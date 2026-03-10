@@ -264,8 +264,8 @@ cc_binary(
 
 pipeline_tests(
     "test_corpus",
-    "PosTests",
-    glob(
+    test_name_prefix = "PosTests",
+    tests = glob(
         [
             "testdata/**/*.rb",
             "testdata/**/*.exp",
@@ -279,8 +279,8 @@ pipeline_tests(
 
 pipeline_tests(
     "test_corpus_prism",
-    "PrismPosTests",
-    glob(
+    test_name_prefix = "PrismPosTests",
+    tests = glob(
         [
             # Replace [parser] with other phases to test Prism at that level
             # Phases: https://github.com/Shopify/sorbet/blob/prism/docs/internals.md#phases
@@ -592,8 +592,8 @@ pipeline_tests(
 
 pipeline_tests(
     "whitequark_parser_corpus",
-    "WhitequarkParserTests",
-    glob([
+    test_name_prefix = "WhitequarkParserTests",
+    tests = glob([
         "whitequark/**/*.rb",
         "whitequark/**/*.exp",
     ]),
@@ -601,8 +601,8 @@ pipeline_tests(
 
 pipeline_tests(
     "test_corpus_lsp",
-    "LSPTests",
-    glob(
+    test_name_prefix = "LSPTests",
+    tests = glob(
         [
             "testdata/**/*.rb",
             "testdata/**/*.rbi",
@@ -614,8 +614,8 @@ pipeline_tests(
 
 pipeline_tests(
     "prism_regression_corpus",
-    "PrismPosTests",
-    glob(
+    test_name_prefix = "PrismPosTests",
+    tests = glob(
         [
             "prism_regression/**/*.rb",
             "prism_regression/**/*.exp",
