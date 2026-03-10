@@ -240,7 +240,9 @@ void GenPackages::runStrict(core::GlobalState &gs) {
         if (existingContents.value() != newContents) {
             if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectPackageRB)) {
                 e.setHeader("`{}` has changes", pkgInfo.show(gs));
-                e.addAutocorrect({"Update __package.rb", {{existingContentsLoc, newContents}}});
+                bool isDidYouMean = false;
+                bool hideEdit = true;
+                e.addAutocorrect({"Update __package.rb", {{existingContentsLoc, newContents}}, isDidYouMean, hideEdit});
             }
         }
     }
