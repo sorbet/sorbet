@@ -25,8 +25,7 @@ bool isTStruct(const ast::ExpressionPtr &expr) {
     auto struct_ = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     return struct_ != nullptr && struct_->segments_.size() == 2 &&
            struct_->segments_[0].first == core::Names::Constants::T() &&
-           struct_->segments_.back().first == core::Names::Constants::Struct() &&
-           ast::MK::isRootScope(struct_->scope_);
+           struct_->segments_.back().first == core::Names::Constants::Struct() && ast::MK::isRootScope(struct_->scope_);
 }
 
 bool isTInexactStruct(const ast::ExpressionPtr &expr) {

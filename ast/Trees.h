@@ -1198,7 +1198,9 @@ public:
     }
 
     // Returns the outermost non-UCL scope (EmptyTree, ConstantLit, etc.)
-    const ExpressionPtr& scope() const { return scope_; }
+    const ExpressionPtr &scope() const {
+        return scope_;
+    }
 
     ExpressionPtr deepCopy() const;
     bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
