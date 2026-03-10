@@ -264,6 +264,7 @@ cc_binary(
 
 pipeline_tests(
     "test_corpus",
+    "PosTests",
     glob(
         [
             "testdata/**/*.rb",
@@ -274,11 +275,11 @@ pipeline_tests(
             "testdata/rbs/assertions_heredoc_modified.rb",
         ],
     ),
-    "PosTests",
 )
 
 pipeline_tests(
     "test_corpus_prism",
+    "PrismPosTests",
     glob(
         [
             # Replace [parser] with other phases to test Prism at that level
@@ -586,21 +587,21 @@ pipeline_tests(
             "testdata/rbs/signatures_types.rb",
         ],
     ),
-    "PrismPosTests",
     parser = "prism",
 )
 
 pipeline_tests(
     "whitequark_parser_corpus",
+    "WhitequarkParserTests",
     glob([
         "whitequark/**/*.rb",
         "whitequark/**/*.exp",
     ]),
-    "WhitequarkParserTests",
 )
 
 pipeline_tests(
     "test_corpus_lsp",
+    "LSPTests",
     glob(
         [
             "testdata/**/*.rb",
@@ -608,12 +609,12 @@ pipeline_tests(
             "testdata/**/*.exp",
         ],
     ),
-    "LSPTests",
     extra_files = ["testdata/lsp/rubyfmt-stub/rubyfmt"],
 )
 
 pipeline_tests(
     "prism_regression_corpus",
+    "PrismPosTests",
     glob(
         [
             "prism_regression/**/*.rb",
@@ -642,7 +643,6 @@ pipeline_tests(
             "prism_regression/assign_to_method_result.rb",
         ],
     ),
-    "PrismPosTests",
     parser = "prism",
 )
 
