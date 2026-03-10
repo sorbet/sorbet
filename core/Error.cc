@@ -232,21 +232,23 @@ void ErrorBuilder::addAutocorrect(AutocorrectSuggestion &&autocorrect) {
     }
 
     vector<ErrorLine> messages;
-    for (auto &edit : autocorrect.edits) {
-        auto isInsert = edit.replacement == "";
-        uint32_t n = edit.loc.length();
-        if (gs.autocorrect) {
-            auto line = isInsert ? ErrorLine::from(edit.loc, "Deleted")
-                                 : ErrorLine::from(edit.loc, "{} `{}`", n == 0 ? "Inserted" : "Replaced with",
-                                                   prettyPrintEditReplacement(edit.replacement));
+    if (!autocorrect.hideEdit) {
+        for (auto &edit : autocorrect.edits) {
+            auto isInsert = edit.replacement == "";
+            uint32_t n = edit.loc.length();
+            if (gs.autocorrect) {
+                auto line = isInsert ? ErrorLine::from(edit.loc, "Deleted")
+                                     : ErrorLine::from(edit.loc, "{} `{}`", n == 0 ? "Inserted" : "Replaced with",
+                                                       prettyPrintEditReplacement(edit.replacement));
 
-            messages.emplace_back(std::move(line));
-        } else {
-            auto line = isInsert ? ErrorLine::from(edit.loc, "Delete")
-                                 : ErrorLine::from(edit.loc, "{} `{}`", n == 0 ? "Insert" : "Replace with",
-                                                   prettyPrintEditReplacement(edit.replacement));
+                messages.emplace_back(std::move(line));
+            } else {
+                auto line = isInsert ? ErrorLine::from(edit.loc, "Delete")
+                                     : ErrorLine::from(edit.loc, "{} `{}`", n == 0 ? "Insert" : "Replace with",
+                                                       prettyPrintEditReplacement(edit.replacement));
 
-            messages.emplace_back(std::move(line));
+                messages.emplace_back(std::move(line));
+            }
         }
     }
     auto errorSection = ErrorSection{sectionTitle, std::move(messages)};
