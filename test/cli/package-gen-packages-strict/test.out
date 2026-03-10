@@ -1,0 +1,63 @@
+--gen-packages can only be can only be used in --sorbet-packages mode
+--gen-packages can not be used when --lsp is also enabled
+--gen-packages-strict can only be specified in --gen-packages mode
+--gen-packages-strict can not be used when --gen-packages-update-visibility-for is also enabled
+A/__package.rb:3: `A` has changes https://srb.help/3734
+     3 |class A < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+
+C/__package.rb:8: Strict dependencies violation: All of `C`'s `import`s must be `dag` or higher https://srb.help/3727
+     8 |  import B
+          ^^^^^^^^
+    B/__package.rb:5: `B`'s `strict_dependencies` level declared here
+     5 |  strict_dependencies 'false'
+                              ^^^^^^^
+
+C/__package.rb:8: Strict dependencies violation: importing `B` will put `C` into a cycle, which is not valid at `strict_dependencies 'dag'` https://srb.help/3727
+     8 |  import B
+          ^^^^^^^^
+  Note:
+    Path from `B` to `C`:
+    `B` →
+    `C`
+
+
+C/__package.rb:8: Package `B` includes explicit visibility modifiers and cannot be imported from `C` https://srb.help/3723
+     8 |  import B
+          ^^^^^^^^
+  Note:
+    Please consult with the owning team before adding a `visible_to` line to the package `B`
+
+B/__package.rb:3: `B` has changes https://srb.help/3734
+     3 |class B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+Errors: 5
+# typed: strict
+
+class A < PackageSpec
+  foo 'a'
+  layer 'app'
+  strict_dependencies 'dag'
+
+  test_import B
+
+  export A::CONSTANT_FROM_A
+end
+# typed: strict
+
+class B < PackageSpec
+  layer 'util'
+  strict_dependencies 'false'
+
+  # layering violations:
+  import A
+
+  # strict_dependencies 'layered' or more strict:
+  import C
+
+  export B::CONSTANT_FROM_B
+
+  visible_to A
+end
