@@ -1822,6 +1822,20 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
             }
 
             auto elseClause = desugarNullable(up_cast(caseNode->else_clause));
+            // Capture the start of the line containing the `else` keyword (or `end` if no else clause).
+            // Whitequark extends empty when bodies to the start of the next line (column 1), not to the
+            // `else`/`end` keyword itself. We find the start of the line by scanning backwards for a newline.
+            core::LocOffsets clauseLoc;
+            if (caseNode->else_clause != nullptr) {
+                clauseLoc = translateLoc(caseNode->else_clause->base.location);
+            } else {
+                // No else clause - use the `end` keyword location as the fallback
+                clauseLoc = translateLoc(caseNode->end_keyword_loc);
+            }
+
+            auto detail = core::Loc::pos2Detail(ctx.file.data(ctx), clauseLoc.beginPos());
+            auto lineStart = core::Loc::detail2Pos(ctx.file.data(ctx), {detail.line, 1}).value();
+            core::LocOffsets nextClauseStartLoc = core::LocOffsets{lineStart, clauseLoc.endPos()};
 
             if (preserveConcreteSyntax) {
                 auto locZeroLen = location.copyWithZeroLength();
@@ -1859,7 +1873,9 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
 
             core::NameRef tempName;
             core::LocOffsets predicateLoc;
-            bool hasPredicate = (predicate != nullptr);
+            // Check if the prism node has a predicate, not the desugared result,
+            // because desugarNullable returns EmptyTree (not nullptr) for null nodes.
+            bool hasPredicate = (caseNode->predicate != nullptr);
 
             if (hasPredicate) {
                 predicateLoc = predicate.loc();
@@ -1871,6 +1887,9 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
             // The if/else ladder for the entire case statement, starting with the else clause as the final `else` when
             // building backwards
             ExpressionPtr resultExpr = move(elseClause);
+            // Track the location of the next clause (else, end, or when) for extending empty when bodies.
+            // Initially this is the else/end clause location; after each iteration it becomes the If location.
+            core::LocOffsets nextClauseLoc = nextClauseStartLoc;
 
             // Iterate over Prism when nodes in reverse to build the if/else ladder backwards
             for (auto it = prismWhenNodes.rbegin(); it != prismWhenNodes.rend(); ++it) {
@@ -1916,7 +1935,22 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                 }
 
                 auto then = desugarStatements(prismWhen->statements);
-                resultExpr = MK::If(whenLoc, move(patternsResult), move(then), move(resultExpr));
+                // Whitequark extends the when clause location to include the start of the next line,
+                // but ONLY when the when body is empty. Use the start of nextClauseLoc as the end.
+                auto ifLoc = whenLoc;
+                bool bodyIsEmpty = (then == nullptr || ast::isa_tree<ast::EmptyTree>(then));
+                if (bodyIsEmpty && nextClauseLoc.exists()) {
+                    ifLoc = core::LocOffsets{whenLoc.beginPos(), nextClauseLoc.beginPos()};
+                }
+                resultExpr = MK::If(ifLoc, move(patternsResult), move(then), move(resultExpr));
+                // Update nextClauseLoc to be the start of this when clause's LINE for the next iteration.
+                // This ensures empty when bodies extend to column 1, not to the indented clause start.
+                auto source = ctx.file.data(ctx).source();
+                uint32_t lineStart = whenLoc.beginPos();
+                while (lineStart > 0 && source[lineStart - 1] != '\n') {
+                    lineStart--;
+                }
+                nextClauseLoc = core::LocOffsets{lineStart, whenLoc.endPos()};
             }
 
             if (hasPredicate) {
