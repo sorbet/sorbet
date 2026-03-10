@@ -328,8 +328,8 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "rbs_parser",
-        url = "https://github.com/ruby/rbs/archive/e5901cd788caa00392c38518e27d3c2800a34328.zip",
-        sha256 = "09413ce9f75e7f65fdafb6c64a2feed20f12c5c0e1b383716fd4f2fe92eae1a0",
-        strip_prefix = "rbs-e5901cd788caa00392c38518e27d3c2800a34328",
+        url = "https://github.com/ruby/rbs/archive/413dd2b3e69b4000f2b614fda7a2e5b54b984833.zip",
+        sha256 = "a4249a66acd3700ada551ce0b9aa67a56e8ffebcabd0e7f5b8bff355516c3ed2",
+        strip_prefix = "rbs-413dd2b3e69b4000f2b614fda7a2e5b54b984833",
         build_file = "@com_stripe_ruby_typer//third_party:rbs_parser.BUILD",
     )
