@@ -1069,7 +1069,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     return MK::Hash(loc, move(keys), move(values));
                 };
 
-                // Desguar
+                // Desugar
                 //   {**x, a: 'a', **y, remaining}
                 // into
                 //   acc = <Magic>.<to-hash-dup>(x)
@@ -1881,7 +1881,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                         // methods from hover. Using the array's loc means that we will get a zero-length loc for
                         // the Splat in that case, and non-zero if there was a real Array literal.
                         stat->loc = loc;
-                        // Desguar
+                        // Desugar
                         //   [a, *x, remaining]
                         // into
                         //   a.concat(<splat>(x)).concat(remaining)

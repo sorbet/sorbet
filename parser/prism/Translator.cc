@@ -4578,7 +4578,7 @@ ast::ExpressionPtr Translator::desugarKeyValuePairs(core::LocOffsets loc, pm_nod
         return MK::Hash(loc, move(keys), move(values));
     };
 
-    // Desguar
+    // Desugar
     //   {**x, a: 'a', **y, remaining}
     // into
     //   acc = <Magic>.<to-hash-dup>(x)
