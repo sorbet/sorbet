@@ -22,4 +22,5 @@ self.m ||= 14
 
 # Multi-target assignment
 self.target1, self.target2 = 15, 16
-self&.target1, self&.target2 = 17, 18 # Not valid Ruby, but the parser needs to support it for the diagnostics to work
+
+FOO.target1, FOO.target2 = 17, 18 # `isPrivateOk` should be false

@@ -746,145 +746,55 @@ ClassDef{
             ]
           }
         }
-        InsSeq{
-          stats = [
-            Assign{
-              lhs = UnresolvedIdent{
-                kind = Local
-                name = <D <U <assignTemp>> $21>
-              }
-              rhs = Self
-            }
-          ],
-          expr = If{
-            cond = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (class ::NilClass)
-                orig = nullptr
-              }
-              fun = <U ===>
-              block = nullptr
-              pos_args = 1
-              args = [
-                UnresolvedIdent{
-                  kind = Local
-                  name = <D <U <assignTemp>> $21>
-                }
-              ]
-            }
-            thenp = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (class ::<Magic>)
-                orig = nullptr
-              }
-              fun = <U <nil-for-safe-navigation>>
-              block = nullptr
-              pos_args = 1
-              args = [
-                UnresolvedIdent{
-                  kind = Local
-                  name = <D <U <assignTemp>> $21>
-                }
-              ]
-            }
-            elsep = Send{
+        Send{
+          flags = {}
+          recv = UnresolvedConstantLit{
+            cnst = <C <U FOO>>
+            scope = EmptyTree
+          }
+          fun = <U target1=>
+          block = nullptr
+          pos_args = 1
+          args = [
+            Send{
               flags = {}
               recv = UnresolvedIdent{
                 kind = Local
-                name = <D <U <assignTemp>> $21>
+                name = <D <U <assignTemp>> $20>
               }
-              fun = <U target1=>
+              fun = <U []>
               block = nullptr
               pos_args = 1
               args = [
-                Send{
-                  flags = {}
-                  recv = UnresolvedIdent{
-                    kind = Local
-                    name = <D <U <assignTemp>> $20>
-                  }
-                  fun = <U []>
-                  block = nullptr
-                  pos_args = 1
-                  args = [
-                    Literal{ value = 0 }
-                  ]
-                }
+                Literal{ value = 0 }
               ]
             }
-          }
+          ]
         }
-        InsSeq{
-          stats = [
-            Assign{
-              lhs = UnresolvedIdent{
-                kind = Local
-                name = <D <U <assignTemp>> $22>
-              }
-              rhs = Self
-            }
-          ],
-          expr = If{
-            cond = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (class ::NilClass)
-                orig = nullptr
-              }
-              fun = <U ===>
-              block = nullptr
-              pos_args = 1
-              args = [
-                UnresolvedIdent{
-                  kind = Local
-                  name = <D <U <assignTemp>> $22>
-                }
-              ]
-            }
-            thenp = Send{
-              flags = {}
-              recv = ConstantLit{
-                symbol = (class ::<Magic>)
-                orig = nullptr
-              }
-              fun = <U <nil-for-safe-navigation>>
-              block = nullptr
-              pos_args = 1
-              args = [
-                UnresolvedIdent{
-                  kind = Local
-                  name = <D <U <assignTemp>> $22>
-                }
-              ]
-            }
-            elsep = Send{
+        Send{
+          flags = {}
+          recv = UnresolvedConstantLit{
+            cnst = <C <U FOO>>
+            scope = EmptyTree
+          }
+          fun = <U target2=>
+          block = nullptr
+          pos_args = 1
+          args = [
+            Send{
               flags = {}
               recv = UnresolvedIdent{
                 kind = Local
-                name = <D <U <assignTemp>> $22>
+                name = <D <U <assignTemp>> $20>
               }
-              fun = <U target2=>
+              fun = <U []>
               block = nullptr
               pos_args = 1
               args = [
-                Send{
-                  flags = {}
-                  recv = UnresolvedIdent{
-                    kind = Local
-                    name = <D <U <assignTemp>> $20>
-                  }
-                  fun = <U []>
-                  block = nullptr
-                  pos_args = 1
-                  args = [
-                    Literal{ value = 1 }
-                  ]
-                }
+                Literal{ value = 1 }
               ]
             }
-          }
+          ]
         }
       ],
       expr = UnresolvedIdent{
