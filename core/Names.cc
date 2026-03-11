@@ -313,6 +313,25 @@ bool NameRef::isUpdateKnowledgeName() const {
     }
 }
 
+bool NameRef::isMethodDefModifierName() const {
+    switch (this->rawId()) {
+        // Visibility modifiers
+        case core::Names::private_().rawId():
+        case core::Names::protected_().rawId():
+        case core::Names::public_().rawId():
+        case core::Names::packagePrivate().rawId():
+
+        // Class method visibility modifiers
+        case core::Names::privateClassMethod().rawId():
+        case core::Names::publicClassMethod().rawId():
+        case core::Names::packagePrivateClassMethod().rawId():
+            return true;
+
+        default:
+            return false;
+    }
+}
+
 NameRefDebugCheck::NameRefDebugCheck(const GlobalState &gs, NameKind kind, uint32_t index) {
     // store the globalStateId of the creating global state to allow sharing refs between siblings
     // when the ref refers to a name in the common ancestor
