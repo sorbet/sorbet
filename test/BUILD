@@ -567,6 +567,7 @@ pipeline_tests(
             "testdata/rbs/signatures_generics.rb",
             "testdata/rbs/signatures_type_aliases.rb",
             "testdata/rbs/signatures_types.rb",
+            "testdata/rbs/data_define_rbs_sig.rb",
         ],
     ),
     "PrismPosTests",
