@@ -13,11 +13,6 @@
 #include "core/errors/desugar.h"
 #include "core/errors/internal.h"
 
-// Redefinition to avoid including parser/prism/Parser.h which has additional dependencies
-namespace sorbet::parser::Prism {
-struct PrismFallback {};
-} // namespace sorbet::parser::Prism
-
 namespace sorbet::ast::prismDesugar {
 
 using namespace std;

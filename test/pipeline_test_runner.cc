@@ -269,11 +269,7 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
                         continue;
                     }
 
-                    try {
-                        prismParseResult = parser::Prism::Parser::run(ctx);
-                    } catch (parser::Prism::PrismFallback &) {
-                        continue;
-                    }
+                    prismParseResult = parser::Prism::Parser::run(ctx);
 
                     break;
                 }
@@ -782,7 +778,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
         // this replicates the logic of pipeline::indexOne
         parser::ParseResult parseResult;
-        bool usePrismDesugar = false;
         switch (parser) {
             case realmain::options::Parser::ORIGINAL: {
                 auto settings = parser::Parser::Settings{false, false, false, gs->cacheSensitiveOptions.rbsEnabled};
@@ -796,14 +791,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 break;
             }
             case realmain::options::Parser::PRISM: {
-                try {
-                    parseResult = parser::Prism::Parser::run(ctx);
-                    usePrismDesugar = true;
-                } catch (parser::Prism::PrismFallback &) {
-                    // Hit a fallback case during Prism parsing, fallback to the legacy parser.
-                    auto settings = parser::Parser::Settings{false, false, false, gs->cacheSensitiveOptions.rbsEnabled};
-                    parseResult = parser::Parser::run(*gs, f, settings);
-                }
+                parseResult = parser::Prism::Parser::run(ctx);
 
                 break;
             }
@@ -825,12 +813,16 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         handler.addObserved(*gs, "rbs-rewrite-tree", [&]() { return nodes->toString(*gs); });
 
         // Desugarer
-        auto ast = usePrismDesugar ? ast::prismDesugar::node2Tree(ctx, move(nodes))
-                                   : ast::desugar::node2Tree(ctx, move(nodes));
+        ast::ExpressionPtr ast;
+        {
+            core::UnfreezeNameTable nameTableAccess(ctx); // enters original strings
+            ast = parser == realmain::options::Parser::PRISM ? ast::prismDesugar::node2Tree(ctx, move(nodes))
+                                                             : ast::desugar::node2Tree(ctx, move(nodes));
+        }
 
         auto file = ast::ParsedFile{move(ast), f};
 
-        if (!usePrismDesugar) {
+        if (parser != realmain::options::Parser::PRISM) {
             // These expectations match the legacy parser's desugar tree, which can be subtly different
             // (e.g. the numbering of unique identifiers). Only test these for the legacy parser.
             handler.addObserved(*gs, "desguar-tree", [&]() { return file.tree.toString(*gs); });
