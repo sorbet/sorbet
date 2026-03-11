@@ -16,7 +16,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           <emptyTree>
         end
 
-        def expect<<todo method>>(arg, &<blk>)
+        def expect<<todo method>>(value = nil, &block)
           <emptyTree>
         end
 
@@ -48,7 +48,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    def expect<<todo method>>(arg, &<blk>)
+    def expect<<todo method>>(value = nil, &block)
       <emptyTree>
     end
 

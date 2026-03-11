@@ -4,7 +4,8 @@
 module RSpec
   module Core
     class ExampleGroup
-      def expect(arg)
+      # https://github.com/rspec/rspec/blob/rspec-expectations-v3.13.5/rspec-expectations/lib/rspec/expectations/syntax.rb#L72-L74
+      def expect(value = nil, &block)
       end
 
       def eq(arg)

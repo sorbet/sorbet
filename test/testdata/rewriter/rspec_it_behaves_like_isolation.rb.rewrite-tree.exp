@@ -2,7 +2,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C RSpec><<C <todo sym>>> < ()
     module <emptyTree>::<C Core><<C <todo sym>>> < ()
       class <emptyTree>::<C ExampleGroup><<C <todo sym>>> < (::<todo sym>)
-        def expect<<todo method>>(arg, &<blk>)
+        def expect<<todo method>>(value = nil, &block)
           <emptyTree>
         end
 

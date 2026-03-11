@@ -40,12 +40,15 @@ ClassDef{
                 MethodDef{
                   flags = {}
                   name = <U expect><<U <todo method>>>
-                  params = [UnresolvedIdent{
-                      kind = Local
-                      name = <U arg>
+                  params = [OptionalParam{
+                      expr = UnresolvedIdent{
+                        kind = Local
+                        name = <U value>
+                      }
+                      default_ = Literal{ value = nil }
                     }, BlockParam{ expr = UnresolvedIdent{
                       kind = Local
-                      name = <U <blk>>
+                      name = <U block>
                     } }]
                   rhs = EmptyTree
                 }
