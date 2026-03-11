@@ -250,6 +250,7 @@ struct StopAfterOptions {
 const vector<StopAfterOptions> stop_after_options({
     {"init", Phase::INIT},
     {"parser", Phase::PARSER},
+    {"rbs", Phase::RBS_REWRITER},
     {"desugarer", Phase::DESUGARER},
     {"rewriter", Phase::REWRITER},
     {"local-vars", Phase::LOCAL_VARS},
