@@ -470,7 +470,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
         }
 
         auto workspaceFilesSpan = absl::MakeSpan(this->workspaceFiles);
-        vector<ast::ParsedFile> indexed;
+        vector<ast::ParsedFile> packageIndexed;
 
         // ----- build the package DB -----
 
@@ -488,7 +488,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
                 if (!result.hasResult()) {
                     return;
                 }
-                indexed = std::move(result.result());
+                packageIndexed = std::move(result.result());
             }
 
             // Only write the cache during initialization to avoid unbounded growth.
@@ -497,27 +497,28 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
                 // usable regardless of whether `--sorbet-packages` was passed.
                 // Want to keep the kvstore around so we can still write to it later.
                 ownedKvstore = cache::ownIfUnchanged(
-                    *this->gs, cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(std::move(ownedKvstore)),
-                                                                    this->config->opts, *this->gs, workers, indexed));
+                    *this->gs,
+                    cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(std::move(ownedKvstore)),
+                                                         this->config->opts, *this->gs, workers, packageIndexed));
             }
-            this->cacheUpdatedFiles(indexed, openFiles);
+            this->cacheUpdatedFiles(packageIndexed, openFiles);
 
             // Only need to compute FoundDefHashes when running to compute a FileHash
             auto foundHashes = nullptr;
 
             // First namer run: only the __package.rb files. This populates the packageDB
             auto cancelled =
-                pipeline::name(*this->gs, absl::MakeSpan(indexed), this->config->opts, workers, foundHashes);
+                pipeline::name(*this->gs, absl::MakeSpan(packageIndexed), this->config->opts, workers, foundHashes);
             if (cancelled) {
-                ast::ParsedFilesOrCancelled::cancel(move(indexed), workers);
+                ast::ParsedFilesOrCancelled::cancel(move(packageIndexed), workers);
                 return;
             }
 
-            pipeline::buildPackageDB(*this->gs, absl::MakeSpan(indexed), workspaceFilesSpan, this->config->opts,
+            pipeline::buildPackageDB(*this->gs, absl::MakeSpan(packageIndexed), workspaceFilesSpan, this->config->opts,
                                      workers);
         }
 
-        auto strata = pipeline::computePackageStrata(*this->gs, indexed, workspaceFilesSpan, this->config->opts);
+        auto strata = pipeline::computePackageStrata(*this->gs, packageIndexed, workspaceFilesSpan, this->config->opts);
         for (auto &stratum : strata) {
             vector<ast::ParsedFile> stratumFiles, nonPackagedIndexed;
 
