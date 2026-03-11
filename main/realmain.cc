@@ -550,7 +550,7 @@ int realmain(int argc, char *argv[]) {
         return returnCode;
     }
 
-    vector<ast::ParsedFile> indexed;
+    vector<ast::ParsedFile> packageIndexed;
     if (opts.runLSP) {
 #ifdef SORBET_REALMAIN_MIN
         logger->warn("LSP is disabled in sorbet-orig for faster builds");
@@ -616,26 +616,27 @@ int realmain(int argc, char *argv[]) {
                 auto result = hashing::Hashing::indexAndComputeFileHashes(*gs, opts, *logger, inputPackageFiles,
                                                                           *workers, kvstore);
                 ENFORCE(result.hasResult(), "There's no cancellation in batch mode");
-                indexed = std::move(result.result());
+                packageIndexed = std::move(result.result());
             } else {
                 auto result = pipeline::index(*gs, inputPackageFiles, opts, *workers, kvstore);
                 ENFORCE(result.hasResult(), "There's no cancellation in batch mode");
-                indexed = std::move(result.result());
+                packageIndexed = std::move(result.result());
             }
 
             // Cache these before any packager rewrites, so that the cache is still
             // usable regardless of whether `--sorbet-packages` was passed.
             // Want to keep the kvstore around so we can still write to it later.
-            kvstore =
-                cache::ownIfUnchanged(*gs, cache::maybeCacheGlobalStateAndFiles(
-                                               OwnedKeyValueStore::abort(move(kvstore)), opts, *gs, *workers, indexed));
+            kvstore = cache::ownIfUnchanged(
+                *gs, cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs, *workers,
+                                                          packageIndexed));
 
             // Populate the packageDB by processing only the __package.rb files.
             // Only need to compute hashes when running to compute a FileHash
             auto foundHashes = nullptr;
-            auto canceled = pipeline::name(*gs, absl::Span<ast::ParsedFile>(indexed), opts, *workers, foundHashes);
+            auto canceled =
+                pipeline::name(*gs, absl::Span<ast::ParsedFile>(packageIndexed), opts, *workers, foundHashes);
             ENFORCE(!canceled, "There's no cancellation in batch mode");
-            pipeline::buildPackageDB(*gs, absl::MakeSpan(indexed), inputFilesSpan, opts, *workers);
+            pipeline::buildPackageDB(*gs, absl::MakeSpan(packageIndexed), inputFilesSpan, opts, *workers);
         }
 
         // We disable tree leaking if we're targeting emscripten, or if we're typechecking in package dependency order.
@@ -645,7 +646,7 @@ int realmain(int argc, char *argv[]) {
         // The rest of the pipeline proceeds by strata in the package condensation graph. When stripe-packages is not
         // enabled, everything ends up in one big stratum.
         vector<ast::ParsedFile> stratumFiles;
-        for (auto &stratum : pipeline::computePackageStrata(*gs, indexed, inputFilesSpan, opts)) {
+        for (auto &stratum : pipeline::computePackageStrata(*gs, packageIndexed, inputFilesSpan, opts)) {
             // We can unconditionally reset (to drop the vectors) instead of having to consult
             // intentionallyLeakASTs, because if intentionallyLeakASTs, then necessarily
             // packageDirected will be false, and thus this loop will only iterate once, and since
@@ -902,7 +903,7 @@ int realmain(int argc, char *argv[]) {
     if (!sorbet::emscripten_build) {
         // Let it go: leak memory so that we don't need to call destructors
         // (Although typecheck leaks these, autogen goes thru a different codepath.)
-        for (auto &e : indexed) {
+        for (auto &e : packageIndexed) {
             intentionallyLeakMemory(e.tree.release());
         }
         intentionallyLeakMemory(gs.release());
