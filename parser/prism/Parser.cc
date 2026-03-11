@@ -1,7 +1,6 @@
 #include "parser/prism/Parser.h"
 #include "absl/types/span.h"
 #include "parser/prism/Helpers.h"
-#include "parser/prism/Translator.h"
 
 using namespace std;
 

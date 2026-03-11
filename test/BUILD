@@ -16,6 +16,7 @@ cc_binary(
     visibility = ["//tools:__pkg__"],
     deps = [
         "//ast/desugar",
+        "//ast/desugar/prism",
         "//ast/treemap",
         "//cfg",
         "//cfg/builder",
