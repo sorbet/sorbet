@@ -833,7 +833,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         if (!usePrismDesugar) {
             // These expectations match the legacy parser's desugar tree, which can be subtly different
             // (e.g. the numbering of unique identifiers). Only test these for the legacy parser.
-            handler.addObserved(*gs, "desguar-tree", [&]() { return file.tree.toString(*gs); });
+            handler.addObserved(*gs, "desugar-tree", [&]() { return file.tree.toString(*gs); });
             handler.addObserved(*gs, "desugar-tree-raw", [&]() { return file.tree.showRaw(*gs); });
         }
 
