@@ -293,7 +293,7 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
         }
 
         // Desugarer
-        ast::ParsedFile desugared;
+        ast::ExpressionPtr ast;
         {
             core::MutableContext ctx(gs, core::Symbols::root(), file);
             core::UnfreezeNameTable nameTableAccess(ctx); // enters original strings
@@ -301,7 +301,6 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
             auto disableParserComparison =
                 BooleanPropertyAssertion::getValue("disable-parser-comparison", assertions).value_or(false);
 
-            ast::ExpressionPtr resultAST;
             if (prismParseResult.has_value()) {
                 // Translate the raw Prism AST into a Whitequark-compatible parser::Node for desugaring.
                 auto enclosingBlockParamLoc = core::LocOffsets::none();
@@ -328,20 +327,17 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
                     }
                 }
 
-                resultAST = move(prismDirectDesugarAST);
+                ast = move(prismDirectDesugarAST);
             } else {
-                resultAST = ast::desugar::node2Tree(ctx, move(legacyParseResult.tree));
+                ast = ast::desugar::node2Tree(ctx, move(legacyParseResult.tree));
             }
-
-            desugared = ast::ParsedFile{move(resultAST), file};
         }
 
-        handler.addObserved(gs, "desugar-tree", [&]() { return desugared.tree.toString(gs); });
-        handler.addObserved(gs, "desugar-tree-raw", [&]() { return desugared.tree.showRaw(gs); });
-
-        ast::ParsedFile localNamed;
+        handler.addObserved(gs, "desugar-tree", [&]() { return ast.toString(gs); });
+        handler.addObserved(gs, "desugar-tree-raw", [&]() { return ast.showRaw(gs); });
 
         // Rewriter
+        ast::ParsedFile desugared{move(ast), file};
         ast::ParsedFile rewritten;
         {
             core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
@@ -356,6 +352,7 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
         handler.addObserved(gs, "rewrite-tree", [&]() { return rewritten.tree.toString(gs); });
         handler.addObserved(gs, "rewrite-tree-raw", [&]() { return rewritten.tree.showRaw(gs); });
 
+        ast::ParsedFile localNamed;
         {
             core::UnfreezeNameTable nameTableAccess(gs); // possibly enters mangled names
             core::MutableContext ctx(gs, core::Symbols::root(), desugared.file);
@@ -855,14 +852,13 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             }
         }
 
-        auto file = ast::ParsedFile{move(ast), f};
-
         // Rewriter pass
-        file.tree = rewriter::Rewriter::run(ctx, move(file.tree));
-        handler.addObserved(*gs, "rewrite-tree", [&]() { return file.tree.toString(*gs); });
-        handler.addObserved(*gs, "rewrite-tree-raw", [&]() { return file.tree.showRaw(*gs); });
+        ast = rewriter::Rewriter::run(ctx, move(ast));
+        handler.addObserved(*gs, "rewrite-tree", [&]() { return ast.toString(*gs); });
+        handler.addObserved(*gs, "rewrite-tree-raw", [&]() { return ast.showRaw(*gs); });
 
         // local vars
+        auto file = ast::ParsedFile{move(ast), f};
         file = local_vars::LocalVars::run(ctx, move(file));
         testSerialize(*gs, file);
         handler.addObserved(*gs, "index-tree", [&]() { return file.tree.toString(*gs); });
