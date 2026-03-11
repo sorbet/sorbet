@@ -9,33 +9,24 @@ namespace sorbet::parser::Prism {
 
 using namespace std::literals::string_view_literals;
 
-parser::ParseResult Parser::run(core::MutableContext ctx, bool preserveConcreteSyntax) {
-    auto file = ctx.file;
-    auto source = file.data(ctx).source();
-    Prism::Parser parser{source};
+Prism::ParseResult Parser::run(core::MutableContext ctx, bool preserveConcreteSyntax) {
+    auto source = ctx.file.data(ctx).source();
     bool collectComments = ctx.state.cacheSensitiveOptions.rbsEnabled;
-    Prism::ParseResult parseResult = parser.parseWithoutTranslation(collectComments);
-
-    auto enclosingBlockParamLoc = core::LocOffsets::none();
-    auto enclosingBlockParamName = core::NameRef::noName();
-    auto translatedTree = Prism::Translator(parser, ctx, parseResult.parseErrors, preserveConcreteSyntax,
-                                            enclosingBlockParamLoc, enclosingBlockParamName)
-                              .translate_TODO(parseResult.getRawNodePointer());
-
-    return parser::ParseResult{move(translatedTree), move(parseResult.commentLocations)};
+    return Parser::parseWithoutTranslation(source, collectComments);
 }
 
 pm_parser_t *Parser::getRawParserPointer() {
     return &parser;
 }
 
-// Parses without translating and returns raw Prism nodes for intermediate processing (e.g., RBS rewriting)
-// Caller must keep Parser alive for later translation, unlike run() which parses + translates in one step
-ParseResult Parser::parseWithoutTranslation(bool collectComments) {
-    pm_node_t *root = pm_parse(&parser);
-    auto comments = collectComments ? collectCommentLocations() : vector<core::LocOffsets>{};
-    return ParseResult{*this, root, collectErrors(), move(comments)};
-};
+// Parses and returns raw Prism nodes for intermediate processing (e.g., RBS rewriting).
+ParseResult Parser::parseWithoutTranslation(string_view source, bool collectComments) {
+    auto parser = make_unique<Prism::Parser>(source);
+    pm_node_t *root = pm_parse(parser->getRawParserPointer());
+    auto errors = parser->collectErrors();
+    auto comments = collectComments ? parser->collectCommentLocations() : vector<core::LocOffsets>{};
+    return ParseResult{move(parser), root, move(errors), move(comments)};
+}
 
 core::LocOffsets Parser::translateLocation(pm_location_t location) const {
     return translateLocation(location.start, location.end);

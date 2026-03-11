@@ -38,10 +38,12 @@
 #include "packager/packager.h"
 #include "parser/parser.h"
 #include "parser/prism/Parser.h"
+#include "parser/prism/Translator.h"
 #include "payload/binary/binary.h"
 #include "payload/payload.h"
 #include "rbs/AssertionsRewriter.h"
 #include "rbs/SigsRewriter.h"
+#include "rbs/prism/RBSRewriterPrism.h"
 #include "resolver/resolver.h"
 #include "rewriter/rewriter.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
@@ -244,7 +246,7 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
 
         // Parser
         parser::ParseResult legacyParseResult;
-        parser::ParseResult prismParseResult;
+        std::optional<parser::Prism::ParseResult> prismParseResult;
         {
             core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
             core::MutableContext ctx(gs, core::Symbols::root(), file);
@@ -262,6 +264,20 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
                     handler.addObserved(gs, "parse-tree-whitequark", [&]() { return nodes->toWhitequark(gs); });
                     handler.addObserved(gs, "parse-tree-json", [&]() { return nodes->toJSON(gs); });
 
+                    if (gs.cacheSensitiveOptions.rbsEnabled) {
+                        core::MutableContext ctx(gs, core::Symbols::root(), file);
+                        auto associator = rbs::CommentsAssociator(ctx, legacyParseResult.commentLocations);
+                        auto commentMap = associator.run(nodes);
+
+                        auto rbsSignatures = rbs::SigsRewriter(ctx, commentMap.signaturesForNode);
+                        nodes = rbsSignatures.run(std::move(nodes));
+
+                        auto rbsAssertions = rbs::AssertionsRewriter(ctx, commentMap.assertionsForNode);
+                        nodes = rbsAssertions.run(std::move(nodes));
+                    }
+
+                    handler.addObserved(gs, "rbs-rewrite-tree", [&]() { return nodes->toString(gs); });
+
                     break;
                 }
                 case realmain::options::Parser::PRISM: {
@@ -269,32 +285,11 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
                         continue;
                     }
 
-                    prismParseResult = parser::Prism::Parser::run(ctx);
+                    prismParseResult.emplace(parser::Prism::Parser::run(ctx));
 
                     break;
                 }
             }
-        }
-
-        parser::ParseResult &parseResult = prismParseResult.tree ? prismParseResult : legacyParseResult;
-
-        {
-            auto &nodes = parseResult.tree;
-
-            if (gs.cacheSensitiveOptions.rbsEnabled) {
-                core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
-                core::MutableContext ctx(gs, core::Symbols::root(), file);
-                auto associator = rbs::CommentsAssociator(ctx, parseResult.commentLocations);
-                auto commentMap = associator.run(nodes);
-
-                auto rbsSignatures = rbs::SigsRewriter(ctx, commentMap.signaturesForNode);
-                nodes = rbsSignatures.run(std::move(nodes));
-
-                auto rbsAssertions = rbs::AssertionsRewriter(ctx, commentMap.assertionsForNode);
-                nodes = rbsAssertions.run(std::move(nodes));
-            }
-
-            handler.addObserved(gs, "rbs-rewrite-tree", [&]() { return nodes->toString(gs); });
         }
 
         // Desugarer
@@ -307,8 +302,16 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
                 BooleanPropertyAssertion::getValue("disable-parser-comparison", assertions).value_or(false);
 
             ast::ExpressionPtr resultAST;
-            if (prismParseResult.tree != nullptr) {
-                auto prismDirectDesugarAST = ast::prismDesugar::node2Tree(ctx, move(prismParseResult.tree));
+            if (prismParseResult.has_value()) {
+                // Translate the raw Prism AST into a Whitequark-compatible parser::Node for desugaring.
+                auto enclosingBlockParamLoc = core::LocOffsets::none();
+                auto enclosingBlockParamName = core::NameRef::noName();
+                auto translatedTree =
+                    parser::Prism::Translator(prismParseResult->getParser(), ctx, prismParseResult->getParseErrors(),
+                                              false, enclosingBlockParamLoc, enclosingBlockParamName)
+                        .translate_TODO(prismParseResult->getRawNodePointer());
+
+                auto prismDirectDesugarAST = ast::prismDesugar::node2Tree(ctx, move(translatedTree));
 
                 if (!disableParserComparison) {
                     ast::ExpressionPtr legacyDesugarAST = ast::desugar::node2Tree(ctx, move(legacyParseResult.tree));
@@ -777,57 +780,82 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         handler.drainErrors(*gs);
 
         // this replicates the logic of pipeline::indexOne
-        parser::ParseResult parseResult;
+        ast::ExpressionPtr ast;
         switch (parser) {
             case realmain::options::Parser::ORIGINAL: {
-                auto settings = parser::Parser::Settings{false, false, false, gs->cacheSensitiveOptions.rbsEnabled};
-                parseResult = parser::Parser::run(*gs, f, settings);
+                // Parser
+                parser::ParseResult parseResult;
+                {
+                    auto settings = parser::Parser::Settings{false, false, false, gs->cacheSensitiveOptions.rbsEnabled};
+                    parseResult = parser::Parser::run(*gs, f, settings);
+                }
 
                 handler.addObserved(*gs, "parse-tree", [&]() { return parseResult.tree->toString(*gs); });
                 handler.addObserved(*gs, "parse-tree-whitequark",
                                     [&]() { return parseResult.tree->toWhitequark(*gs); });
                 handler.addObserved(*gs, "parse-tree-json", [&]() { return parseResult.tree->toJSON(*gs); });
 
+                if (gs->cacheSensitiveOptions.rbsEnabled) {
+                    auto associator = rbs::CommentsAssociator(ctx, parseResult.commentLocations);
+                    auto commentMap = associator.run(parseResult.tree);
+
+                    auto rbsSignatures = rbs::SigsRewriter(ctx, commentMap.signaturesForNode);
+                    parseResult.tree = rbsSignatures.run(std::move(parseResult.tree));
+
+                    auto rbsAssertions = rbs::AssertionsRewriter(ctx, commentMap.assertionsForNode);
+                    parseResult.tree = rbsAssertions.run(std::move(parseResult.tree));
+
+                    handler.addObserved(*gs, "rbs-rewrite-tree", [&]() { return parseResult.tree->toString(*gs); });
+                }
+
+                // Desugarer
+                {
+                    core::UnfreezeNameTable nameTableAccess(ctx);
+                    ast = ast::desugar::node2Tree(ctx, move(parseResult.tree));
+                }
+
+                handler.addObserved(*gs, "desguar-tree", [&]() { return ast.toString(*gs); });
+                handler.addObserved(*gs, "desugar-tree-raw", [&]() { return ast.showRaw(*gs); });
+
                 break;
             }
+
             case realmain::options::Parser::PRISM: {
-                parseResult = parser::Prism::Parser::run(ctx);
+                core::UnfreezeNameTable nameTableAccess(*gs);
+
+                auto prismResult = parser::Prism::Parser::run(ctx);
+
+                // Run the Prism-level RBS rewriter
+                if (gs->cacheSensitiveOptions.rbsEnabled) {
+                    auto &prismParser = prismResult.getParser();
+                    auto node = rbs::runPrismRBSRewrite(*gs, f, prismResult.getRawNodePointer(),
+                                                        prismResult.getCommentLocations(), ctx, prismParser);
+                    prismResult.replaceRootNode(node);
+
+                    handler.addObserved(*gs, "rbs-rewrite-tree", [&]() { return prismResult.prettyPrint(); });
+                }
+
+                // Prism Desugarer
+                {
+                    auto enclosingBlockParamLoc = core::LocOffsets::none();
+                    auto enclosingBlockParamName = core::NameRef::noName();
+                    auto translatedTree =
+                        parser::Prism::Translator(prismResult.getParser(), ctx, prismResult.getParseErrors(), false,
+                                                  enclosingBlockParamLoc, enclosingBlockParamName)
+                            .translate_TODO(prismResult.getRawNodePointer());
+
+                    ast = ast::prismDesugar::node2Tree(ctx, move(translatedTree));
+                }
+
+                // Do *not* check the `desugar-tree` and `desugar-tree-raw` expectations for the Prism parser,
+                // which can be subtly different (e.g. the numbering of unique identifiers).
+                // Instead, we compare the two ASTs in the `index()` function.
 
                 break;
             }
-        }
-
-        if (gs->cacheSensitiveOptions.rbsEnabled) {
-            auto associator = rbs::CommentsAssociator(ctx, parseResult.commentLocations);
-            auto commentMap = associator.run(parseResult.tree);
-
-            auto rbsSignatures = rbs::SigsRewriter(ctx, commentMap.signaturesForNode);
-            parseResult.tree = rbsSignatures.run(std::move(parseResult.tree));
-
-            auto rbsAssertions = rbs::AssertionsRewriter(ctx, commentMap.assertionsForNode);
-            parseResult.tree = rbsAssertions.run(std::move(parseResult.tree));
-        }
-
-        auto nodes = move(parseResult.tree);
-
-        handler.addObserved(*gs, "rbs-rewrite-tree", [&]() { return nodes->toString(*gs); });
-
-        // Desugarer
-        ast::ExpressionPtr ast;
-        {
-            core::UnfreezeNameTable nameTableAccess(ctx); // enters original strings
-            ast = parser == realmain::options::Parser::PRISM ? ast::prismDesugar::node2Tree(ctx, move(nodes))
-                                                             : ast::desugar::node2Tree(ctx, move(nodes));
         }
 
         auto file = ast::ParsedFile{move(ast), f};
-
-        if (parser != realmain::options::Parser::PRISM) {
-            // These expectations match the legacy parser's desugar tree, which can be subtly different
-            // (e.g. the numbering of unique identifiers). Only test these for the legacy parser.
-            handler.addObserved(*gs, "desguar-tree", [&]() { return file.tree.toString(*gs); });
-            handler.addObserved(*gs, "desugar-tree-raw", [&]() { return file.tree.showRaw(*gs); });
-        }
 
         // Rewriter pass
         file.tree = rewriter::Rewriter::run(ctx, move(file.tree));
