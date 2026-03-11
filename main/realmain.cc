@@ -432,7 +432,6 @@ int realmain(int argc, char *argv[]) {
             auto combinedLogger = make_shared<spdlog::logger>("consoleAndFile", begin(sinks), end(sinks));
             combinedLogger->flush_on(spdlog::level::err);
             combinedLogger->set_level(spdlog::level::trace); // pass through everything, let the sinks decide
-            combinedLogger->set_pattern("timestamp=\"%Y-%m-%dT%T.%f\" level=%l %v");
 
             spdlog::register_logger(combinedLogger);
             fatalLogger = combinedLogger;
@@ -443,7 +442,6 @@ int realmain(int argc, char *argv[]) {
             auto combinedLogger = make_shared<spdlog::logger>("typeDiagnosticsAndFile", begin(sinks), end(sinks));
             spdlog::register_logger(combinedLogger);
             combinedLogger->set_level(spdlog::level::trace); // pass through everything, let the sinks decide
-            combinedLogger->set_pattern("timestamp=\"%Y-%m-%dT%T.%f\" level=%l %v");
             typeErrorsConsole = combinedLogger;
         }
     }
