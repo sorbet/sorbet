@@ -422,6 +422,8 @@ int realmain(int argc, char *argv[]) {
         // TODO(jvilk): Reduce size once LSP logging is less chunderous.
         auto fileSink =
             make_shared<spdlog::sinks::rotating_file_sink_mt>(opts.debugLogFile, ((size_t)1) * 1024 * 1024 * 1024, 3);
+        fileSink->set_pattern("timestamp=\"%Y-%m-%dT%T.%f\" level=%l %v");
+
         if (opts.logLevel >= 2) {
             fileSink->set_level(spdlog::level::trace);
         } else {
