@@ -11,7 +11,6 @@ extern "C" {
 
 #include "core/LocOffsets.h"
 #include "parser/Node.h" // To clarify: these are Sorbet Parser nodes, not Prism ones.
-#include "parser/ParseResult.h"
 
 namespace sorbet::parser::Prism {
 
@@ -29,14 +28,6 @@ public:
     pm_error_level_t level;
 };
 
-struct SimpleParseResult {
-    std::vector<ParseError> parseErrors;
-    std::vector<core::LocOffsets> commentLocations;
-
-    SimpleParseResult(std::vector<ParseError> parseErrors, std::vector<core::LocOffsets> commentLocations)
-        : parseErrors(std::move(parseErrors)), commentLocations(std::move(commentLocations)) {}
-};
-
 class Parser final {
     // The version of Ruby syntax that we're parsing with Prism. This determines what syntax is supported or not.
     static constexpr std::string_view ParsedRubyVersion = "3.4.0";
@@ -45,7 +36,6 @@ class Parser final {
     pm_options_t options;
 
     friend class ParseResult;
-    friend struct NodeDeleter;
     friend class Factory;
 
 public:
@@ -65,9 +55,9 @@ public:
     Parser(Parser &&) = delete;
     Parser &operator=(Parser &&) = delete;
 
-    static parser::ParseResult run(core::MutableContext ctx, bool preserveConcreteSyntax = false);
+    static Prism::ParseResult run(core::MutableContext ctx, bool preserveConcreteSyntax = false);
 
-    ParseResult parseWithoutTranslation(bool collectComments = false);
+    static ParseResult parseWithoutTranslation(std::string_view source, bool collectComments = false);
     core::LocOffsets translateLocation(pm_location_t location) const;
     core::LocOffsets translateLocation(const uint8_t *start, const uint8_t *end) const;
     std::string_view resolveConstant(pm_constant_id_t constantId) const;
@@ -93,35 +83,49 @@ private:
 };
 
 class ParseResult final {
-    struct NodeDeleter {
-        Parser &parser;
-
-        void operator()(pm_node_t *node) {
-            pm_node_destroy(parser.getRawParserPointer(), node);
-        }
-    };
-
     friend class Parser;
     friend class Translator;
 
-    const Parser &parser;
-    const std::unique_ptr<pm_node_t, NodeDeleter> node;
-    const std::vector<ParseError> parseErrors;
+    std::unique_ptr<Parser> parser;
+    pm_node_t *node;
+    std::vector<ParseError> parseErrors;
     std::vector<core::LocOffsets> commentLocations;
 
 public:
-    ParseResult(Parser &parser, pm_node_t *node, std::vector<ParseError> parseErrors,
+    ParseResult(std::unique_ptr<Parser> parser, pm_node_t *node, std::vector<ParseError> parseErrors,
                 std::vector<core::LocOffsets> commentLocations)
-        : parser{parser}, node{node, NodeDeleter{parser}}, parseErrors{parseErrors}, commentLocations{
-                                                                                         commentLocations} {}
+        : parser{std::move(parser)}, node{node}, parseErrors{std::move(parseErrors)}, commentLocations{std::move(
+                                                                                          commentLocations)} {}
+
+    ~ParseResult() {
+        if (node) {
+            ENFORCE(parser != nullptr, "The parser must live longer than the nodes it creates.");
+            parser->destroyNode(node);
+        }
+    }
+
+    ParseResult(ParseResult &&other) noexcept
+        : parser{std::move(other.parser)}, node{other.node}, parseErrors{std::move(other.parseErrors)},
+          commentLocations{std::move(other.commentLocations)} {
+        other.node = nullptr;
+    }
 
     ParseResult(const ParseResult &) = delete;            // Copy constructor
-    ParseResult &operator=(const ParseResult &) = delete; // Copy assignment
-    ParseResult(ParseResult &&) = delete;                 // Move constructor
     ParseResult &operator=(ParseResult &&) = delete;      // Move assignment
+    ParseResult &operator=(const ParseResult &) = delete; // Copy assignment
 
     pm_node_t *getRawNodePointer() const {
-        return node.get();
+        return node;
+    }
+
+    // Replace the root node, e.g. after RBS rewriting.
+    void replaceRootNode(pm_node_t *newNode) {
+        // Does not destroy the old node, since the rewriter mutates the tree in-place.
+        node = newNode;
+    }
+
+    std::string prettyPrint() const {
+        return parser->prettyPrint(node);
     }
 
     const std::vector<core::LocOffsets> &getCommentLocations() const {
@@ -132,8 +136,8 @@ public:
         return parseErrors;
     }
 
-    const Parser &getParser() const {
-        return parser;
+    Parser &getParser() {
+        return *parser;
     }
 };
 

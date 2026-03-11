@@ -229,11 +229,12 @@ ast::ExpressionPtr fetchTreeFromCache(core::GlobalState &gs, core::FileRef fref,
 
 parser::ParseResult runParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print,
                               bool traceLexer, bool traceParser) {
-    Timer timeit(gs.tracer(), "runParser", {{"file", string(file.data(gs).path())}});
     parser::ParseResult result;
     {
+        Timer timeit(gs.tracer(), "runParser", {{"file", string(file.data(gs).path())}});
         core::UnfreezeNameTable nameTableAccess(gs); // enters strings from source code as names
-        auto indentationAware = false;               // Don't start in indentation-aware error recovery mode
+
+        auto indentationAware = false; // Don't start in indentation-aware error recovery mode
         auto collectComments = gs.cacheSensitiveOptions.rbsEnabled; // Collect comments for RBS signature translation
         auto settings = parser::Parser::Settings{traceLexer, traceParser, indentationAware, collectComments};
         result = parser::Parser::run(gs, file, settings);
@@ -254,59 +255,39 @@ parser::ParseResult runParser(core::GlobalState &gs, core::FileRef file, const o
     return result;
 }
 
-parser::ParseResult runPrismParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print,
-                                   const options::Options &opts, bool preserveConcreteSyntax = false) {
-    Timer timeit(gs.tracer(), "runParser", {{"file", string(file.data(gs).path())}});
-
-    parser::ParseResult parseResult;
-    {
-        core::MutableContext ctx(gs, core::Symbols::root(), file);
+parser::Prism::ParseResult runPrismParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print,
+                                          const options::Options &opts, bool preserveConcreteSyntax = false) {
+    auto parseResult = [&] {
+        Timer timeit(gs.tracer(), "runParser", {{"file", string(file.data(gs).path())}});
         core::UnfreezeNameTable nameTableAccess(gs); // enters strings from source code as names
-        // The RBS rewriter produces plain Whitequark nodes and not `NodeWithExpr` which causes errors in
-        // `PrismDesugar.cc`. For now, disable all direct translation, and fallback to `Desugar.cc`.
-        auto source = file.data(ctx).source();
-        parser::Prism::Parser parser{source};
+
+        auto source = file.data(gs).source();
         bool collectComments = gs.cacheSensitiveOptions.rbsEnabled;
-        parser::Prism::ParseResult prismResult = parser.parseWithoutTranslation(collectComments);
+        return parser::Prism::Parser::parseWithoutTranslation(source, collectComments);
+    }();
 
-        if (opts.stopAfterPhase == options::Phase::PARSER) {
-            return parser::ParseResult{nullptr, prismResult.getCommentLocations()};
-        }
-
-        auto node = prismResult.getRawNodePointer();
-
-        // TODO: Remove `&& false` once RBS rewriter with Prism AST migration is complete
-        // https://github.com/sorbet/sorbet/issues/9065
-        if (gs.cacheSensitiveOptions.rbsEnabled && false) {
-            node = rbs::runPrismRBSRewrite(gs, file, node, prismResult.getCommentLocations(), ctx, parser);
-            if (print.RBSRewriteTree.enabled) {
-                print.RBSRewriteTree.fmt("{}\n", parser.prettyPrint(node));
-            }
-        }
-
-        auto enclosingBlockParamLoc = core::LocOffsets::none();
-        auto enclosingBlockParamName = core::NameRef::noName();
-        auto translatedTree =
-            parser::Prism::Translator(parser, ctx, prismResult.getParseErrors(), preserveConcreteSyntax,
-                                      enclosingBlockParamLoc, enclosingBlockParamName)
-                .translate_TODO(node);
-
-        parseResult = parser::ParseResult{move(translatedTree), prismResult.getCommentLocations()};
+    if (print.ParseTree.enabled) {
+        print.ParseTree.fmt("{}\n", parseResult.prettyPrint());
     }
 
-    if (parseResult.tree) {
-        if (print.ParseTree.enabled) {
-            print.ParseTree.fmt("{}\n", parseResult.tree->toStringWithTabs(gs, 0));
-        }
-        if (print.ParseTreeJson.enabled) {
-            print.ParseTreeJson.fmt("{}\n", parseResult.tree->toJSON(gs, 0));
-        }
-        if (print.ParseTreeJsonWithLocs.enabled) {
-            print.ParseTreeJson.fmt("{}\n", parseResult.tree->toJSONWithLocs(gs, file, 0));
-        }
-        if (print.ParseTreeWhitequark.enabled) {
-            print.ParseTreeWhitequark.fmt("{}\n", parseResult.tree->toWhitequark(gs, 0));
-        }
+    return parseResult;
+}
+
+parser::Prism::ParseResult runPrismRBSRewrite(core::GlobalState &gs, core::FileRef file,
+                                              parser::Prism::ParseResult parseResult, const options::Printers &print) {
+    if (gs.cacheSensitiveOptions.rbsEnabled) {
+        Timer timeit(gs.tracer(), "runRBSRewrite", {{"file", string(file.data(gs).path())}});
+        core::MutableContext ctx(gs, core::Symbols::root(), file);
+        core::UnfreezeNameTable nameTableAccess(gs);
+
+        auto &parser = parseResult.getParser();
+        auto node = rbs::runPrismRBSRewrite(gs, file, parseResult.getRawNodePointer(),
+                                            parseResult.getCommentLocations(), ctx, parser);
+        parseResult.replaceRootNode(node);
+    }
+
+    if (print.RBSRewriteTree.enabled) {
+        print.RBSRewriteTree.fmt("{}\n", parseResult.prettyPrint());
     }
 
     return parseResult;
@@ -339,18 +320,18 @@ unique_ptr<parser::Node> runRBSRewrite(core::GlobalState &gs, core::FileRef file
 }
 
 ast::ExpressionPtr runDesugar(core::GlobalState &gs, core::FileRef file, unique_ptr<parser::Node> parseTree,
-                              const options::Printers &print, bool preserveConcreteSyntax = false,
-                              bool usePrismDesugar = false) {
+                              const options::Printers &print, bool preserveConcreteSyntax = false) {
     ENFORCE(parseTree);
 
-    Timer timeit(gs.tracer(), "runDesugar", {{"file", string(file.data(gs).path())}});
     ast::ExpressionPtr ast;
-    core::MutableContext ctx(gs, core::Symbols::root(), file);
     {
         core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
-        ast = usePrismDesugar ? ast::prismDesugar::node2Tree(ctx, move(parseTree), preserveConcreteSyntax)
-                              : ast::desugar::node2Tree(ctx, move(parseTree), preserveConcreteSyntax);
+        core::MutableContext ctx(gs, core::Symbols::root(), file);
+
+        Timer timeit(gs.tracer(), "runDesugar", {{"file", string(file.data(gs).path())}});
+        ast = ast::desugar::node2Tree(ctx, move(parseTree), preserveConcreteSyntax);
     }
+
     if (print.DesugarTree.enabled) {
         print.DesugarTree.fmt("{}\n", ast.toStringWithTabs(gs, 0));
     }
@@ -360,6 +341,37 @@ ast::ExpressionPtr runDesugar(core::GlobalState &gs, core::FileRef file, unique_
     if (print.DesugarTreeRawWithLocs.enabled) {
         print.DesugarTreeRawWithLocs.fmt("{}\n", ast.showRawWithLocs(gs, file));
     }
+
+    return ast;
+}
+
+ast::ExpressionPtr runPrismDesugar(core::GlobalState &gs, core::FileRef file, parser::Prism::ParseResult parseResult,
+                                   const options::Printers &print) {
+    ast::ExpressionPtr ast;
+    {
+        core::UnfreezeNameTable nameTableAccess(gs);
+        core::MutableContext ctx(gs, core::Symbols::root(), file);
+
+        auto enclosingBlockParamLoc = core::LocOffsets::none();
+        auto enclosingBlockParamName = core::NameRef::noName();
+        auto translatedTree = parser::Prism::Translator(parseResult.getParser(), ctx, parseResult.getParseErrors(),
+                                                        false, enclosingBlockParamLoc, enclosingBlockParamName)
+                                  .translate_TODO(parseResult.getRawNodePointer());
+
+        Timer timeit(gs.tracer(), "runDesugar", {{"file", string(file.data(gs).path())}});
+        ast = ast::prismDesugar::node2Tree(ctx, move(translatedTree));
+    }
+
+    if (print.DesugarTree.enabled) {
+        print.DesugarTree.fmt("{}\n", ast.toStringWithTabs(gs, 0));
+    }
+    if (print.DesugarTreeRaw.enabled) {
+        print.DesugarTreeRaw.fmt("{}\n", ast.showRaw(gs));
+    }
+    if (print.DesugarTreeRawWithLocs.enabled) {
+        print.DesugarTreeRawWithLocs.fmt("{}\n", ast.showRawWithLocs(gs, file));
+    }
+
     return ast;
 }
 
@@ -422,9 +434,6 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
                 return emptyParsedFile(file);
             }
 
-            bool usePrismDesugar = false;
-
-            unique_ptr<parser::Node> parseTree;
             switch (parser) {
                 case options::Parser::ORIGINAL: {
                     auto parseResult = runParser(lgs, file, print, opts.traceLexer, opts.traceParser);
@@ -432,34 +441,31 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
                         return emptyParsedFile(file);
                     }
 
-                    parseTree = runRBSRewrite(lgs, file, move(parseResult), print);
+                    auto rbsRewrittenParseResult = runRBSRewrite(lgs, file, move(parseResult), print);
 
-                    break;
-                }
-                case options::Parser::PRISM: {
-                    auto parseResult = runPrismParser(lgs, file, print, opts);
-
-                    // The RBS rewriter produces plain Whitequark nodes and not `NodeWithExpr` which causes errors
-                    // in `PrismDesugar.cc`. For now, disable all direct translation, and fallback to `Desugar.cc`.
-                    usePrismDesugar = !lgs.cacheSensitiveOptions.rbsEnabled;
-
-                    // parseResult is null if runPrismParser stopped after an intermediate phase
-                    if (parseResult.tree == nullptr) {
+                    tree = runDesugar(lgs, file, move(rbsRewrittenParseResult), print, false);
+                    if (opts.stopAfterPhase == options::Phase::DESUGARER) {
                         return emptyParsedFile(file);
                     }
 
-                    // TODO: Remove this check once runPrismRBSRewrite is no longer no-oped inside of runPrismParser
-                    // https://github.com/sorbet/sorbet/issues/9065
-                    parseTree = runRBSRewrite(lgs, file, move(parseResult), print);
+                    break;
+                }
+
+                case options::Parser::PRISM: {
+                    auto parseResult = runPrismParser(lgs, file, print, opts);
+                    if (opts.stopAfterPhase == options::Phase::PARSER) {
+                        return emptyParsedFile(file);
+                    }
+
+                    auto rbsRewrittenParseResult = runPrismRBSRewrite(lgs, file, move(parseResult), print);
+
+                    tree = runPrismDesugar(lgs, file, move(rbsRewrittenParseResult), print);
+                    if (opts.stopAfterPhase == options::Phase::DESUGARER) {
+                        return emptyParsedFile(file);
+                    }
 
                     break;
                 }
-            }
-
-            tree = runDesugar(lgs, file, move(parseTree), print, false, usePrismDesugar);
-
-            if (opts.stopAfterPhase == options::Phase::DESUGARER) {
-                return emptyParsedFile(file);
             }
 
             tree = runRewriter(lgs, file, move(tree));
