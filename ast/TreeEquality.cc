@@ -285,10 +285,15 @@ bool compareTrees(const core::GlobalState &gs, const void *avoid, const Tag tag,
         case Tag::UnresolvedConstantLit: {
             auto *a = reinterpret_cast<const UnresolvedConstantLit *>(tree);
             auto *b = reinterpret_cast<const UnresolvedConstantLit *>(other);
-            if (!Comparator::compareNames(gs, a->cnst, b->cnst)) {
+            if (a->segCount() != b->segCount()) {
                 return false;
             }
-            return Comparator::compareNodes(gs, avoid, a->scope, b->scope, file);
+            for (size_t i = 0; i < a->segCount(); ++i) {
+                if (!Comparator::compareNames(gs, a->names()[i], b->names()[i])) {
+                    return false;
+                }
+            }
+            return Comparator::compareNodes(gs, avoid, a->scope(), b->scope(), file);
         }
 
         case Tag::ConstantLit: {
@@ -300,10 +305,10 @@ bool compareTrees(const core::GlobalState &gs, const void *avoid, const Tag tag,
             if (a->original() && b->original()) {
                 auto &alit = *a->original();
                 auto &blit = *b->original();
-                if (alit.cnst != blit.cnst) {
+                if (alit.cnst() != blit.cnst()) {
                     return false;
                 }
-                return Comparator::compareNodes(gs, avoid, alit.scope, blit.scope, file);
+                return Comparator::compareNodes(gs, avoid, alit.scope(), blit.scope(), file);
             } else if (!a->original() && !b->original()) {
                 // This occurs when the constant is created using MK::Constant instead of MK::UnresolvedConstant
                 // (original points to the UnresolvedConstantLit that created this ConstantLit)

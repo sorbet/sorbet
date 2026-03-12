@@ -1178,9 +1178,15 @@ ast::ExpressionPtr Serializer::loadTree(const core::GlobalState &gs, core::File 
 }
 
 void SerializerImpl::pickle(Pickler &p, const ast::UnresolvedConstantLit &lit) {
-    pickle(p, lit.loc);
-    p.putU4(lit.cnst.rawId());
-    pickle(p, lit.scope);
+    pickle(p, lit.scope());
+    p.putU4(lit.segCount());
+    auto ns = lit.names();
+    auto ls = lit.locs();
+    // Pickle in reverse order so unpickling can use SlotInit (which fills backwards)
+    for (size_t i = lit.segCount(); i > 0; --i) {
+        p.putU4(ns[i - 1].rawId());
+        pickle(p, ls[i - 1]);
+    }
 }
 
 void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
@@ -1508,10 +1514,17 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
 
 unique_ptr<ast::UnresolvedConstantLit> SerializerImpl::unpickleUnresolvedConstantLit(UnPickler &p,
                                                                                      const GlobalState &gs) {
-    auto loc = unpickleLocOffsets(p);
-    NameRef cnst = unpickleNameRef(p);
-    auto scope = unpickleExpr(p, gs);
-    return make_unique<ast::UnresolvedConstantLit>(loc, std::move(scope), cnst);
+    auto rootScope = unpickleExpr(p, gs);
+    auto segCount = p.getU4();
+    auto init = ast::UnresolvedConstantLit::make(std::move(rootScope), segCount);
+    auto nameSlot = init.names();
+    auto locSlot = init.locs();
+    // Unpickle in reverse order (matching pickle order) and fill backwards
+    for (uint32_t i = 0; i < segCount; ++i) {
+        *nameSlot-- = unpickleNameRef(p);
+        *locSlot-- = unpickleLocOffsets(p);
+    }
+    return init.finalize();
 }
 
 ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const GlobalState &gs) {

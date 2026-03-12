@@ -28,23 +28,17 @@ ast::ExpressionPtr elemFixedUntyped(core::LocOffsets loc) {
         ast::MK::Block0(loc, ast::MK::Hash1(loc, ast::MK::Symbol(loc, core::Names::fixed()), ast::MK::Untyped(loc)));
     auto typeMember =
         ast::MK::Send0Block(loc, ast::MK::Self(loc), core::Names::typeMember(), loc.copyWithZeroLength(), move(block));
-    return ast::MK::Assign(loc, ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Names::Constants::Elem()),
+    return ast::MK::Assign(loc,
+                           ast::MK::UnresolvedConstant(ast::MK::EmptyTree(), {core::Names::Constants::Elem()}, {loc}),
                            std::move(typeMember));
 }
 
 void selfScopeToEmptyTree(ast::UnresolvedConstantLit &cnst) {
-    if (ast::isa_tree<ast::EmptyTree>(cnst.scope) || ast::isa_tree<ast::ConstantLit>(cnst.scope)) {
+    if (!cnst.hasExprPtrScope()) {
         return;
     }
-
-    if (cnst.scope.isSelfReference()) {
-        cnst.scope = ast::MK::EmptyTree();
-        return;
-    }
-
-    if (auto scope = ast::cast_tree<ast::UnresolvedConstantLit>(cnst.scope)) {
-        selfScopeToEmptyTree(*scope);
-        return;
+    if (cnst.mutableScopeExpr().isSelfReference()) {
+        cnst.mutableScopeExpr() = ast::MK::EmptyTree();
     }
 }
 
@@ -164,14 +158,14 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
 
     auto structUniqueName = asgn->lhs.deepCopy();
     auto &structUniqueNameUnresolvedConst = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(structUniqueName);
-    structUniqueNameUnresolvedConst.cnst =
-        ctx.state.enterNameConstant(ctx.state.freshNameUnique(core::UniqueNameKind::Struct, lhs->cnst, 1));
+    structUniqueNameUnresolvedConst.mutableNames().back() =
+        ctx.state.enterNameConstant(ctx.state.freshNameUnique(core::UniqueNameKind::Struct, lhs->cnst(), 1));
 
     // class Foo$1 < ::Struct
     {
         ast::ClassDef::ANCESTORS_store ancestors;
-        ancestors.emplace_back(ast::MK::UnresolvedConstant(loc, ast::MK::Constant(loc, core::Symbols::root()),
-                                                           core::Names::Constants::Struct()));
+        ancestors.emplace_back(ast::MK::UnresolvedConstant(ast::MK::Constant(loc, core::Symbols::root()),
+                                                           {core::Names::Constants::Struct()}, {loc}));
 
         stats.emplace_back(
             ast::MK::Class(loc, loc, structUniqueName.deepCopy(), std::move(ancestors), std::move(body)));

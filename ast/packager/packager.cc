@@ -6,13 +6,10 @@ using namespace std;
 namespace sorbet::ast::packager {
 
 ExpressionPtr prependRegistry(ExpressionPtr scope) {
-    auto lastConstLit = ast::cast_tree<ast::UnresolvedConstantLit>(scope);
-    ENFORCE(lastConstLit != nullptr);
-    while (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(lastConstLit->scope)) {
-        lastConstLit = constLit;
-    }
-    lastConstLit->scope =
-        ast::MK::Constant(lastConstLit->scope.loc().copyWithZeroLength(), core::Symbols::PackageSpecRegistry());
+    auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(scope);
+    ENFORCE(constLit != nullptr);
+    auto &root = constLit->scope_;
+    root = ast::MK::Constant(root.loc().copyWithZeroLength(), core::Symbols::PackageSpecRegistry());
     return scope;
 }
 

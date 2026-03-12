@@ -27,7 +27,7 @@ vector<ast::ExpressionPtr> HasAttachedClass::run(core::MutableContext ctx, bool 
 
     auto zeroLoc = send->loc.copyWithZeroLength();
     vector<ast::ExpressionPtr> result;
-    auto lhs = ast::MK::UnresolvedConstant(zeroLoc, ast::MK::EmptyTree(), core::Names::Constants::AttachedClass());
+    auto lhs = ast::MK::UnresolvedConstant(ast::MK::EmptyTree(), {core::Names::Constants::AttachedClass()}, {zeroLoc});
 
     // `has_attached_class!` and `type_member` have the same arity, so let's just dup the Send and
     // change the fun so that everything gets passed through. The rest of the pipeline will validate

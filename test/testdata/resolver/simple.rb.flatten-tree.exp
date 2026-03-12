@@ -31,5 +31,5 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  Unresolved: Unresolved: Unresolved: <emptyTree>::<C Does>::<C Not>::<C Exist>
+  Unresolved: <emptyTree>::<C Does>::<C Not>::<C Exist>
 end

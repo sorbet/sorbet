@@ -14,23 +14,17 @@ unique_ptr<ast::UnresolvedConstantLit> dupUnresolvedConstantLit(const ast::Unres
         return nullptr;
     }
 
-    auto scopeCnst = ast::cast_tree<ast::UnresolvedConstantLit>(cons->scope);
-    if (!scopeCnst) {
-        if (ast::isa_tree<ast::EmptyTree>(cons->scope)) {
-            return make_unique<ast::UnresolvedConstantLit>(cons->loc, ast::MK::EmptyTree(), cons->cnst);
-        }
-        auto id = ast::cast_tree<ast::ConstantLit>(cons->scope);
-        if (id == nullptr) {
+    // With the vectorized UCL, scope_ is never a UCL itself.
+    ast::ExpressionPtr dupedScope;
+    if (cons->scopeIsEmpty()) {
+        dupedScope = ast::MK::EmptyTree();
+    } else {
+        dupedScope = ASTUtil::dupType(cons->scope());
+        if (dupedScope == nullptr) {
             return nullptr;
         }
-        ENFORCE(id->symbol() == core::Symbols::root());
-        return make_unique<ast::UnresolvedConstantLit>(cons->loc, ASTUtil::dupType(cons->scope), cons->cnst);
     }
-    auto scope = ASTUtil::dupType(cons->scope);
-    if (scope == nullptr) {
-        return nullptr;
-    }
-    return make_unique<ast::UnresolvedConstantLit>(cons->loc, std::move(scope), cons->cnst);
+    return ast::UnresolvedConstantLit::createUnique(std::move(dupedScope), cons->names(), cons->locs());
 }
 } // namespace
 
@@ -394,19 +388,24 @@ pair<core::NameRef, core::LocOffsets> ASTUtil::getAttrName(core::MutableContext 
 
 bool ASTUtil::isRootScopedSyntacticConstant(const ast::ExpressionPtr &expr,
                                             absl::Span<const core::NameRef> constantName) {
-    auto *p = &expr;
-
-    for (auto it = constantName.rbegin(), end = constantName.rend(); it != end; ++it) {
-        auto ucl = ast::cast_tree<ast::UnresolvedConstantLit>(*p);
-
-        if (ucl == nullptr || ucl->cnst != *it) {
+    auto ucl = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
+    if (ucl == nullptr) {
+        return constantName.empty() && ast::MK::isRootScope(expr);
+    }
+    if (!ast::MK::isRootScope(ucl->scope())) {
+        return false;
+    }
+    auto ns = ucl->names();
+    auto partsIt = ns.begin();
+    auto nameIt = constantName.begin();
+    while (partsIt != ns.end() && nameIt != constantName.end()) {
+        if (*partsIt != *nameIt) {
             return false;
         }
-
-        p = &ucl->scope;
+        ++partsIt;
+        ++nameIt;
     }
-
-    return ast::MK::isRootScope(*p);
+    return partsIt == ns.end() && nameIt == constantName.end();
 }
 
 optional<ASTUtil::DuplicateArg> ASTUtil::findDuplicateArg(core::MutableContext ctx, const ast::Send *send) {

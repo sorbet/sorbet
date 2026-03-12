@@ -89,6 +89,15 @@ private:
 
     ast::ExpressionPtr make_unsupported_node(core::LocOffsets loc, std::string_view nodeName) const;
 
+    // Walk a pm_constant_path_node chain iteratively, collecting all segments, and build
+    // a flat UnresolvedConstantLit in one shot (no nested UCLs as rootScope).
+    // parentNullable: the parent of the outermost node (may be null for ::Foo)
+    // outerLoc: location of the outermost constant name
+    // outerConstName: constant NameRef for the outermost name
+    // nullParentRootLoc: loc for MK::Constant(root) when parentNullable is null
+    ast::ExpressionPtr buildConstantPath(pm_node_t *parentNullable, core::LocOffsets outerLoc,
+                                         core::NameRef outerConstName, core::LocOffsets nullParentRootLoc);
+
     core::LocOffsets translateLoc(pm_location_t loc) const;
     core::LocOffsets translateLoc(const uint8_t *start, const uint8_t *end) const;
 
