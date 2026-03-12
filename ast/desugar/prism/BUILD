@@ -8,8 +8,11 @@ cc_library(
     }),
     visibility = ["//visibility:public"],
     deps = [
+        "//ast",
         "//ast/desugar",
+        "//ast/verifier",
         "//core",
+        "//parser",
         "//parser/prism",
         "@prism",
     ],

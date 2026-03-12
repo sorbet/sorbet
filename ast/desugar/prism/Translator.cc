@@ -4,12 +4,14 @@
 #include "ast/Helpers.h"
 #include "ast/Trees.h"
 #include "ast/desugar/DuplicateHashKeyCheck.h"
+#include "ast/verifier/verifier.h"
 #include "core/errors/desugar.h"
 
 #include "absl/strings/str_replace.h"
 
 using namespace std;
 
+// Any changes made here should also be reflected in the original parser variant in `ast/desugar/Desugar.h`
 namespace sorbet::ast::Desugar::Prism {
 
 using namespace std::literals::string_view_literals;
@@ -5207,6 +5209,23 @@ void Translator::reportError(core::LocOffsets loc, const string &message) const 
     auto errorLoc = core::Loc(ctx.file, loc);
     if (auto e = ctx.state.beginError(errorLoc, core::errors::Parser::ParserError)) {
         e.setHeader("{}", message);
+    }
+}
+
+// The public entry point for desugaring a Prism parse tree into a Sorbet expression tree.
+ExpressionPtr node2Tree(core::MutableContext ctx, unique_ptr<parser::Node> what, bool preserveConcreteSyntax) {
+    try {
+        // Callers should not pass null - when Prism falls back, use legacy desugar instead
+        ENFORCE(what != nullptr, "node2Tree called with null tree");
+        ENFORCE(what->hasDesugaredExpr(), "Node has no desugared expression");
+
+        auto result = what->takeDesugaredExpr();
+        ENFORCE(result != nullptr, "Node has null desugared expr");
+
+        auto verifiedResult = Verifier::run(ctx, move(result));
+        return verifiedResult;
+    } catch (SorbetException &) {
+        throw;
     }
 }
 }; // namespace sorbet::ast::Desugar::Prism

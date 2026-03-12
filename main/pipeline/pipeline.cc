@@ -12,7 +12,6 @@
 #include "absl/strings/match.h"
 #include "ast/Helpers.h"
 #include "ast/desugar/Desugar.h"
-#include "ast/desugar/PrismDesugar.h"
 #include "ast/desugar/prism/Translator.h"
 #include "ast/substitute/substitute.h"
 #include "ast/treemap/treemap.h"
@@ -360,7 +359,7 @@ ast::ExpressionPtr runPrismDesugar(core::GlobalState &gs, core::FileRef file, pa
                 .translate_TODO(parseResult.getRawNodePointer());
 
         Timer timeit(gs.tracer(), "runDesugar", {{"file", string(file.data(gs).path())}});
-        ast = ast::prismDesugar::node2Tree(ctx, move(translatedTree));
+        ast = ast::Desugar::Prism::node2Tree(ctx, move(translatedTree));
     }
 
     if (print.DesugarTree.enabled) {

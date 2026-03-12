@@ -11,6 +11,7 @@ extern "C" {
 #include "prism.h"
 }
 
+// Any changes made here should also be reflected in the original parser variant in `ast/desugar/Desugar.h`
 namespace sorbet::ast::Desugar::Prism {
 
 using parser::Prism::ParseError;
@@ -300,6 +301,12 @@ private:
                                                                        pm_location_t closing_loc,
                                                                        const Translator::DesugaredBlockArgument &block);
 };
+
+// The public entry point for desugaring a Prism parse tree into a Sorbet expression tree.
+// preserveConcreteSyntax is used to skip some of desugarings, to aid in implementation of the Extract to Variable code
+// action. It should not be used elsewhere.
+ExpressionPtr node2Tree(core::MutableContext ctx, std::unique_ptr<parser::Node> what,
+                        bool preserveConcreteSyntax = false);
 
 } // namespace sorbet::ast::Desugar::Prism
 #endif // SORBET_AST_DESUGAR_PRISM_TRANSLATOR_H

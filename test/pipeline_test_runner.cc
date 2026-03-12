@@ -9,7 +9,6 @@
 #include "absl/strings/str_split.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
-#include "ast/desugar/PrismDesugar.h"
 #include "ast/desugar/prism/Translator.h"
 #include "ast/treemap/treemap.h"
 #include "cfg/CFG.h"
@@ -310,7 +309,7 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
                                                                       enclosingBlockParamLoc, enclosingBlockParamName)
                                           .translate_TODO(prismParseResult->getRawNodePointer());
 
-                auto prismDirectDesugarAST = ast::prismDesugar::node2Tree(ctx, move(translatedTree));
+                auto prismDirectDesugarAST = ast::Desugar::Prism::node2Tree(ctx, move(translatedTree));
 
                 if (!disableParserComparison) {
                     ast::ExpressionPtr legacyDesugarAST = ast::desugar::node2Tree(ctx, move(legacyParseResult.tree));
@@ -841,7 +840,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                                                         false, enclosingBlockParamLoc, enclosingBlockParamName)
                             .translate_TODO(prismResult.getRawNodePointer());
 
-                    ast = ast::prismDesugar::node2Tree(ctx, move(translatedTree));
+                    ast = ast::Desugar::Prism::node2Tree(ctx, move(translatedTree));
                 }
 
                 // Do *not* check the `desugar-tree` and `desugar-tree-raw` expectations for the Prism parser,

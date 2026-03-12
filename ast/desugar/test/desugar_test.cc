@@ -2,7 +2,7 @@
 // has to go first as it violates our requirements
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
-#include "ast/desugar/PrismDesugar.h"
+#include "ast/desugar/prism/Translator.h"
 #include "common/common.h"
 #include "core/Error.h"
 #include "core/ErrorQueue.h"
@@ -44,5 +44,5 @@ TEST_CASE("SimplePrismDesugar") { // NOLINT
     auto settings = sorbet::parser::Parser::Settings{};
     auto ast = sorbet::parser::Parser::run(gs, fileId, settings).tree;
     sorbet::core::MutableContext ctx(gs, sorbet::core::Symbols::root(), fileId);
-    auto o1 = sorbet::ast::prismDesugar::node2Tree(ctx, move(ast));
+    auto o1 = sorbet::ast::Desugar::Prism::node2Tree(ctx, move(ast));
 }
