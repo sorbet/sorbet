@@ -305,10 +305,10 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
                 // Translate the raw Prism AST into a Whitequark-compatible parser::Node for desugaring.
                 auto enclosingBlockParamLoc = core::LocOffsets::none();
                 auto enclosingBlockParamName = core::NameRef::noName();
-                auto translatedTree =
-                    parser::Prism::Translator(prismParseResult->getParser(), ctx, prismParseResult->getParseErrors(),
-                                              false, enclosingBlockParamLoc, enclosingBlockParamName)
-                        .translate_TODO(prismParseResult->getRawNodePointer());
+                auto translatedTree = ast::Desugar::Prism::Translator(prismParseResult->getParser(), ctx,
+                                                                      prismParseResult->getParseErrors(), false,
+                                                                      enclosingBlockParamLoc, enclosingBlockParamName)
+                                          .translate_TODO(prismParseResult->getRawNodePointer());
 
                 auto prismDirectDesugarAST = ast::prismDesugar::node2Tree(ctx, move(translatedTree));
 
@@ -837,8 +837,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                     auto enclosingBlockParamLoc = core::LocOffsets::none();
                     auto enclosingBlockParamName = core::NameRef::noName();
                     auto translatedTree =
-                        parser::Prism::Translator(prismResult.getParser(), ctx, prismResult.getParseErrors(), false,
-                                                  enclosingBlockParamLoc, enclosingBlockParamName)
+                        ast::Desugar::Prism::Translator(prismResult.getParser(), ctx, prismResult.getParseErrors(),
+                                                        false, enclosingBlockParamLoc, enclosingBlockParamName)
                             .translate_TODO(prismResult.getRawNodePointer());
 
                     ast = ast::prismDesugar::node2Tree(ctx, move(translatedTree));

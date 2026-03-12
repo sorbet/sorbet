@@ -1,5 +1,5 @@
-#ifndef SORBET_PARSER_PRISM_TRANSLATOR_H
-#define SORBET_PARSER_PRISM_TRANSLATOR_H
+#ifndef SORBET_AST_DESUGAR_PRISM_TRANSLATOR_H
+#define SORBET_AST_DESUGAR_PRISM_TRANSLATOR_H
 
 #include "absl/types/span.h"
 #include "core/errors/parser.h"
@@ -11,7 +11,10 @@ extern "C" {
 #include "prism.h"
 }
 
-namespace sorbet::parser::Prism {
+namespace sorbet::ast::Desugar::Prism {
+
+using parser::Prism::ParseError;
+using parser::Prism::Parser;
 
 class ExprOnly;
 
@@ -298,5 +301,5 @@ private:
                                                                        const Translator::DesugaredBlockArgument &block);
 };
 
-} // namespace sorbet::parser::Prism
-#endif // SORBET_PARSER_PRISM_TRANSLATOR_H
+} // namespace sorbet::ast::Desugar::Prism
+#endif // SORBET_AST_DESUGAR_PRISM_TRANSLATOR_H

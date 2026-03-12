@@ -354,9 +354,10 @@ ast::ExpressionPtr runPrismDesugar(core::GlobalState &gs, core::FileRef file, pa
 
         auto enclosingBlockParamLoc = core::LocOffsets::none();
         auto enclosingBlockParamName = core::NameRef::noName();
-        auto translatedTree = parser::Prism::Translator(parseResult.getParser(), ctx, parseResult.getParseErrors(),
-                                                        false, enclosingBlockParamLoc, enclosingBlockParamName)
-                                  .translate_TODO(parseResult.getRawNodePointer());
+        auto translatedTree =
+            ast::Desugar::Prism::Translator(parseResult.getParser(), ctx, parseResult.getParseErrors(), false,
+                                            enclosingBlockParamLoc, enclosingBlockParamName)
+                .translate_TODO(parseResult.getRawNodePointer());
 
         Timer timeit(gs.tracer(), "runDesugar", {{"file", string(file.data(gs).path())}});
         ast = ast::prismDesugar::node2Tree(ctx, move(translatedTree));

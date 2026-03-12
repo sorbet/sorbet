@@ -10,13 +10,17 @@
 
 using namespace std;
 
-namespace sorbet::parser::Prism {
+namespace sorbet::ast::Desugar::Prism {
 
 using namespace std::literals::string_view_literals;
 using sorbet::ast::MK;
+using sorbet::parser::Prism::cast_prism_string;
+using sorbet::parser::Prism::down_cast;
+using sorbet::parser::Prism::up_cast;
+using sorbet::parser::Prism::walkPrismAST;
 using ExpressionPtr = sorbet::ast::ExpressionPtr;
 
-class ExprOnly final : public Node {
+class ExprOnly final : public parser::Node {
     ast::ExpressionPtr desugaredExpr;
 
 public:
@@ -5205,4 +5209,4 @@ void Translator::reportError(core::LocOffsets loc, const string &message) const 
         e.setHeader("{}", message);
     }
 }
-}; // namespace sorbet::parser::Prism
+}; // namespace sorbet::ast::Desugar::Prism
