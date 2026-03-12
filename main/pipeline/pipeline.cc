@@ -82,6 +82,7 @@ void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) 
         gs.includeErrorSections = false;
     }
     gs.parseWithPrism = opts.cacheSensitiveOptions.usePrismParser;
+    gs.experimentalMethodModifiers = opts.experimentalMethodModifiers;
     gs.ruby3KeywordArgs = opts.ruby3KeywordArgs;
     gs.suppressPayloadSuperclassRedefinitionFor = opts.suppressPayloadSuperclassRedefinitionFor;
     if (!opts.uniquelyDefinedBehavior) {

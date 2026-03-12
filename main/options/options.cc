@@ -757,6 +757,9 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
         "Enables experimental support for RSpec. "
         "There are many RSpec constructs that are impossible for Sorbet to handle. "
         "As a result, there is no path to this flag ever being stable: RSpec support is best effort.");
+    options.add_options(section)("enable-experimental-method-modifiers",
+                                 "Enable experimental support for method def modifiers like `abstract def foo; end`. "
+                                 "Implicitly turned on if you enable RBS support.");
     // }}}
 
     // ----- OTHER -------------------------------------------------------- {{{
@@ -1007,6 +1010,14 @@ void readOptions(Options &opts,
                 "been combined into the `--enable-experimental-rbs-comments` option. Please update your Sorbet config "
                 "to use `--enable-experimental-rbs-comments` instead.");
             opts.cacheSensitiveOptions.rbsEnabled = true;
+        }
+
+        if (raw.count("enable-experimental-method-modifiers") > 0) {
+            opts.experimentalMethodModifiers = raw["enable-experimental-method-modifiers"].as<bool>();
+        } else {
+            // Abstract methods can only work correctly with RBS syntax in their modifier form,
+            // so we default to enabling the option unless it's explicitly disabled.
+            opts.experimentalMethodModifiers = opts.cacheSensitiveOptions.rbsEnabled;
         }
 
         opts.cacheSensitiveOptions.requiresAncestorEnabled = raw["enable-experimental-requires-ancestor"].as<bool>();

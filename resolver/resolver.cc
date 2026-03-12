@@ -3707,6 +3707,9 @@ private:
                 }
 
                 if (send.numPosArgs() == 1 && send.fun.isMethodDefModifierName()) {
+                    if (send.fun == core::Names::abstract() && !ctx.state.experimentalMethodModifiers) {
+                        return;
+                    }
                     processStatement(ctx, send.getPosArg(0), lastSigs);
                     return;
                 }
