@@ -2,7 +2,7 @@
 // has to go first as it violates our requirements
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
-#include "ast/desugar/prism/Translator.h"
+#include "ast/desugar/prism/Desugar.h"
 #include "common/common.h"
 #include "core/Error.h"
 #include "core/ErrorQueue.h"

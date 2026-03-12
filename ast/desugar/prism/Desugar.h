@@ -1,5 +1,5 @@
-#ifndef SORBET_AST_DESUGAR_PRISM_TRANSLATOR_H
-#define SORBET_AST_DESUGAR_PRISM_TRANSLATOR_H
+#ifndef SORBET_AST_DESUGAR_PRISM_DESUGAR_H
+#define SORBET_AST_DESUGAR_PRISM_DESUGAR_H
 
 #include "parser/prism/Parser.h"
 
@@ -14,4 +14,4 @@ using sorbet::parser::Prism::ParseResult;
 ast::ExpressionPtr node2Tree(core::MutableContext ctx, ParseResult parseResult, bool preserveConcreteSyntax = false);
 
 } // namespace sorbet::ast::Desugar::Prism
-#endif // SORBET_AST_DESUGAR_PRISM_TRANSLATOR_H
+#endif // SORBET_AST_DESUGAR_PRISM_DESUGAR_H
