@@ -351,15 +351,8 @@ ast::ExpressionPtr runPrismDesugar(core::GlobalState &gs, core::FileRef file, pa
         core::UnfreezeNameTable nameTableAccess(gs);
         core::MutableContext ctx(gs, core::Symbols::root(), file);
 
-        auto enclosingBlockParamLoc = core::LocOffsets::none();
-        auto enclosingBlockParamName = core::NameRef::noName();
-        auto translatedTree =
-            ast::Desugar::Prism::Translator(parseResult.getParser(), ctx, parseResult.getParseErrors(), false,
-                                            enclosingBlockParamLoc, enclosingBlockParamName)
-                .translate_TODO(parseResult.getRawNodePointer());
-
         Timer timeit(gs.tracer(), "runDesugar", {{"file", string(file.data(gs).path())}});
-        ast = ast::Desugar::Prism::node2Tree(ctx, move(translatedTree));
+        ast = ast::Desugar::Prism::node2Tree(ctx, move(parseResult));
     }
 
     if (print.DesugarTree.enabled) {

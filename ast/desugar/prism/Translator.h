@@ -3,7 +3,6 @@
 
 #include "absl/types/span.h"
 #include "core/errors/parser.h"
-#include "parser/Node.h" // To clarify: these are Sorbet Parser nodes, not Prism ones.
 #include "parser/prism/Parser.h"
 #include <memory>
 
@@ -16,8 +15,7 @@ namespace sorbet::ast::Desugar::Prism {
 
 using parser::Prism::ParseError;
 using parser::Prism::Parser;
-
-class ExprOnly;
+using parser::Prism::ParseResult;
 
 // Enum to specify the type of compound assignment operation.
 // Used by the desugar*OpAssign functions to determine the appropriate desugaring strategy.
@@ -71,9 +69,6 @@ public:
 
     ast::ExpressionPtr desugar(pm_node_t *node);
     ast::ExpressionPtr desugarNullable(pm_node_t *node);
-
-    // Translates the given AST from Prism's node types into the equivalent AST in Sorbet's legacy parser node types.
-    std::unique_ptr<parser::Node> translate_TODO(pm_node_t *node);
 
 private:
     // This private constructor is used for creating child translators with modified context.
@@ -305,8 +300,7 @@ private:
 // The public entry point for desugaring a Prism parse tree into a Sorbet expression tree.
 // preserveConcreteSyntax is used to skip some of desugarings, to aid in implementation of the Extract to Variable code
 // action. It should not be used elsewhere.
-ExpressionPtr node2Tree(core::MutableContext ctx, std::unique_ptr<parser::Node> what,
-                        bool preserveConcreteSyntax = false);
+ast::ExpressionPtr node2Tree(core::MutableContext ctx, ParseResult parseResult, bool preserveConcreteSyntax = false);
 
 } // namespace sorbet::ast::Desugar::Prism
 #endif // SORBET_AST_DESUGAR_PRISM_TRANSLATOR_H

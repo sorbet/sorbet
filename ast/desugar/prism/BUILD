@@ -12,7 +12,6 @@ cc_library(
         "//ast/desugar",
         "//ast/verifier",
         "//core",
-        "//parser",
         "//parser/prism",
         "@prism",
     ],

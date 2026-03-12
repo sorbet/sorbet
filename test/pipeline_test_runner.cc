@@ -301,15 +301,7 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
                 BooleanPropertyAssertion::getValue("disable-parser-comparison", assertions).value_or(false);
 
             if (prismParseResult.has_value()) {
-                // Translate the raw Prism AST into a Whitequark-compatible parser::Node for desugaring.
-                auto enclosingBlockParamLoc = core::LocOffsets::none();
-                auto enclosingBlockParamName = core::NameRef::noName();
-                auto translatedTree = ast::Desugar::Prism::Translator(prismParseResult->getParser(), ctx,
-                                                                      prismParseResult->getParseErrors(), false,
-                                                                      enclosingBlockParamLoc, enclosingBlockParamName)
-                                          .translate_TODO(prismParseResult->getRawNodePointer());
-
-                auto prismDirectDesugarAST = ast::Desugar::Prism::node2Tree(ctx, move(translatedTree));
+                auto prismDirectDesugarAST = ast::Desugar::Prism::node2Tree(ctx, move(prismParseResult.value()));
 
                 if (!disableParserComparison) {
                     ast::ExpressionPtr legacyDesugarAST = ast::desugar::node2Tree(ctx, move(legacyParseResult.tree));
@@ -832,16 +824,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 }
 
                 // Prism Desugarer
-                {
-                    auto enclosingBlockParamLoc = core::LocOffsets::none();
-                    auto enclosingBlockParamName = core::NameRef::noName();
-                    auto translatedTree =
-                        ast::Desugar::Prism::Translator(prismResult.getParser(), ctx, prismResult.getParseErrors(),
-                                                        false, enclosingBlockParamLoc, enclosingBlockParamName)
-                            .translate_TODO(prismResult.getRawNodePointer());
-
-                    ast = ast::Desugar::Prism::node2Tree(ctx, move(translatedTree));
-                }
+                { ast = ast::Desugar::Prism::node2Tree(ctx, move(prismResult)); }
 
                 // Do *not* check the `desugar-tree` and `desugar-tree-raw` expectations for the Prism parser,
                 // which can be subtly different (e.g. the numbering of unique identifiers).
