@@ -442,6 +442,9 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
                     }
 
                     auto rbsRewrittenParseResult = runRBSRewrite(lgs, file, move(parseResult), print);
+                    if (opts.stopAfterPhase == options::Phase::RBS_REWRITER) {
+                        return emptyParsedFile(file);
+                    }
 
                     tree = runDesugar(lgs, file, move(rbsRewrittenParseResult), print, false);
                     if (opts.stopAfterPhase == options::Phase::DESUGARER) {
@@ -458,6 +461,9 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
                     }
 
                     auto rbsRewrittenParseResult = runPrismRBSRewrite(lgs, file, move(parseResult), print);
+                    if (opts.stopAfterPhase == options::Phase::RBS_REWRITER) {
+                        return emptyParsedFile(file);
+                    }
 
                     tree = runPrismDesugar(lgs, file, move(rbsRewrittenParseResult), print);
                     if (opts.stopAfterPhase == options::Phase::DESUGARER) {

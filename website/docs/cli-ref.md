@@ -155,8 +155,9 @@ Usage:
                                 debugging. Also useful when overwhelmed with errors,
                                 because errors from earlier phases (like resolver) can
                                 cause errors downstream (in inferencer).
-                                Phases: [init, parser, desugarer, rewriter, local-vars,
-                                namer, resolver, cfg, inferencer] (default: inferencer)
+                                Phases: [init, parser, rbs, desugarer, rewriter,
+                                local-vars, namer, resolver, cfg, inferencer] (default:
+                                inferencer)
 
 ```
 
