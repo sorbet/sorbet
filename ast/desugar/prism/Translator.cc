@@ -22,60 +22,6 @@ using sorbet::parser::Prism::up_cast;
 using sorbet::parser::Prism::walkPrismAST;
 using ExpressionPtr = sorbet::ast::ExpressionPtr;
 
-class ExprOnly final : public parser::Node {
-    ast::ExpressionPtr desugaredExpr;
-
-public:
-    ExprOnly(ast::ExpressionPtr desugaredExpr, core::LocOffsets loc)
-        : Node(loc), desugaredExpr(std::move(desugaredExpr)) {
-        ENFORCE(this->desugaredExpr != nullptr, "Can't create ExprOnly with a null desugaredExpr.");
-    }
-    virtual ~ExprOnly() = default;
-
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const final {
-        Exception::raise("Not implemented");
-    }
-
-    virtual std::string toJSON(const core::GlobalState &gs, int tabs = 0) final {
-        Exception::raise("Not implemented");
-    }
-
-    virtual std::string toJSONWithLocs(const core::GlobalState &gs, core::FileRef file, int tabs = 0) final {
-        Exception::raise("Not implemented");
-    }
-
-    virtual std::string toWhitequark(const core::GlobalState &gs, int tabs = 0) final {
-        Exception::raise("Not implemented");
-    }
-
-    virtual std::string nodeName() const final {
-        Exception::raise("Not implemented");
-    }
-
-    virtual ast::ExpressionPtr takeDesugaredExpr() final {
-        ENFORCE(this->desugaredExpr != nullptr,
-                "Tried to call make a second call to `takeDesugaredExpr()` on a ExprOnly");
-
-        // We know each `NodeAndExpr` object's `takeDesugaredExpr()` will be called at most once, either:
-        // 1. When its parent node is being translated in `prism/Translator.cc`,
-        //    and this value is used to create that parent's expr.
-        // 2. When this node is visted by `node2TreeImpl` in `PrismDesugar.cc`,
-        //    and this value is called from the `ExprOnly` case
-        //
-        // Because of this, we don't need to make any copies here. Just move this value out,
-        // and hand exclusive ownership to the caller.
-        return move(this->desugaredExpr);
-    }
-
-    virtual bool hasDesugaredExpr() final {
-        return this->desugaredExpr != nullptr;
-    }
-
-    virtual const ast::ExpressionPtr &peekDesugaredExpr() const final {
-        return this->desugaredExpr;
-    }
-};
-
 // Represents a desugared block argument. Valid cases can have:
 // - Just a block pass (e.g., `foo(&block)`)
 // - Just a literal block (e.g., `foo { }`)
@@ -1501,17 +1447,6 @@ ast::ExpressionPtr Translator::desugarNullable(pm_node_t *node) {
     }
 
     return desugar(node);
-}
-
-std::unique_ptr<parser::Node> Translator::translate_TODO(pm_node_t *node) {
-    auto expr = desugar(node);
-    auto loc = expr.loc();
-
-    if (!expr.loc().exists()) {
-        loc = translateLoc(node->location);
-    }
-
-    return make_unique<ExprOnly>(move(expr), loc);
 }
 
 ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
@@ -5213,19 +5148,12 @@ void Translator::reportError(core::LocOffsets loc, const string &message) const 
 }
 
 // The public entry point for desugaring a Prism parse tree into a Sorbet expression tree.
-ExpressionPtr node2Tree(core::MutableContext ctx, unique_ptr<parser::Node> what, bool preserveConcreteSyntax) {
-    try {
-        // Callers should not pass null - when Prism falls back, use legacy desugar instead
-        ENFORCE(what != nullptr, "node2Tree called with null tree");
-        ENFORCE(what->hasDesugaredExpr(), "Node has no desugared expression");
-
-        auto result = what->takeDesugaredExpr();
-        ENFORCE(result != nullptr, "Node has null desugared expr");
-
-        auto verifiedResult = Verifier::run(ctx, move(result));
-        return verifiedResult;
-    } catch (SorbetException &) {
-        throw;
-    }
+ExpressionPtr node2Tree(core::MutableContext ctx, parser::Prism::ParseResult parseResult, bool preserveConcreteSyntax) {
+    auto enclosingBlockParamLoc = core::LocOffsets::none();
+    auto enclosingBlockParamName = core::NameRef::noName();
+    auto expr = Translator(parseResult.getParser(), ctx, parseResult.getParseErrors(), preserveConcreteSyntax,
+                           enclosingBlockParamLoc, enclosingBlockParamName)
+                    .desugar(parseResult.getRawNodePointer());
+    return Verifier::run(ctx, move(expr));
 }
 }; // namespace sorbet::ast::Desugar::Prism
