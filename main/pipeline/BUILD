@@ -13,6 +13,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//ast/desugar",
+        "//ast/desugar/prism",
         "//ast/substitute",
         "//ast/treemap",
         "//cfg",
@@ -57,6 +58,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//ast/desugar",
+        "//ast/desugar/prism",
         "//ast/substitute",
         "//ast/treemap",
         "//cfg",

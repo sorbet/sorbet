@@ -1,5 +1,5 @@
 #include "Translator.h"
-#include "Helpers.h"
+#include "parser/prism/Helpers.h"
 
 #include "ast/Helpers.h"
 #include "ast/Trees.h"
