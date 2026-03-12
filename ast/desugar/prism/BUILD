@@ -1,7 +1,7 @@
 cc_library(
     name = "prism",
-    srcs = ["Translator.cc"],
-    hdrs = ["Translator.h"],
+    srcs = glob(["*.cc"]),
+    hdrs = glob(["*.h"]),
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
