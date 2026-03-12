@@ -39,6 +39,9 @@ core::LocOffsets Parser::translateLocation(const uint8_t *start, const uint8_t *
 }
 
 string_view Parser::resolveConstant(pm_constant_id_t constantId) const {
+    ENFORCE(constantId != PM_CONSTANT_ID_UNSET,
+            "resolveConstant called with PM_CONSTANT_ID_UNSET (anonymous parameter name). "
+            "Caller must check for PM_CONSTANT_ID_UNSET before calling.");
     pm_constant_t *constant = pm_constant_pool_id_to_constant(&parser.constant_pool, constantId);
 
     return cast_prism_string(constant->start, constant->length);
