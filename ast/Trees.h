@@ -1192,7 +1192,7 @@ EXPRESSION(UnresolvedConstantLit)
     // Use the static factory functions instead.
     UnresolvedConstantLit(ExpressionPtr rootScope, uint32_t numSegs);
 
-    uint32_t numSegs_;
+    const uint32_t numSegs_;
     size_t numTrailingObjects(OverloadToken<core::NameRef>) const {
         return numSegs_;
     }
