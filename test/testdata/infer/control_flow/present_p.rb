@@ -24,6 +24,31 @@ class Object
   end
 end
 
+class Time
+  extend T::Sig
+
+  sig {returns(TrueClass)}
+  def present?
+    true
+  end
+end
+
+TimeOrNil = T.type_alias { T.nilable(Time) }
+
+class Widget; end
+
+class Box
+  extend T::Sig
+  extend T::Generic
+
+  Elem = type_member
+
+  sig {returns(Elem)}
+  def present?
+    T.unsafe(nil)
+  end
+end
+
 class A
   extend T::Sig
 
@@ -56,5 +81,43 @@ class A
     if false.present?
       "foo" # error: This code is unreachable
     end
+  end
+
+  sig {params(time: T.nilable(Time)).returns(NilClass)}
+  def test_falsy_branch_narrows(time)
+    if time.present?
+      T.reveal_type(time) # error: Revealed type: `Time`
+    else
+      T.reveal_type(time) # error: Revealed type: `NilClass`
+    end
+    nil
+  end
+
+  sig {params(time: TimeOrNil).returns(NilClass)}
+  def test_falsy_branch_narrows_alias(time)
+    if time.present?
+      T.reveal_type(time) # error: Revealed type: `Time`
+    else
+      T.reveal_type(time) # error: Revealed type: `NilClass`
+    end
+    nil
+  end
+
+  sig {params(w: T.nilable(Widget)).returns(NilClass)}
+  def test_falsy_branch_no_narrow_without_sig(w)
+    # Widget inherits Object#present? which has no sig, so we
+    # conservatively do not narrow away Widget in the falsy branch
+    if !w.present?
+      T.reveal_type(w) # error: Revealed type: `T.nilable(Widget)`
+    end
+    nil
+  end
+
+  sig {params(x: T.any(Box[NilClass], Time)).returns(NilClass)}
+  def test_falsy_branch_narrows_instantiated_sig(x)
+    if !x.present?
+      T.reveal_type(x) # error: Revealed type: `Box[NilClass]`
+    end
+    nil
   end
 end

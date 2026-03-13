@@ -27,6 +27,58 @@ core::TypePtr dropConstructor(core::Context ctx, core::Loc loc, core::TypePtr tp
 bool typeTestReferencesVar(const InlinedVector<pair<cfg::LocalRef, core::TypePtr>, 1> &typeTest, cfg::LocalRef var) {
     return absl::c_any_of(typeTest, [var](auto &test) { return test.first == var; });
 }
+
+// For each component of `type`, dispatches `methodName` and checks whether the
+// inferred return type satisfies `predicate`. Components that fail are replaced
+// with bottom(). Components that do not dispatch cleanly are conservatively kept.
+core::TypePtr filterByMethodReturnType(core::Context ctx, core::Loc loc, const core::TypePtr &type,
+                                       core::NameRef methodName,
+                                       bool (*predicate)(const core::GlobalState &, const core::TypePtr &)) {
+    core::TypePtr result;
+
+    if (type.isUntyped()) {
+        return type;
+    }
+
+    typecase(
+        type,
+        [&](const core::OrType &o) {
+            auto lhs = filterByMethodReturnType(ctx, loc, o.left, methodName, predicate);
+            auto rhs = filterByMethodReturnType(ctx, loc, o.right, methodName, predicate);
+            if (lhs == o.left && rhs == o.right) {
+                result = type;
+            } else {
+                result = core::Types::any(ctx, lhs, rhs);
+            }
+        },
+        [&](const core::TypePtr &) {
+            if (core::is_proxy_type(type)) {
+                result = filterByMethodReturnType(ctx, loc, type.underlying(ctx), methodName, predicate);
+                return;
+            }
+
+            core::TypeAndOrigins recvType{type, loc};
+            InlinedVector<const core::TypeAndOrigins *, 2> args;
+            InlinedVector<core::LocOffsets, 2> argLocs;
+            core::CallLocs locs{ctx.file, loc.offsets(), loc.offsets(), loc.offsets(), argLocs};
+            core::DispatchArgs dispatchArgs{methodName,          locs,
+                                            0,                   args,
+                                            recvType.type,       recvType,
+                                            recvType.type,       nullptr,
+                                            loc,                 true,
+                                            true,                core::NameRef::noName()};
+            auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
+            if (!dispatched.main.errors.empty() || dispatched.returnType == nullptr) {
+                result = type;
+                return;
+            }
+            result = predicate(ctx.state, dispatched.returnType) ? type : core::Types::bottom();
+        }
+    );
+
+    return result;
+}
+
 } // namespace
 
 void TypeTestReverseIndex::addToIndex(cfg::LocalRef from, cfg::LocalRef to) {
@@ -604,6 +656,14 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         // Note that this assumes that .blank? is a rails-compatible monkey patch.
         // In other cases this flow analysis might make incorrect assumptions.
         whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->recv.variable, core::Types::falsyTypes());
+
+        auto &originalType = send->recv.type;
+        auto narrowedForTruthy = filterByMethodReturnType(ctx, loc, originalType, send->fun, core::Types::canBeTruthy);
+        if (!core::Types::equiv(ctx, narrowedForTruthy, originalType) &&
+            !core::Types::equiv(ctx, narrowedForTruthy, core::Types::bottom())) {
+            whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, narrowedForTruthy);
+        }
+
         whoKnows.sanityCheck();
         return;
     }
@@ -612,6 +672,14 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         // Note that this assumes that .present? is a rails-compatible monkey patch.
         // In other cases this flow analysis might make incorrect assumptions.
         whoKnows.truthy().addNoTypeTest(local, typeTestsWithVar, send->recv.variable, core::Types::falsyTypes());
+
+        auto &originalType = send->recv.type;
+        auto narrowedForFalsy = filterByMethodReturnType(ctx, loc, originalType, send->fun, core::Types::canBeFalsy);
+        if (!core::Types::equiv(ctx, narrowedForFalsy, originalType) &&
+            !core::Types::equiv(ctx, narrowedForFalsy, core::Types::bottom())) {
+            whoKnows.falsy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, narrowedForFalsy);
+        }
+
         whoKnows.sanityCheck();
         return;
     }
