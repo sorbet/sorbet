@@ -1,4 +1,4 @@
-#include "Translator.h"
+#include "Desugar.h"
 #include "parser/prism/Helpers.h"
 
 #include "ast/Helpers.h"
@@ -30,10 +30,10 @@ using ExpressionPtr = sorbet::ast::ExpressionPtr;
 // Used by the desugar*OpAssign functions to determine the appropriate desugaring strategy.
 enum class OpAssignKind { And, Or, Operator };
 
-class Translator final {
+class Desugarer final {
     const Parser &parser;
     // This context holds a reference to the GlobalState allocated up the call stack, which is why we don't allow
-    // Translator objects to be copied or moved.
+    // Desugarer objects to be copied or moved.
     core::MutableContext ctx;
 
     // The errors that were found by Prism during parsing
@@ -62,14 +62,14 @@ class Translator final {
     const bool isInModule = false;   // True if we're in a Module definition. False for classes and singleton classes
     const bool isInAnyBlock = false; // True if we're in a `{ }`/`do end` block
 
-    Translator(Translator &&) = delete;                 // Move constructor
-    Translator(const Translator &) = delete;            // Copy constructor
-    Translator &operator=(Translator &&) = delete;      // Move assignment
-    Translator &operator=(const Translator &) = delete; // Copy assignment
+    Desugarer(Desugarer &&) = delete;                 // Move constructor
+    Desugarer(const Desugarer &) = delete;            // Copy constructor
+    Desugarer &operator=(Desugarer &&) = delete;      // Move assignment
+    Desugarer &operator=(const Desugarer &) = delete; // Copy assignment
 public:
-    Translator(const Parser &parser, core::MutableContext ctx, absl::Span<const ParseError> parseErrors,
-               bool preserveConcreteSyntax, core::LocOffsets &enclosingBlockParamLoc,
-               core::NameRef &enclosingBlockParamName)
+    Desugarer(const Parser &parser, core::MutableContext ctx, absl::Span<const ParseError> parseErrors,
+              bool preserveConcreteSyntax, core::LocOffsets &enclosingBlockParamLoc,
+              core::NameRef &enclosingBlockParamName)
         : parser(parser), ctx(ctx), parseErrors(parseErrors), preserveConcreteSyntax(preserveConcreteSyntax),
           parserUniqueCounterStorage(1), desugarUniqueCounterStorage(1),
           parserUniqueCounter(this->parserUniqueCounterStorage),
@@ -82,9 +82,9 @@ public:
 private:
     // This private constructor is used for creating child translators with modified context.
     // uniqueCounterStorage is passed as a dummy value and is never used
-    Translator(const Translator &parent, bool resetDesugarUniqueCounter, core::LocOffsets enclosingMethodLoc,
-               core::NameRef enclosingMethodName, core::LocOffsets &enclosingBlockParamLoc,
-               core::NameRef &enclosingBlockParamName, bool isInModule, bool isInAnyBlock)
+    Desugarer(const Desugarer &parent, bool resetDesugarUniqueCounter, core::LocOffsets enclosingMethodLoc,
+              core::NameRef enclosingMethodName, core::LocOffsets &enclosingBlockParamLoc,
+              core::NameRef &enclosingBlockParamName, bool isInModule, bool isInAnyBlock)
         : parser(parent.parser), ctx(parent.ctx), parseErrors(parent.parseErrors),
           preserveConcreteSyntax(parent.preserveConcreteSyntax), parserUniqueCounterStorage(9999),
           desugarUniqueCounterStorage(resetDesugarUniqueCounter ? 1 : 999999),
@@ -292,18 +292,17 @@ private:
 
     // Context management helpers. These return a copy of `this` with some change to the context.
     bool isInMethodDef() const;
-    Translator enterMethodDef(bool isSingletonMethod, core::LocOffsets methodLoc, core::NameRef methodName,
-                              core::LocOffsets &enclosingBlockParamLoc, core::NameRef &enclosingBlockParamName) const;
-    Translator enterBlockContext() const;
-    Translator enterModuleContext(core::LocOffsets &enclosingBlockParamLoc,
-                                  core::NameRef &enclosingBlockParamName) const;
-    Translator enterClassContext(core::LocOffsets &enclosingBlockParamLoc,
+    Desugarer enterMethodDef(bool isSingletonMethod, core::LocOffsets methodLoc, core::NameRef methodName,
+                             core::LocOffsets &enclosingBlockParamLoc, core::NameRef &enclosingBlockParamName) const;
+    Desugarer enterBlockContext() const;
+    Desugarer enterModuleContext(core::LocOffsets &enclosingBlockParamLoc,
                                  core::NameRef &enclosingBlockParamName) const;
+    Desugarer enterClassContext(core::LocOffsets &enclosingBlockParamLoc, core::NameRef &enclosingBlockParamName) const;
 
     std::pair<core::LocOffsets, core::LocOffsets> computeMethodCallLoc(core::LocOffsets initialLoc, pm_node_t *receiver,
                                                                        absl::Span<pm_node_t *> prismArgs,
                                                                        pm_location_t closing_loc,
-                                                                       const Translator::DesugaredBlockArgument &block);
+                                                                       const Desugarer::DesugaredBlockArgument &block);
 };
 
 // Represents a desugared block argument. Valid cases can have:
@@ -313,7 +312,7 @@ private:
 //
 // We also need to model the invalid case, where both a block pass and literal block
 // (e.g., `foo(...) { }` or `foo(&block) { }`)
-class Translator::DesugaredBlockArgument {
+class Desugarer::DesugaredBlockArgument {
 public:
     // The literal block, if any, e.g. `{ ... }` or `do ... end`
     ast::ExpressionPtr literalBlockExpr;
@@ -374,7 +373,7 @@ public:
 // Helper template to convert a pm_node_list to any store type.
 // This is used to convert prism node lists to store types like ast::Array::ENTRY_store,
 // ast::Send::ARGS_store, ast::InsSeq::STATS_store, etc.
-template <typename StoreType> StoreType Translator::nodeListToStore(const pm_node_list &nodeList) {
+template <typename StoreType> StoreType Desugarer::nodeListToStore(const pm_node_list &nodeList) {
     auto span = absl::MakeSpan(nodeList.nodes, nodeList.size);
 
     StoreType store;
@@ -387,7 +386,7 @@ template <typename StoreType> StoreType Translator::nodeListToStore(const pm_nod
 }
 
 // Collect pattern variable assignments from a pattern node (similar to desugarPatternMatchingVars in PrismDesugar.cc)
-void Translator::collectPatternMatchingVarsPrism(ast::InsSeq::STATS_store &vars, pm_node_t *node) {
+void Desugarer::collectPatternMatchingVarsPrism(ast::InsSeq::STATS_store &vars, pm_node_t *node) {
     if (node == nullptr) {
         return;
     }
@@ -481,7 +480,7 @@ void Translator::collectPatternMatchingVarsPrism(ast::InsSeq::STATS_store &vars,
 }
 
 // Desugar `in` and `=>` oneline pattern matching (mirrors desugarOnelinePattern in Desugar.cc)
-ast::ExpressionPtr Translator::desugarOnelinePattern(core::LocOffsets loc, pm_node_t *match) {
+ast::ExpressionPtr Desugarer::desugarOnelinePattern(core::LocOffsets loc, pm_node_t *match) {
     auto matchExpr = MK::RaiseUnimplemented(loc);
     auto bodyExpr = MK::RaiseUnimplemented(loc);
     auto elseExpr = MK::EmptyTree();
@@ -497,7 +496,7 @@ ast::ExpressionPtr Translator::desugarOnelinePattern(core::LocOffsets loc, pm_no
     return MK::If(loc, move(matchExpr), move(bodyExpr), move(elseExpr));
 }
 
-ast::ExpressionPtr Translator::make_unsupported_node(core::LocOffsets loc, std::string_view nodeName) const {
+ast::ExpressionPtr Desugarer::make_unsupported_node(core::LocOffsets loc, std::string_view nodeName) const {
     if (auto e = ctx.beginIndexerError(loc, core::errors::Desugar::UnsupportedNode)) {
         e.setHeader("Unsupported node type `{}`", nodeName);
     }
@@ -547,7 +546,7 @@ bool isCallToBlockGivenP(pm_call_node *callNode, core::NameRef methodName, ast::
 // Flattens the key/value pairs from the Kwargs Hash into the destination container.
 // If Kwargs Hash contains any splats, we skip the flattening and desugar the hash as-is.
 template <typename Container>
-void Translator::flattenKwargs(pm_keyword_hash_node *kwargsHashNode, Container &destination) {
+void Desugarer::flattenKwargs(pm_keyword_hash_node *kwargsHashNode, Container &destination) {
     ENFORCE(kwargsHashNode != nullptr);
 
     auto elements = absl::MakeSpan(kwargsHashNode->elements.nodes, kwargsHashNode->elements.size);
@@ -610,7 +609,7 @@ ast::ExpressionPtr mergeStrings(core::MutableContext ctx, core::LocOffsets loc,
 // Extract the content and location of a Symbol node.
 // This is handy for `desugarSymbolProc`, where it saves us from needing to dig and
 // cast to extract this info out of an `ast::Literal`.
-pair<core::NameRef, core::LocOffsets> Translator::translateSymbol(pm_symbol_node *symbol) {
+pair<core::NameRef, core::LocOffsets> Desugarer::translateSymbol(pm_symbol_node *symbol) {
     auto location = translateLoc(symbol->base.location);
 
     auto unescaped = &symbol->unescaped;
@@ -620,7 +619,7 @@ pair<core::NameRef, core::LocOffsets> Translator::translateSymbol(pm_symbol_node
     return make_pair(content, location);
 }
 
-ast::ExpressionPtr Translator::desugarDString(core::LocOffsets loc, pm_node_list prismNodeList) {
+ast::ExpressionPtr Desugarer::desugarDString(core::LocOffsets loc, pm_node_list prismNodeList) {
     if (prismNodeList.size == 0) {
         return MK::String(loc, core::Names::empty());
     }
@@ -672,9 +671,9 @@ ast::ExpressionPtr Translator::desugarDString(core::LocOffsets loc, pm_node_list
 // The content of the body is defined by the given lambda, so this method can be reused among the different places
 // where conditional sends can appear.
 template <typename Lambda>
-ast::ExpressionPtr Translator::desugarConditionalSend(core::LocOffsets location, ast::ExpressionPtr receiver,
-                                                      core::LocOffsets recvLoc, pm_constant_id_t methodNameID,
-                                                      pm_location_t methodNamePrismLoc, Lambda &&body) {
+ast::ExpressionPtr Desugarer::desugarConditionalSend(core::LocOffsets location, ast::ExpressionPtr receiver,
+                                                     core::LocOffsets recvLoc, pm_constant_id_t methodNameID,
+                                                     pm_location_t methodNamePrismLoc, Lambda &&body) {
     auto loc0 = location.copyWithZeroLength();
 
     auto recvLoc0 = recvLoc.copyWithZeroLength();
@@ -735,7 +734,7 @@ ast::ExpressionPtr Translator::desugarConditionalSend(core::LocOffsets location,
 // While calling `to_ary` doesn't return the correct value if we were to execute this code,
 // it returns the correct type from a static point of view.
 template <typename PrismNode>
-ast::ExpressionPtr Translator::desugarMlhs(core::LocOffsets loc, PrismNode *lhs, ast::ExpressionPtr rhs) {
+ast::ExpressionPtr Desugarer::desugarMlhs(core::LocOffsets loc, PrismNode *lhs, ast::ExpressionPtr rhs) {
     static_assert(is_same_v<PrismNode, pm_multi_target_node> || is_same_v<PrismNode, pm_multi_write_node>);
 
     auto isValidAssignmentTarget = [](pm_node_t *node) -> bool {
@@ -893,7 +892,7 @@ ast::ExpressionPtr Translator::desugarMlhs(core::LocOffsets loc, PrismNode *lhs,
 }
 
 std::pair</* param */ ast::ExpressionPtr, /* multi-assign statement */ ast::ExpressionPtr>
-Translator::desugarMlhsParam(core::LocOffsets loc, pm_multi_target_node *lhs) {
+Desugarer::desugarMlhsParam(core::LocOffsets loc, pm_multi_target_node *lhs) {
     core::NameRef destructureParam = nextUniqueDesugarName(core::Names::destructureArg());
     auto param = MK::Local(loc, destructureParam);
     auto destructuringExpr = desugarMlhs(loc, lhs, MK::Local(loc, destructureParam));
@@ -918,8 +917,8 @@ ast::Send *asTLet(ExpressionPtr &arg) {
 // TODO: narrow the type back after direct desugaring is complete. https://github.com/Shopify/sorbet/issues/671
 // The location is the location of the whole Prism assignment node.
 template <typename PrismAssignmentNode, typename SorbetAssignmentNode, typename SorbetLHSNode>
-ast::ExpressionPtr Translator::translateAnyOpAssignment(PrismAssignmentNode *node, core::LocOffsets location,
-                                                        ast::ExpressionPtr lhs) {
+ast::ExpressionPtr Desugarer::translateAnyOpAssignment(PrismAssignmentNode *node, core::LocOffsets location,
+                                                       ast::ExpressionPtr lhs) {
     auto rhs = desugar(node->value);
 
     if constexpr (is_same_v<SorbetAssignmentNode, parser::AndAsgn>) {
@@ -937,7 +936,7 @@ ast::ExpressionPtr Translator::translateAnyOpAssignment(PrismAssignmentNode *nod
 
 // The location is the location of the whole Prism assignment node.
 template <typename PrismAssignmentNode, typename SorbetAssignmentNode>
-ast::ExpressionPtr Translator::translateIndexAssignment(pm_node_t *untypedNode, core::LocOffsets location) {
+ast::ExpressionPtr Desugarer::translateIndexAssignment(pm_node_t *untypedNode, core::LocOffsets location) {
     auto node = down_cast<PrismAssignmentNode>(untypedNode);
 
     // The LHS location includes the receiver and the `[]`, but not the `=` or rhs.
@@ -962,8 +961,8 @@ ast::ExpressionPtr Translator::translateIndexAssignment(pm_node_t *untypedNode, 
 
 // The location is the location of the whole Prism assignment node.
 template <typename SorbetAssignmentNode>
-ast::ExpressionPtr Translator::translateAndOrAssignment(core::LocOffsets location, ast::ExpressionPtr lhs,
-                                                        ast::ExpressionPtr rhs) {
+ast::ExpressionPtr Desugarer::translateAndOrAssignment(core::LocOffsets location, ast::ExpressionPtr lhs,
+                                                       ast::ExpressionPtr rhs) {
     const auto isOrAsgn = is_same_v<SorbetAssignmentNode, parser::OrAsgn>;
     const auto isAndAsgn = is_same_v<SorbetAssignmentNode, parser::AndAsgn>;
     static_assert(isOrAsgn || isAndAsgn);
@@ -1084,7 +1083,7 @@ ast::ExpressionPtr Translator::translateAndOrAssignment(core::LocOffsets locatio
     Exception::raise("the LHS has been desugared to something we haven't expected: {}", lhs.toString(ctx));
 }
 
-Translator::OpAsgnScaffolding Translator::copyArgsForOpAsgn(ast::Send *s) {
+Desugarer::OpAsgnScaffolding Desugarer::copyArgsForOpAsgn(ast::Send *s) {
     // This is for storing the temporary assignments followed by the final update. In the case that we have other
     // arguments to the send (e.g. in the case of x.y[z] += 1) we'll want to store the other parameters (z) in a
     // temporary as well, producing a sequence like
@@ -1121,8 +1120,8 @@ Translator::OpAsgnScaffolding Translator::copyArgsForOpAsgn(ast::Send *s) {
 
 // The location is the location of the whole Prism assignment node.
 template <typename SorbetAssignmentNode, typename PrismAssignmentNode>
-ast::ExpressionPtr Translator::translateOpAssignment(PrismAssignmentNode *node, core::LocOffsets location,
-                                                     ast::ExpressionPtr lhs, ast::ExpressionPtr rhs) {
+ast::ExpressionPtr Desugarer::translateOpAssignment(PrismAssignmentNode *node, core::LocOffsets location,
+                                                    ast::ExpressionPtr lhs, ast::ExpressionPtr rhs) {
     // `OpAsgn` assign needs more information about the specific operator here, so it gets special handling here.
     auto opLoc = translateLoc(node->binary_operator_loc);
     auto op = translateConstantName(node->binary_operator);
@@ -1209,8 +1208,8 @@ ast::ExpressionPtr Translator::translateOpAssignment(PrismAssignmentNode *node, 
 // For `x &&= y`: `if x then x = y else x end`
 // For `x ||= y`: `if x then x else x = y end`
 template <OpAssignKind Kind>
-ast::ExpressionPtr Translator::desugarAndOrReference(core::LocOffsets location, ast::ExpressionPtr lhs,
-                                                     ast::ExpressionPtr rhs, bool isIvarOrCvar) {
+ast::ExpressionPtr Desugarer::desugarAndOrReference(core::LocOffsets location, ast::ExpressionPtr lhs,
+                                                    ast::ExpressionPtr rhs, bool isIvarOrCvar) {
     static_assert(Kind == OpAssignKind::And || Kind == OpAssignKind::Or,
                   "desugarAndOrReference only handles And and Or assignments");
 
@@ -1265,8 +1264,8 @@ ast::ExpressionPtr Translator::desugarAndOrReference(core::LocOffsets location, 
 
 // Desugar operator assignment (+=, -=, etc.) for a simple reference LHS.
 // For `x += y`: `x = x + y`
-ast::ExpressionPtr Translator::desugarOpReference(core::LocOffsets location, ast::ExpressionPtr lhs, core::NameRef op,
-                                                  core::LocOffsets opLoc, ast::ExpressionPtr rhs) {
+ast::ExpressionPtr Desugarer::desugarOpReference(core::LocOffsets location, ast::ExpressionPtr lhs, core::NameRef op,
+                                                 core::LocOffsets opLoc, ast::ExpressionPtr rhs) {
     auto lhsCopy = MK::cpRef(lhs);
     auto callOp = MK::Send1(location, move(lhs), op, opLoc, move(rhs));
     return MK::Assign(location, move(lhsCopy), move(callOp));
@@ -1277,8 +1276,8 @@ ast::ExpressionPtr Translator::desugarOpReference(core::LocOffsets location, ast
 // For `recv.method ||= val`: `{ tmp = recv; result = tmp.method; if result then result else tmp.method= val }`
 // For `recv.method += val`:  `{ tmp = recv; tmp.method= tmp.method + val }`
 template <OpAssignKind Kind>
-ast::ExpressionPtr Translator::desugarOpAssignSend(core::LocOffsets location, ast::Send *s, ast::ExpressionPtr rhs,
-                                                   core::NameRef op, core::LocOffsets opLoc) {
+ast::ExpressionPtr Desugarer::desugarOpAssignSend(core::LocOffsets location, ast::Send *s, ast::ExpressionPtr rhs,
+                                                  core::NameRef op, core::LocOffsets opLoc) {
     auto sendLoc = s->loc;
     auto [tempRecv, stats, numPosArgs, readArgs, assgnArgs] = copyArgsForOpAsgn(s);
 
@@ -1326,8 +1325,8 @@ ast::ExpressionPtr Translator::desugarOpAssignSend(core::LocOffsets location, as
 // The structure is: { $temp = recv; if $temp == nil then nil else $temp.method }
 // We need to modify the else branch to perform the assignment.
 template <OpAssignKind Kind>
-ast::ExpressionPtr Translator::desugarOpAssignCSend(core::LocOffsets location, ast::InsSeq *insSeq,
-                                                    ast::ExpressionPtr rhs, core::NameRef op, core::LocOffsets opLoc) {
+ast::ExpressionPtr Desugarer::desugarOpAssignCSend(core::LocOffsets location, ast::InsSeq *insSeq,
+                                                   ast::ExpressionPtr rhs, core::NameRef op, core::LocOffsets opLoc) {
     auto ifExpr = ast::cast_tree<ast::If>(insSeq->expr);
     if (!ifExpr) {
         Exception::raise("Unexpected left-hand side of op=: please file an issue");
@@ -1372,9 +1371,9 @@ ast::ExpressionPtr Translator::desugarOpAssignCSend(core::LocOffsets location, a
 // Core dispatcher for compound assignment desugaring.
 // Routes to the appropriate handler based on the LHS expression type.
 template <OpAssignKind Kind>
-ast::ExpressionPtr Translator::desugarAnyOpAssign(core::LocOffsets location, ast::ExpressionPtr lhs,
-                                                  ast::ExpressionPtr rhs, core::NameRef op, core::LocOffsets opLoc,
-                                                  bool isIvarOrCvar) {
+ast::ExpressionPtr Desugarer::desugarAnyOpAssign(core::LocOffsets location, ast::ExpressionPtr lhs,
+                                                 ast::ExpressionPtr rhs, core::NameRef op, core::LocOffsets opLoc,
+                                                 bool isIvarOrCvar) {
     if (auto s = ast::cast_tree<ast::Send>(lhs)) {
         return desugarOpAssignSend<Kind>(location, s, move(rhs), op, opLoc);
     }
@@ -1412,7 +1411,7 @@ constexpr bool isIvarOrCvarKind(ast::UnresolvedIdent::Kind kind) {
 //   - Kind: The assignment kind (And, Or, Operator)
 //   - IdentKind: The kind of identifier (Local, Instance, Class, Global)
 template <typename PrismVariableNode, OpAssignKind Kind, ast::UnresolvedIdent::Kind IdentKind>
-ast::ExpressionPtr Translator::desugarVariableOpAssign(pm_node_t *untypedNode) {
+ast::ExpressionPtr Desugarer::desugarVariableOpAssign(pm_node_t *untypedNode) {
     auto node = down_cast<PrismVariableNode>(untypedNode);
     auto location = translateLoc(untypedNode->location);
     auto nameLoc = translateLoc(node->name_loc);
@@ -1435,7 +1434,7 @@ ast::ExpressionPtr Translator::desugarVariableOpAssign(pm_node_t *untypedNode) {
 
 // Desugar constant compound assignment nodes (e.g., `CONST &&= val`).
 template <typename PrismConstantNode, OpAssignKind Kind>
-ast::ExpressionPtr Translator::desugarConstantOpAssign(pm_node_t *untypedNode) {
+ast::ExpressionPtr Desugarer::desugarConstantOpAssign(pm_node_t *untypedNode) {
     auto location = translateLoc(untypedNode->location);
 
     if (auto e = ctx.beginIndexerError(location, core::errors::Desugar::NoConstantReassignment)) {
@@ -1475,7 +1474,7 @@ ast::ExpressionPtr Translator::desugarConstantOpAssign(pm_node_t *untypedNode) {
 
 // Desugar constant path compound assignment nodes (e.g., `A::B &&= val`).
 template <typename PrismConstantPathNode, OpAssignKind Kind>
-ast::ExpressionPtr Translator::desugarConstantPathOpAssign(pm_node_t *untypedNode) {
+ast::ExpressionPtr Desugarer::desugarConstantPathOpAssign(pm_node_t *untypedNode) {
     auto location = translateLoc(untypedNode->location);
 
     if (auto e = ctx.beginIndexerError(location, core::errors::Desugar::NoConstantReassignment)) {
@@ -1516,7 +1515,7 @@ ast::ExpressionPtr Translator::desugarConstantPathOpAssign(pm_node_t *untypedNod
 
 // Desugar index compound assignment nodes (e.g., `arr[i] &&= val`).
 template <typename PrismIndexNode, OpAssignKind Kind>
-ast::ExpressionPtr Translator::desugarIndexOpAssign(pm_node_t *untypedNode) {
+ast::ExpressionPtr Desugarer::desugarIndexOpAssign(pm_node_t *untypedNode) {
     auto node = down_cast<PrismIndexNode>(untypedNode);
     auto location = translateLoc(untypedNode->location);
 
@@ -1552,7 +1551,7 @@ ast::ExpressionPtr Translator::desugarIndexOpAssign(pm_node_t *untypedNode) {
 // Desugar send compound assignment nodes (e.g., `obj.method &&= val`, `obj.method += val`).
 // Handles both regular sends and safe navigation sends (CSend).
 template <typename PrismSendNode, OpAssignKind Kind>
-ast::ExpressionPtr Translator::desugarSendOpAssign(pm_node_t *untypedNode) {
+ast::ExpressionPtr Desugarer::desugarSendOpAssign(pm_node_t *untypedNode) {
     auto node = down_cast<PrismSendNode>(untypedNode);
     auto location = translateLoc(untypedNode->location);
     auto name = translateConstantName(node->read_name);
@@ -1627,7 +1626,7 @@ const uint8_t *endLoc(pm_node_t *anyNode);
 //   - PrismAssignmentNode: The prism node type (e.g., pm_local_variable_write_node)
 //   - IdentKind: The kind of identifier (Local, Instance, Class, Global), or void for constants
 template <typename PrismAssignmentNode, ast::UnresolvedIdent::Kind IdentKind>
-ast::ExpressionPtr Translator::desugarAssignment(pm_node_t *untypedNode) {
+ast::ExpressionPtr Desugarer::desugarAssignment(pm_node_t *untypedNode) {
     auto node = down_cast<PrismAssignmentNode>(untypedNode);
     // For heredocs, Prism's location only includes the opening tag (e.g., "x = <<~EOF").
     // Extend to include the full heredoc body by using endLoc() on the value.
@@ -1688,8 +1687,8 @@ ast::ExpressionPtr Translator::desugarAssignment(pm_node_t *untypedNode) {
 }
 
 pair<core::LocOffsets, core::LocOffsets>
-Translator::computeMethodCallLoc(core::LocOffsets initialLoc, pm_node_t *receiver, absl::Span<pm_node_t *> prismArgs,
-                                 pm_location_t closingLoc, const Translator::DesugaredBlockArgument &block) {
+Desugarer::computeMethodCallLoc(core::LocOffsets initialLoc, pm_node_t *receiver, absl::Span<pm_node_t *> prismArgs,
+                                pm_location_t closingLoc, const Desugarer::DesugaredBlockArgument &block) {
     auto result = initialLoc;
 
     if (receiver) {
@@ -1725,7 +1724,7 @@ Translator::computeMethodCallLoc(core::LocOffsets initialLoc, pm_node_t *receive
     return {result, blockLoc};
 }
 
-ast::ExpressionPtr Translator::desugarNullable(pm_node_t *node) {
+ast::ExpressionPtr Desugarer::desugarNullable(pm_node_t *node) {
     if (node == nullptr) {
         return MK::EmptyTree();
     }
@@ -1733,7 +1732,7 @@ ast::ExpressionPtr Translator::desugarNullable(pm_node_t *node) {
     return desugar(node);
 }
 
-ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
+ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
     if (node == nullptr)
         return nullptr;
 
@@ -1821,7 +1820,7 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
             // 1. The arguments to a method call, e.g the `1, 2, 3` in `f(1, 2, 3)`.
             // 2. The value(s) returned from a return statement, e.g. the `1, 2, 3` in `return 1, 2, 3`.
             // 3. The arguments to a `yield` call, e.g. the `1, 2, 3` in `yield 1, 2, 3`.
-            unreachable("PM_ARGUMENTS_NODE is handled separately in `Translator::translateArguments()`.");
+            unreachable("PM_ARGUMENTS_NODE is handled separately in `Desugarer::translateArguments()`.");
         }
         case PM_ARRAY_NODE: { // An array literal, e.g. `[1, 2, 3]`
             auto arrayNode = down_cast<pm_array_node>(node);
@@ -1866,7 +1865,7 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
             return MK::ShadowArg(location, MK::Local(location, sorbetName));
         }
         case PM_BLOCK_PARAMETER_NODE: { // A block parameter declared at the top of a method, e.g. `def m(&block)`
-            unreachable("PM_BLOCK_PARAMETER_NODE is handled separately in `Translator::desugarParametersNode()`.");
+            unreachable("PM_BLOCK_PARAMETER_NODE is handled separately in `Desugarer::desugarParametersNode()`.");
         }
         case PM_BLOCK_PARAMETERS_NODE: { // The parameters declared at the top of a PM_BLOCK_NODE
             unreachable("PM_BLOCK_PARAMETERS_NODE is handled separately in `PM_CALL_NODE`.");
@@ -2368,7 +2367,7 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
                 enclosingBlockParamName = core::Names::blkArg();
             }
 
-            Translator methodContext =
+            Desugarer methodContext =
                 this->enterMethodDef(isSingletonMethod, declLoc, name, enclosingBlockParamLoc, enclosingBlockParamName);
 
             ast::ExpressionPtr body;
@@ -3467,7 +3466,7 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
         case PM_IN_NODE:                // An `in` pattern such as in a `case` statement, or as a standalone expression.
         case PM_PINNED_EXPRESSION_NODE: // A "pinned" expression, like `^(1 + 2)` in `in ^(1 + 2)`
         case PM_PINNED_VARIABLE_NODE:   // A "pinned" variable, like `^x` in `in ^x`
-            unreachable("These pattern-match related nodes are handled separately in `Translator::desugarPattern()`.");
+            unreachable("These pattern-match related nodes are handled separately in `Desugarer::desugarPattern()`.");
 
         case PM_SCOPE_NODE: // An internal node type only created by the MRI's Ruby compiler, and not Prism itself.
             unreachable("Prism's parser never produces `PM_SCOPE_NODE` nodes.");
@@ -3478,11 +3477,11 @@ ast::ExpressionPtr Translator::desugar(pm_node_t *node) {
     }
 }
 
-core::LocOffsets Translator::translateLoc(const uint8_t *start, const uint8_t *end) const {
+core::LocOffsets Desugarer::translateLoc(const uint8_t *start, const uint8_t *end) const {
     return parser.translateLocation(start, end);
 }
 
-core::LocOffsets Translator::translateLoc(pm_location_t loc) const {
+core::LocOffsets Desugarer::translateLoc(pm_location_t loc) const {
     return parser.translateLocation(loc);
 }
 
@@ -3599,7 +3598,7 @@ const uint8_t *startLoc(pm_node_t *anyNode) {
 //
 // E.g. `PM_LOCAL_VARIABLE_TARGET_NODE` normally translates to `parser::LVarLhs`, but `parser::MatchVar` in the context
 // of a pattern.
-ast::ExpressionPtr Translator::desugarPattern(pm_node_t *node) {
+ast::ExpressionPtr Desugarer::desugarPattern(pm_node_t *node) {
     if (node == nullptr)
         return nullptr;
 
@@ -3850,8 +3849,8 @@ ast::ExpressionPtr Translator::desugarPattern(pm_node_t *node) {
 
 tuple<ast::MethodDef::PARAMS_store, ast::InsSeq::STATS_store, core::LocOffsets /* enclosingBlockParamLoc */,
       core::NameRef /* enclosingBlockParamName */>
-Translator::desugarParametersNode(pm_parameters_node *paramsNode, core::LocOffsets location,
-                                  absl::Span<pm_node_t *> blockLocalVariables) {
+Desugarer::desugarParametersNode(pm_parameters_node *paramsNode, core::LocOffsets location,
+                                 absl::Span<pm_node_t *> blockLocalVariables) {
     if (paramsNode == nullptr) {
         auto paramsStore = ast::MethodDef::PARAMS_store{};
 
@@ -4021,7 +4020,7 @@ Translator::desugarParametersNode(pm_parameters_node *paramsNode, core::LocOffse
     return make_tuple(move(paramsStore), move(statsStore), enclosingBlockParamLoc, enclosingBlockParamName);
 }
 
-core::LocOffsets Translator::findItParamUsageLoc(pm_statements_node *statements) {
+core::LocOffsets Desugarer::findItParamUsageLoc(pm_statements_node *statements) {
     ENFORCE(statements != nullptr);
     ENFORCE(0 < statements->body.size, "Can never have an ItParam node on a block with no statements.");
 
@@ -4064,7 +4063,7 @@ core::LocOffsets Translator::findItParamUsageLoc(pm_statements_node *statements)
 }
 
 std::array<core::LocOffsets, 9>
-Translator::findNumberedParamsUsageLocs(core::LocOffsets loc, pm_statements_node *statements, uint8_t maxParamNumber) {
+Desugarer::findNumberedParamsUsageLocs(core::LocOffsets loc, pm_statements_node *statements, uint8_t maxParamNumber) {
     ENFORCE(statements != nullptr);
     ENFORCE(0 < statements->body.size, "Can never have a NumParams node on a block with no statements.");
 
@@ -4101,9 +4100,8 @@ Translator::findNumberedParamsUsageLocs(core::LocOffsets loc, pm_statements_node
     return result;
 }
 
-ast::MethodDef::PARAMS_store
-Translator::translateNumberedParametersNode(pm_numbered_parameters_node *numberedParamsNode,
-                                            pm_statements_node_t *statements) {
+ast::MethodDef::PARAMS_store Desugarer::translateNumberedParametersNode(pm_numbered_parameters_node *numberedParamsNode,
+                                                                        pm_statements_node_t *statements) {
     auto location = translateLoc(numberedParamsNode->base.location);
 
     auto paramCount = numberedParamsNode->maximum;
@@ -4130,8 +4128,8 @@ Translator::translateNumberedParametersNode(pm_numbered_parameters_node *numbere
 
 // `parentLoc` is the location of the entire parent node, which we need for the `foo(...)` case
 // (as the location used for the `<fwd-block>` argument).
-Translator::DesugaredBlockArgument Translator::desugarBlock(pm_node_t *block, pm_arguments_node *otherArgs,
-                                                            pm_location_t parentLoc) {
+Desugarer::DesugaredBlockArgument Desugarer::desugarBlock(pm_node_t *block, pm_arguments_node *otherArgs,
+                                                          pm_location_t parentLoc) {
     auto hasFwdArgs = otherArgs != nullptr && PM_NODE_FLAG_P(otherArgs, PM_ARGUMENTS_NODE_FLAGS_CONTAINS_FORWARDING);
 
     // Check if there's a block argument in otherArgs (e.g., &block in `foo(&block) { }`)
@@ -4202,8 +4200,8 @@ Translator::DesugaredBlockArgument Translator::desugarBlock(pm_node_t *block, pm
     }
 }
 
-ast::ExpressionPtr Translator::desugarLiteralBlock(pm_node *blockBodyNode, pm_node *blockParameters,
-                                                   pm_location_t blockLocation, pm_location_t blockNodeOpeningLoc) {
+ast::ExpressionPtr Desugarer::desugarLiteralBlock(pm_node *blockBodyNode, pm_node *blockParameters,
+                                                  pm_location_t blockLocation, pm_location_t blockNodeOpeningLoc) {
     auto blockBody = this->enterBlockContext().desugarNullable(blockBodyNode);
     ast::MethodDef::PARAMS_store blockParamsStore;
     auto blockLoc = translateLoc(blockLocation);
@@ -4279,7 +4277,7 @@ ast::ExpressionPtr Translator::desugarLiteralBlock(pm_node *blockBodyNode, pm_no
     return MK::Block(blockLoc, move(blockBody), move(blockParamsStore));
 }
 
-Translator::DesugaredBlockArgument Translator::desugarBlockPassArgument(pm_block_argument_node *bp) {
+Desugarer::DesugaredBlockArgument Desugarer::desugarBlockPassArgument(pm_block_argument_node *bp) {
     auto blockPassLoc = translateLoc(bp->base.location); // The location of the entire block pass, including the `&`.
 
     if (bp->expression) { // Block pass with an explicit expression, like `f(&block)`
@@ -4307,7 +4305,7 @@ Translator::DesugaredBlockArgument Translator::desugarBlockPassArgument(pm_block
 // - temp[0]            (evaluates to the 0th elem of the tuple)
 // - temp[1, LONG_MAX]  (evalutes to a tuple type if temp is a tuple type)
 // - foo(*expr)         (call-with-splat handles case of splatted tuple type)
-ast::ExpressionPtr Translator::desugarSymbolProc(pm_symbol_node *symbol) {
+ast::ExpressionPtr Desugarer::desugarSymbolProc(pm_symbol_node *symbol) {
     auto [symbolName, loc] = translateSymbol(symbol);
     auto loc0 = loc.copyWithZeroLength(); // TODO: shorten name
 
@@ -4328,10 +4326,10 @@ ast::ExpressionPtr Translator::desugarSymbolProc(pm_symbol_node *symbol) {
     return MK::Block1(loc, move(body), MK::RestParam(loc0, MK::Local(loc0, tempName)));
 }
 
-ast::ExpressionPtr Translator::desugarMethodCall(ast::ExpressionPtr receiver, core::NameRef methodName,
-                                                 core::LocOffsets messageLoc, pm_arguments_node *argumentsNode,
-                                                 pm_location_t closingLoc, Translator::DesugaredBlockArgument block,
-                                                 core::LocOffsets location, bool isPrivateOk) {
+ast::ExpressionPtr Desugarer::desugarMethodCall(ast::ExpressionPtr receiver, core::NameRef methodName,
+                                                core::LocOffsets messageLoc, pm_arguments_node *argumentsNode,
+                                                pm_location_t closingLoc, Desugarer::DesugaredBlockArgument block,
+                                                core::LocOffsets location, bool isPrivateOk) {
     pm_node_t *receiverNode = nullptr; // TODO: Remove me
 
     ast::Send::Flags flags;
@@ -4634,7 +4632,7 @@ ast::ExpressionPtr Translator::desugarMethodCall(ast::ExpressionPtr receiver, co
 }
 
 template <typename StoreType>
-StoreType Translator::desugarArguments(pm_arguments_node *argsNode, pm_node *blockArgumentNode) {
+StoreType Desugarer::desugarArguments(pm_arguments_node *argsNode, pm_node *blockArgumentNode) {
     static_assert(std::is_same_v<StoreType, ast::Send::ARGS_store> ||
                       std::is_same_v<StoreType, ast::Array::ENTRY_store>,
                   "desugarArguments can only be used with ast::Send::ARGS_store or ast::Array::ENTRY_store");
@@ -4665,7 +4663,7 @@ StoreType Translator::desugarArguments(pm_arguments_node *argsNode, pm_node *blo
 // - If no arguments, create node with EmptyTree
 // - If one argument, create node with that argument
 // - If multiple arguments, create node with an Array of arguments
-ast::ExpressionPtr Translator::desugarBreakNextReturn(pm_arguments_node *argsNode) {
+ast::ExpressionPtr Desugarer::desugarBreakNextReturn(pm_arguments_node *argsNode) {
     if (argsNode == nullptr) {
         return MK::EmptyTree();
     }
@@ -4681,8 +4679,8 @@ ast::ExpressionPtr Translator::desugarBreakNextReturn(pm_arguments_node *argsNod
     return MK::Array(arrayLoc, move(arguments));
 }
 
-ast::ExpressionPtr Translator::desugarArray(core::LocOffsets location, absl::Span<pm_node_t *> prismElements,
-                                            ast::Array::ENTRY_store elements) {
+ast::ExpressionPtr Desugarer::desugarArray(core::LocOffsets location, absl::Span<pm_node_t *> prismElements,
+                                           ast::Array::ENTRY_store elements) {
     auto locZeroLen = location.copyWithZeroLength();
     auto calledFromCallNode = location.empty();
 
@@ -4764,7 +4762,7 @@ ast::ExpressionPtr Translator::desugarArray(core::LocOffsets location, absl::Spa
     return res;
 }
 
-ast::ExpressionPtr Translator::desugarKeyValuePairs(core::LocOffsets loc, pm_node_list_t elements) {
+ast::ExpressionPtr Desugarer::desugarKeyValuePairs(core::LocOffsets loc, pm_node_list_t elements) {
     auto kvPairs = absl::MakeSpan(elements.nodes, elements.size);
 
     auto locZeroLen = loc.copyWithZeroLength();
@@ -4945,7 +4943,7 @@ ast::ExpressionPtr Translator::desugarKeyValuePairs(core::LocOffsets loc, pm_nod
 }
 
 // Helper to desugar statements from a clause node (rescue/ensure/else), returning EmptyTree if null or empty.
-template <typename ClauseNode> ast::ExpressionPtr Translator::desugarClauseStatements(ClauseNode *clause) {
+template <typename ClauseNode> ast::ExpressionPtr Desugarer::desugarClauseStatements(ClauseNode *clause) {
     if (clause == nullptr || clause->statements == nullptr || clause->statements->body.size == 0) {
         return ast::MK::EmptyTree();
     }
@@ -4954,7 +4952,7 @@ template <typename ClauseNode> ast::ExpressionPtr Translator::desugarClauseState
 
 // Helper: Calculate the end position for a RescueCase's location.
 // Priority: statements > reference > exceptions > keyword
-uint32_t Translator::rescueCaseEndPos(const pm_rescue_node &rescueNode) {
+uint32_t Desugarer::rescueCaseEndPos(const pm_rescue_node &rescueNode) {
     if (rescueNode.statements != nullptr) {
         return translateLoc(rescueNode.statements->base.location).endPos();
     }
@@ -4969,7 +4967,7 @@ uint32_t Translator::rescueCaseEndPos(const pm_rescue_node &rescueNode) {
 }
 
 // Builds rescue cases from a linked list of pm_rescue_node clauses.
-ast::Rescue::RESCUE_CASE_store Translator::desugarRescueCases(pm_rescue_node *firstRescueNode) {
+ast::Rescue::RESCUE_CASE_store Desugarer::desugarRescueCases(pm_rescue_node *firstRescueNode) {
     ast::Rescue::RESCUE_CASE_store rescueCases;
 
     for (pm_rescue_node *rescueNode = firstRescueNode; rescueNode != nullptr; rescueNode = rescueNode->subsequent) {
@@ -5082,7 +5080,7 @@ const uint8_t *rescueLocEnd(const pm_begin_node &beginNode) {
 
 // Desugars a pm_begin_node directly into an ast::ExpressionPtr.
 // Returns an ast::Rescue when there are rescue or ensure clauses, otherwise returns an InsSeq (or single expression).
-ast::ExpressionPtr Translator::desugarBegin(pm_begin_node *beginNodePtr) {
+ast::ExpressionPtr Desugarer::desugarBegin(pm_begin_node *beginNodePtr) {
     if (beginNodePtr == nullptr) {
         return ast::MK::EmptyTree();
     }
@@ -5117,8 +5115,8 @@ ast::ExpressionPtr Translator::desugarBegin(pm_begin_node *beginNodePtr) {
 // Translates the given Prism Statements Node into a `parser::Begin` node or an inlined `parser::Node`.
 // @param inlineIfSingle If enabled and there's 1 child node, we skip the `Begin` and just return the one `parser::Node`
 // @param overrideLocation If provided, use this location for the Begin node instead of the statements node location
-ast::ExpressionPtr Translator::desugarStatements(pm_statements_node *stmtsNode, bool inlineIfSingle,
-                                                 core::LocOffsets overrideLocation) {
+ast::ExpressionPtr Desugarer::desugarStatements(pm_statements_node *stmtsNode, bool inlineIfSingle,
+                                                core::LocOffsets overrideLocation) {
     if (stmtsNode == nullptr || stmtsNode->body.size == 0) {
         return ast::MK::EmptyTree();
     }
@@ -5165,7 +5163,7 @@ ast::ExpressionPtr Translator::desugarStatements(pm_statements_node *stmtsNode, 
 // Usually returns the `SorbetLHSNode`, but for constant writes and targets,
 // it can can return an `LVarLhs` as a workaround in the case of a dynamic constant assignment.
 template <typename PrismLhsNode, bool checkForDynamicConstAssign>
-ast::ExpressionPtr Translator::translateConst(pm_node_t *anyNode) {
+ast::ExpressionPtr Desugarer::translateConst(pm_node_t *anyNode) {
     auto node = down_cast<PrismLhsNode>(anyNode);
 
     // Constant name might be unset, e.g. `::`.
@@ -5245,20 +5243,20 @@ ast::ExpressionPtr Translator::translateConst(pm_node_t *anyNode) {
     return MK::UnresolvedConstant(location, move(parentExpr), constantName);
 }
 
-core::NameRef Translator::translateConstantName(pm_constant_id_t constant_id) {
+core::NameRef Desugarer::translateConstantName(pm_constant_id_t constant_id) {
     return ctx.state.enterNameUTF8(parser.resolveConstant(constant_id));
 }
 
-core::NameRef Translator::nextUniqueParserName(core::NameRef original) {
+core::NameRef Desugarer::nextUniqueParserName(core::NameRef original) {
     return ctx.state.freshNameUnique(core::UniqueNameKind::Parser, original, ++parserUniqueCounter);
 }
 
-core::NameRef Translator::nextUniqueDesugarName(core::NameRef original) {
+core::NameRef Desugarer::nextUniqueDesugarName(core::NameRef original) {
     return ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, original, ++desugarUniqueCounter);
 }
 
 // Translate the options from a Regexp literal, if any. E.g. the `i` in `/foo/i`
-ast::ExpressionPtr Translator::desugarRegexpOptions(pm_location_t closingLoc) {
+ast::ExpressionPtr Desugarer::desugarRegexpOptions(pm_location_t closingLoc) {
     ENFORCE(closingLoc.start && closingLoc.end);
 
     auto prismLoc = closingLoc;
@@ -5302,8 +5300,8 @@ ast::ExpressionPtr Translator::desugarRegexpOptions(pm_location_t closingLoc) {
 }
 
 // Translate an unescaped string from a Regexp literal
-ast::ExpressionPtr Translator::desugarRegexp(core::LocOffsets location, core::LocOffsets contentLoc,
-                                             pm_string_t content, pm_location_t closingLoc) {
+ast::ExpressionPtr Desugarer::desugarRegexp(core::LocOffsets location, core::LocOffsets contentLoc, pm_string_t content,
+                                            pm_location_t closingLoc) {
     auto source = parser.extractString(&content);
 
     auto stringContent = source.empty() ? core::Names::empty() : ctx.state.enterNameUTF8(source);
@@ -5320,12 +5318,12 @@ ast::ExpressionPtr Translator::desugarRegexp(core::LocOffsets location, core::Lo
                      move(options));
 }
 
-string_view Translator::sliceLocation(pm_location_t loc) const {
+string_view Desugarer::sliceLocation(pm_location_t loc) const {
     return cast_prism_string(loc.start, loc.end - loc.start);
 }
 
 // Handle invalid or missing constant paths in class/module declarations.
-ast::ExpressionPtr Translator::desugarClassOrModuleName(pm_node_t *constantPath, pm_location_t keywordLoc) {
+ast::ExpressionPtr Desugarer::desugarClassOrModuleName(pm_node_t *constantPath, pm_location_t keywordLoc) {
     if (constantPath == nullptr || (!PM_NODE_TYPE_P(constantPath, PM_CONSTANT_PATH_NODE) &&
                                     !PM_NODE_TYPE_P(constantPath, PM_CONSTANT_READ_NODE))) {
         auto nameLoc = translateLoc(keywordLoc);
@@ -5337,7 +5335,7 @@ ast::ExpressionPtr Translator::desugarClassOrModuleName(pm_node_t *constantPath,
 
 // Desugar a class, singleton class or module body.
 // The body can be a Begin node comprising multiple statements, or a single statement.
-ast::ClassDef::RHS_store Translator::desugarClassOrModule(pm_node *prismBodyNode) {
+ast::ClassDef::RHS_store Desugarer::desugarClassOrModule(pm_node *prismBodyNode) {
     if (prismBodyNode == nullptr) { // Empty body
         ast::ClassDef::RHS_store result;
         result.emplace_back(MK::EmptyTree());
@@ -5374,7 +5372,7 @@ ast::ClassDef::RHS_store Translator::desugarClassOrModule(pm_node *prismBodyNode
     }
 }
 
-core::NameRef Translator::maybeTypedSuper() const {
+core::NameRef Desugarer::maybeTypedSuper() const {
     bool typedSuper = ctx.state.cacheSensitiveOptions.typedSuper;
     bool shouldUseTypedSuper = typedSuper && !isInAnyBlock && !isInModule;
 
@@ -5382,7 +5380,7 @@ core::NameRef Translator::maybeTypedSuper() const {
 }
 
 // Context management methods
-bool Translator::isInMethodDef() const {
+bool Desugarer::isInMethodDef() const {
     ENFORCE(enclosingMethodLoc.exists() == enclosingMethodName.exists(),
             "The enclosing method name and location should always both be present, "
             "or both be absecent, depending on whether we're in a method def or not.")
@@ -5390,41 +5388,41 @@ bool Translator::isInMethodDef() const {
     return enclosingMethodName.exists();
 }
 
-Translator Translator::enterMethodDef(bool isSingletonMethod, core::LocOffsets methodLoc, core::NameRef methodName,
-                                      core::LocOffsets &enclosingBlockParamLoc,
-                                      core::NameRef &enclosingBlockParamName) const {
+Desugarer Desugarer::enterMethodDef(bool isSingletonMethod, core::LocOffsets methodLoc, core::NameRef methodName,
+                                    core::LocOffsets &enclosingBlockParamLoc,
+                                    core::NameRef &enclosingBlockParamName) const {
     auto resetDesugarUniqueCounter = true;
     auto isInModule = this->isInModule && !isSingletonMethod;
-    return Translator(*this, resetDesugarUniqueCounter, methodLoc, methodName, enclosingBlockParamLoc,
-                      enclosingBlockParamName, isInModule, this->isInAnyBlock);
+    return Desugarer(*this, resetDesugarUniqueCounter, methodLoc, methodName, enclosingBlockParamLoc,
+                     enclosingBlockParamName, isInModule, this->isInAnyBlock);
 }
 
-Translator Translator::enterBlockContext() const {
+Desugarer Desugarer::enterBlockContext() const {
     auto resetDesugarUniqueCounter = false; // Blocks inherit their parent's numbering
     auto isInAnyBlock = true;
-    return Translator(*this, resetDesugarUniqueCounter, this->enclosingMethodLoc, this->enclosingMethodName,
-                      this->enclosingBlockParamLoc, this->enclosingBlockParamName, this->isInModule, isInAnyBlock);
+    return Desugarer(*this, resetDesugarUniqueCounter, this->enclosingMethodLoc, this->enclosingMethodName,
+                     this->enclosingBlockParamLoc, this->enclosingBlockParamName, this->isInModule, isInAnyBlock);
 }
 
-Translator Translator::enterModuleContext(core::LocOffsets &enclosingBlockParamLoc,
-                                          core::NameRef &enclosingBlockParamName) const {
+Desugarer Desugarer::enterModuleContext(core::LocOffsets &enclosingBlockParamLoc,
+                                        core::NameRef &enclosingBlockParamName) const {
     auto resetDesugarUniqueCounter = true;
     auto isInModule = true;
     auto isInAnyBlock = false; // Blocks never persist across a class/module boundary
-    return Translator(*this, resetDesugarUniqueCounter, this->enclosingMethodLoc, this->enclosingMethodName,
-                      enclosingBlockParamLoc, enclosingBlockParamName, isInModule, isInAnyBlock);
+    return Desugarer(*this, resetDesugarUniqueCounter, this->enclosingMethodLoc, this->enclosingMethodName,
+                     enclosingBlockParamLoc, enclosingBlockParamName, isInModule, isInAnyBlock);
 }
 
-Translator Translator::enterClassContext(core::LocOffsets &enclosingBlockParamLoc,
-                                         core::NameRef &enclosingBlockParamName) const {
+Desugarer Desugarer::enterClassContext(core::LocOffsets &enclosingBlockParamLoc,
+                                       core::NameRef &enclosingBlockParamName) const {
     auto resetDesugarUniqueCounter = true;
     auto isInModule = false;
     auto isInAnyBlock = false; // Blocks never persist across a class/module boundary
-    return Translator(*this, resetDesugarUniqueCounter, this->enclosingMethodLoc, this->enclosingMethodName,
-                      enclosingBlockParamLoc, enclosingBlockParamName, isInModule, isInAnyBlock);
+    return Desugarer(*this, resetDesugarUniqueCounter, this->enclosingMethodLoc, this->enclosingMethodName,
+                     enclosingBlockParamLoc, enclosingBlockParamName, isInModule, isInAnyBlock);
 }
 
-void Translator::reportError(core::LocOffsets loc, const string &message) const {
+void Desugarer::reportError(core::LocOffsets loc, const string &message) const {
     auto errorLoc = core::Loc(ctx.file, loc);
     if (auto e = ctx.state.beginError(errorLoc, core::errors::Parser::ParserError)) {
         e.setHeader("{}", message);
@@ -5435,8 +5433,8 @@ void Translator::reportError(core::LocOffsets loc, const string &message) const 
 ExpressionPtr node2Tree(core::MutableContext ctx, parser::Prism::ParseResult parseResult, bool preserveConcreteSyntax) {
     auto enclosingBlockParamLoc = core::LocOffsets::none();
     auto enclosingBlockParamName = core::NameRef::noName();
-    auto expr = Translator(parseResult.getParser(), ctx, parseResult.getParseErrors(), preserveConcreteSyntax,
-                           enclosingBlockParamLoc, enclosingBlockParamName)
+    auto expr = Desugarer(parseResult.getParser(), ctx, parseResult.getParseErrors(), preserveConcreteSyntax,
+                          enclosingBlockParamLoc, enclosingBlockParamName)
                     .desugar(parseResult.getRawNodePointer());
     return Verifier::run(ctx, move(expr));
 }

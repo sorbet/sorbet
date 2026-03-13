@@ -9,7 +9,7 @@
 #include "absl/strings/str_split.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
-#include "ast/desugar/prism/Translator.h"
+#include "ast/desugar/prism/Desugar.h"
 #include "ast/treemap/treemap.h"
 #include "cfg/CFG.h"
 #include "cfg/builder/builder.h"

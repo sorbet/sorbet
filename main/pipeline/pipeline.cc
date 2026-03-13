@@ -12,7 +12,7 @@
 #include "absl/strings/match.h"
 #include "ast/Helpers.h"
 #include "ast/desugar/Desugar.h"
-#include "ast/desugar/prism/Translator.h"
+#include "ast/desugar/prism/Desugar.h"
 #include "ast/substitute/substitute.h"
 #include "ast/treemap/treemap.h"
 #include "cfg/CFG.h"
