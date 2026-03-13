@@ -1836,13 +1836,10 @@ class Module < Object
   # The second form is equivalent to `attr_accessor(name)` but deprecated. The
   # last form is equivalent to `attr_reader(name)` but deprecated. Returns an
   # array of defined method names as symbols.
-  sig do
-    params(
-        arg0: T.any(Symbol, String),
-    )
-    .returns(NilClass)
-  end
-  def attr(*arg0); end
+  sig { returns(T::Array[Symbol]) }
+  sig { params(attribute_name: T.any(Symbol, String), make_writer: T::Boolean).returns(T::Array[Symbol]) }
+  sig { params(attribute_name: T.any(Symbol, String), rest: T.any(Symbol, String)).returns(T::Array[Symbol]) }
+  def attr(attribute_name, make_writer = false, *rest); end
 
   # Returns an array of all modules used in the current scope. The ordering of
   # modules in the resulting array is not defined.

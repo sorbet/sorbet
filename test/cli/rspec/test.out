@@ -253,8 +253,8 @@ test/cli/rspec/rspec6.rb:122: Method `after` does not exist on `T.class_of(<root
      122 |  after(:each) do
             ^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
-      NN |  def attr(*arg0); end
-            ^^^^^^^^^^^^^^^
+      NN |  def attr(attribute_name, make_writer = false, *rest); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 test/cli/rspec/rspec6.rb:123: Method `setup_value` does not exist on `T.class_of(<root>)` https://srb.help/7003
      123 |    setup_value
@@ -276,8 +276,8 @@ test/cli/rspec/rspec6.rb:127: Method `after` does not exist on `T.class_of(<root
      127 |  after(:all) do
             ^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
-      NN |  def attr(*arg0); end
-            ^^^^^^^^^^^^^^^
+      NN |  def attr(attribute_name, make_writer = false, *rest); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 test/cli/rspec/rspec6.rb:128: Method `setup_value` does not exist on `T.class_of(<root>)` https://srb.help/7003
      128 |    setup_value
@@ -392,8 +392,8 @@ test/cli/rspec/rspec6.rb:161: Method `after` does not exist on `T.class_of(<root
      161 |  after(:each, :slow) do
             ^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
-      NN |  def attr(*arg0); end
-            ^^^^^^^^^^^^^^^
+      NN |  def attr(attribute_name, make_writer = false, *rest); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 test/cli/rspec/rspec6.rb:162: Method `filtered_value` does not exist on `T.class_of(<root>)` https://srb.help/7003
      162 |    filtered_value
@@ -415,8 +415,8 @@ test/cli/rspec/rspec6.rb:166: Method `after` does not exist on `T.class_of(<root
      166 |  after(:example, cleanup: true) do
             ^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
-      NN |  def attr(*arg0); end
-            ^^^^^^^^^^^^^^^
+      NN |  def attr(attribute_name, make_writer = false, *rest); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 test/cli/rspec/rspec6.rb:167: Method `filtered_value` does not exist on `T.class_of(<root>)` https://srb.help/7003
      167 |    filtered_value
@@ -438,8 +438,8 @@ test/cli/rspec/rspec6.rb:171: Method `after` does not exist on `T.class_of(<root
      171 |  after(:all, :integration, requires_cleanup: true) do
             ^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
-      NN |  def attr(*arg0); end
-            ^^^^^^^^^^^^^^^
+      NN |  def attr(attribute_name, make_writer = false, *rest); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 test/cli/rspec/rspec6.rb:172: Method `filtered_value` does not exist on `T.class_of(<root>)` https://srb.help/7003
      172 |    filtered_value
