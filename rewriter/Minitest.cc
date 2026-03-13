@@ -342,8 +342,7 @@ ast::ExpressionPtr makeSharedExamplesConstant(core::MutableContext ctx, const as
 // that may be nested inside a shared_examples block. Inside a shared_examples block, `self` is
 // a module, not a class. We can't inherit from a module, so we use RSpec::Core::ExampleGroup
 // instead, mirroring what describe/context does in the same situation.
-ast::ExpressionPtr makeTestClassAncestor(core::LocOffsets loc,
-                                         const ast::ExpressionPtr &maybeSharedExamplesName) {
+ast::ExpressionPtr makeTestClassAncestor(core::LocOffsets loc, const ast::ExpressionPtr &maybeSharedExamplesName) {
     if (maybeSharedExamplesName == nullptr) {
         return ast::MK::Self(loc);
     }
