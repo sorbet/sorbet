@@ -19,7 +19,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   class <emptyTree>::<C MyClass><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
     class <emptyTree>::<C <describe 'single shared example with context'>><<C <todo sym>>> < (<self>)
-      module <emptyTree>::<C <shared_examples 'my shared example'>><<C <todo sym>>> < ()
+      module ::<root>::<C <shared_examples 'my shared example'>><<C <todo sym>>> < ()
         def foo_exists<<todo method>>(&<blk>)
           "bar"
         end
@@ -53,7 +53,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     class <emptyTree>::<C <describe 'shared context with 2 params'>><<C <todo sym>>> < (<self>)
-      module <emptyTree>::<C <shared_examples 'context with 2 params'>><<C <todo sym>>> < ()
+      module ::<root>::<C <shared_examples 'context with 2 params'>><<C <todo sym>>> < ()
         def value1<<todo method>>(&<blk>)
           param1
         end
@@ -90,12 +90,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           end
         end
 
-        <self>.include(<emptyTree>::<C <shared_examples 'context with 2 params'>>)
+        <self>.include(::<root>::<C <shared_examples 'context with 2 params'>>)
       end
     end
 
     class <emptyTree>::<C <describe 'shared context with 5 params'>><<C <todo sym>>> < (<self>)
-      module <emptyTree>::<C <shared_examples 'context with 5 params'>><<C <todo sym>>> < ()
+      module ::<root>::<C <shared_examples 'context with 5 params'>><<C <todo sym>>> < ()
         def value1<<todo method>>(&<blk>)
           param1
         end
@@ -156,7 +156,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           end
         end
 
-        <self>.include(<emptyTree>::<C <shared_examples 'context with 5 params'>>)
+        <self>.include(::<root>::<C <shared_examples 'context with 5 params'>>)
       end
     end
   end
