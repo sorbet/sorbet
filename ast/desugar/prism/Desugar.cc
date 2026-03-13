@@ -2335,6 +2335,12 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
 
             core::LocOffsets enclosingBlockParamLoc;
             core::NameRef enclosingBlockParamName;
+            // Desugaring parameters can introduce new statements which define new temporarily local variables at the
+            // start of the method. We enter the method def before desugaring parameters, so those temporaries are
+            // numebred using the method's unique counter, rather than the parent context's counter.
+            Desugarer methodContext =
+                this->enterMethodDef(isSingletonMethod, name, enclosingBlockParamLoc, enclosingBlockParamName);
+
             ast::MethodDef::PARAMS_store paramsStore;
             ast::InsSeq::STATS_store statsStore;
             if (defNode->parameters != nullptr) {
@@ -2349,7 +2355,7 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
                 declLoc = declLoc.join(loc);
 
                 std::tie(paramsStore, statsStore, enclosingBlockParamLoc, enclosingBlockParamName) =
-                    desugarParametersNode(defNode->parameters, loc);
+                    methodContext.desugarParametersNode(defNode->parameters, loc);
             } else {
                 if (rparenLoc.start != nullptr) {
                     // The definition has no parameters but still has parentheses, e.g. `def foo(); end`
@@ -2357,16 +2363,13 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
                     auto loc = translateLoc(defNode->lparen_loc.start, defNode->rparen_loc.end);
 
                     std::tie(paramsStore, statsStore, enclosingBlockParamLoc, enclosingBlockParamName) =
-                        desugarParametersNode(nullptr, loc);
+                        methodContext.desugarParametersNode(nullptr, loc);
                 }
 
                 // Desugaring a method def like `def foo()` should behave like `def foo(&<blk>)`,
                 // so we set a synthetic name here for `yield` to use.
                 enclosingBlockParamName = core::Names::blkArg();
             }
-
-            Desugarer methodContext =
-                this->enterMethodDef(isSingletonMethod, name, enclosingBlockParamLoc, enclosingBlockParamName);
 
             ast::ExpressionPtr body;
             if (defNode->body != nullptr) {
