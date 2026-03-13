@@ -573,6 +573,23 @@ ast::ExpressionPtr prepareParameterizedBody(core::MutableContext ctx, core::Name
 ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::ExpressionPtr &maybeSharedExamplesName,
                              ast::Send *send, bool insideDescribe);
 
+// Returns the appropriate superclass for a test class (e.g. from `its` or `it_behaves_like`)
+// that may be nested inside a shared_examples block. Inside a shared_examples block, `self` is
+// a module, not a class. We can't inherit from a module, so we use RSpec::Core::ExampleGroup
+// instead, mirroring what describe/context does in the same situation.
+ast::ExpressionPtr makeTestClassAncestor(core::LocOffsets loc,
+                                         const ast::ExpressionPtr &maybeSharedExamplesName) {
+    if (maybeSharedExamplesName == nullptr) {
+        return ast::MK::Self(loc);
+    }
+    static const core::NameRef rspecParts[3] = {
+        core::Names::Constants::RSpec(),
+        core::Names::Constants::Core(),
+        core::Names::Constants::ExampleGroup(),
+    };
+    return ast::MK::UnresolvedConstantParts(loc, rspecParts);
+}
+
 ast::ExpressionPtr tryRunSingleOnSend(core::MutableContext ctx, bool isClass,
                                       const ast::ExpressionPtr &maybeSharedExamplesName, ast::ExpressionPtr body,
                                       bool insideDescribe) {
@@ -849,17 +866,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
             describeBody.emplace_back(std::move(itMethod));
 
             ast::ClassDef::ANCESTORS_store ancestors;
-            if (maybeSharedExamplesName == nullptr) {
-                ancestors.emplace_back(ast::MK::Self(arg.loc()));
-            } else {
-                // Inside a shared_examples block, self is a module; use RSpec::Core::ExampleGroup instead.
-                static const core::NameRef rspecParts[3] = {
-                    core::Names::Constants::RSpec(),
-                    core::Names::Constants::Core(),
-                    core::Names::Constants::ExampleGroup(),
-                };
-                ancestors.emplace_back(ast::MK::UnresolvedConstantParts(arg.loc(), rspecParts));
-            }
+            ancestors.emplace_back(makeTestClassAncestor(arg.loc(), maybeSharedExamplesName));
 
             auto describeDeclLoc = declLocForSendWithBlock(*send);
             return ast::MK::Class(send->loc, describeDeclLoc, std::move(describeName), std::move(ancestors),
@@ -982,20 +989,9 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
 
             ast::ClassDef::ANCESTORS_store ancestors;
             ast::ClassDef::RHS_store rhs;
-            if (maybeSharedExamplesName == nullptr) {
-                // Inherit from self to maintain access to outer context
-                ancestors.emplace_back(ast::MK::Self(send->loc.copyWithZeroLength()));
-            } else {
-                // If we're inside a shared_examples block, `self` is a module, not a class.
-                // We can't inherit from a module, so use RSpec::Core::ExampleGroup instead,
-                // mirroring what describe/context does in the same situation.
+            ancestors.emplace_back(makeTestClassAncestor(send->loc.copyWithZeroLength(), maybeSharedExamplesName));
+            if (maybeSharedExamplesName != nullptr) {
                 // Also include the parent shared_examples module so its helpers are available.
-                static const core::NameRef rspecParts[3] = {
-                    core::Names::Constants::RSpec(),
-                    core::Names::Constants::Core(),
-                    core::Names::Constants::ExampleGroup(),
-                };
-                ancestors.emplace_back(ast::MK::UnresolvedConstantParts(send->loc.copyWithZeroLength(), rspecParts));
                 rhs.emplace_back(ast::MK::Send1(send->loc, ast::MK::Self(send->recv.loc()), core::Names::include(),
                                                 send->loc.copyWithZeroLength(), maybeSharedExamplesName.deepCopy()));
             }
