@@ -981,6 +981,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
                                                                       {ctx.state.enterNameConstant(testName)});
 
             ast::ClassDef::ANCESTORS_store ancestors;
+            ast::ClassDef::RHS_store rhs;
             if (maybeSharedExamplesName == nullptr) {
                 // Inherit from self to maintain access to outer context
                 ancestors.emplace_back(ast::MK::Self(send->loc.copyWithZeroLength()));
@@ -988,22 +989,19 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
                 // If we're inside a shared_examples block, `self` is a module, not a class.
                 // We can't inherit from a module, so use RSpec::Core::ExampleGroup instead,
                 // mirroring what describe/context does in the same situation.
+                // Also include the parent shared_examples module so its helpers are available.
                 static const core::NameRef rspecParts[3] = {
                     core::Names::Constants::RSpec(),
                     core::Names::Constants::Core(),
                     core::Names::Constants::ExampleGroup(),
                 };
                 ancestors.emplace_back(ast::MK::UnresolvedConstantParts(send->loc.copyWithZeroLength(), rspecParts));
+                rhs.emplace_back(ast::MK::Send1(send->loc, ast::MK::Self(send->recv.loc()), core::Names::include(),
+                                                send->loc.copyWithZeroLength(), maybeSharedExamplesName.deepCopy()));
             }
 
             // Include the shared examples module in this isolated context
             auto sharedExamplesName = makeSharedExamplesConstant(ctx, arg);
-            ast::ClassDef::RHS_store rhs;
-            if (maybeSharedExamplesName != nullptr) {
-                // Also include the parent shared_examples module so its helpers are available
-                rhs.emplace_back(ast::MK::Send1(send->loc, ast::MK::Self(send->recv.loc()), core::Names::include(),
-                                                send->loc.copyWithZeroLength(), maybeSharedExamplesName.deepCopy()));
-            }
             auto includeStmt = ast::MK::Send1(send->loc, ast::MK::Self(send->recv.loc()), core::Names::include(),
                                               arg.loc(), move(sharedExamplesName));
             rhs.emplace_back(move(includeStmt));
