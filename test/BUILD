@@ -576,10 +576,7 @@ pipeline_tests(
         exclude = [
             # Specific test for the legacy pipeline. Prism has its own `testdata/rbs/assertions_heredoc_modified.rb`.
             "testdata/rbs/assertions_heredoc.rb",
-            "testdata/lsp/hover_rbs.rb",
-            "testdata/lsp/hover_rbs_assertions_let.rb",
             "testdata/rbs/signatures_defs_abstract_autocorrect.rb",
-            "testdata/rbs/signatures_params_autocorrect.rb",
             "testdata/rbs/annotations_helpers.rb",
             "testdata/rbs/assertions_block.rb",
             "testdata/rbs/assertions_csend.rb",

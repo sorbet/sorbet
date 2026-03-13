@@ -79,6 +79,21 @@ else
   T.reveal_type(self) # error: Revealed type: `T.untyped`
 end
 
+# Test that `self as` works in both branches of an if/else
+if ARGV.first == "foo"
+  proc do
+    #: self as Foo
+    T.reveal_type(self) # error: Revealed type: `Foo`
+  end
+else
+  # Same as the `if` branch, to confirm that both
+  # branches get rewritten correctly.
+  proc do
+    #: self as Foo
+    T.reveal_type(self) # error: Revealed type: `Foo`
+  end
+end
+
 begin
   #: self as Foo
   T.reveal_type(self) # error: Revealed type: `Foo`
