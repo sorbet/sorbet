@@ -771,4 +771,20 @@ PackageInfo::CanModifyResult PackageInfo::canModifySymbol(const core::GlobalStat
     return CanModifyResult::NotOwner;
 }
 
+bool PackageInfo::canAccessInternalsOf(bool testPackages, MangledName other) const {
+    ENFORCE(this->exists());
+    ENFORCE(other.exists());
+
+    if (this->mangledName_ == other) {
+        return true;
+    }
+
+    if (!testPackages) {
+        return false;
+    }
+
+    auto *imp = this->importsPackage(other);
+    return imp && imp->usesInternals;
+}
+
 } // namespace sorbet::core::packages
