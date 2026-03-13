@@ -26,19 +26,17 @@ struct DesugarContext final {
     uint32_t &uniqueCounter;
     core::LocOffsets &enclosingBlockParamLoc;
     core::NameRef &enclosingBlockParamName;
-    core::LocOffsets enclosingMethodLoc;
     core::NameRef enclosingMethodName;
     bool inAnyBlock;
     bool inModule;
     bool preserveConcreteSyntax;
 
     DesugarContext(core::MutableContext ctx, uint32_t &uniqueCounter, core::LocOffsets &enclosingBlockParamLoc,
-                   core::NameRef &enclosingBlockParamName, core::LocOffsets enclosingMethodLoc,
-                   core::NameRef enclosingMethodName, bool inAnyBlock, bool inModule, bool preserveConcreteSyntax)
+                   core::NameRef &enclosingBlockParamName, core::NameRef enclosingMethodName, bool inAnyBlock,
+                   bool inModule, bool preserveConcreteSyntax)
         : ctx(ctx), uniqueCounter(uniqueCounter), enclosingBlockParamLoc(enclosingBlockParamLoc),
-          enclosingBlockParamName(enclosingBlockParamName), enclosingMethodLoc(enclosingMethodLoc),
-          enclosingMethodName(enclosingMethodName), inAnyBlock(inAnyBlock), inModule(inModule),
-          preserveConcreteSyntax(preserveConcreteSyntax){};
+          enclosingBlockParamName(enclosingBlockParamName), enclosingMethodName(enclosingMethodName),
+          inAnyBlock(inAnyBlock), inModule(inModule), preserveConcreteSyntax(preserveConcreteSyntax){};
 
     core::NameRef freshNameUnique(core::NameRef name) {
         return ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, name, ++uniqueCounter);
@@ -225,8 +223,7 @@ ExpressionPtr desugarBlock(DesugarContext dctx, parser::Block *block) {
 
     auto inBlock = true;
     DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockParamLoc, dctx.enclosingBlockParamName,
-                         dctx.enclosingMethodLoc, dctx.enclosingMethodName, inBlock, dctx.inModule,
-                         dctx.preserveConcreteSyntax);
+                         dctx.enclosingMethodName, inBlock, dctx.inModule, dctx.preserveConcreteSyntax);
     auto desugaredBody = desugarBody(dctx1, block->loc, block->body, move(destructures));
 
     send->setBlock(MK::Block(block->loc, move(desugaredBody), move(Params)));
@@ -389,8 +386,8 @@ ExpressionPtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::LocOf
     // Reset uniqueCounter within this scope (to keep numbers small)
     uint32_t uniqueCounter = 1;
     auto inModule = dctx.inModule && !isSelf;
-    DesugarContext dctx1(dctx.ctx, uniqueCounter, dctx.enclosingBlockParamLoc, dctx.enclosingBlockParamName, declLoc,
-                         name, dctx.inAnyBlock, inModule, dctx.preserveConcreteSyntax);
+    DesugarContext dctx1(dctx.ctx, uniqueCounter, dctx.enclosingBlockParamLoc, dctx.enclosingBlockParamName, name,
+                         dctx.inAnyBlock, inModule, dctx.preserveConcreteSyntax);
     auto [params, destructures] = desugarParams(dctx1, argnode);
 
     if (params.empty() || !isa_tree<BlockParam>(params.back())) {
@@ -404,7 +401,7 @@ ExpressionPtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::LocOf
     auto enclosingBlockParamName = blockParam2Name(dctx, *blockParam);
     auto initialBlockParamName = enclosingBlockParamName;
 
-    DesugarContext dctx2(dctx1.ctx, dctx1.uniqueCounter, enclosingBlockParamLoc, enclosingBlockParamName, declLoc, name,
+    DesugarContext dctx2(dctx1.ctx, dctx1.uniqueCounter, enclosingBlockParamLoc, enclosingBlockParamName, name,
                          dctx.inAnyBlock, inModule, dctx.preserveConcreteSyntax);
     ExpressionPtr desugaredBody = desugarBody(dctx2, loc, body, move(destructures));
     desugaredBody = validateRBIBody(dctx2, move(desugaredBody));
@@ -600,8 +597,7 @@ ClassDef::RHS_store scopeNodeToBody(DesugarContext dctx, unique_ptr<parser::Node
     // Blocks never persist across a class/module boundary
     auto inAnyBlock = false;
     DesugarContext dctx1(dctx.ctx, uniqueCounter, dctx.enclosingBlockParamLoc, dctx.enclosingBlockParamName,
-                         dctx.enclosingMethodLoc, dctx.enclosingMethodName, inAnyBlock, dctx.inModule,
-                         dctx.preserveConcreteSyntax);
+                         dctx.enclosingMethodName, inAnyBlock, dctx.inModule, dctx.preserveConcreteSyntax);
     if (auto *begin = parser::cast_node<parser::Begin>(node.get())) {
         body.reserve(begin->stmts.size());
         for (auto &stat : begin->stmts) {
@@ -778,7 +774,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     flags.isPrivateOk = true;
                 }
 
-                if (isCallToBlockGivenP(send, rec) && dctx.enclosingMethodLoc.exists()) {
+                if (isCallToBlockGivenP(send, rec) && dctx.enclosingMethodName.exists()) {
                     // Desugar:
                     //     def foo(&my_block)
                     //       x = block_given?
@@ -1570,8 +1566,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
             [&](parser::Kwbegin *kwbegin) { result = desugarBegin(dctx, loc, kwbegin->stmts); },
             [&](parser::Module *module) {
                 DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockParamLoc,
-                                     dctx.enclosingBlockParamName, dctx.enclosingMethodLoc, dctx.enclosingMethodName,
-                                     dctx.inAnyBlock, true, dctx.preserveConcreteSyntax);
+                                     dctx.enclosingBlockParamName, dctx.enclosingMethodName, dctx.inAnyBlock, true,
+                                     dctx.preserveConcreteSyntax);
                 ClassDef::RHS_store body = scopeNodeToBody(dctx1, move(module->body));
                 ExpressionPtr res =
                     MK::Module(module->loc, module->declLoc, node2TreeImpl(dctx, module->name), move(body));
@@ -1579,8 +1575,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
             },
             [&](parser::Class *klass) {
                 DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockParamLoc,
-                                     dctx.enclosingBlockParamName, dctx.enclosingMethodLoc, dctx.enclosingMethodName,
-                                     dctx.inAnyBlock, false, dctx.preserveConcreteSyntax);
+                                     dctx.enclosingBlockParamName, dctx.enclosingMethodName, dctx.inAnyBlock, false,
+                                     dctx.preserveConcreteSyntax);
                 ClassDef::RHS_store body = scopeNodeToBody(dctx1, move(klass->body));
                 ClassDef::ANCESTORS_store ancestors;
                 if (klass->superclass == nullptr) {
@@ -1664,8 +1660,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 }
 
                 DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockParamLoc,
-                                     dctx.enclosingBlockParamName, dctx.enclosingMethodLoc, dctx.enclosingMethodName,
-                                     dctx.inAnyBlock, false, dctx.preserveConcreteSyntax);
+                                     dctx.enclosingBlockParamName, dctx.enclosingMethodName, dctx.inAnyBlock, false,
+                                     dctx.preserveConcreteSyntax);
                 ClassDef::RHS_store body = scopeNodeToBody(dctx1, move(sclass->body));
                 ClassDef::ANCESTORS_store emptyAncestors;
                 ExpressionPtr res =
@@ -2488,7 +2484,7 @@ ExpressionPtr node2Tree(core::MutableContext ctx, unique_ptr<parser::Node> what,
         auto enclosingBlockParamLoc = core::LocOffsets::none();
         auto enclosingBlockParamName = core::NameRef::noName();
         DesugarContext dctx(ctx, uniqueCounter, enclosingBlockParamLoc, enclosingBlockParamName,
-                            core::LocOffsets::none(), core::NameRef::noName(), false, false, preserveConcreteSyntax);
+                            core::NameRef::noName(), false, false, preserveConcreteSyntax);
         auto liftedClassDefLoc = what->loc;
         auto result = node2TreeImpl(dctx, what);
         if (result.loc().exists()) {

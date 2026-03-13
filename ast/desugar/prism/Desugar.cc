@@ -54,11 +54,10 @@ class Desugarer final {
     uint32_t &desugarUniqueCounter;       // Points to the active `desugarUniqueCounterStorage`
 
     // Context variables
-    const core::LocOffsets enclosingMethodLoc; // The location of the method we're in, or `none()`
-    const core::NameRef enclosingMethodName;   // The name of the method we're in, or `noName()`
-    core::LocOffsets &enclosingBlockParamLoc;  // The loc of the `yield` or `block_given?` that triggered a block param
-                                               // to be created, or else the original location of the block parameter.
-    core::NameRef &enclosingBlockParamName;    // The name of the block param of the method we're in, or `noName()`
+    const core::NameRef enclosingMethodName;  // The name of the method we're in, or `noName()`
+    core::LocOffsets &enclosingBlockParamLoc; // The loc of the `yield` or `block_given?` that triggered a block param
+                                              // to be created, or else the original location of the block parameter.
+    core::NameRef &enclosingBlockParamName;   // The name of the block param of the method we're in, or `noName()`
     const bool isInModule = false;   // True if we're in a Module definition. False for classes and singleton classes
     const bool isInAnyBlock = false; // True if we're in a `{ }`/`do end` block
 
@@ -82,18 +81,17 @@ public:
 private:
     // This private constructor is used for creating child translators with modified context.
     // uniqueCounterStorage is passed as a dummy value and is never used
-    Desugarer(const Desugarer &parent, bool resetDesugarUniqueCounter, core::LocOffsets enclosingMethodLoc,
-              core::NameRef enclosingMethodName, core::LocOffsets &enclosingBlockParamLoc,
-              core::NameRef &enclosingBlockParamName, bool isInModule, bool isInAnyBlock)
+    Desugarer(const Desugarer &parent, bool resetDesugarUniqueCounter, core::NameRef enclosingMethodName,
+              core::LocOffsets &enclosingBlockParamLoc, core::NameRef &enclosingBlockParamName, bool isInModule,
+              bool isInAnyBlock)
         : parser(parent.parser), ctx(parent.ctx), parseErrors(parent.parseErrors),
           preserveConcreteSyntax(parent.preserveConcreteSyntax), parserUniqueCounterStorage(9999),
           desugarUniqueCounterStorage(resetDesugarUniqueCounter ? 1 : 999999),
           parserUniqueCounter(parent.parserUniqueCounter),
           desugarUniqueCounter(resetDesugarUniqueCounter ? this->desugarUniqueCounterStorage
                                                          : parent.desugarUniqueCounter),
-          enclosingMethodLoc(enclosingMethodLoc), enclosingMethodName(enclosingMethodName),
-          enclosingBlockParamLoc(enclosingBlockParamLoc), enclosingBlockParamName(enclosingBlockParamName),
-          isInModule(isInModule), isInAnyBlock(isInAnyBlock) {}
+          enclosingMethodName(enclosingMethodName), enclosingBlockParamLoc(enclosingBlockParamLoc),
+          enclosingBlockParamName(enclosingBlockParamName), isInModule(isInModule), isInAnyBlock(isInAnyBlock) {}
 
     ast::ExpressionPtr make_unsupported_node(core::LocOffsets loc, std::string_view nodeName) const;
 
@@ -292,8 +290,8 @@ private:
 
     // Context management helpers. These return a copy of `this` with some change to the context.
     bool isInMethodDef() const;
-    Desugarer enterMethodDef(bool isSingletonMethod, core::LocOffsets methodLoc, core::NameRef methodName,
-                             core::LocOffsets &enclosingBlockParamLoc, core::NameRef &enclosingBlockParamName) const;
+    Desugarer enterMethodDef(bool isSingletonMethod, core::NameRef methodName, core::LocOffsets &enclosingBlockParamLoc,
+                             core::NameRef &enclosingBlockParamName) const;
     Desugarer enterBlockContext() const;
     Desugarer enterModuleContext(core::LocOffsets &enclosingBlockParamLoc,
                                  core::NameRef &enclosingBlockParamName) const;
@@ -2347,7 +2345,7 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
                                                                      : defNode->lparen_loc.start;
                 auto endLoc = defNode->rparen_loc.end == nullptr ? defNode->parameters->base.location.end
                                                                  : defNode->rparen_loc.end;
-                auto loc = translateLoc(pm_location_t{startLoc, endLoc});
+                auto loc = translateLoc(startLoc, endLoc);
                 declLoc = declLoc.join(loc);
 
                 std::tie(paramsStore, statsStore, enclosingBlockParamLoc, enclosingBlockParamName) =
@@ -2368,7 +2366,7 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
             }
 
             Desugarer methodContext =
-                this->enterMethodDef(isSingletonMethod, declLoc, name, enclosingBlockParamLoc, enclosingBlockParamName);
+                this->enterMethodDef(isSingletonMethod, name, enclosingBlockParamLoc, enclosingBlockParamName);
 
             ast::ExpressionPtr body;
             if (defNode->body != nullptr) {
@@ -5381,27 +5379,23 @@ core::NameRef Desugarer::maybeTypedSuper() const {
 
 // Context management methods
 bool Desugarer::isInMethodDef() const {
-    ENFORCE(enclosingMethodLoc.exists() == enclosingMethodName.exists(),
-            "The enclosing method name and location should always both be present, "
-            "or both be absecent, depending on whether we're in a method def or not.")
-
     return enclosingMethodName.exists();
 }
 
-Desugarer Desugarer::enterMethodDef(bool isSingletonMethod, core::LocOffsets methodLoc, core::NameRef methodName,
+Desugarer Desugarer::enterMethodDef(bool isSingletonMethod, core::NameRef methodName,
                                     core::LocOffsets &enclosingBlockParamLoc,
                                     core::NameRef &enclosingBlockParamName) const {
     auto resetDesugarUniqueCounter = true;
     auto isInModule = this->isInModule && !isSingletonMethod;
-    return Desugarer(*this, resetDesugarUniqueCounter, methodLoc, methodName, enclosingBlockParamLoc,
-                     enclosingBlockParamName, isInModule, this->isInAnyBlock);
+    return Desugarer(*this, resetDesugarUniqueCounter, methodName, enclosingBlockParamLoc, enclosingBlockParamName,
+                     isInModule, this->isInAnyBlock);
 }
 
 Desugarer Desugarer::enterBlockContext() const {
     auto resetDesugarUniqueCounter = false; // Blocks inherit their parent's numbering
     auto isInAnyBlock = true;
-    return Desugarer(*this, resetDesugarUniqueCounter, this->enclosingMethodLoc, this->enclosingMethodName,
-                     this->enclosingBlockParamLoc, this->enclosingBlockParamName, this->isInModule, isInAnyBlock);
+    return Desugarer(*this, resetDesugarUniqueCounter, this->enclosingMethodName, this->enclosingBlockParamLoc,
+                     this->enclosingBlockParamName, this->isInModule, isInAnyBlock);
 }
 
 Desugarer Desugarer::enterModuleContext(core::LocOffsets &enclosingBlockParamLoc,
@@ -5409,8 +5403,8 @@ Desugarer Desugarer::enterModuleContext(core::LocOffsets &enclosingBlockParamLoc
     auto resetDesugarUniqueCounter = true;
     auto isInModule = true;
     auto isInAnyBlock = false; // Blocks never persist across a class/module boundary
-    return Desugarer(*this, resetDesugarUniqueCounter, this->enclosingMethodLoc, this->enclosingMethodName,
-                     enclosingBlockParamLoc, enclosingBlockParamName, isInModule, isInAnyBlock);
+    return Desugarer(*this, resetDesugarUniqueCounter, this->enclosingMethodName, enclosingBlockParamLoc,
+                     enclosingBlockParamName, isInModule, isInAnyBlock);
 }
 
 Desugarer Desugarer::enterClassContext(core::LocOffsets &enclosingBlockParamLoc,
@@ -5418,8 +5412,8 @@ Desugarer Desugarer::enterClassContext(core::LocOffsets &enclosingBlockParamLoc,
     auto resetDesugarUniqueCounter = true;
     auto isInModule = false;
     auto isInAnyBlock = false; // Blocks never persist across a class/module boundary
-    return Desugarer(*this, resetDesugarUniqueCounter, this->enclosingMethodLoc, this->enclosingMethodName,
-                     enclosingBlockParamLoc, enclosingBlockParamName, isInModule, isInAnyBlock);
+    return Desugarer(*this, resetDesugarUniqueCounter, this->enclosingMethodName, enclosingBlockParamLoc,
+                     enclosingBlockParamName, isInModule, isInAnyBlock);
 }
 
 void Desugarer::reportError(core::LocOffsets loc, const string &message) const {
