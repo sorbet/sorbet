@@ -1780,10 +1780,10 @@ test/cli/rspec/rspec1.rb:29: Method `verified` does not exist on `T.class_of(<ro
         ^
 Errors: 187
 --------------------------------------------------------------------------
-test/cli/rspec/rspec2.rb:58: `A::<describe 'inside describe'>::<describe 'will include shared examples'>` must inherit `RSpec::Core::ExampleGroup` (required by `A::<describe 'inside describe'>::<shared_examples 'some examples'>`) https://srb.help/5064
+test/cli/rspec/rspec2.rb:58: `A::<describe 'inside describe'>::<describe 'will include shared examples'>` must inherit `RSpec::Core::ExampleGroup` (required by `<shared_examples 'some examples'>`) https://srb.help/5064
     58 |    describe "will include shared examples" do # error: `A::<describe 'inside describe'>::<describe 'will include shared examples'>` must inherit `RSpec::Core::ExampleGroup` (required by `A::<describe 'inside describe'>::<shared_examples 'some examples'>`)
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    test/cli/rspec/rspec2.rb:50: required by `A::<describe 'inside describe'>::<shared_examples 'some examples'>` here
+    test/cli/rspec/rspec2.rb:50: required by `<shared_examples 'some examples'>` here
     50 |    shared_examples "some examples" do
                                             ^
 
@@ -1960,10 +1960,10 @@ test/cli/rspec/rspec4.rb:27: Revealed type: `T.untyped` https://srb.help/7014
     18 |    shared_examples "my shared example" do |my_param|
                                                     ^^^^^^^^
 
-test/cli/rspec/rspec4.rb:29: Method `this_does_not_exist` does not exist on `MyClass::<describe 'single shared example with context'>::<shared_examples 'my shared example'>` https://srb.help/7003
+test/cli/rspec/rspec4.rb:29: Method `this_does_not_exist` does not exist on `<shared_examples 'my shared example'>` https://srb.help/7003
     29 |        this_does_not_exist
                 ^^^^^^^^^^^^^^^^^^^
-  Got `MyClass::<describe 'single shared example with context'>::<shared_examples 'my shared example'>` originating from:
+  Got `<shared_examples 'my shared example'>` originating from:
     test/cli/rspec/rspec4.rb:26:
     26 |      it "works for #{my_param}" do
               ^
@@ -2024,10 +2024,10 @@ test/cli/rspec/rspec4.rb:69: Revealed type: `T.untyped` https://srb.help/7014
     57 |    shared_context "context with 5 params" do |param1, param2, param3, param4, param5|
                                                                                        ^^^^^^
 
-test/cli/rspec/rspec3.rb:24: Method `this_does_not_exist` does not exist on `MyClass::<describe 'single shared example with context'>::<shared_examples 'my shared example'>::<context 'context'>` https://srb.help/7003
+test/cli/rspec/rspec3.rb:24: Method `this_does_not_exist` does not exist on `<shared_examples 'my shared example'>::<context 'context'>` https://srb.help/7003
     24 |          this_does_not_exist
                   ^^^^^^^^^^^^^^^^^^^
-  Got `MyClass::<describe 'single shared example with context'>::<shared_examples 'my shared example'>::<context 'context'>` originating from:
+  Got `<shared_examples 'my shared example'>::<context 'context'>` originating from:
     test/cli/rspec/rspec3.rb:22:
     22 |        it 'works' do
                 ^
