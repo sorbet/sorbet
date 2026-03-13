@@ -338,6 +338,23 @@ ast::ExpressionPtr makeSharedExamplesConstant(core::MutableContext ctx, const as
                                                             ctx.state.enterNameConstant(name));
 }
 
+// Returns the appropriate superclass for a test class (e.g. from `its` or `it_behaves_like`)
+// that may be nested inside a shared_examples block. Inside a shared_examples block, `self` is
+// a module, not a class. We can't inherit from a module, so we use RSpec::Core::ExampleGroup
+// instead, mirroring what describe/context does in the same situation.
+ast::ExpressionPtr makeTestClassAncestor(core::LocOffsets loc,
+                                         const ast::ExpressionPtr &maybeSharedExamplesName) {
+    if (maybeSharedExamplesName == nullptr) {
+        return ast::MK::Self(loc);
+    }
+    static const core::NameRef rspecParts[3] = {
+        core::Names::Constants::RSpec(),
+        core::Names::Constants::Core(),
+        core::Names::Constants::ExampleGroup(),
+    };
+    return ast::MK::UnresolvedConstantParts(loc, rspecParts);
+}
+
 bool isSharedExamplesName(core::NameRef name) {
     switch (name.rawId()) {
         case core::Names::sharedExamples().rawId():
@@ -572,23 +589,6 @@ ast::ExpressionPtr prepareParameterizedBody(core::MutableContext ctx, core::Name
 
 ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::ExpressionPtr &maybeSharedExamplesName,
                              ast::Send *send, bool insideDescribe);
-
-// Returns the appropriate superclass for a test class (e.g. from `its` or `it_behaves_like`)
-// that may be nested inside a shared_examples block. Inside a shared_examples block, `self` is
-// a module, not a class. We can't inherit from a module, so we use RSpec::Core::ExampleGroup
-// instead, mirroring what describe/context does in the same situation.
-ast::ExpressionPtr makeTestClassAncestor(core::LocOffsets loc,
-                                         const ast::ExpressionPtr &maybeSharedExamplesName) {
-    if (maybeSharedExamplesName == nullptr) {
-        return ast::MK::Self(loc);
-    }
-    static const core::NameRef rspecParts[3] = {
-        core::Names::Constants::RSpec(),
-        core::Names::Constants::Core(),
-        core::Names::Constants::ExampleGroup(),
-    };
-    return ast::MK::UnresolvedConstantParts(loc, rspecParts);
-}
 
 ast::ExpressionPtr tryRunSingleOnSend(core::MutableContext ctx, bool isClass,
                                       const ast::ExpressionPtr &maybeSharedExamplesName, ast::ExpressionPtr body,
