@@ -1132,9 +1132,12 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         if (klass.exists()) {
                             ENFORCE(klass.data(ctx)->package.exists(),
                                     "should not mark method package private unless it has a package");
-                            auto curPkg = ctx.state.packageDB().getPackageNameForFile(ctx.file);
+                            auto &db = ctx.state.packageDB();
+                            auto curPkg = db.getPackageNameForFile(ctx.file);
                             if (curPkg.exists()) {
-                                if (klass.data(ctx)->package != curPkg) {
+                                auto testPackages = db.testPackages();
+                                auto &info = db.getPackageInfo(curPkg);
+                                if (!info.canAccessInternalsOf(testPackages, klass.data(ctx)->package)) {
                                     if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PackagePrivateMethod)) {
                                         e.setHeader("Method `{}` on `{}` is package-private and cannot be called from "
                                                     "package `{}`",
