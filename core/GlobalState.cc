@@ -1790,6 +1790,10 @@ unsigned int GlobalState::typeMembersUsed() const {
     return typeMembers.size();
 }
 
+unsigned int GlobalState::typeParametersUsed() const {
+    return typeArgumentsUsed() + typeMembersUsed();
+}
+
 unsigned int GlobalState::filesUsed() const {
     return files->size();
 }
