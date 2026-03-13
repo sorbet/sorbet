@@ -40,6 +40,7 @@ cc_test(
     visibility = ["//tools:__pkg__"],
     deps = [
         "//ast/desugar",
+        "//ast/desugar/prism",
         "@doctest//doctest",
         "@doctest//doctest:main",
     ],
