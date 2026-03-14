@@ -229,32 +229,6 @@ ClassDef{
         params = [
           UnresolvedIdent{
             kind = Local
-            name = <U bar>
-          }
-          ShadowArg{ expr = UnresolvedIdent{
-            kind = Local
-            name = <U baz>
-          } }
-          ShadowArg{ expr = UnresolvedIdent{
-            kind = Local
-            name = <U qux>
-          } }
-        ]
-        body = EmptyTree
-      }
-      pos_args = 0
-      args = [
-      ]
-    }
-
-    Send{
-      flags = {privateOk}
-      recv = Self
-      fun = <U foo>
-      block = Block {
-        params = [
-          UnresolvedIdent{
-            kind = Local
             name = <U positional>
           }
           UnresolvedIdent{
