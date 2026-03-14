@@ -436,13 +436,11 @@ void printElems(const core::GlobalState &gs, fmt::memory_buffer &buf, absl::Span
         if (isa_tree<Block>(a)) {
             continue;
         }
-        if (!first) {
-            if (isa_tree<ShadowArg>(a) && !didshadow) {
-                fmt::format_to(std::back_inserter(buf), "; ");
-                didshadow = true;
-            } else {
-                fmt::format_to(std::back_inserter(buf), ", ");
-            }
+        if (isa_tree<ShadowArg>(a) && !didshadow) {
+            fmt::format_to(std::back_inserter(buf), "; ");
+            didshadow = true;
+        } else if (!first) {
+            fmt::format_to(std::back_inserter(buf), ", ");
         }
         first = false;
         fmt::format_to(std::back_inserter(buf), "{}", a.toStringWithTabs(gs, tabs + 1));
