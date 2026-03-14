@@ -589,22 +589,6 @@ Begin {
         }
       ]
     }
-    Block {
-      send = Send {
-        receiver = NULL
-        method = <U proc>
-        args = [
-        ]
-      }
-      params = Params {
-        params = [
-          Shadowarg {
-            name = <U x>
-          }
-        ]
-      }
-      body = NULL
-    }
     Break {
       exprs = [
         Block {

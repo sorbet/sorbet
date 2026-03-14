@@ -1,0 +1,109 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  <self>.lambda() do |block_local1|
+    <emptyTree>
+  end
+
+  <self>.lambda() do |block_local1; block_local2|
+    <emptyTree>
+  end
+
+  <self>.lambda() do |block_local1; block_local2, block_local3|
+    <emptyTree>
+  end
+
+  <self>.lambda() do |param1; block_local1|
+    <emptyTree>
+  end
+
+  <self>.lambda() do |param1; block_local1, block_local2|
+    <emptyTree>
+  end
+
+  <self>.lambda() do |param1; block_local1, block_local2, block_local3|
+    <emptyTree>
+  end
+
+  <self>.lambda() do |param1, param2; block_local1|
+    <emptyTree>
+  end
+
+  <self>.lambda() do |param1, param2; block_local1, block_local2|
+    <emptyTree>
+  end
+
+  <self>.lambda() do |param1, param2; block_local1, block_local2, block_local3|
+    <emptyTree>
+  end
+
+  <self>.lambda() do |block_local1|
+    <emptyTree>
+  end
+
+  <self>.lambda() do |block_local1; block_local2|
+    <emptyTree>
+  end
+
+  <self>.lambda() do |block_local1; block_local2, block_local3|
+    <emptyTree>
+  end
+
+  <self>.lambda() do |param1; block_local1|
+    <emptyTree>
+  end
+
+  <self>.lambda() do |param1; block_local1, block_local2|
+    <emptyTree>
+  end
+
+  <self>.lambda() do |param1; block_local1, block_local2, block_local3|
+    <emptyTree>
+  end
+
+  <self>.lambda() do |param1, param2; block_local1|
+    <emptyTree>
+  end
+
+  <self>.lambda() do |param1, param2; block_local1, block_local2|
+    <emptyTree>
+  end
+
+  <self>.lambda() do |param1, param2; block_local1, block_local2, block_local3|
+    <emptyTree>
+  end
+
+  ::Kernel.lambda() do |block_local1|
+    <emptyTree>
+  end
+
+  ::Kernel.lambda() do |block_local1; block_local2|
+    <emptyTree>
+  end
+
+  ::Kernel.lambda() do |block_local1; block_local2, block_local3|
+    <emptyTree>
+  end
+
+  ::Kernel.lambda() do |param1; block_local1|
+    <emptyTree>
+  end
+
+  ::Kernel.lambda() do |param1; block_local1, block_local2|
+    <emptyTree>
+  end
+
+  ::Kernel.lambda() do |param1; block_local1, block_local2, block_local3|
+    <emptyTree>
+  end
+
+  ::Kernel.lambda() do |param1, param2; block_local1|
+    <emptyTree>
+  end
+
+  ::Kernel.lambda() do |param1, param2; block_local1, block_local2|
+    <emptyTree>
+  end
+
+  ::Kernel.lambda() do |param1, param2; block_local1, block_local2, block_local3|
+    <emptyTree>
+  end
+end
