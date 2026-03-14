@@ -660,6 +660,146 @@ PackageInfo::aggregateMissingVisibleTo(const core::GlobalState &gs,
     return core::AutocorrectSuggestion{fmt::format("Add missing `{}`", "visible_to"), std::move(allEdits)};
 }
 
+std::string PackageInfo::renderPackageRbContents(const core::GlobalState &gs) const {
+    std::string result;
+
+    if (isPreludePackage()) {
+        result += "  prelude_package\n\n";
+    }
+
+    for (auto &directive : extraDirectives_) {
+        auto directiveSource = core::Loc(file, directive).source(gs);
+        ENFORCE(directiveSource.has_value());
+        result += fmt::format("  {}\n", directiveSource.value());
+    }
+    if (locs.layer.exists()) {
+        result += fmt::format("  layer '{}'\n", layer.show(gs));
+    }
+    if (locs.strictDependenciesLevel.exists()) {
+        result += fmt::format("  strict_dependencies '{}'\n", strictDependenciesLevelToString(strictDependenciesLevel));
+    }
+    if (locs.minTypedLevel.exists() && locs.testsMinTypedLevel.exists()) {
+        ENFORCE(!gs.packageDB().testPackages());
+        result += fmt::format("  sorbet min_typed_level: '{}', tests_min_typed_level: '{}'\n",
+                              core::SigilTraits<core::StrictLevel>::toString(minTypedLevel),
+                              core::SigilTraits<core::StrictLevel>::toString(testsMinTypedLevel));
+    } else if (locs.minTypedLevel.exists() && !locs.testsMinTypedLevel.exists()) {
+        ENFORCE(gs.packageDB().testPackages());
+        result += fmt::format("  sorbet min_typed_level: '{}'\n",
+                              core::SigilTraits<core::StrictLevel>::toString(minTypedLevel));
+    }
+
+    // NOTE: This is duplicated with orderByStrictness.
+    UnorderedMap<StrictDependenciesLevel, vector<pair<StrictDependenciesLevel, string>>> headerMap = {
+        {StrictDependenciesLevel::False,
+         {{StrictDependenciesLevel::False, "  # strict_dependencies 'false':\n"},
+          {StrictDependenciesLevel::Layered, "  # strict_dependencies 'layered' or more strict:\n"}}},
+        {StrictDependenciesLevel::Layered,
+         {{StrictDependenciesLevel::False, "  # strict_dependencies 'false':\n"},
+          {StrictDependenciesLevel::Layered, "  # strict_dependencies 'layered' or 'layered_dag':\n"},
+          {StrictDependenciesLevel::Dag, "  # strict_dependencies 'dag':\n"}}},
+        {StrictDependenciesLevel::LayeredDag,
+         {{StrictDependenciesLevel::False, "  # strict_dependencies 'false':\n"},
+          {StrictDependenciesLevel::Layered, "  # strict_dependencies 'layered' or 'layered_dag':\n"},
+          {StrictDependenciesLevel::Dag, "  # strict_dependencies 'dag':\n"}}},
+        {StrictDependenciesLevel::Dag,
+         {{StrictDependenciesLevel::False, "  # strict_dependencies 'false', 'layered', or 'layered_dag':\n"},
+          {StrictDependenciesLevel::Dag, "  # strict_dependencies 'dag':\n"}}},
+    };
+
+    // NOTE: this loop assumes importedPackageNames are already sorted by orderImports
+    // TODO(neil): sort the imports
+    bool layeringViolationsHeaderShown = false;
+    bool testImportNewLineAdded = false;
+    for (auto &import : importedPackageNames) {
+        auto impPackageName = import.mangledName.owner.show(gs);
+        auto &impPkgInfo = gs.packageDB().getPackageInfo(import.mangledName);
+        if (!impPkgInfo.exists()) {
+            continue;
+        }
+
+        if (gs.packageDB().enforceLayering() && import.type == ImportType::Normal) {
+            if (!layeringViolationsHeaderShown && causesLayeringViolation(gs.packageDB(), impPkgInfo)) {
+                result += "\n  # layering violations:\n";
+                layeringViolationsHeaderShown = true;
+            }
+
+            if (!causesLayeringViolation(gs.packageDB(), impPkgInfo) &&
+                strictDependenciesLevel != StrictDependenciesLevel::None) {
+                auto &headers = headerMap[strictDependenciesLevel];
+                auto headerToPrint = string();
+                while (!headers.empty() && impPkgInfo.strictDependenciesLevel >= headers[0].first) {
+                    headerToPrint = headers[0].second;
+                    headers.erase(headers.begin());
+                }
+                if (headerToPrint != "") {
+                    result += "\n";
+                    result += headerToPrint;
+                }
+            }
+        }
+
+        if (!testImportNewLineAdded && import.type != ImportType::Normal) {
+            result += "\n";
+            testImportNewLineAdded = true;
+        }
+
+        switch (import.type) {
+            case ImportType::Normal:
+                if (import.usesInternals) {
+                    ENFORCE(gs.packageDB().testPackages());
+                    result += fmt::format("  import {}, uses_internals: true\n", impPackageName);
+                } else {
+                    result += fmt::format("  import {}\n", impPackageName);
+                }
+                break;
+            case ImportType::TestHelper:
+                ENFORCE(!gs.packageDB().testPackages());
+                result += fmt::format("  test_import {}\n", impPackageName);
+                break;
+            case ImportType::TestUnit:
+                ENFORCE(!gs.packageDB().testPackages());
+                result += fmt::format("  test_import {}, only: \"test_rb\"\n", impPackageName);
+                break;
+        }
+    }
+
+    if (locs.exportAll.exists() || !exports_.empty()) {
+        result += "\n";
+    }
+    if (locs.exportAll.exists()) {
+        result += "  export_all!\n";
+    } else {
+        // TODO(neil): sort the exports
+        for (auto &export_ : exports_) {
+            auto exportSource = core::Loc(file, export_.loc).source(gs);
+            ENFORCE(exportSource.has_value());
+            result += fmt::format("  {}\n", exportSource.value());
+        }
+    }
+
+    if (!visibleTo().empty() || visibleToTests()) {
+        result += "\n";
+    }
+    // TODO(neil): sort the visible_to
+    for (auto &visibleTo : visibleTo()) {
+        auto visibleToPackageName = visibleTo.mangledName.owner.show(gs);
+        switch (visibleTo.type) {
+            case VisibleToType::Normal:
+                result += fmt::format("  visible_to {}\n", visibleToPackageName);
+                break;
+            case VisibleToType::Wildcard:
+                result += fmt::format("  visible_to {}::*\n", visibleToPackageName);
+                break;
+        }
+    }
+
+    if (visibleToTests()) {
+        result += "  visible_to 'tests'\n";
+    }
+    return result;
+}
+
 bool PackageInfo::operator==(const PackageInfo &rhs) const {
     return mangledName() == rhs.mangledName();
 }
