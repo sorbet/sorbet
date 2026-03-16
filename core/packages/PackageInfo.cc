@@ -336,7 +336,7 @@ optional<core::AutocorrectSuggestion> PackageInfo::addExport(const core::GlobalS
         uint32_t exportOffset = this->locs.loc.endPos() - "end\n"sv.size();
         // we want to find the end of the last non-empty line, so
         // let's do something gross: walk backward until we find non-whitespace
-        const auto &file_source = this->file.data(gs).source();
+        const auto file_source = this->file.data(gs).source();
         while (isspace(file_source[exportOffset])) {
             exportOffset--;
             // this shouldn't happen in a well-formatted
@@ -366,7 +366,7 @@ optional<core::AutocorrectSuggestion> PackageInfo::addVisibleToTests(const core:
         uint32_t visibleToOffset = this->locs.loc.endPos() - "end\n"sv.size();
         // we want to find the end of the last non-empty line, so
         // let's do something gross: walk backward until we find non-whitespace
-        const auto &file_source = this->file.data(gs).source();
+        const auto file_source = this->file.data(gs).source();
         while (isspace(file_source[visibleToOffset])) {
             visibleToOffset--;
             // this shouldn't happen in a well-formatted
@@ -413,7 +413,7 @@ optional<core::AutocorrectSuggestion> PackageInfo::addVisibleTo(const core::Glob
         uint32_t visibleToOffset = this->locs.loc.endPos() - "end\n"sv.size();
         // we want to find the end of the last non-empty line, so
         // let's do something gross: walk backward until we find non-whitespace
-        const auto &file_source = this->file.data(gs).source();
+        const auto file_source = this->file.data(gs).source();
         while (isspace(file_source[visibleToOffset])) {
             visibleToOffset--;
             // this shouldn't happen in a well-formatted
