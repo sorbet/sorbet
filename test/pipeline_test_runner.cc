@@ -807,10 +807,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 }
 
                 // Desugarer
-                {
-                    core::UnfreezeNameTable nameTableAccess(ctx);
-                    ast = ast::desugar::node2Tree(ctx, move(parseResult.tree));
-                }
+                ast = ast::desugar::node2Tree(ctx, move(parseResult.tree));
 
                 handler.addObserved(*gs, "desguar-tree", [&]() { return ast.toString(*gs); });
                 handler.addObserved(*gs, "desugar-tree-raw", [&]() { return ast.showRaw(*gs); });
@@ -819,8 +816,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             }
 
             case realmain::options::Parser::PRISM: {
-                core::UnfreezeNameTable nameTableAccess(*gs);
-
                 auto prismResult = parser::Prism::Parser::run(ctx);
 
                 // Run the Prism-level RBS rewriter
