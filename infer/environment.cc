@@ -619,10 +619,8 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         auto &originalType = send->recv.type;
         auto knowledgeTypeWithoutFalsy = core::Types::approximateSubtract(ctx, originalType, core::Types::falsyTypes());
 
-        if (!core::Types::equiv(ctx, knowledgeTypeWithoutFalsy, originalType)) {
-            whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, knowledgeTypeWithoutFalsy);
-            whoKnows.sanityCheck();
-        }
+        whoKnows.truthy().addNoTypeTest(local, typeTestsWithVar, send->recv.variable, core::Types::falsyTypes());
+        whoKnows.sanityCheck();
         return;
     }
 
