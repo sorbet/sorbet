@@ -603,22 +603,14 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
     if (send->fun == core::Names::blank_p()) {
         // Note that this assumes that .blank? is a rails-compatible monkey patch.
         // In other cases this flow analysis might make incorrect assumptions.
-        auto &originalType = send->recv.type;
-        auto knowledgeTypeWithoutFalsy = core::Types::approximateSubtract(ctx, originalType, core::Types::falsyTypes());
-
-        if (!core::Types::equiv(ctx, knowledgeTypeWithoutFalsy, originalType)) {
-            whoKnows.falsy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, knowledgeTypeWithoutFalsy);
-            whoKnows.sanityCheck();
-        }
+        whoKnows.falsy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, core::Types::falsyTypes());
+        whoKnows.sanityCheck();
         return;
     }
 
     if (send->fun == core::Names::present_p()) {
         // Note that this assumes that .present? is a rails-compatible monkey patch.
         // In other cases this flow analysis might make incorrect assumptions.
-        auto &originalType = send->recv.type;
-        auto knowledgeTypeWithoutFalsy = core::Types::approximateSubtract(ctx, originalType, core::Types::falsyTypes());
-
         whoKnows.truthy().addNoTypeTest(local, typeTestsWithVar, send->recv.variable, core::Types::falsyTypes());
         whoKnows.sanityCheck();
         return;
