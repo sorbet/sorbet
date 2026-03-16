@@ -118,7 +118,7 @@ void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) 
             opts.extraPackageFilesDirectoryUnderscorePrefixes, opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
             opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
             opts.allowRelaxedPackagerChecksFor, opts.updateVisibilityFor, opts.packagerLayers, opts.sorbetPackagesHint,
-            opts.genPackages, opts.packageAttributedErrors, opts.testPackages);
+            opts.genPackages, opts.allowRelaxingTestVisibility, opts.packageAttributedErrors, opts.testPackages);
     }
 #endif
 }
@@ -134,7 +134,7 @@ unique_ptr<core::GlobalState> copyForSlowPath(const core::GlobalState &from, con
         opts.extraPackageFilesDirectoryUnderscorePrefixes, opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
         opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
         opts.allowRelaxedPackagerChecksFor, opts.updateVisibilityFor, opts.packagerLayers, opts.sorbetPackagesHint,
-        opts.genPackages, opts.packageAttributedErrors, opts.testPackages);
+        opts.genPackages, opts.allowRelaxingTestVisibility, opts.packageAttributedErrors, opts.testPackages);
 
     core::serialize::Serializer::loadSymbolTable(*result, PAYLOAD_SYMBOL_TABLE);
 
@@ -741,8 +741,8 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
         opts.cacheSensitiveOptions.sorbetPackages, opts.extraPackageFilesDirectoryUnderscorePrefixes,
         opts.extraPackageFilesDirectorySlashDeprecatedPrefixes, opts.extraPackageFilesDirectorySlashPrefixes,
         opts.packageSkipRBIExportEnforcementDirs, opts.allowRelaxedPackagerChecksFor, opts.updateVisibilityFor,
-        opts.packagerLayers, opts.sorbetPackagesHint, opts.genPackages, opts.packageAttributedErrors,
-        opts.testPackages);
+        opts.packagerLayers, opts.sorbetPackagesHint, opts.genPackages, opts.allowRelaxingTestVisibility,
+        opts.packageAttributedErrors, opts.testPackages);
 
     workers.multiplexJob("indexSuppliedFiles", [emptyGs, &opts, fileq, resultq, &kvstore, cancelable]() {
         Timer timeit(emptyGs->tracer(), "indexSuppliedFilesWorker");
@@ -753,8 +753,8 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
             opts.cacheSensitiveOptions.sorbetPackages, opts.extraPackageFilesDirectoryUnderscorePrefixes,
             opts.extraPackageFilesDirectorySlashDeprecatedPrefixes, opts.extraPackageFilesDirectorySlashPrefixes,
             opts.packageSkipRBIExportEnforcementDirs, opts.allowRelaxedPackagerChecksFor, opts.updateVisibilityFor,
-            opts.packagerLayers, opts.sorbetPackagesHint, opts.genPackages, opts.packageAttributedErrors,
-            opts.testPackages);
+            opts.packagerLayers, opts.sorbetPackagesHint, opts.genPackages, opts.allowRelaxingTestVisibility,
+            opts.packageAttributedErrors, opts.testPackages);
         auto &epochManager = *localGs->epochManager;
 
         IndexThreadResultPack threadResult;

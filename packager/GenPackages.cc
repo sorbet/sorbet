@@ -118,6 +118,7 @@ void GenPackages::run(core::GlobalState &gs) {
     }
 
     auto neededVisibleTo = UnorderedMap<core::packages::MangledName, vector<core::packages::MangledName>>{};
+    auto neededVisibleToTests = UnorderedMap<core::packages::MangledName, bool>{};
     if (gs.packageDB().anyUpdateVisibilityFor()) {
         Timer timeit(gs.tracer(), "gen_packages.run.build_needed_visible_to");
         for (auto pkgName : gs.packageDB().packages()) {
@@ -138,8 +139,15 @@ void GenPackages::run(core::GlobalState &gs) {
                             // - referencedPackage has no visible_to restrictions, and we want to ratchet
                             // referencedPackage's `visible_to`s
                             //
-                            // In either case, we'll add `visible_to pkgName` to referencedPackage's __package.db
-                            neededVisibleTo[referencedPackageName].push_back(pkgName);
+                            // In either case, we'll add a new `visible_to` to referencedPackage's __package.db
+                            if (gs.packageDB().allowRelaxingTestVisibility() && file.data(gs).isPackagedTest()) {
+                                // If --allow-relaxing-test-visibility, and this reference is in a test file, add
+                                // `visible_to 'tests'`
+                                neededVisibleToTests[referencedPackageName] = true;
+                            } else {
+                                // Otherwise, add `visible_to pkgName`
+                                neededVisibleTo[referencedPackageName].push_back(pkgName);
+                            }
                         }
                     }
                 }
@@ -158,9 +166,10 @@ void GenPackages::run(core::GlobalState &gs) {
         // over all files, and it doesn't make sense to rerun the loop for each package, so we do this work upfront
         auto exportsAutocorrect = pkgInfo.aggregateMissingExports(gs, toExport[pkgName]);
         // Similar idea for visible_to.
-        auto visibleToAutocorrect = gs.packageDB().updateVisibilityFor(pkgName)
-                                        ? pkgInfo.aggregateMissingVisibleTo(gs, neededVisibleTo[pkgName])
-                                        : nullopt;
+        auto visibleToAutocorrect =
+            gs.packageDB().updateVisibilityFor(pkgName)
+                ? pkgInfo.aggregateMissingVisibleTo(gs, neededVisibleTo[pkgName], neededVisibleToTests[pkgName])
+                : nullopt;
 
         auto autocorrects = vector<core::AutocorrectSuggestion>{};
         auto missingTypes = vector<string>{};
