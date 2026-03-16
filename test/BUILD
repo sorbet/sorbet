@@ -271,8 +271,8 @@ pipeline_tests(
             "testdata/**/*.exp",
         ],
         exclude = [
-            # Specific test that is modified for Prism, contains minor differences in the exp file
-            "testdata/rbs/assertions_heredoc_modified.rb",
+            "testdata/rbs/**/*.rb",
+            "testdata/rbs/**/*.exp",
         ],
     ),
     "PosTests",
@@ -288,6 +288,10 @@ pipeline_tests(
             "testdata/**/*.exp",
         ],
         exclude = [
+            # RBS tests have their own dedicated targets (rbs_prism)
+            "testdata/rbs/**/*.rb",
+            "testdata/rbs/**/*.exp",
+
             # Prism allows a new line between `.` and `end` as a way to call a method called literally `#end`.
             # The legacy parser treats this as an incomplete call to `x.<method-name-missing>()`, which is much
             # nicer behaviour, which we eventually want to support with Prism as well.
@@ -483,8 +487,6 @@ pipeline_tests(
             "testdata/packager/package-no-spec/**/*.rb",
             "testdata/packager/unpackaged-error/**/*.rb",
             "testdata/parser/empty.rb",
-            "testdata/rbs/signatures_defs_abstract_autocorrect.rb",
-            "testdata/rbs/signatures_params_autocorrect.rb",
             "testdata/infer/crash_after_parse_errors.rb",
             "testdata/infer/untyped.rb",
             "testdata/parser/error_recovery/eof_8.rb",
@@ -503,25 +505,6 @@ pipeline_tests(
             # were not actually running because they have RBS support enabled
             "testdata/lsp/hover_rbs.rb",
             "testdata/lsp/hover_rbs_assertions_let.rb",
-            "testdata/rbs/annotations_helpers.rb",
-            "testdata/rbs/assertions_block.rb",
-            "testdata/rbs/assertions_csend.rb",
-            "testdata/rbs/assertions_csend_assign.rb",
-            "testdata/rbs/assertions_def.rb",
-            "testdata/rbs/assertions_defs.rb",
-            "testdata/rbs/assertions_heredoc.rb",
-            "testdata/rbs/assertions_heredoc_modified.rb",
-            "testdata/rbs/assertions_or_assign.rb",
-            "testdata/rbs/assertions_send_assign.rb",
-            "testdata/rbs/assertions_super.rb",
-            "testdata/rbs/assertions_type_params.rb",
-            "testdata/rbs/signatures_attrs.rb",
-            "testdata/rbs/signatures_blocks.rb",
-            "testdata/rbs/signatures_defs.rb",
-            "testdata/rbs/signatures_defs_multiline.rb",
-            "testdata/rbs/signatures_generics.rb",
-            "testdata/rbs/signatures_type_aliases.rb",
-            "testdata/rbs/signatures_types.rb",
         ],
     ),
     "PrismPosTests",
@@ -568,14 +551,72 @@ pipeline_tests(
     parser = "prism",
 )
 
+pipeline_tests(
+    "rbs_whitequark",
+    glob(
+        [
+            "testdata/rbs/**/*.rb",
+            "testdata/rbs/**/*.exp",
+        ],
+        exclude = [
+            # Specific test that is modified for Prism, contains minor differences in the exp file
+            "testdata/rbs/assertions_heredoc_modified.rb",
+        ],
+    ),
+    "PosTests",
+)
+
+pipeline_tests(
+    "rbs_prism",
+    glob(
+        [
+            "testdata/rbs/**/*.rb",
+            "testdata/rbs/**/*.exp",
+        ],
+        exclude = [
+            # Specific test for the legacy pipeline. Prism has its own `testdata/rbs/assertions_heredoc_modified.rb`.
+            "testdata/rbs/assertions_heredoc.rb",
+            "testdata/lsp/hover_rbs.rb",
+            "testdata/lsp/hover_rbs_assertions_let.rb",
+            "testdata/rbs/signatures_defs_abstract_autocorrect.rb",
+            "testdata/rbs/signatures_params_autocorrect.rb",
+            "testdata/rbs/annotations_helpers.rb",
+            "testdata/rbs/assertions_block.rb",
+            "testdata/rbs/assertions_csend.rb",
+            "testdata/rbs/assertions_csend_assign.rb",
+            "testdata/rbs/assertions_def.rb",
+            "testdata/rbs/assertions_defs.rb",
+            "testdata/rbs/assertions_or_assign.rb",
+            "testdata/rbs/assertions_send_assign.rb",
+            "testdata/rbs/assertions_super.rb",
+            "testdata/rbs/assertions_type_params.rb",
+            "testdata/rbs/signatures_attrs.rb",
+            "testdata/rbs/signatures_blocks.rb",
+            "testdata/rbs/signatures_defs.rb",
+            "testdata/rbs/signatures_defs_multiline.rb",
+            "testdata/rbs/signatures_generics.rb",
+            "testdata/rbs/signatures_type_aliases.rb",
+            "testdata/rbs/signatures_types.rb",
+        ],
+    ),
+    "PrismPosTests",
+    parser = "prism",
+)
+
 test_suite(
     name = "test",
-    tests = ["test_corpus"],
+    tests = [
+        "rbs_whitequark",
+        "test_corpus",
+    ],
 )
 
 test_suite(
     name = "test_prism",
-    tests = ["test_corpus_prism"],
+    tests = [
+        "rbs_prism",
+        "test_corpus_prism",
+    ],
 )
 
 test_suite(
@@ -586,4 +627,12 @@ test_suite(
 test_suite(
     name = "prism_regression",
     tests = ["prism_regression_corpus"],
+)
+
+test_suite(
+    name = "rbs",
+    tests = [
+        "rbs_prism",
+        "rbs_whitequark",
+    ],
 )
