@@ -432,7 +432,9 @@ void autogen(core::GlobalState &gs, vector<core::FileRef> files, ExpectationHand
             auto crcBuilder = autogen::CRCBuilder::create();
             for (auto &tree : trees) {
                 core::Context ctx(gs, core::Symbols::root(), tree.file);
-                auto pf = autogen::Autogen::generate(ctx, move(tree), autogen::AutogenConfig{{}}, *crcBuilder);
+                auto leakTrees = false;
+                auto pf =
+                    autogen::Autogen::generate(ctx, move(tree), autogen::AutogenConfig{{}}, *crcBuilder, leakTrees);
                 payload << pf.toString(ctx, autogen::AutogenVersion::MAX_VERSION);
             }
             return payload.str();
