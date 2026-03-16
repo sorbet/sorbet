@@ -3793,7 +3793,7 @@ regexp_contents: // nothing
                 | tRATIONAL_IMAGINARY
                     {
                       driver.lex.set_state_expr_end();
-                      $$ = driver.build.rational_complex(self, $1);
+                      $$ = driver.build.complex(self, $1);
                     }
                 | tFLOAT_IMAGINARY
                     {
