@@ -277,7 +277,7 @@ class Module < Object
     params(
         arg0: T.any(Symbol, String),
     )
-    .returns(NilClass)
+    .returns(T::Array[Symbol])
   end
   def attr_accessor(*arg0); end
 
@@ -290,7 +290,7 @@ class Module < Object
     params(
         arg0: T.any(Symbol, String),
     )
-    .returns(NilClass)
+    .returns(T::Array[Symbol])
   end
   def attr_reader(*arg0); end
 
@@ -302,7 +302,7 @@ class Module < Object
     params(
         arg0: T.any(Symbol, String),
     )
-    .returns(NilClass)
+    .returns(T::Array[Symbol])
   end
   def attr_writer(*arg0); end
 
