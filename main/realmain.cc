@@ -551,7 +551,6 @@ int realmain(int argc, char *argv[]) {
         return returnCode;
     }
 
-    vector<ast::ParsedFile> packageIndexed;
     if (opts.runLSP) {
 #ifdef SORBET_REALMAIN_MIN
         logger->warn("LSP is disabled in sorbet-orig for faster builds");
@@ -607,6 +606,7 @@ int realmain(int argc, char *argv[]) {
 
         // ----- build the package DB -----
 
+        vector<ast::ParsedFile> packageIndexed;
         auto inputPackageFiles = absl::Span<core::FileRef>{};
         if (opts.cacheSensitiveOptions.sorbetPackages) {
             auto numPackageFiles = pipeline::partitionPackageFiles(*gs, inputFilesSpan);
@@ -736,6 +736,14 @@ int realmain(int argc, char *argv[]) {
 
             for (auto &fileRef : inputFilesSpan) {
                 gs->errorQueue->flushErrorsForFile(*gs, fileRef);
+            }
+
+            if (intentionallyLeakASTs) {
+                // All trees get free'd or leaked during `pipeline::typecheck` which is skipped when we're in
+                // genPackages mode. Leak them here if we're going to.
+                for (auto &e : packageIndexed) {
+                    intentionallyLeakMemory(e.tree.release());
+                }
             }
         }
 
@@ -902,11 +910,6 @@ int realmain(int argc, char *argv[]) {
     opts.flushPrinters();
 
     if (!sorbet::emscripten_build) {
-        // Let it go: leak memory so that we don't need to call destructors
-        // (Although typecheck leaks these, autogen goes thru a different codepath.)
-        for (auto &e : packageIndexed) {
-            intentionallyLeakMemory(e.tree.release());
-        }
         intentionallyLeakMemory(gs.release());
     }
 
