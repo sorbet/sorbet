@@ -1,1 +1,1 @@
-s(:complex, "42")
+s(:complex, "42r")

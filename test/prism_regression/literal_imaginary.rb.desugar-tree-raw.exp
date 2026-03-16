@@ -33,7 +33,19 @@ ClassDef{
       pos_args = 2
       args = [
         Literal{ value = 0 }
-        Literal{ value = "1r" }
+        Send{
+          flags = {}
+          recv = ConstantLit{
+            symbol = (module ::Kernel)
+            orig = nullptr
+          }
+          fun = <U Rational>
+          block = nullptr
+          pos_args = 1
+          args = [
+            Literal{ value = "1" }
+          ]
+        }
       ]
     }
 
@@ -63,7 +75,19 @@ ClassDef{
       pos_args = 2
       args = [
         Literal{ value = 0 }
-        Literal{ value = "1.23r" }
+        Send{
+          flags = {}
+          recv = ConstantLit{
+            symbol = (module ::Kernel)
+            orig = nullptr
+          }
+          fun = <U Rational>
+          block = nullptr
+          pos_args = 1
+          args = [
+            Literal{ value = "1.23" }
+          ]
+        }
       ]
     }
   ]

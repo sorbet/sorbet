@@ -1,5 +1,4 @@
 # typed: false
-# disable-parser-comparison: true
 
 1i
 1ri

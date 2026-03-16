@@ -1531,8 +1531,8 @@ public:
     }
 
     unique_ptr<Node> rational_complex(const token *tok) {
-        // TODO(nelhage): We're losing this information that this was marked as
-        // a Rational in the source.
+        // The token can include include an 'r' suffix (e.g. "1r" for `1ri`),
+        // which later gets stripped out during desugar.
         return make_unique<Complex>(tokLoc(tok), tok->view());
     }
 

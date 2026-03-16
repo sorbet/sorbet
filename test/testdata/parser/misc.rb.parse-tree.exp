@@ -473,10 +473,10 @@ Begin {
       val = "1.23"
     }
     Complex {
-      value = "1"
+      value = "1r"
     }
     Complex {
-      value = "1.23"
+      value = "1.23r"
     }
     Kwbegin {
       stmts = [
