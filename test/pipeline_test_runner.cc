@@ -246,6 +246,7 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
         // Parser
         parser::ParseResult legacyParseResult;
         std::optional<parser::Prism::ParseResult> prismParseResult;
+        bool disableParserComparison = false;
         {
             core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
             core::MutableContext ctx(gs, core::Symbols::root(), file);
@@ -280,11 +281,17 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
                     break;
                 }
                 case realmain::options::Parser::PRISM: {
-                    if (gs.cacheSensitiveOptions.rbsEnabled) {
-                        continue;
-                    }
-
                     prismParseResult.emplace(parser::Prism::Parser::run(ctx));
+
+                    if (gs.cacheSensitiveOptions.rbsEnabled) {
+                        auto &prismParser = prismParseResult->getParser();
+                        auto node = rbs::runPrismRBSRewrite(gs, file, prismParseResult->getRawNodePointer(),
+                                                            prismParseResult->getCommentLocations(), ctx, prismParser);
+                        prismParseResult->replaceRootNode(node);
+                        disableParserComparison = true;
+
+                        handler.addObserved(gs, "rbs-rewrite-tree", [&]() { return prismParseResult->prettyPrint(); });
+                    }
 
                     break;
                 }
@@ -297,7 +304,8 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
             core::MutableContext ctx(gs, core::Symbols::root(), file);
             core::UnfreezeNameTable nameTableAccess(ctx); // enters original strings
 
-            auto disableParserComparison =
+            disableParserComparison =
+                disableParserComparison ||
                 BooleanPropertyAssertion::getValue("disable-parser-comparison", assertions).value_or(false);
 
             if (prismParseResult.has_value()) {
