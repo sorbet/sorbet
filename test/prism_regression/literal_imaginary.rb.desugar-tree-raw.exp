@@ -18,7 +18,52 @@ ClassDef{
       pos_args = 2
       args = [
         Literal{ value = 0 }
-        Literal{ value = "1.0" }
+        Literal{ value = "1" }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = ConstantLit{
+        symbol = (module ::Kernel)
+        orig = nullptr
+      }
+      fun = <U Complex>
+      block = nullptr
+      pos_args = 2
+      args = [
+        Literal{ value = 0 }
+        Literal{ value = "1r" }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = ConstantLit{
+        symbol = (module ::Kernel)
+        orig = nullptr
+      }
+      fun = <U Complex>
+      block = nullptr
+      pos_args = 2
+      args = [
+        Literal{ value = 0 }
+        Literal{ value = "1.23" }
+      ]
+    }
+
+    Send{
+      flags = {}
+      recv = ConstantLit{
+        symbol = (module ::Kernel)
+        orig = nullptr
+      }
+      fun = <U Complex>
+      block = nullptr
+      pos_args = 2
+      args = [
+        Literal{ value = 0 }
+        Literal{ value = "1.23r" }
       ]
     }
   ]

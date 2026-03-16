@@ -467,10 +467,16 @@ Begin {
       }
     }
     Rational {
-      val = "4"
+      val = "1"
+    }
+    Rational {
+      val = "1.23"
     }
     Complex {
-      value = "5"
+      value = "1"
+    }
+    Complex {
+      value = "1.23"
     }
     Kwbegin {
       stmts = [

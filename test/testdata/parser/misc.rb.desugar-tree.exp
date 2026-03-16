@@ -176,9 +176,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   <emptyTree>
 
-  ::Kernel.Rational("4")
+  ::Kernel.Rational("1")
 
-  ::Kernel.Complex(0, "5")
+  ::Kernel.Rational("1.23")
+
+  ::Kernel.Complex(0, "1")
+
+  ::Kernel.Complex(0, "1.23")
 
   <emptyTree>
 rescue <emptyTree>::<C E> => x
