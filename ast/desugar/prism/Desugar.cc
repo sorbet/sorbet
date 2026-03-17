@@ -3684,7 +3684,6 @@ ast::ExpressionPtr Desugarer::desugarPattern(pm_node_t *node) {
             }
 
             if (prismTrailingSplat != nullptr && PM_NODE_TYPE_P(prismTrailingSplat, PM_SPLAT_NODE)) {
-                // TODO: handle PM_NODE_TYPE_P(prismTrailingSplat, PM_MISSING_NODE)
                 desugarPattern(prismTrailingSplat);
             }
 
