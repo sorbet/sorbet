@@ -74,7 +74,7 @@ class A
     if time.present?
       T.reveal_type(time) # error: Revealed type: `Time`
     else
-      T.reveal_type(time) # error: Revealed type: `T.nilable(Time)`
+      T.reveal_type(time) # error: Revealed type: `NilClass`
     end
   end
 

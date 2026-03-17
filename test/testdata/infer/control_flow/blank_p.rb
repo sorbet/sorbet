@@ -74,7 +74,7 @@ class A
   sig { params(time: T.nilable(Time)).void }
   def test_never_blank(time)
     if time.blank?
-      T.reveal_type(time) # error: Revealed type: `T.nilable(Time)`
+      T.reveal_type(time) # error: Revealed type: `NilClass`
     else
       T.reveal_type(time) # error: Revealed type: `Time`
     end

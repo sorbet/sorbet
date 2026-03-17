@@ -563,7 +563,7 @@ void Environment::updateKnowledgeKindOf(core::Context ctx, cfg::LocalRef local, 
 }
 
 void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::Loc loc, const cfg::Send &send,
-                                  KnowledgeFilter &knowledgeFilter) {
+                                  const core::DispatchResult &dispatched, KnowledgeFilter &knowledgeFilter) {
     if (!send.fun.isUpdateKnowledgeName()) {
         // We short circuit here (1) for an honestly negligible performance improvement, but
         // importantly (2) so that if a new method is added to this method, you'll be forced to add it
@@ -604,6 +604,16 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         // Note that this assumes that .blank? is a rails-compatible monkey patch.
         // In other cases this flow analysis might make incorrect assumptions.
         whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send.recv.variable, core::Types::falsyTypes());
+
+        for (auto it = &dispatched; it != nullptr; it = it->secondary.get()) {
+            auto resultType = it->main.method.exists() ? it->main.method.data(ctx)->resultType : nullptr;
+            if ((resultType == core::Types::falseClass() || resultType == core::Types::nilClass()) &&
+                it->main.receiver.isFullyDefined()) {
+                // If this component was unconditionally falsy, then it will not be there in the truthy case
+                whoKnows.truthy().addNoTypeTest(local, typeTestsWithVar, send.recv.variable, it->main.receiver);
+            }
+        }
+
         whoKnows.sanityCheck();
         return;
     }
@@ -612,6 +622,15 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         // Note that this assumes that .present? is a rails-compatible monkey patch.
         // In other cases this flow analysis might make incorrect assumptions.
         whoKnows.truthy().addNoTypeTest(local, typeTestsWithVar, send.recv.variable, core::Types::falsyTypes());
+
+        for (auto it = &dispatched; it != nullptr; it = it->secondary.get()) {
+            auto resultType = it->main.method.exists() ? it->main.method.data(ctx)->resultType : nullptr;
+            if (resultType == core::Types::trueClass() && it->main.receiver.isFullyDefined()) {
+                // If this component was unconditionally true, then it will not be there in the falsy case
+                whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send.recv.variable, it->main.receiver);
+            }
+        }
+
         whoKnows.sanityCheck();
         return;
     }
@@ -1209,7 +1228,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 // after the typecase.
                 setTypeAndOrigin(bind.bind.variable, tp);
                 clearKnowledge(ctx, bind.bind.variable, knowledgeFilter);
-                updateKnowledge(ctx, bind.bind.variable, ctx.locAt(bind.loc), send, knowledgeFilter);
+                updateKnowledge(ctx, bind.bind.variable, ctx.locAt(bind.loc), send, dispatched, knowledgeFilter);
             },
             [&](cfg::Ident &i) {
                 const core::TypeAndOrigins &typeAndOrigin = getTypeAndOrigin(i.what);
