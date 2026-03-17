@@ -92,7 +92,6 @@ class ParseResult final {
     std::vector<core::LocOffsets> commentLocations;
 
 public:
-    ParseResult() = default;
     ParseResult(std::unique_ptr<Parser> parser, pm_node_t *node, std::vector<ParseError> parseErrors,
                 std::vector<core::LocOffsets> commentLocations)
         : parser{std::move(parser)}, node{node}, parseErrors{std::move(parseErrors)}, commentLocations{std::move(

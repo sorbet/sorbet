@@ -254,23 +254,14 @@ parser::ParseResult runParser(core::GlobalState &gs, core::FileRef file, const o
     return result;
 }
 
-parser::Prism::ParseResult runPrismParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print,
-                                          const options::Options &opts, bool preserveConcreteSyntax = false) {
-    parser::Prism::ParseResult parseResult;
-    {
-        Timer timeit(gs.tracer(), "runParser", {{"file", string(file.data(gs).path())}});
-        core::UnfreezeNameTable nameTableAccess(gs); // enters strings from source code as names
+parser::Prism::ParseResult runPrismParser(core::GlobalState &gs, core::FileRef file, const options::Options &opts,
+                                          bool preserveConcreteSyntax = false) {
+    Timer timeit(gs.tracer(), "runParser", {{"file", string(file.data(gs).path())}});
+    core::UnfreezeNameTable nameTableAccess(gs); // enters strings from source code as names
 
-        auto source = file.data(gs).source();
-        bool collectComments = gs.cacheSensitiveOptions.rbsEnabled;
-        parseResult = parser::Prism::Parser::parseWithoutTranslation(source, collectComments);
-    }
-
-    if (print.ParseTree.enabled) {
-        print.ParseTree.fmt("{}\n", parseResult.prettyPrint());
-    }
-
-    return parseResult;
+    auto source = file.data(gs).source();
+    bool collectComments = gs.cacheSensitiveOptions.rbsEnabled;
+    return parser::Prism::Parser::parseWithoutTranslation(source, collectComments);
 }
 
 parser::Prism::ParseResult runPrismRBSRewrite(core::GlobalState &gs, core::FileRef file,
@@ -449,7 +440,12 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
                 }
 
                 case options::Parser::PRISM: {
-                    auto parseResult = runPrismParser(lgs, file, print, opts);
+                    auto parseResult = runPrismParser(lgs, file, opts);
+
+                    if (print.ParseTree.enabled) {
+                        print.ParseTree.fmt("{}\n", parseResult.prettyPrint());
+                    }
+
                     if (opts.stopAfterPhase == options::Phase::PARSER) {
                         return emptyParsedFile(file);
                     }
