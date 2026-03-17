@@ -209,10 +209,6 @@ rescue <emptyTree>::<C E> => x
 
   <self>.`("true")
 
-  <self>.proc() do |x|
-    <emptyTree>
-  end
-
   break(<self>.cfoo(1) do ||
       <emptyTree>
     end)

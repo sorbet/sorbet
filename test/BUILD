@@ -501,6 +501,9 @@ pipeline_tests(
             "testdata/cfg/rescue_var_expression.rb",
             "testdata/parser/misc.rb",
 
+            # The Prism desugarer doesn't check for block-local variables if there are no other parameters
+            "testdata/desugar/shadow_args.rb",
+
             # Fixing a bug in pipeline_test_runner.cc revealed that these tests
             # were not actually running because they have RBS support enabled
             "testdata/lsp/hover_rbs.rb",
@@ -553,16 +556,10 @@ pipeline_tests(
 
 pipeline_tests(
     "rbs_whitequark",
-    glob(
-        [
-            "testdata/rbs/**/*.rb",
-            "testdata/rbs/**/*.exp",
-        ],
-        exclude = [
-            # Specific test that is modified for Prism, contains minor differences in the exp file
-            "testdata/rbs/assertions_heredoc_modified.rb",
-        ],
-    ),
+    glob([
+        "testdata/rbs/**/*.rb",
+        "testdata/rbs/**/*.exp",
+    ]),
     "PosTests",
 )
 
@@ -574,8 +571,6 @@ pipeline_tests(
             "testdata/rbs/**/*.exp",
         ],
         exclude = [
-            # Specific test for the legacy pipeline. Prism has its own `testdata/rbs/assertions_heredoc_modified.rb`.
-            "testdata/rbs/assertions_heredoc.rb",
             "testdata/rbs/signatures_defs_abstract_autocorrect.rb",
             "testdata/rbs/signatures_params_autocorrect.rb",
             "testdata/rbs/annotations_helpers.rb",
