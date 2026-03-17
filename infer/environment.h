@@ -182,7 +182,7 @@ class Environment {
                                cfg::LocalRef ref, KnowledgeFilter &knowledgeFilter, core::NameRef fun);
 
     /* Special case sources of knowledge */
-    void updateKnowledge(core::Context ctx, cfg::LocalRef local, core::Loc loc, const cfg::Send *send,
+    void updateKnowledge(core::Context ctx, cfg::LocalRef local, core::Loc loc, const cfg::Send &send,
                          KnowledgeFilter &knowledgeFilter);
 
     void setTypeAndOrigin(cfg::LocalRef symbol, const core::TypeAndOrigins &typeAndOrigins);
