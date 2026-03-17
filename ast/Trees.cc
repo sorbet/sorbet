@@ -1293,7 +1293,10 @@ string OptionalParam::toStringWithTabs(const core::GlobalState &gs, int tabs) co
 }
 
 string ShadowArg::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
-    return this->expr.toStringWithTabs(gs, tabs);
+    auto name = this->expr.toStringWithTabs(gs, tabs);
+
+    // Shadow args can have an empty name in an error case like `do |;| end`
+    return name.empty() ? "<missing_block_local_params>" : name;
 }
 
 string BlockParam::toStringWithTabs(const core::GlobalState &gs, int tabs) const {

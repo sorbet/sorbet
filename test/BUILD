@@ -501,9 +501,6 @@ pipeline_tests(
             "testdata/cfg/rescue_var_expression.rb",
             "testdata/parser/misc.rb",
 
-            # The Prism desugarer doesn't check for block-local variables if there are no other parameters
-            "testdata/desugar/shadow_args.rb",
-
             # Fixing a bug in pipeline_test_runner.cc revealed that these tests
             # were not actually running because they have RBS support enabled
             "testdata/lsp/hover_rbs.rb",
