@@ -1203,6 +1203,13 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     tp.origins = args[0]->origins;
                 }
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
+
+                // Send is special, because of updateKnowledge, so we do the type and origins stuff
+                // earlier here in the typecase. For all other instructions, this logic is done
+                // after the typecase.
+                setTypeAndOrigin(bind.bind.variable, tp);
+                clearKnowledge(ctx, bind.bind.variable, knowledgeFilter);
+                updateKnowledge(ctx, bind.bind.variable, ctx.locAt(bind.loc), send, knowledgeFilter);
             },
             [&](cfg::Ident &i) {
                 const core::TypeAndOrigins &typeAndOrigin = getTypeAndOrigin(i.what);
@@ -1858,12 +1865,16 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 }
             }
         }
-        setTypeAndOrigin(bind.bind.variable, tp);
 
-        clearKnowledge(ctx, bind.bind.variable, knowledgeFilter);
-        if (auto send = cfg::cast_instruction<cfg::Send>(bind.value)) {
-            updateKnowledge(ctx, bind.bind.variable, ctx.locAt(bind.loc), *send, knowledgeFilter);
-        } else if (auto i = cfg::cast_instruction<cfg::Ident>(bind.value)) {
+        if (!cfg::isa_instruction<cfg::Send>(bind.value)) {
+            // The `Send` case is handled directly in the typecase above, to also be able to handle
+            // `updateKnowledge` there (with access to the DispatchResult)
+            setTypeAndOrigin(bind.bind.variable, tp);
+
+            clearKnowledge(ctx, bind.bind.variable, knowledgeFilter);
+        }
+
+        if (auto i = cfg::cast_instruction<cfg::Ident>(bind.value)) {
             propagateKnowledge(ctx, bind.bind.variable, i->what, knowledgeFilter);
         } else if (auto l = cfg::cast_instruction<cfg::LoadArg>(bind.value)) {
             const auto &argInfo = l->argument(ctx);
