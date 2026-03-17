@@ -1,5 +1,4 @@
 # typed: false
-# disable-parser-comparison: true
 
 lambda do |; block_local1| end
 lambda do |; block_local1, block_local2| end

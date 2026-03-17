@@ -4182,9 +4182,9 @@ ast::ExpressionPtr Desugarer::desugarLiteralBlock(pm_node *blockBodyNode, pm_nod
 
                 auto paramsLoc = translateLoc(paramsNode->base.location);
 
-                if (paramsNode->parameters) {
-                    auto blockLocalVariables = absl::MakeSpan(paramsNode->locals.nodes, paramsNode->locals.size);
+                auto blockLocalVariables = absl::MakeSpan(paramsNode->locals.nodes, paramsNode->locals.size);
 
+                if (paramsNode->parameters) {
                     ast::InsSeq::STATS_store blockStatsStore;
 
                     std::tie(blockParamsStore, blockStatsStore, std::ignore, std::ignore) =
@@ -4193,11 +4193,13 @@ ast::ExpressionPtr Desugarer::desugarLiteralBlock(pm_node *blockBodyNode, pm_nod
                     if (!blockStatsStore.empty()) {
                         blockBody = MK::InsSeq(blockLoc, move(blockStatsStore), move(blockBody));
                     }
+                } else {
+                    blockParamsStore.reserve(blockLocalVariables.size());
+                }
 
-                    // Add in the block-local variables, if any.
-                    for (auto *node : blockLocalVariables) {
-                        blockParamsStore.emplace_back(desugar(node));
-                    }
+                // Add in the block-local variables, if any.
+                for (auto *node : blockLocalVariables) {
+                    blockParamsStore.emplace_back(desugar(node));
                 }
 
                 break;
