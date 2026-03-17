@@ -463,6 +463,7 @@ pipeline_tests(
             "testdata/resolver/it_param_rspec_method.rb",
             "testdata/resolver/sig_misc.rb",
             "testdata/rewriter/initializer_no_arg_with_local.rb",
+            "testdata/desugar/op_asgn_kw_block.rb",
 
             # Prism desugared tree doesn't match legacy desugared tree (desugar differences)
             "testdata/desugar/destructure.rb",
