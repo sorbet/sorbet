@@ -99,7 +99,7 @@ public:
                                                                                           commentLocations)} {}
 
     ~ParseResult() {
-        if (node && parser != nullptr) {
+        if (node != nullptr && parser != nullptr) {
             parser->destroyNode(node);
         }
     }
