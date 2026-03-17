@@ -8,6 +8,9 @@ def test_csend
   foo&.bar ||= 5
 end
 
+# Chained &. should number temps outside-in
+foo&.bar&.baz
+
 # desugar should not require `nil?` support
 BasicObject.new&.__id__
 

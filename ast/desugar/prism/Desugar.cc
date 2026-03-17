@@ -132,9 +132,9 @@ private:
                                          core::LocOffsets location, bool isPrivateOk);
 
     template <typename Lambda>
-    ast::ExpressionPtr desugarConditionalSend(core::LocOffsets location, ast::ExpressionPtr receiver,
-                                              core::LocOffsets recvLoc, pm_constant_id_t methodNameID,
-                                              pm_location_t methodNamePrismLoc, Lambda &&body);
+    ast::ExpressionPtr desugarConditionalSend(core::LocOffsets location, pm_node_t *receiver,
+                                              pm_constant_id_t methodNameID, pm_location_t methodNamePrismLoc,
+                                              Lambda &&body);
 
     template <typename StoreType>
     StoreType desugarArguments(pm_arguments_node *node, pm_node *blockArgumentNode = nullptr);
@@ -669,11 +669,22 @@ ast::ExpressionPtr Desugarer::desugarDString(core::LocOffsets loc, pm_node_list 
 // The content of the body is defined by the given lambda, so this method can be reused among the different places
 // where conditional sends can appear.
 template <typename Lambda>
-ast::ExpressionPtr Desugarer::desugarConditionalSend(core::LocOffsets location, ast::ExpressionPtr receiver,
-                                                     core::LocOffsets recvLoc, pm_constant_id_t methodNameID,
-                                                     pm_location_t methodNamePrismLoc, Lambda &&body) {
+ast::ExpressionPtr Desugarer::desugarConditionalSend(core::LocOffsets location, pm_node_t *receiver,
+                                                     pm_constant_id_t methodNameID, pm_location_t methodNamePrismLoc,
+                                                     Lambda &&body) {
+    ENFORCE(receiver != nullptr, "Conditional sends should always have a receiver.");
+
     auto loc0 = location.copyWithZeroLength();
 
+    // Create the temporary local variable before desugaring the receiver,
+    // so that chained csends get numbered from left to right.
+    auto receiverTempLocalVarName = nextUniqueDesugarName(core::Names::assignTemp());
+
+    auto receiverExpr = desugar(receiver);
+
+    // Note: this location can differ from the `receiver.loc()` if the receiver is a parentheses node.
+    // The Prism node's location will include the parenthesis, but not the desugared `receiver.loc()`.
+    auto recvLoc = translateLoc(receiver->location);
     auto recvLoc0 = recvLoc.copyWithZeroLength();
 
     // The arg loc for the synthetic variable created for the purpose of this safe navigation
@@ -690,11 +701,8 @@ ast::ExpressionPtr Desugarer::desugarConditionalSend(core::LocOffsets location, 
     auto methodName = translateConstantName(methodNameID);
     auto methodNameLoc = translateLoc(methodNamePrismLoc);
 
-    // We only want to evaluate the receiver once, so we store the result in a local temporary variable.
-    core::NameRef receiverTempLocalVarName = nextUniqueDesugarName(core::Names::assignTemp());
-
-    // $temp = receiver
-    auto assignment = MK::Assign(recvLoc0, receiverTempLocalVarName, move(receiver));
+    // $temp = receiverExpr
+    auto assignment = MK::Assign(recvLoc0, receiverTempLocalVarName, move(receiverExpr));
 
     // Just compare with `NilClass` to avoid potentially calling into a class-defined `==`
     auto cond = MK::Send1(loc0, ast::MK::Constant(recvLoc0, core::Symbols::NilClass()), core::Names::tripleEq(),
@@ -806,10 +814,8 @@ ast::ExpressionPtr Desugarer::desugarMlhs(core::LocOffsets loc, PrismNode *lhs, 
                     return MK::Send(parentLoc, move(receiverTempLocal), methodName, methodNameLoc, 1, move(arguments));
                 };
 
-                auto recvLoc = translateLoc(receiverNode->location);
-                auto csendRecvExpr = desugar(receiverNode);
-                auto expr = desugarConditionalSend(cloc, move(csendRecvExpr), recvLoc, callTargetNode->name,
-                                                   callTargetNode->message_loc, body);
+                auto expr =
+                    desugarConditionalSend(cloc, receiverNode, callTargetNode->name, callTargetNode->message_loc, body);
                 stats.emplace_back(move(expr));
             } else {
                 ast::ExpressionPtr receiver;
@@ -1544,7 +1550,6 @@ ast::ExpressionPtr Desugarer::desugarSendOpAssign(pm_node_t *untypedNode) {
     auto node = down_cast<PrismSendNode>(untypedNode);
     auto location = translateLoc(untypedNode->location);
     auto name = translateConstantName(node->read_name);
-    auto receiverExpr = desugar(node->receiver);
     auto messageLoc = translateLoc(node->message_loc);
 
     // The lhs's location spans from the start of the receiver to the end of the message
@@ -1564,6 +1569,7 @@ ast::ExpressionPtr Desugarer::desugarSendOpAssign(pm_node_t *untypedNode) {
         //         $temp.b += 1
         //       end
         //     end
+
         auto body = [&](ast::ExpressionPtr receiverTempLocal, core::LocOffsets parentLoc, core::NameRef methodName,
                         core::LocOffsets methodNameLoc) -> ast::ExpressionPtr {
             // Use `lhsLoc` (e.g. `foo&.bar`) for the inner send, not `parentLoc` (e.g. `foo&.bar += 5`).
@@ -1581,11 +1587,12 @@ ast::ExpressionPtr Desugarer::desugarSendOpAssign(pm_node_t *untypedNode) {
             }
         };
 
-        auto recvLoc = translateLoc(node->receiver->location);
-        return desugarConditionalSend(lhsLoc, move(receiverExpr), recvLoc, node->read_name, node->message_loc, body);
+        return desugarConditionalSend(lhsLoc, node->receiver, node->read_name, node->message_loc, body);
     }
 
     // Regular send: a.b += 1
+    auto receiverExpr = desugar(node->receiver);
+
     ast::Send::Flags flags;
     flags.isPrivateOk = PM_NODE_FLAG_P(untypedNode, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
 
@@ -1875,6 +1882,60 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
 
             auto receiverNode = callNode->receiver;
 
+            // When the message is empty, like `foo.()`, the message location is the
+            // same as the call operator location
+            core::LocOffsets methodNameLoc;
+            if (callNode->message_loc.start == nullptr && callNode->message_loc.end == nullptr) {
+                methodNameLoc = translateLoc(callNode->call_operator_loc);
+            } else {
+                methodNameLoc = translateLoc(callNode->message_loc);
+            }
+
+            if (PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
+                if (this->preserveConcreteSyntax) {
+                    // Desugaring to a InsSeq + If causes a problem for Extract to Variable; the fake If will be where
+                    // the new variable is inserted, which is incorrect. Instead, desugar to a regular send, so that the
+                    // insertion happens in the correct place (what the csend is inside);
+
+                    // Replace the original method name with a new special one that conveys that this is a CSend, so
+                    // that a&.foo is treated as different from a.foo when checking for structural equality.
+                    auto newFun = ctx.state.freshNameUnique(core::UniqueNameKind::DesugarCsend, methodName, 1);
+
+                    auto receiver = desugar(receiverNode);
+                    auto block = desugarBlock(callNode->block, callNode->arguments, callNode->base.location);
+
+                    return desugarMethodCall(move(receiver), newFun, methodNameLoc, callNode->arguments,
+                                             callNode->closing_loc, move(block), location, /*isPrivateOk=*/false);
+                }
+
+                // Desugar:
+                //     result = receiver&.method()
+                // to:
+                //     result = begin
+                //       $temp = receiver
+                //       if ::NilClass === $temp
+                //         ::<Magic>.<nil-for-safe-navigation>($temp)
+                //       else
+                //         $temp.method()
+                //       end
+                //     end
+
+                auto body = [this, callNode, location](ast::ExpressionPtr receiverTempLocal, core::LocOffsets parentLoc,
+                                                       core::NameRef methodName, core::LocOffsets methodNameLoc) {
+                    auto block = desugarBlock(callNode->block, callNode->arguments, callNode->base.location);
+
+                    // Workaround for a bug in the legacy desugarer, which never allows `&.` to call private methods.
+                    // https://github.com/sorbet/sorbet/issues/9756
+                    auto isPrivateOk = false;
+
+                    return desugarMethodCall(move(receiverTempLocal), methodName, methodNameLoc, callNode->arguments,
+                                             callNode->closing_loc, move(block), location, isPrivateOk);
+                };
+
+                return desugarConditionalSend(location, callNode->receiver, callNode->name, callNode->message_loc,
+                                              body);
+            }
+
             ast::ExpressionPtr receiver;
             if (receiverNode == nullptr) { // Convert `foo()` to `self.foo()`
                 // 0-sized Loc, since `self.` doesn't appear in the original file.
@@ -1918,65 +1979,6 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
 
                 return MK::If(location, MK::Local(location, this->enclosingBlockParamName), move(sendExpr),
                               MK::False(location));
-            }
-
-            // When the message is empty, like `foo.()`, the message location is the
-            // same as the call operator location
-            core::LocOffsets methodNameLoc;
-            if (callNode->message_loc.start == nullptr && callNode->message_loc.end == nullptr) {
-                methodNameLoc = translateLoc(callNode->call_operator_loc);
-            } else {
-                methodNameLoc = translateLoc(callNode->message_loc);
-            }
-
-            if (PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
-                ENFORCE(receiverNode != nullptr, "Conditional sends should always have a receiver.");
-
-                if (this->preserveConcreteSyntax) {
-                    // Desugaring to a InsSeq + If causes a problem for Extract to Variable; the fake If will be where
-                    // the new variable is inserted, which is incorrect. Instead, desugar to a regular send, so that the
-                    // insertion happens in the correct place (what the csend is inside);
-
-                    // Replace the original method name with a new special one that conveys that this is a CSend, so
-                    // that a&.foo is treated as different from a.foo when checking for structural equality.
-                    auto newFun = ctx.state.freshNameUnique(core::UniqueNameKind::DesugarCsend, methodName, 1);
-
-                    auto block = desugarBlock(callNode->block, callNode->arguments, callNode->base.location);
-
-                    return desugarMethodCall(move(receiver), newFun, methodNameLoc, callNode->arguments,
-                                             callNode->closing_loc, move(block), location, isPrivateOk);
-                }
-
-                // Desugar:
-                //     result = receiver&.method()
-                // to:
-                //     result = begin
-                //       $temp = receiver
-                //       if ::NilClass === $temp
-                //         ::<Magic>.<nil-for-safe-navigation>($temp)
-                //       else
-                //         $temp.method()
-                //       end
-                //     end
-
-                // Note: this location can differ from the `receiver.loc()` if the receiver is a parentheses node.
-                // The Prism node's location will include the parenthesis, but not the desugared `receiver.loc()`.
-                auto recvLoc = translateLoc(receiverNode->location);
-
-                auto body = [this, callNode, location](ast::ExpressionPtr receiverTempLocal, core::LocOffsets parentLoc,
-                                                       core::NameRef methodName, core::LocOffsets methodNameLoc) {
-                    auto block = desugarBlock(callNode->block, callNode->arguments, callNode->base.location);
-
-                    // Workaround for a bug in the legacy desugarer, which never allows `&.` to call private methods.
-                    // https://github.com/sorbet/sorbet/issues/9756
-                    auto isPrivateOk = false;
-
-                    return desugarMethodCall(move(receiverTempLocal), methodName, methodNameLoc, callNode->arguments,
-                                             callNode->closing_loc, move(block), location, isPrivateOk);
-                };
-
-                return desugarConditionalSend(location, move(receiver), recvLoc, callNode->name, callNode->message_loc,
-                                              body);
             }
 
             auto block = desugarBlock(callNode->block, callNode->arguments, callNode->base.location);
