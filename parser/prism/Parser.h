@@ -92,14 +92,14 @@ class ParseResult final {
     std::vector<core::LocOffsets> commentLocations;
 
 public:
+    ParseResult() = default;
     ParseResult(std::unique_ptr<Parser> parser, pm_node_t *node, std::vector<ParseError> parseErrors,
                 std::vector<core::LocOffsets> commentLocations)
         : parser{std::move(parser)}, node{node}, parseErrors{std::move(parseErrors)}, commentLocations{std::move(
                                                                                           commentLocations)} {}
 
     ~ParseResult() {
-        if (node) {
-            ENFORCE(parser != nullptr, "The parser must live longer than the nodes it creates.");
+        if (node && parser != nullptr) {
             parser->destroyNode(node);
         }
     }
@@ -111,7 +111,7 @@ public:
     }
 
     ParseResult(const ParseResult &) = delete;            // Copy constructor
-    ParseResult &operator=(ParseResult &&) = delete;      // Move assignment
+    ParseResult &operator=(ParseResult &&) = default;     // Move assignment
     ParseResult &operator=(const ParseResult &) = delete; // Copy assignment
 
     pm_node_t *getRawNodePointer() const {
