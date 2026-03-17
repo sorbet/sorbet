@@ -562,16 +562,10 @@ pipeline_tests(
 
 pipeline_tests(
     "rbs_prism",
-    glob(
-        [
-            "testdata/rbs/**/*.rb",
-            "testdata/rbs/**/*.exp",
-        ],
-        exclude = [
-            # Prism output differs from legacy for constant resolution.
-            "testdata/rbs/signatures_types.rb",
-        ],
-    ),
+    glob([
+        "testdata/rbs/**/*.rb",
+        "testdata/rbs/**/*.exp",
+    ]),
     "PrismPosTests",
     parser = "prism",
 )
