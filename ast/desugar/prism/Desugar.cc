@@ -499,7 +499,7 @@ ast::ExpressionPtr Desugarer::make_unsupported_node(core::LocOffsets loc, std::s
         e.setHeader("Unsupported node type `{}`", nodeName);
     }
 
-    return MK::EmptyTree();
+    return MK::Constant(loc, core::Symbols::ErrorNode());
 }
 
 // Helper function to check if an AST expression is a string literal
@@ -819,17 +819,8 @@ ast::ExpressionPtr Desugarer::desugarMlhs(core::LocOffsets loc, PrismNode *lhs, 
                     receiver = desugar(receiverNode);
                 }
 
-                // Unsupported nodes are desugared to an empty tree.
-                // Treat them as if they were `self` to match `Desugar.cc`.
-                // TODO: Clean up after direct desugaring is complete.
-                // https://github.com/Shopify/sorbet/issues/671
                 ast::Send::Flags flags;
-                if (ast::isa_tree<ast::EmptyTree>(receiver)) {
-                    receiver = MK::Self(zcloc);
-                    flags.isPrivateOk = true;
-                } else {
-                    flags.isPrivateOk = PM_NODE_FLAG_P(callTargetNode, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
-                }
+                flags.isPrivateOk = PM_NODE_FLAG_P(callTargetNode, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
 
                 ast::Send::ARGS_store arguments;
                 arguments.emplace_back(move(val));
@@ -1892,17 +1883,8 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
                 receiver = desugar(receiverNode);
             }
 
-            // Unsupported nodes are desugared to an empty tree.
-            // Treat them as if they were `self` to match `Desugar.cc`.
-            // TODO: Clean up after direct desugaring is complete.
-            // https://github.com/Shopify/sorbet/issues/671
             bool isPrivateOk;
-            if (ast::isa_tree<ast::EmptyTree>(receiver)) {
-                receiver = MK::Self(location.copyWithZeroLength());
-                isPrivateOk = true;
-            } else {
-                isPrivateOk = PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
-            }
+            isPrivateOk = PM_NODE_FLAG_P(callNode, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
 
             if (isCallToBlockGivenP(callNode, methodName, receiver) && isInMethodDef()) {
                 // Workaround to match legacy desugarer behaviour in `Dugar.cc`'s version of `desugarBlock().

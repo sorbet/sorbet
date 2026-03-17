@@ -7,14 +7,29 @@ ClassDef{
       orig = nullptr
     }]
   rhs = [
-    EmptyTree
+    ConstantLit{
+      symbol = (static-field ::<ErrorNode>)
+      orig = nullptr
+    }
 
-    EmptyTree
+    ConstantLit{
+      symbol = (static-field ::<ErrorNode>)
+      orig = nullptr
+    }
 
-    EmptyTree
+    ConstantLit{
+      symbol = (static-field ::<ErrorNode>)
+      orig = nullptr
+    }
 
-    EmptyTree
+    ConstantLit{
+      symbol = (static-field ::<ErrorNode>)
+      orig = nullptr
+    }
 
-    EmptyTree
+    ConstantLit{
+      symbol = (static-field ::<ErrorNode>)
+      orig = nullptr
+    }
   ]
 }
