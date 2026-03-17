@@ -172,9 +172,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   {x => y, :foo => 1}
 
-  <emptyTree>
+  ::<ErrorNode>
 
-  <emptyTree>
+  ::<ErrorNode>
 
   ::Kernel.Rational("4")
 

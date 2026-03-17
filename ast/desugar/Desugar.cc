@@ -448,7 +448,7 @@ ExpressionPtr unsupportedNode(DesugarContext dctx, parser::Node *node) {
     if (auto e = dctx.ctx.beginIndexerError(node->loc, core::errors::Desugar::UnsupportedNode)) {
         e.setHeader("Unsupported node type `{}`", node->nodeName());
     }
-    return MK::EmptyTree();
+    return MK::Constant(node->loc, core::Symbols::ErrorNode());
 }
 
 // Desugar multiple left hand side assignments into a sequence of assignments
