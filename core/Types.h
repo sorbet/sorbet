@@ -1038,7 +1038,7 @@ struct CallLocs final {
     LocOffsets call;
     LocOffsets receiver;
     LocOffsets fun;
-    InlinedVector<LocOffsets, 2> &args;
+    absl::Span<const LocOffsets> args;
 };
 
 struct DispatchArgs {
