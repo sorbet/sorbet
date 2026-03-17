@@ -78,6 +78,8 @@ class T::Enum
       raise "Attempting to access serialization map of #{self.class} before it has been initialized." \
         " Enums are not initialized until the 'enums do' block they are defined in has finished running."
     end
+    # Allow enum instances to be passed directly
+    return serialized_val if serialized_val.is_a?(self)
     @mapping[serialized_val]
   end
 
