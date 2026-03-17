@@ -110,8 +110,16 @@ public:
         other.node = nullptr;
     }
 
+    ParseResult &operator=(ParseResult &&other) noexcept {
+        this->parser = std::move(other.parser);
+        this->node = std::move(other.node);
+        other.node = nullptr;
+        this->parseErrors = std::move(other.parseErrors);
+        this->commentLocations = std::move(other.commentLocations);
+        return *this;
+    }
+
     ParseResult(const ParseResult &) = delete;            // Copy constructor
-    ParseResult &operator=(ParseResult &&) = default;     // Move assignment
     ParseResult &operator=(const ParseResult &) = delete; // Copy assignment
 
     pm_node_t *getRawNodePointer() const {
