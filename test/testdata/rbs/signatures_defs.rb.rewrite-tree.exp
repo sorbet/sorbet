@@ -343,6 +343,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C T>.reveal_type(x)
   end
 
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:rest, <emptyTree>::<C P1>, :trailing, <emptyTree>::<C P2>).void()
+  end
+
+  def trailing1<<todo method>>(*rest, trailing, &<blk>)
+    begin
+      <emptyTree>::<C T>.reveal_type(rest)
+      <emptyTree>::<C T>.reveal_type(trailing)
+    end
+  end
+
   <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
   class <emptyTree>::<C P1><<C <todo sym>>> < (::<todo sym>)
@@ -816,4 +827,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.public(<runtime method definition of method3>)
   end
+
+  <runtime method definition of trailing1>
 end

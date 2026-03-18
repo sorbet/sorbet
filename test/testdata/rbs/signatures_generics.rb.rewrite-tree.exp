@@ -23,6 +23,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>
   end
 
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.type_parameters(:X).params(:x, ::<root>::<C T>.type_parameter(:X)).returns(<emptyTree>::<C G17>.<syntheticSquareBrackets>(::<root>::<C T>.type_parameter(:X), ::<root>::<C T>.type_parameter(:X)))
+  end
+
+  def make_g17<<todo method>>(x, &<blk>)
+    <cast:let>(<emptyTree>::<C G17>.<syntheticSquareBrackets>(::<root>::<C T>.type_parameter(:X), ::<root>::<C T>.type_parameter(:X)).new(), <todo sym>, <emptyTree>::<C G17>.<syntheticSquareBrackets>(::<root>::<C T>.type_parameter(:X), ::<root>::<C T>.type_parameter(:X)))
+  end
+
   module <emptyTree>::<C Errors><<C <todo sym>>> < ()
     class <emptyTree>::<C ParseError1><<C <todo sym>>> < (::<todo sym>)
     end
@@ -295,4 +303,39 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   x.foo("a")
 
   x.foo(nil)
+
+  class <emptyTree>::<C G14><<C <todo sym>>> < (::<todo sym>)
+    <emptyTree>::<C U> = ::Sorbet::Private::Static.type_member()
+  end
+
+  g14 = <cast:let>(<emptyTree>::<C G14>.<syntheticSquareBrackets>(::<root>::<C T>.any(<emptyTree>::<C Integer>, <emptyTree>::<C String>)).new(), <todo sym>, <emptyTree>::<C G14>.<syntheticSquareBrackets>(::<root>::<C T>.any(<emptyTree>::<C Integer>, <emptyTree>::<C String>)))
+
+  <emptyTree>::<C T>.reveal_type(g14)
+
+  g15 = <cast:let>(<emptyTree>::<C G14>.<syntheticSquareBrackets>(::<root>::<C T>.all(<emptyTree>::<C Numeric>, <emptyTree>::<C Comparable>)).new(), <todo sym>, <emptyTree>::<C G14>.<syntheticSquareBrackets>(::<root>::<C T>.all(<emptyTree>::<C Numeric>, <emptyTree>::<C Comparable>)))
+
+  <emptyTree>::<C T>.reveal_type(g15)
+
+  module <emptyTree>::<C MyModule><<C <todo sym>>> < ()
+    class <emptyTree>::<C MyClass><<C <todo sym>>> < (::<todo sym>)
+    end
+  end
+
+  g16 = <cast:let>(<emptyTree>::<C G14>.<syntheticSquareBrackets>(<emptyTree>::<C MyModule>::<C MyClass>).new(), <todo sym>, <emptyTree>::<C G14>.<syntheticSquareBrackets>(<emptyTree>::<C MyModule>::<C MyClass>))
+
+  <emptyTree>::<C T>.reveal_type(g16)
+
+  class <emptyTree>::<C G17><<C <todo sym>>> < (::<todo sym>)
+    <emptyTree>::<C T> = ::Sorbet::Private::Static.type_member()
+
+    <emptyTree>::<C U> = ::Sorbet::Private::Static.type_member()
+  end
+
+  <runtime method definition of make_g17>
+
+  class <emptyTree>::<C G18><<C <todo sym>>> < (::<todo sym>)
+    <emptyTree>::<C X> = ::Sorbet::Private::Static.type_member() do ||
+      {:fixed => ::Sorbet::Private::Static::Void}
+    end
+  end
 end

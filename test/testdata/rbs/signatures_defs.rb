@@ -439,3 +439,9 @@ class Visibility
     T.reveal_type(x) # error: Revealed type: `Integer`
   end
 end
+
+#: (*P1, P2) -> void
+def trailing1(*rest, trailing)
+  T.reveal_type(rest) # error: Revealed type: `T::Array[P1]`
+  T.reveal_type(trailing) # error: Revealed type: `P2`
+end

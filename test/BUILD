@@ -577,7 +577,6 @@ pipeline_tests(
             # Specific test for the legacy pipeline. Prism has its own `testdata/rbs/assertions_heredoc_modified.rb`.
             "testdata/rbs/assertions_heredoc.rb",
             "testdata/rbs/signatures_defs_abstract_autocorrect.rb",
-            "testdata/rbs/signatures_params_autocorrect.rb",
             "testdata/rbs/annotations_helpers.rb",
             "testdata/rbs/assertions_block.rb",
             "testdata/rbs/assertions_csend.rb",

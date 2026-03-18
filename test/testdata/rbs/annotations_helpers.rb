@@ -83,3 +83,6 @@ module RequiresAncestor2; end
 
 # @requires_ancestor: Multiple1::Multiple2
 module RequiresAncestor3; end
+
+# @unknown_annotation
+class UnknownAnnotation; end
