@@ -292,7 +292,7 @@ href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%2
 
 > `present?` and `blank?` are not built into Ruby by default. Rather, they are monkey patched methods provided by the Active Support gem. [See here](https://guides.rubyonrails.org/active_support_core_extensions.html#blank-questionmark-and-present-questionmark) for more.
 
-Sorbet's support for `present?` and `blank?` depends on how precisely the signatures for those monkey patched methods are defined. To be maximally precise, ensure that classes which are unconditionally present (never blank) have narrowly-defined signatures.
+Sorbet's support for `present?` and `blank?` depends on how precisely the signatures for those monkey patched methods are defined. To be maximally precise, ensure that classes which are unconditionally present or blank have narrowly-defined signatures.
 
 Consider this code:
 
@@ -325,14 +325,10 @@ Sorbet **only** assumes something about these branches when the declared signatu
 ```ruby
 class Date
   sig { override.returns(FalseClass) }
-  def blank?
-    false
-  end
+  def blank? = false
 
   sig { override.returns(TrueClass) }
-  def present?
-    true
-  end
+  def present? = true
 end
 ```
 
@@ -341,4 +337,17 @@ Then Sorbet is able to tell that:
 - the falsy branch of a call to `x.present?` implies that `x` is not `Date`
 - the truthy branch of a call to `x.blank?` implies that `x` is not `Date`
 
-When declaring these precise signatures, be sure to use the `override` keyword on the signature, which will opt that class and all its children into [strict override checking](override-checking.md), to make sure that no child class regresses this relationship, and turning the type back into a conditionally-present or conditionally-blank type.
+Similarly, if we were to declare some user-defined always-blank type (no such type is declared in Active Support outside of `NilClass` and `FalseClass`), we would need to use these signatures:
+
+```ruby
+class NilClass
+  sig { override.returns(TrueClass) }
+  def blank? = true
+  sig { override.returns(FalseClass) }
+  def present? = true
+end
+```
+
+(For backwards compatibility with previous versions of Sorbet, Sorbet assumes that `NilClass` and `FalseClass` behave this way regardless of their declared signatures, so this only matters for user-defined unconditionally blank types.)
+
+When declaring these precise signatures, be sure to use the `override` keyword which will opt that class and all its children into [strict override checking](override-checking.md), making sure that no child class regresses this relationship, thereby turning the type back into a conditionally-present or conditionally-blank type.

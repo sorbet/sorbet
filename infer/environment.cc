@@ -603,6 +603,10 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
     if (send.fun == core::Names::blank_p()) {
         // Note that this assumes that .blank? is a rails-compatible monkey patch.
         // In other cases this flow analysis might make incorrect assumptions.
+
+        // Default behavior for backwards compat (so that people don't necessarily need signatures
+        // for `NilClass` and `FalseClass`). Technically, this is redundant with precise signatures
+        // for the `NilClass` and `FalseClass` monkey patches.
         whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send.recv.variable, core::Types::falsyTypes());
 
         for (auto it = &dispatched; it != nullptr; it = it->secondary.get()) {
@@ -611,6 +615,13 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
                 it->main.receiver.isFullyDefined()) {
                 // If this component was unconditionally falsy, then it will not be there in the truthy case
                 whoKnows.truthy().addNoTypeTest(local, typeTestsWithVar, send.recv.variable, it->main.receiver);
+            }
+
+            // For user-defined unconditionally blank types
+            if (it->main.receiver != core::Types::falseClass() && it->main.receiver != core::Types::nilClass()) {
+                if (resultType == core::Types::trueClass() && it->main.receiver.isFullyDefined()) {
+                    whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send.recv.variable, it->main.receiver);
+                }
             }
         }
 
@@ -621,6 +632,10 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
     if (send.fun == core::Names::present_p()) {
         // Note that this assumes that .present? is a rails-compatible monkey patch.
         // In other cases this flow analysis might make incorrect assumptions.
+
+        // Default behavior for backwards compat (so that people don't necessarily need signatures
+        // for `NilClass` and `FalseClass`). Technically, this is redundant with precise signatures
+        // for the `NilClass` and `FalseClass` monkey patches.
         whoKnows.truthy().addNoTypeTest(local, typeTestsWithVar, send.recv.variable, core::Types::falsyTypes());
 
         for (auto it = &dispatched; it != nullptr; it = it->secondary.get()) {
@@ -628,6 +643,14 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
             if (resultType == core::Types::trueClass() && it->main.receiver.isFullyDefined()) {
                 // If this component was unconditionally true, then it will not be there in the falsy case
                 whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send.recv.variable, it->main.receiver);
+            }
+
+            // For user-defined unconditionally blank types
+            if (it->main.receiver != core::Types::falseClass() && it->main.receiver != core::Types::nilClass()) {
+                if ((resultType == core::Types::falseClass() || resultType == core::Types::nilClass()) &&
+                    it->main.receiver.isFullyDefined()) {
+                    whoKnows.truthy().addNoTypeTest(local, typeTestsWithVar, send.recv.variable, it->main.receiver);
+                }
             }
         }
 
