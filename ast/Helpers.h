@@ -550,15 +550,13 @@ public:
         // A ZSuper call can have a block argument. Don't include it in the location.
         const uint32_t length = "super"sv.size();
         auto superKeywordLoc = core::LocOffsets{loc.beginPos(), loc.beginPos() + length};
-
-        auto superLen = "super"sv.size();
-        auto funLoc = loc.beginPos() + superLen <= loc.endPos()
-                          ? core::LocOffsets(loc.beginPos(), loc.beginPos() + superLen)
-                          : loc.copyWithZeroLength();
+        if (superKeywordLoc.endPos() > loc.endPos()) {
+            superKeywordLoc = loc.copyWithZeroLength();
+        }
 
         Send::Flags flags;
         flags.isPrivateOk = true;
-        return Send(loc, Self(superKeywordLoc.copyWithZeroLength()), method, funLoc, 1,
+        return Send(loc, Self(superKeywordLoc.copyWithZeroLength()), method, superKeywordLoc, 1,
                     SendArgs(make_expression<ast::ZSuperArgs>(superKeywordLoc.copyEndWithZeroLength())), flags);
     }
 
