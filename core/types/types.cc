@@ -1190,11 +1190,13 @@ Loc DispatchArgs::argsLoc(const GlobalState &gs) const {
             result = callLoc().copyEndWithZeroLength();
         } else if (!locs.fun.exists()) {
             result = core::Loc(locs.file, this->block->loc.copyWithZeroLength());
-        } else {
+        } else if (funLoc().endPos() <= this->block->loc.beginPos()) {
             result = core::Loc(locs.file, funLoc().endPos(), this->block->loc.beginPos());
             if (result.copyEndWithZeroLength().adjust(gs, -1, 0).source(gs) == " ") {
                 result = result.adjust(gs, 0, -1);
             }
+        } else {
+            result = callLoc().copyEndWithZeroLength();
         }
     } else {
         if (locs.fun.exists()) {
