@@ -576,9 +576,8 @@ pipeline_tests(
         exclude = [
             # Specific test for the legacy pipeline. Prism has its own `testdata/rbs/assertions_heredoc_modified.rb`.
             "testdata/rbs/assertions_heredoc.rb",
-            # Prism output differs from legacy for csend desugaring and constant resolution.
-            "testdata/rbs/assertions_csend.rb",
-            "testdata/rbs/assertions_csend_assign.rb",
+
+            # Prism output differs from legacy for constant resolution.
             "testdata/rbs/signatures_types.rb",
         ],
     ),
