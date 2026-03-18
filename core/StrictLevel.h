@@ -3,7 +3,6 @@
 
 #include "core/SigilTraits.h"
 #include <stdint.h>
-#include <string>
 
 namespace sorbet::core {
 enum class StrictLevel : uint8_t {
@@ -72,7 +71,7 @@ public:
         }
     }
 
-    static std::string toString(StrictLevel strictLevel) {
+    static std::string_view toString(StrictLevel strictLevel) {
         switch (strictLevel) {
             case StrictLevel::Internal:
                 return "internal";
