@@ -5117,9 +5117,17 @@ ast::ExpressionPtr Desugarer::desugarStatements(pm_statements_node *stmtsNode, b
         auto prismStatements = absl::MakeSpan(stmtsNode->body.nodes, stmtsNode->body.size);
 
         // Cover the locations spanned from the first to the last statements.
-        // This can be different from the `stmtsNode->base.location`,
-        // because of the special case (handled by `startLoc()` and `endLoc()`).
-        beginNodeLoc = translateLoc(startLoc(prismStatements.front()), endLoc(prismStatements.back()));
+        // When the RBS rewriter inserts synthetic nodes (like `self.abstract!()`) at the end of a statement
+        // list, those nodes may have locations earlier in the file than the real code (e.g. from comment
+        // locations). This can cause start > end, which violates the LocOffsets invariant.
+        // In that case, fall back to using the statements node's own location.
+        auto start = startLoc(prismStatements.front());
+        auto end = endLoc(prismStatements.back());
+        if (start <= end) {
+            beginNodeLoc = translateLoc(start, end);
+        } else {
+            beginNodeLoc = translateLoc(stmtsNode->base.location);
+        }
     }
 
     auto statements = nodeListToStore<ast::InsSeq::STATS_store>(stmtsNode->body);
@@ -5193,6 +5201,62 @@ ast::ExpressionPtr Desugarer::translateConst(pm_node_t *anyNode) {
     ast::ExpressionPtr parentExpr;
 
     if constexpr (isConstantPath) { // Handle constant paths, has a parent node that needs translation.
+        // Resolve well-known root-anchored constant paths that the RBS rewriter injects.
+        // The legacy RBS rewriter emits these as pre-resolved `parser::ResolvedConst` nodes,
+        // but the Prism RBS rewriter inserts raw constant path nodes. Resolving them here
+        // ensures the desugared AST matches the legacy parser output.
+        //
+        // Matches: ::Sorbet::Private::Static, ::T::Sig::WithoutRuntime, ::Sorbet::Private::Static::Void
+        //
+        // Only enabled when RBS is active, since these constants only appear in RBS-rewritten ASTs.
+        if (ctx.state.cacheSensitiveOptions.rbsEnabled) {
+            pm_node_t *current = up_cast(const_cast<PrismLhsNode *>(node));
+            bool isRootAnchored = false;
+            // Max size of 4, to fit the longest path we're searching for (`Sorbet::Private::Static::Void`).
+            // Segments collected innermost-first.
+            InlinedVector<std::string_view, 4> segments;
+
+            while (current != nullptr && segments.size() < 4) {
+                switch (PM_NODE_TYPE(current)) {
+                    case PM_CONSTANT_PATH_NODE: {
+                        auto *p = down_cast<pm_constant_path_node>(current);
+                        segments.push_back(parser.resolveConstant(p->name));
+                        current = p->parent;
+                        if (current == nullptr) {
+                            isRootAnchored = true;
+                        }
+                        break;
+                    }
+                    case PM_CONSTANT_READ_NODE: {
+                        auto *r = down_cast<pm_constant_read_node>(current);
+                        segments.push_back(parser.resolveConstant(r->name));
+                        current = nullptr;
+                        break;
+                    }
+                    default:
+                        current = nullptr;
+                        break;
+                }
+            }
+
+            // Only match root-anchored paths that were fully resolved (no remaining parent).
+            if (isRootAnchored) {
+                // segments: [innermost, ..., outermost]
+                if (segments.size() == 3 && segments[2] == "Sorbet" && segments[1] == "Private" &&
+                    segments[0] == "Static") {
+                    return MK::Constant(location, core::Symbols::Sorbet_Private_Static());
+                }
+                if (segments.size() == 3 && segments[2] == "T" && segments[1] == "Sig" &&
+                    segments[0] == "WithoutRuntime") {
+                    return MK::Constant(location, core::Symbols::T_Sig_WithoutRuntime());
+                }
+                if (segments.size() == 4 && segments[3] == "Sorbet" && segments[2] == "Private" &&
+                    segments[1] == "Static" && segments[0] == "Void") {
+                    return MK::Constant(location, core::Symbols::void_());
+                }
+            }
+        }
+
         if (auto *prismParentNode = node->parent) {
             // This constant reference is chained onto another constant reference.
             // E.g. given `A::B::C`, if `node` is pointing to the root, `A::B` is the `parent`, and `C` is the
