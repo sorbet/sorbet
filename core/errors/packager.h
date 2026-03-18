@@ -40,5 +40,6 @@ constexpr ErrorClass PreludePackageImport{3731, StrictLevel::False};
 // constexpr ErrorClass PreludeLowestLayer{3733, StrictLevel::False};
 constexpr ErrorClass IncorrectPackageRB{3734, StrictLevel::False};
 constexpr ErrorClass TestImportMismatch{3735, StrictLevel::False};
+constexpr ErrorClass TypedSigilTooLow{3736, StrictLevel::False};
 } // namespace sorbet::core::errors::Packager
 #endif
