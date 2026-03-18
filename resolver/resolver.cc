@@ -710,6 +710,9 @@ private:
             return false;
         }
 
+        // TODO(jez) autocorrect
+        // TODO(jez) want to be able to not have enqueued the items at all
+        // (probably means we want to make a call to resolveAncestorJob in the treewalk directly?)
         if (!firstRun) {
             if (lastRun) {
                 if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::DynamicSuperclass)) {
