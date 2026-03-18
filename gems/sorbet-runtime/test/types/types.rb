@@ -1224,6 +1224,7 @@ module Opus::Types::Test
       interface!
 
       sig { abstract.returns(T.untyped) }; def hello; end
+      sig { returns(T.untyped) }; abstract def hello_kw; end
     end
 
     module TestInterface2
@@ -1232,6 +1233,7 @@ module Opus::Types::Test
       interface!
 
       sig { abstract.returns(T.untyped) }; def goodbye; end
+      sig { returns(T.untyped) }; abstract def goodbye_kw; end
     end
 
     class InterfaceImplementor1
@@ -1241,6 +1243,10 @@ module Opus::Types::Test
         'hello'
       end
 
+      def hello_kw
+        'hello_kw'
+      end
+
     end
 
     class InterfaceImplementor2
@@ -1248,6 +1254,10 @@ module Opus::Types::Test
 
       def goodbye
         'goodbye'
+      end
+
+      def goodbye_kw
+        'goodbye_kw'
       end
 
     end
