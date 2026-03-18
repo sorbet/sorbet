@@ -1191,9 +1191,15 @@ Loc DispatchArgs::argsLoc(const GlobalState &gs) const {
         } else if (!locs.fun.exists()) {
             result = core::Loc(locs.file, this->block->loc.copyWithZeroLength());
         } else {
-            result = core::Loc(locs.file, funLoc().endPos(), this->block->loc.beginPos());
-            if (result.copyEndWithZeroLength().adjust(gs, -1, 0).source(gs) == " ") {
-                result = result.adjust(gs, 0, -1);
+            // Guard against invalid loc when block starts before function ends
+            // (occurs with super(&block) when parent method has kwargs).
+            if (funLoc().endPos() <= this->block->loc.beginPos()) {
+                result = core::Loc(locs.file, funLoc().endPos(), this->block->loc.beginPos());
+                if (result.copyEndWithZeroLength().adjust(gs, -1, 0).source(gs) == " ") {
+                    result = result.adjust(gs, 0, -1);
+                }
+            } else {
+                result = callLoc().copyEndWithZeroLength();
             }
         }
     } else {
