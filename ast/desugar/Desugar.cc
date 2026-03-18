@@ -1747,8 +1747,9 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 // Do this by synthesizing a `Send` parse node and letting our
                 // Send desugar handle it.
                 auto method = maybeTypedSuper(dctx);
+                auto funLoc = dctx.ctx.locAt(super->loc).adjustLen(dctx.ctx, 0, "super"sv.size()).offsets();
                 unique_ptr<parser::Node> send =
-                    make_unique<parser::Send>(super->loc, nullptr, method, super->loc, move(super->args));
+                    make_unique<parser::Send>(super->loc, nullptr, method, funLoc, move(super->args));
                 auto res = node2TreeImpl(dctx, send);
                 result = move(res);
             },
