@@ -103,8 +103,7 @@ private:
 
     std::tuple<ast::MethodDef::PARAMS_store, ast::InsSeq::STATS_store, core::LocOffsets /* enclosingBlockParamLoc */,
                core::NameRef /* enclosingBlockParamName */>
-    desugarParametersNode(pm_parameters_node *paramsNode, core::LocOffsets location,
-                          absl::Span<pm_node_t *> blockLocalVariables = {});
+    desugarParametersNode(pm_parameters_node *paramsNode, core::LocOffsets location, size_t extraReserveCount = 0);
 
     core::LocOffsets findItParamUsageLoc(pm_statements_node *statements);
 
@@ -3833,20 +3832,10 @@ ast::ExpressionPtr Desugarer::desugarPattern(pm_node_t *node) {
 
 tuple<ast::MethodDef::PARAMS_store, ast::InsSeq::STATS_store, core::LocOffsets /* enclosingBlockParamLoc */,
       core::NameRef /* enclosingBlockParamName */>
-Desugarer::desugarParametersNode(pm_parameters_node *paramsNode, core::LocOffsets location,
-                                 absl::Span<pm_node_t *> blockLocalVariables) {
+Desugarer::desugarParametersNode(pm_parameters_node *paramsNode, core::LocOffsets location, size_t extraReserveCount) {
     if (paramsNode == nullptr) {
-        auto paramsStore = ast::MethodDef::PARAMS_store{};
-
-        // Add in the block-local variables, if any.
-        paramsStore.reserve(blockLocalVariables.size());
-        for (auto *node : blockLocalVariables) {
-            ENFORCE(PM_NODE_TYPE_P(node, PM_BLOCK_LOCAL_VARIABLE_NODE));
-            // TODO: move `PM_BLOCK_LOCAL_VARIABLE_NODE` case logic to here
-            paramsStore.emplace_back(desugar(node));
-        }
-
-        return {move(paramsStore), ast::InsSeq::STATS_store{}, core::LocOffsets::none(), core::Names::blkArg()};
+        return {ast::MethodDef::PARAMS_store{}, ast::InsSeq::STATS_store{}, core::LocOffsets::none(),
+                core::Names::blkArg()};
     }
 
     auto requireds = absl::MakeSpan(paramsNode->requireds.nodes, paramsNode->requireds.size);
@@ -3862,7 +3851,7 @@ Desugarer::desugarParametersNode(pm_parameters_node *paramsNode, core::LocOffset
     ast::InsSeq::STATS_store statsStore;
 
     paramsStore.reserve(requireds.size() + optionals.size() + restSize + posts.size() + keywords.size() + kwrestSize +
-                        blockSize + blockLocalVariables.size());
+                        blockSize + extraReserveCount);
 
     auto desugarPositionalParam = [this, &paramsStore, &statsStore](auto *n) {
         if (PM_NODE_TYPE_P(n, PM_MULTI_TARGET_NODE)) {
@@ -3993,12 +3982,6 @@ Desugarer::desugarParametersNode(pm_parameters_node *paramsNode, core::LocOffset
         // Desugaring a method def like `def foo(a, b)` should behave like `def foo(a, b, &<blk>)`,
         // so we set a synthetic name here for `yield` to use.
         enclosingBlockParamName = core::Names::blkArg();
-    }
-
-    // Add in the block-local variables, if any.
-    for (auto *node : blockLocalVariables) {
-        ENFORCE(PM_NODE_TYPE_P(node, PM_BLOCK_LOCAL_VARIABLE_NODE));
-        paramsStore.emplace_back(desugar(node));
     }
 
     return make_tuple(move(paramsStore), move(statsStore), enclosingBlockParamLoc, enclosingBlockParamName);
@@ -4195,20 +4178,26 @@ ast::ExpressionPtr Desugarer::desugarLiteralBlock(pm_node *blockBodyNode, pm_nod
             case PM_BLOCK_PARAMETERS_NODE: { // The params declared at the top of a PM_BLOCK_NODE
                 // Like the `|x|` in `foo { |x| ... }`
                 auto paramsNode = down_cast<pm_block_parameters_node>(blockParameters);
-
                 auto paramsLoc = translateLoc(paramsNode->base.location);
 
-                if (paramsNode->parameters) {
-                    auto blockLocalVariables = absl::MakeSpan(paramsNode->locals.nodes, paramsNode->locals.size);
+                auto blockLocalVariables = absl::MakeSpan(paramsNode->locals.nodes, paramsNode->locals.size);
 
+                if (paramsNode->parameters) {
                     ast::InsSeq::STATS_store blockStatsStore;
 
                     std::tie(blockParamsStore, blockStatsStore, std::ignore, std::ignore) =
-                        desugarParametersNode(paramsNode->parameters, paramsLoc, blockLocalVariables);
+                        desugarParametersNode(paramsNode->parameters, paramsLoc, blockLocalVariables.size());
 
                     if (!blockStatsStore.empty()) {
                         blockBody = MK::InsSeq(blockLoc, move(blockStatsStore), move(blockBody));
                     }
+                } else {
+                    blockParamsStore.reserve(blockLocalVariables.size());
+                }
+
+                // Add in the block-local variables, if any.
+                for (auto *node : blockLocalVariables) {
+                    blockParamsStore.emplace_back(desugar(node));
                 }
 
                 break;

@@ -436,13 +436,11 @@ void printElems(const core::GlobalState &gs, fmt::memory_buffer &buf, absl::Span
         if (isa_tree<Block>(a)) {
             continue;
         }
-        if (!first) {
-            if (isa_tree<ShadowArg>(a) && !didshadow) {
-                fmt::format_to(std::back_inserter(buf), "; ");
-                didshadow = true;
-            } else {
-                fmt::format_to(std::back_inserter(buf), ", ");
-            }
+        if (isa_tree<ShadowArg>(a) && !didshadow) {
+            fmt::format_to(std::back_inserter(buf), "; ");
+            didshadow = true;
+        } else if (!first) {
+            fmt::format_to(std::back_inserter(buf), ", ");
         }
         first = false;
         fmt::format_to(std::back_inserter(buf), "{}", a.toStringWithTabs(gs, tabs + 1));
@@ -1295,7 +1293,10 @@ string OptionalParam::toStringWithTabs(const core::GlobalState &gs, int tabs) co
 }
 
 string ShadowArg::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
-    return this->expr.toStringWithTabs(gs, tabs);
+    auto name = this->expr.toStringWithTabs(gs, tabs);
+
+    // Shadow args can have an empty name in an error case like `do |;| end`
+    return name.empty() ? "<missing_block_local_params>" : name;
 }
 
 string BlockParam::toStringWithTabs(const core::GlobalState &gs, int tabs) const {

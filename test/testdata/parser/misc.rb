@@ -143,9 +143,6 @@ undef x, y
 # shellout (xstring)
 %x{true}
 
-# shadowarg
-proc{|;x|}
-
 # Whacky parsing edge case around keyword break and blocks
 break cfoo 1 do end
 

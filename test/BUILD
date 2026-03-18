@@ -553,16 +553,10 @@ pipeline_tests(
 
 pipeline_tests(
     "rbs_whitequark",
-    glob(
-        [
-            "testdata/rbs/**/*.rb",
-            "testdata/rbs/**/*.exp",
-        ],
-        exclude = [
-            # Specific test that is modified for Prism, contains minor differences in the exp file
-            "testdata/rbs/assertions_heredoc_modified.rb",
-        ],
-    ),
+    glob([
+        "testdata/rbs/**/*.rb",
+        "testdata/rbs/**/*.exp",
+    ]),
     "PosTests",
 )
 
@@ -574,8 +568,6 @@ pipeline_tests(
             "testdata/rbs/**/*.exp",
         ],
         exclude = [
-            # Specific test for the legacy pipeline. Prism has its own `testdata/rbs/assertions_heredoc_modified.rb`.
-            "testdata/rbs/assertions_heredoc.rb",
             "testdata/rbs/signatures_defs_abstract_autocorrect.rb",
             "testdata/rbs/annotations_helpers.rb",
             "testdata/rbs/assertions_block.rb",

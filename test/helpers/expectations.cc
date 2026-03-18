@@ -81,8 +81,21 @@ bool addToExpectations(Expectations &exp, string_view filePath, bool isDirectory
         exp.sourceFiles.emplace_back(filePath);
         return true;
     } else if (absl::EndsWith(filePath, ".exp")) {
-        auto kind_start = filePath.rfind(".", filePath.size() - strlen(".exp") - 1);
-        auto kind = filePath.substr(kind_start + 1, filePath.size() - kind_start - strlen(".exp") - 1);
+        // Strip ".exp" to get the kind (e.g. "desugar-tree" or "desugar-tree.prism")
+        auto withoutExp = string_view(filePath);
+        absl::ConsumeSuffix(&withoutExp, ".exp");
+        // Find the source file boundary (.rb. or .rbi.) to support multi-dot kinds like "desugar-tree.prism"
+        size_t kind_start;
+        auto rb_pos = withoutExp.rfind(".rb.");
+        auto rbi_pos = withoutExp.rfind(".rbi.");
+        if (rbi_pos != string_view::npos) {
+            kind_start = rbi_pos + 4; // length of ".rbi"
+        } else if (rb_pos != string_view::npos) {
+            kind_start = rb_pos + 3; // length of ".rb"
+        } else {
+            kind_start = withoutExp.rfind(".");
+        }
+        auto kind = withoutExp.substr(kind_start + 1);
         string source_file_path = absl::StrCat(exp.folder, filePath.substr(0, kind_start));
         exp.expectations[kind][source_file_path] = filePath;
         return true;
