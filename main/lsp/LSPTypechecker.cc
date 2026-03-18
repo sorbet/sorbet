@@ -356,6 +356,8 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
     UnorderedSet<core::FileRef> openFiles;
     ENFORCE(this->cancellationUndoState == nullptr);
     if (cancelable) {
+        timeit.setTag("cancelable", "true");
+
         auto savedGS = std::exchange(this->gs, pipeline::copyForSlowPath(*this->gs, this->config->opts));
 
         // Seed open files with the previous set from `indexedFinalGS`
@@ -365,6 +367,8 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
 
         this->cancellationUndoState =
             make_unique<UndoState>(std::move(savedGS), std::move(this->indexedFinalGS), updates.epoch);
+    } else {
+        timeit.setTag("cancelable", "false");
     }
 
     const uint32_t epoch = updates.epoch;
