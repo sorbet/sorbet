@@ -699,7 +699,7 @@ private:
 
     static bool resolveAncestorJob(core::MutableContext ctx, AncestorResolutionItem &job,
                                    const UnorderedSet<core::ClassOrModuleRef> suppressPayloadSuperclassRedefinitionFor,
-                                   bool lastRun) {
+                                   bool firstRun, bool lastRun) {
         auto ancestorSym = job.ancestor->symbol();
         if (!ancestorSym.exists()) {
             if (!lastRun && !job.isSuperclass && !job.mixinIndex.has_value()) {
@@ -708,6 +708,19 @@ private:
                 job.mixinIndex = job.klass.data(ctx)->addMixinPlaceholder(ctx);
             }
             return false;
+        }
+
+        // TODO(jez) autocorrect
+        // TODO(jez) want to be able to not have enqueued the items at all
+        // (probably means we want to make a call to resolveAncestorJob in the treewalk directly?)
+        if (!firstRun) {
+            if (lastRun) {
+                if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::DynamicSuperclass)) {
+                    e.setHeader("Ancestor must resolve on the first run");
+                }
+            } else {
+                return false;
+            }
         }
 
         core::ClassOrModuleRef resolvedClass;
@@ -1681,37 +1694,7 @@ public:
         // If the constant didn't immediately resolve during the initial treewalk, and we're not
         // allowed to mutate GlobalState, it will never resolve. Let's just skip to the error phase.
         while (progress && (first || !todo.empty() || !todoAncestors.empty())) {
-            first = false;
             counterInc("resolve.constants.retries");
-            {
-                Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.ancestors");
-                // This is an optimization. The order should not matter semantically
-                // We try to resolve most ancestors second because this makes us much more likely to resolve
-                // everything else.
-                long retries = 0;
-                auto f = [&gs, &retries, &suppressPayloadSuperclassRedefinitionFor](
-                             ResolveItems<AncestorResolutionItem> &job) -> bool {
-                    core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                    const auto origSize = job.items.size();
-                    auto g = [&](AncestorResolutionItem &item) -> bool {
-                        auto resolved = resolveAncestorJob(ctx, item, suppressPayloadSuperclassRedefinitionFor, false);
-                        return resolved;
-                    };
-                    auto fileIt = remove_if(job.items.begin(), job.items.end(), std::move(g));
-                    job.items.erase(fileIt, job.items.end());
-                    retries += origSize - job.items.size();
-                    return job.items.empty();
-                };
-                auto it = remove_if(todoAncestors.begin(), todoAncestors.end(), std::move(f));
-                todoAncestors.erase(it, todoAncestors.end());
-                categoryCounterAdd("resolve.constants.ancestor", "retry", retries);
-                progress = retries > 0;
-            }
-            {
-                Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.constants");
-                bool resolvedSomeConstants = resolveConstantResolutionItems(gs, todo, workers);
-                progress = progress || resolvedSomeConstants;
-            }
             {
                 Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.class_aliases");
                 // This is an optimization. The order should not matter semantically
@@ -1735,6 +1718,36 @@ public:
                 progress = progress || retries > 0;
             }
             {
+                Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.ancestors");
+                // This is an optimization. The order should not matter semantically
+                // We try to resolve most ancestors second because this makes us much more likely to resolve
+                // everything else.
+                long retries = 0;
+                auto f = [&gs, &retries, &suppressPayloadSuperclassRedefinitionFor,
+                          first](ResolveItems<AncestorResolutionItem> &job) -> bool {
+                    core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                    const auto origSize = job.items.size();
+                    auto g = [&](AncestorResolutionItem &item) -> bool {
+                        auto resolved =
+                            resolveAncestorJob(ctx, item, suppressPayloadSuperclassRedefinitionFor, first, false);
+                        return resolved;
+                    };
+                    auto fileIt = remove_if(job.items.begin(), job.items.end(), std::move(g));
+                    job.items.erase(fileIt, job.items.end());
+                    retries += origSize - job.items.size();
+                    return job.items.empty();
+                };
+                auto it = remove_if(todoAncestors.begin(), todoAncestors.end(), std::move(f));
+                todoAncestors.erase(it, todoAncestors.end());
+                categoryCounterAdd("resolve.constants.ancestor", "retry", retries);
+                progress = retries > 0;
+            }
+            {
+                Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.constants");
+                bool resolvedSomeConstants = resolveConstantResolutionItems(gs, todo, workers);
+                progress = progress || resolvedSomeConstants;
+            }
+            {
                 Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.type_aliases");
                 long retries = 0;
                 auto f = [&gs, &retries](ResolveItems<TypeAliasResolutionItem> &job) -> bool {
@@ -1751,6 +1764,7 @@ public:
                 categoryCounterAdd("resolve.constants.typealiases", "retry", retries);
                 progress = progress || retries > 0;
             }
+            first = false;
         }
 
         {
@@ -1842,9 +1856,10 @@ public:
             for (auto &job : todoAncestors) {
                 core::MutableContext ctx(gs, core::Symbols::root(), job.file);
                 for (auto &item : job.items) {
-                    auto resolved = resolveAncestorJob(ctx, item, suppressPayloadSuperclassRedefinitionFor, true);
+                    auto resolved =
+                        resolveAncestorJob(ctx, item, suppressPayloadSuperclassRedefinitionFor, false, true);
                     if (!resolved) {
-                        resolved = resolveAncestorJob(ctx, item, suppressPayloadSuperclassRedefinitionFor, true);
+                        resolved = resolveAncestorJob(ctx, item, suppressPayloadSuperclassRedefinitionFor, false, true);
                         ENFORCE(resolved);
                     }
                 }
