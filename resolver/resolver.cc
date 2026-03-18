@@ -1691,7 +1691,6 @@ public:
         // If the constant didn't immediately resolve during the initial treewalk, and we're not
         // allowed to mutate GlobalState, it will never resolve. Let's just skip to the error phase.
         while (progress && (first || !todo.empty() || !todoAncestors.empty())) {
-            first = false;
             counterInc("resolve.constants.retries");
             {
                 Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.ancestors");
@@ -1762,6 +1761,7 @@ public:
                 categoryCounterAdd("resolve.constants.typealiases", "retry", retries);
                 progress = progress || retries > 0;
             }
+            first = false;
         }
 
         {
