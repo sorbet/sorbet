@@ -136,6 +136,34 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
+  class <emptyTree>::<C BindInMethod><<C <todo sym>>> < (::<todo sym>)
+    def call<<todo method>>(arg, &<implicit yield>)
+      <implicit yield>.call()
+    end
+
+    def example<<todo method>>(&<blk>)
+      if <emptyTree>::<C ARGV>.empty?()
+        <self>.call(1) do ||
+          begin
+            <cast:bind>(<self>, <todo sym>, <emptyTree>::<C Foo>)
+            <emptyTree>::<C T>.reveal_type(<self>)
+          end
+        end
+      else
+        <self>.call(2) do ||
+          begin
+            <cast:bind>(<self>, <todo sym>, <emptyTree>::<C Foo>)
+            <emptyTree>::<C T>.reveal_type(<self>)
+          end
+        end
+      end
+    end
+
+    <runtime method definition of call>
+
+    <runtime method definition of example>
+  end
+
   begin
     <cast:bind>(<self>, <todo sym>, <emptyTree>::<C Foo>)
     <emptyTree>::<C T>.reveal_type(<self>)

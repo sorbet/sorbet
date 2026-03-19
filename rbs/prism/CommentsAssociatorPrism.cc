@@ -351,7 +351,9 @@ void CommentsAssociatorPrism::walkConditionalNode(pm_node_t *node, pm_node_t *pr
     lastLine = posToLine(nodeLoc.beginPos());
 
     pm_node_t *thenBody = up_cast(statements);
-    pm_node_t *thenResult = walkBody(node, thenBody);
+    // Bound to thenBody so processTrailingComments doesn't scan into the else branch.
+    pm_node_t *thenBound = thenBody ? thenBody : node;
+    pm_node_t *thenResult = walkBody(thenBound, thenBody);
     statements = down_cast<pm_statements_node_t>(thenResult);
 
     if (thenResult) {

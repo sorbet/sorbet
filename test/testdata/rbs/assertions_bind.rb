@@ -94,6 +94,27 @@ else
   end
 end
 
+# Test bind inside a block with args in if/else branches inside a method
+class BindInMethod
+  def call(arg)
+    yield
+  end
+
+  def example
+    if ARGV.empty?
+      call(1) do
+        #: self as Foo
+        T.reveal_type(self) # error: Revealed type: `Foo`
+      end
+    else
+      call(2) do
+        #: self as Foo
+        T.reveal_type(self) # error: Revealed type: `Foo`
+      end
+    end
+  end
+end
+
 begin
   #: self as Foo
   T.reveal_type(self) # error: Revealed type: `Foo`
