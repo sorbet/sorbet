@@ -1853,11 +1853,26 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 result = move(res);
             },
             [&](parser::Complex *complex) {
+                // Create the desugared Complex call like `::Kernel.Complex(0, unsigned_value)`
+                //
+                // The value itself might be a rational (e.g. `1ri`), which would desugar to:
+                //     ::Kernel.Complex(0, Kernel.Rational("1"))
+                ast::ExpressionPtr imaginaryPart;
+                if (absl::EndsWith(complex->value, "r")) {
+                    auto rationalValue = complex->value.substr(0, complex->value.size() - "r"sv.size());
+                    auto kernel = MK::Constant(loc, core::Symbols::Kernel());
+                    core::NameRef rationalName = core::Names::Constants::Rational().dataCnst(dctx.ctx)->original;
+                    core::NameRef value = dctx.ctx.state.enterNameUTF8(rationalValue);
+                    imaginaryPart = MK::Send1(loc, move(kernel), rationalName, locZeroLen, MK::String(loc, value));
+                } else {
+                    core::NameRef value = dctx.ctx.state.enterNameUTF8(complex->value);
+                    imaginaryPart = MK::String(loc, value);
+                }
+
                 auto kernel = MK::Constant(loc, core::Symbols::Kernel());
                 core::NameRef complex_name = core::Names::Constants::Complex().dataCnst(dctx.ctx)->original;
-                core::NameRef value = dctx.ctx.state.enterNameUTF8(complex->value);
                 auto send =
-                    MK::Send2(loc, move(kernel), complex_name, locZeroLen, MK::Int(loc, 0), MK::String(loc, value));
+                    MK::Send2(loc, move(kernel), complex_name, locZeroLen, MK::Int(loc, 0), move(imaginaryPart));
                 result = move(send);
             },
             [&](parser::Rational *complex) {

@@ -947,7 +947,7 @@ void lexer::set_state_expr_value() {
     ''   % { num_xfrm = num_xfrm_type::NONE; }
   | 'r'  % { num_xfrm = num_xfrm_type::RATIONAL; }
   | 'i'  % { num_xfrm = num_xfrm_type::IMAGINARY; }
-  | 'ri' % { num_xfrm = num_xfrm_type::RATIONAL_IMAGINARY; };
+  | 'r' %{ num_suffix_s = p; } 'i' % { num_xfrm = num_xfrm_type::RATIONAL_IMAGINARY; };
 
   flo_pow_suffix =
     ''   % { num_xfrm = num_xfrm_type::FLOAT; }
@@ -956,7 +956,7 @@ void lexer::set_state_expr_value() {
   flo_suffix =
     flo_pow_suffix
   | 'r'  % { num_xfrm = num_xfrm_type::RATIONAL; }
-  | 'ri' % { num_xfrm = num_xfrm_type::RATIONAL_IMAGINARY; };
+  | 'r' %{ num_suffix_s = p; } 'i' % { num_xfrm = num_xfrm_type::RATIONAL_IMAGINARY; };
 
   #
   # === ESCAPE SEQUENCE PARSING ===
