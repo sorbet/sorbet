@@ -17,6 +17,8 @@ module T::Private::Abstract::Declare
     Abstract::Data.set(mod.singleton_class, :can_have_abstract_methods, true)
     Abstract::Data.set(mod, :abstract_type, type)
 
+    @__is_abstract = true
+
     mod.extend(Abstract::Hooks)
 
     if mod.is_a?(Class)
@@ -30,23 +32,8 @@ module T::Private::Abstract::Declare
         raise "You must call `abstract!` *before* defining a `new` method"
       end
 
-      # Don't need to silence warnings via without_ruby_warnings when calling
-      # define_method because of the guard above
-
-      mod.send(:define_singleton_method, :new) do |*args, &blk|
-        result = super(*args, &blk)
-        if result.instance_of?(mod)
-          raise "#{mod} is declared as abstract; it cannot be instantiated"
-        end
-        result
-      end
-
-      # Ruby doesn not emit "method redefined" warnings for aliased methods
-      # (more robust than undef_method that would create a small window in which the method doesn't exist)
-      mod.singleton_class.send(:alias_method, :new, :new)
-
-      if mod.singleton_class.respond_to?(:ruby2_keywords, true)
-        mod.singleton_class.send(:ruby2_keywords, :new)
+      class << mod
+        alias_method :__sorbet_orig_new, :new
       end
     end
   end
