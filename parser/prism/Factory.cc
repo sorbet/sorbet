@@ -1,4 +1,5 @@
 #include "parser/prism/Factory.h"
+#include "core/Symbols.h"
 #include "parser/prism/Helpers.h"
 #include "parser/prism/Parser.h"
 #include <array>
@@ -274,19 +275,20 @@ pm_node_t *Factory::SorbetPrivateStatic(core::LocOffsets loc) const {
     // Build a root-anchored constant path ::Sorbet::Private::Static
     pm_node_t *sorbet = ConstantPathNode(loc, nullptr, "Sorbet"sv);
     pm_node_t *sorbetPrivate = ConstantPathNode(loc, sorbet, "Private"sv);
-    return ConstantPathNode(loc, sorbetPrivate, "Static"sv);
+    return parser.markResolved(ConstantPathNode(loc, sorbetPrivate, "Static"sv),
+                               core::Symbols::Sorbet_Private_Static());
 }
 
 pm_node_t *Factory::SorbetPrivateStaticVoid(core::LocOffsets loc) const {
     // Build a root-anchored constant path ::Sorbet::Private::Static::Void
-    return ConstantPathNode(loc, SorbetPrivateStatic(loc), "Void"sv);
+    return parser.markResolved(ConstantPathNode(loc, SorbetPrivateStatic(loc), "Void"sv), core::Symbols::void_());
 }
 
 pm_node_t *Factory::TSigWithoutRuntime(core::LocOffsets loc) const {
     // Build a root-anchored constant path ::T::Sig::WithoutRuntime
     pm_node_t *tConst = ConstantPathNode(loc, nullptr, "T"sv);
     pm_node_t *tSig = ConstantPathNode(loc, tConst, "Sig"sv);
-    return ConstantPathNode(loc, tSig, "WithoutRuntime"sv);
+    return parser.markResolved(ConstantPathNode(loc, tSig, "WithoutRuntime"sv), core::Symbols::T_Sig_WithoutRuntime());
 }
 
 pm_node_t *Factory::Symbol(core::LocOffsets nameLoc, string_view name) const {
