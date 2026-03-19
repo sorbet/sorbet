@@ -624,11 +624,6 @@ pipeline_tests(
         exclude = [
             # Specific test for the legacy pipeline. Prism has its own `testdata/rbs/assertions_heredoc_modified.rb`.
             "testdata/rbs/assertions_heredoc.rb",
-
-            # Prism output differs from legacy for constant resolution.
-            "testdata/rbs/annotations_literal_types.rb",
-            "testdata/rbs/signatures_types.rb",
-            "testdata/rbs/annotations_literal_types.rb",
         ],
     ),
     "PrismPosTests",

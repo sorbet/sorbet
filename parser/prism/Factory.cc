@@ -338,7 +338,7 @@ pm_node_t *Factory::Call(core::LocOffsets loc, pm_node_t *receiver, string_view 
 }
 
 pm_node_t *Factory::NilClass(core::LocOffsets loc) const {
-    return ConstantReadNode("NilClass"sv, loc);
+    return parser.markResolved(ConstantReadNode("NilClass"sv, loc), core::Symbols::NilClass());
 }
 
 pm_node_t *Factory::T(core::LocOffsets loc) const {
