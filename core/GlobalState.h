@@ -647,6 +647,10 @@ public:
     // If 'true', enforce use of Ruby 3.0-style keyword args.
     bool ruby3KeywordArgs = false;
 
+    // If 'false', skip fixed point loop for constant resolution--everything must resolve on the
+    // first pass through the tree.
+    bool recursiveConstantResolution = true;
+
     // If 'true', use the Prism parser.
     bool parseWithPrism = false;
 
