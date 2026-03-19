@@ -1681,7 +1681,7 @@ public:
         while (progress && (first || !todo.empty() || !todoAncestors.empty())) {
             first = false;
             counterInc("resolve.constants.retries");
-            {
+            if (gs.recursiveConstantResolution) {
                 Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.ancestors");
                 // This is an optimization. The order should not matter semantically
                 // We try to resolve most ancestors second because this makes us much more likely to resolve
@@ -1749,6 +1749,25 @@ public:
                 categoryCounterAdd("resolve.constants.typealiases", "retry", retries);
                 progress = progress || retries > 0;
             }
+        }
+
+        if (!gs.recursiveConstantResolution) {
+            vector<pair<core::FileRef, AncestorResolutionItem>> unresolved;
+            for (auto &jobs : todoAncestors) {
+                core::MutableContext ctx(gs, core::Symbols::root(), jobs.file);
+                for (auto &job : jobs.items) {
+                    if (!resolveAncestorJob(ctx, job, suppressPayloadSuperclassRedefinitionFor, /* lastRun */ false)) {
+                        unresolved.emplace_back(move(job));
+                    }
+                }
+            }
+
+            for (auto &[file, job] : unresolved) {
+                core::MutableContext ctx(gs, core::Symbols::root(), file);
+                resolveAncestorJob(ctx, job, suppressPayloadSuperclassRedefinitionFor, /* lastRun */ true);
+            }
+
+            todoAncestors.clear();
         }
 
         {
