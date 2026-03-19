@@ -1678,8 +1678,6 @@ public:
         bool progress = true;
         bool first = true; // we need to run at least once to force class aliases and type aliases
 
-        // If the constant didn't immediately resolve during the initial treewalk, and we're not
-        // allowed to mutate GlobalState, it will never resolve. Let's just skip to the error phase.
         while (progress && (first || !todo.empty() || !todoAncestors.empty())) {
             first = false;
             counterInc("resolve.constants.retries");
@@ -1836,9 +1834,6 @@ public:
                 }
             }
 
-            // Only purpose of resolveAncestorJob is to mutate the symbol table, not the tree, so
-            // in non-mutating resolver mode we don't have to do anything (because we don't care
-            // about errors).
             for (auto &job : todoAncestors) {
                 core::MutableContext ctx(gs, core::Symbols::root(), job.file);
                 for (auto &item : job.items) {
