@@ -1,0 +1,797 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(<emptyTree>::<C Foo>)
+  end
+
+  def class_instance_type1<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C Foo>)
+  end
+
+  def class_instance_type2<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(<emptyTree>::<C Foo>::<C Bar>)
+  end
+
+  def class_instance_type3<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(<emptyTree>::<C Foo>::<C Bar>::<C Baz>)
+  end
+
+  def class_instance_type4<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C Foo>::<C Bar>)
+  end
+
+  def class_instance_type5<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>.class_of(<emptyTree>::<C Foo>))
+  end
+
+  def class_singleton_type1<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>.class_of(::<root>::<C Foo>))
+  end
+
+  def class_singleton_type2<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>.class_of(<emptyTree>::<C Foo>::<C Bar>))
+  end
+
+  def class_singleton_type3<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>.class_of(<emptyTree>::<C Foo>::<C Bar>::<C Baz>))
+  end
+
+  def class_singleton_type4<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>.class_of(::<root>::<C Foo>::<C Bar>))
+  end
+
+  def class_singleton_type5<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>.any(<emptyTree>::<C Foo>, <emptyTree>::<C Foo>::<C Bar>))
+  end
+
+  def union_type1<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>.any(<emptyTree>::<C Foo>, <emptyTree>::<C Foo>::<C Bar>, ::<root>::<C Foo>::<C Bar>::<C Baz>))
+  end
+
+  def union_type2<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>.all(<emptyTree>::<C A>, <emptyTree>::<C B>, <emptyTree>::<C C>))
+  end
+
+  def intersection_type1<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>.nilable(<emptyTree>::<C Foo>))
+  end
+
+  def optional_type1<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>.self_type())
+  end
+
+  def base_type1<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>.untyped())
+  end
+
+  def base_type3<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>::<C Boolean>)
+  end
+
+  def base_type4<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(<emptyTree>::<C NilClass>)
+  end
+
+  def base_type5<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>.anything())
+  end
+
+  def base_type6<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.void()
+  end
+
+  def base_type7<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>::<C Array>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
+  end
+
+  def generic_type_array<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>::<C Array>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
+  end
+
+  def generic_type_array_root<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(<emptyTree>::<C Class>)
+  end
+
+  def non_generic_type_class<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C Class>)
+  end
+
+  def non_generic_type_class_root<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>::<C Class>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
+  end
+
+  def generic_type_class<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>::<C Class>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
+  end
+
+  def generic_type_class_root<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(<emptyTree>::<C Module>)
+  end
+
+  def non_generic_type_module<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C Module>)
+  end
+
+  def non_generic_type_module_root<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>::<C Module>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
+  end
+
+  def generic_type_module<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>::<C Module>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
+  end
+
+  def generic_type_module_root<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>::<C Enumerable>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
+  end
+
+  def generic_type_enumerable<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>::<C Enumerable>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
+  end
+
+  def generic_type_enumerable_root<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>::<C Enumerator>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
+  end
+
+  def generic_type_enumerator<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>::<C Enumerator>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
+  end
+
+  def generic_type_enumerator_root<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>::<C Enumerator>::<C Lazy>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
+  end
+
+  def generic_type_enumerator_lazy<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>::<C Enumerator>::<C Lazy>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
+  end
+
+  def generic_type_enumerator_lazy_root<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>::<C Enumerator>::<C Chain>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
+  end
+
+  def generic_type_enumerator_chain<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>::<C Enumerator>::<C Chain>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
+  end
+
+  def generic_type_enumerator_chain_root<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>::<C Hash>.<syntheticSquareBrackets>(<emptyTree>::<C String>, <emptyTree>::<C Integer>))
+  end
+
+  def generic_type_hash<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>::<C Hash>.<syntheticSquareBrackets>(<emptyTree>::<C String>, <emptyTree>::<C Integer>))
+  end
+
+  def generic_type_hash_root<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>::<C Set>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
+  end
+
+  def generic_type_set<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>::<C Set>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
+  end
+
+  def generic_type_set_root<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>::<C Range>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
+  end
+
+  def generic_type_range<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>::<C Range>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
+  end
+
+  def generic_type_range_root<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(<emptyTree>::<C T>::<C Array>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
+  end
+
+  def generic_type_t_array<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(<emptyTree>::<C T>::<C Hash>.<syntheticSquareBrackets>(<emptyTree>::<C String>, <emptyTree>::<C Integer>))
+  end
+
+  def generic_type_t_hash<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(<emptyTree>::<C GenericType1>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))
+  end
+
+  def generic_type5<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(<emptyTree>::<C GenericType2>.<syntheticSquareBrackets>(<emptyTree>::<C GenericType1>.<syntheticSquareBrackets>(::<root>::<C T>.untyped()), <emptyTree>::<C GenericType3>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>, <emptyTree>::<C String>, ::<root>::<C T>.untyped())))
+  end
+
+  def generic_type6<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns([<emptyTree>::<C Integer>])
+  end
+
+  def tuple_type1<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns([<emptyTree>::<C Integer>, <emptyTree>::<C String>, ::<root>::<C T>.untyped()])
+  end
+
+  def tuple_type2<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns({:id => <emptyTree>::<C String>, :name => <emptyTree>::<C String>})
+  end
+
+  def shape_type1<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns({"a" => <emptyTree>::<C String>, "b" => <emptyTree>::<C Integer>})
+  end
+
+  def shape_type1<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns({:a => <emptyTree>::<C String>, :b => <emptyTree>::<C Integer>})
+  end
+
+  def shape_type2<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns({"a" => <emptyTree>::<C String>, :b => <emptyTree>::<C Integer>})
+  end
+
+  def shape_type3<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>.proc().params(:arg0, <emptyTree>::<C Integer>, :arg1, <emptyTree>::<C String>).returns(<emptyTree>::<C String>))
+  end
+
+  def proc_type1<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>.proc().void().bind(<emptyTree>::<C Foo>))
+  end
+
+  def proc_type2<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>.untyped())
+  end
+
+  def proc_type3<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>.untyped())
+  end
+
+  def proc_type4<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>.noreturn())
+  end
+
+  def base_type_last<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(<emptyTree>::<C type foo>)
+  end
+
+  def alias_type1<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>.untyped())
+  end
+
+  def interface_type1<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>.untyped())
+  end
+
+  def literal_type1<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  def untyped_function1<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+  module <emptyTree>::<C A><<C <todo sym>>> < ()
+  end
+
+  module <emptyTree>::<C B><<C <todo sym>>> < ()
+  end
+
+  module <emptyTree>::<C C><<C <todo sym>>> < ()
+  end
+
+  module <emptyTree>::<C Foo><<C <todo sym>>> < ()
+    class <emptyTree>::<C Bar><<C <todo sym>>> < (::<todo sym>)
+      class <emptyTree>::<C Baz><<C <todo sym>>> < (::<todo sym>)
+      end
+    end
+  end
+
+  <runtime method definition of class_instance_type1>
+
+  <emptyTree>::<C T>.reveal_type(<self>.class_instance_type1())
+
+  <runtime method definition of class_instance_type2>
+
+  <emptyTree>::<C T>.reveal_type(<self>.class_instance_type2())
+
+  <runtime method definition of class_instance_type3>
+
+  <emptyTree>::<C T>.reveal_type(<self>.class_instance_type3())
+
+  <runtime method definition of class_instance_type4>
+
+  <emptyTree>::<C T>.reveal_type(<self>.class_instance_type4())
+
+  <runtime method definition of class_instance_type5>
+
+  <emptyTree>::<C T>.reveal_type(<self>.class_instance_type5())
+
+  <runtime method definition of class_singleton_type1>
+
+  <emptyTree>::<C T>.reveal_type(<self>.class_singleton_type1())
+
+  <runtime method definition of class_singleton_type2>
+
+  <emptyTree>::<C T>.reveal_type(<self>.class_singleton_type2())
+
+  <runtime method definition of class_singleton_type3>
+
+  <emptyTree>::<C T>.reveal_type(<self>.class_singleton_type3())
+
+  <runtime method definition of class_singleton_type4>
+
+  <emptyTree>::<C T>.reveal_type(<self>.class_singleton_type4())
+
+  <runtime method definition of class_singleton_type5>
+
+  <emptyTree>::<C T>.reveal_type(<self>.class_singleton_type5())
+
+  <runtime method definition of union_type1>
+
+  <emptyTree>::<C T>.reveal_type(<self>.union_type1())
+
+  <runtime method definition of union_type2>
+
+  <emptyTree>::<C T>.reveal_type(<self>.union_type2())
+
+  <runtime method definition of intersection_type1>
+
+  <emptyTree>::<C T>.reveal_type(<self>.intersection_type1())
+
+  <runtime method definition of optional_type1>
+
+  <emptyTree>::<C T>.reveal_type(<self>.optional_type1())
+
+  <runtime method definition of base_type1>
+
+  <emptyTree>::<C T>.reveal_type(<self>.base_type1())
+
+  class <emptyTree>::<C BaseType2><<C <todo sym>>> < (::<todo sym>)
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::<root>::<C T>.attached_class())
+    end
+
+    def self.base_type2<<todo method>>(&<blk>)
+      <emptyTree>::<C T>.unsafe(nil)
+    end
+
+    <runtime method definition of self.base_type2>
+  end
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C BaseType2>.base_type2())
+
+  <runtime method definition of base_type3>
+
+  <emptyTree>::<C T>.reveal_type(<self>.base_type3())
+
+  <runtime method definition of base_type4>
+
+  <emptyTree>::<C T>.reveal_type(<self>.base_type4())
+
+  <runtime method definition of base_type5>
+
+  <emptyTree>::<C T>.reveal_type(<self>.base_type5())
+
+  <runtime method definition of base_type6>
+
+  <emptyTree>::<C T>.reveal_type(<self>.base_type6())
+
+  <runtime method definition of base_type7>
+
+  <emptyTree>::<C T>.reveal_type(<self>.base_type7())
+
+  <runtime method definition of generic_type_array>
+
+  <emptyTree>::<C T>.reveal_type(<self>.generic_type_array())
+
+  <runtime method definition of generic_type_array_root>
+
+  <emptyTree>::<C T>.reveal_type(<self>.generic_type_array_root())
+
+  <runtime method definition of non_generic_type_class>
+
+  <emptyTree>::<C T>.reveal_type(<self>.non_generic_type_class())
+
+  <runtime method definition of non_generic_type_class_root>
+
+  <emptyTree>::<C T>.reveal_type(<self>.non_generic_type_class_root())
+
+  <runtime method definition of generic_type_class>
+
+  <emptyTree>::<C T>.reveal_type(<self>.generic_type_class())
+
+  <runtime method definition of generic_type_class_root>
+
+  <emptyTree>::<C T>.reveal_type(<self>.generic_type_class_root())
+
+  <runtime method definition of non_generic_type_module>
+
+  <emptyTree>::<C T>.reveal_type(<self>.non_generic_type_module())
+
+  <runtime method definition of non_generic_type_module_root>
+
+  <emptyTree>::<C T>.reveal_type(<self>.non_generic_type_module_root())
+
+  <runtime method definition of generic_type_module>
+
+  <emptyTree>::<C T>.reveal_type(<self>.generic_type_module())
+
+  <runtime method definition of generic_type_module_root>
+
+  <emptyTree>::<C T>.reveal_type(<self>.generic_type_module_root())
+
+  <runtime method definition of generic_type_enumerable>
+
+  <emptyTree>::<C T>.reveal_type(<self>.generic_type_enumerable())
+
+  <runtime method definition of generic_type_enumerable_root>
+
+  <emptyTree>::<C T>.reveal_type(<self>.generic_type_enumerable_root())
+
+  <runtime method definition of generic_type_enumerator>
+
+  <emptyTree>::<C T>.reveal_type(<self>.generic_type_enumerator())
+
+  <runtime method definition of generic_type_enumerator_root>
+
+  <emptyTree>::<C T>.reveal_type(<self>.generic_type_enumerator_root())
+
+  <runtime method definition of generic_type_enumerator_lazy>
+
+  <emptyTree>::<C T>.reveal_type(<self>.generic_type_enumerator_lazy())
+
+  <runtime method definition of generic_type_enumerator_lazy_root>
+
+  <emptyTree>::<C T>.reveal_type(<self>.generic_type_enumerator_lazy_root())
+
+  <runtime method definition of generic_type_enumerator_chain>
+
+  <emptyTree>::<C T>.reveal_type(<self>.generic_type_enumerator_chain())
+
+  <runtime method definition of generic_type_enumerator_chain_root>
+
+  <emptyTree>::<C T>.reveal_type(<self>.generic_type_enumerator_chain_root())
+
+  <runtime method definition of generic_type_hash>
+
+  <emptyTree>::<C T>.reveal_type(<self>.generic_type_hash())
+
+  <runtime method definition of generic_type_hash_root>
+
+  <emptyTree>::<C T>.reveal_type(<self>.generic_type_hash_root())
+
+  <runtime method definition of generic_type_set>
+
+  <emptyTree>::<C T>.reveal_type(<self>.generic_type_set())
+
+  <runtime method definition of generic_type_set_root>
+
+  <emptyTree>::<C T>.reveal_type(<self>.generic_type_set_root())
+
+  <runtime method definition of generic_type_range>
+
+  <emptyTree>::<C T>.reveal_type(<self>.generic_type_range())
+
+  <runtime method definition of generic_type_range_root>
+
+  <emptyTree>::<C T>.reveal_type(<self>.generic_type_range_root())
+
+  <runtime method definition of generic_type_t_array>
+
+  <emptyTree>::<C T>.reveal_type(<self>.generic_type_t_array())
+
+  <runtime method definition of generic_type_t_hash>
+
+  <emptyTree>::<C T>.reveal_type(<self>.generic_type_t_hash())
+
+  class <emptyTree>::<C GenericType1><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(<emptyTree>::<C T>::<C Generic>)
+
+    <emptyTree>::<C T1> = <self>.type_member()
+  end
+
+  class <emptyTree>::<C GenericType2><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(<emptyTree>::<C T>::<C Generic>)
+
+    <emptyTree>::<C T1> = <self>.type_member()
+
+    <emptyTree>::<C T2> = <self>.type_member()
+  end
+
+  class <emptyTree>::<C GenericType3><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(<emptyTree>::<C T>::<C Generic>)
+
+    <emptyTree>::<C T1> = <self>.type_member()
+
+    <emptyTree>::<C T2> = <self>.type_member()
+
+    <emptyTree>::<C T3> = <self>.type_member()
+  end
+
+  <runtime method definition of generic_type5>
+
+  <emptyTree>::<C T>.reveal_type(<self>.generic_type5())
+
+  <runtime method definition of generic_type6>
+
+  <emptyTree>::<C T>.reveal_type(<self>.generic_type6())
+
+  <runtime method definition of tuple_type1>
+
+  <emptyTree>::<C T>.reveal_type(<self>.tuple_type1())
+
+  <runtime method definition of tuple_type2>
+
+  <emptyTree>::<C T>.reveal_type(<self>.tuple_type2())
+
+  <runtime method definition of shape_type1>
+
+  <runtime method definition of shape_type1>
+
+  <emptyTree>::<C T>.reveal_type(<self>.shape_type1())
+
+  <runtime method definition of shape_type2>
+
+  <emptyTree>::<C T>.reveal_type(<self>.shape_type2())
+
+  <runtime method definition of shape_type3>
+
+  <emptyTree>::<C T>.reveal_type(<self>.shape_type3())
+
+  <runtime method definition of proc_type1>
+
+  <emptyTree>::<C T>.reveal_type(<self>.proc_type1())
+
+  <runtime method definition of proc_type2>
+
+  <runtime method definition of proc_type3>
+
+  <emptyTree>::<C T>.reveal_type(<self>.proc_type3())
+
+  <runtime method definition of proc_type4>
+
+  <emptyTree>::<C T>.reveal_type(<self>.proc_type4())
+
+  <runtime method definition of base_type_last>
+
+  <emptyTree>::<C T>.reveal_type(<self>.base_type_last())
+
+  <runtime method definition of alias_type1>
+
+  <runtime method definition of interface_type1>
+
+  <runtime method definition of literal_type1>
+
+  <runtime method definition of untyped_function1>
+end
