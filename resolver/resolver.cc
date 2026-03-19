@@ -1757,7 +1757,7 @@ public:
                 core::MutableContext ctx(gs, core::Symbols::root(), jobs.file);
                 for (auto &job : jobs.items) {
                     if (!resolveAncestorJob(ctx, job, suppressPayloadSuperclassRedefinitionFor, /* lastRun */ false)) {
-                        unresolved.emplace_back(move(job));
+                        unresolved.emplace_back(jobs.file, move(job));
                     }
                 }
             }
