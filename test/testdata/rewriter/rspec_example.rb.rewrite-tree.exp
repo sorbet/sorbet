@@ -94,7 +94,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <runtime method definition of my_helper>
 
-      module <emptyTree>::<C <shared_examples 'some examples'>><<C <todo sym>>> < ()
+      module ::<root>::<C <shared_examples 'some examples'>><<C <todo sym>>> < ()
         def defined_in_shared_examples<<todo method>>(&<blk>)
           "foo"
         end
@@ -115,12 +115,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           <self>.defined_in_shared_examples()
         end
 
-        <self>.include(<emptyTree>::<C <shared_examples 'some examples'>>)
+        <self>.include(::<root>::<C <shared_examples 'some examples'>>)
       end
 
       <self>.test_each([]) do |x|
         begin
-          <self>.include(<emptyTree>::<C <shared_examples 'some examples'>>)
+          <self>.include(::<root>::<C <shared_examples 'some examples'>>)
           <runtime method definition of <it 'has access to defined_in_shared_examples'>>
         end
       end
