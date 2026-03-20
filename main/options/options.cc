@@ -475,6 +475,11 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  "Ensure that every class and module only defines 'behavior' in one file. Ensures "
                                  "that every class or module can be autoloaded by loading exactly one file.",
                                  cxxopts::value<bool>());
+    options.add_options(section)("recursive-constant-resolution",
+                                 "Whether constants without a scope are allowed to resolve recursively, "
+                                 "that is in response to resolving ancestors. Turn this off to improve performance in "
+                                 "large codebases, or to enforce simpler constant access patterns.",
+                                 cxxopts::value<bool>()->default_value("true"));
     fmt::memory_buffer all_stop_after;
     fmt::format_to(
         std::back_inserter(all_stop_after),
@@ -1401,6 +1406,7 @@ void readOptions(Options &opts,
         opts.errorUrlBase = raw["error-url-base"].as<string>();
         opts.noErrorSections = raw["no-error-sections"].as<bool>();
         opts.ruby3KeywordArgs = raw["experimental-ruby3-keyword-args"].as<bool>();
+        opts.recursiveConstantResolution = raw["recursive-constant-resolution"].as<bool>();
         opts.cacheSensitiveOptions.typedSuper = raw["typed-super"].as<bool>();
 
         if (raw.count("suppress-payload-superclass-redefinition-for") > 0) {

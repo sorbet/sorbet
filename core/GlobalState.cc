@@ -1976,6 +1976,7 @@ void GlobalState::copyOptions(const core::GlobalState &other) {
     this->sleepInSlowPathSeconds = other.sleepInSlowPathSeconds;
     this->cacheSensitiveOptions = other.cacheSensitiveOptions;
     this->ruby3KeywordArgs = other.ruby3KeywordArgs;
+    this->recursiveConstantResolution = other.recursiveConstantResolution;
     this->parseWithPrism = other.parseWithPrism;
     this->suppressPayloadSuperclassRedefinitionFor = other.suppressPayloadSuperclassRedefinitionFor;
     this->trackUntyped = other.trackUntyped;

@@ -444,7 +444,10 @@ private:
             return;
         }
 
-        ENFORCE(!resolved.exists());
+        // resolved might exist when not doing recursiveConstantResolution, because we will
+        // intentionally run resolveAncestorJob without subsequently running resolveJob (so
+        // resolving ancestors might make some constants resolve now, but we don't want to permit that)
+        ENFORCE(!resolved.exists() || !gs.recursiveConstantResolution);
         ENFORCE(!job.out->symbol().exists());
 
         bool alreadyReported = false;
@@ -1681,7 +1684,7 @@ public:
         while (progress && (first || !todo.empty() || !todoAncestors.empty())) {
             first = false;
             counterInc("resolve.constants.retries");
-            {
+            if (gs.recursiveConstantResolution) {
                 Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.ancestors");
                 // This is an optimization. The order should not matter semantically
                 // We try to resolve most ancestors second because this makes us much more likely to resolve
@@ -1704,6 +1707,8 @@ public:
                 todoAncestors.erase(it, todoAncestors.end());
                 categoryCounterAdd("resolve.constants.ancestor", "retry", retries);
                 progress = retries > 0;
+            } else {
+                progress = false;
             }
             {
                 Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.constants");
@@ -1816,7 +1821,7 @@ public:
 
         // Note that this is missing alias stubbing, thus resolveJob needs to be able to handle missing aliases.
 
-        {
+        if (gs.recursiveConstantResolution) {
             Timer timeit(gs.tracer(), "resolver.resolve_constants.errors");
 
             // Only give suggestions for the first several constants, because fuzzy suggestions are expensive.
@@ -1842,6 +1847,40 @@ public:
                         resolved = resolveAncestorJob(ctx, item, suppressPayloadSuperclassRedefinitionFor, true);
                         ENFORCE(resolved);
                     }
+                }
+            }
+        } else {
+            vector<pair<core::FileRef, AncestorResolutionItem>> unresolved;
+            for (auto &jobs : todoAncestors) {
+                core::MutableContext ctx(gs, core::Symbols::root(), jobs.file);
+                for (auto &job : jobs.items) {
+                    if (!resolveAncestorJob(ctx, job, suppressPayloadSuperclassRedefinitionFor, /* lastRun */ false)) {
+                        unresolved.emplace_back(jobs.file, move(job));
+                    }
+                }
+            }
+
+            Timer timeit(gs.tracer(), "resolver.resolve_constants.errors");
+
+            for (auto &[file, job] : unresolved) {
+                core::MutableContext ctx(gs, core::Symbols::root(), file);
+                resolveAncestorJob(ctx, job, suppressPayloadSuperclassRedefinitionFor, /* lastRun */ true);
+            }
+
+            todoAncestors.clear();
+
+            // Only give suggestions for the first several constants, because fuzzy suggestions are expensive.
+            int suggestionCount = 0;
+            for (auto &job : todo) {
+                for (auto &item : job.items) {
+                    constantResolutionFailed(gs, job.file, item, suggestionCount);
+                }
+            }
+
+            for (auto &job : todoClassAliases) {
+                core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                for (auto &item : job.items) {
+                    resolveClassAliasJob(ctx, item);
                 }
             }
         }

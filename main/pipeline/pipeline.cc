@@ -82,6 +82,7 @@ void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) 
     }
     gs.parseWithPrism = opts.cacheSensitiveOptions.usePrismParser;
     gs.ruby3KeywordArgs = opts.ruby3KeywordArgs;
+    gs.recursiveConstantResolution = opts.recursiveConstantResolution;
     gs.suppressPayloadSuperclassRedefinitionFor = opts.suppressPayloadSuperclassRedefinitionFor;
     if (!opts.uniquelyDefinedBehavior) {
         // Definitions in multiple locations interact poorly with autoloader this error is enforced in Stripe code.
