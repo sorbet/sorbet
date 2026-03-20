@@ -1,9 +1,18 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
+  <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+  <self>.sig() do ||
+    <self>.returns(<emptyTree>::<C Symbol>)
+  end
+
   def test_strings<<todo method>>(&<blk>)
     begin
       ""
       "foo"
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C X>)
       ::<Magic>.<string-interpolate>("foo", 1)
     end
   end
+
+  <emptyTree>::<C X> = ::<Magic>.<string-interpolate>(nil)
 end
