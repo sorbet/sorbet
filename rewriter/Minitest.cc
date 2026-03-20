@@ -168,7 +168,7 @@ string to_s(core::Context ctx, const ast::ExpressionPtr &arg) {
     }
     auto argConstant = ast::cast_tree<ast::UnresolvedConstantLit>(arg);
     if (argConstant != nullptr) {
-        return constantToString(ctx, *argConstant);
+        return ctx.locAt(argConstant.loc).source(ctx).value_or("<unknown>");
     }
     return arg.toString(ctx);
 }
