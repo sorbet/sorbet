@@ -108,6 +108,48 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
+  module <emptyTree>::<C Foo><<C <todo sym>>> < ()
+    module <emptyTree>::<C Bar><<C <todo sym>>> < ()
+      class <emptyTree>::<C Baz><<C <todo sym>>> < (::<todo sym>)
+      end
+    end
+
+    module <emptyTree>::<C Qux><<C <todo sym>>> < ()
+      class <emptyTree>::<C Baz><<C <todo sym>>> < (::<todo sym>)
+      end
+    end
+  end
+
+  begin
+    <emptyTree>::<C Foo>::<C Bar>::<C Baz>
+    class <emptyTree>::<C <describe 'Foo::Bar::Baz'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      def instance<<todo method>>(&<blk>)
+        <emptyTree>::<C Foo>::<C Bar>::<C Baz>.new()
+      end
+
+      def <it 'creates an instance'><<todo method>>(&<blk>)
+        <self>.instance()
+      end
+
+      <runtime method definition of instance>
+    end
+  end
+
+  begin
+    <emptyTree>::<C Foo>::<C Qux>::<C Baz>
+    class <emptyTree>::<C <describe 'Foo::Qux::Baz'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      def instance<<todo method>>(&<blk>)
+        <emptyTree>::<C Foo>::<C Qux>::<C Baz>.new()
+      end
+
+      def <it 'creates an instance'><<todo method>>(&<blk>)
+        <self>.instance()
+      end
+
+      <runtime method definition of instance>
+    end
+  end
+
   class <emptyTree>::<C <describe 'user_symbol'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
     def data<<todo method>>(&<blk>)
       "test"

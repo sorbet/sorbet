@@ -84,6 +84,32 @@ RSpec.describe UserClass, :needs_macos do
   end
 end
 
+# Test RSpec.describe with namespaced classes sharing the same leaf name
+module Foo
+  module Bar
+    class Baz; end
+  end
+  module Qux
+    class Baz; end
+  end
+end
+
+RSpec.describe Foo::Bar::Baz do
+  let(:instance) { Foo::Bar::Baz.new }
+
+  it "creates an instance" do
+    instance
+  end
+end
+
+RSpec.describe Foo::Qux::Baz do
+  let(:instance) { Foo::Qux::Baz.new }
+
+  it "creates an instance" do
+    instance
+  end
+end
+
 # Test RSpec.describe with a symbol as the first argument
 RSpec.describe :user_symbol do
   let(:data) { "test" }
