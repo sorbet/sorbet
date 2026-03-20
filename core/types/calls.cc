@@ -11,6 +11,7 @@
 #include "core/TypeConstraint.h"
 #include "core/TypeErrorDiagnostics.h"
 #include "core/Types.h"
+#include "core/errors/cfg.h"
 #include "core/errors/infer.h"
 #include "core/lsp/QueryResponse.h"
 #include <algorithm> // find_if, sort
@@ -4416,6 +4417,31 @@ public:
         auto classOfException = make_type<ClassType>(Symbols::Exception().data(gs)->lookupSingletonClass(gs));
         if (!classArg->type.isUntyped() && !Types::isSubType(gs, classArg->type, classOfException)) {
             return;
+        }
+
+        // Check if the class is abstract and has no custom .new method.
+        // This mirrors the check in cfg/builder/builder_walk.cc for `AbstractClass.new`,
+        // but catches the case where the instantiation is implicit via `raise`.
+        //
+        // Class singleton types can be either ClassType or AppliedType (the latter for
+        // classes with type members, which includes all singleton classes in practice).
+        auto singletonSym = ClassOrModuleRef{};
+        if (isa_type<ClassType>(classArg->type)) {
+            singletonSym = cast_type_nonnull<ClassType>(classArg->type).symbol;
+        } else if (auto at = cast_type<AppliedType>(classArg->type)) {
+            singletonSym = at->klass;
+        }
+        if (singletonSym.exists() && singletonSym.data(gs)->isSingletonClass(gs)) {
+            auto attachedClass = singletonSym.data(gs)->attachedClass(gs);
+            if (attachedClass.exists() && attachedClass.data(gs)->flags.isAbstract) {
+                auto method_new = singletonSym.data(gs)->findMethodTransitive(gs, Names::new_());
+                if (method_new.data(gs)->owner == Symbols::Class()) {
+                    if (auto e = gs.beginError(args.argLoc(0), errors::CFG::AbstractClassInstantiated)) {
+                        e.setHeader("Attempting to instantiate abstract class `{}`", attachedClass.show(gs));
+                        e.addErrorLine(attachedClass.data(gs)->loc(), "`{}` defined here", attachedClass.show(gs));
+                    }
+                }
+            }
         }
 
         uint16_t newNumPosArgs = args.args.size() >= 2 ? 1 : 0;
