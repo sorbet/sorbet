@@ -770,7 +770,15 @@ void CommentsAssociatorPrism::walkNode(pm_node_t *node) {
         case PM_ELSE_NODE: {
             auto *else_ = down_cast<pm_else_node_t>(node);
             walkNode(up_cast(else_->statements));
-            consumeCommentsInsideNode(node, "else");
+            // Leave comments on the `end` line for the parent node to associate.
+            auto beginLine = posToLine(translateLocation(node->location).beginPos());
+            int endLine;
+            if (else_->statements) {
+                endLine = posToLine(translateLocation(up_cast(else_->statements)->location).endPos());
+            } else {
+                endLine = beginLine;
+            }
+            consumeCommentsBetweenLines(beginLine, endLine, "else");
             break;
         }
         case PM_ENSURE_NODE: {
