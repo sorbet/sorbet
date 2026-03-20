@@ -45,7 +45,7 @@ public:
     static void pickle(Pickler &p, core::LocOffsets loc);
     static void pickle(Pickler &p, core::Loc loc);
     static void pickle(Pickler &p, shared_ptr<const FileHash> fh);
-    static void pickle(Pickler &p, const ast::UnresolvedConstantLit &lit);
+    static void pickle(Pickler &p, const File &f, const ast::UnresolvedConstantLit &lit);
 
     static shared_ptr<File> unpickleFile(UnPickler &p);
     static UTF8Name unpickleUTF8Name(UnPickler &p, GlobalState &gs);
@@ -1161,7 +1161,7 @@ vector<uint8_t> Serializer::storeTree(const core::File &file, const ast::ParsedF
     // See comment in `serialize.h` above `loadTree`.
     p.putU4(file.source().size());
     SerializerImpl::pickle(p, file.getFileHash());
-    SerializerImpl::pickle(p, tree.tree);
+    SerializerImpl::pickle(p, file, tree.tree);
     return p.result();
 }
 
@@ -1177,10 +1177,10 @@ ast::ExpressionPtr Serializer::loadTree(const core::GlobalState &gs, core::File 
     return SerializerImpl::unpickleExpr(p, gs);
 }
 
-void SerializerImpl::pickle(Pickler &p, const ast::UnresolvedConstantLit &lit) {
+void SerializerImpl::pickle(Pickler &p, const File &f, const ast::UnresolvedConstantLit &lit) {
     pickle(p, lit.loc);
     p.putU4(lit.cnst.rawId());
-    pickle(p, lit.scope);
+    pickle(p, f, lit.scope);
 }
 
 void SerializerImpl::pickle(Pickler &p, const File &f, const ast::ExpressionPtr &what) {
@@ -1209,13 +1209,13 @@ void SerializerImpl::pickle(Pickler &p, const File &f, const ast::ExpressionPtr 
 
             uint32_t size = s.numNonBlockArgs() + (hasBlock ? 1 : 0);
             p.putU4(size);
-            pickle(p, s.recv);
+            pickle(p, f, s.recv);
 
             for (auto &arg : s.nonBlockArgs()) {
-                pickle(p, arg);
+                pickle(p, f, arg);
             }
             if (hasBlock) {
-                pickle(p, *s.rawBlock());
+                pickle(p, f, *s.rawBlock());
             }
 
             break;
@@ -1225,9 +1225,9 @@ void SerializerImpl::pickle(Pickler &p, const File &f, const ast::ExpressionPtr 
             auto &a = ast::cast_tree_nonnull<ast::Block>(what);
             pickle(p, a.loc);
             p.putU4(a.params.size());
-            pickle(p, a.body);
+            pickle(p, f, a.body);
             for (auto &param : a.params) {
-                pickle(p, param);
+                pickle(p, f, param);
             }
             break;
         }
@@ -1242,30 +1242,30 @@ void SerializerImpl::pickle(Pickler &p, const File &f, const ast::ExpressionPtr 
         case ast::Tag::While: {
             auto &a = ast::cast_tree_nonnull<ast::While>(what);
             pickle(p, a.loc);
-            pickle(p, a.cond);
-            pickle(p, a.body);
+            pickle(p, f, a.cond);
+            pickle(p, f, a.body);
             break;
         }
 
         case ast::Tag::Return: {
             auto &a = ast::cast_tree_nonnull<ast::Return>(what);
             pickle(p, a.loc);
-            pickle(p, a.expr);
+            pickle(p, f, a.expr);
             break;
         }
 
         case ast::Tag::If: {
             auto &a = ast::cast_tree_nonnull<ast::If>(what);
             pickle(p, a.loc);
-            pickle(p, a.cond);
-            pickle(p, a.thenp);
-            pickle(p, a.elsep);
+            pickle(p, f, a.cond);
+            pickle(p, f, a.thenp);
+            pickle(p, f, a.elsep);
             break;
         }
 
         case ast::Tag::UnresolvedConstantLit: {
             auto &a = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(what);
-            pickle(p, a);
+            pickle(p, f, a);
             break;
         }
 
@@ -1280,8 +1280,8 @@ void SerializerImpl::pickle(Pickler &p, const File &f, const ast::ExpressionPtr 
         case ast::Tag::Assign: {
             auto &a = ast::cast_tree_nonnull<ast::Assign>(what);
             pickle(p, a.loc);
-            pickle(p, a.lhs);
-            pickle(p, a.rhs);
+            pickle(p, f, a.lhs);
+            pickle(p, f, a.rhs);
             break;
         }
 
@@ -1289,9 +1289,9 @@ void SerializerImpl::pickle(Pickler &p, const File &f, const ast::ExpressionPtr 
             auto &a = ast::cast_tree_nonnull<ast::InsSeq>(what);
             pickle(p, a.loc);
             p.putU4(a.stats.size());
-            pickle(p, a.expr);
+            pickle(p, f, a.expr);
             for (auto &st : a.stats) {
-                pickle(p, st);
+                pickle(p, f, st);
             }
             break;
         }
@@ -1299,14 +1299,14 @@ void SerializerImpl::pickle(Pickler &p, const File &f, const ast::ExpressionPtr 
         case ast::Tag::Next: {
             auto &a = ast::cast_tree_nonnull<ast::Next>(what);
             pickle(p, a.loc);
-            pickle(p, a.expr);
+            pickle(p, f, a.expr);
             break;
         }
 
         case ast::Tag::Break: {
             auto &a = ast::cast_tree_nonnull<ast::Break>(what);
             pickle(p, a.loc);
-            pickle(p, a.expr);
+            pickle(p, f, a.expr);
             break;
         }
 
@@ -1322,10 +1322,10 @@ void SerializerImpl::pickle(Pickler &p, const File &f, const ast::ExpressionPtr 
             ENFORCE_NO_TIMER(h.values.size() == h.keys.size());
             p.putU4(h.values.size());
             for (auto &v : h.values) {
-                pickle(p, v);
+                pickle(p, f, v);
             }
             for (auto &k : h.keys) {
-                pickle(p, k);
+                pickle(p, f, k);
             }
             break;
         }
@@ -1335,7 +1335,7 @@ void SerializerImpl::pickle(Pickler &p, const File &f, const ast::ExpressionPtr 
             pickle(p, a.loc);
             p.putU4(a.elems.size());
             for (auto &e : a.elems) {
-                pickle(p, e);
+                pickle(p, f, e);
             }
             break;
         }
@@ -1345,8 +1345,8 @@ void SerializerImpl::pickle(Pickler &p, const File &f, const ast::ExpressionPtr 
             pickle(p, c.loc);
             p.putU4(c.cast.rawId());
             pickle(p, c.type);
-            pickle(p, c.arg);
-            pickle(p, c.typeExpr);
+            pickle(p, f, c.arg);
+            pickle(p, f, c.typeExpr);
             break;
         }
 
@@ -1363,15 +1363,15 @@ void SerializerImpl::pickle(Pickler &p, const File &f, const ast::ExpressionPtr 
             p.putU4(c.ancestors.size());
             p.putU4(c.singletonAncestors.size());
             p.putU4(c.rhs.size());
-            pickle(p, c.name);
+            pickle(p, f, c.name);
             for (auto &anc : c.ancestors) {
-                pickle(p, anc);
+                pickle(p, f, anc);
             }
             for (auto &anc : c.singletonAncestors) {
-                pickle(p, anc);
+                pickle(p, f, anc);
             }
             for (auto &anc : c.rhs) {
-                pickle(p, anc);
+                pickle(p, f, anc);
             }
             break;
         }
@@ -1388,9 +1388,9 @@ void SerializerImpl::pickle(Pickler &p, const File &f, const ast::ExpressionPtr 
             p.putU4(c.name.rawId());
             p.putU4(c.symbol.id());
             p.putU4(c.params.size());
-            pickle(p, c.rhs);
+            pickle(p, f, c.rhs);
             for (auto &param : c.params) {
-                pickle(p, param);
+                pickle(p, f, param);
             }
             break;
         }
@@ -1399,11 +1399,11 @@ void SerializerImpl::pickle(Pickler &p, const File &f, const ast::ExpressionPtr 
             auto &a = ast::cast_tree_nonnull<ast::Rescue>(what);
             pickle(p, a.loc);
             p.putU4(a.rescueCases.size());
-            pickle(p, a.ensure);
-            pickle(p, a.else_);
-            pickle(p, a.body);
+            pickle(p, f, a.ensure);
+            pickle(p, f, a.else_);
+            pickle(p, f, a.body);
             for (auto &rc : a.rescueCases) {
-                pickle(p, rc);
+                pickle(p, f, rc);
             }
             break;
         }
@@ -1411,10 +1411,10 @@ void SerializerImpl::pickle(Pickler &p, const File &f, const ast::ExpressionPtr 
             auto &a = ast::cast_tree_nonnull<ast::RescueCase>(what);
             pickle(p, a.loc);
             p.putU4(a.exceptions.size());
-            pickle(p, a.var);
-            pickle(p, a.body);
+            pickle(p, f, a.var);
+            pickle(p, f, a.body);
             for (auto &ex : a.exceptions) {
-                pickle(p, ex);
+                pickle(p, f, ex);
             }
             break;
         }
@@ -1422,36 +1422,36 @@ void SerializerImpl::pickle(Pickler &p, const File &f, const ast::ExpressionPtr 
         case ast::Tag::RestParam: {
             auto &a = ast::cast_tree_nonnull<ast::RestParam>(what);
             pickle(p, a.loc);
-            pickle(p, a.expr);
+            pickle(p, f, a.expr);
             break;
         }
 
         case ast::Tag::KeywordArg: {
             auto &a = ast::cast_tree_nonnull<ast::KeywordArg>(what);
             pickle(p, a.loc);
-            pickle(p, a.expr);
+            pickle(p, f, a.expr);
             break;
         }
 
         case ast::Tag::ShadowArg: {
             auto &a = ast::cast_tree_nonnull<ast::ShadowArg>(what);
             pickle(p, a.loc);
-            pickle(p, a.expr);
+            pickle(p, f, a.expr);
             break;
         }
 
         case ast::Tag::BlockParam: {
             auto &a = ast::cast_tree_nonnull<ast::BlockParam>(what);
             pickle(p, a.loc);
-            pickle(p, a.expr);
+            pickle(p, f, a.expr);
             break;
         }
 
         case ast::Tag::OptionalParam: {
             auto &a = ast::cast_tree_nonnull<ast::OptionalParam>(what);
             pickle(p, a.loc);
-            pickle(p, a.expr);
-            pickle(p, a.default_);
+            pickle(p, f, a.expr);
+            pickle(p, f, a.default_);
             break;
         }
 
@@ -1481,7 +1481,7 @@ void SerializerImpl::pickle(Pickler &p, const File &f, const ast::ExpressionPtr 
                 p.putU4(0);
             } else {
                 p.putU4(uint32_t(ast::Tag::UnresolvedConstantLit));
-                pickle(p, *original);
+                pickle(p, f, *original);
             }
             break;
         }
