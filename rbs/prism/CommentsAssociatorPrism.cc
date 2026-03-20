@@ -690,14 +690,25 @@ void CommentsAssociatorPrism::walkNode(pm_node_t *node) {
                 // This is a visibility modifier wrapping a method definition: `private def foo; end`
                 associateSignatureCommentsToNode(node);
                 associateAssertionCommentsToNode(node);
-                walkNode(call->receiver);
-                walkArgumentsNode(call->arguments);
+
+                ENFORCE(call->receiver == nullptr,
+                        "`isMethodDefModifierCall()` should ensure that method def modifiers never have a receiver");
+                ENFORCE(
+                    call->arguments != nullptr && call->arguments->arguments.nodes[0] != nullptr,
+                    "`isMethodDefModifierCall()` should ensure that method def modifiers always exactly one argument");
+                walkNode(call->arguments->arguments.nodes[0]);
+
                 consumeCommentsInsideNode(node, "call");
             } else if (parser.isAttrAccessorCall(node)) {
                 associateSignatureCommentsToNode(node);
                 associateAssertionCommentsToNode(node);
-                walkNode(call->receiver);
-                walkArgumentsNode(call->arguments);
+
+                ENFORCE(call->receiver == nullptr,
+                        "`isAttrAccessorCall()` should ensure that method def modifiers never have a receiver");
+                ENFORCE(call->arguments != nullptr && call->arguments->arguments.nodes[0] != nullptr,
+                        "`isAttrAccessorCall()` should ensure that method def modifiers always exactly one argument");
+                walkNode(call->arguments->arguments.nodes[0]);
+
                 consumeCommentsInsideNode(node, "call");
             } else if (call->arguments != nullptr && call->arguments->arguments.size == 1 &&
                        parser.isSafeNavigationCall(node) && parser.isSetterCall(node)) {
@@ -1168,12 +1179,10 @@ CommentsAssociatorPrism::CommentsAssociatorPrism(core::MutableContext ctx, parse
     : ctx(ctx), parser(parser), prism(parser), commentLocations(commentLocations), commentByLine() {
     auto source = ctx.file.data(ctx).source();
     for (auto &loc : commentLocations) {
-        auto commentString = source.substr(loc.beginPos(), loc.endPos() - loc.beginPos());
-        auto start32 = static_cast<uint32_t>(loc.beginPos());
-        auto end32 = static_cast<uint32_t>(loc.endPos());
-        auto comment = CommentNodePrism{core::LocOffsets{start32, end32}, commentString};
+        auto commentString = source.substr(loc.beginPos(), loc.length());
+        auto comment = CommentNodePrism{loc, commentString};
 
-        auto line = posToLine(start32);
+        auto line = posToLine(loc.beginPos());
         commentByLine[line] = comment;
     }
 }
