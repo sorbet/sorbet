@@ -446,6 +446,10 @@ Usage:
                                 RSpec constructs that are impossible for Sorbet to
                                 handle. As a result, there is no path to this flag ever
                                 being stable: RSpec support is best effort.
+      --enable-experimental-method-modifiers
+                                Enable experimental support for method def modifiers like
+                                `abstract def foo; end`. Implicitly turned on if you
+                                enable RBS support.
 
 ```
 

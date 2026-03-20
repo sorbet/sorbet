@@ -666,7 +666,7 @@ void CommentsAssociator::walkNode(parser::Node *node) {
             contextAllowingTypeAlias.pop_back();
         },
         [&](parser::Send *send) {
-            if (parser::MK::isVisibilitySend(send) || parser::MK::isAttrAccessorSend(send)) {
+            if (parser::MK::isMethodDefModifierSend(send) || parser::MK::isAttrAccessorSend(send)) {
                 associateSignatureCommentsToNode(send);
                 associateAssertionCommentsToNode(send);
                 walkNode(send->receiver.get());

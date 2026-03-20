@@ -219,6 +219,10 @@ public:
     // https://github.com/sorbet/sorbet/issues/1747)
     bool isUpdateKnowledgeName() const;
 
+    // Returns true if this name is one of the "keywords" that can modify a method `def`,
+    // like private/protected/public, abstract, etc.
+    bool isMethodDefModifierName() const;
+
     std::string_view shortName(const GlobalState &gs) const;
     std::string showRaw(const GlobalState &gs) const;
     std::string toString(const GlobalState &gs) const;

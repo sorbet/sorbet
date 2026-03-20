@@ -3701,11 +3701,10 @@ private:
                     return;
                 }
 
-                if (send.numPosArgs() == 1 &&
-                    (send.fun == core::Names::public_() || send.fun == core::Names::private_() ||
-                     send.fun == core::Names::privateClassMethod() || send.fun == core::Names::protected_() ||
-                     send.fun == core::Names::packagePrivateClassMethod() ||
-                     send.fun == core::Names::packagePrivate())) {
+                if (send.numPosArgs() == 1 && send.fun.isMethodDefModifierName()) {
+                    if (send.fun == core::Names::abstract() && !ctx.state.experimentalMethodModifiers) {
+                        return;
+                    }
                     processStatement(ctx, send.getPosArg(0), lastSigs);
                     return;
                 }
