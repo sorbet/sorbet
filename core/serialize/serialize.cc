@@ -1472,6 +1472,12 @@ void SerializerImpl::pickle(Pickler &p, const File &f, const ast::ExpressionPtr 
         case ast::Tag::ConstantLit: {
             auto &a = ast::cast_tree_nonnull<ast::ConstantLit>(what);
             pickle(p, a.loc());
+            if (a.symbol() == Symbols::StubModule()) {
+                fatalLogger->error(R"(msg="pickle ConstantLit StubModule" path="{}" beginPos={} endPos={})",
+                                   absl::CEscape(f.path()), a.loc().beginPos(), a.loc().endPos());
+                fatalLogger->error("source=\"{}\"", absl::CEscape(f.source()));
+                ENFORCE(false);
+            }
             p.putU4(a.symbol().rawId());
             // This encoding is the same encoding that would be used if we were
             // serializing an UnresolvedConstantLit as an ExpressionPtr, nullptr
