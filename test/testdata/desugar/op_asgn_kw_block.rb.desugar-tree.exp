@@ -1,0 +1,33 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  begin
+    []$3 = <self>
+    []$3.[]=([]$3.[]() do |*<block-pass>$2|
+        ::<Magic>.<call-with-splat>(<block-pass>$2.[](0), :to_s, ::<Magic>.<splat>(<block-pass>$2.[](1, 9223372036854775807)), nil)
+      end.&(123456)) do |*<block-pass>$2|
+      ::<Magic>.<call-with-splat>(<block-pass>$2.[](0), :to_s, ::<Magic>.<splat>(<block-pass>$2.[](1, 9223372036854775807)), nil)
+    end
+  end
+
+  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    def []<<todo method>>(*args, *kwargs:, &blk)
+      begin
+        <self>.p([args, kwargs, blk])
+        0
+      end
+    end
+
+    def []=<<todo method>>(*args, *kwargs:, &blk)
+      begin
+        <self>.p([args, kwargs, blk])
+        0
+      end
+    end
+  end
+
+  <self>.p(begin
+      []$4 = <emptyTree>::<C A>.new()
+      []$5 = :x
+      []$6 = 2
+      []$4.[]=([]$4.[]([]$5, []$6).+(3), []$5, []$6)
+    end)
+end
