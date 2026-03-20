@@ -41,7 +41,7 @@ public:
     static void pickle(Pickler &p, const Method &what);
     static void pickle(Pickler &p, const Field &what);
     static void pickle(Pickler &p, const TypeParameter &what);
-    static void pickle(Pickler &p, const ast::ExpressionPtr &what);
+    static void pickle(Pickler &p, const File &f, const ast::ExpressionPtr &what);
     static void pickle(Pickler &p, core::LocOffsets loc);
     static void pickle(Pickler &p, core::Loc loc);
     static void pickle(Pickler &p, shared_ptr<const FileHash> fh);
@@ -1183,7 +1183,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::UnresolvedConstantLit &lit) {
     pickle(p, lit.scope);
 }
 
-void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
+void SerializerImpl::pickle(Pickler &p, const File &f, const ast::ExpressionPtr &what) {
     if (what == nullptr) {
         p.putU4(0);
         return;
