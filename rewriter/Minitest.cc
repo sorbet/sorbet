@@ -160,6 +160,17 @@ ast::ClassDef::RHS_store flattenDescribeBody(ast::ExpressionPtr body) {
     return rhs;
 }
 
+string constantToString(core::Context ctx, const ast::UnresolvedConstantLit &lit) {
+    string result;
+    auto scope = ast::cast_tree<ast::UnresolvedConstantLit>(lit.scope);
+    if (scope != nullptr) {
+        result = constantToString(ctx, *scope);
+        result += "::";
+    }
+    result += lit.cnst.show(ctx);
+    return result;
+}
+
 string to_s(core::Context ctx, const ast::ExpressionPtr &arg) {
     auto argLit = ast::cast_tree<ast::Literal>(arg);
     string argString;
@@ -168,7 +179,7 @@ string to_s(core::Context ctx, const ast::ExpressionPtr &arg) {
     }
     auto argConstant = ast::cast_tree<ast::UnresolvedConstantLit>(arg);
     if (argConstant != nullptr) {
-        return argConstant->cnst.show(ctx);
+        return constantToString(ctx, *argConstant);
     }
     return arg.toString(ctx);
 }
