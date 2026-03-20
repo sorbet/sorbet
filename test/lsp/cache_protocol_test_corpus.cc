@@ -672,4 +672,49 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "ReapOldCacheDirectories") {
     FileOps::removeDir(path);
 }
 
+TEST_CASE_FIXTURE(CacheProtocolTest, "ReapOldFormatSessionDirectories") {
+    auto opts = lspWrapper->opts;
+    REQUIRE(!opts->cacheDir.empty());
+
+    // We don't need any additional LSP behavior here
+    lspWrapper = nullptr;
+
+    // We should start in a state where there are no cache directories.
+    REQUIRE(FileOps::listSubdirs(opts->cacheDir).empty());
+
+    // Create a few fake old-format session-<hex> directories
+    vector<string> oldCaches;
+    for (const auto &suffix : {"abc123", "deadbeef", "0f0f0f"}) {
+        const auto &path =
+            oldCaches.emplace_back(fmt::format("{}/{}{}", opts->cacheDir, realmain::cache::SessionCache::OLD_SESSION_DIR_PREFIX, suffix));
+        FileOps::createDir(path);
+        FileOps::write(fmt::format("{}/data.mdb", path), "");
+        FileOps::write(fmt::format("{}/lock.mdb", path), "");
+    }
+
+    // Also create a sorbet-session-<current-PID> directory that should survive (process is running)
+    auto livePath =
+        fmt::format("{}/{}{}", opts->cacheDir, realmain::cache::SessionCache::SESSION_DIR_PREFIX, getpid());
+    FileOps::createDir(livePath);
+    FileOps::write(fmt::format("{}/data.mdb", livePath), "");
+    FileOps::write(fmt::format("{}/lock.mdb", livePath), "");
+
+    REQUIRE_EQ(FileOps::listSubdirs(opts->cacheDir).size(), oldCaches.size() + 1);
+
+    realmain::cache::SessionCache::reapOldCaches(*opts);
+
+    // Old-format directories should be reaped
+    for (const auto &path : oldCaches) {
+        REQUIRE_FALSE(FileOps::dirExists(path));
+    }
+
+    // The live-PID directory should be preserved
+    REQUIRE(FileOps::dirExists(livePath));
+
+    // Clean up the live-PID directory
+    FileOps::removeFile(fmt::format("{}/data.mdb", livePath));
+    FileOps::removeFile(fmt::format("{}/lock.mdb", livePath));
+    FileOps::removeDir(livePath);
+}
+
 } // namespace sorbet::test::lsp
