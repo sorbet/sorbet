@@ -294,7 +294,13 @@ private:
             }
             scope = scope->parent.get();
         }
-        return nesting->scope.asClassOrModuleRef().data(ctx)->findMemberTransitiveNoDealias(ctx, name);
+        if (ctx.state.recursiveConstantResolution) {
+            return nesting->scope.asClassOrModuleRef().data(ctx)->findMemberTransitiveNoDealias(ctx, name);
+        } else {
+            // We would have already done a non-transitive lookup on nesting->scope in the first
+            // iteration of the loop above, so just return noSymbol directly here.
+            return core::Symbols::noSymbol();
+        }
     }
 
     static bool isAlreadyResolved(core::Context ctx, const ast::ConstantLit &original) {
