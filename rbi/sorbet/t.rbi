@@ -229,7 +229,7 @@ module T::Generic
   #
   # For more information, see https://sorbet.org/docs/generics
   sig {params(variance: Symbol, blk: T.untyped).returns(T::Types::TypeMember)}
-  def type_member(variance=:invariant, &blk); end
+  private def type_member(variance=:invariant, &blk); end
 
   # Type syntax for declaring a generic type variable scoped to the singleton
   # class of the enclosing class. Most commonly used to simulate having an
@@ -237,7 +237,7 @@ module T::Generic
   #
   # For more information, see https://sorbet.org/docs/generics
   sig {params(variance: Symbol, blk: T.untyped).returns(T::Types::TypeTemplate)}
-  def type_template(variance=:invariant, &blk); end
+  private def type_template(variance=:invariant, &blk); end
 
   # Type syntax for applying a generic class to a type argument.
   #
@@ -256,7 +256,7 @@ module T::Generic
   #
   # For more information, see https://sorbet.org/docs/attached-class
   sig {params(variance: Symbol, blk: T.untyped).void}
-  def has_attached_class!(variance=:invariant, &blk); end
+  private def has_attached_class!(variance=:invariant, &blk); end
 end
 
 module T::Helpers
@@ -264,21 +264,21 @@ module T::Helpers
   #
   # For more information, see https://sorbet.org/docs/abstract
   sig {void}
-  def abstract!;  end
+  private def abstract!;  end
 
   # Type syntax for declaring an interface, which is an abstract module where
   # all the methods are abstract.
   #
   # For more information, see https://sorbet.org/docs/abstract
   sig {void}
-  def interface!; end
+  private def interface!; end
 
   # Type syntax for declaring a final class or module, which prevents it from
   # being included, extended, or inherited.
   #
   # For more information, see https://sorbet.org/docs/final
   sig {void}
-  def final!; end
+  private def final!; end
 
   # Type syntax for declaring a sealed class or module, which limits the class
   # or module to being included, extended, or inherited except in the class
@@ -287,7 +287,7 @@ module T::Helpers
   #
   # For more information, see https://sorbet.org/docs/sealed
   sig {void}
-  def sealed!; end
+  private def sealed!; end
 
   # We do not use signatures on `mixes_in_class_methods` as to not duplicate errors
   # between the `namer` phase and typechecking for calls.
@@ -310,14 +310,14 @@ module T::Helpers
   #
   # For more information, see https://sorbet.org/docs/abstract#interfaces-and-the-included-hook
   sig {params(mod: T::Module[T.anything], mods: T::Module[T.anything]).void}
-  def mixes_in_class_methods(mod, *mods); end
+  private def mixes_in_class_methods(mod, *mods); end
 
   # Experimental feature to require that a module be eventually mixed into a
   # given type of module.
   #
   # For more information, see https://sorbet.org/docs/requires-ancestor
   sig { params(block: T.proc.void).void }
-  def requires_ancestor(&block); end
+  private def requires_ancestor(&block); end
 end
 
 module T::Array
