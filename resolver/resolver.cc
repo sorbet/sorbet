@@ -507,11 +507,12 @@ private:
                         auto resolved = job.scope->scope.asClassOrModuleRef().data(ctx)->findMemberTransitiveNoDealias(
                             ctx, original.cnst);
                         if (resolved.exists()) {
+                            auto resolvedStr = resolved.show(ctx);
                             e.addErrorLine(
                                 resolved.loc(ctx),
-                                "Would resolve to `{}`, but constant resolution through inheritance is disabled");
-                            e.replaceWith("Absolutely qualify constant", ctx.locAt(job.out->loc()), "{}",
-                                          resolved.show(ctx));
+                                "Would resolve to `{}`, but constant resolution through inheritance is disabled",
+                                resolvedStr);
+                            e.replaceWith("Absolutely qualify constant", ctx.locAt(job.out->loc()), "{}", resolvedStr);
                             foundCommonTypo = true;
                         }
                     }
