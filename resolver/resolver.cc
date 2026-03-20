@@ -294,7 +294,13 @@ private:
             }
             scope = scope->parent.get();
         }
-        return nesting->scope.asClassOrModuleRef().data(ctx)->findMemberTransitiveNoDealias(ctx, name);
+        if (ctx.state.recursiveConstantResolution) {
+            return nesting->scope.asClassOrModuleRef().data(ctx)->findMemberTransitiveNoDealias(ctx, name);
+        } else {
+            // We would have already done a non-transitive lookup on nesting->scope in the first
+            // iteration of the loop above, so just return noSymbol directly here.
+            return core::Symbols::noSymbol();
+        }
     }
 
     static bool isAlreadyResolved(core::Context ctx, const ast::ConstantLit &original) {
@@ -491,6 +497,23 @@ private:
                             e.didYouMean(to, ctx.locAt(job.out->loc()));
                             foundCommonTypo = true;
                             break;
+                        }
+                    }
+                }
+
+                if (!foundCommonTypo && !gs.recursiveConstantResolution) {
+                    const auto &original = *job.out->original();
+                    if (ast::isa_tree<ast::EmptyTree>(original.scope)) {
+                        auto resolved = job.scope->scope.asClassOrModuleRef().data(ctx)->findMemberTransitiveNoDealias(
+                            ctx, original.cnst);
+                        if (resolved.exists()) {
+                            auto resolvedStr = resolved.show(ctx);
+                            e.addErrorLine(
+                                resolved.loc(ctx),
+                                "Would resolve to `{}`, but constant resolution through inheritance is disabled",
+                                resolvedStr);
+                            e.replaceWith("Absolutely qualify constant", ctx.locAt(job.out->loc()), "{}", resolvedStr);
+                            foundCommonTypo = true;
                         }
                     }
                 }

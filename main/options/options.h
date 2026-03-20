@@ -161,6 +161,7 @@ struct Options {
     int logLevel = 0; // number of time -v was passed
     int autogenVersion = 0;
     bool uniquelyDefinedBehavior = false;
+    bool recursiveConstantResolution = true;
     std::string sorbetPackagesHint = "";
     std::vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes;
     std::vector<std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes;
