@@ -1,0 +1,13 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  <self>.puts(::<ErrorNode>)
+
+  <self>.puts(Unresolved: ::<ErrorNode>::<C B>)
+
+  ::AliasToInt = ::T.type_alias() do ||
+    ::Integer
+  end
+
+  <self>.puts(::<ErrorNode>)
+
+  <self>.puts(Unresolved: ::<ErrorNode>::<C Y>)
+end

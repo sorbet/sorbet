@@ -8,7 +8,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.puts(::E.e())
       <self>.puts(::F.f=(91))
       <self>.puts(::G.new().wrapper())
-      <self>.puts(::T.untyped.h())
+      <self>.puts(::<ErrorNode>.h())
     end
   end
 
