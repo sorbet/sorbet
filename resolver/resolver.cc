@@ -2256,6 +2256,10 @@ class ResolveTypeMembersAndFieldsWalk {
                 }
             },
             [&](const ast::Send &send) {
+                if (send.fun == core::Names::stringInterpolate()) {
+                    result = core::Types::String();
+                    return;
+                }
                 if (send.fun != core::Names::freeze() || send.hasNonBlockArgs() || send.hasBlock() ||
                     !(ast::isa_tree<ast::Array>(send.recv) || ast::isa_tree<ast::Hash>(send.recv))) {
                     return;

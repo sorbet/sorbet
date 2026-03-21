@@ -5,9 +5,8 @@ sig { returns(Symbol) }
 def test_strings
   %q{}
   "foo"
-  T.reveal_type(X) # error: `T.untyped`
+  T.reveal_type(X) # error: `String`
   "foo#{1}" # error: Expected `Symbol` but found `String`
 end
 
 X = "#{}"
-#   ^^^^^ error: Constants must have type annotations
