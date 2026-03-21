@@ -188,30 +188,33 @@ KnowledgeRef KnowledgeRef::under(core::Context ctx, const Environment &env, cfg:
 }
 
 void KnowledgeFact::min(core::Context ctx, const KnowledgeFact &other) {
-    for (auto it = yesTypeTests.begin(); it != yesTypeTests.end(); /* nothing */) {
-        auto &entry = *it;
+    auto yesEnd = yesTypeTests.end();
+    auto yit = std::remove_if(yesTypeTests.begin(), yesEnd, [ctx, &other](auto &entry) {
         cfg::LocalRef local = entry.first;
         auto fnd = absl::c_find_if(other.yesTypeTests, [&](auto const &elem) -> bool { return elem.first == local; });
         if (fnd == other.yesTypeTests.end()) {
             // Note: No need to update Environment::typeTestsWithVar since it is an overapproximation
-            it = yesTypeTests.erase(it);
-        } else {
-            entry.second = core::Types::any(ctx, fnd->second, entry.second);
-            it++;
+            return true;
         }
-    }
-    for (auto it = noTypeTests.begin(); it != noTypeTests.end(); /* nothing */) {
-        auto &entry = *it;
+
+        entry.second = core::Types::any(ctx, fnd->second, entry.second);
+        return false;
+    });
+    yesTypeTests.erase(yit, yesEnd);
+
+    auto noEnd = noTypeTests.end();
+    auto nit = std::remove_if(noTypeTests.begin(), noEnd, [ctx, &other](auto &entry) {
         cfg::LocalRef local = entry.first;
         auto fnd = absl::c_find_if(other.noTypeTests, [&](auto const &elem) -> bool { return elem.first == local; });
         if (fnd == other.noTypeTests.end()) {
             // Note: No need to update Environment::typeTestsWithVar since it is an overapproximation
-            it = noTypeTests.erase(it);
-        } else {
-            entry.second = core::Types::all(ctx, fnd->second, entry.second);
-            it++;
+            return true;
         }
-    }
+
+        entry.second = core::Types::all(ctx, fnd->second, entry.second);
+        return false;
+    });
+    noTypeTests.erase(nit, noEnd);
 }
 
 void KnowledgeFact::sanityCheck() const {
