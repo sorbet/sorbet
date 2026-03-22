@@ -1939,6 +1939,40 @@ void ClassOrModule::recordRequiredAncestorInternal(GlobalState &gs, ClassOrModul
         auto &arg = gs.enterMethodParameter(core::Loc::none(), ancestors, core::Names::arg());
         vector<TypePtr> torigins;
         arg.type = make_type<TupleType>(move(torigins));
+    } else {
+        // We're on a fast path and need to update a location for the `requires_ancestor` symbol.
+        // Symbols for `requires_ancestor` are special:
+        // they can be associated with more than one location in a single file
+        //
+        // For example:
+        // ```
+        // class A
+        //   requires_ancestor { B }
+        //   requires_ancestor { C }
+        // end
+        // ```
+        //
+        // Class `A` would have one symbol for the `requires_ancestor` method, but two identical locations for that
+        // symbol in the same file.
+        //
+        // Usually Sorbet doesn't permit more than one location in a signle file.
+        //
+        // That invariant is enforced by updating the existing location instead
+        // of adding a duplicate (see the first loop in the `addLocInternal`)
+        //
+        // To hack around this constraint, we insert a location for the symbol directly into
+        // `locs_` bypassing `addLoc` (see the last line in this method)
+        //
+        // That means if we want to update a location for `requires_ancestor` symbol,
+        // we need to update all `Loc`'s pointing to `ancestor.loc.file()`
+
+        for (auto &loc : ancestors.data(gs)->locs_) {
+            if (loc.file() == ancestor.loc.file()) {
+                loc = ancestor.loc;
+            }
+        }
+
+        stopInDebugger();
     }
 
     // Do not require the same ancestor twice
