@@ -40,8 +40,15 @@ module Opus::Types::Test
       assert_match(/Return value: Expected type T.noreturn, got type Integer/, e.message)
     end
 
-    it 'nils the return for void' do
+    it 'replaces the return for void by default' do
       assert_equal(T::Private::Types::Void::VOID, TestReturns.voider)
+    end
+
+    it 'returns the actual value when void return value replacement is disabled' do
+      T::Configuration.disable_void_return_value_replacement
+      assert_equal("voider", TestReturns.voider)
+    ensure
+      T::Configuration.enable_void_return_value_replacement
     end
 
     it 'can mark constructors void' do

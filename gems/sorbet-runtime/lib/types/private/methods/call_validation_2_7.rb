@@ -649,8 +649,8 @@ module T::Private::Methods::CallValidation
       # this code is sig validation code.
       # Please issue `finish` to step out of it
 
-      original_method.bind_call(self, &blk)
-      T::Private::Types::Void::VOID
+      return_value = original_method.bind_call(self, &blk)
+      T::Configuration.void_return_value_replacement_enabled? ? T::Private::Types::Void::VOID : return_value
     end
   end
 
@@ -684,8 +684,8 @@ module T::Private::Methods::CallValidation
       # this code is sig validation code.
       # Please issue `finish` to step out of it
 
-      original_method.bind_call(self, arg0, &blk)
-      T::Private::Types::Void::VOID
+      return_value = original_method.bind_call(self, arg0, &blk)
+      T::Configuration.void_return_value_replacement_enabled? ? T::Private::Types::Void::VOID : return_value
     end
   end
 
@@ -731,8 +731,8 @@ module T::Private::Methods::CallValidation
       # this code is sig validation code.
       # Please issue `finish` to step out of it
 
-      original_method.bind_call(self, arg0, arg1, &blk)
-      T::Private::Types::Void::VOID
+      return_value = original_method.bind_call(self, arg0, arg1, &blk)
+      T::Configuration.void_return_value_replacement_enabled? ? T::Private::Types::Void::VOID : return_value
     end
   end
 
@@ -790,8 +790,8 @@ module T::Private::Methods::CallValidation
       # this code is sig validation code.
       # Please issue `finish` to step out of it
 
-      original_method.bind_call(self, arg0, arg1, arg2, &blk)
-      T::Private::Types::Void::VOID
+      return_value = original_method.bind_call(self, arg0, arg1, arg2, &blk)
+      T::Configuration.void_return_value_replacement_enabled? ? T::Private::Types::Void::VOID : return_value
     end
   end
 
@@ -861,8 +861,8 @@ module T::Private::Methods::CallValidation
       # this code is sig validation code.
       # Please issue `finish` to step out of it
 
-      original_method.bind_call(self, arg0, arg1, arg2, arg3, &blk)
-      T::Private::Types::Void::VOID
+      return_value = original_method.bind_call(self, arg0, arg1, arg2, arg3, &blk)
+      T::Configuration.void_return_value_replacement_enabled? ? T::Private::Types::Void::VOID : return_value
     end
   end
 
@@ -1509,8 +1509,8 @@ module T::Private::Methods::CallValidation
       # this code is sig validation code.
       # Please issue `finish` to step out of it
 
-      original_method.bind_call(self, &blk)
-      T::Private::Types::Void::VOID
+      return_value = original_method.bind_call(self, &blk)
+      T::Configuration.void_return_value_replacement_enabled? ? T::Private::Types::Void::VOID : return_value
     end
   end
 
@@ -1544,8 +1544,8 @@ module T::Private::Methods::CallValidation
       # this code is sig validation code.
       # Please issue `finish` to step out of it
 
-      original_method.bind_call(self, arg0, &blk)
-      T::Private::Types::Void::VOID
+      return_value = original_method.bind_call(self, arg0, &blk)
+      T::Configuration.void_return_value_replacement_enabled? ? T::Private::Types::Void::VOID : return_value
     end
   end
 
@@ -1591,8 +1591,8 @@ module T::Private::Methods::CallValidation
       # this code is sig validation code.
       # Please issue `finish` to step out of it
 
-      original_method.bind_call(self, arg0, arg1, &blk)
-      T::Private::Types::Void::VOID
+      return_value = original_method.bind_call(self, arg0, arg1, &blk)
+      T::Configuration.void_return_value_replacement_enabled? ? T::Private::Types::Void::VOID : return_value
     end
   end
 
@@ -1650,8 +1650,8 @@ module T::Private::Methods::CallValidation
       # this code is sig validation code.
       # Please issue `finish` to step out of it
 
-      original_method.bind_call(self, arg0, arg1, arg2, &blk)
-      T::Private::Types::Void::VOID
+      return_value = original_method.bind_call(self, arg0, arg1, arg2, &blk)
+      T::Configuration.void_return_value_replacement_enabled? ? T::Private::Types::Void::VOID : return_value
     end
   end
 
@@ -1721,8 +1721,8 @@ module T::Private::Methods::CallValidation
       # this code is sig validation code.
       # Please issue `finish` to step out of it
 
-      original_method.bind_call(self, arg0, arg1, arg2, arg3, &blk)
-      T::Private::Types::Void::VOID
+      return_value = original_method.bind_call(self, arg0, arg1, arg2, arg3, &blk)
+      T::Configuration.void_return_value_replacement_enabled? ? T::Private::Types::Void::VOID : return_value
     end
   end
 

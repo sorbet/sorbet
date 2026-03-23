@@ -179,9 +179,11 @@ module T::Private::Methods::CallValidation
     return_value = original_method.bind_call(instance, *args, &blk)
 
     # The only type that is allowed to change the return value is `.void`.
-    # It ignores what you returned and changes it to be a private singleton.
+    # It ignores what you returned and changes it to be a private singleton,
+    # unless void return value replacement has been disabled via
+    # T::Configuration.disable_void_return_value_replacement.
     if method_sig.return_type.is_a?(T::Private::Types::Void)
-      T::Private::Types::Void::VOID
+      T::Configuration.void_return_value_replacement_enabled? ? T::Private::Types::Void::VOID : return_value
     else
       message = method_sig.return_type.error_message_for_obj(return_value)
       if message
@@ -282,9 +284,11 @@ module T::Private::Methods::CallValidation
     return_value = original_method.bind_call(instance, *args, &blk)
 
     # The only type that is allowed to change the return value is `.void`.
-    # It ignores what you returned and changes it to be a private singleton.
+    # It ignores what you returned and changes it to be a private singleton,
+    # unless void return value replacement has been disabled via
+    # T::Configuration.disable_void_return_value_replacement.
     if method_sig.return_type.is_a?(T::Private::Types::Void)
-      T::Private::Types::Void::VOID
+      T::Configuration.void_return_value_replacement_enabled? ? T::Private::Types::Void::VOID : return_value
     else
       message = method_sig.return_type.error_message_for_obj(return_value)
       if message

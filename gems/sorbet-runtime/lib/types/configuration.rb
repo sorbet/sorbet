@@ -567,6 +567,40 @@ module T::Configuration
     @sealed_violation_whitelist
   end
 
+  @void_return_value_replacement_enabled = true
+  # Whether to replace the return values of `.void` methods with a sentinel
+  # `T::Private::Types::Void::VOID` value.
+  #
+  # When Sorbet Runtime is active, falsy return values (`nil` and `false`) from
+  # `.void` methods are replaced with `T::Private::Types::Void::VOID`, which is
+  # truthy. This can introduce divergence between test environments (where
+  # Sorbet Runtime is enabled) and production environments (where it may be
+  # disabled for performance reasons).
+  #
+  # Disabling this replacement makes `.void` method return values consistent
+  # between environments where Sorbet Runtime is enabled and disabled.
+  #
+  # The default is to enable void return value replacement (the original behavior).
+  #
+  # @return [T::Boolean]
+  def self.void_return_value_replacement_enabled?
+    @void_return_value_replacement_enabled
+  end
+
+  # Enable void return value replacement (the default behavior).
+  def self.enable_void_return_value_replacement
+    @void_return_value_replacement_enabled = true
+  end
+
+  # Disable void return value replacement.
+  #
+  # When disabled, `.void` methods return their actual return value instead of
+  # `T::Private::Types::Void::VOID`, making runtime behavior consistent with
+  # environments where Sorbet Runtime is not loaded.
+  def self.disable_void_return_value_replacement
+    @void_return_value_replacement_enabled = false
+  end
+
   private_class_method def self.validate_lambda_given!(value)
     if !value.nil? && !value.respond_to?(:call)
       raise ArgumentError.new("Provided value must respond to :call")

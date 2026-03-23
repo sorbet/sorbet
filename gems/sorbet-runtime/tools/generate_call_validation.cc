@@ -186,10 +186,10 @@ void generateCreateValidatorFast(const Options &options, ValidatorKind kind, Typ
     const char *returnValueVar;
     switch (kind) {
         case ValidatorKind::Method:
+        case ValidatorKind::Procedure:
             returnValueVar = "return_value = ";
             break;
         case ValidatorKind::MethodSkipReturn:
-        case ValidatorKind::Procedure:
             returnValueVar = "";
             break;
     }
@@ -206,7 +206,7 @@ void generateCreateValidatorFast(const Options &options, ValidatorKind kind, Typ
 
     switch (kind) {
         case ValidatorKind::Procedure:
-            fmt::print("      T::Private::Types::Void::VOID\n");
+            fmt::print("      T::Configuration.void_return_value_replacement_enabled? ? T::Private::Types::Void::VOID : return_value\n");
             break;
 
         case ValidatorKind::MethodSkipReturn:
