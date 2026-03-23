@@ -115,10 +115,10 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "jemalloc",
-        url = "https://github.com/jemalloc/jemalloc/archive/20f9802e4f25922884448d9581c66d76cc905c0c.zip",  # 5.3
-        sha256 = "1cc1ec93701868691c73b371eb87e5452257996279a42303a91caad355374439",
+        url = "https://github.com/jemalloc/jemalloc/archive/refs/tags/5.3.0.zip",  # 5.3.0
+        sha256 = "1f35888bad9fd331f5a03445bc1bff808a59378be61fef01e9736179d76f2fab",
         build_file = "@com_stripe_ruby_typer//third_party:jemalloc.BUILD",
-        strip_prefix = "jemalloc-20f9802e4f25922884448d9581c66d76cc905c0c",
+        strip_prefix = "jemalloc-5.3.0",
     )
 
     http_archive(
