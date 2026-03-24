@@ -80,6 +80,22 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>.class_of(<emptyTree>::<C GenericSingleton1>).[](<emptyTree>::<C GenericSingleton1>, <emptyTree>::<C Integer>))
+  end
+
+  def class_singleton_generic_type1<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>.class_of(<emptyTree>::<C GenericSingleton2>).[](<emptyTree>::<C GenericSingleton2>, <emptyTree>::<C Integer>, <emptyTree>::<C String>))
+  end
+
+  def class_singleton_generic_type2<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
     <self>.returns(::<root>::<C T>.any(<emptyTree>::<C Foo>, <emptyTree>::<C Foo>::<C Bar>))
   end
 
@@ -556,6 +572,28 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <runtime method definition of class_singleton_type5>
 
   <emptyTree>::<C T>.reveal_type(<self>.class_singleton_type5())
+
+  class <emptyTree>::<C GenericSingleton1><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(<emptyTree>::<C T>::<C Generic>)
+
+    <emptyTree>::<C T1> = <self>.type_template()
+  end
+
+  class <emptyTree>::<C GenericSingleton2><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(<emptyTree>::<C T>::<C Generic>)
+
+    <emptyTree>::<C T1> = <self>.type_template()
+
+    <emptyTree>::<C T2> = <self>.type_template()
+  end
+
+  <runtime method definition of class_singleton_generic_type1>
+
+  <emptyTree>::<C T>.reveal_type(<self>.class_singleton_generic_type1())
+
+  <runtime method definition of class_singleton_generic_type2>
+
+  <emptyTree>::<C T>.reveal_type(<self>.class_singleton_generic_type2())
 
   <runtime method definition of union_type1>
 

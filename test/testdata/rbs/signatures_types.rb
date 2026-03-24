@@ -57,6 +57,29 @@ T.reveal_type(class_singleton_type4) # error: Revealed type: `T.class_of(Foo::Ba
 def class_singleton_type5; T.unsafe(nil); end
 T.reveal_type(class_singleton_type5) # error: Revealed type: `T.class_of(Foo::Bar)`
 
+# Class singleton generic types
+
+class GenericSingleton1
+  extend T::Generic
+
+  T1 = type_template
+end
+
+class GenericSingleton2
+  extend T::Generic
+
+  T1 = type_template
+  T2 = type_template
+end
+
+#: -> singleton(GenericSingleton1)[GenericSingleton1, Integer]
+def class_singleton_generic_type1; T.unsafe(nil); end
+T.reveal_type(class_singleton_generic_type1) # error: Revealed type: `T.class_of(GenericSingleton1)[GenericSingleton1, Integer]`
+
+#: -> singleton(GenericSingleton2)[GenericSingleton2, Integer, String]
+def class_singleton_generic_type2; T.unsafe(nil); end
+T.reveal_type(class_singleton_generic_type2) # error: Revealed type: `T.class_of(GenericSingleton2)[GenericSingleton2, Integer, String]`
+
 # Union types
 
 #: -> (Foo | Foo::Bar)
