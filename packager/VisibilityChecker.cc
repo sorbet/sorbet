@@ -934,8 +934,10 @@ public:
                 }
                 nonConstPackageInfo->trackPackageReferences(file, references);
 
-                auto &referencedSymbols = threadResult->referencedSymbols;
-                nonConstGs.setSymbolsReferencedByFile(file, referencedSymbols);
+                if (gs.packageDB().genPackages()) {
+                    auto &referencedSymbols = threadResult->referencedSymbols;
+                    nonConstGs.setSymbolsReferencedByFile(file, referencedSymbols);
+                }
             }
         }
         barrier.Wait();
