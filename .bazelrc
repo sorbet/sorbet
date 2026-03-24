@@ -93,7 +93,6 @@ build:dbg-linux --config=dbg --platforms=@//tools/platforms:linux_x86_64
 ##
 # release version: optimized, with debug symbols and version information
 build:release-common --define release=true
-build:release-common --define jemalloc=true
 build:release-common --compilation_mode=opt
 build:release-common --config=backtracesymbols
 build:release-common --config=versioned
@@ -127,8 +126,8 @@ build:release-linux-aarch64 --config=static-libs
 # We only use rules_foreign_cc for mimalloc and we only use mimalloc in release
 # builds, so I'm moving this here until we can figure out a better workaround,
 # or a fix lands upstream.
-# build:release-linux --define mimalloc=true
-# build:release-linux-aarch64 --define mimalloc=true
+build:release-linux --define mimalloc=true
+build:release-linux-aarch64 --define mimalloc=true
 
 # This is to turn on vector instructions where available.
 # We used to do this unconditionally, but Rosetta 2 doesn't translate all vector instructions well.
