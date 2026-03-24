@@ -55,6 +55,7 @@ cc_binary(
     deps = [
         "//common",
         "//main/lsp",
+        "//main/options",
         "//payload",
         "//test/helpers",
         "@cxxopts",
@@ -532,6 +533,20 @@ pipeline_tests(
     ),
     "LSPTests",
     extra_files = ["testdata/lsp/rubyfmt-stub/rubyfmt"],
+)
+
+pipeline_tests(
+    "test_corpus_lsp_prism",
+    glob(
+        [
+            "testdata/**/*.rb",
+            "testdata/**/*.rbi",
+            "testdata/**/*.exp",
+        ],
+    ),
+    "PrismLSPTests",
+    extra_files = ["testdata/lsp/rubyfmt-stub/rubyfmt"],
+    parser = "prism",
 )
 
 pipeline_tests(
