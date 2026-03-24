@@ -144,8 +144,18 @@ pm_node_t *TypeToParserNodePrism::classInstanceType(const rbs_types_class_instan
 
 pm_node_t *TypeToParserNodePrism::classSingletonType(const rbs_types_class_singleton_t *node, core::LocOffsets loc,
                                                      const RBSDeclaration &declaration) {
+    auto argsValue = node->args;
+    auto isGeneric = argsValue != nullptr && argsValue->length > 0;
     auto innerType = typeNameType(node->name, false, declaration);
-    return prism.Call1(loc, prism.T(loc), "class_of"sv, innerType);
+    auto classOfNode = prism.Call1(loc, prism.T(loc), "class_of"sv, innerType);
+
+    if (isGeneric) {
+        auto args = translateNodeList(argsValue, declaration);
+        auto methodName = core::Names::squareBrackets().shortName(ctx.state);
+        return prism.Call(loc, classOfNode, methodName, absl::MakeSpan(args));
+    }
+
+    return classOfNode;
 }
 
 pm_node_t *TypeToParserNodePrism::unionType(const rbs_types_union_t *node, core::LocOffsets loc,
