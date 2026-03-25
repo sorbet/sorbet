@@ -1481,10 +1481,10 @@ public:
 
     unique_ptr<Node> pair_label(const token *key) {
         unique_ptr<Node> value;
-        if (islower(key->view().at(0))) {
-            value = ident(key);
-        } else {
+        if (isupper(key->view().at(0))) {
             value = const_(key);
+        } else {
+            value = ident(key);
         }
 
         auto keyLoc = tokLoc(key);
