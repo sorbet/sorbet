@@ -1,7 +1,7 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   _id = 123
 
-  {:_id => <emptyTree>::<C _id>}
+  {:_id => _id}
 
-  <self>.p(:_id, <emptyTree>::<C _id>)
+  <self>.p(:_id, _id)
 end
