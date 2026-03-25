@@ -135,8 +135,23 @@ unique_ptr<parser::Node> TypeToParserNode::classInstanceType(const rbs_types_cla
 
 unique_ptr<parser::Node> TypeToParserNode::classSingletonType(const rbs_types_class_singleton_t *node,
                                                               core::LocOffsets loc, const RBSDeclaration &declaration) {
+    auto argsValue = node->args;
+    auto isGeneric = argsValue != nullptr && argsValue->length > 0;
     auto innerType = typeNameType(node->name, false, declaration);
-    return parser::MK::TClassOf(loc, move(innerType));
+    auto classOfNode = parser::MK::TClassOf(loc, move(innerType));
+
+    if (isGeneric) {
+        auto args = parser::NodeVec();
+        args.reserve(argsValue->length);
+        for (rbs_node_list_node *list_node = argsValue->head; list_node != nullptr; list_node = list_node->next) {
+            auto argType = toParserNode(list_node->node, declaration);
+            args.emplace_back(move(argType));
+        }
+
+        return parser::MK::Send(loc, move(classOfNode), core::Names::squareBrackets(), loc, move(args));
+    }
+
+    return classOfNode;
 }
 
 unique_ptr<parser::Node> TypeToParserNode::unionType(const rbs_types_union_t *node, core::LocOffsets loc,
