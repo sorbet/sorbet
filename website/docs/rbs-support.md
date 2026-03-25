@@ -749,6 +749,18 @@ module Factory
 end
 ```
 
+The RBS syntax requires that the type template be accessed inside the scope of the `class << self` declaration (instead of with methods defined like `def self.*` in the enclosing class definition). Concretely, the following reports a static error on the declaration of `make2` saying that `InstanceType` cannot be resolved:
+
+```ruby
+module Factory
+  #: [InstanceType]
+  class << self; end
+
+  #: -> InstanceType
+  def self.make2; end
+end
+```
+
 ### Variance
 
 [Variance](generics.md#in-out-and-variance) can be specified using the `in` and `out` keywords:
