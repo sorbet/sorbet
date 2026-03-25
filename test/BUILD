@@ -466,7 +466,6 @@ pipeline_tests(
             "testdata/desugar/op_asgn_kw_block.rb",
 
             # Prism desugared tree doesn't match legacy desugared tree (desugar differences)
-            "testdata/desugar/destructure.rb",
             "testdata/desugar/destructure_rest.rb",
             "testdata/desugar/splat.rb",
             "testdata/desugar/star_in_block_arg.rb",
@@ -544,7 +543,6 @@ pipeline_tests(
         exclude = [
             # related to ruby 3.4 syntax changes
             "prism_regression/assign_to_index.rb",
-            "prism_regression/multi_target.rb",
             "prism_regression/call_block_param.rb",
         ],
     ),
