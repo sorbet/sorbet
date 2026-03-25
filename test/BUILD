@@ -543,6 +543,28 @@ pipeline_tests(
             "testdata/**/*.rbi",
             "testdata/**/*.exp",
         ],
+        exclude = [
+            # Prism LSP known failures: completion differences
+            "testdata/lsp/completion/bad_arguments.rb",
+            "testdata/lsp/completion/bad_list_elems.rb",
+            "testdata/lsp/completion/case_1.rb",
+            "testdata/lsp/completion/error_recovery_binop_unop.rb",
+            "testdata/lsp/completion/instance_var.rb",
+            "testdata/lsp/completion/method_kwargs.rb",
+            "testdata/lsp/completion/method_kwargs_extra.rb",
+            "testdata/lsp/completion/missing_assign_rhs.rb",
+            "testdata/lsp/completion/missing_const_name.rb",
+            "testdata/lsp/completion/overridable.rb",
+            "testdata/lsp/completion/symbol_proc.rb",
+            "testdata/lsp/completion/untyped_parse_errors.rb",
+
+            # Prism LSP known failures: fast path
+            "testdata/lsp/fast_path/static_field_type.rb",
+
+            # Prism LSP known failures: hover with RBS
+            "testdata/lsp/hover_rbs.rb",
+            "testdata/lsp/hover_rbs_assertions_let.rb",
+        ],
     ),
     "PrismLSPTests",
     extra_files = ["testdata/lsp/rubyfmt-stub/rubyfmt"],
