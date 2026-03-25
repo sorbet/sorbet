@@ -47,43 +47,20 @@ def foo(x, y); end
 
 > Support for this feature is experimental, and we actively discourage depending on it for anything other than to offer feedback to the Sorbet developers.
 
-There are numerous shortcomings of the comment-based syntax versus `sig` syntax. By contrast, the near-sole upside is that the syntax is terser.
+There are some known limitations to be aware of when using RBS comment syntax.
 
-### The comment-based syntax is second class
+### Semantic differences with Sorbet
 
-The comment-based syntax uses [RBS syntax](https://github.com/ruby/rbs). RBS is an alternative annotation syntax for Ruby. The headline features of RBS:
-
-- It's the type annotation syntax blessed by the Ruby core team, and Matz in particular (the lead of the Ruby project).
-- RBS supports certain enticing features, like duck typing.
-- The syntax is terse.
-- The Ruby distribution bundles a gem for parsing RBS annotations.
-
-However, there are a number of problems which mean that RBS syntax has a second-class position in Sorbet:
-
-### RBS syntax does not match the semantics of Sorbet
-
-Sorbet's type annotation syntax evolved differently from the evolution of RBS syntax. Unfortunately, this difference is not syntax-deep: it affects the semantics of the types too.
-
-Sure, there are similarities: both syntaxes offer a way to express union types, for example. But there are also semantic differences, and RBS syntax reflects these differences. Things which are possible to express in RBS syntax have no analogue in Sorbet and vice versa. Some examples:
+RBS and Sorbet evolved independently, and their type systems differ in more than just syn tax. Some things expressible in RBS have no Sorbet equivalent and vice versa:
 
 - RBS supports duck typing via interfaces (different from Sorbet's [interfaces](abstract.md)), but [Sorbet does not support duck typing](faq.md#can-i-use-sorbet-for-duck-typed-code), by design.
 - RBS supports literal value types. Sorbet does not.
 
-Because of these differences, it's reasonable to assume that a codebase wishing to take full advantage of Sorbet's unique features will eventually need to have annotations that use `sig` syntax. The moment a method's annotation needs to use Sorbet-only syntax, the entire annotation needs to get rewritten—it's not possible to embed Sorbet-only syntax within the context of an RBS signature. While it is possible for RBS comment signatures to coexist with Sorbet `sig` signatures, needing to flip between them adds development friction.
-
-### Sorbet has minimal influence over the evolution of RBS syntax
-
-Sorbet continues to evolve its type syntax. For example, `T.anything`, `T::Class`, and `has_attached_class!` are additions to Sorbet which arrived 6 years after Sorbet's inception—Sorbet development is anything but stale!
-
-Sorbet can adapt more quickly to the needs of Sorbet users by building on its own syntax. Historically, it has been difficult to advocate to adding RBS features that benefit Sorbet specifically.
-
-Our belief is that syntax matters less than semantics; that "what's possible to express in the type system" matters more than "how to express it." Time spent bikeshedding syntax detracts from meaningful improvements to the type system.
+When a method needs Sorbet-only syntax, the entire annotation must use `sig`—it's not possible to mix the two. RBS and `sig` annotations can coexist in the same codebase, but needing to switch between them adds friction.
 
 ### IDE integration is more difficult
 
-Sorbet's type syntax doubles as Ruby syntax. Setting aside other benefits of reusing Ruby syntax for type annotations (e.g., [runtime checking](runtime.md), no need to transpile, seamless integration with linters, etc.), Sorbet's syntax integrates easily with existing editors.
-
-There are a lot of features that come for free by reusing Ruby syntax:
+SBecause RBS comment annotations are not Ruby syntax, some editor features require extra support:
 
 - Syntax highlighting
 
@@ -99,7 +76,7 @@ There are a lot of features that come for free by reusing Ruby syntax:
 
 In fairness, these are technical, implementation considerations, and thus could hope to improve one day. But they remain problems today.
 
-### Performance is worse
+### Performance overhead
 
 The chosen implementation for RBS annotations in comments is:
 
@@ -139,7 +116,7 @@ But steps 2 and 4 are pure overhead (step 3 is a wash). Not only does this imple
 
 In large codebases, this adds nontrivial overhead, and is a blocker in the way of being able to advocate for using this syntax more widely.
 
-#### Runtime checking is a feature
+### No runtime checking
 
 > Note that runtime checking of RBS signatures is not implemented, so type safety is reduced.
 
