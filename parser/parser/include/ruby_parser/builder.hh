@@ -165,7 +165,6 @@ struct builder {
     ForeignPtr (*range_exclusive)(SelfPtr builder, ForeignPtr lhs, const token *oper, ForeignPtr rhs);
     ForeignPtr (*range_inclusive)(SelfPtr builder, ForeignPtr lhs, const token *oper, ForeignPtr rhs);
     ForeignPtr (*rational)(SelfPtr builder, const token *tok);
-    ForeignPtr (*rational_complex)(SelfPtr builder, const token *tok);
     ForeignPtr (*regexp_compose)(SelfPtr builder, const token *begin, const node_list *parts, const token *end,
                                  ForeignPtr options);
     ForeignPtr (*regexp_options)(SelfPtr builder, const token *regopt);

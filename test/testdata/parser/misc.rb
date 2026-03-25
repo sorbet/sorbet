@@ -114,8 +114,11 @@ BEGIN{foo} # error: Unsupported node type `Preexe`
 END{bar} # error: Unsupported node type `Postexe`
 
 # rationals
-4r
-5ri
+1r
+1.23r
+# complex rationals
+1ri
+1.23ri
 
 # rescue, resbody
 begin

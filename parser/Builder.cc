@@ -1530,12 +1530,6 @@ public:
         return make_unique<Rational>(tokLoc(tok), tok->view());
     }
 
-    unique_ptr<Node> rational_complex(const token *tok) {
-        // TODO(nelhage): We're losing this information that this was marked as
-        // a Rational in the source.
-        return make_unique<Complex>(tokLoc(tok), tok->view());
-    }
-
     unique_ptr<Node> regexp_compose(const token *begin, sorbet::parser::NodeVec parts, const token *end,
                                     unique_ptr<Node> options) {
         core::LocOffsets loc = tokLoc(begin).join(tokLoc(end)).join(maybe_loc(options));
@@ -2136,6 +2130,8 @@ ForeignPtr character(SelfPtr builder, const token *char_) {
 }
 
 ForeignPtr complex(SelfPtr builder, const token *tok) {
+    // The token can include include an 'r' suffix (e.g. "1r" for `1ri`),
+    // which later gets stripped out during desugar.
     auto build = cast_builder(builder);
     return build->toForeign(build->complex(tok));
 }
@@ -2292,6 +2288,8 @@ ForeignPtr float_(SelfPtr builder, const token *tok) {
 }
 
 ForeignPtr floatComplex(SelfPtr builder, const token *tok) {
+    // The token can include include an 'r' suffix (e.g. "1r" for `1ri`),
+    // which later gets stripped out during desugar.
     auto build = cast_builder(builder);
     return build->toForeign(build->floatComplex(tok));
 }
@@ -2659,11 +2657,6 @@ ForeignPtr rational(SelfPtr builder, const token *tok) {
     return build->toForeign(build->rational(tok));
 }
 
-ForeignPtr rational_complex(SelfPtr builder, const token *tok) {
-    auto build = cast_builder(builder);
-    return build->toForeign(build->rational_complex(tok));
-}
-
 ForeignPtr regexp_compose(SelfPtr builder, const token *begin, const node_list *parts, const token *end,
                           ForeignPtr options) {
     auto build = cast_builder(builder);
@@ -2934,7 +2927,6 @@ struct ruby_parser::builder Builder::interface = {
     range_exclusive,
     range_inclusive,
     rational,
-    rational_complex,
     regexp_compose,
     regexp_options,
     rescue_body,
