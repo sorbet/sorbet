@@ -225,6 +225,8 @@ This can also be set via the `SORBET_RUNTIME_ENABLE_CHECKING_IN_TESTS` environme
 
 For example, this should probably be placed as the first line of any `rake test` target, as well as any other entry point to a project's tests. If this line is absent, `.checked(:tests)` sigs behave as if they had been `.checked(:never)`.
 
+**Note**: When a `sig` uses `.void` with `.checked(:tests)` or the default checked level is set to `:tests`, the method will return its actual value instead of replacing it with the `T::Private::Types::Void::VOID` sentinel. Use `.checked(:always)` to preserve the standard `.void` replacement behavior.
+
 ## `T::Sig::WithoutRuntime.sig`
 
 Even with `.checked(:never)`, there is some slight runtime overhead. The block for a `sig { ... }` above a method is not evaluated until the first time that method is called. But Sorbet can only know whether a sig is `.checked(:never)` or not until the block is evaluated. So even if a sig is marked `.checked(:never)`, Sorbet will still wrap the method. The first time the method is called, Sorbet will discover the `.checked(:never)` and put back the original method.

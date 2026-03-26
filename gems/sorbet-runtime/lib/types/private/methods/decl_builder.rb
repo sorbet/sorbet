@@ -232,6 +232,9 @@ module T::Private::Methods
         end
         decl.checked = default_checked_level
       end
+      if decl.checked == :tests && decl.returns.is_a?(T::Private::Types::Void)
+        decl.returns = T::Types::Anything::Private::INSTANCE
+      end
       if decl.on_failure.equal?(ARG_NOT_PROVIDED)
         decl.on_failure = nil
       end

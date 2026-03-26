@@ -337,6 +337,50 @@ module Opus::Types::Test
             end
           end
 
+          it 'void with explicit checked(:tests) skips void replacement' do
+            T::Private::RuntimeLevels._toggle_checking_tests(true)
+
+            a = Module.new do
+              extend T::Sig
+              sig { void.checked(:tests) }
+              def self.foo
+                "actual_value"
+              end
+            end
+
+            assert_equal("actual_value", a.foo)
+          end
+
+          it 'void with default_checked_level :tests skips void replacement' do
+            T::Private::RuntimeLevels.instance_variable_set(:@default_checked_level, :tests)
+            T::Private::RuntimeLevels._toggle_checking_tests(true)
+
+            a = Module.new do
+              extend T::Sig
+              sig { void }
+              def self.foo
+                "actual_value"
+              end
+            end
+
+            assert_equal("actual_value", a.foo)
+          end
+
+          it 'void with default_checked_level :tests but explicit checked(:always) still replaces void' do
+            T::Private::RuntimeLevels.instance_variable_set(:@default_checked_level, :tests)
+            T::Private::RuntimeLevels._toggle_checking_tests(true)
+
+            a = Module.new do
+              extend T::Sig
+              sig { void.checked(:always) }
+              def self.foo
+                "actual_value"
+              end
+            end
+
+            assert_equal(T::Private::Types::Void::VOID, a.foo)
+          end
+
           it 'override default checked level to :never but opt in with .checked(:always)' do
             T::Private::RuntimeLevels.instance_variable_set(:@default_checked_level, :never)
 
