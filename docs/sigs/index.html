@@ -200,7 +200,8 @@
 <li><p>Statically, Sorbet will let us return any value (for example, returning either <code>5</code> or <code>nil</code> is valid).</p></li>
 <li><p>Also statically, Sorbet will error when typed code tries to inspect the result of a <code>void</code> method.</p></li>
 <li><p>In the runtime, <code>sorbet-runtime</code> will <em>throw away</em> the result of our method, and return a dummy value instead. (All <code>void</code> methods return the same dummy value.)</p>
-<p>If you do not want this behavior, either use <code>returns(T.anything)</code> instead (<a href="/docs/anything">docs for <code>T.anything</code></a>), or <a href="/docs/runtime">disable runtime checking</a> for that method (or all methods).</p></li>
+<p>If you do not want this behavior, either use <code>returns(T.anything)</code> instead (<a href="/docs/anything">docs for <code>T.anything</code></a>), or <a href="/docs/runtime">disable runtime checking</a> for that method (or all methods).</p>
+<p>Note that the return value will <strong>not</strong> be intercepted and replaced for <code>.void.checked(:tests)</code> signatures. See <a href="/docs/runtime#checkedtests-and-void"><code>.checked(:tests)</code> and <code>.void</code></a> for more.</p></li>
 </ul>
 <p>Replacing the return value with a meaningless value prevents untyped code from silently depending on what a typed method returns, so that the implementation is free to change without worry of breaking existing code which silently depended on the result of the method being meaningful.</p>
 <p>Concretely, here’s a full example of how to use <code>void</code> to type methods with useless returns:</p>
