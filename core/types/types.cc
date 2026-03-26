@@ -247,6 +247,35 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, absl::
                 result = from;
             }
         },
+        [&](const EnumUnion &eu) {
+            if (absl::c_any_of(klasses, [&](auto klass) {
+                    return isSubType(gs, make_type<ClassType>(eu.parentEnumClass(gs)), make_type<ClassType>(klass));
+                })) {
+                // One of the klasses is a superclass of the parentEnumClass.
+                // This means every element in the EnumUnion will be a subtype of that klass, and thus will be dropped.
+                result = Types::bottom();
+            } else {
+                // None of the klasses are a superclass of the parent enum. This means, for each, either:
+                // - they are exactly equal to one of the EnumUnion members
+                // - they are not superclass of any of the EnumUnion members
+                // So we can check for equality of the ClassOrModuleRef directly instead of using isSubType
+                vector<ClassOrModuleRef> kept;
+                for (auto &member : eu.members) {
+                    if (absl::c_all_of(klasses, [&](auto klass) { return klass != member; })) {
+                        kept.emplace_back(member);
+                    }
+                }
+                if (kept.size() == eu.members.size()) {
+                    result = from;
+                } else if (kept.empty()) {
+                    result = Types::bottom();
+                } else if (kept.size() == 1) {
+                    result = make_type<ClassType>(kept[0]);
+                } else {
+                    result = make_type<EnumUnion>(move(kept));
+                }
+            }
+        },
         [&](const SelfTypeParam &p) {
             if (!p.definition.isTypeMember()) {
                 // Only type members have upper bounds--type parameters do not
@@ -321,6 +350,8 @@ TypePtr Types::approximateSubtract(const GlobalState &gs, const TypePtr &from, c
         [&](const OrType &o) {
             result = Types::approximateSubtract(gs, Types::approximateSubtract(gs, from, o.left), o.right);
         },
+        [&](const EnumUnion &e) { result = Types::dropSubtypesOf(gs, from, absl::MakeSpan(e.members)); },
+
         [&](const TypePtr &) { result = from; });
     return result;
 }
@@ -770,6 +801,50 @@ bool MetaType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const 
     return false;
 }
 
+EnumUnion::EnumUnion(vector<ClassOrModuleRef> members) : members(move(members)) {
+    recordAllocatedType("enumunion");
+}
+
+void EnumUnion::_sanityCheck(const GlobalState &gs) const {
+    ENFORCE(members.size() >= 2);
+    auto firstParent = EnumUnion::parentEnumClass(gs, members[0]);
+    for (auto &member : members) {
+        ENFORCE(firstParent == EnumUnion::parentEnumClass(gs, member));
+    }
+}
+
+bool EnumUnion::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
+    if (parentEnumClass(gs).data(gs)->derivesFrom(gs, klass)) {
+        return true;
+    }
+    // The common ancestor of all members of EnumUnion is parentEnumClass, so if it doesn't derive from klass, there's
+    // no way all of the members can derive from it too
+    return false;
+}
+
+ClassOrModuleRef EnumUnion::parentEnumClass(const GlobalState &gs, ClassOrModuleRef sym) {
+    if (!sym.data(gs)->name.isTEnumName(gs)) {
+        return ClassOrModuleRef();
+    }
+    return sym.data(gs)->superClass();
+}
+
+ClassOrModuleRef EnumUnion::parentEnumClass(const GlobalState &gs) const {
+    ENFORCE(!members.empty());
+    auto result = parentEnumClass(gs, members[0]);
+    ENFORCE(result.exists());
+    return result;
+}
+
+TypePtr EnumUnion::toOrType(const GlobalState &gs) const {
+    ENFORCE(members.size() >= 2);
+    auto result = make_type<ClassType>(members[0]);
+    for (size_t i = 1; i < members.size(); i++) {
+        result = OrType::make_shared(result, make_type<ClassType>(members[i]));
+    }
+    return result;
+}
+
 TypeVar::TypeVar(TypeParameterRef sym) : sym(sym) {
     recordAllocatedType("typevar");
 }
@@ -913,9 +988,9 @@ TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
     TypePtr ret;
     typecase(
         type, [&](const ClassType &klass) { ret = type; }, [&](const TypeVar &tv) { ret = type; },
-        [&](const LambdaParam &tv) { ret = type; }, [&](const SelfType &self) { ret = type; },
-        [&](const NamedLiteralType &lit) { ret = type; }, [&](const IntegerLiteralType &i) { ret = type; },
-        [&](const FloatLiteralType &i) { ret = type; },
+        [&](const EnumUnion &enumUnion) { ret = type; }, [&](const LambdaParam &tv) { ret = type; },
+        [&](const SelfType &self) { ret = type; }, [&](const NamedLiteralType &lit) { ret = type; },
+        [&](const IntegerLiteralType &i) { ret = type; }, [&](const FloatLiteralType &i) { ret = type; },
         [&](const AndType &andType) {
             ret = AndType::make_shared(unwrapSelfTypeParam(ctx, andType.left), unwrapSelfTypeParam(ctx, andType.right));
         },
