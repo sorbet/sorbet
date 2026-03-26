@@ -202,6 +202,10 @@ Using `void` instead of `returns(...)` does a number of things:
 
   If you do not want this behavior, either use `returns(T.anything)` instead ([docs for `T.anything`](anything.md)), or [disable runtime checking](runtime.md) for that method (or all methods).
 
+  Note that the return value will **not** be intercepted and replaced for `.void.checked(:tests)` signatures. See [`.checked(:tests)` and `.void`] for more.
+
+[`.checked(:tests)` and `.void`]: runtime.md#checkedtests-and-void
+
 Replacing the return value with a meaningless value prevents untyped code from silently depending on what a typed method returns, so that the implementation is free to change without worry of breaking existing code which silently depended on the result of the method being meaningful.
 
 Concretely, here's a full example of how to use `void` to type methods with useless returns:
