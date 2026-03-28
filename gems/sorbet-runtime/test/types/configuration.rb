@@ -423,5 +423,39 @@ module Opus::Types::Test
         assert_includes(ex.message, "Set the default checked level earlier. There are already some methods whose sig blocks have evaluated which would not be affected by the new default.")
       end
     end
+
+    describe 'recursively_check_in_tests' do
+      before do
+        @orig_recursively_check_in_tests = T::Private::RuntimeLevels.instance_variable_get(:@recursively_check_in_tests)
+        @orig_env_recursively_check_in_tests = ENV['SORBET_RUNTIME_ENABLE_RECURSIVE_CHECKING_IN_TESTS']
+        T::Private::RuntimeLevels.instance_variable_set(:@recursively_check_in_tests, false)
+      end
+
+      after do
+        T::Private::RuntimeLevels.instance_variable_set(:@recursively_check_in_tests, @orig_recursively_check_in_tests)
+        ENV['SORBET_RUNTIME_ENABLE_RECURSIVE_CHECKING_IN_TESTS'] = @orig_env_recursively_check_in_tests
+      end
+      describe 'when not set' do
+        before do
+          ENV['SORBET_RUNTIME_ENABLE_RECURSIVE_CHECKING_IN_TESTS'] = nil
+        end
+        it 'does not recursively check in tests' do
+          T::Private::RuntimeLevels.send(:set_enable_recursive_checking_in_tests_from_environment)
+          assert_equal([nil, 2], T.let([nil, 2], T::Array[Integer]))
+        end
+      end
+
+      describe 'when set' do
+        before do
+          ENV['SORBET_RUNTIME_ENABLE_RECURSIVE_CHECKING_IN_TESTS'] = '1'
+        end
+        it 'recursively checks in tests' do
+          T::Private::RuntimeLevels.send(:set_enable_recursive_checking_in_tests_from_environment)
+          assert_raises(TypeError) do
+            T.let([nil, 2], T::Array[Integer])
+          end
+        end
+      end
+    end
   end
 end
