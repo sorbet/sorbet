@@ -1,7 +1,7 @@
 #include "core/lsp/PreemptionTaskManager.h"
 #include "core/ErrorQueue.h"
 #include "core/NullFlusher.h"
-#include "core/lsp/Task.h"
+#include "core/lsp/PreemptionTask.h"
 #include "core/lsp/TypecheckEpochManager.h"
 
 using namespace std;
@@ -11,7 +11,7 @@ namespace sorbet::core::lsp {
 PreemptionTaskManager::PreemptionTaskManager(shared_ptr<TypecheckEpochManager> epochManager)
     : epochManager(move(epochManager)) {}
 
-bool PreemptionTaskManager::trySchedulePreemptionTask(shared_ptr<Task> task) {
+bool PreemptionTaskManager::trySchedulePreemptionTask(shared_ptr<PreemptionTask> task) {
     TypecheckEpochManager::assertConsistentThread(
         processingThreadId, "PreemptionTaskManager::trySchedulePreemptionTask", "processing thread");
     bool success = false;
@@ -39,7 +39,7 @@ bool PreemptionTaskManager::tryRunScheduledPreemptionTask(const core::GlobalStat
         typecheckingThreadId, "PreemptionTaskManager::tryRunScheduledPreemptionTask", "typechecking thread");
     auto preemptTask = atomic_load(&this->preemptTask);
     if (preemptTask != nullptr &&
-        atomic_compare_exchange_strong(&this->preemptTask, &preemptTask, shared_ptr<Task>(nullptr))) {
+        atomic_compare_exchange_strong(&this->preemptTask, &preemptTask, shared_ptr<PreemptionTask>(nullptr))) {
         // Capture with write lock before running task. Ensures that all worker threads park before we proceed.
         absl::MutexLock lock(&typecheckMutex);
         // The error queue is where typechecking puts all typechecking errors. For a given edit, Sorbet LSP runs
@@ -58,10 +58,10 @@ bool PreemptionTaskManager::tryRunScheduledPreemptionTask(const core::GlobalStat
     return false;
 }
 
-bool PreemptionTaskManager::tryCancelScheduledPreemptionTask(shared_ptr<Task> &task) {
+bool PreemptionTaskManager::tryCancelScheduledPreemptionTask(shared_ptr<PreemptionTask> &task) {
     TypecheckEpochManager::assertConsistentThread(
         processingThreadId, "PreemptionTaskManager::tryCancelScheduledPreemptionTask", "processing thread");
-    return atomic_compare_exchange_strong(&preemptTask, &task, shared_ptr<Task>(nullptr));
+    return atomic_compare_exchange_strong(&preemptTask, &task, shared_ptr<PreemptionTask>(nullptr));
 }
 
 unique_ptr<absl::ReaderMutexLock> PreemptionTaskManager::lockPreemption() const {

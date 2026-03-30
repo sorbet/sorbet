@@ -1,8 +1,8 @@
 #include "main/lsp/LSPTypecheckerCoordinator.h"
 #include "absl/synchronization/notification.h"
 #include "common/concurrency/WorkerPool.h"
+#include "core/lsp/PreemptionTask.h"
 #include "core/lsp/PreemptionTaskManager.h"
-#include "core/lsp/Task.h"
 #include "core/lsp/TypecheckEpochManager.h"
 #include "main/lsp/LSPTask.h"
 #include "main/lsp/notifications/initialized.h"
@@ -22,7 +22,7 @@ namespace {
  * the right to run other types of tasks on this thread when appropriate.
  * - core/lsp/PreemptionTaskManager: Knows nothing about any of this and just wants to run a method with no args.
  */
-class TypecheckerTask final : public core::lsp::Task {
+class TypecheckerTask final : public LSPTypecheckerCoordinator::Task {
     const LSPConfiguration &config;
     const unique_ptr<LSPTask> task;
     const unique_ptr<LSPTypecheckerDelegate> delegate;
@@ -69,7 +69,7 @@ public:
     }
 };
 
-class DangerousTypecheckerTask : public core::lsp::Task {
+class DangerousTypecheckerTask : public LSPTypecheckerCoordinator::Task {
     const LSPConfiguration &config;
     unique_ptr<LSPDangerousTypecheckerTask> task;
     LSPTypechecker &typechecker;
@@ -121,7 +121,7 @@ LSPTypecheckerCoordinator::LSPTypecheckerCoordinator(const shared_ptr<const LSPC
       workers(workers), taskQueue{std::move(taskQueue)},
       preemptionWorkers(WorkerPool::create(config->opts.threads, *config->logger)) {}
 
-void LSPTypecheckerCoordinator::asyncRunInternal(shared_ptr<core::lsp::Task> task) {
+void LSPTypecheckerCoordinator::asyncRunInternal(shared_ptr<LSPTypecheckerCoordinator::Task> task) {
     if (hasDedicatedThread) {
         tasks.push(move(task), 1);
     } else {
@@ -137,11 +137,47 @@ void LSPTypecheckerCoordinator::syncRun(unique_ptr<LSPTask> task) {
     wrappedTask->blockUntilComplete();
 }
 
-shared_ptr<core::lsp::Task>
+namespace {
+
+class PreemptionWrapper : public core::lsp::PreemptionTask {
+    const LSPConfiguration &config;
+    const unique_ptr<LSPTask> task;
+    const unique_ptr<LSPTypecheckerDelegate> delegate;
+
+    unique_ptr<Timer> timeUntilRun;
+
+public:
+    PreemptionWrapper(const LSPConfiguration &config, unique_ptr<LSPTask> task,
+                      unique_ptr<LSPTypecheckerDelegate> delegate)
+        : config{config}, task{move(task)}, delegate{move(delegate)} {}
+
+    void timeLatencyUntilRun(unique_ptr<Timer> timer) {
+        timeUntilRun = move(timer);
+    }
+
+    void cancelTimeLatencyUntilRun() {
+        if (timeUntilRun != nullptr) {
+            timeUntilRun->cancel();
+            timeUntilRun = nullptr;
+        }
+    }
+
+    void run() override {
+        // Destruct timer, if specified. Causes metric to be reported.
+        this->timeUntilRun = nullptr;
+
+        Timer timeit(config.logger, "LSPTask::run");
+        timeit.setTag("method", task->methodString());
+        task->run(*delegate);
+    }
+};
+
+} // namespace
+
+shared_ptr<core::lsp::PreemptionTask>
 LSPTypecheckerCoordinator::trySchedulePreemption(unique_ptr<LSPQueuePreemptionTask> preemptTask) {
-    auto wrappedTask = make_shared<TypecheckerTask>(
-        *config, move(preemptTask), make_unique<LSPTypecheckerDelegate>(*taskQueue, *preemptionWorkers, typechecker),
-        /* collectCounters */ false);
+    auto wrappedTask = make_shared<PreemptionWrapper>(
+        *config, move(preemptTask), make_unique<LSPTypecheckerDelegate>(*taskQueue, *preemptionWorkers, typechecker));
     // Plant this timer before scheduling task to preempt, as task could run before we plant the timer!
     wrappedTask->timeLatencyUntilRun(make_unique<Timer>(*config->logger, "latency.preempt_slow_path"));
     if (hasDedicatedThread && preemptionTaskManager->trySchedulePreemptionTask(wrappedTask)) {
@@ -154,7 +190,7 @@ LSPTypecheckerCoordinator::trySchedulePreemption(unique_ptr<LSPQueuePreemptionTa
     }
 }
 
-bool LSPTypecheckerCoordinator::tryCancelPreemption(shared_ptr<core::lsp::Task> &preemptTask) {
+bool LSPTypecheckerCoordinator::tryCancelPreemption(shared_ptr<core::lsp::PreemptionTask> &preemptTask) {
     return preemptionTaskManager->tryCancelScheduledPreemptionTask(preemptTask);
 }
 
@@ -181,7 +217,7 @@ unique_ptr<Joinable> LSPTypecheckerCoordinator::startTypecheckerThread() {
         typechecker.changeThread();
 
         while (!shouldTerminate) {
-            shared_ptr<core::lsp::Task> task;
+            shared_ptr<Task> task;
             // Note: Pass in 'true' for silent to avoid spamming log with wait_pop_timed entries.
             auto result = tasks.wait_pop_timed(task, WorkerPool::BLOCK_INTERVAL(), *config->logger, true);
             if (result.gotItem()) {
