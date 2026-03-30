@@ -713,7 +713,8 @@ std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingVisibleT
     return core::AutocorrectSuggestion{fmt::format("Add missing `{}`", "visible_to"), std::move(allEdits)};
 }
 
-std::string PackageInfo::renderPackageRbContents(const core::GlobalState &gs) const {
+std::string PackageInfo::renderPackageRbContents(const core::GlobalState &gs,
+                                                 std::vector<core::SymbolRef> newExports) const {
     fmt::memory_buffer result;
 
     if (isPreludePackage()) {
@@ -848,11 +849,9 @@ std::string PackageInfo::renderPackageRbContents(const core::GlobalState &gs) co
     if (locs.exportAll.exists()) {
         fmt::format_to(std::back_inserter(result), "  export_all!\n");
     } else {
-        // TODO(neil): sort the exports
-        for (auto &export_ : exports_) {
-            auto exportSource = core::Loc(file, export_.loc).source(gs);
-            ENFORCE(exportSource.has_value());
-            fmt::format_to(std::back_inserter(result), "  {}\n", exportSource.value());
+        fast_sort(newExports, [&gs](SymbolRef l, SymbolRef r) { return l.show(gs) < r.show(gs); });
+        for (auto &export_ : newExports) {
+            fmt::format_to(std::back_inserter(result), "  export {}\n", export_.show(gs));
         }
     }
 

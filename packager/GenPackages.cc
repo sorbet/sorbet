@@ -243,6 +243,8 @@ void GenPackages::run(core::GlobalState &gs) {
 }
 
 void GenPackages::runStrict(core::GlobalState &gs) {
+    auto toExport = computeToExport(gs);
+
     for (auto pkgName : gs.packageDB().packages()) {
         auto &pkgInfo = gs.packageDB().getPackageInfo(pkgName);
         ENFORCE(pkgInfo.exists());
@@ -252,7 +254,7 @@ void GenPackages::runStrict(core::GlobalState &gs) {
         auto existingContents = existingContentsLoc.source(gs);
         ENFORCE(existingContents.has_value());
 
-        auto newContents = pkgInfo.renderPackageRbContents(gs);
+        auto newContents = pkgInfo.renderPackageRbContents(gs, move(toExport[pkgName]));
 
         if (existingContents.value() != newContents) {
             if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectPackageRB)) {

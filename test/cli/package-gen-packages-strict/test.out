@@ -41,11 +41,10 @@ Errors: 5
 class A < PackageSpec
   foo 'a'
   layer 'app'
-  strict_dependencies 'dag'
+  strict_dependencies 'false'
 
   test_import B
 
-  export A::CONSTANT_FROM_A
 end
 
 ###### cat B/__package.rb ######
@@ -61,6 +60,7 @@ class B < PackageSpec
   # strict_dependencies 'layered' or more strict:
   import C
 
+  export B::ANOTHER_CONSTANT_FROM_B
   export B::CONSTANT_FROM_B
 
   visible_to A
