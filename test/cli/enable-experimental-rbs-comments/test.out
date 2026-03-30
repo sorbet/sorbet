@@ -1,0 +1,34 @@
+==== test correct usage ====
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:x, <emptyTree>::<C Object>).returns(<emptyTree>::<C Integer>)
+  end
+
+  def demo<<todo method>>(x, &<blk>)
+    ::<root>::<C T>.cast(x, <emptyTree>::<C String>)
+  end
+end
+==== test deprecated use with unset parser ====
+⚠️ Going forward, Sorbet will only support RBS mode when parsing with Prism.
+Please add `--parser=prism` to your Sorbet config. This will become an error at the end of May 2026.
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:x, <emptyTree>::<C Object>).returns(<emptyTree>::<C Integer>)
+  end
+
+  def demo<<todo method>>(x, &<blk>)
+    ::<root>::<C T>.cast(x, <emptyTree>::<C String>)
+  end
+end
+==== test deprecated use with original parser ====
+⚠️ Going forward, Sorbet will only support RBS mode when parsing with Prism.
+Please add `--parser=prism` to your Sorbet config. This will become an error at the end of May 2026.
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:x, <emptyTree>::<C Object>).returns(<emptyTree>::<C Integer>)
+  end
+
+  def demo<<todo method>>(x, &<blk>)
+    ::<root>::<C T>.cast(x, <emptyTree>::<C String>)
+  end
+end
