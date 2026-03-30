@@ -33,7 +33,6 @@ class ErrorQueue;
 struct LocalSymbolTableHashes;
 
 namespace lsp {
-class Task;
 class TypecheckEpochManager;
 } // namespace lsp
 
