@@ -7,6 +7,7 @@ extern "C" {
 #include "include/rbs.h"
 }
 
+#include "absl/container/inlined_vector.h"
 #include "core/LocOffsets.h"
 #include "rbs/Parser.h"
 
@@ -76,12 +77,14 @@ struct Comment {
  */
 class RBSDeclaration {
 public:
+    using CommentsVector = absl::InlinedVector<Comment, 1>;
+
     /**
      * All the comments into a single string.
      */
     std::string string;
 
-    RBSDeclaration(std::vector<Comment> comments) : comments(std::move(comments)) {
+    RBSDeclaration(CommentsVector comments) : comments(std::move(comments)) {
         std::string result;
         for (const auto &comment : this->comments) {
             result += comment.string;
@@ -161,7 +164,7 @@ public:
     }
 
 private:
-    std::vector<Comment> comments;
+    CommentsVector comments;
 };
 
 } // namespace sorbet::rbs

@@ -59,7 +59,7 @@ pm_node_t *extractHelperArgument(core::MutableContext ctx, parser::Prism::Parser
         annotation.string.substr(offset),
     };
 
-    return rbs::SignatureTranslatorPrism(ctx, parser).translateType(RBSDeclaration{vector<Comment>{comment}});
+    return rbs::SignatureTranslatorPrism(ctx, parser).translateType(RBSDeclaration{{comment}});
 }
 
 /**
@@ -265,7 +265,7 @@ CommentsPrism SigsRewriterPrism::commentsForNode(pm_node_t *node) {
     auto state = SignatureState::None;
 
     auto &nodes = it->second;
-    auto declarationComments = vector<Comment>{};
+    auto declarationComments = RBSDeclaration::CommentsVector{};
 
     for (auto &commentNode : nodes) {
         if (absl::StartsWith(commentNode.string, "# @")) {
@@ -387,7 +387,7 @@ pm_node_t *SigsRewriterPrism::replaceSyntheticTypeAlias(pm_node_t *node) {
         return prism.TTypeAlias(loc, prism.TUntyped(loc));
     }
 
-    auto typeDeclaration = RBSDeclaration{vector<Comment>{Comment{
+    auto typeDeclaration = RBSDeclaration{{Comment{
         .commentLoc = aliasDeclaration.commentLoc(),
         .typeLoc = core::LocOffsets{aliasDeclaration.fullTypeLoc().beginPos() + (uint32_t)typeBeginLoc + 1,
                                     aliasDeclaration.fullTypeLoc().endPos()},
