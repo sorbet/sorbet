@@ -25,9 +25,6 @@ class LSPConfiguration;
 class LSPQueuePreemptionTask;
 
 class LSPLoop {
-    friend class LSPWrapper;
-    friend class LSPQueuePreemptionTask;
-
     /** Encapsulates the active configuration for the language server. */
     const std::shared_ptr<const LSPConfiguration> config;
     /** Protects outgoingQueue. */
