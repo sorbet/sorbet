@@ -11,7 +11,6 @@
 #include "core/Unfreeze.h"
 #include "core/errors/errors.h"
 #include "core/hashing/hashing.h"
-#include "core/lsp/Task.h"
 #include "core/lsp/TypecheckEpochManager.h"
 #include <string_view>
 #include <utility>
