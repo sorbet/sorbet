@@ -330,7 +330,28 @@ ast::ExpressionPtr makeSharedExamplesConstant(core::MutableContext ctx, const as
     // because they are uniquely identified by the string argument (not which method alias was used
     // to create the module)
     auto name = fmt::format("<shared_examples '{}'>", to_s(ctx, arg));
-    return ast::MK::UnresolvedConstantParts(arg.loc(), {ctx.state.enterNameConstant(name)});
+    // Use root scope so that shared examples are globally accessible regardless of where they are
+    // defined. This matches RSpec's semantics: shared example names are stored in a global registry
+    // and must be unique across the entire test suite.
+    auto rootScope = ast::MK::Constant(arg.loc(), core::Symbols::root());
+    return ast::make_expression<ast::UnresolvedConstantLit>(arg.loc(), move(rootScope),
+                                                            ctx.state.enterNameConstant(name));
+}
+
+// Returns the appropriate superclass for a test class (e.g. from `its` or `it_behaves_like`)
+// that may be nested inside a shared_examples block. Inside a shared_examples block, `self` is
+// a module, not a class. We can't inherit from a module, so we use RSpec::Core::ExampleGroup
+// instead, mirroring what describe/context does in the same situation.
+ast::ExpressionPtr makeTestClassAncestor(core::LocOffsets loc, const ast::ExpressionPtr &maybeSharedExamplesName) {
+    if (maybeSharedExamplesName == nullptr) {
+        return ast::MK::Self(loc);
+    }
+    static const core::NameRef rspecParts[3] = {
+        core::Names::Constants::RSpec(),
+        core::Names::Constants::Core(),
+        core::Names::Constants::ExampleGroup(),
+    };
+    return ast::MK::UnresolvedConstantParts(loc, rspecParts);
 }
 
 bool isSharedExamplesName(core::NameRef name) {
@@ -844,7 +865,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
             describeBody.emplace_back(std::move(itMethod));
 
             ast::ClassDef::ANCESTORS_store ancestors;
-            ancestors.emplace_back(ast::MK::Self(arg.loc()));
+            ancestors.emplace_back(makeTestClassAncestor(arg.loc(), maybeSharedExamplesName));
 
             auto describeDeclLoc = declLocForSendWithBlock(*send);
             return ast::MK::Class(send->loc, describeDeclLoc, std::move(describeName), std::move(ancestors),
@@ -965,16 +986,19 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
             auto isolatedClassName = ast::MK::UnresolvedConstantParts(send->loc.copyWithZeroLength(),
                                                                       {ctx.state.enterNameConstant(testName)});
 
-            // Inherit from self to maintain access to outer context
             ast::ClassDef::ANCESTORS_store ancestors;
-            ancestors.emplace_back(ast::MK::Self(send->loc.copyWithZeroLength()));
+            ast::ClassDef::RHS_store rhs;
+            ancestors.emplace_back(makeTestClassAncestor(send->loc.copyWithZeroLength(), maybeSharedExamplesName));
+            if (maybeSharedExamplesName != nullptr) {
+                // Also include the parent shared_examples module so its helpers are available.
+                rhs.emplace_back(ast::MK::Send1(send->loc, ast::MK::Self(send->recv.loc()), core::Names::include(),
+                                                send->loc.copyWithZeroLength(), maybeSharedExamplesName.deepCopy()));
+            }
 
             // Include the shared examples module in this isolated context
             auto sharedExamplesName = makeSharedExamplesConstant(ctx, arg);
             auto includeStmt = ast::MK::Send1(send->loc, ast::MK::Self(send->recv.loc()), core::Names::include(),
                                               arg.loc(), move(sharedExamplesName));
-
-            ast::ClassDef::RHS_store rhs;
             rhs.emplace_back(move(includeStmt));
 
             auto declLoc = send->loc.copyWithZeroLength();
