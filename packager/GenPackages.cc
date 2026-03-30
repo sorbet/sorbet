@@ -88,26 +88,27 @@ void exportField(const core::GlobalState &gs,
         break;
     }
 }
-}; // namespace
 
-void GenPackages::run(core::GlobalState &gs) {
-    Timer timeit(gs.tracer(), "gen_packages.run");
+UnorderedMap<core::SymbolRef, vector<core::FileRef>> computeReferencingFiles(const core::GlobalState &gs) {
     auto referencingFiles = UnorderedMap<core::SymbolRef, vector<core::FileRef>>{};
-    {
-        // symbolsReferencedByFile is a map from file -> [symbol] referenced in that file
-        // This loop computes the inverse: referencingFiles is a map from symbol -> [file] that reference that symbol
-        Timer timeit(gs.tracer(), "gen_packages.run.build_referencing_files");
-        auto numFiles = gs.getFiles().size();
-        for (auto i = 1; i < numFiles; i++) {
-            core::FileRef fref(i);
-            auto referencedSymbols = gs.getSymbolsReferencedByFile(fref);
-            for (auto &symbol : referencedSymbols) {
-                referencingFiles[symbol].push_back(fref);
-            }
+    // symbolsReferencedByFile is a map from file -> [symbol] referenced in that file
+    // This loop computes the inverse: referencingFiles is a map from symbol -> [file] that reference that symbol
+    Timer timeit(gs.tracer(), "gen_packages.run.build_referencing_files");
+    auto numFiles = gs.getFiles().size();
+    for (auto i = 1; i < numFiles; i++) {
+        core::FileRef fref(i);
+        auto referencedSymbols = gs.getSymbolsReferencedByFile(fref);
+        for (auto &symbol : referencedSymbols) {
+            referencingFiles[symbol].push_back(fref);
         }
     }
+    return referencingFiles;
+}
 
+UnorderedMap<core::packages::MangledName, vector<core::SymbolRef>> computeToExport(const core::GlobalState &gs) {
+    auto referencingFiles = computeReferencingFiles(gs);
     auto toExport = UnorderedMap<core::packages::MangledName, vector<core::SymbolRef>>{};
+
     for (uint32_t i = 1; i < gs.classAndModulesUsed(); ++i) {
         auto classOrModuleRef = core::ClassOrModuleRef(gs, i);
         exportClassOrModule(gs, toExport, classOrModuleRef, referencingFiles[classOrModuleRef]);
@@ -116,6 +117,15 @@ void GenPackages::run(core::GlobalState &gs) {
         auto fieldRef = core::FieldRef(gs, i);
         exportField(gs, toExport, fieldRef, referencingFiles[fieldRef]);
     }
+
+    return toExport;
+}
+}; // namespace
+
+void GenPackages::run(core::GlobalState &gs) {
+    Timer timeit(gs.tracer(), "gen_packages.run");
+
+    auto toExport = computeToExport(gs);
 
     auto neededVisibleTo = UnorderedMap<core::packages::MangledName, vector<core::packages::MangledName>>{};
     auto neededVisibleToTests = UnorderedMap<core::packages::MangledName, bool>{};
