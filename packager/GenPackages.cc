@@ -35,8 +35,7 @@ void exportClassOrModule(const core::GlobalState &gs,
                          core::ClassOrModuleRef symbol, vector<core::FileRef> &referencingFiles) {
     auto data = symbol.data(gs);
     auto owningPackage = data->package;
-    if (!owningPackage.exists() || gs.packageDB().getPackageInfo(owningPackage).locs.exportAll.exists() ||
-        data->flags.isExported) {
+    if (!owningPackage.exists() || gs.packageDB().getPackageInfo(owningPackage).locs.exportAll.exists()) {
         return;
     }
 
@@ -61,8 +60,7 @@ void exportField(const core::GlobalState &gs,
                  vector<core::FileRef> &referencingFiles) {
     auto data = symbol.data(gs);
     auto owningPackage = data->owner.data(gs)->package;
-    if (!owningPackage.exists() || gs.packageDB().getPackageInfo(owningPackage).locs.exportAll.exists() ||
-        data->flags.isExported) {
+    if (!owningPackage.exists() || gs.packageDB().getPackageInfo(owningPackage).locs.exportAll.exists()) {
         return;
     }
 

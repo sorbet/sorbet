@@ -5,4 +5,5 @@ class D < PackageSpec
   layer 'util'
 
   import B
+  export D::AlreadyExportedClass
 end

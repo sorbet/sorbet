@@ -655,6 +655,22 @@ std::optional<core::AutocorrectSuggestion>
 PackageInfo::aggregateMissingExports(const core::GlobalState &gs, vector<core::SymbolRef> &toExport) const {
     std::vector<core::AutocorrectSuggestion::Edit> allEdits;
     for (auto &symbol : toExport) {
+        switch (symbol.kind()) {
+            case core::SymbolRef::Kind::ClassOrModule:
+                if (symbol.asClassOrModuleRef().data(gs)->flags.isExported) {
+                    continue;
+                }
+                break;
+            case core::SymbolRef::Kind::FieldOrStaticField:
+                if (symbol.asFieldRef().data(gs)->flags.isExported) {
+                    continue;
+                }
+                break;
+            case core::SymbolRef::Kind::TypeMember:
+            case core::SymbolRef::Kind::Method:
+            case core::SymbolRef::Kind::TypeParameter:
+                ENFORCE(false, "trying to export something other than ClassOrModule or FieldOrStaticField");
+        }
         auto autocorrect = addExport(gs, symbol);
         if (autocorrect.has_value()) {
             allEdits.insert(allEdits.end(), make_move_iterator(autocorrect.value().edits.begin()),
