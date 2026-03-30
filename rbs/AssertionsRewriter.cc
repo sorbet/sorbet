@@ -40,9 +40,7 @@ parseComment(core::MutableContext ctx, InlineComment comment,
     }
 
     auto signatureTranslator = rbs::SignatureTranslator(ctx);
-    vector<Comment> comments;
-    comments.push_back(comment.comment);
-    auto declaration = RBSDeclaration(comments);
+    auto declaration = RBSDeclaration({comment.comment});
     auto type = signatureTranslator.translateAssertionType(typeParams, declaration);
 
     if (type == nullptr) {
