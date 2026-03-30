@@ -91,7 +91,7 @@ UnorderedMap<core::SymbolRef, vector<core::FileRef>> computeReferencingFiles(con
     auto referencingFiles = UnorderedMap<core::SymbolRef, vector<core::FileRef>>{};
     // symbolsReferencedByFile is a map from file -> [symbol] referenced in that file
     // This loop computes the inverse: referencingFiles is a map from symbol -> [file] that reference that symbol
-    Timer timeit(gs.tracer(), "gen_packages.run.build_referencing_files");
+    Timer timeit(gs.tracer(), "gen_packages.compute_referencing_files");
     auto numFiles = gs.getFiles().size();
     for (auto i = 1; i < numFiles; i++) {
         core::FileRef fref(i);
@@ -104,6 +104,7 @@ UnorderedMap<core::SymbolRef, vector<core::FileRef>> computeReferencingFiles(con
 }
 
 UnorderedMap<core::packages::MangledName, vector<core::SymbolRef>> computeToExport(const core::GlobalState &gs) {
+    Timer timeit(gs.tracer(), "gen_packages.compute_to_export");
     auto referencingFiles = computeReferencingFiles(gs);
     auto toExport = UnorderedMap<core::packages::MangledName, vector<core::SymbolRef>>{};
 
@@ -243,6 +244,8 @@ void GenPackages::run(core::GlobalState &gs) {
 }
 
 void GenPackages::runStrict(core::GlobalState &gs) {
+    Timer timeit(gs.tracer(), "gen_packages.run_strict");
+
     auto toExport = computeToExport(gs);
 
     for (auto pkgName : gs.packageDB().packages()) {
