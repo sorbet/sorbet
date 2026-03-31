@@ -139,6 +139,50 @@ void LSPTypecheckerCoordinator::syncRun(unique_ptr<LSPTask> task) {
 
 namespace {
 
+/**
+ * Represents a preemption task. When run, it will run all tasks at the head of `taskQueue` that can preempt.
+ */
+class LSPQueuePreemptionTask final : public LSPTask {
+    absl::Notification &finished;
+    TaskQueue &taskQueue;
+    LSPIndexer &indexer;
+
+public:
+    LSPQueuePreemptionTask(const LSPConfiguration &config, absl::Notification &finished, TaskQueue &taskQueue,
+                           LSPIndexer &indexer)
+        : LSPTask(config, LSPMethod::SorbetError), finished(finished), taskQueue(taskQueue), indexer(indexer) {}
+
+    void run(LSPTypecheckerDelegate &tc) override {
+        for (;;) {
+            unique_ptr<LSPTask> task;
+            {
+                absl::MutexLock lck(taskQueue.getMutex());
+                if (taskQueue.tasks().empty() || !taskQueue.tasks().front()->canPreempt(indexer)) {
+                    break;
+                }
+                task = move(taskQueue.tasks().front());
+                taskQueue.tasks().pop_front();
+
+                {
+                    Timer timeit(config.logger, "LSPTask::index");
+                    timeit.setTag("method", task->methodString());
+                    // Index while holding lock to prevent races with processing thread.
+                    task->index(indexer);
+                }
+            }
+            prodCategoryCounterInc("lsp.messages.processed", task->methodString());
+
+            if (task->finalPhase() == Phase::INDEX) {
+                continue;
+            }
+            Timer timeit(config.logger, "LSPTask::run");
+            timeit.setTag("method", task->methodString());
+            task->run(tc);
+        }
+        finished.Notify();
+    }
+};
+
 class PreemptionWrapper : public core::lsp::PreemptionTask {
     const LSPConfiguration &config;
     const unique_ptr<LSPTask> task;

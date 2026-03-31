@@ -136,24 +136,6 @@ public:
     virtual void schedulerWaitUntilReady() = 0;
 };
 
-class LSPIndexer;
-class TaskQueue;
-
-/**
- * Represents a preemption task. When run, it will run all tasks at the head of `taskQueue` that can preempt.
- */
-class LSPQueuePreemptionTask final : public LSPTask {
-    absl::Notification &finished;
-    TaskQueue &taskQueue;
-    LSPIndexer &indexer;
-
-public:
-    LSPQueuePreemptionTask(const LSPConfiguration &config, absl::Notification &finished, TaskQueue &taskQueue,
-                           LSPIndexer &indexer);
-
-    void run(LSPTypecheckerDelegate &tc) override;
-};
-
 } // namespace sorbet::realmain::lsp
 
 #endif

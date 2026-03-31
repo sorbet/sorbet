@@ -12,7 +12,6 @@ class PreemptionTaskManager;
 
 namespace sorbet::realmain::lsp {
 class LSPIndexer;
-class LSPQueuePreemptionTask;
 class LSPTask;
 class InitializedTask;
 class SorbetWorkspaceEditTask;
