@@ -1,6 +1,7 @@
 #ifndef RUBY_TYPER_LSP_LSPTYPECHECKERCOORDINATOR_H
 #define RUBY_TYPER_LSP_LSPTYPECHECKERCOORDINATOR_H
 
+#include "absl/synchronization/notification.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "main/lsp/LSPTypechecker.h"
 
@@ -10,8 +11,9 @@ class PreemptionTaskManager;
 } // namespace sorbet::core::lsp
 
 namespace sorbet::realmain::lsp {
-class LSPTask;
+class LSPIndexer;
 class LSPQueuePreemptionTask;
+class LSPTask;
 class InitializedTask;
 class SorbetWorkspaceEditTask;
 class TaskQueue;
@@ -92,8 +94,8 @@ public:
      * Does not block. It is the responsibility of the caller to properly block. Should only be used in one place
      * in `protocol.cc`.
      */
-    std::shared_ptr<core::lsp::PreemptionTask>
-    trySchedulePreemption(std::unique_ptr<LSPQueuePreemptionTask> preemptTask);
+    std::shared_ptr<core::lsp::PreemptionTask> trySchedulePreemption(absl::Notification &finished, TaskQueue &taskQueue,
+                                                                     LSPIndexer &indexer);
 
     /**
      * Attempts to cancel the scheduled preeemption task. Returns true if it succeeds, or false if the task has or will

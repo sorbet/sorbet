@@ -174,10 +174,12 @@ public:
 
 } // namespace
 
-shared_ptr<core::lsp::PreemptionTask>
-LSPTypecheckerCoordinator::trySchedulePreemption(unique_ptr<LSPQueuePreemptionTask> preemptTask) {
+shared_ptr<core::lsp::PreemptionTask> LSPTypecheckerCoordinator::trySchedulePreemption(absl::Notification &finished,
+                                                                                       TaskQueue &taskQueue,
+                                                                                       LSPIndexer &indexer) {
+    auto preemptTask = make_unique<LSPQueuePreemptionTask>(*config, finished, taskQueue, indexer);
     auto wrappedTask = make_shared<PreemptionWrapper>(
-        *config, move(preemptTask), make_unique<LSPTypecheckerDelegate>(*taskQueue, *preemptionWorkers, typechecker));
+        *config, move(preemptTask), make_unique<LSPTypecheckerDelegate>(taskQueue, *preemptionWorkers, typechecker));
     // Plant this timer before scheduling task to preempt, as task could run before we plant the timer!
     wrappedTask->timeLatencyUntilRun(make_unique<Timer>(*config->logger, "latency.preempt_slow_path"));
     if (hasDedicatedThread && preemptionTaskManager->trySchedulePreemptionTask(wrappedTask)) {
