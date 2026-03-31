@@ -141,17 +141,18 @@ namespace {
 
 class PreemptionLoop : public core::lsp::PreemptionTask {
     const LSPConfiguration &config;
-    const unique_ptr<LSPTypecheckerDelegate> delegate;
     absl::Notification &finished;
     TaskQueue &taskQueue;
+    LSPTypecheckerDelegate delegate;
     LSPIndexer &indexer;
 
     unique_ptr<Timer> timeUntilRun;
 
 public:
-    PreemptionLoop(const LSPConfiguration &config, unique_ptr<LSPTypecheckerDelegate> delegate,
-                   absl::Notification &finished, TaskQueue &taskQueue, LSPIndexer &indexer)
-        : config{config}, delegate{move(delegate)}, finished{finished}, taskQueue{taskQueue}, indexer{indexer} {}
+    PreemptionLoop(const LSPConfiguration &config, absl::Notification &finished, TaskQueue &taskQueue,
+                   WorkerPool &preemptionWorkers, LSPTypechecker &typechecker, LSPIndexer &indexer)
+        : config{config}, finished{finished}, taskQueue{taskQueue},
+          delegate(this->taskQueue, preemptionWorkers, typechecker), indexer{indexer} {}
 
     void timeLatencyUntilRun(unique_ptr<Timer> timer) {
         timeUntilRun = move(timer);
@@ -193,7 +194,7 @@ public:
             }
             Timer timeit(config.logger, "LSPTask::run");
             timeit.setTag("method", task->methodString());
-            task->run(*this->delegate);
+            task->run(this->delegate);
         }
         finished.Notify();
     }
@@ -204,9 +205,8 @@ public:
 shared_ptr<core::lsp::PreemptionTask> LSPTypecheckerCoordinator::trySchedulePreemption(absl::Notification &finished,
                                                                                        TaskQueue &taskQueue,
                                                                                        LSPIndexer &indexer) {
-    auto preemptionLoop = make_shared<PreemptionLoop>(
-        *config, make_unique<LSPTypecheckerDelegate>(taskQueue, *preemptionWorkers, typechecker), finished, taskQueue,
-        indexer);
+    auto preemptionLoop =
+        make_shared<PreemptionLoop>(*config, finished, taskQueue, *preemptionWorkers, typechecker, indexer);
     // Plant this timer before scheduling task to preempt, as task could run before we plant the timer!
     preemptionLoop->timeLatencyUntilRun(make_unique<Timer>(*config->logger, "latency.preempt_slow_path"));
     if (hasDedicatedThread && preemptionTaskManager->trySchedulePreemptionTask(preemptionLoop)) {
