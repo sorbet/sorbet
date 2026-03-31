@@ -5,8 +5,8 @@
 #include "main/lsp/LSPTypechecker.h"
 
 namespace sorbet::core::lsp {
+class PreemptionTask;
 class PreemptionTaskManager;
-class Task;
 } // namespace sorbet::core::lsp
 
 namespace sorbet::realmain::lsp {
@@ -21,8 +21,24 @@ class TaskQueue;
  * thread).
  */
 class LSPTypecheckerCoordinator final {
+public:
+    class Task {
+    public:
+        Task() = default;
+        virtual ~Task() = default;
+
+        virtual void run() = 0;
+
+        // Disallow copy/move to force management through smart pointers.
+        Task(Task &) = delete;
+        Task(const Task &) = delete;
+        Task &operator=(Task &&) = delete;
+        Task &operator=(const Task &) = delete;
+    };
+
+private:
     /** Contains a queue of tasks to run on the typechecking thread. */
-    BlockingUnBoundedQueue<std::shared_ptr<core::lsp::Task>> tasks;
+    BlockingUnBoundedQueue<std::shared_ptr<Task>> tasks;
     /** Used to preempt running slow paths. */
     std::shared_ptr<core::lsp::PreemptionTaskManager> preemptionTaskManager;
     /** If 'true', the coordinator should terminate immediately. */
@@ -51,7 +67,7 @@ class LSPTypecheckerCoordinator final {
     /**
      * Runs the provided task on the typechecker thread.
      */
-    void asyncRunInternal(std::shared_ptr<core::lsp::Task> task);
+    void asyncRunInternal(std::shared_ptr<Task> task);
 
 public:
     LSPTypecheckerCoordinator(const std::shared_ptr<const LSPConfiguration> &config,
@@ -76,13 +92,14 @@ public:
      * Does not block. It is the responsibility of the caller to properly block. Should only be used in one place
      * in `protocol.cc`.
      */
-    std::shared_ptr<core::lsp::Task> trySchedulePreemption(std::unique_ptr<LSPQueuePreemptionTask> preemptTask);
+    std::shared_ptr<core::lsp::PreemptionTask>
+    trySchedulePreemption(std::unique_ptr<LSPQueuePreemptionTask> preemptTask);
 
     /**
      * Attempts to cancel the scheduled preeemption task. Returns true if it succeeds, or false if the task has or will
      * run.
      */
-    bool tryCancelPreemption(std::shared_ptr<core::lsp::Task> &preemptTask);
+    bool tryCancelPreemption(std::shared_ptr<core::lsp::PreemptionTask> &preemptTask);
 
     /**
      * Safely shuts down the typechecker and returns the final GlobalState object. Blocks until typechecker completes

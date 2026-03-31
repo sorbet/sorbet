@@ -8,8 +8,8 @@
 #include "core/ErrorCollector.h"
 #include "core/ErrorQueue.h"
 #include "core/NullFlusher.h"
+#include "core/lsp/PreemptionTask.h"
 #include "core/lsp/PreemptionTaskManager.h"
-#include "core/lsp/Task.h"
 #include "core/lsp/TypecheckEpochManager.h"
 #include "main/lsp/LSPLoop.h"
 #include "main/lsp/LSPOutput.h"
@@ -106,7 +106,7 @@ unique_ptr<LSPMessage> makeCancel(int id) {
     return make_unique<LSPMessage>(make_unique<NotificationMessage>("2.0", LSPMethod::$CancelRequest, move(params)));
 }
 
-class CountingTask final : public core::lsp::Task {
+class CountingTask final : public core::lsp::PreemptionTask {
 public:
     int runCount = 0;
     shared_ptr<core::lsp::PreemptionTaskManager> preemptManager;

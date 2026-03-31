@@ -22,7 +22,6 @@ namespace sorbet::realmain::lsp {
 class MarkupContent;
 class LSPInput;
 class LSPConfiguration;
-class LSPQueuePreemptionTask;
 
 class LSPLoop {
     /** Encapsulates the active configuration for the language server. */
