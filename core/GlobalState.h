@@ -506,6 +506,9 @@ public:
 
     int totalErrors() const;
     bool wasNameTableModified() const;
+    void markNameTableAsCached();
+
+    uint32_t nameTableDiffCount = 0;
 
     int globalStateId;
     bool silenceErrors = false;
@@ -755,7 +758,9 @@ private:
     UnorderedSet<int> onlyErrorClasses;
     std::shared_ptr<FileTable> files;
     std::vector<UnorderedSet<core::SymbolRef>> symbolsReferencedByFile;
-    bool wasNameTableModified_ = false;
+    unsigned int utf8NamesWritten_ = 0;
+    unsigned int constantNamesWritten_ = 0;
+    unsigned int uniqueNamesWritten_ = 0;
 
     core::packages::PackageDB packageDB_;
 
