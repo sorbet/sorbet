@@ -27,7 +27,6 @@ class TypecheckerTask final : public core::lsp::Task {
     const unique_ptr<LSPTask> task;
     const unique_ptr<LSPTypecheckerDelegate> delegate;
     const bool collectCounters;
-    absl::Notification started;
     absl::Notification complete;
     CounterState counters;
     unique_ptr<Timer> timeUntilRun;
@@ -51,7 +50,6 @@ public:
     void run() override {
         // Destruct timer, if specified. Causes metric to be reported.
         timeUntilRun = nullptr;
-        started.Notify();
         {
             Timer timeit(config.logger, "LSPTask::run");
             timeit.setTag("method", task->methodString());
