@@ -139,20 +139,36 @@ void LSPTypecheckerCoordinator::syncRun(unique_ptr<LSPTask> task) {
 
 namespace {
 
-/**
- * Represents a preemption task. When run, it will run all tasks at the head of `taskQueue` that can preempt.
- */
-class LSPQueuePreemptionTask final : public LSPTask {
+class PreemptionWrapper : public core::lsp::PreemptionTask {
+    const LSPConfiguration &config;
+    const unique_ptr<LSPTypecheckerDelegate> delegate;
     absl::Notification &finished;
     TaskQueue &taskQueue;
     LSPIndexer &indexer;
 
-public:
-    LSPQueuePreemptionTask(const LSPConfiguration &config, absl::Notification &finished, TaskQueue &taskQueue,
-                           LSPIndexer &indexer)
-        : LSPTask(config, LSPMethod::SorbetError), finished(finished), taskQueue(taskQueue), indexer(indexer) {}
+    unique_ptr<Timer> timeUntilRun;
 
-    void run(LSPTypecheckerDelegate &tc) override {
+public:
+    PreemptionWrapper(const LSPConfiguration &config, unique_ptr<LSPTypecheckerDelegate> delegate,
+                      absl::Notification &finished, TaskQueue &taskQueue, LSPIndexer &indexer)
+        : config{config}, delegate{move(delegate)}, finished{finished}, taskQueue{taskQueue}, indexer{indexer} {}
+
+    void timeLatencyUntilRun(unique_ptr<Timer> timer) {
+        timeUntilRun = move(timer);
+    }
+
+    void cancelTimeLatencyUntilRun() {
+        if (timeUntilRun != nullptr) {
+            timeUntilRun->cancel();
+            timeUntilRun = nullptr;
+        }
+    }
+
+    void run() override {
+        // Destruct timer, if specified. Causes metric to be reported.
+        this->timeUntilRun = nullptr;
+
+        Timer timeit(config.logger, "preemption_loop");
         for (;;) {
             unique_ptr<LSPTask> task;
             {
@@ -172,47 +188,14 @@ public:
             }
             prodCategoryCounterInc("lsp.messages.processed", task->methodString());
 
-            if (task->finalPhase() == Phase::INDEX) {
+            if (task->finalPhase() == LSPTask::Phase::INDEX) {
                 continue;
             }
             Timer timeit(config.logger, "LSPTask::run");
             timeit.setTag("method", task->methodString());
-            task->run(tc);
+            task->run(*this->delegate);
         }
         finished.Notify();
-    }
-};
-
-class PreemptionWrapper : public core::lsp::PreemptionTask {
-    const LSPConfiguration &config;
-    const unique_ptr<LSPTask> task;
-    const unique_ptr<LSPTypecheckerDelegate> delegate;
-
-    unique_ptr<Timer> timeUntilRun;
-
-public:
-    PreemptionWrapper(const LSPConfiguration &config, unique_ptr<LSPTask> task,
-                      unique_ptr<LSPTypecheckerDelegate> delegate)
-        : config{config}, task{move(task)}, delegate{move(delegate)} {}
-
-    void timeLatencyUntilRun(unique_ptr<Timer> timer) {
-        timeUntilRun = move(timer);
-    }
-
-    void cancelTimeLatencyUntilRun() {
-        if (timeUntilRun != nullptr) {
-            timeUntilRun->cancel();
-            timeUntilRun = nullptr;
-        }
-    }
-
-    void run() override {
-        // Destruct timer, if specified. Causes metric to be reported.
-        this->timeUntilRun = nullptr;
-
-        Timer timeit(config.logger, "LSPTask::run");
-        timeit.setTag("method", task->methodString());
-        task->run(*delegate);
     }
 };
 
@@ -221,9 +204,9 @@ public:
 shared_ptr<core::lsp::PreemptionTask> LSPTypecheckerCoordinator::trySchedulePreemption(absl::Notification &finished,
                                                                                        TaskQueue &taskQueue,
                                                                                        LSPIndexer &indexer) {
-    auto preemptTask = make_unique<LSPQueuePreemptionTask>(*config, finished, taskQueue, indexer);
     auto wrappedTask = make_shared<PreemptionWrapper>(
-        *config, move(preemptTask), make_unique<LSPTypecheckerDelegate>(taskQueue, *preemptionWorkers, typechecker));
+        *config, make_unique<LSPTypecheckerDelegate>(taskQueue, *preemptionWorkers, typechecker), finished, taskQueue,
+        indexer);
     // Plant this timer before scheduling task to preempt, as task could run before we plant the timer!
     wrappedTask->timeLatencyUntilRun(make_unique<Timer>(*config->logger, "latency.preempt_slow_path"));
     if (hasDedicatedThread && preemptionTaskManager->trySchedulePreemptionTask(wrappedTask)) {
