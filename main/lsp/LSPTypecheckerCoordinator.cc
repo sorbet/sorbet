@@ -139,7 +139,7 @@ void LSPTypecheckerCoordinator::syncRun(unique_ptr<LSPTask> task) {
 
 namespace {
 
-class PreemptionWrapper : public core::lsp::PreemptionTask {
+class PreemptionLoop : public core::lsp::PreemptionTask {
     const LSPConfiguration &config;
     const unique_ptr<LSPTypecheckerDelegate> delegate;
     absl::Notification &finished;
@@ -149,8 +149,8 @@ class PreemptionWrapper : public core::lsp::PreemptionTask {
     unique_ptr<Timer> timeUntilRun;
 
 public:
-    PreemptionWrapper(const LSPConfiguration &config, unique_ptr<LSPTypecheckerDelegate> delegate,
-                      absl::Notification &finished, TaskQueue &taskQueue, LSPIndexer &indexer)
+    PreemptionLoop(const LSPConfiguration &config, unique_ptr<LSPTypecheckerDelegate> delegate,
+                   absl::Notification &finished, TaskQueue &taskQueue, LSPIndexer &indexer)
         : config{config}, delegate{move(delegate)}, finished{finished}, taskQueue{taskQueue}, indexer{indexer} {}
 
     void timeLatencyUntilRun(unique_ptr<Timer> timer) {
@@ -204,17 +204,17 @@ public:
 shared_ptr<core::lsp::PreemptionTask> LSPTypecheckerCoordinator::trySchedulePreemption(absl::Notification &finished,
                                                                                        TaskQueue &taskQueue,
                                                                                        LSPIndexer &indexer) {
-    auto wrappedTask = make_shared<PreemptionWrapper>(
+    auto preemptionLoop = make_shared<PreemptionLoop>(
         *config, make_unique<LSPTypecheckerDelegate>(taskQueue, *preemptionWorkers, typechecker), finished, taskQueue,
         indexer);
     // Plant this timer before scheduling task to preempt, as task could run before we plant the timer!
-    wrappedTask->timeLatencyUntilRun(make_unique<Timer>(*config->logger, "latency.preempt_slow_path"));
-    if (hasDedicatedThread && preemptionTaskManager->trySchedulePreemptionTask(wrappedTask)) {
+    preemptionLoop->timeLatencyUntilRun(make_unique<Timer>(*config->logger, "latency.preempt_slow_path"));
+    if (hasDedicatedThread && preemptionTaskManager->trySchedulePreemptionTask(preemptionLoop)) {
         // Preempted; task is guaranteed to run by interrupting the slow path.
-        return wrappedTask;
+        return preemptionLoop;
     } else {
         // Did not preempt, so don't collect a latency metric.
-        wrappedTask->cancelTimeLatencyUntilRun();
+        preemptionLoop->cancelTimeLatencyUntilRun();
         return nullptr;
     }
 }
