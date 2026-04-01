@@ -20,9 +20,6 @@ public:
     // ownership from one thread to the other.
     std::vector<std::string> fastPathExtraFiles;
 
-    // Updated on typechecking thread. Contains indexes processed with typechecking global state.
-    std::vector<ast::ParsedFile> updatedFinalGSFileIndexes;
-
     // This specific update contains edits with the given epoch
     uint32_t epoch = 0;
 

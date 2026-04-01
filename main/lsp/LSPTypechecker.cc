@@ -154,11 +154,13 @@ bool LSPTypechecker::typecheck(unique_ptr<LSPFileUpdates> updates, WorkerPool &w
         auto errorFlusher = make_shared<ErrorFlusherLSP>(updates->epoch, errorReporter);
         if (isFastPath) {
             bool isNoopUpdateForRetypecheck = false;
-            filesTypechecked = runFastPath(*updates, workers, errorFlusher, isNoopUpdateForRetypecheck);
+            auto result = runFastPath(*updates, workers, errorFlusher, isNoopUpdateForRetypecheck);
+
+            filesTypechecked = move(result.filesTypechecked);
 
             ENFORCE(updates->updatedFiles.empty());
 
-            for (auto &ast : updates->updatedFinalGSFileIndexes) {
+            for (auto &ast : result.indexedTrees) {
                 this->indexedFinalGS[ast.file.id()] = move(ast);
             }
 
@@ -174,9 +176,9 @@ bool LSPTypechecker::typecheck(unique_ptr<LSPFileUpdates> updates, WorkerPool &w
     return committed;
 }
 
-vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, WorkerPool &workers,
-                                                  shared_ptr<core::ErrorFlusher> errorFlusher,
-                                                  bool isNoopUpdateForRetypecheck) const {
+LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updates, WorkerPool &workers,
+                                                           shared_ptr<core::ErrorFlusher> errorFlusher,
+                                                           bool isNoopUpdateForRetypecheck) const {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     ENFORCE(this->initialized);
     // We assume gs has been through the slow path, which is guaranteed by the initialization path not being cancelable.
@@ -285,6 +287,9 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
         op.emplace(*config, ShowOperation::Kind::FastPath);
     }
     ENFORCE(gs->errorQueue->isEmpty());
+    vector<ast::ParsedFile> toCache;
+    toCache.reserve(toTypecheck.size());
+
     vector<ast::ParsedFile> updatedIndexed;
     for (core::FileRef fref : toTypecheck) {
         auto t = pipeline::indexOne(config->opts, *gs, fref);
@@ -292,7 +297,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
         // As the fast-path might pull in unrelated files in the incremental case, we make sure to only cache files that
         // are explicitly open in the editor.
         if (fref.data(*gs).isOpenInClient()) {
-            updates.updatedFinalGSFileIndexes.push_back(ast::ParsedFile{t.tree.deepCopy(), t.file});
+            toCache.emplace_back(ast::ParsedFile{t.tree.deepCopy(), t.file});
         }
 
         updatedIndexed.emplace_back(std::move(t));
@@ -336,7 +341,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
         "Running fast path over num_files={} incrementalNamer={} preemption={} duration={} files=[{}]",
         toTypecheck.size(), shouldRunIncrementalNamer, isPreemption, duration.usec, files);
 
-    return toTypecheck;
+    return FastPathResult{move(toTypecheck), move(toCache)};
 }
 
 bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const OwnedKeyValueStore> ownedKvstore,
