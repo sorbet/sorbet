@@ -1,0 +1,23 @@
+Exception::raise() msg="packager/packager.cc:1024 enforced condition path.has_value() has failed: Path from otherPkg to thisPkg should always exist if they are in the same SCC"
+
+Backtrace:
+  #3 0xbf169741c46c sorbet::packager::(anonymous namespace)::validateLayering()
+  #4 0xbf169741ad34 sorbet::packager::(anonymous namespace)::validatePackage()
+  #5 0xbf1697423344 sorbet::packager::Packager::buildPackageDB()::$_1::operator()<>()
+  #6 0xbf1697423218 std::__1::__invoke[abi:v15007]<>()
+  #7 0xbf16974231a4 std::__1::invoke<>()
+  #8 0xbf16974131c4 sorbet::Parallel::iterate<>()
+  #9 0xbf16974129f4 sorbet::packager::Packager::buildPackageDB()
+  #10 0xbf1696df61d4 sorbet::realmain::pipeline::buildPackageDB()
+  #11 0xbf16969ea0f8 sorbet::realmain::realmain()
+  #12 0xbf16969c01f4 main
+  #13 0xe7b7c95884c4 
+  #14 0xe7b7c9588598 __libc_start_main
+  #15 0xbf16969c00b0 _start
+
+???: Exception packaging (backtrace is above) https://srb.help/1001
+
+test/t1/__package.rb:7: Strict dependencies violation: importing `Test::T2` will put `Test::T1` into a cycle, which is not valid at `strict_dependencies 'layered_dag'` https://srb.help/3727
+     7 |  import Test::T2
+          ^^^^^^^^^^^^^^^
+Errors: 2
