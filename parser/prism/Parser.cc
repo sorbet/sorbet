@@ -9,22 +9,22 @@ namespace sorbet::parser::Prism {
 using namespace std::literals::string_view_literals;
 
 Prism::ParseResult Parser::run(core::MutableContext ctx, bool preserveConcreteSyntax) {
-    auto source = ctx.file.data(ctx).source();
+    auto parser = make_unique<Prism::Parser>(ctx.file.data(ctx).source());
+    pm_node_t *root = pm_parse(parser->getRawParserPointer());
+
     bool collectComments = ctx.state.cacheSensitiveOptions.rbsEnabled;
-    return Parser::parseWithoutTranslation(source, collectComments);
+    vector<core::LocOffsets> comments;
+    if (collectComments) {
+        comments = parser->collectCommentLocations();
+    }
+
+    auto errors = parser->collectErrors();
+
+    return ParseResult{move(parser), root, move(errors), move(comments)};
 }
 
 pm_parser_t *Parser::getRawParserPointer() {
     return &parser;
-}
-
-// Parses and returns raw Prism nodes for intermediate processing (e.g., RBS rewriting).
-ParseResult Parser::parseWithoutTranslation(string_view source, bool collectComments) {
-    auto parser = make_unique<Prism::Parser>(source);
-    pm_node_t *root = pm_parse(parser->getRawParserPointer());
-    auto errors = parser->collectErrors();
-    auto comments = collectComments ? parser->collectCommentLocations() : vector<core::LocOffsets>{};
-    return ParseResult{move(parser), root, move(errors), move(comments)};
 }
 
 core::LocOffsets Parser::translateLocation(pm_location_t location) const {
