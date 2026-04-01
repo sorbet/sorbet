@@ -134,13 +134,14 @@ LSPClientConfiguration::LSPClientConfiguration(const InitializeParams &params) {
 
 string urlDecode(string_view uri) {
     vector<pair<const absl::string_view, string>> replacements;
+    string to;
 
     for (size_t pos = uri.find('%'); pos != string::npos; pos = uri.find('%', pos + 1)) {
-        // "%3a"
+        // Capture the 3-character percent-encoded sequence starting at pos, e.g. "%3a"
         auto from = uri.substr(pos, 3);
         // add replacement only if % is actually followed by exactly 2 hex digits
         if (from.size() == 3 && isxdigit(from[1]) && isxdigit(from[2])) {
-            string to;
+            to.clear();
             auto valid = absl::HexStringToBytes(from.substr(1), &to);
             ENFORCE(valid, "We checked it was valid above");
             replacements.push_back({from, to});
@@ -182,17 +183,21 @@ void LSPConfiguration::setClientConfig(const shared_ptr<const LSPClientConfigura
         return;
     }
     // Strip any trailing slashes that weakly_canonical may have left (e.g. for a root path "/")
-    while (!canonicalRootPath.empty() && canonicalRootPath.back() == '/') {
-        canonicalRootPath.pop_back();
+    if (auto pos = canonicalRootPath.find_last_not_of('/'); pos != string::npos) {
+        canonicalRootPath.resize(pos + 1);
+    } else {
+        canonicalRootPath.clear();
     }
-    while (!canonicalRootUri.empty() && canonicalRootUri.back() == '/') {
-        canonicalRootUri.pop_back();
+    if (auto pos = canonicalRootUri.find_last_not_of('/'); pos != string::npos) {
+        canonicalRootUri.resize(pos + 1);
+    } else {
+        canonicalRootUri.clear();
     }
 
-    string rootUriPlusSlash = canonicalRootUri + "/";
-    if (absl::StartsWith(canonicalRootPath, rootUriPlusSlash)) {
-        sorbetRootPrefix = canonicalRootPath.substr(rootUriPlusSlash.length());
-        sorbetRootPrefixWithSlash = sorbetRootPrefix + "/";
+    if (absl::StartsWith(canonicalRootPath, canonicalRootUri) &&
+        canonicalRootPath.length() > canonicalRootUri.length() && canonicalRootPath[canonicalRootUri.length()] == '/') {
+        // Store as slash-terminated so callers can unconditionally prepend it.
+        sorbetRootPrefix = canonicalRootPath.substr(canonicalRootUri.length() + 1) + "/";
     }
 }
 
@@ -206,24 +211,15 @@ string LSPConfiguration::localName2Remote(string_view filePath) const {
 
     // Special case: Root uri is '' (happens in Monaco)
     if (clientConfig->rootUri.length() == 0) {
-        if (!sorbetRootPrefix.empty()) {
-            return absl::StrCat(sorbetRootPrefix, "/", relativeUri);
-        }
-        return string(relativeUri);
+        return absl::StrCat(sorbetRootPrefix, relativeUri);
     }
 
     // Use a sorbet: URI if the file is not present on the client AND the client supports sorbet: URIs
     if (clientConfig->enableSorbetURIs &&
         FileOps::isFileIgnored(rootPath, filePath, opts.lspDirsMissingFromClient, {})) {
-        if (!sorbetRootPrefix.empty()) {
-            return absl::StrCat(sorbetScheme, sorbetRootPrefix, "/", relativeUri);
-        }
-        return absl::StrCat(sorbetScheme, relativeUri);
+        return absl::StrCat(sorbetScheme, sorbetRootPrefix, relativeUri);
     }
-    if (!sorbetRootPrefix.empty()) {
-        return absl::StrCat(clientConfig->rootUri, "/", sorbetRootPrefix, "/", relativeUri);
-    }
-    return absl::StrCat(clientConfig->rootUri, "/", relativeUri);
+    return absl::StrCat(clientConfig->rootUri, "/", sorbetRootPrefix, relativeUri);
 }
 
 string LSPConfiguration::remoteName2Local(string_view encodedUri) const {
@@ -255,10 +251,8 @@ string LSPConfiguration::remoteName2Local(string_view encodedUri) const {
     // Strip the root path prefix: it fills the gap between rootUri/sorbetScheme and rootPath
     // in URI space, but is not part of Sorbet's internal file paths. This applies to both
     // file: and sorbet: URIs — localName2Remote inserts the prefix for both.
-    if (!sorbetRootPrefixWithSlash.empty()) {
-        if (absl::StartsWith(path, sorbetRootPrefixWithSlash)) {
-            path = path.substr(sorbetRootPrefixWithSlash.length());
-        }
+    if (absl::StartsWith(path, sorbetRootPrefix)) {
+        path = path.substr(sorbetRootPrefix.length());
     }
 
     if (rootPath.length() > 0) {

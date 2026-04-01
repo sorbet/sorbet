@@ -96,12 +96,10 @@ class LSPConfiguration {
     bool isSorbetUri(std::string_view uri) const;
     // Derived once in setClientConfig (preprocessor thread) from the relationship between
     // rootUri and rootPath; effectively immutable after initialization (see clientConfig docs).
-    // Holds the relative path from the LSP client's workspace root to Sorbet's input directory
-    // (e.g. "Library/Homebrew"), or empty when they are the same directory.
+    // Slash-terminated relative path from the LSP client's workspace root to Sorbet's input
+    // directory (e.g. "Library/Homebrew/"), or empty when they are the same directory.
+    // Callers can unconditionally prepend this to relative URI segments.
     std::string sorbetRootPrefix;
-    // Cached slash-terminated form of sorbetRootPrefix (e.g. "Library/Homebrew/") to avoid
-    // a per-call allocation in remoteName2Local. Empty when sorbetRootPrefix is empty.
-    std::string sorbetRootPrefixWithSlash;
 
 public:
     // The following properties are configured when the language server is created.
