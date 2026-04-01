@@ -29,7 +29,7 @@ Prism::ParseResult Parser::run(core::MutableContext ctx, bool preserveConcreteSy
         }
     }
 
-    return ParseResult{move(parser), root, move(errors), move(comments)};
+    return ParseResult{move(parser), root, move(comments)};
 }
 
 pm_parser_t *Parser::getRawParserPointer() {
