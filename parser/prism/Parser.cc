@@ -13,7 +13,10 @@ Prism::ParseResult Parser::run(core::MutableContext ctx, bool preserveConcreteSy
     pm_node_t *root = pm_parse(parser->getRawParserPointer());
 
     bool collectComments = ctx.state.cacheSensitiveOptions.rbsEnabled;
-    auto comments = collectComments ? parser->collectCommentLocations() : vector<core::LocOffsets>{};
+    vector<core::LocOffsets> comments;
+    if (collectComments) {
+        comments = parser->collectCommentLocations();
+    }
 
     auto errors = parser->collectErrors();
 
