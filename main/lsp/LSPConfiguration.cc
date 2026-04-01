@@ -132,7 +132,7 @@ LSPClientConfiguration::LSPClientConfiguration(const InitializeParams &params) {
     }
 }
 
-string urlDecode(string_view uri) {
+static string urlDecode(string_view uri) {
     vector<pair<const absl::string_view, string>> replacements;
     string to;
 
@@ -176,10 +176,14 @@ void LSPConfiguration::setClientConfig(const shared_ptr<const LSPClientConfigura
     std::error_code ec;
     auto canonicalRootPath = std::filesystem::weakly_canonical(rootPath, ec).string();
     if (ec) {
+        logger->debug("weakly_canonical(\"{}\") failed: {}; skipping sorbetRootPrefix derivation", rootPath,
+                      ec.message());
         return;
     }
     auto canonicalRootUri = std::filesystem::weakly_canonical(rootUriLocalPath, ec).string();
     if (ec) {
+        logger->debug("weakly_canonical(\"{}\") failed: {}; skipping sorbetRootPrefix derivation", rootUriLocalPath,
+                      ec.message());
         return;
     }
     // Strip any trailing slashes that weakly_canonical may have left (e.g. for a root path "/")
