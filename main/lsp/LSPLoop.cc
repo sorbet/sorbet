@@ -296,8 +296,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                     frontTask->canPreempt(indexer)) {
                     absl::Notification finished;
                     string methodStr = convertLSPMethodToString(frontTask->method);
-                    auto preemptTask = make_unique<LSPQueuePreemptionTask>(*config, finished, *taskQueue, indexer);
-                    auto scheduleToken = typecheckerCoord.trySchedulePreemption(move(preemptTask));
+                    auto scheduleToken = typecheckerCoord.trySchedulePreemption(finished, *taskQueue, indexer);
 
                     if (scheduleToken != nullptr) {
                         logger->debug("[Processing] Preempting slow path for task {}", methodStr);

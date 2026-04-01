@@ -139,17 +139,20 @@ void LSPTypecheckerCoordinator::syncRun(unique_ptr<LSPTask> task) {
 
 namespace {
 
-class PreemptionWrapper : public core::lsp::PreemptionTask {
+class PreemptionLoop : public core::lsp::PreemptionTask {
     const LSPConfiguration &config;
-    const unique_ptr<LSPTask> task;
-    const unique_ptr<LSPTypecheckerDelegate> delegate;
+    absl::Notification &finished;
+    TaskQueue &taskQueue;
+    LSPTypecheckerDelegate delegate;
+    LSPIndexer &indexer;
 
     unique_ptr<Timer> timeUntilRun;
 
 public:
-    PreemptionWrapper(const LSPConfiguration &config, unique_ptr<LSPTask> task,
-                      unique_ptr<LSPTypecheckerDelegate> delegate)
-        : config{config}, task{move(task)}, delegate{move(delegate)} {}
+    PreemptionLoop(const LSPConfiguration &config, absl::Notification &finished, TaskQueue &taskQueue,
+                   WorkerPool &preemptionWorkers, LSPTypechecker &typechecker, LSPIndexer &indexer)
+        : config{config}, finished{finished}, taskQueue{taskQueue},
+          delegate(this->taskQueue, preemptionWorkers, typechecker), indexer{indexer} {}
 
     void timeLatencyUntilRun(unique_ptr<Timer> timer) {
         timeUntilRun = move(timer);
@@ -166,26 +169,52 @@ public:
         // Destruct timer, if specified. Causes metric to be reported.
         this->timeUntilRun = nullptr;
 
-        Timer timeit(config.logger, "LSPTask::run");
-        timeit.setTag("method", task->methodString());
-        task->run(*delegate);
+        Timer timeit(config.logger, "preemption_loop");
+        for (;;) {
+            unique_ptr<LSPTask> task;
+            {
+                absl::MutexLock lck(taskQueue.getMutex());
+                if (taskQueue.tasks().empty() || !taskQueue.tasks().front()->canPreempt(indexer)) {
+                    break;
+                }
+                task = move(taskQueue.tasks().front());
+                taskQueue.tasks().pop_front();
+
+                {
+                    Timer timeit(config.logger, "LSPTask::index");
+                    timeit.setTag("method", task->methodString());
+                    // Index while holding lock to prevent races with processing thread.
+                    task->index(indexer);
+                }
+            }
+            prodCategoryCounterInc("lsp.messages.processed", task->methodString());
+
+            if (task->finalPhase() == LSPTask::Phase::INDEX) {
+                continue;
+            }
+            Timer timeit(config.logger, "LSPTask::run");
+            timeit.setTag("method", task->methodString());
+            task->run(this->delegate);
+        }
+        finished.Notify();
     }
 };
 
 } // namespace
 
-shared_ptr<core::lsp::PreemptionTask>
-LSPTypecheckerCoordinator::trySchedulePreemption(unique_ptr<LSPQueuePreemptionTask> preemptTask) {
-    auto wrappedTask = make_shared<PreemptionWrapper>(
-        *config, move(preemptTask), make_unique<LSPTypecheckerDelegate>(*taskQueue, *preemptionWorkers, typechecker));
+shared_ptr<core::lsp::PreemptionTask> LSPTypecheckerCoordinator::trySchedulePreemption(absl::Notification &finished,
+                                                                                       TaskQueue &taskQueue,
+                                                                                       LSPIndexer &indexer) {
+    auto preemptionLoop =
+        make_shared<PreemptionLoop>(*config, finished, taskQueue, *preemptionWorkers, typechecker, indexer);
     // Plant this timer before scheduling task to preempt, as task could run before we plant the timer!
-    wrappedTask->timeLatencyUntilRun(make_unique<Timer>(*config->logger, "latency.preempt_slow_path"));
-    if (hasDedicatedThread && preemptionTaskManager->trySchedulePreemptionTask(wrappedTask)) {
+    preemptionLoop->timeLatencyUntilRun(make_unique<Timer>(*config->logger, "latency.preempt_slow_path"));
+    if (hasDedicatedThread && preemptionTaskManager->trySchedulePreemptionTask(preemptionLoop)) {
         // Preempted; task is guaranteed to run by interrupting the slow path.
-        return wrappedTask;
+        return preemptionLoop;
     } else {
         // Did not preempt, so don't collect a latency metric.
-        wrappedTask->cancelTimeLatencyUntilRun();
+        preemptionLoop->cancelTimeLatencyUntilRun();
         return nullptr;
     }
 }
