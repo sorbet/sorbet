@@ -344,19 +344,6 @@ unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edi
         }
     }
 
-    // Index changes in gs. pipeline::index sorts output by file id, but we need to reorder to match the order of
-    // other fields.
-    UnorderedMap<core::FileRef, int> fileToPos;
-    {
-        int i = -1;
-        for (auto fref : frefs) {
-            // We should have ensured before reaching here that there are no duplicates.
-            ENFORCE(!fileToPos.contains(fref));
-            i++;
-            fileToPos[fref] = i;
-        }
-    }
-
     {
         // Explicitly null. It does not make sense to use kvstore for short-lived editor edits.
         unique_ptr<const OwnedKeyValueStore> kvstore;
