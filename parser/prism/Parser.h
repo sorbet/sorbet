@@ -56,8 +56,6 @@ public:
     Parser &operator=(Parser &&) = delete;
 
     static Prism::ParseResult run(core::MutableContext ctx, bool preserveConcreteSyntax = false);
-
-    static ParseResult parseWithoutTranslation(std::string_view source, bool collectComments = false);
     core::LocOffsets translateLocation(pm_location_t location) const;
     core::LocOffsets translateLocation(const uint8_t *start, const uint8_t *end) const;
     std::string_view resolveConstant(pm_constant_id_t constantId) const;

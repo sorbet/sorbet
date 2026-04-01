@@ -259,9 +259,8 @@ parser::Prism::ParseResult runPrismParser(core::GlobalState &gs, core::FileRef f
     Timer timeit(gs.tracer(), "runParser", {{"file", string(file.data(gs).path())}});
     core::UnfreezeNameTable nameTableAccess(gs); // enters strings from source code as names
 
-    auto source = file.data(gs).source();
-    bool collectComments = gs.cacheSensitiveOptions.rbsEnabled;
-    return parser::Prism::Parser::parseWithoutTranslation(source, collectComments);
+    core::MutableContext ctx(gs, core::Symbols::root(), file);
+    return parser::Prism::Parser::run(ctx);
 }
 
 parser::Prism::ParseResult runPrismRBSRewrite(core::GlobalState &gs, core::FileRef file,
