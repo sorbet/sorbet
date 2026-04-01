@@ -12,20 +12,7 @@ namespace sorbet::realmain::lsp {
  */
 class LSPFileUpdates final {
 public:
-    // This specific update contains edits with the given epoch
-    uint32_t epoch = 0;
-    // The total number of edits that this update represents. Used for stats and assertions.
-    uint32_t editCount = 0;
-    // The total number of edits in this update that are already committed & had diagnostics sent out (via preemption).
-    // Used for stats and assertions.
-    uint32_t committedEditCount = 0;
-
     std::vector<std::shared_ptr<core::File>> updatedFiles;
-
-    TypecheckingPath typecheckingPath = TypecheckingPath::Slow;
-
-    // Indicates whether or not the incremental namer should be used on the fast path.
-    bool fastPathUseIncrementalNamer = false;
 
     // The paths of any additional files implicated in a fast path edit. This vector stores path
     // strings because FileRef IDs might be different in the GlobalState used on the indexing thread
@@ -33,17 +20,36 @@ public:
     // ownership from one thread to the other.
     std::vector<std::string> fastPathExtraFiles;
 
+    // Updated on typechecking thread. Contains indexes processed with typechecking global state.
+    std::vector<ast::ParsedFile> updatedFinalGSFileIndexes;
+
+    // This specific update contains edits with the given epoch
+    uint32_t epoch = 0;
+
+    // The total number of edits that this update represents. Used for stats and assertions.
+    uint32_t editCount = 0;
+
+    // The total number of edits in this update that are already committed & had diagnostics sent out (via preemption).
+    // Used for stats and assertions.
+    uint32_t committedEditCount = 0;
+
+    // (Used in tests) Ensures that a slow path typecheck waits until this number of preemption occurs before finishing.
+    int preemptionsExpected = 0;
+
+    TypecheckingPath typecheckingPath = TypecheckingPath::Slow;
+
+    // Indicates whether or not the incremental namer should be used on the fast path.
+    bool fastPathUseIncrementalNamer = false;
+
     // Indicates that this update contains a new file. Is a hack for determining if combining two updates can take the
     // fast path.
     bool hasNewFiles = false;
+
     // If true, this update caused a slow path to be canceled.
     bool canceledSlowPath = false;
-    // Updated on typechecking thread. Contains indexes processed with typechecking global state.
-    std::vector<ast::ParsedFile> updatedFinalGSFileIndexes;
+
     // (Used in tests) Ensures that a slow path typecheck on these updates waits until it gets cancelled.
     bool cancellationExpected = false;
-    // (Used in tests) Ensures that a slow path typecheck waits until this number of preemption occurs before finishing.
-    int preemptionsExpected = 0;
 
     /**
      * Merges the given (and older) LSPFileUpdates object into this LSPFileUpdates object.
