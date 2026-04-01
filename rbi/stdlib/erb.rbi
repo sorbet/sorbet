@@ -839,6 +839,16 @@ module ERB::DefMethod
   def self.def_erb_method(methodname, erb_or_fname); end
 end
 
+# A module providing C-accelerated HTML escaping, loaded via `require "erb/escape"`.
+# When the native C extension is unavailable, a pure-Ruby fallback is used instead.
+# See: https://github.com/ruby/erb/blob/2fd0a6/lib/erb/util.rb#L11-L28
+module ERB::Escape
+  # Escapes HTML special characters in +s+.
+  # Equivalent to ERB::Util#html_escape but provided as a C extension for speed.
+  sig { params(s: Object).returns(String) }
+  def html_escape(s); end
+end
+
 # A utility module for conversion routines, often handy in HTML generation.
 module ERB::Util
   # Alias for:
