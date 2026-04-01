@@ -756,6 +756,7 @@ unique_ptr<LSPFileUpdates> LSPTypechecker::getNoopUpdate(absl::Span<const core::
     noop.typecheckingPath = TypecheckingPath::Fast;
     // Epoch isn't important for this update.
     noop.epoch = 0;
+    noop.updatedFileRefs = vector(frefs.begin(), frefs.end());
     for (auto fref : frefs) {
         ENFORCE(fref.exists());
         noop.updatedFiles.push_back(gs->getFiles()[fref.id()]);

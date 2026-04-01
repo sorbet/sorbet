@@ -12,6 +12,11 @@ namespace sorbet::realmain::lsp {
  */
 class LSPFileUpdates final {
 public:
+    // The file refs in the indexer's global state that correspond to files at the same index in the `updatedFiles`
+    // vector.
+    std::vector<core::FileRef> updatedFileRefs;
+
+    // Files that have been updated in this edit, and need to be sync'd with the typechecker's global state.
     std::vector<std::shared_ptr<core::File>> updatedFiles;
 
     // The paths of any additional files implicated in a fast path edit. This vector stores path

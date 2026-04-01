@@ -326,9 +326,9 @@ unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edi
 
     UnorderedMap<core::FileRef, shared_ptr<core::File>> newlyEvictedFiles;
     // Update globalStateHashes. Keep track of file IDs for these files, along with old hashes for these files.
-    vector<core::FileRef> frefs;
     {
         core::UnfreezeFileTable fileTableAccess(*gs);
+        update.updatedFileRefs.reserve(update.updatedFiles.size());
         for (auto &file : update.updatedFiles) {
             auto fref = gs->findFileByPath(file->path());
             if (fref.exists()) {
@@ -339,7 +339,7 @@ unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edi
                 fref = gs->enterFile(file);
                 fref.data(*gs).strictLevel = pipeline::decideStrictLevel(*gs, fref, config->opts);
             }
-            frefs.emplace_back(fref);
+            update.updatedFileRefs.emplace_back(fref);
         }
     }
 
@@ -350,8 +350,8 @@ unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edi
         // which one it will be.
         gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer,
                                                        make_shared<core::NullFlusher>());
-        auto trees = hashing::Hashing::indexAndComputeFileHashes(*gs, config->opts, *config->logger,
-                                                                 absl::Span<core::FileRef>(frefs), workers, kvstore);
+        auto trees = hashing::Hashing::indexAndComputeFileHashes(
+            *gs, config->opts, *config->logger, absl::MakeSpan(update.updatedFileRefs), workers, kvstore);
         ENFORCE(trees.hasResult(), "The indexer thread doesn't support cancellation");
     }
 

@@ -5,6 +5,11 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 void LSPFileUpdates::mergeOlder(const LSPFileUpdates &older) {
+    ENFORCE(this->updatedFiles.size() == this->updatedFileRefs.size(), "updatedFiles: {}, updatedFileRefs: {}",
+            this->updatedFiles.size(), this->updatedFileRefs.size());
+    ENFORCE(older.updatedFiles.size() == older.updatedFileRefs.size(), "updatedFiles: {}, updatedFileRefs: {}",
+            older.updatedFiles.size(), older.updatedFileRefs.size());
+
     editCount += older.editCount;
     committedEditCount += older.committedEditCount;
     hasNewFiles = hasNewFiles || older.hasNewFiles;
@@ -12,17 +17,18 @@ void LSPFileUpdates::mergeOlder(const LSPFileUpdates &older) {
     preemptionsExpected += older.preemptionsExpected;
 
     // For updates, we prioritize _newer_ updates.
-    UnorderedSet<string> encountered;
-    for (auto &f : updatedFiles) {
-        encountered.emplace(f->path());
-    }
+    UnorderedSet<core::FileRef> encountered(this->updatedFileRefs.begin(), this->updatedFileRefs.end());
 
-    for (auto &f : older.updatedFiles) {
-        if (encountered.contains(f->path())) {
+    auto ix = -1;
+    for (auto fref : older.updatedFileRefs) {
+        ++ix;
+
+        if (encountered.contains(fref)) {
             continue;
         }
-        encountered.emplace(f->path());
-        updatedFiles.push_back(f);
+        encountered.emplace(fref);
+        this->updatedFileRefs.push_back(fref);
+        this->updatedFiles.push_back(older.updatedFiles[ix]);
     }
     typecheckingPath = TypecheckingPath::Slow;
 }
@@ -34,6 +40,7 @@ LSPFileUpdates LSPFileUpdates::copy() const {
     copy.committedEditCount = committedEditCount;
     copy.typecheckingPath = typecheckingPath;
     copy.hasNewFiles = hasNewFiles;
+    copy.updatedFileRefs = updatedFileRefs;
     copy.updatedFiles = updatedFiles;
     copy.cancellationExpected = cancellationExpected;
     copy.preemptionsExpected = preemptionsExpected;
