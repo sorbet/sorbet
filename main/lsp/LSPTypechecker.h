@@ -96,10 +96,17 @@ class LSPTypechecker final {
     bool runSlowPath(LSPFileUpdates &updates, std::unique_ptr<const OwnedKeyValueStore> ownedKvstore,
                      WorkerPool &workers, std::shared_ptr<core::ErrorFlusher> errorFlusher, SlowPathMode mode);
 
+    struct FastPathResult {
+        // All of the files that we typechecked during the fast path.
+        std::vector<core::FileRef> filesTypechecked;
+
+        // Copies of the indexed trees that were updated during the fast path, for updating the cache of open files.
+        std::vector<ast::ParsedFile> indexedTrees;
+    };
+
     /** Runs incremental typechecking on the provided updates. Returns the final list of files typechecked. */
-    std::vector<core::FileRef> runFastPath(LSPFileUpdates &updates, WorkerPool &workers,
-                                           std::shared_ptr<core::ErrorFlusher> errorFlusher,
-                                           bool isNoopUpdateForRetypecheck) const;
+    FastPathResult runFastPath(LSPFileUpdates &updates, WorkerPool &workers,
+                               std::shared_ptr<core::ErrorFlusher> errorFlusher, bool isNoopUpdateForRetypecheck) const;
 
     /**
      * Open the session-local kvstore.
