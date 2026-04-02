@@ -121,16 +121,10 @@ class ComputePackageSCCs {
                 } else if constexpr (EdgeType != core::packages::ImportType::Normal) {
                     packageGraph.setTestSCCId(poppedPkgName, sccId);
 
-                    // If this is a test-only package, we also set the non-test SCC id to this same id.
-                    if (gs.packageDB().getPackageInfo(poppedPkgName).file.isTestPackage(gs)) {
-                        packageGraph.setSCCId(poppedPkgName, sccId);
-                    } else {
-                        // However, if this is the test package for application code, we add an implicit dependency on
-                        // the application SCC. Those scc ids must exist at this point, as we've already traversed all
-                        // packages once.
-                        auto appSccId = packageGraph.getSCCId(poppedPkgName);
-                        condensationNode.imports.insert(appSccId);
-                    }
+                    // Add an implicit dependency from the test SCC to the application SCC.
+                    // All packages (including test-only) now have sccID_ set from the Normal pass.
+                    auto appSccId = packageGraph.getSCCId(poppedPkgName);
+                    condensationNode.imports.insert(appSccId);
                 }
             } while (poppedPkgName != pkgName);
 
@@ -173,13 +167,6 @@ class ComputePackageSCCs {
         this->nodeMap.clear();
         ENFORCE(this->stack.empty());
         for (auto package : gs.packageDB().packages()) {
-            // We skip test-only packages when we're processing application edges.
-            if constexpr (EdgeType == core::packages::ImportType::Normal) {
-                if (!gs.packageDB().testPackages() && gs.packageDB().getPackageInfo(package).file.isTestPackage(gs)) {
-                    continue;
-                }
-            }
-
             auto &info = this->nodeMap[package];
             if (info.index == NodeInfo::UNVISITED) {
                 this->strongConnect<EdgeType>(package, info, packageGraph);
