@@ -773,9 +773,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     if (targetName == Names::super()) {
         targetName = args.enclosingMethodForSuper;
         mayBeOverloaded = symbol.data(gs)->findParentMethodTransitive(gs, targetName);
-    } else if (symbol != core::Symbols::top()) {
-        // TODO(jez) It would be nice to make `core::Symbols::top()` not have `Object` as its ancestor,
-        // in which case we could simply let the findMethodTransitive run and fail to find any methods
+    } else {
         mayBeOverloaded = symbol.data(gs)->findMethodTransitive(gs, targetName);
     }
 

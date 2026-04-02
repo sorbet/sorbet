@@ -327,7 +327,7 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
             }
         } else {
             if (ref.data(gs)->isClass()) {
-                if (core::Symbols::BasicObject() != ref) {
+                if (core::Symbols::BasicObject() != ref && core::Symbols::top() != ref) {
                     ref.data(gs)->setSuperClass(core::Symbols::Object());
                 }
             } else {

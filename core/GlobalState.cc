@@ -906,8 +906,9 @@ void GlobalState::initEmpty() {
         classAndModules[i].singletonClass(*this);
     }
 
-    // BasicObject has no superclass, so its singleton class can't use the
+    // top() and BasicObject have no superclass, so their singleton classes can't use the
     // normal "follow the attached class's superclass" logic in finalizeAncestors.
+    Symbols::top().data(*this)->singletonClass(*this).data(*this)->setSuperClass(Symbols::Class());
     Symbols::BasicObject().data(*this)->singletonClass(*this).data(*this)->setSuperClass(Symbols::Class());
 
     // This fills in all the way up to MAX_SYNTHETIC_CLASS_SYMBOLS
