@@ -1,6 +1,6 @@
 ----- Abbreviated help output: -------------------------------------------
 
-You must pass either `-e` or at least one folder or ruby file.
+You must pass `-e`, `--e-rbi`, or at least one folder or ruby file.
 
 Sorbet: A fast, powerful typechecker designed for Ruby
 Usage:
@@ -43,7 +43,7 @@ Usage:
 
 ----- Abbreviated help output with empty config file: --------------------
 
-You must pass either `-e` or at least one folder or ruby file.
+You must pass `-e`, `--e-rbi`, or at least one folder or ruby file.
 
 Sorbet: A fast, powerful typechecker designed for Ruby
 Usage:

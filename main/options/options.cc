@@ -1425,9 +1425,10 @@ void readOptions(Options &opts,
             throw EarlyReturnWithCode(1);
         }
 
-        if (raw.count("e") == 0 && opts.inputFileNames.empty() && !raw["version"].as<bool>() && !opts.runLSP &&
-            opts.storeState.empty() && !opts.print.PayloadSources.enabled) {
-            logger->error("You must pass either `{}` or at least one folder or ruby file.\n\n{}", "-e",
+        if (raw.count("e") == 0 && raw.count("e-rbi") == 0 && opts.inputFileNames.empty() &&
+            !raw["version"].as<bool>() && !opts.runLSP && opts.storeState.empty() &&
+            !opts.print.PayloadSources.enabled) {
+            logger->error("You must pass `{}`, `{}`, or at least one folder or ruby file.\n\n{}", "-e", "--e-rbi",
                           options.help({groupToString(Group::INPUT)}));
             throw EarlyReturnWithCode(1);
         }

@@ -10,3 +10,6 @@
      1 |Foo.foo("abc")
                 ^^^^^
 Errors: 1
+
+--- --e-rbi on its own ---
+No errors! Great job.
