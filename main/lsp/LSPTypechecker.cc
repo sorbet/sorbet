@@ -410,15 +410,62 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
                 if (!updates.updatedFiles.empty()) {
                     core::UnfreezeFileTable updateFileTable{*this->gs};
 
+                    vector<pair<core::FileRef, shared_ptr<core::File>>> newFiles;
+                    newFiles.reserve(updates.updatedFiles.size());
+
+                    auto usedFiles = this->gs->filesUsed();
+                    auto ix = -1;
                     for (auto &file : updates.updatedFiles) {
-                        auto fref = this->gs->findFileByPath(file->path());
-                        if (!fref.exists()) {
-                            fref = this->gs->enterFile(std::move(file));
-                            this->workspaceFiles.push_back(fref);
-                        } else {
-                            this->gs->replaceFile(fref, std::move(file));
+                        ++ix;
+
+                        auto fref = updates.updatedFileRefs[ix];
+                        ENFORCE(fref.exists());
+
+                        if (fref.id() >= usedFiles) {
+                            newFiles.emplace_back(fref, move(file));
+                            continue;
                         }
 
+                        ENFORCE(fref == this->gs->findFileByPath(file->path()),
+                                "FileRef mismatch between indexer and typechecker");
+                        this->gs->replaceFile(fref, std::move(file));
+                    }
+
+                    if (!newFiles.empty()) {
+                        // Sort the files by their ref so that we match the order of insertions into the indexer's file
+                        // table.
+                        fast_sort(newFiles, [](auto &l, auto &r) { return l.first.id() < r.first.id(); });
+
+                        this->workspaceFiles.reserve(this->workspaceFiles.size() + newFiles.size());
+
+                        for (auto &[fref, file] : newFiles) {
+                            auto newFref = this->gs->enterFile(std::move(file));
+
+                            // This property relies on `LSPIndexer::commitEdit` never rolling back the effects of
+                            // `GlobalState::enterFile` on the indexer's global state, and LSPFileUpdate values never
+                            // being dropped or truncated.
+                            //
+                            // The first assumption is valid as the indexer only grows its file table and never rolls
+                            // back to a previous state.
+                            //
+                            // The second is valid because the consumer of LSPFileUpdate values from
+                            // `LSPIndexer::commitEdit` is SorbetWorkspaceEdit, and that task will either be a new edit,
+                            // or a merged combination of other edits that have accumulated up to that point. If the
+                            // slow path is cancelled we'll roll back the changes to the file table, but the updates
+                            // themselves will be merged into the next edit, ensuring that we do ultimately insert those
+                            // new files.
+                            if (fref != newFref) {
+                                ENFORCE(false);
+
+                                config->logger->error("Mismatched ref on new file path=\"{}\" expected={} actual={}",
+                                                      file->path(), fref.id(), newFref.id());
+                            }
+
+                            this->workspaceFiles.emplace_back(newFref);
+                        }
+                    }
+
+                    for (auto fref : updates.updatedFileRefs) {
                         // Not all files present in the update set will be from open files--some could be watchman
                         // update events, and others will be the result of a `textDocument/didClose` notification.
                         // As a result, we may need to remove entries from the set that was eagerly cloned from
@@ -430,6 +477,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
                         }
                     }
 
+                    updates.updatedFileRefs.clear();
                     updates.updatedFiles.clear();
                 }
 

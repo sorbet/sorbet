@@ -300,12 +300,22 @@ void LSPIndexer::initialize(IndexerInitializationTask &task, vector<shared_ptr<c
     {
         core::UnfreezeFileTable unfreezeFiles{*this->gs};
 
+        auto ix = 0;
         for (auto &file : files) {
+            ++ix;
             auto fref = this->gs->findFileByPath(file->path());
             if (fref.exists()) {
                 this->gs->replaceFile(fref, std::move(file));
             } else {
-                this->gs->enterFile(std::move(file));
+                fref = this->gs->enterFile(std::move(file));
+            }
+
+            auto expectedFref = core::FileRef(ix);
+            if (fref != expectedFref) {
+                ENFORCE(false);
+
+                config->logger->error("Mismatched ref during indexer initialization path=\"{}\" expected={} actual={}",
+                                      file->path(), expectedFref.id(), fref.id());
             }
         }
     }

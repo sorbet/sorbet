@@ -5,10 +5,8 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 void LSPFileUpdates::mergeOlder(const LSPFileUpdates &older) {
-    ENFORCE(this->updatedFiles.size() == this->updatedFileRefs.size(), "updatedFiles: {}, updatedFileRefs: {}",
-            this->updatedFiles.size(), this->updatedFileRefs.size());
-    ENFORCE(older.updatedFiles.size() == older.updatedFileRefs.size(), "updatedFiles: {}, updatedFileRefs: {}",
-            older.updatedFiles.size(), older.updatedFileRefs.size());
+    ENFORCE(this->updatedFiles.size() == this->updatedFileRefs.size());
+    ENFORCE(older.updatedFiles.size() == older.updatedFileRefs.size());
 
     editCount += older.editCount;
     committedEditCount += older.committedEditCount;
