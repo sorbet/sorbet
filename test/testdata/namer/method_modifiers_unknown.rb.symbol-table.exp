@@ -1,0 +1,18 @@
+class ::<root> < ::Object ()
+  class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> ()
+    method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/namer/method_modifiers_unknown.rb:3
+      argument <blk><block> @ Loc {file=test/testdata/namer/method_modifiers_unknown.rb start=??? end=???}
+  class ::Demo < ::Object () @ test/testdata/namer/method_modifiers_unknown.rb:5
+    method ::Demo#private_unknown : private (<blk>) @ test/testdata/namer/method_modifiers_unknown.rb:8
+      argument <blk><block> @ Loc {file=test/testdata/namer/method_modifiers_unknown.rb start=??? end=???}
+    method ::Demo#unknown_private : private (<blk>) @ test/testdata/namer/method_modifiers_unknown.rb:10
+      argument <blk><block> @ Loc {file=test/testdata/namer/method_modifiers_unknown.rb start=??? end=???}
+  class ::<Class:Demo>[<AttachedClass>] < ::<Class:Object> () @ test/testdata/namer/method_modifiers_unknown.rb:5
+    type-member(+) ::<Class:Demo>::<AttachedClass> -> T.attached_class (of Demo) @ test/testdata/namer/method_modifiers_unknown.rb:5
+    method ::<Class:Demo>#<static-init> (<blk>) @ test/testdata/namer/method_modifiers_unknown.rb:5
+      argument <blk><block> @ Loc {file=test/testdata/namer/method_modifiers_unknown.rb start=??? end=???}
+  class ::Object < ::BasicObject (Object, Kernel) @ (https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/json.rbi#LCENSORED, https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/psych.rbi#LCENSORED, https://github.com/sorbet/sorbet/tree/master/rbi/core/object.rbi#LCENSORED)
+    method ::Object#unknown : private (sym, <blk>) @ test/testdata/namer/method_modifiers_unknown.rb:3
+      argument sym<> @ Loc {file=test/testdata/namer/method_modifiers_unknown.rb start=3:13 end=3:16}
+      argument <blk><block> @ Loc {file=test/testdata/namer/method_modifiers_unknown.rb start=??? end=???}
+

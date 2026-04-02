@@ -514,11 +514,17 @@ public:
             }
             return sym->asSymbol();
         } else if (auto def = ast::cast_tree<ast::RuntimeMethodDefinition>(expr)) {
+            // this handles the `private def foo` case
             return def->name;
-        } else {
-            ENFORCE(!ast::isa_tree<ast::MethodDef>(expr), "methods inside sends should be gone");
-            return core::NameRef::noName();
+        } else if (auto send = ast::cast_tree<ast::Send>(expr)) {
+            // recurse down through other method modifiers, so we can handle e.g. `private abstract def foo`
+            if (send->numPosArgs() == 1) {
+                return unwrapLiteralToMethodName(ctx, send->getPosArg(0));
+            }
         }
+
+        ENFORCE(!ast::isa_tree<ast::MethodDef>(expr), "methods inside sends should be gone");
+        return core::NameRef::noName();
     }
 
     core::FoundDefinitionRef fillAssign(core::Context ctx, const ast::Assign &asgn) {
