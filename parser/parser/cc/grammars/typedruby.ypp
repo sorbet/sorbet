@@ -348,7 +348,9 @@ using namespace std::string_literals;
 
 %type <token>
   args_forward
-  array_premature_end
+  premature_end_k
+  premature_rbrack
+  premature_rparen
   blkarg_mark
   call_op
   cname
@@ -381,6 +383,7 @@ using namespace std::string_literals;
   kend_or_eof
   until
   while
+  opt_nl
 
 %type <delimited_list>
   defs_head_pre
@@ -519,7 +522,7 @@ void parser::error(const ruby_parser::location &lloc, const std::string &msg) {
 
   driver.diagnostics.emplace_back(
     dlevel::ERROR, dclass::UnexpectedToken,
-    diagnostic::range(lloc.beginPos(), lloc.endPos()),
+    diagnostic::range(lloc),
     error_message);
 }
 
@@ -1125,6 +1128,7 @@ lbrace_cmd_block_start:
                     }
                 | tLPAREN mlhs_inner rparen
                     {
+                      driver.enrich_rparen_diagnostic($3, @1);
                       $$ = driver.build.begin(self, $1, $2, $3);
                     }
 
@@ -1134,6 +1138,7 @@ lbrace_cmd_block_start:
                     }
                 | tLPAREN mlhs_inner rparen
                     {
+                      driver.enrich_rparen_diagnostic($3, @1);
                       $$ = driver.build.multi_lhs1(self, $1, $2, $3);
                     }
 
@@ -1194,6 +1199,7 @@ lbrace_cmd_block_start:
        mlhs_item: mlhs_node
                 | tLPAREN mlhs_inner rparen
                     {
+                      driver.enrich_rparen_diagnostic($3, @1);
                       $$ = driver.build.begin(self, $1, $2, $3);
                     }
 
@@ -1808,16 +1814,19 @@ lbrace_cmd_block_start:
 
       paren_args: tLPAREN2 opt_call_args rparen
                     {
+                      driver.enrich_rparen_diagnostic($3, @1);
                       $$ = driver.alloc.delimited_node_list($1, $2, $3);
                     }
                 | tLPAREN2 args tCOMMA args_forward rparen
                     {
+                      driver.enrich_rparen_diagnostic($5, @1);
                       auto forwarded_args = driver.build.forwarded_args(self, $4);
                       $2->emplace_back(forwarded_args);
                       $$ = driver.alloc.delimited_node_list($1, $2, $5);
                     }
                 | tLPAREN2 args_forward rparen
                     {
+                      driver.enrich_rparen_diagnostic($3, @1);
                       auto forwarded_args = driver.build.forwarded_args(self, $2);
                       auto node_list = driver.alloc.node_list(forwarded_args);
                       $$ = driver.alloc.delimited_node_list($1, node_list, $3);
@@ -2020,7 +2029,7 @@ lbrace_cmd_block_start:
 
                      // While scanning an array, if we hit any of these tokens in places where a terminating `]` would
                      // fit, we should stop scanning the array and report an error.
-array_premature_end: eof
+    premature_end_k: eof
                    | kRESCUE
                    | kENSURE
                    | kEND
@@ -2029,7 +2038,10 @@ array_premature_end: eof
                    | kELSE
                    | kWHEN
                    | kIN
-                   | tRPAREN
+   premature_rbrack: tRPAREN
+                   | tRCURLY
+                   | tCOLON
+   premature_rparen: tRBRACK
                    | tRCURLY
                    | tCOLON
 
@@ -2064,6 +2076,7 @@ array_premature_end: eof
                     }
                     rparen
                     {
+                      driver.enrich_rparen_diagnostic($4, @1);
                       $$ = driver.build.begin(self, $1, $2, $4);
                     }
                 | tLPAREN_ARG
@@ -2086,7 +2099,7 @@ array_premature_end: eof
                     {
                       $$ = driver.build.constFetchError(self, $1, $2);
                       driver.rewind_and_reset(@2.endPos());
-                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::ConstWithoutName, diagnostic::range(@2.beginPos(), @2.endPos()));
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::ConstWithoutName, diagnostic::range(@2));
                     }
                 | tCOLON3 tCONSTANT
                     {
@@ -2096,10 +2109,16 @@ array_premature_end: eof
                     {
                       $$ = driver.build.array(self, $1, $2, $3);
                     }
-                | tLBRACK aref_args array_premature_end
+                | tLBRACK aref_args premature_end_k
                     {
                       $$ = driver.build.array(self, $1, $2, $3);
-                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::UnterminatedToken, diagnostic::range(@1.beginPos(), @1.endPos()), "\"[\"");
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::UnterminatedToken, diagnostic::range(@1), "\"[\"");
+                      driver.rewind_and_reset(@2.endPos());
+                    }
+                | tLBRACK aref_args premature_rbrack
+                    {
+                      $$ = driver.build.array(self, $1, $2, $3);
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::UnterminatedToken, diagnostic::range(@1), "\"[\"");
                       driver.rewind_and_reset(@2.endPos());
                     }
                 | tLBRACE assoc_list tRCURLY
@@ -2112,11 +2131,13 @@ array_premature_end: eof
                     }
                 | kYIELD tLPAREN2 call_args rparen
                     {
+                      driver.enrich_rparen_diagnostic($4, @2);
                       $$ = driver.build.keywordYield(self, $1, $2, $3, $4);
                       DIAGCHECK();
                     }
                 | kYIELD tLPAREN2 rparen
                     {
+                      driver.enrich_rparen_diagnostic($3, @2);
                       node_list tmp;
                       $$ = driver.build.keywordYield(self, $1, $2, &tmp, $3);
                       DIAGCHECK();
@@ -2132,16 +2153,19 @@ array_premature_end: eof
                     }
                   expr rparen
                     {
+                      driver.enrich_rparen_diagnostic($6, @3);
                       driver.lex.context.inDefined = false;
                       $$ = driver.build.keywordDefined(self, $1, $3, $5, $6);
                     }
 
                 | kNOT tLPAREN2 expr rparen
                     {
+                      driver.enrich_rparen_diagnostic($4, @2);
                       $$ = driver.build.not_op(self, $1, $2, $3, $4);
                     }
                 | kNOT tLPAREN2 rparen
                     {
+                      driver.enrich_rparen_diagnostic($3, @2);
                       $$ = driver.build.not_op(self, $1, $2, nullptr, $3);
                     }
                 | fcall brace_block
@@ -2184,7 +2208,7 @@ array_premature_end: eof
                     }
                 | kIF strings kDO compstmt if_tail
                     {
-                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::IfInsteadOfItForTest, diagnostic::range(@1.beginPos(), @1.endPos()));
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::IfInsteadOfItForTest, diagnostic::range(@1));
                       auto &else_ = $5;
                       auto end_t = else_ ? else_->tok : nullptr;
                       $$ = driver.build.condition(self, $1, $2, $3, $4->body,
@@ -2510,6 +2534,7 @@ array_premature_end: eof
                     }
                 | tLPAREN f_margs rparen
                     {
+                      driver.enrich_rparen_diagnostic($3, @1);
                       $$ = driver.build.multi_lhs(self, $1, $2, $3);
                     }
 
@@ -3206,24 +3231,28 @@ lcurly_block_start:
                 | p_variable
                 | p_const p_lparen p_args rparen
                     {
+                      driver.enrich_rparen_diagnostic($4, @2);
                       driver.pattern_hash_keys.pop();
                       auto pattern = driver.build.array_pattern(self, $2, $3, $4);
                       $$ = driver.build.const_pattern(self, $1, $2, pattern, $4);
                     }
                 | p_const p_lparen p_find rparen
                     {
+                      driver.enrich_rparen_diagnostic($4, @2);
                       driver.pattern_hash_keys.pop();
                       auto pattern = driver.build.find_pattern(self, $2, $3, $4);
                       $$ = driver.build.const_pattern(self, $1, $2, pattern, $4);
                     }
                 | p_const p_lparen p_kwargs rparen
                     {
+                      driver.enrich_rparen_diagnostic($4, @2);
                       driver.pattern_hash_keys.pop();
                       auto pattern = driver.build.hash_pattern(self, $2, $3, $4);
                       $$ = driver.build.const_pattern(self, $1, $2, pattern, $4);
                     }
                 | p_const tLPAREN2 rparen
                     {
+                      driver.enrich_rparen_diagnostic($3, @2);
                       auto list = driver.alloc.node_list();
                       auto pattern = driver.build.array_pattern(self, $2, list, $3);
                       $$ = driver.build.const_pattern(self, $1, $2, pattern, $3);
@@ -3288,6 +3317,7 @@ lcurly_block_start:
                     }
                   p_expr rparen
                     {
+                      driver.enrich_rparen_diagnostic($4, @1);
                       driver.pattern_hash_keys.pop();
                       $$ = driver.build.begin(self, $1, $3, $4);
                     }
@@ -3493,6 +3523,7 @@ lcurly_block_start:
                     }
       p_expr_ref: tCARET tLPAREN expr_value rparen
                     {
+                      driver.enrich_rparen_diagnostic($4, @2);
                       auto expr = driver.build.begin(self, $2, $3, $4);
                       $$ = driver.build.pin(self, $1, expr);
                     }
@@ -3903,6 +3934,7 @@ f_opt_paren_args: f_paren_args
 
        f_paren_args: tLPAREN2 f_args rparen
                     {
+                      driver.enrich_rparen_diagnostic($3, @1);
                       driver.lex.set_state_expr_value();
                       $$ = driver.build.args(self, $1, $2, $3, true);
                       driver.lex.context.inArgDef = false;
@@ -4125,6 +4157,7 @@ f_opt_paren_args: f_paren_args
                     }
                 | tLPAREN f_margs rparen
                     {
+                      driver.enrich_rparen_diagnostic($3, @1);
                       $$ = driver.build.multi_lhs(self, $1, $2, $3);
                     }
 
@@ -4141,7 +4174,7 @@ f_opt_paren_args: f_paren_args
                 | f_arg tCOMMA error
                     {
                       $$ = $1;
-                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnexpectedToken, diagnostic::range(@2.beginPos(), @2.endPos()), "\",\"");
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnexpectedToken, diagnostic::range(@2), "\",\"");
                     }
 
          f_label: tLABEL
@@ -4344,7 +4377,7 @@ f_opt_paren_args: f_paren_args
                 | tCOMMA error
                     {
                       $$ = driver.alloc.node_list();
-                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnexpectedToken, diagnostic::range(@1.beginPos(), @1.endPos()), "\",\"");
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnexpectedToken, diagnostic::range(@1), "\",\"");
                     }
                 |
                     {
@@ -4354,6 +4387,7 @@ f_opt_paren_args: f_paren_args
        singleton: var_ref
                 | tLPAREN2 expr rparen
                     {
+                      driver.enrich_rparen_diagnostic($3, @1);
                       $$ = $2;
                     }
 
@@ -4385,7 +4419,7 @@ f_opt_paren_args: f_paren_args
                 | assocs tCOMMA error
                     {
                       $$ = $1;
-                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnexpectedToken, diagnostic::range(@2.beginPos(), @2.endPos()), "\",\"");
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::UnexpectedToken, diagnostic::range(@2), "\",\"");
                     }
                 | assocs tCOMMA tIDENTIFIER error
                     {
@@ -4393,7 +4427,7 @@ f_opt_paren_args: f_paren_args
                       auto err = driver.build.call_method(self, nullptr, nullptr, $3, nullptr, nullptr, nullptr);
                       list->emplace_back(driver.build.pair_keyword(self, $3, err));
                       $$ = list;
-                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::PositionalAfterKeyword, diagnostic::range(@3.beginPos(), @3.endPos()), $3->asString());
+                      driver.replace_last_diagnostic(dlevel::ERROR, dclass::PositionalAfterKeyword, diagnostic::range(@3), $3->asString());
                       driver.rewind_and_reset_to_beg(@3.endPos());
                       driver.lex.unadvance($2);
                     }
@@ -4478,10 +4512,34 @@ f_opt_paren_args: f_paren_args
                       $$ = $1;
                     }
        opt_terms:  | terms
-          opt_nl:  | tNL
+          opt_nl: // nothing
+                   {
+                     // @1 doesn't get updated here because there is no location to update to, which means
+                     // that any rule which would otherwise want to access @1 for an opt_nl will actually
+                     // be accessing the location of whatever came before this `opt_nl`. By making opt_nl
+                     // return a token, we can at least detect this case in those rules.
+                     $$ = nullptr;
+                   }
+                | tNL
+                   {
+                     $$ = $1;
+                   }
+
           rparen: opt_nl tRPAREN
                     {
                       $$ = $2;
+                    }
+                | opt_nl premature_end_k
+                    {
+                      $$ = $2;
+                      driver.rewind_and_reset(($1 != nullptr ? @1 : @2).beginPos());
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::UnterminatedToken, $2, "\"(\"");
+                    }
+                | opt_nl premature_rparen
+                    {
+                      $$ = $2;
+                      driver.rewind_and_reset(($1 != nullptr ? @1 : @2).beginPos());
+                      driver.diagnostics.emplace_back(dlevel::ERROR, dclass::UnterminatedToken, $2, "\"(\"");
                     }
         rbracket: opt_nl tRBRACK
                     {
