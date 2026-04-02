@@ -11,9 +11,8 @@
 // are O(1). Please avoid using unless ENFORCE shows up in profiles.
 #define ENFORCE_NO_TIMER(x, ...)                                                                            \
     do {                                                                                                    \
-        if constexpr (::sorbet::debug_mode) {                                                               \
+        if (::sorbet::debug_mode) {                                                                         \
             if (!(x)) {                                                                                     \
-                (void)!(x);                                                                                 \
                 ::sorbet::Exception::enforce_handler(#x, __FILE__, __LINE__ _MAYBE_ADD_COMMA(__VA_ARGS__)); \
             }                                                                                               \
         }                                                                                                   \
