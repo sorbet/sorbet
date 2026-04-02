@@ -370,8 +370,8 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
             openFiles.insert(entry.first);
         }
 
-        this->cancellationUndoState =
-            make_unique<UndoState>(std::move(savedGS), std::move(this->indexedFinalGS), updates.epoch);
+        this->cancellationUndoState = make_unique<UndoState>(std::move(savedGS), std::move(this->indexedFinalGS),
+                                                             this->workspaceFiles, updates.epoch);
     } else {
         timeit.setTag("cancelable", "false");
     }
@@ -408,6 +408,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
                         auto fref = this->gs->findFileByPath(file->path());
                         if (!fref.exists()) {
                             fref = this->gs->enterFile(std::move(file));
+                            this->workspaceFiles.push_back(fref);
                         } else {
                             this->gs->replaceFile(fref, std::move(file));
                         }
@@ -424,29 +425,6 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
                     }
 
                     updates.updatedFiles.clear();
-                }
-
-                this->workspaceFiles.clear();
-                this->workspaceFiles.reserve(this->gs->filesUsed());
-
-                // Rebuild the set of filerefs we're going to index. We're explicitly skipping the `0` file, as
-                // that's always a nullptr.
-                auto ix = 0;
-                for (const auto &file : this->gs->getFiles().subspan(1)) {
-                    ++ix;
-
-                    ENFORCE(file != nullptr);
-
-                    switch (file->sourceType) {
-                        case core::File::Type::NotYetRead:
-                        case core::File::Type::Normal:
-                            this->workspaceFiles.emplace_back(ix);
-                            break;
-
-                        case core::File::Type::PayloadGeneration:
-                        case core::File::Type::Payload:
-                            break;
-                    }
                 }
 
                 break;
@@ -679,7 +657,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
         // Eagerly restore the state to how it was before this slow path, so that we're not holding the old state for an
         // arbitrarily long time. The next update will be responsible for freeing the underlying UndoState after it
         // makes use of the epoch field to determine additional files to include in the edit.
-        cancellationUndoState->restore(this->gs, this->indexedFinalGS);
+        cancellationUndoState->restore(this->gs, this->indexedFinalGS, this->workspaceFiles);
         logger->debug("[Typechecker] Typecheck run for epoch {} was canceled.", updates.epoch);
     }
 
