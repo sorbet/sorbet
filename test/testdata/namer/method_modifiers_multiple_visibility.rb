@@ -3,6 +3,8 @@
 # Multiple visibility modifiers apply at once. The left-most one (which is called last) wins.
 
 class Demo
+  # Standard Ruby visibility modifiers.
+  # Interactions with package_private are tested separately in `test/testdata/packager/test-packages-package-private/a.rb`
   public public       def public_private; end
   public protected    def public_protected; end
   public private      def public_private; end

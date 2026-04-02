@@ -2,27 +2,27 @@ class ::<root> < ::Object ()
   class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> ()
     method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/namer/method_modifiers_multiple_visibility.rb:5
       argument <blk><block> @ Loc {file=test/testdata/namer/method_modifiers_multiple_visibility.rb start=??? end=???}
-  class ::ClassMethodDemo < ::Object () @ test/testdata/namer/method_modifiers_multiple_visibility.rb:38
-  class ::<Class:ClassMethodDemo>[<AttachedClass>] < ::<Class:Object> () @ test/testdata/namer/method_modifiers_multiple_visibility.rb:38
-    type-member(+) ::<Class:ClassMethodDemo>::<AttachedClass> -> T.attached_class (of ClassMethodDemo) @ test/testdata/namer/method_modifiers_multiple_visibility.rb:38
-    method ::<Class:ClassMethodDemo>#<static-init> (<blk>) @ test/testdata/namer/method_modifiers_multiple_visibility.rb:38
+  class ::ClassMethodDemo < ::Object () @ test/testdata/namer/method_modifiers_multiple_visibility.rb:40
+  class ::<Class:ClassMethodDemo>[<AttachedClass>] < ::<Class:Object> () @ test/testdata/namer/method_modifiers_multiple_visibility.rb:40
+    type-member(+) ::<Class:ClassMethodDemo>::<AttachedClass> -> T.attached_class (of ClassMethodDemo) @ test/testdata/namer/method_modifiers_multiple_visibility.rb:40
+    method ::<Class:ClassMethodDemo>#<static-init> (<blk>) @ test/testdata/namer/method_modifiers_multiple_visibility.rb:40
       argument <blk><block> @ Loc {file=test/testdata/namer/method_modifiers_multiple_visibility.rb start=??? end=???}
   class ::Demo < ::Object () @ test/testdata/namer/method_modifiers_multiple_visibility.rb:5
-    method ::Demo#private_private : private (<blk>) @ test/testdata/namer/method_modifiers_multiple_visibility.rb:16
+    method ::Demo#private_private : private (<blk>) @ test/testdata/namer/method_modifiers_multiple_visibility.rb:18
       argument <blk><block> @ Loc {file=test/testdata/namer/method_modifiers_multiple_visibility.rb start=??? end=???}
-    method ::Demo#private_protected : private (<blk>) @ test/testdata/namer/method_modifiers_multiple_visibility.rb:15
+    method ::Demo#private_protected : private (<blk>) @ test/testdata/namer/method_modifiers_multiple_visibility.rb:17
       argument <blk><block> @ Loc {file=test/testdata/namer/method_modifiers_multiple_visibility.rb start=??? end=???}
-    method ::Demo#private_public : private (<blk>) @ test/testdata/namer/method_modifiers_multiple_visibility.rb:14
+    method ::Demo#private_public : private (<blk>) @ test/testdata/namer/method_modifiers_multiple_visibility.rb:16
       argument <blk><block> @ Loc {file=test/testdata/namer/method_modifiers_multiple_visibility.rb start=??? end=???}
-    method ::Demo#protected_private : private (<blk>) @ test/testdata/namer/method_modifiers_multiple_visibility.rb:12
+    method ::Demo#protected_private : private (<blk>) @ test/testdata/namer/method_modifiers_multiple_visibility.rb:14
       argument <blk><block> @ Loc {file=test/testdata/namer/method_modifiers_multiple_visibility.rb start=??? end=???}
-    method ::Demo#protected_protected : protected (<blk>) @ test/testdata/namer/method_modifiers_multiple_visibility.rb:11
+    method ::Demo#protected_protected : protected (<blk>) @ test/testdata/namer/method_modifiers_multiple_visibility.rb:13
       argument <blk><block> @ Loc {file=test/testdata/namer/method_modifiers_multiple_visibility.rb start=??? end=???}
-    method ::Demo#protected_public : protected (<blk>) @ test/testdata/namer/method_modifiers_multiple_visibility.rb:10
+    method ::Demo#protected_public : protected (<blk>) @ test/testdata/namer/method_modifiers_multiple_visibility.rb:12
       argument <blk><block> @ Loc {file=test/testdata/namer/method_modifiers_multiple_visibility.rb start=??? end=???}
-    method ::Demo#public_private (<blk>) @ test/testdata/namer/method_modifiers_multiple_visibility.rb:8
+    method ::Demo#public_private (<blk>) @ test/testdata/namer/method_modifiers_multiple_visibility.rb:10
       argument <blk><block> @ Loc {file=test/testdata/namer/method_modifiers_multiple_visibility.rb start=??? end=???}
-    method ::Demo#public_protected (<blk>) @ test/testdata/namer/method_modifiers_multiple_visibility.rb:7
+    method ::Demo#public_protected (<blk>) @ test/testdata/namer/method_modifiers_multiple_visibility.rb:9
       argument <blk><block> @ Loc {file=test/testdata/namer/method_modifiers_multiple_visibility.rb start=??? end=???}
   class ::<Class:Demo>[<AttachedClass>] < ::<Class:Object> () @ test/testdata/namer/method_modifiers_multiple_visibility.rb:5
     type-member(+) ::<Class:Demo>::<AttachedClass> -> T.attached_class (of Demo) @ test/testdata/namer/method_modifiers_multiple_visibility.rb:5
