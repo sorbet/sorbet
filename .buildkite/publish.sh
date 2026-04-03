@@ -10,8 +10,10 @@ echo "--- setup"
 
 # -- https://deb.nodesource.com/ --
 # (then do what the bash script does directly)
-curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | \
-  gpg --dearmor -o /usr/share/keyrings/nodesource.gpg
+if ! [ -e /usr/share/keyrings/nodesource.gpg ]; then
+  < /dev/null curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | \
+    gpg --dearmor -o /usr/share/keyrings/nodesource.gpg
+fi
 
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_16.x nodistro main" | \
   tee /etc/apt/sources.list.d/nodesource.list
@@ -20,8 +22,10 @@ echo "deb-src [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/n
   tee /etc/apt/sources.list.d/nodesource.list
 
 # -- https://classic.yarnpkg.com/lang/en/docs/install/#debian-stable --
-curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | \
-  gpg --dearmor -o /etc/apt/keyrings/yarn-archive-keyring.gpg
+if ! [ -e /etc/apt/keyrings/yarn-archive-keyring.gpg ]; then
+  < /dev/null curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | \
+    gpg --dearmor -o /etc/apt/keyrings/yarn-archive-keyring.gpg
+fi
 echo "deb [signed-by=/etc/apt/keyrings/yarn-archive-keyring.gpg] https://dl.yarnpkg.com/debian/ stable main" | \
   tee /etc/apt/sources.list.d/yarn.list
 
