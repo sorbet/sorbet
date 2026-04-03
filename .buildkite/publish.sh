@@ -19,7 +19,7 @@ echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/nodes
   tee /etc/apt/sources.list.d/nodesource.list
 
 echo "deb-src [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_16.x nodistro main" | \
-  tee /etc/apt/sources.list.d/nodesource.list
+  tee -a /etc/apt/sources.list.d/nodesource.list
 
 # -- https://classic.yarnpkg.com/lang/en/docs/install/#debian-stable --
 if ! [ -e /etc/apt/keyrings/yarn-archive-keyring.gpg ]; then
