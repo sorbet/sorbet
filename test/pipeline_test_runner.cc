@@ -653,8 +653,9 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                     extension->finishTypecheckFile(ctx, file);
                 }
                 resolvedTree.tree.reset();
-                handler.drainErrors(*gs);
             }
+
+            handler.drainErrors(*gs);
         }
     }
 
