@@ -1,5 +1,6 @@
 #include "parser/prism/Parser.h"
 #include "absl/types/span.h"
+#include "core/errors/parser.h"
 #include "parser/prism/Helpers.h"
 
 using namespace std;
@@ -19,8 +20,16 @@ Prism::ParseResult Parser::run(core::MutableContext ctx, bool preserveConcreteSy
     }
 
     auto errors = parser->collectErrors();
+    for (auto &error : errors) {
+        if (error.id != PM_ERR_UNEXPECTED_TOKEN_CLOSE_CONTEXT) {
+            auto loc = core::Loc(ctx.file, parser->translateLocation(error.location));
+            if (auto e = ctx.state.beginError(loc, core::errors::Parser::ParserError)) {
+                e.setHeader("{}", error.message);
+            }
+        }
+    }
 
-    return ParseResult{move(parser), root, move(errors), move(comments)};
+    return ParseResult{move(parser), root, move(comments)};
 }
 
 pm_parser_t *Parser::getRawParserPointer() {

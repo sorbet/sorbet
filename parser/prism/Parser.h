@@ -84,16 +84,17 @@ class ParseResult final {
     friend class Parser;
     friend class Translator;
 
+    // The parser instance needs to outlive the AST, so we keep it together with the node in this parse result.
     std::unique_ptr<Parser> parser;
+
+    // The root node, allocated by the parser.
     pm_node_t *node;
-    std::vector<ParseError> parseErrors;
+
     std::vector<core::LocOffsets> commentLocations;
 
 public:
-    ParseResult(std::unique_ptr<Parser> parser, pm_node_t *node, std::vector<ParseError> parseErrors,
-                std::vector<core::LocOffsets> commentLocations)
-        : parser{std::move(parser)}, node{node}, parseErrors{std::move(parseErrors)}, commentLocations{std::move(
-                                                                                          commentLocations)} {}
+    ParseResult(std::unique_ptr<Parser> parser, pm_node_t *node, std::vector<core::LocOffsets> commentLocations)
+        : parser{std::move(parser)}, node{node}, commentLocations{std::move(commentLocations)} {}
 
     ~ParseResult() {
         if (node != nullptr && parser != nullptr) {
@@ -102,8 +103,7 @@ public:
     }
 
     ParseResult(ParseResult &&other) noexcept
-        : parser{std::move(other.parser)}, node{other.node}, parseErrors{std::move(other.parseErrors)},
-          commentLocations{std::move(other.commentLocations)} {
+        : parser{std::move(other.parser)}, node{other.node}, commentLocations{std::move(other.commentLocations)} {
         other.node = nullptr;
     }
 
@@ -111,7 +111,6 @@ public:
         this->parser = std::move(other.parser);
         this->node = std::move(other.node);
         other.node = nullptr;
-        this->parseErrors = std::move(other.parseErrors);
         this->commentLocations = std::move(other.commentLocations);
         return *this;
     }
@@ -135,10 +134,6 @@ public:
 
     const std::vector<core::LocOffsets> &getCommentLocations() const {
         return commentLocations;
-    }
-
-    const std::vector<ParseError> &getParseErrors() const {
-        return parseErrors;
     }
 
     Parser &getParser() {
