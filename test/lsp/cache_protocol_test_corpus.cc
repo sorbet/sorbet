@@ -62,6 +62,9 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPUsesCache") {
     auto updatedKey = core::serialize::Serializer::fileKey(
         core::File(string(filePath), string(updatedFileContents), core::File::Type::Normal, 0));
 
+    // Keys don't change with the file contents.
+    REQUIRE_EQ(key, updatedKey);
+
     // LSP should write a cache to disk corresponding to initialization state.
     {
         writeFilesToFS({{relativeFilepath, fileContents}});
@@ -86,10 +89,15 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPUsesCache") {
         auto sink = make_shared<spdlog::sinks::null_sink_mt>();
         auto logger = make_shared<spdlog::logger>("null", sink);
         unique_ptr<const OwnedKeyValueStore> kvstore = realmain::cache::maybeCreateKeyValueStore(logger, *opts);
-        CHECK_EQ(kvstore->read(updatedKey).data, nullptr);
+        auto updatedContents = kvstore->read(updatedKey);
+        REQUIRE_NE(updatedContents.data, nullptr);
 
         auto contents = kvstore->read(key);
         REQUIRE_NE(contents.data, nullptr);
+
+        // Files only have one slot in the cache, so these should point to the same data. However, we should only be
+        // able to deserialize if we provide the file that contains the original contents.
+        REQUIRE_EQ(updatedContents.data, contents.data);
 
         auto gs = make_unique<core::GlobalState>(make_shared<core::ErrorQueue>(*logger, *logger));
         payload::createInitialGlobalState(*gs, *opts, kvstore);
@@ -105,6 +113,10 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPUsesCache") {
         // Loading should fail if file is too small
         core::File smallFile{"", "", core::File::Type::Normal};
         CHECK_EQ(core::serialize::Serializer::loadTree(*gs, smallFile, contents.data), nullptr);
+
+        // Loading should fail if we use the updated text.
+        core::File updatedFile{string(filePath), string(updatedFileContents), core::File::Type::Normal};
+        CHECK_EQ(core::serialize::Serializer::loadTree(*gs, updatedFile, contents.data), nullptr);
     }
 
     // LSP should read from the cache when files on disk match. There should be no cache misses this time since disk

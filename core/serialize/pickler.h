@@ -1,6 +1,7 @@
 #ifndef SORBET_PICKLER_H
 #define SORBET_PICKLER_H
 
+#include "absl/types/span.h"
 #include "common/common.h"
 
 namespace sorbet::core::serialize {
@@ -13,6 +14,7 @@ public:
     void putU1(const uint8_t u);
     void putS8(const int64_t i);
     void putStr(std::string_view s);
+    void putBytes(absl::Span<const uint8_t> bytes);
     std::vector<uint8_t> result();
     Pickler() = default;
 };
@@ -27,6 +29,7 @@ public:
     uint8_t getU1();
     int64_t getS8();
     std::string_view getStr();
+    absl::Span<const uint8_t> getBytes();
     explicit UnPickler(const uint8_t *const compressed, spdlog::logger &tracer);
 };
 

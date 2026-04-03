@@ -222,8 +222,14 @@ ast::ExpressionPtr fetchTreeFromCache(core::GlobalState &gs, core::FileRef fref,
         return nullptr;
     }
 
+    auto tree = core::serialize::Serializer::loadTree(gs, file, maybeCached.data);
+    if (tree == nullptr) {
+        prodCounterInc("types.input.files.kvstore.miss");
+        return nullptr;
+    }
+
     prodCounterInc("types.input.files.kvstore.hit");
-    return core::serialize::Serializer::loadTree(gs, file, maybeCached.data);
+    return tree;
 }
 
 parser::ParseResult runParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print,

@@ -79,6 +79,14 @@ void Pickler::putStr(string_view s) {
     }
 }
 
+void Pickler::putBytes(absl::Span<const uint8_t> bytes) {
+    putU4(bytes.size());
+
+    for (auto b : bytes) {
+        putU1(b);
+    }
+}
+
 constexpr size_t SIZE_BYTES = sizeof(int) / sizeof(uint8_t);
 constexpr int LZ4_COMPRESSION_SETTING = 1;
 
@@ -129,6 +137,14 @@ UnPickler::UnPickler(const uint8_t *const compressed, spdlog::logger &tracer) : 
 string_view UnPickler::getStr() {
     int sz = getU4();
     string_view result((char *)&data[pos], sz);
+    pos += sz;
+
+    return result;
+}
+
+absl::Span<const uint8_t> UnPickler::getBytes() {
+    int sz = getU4();
+    auto result = absl::MakeSpan(&data[pos], sz);
     pos += sz;
 
     return result;
@@ -1148,18 +1164,16 @@ uint32_t Serializer::loadGlobalStateUUID(const GlobalState &gs, const uint8_t *c
 }
 
 string Serializer::fileKey(const core::File &file) {
-    auto path = file.path();
-    string key(path.begin(), path.end());
-    key += "//";
-    auto hashBytes = crypto_hashing::hash64(file.source());
-    key += absl::BytesToHexString(string_view{(char *)hashBytes.data(), size(hashBytes)});
-    return key;
+    return string(file.path());
 }
 
 vector<uint8_t> Serializer::storeTree(const core::File &file, const ast::ParsedFile &tree) {
     Pickler p;
+
     // See comment in `serialize.h` above `loadTree`.
+    p.putBytes(crypto_hashing::hash64(file.source()));
     p.putU4(file.source().size());
+
     SerializerImpl::pickle(p, file.getFileHash());
     SerializerImpl::pickle(p, file, tree.tree);
     return p.result();
@@ -1167,9 +1181,16 @@ vector<uint8_t> Serializer::storeTree(const core::File &file, const ast::ParsedF
 
 ast::ExpressionPtr Serializer::loadTree(const core::GlobalState &gs, core::File &file, const uint8_t *const data) {
     UnPickler p(data, gs.tracer());
+
+    // See comment in `serialize.h` above `loadTree`.
+    auto expectedHash = crypto_hashing::hash64(file.source());
+    auto hashBytes = p.getBytes();
+    if (hashBytes != expectedHash) {
+        return nullptr;
+    }
+
     uint32_t fileSrcLen = p.getU4();
     if (file.source().size() != fileSrcLen) {
-        // See comment in `serialize.h` above `loadTree`.
         // File does not have expected size; bail.
         return nullptr;
     }
