@@ -561,7 +561,7 @@ pipeline_tests(
             "testdata/lsp/fast_path/static_field_type.rb",
 
             # Tests that are also disabled in the pipeline test
-            "test/testdata/cfg/rescue_var_expression.rb"
+            "test/testdata/cfg/rescue_var_expression.rb",
 
             # Prism LSP known failures: hover with RBS
             "testdata/lsp/hover_rbs.rb",
