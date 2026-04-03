@@ -22,6 +22,7 @@ cc_library(
         "//common/json2msgpack",
         "//common/kvstore",
         "//core",
+        "//core/json",
         "//core/proto",
         "//core/serialize",
         "//definition_validator",
@@ -39,6 +40,7 @@ cc_library(
         "//rbs",
         "//resolver",
         "//rewriter",
+        "@rapidjson",
     ],
 )
 

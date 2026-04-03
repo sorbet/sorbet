@@ -5,6 +5,9 @@
 #include "core/proto/proto.h"
 // ^^ has to go first
 #include "common/json2msgpack/json2msgpack.h"
+#include "core/json/json.h"
+#include "rapidjson/prettywriter.h"
+#include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
 #include <sstream>
 #endif
@@ -1604,6 +1607,53 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
 
 // ----- other ----------------------------------------------------------------
 
+#ifndef SORBET_REALMAIN_MIN
+namespace {
+
+// Produces the file table JSON string, matching the format previously produced by
+// Proto::filesToProto + Proto::toJSON (proto3 JSON with add_whitespace=true).
+string printFileTableJSON(const core::GlobalState &gs, const UnorderedMap<long, long> &untypedUsages, bool showFull) {
+    rapidjson::StringBuffer buffer;
+    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+    writer.SetIndent(' ', 1);
+
+    writer.StartObject();
+    writer.Key("files");
+    writer.StartArray();
+
+    for (int i = 1; i < gs.filesUsed(); ++i) {
+        core::FileRef file(i);
+        if (file.data(gs).isPayload()) {
+            if (!showFull) {
+                continue;
+            } else if (gs.censorForSnapshotTests && i > 10) {
+                // Only show the first 10 payload files for the sake of snapshot tests, so that
+                // adding a new RBI file to the payload doesn't require updating snapshot tests.
+                continue;
+            }
+        }
+
+        long untypedCount = 0;
+        auto it = untypedUsages.find(i);
+        if (it != untypedUsages.end()) {
+            untypedCount = it->second;
+        }
+
+        core::JSON::fileToJSON(writer, gs, file, untypedCount);
+    }
+
+    writer.EndArray();
+    writer.EndObject();
+
+    // Proto3 JSON with add_whitespace=true appends a trailing newline.
+    string result(buffer.GetString(), buffer.GetLength());
+    result.push_back('\n');
+    return result;
+}
+
+} // anonymous namespace
+#endif
+
 void printGlobalTables(const core::GlobalState &gs, const options::Options &opts,
                        const UnorderedMap<long, long> &untypedUsages) {
 #ifndef SORBET_REALMAIN_MIN
@@ -1624,13 +1674,11 @@ void printGlobalTables(const core::GlobalState &gs, const options::Options &opts
         if (opts.print.FileTableJson.enabled && opts.print.FileTableFullJson.enabled) {
             Exception::raise("file-table-json and file-table-full-json are mutually exclusive print options");
         }
-        auto files = core::Proto::filesToProto(gs, untypedUsages, opts.print.FileTableFullJson.enabled);
+        auto json = printFileTableJSON(gs, untypedUsages, opts.print.FileTableFullJson.enabled);
         if (opts.print.FileTableJson.outputPath.empty()) {
-            core::Proto::toJSON(files, cout);
+            cout << json;
         } else {
-            stringstream buf;
-            core::Proto::toJSON(files, buf);
-            opts.print.FileTableJson.print(buf.str());
+            opts.print.FileTableJson.print(json);
         }
     }
     if (opts.print.FileTableMessagePack.enabled || opts.print.FileTableFullMessagePack.enabled) {
