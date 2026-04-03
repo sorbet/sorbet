@@ -27,6 +27,7 @@ core::TypePtr dropConstructor(core::Context ctx, core::Loc loc, core::TypePtr tp
 bool typeTestReferencesVar(const InlinedVector<pair<cfg::LocalRef, core::TypePtr>, 1> &typeTest, cfg::LocalRef var) {
     return absl::c_any_of(typeTest, [var](auto &test) { return test.first == var; });
 }
+
 } // namespace
 
 void TypeTestReverseIndex::addToIndex(cfg::LocalRef from, cfg::LocalRef to) {
@@ -1894,6 +1895,34 @@ void Environment::cloneFrom(const Environment &rhs) {
     this->typeTestsWithVar.cloneFrom(rhs.typeTestsWithVar);
 }
 
+namespace {
+
+core::TypeMemberRef extractAttachedClass(const core::GlobalState &gs, const core::TypePtr &type) {
+    if (auto appliedType = core::cast_type<core::AppliedType>(type)) {
+        auto attachedClass = appliedType->klass.data(gs)->findMember(gs, core::Names::Constants::AttachedClass());
+        ENFORCE(attachedClass.exists(), "Indicates we should have reported a type syntax parsing error earlier");
+        return attachedClass.asTypeMemberRef();
+    }
+
+    if (auto andType = core::cast_type<core::AndType>(type)) {
+        auto left = extractAttachedClass(gs, andType->left);
+        if (left.exists()) {
+            // We can short circuit because we know that only one half of the AndType will have a
+            // symbol with `AttachedClass`. If there were two, we would have had two whole
+            // DispatchComponent--the only time we have an `AndType` that's the receiver but a
+            // single `main.rebind`/`main.method` is when the `AndType::dispatchCall` only found a
+            // valid dispatch target on one half of the intersection type.
+            return left;
+        }
+        return extractAttachedClass(gs, andType->right);
+    }
+
+    ENFORCE(false, "Unexpected type, please add a test");
+    return core::Symbols::noTypeMember();
+}
+
+} // namespace
+
 core::TypeAndOrigins Environment::getTypeFromRebind(core::Context ctx, const core::DispatchComponent &main,
                                                     cfg::LocalRef fallback) {
     auto rebind = main.rebind;
@@ -1903,12 +1932,9 @@ core::TypeAndOrigins Environment::getTypeFromRebind(core::Context ctx, const cor
         if (rebind == core::Symbols::MagicBindToSelfType()) {
             result.type = main.receiver;
         } else if (rebind == core::Symbols::MagicBindToAttachedClass()) {
-            auto appliedType = core::cast_type<core::AppliedType>(main.receiver);
-            auto attachedClass = appliedType->klass.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
-
-            auto lambdaParam =
-                core::cast_type<core::LambdaParam>(attachedClass.asTypeMemberRef().data(ctx)->resultType);
-
+            auto attachedClass = extractAttachedClass(ctx, main.receiver);
+            ENFORCE_NO_TIMER(attachedClass.exists(), "MagicBindToAttachedClass rebind requires an AttachedClass");
+            auto lambdaParam = core::cast_type<core::LambdaParam>(attachedClass.data(ctx)->resultType);
             result.type = lambdaParam->upperBound;
         } else {
             result.type = rebind.data(ctx)->externalType();
