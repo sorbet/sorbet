@@ -1570,8 +1570,7 @@ private:
                 alias.data(ctx)->addLoc(ctx, ctx.locAt(typeMember.asgnLoc));
             } else {
                 auto oldSym = context.data(ctx)->findMemberNoDealias(typeTemplateAliasName);
-                if (oldSym.exists() &&
-                    !(oldSym.loc(ctx) == ctx.locAt(typeMember.asgnLoc) || oldSym.loc(ctx).isTombStoned(ctx))) {
+                if (oldSym.exists() && oldSym.loc(ctx) != ctx.locAt(typeMember.asgnLoc)) {
                     emitRedefinedConstantError(ctx, typeMember.nameLoc, typeMemberName,
                                                core::SymbolRef::Kind::TypeMember, oldSym);
                     typeTemplateAliasName = ctx.state.nextMangledName(context, typeTemplateAliasName);

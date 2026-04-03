@@ -23,7 +23,6 @@ public:
         PayloadGeneration, // Files marked during --store-state
         Payload,           // Files loaded from the binary payload
         Normal,
-        TombStone,
     };
 
     // Epoch is _only_ used in LSP mode. Do not depend on it elsewhere.

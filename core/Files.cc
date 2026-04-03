@@ -137,14 +137,12 @@ FileRef::FileRef(unsigned int id) : _id(id) {}
 
 const File &FileRef::data(const GlobalState &gs) const {
     ENFORCE(gs.files->get(_id));
-    ENFORCE(gs.files->get(_id)->sourceType != File::Type::TombStone);
     ENFORCE(gs.files->get(_id)->sourceType != File::Type::NotYetRead);
     return dataAllowingUnsafe(gs);
 }
 
 File &FileRef::data(GlobalState &gs) const {
     ENFORCE(gs.files->get(_id));
-    ENFORCE(gs.files->get(_id)->sourceType != File::Type::TombStone);
     ENFORCE(gs.files->get(_id)->sourceType != File::Type::NotYetRead);
     return dataAllowingUnsafe(gs);
 }
@@ -161,13 +159,11 @@ File &FileRef::dataAllowingUnsafe(GlobalState &gs) const {
 
 bool FileRef::isPackage(const GlobalState &gs) const {
     ENFORCE(gs.files->get(_id));
-    ENFORCE(gs.files->get(_id)->sourceType != File::Type::TombStone);
     return dataAllowingUnsafe(gs).isPackage(gs);
 }
 
 bool FileRef::isTestPackage(const GlobalState &gs) const {
     ENFORCE(gs.files->get(_id));
-    ENFORCE(gs.files->get(_id)->sourceType != File::Type::TombStone);
     return dataAllowingUnsafe(gs).isTestPackage(gs);
 }
 
@@ -176,7 +172,6 @@ string_view File::path() const {
 }
 
 string_view File::source() const {
-    ENFORCE(this->sourceType != File::Type::TombStone);
     ENFORCE(this->sourceType != File::Type::NotYetRead);
     return this->source_;
 }
@@ -238,7 +233,6 @@ void File::setIsOpenInClient(bool isOpenInClient) {
 }
 
 absl::Span<const uint32_t> File::lineBreaks() const {
-    ENFORCE(this->sourceType != File::Type::TombStone);
     ENFORCE(this->sourceType != File::Type::NotYetRead);
     auto ptr = atomic_load(&lineBreaks_);
     if (ptr != nullptr) {

@@ -20,7 +20,9 @@ string readFile(const string &path, const FileSystem &fs) {
         // NOTE: It is not appropriate to throw an error here. Sorbet does not differentiate between Watchman
         // updates that specify if a file has changed or has been deleted, so this is the 'golden path' for deleted
         // files.
-        // TODO(jvilk): Use Tombstone files instead.
+        // An alternative would be to track deleted files in the file table as tombstoned. If we go that direction,
+        // we'll need to make sure to update the handling of those files in the `workspaceFiles` vector that the
+        // LSPTypechecker manages.
         return "";
     }
 }

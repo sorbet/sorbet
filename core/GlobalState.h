@@ -425,7 +425,6 @@ public:
     FileRef enterFile(std::shared_ptr<File> file);
     FileRef reserveFileRef(std::string path);
     std::shared_ptr<File> replaceFile(FileRef whatFile, std::shared_ptr<File> withWhat);
-    static std::unique_ptr<GlobalState> markFileAsTombStone(std::unique_ptr<GlobalState>, FileRef fref);
     FileRef findFileByPath(std::string_view path) const {
         return this->files->findFileByPath(path);
     }
