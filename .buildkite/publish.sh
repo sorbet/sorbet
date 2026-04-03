@@ -8,11 +8,26 @@ fi
 
 echo "--- setup"
 
-curl -fsSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add -
-echo "deb https://deb.nodesource.com/node_16.x focal main" | tee /etc/apt/sources.list.d/nodesource.list
-echo "deb-src https://deb.nodesource.com/node_16.x focal main" | tee -a /etc/apt/sources.list.d/nodesource.list
-curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
-echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
+# -- https://deb.nodesource.com/ --
+# (then do what the bash script does directly)
+if ! [ -e /usr/share/keyrings/nodesource.gpg ]; then
+  < /dev/null curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | \
+    gpg --dearmor -o /usr/share/keyrings/nodesource.gpg
+fi
+
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_16.x nodistro main" | \
+  tee /etc/apt/sources.list.d/nodesource.list
+
+echo "deb-src [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_16.x nodistro main" | \
+  tee -a /etc/apt/sources.list.d/nodesource.list
+
+# -- https://classic.yarnpkg.com/lang/en/docs/install/#debian-stable --
+if ! [ -e /etc/apt/keyrings/yarn-archive-keyring.gpg ]; then
+  < /dev/null curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | \
+    gpg --dearmor -o /etc/apt/keyrings/yarn-archive-keyring.gpg
+fi
+echo "deb [signed-by=/etc/apt/keyrings/yarn-archive-keyring.gpg] https://dl.yarnpkg.com/debian/ stable main" | \
+  tee /etc/apt/sources.list.d/yarn.list
 
 apt-get update
 apt-get install -yy curl jq rubygems file nodejs yarn
