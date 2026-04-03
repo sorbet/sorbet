@@ -171,6 +171,12 @@ bool LSPTypechecker::typecheck(unique_ptr<LSPFileUpdates> updates, WorkerPool &w
         epoch.committed = committed;
     }
 
+    if (gs->hadCriticalError()) {
+        gs->errorQueue->flushAllErrors(*gs);
+        // If flushing the critical error didn't crash the entire process, let's reset the bit for the next typecheck.
+        gs->errorQueue->hadCritical = false;
+    }
+
     sendTypecheckInfo(*config, *gs, committed ? SorbetTypecheckRunStatus::Ended : SorbetTypecheckRunStatus::Cancelled,
                       updates->typecheckingPath, move(filesTypechecked));
     return committed;
