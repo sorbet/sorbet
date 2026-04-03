@@ -445,7 +445,6 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
 
                         case core::File::Type::PayloadGeneration:
                         case core::File::Type::Payload:
-                        case core::File::Type::TombStone:
                             break;
                     }
                 }

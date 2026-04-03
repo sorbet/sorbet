@@ -582,7 +582,6 @@ ast::ExpressionPtr readFileWithStrictnessOverrides(core::GlobalState &gs, core::
         }
         case core::File::Type::PayloadGeneration:
         case core::File::Type::Payload:
-        case core::File::Type::TombStone:
             return nullptr;
     }
 

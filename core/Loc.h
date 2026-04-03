@@ -67,15 +67,6 @@ public:
         return storage.fileRef;
     }
 
-    bool isTombStoned(const GlobalState &gs) const {
-        auto f = file();
-        if (!f.exists()) {
-            return false;
-        } else {
-            return file().data(gs).sourceType == File::Type::TombStone;
-        }
-    }
-
     inline Loc(FileRef file, uint32_t begin, uint32_t end) : storage{{begin, end}, file} {
         ENFORCE_NO_TIMER(storage.offsets.exists());
     }
