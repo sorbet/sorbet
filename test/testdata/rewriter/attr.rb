@@ -4,6 +4,14 @@ class TestAttr
 
   sig {void}
   def initialize
+    @attr1 = T.let(0, Integer)
+    @attr2 = T.let(0, Integer)
+    @attr3 = T.let(0, Integer)
+    @attr4 = T.let(0, Integer)
+    @attr5 = T.let(0, Integer)
+    @attr_no_writer = T.let(0, Integer)
+    @attr_with_writer = T.let(0, Integer)
+
     @v1 = T.let(0, Integer)
     @v2 = T.let("", String)
     @v6 = T.let("", String)
@@ -12,8 +20,25 @@ class TestAttr
     @strv9 = T.let(0.0, Float)
   end
 
-  sig {returns(Integer)}
-  attr :v1
+  sig { returns(Integer) }
+# ^^^^^^^^^^^^^^^^^^^^^^^^ error: Unused type annotation. No method def before next annotation
+  attr
+
+  sig { returns(Integer) }
+  attr :attr1
+
+  sig { returns(Integer) }
+  attr :attr2, :attr3
+
+  sig { returns(Integer) }
+  attr :attr3, :attr4, :attr5
+
+  sig { returns(Integer) }
+  attr :attr_no_writer, false
+
+  sig { returns(Integer) }
+  attr :attr_with_writer, true
+
   sig {params(v1: Integer).returns(Integer)}
   attr_writer :v1
 
@@ -37,4 +62,5 @@ class TestAttr
 
   sig {returns(Float)}
   attr_accessor "strv9"
+
 end

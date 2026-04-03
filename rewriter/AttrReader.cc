@@ -158,16 +158,43 @@ vector<ast::ExpressionPtr> AttrReader::run(core::MutableContext ctx, ast::Send *
 
     bool makeReader = false;
     bool makeWriter = false;
-    if (send->fun == core::Names::attr() || send->fun == core::Names::attrReader() ||
-        send->fun == core::Names::attrAccessor()) {
-        makeReader = true;
+    int attrNameArgCount = send->numPosArgs();
+    switch (send->fun.rawId()) {
+        case core::Names::attrReader().rawId():
+            makeReader = true;
+            break;
+
+        case core::Names::attrWriter().rawId():
+            makeWriter = true;
+            break;
+
+        case core::Names::attrAccessor().rawId():
+            makeReader = true;
+            makeWriter = true;
+            break;
+
+        case core::Names::attr().rawId(): {
+            makeReader = true;
+
+            // `attr` has two forms:
+            // 1. `attr :x, :y, :z` (multiple readers)
+            // 2. `attr :x, true` (single reader + a bool to indicate whether to make a writer)
+            if (send->numPosArgs() == 2) {
+                auto lit = ast::cast_tree<ast::Literal>(send->getPosArg(1));
+                if (lit && (lit->isTrue(ctx.state) || lit->isFalse(ctx.state))) {
+                    makeWriter = lit->isTrue(ctx.state);
+                    attrNameArgCount = 1;
+                }
+            }
+
+            break;
+        };
+
+        default:
+            return empty;
     }
-    if (send->fun == core::Names::attrWriter() || send->fun == core::Names::attrAccessor()) {
-        makeWriter = true;
-    }
-    if (!makeReader && !makeWriter) {
-        return empty;
-    }
+
+    auto attrNameArgs = send->posArgs().subspan(0, attrNameArgCount);
 
     auto loc = send->loc;
     vector<ast::ExpressionPtr> stats;
@@ -200,7 +227,7 @@ vector<ast::ExpressionPtr> AttrReader::run(core::MutableContext ctx, ast::Send *
     bool usedPrevSig = false;
 
     if (makeReader) {
-        for (auto &arg : send->posArgs()) {
+        for (auto &arg : attrNameArgs) {
             auto [name, argLoc] = ASTUtil::getAttrName(ctx, send->fun, arg);
             if (!name.exists()) {
                 return empty;
@@ -223,7 +250,7 @@ vector<ast::ExpressionPtr> AttrReader::run(core::MutableContext ctx, ast::Send *
     }
 
     if (makeWriter) {
-        for (auto &arg : send->posArgs()) {
+        for (auto &arg : attrNameArgs) {
             auto [name, argLoc] = ASTUtil::getAttrName(ctx, send->fun, arg);
             if (!name.exists()) {
                 return empty;
