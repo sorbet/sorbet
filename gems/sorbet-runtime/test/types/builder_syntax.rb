@@ -351,6 +351,30 @@ module Opus::Types::Test
             assert_equal("actual_value", a.foo)
           end
 
+          it 'void with explicit checked(:tests) introspects return_type as Void, not Anything' do
+            a = Module.new do
+              extend T::Sig
+              sig { void.checked(:tests) }
+              def self.foo; end
+            end
+
+            sig = T::Utils.signature_for_method(a.method(:foo))
+            assert_instance_of(T::Private::Types::Void, sig.return_type)
+          end
+
+          it 'void with default_checked_level :tests introspects return_type as Void, not Anything' do
+            T::Private::RuntimeLevels.instance_variable_set(:@default_checked_level, :tests)
+
+            a = Module.new do
+              extend T::Sig
+              sig { void }
+              def self.foo; end
+            end
+
+            sig = T::Utils.signature_for_method(a.method(:foo))
+            assert_instance_of(T::Private::Types::Void, sig.return_type)
+          end
+
           it 'void with default_checked_level :tests skips void replacement' do
             T::Private::RuntimeLevels.instance_variable_set(:@default_checked_level, :tests)
             T::Private::RuntimeLevels._toggle_checking_tests(true)
