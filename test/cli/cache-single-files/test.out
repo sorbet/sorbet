@@ -8,5 +8,5 @@
             types.input.files.kvstore.miss :              1
            types.input.files.kvstore.write :              1
 ====fourth run (cache miss after restoring original file)====
-             types.input.files.kvstore.hit :              1
-           types.input.files.kvstore.write :              0
+            types.input.files.kvstore.miss :              1
+           types.input.files.kvstore.write :              1
