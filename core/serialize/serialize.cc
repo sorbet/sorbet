@@ -204,10 +204,12 @@ uint32_t UnPickler::getU4() {
         zeroCounter--;
         return 0;
     }
-    uint8_t r = data[pos++];
+    uint32_t lpos = pos;
+    uint8_t r = data[lpos++];
     if (r == 0) {
-        zeroCounter = data[pos++];
+        zeroCounter = data[lpos++];
         zeroCounter--;
+        pos = lpos;
         return r;
     } else {
         uint32_t res = r & 127;
@@ -216,31 +218,32 @@ uint32_t UnPickler::getU4() {
             goto done;
         }
 
-        vle = data[pos++];
+        vle = data[lpos++];
         res |= (vle & 127) << 7;
         if ((vle & 128) == 0) {
             goto done;
         }
 
-        vle = data[pos++];
+        vle = data[lpos++];
         res |= (vle & 127) << 14;
         if ((vle & 128) == 0) {
             goto done;
         }
 
-        vle = data[pos++];
+        vle = data[lpos++];
         res |= (vle & 127) << 21;
         if ((vle & 128) == 0) {
             goto done;
         }
 
-        vle = data[pos++];
+        vle = data[lpos++];
         res |= (vle & 127) << 28;
         if ((vle & 128) == 0) {
             goto done;
         }
 
     done:
+        pos = lpos;
         return res;
     }
 }
