@@ -100,9 +100,7 @@ void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) 
     }
 
     gs.trackUntyped = opts.trackUntyped;
-    gs.printingFileTable = opts.print.FileTableJson.enabled || opts.print.FileTableFullJson.enabled ||
-                           opts.print.FileTableProto.enabled || opts.print.FileTableFullProto.enabled ||
-                           opts.print.FileTableMessagePack.enabled || opts.print.FileTableFullMessagePack.enabled;
+    gs.printingFileTable = opts.print.FileTableJson.enabled || opts.print.FileTableFullJson.enabled;
 
     if (opts.suggestTyped) {
         gs.ignoreErrorClassForSuggestTyped(core::errors::Infer::SuggestTyped.code);
@@ -1657,19 +1655,6 @@ string printFileTableJSON(const core::GlobalState &gs, const UnorderedMap<long, 
 void printGlobalTables(const core::GlobalState &gs, const options::Options &opts,
                        const UnorderedMap<long, long> &untypedUsages) {
 #ifndef SORBET_REALMAIN_MIN
-    if (opts.print.FileTableProto.enabled || opts.print.FileTableFullProto.enabled) {
-        if (opts.print.FileTableProto.enabled && opts.print.FileTableFullProto.enabled) {
-            Exception::raise("file-table-proto and file-table-full-proto are mutually exclusive print options");
-        }
-        auto files = core::Proto::filesToProto(gs, untypedUsages, opts.print.FileTableFullProto.enabled);
-        if (opts.print.FileTableProto.outputPath.empty()) {
-            files.SerializeToOstream(&cout);
-        } else {
-            string buf;
-            files.SerializeToString(&buf);
-            opts.print.FileTableProto.print(buf);
-        }
-    }
     if (opts.print.FileTableJson.enabled || opts.print.FileTableFullJson.enabled) {
         if (opts.print.FileTableJson.enabled && opts.print.FileTableFullJson.enabled) {
             Exception::raise("file-table-json and file-table-full-json are mutually exclusive print options");
@@ -1679,27 +1664,6 @@ void printGlobalTables(const core::GlobalState &gs, const options::Options &opts
             cout << json;
         } else {
             opts.print.FileTableJson.print(json);
-        }
-    }
-    if (opts.print.FileTableMessagePack.enabled || opts.print.FileTableFullMessagePack.enabled) {
-        if (opts.print.FileTableMessagePack.enabled && opts.print.FileTableFullMessagePack.enabled) {
-            Exception::raise("file-table-msgpack and file-table-full-msgpack are mutually exclusive print options");
-        }
-        auto files = core::Proto::filesToProto(gs, untypedUsages, opts.print.FileTableFullMessagePack.enabled);
-        stringstream buf;
-        core::Proto::toJSON(files, buf);
-        auto str = buf.str();
-        rapidjson::Document document;
-        document.Parse(str);
-        mpack_writer_t writer;
-        if (opts.print.FileTableMessagePack.outputPath.empty()) {
-            mpack_writer_init_stdfile(&writer, stdout, /* close when done */ false);
-        } else {
-            mpack_writer_init_filename(&writer, opts.print.FileTableMessagePack.outputPath.c_str());
-        }
-        json2msgpack::json2msgpack(document, &writer);
-        if (mpack_writer_destroy(&writer)) {
-            Exception::raise("failed to write msgpack");
         }
     }
 #endif

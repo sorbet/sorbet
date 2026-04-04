@@ -139,11 +139,7 @@ const vector<PrintOptions> print_options({
     {"symbol-table-full-proto", &Printers::SymbolTableFullProto},
     {"symbol-table-full-messagepack", &Printers::SymbolTableFullMessagePack, true, false},
     {"file-table-json", &Printers::FileTableJson, true, true, true},
-    {"file-table-proto", &Printers::FileTableProto, true, true, true},
-    {"file-table-messagepack", &Printers::FileTableMessagePack, true, false, true},
     {"file-table-full-json", &Printers::FileTableFullJson, true, true, true},
-    {"file-table-full-proto", &Printers::FileTableFullProto, true, true, true},
-    {"file-table-full-messagepack", &Printers::FileTableFullMessagePack, true, false, true},
     {"missing-constants", &Printers::MissingConstants, true, true, true},
     {"autogen", &Printers::Autogen},
     {"autogen-msgpack", &Printers::AutogenMsgPack},
@@ -227,8 +223,6 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
         SymbolTableFullJson,
         SymbolTableFullRaw,
         FileTableJson,
-        FileTableProto,
-        FileTableMessagePack,
         MissingConstants,
         Autogen,
         AutogenMsgPack,
@@ -493,7 +487,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  cxxopts::value<vector<string>>(), "<counter>");
     options.add_options(section)(
         "track-untyped",
-        "Include a per-file counter of untyped usages in the `--print=file-table-<format>` output. "
+        "Include a per-file counter of untyped usages in the `--print=file-table-json` output. "
         "This is in addition to the codebase-wide `types.input.untyped.usages` counter.",
         cxxopts::value<string>()->implicit_value("everywhere"), "{[nowhere],everywhere,everywhere-but-tests}");
     options.add_options(section)("metrics-file", "Report counters and some timers to <file>, in JSON format.",

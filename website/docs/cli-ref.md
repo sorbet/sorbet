@@ -168,7 +168,7 @@ Usage:
       --counter <counter>       Print internal counter for <counter> (repeatable)
       --track-untyped [={[nowhere],everywhere,everywhere-but-tests}(=everywhere)]
                                 Include a per-file counter of untyped usages in the
-                                `--print=file-table-<format>` output. This is in addition
+                                `--print=file-table-json` output. This is in addition
                                 to the codebase-wide `types.input.untyped.usages`
                                 counter.
       --metrics-file <file>     Report counters and some timers to <file>, in JSON
@@ -389,9 +389,7 @@ Usage:
                                 --print=<format>:<file>
                                 Most of these formats are unstable, for internal-use only.
 
-                                Stable: [file-table-json, file-table-proto,
-                                file-table-messagepack, file-table-full-json,
-                                file-table-full-proto, file-table-full-messagepack,
+                                Stable: [file-table-json, file-table-full-json,
                                 missing-constants, payload-sources, untyped-blame]
 
                                 Unstable: [parse-tree, parse-tree-json,
