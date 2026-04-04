@@ -1,7 +1,6 @@
 #ifndef SORBET_CORE_PROTO_H
 #define SORBET_CORE_PROTO_H
 // have to go first as they violate our poisons
-#include "proto/File.pb.h"
 #include "proto/Loc.pb.h"
 #include "proto/Name.pb.h"
 #include "proto/Symbol.pb.h"
@@ -28,9 +27,6 @@ public:
     static com::stripe::rubytyper::Type toProto(const GlobalState &gs, const TypePtr &typ);
 
     static com::stripe::rubytyper::Loc toProto(const GlobalState &gs, Loc loc);
-    static com::stripe::rubytyper::FileTable filesToProto(const GlobalState &gs,
-                                                          const UnorderedMap<long, long> &untypedUsages, bool showFull);
-
     static com::stripe::payserver::events::cibot::SourceMetrics toProto(const CounterState &counters,
                                                                         std::string_view prefix);
 

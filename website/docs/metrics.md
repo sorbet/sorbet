@@ -195,7 +195,7 @@ This instructs Sorbet to dump information about the number of untyped usages in 
 }
 ```
 
-The full format for this output can be found in [proto/File.proto](https://github.com/sorbet/sorbet/blob/master/proto/File.proto). Note that due to idiosyncrasies in Sorbet's choice of serialization format (JSON via Protobuf), keys whose values equal their "zero" value are omitted. This means that a file which has no usages of untyped will simply lack an `"untyped_usages"` key entirely.
+Note that keys whose values equal their "zero" value are omitted. This means that a file which has no usages of untyped will simply lack an `"untyped_usages"` key entirely.
 
 Like with the `types.input.untyped.usages` metric, `# typed: false` and `# typed: ignore` files are not considered for the sake of untyped usages. So entries for these files will also lack an `"untyped_usages"` key.
 
