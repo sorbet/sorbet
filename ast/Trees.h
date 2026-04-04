@@ -285,13 +285,13 @@ struct ParsedFile {
         // if 'true' file is completely cached in kvstore
         bool cached : 1;
 
-        Flags() : cached{false} {}
+        Flags() noexcept : cached{false} {}
     };
 
     Flags flags;
 
     ParsedFile() = default;
-    ParsedFile(ast::ExpressionPtr tree, core::FileRef file) : tree{std::move(tree)}, file{file}, flags{} {}
+    ParsedFile(ast::ExpressionPtr tree, core::FileRef file) noexcept : tree{std::move(tree)}, file{file}, flags{} {}
 
     void swap(ParsedFile &other) noexcept {
         using std::swap;
@@ -309,7 +309,7 @@ struct ParsedFile {
     }
 };
 
-inline void swap(ParsedFile &a, ParsedFile &b) {
+inline void swap(ParsedFile &a, ParsedFile &b) noexcept {
     a.swap(b);
 }
 

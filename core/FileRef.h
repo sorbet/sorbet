@@ -9,8 +9,8 @@ class File;
 
 class FileRef final {
 public:
-    FileRef() : _id(0){};
-    FileRef(unsigned int id);
+    FileRef() noexcept : _id(0){};
+    FileRef(unsigned int id) noexcept;
 
     FileRef(FileRef &f) = default;
     FileRef(const FileRef &f) = default;
