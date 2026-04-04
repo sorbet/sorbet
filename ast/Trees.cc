@@ -10,6 +10,22 @@ using namespace std;
 
 namespace sorbet::ast {
 
+static_assert(is_nothrow_constructible_v<ExpressionPtr>);
+static_assert(is_nothrow_default_constructible_v<ExpressionPtr>);
+static_assert(is_nothrow_move_constructible_v<ExpressionPtr>);
+static_assert(is_nothrow_assignable_v<ExpressionPtr, ExpressionPtr>);
+static_assert(is_nothrow_move_assignable_v<ExpressionPtr>);
+static_assert(is_nothrow_destructible_v<ExpressionPtr>);
+static_assert(is_nothrow_swappable_v<ExpressionPtr>);
+
+static_assert(is_nothrow_constructible_v<ParsedFile>);
+static_assert(is_nothrow_default_constructible_v<ParsedFile>);
+static_assert(is_nothrow_move_constructible_v<ParsedFile>);
+static_assert(is_nothrow_assignable_v<ParsedFile, ParsedFile>);
+static_assert(is_nothrow_move_assignable_v<ParsedFile>);
+static_assert(is_nothrow_destructible_v<ParsedFile>);
+static_assert(is_nothrow_swappable_v<ParsedFile>);
+
 #define CASE_STATEMENT(CASE_BODY, T) \
     case Tag::T: {                   \
         CASE_BODY(T)                 \
