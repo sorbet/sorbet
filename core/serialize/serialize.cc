@@ -1171,8 +1171,8 @@ vector<uint8_t> Serializer::storeTree(const core::File &file, const ast::ParsedF
     Pickler p;
 
     // See comment in `serialize.h` above `loadTree`.
-    p.putBytes(crypto_hashing::hash64(file.source()));
     p.putU4(file.source().size());
+    p.putBytes(crypto_hashing::hash64(file.source()));
 
     SerializerImpl::pickle(p, file.getFileHash());
     SerializerImpl::pickle(p, file, tree.tree);
@@ -1183,17 +1183,18 @@ ast::ExpressionPtr Serializer::loadTree(const core::GlobalState &gs, core::File 
     UnPickler p(data, gs.tracer());
 
     // See comment in `serialize.h` above `loadTree`.
+    uint32_t fileSrcLen = p.getU4();
+    if (file.source().size() != fileSrcLen) {
+        // File does not have expected size; bail.
+        return nullptr;
+    }
+
     auto expectedHash = crypto_hashing::hash64(file.source());
     auto hashBytes = p.getBytes();
     if (hashBytes != expectedHash) {
         return nullptr;
     }
 
-    uint32_t fileSrcLen = p.getU4();
-    if (file.source().size() != fileSrcLen) {
-        // File does not have expected size; bail.
-        return nullptr;
-    }
     file.setFileHash(SerializerImpl::unpickleFileHash(p));
     return SerializerImpl::unpickleExpr(p, gs);
 }
