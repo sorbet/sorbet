@@ -297,6 +297,7 @@ struct ParsedFile {
         using std::swap;
         this->tree.swap(other.tree);
         swap(this->file, other.file);
+        swap(this->flags, other.flags);
     }
 
     bool cached() const {
