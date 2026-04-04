@@ -15,6 +15,16 @@ using namespace std;
 
 namespace sorbet::core {
 
+static_assert(is_nothrow_constructible_v<NameRef>);
+static_assert(is_nothrow_default_constructible_v<NameRef>);
+static_assert(is_nothrow_copy_constructible_v<NameRef>);
+static_assert(is_nothrow_move_constructible_v<NameRef>);
+static_assert(is_nothrow_assignable_v<NameRef, NameRef>);
+static_assert(is_nothrow_copy_assignable_v<NameRef>);
+static_assert(is_nothrow_move_assignable_v<NameRef>);
+static_assert(is_nothrow_destructible_v<NameRef>);
+static_assert(is_nothrow_swappable_v<NameRef>);
+
 NameRef::NameRef(const GlobalState &gs, NameKind kind, uint32_t id)
     : DebugOnlyCheck(gs, kind, id), _id{(id << KIND_BITS) | static_cast<uint32_t>(kind)} {
     // If this fails, the symbol table is too big :(
