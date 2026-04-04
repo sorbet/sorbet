@@ -9,12 +9,19 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 UndoState::UndoState(unique_ptr<core::GlobalState> evictedGs, UnorderedMap<int, ast::ParsedFile> evictedIndexedFinalGS,
-                     uint32_t epoch)
-    : evictedGs(move(evictedGs)), evictedIndexedFinalGS(std::move(evictedIndexedFinalGS)), epoch(epoch) {}
+                     const vector<core::FileRef> &workspaceFiles, uint32_t epoch)
+    : evictedGs(move(evictedGs)),
+      evictedIndexedFinalGS(std::move(evictedIndexedFinalGS)), initialWorkspaceFilesSize{workspaceFiles.size()},
+      epoch(epoch) {}
 
-void UndoState::restore(unique_ptr<core::GlobalState> &gs, UnorderedMap<int, ast::ParsedFile> &indexedFinalGS) {
+void UndoState::restore(unique_ptr<core::GlobalState> &gs, UnorderedMap<int, ast::ParsedFile> &indexedFinalGS,
+                        vector<core::FileRef> &workspaceFiles) {
     indexedFinalGS = std::move(evictedIndexedFinalGS);
     gs = move(evictedGs);
+
+    if (workspaceFiles.size() != this->initialWorkspaceFilesSize) {
+        workspaceFiles.erase(workspaceFiles.begin() + this->initialWorkspaceFilesSize, workspaceFiles.end());
+    }
 }
 
 const unique_ptr<core::GlobalState> &UndoState::getEvictedGs() {
