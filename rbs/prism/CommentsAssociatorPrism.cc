@@ -315,7 +315,7 @@ int CommentsAssociatorPrism::maybeInsertStandalonePlaceholders(pm_node_list_t &n
             continuationFor = placeholder;
 
             // Create constant assignment node: `type foo = placeholder`
-            pm_constant_id_t name_id = prism.addConstantToPool(nameStr.c_str());
+            pm_constant_id_t name_id = prism.addConstantToPool(nameStr);
             pm_node_t *constantWrite = prism.ConstantWriteNode(it->second.loc, name_id, placeholder);
 
             // Insert the assignment into the statement list
