@@ -23,7 +23,6 @@ vector<pm_node_t *> TypeParamsToParserNodesPrism::typeParams(const rbs_node_list
         }
 
         auto nameStr = parser.resolveConstant(rbsTypeParam->name);
-        auto nameConstant = ctx.state.enterNameConstant(nameStr);
 
         absl::InlinedVector<pm_node_t *, 1> args{};
         if (rbsTypeParam->variance) {
@@ -66,7 +65,7 @@ vector<pm_node_t *> TypeParamsToParserNodesPrism::typeParams(const rbs_node_list
         }
 
         auto typeCall = prism.Call(loc, prism.SorbetPrivateStatic(loc), "type_member"sv, absl::MakeSpan(args), block);
-        auto assign = prism.ConstantWriteNode(loc, prism.addConstantToPool(nameConstant.show(ctx.state)), typeCall);
+        auto assign = prism.ConstantWriteNode(loc, prism.addConstantToPool(nameStr), typeCall);
         result.push_back(assign);
     }
 
