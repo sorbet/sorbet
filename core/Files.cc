@@ -14,6 +14,16 @@ using namespace std;
 
 namespace sorbet::core {
 
+static_assert(is_nothrow_constructible_v<FileRef>);
+static_assert(is_nothrow_default_constructible_v<FileRef>);
+static_assert(is_nothrow_copy_constructible_v<FileRef>);
+static_assert(is_nothrow_move_constructible_v<FileRef>);
+static_assert(is_nothrow_assignable_v<FileRef, FileRef>);
+static_assert(is_nothrow_copy_assignable_v<FileRef>);
+static_assert(is_nothrow_move_assignable_v<FileRef>);
+static_assert(is_nothrow_destructible_v<FileRef>);
+static_assert(is_nothrow_swappable_v<FileRef>);
+
 namespace {
 
 constexpr auto EXTERNAL_PREFIX = "external/com_stripe_ruby_typer/"sv;
