@@ -362,19 +362,18 @@ optional<pair<core::SymbolRef, vector<core::NameRef>>> ConstantLit::fullUnresolv
             fatalLogger->error("source=\"{}\"", absl::CEscape(ctx.file.data(ctx).source()));
         }
 
+        auto &orig = *nested->original();
+        namesFailedToResolve.emplace_back(orig.cnst);
+
         if (nested->resolutionScopes()->front().exists()) {
             break;
         }
 
-        auto &orig = *nested->original();
-        namesFailedToResolve.emplace_back(orig.cnst);
         nested = ast::cast_tree<ast::ConstantLit>(orig.scope);
         ENFORCE(nested);
         ENFORCE(nested->symbol() == core::Symbols::StubModule());
         ENFORCE(!nested->resolutionScopes()->empty());
     }
-    auto &orig = *nested->original();
-    namesFailedToResolve.emplace_back(orig.cnst);
     auto prefix = nested->resolutionScopes()->front();
     return make_pair(prefix, move(namesFailedToResolve));
 }
