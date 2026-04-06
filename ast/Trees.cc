@@ -352,7 +352,7 @@ optional<pair<core::SymbolRef, vector<core::NameRef>>> ConstantLit::fullUnresolv
     // for Type hashing, and don't care about the order for that.
     vector<core::NameRef> namesFailedToResolve;
     auto *nested = this;
-    while (true) {
+    do {
         ENFORCE(nested->symbol() == core::Symbols::StubModule());
 
         if (nested->resolutionScopes() == nullptr || nested->resolutionScopes()->empty()) [[unlikely]] {
@@ -372,7 +372,8 @@ optional<pair<core::SymbolRef, vector<core::NameRef>>> ConstantLit::fullUnresolv
 
         nested = ast::cast_tree<ast::ConstantLit>(orig.scope);
         ENFORCE(nested);
-    }
+    } while (true);
+
     auto prefix = nested->resolutionScopes()->front();
     return make_pair(prefix, move(namesFailedToResolve));
 }
