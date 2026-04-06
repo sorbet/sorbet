@@ -713,7 +713,7 @@ std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingVisibleT
     return core::AutocorrectSuggestion{fmt::format("Add missing `{}`", "visible_to"), std::move(allEdits)};
 }
 
-std::string PackageInfo::renderPackageRbContents(const core::GlobalState &gs,
+std::string PackageInfo::renderPackageRbContents(const core::GlobalState &gs, vector<Import> newImports,
                                                  std::vector<core::SymbolRef> newExports) const {
     fmt::memory_buffer result;
 
@@ -778,8 +778,14 @@ std::string PackageInfo::renderPackageRbContents(const core::GlobalState &gs,
           {StrictDependenciesLevel::Dag, "  # strict_dependencies 'dag':\n"}}},
     };
 
-    // NOTE: this loop assumes importedPackageNames are already sorted by orderImports
-    // TODO(neil): sort the imports
+    fast_sort(newImports, [&](const auto &a, const auto &b) {
+        auto &aPkgInfo = gs.packageDB().getPackageInfo(a.mangledName);
+        auto &bPkgInfo = gs.packageDB().getPackageInfo(b.mangledName);
+        ENFORCE(aPkgInfo.exists());
+        ENFORCE(bPkgInfo.exists());
+        return orderImports(gs, aPkgInfo, a.isTestImport(), bPkgInfo, b.isTestImport()) < 0;
+    });
+
     bool layeringViolationsHeaderShown = false;
     bool testImportNewLineAdded = false;
 
@@ -787,12 +793,10 @@ std::string PackageInfo::renderPackageRbContents(const core::GlobalState &gs,
             "should not happen, was a new StrictDependenciesLevel added?");
     auto &headers = headerMap.find(strictDependenciesLevel)->second;
     auto headersIt = headers.begin();
-    for (auto &import : importedPackageNames) {
+    for (auto &import : newImports) {
         auto impPackageName = import.mangledName.owner.show(gs);
         auto &impPkgInfo = gs.packageDB().getPackageInfo(import.mangledName);
-        if (!impPkgInfo.exists()) {
-            continue;
-        }
+        ENFORCE(impPkgInfo.exists());
 
         if (gs.packageDB().enforceLayering() && import.type == ImportType::Normal) {
             if (!layeringViolationsHeaderShown && causesLayeringViolation(gs.packageDB(), impPkgInfo)) {
@@ -824,14 +828,16 @@ std::string PackageInfo::renderPackageRbContents(const core::GlobalState &gs,
         }
 
         switch (import.type) {
-            case ImportType::Normal:
-                if (import.usesInternals) {
+            case ImportType::Normal: {
+                auto *existingImport = importsPackage(import.mangledName);
+                if (existingImport != nullptr && existingImport->usesInternals) {
                     ENFORCE(gs.packageDB().testPackages());
                     fmt::format_to(std::back_inserter(result), "  import {}, uses_internals: true\n", impPackageName);
                 } else {
                     fmt::format_to(std::back_inserter(result), "  import {}\n", impPackageName);
                 }
                 break;
+            }
             case ImportType::TestHelper:
                 ENFORCE(!gs.packageDB().testPackages());
                 fmt::format_to(std::back_inserter(result), "  test_import {}\n", impPackageName);
