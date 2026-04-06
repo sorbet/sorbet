@@ -27,3 +27,7 @@ cat A/__package.rb
 echo
 echo "###### cat B/__package.rb ######"
 cat B/__package.rb
+
+echo
+echo "###### cat C/__package.rb ######"
+cat C/__package.rb
