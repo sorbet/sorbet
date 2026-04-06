@@ -43,6 +43,9 @@ class A < PackageSpec
   layer 'app'
   strict_dependencies 'dag'
 
+  # strict_dependencies 'dag':
+  import Prelude
+
   test_import B
 
   export A::CONSTANT_FROM_A
