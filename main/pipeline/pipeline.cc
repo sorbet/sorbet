@@ -859,13 +859,17 @@ void unpartitionPackageFiles(vector<ast::ParsedFile> &packageFiles, vector<ast::
     }
 }
 
-vector<CondensationStratumInfo> computePackageStrata(const core::GlobalState &gs, vector<ast::ParsedFile> &packageFiles,
-                                                     absl::Span<core::FileRef> sourceFiles,
-                                                     const options::Options &opts) {
+PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::ParsedFile> &packageFiles,
+                                   absl::Span<core::FileRef> sourceFiles, const options::Options &opts) {
     Timer timeit(gs.tracer(), "computePackageStrata");
 
+    PackageStrata result;
+
+    result.fileToStratum = vector<uint16_t>(gs.filesUsed(), 0);
+
     if (!opts.packageDirected) {
-        return vector{CondensationStratumInfo{absl::MakeSpan(packageFiles), sourceFiles}};
+        result.strata = {CondensationStratumInfo{absl::MakeSpan(packageFiles), sourceFiles}};
+        return result;
     }
 
     auto &db = gs.packageDB();
@@ -889,7 +893,6 @@ vector<CondensationStratumInfo> computePackageStrata(const core::GlobalState &gs
     auto traversal = db.condensation().computeTraversal(gs);
     ENFORCE(!traversal.strata.empty());
 
-    vector<uint32_t> fileToStratum(gs.filesUsed());
     {
         Timer timeit(gs.tracer(), "computePackageStrata.stratumMapping");
 
@@ -903,7 +906,7 @@ vector<CondensationStratumInfo> computePackageStrata(const core::GlobalState &gs
             if (!pkgName.exists()) {
                 // This is a file with no package, so we unconditionally put it in the first stratum. This means that
                 // it'll be checked at the same time as the first stratum of packaged code.
-                fileToStratum[ix] = 0;
+                result.fileToStratum[ix] = 0;
                 continue;
             }
 
@@ -911,26 +914,28 @@ vector<CondensationStratumInfo> computePackageStrata(const core::GlobalState &gs
                     "All packages must be present in the condensation graph");
             auto &info = stratumMapping[pkgName];
             if (file->isPackagedTest() || file->isPackagedTestHelper()) {
-                fileToStratum[ix] = info.testStratum;
+                ENFORCE(info.testStratum < USHRT_MAX);
+                result.fileToStratum[ix] = info.testStratum;
             } else {
-                fileToStratum[ix] = info.applicationStratum;
+                ENFORCE(info.applicationStratum < USHRT_MAX);
+                result.fileToStratum[ix] = info.applicationStratum;
             }
         }
 
-        fast_sort(sourceFiles, [&fileToStratum = as_const(fileToStratum)](core::FileRef l, core::FileRef r) -> bool {
-            auto lid = l.id();
-            auto rid = r.id();
-            auto lStratum = fileToStratum[lid];
-            auto rStratum = fileToStratum[rid];
-            return std::tie(lStratum, lid) < std::tie(rStratum, rid);
-        });
+        fast_sort(sourceFiles,
+                  [&fileToStratum = as_const(result.fileToStratum)](core::FileRef l, core::FileRef r) -> bool {
+                      auto lid = l.id();
+                      auto rid = r.id();
+                      auto lStratum = fileToStratum[lid];
+                      auto rStratum = fileToStratum[rid];
+                      return std::tie(lStratum, lid) < std::tie(rStratum, rid);
+                  });
     }
 
     // Reserve enough space for all the strata of the condensation traversal, plus one more for unpackaged code.
     auto maxStrata = traversal.strata.size() + 1;
 
-    vector<CondensationStratumInfo> result;
-    result.reserve(maxStrata);
+    result.strata.reserve(maxStrata);
 
     auto sourceSpan = sourceFiles;
 
@@ -938,7 +943,7 @@ vector<CondensationStratumInfo> computePackageStrata(const core::GlobalState &gs
     for (auto &stratum : traversal.strata) {
         ++currentStratum;
 
-        auto &resultStratum = result.emplace_back();
+        auto &resultStratum = result.strata.emplace_back();
 
         {
             auto start = packageFiles.size();
@@ -965,7 +970,7 @@ vector<CondensationStratumInfo> computePackageStrata(const core::GlobalState &gs
         }
 
         {
-            auto it = absl::c_find_if(sourceSpan, [currentStratum, &fileToStratum = as_const(fileToStratum)](
+            auto it = absl::c_find_if(sourceSpan, [currentStratum, &fileToStratum = as_const(result.fileToStratum)](
                                                       auto file) { return fileToStratum[file.id()] > currentStratum; });
             auto len = std::distance(sourceSpan.begin(), it);
             resultStratum.sourceFiles = sourceSpan.subspan(0, len);
@@ -974,8 +979,8 @@ vector<CondensationStratumInfo> computePackageStrata(const core::GlobalState &gs
     }
 
     ENFORCE(sourceSpan.empty());
-    ENFORCE(!result.empty());
-    ENFORCE(result.size() <= maxStrata);
+    ENFORCE(!result.strata.empty());
+    ENFORCE(result.strata.size() <= maxStrata);
 
     return result;
 }
