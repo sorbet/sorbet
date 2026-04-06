@@ -4,8 +4,8 @@ class B < PackageSpec
   layer 'util'
   strict_dependencies 'false'
 
-  import A
   import C
+  import A
 
   export B::CONSTANT_FROM_B
   export B::ANOTHER_CONSTANT_FROM_B
