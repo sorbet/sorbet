@@ -697,7 +697,7 @@ std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingVisibleT
     return core::AutocorrectSuggestion{fmt::format("Add missing `{}`", "visible_to"), std::move(allEdits)};
 }
 
-std::string PackageInfo::renderPackageRbContents(const core::GlobalState &gs) const {
+std::string PackageInfo::renderPackageRbContents(const core::GlobalState &gs, vector<Import> newImports) const {
     fmt::memory_buffer result;
 
     if (isPreludePackage()) {
@@ -760,17 +760,21 @@ std::string PackageInfo::renderPackageRbContents(const core::GlobalState &gs) co
           {StrictDependenciesLevel::Dag, "  # strict_dependencies 'dag':\n"}}},
     };
 
-    // NOTE: this loop assumes importedPackageNames are already sorted by orderImports
-    // TODO(neil): sort the imports
+    fast_sort(newImports, [&](const auto &a, const auto &b) {
+        auto &aPkgInfo = gs.packageDB().getPackageInfo(a.mangledName);
+        auto &bPkgInfo = gs.packageDB().getPackageInfo(b.mangledName);
+        ENFORCE(aPkgInfo.exists());
+        ENFORCE(bPkgInfo.exists());
+        return orderImports(gs, aPkgInfo, a.isTestImport(), bPkgInfo, b.isTestImport()) < 0;
+    });
+
     bool layeringViolationsHeaderShown = false;
     bool testImportNewLineAdded = false;
     uint8_t headerIndex = 0;
-    for (auto &import : importedPackageNames) {
-        auto impPackageName = import.mangledName.owner.show(gs);
+    for (auto &import : newImports) {
         auto &impPkgInfo = gs.packageDB().getPackageInfo(import.mangledName);
-        if (!impPkgInfo.exists()) {
-            continue;
-        }
+        ENFORCE(impPkgInfo.exists());
+        auto impPackageName = import.mangledName.owner.show(gs);
 
         if (gs.packageDB().enforceLayering() && import.type == ImportType::Normal) {
             if (!layeringViolationsHeaderShown && causesLayeringViolation(gs.packageDB(), impPkgInfo)) {
@@ -805,14 +809,16 @@ std::string PackageInfo::renderPackageRbContents(const core::GlobalState &gs) co
         }
 
         switch (import.type) {
-            case ImportType::Normal:
-                if (import.usesInternals) {
+            case ImportType::Normal: {
+                auto *existingImport = importsPackage(import.mangledName);
+                if (existingImport != nullptr && existingImport->usesInternals) {
                     ENFORCE(gs.packageDB().testPackages());
                     fmt::format_to(std::back_inserter(result), "  import {}, uses_internals: true\n", impPackageName);
                 } else {
                     fmt::format_to(std::back_inserter(result), "  import {}\n", impPackageName);
                 }
                 break;
+            }
             case ImportType::TestHelper:
                 ENFORCE(!gs.packageDB().testPackages());
                 fmt::format_to(std::back_inserter(result), "  test_import {}\n", impPackageName);
