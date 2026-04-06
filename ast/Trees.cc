@@ -347,38 +347,40 @@ optional<pair<core::SymbolRef, vector<core::NameRef>>> ConstantLit::fullUnresolv
     if (this->symbol() != core::Symbols::StubModule()) {
         return nullopt;
     }
-    ENFORCE(this->resolutionScopes() != nullptr && !this->resolutionScopes()->empty());
 
     // This list is in reverse order, but that doesn't matter because all we ever use this for is
     // for Type hashing, and don't care about the order for that.
     vector<core::NameRef> namesFailedToResolve;
     auto *nested = this;
-    {
-        while (true) {
-            if (nested->resolutionScopes() == nullptr || nested->resolutionScopes()->empty()) [[unlikely]] {
-                ENFORCE(false);
-                bool hasScopes = nested->resolutionScopes() != nullptr;
-                fatalLogger->error(R"(msg="Bad fullUnresolvedPath" loc="{}" hasScopes={})",
-                                   ctx.locAt(this->loc()).showRaw(ctx), hasScopes);
-                fatalLogger->error("source=\"{}\"", absl::CEscape(ctx.file.data(ctx).source()));
-            }
+    do {
+        ENFORCE(nested->symbol() == core::Symbols::StubModule());
 
-            if (nested->resolutionScopes()->front().exists()) {
-                break;
-            }
-
-            auto &orig = *nested->original();
-            namesFailedToResolve.emplace_back(orig.cnst);
-            nested = ast::cast_tree<ast::ConstantLit>(orig.scope);
-            ENFORCE(nested);
-            ENFORCE(nested->symbol() == core::Symbols::StubModule());
-            ENFORCE(!nested->resolutionScopes()->empty());
+        if (nested->resolutionScopes() == nullptr || nested->resolutionScopes()->empty()) [[unlikely]] {
+            ENFORCE(false);
+            bool hasScopes = nested->resolutionScopes() != nullptr;
+            fatalLogger->error(R"(msg="Bad fullUnresolvedPath" loc="{}" hasScopes={})",
+                               ctx.locAt(this->loc()).showRaw(ctx), hasScopes);
+            fatalLogger->error("source=\"{}\"", absl::CEscape(ctx.file.data(ctx).source()));
         }
+
         auto &orig = *nested->original();
         namesFailedToResolve.emplace_back(orig.cnst);
+
+        if (nested->resolutionScopes()->front().exists()) {
+            break;
+        }
+
+        ENFORCE(!isa_tree<ast::UnresolvedConstantLit>(orig.scope), "Should have resolved all consts");
+        // `orig.scope` won't necessarily be a `ConstantLit`, e.g. due to dynamic constant references
+        nested = ast::cast_tree<ast::ConstantLit>(orig.scope);
+    } while (nested != nullptr);
+
+    if (nested != nullptr) {
+        auto prefix = nested->resolutionScopes()->front();
+        return make_pair(prefix, move(namesFailedToResolve));
+    } else {
+        return make_pair(core::Symbols::ErrorNode(), move(namesFailedToResolve));
     }
-    auto prefix = nested->resolutionScopes()->front();
-    return make_pair(prefix, move(namesFailedToResolve));
 }
 
 Block::Block(core::LocOffsets loc, MethodDef::PARAMS_store params, ExpressionPtr body)
