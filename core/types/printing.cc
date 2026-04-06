@@ -36,7 +36,8 @@ string UnresolvedClassType::toStringWithTabs(const GlobalState &gs, int tabs) co
 
 string UnresolvedClassType::show(const GlobalState &gs, ShowOptions options) const {
     return fmt::format("{}::{} (unresolved)", this->scope.show(gs, options),
-                       fmt::map_join(this->names, "::", [&](const auto &el) -> string { return el.show(gs); }));
+                       fmt::map_join(this->names.rbegin(), this->names.rend(),
+                                     "::", [&](const auto &el) -> string { return el.show(gs); }));
 }
 
 string UnresolvedAppliedType::toStringWithTabs(const GlobalState &gs, int tabs) const {
