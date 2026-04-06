@@ -101,6 +101,13 @@ void SorbetWorkspaceEditTask::runSpecial(LSPTypechecker &typechecker, WorkerPool
         // This is really gnarly; there's got to be a cleaner way to do threading here. We can't move this out because
         // we need `workers`, which is a resource that is explicitly managed by typechecking.
         updates = indexer->commitEdit(*params, workers);
+
+        // IMPORTANT: We only have unqiue access to the indexer until we notify the LSPTypecheckerCoordinator that we
+        // have started, which is done through `startedNotification` below. As there's no mutex that guarantees unique
+        // access to the indexer (other than the task queue's mutex) and the LSPTypecheckerCoordinator will allow new
+        // tasks to start once we notify through `startedNotification`, we need to make sure that we don't accidentally
+        // use `indexer` again after this point.
+        indexer = nullptr;
     } else {
         ENFORCE(updates != nullptr);
     }
@@ -113,7 +120,10 @@ void SorbetWorkspaceEditTask::runSpecial(LSPTypechecker &typechecker, WorkerPool
     // Inform the epoch manager that we're going to perform a cancelable typecheck, then notify the
     // processing thread that it's safe to move on.
     typechecker.state().epochManager->startCommitEpoch(updates->epoch);
+
+    ENFORCE(indexer == nullptr);
     startedNotification.Notify();
+
     const auto newEditCount = updates->editCount - updates->committedEditCount;
 
     // Checks in debug builds that we have exactly 1 diagnostic latency timer per edit
