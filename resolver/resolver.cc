@@ -652,13 +652,16 @@ private:
             return true;
         }
 
-        if (rhsSym.dealias(ctx) != it.lhs) {
-            it.lhs.setResultType(ctx, core::make_type<core::AliasType>(rhsSym));
-        } else {
+        if (rhsSym.dealias(ctx) == it.lhs) {
             if (auto e = ctx.state.beginError(it.lhs.loc(ctx), core::errors::Resolver::RecursiveClassAlias)) {
                 e.setHeader("Class alias aliases to itself");
             }
             it.lhs.setResultType(ctx, core::Types::untypedUntracked());
+        } else if (rhsSym == core::Symbols::StubModule()) {
+            // Error reported elsewhere
+            it.lhs.setResultType(ctx, core::Types::untypedUntracked());
+        } else {
+            it.lhs.setResultType(ctx, core::make_type<core::AliasType>(rhsSym));
         }
         return true;
     }
