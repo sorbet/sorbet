@@ -849,9 +849,12 @@ std::string PackageInfo::renderPackageRbContents(const core::GlobalState &gs,
     if (locs.exportAll.exists()) {
         fmt::format_to(std::back_inserter(result), "  export_all!\n");
     } else {
-        fast_sort(newExports, [&gs](SymbolRef l, SymbolRef r) { return l.show(gs) < r.show(gs); });
-        for (auto &export_ : newExports) {
-            fmt::format_to(std::back_inserter(result), "  export {}\n", export_.show(gs));
+        auto newExportsNames = vector<string>{};
+        transform(newExports.begin(), newExports.end(), back_inserter(newExportsNames),
+                  [&gs](SymbolRef export_) { return export_.show(gs); });
+        fast_sort(newExportsNames, [](string l, string r) { return l < r; });
+        for (auto &export_ : newExportsNames) {
+            fmt::format_to(back_inserter(result), "  export {}\n", export_);
         }
     }
 
