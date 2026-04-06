@@ -43,8 +43,10 @@ class A < PackageSpec
   layer 'app'
   strict_dependencies 'false'
 
-  test_import B
+  # strict_dependencies 'false':
+  import B
 
+  export A::CONSTANT_FROM_A
 end
 
 ###### cat B/__package.rb ######
