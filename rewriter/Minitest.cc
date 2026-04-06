@@ -370,6 +370,9 @@ ast::ExpressionPtr prepareParameterizedBody(core::MutableContext ctx, core::Name
                                             absl::Span<const ast::ExpressionPtr> destructuringStmts,
                                             ast::ExpressionPtr &iteratee, bool insideDescribe);
 
+ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::ExpressionPtr &maybeSharedExamplesName,
+                             ast::Send *send, bool insideDescribe);
+
 ast::ExpressionPtr invalidUnderParameterizedBody(core::MutableContext ctx, core::NameRef eachName,
                                                  ast::ExpressionPtr stmt) {
     if (isSharedExamplesName(eachName)) {
@@ -488,8 +491,18 @@ ast::ExpressionPtr runUnderParameterized(core::MutableContext ctx, core::NameRef
         case core::Names::sharedExamples().rawId():
         case core::Names::sharedContext().rawId():
         case core::Names::sharedExamplesFor().rawId(): {
-            // We don't handle RSpec's SharedExampleGroup inside test_each, because it's not clear
-            // what that should do and whether anyone actually uses it.
+            // When called with the RSpec. prefix (e.g. `RSpec.shared_context 'name' do`),
+            // these are standalone global definitions independent of the block params.
+            // Delegate to runSingle so they get registered as root-scoped constants.
+            if (isRSpec(ctx, send->recv)) {
+                auto result =
+                    runSingle(ctx, /* isClass */ false, /* maybeSharedExamplesName */ nullptr, send, insideDescribe);
+                if (result != nullptr) {
+                    return result;
+                }
+            }
+            // For bare shared_examples inside parameterized blocks we don't handle them,
+            // because it's not clear what that should do and whether anyone actually uses it.
             //
             // We can revisit this choice if people complain about Sorbet lacking support for this.
             break;
@@ -585,9 +598,6 @@ ast::ExpressionPtr prepareParameterizedBody(core::MutableContext ctx, core::Name
 
     return body;
 }
-
-ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::ExpressionPtr &maybeSharedExamplesName,
-                             ast::Send *send, bool insideDescribe);
 
 ast::ExpressionPtr tryRunSingleOnSend(core::MutableContext ctx, bool isClass,
                                       const ast::ExpressionPtr &maybeSharedExamplesName, ast::ExpressionPtr body,
