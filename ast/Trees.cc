@@ -347,7 +347,6 @@ optional<pair<core::SymbolRef, vector<core::NameRef>>> ConstantLit::fullUnresolv
     if (this->symbol() != core::Symbols::StubModule()) {
         return nullopt;
     }
-    ENFORCE(this->resolutionScopes() != nullptr && !this->resolutionScopes()->empty());
 
     // This list is in reverse order, but that doesn't matter because all we ever use this for is
     // for Type hashing, and don't care about the order for that.
