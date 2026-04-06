@@ -440,7 +440,8 @@ private:
         if (job.resolutionFailed) {
             // we only set this when a job has failed for other reasons and we've already reported an error, and
             // continuing on will only redundantly report that we can't resolve the constant, so bail early here
-            job.out->setSymbol(core::Symbols::ErrorNode());
+            job.out->markUnresolved();
+            job.out->resolutionScopes()->emplace_back(core::Symbols::noSymbol());
             return;
         }
 
@@ -452,7 +453,7 @@ private:
         auto &original = *job.out->original();
         if (auto id = ast::cast_tree<ast::ConstantLit>(original.scope)) {
             auto originalScope = id->symbol().dealias(ctx);
-            if (originalScope == core::Symbols::StubModule() || originalScope == core::Symbols::ErrorNode()) {
+            if (originalScope == core::Symbols::StubModule()) {
                 // If we were trying to resolve some literal like C::D but `C` itself was already stubbed,
                 // no need to also report that `D` is missing.
                 alreadyReported = true;

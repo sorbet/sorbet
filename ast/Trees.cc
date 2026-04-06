@@ -370,12 +370,17 @@ optional<pair<core::SymbolRef, vector<core::NameRef>>> ConstantLit::fullUnresolv
             break;
         }
 
+        ENFORCE(!isa_tree<ast::UnresolvedConstantLit>(orig.scope), "Should have resolved all consts");
+        // `orig.scope` won't necessarily be a `ConstantLit`, e.g. due to dynamic constant references
         nested = ast::cast_tree<ast::ConstantLit>(orig.scope);
-        ENFORCE(nested);
-    } while (true);
+    } while (nested != nullptr);
 
-    auto prefix = nested->resolutionScopes()->front();
-    return make_pair(prefix, move(namesFailedToResolve));
+    if (nested != nullptr) {
+        auto prefix = nested->resolutionScopes()->front();
+        return make_pair(prefix, move(namesFailedToResolve));
+    } else {
+        return make_pair(core::Symbols::ErrorNode(), move(namesFailedToResolve));
+    }
 }
 
 Block::Block(core::LocOffsets loc, MethodDef::PARAMS_store params, ExpressionPtr body)
