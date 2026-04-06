@@ -372,7 +372,6 @@ optional<pair<core::SymbolRef, vector<core::NameRef>>> ConstantLit::fullUnresolv
         nested = ast::cast_tree<ast::ConstantLit>(orig.scope);
         ENFORCE(nested);
         ENFORCE(nested->symbol() == core::Symbols::StubModule());
-        ENFORCE(!nested->resolutionScopes()->empty());
     }
     auto prefix = nested->resolutionScopes()->front();
     return make_pair(prefix, move(namesFailedToResolve));
