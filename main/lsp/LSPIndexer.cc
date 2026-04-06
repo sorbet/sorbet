@@ -332,8 +332,7 @@ unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edi
         for (auto &file : update.updatedFiles) {
             auto fref = gs->findFileByPath(file->path());
             if (fref.exists()) {
-                newlyEvictedFiles[fref] = gs->getFiles()[fref.id()];
-                gs->replaceFile(fref, file);
+                newlyEvictedFiles[fref] = gs->replaceFile(fref, file);
             } else {
                 // This file update adds a new file to GlobalState.
                 update.hasNewFiles = true;
