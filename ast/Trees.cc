@@ -353,6 +353,8 @@ optional<pair<core::SymbolRef, vector<core::NameRef>>> ConstantLit::fullUnresolv
     vector<core::NameRef> namesFailedToResolve;
     auto *nested = this;
     while (true) {
+        ENFORCE(nested->symbol() == core::Symbols::StubModule());
+
         if (nested->resolutionScopes() == nullptr || nested->resolutionScopes()->empty()) [[unlikely]] {
             ENFORCE(false);
             bool hasScopes = nested->resolutionScopes() != nullptr;
@@ -370,7 +372,6 @@ optional<pair<core::SymbolRef, vector<core::NameRef>>> ConstantLit::fullUnresolv
 
         nested = ast::cast_tree<ast::ConstantLit>(orig.scope);
         ENFORCE(nested);
-        ENFORCE(nested->symbol() == core::Symbols::StubModule());
     }
     auto prefix = nested->resolutionScopes()->front();
     return make_pair(prefix, move(namesFailedToResolve));
