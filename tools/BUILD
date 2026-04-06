@@ -13,6 +13,7 @@ compilation_database(
     targets = [
         # BEGIN compile_commands targets
         "//ast:ast",
+        "//ast:tree_test",
         "//ast/desugar:desugar",
         "//ast/desugar:desugar_test",
         "//ast/desugar/prism:prism",
