@@ -137,9 +137,10 @@ build:release-linux-aarch64 --define mimalloc=true
 #
 # At Stripe: developer laptops run skylake, devboxes run skylake-avx512
 # however some AWS instances in our fleet still run Sandy Bridge (Skylake predecessor), as of 2018.
-build:release-linux           --copt=-march=sandybridge
-build:release-sanitized-linux --copt=-march=sandybridge
-build:release-linux-aarch64   --copt=-march=armv8.1a
+build:release-linux                   --copt=-march=sandybridge
+build:release-linux-aarch64           --copt=-march=armv8.1a
+build:release-sanitized-linux         --copt=-march=sandybridge
+build:release-sanitized-linux-aarch64 --copt=-march=armv8.1a
 
 build:release-mac --config=release-common --config=shared-libs
 
@@ -165,10 +166,14 @@ build:release-sanitized-linux --config=sanitize-linux
 build:release-sanitized-linux --define jemalloc=false
 build:release-sanitized-linux --config=release-debug-common
 
+build:release-sanitized-linux-aarch64 --copt=-O2
+build:release-sanitized-linux-aarch64 --config=sanitize-linux-aarch64
+build:release-sanitized-linux-aarch64 --define jemalloc=false
+build:release-sanitized-linux-aarch64 --config=release-debug-common
+
 build:release-sanitized-mac --copt=-O2
 build:release-sanitized-mac --config=sanitize-mac
 build:release-sanitized-mac --define jemalloc=false
-build:release-sanitized-linux --config=release-debug-common
 
 ##
 ## Configuration used to to as much testing as possible in CI
@@ -176,6 +181,10 @@ build:release-sanitized-linux --config=release-debug-common
 build:test-sanitized-linux --config=release-sanitized-linux --config=dbg --nostamp --define release=false
 test:test-sanitized-linux --test_env="UBSAN_OPTIONS=print_stacktrace=1"
 test:test-sanitized-linux --test_env="ASAN_OPTIONS=detect_leaks=0"
+
+build:test-sanitized-linux-aarch64 --config=release-sanitized-linux-aarch64 --config=dbg --nostamp --define release=false
+test:test-sanitized-linux-aarch64 --test_env="UBSAN_OPTIONS=print_stacktrace=1"
+test:test-sanitized-linux-aarch64 --test_env="ASAN_OPTIONS=detect_leaks=0"
 
 build:test-sanitized-mac --config=release-sanitized-mac --config=dbg --nostamp --define release=false
 test:test-sanitized-mac --test_env="UBSAN_OPTIONS=print_stacktrace=1"
@@ -189,6 +198,7 @@ build:buildfarm --copt=-Os --linkopt=-Os --config=reduce-intermediate-file-size-
 test:buildfarm --test_output=errors
 
 build:buildfarm-sanitized-linux --config=test-sanitized-linux --config=buildfarm
+build:buildfarm-sanitized-linux-aarch64 --config=test-sanitized-linux-aarch64 --config=buildfarm
 build:buildfarm-sanitized-mac --config=test-sanitized-mac --config=buildfarm --config=shared-libs
 
 ##
@@ -255,6 +265,11 @@ build:sanitize-linux --linkopt=../../external/llvm_toolchain_15_0_7_llvm/lib/cla
 build:sanitize-linux --linkopt=../../external/llvm_toolchain_15_0_7_llvm/lib/clang/15.0.7/lib/x86_64-unknown-linux-gnu/libclang_rt.ubsan_standalone_cxx.a
 build:sanitize-linux --linkopt=../../external/llvm_toolchain_15_0_7_llvm/lib/clang/15.0.7/lib/x86_64-unknown-linux-gnu/libclang_rt.ubsan_standalone.a
 build:sanitize-linux --config=sanitize
+
+build:sanitize-linux-aarch64 --linkopt=../../external/llvm_toolchain_15_0_7_llvm/lib/clang/15.0.7/lib/aarch64-unknown-linux-gnu/libclang_rt.asan_cxx.a
+build:sanitize-linux-aarch64 --linkopt=../../external/llvm_toolchain_15_0_7_llvm/lib/clang/15.0.7/lib/aarch64-unknown-linux-gnu/libclang_rt.ubsan_standalone_cxx.a
+build:sanitize-linux-aarch64 --linkopt=../../external/llvm_toolchain_15_0_7_llvm/lib/clang/15.0.7/lib/aarch64-unknown-linux-gnu/libclang_rt.ubsan_standalone.a
+build:sanitize-linux-aarch64 --config=sanitize
 
 build:sanitize-mac --config=sanitize
 
