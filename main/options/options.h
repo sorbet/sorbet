@@ -68,13 +68,9 @@ struct Printers {
     PrinterConfig TypedSource;
     PrinterConfig SymbolTable;
     PrinterConfig SymbolTableRaw;
-    PrinterConfig SymbolTableProto;
-    PrinterConfig SymbolTableMessagePack;
     PrinterConfig SymbolTableJson;
     PrinterConfig SymbolTableFull;
     PrinterConfig SymbolTableFullRaw;
-    PrinterConfig SymbolTableFullProto;
-    PrinterConfig SymbolTableFullMessagePack;
     PrinterConfig SymbolTableFullJson;
     PrinterConfig FileTableJson;
     PrinterConfig FileTableFullJson;

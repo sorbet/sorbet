@@ -400,10 +400,8 @@ Usage:
                                 name-tree-raw, resolve-tree, resolve-tree-raw,
                                 flatten-tree, flatten-tree-raw, ast, ast-raw, cfg,
                                 cfg-raw, cfg-text, symbol-table, symbol-table-raw,
-                                symbol-table-json, symbol-table-proto,
-                                symbol-table-messagepack, symbol-table-full,
+                                symbol-table-json, symbol-table-full,
                                 symbol-table-full-raw, symbol-table-full-json,
-                                symbol-table-full-proto, symbol-table-full-messagepack,
                                 autogen, autogen-msgpack, autogen-subclasses,
                                 package-tree, minimized-rbi
 

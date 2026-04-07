@@ -1685,34 +1685,6 @@ void printGlobalTables(const core::GlobalState &gs, const options::Options &opts
         json.push_back('\n');
         opts.print.SymbolTableJson.print(json);
     }
-    if (opts.print.SymbolTableProto.enabled) {
-        auto root = core::Proto::toProto(gs, core::Symbols::root(), false);
-        if (opts.print.SymbolTableProto.outputPath.empty()) {
-            root.SerializeToOstream(&cout);
-        } else {
-            string buf;
-            root.SerializeToString(&buf);
-            opts.print.SymbolTableProto.print(buf);
-        }
-    }
-    if (opts.print.SymbolTableMessagePack.enabled) {
-        auto root = core::Proto::toProto(gs, core::Symbols::root(), false);
-        stringstream buf;
-        core::Proto::toJSON(root, buf);
-        auto str = buf.str();
-        rapidjson::Document document;
-        document.Parse(str);
-        mpack_writer_t writer;
-        if (opts.print.SymbolTableMessagePack.outputPath.empty()) {
-            mpack_writer_init_stdfile(&writer, stdout, /* close when done */ false);
-        } else {
-            mpack_writer_init_filename(&writer, opts.print.SymbolTableMessagePack.outputPath.c_str());
-        }
-        json2msgpack::json2msgpack(document, &writer);
-        if (mpack_writer_destroy(&writer)) {
-            Exception::raise("failed to write msgpack");
-        }
-    }
     if (opts.print.SymbolTableFullJson.enabled) {
         rapidjson::StringBuffer buffer;
         rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
@@ -1721,34 +1693,6 @@ void printGlobalTables(const core::GlobalState &gs, const options::Options &opts
         string json(buffer.GetString(), buffer.GetLength());
         json.push_back('\n');
         opts.print.SymbolTableFullJson.print(json);
-    }
-    if (opts.print.SymbolTableFullProto.enabled) {
-        auto root = core::Proto::toProto(gs, core::Symbols::root(), true);
-        if (opts.print.SymbolTableFullProto.outputPath.empty()) {
-            root.SerializeToOstream(&cout);
-        } else {
-            string buf;
-            root.SerializeToString(&buf);
-            opts.print.SymbolTableFullProto.print(buf);
-        }
-    }
-    if (opts.print.SymbolTableFullMessagePack.enabled) {
-        auto root = core::Proto::toProto(gs, core::Symbols::root(), true);
-        stringstream buf;
-        core::Proto::toJSON(root, buf);
-        auto str = buf.str();
-        rapidjson::Document document;
-        document.Parse(str);
-        mpack_writer_t writer;
-        if (opts.print.SymbolTableFullMessagePack.outputPath.empty()) {
-            mpack_writer_init_stdfile(&writer, stdout, /* close when done */ false);
-        } else {
-            mpack_writer_init_filename(&writer, opts.print.SymbolTableFullMessagePack.outputPath.c_str());
-        }
-        json2msgpack::json2msgpack(document, &writer);
-        if (mpack_writer_destroy(&writer)) {
-            Exception::raise("failed to write msgpack");
-        }
     }
 #endif
     if (opts.print.SymbolTableFull.enabled) {
