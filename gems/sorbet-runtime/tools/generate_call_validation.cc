@@ -77,7 +77,7 @@ void generateCreateValidatorFastDispatcher(ValidatorKind kind, TypeKind type) {
                typeString);
     switch (kind) {
         case ValidatorKind::Method:
-            fmt::print("    if method_sig.return_type.is_a?(T::Private::Types::Void)\n"
+            fmt::print("    if method_sig.effective_return_type.is_a?(T::Private::Types::Void)\n"
                        "      raise 'Should have used create_validator_procedure_{}'\n"
                        "    end\n",
                        typeString);
@@ -108,7 +108,7 @@ void generateCreateValidatorFastDispatcher(ValidatorKind kind, TypeKind type) {
                    typeString, arity);
 
         if (kind == ValidatorKind::Method) {
-            fmt::print(", method_sig.return_type{}", rawTypeMethodCall);
+            fmt::print(", method_sig.effective_return_type{}", rawTypeMethodCall);
         }
 
         for (size_t i = 0; i < arity; i++) {
@@ -224,14 +224,14 @@ void generateCreateValidatorFast(const Options &options, ValidatorKind kind, Typ
             }
 
             fmt::print("      unless {}\n"
-                       "        message = method_sig.return_type.error_message_for_obj(return_value)\n"
+                       "        message = method_sig.effective_return_type.error_message_for_obj(return_value)\n"
                        "        if message\n"
                        "          CallValidation.report_error(\n"
                        "            method_sig,\n"
                        "            message,\n"
                        "            'Return value',\n"
                        "            nil,\n"
-                       "            method_sig.return_type,\n"
+                       "            method_sig.effective_return_type,\n"
                        "            return_value,\n"
                        "            caller_offset: -1\n"
                        "          )\n"

@@ -7,28 +7,28 @@
 
 module T::Private::Methods::CallValidation
   def self.create_validator_method_fast(mod, original_method, method_sig, original_visibility)
-    if method_sig.return_type.is_a?(T::Private::Types::Void)
+    if method_sig.effective_return_type.is_a?(T::Private::Types::Void)
       raise 'Should have used create_validator_procedure_fast'
     end
     # trampoline to reduce stack frame size
     arg_types = method_sig.arg_types
     case arg_types.length
     when 0
-      create_validator_method_fast0(mod, original_method, method_sig, original_visibility, method_sig.return_type.raw_type)
+      create_validator_method_fast0(mod, original_method, method_sig, original_visibility, method_sig.effective_return_type.raw_type)
     when 1
-      create_validator_method_fast1(mod, original_method, method_sig, original_visibility, method_sig.return_type.raw_type,
+      create_validator_method_fast1(mod, original_method, method_sig, original_visibility, method_sig.effective_return_type.raw_type,
                                     arg_types[0][1].raw_type)
     when 2
-      create_validator_method_fast2(mod, original_method, method_sig, original_visibility, method_sig.return_type.raw_type,
+      create_validator_method_fast2(mod, original_method, method_sig, original_visibility, method_sig.effective_return_type.raw_type,
                                     arg_types[0][1].raw_type,
                                     arg_types[1][1].raw_type)
     when 3
-      create_validator_method_fast3(mod, original_method, method_sig, original_visibility, method_sig.return_type.raw_type,
+      create_validator_method_fast3(mod, original_method, method_sig, original_visibility, method_sig.effective_return_type.raw_type,
                                     arg_types[0][1].raw_type,
                                     arg_types[1][1].raw_type,
                                     arg_types[2][1].raw_type)
     when 4
-      create_validator_method_fast4(mod, original_method, method_sig, original_visibility, method_sig.return_type.raw_type,
+      create_validator_method_fast4(mod, original_method, method_sig, original_visibility, method_sig.effective_return_type.raw_type,
                                     arg_types[0][1].raw_type,
                                     arg_types[1][1].raw_type,
                                     arg_types[2][1].raw_type,
@@ -58,14 +58,14 @@ module T::Private::Methods::CallValidation
 
       return_value = original_method.bind_call(self, &blk)
       unless return_value.is_a?(return_type)
-        message = method_sig.return_type.error_message_for_obj(return_value)
+        message = method_sig.effective_return_type.error_message_for_obj(return_value)
         if message
           CallValidation.report_error(
             method_sig,
             message,
             'Return value',
             nil,
-            method_sig.return_type,
+            method_sig.effective_return_type,
             return_value,
             caller_offset: -1
           )
@@ -107,14 +107,14 @@ module T::Private::Methods::CallValidation
 
       return_value = original_method.bind_call(self, arg0, &blk)
       unless return_value.is_a?(return_type)
-        message = method_sig.return_type.error_message_for_obj(return_value)
+        message = method_sig.effective_return_type.error_message_for_obj(return_value)
         if message
           CallValidation.report_error(
             method_sig,
             message,
             'Return value',
             nil,
-            method_sig.return_type,
+            method_sig.effective_return_type,
             return_value,
             caller_offset: -1
           )
@@ -168,14 +168,14 @@ module T::Private::Methods::CallValidation
 
       return_value = original_method.bind_call(self, arg0, arg1, &blk)
       unless return_value.is_a?(return_type)
-        message = method_sig.return_type.error_message_for_obj(return_value)
+        message = method_sig.effective_return_type.error_message_for_obj(return_value)
         if message
           CallValidation.report_error(
             method_sig,
             message,
             'Return value',
             nil,
-            method_sig.return_type,
+            method_sig.effective_return_type,
             return_value,
             caller_offset: -1
           )
@@ -241,14 +241,14 @@ module T::Private::Methods::CallValidation
 
       return_value = original_method.bind_call(self, arg0, arg1, arg2, &blk)
       unless return_value.is_a?(return_type)
-        message = method_sig.return_type.error_message_for_obj(return_value)
+        message = method_sig.effective_return_type.error_message_for_obj(return_value)
         if message
           CallValidation.report_error(
             method_sig,
             message,
             'Return value',
             nil,
-            method_sig.return_type,
+            method_sig.effective_return_type,
             return_value,
             caller_offset: -1
           )
@@ -326,14 +326,14 @@ module T::Private::Methods::CallValidation
 
       return_value = original_method.bind_call(self, arg0, arg1, arg2, arg3, &blk)
       unless return_value.is_a?(return_type)
-        message = method_sig.return_type.error_message_for_obj(return_value)
+        message = method_sig.effective_return_type.error_message_for_obj(return_value)
         if message
           CallValidation.report_error(
             method_sig,
             message,
             'Return value',
             nil,
-            method_sig.return_type,
+            method_sig.effective_return_type,
             return_value,
             caller_offset: -1
           )
@@ -867,28 +867,28 @@ module T::Private::Methods::CallValidation
   end
 
   def self.create_validator_method_medium(mod, original_method, method_sig, original_visibility)
-    if method_sig.return_type.is_a?(T::Private::Types::Void)
+    if method_sig.effective_return_type.is_a?(T::Private::Types::Void)
       raise 'Should have used create_validator_procedure_medium'
     end
     # trampoline to reduce stack frame size
     arg_types = method_sig.arg_types
     case arg_types.length
     when 0
-      create_validator_method_medium0(mod, original_method, method_sig, original_visibility, method_sig.return_type)
+      create_validator_method_medium0(mod, original_method, method_sig, original_visibility, method_sig.effective_return_type)
     when 1
-      create_validator_method_medium1(mod, original_method, method_sig, original_visibility, method_sig.return_type,
+      create_validator_method_medium1(mod, original_method, method_sig, original_visibility, method_sig.effective_return_type,
                                     arg_types[0][1])
     when 2
-      create_validator_method_medium2(mod, original_method, method_sig, original_visibility, method_sig.return_type,
+      create_validator_method_medium2(mod, original_method, method_sig, original_visibility, method_sig.effective_return_type,
                                     arg_types[0][1],
                                     arg_types[1][1])
     when 3
-      create_validator_method_medium3(mod, original_method, method_sig, original_visibility, method_sig.return_type,
+      create_validator_method_medium3(mod, original_method, method_sig, original_visibility, method_sig.effective_return_type,
                                     arg_types[0][1],
                                     arg_types[1][1],
                                     arg_types[2][1])
     when 4
-      create_validator_method_medium4(mod, original_method, method_sig, original_visibility, method_sig.return_type,
+      create_validator_method_medium4(mod, original_method, method_sig, original_visibility, method_sig.effective_return_type,
                                     arg_types[0][1],
                                     arg_types[1][1],
                                     arg_types[2][1],
@@ -918,14 +918,14 @@ module T::Private::Methods::CallValidation
 
       return_value = original_method.bind_call(self, &blk)
       unless return_type.valid?(return_value)
-        message = method_sig.return_type.error_message_for_obj(return_value)
+        message = method_sig.effective_return_type.error_message_for_obj(return_value)
         if message
           CallValidation.report_error(
             method_sig,
             message,
             'Return value',
             nil,
-            method_sig.return_type,
+            method_sig.effective_return_type,
             return_value,
             caller_offset: -1
           )
@@ -967,14 +967,14 @@ module T::Private::Methods::CallValidation
 
       return_value = original_method.bind_call(self, arg0, &blk)
       unless return_type.valid?(return_value)
-        message = method_sig.return_type.error_message_for_obj(return_value)
+        message = method_sig.effective_return_type.error_message_for_obj(return_value)
         if message
           CallValidation.report_error(
             method_sig,
             message,
             'Return value',
             nil,
-            method_sig.return_type,
+            method_sig.effective_return_type,
             return_value,
             caller_offset: -1
           )
@@ -1028,14 +1028,14 @@ module T::Private::Methods::CallValidation
 
       return_value = original_method.bind_call(self, arg0, arg1, &blk)
       unless return_type.valid?(return_value)
-        message = method_sig.return_type.error_message_for_obj(return_value)
+        message = method_sig.effective_return_type.error_message_for_obj(return_value)
         if message
           CallValidation.report_error(
             method_sig,
             message,
             'Return value',
             nil,
-            method_sig.return_type,
+            method_sig.effective_return_type,
             return_value,
             caller_offset: -1
           )
@@ -1101,14 +1101,14 @@ module T::Private::Methods::CallValidation
 
       return_value = original_method.bind_call(self, arg0, arg1, arg2, &blk)
       unless return_type.valid?(return_value)
-        message = method_sig.return_type.error_message_for_obj(return_value)
+        message = method_sig.effective_return_type.error_message_for_obj(return_value)
         if message
           CallValidation.report_error(
             method_sig,
             message,
             'Return value',
             nil,
-            method_sig.return_type,
+            method_sig.effective_return_type,
             return_value,
             caller_offset: -1
           )
@@ -1186,14 +1186,14 @@ module T::Private::Methods::CallValidation
 
       return_value = original_method.bind_call(self, arg0, arg1, arg2, arg3, &blk)
       unless return_type.valid?(return_value)
-        message = method_sig.return_type.error_message_for_obj(return_value)
+        message = method_sig.effective_return_type.error_message_for_obj(return_value)
         if message
           CallValidation.report_error(
             method_sig,
             message,
             'Return value',
             nil,
-            method_sig.return_type,
+            method_sig.effective_return_type,
             return_value,
             caller_offset: -1
           )

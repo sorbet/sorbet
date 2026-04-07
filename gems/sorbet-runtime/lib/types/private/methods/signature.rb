@@ -3,7 +3,7 @@
 
 class T::Private::Methods::Signature
   attr_reader :method, :method_name, :arg_types, :kwarg_types, :block_type, :block_name,
-              :rest_type, :rest_name, :keyrest_type, :keyrest_name, :bind,
+              :rest_type, :rest_name, :keyrest_type, :keyrest_name, :bind, :effective_return_type,
               :return_type, :mode, :req_arg_count, :req_kwarg_names, :has_rest, :has_keyrest,
               :check_level, :parameters, :on_failure, :override_allow_incompatible,
               :defined_raw
@@ -46,6 +46,11 @@ class T::Private::Methods::Signature
     @keyrest_type = nil
     @keyrest_name = nil
     @return_type = T::Utils.coerce(raw_return_type)
+    @effective_return_type = if check_level == :tests && @return_type.is_a?(T::Private::Types::Void)
+      T::Types::Anything::Private::INSTANCE
+    else
+      @return_type
+    end
     @bind = bind ? T::Utils.coerce(bind) : bind
     @mode = mode
     @check_level = check_level
