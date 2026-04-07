@@ -365,6 +365,17 @@ bool isSharedExamplesName(core::NameRef name) {
     }
 }
 
+// Rewrites include_examples/include_context to include(ConstantName), or returns EmptyTree to
+// silently drop the call if the argument is not a string/symbol literal (e.g. a block parameter
+// that can't be resolved at compile time). Must only be called after a numPosArgs >= 1 check.
+ast::ExpressionPtr rewriteIncludeExamples(core::MutableContext ctx, ast::Send *send) {
+    if (!ast::isa_tree<ast::Literal>(send->getPosArg(0))) {
+        return ast::MK::EmptyTree();
+    }
+    auto name = makeSharedExamplesConstant(ctx, send->getPosArg(0));
+    return ast::MK::Send1(send->loc, move(send->recv), core::Names::include(), send->funLoc, move(name));
+}
+
 ast::ExpressionPtr prepareParameterizedBody(core::MutableContext ctx, core::NameRef eachName, ast::ExpressionPtr body,
                                             const ast::MethodDef::PARAMS_store &args,
                                             absl::Span<const ast::ExpressionPtr> destructuringStmts,
@@ -519,17 +530,7 @@ ast::ExpressionPtr runUnderParameterized(core::MutableContext ctx, core::NameRef
                 break;
             }
 
-            // Only rewrite when the argument is a string/symbol literal. If it's a variable
-            // (e.g. a shared_examples block param), we can't resolve it at compile time.
-            // Return EmptyTree to silently drop the call rather than leaving a raw
-            // `include_examples(variable)` in the class body which would produce a
-            // method-not-found error.
-            if (!ast::isa_tree<ast::Literal>(send->getPosArg(0))) {
-                return ast::MK::EmptyTree();
-            }
-
-            auto name = makeSharedExamplesConstant(ctx, send->getPosArg(0));
-            return ast::MK::Send1(send->loc, move(send->recv), core::Names::include(), send->funLoc, move(name));
+            return rewriteIncludeExamples(ctx, send);
         }
     }
 
@@ -989,17 +990,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
                 return nullptr;
             }
 
-            // Only rewrite when the argument is a string/symbol literal. If it's a variable
-            // (e.g. a shared_examples block param), we can't resolve it at compile time.
-            // Return EmptyTree to silently drop the call rather than leaving a raw
-            // `include_examples(variable)` in the class body which would produce a
-            // method-not-found error.
-            if (!ast::isa_tree<ast::Literal>(send->getPosArg(0))) {
-                return ast::MK::EmptyTree();
-            }
-
-            auto name = makeSharedExamplesConstant(ctx, send->getPosArg(0));
-            return ast::MK::Send1(send->loc, move(send->recv), core::Names::include(), send->funLoc, move(name));
+            return rewriteIncludeExamples(ctx, send);
         }
 
         case core::Names::itBehavesLike().rawId(): {
