@@ -337,6 +337,24 @@ module Opus::Types::Test
             end
           end
 
+          it 'void with explicit checked(:tests) only changes the effective return type of signature' do
+            T::Private::RuntimeLevels._toggle_checking_tests(true)
+
+            a = Module.new do
+              extend T::Sig
+              sig { void.checked(:tests) }
+              def self.foo
+                "actual_value"
+              end
+            end
+
+            assert_equal("actual_value", a.foo)
+
+            sig = T::Utils.signature_for_method(a.method(:foo))
+            assert_instance_of(T::Types::Anything, sig.effective_return_type)
+            assert_instance_of(T::Private::Types::Void, sig.return_type)
+          end
+
           it 'void with explicit checked(:tests) skips void replacement' do
             T::Private::RuntimeLevels._toggle_checking_tests(true)
 
