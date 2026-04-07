@@ -991,8 +991,11 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
 
             // Only rewrite when the argument is a string/symbol literal. If it's a variable
             // (e.g. a shared_examples block param), we can't resolve it at compile time.
+            // Return EmptyTree to silently drop the call rather than leaving a raw
+            // `include_examples(variable)` in the class body which would produce a
+            // method-not-found error.
             if (!ast::isa_tree<ast::Literal>(send->getPosArg(0))) {
-                return nullptr;
+                return ast::MK::EmptyTree();
             }
 
             auto name = makeSharedExamplesConstant(ctx, send->getPosArg(0));
@@ -1054,6 +1057,8 @@ vector<ast::ExpressionPtr> Minitest::run(core::MutableContext ctx, bool isClass,
         ctx.state.cacheSensitiveOptions.rspecRewriterEnabled) {
         auto *block = send->block();
 
+        // Note: only direct Send children of the block body are scanned.
+        // Shared examples nested inside conditionals or other blocks are not hoisted.
         auto processStmt = [&](ast::ExpressionPtr &stmt) {
             if (auto bodySend = ast::cast_tree<ast::Send>(stmt)) {
                 auto result = runSingle(ctx, /* isClass */ false, /* maybeSharedExamplesName */ nullptr, bodySend,

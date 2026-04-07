@@ -40,3 +40,13 @@ RSpec.describe 'consumer' do
   include_examples 'suite alpha'
   include_examples 'suite beta'
 end
+
+# Dynamic arg in a non-parameterized describe block (exercises the runSingle path).
+# The call should be silently dropped rather than producing a spurious error.
+def suite_helper
+  'suite alpha'
+end
+
+RSpec.describe 'top-level dynamic' do
+  include_examples suite_helper
+end
