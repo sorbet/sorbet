@@ -1677,14 +1677,13 @@ void printGlobalTables(const core::GlobalState &gs, const options::Options &opts
 
 #ifndef SORBET_REALMAIN_MIN
     if (opts.print.SymbolTableJson.enabled) {
-        auto root = core::Proto::toProto(gs, core::Symbols::root(), false);
-        if (opts.print.SymbolTableJson.outputPath.empty()) {
-            core::Proto::toJSON(root, cout);
-        } else {
-            stringstream buf;
-            core::Proto::toJSON(root, buf);
-            opts.print.SymbolTableJson.print(buf.str());
-        }
+        rapidjson::StringBuffer buffer;
+        rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+        writer.SetIndent(' ', 1);
+        core::JSON::symbolToJSON(writer, gs, core::Symbols::root(), false);
+        string json(buffer.GetString(), buffer.GetLength());
+        json.push_back('\n');
+        opts.print.SymbolTableJson.print(json);
     }
     if (opts.print.SymbolTableProto.enabled) {
         auto root = core::Proto::toProto(gs, core::Symbols::root(), false);
@@ -1715,14 +1714,13 @@ void printGlobalTables(const core::GlobalState &gs, const options::Options &opts
         }
     }
     if (opts.print.SymbolTableFullJson.enabled) {
-        auto root = core::Proto::toProto(gs, core::Symbols::root(), true);
-        if (opts.print.SymbolTableJson.outputPath.empty()) {
-            core::Proto::toJSON(root, cout);
-        } else {
-            stringstream buf;
-            core::Proto::toJSON(root, buf);
-            opts.print.SymbolTableJson.print(buf.str());
-        }
+        rapidjson::StringBuffer buffer;
+        rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+        writer.SetIndent(' ', 1);
+        core::JSON::symbolToJSON(writer, gs, core::Symbols::root(), true);
+        string json(buffer.GetString(), buffer.GetLength());
+        json.push_back('\n');
+        opts.print.SymbolTableFullJson.print(json);
     }
     if (opts.print.SymbolTableFullProto.enabled) {
         auto root = core::Proto::toProto(gs, core::Symbols::root(), true);

@@ -97,4 +97,302 @@ void JSON::fileToJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer> &writer, 
     writer.EndObject();
 }
 
+// ----- Symbol table JSON serialization ----------------------------------------
+
+namespace {
+
+// Writes a JSON string value with proto3-style HTML-safe escaping.
+// Proto3 JSON escapes <, >, and & as \u003c, \u003e, \u0026 for HTML safety.
+// rapidjson does not do this by default, so we build the escaped string manually
+// and write it as a raw JSON value when HTML-unsafe characters are present.
+void writeProto3String(rapidjson::PrettyWriter<rapidjson::StringBuffer> &writer, string_view input) {
+    // Fast path: if no HTML-unsafe characters, use rapidjson's normal String method
+    if (input.find_first_of("<>&") == string_view::npos) {
+        writer.String(input.data(), input.size());
+        return;
+    }
+
+    // Slow path: build escaped JSON string literal (including quotes)
+    string escaped;
+    escaped.reserve(input.size() + 16);
+    escaped += '"';
+    for (char c : input) {
+        switch (c) {
+            case '<':
+                escaped += "\\u003c";
+                break;
+            case '>':
+                escaped += "\\u003e";
+                break;
+            case '&':
+                escaped += "\\u0026";
+                break;
+            case '"':
+                escaped += "\\\"";
+                break;
+            case '\\':
+                escaped += "\\\\";
+                break;
+            default:
+                if (static_cast<unsigned char>(c) < 0x20) {
+                    // Control characters need \uXXXX escaping
+                    char buf[7];
+                    snprintf(buf, sizeof(buf), "\\u%04x", static_cast<unsigned char>(c));
+                    escaped += buf;
+                } else {
+                    escaped += c;
+                }
+                break;
+        }
+    }
+    escaped += '"';
+    writer.RawValue(escaped.data(), escaped.size(), rapidjson::kStringType);
+}
+
+// Maps NameKind to the proto enum name strings from proto/Name.proto.
+string_view nameKindToJSONString(NameKind kind) {
+    switch (kind) {
+        case NameKind::UTF8:
+            return "UTF8"sv;
+        case NameKind::UNIQUE:
+            return "UNIQUE"sv;
+        case NameKind::CONSTANT:
+            return "CONSTANT"sv;
+    }
+}
+
+// Maps UniqueNameKind to the proto enum name strings from proto/Name.proto.
+string_view uniqueNameKindToJSONString(UniqueNameKind kind) {
+    switch (kind) {
+        case UniqueNameKind::Parser:
+            return "PARSER"sv;
+        case UniqueNameKind::Desugar:
+            return "DESUGAR"sv;
+        case UniqueNameKind::Namer:
+            return "NAMER"sv;
+        case UniqueNameKind::MangleRename:
+            return "MANGLE_RENAME"sv;
+        case UniqueNameKind::Singleton:
+            return "SINGLETON"sv;
+        case UniqueNameKind::Overload:
+            return "OVERLOAD"sv;
+        case UniqueNameKind::TypeVarName:
+            return "TYPE_VAR_NAME"sv;
+        case UniqueNameKind::PositionalArg:
+            return "POSITIONAL_ARG"sv;
+        case UniqueNameKind::MangledKeywordArg:
+            return "MANGLED_KEYWORD_ARG"sv;
+        case UniqueNameKind::ResolverMissingClass:
+            return "RESOLVER_MISSING_CLASS"sv;
+        case UniqueNameKind::TEnum:
+            return "OPUS_ENUM"sv;
+        case UniqueNameKind::Struct:
+            return "STRUCT"sv;
+        case UniqueNameKind::Packager:
+            return "PACKAGER"sv;
+        case UniqueNameKind::DesugarCsend:
+            Exception::raise("UniqueNameKind::DesugarCsend should only be used in Extract to Variable");
+    }
+}
+
+void nameToJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer> &writer, const GlobalState &gs, NameRef name) {
+    writer.StartObject();
+
+    // NameKind has no UNKNOWN_KIND=0 in C++; all values map to non-zero proto enums,
+    // so kind is always written.
+    auto kind = name.kind();
+    writer.Key("kind");
+    auto s = nameKindToJSONString(kind);
+    writer.String(s.data(), s.size());
+
+    auto nameStr = name.show(gs);
+    if (!nameStr.empty()) {
+        writer.Key("name");
+        writeProto3String(writer, nameStr);
+    }
+
+    // Write unique field for UNIQUE names. Proto code sets NOT_UNIQUE for all names,
+    // but proto3 omits NOT_UNIQUE (enum value 0), so it only appears for UNIQUE names
+    // where the actual UniqueNameKind is set.
+    if (kind == NameKind::UNIQUE) {
+        auto uniqueKind = name.dataUnique(gs)->uniqueNameKind;
+        writer.Key("unique");
+        auto s = uniqueNameKindToJSONString(uniqueKind);
+        writer.String(s.data(), s.size());
+    }
+
+    writer.EndObject();
+}
+
+void argumentToJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer> &writer, const GlobalState &gs,
+                    const ParamInfo &param) {
+    writer.StartObject();
+
+    writer.Key("name");
+    nameToJSON(writer, gs, param.name);
+
+    // Proto3 omits false bools (default value)
+    if (param.flags.isKeyword) {
+        writer.Key("isKeyword");
+        writer.Bool(true);
+    }
+    if (param.flags.isRepeated) {
+        writer.Key("isRepeated");
+        writer.Bool(true);
+    }
+    if (param.flags.isDefault) {
+        writer.Key("isDefault");
+        writer.Bool(true);
+    }
+    if (param.flags.isShadow) {
+        writer.Key("isShadow");
+        writer.Bool(true);
+    }
+    if (param.flags.isBlock) {
+        writer.Key("isBlock");
+        writer.Bool(true);
+    }
+
+    writer.EndObject();
+}
+
+} // namespace
+
+void JSON::symbolToJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer> &writer, const GlobalState &gs, SymbolRef sym,
+                        bool showFull) {
+    writer.StartObject();
+
+    // Fields are written in proto field number order to match proto3 JSON output.
+    // id (field 1)
+    auto id = sym.rawId();
+    if (id != 0) {
+        writer.Key("id");
+        writer.Int(id);
+    }
+
+    // name (field 2) — always a message, proto3 omits if not set, but it's always set here
+    writer.Key("name");
+    nameToJSON(writer, gs, sym.name(gs));
+
+    // kind (field 3)
+    string_view kindStr;
+    if (sym.isClassOrModule()) {
+        kindStr = "CLASS_OR_MODULE"sv;
+    } else if (sym.isStaticField(gs)) {
+        kindStr = "STATIC_FIELD"sv;
+    } else if (sym.isField(gs)) {
+        kindStr = "FIELD"sv;
+    } else if (sym.isMethod()) {
+        kindStr = "METHOD"sv;
+    } else if (sym.isTypeMember()) {
+        kindStr = "TYPE_MEMBER"sv;
+    } else if (sym.isTypeParameter()) {
+        kindStr = "TYPE_ARGUMENT"sv;
+    }
+    if (!kindStr.empty()) {
+        writer.Key("kind");
+        writer.String(kindStr.data(), kindStr.size());
+    }
+
+    // superClass (field 6) — only for CLASS_OR_MODULE
+    if (sym.isClassOrModule()) {
+        auto klass = sym.asClassOrModuleRef();
+        if (klass.data(gs)->superClass().exists()) {
+            auto superClassId = SymbolRef(klass.data(gs)->superClass()).rawId();
+            if (superClassId != 0) {
+                writer.Key("superClass");
+                writer.Int(superClassId);
+            }
+        }
+    }
+
+    // mixins (field 8) — only for CLASS_OR_MODULE
+    if (sym.isClassOrModule()) {
+        auto klass = sym.asClassOrModuleRef();
+        auto mixins = klass.data(gs)->mixins();
+        if (!mixins.empty()) {
+            writer.Key("mixins");
+            writer.StartArray();
+            for (auto thing : mixins) {
+                writer.Int(SymbolRef(thing).rawId());
+            }
+            writer.EndArray();
+        }
+    }
+
+    // children (field 14) — for CLASS_OR_MODULE and METHOD
+    if (sym.isClassOrModule()) {
+        // Collect children first to check if array is non-empty
+        vector<SymbolRef> children;
+        for (auto pair : sym.asClassOrModuleRef().data(gs)->membersStableOrderSlow(gs)) {
+            if (pair.first == Names::singleton() || pair.first == Names::attached() ||
+                pair.first == Names::mixedInClassMethods() || pair.first == Names::Constants::AttachedClass()) {
+                continue;
+            }
+            if (!pair.second.exists()) {
+                continue;
+            }
+            if (!showFull && !pair.second.isPrintable(gs)) {
+                continue;
+            }
+            children.emplace_back(pair.second);
+        }
+        if (!children.empty()) {
+            writer.Key("children");
+            writer.StartArray();
+            for (auto child : children) {
+                symbolToJSON(writer, gs, child, showFull);
+            }
+            writer.EndArray();
+        }
+    } else if (sym.isMethod()) {
+        vector<SymbolRef> children;
+        for (auto typeParam : sym.asMethodRef().data(gs)->typeParameters()) {
+            if (!typeParam.exists()) {
+                continue;
+            }
+            if (!showFull && !typeParam.data(gs)->isPrintable(gs)) {
+                continue;
+            }
+            children.emplace_back(typeParam);
+        }
+        if (!children.empty()) {
+            writer.Key("children");
+            writer.StartArray();
+            for (auto child : children) {
+                symbolToJSON(writer, gs, child, showFull);
+            }
+            writer.EndArray();
+        }
+    }
+
+    // aliasTo (field 16) — only for STATIC_FIELD with AliasType
+    if (sym.isStaticField(gs)) {
+        auto field = sym.asFieldRef();
+        if (core::isa_type<core::AliasType>(field.data(gs)->resultType)) {
+            auto type = core::cast_type_nonnull<AliasType>(field.data(gs)->resultType);
+            auto aliasId = type.symbol.rawId();
+            if (aliasId != 0) {
+                writer.Key("aliasTo");
+                writer.Int(aliasId);
+            }
+        }
+    }
+
+    // arguments (field 17) — only for METHOD
+    if (sym.isMethod()) {
+        auto &params = sym.asMethodRef().data(gs)->parameters;
+        if (!params.empty()) {
+            writer.Key("arguments");
+            writer.StartArray();
+            for (auto &param : params) {
+                argumentToJSON(writer, gs, param);
+            }
+            writer.EndArray();
+        }
+    }
+
+    writer.EndObject();
+}
+
 } // namespace sorbet::core

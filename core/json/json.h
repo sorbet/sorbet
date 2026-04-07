@@ -15,6 +15,9 @@ public:
 
     static void fileToJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer> &writer, const GlobalState &gs,
                            FileRef file, long untypedUsages);
+
+    static void symbolToJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer> &writer, const GlobalState &gs,
+                             SymbolRef sym, bool showFull);
 };
 
 } // namespace sorbet::core
