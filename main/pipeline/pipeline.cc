@@ -1,15 +1,10 @@
 #ifdef SORBET_REALMAIN_MIN
 // minimal build to speedup compilation. Remove extra features
 #else
-// has to go first, as it violates poisons
-#include "core/proto/proto.h"
-// ^^ has to go first
-#include "common/json2msgpack/json2msgpack.h"
 #include "core/json/json.h"
 #include "rapidjson/prettywriter.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
-#include <sstream>
 #endif
 #include "ProgressIndicator.h"
 #include "absl/strings/match.h"

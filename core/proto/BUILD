@@ -21,7 +21,6 @@ cc_library(
     deps = [
         "//common",
         "//core",
-        "//proto",
         "//proto/pay-server",
         "@com_google_protobuf//src/google/protobuf/json",
     ],
