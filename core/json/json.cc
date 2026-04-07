@@ -1,4 +1,7 @@
 #include "core/json/json.h"
+#include "absl/strings/str_cat.h"
+#include "common/Random.h"
+#include "common/counters/Counters_impl.h"
 #include "core/GlobalState.h"
 #include "core/packages/PackageDB.h"
 
@@ -345,6 +348,137 @@ void JSON::symbolToJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer> &writer
     }
 
     writer.EndObject();
+}
+
+// ----- Metrics JSON serialization ---------------------------------------------
+
+string JSON::metricsToJSON(const CounterState &counters, string_view prefix, string_view repo, string_view branch,
+                           string_view sha, string_view status) {
+    rapidjson::StringBuffer buffer;
+    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+    writer.SetIndent(' ', 1);
+
+    writer.StartObject();
+
+    // Fields in proto field number order: repo(1), sha(2), status(3), branch(4), timestamp(5), uuid(6), metrics(10)
+    if (!repo.empty()) {
+        writer.Key("repo");
+        writer.String(repo.data(), repo.size());
+    }
+
+    if (!sha.empty()) {
+        writer.Key("sha");
+        writer.String(sha.data(), sha.size());
+    }
+
+    if (!status.empty()) {
+        writer.Key("status");
+        writer.String(status.data(), status.size());
+    }
+
+    if (!branch.empty()) {
+        writer.Key("branch");
+        writer.String(branch.data(), branch.size());
+    }
+
+    // Proto3 serializes int64 as a string in JSON.
+    auto unix_timestamp = chrono::seconds(time(nullptr));
+    if (unix_timestamp.count() != 0) {
+        writer.Key("timestamp");
+        auto ts = to_string(unix_timestamp.count());
+        writer.String(ts.data(), ts.size());
+    }
+
+    // UUID version 1 as specified in RFC 4122
+    string uuid = fmt::format("{:#08x}-{:#04x}-{:#04x}-{:#04x}-{:#08x}{:#04x}",
+                              (unsigned long long)Random::uniformU8(),
+                              Random::uniformU4(),
+                              Random::uniformU4(0, 0x0fff) | 0x4000,
+                              Random::uniformU4(0, 0x3fff) | 0x8000,
+                              (unsigned long long)Random::uniformU8(), rand());
+    if (!uuid.empty()) {
+        writer.Key("uuid");
+        writer.String(uuid.data(), uuid.size());
+    }
+
+    counters.counters->canonicalize();
+
+    // Collect all metric entries
+    bool hasMetrics = false;
+    auto startMetrics = [&]() {
+        if (!hasMetrics) {
+            writer.Key("metrics");
+            writer.StartArray();
+            hasMetrics = true;
+        }
+    };
+
+    auto writeMetric = [&](string_view name, double value) {
+        startMetrics();
+        writer.StartObject();
+        writer.Key("name");
+        writer.String(name.data(), name.size());
+        writer.Key("value");
+        // Proto3 JSON serializes double values that are exact integers without a decimal point.
+        // rapidjson's Double() always includes a decimal, so we use Int64() for integral values.
+        if (value == static_cast<int64_t>(value)) {
+            writer.Int64(static_cast<int64_t>(value));
+        } else {
+            writer.Double(value);
+        }
+        writer.EndObject();
+    };
+
+    for (auto &cat : counters.counters->countersByCategory) {
+        CounterImpl::CounterType sum = 0;
+        for (auto &e : cat.second) {
+            sum += e.second;
+            writeMetric(absl::StrCat(prefix, ".", cat.first, ".", e.first), e.second);
+        }
+        writeMetric(absl::StrCat(prefix, ".", cat.first, ".total"), sum);
+    }
+
+    for (auto &hist : counters.counters->histograms) {
+        CounterImpl::CounterType sum = 0;
+        int histMin = hist.second.begin()->first;
+        int histMax = hist.second.begin()->first;
+        for (auto &e : hist.second) {
+            sum += e.second;
+            histMin = min(histMin, e.first);
+            histMax = max(histMin, e.first);
+        }
+        CounterImpl::CounterType running = 0;
+        vector<pair<int, bool>> percentiles = {{25, false}, {50, false}, {75, false}, {90, false}};
+        for (auto &e : hist.second) {
+            running += e.second;
+            for (auto &pct : percentiles) {
+                if (pct.second) {
+                    continue;
+                }
+                if (running >= sum * pct.first / 100) {
+                    pct.second = true;
+                    writeMetric(absl::StrCat(prefix, ".", hist.first, ".p", pct.first), e.first);
+                }
+            }
+        }
+        writeMetric(absl::StrCat(prefix, ".", hist.first, ".min"), histMin);
+        writeMetric(absl::StrCat(prefix, ".", hist.first, ".max"), histMax);
+        writeMetric(absl::StrCat(prefix, ".", hist.first, ".total"), sum);
+    }
+
+    for (auto &e : counters.counters->counters) {
+        writeMetric(absl::StrCat(prefix, ".", e.first), e.second);
+    }
+
+    if (hasMetrics) {
+        writer.EndArray();
+    }
+
+    writer.EndObject();
+
+    string result(buffer.GetString(), buffer.GetLength());
+    result.push_back('\n');
+    return result;
 }
 
 } // namespace sorbet::core

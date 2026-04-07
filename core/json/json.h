@@ -18,6 +18,9 @@ public:
 
     static void symbolToJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer> &writer, const GlobalState &gs,
                              SymbolRef sym, bool showFull);
+
+    static std::string metricsToJSON(const CounterState &counters, std::string_view prefix, std::string_view repo,
+                                     std::string_view branch, std::string_view sha, std::string_view status);
 };
 
 } // namespace sorbet::core

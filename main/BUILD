@@ -70,7 +70,7 @@ cc_library(
         "//ast",
         "//common/statsd",
         "//core",
-        "//core/proto",
+        "//core/json",
         "//hashing",
         "//main/autogen",
         "//main/cache",

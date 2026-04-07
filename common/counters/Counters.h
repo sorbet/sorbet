@@ -37,6 +37,7 @@ struct CounterImpl;
 class StatsD;
 namespace core {
 class Proto;
+class JSON;
 }
 namespace web_tracer_framework {
 class Tracing;
@@ -69,6 +70,7 @@ private:
     friend CounterState getAndClearThreadCounters();
     friend void counterConsume(CounterState cs);
     friend class core::Proto;
+    friend class core::JSON;
     friend class StatsD;
     friend class sorbet::web_tracer_framework::Tracing;
     friend class sorbet::web_tracer_framework::TracingTestHelper;
