@@ -949,7 +949,7 @@ PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::Pars
             auto start = packageFiles.size();
             for (auto &scc : stratum) {
                 // TODO(trevor): this can be simplified when we switch to test-packages, as we won't need to emulate the
-                // behavior by copying package files anymore.
+                // behavior by copying package files to be valid in an application-only context anymore.
                 if (scc.isTest || gs.packageDB().testPackages()) {
                     for (auto member : scc.members) {
                         packageFiles.emplace_back(std::move(packagesToPackageRb[member]));
@@ -959,13 +959,18 @@ PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::Pars
                     // and edit out any reference to test symbols.
                     for (auto member : scc.members) {
                         const auto &package = packagesToPackageRb[member];
+
+                        // Test-only packages don't have any application code, so we can safely skip them at this point.
+                        if (package.file.isTestPackage(gs)) {
+                            continue;
+                        }
+
                         packageFiles.emplace_back(packager::Packager::copyPackageWithoutTestExports(gs, package));
                     }
                 }
             }
 
             auto len = packageFiles.size() - start;
-            ENFORCE(len > 0);
             resultStratum.packageFiles = absl::MakeSpan(packageFiles).subspan(start, len);
         }
 
@@ -976,6 +981,9 @@ PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::Pars
             resultStratum.sourceFiles = sourceSpan.subspan(0, len);
             sourceSpan = sourceSpan.subspan(len);
         }
+
+        // If we had non-empty source files, we better have package files that manage them.
+        ENFORCE(resultStratum.sourceFiles.empty() || !resultStratum.packageFiles.empty())
     }
 
     ENFORCE(sourceSpan.empty());
