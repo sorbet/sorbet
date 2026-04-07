@@ -101,54 +101,6 @@ void JSON::fileToJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer> &writer, 
 
 namespace {
 
-// Writes a JSON string value with proto3-style HTML-safe escaping.
-// Proto3 JSON escapes <, >, and & as \u003c, \u003e, \u0026 for HTML safety.
-// rapidjson does not do this by default, so we build the escaped string manually
-// and write it as a raw JSON value when HTML-unsafe characters are present.
-void writeProto3String(rapidjson::PrettyWriter<rapidjson::StringBuffer> &writer, string_view input) {
-    // Fast path: if no HTML-unsafe characters, use rapidjson's normal String method
-    if (input.find_first_of("<>&") == string_view::npos) {
-        writer.String(input.data(), input.size());
-        return;
-    }
-
-    // Slow path: build escaped JSON string literal (including quotes)
-    string escaped;
-    escaped.reserve(input.size() + 16);
-    escaped += '"';
-    for (char c : input) {
-        switch (c) {
-            case '<':
-                escaped += "\\u003c";
-                break;
-            case '>':
-                escaped += "\\u003e";
-                break;
-            case '&':
-                escaped += "\\u0026";
-                break;
-            case '"':
-                escaped += "\\\"";
-                break;
-            case '\\':
-                escaped += "\\\\";
-                break;
-            default:
-                if (static_cast<unsigned char>(c) < 0x20) {
-                    // Control characters need \uXXXX escaping
-                    char buf[7];
-                    snprintf(buf, sizeof(buf), "\\u%04x", static_cast<unsigned char>(c));
-                    escaped += buf;
-                } else {
-                    escaped += c;
-                }
-                break;
-        }
-    }
-    escaped += '"';
-    writer.RawValue(escaped.data(), escaped.size(), rapidjson::kStringType);
-}
-
 // Maps NameKind to the proto enum name strings from proto/Name.proto.
 string_view nameKindToJSONString(NameKind kind) {
     switch (kind) {
@@ -208,7 +160,7 @@ void nameToJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer> &writer, const 
     auto nameStr = name.show(gs);
     if (!nameStr.empty()) {
         writer.Key("name");
-        writeProto3String(writer, nameStr);
+        writer.String(nameStr.data(), nameStr.size());
     }
 
     // Write unique field for UNIQUE names. Proto code sets NOT_UNIQUE for all names,
