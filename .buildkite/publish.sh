@@ -5,6 +5,14 @@ if [ "${CLEAN_BUILD:-}" != "" ] || [ "${PUBLISH_TO_RUBYGEMS:-}" != "" ]; then
   echo "Skipping publish, because this is a scheduled build."
   exit 0
 fi
+# Fork PRs don't have access to the network resources and credentials this
+# script requires. Nothing here is meaningful to run for a fork PR anyway,
+# since publishing only takes effect on master.
+if [ "${BUILDKITE_PULL_REQUEST_REPO:-}" != "" ] && \
+   [ "${BUILDKITE_PULL_REQUEST_REPO:-}" != "https://github.com/sorbet/sorbet" ]; then
+  echo "Skipping publish for fork PR."
+  exit 0
+fi
 
 echo "--- setup"
 
