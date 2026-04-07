@@ -531,7 +531,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     }
 
     vector<ast::ParsedFile> stratumFiles;
-    for (auto &stratum : realmain::pipeline::computePackageStrata(*gs, trees, filesSpan, opts)) {
+    auto strata = realmain::pipeline::computePackageStrata(*gs, trees, filesSpan, opts);
+    for (auto &stratum : strata.strata) {
         stratumFiles.clear();
         stratumFiles.reserve(stratum.packageFiles.size() + stratum.sourceFiles.size());
         absl::c_move(stratum.packageFiles, back_inserter(stratumFiles));

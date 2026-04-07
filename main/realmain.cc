@@ -647,7 +647,8 @@ int realmain(int argc, char *argv[]) {
         // The rest of the pipeline proceeds by strata in the package condensation graph. When stripe-packages is not
         // enabled, everything ends up in one big stratum.
         vector<ast::ParsedFile> stratumFiles;
-        for (auto &stratum : pipeline::computePackageStrata(*gs, packageIndexed, inputFilesSpan, opts)) {
+        auto strata = pipeline::computePackageStrata(*gs, packageIndexed, inputFilesSpan, opts);
+        for (auto &stratum : strata.strata) {
             // We can unconditionally reset (to drop the vectors) instead of having to consult
             // intentionallyLeakASTs, because if intentionallyLeakASTs, then necessarily
             // packageDirected will be false, and thus this loop will only iterate once, and since

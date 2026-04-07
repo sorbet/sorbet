@@ -511,7 +511,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
         }
 
         auto strata = pipeline::computePackageStrata(*this->gs, packageIndexed, workspaceFilesSpan, this->config->opts);
-        for (auto &stratum : strata) {
+        for (auto &stratum : strata.strata) {
             vector<ast::ParsedFile> stratumFiles, nonPackagedIndexed;
 
             // When we unpartition the package and non-package files, we'll realloc stratumFiles to hold everything.

@@ -56,13 +56,20 @@ struct CondensationStratumInfo {
     absl::Span<core::FileRef> sourceFiles;
 };
 
+struct PackageStrata {
+    // The individual strata of the package graph traversal.
+    std::vector<CondensationStratumInfo> strata;
+
+    // The mapping of a core::FileRef to the stratum it occurs in. We identify individual strata with a uint16_t,
+    // because overflowing that value would require a dependency chain of length greater than 65535.
+    std::vector<uint16_t> fileToStratum;
+};
+
 // Using the condensation graph, sort the package and source files according to the stratum they would show up in a
 // parallel traversal of the condensation graph from its roots. The `packageFiles` vector will be mutated to include
 // non-test versions of the package files included originally.
-std::vector<CondensationStratumInfo> computePackageStrata(const core::GlobalState &gs,
-                                                          std::vector<ast::ParsedFile> &packageFiles,
-                                                          absl::Span<core::FileRef> files,
-                                                          const options::Options &opts);
+PackageStrata computePackageStrata(const core::GlobalState &gs, std::vector<ast::ParsedFile> &packageFiles,
+                                   absl::Span<core::FileRef> files, const options::Options &opts);
 
 void buildPackageDB(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, absl::Span<core::FileRef> nonPackageFiles,
                     const options::Options &opts, WorkerPool &workers);
