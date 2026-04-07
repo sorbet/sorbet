@@ -1,6 +1,5 @@
 # typed: true
 # enable-experimental-rspec: true
-# enable-experimental-requires-ancestor: true
 
 module RSpec
   module Core
