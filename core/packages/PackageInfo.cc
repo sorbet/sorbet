@@ -753,8 +753,9 @@ std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingVisibleT
     return core::AutocorrectSuggestion{fmt::format("Add missing `{}`", "visible_to"), std::move(allEdits)};
 }
 
-std::string PackageInfo::renderPackageRbContents(const core::GlobalState &gs, vector<Import> newImports,
-                                                 std::vector<core::SymbolRef> newExports) const {
+std::string PackageInfo::renderPackageRbContents(
+    const core::GlobalState &gs, std::vector<Import> newImports, std::vector<core::SymbolRef> newExports,
+    UnorderedMap<core::packages::MangledName, core::packages::StrictDependenciesLevel> newStrictnessByPkg) const {
     fmt::memory_buffer result;
 
     if (isPreludePackage()) {
@@ -766,12 +767,13 @@ std::string PackageInfo::renderPackageRbContents(const core::GlobalState &gs, ve
         ENFORCE(directiveSource.has_value());
         fmt::format_to(std::back_inserter(result), "  {}\n", directiveSource.value());
     }
-    if (locs.layer.exists()) {
-        fmt::format_to(std::back_inserter(result), "  layer '{}'\n", layer.show(gs));
-    }
-    if (locs.strictDependenciesLevel.exists()) {
+    auto thisPackageStrictness = newStrictnessByPkg[mangledName()];
+    if (gs.packageDB().enforceLayering()) {
+        if (locs.layer.exists()) {
+            fmt::format_to(std::back_inserter(result), "  layer '{}'\n", layer.show(gs));
+        }
         fmt::format_to(std::back_inserter(result), "  strict_dependencies '{}'\n",
-                       strictDependenciesLevelToString(strictDependenciesLevel));
+                       strictDependenciesLevelToString(thisPackageStrictness));
     }
     if (locs.minTypedLevel.exists() && locs.testsMinTypedLevel.exists()) {
         ENFORCE(!gs.packageDB().testPackages());
@@ -823,15 +825,16 @@ std::string PackageInfo::renderPackageRbContents(const core::GlobalState &gs, ve
         auto &bPkgInfo = gs.packageDB().getPackageInfo(b.mangledName);
         ENFORCE(aPkgInfo.exists());
         ENFORCE(bPkgInfo.exists());
-        return orderImports(gs, aPkgInfo, a.isTestImport(), bPkgInfo, b.isTestImport()) < 0;
+        return orderImports(gs, aPkgInfo, a.isTestImport(), bPkgInfo, b.isTestImport(),
+                            newStrictnessByPkg[a.mangledName], newStrictnessByPkg[b.mangledName]) < 0;
     });
 
     bool layeringViolationsHeaderShown = false;
     bool testImportNewLineAdded = false;
 
-    ENFORCE(headerMap.find(strictDependenciesLevel) != headerMap.end(),
+    ENFORCE(headerMap.find(thisPackageStrictness) != headerMap.end(),
             "should not happen, was a new StrictDependenciesLevel added?");
-    auto &headers = headerMap.find(strictDependenciesLevel)->second;
+    auto &headers = headerMap.find(thisPackageStrictness)->second;
     auto headersIt = headers.begin();
     for (auto &import : newImports) {
         auto impPackageName = import.mangledName.owner.show(gs);
@@ -852,7 +855,7 @@ std::string PackageInfo::renderPackageRbContents(const core::GlobalState &gs, ve
                 //
                 // Ex. if only an dag package is imported, we want to skip the 'false' and 'layered'/'layered_dag'
                 // headers, even though they'll be less than the dag package being imported.
-                while (headersIt != headers.end() && headersIt->first <= impPkgInfo.strictDependenciesLevel) {
+                while (headersIt != headers.end() && headersIt->first <= newStrictnessByPkg[import.mangledName]) {
                     headerToPrint = headersIt->second;
                     headersIt++;
                 }
