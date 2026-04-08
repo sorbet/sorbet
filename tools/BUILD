@@ -30,7 +30,6 @@ compilation_database(
         "//common/crypto_hashing:crypto_hashing",
         "//common/enforce_no_timer:enforce_no_timer",
         "//common/exception:exception",
-        "//common/json2msgpack:json2msgpack",
         "//common/kvstore:kvstore",
         "//common/kvstore:kvstore_test",
         "//common/os:os",
