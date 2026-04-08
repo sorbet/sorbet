@@ -707,7 +707,9 @@ std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingVisibleT
     return core::AutocorrectSuggestion{fmt::format("Add missing `{}`", "visible_to"), std::move(allEdits)};
 }
 
-std::string PackageInfo::renderPackageRbContents(const core::GlobalState &gs, vector<Import> newImports) const {
+std::string PackageInfo::renderPackageRbContents(
+    const core::GlobalState &gs, vector<Import> newImports,
+    UnorderedMap<core::packages::MangledName, core::packages::StrictDependenciesLevel> newStrictnessByPkg) const {
     fmt::memory_buffer result;
 
     if (isPreludePackage()) {
@@ -719,12 +721,12 @@ std::string PackageInfo::renderPackageRbContents(const core::GlobalState &gs, ve
         ENFORCE(directiveSource.has_value());
         fmt::format_to(std::back_inserter(result), "  {}\n", directiveSource.value());
     }
-    if (locs.layer.exists()) {
-        fmt::format_to(std::back_inserter(result), "  layer '{}'\n", layer.show(gs));
-    }
-    if (locs.strictDependenciesLevel.exists()) {
+    if (gs.packageDB().enforceLayering()) {
+        if (locs.layer.exists()) {
+            fmt::format_to(std::back_inserter(result), "  layer '{}'\n", layer.show(gs));
+        }
         fmt::format_to(std::back_inserter(result), "  strict_dependencies '{}'\n",
-                       strictDependenciesLevelToString(strictDependenciesLevel));
+                       strictDependenciesLevelToString(newStrictnessByPkg[mangledName()]));
     }
     if (locs.minTypedLevel.exists() && locs.testsMinTypedLevel.exists()) {
         ENFORCE(!gs.packageDB().testPackages());
@@ -775,7 +777,8 @@ std::string PackageInfo::renderPackageRbContents(const core::GlobalState &gs, ve
         auto &bPkgInfo = gs.packageDB().getPackageInfo(b.mangledName);
         ENFORCE(aPkgInfo.exists());
         ENFORCE(bPkgInfo.exists());
-        return orderImports(gs, aPkgInfo, a.isTestImport(), bPkgInfo, b.isTestImport()) < 0;
+        return orderImports(gs, aPkgInfo, a.isTestImport(), bPkgInfo, b.isTestImport(),
+                            newStrictnessByPkg[a.mangledName], newStrictnessByPkg[b.mangledName]) < 0;
     });
 
     bool layeringViolationsHeaderShown = false;
@@ -793,8 +796,8 @@ std::string PackageInfo::renderPackageRbContents(const core::GlobalState &gs, ve
             }
 
             if (!causesLayeringViolation(gs.packageDB(), impPkgInfo) &&
-                strictDependenciesLevel != StrictDependenciesLevel::None) {
-                auto it = headerMap.find(strictDependenciesLevel);
+                newStrictnessByPkg[mangledName()] != StrictDependenciesLevel::None) {
+                auto it = headerMap.find(newStrictnessByPkg[mangledName()]);
                 if (it == headerMap.end()) {
                     // This is already inside a `if (strictDependenciesLevel != StrictDependenciesLevel::None), so this
                     // can only happen if a StrictDependenciesLevel is added.
@@ -803,7 +806,7 @@ std::string PackageInfo::renderPackageRbContents(const core::GlobalState &gs, ve
                 auto &headers = it->second;
                 auto headerToPrint = string();
                 while (headerIndex < headers.size() &&
-                       impPkgInfo.strictDependenciesLevel >= headers[headerIndex].first) {
+                       newStrictnessByPkg[import.mangledName] >= headers[headerIndex].first) {
                     headerToPrint = headers[headerIndex].second;
                     headerIndex++;
                 }
