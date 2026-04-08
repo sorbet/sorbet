@@ -66,7 +66,8 @@ if ! ./tools/scripts/format_website.sh -t &> format_website; then
 fi
 
 echo "~~~ Checking protoc dependency"
-if ./bazel query "somepath(//main:sorbet, @com_google_protobuf//:protoc)" &> protoc_dependency; then
+./bazel query "somepath(//main:sorbet, @com_google_protobuf//:protoc)" 2> /dev/null > protoc_dependency
+if [ "$(wc -l protoc_dependency)" -ne 0 ]; then
   globalErr=1
   echo "^^^ +++"
   cat >> protoc_dependency <<EOF
