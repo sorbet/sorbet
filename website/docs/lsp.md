@@ -326,10 +326,9 @@ _Response_:
 
 ### `sorbet/hierarchyReferences` request
 
-<!-- TODO(jez) Document this -->
-<!-- TODO(jez) Advertise how to use this in VS Code from the references.md doc -->
-
 Finds all references to the symbol under the cursor, plus references to any others that it overrides or is overridden by. That is, it finds references to a given symbol throughout the entire inheritance hierarchy. If the thing at the cursor is a call to a method `Child#foo` that overrides an abstract `Parent#foo` method from a super class and is further overridden by a `GrandChild#foo` method in a subclass, Sorbet finds references to all three of these symbols throughout the workspace.
+
+In VS Code, this feature is available via the [`>Sorbet: Go to References (full hierarchy)`](vscode.md#sorbet-go-to-references-full-hierarchy) command.
 
 _Request_:
 

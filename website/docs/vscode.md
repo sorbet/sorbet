@@ -193,6 +193,18 @@ The same feature is also available as a right-click context menu item:
   <source src="/img/copy-symbol.mp4" type="video/mp4">
 </video>
 
+### `>Sorbet: Go to References (full hierarchy)`
+
+[`>Sorbet: Go to References (full hierarchy)`]: #sorbet-go-to-references-full-hierarchy
+
+Finds all references to the symbol under the cursor, including references to any methods that it overrides or is overridden by throughout the entire inheritance hierarchy. For example, if the cursor is on a method `Child#foo` that overrides an abstract `Parent#foo`, this command finds references to both `Child#foo` and `Parent#foo` (and any other overrides in the hierarchy).
+
+This is different from the built-in "Find All References" command, which only finds references to the specific symbol under the cursor.
+
+<!-- TODO(jez) Add a screenshot or screen recording showing the command in action -->
+
+This feature is powered by a custom extension to the LSP specification: [`sorbet/hierarchyReferences` request](lsp.md#sorbethierarchyreferences-request).
+
 ### `>Sorbet: Configure untyped code highligting`
 
 [`>Sorbet: Configure untyped code highligting`]: #sorbet-configure-untyped-code-highlighting

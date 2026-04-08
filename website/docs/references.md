@@ -11,6 +11,16 @@ Sorbet can show the types and documentation for parts of the program via the LSP
 
 <!-- TODO(jez) Eventually, we should have a section here about how find all references treats package files specially -->
 
+## Hierarchy references
+
+By default, Find All References only finds references to the specific symbol under the cursor. If the cursor is on a method that participates in an inheritance hierarchy (for example, an `override` method or an `abstract` method), the results will not include references to related methods up or down the hierarchy.
+
+Sorbet provides a separate command that finds references throughout the full inheritance hierarchy. In VS Code, use the [`>Sorbet: Go to References (full hierarchy)`](vscode.md#sorbet-go-to-references-full-hierarchy) command.
+
+<!-- TODO(jez) Add a screenshot or screen recording comparing normal references vs hierarchy references -->
+
+For other language clients, send a [`sorbet/hierarchyReferences`](lsp.md#sorbethierarchyreferences-request) request.
+
 ## Troubleshooting
 
 ### Find All References keeps spinning
