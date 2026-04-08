@@ -390,12 +390,9 @@ string JSON::metricsToJSON(const CounterState &counters, string_view prefix, str
     }
 
     // UUID version 1 as specified in RFC 4122
-    string uuid = fmt::format("{:#08x}-{:#04x}-{:#04x}-{:#04x}-{:#08x}{:#04x}",
-                              (unsigned long long)Random::uniformU8(),
-                              Random::uniformU4(),
-                              Random::uniformU4(0, 0x0fff) | 0x4000,
-                              Random::uniformU4(0, 0x3fff) | 0x8000,
-                              (unsigned long long)Random::uniformU8(), rand());
+    string uuid = fmt::format("{:#08x}-{:#04x}-{:#04x}-{:#04x}-{:#08x}{:#04x}", (unsigned long long)Random::uniformU8(),
+                              Random::uniformU4(), Random::uniformU4(0, 0x0fff) | 0x4000,
+                              Random::uniformU4(0, 0x3fff) | 0x8000, (unsigned long long)Random::uniformU8(), rand());
     if (!uuid.empty()) {
         writer.Key("uuid");
         writer.String(uuid.data(), uuid.size());
