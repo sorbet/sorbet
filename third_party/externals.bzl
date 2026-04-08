@@ -47,6 +47,37 @@ def register_sorbet_dependencies():
         strip_prefix = "spdlog-8e5613379f5140fefb0b60412fbf1f5406e7c7f8",
     )
 
+    # We don't use this directly, but protobuf will skip defining its own
+    # `@zlib` if it's present.
+    http_archive(
+        name = "zlib",
+        url = "https://github.com/madler/zlib/archive/v1.3.1.zip",
+        build_file = "@com_stripe_ruby_typer//third_party:zlib.BUILD",
+        sha256 = "50b24b47bf19e1f35d2a21ff36d2a366638cdf958219a66f30ce0861201760e6",
+        strip_prefix = "zlib-1.3.1",
+    )
+
+    # proto_library, cc_proto_library, and java_proto_library rules implicitly
+    # depend on @com_google_protobuf for protoc and proto runtimes.
+    # This statement defines the @com_google_protobuf repo.
+    http_archive(
+        name = "com_google_protobuf",
+        url = "https://github.com/protocolbuffers/protobuf/archive/v3.27.0.zip",
+        sha256 = "913530eba097b17f58b9087fe9c4944de87b56913e3e340b91e317d1e6763dde",
+        strip_prefix = "protobuf-3.27.0",
+        patches = [
+            "@com_stripe_ruby_typer//third_party:com_google_protobuf/cpp_opts.bzl.patch",
+        ],
+    )
+
+    http_archive(
+        name = "libprotobuf-mutator",
+        url = "https://github.com/google/libprotobuf-mutator/archive/68e10c13248517c5bcd531d0e02be483da83fc13.zip",
+        sha256 = "8684276b996e8d8541ed3703420f9dbcc17702bd7b13c6f3d9c13a4656597c76",
+        build_file = "@com_stripe_ruby_typer//third_party:libprotobuf-mutator.BUILD",
+        strip_prefix = "libprotobuf-mutator-68e10c13248517c5bcd531d0e02be483da83fc13",
+    )
+
     http_archive(
         name = "lmdb",
         url = "https://github.com/LMDB/lmdb/archive/da9aeda08c3ff710a0d47d61a079f5a905b0a10a.zip",
