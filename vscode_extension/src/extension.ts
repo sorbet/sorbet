@@ -1,6 +1,7 @@
 import { commands, ExtensionContext, workspace } from "vscode";
 import * as cmdIds from "./commandIds";
 import { copySymbolToClipboard } from "./commands/copySymbolToClipboard";
+import { findHierarchyReferences } from "./commands/findHierarchyReferences";
 import { savePackageFiles } from "./commands/savePackageFiles";
 import { setLogLevel } from "./commands/setLogLevel";
 import { showSorbetActions } from "./commands/showSorbetActions";
@@ -57,6 +58,9 @@ export async function activate(context: ExtensionContext) {
   context.subscriptions.push(
     commands.registerCommand(cmdIds.COPY_SYMBOL_COMMAND_ID, () =>
       copySymbolToClipboard(sorbetExtensionContext),
+    ),
+    commands.registerCommand(cmdIds.FIND_HIERARCHY_REFERENCES_COMMAND_ID, () =>
+      findHierarchyReferences(sorbetExtensionContext),
     ),
     commands.registerCommand(
       cmdIds.SET_LOGLEVEL_COMMAND_ID,

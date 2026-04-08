@@ -32,6 +32,7 @@
     "onCommand:sorbet.setLogLevel",
     "onCommand:sorbet.showOutput",
     "onCommand:sorbet.toggleHighlightUntyped",
+    "onCommand:sorbet.findHierarchyReferences",
     "onCommand:sorbet.toggleTypedFalseCompletionNudges",
     "onLanguage:ruby",
     "workspaceContains:sorbet/*"
@@ -68,6 +69,12 @@
         "title": "Configure untyped code highlighting diagnostic severity",
         "category": "Sorbet",
         "enablement": "workbenchState != empty"
+      },
+      {
+        "command": "sorbet.findHierarchyReferences",
+        "title": "Go to References (full hierarchy)",
+        "category": "Sorbet",
+        "enablement": "workbenchState != empty && editorLangId == ruby && !editorHasSelection && (resourceScheme == file || resourceScheme == sorbet || resourceScheme == vscode-remote)"
       },
       {
         "command": "sorbet.copySymbolToClipboard",

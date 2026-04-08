@@ -47,6 +47,7 @@ const VALID_STATE_TRANSITIONS: ReadonlyMap<
 
 export type SorbetServerCapabilities = ServerCapabilities & {
   sorbetShowSymbolProvider: boolean;
+  sorbetHierarchyReferencesProvider: boolean;
 };
 
 export class SorbetLanguageClient implements Disposable, ErrorHandler {
