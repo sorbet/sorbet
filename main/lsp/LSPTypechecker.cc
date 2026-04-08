@@ -326,7 +326,7 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
     auto sorted = sortParsedFiles(*gs, *errorReporter, move(resolved));
     const auto presorted = true;
     const auto cancelable = false;
-    pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, nullopt, presorted);
+    pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, nullptr, presorted);
     gs->lspTypecheckCount++;
 
     auto duration = timeit.setEndTime();

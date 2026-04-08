@@ -107,8 +107,8 @@ std::vector<ast::ParsedFile> incrementalResolve(
 // properly, which is a significant speedup on large codebases.
 void typecheck(const core::GlobalState &gs, std::vector<ast::ParsedFile> what, const options::Options &opts,
                WorkerPool &workers, bool cancelable = false,
-               std::optional<std::shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager = std::nullopt,
-               bool presorted = false, bool intentionallyLeakASTs = false);
+               std::shared_ptr<core::lsp::PreemptionTaskManager> preemptionManager = nullptr, bool presorted = false,
+               bool intentionallyLeakASTs = false);
 
 // ----- other ----------------------------------------------------------------
 
