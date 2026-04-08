@@ -1677,10 +1677,6 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
             if (c1.symbol == Symbols::bottom()) {
                 return true;
             }
-            if (isSubTypeUnderConstraint(gs, constr, make_type<ClassType>(eu2->parentEnumClass(gs)), t1, mode, errorDetailsCollector)) {
-                // TODO: add a test case for this
-                return true;
-            }
             return absl::c_any_of(eu2->members, [&c1](auto member) { return c1.symbol == member; });
         }
         return isSubTypeUnderConstraint(gs, constr, t1, eu2->toOrType(gs), mode, errorDetailsCollector);
