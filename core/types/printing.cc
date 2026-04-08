@@ -564,18 +564,8 @@ string EnumUnion::toStringWithTabs(const GlobalState &gs, int tabs) const {
 }
 
 string EnumUnion::show(const GlobalState &gs, ShowOptions options) const {
-    fmt::memory_buffer buf;
-    fmt::format_to(std::back_inserter(buf), "T.any(");
-    bool first = true;
-    for (auto &member : members) {
-        if (!first) {
-            fmt::format_to(std::back_inserter(buf), ", ");
-        }
-        first = false;
-        fmt::format_to(std::back_inserter(buf), "{}", member.show(gs, options));
-    }
-    fmt::format_to(std::back_inserter(buf), ")");
-    return to_string(buf);
+    return fmt::format("T.any({})",
+                       fmt::map_join(members, ", ", [&](auto member) -> string { return member.show(gs, options); }));
 }
 
 } // namespace sorbet::core
