@@ -50,7 +50,7 @@ bool PreemptionTaskManager::tryRunScheduledPreemptionTask(const core::GlobalStat
         gs.errorQueue = make_shared<core::ErrorQueue>(previousErrorQueue->logger, previousErrorQueue->tracer,
                                                       make_shared<core::NullFlusher>());
         gs.tracer().debug("[Typechecker] Beginning preemption task.");
-        preemptTask->run();
+        preemptTask->run(this->getPreemptionStratum());
         gs.tracer().debug("[Typechecker] Preemption task complete.");
         gs.errorQueue = move(previousErrorQueue);
         return true;

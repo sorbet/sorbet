@@ -115,7 +115,7 @@ public:
     CountingTask(shared_ptr<core::lsp::PreemptionTaskManager> preemptManager, core::GlobalState &gs)
         : preemptManager(move(preemptManager)), gs(gs) {}
 
-    void run() override {
+    void run(uint16_t currentStratum) override {
         // The task should run with typecheck mutex held with a write lock.
         preemptManager->assertTypecheckMutexHeld();
         // Emulate behavior of most LSP Tasks and drain all diagnostics and query responses.

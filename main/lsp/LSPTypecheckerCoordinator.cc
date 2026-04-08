@@ -165,7 +165,7 @@ public:
         }
     }
 
-    void run() override {
+    void run(uint16_t currentStratum) override {
         // Destruct timer, if specified. Causes metric to be reported.
         this->timeUntilRun = nullptr;
 

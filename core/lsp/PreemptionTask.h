@@ -1,6 +1,8 @@
 #ifndef SORBET_LSP_PREEMPTION_TASK_H
 #define SORBET_LSP_PREEMPTION_TASK_H
 
+#include <cstdint>
+
 namespace sorbet::core::lsp {
 // Generic interface for tasks that can run at preemption points.
 class PreemptionTask {
@@ -8,7 +10,7 @@ public:
     PreemptionTask() = default;
     virtual ~PreemptionTask() = default;
 
-    virtual void run() = 0;
+    virtual void run(uint16_t currentStratum) = 0;
 
     // Disallow copy/move to force management through smart pointers.
     PreemptionTask(PreemptionTask &) = delete;

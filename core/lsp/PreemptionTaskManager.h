@@ -22,6 +22,10 @@ private:
     // Thread ID of the processing thread. Lazily set.
     std::optional<std::thread::id> processingThreadId;
 
+    // The stratum that the typechecker is currently typechecking. Preemption is available for all strata whose id is
+    // less than or equal to this number.
+    std::atomic<uint16_t> preemptionStratum = 0;
+
 public:
     PreemptionTaskManager(std::shared_ptr<TypecheckEpochManager> epochManager);
     // Run only from processing thread.
@@ -39,6 +43,24 @@ public:
     std::unique_ptr<absl::ReaderMutexLock> lockPreemption() const;
     // (For testing only) Assert that typecheckMutex is held.
     void assertTypecheckMutexHeld();
+
+    // Reset the preemption stratum back to the first stratum.
+    void resetPreemptionStratum() {
+        this->preemptionStratum.store(0);
+    }
+
+    // Return the current stratum. All preemption tasks that are possible to run at a stratum that is less than or equal
+    // to this number are runnable at this point.
+    uint16_t getPreemptionStratum() {
+        return this->preemptionStratum.load();
+    }
+
+    // Increment the current preepmtion stratum. Used to indicate that we've started processing a new stratum in the
+    // condensation graph.
+    // Only called from the slow path.
+    void incrementPreemptionStratum() {
+        this->preemptionStratum.fetch_add(1);
+    }
 };
 
 } // namespace sorbet::core::lsp
