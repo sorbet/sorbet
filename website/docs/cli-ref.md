@@ -168,9 +168,8 @@ Usage:
       --counter <counter>       Print internal counter for <counter> (repeatable)
       --track-untyped [={[nowhere],everywhere,everywhere-but-tests}(=everywhere)]
                                 Include a per-file counter of untyped usages in the
-                                `--print=file-table-json` output. This is in addition
-                                to the codebase-wide `types.input.untyped.usages`
-                                counter.
+                                `--print=file-table-json` output. This is in addition to
+                                the codebase-wide `types.input.untyped.usages` counter.
       --metrics-file <file>     Report counters and some timers to <file>, in JSON
                                 format. (default: "")
       --metrics-prefix <string>
@@ -401,9 +400,9 @@ Usage:
                                 flatten-tree, flatten-tree-raw, ast, ast-raw, cfg,
                                 cfg-raw, cfg-text, symbol-table, symbol-table-raw,
                                 symbol-table-json, symbol-table-full,
-                                symbol-table-full-raw, symbol-table-full-json,
-                                autogen, autogen-msgpack, autogen-subclasses,
-                                package-tree, minimized-rbi
+                                symbol-table-full-raw, symbol-table-full-json, autogen,
+                                autogen-msgpack, autogen-subclasses, package-tree,
+                                minimized-rbi
 
 ```
 
