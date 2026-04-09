@@ -1007,7 +1007,7 @@ CheckSize(MetaType, 16, 8);
 
 TYPE(EnumUnion) final : public Refcounted {
 public:
-    std::vector<ClassOrModuleRef> members;
+    const std::vector<ClassOrModuleRef> members;
 
     EnumUnion(std::vector<ClassOrModuleRef> members);
     EnumUnion(const EnumUnion &) = delete;
