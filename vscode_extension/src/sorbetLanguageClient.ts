@@ -22,6 +22,8 @@ import { instrumentLanguageClient } from "./languageClient.metrics";
 import { SorbetExtensionContext } from "./sorbetExtensionContext";
 import { ServerStatus, RestartReason } from "./types";
 
+const STOP_TIMEOUT_MS = 5000;
+
 const VALID_STATE_TRANSITIONS: ReadonlyMap<
   ServerStatus,
   ReadonlySet<ServerStatus>
@@ -55,6 +57,7 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
   private readonly onStatusChangeEmitter: EventEmitter<ServerStatus>;
   private readonly restart: (reason: RestartReason) => void;
   private sorbetProcess?: ChildProcess;
+  private stopPromise?: Promise<void>;
   // Sometimes this is an errno, not a process exit code. This happens when set
   // via the `.on("error")` handler, instead of the `.on("exit")` handler.
   private sorbetProcessExitCode?: number;
@@ -90,35 +93,134 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
    * to keep it alive. Stops the language server and Sorbet processes, and removes UI items.
    */
   public dispose() {
+    this.stop().catch((error: Error) => {
+      this.context.log.error(
+        "Failed to stop Sorbet client during dispose.",
+        error,
+      );
+    });
+  }
+
+  public async stop(): Promise<void> {
+    if (this.stopPromise) {
+      return this.stopPromise;
+    }
+
     this.onStatusChangeEmitter.dispose();
 
-    let stopped = false;
-    /*
-     * stop() only invokes the then() callback after the language server
-     * ACKs the stop request.
-     * Stopping can time out if the language client is repeatedly failing to
-     * start (e.g. if network is down, or path to Sorbet is incorrect), or if
-     * Sorbet never ACKs the stop request.
-     * In the former case (which is the common case), VS code stops retrying
-     * the connection after we call stop(), but never invokes our callback.
-     * Thus, our solution is to wait 5 seconds for a callback, and stop the
-     * process if we haven't heard back.
-     */
-    const stopTimer = setTimeout(() => {
-      stopped = true;
-      this.context.metrics.emitCountMetric("stop.timed_out", 1);
-      if (this.sorbetProcess?.pid) {
-        stopProcess(this.sorbetProcess, this.context.log);
-      }
-      this.sorbetProcess = undefined;
-    }, 5000);
+    const { sorbetProcess } = this;
 
-    this.languageClient.stop().then(() => {
-      if (!stopped) {
-        clearTimeout(stopTimer);
-        this.context.metrics.emitCountMetric("stop.success", 1);
-        this.context.log.info("Sorbet has stopped.");
-      }
+    this.stopPromise = new Promise<void>((resolve) => {
+      let finished = false;
+      const finish = () => {
+        if (!finished) {
+          finished = true;
+          this.sorbetProcess = undefined;
+          resolve();
+        }
+      };
+      /*
+       * languageClient.stop() only invokes the then() callback after the language
+       * server ACKs the stop request.
+       * Stopping can time out if the language client is repeatedly failing to
+       * start (e.g. if network is down, or path to Sorbet is incorrect), or if
+       * Sorbet never ACKs the stop request.
+       * In the former case (which is the common case), VS code stops retrying
+       * the connection after we call stop(), but never invokes our callback.
+       * Thus, our solution is to wait 5 seconds for a callback, and stop the
+       * process if we haven't heard back.
+       */
+      const stopTimer = setTimeout(() => {
+        this.context.metrics.emitCountMetric("stop.timed_out", 1);
+        if (sorbetProcess?.pid) {
+          this.context.log.warn(
+            "Sorbet client stop timed out after 5s; terminating Sorbet process.",
+            sorbetProcess.pid,
+          );
+          stopProcess(sorbetProcess, this.context.log)
+            .catch((error: Error) => {
+              this.context.log.error(
+                "Failed to terminate Sorbet process.",
+                error,
+              );
+            })
+            .then(finish);
+        } else {
+          finish();
+        }
+      }, STOP_TIMEOUT_MS);
+
+      this.languageClient.stop().then(
+        async () => {
+          clearTimeout(stopTimer);
+          this.context.metrics.emitCountMetric("stop.success", 1);
+          this.context.log.info("Sorbet has stopped.");
+          const exited = await this.waitForProcessExit(
+            sorbetProcess,
+            STOP_TIMEOUT_MS,
+          );
+          if (!exited && sorbetProcess?.pid) {
+            this.context.log.warn(
+              "Sorbet acknowledged shutdown but did not exit within 5s; terminating Sorbet process.",
+              sorbetProcess.pid,
+            );
+            await stopProcess(sorbetProcess, this.context.log);
+          }
+          finish();
+        },
+        async (error: Error) => {
+          clearTimeout(stopTimer);
+          this.context.log.warn("Sorbet client stop failed.", error);
+          if (sorbetProcess?.pid) {
+            await stopProcess(sorbetProcess, this.context.log);
+          }
+          finish();
+        },
+      );
+    });
+
+    return this.stopPromise;
+  }
+
+  private waitForProcessExit(
+    sorbetProcess: ChildProcess | undefined,
+    timeoutMs?: number,
+  ): Promise<boolean> {
+    if (
+      !sorbetProcess ||
+      sorbetProcess.exitCode !== null ||
+      sorbetProcess.signalCode !== null
+    ) {
+      return Promise.resolve(true);
+    }
+
+    return new Promise<boolean>((resolve) => {
+      let resolved = false;
+      const timer =
+        timeoutMs === undefined
+          ? undefined
+          : setTimeout(() => {
+              if (!resolved) {
+                resolved = true;
+                sorbetProcess.removeListener("exit", onExit);
+                sorbetProcess.removeListener("error", onExit);
+                resolve(false);
+              }
+            }, timeoutMs);
+      const onExit = () => {
+        if (!resolved) {
+          resolved = true;
+          if (timer !== undefined) {
+            clearTimeout(timer);
+          }
+          sorbetProcess.removeListener("exit", onExit);
+          sorbetProcess.removeListener("error", onExit);
+          resolve(true);
+        }
+      };
+
+      sorbetProcess.on("exit", onExit);
+      sorbetProcess.on("error", onExit);
     });
   }
 

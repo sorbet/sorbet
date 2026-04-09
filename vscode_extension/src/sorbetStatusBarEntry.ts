@@ -74,6 +74,10 @@ export class SorbetStatusBarEntry implements Disposable {
           text = `${sorbetName}: Disabled`;
           tooltip = "The Sorbet server is disabled.";
           break;
+        case ServerStatus.STOPPING:
+          text = `${sorbetName}: Stopping $(sync~spin)`;
+          tooltip = "The Sorbet server is stopping.";
+          break;
         case ServerStatus.ERROR:
           text = `${sorbetName}: Error`;
           tooltip = "Click for remediation items.";
