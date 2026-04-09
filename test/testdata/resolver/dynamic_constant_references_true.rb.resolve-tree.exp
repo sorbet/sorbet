@@ -1,13 +1,13 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   <self>.puts(Unresolved: ::T.unsafe(nil)::<C A>)
 
-  <self>.puts(Unresolved: Unresolved: ::T.unsafe(nil)::<C A>::<C B>)
+  <self>.puts(Unresolved: ::T.unsafe(nil)::<C A>::<C B>)
 
   ::AliasToStr = ::T.type_alias() do ||
     ::String
   end
 
-  <self>.puts(Unresolved: ::AliasToStr::<C X>)
+  <self>.puts(Unresolved: <emptyTree>::<C AliasToStr>::<C X>)
 
-  <self>.puts(Unresolved: Unresolved: ::AliasToStr::<C X>::<C Y>)
+  <self>.puts(Unresolved: <emptyTree>::<C AliasToStr>::<C X>::<C Y>)
 end
