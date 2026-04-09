@@ -6,6 +6,7 @@
 #include "main/lsp/LSPConfiguration.h"
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/LSPOutput.h"
+#include "main/lsp/LSPSignalHandler.h"
 #include "main/lsp/json_types.h"
 #include "rapidjson/document.h"
 #include "rapidjson/writer.h"
@@ -50,6 +51,11 @@ void WatchmanProcess::start() {
         auto p = subprocess::Popen({watchmanPath.c_str(), "-j", "-p", "--no-pretty"},
                                    subprocess::output{subprocess::PIPE}, subprocess::input{subprocess::PIPE});
 
+        // Register the child PID with the SIGTERM handler so that a force-kill
+        // of the Sorbet process still terminates the Watchman child immediately,
+        // even if the clean-shutdown cascade (below) does not get to run.
+        registerWatchmanChildPid(p.pid());
+
         // Ensure the Watchman client subprocess is always terminated and reaped
         // when we leave this scope, regardless of how we exit (normal LSP
         // shutdown, Watchman EOF, exception). subprocess::Popen's destructor is
@@ -59,6 +65,10 @@ void WatchmanProcess::start() {
             subprocess::Popen &p;
             spdlog::logger &logger;
             ~WatchmanGuard() {
+                // Deregister first: the signal handler may have already sent
+                // SIGTERM to the child, so we avoid a redundant signal after
+                // clearing the pid. p.kill() handles ESRCH gracefully.
+                registerWatchmanChildPid(0);
                 if (p.pid() > 0) {
                     logger.debug("Stopping Watchman subprocess {}", p.pid());
                     p.kill(SIGTERM);
