@@ -266,8 +266,8 @@ cc_binary(
 
 pipeline_tests(
     "test_corpus",
-    "PosTests",
-    glob(
+    test_name_prefix = "PosTests",
+    tests = glob(
         [
             "testdata/**/*.rb",
             "testdata/**/*.exp",
@@ -281,8 +281,8 @@ pipeline_tests(
 
 pipeline_tests(
     "test_corpus_prism",
-    "PrismPosTests",
-    glob(
+    test_name_prefix = "PrismPosTests",
+    tests = glob(
         [
             # Replace [parser] with other phases to test Prism at that level
             # Phases: https://github.com/Shopify/sorbet/blob/prism/docs/internals.md#phases
@@ -514,8 +514,8 @@ pipeline_tests(
 
 pipeline_tests(
     "whitequark_parser_corpus",
-    "WhitequarkParserTests",
-    glob([
+    test_name_prefix = "WhitequarkParserTests",
+    tests = glob([
         "whitequark/**/*.rb",
         "whitequark/**/*.exp",
     ]),
@@ -523,8 +523,8 @@ pipeline_tests(
 
 pipeline_tests(
     "test_corpus_lsp",
-    "LSPTests",
-    glob(
+    test_name_prefix = "LSPTests",
+    tests = glob(
         [
             "testdata/**/*.rb",
             "testdata/**/*.rbi",
@@ -536,7 +536,7 @@ pipeline_tests(
 
 pipeline_tests(
     "test_corpus_lsp_prism",
-    glob(
+    tests = glob(
         [
             "testdata/**/*.rb",
             "testdata/**/*.rbi",
@@ -575,8 +575,8 @@ pipeline_tests(
 
 pipeline_tests(
     "prism_regression_corpus",
-    "PrismPosTests",
-    glob(
+    test_name_prefix = "PrismPosTests",
+    tests = glob(
         [
             "prism_regression/**/*.rb",
             "prism_regression/**/*.exp",
@@ -587,13 +587,14 @@ pipeline_tests(
             "prism_regression/call_block_param.rb",
         ],
     ),
-    "PrismPosTests",
+    test_name_prefix = "PrismPosTests",
     parser = "prism",
 )
 
 pipeline_tests(
     "rbs_whitequark",
-    glob(
+    test_name_prefix = "PosTests",
+    tests = glob(
         [
             "testdata/rbs/**/*.rb",
             "testdata/rbs/**/*.exp",
@@ -603,12 +604,11 @@ pipeline_tests(
             "testdata/rbs/assertions_heredoc_modified.rb",
         ],
     ),
-    "PosTests",
 )
 
 pipeline_tests(
     "rbs_prism",
-    glob(
+    tests = glob(
         [
             "testdata/rbs/**/*.rb",
             "testdata/rbs/**/*.exp",

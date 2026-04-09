@@ -64,7 +64,8 @@ _TEST_RUNNERS = {
     "PackagerTests": ":pipeline_test_runner",
 }
 
-def pipeline_tests(suite_name, test_name_prefix, all_paths, extra_files = [], tags = [], parser = None):
+def pipeline_tests(suite_name, test_name_prefix, tests, extra_files = [], tags = [], parser = None):
+    all_paths = tests
     tests = {}  # test_name-> {"path": String, "prefix": String, "sentinel": String, "isPackage": bool}
 
     # The packager step needs folder-based steps since folder structure dictates package membership.
