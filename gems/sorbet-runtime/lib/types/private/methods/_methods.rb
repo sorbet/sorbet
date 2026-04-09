@@ -439,12 +439,6 @@ module T::Private::Methods
     method_owner_and_name_to_key(method.owner, method.name)
   end
 
-  private_class_method def self.key_to_method(key)
-    id, name = key.split("#")
-    obj = ObjectSpace._id2ref(id.to_i)
-    obj.instance_method(name)
-  end
-
   private_class_method def self.run_sig_block_for_key(key, force_type_init: false)
     blk = @sig_wrappers[key]
     if !blk
@@ -453,7 +447,7 @@ module T::Private::Methods
         # We already ran the sig block, perhaps in another thread.
         return sig
       else
-        raise "No `sig` wrapper for #{key_to_method(key)}"
+        raise "No `sig` wrapper for #{key}. This is likely a bug in sorbet-runtime. If you can reproduce, please report an issue."
       end
     end
 
@@ -464,7 +458,7 @@ module T::Private::Methods
       raise
     end
     if @sigs_that_raised[key]
-      raise "A previous invocation of #{key_to_method(key)} raised, and the current one succeeded. Please don't do that."
+      raise "A previous invocation of #{sig.method_desc} raised, and the current one succeeded. Please don't do that."
     end
 
     @sig_wrappers.delete(key)
