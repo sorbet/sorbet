@@ -282,9 +282,8 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
 
                     if (gs.cacheSensitiveOptions.rbsEnabled) {
                         auto &prismParser = prismParseResult->getParser();
-                        auto node = rbs::runPrismRBSRewrite(gs, file, prismParseResult->getRawNodePointer(),
-                                                            prismParseResult->getCommentLocations(), ctx, prismParser);
-                        prismParseResult->replaceRootNode(node);
+                        rbs::runPrismRBSRewrite(gs, file, prismParseResult->getRawNodePointer(),
+                                                prismParseResult->getCommentLocations(), ctx, prismParser);
                         disableParserComparison = true;
 
                         handler.addObserved(gs, "rbs-rewrite-tree", [&]() { return prismParseResult->prettyPrint(); });
@@ -820,9 +819,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                 // Run the Prism-level RBS rewriter
                 if (gs->cacheSensitiveOptions.rbsEnabled) {
                     auto &prismParser = prismResult.getParser();
-                    auto node = rbs::runPrismRBSRewrite(*gs, f, prismResult.getRawNodePointer(),
-                                                        prismResult.getCommentLocations(), ctx, prismParser);
-                    prismResult.replaceRootNode(node);
+                    rbs::runPrismRBSRewrite(*gs, f, prismResult.getRawNodePointer(), prismResult.getCommentLocations(),
+                                            ctx, prismParser);
 
                     handler.addObserved(*gs, "rbs-rewrite-tree", [&]() { return prismResult.prettyPrint(); });
                 }

@@ -265,24 +265,21 @@ parser::Prism::ParseResult runPrismParser(core::GlobalState &gs, core::FileRef f
     return parser::Prism::Parser::run(ctx);
 }
 
-parser::Prism::ParseResult runPrismRBSRewrite(core::GlobalState &gs, core::FileRef file,
-                                              parser::Prism::ParseResult parseResult, const options::Printers &print) {
+void runPrismRBSRewrite(core::GlobalState &gs, core::FileRef file, parser::Prism::ParseResult &parseResult,
+                        const options::Printers &print) {
     if (gs.cacheSensitiveOptions.rbsEnabled) {
         Timer timeit(gs.tracer(), "runRBSRewrite", {{"file", string(file.data(gs).path())}});
         core::MutableContext ctx(gs, core::Symbols::root(), file);
         core::UnfreezeNameTable nameTableAccess(gs);
 
         auto &parser = parseResult.getParser();
-        auto node = rbs::runPrismRBSRewrite(gs, file, parseResult.getRawNodePointer(),
-                                            parseResult.getCommentLocations(), ctx, parser);
-        parseResult.replaceRootNode(node);
+        rbs::runPrismRBSRewrite(gs, file, parseResult.getRawNodePointer(), parseResult.getCommentLocations(), ctx,
+                                parser);
     }
 
     if (print.RBSRewriteTree.enabled) {
         print.RBSRewriteTree.fmt("{}\n", parseResult.prettyPrint());
     }
-
-    return parseResult;
 }
 
 unique_ptr<parser::Node> runRBSRewrite(core::GlobalState &gs, core::FileRef file, parser::ParseResult &&parseResult,
@@ -451,12 +448,12 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
                         return emptyParsedFile(file);
                     }
 
-                    auto rbsRewrittenParseResult = runPrismRBSRewrite(lgs, file, move(parseResult), print);
+                    runPrismRBSRewrite(lgs, file, parseResult, print);
                     if (opts.stopAfterPhase == options::Phase::RBS_REWRITER) {
                         return emptyParsedFile(file);
                     }
 
-                    tree = runPrismDesugar(lgs, file, move(rbsRewrittenParseResult), print);
+                    tree = runPrismDesugar(lgs, file, move(parseResult), print);
                     if (opts.stopAfterPhase == options::Phase::DESUGARER) {
                         return emptyParsedFile(file);
                     }

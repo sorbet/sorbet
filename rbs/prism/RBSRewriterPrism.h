@@ -12,9 +12,9 @@ extern "C" {
 
 namespace sorbet::rbs {
 
-pm_node_t *runPrismRBSRewrite(core::GlobalState &gs, core::FileRef file, pm_node_t *node,
-                              const std::vector<core::LocOffsets> &commentLocations, core::MutableContext &ctx,
-                              parser::Prism::Parser &parser);
+void runPrismRBSRewrite(core::GlobalState &gs, core::FileRef file, pm_node_t *node,
+                        const std::vector<core::LocOffsets> &commentLocations, core::MutableContext &ctx,
+                        parser::Prism::Parser &parser);
 
 } // namespace sorbet::rbs
 
