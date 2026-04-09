@@ -575,10 +575,7 @@ pm_node_t *AssertionsRewriterPrism::rewriteBody(pm_node_t *node) {
     if (PM_NODE_TYPE_P(node, PM_STATEMENTS_NODE)) {
         auto *statements = down_cast<pm_statements_node_t>(node);
 
-        // Iterate over each statement and rewrite it in place
-        for (size_t i = 0; i < statements->body.size; i++) {
-            statements->body.nodes[i] = rewriteNode(statements->body.nodes[i]);
-        }
+        rewriteNodes(statements->body);
 
         return node;
     }
