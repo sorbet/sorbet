@@ -524,6 +524,7 @@ private:
             // continuing on will only redundantly report that we can't resolve the constant, so bail early here
             job.out->markUnresolved();
             job.out->resolutionScopes()->emplace_back(core::Symbols::noSymbol());
+            job.out->setResolvedUpToSegmentForFlatUCL(job.resolvedUpToSegment + 1);
             return;
         }
 
@@ -538,6 +539,7 @@ private:
         // failedSegIdx is the index of the first unresolved segment.
         int failedSegIdx = job.resolvedUpToSegment + 1; // 0 if nothing resolved yet
         ENFORCE(failedSegIdx < (int)original.segCount());
+        ENFORCE(failedSegIdx >= 0);
         core::NameRef failedSegName = original.names()[failedSegIdx];
         core::LocOffsets failedSegLoc = original.locs()[failedSegIdx];
 
@@ -553,7 +555,7 @@ private:
             }
             // Record the last resolved segment index so matchesQuery in DefLocSaver can
             // correctly attribute symbols to each segment when iterating the flat UCL.
-            job.out->setResolvedUpToSegmentForFlatUCL(job.resolvedUpToSegment);
+            job.out->setResolvedUpToSegmentForFlatUCL(failedSegIdx);
         } else if (auto id = ast::cast_tree<ast::ConstantLit>(original.scope())) {
             auto originalScope = id->symbol().dealias(ctx);
             if (originalScope == core::Symbols::StubModule()) {
@@ -567,6 +569,7 @@ private:
                 // we just put a single entry in the resolutionScopes list.
                 job.out->resolutionScopes()->emplace_back(originalScope);
             }
+            job.out->setResolvedUpToSegmentForFlatUCL(failedSegIdx);
         } else if (failedSegIdx == 0 && ast::isa_tree<ast::EmptyTree>(original.scope()) && original.segCount() > 1) {
             // Multi-segment flat UCL with EmptyTree scope where nothing resolved.
             // Segment 0 may have been found via nesting lookup but was not followable
@@ -588,7 +591,7 @@ private:
                     job.out->resolutionScopes()->emplace_back(seg0Sym);
                 }
                 // Segment 0 was resolved; record this so matchesQuery can walk backwards.
-                job.out->setResolvedUpToSegmentForFlatUCL(0);
+                job.out->setResolvedUpToSegmentForFlatUCL(1);
             } else {
                 // Segment 0 was not found: use nesting scopes.
                 auto nesting = job.scope;
@@ -599,6 +602,7 @@ private:
                     }
                     nesting = nesting->parent;
                 }
+                job.out->setResolvedUpToSegmentForFlatUCL(0);
             }
         } else {
             auto nesting = job.scope;
@@ -610,9 +614,12 @@ private:
 
                 nesting = nesting->parent;
             }
+            job.out->setResolvedUpToSegmentForFlatUCL(0);
         }
 
         ENFORCE(!job.out->resolutionScopes()->empty());
+        ENFORCE(job.out->resolvedUpToSegmentForFlatUCL() != -1);
+        ENFORCE(job.out->resolvedUpToSegmentForFlatUCL() < (int)original.segCount());
         ENFORCE(job.scope->scope != core::Symbols::StubModule());
 
         // This name is an artifact of parser recovery--no need to leak the parser implementation to the user,
