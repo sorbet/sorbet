@@ -515,18 +515,20 @@ void SigsRewriterPrism::rewriteClass(pm_node_t *node) {
     }
 }
 
-void SigsRewriterPrism::rewriteNode(pm_node_t *node) {
-    if (node == nullptr) {
-        return;
+inline void SigsRewriterPrism::rewriteNullableNode(pm_node_t *node) {
+    if (node != nullptr) {
+        rewriteNode(node);
     }
+}
 
+void SigsRewriterPrism::rewriteNode(pm_node_t *node) {
     switch (PM_NODE_TYPE(node)) {
         case PM_BEGIN_NODE: {
             auto *begin = down_cast<pm_begin_node_t>(node);
-            rewriteNode(up_cast(begin->statements));
-            rewriteNode(up_cast(begin->rescue_clause));
-            rewriteNode(up_cast(begin->else_clause));
-            rewriteNode(up_cast(begin->ensure_clause));
+            rewriteNullableNode(up_cast(begin->statements));
+            rewriteNullableNode(up_cast(begin->rescue_clause));
+            rewriteNullableNode(up_cast(begin->else_clause));
+            rewriteNullableNode(up_cast(begin->ensure_clause));
             break;
         }
         case PM_BLOCK_NODE: {
@@ -703,7 +705,7 @@ void SigsRewriterPrism::rewriteNode(pm_node_t *node) {
         }
         case PM_SPLAT_NODE: {
             auto *s = down_cast<pm_splat_node_t>(node);
-            rewriteNode(s->expression);
+            rewriteNullableNode(s->expression);
             break;
         }
         case PM_CONSTANT_WRITE_NODE: {

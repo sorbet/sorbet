@@ -52,6 +52,7 @@ private:
     pm_node_t *rewriteBody(pm_node_t *node);
     void rewriteBody(pm_statements_node_t *stmts);
     void rewriteNode(pm_node_t *node);
+    void rewriteNullableNode(pm_node_t *node);
     void rewriteNodes(pm_node_list_t &nodes);
     void rewriteArgumentsNode(pm_arguments_node_t *args);
     void rewriteClass(pm_node_t *node);
