@@ -13,6 +13,7 @@ export type StatusChangedEvent = {
 
 export class SorbetStatusProvider implements Disposable {
   private wrappedActiveLanguageClient?: SorbetLanguageClient;
+  private wrappedServerStatus: ServerStatus;
   private readonly context: SorbetExtensionContext;
   private readonly disposables: Disposable[];
   /** Mutex for startSorbet. Prevents us from starting multiple processes at once. */
@@ -24,6 +25,7 @@ export class SorbetStatusProvider implements Disposable {
 
   constructor(context: SorbetExtensionContext) {
     this.context = context;
+    this.wrappedServerStatus = ServerStatus.DISABLED;
     this.isStarting = false;
     this.lastSorbetRetryTime = 0;
     this.operationStack = [];
@@ -55,9 +57,8 @@ export class SorbetStatusProvider implements Disposable {
       return;
     }
 
-    // Clean-up existing client, if any.
+    // Remove existing client from clean-up tracking, if any.
     if (this.wrappedActiveLanguageClient) {
-      this.wrappedActiveLanguageClient.dispose();
       const i = this.disposables.indexOf(this.wrappedActiveLanguageClient);
       if (i !== -1) {
         this.disposables.splice(i, 1);
@@ -114,6 +115,7 @@ export class SorbetStatusProvider implements Disposable {
    * event listeners are notified.
    */
   private fireOnStatusChanged(data: StatusChangedEvent): void {
+    this.wrappedServerStatus = data.status;
     if (data.stopped) {
       this.operationStack = [];
     }
@@ -163,10 +165,7 @@ export class SorbetStatusProvider implements Disposable {
    * Return current {@link ServerStatus server status}.
    */
   public get serverStatus(): ServerStatus {
-    return (
-      this.activeLanguageClient?.status ||
-      (this.isStarting ? ServerStatus.RESTARTING : ServerStatus.DISABLED)
-    );
+    return this.wrappedServerStatus;
   }
 
   /**
@@ -193,6 +192,7 @@ export class SorbetStatusProvider implements Disposable {
       this.context.log.debug(
         `Waiting ${sleepMS.toFixed(0)}ms before restarting Sorbet…`,
       );
+      this.fireOnStatusChanged({ status: ServerStatus.RESTARTING });
       this.isStarting = true;
       await new Promise((res) => setTimeout(res, sleepMS));
       this.isStarting = false;
@@ -237,8 +237,12 @@ export class SorbetStatusProvider implements Disposable {
    * @param newStatus Status to report.
    */
   public async stopSorbet(newStatus: ServerStatus): Promise<void> {
-    // Use property-setter to ensure proper clean-up.
+    const oldClient = this.activeLanguageClient;
     this.activeLanguageClient = undefined;
+    if (oldClient) {
+      this.fireOnStatusChanged({ status: ServerStatus.STOPPING, stopped: true });
+      await oldClient.stop();
+    }
     this.fireOnStatusChanged({ status: newStatus, stopped: true });
   }
 }

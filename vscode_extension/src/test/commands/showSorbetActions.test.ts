@@ -37,6 +37,13 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
       Action.ConfigureSorbet,
     ]);
 
+    assert.deepStrictEqual(getAvailableActions(ServerStatus.STOPPING), [
+      Action.ViewOutput,
+      Action.RestartSorbet,
+      Action.DisableSorbet,
+      Action.ConfigureSorbet,
+    ]);
+
     assert.deepStrictEqual(getAvailableActions(ServerStatus.INITIALIZING), [
       Action.ViewOutput,
       Action.RestartSorbet,
