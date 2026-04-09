@@ -50,6 +50,23 @@ void WatchmanProcess::start() {
         auto p = subprocess::Popen({watchmanPath.c_str(), "-j", "-p", "--no-pretty"},
                                    subprocess::output{subprocess::PIPE}, subprocess::input{subprocess::PIPE});
 
+        // Ensure the Watchman client subprocess is always terminated and reaped
+        // when we leave this scope, regardless of how we exit (normal LSP
+        // shutdown, Watchman EOF, exception). subprocess::Popen's destructor is
+        // a no-op, so without explicit cleanup the child is orphaned when
+        // start() returns, regardless of which editor is driving Sorbet.
+        struct WatchmanGuard {
+            subprocess::Popen &p;
+            spdlog::logger &logger;
+            ~WatchmanGuard() {
+                if (p.pid() > 0) {
+                    logger.debug("Stopping Watchman subprocess {}", p.pid());
+                    p.kill(SIGTERM);
+                    p.wait();
+                }
+            }
+        } watchmanGuard{p, *logger};
+
         string modifiedWorkspace = workSpace;
         if (!watchmanNamespace.empty()) {
             const optional<string> maybeResolved = FileOps::realpath(workSpace);
