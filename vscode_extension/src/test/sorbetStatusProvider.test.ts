@@ -6,10 +6,12 @@ import { SorbetStatusProvider } from "../sorbetStatusProvider";
 import { RestartReason, ServerStatus } from "../types";
 import { createLogStub } from "./testUtils";
 
-function createDeferredPromise(): {
+interface DeferredPromise {
   promise: Promise<void>;
   resolve: () => void;
-} {
+}
+
+function createDeferredPromise(): DeferredPromise {
   let resolve = () => {};
   const promise = new Promise<void>((res) => {
     resolve = res;

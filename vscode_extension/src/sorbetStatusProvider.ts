@@ -240,7 +240,10 @@ export class SorbetStatusProvider implements Disposable {
     const oldClient = this.activeLanguageClient;
     this.activeLanguageClient = undefined;
     if (oldClient) {
-      this.fireOnStatusChanged({ status: ServerStatus.STOPPING, stopped: true });
+      this.fireOnStatusChanged({
+        status: ServerStatus.STOPPING,
+        stopped: true,
+      });
       await oldClient.stop();
     }
     this.fireOnStatusChanged({ status: newStatus, stopped: true });

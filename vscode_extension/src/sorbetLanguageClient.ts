@@ -196,17 +196,8 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
 
     return new Promise<boolean>((resolve) => {
       let resolved = false;
-      const timer =
-        timeoutMs === undefined
-          ? undefined
-          : setTimeout(() => {
-              if (!resolved) {
-                resolved = true;
-                sorbetProcess.removeListener("exit", onExit);
-                sorbetProcess.removeListener("error", onExit);
-                resolve(false);
-              }
-            }, timeoutMs);
+      let timer: ReturnType<typeof setTimeout> | undefined;
+
       const onExit = () => {
         if (!resolved) {
           resolved = true;
@@ -218,6 +209,17 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
           resolve(true);
         }
       };
+
+      if (timeoutMs !== undefined) {
+        timer = setTimeout(() => {
+          if (!resolved) {
+            resolved = true;
+            sorbetProcess.removeListener("exit", onExit);
+            sorbetProcess.removeListener("error", onExit);
+            resolve(false);
+          }
+        }, timeoutMs);
+      }
 
       sorbetProcess.on("exit", onExit);
       sorbetProcess.on("error", onExit);
