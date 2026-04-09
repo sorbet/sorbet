@@ -17,6 +17,7 @@ cc_library(
         "KwargsFinder.h",
         "LSPFileUpdates.h",
         "LSPIndexer.h",
+        "LSPSignalHandler.h",
         "LSPTask.h",
         "LSPTypechecker.h",
         "LSPTypecheckerCoordinator.h",
