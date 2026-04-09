@@ -814,8 +814,13 @@ EnumUnion::EnumUnion(vector<ClassOrModuleRef> members) : members(move(members)) 
 
 void EnumUnion::_sanityCheck(const GlobalState &gs) const {
     ENFORCE(members.size() >= 2);
+
+    ENFORCE(members[0].data(gs)->name.isTEnumName(gs));
     auto firstParent = EnumUnion::parentEnumClass(gs, members[0]);
+    ENFORCE(firstParent.exists());
+
     for (auto &member : members) {
+        ENFORCE(member.data(gs)->name.isTEnumName(gs));
         ENFORCE(firstParent == EnumUnion::parentEnumClass(gs, member));
     }
 }
