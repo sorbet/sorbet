@@ -19,13 +19,18 @@ void sigtermHandler(int /*sig*/) {
     if (pid > 0) {
         ::kill(pid, SIGTERM);
     }
-    // Ask the LSP stdin reader to exit its polling loop. On the next poll
-    // cycle (within the 100 ms select timeout, or immediately if the signal
-    // was delivered to the reader thread and interrupted its select call),
-    // LSPFDInput::read() will return ErrorOrEof, which propagates through
-    // the reader → message queue → preprocessor → task queue chain and
-    // brings the main LSP loop down cleanly.
+    // Ask the LSP stdin reader to exit its polling loop. This starts the clean
+    // shutdown cascade in case we have time to run it (e.g. graceful SIGTERM
+    // that isn't followed by SIGKILL).
     g_shutdownRequested.store(true, memory_order_relaxed);
+    // Restore the default SIGTERM disposition and re-raise so the process
+    // actually terminates promptly. Without this, Sorbet would stay alive until
+    // the current type-checking task finishes — potentially many minutes on a
+    // large codebase — since the main loop only checks for shutdown between
+    // tasks. The Watchman client has already been signaled above; any zombie
+    // will be reaped by init. Both signal() and raise() are async-signal-safe.
+    ::signal(SIGTERM, SIG_DFL);
+    ::raise(SIGTERM);
 }
 
 } // namespace
