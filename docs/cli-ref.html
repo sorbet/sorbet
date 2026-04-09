@@ -204,9 +204,8 @@ Usage:
       --counter &lt;counter&gt;       Print internal counter for &lt;counter&gt; (repeatable)
       --track-untyped [={[nowhere],everywhere,everywhere-but-tests}(=everywhere)]
                                 Include a per-file counter of untyped usages in the
-                                `--print=file-table-&lt;format&gt;` output. This is in addition
-                                to the codebase-wide `types.input.untyped.usages`
-                                counter.
+                                `--print=file-table-json` output. This is in addition to
+                                the codebase-wide `types.input.untyped.usages` counter.
       --metrics-file &lt;file&gt;     Report counters and some timers to &lt;file&gt;, in JSON
                                 format. (default: "")
       --metrics-prefix &lt;string&gt;
@@ -407,9 +406,7 @@ Usage:
                                 --print=&lt;format&gt;:&lt;file&gt;
                                 Most of these formats are unstable, for internal-use only.
 
-                                Stable: [file-table-json, file-table-proto,
-                                file-table-messagepack, file-table-full-json,
-                                file-table-full-proto, file-table-full-messagepack,
+                                Stable: [file-table-json, file-table-full-json,
                                 missing-constants, payload-sources, untyped-blame]
 
                                 Unstable: [parse-tree, parse-tree-json,
@@ -420,12 +417,10 @@ Usage:
                                 name-tree-raw, resolve-tree, resolve-tree-raw,
                                 flatten-tree, flatten-tree-raw, ast, ast-raw, cfg,
                                 cfg-raw, cfg-text, symbol-table, symbol-table-raw,
-                                symbol-table-json, symbol-table-proto,
-                                symbol-table-messagepack, symbol-table-full,
-                                symbol-table-full-raw, symbol-table-full-json,
-                                symbol-table-full-proto, symbol-table-full-messagepack,
-                                autogen, autogen-msgpack, autogen-subclasses,
-                                package-tree, minimized-rbi
+                                symbol-table-json, symbol-table-full,
+                                symbol-table-full-raw, symbol-table-full-json, autogen,
+                                autogen-msgpack, autogen-subclasses, package-tree,
+                                minimized-rbi
 
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" id="internal-options"></a><a href="#internal-options" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>INTERNAL options</h2>
