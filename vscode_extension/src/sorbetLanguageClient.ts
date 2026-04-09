@@ -340,6 +340,10 @@ export class SorbetLanguageClient implements Disposable, ErrorHandler {
     this.context.log.debug(">", command, ...args);
     this.sorbetProcess = spawn(command, args, {
       cwd: this.workspaceFolder?.uri.fsPath,
+      // Spawn in a new process group on POSIX so that force-stop signals can
+      // be sent to the group (covering wrapper scripts and the Sorbet binary)
+      // without affecting the VS Code extension host process.
+      detached: process.platform !== "win32",
       env: { ...process.env, ...activeConfig?.env },
     });
     // N.B.: 'exit' is sometimes not invoked if the process exits with an error/fails to start, as per the Node.js docs.
