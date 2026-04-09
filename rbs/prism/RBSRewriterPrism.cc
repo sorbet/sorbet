@@ -21,7 +21,7 @@ pm_node_t *runPrismRBSRewrite(core::GlobalState &gs, core::FileRef file, pm_node
     sigsRewriter.run(node);
 
     auto assertionsRewriter = AssertionsRewriterPrism(ctx, parser, commentMap.assertionsForNode);
-    node = assertionsRewriter.run(node);
+    assertionsRewriter.run(node);
 
     return node;
 }

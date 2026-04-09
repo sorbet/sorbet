@@ -588,8 +588,8 @@ pm_node_t *AssertionsRewriterPrism::rewriteBody(pm_node_t *node) {
     return rewriteNode(node);
 }
 
-pm_statements_node_t *AssertionsRewriterPrism::rewriteBody(pm_statements_node_t *stmts) {
-    return down_cast<pm_statements_node_t>(rewriteBody(up_cast(stmts)));
+void AssertionsRewriterPrism::rewriteBody(pm_statements_node_t *stmts) {
+    rewriteBody(up_cast(stmts));
 }
 
 /**
@@ -637,7 +637,7 @@ pm_node_t *AssertionsRewriterPrism::rewriteNode(pm_node_t *node) {
             auto *begin = down_cast<pm_begin_node_t>(node);
             node = maybeInsertCast(node);
             if (begin->statements) {
-                begin->statements = rewriteBody(begin->statements);
+                rewriteBody(begin->statements);
             }
             if (begin->rescue_clause) {
                 begin->rescue_clause = down_cast<pm_rescue_node_t>(rewriteNode(up_cast(begin->rescue_clause)));
@@ -880,7 +880,7 @@ pm_node_t *AssertionsRewriterPrism::rewriteNode(pm_node_t *node) {
             }
             wl->predicate = rewriteNode(wl->predicate);
             if (wl->statements) {
-                wl->statements = rewriteBody(wl->statements);
+                rewriteBody(wl->statements);
             }
             return node;
         }
@@ -893,7 +893,7 @@ pm_node_t *AssertionsRewriterPrism::rewriteNode(pm_node_t *node) {
             }
             until->predicate = rewriteNode(until->predicate);
             if (until->statements) {
-                until->statements = rewriteBody(until->statements);
+                rewriteBody(until->statements);
             }
             return node;
         }
@@ -903,7 +903,7 @@ pm_node_t *AssertionsRewriterPrism::rewriteNode(pm_node_t *node) {
             for_->index = rewriteNode(for_->index);
             for_->collection = rewriteNode(for_->collection);
             if (for_->statements) {
-                for_->statements = rewriteBody(for_->statements);
+                rewriteBody(for_->statements);
             }
             return node;
         }
@@ -940,7 +940,7 @@ pm_node_t *AssertionsRewriterPrism::rewriteNode(pm_node_t *node) {
             node = maybeInsertCast(node);
             if_->predicate = rewriteNode(if_->predicate);
             if (if_->statements) {
-                if_->statements = rewriteBody(if_->statements);
+                rewriteBody(if_->statements);
             }
             if (if_->subsequent) {
                 if_->subsequent = rewriteBody(if_->subsequent);
@@ -952,7 +952,7 @@ pm_node_t *AssertionsRewriterPrism::rewriteNode(pm_node_t *node) {
             node = maybeInsertCast(node);
             unless_->predicate = rewriteNode(unless_->predicate);
             if (unless_->statements) {
-                unless_->statements = rewriteBody(unless_->statements);
+                rewriteBody(unless_->statements);
             }
             if (unless_->else_clause) {
                 unless_->else_clause = down_cast<pm_else_node_t>(rewriteBody(up_cast(unless_->else_clause)));
@@ -972,7 +972,7 @@ pm_node_t *AssertionsRewriterPrism::rewriteNode(pm_node_t *node) {
         case PM_WHEN_NODE: {
             auto *when = down_cast<pm_when_node_t>(node);
             if (when->statements) {
-                when->statements = rewriteBody(when->statements);
+                rewriteBody(when->statements);
             }
             return node;
         }
@@ -990,7 +990,7 @@ pm_node_t *AssertionsRewriterPrism::rewriteNode(pm_node_t *node) {
             auto *inPattern = down_cast<pm_in_node_t>(node);
             inPattern->pattern = rewriteNode(inPattern->pattern);
             if (inPattern->statements) {
-                inPattern->statements = down_cast<pm_statements_node_t>(rewriteBody(up_cast(inPattern->statements)));
+                rewriteBody(inPattern->statements);
             }
             return node;
         }
@@ -1006,7 +1006,7 @@ pm_node_t *AssertionsRewriterPrism::rewriteNode(pm_node_t *node) {
         case PM_RESCUE_NODE: {
             auto *rescue = down_cast<pm_rescue_node_t>(node);
             if (rescue->statements) {
-                rescue->statements = rewriteBody(rescue->statements);
+                rewriteBody(rescue->statements);
             }
             if (rescue->subsequent) {
                 rescue->subsequent = down_cast<pm_rescue_node_t>(rewriteNode(up_cast(rescue->subsequent)));
@@ -1016,14 +1016,14 @@ pm_node_t *AssertionsRewriterPrism::rewriteNode(pm_node_t *node) {
         case PM_ELSE_NODE: {
             auto *else_ = down_cast<pm_else_node_t>(node);
             if (else_->statements) {
-                else_->statements = rewriteBody(else_->statements);
+                rewriteBody(else_->statements);
             }
             return node;
         }
         case PM_ENSURE_NODE: {
             auto *ensure = down_cast<pm_ensure_node_t>(node);
             if (ensure->statements) {
-                ensure->statements = rewriteBody(ensure->statements);
+                rewriteBody(ensure->statements);
             }
             return node;
         }
@@ -1128,14 +1128,14 @@ pm_node_t *AssertionsRewriterPrism::rewriteNode(pm_node_t *node) {
     }
 }
 
-pm_node_t *AssertionsRewriterPrism::run(pm_node_t *node) {
+void AssertionsRewriterPrism::run(pm_node_t *node) {
     if (node == nullptr) {
-        return node;
+        return;
     }
 
     // If there are no assertion comments to process we can skip entire tree walk.
     if (commentsByNode.empty()) {
-        return node;
+        return;
     }
 
     // Calculate total number of comments for early termination.
@@ -1144,7 +1144,7 @@ pm_node_t *AssertionsRewriterPrism::run(pm_node_t *node) {
         totalComments += comments.size();
     }
 
-    return rewriteBody(node);
+    rewriteBody(node);
 }
 
 } // namespace sorbet::rbs
