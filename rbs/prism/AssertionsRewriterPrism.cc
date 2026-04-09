@@ -1136,9 +1136,9 @@ void AssertionsRewriterPrism::run(pm_node_t *node) {
     }
 
     // Calculate total number of comments for early termination.
-    totalComments = 0;
+    this->totalComments = 0;
     for (const auto &[_, comments] : commentsByNode) {
-        totalComments += comments.size();
+        this->totalComments += comments.size();
     }
 
     rewriteBody(node);
