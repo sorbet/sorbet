@@ -27,6 +27,7 @@ shared_ptr<core::File> makeFile(string path, string contents) {
 }
 
 void addFile(LSPFileUpdates &updates, core::FileRef fref, string path, string contents) {
+    updates.updatedFileRefs.push_back(fref);
     updates.updatedFiles.push_back(makeFile(move(path), move(contents)));
 }
 
