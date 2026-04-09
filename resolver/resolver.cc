@@ -393,7 +393,8 @@ private:
                 }
                 // Check type alias on intermediate (non-leaf) segment.
                 if (firstSym.isTypeAlias(ctx) && !job.resolutionFailed) {
-                    if (auto e = ctx.beginError(c.loc(), core::errors::Resolver::ConstantInTypeAlias)) {
+                    auto locs = c.locs();
+                    if (auto e = ctx.beginError(locs[1], core::errors::Resolver::ConstantInTypeAlias)) {
                         e.setHeader("Resolving constants through type aliases is not supported");
                     }
                     job.resolutionFailed = true;
@@ -414,7 +415,7 @@ private:
                     return core::Symbols::noSymbol();
                 }
                 if (sym.isTypeAlias(ctx) && !job.resolutionFailed) {
-                    if (auto e = ctx.beginError(c.loc(), core::errors::Resolver::ConstantInTypeAlias)) {
+                    if (auto e = ctx.beginError(c.locs()[0], core::errors::Resolver::ConstantInTypeAlias)) {
                         e.setHeader("Resolving constants through type aliases is not supported");
                     }
                     job.resolutionFailed = true;
@@ -428,7 +429,7 @@ private:
                 startIdx = 0;
             } else {
                 if (!job.resolutionFailed) {
-                    if (auto e = ctx.beginError(c.loc(), core::errors::Resolver::DynamicConstant)) {
+                    if (auto e = ctx.beginError(c.locs()[0], core::errors::Resolver::DynamicConstant)) {
                         e.setHeader("Dynamic constant references are unsupported");
                     }
                 }
