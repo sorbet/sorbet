@@ -98,7 +98,7 @@ bool TypecheckEpochManager::tryCommitEpoch(core::GlobalState &gs, uint32_t epoch
     if (preemptionManager) {
         // Now that we are no longer running a slow path, run a preemption task that might have snuck in while we were
         // finishing up. No others can be scheduled.
-        preemptionManager->tryRunScheduledPreemptionTask(gs);
+        preemptionManager->tryRunScheduledPreemptionTask(gs, /* allowReschedule */ false);
     }
     return committed;
 }

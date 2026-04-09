@@ -26,6 +26,9 @@ private:
     // less than or equal to this number.
     std::atomic<uint16_t> preemptionStratum = 0;
 
+    // If a preemption task has rescheduled itself, this is the stratum that it indicated it would be runnable at.
+    std::atomic<uint16_t> runnableAt = 0;
+
 public:
     PreemptionTaskManager(std::shared_ptr<TypecheckEpochManager> epochManager);
     // Run only from processing thread.
@@ -34,8 +37,11 @@ public:
     bool trySchedulePreemptionTask(std::shared_ptr<PreemptionTask> task);
     // Run only from the typechecking thread.
     // Runs the scheduled preemption task, if any.
-    // Handles running task with a fresh errorQueue, and restoring previous errorQueue when done.
-    bool tryRunScheduledPreemptionTask(const core::GlobalState &gs);
+    // Must be called with `allowReschedule` set to false on the last run to ensure that the preemption task gets
+    // cleared out. Otherwise there is the possibility that it might get rescheduled, which would cause problems the
+    // next time preemption was scheduled from the main thread. Handles running task with a fresh errorQueue, and
+    // restoring previous errorQueue when done.
+    bool tryRunScheduledPreemptionTask(const core::GlobalState &gs, bool allowReschedule);
     // Run only from processing thread.
     // Tries to cancel the scheduled preemption task. Returns true if it succeeds.
     bool tryCancelScheduledPreemptionTask(std::shared_ptr<PreemptionTask> &task);
@@ -47,6 +53,10 @@ public:
     // Reset the preemption stratum back to the first stratum.
     void resetPreemptionStratum() {
         this->preemptionStratum.store(0);
+
+        // The first time we run a preemption task, it won't know what stratum it needs to be run at, so we
+        // optimistically track this as stratum zero, with the assupmtion that rescheduling will be cheap.
+        this->runnableAt.store(0);
     }
 
     // Return the current stratum. All preemption tasks that are possible to run at a stratum that is less than or equal

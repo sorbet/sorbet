@@ -34,9 +34,18 @@ bool PreemptionTaskManager::trySchedulePreemptionTask(shared_ptr<PreemptionTask>
     return success;
 }
 
-bool PreemptionTaskManager::tryRunScheduledPreemptionTask(const core::GlobalState &gs) {
+bool PreemptionTaskManager::tryRunScheduledPreemptionTask(const core::GlobalState &gs, bool allowReschedule) {
     TypecheckEpochManager::assertConsistentThread(
         typecheckingThreadId, "PreemptionTaskManager::tryRunScheduledPreemptionTask", "typechecking thread");
+
+    auto currentStratum = this->preemptionStratum.load();
+    auto runnableStratum = this->runnableAt.load();
+    // We can early-exit if we know that it's not possible to run preemption yet, but if we know that rescheduling is
+    // not possible, we should run to completion.
+    if (allowReschedule && currentStratum < runnableStratum) {
+        return false;
+    }
+
     auto preemptTask = atomic_load(&this->preemptTask);
     if (preemptTask != nullptr &&
         atomic_compare_exchange_strong(&this->preemptTask, &preemptTask, shared_ptr<PreemptionTask>(nullptr))) {
@@ -50,7 +59,22 @@ bool PreemptionTaskManager::tryRunScheduledPreemptionTask(const core::GlobalStat
         gs.errorQueue = make_shared<core::ErrorQueue>(previousErrorQueue->logger, previousErrorQueue->tracer,
                                                       make_shared<core::NullFlusher>());
         gs.tracer().debug("[Typechecker] Beginning preemption task.");
-        preemptTask->run(this->getPreemptionStratum());
+        auto result = preemptTask->run(currentStratum);
+        if (allowReschedule && result.has_value()) {
+            // In this case the task has indicated that there's more work to do, but that it can't occur until the
+            // stratum named in `result`. We re-queue the task, and remember the stratum that we can run at so that we
+            // can early exit in future calls to `tryRunScheduledPreemptionTask`.
+            this->runnableAt.store(*result);
+
+            // As we haven't called `finish` yet, we're assuming unique access to the preemptTask slot: LSPLoop should
+            // be blocked as the PreemptionLoop won't have notified it yet.
+            auto existingTask = atomic_load(&this->preemptTask);
+            ENFORCE(existingTask == nullptr);
+            auto success = atomic_compare_exchange_strong(&this->preemptTask, &existingTask, preemptTask);
+            ENFORCE(success);
+        } else {
+            preemptTask->finish();
+        }
         gs.tracer().debug("[Typechecker] Preemption task complete.");
         gs.errorQueue = move(previousErrorQueue);
         return true;

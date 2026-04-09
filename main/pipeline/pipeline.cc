@@ -1496,7 +1496,7 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
         Timer timeit(gs.tracer(), "typecheck");
         if (preemptionManager) {
             // Before kicking off typechecking, check if we need to preempt.
-            preemptionManager->tryRunScheduledPreemptionTask(gs);
+            preemptionManager->tryRunScheduledPreemptionTask(gs, /* allowReschedule */ true);
         }
 
         auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(what.size());
@@ -1574,7 +1574,7 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
                     cfgInferProgress.reportProgress(fileq->doneEstimate());
 
                     if (preemptionManager) {
-                        preemptionManager->tryRunScheduledPreemptionTask(gs);
+                        preemptionManager->tryRunScheduledPreemptionTask(gs, /* allowReschedule */ true);
                     }
                 }
                 if (cancelable && epochManager.wasTypecheckingCanceled()) {

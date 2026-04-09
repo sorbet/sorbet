@@ -668,7 +668,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
             while (updates.preemptionsExpected > 0) {
                 auto loopStartTime = Timer::clock_gettime_coarse();
                 auto coarseThreshold = Timer::get_clock_threshold_coarse();
-                while (!preemptManager->tryRunScheduledPreemptionTask(*gs)) {
+                while (!preemptManager->tryRunScheduledPreemptionTask(*gs, /* allowReschedule */ true)) {
                     auto curTime = Timer::clock_gettime_coarse();
                     if (curTime.usec - loopStartTime.usec > 20'000'000) {
                         Exception::raise("Slow path timed out waiting for preemption edit");
