@@ -59,7 +59,7 @@ def _cli_test(name, script, tags = []):
             "{}/*.input".format(name),
             "{}/sorbet/*".format(name),
             "{}/**/file_with_no_dot".format(name),
-        ]) + ["//main:sorbet", "@com_google_protobuf//:protoc", "//proto:protos"],
+        ]) + ["//main:sorbet"],
     )
 
     output = script_path.replace(".sh", ".out")

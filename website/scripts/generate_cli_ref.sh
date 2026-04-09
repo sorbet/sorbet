@@ -36,7 +36,22 @@ EOF
 # Uses script + stty to make the output appear like it's 90 columns,
 # which is the largest we can get and not have scrollbars appear when viewing
 # the docs site on a desktop browser with a large screen.
-script -q /dev/null bash -c "stty cols 90 && \"$sorbet_orig\" --help" 2>&1 | \
+script_cmd() {
+  case "$(uname -s)" in
+      Linux*)
+        script -q -c "stty cols 90 && \"$sorbet_orig\" --help" /dev/null 2>&1
+        ;;
+      Darwin*)
+        script -q /dev/null bash -c "stty cols 90 && \"$sorbet_orig\" --help" 2>&1
+        ;;
+      *)
+        >&2 echo "Unrecognized platform"
+        exit 1
+        ;;
+  esac
+}
+
+script_cmd | \
   # I have no idea what's making this get into the output
   sed -e $'s/^\^D\x08\x08//' | \
   # It seems like when the output is to a tty, lines end with \r\n

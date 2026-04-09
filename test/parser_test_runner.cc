@@ -2,9 +2,6 @@
 #include <cxxopts.hpp>
 // has to go first as it violates our requirements
 
-// has to go first, as it violates poisons
-#include "core/proto/proto.h"
-
 #include "absl/strings/match.h"
 #include "absl/strings/str_split.h"
 #include "ast/ast.h"

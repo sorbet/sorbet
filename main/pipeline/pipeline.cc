@@ -1,12 +1,10 @@
 #ifdef SORBET_REALMAIN_MIN
 // minimal build to speedup compilation. Remove extra features
 #else
-// has to go first, as it violates poisons
-#include "core/proto/proto.h"
-// ^^ has to go first
-#include "common/json2msgpack/json2msgpack.h"
+#include "core/json/json.h"
+#include "rapidjson/prettywriter.h"
+#include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
-#include <sstream>
 #endif
 #include "ProgressIndicator.h"
 #include "absl/strings/match.h"
@@ -97,9 +95,7 @@ void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) 
     }
 
     gs.trackUntyped = opts.trackUntyped;
-    gs.printingFileTable = opts.print.FileTableJson.enabled || opts.print.FileTableFullJson.enabled ||
-                           opts.print.FileTableProto.enabled || opts.print.FileTableFullProto.enabled ||
-                           opts.print.FileTableMessagePack.enabled || opts.print.FileTableFullMessagePack.enabled;
+    gs.printingFileTable = opts.print.FileTableJson.enabled || opts.print.FileTableFullJson.enabled;
 
     if (opts.suggestTyped) {
         gs.ignoreErrorClassForSuggestTyped(core::errors::Infer::SuggestTyped.code);
@@ -1616,54 +1612,65 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
 
 // ----- other ----------------------------------------------------------------
 
+#ifndef SORBET_REALMAIN_MIN
+namespace {
+
+// Produces the file table JSON string, matching the format previously produced by
+// Proto::filesToProto + Proto::toJSON (proto3 JSON with add_whitespace=true).
+string printFileTableJSON(const core::GlobalState &gs, const UnorderedMap<long, long> &untypedUsages, bool showFull) {
+    rapidjson::StringBuffer buffer;
+    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+    writer.SetIndent(' ', 1);
+
+    writer.StartObject();
+    writer.Key("files");
+    writer.StartArray();
+
+    for (int i = 1; i < gs.filesUsed(); ++i) {
+        core::FileRef file(i);
+        if (file.data(gs).isPayload()) {
+            if (!showFull) {
+                continue;
+            } else if (gs.censorForSnapshotTests && i > 10) {
+                // Only show the first 10 payload files for the sake of snapshot tests, so that
+                // adding a new RBI file to the payload doesn't require updating snapshot tests.
+                continue;
+            }
+        }
+
+        long untypedCount = 0;
+        auto it = untypedUsages.find(i);
+        if (it != untypedUsages.end()) {
+            untypedCount = it->second;
+        }
+
+        core::JSON::fileToJSON(writer, gs, file, untypedCount);
+    }
+
+    writer.EndArray();
+    writer.EndObject();
+
+    // Proto3 JSON with add_whitespace=true appends a trailing newline.
+    string result(buffer.GetString(), buffer.GetLength());
+    result.push_back('\n');
+    return result;
+}
+
+} // anonymous namespace
+#endif
+
 void printGlobalTables(const core::GlobalState &gs, const options::Options &opts,
                        const UnorderedMap<long, long> &untypedUsages) {
 #ifndef SORBET_REALMAIN_MIN
-    if (opts.print.FileTableProto.enabled || opts.print.FileTableFullProto.enabled) {
-        if (opts.print.FileTableProto.enabled && opts.print.FileTableFullProto.enabled) {
-            Exception::raise("file-table-proto and file-table-full-proto are mutually exclusive print options");
-        }
-        auto files = core::Proto::filesToProto(gs, untypedUsages, opts.print.FileTableFullProto.enabled);
-        if (opts.print.FileTableProto.outputPath.empty()) {
-            files.SerializeToOstream(&cout);
-        } else {
-            string buf;
-            files.SerializeToString(&buf);
-            opts.print.FileTableProto.print(buf);
-        }
-    }
     if (opts.print.FileTableJson.enabled || opts.print.FileTableFullJson.enabled) {
         if (opts.print.FileTableJson.enabled && opts.print.FileTableFullJson.enabled) {
             Exception::raise("file-table-json and file-table-full-json are mutually exclusive print options");
         }
-        auto files = core::Proto::filesToProto(gs, untypedUsages, opts.print.FileTableFullJson.enabled);
+        auto json = printFileTableJSON(gs, untypedUsages, opts.print.FileTableFullJson.enabled);
         if (opts.print.FileTableJson.outputPath.empty()) {
-            core::Proto::toJSON(files, cout);
+            cout << json;
         } else {
-            stringstream buf;
-            core::Proto::toJSON(files, buf);
-            opts.print.FileTableJson.print(buf.str());
-        }
-    }
-    if (opts.print.FileTableMessagePack.enabled || opts.print.FileTableFullMessagePack.enabled) {
-        if (opts.print.FileTableMessagePack.enabled && opts.print.FileTableFullMessagePack.enabled) {
-            Exception::raise("file-table-msgpack and file-table-full-msgpack are mutually exclusive print options");
-        }
-        auto files = core::Proto::filesToProto(gs, untypedUsages, opts.print.FileTableFullMessagePack.enabled);
-        stringstream buf;
-        core::Proto::toJSON(files, buf);
-        auto str = buf.str();
-        rapidjson::Document document;
-        document.Parse(str);
-        mpack_writer_t writer;
-        if (opts.print.FileTableMessagePack.outputPath.empty()) {
-            mpack_writer_init_stdfile(&writer, stdout, /* close when done */ false);
-        } else {
-            mpack_writer_init_filename(&writer, opts.print.FileTableMessagePack.outputPath.c_str());
-        }
-        json2msgpack::json2msgpack(document, &writer);
-        if (mpack_writer_destroy(&writer)) {
-            Exception::raise("failed to write msgpack");
+            opts.print.FileTableJson.print(json);
         }
     }
 #endif
@@ -1677,80 +1684,22 @@ void printGlobalTables(const core::GlobalState &gs, const options::Options &opts
 
 #ifndef SORBET_REALMAIN_MIN
     if (opts.print.SymbolTableJson.enabled) {
-        auto root = core::Proto::toProto(gs, core::Symbols::root(), false);
-        if (opts.print.SymbolTableJson.outputPath.empty()) {
-            core::Proto::toJSON(root, cout);
-        } else {
-            stringstream buf;
-            core::Proto::toJSON(root, buf);
-            opts.print.SymbolTableJson.print(buf.str());
-        }
-    }
-    if (opts.print.SymbolTableProto.enabled) {
-        auto root = core::Proto::toProto(gs, core::Symbols::root(), false);
-        if (opts.print.SymbolTableProto.outputPath.empty()) {
-            root.SerializeToOstream(&cout);
-        } else {
-            string buf;
-            root.SerializeToString(&buf);
-            opts.print.SymbolTableProto.print(buf);
-        }
-    }
-    if (opts.print.SymbolTableMessagePack.enabled) {
-        auto root = core::Proto::toProto(gs, core::Symbols::root(), false);
-        stringstream buf;
-        core::Proto::toJSON(root, buf);
-        auto str = buf.str();
-        rapidjson::Document document;
-        document.Parse(str);
-        mpack_writer_t writer;
-        if (opts.print.SymbolTableMessagePack.outputPath.empty()) {
-            mpack_writer_init_stdfile(&writer, stdout, /* close when done */ false);
-        } else {
-            mpack_writer_init_filename(&writer, opts.print.SymbolTableMessagePack.outputPath.c_str());
-        }
-        json2msgpack::json2msgpack(document, &writer);
-        if (mpack_writer_destroy(&writer)) {
-            Exception::raise("failed to write msgpack");
-        }
+        rapidjson::StringBuffer buffer;
+        rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+        writer.SetIndent(' ', 1);
+        core::JSON::symbolToJSON(writer, gs, core::Symbols::root(), false);
+        string json(buffer.GetString(), buffer.GetLength());
+        json.push_back('\n');
+        opts.print.SymbolTableJson.print(json);
     }
     if (opts.print.SymbolTableFullJson.enabled) {
-        auto root = core::Proto::toProto(gs, core::Symbols::root(), true);
-        if (opts.print.SymbolTableJson.outputPath.empty()) {
-            core::Proto::toJSON(root, cout);
-        } else {
-            stringstream buf;
-            core::Proto::toJSON(root, buf);
-            opts.print.SymbolTableJson.print(buf.str());
-        }
-    }
-    if (opts.print.SymbolTableFullProto.enabled) {
-        auto root = core::Proto::toProto(gs, core::Symbols::root(), true);
-        if (opts.print.SymbolTableFullProto.outputPath.empty()) {
-            root.SerializeToOstream(&cout);
-        } else {
-            string buf;
-            root.SerializeToString(&buf);
-            opts.print.SymbolTableFullProto.print(buf);
-        }
-    }
-    if (opts.print.SymbolTableFullMessagePack.enabled) {
-        auto root = core::Proto::toProto(gs, core::Symbols::root(), true);
-        stringstream buf;
-        core::Proto::toJSON(root, buf);
-        auto str = buf.str();
-        rapidjson::Document document;
-        document.Parse(str);
-        mpack_writer_t writer;
-        if (opts.print.SymbolTableFullMessagePack.outputPath.empty()) {
-            mpack_writer_init_stdfile(&writer, stdout, /* close when done */ false);
-        } else {
-            mpack_writer_init_filename(&writer, opts.print.SymbolTableFullMessagePack.outputPath.c_str());
-        }
-        json2msgpack::json2msgpack(document, &writer);
-        if (mpack_writer_destroy(&writer)) {
-            Exception::raise("failed to write msgpack");
-        }
+        rapidjson::StringBuffer buffer;
+        rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+        writer.SetIndent(' ', 1);
+        core::JSON::symbolToJSON(writer, gs, core::Symbols::root(), true);
+        string json(buffer.GetString(), buffer.GetLength());
+        json.push_back('\n');
+        opts.print.SymbolTableFullJson.print(json);
     }
 #endif
     if (opts.print.SymbolTableFull.enabled) {

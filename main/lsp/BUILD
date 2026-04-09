@@ -57,7 +57,6 @@ cc_library(
         "//common/statsd",
         "//common/web_tracer_framework:tracing",
         "//core",
-        "//core/proto",
         "//core/serialize",
         "//core/sig_finder",
         "//hashing",

@@ -3,7 +3,7 @@ No errors! Great job.
  "id": <redacted>,
  "name": {
   "kind": "CONSTANT",
-  "name": "\u003croot\u003e"
+  "name": "<root>"
  },
  "kind": "CLASS_OR_MODULE",
  "id": <redacted>,
@@ -12,7 +12,7 @@ No errors! Great job.
    "id": <redacted>,
    "name": {
     "kind": "UNIQUE",
-    "name": "\u003cClass:\u003croot\u003e\u003e",
+    "name": "<Class:<root>>",
     "unique": "SINGLETON"
    },
    "kind": "CLASS_OR_MODULE",
@@ -22,7 +22,7 @@ No errors! Great job.
      "id": <redacted>,
      "name": {
       "kind": "UNIQUE",
-      "name": "\u003cstatic-init\u003e",
+      "name": "<static-init>",
       "unique": "NAMER"
      },
      "kind": "METHOD",
@@ -30,7 +30,7 @@ No errors! Great job.
       {
        "name": {
         "kind": "UTF8",
-        "name": "\u003cblk\u003e"
+        "name": "<blk>"
        },
        "isBlock": true
       }
@@ -51,7 +51,7 @@ No errors! Great job.
    "id": <redacted>,
    "name": {
     "kind": "UNIQUE",
-    "name": "\u003cClass:A\u003e",
+    "name": "<Class:A>",
     "unique": "SINGLETON"
    },
    "kind": "CLASS_OR_MODULE",
@@ -61,14 +61,14 @@ No errors! Great job.
      "id": <redacted>,
      "name": {
       "kind": "UTF8",
-      "name": "\u003cstatic-init\u003e"
+      "name": "<static-init>"
      },
      "kind": "METHOD",
      "arguments": [
       {
        "name": {
         "kind": "UTF8",
-        "name": "\u003cblk\u003e"
+        "name": "<blk>"
        },
        "isBlock": true
       }

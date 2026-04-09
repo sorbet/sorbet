@@ -65,6 +65,19 @@ if ! ./tools/scripts/format_website.sh -t &> format_website; then
     buildkite-agent annotate --context tools/scripts/format_website.sh --style error --append < format_website
 fi
 
+echo "~~~ Checking protoc dependency"
+./bazel query "somepath(//main:sorbet, @com_google_protobuf//:protoc)" 2> /dev/null > protoc_dependency
+if [ "$(wc -l protoc_dependency)" -ne 0 ]; then
+  globalErr=1
+  echo "^^^ +++"
+  cat >> protoc_dependency <<EOF
+
+There is a path to @com_google_protobuf//:protoc from //main:sorbet
+Please remove it, as this represents a substantial regression in compile times.
+EOF
+  buildkite-agent annotate --context "path to @com_google_protobuf//:protoc" --style error --append < protoc_dependency
+fi
+
 if grep -n -r '^  \w*\.md' website &> lint_docusaurus_md; then
   globalErr=1
   echo "^^^ +++"

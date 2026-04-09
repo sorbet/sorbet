@@ -2,10 +2,9 @@
 // minimal build to speedup compilation. Remove extra features
 #else
 #define FULL_BUILD_ONLY(X) X;
-#include "core/proto/proto.h" // has to be included first as it violates our poisons
-// intentional comment to stop from reformatting
 #include "common/statsd/statsd.h"
 #include "common/web_tracer_framework/tracing.h"
+#include "core/json/json.h"
 #include "main/autogen/autogen.h"
 #include "main/autogen/crc_builder.h"
 #include "main/autogen/data/version.h"
@@ -877,7 +876,6 @@ int realmain(int argc, char *argv[]) {
     }
 
     if (!opts.metricsFile.empty()) {
-        auto metrics = core::Proto::toProto(counters, opts.metricsPrefix);
         string status;
         if (gs->hadCriticalError()) {
             status = "Error";
@@ -887,14 +885,9 @@ int realmain(int argc, char *argv[]) {
             status = "Success";
         }
 
-        metrics.set_repo(opts.metricsRepo);
-        metrics.set_branch(opts.metricsBranch);
-        metrics.set_sha(opts.metricsSha);
-        metrics.set_status(status);
+        auto json = core::JSON::metricsToJSON(counters, opts.metricsPrefix, opts.metricsRepo, opts.metricsBranch,
+                                              opts.metricsSha, status);
 
-        auto json = core::Proto::toJSON(metrics);
-
-        // Create output directory if it doesn't exist
         try {
             opts.fs->writeFile(opts.metricsFile, json);
         } catch (FileNotFoundException e) {
