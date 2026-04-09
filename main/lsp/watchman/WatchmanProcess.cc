@@ -65,15 +65,16 @@ void WatchmanProcess::start() {
             subprocess::Popen &p;
             spdlog::logger &logger;
             ~WatchmanGuard() {
-                // Deregister first: the signal handler may have already sent
-                // SIGTERM to the child, so we avoid a redundant signal after
-                // clearing the pid. p.kill() handles ESRCH gracefully.
-                registerWatchmanChildPid(0);
                 if (p.pid() > 0) {
                     logger.debug("Stopping Watchman subprocess {}", p.pid());
                     p.kill(SIGTERM);
                     p.wait();
                 }
+                // Deregister after cleanup: keeps the PID registered while
+                // p.wait() is blocking so that a concurrent SIGTERM handler
+                // can still signal the child if we somehow missed it above.
+                // p.kill() handles ESRCH if the handler beat us to it.
+                registerWatchmanChildPid(0);
             }
         } watchmanGuard{p, *logger};
 
