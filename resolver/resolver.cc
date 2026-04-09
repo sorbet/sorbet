@@ -380,8 +380,8 @@ private:
         int startIdx;
 
         if (job.resolvedUpToSegment < 0) {
-            // Nothing resolved yet — start from scope_.
-            if (ast::isa_tree<ast::EmptyTree>(c.scope_)) {
+            // Nothing resolved yet — start from scope.
+            if (ast::isa_tree<ast::EmptyTree>(c.scope)) {
                 // Single-segment fast path: look up the only segment via nesting scope.
                 if (segCount == 1) {
                     return resolveLhs(ctx, job.scope, c.names()[0]);
@@ -408,7 +408,7 @@ private:
                 job.resolvedUpToSegment = 0;
                 job.resolvedOwner = currentOwner;
                 startIdx = 1;
-            } else if (auto id = ast::cast_tree<ast::ConstantLit>(c.scope_)) {
+            } else if (auto id = ast::cast_tree<ast::ConstantLit>(c.scope)) {
                 auto sym = id->symbol();
                 if (!sym.exists()) {
                     // Waiting for scope to be resolved; retry later.
@@ -453,9 +453,9 @@ private:
             }
 
             // Private constants are not allowed when scope is explicit (i.e. not a nesting lookup).
-            // Nesting lookup applies only to names()[0] when scope_ is EmptyTree; all others are
-            // explicit scope. The scope_ ConstantLit path is always explicit scope.
-            bool isExplicitScope = !ast::isa_tree<ast::EmptyTree>(c.scope_) || i > 0;
+            // Nesting lookup applies only to names()[0] when scope is EmptyTree; all others are
+            // explicit scope. The scope ConstantLit path is always explicit scope.
+            bool isExplicitScope = !ast::isa_tree<ast::EmptyTree>(c.scope) || i > 0;
             if (isExplicitScope && sym.exists() &&
                 ((sym.isClassOrModule() && sym.asClassOrModuleRef().data(ctx)->flags.isPrivate) ||
                  (sym.isStaticField(ctx) && sym.asFieldRef().data(ctx)->flags.isStaticFieldPrivate)) &&
@@ -557,7 +557,7 @@ private:
             // Record the last resolved segment index so matchesQuery in DefLocSaver can
             // correctly attribute symbols to each segment when iterating the flat UCL.
             job.out->setResolvedUpToSegmentForFlatUCL(failedSegIdx);
-        } else if (auto id = ast::cast_tree<ast::ConstantLit>(original.scope())) {
+        } else if (auto id = ast::cast_tree<ast::ConstantLit>(original.scope)) {
             auto originalScope = id->symbol().dealias(ctx);
             if (originalScope == core::Symbols::StubModule()) {
                 // If we were trying to resolve some literal like C::D but `C` itself was already stubbed,
@@ -571,7 +571,7 @@ private:
                 job.out->resolutionScopes()->emplace_back(originalScope);
             }
             job.out->setResolvedUpToSegmentForFlatUCL(failedSegIdx);
-        } else if (failedSegIdx == 0 && ast::isa_tree<ast::EmptyTree>(original.scope()) && original.segCount() > 1) {
+        } else if (failedSegIdx == 0 && ast::isa_tree<ast::EmptyTree>(original.scope) && original.segCount() > 1) {
             // Multi-segment flat UCL with EmptyTree scope where nothing resolved.
             // Segment 0 may have been found via nesting lookup but was not followable
             // (e.g., it's a class alias field whose AliasType hasn't been set yet by
@@ -630,7 +630,7 @@ private:
             if (auto e = ctx.beginError(failedSegLoc, core::errors::Resolver::StubConstant)) {
                 e.setHeader("Unable to resolve constant `{}`", failedSegName.show(ctx));
                 auto foundCommonTypo = false;
-                if (failedSegIdx == 0 && ast::isa_tree<ast::EmptyTree>(original.scope())) {
+                if (failedSegIdx == 0 && ast::isa_tree<ast::EmptyTree>(original.scope)) {
                     for (const auto &[from, to] : COMMON_TYPOS) {
                         if (from == failedSegName) {
                             e.didYouMean(to, ctx.locAt(failedSegLoc));
@@ -1275,8 +1275,8 @@ private:
                 }
                 return;
             }
-            ENFORCE(sym.exists() || ast::isa_tree<ast::ConstantLit>(cnst->original()->scope_) ||
-                    ast::isa_tree<ast::EmptyTree>(cnst->original()->scope_));
+            ENFORCE(sym.exists() || ast::isa_tree<ast::ConstantLit>(cnst->original()->scope) ||
+                    ast::isa_tree<ast::EmptyTree>(cnst->original()->scope));
             if (isSuperclass && sym == core::Symbols::todo()) {
                 // This is the case where the superclass is empty, for example: `class A; end`
                 return;
@@ -1302,8 +1302,8 @@ private:
     void walkUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
         if (auto c = ast::cast_tree<ast::UnresolvedConstantLit>(tree)) {
             // Process the root scope first (never a UCL by invariant, so no recursion needed there)
-            walkUnresolvedConstantLit(ctx, c->scope_);
-            // c->scope_ is now EmptyTree, ConstantLit, or dynamic (error)
+            walkUnresolvedConstantLit(ctx, c->scope);
+            // c->scope is now EmptyTree, ConstantLit, or dynamic (error)
 
             // Create ONE ConstantLit wrapping the entire flat UCL.
             auto out = ast::make_expression<ast::ConstantLit>(core::Symbols::noSymbol(),
@@ -1335,11 +1335,11 @@ private:
                         auto segName = orig.names()[i];
                         auto segLoc = orig.locs()[i];
                         core::SymbolRef sym;
-                        if (i == 0 && ast::isa_tree<ast::EmptyTree>(orig.scope_)) {
+                        if (i == 0 && ast::isa_tree<ast::EmptyTree>(orig.scope)) {
                             sym = resolveLhs(ctx, nesting_, segName);
                         } else if (i == 0) {
                             // ConstantLit scope (e.g. ::A::B)
-                            if (auto id = ast::cast_tree<ast::ConstantLit>(orig.scope_)) {
+                            if (auto id = ast::cast_tree<ast::ConstantLit>(orig.scope)) {
                                 auto scopeSym = id->symbol().dealias(ctx);
                                 if (scopeSym.isClassOrModule()) {
                                     owner = scopeSym.asClassOrModuleRef();
@@ -1694,7 +1694,7 @@ public:
             // Number of segments minus one: A=0, A::B=1, A::B::C=2
             depth += (int)original->segCount() - 1;
             // Walk any ConstantLit scope chain (e.g. the ConstantLit(root) in ::A::B)
-            const ast::ExpressionPtr *scopePtr = &original->scope_;
+            const ast::ExpressionPtr *scopePtr = &original->scope;
             while (scopePtr != nullptr) {
                 auto scopeLit = ast::cast_tree<ast::ConstantLit>(*scopePtr);
                 if (!scopeLit) {
@@ -1702,7 +1702,7 @@ public:
                 }
                 if (auto scopeOrig = scopeLit->original()) {
                     depth += (int)scopeOrig->segCount();
-                    scopePtr = &scopeOrig->scope_;
+                    scopePtr = &scopeOrig->scope;
                 } else {
                     break;
                 }

@@ -2456,7 +2456,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
 
                 Send::ARGS_store args;
                 if (auto lit = cast_tree<UnresolvedConstantLit>(value)) {
-                    if (isa_tree<EmptyTree>(lit->scope())) {
+                    if (isa_tree<EmptyTree>(lit->scope)) {
                         auto ns = lit->names();
                         auto ls = lit->locs();
                         for (size_t i = 0; i < ns.size(); ++i) {

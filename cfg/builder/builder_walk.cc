@@ -557,13 +557,13 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                     // Empirically, these are the only two cases we've needed so far to service the
                     // LSP requests we want (hover and completion), but that doesn't mean these are
                     // the **only** we'll ever want.
-                    if (ast::isa_tree<ast::ConstantLit>(orig->scope_)) {
+                    if (ast::isa_tree<ast::ConstantLit>(orig->scope)) {
                         LocalRef deadSym = cctx.newTemporary(core::Names::keepForIde());
-                        current = walk(cctx.withTarget(deadSym), orig->scope_, current);
-                    } else if (ast::isa_tree<ast::Send>(orig->scope_)) {
+                        current = walk(cctx.withTarget(deadSym), orig->scope, current);
+                    } else if (ast::isa_tree<ast::Send>(orig->scope)) {
                         LocalRef deadSym = cctx.newTemporary(core::Names::keepForIde());
-                        current = walk(cctx.withTarget(deadSym), orig->scope_, current);
-                    } else if (ast::isa_tree<ast::EmptyTree>(orig->scope_) && orig->segCount() > 1) {
+                        current = walk(cctx.withTarget(deadSym), orig->scope, current);
+                    } else if (ast::isa_tree<ast::EmptyTree>(orig->scope) && orig->segCount() > 1) {
                         // Flat multi-segment UCL: create aliases for intermediate segments by
                         // walking up the owner chain from the final symbol. This preserves LSP
                         // hover/completion support for each segment in a multi-segment constant.

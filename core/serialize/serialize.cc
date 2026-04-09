@@ -1200,7 +1200,7 @@ ast::ExpressionPtr Serializer::loadTree(const core::GlobalState &gs, core::File 
 }
 
 void SerializerImpl::pickle(Pickler &p, const File &f, const ast::UnresolvedConstantLit &lit) {
-    pickle(p, f, lit.scope_);
+    pickle(p, f, lit.scope);
     p.putU4(lit.segCount());
     auto ns = lit.names();
     auto ls = lit.locs();

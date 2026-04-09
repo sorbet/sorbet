@@ -96,7 +96,7 @@ void ClassDef::_sanityCheck() {
 }
 
 void UnresolvedConstantLit::_sanityCheck() {
-    ENFORCE(scope_);
+    ENFORCE(scope);
     ENFORCE(numSegs_ > 0);
     ENFORCE(cnst().exists());
 }

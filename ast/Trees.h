@@ -1202,7 +1202,7 @@ public:
     //   [NameRef[0..N-1]]                  = N * 4 bytes
     //   [LocOffsets[0..N-1]]               = N * 8 bytes
     // Total: 16 + N*12 bytes per UCL.  N=1: 28B, N=2: 40B, N=3: 52B.
-    ExpressionPtr scope_; // outermost non-UCL scope (EmptyTree, ConstantLit, etc.)
+    ExpressionPtr scope; // outermost non-UCL scope (EmptyTree, ConstantLit, etc.)
 
     // operator delete is needed because TrailingObjects allocates more than sizeof(*this),
     // so we must call ::operator delete(void*) rather than a sized delete.
@@ -1344,11 +1344,6 @@ public:
     }
     absl::Span<core::NameRef> mutableNames() {
         return {getTrailingObjects<core::NameRef>(), numSegs_};
-    }
-
-    // Returns the outermost non-UCL scope (EmptyTree, ConstantLit, etc.)
-    const ExpressionPtr &scope() const {
-        return scope_;
     }
 
     ExpressionPtr deepCopy() const;

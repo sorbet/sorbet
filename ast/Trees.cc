@@ -334,7 +334,7 @@ Literal::Literal(core::LocOffsets loc, const core::TypePtr &value) : loc(loc), v
 }
 
 UnresolvedConstantLit::UnresolvedConstantLit(ExpressionPtr scope, uint32_t numSegs)
-    : numSegs_(numSegs), scope_(std::move(scope)) {
+    : numSegs_(numSegs), scope(std::move(scope)) {
     categoryCounterInc("trees", "constantlit");
     // Do NOT call _sanityCheck() here — trailing arrays are not yet initialized.
 }
@@ -409,9 +409,9 @@ optional<pair<core::SymbolRef, vector<core::NameRef>>> ConstantLit::fullUnresolv
             break;
         }
 
-        ENFORCE(!isa_tree<ast::UnresolvedConstantLit>(orig.scope_), "Should have resolved all consts");
+        ENFORCE(!isa_tree<ast::UnresolvedConstantLit>(orig.scope), "Should have resolved all consts");
         // `orig.scope` won't necessarily be a `ConstantLit`, e.g. due to dynamic constant references
-        nested = ast::cast_tree<ast::ConstantLit>(orig.scope_);
+        nested = ast::cast_tree<ast::ConstantLit>(orig.scope);
     } while (nested != nullptr);
 
     if (nested != nullptr) {
@@ -823,7 +823,7 @@ string EmptyTree::toStringWithTabs(const core::GlobalState &gs, int tabs) const 
 
 string UnresolvedConstantLit::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
-    fmt::format_to(std::back_inserter(buf), "{}", this->scope_.toStringWithTabs(gs, tabs));
+    fmt::format_to(std::back_inserter(buf), "{}", this->scope.toStringWithTabs(gs, tabs));
     for (auto name : this->names()) {
         fmt::format_to(std::back_inserter(buf), "::{}", name.toString(gs));
     }
@@ -838,7 +838,7 @@ string UnresolvedConstantLit::showRaw(const core::GlobalState &gs, int tabs) con
     fmt::format_to(std::back_inserter(buf), "cnst = {}\n", this->cnst().showRaw(gs));
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "scope = ");
-    showRawSegmentChain(buf, gs, this->scope_, this->names().subspan(0, this->numSegs_ - 1), tabs + 1);
+    showRawSegmentChain(buf, gs, this->scope, this->names().subspan(0, this->numSegs_ - 1), tabs + 1);
     fmt::format_to(std::back_inserter(buf), "\n");
     printTabs(buf, tabs);
     fmt::format_to(std::back_inserter(buf), "}}");
@@ -1876,7 +1876,7 @@ string UnresolvedConstantLit::showRawWithLocs(const core::GlobalState &gs, core:
     fmt::format_to(std::back_inserter(buf), "scope = ");
     auto scopeNames = this->names().subspan(0, this->numSegs_ - 1);
     auto scopeLocs = this->locs().subspan(0, this->numSegs_ - 1);
-    showRawWithLocsSegmentChain(buf, gs, file, this->scope_, scopeNames, scopeLocs, tabs + 1);
+    showRawWithLocsSegmentChain(buf, gs, file, this->scope, scopeNames, scopeLocs, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "\n");
     printTabs(buf, tabs);
     fmt::format_to(std::back_inserter(buf), "}}");

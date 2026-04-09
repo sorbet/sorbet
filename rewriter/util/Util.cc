@@ -14,12 +14,12 @@ unique_ptr<ast::UnresolvedConstantLit> dupUnresolvedConstantLit(const ast::Unres
         return nullptr;
     }
 
-    // With the vectorized UCL, scope_ is never a UCL itself.
+    // With the vectorized UCL, scope is never a UCL itself.
     ast::ExpressionPtr dupedScope;
-    if (ast::isa_tree<ast::EmptyTree>(cons->scope_)) {
+    if (ast::isa_tree<ast::EmptyTree>(cons->scope)) {
         dupedScope = ast::MK::EmptyTree();
     } else {
-        dupedScope = ASTUtil::dupType(cons->scope_);
+        dupedScope = ASTUtil::dupType(cons->scope);
         if (dupedScope == nullptr) {
             return nullptr;
         }
@@ -392,7 +392,7 @@ bool ASTUtil::isRootScopedSyntacticConstant(const ast::ExpressionPtr &expr,
     if (ucl == nullptr) {
         return constantName.empty() && ast::MK::isRootScope(expr);
     }
-    if (!ast::MK::isRootScope(ucl->scope())) {
+    if (!ast::MK::isRootScope(ucl->scope)) {
         return false;
     }
     auto ns = ucl->names();
