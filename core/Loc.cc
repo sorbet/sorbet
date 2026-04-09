@@ -13,6 +13,26 @@ namespace sorbet::core {
 
 using namespace std;
 
+static_assert(is_nothrow_constructible_v<LocOffsets>);
+static_assert(is_nothrow_default_constructible_v<LocOffsets>);
+static_assert(is_nothrow_copy_constructible_v<LocOffsets>);
+static_assert(is_nothrow_move_constructible_v<LocOffsets>);
+static_assert(is_nothrow_assignable_v<LocOffsets, LocOffsets>);
+static_assert(is_nothrow_copy_assignable_v<LocOffsets>);
+static_assert(is_nothrow_move_assignable_v<LocOffsets>);
+static_assert(is_nothrow_destructible_v<LocOffsets>);
+static_assert(is_nothrow_swappable_v<LocOffsets>);
+
+static_assert(is_nothrow_constructible_v<Loc>);
+static_assert(is_nothrow_default_constructible_v<Loc>);
+static_assert(is_nothrow_copy_constructible_v<Loc>);
+static_assert(is_nothrow_move_constructible_v<Loc>);
+static_assert(is_nothrow_assignable_v<Loc, Loc>);
+static_assert(is_nothrow_copy_assignable_v<Loc>);
+static_assert(is_nothrow_move_assignable_v<Loc>);
+static_assert(is_nothrow_destructible_v<Loc>);
+static_assert(is_nothrow_swappable_v<Loc>);
+
 LocOffsets LocOffsets::join(LocOffsets other) const {
     if (!this->exists()) {
         return other;
