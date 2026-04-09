@@ -57,8 +57,9 @@ export class SorbetStatusProvider implements Disposable {
       return;
     }
 
-    // Remove existing client from clean-up tracking, if any.
+    // Clean up existing client, if any.
     if (this.wrappedActiveLanguageClient) {
+      this.wrappedActiveLanguageClient.dispose();
       const i = this.disposables.indexOf(this.wrappedActiveLanguageClient);
       if (i !== -1) {
         this.disposables.splice(i, 1);

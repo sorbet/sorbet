@@ -35,6 +35,7 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
     const startSorbetStub = sinon.stub(provider, "startSorbet").resolves();
     const stopped = createDeferredPromise();
     const fakeClient = <any>{
+      dispose: sinon.stub(),
       stop: sinon.stub().returns(stopped.promise),
       status: ServerStatus.RUNNING,
     };
