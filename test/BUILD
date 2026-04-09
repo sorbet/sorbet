@@ -281,20 +281,6 @@ pipeline_tests(
 
 pipeline_tests(
     "test_corpus_prism",
-    test_name_prefix = "PrismPosTests",
-    tests = glob(
-        [
-            # Replace [parser] with other phases to test Prism at that level
-            # Phases: https://github.com/Shopify/sorbet/blob/prism/docs/internals.md#phases
-            "testdata/**/*.rb",
-            "testdata/**/*.exp",
-        ],
-        exclude = [
-            # RBS tests have their own dedicated targets (rbs_prism)
-            "testdata/rbs/**/*.rb",
-            "testdata/rbs/**/*.exp",
-        ],
-    ),
     disabled_tests = [
         # Prism allows a new line between `.` and `end` as a way to call a method called literally `#end`.
         # The legacy parser treats this as an incomplete call to `x.<method-name-missing>()`, which is much
@@ -511,6 +497,20 @@ pipeline_tests(
         "testdata/lsp/hover_rbs_assertions_let.rb",
     ],
     parser = "prism",
+    test_name_prefix = "PrismPosTests",
+    tests = glob(
+        [
+            # Replace [parser] with other phases to test Prism at that level
+            # Phases: https://github.com/Shopify/sorbet/blob/prism/docs/internals.md#phases
+            "testdata/**/*.rb",
+            "testdata/**/*.exp",
+        ],
+        exclude = [
+            # RBS tests have their own dedicated targets (rbs_prism)
+            "testdata/rbs/**/*.rb",
+            "testdata/rbs/**/*.exp",
+        ],
+    ),
 )
 
 pipeline_tests(
@@ -524,17 +524,19 @@ pipeline_tests(
 
 pipeline_tests(
     "test_corpus_lsp",
+    extra_files = ["testdata/lsp/rubyfmt-stub/rubyfmt"],
     test_name_prefix = "LSPTests",
     tests = glob([
         "testdata/**/*.rb",
         "testdata/**/*.rbi",
         "testdata/**/*.exp",
     ]),
-    extra_files = ["testdata/lsp/rubyfmt-stub/rubyfmt"],
 )
 
 pipeline_tests(
     "test_corpus_lsp_prism",
+    extra_files = ["testdata/lsp/rubyfmt-stub/rubyfmt"],
+    parser = "prism",
     test_name_prefix = "PrismLSPTests",
     tests = glob(
         [
@@ -568,12 +570,11 @@ pipeline_tests(
             "testdata/lsp/hover_rbs_assertions_let.rb",
         ],
     ),
-    extra_files = ["testdata/lsp/rubyfmt-stub/rubyfmt"],
-    parser = "prism",
 )
 
 pipeline_tests(
     "prism_regression_corpus",
+    parser = "prism",
     test_name_prefix = "PrismPosTests",
     tests = glob(
         [
@@ -586,29 +587,23 @@ pipeline_tests(
             "prism_regression/call_block_param.rb",
         ],
     ),
-    parser = "prism",
 )
 
 pipeline_tests(
     "rbs_whitequark",
+    disabled_tests = [
+        # Specific test that is modified for Prism, contains minor differences in the exp file
+        "testdata/rbs/assertions_heredoc_modified.rb",
+    ],
     test_name_prefix = "PosTests",
     tests = glob([
         "testdata/rbs/**/*.rb",
         "testdata/rbs/**/*.exp",
     ]),
-    disabled_tests = [
-        # Specific test that is modified for Prism, contains minor differences in the exp file
-        "testdata/rbs/assertions_heredoc_modified.rb",
-    ],
 )
 
 pipeline_tests(
     "rbs_prism",
-    test_name_prefix = "PrismPosTests",
-    tests = glob([
-        "testdata/rbs/**/*.rb",
-        "testdata/rbs/**/*.exp",
-    ]),
     disabled_tests = [
         # Specific test for the legacy pipeline. Prism has its own `testdata/rbs/assertions_heredoc_modified.rb`.
         "testdata/rbs/assertions_heredoc.rb",
@@ -617,6 +612,11 @@ pipeline_tests(
         "testdata/rbs/signatures_types.rb",
     ],
     parser = "prism",
+    test_name_prefix = "PrismPosTests",
+    tests = glob([
+        "testdata/rbs/**/*.rb",
+        "testdata/rbs/**/*.exp",
+    ]),
 )
 
 test_suite(
