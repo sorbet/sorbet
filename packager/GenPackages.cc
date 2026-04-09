@@ -46,6 +46,14 @@ void exportClassOrModule(const core::GlobalState &gs,
             continue;
         }
 
+        // In test packages mode, if the referencing package imported the owning package with
+        // `uses_internals: true`, it can access unexported symbols without needing an export.
+        if (packageForF.exists() &&
+            gs.packageDB().getPackageInfo(packageForF).canAccessInternalsOf(gs.packageDB().testPackages(),
+                                                                            owningPackage)) {
+            continue;
+        }
+
         if (ownerWillBeExported(gs, toExport[owningPackage], data->owner)) {
             // No need to check the rest of referencingFiles, we're already going to export the owner
             break;
@@ -69,6 +77,14 @@ void exportField(const core::GlobalState &gs,
     for (auto &f : referencingFiles) {
         auto packageForF = gs.packageDB().getPackageNameForFile(f);
         if (packageForF == owningPackage || gs.packageDB().allowRelaxedPackagerChecksFor(packageForF)) {
+            continue;
+        }
+
+        // In test packages mode, if the referencing package imported the owning package with
+        // `uses_internals: true`, it can access unexported symbols without needing an export.
+        if (packageForF.exists() &&
+            gs.packageDB().getPackageInfo(packageForF).canAccessInternalsOf(gs.packageDB().testPackages(),
+                                                                            owningPackage)) {
             continue;
         }
 
