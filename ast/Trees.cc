@@ -391,24 +391,27 @@ optional<pair<core::SymbolRef, vector<core::NameRef>>> ConstantLit::fullUnresolv
     do {
         ENFORCE(nested->symbol() == core::Symbols::StubModule());
 
-        if (nested->resolutionScopes() == nullptr || nested->resolutionScopes()->empty()) [[unlikely]] {
+        auto *data = nested->resolutionData();
+        if (data == nullptr || data->resolutionScopes.empty()) [[unlikely]] {
             ENFORCE(false);
-            bool hasScopes = nested->resolutionScopes() != nullptr;
+            bool hasScopes = data != nullptr;
             fatalLogger->error(R"(msg="Bad fullUnresolvedPath" loc="{}" hasScopes={})",
                                ctx.locAt(this->loc()).showRaw(ctx), hasScopes);
             fatalLogger->error("source=\"{}\"", absl::CEscape(ctx.file.data(ctx).source()));
         }
 
         auto &orig = *nested->original();
-        namesFailedToResolve.emplace_back(orig.cnst);
+        auto names = orig.names().subspan(data->resolvedUpToSegment);
 
-        if (nested->resolutionScopes()->front().exists()) {
+        namesFailedToResolve.insert(namesFailedToResolve.end(), names.rbegin(), names.rend());
+
+        if (data->resolutionScopes.front().exists()) {
             break;
         }
 
-        ENFORCE(!isa_tree<ast::UnresolvedConstantLit>(orig.scope), "Should have resolved all consts");
+        ENFORCE(!isa_tree<ast::UnresolvedConstantLit>(orig.scope_), "Should have resolved all consts");
         // `orig.scope` won't necessarily be a `ConstantLit`, e.g. due to dynamic constant references
-        nested = ast::cast_tree<ast::ConstantLit>(orig.scope);
+        nested = ast::cast_tree<ast::ConstantLit>(orig.scope_);
     } while (nested != nullptr);
 
     if (nested != nullptr) {
