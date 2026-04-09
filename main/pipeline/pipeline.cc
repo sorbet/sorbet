@@ -1488,9 +1488,8 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
 } // namespace
 
 void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
-               WorkerPool &workers, bool cancelable,
-               optional<shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager, bool presorted,
-               bool intentionallyLeakASTs) {
+               WorkerPool &workers, bool cancelable, shared_ptr<core::lsp::PreemptionTaskManager> preemptionManager,
+               bool presorted, bool intentionallyLeakASTs) {
     // Unless the error queue had a critical error, only typecheck should flush errors to the client, otherwise we will
     // drop errors in LSP mode.
     ENFORCE(gs.hadCriticalError() || gs.errorQueue->filesFlushedCount == 0);
@@ -1503,7 +1502,7 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
         Timer timeit(gs.tracer(), "typecheck");
         if (preemptionManager) {
             // Before kicking off typechecking, check if we need to preempt.
-            (*preemptionManager)->tryRunScheduledPreemptionTask(gs);
+            preemptionManager->tryRunScheduledPreemptionTask(gs);
         }
 
         auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(what.size());
@@ -1537,7 +1536,7 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
                                 // the loop. Does not starve writers (tryRunScheduledPreemptionTask)
                                 // because this call can block once tryRunScheduledPreemptionTask tries to acquire
                                 // a (writer) lock.
-                                lock = (*preemptionManager)->lockPreemption();
+                                lock = preemptionManager->lockPreemption();
                             }
                             processedByThread++;
                             // [IDE] Only do the work if typechecking hasn't been canceled.
@@ -1581,7 +1580,7 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
                     cfgInferProgress.reportProgress(fileq->doneEstimate());
 
                     if (preemptionManager) {
-                        (*preemptionManager)->tryRunScheduledPreemptionTask(gs);
+                        preemptionManager->tryRunScheduledPreemptionTask(gs);
                     }
                 }
                 if (cancelable && epochManager.wasTypecheckingCanceled()) {
