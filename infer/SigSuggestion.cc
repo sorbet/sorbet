@@ -371,8 +371,11 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
             closestReturnType =
                 core::Types::resultTypeAsSeenFrom(ctx, closestReturnType, closestMethod.data(ctx)->owner,
                                                   enclosingClass, enclosingClass.data(ctx)->selfTypeArgs(ctx));
-            if (!core::Types::isSubType(ctx, guessedReturnType, closestReturnType)) {
-                // Only correct the guessed return type if the guess isn't subtype compatible (allow narrower guess)
+            // Only correct the guessed return type if the guess isn't subtype compatible (allow narrower guess),
+            // or if the guess is `NilClass`, because that makes it harder to add new, empty method
+            // implementations and rely on the autocorrect to copy the parent signature down.
+            if (guessedReturnType == core::Types::nilClass() ||
+                !core::Types::isSubType(ctx, guessedReturnType, closestReturnType)) {
                 guessedReturnType = closestReturnType;
             }
         }
