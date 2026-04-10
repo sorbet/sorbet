@@ -1111,12 +1111,11 @@ public:
     bool prismDesugarEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
     core::ZippedPairSpan<ExpressionPtr, ExpressionPtr> kviter() {
-        return core::ZippedPairSpan<ExpressionPtr, ExpressionPtr>{absl::MakeSpan(keys), absl::MakeSpan(values)};
+        return core::ZipSpans(absl::MakeSpan(keys), absl::MakeSpan(values));
     }
 
     core::ZippedPairSpan<const ExpressionPtr, const ExpressionPtr> kviter() const {
-        return core::ZippedPairSpan<const ExpressionPtr, const ExpressionPtr>{absl::MakeSpan(keys),
-                                                                              absl::MakeSpan(values)};
+        return core::ZipSpans(absl::MakeSpan(keys), absl::MakeSpan(values));
     }
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
