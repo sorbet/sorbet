@@ -189,12 +189,12 @@ public:
             found.name = ident->name;
         } else {
             if (klass.symbol == core::Symbols::todo()) {
-                const auto &constLit = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(klass.name);
+                const auto &lit = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(klass.name);
                 // Process scope + all segments except the last to get the owner
-                auto owner = defineScope(getOwner(), constLit.scope);
-                for (size_t i = 0; i + 1 < constLit.segCount(); ++i) {
-                    auto name = constLit.names()[i];
-                    auto loc = constLit.locs()[i];
+                auto owner = defineScope(getOwner(), lit.scope);
+                auto names = lit.names();
+                auto locs = lit.locs();
+                for (auto [name, loc] : core::ZipSpans(names.first(names.size() - 1), locs.first(locs.size() - 1))) {
                     core::FoundClass fclass;
                     fclass.owner = owner;
                     fclass.name = name;
@@ -204,7 +204,7 @@ public:
                     owner = foundDefs->addClass(move(fclass));
                 }
                 found.owner = owner;
-                found.name = constLit.cnst();
+                found.name = names.back();
             } else {
                 // Desugar populates a top-level root() ClassDef.
                 // Nothing else should have been typeAlias by now.
@@ -546,9 +546,10 @@ public:
 
         // Process scope + all segments except the last to get the owner
         auto owner = defineScope(getOwner(), lhs.scope);
-        for (size_t i = 0; i + 1 < lhs.segCount(); ++i) {
-            auto name = lhs.names()[i];
-            auto loc = lhs.locs()[i];
+        auto names = lhs.names();
+        auto locs = lhs.locs();
+        ENFORCE(names.size() == locs.size());
+        for (auto [name, loc] : core::ZipSpans(names.first(names.size() - 1), locs.first(locs.size() - 1))) {
             core::FoundClass fclass;
             fclass.owner = owner;
             fclass.name = name;
@@ -559,9 +560,9 @@ public:
         }
         core::FoundStaticField found;
         found.owner = owner;
-        found.name = lhs.cnst();
+        found.name = names.back();
         found.asgnLoc = asgn.loc;
-        found.lhsLoc = lhs.loc();
+        found.lhsLoc = locs.back();
         return foundDefs->addStaticField(move(found));
     }
 
@@ -1938,7 +1939,7 @@ class TreeSymbolizer {
     friend class Namer;
 
     core::SymbolRef squashNamesInner(core::Context ctx, core::SymbolRef owner, ast::ExpressionPtr &node,
-                                     bool firstName) {
+                                     bool firstCall) {
         auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node);
         if (constLit == nullptr) {
             if (auto id = ast::cast_tree<ast::ConstantLit>(node)) {
@@ -1965,24 +1966,22 @@ class TreeSymbolizer {
         }
 
         // Process scope to get the initial owner (never a UCL, so hits base case immediately)
-        const bool firstNameRecursive = false;
-        auto newOwner = squashNamesInner(ctx, owner, constLit->scope, firstNameRecursive);
+        const bool firstCallRecursive = false;
+        auto newOwner = squashNamesInner(ctx, owner, constLit->scope, firstCallRecursive);
         ENFORCE(newOwner.exists());
 
-        // Process all segments except the last without firstName logic
-        for (size_t i = 0; i + 1 < constLit->segCount(); ++i) {
-            auto segName = constLit->names()[i];
-            core::SymbolRef existing = ctx.state.lookupClassSymbol(newOwner.asClassOrModuleRef(), segName);
+        auto names = constLit->names();
+        auto lastName = names.back();
+        names = names.first(names.size() - 1);
+        for (auto name : names) {
+            core::SymbolRef existing = ctx.state.lookupClassSymbol(newOwner.asClassOrModuleRef(), name);
             ENFORCE(existing.exists());
             newOwner = existing;
         }
 
-        // Look up the last segment with firstName logic
-        ENFORCE(constLit->segCount() > 0);
-        auto lastSegName = constLit->cnst();
-        core::SymbolRef existing = ctx.state.lookupClassSymbol(newOwner.asClassOrModuleRef(), lastSegName);
-        if (firstName && !existing.exists() && newOwner.isClassOrModule()) {
-            existing = ctx.state.lookupStaticFieldSymbol(newOwner.asClassOrModuleRef(), lastSegName);
+        core::SymbolRef existing = ctx.state.lookupClassSymbol(newOwner.asClassOrModuleRef(), lastName);
+        if (firstCall && !existing.exists() && newOwner.isClassOrModule()) {
+            existing = ctx.state.lookupStaticFieldSymbol(newOwner.asClassOrModuleRef(), lastName);
             if (existing.exists()) {
                 existing = existing.dealias(ctx.state);
             }
@@ -1996,8 +1995,8 @@ class TreeSymbolizer {
     }
 
     core::SymbolRef squashNames(core::Context ctx, core::SymbolRef owner, ast::ExpressionPtr &node) {
-        const bool firstName = true;
-        return squashNamesInner(ctx, owner, node, firstName);
+        const bool firstCall = true;
+        return squashNamesInner(ctx, owner, node, firstCall);
     }
 
     ast::ExpressionPtr arg2Symbol(int pos, const core::ParsedParam &parsedArg, ast::ExpressionPtr arg) {
@@ -2106,13 +2105,13 @@ public:
         ENFORCE(maybeScope.exists());
 
         // Process all segments except the last to build up the scope
-        for (size_t i = 0; i + 1 < lhs.segCount(); ++i) {
+        auto names = lhs.names();
+        for (auto name : names.first(names.size() - 1)) {
             if (!maybeScope.isClassOrModule()) {
                 auto scopeName = maybeScope.name(ctx);
                 maybeScope = ctx.state.lookupClassSymbol(maybeScope.owner(ctx).asClassOrModuleRef(), scopeName);
             }
-            auto segName = lhs.names()[i];
-            maybeScope = ctx.state.lookupClassSymbol(maybeScope.asClassOrModuleRef(), segName);
+            maybeScope = ctx.state.lookupClassSymbol(maybeScope.asClassOrModuleRef(), name);
             ENFORCE(maybeScope.exists());
         }
 
@@ -2122,7 +2121,7 @@ public:
         }
         auto scope = maybeScope.asClassOrModuleRef();
 
-        core::SymbolRef cnst = ctx.state.lookupStaticFieldSymbol(scope, lhs.cnst());
+        core::SymbolRef cnst = ctx.state.lookupStaticFieldSymbol(scope, names.back());
         ENFORCE(cnst.exists());
         asgn.lhs = ast::make_expression<ast::ConstantLit>(cnst, asgn.lhs.toUnique<ast::UnresolvedConstantLit>());
 
