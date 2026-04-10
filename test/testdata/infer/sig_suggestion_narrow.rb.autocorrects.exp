@@ -9,7 +9,7 @@ class Parent
 end
 
 class Child < Parent
-  sig { returns(T.any(Integer, String)) }
+  sig { returns(Integer) }
   def foo = 0 # error: does not have a `sig`
 end
 # ------------------------------
