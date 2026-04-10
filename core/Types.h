@@ -897,10 +897,10 @@ public:
     bool derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass) const;
 
     ZippedPairSpan<TypePtr, TypePtr> kviter() {
-        return ZippedPairSpan<TypePtr, TypePtr>{absl::MakeSpan(keys), absl::MakeSpan(values)};
+        return ZipSpans(absl::MakeSpan(keys), absl::MakeSpan(values));
     }
     ZippedPairSpan<const TypePtr, const TypePtr> kviter() const {
-        return ZippedPairSpan<const TypePtr, const TypePtr>{absl::MakeSpan(keys), absl::MakeSpan(values)};
+        return ZipSpans(absl::MakeSpan(keys), absl::MakeSpan(values));
     }
 
     std::optional<size_t> indexForKey(const TypePtr &t) const;
