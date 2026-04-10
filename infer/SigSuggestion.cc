@@ -453,9 +453,8 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
         return nullopt;
     }
 
-    bool suggestsVoid = methodSymbol.data(ctx)->name == core::Names::initialize() ||
-                        (core::Types::isSubType(ctx, core::Types::void_(), guessedReturnType) &&
-                         !guessedReturnType.isUntyped() && !guessedReturnType.isBottom());
+    bool suggestsVoid =
+        methodSymbol.data(ctx)->name == core::Names::initialize() || (guessedReturnType.hasTopLevelVoid());
 
     if (suggestsVoid) {
         fmt::format_to(std::back_inserter(ss), "void }}");
