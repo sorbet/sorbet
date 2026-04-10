@@ -86,6 +86,10 @@ class LSPTypechecker final {
     bool slowPathBlocked ABSL_GUARDED_BY(slowPathBlockedMutex) = false;
     absl::Mutex slowPathBlockedMutex;
 
+    std::vector<uint16_t> fileToStratum;
+
+    uint16_t lastStratum = 0;
+
     enum class SlowPathMode {
         Init,
         Cancelable,
@@ -202,6 +206,25 @@ public:
      * doesn't actually change anything.
      */
     std::unique_ptr<LSPFileUpdates> getNoopUpdate(absl::Span<const core::FileRef> frefs) const;
+
+    /**
+     * Get the id of the stratum that an edit involving these files could be checked at.
+     */
+    uint16_t getStratumForEdit(absl::Span<const core::FileRef> edit) const;
+
+    /**
+     * Get the id of the stratum that an edit involving this file could be checked at.
+     */
+    uint16_t getStratumForUri(std::string_view uri) const {
+        return this->getStratumForEdit({this->config->uri2FileRef(*this->gs, uri)});
+    }
+
+    /**
+     * Get the id of the last stratum in the condensation graph.
+     */
+    uint16_t getLastStratum() const {
+        return this->lastStratum;
+    }
 };
 
 /**
@@ -247,6 +270,15 @@ public:
 
     void updateConfigAndGsFromOptions(const DidChangeConfigurationParams &options) const;
     std::unique_ptr<LSPFileUpdates> getNoopUpdate(absl::Span<const core::FileRef> frefs) const;
+    uint16_t getStratumForEdit(absl::Span<const core::FileRef> edit) const;
+
+    uint16_t getLastStratum() const {
+        return typechecker.getLastStratum();
+    }
+
+    uint16_t getStratumForUri(std::string_view uri) const {
+        return typechecker.getStratumForUri(uri);
+    }
 };
 } // namespace sorbet::realmain::lsp
 #endif
