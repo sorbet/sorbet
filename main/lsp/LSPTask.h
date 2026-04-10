@@ -115,6 +115,8 @@ public:
     Phase finalPhase() const override;
 
     bool cancel(const MessageId &id) override;
+
+    core::packages::Stratum preemptionStratum(FileStratumMapping info) const override = 0;
 };
 
 // Doubles as the `methodString` for a `TextDocumentCompletion` LSPTask and also as

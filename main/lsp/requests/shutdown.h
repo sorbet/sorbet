@@ -10,6 +10,8 @@ public:
 
     bool canPreempt(const LSPIndexer &indexer) const override;
 
+    core::packages::Stratum preemptionStratum(FileStratumMapping info) const override;
+
 protected:
     std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerDelegate &ts) override;
 };

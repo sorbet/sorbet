@@ -159,4 +159,9 @@ unique_ptr<ResponseMessage> DocumentFormattingTask::runRequest(LSPTypecheckerDel
     Exception::raise("Unimplemented and unused");
 }
 
+core::packages::Stratum DocumentFormattingTask::preemptionStratum(FileStratumMapping info) const {
+    ENFORCE(false, "Document formatting should be handled by the preprocessor");
+    return info.getLastStratum();
+}
+
 } // namespace sorbet::realmain::lsp

@@ -43,4 +43,9 @@ void DidChangeConfigurationTask::run(LSPTypecheckerDelegate &tc) {
     updates->epoch = epoch;
     tc.typecheckOnFastPath(std::move(updates), {});
 }
+
+core::packages::Stratum DidChangeConfigurationTask::preemptionStratum(FileStratumMapping info) const {
+    return info.getStratumForUris(this->openFilePaths);
+}
+
 } // namespace sorbet::realmain::lsp
