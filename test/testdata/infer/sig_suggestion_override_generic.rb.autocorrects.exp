@@ -1,0 +1,31 @@
+# -- test/testdata/infer/sig_suggestion_override_generic.rb --
+# typed: strict
+# disable-fast-path: true
+
+class A
+  extend T::Sig
+  sig { void }
+  def initialize; end
+
+  sig { returns(T.attached_class) }
+  def self.new # error: does not have a `sig`
+  end
+end
+
+class Parent
+  extend T::Sig, T::Generic
+  Elem = type_member
+
+  sig { returns(Elem) }
+  def foo = raise
+end
+class Child1 < Parent # error: must be re-declared
+  sig { returns(T.untyped) }
+  def foo = raise # error: does not have a `sig`
+end
+class Child2 < Parent
+  Elem = type_member
+  sig { returns(Elem) }
+  def foo = raise # error: does not have a `sig`
+end
+# ------------------------------

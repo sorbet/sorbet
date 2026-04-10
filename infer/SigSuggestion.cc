@@ -368,7 +368,9 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
     if (closestMethod.exists()) {
         auto closestReturnType = closestMethod.data(ctx)->resultType;
         if (closestReturnType && !closestReturnType.isUntyped()) {
-            guessedReturnType = closestReturnType;
+            guessedReturnType =
+                core::Types::resultTypeAsSeenFrom(ctx, closestReturnType, closestMethod.data(ctx)->owner,
+                                                  enclosingClass, enclosingClass.data(ctx)->selfTypeArgs(ctx));
         }
 
         for (const auto &param : closestMethod.data(ctx)->parameters) {
@@ -451,9 +453,8 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
         return nullopt;
     }
 
-    bool suggestsVoid = methodSymbol.data(ctx)->name == core::Names::initialize() ||
-                        (core::Types::isSubType(ctx, core::Types::void_(), guessedReturnType) &&
-                         !guessedReturnType.isUntyped() && !guessedReturnType.isBottom());
+    bool suggestsVoid =
+        methodSymbol.data(ctx)->name == core::Names::initialize() || (guessedReturnType.hasTopLevelVoid());
 
     if (suggestsVoid) {
         fmt::format_to(std::back_inserter(ss), "void }}");
