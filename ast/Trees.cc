@@ -835,7 +835,7 @@ string UnresolvedConstantLit::showRaw(const core::GlobalState &gs, int tabs) con
 
     fmt::format_to(std::back_inserter(buf), "{}{{\n", nodeName());
     printTabs(buf, tabs + 1);
-    fmt::format_to(std::back_inserter(buf), "cnst = {}\n", this->cnst().showRaw(gs));
+    fmt::format_to(std::back_inserter(buf), "cnst = {}\n", this->names()[this->numSegs_ - 1].showRaw(gs));
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "scope = ");
     showRawSegmentChain(buf, gs, this->scope, this->names().subspan(0, this->numSegs_ - 1), tabs + 1);
@@ -1871,7 +1871,7 @@ string UnresolvedConstantLit::showRawWithLocs(const core::GlobalState &gs, core:
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "loc = {}\n", core::Loc(file, this->loc()).fileShortPosToString(gs));
     printTabs(buf, tabs + 1);
-    fmt::format_to(std::back_inserter(buf), "cnst = {}\n", this->cnst().showRaw(gs));
+    fmt::format_to(std::back_inserter(buf), "cnst = {}\n", this->names()[this->numSegs_ - 1].showRaw(gs));
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "scope = ");
     auto scopeNames = this->names().subspan(0, this->numSegs_ - 1);

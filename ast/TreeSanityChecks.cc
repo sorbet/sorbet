@@ -1,6 +1,8 @@
 #include "Trees.h"
 #include "core/Names.h"
 
+#include "absl/algorithm/container.h"
+
 using namespace std;
 
 namespace sorbet::ast {
@@ -98,7 +100,7 @@ void ClassDef::_sanityCheck() {
 void UnresolvedConstantLit::_sanityCheck() {
     ENFORCE(scope);
     ENFORCE(numSegs_ > 0);
-    ENFORCE(cnst().exists());
+    ENFORCE(absl::c_all_of(names(), [](const auto name) -> bool { return name.exists(); }));
 }
 
 void ConstantLit::_sanityCheck() {

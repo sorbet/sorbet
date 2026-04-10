@@ -111,7 +111,7 @@ void Concern::run(core::MutableContext ctx, ast::ClassDef *klass) {
             }
         } else if (auto mod = ast::cast_tree<ast::ClassDef>(stat)) {
             auto name = ast::cast_tree<ast::UnresolvedConstantLit>(mod->name);
-            if (name && name->cnst() == core::Names::Constants::ClassMethods()) {
+            if (name && name->names().back() == core::Names::Constants::ClassMethods()) {
                 if (classMethodsNode) {
                     // ClassMethods module already exists. Let's add mod->rhs into existing module
                     auto classDef = ast::cast_tree<ast::ClassDef>(classMethodsNode);

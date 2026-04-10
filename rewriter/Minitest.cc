@@ -44,7 +44,7 @@ public:
                 tree = ast::MK::EmptyTree();
                 return;
             }
-            auto name = ast::MK::Symbol(cnst->loc(), cnst->cnst());
+            auto name = ast::MK::Symbol(cnst->loc(), cnst->names().back());
 
             // if the constant is already in a T.let, preserve it, otherwise decay it to unsafe
             movedConstants.emplace_back(createConstAssign(*asgn));
@@ -244,7 +244,11 @@ bool isRSpec(core::Context ctx, const ast::ExpressionPtr &recv) {
         return false;
     }
 
-    return cnst->cnst() == core::Names::Constants::RSpec() && ast::MK::isRootScope(cnst->scope);
+    auto names = cnst->names();
+    if (names.size() != 1) {
+        return false;
+    }
+    return names.back() == core::Names::Constants::RSpec() && ast::MK::isRootScope(cnst->scope);
 }
 
 // Some RSpec methods are relatively common method names where we really want to make sure that

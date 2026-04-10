@@ -1245,7 +1245,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 // warnings in `typed: strict` files.
                 if (isa_tree<UnresolvedConstantLit>(lhs) && isa_tree<UnresolvedConstantLit>(rhs)) {
                     auto &rhsConst = cast_tree_nonnull<UnresolvedConstantLit>(rhs);
-                    if (rhsConst.cnst() == core::Names::Constants::ErrorNode()) {
+                    if (rhsConst.names().back() == core::Names::Constants::ErrorNode()) {
                         auto rhsLocZero = rhs.loc().copyWithZeroLength();
                         rhs = MK::Let(rhsLocZero, move(rhs), MK::Untyped(rhsLocZero));
                     }

@@ -576,8 +576,8 @@ public:
         core::FoundTypeMember found;
         found.owner = getOwner();
         found.asgnLoc = asgn.loc;
-        found.nameLoc = typeName->loc();
-        found.name = typeName->cnst();
+        found.nameLoc = typeName->locs().back();
+        found.name = typeName->names().back();
         // Store name rather than core::Variance type so that we can defer reporting an error until later.
         found.varianceName = core::NameRef();
         found.isTypeTemplate = send->fun == core::Names::typeTemplate();
@@ -625,7 +625,8 @@ public:
         bool result = false;
 
         typecase(
-            s.recv, [&](const ast::UnresolvedConstantLit &c) { result = c.cnst() == core::Names::Constants::T(); },
+            s.recv,
+            [&](const ast::UnresolvedConstantLit &c) { result = c.names().back() == core::Names::Constants::T(); },
             [&](const ast::ConstantLit &c) { result = c.symbol() == core::Symbols::T(); },
             [&](const ast::ExpressionPtr &_default) { result = false; });
 
@@ -2222,7 +2223,7 @@ public:
                 auto extraArgsLoc = send->getPosArg(1).loc().join(send->getPosArg(send->numPosArgs() - 1).loc());
                 if (auto e = ctx.beginError(extraArgsLoc, core::errors::Namer::InvalidTypeDefinition)) {
                     e.setHeader("Too many arguments in `{}` definition for `{}`", send->fun.show(ctx),
-                                typeName->cnst().show(ctx));
+                                typeName->names().back().show(ctx));
                     auto firstArgLoc = send->getPosArg(0).loc();
                     auto argsLoc = send->argsLoc();
                     auto replacementRange = core::Loc(ctx.file, firstArgLoc.endPos(), argsLoc.endPos());
@@ -2291,7 +2292,7 @@ public:
                 return ignoreBadTypeMember(ctx, move(tree));
         }
 
-        core::SymbolRef sym = ctx.state.lookupTypeMemberSymbol(onSymbol, typeName->cnst());
+        core::SymbolRef sym = ctx.state.lookupTypeMemberSymbol(onSymbol, typeName->names().back());
         ENFORCE(sym.exists());
 
         // Simulates how squashNames in handleAssignment also creates a ConstantLit

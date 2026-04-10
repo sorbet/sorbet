@@ -24,19 +24,19 @@ bool isTNilableTUntyped(const ast::ExpressionPtr &expr) {
 bool isTStruct(const ast::ExpressionPtr &expr) {
     auto struct_ = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     return struct_ != nullptr && struct_->segCount() == 2 && struct_->names()[0] == core::Names::Constants::T() &&
-           struct_->cnst() == core::Names::Constants::Struct() && ast::MK::isRootScope(struct_->scope);
+           struct_->names()[1] == core::Names::Constants::Struct() && ast::MK::isRootScope(struct_->scope);
 }
 
 bool isTInexactStruct(const ast::ExpressionPtr &expr) {
     auto struct_ = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     return struct_ != nullptr && struct_->segCount() == 2 && struct_->names()[0] == core::Names::Constants::T() &&
-           struct_->cnst() == core::Names::Constants::InexactStruct() && ast::MK::isRootScope(struct_->scope);
+           struct_->names()[1] == core::Names::Constants::InexactStruct() && ast::MK::isRootScope(struct_->scope);
 }
 
 bool isTImmutableStruct(const ast::ExpressionPtr &expr) {
     auto struct_ = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     return struct_ != nullptr && struct_->segCount() == 2 && struct_->names()[0] == core::Names::Constants::T() &&
-           struct_->cnst() == core::Names::Constants::ImmutableStruct() && ast::MK::isRootScope(struct_->scope);
+           struct_->names()[1] == core::Names::Constants::ImmutableStruct() && ast::MK::isRootScope(struct_->scope);
 }
 
 enum class SyntacticSuperClass {

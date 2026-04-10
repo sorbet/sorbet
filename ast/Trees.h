@@ -1325,11 +1325,6 @@ public:
         return getTrailingObjects<core::LocOffsets>()[numSegs_ - 1];
     }
 
-    // Returns the leaf (last) segment's constant name.
-    core::NameRef cnst() const {
-        return getTrailingObjects<core::NameRef>()[numSegs_ - 1];
-    }
-
     // Returns the number of segments.
     size_t segCount() const {
         return numSegs_;

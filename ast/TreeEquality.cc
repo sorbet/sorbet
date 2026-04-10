@@ -305,8 +305,15 @@ bool compareTrees(const core::GlobalState &gs, const void *avoid, const Tag tag,
             if (a->original() && b->original()) {
                 auto &alit = *a->original();
                 auto &blit = *b->original();
-                if (alit.cnst() != blit.cnst()) {
+                auto anames = alit.names();
+                auto bnames = blit.names();
+                if (anames.size() != bnames.size()) {
                     return false;
+                }
+                for (const auto &[aname, bname] : core::ZipSpans(anames, bnames)) {
+                    if (!Comparator::compareNames(gs, aname, bname)) {
+                        return false;
+                    }
                 }
                 return Comparator::compareNodes(gs, avoid, alit.scope, blit.scope, file);
             } else if (!a->original() && !b->original()) {
