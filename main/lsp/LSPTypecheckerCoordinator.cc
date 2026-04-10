@@ -179,6 +179,15 @@ public:
                 if (!indexer.preemptionPossible(taskQueue.tasks())) {
                     break;
                 }
+
+                // If we haven't reached a stratum that's sufficient for running this task, indicate that preemption
+                // should be rescheduled for later.
+                auto neededStratum = taskQueue.tasks().front()->preemptionStratum(delegate.getFileStratumMapping());
+                if (currentStratum < neededStratum) {
+                    result.setRescheduledStratum(neededStratum);
+                    return result;
+                }
+
                 task = move(taskQueue.tasks().front());
                 taskQueue.tasks().pop_front();
 
