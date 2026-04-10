@@ -1,5 +1,6 @@
 # -- test/testdata/infer/sig_suggestion_override_generic.rb --
 # typed: strict
+# disable-fast-path: true
 
 class A
   extend T::Sig

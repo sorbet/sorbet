@@ -1,4 +1,5 @@
 # typed: strict
+# disable-fast-path: true
 
 class A
   extend T::Sig
