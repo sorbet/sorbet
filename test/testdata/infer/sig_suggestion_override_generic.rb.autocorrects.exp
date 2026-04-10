@@ -20,7 +20,7 @@ class Parent
   def foo = raise
 end
 class Child1 < Parent # error: must be re-declared
-  sig { returns(T.untyped) }
+  sig { returns(T.anything) }
   def foo = raise # error: does not have a `sig`
 end
 class Child2 < Parent
