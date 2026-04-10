@@ -21,12 +21,24 @@ void DidChangeConfigurationTask::index(LSPIndexer &indexer) {
     indexer.updateConfigAndGsFromOptions(*params);
 }
 
-void DidChangeConfigurationTask::run(LSPTypecheckerDelegate &tc) {
-    tc.updateConfigAndGsFromOptions(*params);
+namespace {
+
+vector<core::FileRef> getOpenFileRefs(const LSPTypecheckerDelegate &tc, absl::Span<const string_view> openFilePaths) {
     vector<core::FileRef> openFileRefs;
-    for (auto const &path : openFilePaths) {
+    openFileRefs.reserve(openFilePaths.size());
+
+    for (auto path : openFilePaths) {
         openFileRefs.push_back(tc.state().findFileByPath(path));
     }
+
+    return openFileRefs;
+}
+
+} // namespace
+
+void DidChangeConfigurationTask::run(LSPTypecheckerDelegate &tc) {
+    tc.updateConfigAndGsFromOptions(*params);
+    auto openFileRefs = getOpenFileRefs(tc, this->openFilePaths);
     auto updates = tc.getNoopUpdate(openFileRefs);
     updates->epoch = epoch;
     tc.typecheckOnFastPath(std::move(updates), {});
