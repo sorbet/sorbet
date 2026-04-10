@@ -7,6 +7,11 @@ A/__package.rb:3: `A` has changes https://srb.help/3734
         ^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
 
+B/__package.rb:3: `B` has changes https://srb.help/3734
+     3 |class B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+
 C/__package.rb:8: Strict dependencies violation: All of `C`'s `import`s must be `dag` or higher https://srb.help/3727
      8 |  import B
           ^^^^^^^^
@@ -28,11 +33,6 @@ C/__package.rb:8: Package `B` includes explicit visibility modifiers and cannot 
           ^^^^^^^^
   Note:
     Please consult with the owning team before adding a `visible_to` line to the package `B`
-
-B/__package.rb:3: `B` has changes https://srb.help/3734
-     3 |class B < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Done
 Errors: 5
 
 ###### cat A/__package.rb ######
@@ -63,6 +63,7 @@ class B < PackageSpec
 
   # strict_dependencies 'layered' or more strict:
   import C
+  import D
 
   export B::CONSTANT_FROM_B
 
