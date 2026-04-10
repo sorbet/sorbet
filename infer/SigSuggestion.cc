@@ -368,7 +368,9 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
     if (closestMethod.exists()) {
         auto closestReturnType = closestMethod.data(ctx)->resultType;
         if (closestReturnType && !closestReturnType.isUntyped()) {
-            guessedReturnType = closestReturnType;
+            guessedReturnType =
+                core::Types::resultTypeAsSeenFrom(ctx, closestReturnType, closestMethod.data(ctx)->owner,
+                                                  enclosingClass, enclosingClass.data(ctx)->selfTypeArgs(ctx));
         }
 
         for (const auto &param : closestMethod.data(ctx)->parameters) {
