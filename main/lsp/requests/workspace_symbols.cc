@@ -343,4 +343,10 @@ unique_ptr<ResponseMessage> WorkspaceSymbolsTask::runRequest(LSPTypecheckerDeleg
     response->result = matcher.doQuery(params->query);
     return response;
 }
+
+core::packages::Stratum WorkspaceSymbolsTask::preemptionStratum(FileStratumMapping info) const {
+    // This request requires the whole codebase, so we can only support preemption in the final stratum.
+    return info.getLastStratum();
+}
+
 } // namespace sorbet::realmain::lsp

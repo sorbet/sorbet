@@ -87,4 +87,8 @@ unique_ptr<ResponseMessage> SorbetShowSymbolTask::runRequest(LSPTypecheckerDeleg
     return response;
 }
 
+core::packages::Stratum SorbetShowSymbolTask::preemptionStratum(FileStratumMapping info) const {
+    return info.getStratumForUri(this->params->textDocument->uri);
+}
+
 } // namespace sorbet::realmain::lsp

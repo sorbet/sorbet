@@ -18,6 +18,8 @@ public:
 
     std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerDelegate &typechecker) override;
 
+    core::packages::Stratum preemptionStratum(FileStratumMapping info) const override;
+
 private:
     void displayError(std::string errorMessage, std::unique_ptr<ResponseMessage> &response);
 };
