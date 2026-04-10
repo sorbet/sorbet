@@ -93,7 +93,8 @@ vector<core::packages::Import> computeNewImports(const core::GlobalState &gs,
     for (auto &import : pkgInfo.importedPackageNames) {
         auto &impPkgInfo = gs.packageDB().getPackageInfo(import.mangledName);
         if (impPkgInfo.exists() && impPkgInfo.isPreludePackage()) {
-            // Imports to prelude packages should not be removed, even if they're not referenced anywhere.
+            // If the `__package.rb` already imports a prelude package, we should keep that import, even if it's not
+            // referenced anywhere.
             importMap[import.mangledName] = import.type;
         }
     }
