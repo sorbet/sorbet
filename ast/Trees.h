@@ -1583,6 +1583,7 @@ private:
 
         void setResolvedUpToSegmentForFlatUCL(int idx) {
             ENFORCE(tag() == Tag::FailedResolutionSymbol);
+            ENFORCE(idx != -1)
             reinterpret_cast<FailedResolutionData *>(untaggedPtr1())->resolvedUpToSegment = idx;
         }
 
