@@ -395,17 +395,7 @@ bool ASTUtil::isRootScopedSyntacticConstant(const ast::ExpressionPtr &expr,
     if (!ast::MK::isRootScope(ucl->scope)) {
         return false;
     }
-    auto ns = ucl->names();
-    auto partsIt = ns.begin();
-    auto nameIt = constantName.begin();
-    while (partsIt != ns.end() && nameIt != constantName.end()) {
-        if (*partsIt != *nameIt) {
-            return false;
-        }
-        ++partsIt;
-        ++nameIt;
-    }
-    return partsIt == ns.end() && nameIt == constantName.end();
+    return absl::c_equal(ucl->names(), constantName);
 }
 
 optional<ASTUtil::DuplicateArg> ASTUtil::findDuplicateArg(core::MutableContext ctx, const ast::Send *send) {
