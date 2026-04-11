@@ -1352,6 +1352,7 @@ public:
 
     void _sanityCheck();
 };
+CheckSize(UnresolvedConstantLit, 16, 8);
 
 EXPRESSION(ConstantLit) {
 private:
