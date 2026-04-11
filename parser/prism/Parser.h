@@ -122,12 +122,6 @@ public:
         return node;
     }
 
-    // Replace the root node, e.g. after RBS rewriting.
-    void replaceRootNode(pm_node_t *newNode) {
-        // Does not destroy the old node, since the rewriter mutates the tree in-place.
-        node = newNode;
-    }
-
     std::string prettyPrint() const {
         return parser->prettyPrint(node);
     }

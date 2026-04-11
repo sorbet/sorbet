@@ -31,7 +31,8 @@ public:
     AssertionsRewriterPrism(core::MutableContext ctx, parser::Prism::Parser &parser,
                             UnorderedMap<pm_node_t *, std::vector<CommentNodePrism>> &commentsByNode)
         : ctx(ctx), parser(parser), prism(parser), commentsByNode(commentsByNode){};
-    pm_node_t *run(pm_node_t *node);
+    // Rewrite the RBS assertions in the Prism AST, in-place.
+    void run(pm_node_t *node);
 
 private:
     core::MutableContext ctx;
@@ -48,8 +49,7 @@ private:
 
     core::LocOffsets translateLocation(pm_location_t location);
 
-    pm_node_t *rewriteBody(pm_node_t *tree);
-    pm_statements_node_t *rewriteBody(pm_statements_node_t *stmts);
+    void rewriteStatements(pm_statements_node_t *stmts);
     pm_node_t *rewriteNode(pm_node_t *tree);
     void rewriteNodes(pm_node_list_t &nodes);
     void rewriteArgumentsNode(pm_arguments_node_t *args);
