@@ -241,9 +241,12 @@ public:
     PackageInfo &operator=(const PackageInfo &) = delete;
 
     int orderImports(const core::GlobalState &gs, const PackageInfo &a, bool aIsTestImport, const PackageInfo &b,
-                     bool bIsTestImport) const;
+                     bool bIsTestImport,
+                     const std::optional<StrictDependenciesLevel> aStrictnessOverride = std::nullopt,
+                     const std::optional<StrictDependenciesLevel> bStrictnessOverride = std::nullopt) const;
 
-    int orderByStrictness(const PackageDB &packageDB, const PackageInfo &a, const PackageInfo &b) const;
+    int orderByStrictness(const PackageDB &packageDB, const PackageInfo &a, const StrictDependenciesLevel aStrictness,
+                          const PackageInfo &b, const StrictDependenciesLevel bStrictness) const;
 
     int orderByAlphabetical(const core::GlobalState &gs, const PackageInfo &a, const PackageInfo &b) const;
 
