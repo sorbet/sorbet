@@ -677,21 +677,18 @@ InlinedVector<TypeMemberRef, 4> Types::alignBaseTypeArgs(const GlobalState &gs, 
         auto members = what.data(gs)->typeMembers();
         currentAlignment.assign(members.begin(), members.end());
     } else {
+        auto members = what.data(gs)->typeMembers();
         currentAlignment.reserve(asIf.data(gs)->typeMembers().size());
-        for (auto originalTp : asIf.data(gs)->typeMembers()) {
-            auto name = originalTp.data(gs)->name;
-            SymbolRef align;
-            for (auto x : what.data(gs)->typeMembers()) {
-                if (x.data(gs)->name == name) {
-                    align = x;
-                    currentAlignment.emplace_back(x);
-                    break;
-                }
-            }
-            if (!align.exists()) {
-                currentAlignment.emplace_back(Symbols::noTypeMember());
-            }
-        }
+        absl::c_transform(asIf.data(gs)->typeMembers(), back_inserter(currentAlignment),
+                          [&gs, members](auto originalTp) -> TypeMemberRef {
+                              auto name = originalTp.data(gs)->name;
+                              auto it = absl::c_find_if(
+                                  members, [&gs, name](auto x) -> bool { return x.data(gs)->name == name; });
+                              if (it == members.end()) {
+                                  return Symbols::noTypeMember();
+                              }
+                              return *it;
+                          });
     }
     return currentAlignment;
 }
