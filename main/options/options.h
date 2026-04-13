@@ -146,6 +146,7 @@ struct Options {
     bool noErrorCount = false;
     bool autocorrect = false;
     bool didYouMean = true;
+    std::vector<std::string> skipAutocorrectFor;
     bool waitForDebugger = false;
     bool censorForSnapshotTests = false;
     bool forceHashing = false;

@@ -434,6 +434,13 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  "Emit autocorrects to set the `# typed:` sigil in every file to the highest possible "
                                  "level where no errors would be reported in that file. Will downgrade the `# typed:` "
                                  "sigil for any files with errors.");
+    options.add_options(section)(
+        "skip-autocorrect-for",
+        "Skip applying autocorrects to files whose paths contain <pattern>.\n"
+        "When <pattern> starts with `/` it matches against the prefix of the path; otherwise it matches anywhere.\n"
+        "Matches must be against whole path segments, so `foo` matches `foo/bar.rb` and `bar/foo/baz.rb` but not "
+        "`foo.rb` or `foo2/bar.rb`.",
+        cxxopts::value<vector<string>>(), "<pattern>");
     // }}}
 
     // ----- ERRORS ------------------------------------------------------- {{{
@@ -1047,6 +1054,9 @@ void readOptions(Options &opts,
         opts.silenceErrors = raw["quiet"].as<bool>();
         opts.autocorrect = raw["autocorrect"].as<bool>();
         opts.didYouMean = raw["did-you-mean"].as<bool>();
+        if (raw.count("skip-autocorrect-for")) {
+            opts.skipAutocorrectFor = raw["skip-autocorrect-for"].as<vector<string>>();
+        }
         opts.inlineInput = raw["e"].as<string>();
         opts.inlineRBIInput = raw["e-rbi"].as<string>();
         if (opts.autocorrect && opts.silenceErrors) {

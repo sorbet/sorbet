@@ -107,4 +107,35 @@ UnorderedMap<FileRef, string> AutocorrectSuggestion::apply(const GlobalState &gs
     return ret;
 }
 
+bool shouldSkipAutocorrectForFile(string_view path, const vector<string> &skipPatterns) {
+    for (auto &pattern : skipPatterns) {
+        if (pattern.empty()) {
+            continue;
+        }
+        if (pattern.at(0) == '/') {
+            // Prefix match: path must start with pattern
+            if (path.substr(0, pattern.size()) == pattern) {
+                return true;
+            }
+        } else {
+            // Segment match: pattern must appear as a whole path segment
+            auto needle = "/" + pattern;
+            auto pos = path.find(needle);
+            while (pos != string_view::npos) {
+                auto end = pos + needle.size();
+                if (end == path.size() || path[end] == '/') {
+                    return true;
+                }
+                pos = path.find(needle, pos + 1);
+            }
+            // Also check if path starts with the pattern directly (no leading /)
+            if (path.substr(0, pattern.size()) == pattern &&
+                (path.size() == pattern.size() || path[pattern.size()] == '/')) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 } // namespace sorbet::core

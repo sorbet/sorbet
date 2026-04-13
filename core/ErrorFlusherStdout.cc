@@ -56,10 +56,15 @@ void ErrorFlusherStdout::flushErrorCount(spdlog::logger &logger, int count) {
     }
 }
 
-void ErrorFlusherStdout::flushAutocorrects(const GlobalState &gs, FileSystem &fs) {
+void ErrorFlusherStdout::flushAutocorrects(const GlobalState &gs, FileSystem &fs,
+                                           const vector<string> &skipAutocorrectFor) {
     auto toWrite = AutocorrectSuggestion::apply(gs, fs, this->autocorrects);
     for (auto &[file, contents] : toWrite) {
-        fs.writeFile(string(file.data(gs).path()), contents);
+        auto path = file.data(gs).path();
+        if (shouldSkipAutocorrectForFile(path, skipAutocorrectFor)) {
+            continue;
+        }
+        fs.writeFile(string(path), contents);
     }
     autocorrects.clear();
 }

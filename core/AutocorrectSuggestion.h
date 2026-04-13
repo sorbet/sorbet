@@ -32,6 +32,10 @@ struct AutocorrectSuggestion {
     static void mergeAdjacentEdits(std::vector<core::AutocorrectSuggestion::Edit> &edits);
 };
 
+// Returns true if the given file path should be skipped for autocorrect based on the skip patterns.
+// Patterns starting with `/` do a prefix match; others match as whole path segments anywhere in the path.
+bool shouldSkipAutocorrectForFile(std::string_view path, const std::vector<std::string> &skipPatterns);
+
 } // namespace sorbet::core
 
 #endif

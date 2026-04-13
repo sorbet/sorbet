@@ -2,6 +2,7 @@
 #include "absl/algorithm/container.h"
 #include "absl/strings/match.h"
 #include "common/sort/sort.h"
+#include "core/AutocorrectSuggestion.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/ConvertToSingletonClassMethod.h"
 #include "main/lsp/ExtractVariable.h"
@@ -143,6 +144,12 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
         return response;
     }
     auto loc = maybeLoc.value();
+    auto &skipPatterns = config.opts.skipAutocorrectFor;
+    auto autocorrectEditsSkippedFile = [&](const vector<core::AutocorrectSuggestion::Edit> &edits) -> bool {
+        return absl::c_any_of(edits, [&](const auto &edit) {
+            return core::shouldSkipAutocorrectForFile(edit.loc.file().data(gs).path(), skipPatterns);
+        });
+    };
     // Simply querying the file in question is insufficient since indexing errors would not be detected.
     auto errors = typechecker.retypecheck({file});
     vector<core::AutocorrectSuggestion::Edit> allEdits;
@@ -151,7 +158,9 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
             // Collect all autocorrects regardless of range to compile into a "source" autocorrect whose scope is
             // the whole file.
             for (auto &autocorrect : error->autocorrects) {
-                allEdits.insert(allEdits.end(), autocorrect.edits.begin(), autocorrect.edits.end());
+                if (!autocorrectEditsSkippedFile(autocorrect.edits)) {
+                    allEdits.insert(allEdits.end(), autocorrect.edits.begin(), autocorrect.edits.end());
+                }
             }
 
             // We return code actions corresponding to any error that encloses the request's range. Matching request
@@ -164,6 +173,9 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
             }
 
             for (auto &autocorrect : error->autocorrects) {
+                if (autocorrectEditsSkippedFile(autocorrect.edits)) {
+                    continue;
+                }
                 auto action = make_unique<CodeAction>(autocorrect.title);
                 action->kind = CodeActionKind::Quickfix;
                 auto workspaceEdit = make_unique<WorkspaceEdit>();

@@ -831,7 +831,7 @@ int realmain(int argc, char *argv[]) {
             errorFlusher->flushErrorCount(gs->errorQueue->logger, gs->errorQueue->nonSilencedErrorCount);
         }
         if (opts.autocorrect) {
-            errorFlusher->flushAutocorrects(*gs, *opts.fs);
+            errorFlusher->flushAutocorrects(*gs, *opts.fs, opts.skipAutocorrectFor);
         }
         logger->trace("sorbet done");
 
