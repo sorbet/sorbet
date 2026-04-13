@@ -4,10 +4,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   Unresolved: <emptyTree>::<C Bar>
 
-  Unresolved: ::Foo::<C Bar>
+  Unresolved: <emptyTree>::<C Foo>::<C Bar>
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
   Unresolved: <emptyTree>::<C Bar>
 
-  Unresolved: ::Foo::<C Bar>
+  Unresolved: <emptyTree>::<C Foo>::<C Bar>
 end
