@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 # typed: false
 
+
 module T::Private::Methods::CallValidation
   CallValidation = T::Private::Methods::CallValidation
   Modes = T::Private::Methods::Modes
