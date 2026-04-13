@@ -18,8 +18,11 @@ struct AutocorrectSuggestion {
 
     bool isDidYouMean;
 
-    AutocorrectSuggestion(std::string title, std::vector<Edit> edits, bool isDidYouMean = false)
-        : title(title), edits(edits), isDidYouMean(isDidYouMean) {}
+    bool shouldSkipWhenAggregated;
+
+    AutocorrectSuggestion(std::string title, std::vector<Edit> edits, bool isDidYouMean = false,
+                          bool shouldSkipWhenAggregated = false)
+        : title(title), edits(edits), isDidYouMean(isDidYouMean), shouldSkipWhenAggregated(shouldSkipWhenAggregated) {}
 
     // Reads all the files to be edited, and then accumulates all the edits that need to be applied
     // to those files into a resulting string with all edits applied. Does not write those back out
