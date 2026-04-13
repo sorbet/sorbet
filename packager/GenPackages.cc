@@ -1,5 +1,6 @@
 #include "packager/GenPackages.h"
 #include "core/errors/packager.h"
+#include "packager/ComputePackageSCCs.h"
 
 using namespace std;
 
@@ -132,6 +133,107 @@ vector<core::packages::Import> computeNewImports(const core::GlobalState &gs,
     }
 
     return newImports;
+}
+
+class ReferencesPackageGraph {
+    core::packages::PackageDB &packageDB;
+    const core::GlobalState &gs;
+
+public:
+    struct SCCInfo {
+        int sccId;
+        int testSccId;
+    };
+    UnorderedMap<core::packages::MangledName, SCCInfo> nodeMap;
+
+    ReferencesPackageGraph(const core::GlobalState &gs, core::packages::PackageDB &packageDB)
+        : packageDB(packageDB), gs(gs) {}
+
+    vector<core::packages::Import> getImports(core::packages::MangledName packageName) {
+        auto &pkgInfo = packageDB.getPackageInfo(packageName);
+        ENFORCE(pkgInfo.exists());
+        return computeNewImports(gs, pkgInfo);
+    }
+
+    void setSCCId(core::packages::MangledName packageName, int sccId) {
+        nodeMap[packageName].sccId = sccId;
+    }
+
+    int getSCCId(core::packages::MangledName packageName) {
+        return nodeMap[packageName].sccId;
+    }
+
+    void setTestSCCId(core::packages::MangledName packageName, int sccId) {
+        nodeMap[packageName].testSccId = sccId;
+    }
+
+    int getTestSCCId(core::packages::MangledName packageName) {
+        return nodeMap[packageName].testSccId;
+    }
+};
+
+vector<core::packages::StrictDependenciesLevel>
+computeBestStrictness(const core::GlobalState &gs, const core::packages::Condensation &condensation) {
+    auto bestStrictness = vector<core::packages::StrictDependenciesLevel>(
+        condensation.nodes().size(), core::packages::StrictDependenciesLevel::None);
+    auto layerMap = vector<core::NameRef>(condensation.nodes().size(), core::NameRef::noName());
+    for (auto &scc : condensation.nodes()) {
+        ENFORCE(!scc.members.empty());
+        auto &firstPkg = gs.packageDB().getPackageInfo(scc.members[0]);
+        ENFORCE(firstPkg.exists());
+
+        if (!firstPkg.layer.exists()) {
+            bestStrictness[scc.id] = core::packages::StrictDependenciesLevel::False;
+            continue;
+        }
+
+        core::NameRef sccLayer = firstPkg.layer;
+        for (auto &member : scc.members) {
+            auto &pkgInfo = gs.packageDB().getPackageInfo(member);
+            ENFORCE(pkgInfo.exists());
+            if (pkgInfo.layer != sccLayer) {
+                // SCC has multiple layers, which implies layering violation
+                bestStrictness[scc.id] = core::packages::StrictDependenciesLevel::False;
+                break;
+            }
+        }
+        if (bestStrictness[scc.id] == core::packages::StrictDependenciesLevel::False) {
+            continue;
+        }
+
+        layerMap[scc.id] = sccLayer;
+
+        for (auto &impSccId : scc.imports) {
+            ENFORCE(bestStrictness[impSccId] != core::packages::StrictDependenciesLevel::None);
+            if (bestStrictness[impSccId] == core::packages::StrictDependenciesLevel::False) {
+                // imports a strict_dependencies 'false' package
+                bestStrictness[scc.id] = core::packages::StrictDependenciesLevel::False;
+                break;
+            } else {
+                ENFORCE(layerMap[impSccId].exists());
+                if (gs.packageDB().layerIndex(layerMap[scc.id]) < gs.packageDB().layerIndex(layerMap[impSccId])) {
+                    // layering violation
+                    bestStrictness[scc.id] = core::packages::StrictDependenciesLevel::False;
+                    break;
+                } else if (bestStrictness[impSccId] != core::packages::StrictDependenciesLevel::Dag) {
+                    // imports a package that is strict_dependencies 'layered' or 'layered_dag'
+                    bestStrictness[scc.id] = core::packages::StrictDependenciesLevel::LayeredDag;
+                    // Can't break here, since a later import could still bring down the best strictness
+                }
+            }
+        }
+
+        if (bestStrictness[scc.id] == core::packages::StrictDependenciesLevel::None) {
+            // We didn't encounter any import that brought down this SCC's strictness
+            if (scc.members.size() > 1) {
+                // More than one package in SCC, which implies cycle
+                bestStrictness[scc.id] = core::packages::StrictDependenciesLevel::Layered;
+            } else {
+                bestStrictness[scc.id] = core::packages::StrictDependenciesLevel::Dag;
+            }
+        }
+    }
+    return bestStrictness;
 }
 }; // namespace
 
@@ -280,6 +382,33 @@ void GenPackages::run(core::GlobalState &gs) {
 }
 
 void GenPackages::runStrict(core::GlobalState &gs) {
+    ReferencesPackageGraph referencesPackageGraph{gs, gs.packageDB()};
+    auto condensation = ComputePackageSCCs::run(gs, referencesPackageGraph);
+    auto bestStrictness = computeBestStrictness(gs, condensation);
+    auto skipRaisingStrictness = vector<bool>(condensation.nodes().size(), false);
+    for (auto &scc : condensation.nodes()) {
+        for (auto &pkgName : scc.members) {
+            auto &pkgInfo = gs.packageDB().getPackageInfo(pkgName);
+            // TODO(neil): also check if this package is a build package
+            if (pkgInfo.numFilesInPackage() == 0) {
+                skipRaisingStrictness[scc.id] = true;
+                break;
+            }
+        }
+    }
+    auto newStrictnessByPkg = UnorderedMap<core::packages::MangledName, core::packages::StrictDependenciesLevel>(
+        gs.packageDB().packages().size());
+    for (auto pkgName : gs.packageDB().packages()) {
+        auto &pkgInfo = gs.packageDB().getPackageInfo(pkgName);
+        ENFORCE(pkgInfo.exists());
+        auto sccID = referencesPackageGraph.getSCCId(pkgName);
+        auto newStrictDependenciesLevel = bestStrictness[sccID];
+        if (newStrictDependenciesLevel < pkgInfo.strictDependenciesLevel || skipRaisingStrictness[sccID]) {
+            newStrictDependenciesLevel = pkgInfo.strictDependenciesLevel;
+        }
+        newStrictnessByPkg[pkgName] = newStrictDependenciesLevel;
+    }
+
     for (auto pkgName : gs.packageDB().packages()) {
         auto &pkgInfo = gs.packageDB().getPackageInfo(pkgName);
         ENFORCE(pkgInfo.exists());
@@ -289,7 +418,9 @@ void GenPackages::runStrict(core::GlobalState &gs) {
         auto existingContents = existingContentsLoc.source(gs);
         ENFORCE(existingContents.has_value());
 
-        auto newContents = pkgInfo.renderPackageRbContents(gs, computeNewImports(gs, pkgInfo));
+        // TODO(neil): If the __package.rb has an unused import that is a modularity error to import, we'll report an
+        // error on the import in packager.cc, even though we're deleting it here
+        auto newContents = pkgInfo.renderPackageRbContents(gs, computeNewImports(gs, pkgInfo), newStrictnessByPkg);
 
         if (existingContents.value() != newContents) {
             if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectPackageRB)) {
