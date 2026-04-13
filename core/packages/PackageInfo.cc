@@ -67,7 +67,9 @@ unique_ptr<PackageInfo> PackageInfo::deepCopy() const {
 // TODO(neil): explain the rationale behind this ordering (ie. why is not the simple "false < layered < layered_dag
 // < dag" ordering)
 int PackageInfo::orderImports(const core::GlobalState &gs, const PackageInfo &a, bool aIsTestImport,
-                              const PackageInfo &b, bool bIsTestImport) const {
+                              const PackageInfo &b, bool bIsTestImport,
+                              const StrictDependenciesLevel aStrictDependenciesLevel,
+                              const StrictDependenciesLevel bStrictDependenciesLevel) const {
     // Test imports always come last, and aren't sorted by `strict_dependencies`
     if (aIsTestImport && bIsTestImport) {
         return orderByAlphabetical(gs, a, b);
@@ -77,17 +79,25 @@ int PackageInfo::orderImports(const core::GlobalState &gs, const PackageInfo &a,
         return -1;
     } // Neither is a test import
 
-    auto strictnessCompareResult = orderByStrictness(gs.packageDB(), a, b);
+    auto strictnessCompareResult =
+        orderByStrictness(gs.packageDB(), a,
+                          aStrictDependenciesLevel == StrictDependenciesLevel::None ? a.strictDependenciesLevel
+                                                                                    : aStrictDependenciesLevel,
+                          b,
+                          bStrictDependenciesLevel == StrictDependenciesLevel::None ? b.strictDependenciesLevel
+                                                                                    : bStrictDependenciesLevel);
     if (strictnessCompareResult == 0) {
         return orderByAlphabetical(gs, a, b);
     }
     return strictnessCompareResult;
 }
 
-int PackageInfo::orderByStrictness(const PackageDB &packageDB, const PackageInfo &a, const PackageInfo &b) const {
+int PackageInfo::orderByStrictness(const PackageDB &packageDB, const PackageInfo &a,
+                                   const StrictDependenciesLevel aStrictDependenciesLevel, const PackageInfo &b,
+                                   const StrictDependenciesLevel bStrictDependenciesLevel) const {
     if (!packageDB.enforceLayering() || strictDependenciesLevel == StrictDependenciesLevel::None ||
-        a.strictDependenciesLevel == StrictDependenciesLevel::None ||
-        b.strictDependenciesLevel == StrictDependenciesLevel::None || !a.layer.exists() || !b.layer.exists()) {
+        aStrictDependenciesLevel == StrictDependenciesLevel::None ||
+        bStrictDependenciesLevel == StrictDependenciesLevel::None || !a.layer.exists() || !b.layer.exists()) {
         return 0;
     }
 
@@ -109,30 +119,30 @@ int PackageInfo::orderByStrictness(const PackageDB &packageDB, const PackageInfo
 
         case StrictDependenciesLevel::False: {
             // Sort order: Layering violations, false, layered or stricter
-            switch (a.strictDependenciesLevel) {
+            switch (aStrictDependenciesLevel) {
                 case StrictDependenciesLevel::None: {
                     Exception::raise("Early exited from orderByStrictness");
                 }
                 case StrictDependenciesLevel::False:
-                    return b.strictDependenciesLevel == StrictDependenciesLevel::False ? 0 : -1;
+                    return bStrictDependenciesLevel == StrictDependenciesLevel::False ? 0 : -1;
                 case StrictDependenciesLevel::Layered:
                 case StrictDependenciesLevel::LayeredDag:
                 case StrictDependenciesLevel::Dag:
-                    return b.strictDependenciesLevel == StrictDependenciesLevel::False ? 1 : 0;
+                    return bStrictDependenciesLevel == StrictDependenciesLevel::False ? 1 : 0;
             }
         }
         case StrictDependenciesLevel::Layered:
         case StrictDependenciesLevel::LayeredDag: {
             // Sort order: Layering violations, false, layered or layered_dag, dag
-            switch (a.strictDependenciesLevel) {
+            switch (aStrictDependenciesLevel) {
                 case StrictDependenciesLevel::None: {
                     Exception::raise("Early exited from orderByStrictness");
                 }
                 case StrictDependenciesLevel::False:
-                    return b.strictDependenciesLevel == StrictDependenciesLevel::False ? 0 : -1;
+                    return bStrictDependenciesLevel == StrictDependenciesLevel::False ? 0 : -1;
                 case StrictDependenciesLevel::Layered:
                 case StrictDependenciesLevel::LayeredDag:
-                    switch (b.strictDependenciesLevel) {
+                    switch (bStrictDependenciesLevel) {
                         case StrictDependenciesLevel::None: {
                             Exception::raise("Early exited from orderByStrictness");
                         }
@@ -145,21 +155,21 @@ int PackageInfo::orderByStrictness(const PackageDB &packageDB, const PackageInfo
                             return -1;
                     }
                 case StrictDependenciesLevel::Dag:
-                    return b.strictDependenciesLevel == StrictDependenciesLevel::Dag ? 0 : 1;
+                    return bStrictDependenciesLevel == StrictDependenciesLevel::Dag ? 0 : 1;
             }
         }
         case StrictDependenciesLevel::Dag: {
             // Sort order: Layering violations, false or layered or layered_dag, dag
-            switch (a.strictDependenciesLevel) {
+            switch (aStrictDependenciesLevel) {
                 case StrictDependenciesLevel::None: {
                     Exception::raise("Early exited from orderByStrictness");
                 }
                 case StrictDependenciesLevel::False:
                 case StrictDependenciesLevel::Layered:
                 case StrictDependenciesLevel::LayeredDag:
-                    return b.strictDependenciesLevel == StrictDependenciesLevel::Dag ? -1 : 0;
+                    return bStrictDependenciesLevel == StrictDependenciesLevel::Dag ? -1 : 0;
                 case StrictDependenciesLevel::Dag:
-                    return b.strictDependenciesLevel == StrictDependenciesLevel::Dag ? 0 : 1;
+                    return bStrictDependenciesLevel == StrictDependenciesLevel::Dag ? 0 : 1;
             }
         }
     }
