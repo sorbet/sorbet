@@ -369,6 +369,7 @@ bool isSharedExamplesName(core::NameRef name) {
 // silently drop the call if the argument is not a string/symbol literal (e.g. a block parameter
 // that can't be resolved at compile time). Must only be called after a numPosArgs >= 1 check.
 ast::ExpressionPtr rewriteIncludeExamples(core::MutableContext ctx, ast::Send *send) {
+    ENFORCE(send->numPosArgs() > 0);
     if (!ast::isa_tree<ast::Literal>(send->getPosArg(0))) {
         return ast::MK::EmptyTree();
     }
@@ -1044,8 +1045,8 @@ vector<ast::ExpressionPtr> Minitest::run(core::MutableContext ctx, bool isClass,
     // Handle RSpec.local_context do ... end: scan the body for RSpec.shared_examples /
     // shared_context / shared_examples_for calls and hoist them to the top-level scope,
     // making them resolvable via include_examples / include_context in any describe block.
-    if (send->fun == core::Names::localContext() && isRSpec(ctx, send->recv) && send->hasBlock() &&
-        ctx.state.cacheSensitiveOptions.rspecRewriterEnabled) {
+    if (ctx.state.cacheSensitiveOptions.rspecRewriterEnabled && send->fun == core::Names::localContext() &&
+        isRSpec(ctx, send->recv) && send->hasBlock()) {
         auto *block = send->block();
 
         // Note: only direct Send children of the block body are scanned.

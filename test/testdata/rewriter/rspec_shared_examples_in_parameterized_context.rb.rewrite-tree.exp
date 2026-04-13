@@ -1,0 +1,40 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C RSpec><<C <todo sym>>> < ()
+    module <emptyTree>::<C Core><<C <todo sym>>> < ()
+      class <emptyTree>::<C ExampleGroup><<C <todo sym>>> < (::<todo sym>)
+      end
+    end
+  end
+
+  module ::<root>::<C <shared_examples 'outer parameterized context'>><<C <todo sym>>> < ()
+    module ::<root>::<C <shared_examples 'nested context inside parameterized'>><<C <todo sym>>> < ()
+      def value<<todo method>>(&<blk>)
+        42
+      end
+
+      <runtime method definition of value>
+    end
+
+    module ::<root>::<C <shared_examples 'nested examples inside parameterized'>><<C <todo sym>>> < ()
+      def <it 'works'><<todo method>>(&<blk>)
+        <emptyTree>
+      end
+    end
+
+    module ::<root>::<C <shared_examples 'nested examples_for inside parameterized'>><<C <todo sym>>> < ()
+      def <it 'also works'><<todo method>>(&<blk>)
+        <emptyTree>
+      end
+    end
+  end
+
+  class <emptyTree>::<C <describe 'consumer'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+    <self>.include(::<root>::<C <shared_examples 'outer parameterized context'>>)
+
+    <self>.include(::<root>::<C <shared_examples 'nested context inside parameterized'>>)
+
+    <self>.include(::<root>::<C <shared_examples 'nested examples inside parameterized'>>)
+
+    <self>.include(::<root>::<C <shared_examples 'nested examples_for inside parameterized'>>)
+  end
+end
