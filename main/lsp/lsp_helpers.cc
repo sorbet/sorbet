@@ -150,7 +150,6 @@ static const vector<core::NameRef> writerNames = {
 
 static const vector<core::NameRef> readerNames = {
     core::Names::const_(),
-    core::Names::merchantProp(),
     core::Names::attrReader(),
 };
 
