@@ -306,8 +306,9 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                         // thread if a fast path edit preempts, with the `canPreempt` checks of edits in this thread.
                         auto noPreemptionTasksRemain = [&indexer = this->indexer,
                                                         &tasks = this->taskQueue->tasks()]() -> bool {
-                            // Await always holds taskQueueMutex when calling this function, but absl doesn't know that.
-                            return tasks.empty() || !tasks.front()->canPreempt(indexer);
+                            // The capture of `tasks` here is safe because the only caller of this closure is the
+                            // `Await` below, which will lock the mutex that guards `tasks` for its duration.
+                            return !indexer.preemptionPossible(tasks);
                         };
                         // Wait until the head of the queue turns into a non-preemptible task to resume processing the
                         // queue.

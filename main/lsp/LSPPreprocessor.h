@@ -18,6 +18,10 @@ class WatchmanQueryResponse;
 class CancelParams;
 
 class TaskQueue final {
+public:
+    using QueueType = std::deque<std::unique_ptr<LSPTask>>;
+
+private:
     absl::Mutex stateMutex;
 
     std::deque<std::unique_ptr<LSPTask>> pendingTasks ABSL_GUARDED_BY(stateMutex);
@@ -49,8 +53,8 @@ public:
 
     CounterState &getCounters() ABSL_EXCLUSIVE_LOCKS_REQUIRED(stateMutex);
 
-    const std::deque<std::unique_ptr<LSPTask>> &tasks() const ABSL_SHARED_LOCKS_REQUIRED(stateMutex);
-    std::deque<std::unique_ptr<LSPTask>> &tasks() ABSL_EXCLUSIVE_LOCKS_REQUIRED(stateMutex);
+    const QueueType &tasks() const ABSL_SHARED_LOCKS_REQUIRED(stateMutex);
+    QueueType &tasks() ABSL_EXCLUSIVE_LOCKS_REQUIRED(stateMutex);
 
     absl::Mutex *getMutex() ABSL_LOCK_RETURNED(stateMutex);
 
