@@ -34,7 +34,13 @@ module T::Private::Methods
   ARG_NOT_PROVIDED = Object.new
   PROC_TYPE = Object.new
 
-  DeclarationBlock = Struct.new(:mod, :loc, :blk, :final, :raw)
+  # blk_or_decl:
+  # - It's a `Proc` if we haven't forced the thunk yet.
+  # - It's a `Declaration` if we have, but we haven't finished building the sig
+  #   (This can matter for circular load-time behavior, where a method is
+  #   called while its Signature is being built)
+  # - It's `nil` if we've finished building the sig
+  DeclarationBlock = Struct.new(:mod, :loc, :blk_or_decl, :final, :raw)
 
   def self.declare_sig(mod, loc, arg, &blk)
     T::Private::DeclState.current.active_declaration = _declare_sig_internal(mod, loc, arg, &blk)
@@ -337,7 +343,7 @@ module T::Private::Methods
   def self.run_builder(declaration_block)
     builder = DeclBuilder.new(declaration_block.mod, declaration_block.raw)
     builder
-      .instance_exec(&declaration_block.blk)
+      .instance_exec(&declaration_block.blk_or_decl)
       .finalize!
       .decl
   end
