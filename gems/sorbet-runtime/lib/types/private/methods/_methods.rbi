@@ -5,6 +5,9 @@ module T::Private::Methods
     sig {returns(Module)}
     attr_accessor :mod
 
+    sig {returns(T.nilable(Symbol))}
+    attr_accessor :method_name
+
     sig {returns(T.nilable(Thread::Backtrace::Location))}
     attr_accessor :loc
 
@@ -20,6 +23,7 @@ module T::Private::Methods
     sig do
       params(
         mod: Module,
+        method_name: T.nilable(Symbol),
         loc: T.nilable(Thread::Backtrace::Location),
         blk: Proc,
         final: T::Boolean,
@@ -27,7 +31,7 @@ module T::Private::Methods
       )
         .void
     end
-    def initialize(mod, loc, blk, final, raw); end
+    def initialize(mod, method_name, loc, blk, final, raw); end
   end
 
   @installed_hooks = T.let({}, T::Hash[Module, TrueClass])
