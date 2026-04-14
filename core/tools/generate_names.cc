@@ -214,7 +214,6 @@ NameDef names[] = {
     {"timestampedTokenProp", "timestamped_token_prop"},
     {"createdProp", "created_prop"},
     {"updatedProp", "updated_prop"},
-    {"merchantProp", "merchant_prop"},
     {"merchantTokenProp", "merchant_token_prop"},
     {"name"},
     {"encryptedProp", "encrypted_prop"},
@@ -615,8 +614,6 @@ NameDef names[] = {
     {"Tokens", "Tokens", true},
     {"AccountModelMerchant", "AccountModelMerchant", true},
     {"Token", "Token", true},
-    {"Account", "Account", true},
-    {"Merchant", "Merchant", true},
 
     // RBS
     {"RBSBind", "<RBSBind>", true},
