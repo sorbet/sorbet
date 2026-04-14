@@ -7,6 +7,13 @@ class T::Private::DeclState
   sig {params(other: T::Private::DeclState).returns(T::Private::DeclState)}
   def self.current=(other); end
 
+  sig { void }
+  def initialize
+    @active_declaration = T.let(nil, T.nilable(T::Private::Methods::DeclarationBlock))
+    @skip_on_method_added = T.let(nil, T.nilable(TrueClass))
+    @previous_declaration = T.let(nil, T.nilable(T::Private::Methods::DeclarationBlock))
+  end
+
   sig {returns(T.nilable(T::Private::Methods::DeclarationBlock))}
   def active_declaration; end
 
@@ -16,6 +23,9 @@ class T::Private::DeclState
   end
   def active_declaration=(active_declaration); end
 
+  sig { returns(T.nilable(T::Private::Methods::DeclarationBlock)) }
+  def previous_declaration; end
+
   sig {returns(T.nilable(TrueClass))}
   def skip_on_method_added; end
 
@@ -24,6 +34,9 @@ class T::Private::DeclState
 
   sig {void}
   def reset!; end
+
+  sig { returns(T.nilable(T::Private::Methods::DeclarationBlock)) }
+  def consume!; end
 
   sig do
     type_parameters(:U)
