@@ -48,7 +48,7 @@ module T::Private::Methods
   #   (This can matter for circular load-time behavior, where a method is
   #   called while its Signature is being built)
   # - It's `nil` if we've finished building the sig
-  DeclarationBlock = Struct.new(:mod, :loc, :blk_or_decl, :final)
+  DeclarationBlock = Struct.new(:mod, :method_name, :loc, :blk_or_decl, :final)
 
   def self.declare_sig(mod, loc, arg, &blk)
     if T::Private::DeclState.current.active_declaration
@@ -60,7 +60,8 @@ module T::Private::Methods
       raise "Invalid argument to `sig`: #{arg}"
     end
 
-    T::Private::DeclState.current.active_declaration = DeclarationBlock.new(mod, loc, blk, arg == :final)
+    method_name = nil # will be filled in once the next method is defined
+    T::Private::DeclState.current.active_declaration = DeclarationBlock.new(mod, method_name, loc, blk, arg == :final)
 
     nil
   end
@@ -210,6 +211,8 @@ module T::Private::Methods
     if current_declaration.nil?
       return
     end
+
+    current_declaration.method_name = method_name
 
     if method_name == :method_added || method_name == :singleton_method_added
       raise(
