@@ -58,54 +58,49 @@ class AutogenWalk {
         auto *cnst = &cnstRef;
         while (cnst != nullptr && cnst->original() != nullptr) {
             auto &original = *cnst->original();
-            auto ns = original.names();
-            for (auto it = ns.rbegin(); it != ns.rend(); ++it) {
-                out.emplace_back(*it);
-            }
-            cnst = ast::cast_tree<ast::ConstantLit>(original.scope);
+            auto names = original.names();
+            auto *resolutionData = cnst->resolutionData();
+            if (resolutionData != nullptr) {
+                auto unresolved = names.subspan(resolutionData->resolvedUpToSegment);
+                for (auto it = unresolved.rbegin(), end = unresolved.rend(); it != end; ++it) {
+                    out.emplace_back(*it);
+                }
 
-            // If any part of the constant literal scope is a class alias, the final name should be
-            // scoped under the alias. This allows subconstants-of-aliases to be referenced correctly
-            // -- otherwise, we'd have missing edges in our static analysis dependency graphs.
-            if (cnst != nullptr && cnst->original() != nullptr) {
-                auto scopeSym = cnst->symbol();
-                if (scopeSym.isStaticField(ctx) && scopeSym.asFieldRef().data(ctx)->isClassAlias()) {
+                names = names.subspan(0, resolutionData->resolvedUpToSegment);
+            }
+
+            auto scopeSym = cnst->symbol();
+            cnst = ast::cast_tree<ast::ConstantLit>(original.scope);
+            if (cnst != nullptr) {
+                ENFORCE(cnst->original() == nullptr);
+            }
+
+            // If any part of the resolved constant is a class alias, the final name should be
+            // scoped under the alias.  This allows subconstants-of-aliases to be referenced
+            // correctly -- otherwise, we'd have missing edges in our static analysis dependency
+            // graphs.
+            int i = -1;
+            for (auto it = names.rbegin(), end = names.rend(); it != end; ++it) {
+                i++;
+                // This is a little awkward with our current setup -- we know that the
+                // name that we're currently on is a class alias, but now we have to deal
+                // with scoping -- `scopeSym` might have been resolved because of part of
+                // the `UnresolvedConstantLit`, said UCL's scope, or just from the nesting
+                // of this reference.
+                bool isClassAlias = scopeSym.isStaticField(ctx) && scopeSym.asFieldRef().data(ctx)->isClassAlias();
+
+                if (isClassAlias && i != int(names.size() - 1)) {
                     auto resolvedScopeName = symbolName(ctx, scopeSym);
 
                     // append the name in reverse order to the hitherto-built name vector,
                     // then break out of the loop.
                     out.insert(out.end(), resolvedScopeName.rbegin(), resolvedScopeName.rend());
                     break;
+                } else {
+                    out.emplace_back(*it);
                 }
-            } else if (cnst == nullptr && original.segCount() > 1 && ast::isa_tree<ast::EmptyTree>(original.scope)) {
-                // Flat multi-segment UCL (scope = EmptyTree): the ConstantLit chain no longer
-                // exists to trigger the alias check above. Check whether names()[0] (the outermost
-                // scope segment) is a class alias by looking it up in the current nesting chain.
-                // If it is, replace it with its symbolName (which includes the enclosing module).
-                auto s1name = original.names()[0];
-                core::SymbolRef s1sym;
-                for (auto it = nestingStack.rbegin(); it != nestingStack.rend(); ++it) {
-                    auto defId = it->ref._id;
-                    if (defId >= defs.size()) {
-                        continue;
-                    }
-                    auto defSym = defs[defId].sym;
-                    if (!defSym.exists() || !defSym.isClassOrModule()) {
-                        continue;
-                    }
-                    s1sym = defSym.asClassOrModuleRef().data(ctx)->findMemberNoDealias(s1name);
-                    if (s1sym.exists()) {
-                        break;
-                    }
-                }
-                if (s1sym.exists() && s1sym.isStaticField(ctx) && s1sym.asFieldRef().data(ctx)->isClassAlias()) {
-                    // names()[0] was added last to `out` (since we iterate rbegin→rend above,
-                    // the first segment ends up at the back). Replace it with symbolName(s1sym)
-                    // which includes the enclosing module (e.g. [Foo, Alias] for Foo::Alias).
-                    out.pop_back();
-                    auto s1FullName = symbolName(ctx, s1sym);
-                    out.insert(out.end(), s1FullName.rbegin(), s1FullName.rend());
-                }
+
+                scopeSym = scopeSym.owner(ctx);
             }
         }
 
