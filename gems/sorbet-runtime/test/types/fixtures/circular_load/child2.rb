@@ -2,6 +2,6 @@
 
 module Opus::Types::Test::Fixtures::CircularLoad
   class Child2 < Parent
-    foo(self)
+    Parent.foo(self)
   end
 end

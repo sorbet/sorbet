@@ -5,10 +5,12 @@ module Opus::Types::Test::Fixtures::CircularLoad
     extend T::Sig
     sig { params(x: OneOrTwo).void }
     def self.foo(x)
-      @@foo_invocations ||= []
-      @@foo_invocations << x
+      @foo_invocations ||= []
+      @foo_invocations << x
     end
 
-    def self.foo_invocations = @@foo_invocations
+    class << self
+      attr_reader :foo_invocations
+    end
   end
 end
