@@ -327,6 +327,7 @@ module T::Private::Methods
         nil
       end
 
+    # Release location information sooner
     declaration_block.loc = nil
 
     signature =
@@ -336,16 +337,25 @@ module T::Private::Methods
         Signature.new_untyped(method: original_method)
       end
 
+    # Drop this declaration
+    declaration_block.blk_or_decl = nil
+
     unwrap_method(signature.method.owner, signature, original_method)
     signature
   end
 
   def self.run_builder(declaration_block)
+    blk_or_decl = declaration_block.blk_or_decl
+    return blk_or_decl if blk_or_decl.is_a?(Declaration)
+    if blk_or_decl.nil?
+      raise "DeclarationBlock for #{declaration_block.mod} at #{declaration_block.loc} should have already been unwrapped"
+    end
+
     builder = DeclBuilder.new(declaration_block.mod, declaration_block.raw)
-    builder
-      .instance_exec(&declaration_block.blk_or_decl)
-      .finalize!
-      .decl
+    decl = builder.instance_exec(&blk_or_decl).finalize!.decl
+    # Record that we've already run `blk` once and constructed a `Declaration`
+    declaration_block.blk_or_decl = decl
+    decl
   end
 
   def self.build_sig(hook_mod, method_name, original_method, current_declaration)
