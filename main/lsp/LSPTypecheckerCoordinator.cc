@@ -174,7 +174,7 @@ public:
             unique_ptr<LSPTask> task;
             {
                 absl::MutexLock lck(taskQueue.getMutex());
-                if (taskQueue.tasks().empty() || !taskQueue.tasks().front()->canPreempt(indexer)) {
+                if (!indexer.preemptionPossible(taskQueue.tasks())) {
                     break;
                 }
                 task = move(taskQueue.tasks().front());

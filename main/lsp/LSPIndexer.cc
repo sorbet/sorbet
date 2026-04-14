@@ -454,4 +454,8 @@ void LSPIndexer::updateConfigAndGsFromOptions(const DidChangeConfigurationParams
     }
 }
 
+bool LSPIndexer::preemptionPossible(const TaskQueue::QueueType &tasks) const {
+    return !tasks.empty() && tasks.front()->canPreempt(*this);
+}
+
 } // namespace sorbet::realmain::lsp

@@ -111,6 +111,9 @@ public:
     void transferInitializeState(InitializedTask &task);
 
     void updateConfigAndGsFromOptions(const DidChangeConfigurationParams &options) const;
+
+    // Determines if it's possible for the head of the task queue to run during preemption.
+    bool preemptionPossible(const TaskQueue::QueueType &tasks) const;
 };
 
 } // namespace sorbet::realmain::lsp
