@@ -194,8 +194,7 @@ module T::Private::Methods
       return
     end
 
-    current_declaration = T::Private::DeclState.current.active_declaration
-    T::Private::DeclState.current.reset!
+    current_declaration = T::Private::DeclState.current.consume!
 
     if T::Private::Final.final_module?(mod) && (current_declaration.nil? || !current_declaration.final)
       raise "#{mod} was declared as final but its method `#{method_name}` was not declared as final"
