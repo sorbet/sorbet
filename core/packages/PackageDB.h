@@ -13,6 +13,12 @@ namespace sorbet::core::packages {
 
 class PackageDB;
 
+enum class GenPackagesMode : uint8_t {
+    Disabled,
+    Normal,
+    Strict,
+};
+
 class UnfreezePackages final {
 public:
     PackageDB &db;
@@ -63,9 +69,8 @@ public:
         return this->enabled_;
     }
 
-    // Whether the --gen-packages mode is active.
-    bool genPackages() const {
-        return this->genPackages_;
+    GenPackagesMode genPackagesMode() const {
+        return this->genPackagesMode_;
     }
 
     // Whether --gen-packages-allow-relaxing-test-visibility is active.
@@ -118,7 +123,7 @@ public:
 
 private:
     bool enabled_ = false;
-    bool genPackages_ = false;
+    GenPackagesMode genPackagesMode_ = GenPackagesMode::Disabled;
     bool allowRelaxingTestVisibility_ = false;
     bool packageAttributedErrors_ = false;
     bool testPackages_ = false;

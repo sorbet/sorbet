@@ -1,5 +1,5 @@
 ###### --gen-packages not allowed without --sorbet-packages ######
---gen-packages can only be can only be used in --sorbet-packages mode
+--gen-packages can only be used in --sorbet-packages mode
 ###### --gen-packages not allowed with --lsp ######
 --gen-packages can not be used when --lsp is also enabled
 ##################################
