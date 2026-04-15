@@ -66,12 +66,14 @@ D/__package.rb:3: `D` is missing imports and exports https://srb.help/3734
      3 |class D < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    D/__package.rb:7: Inserted `export D::CONSTANT_FROM_D
-      export D::ClassFromD
-      export D::EnumFromD
-      test_import E`
+    D/__package.rb:7: Inserted `test_import E`
      7 |  import B
                   ^
+    D/__package.rb:8: Inserted `export D::CONSTANT_FROM_D
+      export D::ClassFromD
+      export D::EnumFromD`
+     8 |  export D::AlreadyExportedClass
+                                        ^
 
 C/app.rb:8: `F::CONSTANT_FROM_F` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
      8 |      puts F::CONSTANT_FROM_F
@@ -128,10 +130,11 @@ class D < PackageSpec
   layer 'util'
 
   import B
+  test_import E
+  export D::AlreadyExportedClass
   export D::CONSTANT_FROM_D
   export D::ClassFromD
   export D::EnumFromD
-  test_import E
 end
 
 ###### cat E/__package.rb ######
@@ -193,12 +196,14 @@ D/__package.rb:3: `D` is missing imports and exports https://srb.help/3734
      3 |class D < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    D/__package.rb:7: Inserted `export D::CONSTANT_FROM_D
-      export D::ClassFromD
-      export D::EnumFromD
-      test_import E`
+    D/__package.rb:7: Inserted `test_import E`
      7 |  import B
                   ^
+    D/__package.rb:8: Inserted `export D::CONSTANT_FROM_D
+      export D::ClassFromD
+      export D::EnumFromD`
+     8 |  export D::AlreadyExportedClass
+                                        ^
 
 A/constants.rb:5: Unable to resolve constant `G` https://srb.help/5002
      5 |  puts G::ANOTHER_CONSTANT_FROM_G
@@ -268,10 +273,11 @@ class D < PackageSpec
   layer 'util'
 
   import B
+  test_import E
+  export D::AlreadyExportedClass
   export D::CONSTANT_FROM_D
   export D::ClassFromD
   export D::EnumFromD
-  test_import E
 end
 
 ###### cat E/__package.rb ######

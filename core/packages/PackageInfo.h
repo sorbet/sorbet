@@ -338,7 +338,7 @@ public:
     aggregateMissingVisibleTo(const core::GlobalState &gs, std::vector<core::packages::MangledName> &visibleTos,
                               bool visibleToTests) const;
 
-    std::string renderPackageRbContents(const core::GlobalState &gs) const;
+    std::string renderPackageRbContents(const core::GlobalState &gs, std::vector<core::SymbolRef> newExports) const;
 };
 CheckSize(PackageInfo, 256, 8);
 

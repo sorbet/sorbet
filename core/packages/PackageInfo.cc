@@ -655,6 +655,22 @@ std::optional<core::AutocorrectSuggestion>
 PackageInfo::aggregateMissingExports(const core::GlobalState &gs, vector<core::SymbolRef> &toExport) const {
     std::vector<core::AutocorrectSuggestion::Edit> allEdits;
     for (auto &symbol : toExport) {
+        switch (symbol.kind()) {
+            case core::SymbolRef::Kind::ClassOrModule:
+                if (symbol.asClassOrModuleRef().data(gs)->flags.isExported) {
+                    continue;
+                }
+                break;
+            case core::SymbolRef::Kind::FieldOrStaticField:
+                if (symbol.asFieldRef().data(gs)->flags.isExported) {
+                    continue;
+                }
+                break;
+            case core::SymbolRef::Kind::TypeMember:
+            case core::SymbolRef::Kind::Method:
+            case core::SymbolRef::Kind::TypeParameter:
+                ENFORCE(false, "trying to export something other than ClassOrModule or FieldOrStaticField");
+        }
         auto autocorrect = addExport(gs, symbol);
         if (autocorrect.has_value()) {
             allEdits.insert(allEdits.end(), make_move_iterator(autocorrect.value().edits.begin()),
@@ -697,7 +713,8 @@ std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingVisibleT
     return core::AutocorrectSuggestion{fmt::format("Add missing `{}`", "visible_to"), std::move(allEdits)};
 }
 
-std::string PackageInfo::renderPackageRbContents(const core::GlobalState &gs) const {
+std::string PackageInfo::renderPackageRbContents(const core::GlobalState &gs,
+                                                 std::vector<core::SymbolRef> newExports) const {
     fmt::memory_buffer result;
 
     if (isPreludePackage()) {
@@ -832,11 +849,12 @@ std::string PackageInfo::renderPackageRbContents(const core::GlobalState &gs) co
     if (locs.exportAll.exists()) {
         fmt::format_to(std::back_inserter(result), "  export_all!\n");
     } else {
-        // TODO(neil): sort the exports
-        for (auto &export_ : exports_) {
-            auto exportSource = core::Loc(file, export_.loc).source(gs);
-            ENFORCE(exportSource.has_value());
-            fmt::format_to(std::back_inserter(result), "  {}\n", exportSource.value());
+        auto newExportsNames = vector<string>{};
+        absl::c_transform(newExports, back_inserter(newExportsNames),
+                          [&gs](SymbolRef export_) { return export_.show(gs); });
+        fast_sort(newExportsNames, [](string &l, string &r) { return l < r; });
+        for (auto &export_ : newExportsNames) {
+            fmt::format_to(back_inserter(result), "  export {}\n", export_);
         }
     }
 

@@ -8,6 +8,7 @@ class B < PackageSpec
   import C
 
   export B::CONSTANT_FROM_B
+  export B::ANOTHER_CONSTANT_FROM_B
 
   visible_to A
 end

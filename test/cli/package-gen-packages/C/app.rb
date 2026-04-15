@@ -15,6 +15,8 @@ module C
       puts D::ClassFromD
       puts D::ClassFromD::CONSTANT_FROM_D_CLASS
       puts D::EnumFromD::Variant
+
+      D::AlreadyExportedClass.new
     end
   end
 end
