@@ -744,6 +744,7 @@ std::string PackageInfo::renderPackageRbContents(const core::GlobalState &gs) co
     //
     // NOTE: This information (the categories and how they are sorted) is duplicated with orderByStrictness.
     static const UnorderedMap<StrictDependenciesLevel, vector<pair<StrictDependenciesLevel, string>>> headerMap = {
+        {StrictDependenciesLevel::None, {}},
         {StrictDependenciesLevel::False,
          {{StrictDependenciesLevel::False, "  # strict_dependencies 'false':\n"},
           {StrictDependenciesLevel::Layered, "  # strict_dependencies 'layered' or more strict:\n"}}},
@@ -764,7 +765,11 @@ std::string PackageInfo::renderPackageRbContents(const core::GlobalState &gs) co
     // TODO(neil): sort the imports
     bool layeringViolationsHeaderShown = false;
     bool testImportNewLineAdded = false;
-    uint8_t headerIndex = 0;
+
+    ENFORCE(headerMap.find(strictDependenciesLevel) != headerMap.end(),
+            "should not happen, was a new StrictDependenciesLevel added?");
+    auto &headers = headerMap.find(strictDependenciesLevel)->second;
+    auto headersIt = headers.begin();
     for (auto &import : importedPackageNames) {
         auto impPackageName = import.mangledName.owner.show(gs);
         auto &impPkgInfo = gs.packageDB().getPackageInfo(import.mangledName);
@@ -778,20 +783,11 @@ std::string PackageInfo::renderPackageRbContents(const core::GlobalState &gs) co
                 layeringViolationsHeaderShown = true;
             }
 
-            if (!causesLayeringViolation(gs.packageDB(), impPkgInfo) &&
-                strictDependenciesLevel != StrictDependenciesLevel::None) {
-                auto it = headerMap.find(strictDependenciesLevel);
-                if (it == headerMap.end()) {
-                    // This is already inside a `if (strictDependenciesLevel != StrictDependenciesLevel::None), so this
-                    // can only happen if a StrictDependenciesLevel is added.
-                    ENFORCE(false, "should not happen, was a new StrictDependenciesLevel added?");
-                }
-                auto &headers = it->second;
+            if (!causesLayeringViolation(gs.packageDB(), impPkgInfo)) {
                 auto headerToPrint = string();
-                while (headerIndex < headers.size() &&
-                       impPkgInfo.strictDependenciesLevel >= headers[headerIndex].first) {
-                    headerToPrint = headers[headerIndex].second;
-                    headerIndex++;
+                while (headersIt != headers.end() && impPkgInfo.strictDependenciesLevel >= headersIt->first) {
+                    headerToPrint = headersIt->second;
+                    headersIt++;
                 }
                 if (headerToPrint != "") {
                     fmt::format_to(std::back_inserter(result), "\n{}", headerToPrint);
