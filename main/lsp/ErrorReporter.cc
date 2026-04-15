@@ -151,6 +151,7 @@ void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const ve
 
         auto diagnostic = make_unique<Diagnostic>(std::move(range), error->header);
         diagnostic->code = error->what.code;
+        diagnostic->source = "Sorbet";
         if (error->what.code == sorbet::core::errors::Infer::DeadBranchInferencer.code) {
             vector<DiagnosticTag> tags;
             tags.push_back(DiagnosticTag::Unnecessary);
