@@ -6,11 +6,8 @@ class T::Private::Methods::DeclBuilder
   sig {returns(T::Private::Methods::DeclBuilder)}
   def abstract; end
 
-  sig {returns(T::Private::Methods::DeclBuilder)}
+  sig {returns(T.noreturn)}
   def final; end
-
-  sig {returns(T::Private::Methods::DeclBuilder)}
-  def implementation; end
 
   sig {params(allow_incompatible: T.any(T::Boolean, Symbol)).returns(T::Private::Methods::DeclBuilder)}
   def override(allow_incompatible: false); end
