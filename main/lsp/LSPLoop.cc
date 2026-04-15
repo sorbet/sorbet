@@ -342,8 +342,8 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                         }
 
                         // If the first task that cannot preempt is not an edit, there are no tasks to move.
-                        auto cannotPreempt = absl::c_find_if_not(
-                            tasks, [&indexer = this->indexer](auto &task) { return task->canPreempt(indexer); });
+                        auto cannotPreempt = absl::c_find_if(
+                            tasks, [&indexer = this->indexer](auto &task) { return !task->canPreempt(indexer); });
                         if (cannotPreempt == tasks.end() ||
                             dynamic_cast<SorbetWorkspaceEditTask *>(cannotPreempt->get()) == nullptr) {
                             continue;
@@ -351,8 +351,9 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
 
                         config->logger->debug("[Processing] Promoting slow path edits");
 
-                        // Migrate all the edit tasks to the beginning of the queue, but leave everything after
-                        // the first slow path edit alone.
+                        // As we might have more than one edit between the front of the queue and the slow path edit,
+                        // migrate all the edits to the front of the queue and preserve their order so that we can merge
+                        // them into a single edit.
                         auto firstNonEdit = std::stable_partition(tasks.begin(), cannotPreempt + 1, [](auto &task) {
                             return dynamic_cast<SorbetWorkspaceEditTask *>(task.get()) != nullptr;
                         });

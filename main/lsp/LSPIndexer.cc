@@ -474,7 +474,7 @@ bool LSPIndexer::preemptionPossible(const TaskQueue::QueueType &tasks) const {
     }
 
     // If the first task that can't preempt is a workspace edit, return that preemption is no longer possible so that
-    // the main thread will clean out any tasks that do support preemption in favor forcing the slow path cancellation.
+    // the main thread will move the slow path edit to the front of the queue and force a slow path cancellation.
     if (dynamic_cast<SorbetWorkspaceEditTask *>(cannotPreempt->get())) {
         return false;
     }
