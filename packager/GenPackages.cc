@@ -110,15 +110,13 @@ vector<core::packages::Import> computeNewImports(const core::GlobalState &gs,
             if (!pkgInfo.exists()) {
                 continue;
             }
-            // TODO(neil): this ignores strict dependencies violations and unconditionally adds an import.
-            // Should we skip imports that would cause a strict dependencies error instead?
-            auto it = importMap.find(packageName);
-            if (it != importMap.end()) {
+            // TODO(neil): this ignores strict dependencies/visibility violations and unconditionally adds an import.
+            // Should we skip imports that would cause a strict dependencies/visibility error instead?
+            auto [it, inserted] = importMap.insert({packageName, importType});
+            if (!inserted) {
                 if (importType < it->second) {
                     it->second = importType;
                 }
-            } else {
-                importMap[packageName] = importType;
             }
         }
     }
