@@ -87,6 +87,49 @@ void exportField(const core::GlobalState &gs,
     }
 }
 
+vector<core::packages::Import> computeNewImports(const core::GlobalState &gs,
+                                                 const core::packages::PackageInfo &pkgInfo) {
+    UnorderedMap<core::packages::MangledName, core::packages::ImportType> importMap;
+    for (auto &import : pkgInfo.importedPackageNames) {
+        auto &impPkgInfo = gs.packageDB().getPackageInfo(import.mangledName);
+        if (impPkgInfo.exists() && impPkgInfo.isPreludePackage()) {
+            // If the `__package.rb` already imports a prelude package, we should keep that import, even if it's not
+            // referenced anywhere.
+            importMap[import.mangledName] = import.type;
+        }
+    }
+
+    // TODO(neil): this loop is very similar to the loop in aggregateMissingImports, should find a way to deduplicate.
+    // Can't deduplicate trivially because the loop in aggregateMissingImports skips entries where
+    // !packageReferenceInfo.importNeeded or packageReferenceInfo.causesModularityError, as well if the import would
+    // cause a visibility error. Maybe the common helper could take a function that filters?
+    for (auto &[file, referencedPackages] : pkgInfo.packagesReferencedByFile) {
+        auto importType = core::packages::PackageInfo::fileToImportType(gs, file);
+        for (auto &[packageName, packageReferenceInfo] : referencedPackages) {
+            auto &pkgInfo = gs.packageDB().getPackageInfo(packageName);
+            if (!pkgInfo.exists()) {
+                continue;
+            }
+            // TODO(neil): this ignores strict dependencies/visibility violations and unconditionally adds an import.
+            // Should we skip imports that would cause a strict dependencies/visibility error instead?
+            auto [it, inserted] = importMap.insert({packageName, importType});
+            if (!inserted) {
+                if (importType < it->second) {
+                    it->second = importType;
+                }
+            }
+        }
+    }
+
+    vector<core::packages::Import> newImports;
+    newImports.reserve(importMap.size());
+    for (auto &[mangledName, importType] : importMap) {
+        newImports.emplace_back(mangledName, importType, core::LocOffsets::none());
+    }
+
+    return newImports;
+}
+
 UnorderedMap<core::SymbolRef, vector<core::FileRef>> computeReferencingFiles(const core::GlobalState &gs) {
     auto referencingFiles = UnorderedMap<core::SymbolRef, vector<core::FileRef>>{};
     // symbolsReferencedByFile is a map from file -> [symbol] referenced in that file
@@ -257,7 +300,7 @@ void GenPackages::runStrict(core::GlobalState &gs) {
         auto existingContents = existingContentsLoc.source(gs);
         ENFORCE(existingContents.has_value());
 
-        auto newContents = pkgInfo.renderPackageRbContents(gs, move(toExport[pkgName]));
+        auto newContents = pkgInfo.renderPackageRbContents(gs, computeNewImports(gs, pkgInfo), move(toExport[pkgName]));
 
         if (existingContents.value() != newContents) {
             if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectPackageRB)) {
