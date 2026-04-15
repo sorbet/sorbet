@@ -360,10 +360,12 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                         // If we only moved a single edit, we're done.
                         auto numEdits = std::distance(tasks.begin(), firstNonEdit);
                         if (numEdits <= 1) {
+                            prodCategoryCounterInc("lsp.preemption.cancelation", "single");
                             continue;
                         }
 
                         config->logger->debug("[Processing] Merging {} promoted edits", numEdits);
+                        prodCategoryCounterInc("lsp.preemption.cancelation", "merged");
 
                         // At this point, we can assume that the front of the queue is an edit. Merge all of the
                         // newer edits into it to ensure that the front of the queue is a single slow path edit.
