@@ -785,7 +785,13 @@ std::string PackageInfo::renderPackageRbContents(const core::GlobalState &gs) co
 
             if (!causesLayeringViolation(gs.packageDB(), impPkgInfo)) {
                 auto headerToPrint = string();
-                while (headersIt != headers.end() && impPkgInfo.strictDependenciesLevel >= headersIt->first) {
+                // Find the last entry in [headersIt, headers.end()] that has a StrictDependenciesLevel less than or
+                // equal to the StrictDependenciesLevel of the package being imported. It has to be last one rather than
+                // just the next to handle headers being skipped.
+                //
+                // Ex. if only an dag package is imported, we want to skip the 'false' and 'layered'/'layered_dag'
+                // headers, even though they'll be less than the dag package being imported.
+                while (headersIt != headers.end() && headersIt->first <= impPkgInfo.strictDependenciesLevel) {
                     headerToPrint = headersIt->second;
                     headersIt++;
                 }
