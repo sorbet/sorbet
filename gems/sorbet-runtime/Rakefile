@@ -30,8 +30,7 @@ task :rubocop do
   # bazillion times. I'm guessing that something about RuboCop::RakeTask is
   # causing a file to be required that shouldn't be getting required? I have
   # lost patience trying to debug it and am simply going to use a Subprocess.
-  require 'subprocess'
-  Subprocess.check_call(['rubocop'])
+  system('rubocop') || raise("rubocop failed!")
 end
 
 begin

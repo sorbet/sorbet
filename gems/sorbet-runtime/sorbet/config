@@ -1,0 +1,5 @@
+--dir=.
+--ignore=bench
+--ignore=test/types
+--ignore=test/wholesome
+--ignore=vendor
