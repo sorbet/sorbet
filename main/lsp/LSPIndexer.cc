@@ -12,6 +12,7 @@
 #include "main/lsp/LSPConfiguration.h"
 #include "main/lsp/ShowOperation.h"
 #include "main/lsp/json_types.h"
+#include "main/lsp/notifications/sorbet_workspace_edit.h"
 #include "main/pipeline/pipeline.h"
 #include "payload/payload.h"
 
@@ -455,7 +456,30 @@ void LSPIndexer::updateConfigAndGsFromOptions(const DidChangeConfigurationParams
 }
 
 bool LSPIndexer::preemptionPossible(const TaskQueue::QueueType &tasks) const {
-    return !tasks.empty() && tasks.front()->canPreempt(*this);
+    if (tasks.empty()) {
+        return false;
+    }
+
+    auto cannotPreempt =
+        absl::c_find_if_not(tasks, [&indexer = *this](auto &task) { return task->canPreempt(indexer); });
+
+    // No tasks can preempt
+    if (cannotPreempt == tasks.begin()) {
+        return false;
+    }
+
+    // All tasks can preempt
+    if (cannotPreempt == tasks.end()) {
+        return true;
+    }
+
+    // If the first task that can't preempt is a workspace edit, return that preemption is no longer possible so that
+    // the main thread will move the slow path edit to the front of the queue and force a slow path cancellation.
+    if (dynamic_cast<SorbetWorkspaceEditTask *>(cannotPreempt->get())) {
+        return false;
+    }
+
+    return true;
 }
 
 } // namespace sorbet::realmain::lsp

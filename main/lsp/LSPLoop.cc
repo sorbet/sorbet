@@ -330,7 +330,57 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                             logger->debug("[Processing] Canceled scheduled preemption for task {}", methodStr);
                         }
 
-                        // At this point, we are guaranteed that the scheduled task has run or has been canceled.
+                        // At this point, we know that the preemption task has either run or been cancelled. If it was
+                        // cancelled because we detected a new slow path edit in the queue, move all edits between the
+                        // front of the queue and the slow path edit to the front of the queue, and merge them together.
+                        auto &tasks = this->taskQueue->tasks();
+
+                        // If the front of the queue cannot preempt, then we ran to completion and there are no tasks to
+                        // move.
+                        if (tasks.empty() || !tasks.front()->canPreempt(indexer)) {
+                            continue;
+                        }
+
+                        // If the first task that cannot preempt is not an edit, there are no tasks to move.
+                        auto cannotPreempt = absl::c_find_if(
+                            tasks, [&indexer = this->indexer](auto &task) { return !task->canPreempt(indexer); });
+                        if (cannotPreempt == tasks.end() ||
+                            dynamic_cast<SorbetWorkspaceEditTask *>(cannotPreempt->get()) == nullptr) {
+                            continue;
+                        }
+
+                        config->logger->debug("[Processing] Promoting slow path edits");
+
+                        // As we might have more than one edit between the front of the queue and the slow path edit,
+                        // migrate all the edits to the front of the queue and preserve their order so that we can merge
+                        // them into a single edit.
+                        auto firstNonEdit = std::stable_partition(tasks.begin(), cannotPreempt + 1, [](auto &task) {
+                            return dynamic_cast<SorbetWorkspaceEditTask *>(task.get()) != nullptr;
+                        });
+
+                        // If we only moved a single edit, we're done.
+                        auto numEdits = std::distance(tasks.begin(), firstNonEdit);
+                        if (numEdits <= 1) {
+                            prodCategoryCounterInc("lsp.preemption.cancelation", "single");
+                            continue;
+                        }
+
+                        config->logger->debug("[Processing] Merging {} promoted edits", numEdits);
+                        prodCategoryCounterInc("lsp.preemption.cancelation", "merged");
+
+                        // At this point, we can assume that the front of the queue is an edit. Merge all of the
+                        // newer edits into it to ensure that the front of the queue is a single slow path edit.
+                        auto *oldestEdit = dynamic_cast<SorbetWorkspaceEditTask *>(tasks.front().get());
+                        ENFORCE(oldestEdit != nullptr);
+
+                        auto second = tasks.begin() + 1;
+                        for (auto it = second; it != firstNonEdit; ++it) {
+                            auto *newerEdit = dynamic_cast<SorbetWorkspaceEditTask *>(it->get());
+                            oldestEdit->mergeNewer(*newerEdit);
+                        }
+
+                        tasks.erase(second, firstNonEdit);
+
                         continue;
                     }
                     // If preemption scheduling failed, then the slow path probably finished just now. Continue as
