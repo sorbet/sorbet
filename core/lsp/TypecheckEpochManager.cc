@@ -62,7 +62,7 @@ bool TypecheckEpochManager::tryCancelSlowPath(uint32_t newEpoch) {
 }
 
 bool TypecheckEpochManager::tryCommitEpoch(core::GlobalState &gs, uint32_t epoch, bool isCancelable,
-                                           optional<shared_ptr<PreemptionTaskManager>> preemptionManager,
+                                           shared_ptr<PreemptionTaskManager> preemptionManager,
                                            function<void()> typecheck) {
     assertConsistentThread(typecheckingThreadId, "TypecheckEpochManager::tryCommitEpoch", "typechecking");
     if (!isCancelable) {
@@ -95,10 +95,10 @@ bool TypecheckEpochManager::tryCommitEpoch(core::GlobalState &gs, uint32_t epoch
         }
     }
 
-    if (preemptionManager.has_value()) {
+    if (preemptionManager) {
         // Now that we are no longer running a slow path, run a preemption task that might have snuck in while we were
         // finishing up. No others can be scheduled.
-        (*preemptionManager)->tryRunScheduledPreemptionTask(gs);
+        preemptionManager->tryRunScheduledPreemptionTask(gs);
     }
     return committed;
 }
