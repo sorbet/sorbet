@@ -13,6 +13,7 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = ['>= 3.0.0']
 
+  s.add_development_dependency 'benchmark'
   s.add_development_dependency 'minitest', '~> 5.11'
   s.add_development_dependency 'mocha', '~> 2.1'
   s.add_development_dependency 'rake'
