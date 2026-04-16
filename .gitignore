@@ -34,6 +34,9 @@ gems/sorbet-static-and-runtime/Gemfile.lock
 # To distribute sorbet, we copy the built C++ binary here.
 /gems/sorbet-static/libexec/sorbet
 
+# Devboxes install gems into vendor/ by default
+/gems/*/vendor
+
 # Used by tools/scripts/run_benchmarks.sh
 /tmp
 
