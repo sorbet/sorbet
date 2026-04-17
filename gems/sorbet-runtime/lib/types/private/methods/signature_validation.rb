@@ -126,12 +126,12 @@ module T::Private::Methods::SignatureValidation
         # Peaceful
       elsif super_signature.mode == Modes.abstract
         raise "You must use `.override` when overriding the abstract method `#{signature.method_name}`.\n" \
-              "  Abstract definition: #{method_loc_str(super_signature.method)}\n" \
-              "  Implementation definition: #{method_loc_str(signature.method)}\n"
+              "  Abstract definition: #{super_signature.method_desc}\n" \
+              "  Implementation definition: #{signature.method_desc}\n"
       elsif super_signature.mode != Modes.untyped
         raise "You must use `.override` when overriding the existing method `#{signature.method_name}`.\n" \
-              "  Parent definition: #{method_loc_str(super_signature.method)}\n" \
-              "  Child definition:  #{method_loc_str(signature.method)}\n"
+              "  Parent definition: #{super_signature.method_desc}\n" \
+              "  Child definition:  #{signature.method_desc}\n"
       end
     else
       raise "Unexpected mode: #{signature.mode}. Please report this bug at https://github.com/sorbet/sorbet/issues"
@@ -153,7 +153,7 @@ module T::Private::Methods::SignatureValidation
       else
         raise "You marked `#{signature.method_name}` as #{pretty_mode(signature)}, but that method doesn't already exist in this class/module to be overridden.\n" \
           "  Either check for typos and for missing includes or super classes to make the parent method shows up\n" \
-          "  ... or remove #{pretty_mode(signature)} here: #{method_loc_str(signature.method)}\n"
+          "  ... or remove #{pretty_mode(signature)} here: #{signature.method_desc}\n"
       end
     when Modes.standard, *Modes::NON_OVERRIDE_MODES
       # Peaceful
@@ -244,8 +244,8 @@ module T::Private::Methods::SignatureValidation
       if !super_type.subtype_of?(type)
         raise "Incompatible type for arg ##{index + 1} (`#{name}`) in signature for #{mode_noun} of method " \
               "`#{signature.method_name}`:\n" \
-              "* Base: `#{super_type}` (in #{method_loc_str(super_signature.method)})\n" \
-              "* #{mode_noun.capitalize}: `#{type}` (in #{method_loc_str(signature.method)})\n" \
+              "* Base: `#{super_type}` (in #{super_signature.method_desc})\n" \
+              "* #{mode_noun.capitalize}: `#{type}` (in #{signature.method_desc})\n" \
               "(The types must be contravariant.)"
       end
     end
@@ -255,8 +255,8 @@ module T::Private::Methods::SignatureValidation
       type = signature.kwarg_types[name]
       if !super_type.subtype_of?(type)
         raise "Incompatible type for arg `#{name}` in signature for #{mode_noun} of method `#{signature.method_name}`:\n" \
-              "* Base: `#{super_type}` (in #{method_loc_str(super_signature.method)})\n" \
-              "* #{mode_noun.capitalize}: `#{type}` (in #{method_loc_str(signature.method)})\n" \
+              "* Base: `#{super_type}` (in #{super_signature.method_desc})\n" \
+              "* #{mode_noun.capitalize}: `#{type}` (in #{signature.method_desc})\n" \
               "(The types must be contravariant.)"
       end
     end
@@ -271,8 +271,8 @@ module T::Private::Methods::SignatureValidation
 
     if !signature.effective_return_type.subtype_of?(super_signature_return_type)
       raise "Incompatible return type in signature for #{mode_noun} of method `#{signature.method_name}`:\n" \
-            "* Base: `#{super_signature.effective_return_type}` (in #{method_loc_str(super_signature.method)})\n" \
-            "* #{mode_noun.capitalize}: `#{signature.effective_return_type}` (in #{method_loc_str(signature.method)})\n" \
+            "* Base: `#{super_signature.effective_return_type}` (in #{super_signature.method_desc})\n" \
+            "* #{mode_noun.capitalize}: `#{signature.effective_return_type}` (in #{signature.method_desc})\n" \
             "(The types must be covariant.)"
     end
   end
@@ -297,8 +297,8 @@ module T::Private::Methods::SignatureValidation
 
     if visibility_strength(vis) > visibility_strength(super_vis)
       raise "Incompatible visibility for #{mode_noun} of method #{method.name}\n" \
-            "* Base: #{super_vis} (in #{method_loc_str(super_method)})\n" \
-            "* #{mode_noun.capitalize}: #{vis} (in #{method_loc_str(method)})\n" \
+            "* Base: #{super_vis} (in #{super_signature.method_desc})\n" \
+            "* #{mode_noun.capitalize}: #{vis} (in #{signature.method_desc})\n" \
             "(The override must be at least as permissive as the supermethod)" \
     end
   end
@@ -317,16 +317,7 @@ module T::Private::Methods::SignatureValidation
 
   private_class_method def self.base_override_loc_str(signature, super_signature)
     mode_noun = super_signature.mode == Modes.abstract ? 'Implementation' : 'Override'
-    "\n * Base definition: in #{method_loc_str(super_signature.method)}" \
-    "\n * #{mode_noun}: in #{method_loc_str(signature.method)}"
-  end
-
-  private_class_method def self.method_loc_str(method)
-    loc = if method.source_location
-      method.source_location.join(':')
-    else
-      "<unknown location>"
-    end
-    "#{method.owner} at #{loc}"
+    "\n * Base definition: in #{super_signature.method_desc}" \
+    "\n * #{mode_noun}: in #{signature.method_desc}"
   end
 end

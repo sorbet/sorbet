@@ -1,5 +1,6 @@
 --dir=.
 --ignore=bench
---ignore=test/types
---ignore=test/wholesome
+--ignore=test
 --ignore=vendor
+# suppress splats to avoid some `T.unsafe`
+--suppress-error-code=7019

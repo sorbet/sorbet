@@ -164,7 +164,7 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
       assert_includes(
         err.message,
         "You must use `.override` when overriding the abstract method `foo`.\n" \
-        "  Abstract definition: #{AbstractMixin} at #{__FILE__}"
+        "  Abstract definition: #{AbstractMixin}#foo at #{__FILE__}"
       )
     end
   end

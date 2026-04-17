@@ -22,10 +22,10 @@ module T::Private::Methods
         ARG_NOT_PROVIDED, # returns
         ARG_NOT_PROVIDED, # bind
         Modes.standard, # mode
-        ARG_NOT_PROVIDED, # checked
+        nil, # checked
         false, # finalized
         ARG_NOT_PROVIDED, # on_failure
-        nil, # override_allow_incompatible
+        false, # override_allow_incompatible
         ARG_NOT_PROVIDED, # type_parameters
         raw
       )
@@ -98,10 +98,10 @@ module T::Private::Methods
     def checked(level)
       check_live!
 
-      if !decl.checked.equal?(ARG_NOT_PROVIDED)
+      if !decl.checked.nil?
         raise BuilderError.new("You can't call .checked multiple times in a signature.")
       end
-      if level == :never && !decl.on_failure.equal?(ARG_NOT_PROVIDED)
+      if :never == level && !decl.on_failure.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't use .checked(:#{level}) with .on_failure because .on_failure will have no effect.")
       end
       if !T::Private::RuntimeLevels::LEVELS.include?(level)
@@ -119,8 +119,13 @@ module T::Private::Methods
       if !decl.on_failure.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't call .on_failure multiple times in a signature.")
       end
-      if decl.checked == :never
-        raise BuilderError.new("You can't use .on_failure with .checked(:#{decl.checked}) because .on_failure will have no effect.")
+      effective_checked = decl.checked.nil? ? T::Private::RuntimeLevels.default_checked_level : decl.checked
+      if effective_checked == :never
+        if decl.checked.nil?
+          raise BuilderError.new("To use .on_failure you must additionally call .checked(:tests) or .checked(:always), otherwise, the .on_failure has no effect.")
+        else
+          raise BuilderError.new("You can't use .on_failure with .checked(:#{effective_checked}) because .on_failure will have no effect.")
+        end
       end
 
       decl.on_failure = args
@@ -224,13 +229,6 @@ module T::Private::Methods
 
       if decl.bind.equal?(ARG_NOT_PROVIDED)
         decl.bind = nil
-      end
-      if decl.checked.equal?(ARG_NOT_PROVIDED)
-        default_checked_level = T::Private::RuntimeLevels.default_checked_level
-        if default_checked_level == :never && !decl.on_failure.equal?(ARG_NOT_PROVIDED)
-          raise BuilderError.new("To use .on_failure you must additionally call .checked(:tests) or .checked(:always), otherwise, the .on_failure has no effect.")
-        end
-        decl.checked = default_checked_level
       end
       if decl.on_failure.equal?(ARG_NOT_PROVIDED)
         decl.on_failure = nil

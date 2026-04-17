@@ -37,6 +37,7 @@ class T::Private::Methods::Signature
   end
 
   def initialize(method:, method_name:, raw_arg_types:, raw_return_type:, bind:, mode:, check_level:, on_failure:, parameters: method.parameters, override_allow_incompatible: false, defined_raw: false)
+    check_level = check_level.nil? ? T::Private::RuntimeLevels.default_checked_level : check_level
     @method = method
     @method_name = method_name
     @block_type = nil
@@ -241,12 +242,12 @@ class T::Private::Methods::Signature
   end
 
   def method_desc
-    loc = if @method.source_location
-      @method.source_location.join(':')
+    loc = if (source_loc = @method.source_location)
+      source_loc.join(':')
     else
       "<unknown location>"
     end
-    "#{@method} at #{loc}"
+    "#{@method.owner}##{@method_name} at #{loc}"
   end
 
   def force_type_init

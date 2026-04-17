@@ -26,7 +26,7 @@ module Opus::Types::Test
       assert_equal(mod, builder.decl.mod)
       assert_equal({x: Integer}, builder.decl.params)
       assert_equal(String, builder.decl.returns)
-      assert_equal(:always, builder.decl.checked)
+      assert_nil(builder.decl.checked)
       assert_equal('standard', builder.decl.mode)
       assert_equal(true, builder.decl.finalized)
     end
