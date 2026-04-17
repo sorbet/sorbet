@@ -1,6 +1,4 @@
 # frozen_string_literal: true
-# error: File `
-# ^ We can’t assert the full pathname; see https://github.com/sorbet/sorbet/pull/3310
 # typed: true
 # enable-packager: true
 
