@@ -107,7 +107,7 @@ module Opus::Types::Test
       )
       assert_includes(
         err.message,
-        "in #{Base} at #{__FILE__}"
+        "in #{Base}#foo at #{__FILE__}"
       )
     end
 
@@ -130,7 +130,7 @@ module Opus::Types::Test
       )
       assert_includes(
         err.message,
-        "in #{Base} at #{__FILE__}"
+        "in #{Base}#foo at #{__FILE__}"
       )
     end
 
@@ -153,7 +153,7 @@ module Opus::Types::Test
       )
       assert_includes(
         err.message,
-        "in #{Base} at #{__FILE__}"
+        "in #{Base}#foo at #{__FILE__}"
       )
     end
 
@@ -176,7 +176,7 @@ module Opus::Types::Test
       )
       assert_includes(
         err.message,
-        "in #{Base} at #{__FILE__}"
+        "in #{Base}#foo at #{__FILE__}"
       )
     end
 
@@ -199,7 +199,7 @@ module Opus::Types::Test
       )
       assert_includes(
         err.message,
-        "in #{Base} at #{__FILE__}"
+        "in #{Base}#foo at #{__FILE__}"
       )
     end
 
