@@ -1531,10 +1531,11 @@ class Module < Object
   sig do
     params(
         arg0: T.any(Symbol, String),
+        inherit: T::Boolean,
     )
     .returns(T::Boolean)
   end
-  def protected_method_defined?(arg0); end
+  def protected_method_defined?(arg0, inherit=true); end
 
   # With no arguments, sets the default visibility for subsequently defined
   # methods to public. With arguments, sets the named methods to have public
@@ -1621,10 +1622,11 @@ class Module < Object
   sig do
     params(
         arg0: T.any(Symbol, String),
+        inherit: T::Boolean,
     )
     .returns(T::Boolean)
   end
-  def public_method_defined?(arg0); end
+  def public_method_defined?(arg0, inherit=true); end
 
   # Refine *mod* in the receiver.
   #
