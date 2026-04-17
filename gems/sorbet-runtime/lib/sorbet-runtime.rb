@@ -9,6 +9,7 @@
 module T; end
 module T::Helpers; end
 module T::Private; end
+T::Private::IS_TYPECHECKING = false
 module T::Private::Abstract; end
 module T::Private::Types; end
 
