@@ -13,7 +13,7 @@ module T::Private::Sealed
     def sealed_subclasses
       @sorbet_sealed_module_all_subclasses_set ||= # rubocop:disable Naming/MemoizedInstanceVariableName
         begin
-          require 'set'
+          Kernel.require 'set'
           Set.new(@sorbet_sealed_module_all_subclasses).freeze
         end
     end
@@ -40,7 +40,7 @@ module T::Private::Sealed
       # else will add to it
       @sorbet_sealed_module_all_subclasses_set ||= # rubocop:disable Naming/MemoizedInstanceVariableName
         begin
-          require 'set'
+          Kernel.require 'set'
           Set.new(@sorbet_sealed_module_all_subclasses).freeze
         end
     end
