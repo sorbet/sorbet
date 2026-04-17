@@ -1793,6 +1793,11 @@ module Enumerable
   #
   # See also
   # [`Array#uniq`](https://docs.ruby-lang.org/en/2.7.0/Array.html#method-i-uniq).
+  sig do
+    params(
+      blk: T.nilable(T.proc.params(arg0: Elem).returns(T.anything))
+    ).returns(T::Array[Elem])
+  end
   def uniq(&blk); end
 
   # Iterates the given block for each slice of <n> elements. If no block is
