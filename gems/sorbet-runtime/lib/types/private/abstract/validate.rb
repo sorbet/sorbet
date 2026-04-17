@@ -9,7 +9,7 @@ module T::Private::Abstract::Validate
 
   def self.validate_abstract_module(mod)
     type = Abstract::Data.get(mod, :abstract_type)
-    validate_interface(mod) if type == :interface
+    validate_interface(mod) if :interface == type
   end
 
   # Validates a class/module with an abstract class/module as an ancestor. This must be called
