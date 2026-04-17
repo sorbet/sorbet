@@ -32,8 +32,12 @@ module T::Private::Methods
   # in installed_hooks.
   @old_hooks = nil
 
-  ARG_NOT_PROVIDED = Object.new
-  PROC_TYPE = Object.new
+  module ARG_NOT_PROVIDED
+    freeze
+  end
+  module PROC_TYPE
+    freeze
+  end
 
   # blk_or_decl:
   # - It's a `Proc` if we haven't forced the thunk yet.
