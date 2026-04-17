@@ -208,7 +208,7 @@ module T::Private::Methods
       check_live!
 
       names.each do |name|
-        raise BuilderError.new("not a symbol: #{name}") unless name.is_a?(Symbol)
+        raise BuilderError.new("not a symbol: #{name}") unless Symbol === name
       end
 
       if !decl.type_parameters.equal?(ARG_NOT_PROVIDED)

@@ -168,7 +168,7 @@ module T::Private::Methods::SignatureValidation
     # for any class.
     owner = signature.method.owner
     if (signature.mode == Modes.abstract || Modes::OVERRIDABLE_MODES.include?(signature.mode)) &&
-        owner.singleton_class? && owner.superclass == Module
+        owner.singleton_class? && Class === owner && owner.superclass == Module
       raise "Defining an overridable class method (via #{pretty_mode(signature)}) " \
             "on a module is not allowed. Class methods on " \
             "modules do not get inherited and thus cannot be overridden."
