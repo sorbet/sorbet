@@ -34,7 +34,13 @@ module T::Private::Methods
   ARG_NOT_PROVIDED = Object.new
   PROC_TYPE = Object.new
 
-  DeclarationBlock = Struct.new(:mod, :loc, :blk, :final, :raw)
+  # blk_or_decl:
+  # - It's a `Proc` if we haven't forced the thunk yet.
+  # - It's a `Declaration` if we have, but we haven't finished building the sig
+  #   (This can matter for circular load-time behavior, where a method is
+  #   called while its Signature is being built)
+  # - It's `nil` if we've finished building the sig
+  DeclarationBlock = Struct.new(:mod, :loc, :blk_or_decl, :final, :raw)
 
   def self.declare_sig(mod, loc, arg, &blk)
     T::Private::DeclState.current.active_declaration = _declare_sig_internal(mod, loc, arg, &blk)
@@ -321,6 +327,7 @@ module T::Private::Methods
         nil
       end
 
+    # Release location information sooner
     declaration_block.loc = nil
 
     signature =
@@ -331,15 +338,25 @@ module T::Private::Methods
       end
 
     unwrap_method(signature.method.owner, signature, original_method)
+
+    # Drop this declaration. Only drop it after we've actually wrapped the
+    # method and recorded the signature, because that might raise an exception,
+    # leaving the declaration in a weird state if the program rescues that
+    # exception and continues.
+    declaration_block.blk_or_decl = nil
+
     signature
   end
 
   def self.run_builder(declaration_block)
+    blk_or_decl = declaration_block.blk_or_decl
+    return blk_or_decl if blk_or_decl.is_a?(Declaration)
+
     builder = DeclBuilder.new(declaration_block.mod, declaration_block.raw)
-    builder
-      .instance_exec(&declaration_block.blk)
-      .finalize!
-      .decl
+    decl = builder.instance_exec(&declaration_block.blk_or_decl).finalize!.decl
+    # Record that we've already run `blk` once and constructed a `Declaration`
+    declaration_block.blk_or_decl = decl
+    decl
   end
 
   def self.build_sig(hook_mod, method_name, original_method, current_declaration)
@@ -400,7 +417,7 @@ module T::Private::Methods
     @signatures_by_method[key]
   end
 
-  def self.unwrap_method(mod, signature, original_method)
+  private_class_method def self.unwrap_method(mod, signature, original_method)
     maybe_wrapped_method = CallValidation.wrap_method_if_needed(mod, signature, original_method)
     @signatures_by_method[method_to_key(maybe_wrapped_method)] = signature
   end
