@@ -1,0 +1,33 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(<emptyTree>::<C type top_level>)
+  end
+
+  def top_level_type_alias<<todo method>>(&<blk>)
+    "42"
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(<emptyTree>::<C type trailing>)
+  end
+
+  def trailing_type_alias<<todo method>>(&<blk>)
+    42
+  end
+
+  <emptyTree>::<C type top_level> = ::<root>::<C T>.type_alias() do ||
+    <emptyTree>::<C Integer>
+  end
+
+  <runtime method definition of top_level_type_alias>
+
+  <emptyTree>::<C type another> = ::<root>::<C T>.type_alias() do ||
+    <emptyTree>::<C Integer>
+  end
+
+  <runtime method definition of trailing_type_alias>
+
+  <emptyTree>::<C type trailing> = ::<root>::<C T>.type_alias() do ||
+    <emptyTree>::<C String>
+  end
+end
