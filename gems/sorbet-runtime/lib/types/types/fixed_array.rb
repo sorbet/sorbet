@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 # https://jira.corp.stripe.com/browse/RUBYPLAT-1107
-# typed: false
+# typed: true
 
 module T::Types
   # Takes a list of types. Validates each item in an array using the type in the same position
