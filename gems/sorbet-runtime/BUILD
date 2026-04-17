@@ -24,7 +24,9 @@ filegroup(
     srcs = glob([
         "lib/**/*.rbi",
         "sorbet/rbi/**/*.rbi",
-    ]),
+    ]) + [
+        "sorbet/config",
+    ],
 )
 
 sh_test(

@@ -1,4 +1,6 @@
 #!/bin/bash
 set -euo pipefail
 
-main/sorbet "$@"
+cd gems/sorbet-runtime
+# Inherits arguments from sorbet/config
+../../main/sorbet
