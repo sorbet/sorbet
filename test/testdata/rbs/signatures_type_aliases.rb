@@ -195,3 +195,21 @@ class EmptySingleton
     end
   end
 end
+
+#: type top_level = Integer
+
+#: -> top_level
+def top_level_type_alias
+  "42"
+# ^^^^ error: Expected `Integer` but found `String("42")` for method result type
+end
+
+#: type another_top_level = Integer
+
+#: -> trailing_top_level
+def trailing_type_alias
+  42
+# ^^ error: Expected `String` but found `Integer(42)` for method result type
+end
+
+#: type trailing_top_level = String
