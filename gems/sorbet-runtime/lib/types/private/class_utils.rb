@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-# typed: false
+# typed: true
 
 # Cut down version of Chalk::Tools::ClassUtils with only :replace_method functionality.
 # Extracted to a separate namespace so the type system can be used standalone.
