@@ -52,7 +52,7 @@ class T::Private::Methods::Signature
     else
       @return_type
     end
-    @bind = bind ? T::Utils.coerce(bind) : bind
+    @bind = NilClass.===(bind) ? bind : T::Utils.coerce(bind)
     @mode = mode
     @check_level = check_level
     @parameters = parameters
