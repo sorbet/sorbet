@@ -123,6 +123,10 @@ module T::Private::Methods
   # names that were declared final at one point.
   def self._check_final_ancestors(target, target_ancestors, source_method_names, source)
     source_ancestors = nil
+    if T::Private::IS_TYPECHECKING
+      # Need to avoid a pinning error, but don't want to use runtime types in _methods.rb
+      source_ancestors = T.let(nil, T.nilable(T::Array[T::Module[T.anything]]))
+    end
     # use reverse_each to check farther-up ancestors first, for better error messages.
     target_ancestors.reverse_each do |ancestor|
       final_methods = @modules_with_final.fetch(ancestor, nil)
