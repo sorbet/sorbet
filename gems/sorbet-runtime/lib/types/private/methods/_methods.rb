@@ -50,7 +50,7 @@ module T::Private::Methods
 
   # See tests for how to use this.  But you shouldn't be using this.
   def self._declare_sig(mod, arg=nil, &blk)
-    _declare_sig_internal(mod, caller_locations(1, 1).first, arg, raw: true, &blk)
+    _declare_sig_internal(mod, caller_locations(1, 1)&.first, arg, raw: true, &blk)
   end
 
   private_class_method def self._declare_sig_internal(mod, loc, arg, raw: false, &blk)
@@ -158,7 +158,8 @@ module T::Private::Methods
           next if defining_ancestor_idx && source_ancestors[defining_ancestor_idx] == ancestor
         end
 
-        definition_file, definition_line = T::Private::Methods.signature_for_method(ancestor.instance_method(method_name)).method.source_location
+        final_sig = T::Private::Methods.signature_for_method(ancestor.instance_method(method_name))
+        definition_file, definition_line = final_sig&.method&.source_location
         is_redefined = target == ancestor
         caller_loc = T::Private::CallerUtils.find_caller { |loc| !loc.path.to_s.start_with?(SORBET_RUNTIME_LIB_PATH) }
         extra_info = "\n"
@@ -396,7 +397,7 @@ module T::Private::Methods
       SignatureValidation.validate(signature)
       signature
     rescue => e
-      super_method = original_method&.super_method
+      super_method = original_method.super_method
       super_signature = signature_for_method(super_method) if super_method
 
       T::Configuration.sig_validation_error_handler(
