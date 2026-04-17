@@ -312,7 +312,7 @@ module T::Private::Methods::SignatureValidation
   private_constant :METHOD_VISIBILITIES
 
   private_class_method def self.visibility_strength(vis)
-    METHOD_VISIBILITIES.find_index(vis)
+    METHOD_VISIBILITIES.find_index(vis) || raise("Unexpected visibility `#{vis}`")
   end
 
   private_class_method def self.base_override_loc_str(signature, super_signature)
