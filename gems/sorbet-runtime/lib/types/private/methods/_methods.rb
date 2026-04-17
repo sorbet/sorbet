@@ -236,7 +236,7 @@ module T::Private::Methods
     # (or unwrap back to the original method).
     key = method_owner_and_name_to_key(mod, method_name)
     unless current_declaration.raw
-      T::Private::ClassUtils.replace_method(mod, method_name, true) do |*args, &blk|
+      T::Private::ClassUtils.replace_method(original_method, mod, method_name) do |*args, &blk|
         method_sig = T::Private::Methods.maybe_run_sig_block_for_key(key)
         method_sig ||= T::Private::Methods._handle_missing_method_signature(
           self,
@@ -521,15 +521,21 @@ module T::Private::Methods
       end
       @old_hooks = nil
     else
-      old_included = T::Private::ClassUtils.replace_method(Module, :included, true) do |arg|
+      # Grab the original methods before replacing them, so that each block
+      # closure can reference a variable that is already assigned.
+      # (Do this directly, to avoid pinning errors)
+      old_included = Module.instance_method(:included)
+      T::Private::ClassUtils.replace_method(old_included, Module, :included) do |arg|
         old_included.bind_call(self, arg)
         ::T::Private::Methods._hook_impl(arg, false, self)
       end
-      old_extended = T::Private::ClassUtils.replace_method(Module, :extended, true) do |arg|
+      old_extended = Module.instance_method(:extended)
+      T::Private::ClassUtils.replace_method(old_extended, Module, :extended) do |arg|
         old_extended.bind_call(self, arg)
         ::T::Private::Methods._hook_impl(arg, true, self)
       end
-      old_inherited = T::Private::ClassUtils.replace_method(Class, :inherited, true) do |arg|
+      old_inherited = Class.instance_method(:inherited)
+      T::Private::ClassUtils.replace_method(old_inherited, Class, :inherited) do |arg|
         old_inherited.bind_call(self, arg)
         ::T::Private::Methods._hook_impl(arg, false, self)
       end

@@ -898,9 +898,11 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     begin
       barrier = Concurrent::CyclicBarrier.new(2)
       mutex = Mutex.new
-      replaced = T::Private::ClassUtils.replace_method(T::Private::Methods.singleton_class, :run_sig_block_for_method) do |*args|
+      mod = T::Private::Methods.singleton_class
+      original_method = mod.instance_method(:run_sig_block_for_method)
+      T::Private::ClassUtils.replace_method(original_method, mod, :run_sig_block_for_method) do |*args|
         barrier.wait
-        mutex.synchronize { replaced.bind_call(T::Private::Methods, *args) }
+        mutex.synchronize { original_method.bind_call(T::Private::Methods, *args) }
       end
 
       klass = Class.new do
@@ -913,7 +915,15 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
       klass.hello
     ensure
       thread&.join
-      replaced&.restore
+
+      # We can directly restore this by redefining the method because we know
+      # that `run_sig_block_for_method` was defined on
+      # `T::Private::Methods.singleton_class`, not an ancestor.
+      #
+      # (If that weren't the case, we'd have to restore via `remove_method`)
+      T::Configuration.without_ruby_warnings do
+        mod.send(:define_method, original_method.name, original_method)
+      end
     end
   end
 
