@@ -4,8 +4,9 @@
 module T::Private::Methods
   @installed_hooks = {}
   if defined?(Concurrent::Hash)
-    @signatures_by_method = Concurrent::Hash.new
-    @sig_wrappers = Concurrent::Hash.new
+    # Hide the Concurrent::Hash so that we get better typing by lying and saying it's a Hash
+    instance_variable_set(:@signatures_by_method, Concurrent::Hash.new)
+    instance_variable_set(:@sig_wrappers, Concurrent::Hash.new)
   else
     @signatures_by_method = {}
     @sig_wrappers = {}
