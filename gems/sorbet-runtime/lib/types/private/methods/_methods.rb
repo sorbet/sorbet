@@ -112,7 +112,9 @@ module T::Private::Methods
 
   # Fetch the directory name of the file that defines the `T::Private` constant and
   # add a trailing slash to allow us to match it as a directory prefix.
-  SORBET_RUNTIME_LIB_PATH = File.dirname(T.const_source_location(:Private).first) + File::SEPARATOR
+  sorbet_runtime_loc = T.const_source_location(:Private)
+  raise "T::Private constant location not found" unless sorbet_runtime_loc
+  SORBET_RUNTIME_LIB_PATH = File.dirname(sorbet_runtime_loc.first) + File::SEPARATOR
   private_constant :SORBET_RUNTIME_LIB_PATH
 
   # when target includes a module with instance methods source_method_names, ensure there is zero intersection between
@@ -252,7 +254,7 @@ module T::Private::Methods
         method_sig ||= T::Private::Methods._handle_missing_method_signature(
           self,
           original_method,
-          __callee__,
+          __callee__ || raise("Unknown __callee__ for method without a signature"),
         )
 
         # Should be the same logic as CallValidation.wrap_method_if_needed but we

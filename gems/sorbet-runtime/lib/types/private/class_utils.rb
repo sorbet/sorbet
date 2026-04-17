@@ -22,6 +22,9 @@ module T::Private::ClassUtils
       # of these errors changed across Ruby VM versions, in ways that would sometimes
       # cause tests to fail if they were dependent on hard coding errors).
       mod.method(name)
+      # This is just to prove to Sorbet that this method raises.
+      # This line should be unreachable in practice due to the above call.
+      raise NameError.new("undefined method `#{name}' for class `#{mod}'")
     end
   end
 

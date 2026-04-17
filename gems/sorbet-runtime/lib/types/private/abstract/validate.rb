@@ -56,7 +56,7 @@ module T::Private::Abstract::Validate
       # signature and (b) methods from ancestors (note that these ancestors can come before or
       # after the abstract module in the inheritance chain -- the former coming from
       # walking `mod.ancestors` above).
-      abstract_signature = Methods.signature_for_method(abstract_method)
+      abstract_signature = Methods.signature_for_method(abstract_method) || raise("Method being abstract must imply it has a signature")
       # We allow implementation methods to be defined without a signature.
       # In that case, get its untyped signature.
       implementation_signature ||= Methods::Signature.new_untyped(
