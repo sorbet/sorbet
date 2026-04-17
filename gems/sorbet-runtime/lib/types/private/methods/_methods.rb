@@ -337,10 +337,14 @@ module T::Private::Methods
         Signature.new_untyped(method: original_method)
       end
 
-    # Drop this declaration
+    unwrap_method(signature.method.owner, signature, original_method)
+
+    # Drop this declaration. Only drop it after we've actually wrapped the
+    # method and recorded the signature, because that might raise an exception,
+    # leaving the declaration in a weird state if the program rescues that
+    # exception and continues.
     declaration_block.blk_or_decl = nil
 
-    unwrap_method(signature.method.owner, signature, original_method)
     signature
   end
 
@@ -413,7 +417,7 @@ module T::Private::Methods
     @signatures_by_method[key]
   end
 
-  def self.unwrap_method(mod, signature, original_method)
+  private_class_method def self.unwrap_method(mod, signature, original_method)
     maybe_wrapped_method = CallValidation.wrap_method_if_needed(mod, signature, original_method)
     @signatures_by_method[method_to_key(maybe_wrapped_method)] = signature
   end
