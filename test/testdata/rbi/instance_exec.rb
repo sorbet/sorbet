@@ -4,7 +4,7 @@ class A
 end
 
 res = A.new.instance_exec do |arg0|
-  T.reveal_type(arg0) # error: `T.untyped`
+  T.reveal_type(arg0) # error: `NilClass`
   1
 end
 T.reveal_type(res) # error: `Integer`
