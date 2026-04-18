@@ -422,6 +422,11 @@ public:
                 addMethodAlias(ctx, original);
                 break;
             }
+
+            default: {
+                ENFORCE(!original.fun.isMethodDefModifierName(), "Unhandled method def modifier: {}",
+                        original.fun.show(ctx));
+            }
         }
     }
 

@@ -144,7 +144,7 @@ bool Parser::isSafeNavigationCall(pm_node_t *node) const {
     return PM_NODE_TYPE_P(node, PM_CALL_NODE) && PM_NODE_FLAG_P(node, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION);
 }
 
-bool Parser::isMethodDefModifierCall(pm_node_t *node) const {
+bool Parser::isMethodDefModifierCall(pm_node_t *node, const core::GlobalState &gs) const {
     if (!PM_NODE_TYPE_P(node, PM_CALL_NODE)) {
         return false;
     }
@@ -167,11 +167,8 @@ bool Parser::isMethodDefModifierCall(pm_node_t *node) const {
         return false;
     }
 
-    // Check if the method name is one of the recognized method definition modifiers
     auto methodName = resolveConstant(call->name);
-    return methodName == "private"sv || methodName == "protected"sv || methodName == "public"sv ||
-           methodName == "private_class_method"sv || methodName == "public_class_method"sv ||
-           methodName == "package_private"sv || methodName == "package_private_class_method"sv;
+    return gs.lookupNameUTF8(methodName).isMethodDefModifierName();
 }
 
 bool Parser::isAttrAccessorCall(pm_node_t *node) const {

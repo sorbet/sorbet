@@ -21,7 +21,7 @@ namespace sorbet::rbs {
 
 namespace {
 
-bool canHaveSignature(pm_node_t *node, const parser::Prism::Parser &parser) {
+bool canHaveSignature(pm_node_t *node, const parser::Prism::Parser &parser, const core::GlobalState &gs) {
     if (node == nullptr) {
         return false;
     }
@@ -32,7 +32,7 @@ bool canHaveSignature(pm_node_t *node, const parser::Prism::Parser &parser) {
             // (singleton methods have a receiver field set)
             return true;
         case PM_CALL_NODE: {
-            return parser.isAttrAccessorCall(node) || parser.isMethodDefModifierCall(node);
+            return parser.isAttrAccessorCall(node) || parser.isMethodDefModifierCall(node, gs);
         }
         default:
             return false;
@@ -346,7 +346,7 @@ unique_ptr<vector<pm_node_t *>> SigsRewriterPrism::signaturesForNode(pm_node_t *
             }
         } else if (PM_NODE_TYPE_P(node, PM_CALL_NODE)) {
             auto *call = down_cast<pm_call_node_t>(node);
-            if (parser.isMethodDefModifierCall(node)) {
+            if (parser.isMethodDefModifierCall(node, ctx.state)) {
                 // For method definition modifiers, translate the signature for the inner method definition
                 auto sig = signatureTranslator.translateMethodSignature(call->arguments->arguments.nodes[0],
                                                                         declaration, comments.annotations);
@@ -436,7 +436,7 @@ pm_node_t *SigsRewriterPrism::rewriteBody(pm_node_t *node) {
         for (size_t i = 0; i < oldStmts.size; i++) {
             pm_node_t *stmt = oldStmts.nodes[i];
 
-            if (canHaveSignature(stmt, parser)) {
+            if (canHaveSignature(stmt, parser, ctx.state)) {
                 if (auto signatures = signaturesForNode(stmt)) {
                     // Add all signatures
                     for (auto sig : *signatures) {
@@ -458,7 +458,7 @@ pm_node_t *SigsRewriterPrism::rewriteBody(pm_node_t *node) {
     }
 
     // Handle single node that is a signature target
-    if (canHaveSignature(node, parser)) {
+    if (canHaveSignature(node, parser, ctx.state)) {
         if (auto signatures = signaturesForNode(node)) {
             rewriteNode(node);
 

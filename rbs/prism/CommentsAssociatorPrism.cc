@@ -686,7 +686,7 @@ void CommentsAssociatorPrism::walkNode(pm_node_t *node) {
         case PM_CALL_NODE: {
             auto *call = down_cast<pm_call_node_t>(node);
 
-            if (parser.isMethodDefModifierCall(node)) {
+            if (parser.isMethodDefModifierCall(node, ctx.state)) {
                 // This is a modifier wrapping a method definition, like `private def foo; end`
                 associateSignatureCommentsToNode(node);
                 associateAssertionCommentsToNode(node);
