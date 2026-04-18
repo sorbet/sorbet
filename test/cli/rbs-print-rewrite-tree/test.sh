@@ -1,20 +1,24 @@
 #!/bin/bash
 set -euo pipefail
 
+common_args=(
+  --silence-dev-message
+  --quiet
+  --no-error-count
+  --print=rbs-rewrite-tree
+  --stop-after=rbs
+  --parser=prism
+  test/cli/rbs-print-rewrite-tree/test.rb
+)
+
 main/sorbet \
-  --print=rbs-rewrite-tree \
+  "${common_args[@]}" \
   --enable-experimental-rbs-comments \
-  --parser=prism \
-  --silence-dev-message \
-  --no-error-count \
-  --quiet \
   test/cli/rbs-print-rewrite-tree/test.rb 2>&1
 
 echo --------------------------------------------------------------------------
 
+# intentionally not using `--enable-experimental-rbs-comments`
 main/sorbet \
-  --print=rbs-rewrite-tree \
-  --silence-dev-message \
-  --no-error-count \
-  --quiet \
+  "${common_args[@]}" \
   test/cli/rbs-print-rewrite-tree/test.rb 2>&1
