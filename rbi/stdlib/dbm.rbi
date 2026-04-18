@@ -245,7 +245,7 @@ class DBM
   # [`WRITER`](https://docs.ruby-lang.org/en/2.7.0/DBM.html#WRITER),
   # [`WRCREAT`](https://docs.ruby-lang.org/en/2.7.0/DBM.html#WRCREAT) or
   # [`NEWDB`](https://docs.ruby-lang.org/en/2.7.0/DBM.html#NEWDB).
-  def self.new(*_); end
+  def initialize(*_); end
 
   # Open a dbm database and yields it if a block is given. See also `DBM.new`.
   def self.open(*_); end

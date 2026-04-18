@@ -749,7 +749,7 @@ class RubyVM::InstructionSequence < Object
   # RubyVM::InstructionSequence.compile(File.read(path), path, path)
   # #=> <RubyVM::InstructionSequence:<compiled>@/absolute/path/to/test.rb:1>
   # ```
-  def self.new(*_); end
+  def initialize(*_); end
 
   # Returns the instruction sequence containing the given proc or method.
   #

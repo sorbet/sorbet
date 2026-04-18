@@ -24,7 +24,7 @@ class WeakRef < Delegator
   # [`Symbol`](https://docs.ruby-lang.org/en/2.7.0/Symbol.html),
   # [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html), or
   # [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html).
-  def self.new(orig); end
+  def initialize(orig); end
 
   # Returns true if the referenced object is still alive.
   def weakref_alive?; end

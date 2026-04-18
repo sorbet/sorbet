@@ -94,14 +94,14 @@ end
 class OpenURI::HTTPError < ::StandardError
   def io; end
 
-  def self.new(message, io); end
+  def initialize(message, io); end
 end
 
 # Raised on redirection, only occurs when `redirect` option for HTTP is `false`.
 class OpenURI::HTTPRedirect < ::OpenURI::HTTPError
   def uri; end
 
-  def self.new(message, io, uri); end
+  def initialize(message, io, uri); end
 end
 
 # Mixin for holding meta-information.

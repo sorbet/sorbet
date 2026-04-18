@@ -80,7 +80,7 @@ class REXML::AttlistDecl < ::REXML::Child
   # parse it. Sorry, but for the foreseeable future, DTD support in
   # [`REXML`](https://docs.ruby-lang.org/en/2.7.0/REXML.html) is pretty weak on
   # convenience. Have I mentioned how much I hate DTDs?
-  def self.new(source); end
+  def initialize(source); end
 
   # Access the attlist attribute/value pairs.
   #
@@ -162,7 +162,7 @@ class REXML::Attribute
   # Attribute.new( "attr", "attr_value" )
   # Attribute.new( "attr", "attr_value", parent_element )
   # ```
-  def self.new(first, second = _, parent = _); end
+  def initialize(first, second = _, parent = _); end
 
   # Returns true if other is an
   # [`Attribute`](https://docs.ruby-lang.org/en/2.7.0/REXML/Attribute.html) and
@@ -277,7 +277,7 @@ class REXML::Attributes < ::Hash
   # Constructor
   # element
   # :   the Element of which this is an Attribute
-  def self.new(element); end
+  def initialize(element); end
 
   # Alias for:
   # [`add`](https://docs.ruby-lang.org/en/2.7.0/REXML/Attributes.html#method-i-add)
@@ -452,7 +452,7 @@ class REXML::CData < ::REXML::Text
   # CData.new( "Here is some CDATA" )
   # CData.new( "Some unprocessed data", respect_whitespace_TF, parent_element )
   # ```
-  def self.new(first, whitespace = _, parent = _); end
+  def initialize(first, whitespace = _, parent = _); end
 
   # Make a copy of this object
   #
@@ -514,7 +514,7 @@ class REXML::Child
   # parent
   # :   if supplied, the parent of this child will be set to the supplied value,
   #     and self will be added to the parent
-  def self.new(parent = _); end
+  def initialize(parent = _); end
 
   # This doesn't yet handle encodings
   def bytes; end
@@ -596,7 +596,7 @@ class REXML::Comment < ::REXML::Child
   # argument is duplicated. If Source, the argument is scanned for a comment.
   # @param second If the first argument is a Source, this argument should be
   # nil, not supplied, or a Parent to be set as the parent of this object
-  def self.new(first, second = _); end
+  def initialize(first, second = _); end
 
   # Compares this
   # [`Comment`](https://docs.ruby-lang.org/en/2.7.0/REXML/Comment.html) to
@@ -641,7 +641,7 @@ end
 # This is an abstract class. You never use this directly; it serves as a parent
 # class for the specific declarations.
 class REXML::Declaration < ::REXML::Child
-  def self.new(src); end
+  def initialize(src); end
 
   def to_s; end
 
@@ -686,7 +686,7 @@ class REXML::DocType < ::REXML::Parent
   # ```
   #
   # is *deprecated*. Do not use it. It will probably disappear.
-  def self.new(first, parent = _); end
+  def initialize(first, parent = _); end
 
   def add(child); end
 
@@ -790,7 +790,7 @@ class REXML::Document < ::REXML::Element
   # [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) documents. @param
   # context if supplied, contains the context of the document; this should be a
   # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html).
-  def self.new(source = _, context = _); end
+  def initialize(source = _, context = _); end
 
   # Alias for:
   # [`add`](https://docs.ruby-lang.org/en/2.7.0/REXML/Document.html#method-i-add)
@@ -996,7 +996,7 @@ class REXML::Element < ::REXML::Parent
   # *   `:raw` can be :`all`, or an array of strings being the names of the
   #     elements to process in raw mode. In raw mode, special characters in text
   #     is not converted to or from entities.
-  def self.new(arg = _, parent = _, context = _); end
+  def initialize(arg = _, parent = _, context = _); end
 
   # Fetches an attribute value or a child.
   #
@@ -1503,7 +1503,7 @@ class REXML::Element < ::REXML::Parent
 end
 
 class REXML::ElementDecl < ::REXML::Declaration
-  def self.new(src); end
+  def initialize(src); end
 end
 
 # A class which provides filtering of children for
@@ -1519,7 +1519,7 @@ class REXML::Elements
   # Constructor
   # parent
   # :   the parent Element
-  def self.new(parent); end
+  def initialize(parent); end
 
   # Alias for:
   # [`add`](https://docs.ruby-lang.org/en/2.7.0/REXML/Elements.html#method-i-add)
@@ -1741,7 +1741,7 @@ class REXML::Entity < ::REXML::Child
   # ```ruby
   # e = Entity.new( 'amp', '&' )
   # ```
-  def self.new(stream, value = _, parent = _, reference = _); end
+  def initialize(stream, value = _, parent = _, reference = _); end
 
   def external; end
 
@@ -1818,7 +1818,7 @@ module REXML::EntityConst
 end
 
 class REXML::ExternalEntity < ::REXML::Child
-  def self.new(src); end
+  def initialize(src); end
 
   def to_s; end
 
@@ -1836,7 +1836,7 @@ class REXML::Formatters::Default
   #     tag, so that IE's bad
   #     [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) parser doesn't
   #     choke.
-  def self.new(ie_hack = _); end
+  def initialize(ie_hack = _); end
 
   # Writes the node to some output.
   #
@@ -1883,7 +1883,7 @@ class REXML::Formatters::Pretty < ::REXML::Formatters::Default
   #     thereby allowing Internet Explorer's
   #     [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) parser to
   #     function. Defaults to false.
-  def self.new(indentation = _, ie_hack = _); end
+  def initialize(indentation = _, ie_hack = _); end
 
   # If compact is set to true, then the formatter will attempt to use as little
   # space as possible
@@ -2077,7 +2077,7 @@ end
 # See the Source class for method documentation
 class REXML::IOSource < ::REXML::Source
   # block\_size has been deprecated
-  def self.new(arg, block_size = _, encoding = _); end
+  def initialize(arg, block_size = _, encoding = _); end
 
   def consume(pattern); end
 
@@ -2116,7 +2116,7 @@ class REXML::Instruction < ::REXML::Child
   # Parent. Can only be a Parent if the target argument is a Source. Otherwise,
   # this [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) is set as
   # the content of this instruction.
-  def self.new(target, content = _); end
+  def initialize(target, content = _); end
 
   # @return true if other is an
   # [`Instruction`](https://docs.ruby-lang.org/en/2.7.0/REXML/Instruction.html),
@@ -2220,7 +2220,7 @@ module REXML::Node
 end
 
 class REXML::NotationDecl < ::REXML::Child
-  def self.new(name, middle, pub, sys); end
+  def initialize(name, middle, pub, sys); end
 
   # This method retrieves the name of the notation.
   #
@@ -2244,7 +2244,7 @@ end
 class REXML::Output
   include(::REXML::Encoding)
 
-  def self.new(real_IO, encd = _); end
+  def initialize(real_IO, encd = _); end
 
   def <<(content); end
 
@@ -2263,7 +2263,7 @@ class REXML::Parent < ::REXML::Child
 
   # Constructor @param parent if supplied, will be set as the parent of this
   # object
-  def self.new(parent = _); end
+  def initialize(parent = _); end
 
   # Alias for:
   # [`push`](https://docs.ruby-lang.org/en/2.7.0/REXML/Parent.html#method-i-push)
@@ -2363,7 +2363,7 @@ class REXML::Parent < ::REXML::Child
 end
 
 class REXML::ParseException < ::RuntimeError
-  def self.new(message, source = _, parser = _, exception = _); end
+  def initialize(message, source = _, parser = _, exception = _); end
 
   def context; end
 
@@ -2548,7 +2548,7 @@ class REXML::Parsers::BaseParser
 
   XMLDECL_START = T.let(T.unsafe(nil), Regexp)
 
-  def self.new(source); end
+  def initialize(source); end
 
   def add_listener(listener); end
 
@@ -2589,7 +2589,7 @@ class REXML::Parsers::BaseParser
 end
 
 class REXML::Parsers::StreamParser
-  def self.new(source, listener); end
+  def initialize(source, listener); end
 
   def add_listener(listener); end
 
@@ -2597,7 +2597,7 @@ class REXML::Parsers::StreamParser
 end
 
 class REXML::Parsers::TreeParser
-  def self.new(source, build_context = _); end
+  def initialize(source, build_context = _); end
 
   def add_listener(listener); end
 
@@ -2838,7 +2838,7 @@ class REXML::Source
   # valid [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) document @param
   # encoding if non-null, sets the encoding of the source to this value,
   # overriding all encoding detection
-  def self.new(arg, encoding = _); end
+  def initialize(arg, encoding = _); end
 
   # The current buffer (what we're going to read next)
   def buffer; end
@@ -2998,7 +2998,7 @@ class REXML::SyncEnumerator
   # [`SyncEnumerator`](https://docs.ruby-lang.org/en/2.6.0/REXML/SyncEnumerator.html)
   # which enumerates rows of given
   # [`Enumerable`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html) objects.
-  def self.new(*enums); end
+  def initialize(*enums); end
 
   # Enumerates rows of the
   # [`Enumerable`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html) objects.
@@ -3088,7 +3088,7 @@ class REXML::Text < ::REXML::Child
   # In the last example, the `entity_filter` argument is ignored.
   #
   # `illegal` INTERNAL USE ONLY
-  def self.new(arg, respect_whitespace = _, parent = _, raw = _, entity_filter = _, illegal = _); end
+  def initialize(arg, respect_whitespace = _, parent = _, raw = _, entity_filter = _, illegal = _); end
 
   # Appends text to this text node. The text is appended in the `raw` mode of
   # this text node.
@@ -3219,13 +3219,13 @@ class REXML::Text < ::REXML::Child
 end
 
 class REXML::UndefinedNamespaceException < ::REXML::ParseException
-  def self.new(prefix, source, parser); end
+  def initialize(prefix, source, parser); end
 end
 
 module REXML::Validation; end
 
 class REXML::Validation::ValidationException < ::RuntimeError
-  def self.new(msg); end
+  def initialize(msg); end
 end
 
 REXML::Version = T.let(T.unsafe(nil), String)
@@ -3244,7 +3244,7 @@ class REXML::XMLDecl < ::REXML::Child
 
   STOP = T.let(T.unsafe(nil), String)
 
-  def self.new(version = _, encoding = _, standalone = _); end
+  def initialize(version = _, encoding = _, standalone = _); end
 
   def ==(other); end
 
@@ -3431,7 +3431,7 @@ class REXML::XPathParser
 
   LITERAL = T.let(T.unsafe(nil), Regexp)
 
-  def self.new; end
+  def initialize; end
 
   def []=(variable_name, value); end
 

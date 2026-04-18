@@ -68,7 +68,7 @@ class IPAddr
   # [`in_addr`](https://docs.ruby-lang.org/en/2.7.0/IPAddr.html#method-i-in_addr)
   # value instead of an
   # [`IPAddr`](https://docs.ruby-lang.org/en/2.7.0/IPAddr.html) object.
-  def self.new(addr = _, family = _); end
+  def initialize(addr = _, family = _); end
 
   # Returns a new ipaddr built by bitwise AND.
   def &(other); end

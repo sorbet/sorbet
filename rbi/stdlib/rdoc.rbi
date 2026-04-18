@@ -118,7 +118,7 @@ class RDoc::Alias < ::RDoc::CodeObject
   # Creates a new [`Alias`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Alias.html)
   # with a token stream of `text` that aliases `old_name` to `new_name`, has
   # `comment` and is a `singleton` context.
-  def self.new(text, old_name, new_name, comment, singleton = _); end
+  def initialize(text, old_name, new_name, comment, singleton = _); end
 
   # Order by
   # [`singleton`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Alias.html#attribute-i-singleton)
@@ -194,7 +194,7 @@ class RDoc::AnyMethod < ::RDoc::MethodAttr
   # Creates a new
   # [`AnyMethod`](https://docs.ruby-lang.org/en/2.7.0/RDoc/AnyMethod.html) with
   # a token stream `text` and `name`
-  def self.new(text, name); end
+  def initialize(text, name); end
 
   # Adds `an_alias` as an alias for this method in `context`.
   def add_alias(an_alias, context = _); end
@@ -291,7 +291,7 @@ class RDoc::Attr < ::RDoc::MethodAttr
   # Creates a new [`Attr`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Attr.html)
   # with body `text`, `name`, read/write status `rw` and `comment`. `singleton`
   # marks this as a class attribute.
-  def self.new(text, name, rw, comment, singleton = _); end
+  def initialize(text, name, rw, comment, singleton = _); end
 
   # Attributes are equal when their names, singleton and rw are identical
   def ==(other); end
@@ -348,7 +348,7 @@ class RDoc::ClassModule < ::RDoc::Context
   # with `name` with optional `superclass`
   #
   # This is a constructor for subclasses, and must never be called directly.
-  def self.new(name, superclass = _); end
+  def initialize(name, superclass = _); end
 
   # Adds `comment` to this ClassModule's list of comments at `location`. This
   # method is preferred over
@@ -599,7 +599,7 @@ class RDoc::CodeObject
   # Creates a new
   # [`CodeObject`](https://docs.ruby-lang.org/en/2.7.0/RDoc/CodeObject.html)
   # that will document itself and its children
-  def self.new; end
+  def initialize; end
 
   # Our comment
   def comment; end
@@ -831,7 +831,7 @@ class RDoc::Comment
   # Creates a new comment with `text` that is found in the
   # [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TopLevel.html)
   # `location`.
-  def self.new(text = _, location = _); end
+  def initialize(text = _, location = _); end
 
   def ==(other); end
 
@@ -933,7 +933,7 @@ class RDoc::Constant < ::RDoc::CodeObject
   ::RDoc::Constant::MARSHAL_VERSION = T.let(T.unsafe(nil), Integer)
 
   # Creates a new constant with `name`, `value` and `comment`
-  def self.new(name, value, comment); end
+  def initialize(name, value, comment); end
 
   # Constants are ordered by name
   def <=>(other); end
@@ -1019,7 +1019,7 @@ class RDoc::Context < ::RDoc::CodeObject
   TYPES = T.let(T.unsafe(nil), T::Array[T.untyped])
 
   # Creates an unnamed empty context with public current visibility
-  def self.new; end
+  def initialize; end
 
   # Contexts are sorted by
   # [`full_name`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Context.html#method-i-full_name)
@@ -1434,7 +1434,7 @@ class RDoc::Context::Section
   MARSHAL_VERSION = T.let(T.unsafe(nil), Integer)
 
   # Creates a new section with `title` and `comment`
-  def self.new(parent, title, comment); end
+  def initialize(parent, title, comment); end
 
   # Sections are equal when they have the same
   # [`title`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Context/Section.html#attribute-i-title)
@@ -1544,7 +1544,7 @@ class RDoc::CrossReference
 
   # Allows cross-references to be created based on the given `context`
   # ([`RDoc::Context`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Context.html)).
-  def self.new(context); end
+  def initialize(context); end
 
   # Returns a reference to `name`.
   #
@@ -1579,7 +1579,7 @@ end
 # Note that binding must enclose the io you wish to output on.
 class RDoc::ERBIO < ::ERB
   # Defaults `eoutvar` to 'io', otherwise is identical to ERB's initialize
-  def self.new(str, safe_level = _, trim_mode = _, eoutvar = _); end
+  def initialize(str, safe_level = _, trim_mode = _, eoutvar = _); end
 
   # Instructs `compiler` how to write to `io_variable`
   def set_eoutvar(compiler, io_variable); end
@@ -1767,7 +1767,7 @@ class RDoc::Generator::Darkfish
   VERSION = T.let(T.unsafe(nil), String)
 
   # Initialize a few instance variables before we start
-  def self.new(store, options); end
+  def initialize(store, options); end
 
   # Creates a template from its components and the `body_file`.
   #
@@ -2011,7 +2011,7 @@ class RDoc::Generator::JsonIndex
   # of links in the output index.
   #
   # `options` are the same options passed to the parent generator.
-  def self.new(parent_generator, options); end
+  def initialize(parent_generator, options); end
 
   # Builds the [`JSON`](https://docs.ruby-lang.org/en/2.6.0/JSON.html) index as
   # a [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html).
@@ -2140,7 +2140,7 @@ class RDoc::Generator::POT
   # Description of this generator
   DESCRIPTION = T.let(T.unsafe(nil), String)
 
-  def self.new(store, options); end
+  def initialize(store, options); end
 
   def class_dir; end
 
@@ -2152,7 +2152,7 @@ end
 # [`RDoc::Store`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Store.html)
 class RDoc::Generator::POT::MessageExtractor
   # Creates a message extractor for `store`.
-  def self.new(store); end
+  def initialize(store); end
 
   # Extracts messages from `store`, stores them into
   # [`RDoc::Generator::POT::PO`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Generator/POT/PO.html)
@@ -2167,7 +2167,7 @@ class RDoc::Generator::POT::PO
   # Creates an object that represents
   # [`PO`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Generator/POT/PO.html)
   # format.
-  def self.new; end
+  def initialize; end
 
   # Adds a
   # [`PO`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Generator/POT/PO.html) entry
@@ -2185,7 +2185,7 @@ end
 # A PO entry in PO
 class RDoc::Generator::POT::POEntry
   # Creates a PO entry for `msgid`. Other values can be specified by `options`.
-  def self.new(msgid, options = _); end
+  def initialize(msgid, options = _); end
 
   # The comment content extracted from source file
   def extracted_comment; end
@@ -2217,7 +2217,7 @@ class RDoc::Generator::RI
   # Description of this generator
   DESCRIPTION = T.let(T.unsafe(nil), String)
 
-  def self.new(store, options); end
+  def initialize(store, options); end
 
   # Writes the parsed data store to disk for use by ri.
   def generate; end
@@ -2241,7 +2241,7 @@ module RDoc::I18n; end
 class RDoc::I18n::Locale
   # Creates a new locale object for `name` locale. `name` must follow IETF
   # language tag format.
-  def self.new(name); end
+  def initialize(name); end
 
   # Loads translation messages from `locale_directory`/+@name+/rdoc.po or
   # `locale_directory`/+@name+.po. The former has high priority.
@@ -2288,7 +2288,7 @@ end
 # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of them.
 class RDoc::I18n::Text
   # Creates a new i18n supported text for `raw` text.
-  def self.new(raw); end
+  def initialize(raw); end
 
   # Extracts translation target messages and yields each message.
   #
@@ -2554,7 +2554,7 @@ class RDoc::Markdown
   # Creates a new markdown parser that enables the given `extensions`.
   #
   # Also aliased as: orig\_initialize
-  def self.new(extensions = _, debug = _); end
+  def initialize(extensions = _, debug = _); end
 
   def _Alphanumeric; end
 
@@ -3203,7 +3203,7 @@ class RDoc::Markdown
 end
 
 class RDoc::Markdown::Literals
-  def self.new(str, debug = _); end
+  def initialize(str, debug = _); end
 
   def _Alphanumeric; end
 
@@ -3281,7 +3281,7 @@ class RDoc::Markdown::Literals
 end
 
 class RDoc::Markdown::Literals::MemoEntry
-  def self.new(ans, pos); end
+  def initialize(ans, pos); end
 
   def ans; end
 
@@ -3301,7 +3301,7 @@ end
 class RDoc::Markdown::Literals::ParseError < ::RuntimeError; end
 
 class RDoc::Markdown::Literals::RuleInfo
-  def self.new(name, rendered); end
+  def initialize(name, rendered); end
 
   def name; end
 
@@ -3311,7 +3311,7 @@ end
 RDoc::Markdown::Literals::Rules = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
 
 class RDoc::Markdown::MemoEntry
-  def self.new(ans, pos); end
+  def initialize(ans, pos); end
 
   def ans; end
 
@@ -3331,7 +3331,7 @@ end
 class RDoc::Markdown::ParseError < ::RuntimeError; end
 
 class RDoc::Markdown::RuleInfo
-  def self.new(name, rendered); end
+  def initialize(name, rendered); end
 
   def name; end
 
@@ -4199,7 +4199,7 @@ class RDoc::Markup
   # Take a block of text and use various heuristics to determine its structure
   # (paragraphs, lists, and so on). Invoke an event handler as we identify
   # significant chunks.
-  def self.new(attribute_manager = _); end
+  def initialize(attribute_manager = _); end
 
   # Add to the sequences recognized as general markup.
   def add_html(tag, name); end
@@ -4247,7 +4247,7 @@ class RDoc::Markup::AttrChanger < ::Struct
 
   def self.members; end
 
-  def self.new(*_); end
+  def initialize(*_); end
 end
 
 # An array of attributes which parallels the characters in a string.
@@ -4255,7 +4255,7 @@ class RDoc::Markup::AttrSpan
   # Creates a new
   # [`AttrSpan`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/AttrSpan.html)
   # for `length` characters
-  def self.new(length); end
+  def initialize(length); end
 
   # Accesses flags for character `n`
   def [](n); end
@@ -4275,7 +4275,7 @@ class RDoc::Markup::AttributeManager
 
   # Creates a new attribute manager that understands bold, emphasized and
   # teletype text.
-  def self.new; end
+  def initialize; end
 
   # Adds a markup class with `name` for words surrounded by HTML tag `tag`. To
   # process emphasis tags:
@@ -4360,7 +4360,7 @@ end
 # value.
 class RDoc::Markup::Attributes
   # Creates a new attributes set.
-  def self.new; end
+  def initialize; end
 
   # Returns a string representation of `bitmap`
   def as_string(bitmap); end
@@ -4383,7 +4383,7 @@ class RDoc::Markup::BlankLine < ::RDoc::Markup::Element
 
   # [`RDoc::Markup::BlankLine`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/BlankLine.html)
   # is a singleton
-  def self.new; end
+  def initialize; end
 end
 
 # A quoted section which contains markup items.
@@ -4409,7 +4409,7 @@ class RDoc::Markup::Document
   # Creates a new
   # [`Document`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/Document.html)
   # with `parts`
-  def self.new(*parts); end
+  def initialize(*parts); end
 
   # Appends `part` to the document
   def <<(part); end
@@ -4496,7 +4496,7 @@ end
 class RDoc::Markup::Formatter
   # Creates a new
   # [`Formatter`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/Formatter.html)
-  def self.new(options, markup = _); end
+  def initialize(options, markup = _); end
 
   # Adds `document` to the output
   def accept_document(document); end
@@ -4575,7 +4575,7 @@ class RDoc::Markup::Formatter::InlineTag < ::Struct
 
   def self.members; end
 
-  def self.new(*_); end
+  def initialize(*_); end
 end
 
 # A hard-break in the middle of a paragraph.
@@ -4589,7 +4589,7 @@ class RDoc::Markup::HardBreak < ::RDoc::Markup::Element
 
   # [`RDoc::Markup::HardBreak`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/HardBreak.html)
   # is a singleton
-  def self.new; end
+  def initialize; end
 end
 
 class RDoc::Markup::Heading < ::RDoc::Markup::Element
@@ -4619,7 +4619,7 @@ class RDoc::Markup::Heading < ::RDoc::Markup::Element
 
   def self.members; end
 
-  def self.new(*_); end
+  def initialize(*_); end
 
   def self.to_html; end
 
@@ -4633,7 +4633,7 @@ end
 # This implementation in incomplete.
 class RDoc::Markup::Include
   # Creates a new include that will import `file` from `include_path`
-  def self.new(file, include_path); end
+  def initialize(file, include_path); end
 
   def ==(other); end
 
@@ -4652,7 +4652,7 @@ class RDoc::Markup::IndentedParagraph < ::RDoc::Markup::Raw
   # Creates a new
   # [`IndentedParagraph`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/IndentedParagraph.html)
   # containing `parts` indented with `indent` spaces
-  def self.new(indent, *parts); end
+  def initialize(indent, *parts); end
 
   def ==(other); end
 
@@ -4697,7 +4697,7 @@ end
 class RDoc::Markup::List
   # Creates a new list of `type` with `items`. Valid list types are: `:BULLET`,
   # `:LABEL`, `:LALPHA`, `:NOTE`, `:NUMBER`, `:UALPHA`
-  def self.new(type = _, *items); end
+  def initialize(type = _, *items); end
 
   # Appends `item` to the list
   def <<(item); end
@@ -4744,7 +4744,7 @@ class RDoc::Markup::ListItem
   # Creates a new
   # [`ListItem`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/ListItem.html)
   # with an optional `label` containing `parts`
-  def self.new(label = _, *parts); end
+  def initialize(label = _, *parts); end
 
   # Appends `part` to the
   # [`ListItem`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/ListItem.html)
@@ -4825,7 +4825,7 @@ class RDoc::Markup::Parser
   # [`Parser`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/Parser.html). See
   # also
   # [`::parse`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/Parser.html#method-c-parse)
-  def self.new; end
+  def initialize; end
 
   # Builds a Heading of `level`
   def build_heading(level); end
@@ -4929,7 +4929,7 @@ class RDoc::Markup::Parser::ParseError < ::RDoc::Markup::Parser::Error; end
 class RDoc::Markup::PreProcess
   # Creates a new pre-processor for `input_file_name` that will look for
   # included files in `include_path`
-  def self.new(input_file_name, include_path); end
+  def initialize(input_file_name, include_path); end
 
   # Look for the given file in the directory containing the current file, and
   # then in each of the directories specified in the RDOC\_INCLUDE path
@@ -5018,7 +5018,7 @@ class RDoc::Markup::Raw
   # Creates a new
   # [`Raw`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/Raw.html) containing
   # `parts`
-  def self.new(*parts); end
+  def initialize(*parts); end
 
   # Appends `text`
   def <<(text); end
@@ -5054,7 +5054,7 @@ class RDoc::Markup::Rule < ::Struct
 end
 
 class RDoc::Markup::Special
-  def self.new(type, text); end
+  def initialize(type, text); end
 
   def ==(o); end
 
@@ -5075,7 +5075,7 @@ class RDoc::Markup::ToAnsi < ::RDoc::Markup::ToRdoc
   # Creates a new
   # [`ToAnsi`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/ToAnsi.html)
   # visitor that is ready to output vibrant ANSI color!
-  def self.new(markup = _); end
+  def initialize(markup = _); end
 
   # Overrides indent width to ensure output lines up correctly.
   def accept_list_item_end(list_item); end
@@ -5100,7 +5100,7 @@ class RDoc::Markup::ToBs < ::RDoc::Markup::ToRdoc
   # Returns a new
   # [`ToBs`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/ToBs.html) that is
   # ready for hot backspace action!
-  def self.new(markup = _); end
+  def initialize(markup = _); end
 
   # Makes heading text bold.
   def accept_heading(heading); end
@@ -5129,7 +5129,7 @@ class RDoc::Markup::ToHtml < ::RDoc::Markup::Formatter
   LIST_TYPE_TO_HTML = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
 
   # Creates a new formatter that will output HTML
-  def self.new(options, markup = _); end
+  def initialize(options, markup = _); end
 
   # Adds `blank_line` to the output
   def accept_blank_line(blank_line); end
@@ -5252,7 +5252,7 @@ class RDoc::Markup::ToHtmlCrossref < ::RDoc::Markup::ToHtml
   # which lives at `from_path` in the generated files. '#' characters on
   # references are removed unless `show_hash` is true. Only method names
   # preceded by '#' or '::' are linked, unless `hyperlink_all` is true.
-  def self.new(options, from_path, context, markup = _); end
+  def initialize(options, from_path, context, markup = _); end
 
   # [`RDoc::CodeObject`](https://docs.ruby-lang.org/en/2.6.0/RDoc/CodeObject.html)
   # for generating references
@@ -5294,7 +5294,7 @@ class RDoc::Markup::ToHtmlSnippet < ::RDoc::Markup::ToHtml
   # [`ToHtmlSnippet`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/ToHtmlSnippet.html)
   # formatter that will cut off the input on the next word boundary after the
   # given number of `characters` or `paragraphs` of text have been encountered.
-  def self.new(options, characters = _, paragraphs = _, markup = _); end
+  def initialize(options, characters = _, paragraphs = _, markup = _); end
 
   # Adds `heading` to the output as a paragraph
   def accept_heading(heading); end
@@ -5380,7 +5380,7 @@ end
 # This formatter only works on Paragraph instances. Attempting to process other
 # markup syntax items will not work.
 class RDoc::Markup::ToJoinedParagraph < ::RDoc::Markup::Formatter
-  def self.new; end
+  def initialize; end
 
   def accept_block_quote(*node); end
 
@@ -5413,7 +5413,7 @@ end
 # marks removed (\SomeClass is converted to SomeClass).
 class RDoc::Markup::ToLabel < ::RDoc::Markup::Formatter
   # Creates a new formatter that will output HTML-safe labels
-  def self.new(markup = _); end
+  def initialize(markup = _); end
 
   def accept_blank_line(*node); end
 
@@ -5456,7 +5456,7 @@ end
 # Outputs parsed markup as Markdown
 class RDoc::Markup::ToMarkdown < ::RDoc::Markup::ToRdoc
   # Creates a new formatter that will output Markdown format text
-  def self.new(markup = _); end
+  def initialize(markup = _); end
 
   # Finishes consumption of `list`
   def accept_list_end(list); end
@@ -5497,7 +5497,7 @@ end
 class RDoc::Markup::ToRdoc < ::RDoc::Markup::Formatter
   # Creates a new formatter that will output (mostly)
   # [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) markup
-  def self.new(markup = _); end
+  def initialize(markup = _); end
 
   # Adds `blank_line` to the output
   def accept_blank_line(blank_line); end
@@ -5593,7 +5593,7 @@ end
 # [`RDoc::Markup::Document`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/Document.html)
 # to help build a table of contents
 class RDoc::Markup::ToTableOfContents < ::RDoc::Markup::Formatter
-  def self.new; end
+  def initialize; end
 
   def accept_blank_line(*node); end
 
@@ -5677,7 +5677,7 @@ end
 # undocumented parameters.
 class RDoc::Markup::ToTtOnly < ::RDoc::Markup::Formatter
   # Creates a new tt-only formatter.
-  def self.new(markup = _); end
+  def initialize(markup = _); end
 
   # Alias for:
   # [`do_nothing`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/ToTtOnly.html#method-i-do_nothing)
@@ -5750,7 +5750,7 @@ end
 
 # A section of verbatim text
 class RDoc::Markup::Verbatim < ::RDoc::Markup::Raw
-  def self.new(*parts); end
+  def initialize(*parts); end
 
   def ==(other); end
 
@@ -5788,7 +5788,7 @@ class RDoc::MethodAttr < ::RDoc::CodeObject
   # from token stream `text` and method or attribute name `name`.
   #
   # Usually this is called by super from a subclass.
-  def self.new(text, name); end
+  def initialize(text, name); end
 
   # Order by
   # [`singleton`](https://docs.ruby-lang.org/en/2.7.0/RDoc/MethodAttr.html#attribute-i-singleton)
@@ -5971,7 +5971,7 @@ end
 class RDoc::Mixin < ::RDoc::CodeObject
   # Creates a new [`Mixin`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Mixin.html)
   # for `name` with `comment`
-  def self.new(name, comment); end
+  def initialize(name, comment); end
 
   # Mixins are sorted by name
   def <=>(other); end
@@ -6185,7 +6185,7 @@ class RDoc::Options
   # `"rdoc/generator/template/#{template_name}"`
   Template = T.let(T.unsafe(nil), Object)
 
-  def self.new; end
+  def initialize; end
 
   def ==(other); end
 
@@ -6572,7 +6572,7 @@ class RDoc::Parser
   # `top_level`, `file_name`, `content`, `options` and `stats` in instance
   # variables. In +@preprocess+ an RDoc::Markup::PreProcess object is created
   # which allows processing of directives.
-  def self.new(top_level, file_name, content, options, stats); end
+  def initialize(top_level, file_name, content, options, stats); end
 
   # The name of the file being parsed
   def file_name; end
@@ -6778,7 +6778,7 @@ class RDoc::Parser::C < ::RDoc::Parser
   # Prepares for parsing a
   # [`C`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/C.html) file. See
   # RDoc::Parser#initialize for details on the arguments.
-  def self.new(top_level, file_name, content, options, stats); end
+  def initialize(top_level, file_name, content, options, stats); end
 
   # Maps [`C`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/C.html) variable
   # names to names of Ruby classes or modules
@@ -7152,7 +7152,7 @@ class RDoc::Parser::Ruby < ::RDoc::Parser
 
   # Creates a new
   # [`Ruby`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Parser/Ruby.html) parser.
-  def self.new(top_level, file_name, content, options, stats); end
+  def initialize(top_level, file_name, content, options, stats); end
 
   # Look for the first comment in a file that isn't a shebang line.
   def collect_first_comment; end
@@ -7474,7 +7474,7 @@ class RDoc::Parser::Simple < ::RDoc::Parser
   include(::RDoc::Parser::Text)
 
   # Prepare to parse a plain file
-  def self.new(top_level, file_name, content, options, stats); end
+  def initialize(top_level, file_name, content, options, stats); end
 
   def content; end
 
@@ -7595,7 +7595,7 @@ class RDoc::RD::BlockParser < ::Racc::Parser
   # Use
   # [`parse`](https://docs.ruby-lang.org/en/2.6.0/RDoc/RD/BlockParser.html#method-i-parse)
   # to parse an rd-format document.
-  def self.new; end
+  def initialize; end
 
   def _reduce_1(val, _values, result); end
 
@@ -7788,7 +7788,7 @@ class RDoc::RD::Inline
   # [`Inline`](https://docs.ruby-lang.org/en/2.6.0/RDoc/RD/Inline.html) or a
   # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html). If `reference`
   # is not given it will use the text from `rdoc`.
-  def self.new(rdoc, reference = _); end
+  def initialize(rdoc, reference = _); end
 end
 
 # [`RD`](https://docs.ruby-lang.org/en/2.6.0/RDoc/RD.html) format parser for
@@ -7886,7 +7886,7 @@ class RDoc::RD::InlineParser < ::Racc::Parser
 
   # Creates a new parser for inline markup in the rd format. The `block_parser`
   # is used to for footnotes and labels in the inline text.
-  def self.new(block_parser); end
+  def initialize(block_parser); end
 
   def _reduce_101(val, _values, result); end
 
@@ -8040,7 +8040,7 @@ class RDoc::RDoc
   # Creates a new
   # [`RDoc::RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc/RDoc.html) instance.
   # Call document to parse files and generate documentation.
-  def self.new; end
+  def initialize; end
 
   # Generates documentation or a coverage report depending upon the settings in
   # `options`.
@@ -8199,7 +8199,7 @@ module RDoc::RI; end
 class RDoc::RI::Driver
   # Creates a new driver using `initial_options` from
   # [`::process_args`](https://docs.ruby-lang.org/en/2.6.0/RDoc/RI/Driver.html#method-c-process_args)
-  def self.new(initial_options = _); end
+  def initialize(initial_options = _); end
 
   # Adds paths for undocumented classes `also_in` to `out`
   def add_also_in(out, also_in); end
@@ -8445,7 +8445,7 @@ class RDoc::RI::Driver::Error < ::RDoc::RI::Error; end
 
 # Raised when a name isn't found in the ri data stores
 class RDoc::RI::Driver::NotFoundError < ::RDoc::RI::Driver::Error
-  def self.new(klass, suggestions = _); end
+  def initialize(klass, suggestions = _); end
 
   def message; end
 
@@ -8541,7 +8541,7 @@ class RDoc::Require < ::RDoc::CodeObject
   # Creates a new
   # [`Require`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Require.html) that
   # loads `name` with `comment`
-  def self.new(name, comment); end
+  def initialize(name, comment); end
 
   def inspect; end
 
@@ -8598,7 +8598,7 @@ class RDoc::RipperStateLex
 
   RIPPER_HAS_LEX_STATE = T.let(T.unsafe(nil), TrueClass)
 
-  def self.new(code); end
+  def initialize(code); end
 
   def get_squashed_tk; end
 
@@ -8608,7 +8608,7 @@ class RDoc::RipperStateLex
 end
 
 class RDoc::RipperStateLex::InnerStateLex < ::Ripper::Filter
-  def self.new(code); end
+  def initialize(code); end
 
   def each(&block); end
 
@@ -8650,7 +8650,7 @@ class RDoc::Servlet < ::WEBrick::HTTPServlet::AbstractServlet
   # `server` is provided automatically by
   # [`WEBrick`](https://docs.ruby-lang.org/en/2.7.0/WEBrick.html) when mounting.
   # `stores` and `cache` are provided automatically by the servlet.
-  def self.new(server, stores, cache, mount_path = _, extra_doc_dirs = _); end
+  def initialize(server, stores, cache, mount_path = _, extra_doc_dirs = _); end
 
   # Serves the asset at the path in `req` for `generator_name` via `res`.
   def asset(generator_name, req, res); end
@@ -8748,7 +8748,7 @@ class RDoc::Stats
   # Creates a new [`Stats`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Stats.html)
   # that will have `num_files`. `verbosity` defaults to 1 which will create an
   # RDoc::Stats::Normal outputter.
-  def self.new(store, num_files, verbosity = _); end
+  def initialize(store, num_files, verbosity = _); end
 
   # Records the parsing of an alias `as`.
   def add_alias(as); end
@@ -8856,7 +8856,7 @@ class RDoc::Stats::Quiet
   # Creates a new
   # [`Quiet`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Stats/Quiet.html) that
   # will print nothing
-  def self.new(num_files); end
+  def initialize(num_files); end
 
   # Prints a message at the beginning of parsing
   def begin_adding(*_); end
@@ -8934,7 +8934,7 @@ end
 class RDoc::Store
   # Creates a new [`Store`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Store.html)
   # of `type` that will load or save to `path`
-  def self.new(path = _, type = _); end
+  def initialize(path = _, type = _); end
 
   # Adds `module` as an enclosure (namespace) for the given `variable` for C
   # files.
@@ -9244,7 +9244,7 @@ class RDoc::Store::MissingFileError < ::RDoc::Store::Error
   # [`MissingFileError`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Store/MissingFileError.html)
   # for the missing `file` for the given `name` that should have been in the
   # `store`.
-  def self.new(store, file, name); end
+  def initialize(store, file, name); end
 
   # The file the
   # [`name`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Store/MissingFileError.html#attribute-i-name)
@@ -9589,7 +9589,7 @@ class RDoc::TomDoc < ::RDoc::Markup::Parser
   # [`TomDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TomDoc.html) parser. See
   # also
   # [`RDoc::Markup::parse`](https://docs.ruby-lang.org/en/2.7.0/RDoc/Markup.html#method-c-parse)
-  def self.new; end
+  def initialize; end
 
   # Builds a heading from the token stream
   #
@@ -9695,7 +9695,7 @@ class RDoc::TopLevel < ::RDoc::Context
   # [`TopLevel`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TopLevel.html) for the
   # file at `absolute_name`. If documentation is being generated outside the
   # source dir `relative_name` is relative to the source directory.
-  def self.new(absolute_name, relative_name = _); end
+  def initialize(absolute_name, relative_name = _); end
 
   # An
   # [`RDoc::TopLevel`](https://docs.ruby-lang.org/en/2.7.0/RDoc/TopLevel.html)

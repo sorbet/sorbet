@@ -4382,9 +4382,9 @@ class Bundler::GemHelpers::PlatformMatch < Struct
     params(
       _: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
-  def self.new(*_); end
+  def initialize(*_); end
 
   sig do
     params(
@@ -4871,9 +4871,9 @@ class Bundler::LazySpecification::Identifier < Struct
     params(
       _: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
-  def self.new(*_); end
+  def initialize(*_); end
 end
 
 class Bundler::LockfileError < Bundler::BundlerError
@@ -5649,9 +5649,9 @@ class Bundler::Molinillo::DependencyGraph::Edge < Struct
     params(
       _: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
-  def self.new(*_); end
+  def initialize(*_); end
 end
 
 # A log for dependency graph actions
@@ -6273,9 +6273,9 @@ class Bundler::Molinillo::ResolutionState < Struct
     params(
       _: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
-  def self.new(*_); end
+  def initialize(*_); end
 end
 
 # This class encapsulates a dependency resolver. The resolver is responsible for
@@ -6531,9 +6531,9 @@ class Bundler::Molinillo::Resolver::Resolution::Conflict < Struct
     params(
       _: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
-  def self.new(*_); end
+  def initialize(*_); end
 end
 
 class Bundler::Molinillo::Resolver::Resolution::PossibilitySet < Struct
@@ -6586,9 +6586,9 @@ class Bundler::Molinillo::Resolver::Resolution::PossibilitySet < Struct
     params(
       _: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
-  def self.new(*_); end
+  def initialize(*_); end
 end
 
 class Bundler::Molinillo::Resolver::Resolution::UnwindDetails < Struct
@@ -6731,9 +6731,9 @@ class Bundler::Molinillo::Resolver::Resolution::UnwindDetails < Struct
     params(
       _: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
-  def self.new(*_); end
+  def initialize(*_); end
 end
 
 # An error that occurred during the resolution process
@@ -8867,9 +8867,9 @@ class Bundler::Settings::Path < Struct
     params(
       _: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
-  def self.new(*_); end
+  def initialize(*_); end
 end
 
 module Bundler::SharedHelpers

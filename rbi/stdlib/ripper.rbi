@@ -199,7 +199,7 @@ class Ripper::Filter
   # Ripper::Lexer.new
   #
   # The lexer is for internal use only.
-  def self.new(src, filename = '-', lineno = 1); end
+  def initialize(src, filename = '-', lineno = 1); end
 
   # The column number of the current token. This value starts from 0. This
   # method is valid only in event handlers.
