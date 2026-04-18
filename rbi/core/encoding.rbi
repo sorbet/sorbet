@@ -947,7 +947,7 @@ class Encoding::Converter < Data
   #               #    [#<Encoding:EUC-JP>, #<Encoding:UTF-8>],
   #               #    [#<Encoding:UTF-8>, #<Encoding:UTF-16BE>]]
   # ```
-  def self.new(*_); end
+  def initialize(*_); end
 
   def ==(_); end
 

@@ -483,7 +483,7 @@ class IRB::Context
   # :   uses a [`File`](https://docs.ruby-lang.org/en/2.7.0/File.html)
   # `other`
   # :   uses this as InputMethod
-  def self.new(irb, workspace = _, input_method = _, output_method = _); end
+  def initialize(irb, workspace = _, input_method = _, output_method = _); end
 
   # A copy of the default `IRB.conf[:AP_NAME]`
   def ap_name; end
@@ -1073,7 +1073,7 @@ end
 # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) with irb, see InputMethod
 class IRB::FileInputMethod < ::IRB::InputMethod
   # Creates a new input method object
-  def self.new(file); end
+  def initialize(file); end
 
   # The external encoding for standard input.
   def encoding; end
@@ -1097,7 +1097,7 @@ end
 
 class IRB::InputMethod
   # Creates a new input method object
-  def self.new(file = _); end
+  def initialize(file = _); end
 
   # The file name of this input method, usually given during initialization.
   def file_name; end
@@ -1157,7 +1157,7 @@ class IRB::Inspector
 
   # Creates a new inspector object, using the given `inspect_proc` when output
   # return values in irb.
-  def self.new(inspect_proc, init_proc = _); end
+  def initialize(inspect_proc, init_proc = _); end
 
   # [`Proc`](https://docs.ruby-lang.org/en/2.7.0/Proc.html) to call when the
   # inspector is activated, good for requiring dependent libraries.
@@ -1188,7 +1188,7 @@ class IRB::Irb
   ATTR_TTY = T.let(T.unsafe(nil), String)
 
   # Creates a new irb session
-  def self.new(workspace = _, input_method = _, output_method = _); end
+  def initialize(workspace = _, input_method = _, output_method = _); end
 
   # Returns the current context of this irb session
   def context; end
@@ -1299,7 +1299,7 @@ end
 class IRB::Notifier::AbstractNotifier
   # Creates a new
   # [`Notifier`](https://docs.ruby-lang.org/en/2.7.0/IRB/Notifier.html) object
-  def self.new(prefix, base_notifier); end
+  def initialize(prefix, base_notifier); end
 
   # Execute the given block if notifications are enabled.
   def exec_if; end
@@ -1358,7 +1358,7 @@ end
 class IRB::Notifier::CompositeNotifier < ::IRB::Notifier::AbstractNotifier
   # Create a new composite notifier object with the given `prefix`, and
   # `base_notifier` to use for output.
-  def self.new(prefix, base_notifier); end
+  def initialize(prefix, base_notifier); end
 
   # Creates a new LeveledNotifier in the composite
   # [`notifiers`](https://docs.ruby-lang.org/en/2.7.0/IRB/Notifier/CompositeNotifier.html#attribute-i-notifiers)
@@ -1428,7 +1428,7 @@ class IRB::Notifier::LeveledNotifier < ::IRB::Notifier::AbstractNotifier
   #
   # The given `level` is used to compare other leveled notifiers in the
   # CompositeNotifier group to determine whether or not to output notifications.
-  def self.new(base, level, prefix); end
+  def initialize(base, level, prefix); end
 
   # Compares the level of this notifier object with the given `other` notifier.
   #
@@ -1452,7 +1452,7 @@ end
 # CompositeNotifier#notifiers, and will not output messages of any sort.
 class IRB::Notifier::NoMsgNotifier < ::IRB::Notifier::LeveledNotifier
   # Creates a new notifier that should not be used to output messages.
-  def self.new; end
+  def initialize; end
 
   # Ensures notifications are ignored, see AbstractNotifier#notify? for more
   # information.
@@ -1541,7 +1541,7 @@ class IRB::RelineInputMethod < ::IRB::InputMethod
 
   # Creates a new input method object using
   # [`Reline`](https://docs.ruby-lang.org/en/3.1.0/Reline.html)
-  def self.new; end
+  def initialize; end
 
   # The external encoding for standard input.
   def encoding; end
@@ -1577,7 +1577,7 @@ class IRB::ReadlineInputMethod < ::IRB::InputMethod
 
   # Creates a new input method object using
   # [`Readline`](https://docs.ruby-lang.org/en/2.7.0/Readline.html)
-  def self.new; end
+  def initialize; end
 
   # The external encoding for standard input.
   def encoding; end
@@ -1617,7 +1617,7 @@ end
 
 class IRB::StdioInputMethod < ::IRB::InputMethod
   # Creates a new input method object
-  def self.new; end
+  def initialize; end
 
   # The external encoding for standard input.
   def encoding; end
@@ -1668,7 +1668,7 @@ class IRB::WorkSpace
   #
   # set self to main if specified, otherwise inherit main from
   # TOPLEVEL\_BINDING.
-  def self.new(*main); end
+  def initialize(*main); end
 
   # The [`Binding`](https://docs.ruby-lang.org/en/2.7.0/Binding.html) of this
   # workspace

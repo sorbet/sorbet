@@ -255,7 +255,7 @@ class Prime::EratosthenesGenerator < ::Prime::PseudoPrimeGenerator
   # [`next`](https://docs.ruby-lang.org/en/2.7.0/Prime/EratosthenesGenerator.html#method-i-next)
   def succ; end
 
-  def self.new; end
+  def initialize; end
 end
 
 # Internal use. An implementation of Eratosthenes' sieve
@@ -265,7 +265,7 @@ class Prime::EratosthenesSieve
 
   def get_nth_prime(n); end
 
-  def self.new; end
+  def initialize; end
 end
 
 # Generates all integers which are greater than 2 and are not divisible by
@@ -286,7 +286,7 @@ class Prime::Generator23 < ::Prime::PseudoPrimeGenerator
   # [`next`](https://docs.ruby-lang.org/en/2.7.0/Prime/Generator23.html#method-i-next)
   def succ; end
 
-  def self.new; end
+  def initialize; end
 end
 
 # An abstract class for enumerating pseudo-prime numbers.
@@ -326,7 +326,7 @@ class Prime::PseudoPrimeGenerator
   # see `Enumerator`#with\_object.
   def with_object(obj); end
 
-  def self.new(ubound = nil); end
+  def initialize(ubound = nil); end
 end
 
 # Internal use. An implementation of prime table by trial division method.
@@ -339,7 +339,7 @@ class Prime::TrialDivision
   # `index` is a 0-based index.
   def [](index); end
 
-  def self.new; end
+  def initialize; end
 end
 
 # An implementation of `PseudoPrimeGenerator` which uses a prime table generated
@@ -357,5 +357,5 @@ class Prime::TrialDivisionGenerator < ::Prime::PseudoPrimeGenerator
   # [`next`](https://docs.ruby-lang.org/en/2.7.0/Prime/TrialDivisionGenerator.html#method-i-next)
   def succ; end
 
-  def self.new; end
+  def initialize; end
 end

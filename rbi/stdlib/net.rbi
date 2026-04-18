@@ -383,8 +383,6 @@ class Net::DNS::RR
 
   def value(); end
 
-  def self.new(*args); end
-
   def self.parse(data); end
 
   def self.parse_packet(data, offset); end
@@ -1830,8 +1828,6 @@ class Net::HTTP < Net::Protocol
   # [`request_head`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#method-i-request_head)
   def head2(path, initheader=T.unsafe(nil), &block); end
 
-  def initialize(address, port=T.unsafe(nil)); end
-
   def inspect(); end
 
   # Seconds to reuse the connection of the previous request. If the idle time is
@@ -2336,7 +2332,7 @@ class Net::HTTP < Net::Protocol
   # the specified server address, without opening the TCP connection or
   # initializing the [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html)
   # session. The `address` should be a DNS hostname or IP address.
-  def self.new(address, port=T.unsafe(nil), p_addr=T.unsafe(nil), p_port=T.unsafe(nil), p_user=T.unsafe(nil), p_pass=T.unsafe(nil)); end
+  def initialize(address, port=T.unsafe(nil), p_addr=T.unsafe(nil), p_port=T.unsafe(nil), p_user=T.unsafe(nil), p_pass=T.unsafe(nil)); end
 
   # Alias for:
   # [`new`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#method-c-new)
@@ -4355,7 +4351,7 @@ class Net::IMAP::Address < Struct
 
   def self.members(); end
 
-  def self.new(*_); end
+  def initialize(*_); end
 end
 
 class Net::IMAP::DataLite < Data
@@ -4809,7 +4805,7 @@ class Net::IMAP::ContentDisposition < Struct
 
   def self.members(); end
 
-  def self.new(*_); end
+  def initialize(*_); end
 end
 
 # [`Net::IMAP::ContinuationRequest`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#ContinuationRequest)
@@ -4847,7 +4843,7 @@ class Net::IMAP::ContinuationRequest < Struct
 
   def self.members(); end
 
-  def self.new(*_); end
+  def initialize(*_); end
 end
 
 # Authenticator for the "CRAM-MD5" authentication type. See authenticate().
@@ -4965,7 +4961,7 @@ class Net::IMAP::Envelope < Struct
 
   def self.members(); end
 
-  def self.new(*_); end
+  def initialize(*_); end
 end
 
 # Superclass of [`IMAP`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html)
@@ -5033,7 +5029,7 @@ class Net::IMAP::FetchData < Struct
 
   def self.members(); end
 
-  def self.new(*_); end
+  def initialize(*_); end
 end
 
 # [`Error`](https://docs.ruby-lang.org/en/2.7.0/Error.html) raised when too many
@@ -5097,7 +5093,7 @@ class Net::IMAP::MailboxACLItem < Struct
 
   def self.members(); end
 
-  def self.new(*_); end
+  def initialize(*_); end
 end
 
 # [`Net::IMAP::MailboxList`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#MailboxList)
@@ -5141,7 +5137,7 @@ class Net::IMAP::MailboxList < Struct
 
   def self.members(); end
 
-  def self.new(*_); end
+  def initialize(*_); end
 end
 
 # [`Net::IMAP::MailboxQuota`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#MailboxQuota)
@@ -5186,7 +5182,7 @@ class Net::IMAP::MailboxQuota < Struct
 
   def self.members(); end
 
-  def self.new(*_); end
+  def initialize(*_); end
 end
 
 # [`Net::IMAP::MailboxQuotaRoot`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#MailboxQuotaRoot)
@@ -5219,7 +5215,7 @@ class Net::IMAP::MailboxQuotaRoot < Struct
 
   def self.members(); end
 
-  def self.new(*_); end
+  def initialize(*_); end
 end
 
 class Net::IMAP::MessageSet < Net::IMAP::CommandData
@@ -5308,7 +5304,7 @@ class Net::IMAP::ResponseCode < Struct
 
   def self.members(); end
 
-  def self.new(*_); end
+  def initialize(*_); end
 end
 
 # Superclass of all errors used to encapsulate "fail" responses from the server.
@@ -5380,7 +5376,7 @@ class Net::IMAP::ResponseParser::Token < Struct
 
   def self.members(); end
 
-  def self.new(*_); end
+  def initialize(*_); end
 end
 
 # [`Net::IMAP::ResponseText`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#ResponseText)
@@ -5413,7 +5409,7 @@ class Net::IMAP::ResponseText < Struct
 
   def self.members(); end
 
-  def self.new(*_); end
+  def initialize(*_); end
 end
 
 # [`Net::IMAP::StatusData`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#StatusData)
@@ -5442,7 +5438,7 @@ class Net::IMAP::StatusData < Struct
 
   def self.members(); end
 
-  def self.new(*_); end
+  def initialize(*_); end
 end
 
 # [`Net::IMAP::TaggedResponse`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#TaggedResponse)
@@ -5496,7 +5492,7 @@ class Net::IMAP::TaggedResponse < Struct
 
   def self.members(); end
 
-  def self.new(*_); end
+  def initialize(*_); end
 end
 
 # [`Net::IMAP::ThreadMember`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#ThreadMember)
@@ -5527,7 +5523,7 @@ class Net::IMAP::ThreadMember < Struct
 
   def self.members(); end
 
-  def self.new(*_); end
+  def initialize(*_); end
 end
 
 # [`Net::IMAP::UntaggedResponse`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#UntaggedResponse)
@@ -5573,7 +5569,7 @@ class Net::IMAP::UntaggedResponse < Struct
 
   def self.members(); end
 
-  def self.new(*_); end
+  def initialize(*_); end
 end
 
 class Net::InternetMessageIO < Net::BufferedIO

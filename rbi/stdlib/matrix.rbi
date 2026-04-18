@@ -82,7 +82,7 @@ class Vector
   # is private; use Vector[] or
   # [`Vector.elements`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-c-elements)
   # to create.
-  def self.new(array); end
+  def initialize(array); end
 
   # Creates a [`Vector`](https://docs.ruby-lang.org/en/2.7.0/Vector.html) from a
   # list of elements.
@@ -348,7 +348,7 @@ class Matrix
   # is private; use
   # [`Matrix.rows`](https://docs.ruby-lang.org/en/2.7.0/Matrix.html#method-c-rows),
   # columns, [], etc... to create.
-  def self.new(rows, column_count = rows[0].size); end
+  def initialize(rows, column_count = rows[0].size); end
 
   # Alias for:
   # [`identity`](https://docs.ruby-lang.org/en/2.7.0/Matrix.html#method-c-identity)
@@ -525,7 +525,7 @@ end
 # If A is symmetric, then V is orthogonal and thus A = V\*D\*V.t
 class Matrix::EigenvalueDecomposition
   # Constructs the eigenvalue decomposition for a square matrix `A`
-  def self.new(a); end
+  def initialize(a); end
 
   # Alias for:
   # [`eigenvalue_matrix`](https://docs.ruby-lang.org/en/2.7.0/Matrix/EigenvalueDecomposition.html#method-i-eigenvalue_matrix)

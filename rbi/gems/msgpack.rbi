@@ -185,9 +185,9 @@ class MessagePack::ExtensionValue < Struct
     params(
       arg0: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .void
   end
-  def self.new(*arg0); end
+  def initialize(*arg0); end
 end
 
 class MessagePack::Factory

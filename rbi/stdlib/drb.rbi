@@ -637,8 +637,8 @@ class DRb::DRbObject
   # `obj` is the (local) object we want to create a stub for. Normally this is
   # `nil`. `uri` is the [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) of
   # the remote object that this will be a stub for.
-  sig { params(obj: T.nilable(Object), uri: String).returns(DRb::DRbObject) }
-  def self.new(obj, uri = _); end
+  sig { params(obj: T.nilable(Object), uri: String).void }
+  def initialize(obj, uri = _); end
 
   # Creates a
   # [`DRb::DRbObject`](https://docs.ruby-lang.org/en/2.6.0/DRb/DRbObject.html)
@@ -818,8 +818,8 @@ class DRb::DRbRemoteError < ::DRb::DRbError
 
   # Creates a new remote error that wraps the
   # [`Exception`](https://docs.ruby-lang.org/en/2.6.0/Exception.html) `error`
-  sig { params(error: Exception).returns(DRb::DRbRemoteError) }
-  def self.new(error); end
+  sig { params(error: Exception).void }
+  def initialize(error); end
 end
 
 # [`Class`](https://docs.ruby-lang.org/en/2.6.0/Class.html) representing a drb
@@ -1007,9 +1007,9 @@ class DRb::DRbServer
       uri: String,
       front: T.nilable(Object),
       config_or_acl: T.nilable(Object)
-    ).returns(DRb::DRbServer)
+    ).void
   end
-  def self.new(uri, front, config_or_acl); end
+  def initialize(uri, front, config_or_acl); end
 
   # Get the default value of the :verbose option.
   sig { returns(T::Boolean) }
@@ -1113,6 +1113,6 @@ class DRb::DRbUnknownError < ::DRb::DRbError
   # for the
   # [`DRb::DRbUnknown`](https://docs.ruby-lang.org/en/2.6.0/DRb/DRbUnknown.html)
   # object `unknown`
-  sig { params(unknown: DRb::DRbUnknown).returns(DRb::DRbUnknownError) }
-  def self.new(unknown); end
+  sig { params(unknown: DRb::DRbUnknown).void }
+  def initialize(unknown); end
 end

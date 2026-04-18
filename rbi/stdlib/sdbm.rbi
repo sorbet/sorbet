@@ -72,7 +72,7 @@ class SDBM
   #
   # If the file exists, it will be opened in read/write mode. If this fails, it
   # will be opened in read-only mode.
-  def self.new(*_); end
+  def initialize(*_); end
 
   # Returns the `value` in the database associated with the given `key` string.
   #
