@@ -383,8 +383,6 @@ class Net::DNS::RR
 
   def value(); end
 
-  def initialize(*args); end
-
   def self.parse(data); end
 
   def self.parse_packet(data, offset); end
@@ -1829,8 +1827,6 @@ class Net::HTTP < Net::Protocol
   # Alias for:
   # [`request_head`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#method-i-request_head)
   def head2(path, initheader=T.unsafe(nil), &block); end
-
-  def initialize(address, port=T.unsafe(nil)); end
 
   def inspect(); end
 

@@ -205,7 +205,6 @@ class Reline::KillRing::RingPoint < Struct
   def self.inspect; end
   def self.keyword_init?; end
   def self.members; end
-  def initialize(*arg0); end
   def str; end
   def str=(_); end
   Elem = type_member(:out) {{fixed: T.untyped}}
