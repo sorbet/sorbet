@@ -306,7 +306,7 @@ class Syslog::Logger
   # may be set to specify the facility level which will be used.
   #
   # Due to the way syslog works, only one program name may be chosen.
-  def self.new(program_name = _, facility = _); end
+  def initialize(program_name = _, facility = _); end
 
   # Almost duplicates
   # [`Logger#add`](https://docs.ruby-lang.org/en/2.7.0/Logger.html#method-i-add).

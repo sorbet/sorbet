@@ -367,7 +367,7 @@ end
 class Resolv::DNS::Config
   InitialTimeout = T.let(T.unsafe(nil), Integer)
 
-  def self.new(config_info = _); end
+  def initialize(config_info = _); end
 
   def generate_candidates(name); end
 
@@ -409,7 +409,7 @@ module Resolv::DNS::Label
 end
 
 class Resolv::DNS::Label::Str
-  def self.new(string); end
+  def initialize(string); end
 
   def ==(other); end
 
@@ -427,7 +427,7 @@ class Resolv::DNS::Label::Str
 end
 
 class Resolv::DNS::Message
-  def self.new(id = _); end
+  def initialize(id = _); end
 
   def ==(other); end
 
@@ -495,7 +495,7 @@ class Resolv::DNS::Message
 end
 
 class Resolv::DNS::Message::MessageDecoder
-  def self.new(data); end
+  def initialize(data); end
 
   def get_bytes(len = _); end
 
@@ -521,7 +521,7 @@ class Resolv::DNS::Message::MessageDecoder
 end
 
 class Resolv::DNS::Message::MessageEncoder
-  def self.new; end
+  def initialize; end
 
   def put_bytes(d); end
 
@@ -666,7 +666,7 @@ module Resolv::DNS::RCode
 end
 
 class Resolv::DNS::Requester
-  def self.new; end
+  def initialize; end
 
   def close; end
 
@@ -676,7 +676,7 @@ class Resolv::DNS::Requester
 end
 
 class Resolv::DNS::Requester::ConnectedUDP < ::Resolv::DNS::Requester
-  def self.new(host, port = _); end
+  def initialize(host, port = _); end
 
   def close; end
 
@@ -702,11 +702,11 @@ end
 class Resolv::DNS::Requester::RequestError < ::StandardError; end
 
 class Resolv::DNS::Requester::Sender
-  def self.new(msg, data, sock); end
+  def initialize(msg, data, sock); end
 end
 
 class Resolv::DNS::Requester::TCP < ::Resolv::DNS::Requester
-  def self.new(host, port = _); end
+  def initialize(host, port = _); end
 
   def close; end
 
@@ -722,7 +722,7 @@ class Resolv::DNS::Requester::TCP::Sender < ::Resolv::DNS::Requester::Sender
 end
 
 class Resolv::DNS::Requester::UnconnectedUDP < ::Resolv::DNS::Requester
-  def self.new(*nameserver_port); end
+  def initialize(*nameserver_port); end
 
   def close; end
 
@@ -732,7 +732,7 @@ class Resolv::DNS::Requester::UnconnectedUDP < ::Resolv::DNS::Requester
 end
 
 class Resolv::DNS::Requester::UnconnectedUDP::Sender < ::Resolv::DNS::Requester::Sender
-  def self.new(msg, data, sock, host, port); end
+  def initialize(msg, data, sock, host, port); end
 
   def data; end
 
@@ -1050,7 +1050,7 @@ end
 class Resolv::DNS::Resource::LOC < ::Resolv::DNS::Resource
   TypeValue = T.let(T.unsafe(nil), Integer)
 
-  def self.new(version, ssize, hprecision, vprecision, latitude, longitude, altitude); end
+  def initialize(version, ssize, hprecision, vprecision, latitude, longitude, altitude); end
 
   # The altitude of the
   # [`LOC`](https://docs.ruby-lang.org/en/2.7.0/Resolv/DNS/Resource/LOC.html)

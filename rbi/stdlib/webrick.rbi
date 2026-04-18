@@ -1155,9 +1155,9 @@ class WEBrick::HTTPAuth::DigestAuth::OpaqueInfo < Struct
     params(
       _: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
-  def self.new(*_); end
+  def initialize(*_); end
 end
 
 # [`Htdigest`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPAuth/Htdigest.html)

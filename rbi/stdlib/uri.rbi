@@ -607,7 +607,7 @@ class URI::FTP < URI::Generic
   #
   # Arguments are `scheme`, `userinfo`, `host`, `port`, `registry`, `path`,
   # `opaque`, `query`, and `fragment`, in that order.
-  def self.new(scheme, userinfo, host, port, registry, path, opaque, query, fragment, parser = _, arg_check = _); end
+  def initialize(scheme, userinfo, host, port, registry, path, opaque, query, fragment, parser = _, arg_check = _); end
 
   def merge(oth); end
 
@@ -1840,7 +1840,7 @@ class URI::LDAPS < URI::LDAP
   #
   # See also
   # [`URI::Generic.new`](https://docs.ruby-lang.org/en/2.6.0/URI/Generic.html#method-c-new).
-  def self.new(*arg); end
+  def initialize(*arg); end
 
   # Returns attributes.
   def attributes; end
@@ -1971,7 +1971,7 @@ class URI::MailTo < URI::Generic
   # This method is usually called from
   # [`URI::parse`](https://docs.ruby-lang.org/en/2.7.0/URI.html#method-c-parse),
   # which checks the validity of each component.
-  def self.new(*arg); end
+  def initialize(*arg); end
 
   # E-mail headers set by the URL, as an
   # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of Arrays.
@@ -2144,7 +2144,7 @@ class URI::RFC2396_Parser < Object
   # u1 == u2 #=> true
   # u1.eql?(u2) #=> false
   # ```
-  def self.new(opts = _); end
+  def initialize(opts = _); end
 
   # ## Args
   #

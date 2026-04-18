@@ -592,7 +592,7 @@ class Enumerator::Lazy < Enumerator
   # filter_map(1..Float::INFINITY) {|i| i*i if i.even?}.first(5)
   # #=> [4, 16, 36, 64, 100]
   # ```
-  def self.new(*_); end
+  def initialize(*_); end
 
   # Like
   # [`Enumerable#chunk`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-chunk),

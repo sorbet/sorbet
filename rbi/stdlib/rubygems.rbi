@@ -1123,7 +1123,7 @@ class Gem::Platform < Object
 
   def self.match(platform); end
 
-  def self.new(arch); end
+  def initialize(arch); end
 end
 
 # Generated when trying to lookup a gem to indicate that the gem was found, but
@@ -2751,9 +2751,9 @@ class Gem::Version < Object
         Gem::Version, # Will return the same version object
         NilClass # Deprecated, and will issue a warning
       )
-    ).returns(Gem::Version)
+    ).void
   end
-  def self.new(version); end
+  def initialize(version); end
 end
 
 class Gem::Package

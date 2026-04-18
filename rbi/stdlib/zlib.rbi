@@ -450,7 +450,7 @@ class Zlib::Deflate < ::Zlib::ZStream
   #
   # While this example will work, for best optimization review the flags for
   # your specific time, memory usage and output space requirements.
-  def self.new(*_); end
+  def initialize(*_); end
 
   # Inputs `string` into the deflate stream just like
   # [`Zlib::Deflate#deflate`](https://docs.ruby-lang.org/en/2.7.0/Zlib/Deflate.html#method-i-deflate),
@@ -950,7 +950,7 @@ class Zlib::GzipWriter < ::Zlib::GzipFile
   # The `options` hash may be used to set the encoding of the data.
   # `:external_encoding`, `:internal_encoding` and `:encoding` may be set as in
   # [`IO::new`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-new).
-  def self.new(*_); end
+  def initialize(*_); end
 
   # Same as [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html).
   def <<(_); end
@@ -1061,7 +1061,7 @@ class Zlib::Inflate < ::Zlib::ZStream
   #   end
   # end
   # ```
-  def self.new(*_); end
+  def initialize(*_); end
 
   # Same as [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html).
   def <<(_); end

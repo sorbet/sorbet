@@ -15,7 +15,7 @@ class Rinda::DRbObjectTemplate
   # Creates a new
   # [`DRbObjectTemplate`](https://docs.ruby-lang.org/en/2.7.0/Rinda/DRbObjectTemplate.html)
   # that will match against `uri` and `ref`.
-  def self.new(uri = _, ref = _); end
+  def initialize(uri = _, ref = _); end
 
   # This
   # [`DRbObjectTemplate`](https://docs.ruby-lang.org/en/2.7.0/Rinda/DRbObjectTemplate.html)
@@ -59,7 +59,7 @@ class Rinda::NotifyTemplateEntry < ::Rinda::TemplateEntry
   # Creates a new
   # [`NotifyTemplateEntry`](https://docs.ruby-lang.org/en/2.7.0/Rinda/NotifyTemplateEntry.html)
   # that watches `place` for +event+s that match `tuple`.
-  def self.new(place, event, tuple, expires = _); end
+  def initialize(place, event, tuple, expires = _); end
 
   # Yields event/tuple pairs until this
   # [`NotifyTemplateEntry`](https://docs.ruby-lang.org/en/2.7.0/Rinda/NotifyTemplateEntry.html)
@@ -139,7 +139,7 @@ class Rinda::RingFinger
   # be made using the given
   # [`multicast_hops`](https://docs.ruby-lang.org/en/2.7.0/Rinda/RingFinger.html#attribute-i-multicast_hops)
   # and multicast\_interface.
-  def self.new(broadcast_list = _, port = _); end
+  def initialize(broadcast_list = _, port = _); end
 
   # The list of addresses where
   # [`RingFinger`](https://docs.ruby-lang.org/en/2.7.0/Rinda/RingFinger.html)
@@ -228,7 +228,7 @@ class Rinda::RingProvider
   # [`RingProvider`](https://docs.ruby-lang.org/en/2.7.0/Rinda/RingProvider.html)
   # that will provide a `klass` service running on `front`, with a
   # `description`. `renewer` is optional.
-  def self.new(klass, front, desc, renewer = _); end
+  def initialize(klass, front, desc, renewer = _); end
 
   # Advertises this service on the primary remote TupleSpace.
   def provide; end
@@ -312,7 +312,7 @@ class Rinda::RingServer
   #
   # If the second is omitted then '::1' is used. If the third is omitted then 0
   # (default interface) is used.
-  def self.new(ts, addresses = _, port = _); end
+  def initialize(ts, addresses = _, port = _); end
 
   # Pulls lookup tuples out of the TupleSpace and sends their
   # [`DRb`](https://docs.ruby-lang.org/en/2.7.0/DRb.html) object the address of
@@ -354,7 +354,7 @@ end
 class Rinda::RingServer::Renewer
   include(::DRb::DRbUndumped)
 
-  def self.new; end
+  def initialize; end
 
   def renew; end
 
@@ -373,7 +373,7 @@ class Rinda::SimpleRenewer
   # Creates a new
   # [`SimpleRenewer`](https://docs.ruby-lang.org/en/2.7.0/Rinda/SimpleRenewer.html)
   # that keeps an object alive for another `sec` seconds.
-  def self.new(sec = _); end
+  def initialize(sec = _); end
 
   # Called by the TupleSpace to check if the object is still alive.
   def renew; end
@@ -435,7 +435,7 @@ class Rinda::Tuple
   # `ary_or_hash` which must be an
   # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) or
   # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html).
-  def self.new(ary_or_hash); end
+  def initialize(ary_or_hash); end
 
   # Accessor method for elements of the tuple.
   def [](k); end
@@ -457,7 +457,7 @@ end
 # [`TupleBag`](https://docs.ruby-lang.org/en/2.7.0/Rinda/TupleBag.html) is an
 # unordered collection of tuples. It is the basis of Tuplespace.
 class Rinda::TupleBag
-  def self.new; end
+  def initialize; end
 
   # Removes `tuple` from the
   # [`TupleBag`](https://docs.ruby-lang.org/en/2.7.0/Rinda/TupleBag.html).
@@ -492,7 +492,7 @@ end
 class Rinda::TupleBag::TupleBin
   extend(::Forwardable)
 
-  def self.new; end
+  def initialize; end
 
   def add(tuple); end
 
@@ -522,7 +522,7 @@ class Rinda::TupleEntry
   # A renewer must implement the `renew` method which returns a
   # [`Numeric`](https://docs.ruby-lang.org/en/2.7.0/Numeric.html), nil, or true
   # to indicate when the tuple has expired.
-  def self.new(ary, sec = _); end
+  def initialize(ary, sec = _); end
 
   # Retrieves `key` from the tuple.
   def [](key); end
@@ -611,7 +611,7 @@ class Rinda::TupleSpace
   # the
   # [`TupleSpace`](https://docs.ruby-lang.org/en/2.7.0/Rinda/TupleSpace.html)
   # will stop looking for dead tuples.
-  def self.new(period = _); end
+  def initialize(period = _); end
 
   # Moves `tuple` to `port`.
   def move(port, tuple, sec = _); end
@@ -653,7 +653,7 @@ class Rinda::TupleSpaceProxy
   # Creates a new
   # [`TupleSpaceProxy`](https://docs.ruby-lang.org/en/2.7.0/Rinda/TupleSpaceProxy.html)
   # to wrap `ts`.
-  def self.new(ts); end
+  def initialize(ts); end
 
   # Registers for notifications of event `ev` on the proxied TupleSpace. See
   # TupleSpace#notify
@@ -674,7 +674,7 @@ class Rinda::TupleSpaceProxy
 end
 
 class Rinda::TupleSpaceProxy::Port
-  def self.new; end
+  def initialize; end
 
   def close; end
 
@@ -687,7 +687,7 @@ end
 
 # *Documentation?*
 class Rinda::WaitTemplateEntry < ::Rinda::TemplateEntry
-  def self.new(place, ary, expires = _); end
+  def initialize(place, ary, expires = _); end
 
   def cancel; end
 

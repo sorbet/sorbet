@@ -292,7 +292,7 @@ class PStore
   # [`PStore`](https://docs.ruby-lang.org/en/2.7.0/PStore.html) objects are
   # always reentrant. But if *thread\_safe* is set to true, then it will become
   # thread-safe at the cost of a minor performance hit.
-  def self.new(file, thread_safe = false); end
+  def initialize(file, thread_safe = false); end
 end
 
 # The error type thrown by all

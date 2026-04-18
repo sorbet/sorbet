@@ -205,7 +205,7 @@ class Reline::KillRing::RingPoint < Struct
   def self.inspect; end
   def self.keyword_init?; end
   def self.members; end
-  def self.new(*arg0); end
+  def initialize(*arg0); end
   def str; end
   def str=(_); end
   Elem = type_member(:out) {{fixed: T.untyped}}
@@ -455,7 +455,7 @@ class Struct::CompletionJourneyData < Struct
   def self.inspect; end
   def self.keyword_init?; end
   def self.members; end
-  def self.new(*arg0); end
+  def initialize(*arg0); end
   Elem = type_member(:out) {{fixed: T.untyped}}
 end
 class Struct::MenuInfo < Struct
@@ -465,7 +465,7 @@ class Struct::MenuInfo < Struct
   def self.inspect; end
   def self.keyword_init?; end
   def self.members; end
-  def self.new(*arg0); end
+  def initialize(*arg0); end
   def target; end
   def target=(_); end
   Elem = type_member(:out) {{fixed: T.untyped}}
@@ -616,7 +616,7 @@ class Struct::Key < Struct
   def self.inspect; end
   def self.keyword_init?; end
   def self.members; end
-  def self.new(*arg0); end
+  def initialize(*arg0); end
   def with_meta; end
   def with_meta=(_); end
   Elem = type_member(:out) {{fixed: T.untyped}}
@@ -626,7 +626,7 @@ class Reline::CursorPos < Struct
   def self.inspect; end
   def self.keyword_init?; end
   def self.members; end
-  def self.new(*arg0); end
+  def initialize(*arg0); end
   def x; end
   def x=(_); end
   def y; end
@@ -648,7 +648,7 @@ class Reline::DialogRenderInfo < Struct
   def self.inspect; end
   def self.keyword_init?; end
   def self.members; end
-  def self.new(*arg0); end
+  def initialize(*arg0); end
   def width; end
   def width=(_); end
   Elem = type_member(:out) {{fixed: T.untyped}}
@@ -723,6 +723,6 @@ class Reline::Core::DialogProc < Struct
   def self.inspect; end
   def self.keyword_init?; end
   def self.members; end
-  def self.new(*arg0); end
+  def initialize(*arg0); end
   Elem = type_member(:out) {{fixed: T.untyped}}
 end
