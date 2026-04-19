@@ -76,7 +76,6 @@ module T::Private::ClassUtils
       end
     end
 
-    overwritten = original_owner == mod
     T::Configuration.without_ruby_warnings do
       T::Private::DeclState.current.without_on_method_added do
         def_with_visibility(mod, name, original_visibility, &blk)
