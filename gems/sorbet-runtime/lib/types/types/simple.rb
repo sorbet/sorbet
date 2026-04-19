@@ -91,17 +91,17 @@ module T::Types
           return cached if cached
 
           type = if mod == ::Array
-            T::Array[T.untyped]
+            TypedArray::Untyped::Private::INSTANCE
           elsif mod == ::Hash
-            T::Hash[T.untyped, T.untyped]
+            TypedHash::Untyped.new
           elsif mod == ::Enumerable
-            T::Enumerable[T.untyped]
+            TypedEnumerable::Untyped.new
           elsif mod == ::Enumerator
-            T::Enumerator[T.untyped]
+            TypedEnumerator::Untyped.new
           elsif mod == ::Range
-            T::Range[T.untyped]
+            TypedRange.new(type)
           elsif !Object.autoload?(:Set) && Object.const_defined?(:Set) && mod == ::Set
-            T::Set[T.untyped]
+            TypedSet::Untyped.new
           else
             # ideally we would have a case mapping from ::Class -> T::Class and
             # ::Module -> T::Module here but for backwards compatibility we
