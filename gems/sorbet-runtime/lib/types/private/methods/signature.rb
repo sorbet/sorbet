@@ -67,10 +67,15 @@ class T::Private::Methods::Signature
     @defined_raw = defined_raw
 
     # Use T.untyped in lieu of T.nilable to try to avoid unnecessary allocations.
-    arg_types = T.let(nil, T.untyped)
-    kwarg_types = T.let(nil, T.untyped)
+    arg_types = nil
+    kwarg_types = nil
+    req_kwarg_names = nil
+    if T::Private::IS_TYPECHECKING
+      arg_types = T.let(nil, T.nilable(T::Array[[Symbol, T::Types::Base]]))
+      kwarg_types = T.let(nil, T.nilable(T::Hash[Symbol, T::Types::Base]))
+      req_kwarg_names = T.let(nil, T.nilable(T::Array[Symbol]))
+    end
     req_arg_count = 0
-    req_kwarg_names = T.let(nil, T.untyped)
 
     # If sig params are declared but there is a single parameter with a missing name
     # **and** the method ends with a "=", assume it is a writer method generated
