@@ -200,7 +200,7 @@ module T::Private::Methods::SignatureValidation
             "#{base_override_loc_str(signature, super_signature)}"
     end
 
-    if !signature.has_keyrest
+    if signature.keyrest_type.nil?
       # O(nm), but n and m are tiny here
       missing_kwargs = super_signature.kwarg_names - signature.kwarg_names
       if !missing_kwargs.empty?
@@ -210,7 +210,7 @@ module T::Private::Methods::SignatureValidation
       end
     end
 
-    if !signature.has_keyrest && super_signature.has_keyrest
+    if signature.keyrest_type.nil? && !super_signature.keyrest_type.nil?
       raise "Your definition of `#{method_name}` must have `**#{super_signature.keyrest_name}` " \
             "to be compatible with the method it #{mode_verb}: " \
             "#{base_override_loc_str(signature, super_signature)}"

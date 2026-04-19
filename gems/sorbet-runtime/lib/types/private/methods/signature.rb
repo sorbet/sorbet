@@ -4,7 +4,7 @@
 class T::Private::Methods::Signature
   attr_reader :method, :method_name, :arg_types, :kwarg_types, :block_type, :block_name,
               :rest_type, :rest_name, :keyrest_type, :keyrest_name, :bind, :effective_return_type,
-              :return_type, :mode, :req_arg_count, :req_kwarg_names, :has_keyrest,
+              :return_type, :mode, :req_arg_count, :req_kwarg_names,
               :check_level, :parameters, :on_failure, :override_allow_incompatible,
               :defined_raw
 
@@ -55,7 +55,6 @@ class T::Private::Methods::Signature
     @bind = bind ? T::Utils.coerce(bind) : bind
     @mode = mode
     @check_level = check_level
-    @has_keyrest = false
     @parameters = parameters
     @on_failure = on_failure
     @override_allow_incompatible = override_allow_incompatible
@@ -142,7 +141,6 @@ class T::Private::Methods::Signature
         @rest_name = param_name
         @rest_type = type
       when :keyrest
-        @has_keyrest = true
         @keyrest_name = param_name
         @keyrest_type = type
       else
@@ -193,7 +191,7 @@ class T::Private::Methods::Signature
     # causes forwarding **kwargs to do the wrong thing: see https://bugs.ruby-lang.org/issues/10708
     # and https://bugs.ruby-lang.org/issues/11860.
     args_length = args.length
-    if (args_length > @req_arg_count) && (!@kwarg_types.empty? || @has_keyrest) && args[-1].is_a?(Hash)
+    if (args_length > @req_arg_count) && (!@kwarg_types.empty? || !@keyrest_type.nil?) && args[-1].is_a?(Hash)
       kwargs = args[-1]
       args_length -= 1
     else
@@ -231,7 +229,7 @@ class T::Private::Methods::Signature
 
     kwargs.each do |name, val|
       type = @kwarg_types[name]
-      if !type && @has_keyrest
+      if !type && !@keyrest_type.nil?
         type = @keyrest_type
       end
 
