@@ -35,7 +35,7 @@ class T::Private::Methods::Signature
   attr_reader :req_kwarg_names
   sig {returns(Symbol)}
   attr_reader :check_level
-  sig {returns(T.untyped)}
+  sig {returns(T::Array[[Symbol, Symbol]])}
   attr_reader :parameters
   sig {returns(T.nilable(T::Array[T.untyped]))}
   attr_reader :on_failure
@@ -44,7 +44,16 @@ class T::Private::Methods::Signature
   sig {returns(T::Boolean)}
   attr_reader :defined_raw
 
-  sig {params(method: UnboundMethod, mode: String, parameters: T.untyped).returns(T.attached_class)}
+  sig do
+    params(
+      method: UnboundMethod,
+      mode: String,
+      # This is a lie: it would be better to say T.any([Symbol], [Symbol, Symbol])
+      # but Sorbet can't lub unequal tuples rught now (leads to T::Array[T.untyped])
+      parameters: T::Array[[Symbol, Symbol]]
+    )
+      .returns(T.attached_class)
+  end
   def self.new_untyped(method:, mode: T::Private::Methods::Modes.untyped, parameters: method.parameters); end
 
   sig do
@@ -57,7 +66,7 @@ class T::Private::Methods::Signature
       mode: String,
       check_level: T.nilable(Symbol),
       on_failure: T.nilable(T::Array[T.untyped]),
-      parameters: T.untyped,
+      parameters: T::Array[[Symbol, Symbol]],
       override_allow_incompatible: T.any(TrueClass, FalseClass, Symbol),
       defined_raw: T::Boolean,
     ).void
@@ -76,7 +85,7 @@ class T::Private::Methods::Signature
     @bind = T.let(nil, T.nilable(T::Types::Base))
     @mode = T.let(mode, String)
     @check_level = T.let(check_level, Symbol)
-    @parameters = T.let(parameters, T.untyped)
+    @parameters = T.let(parameters, T::Array[[Symbol, Symbol]])
     @on_failure = T.let(on_failure, T.nilable(T::Array[T.untyped]))
     @override_allow_incompatible = T.let(override_allow_incompatible, T.any(T::Boolean, Symbol))
     @defined_raw = T.let(defined_raw, T::Boolean)
