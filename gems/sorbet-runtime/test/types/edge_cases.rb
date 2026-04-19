@@ -923,7 +923,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     klass = Class.new do
       define_singleton_method(:method_added) do |name|
         # Reaching into a private method for testing purposes
-        visibility = T::Private::ClassUtils.send(:visibility_method_name, self, name)
+        visibility = T::Private::ClassUtils.visibility_method_name(self, name)
 
         method_redefinitions << [name, visibility]
 
