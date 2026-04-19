@@ -74,8 +74,8 @@ T.reveal_type(arr.fetch(0) { 'error' }) # error: Revealed type: `T.any(Integer, 
 x = [[1, "a"], [2, "b"]]
 T.reveal_type(x.transpose) # error: Revealed type: `[T::Array[Integer], T::Array[String]] (2-tuple)`
 x = [[1, "a"], [2]]
-T.reveal_type(x.transpose) # error: Revealed type: `T::Array[T::Array[T.untyped]]`
+T.reveal_type(x.transpose) # error: Revealed type: `T::Array[T.any([Integer(1), String("a")], [Integer(2)])]`
 x = [[3.4], [1, "a"]]
-T.reveal_type(x.transpose) # error: Revealed type: `T::Array[T::Array[T.untyped]]`
+T.reveal_type(x.transpose) # error: Revealed type: `T::Array[T.any([Float(3.400000)], [Integer(1), String("a")])]`
 x = [[3.4, "a"], [:a, 5]]
 T.reveal_type(x.transpose) # error: Revealed type: `[T::Array[T.any(Float, Symbol)], T::Array[T.any(Integer, String)]] (2-tuple)`

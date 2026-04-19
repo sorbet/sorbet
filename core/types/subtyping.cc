@@ -379,7 +379,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                                 result = make_type<TupleType>(move(elemLubs));
                             }
                         } else {
-                            result = Types::arrayOfUntyped(Symbols::Magic_UntypedSource_tupleLub());
+                            result = OrType::make_shared(t1, t2);
                         }
                     } else {
                         result = lub(gs, a1.underlying(gs), t2.underlying(gs));
