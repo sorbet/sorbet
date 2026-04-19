@@ -3,61 +3,14 @@
 
 # Cut down version of Chalk::Tools::ClassUtils with only :replace_method functionality.
 # Extracted to a separate namespace so the type system can be used standalone.
+#
+# Note: the functionality to "restore" a method was removed, because it is no
+# longer being used by sorbet-runtime. Restoring a method requires care--if you
+# need to reintroduce this functionality, consult the git history for how to do
+# it safely.
 module T::Private::ClassUtils
-  class ReplacedMethod
-    def initialize(mod, old_method, new_method, overwritten, visibility)
-      if old_method.name != new_method.name
-        raise "Method names must match. old=#{old_method.name} new=#{new_method.name}"
-      end
-      @mod = mod
-      @old_method = old_method
-      @new_method = new_method
-      @overwritten = overwritten
-      @name = old_method.name
-      @visibility = visibility
-      @restored = false
-    end
-
-    def restore
-      # The check below would also catch this, but this makes the failure mode much clearer
-      if @restored
-        raise "Method '#{@name}' on '#{@mod}' was already restored"
-      end
-
-      if @mod.instance_method(@name) != @new_method
-        raise "Trying to restore #{@mod}##{@name} but the method has changed since the call to replace_method"
-      end
-
-      @restored = true
-
-      if @overwritten
-        # The original method was overwritten. Overwrite again to restore it.
-        T::Configuration.without_ruby_warnings do
-          @mod.send(:define_method, @old_method.name, @old_method)
-        end
-      else
-        # The original method was in an ancestor. Restore it by removing the overriding method.
-        @mod.send(:remove_method, @old_method.name)
-      end
-
-      # Restore the visibility. Note that we need to do this even when we call remove_method
-      # above, because the module may have set custom visibility for a method it inherited.
-      @mod.send(@visibility, @old_method.name)
-
-      nil
-    end
-
-    def bind(obj)
-      @old_method.bind(obj)
-    end
-
-    def to_s
-      @old_method.to_s
-    end
-  end
-
   # `name` must be an instance method (for class methods, pass in mod.singleton_class)
-  private_class_method def self.visibility_method_name(mod, name)
+  def self.visibility_method_name(mod, name)
     if mod.public_method_defined?(name)
       :public
     elsif mod.protected_method_defined?(name)
@@ -65,7 +18,10 @@ module T::Private::ClassUtils
     elsif mod.private_method_defined?(name)
       :private
     else
-      mod.method(name) # Raises
+      # Raises a NameError formatted like the Ruby VM would (the exact text formatting
+      # of these errors changed across Ruby VM versions, in ways that would sometimes
+      # cause tests to fail if they were dependent on hard coding errors).
+      mod.method(name)
     end
   end
 
@@ -90,15 +46,18 @@ module T::Private::ClassUtils
     end
   end
 
-  # Replaces a method, either by overwriting it (if it is defined directly on `mod`) or by
-  # overriding it (if it is defined by one of mod's ancestors).  If `original_only` is
-  # false, returns a ReplacedMethod instance on which you can call `bind(...).call(...)`
-  # to call the original method, or `restore` to restore the original method (by
-  # overwriting or removing the override).
+  # Replaces a method, either by overwriting it (if it is defined directly on
+  # `mod`) or by overriding it (if it is defined by one of mod's ancestors).
   #
-  # If `original_only` is true, return the `UnboundMethod` representing the original method.
-  def self.replace_method(mod, name, original_only=false, &blk)
-    original_method = mod.instance_method(name)
+  # Takes the `original_method` as a parameter, so it does not return anything.
+  #
+  # Can also avoid `T.let` pinning errors by letting the caller pre-compute the
+  # `original_method`, so it knows that it will always be defined (because it
+  # doesn't know that the block will always run once)
+  #
+  # Does not share code with `replace_method_with_handle`, for performance (do
+  # not want to increase the call stack, as this is a very sensitive code path).
+  def self.replace_method(original_method, mod, name, &blk)
     original_visibility = visibility_method_name(mod, name)
     original_owner = original_method.owner
 
@@ -124,11 +83,6 @@ module T::Private::ClassUtils
       end
     end
 
-    if original_only
-      original_method
-    else
-      new_method = mod.instance_method(name)
-      ReplacedMethod.new(mod, original_method, new_method, overwritten, original_visibility)
-    end
+    nil
   end
 end

@@ -304,7 +304,7 @@ module T::Private::Methods::SignatureValidation
   end
 
   private_class_method def self.method_visibility(method)
-    T::Private::Methods.visibility_method_name(method.owner, method.name)
+    T::Private::ClassUtils.visibility_method_name(method.owner, method.name)
   end
 
   # Higher = more restrictive.
