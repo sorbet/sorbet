@@ -8,7 +8,13 @@ class T::Private::Methods::Signature
               :check_level, :parameters, :on_failure, :override_allow_incompatible,
               :defined_raw
 
-  UNNAMED_REQUIRED_PARAMETERS = [[:req]].freeze
+  # T.unsafe: `UnboundMethod#parameters` lies and says `T::Array[[Symbol, Symbol]]`.
+  # Sorbet can't lub tuple types, meaning that `T.any([Symbol], [Symbol,
+  # Symbol])` would just be `T::Array[T.untyped]`. But Sorbet can see that
+  # UNNAMED_REQUIRED_PARAMETERS, which is an array of 1-tuples, can never
+  # equal an array of 2-tuples, and calls the code dead. There's no good
+  # option, let's just unsafe until tuples are better and we can fix the sig.
+  UNNAMED_REQUIRED_PARAMETERS = T.unsafe([[:req]].freeze)
 
   def self.new_untyped(method:, mode: T::Private::Methods::Modes.untyped, parameters: method.parameters)
     # Using `NotTyped` ensures we'll get an error if we ever try validation on these.
@@ -16,7 +22,7 @@ class T::Private::Methods::Signature
     raw_return_type = not_typed
     # Map missing parameter names to "argN" positionally
     parameters = parameters.each_with_index.map do |(param_kind, param_name), index|
-      [param_kind, param_name || "arg#{index}"]
+      [param_kind, T.unsafe(param_name) || "arg#{index}".to_sym]
     end
     raw_arg_types = {}
     parameters.each do |_, param_name|
@@ -91,7 +97,7 @@ class T::Private::Methods::Signature
     end
     i = 0
     raw_arg_types.each do |type_name, raw_type|
-      param_kind, param_name = parameters[i]
+      param_kind, param_name = parameters.fetch(i)
 
       if type_name != param_name
         hint = ""
@@ -107,7 +113,7 @@ class T::Private::Methods::Signature
 
         raise "Parameter `#{type_name}` is declared out of order (declared as arg number " \
               "#{i + 1}, defined in the method as arg number " \
-              "#{parameters.index { |_, name| name == type_name } + 1}).#{hint}\nMethod: #{method_desc}"
+              "#{T.must(parameters.index { |_, name| name == type_name }) + 1}).#{hint}\nMethod: #{method_desc}"
       end
 
       type = T::Utils.coerce(raw_type)
