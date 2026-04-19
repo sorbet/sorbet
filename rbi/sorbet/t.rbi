@@ -437,6 +437,7 @@ module T::Configuration
 end
 
 module T::Utils
+  sig { params(method: T.any(Proc, UnboundMethod)).returns(Integer) }
   def self.arity(method); end
 
   # Converts Sorbet type syntax into a T::Types::Base instance to provide
@@ -445,12 +446,16 @@ module T::Utils
   def self.coerce(val); end
 
   def self.resolve_alias(type); end
+
+  sig { params(force_type_init: T::Boolean).void }
   def self.run_all_sig_blocks(force_type_init: true); end
   def self.signature_for_method(method); end
   def self.signature_for_instance_method(mod, method_name); end
+
   sig { params(type: T.anything).returns(T.nilable(T::Types::Base)) }
   def self.unwrap_nilable(type); end
   def self.wrap_method_with_call_validation_if_needed(mod, method_sig, original_method); end
+
   def self.check_type_recursive!(value, type); end
 
   # only one caller; delete
@@ -459,9 +464,16 @@ end
 
 
 module T::AbstractUtils
+  sig { params(method: UnboundMethod).returns(T::Boolean) }
   def self.abstract_method?(method); end
+
+  sig { params(mod: T::Module[T.anything]).returns(T::Array[UnboundMethod]) }
   def self.abstract_methods_for(mod); end
+
+  sig { params(mod: T::Module[T.anything]).returns(T::Boolean) }
   def self.abstract_module?(mod); end
+
+  sig { params(mod: T::Module[T.anything]).returns(T::Array[UnboundMethod]) }
   def self.declared_abstract_methods_for(mod); end
 end
 
