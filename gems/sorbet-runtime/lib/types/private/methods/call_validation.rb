@@ -74,7 +74,13 @@ module T::Private::Methods::CallValidation
   def self.create_validator_method(mod, original_method, method_sig, original_visibility)
     has_fixed_arity = method_sig.kwarg_types.empty? && method_sig.rest_type.nil? && method_sig.keyrest_type.nil? &&
       original_method.parameters.all? { |(kind, _name)| kind == :req || kind == :block }
-    can_skip_block_type = method_sig.block_type.nil? || method_sig.block_type.valid?(nil)
+
+    # nil implies block_type.nil?
+    # true implies !block_type.nil? and block_type.valid?(nil)
+    # false implies !block_type.nil? and !block_type.valid?(nil)
+    # This formulation avoids a type error without introducing extra method calls or local vars
+    can_skip_block_type = method_sig.block_type&.valid?(nil) != false
+
     ok_for_fast_path = has_fixed_arity && can_skip_block_type && !method_sig.bind && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
 
     all_args_are_simple = ok_for_fast_path && method_sig.arg_types.all? { |_name, type| type.is_a?(T::Types::Simple) }
