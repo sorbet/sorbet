@@ -39,7 +39,7 @@ module T::Types
         # evades Sorbet's static check and we end up on the slow path, or if someone
         # is using the T:Types::Union constructor directly (the latter possibility
         # is why we don't just move the `uniq` into `Private::Pool.union_of_types`).
-        return types[0].name
+        return types.fetch(0).name
       end
       nilable = T::Utils.coerce(NilClass)
       trueclass = T::Utils.coerce(TrueClass)
