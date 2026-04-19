@@ -181,10 +181,6 @@ class T::Private::Methods::Signature
     @method.owner
   end
 
-  def dsl_method
-    "#{@mode}_method"
-  end
-
   # @return [Hash] a mapping like `{arg_name: [val, type], ...}`, for only those args actually present.
   def each_args_value_type(args)
     # Manually split out args and kwargs based on ruby's behavior. Do not try to implement this by
