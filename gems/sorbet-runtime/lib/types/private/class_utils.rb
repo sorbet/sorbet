@@ -57,7 +57,7 @@ module T::Private::ClassUtils
   end
 
   # `name` must be an instance method (for class methods, pass in mod.singleton_class)
-  private_class_method def self.visibility_method_name(mod, name)
+  def self.visibility_method_name(mod, name)
     if mod.public_method_defined?(name)
       :public
     elsif mod.protected_method_defined?(name)
@@ -65,7 +65,10 @@ module T::Private::ClassUtils
     elsif mod.private_method_defined?(name)
       :private
     else
-      mod.method(name) # Raises
+      # Raises a NameError formatted like the Ruby VM would (the exact text formatting
+      # of these errors changed across Ruby VM versions, in ways that would sometimes
+      # cause tests to fail if they were dependent on hard coding errors).
+      mod.method(name)
     end
   end
 
