@@ -187,8 +187,8 @@ class T::Private::Methods::Signature
     # causes forwarding **kwargs to do the wrong thing: see https://bugs.ruby-lang.org/issues/10708
     # and https://bugs.ruby-lang.org/issues/11860.
     args_length = args.length
-    if (args_length > @req_arg_count) && (!@kwarg_types.empty? || !@keyrest_type.nil?) && args[-1].is_a?(Hash)
-      kwargs = args[-1]
+    if (args_length > @req_arg_count) && (!@kwarg_types.empty? || !@keyrest_type.nil?) && (last_arg = args[-1]).is_a?(Hash)
+      kwargs = last_arg
       args_length -= 1
     else
       kwargs = EMPTY_HASH
@@ -208,7 +208,8 @@ class T::Private::Methods::Signature
       # Process given pre-rest args. When there are no rest args,
       # this is just the given number of args.
       while it < args_length && it < @arg_types.length
-        yield @arg_types[it][0], args[it], @arg_types[it][1]
+        arg_type = @arg_types.fetch(it)
+        yield arg_type[0], args[it], arg_type[1]
         it += 1
       end
 
