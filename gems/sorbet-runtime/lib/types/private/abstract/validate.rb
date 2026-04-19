@@ -111,8 +111,8 @@ module T::Private::Abstract::Validate
   end
 
   private_class_method def self.describe_method(method, show_owner: true)
-    loc = if method.source_location
-      method.source_location.join(':')
+    loc = if (source_loc = method.source_location)
+      source_loc.join(':')
     else
       "<unknown location>"
     end

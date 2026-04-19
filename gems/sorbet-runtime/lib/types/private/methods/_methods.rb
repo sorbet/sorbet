@@ -497,8 +497,9 @@ module T::Private::Methods
 
   def self.run_all_sig_blocks(force_type_init: true)
     loop do
-      break if @sig_wrappers.empty?
-      key, = @sig_wrappers.first
+      first_wrapper = @sig_wrappers.first
+      break unless first_wrapper
+      key, = first_wrapper
       run_sig_block_for_key(key, force_type_init: force_type_init)
     end
   end
