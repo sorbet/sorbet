@@ -133,7 +133,7 @@ module T::Utils
   # @return [String]
   #
   def self.string_truncate_middle(str, start_len, end_len, ellipsis='...')
-    return unless str
+    return str unless str
 
     raise ArgumentError.new('must provide start_len') unless start_len
     raise ArgumentError.new('must provide end_len') unless end_len
