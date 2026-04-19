@@ -89,6 +89,10 @@ class T::Private::Methods::Signature
     @on_failure = T.let(on_failure, T.nilable(T::Array[T.untyped]))
     @override_allow_incompatible = T.let(override_allow_incompatible, T.any(T::Boolean, Symbol))
     @defined_raw = T.let(defined_raw, T::Boolean)
+    @arg_types = T.let([], T::Array[[Symbol, T::Types::Base]])
+    @kwarg_types = T.let([], T::Hash[Symbol, T::Types::Base])
+    @req_arg_count = T.let(0, Integer)
+    @req_kwarg_names = T.let([], T::Array[Symbol])
   end
 
   sig { params(method_name: Symbol).returns(Symbol) }
