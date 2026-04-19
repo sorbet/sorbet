@@ -4,7 +4,7 @@
 class T::Private::Methods::Signature
   attr_reader :method, :method_name, :arg_types, :kwarg_types, :block_type, :block_name,
               :rest_type, :rest_name, :keyrest_type, :keyrest_name, :bind, :effective_return_type,
-              :return_type, :mode, :req_arg_count, :req_kwarg_names, :has_rest, :has_keyrest,
+              :return_type, :mode, :req_arg_count, :req_kwarg_names, :has_keyrest,
               :check_level, :parameters, :on_failure, :override_allow_incompatible,
               :defined_raw
 
@@ -55,7 +55,6 @@ class T::Private::Methods::Signature
     @bind = bind ? T::Utils.coerce(bind) : bind
     @mode = mode
     @check_level = check_level
-    @has_rest = false
     @has_keyrest = false
     @parameters = parameters
     @on_failure = on_failure
@@ -140,7 +139,6 @@ class T::Private::Methods::Signature
         @block_name = param_name
         @block_type = type
       when :rest
-        @has_rest = true
         @rest_name = param_name
         @rest_type = type
       when :keyrest
@@ -202,7 +200,7 @@ class T::Private::Methods::Signature
       kwargs = EMPTY_HASH
     end
 
-    if !@has_rest && ((args_length < @req_arg_count) || (args_length > @arg_types.length))
+    if @rest_type.nil? && ((args_length < @req_arg_count) || (args_length > @arg_types.length))
       expected_str = @req_arg_count.to_s
       if @arg_types.length != @req_arg_count
         expected_str += "..#{@arg_types.length}"
@@ -220,7 +218,7 @@ class T::Private::Methods::Signature
         it += 1
       end
 
-      if @has_rest
+      if !@rest_type.nil?
         rest_count = args_length - @arg_types.length
         rest_count = 0 if rest_count.negative?
 

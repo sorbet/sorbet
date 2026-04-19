@@ -182,13 +182,13 @@ module T::Private::Methods::SignatureValidation
     method_name = signature.method_name
     mode_verb = super_signature.mode == Modes.abstract ? 'implements' : 'overrides'
 
-    if !signature.has_rest && signature.arg_count < super_signature.arg_count
+    if signature.rest_type.nil? && signature.arg_count < super_signature.arg_count
       raise "Your definition of `#{method_name}` must accept at least #{super_signature.arg_count} " \
             "positional arguments to be compatible with the method it #{mode_verb}: " \
             "#{base_override_loc_str(signature, super_signature)}"
     end
 
-    if !signature.has_rest && super_signature.has_rest
+    if signature.rest_type.nil? && !super_signature.rest_type.nil?
       raise "Your definition of `#{method_name}` must have `*#{super_signature.rest_name}` " \
             "to be compatible with the method it #{mode_verb}: " \
             "#{base_override_loc_str(signature, super_signature)}"

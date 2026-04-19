@@ -68,7 +68,7 @@ module T::Private::Methods::CallValidation
   end
 
   def self.create_validator_method(mod, original_method, method_sig, original_visibility)
-    has_fixed_arity = method_sig.kwarg_types.empty? && !method_sig.has_rest && !method_sig.has_keyrest &&
+    has_fixed_arity = method_sig.kwarg_types.empty? && method_sig.rest_type.nil? && !method_sig.has_keyrest &&
       original_method.parameters.all? { |(kind, _name)| kind == :req || kind == :block }
     can_skip_block_type = method_sig.block_type.nil? || method_sig.block_type.valid?(nil)
     ok_for_fast_path = has_fixed_arity && can_skip_block_type && !method_sig.bind && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
