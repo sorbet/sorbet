@@ -17,6 +17,7 @@
     "sorbet.configFilePatterns": [
       "../../../bazel-bin/main/sorbet",
     ],
+    "sorbet.inlayTypeHints": "after_var",
     // Get the VS Code language client library to log protocol messages to the
     // Sorbet output window.
     // https://code.visualstudio.com/api/language-extensions/language-server-extension-guide#logging-support-for-language-server
