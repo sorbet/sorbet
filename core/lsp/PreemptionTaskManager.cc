@@ -34,11 +34,11 @@ bool PreemptionTaskManager::trySchedulePreemptionTask(shared_ptr<PreemptionTask>
     return success;
 }
 
-bool PreemptionTaskManager::tryRunScheduledPreemptionTask(const core::GlobalState &gs, bool allowReschedule) {
+bool PreemptionTaskManager::tryRunScheduledPreemptionTask(const core::GlobalState &gs, uint16_t currentStratum,
+                                                          bool allowReschedule) {
     TypecheckEpochManager::assertConsistentThread(
         typecheckingThreadId, "PreemptionTaskManager::tryRunScheduledPreemptionTask", "typechecking thread");
 
-    auto currentStratum = this->preemptionStratum.load();
     auto runnableStratum = this->runnableAt.load();
     // We can early-exit if we know that it's not possible to run preemption yet, but if we know that rescheduling is
     // not possible, we should run to completion.

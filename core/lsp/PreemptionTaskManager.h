@@ -22,10 +22,6 @@ private:
     // Thread ID of the processing thread. Lazily set.
     std::optional<std::thread::id> processingThreadId;
 
-    // The stratum that the typechecker is currently typechecking. Preemption is available for all strata whose id is
-    // less than or equal to this number.
-    std::atomic<uint16_t> preemptionStratum = 0;
-
     // If a preemption task has rescheduled itself, this is the stratum that it indicated it would be runnable at.
     std::atomic<uint16_t> runnableAt = 0;
 
@@ -41,7 +37,7 @@ public:
     // cleared out. Otherwise there is the possibility that it might get rescheduled, which would cause problems the
     // next time preemption was scheduled from the main thread. Handles running task with a fresh errorQueue, and
     // restoring previous errorQueue when done.
-    bool tryRunScheduledPreemptionTask(const core::GlobalState &gs, bool allowReschedule);
+    bool tryRunScheduledPreemptionTask(const core::GlobalState &gs, uint16_t currentStratum, bool allowReschedule);
     // Run only from processing thread.
     // Tries to cancel the scheduled preemption task. Returns true if it succeeds.
     bool tryCancelScheduledPreemptionTask(std::shared_ptr<PreemptionTask> &task);
@@ -52,24 +48,9 @@ public:
 
     // Reset the preemption stratum back to the first stratum.
     void resetPreemptionStratum() {
-        this->preemptionStratum.store(0);
-
         // The first time we run a preemption task, it won't know what stratum it needs to be run at, so we
         // optimistically track this as stratum zero, with the assupmtion that rescheduling will be cheap.
         this->runnableAt.store(0);
-    }
-
-    // Return the current stratum. All preemption tasks that are possible to run at a stratum that is less than or equal
-    // to this number are runnable at this point.
-    uint16_t getPreemptionStratum() {
-        return this->preemptionStratum.load();
-    }
-
-    // Increment the current preepmtion stratum. Used to indicate that we've started processing a new stratum in the
-    // condensation graph.
-    // Only called from the slow path.
-    void incrementPreemptionStratum() {
-        this->preemptionStratum.fetch_add(1);
     }
 };
 

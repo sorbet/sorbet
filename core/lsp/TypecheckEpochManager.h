@@ -2,6 +2,7 @@
 #define SORBET_LSP_TYPECHECKEPOCHMANAGER_H
 
 #include "core/core.h"
+#include <cstdint>
 #include <memory>
 
 namespace sorbet::core::lsp {
@@ -53,7 +54,7 @@ public:
     // Tries to commit the given epoch. Returns true if the commit succeeded, or false if it was canceled.
     // The presence of PreemptionTaskManager determines if this commit is preemptible.
     bool tryCommitEpoch(core::GlobalState &gs, uint32_t epoch, bool isCancelable,
-                        std::shared_ptr<PreemptionTaskManager> preemptionManager, std::function<void()> typecheck);
+                        std::shared_ptr<PreemptionTaskManager> preemptionManager, std::function<uint16_t()> typecheck);
     // Grabs the epoch lock, and calls function with the current typechecking status.
     void withEpochLock(std::function<void(TypecheckingStatus)> lambda) const;
 };

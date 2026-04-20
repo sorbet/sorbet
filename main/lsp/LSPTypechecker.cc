@@ -326,7 +326,9 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
     auto sorted = sortParsedFiles(*gs, *errorReporter, move(resolved));
     const auto presorted = true;
     const auto cancelable = false;
-    pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, nullptr, presorted);
+    // TODO(trevor): ultimately this should be the maximum stratum, but for now this is acceptable.
+    const auto currentStratum = 0;
+    pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, currentStratum, nullptr, presorted);
     gs->lspTypecheckCount++;
 
     auto duration = timeit.setEndTime();
@@ -388,7 +390,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
     auto &epochManager = *this->gs->epochManager;
     // Note: Commits can only be canceled if this edit is cancelable, LSP is running across multiple threads, and the
     // cancelation feature is enabled.
-    auto committed = epochManager.tryCommitEpoch(*this->gs, epoch, cancelable, preemptManager, [&]() -> void {
+    auto committed = epochManager.tryCommitEpoch(*this->gs, epoch, cancelable, preemptManager, [&]() -> uint16_t {
         // Replace error queue with one that is owned by this thread.
         this->gs->errorQueue =
             make_shared<core::ErrorQueue>(this->gs->errorQueue->logger, this->gs->errorQueue->tracer, errorFlusher);
@@ -519,6 +521,11 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
         if (this->config->opts.cacheSensitiveOptions.sorbetPackages) {
             Timer timeit(this->config->logger, "buildPackageDB");
 
+            // This is a bit of a lie: we haven't gotten the first stratum to a state where we could run preemption
+            // tasks yet, but any errors raised by running a preemption action on this incomplete global state will be
+            // transient.
+            uint16_t firstStratum = 0;
+
             auto numPackageFiles = pipeline::partitionPackageFiles(*this->gs, workspaceFilesSpan);
             auto inputPackageFiles = workspaceFilesSpan.first(numPackageFiles);
             workspaceFilesSpan = workspaceFilesSpan.subspan(numPackageFiles);
@@ -528,7 +535,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
                     hashing::Hashing::indexAndComputeFileHashes(*this->gs, this->config->opts, *this->config->logger,
                                                                 inputPackageFiles, workers, ownedKvstore, cancelable);
                 if (!result.hasResult()) {
-                    return;
+                    return firstStratum;
                 }
                 packageIndexed = std::move(result.result());
             }
@@ -553,16 +560,23 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
                 pipeline::name(*this->gs, absl::MakeSpan(packageIndexed), this->config->opts, workers, foundHashes);
             if (cancelled) {
                 ast::ParsedFilesOrCancelled::cancel(move(packageIndexed), workers);
-                return;
+                return firstStratum;
             }
 
             pipeline::buildPackageDB(*this->gs, absl::MakeSpan(packageIndexed), workspaceFilesSpan, this->config->opts,
                                      workers);
         }
 
+        // This is cast to a uint16_t everywhere it's used. This seems bad, but it should be fine because:
+        // 1. we increment in the beginning of the loop before any use
+        // 2. overflowing a uint16_t would mean that we have a chain of depndencies that's >65535 packages long
+        int currentStratum = -1;
+
         auto strata = pipeline::computePackageStrata(*this->gs, packageIndexed, workspaceFilesSpan, this->config->opts);
         for (auto &stratum : strata.strata) {
             vector<ast::ParsedFile> stratumFiles, nonPackagedIndexed;
+
+            ++currentStratum;
 
             // When we unpartition the package and non-package files, we'll realloc stratumFiles to hold everything.
             stratumFiles.reserve(stratum.packageFiles.size() + stratum.sourceFiles.size());
@@ -589,7 +603,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
                         ownedKvstore, cancelable);
                     if (!result.hasResult()) {
                         ast::ParsedFilesOrCancelled::cancel(std::move(stratumFiles), workers);
-                        return;
+                        return currentStratum;
                     }
                     nonPackagedIndexed = std::move(result.result());
                     this->cacheUpdatedFiles(nonPackagedIndexed, openFiles);
@@ -621,7 +635,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
                 if (canceled) {
                     ast::ParsedFilesOrCancelled::cancel(move(stratumFiles), workers);
                     ast::ParsedFilesOrCancelled::cancel(move(nonPackagedIndexed), workers);
-                    return;
+                    return currentStratum;
                 }
                 pipeline::validatePackagedFiles(*this->gs, absl::MakeSpan(nonPackagedIndexed), this->config->opts,
                                                 workers);
@@ -633,14 +647,14 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
             indexingOp.reset();
 
             if (epochManager.wasTypecheckingCanceled()) {
-                return;
+                return currentStratum;
             }
 
             pipeline::unpartitionPackageFiles(stratumFiles, std::move(nonPackagedIndexed));
 
             auto maybeResolved = pipeline::resolve(*gs, move(stratumFiles), config->opts, workers);
             if (!maybeResolved.hasResult()) {
-                return;
+                return currentStratum;
             }
 
             if (gs->sleepInSlowPathSeconds.has_value()) {
@@ -668,7 +682,8 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
             while (updates.preemptionsExpected > 0) {
                 auto loopStartTime = Timer::clock_gettime_coarse();
                 auto coarseThreshold = Timer::get_clock_threshold_coarse();
-                while (!preemptManager->tryRunScheduledPreemptionTask(*gs, /* allowReschedule */ true)) {
+                while (
+                    !preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true)) {
                     auto curTime = Timer::clock_gettime_coarse();
                     if (curTime.usec - loopStartTime.usec > 20'000'000) {
                         Exception::raise("Slow path timed out waiting for preemption edit");
@@ -689,15 +704,16 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
                     }
                     Timer::timedSleep(coarseThreshold, *logger, "slow_path.expected_cancellation.sleep");
                 }
-                return;
+                return currentStratum;
             }
 
             auto sorted = sortParsedFiles(*gs, *errorReporter, move(maybeResolved.result()));
             const auto presorted = true;
-            pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, preemptManager, presorted);
-
-            this->preemptManager->incrementPreemptionStratum();
+            pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, currentStratum, preemptManager,
+                                presorted);
         }
+
+        return currentStratum;
     });
 
     gs->lspQuery = core::lsp::Query::noQuery();

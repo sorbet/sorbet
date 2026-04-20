@@ -646,8 +646,11 @@ int realmain(int argc, char *argv[]) {
         // The rest of the pipeline proceeds by strata in the package condensation graph. When stripe-packages is not
         // enabled, everything ends up in one big stratum.
         vector<ast::ParsedFile> stratumFiles;
+        int currentStratum = -1;
         auto strata = pipeline::computePackageStrata(*gs, packageIndexed, inputFilesSpan, opts);
         for (auto &stratum : strata.strata) {
+            ++currentStratum;
+
             // We can unconditionally reset (to drop the vectors) instead of having to consult
             // intentionallyLeakASTs, because if intentionallyLeakASTs, then necessarily
             // packageDirected will be false, and thus this loop will only iterate once, and since
@@ -708,7 +711,7 @@ int realmain(int argc, char *argv[]) {
                 if (opts.genPackagesMode == core::packages::GenPackagesMode::Disabled) {
                     // In --gen-packages mode, we skip typecheck because we only want to show packaging related errors,
                     // and skipping typecheck saves a significant amount of time.
-                    pipeline::typecheck(*gs, move(stratumFiles), opts, *workers, /* cancelable */ false,
+                    pipeline::typecheck(*gs, move(stratumFiles), opts, *workers, /* cancelable */ false, currentStratum,
                                         /* preemptionManager */ nullptr, /* presorted */ false, intentionallyLeakASTs);
 
                     if (gs->hadCriticalError()) {

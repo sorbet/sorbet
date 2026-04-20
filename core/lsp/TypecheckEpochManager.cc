@@ -63,7 +63,7 @@ bool TypecheckEpochManager::tryCancelSlowPath(uint32_t newEpoch) {
 
 bool TypecheckEpochManager::tryCommitEpoch(core::GlobalState &gs, uint32_t epoch, bool isCancelable,
                                            shared_ptr<PreemptionTaskManager> preemptionManager,
-                                           function<void()> typecheck) {
+                                           function<uint16_t()> typecheck) {
     assertConsistentThread(typecheckingThreadId, "TypecheckEpochManager::tryCommitEpoch", "typechecking");
     if (!isCancelable) {
         typecheck();
@@ -74,7 +74,7 @@ bool TypecheckEpochManager::tryCommitEpoch(core::GlobalState &gs, uint32_t epoch
     ENFORCE(ABSL_TS_UNCHECKED_READ(currentlyProcessingLSPEpoch).load() == epoch);
     // Typechecking does not run under the mutex, as it would prevent another thread from running `tryCancelSlowPath`
     // during typechecking.
-    typecheck();
+    auto finalStratum = typecheck();
 
     bool committed = false;
     {
@@ -98,7 +98,7 @@ bool TypecheckEpochManager::tryCommitEpoch(core::GlobalState &gs, uint32_t epoch
     if (preemptionManager) {
         // Now that we are no longer running a slow path, run a preemption task that might have snuck in while we were
         // finishing up. No others can be scheduled.
-        preemptionManager->tryRunScheduledPreemptionTask(gs, /* allowReschedule */ false);
+        preemptionManager->tryRunScheduledPreemptionTask(gs, finalStratum, /* allowReschedule */ false);
     }
     return committed;
 }

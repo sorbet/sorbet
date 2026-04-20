@@ -346,7 +346,8 @@ TEST_CASE("PreemptionTasksWorkAsExpected") {
                                       vector<core::ErrorSection>(), vector<core::AutocorrectSuggestion>(), false));
 
     // No preemption task registered.
-    CHECK_FALSE(preemptManager->tryRunScheduledPreemptionTask(*gs, /* allowReschedule */ true));
+    uint16_t currentStratum = 0;
+    CHECK_FALSE(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true));
 
     auto task = make_shared<CountingTask>(preemptManager, *gs);
     // Should fail because a slow path is not running, so there's nothing to preempt.
@@ -362,7 +363,7 @@ TEST_CASE("PreemptionTasksWorkAsExpected") {
     CHECK(preemptManager->trySchedulePreemptionTask(task));
 
     // This should run + clear the scheduled task.
-    CHECK(preemptManager->tryRunScheduledPreemptionTask(*gs, /* allowReschedule */ true));
+    CHECK(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true));
     CHECK_EQ(1, task->runCount);
 
     // Our error should still be there.
@@ -410,7 +411,8 @@ TEST_CASE("PreemptionReschedulingWorksAsExpected") {
                                       vector<core::ErrorSection>(), vector<core::AutocorrectSuggestion>(), false));
 
     // No preemption task registered.
-    CHECK_FALSE(preemptManager->tryRunScheduledPreemptionTask(*gs, /* allowReschedule */ true));
+    uint16_t currentStratum = 0;
+    CHECK_FALSE(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true));
 
     auto task = make_shared<ReschedulingTask>(2);
 
@@ -422,26 +424,22 @@ TEST_CASE("PreemptionReschedulingWorksAsExpected") {
     CHECK(preemptManager->trySchedulePreemptionTask(task));
 
     // This should run scheduled task, but not clear it.
-    CHECK_EQ(0, preemptManager->getPreemptionStratum());
-    CHECK(preemptManager->tryRunScheduledPreemptionTask(*gs, /* allowReschedule */ true));
+    CHECK(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true));
     CHECK_EQ(1, task->runCount);
 
     // This should not run the scheduled task, as we haven't made it to stratum 2 yet.
-    preemptManager->incrementPreemptionStratum();
-    CHECK_EQ(1, preemptManager->getPreemptionStratum());
-    CHECK_FALSE(preemptManager->tryRunScheduledPreemptionTask(*gs, /* allowReschedule */ true));
+    ++currentStratum;
+    CHECK_FALSE(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true));
     CHECK_EQ(1, task->runCount);
 
     // This should run and clear the task.
-    preemptManager->incrementPreemptionStratum();
-    CHECK_EQ(2, preemptManager->getPreemptionStratum());
-    CHECK(preemptManager->tryRunScheduledPreemptionTask(*gs, /* allowReschedule */ true));
+    ++currentStratum;
+    CHECK(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true));
     CHECK_EQ(2, task->runCount);
 
     // Running at stratum 3 should show no preemption tasks run
-    preemptManager->incrementPreemptionStratum();
-    CHECK_EQ(3, preemptManager->getPreemptionStratum());
-    CHECK_FALSE(preemptManager->tryRunScheduledPreemptionTask(*gs, /* allowReschedule */ true));
+    ++currentStratum;
+    CHECK_FALSE(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true));
     CHECK_EQ(2, task->runCount);
 
     // The preemption manager has dropped the task, so we should be the only remaining reference.
@@ -464,7 +462,8 @@ TEST_CASE("RescheduledPreemptionTasksClearOnCancelation") {
                                       vector<core::ErrorSection>(), vector<core::AutocorrectSuggestion>(), false));
 
     // No preemption task registered.
-    CHECK_FALSE(preemptManager->tryRunScheduledPreemptionTask(*gs, /* allowReschedule */ true));
+    uint16_t currentStratum = 0;
+    CHECK_FALSE(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true));
 
     auto task = make_shared<ReschedulingTask>(2);
 
@@ -476,13 +475,12 @@ TEST_CASE("RescheduledPreemptionTasksClearOnCancelation") {
     CHECK(preemptManager->trySchedulePreemptionTask(task));
 
     // This should run scheduled task, but not clear it.
-    CHECK_EQ(0, preemptManager->getPreemptionStratum());
-    CHECK(preemptManager->tryRunScheduledPreemptionTask(*gs, /* allowReschedule */ true));
+    CHECK(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true));
     CHECK_EQ(1, task->runCount);
 
     // If we cancel at this point and schedule a new task, that should be successful.
     CHECK(gs->epochManager->tryCancelSlowPath(3));
-    CHECK(preemptManager->tryRunScheduledPreemptionTask(*gs, /* allowReschedule */ false));
+    CHECK(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ false));
 
     // Allow the task to be scheduled again, now that cancellation has run and we've cleared out the preemption task
     // slot.
