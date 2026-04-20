@@ -384,8 +384,6 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
         timeit.setTag("cancelable", "false");
     }
 
-    this->preemptManager->resetPreemptionStratum();
-
     const uint32_t epoch = updates.epoch;
     auto &epochManager = *this->gs->epochManager;
     // Note: Commits can only be canceled if this edit is cancelable, LSP is running across multiple threads, and the
