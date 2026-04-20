@@ -1,4 +1,5 @@
 #include "WatchmanProcess.h"
+#include "absl/cleanup/cleanup.h"
 #include "absl/strings/strip.h"
 #include "common/FileOps.h"
 #include "common/common.h"
@@ -61,22 +62,18 @@ void WatchmanProcess::start() {
         // shutdown, Watchman EOF, exception). subprocess::Popen's destructor is
         // a no-op, so without explicit cleanup the child is orphaned when
         // start() returns, regardless of which editor is driving Sorbet.
-        struct WatchmanGuard {
-            subprocess::Popen &p;
-            spdlog::logger &logger;
-            ~WatchmanGuard() {
-                if (p.pid() > 0) {
-                    logger.debug("Stopping Watchman subprocess {}", p.pid());
-                    p.kill(SIGTERM);
-                    p.wait();
-                }
-                // Deregister after cleanup: keeps the PID registered while
-                // p.wait() is blocking so that a concurrent SIGTERM handler
-                // can still signal the child if we somehow missed it above.
-                // p.kill() handles ESRCH if the handler beat us to it.
-                registerWatchmanChildPid(0);
+        auto watchmanGuard = absl::Cleanup([&p, &logger = *logger]() {
+            if (p.pid() > 0) {
+                logger.debug("Stopping Watchman subprocess {}", p.pid());
+                p.kill(SIGTERM);
+                p.wait();
             }
-        } watchmanGuard{p, *logger};
+            // Deregister after cleanup: keeps the PID registered while
+            // p.wait() is blocking so that a concurrent SIGTERM handler
+            // can still signal the child if we somehow missed it above.
+            // p.kill() handles ESRCH if the handler beat us to it.
+            registerWatchmanChildPid(0);
+        });
 
         string modifiedWorkspace = workSpace;
         if (!watchmanNamespace.empty()) {

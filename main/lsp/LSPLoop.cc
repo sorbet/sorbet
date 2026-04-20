@@ -1,4 +1,5 @@
 #include "main/lsp/LSPLoop.h"
+#include "absl/cleanup/cleanup.h"
 #include "absl/synchronization/mutex.h"
 #include "absl/synchronization/notification.h"
 #include "common/EarlyReturnWithCode.h"
@@ -197,12 +198,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
     // returns so that the signal disposition is not permanently changed by this call.
     struct sigaction prevSigtermAction;
     installLSPSigtermHandler(&prevSigtermAction);
-    struct SigtermRestore {
-        struct sigaction prev;
-        ~SigtermRestore() {
-            sigaction(SIGTERM, &prev, nullptr);
-        }
-    } sigtermRestore{prevSigtermAction};
+    auto sigtermRestore = absl::Cleanup([prevSigtermAction]() { sigaction(SIGTERM, &prevSigtermAction, nullptr); });
 
     // Message queue stores requests that arrive from the client and Watchman. No preprocessing is performed on
     // these messages (e.g., edits are not merged).
