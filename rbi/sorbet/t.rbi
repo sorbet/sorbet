@@ -437,7 +437,7 @@ module T::Configuration
 end
 
 module T::Utils
-  sig { params(method: T.any(Proc, UnboundMethod)).returns(Integer) }
+  sig { params(method: T.any(Proc, Method, UnboundMethod)).returns(Integer) }
   def self.arity(method); end
 
   # Converts Sorbet type syntax into a T::Types::Base instance to provide
@@ -464,13 +464,15 @@ end
 
 
 module T::AbstractUtils
-  sig { params(method: UnboundMethod).returns(T::Boolean) }
+  sig { params(method: T.any(Method, UnboundMethod)).returns(T::Boolean) }
   def self.abstract_method?(method); end
 
   sig { params(mod: T::Module[T.anything]).returns(T::Array[UnboundMethod]) }
   def self.abstract_methods_for(mod); end
 
-  sig { params(mod: T::Module[T.anything]).returns(T::Boolean) }
+  # This should have been limited to checking Module.
+  # Have to put it at `BasicObject` because callers assume they can pass anything
+  sig { params(mod: BasicObject).returns(T::Boolean) }
   def self.abstract_module?(mod); end
 
   sig { params(mod: T::Module[T.anything]).returns(T::Array[UnboundMethod]) }
