@@ -315,6 +315,58 @@ module Opus::Types::Test
         assert_empty(lines[3..-1])
       end
 
+      it "reports type errors on method's owner isn't a Class or Module" do
+        klass = Class.new do
+          extend T::Sig
+
+          sig { returns(Integer) }
+          def bad_method = "not an integer"
+        end
+
+        object = klass.new
+        def object.to_s = raise
+
+        err = assert_raises(TypeError) { klass.new.bad_method }
+
+        lines = err.message.split("\n")
+        assert_equal("Return value: Expected type Integer, got type String with value \"not an integer\"", lines[0])
+        assert_match(/\ADefinition: .+method_validation.rb:\d+ \(#<Class:0x\h+>#bad_method\)\z/, lines[2])
+      end
+
+      it "reports type errors even when the method owner's to_s returns nil" do
+        klass = Class.new do
+          extend T::Sig
+
+          def self.to_s = nil
+
+          sig { returns(Integer) }
+          def bad_method = "not an integer"
+        end
+
+        err = assert_raises(TypeError) { klass.new.bad_method }
+
+        lines = err.message.split("\n")
+        assert_equal("Return value: Expected type Integer, got type String with value \"not an integer\"", lines[0])
+        assert_match(/\ADefinition: .+method_validation.rb:\d+ \(#<Class:0x\h+>#bad_method\)\z/, lines[2])
+      end
+
+      it "reports type errors even when the method owner's to_s raises a non-StandardError" do
+        klass = Class.new do
+          extend T::Sig
+
+          def self.to_s = raise(Exception) # rubocop:disable Lint/RaiseException
+
+          sig { returns(Integer) }
+          def bad_method = "not an integer"
+        end
+
+        err = assert_raises(TypeError) { klass.new.bad_method }
+
+        lines = err.message.split("\n")
+        assert_equal("Return value: Expected type Integer, got type String with value \"not an integer\"", lines[0])
+        assert_match(/\ADefinition: .+method_validation.rb:\d+ \(#<Class:0x\h+>#bad_method\)\z/, lines[2])
+      end
+
       it "accepts T.proc" do
         @mod.sig { params(blk: T.proc.params(i: Integer).returns(Integer)).returns(Integer) }
         def @mod.foo(&blk)
