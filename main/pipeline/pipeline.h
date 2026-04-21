@@ -105,7 +105,7 @@ std::vector<ast::ParsedFile> incrementalResolve(
 // Note: `cancelable` and `preemption task manager` are only applicable to LSP.
 // If `intentionallyLeakASTs` is `true`, typecheck will leak the ASTs rather than pay the cost of deleting them
 // properly, which is a significant speedup on large codebases.
-void typecheck(const core::GlobalState &gs, std::vector<ast::ParsedFile> what, const options::Options &opts,
+void typecheck(const core::GlobalState &gs, std::vector<ast::ParsedFile> &&what, const options::Options &opts,
                WorkerPool &workers, bool cancelable = false, uint16_t currentStratum = 0,
                std::shared_ptr<core::lsp::PreemptionTaskManager> preemptionManager = nullptr,
                bool intentionallyLeakASTs = false);

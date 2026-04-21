@@ -1481,7 +1481,7 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
 
 } // namespace
 
-void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
+void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> &&what, const options::Options &opts,
                WorkerPool &workers, bool cancelable, uint16_t currentStratum,
                shared_ptr<core::lsp::PreemptionTaskManager> preemptionManager, bool intentionallyLeakASTs) {
     // Unless the error queue had a critical error, only typecheck should flush errors to the client, otherwise we will
