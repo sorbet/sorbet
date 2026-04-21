@@ -1065,6 +1065,7 @@ class Set < Object
   # Source: https://github.com/ruby/ruby/blob/master/lib/set/subclass_compatible.rb
   module SubclassCompatible
     module ClassMethods; end
+    private_constant :SubclassCompatible
   end
 end
 
