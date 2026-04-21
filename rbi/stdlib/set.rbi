@@ -1057,6 +1057,16 @@ class Set < Object
   # Clone internal hash.
   sig { params(orig: T::Set[Elem], options: T.untyped).returns(T::Set[Elem]) }
   def initialize_clone(orig, **options); end
+
+  # Provides backwards compatibility for subclasses of Set with the pure-Ruby
+  # Set implementation used before Ruby 4. Automatically included in Set
+  # subclasses.
+  #
+  # Source: https://github.com/ruby/ruby/blob/master/lib/set/subclass_compatible.rb
+  module SubclassCompatible
+    module ClassMethods; end
+  end
+  private_constant :SubclassCompatible
 end
 
 # [`SortedSet`](https://docs.ruby-lang.org/en/2.7.0/SortedSet.html) implements a
