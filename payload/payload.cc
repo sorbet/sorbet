@@ -59,25 +59,29 @@ void createInitialGlobalState(core::GlobalState &gs, const realmain::options::Op
 
     // We can use the kvstore to read in the cached name table. We read this in after the payload has been initialized,
     // as the cached name table will extend the payload's existing table when the sorbet versions match.
-
-    // Fails if this is uncommented
-    // gs.markNameTableAsCached();
-
     if (kvstore) {
         auto maybeUUIDBytes = kvstore->read(core::serialize::Serializer::NAME_TABLE_UUID_KEY);
-        auto maybeDiffCountBytes = kvstore->read(core::serialize::Serializer::NAME_TABLE_DIFF_COUNT_KEY);
-        auto maybeHashSizeBytes = kvstore->read(core::serialize::Serializer::NAME_TABLE_HASH_SIZE_KEY);
         if (maybeUUIDBytes.data != nullptr) {
             Timer timeit(gs.tracer(), "read_name_table.kvstore");
-            if (maybeDiffCountBytes.data != nullptr && maybeHashSizeBytes.data != nullptr) {
-                core::serialize::Serializer::loadAndResizeNamesHash(gs, maybeHashSizeBytes.data);
-                auto diffCount = core::serialize::Serializer::loadDiffCount(maybeDiffCountBytes.data, gs.tracer());
-                if (diffCount > 0) {
-                    for (uint32_t i = 0; i < diffCount; i++) {
-                        auto data = kvstore->read(core::serialize::Serializer::nameTableDiffKey(i));
-                        ENFORCE(data.data != nullptr);
-                        core::serialize::Serializer::loadAndAppendNameTableDiff(gs, data.data);
+            if (options.packageDirected) {
+                auto maybeDiffCountBytes = kvstore->read(core::serialize::Serializer::NAME_TABLE_DIFF_COUNT_KEY);
+                auto maybeHashSizeBytes = kvstore->read(core::serialize::Serializer::NAME_TABLE_HASH_SIZE_KEY);
+                if (maybeDiffCountBytes.data != nullptr && maybeHashSizeBytes.data != nullptr) {
+                    core::serialize::Serializer::loadAndResizeNamesHash(gs, maybeHashSizeBytes.data);
+                    auto diffCount =
+                        core::serialize::Serializer::loadDiffCount(maybeDiffCountBytes.data, gs.tracer());
+                    if (diffCount > 0) {
+                        for (uint32_t i = 0; i < diffCount; i++) {
+                            auto data = kvstore->read(core::serialize::Serializer::nameTableDiffKey(i));
+                            ENFORCE(data.data != nullptr);
+                            core::serialize::Serializer::loadAndAppendNameTableDiff(gs, data.data);
+                        }
                     }
+                }
+            } else {
+                auto maybeGsBytes = kvstore->read(core::serialize::Serializer::NAME_TABLE_KEY);
+                if (maybeGsBytes.data != nullptr) {
+                    core::serialize::Serializer::loadAndOverwriteNameTable(gs, maybeUUIDBytes.data, maybeGsBytes.data);
                 }
             }
             if constexpr (debug_mode) {

@@ -64,7 +64,7 @@ bool kvstoreChangedSinceGsCreation(const core::GlobalState &gs, const unique_ptr
  * now contains the contents of the current GlobalState (either because it already contained it, or
  * it was just written).
  */
-bool retainGlobalState(core::GlobalState &gs, const unique_ptr<OwnedKeyValueStore> &kvstore) {
+bool retainGlobalState(core::GlobalState &gs, const unique_ptr<OwnedKeyValueStore> &kvstore, bool packageDirected) {
     if (!kvstore) {
         return false;
     }
@@ -95,16 +95,21 @@ bool retainGlobalState(core::GlobalState &gs, const unique_ptr<OwnedKeyValueStor
         gs.kvstoreUuid = Random::uniformU4();
         kvstore->write(core::serialize::Serializer::NAME_TABLE_UUID_KEY, core::serialize::Serializer::storeUUID(gs));
 
-        auto diffIndex = gs.nameTableDiffCount;
-        kvstore->write(core::serialize::Serializer::nameTableDiffKey(diffIndex),
-                       core::serialize::Serializer::storeNameTableDiff(gs));
+        if (packageDirected) {
+            auto diffIndex = gs.nameTableDiffCount;
+            kvstore->write(core::serialize::Serializer::nameTableDiffKey(diffIndex),
+                           core::serialize::Serializer::storeNameTableDiff(gs));
 
-        gs.nameTableDiffCount = diffIndex + 1;
-        kvstore->write(core::serialize::Serializer::NAME_TABLE_DIFF_COUNT_KEY,
-                       core::serialize::Serializer::storeDiffCount(gs.nameTableDiffCount));
-        kvstore->write(core::serialize::Serializer::NAME_TABLE_HASH_SIZE_KEY,
-                       core::serialize::Serializer::storeHashSize(gs));
-        gs.markNameTableAsCached();
+            gs.nameTableDiffCount = diffIndex + 1;
+            kvstore->write(core::serialize::Serializer::NAME_TABLE_DIFF_COUNT_KEY,
+                           core::serialize::Serializer::storeDiffCount(gs.nameTableDiffCount));
+            kvstore->write(core::serialize::Serializer::NAME_TABLE_HASH_SIZE_KEY,
+                           core::serialize::Serializer::storeHashSize(gs));
+            gs.markNameTableAsCached();
+        } else {
+            kvstore->write(core::serialize::Serializer::NAME_TABLE_KEY,
+                           core::serialize::Serializer::storeNameTable(gs));
+        }
     }
 
     return true;
@@ -202,7 +207,7 @@ unique_ptr<KeyValueStore> maybeCacheGlobalStateAndFiles(unique_ptr<KeyValueStore
         return kvstore;
     }
     auto ownedKvstore = make_unique<OwnedKeyValueStore>(move(kvstore));
-    auto cacheHasGlobalState = retainGlobalState(gs, ownedKvstore);
+    auto cacheHasGlobalState = retainGlobalState(gs, ownedKvstore, opts.packageDirected);
     if (cacheHasGlobalState) {
         cacheTreesAndFiles(gs, workers, indexed, ownedKvstore);
         auto sizeBytes = ownedKvstore->cacheSize();
@@ -330,9 +335,16 @@ unique_ptr<KeyValueStore> SessionCache::open(shared_ptr<::spdlog::logger> logger
     // If the name table entry is missing, this indicates that the cache is completely fresh and doesn't originate in a
     // copy from the result of indexing. This can happen if only the `data.mdb` file was removed from `this->path`, and
     // the KeyValueStore created a fresh database when created.
-    const auto nameTableDiffCountEntry = kvstore->read(core::serialize::Serializer::NAME_TABLE_DIFF_COUNT_KEY);
-    if (nameTableDiffCountEntry.len == 0) {
-        return nullptr;
+    if (opts.packageDirected) {
+        const auto nameTableDiffCountEntry = kvstore->read(core::serialize::Serializer::NAME_TABLE_DIFF_COUNT_KEY);
+        if (nameTableDiffCountEntry.len == 0) {
+            return nullptr;
+        }
+    } else {
+        const auto nameTableEntry = kvstore->read(core::serialize::Serializer::NAME_TABLE_KEY);
+        if (nameTableEntry.len == 0) {
+            return nullptr;
+        }
     }
 
     // We abort here because there will be no outstanding transactions present.

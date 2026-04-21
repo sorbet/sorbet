@@ -758,6 +758,7 @@ private:
     UnorderedSet<int> onlyErrorClasses;
     std::shared_ptr<FileTable> files;
     std::vector<UnorderedSet<core::SymbolRef>> symbolsReferencedByFile;
+    bool wasNameTableModified_ = false;
     unsigned int utf8NamesWritten_ = 0;
     unsigned int constantNamesWritten_ = 0;
     unsigned int uniqueNamesWritten_ = 0;
