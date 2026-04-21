@@ -165,7 +165,7 @@ public:
         }
     }
 
-    void run() override {
+    optional<uint16_t> run(uint16_t currentStratum) override {
         // Destruct timer, if specified. Causes metric to be reported.
         this->timeUntilRun = nullptr;
 
@@ -196,6 +196,11 @@ public:
             timeit.setTag("method", task->methodString());
             task->run(this->delegate);
         }
+
+        return nullopt;
+    }
+
+    void finish() override {
         finished.Notify();
     }
 };

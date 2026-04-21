@@ -115,13 +115,15 @@ public:
     CountingTask(shared_ptr<core::lsp::PreemptionTaskManager> preemptManager, core::GlobalState &gs)
         : preemptManager(move(preemptManager)), gs(gs) {}
 
-    void run() override {
+    optional<uint16_t> run(uint16_t currentStratum) override {
         // The task should run with typecheck mutex held with a write lock.
         preemptManager->assertTypecheckMutexHeld();
         // Emulate behavior of most LSP Tasks and drain all diagnostics and query responses.
         // This should never drain error queue items from the preempted task.
         gs.errorQueue->flushAllErrors(gs);
         runCount++;
+
+        return nullopt;
     }
 };
 
@@ -344,7 +346,8 @@ TEST_CASE("PreemptionTasksWorkAsExpected") {
                                       vector<core::ErrorSection>(), vector<core::AutocorrectSuggestion>(), false));
 
     // No preemption task registered.
-    CHECK_FALSE(preemptManager->tryRunScheduledPreemptionTask(*gs));
+    uint16_t currentStratum = 0;
+    CHECK_FALSE(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true));
 
     auto task = make_shared<CountingTask>(preemptManager, *gs);
     // Should fail because a slow path is not running, so there's nothing to preempt.
@@ -360,7 +363,7 @@ TEST_CASE("PreemptionTasksWorkAsExpected") {
     CHECK(preemptManager->trySchedulePreemptionTask(task));
 
     // This should run + clear the scheduled task.
-    CHECK(preemptManager->tryRunScheduledPreemptionTask(*gs));
+    CHECK(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true));
     CHECK_EQ(1, task->runCount);
 
     // Our error should still be there.
@@ -375,6 +378,210 @@ TEST_CASE("PreemptionTasksWorkAsExpected") {
 
     // We should not be able to schedule further tasks after cancelation.
     CHECK_FALSE(preemptManager->trySchedulePreemptionTask(task));
+}
+
+class ReschedulingTask : public core::lsp::PreemptionTask {
+public:
+    const uint16_t targetStratum;
+    int runCount = 0;
+    bool successful = false;
+
+    ReschedulingTask(uint16_t targetStratum) : targetStratum{targetStratum} {}
+
+    optional<uint16_t> run(uint16_t currentStratum) override {
+        CHECK_FALSE(this->successful);
+
+        this->runCount++;
+
+        if (this->targetStratum > currentStratum) {
+            return this->targetStratum;
+        }
+
+        this->successful = true;
+
+        return nullopt;
+    }
+};
+
+TEST_CASE("PreemptionReschedulingWorksAsExpected") {
+    auto errorCollector = make_shared<core::ErrorCollector>();
+    auto gs = makeGS(errorCollector);
+    // Note: needs to be > 0 otherwise an enforce triggers.
+    gs->lspTypecheckCount++;
+    auto preemptManager = make_shared<core::lsp::PreemptionTaskManager>(gs->epochManager);
+
+    // Put an error in the queue.
+    gs->errorQueue->pushError(
+        *gs, make_unique<core::Error>(core::Loc::none(), core::ErrorClass{1, core::StrictLevel::True}, "MyError",
+                                      vector<core::ErrorSection>(), vector<core::AutocorrectSuggestion>(), false));
+
+    // No preemption task registered.
+    uint16_t currentStratum = 0;
+    CHECK_FALSE(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true));
+
+    auto task = make_shared<ReschedulingTask>(2);
+
+    // Signify to GlobalState that a slow path is beginning.
+    gs->epochManager->startCommitEpoch(2);
+    CHECK_FALSE(gs->epochManager->wasTypecheckingCanceled());
+
+    // Preempting should work now.
+    CHECK(preemptManager->trySchedulePreemptionTask(task));
+
+    // This should run scheduled task, but not clear it.
+    CHECK(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true));
+    CHECK_EQ(1, task->runCount);
+
+    // This should not run the scheduled task, as we haven't made it to stratum 2 yet.
+    ++currentStratum;
+    CHECK_FALSE(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true));
+    CHECK_EQ(1, task->runCount);
+
+    // This should run and clear the task.
+    ++currentStratum;
+    CHECK(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true));
+    CHECK_EQ(2, task->runCount);
+
+    // Running at stratum 3 should show no preemption tasks run
+    ++currentStratum;
+    CHECK_FALSE(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true));
+    CHECK_EQ(2, task->runCount);
+    CHECK(task->successful);
+
+    // The preemption manager has dropped the task, so we should be the only remaining reference.
+    CHECK_EQ(1, task.use_count());
+
+    // Cancel the slow path
+    CHECK(gs->epochManager->tryCancelSlowPath(3));
+}
+
+TEST_CASE("RescheduledPreemptionTasksClearOnCancelation") {
+    auto errorCollector = make_shared<core::ErrorCollector>();
+    auto gs = makeGS(errorCollector);
+    // Note: needs to be > 0 otherwise an enforce triggers.
+    gs->lspTypecheckCount++;
+    auto preemptManager = make_shared<core::lsp::PreemptionTaskManager>(gs->epochManager);
+
+    // Put an error in the queue.
+    gs->errorQueue->pushError(
+        *gs, make_unique<core::Error>(core::Loc::none(), core::ErrorClass{1, core::StrictLevel::True}, "MyError",
+                                      vector<core::ErrorSection>(), vector<core::AutocorrectSuggestion>(), false));
+
+    // No preemption task registered.
+    uint16_t currentStratum = 0;
+    CHECK_FALSE(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true));
+
+    auto task = make_shared<ReschedulingTask>(2);
+
+    // Signify to GlobalState that a slow path is beginning.
+    gs->epochManager->startCommitEpoch(2);
+    CHECK_FALSE(gs->epochManager->wasTypecheckingCanceled());
+
+    // Preempting should work now.
+    CHECK(preemptManager->trySchedulePreemptionTask(task));
+
+    // This should run scheduled task, but not clear it.
+    CHECK(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true));
+    CHECK_EQ(1, task->runCount);
+
+    // If we cancel at this point and schedule a new task, that should be successful.
+    CHECK(gs->epochManager->tryCancelSlowPath(3));
+    CHECK(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ false));
+
+    // Allow the task to be scheduled again, now that cancellation has run and we've cleared out the preemption task
+    // slot.
+    gs->epochManager->startCommitEpoch(3);
+    CHECK_FALSE(gs->epochManager->wasTypecheckingCanceled());
+    CHECK_FALSE(task->successful);
+
+    // The preemption manager has dropped the task, so we should be the only remaining reference.
+    CHECK_EQ(1, task.use_count());
+
+    // Scheduling another task should work fine
+    task = make_shared<ReschedulingTask>(2);
+    CHECK(preemptManager->trySchedulePreemptionTask(task));
+}
+
+TEST_CASE("RescheduledPreemptionTasksClearOnSuccess") {
+    auto errorCollector = make_shared<core::ErrorCollector>();
+    auto gs = makeGS(errorCollector);
+    // Note: needs to be > 0 otherwise an enforce triggers.
+    gs->lspTypecheckCount++;
+    auto preemptManager = make_shared<core::lsp::PreemptionTaskManager>(gs->epochManager);
+
+    // Put an error in the queue.
+    gs->errorQueue->pushError(
+        *gs, make_unique<core::Error>(core::Loc::none(), core::ErrorClass{1, core::StrictLevel::True}, "MyError",
+                                      vector<core::ErrorSection>(), vector<core::AutocorrectSuggestion>(), false));
+
+    // No preemption task registered.
+    uint16_t currentStratum = 0;
+    CHECK_FALSE(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true));
+
+    auto task = make_shared<ReschedulingTask>(2);
+
+    // Signify to GlobalState that a slow path is beginning.
+    gs->epochManager->startCommitEpoch(2);
+    CHECK_FALSE(gs->epochManager->wasTypecheckingCanceled());
+
+    // Preempting should work now.
+    CHECK(preemptManager->trySchedulePreemptionTask(task));
+
+    CHECK(gs->epochManager->tryCommitEpoch(*gs, 2, true, preemptManager, [&]() {
+        // This should run scheduled task, but not clear it.
+        CHECK(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true));
+        CHECK_EQ(1, task->runCount);
+        return 2;
+    }));
+
+    // tryCommitEpoch will be successful, and the task will have run to completion.
+    CHECK_FALSE(gs->epochManager->wasTypecheckingCanceled());
+    CHECK(task->successful);
+
+    // The preemption manager has dropped the task, so we should be the only remaining reference.
+    CHECK_EQ(1, task.use_count());
+}
+
+// Very similar to the previous test, but checks that the preemption task is given the final stratum reported by the
+// lambda given to `tryCommitEpoch`.
+TEST_CASE("RescheduledPreemptionTasksClearOnSuccessWrongStratum") {
+    auto errorCollector = make_shared<core::ErrorCollector>();
+    auto gs = makeGS(errorCollector);
+    // Note: needs to be > 0 otherwise an enforce triggers.
+    gs->lspTypecheckCount++;
+    auto preemptManager = make_shared<core::lsp::PreemptionTaskManager>(gs->epochManager);
+
+    // Put an error in the queue.
+    gs->errorQueue->pushError(
+        *gs, make_unique<core::Error>(core::Loc::none(), core::ErrorClass{1, core::StrictLevel::True}, "MyError",
+                                      vector<core::ErrorSection>(), vector<core::AutocorrectSuggestion>(), false));
+
+    // No preemption task registered.
+    uint16_t currentStratum = 0;
+    CHECK_FALSE(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true));
+
+    auto task = make_shared<ReschedulingTask>(2);
+
+    // Signify to GlobalState that a slow path is beginning.
+    gs->epochManager->startCommitEpoch(2);
+    CHECK_FALSE(gs->epochManager->wasTypecheckingCanceled());
+
+    // Preempting should work now.
+    CHECK(preemptManager->trySchedulePreemptionTask(task));
+
+    CHECK(gs->epochManager->tryCommitEpoch(*gs, 2, true, preemptManager, [&]() {
+        // This should run scheduled task, but not clear it.
+        CHECK(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true));
+        CHECK_EQ(1, task->runCount);
+        return 1;
+    }));
+
+    // tryCommitEpoch will be successful, but the task will not report success, as it can only run at stratum >= 2.
+    CHECK_FALSE(gs->epochManager->wasTypecheckingCanceled());
+    CHECK_FALSE(task->successful);
+
+    // The preemption manager has dropped the task, so we should be the only remaining reference.
+    CHECK_EQ(1, task.use_count());
 }
 
 } // namespace sorbet::realmain::lsp::test

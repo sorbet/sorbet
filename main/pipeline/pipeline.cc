@@ -1482,8 +1482,9 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
 } // namespace
 
 void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
-               WorkerPool &workers, bool cancelable, shared_ptr<core::lsp::PreemptionTaskManager> preemptionManager,
-               bool presorted, bool intentionallyLeakASTs) {
+               WorkerPool &workers, bool cancelable, uint16_t currentStratum,
+               shared_ptr<core::lsp::PreemptionTaskManager> preemptionManager, bool presorted,
+               bool intentionallyLeakASTs) {
     // Unless the error queue had a critical error, only typecheck should flush errors to the client, otherwise we will
     // drop errors in LSP mode.
     ENFORCE(gs.hadCriticalError() || gs.errorQueue->filesFlushedCount == 0);
@@ -1496,7 +1497,7 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
         Timer timeit(gs.tracer(), "typecheck");
         if (preemptionManager) {
             // Before kicking off typechecking, check if we need to preempt.
-            preemptionManager->tryRunScheduledPreemptionTask(gs);
+            preemptionManager->tryRunScheduledPreemptionTask(gs, currentStratum, /* allowReschedule */ true);
         }
 
         auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(what.size());
@@ -1574,7 +1575,8 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
                     cfgInferProgress.reportProgress(fileq->doneEstimate());
 
                     if (preemptionManager) {
-                        preemptionManager->tryRunScheduledPreemptionTask(gs);
+                        preemptionManager->tryRunScheduledPreemptionTask(gs, currentStratum,
+                                                                         /* allowReschedule */ true);
                     }
                 }
                 if (cancelable && epochManager.wasTypecheckingCanceled()) {
