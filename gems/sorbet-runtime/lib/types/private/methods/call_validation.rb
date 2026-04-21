@@ -12,7 +12,7 @@ module T::Private::Methods::CallValidation
   # @param method_sig [T::Private::Methods::Signature]
   # @return [UnboundMethod] the new wrapper method (or the original one if we didn't wrap it)
   def self.wrap_method_if_needed(mod, method_sig, original_method)
-    original_visibility = T::Private::Methods.visibility_method_name(mod, method_sig.method_name)
+    original_visibility = T::Private::ClassUtils.visibility_method_name(mod, method_sig.method_name)
     if method_sig.mode == T::Private::Methods::Modes.abstract
       create_abstract_wrapper(mod, method_sig, original_method, original_visibility)
     # Do nothing in this case; this method was not wrapped in _on_method_added.
@@ -70,22 +70,30 @@ module T::Private::Methods::CallValidation
   def self.create_validator_method(mod, original_method, method_sig, original_visibility)
     has_fixed_arity = method_sig.kwarg_types.empty? && method_sig.rest_type.nil? && method_sig.keyrest_type.nil? &&
       original_method.parameters.all? { |(kind, _name)| kind == :req || kind == :block }
-    can_skip_block_type = method_sig.block_type.nil? || method_sig.block_type.valid?(nil)
+
+    # nil implies block_type.nil?
+    # true implies !block_type.nil? and block_type.valid?(nil)
+    # false implies !block_type.nil? and !block_type.valid?(nil)
+    # This formulation avoids a type error without introducing extra method calls or local vars
+    can_skip_block_type = method_sig.block_type&.valid?(nil) != false
+
     ok_for_fast_path = has_fixed_arity && can_skip_block_type && !method_sig.bind && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
 
     all_args_are_simple = ok_for_fast_path && method_sig.arg_types.all? { |_name, type| type.is_a?(T::Types::Simple) }
-    simple_method = all_args_are_simple && method_sig.effective_return_type.is_a?(T::Types::Simple)
-    simple_procedure = all_args_are_simple && method_sig.effective_return_type.is_a?(T::Private::Types::Void)
+
+    effective_return_type = method_sig.effective_return_type
+    simple_method = all_args_are_simple && effective_return_type.is_a?(T::Types::Simple)
+    simple_procedure = all_args_are_simple && effective_return_type.is_a?(T::Private::Types::Void)
 
     # All the types for which valid? unconditionally returns `true`
     return_is_ignorable =
-      method_sig.effective_return_type.equal?(T::Types::Untyped::Private::INSTANCE) ||
-      method_sig.effective_return_type.equal?(T::Types::Anything::Private::INSTANCE) ||
-      method_sig.effective_return_type.equal?(T::Types::AttachedClassType::Private::INSTANCE) ||
-      method_sig.effective_return_type.equal?(T::Types::SelfType::Private::INSTANCE) ||
-      method_sig.effective_return_type.is_a?(T::Types::TypeParameter) ||
-      method_sig.effective_return_type.is_a?(T::Types::TypeVariable) ||
-      (method_sig.effective_return_type.is_a?(T::Types::Simple) && method_sig.effective_return_type.raw_type.equal?(BasicObject))
+      effective_return_type.equal?(T::Types::Untyped::Private::INSTANCE) ||
+      effective_return_type.equal?(T::Types::Anything::Private::INSTANCE) ||
+      effective_return_type.equal?(T::Types::AttachedClassType::Private::INSTANCE) ||
+      effective_return_type.equal?(T::Types::SelfType::Private::INSTANCE) ||
+      effective_return_type.is_a?(T::Types::TypeParameter) ||
+      effective_return_type.is_a?(T::Types::TypeVariable) ||
+      (effective_return_type.is_a?(T::Types::Simple) && effective_return_type.raw_type.equal?(BasicObject))
 
     returns_anything_method = all_args_are_simple && return_is_ignorable
 
@@ -97,7 +105,7 @@ module T::Private::Methods::CallValidation
           create_validator_method_skip_return_fast(mod, original_method, method_sig, original_visibility)
         elsif simple_procedure
           create_validator_procedure_fast(mod, original_method, method_sig, original_visibility)
-        elsif ok_for_fast_path && method_sig.effective_return_type.is_a?(T::Private::Types::Void)
+        elsif ok_for_fast_path && effective_return_type.is_a?(T::Private::Types::Void)
           create_validator_procedure_medium(mod, original_method, method_sig, original_visibility)
         elsif ok_for_fast_path && return_is_ignorable
           create_validator_method_skip_return_medium(mod, original_method, method_sig, original_visibility)
