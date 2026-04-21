@@ -1065,8 +1065,8 @@ class Set < Object
   # Source: https://github.com/ruby/ruby/blob/master/lib/set/subclass_compatible.rb
   module SubclassCompatible
     module ClassMethods; end
-    private_constant :SubclassCompatible
   end
+  private_constant :SubclassCompatible
 end
 
 # [`SortedSet`](https://docs.ruby-lang.org/en/2.7.0/SortedSet.html) implements a
