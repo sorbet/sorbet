@@ -15,8 +15,8 @@ public:
     // be done until the stratum indicated.
     virtual std::optional<uint16_t> run(uint16_t currentStratum) = 0;
 
-    // Optional hook called when the task has been run to completion. Any notification to unblock other threads sould be
-    // done here to avoid accidentally unblocking work that could interact with the preemption scheduler.
+    // Optional hook called when the task has been run to completion. Any notification to unblock other threads should
+    // be done here to avoid accidentally unblocking work that could interact with the preemption scheduler.
     virtual void finish() {}
 
     // Disallow copy/move to force management through smart pointers.

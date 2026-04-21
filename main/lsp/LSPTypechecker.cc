@@ -567,7 +567,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
 
         // This is cast to a uint16_t everywhere it's used. This seems bad, but it should be fine because:
         // 1. we increment in the beginning of the loop before any use
-        // 2. overflowing a uint16_t would mean that we have a chain of depndencies that's >65535 packages long
+        // 2. overflowing a uint16_t would mean that we have a chain of dependencies that's >65535 packages long
         int currentStratum = -1;
 
         auto strata = pipeline::computePackageStrata(*this->gs, packageIndexed, workspaceFilesSpan, this->config->opts);

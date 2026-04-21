@@ -36,7 +36,7 @@ private:
     // 2. No other preemption task will be scheduled while we're running the current one, as the main thread will be
     //    blocked waiting for a notification from the running task's `finish` method. Again, this logic is pretty
     //    specific to the `PreemptionLoop` implementation, but that's also the only non-test implementation of
-    //    `PremeptionTask`.
+    //    `PreemeptionTask`.
     std::atomic<uint16_t> runnableAt = 0;
 
 public:
