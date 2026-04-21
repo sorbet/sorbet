@@ -378,8 +378,9 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
             openFiles.insert(entry.first);
         }
 
-        this->cancellationUndoState = make_unique<UndoState>(std::move(savedGS), std::move(this->indexedFinalGS),
-                                                             this->workspaceFiles, updates.epoch);
+        this->cancellationUndoState =
+            make_unique<UndoState>(std::move(savedGS), std::move(this->indexedFinalGS), move(this->fileToStratum),
+                                   this->lastStratum, this->workspaceFiles, updates.epoch);
     } else {
         timeit.setTag("cancelable", "false");
     }
@@ -571,6 +572,8 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
         int currentStratum = -1;
 
         auto strata = pipeline::computePackageStrata(*this->gs, packageIndexed, workspaceFilesSpan, this->config->opts);
+        this->fileToStratum = move(strata.fileToStratum);
+        this->lastStratum = strata.strata.size() - 1;
         for (auto &stratum : strata.strata) {
             vector<ast::ParsedFile> stratumFiles, nonPackagedIndexed;
 
@@ -729,7 +732,8 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
         // Eagerly restore the state to how it was before this slow path, so that we're not holding the old state for an
         // arbitrarily long time. The next update will be responsible for freeing the underlying UndoState after it
         // makes use of the epoch field to determine additional files to include in the edit.
-        cancellationUndoState->restore(this->gs, this->indexedFinalGS, this->workspaceFiles);
+        cancellationUndoState->restore(this->gs, this->indexedFinalGS, this->fileToStratum, this->lastStratum,
+                                       this->workspaceFiles);
         logger->debug("[Typechecker] Typecheck run for epoch {} was canceled.", updates.epoch);
     }
 
@@ -837,6 +841,22 @@ vector<unique_ptr<core::Error>> LSPTypechecker::retypecheck(vector<core::FileRef
     runFastPath(*updates, workers, errorCollector, isNoopUpdateForRetypecheck);
 
     return errorCollector->drainErrors();
+}
+
+uint16_t LSPTypechecker::getStratumForEdit(absl::Span<const core::FileRef> edit) const {
+    uint16_t stratum = 0;
+
+    for (auto fref : edit) {
+        if (fref.id() >= this->fileToStratum.size()) {
+            // Indicate that this can only run at the end of the slow path, as we don't have any information about this
+            // file.
+            return this->lastStratum;
+        }
+
+        stratum = std::max(stratum, this->fileToStratum[fref.id()]);
+    }
+
+    return stratum;
 }
 
 ast::ExpressionPtr LSPTypechecker::getLocalVarTrees(core::FileRef fref) const {
@@ -1004,6 +1024,10 @@ void LSPTypecheckerDelegate::updateConfigAndGsFromOptions(const DidChangeConfigu
 
 unique_ptr<LSPFileUpdates> LSPTypecheckerDelegate::getNoopUpdate(absl::Span<const core::FileRef> frefs) const {
     return typechecker.getNoopUpdate(frefs);
+}
+
+uint16_t LSPTypecheckerDelegate::getStratumForEdit(absl::Span<const core::FileRef> edit) const {
+    return typechecker.getStratumForEdit(edit);
 }
 
 } // namespace sorbet::realmain::lsp
