@@ -78,10 +78,12 @@ bool PreemptionTaskManager::tryRunScheduledPreemptionTask(const core::GlobalStat
             ENFORCE(existingTask == nullptr);
             auto success = atomic_compare_exchange_strong(&this->preemptTask, &existingTask, preemptTask);
             ENFORCE(success);
+
+            gs.tracer().debug("[Typechecker] Preemption task deferred.");
         } else {
             preemptTask->finish();
+            gs.tracer().debug("[Typechecker] Preemption task complete.");
         }
-        gs.tracer().debug("[Typechecker] Preemption task complete.");
         gs.errorQueue = move(previousErrorQueue);
         return true;
     }
