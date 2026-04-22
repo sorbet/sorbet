@@ -221,19 +221,18 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
             // The "2 * ..." is so that we can get a rough idea of whether there's an easy
             // bang-for-buck bump we could make to the threshold by reading the logs.
             //
-            // One of two things could be true:
-            // - We're running on the indexer thread to decide typecheckingPath, which only cares about how
-            //   many extra files there are, not what they are.
+            // One of three things could be true:
+            // - We're running on the indexer thread via commitEdit to decide typecheckingPath,
+            //   which only cares about how many extra files there are, not what they are.
+            // - We're running on the indexer thread via canPreempt to decide whether preemption
+            //   is possible, which also only cares about the count.
             // - We're running on the typechecker thread (knowing that typecheckingPath was already
             //   TypecheckingPath::Fast) and simply need to compute the list of files to typecheck.
             //   But that would be a contradiction--because otherwise the indexer would have marked
             //   the update as not being able to take the fast path.
             //
-            // So it's actually only the first thing that's true.
-
-            // Crude indicator of being on indexer thread, as the typechecker thread always
-            // calls us with an empty map of evictedFiles
-            ENFORCE(!evictedFiles.empty());
+            // So it's actually only one of the first two things that's true, and neither of which
+            // care about the full file list, so let's early exit.
             return result;
         }
     }
