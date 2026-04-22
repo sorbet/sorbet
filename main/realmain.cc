@@ -711,8 +711,9 @@ int realmain(int argc, char *argv[]) {
                 if (opts.genPackagesMode == core::packages::GenPackagesMode::Disabled) {
                     // In --gen-packages mode, we skip typecheck because we only want to show packaging related errors,
                     // and skipping typecheck saves a significant amount of time.
+                    pipeline::sortBySize(*gs, stratumFiles);
                     pipeline::typecheck(*gs, move(stratumFiles), opts, *workers, /* cancelable */ false, currentStratum,
-                                        /* preemptionManager */ nullptr, /* presorted */ false, intentionallyLeakASTs);
+                                        /* preemptionManager */ nullptr, intentionallyLeakASTs);
 
                     if (gs->hadCriticalError()) {
                         gs->errorQueue->flushAllErrors(*gs);

@@ -324,11 +324,10 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
                                                        config->opts, workers)
                         : pipeline::incrementalResolve(*gs, move(updatedIndexed), nullopt, config->opts, workers);
     auto sorted = sortParsedFiles(*gs, *errorReporter, move(resolved));
-    const auto presorted = true;
     const auto cancelable = false;
     // TODO(trevor): ultimately this should be the maximum stratum, but for now this is acceptable.
     const auto currentStratum = 0;
-    pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, currentStratum, nullptr, presorted);
+    pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, currentStratum, nullptr);
     gs->lspTypecheckCount++;
 
     auto duration = timeit.setEndTime();
@@ -709,9 +708,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
             }
 
             auto sorted = sortParsedFiles(*gs, *errorReporter, move(maybeResolved.result()));
-            const auto presorted = true;
-            pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, currentStratum, preemptManager,
-                                presorted);
+            pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, currentStratum, preemptManager);
         }
 
         return currentStratum;
@@ -814,6 +811,7 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const vector<cor
     tryApplyLocalVarSaver(*gs, resolved);
 
     const auto cancelable = true;
+    pipeline::sortBySize(*gs, resolved);
     pipeline::typecheck(*gs, move(resolved), config->opts, workers, cancelable);
     gs->lspTypecheckCount++;
     gs->lspQuery = core::lsp::Query::noQuery();
