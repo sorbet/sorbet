@@ -1404,4 +1404,77 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "MergingEditsWhenCancellingPreempti
         CHECK_EQ(counters.getCategoryCounter("lsp.preemption.cancelation", "merged"), 1);
     }
 }
+
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptDoesNotCrashOnEvictedFilesShortCircuit") {
+    // Set lspMaxFilesOnFastPath to 1 so the short-circuit in fastPathFilesToTypecheck
+    // triggers with just a few extra files: totalChanged > 2 * 1 = 2.
+    // (We could do this without, but it would involve making dozens of files that use the symbol)
+    auto opts = make_shared<realmain::options::Options>();
+    opts->lspMaxFilesOnFastPath = 1;
+    resetState(opts);
+
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->enableTypecheckInfo = true;
+    assertErrorDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
+
+    // Sequence of edits:
+    //
+    // - Slow path edit in foo.rb
+    // - While slow path is going, fast path edit in bar.rb that implicates more than lspMaxFilesOnFastPath
+
+    assertErrorDiagnostics(send(*openFile("bar.rb", "# typed: true\n"
+                                                    "class Bar\n"
+                                                    "  extend T::Sig\n"
+                                                    "  sig { returns(String) }\n"
+                                                    "  def compute_value = 'hi'\n"
+                                                    "end\n")),
+                           {});
+    assertErrorDiagnostics(send(*openFile("baz.rb", "# typed: true\n"
+                                                    "class Baz\n"
+                                                    "  def baz_method = Bar.new.compute_value\n"
+                                                    "end\n")),
+                           {});
+    assertErrorDiagnostics(send(*openFile("qux.rb", "# typed: true\n"
+                                                    "class Qux\n"
+                                                    "  def qux_method = Bar.new.compute_value\n"
+                                                    "end\n")),
+                           {});
+    assertErrorDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
+                                                    "class Foo\n"
+                                                    "end")),
+                           {});
+
+    setSlowPathBlocked(true);
+
+    sendAsync(*changeFile("foo.rb",
+                          "# typed: true\n"
+                          "class Foo2\n"
+                          "end",
+                          2));
+
+    // Wait for the slow path to start.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // Fast path edit changes compute_value: which means 3 files on the fast path, triggering the
+    // short-circuit in `fastPathFilesToTypecheck`.
+    sendAsync(*changeFile("bar.rb",
+                          "# typed: true\n"
+                          "class Bar\n"
+                          "  extend T::Sig\n"
+                          "  sig { returns(Integer) }\n"
+                          "  def compute_value = 0\n"
+                          "end\n",
+                          4));
+
+    // Unblock the slow path.
+    setSlowPathBlocked(false);
+
+    // Drain the pipeline with a fence.
+    assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
+}
 } // namespace sorbet::test::lsp
