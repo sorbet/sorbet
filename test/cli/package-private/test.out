@@ -73,8 +73,8 @@ a/a.rb:24: Method `void` does not exist on `T.class_of(Global)` https://srb.help
     a/a.rb:24: Replace with `load`
     24 |    sig { void }
                   ^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L1664: Defined here
-    1664 |  def load(filename, arg0=T.unsafe(nil)); end
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Defined here
+      NN |  def load(filename, arg0=T.unsafe(nil)); end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 a/a.rb:27: Method `sig` does not exist on `T.class_of(Global)` https://srb.help/7003
@@ -100,8 +100,8 @@ a/a.rb:27: Method `void` does not exist on `T.class_of(Global)` https://srb.help
     a/a.rb:27: Replace with `load`
     27 |    sig { void }
                   ^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L1664: Defined here
-    1664 |  def load(filename, arg0=T.unsafe(nil)); end
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Defined here
+      NN |  def load(filename, arg0=T.unsafe(nil)); end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 a/a.rb:30: Method `sig` does not exist on `T.class_of(Global)` https://srb.help/7003
@@ -127,8 +127,8 @@ a/a.rb:30: Method `void` does not exist on `T.class_of(Global)` https://srb.help
     a/a.rb:30: Replace with `load`
     30 |    sig { void }
                   ^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L1664: Defined here
-    1664 |  def load(filename, arg0=T.unsafe(nil)); end
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Defined here
+      NN |  def load(filename, arg0=T.unsafe(nil)); end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 a/a.rb:33: Method `sig` does not exist on `T.class_of(Global)` https://srb.help/7003
@@ -154,15 +154,15 @@ a/a.rb:33: Method `void` does not exist on `T.class_of(Global)` https://srb.help
     a/a.rb:33: Replace with `load`
     33 |    sig { void }
                   ^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L1664: Defined here
-    1664 |  def load(filename, arg0=T.unsafe(nil)); end
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Defined here
+      NN |  def load(filename, arg0=T.unsafe(nil)); end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 a/a.rbi:3: Superclasses may only be set on constants in the package that owns them https://srb.help/5084
      3 |class ::Module < Object
                          ^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#L26: Symbol originally defined here
-    26 |class Module < Object
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Symbol originally defined here
+    NN |class Module < Object
         ^^^^^^^^^^^^^^^^^^^^^
     a/__package.rb:3: Package defined here is not a `prelude_package`
      3 |class A < PackageSpec
