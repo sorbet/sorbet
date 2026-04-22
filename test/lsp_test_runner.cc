@@ -354,7 +354,7 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, const v
     transform(ignoredCodeActionAssertions.begin(), ignoredCodeActionAssertions.end(),
               back_inserter(ignoredCodeActionKinds), getCodeActionKind);
 
-    auto errors = RangeAssertion::getErrorAssertions(assertions);
+    auto errors = RangeAssertion::getAssertions<ErrorAssertion>(assertions);
     UnorderedMap<string, vector<shared_ptr<RangeAssertion>>> errorsByFilename;
     for (auto &error : errors) {
         errorsByFilename[error->filename].emplace_back(error);
@@ -566,7 +566,7 @@ TEST_CASE("LSPTest") {
     if (test.expectations.contains("autogen")) {
         // Some autogen tests assume that some errors will occur from the resolver step, others assume the resolver
         // won't run.
-        if (!RangeAssertion::getErrorAssertions(assertions).empty()) {
+        if (!RangeAssertion::getAssertions<ErrorAssertion>(assertions).empty()) {
             // ...and stop after the resolver phase if there are errors
             lspWrapper->opts->stopAfterPhase = realmain::options::Phase::RESOLVER;
         } else {
@@ -638,11 +638,12 @@ TEST_CASE("LSPTest") {
             auto responses = getLSPResponsesFor(*lspWrapper, move(updates));
             updateDiagnostics(config, testFileUris, responses, diagnostics);
             bool errorAssertionsPassed = ErrorAssertion::checkAll(
-                test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics, errorPrefixes[i]);
+                test.sourceFileContents, RangeAssertion::getAssertions<ErrorAssertion>(assertions), diagnostics,
+                errorPrefixes[i]);
 
-            bool untypedAssertionsPassed =
-                UntypedAssertion::checkAll(test.sourceFileContents, RangeAssertion::getUntypedAssertions(assertions),
-                                           diagnostics, errorPrefixes[i]);
+            bool untypedAssertionsPassed = UntypedAssertion::checkAll(
+                test.sourceFileContents, RangeAssertion::getAssertions<UntypedAssertion>(assertions), diagnostics,
+                errorPrefixes[i]);
 
             slowPathPassed = errorAssertionsPassed && untypedAssertionsPassed;
         }
@@ -950,8 +951,9 @@ TEST_CASE("LSPTest") {
                 testDocumentSymbols(*lspWrapper, test, nextId, testFileUris[originalFile], updateFile);
             }
 
-            const bool passed = ErrorAssertion::checkAll(
-                updatesAndContents, RangeAssertion::getErrorAssertions(assertions), diagnostics, errorPrefix);
+            const bool passed =
+                ErrorAssertion::checkAll(updatesAndContents, RangeAssertion::getAssertions<ErrorAssertion>(assertions),
+                                         diagnostics, errorPrefix);
 
             if (!passed) {
                 // Abort if an update fails its assertions, as subsequent updates will likely fail as well.

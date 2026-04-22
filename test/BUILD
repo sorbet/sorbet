@@ -529,6 +529,11 @@ pipeline_tests(
             "testdata/**/*.rbi",
             "testdata/**/*.exp",
         ],
+        # package-directed is known to be incompatible with the LSP tests for now
+        # todo(gdritter): fix this!
+        exclude = [
+            "testdata/packager/directed-*/**/*",
+        ],
     ),
     "LSPTests",
     extra_files = ["testdata/lsp/rubyfmt-stub/rubyfmt"],
@@ -566,6 +571,10 @@ pipeline_tests(
             # Prism LSP known failures: hover with RBS
             "testdata/lsp/hover_rbs.rb",
             "testdata/lsp/hover_rbs_assertions_let.rb",
+
+            # package-directed is known to be incompatible with the LSP tests for now
+            # todo(gdritter): fix this!
+            "testdata/packager/directed-*/**/*",
         ],
     ),
     "PrismLSPTests",

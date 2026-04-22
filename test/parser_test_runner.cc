@@ -172,7 +172,8 @@ TEST_CASE("WhitequarkParserTest") {
             auto path = error->loc.file().data(gs).path();
             diagnostics[string(path.begin(), path.end())].push_back(std::move(diag));
         }
-        ErrorAssertion::checkAll(test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics);
+        ErrorAssertion::checkAll(test.sourceFileContents, RangeAssertion::getAssertions<ErrorAssertion>(assertions),
+                                 diagnostics);
     }
 
     MESSAGE("errors OK");
