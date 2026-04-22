@@ -32,12 +32,15 @@ module T::Private::Methods
   # in installed_hooks.
   @old_hooks = nil
 
+  # These names are for backwards compatibility from when these were `Object.new` instances
+  # rubocop:disable Naming/ClassAndModuleCamelCase
   module ARG_NOT_PROVIDED
     freeze
   end
   module PROC_TYPE
     freeze
   end
+  # rubocop:enable Naming/ClassAndModuleCamelCase
 
   # blk_or_decl:
   # - It's a `Proc` if we haven't forced the thunk yet.
