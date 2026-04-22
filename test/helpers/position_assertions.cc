@@ -11,7 +11,6 @@
 #include "main/lsp/LSPConfiguration.h"
 #include "test/helpers/lsp.h"
 #include "test/helpers/position_assertions.h"
-#include <charconv>
 #include <iterator>
 #include <regex>
 #include <string.h>
@@ -2617,10 +2616,10 @@ string HierarchyRefAssertion::toString() const {
 shared_ptr<StratumAssertion> StratumAssertion::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
                                                     string_view assertionContents, string_view assertionType) {
     int value;
-    auto [_, ec] = from_chars(assertionContents.data(), assertionContents.data() + assertionContents.size(), value);
+    int success = absl::SimpleAtoi(assertionContents, &value);
     {
         INFO("Invalid integer value: '" << assertionContents << "'");
-        CHECK_EQ(ec, std::errc{});
+        CHECK(success);
     }
     return make_shared<StratumAssertion>(filename, range, assertionLine, value);
 }
