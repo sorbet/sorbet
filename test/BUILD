@@ -266,7 +266,8 @@ cc_binary(
 
 pipeline_tests(
     "test_corpus",
-    glob(
+    test_name_prefix = "PosTests",
+    tests = glob(
         [
             "testdata/**/*.rb",
             "testdata/**/*.exp",
@@ -276,12 +277,228 @@ pipeline_tests(
             "testdata/rbs/**/*.exp",
         ],
     ),
-    "PosTests",
 )
 
 pipeline_tests(
     "test_corpus_prism",
-    glob(
+    disabled_tests = [
+        # Prism allows a new line between `.` and `end` as a way to call a method called literally `#end`.
+        # The legacy parser treats this as an incomplete call to `x.<method-name-missing>()`, which is much
+        # nicer behaviour, which we eventually want to support with Prism as well.
+        # https://github.com/Shopify/sorbet/issues/739
+        "testdata/lsp/completion/missing_fun.rb",
+
+        # Tests having to do with tree differences in invalid Ruby code; will address later
+        "testdata/parser/error_recovery/assign.rb",
+        "testdata/parser/error_recovery/begin_1.rb",
+        "testdata/parser/error_recovery/block_do_1.rb",
+        "testdata/parser/error_recovery/case_1.rb",
+        "testdata/parser/error_recovery/case_2.rb",
+        "testdata/parser/error_recovery/circular_argument_reference.rb",
+        "testdata/parser/error_recovery/class_indent_1.rb",
+        "testdata/parser/error_recovery/class_indent_2.rb",
+        "testdata/parser/error_recovery/class_indent_3.rb",
+        "testdata/parser/error_recovery/class_indent_4.rb",
+        "testdata/parser/error_recovery/class_indent_5.rb",
+        "testdata/parser/error_recovery/class_indent_6.rb",
+        "testdata/parser/error_recovery/class_weird_newline_indent.rb",
+        "testdata/parser/error_recovery/const_case.rb",
+        "testdata/parser/error_recovery/constant_only_scope.rb",
+        "testdata/parser/error_recovery/def_missing_end_1.rb",
+        "testdata/parser/error_recovery/def_missing_end_2.rb",
+        "testdata/parser/error_recovery/defn_indent_1.rb",
+        "testdata/parser/error_recovery/defn_indent_2.rb",
+        "testdata/parser/error_recovery/defn_indent_3.rb",
+        "testdata/parser/error_recovery/defn_indent_4.rb",
+        "testdata/parser/error_recovery/defn_indent_5.rb",
+        "testdata/parser/error_recovery/defn_indent_6.rb",
+        "testdata/parser/error_recovery/defs_indent_1.rb",
+        "testdata/parser/error_recovery/defs_indent_2.rb",
+        "testdata/parser/error_recovery/defs_indent_3.rb",
+        "testdata/parser/error_recovery/defs_indent_4.rb",
+        "testdata/parser/error_recovery/defs_indent_5.rb",
+        "testdata/parser/error_recovery/defs_indent_6.rb",
+        "testdata/parser/error_recovery/eof_1.rb",
+        "testdata/parser/error_recovery/eof_2.rb",
+        "testdata/parser/error_recovery/eof_3.rb",
+        "testdata/parser/error_recovery/eof_4.rb",
+        "testdata/parser/error_recovery/eof_5.rb",
+        "testdata/parser/error_recovery/eof_6.rb",
+        "testdata/parser/error_recovery/eof_7.rb",
+        "testdata/parser/error_recovery/eof_9.rb",
+        "testdata/parser/error_recovery/forward_args.rb",
+        "testdata/parser/error_recovery/if_do_1.rb",
+        "testdata/parser/error_recovery/if_do_2.rb",
+        "testdata/parser/error_recovery/if_indent_1.rb",
+        "testdata/parser/error_recovery/if_indent_2.rb",
+        "testdata/parser/error_recovery/if_indent_3.rb",
+        "testdata/parser/error_recovery/if_indent_4.rb",
+        "testdata/parser/error_recovery/if_indent_5.rb",
+        "testdata/parser/error_recovery/if_no_end.rb",
+        "testdata/parser/error_recovery/lonely_def_01.rb",
+        "testdata/parser/error_recovery/lonely_def_02.rb",
+        "testdata/parser/error_recovery/lonely_def_03.rb",
+        "testdata/parser/error_recovery/lonely_def_04.rb",
+        "testdata/parser/error_recovery/lonely_def_05.rb",
+        "testdata/parser/error_recovery/lonely_def_06.rb",
+        "testdata/parser/error_recovery/lonely_def_07.rb",
+        "testdata/parser/error_recovery/lonely_def_08.rb",
+        "testdata/parser/error_recovery/lonely_def_09.rb",
+        "testdata/parser/error_recovery/lonely_def_10.rb",
+        "testdata/parser/error_recovery/lonely_def_11.rb",
+        "testdata/parser/error_recovery/lonely_def_12.rb",
+        "testdata/parser/error_recovery/lonely_def_13.rb",
+        "testdata/parser/error_recovery/lonely_def_14.rb",
+        "testdata/parser/error_recovery/long_line_indent.rb",
+        "testdata/parser/error_recovery/long_prefix_indent.rb",
+        "testdata/parser/error_recovery/missing_fun.rb",
+        "testdata/parser/error_recovery/missing_operator.rb",
+        "testdata/parser/error_recovery/module_indent_1.rb",
+        "testdata/parser/error_recovery/module_indent_2.rb",
+        "testdata/parser/error_recovery/module_indent_3.rb",
+        "testdata/parser/error_recovery/module_indent_4.rb",
+        "testdata/parser/error_recovery/module_indent_5.rb",
+        "testdata/parser/error_recovery/module_indent_6.rb",
+        "testdata/parser/error_recovery/multiple_stmts.rb",
+        "testdata/parser/error_recovery/numparams.rb",
+        "testdata/parser/error_recovery/numparams_crash_1.rb",
+        "testdata/parser/error_recovery/numparams_crash_2.rb",
+        "testdata/parser/error_recovery/numparams_crash_3.rb",
+        "testdata/parser/error_recovery/numparams_crash_5.rb",
+        "testdata/parser/error_recovery/pos_after_kw_1.rb",
+        "testdata/parser/error_recovery/send_after_end.rb",
+        "testdata/parser/error_recovery/unmatched_block_args_1.rb",
+        "testdata/parser/error_recovery/unmatched_block_args_2.rb",
+        "testdata/parser/error_recovery/unmatched_block_args_3.rb",
+        "testdata/parser/error_recovery/unmatched_block_args_4.rb",
+        "testdata/parser/error_recovery/unterminated_array.rb",
+        "testdata/parser/error_recovery/unterminated_array_bad_1.rb",
+        "testdata/parser/error_recovery/unterminated_array_bad_2.rb",
+        "testdata/parser/crash_block_pass_suggestion.rb",
+        "testdata/parser/invalid_fatal.rb",
+        "testdata/parser/invalid_syntax_error.rb",
+        "testdata/parser/kwargs_missing_comma.rb",
+        "testdata/parser/kwnil_errors.rb",  # See https://github.com/Shopify/sorbet/issues/393
+        "testdata/parser/offset0.rb",
+        "testdata/parser/kwargs.rb",
+        "testdata/lsp/completion/bad_arguments.rb",
+        "testdata/lsp/completion/bad_list_elems.rb",
+        "testdata/lsp/completion/case_1.rb",
+        "testdata/lsp/completion/case_2.rb",
+        "testdata/lsp/completion/eof.rb",
+        "testdata/lsp/completion/missing_const_name.rb",
+        "testdata/lsp/completion/self_receiver.rb",
+        "testdata/lsp/completion/enum_case.rb",
+        "testdata/lsp/completion/enum_case_crash.rb",
+        "testdata/lsp/duplicate_kwarg.rb",
+        "testdata/namer/fuzz_repeated_kwarg.rb",
+        "testdata/deviations/keyword_method_names.rb",
+        "testdata/rewriter/minitest_empty_test_each.rb",
+        "testdata/parser/invalid_def_block_param_after_forward.rb",
+        "testdata/parser/invalid_def_forward_after_block_param.rb",
+
+        # Sorbets' parser incorrectly accepts invalid syntax
+        "testdata/desugar/pattern_matching_hash.rb",  # See https://github.com/Shopify/sorbet/issues/362
+
+        # Prism doesn't have enough context to reject f(&b, 1), and attempts to treat it equivalently to f(1, &b)
+        "testdata/desugar/bad_block_pass.rb",
+
+        # Additional failing Prism tests - various location and desugaring differences
+        "testdata/compiler/block_iseq_names.rb",
+        "testdata/compiler/exceptions/raise_across_interop__*.rb",
+        "testdata/compiler/exceptions/rescue_in_block.rb",
+        "testdata/compiler/intrinsics/array_compact.rb",
+        "testdata/compiler/intrinsics/array_compact_bang.rb",
+        "testdata/compiler/intrinsics/array_reject_bang.rb",
+        "testdata/compiler/intrinsics/hash_merge.rb",
+        "testdata/compiler/intrinsics/hash_merge_bang.rb",
+        "testdata/core/fuzz_unparsable.rb",
+        "testdata/desugar/fuzz_block_pass.rb",
+        "testdata/desugar/fuzz_break_do_end.rb",
+        "testdata/desugar/pattern_matching_const.rb",
+        "testdata/desugar/pattern_matching_pins.rb",
+        "testdata/infer/fuzz_uninitialized_vars.rb",
+        "testdata/infer/missing_method_name.rb",
+        "testdata/infer/or_and_conditional_branch.rb",
+        "testdata/infer/t_proc_metatype.rb",
+        "testdata/lsp/code_actions/extract_variable_single/invalid.rb",
+        "testdata/lsp/completion/error_recovery_binop_unop.rb",
+        "testdata/lsp/completion/if_empty.rb",
+        "testdata/lsp/completion/instance_var.rb",
+        "testdata/lsp/completion/instance_var_strict.rb",
+        "testdata/lsp/completion/method_kwargs.rb",
+        "testdata/lsp/completion/method_kwargs_extra.rb",
+        "testdata/lsp/completion/missing_assign_rhs.rb",
+        "testdata/lsp/completion/operators.rb",
+        "testdata/lsp/completion/overridable.rb",
+        "testdata/lsp/completion/setter.rb",
+        "testdata/lsp/completion/snippet_before_variable.rb",
+        "testdata/lsp/completion/superclass.rb",
+        "testdata/lsp/completion/symbol_proc.rb",
+        "testdata/lsp/completion/untyped_parse_errors.rb",
+        "testdata/lsp/completion/untyped_receiver.rb",
+        "testdata/lsp/hover_methods_inside_block.rb",
+        "testdata/lsp/show_symbol.rb",
+        "testdata/namer/duplicate_field_error.rb",
+        "testdata/parser/bad_argument_crash.rb",
+        "testdata/parser/compare_overload_parse_error.rb",
+        "testdata/parser/crash_case_empty_var.rb",
+        "testdata/parser/curly_braces_block_pass.rb",
+        "testdata/parser/fuzz_ivar.rb",
+        "testdata/parser/heredoc_squiggle_dedent.rb",
+        "testdata/parser/heredoc_xstring.rb",
+        "testdata/parser/it_param_invalid_syntax.rb",
+        "testdata/parser/it_param_with_explicit_args.rb",
+        "testdata/parser/kwargs_missing_comma_unsupported.rb",
+        "testdata/resolver/it_param_rspec_method.rb",
+        "testdata/resolver/sig_misc.rb",
+        "testdata/rewriter/initializer_no_arg_with_local.rb",
+        "testdata/desugar/op_asgn_kw_block.rb",
+
+        # Prism desugared tree doesn't match legacy desugared tree (desugar differences)
+        "testdata/desugar/destructure_rest.rb",
+        "testdata/desugar/splat.rb",
+        "testdata/desugar/star_in_block_arg.rb",
+        "testdata/infer/generics/validator.rb",
+        "testdata/lsp/fast_path/alias_stub_module__*.rb",
+        "testdata/lsp/fast_path/not_enough_files/not_enough_files__*.rb",
+        "testdata/lsp/fast_path/too_many_files/too_many_files__*.rb",
+        "testdata/lsp/ripper_parse_error_formatting.rb",
+        "testdata/lsp/rubyfmt_init_error.rb",
+        "testdata/lsp/rubyfmt_io_error_formatting.rb",
+        "testdata/lsp/rubyfmt_ruby_error.rb",
+        "testdata/lsp/rubyfmt_unknown_error.rb",
+        "testdata/lsp/successful_formatting.rb",
+        "testdata/lsp/syntax_error_formatting.rb",
+        "testdata/lsp/workspace_symbols_stdlib.rb",
+        "testdata/minimize-rbi/external.rb",
+        "testdata/minimize-rbi/private.rb",
+        "testdata/packager/empty_package_file/**/*.rb",
+        "testdata/packager/package-no-spec/**/*.rb",
+        "testdata/packager/unpackaged-error/**/*.rb",
+        "testdata/parser/empty.rb",
+        "testdata/infer/crash_after_parse_errors.rb",
+        "testdata/infer/untyped.rb",
+        "testdata/parser/error_recovery/eof_8.rb",
+        "testdata/parser/error_recovery/other_missing_end.rb",
+        "testdata/rbi/proc.rb",
+
+        # Prism preserves more of the structure than the legacy parser
+        "testdata/parser/error_recovery/block_forwarding_invalid_def.rb",
+
+        # Fixing a bug in pipeline_test_runner.cc revealed that these tests
+        # were not actually running because they use MLHS
+        "testdata/cfg/rescue_var_expression.rb",
+        "testdata/parser/misc.rb",
+
+        # Fixing a bug in pipeline_test_runner.cc revealed that these tests
+        # were not actually running because they have RBS support enabled
+        "testdata/lsp/hover_rbs.rb",
+        "testdata/lsp/hover_rbs_assertions_let.rb",
+    ],
+    parser = "prism",
+    test_name_prefix = "PrismPosTests",
+    tests = glob(
         [
             # Replace [parser] with other phases to test Prism at that level
             # Phases: https://github.com/Shopify/sorbet/blob/prism/docs/internals.md#phases
@@ -292,251 +509,36 @@ pipeline_tests(
             # RBS tests have their own dedicated targets (rbs_prism)
             "testdata/rbs/**/*.rb",
             "testdata/rbs/**/*.exp",
-
-            # Prism allows a new line between `.` and `end` as a way to call a method called literally `#end`.
-            # The legacy parser treats this as an incomplete call to `x.<method-name-missing>()`, which is much
-            # nicer behaviour, which we eventually want to support with Prism as well.
-            # https://github.com/Shopify/sorbet/issues/739
-            "testdata/lsp/completion/missing_fun.rb",
-
-            # Tests having to do with tree differences in invalid Ruby code; will address later
-            "testdata/parser/error_recovery/assign.rb",
-            "testdata/parser/error_recovery/begin_1.rb",
-            "testdata/parser/error_recovery/block_do_1.rb",
-            "testdata/parser/error_recovery/case_1.rb",
-            "testdata/parser/error_recovery/case_2.rb",
-            "testdata/parser/error_recovery/circular_argument_reference.rb",
-            "testdata/parser/error_recovery/class_indent_1.rb",
-            "testdata/parser/error_recovery/class_indent_2.rb",
-            "testdata/parser/error_recovery/class_indent_3.rb",
-            "testdata/parser/error_recovery/class_indent_4.rb",
-            "testdata/parser/error_recovery/class_indent_5.rb",
-            "testdata/parser/error_recovery/class_indent_6.rb",
-            "testdata/parser/error_recovery/class_weird_newline_indent.rb",
-            "testdata/parser/error_recovery/const_case.rb",
-            "testdata/parser/error_recovery/constant_only_scope.rb",
-            "testdata/parser/error_recovery/def_missing_end_1.rb",
-            "testdata/parser/error_recovery/def_missing_end_2.rb",
-            "testdata/parser/error_recovery/defn_indent_1.rb",
-            "testdata/parser/error_recovery/defn_indent_2.rb",
-            "testdata/parser/error_recovery/defn_indent_3.rb",
-            "testdata/parser/error_recovery/defn_indent_4.rb",
-            "testdata/parser/error_recovery/defn_indent_5.rb",
-            "testdata/parser/error_recovery/defn_indent_6.rb",
-            "testdata/parser/error_recovery/defs_indent_1.rb",
-            "testdata/parser/error_recovery/defs_indent_2.rb",
-            "testdata/parser/error_recovery/defs_indent_3.rb",
-            "testdata/parser/error_recovery/defs_indent_4.rb",
-            "testdata/parser/error_recovery/defs_indent_5.rb",
-            "testdata/parser/error_recovery/defs_indent_6.rb",
-            "testdata/parser/error_recovery/eof_1.rb",
-            "testdata/parser/error_recovery/eof_2.rb",
-            "testdata/parser/error_recovery/eof_3.rb",
-            "testdata/parser/error_recovery/eof_4.rb",
-            "testdata/parser/error_recovery/eof_5.rb",
-            "testdata/parser/error_recovery/eof_6.rb",
-            "testdata/parser/error_recovery/eof_7.rb",
-            "testdata/parser/error_recovery/eof_9.rb",
-            "testdata/parser/error_recovery/forward_args.rb",
-            "testdata/parser/error_recovery/if_do_1.rb",
-            "testdata/parser/error_recovery/if_do_2.rb",
-            "testdata/parser/error_recovery/if_indent_1.rb",
-            "testdata/parser/error_recovery/if_indent_2.rb",
-            "testdata/parser/error_recovery/if_indent_3.rb",
-            "testdata/parser/error_recovery/if_indent_4.rb",
-            "testdata/parser/error_recovery/if_indent_5.rb",
-            "testdata/parser/error_recovery/if_no_end.rb",
-            "testdata/parser/error_recovery/lonely_def_01.rb",
-            "testdata/parser/error_recovery/lonely_def_02.rb",
-            "testdata/parser/error_recovery/lonely_def_03.rb",
-            "testdata/parser/error_recovery/lonely_def_04.rb",
-            "testdata/parser/error_recovery/lonely_def_05.rb",
-            "testdata/parser/error_recovery/lonely_def_06.rb",
-            "testdata/parser/error_recovery/lonely_def_07.rb",
-            "testdata/parser/error_recovery/lonely_def_08.rb",
-            "testdata/parser/error_recovery/lonely_def_09.rb",
-            "testdata/parser/error_recovery/lonely_def_10.rb",
-            "testdata/parser/error_recovery/lonely_def_11.rb",
-            "testdata/parser/error_recovery/lonely_def_12.rb",
-            "testdata/parser/error_recovery/lonely_def_13.rb",
-            "testdata/parser/error_recovery/lonely_def_14.rb",
-            "testdata/parser/error_recovery/long_line_indent.rb",
-            "testdata/parser/error_recovery/long_prefix_indent.rb",
-            "testdata/parser/error_recovery/missing_fun.rb",
-            "testdata/parser/error_recovery/missing_operator.rb",
-            "testdata/parser/error_recovery/module_indent_1.rb",
-            "testdata/parser/error_recovery/module_indent_2.rb",
-            "testdata/parser/error_recovery/module_indent_3.rb",
-            "testdata/parser/error_recovery/module_indent_4.rb",
-            "testdata/parser/error_recovery/module_indent_5.rb",
-            "testdata/parser/error_recovery/module_indent_6.rb",
-            "testdata/parser/error_recovery/multiple_stmts.rb",
-            "testdata/parser/error_recovery/numparams.rb",
-            "testdata/parser/error_recovery/numparams_crash_1.rb",
-            "testdata/parser/error_recovery/numparams_crash_2.rb",
-            "testdata/parser/error_recovery/numparams_crash_3.rb",
-            "testdata/parser/error_recovery/numparams_crash_5.rb",
-            "testdata/parser/error_recovery/pos_after_kw_1.rb",
-            "testdata/parser/error_recovery/send_after_end.rb",
-            "testdata/parser/error_recovery/unmatched_block_args_1.rb",
-            "testdata/parser/error_recovery/unmatched_block_args_2.rb",
-            "testdata/parser/error_recovery/unmatched_block_args_3.rb",
-            "testdata/parser/error_recovery/unmatched_block_args_4.rb",
-            "testdata/parser/error_recovery/unterminated_array.rb",
-            "testdata/parser/error_recovery/unterminated_array_bad_1.rb",
-            "testdata/parser/error_recovery/unterminated_array_bad_2.rb",
-            "testdata/parser/crash_block_pass_suggestion.rb",
-            "testdata/parser/invalid_fatal.rb",
-            "testdata/parser/invalid_syntax_error.rb",
-            "testdata/parser/kwargs_missing_comma.rb",
-            "testdata/parser/kwnil_errors.rb",  # See https://github.com/Shopify/sorbet/issues/393
-            "testdata/parser/offset0.rb",
-            "testdata/parser/kwargs.rb",
-            "testdata/lsp/completion/bad_arguments.rb",
-            "testdata/lsp/completion/bad_list_elems.rb",
-            "testdata/lsp/completion/case_1.rb",
-            "testdata/lsp/completion/case_2.rb",
-            "testdata/lsp/completion/eof.rb",
-            "testdata/lsp/completion/missing_const_name.rb",
-            "testdata/lsp/completion/self_receiver.rb",
-            "testdata/lsp/completion/enum_case.rb",
-            "testdata/lsp/completion/enum_case_crash.rb",
-            "testdata/lsp/duplicate_kwarg.rb",
-            "testdata/namer/fuzz_repeated_kwarg.rb",
-            "testdata/deviations/keyword_method_names.rb",
-            "testdata/rewriter/minitest_empty_test_each.rb",
-            "testdata/parser/invalid_def_block_param_after_forward.rb",
-            "testdata/parser/invalid_def_forward_after_block_param.rb",
-
-            # Sorbets' parser incorrectly accepts invalid syntax
-            "testdata/desugar/pattern_matching_hash.rb",  # See https://github.com/Shopify/sorbet/issues/362
-
-            # Prism doesn't have enough context to reject f(&b, 1), and attempts to treat it equivalently to f(1, &b)
-            "testdata/desugar/bad_block_pass.rb",
-
-            # Additional failing Prism tests - various location and desugaring differences
-            "testdata/compiler/block_iseq_names.rb",
-            "testdata/compiler/exceptions/raise_across_interop__*.rb",
-            "testdata/compiler/exceptions/rescue_in_block.rb",
-            "testdata/compiler/intrinsics/array_compact.rb",
-            "testdata/compiler/intrinsics/array_compact_bang.rb",
-            "testdata/compiler/intrinsics/array_reject_bang.rb",
-            "testdata/compiler/intrinsics/hash_merge.rb",
-            "testdata/compiler/intrinsics/hash_merge_bang.rb",
-            "testdata/core/fuzz_unparsable.rb",
-            "testdata/desugar/fuzz_block_pass.rb",
-            "testdata/desugar/fuzz_break_do_end.rb",
-            "testdata/desugar/pattern_matching_const.rb",
-            "testdata/desugar/pattern_matching_pins.rb",
-            "testdata/infer/fuzz_uninitialized_vars.rb",
-            "testdata/infer/missing_method_name.rb",
-            "testdata/infer/or_and_conditional_branch.rb",
-            "testdata/infer/t_proc_metatype.rb",
-            "testdata/lsp/code_actions/extract_variable_single/invalid.rb",
-            "testdata/lsp/completion/error_recovery_binop_unop.rb",
-            "testdata/lsp/completion/if_empty.rb",
-            "testdata/lsp/completion/instance_var.rb",
-            "testdata/lsp/completion/instance_var_strict.rb",
-            "testdata/lsp/completion/method_kwargs.rb",
-            "testdata/lsp/completion/method_kwargs_extra.rb",
-            "testdata/lsp/completion/missing_assign_rhs.rb",
-            "testdata/lsp/completion/operators.rb",
-            "testdata/lsp/completion/overridable.rb",
-            "testdata/lsp/completion/setter.rb",
-            "testdata/lsp/completion/snippet_before_variable.rb",
-            "testdata/lsp/completion/superclass.rb",
-            "testdata/lsp/completion/symbol_proc.rb",
-            "testdata/lsp/completion/untyped_parse_errors.rb",
-            "testdata/lsp/completion/untyped_receiver.rb",
-            "testdata/lsp/hover_methods_inside_block.rb",
-            "testdata/lsp/show_symbol.rb",
-            "testdata/namer/duplicate_field_error.rb",
-            "testdata/parser/bad_argument_crash.rb",
-            "testdata/parser/compare_overload_parse_error.rb",
-            "testdata/parser/crash_case_empty_var.rb",
-            "testdata/parser/curly_braces_block_pass.rb",
-            "testdata/parser/fuzz_ivar.rb",
-            "testdata/parser/heredoc_squiggle_dedent.rb",
-            "testdata/parser/heredoc_xstring.rb",
-            "testdata/parser/it_param_invalid_syntax.rb",
-            "testdata/parser/it_param_with_explicit_args.rb",
-            "testdata/parser/kwargs_missing_comma_unsupported.rb",
-            "testdata/resolver/it_param_rspec_method.rb",
-            "testdata/resolver/sig_misc.rb",
-            "testdata/rewriter/initializer_no_arg_with_local.rb",
-            "testdata/desugar/op_asgn_kw_block.rb",
-
-            # Prism desugared tree doesn't match legacy desugared tree (desugar differences)
-            "testdata/desugar/destructure_rest.rb",
-            "testdata/desugar/splat.rb",
-            "testdata/desugar/star_in_block_arg.rb",
-            "testdata/infer/generics/validator.rb",
-            "testdata/lsp/fast_path/alias_stub_module__*.rb",
-            "testdata/lsp/fast_path/not_enough_files/not_enough_files__*.rb",
-            "testdata/lsp/fast_path/too_many_files/too_many_files__*.rb",
-            "testdata/lsp/ripper_parse_error_formatting.rb",
-            "testdata/lsp/rubyfmt_init_error.rb",
-            "testdata/lsp/rubyfmt_io_error_formatting.rb",
-            "testdata/lsp/rubyfmt_ruby_error.rb",
-            "testdata/lsp/rubyfmt_unknown_error.rb",
-            "testdata/lsp/successful_formatting.rb",
-            "testdata/lsp/syntax_error_formatting.rb",
-            "testdata/lsp/workspace_symbols_stdlib.rb",
-            "testdata/minimize-rbi/external.rb",
-            "testdata/minimize-rbi/private.rb",
-            "testdata/packager/empty_package_file/**/*.rb",
-            "testdata/packager/package-no-spec/**/*.rb",
-            "testdata/packager/unpackaged-error/**/*.rb",
-            "testdata/parser/empty.rb",
-            "testdata/infer/crash_after_parse_errors.rb",
-            "testdata/infer/untyped.rb",
-            "testdata/parser/error_recovery/eof_8.rb",
-            "testdata/parser/error_recovery/other_missing_end.rb",
-            "testdata/rbi/proc.rb",
-
-            # Prism preserves more of the structure than the legacy parser
-            "testdata/parser/error_recovery/block_forwarding_invalid_def.rb",
-
-            # Fixing a bug in pipeline_test_runner.cc revealed that these tests
-            # were not actually running because they use MLHS
-            "testdata/cfg/rescue_var_expression.rb",
-            "testdata/parser/misc.rb",
-
-            # Fixing a bug in pipeline_test_runner.cc revealed that these tests
-            # were not actually running because they have RBS support enabled
-            "testdata/lsp/hover_rbs.rb",
-            "testdata/lsp/hover_rbs_assertions_let.rb",
         ],
     ),
-    "PrismPosTests",
-    parser = "prism",
 )
 
 pipeline_tests(
     "whitequark_parser_corpus",
-    glob([
+    test_name_prefix = "WhitequarkParserTests",
+    tests = glob([
         "whitequark/**/*.rb",
         "whitequark/**/*.exp",
     ]),
-    "WhitequarkParserTests",
 )
 
 pipeline_tests(
     "test_corpus_lsp",
-    glob(
-        [
-            "testdata/**/*.rb",
-            "testdata/**/*.rbi",
-            "testdata/**/*.exp",
-        ],
-    ),
-    "LSPTests",
     extra_files = ["testdata/lsp/rubyfmt-stub/rubyfmt"],
+    test_name_prefix = "LSPTests",
+    tests = glob([
+        "testdata/**/*.rb",
+        "testdata/**/*.rbi",
+        "testdata/**/*.exp",
+    ]),
 )
 
 pipeline_tests(
     "test_corpus_lsp_prism",
-    glob(
+    extra_files = ["testdata/lsp/rubyfmt-stub/rubyfmt"],
+    parser = "prism",
+    test_name_prefix = "PrismLSPTests",
+    tests = glob(
         [
             "testdata/**/*.rb",
             "testdata/**/*.rbi",
@@ -568,14 +570,13 @@ pipeline_tests(
             "testdata/lsp/hover_rbs_assertions_let.rb",
         ],
     ),
-    "PrismLSPTests",
-    extra_files = ["testdata/lsp/rubyfmt-stub/rubyfmt"],
-    parser = "prism",
 )
 
 pipeline_tests(
     "prism_regression_corpus",
-    glob(
+    parser = "prism",
+    test_name_prefix = "PrismPosTests",
+    tests = glob(
         [
             "prism_regression/**/*.rb",
             "prism_regression/**/*.exp",
@@ -586,42 +587,36 @@ pipeline_tests(
             "prism_regression/call_block_param.rb",
         ],
     ),
-    "PrismPosTests",
-    parser = "prism",
 )
 
 pipeline_tests(
     "rbs_whitequark",
-    glob(
-        [
-            "testdata/rbs/**/*.rb",
-            "testdata/rbs/**/*.exp",
-        ],
-        exclude = [
-            # Specific test that is modified for Prism, contains minor differences in the exp file
-            "testdata/rbs/assertions_heredoc_modified.rb",
-        ],
-    ),
-    "PosTests",
+    disabled_tests = [
+        # Specific test that is modified for Prism, contains minor differences in the exp file
+        "testdata/rbs/assertions_heredoc_modified.rb",
+    ],
+    test_name_prefix = "PosTests",
+    tests = glob([
+        "testdata/rbs/**/*.rb",
+        "testdata/rbs/**/*.exp",
+    ]),
 )
 
 pipeline_tests(
     "rbs_prism",
-    glob(
-        [
-            "testdata/rbs/**/*.rb",
-            "testdata/rbs/**/*.exp",
-        ],
-        exclude = [
-            # Specific test for the legacy pipeline. Prism has its own `testdata/rbs/assertions_heredoc_modified.rb`.
-            "testdata/rbs/assertions_heredoc.rb",
+    disabled_tests = [
+        # Specific test for the legacy pipeline. Prism has its own `testdata/rbs/assertions_heredoc_modified.rb`.
+        "testdata/rbs/assertions_heredoc.rb",
 
-            # Prism output differs from legacy for constant resolution.
-            "testdata/rbs/signatures_types.rb",
-        ],
-    ),
-    "PrismPosTests",
+        # Prism output differs from legacy for constant resolution.
+        "testdata/rbs/signatures_types.rb",
+    ],
     parser = "prism",
+    test_name_prefix = "PrismPosTests",
+    tests = glob([
+        "testdata/rbs/**/*.rb",
+        "testdata/rbs/**/*.exp",
+    ]),
 )
 
 test_suite(

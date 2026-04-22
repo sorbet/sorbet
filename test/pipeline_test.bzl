@@ -64,7 +64,10 @@ _TEST_RUNNERS = {
     "PackagerTests": ":pipeline_test_runner",
 }
 
-def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_files = [], tags = [], parser = None):
+def pipeline_tests(suite_name, test_name_prefix, tests, disabled_tests = [], extra_files = [], tags = [], parser = None):
+    all_paths = tests
+    disabled_test_paths = disabled_tests
+
     tests = {}  # test_name-> {"path": String, "prefix": String, "sentinel": String, "isPackage": bool}
 
     # The packager step needs folder-based steps since folder structure dictates package membership.
@@ -89,7 +92,7 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_files = [], ta
                         "sentinel": test_name,
                         "isMultiFile": False,
                         "isDirectory": True,
-                        "disabled": "disabled" in test_name,
+                        "disabled": path in disabled_test_paths,
                         "isPackage": True,
                     }
 
@@ -109,7 +112,7 @@ def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_files = [], ta
                 "sentinel": path,
                 "isMultiFile": "__" in path,
                 "isDirectory": False,
-                "disabled": "disabled" in path,
+                "disabled": path in disabled_test_paths,
                 "isPackage": False,
             }
             tests[test_name] = data
