@@ -8,7 +8,13 @@ class T::Private::Methods::Signature
               :check_level, :parameters, :on_failure, :override_allow_incompatible,
               :defined_raw
 
-  UNNAMED_REQUIRED_PARAMETERS = [[:req]].freeze
+  # T.unsafe: `UnboundMethod#parameters` lies and says `T::Array[[Symbol, Symbol]]`.
+  # Sorbet can't lub tuple types, meaning that `T.any([Symbol], [Symbol,
+  # Symbol])` would just be `T::Array[T.untyped]`. But Sorbet can see that
+  # UNNAMED_REQUIRED_PARAMETERS, which is an array of 1-tuples, can never
+  # equal an array of 2-tuples, and calls the code dead. There's no good
+  # option, let's just unsafe until tuples are better and we can fix the sig.
+  UNNAMED_REQUIRED_PARAMETERS = T.unsafe([[:req]].freeze)
 
   def self.new_untyped(method:, mode: T::Private::Methods::Modes.untyped, parameters: method.parameters)
     # Using `NotTyped` ensures we'll get an error if we ever try validation on these.
@@ -16,7 +22,7 @@ class T::Private::Methods::Signature
     raw_return_type = not_typed
     # Map missing parameter names to "argN" positionally
     parameters = parameters.each_with_index.map do |(param_kind, param_name), index|
-      [param_kind, param_name || "arg#{index}"]
+      [param_kind, T.unsafe(param_name) || "arg#{index}".to_sym]
     end
     raw_arg_types = {}
     parameters.each do |_, param_name|
@@ -52,7 +58,7 @@ class T::Private::Methods::Signature
     else
       @return_type
     end
-    @bind = bind ? T::Utils.coerce(bind) : bind
+    @bind = NilClass.===(bind) ? bind : T::Utils.coerce(bind)
     @mode = mode
     @check_level = check_level
     @parameters = parameters
@@ -61,10 +67,15 @@ class T::Private::Methods::Signature
     @defined_raw = defined_raw
 
     # Use T.untyped in lieu of T.nilable to try to avoid unnecessary allocations.
-    arg_types = T.let(nil, T.untyped)
-    kwarg_types = T.let(nil, T.untyped)
+    arg_types = nil
+    kwarg_types = nil
+    req_kwarg_names = nil
+    if T::Private::IS_TYPECHECKING
+      arg_types = T.let(nil, T.nilable(T::Array[[Symbol, T::Types::Base]]))
+      kwarg_types = T.let(nil, T.nilable(T::Hash[Symbol, T::Types::Base]))
+      req_kwarg_names = T.let(nil, T.nilable(T::Array[Symbol]))
+    end
     req_arg_count = 0
-    req_kwarg_names = T.let(nil, T.untyped)
 
     # If sig params are declared but there is a single parameter with a missing name
     # **and** the method ends with a "=", assume it is a writer method generated
@@ -91,7 +102,7 @@ class T::Private::Methods::Signature
     end
     i = 0
     raw_arg_types.each do |type_name, raw_type|
-      param_kind, param_name = parameters[i]
+      param_kind, param_name = parameters.fetch(i)
 
       if type_name != param_name
         hint = ""
@@ -107,7 +118,7 @@ class T::Private::Methods::Signature
 
         raise "Parameter `#{type_name}` is declared out of order (declared as arg number " \
               "#{i + 1}, defined in the method as arg number " \
-              "#{parameters.index { |_, name| name == type_name } + 1}).#{hint}\nMethod: #{method_desc}"
+              "#{T.must(parameters.index { |_, name| name == type_name }) + 1}).#{hint}\nMethod: #{method_desc}"
       end
 
       type = T::Utils.coerce(raw_type)
@@ -187,8 +198,8 @@ class T::Private::Methods::Signature
     # causes forwarding **kwargs to do the wrong thing: see https://bugs.ruby-lang.org/issues/10708
     # and https://bugs.ruby-lang.org/issues/11860.
     args_length = args.length
-    if (args_length > @req_arg_count) && (!@kwarg_types.empty? || !@keyrest_type.nil?) && args[-1].is_a?(Hash)
-      kwargs = args[-1]
+    if (args_length > @req_arg_count) && (!@kwarg_types.empty? || !@keyrest_type.nil?) && (last_arg = args[-1]).is_a?(Hash)
+      kwargs = last_arg
       args_length -= 1
     else
       kwargs = EMPTY_HASH
@@ -208,7 +219,8 @@ class T::Private::Methods::Signature
       # Process given pre-rest args. When there are no rest args,
       # this is just the given number of args.
       while it < args_length && it < @arg_types.length
-        yield @arg_types[it][0], args[it], @arg_types[it][1]
+        arg_type = @arg_types.fetch(it)
+        yield arg_type[0], args[it], arg_type[1]
         it += 1
       end
 
