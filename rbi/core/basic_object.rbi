@@ -273,6 +273,26 @@ class BasicObject
   end
   def instance_eval(arg0=T.unsafe(nil), filename=T.unsafe(nil), lineno=T.unsafe(nil), &blk); end
 
+  ### Note: a safer signature for the *args case of instance_exec might be something like
+  ###
+  ###     sig do
+  ###       type_parameters(:U, :V)
+  ###       .params(
+  ###           args: T.type_parameter(:V),
+  ###           blk: T.proc.bind(T.untyped).params(args: T.type_parameter(:V)).returns(T.type_parameter(:U)),
+  ###       )
+  ###       .returns(T.type_parameter(:U))
+  ###     end
+  ###
+  ### Which indicates that the block parameters' types are determined by the
+  ### arguments passed to `instance_exec`, but in practice code using
+  ### `instance_exec` likes to assume the first block param has the first
+  ### argument's type, the second has the second's, etc. but the above
+  ### signature would force the params to be operated on homogenously. So in
+  ### the interest of being useful and not pedantic, use the signature below, which
+  ### types the block params as either not present (if there are no args) or
+  ### untyped if there are.
+
   # Executes the given block within the context of the receiver (*obj*). In
   # order to set the context, the variable `self` is set to *obj* while the code
   # is executing, giving the code access to *obj*'s instance variables.
@@ -288,9 +308,16 @@ class BasicObject
   # k.instance_exec(5) {|x| @secret+x }   #=> 104
   # ```
   sig do
-    type_parameters(:U, :V)
+    type_parameters(:U)
     .params(
-        args: T.type_parameter(:V),
+        blk: T.proc.bind(T.untyped).returns(T.type_parameter(:U)),
+    )
+    .returns(T.type_parameter(:U))
+  end
+  sig do
+    type_parameters(:U)
+    .params(
+        args: T.anything,
         blk: T.proc.bind(T.untyped).params(args: T.untyped).returns(T.type_parameter(:U)),
     )
     .returns(T.type_parameter(:U))

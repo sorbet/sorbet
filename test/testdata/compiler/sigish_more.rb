@@ -16,6 +16,7 @@ module Sigish
   T::Sig::WithoutRuntime.sig {params(blk: T.proc.bind(DeclBuilder).params(arg0: T.untyped).void).void}
   def sig(&blk)
     DeclBuilder.new.instance_exec(&blk)
+  # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Expected `T.proc.returns(T.anything)` but found `T.proc.params(arg0: T.untyped).void` for block argument
   end
 end
 
