@@ -135,6 +135,20 @@ module Kernel
   # c(4)   #=> []
   # c(5)   #=> nil
   # ```
+  sig do
+    params(
+        start_or_range: Integer,
+        length: Integer,
+    )
+    .returns(T.nilable(T::Array[String]))
+  end
+  sig do
+    params(
+        start_or_range: T::Range[Integer],
+    )
+    .returns(T.nilable(T::Array[String]))
+  end
+  sig {returns(T::Array[String])}
   def self.caller(start_or_range=T.unsafe(nil), length=T.unsafe(nil)); end
 
   # Returns the current execution stack---an array containing backtrace location
