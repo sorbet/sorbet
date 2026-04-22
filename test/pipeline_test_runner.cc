@@ -461,8 +461,6 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     }
 
     auto assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
-    // TODO(jez) Make sure we add an assertion for `package-directed: true`
-    // Right now, `opts.packageDirected` is always false
     auto opts = RangeAssertion::parseOptions(assertions);
     opts.censorForSnapshotTests = true;
     opts.sorbetPackagesHint = "PACKAGE_ERROR_HINT";
@@ -528,6 +526,17 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
     vector<ast::ParsedFile> stratumFiles;
     auto strata = realmain::pipeline::computePackageStrata(*gs, trees, filesSpan, opts);
+
+    for (auto &stratumAssertion : RangeAssertion::getAssertions<StratumAssertion>(assertions)) {
+        auto file = gs->findFileByPath(stratumAssertion->filename);
+        int actualStratum = strata.fileToStratum[file.id()];
+        if (actualStratum != stratumAssertion->value) {
+            ADD_FAIL_CHECK_AT(string(stratumAssertion->filename).c_str(), stratumAssertion->assertionLine + 1,
+                              "Expected " << stratumAssertion->filename << " at stratum " << stratumAssertion->value
+                                          << "; got " << actualStratum);
+        }
+    }
+
     for (auto &stratum : strata.strata) {
         stratumFiles.clear();
         stratumFiles.reserve(stratum.packageFiles.size() + stratum.sourceFiles.size());
@@ -740,7 +749,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             auto path = error->loc.file().data(*gs).path();
             diagnostics[string(path.begin(), path.end())].push_back(std::move(diag));
         }
-        ErrorAssertion::checkAll(test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics);
+        ErrorAssertion::checkAll(test.sourceFileContents, RangeAssertion::getAssertions<ErrorAssertion>(assertions),
+                                 diagnostics);
     }
 
     // Allow later phases to have errors that we didn't test for

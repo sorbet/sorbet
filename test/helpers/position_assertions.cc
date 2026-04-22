@@ -11,6 +11,7 @@
 #include "main/lsp/LSPConfiguration.h"
 #include "test/helpers/lsp.h"
 #include "test/helpers/position_assertions.h"
+#include <charconv>
 #include <iterator>
 #include <regex>
 #include <string.h>
@@ -268,6 +269,7 @@ const UnorderedMap<
         {"uniquely-defined-behavior", BooleanPropertyAssertion::make},
         {"check-out-of-order-constant-references", BooleanPropertyAssertion::make},
         {"enable-packager", BooleanPropertyAssertion::make},
+        {"enable-package-directed", BooleanPropertyAssertion::make},
         {"enable-experimental-rbs-comments", BooleanPropertyAssertion::make},
         {"enable-experimental-requires-ancestor", BooleanPropertyAssertion::make},
         {"enable-experimental-rspec", BooleanPropertyAssertion::make},
@@ -303,6 +305,7 @@ const UnorderedMap<
         {"find-hierarchy-refs", FindHierarchyRefsAssertion::make},
         {"hierarchy-ref", HierarchyRefAssertion::make},
         {"enable-test-packages", BooleanPropertyAssertion::make},
+        {"stratum", StratumAssertion::make},
 };
 
 // Ignore any comments that have these labels (e.g. `# typed: true`).
@@ -558,28 +561,6 @@ unique_ptr<Range> RangeAssertion::makeRange(int sourceLine, int startChar, int e
     return make_unique<Range>(make_unique<Position>(sourceLine, startChar), make_unique<Position>(sourceLine, endChar));
 }
 
-vector<shared_ptr<ErrorAssertion>>
-RangeAssertion::getErrorAssertions(const vector<shared_ptr<RangeAssertion>> &assertions) {
-    vector<shared_ptr<ErrorAssertion>> rv;
-    for (auto assertion : assertions) {
-        if (auto assertionOfType = dynamic_pointer_cast<ErrorAssertion>(assertion)) {
-            rv.push_back(assertionOfType);
-        }
-    }
-    return rv;
-}
-
-vector<shared_ptr<UntypedAssertion>>
-RangeAssertion::getUntypedAssertions(const vector<shared_ptr<RangeAssertion>> &assertions) {
-    vector<shared_ptr<UntypedAssertion>> rv;
-    for (auto assertion : assertions) {
-        if (auto assertionOfType = dynamic_pointer_cast<UntypedAssertion>(assertion)) {
-            rv.push_back(assertionOfType);
-        }
-    }
-    return rv;
-}
-
 vector<shared_ptr<RangeAssertion>> parseAssertionsForFile(const shared_ptr<core::File> &file) {
     vector<shared_ptr<RangeAssertion>> assertions;
 
@@ -748,6 +729,8 @@ realmain::options::Options RangeAssertion::parseOptions(vector<shared_ptr<RangeA
 
     vector<string> defaultLayers = {};
     opts.packagerLayers = StringPropertyAssertions::getValues("packager-layers", assertions).value_or(defaultLayers);
+
+    opts.packageDirected = BooleanPropertyAssertion::getValue("enable-package-directed", assertions).value_or(false);
 
     return opts;
 }
@@ -2629,6 +2612,24 @@ shared_ptr<HierarchyRefAssertion> HierarchyRefAssertion::make(string_view filena
 
 string HierarchyRefAssertion::toString() const {
     return fmt::format("find-hierarchy-refs: {}", symbol);
+}
+
+shared_ptr<StratumAssertion> StratumAssertion::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                                    string_view assertionContents, string_view assertionType) {
+    int value;
+    auto [_, ec] = from_chars(assertionContents.data(), assertionContents.data() + assertionContents.size(), value);
+    {
+        INFO("Invalid integer value: '" << assertionContents << "'");
+        CHECK_EQ(ec, std::errc{});
+    }
+    return make_shared<StratumAssertion>(filename, range, assertionLine, value);
+}
+
+StratumAssertion::StratumAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine, int value)
+    : RangeAssertion(filename, range, assertionLine), value(value){};
+
+string StratumAssertion::toString() const {
+    return fmt::format("stratum: {}", value);
 }
 
 } // namespace sorbet::test

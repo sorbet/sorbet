@@ -13,9 +13,6 @@ using namespace sorbet::realmain::lsp;
 // This is needed to skip error assertions when running under Prism
 extern realmain::options::Parser parser;
 
-class ErrorAssertion;
-class UntypedAssertion;
-
 /**
  * An assertion that is relevant to a specific set of characters on a line.
  * If Range is set such that the start character is 0 and end character is END_OF_LINE_POS, then the assertion
@@ -44,13 +41,19 @@ public:
     }
 
     /**
-     * Filters a vector of assertions and returns only ErrorAssertions.
+     * Returns all the assertions of type `T`
      */
-    static std::vector<std::shared_ptr<ErrorAssertion>>
-    getErrorAssertions(const std::vector<std::shared_ptr<RangeAssertion>> &assertions);
-
-    static std::vector<std::shared_ptr<UntypedAssertion>>
-    getUntypedAssertions(const std::vector<std::shared_ptr<RangeAssertion>> &assertions);
+    template <class T>
+    std::vector<std::shared_ptr<T>> static getAssertions(
+        const std::vector<std::shared_ptr<RangeAssertion>> &assertions) {
+        std::vector<std::shared_ptr<T>> rv;
+        for (auto assertion : assertions) {
+            if (auto assertionOfType = std::dynamic_pointer_cast<T>(assertion)) {
+                rv.push_back(assertionOfType);
+            }
+        }
+        return rv;
+    }
 
     const std::string filename;
     const std::unique_ptr<Range> range;
@@ -619,6 +622,20 @@ public:
                                                        int assertionLine, std::string_view assertionContents,
                                                        std::string_view assertionType);
     const std::string symbol;
+    std::string toString() const override;
+};
+
+// # stratum: 0
+class StratumAssertion final : public RangeAssertion {
+public:
+    static std::shared_ptr<StratumAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
+                                                  int assertionLine, std::string_view assertionContents,
+                                                  std::string_view assertionType);
+
+    const int value;
+
+    StratumAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine, int value);
+
     std::string toString() const override;
 };
 
