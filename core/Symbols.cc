@@ -628,8 +628,8 @@ bool ClassOrModuleRef::isPackageSpecSymbol(const GlobalState &gs) const {
 
 bool ClassOrModuleRef::isBuiltinGenericForwarder() const {
     return *this == Symbols::T_Hash() || *this == Symbols::T_Array() || *this == Symbols::T_Set() ||
-           *this == Symbols::T_Range() || *this == Symbols::T_Class() || *this == Symbols::T_Module() ||
-           *this == Symbols::T_Enumerable() || *this == Symbols::T_Enumerator() ||
+           *this == Symbols::T_Proc() || *this == Symbols::T_Range() || *this == Symbols::T_Class() ||
+           *this == Symbols::T_Module() || *this == Symbols::T_Enumerable() || *this == Symbols::T_Enumerator() ||
            *this == Symbols::T_Enumerator_Lazy() || *this == Symbols::T_Enumerator_Chain();
 }
 
@@ -654,6 +654,8 @@ ClassOrModuleRef ClassOrModuleRef::maybeUnwrapBuiltinGenericForwarder() const {
         return Symbols::Class();
     } else if (*this == Symbols::T_Module()) {
         return Symbols::Module();
+    } else if (*this == Symbols::T_Proc()) {
+        return Symbols::Proc();
     } else {
         return *this;
     }
@@ -680,6 +682,8 @@ ClassOrModuleRef ClassOrModuleRef::forwarderForBuiltinGeneric() const {
         return Symbols::T_Class();
     } else if (*this == Symbols::Module()) {
         return Symbols::T_Module();
+    } else if (*this == Symbols::Proc()) {
+        return Symbols::T_Proc();
     } else {
         return Symbols::noClassOrModule();
     }
@@ -689,8 +693,9 @@ ClassOrModuleRef ClassOrModuleRef::forwarderForBuiltinGeneric() const {
 // !! The set of stdlib classes receiving this special behavior should NOT grow over time !!
 bool ClassOrModuleRef::isLegacyStdlibGeneric() const {
     return *this == Symbols::Hash() || *this == Symbols::Array() || *this == Symbols::Set() ||
-           *this == Symbols::Range() || *this == Symbols::Enumerable() || *this == Symbols::Enumerator() ||
-           *this == Symbols::Enumerator_Lazy() || *this == Symbols::Enumerator_Chain();
+           *this == Symbols::Range() || *this == Symbols::Proc() || *this == Symbols::Enumerable() ||
+           *this == Symbols::Enumerator() || *this == Symbols::Enumerator_Lazy() ||
+           *this == Symbols::Enumerator_Chain();
 }
 
 MethodRef ClassOrModuleRef::lookupStaticInit(const Context &ctx) const {

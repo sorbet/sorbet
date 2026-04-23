@@ -276,7 +276,7 @@ module Kernel
   sig do
     params(
         symbol: T.any(Symbol, String),
-        method: T.any(Proc, Method, UnboundMethod)
+        method: T.any(T::Proc[T.untyped], Method, UnboundMethod)
     )
     .returns(Symbol)
   end
@@ -1138,7 +1138,7 @@ module Kernel
     params(
         blk: T.proc.returns(BasicObject),
     )
-    .returns(Proc)
+    .returns(T::Proc[T.untyped])
   end
   def at_exit(&blk); end
 
@@ -1893,7 +1893,7 @@ module Kernel
     .params(
         blk: T.untyped,
     )
-    .returns(Proc)
+    .returns(T::Proc[T.untyped])
   end
   def proc(&blk); end
 
@@ -1906,7 +1906,7 @@ module Kernel
     .params(
         blk: T.untyped,
     )
-    .returns(Proc)
+    .returns(T::Proc[T.untyped])
   end
   def lambda(&blk); end
 
@@ -2859,14 +2859,14 @@ module Kernel
         signal: T.any(Integer, String, Symbol),
         command: BasicObject,
     )
-    .returns(T.any(String, Proc))
+    .returns(T.any(String, T::Proc[T.untyped]))
   end
   sig do
     params(
         signal: T.any(Integer, String, Symbol),
         blk: T.proc.params(arg0: Integer).returns(BasicObject),
     )
-    .returns(T.any(String, Proc))
+    .returns(T.any(String, T::Proc[T.untyped]))
   end
   def trap(signal, command=T.unsafe(nil), &blk); end
 
