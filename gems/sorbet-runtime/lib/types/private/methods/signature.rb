@@ -159,6 +159,20 @@ class T::Private::Methods::Signature
   attr_writer :method_name
   protected :method_name=
 
+  # Adapted from T::Private::Methods::DeclBuilder#abstract
+  def make_abstract!
+    case mode
+    when T::Private::Methods::Modes.standard
+      @mode = T::Private::Methods::Modes.abstract
+    when T::Private::Methods::Modes.abstract
+      raise T::Private::Methods::DeclBuilder::BuilderError.new(".abstract cannot be repeated in a single signature")
+    else
+      raise T::Private::Methods::DeclBuilder::BuilderError.new("`.abstract` cannot be combined with `.override` or `.overridable`.")
+    end
+
+    nil
+  end
+
   def as_alias(alias_name)
     new_sig = clone
     new_sig.method_name = alias_name

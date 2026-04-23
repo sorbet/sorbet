@@ -604,6 +604,18 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     T::Private::Abstract::Validate.validate_abstract_module(klass)
   end
 
+  it 'allows private abstract methods (keyword style)' do
+    klass = Class.new do
+      extend T::Sig
+      extend T::Helpers
+      abstract!
+
+      sig { void }
+      abstract private def foo_kw; end
+    end
+    T::Private::Abstract::Validate.validate_abstract_module(klass)
+  end
+
   it 'allows abstract classes to return instances of other types' do
     mod = Module.new do
       def new(type: self)

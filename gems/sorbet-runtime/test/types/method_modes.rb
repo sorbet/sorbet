@@ -9,6 +9,9 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
 
     sig { abstract.returns(Object) }
     def foo; end
+
+    sig { returns(Object) }
+    abstract def foo_kw; end
   end
 
   describe "with a super method" do
@@ -83,6 +86,8 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
         extend T::Helpers
         sig { override.overridable.returns(Object) }
         def foo; end
+        sig { override.overridable.returns(Object) }
+        def foo_kw; end
       end
 
       mod = Module.new do
@@ -91,6 +96,8 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
         extend T::Helpers
         sig { override.returns(Object) }
         def foo; end
+        sig { override.returns(Object) }
+        def foo_kw; end
       end
 
       klass = Class.new do
@@ -155,6 +162,8 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
         include AbstractMixin
         sig { returns(Object) }
         def foo; end
+        sig { returns(Object) }
+        def foo_kw; end
       end
 
       err = assert_raises(RuntimeError) do

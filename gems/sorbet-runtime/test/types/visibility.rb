@@ -8,11 +8,15 @@ class Opus::Types::Test::VisibilityTest < Critic::Unit::UnitTest
       abstract!
       sig { abstract.returns(Integer) }
       def foo; end
+      sig { returns(Integer) }
+      abstract def foo_kw; end
     end
     child = Class.new(parent) do
       extend T::Sig, T::Helpers
       sig { override.returns(Integer) }
       def foo; 0; end
+      sig { override.returns(Integer) }
+      def foo_kw; 0; end
     end
 
     T::Private::Abstract::Validate.validate_subclass(child)
@@ -24,11 +28,15 @@ class Opus::Types::Test::VisibilityTest < Critic::Unit::UnitTest
       abstract!
       sig { abstract.returns(Integer) }
       private def foo; end
+      sig { returns(Integer) }
+      private abstract def foo_kw; end
     end
     child = Class.new(parent) do
       extend T::Sig, T::Helpers
       sig { override.returns(Integer) }
       private def foo; 0; end
+      sig { override.returns(Integer) }
+      private def foo_kw; 0; end
     end
 
     T::Private::Abstract::Validate.validate_subclass(child)
@@ -40,11 +48,15 @@ class Opus::Types::Test::VisibilityTest < Critic::Unit::UnitTest
       abstract!
       sig { abstract.returns(Integer) }
       private def foo; end
+      sig { returns(Integer) }
+      private abstract def foo_kw; end
     end
     child = Class.new(parent) do
       extend T::Sig, T::Helpers
       sig { override.returns(Integer) }
       def foo; 0; end
+      sig { override.returns(Integer) }
+      def foo_kw; 0; end
     end
 
     T::Private::Abstract::Validate.validate_subclass(child)
@@ -56,11 +68,15 @@ class Opus::Types::Test::VisibilityTest < Critic::Unit::UnitTest
       abstract!
       sig { abstract.returns(Integer) }
       protected def foo; end
+      sig { returns(Integer) }
+      protected abstract def foo_kw; end
     end
     child = Class.new(parent) do
       extend T::Sig, T::Helpers
       sig { override.returns(Integer) }
       def foo; 0; end
+      sig { override.returns(Integer) }
+      def foo_kw; 0; end
     end
 
     T::Private::Abstract::Validate.validate_subclass(child)
@@ -72,11 +88,15 @@ class Opus::Types::Test::VisibilityTest < Critic::Unit::UnitTest
       abstract!
       sig { abstract.returns(Integer) }
       def foo; end
+      sig { returns(Integer) }
+      abstract def foo_kw; end
     end
     child = Class.new(parent) do
       extend T::Sig, T::Helpers
       sig { override.returns(Integer) }
       private def foo; 0; end
+      sig { override.returns(Integer) }
+      private def foo_kw; 0; end
     end
 
     err = assert_raises(RuntimeError) do
@@ -92,11 +112,15 @@ class Opus::Types::Test::VisibilityTest < Critic::Unit::UnitTest
       abstract!
       sig { abstract.returns(Integer) }
       def foo; end
+      sig { returns(Integer) }
+      abstract def foo_kw; end
     end
     child = Class.new(parent) do
       extend T::Sig, T::Helpers
       sig { override.returns(Integer) }
       protected def foo; 0; end
+      sig { override.returns(Integer) }
+      protected def foo_kw; 0; end
     end
 
     err = assert_raises(RuntimeError) do
@@ -112,11 +136,15 @@ class Opus::Types::Test::VisibilityTest < Critic::Unit::UnitTest
       abstract!
       sig { abstract.returns(Integer) }
       protected def foo; end
+      sig { returns(Integer) }
+      protected abstract def foo_kw; end
     end
     child = Class.new(parent) do
       extend T::Sig, T::Helpers
       sig { override.returns(Integer) }
       private def foo; 0; end
+      sig { override.returns(Integer) }
+      private def foo_kw; 0; end
     end
 
     err = assert_raises(RuntimeError) do
@@ -132,11 +160,15 @@ class Opus::Types::Test::VisibilityTest < Critic::Unit::UnitTest
       abstract!
       sig { abstract.returns(Integer) }
       def foo; end
+      sig { returns(Integer) }
+      abstract def foo_kw; end
     end
     child = Class.new(parent) do
       extend T::Sig, T::Helpers
       sig { override(allow_incompatible: :visibility).returns(Integer) }
       private def foo; 0; end
+      sig { override(allow_incompatible: :visibility).returns(Integer) }
+      private def foo_kw; 0; end
     end
 
     T::Private::Abstract::Validate.validate_subclass(child)
@@ -148,11 +180,15 @@ class Opus::Types::Test::VisibilityTest < Critic::Unit::UnitTest
       abstract!
       sig { abstract.returns(Integer) }
       def foo; end
+      sig { returns(Integer) }
+      abstract def foo_kw; end
     end
     child = Class.new(parent) do
       extend T::Sig, T::Helpers
       sig { override(allow_incompatible: true).returns(Integer) }
       private def foo; 0; end
+      sig { override(allow_incompatible: true).returns(Integer) }
+      private def foo_kw; 0; end
     end
 
     T::Private::Abstract::Validate.validate_subclass(child)
