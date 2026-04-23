@@ -96,6 +96,7 @@ build:release-common --define release=true
 build:release-common --compilation_mode=opt
 build:release-common --config=backtracesymbols
 build:release-common --config=versioned
+build:release-common --cxxopt=-fsized-deallocation --cxxopt=-faligned-allocation
 
 build:release-debug-common --config=forcedebug
 build:release-debug-common --config=debugsymbols
