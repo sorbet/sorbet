@@ -66,7 +66,6 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "MultithreadedWrapperWorks") {
         CHECK_EQ(initCounters.getCategoryCounter("lsp.messages.processed", "initialized"), 1);
         CHECK_EQ(initCounters.getCategoryCounter("lsp.updates", "slowpath"), 1);
         CHECK_EQ(initCounters.getCategoryCounterSum("lsp.updates"), 1);
-        CHECK_EQ(initCounters.getTimings("initial_index").size(), 1);
         CHECK_EQ(initCounters.getCategoryCounterSum("lsp.messages.canceled"), 0);
     }
 

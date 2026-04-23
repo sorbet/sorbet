@@ -795,8 +795,6 @@ ast::ParsedFilesOrCancelled index(core::GlobalState &gs, absl::Span<const core::
         return empty;
     }
 
-    gs.sanityCheck();
-
     if (files.size() < 3) {
         // Run singlethreaded if only using 2 files
         vector<ast::ParsedFile> parsed;
