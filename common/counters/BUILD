@@ -12,6 +12,10 @@ cc_library(
         "Counters.h",
         "Counters_impl.h",
     ],
+    copts = select({
+        "//tools/config:dbg": ["-O2"],
+        "//conditions:default": [],
+    }),
     linkopts = select({
         "@platforms//os:linux": ["-lm"],
         "//conditions:default": [],
