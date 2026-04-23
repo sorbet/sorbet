@@ -1303,4 +1303,7 @@ class Integer < Numeric
   # [`Math::DomainError`](https://docs.ruby-lang.org/en/2.7.0/Math/DomainError.html)
   # is raised.
   def self.sqrt(_); end
+
+  sig { overridable.returns(FalseClass) }
+  def !(); end
 end
