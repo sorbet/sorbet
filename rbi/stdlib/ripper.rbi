@@ -188,6 +188,21 @@ class Ripper
   # ```
   sig {params(src: String, filename: String, lineno: Integer).returns(T::Array[String])}
   def self.tokenize(src, filename = "-", lineno = 1); end
+
+  # Create a new
+  # [`Ripper`](https://docs.ruby-lang.org/en/2.7.0/Ripper.html) object. `src` must be a
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html), an
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html), or an
+  # [`Object`](https://docs.ruby-lang.org/en/2.7.0/Object.html) which has
+  # [`gets`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-gets) method.
+  #
+  # This method does not starts parsing. See also
+  # [`Ripper#parse`](https://docs.ruby-lang.org/en/2.7.0/Ripper.html#method-i-parse) and
+  # [`Ripper.parse`](https://docs.ruby-lang.org/en/2.7.0/Ripper.html#method-c-parse).
+  def initialize(src, filename="(ripper)", lineno=1); end
+
+  # Start parsing and returns the value of the root action.
+  def parse; end
 end
 
 # This class handles only scanner events, which are dispatched in the 'right'
