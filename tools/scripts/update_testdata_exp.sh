@@ -272,6 +272,19 @@ for this_src in "${rb_src[@]}" DUMMY; do
             >>"$COMMAND_FILE"
           ;;
       esac
+
+      # If a .prism.exp file exists for this pass, also update it using Prism.
+      prism_candidate="$basename.$pass.prism.exp"
+      if [ -e "$prism_candidate" ]; then
+        echo bazel-bin/main/sorbet \
+          --parser=prism \
+          --silence-dev-message --suppress-non-critical --censor-for-snapshot-tests \
+          --print "$pass" --max-threads 0 \
+          "${args[@]+"${args[@]}"}" "${pass_args[@]+"${pass_args[@]}"}" "${srcs[@]}" \
+          \> "$prism_candidate" \
+          2\>/dev/null \
+          >>"$COMMAND_FILE"
+      fi
     done
   fi
 
