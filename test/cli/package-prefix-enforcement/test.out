@@ -200,8 +200,8 @@ nested/nested.rb:61: Method `void` does not exist on `T.class_of(TopLevel::Foo)`
     nested/nested.rb:61: Replace with `load`
     61 |    sig {void}
                  ^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L1664: Defined here
-    1664 |  def load(filename, arg0=T.unsafe(nil)); end
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#LCENSORED: Defined here
+      NN |  def load(filename, arg0=T.unsafe(nil)); end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 nested/nested.test.rb:19: Cannot initialize the module `Root` by constant assignment https://srb.help/4022
@@ -285,8 +285,8 @@ commands/foo_command.rb:4: File belongs to package `Root::Commands::Foo` but def
 extend_sig.rb:4: `include` may only be used on constants in the package that owns them https://srb.help/5084
      4 |  include T::Sig
                   ^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#L26: Symbol originally defined here
-    26 |class Module < Object
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Symbol originally defined here
+    NN |class Module < Object
         ^^^^^^^^^^^^^^^^^^^^^
     __package.rb:3: Package defined here is not a `prelude_package`
      3 |class Root < PackageSpec
