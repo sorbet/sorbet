@@ -5,6 +5,10 @@ cc_library(
         "serialize.cc",
     ],
     hdrs = ["serialize.h"],
+    copts = select({
+        "//tools/config:dbg": ["-O2"],
+        "//conditions:default": [],
+    }),
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,

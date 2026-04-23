@@ -6,6 +6,10 @@ cc_library(
     hdrs = [
         "lib/lz4.h",
     ],
+    copts = select({
+        "@com_stripe_ruby_typer//tools/config:dbg": ["-O2"],
+        "//conditions:default": [],
+    }),
     linkstatic = select({
         "@com_stripe_ruby_typer//tools/config:linkshared": 0,
         "//conditions:default": 1,
