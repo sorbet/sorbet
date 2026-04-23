@@ -1,4 +1,5 @@
 #include "main/lsp/wrapper.h"
+#include "common/concurrency/WorkerPool.h"
 #include "core/ErrorQueue.h"
 #include "core/NullFlusher.h"
 #include "core/errors/namer.h"
@@ -79,7 +80,15 @@ LSPWrapper::LSPWrapper(unique_ptr<core::GlobalState> gs, shared_ptr<options::Opt
       config_(make_shared<LSPConfiguration>(*opts, output, move(logger), disableFastPath)),
       lspLoop(make_shared<LSPLoop>(std::move(gs), *workers, config_, move(kvstore))), opts(move(opts)) {}
 
-LSPWrapper::~LSPWrapper() = default;
+LSPWrapper::~LSPWrapper() {
+    // Drain any in-flight worker pool tasks before member destruction begins.
+    // If there is still any work on the workers, they assume that `GlobalState` has not been dropped yet.
+    //
+    // We drop the this->lspLoop field before this->workers, which means that we can find ourself in
+    // a state where there are still workers running but the GlobalState they're running against
+    // (owned by threads spawned transitively from LSPLoop) has been dropped.
+    workers->multiplexJobWait("drainWorkers", []() {});
+}
 
 SingleThreadedLSPWrapper::SingleThreadedLSPWrapper(unique_ptr<core::GlobalState> gs, shared_ptr<options::Options> opts,
                                                    shared_ptr<spdlog::logger> logger,
