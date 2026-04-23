@@ -495,6 +495,24 @@ const FileType fileTypeFromCtx(const core::Context ctx) {
     }
 }
 
+class UnpackagedVisibilityCheckerPass final {
+public:
+    void postTransformConstantLit(core::Context ctx, const ast::ConstantLit &lit) {
+        auto litSymbol = lit.symbol();
+        if (!litSymbol.isClassOrModule() && !litSymbol.isFieldOrStaticField()) {
+            return;
+        }
+
+        auto otherPackage = litSymbol.enclosingClass(ctx).data(ctx)->package;
+        if (otherPackage.exists()) {
+            if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::PackagedSymbolInUnpackagedContext)) {
+                e.setHeader("`{}` is defined in a package and cannot be referenced in unpackaged code",
+                            litSymbol.show(ctx));
+            }
+        }
+    }
+};
+
 class VisibilityCheckerPass final {
     void addExportInfo(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef litSymbol, bool definesBehavior) {
         auto definedHereLoc = litSymbol.loc(ctx);
@@ -901,6 +919,9 @@ public:
                 }
                 auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
                 if (!pkgName.exists()) {
+                    core::Context ctx{gs, core::Symbols::root(), f.file};
+                    UnpackagedVisibilityCheckerPass pass;
+                    ast::ConstTreeWalk::apply(ctx, pass, f.tree);
                     resultq->push(std::nullopt, 1);
                     continue;
                 }
