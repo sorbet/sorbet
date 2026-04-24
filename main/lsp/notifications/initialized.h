@@ -26,8 +26,7 @@ public:
 
     void setGlobalState(std::unique_ptr<core::GlobalState> gs);
     void setKeyValueStore(std::unique_ptr<KeyValueStore> kvstore);
-
-    bool needsMultithreading(const LSPIndexer &indexer) const override;
+    bool canPreempt(const LSPIndexer &indexer) const override;
 };
 } // namespace sorbet::realmain::lsp
 

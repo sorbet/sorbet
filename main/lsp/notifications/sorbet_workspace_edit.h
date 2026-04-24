@@ -37,7 +37,6 @@ public:
 
     bool canPreempt(const LSPIndexer &index) const override;
     TypecheckingPath getTypecheckingPath(const LSPIndexer &index) const;
-    bool needsMultithreading(const LSPIndexer &index) const override;
 };
 
 } // namespace sorbet::realmain::lsp

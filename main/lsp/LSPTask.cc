@@ -261,10 +261,6 @@ bool LSPRequestTask::cancel(const MessageId &id) {
     return false;
 }
 
-bool LSPTask::needsMultithreading(const LSPIndexer &indexer) const {
-    return false;
-}
-
 bool LSPTask::isDelayable() const {
     return false;
 }
@@ -274,8 +270,7 @@ bool LSPTask::cancel(const MessageId &id) {
 }
 
 bool LSPTask::canPreempt(const LSPIndexer &indexer) const {
-    // A task that can preempt cannot be multithreaded.
-    return !needsMultithreading(indexer);
+    return true;
 }
 
 vector<unique_ptr<Location>>

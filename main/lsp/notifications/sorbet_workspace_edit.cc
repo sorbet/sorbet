@@ -157,10 +157,6 @@ bool SorbetWorkspaceEditTask::canPreempt(const LSPIndexer &index) const {
     return getTypecheckingPath(index) == TypecheckingPath::Fast;
 }
 
-bool SorbetWorkspaceEditTask::needsMultithreading(const LSPIndexer &index) const {
-    return getTypecheckingPath(index) != TypecheckingPath::Fast;
-}
-
 const SorbetWorkspaceEditParams &SorbetWorkspaceEditTask::getParams() const {
     return *params;
 }
