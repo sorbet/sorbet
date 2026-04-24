@@ -649,6 +649,9 @@ public:
     // If 'true', use the Prism parser.
     bool parseWithPrism = false;
 
+    // Whether to enable experimental method def modifiers like `abstract def foo; end`
+    bool experimentalMethodModifiers = false;
+
     // Some options change the behavior of things that might be cached, including ASTs, the file
     // table, the name table, the symbol table, etc.
     //

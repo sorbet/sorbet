@@ -226,6 +226,9 @@ struct Options {
     };
     CacheSensitiveOptions cacheSensitiveOptions;
 
+    // Enable experimental support for `abstract def foo; end` syntax
+    bool experimentalMethodModifiers = false;
+
     bool packageAttributedErrors = false;
     bool packageDirected = false;
     bool testPackages = false;

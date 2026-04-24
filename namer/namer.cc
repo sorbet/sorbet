@@ -331,7 +331,7 @@ public:
 
         // After flatten, method defs have been hoisted and reordered, so instead we look for the
         // keep_def / keep_self_def calls, which will still be ordered correctly relative to
-        // visibility modifiers.
+        // method def modifiers.
         ownerStack.emplace_back(def);
         methodVisiStack.emplace_back(nullopt);
     }
@@ -406,6 +406,18 @@ public:
                     addMethodModifiers(ctx, original.fun, original.posArgs());
                 }
                 break;
+            case core::Names::abstract().rawId(): {
+                if (!ctx.state.experimentalMethodModifiers) {
+                    break;
+                }
+                if (ownerIsMethod) {
+                    break;
+                }
+                if (original.hasPosArgs()) {
+                    addMethodModifiers(ctx, original.fun, original.posArgs());
+                }
+                break;
+            }
             case core::Names::privateConstant().rawId(): {
                 if (ownerIsMethod) {
                     break;
@@ -421,6 +433,11 @@ public:
                 }
                 addMethodAlias(ctx, original);
                 break;
+            }
+
+            default: {
+                ENFORCE(!original.fun.isMethodDefModifierName(), "Unhandled method def modifier: {}",
+                        original.fun.show(ctx));
             }
         }
     }
@@ -515,6 +532,18 @@ public:
             return sym->asSymbol();
         } else if (auto def = ast::cast_tree<ast::RuntimeMethodDefinition>(expr)) {
             return def->name;
+        } else if (auto send = ast::cast_tree<ast::Send>(expr)) {
+            // Handles combinations of modifiers like
+            // - `private abstract def foo` (`private(abstract(def foo; end))`)
+            // - `abstract private def foo` (`abstract(private(def foo; end))`)
+            if (send->fun.isMethodDefModifierName()) {
+                // Note: `ctx.state.experimentalMethodModifiers` is not checked here,
+                // so that the `private` in `private abstract def foo` is always parsed as a method def modifier,
+                // even if the `abstract` is later "ignored" by the resolver.
+                return unwrapLiteralToMethodName(ctx, send->getPosArg(0));
+            }
+
+            return core::NameRef::noName();
         } else {
             ENFORCE(!ast::isa_tree<ast::MethodDef>(expr), "methods inside sends should be gone");
             return core::NameRef::noName();
@@ -1155,6 +1184,9 @@ private:
                 case core::Names::public_().rawId():
                 case core::Names::publicClassMethod().rawId():
                     method.data(ctx)->setMethodPublic();
+                    break;
+                case core::Names::abstract().rawId():
+                    method.data(ctx)->flags.isAbstract = true;
                     break;
                 default:
                     break;
