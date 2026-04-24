@@ -2,10 +2,10 @@
 #define SORBET_LSP_PREEMPTIONTASKMANAGER_H
 
 #include "core/GlobalState.h"
+#include "core/lsp/PreemptionTask.h"
 #include <memory>
 
 namespace sorbet::core::lsp {
-class PreemptionTask;
 class TypecheckEpochManager;
 class PreemptionTaskManager final {
 private:
@@ -51,7 +51,8 @@ public:
     // cleared out. Otherwise there is the possibility that it might get rescheduled, which would cause problems the
     // next time preemption was scheduled from the main thread. Handles running task with a fresh errorQueue, and
     // restoring previous errorQueue when done.
-    bool tryRunScheduledPreemptionTask(const core::GlobalState &gs, uint16_t currentStratum, bool allowReschedule);
+    PreemptionTask::RunResult tryRunScheduledPreemptionTask(const core::GlobalState &gs, uint16_t currentStratum,
+                                                            bool allowReschedule);
     // Run only from processing thread.
     // Tries to cancel the scheduled preemption task. Returns true if it succeeds.
     bool tryCancelScheduledPreemptionTask(std::shared_ptr<PreemptionTask> &task);

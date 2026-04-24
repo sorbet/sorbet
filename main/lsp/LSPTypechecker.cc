@@ -679,18 +679,33 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
             timeit.clone("slow_path.blocking_time");
 
             // [Test only] Wait for a preemption if one is expected.
-            while (updates.preemptionsExpected > 0) {
+            if (updates.preemptionsExpected > 0) {
                 auto loopStartTime = Timer::clock_gettime_coarse();
                 auto coarseThreshold = Timer::get_clock_threshold_coarse();
-                while (
-                    !preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true)) {
-                    auto curTime = Timer::clock_gettime_coarse();
-                    if (curTime.usec - loopStartTime.usec > 20'000'000) {
-                        Exception::raise("Slow path timed out waiting for preemption edit");
+                while (updates.preemptionsExpected > 0) {
+                    auto result = preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum,
+                                                                                /* allowReschedule */ true);
+
+                    if (!result.progress()) {
+                        auto curTime = Timer::clock_gettime_coarse();
+                        if (curTime.usec - loopStartTime.usec > 20'000'000) {
+                            Exception::raise("Slow path timed out waiting for preemption edit");
+                        }
+                        Timer::timedSleep(coarseThreshold, *logger, "slow_path.expected_preemption.sleep");
+                        continue;
                     }
-                    Timer::timedSleep(coarseThreshold, *logger, "slow_path.expected_preemption.sleep");
+
+                    if (result.tasksHandled) {
+                        updates.preemptionsExpected--;
+                    }
+
+                    // If we've been rescheduled to a later strautm, there's no way that we'll satisfy all the
+                    // expected preemptions at this point.
+                    if (result.rescheduled.has_value()) {
+                        ENFORCE(*result.rescheduled > currentStratum);
+                        break;
+                    }
                 }
-                updates.preemptionsExpected--;
             }
 
             // [Test only] Wait for a cancellation if one is expected.
@@ -704,11 +719,17 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
                     }
                     Timer::timedSleep(coarseThreshold, *logger, "slow_path.expected_cancellation.sleep");
                 }
+                ENFORCE(updates.preemptionsExpected == 0);
                 return currentStratum;
             }
 
             auto sorted = sortParsedFiles(*gs, *errorReporter, move(maybeResolved.result()));
             pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, currentStratum, preemptManager);
+        }
+
+        // [Test only] Ensure that we handled all expected preemptions
+        if (updates.preemptionsExpected > 0) {
+            Exception::raise("Slow path failed to handle all expected preemptions");
         }
 
         return currentStratum;
