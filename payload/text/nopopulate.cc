@@ -1,5 +1,5 @@
-#include "payload/text/text.h"
 #include "common/exception/Exception.h"
+#include "payload/text/text.h"
 using namespace std;
 
 namespace sorbet::rbi {
