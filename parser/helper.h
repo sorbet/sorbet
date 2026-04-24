@@ -389,16 +389,13 @@ public:
     }
 
     /**
-     * Is `send` a visibility modifier (private, protected, public, etc.)?
+     * Is `send` a method definition modifier (private, protected, public, etc.)?
      */
-    static bool isVisibilitySend(const parser::Send *send) {
+    static bool isMethodDefModifierSend(const parser::Send *send) {
         return send->receiver == nullptr && send->args.size() == 1 &&
                (parser::isa_node<parser::DefMethod>(send->args[0].get()) ||
                 parser::isa_node<parser::DefS>(send->args[0].get())) &&
-               (send->method == core::Names::private_() || send->method == core::Names::protected_() ||
-                send->method == core::Names::public_() || send->method == core::Names::privateClassMethod() ||
-                send->method == core::Names::publicClassMethod() || send->method == core::Names::packagePrivate() ||
-                send->method == core::Names::packagePrivateClassMethod());
+               send->method.isMethodDefModifierName();
     }
 
     /**

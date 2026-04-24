@@ -69,7 +69,7 @@ public:
     bool isT(pm_node_t *node) const;
     bool isSetterCall(pm_node_t *node) const;
     bool isSafeNavigationCall(pm_node_t *node) const;
-    bool isVisibilityCall(pm_node_t *node) const;
+    bool isMethodDefModifierCall(pm_node_t *node, const core::GlobalState &gs) const;
     bool isAttrAccessorCall(pm_node_t *node) const;
 
     void destroyNode(pm_node_t *node);

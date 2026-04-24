@@ -20,7 +20,7 @@ parser::Node *signaturesTarget(parser::Node *node) {
     }
 
     if (auto send = parser::cast_node<parser::Send>(node)) {
-        if (parser::MK::isAttrAccessorSend(send) || parser::MK::isVisibilitySend(send)) {
+        if (parser::MK::isAttrAccessorSend(send) || parser::MK::isMethodDefModifierSend(send)) {
             return node;
         }
     }
@@ -317,7 +317,7 @@ unique_ptr<parser::NodeVec> SigsRewriter::signaturesForNode(parser::Node *node) 
 
             signatures->emplace_back(move(sig));
         } else if (auto send = parser::cast_node<parser::Send>(node)) {
-            if (parser::MK::isVisibilitySend(send)) {
+            if (parser::MK::isMethodDefModifierSend(send)) {
                 auto sig = signatureTranslator.translateMethodSignature(send->args[0].get(), declaration,
                                                                         comments.annotations);
                 signatures->emplace_back(move(sig));

@@ -331,7 +331,7 @@ public:
 
         // After flatten, method defs have been hoisted and reordered, so instead we look for the
         // keep_def / keep_self_def calls, which will still be ordered correctly relative to
-        // visibility modifiers.
+        // method def modifiers.
         ownerStack.emplace_back(def);
         methodVisiStack.emplace_back(nullopt);
     }
@@ -421,6 +421,11 @@ public:
                 }
                 addMethodAlias(ctx, original);
                 break;
+            }
+
+            default: {
+                ENFORCE(!original.fun.isMethodDefModifierName(), "Unhandled method def modifier: {}",
+                        original.fun.show(ctx));
             }
         }
     }
