@@ -115,7 +115,9 @@ public:
     CountingTask(shared_ptr<core::lsp::PreemptionTaskManager> preemptManager, core::GlobalState &gs)
         : preemptManager(move(preemptManager)), gs(gs) {}
 
-    optional<uint16_t> run(uint16_t currentStratum) override {
+    RunResult run(uint16_t currentStratum) override {
+        RunResult result;
+
         // The task should run with typecheck mutex held with a write lock.
         preemptManager->assertTypecheckMutexHeld();
         // Emulate behavior of most LSP Tasks and drain all diagnostics and query responses.
@@ -123,7 +125,9 @@ public:
         gs.errorQueue->flushAllErrors(gs);
         runCount++;
 
-        return nullopt;
+        result.tasksHandled = true;
+
+        return result;
     }
 };
 
@@ -388,18 +392,22 @@ public:
 
     ReschedulingTask(uint16_t targetStratum) : targetStratum{targetStratum} {}
 
-    optional<uint16_t> run(uint16_t currentStratum) override {
+    RunResult run(uint16_t currentStratum) override {
+        RunResult result;
+
         CHECK_FALSE(this->successful);
 
         this->runCount++;
 
         if (this->targetStratum > currentStratum) {
-            return this->targetStratum;
+            result.rescheduled = this->targetStratum;
+            return result;
         }
 
+        result.tasksHandled = true;
         this->successful = true;
 
-        return nullopt;
+        return result;
     }
 };
 
