@@ -12,7 +12,7 @@ indent4() {
   sed -e 's/^/    /'
 }
 
-grep -r --only-matching '^constexpr ErrorClass [^{]*{\([0-9]*\),' core/errors/ | \
+grep -r --only-matching '^inline constexpr ErrorClass [^{]*{\([0-9]*\),' core/errors/ | \
     grep --only-matching '[0-9]*' | \
     sort | \
     uniq -c > "$tmp_output"
