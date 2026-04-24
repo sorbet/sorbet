@@ -1,6 +1,5 @@
 #ifndef SORBET_GLOBAL_STATE_H
 #define SORBET_GLOBAL_STATE_H
-#include "absl/synchronization/mutex.h"
 
 #include "common/StableStringStorage.h"
 #include "core/Error.h"

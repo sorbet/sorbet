@@ -8,7 +8,7 @@
 
 namespace sorbet {
 
-constexpr bool enable_counters = debug_mode;
+inline constexpr bool enable_counters = debug_mode;
 
 // A comment on the use of strings in this API
 //
