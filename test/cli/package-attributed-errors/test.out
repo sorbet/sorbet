@@ -31,10 +31,6 @@
      3 |class Lib::Nested < PackageSpec
         ^
 
-[<none>] unpackaged.rb:1: File `./unpackaged.rb` does not belong to a package; add a `__package.rb` file to one of its parent directories https://srb.help/3705
-     1 |# typed: strict
-        ^
-
 [<none>] unpackaged.rb:4: Expected `Integer` but found `String("")` for argument `arg0` https://srb.help/7002
      4 |  1 + ""
               ^^
@@ -46,4 +42,4 @@
     unpackaged.rb:4:
      4 |  1 + ""
               ^^
-Errors: 5
+Errors: 4

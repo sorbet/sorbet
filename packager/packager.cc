@@ -20,8 +20,6 @@ namespace sorbet::packager {
 using namespace core::packages;
 namespace {
 
-constexpr string_view PACKAGE_FILE_NAME = "__package.rb"sv;
-
 string buildValidLayersStr(const core::GlobalState &gs) {
     auto validLayers = gs.packageDB().layers();
     ENFORCE(validLayers.size() > 0);
@@ -1157,12 +1155,6 @@ void validatePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
 
     auto pkg = ctx.state.packageDB().getPackageNameForFile(ctx.file);
     if (!pkg.exists()) {
-        // Don't transform, but raise an error on the first line.
-        if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::UnpackagedFile)) {
-            e.setHeader("File `{}` does not belong to a package; add a `{}` file to one "
-                        "of its parent directories",
-                        ctx.file.data(ctx).path(), PACKAGE_FILE_NAME);
-        }
         return;
     }
 

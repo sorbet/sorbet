@@ -714,6 +714,12 @@ Fix the error by explicitly `import`'ing the upstream package into the `__packag
 
 Note that sometimes it is not possible to import another package because doing so would make the dependency graph of packages have a dependency cycle. In these cases, a common solution is to factor the shared functionality to a new package, and import that new package wherever it's needed. In some situations, there may be simpler ways to restructure the code that don't involve making a new package.
 
+## 3719
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+Code that is not in a package cannot reference code which is defined in packages.
+
 ## 3720
 
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
