@@ -1083,6 +1083,44 @@ You are encouraged to play around with various clang-based tools which use the
     -style=file -assume-filename=<CURRENT_FILE>
     ```
 
+-   [clang-tidy] -- Clang-based static analysis / linting
+
+    We run `clang-tidy` in CI via a Bazel aspect. To run it locally:
+
+    ```bash
+    # Run on all targets
+    ./bazel build --keep_going --config=clang-tidy --config=dbg //...
+
+    # Run on a single target (note: only runs on files *directly* in that target)
+    ./bazel build --config=clang-tidy --config=dbg //main/lsp:lsp
+    ```
+
+    The checks and their configuration live in `.clang-tidy` at the repo
+    root.
+
+    `clang-tidy` supports the same `compilation_commands.json` database that
+    `clangd` does, but unfortunately it doesn't seem to support the `directory`
+    argument. We have a wrapper script you can point your editor at that `cd`'s
+    and then runs the `clang-tidy` built by our toolchain:
+
+    ```vim
+    if filereadable("./compile_commands.json")
+      " I set these to use clangd via nvim-lsp, but you could have clangd here.
+      let g:ale_linters.c = []
+      let g:ale_linters.cpp = []
+
+      if filereadable(".clang-tidy") && filereadable("tools/scripts/clang-tidy")
+        let g:ale_linters.c += ['clangtidy']
+        let g:ale_linters.cpp += ['clangtidy']
+        let g:ale_cpp_clangtidy_executable = 'tools/scripts/clang-tidy'
+        let g:ale_cpp_clangtidy_extra_options = '--use-color=0'
+      endif
+    endif
+    ```
+
+    Liek `clangd`, this requires that you have recently built `//main:sorbet` or
+    some target that includes the file you were hoping to check.
+
 -   [CLion] -- JetBrains C/C++ IDE
 
     CLion can be made aware of the `compile_commands.json` database.
@@ -1105,6 +1143,7 @@ You are encouraged to play around with various clang-based tools which use the
 [rtags]: https://github.com/Andersbakken/rtags
 [clangd]: https://clang.llvm.org/extra/clangd.html
 [clang-format]: https://clang.llvm.org/docs/ClangFormat.html
+[clang-tidy]: https://clang.llvm.org/extra/clang-tidy/
 [CLion]: https://www.jetbrains.com/clion/
 [vscode-clangd]: https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-clangd
 

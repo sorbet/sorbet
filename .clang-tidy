@@ -1,3 +1,4 @@
 ---
 Checks: '-*,abseil-duration-addition'
 WarningsAsErrors: ''
+UseColor: true
