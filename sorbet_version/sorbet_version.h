@@ -17,27 +17,27 @@ extern "C" {
 namespace sorbet {
 
 #ifdef DEBUG_MODE
-constexpr bool debug_mode = true;
+inline constexpr bool debug_mode = true;
 #else
-constexpr bool debug_mode = false;
+inline constexpr bool debug_mode = false;
 #endif
 
 #ifdef TRACK_UNTYPED_BLAME_MODE
-constexpr bool track_untyped_blame_mode = true;
+inline constexpr bool track_untyped_blame_mode = true;
 #else
-constexpr bool track_untyped_blame_mode = false;
+inline constexpr bool track_untyped_blame_mode = false;
 #endif
 
 #if !defined(EMSCRIPTEN)
-constexpr bool emscripten_build = false;
+inline constexpr bool emscripten_build = false;
 #else
-constexpr bool emscripten_build = true;
+inline constexpr bool emscripten_build = true;
 #endif
 
 #if !defined(FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION)
-constexpr bool fuzz_mode = false;
+inline constexpr bool fuzz_mode = false;
 #else
-constexpr bool fuzz_mode = true;
+inline constexpr bool fuzz_mode = true;
 #endif
 
 } // namespace sorbet
