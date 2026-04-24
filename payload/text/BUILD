@@ -59,7 +59,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "text",
-        "//core",
+        "//common/exception",
     ],
 )
 
