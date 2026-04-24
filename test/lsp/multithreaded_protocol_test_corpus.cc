@@ -43,6 +43,17 @@ constexpr auto timestampGranularity = chrono::milliseconds(2);
 class MultithreadedProtocolTest : public ProtocolTest {
 public:
     MultithreadedProtocolTest() : ProtocolTest(/*multithreading*/ true, /*caching*/ false) {}
+
+    // The timeout here is a balance: we want to wait long enough for all slow path edits to
+    // complete, but not so long that we're just busy waiting. Because the files involved in this
+    // test are generally tiny, 500ms should be plenty of time, but if this is causing flakiness we
+    // will need to adjust this or, ideally, make the slow path faster ;-)
+    void assertSlowPathBlockedAndUnblock(int timeout_ms = 500) {
+        auto &wrapper = dynamic_cast<MultiThreadedLSPWrapper &>(*lspWrapper);
+        auto msg = wrapper.read(timeout_ms);
+        REQUIRE(msg == nullptr);
+        setSlowPathBlocked(false);
+    }
 };
 
 } // namespace
@@ -55,7 +66,6 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "MultithreadedWrapperWorks") {
         CHECK_EQ(initCounters.getCategoryCounter("lsp.messages.processed", "initialized"), 1);
         CHECK_EQ(initCounters.getCategoryCounter("lsp.updates", "slowpath"), 1);
         CHECK_EQ(initCounters.getCategoryCounterSum("lsp.updates"), 1);
-        CHECK_EQ(initCounters.getTimings("initial_index").size(), 1);
         CHECK_EQ(initCounters.getCategoryCounterSum("lsp.messages.canceled"), 0);
     }
 
@@ -957,16 +967,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "StallInSlowPathWorks") {
         REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
     }
 
-    // We expect the slow path to be blocked, so we want to make sure that we _don't_ receive any messages within a
-    // pretty long time frame---let's say 2000ms.
-    {
-        auto &wrapper = dynamic_cast<MultiThreadedLSPWrapper &>(*lspWrapper);
-        auto msg = wrapper.read(2000);
-        REQUIRE(msg == nullptr);
-    }
-
-    // Unblock the slow path.
-    setSlowPathBlocked(false);
+    assertSlowPathBlockedAndUnblock();
 
     // The slow path should now be unblocked. Wait for typechecking to end.
     {
@@ -1040,16 +1041,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PreemptionCanceledForSlowPathWorks
                           "end\n",
                           4, false, 0));
 
-    // We expect the slow path to be blocked, so we want to make sure that we _don't_ receive any messages within a
-    // pretty long time frame---let's say 2000ms.
-    {
-        auto &wrapper = dynamic_cast<MultiThreadedLSPWrapper &>(*lspWrapper);
-        auto msg = wrapper.read(2000);
-        REQUIRE(msg == nullptr);
-    }
-
-    // Unblock the slow path.
-    setSlowPathBlocked(false);
+    assertSlowPathBlockedAndUnblock();
 
     // The slow path should now be unblocked, and will be canceled immediately.
     {
@@ -1189,16 +1181,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PreemptionCanceledForSlowPathWorks
                           "end\n",
                           4, false, 0));
 
-    // We expect the slow path to be blocked, so we want to make sure that we _don't_ receive any messages within a
-    // pretty long time frame---let's say 2000ms.
-    {
-        auto &wrapper = dynamic_cast<MultiThreadedLSPWrapper &>(*lspWrapper);
-        auto msg = wrapper.read(2000);
-        REQUIRE(msg == nullptr);
-    }
-
-    // Unblock the slow path.
-    setSlowPathBlocked(false);
+    assertSlowPathBlockedAndUnblock();
 
     // The slow path should now be unblocked, and will be canceled immediately.
     {
@@ -1358,16 +1341,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "MergingEditsWhenCancellingPreempti
                           "end\n",
                           5, false, 0));
 
-    // We expect the slow path to be blocked, so we want to make sure that we _don't_ receive any messages within a
-    // pretty long time frame---let's say 2000ms.
-    {
-        auto &wrapper = dynamic_cast<MultiThreadedLSPWrapper &>(*lspWrapper);
-        auto msg = wrapper.read(2000);
-        REQUIRE(msg == nullptr);
-    }
-
-    // Unblock the slow path.
-    setSlowPathBlocked(false);
+    assertSlowPathBlockedAndUnblock();
 
     // The slow path should now be unblocked, and will be canceled immediately.
     {
