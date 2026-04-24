@@ -11,7 +11,7 @@ using ForeignPtr = const void *;
 using SelfPtr = const void *;
 
 struct node_list;
-struct token;
+class token;
 
 struct builder {
     ForeignPtr (*accessible)(SelfPtr builder, ForeignPtr node);
