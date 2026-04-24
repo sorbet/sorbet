@@ -28,6 +28,5 @@ cc_library(
         "//sorbet_version",
         "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/strings",
-        "@spdlog",
     ],
 )

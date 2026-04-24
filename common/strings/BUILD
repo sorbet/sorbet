@@ -21,5 +21,5 @@ cc_library(
         "//conditions:default": 1,
     }),
     visibility = ["//visibility:public"],
-    deps = [],
+    deps = ["@spdlog"],
 )
