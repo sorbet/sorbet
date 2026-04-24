@@ -208,6 +208,15 @@ def register_sorbet_dependencies():
     )
 
     http_archive(
+        name = "bazel_clang_tidy",
+        url = "https://github.com/erenon/bazel_clang_tidy/archive/c4d35e0d0b838309358e57a2efed831780f85cd0.tar.gz",
+        sha256 = "96da6e935ccc91045cf928dbc57f22508a2729c51f7fb3f56178017b0deb9b3c",
+        strip_prefix = "bazel_clang_tidy-c4d35e0d0b838309358e57a2efed831780f85cd0",
+        patches = ["@com_stripe_ruby_typer//third_party:bazel_clang_tidy/clang_tidy_BUILD.patch"],
+        patch_args = ["-p1"],
+    )
+
+    http_archive(
         name = "io_bazel_rules_go",
         sha256 = "d6ab6b57e48c09523e93050f13698f708428cfd5e619252e369d377af6597707",
         url = "https://github.com/bazelbuild/rules_go/releases/download/v0.43.0/rules_go-v0.43.0.zip",
