@@ -4,8 +4,8 @@
 #include <string_view>
 
 namespace sorbet::core {
-static constexpr unsigned int HASH_MULT = 65599; // sdbm
-static constexpr unsigned int HASH_MULT2 = 31;   // for names
+inline constexpr unsigned int HASH_MULT = 65599; // sdbm
+inline constexpr unsigned int HASH_MULT2 = 31;   // for names
 
 inline unsigned int mix(unsigned int acc, unsigned int nw) {
     return nw + (acc << 6) + (acc << 16) - acc; // HASH_MULT in faster version
