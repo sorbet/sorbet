@@ -5,7 +5,7 @@
 
 root="$PWD"
 
-cd test/cli/test-packages-minimal
+cd test/cli/test-packages-minimal || ( echo "Failed to cd!"; exit 1 )
 
 "$root/main/sorbet" \
   --censor-for-snapshot-tests --silence-dev-message --max-threads=0 \

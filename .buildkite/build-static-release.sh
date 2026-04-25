@@ -5,7 +5,7 @@ set -euo pipefail
 export JOB_NAME=build-static-release
 source .buildkite/tools/setup-bazel.sh
 
-kernel_name="$(uname -s | tr 'A-Z' 'a-z')"
+kernel_name="$(uname -s | tr '[:upper:]' '[:lower:]')"
 processor_name="$(uname -m)"
 
 platform="${kernel_name}-${processor_name}"
@@ -26,9 +26,9 @@ case "$platform" in
     ;;
 esac
 
-echo will run with $CONFIG_OPTS
+echo will run with "$CONFIG_OPTS"
 
-./bazel build //main:sorbet --strip=always $CONFIG_OPTS
+./bazel build //main:sorbet --strip=always "$CONFIG_OPTS"
 
 if [ "$kernel_name" != "darwin" ]; then
   cp bazel-bin/main/sorbet sorbet_bin

@@ -39,6 +39,8 @@ fi
 misformatted=()
 diffs=""
 
+# Shellcheck can't see that this is called by trap I guess?
+# shellcheck disable=SC2329
 cleanup() {
     for src in "${cxx_src[@]}"; do
         rm -f "$src.formatted"
