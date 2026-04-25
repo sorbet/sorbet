@@ -4174,7 +4174,7 @@ ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vect
     // But it can be super useful to uncomment when debugging certain issues.
     // ctx.state.sanityCheck();
 
-    return result;
+        return result;
 }
 
 vector<ast::ParsedFile> Resolver::runConstantResolution(core::GlobalState &gs, vector<ast::ParsedFile> trees,
