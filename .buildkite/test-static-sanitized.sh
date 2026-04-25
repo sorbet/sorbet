@@ -23,6 +23,7 @@ elif [[ "mac" == "$platform" ]]; then
 fi
 
 export JOB_NAME=test-static-sanitized
+# shellcheck source-path=SCRIPTDIR/..
 source .buildkite/tools/setup-bazel.sh
 
 echo -- will run with "${test_args[@]}"
@@ -46,9 +47,11 @@ if [ "$err" -ne 0 ]; then
   echo "--- annotating build result"
   failing_tests="$(mktemp)"
 
-  echo 'Run this command to run failing tests locally:' >> "$failing_tests"
-  echo >> "$failing_tests"
-  echo '```bash' >> "$failing_tests"
+  {
+    echo 'Run this command to run failing tests locally:'
+    echo
+    echo '```bash'
+  } >> "$failing_tests"
 
   # Take the lines that start with target labels.
   # Lines look like "//foo  FAILED in 10s"

@@ -37,6 +37,7 @@ echo --------------------------------------------------------------------------
 
 in_pipe="$(mktemp -u)"
 mkfifo -m 600 "$in_pipe"
+# shellcheck disable=SC2064
 trap "rm $in_pipe" exit
 
 "$old_pwd/main/sorbet" --silence-dev-message --lsp --disable-watchman --forcibly-silence-lsp-multiple-dir-error foo bar < "$in_pipe" &

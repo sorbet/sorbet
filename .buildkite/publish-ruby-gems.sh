@@ -22,6 +22,7 @@ mkdir -p "$HOME/.gem"
 printf -- $'---\n:rubygems_api_key: %s\n' "$SORBET_RUBYGEMS_API_KEY" > "$HOME/.gem/credentials"
 chmod 600 "$HOME/.gem/credentials"
 
+# shellcheck source-path=SCRIPTDIR/..
 source .buildkite/tools/with_backoff.sh
 
 rbenv install --skip-existing

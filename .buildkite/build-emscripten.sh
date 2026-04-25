@@ -7,6 +7,7 @@ echo "--- Pre-setup"
 command -v realpath
 
 export JOB_NAME=build-emscripten
+# shellcheck source-path=SCRIPTDIR/..
 source .buildkite/tools/setup-bazel.sh
 
 PATH=$PATH:$(pwd)

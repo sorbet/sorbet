@@ -3,7 +3,7 @@
 set -euo pipefail
 export JOB_NAME=linters
 
-# shellcheck source=SCRIPTDIR/tools/setup-bazel.sh
+# shellcheck source-path=SCRIPTDIR/..
 source .buildkite/tools/setup-bazel.sh
 
 set -x

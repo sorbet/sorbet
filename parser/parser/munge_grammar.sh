@@ -4,7 +4,7 @@ set -euo pipefail
 
 infile="$1"
 outfile="$2"
-replacement="$(basename ${outfile} .ypp)"
+replacement="$(basename "${outfile}" .ypp)"
 
 sed -e "s/TYPEDRUBY/${replacement}/g" "$infile" > "$outfile"
 
