@@ -42,3 +42,5 @@ if [ "${1:-}" = "-t" ]; then
 else
   list_sh_src | xargs -0 "$shellcheck" -s bash
 fi
+
+echo "No errors"
