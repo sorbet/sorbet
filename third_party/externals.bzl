@@ -302,19 +302,19 @@ def register_sorbet_dependencies():
         url = "https://github.com/aspect-build/bazel-lib/releases/download/v2.7.0/bazel-lib-v2.7.0.tar.gz",
     )
 
-    shellcheck_version = "0.8.0"
+    shellcheck_version = "0.11.0"
     http_archive(
         name = "shellcheck_linux",
         url = "https://github.com/koalaman/shellcheck/releases/download/v{0}/shellcheck-v{0}.linux.x86_64.tar.xz".format(shellcheck_version),
         build_file = "@com_stripe_ruby_typer//third_party:shellcheck.BUILD",
-        sha256 = "ab6ee1b178f014d1b86d1e24da20d1139656c8b0ed34d2867fbb834dad02bf0a",
+        sha256 = "8c3be12b05d5c177a04c29e3c78ce89ac86f1595681cab149b65b97c4e227198",
         strip_prefix = "shellcheck-v{}".format(shellcheck_version),
     )
     http_archive(
         name = "shellcheck_darwin",
         url = "https://github.com/koalaman/shellcheck/releases/download/v{0}/shellcheck-v{0}.darwin.x86_64.tar.xz".format(shellcheck_version),
         build_file = "@com_stripe_ruby_typer//third_party:shellcheck.BUILD",
-        sha256 = "e065d4afb2620cc8c1d420a9b3e6243c84ff1a693c1ff0e38f279c8f31e86634",
+        sha256 = "3c89db4edcab7cf1c27bff178882e0f6f27f7afdf54e859fa041fca10febe4c6",
         strip_prefix = "shellcheck-v{}".format(shellcheck_version),
     )
 
