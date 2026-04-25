@@ -3,11 +3,15 @@
 set -e
 
 mode="fix"
+show_diff=false
 
-while getopts 't' opt; do
+while getopts 'td' opt; do
     case "$opt" in
         t)
             mode="test"
+            ;;
+        d)
+            show_diff=true
             ;;
         *)
             break
@@ -33,6 +37,7 @@ else
 fi
 
 misformatted=()
+diffs=""
 
 cleanup() {
     for src in "${cxx_src[@]}"; do
@@ -51,6 +56,8 @@ for src in "${cxx_src[@]}"; do
         misformatted=("${misformatted[@]}" "$src")
         if [ "$mode" = "fix" ]; then
             cp "$src.formatted" "$src"
+        elif [ "$show_diff" = "true" ]; then
+            diffs+=$'\n'"$(diff -u --label "a/$src" --label "b/$src" "$src" "$src.formatted" | head -n 200 || true)"
         fi
     fi
 
@@ -93,6 +100,13 @@ else
         done
     fi
     echo '```'
+    if [ -n "$diffs" ]; then
+        diff_lines="$(wc -l <<< "$diffs")"
+        if [ "$diff_lines" -le 20 ]; then
+            echo ""
+            echo '```diff'"$diffs"$'\n''```'
+        fi
+    fi
 fi
 
 

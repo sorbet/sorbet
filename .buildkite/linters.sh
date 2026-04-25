@@ -17,7 +17,7 @@ if ! ./tools/scripts/format_build_files.sh -t &> buildifier; then
 fi
 
 echo "~~~ Checking c++ formatting"
-if ! ./tools/scripts/format_cxx.sh -t &> format_cxx; then
+if ! ./tools/scripts/format_cxx.sh -td &> format_cxx; then
     globalErr=1
     echo "^^^ +++"
     buildkite-agent annotate --context tools/scripts/format_cxx.sh --style error --append < format_cxx
