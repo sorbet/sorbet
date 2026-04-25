@@ -17,8 +17,13 @@ case "${unameOut}" in
 esac
 
 # Fetches shellcheck binary
-if ! bazel build "@shellcheck_$platform//:shellcheck_exe"; then
+bazel_build="$(mktemp)"
+trap 'rm -f "$bazel_build"' EXIT
+if ! bazel build "@shellcheck_$platform//:shellcheck_exe" &> "$bazel_build"; then
   echo "warning: Could not fetch shellcheck with Bazel. Falling back to system"
+  echo '```'
+  cat "$bazel_build"
+  echo '```'
   shellcheck="shellcheck"
 else
   shellcheck="$(bazel info output_base)/external/shellcheck_$platform/shellcheck"
