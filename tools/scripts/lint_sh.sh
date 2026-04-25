@@ -1,11 +1,11 @@
 #!/bin/bash
 
-set -e
+set -euo pipefail
 
 cd "$(dirname "$0")/../.."
 
 list_sh_src() {
-    git ls-files -z -c -m -o --exclude-standard -- '*.sh' '*.bash'
+  git ls-files -z -c -m -o --exclude-standard -- '*.sh' '*.bash'
 }
 
 
@@ -24,18 +24,19 @@ else
   shellcheck="bazel-sorbet/external/shellcheck_$platform/shellcheck"
 fi
 
-if [ "$1" = "-t" ]; then
-  OUTPUT=$(list_sh_src | xargs -0 "$shellcheck" -s bash || :)
-  if [ -n "$OUTPUT" ]; then
+"$shellcheck" --version
+
+if [ "${1:-}" = "-t" ]; then
+  if ! output=$(list_sh_src | xargs -0 "$shellcheck" -s bash 2>&1); then
     echo "Some shell files have lint errors!"
     echo ""
     echo -n "\`\`\`"
-    echo "$OUTPUT"
+    echo "$output"
     echo "\`\`\`"
     echo ''
     echo "Run \`./tools/scripts/lint_sh.sh\` to see the errors."
     exit 1
   fi
 else
-    list_sh_src | xargs -0 "$shellcheck" -s bash
+  list_sh_src | xargs -0 "$shellcheck" -s bash
 fi
