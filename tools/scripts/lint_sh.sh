@@ -26,13 +26,14 @@ if ! bazel build "@shellcheck_$platform//:shellcheck_exe" &> "$bazel_build"; the
   echo '```'
   shellcheck="shellcheck"
 else
-  shellcheck="$(bazel info output_base)/external/shellcheck_$platform/shellcheck"
+  shellcheck="$(bazel info output_base 2> /dev/null)/external/shellcheck_$platform/shellcheck"
 fi
 
 "$shellcheck" --version
 
 if [ "${1:-}" = "-t" ]; then
   if ! output=$(list_sh_src | xargs -0 "$shellcheck" -s bash 2>&1); then
+    echo ""
     echo "Some shell files have lint errors!"
     echo ""
     echo -n "\`\`\`"
