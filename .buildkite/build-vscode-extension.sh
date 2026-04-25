@@ -2,6 +2,7 @@
 
 set -euo pipefail
 
+# shellcheck source-path=SCRIPTDIR/..
 source .buildkite/tools/with_backoff.sh
 
 pushd vscode_extension

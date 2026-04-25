@@ -23,6 +23,7 @@ elif [[ "mac" == "$platform" ]]; then
 fi
 
 export JOB_NAME=test-static-sanitized
+# shellcheck source-path=SCRIPTDIR/..
 source .buildkite/tools/setup-bazel.sh
 
 echo -- will run with "${test_args[@]}"

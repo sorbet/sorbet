@@ -3,6 +3,7 @@
 set -euo pipefail
 
 export JOB_NAME=build-static-release
+# shellcheck source-path=SCRIPTDIR/..
 source .buildkite/tools/setup-bazel.sh
 
 kernel_name="$(uname -s | tr '[:upper:]' '[:lower:]')"
