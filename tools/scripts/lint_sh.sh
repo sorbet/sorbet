@@ -5,7 +5,10 @@ set -euo pipefail
 cd "$(dirname "$0")/../.."
 
 list_sh_src() {
-  git ls-files -z -c -m -o --exclude-standard -- '*.sh' '*.bash'
+  # If a file is modified and committed, it will show up twice, so we have to uniq to avoid duplicate errors locally.
+  git ls-files -z --cached --modified --others --exclude-standard -- '*.sh' '*.bash' | \
+    LC_COLLATE=C sort -z | \
+    uniq -z
 }
 
 kernel_name="$(uname -s | tr '[:upper:]' '[:lower:]')"
