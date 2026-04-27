@@ -4,6 +4,7 @@
 #include "common/typecase.h"
 #include "core/Names.h"
 #include "core/TypeConstraint.h"
+#include <memory>
 #include <utility>
 
 using namespace std;
@@ -118,20 +119,40 @@ string LoadSelf::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) 
     return fmt::format("LoadSelf {{ link = {} }}", this->link->fun.showRaw(gs));
 }
 
-Send::Send(LocalRef recv, core::LocOffsets receiverLoc, core::NameRef fun, core::LocOffsets funLoc, uint16_t numPosArgs,
-           const InlinedVector<LocalRef, 2> &args, InlinedVector<core::LocOffsets, 2> &&argLocs, bool isPrivateOk,
-           shared_ptr<core::SendAndBlockLink> link)
-    : isPrivateOk(isPrivateOk), numPosArgs(numPosArgs), fun(fun), recv(recv), funLoc(funLoc), receiverLoc(receiverLoc),
-      argLocs(std::move(argLocs)), link(move(link)) {
-    ENFORCE(numPosArgs <= args.size(), "Expected {} positional arguments, but only have {} args", numPosArgs,
-            args.size());
+Send::SendInitializer::SendInitializer(Send *snd) : snd(snd), refs(snd->argRefs()), locs(snd->argLocs()) {}
 
-    this->args.reserve(args.size());
-    for (const auto &e : args) {
-        this->args.emplace_back(e);
+Send::SendInitializer Send::make(LocalRef recv, core::LocOffsets receiverLoc, core::NameRef fun,
+                                 core::LocOffsets funLoc, uint16_t numPosArgs, bool isPrivateOk, size_t numArgs) {
+    size_t totalSize = Parent::totalSizeToAlloc<LocalRef, core::TypePtr, core::LocOffsets>(numArgs, numArgs, numArgs);
+    void *p = ::operator new(totalSize);
+    Send *snd = new (p) Send(recv, receiverLoc, fun, funLoc, numPosArgs, isPrivateOk, numArgs);
+    // Go ahead and initialize all the TypePtrs; we will assign real values in infer.
+    for (auto &t : snd->argTypes()) {
+        new (&t) core::TypePtr();
     }
+    return SendInitializer(snd);
+}
+
+Send::Send(LocalRef recv, core::LocOffsets receiverLoc, core::NameRef fun, core::LocOffsets funLoc, uint16_t numPosArgs,
+           bool isPrivateOk, size_t numArgs)
+    : isPrivateOk(isPrivateOk), numPosArgs(numPosArgs), fun(fun), recv(recv), funLoc(funLoc), receiverLoc(receiverLoc),
+      numArgs(numArgs) {
+    ENFORCE(numPosArgs <= numArgs, "Expected {} positional arguments, but only have {} args", numPosArgs, numArgs);
+
     categoryCounterInc("cfg", "send");
-    histogramInc("cfg.send.args", this->args.size());
+    histogramInc("cfg.send.args", numArgs);
+}
+
+namespace {
+template <typename T> void destroySpan(absl::Span<T> span) {
+    destroy_n(span.begin(), span.size());
+}
+} // namespace
+
+Send::~Send() {
+    destroySpan(argRefs());
+    destroySpan(argTypes());
+    destroySpan(argLocs());
 }
 
 core::LocOffsets Send::locWithoutBlock(core::LocOffsets bindLoc) {
@@ -146,10 +167,10 @@ core::LocOffsets Send::locWithoutBlock(core::LocOffsets bindLoc) {
         return bindLoc;
     }
 
-    if (!this->argLocs.empty()) {
+    if (!this->argLocs().empty()) {
         // For sig, the arg will often be a reference to an implicit self,
         // so the back of argLocs is a zero width loc.
-        return this->receiverLoc.join(this->funLoc).join(this->argLocs.back());
+        return this->receiverLoc.join(this->funLoc).join(this->argLocs().back());
     }
 
     return this->receiverLoc.join(this->funLoc);
@@ -219,16 +240,20 @@ string Alias::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) con
 }
 
 string Send::toString(const core::GlobalState &gs, const CFG &cfg) const {
-    return fmt::format(
-        "{}.{}({})", this->recv.toString(gs, cfg), this->fun.toString(gs),
-        fmt::map_join(this->args, ", ", [&](const auto &arg) -> string { return arg.toString(gs, cfg); }));
+    return fmt::format("{}.{}({})", this->recv.toString(gs, cfg), this->fun.toString(gs),
+                       fmt::map_join(this->argSpan(), ", ", [&](const auto &arg) -> string {
+                           VariableUseSite site(arg.key, arg.value);
+                           return site.toString(gs, cfg);
+                       }));
 }
 
 string Send::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
-    return fmt::format(
-        "Send {{\n{0}&nbsp;recv = {1},\n{0}&nbsp;fun = {2},\n{0}&nbsp;args = ({3}),\n{0}}}", spacesForTabLevel(tabs),
-        this->recv.toString(gs, cfg), this->fun.showRaw(gs),
-        fmt::map_join(this->args, ", ", [&](const auto &arg) -> string { return arg.showRaw(gs, cfg, tabs + 1); }));
+    return fmt::format("Send {{\n{0}&nbsp;recv = {1},\n{0}&nbsp;fun = {2},\n{0}&nbsp;args = ({3}),\n{0}}}",
+                       spacesForTabLevel(tabs), this->recv.toString(gs, cfg), this->fun.showRaw(gs),
+                       fmt::map_join(this->argSpan(), ", ", [&](const auto &arg) -> string {
+                           VariableUseSite site(arg.key, arg.value);
+                           return site.showRaw(gs, cfg, tabs + 1);
+                       }));
 }
 
 string LoadArg::toString(const core::GlobalState &gs, const CFG &cfg) const {
