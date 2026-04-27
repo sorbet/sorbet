@@ -1504,7 +1504,6 @@ NameRef GlobalState::enterNameUTF8(string_view nm) {
     ENFORCE(NameHash::hashNameRef(*this, name) == hash);
     categoryCounterInc("names", "utf8");
 
-    wasNameTableModified_ = true;
     return name;
 }
 
@@ -1531,7 +1530,6 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
 
     constantNames.emplace_back(ConstantName{original});
     ENFORCE(NameHash::hashNameRef(*this, name) == hash);
-    wasNameTableModified_ = true;
     categoryCounterInc("names", "constant");
     return name;
 }
@@ -1630,7 +1628,6 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
 
     uniqueNames.emplace_back(UniqueName{original, num, uniqueNameKind});
     ENFORCE(NameHash::hashNameRef(*this, name) == hash);
-    wasNameTableModified_ = true;
     categoryCounterInc("names", "unique");
     return name;
 }
@@ -2282,7 +2279,26 @@ bool GlobalState::shouldReportErrorOn(FileRef file, ErrorClass what) const {
 }
 
 bool GlobalState::wasNameTableModified() const {
-    return wasNameTableModified_;
+    return utf8Names.size() > utf8NamesWritten_ || constantNames.size() > constantNamesWritten_ ||
+           uniqueNames.size() > uniqueNamesWritten_;
+}
+
+void GlobalState::markNameTableAsCached() {
+    utf8NamesWritten_ = utf8Names.size();
+    constantNamesWritten_ = constantNames.size();
+    uniqueNamesWritten_ = uniqueNames.size();
+}
+
+uint32_t GlobalState::getNameTableDiffCount() const {
+    return nameTableDiffCount;
+}
+
+void GlobalState::setNameTableDiffCount(uint32_t count) {
+    nameTableDiffCount = count;
+}
+
+void GlobalState::incrementNameTableDiffCount() {
+    nameTableDiffCount++;
 }
 
 void GlobalState::trace(string_view msg) const {

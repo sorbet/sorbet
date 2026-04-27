@@ -27,6 +27,8 @@ class SerializerImpl {
 public:
     static Pickler pickleNameTable(const GlobalState &gs);
     static void pickleNameTable(Pickler &p, const GlobalState &gs);
+    static void pickleNameTableDiff(Pickler &p, const GlobalState &gs);
+    static void unpickleNameTableDiff(UnPickler &p, GlobalState &result);
     static Pickler pickleSymbolTable(const GlobalState &gs);
     static void pickleSymbolTable(Pickler &p, const GlobalState &gs);
     static Pickler pickleFileTable(const GlobalState &gs, bool payloadOnly);
@@ -1048,6 +1050,73 @@ void SerializerImpl::unpickleNameTable(UnPickler &p, GlobalState &result) {
         }
     }
 }
+void SerializerImpl::pickleNameTableDiff(Pickler &p, const GlobalState &gs) {
+    auto startUtf8 = gs.utf8NamesWritten_;
+    auto numNewUtf8 = gs.utf8Names.size() - startUtf8;
+    p.putU4(startUtf8);
+    p.putU4(numNewUtf8);
+
+    for (unsigned int i = startUtf8; i < gs.utf8Names.size(); i++) {
+        p.putU4(core::NameHash::hashMixUTF8(gs.utf8Names[i].utf8));
+        pickle(p, gs.utf8Names[i]);
+    }
+
+    auto startConstant = gs.constantNamesWritten_;
+    auto numNewConstant = gs.constantNames.size() - startConstant;
+    p.putU4(startConstant);
+    p.putU4(numNewConstant);
+
+    for (unsigned int i = startConstant; i < gs.constantNames.size(); i++) {
+        p.putU4(core::NameHash::hashMixConstant(gs.constantNames[i].original.rawId()));
+        pickle(p, gs.constantNames[i]);
+    }
+
+    auto startUnique = gs.uniqueNamesWritten_;
+    auto numNewUnique = gs.uniqueNames.size() - startUnique;
+    p.putU4(startUnique);
+    p.putU4(numNewUnique);
+
+    for (unsigned int i = startUnique; i < gs.uniqueNames.size(); i++) {
+        auto &n = gs.uniqueNames[i];
+        p.putU4(core::NameHash::hashMixUnique(n.uniqueNameKind, n.num, n.original.rawId()));
+        pickle(p, n);
+    }
+}
+
+void SerializerImpl::unpickleNameTableDiff(UnPickler &p, GlobalState &result) {
+    auto startUtf8 = p.getU4();
+    auto numNewUtf8 = p.getU4();
+
+    for (uint32_t i = 0; i < numNewUtf8; i++) {
+        auto hash = p.getU4();
+        result.utf8Names.emplace_back(unpickleUTF8Name(p, result));
+        auto &bucket = result.namesByHash.lookupBucket(hash, NameHash::Bucket::isEmpty());
+        bucket.hash = hash;
+        bucket.rawId = core::NameRef(result, core::NameKind::UTF8, startUtf8 + i).rawId();
+    }
+
+    auto startConstant = p.getU4();
+    auto numNewConstant = p.getU4();
+
+    for (uint32_t i = 0; i < numNewConstant; i++) {
+        auto hash = p.getU4();
+        result.constantNames.emplace_back(unpickleConstantName(p, result));
+        auto &bucket = result.namesByHash.lookupBucket(hash, NameHash::Bucket::isEmpty());
+        bucket.hash = hash;
+        bucket.rawId = core::NameRef(result, core::NameKind::CONSTANT, startConstant + i).rawId();
+    }
+
+    auto startUnique = p.getU4();
+    auto numNewUnique = p.getU4();
+
+    for (uint32_t i = 0; i < numNewUnique; i++) {
+        auto hash = p.getU4();
+        result.uniqueNames.emplace_back(unpickleUniqueName(p, result));
+        auto &bucket = result.namesByHash.lookupBucket(hash, NameHash::Bucket::isEmpty());
+        bucket.hash = hash;
+        bucket.rawId = core::NameRef(result, core::NameKind::UNIQUE, startUnique + i).rawId();
+    }
+}
 
 void SerializerImpl::pickle(Pickler &p, LocOffsets loc) {
     p.putU4(loc.beginLoc);
@@ -1084,6 +1153,49 @@ vector<uint8_t> Serializer::storeNameTable(const GlobalState &gs) {
     p.putU4(Serializer::VERSION);
     SerializerImpl::pickleNameTable(p, gs);
     return p.result();
+}
+
+vector<uint8_t> Serializer::storeNameTableDiff(const GlobalState &gs) {
+    Pickler p;
+    p.putU4(Serializer::VERSION);
+    SerializerImpl::pickleNameTableDiff(p, gs);
+    return p.result();
+}
+
+void Serializer::loadAndAppendNameTableDiff(GlobalState &gs, const uint8_t *const data) {
+    UnPickler p(data, gs.tracer());
+    if (p.getU4() != Serializer::VERSION) {
+        Exception::raise("Payload version mismatch");
+    }
+    SerializerImpl::unpickleNameTableDiff(p, gs);
+}
+
+vector<uint8_t> Serializer::storeNameTableDiffCountAndHashSize(uint32_t count, const GlobalState &gs) {
+    Pickler p;
+    p.putU4(Serializer::VERSION);
+    p.putU4(count);
+    p.putU4(gs.namesByHash.size());
+    return p.result();
+}
+
+uint32_t Serializer::loadNameTableDiffCountAndResizeNamesHash(GlobalState &gs, const uint8_t *const data) {
+    gs.utf8Names.clear();
+    gs.constantNames.clear();
+    gs.uniqueNames.clear();
+    gs.namesByHash.clear();
+
+    UnPickler p(data, gs.tracer());
+    if (p.getU4() != Serializer::VERSION) {
+        Exception::raise("Payload version mismatch");
+    }
+    auto diffCount = p.getU4();
+    auto namesByHashSize = p.getU4();
+    gs.namesByHash.resize(namesByHashSize);
+    return diffCount;
+}
+
+string Serializer::nameTableDiffKey(uint32_t index) {
+    return fmt::format("NameTableDiff:{}", index);
 }
 
 Serializer::SerializedGlobalState Serializer::store(const GlobalState &gs) {
