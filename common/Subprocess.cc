@@ -154,5 +154,11 @@ optional<sorbet::Subprocess::Result> sorbet::Subprocess::spawn(string executable
         return nullopt;
     }
 
+    if (!WIFEXITED(childStatus)) {
+        // Child was killed by a signal (e.g., segfault, abort). WEXITSTATUS is
+        // only valid when WIFEXITED is true.
+        return nullopt;
+    }
+
     return sorbet::Subprocess::Result{sink.str(), WEXITSTATUS(childStatus)};
 }
