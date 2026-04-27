@@ -687,7 +687,7 @@ PackageInfo::aggregateMissingExports(const core::GlobalState &gs, vector<core::S
 }
 
 std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingVisibleTo(
-    const core::GlobalState &gs, std::vector<core::packages::MangledName> &visibleTos, bool visibleToTests) const {
+    const core::GlobalState &gs, UnorderedSet<core::packages::MangledName> &visibleTos, bool visibleToTests) const {
     std::vector<core::AutocorrectSuggestion::Edit> allEdits;
     for (auto &pkgName : visibleTos) {
         auto autocorrect = addVisibleTo(gs, pkgName);
