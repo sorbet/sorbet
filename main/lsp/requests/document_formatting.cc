@@ -91,6 +91,12 @@ void DocumentFormattingTask::preprocess(LSPPreprocessor &preprocessor) {
         auto originalLineCount = findLineBreaks(sourceView).size();
         auto processResponse = sorbet::Subprocess::spawn(config.opts.rubyfmtPath, vector<string>(), sourceView);
 
+        if (!processResponse.has_value()) {
+            displayError(fmt::format("`rubyfmt` crashed or failed to run while formatting {}.", path), response);
+            config.output->write(move(response));
+            return;
+        }
+
         auto returnCode = processResponse->status;
         auto formattedContents = processResponse->output;
 
