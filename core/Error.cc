@@ -21,6 +21,7 @@ using namespace std;
 namespace {
 
 constexpr auto ERROR_COLOR = rang::fg::red;
+constexpr auto SUCCESS_COLOR = rang::fg::green;
 constexpr auto LOW_NOISE_COLOR = rang::fgB::black;
 constexpr auto DETAIL_COLOR = rang::fg::yellow;
 constexpr auto RESET_COLOR = rang::fg::reset;
@@ -116,7 +117,8 @@ string ErrorSection::toString(const GlobalState &gs) const {
         } else {
             formattedHeader = this->header;
         }
-        buf << indent << DETAIL_COLOR << restoreColors(formattedHeader, DETAIL_COLOR) << RESET_COLOR;
+        auto color = gs.autocorrect ? SUCCESS_COLOR : DETAIL_COLOR;
+        buf << indent << color << restoreColors(formattedHeader, color) << RESET_COLOR;
     } else {
         skipEOL = true;
     }
@@ -174,9 +176,14 @@ string Error::toString(const GlobalState &gs) const {
         buf << "[" << pkgName << "] ";
     }
 
+    // Sorbet was called with -a, and this error has autocorrects for it. In that case, let's not render the error
+    // header in red, so the user can focus on the errors that don't have an autocorrect associated with them.
+    // TODO(neil): We might also want to reorder how the error and autocorrect is presented to make it even more
+    // obvious. For example, showing the autocorrect at the top level and nesting the error underneath.
+    auto autocorrectApplied = gs.autocorrect && !autocorrects.empty();
     buf << FILE_POS_STYLE << loc.filePosToString(gs) << RESET_STYLE << ": " << ERROR_COLOR
-        << restoreColors(header, ERROR_COLOR) << RESET_COLOR << LOW_NOISE_COLOR << " " << gs.errorUrlBase << what.code
-        << RESET_COLOR;
+        << restoreColors(header, autocorrectApplied ? RESET_COLOR : ERROR_COLOR) << RESET_COLOR << LOW_NOISE_COLOR
+        << " " << gs.errorUrlBase << what.code << RESET_COLOR;
     if (loc.exists()) {
         auto fileLength = loc.file().data(gs).source().size();
         if (loc.beginPos() > fileLength || loc.endPos() > fileLength) {
