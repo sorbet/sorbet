@@ -291,9 +291,15 @@ void GenPackages::runStrict(core::GlobalState &gs) {
 
     auto toExport = computeToExport(gs);
 
+    uint64_t numKeys = 0;
+    uint64_t numValues = 0;
     for (auto pkgName : gs.packageDB().packages()) {
         auto &pkgInfo = gs.packageDB().getPackageInfo(pkgName);
         ENFORCE(pkgInfo.exists());
+        for (auto &[file, referencedPackages] : pkgInfo.packagesReferencedByFile) {
+            numKeys++;
+            numValues += referencedPackages.size();
+        }
 
         auto existingContentsLoc = core::Loc(pkgInfo.file, pkgInfo.locs.loc)
                                        .adjust(gs, pkgInfo.locs.declLoc.length() + 1, -1 * (int32_t) "end"sv.size());
@@ -311,6 +317,7 @@ void GenPackages::runStrict(core::GlobalState &gs) {
             }
         }
     }
+    fmt::print("keys: {}, values: {}\n", numKeys, numValues);
 }
 
 } // namespace sorbet::packager
