@@ -178,6 +178,8 @@ string Error::toString(const GlobalState &gs) const {
 
     // Sorbet was called with -a, and this error has autocorrects for it. In that case, let's not render the error
     // header in red, so the user can focus on the errors that don't have an autocorrect associated with them.
+    // TODO(neil): We might also want to reorder how the error and autocorrect is presented to make it even more
+    // obvious. For example, showing the autocorrect at the top level and nesting the error underneath.
     auto autocorrectApplied = gs.autocorrect && !autocorrects.empty();
     buf << FILE_POS_STYLE << loc.filePosToString(gs) << RESET_STYLE << ": " << ERROR_COLOR
         << restoreColors(header, autocorrectApplied ? RESET_COLOR : ERROR_COLOR) << RESET_COLOR << LOW_NOISE_COLOR
