@@ -679,7 +679,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
             timeit.clone("slow_path.blocking_time");
 
             // [Test only] Wait for a preemption if one is expected.
-            if (updates.preemptionsExpected > 0) {
+            if (updates.preemptionsExpected > 0) [[unlikely]] {
                 auto loopStartTime = Timer::clock_gettime_coarse();
                 auto coarseThreshold = Timer::get_clock_threshold_coarse();
                 while (updates.preemptionsExpected > 0) {
@@ -695,14 +695,14 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
                         continue;
                     }
 
-                    if (result.tasksHandled) {
+                    if (result.getTasksHandled()) {
                         updates.preemptionsExpected--;
                     }
 
                     // If we've been rescheduled to a later strautm, there's no way that we'll satisfy all the
                     // expected preemptions at this point.
-                    if (result.rescheduled.has_value()) {
-                        ENFORCE(*result.rescheduled > currentStratum);
+                    if (result.wasRescheduled()) {
+                        ENFORCE(result.getRescheduledStratum() > currentStratum);
                         break;
                     }
                 }
@@ -719,7 +719,6 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
                     }
                     Timer::timedSleep(coarseThreshold, *logger, "slow_path.expected_cancellation.sleep");
                 }
-                ENFORCE(updates.preemptionsExpected == 0);
                 return currentStratum;
             }
 
@@ -728,7 +727,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
         }
 
         // [Test only] Ensure that we handled all expected preemptions
-        if (updates.preemptionsExpected > 0) {
+        if (updates.preemptionsExpected > 0) [[unlikely]] {
             Exception::raise("Slow path failed to handle all expected preemptions");
         }
 

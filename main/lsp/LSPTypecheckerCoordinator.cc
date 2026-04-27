@@ -191,7 +191,7 @@ public:
             }
 
             prodCategoryCounterInc("lsp.messages.processed", task->methodString());
-            result.tasksHandled = true;
+            result.setTasksHandled();
 
             if (task->finalPhase() == LSPTask::Phase::INDEX) {
                 continue;

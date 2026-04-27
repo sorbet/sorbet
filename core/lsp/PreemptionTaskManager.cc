@@ -69,11 +69,11 @@ PreemptionTask::RunResult PreemptionTaskManager::tryRunScheduledPreemptionTask(c
                                                       make_shared<core::NullFlusher>());
         gs.tracer().debug("[Typechecker] Beginning preemption task.");
         result = preemptTask->run(currentStratum);
-        if (allowReschedule && result.rescheduled.has_value()) {
+        if (allowReschedule && result.wasRescheduled()) {
             // In this case the task has indicated that there's more work to do, but that it can't occur until the
             // stratum named in `result`. We re-queue the task, and remember the stratum that we can run at so that we
             // can early exit in future calls to `tryRunScheduledPreemptionTask`.
-            this->runnableAt.store(*result.rescheduled);
+            this->runnableAt.store(result.getRescheduledStratum());
 
             // As we haven't called `finish` yet, we're assuming unique access to the preemptTask slot: LSPLoop will be
             // blocked as the PreemptionLoop won't have notified it yet.

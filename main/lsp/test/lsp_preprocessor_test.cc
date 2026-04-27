@@ -125,7 +125,7 @@ public:
         gs.errorQueue->flushAllErrors(gs);
         runCount++;
 
-        result.tasksHandled = true;
+        result.setTasksHandled();
 
         return result;
     }
@@ -401,11 +401,11 @@ public:
         this->runCount++;
 
         if (this->targetStratum > currentStratum) {
-            result.rescheduled = this->targetStratum;
+            result.setRescheduledStratum(this->targetStratum);
             return result;
         }
 
-        result.tasksHandled = true;
+        result.setTasksHandled();
         this->successful = true;
 
         return result;
