@@ -335,7 +335,7 @@ public:
     std::optional<core::AutocorrectSuggestion> aggregateMissingExports(const core::GlobalState &gs,
                                                                        std::vector<core::SymbolRef> &toExport) const;
     std::optional<core::AutocorrectSuggestion>
-    aggregateMissingVisibleTo(const core::GlobalState &gs, std::vector<core::packages::MangledName> &visibleTos,
+    aggregateMissingVisibleTo(const core::GlobalState &gs, UnorderedSet<core::packages::MangledName> &visibleTos,
                               bool visibleToTests) const;
 
     std::string renderPackageRbContents(const core::GlobalState &gs, std::vector<Import> newImports,

@@ -169,7 +169,7 @@ void GenPackages::run(core::GlobalState &gs) {
 
     auto toExport = computeToExport(gs);
 
-    auto neededVisibleTo = UnorderedMap<core::packages::MangledName, vector<core::packages::MangledName>>{};
+    auto neededVisibleTo = UnorderedMap<core::packages::MangledName, UnorderedSet<core::packages::MangledName>>{};
     auto neededVisibleToTests = UnorderedMap<core::packages::MangledName, bool>{};
     if (gs.packageDB().anyUpdateVisibilityFor()) {
         Timer timeit(gs.tracer(), "gen_packages.run.build_needed_visible_to");
@@ -198,7 +198,7 @@ void GenPackages::run(core::GlobalState &gs) {
                                 neededVisibleToTests[referencedPackageName] = true;
                             } else {
                                 // Otherwise, add `visible_to pkgName`
-                                neededVisibleTo[referencedPackageName].push_back(pkgName);
+                                neededVisibleTo[referencedPackageName].insert(pkgName);
                             }
                         }
                     }

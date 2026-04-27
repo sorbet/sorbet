@@ -28,7 +28,6 @@ B/__package.rb:3: `B` is missing `visible_to`s https://srb.help/3734
         ^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
     B/__package.rb:9: Inserted `visible_to C
-      visible_to C
       visible_to D`
      9 |  visible_to A
                       ^
@@ -59,7 +58,6 @@ E/__package.rb:3: `E` is missing `visible_to`s https://srb.help/3734
         ^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
     E/__package.rb:7: Inserted `visible_to 'tests'
-      visible_to C
       visible_to C`
      7 |  export E::CONSTANT_FROM_E
                                    ^
@@ -107,7 +105,6 @@ class B < PackageSpec
 
   visible_to A
   visible_to C
-  visible_to C
   visible_to D
   visible_to G
 end
@@ -150,7 +147,6 @@ class E < PackageSpec
   export E::CONSTANT_FROM_E
   visible_to 'tests'
   visible_to C
-  visible_to C
 end
 ##############################
 ###### Package directed ######
@@ -162,7 +158,6 @@ B/__package.rb:3: `B` is missing `visible_to`s https://srb.help/3734
         ^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
     B/__package.rb:9: Inserted `visible_to C
-      visible_to C
       visible_to D`
      9 |  visible_to A
                       ^
@@ -193,7 +188,6 @@ E/__package.rb:3: `E` is missing `visible_to`s https://srb.help/3734
         ^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
     E/__package.rb:7: Inserted `visible_to 'tests'
-      visible_to C
       visible_to C`
      7 |  export E::CONSTANT_FROM_E
                                    ^
@@ -254,7 +248,6 @@ class B < PackageSpec
 
   visible_to A
   visible_to C
-  visible_to C
   visible_to D
   visible_to G
 end
@@ -296,6 +289,5 @@ class E < PackageSpec
 
   export E::CONSTANT_FROM_E
   visible_to 'tests'
-  visible_to C
   visible_to C
 end
