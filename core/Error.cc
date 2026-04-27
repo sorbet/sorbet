@@ -21,6 +21,7 @@ using namespace std;
 namespace {
 
 constexpr auto ERROR_COLOR = rang::fg::red;
+constexpr auto SUCCESS_COLOR = rang::fg::green;
 constexpr auto LOW_NOISE_COLOR = rang::fgB::black;
 constexpr auto DETAIL_COLOR = rang::fg::yellow;
 constexpr auto RESET_COLOR = rang::fg::reset;
@@ -116,7 +117,8 @@ string ErrorSection::toString(const GlobalState &gs) const {
         } else {
             formattedHeader = this->header;
         }
-        buf << indent << DETAIL_COLOR << restoreColors(formattedHeader, DETAIL_COLOR) << RESET_COLOR;
+        auto color = gs.autocorrect ? SUCCESS_COLOR : DETAIL_COLOR;
+        buf << indent << color << restoreColors(formattedHeader, color) << RESET_COLOR;
     } else {
         skipEOL = true;
     }
