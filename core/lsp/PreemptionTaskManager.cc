@@ -41,15 +41,18 @@ bool PreemptionTaskManager::trySchedulePreemptionTask(shared_ptr<PreemptionTask>
     return success;
 }
 
-bool PreemptionTaskManager::tryRunScheduledPreemptionTask(const core::GlobalState &gs, uint16_t currentStratum,
-                                                          bool allowReschedule) {
+PreemptionTask::RunResult PreemptionTaskManager::tryRunScheduledPreemptionTask(const core::GlobalState &gs,
+                                                                               uint16_t currentStratum,
+                                                                               bool allowReschedule) {
+    PreemptionTask::RunResult result;
+
     TypecheckEpochManager::assertConsistentThread(
         typecheckingThreadId, "PreemptionTaskManager::tryRunScheduledPreemptionTask", "typechecking thread");
 
     // We can early-exit if we know that it's not possible to run preemption yet, but if we know that rescheduling is
     // not possible, we should run to completion.
     if (allowReschedule && currentStratum < this->runnableAt.load()) {
-        return false;
+        return result;
     }
 
     auto preemptTask = atomic_load(&this->preemptTask);
@@ -65,12 +68,12 @@ bool PreemptionTaskManager::tryRunScheduledPreemptionTask(const core::GlobalStat
         gs.errorQueue = make_shared<core::ErrorQueue>(previousErrorQueue->logger, previousErrorQueue->tracer,
                                                       make_shared<core::NullFlusher>());
         gs.tracer().debug("[Typechecker] Beginning preemption task.");
-        auto result = preemptTask->run(currentStratum);
-        if (allowReschedule && result.has_value()) {
+        result = preemptTask->run(currentStratum);
+        if (allowReschedule && result.wasRescheduled()) {
             // In this case the task has indicated that there's more work to do, but that it can't occur until the
             // stratum named in `result`. We re-queue the task, and remember the stratum that we can run at so that we
             // can early exit in future calls to `tryRunScheduledPreemptionTask`.
-            this->runnableAt.store(*result);
+            this->runnableAt.store(result.getRescheduledStratum());
 
             // As we haven't called `finish` yet, we're assuming unique access to the preemptTask slot: LSPLoop will be
             // blocked as the PreemptionLoop won't have notified it yet.
@@ -85,9 +88,9 @@ bool PreemptionTaskManager::tryRunScheduledPreemptionTask(const core::GlobalStat
             gs.tracer().debug("[Typechecker] Preemption task complete.");
         }
         gs.errorQueue = move(previousErrorQueue);
-        return true;
     }
-    return false;
+
+    return result;
 }
 
 bool PreemptionTaskManager::tryCancelScheduledPreemptionTask(shared_ptr<PreemptionTask> &task) {

@@ -115,7 +115,9 @@ public:
     CountingTask(shared_ptr<core::lsp::PreemptionTaskManager> preemptManager, core::GlobalState &gs)
         : preemptManager(move(preemptManager)), gs(gs) {}
 
-    optional<uint16_t> run(uint16_t currentStratum) override {
+    RunResult run(uint16_t currentStratum) override {
+        RunResult result;
+
         // The task should run with typecheck mutex held with a write lock.
         preemptManager->assertTypecheckMutexHeld();
         // Emulate behavior of most LSP Tasks and drain all diagnostics and query responses.
@@ -123,7 +125,9 @@ public:
         gs.errorQueue->flushAllErrors(gs);
         runCount++;
 
-        return nullopt;
+        result.setTasksHandled();
+
+        return result;
     }
 };
 
@@ -347,7 +351,8 @@ TEST_CASE("PreemptionTasksWorkAsExpected") {
 
     // No preemption task registered.
     uint16_t currentStratum = 0;
-    CHECK_FALSE(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true));
+    CHECK_FALSE(
+        preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true).progress());
 
     auto task = make_shared<CountingTask>(preemptManager, *gs);
     // Should fail because a slow path is not running, so there's nothing to preempt.
@@ -363,7 +368,7 @@ TEST_CASE("PreemptionTasksWorkAsExpected") {
     CHECK(preemptManager->trySchedulePreemptionTask(task));
 
     // This should run + clear the scheduled task.
-    CHECK(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true));
+    CHECK(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true).progress());
     CHECK_EQ(1, task->runCount);
 
     // Our error should still be there.
@@ -388,18 +393,22 @@ public:
 
     ReschedulingTask(uint16_t targetStratum) : targetStratum{targetStratum} {}
 
-    optional<uint16_t> run(uint16_t currentStratum) override {
+    RunResult run(uint16_t currentStratum) override {
+        RunResult result;
+
         CHECK_FALSE(this->successful);
 
         this->runCount++;
 
         if (this->targetStratum > currentStratum) {
-            return this->targetStratum;
+            result.setRescheduledStratum(this->targetStratum);
+            return result;
         }
 
+        result.setTasksHandled();
         this->successful = true;
 
-        return nullopt;
+        return result;
     }
 };
 
@@ -417,7 +426,8 @@ TEST_CASE("PreemptionReschedulingWorksAsExpected") {
 
     // No preemption task registered.
     uint16_t currentStratum = 0;
-    CHECK_FALSE(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true));
+    CHECK_FALSE(
+        preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true).progress());
 
     auto task = make_shared<ReschedulingTask>(2);
 
@@ -429,22 +439,24 @@ TEST_CASE("PreemptionReschedulingWorksAsExpected") {
     CHECK(preemptManager->trySchedulePreemptionTask(task));
 
     // This should run scheduled task, but not clear it.
-    CHECK(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true));
+    CHECK(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true).progress());
     CHECK_EQ(1, task->runCount);
 
     // This should not run the scheduled task, as we haven't made it to stratum 2 yet.
     ++currentStratum;
-    CHECK_FALSE(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true));
+    CHECK_FALSE(
+        preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true).progress());
     CHECK_EQ(1, task->runCount);
 
     // This should run and clear the task.
     ++currentStratum;
-    CHECK(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true));
+    CHECK(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true).progress());
     CHECK_EQ(2, task->runCount);
 
     // Running at stratum 3 should show no preemption tasks run
     ++currentStratum;
-    CHECK_FALSE(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true));
+    CHECK_FALSE(
+        preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true).progress());
     CHECK_EQ(2, task->runCount);
     CHECK(task->successful);
 
@@ -469,7 +481,8 @@ TEST_CASE("RescheduledPreemptionTasksClearOnCancelation") {
 
     // No preemption task registered.
     uint16_t currentStratum = 0;
-    CHECK_FALSE(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true));
+    CHECK_FALSE(
+        preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true).progress());
 
     auto task = make_shared<ReschedulingTask>(2);
 
@@ -481,12 +494,12 @@ TEST_CASE("RescheduledPreemptionTasksClearOnCancelation") {
     CHECK(preemptManager->trySchedulePreemptionTask(task));
 
     // This should run scheduled task, but not clear it.
-    CHECK(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true));
+    CHECK(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true).progress());
     CHECK_EQ(1, task->runCount);
 
     // If we cancel at this point and schedule a new task, that should be successful.
     CHECK(gs->epochManager->tryCancelSlowPath(3));
-    CHECK(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ false));
+    CHECK(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ false).progress());
 
     // Allow the task to be scheduled again, now that cancellation has run and we've cleared out the preemption task
     // slot.
@@ -516,7 +529,8 @@ TEST_CASE("RescheduledPreemptionTasksClearOnSuccess") {
 
     // No preemption task registered.
     uint16_t currentStratum = 0;
-    CHECK_FALSE(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true));
+    CHECK_FALSE(
+        preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true).progress());
 
     auto task = make_shared<ReschedulingTask>(2);
 
@@ -529,7 +543,8 @@ TEST_CASE("RescheduledPreemptionTasksClearOnSuccess") {
 
     CHECK(gs->epochManager->tryCommitEpoch(*gs, 2, true, preemptManager, [&]() {
         // This should run scheduled task, but not clear it.
-        CHECK(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true));
+        CHECK(
+            preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true).progress());
         CHECK_EQ(1, task->runCount);
         return 2;
     }));
@@ -558,7 +573,8 @@ TEST_CASE("RescheduledPreemptionTasksClearOnSuccessWrongStratum") {
 
     // No preemption task registered.
     uint16_t currentStratum = 0;
-    CHECK_FALSE(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true));
+    CHECK_FALSE(
+        preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true).progress());
 
     auto task = make_shared<ReschedulingTask>(2);
 
@@ -571,7 +587,8 @@ TEST_CASE("RescheduledPreemptionTasksClearOnSuccessWrongStratum") {
 
     CHECK(gs->epochManager->tryCommitEpoch(*gs, 2, true, preemptManager, [&]() {
         // This should run scheduled task, but not clear it.
-        CHECK(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true));
+        CHECK(
+            preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true).progress());
         CHECK_EQ(1, task->runCount);
         return 1;
     }));

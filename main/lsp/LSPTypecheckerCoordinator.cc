@@ -165,7 +165,9 @@ public:
         }
     }
 
-    optional<uint16_t> run(uint16_t currentStratum) override {
+    RunResult run(uint16_t currentStratum) override {
+        RunResult result;
+
         // Destruct timer, if specified. Causes metric to be reported.
         this->timeUntilRun = nullptr;
 
@@ -187,7 +189,9 @@ public:
                     task->index(indexer);
                 }
             }
+
             prodCategoryCounterInc("lsp.messages.processed", task->methodString());
+            result.setTasksHandled();
 
             if (task->finalPhase() == LSPTask::Phase::INDEX) {
                 continue;
@@ -197,7 +201,7 @@ public:
             task->run(this->delegate);
         }
 
-        return nullopt;
+        return result;
     }
 
     void finish() override {
