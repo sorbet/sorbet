@@ -319,7 +319,8 @@ ExpressionPtr desugarDString(DesugarContext dctx, core::LocOffsets loc, parser::
         return mergeStrings(dctx, loc, move(stringsAccumulated));
     } else {
         auto recv = MK::Magic(loc);
-        return MK::Send(loc, move(recv), core::Names::stringInterpolate(), loc.copyWithZeroLength(), interpArgs.size(),
+        auto numPosArgs = interpArgs.size();
+        return MK::Send(loc, move(recv), core::Names::stringInterpolate(), loc.copyWithZeroLength(), numPosArgs,
                         move(interpArgs));
     }
 }
@@ -2142,7 +2143,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     // No enclosing block arg can happen when e.g. yield is called in a class / at the top-level.
                     recv = MK::RaiseUnimplemented(loc);
                 }
-                ExpressionPtr res = MK::Send(loc, move(recv), core::Names::call(), locZeroLen, args.size(), move(args));
+                auto numPosArgs = args.size();
+                ExpressionPtr res = MK::Send(loc, move(recv), core::Names::call(), locZeroLen, numPosArgs, move(args));
                 result = move(res);
             },
             [&](parser::Rescue *rescue) {
@@ -2268,7 +2270,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     move(patterns.begin(), patterns.end(), back_inserter(args));
                     move(bodies.begin(), bodies.end(), back_inserter(args));
 
-                    result = MK::Send(loc, MK::Magic(locZeroLen), core::Names::caseWhen(), locZeroLen, args.size(),
+                    auto numPosArgs = args.size();
+                    result = MK::Send(loc, MK::Magic(locZeroLen), core::Names::caseWhen(), locZeroLen, numPosArgs,
                                       move(args));
                     return;
                 }

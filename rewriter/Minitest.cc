@@ -137,7 +137,8 @@ ast::ExpressionPtr addSigVoid(core::Context ctx, ast::ExpressionPtr expr) {
         ENFORCE(false, "Added a sig to something that wasn't a method def");
         declLoc = expr.loc();
     }
-    return ast::MK::InsSeq1(expr.loc(), ast::MK::SigVoid(declLoc, {}), std::move(expr));
+    auto exprLoc = expr.loc();
+    return ast::MK::InsSeq1(exprLoc, ast::MK::SigVoid(declLoc, {}), std::move(expr));
 }
 
 core::LocOffsets declLocForSendWithBlock(const ast::Send &send) {
@@ -427,7 +428,8 @@ ast::ExpressionPtr runUnderParameterized(core::MutableContext ctx, core::NameRef
                 for (auto &stmt : destructuringStmts) {
                     stmts.emplace_back(stmt.deepCopy());
                 }
-                body = ast::MK::InsSeq(body.loc(), std::move(stmts), std::move(body));
+                auto bodyLoc = body.loc();
+                body = ast::MK::InsSeq(bodyLoc, std::move(stmts), std::move(body));
             }
         }
 

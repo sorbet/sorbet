@@ -43,7 +43,8 @@ void TestCase::run(core::MutableContext ctx, ast::ClassDef *klass) {
         auto snake_case_name = absl::StrReplaceAll(arg0->asString().toString(ctx), {{" ", "_"}});
         auto name = ctx.state.enterNameUTF8("test_" + snake_case_name);
         auto method = ast::MK::SyntheticMethod0(loc, loc, name, std::move(block->body));
-        auto method_with_sig = ast::MK::InsSeq1(method.loc(), ast::MK::SigVoid(method.loc(), {}), std::move(method));
+        auto methodLoc = method.loc();
+        auto method_with_sig = ast::MK::InsSeq1(methodLoc, ast::MK::SigVoid(methodLoc, {}), std::move(method));
 
         stats.emplace_back(std::move(method_with_sig));
     }
@@ -59,8 +60,9 @@ void TestCase::run(core::MutableContext ctx, ast::ClassDef *klass) {
                 send->fun == core::Names::setup() ? core::Names::beforeAngles() : core::Names::teardown();
 
             auto method = ast::MK::SyntheticMethod0(loc, loc, method_name, std::move(block->body));
+            auto methodLoc = method.loc();
             auto method_with_sig =
-                ast::MK::InsSeq1(method.loc(), ast::MK::SigVoid(method.loc(), {}), std::move(method));
+                ast::MK::InsSeq1(methodLoc, ast::MK::SigVoid(methodLoc, {}), std::move(method));
 
             stats.emplace_back(std::move(method_with_sig));
         }

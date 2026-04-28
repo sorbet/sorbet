@@ -37,7 +37,8 @@ void ErrorQueue::flushErrorsForFile(const GlobalState &gs, FileRef file) {
 
     core::ErrorQueueMessage msg;
     for (auto result = queue.try_pop(msg); result.gotItem(); result = queue.try_pop(msg)) {
-        collected[msg.whatFile].emplace_back(make_unique<ErrorQueueMessage>(move(msg)));
+        auto whatFile = msg.whatFile;
+        collected[whatFile].emplace_back(make_unique<ErrorQueueMessage>(move(msg)));
     }
 
     errorFlusher->flushErrors(logger, gs, file, move(collected[file]));
@@ -78,7 +79,8 @@ UnorderedMap<core::FileRef, vector<unique_ptr<core::ErrorQueueMessage>>> ErrorQu
 
     core::ErrorQueueMessage msg;
     for (auto result = queue.try_pop(msg); result.gotItem(); result = queue.try_pop(msg)) {
-        collected[msg.whatFile].emplace_back(make_unique<ErrorQueueMessage>(move(msg)));
+        auto whatFile = msg.whatFile;
+        collected[whatFile].emplace_back(make_unique<ErrorQueueMessage>(move(msg)));
     }
 
     auto out = std::move(collected);

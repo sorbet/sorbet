@@ -63,7 +63,8 @@ vector<ast::ExpressionPtr> ClassNew::run(core::MutableContext ctx, ast::Assign *
     auto *block = send->block();
     if (block != nullptr && block->params.size() == 1) {
         auto blockParam = move(block->params[0]);
-        body.emplace_back(ast::MK::Assign(blockParam.loc(), move(blockParam), asgn->lhs.deepCopy()));
+        auto blockParamLoc = blockParam.loc();
+        body.emplace_back(ast::MK::Assign(blockParamLoc, move(blockParam), asgn->lhs.deepCopy()));
     }
 
     if (block != nullptr) {

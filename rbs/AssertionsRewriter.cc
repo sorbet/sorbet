@@ -264,9 +264,11 @@ AssertionsRewriter::insertCast(unique_ptr<parser::Node> node,
     maybeSupplyGenericTypeArguments(ctx, &node, &type);
 
     if (kind == InlineComment::Kind::LET) {
-        return parser::MK::TLet(type->loc, move(node), move(type));
+        auto loc = type->loc;
+        return parser::MK::TLet(loc, move(node), move(type));
     } else if (kind == InlineComment::Kind::CAST) {
-        return parser::MK::TCast(type->loc, move(node), move(type));
+        auto loc = type->loc;
+        return parser::MK::TCast(loc, move(node), move(type));
     } else if (kind == InlineComment::Kind::MUST) {
         return parser::MK::TMust(type->loc, move(node));
     } else if (kind == InlineComment::Kind::UNSAFE) {
@@ -327,8 +329,9 @@ unique_ptr<parser::Node> AssertionsRewriter::replaceSyntheticBind(unique_ptr<par
     }
 
     auto type = move(pair->first);
+    auto loc = type->loc;
 
-    return parser::MK::TBindSelf(type->loc, move(type));
+    return parser::MK::TBindSelf(loc, move(type));
 }
 
 /**

@@ -641,8 +641,9 @@ ast::ExpressionPtr Desugarer::desugarDString(core::LocOffsets loc, pm_node_list 
     }
 
     auto recv = MK::Magic(loc);
+    auto numPosArgs = static_cast<uint16_t>(interpArgs.size());
     return MK::Send(loc, move(recv), core::Names::stringInterpolate(), loc.copyWithZeroLength(),
-                    static_cast<uint16_t>(interpArgs.size()), move(interpArgs));
+                    numPosArgs, move(interpArgs));
 }
 
 // Desugars a conditional send, like so:
@@ -2046,7 +2047,8 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
 
             auto predicate = desugar(caseMatchNode->predicate);
             auto tempName = nextUniqueDesugarName(core::Names::assignTemp());
-            auto assignExpr = MK::Assign(predicate.loc(), tempName, move(predicate));
+            auto predicateLoc = predicate.loc();
+            auto assignExpr = MK::Assign(predicateLoc, tempName, move(predicate));
 
             return MK::InsSeq1(location, move(assignExpr), move(resultExpr));
         }
@@ -2110,7 +2112,8 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
                 args.emplace_back(move(elseClause));
 
                 // Desugar to `::Magic.caseWhen(predicate, num_patterns, patterns..., bodies..., else)`
-                return MK::Send(location, MK::Magic(locZeroLen), core::Names::caseWhen(), locZeroLen, args.size(),
+                auto numPosArgs = args.size();
+                return MK::Send(location, MK::Magic(locZeroLen), core::Names::caseWhen(), locZeroLen, numPosArgs,
                                 move(args));
             }
 
@@ -2172,8 +2175,9 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
                     if (patternsResult == nullptr) {
                         patternsResult = move(testExpr);
                     } else {
-                        auto trueExpr = MK::True(testExpr.loc());
-                        patternsResult = MK::If(testExpr.loc(), move(testExpr), move(trueExpr), move(patternsResult));
+                        auto testExprLoc = testExpr.loc();
+                        auto trueExpr = MK::True(testExprLoc);
+                        patternsResult = MK::If(testExprLoc, move(testExpr), move(trueExpr), move(patternsResult));
                     }
                 }
 
@@ -2453,15 +2457,17 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
 
                     absl::c_reverse(args);
                     auto argLoc = translateLoc(definedNode->value->location);
+                    auto numPosArgs = args.size();
                     return MK::Send(argLoc, MK::Magic(argLoc), core::Names::defined_p(), location.copyWithZeroLength(),
-                                    args.size(), move(args));
+                                    numPosArgs, move(args));
                 }
                 default: {
                     // All other cases desugar to `::Magic.defined?()` with 0 arguments
                     ast::Send::ARGS_store args;
                     auto argLoc = translateLoc(definedNode->value->location);
+                    auto numPosArgs = args.size();
                     return MK::Send(argLoc, MK::Magic(argLoc), core::Names::defined_p(), location.copyWithZeroLength(),
-                                    args.size(), move(args));
+                                    numPosArgs, move(args));
                 }
             }
         }
@@ -2759,7 +2765,8 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
 
             auto argExprs = desugarArguments<ast::Send::ARGS_store>(indexedTargetNode->arguments);
 
-            return MK::Send(location, move(receiver), core::Names::squareBracketsEq(), lBracketLoc, argExprs.size(),
+            auto numPosArgs = argExprs.size();
+            return MK::Send(location, move(receiver), core::Names::squareBracketsEq(), lBracketLoc, numPosArgs,
                             move(argExprs));
         }
         case PM_INSTANCE_VARIABLE_AND_WRITE_NODE: { // And-assignment to an instance variable, e.g. `@iv &&= false`
@@ -3343,8 +3350,9 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
             ENFORCE(undefNode->names.size > 0, "PM_UNDEF_NODE without names is expected to be a parse error");
 
             auto args = nodeListToStore<ast::Send::ARGS_store>(undefNode->names);
+            auto numPosArgs = args.size();
             auto expr = MK::Send(location, MK::Constant(location, core::Symbols::Kernel()), core::Names::undef(),
-                                 location.copyWithZeroLength(), args.size(), std::move(args));
+                                 location.copyWithZeroLength(), numPosArgs, std::move(args));
             // It wasn't a Send to begin with--there's no way this could result in a private
             // method call error.
             ast::cast_tree_nonnull<ast::Send>(expr).flags.isPrivateOk = true;
@@ -3435,8 +3443,9 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
                 recv = MK::RaiseUnimplemented(location);
             }
 
+            auto numPosArgs = yieldArgs.size();
             return MK::Send(location, std::move(recv), core::Names::call(), location.copyWithZeroLength(),
-                            yieldArgs.size(), std::move(yieldArgs));
+                            numPosArgs, std::move(yieldArgs));
         }
 
         case PM_ALTERNATION_PATTERN_NODE: // A pattern like `1 | 2`
