@@ -15,8 +15,8 @@ ReferencesTask::ReferencesTask(const LSPConfiguration &config, MessageId id, uni
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentReferences), params(move(params)),
       hierarchyReferences(hierarchyReferences) {}
 
-bool ReferencesTask::needsMultithreading(const LSPIndexer &indexer) const {
-    return true;
+bool ReferencesTask::canPreempt(const LSPIndexer &indexer) const {
+    return false;
 }
 
 namespace {

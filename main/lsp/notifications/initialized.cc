@@ -28,8 +28,8 @@ void InitializedTask::run(LSPTypecheckerDelegate &typechecker) {
     typechecker.resumeTaskQueue(*this);
 }
 
-bool InitializedTask::needsMultithreading(const LSPIndexer &indexer) const {
-    return true;
+bool InitializedTask::canPreempt(const LSPIndexer &indexer) const {
+    return false;
 }
 
 void InitializedTask::setGlobalState(unique_ptr<core::GlobalState> gs) {

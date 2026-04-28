@@ -75,8 +75,6 @@ public:
 
     virtual bool canPreempt(const LSPIndexer &) const;
 
-    virtual bool needsMultithreading(const LSPIndexer &) const;
-
     // Returns the phase at which the task is complete. Some tasks only need to interface with the preprocessor or the
     // indexer. The default implementation returns RUN.
     virtual Phase finalPhase() const;
