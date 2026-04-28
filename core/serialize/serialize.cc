@@ -1171,6 +1171,9 @@ vector<uint8_t> Serializer::storeNameTableDiffCountAndHashSize(uint32_t count, c
     p.putU4(Serializer::VERSION);
     p.putU4(count);
     p.putU4(gs.namesByHash.size());
+    p.putU4(gs.utf8Names.size());
+    p.putU4(gs.constantNames.size());
+    p.putU4(gs.uniqueNames.size());
     return p.result();
 }
 
@@ -1186,7 +1189,13 @@ uint32_t Serializer::loadNameTableDiffCountAndResizeNamesHash(GlobalState &gs, c
     }
     auto diffCount = p.getU4();
     auto namesByHashSize = p.getU4();
+    auto utf8NamesSize = p.getU4();
+    auto constantNamesSize = p.getU4();
+    auto uniqueNamesSize = p.getU4();
     gs.namesByHash.resize(namesByHashSize);
+    gs.utf8Names.reserve(nextPowerOfTwo(utf8NamesSize));
+    gs.constantNames.reserve(nextPowerOfTwo(constantNamesSize));
+    gs.uniqueNames.reserve(nextPowerOfTwo(uniqueNamesSize));
     return diffCount;
 }
 
