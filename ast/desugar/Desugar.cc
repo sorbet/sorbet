@@ -304,7 +304,7 @@ ExpressionPtr desugarDString(DesugarContext dctx, core::LocOffsets loc, parser::
         auto &stat = *it;
         ExpressionPtr narg = node2TreeImpl(dctx, stat);
         if (allStringsSoFar && isStringLit(dctx, narg)) {
-            stringsAccumulated.emplace_back(move(narg));
+            stringsAccumulated.emplace_back(move(narg)); // NOLINT(bugprone-use-after-move)
         } else if (isa_tree<EmptyTree>(narg)) {
             // no op
         } else {

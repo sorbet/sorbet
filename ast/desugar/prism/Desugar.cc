@@ -622,7 +622,7 @@ ast::ExpressionPtr Desugarer::desugarDString(core::LocOffsets loc, pm_node_list 
         auto expr = desugar(prismNode);
 
         if (allStringsSoFar && isStringLit(expr)) {
-            stringsAccumulated.emplace_back(move(expr));
+            stringsAccumulated.emplace_back(move(expr)); // NOLINT(bugprone-use-after-move)
         } else {
             if (allStringsSoFar) {
                 // Transition from all strings to mixed content
