@@ -529,11 +529,11 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
     for (auto &stratumAssertion : RangeAssertion::getAssertions<StratumAssertion>(assertions)) {
         auto file = gs->findFileByPath(stratumAssertion->filename);
-        int actualStratum = strata.fileToStratum[file.id()];
+        auto actualStratum = strata.fileToStratum[file.id()];
         if (actualStratum != stratumAssertion->value) {
             ADD_FAIL_CHECK_AT(stratumAssertion->filename.c_str(), stratumAssertion->assertionLine + 1,
-                              "Expected " << stratumAssertion->filename << " at stratum " << stratumAssertion->value
-                                          << "; got " << actualStratum);
+                              "Expected " << stratumAssertion->filename << " at stratum "
+                                          << stratumAssertion->value.rawId() << "; got " << actualStratum.rawId());
         }
     }
 

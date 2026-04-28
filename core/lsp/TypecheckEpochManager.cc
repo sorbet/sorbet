@@ -63,7 +63,7 @@ bool TypecheckEpochManager::tryCancelSlowPath(uint32_t newEpoch) {
 
 bool TypecheckEpochManager::tryCommitEpoch(core::GlobalState &gs, uint32_t epoch, bool isCancelable,
                                            shared_ptr<PreemptionTaskManager> preemptionManager,
-                                           function<uint16_t()> typecheck) {
+                                           function<packages::Stratum()> typecheck) {
     assertConsistentThread(typecheckingThreadId, "TypecheckEpochManager::tryCommitEpoch", "typechecking");
     if (!isCancelable) {
         typecheck();
