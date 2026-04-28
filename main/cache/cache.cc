@@ -95,6 +95,8 @@ bool retainGlobalState(core::GlobalState &gs, const unique_ptr<OwnedKeyValueStor
         gs.kvstoreUuid = Random::uniformU4();
         kvstore->write(core::serialize::Serializer::NAME_TABLE_UUID_KEY, core::serialize::Serializer::storeUUID(gs));
 
+        // Write the diff entry before updating the metadata (diff count + hash size), so that a
+        // failure to write the diff doesn't corrupt the existing cached data.
         kvstore->write(core::serialize::Serializer::nameTableDiffKey(gs.getNameTableDiffCount()),
                        core::serialize::Serializer::storeNameTableDiff(gs));
 

@@ -60,9 +60,11 @@ void createInitialGlobalState(core::GlobalState &gs, const realmain::options::Op
     // We can use the kvstore to read in the cached name table. We read this in after the payload has been initialized,
     // as the cached name table will extend the payload's existing table when the sorbet versions match.
 
-    // Fails if this is uncommented
-    // TODO: explain why
-    // gs.markNameTableAsCached();
+    // We've just read the payload from the cache, so it would make sense to call gs.markNameTableAsCached() here. That
+    // way, we wouldn't to store the payload to the cache again in the name table cache for the first stratum. However,
+    // when we start readingthe cache entries for non payload names, we'll resize the names hash, which makes the
+    // entries added from the payload invalid. To get around this, we don't mark the name table as cached, and then just
+    // store the names from the payload again.
 
     if (kvstore) {
         auto maybeUUIDBytes = kvstore->read(core::serialize::Serializer::NAME_TABLE_UUID_KEY);
