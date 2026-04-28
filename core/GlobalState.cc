@@ -357,6 +357,7 @@ void GlobalState::initEmpty() {
     ENFORCE_NO_TIMER(klass == Symbols::TSingleton());
     klass = synthesizeClass(core::Names::Constants::Class(), 0);
     ENFORCE_NO_TIMER(klass == Symbols::Class());
+    // Unlike some other classes that pass `0` here, BasicObject *actually* has no superclass, similar to `top`.
     klass = synthesizeClass(core::Names::Constants::BasicObject(), 0);
     ENFORCE_NO_TIMER(klass == Symbols::BasicObject());
     method = enterMethod(*this, Symbols::BasicObject(), Names::initialize()).build();
@@ -904,6 +905,11 @@ void GlobalState::initEmpty() {
         }
         classAndModules[i].singletonClass(*this);
     }
+
+    // top() and BasicObject have no superclass, so their singleton classes can't use the
+    // normal "follow the attached class's superclass" logic in finalizeAncestors.
+    Symbols::top().data(*this)->singletonClass(*this).data(*this)->setSuperClass(Symbols::Class());
+    Symbols::BasicObject().data(*this)->singletonClass(*this).data(*this)->setSuperClass(Symbols::Class());
 
     // This fills in all the way up to MAX_SYNTHETIC_CLASS_SYMBOLS
     ENFORCE_NO_TIMER(classAndModules.size() < Symbols::Proc0().id());
