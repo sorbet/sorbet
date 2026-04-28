@@ -1143,7 +1143,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                                                     numPosArgs, move(mergeValues))));
                         }
 
-                        mergeValues.clear();
+                        mergeValues = decltype(mergeValues){};
                         mergeValues.emplace_back(MK::Local(loc, acc));
                     }
 

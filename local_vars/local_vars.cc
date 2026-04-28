@@ -327,7 +327,7 @@ class LocalNameInserter {
                     posArgsArray = ast::MK::Send1(
                         zSuperArgsLoc, ast::MK::Array(zSuperArgsLoc, std::move(posArgsEntries)), core::Names::concat(),
                         zSuperArgsLoc.copyWithZeroLength(), std::move(posArgsArray));
-                    posArgsEntries.clear();
+                    posArgsEntries = decltype(posArgsEntries){};
                 }
             } else if (arg.flags.isKeyword()) {
                 ENFORCE(kwArgsHash == nullptr, "Saw keyword arg after keyword splat");
@@ -350,8 +350,8 @@ class LocalNameInserter {
                         zSuperArgsLoc,
                         ast::MK::Hash(zSuperArgsLoc, std::move(kwArgKeyEntries), std::move(kwArgValueEntries)),
                         core::Names::merge(), zSuperArgsLoc.copyWithZeroLength(), std::move(kwArgsHash));
-                    kwArgKeyEntries.clear();
-                    kwArgValueEntries.clear();
+                    kwArgKeyEntries = decltype(kwArgKeyEntries){};
+                    kwArgValueEntries = decltype(kwArgValueEntries){};
                 }
             } else if (arg.flags.block) {
                 if (arg.arg._name != core::Names::blkArg() || !isStrictFile) {
@@ -369,7 +369,7 @@ class LocalNameInserter {
             posArgsArray = ast::MK::Send1(original.loc, std::move(posArgsArray), core::Names::concat(),
                                           original.loc.copyWithZeroLength(),
                                           ast::MK::Array(original.loc, std::move(posArgsEntries)));
-            posArgsEntries.clear();
+            posArgsEntries = decltype(posArgsEntries){};
         }
 
         auto method = ast::MK::Literal(original.loc,
@@ -444,7 +444,7 @@ class LocalNameInserter {
             newArgs.push_back(std::move(blockArg));
 
             absl::c_move(std::move(posArgsEntries), std::back_inserter(newArgs));
-            posArgsEntries.clear();
+            posArgsEntries = decltype(posArgsEntries){};
 
             newNumPosArgs = newArgs.size();
 
@@ -467,7 +467,7 @@ class LocalNameInserter {
                             int(kwArgsHash != nullptr) + /* hasBlock */ int(originalBlock != nullptr));
 
             absl::c_move(std::move(posArgsEntries), std::back_inserter(newArgs));
-            posArgsEntries.clear();
+            posArgsEntries = decltype(posArgsEntries){};
 
             newNumPosArgs = newArgs.size();
 

@@ -4893,7 +4893,7 @@ ast::ExpressionPtr Desugarer::desugarKeyValuePairs(core::LocOffsets loc, pm_node
                                                              locZeroLen, numPosArgs, move(mergeValues))));
             }
 
-            mergeValues.clear();
+            mergeValues = decltype(mergeValues){};
             mergeValues.emplace_back(MK::Local(loc, acc));
         }
 

@@ -265,7 +265,7 @@ Comments SigsRewriter::commentsForNode(parser::Node *node) {
                     // down the line
                     comments.signatures.emplace_back(
                         RBSDeclaration{move(declaration_comments)}); // Save current declaration
-                    declaration_comments.clear();
+                    declaration_comments = decltype(declaration_comments){};
                     declaration_comments.emplace_back(move(comment));
                 }
                 continue;

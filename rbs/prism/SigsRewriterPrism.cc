@@ -296,7 +296,7 @@ CommentsPrism SigsRewriterPrism::commentsForNode(pm_node_t *node) {
                 declarationComments.emplace_back(move(comment));
             } else {
                 comments.signatures.emplace_back(RBSDeclaration{move(declarationComments)});
-                declarationComments.clear();
+                declarationComments = decltype(declarationComments){};
                 declarationComments.emplace_back(move(comment));
             }
             continue;
