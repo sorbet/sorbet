@@ -1086,35 +1086,38 @@ void SerializerImpl::pickleNameTableDiff(Pickler &p, const GlobalState &gs) {
 void SerializerImpl::unpickleNameTableDiff(UnPickler &p, GlobalState &result) {
     auto startUtf8 = p.getU4();
     auto numNewUtf8 = p.getU4();
+    ENFORCE(result.utf8Names.size() == startUtf8);
 
-    for (uint32_t i = 0; i < numNewUtf8; i++) {
+    for (uint32_t i = startUtf8; i < startUtf8 + numNewUtf8; i++) {
         auto hash = p.getU4();
         result.utf8Names.emplace_back(unpickleUTF8Name(p, result));
         auto &bucket = result.namesByHash.lookupBucket(hash, NameHash::Bucket::isEmpty());
         bucket.hash = hash;
-        bucket.rawId = core::NameRef(result, core::NameKind::UTF8, startUtf8 + i).rawId();
+        bucket.rawId = core::NameRef(result, core::NameKind::UTF8, i).rawId();
     }
 
     auto startConstant = p.getU4();
     auto numNewConstant = p.getU4();
+    ENFORCE(result.constantNames.size() == startConstant);
 
-    for (uint32_t i = 0; i < numNewConstant; i++) {
+    for (uint32_t i = startConstant; i < startConstant + numNewConstant; i++) {
         auto hash = p.getU4();
         result.constantNames.emplace_back(unpickleConstantName(p, result));
         auto &bucket = result.namesByHash.lookupBucket(hash, NameHash::Bucket::isEmpty());
         bucket.hash = hash;
-        bucket.rawId = core::NameRef(result, core::NameKind::CONSTANT, startConstant + i).rawId();
+        bucket.rawId = core::NameRef(result, core::NameKind::CONSTANT, i).rawId();
     }
 
     auto startUnique = p.getU4();
     auto numNewUnique = p.getU4();
+    ENFORCE(result.uniqueNames.size() == startUnique);
 
-    for (uint32_t i = 0; i < numNewUnique; i++) {
+    for (uint32_t i = startUnique; i < startUnique + numNewUnique; i++) {
         auto hash = p.getU4();
         result.uniqueNames.emplace_back(unpickleUniqueName(p, result));
         auto &bucket = result.namesByHash.lookupBucket(hash, NameHash::Bucket::isEmpty());
         bucket.hash = hash;
-        bucket.rawId = core::NameRef(result, core::NameKind::UNIQUE, startUnique + i).rawId();
+        bucket.rawId = core::NameRef(result, core::NameKind::UNIQUE, i).rawId();
     }
 }
 
