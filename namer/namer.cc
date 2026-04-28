@@ -682,6 +682,18 @@ public:
             }
         }
     }
+
+    void postTransformUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
+        auto &scope = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(tree).scope;
+        ast::TreeWalk::apply(ctx, *this, scope);
+    }
+
+    void postTransformConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
+        auto original = ast::cast_tree_nonnull<ast::ConstantLit>(tree).original();
+        if (original != nullptr) {
+            ast::TreeWalk::apply(ctx, *this, original->scope);
+        }
+    }
 };
 
 using BehaviorLocs = InlinedVector<core::Loc, 1>;

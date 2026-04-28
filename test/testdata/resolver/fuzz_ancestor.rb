@@ -19,3 +19,10 @@ class A
   #          ^ error: `include` must only contain constant literals
   #          ^ error: Method `c` does not exist on `T.class_of(A)`
 end
+
+  (class A < 0;end)::B
+  #          ^ error: Superclasses must only contain constant literals
+# ^^^^^^^^^^^^^^^^^^^^ error: Dynamic constant references are unsupported
+  (class A < puts;end)::B
+  #          ^^^^ error: Superclasses must only contain constant literals
+# ^^^^^^^^^^^^^^^^^^^^^^^ error: Dynamic constant references are unsupported
