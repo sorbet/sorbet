@@ -19,7 +19,7 @@ using namespace std;
 auto logger = spdlog::stderr_color_mt("parser_test");
 auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 
-TEST_CASE("SimpleParse") { // NOLINT
+TEST_CASE("SimpleParse") {
     sorbet::core::GlobalState gs(errorQueue);
     gs.initEmpty();
     sorbet::core::UnfreezeNameTable nameTableAccess(gs);
@@ -39,7 +39,7 @@ struct DedentTest {
     string_view out;
 };
 
-TEST_CASE("TestDedent") { // NOLINT
+TEST_CASE("TestDedent") {
     vector<DedentTest> cases = {
         {2, "    hi"sv, "  hi"sv},
         {10, "  \t    hi"sv, "  hi"sv},

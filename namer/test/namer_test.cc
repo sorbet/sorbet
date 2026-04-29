@@ -76,7 +76,7 @@ TEST_CASE("namer tests") {
         REQUIRE_EQ(1, symbol->parameters.size());
     }
 
-    SUBCASE("Idempotent") { // NOLINT
+    SUBCASE("Idempotent") {
         auto baseSymbols = gs.symbolsUsedTotal();
         auto baseMethods = gs.methodsUsed();
         auto baseNames = gs.namesUsedTotal();
@@ -107,7 +107,7 @@ TEST_CASE("namer tests") {
         REQUIRE_EQ(baseNames + 2, gs.namesUsedTotal());
     }
 
-    SUBCASE("NameClass") { // NOLINT
+    SUBCASE("NameClass") {
         auto tree = getTree(gs, "class Test; class Foo; end; end");
         {
             auto localTree = sorbet::local_vars::LocalVars::run(gs, move(tree));
@@ -127,7 +127,7 @@ TEST_CASE("namer tests") {
         REQUIRE_EQ(1, fooInfo->members().size());
     }
 
-    SUBCASE("InsideClass") { // NOLINT
+    SUBCASE("InsideClass") {
         auto tree = getTree(gs, "class Test; class Foo; def bar; end; end; end");
         {
             auto localTree = sorbet::local_vars::LocalVars::run(gs, move(tree));

@@ -21,7 +21,7 @@ using namespace std;
 auto logger = spdlog::stderr_color_mt("desugar_test");
 auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 
-TEST_CASE("SimpleDesugar") { // NOLINT
+TEST_CASE("SimpleDesugar") {
     sorbet::core::GlobalState gs(errorQueue);
     gs.initEmpty();
     sorbet::core::UnfreezeNameTable nameTableAccess(gs);
@@ -34,7 +34,7 @@ TEST_CASE("SimpleDesugar") { // NOLINT
     auto o1 = sorbet::ast::desugar::node2Tree(ctx, move(ast));
 }
 
-TEST_CASE("SimplePrismDesugar") { // NOLINT
+TEST_CASE("SimplePrismDesugar") {
     sorbet::core::GlobalState gs(errorQueue);
     gs.initEmpty();
     sorbet::core::UnfreezeNameTable nameTableAccess(gs);

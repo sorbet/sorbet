@@ -8,7 +8,7 @@
 
 namespace sorbet::common {
 
-TEST_CASE("Levenstein") { // NOLINT
+TEST_CASE("Levenstein") {
     Levenstein levenstein;
     CHECK_EQ(2, levenstein.distance("Mama", "Papa", 10));
     CHECK_EQ(5, levenstein.distance("Ruby", "Scala", 10));

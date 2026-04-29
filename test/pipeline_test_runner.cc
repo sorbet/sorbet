@@ -448,7 +448,7 @@ void autogen(core::GlobalState &gs, vector<core::FileRef> files, ExpectationHand
     handler.checkExpectations();
 }
 
-TEST_CASE("PerPhaseTest") { // NOLINT
+TEST_CASE("PerPhaseTest") {
     Expectations test = Expectations::getExpectations(singleTest);
 
     auto inputPath = test.folder + test.basename;
