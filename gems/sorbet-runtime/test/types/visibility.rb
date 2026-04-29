@@ -186,4 +186,82 @@ class Opus::Types::Test::VisibilityTest < Critic::Unit::UnitTest
 
     T::Private::Abstract::Validate.validate_subclass(child)
   end
+
+  describe "DSL methods forms" do
+    it "both DSL" do
+      parent = Class.new do
+        extend T::Sig, T::Sig::DSL, T::Helpers
+        abstract!
+        sig { void }
+        abstract def foo; end
+      end
+      child = Class.new(parent) do
+        extend T::Sig, T::Sig::DSL
+        sig { void }
+        private override def foo; end
+      end
+      err = assert_raises(RuntimeError) do
+        T::Private::Abstract::Validate.validate_subclass(child)
+      end
+      assert_includes(err.message, "Incompatible visibility")
+      assert_includes(err.message, "at least as permissive")
+    end
+
+    it "only parent DSL" do
+      parent = Class.new do
+        extend T::Sig, T::Sig::DSL, T::Helpers
+        abstract!
+        sig { void }
+        abstract def foo; end
+      end
+      child = Class.new(parent) do
+        extend T::Sig
+        sig { override.void }
+        private def foo; end
+      end
+      err = assert_raises(RuntimeError) do
+        T::Private::Abstract::Validate.validate_subclass(child)
+      end
+      assert_includes(err.message, "Incompatible visibility")
+      assert_includes(err.message, "at least as permissive")
+    end
+
+    it "only child DSL" do
+      parent = Class.new do
+        extend T::Sig, T::Helpers
+        abstract!
+        sig { abstract.void }
+        def foo; end
+      end
+      child = Class.new(parent) do
+        extend T::Sig, T::Sig::DSL
+        sig { void }
+        private override def foo; end
+      end
+      err = assert_raises(RuntimeError) do
+        T::Private::Abstract::Validate.validate_subclass(child)
+      end
+      assert_includes(err.message, "Incompatible visibility")
+      assert_includes(err.message, "at least as permissive")
+    end
+
+    it "override private" do
+      parent = Class.new do
+        extend T::Sig, T::Helpers
+        abstract!
+        sig { abstract.void }
+        def foo; end
+      end
+      child = Class.new(parent) do
+        extend T::Sig, T::Sig::DSL
+        sig { void }
+        override private def foo; end
+      end
+      err = assert_raises(RuntimeError) do
+        T::Private::Abstract::Validate.validate_subclass(child)
+      end
+      assert_includes(err.message, "Incompatible visibility")
+      assert_includes(err.message, "at least as permissive")
+    end
+  end
 end
