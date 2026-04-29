@@ -165,13 +165,15 @@ bool ASTUtil::hasTruthyHashValue(core::MutableContext ctx, const ast::Hash &hash
 
 pair<ast::ExpressionPtr, ast::ExpressionPtr> ASTUtil::extractHashValue(core::MutableContext ctx, ast::Hash &hash,
                                                                        core::NameRef name) {
-    for (auto [keyExpr, valExpr] : hash.kviter()) {
-        auto key = ast::cast_tree<ast::Literal>(keyExpr);
+    for (size_t idx = 0; idx < hash.keys.size() && idx < hash.values.size(); idx++) {
+        auto key = ast::cast_tree<ast::Literal>(hash.keys[idx]);
         if (key && key->isSymbol() && key->asSymbol() == name) {
-            auto key = std::move(keyExpr);
-            auto value = std::move(valExpr);
-            hash.keys.erase(&keyExpr);
-            hash.values.erase(&valExpr);
+            auto key = move(hash.keys[idx]);
+            hash.keys.erase(hash.keys.begin() + idx);
+
+            auto value = move(hash.values[idx]);
+            hash.values.erase(hash.values.begin() + idx);
+
             return make_pair(move(key), move(value));
         }
     }
