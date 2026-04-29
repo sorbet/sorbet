@@ -36,3 +36,5 @@ if command -v jq &> /dev/null; then
 else
   cp bazel-bin/tools/compile_commands.json compile_commands.json
 fi
+
+echo '[ .. ] Wrote ./compile_commands.json'
