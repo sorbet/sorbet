@@ -21,7 +21,7 @@ const vector<string> PackageHelpers::LAYERS_LIB_APP = {"lib", "app"};
 const vector<string> PackageHelpers::LAYERS_UTIL_LIB_APP = {"util", "lib", "app"};
 
 string PackageTextBuilder::build() {
-    string out = fmt::format("class {} < PackageSpec\n", this->name);
+    string out = fmt::format("# typed: strict\n\nclass {} < PackageSpec\n", this->name);
 
     if (this->preludePackage) {
         fmt::format_to(back_inserter(out), "  prelude_package\n");
