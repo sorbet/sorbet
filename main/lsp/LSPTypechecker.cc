@@ -859,22 +859,6 @@ vector<unique_ptr<core::Error>> LSPTypechecker::retypecheck(vector<core::FileRef
     return errorCollector->drainErrors();
 }
 
-core::packages::Stratum LSPTypechecker::getStratumForEdit(absl::Span<const core::FileRef> edit) const {
-    core::packages::Stratum stratum(0);
-
-    for (auto fref : edit) {
-        if (fref.id() >= this->fileToStratum.size()) {
-            // Indicate that this can only run at the end of the slow path, as we don't have any information about this
-            // file.
-            return this->lastStratum;
-        }
-
-        stratum = std::max(stratum, this->fileToStratum[fref.id()]);
-    }
-
-    return stratum;
-}
-
 ast::ExpressionPtr LSPTypechecker::getLocalVarTrees(core::FileRef fref) const {
     auto preserveConcreteSyntax = true;
     auto afterDesugar = pipeline::desugarOne(config->opts, *gs, fref, preserveConcreteSyntax);
@@ -986,6 +970,33 @@ void LSPTypechecker::updateConfigAndGsFromOptions(const DidChangeConfigurationPa
     }
 }
 
+core::packages::Stratum FileStratumMapping::getStratumForUris(absl::Span<const string_view> paths) const {
+    core::packages::Stratum stratum(0);
+    for (auto path : paths) {
+        auto ref = this->tc.state().findFileByPath(path);
+
+        // Fall back on the last stratum for new files.
+        if (!ref.exists()) {
+            return this->tc.lastStratum;
+        }
+
+        stratum = std::max(stratum, this->tc.fileToStratum[ref.id()]);
+    }
+
+    return stratum;
+}
+
+core::packages::Stratum FileStratumMapping::getStratumForUri(std::string_view path) const {
+    auto ref = this->tc.state().findFileByPath(path);
+
+    // Fall back on the last stratum for new files.
+    if (!ref.exists()) {
+        return this->tc.lastStratum;
+    }
+
+    return this->tc.fileToStratum[ref.id()];
+}
+
 LSPTypecheckerDelegate::LSPTypecheckerDelegate(TaskQueue &queue, WorkerPool &workers, LSPTypechecker &typechecker)
     : typechecker(typechecker), queue{queue}, workers(workers) {}
 
@@ -1040,10 +1051,6 @@ void LSPTypecheckerDelegate::updateConfigAndGsFromOptions(const DidChangeConfigu
 
 unique_ptr<LSPFileUpdates> LSPTypecheckerDelegate::getNoopUpdate(absl::Span<const core::FileRef> frefs) const {
     return typechecker.getNoopUpdate(frefs);
-}
-
-core::packages::Stratum LSPTypecheckerDelegate::getStratumForEdit(absl::Span<const core::FileRef> edit) const {
-    return typechecker.getStratumForEdit(edit);
 }
 
 } // namespace sorbet::realmain::lsp

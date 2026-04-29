@@ -37,11 +37,14 @@ struct LSPQueryResult {
 };
 
 class UndoState;
+class FileStratumMapping;
 
 /**
  * Encapsulates typechecker operations and enforces that they happen on a single thread.
  */
 class LSPTypechecker final {
+    friend class FileStratumMapping;
+
     /** Contains the ID of the thread responsible for typechecking. */
     std::thread::id typecheckerThreadId;
     /**
@@ -209,24 +212,40 @@ public:
     std::unique_ptr<LSPFileUpdates> getNoopUpdate(absl::Span<const core::FileRef> frefs) const;
 
     /**
+     * Return a helper that can query information about package strata, without exposing the rest of the typechecker.
+     */
+    FileStratumMapping getFileStratumMapping() const;
+};
+
+class FileStratumMapping {
+    friend class LSPTypechecker;
+
+    const LSPTypechecker &tc;
+
+    FileStratumMapping(const LSPTypechecker &tc) : tc{tc} {}
+
+public:
+    /**
      * Get the id of the stratum that an edit involving these files could be checked at.
      */
-    core::packages::Stratum getStratumForEdit(absl::Span<const core::FileRef> edit) const;
+    core::packages::Stratum getStratumForUris(absl::Span<const std::string_view> edit) const;
 
     /**
      * Get the id of the stratum that an edit involving this file could be checked at.
      */
-    core::packages::Stratum getStratumForUri(std::string_view uri) const {
-        return this->getStratumForEdit({this->config->uri2FileRef(*this->gs, uri)});
-    }
+    core::packages::Stratum getStratumForUri(std::string_view uri) const;
 
     /**
      * Get the id of the last stratum in the condensation graph.
      */
     core::packages::Stratum getLastStratum() const {
-        return this->lastStratum;
+        return this->tc.lastStratum;
     }
 };
+
+inline FileStratumMapping LSPTypechecker::getFileStratumMapping() const {
+    return FileStratumMapping{*this};
+}
 
 /**
  * Provides lambdas with a set of operations that they are allowed to do with the LSPTypechecker.
@@ -271,14 +290,8 @@ public:
 
     void updateConfigAndGsFromOptions(const DidChangeConfigurationParams &options) const;
     std::unique_ptr<LSPFileUpdates> getNoopUpdate(absl::Span<const core::FileRef> frefs) const;
-    core::packages::Stratum getStratumForEdit(absl::Span<const core::FileRef> edit) const;
-
-    core::packages::Stratum getLastStratum() const {
-        return typechecker.getLastStratum();
-    }
-
-    core::packages::Stratum getStratumForUri(std::string_view uri) const {
-        return typechecker.getStratumForUri(uri);
+    FileStratumMapping getFileStratumMapping() const {
+        return this->typechecker.getFileStratumMapping();
     }
 };
 } // namespace sorbet::realmain::lsp
