@@ -447,12 +447,16 @@ TEST_CASE("PreemptionReschedulingWorksAsExpected") {
               .progress());
     CHECK_EQ(1, task->runCount);
 
-    // This should not run the scheduled task, as we haven't made it to stratum 2 yet.
+    // This should not run the scheduled task, as we haven't made it to stratum 2 yet: it will indicate that preemption
+    // is rescheduled, but that no tasks were handled.
     ++currentStratum;
-    CHECK_FALSE(
-        preemptManager
-            ->tryRunScheduledPreemptionTask(*gs, core::packages::Stratum(currentStratum), /* allowReschedule */ true)
-            .progress());
+    {
+        auto result = preemptManager->tryRunScheduledPreemptionTask(*gs, core::packages::Stratum(currentStratum),
+                                                                    /* allowReschedule */ true);
+        CHECK(result.progress());
+        CHECK(result.wasRescheduled());
+        CHECK_FALSE(result.getTasksHandled());
+    }
     CHECK_EQ(1, task->runCount);
 
     // This should run and clear the task.

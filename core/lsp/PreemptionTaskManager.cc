@@ -51,8 +51,12 @@ PreemptionTask::RunResult PreemptionTaskManager::tryRunScheduledPreemptionTask(c
 
     // We can early-exit if we know that it's not possible to run preemption yet, but if we know that rescheduling is
     // not possible, we should run to completion.
-    if (allowReschedule && currentStratum < this->runnableAt.load()) {
-        return result;
+    if (allowReschedule) {
+        auto runnableStratum = this->runnableAt.load();
+        if (currentStratum < runnableStratum) {
+            result.setRescheduledStratum(runnableStratum);
+            return result;
+        }
     }
 
     auto preemptTask = atomic_load(&this->preemptTask);
