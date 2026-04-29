@@ -531,7 +531,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         auto file = gs->findFileByPath(stratumAssertion->filename);
         int actualStratum = strata.fileToStratum[file.id()];
         if (actualStratum != stratumAssertion->value) {
-            ADD_FAIL_CHECK_AT(string(stratumAssertion->filename).c_str(), stratumAssertion->assertionLine + 1,
+            ADD_FAIL_CHECK_AT(stratumAssertion->filename.c_str(), stratumAssertion->assertionLine + 1,
                               "Expected " << stratumAssertion->filename << " at stratum " << stratumAssertion->value
                                           << "; got " << actualStratum);
         }
