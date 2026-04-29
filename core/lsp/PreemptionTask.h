@@ -2,8 +2,7 @@
 #define SORBET_LSP_PREEMPTION_TASK_H
 
 #include "common/common.h"
-#include <cstdint>
-#include <optional>
+#include "core/packages/Stratum.h"
 
 namespace sorbet::core::lsp {
 // Generic interface for tasks that can run at preemption points.
@@ -27,7 +26,7 @@ public:
         bool tasksHandled_ = false;
         bool wasRescheduled_ = false;
 
-        uint16_t rescheduled = 0;
+        packages::Stratum rescheduled;
 
     public:
         RunResult() = default;
@@ -43,14 +42,14 @@ public:
         }
 
         // Indicate that the preemption task would like to be run again at the provided stratum.
-        void setRescheduledStratum(uint16_t stratum) {
+        void setRescheduledStratum(packages::Stratum stratum) {
             this->wasRescheduled_ = true;
             this->rescheduled = stratum;
         }
 
         // Fetch the stratum that the preemption task requested to be rescheduled to (only valid if
         // `setRescheduledStratum` has been called).
-        uint16_t getRescheduledStratum() const {
+        packages::Stratum getRescheduledStratum() const {
             ENFORCE(this->wasRescheduled_);
             return this->rescheduled;
         }
@@ -68,7 +67,7 @@ public:
 
     // Run the preemption task. Returning a non-empty result indicates that there is more work to do, and that it can't
     // be done until the stratum indicated.
-    virtual RunResult run(uint16_t currentStratum) = 0;
+    virtual RunResult run(packages::Stratum currentStratum) = 0;
 
     // Optional hook called when the task has been run to completion. Any notification to unblock other threads should
     // be done here to avoid accidentally unblocking work that could interact with the preemption scheduler.

@@ -325,9 +325,7 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
                         : pipeline::incrementalResolve(*gs, move(updatedIndexed), nullopt, config->opts, workers);
     auto sorted = sortParsedFiles(*gs, *errorReporter, move(resolved));
     const auto cancelable = false;
-    // TODO(trevor): ultimately this should be the maximum stratum, but for now this is acceptable.
-    const auto currentStratum = 0;
-    pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, currentStratum, nullptr);
+    pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, this->lastStratum, nullptr);
     gs->lspTypecheckCount++;
 
     auto duration = timeit.setEndTime();
@@ -388,7 +386,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
     auto &epochManager = *this->gs->epochManager;
     // Note: Commits can only be canceled if this edit is cancelable, LSP is running across multiple threads, and the
     // cancelation feature is enabled.
-    auto committed = epochManager.tryCommitEpoch(*this->gs, epoch, cancelable, preemptManager, [&]() -> uint16_t {
+    auto committed = epochManager.tryCommitEpoch(*this->gs, epoch, cancelable, preemptManager, [&]() {
         // Replace error queue with one that is owned by this thread.
         this->gs->errorQueue =
             make_shared<core::ErrorQueue>(this->gs->errorQueue->logger, this->gs->errorQueue->tracer, errorFlusher);
@@ -522,7 +520,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
             // This is a bit of a lie: we haven't gotten the first stratum to a state where we could run preemption
             // tasks yet, but any errors raised by running a preemption action on this incomplete global state will be
             // transient.
-            uint16_t firstStratum = 0;
+            core::packages::Stratum firstStratum(0);
 
             auto numPackageFiles = pipeline::partitionPackageFiles(*this->gs, workspaceFilesSpan);
             auto inputPackageFiles = workspaceFilesSpan.first(numPackageFiles);
@@ -568,15 +566,15 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
         // This is cast to a uint16_t everywhere it's used. This seems bad, but it should be fine because:
         // 1. we increment in the beginning of the loop before any use
         // 2. overflowing a uint16_t would mean that we have a chain of dependencies that's >65535 packages long
-        int currentStratum = -1;
+        int stratumIx = -1;
 
         auto strata = pipeline::computePackageStrata(*this->gs, packageIndexed, workspaceFilesSpan, this->config->opts);
         this->fileToStratum = move(strata.fileToStratum);
-        this->lastStratum = strata.strata.size() - 1;
+        this->lastStratum = core::packages::Stratum(strata.strata.size() - 1);
         for (auto &stratum : strata.strata) {
             vector<ast::ParsedFile> stratumFiles, nonPackagedIndexed;
 
-            ++currentStratum;
+            core::packages::Stratum currentStratum(++stratumIx);
 
             // When we unpartition the package and non-package files, we'll realloc stratumFiles to hold everything.
             stratumFiles.reserve(stratum.packageFiles.size() + stratum.sourceFiles.size());
@@ -731,7 +729,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
             Exception::raise("Slow path failed to handle all expected preemptions");
         }
 
-        return currentStratum;
+        return core::packages::Stratum(stratumIx);
     });
 
     gs->lspQuery = core::lsp::Query::noQuery();
@@ -861,8 +859,8 @@ vector<unique_ptr<core::Error>> LSPTypechecker::retypecheck(vector<core::FileRef
     return errorCollector->drainErrors();
 }
 
-uint16_t LSPTypechecker::getStratumForEdit(absl::Span<const core::FileRef> edit) const {
-    uint16_t stratum = 0;
+core::packages::Stratum LSPTypechecker::getStratumForEdit(absl::Span<const core::FileRef> edit) const {
+    core::packages::Stratum stratum(0);
 
     for (auto fref : edit) {
         if (fref.id() >= this->fileToStratum.size()) {
@@ -1044,7 +1042,7 @@ unique_ptr<LSPFileUpdates> LSPTypecheckerDelegate::getNoopUpdate(absl::Span<cons
     return typechecker.getNoopUpdate(frefs);
 }
 
-uint16_t LSPTypecheckerDelegate::getStratumForEdit(absl::Span<const core::FileRef> edit) const {
+core::packages::Stratum LSPTypecheckerDelegate::getStratumForEdit(absl::Span<const core::FileRef> edit) const {
     return typechecker.getStratumForEdit(edit);
 }
 

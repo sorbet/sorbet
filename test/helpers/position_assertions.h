@@ -1,6 +1,7 @@
 #ifndef TEST_HELPERS_POSITION_ASSERTIONS_H
 #define TEST_HELPERS_POSITION_ASSERTIONS_H
 
+#include "core/packages/Stratum.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/wrapper.h"
 #include "main/options/options.h"
@@ -632,9 +633,10 @@ public:
                                                   int assertionLine, std::string_view assertionContents,
                                                   std::string_view assertionType);
 
-    const int value;
+    const core::packages::Stratum value;
 
-    StratumAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine, int value);
+    StratumAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
+                     core::packages::Stratum value);
 
     std::string toString() const override;
 };

@@ -33,7 +33,7 @@ bool PreemptionTaskManager::trySchedulePreemptionTask(shared_ptr<PreemptionTask>
         // slot is empty, this should not have any affect on an existing task. However, if there was somehow a task
         // already scheduled that had set `runnableAt`, this would cause it to run again immediately and then
         // potentially defer itself again.
-        runnableAt.store(0);
+        runnableAt.store(packages::Stratum());
 
         success = atomic_compare_exchange_strong(&preemptTask, &existingTask, move(task));
     });
@@ -42,7 +42,7 @@ bool PreemptionTaskManager::trySchedulePreemptionTask(shared_ptr<PreemptionTask>
 }
 
 PreemptionTask::RunResult PreemptionTaskManager::tryRunScheduledPreemptionTask(const core::GlobalState &gs,
-                                                                               uint16_t currentStratum,
+                                                                               packages::Stratum currentStratum,
                                                                                bool allowReschedule) {
     PreemptionTask::RunResult result;
 

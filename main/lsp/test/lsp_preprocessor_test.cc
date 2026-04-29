@@ -11,6 +11,7 @@
 #include "core/lsp/PreemptionTask.h"
 #include "core/lsp/PreemptionTaskManager.h"
 #include "core/lsp/TypecheckEpochManager.h"
+#include "core/packages/Stratum.h"
 #include "main/lsp/LSPLoop.h"
 #include "main/lsp/LSPOutput.h"
 #include "main/lsp/LSPTask.h"
@@ -115,7 +116,7 @@ public:
     CountingTask(shared_ptr<core::lsp::PreemptionTaskManager> preemptManager, core::GlobalState &gs)
         : preemptManager(move(preemptManager)), gs(gs) {}
 
-    RunResult run(uint16_t currentStratum) override {
+    RunResult run(core::packages::Stratum currentStratum) override {
         RunResult result;
 
         // The task should run with typecheck mutex held with a write lock.
@@ -350,7 +351,7 @@ TEST_CASE("PreemptionTasksWorkAsExpected") {
                                       vector<core::ErrorSection>(), vector<core::AutocorrectSuggestion>(), false));
 
     // No preemption task registered.
-    uint16_t currentStratum = 0;
+    core::packages::Stratum currentStratum(0);
     CHECK_FALSE(
         preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true).progress());
 
@@ -387,13 +388,13 @@ TEST_CASE("PreemptionTasksWorkAsExpected") {
 
 class ReschedulingTask : public core::lsp::PreemptionTask {
 public:
-    const uint16_t targetStratum;
+    const core::packages::Stratum targetStratum;
     int runCount = 0;
     bool successful = false;
 
     ReschedulingTask(uint16_t targetStratum) : targetStratum{targetStratum} {}
 
-    RunResult run(uint16_t currentStratum) override {
+    RunResult run(core::packages::Stratum currentStratum) override {
         RunResult result;
 
         CHECK_FALSE(this->successful);
@@ -427,7 +428,9 @@ TEST_CASE("PreemptionReschedulingWorksAsExpected") {
     // No preemption task registered.
     uint16_t currentStratum = 0;
     CHECK_FALSE(
-        preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true).progress());
+        preemptManager
+            ->tryRunScheduledPreemptionTask(*gs, core::packages::Stratum(currentStratum), /* allowReschedule */ true)
+            .progress());
 
     auto task = make_shared<ReschedulingTask>(2);
 
@@ -439,24 +442,32 @@ TEST_CASE("PreemptionReschedulingWorksAsExpected") {
     CHECK(preemptManager->trySchedulePreemptionTask(task));
 
     // This should run scheduled task, but not clear it.
-    CHECK(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true).progress());
+    CHECK(preemptManager
+              ->tryRunScheduledPreemptionTask(*gs, core::packages::Stratum(currentStratum), /* allowReschedule */ true)
+              .progress());
     CHECK_EQ(1, task->runCount);
 
     // This should not run the scheduled task, as we haven't made it to stratum 2 yet.
     ++currentStratum;
     CHECK_FALSE(
-        preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true).progress());
+        preemptManager
+            ->tryRunScheduledPreemptionTask(*gs, core::packages::Stratum(currentStratum), /* allowReschedule */ true)
+            .progress());
     CHECK_EQ(1, task->runCount);
 
     // This should run and clear the task.
     ++currentStratum;
-    CHECK(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true).progress());
+    CHECK(preemptManager
+              ->tryRunScheduledPreemptionTask(*gs, core::packages::Stratum(currentStratum), /* allowReschedule */ true)
+              .progress());
     CHECK_EQ(2, task->runCount);
 
     // Running at stratum 3 should show no preemption tasks run
     ++currentStratum;
     CHECK_FALSE(
-        preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true).progress());
+        preemptManager
+            ->tryRunScheduledPreemptionTask(*gs, core::packages::Stratum(currentStratum), /* allowReschedule */ true)
+            .progress());
     CHECK_EQ(2, task->runCount);
     CHECK(task->successful);
 
@@ -482,7 +493,9 @@ TEST_CASE("RescheduledPreemptionTasksClearOnCancelation") {
     // No preemption task registered.
     uint16_t currentStratum = 0;
     CHECK_FALSE(
-        preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true).progress());
+        preemptManager
+            ->tryRunScheduledPreemptionTask(*gs, core::packages::Stratum(currentStratum), /* allowReschedule */ true)
+            .progress());
 
     auto task = make_shared<ReschedulingTask>(2);
 
@@ -494,12 +507,16 @@ TEST_CASE("RescheduledPreemptionTasksClearOnCancelation") {
     CHECK(preemptManager->trySchedulePreemptionTask(task));
 
     // This should run scheduled task, but not clear it.
-    CHECK(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true).progress());
+    CHECK(preemptManager
+              ->tryRunScheduledPreemptionTask(*gs, core::packages::Stratum(currentStratum), /* allowReschedule */ true)
+              .progress());
     CHECK_EQ(1, task->runCount);
 
     // If we cancel at this point and schedule a new task, that should be successful.
     CHECK(gs->epochManager->tryCancelSlowPath(3));
-    CHECK(preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ false).progress());
+    CHECK(preemptManager
+              ->tryRunScheduledPreemptionTask(*gs, core::packages::Stratum(currentStratum), /* allowReschedule */ false)
+              .progress());
 
     // Allow the task to be scheduled again, now that cancellation has run and we've cleared out the preemption task
     // slot.
@@ -528,7 +545,7 @@ TEST_CASE("RescheduledPreemptionTasksClearOnSuccess") {
                                       vector<core::ErrorSection>(), vector<core::AutocorrectSuggestion>(), false));
 
     // No preemption task registered.
-    uint16_t currentStratum = 0;
+    core::packages::Stratum currentStratum(0);
     CHECK_FALSE(
         preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true).progress());
 
@@ -546,7 +563,7 @@ TEST_CASE("RescheduledPreemptionTasksClearOnSuccess") {
         CHECK(
             preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true).progress());
         CHECK_EQ(1, task->runCount);
-        return 2;
+        return core::packages::Stratum(2);
     }));
 
     // tryCommitEpoch will be successful, and the task will have run to completion.
@@ -572,7 +589,7 @@ TEST_CASE("RescheduledPreemptionTasksClearOnSuccessWrongStratum") {
                                       vector<core::ErrorSection>(), vector<core::AutocorrectSuggestion>(), false));
 
     // No preemption task registered.
-    uint16_t currentStratum = 0;
+    core::packages::Stratum currentStratum(0);
     CHECK_FALSE(
         preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true).progress());
 
@@ -590,7 +607,7 @@ TEST_CASE("RescheduledPreemptionTasksClearOnSuccessWrongStratum") {
         CHECK(
             preemptManager->tryRunScheduledPreemptionTask(*gs, currentStratum, /* allowReschedule */ true).progress());
         CHECK_EQ(1, task->runCount);
-        return 1;
+        return core::packages::Stratum(1);
     }));
 
     // tryCommitEpoch will be successful, but the task will not report success, as it can only run at stratum >= 2.

@@ -2621,14 +2621,15 @@ shared_ptr<StratumAssertion> StratumAssertion::make(string_view filename, unique
         INFO("Invalid integer value: '" << assertionContents << "'");
         CHECK(success);
     }
-    return make_shared<StratumAssertion>(filename, range, assertionLine, value);
+    return make_shared<StratumAssertion>(filename, range, assertionLine, core::packages::Stratum(value));
 }
 
-StratumAssertion::StratumAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine, int value)
+StratumAssertion::StratumAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                   core::packages::Stratum value)
     : RangeAssertion(filename, range, assertionLine), value(value){};
 
 string StratumAssertion::toString() const {
-    return fmt::format("stratum: {}", value);
+    return fmt::format("stratum: {}", value.rawId());
 }
 
 } // namespace sorbet::test

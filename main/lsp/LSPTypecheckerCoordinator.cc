@@ -165,7 +165,7 @@ public:
         }
     }
 
-    RunResult run(uint16_t currentStratum) override {
+    RunResult run(core::packages::Stratum currentStratum) override {
         RunResult result;
 
         // Destruct timer, if specified. Causes metric to be reported.

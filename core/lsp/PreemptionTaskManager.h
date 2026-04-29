@@ -3,6 +3,7 @@
 
 #include "core/GlobalState.h"
 #include "core/lsp/PreemptionTask.h"
+#include "core/packages/Stratum.h"
 #include <memory>
 
 namespace sorbet::core::lsp {
@@ -37,7 +38,7 @@ private:
     //    blocked waiting for a notification from the running task's `finish` method. Again, this logic is pretty
     //    specific to the `PreemptionLoop` implementation, but that's also the only non-test implementation of
     //    `PreemeptionTask`.
-    std::atomic<uint16_t> runnableAt = 0;
+    std::atomic<packages::Stratum> runnableAt;
 
 public:
     PreemptionTaskManager(std::shared_ptr<TypecheckEpochManager> epochManager);
@@ -51,8 +52,8 @@ public:
     // cleared out. Otherwise there is the possibility that it might get rescheduled, which would cause problems the
     // next time preemption was scheduled from the main thread. Handles running task with a fresh errorQueue, and
     // restoring previous errorQueue when done.
-    PreemptionTask::RunResult tryRunScheduledPreemptionTask(const core::GlobalState &gs, uint16_t currentStratum,
-                                                            bool allowReschedule);
+    PreemptionTask::RunResult tryRunScheduledPreemptionTask(const core::GlobalState &gs,
+                                                            packages::Stratum currentStratum, bool allowReschedule);
     // Run only from processing thread.
     // Tries to cancel the scheduled preemption task. Returns true if it succeeds.
     bool tryCancelScheduledPreemptionTask(std::shared_ptr<PreemptionTask> &task);

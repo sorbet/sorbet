@@ -856,7 +856,7 @@ PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::Pars
 
     PackageStrata result;
 
-    result.fileToStratum = vector<uint16_t>(gs.filesUsed(), 0);
+    result.fileToStratum = vector<core::packages::Stratum>(gs.filesUsed(), core::packages::Stratum(0));
 
     if (!opts.packageDirected) {
         result.strata = {CondensationStratumInfo{absl::MakeSpan(packageFiles), sourceFiles}};
@@ -897,7 +897,7 @@ PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::Pars
             if (!pkgName.exists()) {
                 // This is a file with no package, so we unconditionally put it in the first stratum. This means that
                 // it'll be checked at the same time as the first stratum of packaged code.
-                result.fileToStratum[ix] = 0;
+                result.fileToStratum[ix] = core::packages::Stratum(0);
                 continue;
             }
 
@@ -906,10 +906,10 @@ PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::Pars
             auto &info = stratumMapping[pkgName];
             if (file->isPackagedTest() || file->isPackagedTestHelper()) {
                 ENFORCE(info.testStratum < USHRT_MAX);
-                result.fileToStratum[ix] = info.testStratum;
+                result.fileToStratum[ix] = core::packages::Stratum(info.testStratum);
             } else {
                 ENFORCE(info.applicationStratum < USHRT_MAX);
-                result.fileToStratum[ix] = info.applicationStratum;
+                result.fileToStratum[ix] = core::packages::Stratum(info.applicationStratum);
             }
         }
 
@@ -966,8 +966,10 @@ PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::Pars
         }
 
         {
-            auto it = absl::c_find_if(sourceSpan, [currentStratum, &fileToStratum = as_const(result.fileToStratum)](
-                                                      auto file) { return fileToStratum[file.id()] > currentStratum; });
+            auto it = absl::c_find_if(sourceSpan,
+                                      [currentStratum, &fileToStratum = as_const(result.fileToStratum)](auto file) {
+                                          return fileToStratum[file.id()] > core::packages::Stratum(currentStratum);
+                                      });
             auto len = std::distance(sourceSpan.begin(), it);
             resultStratum.sourceFiles = sourceSpan.subspan(0, len);
             sourceSpan = sourceSpan.subspan(len);
@@ -1480,7 +1482,7 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
 } // namespace
 
 void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> &&what, const options::Options &opts,
-               WorkerPool &workers, bool cancelable, uint16_t currentStratum,
+               WorkerPool &workers, bool cancelable, core::packages::Stratum currentStratum,
                shared_ptr<core::lsp::PreemptionTaskManager> preemptionManager, bool intentionallyLeakASTs) {
     // Unless the error queue had a critical error, only typecheck should flush errors to the client, otherwise we will
     // drop errors in LSP mode.

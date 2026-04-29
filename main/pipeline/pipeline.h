@@ -6,6 +6,7 @@
 #include "common/concurrency/WorkerPool.h"
 #include "common/kvstore/KeyValueStore.h"
 #include "core/FileHash.h"
+#include "core/packages/Stratum.h"
 #include "main/options/options.h"
 
 namespace sorbet::core::lsp {
@@ -62,7 +63,7 @@ struct PackageStrata {
 
     // The mapping of a core::FileRef to the stratum it occurs in. We identify individual strata with a uint16_t,
     // because overflowing that value would require a dependency chain of length greater than 65535.
-    std::vector<uint16_t> fileToStratum;
+    std::vector<core::packages::Stratum> fileToStratum;
 };
 
 // Using the condensation graph, sort the package and source files according to the stratum they would show up in a
@@ -106,7 +107,8 @@ std::vector<ast::ParsedFile> incrementalResolve(
 // If `intentionallyLeakASTs` is `true`, typecheck will leak the ASTs rather than pay the cost of deleting them
 // properly, which is a significant speedup on large codebases.
 void typecheck(const core::GlobalState &gs, std::vector<ast::ParsedFile> &&what, const options::Options &opts,
-               WorkerPool &workers, bool cancelable = false, uint16_t currentStratum = 0,
+               WorkerPool &workers, bool cancelable = false,
+               core::packages::Stratum currentStratum = core::packages::Stratum(),
                std::shared_ptr<core::lsp::PreemptionTaskManager> preemptionManager = nullptr,
                bool intentionallyLeakASTs = false);
 
