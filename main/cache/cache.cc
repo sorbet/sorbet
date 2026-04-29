@@ -148,6 +148,7 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, absl::
                         // Stream out compressed files so that writes happen in parallel with processing.
                         if (processedByThread > 100) {
                             resultq->push(move(threadResult), processedByThread);
+                            threadResult = decltype(threadResult){};
                             processedByThread = 0;
                         }
                     }
