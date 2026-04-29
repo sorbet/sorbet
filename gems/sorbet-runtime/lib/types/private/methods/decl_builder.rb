@@ -15,7 +15,7 @@ module T::Private::Methods
       end
     end
 
-    def initialize(mod)
+    def initialize(mod, abstract, override, overridable)
       @decl = Declaration.new(
         mod,
         ARG_NOT_PROVIDED, # params
@@ -28,6 +28,23 @@ module T::Private::Methods
         false, # override_allow_incompatible
         ARG_NOT_PROVIDED, # type_parameters
       )
+
+      # Call the methods after the fact (instead of setting them in the constructor)
+      # so we get the BuilderError's, if applicable
+
+      if abstract
+        self.abstract
+      end
+
+      if override == :allow_incompatible
+        self.override(allow_incompatible: true)
+      elsif override
+        self.override
+      end
+
+      if overridable
+        self.overridable
+      end
     end
 
     def params(*unused_positional_params, **params)
