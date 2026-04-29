@@ -642,8 +642,8 @@ ast::ExpressionPtr Desugarer::desugarDString(core::LocOffsets loc, pm_node_list 
 
     auto recv = MK::Magic(loc);
     auto numPosArgs = static_cast<uint16_t>(interpArgs.size());
-    return MK::Send(loc, move(recv), core::Names::stringInterpolate(), loc.copyWithZeroLength(),
-                    numPosArgs, move(interpArgs));
+    return MK::Send(loc, move(recv), core::Names::stringInterpolate(), loc.copyWithZeroLength(), numPosArgs,
+                    move(interpArgs));
 }
 
 // Desugars a conditional send, like so:
@@ -3444,8 +3444,8 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
             }
 
             auto numPosArgs = yieldArgs.size();
-            return MK::Send(location, std::move(recv), core::Names::call(), location.copyWithZeroLength(),
-                            numPosArgs, std::move(yieldArgs));
+            return MK::Send(location, std::move(recv), core::Names::call(), location.copyWithZeroLength(), numPosArgs,
+                            std::move(yieldArgs));
         }
 
         case PM_ALTERNATION_PATTERN_NODE: // A pattern like `1 | 2`

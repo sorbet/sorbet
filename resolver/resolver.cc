@@ -1614,8 +1614,7 @@ public:
                         walkResult.todoClassMethods_.emplace_back(jobFile, move(constants.todoClassMethods_));
                     }
                     if (!constants.todoRequiredAncestors_.empty()) {
-                        walkResult.todoRequiredAncestors_.emplace_back(jobFile,
-                                                                       move(constants.todoRequiredAncestors_));
+                        walkResult.todoRequiredAncestors_.emplace_back(jobFile, move(constants.todoRequiredAncestors_));
                     }
                 }
             }

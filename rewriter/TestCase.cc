@@ -61,8 +61,7 @@ void TestCase::run(core::MutableContext ctx, ast::ClassDef *klass) {
 
             auto method = ast::MK::SyntheticMethod0(loc, loc, method_name, std::move(block->body));
             auto methodLoc = method.loc();
-            auto method_with_sig =
-                ast::MK::InsSeq1(methodLoc, ast::MK::SigVoid(methodLoc, {}), std::move(method));
+            auto method_with_sig = ast::MK::InsSeq1(methodLoc, ast::MK::SigVoid(methodLoc, {}), std::move(method));
 
             stats.emplace_back(std::move(method_with_sig));
         }
