@@ -5,6 +5,7 @@ AllCops:
   NewCops: disable
   SuggestExtensions: false
   TargetRubyVersion: 3.0
+  AllowSymlinksInCacheRootDirectory: true
   Exclude:
     - 'vendor/**/*'
     - 'test/wholesome/vendor/**/*'
