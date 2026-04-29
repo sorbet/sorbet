@@ -20,6 +20,15 @@ module T::Private::Methods
     sig {returns(T::Boolean)}
     attr_accessor :raw
 
+    sig {returns(T.nilable(T::Boolean))}
+    attr_accessor :abstract
+
+    sig {returns(T.any(NilClass, T::Boolean, Symbol))}
+    attr_accessor :override
+
+    sig {returns(T.nilable(T::Boolean))}
+    attr_accessor :overridable
+
     sig do
       params(
         mod: Module,
@@ -27,11 +36,14 @@ module T::Private::Methods
         loc: T.nilable(Thread::Backtrace::Location),
         blk: Proc,
         final: T::Boolean,
-        raw: T::Boolean
+        raw: T::Boolean,
+        abstract: T.nilable(T::Boolean),
+        override: T.any(NilClass, T::Boolean, Symbol),
+        overridable: T.nilable(T::Boolean)
       )
         .void
     end
-    def initialize(mod, method_name, loc, blk, final, raw); end
+    def initialize(mod, method_name, loc, blk, final, raw, abstract, override, overridable); end
   end
 
   @installed_hooks = T.let({}, T::Hash[Module, TrueClass])
@@ -41,6 +53,21 @@ module T::Private::Methods
   @signatures_by_method = T.let({}, T::Hash[String, Signature])
   @sigs_that_raised = T.let({}, T::Hash[String, TrueClass])
   @old_hooks = T.let(nil, T.nilable([UnboundMethod, UnboundMethod, UnboundMethod]))
+
+  sig { params(mod: Module, method_name: Symbol, dsl_name: Symbol).returns(T.nilable(DeclarationBlock)) }
+  private_class_method def self.ensure_valid_declare_dsl!(mod, method_name, dsl_name); end
+
+  sig { params(mod: Module, method_name: Symbol).returns(NilClass) }
+  def self.declare_abstract(mod, method_name); end
+
+  sig { params(mod: Module, method_name: Symbol, allow_incompatible: T.nilable(T::Boolean)).returns(NilClass) }
+  def self.declare_override(mod, method_name, allow_incompatible); end
+
+  sig { params(mod: Module, method_name: Symbol).returns(NilClass) }
+  def self.declare_final(mod, method_name); end
+
+  sig { params(mod: Module, method_name: Symbol).returns(NilClass) }
+  def self.declare_overridable(mod, method_name); end
 
   sig {params(mod: Module, loc: T.nilable(Thread::Backtrace::Location), arg: T.nilable(Symbol), blk: T.untyped).returns(NilClass)}
   def self.declare_sig(mod, loc, arg, &blk); end

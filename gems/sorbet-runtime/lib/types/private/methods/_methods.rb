@@ -48,10 +48,88 @@ module T::Private::Methods
   #   (This can matter for circular load-time behavior, where a method is
   #   called while its Signature is being built)
   # - It's `nil` if we've finished building the sig
-  DeclarationBlock = Struct.new(:mod, :method_name, :loc, :blk_or_decl, :final, :raw)
+  DeclarationBlock = Struct.new(:mod, :method_name, :loc, :blk_or_decl, :final, :raw, :abstract, :override, :overridable)
 
   def self.declare_sig(mod, loc, arg, &blk)
     T::Private::DeclState.current.active_declaration = _declare_sig_internal(mod, loc, arg, &blk)
+
+    nil
+  end
+
+  private_class_method def self.ensure_valid_declare_dsl!(mod, method_name, dsl_name)
+    previous_declaration = T::Private::DeclState.current.previous_declaration
+    if previous_declaration.nil?
+      # TODO(jez) Eventually, relax this and allow these DSLs without a preceding `sig`
+      raise DeclBuilder::BuilderError.new("You must declare a `sig` before using `#{dsl_name}` on the method `#{method_name}`")
+    end
+
+    if !previous_declaration.blk_or_decl.is_a?(Proc)
+      raise DeclBuilder::BuilderError.new("Cannot call `#{dsl_name} #{method_name.inspect}`, because the sig block has already run")
+    end
+
+    if previous_declaration.mod != mod || previous_declaration.method_name != method_name
+      raise DeclBuilder::BuilderError.new(
+        "Can only call `#{dsl_name} #{method_name.inspect}` for the previously sig'd method. " \
+        "Expected: #{previous_declaration.mod}##{previous_declaration.method_name}"
+      )
+    end
+
+    previous_declaration
+  end
+
+  def self.declare_abstract(mod, method_name)
+    previous_declaration = ensure_valid_declare_dsl!(mod, method_name, :abstract)
+    return unless previous_declaration
+
+    if previous_declaration.abstract
+      raise DeclBuilder::BuilderError.new("Cannot call `abstract` twice for the method `#{method_name}`")
+    end
+
+    previous_declaration.abstract = true
+
+    nil
+  end
+
+  def self.declare_override(mod, method_name, allow_incompatible)
+    previous_declaration = ensure_valid_declare_dsl!(mod, method_name, :override)
+    return unless previous_declaration
+
+    if previous_declaration.override
+      raise DeclBuilder::BuilderError.new("Cannot call `override` twice for the method `#{method_name}`")
+    end
+
+    previous_declaration.override = allow_incompatible ? :allow_incompatible : true
+
+    nil
+  end
+
+  def self.declare_final(mod, method_name)
+    previous_declaration = ensure_valid_declare_dsl!(mod, method_name, :final)
+    return unless previous_declaration
+
+    if previous_declaration.final
+      raise DeclBuilder::BuilderError.new("Cannot declare `#{method_name}` final twice (from `sig(:final)` nor `final def`)")
+    end
+
+    previous_declaration.final = true
+
+    # previous_declaration.mod is the module where the sig was declared.
+    # We need to register the method on the actual method owner (mod or its singleton_class).
+    # Since _on_method_added already resolved `mod` for us, use that.
+    add_module_with_final_method(mod, method_name)
+
+    nil
+  end
+
+  def self.declare_overridable(mod, method_name)
+    previous_declaration = ensure_valid_declare_dsl!(mod, method_name, :overridable)
+    return unless previous_declaration
+
+    if previous_declaration.overridable
+      raise DeclBuilder::BuilderError.new("Cannot call `overridable` twice for the method `#{method_name}`")
+    end
+
+    previous_declaration.overridable = true
 
     nil
   end
@@ -74,7 +152,10 @@ module T::Private::Methods
     end
 
     method_name = nil # will be filled in once the next method is defined
-    DeclarationBlock.new(mod, method_name, loc, blk, arg == :final, raw)
+    abstract = nil
+    override = nil
+    overridable = nil
+    DeclarationBlock.new(mod, method_name, loc, blk, arg == :final, raw, abstract, override, overridable)
   end
 
   def self._with_declared_signature(mod, declblock, &blk)
@@ -93,7 +174,11 @@ module T::Private::Methods
   end
 
   def self.start_proc
-    DeclBuilder.new(PROC_TYPE, false)
+    # abstract/override/overridable don't make sense on procs
+    abstract = false
+    override = false
+    overridable = false
+    DeclBuilder.new(PROC_TYPE, false, abstract, override, overridable)
   end
 
   def self.finalize_proc(decl)
@@ -379,7 +464,13 @@ module T::Private::Methods
       raise "DeclarationBlock for #{declaration_block.mod} at #{declaration_block.loc} should have already been unwrapped"
     end
 
-    builder = DeclBuilder.new(declaration_block.mod, declaration_block.raw)
+    builder = DeclBuilder.new(
+      declaration_block.mod,
+      declaration_block.raw,
+      declaration_block.abstract,
+      declaration_block.override,
+      declaration_block.overridable
+    )
     decl = builder.instance_exec(&blk_or_decl).finalize!.decl
     # Record that we've already run `blk` once and constructed a `Declaration`
     declaration_block.blk_or_decl = decl

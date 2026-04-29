@@ -6,6 +6,36 @@ module T::Sig
   sig {params(arg0: T.nilable(Symbol), blk: T.proc.bind(T::Private::Methods::DeclBuilder).void).void}
   def sig(arg0=nil, &blk); end
 end
+module T::Sig::DSL
+  # Declare an abstract method. An abstract method must be implemented by a
+  # child, unless that child is also an abstract class or module.
+  #
+  # See <https://sorbet.org/docs/abstract>
+  sig { params(method_name: Symbol).returns(Symbol) }
+  def abstract(method_name); end
+
+  # Override a method, opting it into override checks. Override checking
+  # ensures that the child method is compatible with the parent method.
+  #
+  # See <https://sorbet.org/docs/override-checking>
+  sig { params(method_name: Symbol, allow_incompatible: T::Boolean).returns(Symbol) }
+  def override(method_name, allow_incompatible: false); end
+
+  # Declare a final method, which cannot be overridden, redefined, or mocked.
+  #
+  # See <https://sorbet.org/docs/final>
+  sig { params(method_name: Symbol).returns(Symbol) }
+  def final(method_name); end
+
+  # Declare an overridable method, requiring that all children must opt their
+  # override into override checking. (All methods are overridable by default,
+  # but not all overrides must opt into override checking, unless the parent
+  # method is `overridable`.)
+  #
+  # See <https://sorbet.org/docs/override-checking>
+  sig { params(method_name: Symbol).returns(Symbol) }
+  def overridable(method_name); end
+end
 module T::Sig::WithoutRuntime
   # At runtime, does nothing, but statically it is treated exactly the same
   # as T::Sig#sig. Only use it in cases where you can't use T::Sig#sig.
