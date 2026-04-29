@@ -10,7 +10,7 @@ set -x
 globalErr=0
 
 echo "~~~ Checking build files"
-if ! ./tools/scripts/format_build_files.sh -t &> buildifier; then
+if ! ./tools/scripts/format_build_files.sh -t > buildifier; then
     globalErr=1
     echo "^^^ +++"
     buildkite-agent annotate --context tools/scripts/format_build_files.sh --style error --append < buildifier
@@ -24,7 +24,7 @@ if ! ./tools/scripts/format_cxx.sh -td &> format_cxx; then
 fi
 
 echo "~~~ Checking that the compilation db builds"
-if ! ./tools/scripts/build_compilation_db.sh &> compdb; then
+if ! ./tools/scripts/build_compilation_db.sh > compdb; then
     globalErr=1
     echo "^^^ +++"
     buildkite-agent annotate --context tools/scripts/build_compilation_db.sh --style error --append < compdb

@@ -23,7 +23,12 @@ shift $((OPTIND - 1))
 
 cd "$(dirname "$0")/../.."
 
-./bazel build --config=dbg //tools:clang-format &> /dev/null
+bazel_args=(
+  "--ui_event_filters=-info,-stdout,-stderr"
+  "--noshow_progress"
+  "--config=dbg"
+)
+./bazel build "${bazel_args[@]}" //tools:clang-format >&2
 
 if [ "$#" -ne 0 ]; then
     cxx_src=("$@")

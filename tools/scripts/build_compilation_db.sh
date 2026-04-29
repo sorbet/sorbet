@@ -17,10 +17,24 @@ cd "$(dirname "$0")/../.."
 # folder if they have been cached, which means that clangd won't find them.
 #
 # TODO(jez) Do other compile commands generators work better here?
-./bazel build //tools:compdb --config=dbg "$@"
+bazel_args=(
+  "--ui_event_filters=-info,-stdout,-stderr"
+  "--config=dbg"
+)
+if ! ./bazel build "${bazel_args[@]}" //tools:compdb "$@" >&2; then
+  if ! [ -t 1 ]; then
+    echo '[ERR!] Failed to build //tools:compdb'
+    echo 'Check the logs, or run this locally to reproduce:'
+    echo
+    echo '    ./bazel build --config=dbg //tools:compdb'
+  fi
+  exit 1
+fi
 
 if command -v jq &> /dev/null; then
   jq . < bazel-bin/tools/compile_commands.json > compile_commands.json
 else
   cp bazel-bin/tools/compile_commands.json compile_commands.json
 fi
+
+echo '[ .. ] Wrote ./compile_commands.json'
