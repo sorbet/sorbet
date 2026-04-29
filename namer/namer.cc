@@ -959,7 +959,8 @@ private:
 
                 if (swapArgs && arg.flags.isBlock) {
                     // see comment on if (swapArgs) above
-                    methodData->parameters.emplace_back(move(swappedArg));
+                    // This is not actually a use after move because there is only ever one block arg
+                    methodData->parameters.emplace_back(move(swappedArg)); // NOLINT(bugprone-use-after-move)
                 }
 
                 defineArg(ctx, methodData, i, arg);
