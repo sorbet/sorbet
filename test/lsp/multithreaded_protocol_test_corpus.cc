@@ -4,6 +4,7 @@
 #include "common/common.h"
 #include "common/sort/sort.h"
 #include "test/helpers/lsp.h"
+#include "test/helpers/packages.h"
 #include "test/lsp/ProtocolTest.h"
 
 using namespace std;
@@ -1451,4 +1452,317 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptDoesNotCrashOnEvictedFil
     // Drain the pipeline with a fence.
     assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
 }
+
+// This case shows how preemption works when the preemption tasks occur in a stratum that's at or before the one that
+// contains the file that kicked off the slow path.
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedPreemptionBeforeSlowPathStratum") {
+    auto opts = make_shared<realmain::options::Options>();
+    opts->cacheSensitiveOptions.sorbetPackages = true;
+    opts->packageDirected = true;
+    resetState(opts);
+
+    vector<pair<string, string>> files = {
+        {"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A"}).build()},
+        {"a.rb", "# typed: true\n"
+                 "module Root\n"
+                 "  class A\n"
+                 "    def fun\n"
+                 "    end\n"
+                 "  end\n"
+                 "end\n"},
+        {"foo/__package.rb",
+         PackageTextBuilder().withName("Root::Foo").withExports({"Root::Foo::A"}).withImports({"Root"}).build()},
+        {"foo/a.rb", "# typed: true\n"
+                     "module Root::Foo\n"
+                     "  class A\n"
+                     "    def foo\n"
+                     "      Root::A.new()\n"
+                     "    end\n"
+                     "  end\n"
+                     "end\n"},
+    };
+
+    writeFilesToFS(files);
+
+    for (auto &[path, _] : files) {
+        this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/{}", this->rootPath, path));
+    }
+
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->enableTypecheckInfo = true;
+    assertErrorDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
+
+    assertErrorDiagnostics(send(*openFile("a.rb", files[1].second)), {});
+
+    assertErrorDiagnostics(send(*openFile("foo/b.rb", "# typed: true\n"
+                                                      "module Root::Foo\n"
+                                                      "  class Bar\n"
+                                                      "  end\n"
+                                                      "end\n")),
+                           {});
+
+    setSlowPathBlocked(true);
+
+    {
+        auto cancellationExpected = false;
+
+        // We're expecting one preemption from each of the following sub-cases.
+        auto preemptionsExpected = 1;
+
+        sendAsync(*changeFile("foo/b.rb",
+                              "# typed: true\n"
+                              "module Root::Foo\n"
+                              "  class Bar\n"
+                              "    class Inner\n"
+                              "      def bar\n"
+                              "        Root::A.n\n"
+                              "      end\n"
+                              "    end\n"
+                              "  end\n"
+                              "end\n",
+                              2, cancellationExpected, preemptionsExpected));
+    }
+
+    // Wait for typechecking to start.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    SUBCASE("completion") {
+        // Send a completion request at the end of `Root::A.`
+        sendAsync(*completion("foo/b.rb", 5, 16));
+
+        setSlowPathBlocked(false);
+
+        // This is the completion result
+        auto resp = readAsync();
+        REQUIRE(resp->isResponse());
+        CHECK_EQ(resp->asResponse().requestMethod, LSPMethod::TextDocumentCompletion);
+    }
+
+    SUBCASE("hover") {
+        // Send a hover request at the end of `Root::A.`
+        sendAsync(*hover("foo/b.rb", 5, 14));
+
+        setSlowPathBlocked(false);
+
+        // This is the hover result
+        auto resp = readAsync();
+        REQUIRE(resp->isResponse());
+        CHECK_EQ(resp->asResponse().requestMethod, LSPMethod::TextDocumentHover);
+    }
+
+    SUBCASE("fast_path_edit") {
+        // Make a fast-path edit to a.rb
+        sendAsync(*changeFile("a.rb",
+                              "# typed: true\n"
+                              "module Root\n"
+                              "  class A\n"
+                              "    def fun\n"
+                              "      A.new\n"
+                              "    end\n"
+                              "  end\n"
+                              "end\n",
+                              2));
+
+        setSlowPathBlocked(false);
+
+        // We should see a fast path start notification
+        {
+            auto diag = readAsync();
+            REQUIRE(diag->isNotification());
+            REQUIRE_EQ(diag->asNotification().method, LSPMethod::SorbetTypecheckRunInfo);
+            auto &runInfo = get<unique_ptr<SorbetTypecheckRunInfo>>(diag->asNotification().params);
+            CHECK_EQ(runInfo->typecheckingPath, TypecheckingPath::Fast);
+            CHECK_EQ(runInfo->status, SorbetTypecheckRunStatus::Started);
+            CHECK(runInfo->filesTypechecked.empty());
+        }
+
+        // And then a fast path end notification
+        {
+            auto diag = readAsync();
+            REQUIRE(diag->isNotification());
+            REQUIRE_EQ(diag->asNotification().method, LSPMethod::SorbetTypecheckRunInfo);
+            auto &runInfo = get<unique_ptr<SorbetTypecheckRunInfo>>(diag->asNotification().params);
+            CHECK_EQ(runInfo->typecheckingPath, TypecheckingPath::Fast);
+            CHECK_EQ(runInfo->status, SorbetTypecheckRunStatus::Ended);
+            REQUIRE_EQ(runInfo->filesTypechecked.size(), 1);
+            CHECK_EQ(runInfo->filesTypechecked.front(), fmt::format("{}/a.rb", this->rootPath));
+        }
+    }
+
+    // This is the slow path publishing a notification about the call to Roo::A.n
+    auto diag = readAsync();
+    REQUIRE(diag->isNotification());
+    CHECK_EQ(diag->asNotification().method, LSPMethod::TextDocumentPublishDiagnostics);
+
+    // Finally, we'll see the slow path end
+    {
+        auto diag = readAsync();
+        REQUIRE(diag->isNotification());
+        REQUIRE_EQ(diag->asNotification().method, LSPMethod::SorbetTypecheckRunInfo);
+        auto &runInfo = get<unique_ptr<SorbetTypecheckRunInfo>>(diag->asNotification().params);
+        CHECK_EQ(runInfo->typecheckingPath, TypecheckingPath::Slow);
+        CHECK_EQ(runInfo->status, SorbetTypecheckRunStatus::Ended);
+    }
+}
+
+// This case shows how preemption works when the preemption tasks occur in a stratum that's after the one that contains
+// the file that kicked off the slow path.
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedPreemptionAfterSlowPathStratum") {
+    auto opts = make_shared<realmain::options::Options>();
+    opts->cacheSensitiveOptions.sorbetPackages = true;
+    opts->packageDirected = true;
+    resetState(opts);
+
+    vector<pair<string, string>> files = {
+        {"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A"}).build()},
+        {"a.rb", "# typed: true\n"
+                 "module Root\n"
+                 "  class A\n"
+                 "    def fun\n"
+                 "    end\n"
+                 "  end\n"
+                 "end\n"},
+        {"foo/__package.rb",
+         PackageTextBuilder().withName("Root::Foo").withExports({"Root::Foo::A"}).withImports({"Root"}).build()},
+        {"foo/a.rb", "# typed: true\n"
+                     "module Root::Foo\n"
+                     "  class A\n"
+                     "    def foo\n"
+                     "      Root::A.new()\n"
+                     "    end\n"
+                     "  end\n"
+                     "end\n"},
+    };
+
+    writeFilesToFS(files);
+
+    for (auto &[path, _] : files) {
+        this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/{}", this->rootPath, path));
+    }
+
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->enableTypecheckInfo = true;
+    assertErrorDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
+
+    // Add a new file in the first stratum
+    assertErrorDiagnostics(send(*openFile("b.rb", "# typed: true\n"
+                                                  "module Root\n"
+                                                  "  class B\n"
+                                                  "  end\n"
+                                                  "end\n")),
+                           {});
+
+    assertErrorDiagnostics(send(*openFile("foo/a.rb", files[3].second)), {});
+
+    setSlowPathBlocked(true);
+
+    {
+        auto cancellationExpected = false;
+
+        // We're expecting one preemption from each of the following sub-cases.
+        auto preemptionsExpected = 1;
+
+        // We're modifying a file in the first stratum, and making preemption queries for files in the second.
+        sendAsync(*changeFile("b.rb",
+                              "# typed: true\n"
+                              "module Root\n"
+                              "  class B\n"
+                              "    class Inner\n"
+                              "      def bar\n"
+                              "        Root::A.n\n"
+                              "      end\n"
+                              "    end\n"
+                              "  end\n"
+                              "end\n",
+                              2, cancellationExpected, preemptionsExpected));
+    }
+
+    // Wait for typechecking to start.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    SUBCASE("hover") {
+        // Send a hover request at the end of `Root::A.`
+        sendAsync(*hover("foo/a.rb", 4, 12));
+
+        setSlowPathBlocked(false);
+
+        // This is the slow path publishing a notification about the call to Roo::A.n in b.rb, which happens on an
+        // earlier stratum than the hover in foo/a.rb.
+        auto diag = readAsync();
+        REQUIRE(diag->isNotification());
+        CHECK_EQ(diag->asNotification().method, LSPMethod::TextDocumentPublishDiagnostics);
+
+        // This is the hover result
+        auto resp = readAsync();
+        REQUIRE(resp->isResponse());
+        CHECK_EQ(resp->asResponse().requestMethod, LSPMethod::TextDocumentHover);
+    }
+
+    SUBCASE("fast_path_edit") {
+        // Make a fast-path edit to foo/a.rb
+        sendAsync(*changeFile("foo/a.rb",
+                              "# typed: true\n"
+                              "module Root::Foo\n"
+                              "  class A\n"
+                              "    def foo\n"
+                              "      Root::A.new()\n"
+                              "      puts :hi\n"
+                              "    end\n"
+                              "  end\n"
+                              "end\n",
+                              2));
+
+        setSlowPathBlocked(false);
+
+        // This is the slow path publishing a notification about the call to Roo::A.n in b.rb, which happens on an
+        // earlier stratum than the fast path edit to foo/a.rb
+        auto diag = readAsync();
+        REQUIRE(diag->isNotification());
+        CHECK_EQ(diag->asNotification().method, LSPMethod::TextDocumentPublishDiagnostics);
+
+        // We should see a fast path start notification
+        {
+            auto diag = readAsync();
+            REQUIRE(diag->isNotification());
+            REQUIRE_EQ(diag->asNotification().method, LSPMethod::SorbetTypecheckRunInfo);
+            auto &runInfo = get<unique_ptr<SorbetTypecheckRunInfo>>(diag->asNotification().params);
+            CHECK_EQ(runInfo->typecheckingPath, TypecheckingPath::Fast);
+            CHECK_EQ(runInfo->status, SorbetTypecheckRunStatus::Started);
+            CHECK(runInfo->filesTypechecked.empty());
+        }
+
+        // And then a fast path end notification
+        {
+            auto diag = readAsync();
+            REQUIRE(diag->isNotification());
+            REQUIRE_EQ(diag->asNotification().method, LSPMethod::SorbetTypecheckRunInfo);
+            auto &runInfo = get<unique_ptr<SorbetTypecheckRunInfo>>(diag->asNotification().params);
+            CHECK_EQ(runInfo->typecheckingPath, TypecheckingPath::Fast);
+            CHECK_EQ(runInfo->status, SorbetTypecheckRunStatus::Ended);
+            REQUIRE_EQ(runInfo->filesTypechecked.size(), 1);
+            CHECK_EQ(runInfo->filesTypechecked.front(), fmt::format("{}/foo/a.rb", this->rootPath));
+        }
+    }
+
+    // Finally, we'll see the slow path end
+    {
+        auto diag = readAsync();
+        REQUIRE(diag->isNotification());
+        REQUIRE_EQ(diag->asNotification().method, LSPMethod::SorbetTypecheckRunInfo);
+        auto &runInfo = get<unique_ptr<SorbetTypecheckRunInfo>>(diag->asNotification().params);
+        CHECK_EQ(runInfo->typecheckingPath, TypecheckingPath::Slow);
+        CHECK_EQ(runInfo->status, SorbetTypecheckRunStatus::Ended);
+    }
+}
+
 } // namespace sorbet::test::lsp
