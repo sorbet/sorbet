@@ -6,13 +6,12 @@ cd "$(dirname "$0")/../.."
 
 
 if [ "$1" == "-t" ]; then
-
   # quieter bazel output
   bazel_args=(
     "--ui_event_filters=-info,-stdout,-stderr"
     "--noshow_progress"
   )
-  if ! bazel run "${bazel_args[@]}" //test/lint/buildifier:lint &> /dev/null; then
+  if ! bazel run "${bazel_args[@]}" //test/lint/buildifier:lint >&2; then
     echo "Some bazel files need to be formatted! Please run:"
     echo
     echo '```sh'

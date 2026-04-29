@@ -10,7 +10,7 @@ set -x
 globalErr=0
 
 echo "~~~ Checking build files"
-if ! ./tools/scripts/format_build_files.sh -t &> buildifier; then
+if ! ./tools/scripts/format_build_files.sh -t > buildifier; then
     globalErr=1
     echo "^^^ +++"
     buildkite-agent annotate --context tools/scripts/format_build_files.sh --style error --append < buildifier
