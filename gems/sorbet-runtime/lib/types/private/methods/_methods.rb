@@ -254,6 +254,8 @@ module T::Private::Methods
             "to `sig` is immediately followed by a method definition on the same " \
             "class/module."
     end
+    # Overwrite the DeclarationBlock mod with `mod`, which is the Module that owns the method.
+    current_declaration.mod = mod
 
     original_method = mod.instance_method(method_name)
     sig_block = lambda do
