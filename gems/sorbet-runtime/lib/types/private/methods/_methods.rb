@@ -257,7 +257,7 @@ module T::Private::Methods
 
     original_method = mod.instance_method(method_name)
     sig_block = lambda do
-      T::Private::Methods.run_sig(hook_mod, method_name, original_method, current_declaration)
+      T::Private::Methods.run_sig(method_name, original_method, current_declaration)
     end
 
     # Always replace the original method with this wrapper,
@@ -338,7 +338,7 @@ module T::Private::Methods
 
   # Executes the `sig` block, and converts the resulting Declaration
   # to a Signature.
-  def self.run_sig(hook_mod, method_name, original_method, declaration_block)
+  def self.run_sig(method_name, original_method, declaration_block)
     current_declaration =
       begin
         run_builder(declaration_block)
@@ -352,7 +352,7 @@ module T::Private::Methods
 
     signature =
       if current_declaration
-        build_sig(hook_mod, method_name, original_method, current_declaration)
+        build_sig(method_name, original_method, current_declaration)
       else
         Signature.new_untyped(method: original_method)
       end
@@ -382,7 +382,7 @@ module T::Private::Methods
     decl
   end
 
-  def self.build_sig(hook_mod, method_name, original_method, current_declaration)
+  def self.build_sig(method_name, original_method, current_declaration)
     begin
       signature = Signature.new(
         method: original_method,
