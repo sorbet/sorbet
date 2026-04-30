@@ -200,6 +200,8 @@ module T::Private::Methods
   end
 
   def self.add_module_with_final_method(mod, method_name)
+    @was_ever_final_names[method_name] = true
+
     # Side-effectfully initializes the value if it's not already there
     methods = @modules_with_final[mod]
     if methods.nil?
@@ -281,7 +283,6 @@ module T::Private::Methods
 
     @sig_wrappers[key] = sig_block
     if current_declaration.final
-      @was_ever_final_names[method_name] = true
       add_module_with_final_method(mod, method_name)
     end
   end
