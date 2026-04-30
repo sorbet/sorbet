@@ -2,13 +2,11 @@ No errors! Great job.
             types.input.files.kvstore.miss :              8
            types.input.files.kvstore.write :              8
 No errors! Great job.
-             read_name_table.kvstore.value :              1 ms
              types.input.files.kvstore.hit :              8
            types.input.files.kvstore.write :              0
 No errors! Great job.
             types.input.files.kvstore.miss :              8
            types.input.files.kvstore.write :              8
 No errors! Great job.
-             read_name_table.kvstore.value :              1 ms
              types.input.files.kvstore.hit :              8
            types.input.files.kvstore.write :              0
