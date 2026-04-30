@@ -285,8 +285,13 @@ bool compareTrees(const core::GlobalState &gs, const void *avoid, const Tag tag,
         case Tag::UnresolvedConstantLit: {
             auto *a = reinterpret_cast<const UnresolvedConstantLit *>(tree);
             auto *b = reinterpret_cast<const UnresolvedConstantLit *>(other);
-            if (!Comparator::compareNames(gs, a->cnst, b->cnst)) {
+            if (a->segCount() != b->segCount()) {
                 return false;
+            }
+            for (size_t i = 0; i < a->segCount(); ++i) {
+                if (!Comparator::compareNames(gs, a->names()[i], b->names()[i])) {
+                    return false;
+                }
             }
             return Comparator::compareNodes(gs, avoid, a->scope, b->scope, file);
         }
@@ -300,8 +305,15 @@ bool compareTrees(const core::GlobalState &gs, const void *avoid, const Tag tag,
             if (a->original() && b->original()) {
                 auto &alit = *a->original();
                 auto &blit = *b->original();
-                if (alit.cnst != blit.cnst) {
+                auto anames = alit.names();
+                auto bnames = blit.names();
+                if (anames.size() != bnames.size()) {
                     return false;
+                }
+                for (const auto &[aname, bname] : core::ZipSpans(anames, bnames)) {
+                    if (!Comparator::compareNames(gs, aname, bname)) {
+                        return false;
+                    }
                 }
                 return Comparator::compareNodes(gs, avoid, alit.scope, blit.scope, file);
             } else if (!a->original() && !b->original()) {

@@ -47,7 +47,7 @@ bb5[firstDead=9](<self>: T.class_of(TestRescue), <block-pre-call-temp>$5: Sorbet
     # outerLoops: 1
     <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
     <cfgAlias>$11: T.class_of(T::Array) = alias <C Array>
-    <cfgAlias>$13: T.class_of(T) = alias <C T>
+    <cfgAlias>$12: T.class_of(T) = alias <C T>
     <cfgAlias>$16: T.class_of(T) = alias <C T>
     <cfgAlias>$18: T.class_of(Exception) = alias <C Exception>
     <statTemp>$14: Runtime object representing type: T.class_of(Exception) = <cfgAlias>$16: T.class_of(T).class_of(<cfgAlias>$18: T.class_of(Exception))
@@ -69,7 +69,7 @@ bb7[firstDead=7](<block-pre-call-temp>$22: Sorbet::Private::Static::Void, <selfR
     <statTemp>$20: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$22, sig>
     <self>: T.class_of(TestRescue) = <selfRestore>$23
     <cfgAlias>$42: T.class_of(T::Sig) = alias <C Sig>
-    <cfgAlias>$44: T.class_of(T) = alias <C T>
+    <cfgAlias>$43: T.class_of(T) = alias <C T>
     <statTemp>$39: T.class_of(TestRescue) = <self>: T.class_of(TestRescue).extend(<cfgAlias>$42: T.class_of(T::Sig))
     <returnMethodTemp>$2: Symbol(:parse_ruby_bug_12402_2) = :parse_ruby_bug_12402_2
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:parse_ruby_bug_12402_2)

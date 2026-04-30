@@ -26,16 +26,15 @@ bool doesExtendConcern(core::MutableContext ctx, ast::ClassDef *klass) {
                 if (firstArg == nullptr) {
                     return;
                 }
-                auto firstArgScope = ast::cast_tree<ast::UnresolvedConstantLit>(firstArg->scope);
-                if (firstArgScope == nullptr) {
+                // Match `ActiveSupport::Concern`: exactly 2 segments with root scope
+                if (firstArg->segCount() != 2) {
                     return;
                 }
-                auto outerScope = ast::cast_tree<ast::UnresolvedConstantLit>(firstArgScope->scope);
-                if (outerScope != nullptr) {
+                if (!ast::MK::isRootScope(firstArg->scope)) {
                     return;
                 }
-                if (firstArg->cnst != core::Names::Constants::Concern() ||
-                    firstArgScope->cnst != core::Names::Constants::ActiveSupport()) {
+                if (firstArg->names()[0] != core::Names::Constants::ActiveSupport() ||
+                    firstArg->names()[1] != core::Names::Constants::Concern()) {
                     return;
                 }
 
@@ -104,15 +103,15 @@ void Concern::run(core::MutableContext ctx, ast::ClassDef *klass) {
                     } else {
                         rhs.emplace_back(std::move(block->body));
                     }
-                    auto name =
-                        ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Names::Constants::ClassMethods());
+                    auto name = ast::MK::UnresolvedConstant(ast::MK::EmptyTree(),
+                                                            {core::Names::Constants::ClassMethods()}, {loc});
                     classMethodsNode = ast::MK::Module(loc, loc, std::move(name), std::move(rhs));
                 }
                 continue;
             }
         } else if (auto mod = ast::cast_tree<ast::ClassDef>(stat)) {
             auto name = ast::cast_tree<ast::UnresolvedConstantLit>(mod->name);
-            if (name && name->cnst == core::Names::Constants::ClassMethods()) {
+            if (name && name->names().back() == core::Names::Constants::ClassMethods()) {
                 if (classMethodsNode) {
                     // ClassMethods module already exists. Let's add mod->rhs into existing module
                     auto classDef = ast::cast_tree<ast::ClassDef>(classMethodsNode);
@@ -135,7 +134,7 @@ void Concern::run(core::MutableContext ctx, ast::ClassDef *klass) {
         // Generate a Send { Magic.mixes_in_class_methods(ClassMethods) }
         auto magic = ast::MK::Magic(klass->loc);
         auto classMethods =
-            ast::MK::UnresolvedConstant(klass->loc, ast::MK::EmptyTree(), core::Names::Constants::ClassMethods());
+            ast::MK::UnresolvedConstant(ast::MK::EmptyTree(), {core::Names::Constants::ClassMethods()}, {klass->loc});
         auto sendForMixes =
             ast::MK::Send2(klass->loc, std::move(magic), core::Names::mixesInClassMethods(),
                            klass->loc.copyWithZeroLength(), ast::MK::Self(klass->loc), std::move(classMethods));

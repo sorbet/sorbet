@@ -6,7 +6,7 @@
 namespace sorbet::core::serialize {
 class Serializer {
 public:
-    static const uint32_t VERSION = 6;
+    static const uint32_t VERSION = 8;
 
     static constexpr std::string_view NAME_TABLE_UUID_KEY = "NameTableUUID";
     static constexpr std::string_view NAME_TABLE_DIFF_COUNT_AND_HASH_SIZE_KEY = "NameTableDiffCountAndHashSize";

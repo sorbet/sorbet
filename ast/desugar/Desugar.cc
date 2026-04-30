@@ -785,9 +785,60 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
             // add entries here, without consulting the "node.*" counters from a
             // run over a representative code base.
             [&](parser::Const *const_) {
-                auto scope = node2TreeImpl(dctx, const_->scope);
-                ExpressionPtr res = MK::UnresolvedConstant(loc, move(scope), const_->name);
-                result = move(res);
+                // Walk the Const/ConstLhs chain iteratively to build a flat UCL.
+                // Both Const (RHS) and ConstLhs (LHS) can appear in the same chain,
+                // e.g. `class Foo::Bar::Baz` gives ConstLhs(scope=Const(scope=Const(nil,Foo),Bar),Baz).
+
+                // First pass: count segments and find rootScope
+                uint32_t segmentCount = 0;
+                unique_ptr<parser::Node> *lastScopeRef = nullptr;
+                parser::Node *cur = const_;
+                while (cur != nullptr) {
+                    if (auto *c = parser::cast_node<parser::Const>(cur)) {
+                        segmentCount++;
+                        lastScopeRef = &c->scope;
+                        cur = c->scope.get();
+                    } else if (auto *cl = parser::cast_node<parser::ConstLhs>(cur)) {
+                        segmentCount++;
+                        lastScopeRef = &cl->scope;
+                        cur = cl->scope.get();
+                    } else {
+                        break; // Cbase or a dynamic scope (e.g. a method call)
+                    }
+                }
+
+                ExpressionPtr rootScope;
+                if (cur == nullptr) {
+                    rootScope = MK::EmptyTree();
+                } else if (parser::isa_node<parser::Cbase>(cur)) {
+                    rootScope = MK::Constant(cur->loc, core::Symbols::root());
+                } else {
+                    // Dynamic root (e.g. `foo()::Bar`): lastScopeRef owns cur.
+                    ENFORCE(lastScopeRef != nullptr);
+                    rootScope = node2TreeImpl(dctx, *lastScopeRef);
+                }
+
+                // Second pass: allocate and fill (SlotInit fills backwards from end to start)
+                auto init = UnresolvedConstantLit::make(move(rootScope), segmentCount);
+                auto nameSlot = init.names();
+                auto locSlot = init.locs();
+
+                cur = const_;
+                while (cur != nullptr) {
+                    if (auto *c = parser::cast_node<parser::Const>(cur)) {
+                        *nameSlot-- = c->name;
+                        *locSlot-- = c->loc;
+                        cur = c->scope.get();
+                    } else if (auto *cl = parser::cast_node<parser::ConstLhs>(cur)) {
+                        *nameSlot-- = cl->name;
+                        *locSlot-- = cl->loc;
+                        cur = cl->scope.get();
+                    } else {
+                        break;
+                    }
+                }
+
+                result = ExpressionPtr::fromUnique(init.finalize());
             },
             [&](parser::Send *send) {
                 Send::Flags flags;
@@ -1194,7 +1245,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 // warnings in `typed: strict` files.
                 if (isa_tree<UnresolvedConstantLit>(lhs) && isa_tree<UnresolvedConstantLit>(rhs)) {
                     auto &rhsConst = cast_tree_nonnull<UnresolvedConstantLit>(rhs);
-                    if (rhsConst.cnst == core::Names::Constants::ErrorNode()) {
+                    if (rhsConst.names().back() == core::Names::Constants::ErrorNode()) {
                         auto rhsLocZero = rhs.loc().copyWithZeroLength();
                         rhs = MK::Let(rhsLocZero, move(rhs), MK::Untyped(rhsLocZero));
                     }
@@ -1583,9 +1634,60 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 result = move(res);
             },
             [&](parser::ConstLhs *constLhs) {
-                auto scope = node2TreeImpl(dctx, constLhs->scope);
-                ExpressionPtr res = MK::UnresolvedConstant(loc, move(scope), constLhs->name);
-                result = move(res);
+                // Walk the ConstLhs/Const chain iteratively to build a flat UCL.
+                // Both ConstLhs (LHS) and Const (RHS) can appear in the same chain,
+                // e.g. `class Foo::Bar::Baz` gives ConstLhs(scope=Const(scope=Const(nil,Foo),Bar),Baz).
+
+                // First pass: count segments and find rootScope
+                uint32_t segmentCount = 0;
+                unique_ptr<parser::Node> *lastScopeRef = nullptr;
+                parser::Node *cur = constLhs;
+                while (cur != nullptr) {
+                    if (auto *cl = parser::cast_node<parser::ConstLhs>(cur)) {
+                        segmentCount++;
+                        lastScopeRef = &cl->scope;
+                        cur = cl->scope.get();
+                    } else if (auto *c = parser::cast_node<parser::Const>(cur)) {
+                        segmentCount++;
+                        lastScopeRef = &c->scope;
+                        cur = c->scope.get();
+                    } else {
+                        break; // Cbase or a dynamic scope (e.g. a method call)
+                    }
+                }
+
+                ExpressionPtr rootScope;
+                if (cur == nullptr) {
+                    rootScope = MK::EmptyTree();
+                } else if (parser::isa_node<parser::Cbase>(cur)) {
+                    rootScope = MK::Constant(cur->loc, core::Symbols::root());
+                } else {
+                    // Dynamic root (e.g. `foo()::Bar`): lastScopeRef owns cur.
+                    ENFORCE(lastScopeRef != nullptr);
+                    rootScope = node2TreeImpl(dctx, *lastScopeRef);
+                }
+
+                // Second pass: allocate and fill (SlotInit fills backwards from end to start)
+                auto init = UnresolvedConstantLit::make(move(rootScope), segmentCount);
+                auto nameSlot = init.names();
+                auto locSlot = init.locs();
+
+                cur = constLhs;
+                while (cur != nullptr) {
+                    if (auto *cl = parser::cast_node<parser::ConstLhs>(cur)) {
+                        *nameSlot-- = cl->name;
+                        *locSlot-- = cl->loc;
+                        cur = cl->scope.get();
+                    } else if (auto *c = parser::cast_node<parser::Const>(cur)) {
+                        *nameSlot-- = c->name;
+                        *locSlot-- = c->loc;
+                        cur = c->scope.get();
+                    } else {
+                        break;
+                    }
+                }
+
+                result = ExpressionPtr::fromUnique(init.finalize());
             },
             [&](parser::Cbase *cbase) {
                 ExpressionPtr res = MK::Constant(loc, core::Symbols::root());
@@ -2353,16 +2455,17 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 }
 
                 Send::ARGS_store args;
-                while (!isa_tree<EmptyTree>(value)) {
-                    auto lit = cast_tree<UnresolvedConstantLit>(value);
-                    if (lit == nullptr) {
-                        args.clear();
-                        break;
+                if (auto lit = cast_tree<UnresolvedConstantLit>(value)) {
+                    if (isa_tree<EmptyTree>(lit->scope)) {
+                        auto ns = lit->names();
+                        auto ls = lit->locs();
+                        for (size_t i = 0; i < ns.size(); ++i) {
+                            args.emplace_back(MK::String(ls[i], ns[i]));
+                        }
                     }
-                    args.emplace_back(MK::String(lit->loc, lit->cnst));
-                    value = move(lit->scope);
+                    // else: dynamic constant path (non-EmptyTree root scope) → args stays empty
                 }
-                absl::c_reverse(args);
+                // else: non-UCL value or EmptyTree → args stays empty
 
                 auto numPosArgs = args.size();
                 auto res = MK::Send(loc, MK::Magic(loc), core::Names::defined_p(), locZeroLen, numPosArgs, move(args));

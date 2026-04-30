@@ -58,24 +58,49 @@ class AutogenWalk {
         auto *cnst = &cnstRef;
         while (cnst != nullptr && cnst->original() != nullptr) {
             auto &original = *cnst->original();
-            out.emplace_back(original.cnst);
-            cnst = ast::cast_tree<ast::ConstantLit>(original.scope);
+            auto names = original.names();
+            auto *resolutionData = cnst->resolutionData();
+            if (resolutionData != nullptr) {
+                auto unresolved = names.subspan(resolutionData->resolvedUpToSegment);
+                for (auto it = unresolved.rbegin(), end = unresolved.rend(); it != end; ++it) {
+                    out.emplace_back(*it);
+                }
 
-            // If any part of the constant literal scope is a class alias, the final name should be scoped
-            // under the *dealiased* scope. This allows subconstants-of-aliases to be referenced
-            // correctly -- otherwise, we'd have missing edges in our static analysis dependency graphs, which
-            // drive pre-loading for our Ruby services at Stripe, and also have to jump hoops with complicated
-            // heuristics in our package generation tooling to determine whether something was resolved via an alias.
-            if (cnst != nullptr && cnst->original() != nullptr) {
-                auto scopeSym = cnst->symbol();
-                if (scopeSym.isStaticField(ctx) && scopeSym.asFieldRef().data(ctx)->isClassAlias()) {
+                names = names.subspan(0, resolutionData->resolvedUpToSegment);
+            }
+
+            auto scopeSym = cnst->symbol();
+            cnst = ast::cast_tree<ast::ConstantLit>(original.scope);
+            if (cnst != nullptr) {
+                ENFORCE(cnst->original() == nullptr);
+            }
+
+            // If any part of the resolved constant is a class alias, the final name should be
+            // scoped under the alias.  This allows subconstants-of-aliases to be referenced
+            // correctly -- otherwise, we'd have missing edges in our static analysis dependency
+            // graphs.
+            int i = -1;
+            for (auto it = names.rbegin(), end = names.rend(); it != end; ++it) {
+                i++;
+                // This is a little awkward with our current setup -- we know that the
+                // name that we're currently on is a class alias, but now we have to deal
+                // with scoping -- `scopeSym` might have been resolved because of part of
+                // the `UnresolvedConstantLit`, said UCL's scope, or just from the nesting
+                // of this reference.
+                bool isClassAlias = scopeSym.isStaticField(ctx) && scopeSym.asFieldRef().data(ctx)->isClassAlias();
+
+                if (isClassAlias && i != int(names.size() - 1)) {
                     auto resolvedScopeName = symbolName(ctx, scopeSym);
 
                     // append the name in reverse order to the hitherto-built name vector,
                     // then break out of the loop.
                     out.insert(out.end(), resolvedScopeName.rbegin(), resolvedScopeName.rend());
                     break;
+                } else {
+                    out.emplace_back(*it);
                 }
+
+                scopeSym = scopeSym.owner(ctx);
             }
         }
 

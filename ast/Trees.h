@@ -7,6 +7,7 @@
 #include "core/KwPair.h"
 #include "core/LocalVariable.h"
 #include "core/SymbolRef.h"
+#include "core/TrailingObjects.h"
 #include "core/Types.h"
 #include "core/UntaggedPtr.h"
 #include "core/ZippedPair.h"
@@ -1181,14 +1182,164 @@ public:
 };
 CheckSize(Literal, 16, 8);
 
-EXPRESSION(UnresolvedConstantLit) {
+EXPRESSION(UnresolvedConstantLit)
+    : private core::TrailingObjects<UnresolvedConstantLit, core::NameRef, core::LocOffsets> {
+    friend TrailingObjects;
+
+    // Private constructor — initializes base fields only. Does NOT call _sanityCheck()
+    // because the trailing NameRef/LocOffsets arrays are not yet initialized at this point.
+    // Use the static factory functions instead.
+    UnresolvedConstantLit(ExpressionPtr rootScope, uint32_t numSegs);
+
+    const uint32_t numSegs_;
+    size_t numTrailingObjects(OverloadToken<core::NameRef>) const {
+        return numSegs_;
+    }
+
 public:
-    const core::LocOffsets loc;
+    // Memory layout (variable-size allocation via TrailingObjects):
+    //   [scope_: 8][numSegs_: 4][pad: 4]  = 16 bytes base
+    //   [NameRef[0..N-1]]                  = N * 4 bytes
+    //   [LocOffsets[0..N-1]]               = N * 8 bytes
+    // Total: 16 + N*12 bytes per UCL.  N=1: 28B, N=2: 40B, N=3: 52B.
+    ExpressionPtr scope; // outermost non-UCL scope (EmptyTree, ConstantLit, etc.)
 
-    core::NameRef cnst;
-    ExpressionPtr scope;
+    // operator delete is needed because TrailingObjects allocates more than sizeof(*this),
+    // so we must call ::operator delete(void*) rather than a sized delete.
+    void operator delete(void *p) {
+        ::operator delete(p);
+    }
 
-    UnresolvedConstantLit(core::LocOffsets loc, ExpressionPtr scope, core::NameRef cnst);
+    // Factory functions — must be used instead of direct construction.
+    static ExpressionPtr create(ExpressionPtr && scope, absl::Span<const core::NameRef> names,
+                                absl::Span<const core::LocOffsets> locs);
+    static std::unique_ptr<UnresolvedConstantLit> createUnique(
+        ExpressionPtr && scope, absl::Span<const core::NameRef> names, absl::Span<const core::LocOffsets> locs);
+
+    // Helper class that manages sequential slot initialization with automatic index progression.
+    // Uses iterator-style API with operator*() and operator--().
+    // Fills slots in reverse order (from end to start), which matches the common pattern
+    // of traversing constant chains forward but needing to fill arrays backwards.
+    //
+    // Usage:
+    //   auto slot = init.names();
+    //   *slot-- = value1;  // Constructs value1 in current slot, then moves to previous
+    //   *slot-- = value2;  // Constructs value2 in current slot, then moves to previous
+    template <typename T> class SlotInit {
+    private:
+        T *current_;
+
+        // Helper class returned by operator* that handles assignment with placement new.
+        class SlotRef {
+        private:
+            T *ptr_;
+            SlotInit &parent_;
+
+        public:
+            SlotRef(T *ptr, SlotInit &parent) : ptr_(ptr), parent_(parent) {}
+
+            // Assignment operator that uses placement new to construct the value.
+            SlotRef &operator=(const T &value) {
+                new (ptr_) T(value);
+                return *this;
+            }
+
+            // Move assignment
+            SlotRef &operator=(T &&value) {
+                new (ptr_) T(std::move(value));
+                return *this;
+            }
+        };
+
+    public:
+        explicit SlotInit(T *start) : current_(start) {}
+
+        // Returns a SlotRef that handles assignment with placement new.
+        SlotRef operator*() {
+            return SlotRef(current_, *this);
+        }
+
+        // Pre-decrement: moves to previous slot and returns *this.
+        SlotInit &operator--() {
+            current_--;
+            return *this;
+        }
+
+        // Post-decrement: moves to previous slot and returns old position.
+        SlotInit operator--(int) {
+            SlotInit old = *this;
+            current_--;
+            return old;
+        }
+    };
+
+    // Helper class for incremental initialization without intermediate vectors.
+    // Provides SlotInit helpers that fill backwards (from end to start).
+    class Initializer {
+    private:
+        UnresolvedConstantLit *ucl_;
+
+        friend class UnresolvedConstantLit;
+        explicit Initializer(UnresolvedConstantLit *ucl) : ucl_(ucl) {}
+
+    public:
+        // Returns the number of segments to initialize.
+        uint32_t count() const {
+            return ucl_->numSegs_;
+        }
+
+        // Returns a SlotInit for names that starts at the END and fills backwards.
+        // Usage: auto slot = init.names(); *slot-- = value1; *slot-- = value2; ...
+        SlotInit<core::NameRef> names() {
+            return SlotInit<core::NameRef>(ucl_->getTrailingObjects<core::NameRef>() + ucl_->numSegs_ - 1);
+        }
+
+        // Returns a SlotInit for locs that starts at the END and fills backwards.
+        // Usage: auto slot = init.locs(); *slot-- = loc1; *slot-- = loc2; ...
+        SlotInit<core::LocOffsets> locs() {
+            return SlotInit<core::LocOffsets>(ucl_->getTrailingObjects<core::LocOffsets>() + ucl_->numSegs_ - 1);
+        }
+
+        // Finalizes the initialization and returns the completed UnresolvedConstantLit.
+        // All slots must have been initialized before calling this.
+        std::unique_ptr<UnresolvedConstantLit> finalize() {
+            ucl_->_sanityCheck();
+            return std::unique_ptr<UnresolvedConstantLit>(ucl_);
+        }
+    };
+
+    // Allocates an UnresolvedConstantLit with trailing storage but does not give you
+    // a fully-formed object.  Initializer will require you to fill in the names and
+    // locs of the names; once that's done, you can call Initializer::finalize to
+    // receive a fully-formed object.
+    static Initializer make(ExpressionPtr && scope, uint32_t numSegs) {
+        ENFORCE(numSegs > 0);
+        size_t sz = totalSizeToAlloc<core::NameRef, core::LocOffsets>(numSegs, numSegs);
+        void *raw = ::operator new(sz);
+        auto *ucl = new (raw) UnresolvedConstantLit(std::move(scope), numSegs);
+        return Initializer(ucl);
+    }
+
+    // Returns the loc of the leaf (last) segment.
+    core::LocOffsets loc() const {
+        return getTrailingObjects<core::LocOffsets>()[numSegs_ - 1];
+    }
+
+    // Returns the number of segments.
+    size_t segCount() const {
+        return numSegs_;
+    }
+
+    // Span accessors (zero-overhead views into trailing arrays).
+    absl::Span<const core::NameRef> names() const {
+        return {getTrailingObjects<core::NameRef>(), numSegs_};
+    }
+    absl::Span<const core::LocOffsets> locs() const {
+        return {getTrailingObjects<core::LocOffsets>(), numSegs_};
+    }
+    absl::Span<core::NameRef> mutableNames() {
+        return {getTrailingObjects<core::NameRef>(), numSegs_};
+    }
 
     ExpressionPtr deepCopy() const;
     bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
@@ -1201,7 +1352,7 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(UnresolvedConstantLit, 24, 8);
+CheckSize(UnresolvedConstantLit, 16, 8);
 
 EXPRESSION(ConstantLit) {
 private:
@@ -1236,7 +1387,7 @@ private:
     //    bytes of storage.
     //
     //    struct FailedResolutionSymbol {
-    //        std::unique_ptr<std::vector<core::SymbolRef>> resolutionScopes;
+    //        std::unique_ptr<FailedResolutionData> data; // see below
     //        std::unique_ptr<UnresolvedConstantLit> original;
     //    };
     //
@@ -1245,6 +1396,17 @@ private:
     //
     // We can represent all three of these in 16 bytes of space by doing a bunch of manual
     // pointer tagging.
+
+    // Heap-allocated data for a ConstantLit that failed to resolve.
+    struct FailedResolutionData {
+        std::vector<core::SymbolRef> resolutionScopes;
+        // For flat (EmptyTree-scoped) UCLs: the index of the last successfully resolved
+        // segment, or -1 if no segment resolved or this is not a flat UCL with partial
+        // resolution. Used by DefLocSaver::matchesQuery to correctly attribute symbols
+        // to intermediate segments when part of the chain failed.
+        int resolvedUpToSegment = -1;
+    };
+
     enum class Tag : uint8_t {
         KnownSymbol = 1,
         ResolvedSymbol,
@@ -1293,7 +1455,7 @@ private:
         }
 
         static tagged_storage allocateResolutionScopes() {
-            return tagPtr(Tag::FailedResolutionSymbol, new std::vector<core::SymbolRef>());
+            return tagPtr(Tag::FailedResolutionSymbol, new FailedResolutionData());
         }
 
         Storage(core::LocOffsets loc, core::SymbolRef symbol) : ptr1(tagSymbol(Tag::KnownSymbol, symbol)) {
@@ -1331,8 +1493,8 @@ private:
                     break;
                 }
                 case Tag::FailedResolutionSymbol: {
-                    auto *scopes = resolutionScopes();
-                    delete scopes;
+                    auto *data = reinterpret_cast<FailedResolutionData *>(untaggedPtr1());
+                    delete data;
                     auto *ucl = original();
                     delete ucl;
                     break;
@@ -1366,7 +1528,7 @@ private:
                     return *reinterpret_cast<const core::LocOffsets *>(&ptr2);
                 case Tag::ResolvedSymbol:
                 case Tag::FailedResolutionSymbol:
-                    return original()->loc;
+                    return original()->loc();
             }
         }
 
@@ -1380,13 +1542,23 @@ private:
             }
         }
 
+        const FailedResolutionData *resolutionData() const {
+            switch (tag()) {
+                case Tag::KnownSymbol:
+                case Tag::ResolvedSymbol:
+                    return nullptr;
+                case Tag::FailedResolutionSymbol:
+                    return reinterpret_cast<FailedResolutionData *>(untaggedPtr1());
+            }
+        }
+
         std::vector<core::SymbolRef> *resolutionScopes() {
             switch (tag()) {
                 case Tag::KnownSymbol:
                 case Tag::ResolvedSymbol:
                     return nullptr;
                 case Tag::FailedResolutionSymbol:
-                    return reinterpret_cast<std::vector<core::SymbolRef> *>(untaggedPtr1());
+                    return &reinterpret_cast<FailedResolutionData *>(untaggedPtr1())->resolutionScopes;
             }
         }
 
@@ -1396,8 +1568,24 @@ private:
                 case Tag::ResolvedSymbol:
                     return nullptr;
                 case Tag::FailedResolutionSymbol:
-                    return reinterpret_cast<const std::vector<core::SymbolRef> *>(untaggedPtr1());
+                    return &reinterpret_cast<const FailedResolutionData *>(untaggedPtr1())->resolutionScopes;
             }
+        }
+
+        int resolvedUpToSegmentForFlatUCL() const {
+            switch (tag()) {
+                case Tag::KnownSymbol:
+                case Tag::ResolvedSymbol:
+                    return -1;
+                case Tag::FailedResolutionSymbol:
+                    return reinterpret_cast<const FailedResolutionData *>(untaggedPtr1())->resolvedUpToSegment;
+            }
+        }
+
+        void setResolvedUpToSegmentForFlatUCL(int idx) {
+            ENFORCE(tag() == Tag::FailedResolutionSymbol);
+            ENFORCE(idx != -1)
+            reinterpret_cast<FailedResolutionData *>(untaggedPtr1())->resolvedUpToSegment = idx;
         }
 
         void setSymbol(core::SymbolRef sym) {
@@ -1451,9 +1639,24 @@ public:
         return storage.resolutionScopes();
     }
 
+    const FailedResolutionData *resolutionData() const {
+        return storage.resolutionData();
+    }
+
     // Marks this constant as unresolved and allocates a vector for `resolutionScopes`.
     void markUnresolved() {
         storage.markUnresolved();
+    }
+
+    // For flat (EmptyTree-scoped) UCLs that failed to resolve: the index of the last
+    // successfully resolved segment, or -1 if no segment resolved or this is an
+    // explicit-scope UCL. Set by the resolver in constantResolutionFailed.
+    int resolvedUpToSegmentForFlatUCL() const {
+        return storage.resolvedUpToSegmentForFlatUCL();
+    }
+
+    void setResolvedUpToSegmentForFlatUCL(int idx) {
+        storage.setResolvedUpToSegmentForFlatUCL(idx);
     }
 
     UnresolvedConstantLit *original() {

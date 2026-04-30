@@ -23,20 +23,20 @@ bool isTNilableTUntyped(const ast::ExpressionPtr &expr) {
 
 bool isTStruct(const ast::ExpressionPtr &expr) {
     auto struct_ = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
-    return struct_ != nullptr && struct_->cnst == core::Names::Constants::Struct() &&
-           ast::MK::isTApproximate(struct_->scope);
+    return struct_ != nullptr && struct_->segCount() == 2 && struct_->names()[0] == core::Names::Constants::T() &&
+           struct_->names()[1] == core::Names::Constants::Struct() && ast::MK::isRootScope(struct_->scope);
 }
 
 bool isTInexactStruct(const ast::ExpressionPtr &expr) {
     auto struct_ = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
-    return struct_ != nullptr && struct_->cnst == core::Names::Constants::InexactStruct() &&
-           ast::MK::isTApproximate(struct_->scope);
+    return struct_ != nullptr && struct_->segCount() == 2 && struct_->names()[0] == core::Names::Constants::T() &&
+           struct_->names()[1] == core::Names::Constants::InexactStruct() && ast::MK::isRootScope(struct_->scope);
 }
 
 bool isTImmutableStruct(const ast::ExpressionPtr &expr) {
     auto struct_ = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
-    return struct_ != nullptr && struct_->cnst == core::Names::Constants::ImmutableStruct() &&
-           ast::MK::isTApproximate(struct_->scope);
+    return struct_ != nullptr && struct_->segCount() == 2 && struct_->names()[0] == core::Names::Constants::T() &&
+           struct_->names()[1] == core::Names::Constants::ImmutableStruct() && ast::MK::isRootScope(struct_->scope);
 }
 
 enum class SyntacticSuperClass {
@@ -201,8 +201,9 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             ret.name = send->fun == core::Names::createdProp() ? core::Names::created() : core::Names::updated();
             // 5 is the length of the _prop suffix
             ret.nameLoc = core::LocOffsets{send->loc.beginPos(), send->loc.endPos() - 5};
-            ret.type = ASTUtil::mkNilable(send->loc, ast::MK::UnresolvedConstant(send->loc, ast::MK::EmptyTree(),
-                                                                                 core::Names::Constants::Numeric()));
+            ret.type = ASTUtil::mkNilable(
+                send->loc,
+                ast::MK::UnresolvedConstant(ast::MK::EmptyTree(), {core::Names::Constants::Numeric()}, {send->loc}));
             break;
         }
         case core::Names::merchantTokenProp().rawId():

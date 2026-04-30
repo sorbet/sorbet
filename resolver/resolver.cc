@@ -168,6 +168,13 @@ private:
         shared_ptr<Nesting> scope;
         ast::ConstantLit *out;
         bool resolutionFailed = false;
+        // For multi-segment flat UCLs: tracks how many segments have been resolved so far.
+        // -1 means nothing resolved yet. When resolvedUpToSegment == segCount-1, all done.
+        int resolvedUpToSegment = -1;
+        // The dealiased ClassOrModuleRef of the segment at index resolvedUpToSegment.
+        // Used as the starting scope for the next segment lookup on retry.
+        // Only meaningful when resolvedUpToSegment >= 0.
+        core::ClassOrModuleRef resolvedOwner;
 
         ConstantResolutionItem() = default;
         ConstantResolutionItem(const shared_ptr<Nesting> &scope, ast::ConstantLit *lit) : scope(scope), out(lit) {}
@@ -328,8 +335,7 @@ private:
     // if resolved symbol is only defined in the current file, and
     //    the definition is after the reference loc,
     // then, report an error.
-    static void checkReferenceOrder(core::Context ctx, core::SymbolRef resolutionResult,
-                                    const ast::UnresolvedConstantLit &c,
+    static void checkReferenceOrder(core::Context ctx, core::SymbolRef resolutionResult, core::LocOffsets refLoc,
                                     const UnorderedMap<core::SymbolRef, core::LocOffsets> &firstDefinitionLocs) {
         if (!ctx.file.data(ctx).isRBI() && resolutionResult.exists() &&
             resolutionResult.isOnlyDefinedInFile(ctx.state, ctx.file)) {
@@ -349,9 +355,8 @@ private:
             }
 
             // Check for ordering between reference loc and definition loc.
-            const auto &refLoc = c.loc;
             if (defLoc.beginPos() > refLoc.endPos()) {
-                if (auto e = ctx.beginError(c.loc, core::errors::Resolver::OutOfOrderConstantAccess)) {
+                if (auto e = ctx.beginError(refLoc, core::errors::Resolver::OutOfOrderConstantAccess)) {
                     e.setHeader("`{}` referenced before it is defined", resolutionResult.show(ctx));
                     e.addErrorLine(ctx.locAt(defLoc), "Defined here");
                 }
@@ -360,54 +365,132 @@ private:
     }
 
     static core::SymbolRef resolveConstant(core::Context ctx, ConstantResolutionItem &job) {
-        auto &c = *job.out->original();
-        if (ast::isa_tree<ast::EmptyTree>(c.scope)) {
-            auto result = resolveLhs(ctx, job.scope, c.cnst);
-
-            return result;
+        // If the ConstantLit already has a symbol set (e.g., by Namer for qualified constants
+        // like `A::B::Foo = T.type_alias {...}`), return it directly.
+        auto existingSym = job.out->symbol();
+        if (existingSym.exists()) {
+            return existingSym;
         }
-        if (auto id = ast::cast_tree<ast::ConstantLit>(c.scope)) {
-            auto sym = id->symbol();
+
+        auto &c = *job.out->original();
+        auto segCount = (int)c.segCount();
+        ENFORCE(segCount >= 1);
+
+        core::ClassOrModuleRef currentOwner;
+        int startIdx;
+
+        if (job.resolvedUpToSegment < 0) {
+            // Nothing resolved yet — start from scope.
+            if (ast::isa_tree<ast::EmptyTree>(c.scope)) {
+                // Single-segment fast path: look up the only segment via nesting scope.
+                if (segCount == 1) {
+                    return resolveLhs(ctx, job.scope, c.names()[0]);
+                }
+                // Multi-segment: look up names()[0] (first segment) via nesting scope.
+                auto firstSym = resolveLhs(ctx, job.scope, c.names()[0]);
+                if (!firstSym.exists()) {
+                    return core::Symbols::noSymbol();
+                }
+                // Check type alias on intermediate (non-leaf) segment.
+                if (firstSym.isTypeAlias(ctx) && !job.resolutionFailed) {
+                    auto locs = c.locs();
+                    if (auto e = ctx.beginError(locs[1], core::errors::Resolver::ConstantInTypeAlias)) {
+                        e.setHeader("Resolving constants through type aliases is not supported");
+                    }
+                    job.resolutionFailed = true;
+                    return core::Symbols::noSymbol();
+                }
+                auto dealiased = firstSym.dealias(ctx);
+                if (!dealiased.isClassOrModule()) {
+                    return core::Symbols::noSymbol();
+                }
+                currentOwner = dealiased.asClassOrModuleRef();
+                job.resolvedUpToSegment = 0;
+                job.resolvedOwner = currentOwner;
+                startIdx = 1;
+            } else if (auto id = ast::cast_tree<ast::ConstantLit>(c.scope)) {
+                auto sym = id->symbol();
+                if (!sym.exists()) {
+                    // Waiting for scope to be resolved; retry later.
+                    return core::Symbols::noSymbol();
+                }
+                if (sym.isTypeAlias(ctx) && !job.resolutionFailed) {
+                    if (auto e = ctx.beginError(c.locs()[0], core::errors::Resolver::ConstantInTypeAlias)) {
+                        e.setHeader("Resolving constants through type aliases is not supported");
+                    }
+                    job.resolutionFailed = true;
+                    return core::Symbols::noSymbol();
+                }
+                auto resolved = sym.dealias(ctx);
+                if (!resolved.isClassOrModule()) {
+                    return core::Symbols::noSymbol();
+                }
+                currentOwner = resolved.asClassOrModuleRef();
+                startIdx = 0;
+            } else {
+                if (!job.resolutionFailed) {
+                    if (auto e = ctx.beginError(c.locs()[0], core::errors::Resolver::DynamicConstant)) {
+                        e.setHeader("Dynamic constant references are unsupported");
+                    }
+                }
+                job.resolutionFailed = true;
+                return core::Symbols::noSymbol();
+            }
+        } else {
+            // Resume from last saved position.
+            currentOwner = job.resolvedOwner;
+            startIdx = job.resolvedUpToSegment + 1;
+        }
+
+        // Walk segments from startIdx to segCount-1.
+        for (int i = startIdx; i < segCount; ++i) {
+            auto segName = c.names()[i];
+            auto segLoc = c.locs()[i];
+            auto sym = currentOwner.data(ctx)->findMemberNoDealias(segName);
             if (!sym.exists()) {
-                // Still waiting for scope to be resolved. Don't mark resolutionFailed yet, just
-                // return noSymbol so that this job is picked up on the next time through the loop.
+                // Can't resolve this segment yet; progress already saved, retry later.
                 return core::Symbols::noSymbol();
             }
 
+            // Private constants are not allowed when scope is explicit (i.e. not a nesting lookup).
+            // Nesting lookup applies only to names()[0] when scope is EmptyTree; all others are
+            // explicit scope. The scope ConstantLit path is always explicit scope.
+            bool isExplicitScope = !ast::isa_tree<ast::EmptyTree>(c.scope) || i > 0;
+            if (isExplicitScope && sym.exists() &&
+                ((sym.isClassOrModule() && sym.asClassOrModuleRef().data(ctx)->flags.isPrivate) ||
+                 (sym.isStaticField(ctx) && sym.asFieldRef().data(ctx)->flags.isStaticFieldPrivate)) &&
+                !ctx.file.data(ctx).isRBI()) {
+                if (auto e = ctx.beginError(segLoc, core::errors::Resolver::PrivateConstantReferenced)) {
+                    e.setHeader("Non-private reference to private constant `{}` referenced", sym.show(ctx));
+                }
+            }
+
+            if (i == segCount - 1) {
+                // Leaf segment: return pre-dealias symbol (consistent with existing behavior).
+                // Do NOT advance resolvedUpToSegment here: if the caller (e.g. resolveConstantJob)
+                // needs to retry (e.g. the symbol is a type alias whose resultType isn't set yet),
+                // we need to re-resolve the leaf from the last saved intermediate position.
+                return sym;
+            }
+
+            // Intermediate segment: type-alias check, then dealias for next lookup.
             if (sym.isTypeAlias(ctx) && !job.resolutionFailed) {
-                if (auto e = ctx.beginError(c.loc, core::errors::Resolver::ConstantInTypeAlias)) {
+                if (auto e = ctx.beginError(c.loc(), core::errors::Resolver::ConstantInTypeAlias)) {
                     e.setHeader("Resolving constants through type aliases is not supported");
                 }
                 job.resolutionFailed = true;
                 return core::Symbols::noSymbol();
             }
-
-            auto resolved = sym.dealias(ctx);
-            core::SymbolRef result;
-            if (resolved.isClassOrModule()) {
-                result = resolved.asClassOrModuleRef().data(ctx)->findMemberNoDealias(c.cnst);
+            auto dealiased = sym.dealias(ctx);
+            if (!dealiased.isClassOrModule()) {
+                return core::Symbols::noSymbol();
             }
-
-            // Private constants are allowed to be resolved, when there is no scope set (the scope is checked above),
-            // otherwise we should error out. Private constant references _are not_ enforced inside RBI files.
-            if (result.exists() &&
-                ((result.isClassOrModule() && result.asClassOrModuleRef().data(ctx)->flags.isPrivate) ||
-                 (result.isStaticField(ctx) && result.asFieldRef().data(ctx)->flags.isStaticFieldPrivate)) &&
-                !ctx.file.data(ctx).isRBI()) {
-                if (auto e = ctx.beginError(c.loc, core::errors::Resolver::PrivateConstantReferenced)) {
-                    e.setHeader("Non-private reference to private constant `{}` referenced", result.show(ctx));
-                }
-            }
-
-            return result;
+            currentOwner = dealiased.asClassOrModuleRef();
+            job.resolvedUpToSegment = i;
+            job.resolvedOwner = currentOwner;
         }
 
-        if (!job.resolutionFailed) {
-            if (auto e = ctx.beginError(c.loc, core::errors::Resolver::DynamicConstant)) {
-                e.setHeader("Dynamic constant references are unsupported");
-            }
-        }
-        job.resolutionFailed = true;
+        ENFORCE(false, "unreachable");
         return core::Symbols::noSymbol();
     }
 
@@ -429,7 +512,7 @@ private:
                 auto loc = resolvedField.data(ctx)->loc();
                 if (auto e = ctx.state.beginError(loc, core::errors::Resolver::RecursiveTypeAlias)) {
                     e.setHeader("Unable to resolve right hand side of type alias `{}`", resolved.show(ctx));
-                    e.addErrorLine(ctx.locAt(job.out->original()->loc), "Type alias used here");
+                    e.addErrorLine(ctx.locAt(job.out->original()->loc()), "Type alias used here");
                 }
 
                 resolvedField.data(gs)->resultType = core::Types::untyped(resolved);
@@ -442,6 +525,7 @@ private:
             // continuing on will only redundantly report that we can't resolve the constant, so bail early here
             job.out->markUnresolved();
             job.out->resolutionScopes()->emplace_back(core::Symbols::noSymbol());
+            job.out->setResolvedUpToSegmentForFlatUCL(job.resolvedUpToSegment + 1);
             return;
         }
 
@@ -451,7 +535,29 @@ private:
         bool alreadyReported = false;
         job.out->markUnresolved();
         auto &original = *job.out->original();
-        if (auto id = ast::cast_tree<ast::ConstantLit>(original.scope)) {
+
+        // Determine which segment failed to resolve and its location.
+        // failedSegIdx is the index of the first unresolved segment.
+        int failedSegIdx = job.resolvedUpToSegment + 1; // 0 if nothing resolved yet
+        ENFORCE(failedSegIdx < (int)original.segCount());
+        ENFORCE(failedSegIdx >= 0);
+        core::NameRef failedSegName = original.names()[failedSegIdx];
+        core::LocOffsets failedSegLoc = original.locs()[failedSegIdx];
+
+        if (job.resolvedUpToSegment >= 0) {
+            // Some segments resolved before failure: scope is the last resolved owner.
+            // Treat like an explicit-scope constant resolution.
+            auto ownerSym = core::SymbolRef(job.resolvedOwner);
+            if (ownerSym.dealias(ctx) == core::Symbols::StubModule()) {
+                alreadyReported = true;
+                job.out->resolutionScopes()->emplace_back(core::Symbols::noSymbol());
+            } else {
+                job.out->resolutionScopes()->emplace_back(ownerSym);
+            }
+            // Record the last resolved segment index so matchesQuery in DefLocSaver can
+            // correctly attribute symbols to each segment when iterating the flat UCL.
+            job.out->setResolvedUpToSegmentForFlatUCL(failedSegIdx);
+        } else if (auto id = ast::cast_tree<ast::ConstantLit>(original.scope)) {
             auto originalScope = id->symbol().dealias(ctx);
             if (originalScope == core::Symbols::StubModule()) {
                 // If we were trying to resolve some literal like C::D but `C` itself was already stubbed,
@@ -464,6 +570,41 @@ private:
                 // we just put a single entry in the resolutionScopes list.
                 job.out->resolutionScopes()->emplace_back(originalScope);
             }
+            job.out->setResolvedUpToSegmentForFlatUCL(failedSegIdx);
+        } else if (failedSegIdx == 0 && ast::isa_tree<ast::EmptyTree>(original.scope) && original.segCount() > 1) {
+            // Multi-segment flat UCL with EmptyTree scope where nothing resolved.
+            // Segment 0 may have been found via nesting lookup but was not followable
+            // (e.g., it's a class alias field whose AliasType hasn't been set yet by
+            // resolveClassAliasJob, which runs after constantResolutionFailed). Try to
+            // find segment 0 to identify the actual failing segment.
+            auto seg0Sym = resolveLhs(ctx, job.scope, original.names()[0]);
+            if (seg0Sym.exists()) {
+                // Segment 0 was found; the actual failing segment is 1.
+                failedSegIdx = 1;
+                failedSegName = original.names()[1];
+                failedSegLoc = original.locs()[1];
+                if (seg0Sym.dealias(ctx) == core::Symbols::StubModule()) {
+                    alreadyReported = true;
+                    job.out->resolutionScopes()->emplace_back(core::Symbols::noSymbol());
+                } else {
+                    // Mirror the ConstantLit-scope branch: use the found symbol (not its
+                    // dealias) as the scope, consistent with how chained ConstantLits behaved.
+                    job.out->resolutionScopes()->emplace_back(seg0Sym);
+                }
+                // Segment 0 was resolved; record this so matchesQuery can walk backwards.
+                job.out->setResolvedUpToSegmentForFlatUCL(1);
+            } else {
+                // Segment 0 was not found: use nesting scopes.
+                auto nesting = job.scope;
+                while (true) {
+                    job.out->resolutionScopes()->emplace_back(nesting->scope);
+                    if (nesting->parent == nullptr) {
+                        break;
+                    }
+                    nesting = nesting->parent;
+                }
+                job.out->setResolvedUpToSegmentForFlatUCL(0);
+            }
         } else {
             auto nesting = job.scope;
             while (true) {
@@ -474,22 +615,25 @@ private:
 
                 nesting = nesting->parent;
             }
+            job.out->setResolvedUpToSegmentForFlatUCL(0);
         }
 
         ENFORCE(!job.out->resolutionScopes()->empty());
+        ENFORCE(job.out->resolvedUpToSegmentForFlatUCL() != -1);
+        ENFORCE(job.out->resolvedUpToSegmentForFlatUCL() < (int)original.segCount());
         ENFORCE(job.scope->scope != core::Symbols::StubModule());
 
         // This name is an artifact of parser recovery--no need to leak the parser implementation to the user,
         // because an error will have already been reported.
-        auto constantNameMissing = original.cnst == core::Names::Constants::ConstantNameMissing();
+        auto constantNameMissing = failedSegName == core::Names::Constants::ConstantNameMissing();
         if (!constantNameMissing && !alreadyReported) {
-            if (auto e = ctx.beginError(original.loc, core::errors::Resolver::StubConstant)) {
-                e.setHeader("Unable to resolve constant `{}`", original.cnst.show(ctx));
+            if (auto e = ctx.beginError(failedSegLoc, core::errors::Resolver::StubConstant)) {
+                e.setHeader("Unable to resolve constant `{}`", failedSegName.show(ctx));
                 auto foundCommonTypo = false;
-                if (ast::isa_tree<ast::EmptyTree>(original.scope)) {
+                if (failedSegIdx == 0 && ast::isa_tree<ast::EmptyTree>(original.scope)) {
                     for (const auto &[from, to] : COMMON_TYPOS) {
-                        if (from == original.cnst) {
-                            e.didYouMean(to, ctx.locAt(job.out->loc()));
+                        if (from == failedSegName) {
+                            e.didYouMean(to, ctx.locAt(failedSegLoc));
                             foundCommonTypo = true;
                             break;
                         }
@@ -502,7 +646,7 @@ private:
                     suggestionCount++;
 
                     auto suggested =
-                        suggestScope.asClassOrModuleRef().data(ctx)->findMemberFuzzyMatch(ctx, original.cnst);
+                        suggestScope.asClassOrModuleRef().data(ctx)->findMemberFuzzyMatch(ctx, failedSegName);
 
                     if (ctx.file.data(ctx).isPackage(gs) &&
                         !suggestScope.asClassOrModuleRef().isPackageSpecSymbol(ctx.state)) {
@@ -529,7 +673,7 @@ private:
                     }
                     for (auto suggestion : suggested) {
                         const auto replacement = suggestion.symbol.show(ctx);
-                        auto replaceLoc = ctx.locAt(job.out->loc());
+                        auto replaceLoc = ctx.locAt(failedSegLoc);
                         if (replaceLoc.source(ctx) == replacement) {
                             // The replacement is the same as the original.
                             // This can happen for a number of reasons, usually due to things
@@ -1141,7 +1285,7 @@ private:
         } else if (ancestor.isSelfReference()) {
             auto loc = ancestor.loc();
             auto enclosingClass = ctx.owner.enclosingClass(ctx);
-            auto nw = ast::MK::UnresolvedConstant(loc, std::move(ancestor), enclosingClass.data(ctx)->name);
+            auto nw = ast::MK::UnresolvedConstant(std::move(ancestor), {enclosingClass.data(ctx)->name}, {loc});
             auto out =
                 ast::make_expression<ast::ConstantLit>(enclosingClass, nw.toUnique<ast::UnresolvedConstantLit>());
             job.ancestor = ast::cast_tree<ast::ConstantLit>(out);
@@ -1157,26 +1301,68 @@ private:
 
     void walkUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
         if (auto c = ast::cast_tree<ast::UnresolvedConstantLit>(tree)) {
+            // Process the root scope first (never a UCL by invariant, so no recursion needed there)
             walkUnresolvedConstantLit(ctx, c->scope);
+            // c->scope is now EmptyTree, ConstantLit, or dynamic (error)
+
+            // Create ONE ConstantLit wrapping the entire flat UCL.
             auto out = ast::make_expression<ast::ConstantLit>(core::Symbols::noSymbol(),
                                                               tree.toUnique<ast::UnresolvedConstantLit>());
             auto constant = ast::cast_tree<ast::ConstantLit>(out);
             ConstantResolutionItem job{nesting_, constant};
             if (resolveConstantJob(ctx, job)) {
                 categoryCounterInc("resolve.constants.nonancestor", "firstpass");
-                if (this->loadTimeScope() && (!constant->symbol().isClassOrModule() ||
-                                              constant->symbol().asClassOrModuleRef().data(ctx)->isDeclared())) {
-                    // While Sorbet treats class A::B; end like an implicit definition of A, it's actually a
-                    // reference of A--Ruby will require a proper definition of A elsewhere. Long term,
-                    // Sorbet should be taught to emit errors when these references are not actually defined,
-                    // matching Ruby's behavior. Then the reference order checks will be able to check all
-                    // references against their definitions, and not limit them to only isDeclared symbols here.
-
-                    // (Historically, Stripe's custom autoloader used static analysis to predeclare these
-                    // intermediate namespaces, so they would always be defined at the right time. As Stripe's
-                    // codebase moves away from this legacy autoloader, it will be easier to introduce such
-                    // changes into Sorbet.)
-                    checkReferenceOrder(ctx, constant->symbol(), *c, firstDefinitionLocs);
+                if (this->loadTimeScope()) {
+                    // Check reference order for each resolved segment individually.
+                    // Since resolveConstantJob succeeded, all segments are resolved. We re-walk
+                    // them here to get each segment's symbol and loc for the out-of-order check.
+                    //
+                    // While Sorbet treats class A::B; end like an implicit definition of A, it's
+                    // actually a reference of A--Ruby will require a proper definition of A
+                    // elsewhere. Long term, Sorbet should be taught to emit errors when these
+                    // references are not actually defined, matching Ruby's behavior. Then the
+                    // reference order checks will be able to check all references against their
+                    // definitions, and not limit them to only isDeclared symbols here.
+                    //
+                    // (Historically, Stripe's custom autoloader used static analysis to predeclare
+                    // these intermediate namespaces, so they would always be defined at the right
+                    // time. As Stripe's codebase moves away from this legacy autoloader, it will be
+                    // easier to introduce such changes into Sorbet.)
+                    auto &orig = *constant->original();
+                    auto segCount = (int)orig.segCount();
+                    core::ClassOrModuleRef owner;
+                    for (int i = 0; i < segCount; ++i) {
+                        auto segName = orig.names()[i];
+                        auto segLoc = orig.locs()[i];
+                        core::SymbolRef sym;
+                        if (i == 0 && ast::isa_tree<ast::EmptyTree>(orig.scope)) {
+                            sym = resolveLhs(ctx, nesting_, segName);
+                        } else if (i == 0) {
+                            // ConstantLit scope (e.g. ::A::B)
+                            if (auto id = ast::cast_tree<ast::ConstantLit>(orig.scope)) {
+                                auto scopeSym = id->symbol().dealias(ctx);
+                                if (scopeSym.isClassOrModule()) {
+                                    owner = scopeSym.asClassOrModuleRef();
+                                    sym = owner.data(ctx)->findMemberNoDealias(segName);
+                                }
+                            }
+                        } else {
+                            if (owner.exists()) {
+                                sym = owner.data(ctx)->findMemberNoDealias(segName);
+                            }
+                        }
+                        if (!sym.exists()) {
+                            break;
+                        }
+                        if (!sym.isClassOrModule() || sym.asClassOrModuleRef().data(ctx)->isDeclared()) {
+                            checkReferenceOrder(ctx, sym, segLoc, firstDefinitionLocs);
+                        }
+                        auto dealiased = sym.dealias(ctx);
+                        if (!dealiased.isClassOrModule()) {
+                            break;
+                        }
+                        owner = dealiased.asClassOrModuleRef();
+                    }
                 }
             } else {
                 todo_.emplace_back(std::move(job));
@@ -1504,13 +1690,23 @@ public:
 
     static int constantDepth(ast::ConstantLit *exp) {
         int depth = 0;
-        ast::ConstantLit *scope = exp;
-        while (auto original = scope->original()) {
-            scope = ast::cast_tree<ast::ConstantLit>(original->scope);
-            if (!scope) {
-                break;
+        if (auto original = exp->original()) {
+            // Number of segments minus one: A=0, A::B=1, A::B::C=2
+            depth += (int)original->segCount() - 1;
+            // Walk any ConstantLit scope chain (e.g. the ConstantLit(root) in ::A::B)
+            const ast::ExpressionPtr *scopePtr = &original->scope;
+            while (scopePtr != nullptr) {
+                auto scopeLit = ast::cast_tree<ast::ConstantLit>(*scopePtr);
+                if (!scopeLit) {
+                    break;
+                }
+                if (auto scopeOrig = scopeLit->original()) {
+                    depth += (int)scopeOrig->segCount();
+                    scopePtr = &scopeOrig->scope;
+                } else {
+                    break;
+                }
             }
-            depth += 1;
         }
         return depth;
     }
