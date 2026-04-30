@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 cwd="$(pwd)"
 
 tmp="$(mktemp -d)"
