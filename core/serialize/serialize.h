@@ -8,15 +8,20 @@ class Serializer {
 public:
     static const uint32_t VERSION = 6;
 
-    static constexpr std::string_view NAME_TABLE_KEY = "NameTable";
     static constexpr std::string_view NAME_TABLE_UUID_KEY = "NameTableUUID";
+    static constexpr std::string_view NAME_TABLE_DIFF_COUNT_AND_HASH_SIZE_KEY = "NameTableDiffCountAndHashSize";
+
+    static std::string nameTableDiffKey(uint32_t index);
 
     // Serialize only the UUID from a global state.
     static std::vector<uint8_t> storeUUID(const GlobalState &gs);
 
-    // Serialize only the name table from a global state. This is suffient for deserializing trees that have only been
-    // through the indexing, as they won't have any non-well-known symbols present.
-    static std::vector<uint8_t> storeNameTable(const GlobalState &gs);
+    static std::vector<uint8_t> storeNameTableDiff(const GlobalState &gs);
+
+    static void loadAndAppendNameTableDiff(GlobalState &gs, const uint8_t *const data);
+
+    static std::vector<uint8_t> storeNameTableDiffCountAndHashSize(uint32_t count, const GlobalState &gs);
+    static uint32_t loadNameTableDiffCountAndResizeNamesHash(GlobalState &gs, const uint8_t *const data);
 
     struct SerializedGlobalState {
         std::vector<uint8_t> symbolTableData;
@@ -31,9 +36,6 @@ public:
 
     // Serializes an AST and file hash.
     static std::vector<uint8_t> storeTree(const core::File &file, const ast::ParsedFile &tree);
-
-    // Augment a global state with the name table stored in the cache.
-    static void loadAndOverwriteNameTable(GlobalState &gs, const uint8_t *const uuidData, const uint8_t *const data);
 
     // Load the global state out of buffers that contain the symbol table, name table, and file table. This is only
     // intended to be used for loading the payload out of buffers that are compiled in to the binary.
