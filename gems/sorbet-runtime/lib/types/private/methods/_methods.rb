@@ -1,11 +1,12 @@
 # frozen_string_literal: true
-# typed: false
+# typed: true
 
 module T::Private::Methods
   @installed_hooks = {}
   if defined?(Concurrent::Hash)
-    @signatures_by_method = Concurrent::Hash.new
-    @sig_wrappers = Concurrent::Hash.new
+    # Hide the Concurrent::Hash so that we get better typing by lying and saying it's a Hash
+    instance_variable_set(:@signatures_by_method, Concurrent::Hash.new)
+    instance_variable_set(:@sig_wrappers, Concurrent::Hash.new)
   else
     @signatures_by_method = {}
     @sig_wrappers = {}
@@ -31,10 +32,23 @@ module T::Private::Methods
   # in installed_hooks.
   @old_hooks = nil
 
-  ARG_NOT_PROVIDED = Object.new
-  PROC_TYPE = Object.new
+  # These names are for backwards compatibility from when these were `Object.new` instances
+  # rubocop:disable Naming/ClassAndModuleCamelCase
+  module ARG_NOT_PROVIDED
+    freeze
+  end
+  module PROC_TYPE
+    freeze
+  end
+  # rubocop:enable Naming/ClassAndModuleCamelCase
 
-  DeclarationBlock = Struct.new(:mod, :loc, :blk, :final, :raw)
+  # blk_or_decl:
+  # - It's a `Proc` if we haven't forced the thunk yet.
+  # - It's a `Declaration` if we have, but we haven't finished building the sig
+  #   (This can matter for circular load-time behavior, where a method is
+  #   called while its Signature is being built)
+  # - It's `nil` if we've finished building the sig
+  DeclarationBlock = Struct.new(:mod, :loc, :blk_or_decl, :final, :raw)
 
   def self.declare_sig(mod, loc, arg, &blk)
     T::Private::DeclState.current.active_declaration = _declare_sig_internal(mod, loc, arg, &blk)
@@ -44,7 +58,7 @@ module T::Private::Methods
 
   # See tests for how to use this.  But you shouldn't be using this.
   def self._declare_sig(mod, arg=nil, &blk)
-    _declare_sig_internal(mod, caller_locations(1, 1).first, arg, raw: true, &blk)
+    _declare_sig_internal(mod, caller_locations(1, 1)&.first, arg, raw: true, &blk)
   end
 
   private_class_method def self._declare_sig_internal(mod, loc, arg, raw: false, &blk)
@@ -106,7 +120,9 @@ module T::Private::Methods
 
   # Fetch the directory name of the file that defines the `T::Private` constant and
   # add a trailing slash to allow us to match it as a directory prefix.
-  SORBET_RUNTIME_LIB_PATH = File.dirname(T.const_source_location(:Private).first) + File::SEPARATOR
+  sorbet_runtime_loc = T.const_source_location(:Private)
+  raise "T::Private constant location not found" unless sorbet_runtime_loc
+  SORBET_RUNTIME_LIB_PATH = File.dirname(sorbet_runtime_loc.first) + File::SEPARATOR
   private_constant :SORBET_RUNTIME_LIB_PATH
 
   # when target includes a module with instance methods source_method_names, ensure there is zero intersection between
@@ -115,10 +131,14 @@ module T::Private::Methods
   #
   # we assume that source_method_names has already been filtered to only include method
   # names that were declared final at one point.
-  def self._check_final_ancestors(target, target_ancestors, source_method_names, source)
+  def self._check_final_ancestors(target, source_method_names, source)
     source_ancestors = nil
+    if T::Private::IS_TYPECHECKING
+      # Need to avoid a pinning error, but don't want to use runtime types in _methods.rb
+      source_ancestors = T.let(nil, T.nilable(T::Array[T::Module[T.anything]]))
+    end
     # use reverse_each to check farther-up ancestors first, for better error messages.
-    target_ancestors.reverse_each do |ancestor|
+    target.ancestors.reverse_each do |ancestor|
       final_methods = @modules_with_final.fetch(ancestor, nil)
       # In this case, either ancestor didn't have any final methods anywhere in its
       # ancestor chain, or ancestor did have final methods somewhere in its ancestor
@@ -148,7 +168,8 @@ module T::Private::Methods
           next if defining_ancestor_idx && source_ancestors[defining_ancestor_idx] == ancestor
         end
 
-        definition_file, definition_line = T::Private::Methods.signature_for_method(ancestor.instance_method(method_name)).method.source_location
+        final_sig = T::Private::Methods.signature_for_method(ancestor.instance_method(method_name))
+        definition_file, definition_line = final_sig&.method&.source_location
         is_redefined = target == ancestor
         caller_loc = T::Private::CallerUtils.find_caller { |loc| !loc.path.to_s.start_with?(SORBET_RUNTIME_LIB_PATH) }
         extra_info = "\n"
@@ -179,6 +200,7 @@ module T::Private::Methods
   end
 
   def self.add_module_with_final_method(mod, method_name)
+    # Side-effectfully initializes the value if it's not already there
     methods = @modules_with_final[mod]
     if methods.nil?
       methods = {}
@@ -186,12 +208,6 @@ module T::Private::Methods
     end
     methods[method_name] = true
     nil
-  end
-
-  def self.note_module_deals_with_final(mod)
-    # Side-effectfully initialize the value if it's not already there
-    @modules_with_final[mod]
-    @modules_with_final[mod.singleton_class]
   end
 
   # Only public because it needs to get called below inside the replace_method blocks below.
@@ -207,7 +223,7 @@ module T::Private::Methods
     end
     # Don't compute mod.ancestors if we don't need to bother checking final-ness.
     if @was_ever_final_names.include?(method_name) && @modules_with_final.include?(mod)
-      _check_final_ancestors(mod, mod.ancestors, [method_name], nil)
+      _check_final_ancestors(mod, [method_name], nil)
       # We need to fetch the active declaration again, as _check_final_ancestors
       # may have reset it (see the comment in that method for details).
       current_declaration = T::Private::DeclState.current.active_declaration
@@ -236,12 +252,12 @@ module T::Private::Methods
     # (or unwrap back to the original method).
     key = method_owner_and_name_to_key(mod, method_name)
     unless current_declaration.raw
-      T::Private::ClassUtils.replace_method(mod, method_name, true) do |*args, &blk|
+      T::Private::ClassUtils.replace_method(original_method, mod, method_name) do |*args, &blk|
         method_sig = T::Private::Methods.maybe_run_sig_block_for_key(key)
         method_sig ||= T::Private::Methods._handle_missing_method_signature(
           self,
           original_method,
-          __callee__,
+          __callee__ || raise("Unknown __callee__ for method without a signature"),
         )
 
         # Should be the same logic as CallValidation.wrap_method_if_needed but we
@@ -266,9 +282,6 @@ module T::Private::Methods
     @sig_wrappers[key] = sig_block
     if current_declaration.final
       @was_ever_final_names[method_name] = true
-      # use hook_mod, not mod, because for example, we want class C to be marked as having final if we def C.foo as
-      # final. change this to mod to see some final_method tests fail.
-      note_module_deals_with_final(hook_mod)
       add_module_with_final_method(mod, method_name)
     end
   end
@@ -321,6 +334,7 @@ module T::Private::Methods
         nil
       end
 
+    # Release location information sooner
     declaration_block.loc = nil
 
     signature =
@@ -331,15 +345,28 @@ module T::Private::Methods
       end
 
     unwrap_method(signature.method.owner, signature, original_method)
+
+    # Drop this declaration. Only drop it after we've actually wrapped the
+    # method and recorded the signature, because that might raise an exception,
+    # leaving the declaration in a weird state if the program rescues that
+    # exception and continues.
+    declaration_block.blk_or_decl = nil
+
     signature
   end
 
   def self.run_builder(declaration_block)
+    blk_or_decl = declaration_block.blk_or_decl
+    return blk_or_decl if blk_or_decl.is_a?(Declaration)
+    if blk_or_decl.nil?
+      raise "DeclarationBlock for #{declaration_block.mod} at #{declaration_block.loc} should have already been unwrapped"
+    end
+
     builder = DeclBuilder.new(declaration_block.mod, declaration_block.raw)
-    builder
-      .instance_exec(&declaration_block.blk)
-      .finalize!
-      .decl
+    decl = builder.instance_exec(&blk_or_decl).finalize!.decl
+    # Record that we've already run `blk` once and constructed a `Declaration`
+    declaration_block.blk_or_decl = decl
+    decl
   end
 
   def self.build_sig(hook_mod, method_name, original_method, current_declaration)
@@ -372,7 +399,7 @@ module T::Private::Methods
       SignatureValidation.validate(signature)
       signature
     rescue => e
-      super_method = original_method&.super_method
+      super_method = original_method.super_method
       super_signature = signature_for_method(super_method) if super_method
 
       T::Configuration.sig_validation_error_handler(
@@ -400,7 +427,7 @@ module T::Private::Methods
     @signatures_by_method[key]
   end
 
-  def self.unwrap_method(mod, signature, original_method)
+  private_class_method def self.unwrap_method(mod, signature, original_method)
     maybe_wrapped_method = CallValidation.wrap_method_if_needed(mod, signature, original_method)
     @signatures_by_method[method_to_key(maybe_wrapped_method)] = signature
   end
@@ -470,8 +497,9 @@ module T::Private::Methods
 
   def self.run_all_sig_blocks(force_type_init: true)
     loop do
-      break if @sig_wrappers.empty?
-      key, = @sig_wrappers.first
+      first_wrapper = @sig_wrappers.first
+      break unless first_wrapper
+      key, = first_wrapper
       run_sig_block_for_key(key, force_type_init: force_type_init)
     end
   end
@@ -482,14 +510,15 @@ module T::Private::Methods
 
   # the module target is adding the methods from the module source to itself. we need to check that for all instance
   # methods M on source, M is not defined on any of target's ancestors.
-  def self._hook_impl(target, singleton_class, source)
+  def self._hook_impl(target, source)
     # we do not need to call add_was_ever_final here, because we have already marked
     # any such methods when source was originally defined.
     if !@modules_with_final.include?(target)
       if !@modules_with_final.include?(source)
         return
       end
-      note_module_deals_with_final(target)
+      # Side-effectfully initialize the value if it's not already there
+      @modules_with_final[target]
       install_hooks(target)
       return
     end
@@ -502,8 +531,7 @@ module T::Private::Methods
       return
     end
 
-    target_ancestors = singleton_class ? target.singleton_class.ancestors : target.ancestors
-    _check_final_ancestors(target, target_ancestors, methods, source)
+    _check_final_ancestors(target, methods, source)
   end
 
   def self.set_final_checks_on_hooks(enable)
@@ -521,17 +549,24 @@ module T::Private::Methods
       end
       @old_hooks = nil
     else
-      old_included = T::Private::ClassUtils.replace_method(Module, :included, true) do |arg|
+      # Grab the original methods before replacing them, so that each block
+      # closure can reference a variable that is already assigned.
+      # (Do this directly, to avoid pinning errors)
+      old_included = Module.instance_method(:included)
+      T::Private::ClassUtils.replace_method(old_included, Module, :included) do |arg|
         old_included.bind_call(self, arg)
-        ::T::Private::Methods._hook_impl(arg, false, self)
+        ::T::Private::Methods._hook_impl(arg, self)
       end
-      old_extended = T::Private::ClassUtils.replace_method(Module, :extended, true) do |arg|
+      old_extended = Module.instance_method(:extended)
+      T::Private::ClassUtils.replace_method(old_extended, Module, :extended) do |arg|
         old_extended.bind_call(self, arg)
-        ::T::Private::Methods._hook_impl(arg, true, self)
+        ::T::Private::Methods._hook_impl(arg.singleton_class, self)
       end
-      old_inherited = T::Private::ClassUtils.replace_method(Class, :inherited, true) do |arg|
+      old_inherited = Class.instance_method(:inherited)
+      T::Private::ClassUtils.replace_method(old_inherited, Class, :inherited) do |arg|
         old_inherited.bind_call(self, arg)
-        ::T::Private::Methods._hook_impl(arg, false, self)
+        ::T::Private::Methods._hook_impl(arg, self)
+        ::T::Private::Methods._hook_impl(arg.singleton_class, self.singleton_class)
       end
       @old_hooks = [old_included, old_extended, old_inherited]
     end
@@ -539,14 +574,14 @@ module T::Private::Methods
 
   module MethodHooks
     def method_added(name)
-      ::T::Private::Methods._on_method_added(self, self, name)
+      ::T::Private::Methods._on_method_added(T.unsafe(self), T.unsafe(self), name)
       super(name)
     end
   end
 
   module SingletonMethodHooks
     def singleton_method_added(name)
-      ::T::Private::Methods._on_method_added(self, singleton_class, name)
+      ::T::Private::Methods._on_method_added(T.unsafe(self), singleton_class, name)
       super(name)
     end
   end
@@ -581,22 +616,6 @@ module T::Private::Methods
       mod.extend(MethodHooks)
     end
     mod.extend(SingletonMethodHooks)
-  end
-
-  # `name` must be an instance method (for class methods, pass in mod.singleton_class)
-  def self.visibility_method_name(mod, name)
-    if mod.public_method_defined?(name)
-      :public
-    elsif mod.protected_method_defined?(name)
-      :protected
-    elsif mod.private_method_defined?(name)
-      :private
-    else
-      # Raises a NameError formatted like the Ruby VM would (the exact text formatting
-      # of these errors changed across Ruby VM versions, in ways that would sometimes
-      # cause tests to fail if they were dependent on hard coding errors).
-      mod.method(name)
-    end
   end
 end
 
