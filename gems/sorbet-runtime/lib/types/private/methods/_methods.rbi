@@ -63,9 +63,6 @@ module T::Private::Methods
   sig {params(mod: Module, method_name: Symbol).returns(NilClass)}
   def self.add_module_with_final_method(mod, method_name); end
 
-  sig {params(mod: Module).void}
-  def self.note_module_deals_with_final(mod); end
-
   sig {params(hook_mod: Module, mod: Module, method_name: Symbol).void}
   def self._on_method_added(hook_mod, mod, method_name); end
 
