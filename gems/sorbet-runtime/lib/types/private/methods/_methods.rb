@@ -67,7 +67,11 @@ module T::Private::Methods
       raise DeclBuilder::BuilderError.new("Cannot call `#{dsl_name} #{method_name.inspect}`, because the sig block has already run")
     end
 
-    if previous_declaration.mod != mod || previous_declaration.method_name != method_name
+    # previous_declaration.mod is the method owner (which for `def self.foo`
+    # is the singleton class). The DSL caller's `self` is the class itself,
+    # so we also accept mod.singleton_class == previous_declaration.mod.
+    mod_matches = previous_declaration.mod == mod || previous_declaration.mod == mod.singleton_class
+    if !mod_matches || previous_declaration.method_name != method_name
       raise DeclBuilder::BuilderError.new(
         "Can only call `#{dsl_name} #{method_name.inspect}` for the previously sig'd method. " \
         "Expected: #{previous_declaration.mod}##{previous_declaration.method_name}"
@@ -113,10 +117,10 @@ module T::Private::Methods
 
     previous_declaration.final = true
 
-    # previous_declaration.mod is the module where the sig was declared.
-    # We need to register the method on the actual method owner (mod or its singleton_class).
-    # Since _on_method_added already resolved `mod` for us, use that.
-    add_module_with_final_method(mod, method_name)
+    # Register final bookkeeping that _on_method_added would have done if it
+    # had seen final=true at that time. Use previous_declaration.mod (the actual
+    # method owner, which is the singleton_class for `def self.foo`).
+    add_module_with_final_method(previous_declaration.mod, method_name)
 
     nil
   end
