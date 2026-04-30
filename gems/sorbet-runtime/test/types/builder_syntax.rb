@@ -23,7 +23,7 @@ module Opus::Types::Test
       mod.fn(1) # executes the sig block
 
       assert(builder)
-      assert_equal(mod, builder.decl.mod)
+      assert_equal(mod.singleton_class, builder.decl.mod)
       assert_equal({x: Integer}, builder.decl.params)
       assert_equal(String, builder.decl.returns)
       assert_nil(builder.decl.checked)
