@@ -356,6 +356,33 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
     end
   end
 
+  describe "singleton class methods" do
+    before do
+      T::Configuration.enable_final_checks_on_hooks
+    end
+
+    after do
+      T::Configuration.reset_final_checks_on_hooks
+    end
+
+    it "final def self.foo prevents overriding in subclass" do
+      parent = Class.new do
+        extend T::Sig, T::Sig::DSL
+        sig { void }
+        final def self.foo; end
+      end
+
+      err = assert_raises(RuntimeError) do
+        Class.new(parent) do
+          extend T::Sig
+          sig { void }
+          def self.foo; end
+        end
+      end
+      assert_includes(err.message, "final")
+    end
+  end
+
   describe "overridable + override combo" do
     it "overridable override def" do
       parent = Class.new do
