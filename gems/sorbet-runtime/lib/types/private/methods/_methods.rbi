@@ -69,14 +69,14 @@ module T::Private::Methods
   sig {params(receiver: Object, original_method: UnboundMethod, callee: Symbol).returns(T::Private::Methods::Signature)}
   def self._handle_missing_method_signature(receiver, original_method, callee); end
 
-  sig {params(hook_mod: Module, method_name: Symbol, original_method: UnboundMethod, declaration_block: DeclarationBlock).returns(T::Private::Methods::Signature)}
-  def self.run_sig(hook_mod, method_name, original_method, declaration_block); end
+  sig {params(method_name: Symbol, original_method: UnboundMethod, declaration_block: DeclarationBlock).returns(T::Private::Methods::Signature)}
+  def self.run_sig(method_name, original_method, declaration_block); end
 
   sig {params(declaration_block: DeclarationBlock).returns(T::Private::Methods::Declaration)}
   def self.run_builder(declaration_block); end
 
-  sig {params(hook_mod: Module, method_name: Symbol, original_method: UnboundMethod, current_declaration: T::Private::Methods::Declaration).returns(T::Private::Methods::Signature)}
-  def self.build_sig(hook_mod, method_name, original_method, current_declaration); end
+  sig {params(method_name: Symbol, original_method: UnboundMethod, current_declaration: T::Private::Methods::Declaration).returns(T::Private::Methods::Signature)}
+  def self.build_sig(method_name, original_method, current_declaration); end
 
   sig {params(method: T.any(Method, UnboundMethod)).returns(T.nilable(T::Private::Methods::Signature))}
   def self.signature_for_method(method); end
