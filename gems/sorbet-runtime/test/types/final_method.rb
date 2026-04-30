@@ -623,7 +623,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         extend m2, m1
       end
     end
-    assert_overridden_err('foo', MODULE_REGEX_STR, CLASS_REGEX_STR, __LINE__ - 10, __LINE__ - 3, err)
+    assert_overridden_err('foo', MODULE_REGEX_STR, CLASS_CLASS_REGEX_STR, __LINE__ - 10, __LINE__ - 3, err)
   end
 
   it "allows calling final methods" do

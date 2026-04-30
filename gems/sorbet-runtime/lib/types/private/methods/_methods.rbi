@@ -57,8 +57,8 @@ module T::Private::Methods
 
   IS_TYPECHECKING = T.let(false, T::Boolean)
 
-  sig {params(target: Module, target_ancestors: T::Array[Module], source_method_names: T::Array[Symbol], source: T.nilable(Module)).void}
-  def self._check_final_ancestors(target, target_ancestors, source_method_names, source); end
+  sig {params(target: Module, source_method_names: T::Array[Symbol], source: T.nilable(Module)).void}
+  def self._check_final_ancestors(target, source_method_names, source); end
 
   sig {params(mod: Module, method_name: Symbol).returns(NilClass)}
   def self.add_module_with_final_method(mod, method_name); end
@@ -105,8 +105,8 @@ module T::Private::Methods
   sig {returns(T::Array[T::Private::Methods::Signature])}
   def self.all_checked_tests_sigs; end
 
-  sig {params(target: Module, singleton_class: T::Boolean, source: Module).void}
-  def self._hook_impl(target, singleton_class, source); end
+  sig {params(target: Module, source: Module).void}
+  def self._hook_impl(target, source); end
 
   sig {params(enable: T::Boolean).void}
   def self.set_final_checks_on_hooks(enable); end
