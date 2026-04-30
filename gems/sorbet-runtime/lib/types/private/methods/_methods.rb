@@ -243,6 +243,18 @@ module T::Private::Methods
       )
     end
 
+    # We allow `sig` in the current module's context (normal case) and
+    if hook_mod != current_declaration.mod &&
+       # inside `class << self`, and
+       hook_mod.singleton_class != current_declaration.mod &&
+       # on `self` at the top level of a file
+       current_declaration.mod != TOP_SELF
+      raise "A method (#{method_name}) is being added on a different class/module (#{hook_mod}) than the " \
+            "last call to `sig` (#{current_declaration.mod}). Make sure each call " \
+            "to `sig` is immediately followed by a method definition on the same " \
+            "class/module."
+    end
+
     original_method = mod.instance_method(method_name)
     sig_block = lambda do
       T::Private::Methods.run_sig(hook_mod, method_name, original_method, current_declaration)
@@ -372,18 +384,6 @@ module T::Private::Methods
 
   def self.build_sig(hook_mod, method_name, original_method, current_declaration)
     begin
-      # We allow `sig` in the current module's context (normal case) and
-      if hook_mod != current_declaration.mod &&
-         # inside `class << self`, and
-         hook_mod.singleton_class != current_declaration.mod &&
-         # on `self` at the top level of a file
-         current_declaration.mod != TOP_SELF
-        raise "A method (#{method_name}) is being added on a different class/module (#{hook_mod}) than the " \
-              "last call to `sig` (#{current_declaration.mod}). Make sure each call " \
-              "to `sig` is immediately followed by a method definition on the same " \
-              "class/module."
-      end
-
       signature = Signature.new(
         method: original_method,
         method_name: method_name,

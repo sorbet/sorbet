@@ -102,9 +102,8 @@ module Opus::Types::Test
         end
 
         @mod.sig { returns(Symbol) }
-        def mod2.bar; end
         err = assert_raises(RuntimeError) do
-          mod2.bar
+          def mod2.bar; end
         end
 
         assert_equal(
