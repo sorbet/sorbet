@@ -200,6 +200,7 @@ module T::Private::Methods
   end
 
   def self.add_module_with_final_method(mod, method_name)
+    # Side-effectfully initializes the value if it's not already there
     methods = @modules_with_final[mod]
     if methods.nil?
       methods = {}
@@ -207,11 +208,6 @@ module T::Private::Methods
     end
     methods[method_name] = true
     nil
-  end
-
-  def self.note_module_deals_with_final(mod)
-    # Side-effectfully initialize the value if it's not already there
-    @modules_with_final[mod]
   end
 
   # Only public because it needs to get called below inside the replace_method blocks below.
@@ -286,7 +282,6 @@ module T::Private::Methods
     @sig_wrappers[key] = sig_block
     if current_declaration.final
       @was_ever_final_names[method_name] = true
-      note_module_deals_with_final(mod)
       add_module_with_final_method(mod, method_name)
     end
   end
@@ -522,7 +517,8 @@ module T::Private::Methods
       if !@modules_with_final.include?(source)
         return
       end
-      note_module_deals_with_final(target)
+      # Side-effectfully initialize the value if it's not already there
+      @modules_with_final[target]
       install_hooks(target)
       return
     end
