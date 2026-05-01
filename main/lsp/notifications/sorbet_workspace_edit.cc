@@ -1,4 +1,5 @@
 #include "main/lsp/notifications/sorbet_workspace_edit.h"
+#include "absl/algorithm/container.h"
 #include "core/lsp/TypecheckEpochManager.h"
 #include "main/lsp/LSPFileUpdates.h"
 #include "main/lsp/LSPIndexer.h"
@@ -159,6 +160,13 @@ bool SorbetWorkspaceEditTask::canPreempt(const LSPIndexer &index) const {
 
 const SorbetWorkspaceEditParams &SorbetWorkspaceEditTask::getParams() const {
     return *params;
+}
+
+core::packages::Stratum SorbetWorkspaceEditTask::preemptionStratum(FileStratumMapping info) const {
+    vector<string_view> paths;
+    paths.reserve(this->params->updates.size());
+    absl::c_transform(this->params->updates, back_inserter(paths), [](auto &file) { return file->path(); });
+    return info.getStratumForUris(paths);
 }
 
 } // namespace sorbet::realmain::lsp

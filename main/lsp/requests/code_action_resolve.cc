@@ -120,4 +120,12 @@ unique_ptr<ResponseMessage> CodeActionResolveTask::runRequest(LSPTypecheckerDele
     return response;
 }
 
+core::packages::Stratum CodeActionResolveTask::preemptionStratum(FileStratumMapping info) const {
+    if (auto &insertOverride = this->params->data.value()->insertOverride) {
+        return info.getStratumForUri(insertOverride.value()->textDocument->uri);
+    }
+
+    return info.getStratumForUri(this->params->data.value()->params->textDocument->uri);
+}
+
 } // namespace sorbet::realmain::lsp

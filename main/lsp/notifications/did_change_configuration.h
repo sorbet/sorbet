@@ -19,6 +19,8 @@ public:
     void index(LSPIndexer &indexer) override;
 
     void run(LSPTypecheckerDelegate &tc) override;
+
+    core::packages::Stratum preemptionStratum(FileStratumMapping info) const override;
 };
 } // namespace sorbet::realmain::lsp
 
