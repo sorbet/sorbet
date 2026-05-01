@@ -7,6 +7,7 @@ module C
       puts E::CONSTANT_FROM_E
       puts F::CONSTANT_FROM_F
       puts G::CONSTANT_FROM_G
+      puts AnotherPackage::CONSTANT
 
       puts B::CONSTANT_FROM_B
       puts E::CONSTANT_FROM_E
