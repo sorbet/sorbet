@@ -487,7 +487,7 @@ private:
         auto isExport = false;
         auto isImport = false;
         if (isPackage) {
-            // In case the file is a __package.rb file, and the scope is a PackageSpec-scoped symbol,
+            // In the case the file is a __package.rb file, and the scope is a PackageSpec-scoped symbol,
             // the resolution error must be in an import statement. Otherwise, it is in an export statement.
 
             // TODO (aadi-stripe) Find a less brittle way of ascertaining whether the error comes from an
