@@ -179,15 +179,15 @@ build:release-sanitized-mac --define jemalloc=false
 ## Configuration used to to as much testing as possible in CI
 ##
 build:test-sanitized-linux --config=release-sanitized-linux --config=dbg --nostamp --define release=false
-test:test-sanitized-linux --test_env="UBSAN_OPTIONS=print_stacktrace=1"
-test:test-sanitized-linux --test_env="ASAN_OPTIONS=detect_leaks=0"
+common:test-sanitized-linux --test_env="UBSAN_OPTIONS=print_stacktrace=1"
+common:test-sanitized-linux --test_env="ASAN_OPTIONS=detect_leaks=0"
 
 build:test-sanitized-linux-aarch64 --config=release-sanitized-linux-aarch64 --config=dbg --nostamp --define release=false
-test:test-sanitized-linux-aarch64 --test_env="UBSAN_OPTIONS=print_stacktrace=1"
-test:test-sanitized-linux-aarch64 --test_env="ASAN_OPTIONS=detect_leaks=0"
+common:test-sanitized-linux-aarch64 --test_env="UBSAN_OPTIONS=print_stacktrace=1"
+common:test-sanitized-linux-aarch64 --test_env="ASAN_OPTIONS=detect_leaks=0"
 
 build:test-sanitized-mac --config=release-sanitized-mac --config=dbg --nostamp --define release=false
-test:test-sanitized-mac --test_env="UBSAN_OPTIONS=print_stacktrace=1"
+common:test-sanitized-mac --test_env="UBSAN_OPTIONS=print_stacktrace=1"
 
 build:reduce-intermediate-file-size-base --copt=-g0 --linkopt=-g0 # used by buildfarm to have less debug information on disk
 build:reduce-intermediate-file-size-base --strip=always
