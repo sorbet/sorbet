@@ -10,6 +10,7 @@ compilation_database(
     name = "compdb",
     testonly = True,
     output_base = OUTPUT_BASE,
+    tags = ["manual"],
     targets = [
         # BEGIN compile_commands targets
         "//ast:ast",

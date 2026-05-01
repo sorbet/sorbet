@@ -40,7 +40,9 @@ steps:
   - label: ":mac: test-static-sanitized.sh (master only)"
     command: '.buildkite/test-static-sanitized.sh < /dev/null'
     branches: "master"
-    artifact_paths: _out_/profile.json
+    artifact_paths:
+      - _out_/profile.json
+      - _out_/clang_tidy_profile.json
     agents:
       os: mac
     # TODO(jez) We should only retry for specific error.
@@ -50,7 +52,9 @@ steps:
 
   - label: ":linux: test-static-sanitized.sh"
     command: '.buildkite/test-static-sanitized.sh < /dev/null'
-    artifact_paths: _out_/profile.json
+    artifact_paths:
+      - _out_/profile.json
+      - _out_/clang_tidy_profile.json
     <<: *elastic
 
   - label: ":linux: test-vscode-extension.sh"

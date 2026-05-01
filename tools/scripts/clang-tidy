@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Can't use a system-wide installed `clang-tidy` unless there are also
+# system-wide installed header files relative to that binary (e.g., can't just
+# copy clang-tidy to ~/bin like for `clang-format`)
+#
+# If invoke the `clang-tidy` binary from within the exec root, it will find the system headers.
+#
+# But there's another problem, which is that it doesn't seems like clang-tidy
+# respects the "directory" option in `compile_commands.json` (?) leading to it
+# to not find bazel library things, like anything in external/com_google_absl
+#
+# We can work around this with our own script for editors to use.
+
+cd "$(dirname "$0")/../../bazel-sorbet"
+exec external/llvm_toolchain_15_0_7/bin/clang-tidy "$@"

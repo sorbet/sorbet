@@ -14,25 +14,26 @@ case "${unameOut}" in
     *)          exit 1
 esac
 
-test_args=()
+build_args=()
 
 if [[ "linux" == "$platform" ]]; then
-  test_args+=("--config=buildfarm-sanitized-linux")
+  build_args+=("--config=buildfarm-sanitized-linux")
 elif [[ "mac" == "$platform" ]]; then
-  test_args+=("--config=buildfarm-sanitized-mac")
+  build_args+=("--config=buildfarm-sanitized-mac")
 fi
 
 export JOB_NAME=test-static-sanitized
 # shellcheck source-path=SCRIPTDIR/..
 source .buildkite/tools/setup-bazel.sh
 
-echo -- will run with "${test_args[@]}"
+echo -- will run with "${build_args[@]}"
 
 err=0
 
 mkdir -p _out_
 
-test_args+=(
+test_args=(
+  "${build_args[@]}"
   "--build_tests_only"
   "//..."
 )
@@ -79,6 +80,30 @@ if [ "$err" -ne 0 ]; then
   echo '```' >> "$failing_tests"
 
   buildkite-agent annotate --context "test-static-sanitized.sh" --style error --append < "$failing_tests"
+fi
 
+# Run clang-tidy even if tests failed (reuses the same build config for cache hits)
+clang_tidy_err=0
+./bazel build \
+  --keep_going \
+  --config=clang-tidy \
+  "${build_args[@]}" \
+  --experimental_generate_json_trace_profile \
+  --profile=_out_/clang_tidy_profile.json \
+  //... \
+  || clang_tidy_err=$?
+
+if [ "$clang_tidy_err" -ne 0 ]; then
+  {
+    echo 'There were clang-tidy errors. To reproduce locally:'
+    echo
+    echo '```bash'
+    echo './bazel build --keep_going --config=clang-tidy --config=dbg //...'
+    echo '```'
+  } | buildkite-agent annotate --context "clang-tidy" --style error --append
+fi
+
+if [ "$err" -ne 0 ]; then
   exit "$err"
 fi
+exit "$clang_tidy_err"
