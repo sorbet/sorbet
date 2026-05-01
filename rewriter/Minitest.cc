@@ -510,7 +510,7 @@ ast::ExpressionPtr runUnderParameterized(core::MutableContext ctx, core::NameRef
             // When called with the RSpec. prefix (e.g. `RSpec.shared_context 'name' do`),
             // these are standalone global definitions independent of the block params.
             // Delegate to runSingle so they get registered as root-scoped constants.
-            if (isRSpec(ctx, send->recv)) {
+            if (ctx.state.cacheSensitiveOptions.rspecRewriterEnabled && isRSpec(ctx, send->recv)) {
                 auto result =
                     runSingle(ctx, /* isClass */ false, /* maybeSharedExamplesName */ nullptr, send, insideDescribe);
                 if (result != nullptr) {
