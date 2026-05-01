@@ -62,6 +62,9 @@ C/__package.rb:3: `C` is missing imports https://srb.help/3734
      3 |class C < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
+    C/__package.rb:8: Deleted
+     8 |  import AnotherPack
+        ^^^^^^^^^^^^^^^^^^^^
     C/__package.rb:8: Inserted `import AnotherPackage
       import B`
      8 |  import AnotherPack
@@ -125,7 +128,7 @@ class C < PackageSpec
   layer 'util'
 
   import A
-  import AnotherPack
+
   import AnotherPackage
   import B
   import D
@@ -209,6 +212,9 @@ C/__package.rb:3: `C` is missing imports https://srb.help/3734
      3 |class C < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
+    C/__package.rb:8: Deleted
+     8 |  import AnotherPack
+        ^^^^^^^^^^^^^^^^^^^^
     C/__package.rb:8: Inserted `import AnotherPackage
       import B`
      8 |  import AnotherPack
@@ -285,7 +291,7 @@ class C < PackageSpec
   layer 'util'
 
   import A
-  import AnotherPack
+
   import AnotherPackage
   import B
   import D
