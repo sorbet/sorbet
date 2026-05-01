@@ -5,5 +5,6 @@ class C < PackageSpec
   layer 'util'
 
   import A
+  import AnotherPack
   import D
 end

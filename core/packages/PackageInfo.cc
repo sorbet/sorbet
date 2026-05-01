@@ -611,6 +611,23 @@ core::packages::ImportType PackageInfo::fileToImportType(const core::GlobalState
 std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingImports(const core::GlobalState &gs) const {
     std::vector<core::AutocorrectSuggestion::Edit> allEdits;
     UnorderedMap<core::packages::MangledName, core::packages::ImportType> toImport;
+
+    for (auto &i : importedPackageNames) {
+        auto &pkgInfo = gs.packageDB().getPackageInfo(i.mangledName);
+        if (!pkgInfo.exists()) {
+            // This is an import to a package that doesn't exist. If the package the user was actually trying to import
+            // is used somewhere, then we're going to add an import to the correct name just below, so we can delete
+            // this line.
+            auto importLoc = core::Loc(file, i.loc);
+            // -2 to delete the indentation. Ideally, this would be -3 to remove the new line too, but the preview for
+            // the autocorrect will show the entire previous line in that case, which will make the use think that we're
+            // deleting that import.
+            // TODO(neil): update the preview to not show that line, so we that we can delete the new line too.
+            core::AutocorrectSuggestion::Edit deleteEdit = {importLoc.adjust(gs, -2, 0), ""};
+            allEdits.push_back(deleteEdit);
+        }
+    }
+
     for (auto &[file, referencedPackages] : packagesReferencedByFile) {
         auto importType = fileToImportType(gs, file);
         for (auto &[packageName, packageReferenceInfo] : referencedPackages) {
