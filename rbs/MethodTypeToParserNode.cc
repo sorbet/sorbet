@@ -558,8 +558,9 @@ unique_ptr<parser::Node> MethodTypeToParserNode::attrSignature(const parser::Sen
         sigBuilder = parser::MK::Send(send->loc, move(sigBuilder), core::Names::params(), send->loc, move(sigArgs));
     }
 
+    auto returnTypeLoc = returnType->loc;
     sigBuilder =
-        parser::MK::Send1(fullTypeLoc, move(sigBuilder), core::Names::returns(), returnType->loc, move(returnType));
+        parser::MK::Send1(fullTypeLoc, move(sigBuilder), core::Names::returns(), returnTypeLoc, move(returnType));
 
     auto sigArgs = parser::NodeVec();
 

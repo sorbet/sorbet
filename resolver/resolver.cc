@@ -1613,25 +1613,25 @@ public:
 
                     core::Context ictx(gs, core::Symbols::root(), job.file);
                     ast::TreeWalk::apply(ictx, constants, job.tree);
+                    auto jobFile = job.file;
                     partiallyResolvedTrees.emplace_back(move(job));
                     if (!constants.todo_.empty()) {
-                        walkResult.todo_.emplace_back(job.file, move(constants.todo_));
+                        walkResult.todo_.emplace_back(jobFile, move(constants.todo_));
                     }
                     if (!constants.todoAncestors_.empty()) {
-                        walkResult.todoAncestors_.emplace_back(job.file, move(constants.todoAncestors_));
+                        walkResult.todoAncestors_.emplace_back(jobFile, move(constants.todoAncestors_));
                     }
                     if (!constants.todoClassAliases_.empty()) {
-                        walkResult.todoClassAliases_.emplace_back(job.file, move(constants.todoClassAliases_));
+                        walkResult.todoClassAliases_.emplace_back(jobFile, move(constants.todoClassAliases_));
                     }
                     if (!constants.todoTypeAliases_.empty()) {
-                        walkResult.todoTypeAliases_.emplace_back(job.file, move(constants.todoTypeAliases_));
+                        walkResult.todoTypeAliases_.emplace_back(jobFile, move(constants.todoTypeAliases_));
                     }
                     if (!constants.todoClassMethods_.empty()) {
-                        walkResult.todoClassMethods_.emplace_back(job.file, move(constants.todoClassMethods_));
+                        walkResult.todoClassMethods_.emplace_back(jobFile, move(constants.todoClassMethods_));
                     }
                     if (!constants.todoRequiredAncestors_.empty()) {
-                        walkResult.todoRequiredAncestors_.emplace_back(job.file,
-                                                                       move(constants.todoRequiredAncestors_));
+                        walkResult.todoRequiredAncestors_.emplace_back(jobFile, move(constants.todoRequiredAncestors_));
                     }
                 }
             }

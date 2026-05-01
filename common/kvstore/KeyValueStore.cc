@@ -81,7 +81,7 @@ KeyValueStore::KeyValueStore(shared_ptr<spdlog::logger> logger, string version, 
     ENFORCE(!this->version.empty());
     bool expected = false;
     if (!kvstoreInUse.compare_exchange_strong(expected, true)) {
-        throw_mdb_error("Cannot create two kvstore instances simultaneously.", 0, path);
+        throw_mdb_error("Cannot create two kvstore instances simultaneously.", 0, this->path);
     }
 
     int rc = mdb_env_create(&dbState->env);
@@ -128,7 +128,7 @@ KeyValueStore::KeyValueStore(shared_ptr<spdlog::logger> logger, string version, 
     }
     return;
 fail:
-    throw_mdb_error("failed to create database"sv, rc, path);
+    throw_mdb_error("failed to create database"sv, rc, this->path);
 }
 KeyValueStore::~KeyValueStore() noexcept(false) {
     mdb_env_close(dbState->env);

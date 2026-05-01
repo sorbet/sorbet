@@ -1,4 +1,4 @@
 ---
-Checks: '-*,abseil-duration-addition'
-WarningsAsErrors: ''
+Checks: '-*,abseil-duration-addition,bugprone-use-after-move'
+WarningsAsErrors: 'bugprone-use-after-move'
 UseColor: true

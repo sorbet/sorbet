@@ -1341,7 +1341,8 @@ public:
         auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(m.symbol), m);
 
         if (opts.stopAfterPhase != options::Phase::CFG) {
-            cfg = infer::Inference::run(ctx.withOwner(cfg->symbol), move(cfg));
+            auto sym = cfg->symbol;
+            cfg = infer::Inference::run(ctx.withOwner(sym), move(cfg));
             if (cfg) {
                 for (auto &extension : ctx.state.semanticExtensions) {
                     extension->typecheck(ctx, ctx.file, *cfg);
@@ -1370,7 +1371,8 @@ public:
         auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(symbol), c, symbol);
 
         if (opts.stopAfterPhase != options::Phase::CFG) {
-            cfg = infer::Inference::run(ctx.withOwner(cfg->symbol), move(cfg));
+            auto sym = cfg->symbol;
+            cfg = infer::Inference::run(ctx.withOwner(sym), move(cfg));
             if (cfg) {
                 for (auto &extension : ctx.state.semanticExtensions) {
                     extension->typecheck(ctx, ctx.file, *cfg);

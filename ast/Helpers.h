@@ -437,11 +437,13 @@ public:
     }
 
     static ExpressionPtr All(core::LocOffsets loc, Send::ARGS_store args) {
-        return Send(loc, T(loc), core::Names::all(), loc.copyWithZeroLength(), args.size(), std::move(args));
+        auto numPosArgs = args.size();
+        return Send(loc, T(loc), core::Names::all(), loc.copyWithZeroLength(), numPosArgs, std::move(args));
     }
 
     static ExpressionPtr Any(core::LocOffsets loc, Send::ARGS_store args) {
-        return Send(loc, T(loc), core::Names::any(), loc.copyWithZeroLength(), args.size(), std::move(args));
+        auto numPosArgs = args.size();
+        return Send(loc, T(loc), core::Names::any(), loc.copyWithZeroLength(), numPosArgs, std::move(args));
     }
 
     static ExpressionPtr Anything(core::LocOffsets loc) {

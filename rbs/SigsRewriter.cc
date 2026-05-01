@@ -113,7 +113,8 @@ unique_ptr<parser::Node> maybeWrapBody(unique_ptr<parser::Node> &owner, unique_p
     } else if (parser::isa_node<parser::Begin>(body.get())) {
         return body;
     } else {
-        return make_unique<parser::Begin>(body->loc, NodeVec1(move(body)));
+        auto loc = body->loc;
+        return make_unique<parser::Begin>(loc, NodeVec1(move(body)));
     }
 }
 
@@ -264,7 +265,7 @@ Comments SigsRewriter::commentsForNode(parser::Node *node) {
                     // down the line
                     comments.signatures.emplace_back(
                         RBSDeclaration{move(declaration_comments)}); // Save current declaration
-                    declaration_comments.clear();
+                    declaration_comments = decltype(declaration_comments){};
                     declaration_comments.emplace_back(move(comment));
                 }
                 continue;
@@ -367,7 +368,8 @@ unique_ptr<parser::Node> SigsRewriter::replaceSyntheticTypeAlias(unique_ptr<pars
         type = parser::MK::TUntyped(node->loc);
     }
 
-    return parser::MK::TTypeAlias(type->loc, move(type));
+    auto loc = type->loc;
+    return parser::MK::TTypeAlias(loc, move(type));
 }
 
 parser::NodeVec SigsRewriter::rewriteNodes(parser::NodeVec nodes) {

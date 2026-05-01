@@ -268,7 +268,7 @@ TEST_SUITE("TypePtr") {
             CHECK_EQ(1, counter->load());
 
             // Moving should clear counter from ptrCopy and make it an empty TypePtr
-            CHECK_EQ(0, TypePtrTestHelper::store(ptrCopy));
+            CHECK_EQ(0, TypePtrTestHelper::store(ptrCopy)); // NOLINT(bugprone-use-after-move)
             CHECK_EQ(TypePtr(), ptrCopy);
 
             // Assigning to nullptr should increment counter (and not try to increment the null counter field in

@@ -132,6 +132,7 @@ TEST_CASE("ReportsEmptyErrorsToVSCodeIfFilePreviouslyHadErrors") {
     er.beginEpoch(epoch, false, move(emptyDiagnosticLatencyTimers));
     er.pushDiagnostics(epoch, fref, errors, *gs);
 
+    emptyDiagnosticLatencyTimers = decltype(emptyDiagnosticLatencyTimers){};
     er.beginEpoch(newEpoch, true, move(emptyDiagnosticLatencyTimers));
     er.pushDiagnostics(newEpoch, fref, emptyErrorList, *gs);
     auto output = outputVector->getOutput();
@@ -165,6 +166,7 @@ TEST_CASE("DoesNotReportToVSCodeWhenFileNeverHadErrors") {
     er.beginEpoch(epoch, false, move(emptyDiagnosticLatencyTimers));
     er.pushDiagnostics(epoch, fref, emptyErrorList, *gs);
 
+    emptyDiagnosticLatencyTimers = decltype(emptyDiagnosticLatencyTimers){};
     er.beginEpoch(newEpoch, true, move(emptyDiagnosticLatencyTimers));
     er.pushDiagnostics(newEpoch, fref, emptyErrorList, *gs);
 
@@ -199,10 +201,12 @@ TEST_CASE("ErrorReporterIgnoresErrorsFromOldEpochs") {
     // pushDiagnostics is called for foo.rb at epoch 0 with no errors (initial state)
     er.pushDiagnostics(initialEpoch, fref, emptyErrorList, *gs);
 
+    emptyDiagnosticLatencyTimers = decltype(emptyDiagnosticLatencyTimers){};
     er.beginEpoch(latestEpoch, true, move(emptyDiagnosticLatencyTimers));
     // pushDiagnostics is called for foo.rb at epoch 2 with no errors (the fast path preemption)
     er.pushDiagnostics(latestEpoch, fref, emptyErrorList, *gs);
 
+    emptyDiagnosticLatencyTimers = decltype(emptyDiagnosticLatencyTimers){};
     er.beginEpoch(slowPathEpoch, true, move(emptyDiagnosticLatencyTimers));
     // pushDiagnostics is called for foo.rb at epoch 1 with errors (the slow path)
     er.pushDiagnostics(slowPathEpoch, fref, errors, *gs);
@@ -366,6 +370,7 @@ TEST_CASE("filesWithErrorsSince") {
     INFO("Only returns files with lastReportedEpoch >= sent epoch");
     CHECK(er.filesWithErrorsSince(requestedEpoch).empty());
 
+    diagnosticLatencyTimers = decltype(diagnosticLatencyTimers){};
     er.beginEpoch(requestedEpoch, true, move(diagnosticLatencyTimers));
     er.pushDiagnostics(requestedEpoch, fref, errors, *gs);
     er.pushDiagnostics(requestedEpoch, frefWithoutErrors, emptyErrorList, *gs);
