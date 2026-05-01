@@ -1,5 +1,6 @@
 #include "main/lsp/LSPInput.h"
 #include "main/lsp/LSPMessage.h"
+#include "main/lsp/LSPSignalHandler.h"
 #include "spdlog/spdlog.h"
 #include <iterator>
 
@@ -10,6 +11,13 @@ namespace sorbet::realmain::lsp {
 LSPFDInput::LSPFDInput(shared_ptr<spdlog::logger> logger, int inputFd) : logger(move(logger)), inputFd(inputFd) {}
 
 LSPInput::ReadOutput LSPFDInput::read(int timeoutMs) {
+    // Check for a SIGTERM-triggered shutdown request before each read attempt.
+    // This ensures the reader exits promptly even if the signal was delivered
+    // to a different thread and did not interrupt our select() call directly.
+    if (isLSPShutdownRequested()) {
+        return ReadOutput{FileOps::ReadResult::ErrorOrEof, nullptr};
+    }
+
     int length = -1;
     string allRead;
     {

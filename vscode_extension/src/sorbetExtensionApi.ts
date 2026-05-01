@@ -70,6 +70,7 @@ export class SorbetExtensionApiImpl implements Disposable {
         return Status.Disabled;
       case ServerStatus.ERROR:
         return Status.Error;
+      case ServerStatus.STOPPING:
       case ServerStatus.INITIALIZING:
       case ServerStatus.RESTARTING:
         return Status.Start;

@@ -1,4 +1,5 @@
 #include "main/lsp/LSPLoop.h"
+#include "absl/cleanup/cleanup.h"
 #include "absl/synchronization/mutex.h"
 #include "absl/synchronization/notification.h"
 #include "common/EarlyReturnWithCode.h"
@@ -13,6 +14,7 @@
 #include "main/lsp/LSPInput.h"
 #include "main/lsp/LSPOutput.h"
 #include "main/lsp/LSPPreprocessor.h"
+#include "main/lsp/LSPSignalHandler.h"
 #include "main/lsp/LSPTask.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/notifications/sorbet_workspace_edit.h"
@@ -189,6 +191,14 @@ void LSPLoop::runTask(unique_ptr<LSPTask> task) {
 
 optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> input) {
     // Naming convention: thread that executes this function is called processing thread
+
+    // Install a SIGTERM handler for the duration of the LSP session. The handler kills the Watchman
+    // child subprocess immediately and sets a flag that causes the LSP stdin reader to exit its
+    // polling loop, which cascades to a clean shutdown. We restore the previous handler when runLSP
+    // returns so that the signal disposition is not permanently changed by this call.
+    struct sigaction prevSigtermAction;
+    installLSPSigtermHandler(&prevSigtermAction);
+    auto sigtermRestore = absl::Cleanup([prevSigtermAction]() { sigaction(SIGTERM, &prevSigtermAction, nullptr); });
 
     // Message queue stores requests that arrive from the client and Watchman. No preprocessing is performed on
     // these messages (e.g., edits are not merged).

@@ -32,6 +32,8 @@ export enum RestartReason {
 export const enum ServerStatus {
   // The language client is disabled.
   DISABLED,
+  // The language client is stopping.
+  STOPPING,
   // The language client is restarting.
   RESTARTING,
   // The language client is initializing.
