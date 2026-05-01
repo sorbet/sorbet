@@ -62,9 +62,28 @@ C/__package.rb:3: `C` is missing imports https://srb.help/3734
       import B`
      8 |  import AnotherPack
                             ^
-    C/__package.rb:9: Inserted `import E`
+    C/__package.rb:9: Inserted `import D::ANestedPackage
+      import E`
      9 |  import D
                   ^
+
+D/__package.rb:9: Cannot export `D::ANestedPackage::Foo` because it is owned by another package https://srb.help/3721
+     9 |  export D::ANestedPackage::Foo
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    D/ANestedPackage/foo.rb:3: Defined here
+     3 |class D::ANestedPackage::Foo
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+D/__package.rb:10: Cannot export enum value `D::EnumFromD::Variant`. Instead, export the entire enum `D::EnumFromD` https://srb.help/3721
+    10 |  export D::EnumFromD::Variant
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    D/constants.rb:14: Defined here
+    14 |      Variant = new
+              ^^^^^^^
+  Autocorrect: Done
+    D/__package.rb:10: Replaced with `export D::EnumFromD`
+    10 |  export D::EnumFromD::Variant
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 D/__package.rb:3: `D` is missing imports and exports https://srb.help/3734
      3 |class D < PackageSpec
@@ -73,11 +92,19 @@ D/__package.rb:3: `D` is missing imports and exports https://srb.help/3734
     D/__package.rb:7: Inserted `test_import E`
      7 |  import B
                   ^
-    D/__package.rb:8: Inserted `export D::CONSTANT_FROM_D
+    D/__package.rb:9: Inserted `export D::CONSTANT_FROM_D
       export D::ClassFromD
       export D::EnumFromD`
-     8 |  export D::AlreadyExportedClass
-                                        ^
+     9 |  export D::ANestedPackage::Foo
+                                       ^
+
+D/ANestedPackage/__package.rb:3: `D::ANestedPackage` is missing exports https://srb.help/3734
+     3 |class D::ANestedPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    D/ANestedPackage/__package.rb:5: Inserted `export D::ANestedPackage::Foo`
+     5 |  layer 'util'
+                      ^
 
 C/app.rb:8: `F::CONSTANT_FROM_F` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
      8 |      puts F::CONSTANT_FROM_F
@@ -96,7 +123,7 @@ C/app.rb:9: Package `G` includes explicit visibility modifiers and cannot be imp
                    ^^^^^^^^^^^^^^^^^^
   Note:
     Please consult with the owning team before adding a `visible_to` line to the package `G`
-Errors: 9
+Errors: 12
 
 ###### cat B/__package.rb ######
 # typed: strict
@@ -124,6 +151,7 @@ class C < PackageSpec
   import AnotherPackage
   import B
   import D
+  import D::ANestedPackage
   import E
 end
 
@@ -137,9 +165,20 @@ class D < PackageSpec
   import B
   test_import E
   export D::AlreadyExportedClass
+  export D::ANestedPackage::Foo
   export D::CONSTANT_FROM_D
   export D::ClassFromD
   export D::EnumFromD
+  export D::EnumFromD
+end
+
+###### cat D/ANestedPackage/__package.rb ######
+# typed: strict
+
+class D::ANestedPackage < PackageSpec
+  strict_dependencies 'dag'
+  layer 'util'
+  export D::ANestedPackage::Foo
 end
 
 ###### cat E/__package.rb ######
@@ -197,9 +236,46 @@ C/__package.rb:3: `C` is missing imports https://srb.help/3734
       import B`
      8 |  import AnotherPack
                             ^
-    C/__package.rb:9: Inserted `import E`
+    C/__package.rb:9: Inserted `import D::ANestedPackage
+      import E`
      9 |  import D
                   ^
+
+D/__package.rb:9: Cannot export `D::ANestedPackage::Foo` because it is owned by another package https://srb.help/3721
+     9 |  export D::ANestedPackage::Foo
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    D/ANestedPackage/foo.rb:3: Defined here
+     3 |class D::ANestedPackage::Foo
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+D/__package.rb:10: Cannot export enum value `D::EnumFromD::Variant`. Instead, export the entire enum `D::EnumFromD` https://srb.help/3721
+    10 |  export D::EnumFromD::Variant
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    D/constants.rb:14: Defined here
+    14 |      Variant = new
+              ^^^^^^^
+  Autocorrect: Done
+    D/__package.rb:10: Replaced with `export D::EnumFromD`
+    10 |  export D::EnumFromD::Variant
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+D/__package.rb:9: Cannot export `D::ANestedPackage::Foo` because it is owned by another package https://srb.help/3721
+     9 |  export D::ANestedPackage::Foo
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    D/ANestedPackage/foo.rb:3: Defined here
+     3 |class D::ANestedPackage::Foo
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+D/__package.rb:10: Cannot export enum value `D::EnumFromD::Variant`. Instead, export the entire enum `D::EnumFromD` https://srb.help/3721
+    10 |  export D::EnumFromD::Variant
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    D/constants.rb:14: Defined here
+    14 |      Variant = new
+              ^^^^^^^
+  Autocorrect: Done
+    D/__package.rb:10: Replaced with `export D::EnumFromD`
+    10 |  export D::EnumFromD::Variant
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 D/__package.rb:3: `D` is missing imports and exports https://srb.help/3734
      3 |class D < PackageSpec
@@ -208,11 +284,19 @@ D/__package.rb:3: `D` is missing imports and exports https://srb.help/3734
     D/__package.rb:7: Inserted `test_import E`
      7 |  import B
                   ^
-    D/__package.rb:8: Inserted `export D::CONSTANT_FROM_D
+    D/__package.rb:9: Inserted `export D::CONSTANT_FROM_D
       export D::ClassFromD
       export D::EnumFromD`
-     8 |  export D::AlreadyExportedClass
-                                        ^
+     9 |  export D::ANestedPackage::Foo
+                                       ^
+
+D/ANestedPackage/__package.rb:3: `D::ANestedPackage` is missing exports https://srb.help/3734
+     3 |class D::ANestedPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    D/ANestedPackage/__package.rb:5: Inserted `export D::ANestedPackage::Foo`
+     5 |  layer 'util'
+                      ^
 
 A/constants.rb:5: Unable to resolve constant `G` https://srb.help/5002
      5 |  puts G::ANOTHER_CONSTANT_FROM_G
@@ -244,7 +328,7 @@ C/app.rb:9: Package `G` includes explicit visibility modifiers and cannot be imp
                    ^^^^^^^^^^^^^^^^^^
   Note:
     Please consult with the owning team before adding a `visible_to` line to the package `G`
-Errors: 8
+Errors: 13
 
 ###### cat B/__package.rb ######
 # typed: strict
@@ -272,6 +356,7 @@ class C < PackageSpec
   import AnotherPackage
   import B
   import D
+  import D::ANestedPackage
   import E
 end
 
@@ -285,9 +370,20 @@ class D < PackageSpec
   import B
   test_import E
   export D::AlreadyExportedClass
+  export D::ANestedPackage::Foo
   export D::CONSTANT_FROM_D
   export D::ClassFromD
   export D::EnumFromD
+  export D::EnumFromD
+end
+
+###### cat D/ANestedPackage/__package.rb ######
+# typed: strict
+
+class D::ANestedPackage < PackageSpec
+  strict_dependencies 'dag'
+  layer 'util'
+  export D::ANestedPackage::Foo
 end
 
 ###### cat E/__package.rb ######
