@@ -139,6 +139,10 @@ public:
     // These are copied into every package that imports this package.
     std::vector<Export> exports_ = {};
 
+    // In gen-packages mode, we should delete exports that are invalid. This vector is used to track them when
+    // encountered in VisibilityChecker, so we can remove them in GenPackages
+    std::vector<Export> exportsToDelete_ = {};
+
     // The other packages to which this package is visible. If this vector is empty, then it means
     // the package is fully public and can be imported by anything.
     //
@@ -341,7 +345,7 @@ public:
     std::string renderPackageRbContents(const core::GlobalState &gs, std::vector<Import> newImports,
                                         std::vector<core::SymbolRef> newExports) const;
 };
-CheckSize(PackageInfo, 256, 8);
+CheckSize(PackageInfo, 280, 8);
 
 } // namespace sorbet::core::packages
 #endif

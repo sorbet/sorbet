@@ -237,6 +237,7 @@ class PropagateVisibility final {
     void checkExportPackage(core::MutableContext ctx, core::LocOffsets loc, core::SymbolRef sym) {
         ENFORCE(!sym.locs(ctx).empty()); // Can't be empty
 
+        bool shouldDeleteExport = false;
         if (onlyInRBI(ctx, sym)) {
             if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidExport)) {
                 e.setHeader("Cannot export `{}` because it is only defined in an RBI file", sym.show(ctx));
@@ -246,9 +247,14 @@ class PropagateVisibility final {
 
         auto symPackage = sym.enclosingClass(ctx).data(ctx)->package;
         if (symPackage != this->package.mangledName()) {
-            if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidExport)) {
-                e.setHeader("Cannot export `{}` because it is owned by another package", sym.show(ctx));
-                e.addErrorLine(sym.loc(ctx), "Defined here");
+            if (ctx.state.packageDB().genPackagesMode() == core::packages::GenPackagesMode::Disabled) {
+                if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidExport)) {
+                    e.setHeader("Cannot export `{}` because it is owned by another package", sym.show(ctx));
+                    e.addErrorLine(sym.loc(ctx), "Defined here");
+                    // TODO(neil): should there be an autocorrect to delete this import here?
+                }
+            } else {
+                shouldDeleteExport = true;
             }
         }
 
@@ -265,17 +271,25 @@ class PropagateVisibility final {
         // enum, not the specific enum value, to avoid conflict-inducing churn on `__package.rb` files.
         auto enumClass = getEnumClassForEnumValue(ctx.state, sym);
         if (enumClass.exists()) {
-            if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidExport)) {
-                string enumClassName = enumClass.show(ctx);
-                e.setHeader("Cannot export enum value `{}`. Instead, export the entire enum `{}`", sym.show(ctx),
-                            enumClassName);
-                e.addErrorLine(sym.loc(ctx), "Defined here");
+            if (ctx.state.packageDB().genPackagesMode() == core::packages::GenPackagesMode::Disabled) {
+                if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidExport)) {
+                    string enumClassName = enumClass.show(ctx);
+                    e.setHeader("Cannot export enum value `{}`. Instead, export the entire enum `{}`", sym.show(ctx),
+                                enumClassName);
+                    e.addErrorLine(sym.loc(ctx), "Defined here");
 
-                e.addAutocorrect(core::AutocorrectSuggestion{
-                    fmt::format("Export `{}`", enumClassName),
-                    {core::AutocorrectSuggestion::Edit{core::Loc{package.fullLoc().file(), loc},
-                                                       fmt::format("export {}", enumClassName)}}});
+                    e.addAutocorrect(core::AutocorrectSuggestion{
+                        fmt::format("Export `{}`", enumClassName),
+                        {core::AutocorrectSuggestion::Edit{core::Loc{package.fullLoc().file(), loc},
+                                                           fmt::format("export {}", enumClassName)}}});
+                }
+            } else {
+                shouldDeleteExport = true;
             }
+        }
+        if (shouldDeleteExport) {
+            ENFORCE(ctx.state.packageDB().genPackagesMode() != core::packages::GenPackagesMode::Disabled);
+            this->package.exportsToDelete_.emplace_back(loc);
         }
     }
 
