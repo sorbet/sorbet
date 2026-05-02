@@ -55,9 +55,9 @@ C/__package.rb:3: `C` is missing imports https://srb.help/3734
      3 |class C < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    C/__package.rb:7: Deleted
-     7 |  import A
+    C/__package.rb:8: Deleted
      8 |  import AnotherPack
+        ^^^^^^^^^^^^^^^^^^^^
     C/__package.rb:8: Inserted `import AnotherPackage
       import B`
      8 |  import AnotherPack
@@ -190,9 +190,9 @@ C/__package.rb:3: `C` is missing imports https://srb.help/3734
      3 |class C < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    C/__package.rb:7: Deleted
-     7 |  import A
+    C/__package.rb:8: Deleted
      8 |  import AnotherPack
+        ^^^^^^^^^^^^^^^^^^^^
     C/__package.rb:8: Inserted `import AnotherPackage
       import B`
      8 |  import AnotherPack

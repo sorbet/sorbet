@@ -24,9 +24,9 @@ imported_as_test/foo_class.rb:5: `Other::OtherClass` resolves but is not exporte
     imported_as_test/__package.rb:3: Insert `import Other`
      3 |class Foo::MissingImport < PackageSpec
                                               ^
-    imported_as_test/__package.rb:3: Delete
-     3 |class Foo::MissingImport < PackageSpec
+    imported_as_test/__package.rb:4: Delete
      4 |  test_import Other
+        ^^^^^^^^^^^^^^^^^^^
     other/__package.rb:3: Insert `export Other::OtherClass`
      3 |class Other < PackageSpec
                                  ^
@@ -45,9 +45,9 @@ imported_as_test_unit/test/foo_class.rb:5: `Other::OtherClass` resolves but is n
     imported_as_test_unit/__package.rb:3: Insert `test_import Other`
      3 |class Foo::MissingImport < PackageSpec
                                               ^
-    imported_as_test_unit/__package.rb:3: Delete
-     3 |class Foo::MissingImport < PackageSpec
+    imported_as_test_unit/__package.rb:4: Delete
      4 |  test_import Other, only: "test_rb"
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     other/__package.rb:3: Insert `export Other::OtherClass`
      3 |class Other < PackageSpec
                                  ^
