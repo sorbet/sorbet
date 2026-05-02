@@ -199,8 +199,8 @@ optional<core::AutocorrectSuggestion> PackageInfo::addImport(const core::GlobalS
                     // insert the `import`.
                     auto importLoc = core::Loc(fullLoc().file(), import.loc);
                     auto [lineStart, numWhitespace] = importLoc.findStartOfIndentation(gs);
-                    auto beginPos =
-                        lineStart.adjust(gs, -numWhitespace, 0).beginPos(); // -numWhitespace for the indentation
+                    auto beginPos = lineStart.adjust(gs, -numWhitespace - 1, 0)
+                                        .beginPos(); // -numWhitespace - 1 for the indentation and previous new line
                     auto endPos = importLoc.endPos();
                     core::Loc replaceLoc(importLoc.file(), beginPos, endPos);
 
@@ -620,7 +620,8 @@ std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingImports(
             // this line.
             auto importLoc = core::Loc(fullLoc().file(), import.loc);
             auto [lineStart, numWhitespace] = importLoc.findStartOfIndentation(gs);
-            auto beginPos = lineStart.adjust(gs, -numWhitespace, 0).beginPos(); // -numWhitespace for the indentation
+            auto beginPos = lineStart.adjust(gs, -numWhitespace - 1, 0)
+                                .beginPos(); // -numWhitespace - 1 for the indentation and previous new line
             auto endPos = importLoc.endPos();
             core::Loc replaceLoc(importLoc.file(), beginPos, endPos);
             core::AutocorrectSuggestion::Edit deleteEdit = {replaceLoc, ""};

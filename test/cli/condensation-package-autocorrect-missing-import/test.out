@@ -59,9 +59,9 @@ use_other_package/foo.rb:9: Used `test_import` constant `Foo::Bar::OtherPackageT
     use_other_package/__package.rb:7: Inserted `import Foo::Bar::OtherPackageTest`
      7 |  strict_dependencies 'layered'
                                        ^
-    use_other_package/__package.rb:8: Deleted
+    use_other_package/__package.rb:7: Deleted
+     7 |  strict_dependencies 'layered'
      8 |  test_import Foo::Bar::OtherPackageTest
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 use_other_package/foo.rb:15: `Foo::Bar::OtherPackage::OtherClass` resolves but its package is not imported https://srb.help/3718
     15 |  Foo::Bar::OtherPackage::OtherClass # resolves via root
@@ -104,7 +104,7 @@ class Foo::MyPackage < PackageSpec
   layer 'lib'
   strict_dependencies 'layered'
   import Foo::Bar::OtherPackage
-
+  test_import Foo::Bar::OtherPackageTest
 end
 
 --------------------------------------------------------------------------
