@@ -672,6 +672,19 @@ std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingImports(
 std::optional<core::AutocorrectSuggestion>
 PackageInfo::aggregateMissingExports(const core::GlobalState &gs, vector<core::SymbolRef> &toExport) const {
     std::vector<core::AutocorrectSuggestion::Edit> allEdits;
+    for (auto export_ : exportsToDelete_) {
+        // This is an invalid export (ex. exporting a constant from a different package). If the constant the user was
+        // trying to expot is used somewhere, then we're going to add the correct export just below, so we can delete
+        // this line.
+        auto exportLoc = core::Loc(fullLoc().file(), export_.loc);
+        auto [lineStart, numWhitespace] = exportLoc.findStartOfIndentation(gs);
+        auto beginPos = lineStart.adjust(gs, -numWhitespace - 1, 0)
+                            .beginPos(); // -numWhitespace - 1 for the indentation and previous new line
+        auto endPos = exportLoc.endPos();
+        core::Loc replaceLoc(exportLoc.file(), beginPos, endPos);
+        core::AutocorrectSuggestion::Edit deleteEdit = {replaceLoc, ""};
+        allEdits.push_back(deleteEdit);
+    }
     for (auto &symbol : toExport) {
         switch (symbol.kind()) {
             case core::SymbolRef::Kind::ClassOrModule:
