@@ -317,6 +317,7 @@ pipeline_tests(
             "testdata/parser/error_recovery/constant_only_scope.rb",
             "testdata/parser/error_recovery/def_missing_end_1.rb",
             "testdata/parser/error_recovery/def_missing_end_2.rb",
+            "testdata/parser/error_recovery/def_reswords.rb",
             "testdata/parser/error_recovery/defn_indent_1.rb",
             "testdata/parser/error_recovery/defn_indent_2.rb",
             "testdata/parser/error_recovery/defn_indent_3.rb",

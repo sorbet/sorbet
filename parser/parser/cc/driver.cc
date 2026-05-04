@@ -153,6 +153,15 @@ ForeignPtr base_driver::rewind_and_munge_body_if_dedented(SelfPtr self, token_t 
         // But bodyStartToken is tNL if empty body, which fails the assertion in compare_indent_level
         this->rewind_to_tok_start(endToken);
         return body;
+    } else if (bodyStartToken->type() == token_type::tNL) {
+        // There are some cases where the file is so messed up that the parse is very unexpected.
+        // The `tNL` token can sneak in when the grammar decided to produce an empty `stmts`. When
+        // there's an empty production, the @$ (the yyloc information) uses whatever happened to be
+        // the most recent token, which might be a `tNL`. `compare_indent_level` only works when
+        // comparing non-`tNL` tokens, so we actually need to be very defensive against there being
+        // sneaky tNL tokens. Give up, and say that the method body was properly indented
+        this->rewind_to_tok_start(endToken);
+        return body;
     } else if (this->lex.compare_indent_level(bodyStartToken, beginToken) <= 0) {
         // Not even the very first thing in the body is indented. Treat this like empty method.
         this->rewind_and_reset(headerEndPos);
