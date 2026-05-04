@@ -15,14 +15,6 @@ A/__package.rb:3: `A` is missing imports https://srb.help/3734
      5 |  layer 'app'
                      ^
 
-G/__package.rb:3: `G` is missing exports https://srb.help/3734
-     3 |class G < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Done
-    G/__package.rb:8: Inserted `export G::ANOTHER_CONSTANT_FROM_G`
-     8 |
-        ^
-
 B/__package.rb:3: `B` is missing `visible_to`s https://srb.help/3734
      3 |class B < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^
@@ -32,14 +24,13 @@ B/__package.rb:3: `B` is missing `visible_to`s https://srb.help/3734
      9 |  visible_to A
                       ^
 
-E/__package.rb:3: `E` is missing `visible_to`s https://srb.help/3734
-     3 |class E < PackageSpec
+G/__package.rb:3: `G` is missing exports https://srb.help/3734
+     3 |class G < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    E/__package.rb:7: Inserted `visible_to 'tests'
-      visible_to C`
-     7 |  export E::CONSTANT_FROM_E
-                                   ^
+    G/__package.rb:8: Inserted `export G::ANOTHER_CONSTANT_FROM_G`
+     8 |
+        ^
 
 C/__package.rb:7: Layering violation: cannot import `A` (in layer `app`) from `C` (in layer `util`) https://srb.help/3726
      7 |  import A
@@ -62,9 +53,19 @@ C/__package.rb:3: `C` is missing imports https://srb.help/3734
       import B`
      8 |  import AnotherPack
                             ^
-    C/__package.rb:9: Inserted `import E`
+    C/__package.rb:9: Inserted `import E
+      import Intermediate`
      9 |  import D
                   ^
+
+E/__package.rb:3: `E` is missing `visible_to`s https://srb.help/3734
+     3 |class E < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    E/__package.rb:7: Inserted `visible_to 'tests'
+      visible_to C`
+     7 |  export E::CONSTANT_FROM_E
+                                   ^
 
 D/__package.rb:3: `D` is missing imports and exports https://srb.help/3734
      3 |class D < PackageSpec
@@ -126,6 +127,7 @@ class C < PackageSpec
   import B
   import D
   import E
+  import Intermediate
 end
 
 ###### cat D/__package.rb ######
@@ -168,15 +170,6 @@ B/__package.rb:3: `B` is missing `visible_to`s https://srb.help/3734
      9 |  visible_to A
                       ^
 
-E/__package.rb:3: `E` is missing `visible_to`s https://srb.help/3734
-     3 |class E < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Done
-    E/__package.rb:7: Inserted `visible_to 'tests'
-      visible_to C`
-     7 |  export E::CONSTANT_FROM_E
-                                   ^
-
 C/__package.rb:7: Layering violation: cannot import `A` (in layer `app`) from `C` (in layer `util`) https://srb.help/3726
      7 |  import A
           ^^^^^^^^
@@ -198,9 +191,19 @@ C/__package.rb:3: `C` is missing imports https://srb.help/3734
       import B`
      8 |  import AnotherPack
                             ^
-    C/__package.rb:9: Inserted `import E`
+    C/__package.rb:9: Inserted `import E
+      import Intermediate`
      9 |  import D
                   ^
+
+E/__package.rb:3: `E` is missing `visible_to`s https://srb.help/3734
+     3 |class E < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    E/__package.rb:7: Inserted `visible_to 'tests'
+      visible_to C`
+     7 |  export E::CONSTANT_FROM_E
+                                   ^
 
 D/__package.rb:3: `D` is missing imports and exports https://srb.help/3734
      3 |class D < PackageSpec
@@ -275,6 +278,7 @@ class C < PackageSpec
   import B
   import D
   import E
+  import Intermediate
 end
 
 ###### cat D/__package.rb ######
