@@ -121,7 +121,6 @@ class C < PackageSpec
   layer 'util'
 
   import A
-
   import AnotherPackage
   import B
   import D
@@ -270,7 +269,6 @@ class C < PackageSpec
   layer 'util'
 
   import A
-
   import AnotherPackage
   import B
   import D

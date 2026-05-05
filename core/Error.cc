@@ -241,18 +241,26 @@ void ErrorBuilder::addAutocorrect(AutocorrectSuggestion &&autocorrect) {
     vector<ErrorLine> messages;
     if (!autocorrect.hideEdit) {
         for (auto &edit : autocorrect.edits) {
-            auto isInsert = edit.replacement == "";
+            auto isDeletion = edit.replacement == "";
             uint32_t n = edit.loc.length();
+            auto locWithoutLeadingNewLine = edit.loc;
+            auto source = locWithoutLeadingNewLine.source(gs);
+            while (source.has_value() && source.value().size() > 0 && source.value()[0] == '\n') {
+                locWithoutLeadingNewLine = locWithoutLeadingNewLine.adjust(gs, 1, 0);
+                source = locWithoutLeadingNewLine.source(gs);
+            }
             if (gs.autocorrect) {
-                auto line = isInsert ? ErrorLine::from(edit.loc, "Deleted")
-                                     : ErrorLine::from(edit.loc, "{} `{}`", n == 0 ? "Inserted" : "Replaced with",
-                                                       prettyPrintEditReplacement(edit.replacement));
+                auto line = isDeletion ? ErrorLine::from(locWithoutLeadingNewLine, "Deleted")
+                                       : ErrorLine::from(locWithoutLeadingNewLine, "{} `{}`",
+                                                         n == 0 ? "Inserted" : "Replaced with",
+                                                         prettyPrintEditReplacement(edit.replacement));
 
                 messages.emplace_back(std::move(line));
             } else {
-                auto line = isInsert ? ErrorLine::from(edit.loc, "Delete")
-                                     : ErrorLine::from(edit.loc, "{} `{}`", n == 0 ? "Insert" : "Replace with",
-                                                       prettyPrintEditReplacement(edit.replacement));
+                auto line = isDeletion ? ErrorLine::from(locWithoutLeadingNewLine, "Delete")
+                                       : ErrorLine::from(locWithoutLeadingNewLine, "{} `{}`",
+                                                         n == 0 ? "Insert" : "Replace with",
+                                                         prettyPrintEditReplacement(edit.replacement));
 
                 messages.emplace_back(std::move(line));
             }
