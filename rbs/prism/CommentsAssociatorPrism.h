@@ -69,6 +69,7 @@ private:
     void associateSignatureCommentsToNode(pm_node_t *node);
     void consumeCommentsInsideNode(pm_node_t *node, std::string_view kind);
     void consumeCommentsBetweenLines(int startLine, int endLine, std::string_view kind);
+    void consumeOrphanedSignatureComments(int startLine, int endLine);
     void consumeCommentsUntilLine(int line);
     std::optional<uint32_t> locateTargetLine(pm_node_t *node);
     core::LocOffsets translateLocation(pm_location_t location);

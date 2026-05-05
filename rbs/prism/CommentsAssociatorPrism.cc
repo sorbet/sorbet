@@ -159,6 +159,33 @@ void CommentsAssociatorPrism::consumeCommentsBetweenLines(int startLine, int end
     commentByLine.erase(startIt, it);
 }
 
+void CommentsAssociatorPrism::consumeOrphanedSignatureComments(int startLine, int endLine) {
+    auto source = ctx.file.data(ctx).source();
+    for (auto it = commentByLine.begin(); it != commentByLine.end();) {
+        if (it->first <= startLine) {
+            ++it;
+            continue;
+        }
+        if (it->first >= endLine) {
+            break;
+        }
+        auto commentBegin = it->second.loc.beginPos();
+        auto detail = core::Loc::pos2Detail(ctx.file.data(ctx), commentBegin);
+        auto lineStart = source.substr(commentBegin - (detail.column - 1), detail.column - 1);
+        if (lineStart.find_first_not_of(" \t") != std::string_view::npos) {
+            ++it;
+            continue;
+        }
+        if (absl::StartsWith(it->second.string, RBS_PREFIX) ||
+            absl::StartsWith(it->second.string, MULTILINE_RBS_PREFIX)) {
+            if (auto e = ctx.beginIndexerError(it->second.loc, core::errors::Rewriter::RBSUnusedComment)) {
+                e.setHeader("Unused RBS signature comment. No method definition found after it");
+            }
+        }
+        it = commentByLine.erase(it);
+    }
+}
+
 void CommentsAssociatorPrism::consumeCommentsUntilLine(int line) {
     auto it = commentByLine.begin();
     while (it != commentByLine.end()) {
@@ -532,7 +559,9 @@ void CommentsAssociatorPrism::walkStatements(pm_node_list_t &nodes) {
         auto inserted = maybeInsertStandalonePlaceholders(nodes, i, lastLine, beginLine);
         i += inserted;
 
+        auto prevLastLine = lastLine;
         walkNode(stmt);
+        consumeOrphanedSignatureComments(prevLastLine, beginLine);
 
         lastLine = posToLine(stmtLoc.endPos());
     }

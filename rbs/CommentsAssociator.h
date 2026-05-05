@@ -48,6 +48,7 @@ private:
     void associateSignatureCommentsToNode(parser::Node *node);
     void consumeCommentsInsideNode(parser::Node *node, std::string kind);
     void consumeCommentsBetweenLines(int startLine, int endLine, std::string kind);
+    void consumeOrphanedSignatureComments(int startLine, int endLine);
     void consumeCommentsUntilLine(int line);
     std::optional<uint32_t> locateTargetLine(parser::Node *node);
 
