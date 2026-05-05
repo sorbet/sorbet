@@ -1210,38 +1210,87 @@ private:
     //
     // A ConstantLit can be in one of three states:
     //
-    // 1. A known constant that we create ourselves (e.g. core::Symbols::root()).  This requires
-    //    12 bytes of storage:
+    // 1. A known constant that we create ourselves (e.g. core::Symbols::root()).  Expressed as
+    //    a struct definition, it requires 12 bytes of storage:
     //
     //    struct KnownSymbol {
-    //        core::SymbolRef sym;
     //        core::LocOffsets loc;
+    //        core::SymbolRef sym;
     //    };
     //
     //    The loc is actually important to propagate information into later passes and to ensure
     //    that various ENFORCEs around loc consistency hold.
+    //
+    //    Due to alignment requirements and the need to hold a tag, the actual struct definition
+    //    looks more like:
+    //
+    //    struct KnownSymbol {
+    //        uint64_t loc; // re-interpretable as a `core::LocOffsets`
+    //        union {
+    //            struct {
+    //                uint16_t tag;
+    //                uint8_t rawId[4]; // sym.rawId()
+    //                uint16_t unused;  // always zeros
+    //            };
+    //            uint64_t val;
+    //        } u;
+    //    };
+    //
+    //    We cheat a little bit by re-interpreting `loc` as a `core::LocOffsets`; using types
+    //    with actual constructors and destructors here is complicated.
     //
     // 2. A resolved constant.  We cheat a little bit here because this is actually encompassing
     //    both a constant that we are attempting to resolve and a constant that we have finished
     //    resolving.  This requires 16 bytes of storage due to alignment requirements:
     //
     //    struct ResolvedSymbol {
-    //        core::SymbolRef sym;
     //        std::unique_ptr<UnresolvedConstantLit> original;
+    //        core::SymbolRef sym;
     //    };
     //
     //    The loc for this constant is derivable from `original`.
+    //
+    //    Similarly to case 1, the actual definition looks more like:
+    //
+    //    struct ResolvedSymbol {
+    //        UnresolvedConstantLit *original;
+    //        union {
+    //            struct {
+    //                uint16_t tag;
+    //                uint8_t rawId[4]; // sym.rawId()
+    //                uint16_t unused;  // always zeros
+    //            };
+    //            uint64_t val;
+    //        } u;
+    //    };
+    //
+    //    Since we have to manage the lifetime of `original` ourselves, rather than relying on
+    //    objects with proper constructors and destructors to do it for us.
     //
     // 3. A constant that we attempted to resolve, but resolution failed.  This requires 16
     //    bytes of storage.
     //
     //    struct FailedResolutionSymbol {
-    //        std::unique_ptr<std::vector<core::SymbolRef>> resolutionScopes;
     //        std::unique_ptr<UnresolvedConstantLit> original;
+    //        std::unique_ptr<std::vector<core::SymbolRef>> resolutionScopes;
     //    };
     //
     //    We transition the second case -- where the second case is representing a symbol that
     //    is in the process of resolving -- to this case, and then we never transition out.
+    //
+    //    Since the storage for `resolutionScopes` overlaps with the tagging scheme above,
+    //    the actual struct definition looks more like:
+    //
+    //    struct FailedResolutionSymbol {
+    //        UnresolvedConstantLit *original;
+    //        union {
+    //            struct {
+    //                uint16_t tag;
+    //                uint8_t ptrBytes[6]; // upper 48 bits of `resolutionScopes`
+    //            };
+    //            uint64_t val;
+    //        } u;
+    //    };
     //
     // We can represent all three of these in 16 bytes of space by doing a bunch of manual
     // pointer tagging.
@@ -1257,23 +1306,23 @@ private:
         static constexpr tagged_storage TAG_MASK = 0xffff;
         static constexpr tagged_storage PTR_MASK = ~TAG_MASK;
 
+        // This member is either a LocOffsets (in the case of a known symbol) or a pointer
+        // to the associated UnresolvedConstantLit.
+        tagged_storage ptr1;
         // This member is a tagged quantity; its upper 48 bits will be either a raw symbol
         // ID or a pointer to a vector of SymbolRefs representing the resolution scopes
         // for a constant that failed to resolve.
         //
-        // The tag determines the value for both this member and ptr2.
-        tagged_storage ptr1;
-        // This member is either a LocOffsets (in the case of a known symbol) or a pointer
-        // to the associated UnresolvedConstantLit.
+        // The tag determines the value for both this member and ptr1.
         tagged_storage ptr2;
 
-        tagged_storage untaggedPtr1() const noexcept {
-            auto val = ptr1 & PTR_MASK;
+        tagged_storage untaggedPtr2() const noexcept {
+            auto val = ptr2 & PTR_MASK;
             return val >> 16;
         }
 
         Tag tag() const {
-            auto value = ptr1 & TAG_MASK;
+            auto value = ptr2 & TAG_MASK;
             return static_cast<Tag>(value);
         }
 
@@ -1296,13 +1345,13 @@ private:
             return tagPtr(Tag::FailedResolutionSymbol, new std::vector<core::SymbolRef>());
         }
 
-        Storage(core::LocOffsets loc, core::SymbolRef symbol) : ptr1(tagSymbol(Tag::KnownSymbol, symbol)) {
-            static_assert(sizeof(loc) == sizeof(ptr2), "LocOffsets is too big to fit!");
-            new (&ptr2) core::LocOffsets(loc);
+        Storage(core::LocOffsets loc, core::SymbolRef symbol) : ptr2(tagSymbol(Tag::KnownSymbol, symbol)) {
+            static_assert(sizeof(loc) == sizeof(ptr1), "LocOffsets is too big to fit!");
+            new (&ptr1) core::LocOffsets(loc);
         }
 
         Storage(core::SymbolRef symbol, std::unique_ptr<UnresolvedConstantLit> original)
-            : ptr1(tagSymbol(Tag::ResolvedSymbol, symbol)), ptr2(reinterpret_cast<tagged_storage>(original.release())) {
+            : ptr1(reinterpret_cast<tagged_storage>(original.release())), ptr2(tagSymbol(Tag::ResolvedSymbol, symbol)) {
         }
 
         // We have to explicitly delete these, because otherwise making a copy of a `Storage`
@@ -1319,13 +1368,13 @@ private:
         ~Storage() {
             switch (tag()) {
                 case Tag::KnownSymbol: {
-                    // ptr1 just holds the raw ID for the symbol, so only delete LocOffsets.
-                    auto *p = reinterpret_cast<core::LocOffsets *>(&ptr2);
+                    // ptr2 just holds the raw ID for the symbol, so only destroy LocOffsets.
+                    auto *p = reinterpret_cast<core::LocOffsets *>(&ptr1);
                     p->~LocOffsets();
                     break;
                 }
                 case Tag::ResolvedSymbol: {
-                    // ptr1 just holds the raw ID for the symbol.
+                    // ptr2 just holds the raw ID for the symbol.
                     auto *ucl = original();
                     delete ucl;
                     break;
@@ -1346,7 +1395,7 @@ private:
                     return nullptr;
                 case Tag::ResolvedSymbol:
                 case Tag::FailedResolutionSymbol:
-                    return reinterpret_cast<UnresolvedConstantLit *>(ptr2);
+                    return reinterpret_cast<UnresolvedConstantLit *>(ptr1);
             }
         }
 
@@ -1356,14 +1405,14 @@ private:
                     return nullptr;
                 case Tag::ResolvedSymbol:
                 case Tag::FailedResolutionSymbol:
-                    return reinterpret_cast<const UnresolvedConstantLit *>(ptr2);
+                    return reinterpret_cast<const UnresolvedConstantLit *>(ptr1);
             }
         }
 
         core::LocOffsets loc() const {
             switch (tag()) {
                 case Tag::KnownSymbol:
-                    return *reinterpret_cast<const core::LocOffsets *>(&ptr2);
+                    return *reinterpret_cast<const core::LocOffsets *>(&ptr1);
                 case Tag::ResolvedSymbol:
                 case Tag::FailedResolutionSymbol:
                     return original()->loc;
@@ -1374,7 +1423,7 @@ private:
             switch (tag()) {
                 case Tag::KnownSymbol:
                 case Tag::ResolvedSymbol:
-                    return core::SymbolRef::fromRaw(static_cast<uint32_t>(untaggedPtr1()));
+                    return core::SymbolRef::fromRaw(static_cast<uint32_t>(untaggedPtr2()));
                 case Tag::FailedResolutionSymbol:
                     return core::Symbols::StubModule();
             }
@@ -1386,7 +1435,7 @@ private:
                 case Tag::ResolvedSymbol:
                     return nullptr;
                 case Tag::FailedResolutionSymbol:
-                    return reinterpret_cast<std::vector<core::SymbolRef> *>(untaggedPtr1());
+                    return reinterpret_cast<std::vector<core::SymbolRef> *>(untaggedPtr2());
             }
         }
 
@@ -1396,20 +1445,20 @@ private:
                 case Tag::ResolvedSymbol:
                     return nullptr;
                 case Tag::FailedResolutionSymbol:
-                    return reinterpret_cast<const std::vector<core::SymbolRef> *>(untaggedPtr1());
+                    return reinterpret_cast<const std::vector<core::SymbolRef> *>(untaggedPtr2());
             }
         }
 
         void setSymbol(core::SymbolRef sym) {
             ENFORCE(tag() == Tag::ResolvedSymbol);
             ENFORCE(sym != core::Symbols::StubModule());
-            ptr1 = tagSymbol(Tag::ResolvedSymbol, sym);
+            ptr2 = tagSymbol(Tag::ResolvedSymbol, sym);
         }
 
         void markUnresolved() {
             ENFORCE(tag() == Tag::ResolvedSymbol);
             if (tag() == Tag::ResolvedSymbol) {
-                ptr1 = allocateResolutionScopes();
+                ptr2 = allocateResolutionScopes();
                 ENFORCE(tag() == Tag::FailedResolutionSymbol);
             }
         }
