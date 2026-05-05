@@ -3,11 +3,11 @@
 
 module T::Private::CallerUtils
   if Thread.respond_to?(:each_caller_location) # RUBY_VERSION >= "3.2"
-    def self.find_caller
-      skipped_first = false
+    def self.find_caller(callers_to_skip: 0)
+      remaining_to_skip = callers_to_skip + 1
       Thread.each_caller_location do |loc|
-        unless skipped_first
-          skipped_first = true
+        if remaining_to_skip.positive?
+          remaining_to_skip -= 1
           next
         end
 
@@ -18,8 +18,8 @@ module T::Private::CallerUtils
       nil
     end
   else
-    def self.find_caller
-      caller_locations(2).find do |loc|
+    def self.find_caller(callers_to_skip: 0)
+      caller_locations(2 + callers_to_skip).find do |loc|
         !loc.path&.start_with?("<internal:") && yield(loc)
       end
     end
