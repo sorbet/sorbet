@@ -7,6 +7,7 @@
 puts "hello"
 
 def foo(x)
+  T.reveal_type(x) # error: Revealed type: `T.untyped`
 end
 
 # Signature comment before an assignment
@@ -15,6 +16,7 @@ end
 x = 1
 
 def bar(x)
+  T.reveal_type(x) # error: Revealed type: `T.untyped`
 end
 
 # Normal case: signature directly before def should still work
