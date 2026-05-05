@@ -1,0 +1,9 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  <emptyTree>::<C type another> = ::<root>::<C T>.type_alias() do ||
+    <emptyTree>::<C String>
+  end
+
+  <emptyTree>::<C type top_level> = ::<root>::<C T>.type_alias() do ||
+    <emptyTree>::<C Integer>
+  end
+end
