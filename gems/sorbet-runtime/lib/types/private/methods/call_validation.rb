@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-# typed: false
+# typed: true
 
 module T::Private::Methods::CallValidation
   CallValidation = T::Private::Methods::CallValidation
@@ -139,7 +139,7 @@ module T::Private::Methods::CallValidation
     # reduce number of allocations that happen here.
 
     if method_sig.bind
-      message = method_sig.bind.error_message_for_obj(instance)
+      message = method_sig.bind&.error_message_for_obj(instance)
       if message
         CallValidation.report_error(
           method_sig,
@@ -338,7 +338,7 @@ module T::Private::Methods::CallValidation
       end
 
     pretty_message = "#{kind}#{name ? " '#{name}'" : ''}: #{error_message}\n" \
-      "Caller: #{caller_loc.path}:#{caller_loc.lineno}\n" \
+      "Caller: #{caller_loc&.path}:#{caller_loc&.lineno}\n" \
       "Definition: #{definition_file}:#{definition_line} (#{pretty_method_name})"
 
     T::Configuration.call_validation_error_handler(

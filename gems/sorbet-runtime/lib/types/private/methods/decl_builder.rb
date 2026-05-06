@@ -208,7 +208,7 @@ module T::Private::Methods
       check_live!
 
       names.each do |name|
-        raise BuilderError.new("not a symbol: #{name}") unless name.is_a?(Symbol)
+        raise BuilderError.new("not a symbol: #{name}") unless Symbol === name
       end
 
       if !decl.type_parameters.equal?(ARG_NOT_PROVIDED)
@@ -237,7 +237,7 @@ module T::Private::Methods
         decl.params = FROZEN_HASH
       end
       if decl.type_parameters.equal?(ARG_NOT_PROVIDED)
-        decl.type_parameters = FROZEN_HASH
+        decl.type_parameters = FROZEN_ARRAY
       end
 
       decl.finalized = true
@@ -246,5 +246,6 @@ module T::Private::Methods
     end
 
     FROZEN_HASH = {}.freeze
+    FROZEN_ARRAY = [].freeze
   end
 end

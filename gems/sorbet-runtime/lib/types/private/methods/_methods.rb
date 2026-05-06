@@ -1,11 +1,12 @@
 # frozen_string_literal: true
-# typed: false
+# typed: true
 
 module T::Private::Methods
   @installed_hooks = {}
   if defined?(Concurrent::Hash)
-    @signatures_by_method = Concurrent::Hash.new
-    @sig_wrappers = Concurrent::Hash.new
+    # Hide the Concurrent::Hash so that we get better typing by lying and saying it's a Hash
+    instance_variable_set(:@signatures_by_method, Concurrent::Hash.new)
+    instance_variable_set(:@sig_wrappers, Concurrent::Hash.new)
   else
     @signatures_by_method = {}
     @sig_wrappers = {}
@@ -31,8 +32,15 @@ module T::Private::Methods
   # in installed_hooks.
   @old_hooks = nil
 
-  ARG_NOT_PROVIDED = Object.new
-  PROC_TYPE = Object.new
+  # These names are for backwards compatibility from when these were `Object.new` instances
+  # rubocop:disable Naming/ClassAndModuleCamelCase
+  module ARG_NOT_PROVIDED
+    freeze
+  end
+  module PROC_TYPE
+    freeze
+  end
+  # rubocop:enable Naming/ClassAndModuleCamelCase
 
   # blk_or_decl:
   # - It's a `Proc` if we haven't forced the thunk yet.
@@ -50,7 +58,7 @@ module T::Private::Methods
 
   # See tests for how to use this.  But you shouldn't be using this.
   def self._declare_sig(mod, arg=nil, &blk)
-    _declare_sig_internal(mod, caller_locations(1, 1).first, arg, raw: true, &blk)
+    _declare_sig_internal(mod, caller_locations(1, 1)&.first, arg, raw: true, &blk)
   end
 
   private_class_method def self._declare_sig_internal(mod, loc, arg, raw: false, &blk)
@@ -112,7 +120,9 @@ module T::Private::Methods
 
   # Fetch the directory name of the file that defines the `T::Private` constant and
   # add a trailing slash to allow us to match it as a directory prefix.
-  SORBET_RUNTIME_LIB_PATH = File.dirname(T.const_source_location(:Private).first) + File::SEPARATOR
+  sorbet_runtime_loc = T.const_source_location(:Private)
+  raise "T::Private constant location not found" unless sorbet_runtime_loc
+  SORBET_RUNTIME_LIB_PATH = File.dirname(sorbet_runtime_loc.first) + File::SEPARATOR
   private_constant :SORBET_RUNTIME_LIB_PATH
 
   # when target includes a module with instance methods source_method_names, ensure there is zero intersection between
@@ -123,6 +133,10 @@ module T::Private::Methods
   # names that were declared final at one point.
   def self._check_final_ancestors(target, target_ancestors, source_method_names, source)
     source_ancestors = nil
+    if T::Private::IS_TYPECHECKING
+      # Need to avoid a pinning error, but don't want to use runtime types in _methods.rb
+      source_ancestors = T.let(nil, T.nilable(T::Array[T::Module[T.anything]]))
+    end
     # use reverse_each to check farther-up ancestors first, for better error messages.
     target_ancestors.reverse_each do |ancestor|
       final_methods = @modules_with_final.fetch(ancestor, nil)
@@ -154,7 +168,8 @@ module T::Private::Methods
           next if defining_ancestor_idx && source_ancestors[defining_ancestor_idx] == ancestor
         end
 
-        definition_file, definition_line = T::Private::Methods.signature_for_method(ancestor.instance_method(method_name)).method.source_location
+        final_sig = T::Private::Methods.signature_for_method(ancestor.instance_method(method_name))
+        definition_file, definition_line = final_sig&.method&.source_location
         is_redefined = target == ancestor
         caller_loc = T::Private::CallerUtils.find_caller { |loc| !loc.path.to_s.start_with?(SORBET_RUNTIME_LIB_PATH) }
         extra_info = "\n"
@@ -247,7 +262,7 @@ module T::Private::Methods
         method_sig ||= T::Private::Methods._handle_missing_method_signature(
           self,
           original_method,
-          __callee__,
+          __callee__ || raise("Unknown __callee__ for method without a signature"),
         )
 
         # Should be the same logic as CallValidation.wrap_method_if_needed but we
@@ -392,7 +407,7 @@ module T::Private::Methods
       SignatureValidation.validate(signature)
       signature
     rescue => e
-      super_method = original_method&.super_method
+      super_method = original_method.super_method
       super_signature = signature_for_method(super_method) if super_method
 
       T::Configuration.sig_validation_error_handler(
@@ -490,8 +505,9 @@ module T::Private::Methods
 
   def self.run_all_sig_blocks(force_type_init: true)
     loop do
-      break if @sig_wrappers.empty?
-      key, = @sig_wrappers.first
+      first_wrapper = @sig_wrappers.first
+      break unless first_wrapper
+      key, = first_wrapper
       run_sig_block_for_key(key, force_type_init: force_type_init)
     end
   end
@@ -565,14 +581,14 @@ module T::Private::Methods
 
   module MethodHooks
     def method_added(name)
-      ::T::Private::Methods._on_method_added(self, self, name)
+      ::T::Private::Methods._on_method_added(T.unsafe(self), T.unsafe(self), name)
       super(name)
     end
   end
 
   module SingletonMethodHooks
     def singleton_method_added(name)
-      ::T::Private::Methods._on_method_added(self, singleton_class, name)
+      ::T::Private::Methods._on_method_added(T.unsafe(self), singleton_class, name)
       super(name)
     end
   end

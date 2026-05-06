@@ -168,7 +168,7 @@ module T::Private::Methods::SignatureValidation
     # for any class.
     owner = signature.method.owner
     if (signature.mode == Modes.abstract || Modes::OVERRIDABLE_MODES.include?(signature.mode)) &&
-        owner.singleton_class? && owner.superclass == Module
+        owner.singleton_class? && Class === owner && owner.superclass == Module
       raise "Defining an overridable class method (via #{pretty_mode(signature)}) " \
             "on a module is not allowed. Class methods on " \
             "modules do not get inherited and thus cannot be overridden."
@@ -312,7 +312,7 @@ module T::Private::Methods::SignatureValidation
   private_constant :METHOD_VISIBILITIES
 
   private_class_method def self.visibility_strength(vis)
-    METHOD_VISIBILITIES.find_index(vis)
+    METHOD_VISIBILITIES.find_index(vis) || raise("Unexpected visibility `#{vis}`")
   end
 
   private_class_method def self.base_override_loc_str(signature, super_signature)

@@ -1,5 +1,5 @@
-# typed: true
 # frozen_string_literal: true
+# typed: true
 
 module T::Configuration
   # Announces to Sorbet that we are currently in a test environment, so it
