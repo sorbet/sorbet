@@ -478,6 +478,8 @@ int realmain(int argc, char *argv[]) {
                          "or set SORBET_SILENCE_DEV_MESSAGE=1 in your shell environment.\n");
         }
     }
+
+    prodCounterSet("thread_pool_size", opts.threads);
     unique_ptr<WorkerPool> workers = WorkerPool::create(opts.threads, *logger);
 
     auto errorFlusher = make_shared<core::ErrorFlusherStdout>();
