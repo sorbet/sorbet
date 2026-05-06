@@ -479,7 +479,7 @@ int realmain(int argc, char *argv[]) {
         }
     }
 
-    prodCounterSet("thread_pool_size", opts.threads);
+    prodCounterSet("worker_pool_size", opts.threads);
     unique_ptr<WorkerPool> workers = WorkerPool::create(opts.threads, *logger);
 
     auto errorFlusher = make_shared<core::ErrorFlusherStdout>();
