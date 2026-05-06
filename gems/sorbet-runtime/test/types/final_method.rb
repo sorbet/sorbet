@@ -13,6 +13,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
 
   CLASS_REGEX_STR = "#<Class:0x[0-9a-f]+>"
   CLASS_CLASS_REGEX_STR = "#<Class:#<Class:0x[0-9a-f]+>>"
+  INSTANCE_CLASS_REGEX_STR = "#<Class:#<#<Class:0x[0-9a-f]+>:0x[0-9a-f]+>>"
   MODULE_REGEX_STR = "#<Module:0x[0-9a-f]+>"
 
   private def assert_msg_matches(regex, final_line, method_line, explanation, err)
@@ -623,7 +624,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         extend m2, m1
       end
     end
-    assert_overridden_err('foo', MODULE_REGEX_STR, CLASS_REGEX_STR, __LINE__ - 10, __LINE__ - 3, err)
+    assert_overridden_err('foo', MODULE_REGEX_STR, CLASS_CLASS_REGEX_STR, __LINE__ - 10, __LINE__ - 3, err)
   end
 
   it "allows calling final methods" do
@@ -737,6 +738,21 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
     Module.new do
       include m1, m1
     end
+  end
+
+  it "forbids overriding a final method on an instance's singleton class via extend" do
+    m = Module.new do
+      extend T::Sig
+      sig(:final) { void }
+      def foo; end
+    end
+    klass = Class.new
+    instance = klass.new
+    instance.extend(m)
+    err = assert_raises(RuntimeError) do
+      def instance.foo; end
+    end
+    assert_overridden_err('foo', MODULE_REGEX_STR, INSTANCE_CLASS_REGEX_STR, __LINE__ - 8, __LINE__ - 2, err)
   end
 
   it "allows extending modules again" do
