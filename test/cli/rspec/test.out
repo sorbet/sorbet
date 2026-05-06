@@ -207,8 +207,8 @@ test/cli/rspec/rspec6.rb:112: Method `before` does not exist on `T.class_of(<roo
      112 |  before(:each) do
             ^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
-      NN |  def refine(arg0, &blk); end
-            ^^^^^^^^^^^^^^^^^^^^^^
+      NN |  private def refine(arg0, &blk); end
+                    ^^^^^^^^^^^^^^^^^^^^^^
 
 test/cli/rspec/rspec6.rb:113: Method `setup_value` does not exist on `T.class_of(<root>)` https://srb.help/7003
      113 |    setup_value
@@ -230,8 +230,8 @@ test/cli/rspec/rspec6.rb:117: Method `before` does not exist on `T.class_of(<roo
      117 |  before(:all) do
             ^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
-      NN |  def refine(arg0, &blk); end
-            ^^^^^^^^^^^^^^^^^^^^^^
+      NN |  private def refine(arg0, &blk); end
+                    ^^^^^^^^^^^^^^^^^^^^^^
 
 test/cli/rspec/rspec6.rb:118: Method `setup_value` does not exist on `T.class_of(<root>)` https://srb.help/7003
      118 |    setup_value
@@ -323,8 +323,8 @@ test/cli/rspec/rspec6.rb:146: Method `before` does not exist on `T.class_of(<roo
      146 |  before(:each, :slow) do
             ^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
-      NN |  def refine(arg0, &blk); end
-            ^^^^^^^^^^^^^^^^^^^^^^
+      NN |  private def refine(arg0, &blk); end
+                    ^^^^^^^^^^^^^^^^^^^^^^
 
 test/cli/rspec/rspec6.rb:147: Method `filtered_value` does not exist on `T.class_of(<root>)` https://srb.help/7003
      147 |    filtered_value
@@ -346,8 +346,8 @@ test/cli/rspec/rspec6.rb:151: Method `before` does not exist on `T.class_of(<roo
      151 |  before(:example, authorized: true) do
             ^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
-      NN |  def refine(arg0, &blk); end
-            ^^^^^^^^^^^^^^^^^^^^^^
+      NN |  private def refine(arg0, &blk); end
+                    ^^^^^^^^^^^^^^^^^^^^^^
 
 test/cli/rspec/rspec6.rb:152: Method `filtered_value` does not exist on `T.class_of(<root>)` https://srb.help/7003
      152 |    filtered_value
@@ -369,8 +369,8 @@ test/cli/rspec/rspec6.rb:156: Method `before` does not exist on `T.class_of(<roo
      156 |  before(:context, :integration, :needs_db) do
             ^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
-      NN |  def refine(arg0, &blk); end
-            ^^^^^^^^^^^^^^^^^^^^^^
+      NN |  private def refine(arg0, &blk); end
+                    ^^^^^^^^^^^^^^^^^^^^^^
 
 test/cli/rspec/rspec6.rb:157: Method `filtered_value` does not exist on `T.class_of(<root>)` https://srb.help/7003
      157 |    filtered_value

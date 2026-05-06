@@ -258,7 +258,7 @@ class Module < Object
     )
     .returns(T.self_type)
   end
-  def append_features(arg0); end
+  private def append_features(arg0); end
 
   # Defines a named attribute for this module, where the name is
   # *symbol.*`id2name`, creating an instance variable (`@name`) and a
@@ -543,7 +543,7 @@ class Module < Object
     )
     .returns(T.untyped)
   end
-  def const_added(const_name); end
+  private def const_added(const_name); end
 
   # Says whether *mod* or its ancestors have a constant with the given name:
   #
@@ -900,7 +900,7 @@ class Module < Object
     )
     .returns(T.untyped)
   end
-  def extend_object(arg0); end
+  private def extend_object(arg0); end
 
   # The equivalent of `included`, but for extended modules.
   #
@@ -921,7 +921,7 @@ class Module < Object
     )
     .returns(T.untyped)
   end
-  def extended(othermod); end
+  private def extended(othermod); end
 
   # Prevents further modifications to *mod*.
   #
@@ -984,7 +984,7 @@ class Module < Object
     )
     .returns(T.untyped)
   end
-  def included(othermod); end
+  private def included(othermod); end
 
   # Returns the list of modules included or prepended in *mod* or one of *mod*'s
   # ancestors.
@@ -1014,7 +1014,7 @@ class Module < Object
     )
     .void
   end
-  def initialize(&blk); end
+  private def initialize(&blk); end
 
   # Returns an `UnboundMethod` representing the given instance method in *mod*.
   #
@@ -1107,7 +1107,7 @@ class Module < Object
     )
     .returns(T.untyped)
   end
-  def method_added(meth); end
+  private def method_added(meth); end
 
   # Returns `true` if the named method is defined by *mod*. If *inherit* is set,
   # the lookup will also search *mod*'s ancestors. Public and protected methods
@@ -1177,7 +1177,7 @@ class Module < Object
     )
     .returns(T.untyped)
   end
-  def method_removed(method_name); end
+  private def method_removed(method_name); end
 
   # Evaluates the string or block in the context of *mod*, except that when a
   # block is given, constant/class variable lookup is not affected. This can be
@@ -1296,7 +1296,7 @@ class Module < Object
   sig { params(arg0: Symbol).returns(Symbol) }
   sig { params(arg0: String).returns(String) }
   sig { params(arg0: T.any(Symbol, String), rest: T.any(Symbol, String)).returns(T::Array[T.any(Symbol, String)]) }
-  def module_function(arg0=T.unsafe(nil), *rest); end
+  private def module_function(arg0=T.unsafe(nil), *rest); end
 
   # Returns the name of the module *mod*. Returns nil for anonymous modules.
   sig {returns(T.nilable(String))}
@@ -1326,7 +1326,7 @@ class Module < Object
     )
     .returns(T.self_type)
   end
-  def prepend_features(arg0); end
+  private def prepend_features(arg0); end
 
   # The equivalent of `included`, but for prepended modules.
   #
@@ -1347,7 +1347,7 @@ class Module < Object
     )
     .returns(T.untyped)
   end
-  def prepended(othermod); end
+  private def prepended(othermod); end
 
   # With no arguments, sets the default visibility for subsequently defined
   # methods to private. With arguments, sets the named methods to have private
@@ -1375,7 +1375,7 @@ class Module < Object
   sig { params(method_name: Symbol).returns(Symbol) }
   sig { params(method_name: String).returns(String) }
   sig { params(method_name: T.any(Symbol, String), rest: T.any(Symbol, String)).returns(T::Array[T.any(Symbol, String)]) }
-  def private(method_name=T.unsafe(nil), *rest); end
+  private def private(method_name=T.unsafe(nil), *rest); end
 
   # Makes existing class methods private. Often used to hide the default
   # constructor `new`.
@@ -1490,7 +1490,7 @@ class Module < Object
   sig { params(method_name: Symbol).returns(Symbol) }
   sig { params(method_name: String).returns(String) }
   sig { params(method_name: T.any(Symbol, String), rest: T.any(Symbol, String)).returns(T::Array[T.any(Symbol, String)]) }
-  def protected(method_name=T.unsafe(nil), *rest); end
+  private def protected(method_name=T.unsafe(nil), *rest); end
 
   # Returns a list of the protected instance methods defined in *mod*. If the
   # optional parameter is `false`, the methods of any ancestors are not
@@ -1549,7 +1549,7 @@ class Module < Object
   sig { params(method_name: Symbol).returns(Symbol) }
   sig { params(method_name: String).returns(String) }
   sig { params(method_name: T.any(Symbol, String), rest: T.any(Symbol, String)).returns(T::Array[T.any(Symbol, String)]) }
-  def public(method_name=T.unsafe(nil), *rest); end
+  private def public(method_name=T.unsafe(nil), *rest); end
 
   # Makes a list of existing class methods public.
   #
@@ -1638,7 +1638,7 @@ class Module < Object
     )
     .returns(T.self_type)
   end
-  def refine(arg0, &blk); end
+  private def refine(arg0, &blk); end
 
   # Returns a list of refinements included in the receiver.
   #
@@ -1695,7 +1695,7 @@ class Module < Object
     )
     .returns(T.untyped)
   end
-  def remove_const(arg0); end
+  private def remove_const(arg0); end
 
   # Removes the method identified by *symbol* from the current class. For an
   # example, see
@@ -1743,7 +1743,7 @@ class Module < Object
   # behavior of the `foo` method using the above approach will change so that
   # the method does not pass through keywords.
   sig { params(method_name: Symbol).returns(T.self_type) }
-  def ruby2_keywords(*method_name); end
+  private def ruby2_keywords(*method_name); end
 
   # Returns `true` if *mod* is a singleton class or `false` if it is an ordinary
   # class or module.
@@ -1822,7 +1822,7 @@ class Module < Object
     )
     .returns(T.self_type)
   end
-  def using(arg0); end
+  private def using(arg0); end
 
   # Returns a string representing this module or class. For basic classes and
   # modules, this is the name. For singletons, we show information on the thing
