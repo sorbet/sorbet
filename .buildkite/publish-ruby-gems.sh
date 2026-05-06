@@ -2,8 +2,13 @@
 
 set -euo pipefail
 
-if [ "${PUBLISH_TO_RUBYGEMS:-}" == "" ]; then
-  echo "Skipping because this build is not the nightly RubyGems scheduled build"
+if [ "${BUILDKITE_BRANCH:-}" != "master" ]; then
+  echo "Skipping because this is not the master branch"
+  exit 0
+fi
+
+if [ "${PUBLISH_TO_RUBYGEMS:-}" == "" ] && git diff --quiet HEAD^..HEAD -- gems/; then
+  echo "Skipping because this is not the nightly RubyGems scheduled build and gems/ was not changed"
   exit 0
 fi
 
