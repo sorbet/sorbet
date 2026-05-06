@@ -826,13 +826,6 @@ ast::ExpressionPtr Desugarer::desugarMlhs(core::LocOffsets loc, PrismNode *lhs, 
             }
         } else {
             ast::ExpressionPtr lh = desugar(c);
-            if (auto restParam = ast::cast_tree<ast::RestParam>(lh)) {
-                if (auto e = ctx.beginIndexerError(lh.loc(), core::errors::Desugar::UnsupportedRestArgsDestructure)) {
-                    e.setHeader("Unsupported rest args in destructure");
-                }
-                lh = move(restParam->expr);
-            }
-
             auto lhloc = lh.loc();
             stats.emplace_back(MK::Assign(lhloc, move(lh), move(val)));
         }

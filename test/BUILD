@@ -274,6 +274,10 @@ pipeline_tests(
         exclude = [
             "testdata/rbs/**/*.rb",
             "testdata/rbs/**/*.exp",
+
+            # Cases where Prism has a better output than the legacy parser,
+            # and a different `_prism.rb` test exists to characterize Prism's behaviour.
+            "testdata/desugar/star_in_block_arg_prism.rb",
         ],
     ),
     "PosTests",
@@ -537,6 +541,10 @@ pipeline_tests(
         # todo(gdritter): fix this!
         exclude = [
             "testdata/packager/directed-*/**/*",
+
+            # Cases where Prism has a better output than the legacy parser,
+            # and a different `_prism.rb` test exists to characterize Prism's behaviour.
+            "testdata/desugar/star_in_block_arg_prism.rb",
         ],
     ),
     "LSPTests",
