@@ -970,13 +970,11 @@ void LSPTypechecker::updateConfigAndGsFromOptions(const DidChangeConfigurationPa
     }
 }
 
-core::packages::Stratum FileStratumMapping::getStratumForUris(absl::Span<const string_view> paths) const {
+core::packages::Stratum FileStratumMapping::getStratumForFiles(absl::Span<const core::FileRef> refs) const {
     core::packages::Stratum stratum(0);
-    for (auto path : paths) {
-        auto ref = this->tc.state().findFileByPath(path);
-
+    for (auto ref : refs) {
         // Fall back on the last stratum for new files.
-        if (!ref.exists()) {
+        if (!ref.exists() || ref.id() >= this->tc.fileToStratum.size()) {
             return this->tc.lastStratum;
         }
 
@@ -986,11 +984,26 @@ core::packages::Stratum FileStratumMapping::getStratumForUris(absl::Span<const s
     return stratum;
 }
 
-core::packages::Stratum FileStratumMapping::getStratumForUri(std::string_view path) const {
-    auto ref = this->tc.state().findFileByPath(path);
+core::packages::Stratum FileStratumMapping::getStratumForPaths(absl::Span<const string_view> paths) const {
+    vector<core::FileRef> refs;
+    refs.reserve(paths.size());
+    absl::c_transform(paths, back_inserter(refs),
+                      [&gs = this->tc.state()](auto path) { return gs.findFileByPath(path); });
+    return this->getStratumForFiles(refs);
+}
 
+core::packages::Stratum FileStratumMapping::getStratumForUris(absl::Span<const string_view> uris) const {
+    vector<core::FileRef> refs;
+    refs.reserve(uris.size());
+    absl::c_transform(uris, back_inserter(refs), [&gs = this->tc.state(), &config = *this->tc.config](auto uri) {
+        return config.uri2FileRef(gs, uri);
+    });
+    return this->getStratumForFiles(refs);
+}
+
+core::packages::Stratum FileStratumMapping::getStratumForFile(core::FileRef ref) const {
     // Fall back on the last stratum for new files.
-    if (!ref.exists()) {
+    if (!ref.exists() || ref.id() >= this->tc.fileToStratum.size()) {
         return this->tc.lastStratum;
     }
 

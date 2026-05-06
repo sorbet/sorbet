@@ -226,14 +226,38 @@ class FileStratumMapping {
 
 public:
     /**
-     * Get the id of the stratum that an edit involving these files could be checked at.
+     * Get the id of the stratum that an edit involving these file refs could be checked at.
      */
-    core::packages::Stratum getStratumForUris(absl::Span<const std::string_view> edit) const;
+    core::packages::Stratum getStratumForFiles(absl::Span<const core::FileRef> frefs) const;
 
     /**
-     * Get the id of the stratum that an edit involving this file could be checked at.
+     * Get the id of the stratum that an edit involving these paths could be checked at.
      */
-    core::packages::Stratum getStratumForUri(std::string_view uri) const;
+    core::packages::Stratum getStratumForPaths(absl::Span<const std::string_view> paths) const;
+
+    /**
+     * Get the id of the stratum that an edit involving these uris could be checked at.
+     */
+    core::packages::Stratum getStratumForUris(absl::Span<const std::string_view> uris) const;
+
+    /**
+     * Get the id of the stratum that an edit involving this file ref could be checked at.
+     */
+    core::packages::Stratum getStratumForFile(core::FileRef ref) const;
+
+    /**
+     * Get the id of the stratum that an edit involving this path could be checked at.
+     */
+    core::packages::Stratum getStratumForPath(const std::string_view path) const {
+        return this->getStratumForFile(this->tc.state().findFileByPath(path));
+    }
+
+    /**
+     * Get the id of the stratum that an edit involving this uri could be checked at.
+     */
+    core::packages::Stratum getStratumForUri(std::string_view uri) const {
+        return this->getStratumForFile(this->tc.config->uri2FileRef(this->tc.state(), uri));
+    }
 
     /**
      * Get the id of the last stratum in the condensation graph.
