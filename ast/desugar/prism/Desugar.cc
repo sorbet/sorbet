@@ -1586,7 +1586,7 @@ ast::ExpressionPtr Desugarer::desugarSendOpAssign(pm_node_t *untypedNode) {
     ast::Send::Flags flags;
     flags.isPrivateOk = PM_NODE_FLAG_P(untypedNode, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
 
-    auto lhs = MK::Send(lhsLoc, move(receiverExpr), name, messageLoc, 0, ast::Send::ARGS_store{}, flags);
+    auto lhs = MK::Send0(lhsLoc, move(receiverExpr), name, messageLoc, flags);
     auto rhs = desugar(node->value);
 
     if constexpr (Kind == OpAssignKind::Operator) {
