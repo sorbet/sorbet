@@ -1,0 +1,71 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  <emptyTree>
+rescue => <rescueTemp>$2
+  begin
+    @ivar = <rescueTemp>$2
+    <emptyTree>
+  end
+
+  <emptyTree>
+rescue => <rescueTemp>$3
+  begin
+    @@cvar = <rescueTemp>$3
+    <emptyTree>
+  end
+
+  <emptyTree>
+rescue => <rescueTemp>$4
+  begin
+    $gvar = <rescueTemp>$4
+    <emptyTree>
+  end
+
+  <emptyTree>
+rescue => <rescueTemp>$5
+  begin
+    <self>.call_target1=(<rescueTemp>$5)
+    <emptyTree>
+  end
+
+  <emptyTree>
+rescue => <rescueTemp>$6
+  begin
+    <self>.call_target2=(<rescueTemp>$6)
+    <emptyTree>
+  end
+
+  <emptyTree>
+rescue => <rescueTemp>$7
+  begin
+    <emptyTree>::<C ConstantTarget> = <rescueTemp>$7
+    <emptyTree>
+  end
+
+  <emptyTree>
+rescue => <rescueTemp>$8
+  begin
+    ::<root>::<C ConstantPathTarget> = <rescueTemp>$8
+    <emptyTree>
+  end
+
+  <emptyTree>
+rescue => <rescueTemp>$9
+  begin
+    <emptyTree>::<C Nested>::<C ConstantPathTarget> = <rescueTemp>$9
+    <emptyTree>
+  end
+
+  <emptyTree>
+rescue => <rescueTemp>$10
+  begin
+    ::<root>::<C Nested>::<C ConstantPathTarget> = <rescueTemp>$10
+    <emptyTree>
+  end
+
+  <emptyTree>
+rescue => <rescueTemp>$11
+  begin
+    <self>.a().[]=(123, <rescueTemp>$11)
+    <emptyTree>
+  end
+end
