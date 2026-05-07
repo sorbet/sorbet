@@ -2391,16 +2391,14 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 if (auto e = dctx.ctx.beginIndexerError(what->loc, core::errors::Desugar::UndefUsage)) {
                     e.setHeader("Unsupported method: undef");
                 }
+
                 Send::ARGS_store args;
                 for (auto &expr : undef->exprs) {
                     args.emplace_back(node2TreeImpl(dctx, expr));
                 }
-                auto numPosArgs = args.size();
-                auto res = MK::Send(loc, MK::Constant(loc, core::Symbols::Kernel()), core::Names::undef(), locZeroLen,
-                                    numPosArgs, move(args));
-                // It wasn't a Send to begin with--there's no way this could result in a private
-                // method call error.
-                ast::cast_tree_nonnull<ast::Send>(res).flags.isPrivateOk = true;
+
+                // Desugar `undef :foo, :bar` to `::<Magic>.<undef>(:foo, :bar)`
+                auto res = MK::Send(loc, MK::Magic(loc), core::Names::undef(), locZeroLen, args.size(), move(args));
                 result = move(res);
             },
             [&](parser::CaseMatch *caseMatch) {

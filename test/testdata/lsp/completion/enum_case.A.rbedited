@@ -32,5 +32,5 @@ def example(my_enum)
   #               ^ apply-completion: [C] item: 0
 
   my_enum.
-    #     ^ apply-completion: [D] item: 122
+    #     ^ apply-completion: [D] item: 121
 end # error: unexpected token "end"

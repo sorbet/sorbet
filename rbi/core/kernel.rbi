@@ -736,14 +736,6 @@ module Kernel
   sig {returns(T.self_type)}
   def trust(); end
 
-  sig do
-    params(
-        arg: BasicObject,
-    )
-    .void
-  end
-  def undef(*arg); end
-
   sig {returns(T.self_type)}
   def untaint(); end
 

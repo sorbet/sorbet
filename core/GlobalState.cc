@@ -759,6 +759,11 @@ void GlobalState::initEmpty() {
     // Synthesize <Magic>.<retry>() => Void
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::retry()).buildWithResult(Types::void_());
 
+    // Synthesize <Magic>.<undef>(*arg0: Symbol) => Void
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::undef())
+                 .repeatedTypedArg(Names::arg0(), Types::Symbol())
+                 .buildWithResult(Types::void_());
+
     // Synthesize <Magic>.<blockBreak>(args: T.untyped) => T.untyped
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::blockBreak())
                  .untypedArg(Names::arg0())

@@ -205,7 +205,7 @@ rescue <emptyTree>::<C E> => x
     7
   end
 
-  ::Kernel.undef(:x, :y)
+  ::<Magic>.<undef>(:x, :y)
 
   ["a", "b"]
 

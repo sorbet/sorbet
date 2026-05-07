@@ -56,7 +56,7 @@ NameDef names[] = {
     {"orOp", "|"},
     {"backtick", "`"},
     {"defined_p", "defined?"},
-    {"undef"},
+    {"undef", "<undef>"},
     {"each"},
     {"subclasses"},
     {"transpose"},

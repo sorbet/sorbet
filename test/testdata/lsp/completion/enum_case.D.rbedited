@@ -32,5 +32,5 @@ def example(my_enum)
   else
     T.absurd(my_enum)
   end
-    #     ^ apply-completion: [D] item: 122
+    #     ^ apply-completion: [D] item: 121
 end # error: unexpected token "end"

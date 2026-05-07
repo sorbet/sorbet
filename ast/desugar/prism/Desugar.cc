@@ -3343,12 +3343,10 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
             ENFORCE(undefNode->names.size > 0, "PM_UNDEF_NODE without names is expected to be a parse error");
 
             auto args = nodeListToStore<ast::Send::ARGS_store>(undefNode->names);
-            auto expr = MK::Send(location, MK::Constant(location, core::Symbols::Kernel()), core::Names::undef(),
-                                 location.copyWithZeroLength(), args.size(), std::move(args));
-            // It wasn't a Send to begin with--there's no way this could result in a private
-            // method call error.
-            ast::cast_tree_nonnull<ast::Send>(expr).flags.isPrivateOk = true;
-            return expr;
+
+            // Desugar `undef :foo, :bar` to `::<Magic>.<undef>(:foo, :bar)`
+            return MK::Send(location, MK::Magic(location), core::Names::undef(), location.copyWithZeroLength(),
+                            args.size(), move(args));
         }
         case PM_UNLESS_NODE: { // An `unless` branch, either in a statement or modifier form.
             auto unlessNode = down_cast<pm_unless_node>(node);

@@ -81,8 +81,7 @@ const RubyKeyword rubyKeywords[] = {
     {"super", "Calls the current method in a superclass."},
     {"then", "Indicates the end of conditional blocks in control structures."},
     {"true", "Boolean true."},
-    // This is also defined on Kernel
-    // {"undef", "Prevents a class or module from responding to a method call."},
+    {"undef", "Prevents a class or module from responding to a method call."},
     {"unless", "Used for unless and modifier unless expressions.", "unless ${1:expr}\n  $0\nend", "unless/end"},
     {"until", "Creates a loop that executes until the condition is true.", "until ${1:expr}\n  $0\nend", "until/end"},
     // Would really like to dedent the line too...
