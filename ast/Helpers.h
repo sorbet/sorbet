@@ -557,8 +557,8 @@ public:
 
         Send::Flags flags;
         flags.isPrivateOk = true;
-        return Send(loc, Self(superKeywordLoc.copyWithZeroLength()), method, superKeywordLoc, 1,
-                    SendArgs(make_expression<ast::ZSuperArgs>(superKeywordLoc.copyEndWithZeroLength())), flags);
+        return Send1(loc, Self(superKeywordLoc.copyWithZeroLength()), method, superKeywordLoc,
+                     make_expression<ast::ZSuperArgs>(superKeywordLoc.copyEndWithZeroLength()), flags);
     }
 
     static ExpressionPtr Magic(core::LocOffsets loc) {

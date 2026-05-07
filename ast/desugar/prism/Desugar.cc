@@ -798,10 +798,7 @@ ast::ExpressionPtr Desugarer::desugarMlhs(core::LocOffsets loc, PrismNode *lhs, 
             if (PM_NODE_FLAG_P(callTargetNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
                 auto body = [&val](ast::ExpressionPtr receiverTempLocal, core::LocOffsets parentLoc,
                                    core::NameRef methodName, core::LocOffsets methodNameLoc) {
-                    ast::Send::ARGS_store arguments;
-                    arguments.emplace_back(move(val));
-
-                    return MK::Send(parentLoc, move(receiverTempLocal), methodName, methodNameLoc, 1, move(arguments));
+                    return MK::Send1(parentLoc, move(receiverTempLocal), methodName, methodNameLoc, move(val));
                 };
 
                 auto expr =
@@ -818,11 +815,7 @@ ast::ExpressionPtr Desugarer::desugarMlhs(core::LocOffsets loc, PrismNode *lhs, 
                 ast::Send::Flags flags;
                 flags.isPrivateOk = PM_NODE_FLAG_P(callTargetNode, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
 
-                ast::Send::ARGS_store arguments;
-                arguments.emplace_back(move(val));
-
-                stats.emplace_back(
-                    MK::Send(cloc, move(receiver), methodName, methodNameLoc, 1, move(arguments), flags));
+                stats.emplace_back(MK::Send1(cloc, move(receiver), methodName, methodNameLoc, move(val), flags));
             }
         } else {
             ast::ExpressionPtr lh = desugar(c);
