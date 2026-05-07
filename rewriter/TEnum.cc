@@ -155,8 +155,6 @@ optional<ProcessStatResult> processStat(core::MutableContext ctx, ast::ClassDef 
     auto classDef =
         ast::MK::Class(statLocZero, statLocZero, classCnst.deepCopy(), std::move(parent), std::move(classRhs));
 
-    ast::Send::Flags flags = {};
-    flags.isPrivateOk = true;
     auto singletonAsgn = ast::MK::Assign(
         statLocZero, std::move(asgn->lhs),
         ast::make_expression<ast::Cast>(statLocZero, core::Types::todo(),
