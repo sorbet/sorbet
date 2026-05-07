@@ -105,9 +105,11 @@ void Command::run(core::MutableContext ctx, ast::ClassDef *klass) {
             args.push_back(ast::MK::Symbol(loc, name));
         }
 
+        ast::Send::Flags flags;
+        flags.isPrivateOk = true;
         auto hiddenPrivate =
             ast::MK::Send(klass->loc.copyWithZeroLength(), ast::MK::Self(klass->loc), core::Names::private_(),
-                          klass->loc.copyWithZeroLength(), instanceMethods.size(), std::move(args));
+                          klass->loc.copyWithZeroLength(), instanceMethods.size(), std::move(args), flags);
 
         klass->rhs.push_back(std::move(hiddenPrivate));
     }
