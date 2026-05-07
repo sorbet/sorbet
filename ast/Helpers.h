@@ -42,9 +42,10 @@ public:
         return send;
     }
 
-    static ExpressionPtr Send0(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, core::LocOffsets funLoc) {
+    static ExpressionPtr Send0(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, core::LocOffsets funLoc,
+                               Send::Flags flags = {}) {
         Send::ARGS_store nargs;
-        return Send(loc, std::move(recv), fun, funLoc, 0, std::move(nargs));
+        return Send(loc, std::move(recv), fun, funLoc, 0, std::move(nargs), flags);
     }
 
     static ExpressionPtr Send0Block(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun,
@@ -58,8 +59,8 @@ public:
     }
 
     static ExpressionPtr Send1(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, core::LocOffsets funLoc,
-                               ExpressionPtr arg1) {
-        return Send(loc, std::move(recv), fun, funLoc, 1, SendArgs(std::move(arg1)));
+                               ExpressionPtr arg1, Send::Flags flags = {}) {
+        return Send(loc, std::move(recv), fun, funLoc, 1, SendArgs(std::move(arg1)), flags);
     }
 
     static ExpressionPtr Send2(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, core::LocOffsets funLoc,
