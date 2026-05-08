@@ -644,7 +644,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C EncryptedProp><<C <todo sym>>> < (::<todo sym>)
-    def self.encrypted_prop<<todo method>>(opts = {}, &<blk>)
+    def self.encrypted_prop<<todo method>>(name, kind: = nil, *opts:, &<blk>)
       <emptyTree>
     end
 
@@ -732,6 +732,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of self.encrypted_prop>
 
+    <self>.encrypted_prop(:foo)
+
     <runtime method definition of foo>
 
     <runtime method definition of encrypted_foo>
@@ -740,9 +742,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of encrypted_foo=>
 
+    <self>.encrypted_prop(:bar, :migrating, true, :immutable, true)
+
     <runtime method definition of bar>
 
     <runtime method definition of encrypted_bar>
+
+    <self>.encrypted_prop(:with_errors, "".dne())
 
     <runtime method definition of with_errors>
 
