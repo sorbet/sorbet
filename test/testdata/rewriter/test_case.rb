@@ -45,6 +45,9 @@ class MyTest < ActiveSupport::TestCase
   test "valid method call" do
   end
 
+  test "valid method call with keyword args", focus: true do
+  end
+
   test "block is evaluated in the context of an instance" do
     assert true
   end

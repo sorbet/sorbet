@@ -35,6 +35,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
+    def test_valid_method_call_with_keyword_args<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.void()
+    end
+
     def test_block_is_evaluated_in_the_context_of_an_instance<<todo method>>(&<blk>)
       <self>.assert(true)
     end
@@ -99,6 +107,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     <runtime method definition of test_valid_method_call>
+
+    <runtime method definition of test_valid_method_call_with_keyword_args>
 
     <runtime method definition of test_block_is_evaluated_in_the_context_of_an_instance>
 
