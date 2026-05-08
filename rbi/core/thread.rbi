@@ -1249,10 +1249,46 @@ class Thread < Object
   sig {returns(T.untyped)}
   def self.stop; end
 
-  # Yields each frame of the current execution stack as a
-  # backtrace location object.
-  sig {params(blk: T.proc.params(location: Thread::Backtrace::Location).void).returns(T.untyped)}
-  def self.each_caller_location(&blk); end
+  # Yields each frame of the current execution stack as a backtrace location
+  # object.
+  #
+  # Similar to +Kernel#caller_locations+, but without allocating an array. The
+  # parameters work the same way:
+  #
+  # The optional *start* parameter determines the number of initial stack
+  # entries to omit from the top of the stack.
+  #
+  # A second optional `length` parameter can be used to limit how many entries
+  # are yielded from the stack.
+  #
+  # Optionally you can pass a range, which will yield the entries within the
+  # specified range.
+  #
+  # Unlike +Kernel#caller_locations+, this method does not allocate an array,
+  # and is therefore more efficient when only some of the entries are needed.
+  # The block can `break` early to stop iterating through the stack.
+  sig do
+    params(
+        start_or_range: Integer,
+        length: Integer,
+        blk: T.proc.params(location: Thread::Backtrace::Location).void,
+    )
+    .returns(NilClass)
+  end
+  sig do
+    params(
+        start_or_range: T::Range[Integer],
+        blk: T.proc.params(location: Thread::Backtrace::Location).void,
+    )
+    .returns(NilClass)
+  end
+  sig do
+    params(
+        blk: T.proc.params(location: Thread::Backtrace::Location).void,
+    )
+    .returns(NilClass)
+  end
+  def self.each_caller_location(start_or_range=T.unsafe(nil), length=T.unsafe(nil), &blk); end
 end
 
 class Thread::Backtrace < Object
