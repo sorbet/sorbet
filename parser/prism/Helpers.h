@@ -254,6 +254,23 @@ template <typename Visitor> void walkPrismAST(const pm_node_t *node, Visitor &&v
     pm_visit_node(node, callback, &visitor);
 }
 
+inline bool isAssignmentTarget(const pm_node_t *node) {
+    switch (PM_NODE_TYPE(node)) {
+        case PM_LOCAL_VARIABLE_TARGET_NODE:    // _, ex = []
+        case PM_INSTANCE_VARIABLE_TARGET_NODE: // _, @ivar = []
+        case PM_CLASS_VARIABLE_TARGET_NODE:    // _, @@cvar = []
+        case PM_GLOBAL_VARIABLE_TARGET_NODE:   // _, $gvar = []
+        case PM_CONSTANT_TARGET_NODE:          // _, Constant = []
+        case PM_CONSTANT_PATH_TARGET_NODE:     // _, Constant::Path = []
+        case PM_CALL_TARGET_NODE:              // _, self.call_target = []
+        case PM_INDEX_TARGET_NODE:             // _, self[index] = []
+        case PM_MULTI_TARGET_NODE:             // _, (a, b) = []
+            return true;
+        default:
+            return false;
+    }
+}
+
 } // namespace sorbet::parser::Prism
 
 #endif // SORBET_PARSER_PRISM_HELPERS_H

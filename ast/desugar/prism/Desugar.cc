@@ -734,21 +734,7 @@ ast::ExpressionPtr Desugarer::desugarMlhs(core::LocOffsets loc, PrismNode *lhs, 
     static_assert(is_same_v<PrismNode, pm_multi_target_node> || is_same_v<PrismNode, pm_multi_write_node>);
 
     auto isValidAssignmentTarget = [](pm_node_t *node) -> bool {
-        switch (PM_NODE_TYPE(node)) {
-            case PM_LOCAL_VARIABLE_TARGET_NODE:
-            case PM_INSTANCE_VARIABLE_TARGET_NODE:
-            case PM_CLASS_VARIABLE_TARGET_NODE:
-            case PM_GLOBAL_VARIABLE_TARGET_NODE:
-            case PM_CONSTANT_TARGET_NODE:
-            case PM_CONSTANT_PATH_TARGET_NODE:
-            case PM_CALL_TARGET_NODE:
-            case PM_INDEX_TARGET_NODE:
-            case PM_MULTI_TARGET_NODE:
-            case PM_REQUIRED_PARAMETER_NODE:
-                return true;
-            default:
-                return false;
-        }
+        return parser::Prism::isAssignmentTarget(node) || PM_NODE_TYPE_P(node, PM_REQUIRED_PARAMETER_NODE);
     };
 
     auto lefts = absl::MakeSpan(lhs->lefts.nodes, lhs->lefts.size);
@@ -2519,25 +2505,8 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
         case PM_FOR_NODE: { // `for x in a; ...; end`
             auto forNode = down_cast<pm_for_node>(node);
 
-            auto isValidTarget = [](pm_node_t *node) {
-                switch (PM_NODE_TYPE(node)) {
-                    case PM_LOCAL_VARIABLE_TARGET_NODE:
-                    case PM_INSTANCE_VARIABLE_TARGET_NODE:
-                    case PM_CLASS_VARIABLE_TARGET_NODE:
-                    case PM_GLOBAL_VARIABLE_TARGET_NODE:
-                    case PM_CONSTANT_TARGET_NODE:
-                    case PM_CONSTANT_PATH_TARGET_NODE:
-                    case PM_CALL_TARGET_NODE:
-                    case PM_INDEX_TARGET_NODE:
-                    case PM_MULTI_TARGET_NODE:
-                        return true;
-                    default:
-                        return false;
-                }
-            };
-
             // Index might be invalid in error recovery cases, match original parser behavior.
-            if (!isValidTarget(forNode->index)) {
+            if (!parser::Prism::isAssignmentTarget(forNode->index)) {
                 return MK::Nil(location.copyWithZeroLength());
             }
 
