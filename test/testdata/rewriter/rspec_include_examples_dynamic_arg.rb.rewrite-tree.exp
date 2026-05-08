@@ -1,0 +1,38 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def suite_helper<<todo method>>(&<blk>)
+    "suite alpha"
+  end
+
+  module <emptyTree>::<C RSpec><<C <todo sym>>> < ()
+    module <emptyTree>::<C Core><<C <todo sym>>> < ()
+      class <emptyTree>::<C ExampleGroup><<C <todo sym>>> < (::<todo sym>)
+      end
+    end
+  end
+
+  module ::<root>::<C <shared_examples 'suite alpha'>><<C <todo sym>>> < ()
+    def <it 'passes'><<todo method>>(&<blk>)
+      <emptyTree>
+    end
+  end
+
+  module ::<root>::<C <shared_examples 'suite beta'>><<C <todo sym>>> < ()
+    def <it 'also passes'><<todo method>>(&<blk>)
+      <emptyTree>
+    end
+  end
+
+  module ::<root>::<C <shared_examples 'runner'>><<C <todo sym>>> < ()
+  end
+
+  class <emptyTree>::<C <describe 'consumer'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+    <self>.include(::<root>::<C <shared_examples 'suite alpha'>>)
+
+    <self>.include(::<root>::<C <shared_examples 'suite beta'>>)
+  end
+
+  <runtime method definition of suite_helper>
+
+  class <emptyTree>::<C <describe 'top-level dynamic'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+  end
+end
