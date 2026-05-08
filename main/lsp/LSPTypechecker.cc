@@ -211,17 +211,22 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
 
     vector<core::FileRef> toTypecheck;
     toTypecheck.reserve(updates.fastPathExtraFiles.size() + updates.updatedFiles.size());
-    for (auto &path : updates.fastPathExtraFiles) {
-        auto fref = gs->findFileByPath(path);
-        ENFORCE(fref.exists());
-        toTypecheck.emplace_back(fref);
+
+    absl::c_copy(updates.fastPathExtraFiles, back_inserter(toTypecheck));
+    if constexpr (debug_mode) {
+        for (auto fref : updates.fastPathExtraFiles) {
+            ENFORCE(fref.exists());
+        }
     }
 
     config->logger->debug("Added {} files that were not part of the edit to the update set", toTypecheck.size());
     UnorderedMap<core::FileRef, shared_ptr<const core::FileHash>> oldFoundHashesForFiles;
+    auto ix = -1;
     for (auto &file : updates.updatedFiles) {
-        auto fref = gs->findFileByPath(file->path());
+        ++ix;
+        auto fref = updates.updatedFileRefs[ix];
         ENFORCE(fref.exists(), "New files are not supported in the fast path");
+        ENFORCE(fref == gs->findFileByPath(file->path()));
 
         auto oldFile = gs->replaceFile(fref, std::move(file));
 
@@ -250,6 +255,7 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
     }
 
     updates.updatedFiles.clear();
+    updates.updatedFileRefs.clear();
 
     if (shouldRunIncrementalNamer && gs->packageDB().enabled()) {
         vector<core::FileRef> packageFiles;

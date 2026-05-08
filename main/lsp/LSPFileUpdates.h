@@ -14,16 +14,19 @@ class LSPFileUpdates final {
 public:
     // The file refs in the indexer's global state that correspond to files at the same index in the `updatedFiles`
     // vector.
+    //
+    // FileRefs are used here, because we explicitly ensure that the file refs match up between the indexer and
+    // typechecker global states when applying updates in the slow path.
     std::vector<core::FileRef> updatedFileRefs;
 
     // Files that have been updated in this edit, and need to be sync'd with the typechecker's global state.
     std::vector<std::shared_ptr<core::File>> updatedFiles;
 
-    // The paths of any additional files implicated in a fast path edit. This vector stores path
-    // strings because FileRef IDs might be different in the GlobalState used on the indexing thread
-    // and the typechecking thread, but the `LSPFileUpdates` structure must be valid to transfer
-    // ownership from one thread to the other.
-    std::vector<std::string> fastPathExtraFiles;
+    // Any additional files implicated in a fast path edit.
+    //
+    // FileRefs are used here, because we explicitly ensure that the file refs match up between the indexer and
+    // typechecker global states when applying updates in the slow path.
+    std::vector<core::FileRef> fastPathExtraFiles;
 
     // This specific update contains edits with the given epoch
     uint32_t epoch = 0;
@@ -81,7 +84,7 @@ public:
         bool useIncrementalNamer = false;
 
         // Extra files that need to be typechecked because the file mentions the name of one of the changed symbols.
-        std::vector<std::string> extraFiles;
+        std::vector<core::FileRef> extraFiles;
     };
 
     // It would be nice to have this accept `...<const core::File>...`
