@@ -89,6 +89,7 @@ class EncryptedProp
   def self.encrypted_prop(opts={}); end
   encrypted_prop :foo
   encrypted_prop :bar, migrating: true, immutable: true
+  encrypted_prop :with_errors, "".dne
 end
 
 def main

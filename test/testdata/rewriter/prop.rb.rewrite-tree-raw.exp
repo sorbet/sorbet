@@ -6057,6 +6057,407 @@ ClassDef{
         }
 
         Send{
+          flags = {rewriterSynthesized}
+          recv = ConstantLit{
+            symbol = (module ::T::Sig::WithoutRuntime)
+            orig = nullptr
+          }
+          fun = <U sig>
+          block = Block {
+            params = [
+            ]
+            body = Send{
+              flags = {}
+              recv = Self
+              fun = <U returns>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Send{
+                  flags = {}
+                  recv = ConstantLit{
+                    symbol = (module ::T)
+                    orig = nullptr
+                  }
+                  fun = <U nilable>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    ConstantLit{
+                      symbol = (class ::String)
+                      orig = nullptr
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+          pos_args = 0
+          args = [
+          ]
+        }
+
+        MethodDef{
+          flags = {rewriterSynthesized}
+          name = <U with_errors><<U <todo method>>>
+          params = [BlockParam{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = Send{
+            flags = {rewriterSynthesized}
+            recv = Send{
+              flags = {}
+              recv = ConstantLit{
+                symbol = (module ::T)
+                orig = nullptr
+              }
+              fun = <U unsafe>
+              block = nullptr
+              pos_args = 1
+              args = [
+                ConstantLit{
+                  symbol = (module ::Kernel)
+                  orig = nullptr
+                }
+              ]
+            }
+            fun = <U raise>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+            ]
+          }
+        }
+
+        Send{
+          flags = {rewriterSynthesized}
+          recv = ConstantLit{
+            symbol = (module ::T::Sig::WithoutRuntime)
+            orig = nullptr
+          }
+          fun = <U sig>
+          block = Block {
+            params = [
+            ]
+            body = Send{
+              flags = {}
+              recv = Self
+              fun = <U returns>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Send{
+                  flags = {}
+                  recv = ConstantLit{
+                    symbol = (module ::T)
+                    orig = nullptr
+                  }
+                  fun = <U nilable>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    UnresolvedConstantLit{
+                      cnst = <C <U EncryptedValue>>
+                      scope = UnresolvedConstantLit{
+                        cnst = <C <U Encryptable>>
+                        scope = UnresolvedConstantLit{
+                          cnst = <C <U Mixins>>
+                          scope = UnresolvedConstantLit{
+                            cnst = <C <U Model>>
+                            scope = UnresolvedConstantLit{
+                              cnst = <C <U DB>>
+                              scope = UnresolvedConstantLit{
+                                cnst = <C <U Opus>>
+                                scope = EmptyTree
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+          pos_args = 0
+          args = [
+          ]
+        }
+
+        MethodDef{
+          flags = {rewriterSynthesized}
+          name = <U encrypted_with_errors><<U <todo method>>>
+          params = [BlockParam{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = Send{
+            flags = {rewriterSynthesized}
+            recv = Send{
+              flags = {}
+              recv = ConstantLit{
+                symbol = (module ::T)
+                orig = nullptr
+              }
+              fun = <U unsafe>
+              block = nullptr
+              pos_args = 1
+              args = [
+                ConstantLit{
+                  symbol = (module ::Kernel)
+                  orig = nullptr
+                }
+              ]
+            }
+            fun = <U raise>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+            ]
+          }
+        }
+
+        Send{
+          flags = {rewriterSynthesized}
+          recv = ConstantLit{
+            symbol = (module ::T::Sig::WithoutRuntime)
+            orig = nullptr
+          }
+          fun = <U sig>
+          block = Block {
+            params = [
+            ]
+            body = Send{
+              flags = {}
+              recv = Send{
+                flags = {}
+                recv = Self
+                fun = <U params>
+                block = nullptr
+                pos_args = 0
+                args = [
+                  Literal{ value = :arg0 }
+                  Send{
+                    flags = {}
+                    recv = ConstantLit{
+                      symbol = (module ::T)
+                      orig = nullptr
+                    }
+                    fun = <U nilable>
+                    block = nullptr
+                    pos_args = 1
+                    args = [
+                      ConstantLit{
+                        symbol = (class ::String)
+                        orig = nullptr
+                      }
+                    ]
+                  }
+                ]
+              }
+              fun = <U returns>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Send{
+                  flags = {}
+                  recv = ConstantLit{
+                    symbol = (module ::T)
+                    orig = nullptr
+                  }
+                  fun = <U nilable>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    ConstantLit{
+                      symbol = (class ::String)
+                      orig = nullptr
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+          pos_args = 0
+          args = [
+          ]
+        }
+
+        MethodDef{
+          flags = {rewriterSynthesized}
+          name = <U with_errors=><<U <todo method>>>
+          params = [UnresolvedIdent{
+              kind = Local
+              name = <U arg0>
+            }, BlockParam{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = Send{
+            flags = {rewriterSynthesized}
+            recv = Send{
+              flags = {}
+              recv = ConstantLit{
+                symbol = (module ::T)
+                orig = nullptr
+              }
+              fun = <U unsafe>
+              block = nullptr
+              pos_args = 1
+              args = [
+                ConstantLit{
+                  symbol = (module ::Kernel)
+                  orig = nullptr
+                }
+              ]
+            }
+            fun = <U raise>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+            ]
+          }
+        }
+
+        Send{
+          flags = {rewriterSynthesized}
+          recv = ConstantLit{
+            symbol = (module ::T::Sig::WithoutRuntime)
+            orig = nullptr
+          }
+          fun = <U sig>
+          block = Block {
+            params = [
+            ]
+            body = Send{
+              flags = {}
+              recv = Send{
+                flags = {}
+                recv = Self
+                fun = <U params>
+                block = nullptr
+                pos_args = 0
+                args = [
+                  Literal{ value = :arg0 }
+                  Send{
+                    flags = {}
+                    recv = ConstantLit{
+                      symbol = (module ::T)
+                      orig = nullptr
+                    }
+                    fun = <U nilable>
+                    block = nullptr
+                    pos_args = 1
+                    args = [
+                      UnresolvedConstantLit{
+                        cnst = <C <U EncryptedValue>>
+                        scope = UnresolvedConstantLit{
+                          cnst = <C <U Encryptable>>
+                          scope = UnresolvedConstantLit{
+                            cnst = <C <U Mixins>>
+                            scope = UnresolvedConstantLit{
+                              cnst = <C <U Model>>
+                              scope = UnresolvedConstantLit{
+                                cnst = <C <U DB>>
+                                scope = UnresolvedConstantLit{
+                                  cnst = <C <U Opus>>
+                                  scope = EmptyTree
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+              fun = <U returns>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Send{
+                  flags = {}
+                  recv = ConstantLit{
+                    symbol = (module ::T)
+                    orig = nullptr
+                  }
+                  fun = <U nilable>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    UnresolvedConstantLit{
+                      cnst = <C <U EncryptedValue>>
+                      scope = UnresolvedConstantLit{
+                        cnst = <C <U Encryptable>>
+                        scope = UnresolvedConstantLit{
+                          cnst = <C <U Mixins>>
+                          scope = UnresolvedConstantLit{
+                            cnst = <C <U Model>>
+                            scope = UnresolvedConstantLit{
+                              cnst = <C <U DB>>
+                              scope = UnresolvedConstantLit{
+                                cnst = <C <U Opus>>
+                                scope = EmptyTree
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+          pos_args = 0
+          args = [
+          ]
+        }
+
+        MethodDef{
+          flags = {rewriterSynthesized}
+          name = <U encrypted_with_errors=><<U <todo method>>>
+          params = [UnresolvedIdent{
+              kind = Local
+              name = <U arg0>
+            }, BlockParam{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = Send{
+            flags = {rewriterSynthesized}
+            recv = Send{
+              flags = {}
+              recv = ConstantLit{
+                symbol = (module ::T)
+                orig = nullptr
+              }
+              fun = <U unsafe>
+              block = nullptr
+              pos_args = 1
+              args = [
+                ConstantLit{
+                  symbol = (module ::Kernel)
+                  orig = nullptr
+                }
+              ]
+            }
+            fun = <U raise>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+            ]
+          }
+        }
+
+        Send{
           flags = {privateOk}
           recv = Self
           fun = <U include>
@@ -6086,6 +6487,14 @@ ClassDef{
         <runtime method definition of bar>
 
         <runtime method definition of encrypted_bar>
+
+        <runtime method definition of with_errors>
+
+        <runtime method definition of encrypted_with_errors>
+
+        <runtime method definition of with_errors=>
+
+        <runtime method definition of encrypted_with_errors=>
       ]
     }
 
