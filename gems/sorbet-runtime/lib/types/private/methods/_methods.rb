@@ -56,11 +56,6 @@ module T::Private::Methods
     nil
   end
 
-  # See tests for how to use this.  But you shouldn't be using this.
-  def self._declare_sig(mod, arg=nil, &blk)
-    _declare_sig_internal(mod, caller_locations(1, 1)&.first, arg, raw: true, &blk)
-  end
-
   private_class_method def self._declare_sig_internal(mod, loc, arg, raw: false, &blk)
     install_hooks(mod)
 
@@ -74,21 +69,6 @@ module T::Private::Methods
     end
 
     DeclarationBlock.new(mod, loc, blk, arg == :final, raw)
-  end
-
-  def self._with_declared_signature(mod, declblock, &blk)
-    # If declblock is provided, this code is equivalent to the check in
-    # _declare_sig_internal, above.
-    # If declblock is not provided and we have an active declaration, we are
-    # obviously doing something wrong.
-    if T::Private::DeclState.current.active_declaration
-      T::Private::DeclState.current.reset!
-      raise "You called sig twice without declaring a method in between"
-    end
-    if declblock
-      T::Private::DeclState.current.active_declaration = declblock
-    end
-    mod.module_exec(&blk)
   end
 
   def self.start_proc
