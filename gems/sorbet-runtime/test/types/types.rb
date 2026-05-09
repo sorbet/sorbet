@@ -851,6 +851,42 @@ module Opus::Types::Test
       it 'can have its metatype instantiated' do
         assert_equal(3..4, T::Range[Integer].new(3, 4))
       end
+
+      it 'returns a TypedRange::Untyped from type_for_module(::Range)' do
+        type = T::Types::Simple::Private::Pool.type_for_module(::Range)
+        assert_instance_of(T::Types::TypedRange::Untyped, type)
+      end
+
+      it 'caches the untyped wrapper instance for ::Range' do
+        x = T::Types::Simple::Private::Pool.type_for_module(::Range)
+        y = T::Types::Simple::Private::Pool.type_for_module(::Range)
+        assert_equal(x.object_id, y.object_id)
+      end
+
+      it 'returns "T::Range[T.untyped]" as the name of the untyped wrapper' do
+        type = T::Types::Simple::Private::Pool.type_for_module(::Range)
+        assert_equal('T::Range[T.untyped]', type.name)
+      end
+
+      it 'validates any Range object with the untyped wrapper' do
+        type = T::Types::Simple::Private::Pool.type_for_module(::Range)
+        assert(type.valid?(0..10))
+        assert(type.valid?('a'..'z'))
+        refute(type.valid?([1, 2, 3]))
+        refute(type.valid?(nil))
+      end
+
+      it 'works with T.nilable(Range) on a T::Struct' do
+        klass = Class.new(T::Struct) do
+          const :r, T.nilable(Range)
+        end
+
+        instance_with_value = klass.new(r: 0..10)
+        assert_equal(0..10, instance_with_value.r)
+
+        instance_without_value = klass.new(r: nil)
+        assert_nil(instance_without_value.r)
+      end
     end
 
     describe "TypedSet" do

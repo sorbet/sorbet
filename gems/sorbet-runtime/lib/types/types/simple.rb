@@ -99,7 +99,7 @@ module T::Types
           elsif mod == ::Enumerator
             TypedEnumerator::Untyped.new
           elsif mod == ::Range
-            TypedRange.new(type)
+            TypedRange::Untyped.new
           elsif !Object.autoload?(:Set) && Object.const_defined?(:Set) && mod == ::Set
             TypedSet::Untyped.new
           else
