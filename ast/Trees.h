@@ -96,7 +96,7 @@ private:
 
     template <typename E, typename... Args> friend ExpressionPtr make_expression(Args &&...);
 
-    static tagged_storage tagPtr(Tag tag, void *expr) {
+    static tagged_storage tagPtr(Tag tag, void *expr) noexcept {
         ENFORCE(static_cast<size_t>(tag) != 0);
         ENFORCE(expr != nullptr);
 
@@ -107,7 +107,7 @@ private:
         return maskedPtr | val;
     }
 
-    ExpressionPtr(Tag tag, void *expr) : ptr(tagPtr(tag, expr)) {}
+    ExpressionPtr(Tag tag, void *expr) noexcept : ptr(tagPtr(tag, expr)) {}
 
     static void deleteTagged(Tag tag, void *ptr) noexcept;
 
