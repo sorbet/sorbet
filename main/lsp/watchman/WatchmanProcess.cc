@@ -10,6 +10,8 @@
 #include "rapidjson/document.h"
 #include "rapidjson/writer.h"
 #include "subprocess.hpp"
+#include <chrono>
+#include <thread>
 
 using namespace std;
 
@@ -40,6 +42,40 @@ template <typename F> void catchDeserializationError(spdlog::logger &logger, con
     }
 }
 
+// Attempt to shut down the watchman CLI cleanly. The CLI's `-p` (persistent) mode keeps a unix
+// socket connection to the watchman daemon open until its stdin closes AND its parent has gone
+// away. If we just let Popen go out of scope we close the FDs, but cpp-subprocess never reaps —
+// the daemon-connection socket can outlive sorbet, leaving the daemon to grow thread/port
+// counts unboundedly across editor restarts. So: close stdin, give it a beat to exit on EOF,
+// then SIGTERM if it's still around, and reap.
+void shutdownWatchmanChild(subprocess::Popen &p, spdlog::logger &logger) {
+    try {
+        p.close_input();
+    } catch (...) {
+        // best-effort
+    }
+    for (int i = 0; i < 10; i++) {
+        try {
+            if (p.poll() != -1) {
+                return;
+            }
+        } catch (...) {
+            return;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    }
+    try {
+        p.kill(SIGTERM);
+    } catch (...) {
+        // best-effort
+    }
+    try {
+        p.wait();
+    } catch (...) {
+        // best-effort
+    }
+}
+
 } // namespace
 
 void WatchmanProcess::start() {
@@ -49,6 +85,17 @@ void WatchmanProcess::start() {
 
         auto p = subprocess::Popen({watchmanPath.c_str(), "-j", "-p", "--no-pretty"},
                                    subprocess::output{subprocess::PIPE}, subprocess::input{subprocess::PIPE});
+
+        // Declared after `p` so it only runs if construction succeeded. Runs on every exit path
+        // out of this scope — normal return, break, or exception — so the watchman child is
+        // always reaped before this thread returns.
+        struct ShutdownGuard {
+            subprocess::Popen &p;
+            spdlog::logger &logger;
+            ~ShutdownGuard() noexcept {
+                shutdownWatchmanChild(p, logger);
+            }
+        } shutdownGuard{p, *logger};
 
         string modifiedWorkspace = workSpace;
         if (!watchmanNamespace.empty()) {
