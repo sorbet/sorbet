@@ -1,4 +1,5 @@
 #include "WatchmanProcess.h"
+#include "WatchmanShutdown.h"
 #include "absl/strings/strip.h"
 #include "common/FileOps.h"
 #include "common/common.h"
@@ -49,6 +50,16 @@ void WatchmanProcess::start() {
 
         auto p = subprocess::Popen({watchmanPath.c_str(), "-j", "-p", "--no-pretty"},
                                    subprocess::output{subprocess::PIPE}, subprocess::input{subprocess::PIPE});
+
+        // Declared after `p` so it only runs if construction succeeded. Runs on every exit path
+        // out of this scope — normal return, break, or exception — so the watchman child is
+        // always reaped before this thread returns.
+        struct ShutdownGuard {
+            subprocess::Popen &p;
+            ~ShutdownGuard() noexcept {
+                shutdownWatchmanChild(p);
+            }
+        } shutdownGuard{p};
 
         string modifiedWorkspace = workSpace;
         if (!watchmanNamespace.empty()) {
