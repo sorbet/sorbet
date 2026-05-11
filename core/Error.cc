@@ -245,9 +245,15 @@ void ErrorBuilder::addAutocorrect(AutocorrectSuggestion &&autocorrect) {
             uint32_t n = edit.loc.length();
             auto locWithoutLeadingNewLine = edit.loc;
             auto source = locWithoutLeadingNewLine.source(gs);
-            while (source.has_value() && source.value().size() > 0 && source.value()[0] == '\n') {
-                locWithoutLeadingNewLine = locWithoutLeadingNewLine.adjust(gs, 1, 0);
-                source = locWithoutLeadingNewLine.source(gs);
+            uint32_t leadingNewLines = 0;
+            if (source.has_value()) {
+                auto sv = source.value();
+                while (leadingNewLines < sv.size() && sv[leadingNewLines] == '\n') {
+                    leadingNewLines++;
+                }
+            }
+            if (leadingNewLines > 0) {
+                locWithoutLeadingNewLine = locWithoutLeadingNewLine.adjust(gs, leadingNewLines, 0);
             }
             if (gs.autocorrect) {
                 auto line = isDeletion ? ErrorLine::from(locWithoutLeadingNewLine, "Deleted")
