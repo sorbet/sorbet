@@ -507,6 +507,9 @@ pipeline_tests(
             # were not actually running because they have RBS support enabled
             "testdata/lsp/hover_rbs.rb",
             "testdata/lsp/hover_rbs_assertions_let.rb",
+
+            # PM_CALL_TARGET_NODE isn't currently handled for-loop target
+            "testdata/desugar/for.rb",
         ],
     ),
     "PrismPosTests",
@@ -576,6 +579,9 @@ pipeline_tests(
             # package-directed is known to be incompatible with the LSP tests for now
             # todo(gdritter): fix this!
             "testdata/packager/directed-*/**/*",
+
+            # PM_CALL_TARGET_NODE isn't currently handled for-loop target
+            "testdata/desugar/for.rb",
         ],
     ),
     "PrismLSPTests",

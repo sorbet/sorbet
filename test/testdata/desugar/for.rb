@@ -80,28 +80,26 @@ end
 
 a = T.let([], T::Array[[Symbol, Integer]])
 
-for @ivar in [[:a, 1], [:b, 2], [:c, 3]] # error: Expected `[Symbol, Integer]` but found `NilClass` for field
+for @ivar in [[:a, 1], [:b, 2], [:c, 3]]
   "loop body"
 end
 
 
-for @@cvar in [[:a, 1], [:b, 2], [:c, 3]] # error: Expected `[Symbol, Integer]` but found `NilClass` for field
+for @@cvar in [[:a, 1], [:b, 2], [:c, 3]]
   "loop body"
 end
 
 
-for $gvar in [[:a, 1], [:b, 2], [:c, 3]] # error: Expected `[Symbol, Integer]` but found `NilClass` for field
+for $gvar in [[:a, 1], [:b, 2], [:c, 3]]
   "loop body"
 end
 
 
-for self.call_target in [[:a, 1], [:b, 2], [:c, 3]] # error: Assigning a value to `arg` that does not match expected type `[Symbol, Integer]`
-  # isPrivateOk should be true
+for self.call_target in [[:a, 1], [:b, 2], [:c, 3]] # isPrivateOk should be true
   "loop body"
 end
 
-for self::call_target in [[:a, 1], [:b, 2], [:c, 3]] # error: Assigning a value to `arg` that does not match expected type `[Symbol, Integer]`
-  # isPrivateOk should be true
+for self::call_target in [[:a, 1], [:b, 2], [:c, 3]] # isPrivateOk should be true
   "loop body"
 end
 
@@ -109,23 +107,23 @@ for E.e in [] do # isPrivateOk should be false
   "loop body"
 end
 
-for ConstantTarget in [[:a, 1], [:b, 2], [:c, 3]] # error: Expected `[Symbol, Integer]` but found `NilClass` for field
+for ConstantTarget in [[:a, 1], [:b, 2], [:c, 3]]
   "loop body"
 end
 
 
-for ::ConstantPathTarget in [[:a, 1], [:b, 2], [:c, 3]] # error: Expected `[Symbol, Integer]` but found `NilClass` for field
+for ::ConstantPathTarget in [[:a, 1], [:b, 2], [:c, 3]]
   "loop body"
 end
 
-for Nested::ConstantPathTarget in [[:a, 1], [:b, 2], [:c, 3]] # error: Expected `[Symbol, Integer]` but found `NilClass` for field
+for Nested::ConstantPathTarget in [[:a, 1], [:b, 2], [:c, 3]]
   "loop body"
 end
 
-for ::Nested::ConstantPathTarget in [[:a, 1], [:b, 2], [:c, 3]] # error: Expected `[Symbol, Integer]` but found `NilClass` for field
+for ::Nested::ConstantPathTarget in [[:a, 1], [:b, 2], [:c, 3]]
   "loop body"
 end
 
-for a[123] in [[:a, 1], [:b, 2], [:c, 3]] do # error: Expected `[Symbol, Integer]` but found `NilClass` for argument `arg1`
+for a[123] in [[:a, 1], [:b, 2], [:c, 3]] do
   "loop body"
 end

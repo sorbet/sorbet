@@ -480,6 +480,8 @@ ExpressionPtr desugarMlhs(DesugarContext dctx, core::LocOffsets loc, parser::Mlh
     auto zloc = loc.copyWithZeroLength();
 
     for (auto &c : lhs->exprs) {
+        ENFORCE(c != nullptr, "unexpected null in mlhs");
+
         if (auto *splat = parser::cast_node<parser::SplatLhs>(c.get())) {
             ENFORCE(!didSplat, "did splat already");
             didSplat = true;
@@ -1783,44 +1785,97 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
             },
             [&](parser::ZSuper *zuper) { result = MK::ZSuper(loc, maybeTypedSuper(dctx)); },
             [&](parser::For *for_) {
-                MethodDef::PARAMS_store params;
-                bool canProvideNiceDesugar = true;
-                auto mlhsNode = move(for_->vars);
-                if (auto *mlhs = parser::cast_node<parser::Mlhs>(mlhsNode.get())) {
-                    for (auto &c : mlhs->exprs) {
-                        if (!parser::isa_node<parser::LVarLhs>(c.get())) {
-                            canProvideNiceDesugar = false;
-                            break;
-                        }
-                    }
-                    if (canProvideNiceDesugar) {
-                        for (auto &c : mlhs->exprs) {
-                            params.emplace_back(node2TreeImpl(dctx, c));
-                        }
-                    }
+                auto forLoopVar = move(for_->vars);
+
+                bool canProvideNiceDesugar = false;
+                if (auto *mlhs = parser::cast_node<parser::Mlhs>(forLoopVar.get())) {
+                    // `for x, y in []` — nice only if every entry is an LVarLhs (not e.g. `(a, b).c` or `@ivar`).
+                    canProvideNiceDesugar = absl::c_all_of(
+                        mlhs->exprs, [](const auto &c) { return parser::isa_node<parser::LVarLhs>(c.get()); });
+                } else if (parser::isa_node<parser::LVarLhs>(forLoopVar.get())) {
+                    // `for local in []`
+                    canProvideNiceDesugar = true;
                 } else {
-                    canProvideNiceDesugar = parser::isa_node<parser::LVarLhs>(mlhsNode.get());
-                    if (canProvideNiceDesugar) {
-                        ExpressionPtr lhs = node2TreeImpl(dctx, mlhsNode);
-                        params.emplace_back(move(lhs));
-                    } else {
-                        mlhsNode = make_unique<parser::Mlhs>(loc, NodeVec1(move(mlhsNode)));
-                    }
+                    // `for @ivar in []` (or any other single non-local variable target)
+                    canProvideNiceDesugar = false;
                 }
 
-                auto body = node2TreeImpl(dctx, for_->body);
-
-                ExpressionPtr block;
+                ExpressionPtr block; // the body to the `each` loop we'll create
                 if (canProvideNiceDesugar) {
-                    block = MK::Block(loc, move(body), move(params));
+                    MethodDef::PARAMS_store params;
+                    if (parser::isa_node<parser::LVarLhs>(forLoopVar.get())) { // single local
+                        // Desugar:
+                        //     for a in []
+                        // into:
+                        //     [].each { |a| ... }
+
+                        auto localVar = node2TreeImpl(dctx, forLoopVar);
+                        params.emplace_back(move(localVar));
+                    } else if (auto *mlhs = parser::cast_node<parser::Mlhs>(forLoopVar.get())) { // mlhs of all locals
+                        // Desugar:
+                        //     for a, b, c in []
+                        // into:
+                        //     [].each { |a, b, c| ... }
+                        for (auto &c : mlhs->exprs) {
+                            ENFORCE(parser::isa_node<parser::LVarLhs>(c.get()));
+                            params.emplace_back(node2TreeImpl(dctx, c));
+                        }
+                    } else {
+                        unreachable("Expected the `forLoopVar` to be either a LVarLhs or Mlhs");
+                    }
+
+                    auto loopBody = node2TreeImpl(dctx, for_->body);
+                    block = MK::Block(loc, move(loopBody), move(params));
                 } else {
-                    auto temp = dctx.freshNameUnique(core::Names::forTemp());
+                    // Create a temporary local variable, and use it as the block parameter.
+                    // We'll later assign it to the actual loop variable(s) in the block body
+                    core::NameRef forLoopTempVarName = dctx.freshNameUnique(core::Names::forTemp());
+                    MethodDef::PARAMS_store params;
+                    params.emplace_back(MK::Local(loc, forLoopTempVarName));
 
-                    unique_ptr<parser::Node> masgn =
-                        make_unique<parser::Masgn>(loc, move(mlhsNode), make_unique<parser::LVar>(loc, temp));
+                    ExpressionPtr assignment;
+                    if (parser::isa_node<parser::Mlhs>(forLoopVar.get())) { // mlhs with non-local variables entries
+                        // Desugar:
+                        //     for @ivar, @@cvar, $gvar in []
+                        // into:
+                        //     [].each do |forTemp$1|
+                        //       begin
+                        //         <assignTemp>$2 = forTemp$1
+                        //         <assignTemp>$3 = ::<Magic>.<expand-splat>(<assignTemp>$2, 3, 0)
+                        //         @ivar  = <assignTemp>$3.[](0)
+                        //         @@cvar = <assignTemp>$3.[](1)
+                        //         $gvar  = <assignTemp>$3.[](2)
+                        //       end
+                        //       begin
+                        //         "the loop body"
+                        //       end
+                        //     end
+                        auto mlhs = move(forLoopVar);
+                        auto rhs = make_unique<parser::LVar>(loc, forLoopTempVarName);
+                        unique_ptr<parser::Node> masgn = make_unique<parser::Masgn>(loc, move(mlhs), move(rhs));
+                        assignment = node2TreeImpl(dctx, masgn);
+                    } else { // single non-local variable target
+                        // Desugar:
+                        //     for @ivar in []
+                        // into:
+                        //     [].each do |forTemp$1|
+                        //       @ivar = forTemp$1
+                        //       begin
+                        //         "the loop body"
+                        //       end
+                        //     end
+                        // MK::Assign handles a Send LHS by folding the rhs in as a positional arg.
+                        auto lhs = node2TreeImpl(dctx, forLoopVar);
+                        auto rhs = MK::Local(loc, forLoopTempVarName);
+                        assignment = MK::Assign(loc, move(lhs), move(rhs));
+                    }
 
-                    body = MK::InsSeq1(loc, node2TreeImpl(dctx, masgn), move(body));
-                    block = MK::Block(loc, move(body), move(params));
+                    auto loopBody = node2TreeImpl(dctx, for_->body); // The loop's actual body
+
+                    // prepend the (multi-)assignment to the loop body
+                    loopBody = MK::InsSeq1(loc, move(assignment), move(loopBody));
+
+                    block = MK::Block(loc, move(loopBody), move(params));
                 }
 
                 auto res =
