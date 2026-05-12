@@ -287,6 +287,8 @@ GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue, shared_ptr<lsp::Type
     int namesByHashSize = nextPowerOfTwo(
         2 * (PAYLOAD_MAX_UTF8_NAME_COUNT + PAYLOAD_MAX_CONSTANT_NAME_COUNT + PAYLOAD_MAX_UNIQUE_NAME_COUNT));
     namesByHash.resize(namesByHashSize);
+
+    this->symbolOffsets.emplace_back();
 }
 
 unique_ptr<GlobalState> GlobalState::makeEmptyGlobalStateForHashing(spdlog::logger &logger) {

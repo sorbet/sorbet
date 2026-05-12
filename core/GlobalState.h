@@ -698,7 +698,7 @@ public:
 
     // Symbol table offset information for the current stratum of files.
     const SymbolTableOffsets &newSymbols() const {
-        return this->symbolOffsets;
+        return this->symbolOffsets.back();
     }
 
     // ClassOrModules that have been introduced in the current stratum of files.
@@ -726,8 +726,13 @@ public:
         return this->newSymbols().typeParameterRefs(*this);
     }
 
+    // Reserve space for internal structures, under the assumption that we'll see `len` strata.
+    void preallocateForStrata(size_t len) {
+        this->symbolOffsets.reserve(len);
+    }
+
     void updateSymbolTableOffsets() {
-        this->symbolOffsets = SymbolTableOffsets(*this);
+        this->symbolOffsets.emplace_back(SymbolTableOffsets(*this));
     }
 
 private:
@@ -774,7 +779,8 @@ private:
     bool symbolTableFrozen = true;
     bool fileTableFrozen = true;
 
-    SymbolTableOffsets symbolOffsets;
+    // Symbol table offsets for each stratum of the package graph traversal.
+    std::vector<SymbolTableOffsets> symbolOffsets;
 
     // Copy options over from another GlobalState. Private, as it's only meant to be used as a helper to implement other
     // copying strategies.
