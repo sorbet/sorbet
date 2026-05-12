@@ -65,30 +65,6 @@ void LSPLoop::sendCountersToStatsd(chrono::time_point<chrono::steady_clock> curr
 }
 
 namespace {
-class TypecheckCountTask : public LSPTask {
-    int &count;
-
-public:
-    TypecheckCountTask(const LSPConfiguration &config, int &count)
-        : LSPTask(config, LSPMethod::SorbetError), count(count) {}
-
-    bool canPreempt(const LSPIndexer &indexer) const override {
-        return false;
-    }
-
-    void run(LSPTypecheckerDelegate &tc) override {
-        count = tc.state().lspTypecheckCount;
-    }
-};
-} // namespace
-
-int LSPLoop::getTypecheckCount() {
-    int count = 0;
-    typecheckerCoord.syncRun(make_unique<TypecheckCountTask>(*config, count));
-    return count;
-}
-
-namespace {
 class NotifyNotificationOnDestruction {
     absl::Notification &notification;
 

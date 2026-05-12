@@ -187,9 +187,6 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
                                                            bool isNoopUpdateForRetypecheck) const {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     ENFORCE(this->initialized);
-    // We assume gs has been through the slow path, which is guaranteed by the initialization path not being cancelable.
-    ENFORCE(gs->lspTypecheckCount > 0,
-            "Tried to run fast path with a GlobalState object that never had inferencer and resolver runs.");
     // This property is set to 'true' in tests only if the update is expected to take the slow path and get cancelled.
     ENFORCE(!updates.cancellationExpected);
     ENFORCE(updates.preemptionsExpected == 0);
@@ -332,7 +329,6 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
     auto sorted = sortParsedFiles(*gs, *errorReporter, move(resolved));
     const auto cancelable = false;
     pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, this->lastStratum, nullptr);
-    gs->lspTypecheckCount++;
 
     auto duration = timeit.setEndTime();
     std::string files;
@@ -671,8 +667,6 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
                 }
             }
 
-            // Inform the fast path that this global state is OK for typechecking as resolution has completed.
-            gs->lspTypecheckCount++;
             // TODO(jvilk): Remove conditional once initial typecheck is preemptible.
             if (cancelable) {
                 // Inform users that Sorbet should be responsive now.
@@ -817,9 +811,6 @@ void tryApplyDefLocSaver(const core::GlobalState &gs, vector<ast::ParsedFile> &i
 LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const vector<core::FileRef> &filesForQuery,
                                      WorkerPool &workers) const {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
-    // We assume gs has been through the slow path, which is guaranteed by the initialization path not being cancelable.
-    ENFORCE(gs->lspTypecheckCount > 0,
-            "Tried to run a query with a GlobalState object that never had inferencer and resolver runs.");
 
     // Replace error queue with one that is owned by this thread.
     auto queryCollector = make_shared<QueryCollector>();
@@ -837,7 +828,6 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const vector<cor
     const auto cancelable = true;
     pipeline::sortBySize(*gs, resolved);
     pipeline::typecheck(*gs, move(resolved), config->opts, workers, cancelable);
-    gs->lspTypecheckCount++;
     gs->lspQuery = core::lsp::Query::noQuery();
     return LSPQueryResult{queryCollector->drainQueryResponses(), nullptr};
 }

@@ -164,10 +164,6 @@ void LSPWrapper::enableAllExperimentalFeatures() {
     opts->lspDocumentFormatRubyfmtEnabled = true;
 }
 
-int LSPWrapper::getTypecheckCount() {
-    return lspLoop->getTypecheckCount();
-}
-
 void LSPWrapper::setSlowPathBlocked(bool blocked) {
     lspLoop->setSlowPathBlocked(blocked);
 }

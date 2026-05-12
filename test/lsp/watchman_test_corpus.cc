@@ -105,20 +105,24 @@ TEST_CASE_FIXTURE(ProtocolTest, "MergesMultipleWatchmanUpdates") {
 
     string buggyFileContents = "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n";
     writeFilesToFS({{"foo.rb", buggyFileContents}, {"bar.rb", buggyFileContents}, {"baz.rb", buggyFileContents}});
+
+    // Clear counters
+    getCounters();
+
     assertErrorDiagnostics(send(move(requests)), {
                                                      {"foo.rb", 3, "Expected `Integer`"},
                                                      {"bar.rb", 3, "Expected `Integer`"},
                                                      {"baz.rb", 3, "Expected `Integer`"},
                                                  });
 
-    // getTypecheckCount tracks the number of times typechecking has run on the same version of the typechecker's
-    // GlobalState. It's reset to 1 after each slow path run, and incremented after every fast path.
-    // We expect the merged case to run 1 slow path (where typecheck count would be 1), and the unmerged case to run
-    // 3 slow paths and 2 fast paths (where typecheck count would be 3).
+    auto counters = getCounters();
+
     INFO(fmt::format("Expected Sorbet to apply multiple Watchman updates in one typechecking run, but Sorbet ran "
                      "typechecking {} times.",
-                     lspWrapper->getTypecheckCount()));
-    CHECK_EQ(lspWrapper->getTypecheckCount(), 1);
+                     counters.getCategoryCounter("lsp.updates", "slowpath")));
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 1);
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "fastpath"), 0);
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath_canceled"), 0);
 }
 
 TEST_CASE_FIXTURE(ProtocolTest, "ZeroingOutPackageFiles") {

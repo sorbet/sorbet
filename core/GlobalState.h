@@ -605,9 +605,6 @@ public:
 
     FlowId creation; // used to track flow of global states
 
-    // Indicates the number of times LSP has run the type checker with this global state.
-    // Used to ensure GlobalState is in the correct state to process requests.
-    unsigned int lspTypecheckCount = 0;
     // [LSP] Manages typechecking epochs and cancelation.
     std::shared_ptr<lsp::TypecheckEpochManager> epochManager;
 

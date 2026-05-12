@@ -1042,14 +1042,17 @@ TEST_CASE_FIXTURE(ProtocolTest, "OpeningExistingFilesTakesTheFastPath") {
 
     assertErrorDiagnostics(initializeLSP(), {});
 
-    auto typecheckCount = this->lspWrapper->getTypecheckCount();
+    // Clear the counters
+    getCounters();
 
     for (auto &file : files) {
         assertErrorDiagnostics(send(*openFile(file.first, file.second)), {});
-        typecheckCount++;
 
-        // Opening each file should cause one fast path to run, which will increment the typecheck count once.
-        REQUIRE_EQ(this->lspWrapper->getTypecheckCount(), typecheckCount);
+        // Opening each file should cause one fast path to run.
+        auto counters = getCounters();
+        REQUIRE_EQ(counters.getCategoryCounter("lsp.updates", "fastpath"), 1);
+        REQUIRE_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 0);
+        REQUIRE_EQ(counters.getCategoryCounter("lsp.updates", "slowpath_canceled"), 0);
     }
 }
 

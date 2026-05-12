@@ -2016,7 +2016,6 @@ unique_ptr<GlobalState> GlobalState::deepCopyGlobalState(bool keepId) const {
     result->symbolsReferencedByFile = this->symbolsReferencedByFile;
     result->lspQuery = this->lspQuery;
     result->kvstoreUuid = this->kvstoreUuid;
-    result->lspTypecheckCount = this->lspTypecheckCount;
     result->utf8Names.reserve(this->utf8Names.capacity());
     result->constantNames.reserve(this->constantNames.capacity());
     result->uniqueNames.reserve(this->uniqueNames.capacity());

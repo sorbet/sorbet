@@ -341,8 +341,6 @@ TEST_CASE("MergesFileUpdatesProperlyAfterCancelation") {
 TEST_CASE("PreemptionTasksWorkAsExpected") {
     auto errorCollector = make_shared<core::ErrorCollector>();
     auto gs = makeGS(errorCollector);
-    // Note: needs to be > 0 otherwise an enforce triggers.
-    gs->lspTypecheckCount++;
     auto preemptManager = make_shared<core::lsp::PreemptionTaskManager>(gs->epochManager);
 
     // Put an error in the queue.
@@ -416,8 +414,6 @@ public:
 TEST_CASE("PreemptionReschedulingWorksAsExpected") {
     auto errorCollector = make_shared<core::ErrorCollector>();
     auto gs = makeGS(errorCollector);
-    // Note: needs to be > 0 otherwise an enforce triggers.
-    gs->lspTypecheckCount++;
     auto preemptManager = make_shared<core::lsp::PreemptionTaskManager>(gs->epochManager);
 
     // Put an error in the queue.
@@ -485,8 +481,6 @@ TEST_CASE("PreemptionReschedulingWorksAsExpected") {
 TEST_CASE("RescheduledPreemptionTasksClearOnCancelation") {
     auto errorCollector = make_shared<core::ErrorCollector>();
     auto gs = makeGS(errorCollector);
-    // Note: needs to be > 0 otherwise an enforce triggers.
-    gs->lspTypecheckCount++;
     auto preemptManager = make_shared<core::lsp::PreemptionTaskManager>(gs->epochManager);
 
     // Put an error in the queue.
@@ -539,8 +533,6 @@ TEST_CASE("RescheduledPreemptionTasksClearOnCancelation") {
 TEST_CASE("RescheduledPreemptionTasksClearOnSuccess") {
     auto errorCollector = make_shared<core::ErrorCollector>();
     auto gs = makeGS(errorCollector);
-    // Note: needs to be > 0 otherwise an enforce triggers.
-    gs->lspTypecheckCount++;
     auto preemptManager = make_shared<core::lsp::PreemptionTaskManager>(gs->epochManager);
 
     // Put an error in the queue.
@@ -583,8 +575,6 @@ TEST_CASE("RescheduledPreemptionTasksClearOnSuccess") {
 TEST_CASE("RescheduledPreemptionTasksClearOnSuccessWrongStratum") {
     auto errorCollector = make_shared<core::ErrorCollector>();
     auto gs = makeGS(errorCollector);
-    // Note: needs to be > 0 otherwise an enforce triggers.
-    gs->lspTypecheckCount++;
     auto preemptManager = make_shared<core::lsp::PreemptionTaskManager>(gs->epochManager);
 
     // Put an error in the queue.
