@@ -627,42 +627,40 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                     // walked that new RHS.
 
                     auto zeroLoc = a.loc.copyWithZeroLength();
-
-                    InlinedVector<LocalRef, 2> args;
-                    InlinedVector<core::LocOffsets, 2> argLocs;
-
                     auto recvTemp = cctx.newTemporary(core::Names::statTemp());
                     auto magic = ast::MK::Constant(zeroLoc, core::Symbols::Magic());
                     current = walk(cctx.withTarget(recvTemp), magic, current);
 
+                    // This must match the number of temporaries we create below.
+                    const auto numArgs = 4;
+                    const auto isPrivateOk = true;
+                    auto snd = Send::make(recvTemp, magic.loc(), core::Names::suggestFieldType(), zeroLoc, numArgs,
+                                          isPrivateOk, numArgs);
+
                     auto rhsTemp = cctx.newTemporary(core::Names::statTemp());
-                    args.emplace_back(rhsTemp);
-                    argLocs.emplace_back(a.rhs.loc());
+                    *snd.refs++ = rhsTemp;
+                    *snd.locs++ = a.rhs.loc();
                     current = walk(cctx.withTarget(rhsTemp), a.rhs, current);
 
                     auto fieldKindTemp = cctx.newTemporary(core::Names::statTemp());
-                    args.emplace_back(fieldKindTemp);
+                    *snd.refs++ = fieldKindTemp;
                     auto fieldKindStr = ast::MK::String(zeroLoc, fieldKind);
-                    argLocs.emplace_back(fieldKindStr.loc());
+                    *snd.locs++ = fieldKindStr.loc();
                     current = walk(cctx.withTarget(fieldKindTemp), fieldKindStr, current);
 
                     auto ownerTemp = cctx.newTemporary(core::Names::statTemp());
-                    args.emplace_back(ownerTemp);
+                    *snd.refs++ = ownerTemp;
                     auto ownerStr = ast::MK::String(zeroLoc, cctx.ctx.owner.asMethodRef().data(cctx.ctx)->name);
-                    argLocs.emplace_back(ownerStr.loc());
+                    *snd.locs++ = ownerStr.loc();
                     current = walk(cctx.withTarget(ownerTemp), ownerStr, current);
 
                     auto identTemp = cctx.newTemporary(core::Names::statTemp());
-                    args.emplace_back(identTemp);
+                    *snd.refs++ = identTemp;
                     auto identName = ast::MK::Symbol(zeroLoc, ident->name);
-                    argLocs.emplace_back(identName.loc());
+                    *snd.locs++ = identName.loc();
                     current = walk(cctx.withTarget(identTemp), identName, current);
 
-                    current->exprs.emplace_back(lhs, a.lhs.loc(),
-                                                make_insn<Send>(recvTemp, magic.loc(), core::Names::suggestFieldType(),
-                                                                zeroLoc, args.size(), move(args), move(argLocs),
-                                                                /* isPrivateOk */ true));
-
+                    current->exprs.emplace_back(lhs, a.lhs.loc(), std::move(snd).asInsnPtr());
                     current->exprs.emplace_back(cctx.target, a.loc, make_insn<Ident>(lhs));
                     ret = current;
                 } else {
