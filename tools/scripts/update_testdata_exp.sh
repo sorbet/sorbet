@@ -8,6 +8,9 @@ cd ../..
 
 if ! command -v parallel &> /dev/null; then
   echo "This script requires GNU parallel to be installed"
+  if [ "$(uname)" == "Darwin" ]; then
+      echo "run brew install parallel to install it"
+  fi
   exit 1
 fi
 

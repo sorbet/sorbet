@@ -644,7 +644,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C EncryptedProp><<C <todo sym>>> < (::<todo sym>)
-    def self.encrypted_prop<<todo method>>(opts = {}, &<blk>)
+    def self.encrypted_prop<<todo method>>(name, kind: = nil, *opts:, &<blk>)
       <emptyTree>
     end
 
@@ -696,9 +696,43 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::T.nilable(::String))
+    end
+
+    def with_errors<<todo method>>(&<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::T.nilable(<emptyTree>::<C Opus>::<C DB>::<C Model>::<C Mixins>::<C Encryptable>::<C EncryptedValue>))
+    end
+
+    def encrypted_with_errors<<todo method>>(&<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params(:arg0, ::T.nilable(::String)).returns(::T.nilable(::String))
+    end
+
+    def with_errors=<<todo method>>(arg0, &<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params(:arg0, ::T.nilable(<emptyTree>::<C Opus>::<C DB>::<C Model>::<C Mixins>::<C Encryptable>::<C EncryptedValue>)).returns(::T.nilable(<emptyTree>::<C Opus>::<C DB>::<C Model>::<C Mixins>::<C Encryptable>::<C EncryptedValue>))
+    end
+
+    def encrypted_with_errors=<<todo method>>(arg0, &<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
     <self>.include(<emptyTree>::<C T>::<C Props>)
 
     <runtime method definition of self.encrypted_prop>
+
+    <self>.encrypted_prop(:foo)
 
     <runtime method definition of foo>
 
@@ -708,9 +742,21 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of encrypted_foo=>
 
+    <self>.encrypted_prop(:bar, :migrating, true, :immutable, true)
+
     <runtime method definition of bar>
 
     <runtime method definition of encrypted_bar>
+
+    <self>.encrypted_prop(:with_errors, "".dne())
+
+    <runtime method definition of with_errors>
+
+    <runtime method definition of encrypted_with_errors>
+
+    <runtime method definition of with_errors=>
+
+    <runtime method definition of encrypted_with_errors=>
   end
 
   <runtime method definition of main>

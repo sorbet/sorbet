@@ -86,9 +86,11 @@ end
 
 class EncryptedProp
   include T::Props
-  def self.encrypted_prop(opts={}); end
+  def self.encrypted_prop(name, kind: nil, **opts); end
   encrypted_prop :foo
   encrypted_prop :bar, migrating: true, immutable: true
+  encrypted_prop :with_errors, "".dne
+                                # ^^^ error: Method `dne` does not exist on `String` component of `String("")`
 end
 
 def main

@@ -61,6 +61,7 @@ public:
 
         ast::ExpressionPtr *prevStat = nullptr;
         UnorderedMap<void *, vector<ast::ExpressionPtr>> replaceNodes;
+        UnorderedMap<void *, vector<ast::ExpressionPtr>> insertNodes;
         for (auto &stat : classDef->rhs) {
             typecase(
                 stat,
@@ -94,7 +95,7 @@ public:
 
                     nodes = MixinEncryptedProp::run(ctx, &send);
                     if (!nodes.empty()) {
-                        replaceNodes[stat.get()] = std::move(nodes);
+                        insertNodes[stat.get()] = std::move(nodes);
                         return;
                     }
 
@@ -156,7 +157,7 @@ public:
 
             prevStat = &stat;
         }
-        if (replaceNodes.empty()) {
+        if (replaceNodes.empty() && insertNodes.empty()) {
             ModuleFunction::run(ctx, classDef);
             return;
         }
@@ -167,9 +168,21 @@ public:
 
         for (auto &stat : oldRHS) {
             auto replacement = replaceNodes.find(stat.get());
+            auto insertion = insertNodes.find(stat.get());
+            ENFORCE(replacement == replaceNodes.end() || insertion == insertNodes.end(),
+                    "the same statement shouldn't be in both replaceNodes and insertNodes");
             if (replacement == replaceNodes.end()) {
+                // Keep the original statement
                 classDef->rhs.emplace_back(std::move(stat));
+
+                if (insertion != insertNodes.end()) {
+                    // Also add the nodes in insertNodes[stat]
+                    for (auto &newNode : insertion->second) {
+                        classDef->rhs.emplace_back(std::move(newNode));
+                    }
+                }
             } else {
+                // Replace the original with the nodes in replaceNodes[stat]
                 for (auto &newNode : replacement->second) {
                     classDef->rhs.emplace_back(std::move(newNode));
                 }
