@@ -703,27 +703,27 @@ public:
 
     // ClassOrModules that have been introduced in the current stratum of files.
     SymbolRange<ClassOrModuleRef> newClassOrModules() const {
-        return this->symbolOffsets.classOrModuleRefs(*this);
+        return this->newSymbols().classOrModuleRefs(*this);
     }
 
     // Methods that have been introduced in the current stratum of files.
     SymbolRange<MethodRef> newMethods() const {
-        return this->symbolOffsets.methodRefs(*this);
+        return this->newSymbols().methodRefs(*this);
     }
 
     // Fields that have been introduced in the current stratum of files.
     SymbolRange<FieldRef> newFields() const {
-        return this->symbolOffsets.fieldRefs(*this);
+        return this->newSymbols().fieldRefs(*this);
     }
 
     // Type members that have been introduced in the current stratum of files.
     SymbolRange<TypeMemberRef> newTypeMemberRefs() const {
-        return this->symbolOffsets.typeMemberRefs(*this);
+        return this->newSymbols().typeMemberRefs(*this);
     }
 
     // Type parameters that have been introduced in the current stratum of files.
     SymbolRange<TypeParameterRef> newTypeParameterRefs() const {
-        return this->symbolOffsets.typeParameterRefs(*this);
+        return this->newSymbols().typeParameterRefs(*this);
     }
 
     void updateSymbolTableOffsets() {
