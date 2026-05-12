@@ -1,4 +1,6 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
+  <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
   class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
     def self.each<<todo method>>(&blk)
       begin
@@ -100,4 +102,160 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   <emptyTree>::<C Main>.main()
+
+  @ivar = <emptyTree>::<C T>.let([:x, 0], [<emptyTree>::<C Symbol>, <emptyTree>::<C Integer>])
+
+  @@cvar = <emptyTree>::<C T>.let([:x, 0], [<emptyTree>::<C Symbol>, <emptyTree>::<C Integer>])
+
+  $gvar = <emptyTree>::<C T>.let([:x, 0], [<emptyTree>::<C Symbol>, <emptyTree>::<C Integer>])
+
+  <self>.sig() do ||
+    <self>.params(:arg, [<emptyTree>::<C Symbol>, <emptyTree>::<C Integer>]).void()
+  end
+
+  def call_target=<<todo method>>(arg, &<blk>)
+    <emptyTree>
+  end
+
+  <emptyTree>::<C ConstantTarget> = <emptyTree>::<C T>.let([:x, 0], [<emptyTree>::<C Symbol>, <emptyTree>::<C Integer>])
+
+  <emptyTree>::<C ConstantPathTarget> = <emptyTree>::<C T>.let([:x, 0], [<emptyTree>::<C Symbol>, <emptyTree>::<C Integer>])
+
+  module <emptyTree>::<C Nested><<C <todo sym>>> < ()
+    <emptyTree>::<C ConstantPathTarget> = <emptyTree>::<C T>.let([:x, 0], [<emptyTree>::<C Symbol>, <emptyTree>::<C Integer>])
+  end
+
+  a = <emptyTree>::<C T>.let([], <emptyTree>::<C T>::<C Array>.[]([<emptyTree>::<C Symbol>, <emptyTree>::<C Integer>]))
+
+  [[:a, 1], [:b, 2], [:c, 3]].each() do ||
+    begin
+      begin
+        <assignTemp>$3 = forTemp$2
+        <assignTemp>$4 = ::<Magic>.<expand-splat>(<assignTemp>$3, 1, 0)
+        @ivar = <assignTemp>$4.[](0)
+        <assignTemp>$3
+      end
+      "loop body"
+    end
+  end
+
+  [[:a, 1], [:b, 2], [:c, 3]].each() do ||
+    begin
+      begin
+        <assignTemp>$6 = forTemp$5
+        <assignTemp>$7 = ::<Magic>.<expand-splat>(<assignTemp>$6, 1, 0)
+        @@cvar = <assignTemp>$7.[](0)
+        <assignTemp>$6
+      end
+      "loop body"
+    end
+  end
+
+  [[:a, 1], [:b, 2], [:c, 3]].each() do ||
+    begin
+      begin
+        <assignTemp>$9 = forTemp$8
+        <assignTemp>$10 = ::<Magic>.<expand-splat>(<assignTemp>$9, 1, 0)
+        $gvar = <assignTemp>$10.[](0)
+        <assignTemp>$9
+      end
+      "loop body"
+    end
+  end
+
+  [[:a, 1], [:b, 2], [:c, 3]].each() do ||
+    begin
+      begin
+        <assignTemp>$12 = forTemp$11
+        <assignTemp>$13 = ::<Magic>.<expand-splat>(<assignTemp>$12, 1, 0)
+        <self>.call_target=(<assignTemp>$13.[](0))
+        <assignTemp>$12
+      end
+      "loop body"
+    end
+  end
+
+  [[:a, 1], [:b, 2], [:c, 3]].each() do ||
+    begin
+      begin
+        <assignTemp>$15 = forTemp$14
+        <assignTemp>$16 = ::<Magic>.<expand-splat>(<assignTemp>$15, 1, 0)
+        <self>.call_target=(<assignTemp>$16.[](0))
+        <assignTemp>$15
+      end
+      "loop body"
+    end
+  end
+
+  [].each() do ||
+    begin
+      begin
+        <assignTemp>$18 = forTemp$17
+        <assignTemp>$19 = ::<Magic>.<expand-splat>(<assignTemp>$18, 1, 0)
+        <emptyTree>::<C E>.e=(<assignTemp>$19.[](0))
+        <assignTemp>$18
+      end
+      "loop body"
+    end
+  end
+
+  [[:a, 1], [:b, 2], [:c, 3]].each() do ||
+    begin
+      begin
+        <assignTemp>$21 = forTemp$20
+        <assignTemp>$22 = ::<Magic>.<expand-splat>(<assignTemp>$21, 1, 0)
+        <emptyTree>::<C ConstantTarget> = <assignTemp>$22.[](0)
+        <assignTemp>$21
+      end
+      "loop body"
+    end
+  end
+
+  [[:a, 1], [:b, 2], [:c, 3]].each() do ||
+    begin
+      begin
+        <assignTemp>$24 = forTemp$23
+        <assignTemp>$25 = ::<Magic>.<expand-splat>(<assignTemp>$24, 1, 0)
+        ::<root>::<C ConstantPathTarget> = <assignTemp>$25.[](0)
+        <assignTemp>$24
+      end
+      "loop body"
+    end
+  end
+
+  [[:a, 1], [:b, 2], [:c, 3]].each() do ||
+    begin
+      begin
+        <assignTemp>$27 = forTemp$26
+        <assignTemp>$28 = ::<Magic>.<expand-splat>(<assignTemp>$27, 1, 0)
+        <emptyTree>::<C Nested>::<C ConstantPathTarget> = <assignTemp>$28.[](0)
+        <assignTemp>$27
+      end
+      "loop body"
+    end
+  end
+
+  [[:a, 1], [:b, 2], [:c, 3]].each() do ||
+    begin
+      begin
+        <assignTemp>$30 = forTemp$29
+        <assignTemp>$31 = ::<Magic>.<expand-splat>(<assignTemp>$30, 1, 0)
+        ::<root>::<C Nested>::<C ConstantPathTarget> = <assignTemp>$31.[](0)
+        <assignTemp>$30
+      end
+      "loop body"
+    end
+  end
+
+  [[:a, 1], [:b, 2], [:c, 3]].each() do ||
+    begin
+      begin
+        <assignTemp>$33 = forTemp$32
+        <assignTemp>$34 = ::<Magic>.<expand-splat>(<assignTemp>$33, 1, 0)
+        a.[]=(123, <assignTemp>$34.[](0))
+        <assignTemp>$33
+      end
+      "loop body"
+    end
+  end
 end
