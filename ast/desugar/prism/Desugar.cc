@@ -20,6 +20,7 @@ using sorbet::parser::Prism::cast_prism_string;
 using sorbet::parser::Prism::down_cast;
 using sorbet::parser::Prism::down_cast_nonnull;
 using sorbet::parser::Prism::isa_node;
+using sorbet::parser::Prism::isa_node_nullable;
 using sorbet::parser::Prism::Parser;
 using sorbet::parser::Prism::ParseResult;
 using sorbet::parser::Prism::up_cast;
@@ -750,7 +751,7 @@ ast::ExpressionPtr Desugarer::desugarMlhs(core::LocOffsets loc, PrismNode *lhs, 
     int before = 0, after = 0;
     auto zloc = loc.copyWithZeroLength();
 
-    bool hasSplat = lhs->rest && isa_node<pm_splat_node>(lhs->rest);
+    bool hasSplat = isa_node_nullable<pm_splat_node>(lhs->rest);
 
     auto processTarget = [this, &stats, &i, zloc, tempExpanded](pm_node_t *c) {
         ENFORCE(!isa_node<pm_splat_node>(c), "splat already handled");
@@ -1908,7 +1909,7 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
             if (isCallToBlockGivenP(callNode, methodName, receiver) && isInMethodDef()) {
                 // Workaround to match legacy desugarer behaviour in `Dugar.cc`'s version of `desugarBlock().
                 // https://github.com/sorbet/sorbet/issues/9860
-                if (callNode->block != nullptr && isa_node<pm_block_node>(callNode->block)) {
+                if (isa_node_nullable<pm_block_node>(callNode->block)) {
                     auto blockLoc = translateLoc(callNode->block->location);
                     if (auto e = ctx.beginIndexerError(blockLoc, core::errors::Desugar::UnsupportedNode)) {
                         e.setHeader("No body in block");
@@ -3618,7 +3619,7 @@ ast::ExpressionPtr Desugarer::desugarPattern(pm_node_t *node) {
                 desugarPattern(prismNode);
             }
 
-            if (prismTrailingSplat != nullptr && isa_node<pm_splat_node>(prismTrailingSplat)) {
+            if (isa_node_nullable<pm_splat_node>(prismTrailingSplat)) {
                 desugarPattern(prismTrailingSplat);
             }
 
@@ -3956,13 +3957,13 @@ core::LocOffsets Desugarer::findItParamUsageLoc(pm_statements_node *statements) 
         }
         // Don't descend into nested blocks/lambdas that have their own 'it' parameter
         if (auto *blockNode = down_cast<pm_block_node>(const_cast<pm_node_t *>(node))) {
-            if (blockNode->parameters != nullptr && PM_NODE_TYPE_P(blockNode->parameters, PM_IT_PARAMETERS_NODE)) {
+            if (isa_node_nullable<pm_it_parameters_node>(blockNode->parameters)) {
                 // This nested block has its own 'it', don't descend into it
                 return false;
             }
         }
         if (auto *lambdaNode = down_cast<pm_lambda_node>(const_cast<pm_node_t *>(node))) {
-            if (lambdaNode->parameters != nullptr && PM_NODE_TYPE_P(lambdaNode->parameters, PM_IT_PARAMETERS_NODE)) {
+            if (isa_node_nullable<pm_it_parameters_node>(lambdaNode->parameters)) {
                 // This nested lambda has its own 'it', don't descend into it
                 return false;
             }
@@ -4304,7 +4305,7 @@ ast::ExpressionPtr Desugarer::desugarMethodCall(ast::ExpressionPtr receiver, cor
             auto isKwargs = PM_NODE_FLAG_P(keywordHashNode, PM_KEYWORD_HASH_NODE_FLAGS_SYMBOL_KEYS) ||
                             absl::c_all_of(elements, [](auto *node) {
                                 if (auto *pair = down_cast<pm_assoc_node>(node)) {
-                                    return pair->key && PM_NODE_TYPE_P(pair->key, PM_SYMBOL_NODE);
+                                    return isa_node_nullable<pm_symbol_node>(pair->key);
                                 }
                                 if (isa_node<pm_assoc_splat_node>(node)) {
                                     return true;

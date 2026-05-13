@@ -203,18 +203,20 @@ template <typename PrismNode> inline bool isa_node(pm_node_t *anyNode) {
     return PM_NODE_TYPE_P(anyNode, PrismNodeTypeHelper<PrismNode>::TypeID);
 }
 
+// Like `isa_node`, but also returns `false` if the node is null.
+template <typename PrismNode> inline bool isa_node_nullable(pm_node_t *anyNode) {
+    return anyNode != nullptr && isa_node<PrismNode>(anyNode);
+}
+
 // Take a pointer to a type-erased `pm_node_t` and down-cast it to a pointer of a specific Prism node "subclass",
 // or return `nullptr` if the node is null or not of the expected type. Matches the convention of other Sorbet
 // downcasting helpers like `cast_tree`, `cast_node`, `cast_type`, and C++'s `dynamic_cast`.
 template <typename PrismNode> PrismNode *down_cast(pm_node_t *anyNode) {
-    if (anyNode == nullptr) {
-        return nullptr;
+    if (isa_node_nullable<PrismNode>(anyNode)) {
+        return reinterpret_cast<PrismNode *>(anyNode);
     }
 
-    if (!isa_node<PrismNode>(anyNode)) {
-        return nullptr;
-    }
-    return reinterpret_cast<PrismNode *>(anyNode);
+    return nullptr;
 }
 
 // Take a pointer to a type-erased `pm_node_t` and down-cast it to a pointer of a specific Prism node "subclass".
