@@ -3039,17 +3039,17 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
         case PM_PARENTHESES_NODE: { // A parethesized expression, e.g. `(a)`
             auto parensNode = down_cast<pm_parentheses_node>(node);
 
-            auto stmtsNode = parensNode->body;
+            auto body = parensNode->body;
 
-            if (stmtsNode == nullptr) {
+            if (body == nullptr) {
                 return MK::Nil(location);
             }
 
-            if (PM_NODE_TYPE_P(stmtsNode, PM_STATEMENTS_NODE)) {
+            if (PM_NODE_TYPE_P(body, PM_STATEMENTS_NODE)) {
                 auto inlineIfSingle = false;
-                return desugarStatements(down_cast<pm_statements_node>(stmtsNode), inlineIfSingle);
+                return desugarStatements(down_cast<pm_statements_node>(body), inlineIfSingle);
             } else {
-                return desugar(stmtsNode);
+                return desugar(body);
             }
         }
         case PM_PRE_EXECUTION_NODE: { // The BEGIN keyword and body, like `BEGIN { ... }`
