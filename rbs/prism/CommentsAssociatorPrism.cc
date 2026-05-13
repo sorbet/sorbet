@@ -436,9 +436,8 @@ pm_node_t *CommentsAssociatorPrism::walkBody(pm_node_t *node, pm_node_t *body) {
         return nullptr;
     }
 
-    if (PM_NODE_TYPE_P(body, PM_BEGIN_NODE)) {
+    if (auto *begin = down_cast<pm_begin_node_t>(body)) {
         // The body is already a Begin node, so we don't need any wrapping
-        auto *begin = down_cast_nonnull<pm_begin_node_t>(body);
         walkNode(body);
 
         if (begin->statements) {
@@ -448,8 +447,7 @@ pm_node_t *CommentsAssociatorPrism::walkBody(pm_node_t *node, pm_node_t *body) {
         return body;
     }
 
-    if (PM_NODE_TYPE_P(body, PM_STATEMENTS_NODE)) {
-        auto *statements = down_cast_nonnull<pm_statements_node_t>(body);
+    if (auto *statements = down_cast<pm_statements_node_t>(body)) {
         walkNode(body);
         processTrailingComments(node, statements->body);
 

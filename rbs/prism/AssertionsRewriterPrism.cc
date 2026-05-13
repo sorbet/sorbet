@@ -63,11 +63,11 @@ vector<pair<core::LocOffsets, core::NameRef>>
 extractTypeParamsPrism(core::MutableContext ctx, const parser::Prism::Parser &parser, pm_node_t *block) {
     vector<pair<core::LocOffsets, core::NameRef>> typeParams;
 
-    if (!block || !PM_NODE_TYPE_P(block, PM_BLOCK_NODE)) {
+    auto *blockNode = down_cast<pm_block_node_t>(block);
+    if (!blockNode) {
         return typeParams;
     }
 
-    auto *blockNode = down_cast_nonnull<pm_block_node_t>(block);
     if (!blockNode->body) {
         return typeParams;
     }
@@ -76,8 +76,7 @@ extractTypeParamsPrism(core::MutableContext ctx, const parser::Prism::Parser &pa
     pm_node_t *node = blockNode->body;
 
     // If it's a statements node, get the first statement
-    if (PM_NODE_TYPE_P(node, PM_STATEMENTS_NODE)) {
-        auto *statements = down_cast_nonnull<pm_statements_node_t>(node);
+    if (auto *statements = down_cast<pm_statements_node_t>(node)) {
         ENFORCE(statements->body.size > 0);
         node = statements->body.nodes[0];
     }
@@ -85,8 +84,7 @@ extractTypeParamsPrism(core::MutableContext ctx, const parser::Prism::Parser &pa
     pm_call_node_t *call = nullptr;
 
     // Walk through the call chain to find type_parameters()
-    while (node && PM_NODE_TYPE_P(node, PM_CALL_NODE)) {
-        auto *callNode = down_cast_nonnull<pm_call_node_t>(node);
+    while (auto *callNode = down_cast<pm_call_node_t>(node)) {
         auto methodName = parser.resolveConstant(callNode->name);
 
         if (methodName == "type_parameters") {
@@ -105,11 +103,11 @@ extractTypeParamsPrism(core::MutableContext ctx, const parser::Prism::Parser &pa
     if (auto *args = call->arguments) {
         for (size_t i = 0; i < args->arguments.size; i++) {
             pm_node_t *arg = args->arguments.nodes[i];
-            if (!PM_NODE_TYPE_P(arg, PM_SYMBOL_NODE)) {
+            auto *sym = down_cast<pm_symbol_node_t>(arg);
+            if (!sym) {
                 continue;
             }
 
-            auto *sym = down_cast_nonnull<pm_symbol_node_t>(arg);
             auto symbolName = parser.extractString(&sym->unescaped);
             auto nameRef = ctx.state.enterNameUTF8(symbolName);
             auto loc = parser.translateLocation(arg->location);
@@ -128,29 +126,24 @@ extractTypeParamsPrism(core::MutableContext ctx, const parser::Prism::Parser &pa
  */
 bool sameConstant(parser::Prism::Parser &parser, pm_node_t *a, pm_node_t *b) {
     while (a != nullptr && b != nullptr) {
-        pm_node_type aType = PM_NODE_TYPE(a);
-        pm_node_type bType = PM_NODE_TYPE(b);
-
-        if (aType == PM_CONSTANT_READ_NODE && bType == PM_CONSTANT_READ_NODE) {
-            auto *aConst = down_cast_nonnull<pm_constant_read_node_t>(a);
-            auto *bConst = down_cast_nonnull<pm_constant_read_node_t>(b);
-            return aConst->name == bConst->name;
+        if (auto *constA = down_cast<pm_constant_read_node_t>(a), *constB = down_cast<pm_constant_read_node_t>(b);
+            constA && constB) {
+            return constA->name == constB->name;
         }
 
-        if (aType == PM_CONSTANT_PATH_NODE && bType == PM_CONSTANT_PATH_NODE) {
-            auto *aPath = down_cast_nonnull<pm_constant_path_node_t>(a);
-            auto *bPath = down_cast_nonnull<pm_constant_path_node_t>(b);
-
-            if (aPath->name != bPath->name) {
+        if (auto *pathA = down_cast<pm_constant_path_node_t>(a), *pathB = down_cast<pm_constant_path_node_t>(b);
+            pathA && pathB) {
+            if (pathA->name != pathB->name) {
                 return false;
             }
 
-            if (aPath->parent == nullptr && bPath->parent == nullptr) {
+            if (pathA->parent == nullptr && pathB->parent == nullptr) {
                 return true;
             }
 
-            a = aPath->parent;
-            b = bPath->parent;
+            a = pathA->parent;
+            b = pathB->parent;
+
             continue;
         }
 
@@ -262,27 +255,23 @@ pm_node_t *deepCopyGenericTypeNode(parser::Prism::Parser &parser, pm_node_t *nod
  */
 void maybeSupplyGenericTypeArguments(core::MutableContext ctx, parser::Prism::Parser &parser, pm_node_t **node,
                                      pm_node_t **type) {
-    // We only rewrite `.new` calls
-    if (!PM_NODE_TYPE_P(*node, PM_CALL_NODE)) {
+    auto *newCall = down_cast<pm_call_node_t>(*node);
+    if (!newCall) {
         return;
     }
 
-    auto *newCall = down_cast_nonnull<pm_call_node_t>(*node);
-    auto methodName = parser.resolveConstant(newCall->name);
+    // We only rewrite `.new` calls
+    if (parser.resolveConstant(newCall->name) != "new"sv) {
+        return;
+    }
 
-    if (methodName != "new"sv) {
+    auto *bracketCall = down_cast<pm_call_node_t>(*type);
+    if (!bracketCall) {
         return;
     }
 
     // We only rewrite when casted to a generic type (syntheticSquareBrackets)
-    if (!PM_NODE_TYPE_P(*type, PM_CALL_NODE)) {
-        return;
-    }
-
-    auto *bracketCall = down_cast_nonnull<pm_call_node_t>(*type);
-    auto bracketMethodName = parser.resolveConstant(bracketCall->name);
-
-    if (bracketMethodName != "<syntheticSquareBrackets>"sv) {
+    if (parser.resolveConstant(bracketCall->name) != "<syntheticSquareBrackets>"sv) {
         return;
     }
 
@@ -308,11 +297,10 @@ void maybeSupplyGenericTypeArguments(core::MutableContext ctx, parser::Prism::Pa
  * Returns `true` if the node is a `sig` call (so caller can skip further processing), `false` otherwise.
  */
 bool AssertionsRewriterPrism::saveMethodTypeParams(pm_node_t *call) {
-    if (!call || !PM_NODE_TYPE_P(call, PM_CALL_NODE)) {
+    auto *callNode = down_cast<pm_call_node_t>(call);
+    if (!callNode) {
         return false;
     }
-
-    auto *callNode = down_cast_nonnull<pm_call_node_t>(call);
 
     // Check if this is a sig() call
     auto methodName = parser.resolveConstant(callNode->name);

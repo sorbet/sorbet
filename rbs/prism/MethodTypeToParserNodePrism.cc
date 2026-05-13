@@ -22,15 +22,13 @@ bool isSelfOrKernel(pm_node_t *node, const parser::Prism::Parser *prismParser) {
         return true;
     }
 
-    if (PM_NODE_TYPE_P(node, PM_CONSTANT_READ_NODE)) {
-        auto *constant = down_cast_nonnull<pm_constant_read_node_t>(node);
+    if (auto *constant = down_cast<pm_constant_read_node_t>(node)) {
         auto name = prismParser->resolveConstant(constant->name);
         // Check if it's Kernel constant with no scope (::Kernel or bare Kernel)
         return name == "Kernel";
     }
 
-    if (PM_NODE_TYPE_P(node, PM_CONSTANT_PATH_NODE)) {
-        auto *constantPath = down_cast_nonnull<pm_constant_path_node_t>(node);
+    if (auto *constantPath = down_cast<pm_constant_path_node_t>(node)) {
         // Check if it's ::Kernel (parent is nullptr, representing root ::)
         // We reject Foo::Kernel or any other scoped constant
         if (constantPath->parent == nullptr) {
@@ -74,11 +72,10 @@ core::AutocorrectSuggestion autocorrectAbstractBody(core::MutableContext ctx, pm
 // Returns true if the node is a valid abstract method (def node with a body that only raises)
 // e.g. def abstract_method = raise
 bool isValidAbstractMethod(pm_node_t *node, const parser::Prism::Parser *prismParser) {
-    if (!PM_NODE_TYPE_P(node, PM_DEF_NODE)) {
+    auto *def = down_cast<pm_def_node_t>(node);
+    if (def == nullptr) {
         return false;
     }
-
-    auto *def = down_cast_nonnull<pm_def_node_t>(node);
 
     if (def->body == nullptr) {
         return false;
@@ -87,19 +84,18 @@ bool isValidAbstractMethod(pm_node_t *node, const parser::Prism::Parser *prismPa
     pm_node_t *bodyNode = def->body;
 
     // Unwrap statements node if it contains exactly one statement
-    if (PM_NODE_TYPE_P(bodyNode, PM_STATEMENTS_NODE)) {
-        auto *stmts = down_cast_nonnull<pm_statements_node_t>(bodyNode);
+    if (auto *stmts = down_cast<pm_statements_node_t>(bodyNode)) {
         if (stmts->body.size != 1) {
             return false; // Multiple statements, not just a raise
         }
         bodyNode = stmts->body.nodes[0];
     }
 
-    if (!PM_NODE_TYPE_P(bodyNode, PM_CALL_NODE)) {
+    auto *call = down_cast<pm_call_node_t>(bodyNode);
+    if (call == nullptr) {
         return false;
     }
 
-    auto *call = down_cast_nonnull<pm_call_node_t>(bodyNode);
     auto methodName = prismParser->resolveConstant(call->name);
 
     // Check if it's a raise call with no receiver or self/Kernel receiver
@@ -492,10 +488,10 @@ pm_node_t *MethodTypeToParserNodePrism::attrSignature(pm_call_node_t *call, cons
 
         // For attr_writer, we need to add the param to the sig
         pm_node_t *arg = call->arguments->arguments.nodes[0];
-        if (!PM_NODE_TYPE_P(arg, PM_SYMBOL_NODE)) {
+        auto *symbolNode = down_cast<pm_symbol_node_t>(arg);
+        if (symbolNode == nullptr) {
             return nullptr;
         }
-        auto *symbolNode = down_cast_nonnull<pm_symbol_node_t>(arg);
         auto argName = prismParser.extractString(&symbolNode->unescaped);
 
         // The location points to the `:name` symbol, adjust to point to actual name
@@ -602,8 +598,7 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(pm_node_t *methodDef, co
     pm_node_t *receiver = prism.TSigWithoutRuntime(firstLineTypeLoc);
 
     vector<pm_node_t *> methodParams;
-    if (PM_NODE_TYPE_P(methodDef, PM_DEF_NODE)) {
-        auto def = down_cast_nonnull<pm_def_node_t>(methodDef);
+    if (auto *def = down_cast<pm_def_node_t>(methodDef)) {
         methodParams = getMethodParams(def);
     }
 

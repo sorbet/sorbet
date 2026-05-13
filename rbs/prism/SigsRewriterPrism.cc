@@ -147,13 +147,12 @@ bool containsExtendTHelper(pm_statements_node_t *body, const parser::Prism::Pars
 
     auto statements = absl::MakeSpan(body->body.nodes, body->body.size);
     return absl::c_any_of(statements, [&](pm_node_t *stmt) {
-        if (!PM_NODE_TYPE_P(stmt, PM_CALL_NODE)) {
+        auto *call = down_cast<pm_call_node_t>(stmt);
+        if (call == nullptr) {
             return false;
         }
 
-        auto *call = down_cast_nonnull<pm_call_node_t>(stmt);
         auto methodName = prismParser.resolveConstant(call->name);
-
         if (methodName != "extend") {
             return false;
         }
@@ -167,13 +166,12 @@ bool containsExtendTHelper(pm_statements_node_t *body, const parser::Prism::Pars
         }
 
         pm_node_t *arg = call->arguments->arguments.nodes[0];
-        if (!PM_NODE_TYPE_P(arg, PM_CONSTANT_PATH_NODE)) {
+        auto *constantPath = down_cast<pm_constant_path_node_t>(arg);
+        if (constantPath == nullptr) {
             return false;
         }
 
-        auto *constantPath = down_cast_nonnull<pm_constant_path_node_t>(arg);
         auto argName = prismParser.resolveConstant(constantPath->name);
-
         if (argName != "Helpers") {
             return false;
         }
@@ -343,8 +341,7 @@ unique_ptr<vector<pm_node_t *>> SigsRewriterPrism::signaturesForNode(pm_node_t *
             if (sig) {
                 signatures->emplace_back(sig);
             }
-        } else if (PM_NODE_TYPE_P(node, PM_CALL_NODE)) {
-            auto *call = down_cast_nonnull<pm_call_node_t>(node);
+        } else if (auto *call = down_cast<pm_call_node_t>(node)) {
             if (parser.isMethodDefModifierCall(node, ctx.state)) {
                 // For method definition modifiers, translate the signature for the inner method definition
                 auto sig = signatureTranslator.translateMethodSignature(call->arguments->arguments.nodes[0],
@@ -424,9 +421,7 @@ pm_node_t *SigsRewriterPrism::rewriteBody(pm_node_t *node) {
     }
 
     // Handle statements nodes (class/module bodies with multiple statements)
-    if (PM_NODE_TYPE_P(node, PM_STATEMENTS_NODE)) {
-        auto *statements = down_cast_nonnull<pm_statements_node_t>(node);
-
+    if (auto *statements = down_cast<pm_statements_node_t>(node)) {
         // Save old statements before modifying (pm_node_list_append can realloc, invalidating pointers)
         pm_node_list_t oldStmts = statements->body;
         statements->body = (pm_node_list_t){.size = 0, .capacity = 0, .nodes = nullptr};
@@ -710,9 +705,7 @@ void SigsRewriterPrism::rewriteNode(pm_node_t *node) {
         case PM_CONSTANT_WRITE_NODE: {
             auto *write = down_cast_nonnull<pm_constant_write_node_t>(node);
             // Check if this is a type alias assignment with synthetic marker
-            if (auto *constantRead = PM_NODE_TYPE_P(write->value, PM_CONSTANT_READ_NODE)
-                                         ? down_cast_nonnull<pm_constant_read_node_t>(write->value)
-                                         : nullptr) {
+            if (auto *constantRead = down_cast<pm_constant_read_node_t>(write->value)) {
                 if (constantRead->name == RBS_SYNTHETIC_TYPE_ALIAS_MARKER) {
                     // Replace the value with the T.type_alias call
                     write->value = replaceSyntheticTypeAlias(write->value);

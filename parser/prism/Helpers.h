@@ -194,6 +194,23 @@ template <typename PrismNode> pm_node_t *up_cast(PrismNode *node) {
     return reinterpret_cast<pm_node_t *>(node);
 }
 
+// Take a pointer to a type-erased `pm_node_t` and down-cast it to a pointer of a specific Prism node "subclass",
+// or return `nullptr` if the node is null or not of the expected type. Matches the convention of other Sorbet
+// downcasting helpers like `cast_tree`, `cast_node`, `cast_type`, and C++'s `dynamic_cast`.
+template <typename PrismNode> PrismNode *down_cast(pm_node_t *anyNode) {
+    static_assert(std::is_same_v<decltype(PrismNode::base), pm_node_t>,
+                  "The `down_cast` function should only be called on Prism node pointers.");
+
+    if (anyNode == nullptr) {
+        return nullptr;
+    }
+
+    if (!PM_NODE_TYPE_P(anyNode, PrismNodeTypeHelper<PrismNode>::TypeID)) {
+        return nullptr;
+    }
+    return reinterpret_cast<PrismNode *>(anyNode);
+}
+
 // Take a pointer to a type-erased `pm_node_t` and down-cast it to a pointer of a specific Prism node "subclass".
 // In debug builds, this helper checks the node's type before casting, to ensure it's casted correctly.
 template <typename PrismNode> PrismNode *down_cast_nonnull(pm_node_t *anyNode) {

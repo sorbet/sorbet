@@ -18,8 +18,8 @@ bool hasTypeParam(absl::Span<const pair<core::LocOffsets, core::NameRef>> typePa
 }
 
 bool isEnumerator(pm_node_t *node, parser::Prism::Parser &prismParser, core::GlobalState &gs) {
-    auto *constNode = PM_NODE_TYPE_P(node, PM_CONSTANT_READ_NODE) ? down_cast_nonnull<pm_constant_read_node_t>(node) : nullptr;
-    auto *pathNode = PM_NODE_TYPE_P(node, PM_CONSTANT_PATH_NODE) ? down_cast_nonnull<pm_constant_path_node_t>(node) : nullptr;
+    auto *constNode = down_cast<pm_constant_read_node_t>(node);
+    auto *pathNode = down_cast<pm_constant_path_node_t>(node);
 
     if (!constNode && !pathNode) {
         return false;
