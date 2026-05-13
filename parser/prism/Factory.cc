@@ -174,7 +174,7 @@ pm_call_node_t *Factory::createCallNode(pm_node_t *receiver, pm_constant_id_t me
                              .name = methodId,
                              .message_loc = messageLoc,
                              .opening_loc = tinyLoc,
-                             .arguments = down_cast<pm_arguments_node_t>(arguments),
+                             .arguments = down_cast_nonnull<pm_arguments_node_t>(arguments),
                              .closing_loc = tinyLoc,
                              .block = block};
 
@@ -463,7 +463,7 @@ pm_node_t *Factory::TTypeAlias(core::LocOffsets loc, pm_node_t *type) const {
 
     pm_node_t *block = Block(loc, StatementsNode(loc, absl::Span<pm_node_t *>{&type, 1}));
 
-    auto *call = down_cast<pm_call_node_t>(typeAliasCall);
+    auto *call = down_cast_nonnull<pm_call_node_t>(typeAliasCall);
     call->block = block;
 
     return typeAliasCall;

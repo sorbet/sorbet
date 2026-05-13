@@ -103,7 +103,7 @@ vector<pm_node_t *> extractHelpers(core::MutableContext ctx, absl::Span<const Co
 
                 pm_node_t *callNode =
                     prism.Call0(annotation.typeLoc, prism.Self(annotation.typeLoc), "requires_ancestor"sv);
-                auto *call = down_cast<pm_call_node_t>(callNode);
+                auto *call = down_cast_nonnull<pm_call_node_t>(callNode);
                 call->block = prism.Block(annotation.typeLoc, stmts);
 
                 helperNode = callNode;
@@ -151,7 +151,7 @@ bool containsExtendTHelper(pm_statements_node_t *body, const parser::Prism::Pars
             return false;
         }
 
-        auto *call = down_cast<pm_call_node_t>(stmt);
+        auto *call = down_cast_nonnull<pm_call_node_t>(stmt);
         auto methodName = prismParser.resolveConstant(call->name);
 
         if (methodName != "extend") {
@@ -171,7 +171,7 @@ bool containsExtendTHelper(pm_statements_node_t *body, const parser::Prism::Pars
             return false;
         }
 
-        auto *constantPath = down_cast<pm_constant_path_node_t>(arg);
+        auto *constantPath = down_cast_nonnull<pm_constant_path_node_t>(arg);
         auto argName = prismParser.resolveConstant(constantPath->name);
 
         if (argName != "Helpers") {
@@ -187,7 +187,7 @@ bool containsExtendTHelper(pm_statements_node_t *body, const parser::Prism::Pars
  */
 void maybeInsertExtendTHelpers(pm_node_t *body, core::LocOffsets loc, const parser::Prism::Parser &prismParser,
                                core::MutableContext ctx, const parser::Prism::Factory &prism) {
-    auto *statements = down_cast<pm_statements_node_t>(body);
+    auto *statements = down_cast_nonnull<pm_statements_node_t>(body);
     ENFORCE(statements != nullptr);
 
     if (containsExtendTHelper(statements, prismParser, ctx)) {
@@ -205,7 +205,7 @@ void maybeInsertExtendTHelpers(pm_node_t *body, core::LocOffsets loc, const pars
  * Inserts the helpers into the body.
  */
 void insertHelpers(pm_node_t *body, absl::Span<pm_node_t *const> helpers) {
-    auto *statements = down_cast<pm_statements_node_t>(body);
+    auto *statements = down_cast_nonnull<pm_statements_node_t>(body);
     ENFORCE(statements != nullptr);
 
     for (auto *helper : helpers) {
@@ -241,7 +241,7 @@ void SigsRewriterPrism::insertTypeParams(pm_node_t *node, pm_node_t *body) {
         return;
     }
 
-    auto *statements = down_cast<pm_statements_node_t>(body);
+    auto *statements = down_cast_nonnull<pm_statements_node_t>(body);
 
     for (auto *typeParam : typeParams) {
         pm_node_list_append(&statements->body, typeParam);
@@ -344,7 +344,7 @@ unique_ptr<vector<pm_node_t *>> SigsRewriterPrism::signaturesForNode(pm_node_t *
                 signatures->emplace_back(sig);
             }
         } else if (PM_NODE_TYPE_P(node, PM_CALL_NODE)) {
-            auto *call = down_cast<pm_call_node_t>(node);
+            auto *call = down_cast_nonnull<pm_call_node_t>(node);
             if (parser.isMethodDefModifierCall(node, ctx.state)) {
                 // For method definition modifiers, translate the signature for the inner method definition
                 auto sig = signatureTranslator.translateMethodSignature(call->arguments->arguments.nodes[0],
@@ -425,7 +425,7 @@ pm_node_t *SigsRewriterPrism::rewriteBody(pm_node_t *node) {
 
     // Handle statements nodes (class/module bodies with multiple statements)
     if (PM_NODE_TYPE_P(node, PM_STATEMENTS_NODE)) {
-        auto *statements = down_cast<pm_statements_node_t>(node);
+        auto *statements = down_cast_nonnull<pm_statements_node_t>(node);
 
         // Save old statements before modifying (pm_node_list_append can realloc, invalidating pointers)
         pm_node_list_t oldStmts = statements->body;
@@ -501,13 +501,13 @@ void SigsRewriterPrism::rewriteClass(pm_node_t *node) {
 
     switch (PM_NODE_TYPE(node)) {
         case PM_CLASS_NODE:
-            processClassBody(node, down_cast<pm_class_node_t>(node)->body, helpers);
+            processClassBody(node, down_cast_nonnull<pm_class_node_t>(node)->body, helpers);
             break;
         case PM_MODULE_NODE:
-            processClassBody(node, down_cast<pm_module_node_t>(node)->body, helpers);
+            processClassBody(node, down_cast_nonnull<pm_module_node_t>(node)->body, helpers);
             break;
         case PM_SINGLETON_CLASS_NODE:
-            processClassBody(node, down_cast<pm_singleton_class_node_t>(node)->body, helpers);
+            processClassBody(node, down_cast_nonnull<pm_singleton_class_node_t>(node)->body, helpers);
             break;
         default:
             Exception::raise("Unimplemented node type for rewriteClass: {}", (int)PM_NODE_TYPE(node));
@@ -523,7 +523,7 @@ inline void SigsRewriterPrism::rewriteNullableNode(pm_node_t *node) {
 void SigsRewriterPrism::rewriteNode(pm_node_t *node) {
     switch (PM_NODE_TYPE(node)) {
         case PM_BEGIN_NODE: {
-            auto *begin = down_cast<pm_begin_node_t>(node);
+            auto *begin = down_cast_nonnull<pm_begin_node_t>(node);
             rewriteNullableNode(up_cast(begin->statements));
             rewriteNullableNode(up_cast(begin->rescue_clause));
             rewriteNullableNode(up_cast(begin->else_clause));
@@ -531,79 +531,79 @@ void SigsRewriterPrism::rewriteNode(pm_node_t *node) {
             break;
         }
         case PM_BLOCK_NODE: {
-            auto *block = down_cast<pm_block_node_t>(node);
+            auto *block = down_cast_nonnull<pm_block_node_t>(node);
             block->body = rewriteBody(block->body);
             break;
         }
         case PM_LOCAL_VARIABLE_WRITE_NODE: {
-            auto *n = down_cast<pm_local_variable_write_node_t>(node);
+            auto *n = down_cast_nonnull<pm_local_variable_write_node_t>(node);
             rewriteNode(n->value);
             break;
             break;
         }
         case PM_LOCAL_VARIABLE_AND_WRITE_NODE: {
-            auto *n = down_cast<pm_local_variable_and_write_node_t>(node);
+            auto *n = down_cast_nonnull<pm_local_variable_and_write_node_t>(node);
             rewriteNode(n->value);
             break;
         }
         case PM_LOCAL_VARIABLE_OR_WRITE_NODE: {
-            auto *n = down_cast<pm_local_variable_or_write_node_t>(node);
+            auto *n = down_cast_nonnull<pm_local_variable_or_write_node_t>(node);
             rewriteNode(n->value);
             break;
         }
         case PM_LOCAL_VARIABLE_OPERATOR_WRITE_NODE: {
-            auto *n = down_cast<pm_local_variable_operator_write_node_t>(node);
+            auto *n = down_cast_nonnull<pm_local_variable_operator_write_node_t>(node);
             rewriteNode(n->value);
             break;
         }
         case PM_MODULE_NODE: {
-            auto *mod = down_cast<pm_module_node_t>(node);
+            auto *mod = down_cast_nonnull<pm_module_node_t>(node);
             rewriteBody(mod->body);
             rewriteClass(node);
             break;
         }
         case PM_CLASS_NODE: {
-            auto *cls = down_cast<pm_class_node_t>(node);
+            auto *cls = down_cast_nonnull<pm_class_node_t>(node);
             rewriteBody(cls->body);
             rewriteClass(node);
             break;
         }
         case PM_DEF_NODE: {
-            auto *def = down_cast<pm_def_node_t>(node);
+            auto *def = down_cast_nonnull<pm_def_node_t>(node);
             rewriteBody(def->body);
             break;
         }
         case PM_SINGLETON_CLASS_NODE: {
-            auto *sclass = down_cast<pm_singleton_class_node_t>(node);
+            auto *sclass = down_cast_nonnull<pm_singleton_class_node_t>(node);
             rewriteBody(sclass->body);
             rewriteClass(node);
             break;
         }
         case PM_FOR_NODE: {
-            auto *for_ = down_cast<pm_for_node_t>(node);
+            auto *for_ = down_cast_nonnull<pm_for_node_t>(node);
             if (auto *stmts = for_->statements) {
                 rewriteBody(stmts);
             }
             break;
         }
         case PM_ARRAY_NODE: {
-            auto *array = down_cast<pm_array_node_t>(node);
+            auto *array = down_cast_nonnull<pm_array_node_t>(node);
             rewriteNodes(array->elements);
             break;
         }
         case PM_HASH_NODE: {
-            auto *hash = down_cast<pm_hash_node_t>(node);
+            auto *hash = down_cast_nonnull<pm_hash_node_t>(node);
             rewriteNodes(hash->elements);
             break;
         }
         case PM_ASSOC_NODE: {
-            auto *pair = down_cast<pm_assoc_node_t>(node);
+            auto *pair = down_cast_nonnull<pm_assoc_node_t>(node);
             rewriteNode(pair->key);
             rewriteNode(pair->value);
             break;
         }
         case PM_RESCUE_NODE: {
-            auto *rescue = down_cast<pm_rescue_node_t>(node);
+            auto *rescue = down_cast_nonnull<pm_rescue_node_t>(node);
             if (auto *stmts = rescue->statements) {
                 rewriteBody(stmts);
             }
@@ -613,21 +613,21 @@ void SigsRewriterPrism::rewriteNode(pm_node_t *node) {
             break;
         }
         case PM_ELSE_NODE: {
-            auto *else_ = down_cast<pm_else_node_t>(node);
+            auto *else_ = down_cast_nonnull<pm_else_node_t>(node);
             if (auto *stmts = else_->statements) {
                 rewriteBody(stmts);
             }
             break;
         }
         case PM_ENSURE_NODE: {
-            auto *ensure = down_cast<pm_ensure_node_t>(node);
+            auto *ensure = down_cast_nonnull<pm_ensure_node_t>(node);
             if (auto *stmts = ensure->statements) {
                 rewriteBody(stmts);
             }
             break;
         }
         case PM_IF_NODE: {
-            auto *if_ = down_cast<pm_if_node_t>(node);
+            auto *if_ = down_cast_nonnull<pm_if_node_t>(node);
             if (auto *stmts = if_->statements) {
                 rewriteBody(stmts);
             }
@@ -637,45 +637,45 @@ void SigsRewriterPrism::rewriteNode(pm_node_t *node) {
             break;
         }
         case PM_UNLESS_NODE: {
-            auto *unless_ = down_cast<pm_unless_node_t>(node);
+            auto *unless_ = down_cast_nonnull<pm_unless_node_t>(node);
             if (auto *stmts = unless_->statements) {
                 rewriteBody(stmts);
             }
             if (auto *elseClause = unless_->else_clause) {
-                unless_->else_clause = down_cast<pm_else_node_t>(rewriteBody(up_cast(elseClause)));
+                unless_->else_clause = down_cast_nonnull<pm_else_node_t>(rewriteBody(up_cast(elseClause)));
             }
             break;
         }
         case PM_MULTI_WRITE_NODE: {
-            auto *masgn = down_cast<pm_multi_write_node_t>(node);
+            auto *masgn = down_cast_nonnull<pm_multi_write_node_t>(node);
             rewriteNode(masgn->value);
             break;
         }
         case PM_CASE_NODE: {
-            auto *case_ = down_cast<pm_case_node_t>(node);
+            auto *case_ = down_cast_nonnull<pm_case_node_t>(node);
             rewriteNodes(case_->conditions);
             if (auto *elseClause = case_->else_clause) {
-                case_->else_clause = down_cast<pm_else_node_t>(rewriteBody(up_cast(elseClause)));
+                case_->else_clause = down_cast_nonnull<pm_else_node_t>(rewriteBody(up_cast(elseClause)));
             }
             break;
         }
         case PM_CASE_MATCH_NODE: {
-            auto *case_ = down_cast<pm_case_match_node_t>(node);
+            auto *case_ = down_cast_nonnull<pm_case_match_node_t>(node);
             rewriteNodes(case_->conditions);
             if (auto *elseClause = case_->else_clause) {
-                case_->else_clause = down_cast<pm_else_node_t>(rewriteBody(up_cast(elseClause)));
+                case_->else_clause = down_cast_nonnull<pm_else_node_t>(rewriteBody(up_cast(elseClause)));
             }
             break;
         }
         case PM_WHEN_NODE: {
-            auto *when = down_cast<pm_when_node_t>(node);
+            auto *when = down_cast_nonnull<pm_when_node_t>(node);
             if (auto *stmts = when->statements) {
                 rewriteBody(stmts);
             }
             break;
         }
         case PM_CALL_NODE: {
-            auto *call = down_cast<pm_call_node_t>(node);
+            auto *call = down_cast_nonnull<pm_call_node_t>(node);
             if (auto *block = call->block) {
                 rewriteNode(block);
             }
@@ -683,35 +683,35 @@ void SigsRewriterPrism::rewriteNode(pm_node_t *node) {
             break;
         }
         case PM_SUPER_NODE: {
-            auto *sup = down_cast<pm_super_node_t>(node);
+            auto *sup = down_cast_nonnull<pm_super_node_t>(node);
             rewriteArgumentsNode(sup->arguments);
             break;
         }
         case PM_RETURN_NODE: {
-            auto *ret = down_cast<pm_return_node_t>(node);
+            auto *ret = down_cast_nonnull<pm_return_node_t>(node);
             rewriteArgumentsNode(ret->arguments);
             break;
         }
         case PM_NEXT_NODE: {
-            auto *n = down_cast<pm_next_node_t>(node);
+            auto *n = down_cast_nonnull<pm_next_node_t>(node);
             rewriteArgumentsNode(n->arguments);
             break;
         }
         case PM_BREAK_NODE: {
-            auto *b = down_cast<pm_break_node_t>(node);
+            auto *b = down_cast_nonnull<pm_break_node_t>(node);
             rewriteArgumentsNode(b->arguments);
             break;
         }
         case PM_SPLAT_NODE: {
-            auto *s = down_cast<pm_splat_node_t>(node);
+            auto *s = down_cast_nonnull<pm_splat_node_t>(node);
             rewriteNullableNode(s->expression);
             break;
         }
         case PM_CONSTANT_WRITE_NODE: {
-            auto *write = down_cast<pm_constant_write_node_t>(node);
+            auto *write = down_cast_nonnull<pm_constant_write_node_t>(node);
             // Check if this is a type alias assignment with synthetic marker
             if (auto *constantRead = PM_NODE_TYPE_P(write->value, PM_CONSTANT_READ_NODE)
-                                         ? down_cast<pm_constant_read_node_t>(write->value)
+                                         ? down_cast_nonnull<pm_constant_read_node_t>(write->value)
                                          : nullptr) {
                 if (constantRead->name == RBS_SYNTHETIC_TYPE_ALIAS_MARKER) {
                     // Replace the value with the T.type_alias call
@@ -723,12 +723,12 @@ void SigsRewriterPrism::rewriteNode(pm_node_t *node) {
             break;
         }
         case PM_PROGRAM_NODE: {
-            auto *program = down_cast<pm_program_node_t>(node);
+            auto *program = down_cast_nonnull<pm_program_node_t>(node);
             rewriteBody(up_cast(program->statements));
             break;
         }
         case PM_STATEMENTS_NODE: {
-            auto *statements = down_cast<pm_statements_node_t>(node);
+            auto *statements = down_cast_nonnull<pm_statements_node_t>(node);
             rewriteNodes(statements->body);
             break;
         }

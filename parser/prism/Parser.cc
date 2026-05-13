@@ -106,7 +106,7 @@ bool Parser::isTUntyped(pm_node_t *node) const {
         return false;
     }
 
-    pm_call_node_t *call = down_cast<pm_call_node_t>(node);
+    pm_call_node_t *call = down_cast_nonnull<pm_call_node_t>(node);
     auto methodName = resolveConstant(call->name);
 
     return methodName == "untyped"sv && isT(call->receiver);
@@ -118,11 +118,11 @@ bool Parser::isT(pm_node_t *node) const {
     }
 
     if (PM_NODE_TYPE_P(node, PM_CONSTANT_READ_NODE)) { // T
-        auto *constNode = down_cast<pm_constant_read_node_t>(node);
+        auto *constNode = down_cast_nonnull<pm_constant_read_node_t>(node);
         auto name = resolveConstant(constNode->name);
         return name == "T";
     } else if (PM_NODE_TYPE_P(node, PM_CONSTANT_PATH_NODE)) { // ::T
-        auto *pathNode = down_cast<pm_constant_path_node_t>(node);
+        auto *pathNode = down_cast_nonnull<pm_constant_path_node_t>(node);
         auto name = resolveConstant(pathNode->name);
         return name == "T" && pathNode->parent == nullptr;
     }
@@ -135,7 +135,7 @@ bool Parser::isSetterCall(pm_node_t *node) const {
         return false;
     }
 
-    auto *call = down_cast<pm_call_node_t>(node);
+    auto *call = down_cast_nonnull<pm_call_node_t>(node);
     auto methodName = resolveConstant(call->name);
     return !methodName.empty() && methodName.back() == '=';
 }
@@ -149,7 +149,7 @@ bool Parser::isMethodDefModifierCall(pm_node_t *node, const core::GlobalState &g
         return false;
     }
 
-    auto *call = down_cast<pm_call_node_t>(node);
+    auto *call = down_cast_nonnull<pm_call_node_t>(node);
 
     // Must have no receiver (implicit self)
     if (call->receiver != nullptr) {
@@ -176,7 +176,7 @@ bool Parser::isAttrAccessorCall(pm_node_t *node) const {
         return false;
     }
 
-    auto *call = down_cast<pm_call_node_t>(node);
+    auto *call = down_cast_nonnull<pm_call_node_t>(node);
 
     // Must have no receiver or self receiver
     if (call->receiver != nullptr && !PM_NODE_TYPE_P(call->receiver, PM_SELF_NODE)) {

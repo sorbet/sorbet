@@ -23,14 +23,14 @@ bool isSelfOrKernel(pm_node_t *node, const parser::Prism::Parser *prismParser) {
     }
 
     if (PM_NODE_TYPE_P(node, PM_CONSTANT_READ_NODE)) {
-        auto *constant = down_cast<pm_constant_read_node_t>(node);
+        auto *constant = down_cast_nonnull<pm_constant_read_node_t>(node);
         auto name = prismParser->resolveConstant(constant->name);
         // Check if it's Kernel constant with no scope (::Kernel or bare Kernel)
         return name == "Kernel";
     }
 
     if (PM_NODE_TYPE_P(node, PM_CONSTANT_PATH_NODE)) {
-        auto *constantPath = down_cast<pm_constant_path_node_t>(node);
+        auto *constantPath = down_cast_nonnull<pm_constant_path_node_t>(node);
         // Check if it's ::Kernel (parent is nullptr, representing root ::)
         // We reject Foo::Kernel or any other scoped constant
         if (constantPath->parent == nullptr) {
@@ -47,7 +47,7 @@ core::AutocorrectSuggestion autocorrectAbstractBody(core::MutableContext ctx, pm
     core::LocOffsets editLoc;
     string corrected;
 
-    auto *def = down_cast<pm_def_node_t>(method);
+    auto *def = down_cast_nonnull<pm_def_node_t>(method);
     auto methodLoc = prismParser->translateLocation(method->location);
     auto nameLoc = prismParser->translateLocation(def->name_loc);
 
@@ -78,7 +78,7 @@ bool isValidAbstractMethod(pm_node_t *node, const parser::Prism::Parser *prismPa
         return false;
     }
 
-    auto *def = down_cast<pm_def_node_t>(node);
+    auto *def = down_cast_nonnull<pm_def_node_t>(node);
 
     if (def->body == nullptr) {
         return false;
@@ -88,7 +88,7 @@ bool isValidAbstractMethod(pm_node_t *node, const parser::Prism::Parser *prismPa
 
     // Unwrap statements node if it contains exactly one statement
     if (PM_NODE_TYPE_P(bodyNode, PM_STATEMENTS_NODE)) {
-        auto *stmts = down_cast<pm_statements_node_t>(bodyNode);
+        auto *stmts = down_cast_nonnull<pm_statements_node_t>(bodyNode);
         if (stmts->body.size != 1) {
             return false; // Multiple statements, not just a raise
         }
@@ -99,7 +99,7 @@ bool isValidAbstractMethod(pm_node_t *node, const parser::Prism::Parser *prismPa
         return false;
     }
 
-    auto *call = down_cast<pm_call_node_t>(bodyNode);
+    auto *call = down_cast_nonnull<pm_call_node_t>(bodyNode);
     auto methodName = prismParser->resolveConstant(call->name);
 
     // Check if it's a raise call with no receiver or self/Kernel receiver
@@ -109,13 +109,13 @@ bool isValidAbstractMethod(pm_node_t *node, const parser::Prism::Parser *prismPa
 void ensureAbstractMethodRaises(core::MutableContext ctx, pm_node_t *node, parser::Prism::Parser *prismParser) {
     if (isValidAbstractMethod(node, prismParser)) {
         // Method properly raises, remove body to avoid error 5019 later in the pipeline
-        auto *def = down_cast<pm_def_node_t>(node);
+        auto *def = down_cast_nonnull<pm_def_node_t>(node);
         prismParser->destroyNode(def->body);
         def->body = nullptr;
         return;
     }
 
-    auto *def = down_cast<pm_def_node_t>(node);
+    auto *def = down_cast_nonnull<pm_def_node_t>(node);
     auto nodeLoc = prismParser->translateLocation(node->location);
 
     if (auto e = ctx.beginIndexerError(nodeLoc, core::errors::Rewriter::RBSAbstractMethodNoRaises)) {
@@ -224,7 +224,7 @@ optional<core::AutocorrectSuggestion> autocorrectArg(core::MutableContext ctx, p
     switch (PM_NODE_TYPE(methodArg)) {
         // Should be: `Type name`
         case PM_REQUIRED_PARAMETER_NODE: {
-            auto *param = down_cast<pm_required_parameter_node_t>(methodArg);
+            auto *param = down_cast_nonnull<pm_required_parameter_node_t>(methodArg);
             if (arg.name) {
                 auto nameStr = prismParser.resolveConstant(param->name);
                 corrected = fmt::format("{} {}", typeString, nameStr);
@@ -235,7 +235,7 @@ optional<core::AutocorrectSuggestion> autocorrectArg(core::MutableContext ctx, p
         }
         // Should be: `?Type name`
         case PM_OPTIONAL_PARAMETER_NODE: {
-            auto *param = down_cast<pm_optional_parameter_node_t>(methodArg);
+            auto *param = down_cast_nonnull<pm_optional_parameter_node_t>(methodArg);
             if (arg.name) {
                 auto nameStr = prismParser.resolveConstant(param->name);
                 corrected = fmt::format("?{} {}", typeString, nameStr);
@@ -246,7 +246,7 @@ optional<core::AutocorrectSuggestion> autocorrectArg(core::MutableContext ctx, p
         }
         // Should be: `*Type name`
         case PM_REST_PARAMETER_NODE: {
-            auto *param = down_cast<pm_rest_parameter_node_t>(methodArg);
+            auto *param = down_cast_nonnull<pm_rest_parameter_node_t>(methodArg);
             if (arg.name) {
                 auto nameStr = prismParser.resolveConstant(param->name);
                 corrected = fmt::format("*{} {}", typeString, nameStr);
@@ -257,21 +257,21 @@ optional<core::AutocorrectSuggestion> autocorrectArg(core::MutableContext ctx, p
         }
         // Should be: `name: Type`
         case PM_REQUIRED_KEYWORD_PARAMETER_NODE: {
-            auto *param = down_cast<pm_required_keyword_parameter_node_t>(methodArg);
+            auto *param = down_cast_nonnull<pm_required_keyword_parameter_node_t>(methodArg);
             auto nameStr = prismParser.resolveConstant(param->name);
             corrected = fmt::format("{}: {}", nameStr, typeString);
             break;
         }
         // Should be: `?name: Type`
         case PM_OPTIONAL_KEYWORD_PARAMETER_NODE: {
-            auto *param = down_cast<pm_optional_keyword_parameter_node_t>(methodArg);
+            auto *param = down_cast_nonnull<pm_optional_keyword_parameter_node_t>(methodArg);
             auto nameStr = prismParser.resolveConstant(param->name);
             corrected = fmt::format("?{}: {}", nameStr, typeString);
             break;
         }
         // Should be: `**Type name`
         case PM_KEYWORD_REST_PARAMETER_NODE: {
-            auto *param = down_cast<pm_keyword_rest_parameter_node_t>(methodArg);
+            auto *param = down_cast_nonnull<pm_keyword_rest_parameter_node_t>(methodArg);
             if (arg.name) {
                 auto nameStr = prismParser.resolveConstant(param->name);
                 corrected = fmt::format("**{} {}", typeString, nameStr);
@@ -393,19 +393,19 @@ pm_constant_id_t getParamName(pm_node_t *paramNode) {
 
     switch (PM_NODE_TYPE(paramNode)) {
         case PM_REQUIRED_PARAMETER_NODE:
-            return down_cast<pm_required_parameter_node_t>(paramNode)->name;
+            return down_cast_nonnull<pm_required_parameter_node_t>(paramNode)->name;
         case PM_OPTIONAL_PARAMETER_NODE:
-            return down_cast<pm_optional_parameter_node_t>(paramNode)->name;
+            return down_cast_nonnull<pm_optional_parameter_node_t>(paramNode)->name;
         case PM_REST_PARAMETER_NODE:
-            return down_cast<pm_rest_parameter_node_t>(paramNode)->name;
+            return down_cast_nonnull<pm_rest_parameter_node_t>(paramNode)->name;
         case PM_REQUIRED_KEYWORD_PARAMETER_NODE:
-            return down_cast<pm_required_keyword_parameter_node_t>(paramNode)->name;
+            return down_cast_nonnull<pm_required_keyword_parameter_node_t>(paramNode)->name;
         case PM_OPTIONAL_KEYWORD_PARAMETER_NODE:
-            return down_cast<pm_optional_keyword_parameter_node_t>(paramNode)->name;
+            return down_cast_nonnull<pm_optional_keyword_parameter_node_t>(paramNode)->name;
         case PM_KEYWORD_REST_PARAMETER_NODE:
-            return down_cast<pm_keyword_rest_parameter_node_t>(paramNode)->name;
+            return down_cast_nonnull<pm_keyword_rest_parameter_node_t>(paramNode)->name;
         case PM_BLOCK_PARAMETER_NODE:
-            return down_cast<pm_block_parameter_node_t>(paramNode)->name;
+            return down_cast_nonnull<pm_block_parameter_node_t>(paramNode)->name;
         default:
             return PM_CONSTANT_ID_UNSET;
     }
@@ -495,7 +495,7 @@ pm_node_t *MethodTypeToParserNodePrism::attrSignature(pm_call_node_t *call, cons
         if (!PM_NODE_TYPE_P(arg, PM_SYMBOL_NODE)) {
             return nullptr;
         }
-        auto *symbolNode = down_cast<pm_symbol_node_t>(arg);
+        auto *symbolNode = down_cast_nonnull<pm_symbol_node_t>(arg);
         auto argName = prismParser.extractString(&symbolNode->unescaped);
 
         // The location points to the `:name` symbol, adjust to point to actual name
@@ -603,7 +603,7 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(pm_node_t *methodDef, co
 
     vector<pm_node_t *> methodParams;
     if (PM_NODE_TYPE_P(methodDef, PM_DEF_NODE)) {
-        auto def = down_cast<pm_def_node_t>(methodDef);
+        auto def = down_cast_nonnull<pm_def_node_t>(methodDef);
         methodParams = getMethodParams(def);
     }
 
