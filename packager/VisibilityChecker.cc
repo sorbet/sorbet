@@ -566,6 +566,8 @@ public:
     }
 
     void postTransformConstantLit(core::Context ctx, const ast::ConstantLit &lit) {
+        auto &db = ctx.state.packageDB();
+
         if (constantAssignmentDefinitions.contains(&lit)) {
             return;
         }
@@ -580,6 +582,10 @@ public:
         // symbolsReferenced, and not A, A::B, A::B::C.
         // TODO(neil): we should also track A, A::B, A::B::C, so that we can use this for find all references too.
         referencedSymbols.insert(litSymbol);
+
+        if (db.genPackagesMode() != core::packages::GenPackagesMode::Disabled) {
+            trackScopeChainPackages(ctx, lit);
+        }
 
         auto loc = litSymbol.loc(ctx);
 
@@ -598,8 +604,6 @@ public:
             }
             return;
         }
-
-        auto &db = ctx.state.packageDB();
 
         // no need to check visibility for these cases
         auto otherPackage = litSymbol.enclosingClass(ctx).data(ctx)->package;
@@ -860,6 +864,41 @@ public:
                     }
                 }
             }
+        }
+    }
+
+    // When a constant reference like C::ALIASED::CONSTANT resolves through an alias to a symbol
+    // in a different package (e.g., AnotherPackage::NESTED::CONSTANT), the tree walker only visits
+    // the outermost ConstantLit. We need to also track the packages referenced by intermediate
+    // constants in the original scope chain (e.g., C) so that imports are generated for them too.
+    void trackScopeChainPackages(core::Context ctx, const ast::ConstantLit &lit) {
+        auto *original = lit.original();
+        if (original == nullptr) {
+            return;
+        }
+
+        const ast::ConstantLit *scope = ast::cast_tree<ast::ConstantLit>(original->scope);
+        while (scope != nullptr) {
+            auto scopeSymbol = scope->symbol();
+            if (scopeSymbol.isStaticField(ctx) && core::isa_type<core::AliasType>(scopeSymbol.resultType(ctx))) {
+                auto scopePackage = scopeSymbol.enclosingClass(ctx).data(ctx)->package;
+                if (scopePackage.exists() && scopePackage != this->package.mangledName()) {
+                    auto *import = this->package.importsPackage(scopePackage);
+                    bool wasImported = import != nullptr;
+                    bool importNeeded = !wasImported;
+                    auto [it, inserted] = referencedPackages.insert(
+                        {scopePackage, {.importNeeded = importNeeded, .causesModularityError = false}});
+                    if (!inserted && importNeeded) {
+                        it->second.importNeeded = true;
+                    }
+                }
+            }
+
+            auto *scopeOriginal = scope->original();
+            if (scopeOriginal == nullptr) {
+                break;
+            }
+            scope = ast::cast_tree<ast::ConstantLit>(scopeOriginal->scope);
         }
     }
 

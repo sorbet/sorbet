@@ -5,4 +5,5 @@ class AnotherPackage < PackageSpec
   layer 'util'
 
   export AnotherPackage::CONSTANT
+  export AnotherPackage::NESTED
 end

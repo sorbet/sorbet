@@ -32,10 +32,14 @@ B/__package.rb:3: `B` is missing `visible_to`s https://srb.help/3734
      9 |  visible_to A
                       ^
 
-E/__package.rb:3: `E` is missing `visible_to`s https://srb.help/3734
+E/__package.rb:3: `E` is missing imports and `visible_to`s https://srb.help/3734
      3 |class E < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
+    E/__package.rb:5: Inserted `import AnotherPackage
+      import C`
+     5 |  layer 'util'
+                      ^
     E/__package.rb:7: Inserted `visible_to 'tests'
       visible_to C`
      7 |  export E::CONSTANT_FROM_E
@@ -148,6 +152,8 @@ end
 class E < PackageSpec
   strict_dependencies 'dag'
   layer 'util'
+  import AnotherPackage
+  import C
 
   export E::CONSTANT_FROM_E
   visible_to 'tests'
@@ -227,6 +233,19 @@ A/constants.rb:5: Unable to resolve constant `G` https://srb.help/5002
      3 |module A
         ^^^^^^^^
 
+E/constants.rb:5: Unable to resolve constant `C` https://srb.help/5002
+     5 |  puts C::ALIASED::CONSTANT
+               ^
+    https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/t.rbi#L16: `T` defined here
+    16 |module T
+        ^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/gc.rbi#L12: `GC` defined here
+    12 |module GC
+        ^^^^^^^^^
+    A/constants.rb:3: `A` defined here
+     3 |module A
+        ^^^^^^^^
+
 C/app.rb:8: `F::CONSTANT_FROM_F` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
      8 |      puts F::CONSTANT_FROM_F
                    ^^^^^^^^^^^^^^^^^^
@@ -244,7 +263,7 @@ C/app.rb:9: Package `G` includes explicit visibility modifiers and cannot be imp
                    ^^^^^^^^^^^^^^^^^^
   Note:
     Please consult with the owning team before adding a `visible_to` line to the package `G`
-Errors: 8
+Errors: 9
 
 ###### cat B/__package.rb ######
 # typed: strict

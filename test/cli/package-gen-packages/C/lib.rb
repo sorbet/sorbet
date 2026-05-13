@@ -1,6 +1,8 @@
 # typed: strict
 
 module C
+  ALIASED = AnotherPackage::NESTED
+
   class Lib
     def self.run
       puts B::CONSTANT_FROM_B
