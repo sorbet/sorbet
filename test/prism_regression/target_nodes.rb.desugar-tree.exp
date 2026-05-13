@@ -68,4 +68,74 @@ rescue => <rescueTemp>$11
     <self>.a().[]=(123, <rescueTemp>$11)
     <emptyTree>
   end
+
+  [].each() do |forTemp$12|
+    begin
+      @ivar = forTemp$12
+      <emptyTree>
+    end
+  end
+
+  [].each() do |forTemp$13|
+    begin
+      @@cvar = forTemp$13
+      <emptyTree>
+    end
+  end
+
+  [].each() do |forTemp$14|
+    begin
+      $gvar = forTemp$14
+      <emptyTree>
+    end
+  end
+
+  [].each() do |forTemp$15|
+    begin
+      <self>.call_target1=(forTemp$15)
+      <emptyTree>
+    end
+  end
+
+  [].each() do |forTemp$16|
+    begin
+      <self>.call_target2=(forTemp$16)
+      <emptyTree>
+    end
+  end
+
+  [].each() do |forTemp$17|
+    begin
+      <emptyTree>::<C ConstantTarget> = forTemp$17
+      <emptyTree>
+    end
+  end
+
+  [].each() do |forTemp$18|
+    begin
+      ::<root>::<C ConstantPathTarget> = forTemp$18
+      <emptyTree>
+    end
+  end
+
+  [].each() do |forTemp$19|
+    begin
+      <emptyTree>::<C Nested>::<C ConstantPathTarget> = forTemp$19
+      <emptyTree>
+    end
+  end
+
+  [].each() do |forTemp$20|
+    begin
+      ::<root>::<C Nested>::<C ConstantPathTarget> = forTemp$20
+      <emptyTree>
+    end
+  end
+
+  [].each() do |forTemp$21|
+    begin
+      <self>.a().[]=(123, forTemp$21)
+      <emptyTree>
+    end
+  end
 end

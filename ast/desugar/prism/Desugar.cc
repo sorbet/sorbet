@@ -2576,6 +2576,20 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
                     //     end
                     auto rhs = MK::Local(location, forLoopTempVarName);
                     assignment = desugarMlhs(location, mlhs, move(rhs));
+                } else if (isa_node<pm_call_target_node>(forLoopVar)) { // single call target
+                    // Desugar:
+                    //     for self.foo in []
+                    // into:
+                    //     [].each do |forTemp$1|
+                    //       self.foo=(forTemp$1)
+                    //       begin
+                    //         "the loop body"
+                    //       end
+                    //     end
+                    auto *callTargetNode = down_cast<pm_call_target_node>(forLoopVar);
+                    auto loc = translateLoc(callTargetNode->base.location);
+                    auto rhs = MK::Local(location, forLoopTempVarName);
+                    assignment = desugarCallTargetNode(callTargetNode, loc, move(rhs));
                 } else { // single non-local variable target
                     // Desugar:
                     //     for @ivar in []
@@ -2586,7 +2600,6 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
                     //         "the loop body"
                     //       end
                     //     end
-                    // MK::Assign handles a Send LHS by folding the rhs in as a positional arg.
                     auto lhs = desugar(forLoopVar);
                     auto rhs = MK::Local(location, forLoopTempVarName);
                     assignment = MK::Assign(location, move(lhs), move(rhs));
