@@ -241,7 +241,6 @@ void SigsRewriterPrism::insertTypeParams(pm_node_t *node, pm_node_t *body) {
         return;
     }
 
-    ENFORCE(body != nullptr && PM_NODE_TYPE_P(body, PM_STATEMENTS_NODE), "Body must be a statements node");
     auto *statements = down_cast<pm_statements_node_t>(body);
 
     for (auto *typeParam : typeParams) {

@@ -551,7 +551,6 @@ void Desugarer::flattenKwargs(pm_keyword_hash_node *kwargsHashNode, Container &d
 
     // Flatten each key/value pair directly
     for (auto *element : elements) {
-        ENFORCE(PM_NODE_TYPE_P(element, PM_ASSOC_NODE));
         auto *assoc = down_cast<pm_assoc_node>(element);
 
         // Special handling for symbol keys with trailing colon (like `a: 1` instead of `:a => 1`)
@@ -1978,7 +1977,6 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
 
             // Build the if ladder backwards from the last "in" to the first
             for (auto it = inNodes.rbegin(); it != inNodes.rend(); ++it) {
-                ENFORCE(PM_NODE_TYPE_P(*it, PM_IN_NODE));
                 auto inPattern = down_cast<pm_in_node>(*it);
 
                 // Get the actual pattern location (unwrapping if/unless guards)
