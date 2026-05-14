@@ -3,16 +3,28 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C Test><<C <todo sym>>> < (::<todo sym>)
-    class <emptyTree>::<C <describe '"".dne()'>><<C <todo sym>>> < (<self>)
+    begin
+      "".dne()
+      class <emptyTree>::<C <describe '"".dne()'>><<C <todo sym>>> < (<self>)
+      end
     end
 
-    class <emptyTree>::<C <describe 'A'>><<C <todo sym>>> < (<self>)
+    begin
+      <emptyTree>::<C A>
+      class <emptyTree>::<C <describe 'A'>><<C <todo sym>>> < (<self>)
+      end
     end
 
-    class <emptyTree>::<C <describe 'B'>><<C <todo sym>>> < (<self>)
+    begin
+      <emptyTree>::<C B>
+      class <emptyTree>::<C <describe 'B'>><<C <todo sym>>> < (<self>)
+      end
     end
 
-    class <emptyTree>::<C <describe 'a'>><<C <todo sym>>> < (<self>)
+    begin
+      "a"
+      class <emptyTree>::<C <describe 'a'>><<C <todo sym>>> < (<self>)
+      end
     end
   end
 end
