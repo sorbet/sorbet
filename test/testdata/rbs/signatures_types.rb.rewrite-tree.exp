@@ -16,6 +16,38 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::FalseClass)
+  end
+
+  def returns_false<<todo method>>(&<blk>)
+    false
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:f, ::FalseClass).void()
+  end
+
+  def takes_false<<todo method>>(f, &<blk>)
+    <emptyTree>::<C T>.reveal_type(f)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::TrueClass)
+  end
+
+  def returns_true<<todo method>>(&<blk>)
+    true
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:t, ::TrueClass).void()
+  end
+
+  def takes_true<<todo method>>(t, &<blk>)
+    <emptyTree>::<C T>.reveal_type(t)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
     <self>.returns(<emptyTree>::<C Foo>)
   end
 
@@ -554,6 +586,18 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C T>.reveal_type(<self>.returns_nil())
 
   <runtime method definition of takes_nil>
+
+  <runtime method definition of returns_false>
+
+  <emptyTree>::<C T>.reveal_type(<self>.returns_false())
+
+  <runtime method definition of takes_false>
+
+  <runtime method definition of returns_true>
+
+  <emptyTree>::<C T>.reveal_type(<self>.returns_true())
+
+  <runtime method definition of takes_true>
 
   <runtime method definition of class_instance_type1>
 

@@ -39,10 +39,12 @@ template <typename Type> struct RBSNodeTypeHelper {
         static constexpr enum rbs_node_type TypeID = type_enum; \
     }
 
+DEF_RBS_TYPE_HELPER(rbs_ast_bool_t, RBS_AST_BOOL);
 DEF_RBS_TYPE_HELPER(rbs_ast_symbol_t, RBS_AST_SYMBOL);
 DEF_RBS_TYPE_HELPER(rbs_ast_type_param_t, RBS_AST_TYPE_PARAM);
 DEF_RBS_TYPE_HELPER(rbs_types_function_t, RBS_TYPES_FUNCTION);
 DEF_RBS_TYPE_HELPER(rbs_types_function_param_t, RBS_TYPES_FUNCTION_PARAM);
+DEF_RBS_TYPE_HELPER(rbs_types_literal_t, RBS_TYPES_LITERAL);
 
 #undef DEF_RBS_TYPE_HELPER
 

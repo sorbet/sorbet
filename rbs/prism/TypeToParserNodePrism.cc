@@ -393,10 +393,25 @@ pm_node_t *TypeToParserNodePrism::toPrismNode(const rbs_node_t *node, const RBSD
         case RBS_TYPES_INTERSECTION:
             return intersectionType((rbs_types_intersection_t *)node, nodeLoc, declaration);
         case RBS_TYPES_LITERAL: {
-            if (auto e = ctx.beginIndexerError(nodeLoc, core::errors::Rewriter::RBSUnsupported)) {
-                e.setHeader("RBS literal types are not supported");
+            rbs_types_literal_t *literalNode = rbs_down_cast<rbs_types_literal_t>(const_cast<rbs_node_t *>(node));
+
+            switch (literalNode->literal->type) {
+                case RBS_AST_BOOL: { // Boolean literals used in type positions, like `(false) -> true`
+                    auto *boolNode = rbs_down_cast<rbs_ast_bool_t>(literalNode->literal);
+
+                    // Sorbet doesn't support literal bool types. Rewrite them to their corresponding classes instead:
+                    // * `true` -> `TrueClass`
+                    // * `false` -> `FalseClass`
+                    return boolNode->value ? prism.TrueClass(nodeLoc) : prism.FalseClass(nodeLoc);
+                }
+                default: {
+                    // We don't have a good way to represent other literal types, so we just return T.untyped for them.
+                    if (auto e = ctx.beginIndexerError(nodeLoc, core::errors::Rewriter::RBSUnsupported)) {
+                        e.setHeader("RBS literal types are not supported");
+                    }
+                    return prism.TUntyped(nodeLoc);
+                }
             }
-            return prism.TUntyped(nodeLoc);
         }
         case RBS_TYPES_OPTIONAL:
             return optionalType((rbs_types_optional_t *)node, nodeLoc, declaration);

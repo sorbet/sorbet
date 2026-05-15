@@ -1,3 +1,7 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   n = <cast:let>(nil, <todo sym>, ::NilClass)
+
+  t = <cast:let>(true, <todo sym>, ::TrueClass)
+
+  f = <cast:let>(false, <todo sym>, ::FalseClass)
 end
