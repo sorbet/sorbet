@@ -8,40 +8,56 @@ module RSpec
   end
 end
 
-# Because shared_examples constants are placed at root scope (matching RSpec's
-# global registry), two shared_examples with the same name in different modules
-# map to the same constant and their definitions are merged.
-#
-# This mirrors RSpec's own behavior: redefining a shared example with an existing
-# name produces a warning in RSpec, and the convention is that names are globally
-# unique. Sorbet surfaces the conflict as a type error when the merged definitions
-# are incompatible.
+# `RSpec.shared_examples` writes to RSpec's global registry, so two definitions
+# with the same name collide at runtime regardless of where the call appears.
+# The rewriter mirrors that by placing both at root scope; Sorbet merges them
+# and surfaces the conflicting sigs as type errors on both bodies.
 
 module A
-  RSpec.describe 'group A' do
+  RSpec.shared_examples 'same name' do
     extend T::Sig
 
-    shared_examples 'same name' do
-      extend T::Sig
-
-      sig { returns(String) }
-      let(:value) { 'hello' } # error: Expected `Integer` but found `String("hello")` for method result type
-    end
+    sig { returns(String) }
+    let(:value) { 'hello' } # error: Expected `Integer` but found `String("hello")` for method result type
   end
 end
 
 module B
-  RSpec.describe 'group B' do
+  RSpec.shared_examples 'same name' do
     extend T::Sig
 
-    # This shared_examples has the same name as the one in module A.
-    # Both definitions are merged into ::<shared_examples 'same name'>,
-    # and the conflicting sigs produce an error on both bodies.
-    shared_examples 'same name' do
+    sig { returns(Integer) }
+    let(:value) { 'world' } # error: Expected `Integer` but found `String("world")` for method result type
+  end
+end
+
+# Bare `shared_examples` inside `RSpec.describe` is nested under the describe,
+# not registered globally. Two definitions with the same name in different
+# describes live in different nested scopes and do not collide — matching
+# RSpec runtime, where the registry context is the enclosing example group
+# class, not the global `:main` context.
+module C
+  RSpec.describe 'group C' do
+    extend T::Sig
+
+    shared_examples 'independent name' do
+      extend T::Sig
+
+      sig { returns(String) }
+      let(:value) { 'hello' }
+    end
+  end
+end
+
+module D
+  RSpec.describe 'group D' do
+    extend T::Sig
+
+    shared_examples 'independent name' do
       extend T::Sig
 
       sig { returns(Integer) }
-      let(:value) { 'world' } # error: Expected `Integer` but found `String("world")` for method result type
+      let(:value) { 42 }
     end
   end
 end
