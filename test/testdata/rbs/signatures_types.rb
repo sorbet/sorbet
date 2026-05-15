@@ -13,6 +13,13 @@ module Foo
   end
 end
 
+#: -> nil
+def returns_nil = nil;
+T.reveal_type(returns_nil) # error: Revealed type: `NilClass`
+
+#: (nil) -> void
+def takes_nil(n) = T.reveal_type(n) # error: Revealed type: `NilClass`
+
 # Class instance types
 
 #: -> Foo

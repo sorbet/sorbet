@@ -626,6 +626,7 @@ pipeline_tests(
             "testdata/rbs/assertions_heredoc.rb",
 
             # Prism output differs from legacy for constant resolution.
+            "testdata/rbs/annotations_literal_types.rb",
             "testdata/rbs/signatures_types.rb",
         ],
     ),
