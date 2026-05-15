@@ -287,3 +287,67 @@ end
 href="https://sorbet.run/#%23%20typed%3A%20true%0Aextend%20T%3A%3ASig%0A%0Asig%20%7B%20params%28xs%3A%20T%3A%3AArray%5BT.any%28Integer%2C%20String%29%5D%29.void%20%7D%0Adef%20example%28xs%29%0A%20%20ys%20%3D%20xs.select%20%7B%20%7Cx%7C%20x.is_a%3F%28Integer%29%20%7D%0A%20%20T.reveal_type%28ys%29%20%23%20%3C-%20not%20just%20Integer%20%E2%9D%8C%0A%0A%20%20ys%20%3D%20xs.filter_map%20%7B%20%7Cx%7C%20x%20if%20x.is_a%3F%28Integer%29%20%7D%0A%20%20T.reveal_type%28ys%29%20%23%20%3C-%20only%20integers%20%E2%9C%85%0Aend">View on sorbet.run</a>
 
 `Array#filter_map` removes any element for which the filter returns a falsy value. If the value is truthy, the value at that index is mapped to the new, truthy value. The `x if x.is_a?(Integer)` evaluates to `x` (an `Integer`, thus always truthy) if it's an Integer, or implicitly returns `nil` (which is falsy) if it's a String.
+
+## Special handling for `present?` and `blank?`
+
+> `present?` and `blank?` are not built into Ruby by default. Rather, they are monkey patched methods provided by the Active Support gem. [See here](https://guides.rubyonrails.org/active_support_core_extensions.html#blank-questionmark-and-present-questionmark) for more.
+
+Sorbet's support for `present?` and `blank?` depends on how precisely the signatures for those monkey patched methods are defined. To be maximally precise, ensure that classes which are unconditionally present or blank have narrowly-defined signatures.
+
+Consider this code:
+
+```ruby
+if x.present?
+  # truthy branch
+else
+  # falsy branch
+end
+
+if x.blank?
+  # truthy branch
+else
+  # falsy branch
+end
+```
+
+By default Sorbet assumes that:
+
+- the truthy branch of a call to `x.present?` implies that `x` is neither `false` nor `nil`
+- the falsy branch of a call to `x.blank?` implies that `x` is neither `false` nor `nil`
+
+Put another way, by default Sorbet assumes nothing about:
+
+- the falsy branch of a call to `x.present?`
+- the truthy branch of a call to `x.blank`?
+
+Sorbet **only** assumes something about these branches when the declared signature for `present?` or `blank?` makes it clear that values of that type are present or blank unconditionally. For example Active Support declares that `Date` (and all subclasses of `Date`, like `DateTime`) are not blank (unconditionally present). If we declare that to Sorbet:
+
+```ruby
+class Date
+  sig { override.returns(FalseClass) }
+  def blank? = false
+
+  sig { override.returns(TrueClass) }
+  def present? = true
+end
+```
+
+Then Sorbet is able to tell that:
+
+- the falsy branch of a call to `x.present?` implies that `x` is not `Date`
+- the truthy branch of a call to `x.blank?` implies that `x` is not `Date`
+
+Similarly, if we were to declare some user-defined always-blank type (no such type is declared in Active Support outside of `NilClass` and `FalseClass`), we would need to use these signatures:
+
+```ruby
+class NilClass
+  sig { override.returns(TrueClass) }
+  def blank? = true
+  sig { override.returns(FalseClass) }
+  def present? = true
+end
+```
+
+(For backwards compatibility with previous versions of Sorbet, Sorbet assumes that `NilClass` and `FalseClass` behave this way regardless of their declared signatures, so this only matters for user-defined unconditionally blank types.)
+
+When declaring these precise signatures, be sure to use the `override` keyword which will opt that class and all its children into [strict override checking](override-checking.md), making sure that no child class regresses this relationship, thereby turning the type back into a conditionally-present or conditionally-blank type.

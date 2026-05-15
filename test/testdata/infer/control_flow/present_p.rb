@@ -24,6 +24,17 @@ class Object
   end
 end
 
+class Time
+  # Time is always present, because it is never blank
+  T::Sig::WithoutRuntime.sig { returns(TrueClass) }
+  def present? = true
+end
+
+class NeverPresent
+  T::Sig::WithoutRuntime.sig { returns(FalseClass) }
+  def present? = false
+end
+
 class A
   extend T::Sig
 
@@ -55,6 +66,37 @@ class A
   def unreachable_false()
     if false.present?
       "foo" # error: This code is unreachable
+    end
+  end
+
+  sig { params(time: T.nilable(Time)).void }
+  def test_always_present(time)
+    if time.present?
+      T.reveal_type(time) # error: Revealed type: `Time`
+    else
+      T.reveal_type(time) # error: Revealed type: `NilClass`
+    end
+  end
+
+  sig {
+    type_parameters(:U)
+      .params(time: T.nilable(T.all(T.type_parameter(:U), Time)))
+      .void
+  }
+  def test_always_present_not_fully_defined(time)
+    if time.present?
+      T.reveal_type(time) # error: Revealed type: `T.all(Time, T.type_parameter(:U) (of A#test_always_present_not_fully_defined))`
+    else
+      T.reveal_type(time) # error: Revealed type: `T.nilable(T.all(Time, T.type_parameter(:U) (of A#test_always_present_not_fully_defined)))`
+    end
+  end
+
+  sig { params(x: T.any(String, NeverPresent)).void }
+  def test_custom_never_present(x)
+    if x.present?
+      T.reveal_type(x) # error: `T.any(String, NeverPresent)`
+    else
+      T.reveal_type(x) # error: `T.any(String, NeverPresent)`
     end
   end
 end
