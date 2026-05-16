@@ -4,6 +4,7 @@
 #include "common/typecase.h"
 #include "core/Names.h"
 #include "core/TypeConstraint.h"
+#include "cfg/CFG.h"
 #include <memory>
 #include <utility>
 
@@ -77,11 +78,11 @@ Return::Return(LocalRef what, core::LocOffsets whatLoc) : what(what), whatLoc(wh
 }
 
 string SolveConstraint::toString(const core::GlobalState &gs, const CFG &cfg) const {
-    return fmt::format("Solve<{}, {}>", this->send.toString(gs, cfg), this->link->fun.toString(gs));
+    return fmt::format("Solve<{}, {}>", this->send.toString(gs, cfg), cfg.linkFor(this->link)->fun.toString(gs));
 }
 
 string SolveConstraint::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
-    return fmt::format("Solve {{ send = {}, link = {} }}", this->send.toString(gs, cfg), this->link->fun.showRaw(gs));
+    return fmt::format("Solve {{ send = {}, link = {} }}", this->send.toString(gs, cfg), cfg.linkFor(this->link)->fun.showRaw(gs));
 }
 
 string Return::toString(const core::GlobalState &gs, const CFG &cfg) const {
@@ -93,30 +94,30 @@ string Return::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) co
                        this->what.showRaw(gs, cfg, tabs + 1));
 }
 
-BlockReturn::BlockReturn(shared_ptr<core::SendAndBlockLink> link, LocalRef what) : link(std::move(link)), what(what) {
+BlockReturn::BlockReturn(LinkRef link, LocalRef what) : link(link), what(what) {
     categoryCounterInc("cfg", "blockreturn");
 }
 
 string BlockReturn::toString(const core::GlobalState &gs, const CFG &cfg) const {
-    return fmt::format("blockreturn<{}> {}", this->link->fun.toString(gs), this->what.toString(gs, cfg));
+    return fmt::format("blockreturn<{}> {}", cfg.linkFor(this->link)->fun.toString(gs), this->what.toString(gs, cfg));
 }
 
 string BlockReturn::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
     return fmt::format("BlockReturn {{\n{0}&nbsp;link = {1},\n{0}&nbsp;what = {2},\n{0}}}", spacesForTabLevel(tabs),
-                       this->link->fun.showRaw(gs), this->what.showRaw(gs, cfg, tabs + 1));
+                       cfg.linkFor(this->link)->fun.showRaw(gs), this->what.showRaw(gs, cfg, tabs + 1));
 }
 
-LoadSelf::LoadSelf(shared_ptr<core::SendAndBlockLink> link, LocalRef fallback)
-    : fallback(fallback), link(std::move(link)) {
+LoadSelf::LoadSelf(LinkRef link, LocalRef fallback)
+    : fallback(fallback), link(link) {
     categoryCounterInc("cfg", "loadself");
 }
 
 string LoadSelf::toString(const core::GlobalState &gs, const CFG &cfg) const {
-    return fmt::format("loadSelf({})", this->link->fun.toString(gs));
+    return fmt::format("loadSelf({})", cfg.linkFor(this->link)->fun.toString(gs));
 }
 
 string LoadSelf::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
-    return fmt::format("LoadSelf {{ link = {} }}", this->link->fun.showRaw(gs));
+    return fmt::format("LoadSelf {{ link = {} }}", cfg.linkFor(this->link)->fun.showRaw(gs));
 }
 
 Send::SendInitializer::SendInitializer(Send *snd) : snd(snd), refs(snd->argRefs()), locs(snd->argLocs()) {}
@@ -156,7 +157,7 @@ Send::~Send() {
 }
 
 core::LocOffsets Send::locWithoutBlock(core::LocOffsets bindLoc) {
-    if (this->link == nullptr) {
+    if (!this->link) {
         // This location is slightly better, because it will include the last `)` if that exists,
         // which means that queries for things like
         //
@@ -281,11 +282,11 @@ const core::ParamInfo &ArgPresent::argument(const core::GlobalState &gs) const {
 }
 
 string LoadYieldParams::toString(const core::GlobalState &gs, const CFG &cfg) const {
-    return fmt::format("load_yield_params({})", this->link->fun.toString(gs));
+    return fmt::format("load_yield_params({})", cfg.linkFor(this->link)->fun.toString(gs));
 }
 
 string LoadYieldParams::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
-    return fmt::format("LoadYieldParams {{ link = {0} }}", this->link->fun.showRaw(gs));
+    return fmt::format("LoadYieldParams {{ link = {0} }}", cfg.linkFor(this->link)->fun.showRaw(gs));
 }
 
 string YieldParamPresent::toString(const core::GlobalState &gs, const CFG &cfg) const {

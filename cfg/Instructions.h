@@ -1,6 +1,7 @@
 #ifndef SORBET_INSTRUCTIONS_H
 #define SORBET_INSTRUCTIONS_H
 
+#include "cfg/LinkRef.h"
 #include "cfg/LocalRef.h"
 #include "core/Context.h"
 #include "core/GlobalState.h"
@@ -238,8 +239,8 @@ CheckSize(Alias, 8, 8);
 INSN(SolveConstraint) : public Instruction {
 public:
     LocalRef send;
-    std::shared_ptr<core::SendAndBlockLink> link;
-    SolveConstraint(std::shared_ptr<core::SendAndBlockLink> link, LocalRef send) : send(send), link(std::move(link)) {
+    LinkRef link;
+    SolveConstraint(LinkRef link, LocalRef send) : send(send), link(link) {
         categoryCounterInc("cfg", "solveconstraint");
     };
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
@@ -269,7 +270,7 @@ public:
     core::LocOffsets funLoc;
     core::LocOffsets receiverLoc;
     const size_t numArgs;
-    std::shared_ptr<core::SendAndBlockLink> link;
+    LinkRef link;
 
     // We only need this for the first two sets of trailing types, but it's
     // defined identically for all three types and it's convenient to have it
@@ -385,10 +386,10 @@ CheckSize(Return, 24, 8);
 
 INSN(BlockReturn) : public Instruction {
 public:
-    std::shared_ptr<core::SendAndBlockLink> link;
+    LinkRef link;
     VariableUseSite what;
 
-    BlockReturn(std::shared_ptr<core::SendAndBlockLink> link, LocalRef what);
+    BlockReturn(LinkRef link, LocalRef what);
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
@@ -397,8 +398,8 @@ CheckSize(BlockReturn, 32, 8);
 INSN(LoadSelf) : public Instruction {
 public:
     LocalRef fallback;
-    std::shared_ptr<core::SendAndBlockLink> link;
-    LoadSelf(std::shared_ptr<core::SendAndBlockLink> link, LocalRef fallback);
+    LinkRef link;
+    LoadSelf(LinkRef link, LocalRef fallback);
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
@@ -456,9 +457,9 @@ CheckSize(ArgPresent, 8, 8);
 
 INSN(LoadYieldParams) : public Instruction {
 public:
-    std::shared_ptr<core::SendAndBlockLink> link;
+    LinkRef link;
 
-    LoadYieldParams(std::shared_ptr<core::SendAndBlockLink> link) : link(std::move(link)) {
+    LoadYieldParams(LinkRef link) : link(std::move(link)) {
         categoryCounterInc("cfg", "loadyieldparams");
     };
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;

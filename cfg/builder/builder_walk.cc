@@ -258,9 +258,8 @@ BasicBlock *CFGBuilder::walkBlockReturn(CFGContext cctx, core::LocOffsets loc, c
     auto afterNext = walk(cctx.withTarget(exprSym), expr, current);
     if (afterNext != cctx.inWhat.deadBlock() && cctx.isInsideRubyBlock) {
         LocalRef dead = cctx.newTemporary(core::Names::nextTemp());
-        ENFORCE(cctx.link != nullptr);
-        ENFORCE(cctx.link->get() != nullptr);
-        afterNext->exprs.emplace_back(dead, loc, make_insn<BlockReturn>(*cctx.link, exprSym));
+        ENFORCE(cctx.inWhat.linkFor(cctx.link).get() != nullptr);
+        afterNext->exprs.emplace_back(dead, loc, make_insn<BlockReturn>(cctx.link, exprSym));
     }
 
     if (cctx.nextScope == nullptr) {
@@ -723,7 +722,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                     for (auto &e : blockParamFlags) {
                         paramFlags.emplace_back(e.flags);
                     }
-                    auto link = make_shared<core::SendAndBlockLink>(s.fun, block->loc, move(paramFlags));
+                    auto link = cctx.inWhat.enterLink(s.fun, block->loc, move(paramFlags));
                     auto send = std::move(snd).asInsnPtr();
                     (*cast_instruction<Send>(send)).link = link;
                     LocalRef sendTemp = cctx.newTemporary(core::Names::blockPreCallTemp());
@@ -826,7 +825,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                         }
 
                         synthesizeExpr(blockLast, dead, blockReturnLoc,
-                                       make_insn<BlockReturn>(std::move(link), blockrv));
+                                       make_insn<BlockReturn>(link, blockrv));
                     }
 
                     unconditionalJump(blockLast, headerBlock, cctx.inWhat, s.loc);

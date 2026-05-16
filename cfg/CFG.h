@@ -9,7 +9,7 @@
 #include <memory>
 
 #include "cfg/Instructions.h"
-
+#include "cfg/LinkRef.h"
 //
 // This file defines the IR that the inference algorithm operates on.
 // A CFG (control flow graph) is a directed graph of "basic blocks" which are
@@ -190,6 +190,10 @@ public:
     ReadsAndWrites findAllReadsAndWrites(core::Context ctx);
     LocalRef enterLocal(core::LocalVariable variable);
 
+    LinkRef enterLink(core::NameRef fun, core::LocOffsets loc, std::vector<core::ParamInfo::Flags> &&paramFlags);
+    std::shared_ptr<core::SendAndBlockLink> &linkFor(LinkRef);
+    const std::shared_ptr<core::SendAndBlockLink> &linkFor(LinkRef) const;
+
 private:
     CFG();
     BasicBlock *freshBlock(int outerLoops);
@@ -206,6 +210,8 @@ private:
      * Map from LocalVariable -> LocalRef. Used to de-dupe variables in localVariables.
      */
     UnorderedMap<core::LocalVariable, LocalRef> localVariableToLocalRef;
+
+    std::vector<std::shared_ptr<core::SendAndBlockLink>> links;
 };
 
 } // namespace sorbet::cfg
