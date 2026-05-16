@@ -628,6 +628,7 @@ pipeline_tests(
             # Prism output differs from legacy for constant resolution.
             "testdata/rbs/annotations_literal_types.rb",
             "testdata/rbs/signatures_types.rb",
+            "testdata/rbs/annotations_literal_types.rb",
         ],
     ),
     "PrismPosTests",

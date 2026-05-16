@@ -337,6 +337,10 @@ pm_node_t *Factory::Call(core::LocOffsets loc, pm_node_t *receiver, string_view 
     return up_cast(createCallNode(receiver, methodId, up_cast(arguments), tinyLoc, fullLoc, tinyLoc, block));
 }
 
+pm_node_t *Factory::NilClass(core::LocOffsets loc) const {
+    return ConstantReadNode("NilClass"sv, loc);
+}
+
 pm_node_t *Factory::T(core::LocOffsets loc) const {
     return ConstantPathNode(loc, nullptr, "T");
 }
