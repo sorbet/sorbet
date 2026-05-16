@@ -260,7 +260,7 @@ INSN(Send) : public Instruction, private core::TrailingObjects<Send, LocalRef, c
     }
 
     Send(LocalRef recv, core::LocOffsets receiverLoc, core::NameRef fun, core::LocOffsets funLoc, uint16_t numPosArgs,
-         bool isPrivateOk, size_t numArgs);
+         bool isPrivateOk, uint32_t numArgs);
 
 public:
     bool isPrivateOk;
@@ -269,7 +269,7 @@ public:
     VariableUseSite recv;
     core::LocOffsets funLoc;
     core::LocOffsets receiverLoc;
-    const size_t numArgs;
+    const uint32_t numArgs;
     LinkRef link;
 
     // We only need this for the first two sets of trailing types, but it's
@@ -339,7 +339,7 @@ public:
     };
 
     static SendInitializer make(LocalRef recv, core::LocOffsets receiverLoc, core::NameRef fun, core::LocOffsets funLoc,
-                                uint16_t numPosArgs, bool isPrivateOk, size_t numArgs);
+                                uint16_t numPosArgs, bool isPrivateOk, uint32_t numArgs);
 
     absl::Span<LocalRef> argRefs() {
         return span<LocalRef>();
@@ -371,7 +371,7 @@ public:
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(Send, 56, 8);
+CheckSize(Send, 48, 8);
 
 INSN(Return) : public Instruction {
 public:

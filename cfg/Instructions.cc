@@ -123,7 +123,7 @@ string LoadSelf::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) 
 Send::SendInitializer::SendInitializer(Send *snd) : snd(snd), refs(snd->argRefs()), locs(snd->argLocs()) {}
 
 Send::SendInitializer Send::make(LocalRef recv, core::LocOffsets receiverLoc, core::NameRef fun,
-                                 core::LocOffsets funLoc, uint16_t numPosArgs, bool isPrivateOk, size_t numArgs) {
+                                 core::LocOffsets funLoc, uint16_t numPosArgs, bool isPrivateOk, uint32_t numArgs) {
     size_t totalSize = Parent::totalSizeToAlloc<LocalRef, core::TypePtr, core::LocOffsets>(numArgs, numArgs, numArgs);
     void *p = ::operator new(totalSize);
     Send *snd = new (p) Send(recv, receiverLoc, fun, funLoc, numPosArgs, isPrivateOk, numArgs);
@@ -135,7 +135,7 @@ Send::SendInitializer Send::make(LocalRef recv, core::LocOffsets receiverLoc, co
 }
 
 Send::Send(LocalRef recv, core::LocOffsets receiverLoc, core::NameRef fun, core::LocOffsets funLoc, uint16_t numPosArgs,
-           bool isPrivateOk, size_t numArgs)
+           bool isPrivateOk, uint32_t numArgs)
     : isPrivateOk(isPrivateOk), numPosArgs(numPosArgs), fun(fun), recv(recv), funLoc(funLoc), receiverLoc(receiverLoc),
       numArgs(numArgs) {
     ENFORCE(numPosArgs <= numArgs, "Expected {} positional arguments, but only have {} args", numPosArgs, numArgs);
