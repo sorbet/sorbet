@@ -246,7 +246,7 @@ public:
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(SolveConstraint, 24, 8);
+CheckSize(SolveConstraint, 8, 8);
 
 INSN(Send) : public Instruction, private core::TrailingObjects<Send, LocalRef, core::TypePtr, core::LocOffsets> {
     friend core::TrailingObjects<Send, LocalRef, core::TypePtr, core::LocOffsets>;
@@ -371,7 +371,7 @@ public:
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(Send, 64, 8);
+CheckSize(Send, 56, 8);
 
 INSN(Return) : public Instruction {
 public:
@@ -393,7 +393,7 @@ public:
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(BlockReturn, 32, 8);
+CheckSize(BlockReturn, 24, 8);
 
 INSN(LoadSelf) : public Instruction {
 public:
@@ -403,7 +403,7 @@ public:
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(LoadSelf, 24, 8);
+CheckSize(LoadSelf, 8, 8);
 
 INSN(Literal) : public Instruction {
 public:
@@ -465,7 +465,7 @@ public:
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(LoadYieldParams, 16, 8);
+CheckSize(LoadYieldParams, 8, 8);
 
 INSN(YieldParamPresent) : public Instruction {
 public:
