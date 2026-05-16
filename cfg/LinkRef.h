@@ -10,7 +10,7 @@ class LinkRef final {
 
 public:
     LinkRef() = default;
-    LinkRef(uint32_t id) noexcept : _id(id) {}
+    explicit LinkRef(uint32_t id) noexcept : _id(id) {}
     LinkRef(const LinkRef &) = default;
     LinkRef(LinkRef &&) = default;
     LinkRef &operator=(LinkRef &&) = default;
