@@ -1,10 +1,10 @@
 #include "Instructions.h"
 
+#include "cfg/CFG.h"
 #include "common/strings/formatting.h"
 #include "common/typecase.h"
 #include "core/Names.h"
 #include "core/TypeConstraint.h"
-#include "cfg/CFG.h"
 #include <memory>
 #include <utility>
 
@@ -82,7 +82,8 @@ string SolveConstraint::toString(const core::GlobalState &gs, const CFG &cfg) co
 }
 
 string SolveConstraint::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
-    return fmt::format("Solve {{ send = {}, link = {} }}", this->send.toString(gs, cfg), cfg.linkFor(this->link)->fun.showRaw(gs));
+    return fmt::format("Solve {{ send = {}, link = {} }}", this->send.toString(gs, cfg),
+                       cfg.linkFor(this->link)->fun.showRaw(gs));
 }
 
 string Return::toString(const core::GlobalState &gs, const CFG &cfg) const {
@@ -107,8 +108,7 @@ string BlockReturn::showRaw(const core::GlobalState &gs, const CFG &cfg, int tab
                        cfg.linkFor(this->link)->fun.showRaw(gs), this->what.showRaw(gs, cfg, tabs + 1));
 }
 
-LoadSelf::LoadSelf(LinkRef link, LocalRef fallback)
-    : fallback(fallback), link(link) {
+LoadSelf::LoadSelf(LinkRef link, LocalRef fallback) : fallback(fallback), link(link) {
     categoryCounterInc("cfg", "loadself");
 }
 

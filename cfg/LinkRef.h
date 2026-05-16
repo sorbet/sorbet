@@ -26,6 +26,6 @@ public:
 };
 CheckSize(LinkRef, 4, 4);
 
-}
+} // namespace sorbet::cfg
 
 #endif
