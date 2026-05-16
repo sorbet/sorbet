@@ -36,6 +36,13 @@ end
 # describes live in different nested scopes and do not collide — matching
 # RSpec runtime, where the registry context is the enclosing example group
 # class, not the global `:main` context.
+#
+# If a future change re-rooted bare definitions, the conflicting sigs below
+# would merge and surface as type errors like the `module A`/`module B` case
+# above. The `include_examples` consumers also pin that the bare-nested
+# constant is reachable from within its own describe's ancestor walk — a
+# scoping regression that narrowed the nesting too far would surface as an
+# unresolved-constant error there.
 module C
   RSpec.describe 'group C' do
     extend T::Sig
@@ -45,6 +52,10 @@ module C
 
       sig { returns(String) }
       let(:value) { 'hello' }
+    end
+
+    describe 'consumer of independent name in C' do
+      include_examples 'independent name'
     end
   end
 end
@@ -58,6 +69,10 @@ module D
 
       sig { returns(Integer) }
       let(:value) { 42 }
+    end
+
+    describe 'consumer of independent name in D' do
+      include_examples 'independent name'
     end
   end
 end

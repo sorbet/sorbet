@@ -55,6 +55,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
         <runtime method definition of value>
       end
+
+      class <emptyTree>::<C <describe 'consumer of independent name in C'>><<C <todo sym>>> < (<self>)
+        <self>.include(<emptyTree>::<C <shared_examples 'independent name'>>)
+      end
     end
   end
 
@@ -74,6 +78,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
         <runtime method definition of value>
+      end
+
+      class <emptyTree>::<C <describe 'consumer of independent name in D'>><<C <todo sym>>> < (<self>)
+        <self>.include(<emptyTree>::<C <shared_examples 'independent name'>>)
       end
     end
   end

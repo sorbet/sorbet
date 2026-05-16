@@ -330,14 +330,17 @@ core::NameRef nameForTestHelperMethod(core::MutableContext ctx, const ast::Send 
 //
 // RSpec's shared-example registry is keyed by the class that called `shared_examples`:
 // `RSpec.shared_examples` registers under the `:main` slot, but bare `shared_examples`
-// registers under the enclosing group's class. We mirror this in the synthesized AST —
+// registers under the consumer's class at runtime (RSpec re-runs the outer's block via
+// `class_exec` on each `include_context`). We mirror this in the synthesized AST —
 // `RSpec.`-prefixed definitions get a root-scoped module (`rootScoped=true`); bare
-// definitions get a module nested under the enclosing scope. Consumer references
-// (`include_examples` / `it_behaves_like`) always use unrooted constants so lookup
-// reaches both root-scoped definitions (via `Object`) and nested ones (via the
-// consumer's ancestor chain when it `include`s the outer). A reference that finds
-// neither raises an unresolved-constant error, matching RSpec's runtime "example
-// group not found".
+// definitions get an unrooted constant nested under the enclosing scope. Consumer
+// references (`include_examples` / `it_behaves_like`) always use unrooted constants so
+// lookup reaches both root-scoped definitions (via `Object`) and nested ones (via the
+// consumer's ancestor chain when it `include`s the outer).
+//
+// The constant name format `<shared_examples 'foo'>` is load-bearing for user-visible
+// errors — Sorbet surfaces it in unresolved-constant messages. Changing the format or
+// the rooted/unrooted choice here is a breaking change for downstream snapshot tests.
 ast::ExpressionPtr makeSharedExamplesConstant(core::MutableContext ctx, const ast::ExpressionPtr &arg,
                                               bool rootScoped) {
     // We use shared_examples regardless of the send used to create the shared examples module,
@@ -378,10 +381,6 @@ bool isSharedExamplesName(core::NameRef name) {
 // Rewrites include_examples/include_context to include(ConstantName), or returns EmptyTree to
 // silently drop the call if the argument is not a string/symbol literal (e.g. a block parameter
 // that can't be resolved at compile time). Must only be called after a numPosArgs >= 1 check.
-//
-// The synthesized `include` uses an unrooted constant reference so the consumer's class
-// hierarchy lookup can reach both root-scoped definitions (via `Object`) and nested
-// definitions (via the consumer's ancestor chain — see the parameterized-outer case).
 ast::ExpressionPtr rewriteIncludeExamples(core::MutableContext ctx, ast::Send *send) {
     ENFORCE(send->numPosArgs() > 0);
     if (!ast::isa_tree<ast::Literal>(send->getPosArg(0))) {
@@ -975,7 +974,13 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
                 // We want to "fake" a test_each to approximate support for `shared_examples` that
                 // accept parameters. Inside the body, it's basically the same as a test_each over a
                 // single element.
-
+                //
+                // We hardcode `insideDescribe=true` here so that bare `shared_examples` nested
+                // inside an outer parameterized `shared_context` reach the bare-arm of `runSingle`
+                // (which gates on `insideDescribe || recvIsRSpec`) instead of being dropped. If
+                // this argument ever becomes propagated, the bare-nested-in-parameterized fixture
+                // (`rspec_shared_examples_bare_in_parameterized_context*.rb`) should catch the
+                // regression.
                 auto iterateeLoc = block->params.front().loc().join(block->params.back().loc());
                 ast::Array::ENTRY_store entries;
                 entries.emplace_back(ast::MK::UntypedNil(iterateeLoc));

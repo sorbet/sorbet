@@ -134,6 +134,14 @@ RSpec.describe 'transitive consumer including only B' do
   include_examples 'bare nested in transitive A'
 end
 
+# Negative companion: a consumer that skips the transitive chain entirely
+# cannot reach A's bare-nested inner — the unrooted constant has no path
+# through the consumer's ancestors.
+RSpec.describe 'consumer skipping the transitive chain' do
+  include_examples 'bare nested in transitive A'
+  #                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error-with-dupes: Unable to resolve constant `<shared_examples 'bare nested in transitive A'>`
+end
+
 # (6) Bare shared_examples with block params nested in a parameterized outer.
 # At runtime: `include_context 'outer with params for inner', :foo` re-runs the
 # outer's block on the consumer with `outer_x=:foo`, registering the inner

@@ -114,6 +114,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.include(<emptyTree>::<C <shared_examples 'bare nested in transitive A'>>)
   end
 
+  class <emptyTree>::<C <describe 'consumer skipping the transitive chain'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+    <self>.include(<emptyTree>::<C <shared_examples 'bare nested in transitive A'>>)
+  end
+
   module ::<root>::<C <shared_examples 'outer with params for inner'>><<C <todo sym>>> < ()
     module <emptyTree>::<C <shared_examples 'inner with params'>><<C <todo sym>>> < ()
       def <it 'uses both'><<todo method>>(&<blk>)
