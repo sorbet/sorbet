@@ -139,7 +139,7 @@ end
 # through the consumer's ancestors.
 RSpec.describe 'consumer skipping the transitive chain' do
   include_examples 'bare nested in transitive A'
-  #                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error-with-dupes: Unable to resolve constant `<shared_examples 'bare nested in transitive A'>`
+  #                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error-with-dupes: Unable to resolve constant `<shared_examples 'bare nested in transitive A'>`
 end
 
 # (6) Bare shared_examples with block params nested in a parameterized outer.
