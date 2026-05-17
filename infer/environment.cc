@@ -1038,7 +1038,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 }
 
                 const core::TypeAndOrigins &recvType = getAndFillTypeAndOrigin(send.recv);
-                if (send.link) {
+                if (send.link.exists()) {
                     checkFullyDefined = false;
                 }
                 core::CallLocs locs{
@@ -1051,7 +1051,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 core::DispatchArgs dispatchArgs{send.fun,        locs,
                                                 send.numPosArgs, args,
                                                 recvType.type,   recvType,
-                                                recvType.type,   inWhat.linkFor(send.link).get(),
+                                                recvType.type,   send.link.data(inWhat).get(),
                                                 ownerLoc,        send.isPrivateOk,
                                                 suppressErrors,  inWhat.symbol.data(ctx)->name};
                 auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
@@ -1150,16 +1150,16 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     it = it->secondary.get();
                 }
                 shared_ptr<core::DispatchResult> retainedResult;
-                if (send.link) {
+                if (send.link.exists()) {
                     // this type should never be used, thus we put a useless type
                     tp.type = core::Types::void_();
                 } else {
                     tp.type = dispatched.returnType;
                 }
-                if (send.link || lspQueryMatch) {
+                if (send.link.exists() || lspQueryMatch) {
                     retainedResult = make_shared<core::DispatchResult>(std::move(dispatched));
                 }
-                if (send.link) {
+                if (send.link.exists()) {
                     // This should eventually become ENFORCEs but currently they are wrong
                     if (!retainedResult->main.blockReturnType) {
                         // TODO(jez) This only looks at the main component!
@@ -1201,8 +1201,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                                 send.isPrivateOk, send.numPosArgs, ctx.file, bind.loc, send.receiverLoc,
                                                 send.funLoc, locWithoutBlock));
                 }
-                if (send.link) {
-                    inWhat.linkFor(send.link)->result = move(retainedResult);
+                if (send.link.exists()) {
+                    send.link.data(inWhat)->result = move(retainedResult);
                 }
                 if (send.fun == core::Names::toHashDup()) {
                     ENFORCE(send.numArgs == 1, "Desugar invariant");
@@ -1309,7 +1309,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
             [&](cfg::SolveConstraint &i) {
                 core::TypePtr type;
                 // TODO: this should repeat the same dance with Or and And components that dispatchCall does
-                auto &link = inWhat.linkFor(i.link);
+                auto &link = i.link.data(inWhat);
                 const auto &main = link->result->main;
                 if (main.constr) {
                     if (!main.constr->solve(ctx)) {
@@ -1396,7 +1396,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
             },
             [&](cfg::LoadYieldParams &insn) {
-                auto &link = inWhat.linkFor(insn.link);
+                auto &link = insn.link.data(inWhat);
                 ENFORCE(link);
                 ENFORCE(link->result);
                 ENFORCE(link->result->main.blockPreType);
@@ -1559,7 +1559,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 }
             },
             [&](cfg::BlockReturn &i) {
-                auto &link = inWhat.linkFor(i.link);
+                auto &link = i.link.data(inWhat);
                 ENFORCE(link);
                 ENFORCE(link->result->main.blockReturnType != nullptr);
 
@@ -1636,7 +1636,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
             },
             [&](cfg::LoadSelf &l) {
-                auto &link = inWhat.linkFor(l.link);
+                auto &link = l.link.data(inWhat);
                 ENFORCE(link);
                 auto tpo = getTypeFromRebind(ctx, link->result->main, l.fallback);
                 auto it = link->result->secondary.get();

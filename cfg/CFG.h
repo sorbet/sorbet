@@ -110,6 +110,7 @@ public:
     };
 
     friend class CFGBuilder;
+    friend class LinkRef;
     friend class LocalRef;
     friend class UnfreezeCFGLocalVariables;
     /**
@@ -191,8 +192,6 @@ public:
     LocalRef enterLocal(core::LocalVariable variable);
 
     LinkRef enterLink(core::NameRef fun, core::LocOffsets loc, std::vector<core::ParamInfo::Flags> &&paramFlags);
-    std::shared_ptr<core::SendAndBlockLink> &linkFor(LinkRef);
-    const std::shared_ptr<core::SendAndBlockLink> &linkFor(LinkRef) const;
 
 private:
     CFG();

@@ -68,16 +68,6 @@ LinkRef CFG::enterLink(core::NameRef fun, core::LocOffsets loc, vector<core::Par
     return LinkRef(static_cast<uint32_t>(id));
 }
 
-shared_ptr<core::SendAndBlockLink> &CFG::linkFor(LinkRef ref) {
-    ENFORCE(ref.id() < links.size());
-    return links[ref.id()];
-}
-
-const shared_ptr<core::SendAndBlockLink> &CFG::linkFor(LinkRef ref) const {
-    ENFORCE(ref.id() < links.size());
-    return links[ref.id()];
-}
-
 CFG::CFG() {
     freshBlock(0); // entry;
     freshBlock(0); // dead code;

@@ -3,7 +3,15 @@
 
 #include "common/common.h"
 
+#include <utility>
+
+namespace sorbet::core {
+class SendAndBlockLink;
+}
+
 namespace sorbet::cfg {
+
+class CFG;
 
 class LinkRef final {
     uint32_t _id = 0;
@@ -16,12 +24,11 @@ public:
     LinkRef &operator=(LinkRef &&) = default;
     LinkRef &operator=(const LinkRef &) = default;
 
-    operator bool() const noexcept {
-        return _id != 0;
-    }
+    std::shared_ptr<core::SendAndBlockLink> &data(CFG &cfg);
+    const std::shared_ptr<core::SendAndBlockLink> &data(const CFG &cfg) const;
 
-    uint32_t id() const noexcept {
-        return this->_id;
+    bool exists() const noexcept {
+        return _id != 0;
     }
 };
 CheckSize(LinkRef, 4, 4);

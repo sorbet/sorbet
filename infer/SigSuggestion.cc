@@ -88,7 +88,7 @@ void extractSendArgumentKnowledge(core::Context ctx, cfg::CFG &cfg, core::LocOff
                                     snd->recv.type,
                                     wrappedFullType,
                                     snd->recv.type,
-                                    cfg.linkFor(snd->link).get(),
+                                    snd->link.data(cfg).get(),
                                     originForUninitialized,
                                     snd->isPrivateOk,
                                     suppressErrors,
