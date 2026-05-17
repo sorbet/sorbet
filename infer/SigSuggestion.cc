@@ -50,7 +50,7 @@ core::TypePtr extractArgType(core::Context ctx, cfg::Send &send, core::DispatchC
     return to;
 }
 
-void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, cfg::Send *snd,
+void extractSendArgumentKnowledge(core::Context ctx, cfg::CFG &cfg, core::LocOffsets bindLoc, cfg::Send *snd,
                                   const UnorderedMap<cfg::LocalRef, InlinedVector<core::NameRef, 1>> &blockLocals,
                                   UnorderedMap<core::NameRef, core::TypePtr> &blockArgRequirements,
                                   const core::NameRef currentMethodName) {
@@ -88,7 +88,7 @@ void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, c
                                     snd->recv.type,
                                     wrappedFullType,
                                     snd->recv.type,
-                                    snd->link.get(),
+                                    cfg.linkFor(snd->link).get(),
                                     originForUninitialized,
                                     snd->isPrivateOk,
                                     suppressErrors,
@@ -213,7 +213,7 @@ UnorderedMap<core::NameRef, core::TypePtr> guessArgumentTypes(core::Context ctx,
 
                 if (shouldFindArgumentTypes) {
                     auto currentMethodName = cfg.symbol.data(ctx)->name;
-                    extractSendArgumentKnowledge(ctx, bind.loc, snd, blockLocals, blockArgRequirements,
+                    extractSendArgumentKnowledge(ctx, cfg, bind.loc, snd, blockLocals, blockArgRequirements,
                                                  currentMethodName);
                 }
             }
