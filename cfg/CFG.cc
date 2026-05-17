@@ -62,12 +62,32 @@ LocalRef CFG::enterLocal(core::LocalVariable variable) {
     return ref;
 }
 
+LinkRef CFG::enterLink(core::NameRef fun, core::LocOffsets loc, vector<core::ParamInfo::Flags> &&paramFlags) {
+    auto id = links.size();
+    links.emplace_back(make_shared<core::SendAndBlockLink>(fun, loc, std::move(paramFlags)));
+    return LinkRef(static_cast<uint32_t>(id));
+}
+
+shared_ptr<core::SendAndBlockLink> &CFG::linkFor(LinkRef ref) {
+    ENFORCE(ref.id() < links.size());
+    return links[ref.id()];
+}
+
+const shared_ptr<core::SendAndBlockLink> &CFG::linkFor(LinkRef ref) const {
+    ENFORCE(ref.id() < links.size());
+    return links[ref.id()];
+}
+
 CFG::CFG() {
     freshBlock(0); // entry;
     freshBlock(0); // dead code;
     deadBlock()->bexit.elseb = deadBlock();
     deadBlock()->bexit.thenb = deadBlock();
     deadBlock()->bexit.cond.variable = LocalRef::unconditional();
+
+    // The default LinkRef is 0; we push a nullptr here so e.g. a Send without a block can
+    // simply use its default LinkRef to index into the array instead of having to branch.
+    links.emplace_back(nullptr);
 
     UnfreezeCFGLocalVariables unfreezeVars(*this);
     // Enter a few fixed local variables

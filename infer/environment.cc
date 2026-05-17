@@ -1051,7 +1051,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 core::DispatchArgs dispatchArgs{send.fun,        locs,
                                                 send.numPosArgs, args,
                                                 recvType.type,   recvType,
-                                                recvType.type,   send.link.get(),
+                                                recvType.type,   inWhat.linkFor(send.link).get(),
                                                 ownerLoc,        send.isPrivateOk,
                                                 suppressErrors,  inWhat.symbol.data(ctx)->name};
                 auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
@@ -1202,7 +1202,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                                 send.funLoc, locWithoutBlock));
                 }
                 if (send.link) {
-                    send.link->result = move(retainedResult);
+                    inWhat.linkFor(send.link)->result = move(retainedResult);
                 }
                 if (send.fun == core::Names::toHashDup()) {
                     ENFORCE(send.numArgs == 1, "Desugar invariant");
@@ -1309,7 +1309,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
             [&](cfg::SolveConstraint &i) {
                 core::TypePtr type;
                 // TODO: this should repeat the same dance with Or and And components that dispatchCall does
-                const auto &main = i.link->result->main;
+                auto &link = inWhat.linkFor(i.link);
+                const auto &main = link->result->main;
                 if (main.constr) {
                     if (!main.constr->solve(ctx)) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::GenericMethodConstraintUnsolved)) {
@@ -1325,12 +1326,12 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     // Write back into the DispatchResult so that retained results affect LSP queries.
                     // (Note that the SendResponse has already been pushed, with a shared_ptr to the
                     // DispatchResult we're mutating here)
-                    i.link->result->returnType = type;
+                    link->result->returnType = type;
                 } else {
-                    type = i.link->result->returnType;
+                    type = link->result->returnType;
                 }
                 auto loc = ctx.locAt(bind.loc);
-                type = flatmapHack(ctx, main.receiver, type, i.link->fun, loc, inWhat.symbol.data(ctx)->name);
+                type = flatmapHack(ctx, main.receiver, type, link->fun, loc, inWhat.symbol.data(ctx)->name);
                 tp.type = std::move(type);
                 tp.origins.emplace_back(loc);
             },
@@ -1395,18 +1396,19 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
             },
             [&](cfg::LoadYieldParams &insn) {
-                ENFORCE(insn.link);
-                ENFORCE(insn.link->result);
-                ENFORCE(insn.link->result->main.blockPreType);
+                auto &link = inWhat.linkFor(insn.link);
+                ENFORCE(link);
+                ENFORCE(link->result);
+                ENFORCE(link->result->main.blockPreType);
 
-                auto &procType = insn.link->result->main.blockPreType;
+                auto &procType = link->result->main.blockPreType;
                 auto params = procType.getCallArguments(ctx, core::Names::call());
-                auto it = insn.link->result->secondary.get();
+                auto it = link->result->secondary.get();
                 while (it != nullptr) {
                     auto &secondaryProcType = it->main.blockPreType;
                     if (secondaryProcType != nullptr) {
                         auto secondaryParams = secondaryProcType.getCallArguments(ctx, core::Names::call());
-                        switch (insn.link->result->secondaryKind) {
+                        switch (link->result->secondaryKind) {
                             case core::DispatchResult::Combinator::OR:
                                 params = core::Types::any(ctx, params, secondaryParams);
                                 break;
@@ -1433,7 +1435,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 // TODO(nelhage): If this block is a lambda, not a proc, this
                 // rule doesn't apply. We don't model the distinction accurately
                 // yet.
-                auto &blkParams = insn.link->paramFlags;
+                auto &blkParams = link->paramFlags;
                 auto tuple = core::cast_type<core::TupleType>(params);
                 if (blkParams.size() > 1 && !blkParams.front().isRepeated && tuple && tuple->elems.size() == 1 &&
                     tuple->elems.front().derivesFrom(ctx, core::Symbols::Array())) {
@@ -1557,19 +1559,20 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 }
             },
             [&](cfg::BlockReturn &i) {
-                ENFORCE(i.link);
-                ENFORCE(i.link->result->main.blockReturnType != nullptr);
+                auto &link = inWhat.linkFor(i.link);
+                ENFORCE(link);
+                ENFORCE(link->result->main.blockReturnType != nullptr);
 
                 const core::TypeAndOrigins &typeAndOrigin = getAndFillTypeAndOrigin(i.what);
-                auto expectedType = i.link->result->main.blockReturnType;
+                auto expectedType = link->result->main.blockReturnType;
                 if (core::Types::isSubType(ctx, core::Types::void_(), expectedType)) {
                     expectedType = core::Types::top();
                 }
                 bool isSubtype;
                 core::ErrorSection::Collector errorDetailsCollector;
-                if (i.link->result->main.constr) {
+                if (link->result->main.constr) {
                     isSubtype = core::Types::isSubTypeUnderConstraint(
-                        ctx, *i.link->result->main.constr, typeAndOrigin.type, expectedType,
+                        ctx, *link->result->main.constr, typeAndOrigin.type, expectedType,
                         core::UntypedMode::AlwaysCompatible, errorDetailsCollector);
                 } else {
                     isSubtype = core::Types::isSubType(ctx, typeAndOrigin.type, expectedType, errorDetailsCollector);
@@ -1579,7 +1582,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         e.setHeader("Expected `{}` but found `{}` for block result type", expectedType.show(ctx),
                                     typeAndOrigin.type.show(ctx));
 
-                        const auto &bspec = i.link->result->main.method.data(ctx)->parameters.back();
+                        const auto &bspec = link->result->main.method.data(ctx)->parameters.back();
                         ENFORCE(bspec.flags.isBlock, "The last symbol must be the block arg");
                         e.addErrorSection(
                             core::TypeAndOrigins::explainExpected(ctx, expectedType, bspec.loc, "block result type"));
@@ -1633,12 +1636,13 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
             },
             [&](cfg::LoadSelf &l) {
-                ENFORCE(l.link);
-                auto tpo = getTypeFromRebind(ctx, l.link->result->main, l.fallback);
-                auto it = l.link->result->secondary.get();
+                auto &link = inWhat.linkFor(l.link);
+                ENFORCE(link);
+                auto tpo = getTypeFromRebind(ctx, link->result->main, l.fallback);
+                auto it = link->result->secondary.get();
                 while (it != nullptr) {
                     auto secondaryTpo = getTypeFromRebind(ctx, it->main, l.fallback);
-                    switch (l.link->result->secondaryKind) {
+                    switch (link->result->secondaryKind) {
                         case core::DispatchResult::Combinator::OR:
                             tpo.type = core::Types::any(ctx, tpo.type, secondaryTpo.type);
                             break;
