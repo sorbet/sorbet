@@ -16,7 +16,7 @@ public:
     LinkRef &operator=(LinkRef &&) = default;
     LinkRef &operator=(const LinkRef &) = default;
 
-    operator bool() const noexcept {
+    bool exists() const noexcept {
         return _id != 0;
     }
 

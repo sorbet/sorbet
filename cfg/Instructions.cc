@@ -157,7 +157,7 @@ Send::~Send() {
 }
 
 core::LocOffsets Send::locWithoutBlock(core::LocOffsets bindLoc) {
-    if (!this->link) {
+    if (!this->link.exists()) {
         // This location is slightly better, because it will include the last `)` if that exists,
         // which means that queries for things like
         //

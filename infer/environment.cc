@@ -1038,7 +1038,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 }
 
                 const core::TypeAndOrigins &recvType = getAndFillTypeAndOrigin(send.recv);
-                if (send.link) {
+                if (send.link.exists()) {
                     checkFullyDefined = false;
                 }
                 core::CallLocs locs{
@@ -1150,16 +1150,16 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     it = it->secondary.get();
                 }
                 shared_ptr<core::DispatchResult> retainedResult;
-                if (send.link) {
+                if (send.link.exists()) {
                     // this type should never be used, thus we put a useless type
                     tp.type = core::Types::void_();
                 } else {
                     tp.type = dispatched.returnType;
                 }
-                if (send.link || lspQueryMatch) {
+                if (send.link.exists() || lspQueryMatch) {
                     retainedResult = make_shared<core::DispatchResult>(std::move(dispatched));
                 }
-                if (send.link) {
+                if (send.link.exists()) {
                     // This should eventually become ENFORCEs but currently they are wrong
                     if (!retainedResult->main.blockReturnType) {
                         // TODO(jez) This only looks at the main component!
@@ -1201,7 +1201,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                                 send.isPrivateOk, send.numPosArgs, ctx.file, bind.loc, send.receiverLoc,
                                                 send.funLoc, locWithoutBlock));
                 }
-                if (send.link) {
+                if (send.link.exists()) {
                     inWhat.linkFor(send.link)->result = move(retainedResult);
                 }
                 if (send.fun == core::Names::toHashDup()) {
