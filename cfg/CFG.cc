@@ -86,7 +86,7 @@ CFG::CFG() {
     deadBlock()->bexit.cond.variable = LocalRef::unconditional();
 
     // The default LinkRef is 0; we push a nullptr here so e.g. a Send without a block can
-    // simply use its default LinkRef without having to branch.
+    // simply use its default LinkRef to index into the array instead of having to branch.
     links.emplace_back(nullptr);
 
     UnfreezeCFGLocalVariables unfreezeVars(*this);
