@@ -824,8 +824,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                             blockReturnLoc = blockLast->exprs.back().loc;
                         }
 
-                        synthesizeExpr(blockLast, dead, blockReturnLoc,
-                                       make_insn<BlockReturn>(link, blockrv));
+                        synthesizeExpr(blockLast, dead, blockReturnLoc, make_insn<BlockReturn>(link, blockrv));
                     }
 
                     unconditionalJump(blockLast, headerBlock, cctx.inWhat, s.loc);
