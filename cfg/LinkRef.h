@@ -30,10 +30,6 @@ public:
     bool exists() const noexcept {
         return _id != 0;
     }
-
-    uint32_t id() const noexcept {
-        return this->_id;
-    }
 };
 CheckSize(LinkRef, 4, 4);
 
