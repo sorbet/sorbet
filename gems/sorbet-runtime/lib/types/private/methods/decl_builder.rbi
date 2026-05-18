@@ -34,9 +34,6 @@ module T::Private::Methods
     sig {returns(T.any(T::Array[Symbol], T.class_of(ARG_NOT_PROVIDED)))}
     attr_accessor :type_parameters
 
-    sig {returns(T::Boolean)}
-    attr_accessor :raw
-
     sig do
       params(
         mod: Module,
@@ -49,7 +46,6 @@ module T::Private::Methods
         on_failure: T.any(T::Array[T.untyped], T.class_of(ARG_NOT_PROVIDED)),
         override_allow_incompatible: T.any(T::Boolean, Symbol),
         type_parameters: T.any(T::Array[Symbol], T.class_of(ARG_NOT_PROVIDED)),
-        raw: T::Boolean,
       )
         .void
     end
@@ -63,8 +59,7 @@ module T::Private::Methods
       finalized,
       on_failure,
       override_allow_incompatible,
-      type_parameters,
-      raw
+      type_parameters
     ); end
   end
 
@@ -77,8 +72,8 @@ module T::Private::Methods
     sig {returns(Declaration)}
     def decl; end
 
-    sig {params(mod: Module, raw: T::Boolean).void}
-    def initialize(mod, raw)
+    sig {params(mod: Module).void}
+    def initialize(mod)
       @decl = T.let(nil, Declaration)
     end
 

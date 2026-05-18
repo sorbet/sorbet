@@ -14,20 +14,16 @@ module T::Private::Methods
     sig {returns(T::Boolean)}
     attr_accessor :final
 
-    sig {returns(T::Boolean)}
-    attr_accessor :raw
-
     sig do
       params(
         mod: Module,
         loc: T.nilable(Thread::Backtrace::Location),
         blk: Proc,
         final: T::Boolean,
-        raw: T::Boolean
       )
         .void
     end
-    def initialize(mod, loc, blk, final, raw); end
+    def initialize(mod, loc, blk, final); end
   end
 
   @installed_hooks = T.let({}, T::Hash[Module, TrueClass])
@@ -111,8 +107,8 @@ module T::Private::Methods
   sig {params(mod: T::Module[T.anything]).void}
   def self.install_hooks(mod); end
 
-  sig {params(mod: Module, loc: T.nilable(Thread::Backtrace::Location), arg: T.nilable(Symbol), raw: T::Boolean, blk: Proc).returns(DeclarationBlock)}
-  private_class_method def self._declare_sig_internal(mod, loc, arg, raw: false, &blk); end
+  sig {params(mod: Module, loc: T.nilable(Thread::Backtrace::Location), arg: T.nilable(Symbol), blk: Proc).returns(DeclarationBlock)}
+  private_class_method def self._declare_sig_internal(mod, loc, arg, &blk); end
 
   sig {params(key: String).returns(T.nilable(T::Private::Methods::Signature))}
   private_class_method def self.signature_for_key(key); end

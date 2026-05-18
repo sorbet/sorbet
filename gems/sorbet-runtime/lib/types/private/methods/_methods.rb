@@ -48,7 +48,7 @@ module T::Private::Methods
   #   (This can matter for circular load-time behavior, where a method is
   #   called while its Signature is being built)
   # - It's `nil` if we've finished building the sig
-  DeclarationBlock = Struct.new(:mod, :loc, :blk_or_decl, :final, :raw)
+  DeclarationBlock = Struct.new(:mod, :loc, :blk_or_decl, :final)
 
   def self.declare_sig(mod, loc, arg, &blk)
     T::Private::DeclState.current.active_declaration = _declare_sig_internal(mod, loc, arg, &blk)
@@ -56,7 +56,7 @@ module T::Private::Methods
     nil
   end
 
-  private_class_method def self._declare_sig_internal(mod, loc, arg, raw: false, &blk)
+  private_class_method def self._declare_sig_internal(mod, loc, arg, &blk)
     install_hooks(mod)
 
     if T::Private::DeclState.current.active_declaration
@@ -68,11 +68,11 @@ module T::Private::Methods
       raise "Invalid argument to `sig`: #{arg}"
     end
 
-    DeclarationBlock.new(mod, loc, blk, arg == :final, raw)
+    DeclarationBlock.new(mod, loc, blk, arg == :final)
   end
 
   def self.start_proc
-    DeclBuilder.new(PROC_TYPE, false)
+    DeclBuilder.new(PROC_TYPE)
   end
 
   def self.finalize_proc(decl)
@@ -233,7 +233,6 @@ module T::Private::Methods
     # This wrapper is very slow, so it will subsequently re-wrap with a much faster wrapper
     # (or unwrap back to the original method).
     key = method_owner_and_name_to_key(mod, method_name)
-    unless current_declaration.raw
       T::Private::ClassUtils.replace_method(original_method, mod, method_name) do |*args, &blk|
         method_sig = T::Private::Methods.maybe_run_sig_block_for_key(key)
         method_sig ||= T::Private::Methods._handle_missing_method_signature(
@@ -259,7 +258,6 @@ module T::Private::Methods
           original_method.bind_call(self, *args, &blk)
         end
       end
-    end
 
     @sig_wrappers[key] = sig_block
     if current_declaration.final
@@ -343,7 +341,7 @@ module T::Private::Methods
       raise "DeclarationBlock for #{declaration_block.mod} at #{declaration_block.loc} should have already been unwrapped"
     end
 
-    builder = DeclBuilder.new(declaration_block.mod, declaration_block.raw)
+    builder = DeclBuilder.new(declaration_block.mod)
     decl = builder.instance_exec(&blk_or_decl).finalize!.decl
     # Record that we've already run `blk` once and constructed a `Declaration`
     declaration_block.blk_or_decl = decl
