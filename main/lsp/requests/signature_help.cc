@@ -122,4 +122,9 @@ unique_ptr<ResponseMessage> SignatureHelpTask::runRequest(LSPTypecheckerDelegate
     response->result = move(sigHelp);
     return response;
 }
+
+core::packages::Stratum SignatureHelpTask::preemptionStratum(FileStratumMapping info) const {
+    return info.getStratumForUri(this->params->textDocument->uri);
+}
+
 } // namespace sorbet::realmain::lsp

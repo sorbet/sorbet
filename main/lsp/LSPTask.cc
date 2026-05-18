@@ -218,6 +218,10 @@ void LSPTask::preprocess(LSPPreprocessor &preprocessor) {}
 
 void LSPTask::index(LSPIndexer &indexer) {}
 
+core::packages::Stratum LSPTask::preemptionStratum(FileStratumMapping info) const {
+    return info.getLastStratum();
+}
+
 LSPRequestTask::LSPRequestTask(const LSPConfiguration &config, MessageId id, LSPMethod method)
     : LSPTask(config, method), id(move(id)) {}
 

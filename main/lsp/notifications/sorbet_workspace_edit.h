@@ -34,6 +34,7 @@ public:
     void run(LSPTypecheckerDelegate &typechecker) override;
     void runSpecial(LSPTypechecker &typechecker, WorkerPool &workers) override;
     void schedulerWaitUntilReady() override;
+    core::packages::Stratum preemptionStratum(FileStratumMapping info) const override;
 
     bool canPreempt(const LSPIndexer &index) const override;
     TypecheckingPath getTypecheckingPath(const LSPIndexer &index) const;
