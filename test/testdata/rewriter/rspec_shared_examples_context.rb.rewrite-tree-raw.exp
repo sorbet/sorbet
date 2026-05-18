@@ -104,10 +104,7 @@ ClassDef{
               kind = module
               name = UnresolvedConstantLit{
                 cnst = <C <U <shared_examples 'my shared example'>>>
-                scope = ConstantLit{
-                  symbol = (class ::<root>)
-                  orig = nullptr
-                }
+                scope = EmptyTree
               }
               symbol = <C <U <todo sym>>>
               ancestors = []
@@ -142,10 +139,7 @@ ClassDef{
                       }
                     }, UnresolvedConstantLit{
                       cnst = <C <U <shared_examples 'my shared example'>>>
-                      scope = ConstantLit{
-                        symbol = (class ::<root>)
-                        orig = nullptr
-                      }
+                      scope = EmptyTree
                     }]
                   rhs = [
                     MethodDef{

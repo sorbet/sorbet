@@ -325,17 +325,30 @@ core::NameRef nameForTestHelperMethod(core::MutableContext ctx, const ast::Send 
     }
 }
 
-ast::ExpressionPtr makeSharedExamplesConstant(core::MutableContext ctx, const ast::ExpressionPtr &arg) {
+// Synthesizes an `UnresolvedConstantLit` for a `<shared_examples 'name'>` module
+// reference, either root-scoped (`::<...>`) or unrooted.
+//
+// RSpec's shared-example registry is keyed by the class that called `shared_examples`:
+// `RSpec.shared_examples` registers under the `:main` slot, but bare `shared_examples`
+// registers under the consumer's class at runtime (RSpec re-runs the outer's block via
+// `class_exec` on each `include_context`). We mirror this in the synthesized AST —
+// `RSpec.`-prefixed definitions get a root-scoped module (`rootScoped=true`); bare
+// definitions get an unrooted constant nested under the enclosing scope. Consumer
+// references (`include_examples` / `it_behaves_like`) always use unrooted constants so
+// lookup reaches both root-scoped definitions (via `Object`) and nested ones (via the
+// consumer's ancestor chain when it `include`s the outer).
+//
+// The constant name format `<shared_examples 'foo'>` is load-bearing for user-visible
+// errors — Sorbet surfaces it in unresolved-constant messages. Changing the format or
+// the rooted/unrooted choice here is a breaking change for downstream snapshot tests.
+ast::ExpressionPtr makeSharedExamplesConstant(core::MutableContext ctx, const ast::ExpressionPtr &arg,
+                                              bool rootScoped) {
     // We use shared_examples regardless of the send used to create the shared examples module,
     // because they are uniquely identified by the string argument (not which method alias was used
     // to create the module)
     auto name = fmt::format("<shared_examples '{}'>", to_s(ctx, arg));
-    // Use root scope so that shared examples are globally accessible regardless of where they are
-    // defined. This matches RSpec's semantics: shared example names are stored in a global registry
-    // and must be unique across the entire test suite.
-    auto rootScope = ast::MK::Constant(arg.loc(), core::Symbols::root());
-    return ast::make_expression<ast::UnresolvedConstantLit>(arg.loc(), move(rootScope),
-                                                            ctx.state.enterNameConstant(name));
+    ast::ExpressionPtr scope = rootScoped ? ast::MK::Constant(arg.loc(), core::Symbols::root()) : ast::MK::EmptyTree();
+    return ast::make_expression<ast::UnresolvedConstantLit>(arg.loc(), move(scope), ctx.state.enterNameConstant(name));
 }
 
 // Returns the appropriate superclass for a test class (e.g. from `its` or `it_behaves_like`)
@@ -373,7 +386,7 @@ ast::ExpressionPtr rewriteIncludeExamples(core::MutableContext ctx, ast::Send *s
     if (!ast::isa_tree<ast::Literal>(send->getPosArg(0))) {
         return ast::MK::EmptyTree();
     }
-    auto name = makeSharedExamplesConstant(ctx, send->getPosArg(0));
+    auto name = makeSharedExamplesConstant(ctx, send->getPosArg(0), /*rootScoped=*/false);
     return ast::MK::Send1(send->loc, move(send->recv), core::Names::include(), send->funLoc, move(name));
 }
 
@@ -420,9 +433,11 @@ ast::ExpressionPtr runUnderParameterized(core::MutableContext ctx, core::NameRef
     }
 
     if (send->hasBlock() && send->block()->params.size() != 0) {
-        // Allow RSpec.shared_examples/shared_context with block params to pass through to the
-        // switch below, where they'll be handled by runSingle if the receiver is RSpec.
-        if (!isSharedExamplesName(send->fun) || !isRSpec(ctx, send->recv)) {
+        // Allow shared_examples/shared_context (bare or RSpec.-prefixed) with block params to
+        // pass through to the switch below, where they'll be handled by runSingle's
+        // sharedExamples arm (which fake-test_each's the inner body). Other statements with
+        // block params are unsupported.
+        if (!isSharedExamplesName(send->fun)) {
             return invalidUnderParameterizedBody(ctx, eachName, move(stmt));
         }
     }
@@ -507,20 +522,17 @@ ast::ExpressionPtr runUnderParameterized(core::MutableContext ctx, core::NameRef
         case core::Names::sharedExamples().rawId():
         case core::Names::sharedContext().rawId():
         case core::Names::sharedExamplesFor().rawId(): {
-            // When called with the RSpec. prefix (e.g. `RSpec.shared_context 'name' do`),
-            // these are standalone global definitions independent of the block params.
-            // Delegate to runSingle so they get registered as root-scoped constants.
-            if (ctx.state.cacheSensitiveOptions.rspecRewriterEnabled && isRSpec(ctx, send->recv)) {
-                auto result =
-                    runSingle(ctx, /* isClass */ false, /* maybeSharedExamplesName */ nullptr, send, insideDescribe);
-                if (result != nullptr) {
-                    return result;
-                }
+            if (!ctx.state.cacheSensitiveOptions.rspecRewriterEnabled) {
+                break;
             }
-            // For bare shared_examples inside parameterized blocks we don't handle them,
-            // because it's not clear what that should do and whether anyone actually uses it.
-            //
-            // We can revisit this choice if people complain about Sorbet lacking support for this.
+            // `RSpec.`-prefixed registers globally, bare-receiver scopes to the consumer on
+            // each include of the outer. `runSingle` distinguishes the two by checking the
+            // receiver — see the comment on its `sharedExamples` arm.
+            auto result =
+                runSingle(ctx, /* isClass */ false, /* maybeSharedExamplesName */ nullptr, send, insideDescribe);
+            if (result != nullptr) {
+                return result;
+            }
             break;
         }
 
@@ -619,7 +631,7 @@ ast::ExpressionPtr tryRunSingleOnSend(core::MutableContext ctx, bool isClass,
                                       bool insideDescribe) {
     auto bodySend = ast::cast_tree<ast::Send>(body);
     if (bodySend) {
-        auto change = runSingle(ctx, isClass, move(maybeSharedExamplesName), bodySend, insideDescribe);
+        auto change = runSingle(ctx, isClass, maybeSharedExamplesName, bodySend, insideDescribe);
         if (change) {
             return change;
         }
@@ -829,7 +841,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
             auto declLoc = declLocForSendWithBlock(*send);
             auto method = ast::MK::SyntheticMethod0(
                 send->loc, declLoc, std::move(name),
-                prepareBody(ctx, isClass, move(maybeSharedExamplesName), std::move(block->body), insideDescribe));
+                prepareBody(ctx, isClass, maybeSharedExamplesName, std::move(block->body), insideDescribe));
 
             // This prevents the `RuntimeMethodDefinition` from getting generated. For these `it`-block
             // defined methods, we don't actually need to care about the RuntimeMethodDefinition, and
@@ -935,7 +947,16 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
                 return nullptr;
             }
 
-            auto name = makeSharedExamplesConstant(ctx, send->getPosArg(0));
+            // RSpec keys its shared-example-group registry by the *calling class*.
+            // `RSpec.`-prefixed registrations land under `:main`, so we synthesize them at root
+            // scope (resolvable from anywhere). Bare-receiver registrations inside an outer
+            // `shared_context` are keyed by the consumer's class at runtime (RSpec re-runs the
+            // outer's block via `class_exec` on each `include_context`); we approximate that by
+            // synthesizing the inner as a module nested under the outer's synthetic module —
+            // reachable through the ancestor chain from consumers that include the outer,
+            // unresolved from those that don't. See `makeSharedExamplesConstant` for the full
+            // rationale.
+            auto name = makeSharedExamplesConstant(ctx, send->getPosArg(0), /*rootScoped=*/recvIsRSpec);
 
             auto declLoc = declLocForSendWithBlock(*send);
 
@@ -953,7 +974,13 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
                 // We want to "fake" a test_each to approximate support for `shared_examples` that
                 // accept parameters. Inside the body, it's basically the same as a test_each over a
                 // single element.
-
+                //
+                // We hardcode `insideDescribe=true` here so that bare `shared_examples` nested
+                // inside an outer parameterized `shared_context` reach the bare-arm of `runSingle`
+                // (which gates on `insideDescribe || recvIsRSpec`) instead of being dropped. If
+                // this argument ever becomes propagated, the bare-nested-in-parameterized fixture
+                // (`rspec_shared_examples_bare_in_parameterized_context*.rb`) should catch the
+                // regression.
                 auto iterateeLoc = block->params.front().loc().join(block->params.back().loc());
                 ast::Array::ENTRY_store entries;
                 entries.emplace_back(ast::MK::UntypedNil(iterateeLoc));
@@ -1019,8 +1046,17 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
                                                 send->loc.copyWithZeroLength(), maybeSharedExamplesName.deepCopy()));
             }
 
-            // Include the shared examples module in this isolated context
-            auto sharedExamplesName = makeSharedExamplesConstant(ctx, arg);
+            // Include the shared examples module in this isolated context. Use an unrooted
+            // reference so the lookup walks the consumer's class hierarchy (finds both
+            // root-scoped and nested-under-outer definitions).
+            //
+            // Load-bearing: this isolated class is emitted *lexically* where the original
+            // `it_behaves_like` call appeared (inside the consumer's describe), so the
+            // unrooted lookup walks through the consumer's ancestors and reaches a
+            // bare-nested-under-outer shared examples module via the included outer. If a
+            // future refactor hoists this class out of the consumer's lexical scope, bare
+            // nested references will silently stop resolving.
+            auto sharedExamplesName = makeSharedExamplesConstant(ctx, arg, /*rootScoped=*/false);
             auto includeStmt = ast::MK::Send1(send->loc, ast::MK::Self(send->recv.loc()), core::Names::include(),
                                               arg.loc(), move(sharedExamplesName));
             rhs.emplace_back(move(includeStmt));

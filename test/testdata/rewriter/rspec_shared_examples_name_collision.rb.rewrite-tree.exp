@@ -1,0 +1,88 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C RSpec><<C <todo sym>>> < ()
+    module <emptyTree>::<C Core><<C <todo sym>>> < ()
+      class <emptyTree>::<C ExampleGroup><<C <todo sym>>> < (::<todo sym>)
+      end
+    end
+  end
+
+  module <emptyTree>::<C A><<C <todo sym>>> < ()
+    module ::<root>::<C <shared_examples 'same name'>><<C <todo sym>>> < ()
+      <self>.sig() do ||
+        <self>.returns(<emptyTree>::<C String>)
+      end
+
+      def value<<todo method>>(&<blk>)
+        "hello"
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      <runtime method definition of value>
+    end
+  end
+
+  module <emptyTree>::<C B><<C <todo sym>>> < ()
+    module ::<root>::<C <shared_examples 'same name'>><<C <todo sym>>> < ()
+      <self>.sig() do ||
+        <self>.returns(<emptyTree>::<C Integer>)
+      end
+
+      def value<<todo method>>(&<blk>)
+        "world"
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      <runtime method definition of value>
+    end
+  end
+
+  module <emptyTree>::<C C><<C <todo sym>>> < ()
+    class <emptyTree>::<C <describe 'group C'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      module <emptyTree>::<C <shared_examples 'independent name'>><<C <todo sym>>> < ()
+        <self>.sig() do ||
+          <self>.returns(<emptyTree>::<C String>)
+        end
+
+        def value<<todo method>>(&<blk>)
+          "hello"
+        end
+
+        <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+        <runtime method definition of value>
+      end
+
+      class <emptyTree>::<C <describe 'consumer of independent name in C'>><<C <todo sym>>> < (<self>)
+        <self>.include(<emptyTree>::<C <shared_examples 'independent name'>>)
+      end
+    end
+  end
+
+  module <emptyTree>::<C D><<C <todo sym>>> < ()
+    class <emptyTree>::<C <describe 'group D'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      module <emptyTree>::<C <shared_examples 'independent name'>><<C <todo sym>>> < ()
+        <self>.sig() do ||
+          <self>.returns(<emptyTree>::<C Integer>)
+        end
+
+        def value<<todo method>>(&<blk>)
+          42
+        end
+
+        <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+        <runtime method definition of value>
+      end
+
+      class <emptyTree>::<C <describe 'consumer of independent name in D'>><<C <todo sym>>> < (<self>)
+        <self>.include(<emptyTree>::<C <shared_examples 'independent name'>>)
+      end
+    end
+  end
+end

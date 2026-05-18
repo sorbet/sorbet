@@ -27,10 +27,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C <describe 'consumer'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
-    <self>.include(::<root>::<C <shared_examples 'nested context inside local context'>>)
+    <self>.include(<emptyTree>::<C <shared_examples 'nested context inside local context'>>)
 
-    <self>.include(::<root>::<C <shared_examples 'nested examples inside local context'>>)
+    <self>.include(<emptyTree>::<C <shared_examples 'nested examples inside local context'>>)
 
-    <self>.include(::<root>::<C <shared_examples 'nested examples_for inside local context'>>)
+    <self>.include(<emptyTree>::<C <shared_examples 'nested examples_for inside local context'>>)
   end
 end
