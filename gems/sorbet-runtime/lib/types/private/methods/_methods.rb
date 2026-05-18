@@ -51,12 +51,6 @@ module T::Private::Methods
   DeclarationBlock = Struct.new(:mod, :loc, :blk_or_decl, :final)
 
   def self.declare_sig(mod, loc, arg, &blk)
-    T::Private::DeclState.current.active_declaration = _declare_sig_internal(mod, loc, arg, &blk)
-
-    nil
-  end
-
-  private_class_method def self._declare_sig_internal(mod, loc, arg, &blk)
     install_hooks(mod)
 
     if T::Private::DeclState.current.active_declaration
@@ -68,7 +62,9 @@ module T::Private::Methods
       raise "Invalid argument to `sig`: #{arg}"
     end
 
-    DeclarationBlock.new(mod, loc, blk, arg == :final)
+    T::Private::DeclState.current.active_declaration = DeclarationBlock.new(mod, loc, blk, arg == :final)
+
+    nil
   end
 
   def self.start_proc

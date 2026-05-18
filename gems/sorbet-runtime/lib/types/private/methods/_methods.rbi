@@ -107,9 +107,6 @@ module T::Private::Methods
   sig {params(mod: T::Module[T.anything]).void}
   def self.install_hooks(mod); end
 
-  sig {params(mod: Module, loc: T.nilable(Thread::Backtrace::Location), arg: T.nilable(Symbol), blk: Proc).returns(DeclarationBlock)}
-  private_class_method def self._declare_sig_internal(mod, loc, arg, &blk); end
-
   sig {params(key: String).returns(T.nilable(T::Private::Methods::Signature))}
   private_class_method def self.signature_for_key(key); end
 
