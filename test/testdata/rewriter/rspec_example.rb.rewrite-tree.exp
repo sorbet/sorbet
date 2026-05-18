@@ -66,62 +66,68 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of eq>
 
-    class <emptyTree>::<C <describe 'inside describe'>><<C <todo sym>>> < (<self>)
-      def my_helper<<todo method>>(&<blk>)
-        <emptyTree>
-      end
+    begin
+      "inside describe"
+      class <emptyTree>::<C <describe 'inside describe'>><<C <todo sym>>> < (<self>)
+        def my_helper<<todo method>>(&<blk>)
+          <emptyTree>
+        end
 
-      def <it><<todo method>>(&<blk>)
-        begin
+        def <it><<todo method>>(&<blk>)
+          begin
+            <self>.my_helper()
+            <self>.described_class()
+          end
+        end
+
+        def <it 'example'><<todo method>>(&<blk>)
           <self>.my_helper()
-          <self>.described_class()
-        end
-      end
-
-      def <it 'example'><<todo method>>(&<blk>)
-        <self>.my_helper()
-      end
-
-      def <it><<todo method>>(&<blk>)
-        <self>.my_helper()
-      end
-
-      def <it 'has access to defined_in_shared_examples'><<todo method>>(&<blk>)
-        [].each() do |x|
-          <self>.defined_in_shared_examples()
-        end
-      end
-
-      <runtime method definition of my_helper>
-
-      module ::<root>::<C <shared_examples 'some examples'>><<C <todo sym>>> < ()
-        def defined_in_shared_examples<<todo method>>(&<blk>)
-          "foo"
         end
 
-        def <it 'a shared example'><<todo method>>(&<blk>)
-          <self>.described_class()
+        def <it><<todo method>>(&<blk>)
+          <self>.my_helper()
         end
 
-        <runtime method definition of defined_in_shared_examples>
-
-        ::<Magic>.requires_ancestor() do ||
-          <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
-        end
-      end
-
-      class <emptyTree>::<C <describe 'will include shared examples'>><<C <todo sym>>> < (<self>)
         def <it 'has access to defined_in_shared_examples'><<todo method>>(&<blk>)
-          <self>.defined_in_shared_examples()
+          [].each() do |x|
+            <self>.defined_in_shared_examples()
+          end
         end
 
-        <self>.include(::<root>::<C <shared_examples 'some examples'>>)
-      end
+        <runtime method definition of my_helper>
 
-      <self>.test_each([]) do |x|
+        module ::<root>::<C <shared_examples 'some examples'>><<C <todo sym>>> < ()
+          def defined_in_shared_examples<<todo method>>(&<blk>)
+            "foo"
+          end
+
+          def <it 'a shared example'><<todo method>>(&<blk>)
+            <self>.described_class()
+          end
+
+          <runtime method definition of defined_in_shared_examples>
+
+          ::<Magic>.requires_ancestor() do ||
+            <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
+          end
+        end
+
         begin
-          <self>.include(::<root>::<C <shared_examples 'some examples'>>)
-          <runtime method definition of <it 'has access to defined_in_shared_examples'>>
+          "will include shared examples"
+          class <emptyTree>::<C <describe 'will include shared examples'>><<C <todo sym>>> < (<self>)
+            def <it 'has access to defined_in_shared_examples'><<todo method>>(&<blk>)
+              <self>.defined_in_shared_examples()
+            end
+
+            <self>.include(::<root>::<C <shared_examples 'some examples'>>)
+          end
+        end
+
+        <self>.test_each([]) do |x|
+          begin
+            <self>.include(::<root>::<C <shared_examples 'some examples'>>)
+            <runtime method definition of <it 'has access to defined_in_shared_examples'>>
+          end
         end
       end
     end
@@ -142,126 +148,150 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    class <emptyTree>::<C <describe 'contains generic name group'>><<C <todo sym>>> < (<self>)
-      class <emptyTree>::<C <example_group 'example_group group'>><<C <todo sym>>> < (<self>)
-        def <it><<todo method>>(&<blk>)
-          <self>.outer_helper()
-        end
-      end
-
-      class <emptyTree>::<C <context 'context group'>><<C <todo sym>>> < (<self>)
-        def <it><<todo method>>(&<blk>)
-          <self>.outer_helper()
-        end
-      end
-    end
-
-    class <emptyTree>::<C <xdescribe 'xdescribe group'>><<C <todo sym>>> < (<self>)
-      def <it><<todo method>>(&<blk>)
-        <self>.outer_helper()
-      end
-    end
-
-    class <emptyTree>::<C <describe 'its support'>><<C <todo sym>>> < (<self>)
-      def foo<<todo method>>(&<blk>)
-        "bar"
-      end
-
-      <runtime method definition of foo>
-
-      class <emptyTree>::<C <describe 'bar'>><<C <todo sym>>> < (<self>)
-        def <it><<todo method>>(&<blk>)
-          <self>.expect(<self>.subject().bar()).to(<self>.eq(<self>.foo()))
-        end
-      end
-
-      class <emptyTree>::<C <describe 'bar'>><<C <todo sym>>> < (<self>)
-        def <it><<todo method>>(&<blk>)
-          <self>.expect(<self>.subject().bar()).to(<self>.eq(<self>.foo()))
-        end
-      end
-
-      class <emptyTree>::<C <describe 'size'>><<C <todo sym>>> < (<self>)
-        def <it><<todo method>>(&<blk>)
-          begin
-            ::Module.const_set(:X, 1)
-            <self>.expect(<self>.subject().size()).to(<self>.eq(<emptyTree>::<C X>))
+    begin
+      "contains generic name group"
+      class <emptyTree>::<C <describe 'contains generic name group'>><<C <todo sym>>> < (<self>)
+        begin
+          "example_group group"
+          class <emptyTree>::<C <example_group 'example_group group'>><<C <todo sym>>> < (<self>)
+            def <it><<todo method>>(&<blk>)
+              <self>.outer_helper()
+            end
           end
         end
 
         begin
-          <emptyTree>::<C X> = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-          <emptyTree>
-        end
-      end
-
-      class <emptyTree>::<C <describe 'size'>><<C <todo sym>>> < (<self>)
-        def <it><<todo method>>(&<blk>)
-          <emptyTree>::<C T>.reveal_type(<self>)
+          "context group"
+          class <emptyTree>::<C <context 'context group'>><<C <todo sym>>> < (<self>)
+            def <it><<todo method>>(&<blk>)
+              <self>.outer_helper()
+            end
+          end
         end
       end
     end
 
-    class <emptyTree>::<C <describe 'its with typed subject'>><<C <todo sym>>> < (<self>)
-      <self>.sig() do ||
-        <self>.returns(<emptyTree>::<C ThingWithSize>)
+    begin
+      "xdescribe group"
+      class <emptyTree>::<C <xdescribe 'xdescribe group'>><<C <todo sym>>> < (<self>)
+        def <it><<todo method>>(&<blk>)
+          <self>.outer_helper()
+        end
       end
+    end
 
-      def subject<<todo method>>(&<blk>)
-        <emptyTree>::<C ThingWithSize>.new()
-      end
-
-      class <emptyTree>::<C ThingWithSize><<C <todo sym>>> < (::<todo sym>)
-        <self>.sig() do ||
-          <self>.returns(<emptyTree>::<C Integer>)
+    begin
+      "its support"
+      class <emptyTree>::<C <describe 'its support'>><<C <todo sym>>> < (<self>)
+        def foo<<todo method>>(&<blk>)
+          "bar"
         end
 
-        def size<<todo method>>(&<blk>)
-          42
+        <runtime method definition of foo>
+
+        class <emptyTree>::<C <describe 'bar'>><<C <todo sym>>> < (<self>)
+          def <it><<todo method>>(&<blk>)
+            <self>.expect(<self>.subject().bar()).to(<self>.eq(<self>.foo()))
+          end
+        end
+
+        class <emptyTree>::<C <describe 'bar'>><<C <todo sym>>> < (<self>)
+          def <it><<todo method>>(&<blk>)
+            <self>.expect(<self>.subject().bar()).to(<self>.eq(<self>.foo()))
+          end
+        end
+
+        class <emptyTree>::<C <describe 'size'>><<C <todo sym>>> < (<self>)
+          def <it><<todo method>>(&<blk>)
+            begin
+              ::Module.const_set(:X, 1)
+              <self>.expect(<self>.subject().size()).to(<self>.eq(<emptyTree>::<C X>))
+            end
+          end
+
+          begin
+            <emptyTree>::<C X> = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+            <emptyTree>
+          end
+        end
+
+        class <emptyTree>::<C <describe 'size'>><<C <todo sym>>> < (<self>)
+          def <it><<todo method>>(&<blk>)
+            <emptyTree>::<C T>.reveal_type(<self>)
+          end
+        end
+      end
+    end
+
+    begin
+      "its with typed subject"
+      class <emptyTree>::<C <describe 'its with typed subject'>><<C <todo sym>>> < (<self>)
+        <self>.sig() do ||
+          <self>.returns(<emptyTree>::<C ThingWithSize>)
+        end
+
+        def subject<<todo method>>(&<blk>)
+          <emptyTree>::<C ThingWithSize>.new()
+        end
+
+        class <emptyTree>::<C ThingWithSize><<C <todo sym>>> < (::<todo sym>)
+          <self>.sig() do ||
+            <self>.returns(<emptyTree>::<C Integer>)
+          end
+
+          def size<<todo method>>(&<blk>)
+            42
+          end
+
+          <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+          <runtime method definition of size>
         end
 
         <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-        <runtime method definition of size>
-      end
+        <runtime method definition of subject>
 
-      <self>.extend(<emptyTree>::<C T>::<C Sig>)
-
-      <runtime method definition of subject>
-
-      class <emptyTree>::<C <describe 'size'>><<C <todo sym>>> < (<self>)
-        def <it><<todo method>>(&<blk>)
-          begin
-            <emptyTree>::<C T>.reveal_type(<self>.subject())
-            <self>.expect(<self>.subject().size()).to(<self>.eq(42))
+        class <emptyTree>::<C <describe 'size'>><<C <todo sym>>> < (<self>)
+          def <it><<todo method>>(&<blk>)
+            begin
+              <emptyTree>::<C T>.reveal_type(<self>.subject())
+              <self>.expect(<self>.subject().size()).to(<self>.eq(42))
+            end
           end
         end
-      end
 
-      class <emptyTree>::<C <describe 'no_such_method'>><<C <todo sym>>> < (<self>)
-        def <it><<todo method>>(&<blk>)
-          <self>.expect(<self>.subject().no_such_method()).to(<self>.eq(0))
+        class <emptyTree>::<C <describe 'no_such_method'>><<C <todo sym>>> < (<self>)
+          def <it><<todo method>>(&<blk>)
+            <self>.expect(<self>.subject().no_such_method()).to(<self>.eq(0))
+          end
         end
       end
     end
   end
 
-  class <emptyTree>::<C <context 'B'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
-    def another_outer_helper<<todo method>>(&<blk>)
-      <emptyTree>
-    end
+  begin
+    "B"
+    class <emptyTree>::<C <context 'B'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      def another_outer_helper<<todo method>>(&<blk>)
+        <emptyTree>
+      end
 
-    def <it 'inside B'><<todo method>>(&<blk>)
-      <self>.another_outer_helper()
-    end
+      def <it 'inside B'><<todo method>>(&<blk>)
+        <self>.another_outer_helper()
+      end
 
-    <runtime method definition of another_outer_helper>
+      <runtime method definition of another_outer_helper>
 
-    class <emptyTree>::<C <context 'Nested, no RSpec'>><<C <todo sym>>> < (<self>)
-      def <it 'inside Nested'><<todo method>>(&<blk>)
-        begin
-          <self>.another_outer_helper()
-          <self>.described_class()
+      begin
+        "Nested, no RSpec"
+        class <emptyTree>::<C <context 'Nested, no RSpec'>><<C <todo sym>>> < (<self>)
+          def <it 'inside Nested'><<todo method>>(&<blk>)
+            begin
+              <self>.another_outer_helper()
+              <self>.described_class()
+            end
+          end
         end
       end
     end

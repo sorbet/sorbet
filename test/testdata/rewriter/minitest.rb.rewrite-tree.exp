@@ -87,19 +87,22 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    class <emptyTree>::<C <describe 'some inner tests'>><<C <todo sym>>> < (<self>)
-      def inside_method<<todo method>>(&<blk>)
-        <emptyTree>
-      end
-
-      def <it 'works inside'><<todo method>>(&<blk>)
-        begin
-          <self>.outside_method()
-          <self>.inside_method()
+    begin
+      "some inner tests"
+      class <emptyTree>::<C <describe 'some inner tests'>><<C <todo sym>>> < (<self>)
+        def inside_method<<todo method>>(&<blk>)
+          <emptyTree>
         end
-      end
 
-      <runtime method definition of inside_method>
+        def <it 'works inside'><<todo method>>(&<blk>)
+          begin
+            <self>.outside_method()
+            <self>.inside_method()
+          end
+        end
+
+        <runtime method definition of inside_method>
+      end
     end
 
     <runtime method definition of instance_helper>
@@ -110,23 +113,26 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @random_method_ivar = <cast:let>(3, <todo sym>, <emptyTree>::<C Integer>)
     end
 
-    class <emptyTree>::<C <describe 'Object'>><<C <todo sym>>> < (<self>)
-      def <it 'Object'><<todo method>>(&<blk>)
-        <emptyTree>
-      end
+    begin
+      <emptyTree>::<C Object>
+      class <emptyTree>::<C <describe 'Object'>><<C <todo sym>>> < (<self>)
+        def <it 'Object'><<todo method>>(&<blk>)
+          <emptyTree>
+        end
 
-      def <it 'Object'><<todo method>>(&<blk>)
-        <emptyTree>
-      end
+        def <it 'Object'><<todo method>>(&<blk>)
+          <emptyTree>
+        end
 
-      begin
-        <emptyTree>::<C Object>
-        <emptyTree>
-      end
+        begin
+          <emptyTree>::<C Object>
+          <emptyTree>
+        end
 
-      begin
-        <emptyTree>::<C Object>
-        <emptyTree>
+        begin
+          <emptyTree>::<C Object>
+          <emptyTree>
+        end
       end
     end
 
@@ -138,12 +144,18 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.junk()
     end
 
-    class <emptyTree>::<C <describe 'a non-ideal situation'>><<C <todo sym>>> < (<self>)
-      def <it 'contains nested describes'><<todo method>>(&<blk>)
-        <emptyTree>
-      end
+    begin
+      "a non-ideal situation"
+      class <emptyTree>::<C <describe 'a non-ideal situation'>><<C <todo sym>>> < (<self>)
+        def <it 'contains nested describes'><<todo method>>(&<blk>)
+          begin
+            "nobody should write this but we should still parse it"
+            <emptyTree>
+          end
+        end
 
-      class <emptyTree>::<C <describe 'nobody should write this but we should still parse it'>><<C <todo sym>>> < (<self>)
+        class <emptyTree>::<C <describe 'nobody should write this but we should still parse it'>><<C <todo sym>>> < (<self>)
+        end
       end
     end
 
@@ -166,25 +178,28 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  class <emptyTree>::<C <describe 'extends T::Sig'>><<C <todo sym>>> < (<self>)
-    <self>.sig() do ||
-      <self>.returns(<emptyTree>::<C Integer>)
-    end
-
-    def example<<todo method>>(&<blk>)
-      0
-    end
-
-    def <it 'calls example'><<todo method>>(&<blk>)
-      begin
-        res = <self>.example()
-        <emptyTree>::<C T>.reveal_type(res)
+  begin
+    "extends T::Sig"
+    class <emptyTree>::<C <describe 'extends T::Sig'>><<C <todo sym>>> < (<self>)
+      <self>.sig() do ||
+        <self>.returns(<emptyTree>::<C Integer>)
       end
+
+      def example<<todo method>>(&<blk>)
+        0
+      end
+
+      def <it 'calls example'><<todo method>>(&<blk>)
+        begin
+          res = <self>.example()
+          <emptyTree>::<C T>.reveal_type(res)
+        end
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      <runtime method definition of example>
     end
-
-    <self>.extend(<emptyTree>::<C T>::<C Sig>)
-
-    <runtime method definition of example>
   end
 
   <runtime method definition of junk>

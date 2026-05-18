@@ -12,67 +12,82 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <runtime method definition of self.describe>
   end
 
-  class <emptyTree>::<C <describe 'User'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
-    def name<<todo method>>(&<blk>)
-      "Alice"
-    end
-
-    def <it 'has a name'><<todo method>>(&<blk>)
-      <self>.name()
-    end
-
-    <runtime method definition of name>
-
-    class <emptyTree>::<C <context 'when verified'>><<C <todo sym>>> < (<self>)
-      def verified<<todo method>>(&<blk>)
-        true
+  begin
+    "User"
+    class <emptyTree>::<C <describe 'User'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      def name<<todo method>>(&<blk>)
+        "Alice"
       end
 
-      def <it 'shows verified status'><<todo method>>(&<blk>)
-        begin
-          <self>.name()
-          <self>.verified()
+      def <it 'has a name'><<todo method>>(&<blk>)
+        <self>.name()
+      end
+
+      <runtime method definition of name>
+
+      begin
+        "when verified"
+        class <emptyTree>::<C <context 'when verified'>><<C <todo sym>>> < (<self>)
+          def verified<<todo method>>(&<blk>)
+            true
+          end
+
+          def <it 'shows verified status'><<todo method>>(&<blk>)
+            begin
+              <self>.name()
+              <self>.verified()
+            end
+          end
+
+          <runtime method definition of verified>
         end
       end
-
-      <runtime method definition of verified>
     end
   end
 
-  class <emptyTree>::<C <describe 'User'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
-    def path<<todo method>>(&<blk>)
-      "/some/path"
-    end
+  begin
+    "User"
+    class <emptyTree>::<C <describe 'User'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      def path<<todo method>>(&<blk>)
+        "/some/path"
+      end
 
-    def <it 'has a path'><<todo method>>(&<blk>)
-      <self>.path()
-    end
+      def <it 'has a path'><<todo method>>(&<blk>)
+        <self>.path()
+      end
 
-    <runtime method definition of path>
+      <runtime method definition of path>
+    end
   end
 
-  class <emptyTree>::<C <describe 'User'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
-    def value<<todo method>>(&<blk>)
-      42
-    end
+  begin
+    "User"
+    class <emptyTree>::<C <describe 'User'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      def value<<todo method>>(&<blk>)
+        42
+      end
 
-    def <it 'has a value'><<todo method>>(&<blk>)
-      <self>.value()
-    end
+      def <it 'has a value'><<todo method>>(&<blk>)
+        <self>.value()
+      end
 
-    <runtime method definition of value>
+      <runtime method definition of value>
+    end
   end
 
-  class <emptyTree>::<C <describe 'User'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
-    def count<<todo method>>(&<blk>)
-      10
-    end
+  begin
+    "User"
+    class <emptyTree>::<C <describe 'User'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      def count<<todo method>>(&<blk>)
+        10
+      end
 
-    def <it 'has a count'><<todo method>>(&<blk>)
-      <self>.count()
-    end
+      def <it 'has a count'><<todo method>>(&<blk>)
+        <self>.count()
+      end
 
-    <runtime method definition of count>
+      <runtime method definition of count>
+    end
   end
 
   class <emptyTree>::<C UserClass><<C <todo sym>>> < (::<todo sym>)
@@ -150,27 +165,33 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  class <emptyTree>::<C <describe 'user_symbol'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
-    def data<<todo method>>(&<blk>)
-      "test"
-    end
+  begin
+    :user_symbol
+    class <emptyTree>::<C <describe 'user_symbol'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      def data<<todo method>>(&<blk>)
+        "test"
+      end
 
-    def <it 'has data'><<todo method>>(&<blk>)
-      <self>.data()
-    end
+      def <it 'has data'><<todo method>>(&<blk>)
+        <self>.data()
+      end
 
-    <runtime method definition of data>
+      <runtime method definition of data>
+    end
   end
 
-  class <emptyTree>::<C <describe 'user_symbol'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
-    def result<<todo method>>(&<blk>)
-      true
-    end
+  begin
+    :user_symbol
+    class <emptyTree>::<C <describe 'user_symbol'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      def result<<todo method>>(&<blk>)
+        true
+      end
 
-    def <it 'has a result'><<todo method>>(&<blk>)
-      <self>.result()
-    end
+      def <it 'has a result'><<todo method>>(&<blk>)
+        <self>.result()
+      end
 
-    <runtime method definition of result>
+      <runtime method definition of result>
+    end
   end
 end
