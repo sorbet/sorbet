@@ -18,145 +18,160 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C MyClass><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
-    class <emptyTree>::<C <describe 'single shared example with context'>><<C <todo sym>>> < (<self>)
-      module ::<root>::<C <shared_examples 'my shared example'>><<C <todo sym>>> < ()
-        def foo_exists<<todo method>>(&<blk>)
-          "bar"
-        end
+    begin
+      "single shared example with context"
+      class <emptyTree>::<C <describe 'single shared example with context'>><<C <todo sym>>> < (<self>)
+        module ::<root>::<C <shared_examples 'my shared example'>><<C <todo sym>>> < ()
+          def foo_exists<<todo method>>(&<blk>)
+            "bar"
+          end
 
-        def uses_my_param<<todo method>>(&<blk>)
+          def uses_my_param<<todo method>>(&<blk>)
+            <emptyTree>::<C T>.reveal_type(my_param)
+          end
+
+          def <it '::<Magic>.<string-interpolate>("works for ", my_param)'><<todo method>>(&<blk>)
+            [::T.unsafe(nil)].each() do |my_param|
+              begin
+                <emptyTree>::<C T>.reveal_type(my_param)
+                <self>.expect(<self>.foo_exists()).to(<self>.eq("bar"))
+                <self>.this_does_not_exist()
+              end
+            end
+          end
+
           <emptyTree>::<C T>.reveal_type(my_param)
-        end
 
-        def <it '::<Magic>.<string-interpolate>("works for ", my_param)'><<todo method>>(&<blk>)
-          [::T.unsafe(nil)].each() do |my_param|
-            begin
-              <emptyTree>::<C T>.reveal_type(my_param)
-              <self>.expect(<self>.foo_exists()).to(<self>.eq("bar"))
-              <self>.this_does_not_exist()
-            end
+          <runtime method definition of foo_exists>
+
+          <runtime method definition of uses_my_param>
+
+          <runtime method definition of <it '::<Magic>.<string-interpolate>("works for ", my_param)'>>
+
+          ::<Magic>.requires_ancestor() do ||
+            <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
           end
-        end
-
-        <emptyTree>::<C T>.reveal_type(my_param)
-
-        <runtime method definition of foo_exists>
-
-        <runtime method definition of uses_my_param>
-
-        <runtime method definition of <it '::<Magic>.<string-interpolate>("works for ", my_param)'>>
-
-        ::<Magic>.requires_ancestor() do ||
-          <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
         end
       end
     end
 
-    class <emptyTree>::<C <describe 'shared context with 2 params'>><<C <todo sym>>> < (<self>)
-      module ::<root>::<C <shared_examples 'context with 2 params'>><<C <todo sym>>> < ()
-        def value1<<todo method>>(&<blk>)
-          param1
-        end
+    begin
+      "shared context with 2 params"
+      class <emptyTree>::<C <describe 'shared context with 2 params'>><<C <todo sym>>> < (<self>)
+        module ::<root>::<C <shared_examples 'context with 2 params'>><<C <todo sym>>> < ()
+          def value1<<todo method>>(&<blk>)
+            param1
+          end
 
-        def value2<<todo method>>(&<blk>)
-          param2
-        end
+          def value2<<todo method>>(&<blk>)
+            param2
+          end
 
-        def <it 'uses the params'><<todo method>>(&<blk>)
-          [::T.unsafe(nil)].each() do |param1, param2|
-            begin
-              <emptyTree>::<C T>.reveal_type(param1)
-              <emptyTree>::<C T>.reveal_type(param2)
+          def <it 'uses the params'><<todo method>>(&<blk>)
+            [::T.unsafe(nil)].each() do |param1, param2|
+              begin
+                <emptyTree>::<C T>.reveal_type(param1)
+                <emptyTree>::<C T>.reveal_type(param2)
+              end
             end
           end
-        end
 
-        <runtime method definition of value1>
+          <runtime method definition of value1>
 
-        <runtime method definition of value2>
+          <runtime method definition of value2>
 
-        <runtime method definition of <it 'uses the params'>>
+          <runtime method definition of <it 'uses the params'>>
 
-        ::<Magic>.requires_ancestor() do ||
-          <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
-        end
-      end
-
-      class <emptyTree>::<C <describe 'including context'>><<C <todo sym>>> < (<self>)
-        def <it 'has access to values'><<todo method>>(&<blk>)
-          begin
-            <self>.value1()
-            <self>.value2()
+          ::<Magic>.requires_ancestor() do ||
+            <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
           end
         end
 
-        <self>.include(::<root>::<C <shared_examples 'context with 2 params'>>)
+        begin
+          "including context"
+          class <emptyTree>::<C <describe 'including context'>><<C <todo sym>>> < (<self>)
+            def <it 'has access to values'><<todo method>>(&<blk>)
+              begin
+                <self>.value1()
+                <self>.value2()
+              end
+            end
+
+            <self>.include(::<root>::<C <shared_examples 'context with 2 params'>>)
+          end
+        end
       end
     end
 
-    class <emptyTree>::<C <describe 'shared context with 5 params'>><<C <todo sym>>> < (<self>)
-      module ::<root>::<C <shared_examples 'context with 5 params'>><<C <todo sym>>> < ()
-        def value1<<todo method>>(&<blk>)
-          param1
-        end
+    begin
+      "shared context with 5 params"
+      class <emptyTree>::<C <describe 'shared context with 5 params'>><<C <todo sym>>> < (<self>)
+        module ::<root>::<C <shared_examples 'context with 5 params'>><<C <todo sym>>> < ()
+          def value1<<todo method>>(&<blk>)
+            param1
+          end
 
-        def value2<<todo method>>(&<blk>)
-          param2
-        end
+          def value2<<todo method>>(&<blk>)
+            param2
+          end
 
-        def value3<<todo method>>(&<blk>)
-          param3
-        end
+          def value3<<todo method>>(&<blk>)
+            param3
+          end
 
-        def value4<<todo method>>(&<blk>)
-          param4
-        end
+          def value4<<todo method>>(&<blk>)
+            param4
+          end
 
-        def value5<<todo method>>(&<blk>)
-          param5
-        end
+          def value5<<todo method>>(&<blk>)
+            param5
+          end
 
-        def <it 'uses the params'><<todo method>>(&<blk>)
-          [::T.unsafe(nil)].each() do |param1, param2, param3, param4, param5|
-            begin
-              <emptyTree>::<C T>.reveal_type(param1)
-              <emptyTree>::<C T>.reveal_type(param2)
-              <emptyTree>::<C T>.reveal_type(param3)
-              <emptyTree>::<C T>.reveal_type(param4)
-              <emptyTree>::<C T>.reveal_type(param5)
+          def <it 'uses the params'><<todo method>>(&<blk>)
+            [::T.unsafe(nil)].each() do |param1, param2, param3, param4, param5|
+              begin
+                <emptyTree>::<C T>.reveal_type(param1)
+                <emptyTree>::<C T>.reveal_type(param2)
+                <emptyTree>::<C T>.reveal_type(param3)
+                <emptyTree>::<C T>.reveal_type(param4)
+                <emptyTree>::<C T>.reveal_type(param5)
+              end
             end
           end
-        end
 
-        <runtime method definition of value1>
+          <runtime method definition of value1>
 
-        <runtime method definition of value2>
+          <runtime method definition of value2>
 
-        <runtime method definition of value3>
+          <runtime method definition of value3>
 
-        <runtime method definition of value4>
+          <runtime method definition of value4>
 
-        <runtime method definition of value5>
+          <runtime method definition of value5>
 
-        <runtime method definition of <it 'uses the params'>>
+          <runtime method definition of <it 'uses the params'>>
 
-        ::<Magic>.requires_ancestor() do ||
-          <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
-        end
-      end
-
-      class <emptyTree>::<C <describe 'including context'>><<C <todo sym>>> < (<self>)
-        def <it 'has access to values'><<todo method>>(&<blk>)
-          begin
-            <self>.value1()
-            <self>.value2()
-            <self>.value3()
-            <self>.value4()
-            <self>.value5()
+          ::<Magic>.requires_ancestor() do ||
+            <emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>
           end
         end
 
-        <self>.include(::<root>::<C <shared_examples 'context with 5 params'>>)
+        begin
+          "including context"
+          class <emptyTree>::<C <describe 'including context'>><<C <todo sym>>> < (<self>)
+            def <it 'has access to values'><<todo method>>(&<blk>)
+              begin
+                <self>.value1()
+                <self>.value2()
+                <self>.value3()
+                <self>.value4()
+                <self>.value5()
+              end
+            end
+
+            <self>.include(::<root>::<C <shared_examples 'context with 5 params'>>)
+          end
+        end
       end
     end
   end

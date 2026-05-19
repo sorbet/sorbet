@@ -25,14 +25,20 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   module ::<root>::<C <shared_examples 'runner'>><<C <todo sym>>> < ()
   end
 
-  class <emptyTree>::<C <describe 'consumer'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
-    <self>.include(::<root>::<C <shared_examples 'suite alpha'>>)
+  begin
+    "consumer"
+    class <emptyTree>::<C <describe 'consumer'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      <self>.include(::<root>::<C <shared_examples 'suite alpha'>>)
 
-    <self>.include(::<root>::<C <shared_examples 'suite beta'>>)
+      <self>.include(::<root>::<C <shared_examples 'suite beta'>>)
+    end
   end
 
   <runtime method definition of suite_helper>
 
-  class <emptyTree>::<C <describe 'top-level dynamic'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+  begin
+    "top-level dynamic"
+    class <emptyTree>::<C <describe 'top-level dynamic'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+    end
   end
 end

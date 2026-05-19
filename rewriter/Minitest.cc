@@ -792,10 +792,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
 
             // Preserve the original constant reference in the tree so Sorbet can
             // resolve it for hover and go-to-definition.
-            if (recvIsRSpec && ast::isa_tree<ast::UnresolvedConstantLit>(arg)) {
-                return ast::MK::InsSeq1(send->loc, arg.deepCopy(), move(classDef));
-            }
-            return classDef;
+            return ast::MK::InsSeq1(send->loc, arg.deepCopy(), move(classDef));
         }
 
         case core::Names::after().rawId():
