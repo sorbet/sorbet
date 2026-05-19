@@ -6,10 +6,10 @@ class Opus::Types::Test::Ruby2KeywordsTest < Critic::Unit::UnitTest
   # Ruby 3.4+, where the VM warns if ruby2_keywords is applied to a method that
   # already handles keywords or does not accept a splat.
 
-  def warnings_for(&block)
+  def warnings_for
     old_stderr = $stderr
     $stderr = StringIO.new
-    block.call
+    yield
     $stderr.string
   ensure
     $stderr = old_stderr
