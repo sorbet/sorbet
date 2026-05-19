@@ -76,7 +76,8 @@ module T::Private::Methods
       raise DeclBuilder::BuilderError.new("You must declare a `sig` before using `#{dsl_name}` on the method `#{method_name}`")
     end
 
-    if !previous_declaration.blk_or_decl.is_a?(Proc)
+    blk_or_decl = previous_declaration.blk_or_decl
+    if !blk_or_decl.is_a?(Proc) && blk_or_decl != ARG_NOT_PROVIDED
       raise DeclBuilder::BuilderError.new("Cannot call `#{dsl_name} #{method_name.inspect}`, because the sig block has already run")
     end
 
@@ -317,6 +318,21 @@ module T::Private::Methods
     end
 
     if current_declaration.nil?
+      # Record a block-less declaration, for DSL methods like `override`
+      # (note that `current_declaration` == `previous_declaration` after `consume!`)
+      T::Private::DeclState.current.previous_declaration = DeclarationBlock.new(
+        mod,
+        method_name,
+        nil, # loc being nil should not matter because it's only used when running the sig block
+        # TODO(jez) I think that we will want this `blk` to actually create an
+        # untyped declaration for the given method, akin to `Signature.new_untyped`,
+        # but at the `Declaration` level.
+        ARG_NOT_PROVIDED, # blk
+        false,            # final
+        nil,              # abstract
+        nil,              # override
+        nil               # overridable
+      )
       return
     end
 
