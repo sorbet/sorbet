@@ -2087,7 +2087,9 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
             bool hasPredicate = (caseNode->predicate != nullptr);
 
             if (hasPredicate) {
-                predicateLoc = predicate.loc();
+                // Use the Prism node's loc directly (not the desugared expr's loc) so that
+                // e.g. `case (1)` retains the parens-inclusive loc rather than collapsing to `1`.
+                predicateLoc = translateLoc(caseNode->predicate->location);
                 tempName = nextUniqueDesugarName(core::Names::assignTemp());
             } else {
                 tempName = core::NameRef::noName();
