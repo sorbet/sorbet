@@ -5,7 +5,6 @@
 #include "core/errors/rewriter.h"
 #include "parser/helper.h"
 #include "parser/prism/Helpers.h"
-#include "rbs/SignatureTranslator.h"
 #include <algorithm>
 
 using namespace std;

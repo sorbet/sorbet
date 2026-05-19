@@ -272,8 +272,10 @@ pipeline_tests(
             "testdata/**/*.exp",
         ],
         exclude = [
+            # RBS is only supported with Prism. Run these with `//test:test_corpus_prism`.
             "testdata/rbs/**/*.rb",
             "testdata/rbs/**/*.exp",
+            "testdata/lsp/*_rbs*.rb",
 
             # Prism-specific variant of `missing_shadow_args.rb` (different parser errors and desugar tree).
             "testdata/parser/error_recovery/missing_shadow_args_prism.rb",
@@ -541,10 +543,15 @@ pipeline_tests(
             "testdata/**/*.rbi",
             "testdata/**/*.exp",
         ],
-        # package-directed is known to be incompatible with the LSP tests for now
-        # todo(gdritter): fix this!
         exclude = [
+            # package-directed is known to be incompatible with the LSP tests for now
+            # todo(gdritter): fix this!
             "testdata/packager/directed-*/**/*",
+
+            # RBS is only supported with Prism. Run these with `//test:test_corpus_lsp_prism`.
+            "testdata/rbs/**/*.rb",
+            "testdata/rbs/**/*.exp",
+            "testdata/lsp/*_rbs*.rb",
 
             # These test require support for RBS boolean literal types,
             # which will not be back-ported to the whitequark-based RBS rewriter.

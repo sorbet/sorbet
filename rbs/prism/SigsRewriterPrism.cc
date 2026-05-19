@@ -6,8 +6,6 @@
 #include "core/errors/rewriter.h"
 #include "parser/helper.h"
 #include "parser/prism/Helpers.h"
-#include "rbs/SignatureTranslator.h"
-#include "rbs/TypeParamsToParserNodes.h"
 
 extern "C" {
 #include "prism.h"

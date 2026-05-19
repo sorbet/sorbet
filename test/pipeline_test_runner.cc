@@ -37,8 +37,6 @@
 #include "parser/prism/Parser.h"
 #include "payload/binary/binary.h"
 #include "payload/payload.h"
-#include "rbs/AssertionsRewriter.h"
-#include "rbs/SigsRewriter.h"
 #include "rbs/prism/RBSRewriterPrism.h"
 #include "resolver/resolver.h"
 #include "rewriter/rewriter.h"
@@ -249,29 +247,19 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
             core::MutableContext ctx(gs, core::Symbols::root(), file);
 
             // Always run the legacy parser.
-            auto settings = parser::Parser::Settings{false, false, false, gs.cacheSensitiveOptions.rbsEnabled};
+            auto settings = parser::Parser::Settings{false, false, false};
             legacyParseResult = parser::Parser::run(gs, file, settings);
 
             switch (parser) {
                 case realmain::options::Parser::ORIGINAL: {
+                    ENFORCE(!gs.cacheSensitiveOptions.rbsEnabled, "RBS mode is only supported with the Prism parser");
+
                     auto &nodes = legacyParseResult.tree;
 
                     handler.drainErrors(gs);
                     handler.addObserved(gs, "parse-tree", [&]() { return nodes->toString(gs); });
                     handler.addObserved(gs, "parse-tree-whitequark", [&]() { return nodes->toWhitequark(gs); });
                     handler.addObserved(gs, "parse-tree-json", [&]() { return nodes->toJSON(gs); });
-
-                    if (gs.cacheSensitiveOptions.rbsEnabled) {
-                        core::MutableContext ctx(gs, core::Symbols::root(), file);
-                        auto associator = rbs::CommentsAssociator(ctx, legacyParseResult.commentLocations);
-                        auto commentMap = associator.run(nodes);
-
-                        auto rbsSignatures = rbs::SigsRewriter(ctx, commentMap.signaturesForNode);
-                        nodes = rbsSignatures.run(std::move(nodes));
-
-                        auto rbsAssertions = rbs::AssertionsRewriter(ctx, commentMap.assertionsForNode);
-                        nodes = rbsAssertions.run(std::move(nodes));
-                    }
 
                     handler.addObserved(gs, "rbs-rewrite-tree", [&]() { return nodes->toString(gs); });
 
@@ -789,10 +777,12 @@ TEST_CASE("PerPhaseTest") {
         ast::ExpressionPtr ast;
         switch (parser) {
             case realmain::options::Parser::ORIGINAL: {
+                ENFORCE(!gs->cacheSensitiveOptions.rbsEnabled, "RBS mode is only supported with the Prism parser");
+
                 // Parser
                 parser::ParseResult parseResult;
                 {
-                    auto settings = parser::Parser::Settings{false, false, false, gs->cacheSensitiveOptions.rbsEnabled};
+                    auto settings = parser::Parser::Settings{false, false, false};
                     parseResult = parser::Parser::run(*gs, f, settings);
                 }
 
@@ -800,19 +790,6 @@ TEST_CASE("PerPhaseTest") {
                 handler.addObserved(*gs, "parse-tree-whitequark",
                                     [&]() { return parseResult.tree->toWhitequark(*gs); });
                 handler.addObserved(*gs, "parse-tree-json", [&]() { return parseResult.tree->toJSON(*gs); });
-
-                if (gs->cacheSensitiveOptions.rbsEnabled) {
-                    auto associator = rbs::CommentsAssociator(ctx, parseResult.commentLocations);
-                    auto commentMap = associator.run(parseResult.tree);
-
-                    auto rbsSignatures = rbs::SigsRewriter(ctx, commentMap.signaturesForNode);
-                    parseResult.tree = rbsSignatures.run(std::move(parseResult.tree));
-
-                    auto rbsAssertions = rbs::AssertionsRewriter(ctx, commentMap.assertionsForNode);
-                    parseResult.tree = rbsAssertions.run(std::move(parseResult.tree));
-
-                    handler.addObserved(*gs, "rbs-rewrite-tree", [&]() { return parseResult.tree->toString(*gs); });
-                }
 
                 // Desugarer
                 ast = ast::desugar::node2Tree(ctx, move(parseResult.tree));
