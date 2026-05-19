@@ -623,7 +623,7 @@ pipeline_tests(
 )
 
 pipeline_tests(
-    "rbs_prism",
+    "rbs",
     glob(
         [
             "testdata/rbs/**/*.rb",
@@ -648,7 +648,7 @@ test_suite(
 test_suite(
     name = "test_prism",
     tests = [
-        "rbs_prism",
+        "rbs",
         "test_corpus_prism",
     ],
 )
@@ -661,11 +661,4 @@ test_suite(
 test_suite(
     name = "prism_regression",
     tests = ["prism_regression_corpus"],
-)
-
-test_suite(
-    name = "rbs",
-    tests = [
-        "rbs_prism",
-    ],
 )
