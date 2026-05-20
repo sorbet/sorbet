@@ -414,6 +414,59 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
 
 namespace {
 
+// Determine how much of the symbol table we can copy when starting a slow path edit: any __package.rb modification
+// means that we can't reuse the symbol table.
+core::packages::Stratum determineStartingStratum(const core::GlobalState &gs,
+                                                 const vector<core::packages::Stratum> &fileToStratum,
+                                                 const core::packages::Stratum lastStratum,
+                                                 const LSPFileUpdates &update) {
+    // We start by assuming we can copy the whole previous symbol table.
+    auto editStratum = lastStratum;
+
+    int ix = -1;
+    for (auto &file : update.updatedFiles) {
+        ++ix;
+
+        auto fref = update.updatedFileRefs[ix];
+
+        core::packages::Stratum fileStratum;
+
+        // If this is a new file, we can still copy a prefix if we can determine what package it would belong to.
+        if (fref.id() >= fileToStratum.size()) {
+            // We can't keep any part of the symbol table if we see a new package file
+            if (file->hasPackageRbPath()) {
+                return core::packages::Stratum(0);
+            }
+
+            auto pkg = gs.packageDB().findPackageByPath(gs, *file);
+            if (!pkg.exists()) {
+                return core::packages::Stratum(0);
+            }
+
+            auto &info = gs.packageDB().getPackageInfo(pkg);
+            ENFORCE(info.exists());
+
+            // We have already checked for new package files above, so this should always be true.
+            ENFORCE(info.file.id() < fileToStratum.size());
+            fileStratum = fileToStratum[info.file.id()];
+        } else {
+            // We can't keep any part of the symbol table if the package file has changed.
+            if (file->hasPackageRbPath() && fref.data(gs).source() != file->source()) {
+                return core::packages::Stratum(0);
+            }
+
+            fileStratum = fileToStratum[fref.id()];
+        }
+
+        // We need to find the earliest stratum involved in this edit to know what prefix of the symbol table will not
+        // be affected by it. This is the opposite of what we do for preemption, as in that case we need to know the
+        // point at which an edit's dependencies will all have been satisfied.
+        editStratum = std::min(editStratum, fileStratum);
+    }
+
+    return editStratum;
+}
+
 // Determine which files we need to copy into the open files cache (indexedFinalGS), and update the file table to point
 // to the updated files.
 void applyFileTableUpdates(core::GlobalState &gs, vector<core::FileRef> &workspaceFiles, const LSPConfiguration &config,
