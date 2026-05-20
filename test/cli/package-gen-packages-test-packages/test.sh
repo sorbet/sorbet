@@ -40,6 +40,10 @@ echo "###### cat D/__package.rb ######"
 cat D/__package.rb
 
 echo
+echo "###### cat D/ANestedPackage/__package.rb ######"
+cat D/ANestedPackage/__package.rb
+
+echo
 echo "###### cat E/__package.rb ######"
 cat E/__package.rb
 
@@ -77,6 +81,10 @@ cat C/__package.rb
 echo
 echo "###### cat D/__package.rb ######"
 cat D/__package.rb
+
+echo
+echo "###### cat D/ANestedPackage/__package.rb ######"
+cat D/ANestedPackage/__package.rb
 
 echo
 echo "###### cat E/__package.rb ######"
