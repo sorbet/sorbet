@@ -1154,8 +1154,7 @@ ast::ExpressionPtr Desugarer::translateOpAssignment(PrismAssignmentNode *node, c
         return lhs;
     }
 
-    auto s = fmt::format("the LHS has been desugared to something we haven't expected: {}", lhs.toString(ctx));
-    Exception::raise(s);
+    Exception::raise("the LHS has been desugared to something we haven't expected: {}", lhs.toString(ctx));
 }
 
 // Desugar &&= or ||= for a simple reference LHS (local, instance, class, global variable).
