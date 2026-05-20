@@ -35,7 +35,6 @@ private:
     absl::Mutex &messageQueueMutex;
     absl::Notification &initializedNotification;
     const std::shared_ptr<const LSPConfiguration> config;
-    std::string watchmanNamespace;
 
     /**
      * Starts up a Watchman subprocess and begins processing file changes. Runs in a dedicated thread.
@@ -64,7 +63,7 @@ public:
     WatchmanProcess(std::shared_ptr<spdlog::logger> logger, std::string_view watchmanPath, std::string_view workSpace,
                     std::vector<std::string> extensions, MessageQueueState &messageQueue,
                     absl::Mutex &messageQueueMutex, absl::Notification &initializedNotification,
-                    std::shared_ptr<const LSPConfiguration> config, std::string_view watchmanNamespace);
+                    std::shared_ptr<const LSPConfiguration> config);
 
     ~WatchmanProcess();
 

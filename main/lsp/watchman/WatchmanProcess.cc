@@ -1,5 +1,4 @@
 #include "WatchmanProcess.h"
-#include "absl/strings/strip.h"
 #include "common/FileOps.h"
 #include "common/common.h"
 #include "common/strings/formatting.h"
@@ -10,6 +9,8 @@
 #include "rapidjson/document.h"
 #include "rapidjson/writer.h"
 #include "subprocess.hpp"
+#include <chrono>
+#include <thread>
 
 using namespace std;
 
@@ -18,12 +19,12 @@ namespace sorbet::realmain::lsp::watchman {
 WatchmanProcess::WatchmanProcess(shared_ptr<spdlog::logger> logger, string_view watchmanPath, string_view workSpace,
                                  vector<string> extensions, MessageQueueState &messageQueue,
                                  absl::Mutex &messageQueueMutex, absl::Notification &initializedNotification,
-                                 shared_ptr<const LSPConfiguration> config, string_view watchmanNamespace)
+                                 shared_ptr<const LSPConfiguration> config)
     : logger(std::move(logger)), watchmanPath(string(watchmanPath)), workSpace(string(workSpace)),
       extensions(std::move(extensions)),
       thread(runInAThread("watchmanReader", std::bind(&WatchmanProcess::start, this))), messageQueue(messageQueue),
-      messageQueueMutex(messageQueueMutex), initializedNotification(initializedNotification), config(std::move(config)),
-      watchmanNamespace(watchmanNamespace) {}
+      messageQueueMutex(messageQueueMutex), initializedNotification(initializedNotification),
+      config(std::move(config)) {}
 
 WatchmanProcess::~WatchmanProcess() {
     exitWithCode(0, "");
@@ -40,6 +41,112 @@ template <typename F> void catchDeserializationError(spdlog::logger &logger, con
     }
 }
 
+struct WatchProjectResult {
+    string watchRoot;
+    // Path of the queried directory relative to watchRoot. Empty when the queried directory IS
+    // the watch root.
+    string relativePath;
+};
+
+// Synchronously read one line of JSON from watchman, polling isStopped() so the destructor can
+// break us out of the wait. Returns nullopt iff isStopped() became true before a line arrived.
+optional<string> readJsonLine(int fd, string &buffer, const std::function<bool()> &isStopped) {
+    while (!isStopped()) {
+        errno = 0;
+        auto r = sorbet::FileOps::readLineFromFd(fd, buffer);
+        if (r.result == sorbet::FileOps::ReadResult::Timeout) {
+            continue;
+        }
+        if (r.result == sorbet::FileOps::ReadResult::ErrorOrEof) {
+            if (errno == EINTR) {
+                continue;
+            }
+            throw runtime_error("watchman closed pipe before responding");
+        }
+        ENFORCE(r.result == sorbet::FileOps::ReadResult::Success);
+        return std::move(*r.output);
+    }
+    return nullopt;
+}
+
+// Issues `["watch-project", workspace]` to watchman and parses the response. Sorbet's workspace
+// can sit inside an existing watched root (e.g. a subdirectory of a larger repo whose top level
+// is already watched). Watchman rejects subscribes whose root isn't a registered watch, so we
+// ask it to resolve the workspace to the right (watch, relative_path) pair via watch-project.
+// https://facebook.github.io/watchman/docs/cmd/watch-project.html
+WatchProjectResult resolveWatchProject(subprocess::Popen &p, int fd, string &buffer, string_view workspace,
+                                       spdlog::logger &logger, const std::function<bool()> &isStopped) {
+    rapidjson::StringBuffer buf;
+    rapidjson::Writer<rapidjson::StringBuffer> w(buf);
+    w.StartArray();
+    w.String("watch-project");
+    w.String(workspace.data(), workspace.size());
+    w.EndArray();
+
+    string cmd = buf.GetString();
+    p.send(cmd.c_str(), cmd.size());
+    logger.debug(cmd);
+
+    auto line = readJsonLine(fd, buffer, isStopped);
+    if (!line.has_value()) {
+        throw runtime_error("watchman watch-project interrupted by shutdown");
+    }
+    logger.debug(*line);
+
+    rapidjson::MemoryPoolAllocator<> alloc;
+    rapidjson::Document doc(&alloc);
+    if (doc.Parse(line->c_str(), line->size()).HasParseError() || !doc.IsObject()) {
+        throw runtime_error(fmt::format("watch-project response was not a JSON object: {}", *line));
+    }
+    if (doc.HasMember("error") && doc["error"].IsString()) {
+        throw runtime_error(fmt::format("watch-project failed: {}", doc["error"].GetString()));
+    }
+    if (!doc.HasMember("watch") || !doc["watch"].IsString()) {
+        throw runtime_error(fmt::format("watch-project response missing 'watch' field: {}", *line));
+    }
+
+    WatchProjectResult result;
+    result.watchRoot = doc["watch"].GetString();
+    if (doc.HasMember("relative_path") && doc["relative_path"].IsString()) {
+        result.relativePath = doc["relative_path"].GetString();
+    }
+    return result;
+}
+
+// Attempt to shut down the watchman CLI cleanly. The CLI's `-p` (persistent) mode keeps a unix
+// socket connection to the watchman daemon open until its stdin closes AND its parent has gone
+// away. If we just let Popen go out of scope we close the FDs, but cpp-subprocess never reaps —
+// the daemon-connection socket can outlive sorbet, leaving the daemon to grow thread/port
+// counts unboundedly across editor restarts. So: close stdin, give it a beat to exit on EOF,
+// then SIGTERM if it's still around, and reap.
+void shutdownWatchmanChild(subprocess::Popen &p, spdlog::logger &logger) {
+    try {
+        p.close_input();
+    } catch (...) {
+        // best-effort
+    }
+    for (int i = 0; i < 10; i++) {
+        try {
+            if (p.poll() != -1) {
+                return;
+            }
+        } catch (...) {
+            return;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    }
+    try {
+        p.kill(SIGTERM);
+    } catch (...) {
+        // best-effort
+    }
+    try {
+        p.wait();
+    } catch (...) {
+        // best-effort
+    }
+}
+
 } // namespace
 
 void WatchmanProcess::start() {
@@ -50,44 +157,38 @@ void WatchmanProcess::start() {
         auto p = subprocess::Popen({watchmanPath.c_str(), "-j", "-p", "--no-pretty"},
                                    subprocess::output{subprocess::PIPE}, subprocess::input{subprocess::PIPE});
 
-        string modifiedWorkspace = workSpace;
-        if (!watchmanNamespace.empty()) {
-            const optional<string> maybeResolved = FileOps::realpath(workSpace);
-            if (!maybeResolved.has_value()) {
-                logger->debug("Unable to resolve workspace path {} for namespacing", workSpace);
-                watchmanNamespace.clear();
-            } else {
-                string_view root(*maybeResolved);
-                logger->debug("realpath({}) = {}", workSpace, root);
-                if (absl::ConsumeSuffix(&root, watchmanNamespace)) {
-                    string gitDirectory(root);
-                    gitDirectory += "/.git";
-                    if (FileOps::dirExists(gitDirectory)) {
-                        logger->debug("Using {} as watchman root", root);
-                        modifiedWorkspace = root;
-                    } else {
-                        logger->debug(
-                            "Parent directory {} of namespace {} is not a git repository, disabling namespacing", root,
-                            watchmanNamespace);
-                        watchmanNamespace.clear();
-                    }
-                } else {
-                    logger->debug("Watched directory {} is not in namespace {}, disabling namespacing", root,
-                                  watchmanNamespace);
-                    watchmanNamespace.clear();
-                }
+        // Declared after `p` so it only runs if construction succeeded. Runs on every exit path
+        // out of this scope — normal return, break, or exception — so the watchman child is
+        // always reaped before this thread returns.
+        struct ShutdownGuard {
+            subprocess::Popen &p;
+            spdlog::logger &logger;
+            ~ShutdownGuard() noexcept {
+                shutdownWatchmanChild(p, logger);
             }
-        }
+        } shutdownGuard{p, *logger};
 
-        logger->debug("Starting monitoring path {} with watchman for files with extensions {}. Subscription id: {}",
-                      modifiedWorkspace, fmt::join(extensions, ","), subscriptionName);
+        auto file = p.output();
+        auto fd = fileno(file);
+        string buffer;
+
+        auto stoppedFn = [this]() { return this->isStopped(); };
+
+        // Resolve workspace → (watch root, relative path) so the subscribe targets a registered
+        // watchman root rather than an arbitrary subdirectory.
+        WatchProjectResult resolved = resolveWatchProject(p, fd, buffer, workSpace, *logger, stoppedFn);
+
+        logger->debug("Starting monitoring path {} (watch root {}, relative_root {}) with watchman for files with "
+                      "extensions {}. Subscription id: {}",
+                      workSpace, resolved.watchRoot, resolved.relativePath.empty() ? "<none>" : resolved.relativePath,
+                      fmt::join(extensions, ","), subscriptionName);
 
         rapidjson::StringBuffer subscribeCommandBuffer;
         rapidjson::Writer<rapidjson::StringBuffer> w(subscribeCommandBuffer);
         {
             w.StartArray();
             w.String("subscribe");
-            w.String(modifiedWorkspace);
+            w.String(resolved.watchRoot);
             w.String(subscriptionName);
 
             {
@@ -101,13 +202,6 @@ void WatchmanProcess::start() {
                         w.StartArray();
                         w.String("type");
                         w.String("f");
-                        w.EndArray();
-                    }
-
-                    if (!watchmanNamespace.empty()) {
-                        w.StartArray();
-                        w.String("dirname");
-                        w.String(watchmanNamespace);
                         w.EndArray();
                     }
 
@@ -158,6 +252,14 @@ void WatchmanProcess::start() {
                     w.EndArray();
                 }
 
+                // When workspace is a subdirectory of the watch root, scope the subscription to it.
+                // Watchman returns file names relative to relative_root, matching the contract the
+                // rest of Sorbet expects. https://facebook.github.io/watchman/docs/cmd/subscribe.html
+                if (!resolved.relativePath.empty()) {
+                    w.String("relative_root");
+                    w.String(resolved.relativePath);
+                }
+
                 // Note 2: `empty_on_fresh_instance` prevents Watchman from sending entire contents of folder if this
                 // subscription starts the daemon / causes the daemon to watch this folder for the first time.
                 w.String("empty_on_fresh_instance");
@@ -172,11 +274,6 @@ void WatchmanProcess::start() {
         string subscribeCommand = subscribeCommandBuffer.GetString();
         p.send(subscribeCommand.c_str(), subscribeCommand.size());
         logger->debug(subscribeCommand);
-
-        auto file = p.output();
-        auto fd = fileno(file);
-
-        string buffer;
 
         while (!isStopped()) {
             errno = 0;
@@ -208,18 +305,6 @@ void WatchmanProcess::start() {
             } else if (d.HasMember("is_fresh_instance")) {
                 catchDeserializationError(*logger, line, [&d, this]() {
                     auto queryResponse = sorbet::realmain::lsp::WatchmanQueryResponse::fromJSONValue(d);
-                    if (!watchmanNamespace.empty()) {
-                        auto prefix(watchmanNamespace);
-                        prefix += "/";
-
-                        for (auto &file : queryResponse->files) {
-                            string_view view(file);
-                            if (!absl::ConsumePrefix(&view, prefix)) {
-                                continue;
-                            }
-                            file = view;
-                        }
-                    }
                     processQueryResponse(move(queryResponse));
                 });
             } else if (d.HasMember("state-enter")) {
