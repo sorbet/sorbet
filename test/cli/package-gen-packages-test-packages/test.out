@@ -90,6 +90,9 @@ D/__package.rb:3: `D` is missing exports https://srb.help/3734
       export D::EnumFromD`
      9 |  export D::ANestedPackage::Foo
                                        ^
+    D/__package.rb:10: Inserted `export D::ShouldNotBeExported`
+    10 |  export D::EnumFromD::Variant
+                                      ^
 
 D/ANestedPackage/__package.rb:3: `D::ANestedPackage` is missing exports https://srb.help/3734
      3 |class D::ANestedPackage < PackageSpec
@@ -160,6 +163,7 @@ class D < PackageSpec
   export D::CONSTANT_FROM_D
   export D::ClassFromD
   export D::EnumFromD
+  export D::ShouldNotBeExported
 end
 
 ###### cat D/ANestedPackage/__package.rb ######
@@ -268,6 +272,9 @@ D/__package.rb:3: `D` is missing exports https://srb.help/3734
       export D::EnumFromD`
      9 |  export D::ANestedPackage::Foo
                                        ^
+    D/__package.rb:10: Inserted `export D::ShouldNotBeExported`
+    10 |  export D::EnumFromD::Variant
+                                      ^
 
 D/ANestedPackage/__package.rb:3: `D::ANestedPackage` is missing exports https://srb.help/3734
      3 |class D::ANestedPackage < PackageSpec
@@ -351,6 +358,7 @@ class D < PackageSpec
   export D::CONSTANT_FROM_D
   export D::ClassFromD
   export D::EnumFromD
+  export D::ShouldNotBeExported
 end
 
 ###### cat D/ANestedPackage/__package.rb ######

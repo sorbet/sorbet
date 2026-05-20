@@ -15,4 +15,7 @@ module D
       OtherVariant = new
     end
   end
+
+  class ShouldNotBeExported
+  end
 end
