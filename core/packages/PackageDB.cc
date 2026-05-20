@@ -88,6 +88,10 @@ MangledName PackageDB::findPackageByPath(const core::GlobalState &gs, core::File
     // See https://github.com/sorbet/sorbet/pull/5291 for more information.
     auto &fileData = file.dataAllowingUnsafe(gs);
 
+    return this->findPackageByPath(gs, fileData);
+}
+
+MangledName PackageDB::findPackageByPath(const core::GlobalState &gs, const core::File &fileData) const {
     string_view path = fileData.path();
     int curPrefixPos = path.find_last_of('/');
     while (curPrefixPos > 0) {
