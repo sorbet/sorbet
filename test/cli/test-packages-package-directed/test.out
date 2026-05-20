@@ -1,11 +1,1 @@
-app/test/app_test.rb:4: Unable to resolve constant `App` https://srb.help/5002
-     4 |  puts App::MyClass
-               ^^^
-  Did you mean `Test::App`? Use `-a` to autocorrect
-    app/test/app_test.rb:4: Replace with `Test::App`
-     4 |  puts App::MyClass
-               ^^^
-    app/test/app_test.rb:3: `Test::App` defined here
-     3 |module Test::App
-        ^^^^^^^^^^^^^^^^
-Errors: 1
+No errors! Great job.

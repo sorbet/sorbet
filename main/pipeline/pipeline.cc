@@ -904,7 +904,7 @@ PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::Pars
             ENFORCE(stratumMapping.find(pkgName) != stratumMapping.end(),
                     "All packages must be present in the condensation graph");
             auto &info = stratumMapping[pkgName];
-            if (file->isPackagedTest() || file->isPackagedTestHelper()) {
+            if (!db.testPackages() && (file->isPackagedTest() || file->isPackagedTestHelper())) {
                 ENFORCE(info.testStratum < USHRT_MAX);
                 result.fileToStratum[ix] = core::packages::Stratum(info.testStratum);
             } else {
