@@ -274,6 +274,10 @@ pipeline_tests(
         exclude = [
             "testdata/rbs/**/*.rb",
             "testdata/rbs/**/*.exp",
+
+            # Cases where Prism has a better output than the legacy parser,
+            # and a different `_prism.rb` test exists to characterize Prism's behaviour.
+            "testdata/desugar/star_in_block_arg_prism.rb",
         ],
     ),
     "PosTests",
@@ -292,6 +296,10 @@ pipeline_tests(
             # RBS tests have their own dedicated targets (rbs_prism)
             "testdata/rbs/**/*.rb",
             "testdata/rbs/**/*.exp",
+
+            # Cases where Prism has a better output than the legacy parser,
+            # and a different `_prism.rb` test exists to characterize Prism's behaviour.
+            "testdata/desugar/star_in_block_arg.rb",
 
             # Prism allows a new line between `.` and `end` as a way to call a method called literally `#end`.
             # The legacy parser treats this as an incomplete call to `x.<method-name-missing>()`, which is much
@@ -470,7 +478,6 @@ pipeline_tests(
             # Prism desugared tree doesn't match legacy desugared tree (desugar differences)
             "testdata/desugar/destructure_rest.rb",
             "testdata/desugar/splat.rb",
-            "testdata/desugar/star_in_block_arg.rb",
             "testdata/infer/generics/validator.rb",
             "testdata/lsp/fast_path/alias_stub_module__*.rb",
             "testdata/lsp/fast_path/not_enough_files/not_enough_files__*.rb",
@@ -534,6 +541,10 @@ pipeline_tests(
         # todo(gdritter): fix this!
         exclude = [
             "testdata/packager/directed-*/**/*",
+
+            # Cases where Prism has a better output than the legacy parser,
+            # and a different `_prism.rb` test exists to characterize Prism's behaviour.
+            "testdata/desugar/star_in_block_arg_prism.rb",
         ],
     ),
     "LSPTests",

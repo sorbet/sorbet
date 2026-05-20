@@ -1,0 +1,23 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+  <self>.sig() do ||
+    <self>.params(:blk, <emptyTree>::<C T>.proc().params(:args, <emptyTree>::<C Integer>).void()).void()
+  end
+
+  def foo<<todo method>>(&blk)
+    <emptyTree>
+  end
+
+  <self>.foo() do |<destructure>$2|
+    begin
+      begin
+        <assignTemp>$3 = <destructure>$2
+        <assignTemp>$4 = ::<Magic>.<expand-splat>(<assignTemp>$3, 0, 0)
+        args = <assignTemp>$4.to_ary()
+        <assignTemp>$3
+      end
+      <emptyTree>::<C T>.reveal_type(args)
+    end
+  end
+end
