@@ -469,7 +469,6 @@ pipeline_tests(
 
             # Prism desugared tree doesn't match legacy desugared tree (desugar differences)
             "testdata/desugar/destructure_rest.rb",
-            "testdata/desugar/splat.rb",
             "testdata/desugar/star_in_block_arg.rb",
             "testdata/infer/generics/validator.rb",
             "testdata/lsp/fast_path/alias_stub_module__*.rb",
