@@ -554,12 +554,17 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, KVStoreStrategy &kvsto
     ENFORCE(updates.typecheckingPath != TypecheckingPath::Fast || config->disableFastPath);
     logger->debug("Taking slow path");
 
+    core::packages::Stratum startingStratum(0);
     UnorderedSet<core::FileRef> openFiles;
     ENFORCE(this->cancellationUndoState == nullptr);
     if (cancelable) {
         timeit.setTag("cancelable", "true");
 
-        auto savedGS = std::exchange(this->gs, pipeline::copyForSlowPath(*this->gs, this->config->opts));
+        startingStratum = determineStartingStratum(*this->gs, this->fileToStratum, this->lastStratum, updates);
+        config->logger->error("Starting from stratum {}", startingStratum.rawId());
+
+        auto savedGS =
+            std::exchange(this->gs, pipeline::copyForSlowPath(*this->gs, this->config->opts, startingStratum));
 
         // Seed open files with the previous set from `indexedFinalGS`
         for (auto &entry : this->indexedFinalGS) {
@@ -692,11 +697,6 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, KVStoreStrategy &kvsto
                                      workers);
         }
 
-        // This is cast to a uint16_t everywhere it's used. This seems bad, but it should be fine because:
-        // 1. we increment in the beginning of the loop before any use
-        // 2. overflowing a uint16_t would mean that we have a chain of dependencies that's >65535 packages long
-        int stratumIx = -1;
-
         auto strata = pipeline::computePackageStrata(*this->gs, packageIndexed, workspaceFilesSpan, this->config->opts);
         const auto numStrata = strata.strata.size();
         this->fileToStratum = move(strata.fileToStratum);
@@ -707,13 +707,15 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, KVStoreStrategy &kvsto
         // to the SlowPathNonBlocking status. This isn't exactly correct, as you could switch to editing a file in an
         // earlier stratum and see requests handled by preemption before the status changes, or edit a file in a later
         // stratum and see `Loading...` despite the status.
-        auto editStratum = updatedFileRefs.empty() ? this->lastStratum
-                                                   : this->getFileStratumMapping().getStratumForFiles(updatedFileRefs);
+        auto editStratum =
+            updatedFileRefs.empty()
+                ? this->lastStratum
+                : std::max(startingStratum, this->getFileStratumMapping().getStratumForFiles(updatedFileRefs));
 
-        for (auto &stratum : strata.strata) {
+        for (auto stratumIx = startingStratum.rawId(); stratumIx < numStrata; ++stratumIx) {
+            auto &stratum = strata.strata[stratumIx];
+            core::packages::Stratum currentStratum(stratumIx);
             vector<ast::ParsedFile> stratumFiles, nonPackagedIndexed;
-
-            core::packages::Stratum currentStratum(++stratumIx);
 
             // When we unpartition the package and non-package files, we'll realloc stratumFiles to hold everything.
             stratumFiles.reserve(stratum.packageFiles.size() + stratum.sourceFiles.size());
@@ -873,7 +875,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, KVStoreStrategy &kvsto
             Exception::raise("Slow path failed to handle all expected preemptions");
         }
 
-        return core::packages::Stratum(stratumIx);
+        return this->lastStratum;
     });
 
     gs->lspQuery = core::lsp::Query::noQuery();

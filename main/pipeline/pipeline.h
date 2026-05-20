@@ -121,7 +121,8 @@ void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, lo
                         const options::Options &opts);
 
 // Create a copy of `from` that has its symbol table reset to the payload.
-std::unique_ptr<core::GlobalState> copyForSlowPath(const core::GlobalState &from, const options::Options &opts);
+std::unique_ptr<core::GlobalState> copyForSlowPath(const core::GlobalState &from, const options::Options &opts,
+                                                   core::packages::Stratum forStratum);
 
 // Sort files by size, so that larger files appear earlier than smaller files.
 //

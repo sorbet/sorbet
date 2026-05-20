@@ -13,6 +13,7 @@
 #include "core/lsp/Query.h"
 #include "core/packages/PackageDB.h"
 #include "core/packages/PackageInfo.h"
+#include "core/packages/Stratum.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include <memory>
 
@@ -282,6 +283,8 @@ public:
 
 // A snapshot of the size of all of GlobalState's symbol tables at a point in time.
 class SymbolTableOffsets {
+    friend class GlobalState;
+
     // The defaults of `1` are because all of our symbol tables reserve index `0` for the invalid entry, so all valid
     // indices will start at offset `1` into their respective vector.
     unsigned int classAndModulesOffset = 1;
@@ -590,6 +593,10 @@ public:
                     const std::vector<std::string> &updateVisibilityFor, const std::vector<std::string> &packagerLayers,
                     std::string errorHint, packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility,
                     bool packageAttributedErrors, bool testPackages) const;
+
+    // Copy the symbol table from other, planning to start typechecking at the given stratum. Returns `true` if the copy
+    // took place, or `false` if the symbol table was left un-initialized.
+    bool copySymbolTableFrom(const GlobalState &other, packages::Stratum toStratum);
 
     // Contains a path prefix that should be stripped from all printed paths.
     std::string pathPrefix;

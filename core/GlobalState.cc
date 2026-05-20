@@ -2192,6 +2192,67 @@ GlobalState::copyForSlowPath(const vector<string> &extraPackageFilesDirectoryUnd
     return result;
 }
 
+bool GlobalState::copySymbolTableFrom(const GlobalState &other, packages::Stratum toStratum) {
+    // Exit early if there's nothing to copy.
+    if (!other.packageDB().enabled() || toStratum == packages::Stratum(0) ||
+        toStratum.rawId() >= other.symbolOffsets.size()) {
+        return false;
+    }
+
+    this->packageDB_ = other.packageDB().deepCopy();
+
+    this->symbolOffsets.clear();
+    this->symbolOffsets.insert(this->symbolOffsets.begin(), other.symbolOffsets.begin(),
+                               other.symbolOffsets.begin() + toStratum.rawId() + 1);
+
+    auto offsets = other.symbolOffsets[toStratum.rawId()];
+
+    ENFORCE(this->classAndModules.empty());
+    for (auto i = 0; i < offsets.classAndModulesOffset; ++i) {
+        this->classAndModules.emplace_back(other.classAndModules[i].deepCopy(*this));
+    }
+
+    // TODO(trevor): multiplex this with the worker pool
+    for (auto &sym : this->classAndModules) {
+        absl::erase_if(sym.members(), [offsets](pair<NameRef, SymbolRef> e) {
+            auto sym = e.second;
+            switch (sym.kind()) {
+                case SymbolRef::Kind::ClassOrModule:
+                    return sym.asClassOrModuleRef().id() >= offsets.classAndModulesOffset;
+                case SymbolRef::Kind::Method:
+                    return sym.asMethodRef().id() >= offsets.methodsOffset;
+                case SymbolRef::Kind::FieldOrStaticField:
+                    return sym.asFieldRef().id() >= offsets.fieldsOffset;
+                case SymbolRef::Kind::TypeParameter:
+                case SymbolRef::Kind::TypeMember:
+                    return false;
+            }
+        });
+    }
+
+    ENFORCE(this->methods.empty());
+    for (auto i = 0; i < offsets.methodsOffset; ++i) {
+        this->methods.emplace_back(other.methods[i].deepCopy(*this));
+    }
+
+    ENFORCE(this->fields.empty());
+    for (auto i = 0; i < offsets.fieldsOffset; ++i) {
+        this->fields.emplace_back(other.fields[i].deepCopy(*this));
+    }
+
+    ENFORCE(this->typeParameters.empty());
+    for (auto i = 0; i < offsets.typeParametersOffset; ++i) {
+        this->typeParameters.emplace_back(other.typeParameters[i].deepCopy(*this));
+    }
+
+    ENFORCE(this->typeMembers.empty());
+    for (auto i = 0; i < offsets.typeMembersOffset; ++i) {
+        this->typeMembers.emplace_back(other.typeMembers[i].deepCopy(*this));
+    }
+
+    return true;
+}
+
 string_view GlobalState::getPrintablePath(string_view path) const {
     // Only strip the path prefix if the path has it.
     if (path.substr(0, pathPrefix.length()) == pathPrefix) {
