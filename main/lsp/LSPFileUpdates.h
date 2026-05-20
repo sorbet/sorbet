@@ -56,6 +56,9 @@ public:
     // (Used in tests) Ensures that a slow path typecheck on these updates waits until it gets cancelled.
     bool cancellationExpected = false;
 
+    // True if this edit modifies the package database by adding, removing, or modifying a __package.rb.
+    bool modifiesPackageDB = false;
+
     /**
      * Merges the given (and older) LSPFileUpdates object into this LSPFileUpdates object.
      *

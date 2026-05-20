@@ -56,6 +56,7 @@ class LSPIndexer final {
 
     struct TypecheckingPathResult {
         TypecheckingPath path = TypecheckingPath::Slow;
+        bool modifiesPackageDB = false;
         LSPFileUpdates::FastPathFilesToTypecheckResult files;
     };
 

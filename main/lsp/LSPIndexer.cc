@@ -103,7 +103,37 @@ LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &ch
         return result;
     }
 
+    if (this->gs->packageDB().enabled()) {
+        // NOTE: it would be really nice to partition `changedFiles` by `hasPackageRbPath`, but we must not change the
+        // order of its elements as there's a parallel vector of FileRefs that it needs to remain consistent with.
+        for (auto &f : changedFiles) {
+            if (!f->hasPackageRbPath()) {
+                continue;
+            }
+
+            // We don't yet have a content hash that works for package files yet. Instead, we check if the package file
+            // source text has changed at all. If it does, we take the slow path.
+            // Only relevant in `--sorbet-packages` mode. This prevents LSP editing features like autocomplete from
+            // working in `__package.rb` since every edit causes a slow path.
+            // Note: We don't use File::isPackage because we have not necessarily set the packager options on initialGS
+            // yet
+            auto fref = gs->findFileByPath(f->path());
+            if (!fref.exists() || f->source() != getOldFile(fref, *gs, evictedFiles).source()) {
+                logger.debug("Taking slow path because {} is a package file", f->path());
+                prodCategoryCounterInc("lsp.slow_path_reason", "package_file");
+                timeit.setTag("path_chosen", "slow");
+                result.modifiesPackageDB = true;
+                return result;
+            }
+        }
+    }
+
     for (auto &f : changedFiles) {
+        // We processed all __package.rb files above
+        if (this->config->opts.cacheSensitiveOptions.sorbetPackages && f->hasPackageRbPath()) {
+            continue;
+        }
+
         auto fref = gs->findFileByPath(f->path());
         if (!fref.exists()) {
             logger.debug("Taking slow path because {} is a new file", f->path());
@@ -113,18 +143,6 @@ LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &ch
         }
 
         const auto &oldFile = getOldFile(fref, *gs, evictedFiles);
-        // We don't yet have a content hash that works for package files yet. Instead, we check if the package file
-        // source text has changed at all. If it does, we take the slow path.
-        // Only relevant in `--sorbet-packages` mode. This prevents LSP editing features like autocomplete from
-        // working in `__package.rb` since every edit causes a slow path.
-        // Note: We don't use File::isPackage because we have not necessarily set the packager options on initialGS yet
-        if (this->config->opts.cacheSensitiveOptions.sorbetPackages && oldFile.hasPackageRbPath() &&
-            oldFile.source() != f->source()) {
-            logger.debug("Taking slow path because {} is a package file", f->path());
-            prodCategoryCounterInc("lsp.slow_path_reason", "package_file");
-            timeit.setTag("path_chosen", "slow");
-            return result;
-        }
         ENFORCE(oldFile.getFileHash() != nullptr);
         ENFORCE(f->getFileHash() != nullptr);
         const auto &oldHash = *oldFile.getFileHash();
@@ -237,19 +255,22 @@ LSPIndexer::getTypecheckingPath(LSPFileUpdates &edit,
         return TypecheckingPath::Slow;
     }
 
-    auto [path, result] = getTypecheckingPathInternal(edit.updatedFiles, evictedFiles);
-    switch (path) {
+    auto result = getTypecheckingPathInternal(edit.updatedFiles, evictedFiles);
+    switch (result.path) {
         case TypecheckingPath::Fast: {
-            edit.fastPathUseIncrementalNamer = result.useIncrementalNamer;
-            edit.fastPathExtraFiles = std::move(result.extraFiles);
+            ENFORCE(!result.modifiesPackageDB);
+            edit.fastPathUseIncrementalNamer = result.files.useIncrementalNamer;
+            edit.fastPathExtraFiles = std::move(result.files.extraFiles);
             break;
         }
 
-        case TypecheckingPath::Slow:
+        case TypecheckingPath::Slow: {
+            edit.modifiesPackageDB = result.modifiesPackageDB;
             break;
+        }
     }
 
-    return path;
+    return result.path;
 }
 
 TypecheckingPath LSPIndexer::getTypecheckingPath(const vector<shared_ptr<core::File>> &changedFiles) const {
@@ -267,8 +288,8 @@ TypecheckingPath LSPIndexer::getTypecheckingPath(const vector<shared_ptr<core::F
     // Ensure all files have computed hashes.
     computeFileHashes(changedFiles);
 
-    auto [path, result] = getTypecheckingPathInternal(changedFiles, emptyMap);
-    return path;
+    auto result = getTypecheckingPathInternal(changedFiles, emptyMap);
+    return result.path;
 }
 
 void LSPIndexer::transferInitializeState(InitializedTask &task) {
