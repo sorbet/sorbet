@@ -45,6 +45,15 @@ void exportClassOrModule(const core::GlobalState &gs,
             continue;
         }
 
+        if (packageForF.exists()) {
+            auto &referencingPkgInfo = gs.packageDB().getPackageInfo(packageForF);
+            auto *imp = referencingPkgInfo.importsPackage(owningPackage);
+            if (imp != nullptr && imp->usesInternals) {
+                ENFORCE(gs.packageDB().testPackages());
+                continue;
+            }
+        }
+
         if (ownerWillBeExported(gs, toExport[owningPackage], data->owner)) {
             // No need to check the rest of referencingFiles, we're already going to export the owner
             break;
@@ -68,6 +77,15 @@ void exportField(const core::GlobalState &gs,
         auto packageForF = gs.packageDB().getPackageNameForFile(f);
         if (packageForF == owningPackage || gs.packageDB().allowRelaxedPackagerChecksFor(packageForF)) {
             continue;
+        }
+
+        if (packageForF.exists()) {
+            auto &referencingPkgInfo = gs.packageDB().getPackageInfo(packageForF);
+            auto *imp = referencingPkgInfo.importsPackage(owningPackage);
+            if (imp != nullptr && imp->usesInternals) {
+                ENFORCE(gs.packageDB().testPackages());
+                continue;
+            }
         }
 
         if (ownerWillBeExported(gs, toExport[owningPackage], data->owner)) {
