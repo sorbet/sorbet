@@ -13,6 +13,8 @@ public:
     ImplementationTask(const LSPConfiguration &config, MessageId id, std::unique_ptr<ImplementationParams> params);
 
     std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerDelegate &typechecker) override;
+
+    core::packages::Stratum preemptionStratum(FileStratumMapping info) const override;
 };
 
 } // namespace sorbet::realmain::lsp

@@ -28,21 +28,27 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  class <emptyTree>::<C <describe 'consumer that includes the outer'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
-    <self>.include(<emptyTree>::<C <shared_examples 'outer parameterized context'>>)
+  begin
+    "consumer that includes the outer"
+    class <emptyTree>::<C <describe 'consumer that includes the outer'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      <self>.include(<emptyTree>::<C <shared_examples 'outer parameterized context'>>)
 
-    <self>.include(<emptyTree>::<C <shared_examples 'bare nested context inside parameterized'>>)
+      <self>.include(<emptyTree>::<C <shared_examples 'bare nested context inside parameterized'>>)
 
-    <self>.include(<emptyTree>::<C <shared_examples 'bare nested examples inside parameterized'>>)
+      <self>.include(<emptyTree>::<C <shared_examples 'bare nested examples inside parameterized'>>)
 
-    <self>.include(<emptyTree>::<C <shared_examples 'bare nested examples_for inside parameterized'>>)
+      <self>.include(<emptyTree>::<C <shared_examples 'bare nested examples_for inside parameterized'>>)
+    end
   end
 
-  class <emptyTree>::<C <describe 'consumer that does not include the outer'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
-    <self>.include(<emptyTree>::<C <shared_examples 'bare nested context inside parameterized'>>)
+  begin
+    "consumer that does not include the outer"
+    class <emptyTree>::<C <describe 'consumer that does not include the outer'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      <self>.include(<emptyTree>::<C <shared_examples 'bare nested context inside parameterized'>>)
 
-    <self>.include(<emptyTree>::<C <shared_examples 'bare nested examples inside parameterized'>>)
+      <self>.include(<emptyTree>::<C <shared_examples 'bare nested examples inside parameterized'>>)
 
-    <self>.include(<emptyTree>::<C <shared_examples 'bare nested examples_for inside parameterized'>>)
+      <self>.include(<emptyTree>::<C <shared_examples 'bare nested examples_for inside parameterized'>>)
+    end
   end
 end

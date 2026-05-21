@@ -16,18 +16,24 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  class <emptyTree>::<C <describe 'two-level consumer that includes outer and middle'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
-    <self>.include(<emptyTree>::<C <shared_examples 'two-level outer'>>)
+  begin
+    "two-level consumer that includes outer and middle"
+    class <emptyTree>::<C <describe 'two-level consumer that includes outer and middle'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      <self>.include(<emptyTree>::<C <shared_examples 'two-level outer'>>)
 
-    <self>.include(<emptyTree>::<C <shared_examples 'middle bare context'>>)
+      <self>.include(<emptyTree>::<C <shared_examples 'middle bare context'>>)
 
-    <self>.include(<emptyTree>::<C <shared_examples 'inner bare examples'>>)
+      <self>.include(<emptyTree>::<C <shared_examples 'inner bare examples'>>)
+    end
   end
 
-  class <emptyTree>::<C <describe 'two-level consumer that skips the outer'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
-    <self>.include(<emptyTree>::<C <shared_examples 'middle bare context'>>)
+  begin
+    "two-level consumer that skips the outer"
+    class <emptyTree>::<C <describe 'two-level consumer that skips the outer'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      <self>.include(<emptyTree>::<C <shared_examples 'middle bare context'>>)
 
-    <self>.include(<emptyTree>::<C <shared_examples 'inner bare examples'>>)
+      <self>.include(<emptyTree>::<C <shared_examples 'inner bare examples'>>)
+    end
   end
 
   module ::<root>::<C <shared_examples 'it_behaves_like outer'>><<C <todo sym>>> < ()
@@ -38,17 +44,23 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  class <emptyTree>::<C <describe 'consumer using it_behaves_like with bare nested name'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
-    <self>.include(<emptyTree>::<C <shared_examples 'it_behaves_like outer'>>)
+  begin
+    "consumer using it_behaves_like with bare nested name"
+    class <emptyTree>::<C <describe 'consumer using it_behaves_like with bare nested name'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      <self>.include(<emptyTree>::<C <shared_examples 'it_behaves_like outer'>>)
 
-    class <emptyTree>::<C <it_behaves_like 'bare nested for it_behaves_like'>><<C <todo sym>>> < (<self>)
-      <self>.include(<emptyTree>::<C <shared_examples 'bare nested for it_behaves_like'>>)
+      class <emptyTree>::<C <it_behaves_like 'bare nested for it_behaves_like'>><<C <todo sym>>> < (<self>)
+        <self>.include(<emptyTree>::<C <shared_examples 'bare nested for it_behaves_like'>>)
+      end
     end
   end
 
-  class <emptyTree>::<C <describe 'consumer using it_behaves_like without including the outer'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
-    class <emptyTree>::<C <it_behaves_like 'bare nested for it_behaves_like'>><<C <todo sym>>> < (<self>)
-      <self>.include(<emptyTree>::<C <shared_examples 'bare nested for it_behaves_like'>>)
+  begin
+    "consumer using it_behaves_like without including the outer"
+    class <emptyTree>::<C <describe 'consumer using it_behaves_like without including the outer'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      class <emptyTree>::<C <it_behaves_like 'bare nested for it_behaves_like'>><<C <todo sym>>> < (<self>)
+        <self>.include(<emptyTree>::<C <shared_examples 'bare nested for it_behaves_like'>>)
+      end
     end
   end
 
@@ -66,14 +78,20 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  class <emptyTree>::<C <describe 'collision consumer including outer'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
-    <self>.include(<emptyTree>::<C <shared_examples 'collision outer'>>)
+  begin
+    "collision consumer including outer"
+    class <emptyTree>::<C <describe 'collision consumer including outer'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      <self>.include(<emptyTree>::<C <shared_examples 'collision outer'>>)
 
-    <self>.include(<emptyTree>::<C <shared_examples 'collision name'>>)
+      <self>.include(<emptyTree>::<C <shared_examples 'collision name'>>)
+    end
   end
 
-  class <emptyTree>::<C <describe 'collision consumer skipping outer'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
-    <self>.include(<emptyTree>::<C <shared_examples 'collision name'>>)
+  begin
+    "collision consumer skipping outer"
+    class <emptyTree>::<C <describe 'collision consumer skipping outer'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      <self>.include(<emptyTree>::<C <shared_examples 'collision name'>>)
+    end
   end
 
   module ::<root>::<C <shared_examples 'shared outer for two consumers'>><<C <todo sym>>> < ()
@@ -84,16 +102,22 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  class <emptyTree>::<C <describe 'first consumer of the shared outer'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
-    <self>.include(<emptyTree>::<C <shared_examples 'shared outer for two consumers'>>)
+  begin
+    "first consumer of the shared outer"
+    class <emptyTree>::<C <describe 'first consumer of the shared outer'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      <self>.include(<emptyTree>::<C <shared_examples 'shared outer for two consumers'>>)
 
-    <self>.include(<emptyTree>::<C <shared_examples 'shared inner for two consumers'>>)
+      <self>.include(<emptyTree>::<C <shared_examples 'shared inner for two consumers'>>)
+    end
   end
 
-  class <emptyTree>::<C <describe 'second consumer of the shared outer'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
-    <self>.include(<emptyTree>::<C <shared_examples 'shared outer for two consumers'>>)
+  begin
+    "second consumer of the shared outer"
+    class <emptyTree>::<C <describe 'second consumer of the shared outer'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      <self>.include(<emptyTree>::<C <shared_examples 'shared outer for two consumers'>>)
 
-    <self>.include(<emptyTree>::<C <shared_examples 'shared inner for two consumers'>>)
+      <self>.include(<emptyTree>::<C <shared_examples 'shared inner for two consumers'>>)
+    end
   end
 
   module ::<root>::<C <shared_examples 'transitive A'>><<C <todo sym>>> < ()
@@ -108,14 +132,20 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.include(<emptyTree>::<C <shared_examples 'transitive A'>>)
   end
 
-  class <emptyTree>::<C <describe 'transitive consumer including only B'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
-    <self>.include(<emptyTree>::<C <shared_examples 'transitive B'>>)
+  begin
+    "transitive consumer including only B"
+    class <emptyTree>::<C <describe 'transitive consumer including only B'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      <self>.include(<emptyTree>::<C <shared_examples 'transitive B'>>)
 
-    <self>.include(<emptyTree>::<C <shared_examples 'bare nested in transitive A'>>)
+      <self>.include(<emptyTree>::<C <shared_examples 'bare nested in transitive A'>>)
+    end
   end
 
-  class <emptyTree>::<C <describe 'consumer skipping the transitive chain'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
-    <self>.include(<emptyTree>::<C <shared_examples 'bare nested in transitive A'>>)
+  begin
+    "consumer skipping the transitive chain"
+    class <emptyTree>::<C <describe 'consumer skipping the transitive chain'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      <self>.include(<emptyTree>::<C <shared_examples 'bare nested in transitive A'>>)
+    end
   end
 
   module ::<root>::<C <shared_examples 'outer with params for inner'>><<C <todo sym>>> < ()
@@ -130,13 +160,19 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  class <emptyTree>::<C <describe 'consumer of parameterized inner'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
-    <self>.include(<emptyTree>::<C <shared_examples 'outer with params for inner'>>)
+  begin
+    "consumer of parameterized inner"
+    class <emptyTree>::<C <describe 'consumer of parameterized inner'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      <self>.include(<emptyTree>::<C <shared_examples 'outer with params for inner'>>)
 
-    <self>.include(<emptyTree>::<C <shared_examples 'inner with params'>>)
+      <self>.include(<emptyTree>::<C <shared_examples 'inner with params'>>)
+    end
   end
 
-  class <emptyTree>::<C <describe 'consumer that skips the outer for parameterized inner'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
-    <self>.include(<emptyTree>::<C <shared_examples 'inner with params'>>)
+  begin
+    "consumer that skips the outer for parameterized inner"
+    class <emptyTree>::<C <describe 'consumer that skips the outer for parameterized inner'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      <self>.include(<emptyTree>::<C <shared_examples 'inner with params'>>)
+    end
   end
 end

@@ -15,7 +15,7 @@ module T::Private::Methods
       end
     end
 
-    def initialize(mod, raw)
+    def initialize(mod)
       @decl = Declaration.new(
         mod,
         ARG_NOT_PROVIDED, # params
@@ -27,7 +27,6 @@ module T::Private::Methods
         ARG_NOT_PROVIDED, # on_failure
         false, # override_allow_incompatible
         ARG_NOT_PROVIDED, # type_parameters
-        raw
       )
     end
 

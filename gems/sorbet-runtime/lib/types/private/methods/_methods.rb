@@ -48,15 +48,9 @@ module T::Private::Methods
   #   (This can matter for circular load-time behavior, where a method is
   #   called while its Signature is being built)
   # - It's `nil` if we've finished building the sig
-  DeclarationBlock = Struct.new(:mod, :loc, :blk_or_decl, :final, :raw)
+  DeclarationBlock = Struct.new(:mod, :loc, :blk_or_decl, :final)
 
   def self.declare_sig(mod, loc, arg, &blk)
-    T::Private::DeclState.current.active_declaration = _declare_sig_internal(mod, loc, arg, &blk)
-
-    nil
-  end
-
-  private_class_method def self._declare_sig_internal(mod, loc, arg, raw: false, &blk)
     install_hooks(mod)
 
     if T::Private::DeclState.current.active_declaration
@@ -68,11 +62,13 @@ module T::Private::Methods
       raise "Invalid argument to `sig`: #{arg}"
     end
 
-    DeclarationBlock.new(mod, loc, blk, arg == :final, raw)
+    T::Private::DeclState.current.active_declaration = DeclarationBlock.new(mod, loc, blk, arg == :final)
+
+    nil
   end
 
   def self.start_proc
-    DeclBuilder.new(PROC_TYPE, false)
+    DeclBuilder.new(PROC_TYPE)
   end
 
   def self.finalize_proc(decl)
@@ -233,31 +229,29 @@ module T::Private::Methods
     # This wrapper is very slow, so it will subsequently re-wrap with a much faster wrapper
     # (or unwrap back to the original method).
     key = method_owner_and_name_to_key(mod, method_name)
-    unless current_declaration.raw
-      T::Private::ClassUtils.replace_method(original_method, mod, method_name) do |*args, &blk|
-        method_sig = T::Private::Methods.maybe_run_sig_block_for_key(key)
-        method_sig ||= T::Private::Methods._handle_missing_method_signature(
-          self,
-          original_method,
-          __callee__ || raise("Unknown __callee__ for method without a signature"),
-        )
+    T::Private::ClassUtils.replace_method(original_method, mod, method_name) do |*args, &blk|
+      method_sig = T::Private::Methods.maybe_run_sig_block_for_key(key)
+      method_sig ||= T::Private::Methods._handle_missing_method_signature(
+        self,
+        original_method,
+        __callee__ || raise("Unknown __callee__ for method without a signature"),
+      )
 
-        # Should be the same logic as CallValidation.wrap_method_if_needed but we
-        # don't want that extra layer of indirection in the callstack
-        if method_sig.mode == T::Private::Methods::Modes.abstract
-          # We're in an interface method, keep going up the chain
-          if defined?(super)
-            super(*args, &blk)
-          else
-            raise NotImplementedError.new("The method `#{method_sig.method_name}` on #{mod} is declared as `abstract`. It does not have an implementation.")
-          end
-        # Note, this logic is duplicated (intentionally, for micro-perf) at `CallValidation.wrap_method_if_needed`,
-        # make sure to keep changes in sync.
-        elsif method_sig.check_level == :always || (method_sig.check_level == :tests && T::Private::RuntimeLevels.check_tests?)
-          CallValidation.validate_call(self, original_method, method_sig, args, blk)
+      # Should be the same logic as CallValidation.wrap_method_if_needed but we
+      # don't want that extra layer of indirection in the callstack
+      if method_sig.mode == T::Private::Methods::Modes.abstract
+        # We're in an interface method, keep going up the chain
+        if defined?(super)
+          super(*args, &blk)
         else
-          original_method.bind_call(self, *args, &blk)
+          raise NotImplementedError.new("The method `#{method_sig.method_name}` on #{mod} is declared as `abstract`. It does not have an implementation.")
         end
+      # Note, this logic is duplicated (intentionally, for micro-perf) at `CallValidation.wrap_method_if_needed`,
+      # make sure to keep changes in sync.
+      elsif method_sig.check_level == :always || (method_sig.check_level == :tests && T::Private::RuntimeLevels.check_tests?)
+        CallValidation.validate_call(self, original_method, method_sig, args, blk)
+      else
+        original_method.bind_call(self, *args, &blk)
       end
     end
 
@@ -343,7 +337,7 @@ module T::Private::Methods
       raise "DeclarationBlock for #{declaration_block.mod} at #{declaration_block.loc} should have already been unwrapped"
     end
 
-    builder = DeclBuilder.new(declaration_block.mod, declaration_block.raw)
+    builder = DeclBuilder.new(declaration_block.mod)
     decl = builder.instance_exec(&blk_or_decl).finalize!.decl
     # Record that we've already run `blk` once and constructed a `Declaration`
     declaration_block.blk_or_decl = decl

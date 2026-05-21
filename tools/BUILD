@@ -75,6 +75,7 @@ compilation_database(
         "//main/lsp:lsp_file_updates_test",
         "//main/lsp:lsp_preprocessor_test",
         "//main/lsp:lsp_test",
+        "//main/lsp:watchman_shutdown_test",
         "//main/minimize:minimize",
         "//main/options:options",
         "//main/options:options_test",

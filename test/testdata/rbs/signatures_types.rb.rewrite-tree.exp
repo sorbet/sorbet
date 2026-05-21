@@ -1,5 +1,21 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::NilClass)
+  end
+
+  def returns_nil<<todo method>>(&<blk>)
+    nil
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:n, ::NilClass).void()
+  end
+
+  def takes_nil<<todo method>>(n, &<blk>)
+    <emptyTree>::<C T>.reveal_type(n)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
     <self>.returns(<emptyTree>::<C Foo>)
   end
 
@@ -532,6 +548,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
   end
+
+  <runtime method definition of returns_nil>
+
+  <emptyTree>::<C T>.reveal_type(<self>.returns_nil())
+
+  <runtime method definition of takes_nil>
 
   <runtime method definition of class_instance_type1>
 

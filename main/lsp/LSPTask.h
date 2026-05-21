@@ -91,6 +91,10 @@ public:
     // Runs the task. Is only ever invoked from the typechecker thread. Since it is exceedingly rare for a request to
     // not need to interface with the typechecker, this method must be implemented by all subclasses.
     virtual void run(LSPTypecheckerDelegate &typechecker) = 0;
+
+    // The stratum that this task is runnable at, if running from the preemption scheduler. By default this returns the
+    // last stratum, which is a conservatively correct choice for any task that supports preemption.
+    virtual core::packages::Stratum preemptionStratum(FileStratumMapping info) const;
 };
 
 /**
@@ -111,6 +115,8 @@ public:
     Phase finalPhase() const override;
 
     bool cancel(const MessageId &id) override;
+
+    core::packages::Stratum preemptionStratum(FileStratumMapping info) const override = 0;
 };
 
 // Doubles as the `methodString` for a `TextDocumentCompletion` LSPTask and also as

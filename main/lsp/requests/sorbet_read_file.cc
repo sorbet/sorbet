@@ -23,4 +23,9 @@ unique_ptr<ResponseMessage> SorbetReadFileTask::runRequest(LSPTypecheckerDelegat
     return response;
 }
 
+core::packages::Stratum SorbetReadFileTask::preemptionStratum(FileStratumMapping info) const {
+    // This task only interacts with the file table.
+    return core::packages::Stratum(0);
+}
+
 } // namespace sorbet::realmain::lsp

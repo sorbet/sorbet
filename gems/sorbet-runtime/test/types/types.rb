@@ -887,6 +887,11 @@ module Opus::Types::Test
         instance_without_value = klass.new(r: nil)
         assert_nil(instance_without_value.r)
       end
+
+      it 'returns a TypedRange::Untyped from T::Range[T.untyped]' do
+        type = T::Range[T.untyped]
+        assert_instance_of(T::Types::TypedRange::Untyped, type)
+      end
     end
 
     describe "TypedSet" do

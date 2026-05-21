@@ -159,6 +159,7 @@ bool LSPTypechecker::typecheck(unique_ptr<LSPFileUpdates> updates, WorkerPool &w
             filesTypechecked = move(result.filesTypechecked);
 
             ENFORCE(updates->updatedFiles.empty());
+            ENFORCE(updates->updatedFileRefs.empty());
 
             for (auto &ast : result.indexedTrees) {
                 this->indexedFinalGS[ast.file.id()] = move(ast);
@@ -469,6 +470,8 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
         this->gs->errorQueue =
             make_shared<core::ErrorQueue>(this->gs->errorQueue->logger, this->gs->errorQueue->tracer, errorFlusher);
 
+        vector<core::FileRef> updatedFileRefs;
+
         switch (mode) {
             // Initialization fetches the list of files to index from the options
             case SlowPathMode::Init: {
@@ -486,7 +489,8 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
                 if (!updates.updatedFiles.empty()) {
                     applyFileTableUpdates(*this->gs, this->workspaceFiles, *this->config, openFiles, updates);
 
-                    updates.updatedFileRefs.clear();
+                    ENFORCE(updatedFileRefs.empty());
+                    std::swap(updates.updatedFileRefs, updatedFileRefs);
                     updates.updatedFiles.clear();
                 }
 
@@ -494,7 +498,6 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
             }
         }
 
-        ENFORCE(updates.updatedFiles.empty());
         ENFORCE(gs->lspQuery.isEmpty());
 
         auto indexingOp = make_optional<ShowOperation>(*config, ShowOperation::Kind::Indexing);
@@ -580,6 +583,14 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
         auto strata = pipeline::computePackageStrata(*this->gs, packageIndexed, workspaceFilesSpan, this->config->opts);
         this->fileToStratum = move(strata.fileToStratum);
         this->lastStratum = core::packages::Stratum(strata.strata.size() - 1);
+
+        // Determine which stratum this edit will be checked at, so that we have a good reference for when to switch
+        // to the SlowPathNonBlocking status. This isn't exactly correct, as you could switch to editing a file in an
+        // earlier stratum and see requests handled by preemption before the status changes, or edit a file in a later
+        // stratum and see `Loading...` despite the status.
+        auto editStratum = updatedFileRefs.empty() ? this->lastStratum
+                                                   : this->getFileStratumMapping().getStratumForFiles(updatedFileRefs);
+
         for (auto &stratum : strata.strata) {
             vector<ast::ParsedFile> stratumFiles, nonPackagedIndexed;
 
@@ -674,14 +685,16 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
                 }
             }
 
-            // TODO(jvilk): Remove conditional once initial typecheck is preemptible.
-            if (cancelable) {
-                // Inform users that Sorbet should be responsive now.
-                // Explicitly end previous operation before beginning next operation.
-                slowPathOp.emplace(*config, ShowOperation::Kind::SlowPathNonBlocking);
+            if (currentStratum == editStratum) {
+                // TODO(jvilk): Remove conditional once initial typecheck is preemptible.
+                if (cancelable) {
+                    // Inform users that Sorbet should be responsive now.
+                    // Explicitly end previous operation before beginning next operation.
+                    slowPathOp.emplace(*config, ShowOperation::Kind::SlowPathNonBlocking);
+                }
+                // Report how long the slow path blocks preemption.
+                timeit.clone("slow_path.blocking_time");
             }
-            // Report how long the slow path blocks preemption.
-            timeit.clone("slow_path.blocking_time");
 
             // [Test only] Wait for a preemption if one is expected.
             if (updates.preemptionsExpected > 0) [[unlikely]] {

@@ -78,6 +78,9 @@ public:
     pm_node_t *SorbetPrivateStaticVoid(core::LocOffsets loc) const;
     pm_node_t *TSigWithoutRuntime(core::LocOffsets loc) const;
 
+    // Standard library types
+    pm_node_t *NilClass(core::LocOffsets loc) const;
+
     // T constant and method helpers
     pm_node_t *T(core::LocOffsets loc) const;
     pm_node_t *THelpers(core::LocOffsets loc) const;

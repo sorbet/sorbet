@@ -83,6 +83,10 @@ public:
     CompletionTask(const LSPConfiguration &config, MessageId id, std::unique_ptr<CompletionParams> params);
 
     std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerDelegate &typechecker) override;
+
+    std::unique_ptr<ResponseMessage> serverCancel();
+
+    core::packages::Stratum preemptionStratum(FileStratumMapping info) const override;
 };
 
 } // namespace sorbet::realmain::lsp

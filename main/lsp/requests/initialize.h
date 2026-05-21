@@ -20,6 +20,8 @@ protected:
     void preprocess(LSPPreprocessor &preprocessor) override;
 
     std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerDelegate &ts) override;
+
+    core::packages::Stratum preemptionStratum(FileStratumMapping info) const override;
 };
 } // namespace sorbet::realmain::lsp
 

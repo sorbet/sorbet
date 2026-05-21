@@ -469,7 +469,6 @@ pipeline_tests(
 
             # Prism desugared tree doesn't match legacy desugared tree (desugar differences)
             "testdata/desugar/destructure_rest.rb",
-            "testdata/desugar/splat.rb",
             "testdata/desugar/star_in_block_arg.rb",
             "testdata/infer/generics/validator.rb",
             "testdata/lsp/fast_path/alias_stub_module__*.rb",
@@ -625,9 +624,6 @@ pipeline_tests(
         exclude = [
             # Specific test for the legacy pipeline. Prism has its own `testdata/rbs/assertions_heredoc_modified.rb`.
             "testdata/rbs/assertions_heredoc.rb",
-
-            # Prism output differs from legacy for constant resolution.
-            "testdata/rbs/signatures_types.rb",
         ],
     ),
     "PrismPosTests",

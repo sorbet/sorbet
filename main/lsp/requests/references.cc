@@ -292,4 +292,9 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
     return response;
 }
 
+core::packages::Stratum ReferencesTask::preemptionStratum(FileStratumMapping info) const {
+    // We can't tell how much of the codebase we'd need to see, so we conservatively default to the whole thing.
+    return info.getLastStratum();
+}
+
 } // namespace sorbet::realmain::lsp

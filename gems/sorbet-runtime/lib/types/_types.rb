@@ -342,7 +342,11 @@ module T
 
   module Range
     def self.[](type)
-      T::Types::TypedRange.new(type)
+      if type.is_a?(T::Types::Untyped)
+        T::Types::TypedRange::Untyped.new
+      else
+        T::Types::TypedRange.new(type)
+      end
     end
   end
 

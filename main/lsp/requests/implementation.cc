@@ -146,4 +146,9 @@ unique_ptr<ResponseMessage> ImplementationTask::runRequest(LSPTypecheckerDelegat
     response->result = move(result);
     return response;
 }
+
+core::packages::Stratum ImplementationTask::preemptionStratum(FileStratumMapping info) const {
+    return info.getStratumForUri(this->params->textDocument->uri);
+}
+
 } // namespace sorbet::realmain::lsp

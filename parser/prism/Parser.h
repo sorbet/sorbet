@@ -10,6 +10,7 @@ extern "C" {
 }
 
 #include "core/LocOffsets.h"
+#include "core/SymbolRef.h"
 #include "parser/Node.h" // To clarify: these are Sorbet Parser nodes, not Prism ones.
 
 namespace sorbet::parser::Prism {
@@ -34,6 +35,11 @@ class Parser final {
 
     pm_parser_t parser;
     pm_options_t options;
+
+    // Tracks Prism constant nodes (by their `node_id`) that have already been resolved to a known Sorbet symbol.
+    // The desugarer can directly emit resolved `ast::ConstantLit` nodes for these, instead of the usual
+    // `ast::UnresolvedConstantLit` nodes.
+    UnorderedMap<uint32_t, core::SymbolRef> resolvedConstants_;
 
     friend class ParseResult;
     friend class Factory;
@@ -73,6 +79,19 @@ public:
     bool isAttrAccessorCall(pm_node_t *node) const;
 
     void destroyNode(pm_node_t *node);
+
+    // Record that `node` should resolve to `symbol`. Returns the same node pointer, for convenience.
+    pm_node_t *markResolved(pm_node_t *node, core::SymbolRef symbol) {
+        ENFORCE(node != nullptr);
+        resolvedConstants_[node->node_id] = symbol;
+        return node;
+    }
+
+    // Returns the resolved Symbol for `node` (if there was one).
+    core::SymbolRef getResolvedSymbol(const pm_node_t *node) const {
+        auto it = resolvedConstants_.find(node->node_id);
+        return it != resolvedConstants_.end() ? it->second : core::Symbols::noSymbol();
+    }
 
 private:
     std::vector<ParseError> collectErrors();
