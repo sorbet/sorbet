@@ -208,6 +208,9 @@ PackageDB PackageDB::deepCopy() const {
     // This assumes that the GlobalState this PackageDB is getting copied into also has these
     // interned mangledName NameRefs at the same IDs as the current PackageDB.
     result.mangledNames = this->mangledNames;
+    // Likewise, this assumes that the GlobalState this PackageDB is getting copied into also has
+    // the same set of files available.
+    result.packageForFile_ = this->packageForFile_;
 
     // --- options ---
     result.enabled_ = this->enabled_;
