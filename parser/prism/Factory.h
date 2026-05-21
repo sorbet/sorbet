@@ -80,6 +80,8 @@ public:
 
     // Standard library types
     pm_node_t *NilClass(core::LocOffsets loc) const;
+    pm_node_t *TrueClass(core::LocOffsets loc) const;
+    pm_node_t *FalseClass(core::LocOffsets loc) const;
 
     // T constant and method helpers
     pm_node_t *T(core::LocOffsets loc) const;

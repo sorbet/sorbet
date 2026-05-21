@@ -20,6 +20,20 @@ T.reveal_type(returns_nil) # error: Revealed type: `NilClass`
 #: (nil) -> void
 def takes_nil(n) = T.reveal_type(n) # error: Revealed type: `NilClass`
 
+#: -> false
+def returns_false = false;
+T.reveal_type(returns_false) # error: Revealed type: `FalseClass`
+
+#: (false) -> void
+def takes_false(f) = T.reveal_type(f) # error: Revealed type: `FalseClass`
+
+#: -> true
+def returns_true = true;
+T.reveal_type(returns_true) # error: Revealed type: `TrueClass`
+
+#: (true) -> void
+def takes_true(t) = T.reveal_type(t) # error: Revealed type: `TrueClass`
+
 # Class instance types
 
 #: -> Foo
