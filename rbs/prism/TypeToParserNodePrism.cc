@@ -369,7 +369,7 @@ pm_node_t *TypeToParserNodePrism::toPrismNode(const rbs_node_t *node, const RBSD
         case RBS_TYPES_BASES_INSTANCE:
             return prism.TAttachedClass(nodeLoc);
         case RBS_TYPES_BASES_NIL:
-            return prism.ConstantReadNode("NilClass"sv, nodeLoc);
+            return prism.NilClass(nodeLoc);
         case RBS_TYPES_BASES_SELF:
             return prism.TSelfType(nodeLoc);
         case RBS_TYPES_BASES_TOP:

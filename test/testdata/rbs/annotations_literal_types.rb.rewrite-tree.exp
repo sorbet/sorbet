@@ -1,0 +1,3 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  n = <cast:let>(nil, <todo sym>, ::NilClass)
+end
