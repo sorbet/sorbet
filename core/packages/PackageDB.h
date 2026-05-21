@@ -43,6 +43,8 @@ public:
     void setPackageNameForFile(FileRef file, MangledName mangledName);
 
     MangledName findPackageByPath(const core::GlobalState &gs, core::FileRef file) const;
+    MangledName findPackageByPath(const core::GlobalState &gs, const core::File &fileData) const;
+
     const PackageInfo &getPackageInfo(MangledName mangledName) const;
     PackageInfo *getPackageInfoNonConst(MangledName mangledName);
 
