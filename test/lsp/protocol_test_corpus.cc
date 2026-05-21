@@ -5,6 +5,7 @@
 #include "absl/strings/str_replace.h"
 #include "common/common.h"
 #include "test/helpers/lsp.h"
+#include "test/helpers/packages.h"
 
 using namespace std;
 
@@ -1127,6 +1128,92 @@ TEST_CASE_FIXTURE(ProtocolTest, "SignatureHelpInMagicBuildHash") {
         REQUIRE_NE(sigHelp, nullptr);
         REQUIRE_NE(*sigHelp, nullptr);
         REQUIRE_EQ(1, (*sigHelp)->signatures.size());
+    }
+}
+
+TEST_CASE_FIXTURE(ProtocolTest, "ShowOperationPackaged") {
+    auto initOpts = make_shared<realmain::options::Options>();
+    initOpts->cacheSensitiveOptions.sorbetPackages = true;
+    SUBCASE("Monolithic") {
+        initOpts->packageDirected = false;
+        resetState(initOpts);
+    }
+    SUBCASE("PackageDirected") {
+        initOpts->packageDirected = true;
+        resetState(initOpts);
+    }
+
+    vector<pair<string, string>> files = {
+        {"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A"}).build()},
+        {"a.rb", "# typed: true\n"
+                 "module Root\n"
+                 "  class A\n"
+                 "    def fun\n"
+                 "    end\n"
+                 "  end\n"
+                 "end\n"},
+        {"foo/__package.rb",
+         PackageTextBuilder().withName("Root::Foo").withExports({"Root::Foo::A"}).withImports({"Root"}).build()},
+        {"foo/a.rb", "# typed: true\n"
+                     "module Root::Foo\n"
+                     "  class A\n"
+                     "    def foo\n"
+                     "      Root::A.new()\n"
+                     "    end\n"
+                     "  end\n"
+                     "end\n"},
+    };
+
+    writeFilesToFS(files);
+
+    for (auto &[path, _] : files) {
+        this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/{}", this->rootPath, path));
+    }
+
+    auto supportsMarkdown = true;
+    auto supportsCodeActionResolve = true;
+    auto opts = make_unique<SorbetInitializationOptions>();
+    opts->supportsOperationNotifications = true;
+
+    auto checkNameAndStatus = [](auto &resp, std::string name, auto status) {
+        auto &params = get<unique_ptr<SorbetShowOperationParams>>(resp->asNotification().params);
+        CHECK_EQ(params->operationName, name);
+        CHECK_EQ(params->status, status);
+    };
+
+    // The initial slow path.
+    {
+        auto resps = initializeLSP(supportsMarkdown, supportsCodeActionResolve, move(opts));
+        REQUIRE_EQ(resps.size(), 4);
+        REQUIRE(absl::c_all_of(resps, [](auto &resp) { return resp->isNotification(); }));
+        REQUIRE(absl::c_all_of(
+            resps, [](auto &resp) { return resp->asNotification().method == LSPMethod::SorbetShowOperation; }));
+
+        checkNameAndStatus(resps[0], "SlowPathBlocking", SorbetOperationStatus::Start);
+        checkNameAndStatus(resps[1], "Indexing", SorbetOperationStatus::Start);
+        checkNameAndStatus(resps[2], "Indexing", SorbetOperationStatus::End);
+        checkNameAndStatus(resps[3], "SlowPathBlocking", SorbetOperationStatus::End);
+    }
+
+    // Add a new file, kicking off a slow path that supports preemption.
+    {
+        auto resps = send(*openFile("foo/b.rb", "# typed: true\n"
+                                                "module Root::Foo\n"
+                                                "  class B\n"
+                                                "  end\n"
+                                                "end\n"));
+
+        REQUIRE_EQ(resps.size(), 6);
+        REQUIRE(absl::c_all_of(resps, [](auto &resp) { return resp->isNotification(); }));
+        REQUIRE(absl::c_all_of(
+            resps, [](auto &resp) { return resp->asNotification().method == LSPMethod::SorbetShowOperation; }));
+
+        checkNameAndStatus(resps[0], "SlowPathBlocking", SorbetOperationStatus::Start);
+        checkNameAndStatus(resps[1], "Indexing", SorbetOperationStatus::Start);
+        checkNameAndStatus(resps[2], "Indexing", SorbetOperationStatus::End);
+        checkNameAndStatus(resps[3], "SlowPathBlocking", SorbetOperationStatus::End);
+        checkNameAndStatus(resps[4], "SlowPathNonBlocking", SorbetOperationStatus::Start);
+        checkNameAndStatus(resps[5], "SlowPathNonBlocking", SorbetOperationStatus::End);
     }
 }
 
