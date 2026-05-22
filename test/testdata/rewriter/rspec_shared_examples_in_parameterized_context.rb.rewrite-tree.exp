@@ -31,13 +31,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   begin
     "consumer"
     class <emptyTree>::<C <describe 'consumer'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
-      <self>.include(::<root>::<C <shared_examples 'outer parameterized context'>>)
+      <self>.include(<emptyTree>::<C <shared_examples 'outer parameterized context'>>)
 
-      <self>.include(::<root>::<C <shared_examples 'nested context inside parameterized'>>)
+      <self>.include(<emptyTree>::<C <shared_examples 'nested context inside parameterized'>>)
 
-      <self>.include(::<root>::<C <shared_examples 'nested examples inside parameterized'>>)
+      <self>.include(<emptyTree>::<C <shared_examples 'nested examples inside parameterized'>>)
 
-      <self>.include(::<root>::<C <shared_examples 'nested examples_for inside parameterized'>>)
+      <self>.include(<emptyTree>::<C <shared_examples 'nested examples_for inside parameterized'>>)
     end
   end
 end

@@ -39,7 +39,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
         <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-        module ::<root>::<C <shared_examples 'shared behavior'>><<C <todo sym>>> < ()
+        module <emptyTree>::<C <shared_examples 'shared behavior'>><<C <todo sym>>> < ()
           <self>.sig() do ||
             <self>.returns(<emptyTree>::<C String>)
           end
@@ -67,10 +67,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
         <runtime method definition of shared_value>
 
-        <self>.include(::<root>::<C <shared_examples 'shared behavior'>>)
+        <self>.include(<emptyTree>::<C <shared_examples 'shared behavior'>>)
 
         class <emptyTree>::<C <it_behaves_like 'shared behavior'>><<C <todo sym>>> < (<self>)
-          <self>.include(::<root>::<C <shared_examples 'shared behavior'>>)
+          <self>.include(<emptyTree>::<C <shared_examples 'shared behavior'>>)
         end
 
         begin
@@ -94,7 +94,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
             <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-            module ::<root>::<C <shared_examples 'defines helper method'>><<C <todo sym>>> < ()
+            module <emptyTree>::<C <shared_examples 'defines helper method'>><<C <todo sym>>> < ()
               <self>.sig() do ||
                 <self>.returns(<emptyTree>::<C String>)
               end
@@ -123,12 +123,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             <runtime method definition of helper_method>
 
             class <emptyTree>::<C <it_behaves_like 'defines helper method'>><<C <todo sym>>> < (<self>)
-              <self>.include(::<root>::<C <shared_examples 'defines helper method'>>)
+              <self>.include(<emptyTree>::<C <shared_examples 'defines helper method'>>)
             end
           end
         end
 
-        module ::<root>::<C <shared_examples 'parameterized behavior'>><<C <todo sym>>> < ()
+        module <emptyTree>::<C <shared_examples 'parameterized behavior'>><<C <todo sym>>> < ()
           def <it 'receives parameter'><<todo method>>(&<blk>)
             [::T.unsafe(nil)].each() do |expected_value|
               <self>.expect(expected_value).to(<self>.eq("param_value"))
@@ -143,10 +143,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         end
 
         class <emptyTree>::<C <it_behaves_like 'parameterized behavior'>><<C <todo sym>>> < (<self>)
-          <self>.include(::<root>::<C <shared_examples 'parameterized behavior'>>)
+          <self>.include(<emptyTree>::<C <shared_examples 'parameterized behavior'>>)
         end
 
-        module ::<root>::<C <shared_examples 'math behavior'>><<C <todo sym>>> < ()
+        module <emptyTree>::<C <shared_examples 'math behavior'>><<C <todo sym>>> < ()
           def <it 'performs calculation'><<todo method>>(&<blk>)
             [::T.unsafe(nil)].each() do |a, b, result|
               <self>.expect(a.+(b)).to(<self>.eq(result))
@@ -161,11 +161,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         end
 
         class <emptyTree>::<C <it_behaves_like 'math behavior'>><<C <todo sym>>> < (<self>)
-          <self>.include(::<root>::<C <shared_examples 'math behavior'>>)
+          <self>.include(<emptyTree>::<C <shared_examples 'math behavior'>>)
         end
 
         class <emptyTree>::<C <it_behaves_like 'math behavior'>><<C <todo sym>>> < (<self>)
-          <self>.include(::<root>::<C <shared_examples 'math behavior'>>)
+          <self>.include(<emptyTree>::<C <shared_examples 'math behavior'>>)
         end
       end
     end

@@ -21,7 +21,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     begin
       "single shared example with context"
       class <emptyTree>::<C <describe 'single shared example with context'>><<C <todo sym>>> < (<self>)
-        module ::<root>::<C <shared_examples 'my shared example'>><<C <todo sym>>> < ()
+        module <emptyTree>::<C <shared_examples 'my shared example'>><<C <todo sym>>> < ()
           def foo_exists<<todo method>>(&<blk>)
             "bar"
           end
@@ -58,7 +58,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     begin
       "shared context with 2 params"
       class <emptyTree>::<C <describe 'shared context with 2 params'>><<C <todo sym>>> < (<self>)
-        module ::<root>::<C <shared_examples 'context with 2 params'>><<C <todo sym>>> < ()
+        module <emptyTree>::<C <shared_examples 'context with 2 params'>><<C <todo sym>>> < ()
           def value1<<todo method>>(&<blk>)
             param1
           end
@@ -97,7 +97,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
               end
             end
 
-            <self>.include(::<root>::<C <shared_examples 'context with 2 params'>>)
+            <self>.include(<emptyTree>::<C <shared_examples 'context with 2 params'>>)
           end
         end
       end
@@ -106,7 +106,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     begin
       "shared context with 5 params"
       class <emptyTree>::<C <describe 'shared context with 5 params'>><<C <todo sym>>> < (<self>)
-        module ::<root>::<C <shared_examples 'context with 5 params'>><<C <todo sym>>> < ()
+        module <emptyTree>::<C <shared_examples 'context with 5 params'>><<C <todo sym>>> < ()
           def value1<<todo method>>(&<blk>)
             param1
           end
@@ -169,7 +169,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
               end
             end
 
-            <self>.include(::<root>::<C <shared_examples 'context with 5 params'>>)
+            <self>.include(<emptyTree>::<C <shared_examples 'context with 5 params'>>)
           end
         end
       end
