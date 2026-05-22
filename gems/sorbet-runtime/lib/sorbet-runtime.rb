@@ -27,6 +27,7 @@ require_relative 'types/private/methods/_methods'
 require_relative 'types/sig'
 require_relative 'types/sig/dsl'
 require_relative 'types/helpers'
+require_relative 'types/syntax'
 require_relative 'types/private/final'
 require_relative 'types/private/sealed'
 
