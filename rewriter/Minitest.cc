@@ -325,22 +325,11 @@ core::NameRef nameForTestHelperMethod(core::MutableContext ctx, const ast::Send 
     }
 }
 
-// Synthesizes an `UnresolvedConstantLit` for a `<shared_examples 'name'>` module
-// reference, either root-scoped (`::<...>`) or unrooted.
-//
-// RSpec's shared-example registry is keyed by the class that called `shared_examples`:
-// `RSpec.shared_examples` registers under the `:main` slot, but bare `shared_examples`
-// registers under the consumer's class at runtime (RSpec re-runs the outer's block via
-// `class_exec` on each `include_context`). We mirror this in the synthesized AST —
-// `RSpec.`-prefixed definitions get a root-scoped module (`rootScoped=true`); bare
-// definitions get an unrooted constant nested under the enclosing scope. Consumer
+// Synthesizes a `<shared_examples 'name'>` constant reference, either root-scoped
+// (`rootScoped=true`, for `RSpec.shared_examples`, matching RSpec's `:main` registry slot)
+// or unrooted (for bare `shared_examples`, nested under the enclosing scope). Consumer
 // references (`include_examples` / `it_behaves_like`) always use unrooted constants so
-// lookup reaches both root-scoped definitions (via `Object`) and nested ones (via the
-// consumer's ancestor chain when it `include`s the outer).
-//
-// The constant name format `<shared_examples 'foo'>` is load-bearing for user-visible
-// errors — Sorbet surfaces it in unresolved-constant messages. Changing the format or
-// the rooted/unrooted choice here is a breaking change for downstream snapshot tests.
+// lookup reaches both via the ancestor chain.
 ast::ExpressionPtr makeSharedExamplesConstant(core::MutableContext ctx, const ast::ExpressionPtr &arg,
                                               bool rootScoped) {
     // We use shared_examples regardless of the send used to create the shared examples module,
@@ -631,7 +620,7 @@ ast::ExpressionPtr tryRunSingleOnSend(core::MutableContext ctx, bool isClass,
                                       bool insideDescribe) {
     auto bodySend = ast::cast_tree<ast::Send>(body);
     if (bodySend) {
-        auto change = runSingle(ctx, isClass, maybeSharedExamplesName, bodySend, insideDescribe);
+        auto change = runSingle(ctx, isClass, move(maybeSharedExamplesName), bodySend, insideDescribe);
         if (change) {
             return change;
         }
@@ -838,7 +827,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
             auto declLoc = declLocForSendWithBlock(*send);
             auto method = ast::MK::SyntheticMethod0(
                 send->loc, declLoc, std::move(name),
-                prepareBody(ctx, isClass, maybeSharedExamplesName, std::move(block->body), insideDescribe));
+                prepareBody(ctx, isClass, move(maybeSharedExamplesName), std::move(block->body), insideDescribe));
 
             // This prevents the `RuntimeMethodDefinition` from getting generated. For these `it`-block
             // defined methods, we don't actually need to care about the RuntimeMethodDefinition, and
@@ -944,15 +933,7 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
                 return nullptr;
             }
 
-            // RSpec keys its shared-example-group registry by the *calling class*.
-            // `RSpec.`-prefixed registrations land under `:main`, so we synthesize them at root
-            // scope (resolvable from anywhere). Bare-receiver registrations inside an outer
-            // `shared_context` are keyed by the consumer's class at runtime (RSpec re-runs the
-            // outer's block via `class_exec` on each `include_context`); we approximate that by
-            // synthesizing the inner as a module nested under the outer's synthetic module —
-            // reachable through the ancestor chain from consumers that include the outer,
-            // unresolved from those that don't. See `makeSharedExamplesConstant` for the full
-            // rationale.
+            // See `makeSharedExamplesConstant` for why the receiver drives `rootScoped`.
             auto name = makeSharedExamplesConstant(ctx, send->getPosArg(0), /*rootScoped=*/recvIsRSpec);
 
             auto declLoc = declLocForSendWithBlock(*send);

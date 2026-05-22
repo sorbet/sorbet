@@ -8,23 +8,10 @@ module RSpec
   end
 end
 
-# Coverage for review-suggested gaps in #10273:
-#
-#   1. Two-level bare nesting: a bare `shared_context` inside a parameterized outer,
-#      with a bare `shared_examples` inside that. Both inner levels should be nested
-#      (not root-scoped) so consumers that include the outer can reach them via the
-#      ancestor chain, while consumers that don't get unresolved-constant errors.
-#
-#   2. `it_behaves_like 'bare nested name'`: the synthesized isolation class
-#      inherits from the consumer's describe class, so the unrooted constant
-#      reference still resolves through the consumer's ancestor chain.
-#
-#   3. Root-scope vs. bare-nested name collision: when an `RSpec.`-prefixed
-#      shared_examples and a bare-nested one share a name, consumers that include
-#      the outer pick up the nested one via ancestor lookup; consumers that don't
-#      still find the root-scoped one through `Object`.
-
-# (1) Two-level bare nesting.
+# Two-level bare nesting: a bare `shared_context` inside a parameterized outer,
+# with a bare `shared_examples` inside that. Both inner levels should be nested
+# (not root-scoped) so consumers that include the outer can reach them via the
+# ancestor chain, while consumers that don't get unresolved-constant errors.
 RSpec.shared_context 'two-level outer' do |x|
   shared_context 'middle bare context' do
     shared_examples 'inner bare examples' do
@@ -47,7 +34,9 @@ RSpec.describe 'two-level consumer that skips the outer' do
   #                ^^^^^^^^^^^^^^^^^^^^^ error-with-dupes: Unable to resolve constant `<shared_examples 'inner bare examples'>`
 end
 
-# (2) it_behaves_like resolving a bare-nested constant.
+# `it_behaves_like 'bare nested name'`: the synthesized isolation class
+# inherits from the consumer's describe class, so the unrooted constant
+# reference still resolves through the consumer's ancestor chain.
 RSpec.shared_context 'it_behaves_like outer' do |x|
   shared_examples 'bare nested for it_behaves_like' do
     it 'works' do
@@ -65,7 +54,10 @@ RSpec.describe 'consumer using it_behaves_like without including the outer' do
   #               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error-with-dupes: Unable to resolve constant `<shared_examples 'bare nested for it_behaves_like'>`
 end
 
-# (3) Name collision: same name registered at root scope and bare-nested.
+# Root-scope vs. bare-nested name collision: when an `RSpec.`-prefixed
+# shared_examples and a bare-nested one share a name, consumers that include
+# the outer pick up the nested one via ancestor lookup; consumers that don't
+# still find the root-scoped one through `Object`.
 RSpec.shared_examples 'collision name' do
   it 'root-scoped version' do
   end
@@ -92,11 +84,11 @@ RSpec.describe 'collision consumer skipping outer' do
   include_examples 'collision name'
 end
 
-# (4) Two separate consumers including the same parameterized outer.
-# At runtime each consumer's `include_context` re-runs the outer's block as
-# `class_exec` on the consumer, registering the inner under the consumer's
-# class. Sorbet collapses this into a single nested module under the outer's
-# synthetic class; both consumers reach the inner via the include chain.
+# Two separate consumers including the same parameterized outer. At runtime
+# each consumer's `include_context` re-runs the outer's block as `class_exec`
+# on the consumer, registering the inner under the consumer's class. Sorbet
+# collapses this into a single nested module under the outer's synthetic
+# class; both consumers reach the inner via the include chain.
 RSpec.shared_context 'shared outer for two consumers' do |x|
   shared_examples 'shared inner for two consumers' do
     it 'works' do
@@ -114,9 +106,9 @@ RSpec.describe 'second consumer of the shared outer' do
   include_examples 'shared inner for two consumers'
 end
 
-# (5) Transitive include: B's shared_context includes A's outer, and the
-# consumer includes only B. The bare-nested constant declared in A should
-# still resolve from the consumer's describe via the transitive ancestor walk
+# Transitive include: B's shared_context includes A's outer, and the consumer
+# includes only B. The bare-nested constant declared in A should still resolve
+# from the consumer's describe via the transitive ancestor walk
 # (consumer -> B -> A).
 RSpec.shared_context 'transitive A' do |x|
   shared_examples 'bare nested in transitive A' do
@@ -142,12 +134,12 @@ RSpec.describe 'consumer skipping the transitive chain' do
   #                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error-with-dupes: Unable to resolve constant `<shared_examples 'bare nested in transitive A'>`
 end
 
-# (6) Bare shared_examples with block params nested in a parameterized outer.
-# At runtime: `include_context 'outer with params for inner', :foo` re-runs the
-# outer's block on the consumer with `outer_x=:foo`, registering the inner
-# (which itself accepts a block param) against the consumer's class.
-# `include_examples 'inner with params', :bar` then runs the inner's block on a
-# nested isolated group with `inner_y=:bar`. The rewriter fake-test_each's
+# Bare shared_examples with block params nested in a parameterized outer.
+# At runtime: `include_context 'outer with params for inner', :foo` re-runs
+# the outer's block on the consumer with `outer_x=:foo`, registering the
+# inner (which itself accepts a block param) against the consumer's class.
+# `include_examples 'inner with params', :bar` then runs the inner's block on
+# a nested isolated group with `inner_y=:bar`. The rewriter fake-test_each's
 # both the outer and the inner so Sorbet sees the methods that get synthesized.
 RSpec.shared_context 'outer with params for inner' do |outer_x|
   shared_examples 'inner with params' do |inner_y|
