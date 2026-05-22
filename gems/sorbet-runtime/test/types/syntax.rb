@@ -55,7 +55,4 @@ class Opus::Types::Test::SyntaxTest < Critic::Unit::UnitTest
     end
     assert_match(/The types must be covariant/, e.message)
   end
-
-  # - `abstract`/`override` with `sig`
-  # - `interface!` with `abstract`
 end

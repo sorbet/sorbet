@@ -355,6 +355,22 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
     assert_overridden_err('foo', MODULE_REGEX_STR, CLASS_CLASS_REGEX_STR, __LINE__ - 10, __LINE__ - 3, err)
   end
 
+  it "forbids overriding a final method via `class << self`" do
+    parent = Class.new do
+      extend T::Sig
+      sig(:final) { void }
+      def self.foo; end
+    end
+    err = assert_raises(RuntimeError) do
+      child = Class.new(parent) do
+        class << self
+          def foo; end
+        end
+      end
+    end
+    assert_overridden_err('foo', CLASS_CLASS_REGEX_STR, CLASS_CLASS_REGEX_STR, __LINE__ - 9, __LINE__ - 4, err)
+  end
+
   it "allows calling final methods" do
     m = Module.new do
       extend T::Sig
