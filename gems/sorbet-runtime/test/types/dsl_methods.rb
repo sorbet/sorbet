@@ -316,6 +316,11 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
       end
 
       assert(parent.private_method_defined?(:foo))
+
+      # force the sig, make sure it's still private
+      _sig = T::Utils.signature_for_method(parent.instance_method(:foo))
+
+      assert(parent.private_method_defined?(:foo))
     end
 
     it "private abstract def" do
@@ -325,6 +330,11 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
         sig { void }
         private abstract def foo; end
       end
+
+      assert(parent.private_method_defined?(:foo))
+
+      # force the sig, make sure it's still private
+      _sig = T::Utils.signature_for_method(parent.instance_method(:foo))
 
       assert(parent.private_method_defined?(:foo))
     end
@@ -342,7 +352,31 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
         override private def foo; end
       end
 
+      assert(child.private_method_defined?(:foo))
+
       T::Private::Abstract::Validate.validate_subclass(child)
+
+      assert(child.private_method_defined?(:foo))
+    end
+
+    it "private override def" do
+      parent = Class.new do
+        extend T::Sig, T::Helpers
+        abstract!
+        sig { abstract.void }
+        private def foo; end
+      end
+      child = Class.new(parent) do
+        extend T::Sig, T::Sig::DSL
+        sig { void }
+        private override def foo; end
+      end
+
+      assert(child.private_method_defined?(:foo))
+
+      T::Private::Abstract::Validate.validate_subclass(child)
+
+      assert(child.private_method_defined?(:foo))
     end
 
     it "final private def" do
