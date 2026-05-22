@@ -12,11 +12,11 @@ cd "$tmp" || exit 1
 
 echo "###### --gen-packages not allowed without --sorbet-packages ######"
 
-"$cwd/main/sorbet" --max-threads=0 --silence-dev-message --gen-packages --packager-layers=util,app -a . 2>&1
+"$cwd/main/sorbet" --max-threads=0 --censor-for-snapshot-tests --silence-dev-message --gen-packages --packager-layers=util,app -a . 2>&1
 
 echo "###### --gen-packages not allowed with --lsp ######"
 
-"$cwd/main/sorbet" --max-threads=0 --silence-dev-message --lsp --sorbet-packages --experimental-test-packages --gen-packages --packager-layers=util,app -a . 2>&1
+"$cwd/main/sorbet" --max-threads=0 --censor-for-snapshot-tests --silence-dev-message --lsp --sorbet-packages --experimental-test-packages --gen-packages --packager-layers=util,app -a . 2>&1
 
 echo "##################################"
 echo "###### Non package directed ######"
@@ -25,7 +25,7 @@ echo "##################################"
 echo
 echo "###### Running gen-packages ######"
 
-"$cwd/main/sorbet" --did-you-mean=false --max-threads=0 --silence-dev-message --sorbet-packages --experimental-test-packages --gen-packages --packager-layers=util,app  --gen-packages-update-visibility-for=B --gen-packages-update-visibility-for=E --gen-packages-allow-relaxing-test-visibility -a . 2>&1
+"$cwd/main/sorbet" --did-you-mean=false --max-threads=0 --censor-for-snapshot-tests --silence-dev-message --sorbet-packages --experimental-test-packages --gen-packages --packager-layers=util,app  --gen-packages-update-visibility-for=B --gen-packages-update-visibility-for=E --gen-packages-allow-relaxing-test-visibility -a . 2>&1
 
 echo
 echo "###### cat B/__package.rb ######"
@@ -68,7 +68,7 @@ cd "$tmp" || exit 1
 echo
 echo "###### Running gen-packages ######"
 
-"$cwd/main/sorbet" --max-threads=0 --did-you-mean=false --silence-dev-message --sorbet-packages --experimental-test-packages --experimental-package-directed --gen-packages --packager-layers=util,app  --gen-packages-update-visibility-for=B --gen-packages-update-visibility-for=E --gen-packages-allow-relaxing-test-visibility -a . 2>&1
+"$cwd/main/sorbet" --max-threads=0 --did-you-mean=false --censor-for-snapshot-tests --silence-dev-message --sorbet-packages --experimental-test-packages --experimental-package-directed --gen-packages --packager-layers=util,app  --gen-packages-update-visibility-for=B --gen-packages-update-visibility-for=E --gen-packages-allow-relaxing-test-visibility -a . 2>&1
 
 echo
 echo "###### cat B/__package.rb ######"
