@@ -208,4 +208,65 @@ class Opus::Types::Test::FinalModuleTest < Critic::Unit::UnitTest
       final!
     end
   end
+
+  it "forbids declaring a non-final method in a final module without T::Sig" do
+    err = assert_raises(RuntimeError) do
+      Module.new do
+        extend T::Helpers
+        final!
+        def foo; end
+      end
+    end
+    assert_match(/was declared as final but its method `foo` was not declared as final/, err.message)
+  end
+
+  it "forbids declaring a non-final class method in a final module without T::Sig" do
+    err = assert_raises(RuntimeError) do
+      Module.new do
+        extend T::Helpers
+        final!
+        def self.foo; end
+      end
+    end
+    assert_match(/was declared as final but its method `foo` was not declared as final/, err.message)
+  end
+
+  it "forbids declaring a non-final method in class << self of a final class without T::Sig" do
+    err = assert_raises(RuntimeError) do
+      Class.new do
+        extend T::Helpers
+        final!
+        class << self
+          def foo; end
+        end
+      end
+    end
+    assert_match(/was declared as final but its method `foo` was not declared as final/, err.message)
+  end
+
+  it "forbids declaring a non-final class method when final! is in class << self" do
+    err = assert_raises(RuntimeError) do
+      Class.new do
+        class << self
+          extend T::Helpers
+          final!
+        end
+        def self.foo; end
+      end
+    end
+    assert_match(/was declared as final but its method `foo` was not declared as final/, err.message)
+  end
+
+  it "forbids declaring a non-final method inside class << self when final! is in class << self" do
+    err = assert_raises(RuntimeError) do
+      Class.new do
+        class << self
+          extend T::Helpers
+          final!
+          def foo; end
+        end
+      end
+    end
+    assert_match(/was declared as final but its method `foo` was not declared as final/, err.message)
+  end
 end
