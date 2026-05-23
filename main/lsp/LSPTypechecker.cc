@@ -453,7 +453,9 @@ core::packages::Stratum determineStartingStratum(const core::GlobalState &gs,
             ENFORCE(info.file.id() < fileToStratum.size());
             fileStratum = fileToStratum[info.file.id()];
         } else {
-            // We can't keep any part of the symbol table if the package file has changed.
+            // We can't keep any part of the symbol table if the package file has changed. The byte-for-byte comparison
+            // is a little expensive here, but we could refactor LSPIndexer::getTypecheckingPathInternal to cache the
+            // results of this check on the LSPFileUpdates so that we could avoid the additional check here.
             if (file->hasPackageRbPath() && fref.data(gs).source() != file->source()) {
                 return core::packages::Stratum(0);
             }

@@ -2144,15 +2144,15 @@ unique_ptr<GlobalState> GlobalState::copyForLSPTypechecker(
 
     return result;
 }
-unique_ptr<GlobalState>
-GlobalState::copyForSlowPath(const vector<string> &extraPackageFilesDirectoryUnderscorePrefixes,
-                             const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                             const vector<string> &extraPackageFilesDirectorySlashPrefixes,
-                             const vector<string> &packageSkipRBIExportEnforcementDirs,
-                             const vector<string> &allowRelaxedPackagerChecksFor,
-                             const vector<string> &updateVisibilityFor, const vector<string> &packagerLayers,
-                             string errorHint, packages::GenPackagesMode genPackagesMode,
-                             bool allowRelaxingTestVisibility, bool packageAttributedErrors, bool testPackages) const {
+
+pair<unique_ptr<GlobalState>, bool> GlobalState::copyForSlowPath(
+    const vector<string> &extraPackageFilesDirectoryUnderscorePrefixes,
+    const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
+    const vector<string> &extraPackageFilesDirectorySlashPrefixes,
+    const vector<string> &packageSkipRBIExportEnforcementDirs, const vector<string> &allowRelaxedPackagerChecksFor,
+    const vector<string> &updateVisibilityFor, const vector<string> &packagerLayers, string errorHint,
+    packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility, bool packageAttributedErrors,
+    bool testPackages, core::packages::Stratum toStratum) const {
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
 
     // We omit a call to `initEmpty` here, as the only intended use of this function is to have its symbol table
@@ -2179,29 +2179,41 @@ GlobalState::copyForSlowPath(const vector<string> &extraPackageFilesDirectoryUnd
     result->typeParameters.reserve(this->typeParameters.capacity());
     result->typeMembers.reserve(this->typeMembers.capacity());
 
+    bool copiedSymbolTablePrefix = false;
     if (packageDB().enabled()) {
-        core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*result);
-        core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = result->unfreezePackages();
-        result->setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes,
-                                   extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                                   extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs,
-                                   allowRelaxedPackagerChecksFor, updateVisibilityFor, packagerLayers, errorHint,
-                                   genPackagesMode, allowRelaxingTestVisibility, packageAttributedErrors, testPackages);
+        {
+            core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*result);
+            core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = result->unfreezePackages();
+            result->setPackagerOptions(
+                extraPackageFilesDirectoryUnderscorePrefixes, extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs,
+                allowRelaxedPackagerChecksFor, updateVisibilityFor, packagerLayers, errorHint, genPackagesMode,
+                allowRelaxingTestVisibility, packageAttributedErrors, testPackages);
+        }
+
+        copiedSymbolTablePrefix = result->copySymbolTableFrom(*this, toStratum);
     }
 
-    return result;
+    return {move(result), copiedSymbolTablePrefix};
 }
 
 bool GlobalState::copySymbolTableFrom(const GlobalState &other, packages::Stratum toStratum) {
-    // Exit early if there's nothing to copy.
-    if (!other.packageDB().enabled() || toStratum == packages::Stratum(0) ||
-        toStratum.rawId() >= other.symbolOffsets.size()) {
+    // Copying a prefix of the symbol tables assumes that this global state derives from `other`.
+    ENFORCE(this->files->size() == other.files->size());
+    ENFORCE(this->constantNames.size() == other.constantNames.size());
+    ENFORCE(this->uniqueNames.size() == other.uniqueNames.size());
+    ENFORCE(this->namesByHash.size() == other.namesByHash.size());
+    ENFORCE(other.packageDB().enabled(), "Copying a prefix of the symbol table requires --sorbet-packages");
+
+    // Exit early if there's nothing to copy, or if we don't have information about the stratum specified.
+    if (toStratum == packages::Stratum(0) || toStratum.rawId() >= other.symbolOffsets.size()) {
         return false;
     }
 
     this->packageDB_ = other.packageDB().deepCopy();
 
     this->symbolOffsets.clear();
+    this->symbolOffsets.reserve(other.symbolOffsets.size());
     this->symbolOffsets.insert(this->symbolOffsets.begin(), other.symbolOffsets.begin(),
                                other.symbolOffsets.begin() + toStratum.rawId() + 1);
 
@@ -2224,8 +2236,9 @@ bool GlobalState::copySymbolTableFrom(const GlobalState &other, packages::Stratu
                 case SymbolRef::Kind::FieldOrStaticField:
                     return sym.asFieldRef().id() >= offsets.fieldsOffset;
                 case SymbolRef::Kind::TypeParameter:
+                    return sym.asTypeParameterRef().id() >= offsets.typeParametersOffset;
                 case SymbolRef::Kind::TypeMember:
-                    return false;
+                    return sym.asTypeMemberRef().id() >= offsets.typeMembersOffset;
             }
         });
     }

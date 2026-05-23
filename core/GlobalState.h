@@ -581,10 +581,10 @@ public:
         std::string errorHint, packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility,
         bool testPackages) const;
 
-    // Copy the name table, file table and other parts of GlobalState that are required to start the slow path.
-    // NOTE: this very intentionally will not copy the symbol table, and the expectation is that the symbol table will
-    // be overwritten by immediately deserializaing the payload over it.
-    std::unique_ptr<GlobalState>
+    // Copy the name table, file table and other parts of GlobalState that are required to start the slow path. If the
+    // `toStratum` value is passed as something other than the `0` stratum, the prefix of the symbol table leading up to
+    // that stratum will be copied over as well.
+    std::pair<std::unique_ptr<GlobalState>, bool>
     copyForSlowPath(const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
                     const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
                     const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
@@ -592,11 +592,7 @@ public:
                     const std::vector<std::string> &allowRelaxedPackagerChecksFor,
                     const std::vector<std::string> &updateVisibilityFor, const std::vector<std::string> &packagerLayers,
                     std::string errorHint, packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility,
-                    bool packageAttributedErrors, bool testPackages) const;
-
-    // Copy the symbol table from other, planning to start typechecking at the given stratum. Returns `true` if the copy
-    // took place, or `false` if the symbol table was left un-initialized.
-    bool copySymbolTableFrom(const GlobalState &other, packages::Stratum toStratum);
+                    bool packageAttributedErrors, bool testPackages, core::packages::Stratum toStratum) const;
 
     // Contains a path prefix that should be stripped from all printed paths.
     std::string pathPrefix;
@@ -801,6 +797,13 @@ private:
                                    SymbolRef defaultReturnValue, bool ignoreKind = false) const;
 
     std::string toStringWithOptions(bool showFull, bool showRaw) const;
+
+    // Copy the symbol table from other, planning to start typechecking at the given stratum. Returns `true` if the copy
+    // took place, or `false` if the symbol table was left un-initialized.
+    //
+    // This method requires that `this` be derived from `other`, as the copied symbol table prefix will assume that
+    // their name tables and file tables to match.
+    bool copySymbolTableFrom(const GlobalState &other, packages::Stratum toStratum);
 };
 // CheckSize(GlobalState, 152, 8);
 // Historically commented out because size of unordered_map was different between different versions of stdlib
