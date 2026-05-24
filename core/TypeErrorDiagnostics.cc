@@ -44,19 +44,32 @@ void TypeErrorDiagnostics::maybeAutocorrect(const GlobalState &gs, ErrorBuilder 
 
 void TypeErrorDiagnostics::insertTypeArguments(const GlobalState &gs, ErrorBuilder &e, ClassOrModuleRef klass,
                                                core::Loc replaceLoc) {
-    // if we're looking at `Array`, we want the autocorrect to include `T::`, but we don't need to
-    // if we're already looking at `T::Array` instead.
+    // Extract the built-in generic forwarder if it exists
     klass = klass.maybeUnwrapBuiltinGenericForwarder();
     auto typePrefixSym = klass.forwarderForBuiltinGeneric();
-    if (!typePrefixSym.exists()) {
+    
+    // Flag to determine if we are dealing with a built-in class that requires a specific prefix (like T::Array)
+    bool isBuiltin = typePrefixSym.exists();
+    if (!isBuiltin) {
         typePrefixSym = klass;
     }
 
     auto loc = replaceLoc;
     if (loc.exists()) {
+        std::string prefixStr;
+        auto sourceOpt = loc.source(gs);
+        
+        // If it's a standard user-defined class and we have the source text, use the exact text the user typed
+        if (!isBuiltin && sourceOpt.has_value()) {
+            prefixStr = std::string(sourceOpt.value());
+        } else {
+            // Otherwise, fallback to the fully qualified name
+            prefixStr = typePrefixSym.show(gs);
+        }
+
         if (klass == core::Symbols::Hash() || klass == core::Symbols::T_Hash()) {
             // Hash is special because it has arity 3 but you're only supposed to write the first 2
-            e.replaceWith("Add type arguments", loc, "{}[T.untyped, T.untyped]", typePrefixSym.show(gs));
+            e.replaceWith("Add type arguments", loc, "{}[T.untyped, T.untyped]", prefixStr);
         } else {
             auto numTypeArgs = klass.data(gs)->typeArity(gs);
             auto arg = ((klass == Symbols::Class() || klass == Symbols::T_Class()) ||
@@ -67,7 +80,7 @@ void TypeErrorDiagnostics::insertTypeArguments(const GlobalState &gs, ErrorBuild
             for (int i = 0; i < numTypeArgs; i++) {
                 untypeds.emplace_back(arg);
             }
-            e.replaceWith("Add type arguments", loc, "{}[{}]", typePrefixSym.show(gs), absl::StrJoin(untypeds, ", "));
+            e.replaceWith("Add type arguments", loc, "{}[{}]", prefixStr, absl::StrJoin(untypeds, ", "));
         }
     }
 }
