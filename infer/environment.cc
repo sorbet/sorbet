@@ -1221,17 +1221,31 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 //   of `self`
                 // * if the RHS is `<exceptionValue>` we inherit the RHS to propagate locations that include `rescue`
                 //   and enables more targeted advice when reporting pinning errors below.
+                const bool rhsExceptionValue = i.what.data(inWhat)._name == core::Names::exceptionValue();
                 if (bind.bind.variable.isSyntheticTemporary(inWhat) ||
-                    bind.bind.variable == cfg::LocalRef::selfVariable() ||
-                    i.what.data(inWhat)._name == core::Names::exceptionValue()) {
+                    bind.bind.variable == cfg::LocalRef::selfVariable() || rhsExceptionValue) {
                     tp.origins = typeAndOrigin.origins;
                 } else {
                     tp.origins.emplace_back(ctx.locAt(bind.loc));
                 }
 
                 if (lspQueryMatch && !bind.value.isSynthetic()) {
+                    // Don't let `<exceptionValue>` propagate out into LSP.  Use the real thing.
+                    auto responseRef = rhsExceptionValue ? bind.bind.variable : i.what;
+                    // Similarly, don't let the weird loc of `rescue` make its way out.
+                    auto responseTp = tp;
+                    auto &origins = responseTp.origins;
+                    origins.erase(std::remove_if(origins.begin(), origins.end(),
+                                                 [&ctx](auto loc) {
+                                                     auto src = loc.source(ctx);
+                                                     if (src && *src == "rescue") {
+                                                         return true;
+                                                     }
+                                                     return false;
+                                                 }),
+                                  origins.end());
                     core::lsp::QueryResponse::pushQueryResponse(
-                        ctx, core::lsp::IdentResponse(ctx.locAt(bind.loc), i.what.data(inWhat), tp,
+                        ctx, core::lsp::IdentResponse(ctx.locAt(bind.loc), responseRef.data(inWhat), responseTp,
                                                       ctx.owner.asMethodRef(), ctx.locAt(inWhat.loc)));
                 }
 
