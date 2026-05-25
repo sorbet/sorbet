@@ -992,18 +992,19 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                     auto &exceptions = rescueCase->exceptions;
                     auto local = ast::cast_tree<ast::Local>(rescueCase->var);
                     ENFORCE(local != nullptr, "rescue case var not a local?");
+                    auto varLoc = local->loc;
+                    auto zVarLoc = varLoc.copyWithZeroLength();
 
                     auto localVar = cctx.inWhat.enterLocal(local->localVariable);
-                    caseBody->exprs.emplace_back(localVar, rescueCase->var.loc(), make_insn<Ident>(exceptionValue));
+                    caseBody->exprs.emplace_back(localVar, varLoc, make_insn<Ident>(exceptionValue));
 
                     // We don't support typed exceptions in `ensure` yet.
                     // We have a lot of tests that show why, but it boils down to a combination of
                     // Sorbet's "simplified view of the control flow" for exceptions (see comment above)
                     // and Sorbet's dead code detection.
                     if (!ast::isa_tree<ast::EmptyTree>(a.ensure)) {
-                        auto zloc = rescueCase->var.loc().copyWithZeroLength();
                         auto unsafe = ast::MK::Unsafe(
-                            zloc, ast::make_expression<ast::Local>(zloc, exceptionValue.data(cctx.inWhat)));
+                            zVarLoc, ast::make_expression<ast::Local>(zVarLoc, exceptionValue.data(cctx.inWhat)));
                         ensureBody = walk(cctx.withTarget(localVar), unsafe, ensureBody);
                     }
 
@@ -1012,11 +1013,11 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                                    make_insn<Literal>(core::Types::nilClass()));
 
                     auto res = cctx.newTemporary(core::Names::keepForCfgTemp());
-                    synthesizeExpr(caseBody, res, rescueCase->loc, make_insn<KeepAlive>(exceptionValue));
+                    synthesizeExpr(caseBody, res, zVarLoc, make_insn<KeepAlive>(exceptionValue));
 
                     if (exceptions.empty()) {
                         // rescue without a class catches StandardError
-                        auto ex = ast::MK::Constant(rescueCase->var.loc(), core::Symbols::StandardError());
+                        auto ex = ast::MK::Constant(zVarLoc, core::Symbols::StandardError());
                         rescueHandlersBlock =
                             buildExceptionHandler(cctx, ex, caseBody, exceptionValue, rescueHandlersBlock);
                     } else {
@@ -1034,7 +1035,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                 // and if so, after the ensure runs, we should jump to dead
                 // since in Ruby the exception would propagate up the statck.
                 auto gotoDeadTemp = cctx.newTemporary(core::Names::gotoDeadTemp());
-                synthesizeExpr(rescueHandlersBlock, gotoDeadTemp, a.loc, make_insn<Literal>(core::Types::trueClass()));
+                synthesizeExpr(rescueHandlersBlock, gotoDeadTemp, a.loc.copyWithZeroLength(),
+                               make_insn<Literal>(core::Types::trueClass()));
                 unconditionalJump(rescueHandlersBlock, ensureBody, cctx.inWhat, a.loc);
 
                 auto throwAway = cctx.newTemporary(core::Names::throwAwayTemp());
