@@ -5,6 +5,8 @@
 #include "core/LocalVariable.h"
 #include "core/SymbolRef.h"
 
+#include <variant>
+
 namespace sorbet::core::lsp {
 
 /**
