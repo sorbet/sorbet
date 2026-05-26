@@ -71,6 +71,8 @@ ExpressionPtr getDefaultValue(ExpressionPtr param) {
 
 vector<core::ParsedParam> ParamParsing::parseParams(const ast::MethodDef::PARAMS_store &params) {
     vector<core::ParsedParam> parsedParams;
+    parsedParams.reserve(params.size());
+
     for (auto &param : params) {
         if (!ast::isa_reference(param)) {
             Exception::raise("Must be a reference!");
