@@ -153,10 +153,10 @@ void ExpressionPtr::resetToEmpty(EmptyTree *expr) noexcept {
     resetTagged(tagPtr(ExpressionToTag<EmptyTree>::value, expr));
 }
 
+// Returns true for nodes that are a pure read, like from a local variable, instance variable, `self`, etc.
+// These can be copied with `MK::cpRef`.
 bool isa_reference(const ExpressionPtr &what) {
-    return isa_tree<Local>(what) || isa_tree<UnresolvedIdent>(what) || isa_tree<RestParam>(what) ||
-           isa_tree<KeywordArg>(what) || isa_tree<OptionalParam>(what) || isa_tree<BlockParam>(what) ||
-           isa_tree<ShadowArg>(what) || isa_tree<Self>(what);
+    return isa_tree<Local>(what) || isa_tree<UnresolvedIdent>(what) || isa_tree<Self>(what);
 }
 
 /** https://git.corp.stripe.com/gist/nelhage/51564501674174da24822e60ad770f64
