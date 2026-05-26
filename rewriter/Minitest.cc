@@ -2,11 +2,13 @@
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
+#include "common/common.h"
 #include "core/Context.h"
 #include "core/Names.h"
 #include "core/core.h"
 #include "core/errors/rewriter.h"
 #include "rewriter/rewriter.h"
+#include <optional>
 
 using namespace std;
 
@@ -991,8 +993,16 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
 
         case core::Names::includeExamples().rawId():
         case core::Names::includeContext().rawId(): {
-            if (!ctx.state.cacheSensitiveOptions.rspecRewriterEnabled || block != nullptr ||
-                !send->recv.isSelfReference() || !insideDescribe || send->numPosArgs() < 1) {
+            // `include_context 'name'` (no block) maps to a synthetic include of the
+            // `<shared_examples 'name'>` module. The with-block forms
+            // `include_context 'name' do ... end` (and `include_examples 'name' do ... end`)
+            // add setup specific to the consumer's example group; the most important effect
+            // for type checking is still the include, so we emit the include and drop the
+            // block body. (The block can shadow `let`/`before` from the included context
+            // with local overrides, but those are evaluated as RSpec example-group methods
+            // that Sorbet already approximates loosely.)
+            if (!ctx.state.cacheSensitiveOptions.rspecRewriterEnabled || !send->recv.isSelfReference() ||
+                !insideDescribe || send->numPosArgs() < 1) {
                 return nullptr;
             }
 
@@ -1048,7 +1058,205 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
     return nullptr;
 }
 
+// Iterates over each top-level statement of a block body. Block bodies are either an `InsSeq`
+// (multi-statement) or a single ExpressionPtr (one statement); the caller usually wants to
+// treat both shapes uniformly.
+template <typename F> void forEachBlockBodyStmt(ast::ExpressionPtr &body, F &&fn) {
+    if (auto bodySeq = ast::cast_tree<ast::InsSeq>(body)) {
+        for (auto &exp : bodySeq->stats) {
+            fn(exp);
+        }
+        fn(bodySeq->expr);
+    } else {
+        fn(body);
+    }
+}
+
+// Returns the underlying NameRef of a string-literal arg, or nullopt otherwise.
+std::optional<core::NameRef> asStringLiteral(const ast::ExpressionPtr &expr) {
+    auto lit = ast::cast_tree<ast::Literal>(expr);
+    if (lit == nullptr || !lit->isString()) {
+        return std::nullopt;
+    }
+    return lit->asString();
+}
+
+// Returns the underlying NameRef of a symbol-literal arg, or nullopt otherwise.
+std::optional<core::NameRef> asSymbolLiteral(const ast::ExpressionPtr &expr) {
+    auto lit = ast::cast_tree<ast::Literal>(expr);
+    if (lit == nullptr || !lit->isSymbol()) {
+        return std::nullopt;
+    }
+    return lit->asSymbol();
+}
+
+// Scans one `RSpec.configure do |config| ... end` block body for the pairing:
+//   config.include_context 'NAME', :TAG
+//   config.define_derived_metadata(...) do |m|; m[:TAG] = true; end
+// Adds each matching context NAME to `out`.
+void collectAutoIncludedFromConfigure(core::MutableContext ctx, ast::Block *block,
+                                      UnorderedSet<core::NameRef> &out) {
+    if (block == nullptr) {
+        return;
+    }
+
+    UnorderedMap<core::NameRef, core::NameRef> nameByTag; // :tag -> 'name'
+    UnorderedSet<core::NameRef> tagsAutoApplied;
+
+    forEachBlockBodyStmt(block->body, [&](ast::ExpressionPtr &stmt) {
+        auto send = ast::cast_tree<ast::Send>(stmt);
+        if (send == nullptr) {
+            return;
+        }
+
+        // config.include_context 'NAME', :TAG, ... (any extra args are accepted)
+        if (send->fun == core::Names::includeContext() && send->numPosArgs() >= 2 && !send->hasBlock()) {
+            auto nameOpt = asStringLiteral(send->getPosArg(0));
+            auto tagOpt = asSymbolLiteral(send->getPosArg(1));
+            if (nameOpt.has_value() && tagOpt.has_value()) {
+                nameByTag[*tagOpt] = *nameOpt;
+            }
+            return;
+        }
+
+        // config.define_derived_metadata(...) do |metadata|; metadata[:TAG] = true; end
+        if (send->fun == core::Names::defineDerivedMetadata() && send->hasBlock()) {
+            auto inner = send->block();
+            if (inner == nullptr || inner->params.size() != 1) {
+                return;
+            }
+
+            forEachBlockBodyStmt(inner->body, [&](ast::ExpressionPtr &innerStmt) {
+                auto assign = ast::cast_tree<ast::Send>(innerStmt);
+                if (assign == nullptr || assign->fun != core::Names::squareBracketsEq() ||
+                    assign->numPosArgs() != 2 || assign->hasBlock()) {
+                    return;
+                }
+                auto tagOpt = asSymbolLiteral(assign->getPosArg(0));
+                if (!tagOpt.has_value()) {
+                    return;
+                }
+                auto valLit = ast::cast_tree<ast::Literal>(assign->getPosArg(1));
+                if (valLit == nullptr || !valLit->isTrue(ctx.state)) {
+                    return;
+                }
+                tagsAutoApplied.insert(*tagOpt);
+            });
+        }
+    });
+
+    for (auto tag : tagsAutoApplied) {
+        auto it = nameByTag.find(tag);
+        if (it != nameByTag.end()) {
+            out.insert(it->second);
+        }
+    }
+}
+
+// Clones a bare-receiver Send (e.g. `shared_examples 'foo' do ... end`) as the equivalent
+// `RSpec.<fun>(args) do ... end`, deep-copying positional args and the block. Used to hoist
+// nested bare shared_examples from an auto-included `RSpec.shared_context` to top level so
+// the per-statement rewriter emits a root-scoped synthetic module.
+ast::ExpressionPtr cloneAsRSpecPrefixed(core::MutableContext ctx, ast::Send *send) {
+    ENFORCE(send != nullptr);
+
+    auto recvLoc = send->recv.loc();
+    auto rspecRecv = ast::MK::UnresolvedConstantParts(recvLoc, {core::Names::Constants::RSpec()});
+
+    auto numPosArgs = send->numPosArgs();
+    ast::Send::ARGS_store newArgs;
+    for (uint16_t i = 0; i < numPosArgs; ++i) {
+        newArgs.emplace_back(send->getPosArg(i).deepCopy());
+    }
+
+    ast::Send::Flags newFlags;
+    newFlags.isRewriterSynthesized = true;
+    if (send->hasBlock()) {
+        // Send stores the block as the last entry in `args`. We need to deep-copy that whole
+        // entry (the `ast::Block` tree) into our new send.
+        auto *blockExpr = send->rawBlock();
+        ENFORCE(blockExpr != nullptr);
+        newArgs.emplace_back(blockExpr->deepCopy());
+        newFlags.hasBlock = true;
+    }
+
+    return ast::MK::Send(send->loc, std::move(rspecRecv), send->fun, send->funLoc, numPosArgs,
+                         std::move(newArgs), newFlags);
+}
+
 } // namespace
+
+void Minitest::runOnClassDef(core::MutableContext ctx, ast::ClassDef *classDef) {
+    if (!ctx.state.cacheSensitiveOptions.rspecRewriterEnabled) {
+        return;
+    }
+    if (ctx.state.cacheSensitiveOptions.runningUnderAutogen) {
+        return;
+    }
+    if (classDef == nullptr) {
+        return;
+    }
+
+    // Pass 1: scan top-level RSpec.configure blocks for the auto-include pairing.
+    UnorderedSet<core::NameRef> autoIncludedNames;
+    for (auto &stat : classDef->rhs) {
+        auto send = ast::cast_tree<ast::Send>(stat);
+        if (send == nullptr || !send->hasBlock()) {
+            continue;
+        }
+        if (send->fun != core::Names::configure() || !isRSpec(ctx, send->recv)) {
+            continue;
+        }
+        collectAutoIncludedFromConfigure(ctx, send->block(), autoIncludedNames);
+    }
+    if (autoIncludedNames.empty()) {
+        return;
+    }
+
+    // Pass 2: for each `RSpec.shared_context 'NAME', :TAG do ... end` where NAME is auto-included,
+    // clone its direct-child bare shared_examples/shared_context/shared_examples_for sends as
+    // top-level `RSpec.<fun>` sends. The per-statement pass below will then emit root-scoped
+    // synthetic modules for each.
+    std::vector<ast::ExpressionPtr> hoisted;
+    for (auto &stat : classDef->rhs) {
+        auto send = ast::cast_tree<ast::Send>(stat);
+        if (send == nullptr || !send->hasBlock()) {
+            continue;
+        }
+        if (!isRSpec(ctx, send->recv) || send->fun != core::Names::sharedContext() || send->numPosArgs() < 1) {
+            continue;
+        }
+        auto nameOpt = asStringLiteral(send->getPosArg(0));
+        if (!nameOpt.has_value() || autoIncludedNames.count(*nameOpt) == 0) {
+            continue;
+        }
+
+        auto *block = send->block();
+        if (block == nullptr) {
+            continue;
+        }
+
+        forEachBlockBodyStmt(block->body, [&](ast::ExpressionPtr &innerStmt) {
+            auto innerSend = ast::cast_tree<ast::Send>(innerStmt);
+            if (innerSend == nullptr || !innerSend->hasBlock()) {
+                return;
+            }
+            if (!innerSend->recv.isSelfReference() || !isSharedExamplesName(innerSend->fun) ||
+                innerSend->numPosArgs() < 1) {
+                return;
+            }
+
+            auto cloned = cloneAsRSpecPrefixed(ctx, innerSend);
+            if (cloned != nullptr) {
+                hoisted.emplace_back(std::move(cloned));
+            }
+        });
+    }
+
+    for (auto &h : hoisted) {
+        classDef->rhs.emplace_back(std::move(h));
+    }
+}
 
 vector<ast::ExpressionPtr> Minitest::run(core::MutableContext ctx, bool isClass, ast::Send *send) {
     vector<ast::ExpressionPtr> stats;
