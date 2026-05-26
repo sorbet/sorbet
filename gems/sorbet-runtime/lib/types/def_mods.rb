@@ -2,7 +2,7 @@
 # typed: true
 
 # Optional mixin providing `abstract`, `override`, `overridable`, and `final`
-# as method-level DSL keywords. Use with `extend T::Sig::DSL`.
+# as method-level DSL keywords. Use with `extend T::DefMods`.
 #
 # These are alternatives to writing modifiers inside a `sig { ... }` block:
 #
@@ -18,7 +18,7 @@
 # like `private`. However, unlike those methods, these methods use the `sig`
 # declaration to discover the most-recently-defined method, instead of needing
 # `*_class_method` variants, like `private_class_method`.
-module T::Sig::DSL
+module T::DefMods
   def abstract(method_name)
     Kernel.raise TypeError.new("abstract accepts a Symbol, got #{method_name.class}") unless method_name.is_a?(Symbol)
 

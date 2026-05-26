@@ -7,7 +7,7 @@
 # annotations
 module T::Syntax
   include T::Sig
-  include T::Sig::DSL
+  include T::DefMods
   include T::Helpers
 
   # ===== NOTE: Must keep in sync with `T::Sig`! ==============================
@@ -15,9 +15,9 @@ module T::Syntax
   # However, there are some slight differences:
   #
   # - We don't need the extra `include ... MethodHooks` lines, because those
-  #   come from the `include T::Sig` (c.f. `T::Sig::DSL` though, where those
+  #   come from the `include T::Sig` (c.f. `T::DefMods` though, where those
   #   extra `include` *are* required because there is otherwise no inheritance
-  #   relationship between `T::Sig` and `T::Sig::DSL`)
+  #   relationship between `T::Sig` and `T::DefMods`)
   #
   # - We don't do the TOP_SELF things, because it's not clear that you ever
   #   really want this for TOP_SELF. e.g. what would it mean to write

@@ -13,7 +13,7 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
   describe "abstract" do
     it "works with abstract!" do
       parent = Class.new do
-        extend T::Sig, T::Sig::DSL, T::Helpers
+        extend T::Sig, T::DefMods, T::Helpers
         abstract!
         sig { void }
         abstract def foo; end
@@ -29,7 +29,7 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
 
     it "dispatches via super (matching sig { abstract } behavior)" do
       mod = Module.new do
-        extend T::Sig, T::Sig::DSL, T::Helpers
+        extend T::Sig, T::DefMods, T::Helpers
         interface!
         sig { returns(String) }
         abstract def foo; end
@@ -49,7 +49,7 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
 
     it "raises NotImplementedError if no super" do
       mod = Module.new do
-        extend T::Sig, T::Sig::DSL, T::Helpers
+        extend T::Sig, T::DefMods, T::Helpers
         interface!
         sig { returns(String) }
         abstract def foo; end
@@ -67,7 +67,7 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
     it "errors without preceding sig" do
       err = assert_raises(ArgumentError) do
         Class.new do
-          extend T::Sig, T::Sig::DSL, T::Helpers
+          extend T::Sig, T::DefMods, T::Helpers
           abstract!
           def foo; end
           abstract :foo
@@ -79,7 +79,7 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
     it "errors if called for wrong method" do
       err = assert_raises(ArgumentError) do
         Class.new do
-          extend T::Sig, T::Sig::DSL, T::Helpers
+          extend T::Sig, T::DefMods, T::Helpers
           abstract!
           sig { void }
           def foo; end
@@ -94,7 +94,7 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
     it "errors if called twice" do
       err = assert_raises(ArgumentError) do
         Class.new do
-          extend T::Sig, T::Sig::DSL, T::Helpers
+          extend T::Sig, T::DefMods, T::Helpers
           abstract!
           sig { void }
           abstract def foo; end
@@ -106,7 +106,7 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
 
     it "errors when combined with sig { abstract }" do
       parent = Class.new do
-        extend T::Sig, T::Sig::DSL, T::Helpers
+        extend T::Sig, T::DefMods, T::Helpers
         abstract!
         sig { abstract.void }
         abstract def foo; end
@@ -136,7 +136,7 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
         def foo; end
       end
       child = Class.new(parent) do
-        extend T::Sig, T::Sig::DSL
+        extend T::Sig, T::DefMods
         sig { void }
         override def foo; end
       end
@@ -152,7 +152,7 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
         def foo; end
       end
       child = Class.new(parent) do
-        extend T::Sig, T::Sig::DSL
+        extend T::Sig, T::DefMods
         sig { void }
         private def foo; end
         override(:foo, allow_incompatible: true)
@@ -165,7 +165,7 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
     it "errors without preceding sig" do
       err = assert_raises(ArgumentError) do
         Class.new do
-          extend T::Sig, T::Sig::DSL
+          extend T::Sig, T::DefMods
           def foo; end
           override :foo
         end
@@ -182,7 +182,7 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
           def foo; end
         end
         Class.new(parent) do
-          extend T::Sig, T::Sig::DSL
+          extend T::Sig, T::DefMods
           sig { void }
           override def foo; end
           override :foo
@@ -199,7 +199,7 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
         def foo; end
       end
       child = Class.new(parent) do
-        extend T::Sig, T::Sig::DSL
+        extend T::Sig, T::DefMods
         sig { override.void }
         override def foo; end
       end
@@ -224,7 +224,7 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
 
     it "prevents overriding in subclass" do
       parent = Class.new do
-        extend T::Sig, T::Sig::DSL
+        extend T::Sig, T::DefMods
         sig { void }
         final def foo; end
       end
@@ -242,7 +242,7 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
     it "errors when combined with sig(:final)" do
       err = assert_raises(ArgumentError) do
         Class.new do
-          extend T::Sig, T::Sig::DSL
+          extend T::Sig, T::DefMods
           sig(:final) { void }
           final def foo; end
         end
@@ -253,7 +253,7 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
     it "errors without preceding sig" do
       err = assert_raises(ArgumentError) do
         Class.new do
-          extend T::Sig, T::Sig::DSL
+          extend T::Sig, T::DefMods
           def bar; end
           final :foo
         end
@@ -265,7 +265,7 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
   describe "overridable" do
     it "allows child to override" do
       parent = Class.new do
-        extend T::Sig, T::Sig::DSL
+        extend T::Sig, T::DefMods
         sig { void }
         overridable def foo; end
       end
@@ -281,7 +281,7 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
     it "errors if called twice" do
       err = assert_raises(ArgumentError) do
         Class.new do
-          extend T::Sig, T::Sig::DSL
+          extend T::Sig, T::DefMods
           sig { void }
           overridable def foo; end
           overridable :foo
@@ -292,7 +292,7 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
 
     it "errors when combined with sig { overridable }" do
       klass = Class.new do
-        extend T::Sig, T::Sig::DSL
+        extend T::Sig, T::DefMods
         sig { overridable.void }
         overridable def foo; end
       end
@@ -309,7 +309,7 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
   describe "composition with visibility" do
     it "abstract private def" do
       parent = Class.new do
-        extend T::Sig, T::Sig::DSL, T::Helpers
+        extend T::Sig, T::DefMods, T::Helpers
         abstract!
         sig { void }
         abstract private def foo; end
@@ -325,7 +325,7 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
 
     it "private abstract def" do
       parent = Class.new do
-        extend T::Sig, T::Sig::DSL, T::Helpers
+        extend T::Sig, T::DefMods, T::Helpers
         abstract!
         sig { void }
         private abstract def foo; end
@@ -347,7 +347,7 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
         private def foo; end
       end
       child = Class.new(parent) do
-        extend T::Sig, T::Sig::DSL
+        extend T::Sig, T::DefMods
         sig { void }
         override private def foo; end
       end
@@ -367,7 +367,7 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
         private def foo; end
       end
       child = Class.new(parent) do
-        extend T::Sig, T::Sig::DSL
+        extend T::Sig, T::DefMods
         sig { void }
         private override def foo; end
       end
@@ -381,7 +381,7 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
 
     it "final private def" do
       klass = Class.new do
-        extend T::Sig, T::Sig::DSL
+        extend T::Sig, T::DefMods
         sig { void }
         final private def foo; end
       end
@@ -401,7 +401,7 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
 
     it "final def self.foo prevents overriding in subclass" do
       parent = Class.new do
-        extend T::Sig, T::Sig::DSL
+        extend T::Sig, T::DefMods
         sig { void }
         final def self.foo; end
       end
@@ -426,7 +426,7 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
         def foo; end
       end
       child = Class.new(parent) do
-        extend T::Sig, T::Sig::DSL
+        extend T::Sig, T::DefMods
         sig { void }
         overridable override def foo; end
       end
@@ -448,7 +448,7 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
       # We extend T::Sig to ensure _on_method_added fires and clears state.
       err = assert_raises(ArgumentError) do
         Class.new do
-          extend T::Sig, T::Sig::DSL
+          extend T::Sig, T::DefMods
           T::Sig::WithoutRuntime.sig { void }
           def foo; end
           abstract :foo
@@ -461,7 +461,7 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
   describe "postfix form" do
     it "abstract :method_name after def" do
       parent = Class.new do
-        extend T::Sig, T::Sig::DSL, T::Helpers
+        extend T::Sig, T::DefMods, T::Helpers
         abstract!
         sig { void }
         def foo; end
@@ -484,7 +484,7 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
         def foo; end
       end
       child = Class.new(parent) do
-        extend T::Sig, T::Sig::DSL
+        extend T::Sig, T::DefMods
         sig { void }
         def foo; end
         override :foo
@@ -498,7 +498,7 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
     it "abstract raises TypeError for non-Symbol" do
       err = assert_raises(TypeError) do
         Class.new do
-          extend T::Sig, T::Sig::DSL, T::Helpers
+          extend T::Sig, T::DefMods, T::Helpers
           abstract!
           abstract "foo"
         end
@@ -509,7 +509,7 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
     it "override raises TypeError for non-Symbol" do
       err = assert_raises(TypeError) do
         Class.new do
-          extend T::Sig, T::Sig::DSL
+          extend T::Sig, T::DefMods
           override "foo"
         end
       end
