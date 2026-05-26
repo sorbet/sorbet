@@ -15,9 +15,9 @@ class TestCase
     case x
     when ->(y) { false }
     when String
-      # Fails to narrow to `String` because of the mere presence of the `-> (y) { false }` lambda above.
+      # Narrows correctly even with the `-> (y) { false }` lambda above.
       T.reveal_type(x)
-    # ^^^^^^^^^^^^^^^^ error: Revealed type: `Object`
+    # ^^^^^^^^^^^^^^^^ error: Revealed type: `String`
     end
   end
 
@@ -28,9 +28,9 @@ class TestCase
     when ->(y) { false }
     when String
     when Integer
-      # Fails to narrow to `Integer` because of the mere presence of the `-> (y) { false }` lambda above.
+      # Narrows correctly even with the `-> (y) { false }` lambda above.
       T.reveal_type(x)
-    # ^^^^^^^^^^^^^^^^ error: Revealed type: `T.any(Integer, String)`
+    # ^^^^^^^^^^^^^^^^ error: Revealed type: `Integer`
     else T.absurd(x)
     end
   end

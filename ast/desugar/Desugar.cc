@@ -2328,15 +2328,30 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     return;
                 }
 
-                ExpressionPtr assign;
-                auto temp = core::NameRef::noName();
-                core::LocOffsets cloc;
+                bool hasCondition = case_->condition != nullptr;
 
-                if (case_->condition != nullptr) {
+                core::LocOffsets cloc;
+                ExpressionPtr condition;
+                // If the predicate is already reference-like (local, ivar, self, etc.), reading it is side-effect-free,
+                // so we can read it directly in each `===`, skipping the synthetic `<assignTemp>` local.
+                bool needsTempLocal = false;
+                auto temp = core::NameRef::noName();
+                ExpressionPtr assign;
+                if (hasCondition) {
                     cloc = case_->condition->loc;
-                    temp = dctx.freshNameUnique(core::Names::assignTemp());
-                    assign = MK::Assign(cloc, temp, node2TreeImpl(dctx, case_->condition));
+                    condition = node2TreeImpl(dctx, case_->condition);
+                    needsTempLocal = !isa_reference(condition);
+                    if (needsTempLocal) {
+                        temp = dctx.freshNameUnique(core::Names::assignTemp());
+                        assign = MK::Assign(cloc, temp, move(condition));
+                    }
                 }
+
+                // Build an AST node that reads the case's condition.
+                auto makeConditionRead = [&]() -> ExpressionPtr {
+                    return needsTempLocal ? MK::Local(cloc, temp) : MK::cpRef(condition);
+                };
+
                 ExpressionPtr res = node2TreeImpl(dctx, case_->else_);
                 for (auto it = case_->whens.rbegin(); it != case_->whens.rend(); ++it) {
                     auto when = parser::cast_node<parser::When>(it->get());
@@ -2345,22 +2360,20 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     for (auto &cnode : when->patterns) {
                         ExpressionPtr test;
                         if (parser::isa_node<parser::Splat>(cnode.get())) {
-                            ENFORCE(temp.exists(), "splats need something to test against");
+                            ENFORCE(hasCondition, "splats need something to test against");
                             auto recv = MK::Magic(loc);
-                            auto local = MK::Local(cloc, temp);
                             // TODO(froydnj): use the splat's var directly so we can elide the
                             // coercion to an array where possible.
                             auto splat = node2TreeImpl(dctx, cnode);
                             auto patternloc = splat.loc();
                             test = MK::Send2(patternloc, move(recv), core::Names::checkMatchArray(),
-                                             patternloc.copyWithZeroLength(), move(local), move(splat));
+                                             patternloc.copyWithZeroLength(), makeConditionRead(), move(splat));
                         } else {
                             auto ctree = node2TreeImpl(dctx, cnode);
-                            if (temp.exists()) {
-                                auto local = MK::Local(cloc, temp);
+                            if (hasCondition) {
                                 auto patternloc = ctree.loc();
                                 test = MK::Send1(patternloc, move(ctree), core::Names::tripleEq(),
-                                                 patternloc.copyWithZeroLength(), move(local));
+                                                 patternloc.copyWithZeroLength(), makeConditionRead());
                             } else {
                                 test = move(ctree);
                             }
@@ -2375,9 +2388,11 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     }
                     res = MK::If(when->loc, move(cond), node2TreeImpl(dctx, when->body), move(res));
                 }
+
                 if (assign != nullptr) {
                     res = MK::InsSeq1(loc, move(assign), move(res));
                 }
+
                 result = move(res);
             },
             [&](parser::Splat *splat) {

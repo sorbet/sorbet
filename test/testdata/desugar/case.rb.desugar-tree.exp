@@ -53,48 +53,33 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           end
         end
         <emptyTree>::<C T>.bind(<self>, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
-        begin
-          <assignTemp>$3 = <self>
-          if <emptyTree>::<C Integer>.===(<assignTemp>$3)
-            <emptyTree>
-          else
-            <emptyTree>::<C T>.absurd(<self>)
-          end
+        if <emptyTree>::<C Integer>.===(<self>)
+          <emptyTree>
+        else
+          <emptyTree>::<C T>.absurd(<self>)
         end
         lvar = <emptyTree>::<C T>.let(123, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
-        begin
-          <assignTemp>$4 = lvar
-          if <emptyTree>::<C Integer>.===(<assignTemp>$4)
-            <emptyTree>
-          else
-            <emptyTree>::<C T>.absurd(lvar)
-          end
+        if <emptyTree>::<C Integer>.===(lvar)
+          <emptyTree>
+        else
+          <emptyTree>::<C T>.absurd(lvar)
         end
         @ivar = <emptyTree>::<C T>.let(123, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
-        begin
-          <assignTemp>$5 = @ivar
-          if <emptyTree>::<C Integer>.===(<assignTemp>$5)
-            <emptyTree>
-          else
-            <emptyTree>::<C T>.absurd(@ivar)
-          end
+        if <emptyTree>::<C Integer>.===(@ivar)
+          <emptyTree>
+        else
+          <emptyTree>::<C T>.absurd(@ivar)
         end
-        begin
-          <assignTemp>$6 = @@cvar
-          if <emptyTree>::<C Integer>.===(<assignTemp>$6)
-            <emptyTree>
-          else
-            <emptyTree>::<C T>.absurd(@@cvar)
-          end
+        if <emptyTree>::<C Integer>.===(@@cvar)
+          <emptyTree>
+        else
+          <emptyTree>::<C T>.absurd(@@cvar)
         end
         $gvar = <emptyTree>::<C T>.let(123, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
-        begin
-          <assignTemp>$7 = $gvar
-          if <emptyTree>::<C Integer>.===(<assignTemp>$7)
-            <emptyTree>
-          else
-            <emptyTree>::<C T>.absurd($gvar)
-          end
+        if <emptyTree>::<C Integer>.===($gvar)
+          <emptyTree>
+        else
+          <emptyTree>::<C T>.absurd($gvar)
         end
       end
     end
