@@ -136,7 +136,10 @@ public:
         return make_expression<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Instance, name);
     }
 
+    // Create a new "read" node for the given reference read node.
     static ExpressionPtr cpRef(ExpressionPtr &name) {
+        ENFORCE(isa_reference(name), "Can only copy reference-like nodes with cpRef");
+
         if (auto nm = cast_tree<UnresolvedIdent>(name)) {
             return make_expression<UnresolvedIdent>(nm->loc, nm->kind, nm->name);
         } else if (auto nm = cast_tree<ast::Local>(name)) {
@@ -144,7 +147,8 @@ public:
         } else if (auto self = cast_tree<ast::Self>(name)) {
             return make_expression<ast::Self>(self->loc);
         }
-        Exception::notImplemented();
+
+        unreachable("MK::cpRef should handle every type that passes `isa_reference()`.");
     }
 
     static ExpressionPtr Assign(core::LocOffsets loc, ExpressionPtr lhs, ExpressionPtr rhs) {
