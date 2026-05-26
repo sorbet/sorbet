@@ -190,13 +190,13 @@ class Opus::Types::Test::VisibilityTest < Critic::Unit::UnitTest
   describe "DSL methods forms" do
     it "both DSL" do
       parent = Class.new do
-        extend T::Sig, T::Sig::DSL, T::Helpers
+        extend T::Sig, T::DefMods, T::Helpers
         abstract!
         sig { void }
         abstract def foo; end
       end
       child = Class.new(parent) do
-        extend T::Sig, T::Sig::DSL
+        extend T::Sig, T::DefMods
         sig { void }
         private override def foo; end
       end
@@ -209,7 +209,7 @@ class Opus::Types::Test::VisibilityTest < Critic::Unit::UnitTest
 
     it "only parent DSL" do
       parent = Class.new do
-        extend T::Sig, T::Sig::DSL, T::Helpers
+        extend T::Sig, T::DefMods, T::Helpers
         abstract!
         sig { void }
         abstract def foo; end
@@ -234,7 +234,7 @@ class Opus::Types::Test::VisibilityTest < Critic::Unit::UnitTest
         def foo; end
       end
       child = Class.new(parent) do
-        extend T::Sig, T::Sig::DSL
+        extend T::Sig, T::DefMods
         sig { void }
         private override def foo; end
       end
@@ -253,7 +253,7 @@ class Opus::Types::Test::VisibilityTest < Critic::Unit::UnitTest
         def foo; end
       end
       child = Class.new(parent) do
-        extend T::Sig, T::Sig::DSL
+        extend T::Sig, T::DefMods
         sig { void }
         override private def foo; end
       end

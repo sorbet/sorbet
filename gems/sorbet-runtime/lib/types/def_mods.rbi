@@ -1,11 +1,11 @@
 # typed: true
 
-# T::Sig::DSL is a public API and thus should have an RBI in `rbi/`
+# T::DefMods is a public API and thus should have an RBI in `rbi/`
 # (inside Sorbet's payload).
 #
 # However, we need to intentionally redefine the method with a wider signature
 # so that sorbet-runtime can do the runtime type validation.
-module T::Sig::DSL
+module T::DefMods
   sig { params(method_name: Kernel).returns(Symbol) }
   def abstract(method_name); end
 
