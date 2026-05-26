@@ -2,6 +2,7 @@
 #define SORBET_ARITY_HASH_H
 
 #include "common/common.h"
+#include <compare>
 
 namespace sorbet::core {
 
@@ -33,18 +34,22 @@ public:
         return _hashValue == ALIAS_METHOD;
     }
 
-    inline bool operator==(const ArityHash &rhs) const noexcept {
+    auto operator<=>(const ArityHash &rhs) const noexcept {
         ENFORCE(isDefined());
         ENFORCE(rhs.isDefined());
-        return _hashValue == rhs._hashValue;
+        return _hashValue <=> rhs._hashValue;
     }
 
-    inline bool operator!=(const ArityHash &rhs) const noexcept {
-        return !(rhs == *this);
+    bool operator==(const ArityHash &rhs) const noexcept {
+        return std::is_eq(*this <=> rhs);
     }
 
-    inline bool operator<(const ArityHash &rhs) const noexcept {
-        return this->_hashValue < rhs._hashValue;
+    bool operator!=(const ArityHash &rhs) const noexcept {
+        return std::is_neq(*this <=> rhs);
+    }
+
+    bool operator<(const ArityHash &rhs) const noexcept {
+        return std::is_lt(*this <=> rhs);
     }
 
     // Pseudo-private, only public for serialization

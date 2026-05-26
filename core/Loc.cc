@@ -269,14 +269,6 @@ string LocOffsets::showRaw() const {
     return fmt::format("LocOffsets {{beginPos={}, endPos={}}}", beginPos(), endPos());
 }
 
-bool LocOffsets::operator==(const LocOffsets &rhs) const {
-    return this->beginLoc == rhs.beginLoc && this->endLoc == rhs.endLoc;
-}
-
-bool LocOffsets::operator!=(const LocOffsets &rhs) const {
-    return !(rhs == *this);
-}
-
 string Loc::showRaw(const GlobalState &gs) const {
     string_view path;
     if (file().exists()) {
@@ -356,14 +348,6 @@ bool Loc::contains(const Loc &other) const {
     ENFORCE_NO_TIMER(this->exists());
     ENFORCE_NO_TIMER(other.exists());
     return file() == other.file() && offsets().contains(other.offsets());
-}
-
-bool Loc::operator==(const Loc &rhs) const {
-    return storage.offsets == rhs.storage.offsets && storage.fileRef == rhs.storage.fileRef;
-}
-
-bool Loc::operator!=(const Loc &rhs) const {
-    return !(rhs == *this);
 }
 
 Loc Loc::adjust(const GlobalState &gs, int32_t beginAdjust, int32_t endAdjust) const {

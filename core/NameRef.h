@@ -2,6 +2,8 @@
 #define RUBY_TYPER_NAMEREF_H
 #include "common/common.h"
 #include "core/DebugOnlyCheck.h"
+#include <compare>
+
 namespace sorbet::core {
 class GlobalState;
 class NameSubstitution;
@@ -134,12 +136,15 @@ public:
 
     NameRef &operator=(const NameRef &rhs) = default;
 
-    bool operator==(const NameRef &rhs) const {
-        return _id == rhs._id;
+    auto operator<=>(const NameRef &rhs) const noexcept {
+        return this->_id <=> rhs._id;
     }
 
-    bool operator!=(const NameRef &rhs) const {
-        return !(rhs == *this);
+    inline bool operator==(const NameRef &rhs) const noexcept {
+        return std::is_eq(*this <=> rhs);
+    }
+    inline bool operator!=(const NameRef &rhs) const noexcept {
+        return std::is_neq(*this <=> rhs);
     }
 
     constexpr uint32_t rawId() const {

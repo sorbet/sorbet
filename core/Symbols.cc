@@ -38,54 +38,6 @@ string showInternal(const GlobalState &gs, core::SymbolRef owner, core::NameRef 
 }
 } // namespace
 
-bool SymbolRef::operator==(const SymbolRef &rhs) const {
-    return _id == rhs._id;
-}
-
-bool SymbolRef::operator!=(const SymbolRef &rhs) const {
-    return !(rhs == *this);
-}
-
-bool ClassOrModuleRef::operator==(const ClassOrModuleRef &rhs) const {
-    return rhs._id == this->_id;
-}
-
-bool ClassOrModuleRef::operator!=(const ClassOrModuleRef &rhs) const {
-    return rhs._id != this->_id;
-}
-
-bool MethodRef::operator==(const MethodRef &rhs) const {
-    return rhs._id == this->_id;
-}
-
-bool MethodRef::operator!=(const MethodRef &rhs) const {
-    return rhs._id != this->_id;
-}
-
-bool FieldRef::operator==(const FieldRef &rhs) const {
-    return rhs._id == this->_id;
-}
-
-bool FieldRef::operator!=(const FieldRef &rhs) const {
-    return rhs._id != this->_id;
-}
-
-bool TypeMemberRef::operator==(const TypeMemberRef &rhs) const {
-    return rhs._id == this->_id;
-}
-
-bool TypeMemberRef::operator!=(const TypeMemberRef &rhs) const {
-    return rhs._id != this->_id;
-}
-
-bool TypeParameterRef::operator==(const TypeParameterRef &rhs) const {
-    return rhs._id == this->_id;
-}
-
-bool TypeParameterRef::operator!=(const TypeParameterRef &rhs) const {
-    return rhs._id != this->_id;
-}
-
 vector<TypePtr> ClassOrModule::selfTypeArgs(const GlobalState &gs) const {
     vector<TypePtr> targs;
     for (auto tm : typeMembers()) {

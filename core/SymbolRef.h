@@ -147,8 +147,8 @@ public:
     ConstClassOrModuleData data(const GlobalState &gs) const;
     ConstClassOrModuleData dataAllowingNone(const GlobalState &gs) const;
 
-    bool operator==(const ClassOrModuleRef &rhs) const;
-    bool operator!=(const ClassOrModuleRef &rhs) const;
+    bool operator==(const ClassOrModuleRef &rhs) const noexcept = default;
+    bool operator!=(const ClassOrModuleRef &rhs) const noexcept = default;
 
     std::string toString(const GlobalState &gs) const {
         bool showFull = false;
@@ -242,9 +242,8 @@ public:
     };
     std::string show(const GlobalState &gs, ShowOptions options) const;
 
-    bool operator==(const MethodRef &rhs) const;
-
-    bool operator!=(const MethodRef &rhs) const;
+    bool operator==(const MethodRef &rhs) const noexcept = default;
+    bool operator!=(const MethodRef &rhs) const noexcept = default;
 };
 CheckSize(MethodRef, 4, 4);
 
@@ -287,9 +286,8 @@ public:
     };
     std::string show(const GlobalState &gs, ShowOptions options) const;
 
-    bool operator==(const FieldRef &rhs) const;
-
-    bool operator!=(const FieldRef &rhs) const;
+    bool operator==(const FieldRef &rhs) const noexcept = default;
+    bool operator!=(const FieldRef &rhs) const noexcept = default;
 };
 CheckSize(FieldRef, 4, 4);
 
@@ -331,9 +329,8 @@ public:
     };
     std::string show(const GlobalState &gs, ShowOptions options) const;
 
-    bool operator==(const TypeMemberRef &rhs) const;
-
-    bool operator!=(const TypeMemberRef &rhs) const;
+    bool operator==(const TypeMemberRef &rhs) const noexcept = default;
+    bool operator!=(const TypeMemberRef &rhs) const noexcept = default;
 };
 CheckSize(TypeMemberRef, 4, 4);
 
@@ -376,9 +373,8 @@ public:
     };
     std::string show(const GlobalState &gs, ShowOptions options) const;
 
-    bool operator==(const TypeParameterRef &rhs) const;
-
-    bool operator!=(const TypeParameterRef &rhs) const;
+    bool operator==(const TypeParameterRef &rhs) const noexcept = default;
+    bool operator!=(const TypeParameterRef &rhs) const noexcept = default;
 };
 CheckSize(TypeParameterRef, 4, 4);
 
@@ -531,9 +527,8 @@ public:
     }
 
 public:
-    bool operator==(const SymbolRef &rhs) const;
-
-    bool operator!=(const SymbolRef &rhs) const;
+    bool operator==(const SymbolRef &rhs) const noexcept = default;
+    bool operator!=(const SymbolRef &rhs) const noexcept = default;
 
     // TODO(jvilk): Remove as many of these methods as possible in favor of callsites using .data on the more specific
     // symbol *Ref classes (e.g., ClassOrModuleRef). These were introduced to wean the codebase from calling

@@ -36,14 +36,6 @@ bool LocalVariable::isAliasForGlobal(const GlobalState &gs) const {
     return _name == Names::cfgAlias();
 }
 
-bool LocalVariable::operator==(const LocalVariable &rhs) const {
-    return this->_name == rhs._name && this->unique == rhs.unique;
-}
-
-bool LocalVariable::operator!=(const LocalVariable &rhs) const {
-    return !this->operator==(rhs);
-}
-
 string LocalVariable::showRaw(const GlobalState &gs) const {
     if (unique == 0) {
         return this->_name.showRaw(gs);
