@@ -635,15 +635,19 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
                         *this->gs, cache::maybeCacheGlobalStateAndFiles(
                                        OwnedKeyValueStore::abort(std::move(ownedKvstore)), this->config->opts,
                                        *this->gs, workers, nonPackagedIndexed));
+                }
 
-                    // Close and copy the global kvstore, so that we have unique access for the rest of the session.
-                    this->sessionCache =
-                        cache::SessionCache::make(std::move(ownedKvstore), *this->config->logger, this->config->opts);
+                if (currentStratum == this->lastStratum) {
+                    if (mode == SlowPathMode::Init) {
+                        // Close and copy the global kvstore, so that we have unique access for the rest of the session.
+                        this->sessionCache = cache::SessionCache::make(std::move(ownedKvstore), *this->config->logger,
+                                                                       this->config->opts);
 
-                    this->initialized = true;
-                } else {
-                    // We don't write in the cancelable slow path, and all our read operations have completed.
-                    OwnedKeyValueStore::abort(std::move(ownedKvstore));
+                        this->initialized = true;
+                    } else {
+                        // We don't write in the cancelable slow path, and all our read operations have completed.
+                        OwnedKeyValueStore::abort(std::move(ownedKvstore));
+                    }
                 }
 
                 // Second namer run: all the other files (the packageDB shouldn't change)
