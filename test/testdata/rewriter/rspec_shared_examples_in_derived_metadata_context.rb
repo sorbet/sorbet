@@ -95,7 +95,7 @@ end
 
 RSpec.describe 'consumer that does not include outer' do
   it_behaves_like 'manually included only'
-  #                ^^^^^^^^^^^^^^^^^^^^^^^ error-with-dupes: Unable to resolve constant `<shared_examples 'manually included only'>`
+  #               ^^^^^^^^^^^^^^^^^^^^^^^^ error-with-dupes: Unable to resolve constant `<shared_examples 'manually included only'>`
 end
 
 # -----------------------------------------------------------------------------
@@ -118,7 +118,7 @@ end
 #     class Container
 #       include Outer
 #       class Nested
-#         p Inner   # NameError: uninitialized constant Container::Nested::Inner
+#         p Inner   # raises uninitialized constant Container::Nested::Inner
 #       end
 #     end
 #

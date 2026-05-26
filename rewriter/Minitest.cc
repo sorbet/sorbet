@@ -1094,8 +1094,7 @@ std::optional<core::NameRef> asSymbolLiteral(const ast::ExpressionPtr &expr) {
 //   config.include_context 'NAME', :TAG
 //   config.define_derived_metadata(...) do |m|; m[:TAG] = true; end
 // Adds each matching context NAME to `out`.
-void collectAutoIncludedFromConfigure(core::MutableContext ctx, ast::Block *block,
-                                      UnorderedSet<core::NameRef> &out) {
+void collectAutoIncludedFromConfigure(core::MutableContext ctx, ast::Block *block, UnorderedSet<core::NameRef> &out) {
     if (block == nullptr) {
         return;
     }
@@ -1128,8 +1127,8 @@ void collectAutoIncludedFromConfigure(core::MutableContext ctx, ast::Block *bloc
 
             forEachBlockBodyStmt(inner->body, [&](ast::ExpressionPtr &innerStmt) {
                 auto assign = ast::cast_tree<ast::Send>(innerStmt);
-                if (assign == nullptr || assign->fun != core::Names::squareBracketsEq() ||
-                    assign->numPosArgs() != 2 || assign->hasBlock()) {
+                if (assign == nullptr || assign->fun != core::Names::squareBracketsEq() || assign->numPosArgs() != 2 ||
+                    assign->hasBlock()) {
                     return;
                 }
                 auto tagOpt = asSymbolLiteral(assign->getPosArg(0));
@@ -1180,8 +1179,8 @@ ast::ExpressionPtr cloneAsRSpecPrefixed(core::MutableContext ctx, ast::Send *sen
         newFlags.hasBlock = true;
     }
 
-    return ast::MK::Send(send->loc, std::move(rspecRecv), send->fun, send->funLoc, numPosArgs,
-                         std::move(newArgs), newFlags);
+    return ast::MK::Send(send->loc, std::move(rspecRecv), send->fun, send->funLoc, numPosArgs, std::move(newArgs),
+                         newFlags);
 }
 
 } // namespace
