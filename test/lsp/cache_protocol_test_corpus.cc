@@ -15,6 +15,7 @@
 #include "spdlog/sinks/null_sink.h"
 #include "test/helpers/CounterStateDatabase.h"
 #include "test/helpers/lsp.h"
+#include "test/helpers/packages.h"
 #include "test/lsp/ProtocolTest.h"
 #include <sys/wait.h>
 
@@ -682,6 +683,74 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "ReapOldCacheDirectories") {
     // Clean up
     FileOps::removeFile(fmt::format("{}/keep-around", path));
     FileOps::removeDir(path);
+}
+
+TEST_CASE_FIXTURE(CacheProtocolTest, "CachePopulationWithPackages") {
+    // We're re-initializing everything for sorbet-packages, so we have to release the initial cache.
+    this->lspWrapper = nullptr;
+
+    {
+        auto opts = make_shared<realmain::options::Options>();
+        opts->cacheSensitiveOptions.sorbetPackages = true;
+        SUBCASE("Monolithic") {
+            opts->packageDirected = false;
+            resetState(opts);
+        }
+        SUBCASE("PackageDirected") {
+            opts->packageDirected = true;
+            resetState(opts);
+        }
+    }
+
+    REQUIRE_NE(this->lspWrapper, nullptr);
+
+    vector<pair<string, string>> files = {
+        {"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A"}).build()},
+        {"a.rb", "# typed: true\n"
+                 "module Root\n"
+                 "  class A\n"
+                 "    def fun\n"
+                 "    end\n"
+                 "  end\n"
+                 "end\n"},
+        {"foo/__package.rb",
+         PackageTextBuilder().withName("Root::Foo").withExports({"Root::Foo::A"}).withImports({"Root"}).build()},
+        {"foo/a.rb", "# typed: true\n"
+                     "module Root::Foo\n"
+                     "  class A\n"
+                     "    def foo\n"
+                     "      Root::A.new()\n"
+                     "    end\n"
+                     "  end\n"
+                     "end\n"},
+    };
+
+    writeFilesToFS(files);
+
+    for (auto &[path, _] : files) {
+        this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/{}", this->rootPath, path));
+    }
+
+    // LSP should write a cache to disk corresponding to initialization state.
+    assertErrorDiagnostics(initializeLSP(), {});
+
+    auto opts = lspWrapper->opts;
+
+    // Close our handle to the cache.
+    this->lspWrapper = nullptr;
+
+    auto sink = make_shared<spdlog::sinks::null_sink_mt>();
+    auto logger = make_shared<spdlog::logger>("null", sink);
+    unique_ptr<const OwnedKeyValueStore> kvstore = realmain::cache::maybeCreateKeyValueStore(logger, *opts);
+
+    // The files should all exist in the cache
+    for (auto &[path, _] : files) {
+        auto fullPath = fmt::format("{}/{}", this->rootPath, path);
+        INFO("Checking ", fullPath);
+        auto val = kvstore->read(fullPath);
+        CHECK_NE(val.len, 0);
+        CHECK_NE(val.data, nullptr);
+    }
 }
 
 } // namespace sorbet::test::lsp
