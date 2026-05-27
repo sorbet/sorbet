@@ -127,7 +127,6 @@ module T::Private::Methods
       raise DeclBuilder::BuilderError.new("Cannot call `override` twice for the method `#{method_name}`")
     end
 
-    # TODO(jez) should this be in the previous_declaration?
     method = mod.instance_method(method_name)
     super_method = method.super_method
     if super_method.nil?
