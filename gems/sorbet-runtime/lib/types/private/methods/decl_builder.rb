@@ -36,10 +36,8 @@ module T::Private::Methods
         self.abstract
       end
 
-      if override == :allow_incompatible
-        self.override(allow_incompatible: true)
-      elsif override
-        self.override
+      if override
+        self.override(**override)
       end
 
       if overridable

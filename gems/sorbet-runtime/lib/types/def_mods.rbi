@@ -11,7 +11,7 @@ module T::DefMods
 
   # Intentionally redefine the method with a different signature for sorbet-runtime,
   # so we can do the runtime type validation
-  sig { params(method_name: Kernel, allow_incompatible: T::Boolean).returns(Symbol) }
+  sig { params(method_name: Kernel, allow_incompatible: T.any(T::Boolean, Symbol)).returns(Symbol) }
   def override(method_name, allow_incompatible: false); end
 
   # Intentionally redefine the method with a different signature for sorbet-runtime,

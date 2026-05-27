@@ -158,8 +158,44 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
         override(:foo, allow_incompatible: true)
       end
 
-      # Should not raise - allow_incompatible suppresses the visibility check
       T::Private::Abstract::Validate.validate_subclass(child)
+    end
+
+    it "works with allow_incompatible: :visibility" do
+      parent = Class.new do
+        extend T::Sig, T::Helpers
+        abstract!
+        sig { abstract.void }
+        def foo; end
+      end
+      child = Class.new(parent) do
+        extend T::Sig, T::DefMods
+        sig { void }
+        private def foo; end
+        override(:foo, allow_incompatible: :visibility)
+      end
+
+      T::Private::Abstract::Validate.validate_subclass(child)
+    end
+
+    it "allow_incompatible: :visibility only suppresses visibility errors" do
+      parent = Class.new do
+        extend T::Sig, T::Helpers
+        abstract!
+        sig { abstract.returns(Integer) }
+        def foo; end
+      end
+      child = Class.new(parent) do
+        extend T::Sig, T::DefMods
+        sig { returns(String) }
+        def foo; "not an int"; end
+        override(:foo, allow_incompatible: :visibility)
+      end
+
+      err = assert_raises(RuntimeError) do
+        T::Private::Abstract::Validate.validate_subclass(child)
+      end
+      assert_includes(err.message, 'Incompatible return type in signature for implementation of method `foo`')
     end
 
     it "errors eagerly if override used without overriding something" do

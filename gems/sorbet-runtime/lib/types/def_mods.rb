@@ -35,7 +35,7 @@ module T::DefMods
     Kernel.raise TypeError.new("override accepts a Symbol, got #{method_name.class}") unless method_name.is_a?(Symbol)
 
     begin
-      T::Private::Methods.declare_override(T.unsafe(self), method_name, allow_incompatible)
+      T::Private::Methods.declare_override(T.unsafe(self), method_name, allow_incompatible: allow_incompatible)
     rescue T::Private::Methods::DeclBuilder::BuilderError => e
       T::Configuration.sig_builder_error_handler(e, Kernel.caller_locations(1, 1)&.first)
     end
