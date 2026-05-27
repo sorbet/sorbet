@@ -102,11 +102,11 @@ vector<core::LocOffsets> Parser::collectCommentLocations() {
 }
 
 bool Parser::isTUntyped(pm_node_t *node) const {
-    if (!node || !PM_NODE_TYPE_P(node, PM_CALL_NODE)) {
+    pm_call_node_t *call = down_cast<pm_call_node_t>(node);
+    if (!call) {
         return false;
     }
 
-    pm_call_node_t *call = down_cast_nonnull<pm_call_node_t>(node);
     auto methodName = resolveConstant(call->name);
 
     return methodName == "untyped"sv && isT(call->receiver);
@@ -117,12 +117,10 @@ bool Parser::isT(pm_node_t *node) const {
         return false;
     }
 
-    if (PM_NODE_TYPE_P(node, PM_CONSTANT_READ_NODE)) { // T
-        auto *constNode = down_cast_nonnull<pm_constant_read_node_t>(node);
+    if (auto *constNode = down_cast<pm_constant_read_node_t>(node)) { // T
         auto name = resolveConstant(constNode->name);
         return name == "T";
-    } else if (PM_NODE_TYPE_P(node, PM_CONSTANT_PATH_NODE)) { // ::T
-        auto *pathNode = down_cast_nonnull<pm_constant_path_node_t>(node);
+    } else if (auto *pathNode = down_cast<pm_constant_path_node_t>(node)) { // ::T
         auto name = resolveConstant(pathNode->name);
         return name == "T" && pathNode->parent == nullptr;
     }
@@ -131,25 +129,25 @@ bool Parser::isT(pm_node_t *node) const {
 }
 
 bool Parser::isSetterCall(pm_node_t *node) const {
-    if (!PM_NODE_TYPE_P(node, PM_CALL_NODE)) {
+    auto *call = down_cast<pm_call_node_t>(node);
+    if (!call) {
         return false;
     }
 
-    auto *call = down_cast_nonnull<pm_call_node_t>(node);
     auto methodName = resolveConstant(call->name);
+
     return !methodName.empty() && methodName.back() == '=';
 }
 
 bool Parser::isSafeNavigationCall(pm_node_t *node) const {
-    return PM_NODE_TYPE_P(node, PM_CALL_NODE) && PM_NODE_FLAG_P(node, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION);
+    return isa_node<pm_call_node_t>(node) && PM_NODE_FLAG_P(node, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION);
 }
 
 bool Parser::isMethodDefModifierCall(pm_node_t *node, const core::GlobalState &gs) const {
-    if (!PM_NODE_TYPE_P(node, PM_CALL_NODE)) {
+    auto *call = down_cast<pm_call_node_t>(node);
+    if (!call) {
         return false;
     }
-
-    auto *call = down_cast_nonnull<pm_call_node_t>(node);
 
     // Must have no receiver (implicit self)
     if (call->receiver != nullptr) {
@@ -163,7 +161,7 @@ bool Parser::isMethodDefModifierCall(pm_node_t *node, const core::GlobalState &g
 
     // That argument must be a method definition
     pm_node_t *arg = call->arguments->arguments.nodes[0];
-    if (!PM_NODE_TYPE_P(arg, PM_DEF_NODE)) {
+    if (!isa_node<pm_def_node>(arg)) {
         return false;
     }
 
@@ -172,14 +170,13 @@ bool Parser::isMethodDefModifierCall(pm_node_t *node, const core::GlobalState &g
 }
 
 bool Parser::isAttrAccessorCall(pm_node_t *node) const {
-    if (!PM_NODE_TYPE_P(node, PM_CALL_NODE)) {
+    auto *call = down_cast<pm_call_node_t>(node);
+    if (!call) {
         return false;
     }
 
-    auto *call = down_cast_nonnull<pm_call_node_t>(node);
-
     // Must have no receiver or self receiver
-    if (call->receiver != nullptr && !PM_NODE_TYPE_P(call->receiver, PM_SELF_NODE)) {
+    if (call->receiver != nullptr && !isa_node<pm_self_node>(call->receiver)) {
         return false;
     }
 
