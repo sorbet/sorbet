@@ -314,6 +314,8 @@ end
 
 Since every singleton class descends from `Module`, this will make the `sig` method available in every class body.
 
+With this monkey patch in place, `sig` is also accepted when the method lands on an ancestor module of the declaring class (e.g. RSpec's `let` and `subject`), as long as the method body lives in the same source file as the `sig`.
+
 This involves a monkey patch, and is **not** required to use Sorbet. But the most earnest users of Sorbet all eventually add this monkey patch, because `extend T::Sig` ends up getting written into almost every class.
 
 We recommend putting this monkeypatch in the same file that

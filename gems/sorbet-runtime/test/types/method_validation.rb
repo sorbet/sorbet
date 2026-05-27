@@ -11,6 +11,10 @@ module Opus::Types::Test
       end
     end
 
+    after do
+      T::Private::DeclState.current.reset!
+    end
+
     private def check_alloc_counts
       @check_alloc_counts = Gem::Version.new(RUBY_VERSION) < Gem::Version.new('3.0')
     end
@@ -94,7 +98,7 @@ module Opus::Types::Test
         )
       end
 
-      it "raises an error when adding a method to a different module than the last declaration" do
+      it "silently preserves the declaration when a method is added on an unrelated module" do
         mod2 = Module.new do
           extend T::Sig
           sig { returns(String) }
@@ -102,17 +106,119 @@ module Opus::Types::Test
         end
 
         @mod.sig { returns(Symbol) }
+        refute_nil(T::Private::DeclState.current.active_declaration)
+
+        def mod2.bar; :bar; end
+        assert_equal(:bar, mod2.bar)
+        refute_nil(T::Private::DeclState.current.active_declaration)
+
+        # Integer return violates `returns(Symbol)`, proving the sig bound.
+        def @mod.qux; 42; end
+        assert_nil(T::Private::DeclState.current.active_declaration)
+        assert_raises(TypeError) { @mod.qux }
+      end
+
+      it "raises on a second `sig` if a method was added on an unrelated module in between" do
+        mod2 = Module.new { extend T::Sig }
+
+        @mod.sig { returns(Symbol) }
         def mod2.bar; end
+
         err = assert_raises(RuntimeError) do
-          mod2.bar
+          @mod.sig { returns(Symbol) }
+        end
+        assert_equal("You called sig twice without declaring a method in between", err.message)
+      end
+
+      it "accepts a method added on an included ancestor module of the declaration target" do
+        helper_module = Module.new
+        T::Private::Methods.install_hooks(helper_module)
+
+        consumer = Class.new do
+          extend T::Sig
+          include helper_module
         end
 
-        assert_equal(
-          "A method (bar) is being added on a different class/module (#{mod2}) than the last call to " \
-          "`sig` (#{@mod}). Make sure each call to `sig` is immediately " \
-          "followed by a method definition on the same class/module.",
-          err.message
-        )
+        consumer.sig { returns(Integer) }
+        helper_module.send(:define_method, :foo) { 42 }
+
+        assert_equal(42, consumer.new.foo)
+      end
+
+      it "accepts a method added on a prepended ancestor module of the declaration target" do
+        helper_module = Module.new
+        T::Private::Methods.install_hooks(helper_module)
+
+        consumer = Class.new do
+          extend T::Sig
+          prepend helper_module
+        end
+
+        consumer.sig { returns(Integer) }
+        helper_module.send(:define_method, :foo) { 42 }
+
+        assert_equal(42, consumer.new.foo)
+      end
+
+      it "accepts a method added on a transitive ancestor module of the declaration target" do
+        inner_helper = Module.new
+        T::Private::Methods.install_hooks(inner_helper)
+
+        outer_helper = Module.new do
+          include inner_helper
+        end
+
+        consumer = Class.new do
+          extend T::Sig
+          include outer_helper
+        end
+
+        consumer.sig { returns(Integer) }
+        inner_helper.send(:define_method, :foo) { 42 }
+
+        assert_equal(42, consumer.new.foo)
+      end
+
+      it "accepts an ancestor-path sig when hooks are installed via `extend T::Sig`" do
+        helper_module = Module.new do
+          extend T::Sig
+        end
+
+        consumer = Class.new do
+          extend T::Sig
+          include helper_module
+        end
+
+        consumer.sig { returns(Integer) }
+        helper_module.send(:define_method, :foo) { :wrong_type }
+
+        assert_raises(TypeError) { consumer.new.foo }
+      end
+
+      it "raises when an ancestor-path method is added from a different file than the sig" do
+        helper_module = Module.new
+        T::Private::Methods.install_hooks(helper_module)
+
+        consumer = Class.new do
+          extend T::Sig
+          include helper_module
+        end
+
+        # rubocop:disable Style/EvalWithLocation
+        far_away_block = eval("proc { 42 }", binding, "/tmp/some_other_file.rb", 1)
+        # rubocop:enable Style/EvalWithLocation
+
+        consumer.sig { returns(Integer) }
+        err = assert_raises(RuntimeError) do
+          helper_module.send(:define_method, :foo, &far_away_block)
+        end
+        assert_match(/different file/, err.message)
+        assert_match(/`foo`/, err.message)
+        assert_match(%r{/tmp/some_other_file\.rb}, err.message)
+
+        consumer.sig { returns(Integer) }
+        helper_module.send(:define_method, :bar) { 7 }
+        assert_equal(7, consumer.new.bar)
       end
 
       it "gives a helpful error if you order optional kwargs after required" do

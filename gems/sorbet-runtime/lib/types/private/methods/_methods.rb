@@ -208,6 +208,26 @@ module T::Private::Methods
     if current_declaration.nil?
       return
     end
+
+    # Leave the declaration intact if the hook fired on a module unrelated
+    # to the pending sig; the next adjacent definition can consume it.
+    match_kind = sig_target_match_kind(hook_mod, current_declaration.mod)
+    if match_kind.nil?
+      return
+    end
+
+    # On the ancestor path, require same-file adjacency to catch a stray
+    # sig being silently consumed by a `define_method` defined elsewhere.
+    if match_kind == :ancestor
+      sig_loc = current_declaration.loc
+      method_path = mod.instance_method(method_name).source_location&.first
+      if sig_loc && method_path && sig_loc.path != method_path
+        T::Private::DeclState.current.reset!
+        raise "`sig` at #{sig_loc.path}:#{sig_loc.lineno} would be applied to " \
+              "`#{method_name}` on #{hook_mod} (#{method_path}), which is in a different file."
+      end
+    end
+
     T::Private::DeclState.current.reset!
 
     if method_name == :method_added || method_name == :singleton_method_added
@@ -342,20 +362,20 @@ module T::Private::Methods
     decl
   end
 
+  # Returns :exact, :singleton, :top_self, :ancestor, or nil. The :ancestor
+  # case covers patterns like RSpec `let`, where the method is added on an
+  # included helper module rather than the declared class itself.
+  def self.sig_target_match_kind(hook_mod, declaration_mod)
+    return :exact if hook_mod == declaration_mod
+    return :singleton if hook_mod.singleton_class == declaration_mod
+    return :top_self if declaration_mod == TOP_SELF
+    return :ancestor if declaration_mod.is_a?(Module) && declaration_mod.ancestors.include?(hook_mod)
+
+    nil
+  end
+
   def self.build_sig(hook_mod, method_name, original_method, current_declaration)
     begin
-      # We allow `sig` in the current module's context (normal case) and
-      if hook_mod != current_declaration.mod &&
-         # inside `class << self`, and
-         hook_mod.singleton_class != current_declaration.mod &&
-         # on `self` at the top level of a file
-         current_declaration.mod != TOP_SELF
-        raise "A method (#{method_name}) is being added on a different class/module (#{hook_mod}) than the " \
-              "last call to `sig` (#{current_declaration.mod}). Make sure each call " \
-              "to `sig` is immediately followed by a method definition on the same " \
-              "class/module."
-      end
-
       signature = Signature.new(
         method: original_method,
         method_name: method_name,
