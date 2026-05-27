@@ -249,7 +249,7 @@ class T::Private::Methods::Signature
     self.class.method_desc(@method, @method_name)
   end
 
-  def self.method_desc(method, method_name, source_loc = method.source_location)
+  def self.method_desc(method, method_name, source_loc=method.source_location)
     loc = if source_loc
       source_loc.join(':')
     else

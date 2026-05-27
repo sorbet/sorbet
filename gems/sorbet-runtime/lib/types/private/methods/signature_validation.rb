@@ -138,7 +138,7 @@ module T::Private::Methods::SignatureValidation
     end
   end
 
-  def self.validate_non_override_mode(mode, method_name, method, source_loc = method.source_location)
+  def self.validate_non_override_mode(mode, method_name, method, source_loc=method.source_location)
     case mode
     when Modes.override
       if method_name == :each && method.owner < Enumerable
