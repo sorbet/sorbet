@@ -108,7 +108,8 @@ class LocalNameInserter {
                     named.flags.shadow = true;
                     cursor = &shadow.expr;
                 },
-                [&](const ast::Local &local) { Exception::raise("Local variable found in argument list"); });
+                [&](const ast::Local &local) { unreachable("Local variable found in argument list"); },
+                [&](const ast::ExpressionPtr &expr) { unreachable("Unexpected node type in parameter position."); });
         }
 
         named.expr = move(arg);
@@ -120,10 +121,6 @@ class LocalNameInserter {
         int pos = -1;
         for (auto &param : methodParams) {
             ++pos;
-
-            if (!ast::isa_reference(param)) {
-                Exception::raise("Must be a reference!");
-            }
             auto named = nameArg(ctx, namedParams, move(param), pos);
             namedParams.emplace_back(move(named));
         }
