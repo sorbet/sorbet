@@ -1263,9 +1263,18 @@ vector<ast::ExpressionPtr> Minitest::run(core::MutableContext ctx, bool isClass,
         return stats;
     }
 
-    // Handle RSpec.local_context do ... end: scan the body for RSpec.shared_examples /
-    // shared_context / shared_examples_for calls and hoist them to the top-level scope,
-    // making them resolvable via include_examples / include_context in any describe block.
+    // Handle RSpec.local_context do ... end: scan the body for shared_examples /
+    // shared_context / shared_examples_for calls (bare or RSpec.-prefixed) and hoist them
+    // to the top-level scope, making them resolvable via include_examples / include_context
+    // in any describe block.
+    //
+    // At runtime `RSpec.local_context` registers the block body to be re-evaluated inside
+    // each consumer's example group, so any shared_examples-family call defined inside it
+    // (bare or RSpec.-prefixed) ends up registered in the RSpec global / consumer registry.
+    // We pass `insideDescribe=true` for bare shared_examples-family calls so they pass
+    // `runSingle`'s `!insideDescribe && !recvIsRSpec` gate. Other bare sends (e.g. `let`,
+    // `before`, `it`) keep being dropped on purpose -- they would otherwise emit method
+    // defs at root scope.
     if (ctx.state.cacheSensitiveOptions.rspecRewriterEnabled && send->fun == core::Names::localContext() &&
         isRSpec(ctx, send->recv) && send->hasBlock()) {
         auto *block = send->block();
@@ -1273,12 +1282,18 @@ vector<ast::ExpressionPtr> Minitest::run(core::MutableContext ctx, bool isClass,
         // Note: only direct Send children of the block body are scanned.
         // Shared examples nested inside conditionals or other blocks are not hoisted.
         auto processStmt = [&](ast::ExpressionPtr &stmt) {
-            if (auto bodySend = ast::cast_tree<ast::Send>(stmt)) {
-                auto result = runSingle(ctx, /* isClass */ false, /* maybeSharedExamplesName */ nullptr, bodySend,
-                                        /* insideDescribe */ false);
-                if (result != nullptr) {
-                    stats.emplace_back(std::move(result));
-                }
+            auto bodySend = ast::cast_tree<ast::Send>(stmt);
+            if (bodySend == nullptr) {
+                return;
+            }
+            // Only treat bare shared_examples-family calls as if we were inside a describe.
+            // For anything else (including bare `let`/`before`/`it`), keep `insideDescribe=false`
+            // so `runSingle` drops it instead of emitting root-scoped pollution.
+            bool isBareSharedExamples = bodySend->recv.isSelfReference() && isSharedExamplesName(bodySend->fun);
+            auto result = runSingle(ctx, /* isClass */ false, /* maybeSharedExamplesName */ nullptr, bodySend,
+                                    /* insideDescribe */ isBareSharedExamples);
+            if (result != nullptr) {
+                stats.emplace_back(std::move(result));
             }
         };
 
