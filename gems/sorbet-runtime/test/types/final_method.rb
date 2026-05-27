@@ -362,7 +362,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
       def self.foo; end
     end
     err = assert_raises(RuntimeError) do
-      child = Class.new(parent) do
+      Class.new(parent) do
         class << self
           def foo; end
         end
