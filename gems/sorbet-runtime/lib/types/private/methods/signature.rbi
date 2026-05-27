@@ -119,6 +119,9 @@ class T::Private::Methods::Signature
   sig {returns(String)}
   def method_desc; end
 
+  sig {params(method: UnboundMethod, method_name: Symbol, source_loc: T.nilable([String, Integer])).returns(String)}
+  def self.method_desc(method, method_name, source_loc = method.source_location); end
+
   sig {void}
   def force_type_init; end
 
