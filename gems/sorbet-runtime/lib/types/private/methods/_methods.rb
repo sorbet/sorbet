@@ -115,6 +115,14 @@ module T::Private::Methods
       raise DeclBuilder::BuilderError.new("Cannot call `override` twice for the method `#{method_name}`")
     end
 
+    # TODO(jez) should this be in the previous_declaration?
+    method = mod.instance_method(method_name)
+    super_method = method.super_method
+    if super_method.nil?
+      source_loc = Kernel.caller_locations(2, 1)&.map { |loc| [loc.path || "<unknown>", loc.lineno] }&.first
+      T::Private::Methods::SignatureValidation.validate_non_override_mode(Modes.override, method_name, method, source_loc)
+    end
+
     previous_declaration.override = allow_incompatible ? :allow_incompatible : true
 
     nil
