@@ -104,7 +104,252 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.name()
       end
 
+      def <it 'reveals the typed described_class'><<todo method>>(&<blk>)
+        <emptyTree>::<C T>.reveal_type(<self>.described_class())
+      end
+
+      def <it 'rejects calls that don't exist on described_class'><<todo method>>(&<blk>)
+        <self>.described_class().no_such_method()
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.returns(::T.class_of(<emptyTree>::<C UserClass>))
+      end
+
+      def described_class<<todo method>>(&<blk>)
+        <emptyTree>::<C UserClass>
+      end
+
       <runtime method definition of name>
+    end
+  end
+
+  begin
+    <emptyTree>::<C UserClass>
+    class <emptyTree>::<C <describe 'UserClass'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      def user<<todo method>>(&<blk>)
+        <self>.described_class().new()
+      end
+
+      def bogus<<todo method>>(&<blk>)
+        <self>.described_class().no_such_method()
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.returns(::T.class_of(<emptyTree>::<C UserClass>))
+      end
+
+      def described_class<<todo method>>(&<blk>)
+        <emptyTree>::<C UserClass>
+      end
+
+      <runtime method definition of user>
+
+      <runtime method definition of bogus>
+    end
+  end
+
+  begin
+    <emptyTree>::<C UserClass>
+    class <emptyTree>::<C <describe 'UserClass'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      <self>.sig() do ||
+        <self>.returns(<emptyTree>::<C UserClass>)
+      end
+
+      def user<<todo method>>(&<blk>)
+        <self>.described_class().new()
+      end
+
+      <self>.sig() do ||
+        <self>.returns(<emptyTree>::<C T>.class_of(<emptyTree>::<C UserClass>))
+      end
+
+      def klass<<todo method>>(&<blk>)
+        <self>.described_class()
+      end
+
+      def <it 'propagates the typed return through subject and let'><<todo method>>(&<blk>)
+        begin
+          <emptyTree>::<C T>.reveal_type(<self>.user())
+          <emptyTree>::<C T>.reveal_type(<self>.klass())
+        end
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.returns(::T.class_of(<emptyTree>::<C UserClass>))
+      end
+
+      def described_class<<todo method>>(&<blk>)
+        <emptyTree>::<C UserClass>
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      <runtime method definition of user>
+
+      <runtime method definition of klass>
+    end
+  end
+
+  module <emptyTree>::<C DescribedModule><<C <todo sym>>> < ()
+    def self.helper<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <runtime method definition of self.helper>
+  end
+
+  begin
+    <emptyTree>::<C DescribedModule>
+    class <emptyTree>::<C <describe 'DescribedModule'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      def <it 'described_class is the singleton type of the module'><<todo method>>(&<blk>)
+        begin
+          <emptyTree>::<C T>.reveal_type(<self>.described_class())
+          <self>.described_class().helper()
+          <self>.described_class().new()
+        end
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.returns(::T.class_of(<emptyTree>::<C DescribedModule>))
+      end
+
+      def described_class<<todo method>>(&<blk>)
+        <emptyTree>::<C DescribedModule>
+      end
+    end
+  end
+
+  begin
+    <emptyTree>::<C UserClass>
+    class <emptyTree>::<C <describe 'UserClass'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      def <before><<todo method>>(&<blk>)
+        begin
+          <emptyTree>::<C T>.reveal_type(<self>.described_class())
+          <self>.described_class().no_such_method()
+        end
+      end
+
+      def <after><<todo method>>(&<blk>)
+        <self>.described_class().also_missing()
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.returns(::T.class_of(<emptyTree>::<C UserClass>))
+      end
+
+      def described_class<<todo method>>(&<blk>)
+        <emptyTree>::<C UserClass>
+      end
+    end
+  end
+
+  class <emptyTree>::<C AlternateClass><<C <todo sym>>> < (::<todo sym>)
+  end
+
+  class <emptyTree>::<C UserClassWithLetOverride><<C <todo sym>>> < (::<todo sym>)
+  end
+
+  class <emptyTree>::<C UserClassWithDefOverride><<C <todo sym>>> < (::<todo sym>)
+  end
+
+  class <emptyTree>::<C UserClassWithSubjectOverride><<C <todo sym>>> < (::<todo sym>)
+  end
+
+  begin
+    <emptyTree>::<C UserClassWithLetOverride>
+    class <emptyTree>::<C <describe 'UserClassWithLetOverride'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      <self>.sig() do ||
+        <self>.returns(<emptyTree>::<C T>.class_of(<emptyTree>::<C AlternateClass>))
+      end
+
+      def described_class<<todo method>>(&<blk>)
+        <emptyTree>::<C AlternateClass>
+      end
+
+      def <it 'honors the user-defined described_class via let'><<todo method>>(&<blk>)
+        <emptyTree>::<C T>.reveal_type(<self>.described_class())
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      <runtime method definition of described_class>
+    end
+  end
+
+  begin
+    <emptyTree>::<C UserClassWithDefOverride>
+    class <emptyTree>::<C <describe 'UserClassWithDefOverride'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      <self>.sig() do ||
+        <self>.returns(<emptyTree>::<C T>.class_of(<emptyTree>::<C AlternateClass>))
+      end
+
+      def described_class<<todo method>>(&<blk>)
+        <emptyTree>::<C AlternateClass>
+      end
+
+      def <it 'honors the user-defined described_class via def'><<todo method>>(&<blk>)
+        <emptyTree>::<C T>.reveal_type(<self>.described_class())
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      <runtime method definition of described_class>
+    end
+  end
+
+  begin
+    <emptyTree>::<C UserClassWithSubjectOverride>
+    class <emptyTree>::<C <describe 'UserClassWithSubjectOverride'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      <self>.sig() do ||
+        <self>.returns(<emptyTree>::<C T>.class_of(<emptyTree>::<C AlternateClass>))
+      end
+
+      def described_class<<todo method>>(&<blk>)
+        <emptyTree>::<C AlternateClass>
+      end
+
+      def <it 'honors the user-defined described_class via subject'><<todo method>>(&<blk>)
+        <emptyTree>::<C T>.reveal_type(<self>.described_class())
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      <runtime method definition of described_class>
+    end
+  end
+
+  begin
+    <emptyTree>::<C UserClass>
+    class <emptyTree>::<C <xdescribe 'UserClass'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      def <it 'xdescribe propagates described_class'><<todo method>>(&<blk>)
+        <emptyTree>::<C T>.reveal_type(<self>.described_class())
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.returns(::T.class_of(<emptyTree>::<C UserClass>))
+      end
+
+      def described_class<<todo method>>(&<blk>)
+        <emptyTree>::<C UserClass>
+      end
+    end
+  end
+
+  begin
+    <emptyTree>::<C UserClass>
+    class <emptyTree>::<C <fdescribe 'UserClass'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      def <it 'fdescribe propagates described_class'><<todo method>>(&<blk>)
+        <emptyTree>::<C T>.reveal_type(<self>.described_class())
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.returns(::T.class_of(<emptyTree>::<C UserClass>))
+      end
+
+      def described_class<<todo method>>(&<blk>)
+        <emptyTree>::<C UserClass>
+      end
     end
   end
 
@@ -117,6 +362,18 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       def <it 'has a value'><<todo method>>(&<blk>)
         <self>.value()
+      end
+
+      def <it 'reveals the typed described_class with metadata args'><<todo method>>(&<blk>)
+        <emptyTree>::<C T>.reveal_type(<self>.described_class())
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.returns(::T.class_of(<emptyTree>::<C UserClass>))
+      end
+
+      def described_class<<todo method>>(&<blk>)
+        <emptyTree>::<C UserClass>
       end
 
       <runtime method definition of value>
@@ -146,6 +403,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.instance()
       end
 
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.returns(::T.class_of(<emptyTree>::<C Foo>::<C Bar>::<C Baz>))
+      end
+
+      def described_class<<todo method>>(&<blk>)
+        <emptyTree>::<C Foo>::<C Bar>::<C Baz>
+      end
+
       <runtime method definition of instance>
     end
   end
@@ -161,7 +426,115 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.instance()
       end
 
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.returns(::T.class_of(<emptyTree>::<C Foo>::<C Qux>::<C Baz>))
+      end
+
+      def described_class<<todo method>>(&<blk>)
+        <emptyTree>::<C Foo>::<C Qux>::<C Baz>
+      end
+
       <runtime method definition of instance>
+    end
+  end
+
+  begin
+    <emptyTree>::<C Foo>::<C Bar>::<C Baz>
+    class <emptyTree>::<C <describe 'Foo::Bar::Baz'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      def <it 'outer described_class'><<todo method>>(&<blk>)
+        <emptyTree>::<C T>.reveal_type(<self>.described_class())
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.returns(::T.class_of(<emptyTree>::<C Foo>::<C Bar>::<C Baz>))
+      end
+
+      def described_class<<todo method>>(&<blk>)
+        <emptyTree>::<C Foo>::<C Bar>::<C Baz>
+      end
+
+      begin
+        <emptyTree>::<C Foo>::<C Qux>::<C Baz>
+        class <emptyTree>::<C <describe 'Foo::Qux::Baz'>><<C <todo sym>>> < (<self>)
+          def <before><<todo method>>(&<blk>)
+            <emptyTree>::<C T>.reveal_type(<self>.described_class())
+          end
+
+          def <it 'inner describe overrides described_class'><<todo method>>(&<blk>)
+            <emptyTree>::<C T>.reveal_type(<self>.described_class())
+          end
+
+          ::T::Sig::WithoutRuntime.sig() do ||
+            <self>.returns(::T.class_of(<emptyTree>::<C Foo>::<C Qux>::<C Baz>))
+          end
+
+          def described_class<<todo method>>(&<blk>)
+            <emptyTree>::<C Foo>::<C Qux>::<C Baz>
+          end
+        end
+      end
+
+      begin
+        "a string argument"
+        class <emptyTree>::<C <describe 'a string argument'>><<C <todo sym>>> < (<self>)
+          def <it 'does not override described_class'><<todo method>>(&<blk>)
+            <emptyTree>::<C T>.reveal_type(<self>.described_class())
+          end
+        end
+      end
+
+      begin
+        :a_symbol_argument
+        class <emptyTree>::<C <context 'a_symbol_argument'>><<C <todo sym>>> < (<self>)
+          def <it 'does not override described_class'><<todo method>>(&<blk>)
+            <emptyTree>::<C T>.reveal_type(<self>.described_class())
+          end
+        end
+      end
+    end
+  end
+
+  class <emptyTree>::<C OuterForNestedOverride><<C <todo sym>>> < (::<todo sym>)
+  end
+
+  class <emptyTree>::<C InnerForNestedOverride><<C <todo sym>>> < (::<todo sym>)
+  end
+
+  begin
+    <emptyTree>::<C OuterForNestedOverride>
+    class <emptyTree>::<C <describe 'OuterForNestedOverride'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      def <it 'outer still synthesizes described_class'><<todo method>>(&<blk>)
+        <emptyTree>::<C T>.reveal_type(<self>.described_class())
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.returns(::T.class_of(<emptyTree>::<C OuterForNestedOverride>))
+      end
+
+      def described_class<<todo method>>(&<blk>)
+        <emptyTree>::<C OuterForNestedOverride>
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      begin
+        <emptyTree>::<C InnerForNestedOverride>
+        class <emptyTree>::<C <describe 'InnerForNestedOverride'>><<C <todo sym>>> < (<self>)
+          <self>.sig() do ||
+            <self>.returns(<emptyTree>::<C T>.class_of(<emptyTree>::<C AlternateClass>))
+          end
+
+          def described_class<<todo method>>(&<blk>)
+            <emptyTree>::<C AlternateClass>
+          end
+
+          def <it 'inner override wins'><<todo method>>(&<blk>)
+            <emptyTree>::<C T>.reveal_type(<self>.described_class())
+          end
+
+          <runtime method definition of described_class>
+        end
+      end
     end
   end
 

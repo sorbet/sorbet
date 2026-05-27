@@ -280,6 +280,7 @@ NameDef names[] = {
     {"its"},
     {"isExpected", "is_expected"},
     {"expect"},
+    {"describedClass", "described_class"},
     {"before"},
     {"beforeAngles", "<before>"},
     {"after"},

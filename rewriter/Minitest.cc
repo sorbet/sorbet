@@ -160,6 +160,33 @@ ast::ClassDef::RHS_store flattenDescribeBody(ast::ExpressionPtr body) {
     return rhs;
 }
 
+// Returns true if `classBody` already contains a `described_class` method definition (whether
+// explicit `def described_class` or rewritten from `let(:described_class)` / `subject(:described_class)`).
+// The one-level `InsSeq` descent mirrors the output shape of `ConstantMover::addConstantsToExpression`,
+// which wraps a rewritten `let`/`subject` method def in an `InsSeq` when constants are hoisted.
+bool hasUserDefinedDescribedClass(const ast::ClassDef::RHS_store &classBody) {
+    auto isDescribedClassMethod = [](const ast::ExpressionPtr &stmt) {
+        auto methodDef = ast::cast_tree<ast::MethodDef>(stmt);
+        return methodDef && methodDef->name == core::Names::describedClass();
+    };
+    for (const auto &stmt : classBody) {
+        if (isDescribedClassMethod(stmt)) {
+            return true;
+        }
+        if (auto insSeq = ast::cast_tree<ast::InsSeq>(stmt)) {
+            for (const auto &nested : insSeq->stats) {
+                if (isDescribedClassMethod(nested)) {
+                    return true;
+                }
+            }
+            if (isDescribedClassMethod(insSeq->expr)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 string to_s(core::Context ctx, const ast::ExpressionPtr &arg) {
     auto argLit = ast::cast_tree<ast::Literal>(arg);
     string argString;
@@ -788,8 +815,26 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
                                : arg.loc();
             auto name = ast::MK::UnresolvedConstantParts(nameLoc, {ctx.state.enterNameConstant(testName)});
             auto declLoc = declLocForSendWithBlock(*send);
-            auto classDef = ast::MK::Class(send->loc, declLoc, std::move(name), std::move(ancestors),
-                                           flattenDescribeBody(move(rhs)));
+            auto classBody = flattenDescribeBody(move(rhs));
+
+            // For an RSpec `describe`/`context` with a constant arg, synthesize an instance method
+            // `described_class` typed `T.class_of(arg)`. Without this, callers see the `T.untyped`
+            // return from `RSpec::Core::ExampleGroup#described_class`, or for nested describes the
+            // wrong constant inherited from the enclosing describe. Skipped when the user defines
+            // their own `described_class` to avoid shadowing or duplicate-method errors.
+            if (rspecMode && ast::isa_tree<ast::UnresolvedConstantLit>(arg) &&
+                !hasUserDefinedDescribedClass(classBody)) {
+                auto methodLoc = arg.loc().copyWithZeroLength();
+                auto describedClassMethod =
+                    ast::MK::SyntheticMethod0(arg.loc(), methodLoc, core::Names::describedClass(), arg.deepCopy());
+                ast::cast_tree_nonnull<ast::MethodDef>(describedClassMethod).flags.discardDef = true;
+                auto sig = ast::MK::Sig0(methodLoc, ast::MK::ClassOf(methodLoc, arg.deepCopy()));
+                classBody.emplace_back(std::move(sig));
+                classBody.emplace_back(std::move(describedClassMethod));
+            }
+
+            auto classDef =
+                ast::MK::Class(send->loc, declLoc, std::move(name), std::move(ancestors), std::move(classBody));
 
             // Preserve the original constant reference in the tree so Sorbet can
             // resolve it for hover and go-to-definition.
