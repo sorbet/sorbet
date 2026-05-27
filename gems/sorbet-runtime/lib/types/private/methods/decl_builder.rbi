@@ -76,7 +76,7 @@ module T::Private::Methods
       params(
         mod: Module,
         abstract: T.nilable(T::Boolean),
-        override: T.nilable(T.any(T::Boolean, Symbol)),
+        override: T.nilable({allow_incompatible: T.any(T::Boolean, Symbol)}),
         overridable: T.nilable(T::Boolean)
       ).void
     end

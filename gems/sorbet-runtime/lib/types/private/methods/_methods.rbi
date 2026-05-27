@@ -20,7 +20,7 @@ module T::Private::Methods
     sig {returns(T.nilable(T::Boolean))}
     attr_accessor :abstract
 
-    sig {returns(T.any(NilClass, T::Boolean, Symbol))}
+    sig {returns(T.nilable({allow_incompatible: T.any(T::Boolean, Symbol)}))}
     attr_accessor :override
 
     sig {returns(T.nilable(T::Boolean))}
@@ -34,7 +34,7 @@ module T::Private::Methods
         blk: Proc,
         final: T::Boolean,
         abstract: T.nilable(T::Boolean),
-        override: T.any(NilClass, T::Boolean, Symbol),
+        override: T.nilable({allow_incompatible: T.any(T::Boolean, Symbol)}),
         overridable: T.nilable(T::Boolean)
       )
         .void
@@ -56,8 +56,8 @@ module T::Private::Methods
   sig { params(mod: Module, method_name: Symbol).returns(NilClass) }
   def self.declare_abstract(mod, method_name); end
 
-  sig { params(mod: Module, method_name: Symbol, allow_incompatible: T.nilable(T::Boolean)).returns(NilClass) }
-  def self.declare_override(mod, method_name, allow_incompatible); end
+  sig { params(mod: Module, method_name: Symbol, allow_incompatible: T.any(T::Boolean, Symbol)).returns(NilClass) }
+  def self.declare_override(mod, method_name, allow_incompatible:); end
 
   sig { params(mod: Module, method_name: Symbol).returns(NilClass) }
   def self.declare_final(mod, method_name); end

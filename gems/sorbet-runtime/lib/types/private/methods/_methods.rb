@@ -107,7 +107,7 @@ module T::Private::Methods
     nil
   end
 
-  def self.declare_override(mod, method_name, allow_incompatible)
+  def self.declare_override(mod, method_name, allow_incompatible:)
     previous_declaration = ensure_valid_declare_dsl!(mod, method_name, :override)
     return unless previous_declaration
 
@@ -123,7 +123,7 @@ module T::Private::Methods
       T::Private::Methods::SignatureValidation.validate_non_override_mode(Modes.override, method_name, method, source_loc)
     end
 
-    previous_declaration.override = allow_incompatible ? :allow_incompatible : true
+    previous_declaration.override = {allow_incompatible: allow_incompatible}
 
     nil
   end
@@ -162,7 +162,7 @@ module T::Private::Methods
   def self.start_proc
     # abstract/override/overridable don't make sense on procs
     abstract = false
-    override = false
+    override = nil
     overridable = false
     DeclBuilder.new(PROC_TYPE, abstract, override, overridable)
   end
