@@ -24,12 +24,11 @@ module T::Private::Methods
       params(
         mod: Module,
         method_name: Symbol,
-        original_method: UnboundMethod,
         original_visibility: Symbol
       )
         .void
     end
-    def self.create_abstract_wrapper(mod, method_name, original_method, original_visibility); end
+    def self.create_abstract_wrapper(mod, method_name, original_visibility); end
 
     sig do
       params(
