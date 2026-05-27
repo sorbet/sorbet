@@ -162,6 +162,18 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
       T::Private::Abstract::Validate.validate_subclass(child)
     end
 
+    it "errors eagerly if override used without overriding something" do
+      err = assert_raises(RuntimeError) do
+        Class.new do
+          extend T::Sig, T::DefMods
+          sig { void }
+          override def foo; end
+        end
+      end
+      assert_includes(err.message, "You marked `foo` as override, but that method doesn't already exist in this class/module to be overridden")
+      assert_match(/remove override .*#{__FILE__}:#{__LINE__ - 4}/, err.message)
+    end
+
     it "errors without preceding sig" do
       err = assert_raises(ArgumentError) do
         Class.new do
