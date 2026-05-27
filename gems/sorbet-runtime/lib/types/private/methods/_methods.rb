@@ -104,6 +104,18 @@ module T::Private::Methods
 
     previous_declaration.abstract = true
 
+    # # TODO(jez) In the future, we will want some logic like this, but ONLY if
+    # # the method did not have a sig. The first-call sig wrapper is normally in
+    # # charge of running the sig block (even for abstract methods) If we know
+    # # for sure that we're not going to have a sig, but we want the runtime
+    # # `super` logic (possibly because there is an RBS method annotation), we
+    # # are safe to eagerly call `create_abstract_wrapper` to overwrite the
+    # # user's method.
+    # #
+    # # (Omitting this until we support DSL methods without runtime `sig`'s)
+    # original_visibility = T::Private::ClassUtils.visibility_method_name(mod, method_name)
+    # T::Private::Methods::CallValidation.create_abstract_wrapper(mod, method_name, original_visibility)
+
     nil
   end
 
