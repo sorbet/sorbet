@@ -98,9 +98,9 @@ module T::Private::Methods::SignatureValidation
 
   private_class_method def self.pretty_mode(mode)
     if mode == Modes.overridable_override
-      '.overridable.override'
+      'overridable.override'
     else
-      ".#{mode}"
+      mode
     end
   end
 

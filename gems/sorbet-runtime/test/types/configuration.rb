@@ -187,7 +187,7 @@ module Opus::Types::Test
           end
           assert_includes(
             ex.message,
-            "You marked `foo` as .override, but that method doesn't already exist"
+            "You marked `foo` as override, but that method doesn't already exist"
           )
         end
       end
@@ -205,7 +205,7 @@ module Opus::Types::Test
 
         it 'handles a sig build error' do
           CustomReceiver.expects(:receive).once.with do |error, opts|
-            error.message.include?("You marked `foo` as .override, but that method doesn't already exist") &&
+            error.message.include?("You marked `foo` as override, but that method doesn't already exist") &&
               error.is_a?(RuntimeError) &&
               opts.is_a?(Hash) &&
               opts[:method].is_a?(UnboundMethod) &&
