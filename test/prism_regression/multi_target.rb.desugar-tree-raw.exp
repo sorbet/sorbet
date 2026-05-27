@@ -765,6 +765,10 @@ ClassDef{
       fun = <U each>
       block = Block {
         params = [
+          UnresolvedIdent{
+            kind = Local
+            name = <D <U forTemp> $21>
+          }
         ]
         body = InsSeq{
           stats = [
@@ -1692,6 +1696,10 @@ ClassDef{
       fun = <U each>
       block = Block {
         params = [
+          UnresolvedIdent{
+            kind = Local
+            name = <D <U forTemp> $46>
+          }
         ]
         body = InsSeq{
           stats = [

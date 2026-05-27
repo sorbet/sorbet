@@ -754,6 +754,7 @@ ast::ExpressionPtr Desugarer::desugarMlhs(core::LocOffsets loc, PrismNode *lhs, 
     bool hasSplat = isa_node_nullable<pm_splat_node>(lhs->rest);
 
     auto processTarget = [this, &stats, &i, zloc, tempExpanded](pm_node_t *c) {
+        ENFORCE(c != nullptr, "unexpected null in mlhs");
         ENFORCE(!isa_node<pm_splat_node>(c), "splat already handled");
 
         auto cloc = translateLoc(c->location);
@@ -2482,63 +2483,107 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
         case PM_FOR_NODE: { // `for x in a; ...; end`
             auto forNode = down_cast_nonnull<pm_for_node>(node);
 
+            auto *forLoopVar = forNode->index;
+
             // Index might be invalid in error recovery cases, match original parser behavior.
-            if (!parser::Prism::isAssignmentTarget(forNode->index)) {
+            if (!parser::Prism::isAssignmentTarget(forLoopVar)) {
                 return MK::Nil(location.copyWithZeroLength());
             }
 
-            auto *mlhs = down_cast<pm_multi_target_node>(forNode->index);
-
-            auto collection = desugar(forNode->collection);
-            auto body = desugarStatements(forNode->statements);
-
-            // Desugar `for x in collection; body; end` into `collection.each { |x| body }`
-            bool canProvideNiceDesugar = true;
-
-            // Check if the variable is a simple local variable or a multi-target with only local variables
-            if (mlhs) {
-                // Multi-target: check if all are local variables (no nested multi-targets or other complex targets)
+            bool canProvideNiceDesugar = false;
+            if (auto *mlhs = down_cast<pm_multi_target_node>(forLoopVar)) {
+                // `for x, y in []` — nice only if every entry is a LocalVariableTarget (not e.g. `(a, b).c` or
+                // `@ivar`).
                 auto targets = absl::MakeSpan(mlhs->lefts.nodes, mlhs->lefts.size);
                 canProvideNiceDesugar = absl::c_all_of(
                     targets, [](pm_node_t *target) { return isa_node<pm_local_variable_target_node>(target); });
+            } else if (isa_node<pm_local_variable_target_node>(forLoopVar)) {
+                // `for local in []`
+                canProvideNiceDesugar = true;
             } else {
-                // Single variable: check if it's a local variable
-                canProvideNiceDesugar = isa_node<pm_local_variable_target_node>(forNode->index);
+                // `for @ivar in []` (or any other single non-local variable target)
+                canProvideNiceDesugar = false;
             }
 
-            auto locZeroLen = location.copyWithZeroLength();
-            ast::MethodDef::PARAMS_store params;
-
+            ExpressionPtr block; // the body to the `each` loop we'll create
             if (canProvideNiceDesugar) {
-                // Simple case: `for x in a; body; end` -> `a.each { |x| body }`
-                if (mlhs) {
+                ast::MethodDef::PARAMS_store params;
+                if (isa_node<pm_local_variable_target_node>(forLoopVar)) { // single local
+                    // Desugar:
+                    //     for a in []
+                    // into:
+                    //     [].each { |a| ... }
+
+                    auto localVar = desugar(forLoopVar);
+                    params.emplace_back(move(localVar));
+                } else if (auto *mlhs = down_cast<pm_multi_target_node>(forLoopVar)) { // mlhs of all locals
+                    // Desugar:
+                    //     for a, b, c in []
+                    // into:
+                    //     [].each { |a, b, c| ... }
                     auto targets = absl::MakeSpan(mlhs->lefts.nodes, mlhs->lefts.size);
                     for (auto *target : targets) {
+                        ENFORCE(isa_node<pm_local_variable_target_node>(target));
                         params.emplace_back(desugar(target));
                     }
                 } else {
-                    params.emplace_back(desugar(forNode->index));
+                    unreachable("Expected the `forLoopVar` to be either a local variable target or multi-target");
                 }
+
+                auto loopBody = desugarStatements(forNode->statements);
+                block = MK::Block(location, move(loopBody), move(params));
             } else {
-                // Complex case: `for @x in a; body; end` -> `a.each { || @x = <temp>; body }`
-                auto temp = nextUniqueDesugarName(core::Names::forTemp());
-                auto tempLocal = MK::Local(location, temp);
+                // Create a temporary local variable, and use it as the block parameter.
+                // We'll later assign it to the actual loop variable(s) in the block body
+                core::NameRef forLoopTempVarName = nextUniqueDesugarName(core::Names::forTemp());
+                ast::MethodDef::PARAMS_store params;
+                params.emplace_back(MK::Local(location, forLoopTempVarName));
 
-                // Desugar the assignment
-                ExpressionPtr masgnExpr;
-                if (mlhs) {
-                    // Multi-target: use desugarMlhs for complex expansion
-                    masgnExpr = desugarMlhs(location, mlhs, move(tempLocal));
-                } else {
-                    // Single variable: simple assignment
-                    masgnExpr = MK::Assign(location, desugar(forNode->index), move(tempLocal));
+                ExpressionPtr assignment;
+                if (auto *mlhs = down_cast<pm_multi_target_node>(forLoopVar)) { // mlhs with non-local variables entries
+                    // Desugar:
+                    //     for @ivar, @@cvar, $gvar in []
+                    // into:
+                    //     [].each do |forTemp$1|
+                    //       begin
+                    //         <assignTemp>$2 = forTemp$1
+                    //         <assignTemp>$3 = ::<Magic>.<expand-splat>(<assignTemp>$2, 3, 0)
+                    //         @ivar  = <assignTemp>$3.[](0)
+                    //         @@cvar = <assignTemp>$3.[](1)
+                    //         $gvar  = <assignTemp>$3.[](2)
+                    //       end
+                    //       begin
+                    //         "the loop body"
+                    //       end
+                    //     end
+                    auto rhs = MK::Local(location, forLoopTempVarName);
+                    assignment = desugarMlhs(location, mlhs, move(rhs));
+                } else { // single non-local variable target
+                    // Desugar:
+                    //     for @ivar in []
+                    // into:
+                    //     [].each do |forTemp$1|
+                    //       @ivar = forTemp$1
+                    //       begin
+                    //         "the loop body"
+                    //       end
+                    //     end
+                    // MK::Assign handles a Send LHS by folding the rhs in as a positional arg.
+                    auto lhs = desugar(forLoopVar);
+                    auto rhs = MK::Local(location, forLoopTempVarName);
+                    assignment = MK::Assign(location, move(lhs), move(rhs));
                 }
 
-                body = MK::InsSeq1(location, move(masgnExpr), move(body));
+                auto loopBody = desugarStatements(forNode->statements); // The loop's actual body
+
+                // prepend the (multi-)assignment to the loop body
+                loopBody = MK::InsSeq1(location, move(assignment), move(loopBody));
+
+                block = MK::Block(location, move(loopBody), move(params));
             }
 
-            auto block = MK::Block(location, move(body), move(params));
-            return MK::Send0Block(location, move(collection), core::Names::each(), locZeroLen, move(block));
+            auto locZeroLen = location.copyWithZeroLength();
+            return MK::Send0Block(location, desugar(forNode->collection), core::Names::each(), locZeroLen, move(block));
         }
         case PM_FORWARDING_ARGUMENTS_NODE: { // The `...` argument in a method call, like `foo(...)`
             unreachable("PM_FORWARDING_ARGUMENTS_NODE is handled separately in `PM_CALL_NODE`.");
