@@ -686,7 +686,7 @@ public:
                 [&](const class ShadowArg &shadow) { cursor = &shadow.expr; },
                 // ENFORCES are last so that we don't pay the price of casting in the fast path.
                 [&](const ast::Local &opt) { ENFORCE(false, "Should only be called before local_vars.cc"); },
-                [&](const ExpressionPtr &expr) { ENFORCE(false, "Unexpected node type in argument position."); });
+                [&](const ExpressionPtr &expr) { ENFORCE(false, "Unexpected node type in parameter position."); });
         }
     }
 
@@ -707,7 +707,7 @@ public:
                 [&](const class ShadowArg &shadow) { cursor = &shadow.expr; },
                 // ENFORCES are last so that we don't pay the price of casting in the fast path.
                 [&](const UnresolvedIdent &opt) { ENFORCE(false, "Namer should have created a Local for this arg."); },
-                [&](const ExpressionPtr &expr) { ENFORCE(false, "Unexpected node type in argument position."); });
+                [&](const ExpressionPtr &expr) { ENFORCE(false, "Unexpected node type in parameter position."); });
         }
     }
 };
