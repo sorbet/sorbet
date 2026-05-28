@@ -308,7 +308,6 @@ T.let(int_box, Box[Numeric])
 <p>Covariant type variables preserve the subtyping relationship. Specifically, if the type <code>Child</code> is a subtype of the type <code>Parent</code>, then the type <code>M[Child]</code> is a subtype of the type <code>M[Parent]</code> if the type member of <code>M</code> is covariant. In symbols:</p>
 <pre><code class="hljs css language-plaintext">Child &lt;: Parent  ==&gt;  M[Child] &lt;: M[Parent]
 </code></pre>
-<p>Note that only a Ruby <code>module</code> (not a <code>class</code>) may have a covariant <code>type_member</code>. (See the docs for error code <a href="/docs/error-reference#5016">5016</a> for more information.) Note that since <code>type_template</code> creates a type variable scoped to a singleton class, <code>type_template</code> can never be covariant (because all singleton classes are classes, even singleton classes of modules).</p>
 <p>Here’s an example of a module that has a covariant type member:</p>
 <pre><code class="hljs css language-ruby">extend T::Sig
 
