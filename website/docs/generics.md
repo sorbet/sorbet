@@ -327,8 +327,6 @@ Covariant type variables preserve the subtyping relationship. Specifically, if t
 Child <: Parent  ==>  M[Child] <: M[Parent]
 ```
 
-Note that only a Ruby `module` (not a `class`) may have a covariant `type_member`. (See the docs for error code [5016](error-reference.md#5016) for more information.) Note that since `type_template` creates a type variable scoped to a singleton class, `type_template` can never be covariant (because all singleton classes are classes, even singleton classes of modules).
-
 Here's an example of a module that has a covariant type member:
 
 ```ruby
