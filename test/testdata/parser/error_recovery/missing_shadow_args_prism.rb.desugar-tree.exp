@@ -1,0 +1,13 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  <self>.lambda() do ||
+    <emptyTree>
+  end
+
+  <self>.lambda() do ||
+    <emptyTree>
+  end
+
+  ::Kernel.lambda() do ||
+    <emptyTree>
+  end
+end
