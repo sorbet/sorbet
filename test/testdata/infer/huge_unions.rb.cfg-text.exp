@@ -396,9 +396,9 @@ method ::<Class:A>#send_beta_invitation {
 bb0[firstDead=-1]():
     <self>: T.class_of(A) = cast(<self>: NilClass, T.class_of(A));
     invite: T.untyped = load_arg(invite)
-    <statTemp>$6: Integer(1) = 1
-    <ifTemp>$5: T::Boolean = <statTemp>$6: Integer(1).===(invite: T.untyped)
-    <ifTemp>$5 -> (T::Boolean ? bb2 : bb3)
+    <statTemp>$5: Integer(1) = 1
+    <ifTemp>$4: T::Boolean = <statTemp>$5: Integer(1).===(invite: T.untyped)
+    <ifTemp>$4 -> (T::Boolean ? bb2 : bb3)
 
 # backedges
 # - bb61
@@ -409,281 +409,281 @@ bb1[firstDead=-1](<returnMethodTemp>$2):
 # backedges
 # - bb0
 bb2[firstDead=-1]():
-    <cfgAlias>$8: T.class_of(C1) = alias <C C1>
-    r: T.class_of(C1) = <cfgAlias>$8
+    <cfgAlias>$7: T.class_of(C1) = alias <C C1>
+    r: T.class_of(C1) = <cfgAlias>$7
     <unconditional> -> bb61
 
 # backedges
 # - bb0
 bb3[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
-    <statTemp>$10: Integer(2) = 2
-    <ifTemp>$9: T::Boolean = <statTemp>$10: Integer(2).===(invite: T.untyped)
-    <ifTemp>$9 -> (T::Boolean ? bb4 : bb5)
+    <statTemp>$9: Integer(2) = 2
+    <ifTemp>$8: T::Boolean = <statTemp>$9: Integer(2).===(invite: T.untyped)
+    <ifTemp>$8 -> (T::Boolean ? bb4 : bb5)
 
 # backedges
 # - bb3
 bb4[firstDead=-1]():
-    <cfgAlias>$12: T.class_of(C2) = alias <C C2>
-    r: T.class_of(C2) = <cfgAlias>$12
+    <cfgAlias>$11: T.class_of(C2) = alias <C C2>
+    r: T.class_of(C2) = <cfgAlias>$11
     <unconditional> -> bb61
 
 # backedges
 # - bb3
 bb5[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
-    <statTemp>$14: Integer(3) = 3
-    <ifTemp>$13: T::Boolean = <statTemp>$14: Integer(3).===(invite: T.untyped)
-    <ifTemp>$13 -> (T::Boolean ? bb6 : bb7)
+    <statTemp>$13: Integer(3) = 3
+    <ifTemp>$12: T::Boolean = <statTemp>$13: Integer(3).===(invite: T.untyped)
+    <ifTemp>$12 -> (T::Boolean ? bb6 : bb7)
 
 # backedges
 # - bb5
 bb6[firstDead=-1]():
-    <cfgAlias>$16: T.class_of(C3) = alias <C C3>
-    r: T.class_of(C3) = <cfgAlias>$16
+    <cfgAlias>$15: T.class_of(C3) = alias <C C3>
+    r: T.class_of(C3) = <cfgAlias>$15
     <unconditional> -> bb61
 
 # backedges
 # - bb5
 bb7[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
-    <statTemp>$18: Integer(4) = 4
-    <ifTemp>$17: T::Boolean = <statTemp>$18: Integer(4).===(invite: T.untyped)
-    <ifTemp>$17 -> (T::Boolean ? bb8 : bb9)
+    <statTemp>$17: Integer(4) = 4
+    <ifTemp>$16: T::Boolean = <statTemp>$17: Integer(4).===(invite: T.untyped)
+    <ifTemp>$16 -> (T::Boolean ? bb8 : bb9)
 
 # backedges
 # - bb7
 bb8[firstDead=-1]():
-    <cfgAlias>$20: T.class_of(C4) = alias <C C4>
-    r: T.class_of(C4) = <cfgAlias>$20
+    <cfgAlias>$19: T.class_of(C4) = alias <C C4>
+    r: T.class_of(C4) = <cfgAlias>$19
     <unconditional> -> bb61
 
 # backedges
 # - bb7
 bb9[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
-    <statTemp>$22: Integer(5) = 5
-    <ifTemp>$21: T::Boolean = <statTemp>$22: Integer(5).===(invite: T.untyped)
-    <ifTemp>$21 -> (T::Boolean ? bb10 : bb11)
+    <statTemp>$21: Integer(5) = 5
+    <ifTemp>$20: T::Boolean = <statTemp>$21: Integer(5).===(invite: T.untyped)
+    <ifTemp>$20 -> (T::Boolean ? bb10 : bb11)
 
 # backedges
 # - bb9
 bb10[firstDead=-1]():
-    <cfgAlias>$24: T.class_of(C5) = alias <C C5>
-    r: T.class_of(C5) = <cfgAlias>$24
+    <cfgAlias>$23: T.class_of(C5) = alias <C C5>
+    r: T.class_of(C5) = <cfgAlias>$23
     <unconditional> -> bb61
 
 # backedges
 # - bb9
 bb11[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
-    <statTemp>$26: Integer(6) = 6
-    <ifTemp>$25: T::Boolean = <statTemp>$26: Integer(6).===(invite: T.untyped)
-    <ifTemp>$25 -> (T::Boolean ? bb12 : bb13)
+    <statTemp>$25: Integer(6) = 6
+    <ifTemp>$24: T::Boolean = <statTemp>$25: Integer(6).===(invite: T.untyped)
+    <ifTemp>$24 -> (T::Boolean ? bb12 : bb13)
 
 # backedges
 # - bb11
 bb12[firstDead=-1]():
-    <cfgAlias>$28: T.class_of(C6) = alias <C C6>
-    r: T.class_of(C6) = <cfgAlias>$28
+    <cfgAlias>$27: T.class_of(C6) = alias <C C6>
+    r: T.class_of(C6) = <cfgAlias>$27
     <unconditional> -> bb61
 
 # backedges
 # - bb11
 bb13[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
-    <statTemp>$30: Integer(7) = 7
-    <ifTemp>$29: T::Boolean = <statTemp>$30: Integer(7).===(invite: T.untyped)
-    <ifTemp>$29 -> (T::Boolean ? bb14 : bb15)
+    <statTemp>$29: Integer(7) = 7
+    <ifTemp>$28: T::Boolean = <statTemp>$29: Integer(7).===(invite: T.untyped)
+    <ifTemp>$28 -> (T::Boolean ? bb14 : bb15)
 
 # backedges
 # - bb13
 bb14[firstDead=-1]():
-    <cfgAlias>$32: T.class_of(C7) = alias <C C7>
-    r: T.class_of(C7) = <cfgAlias>$32
+    <cfgAlias>$31: T.class_of(C7) = alias <C C7>
+    r: T.class_of(C7) = <cfgAlias>$31
     <unconditional> -> bb61
 
 # backedges
 # - bb13
 bb15[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
-    <statTemp>$34: Integer(8) = 8
-    <ifTemp>$33: T::Boolean = <statTemp>$34: Integer(8).===(invite: T.untyped)
-    <ifTemp>$33 -> (T::Boolean ? bb16 : bb17)
+    <statTemp>$33: Integer(8) = 8
+    <ifTemp>$32: T::Boolean = <statTemp>$33: Integer(8).===(invite: T.untyped)
+    <ifTemp>$32 -> (T::Boolean ? bb16 : bb17)
 
 # backedges
 # - bb15
 bb16[firstDead=-1]():
-    <cfgAlias>$36: T.class_of(C8) = alias <C C8>
-    r: T.class_of(C8) = <cfgAlias>$36
+    <cfgAlias>$35: T.class_of(C8) = alias <C C8>
+    r: T.class_of(C8) = <cfgAlias>$35
     <unconditional> -> bb61
 
 # backedges
 # - bb15
 bb17[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
-    <statTemp>$38: Integer(9) = 9
-    <ifTemp>$37: T::Boolean = <statTemp>$38: Integer(9).===(invite: T.untyped)
-    <ifTemp>$37 -> (T::Boolean ? bb18 : bb19)
+    <statTemp>$37: Integer(9) = 9
+    <ifTemp>$36: T::Boolean = <statTemp>$37: Integer(9).===(invite: T.untyped)
+    <ifTemp>$36 -> (T::Boolean ? bb18 : bb19)
 
 # backedges
 # - bb17
 bb18[firstDead=-1]():
-    <cfgAlias>$40: T.class_of(C9) = alias <C C9>
-    r: T.class_of(C9) = <cfgAlias>$40
+    <cfgAlias>$39: T.class_of(C9) = alias <C C9>
+    r: T.class_of(C9) = <cfgAlias>$39
     <unconditional> -> bb61
 
 # backedges
 # - bb17
 bb19[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
-    <statTemp>$42: Integer(10) = 10
-    <ifTemp>$41: T::Boolean = <statTemp>$42: Integer(10).===(invite: T.untyped)
-    <ifTemp>$41 -> (T::Boolean ? bb20 : bb21)
+    <statTemp>$41: Integer(10) = 10
+    <ifTemp>$40: T::Boolean = <statTemp>$41: Integer(10).===(invite: T.untyped)
+    <ifTemp>$40 -> (T::Boolean ? bb20 : bb21)
 
 # backedges
 # - bb19
 bb20[firstDead=-1]():
-    <cfgAlias>$44: T.class_of(C10) = alias <C C10>
-    r: T.class_of(C10) = <cfgAlias>$44
+    <cfgAlias>$43: T.class_of(C10) = alias <C C10>
+    r: T.class_of(C10) = <cfgAlias>$43
     <unconditional> -> bb61
 
 # backedges
 # - bb19
 bb21[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
-    <statTemp>$46: Integer(11) = 11
-    <ifTemp>$45: T::Boolean = <statTemp>$46: Integer(11).===(invite: T.untyped)
-    <ifTemp>$45 -> (T::Boolean ? bb22 : bb23)
+    <statTemp>$45: Integer(11) = 11
+    <ifTemp>$44: T::Boolean = <statTemp>$45: Integer(11).===(invite: T.untyped)
+    <ifTemp>$44 -> (T::Boolean ? bb22 : bb23)
 
 # backedges
 # - bb21
 bb22[firstDead=-1]():
-    <cfgAlias>$48: T.class_of(C11) = alias <C C11>
-    r: T.class_of(C11) = <cfgAlias>$48
+    <cfgAlias>$47: T.class_of(C11) = alias <C C11>
+    r: T.class_of(C11) = <cfgAlias>$47
     <unconditional> -> bb61
 
 # backedges
 # - bb21
 bb23[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
-    <statTemp>$50: Integer(12) = 12
-    <ifTemp>$49: T::Boolean = <statTemp>$50: Integer(12).===(invite: T.untyped)
-    <ifTemp>$49 -> (T::Boolean ? bb24 : bb25)
+    <statTemp>$49: Integer(12) = 12
+    <ifTemp>$48: T::Boolean = <statTemp>$49: Integer(12).===(invite: T.untyped)
+    <ifTemp>$48 -> (T::Boolean ? bb24 : bb25)
 
 # backedges
 # - bb23
 bb24[firstDead=-1]():
-    <cfgAlias>$52: T.class_of(C12) = alias <C C12>
-    r: T.class_of(C12) = <cfgAlias>$52
+    <cfgAlias>$51: T.class_of(C12) = alias <C C12>
+    r: T.class_of(C12) = <cfgAlias>$51
     <unconditional> -> bb61
 
 # backedges
 # - bb23
 bb25[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
-    <statTemp>$54: Integer(13) = 13
-    <ifTemp>$53: T::Boolean = <statTemp>$54: Integer(13).===(invite: T.untyped)
-    <ifTemp>$53 -> (T::Boolean ? bb26 : bb27)
+    <statTemp>$53: Integer(13) = 13
+    <ifTemp>$52: T::Boolean = <statTemp>$53: Integer(13).===(invite: T.untyped)
+    <ifTemp>$52 -> (T::Boolean ? bb26 : bb27)
 
 # backedges
 # - bb25
 bb26[firstDead=-1]():
-    <cfgAlias>$56: T.class_of(C13) = alias <C C13>
-    r: T.class_of(C13) = <cfgAlias>$56
+    <cfgAlias>$55: T.class_of(C13) = alias <C C13>
+    r: T.class_of(C13) = <cfgAlias>$55
     <unconditional> -> bb61
 
 # backedges
 # - bb25
 bb27[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
-    <statTemp>$58: Integer(14) = 14
-    <ifTemp>$57: T::Boolean = <statTemp>$58: Integer(14).===(invite: T.untyped)
-    <ifTemp>$57 -> (T::Boolean ? bb28 : bb29)
+    <statTemp>$57: Integer(14) = 14
+    <ifTemp>$56: T::Boolean = <statTemp>$57: Integer(14).===(invite: T.untyped)
+    <ifTemp>$56 -> (T::Boolean ? bb28 : bb29)
 
 # backedges
 # - bb27
 bb28[firstDead=-1]():
-    <cfgAlias>$60: T.class_of(C14) = alias <C C14>
-    r: T.class_of(C14) = <cfgAlias>$60
+    <cfgAlias>$59: T.class_of(C14) = alias <C C14>
+    r: T.class_of(C14) = <cfgAlias>$59
     <unconditional> -> bb61
 
 # backedges
 # - bb27
 bb29[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
-    <statTemp>$62: Integer(15) = 15
-    <ifTemp>$61: T::Boolean = <statTemp>$62: Integer(15).===(invite: T.untyped)
-    <ifTemp>$61 -> (T::Boolean ? bb30 : bb31)
+    <statTemp>$61: Integer(15) = 15
+    <ifTemp>$60: T::Boolean = <statTemp>$61: Integer(15).===(invite: T.untyped)
+    <ifTemp>$60 -> (T::Boolean ? bb30 : bb31)
 
 # backedges
 # - bb29
 bb30[firstDead=-1]():
-    <cfgAlias>$64: T.class_of(C15) = alias <C C15>
-    r: T.class_of(C15) = <cfgAlias>$64
+    <cfgAlias>$63: T.class_of(C15) = alias <C C15>
+    r: T.class_of(C15) = <cfgAlias>$63
     <unconditional> -> bb61
 
 # backedges
 # - bb29
 bb31[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
-    <statTemp>$66: Integer(16) = 16
-    <ifTemp>$65: T::Boolean = <statTemp>$66: Integer(16).===(invite: T.untyped)
-    <ifTemp>$65 -> (T::Boolean ? bb32 : bb33)
+    <statTemp>$65: Integer(16) = 16
+    <ifTemp>$64: T::Boolean = <statTemp>$65: Integer(16).===(invite: T.untyped)
+    <ifTemp>$64 -> (T::Boolean ? bb32 : bb33)
 
 # backedges
 # - bb31
 bb32[firstDead=-1]():
-    <cfgAlias>$68: T.class_of(C16) = alias <C C16>
-    r: T.class_of(C16) = <cfgAlias>$68
+    <cfgAlias>$67: T.class_of(C16) = alias <C C16>
+    r: T.class_of(C16) = <cfgAlias>$67
     <unconditional> -> bb61
 
 # backedges
 # - bb31
 bb33[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
-    <statTemp>$70: Integer(17) = 17
-    <ifTemp>$69: T::Boolean = <statTemp>$70: Integer(17).===(invite: T.untyped)
-    <ifTemp>$69 -> (T::Boolean ? bb34 : bb35)
+    <statTemp>$69: Integer(17) = 17
+    <ifTemp>$68: T::Boolean = <statTemp>$69: Integer(17).===(invite: T.untyped)
+    <ifTemp>$68 -> (T::Boolean ? bb34 : bb35)
 
 # backedges
 # - bb33
 bb34[firstDead=-1]():
-    <cfgAlias>$72: T.class_of(C17) = alias <C C17>
-    r: T.class_of(C17) = <cfgAlias>$72
+    <cfgAlias>$71: T.class_of(C17) = alias <C C17>
+    r: T.class_of(C17) = <cfgAlias>$71
     <unconditional> -> bb61
 
 # backedges
 # - bb33
 bb35[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
-    <statTemp>$74: Integer(18) = 18
-    <ifTemp>$73: T::Boolean = <statTemp>$74: Integer(18).===(invite: T.untyped)
-    <ifTemp>$73 -> (T::Boolean ? bb36 : bb37)
+    <statTemp>$73: Integer(18) = 18
+    <ifTemp>$72: T::Boolean = <statTemp>$73: Integer(18).===(invite: T.untyped)
+    <ifTemp>$72 -> (T::Boolean ? bb36 : bb37)
 
 # backedges
 # - bb35
 bb36[firstDead=-1]():
-    <cfgAlias>$76: T.class_of(C18) = alias <C C18>
-    r: T.class_of(C18) = <cfgAlias>$76
+    <cfgAlias>$75: T.class_of(C18) = alias <C C18>
+    r: T.class_of(C18) = <cfgAlias>$75
     <unconditional> -> bb61
 
 # backedges
 # - bb35
 bb37[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
-    <statTemp>$78: Integer(19) = 19
-    <ifTemp>$77: T::Boolean = <statTemp>$78: Integer(19).===(invite: T.untyped)
-    <ifTemp>$77 -> (T::Boolean ? bb38 : bb39)
+    <statTemp>$77: Integer(19) = 19
+    <ifTemp>$76: T::Boolean = <statTemp>$77: Integer(19).===(invite: T.untyped)
+    <ifTemp>$76 -> (T::Boolean ? bb38 : bb39)
 
 # backedges
 # - bb37
 bb38[firstDead=-1]():
-    <cfgAlias>$80: T.class_of(C19) = alias <C C19>
-    r: T.class_of(C19) = <cfgAlias>$80
+    <cfgAlias>$79: T.class_of(C19) = alias <C C19>
+    r: T.class_of(C19) = <cfgAlias>$79
     <unconditional> -> bb61
 
 # backedges
 # - bb37
 bb39[firstDead=-1](<self>: T.class_of(A), invite: T.untyped):
-    <statTemp>$82: Integer(20) = 20
-    <ifTemp>$81: T::Boolean = <statTemp>$82: Integer(20).===(invite: T.untyped)
-    <ifTemp>$81 -> (T::Boolean ? bb40 : bb41)
+    <statTemp>$81: Integer(20) = 20
+    <ifTemp>$80: T::Boolean = <statTemp>$81: Integer(20).===(invite: T.untyped)
+    <ifTemp>$80 -> (T::Boolean ? bb40 : bb41)
 
 # backedges
 # - bb39
 bb40[firstDead=-1]():
-    <cfgAlias>$84: T.class_of(C20) = alias <C C20>
-    r: T.class_of(C20) = <cfgAlias>$84
+    <cfgAlias>$83: T.class_of(C20) = alias <C C20>
+    r: T.class_of(C20) = <cfgAlias>$83
     <unconditional> -> bb61
 
 # backedges
 # - bb39
 bb41[firstDead=2](<self>: T.class_of(A)):
-    <statTemp>$86: String("Bla bla bla") = "Bla bla bla"
-    <statTemp>$3: T.noreturn = <self>: T.class_of(A).raise(<statTemp>$86: String("Bla bla bla"))
+    <statTemp>$85: String("Bla bla bla") = "Bla bla bla"
+    <statTemp>$3: T.noreturn = <self>: T.class_of(A).raise(<statTemp>$85: String("Bla bla bla"))
     <unconditional> -> bb61
 
 # backedges

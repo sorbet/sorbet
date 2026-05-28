@@ -83,9 +83,9 @@ method ::Object#f {
 bb0[firstDead=-1]():
     <self>: Object = cast(<self>: NilClass, Object);
     x: T.any(Concrete, Other) = load_arg(x)
-    <cfgAlias>$7: T.class_of(Concrete) = alias <C Concrete>
-    <ifTemp>$5: T::Boolean = <cfgAlias>$7: T.class_of(Concrete).===(x: T.any(Concrete, Other))
-    <ifTemp>$5 -> (T::Boolean ? bb2 : bb3)
+    <cfgAlias>$6: T.class_of(Concrete) = alias <C Concrete>
+    <ifTemp>$4: T::Boolean = <cfgAlias>$6: T.class_of(Concrete).===(x: T.any(Concrete, Other))
+    <ifTemp>$4 -> (T::Boolean ? bb2 : bb3)
 
 # backedges
 # - bb13
@@ -95,28 +95,28 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 bb2[firstDead=-1](x: Concrete):
-    <cfgAlias>$10: T.class_of(Concrete) = alias <C Concrete>
-    keep_for_ide$9: T.class_of(Concrete) = <cfgAlias>$10
-    keep_for_ide$9: T.untyped = <keep-alive> keep_for_ide$9
-    <castTemp>$11: Concrete = x
-    <statTemp>$3: Concrete = cast(<castTemp>$11: Concrete, Concrete);
+    <cfgAlias>$9: T.class_of(Concrete) = alias <C Concrete>
+    keep_for_ide$8: T.class_of(Concrete) = <cfgAlias>$9
+    keep_for_ide$8: T.untyped = <keep-alive> keep_for_ide$8
+    <castTemp>$10: Concrete = x
+    <statTemp>$3: Concrete = cast(<castTemp>$10: Concrete, Concrete);
     <unconditional> -> bb7
 
 # backedges
 # - bb0
 bb3[firstDead=-1](x: Other):
-    <cfgAlias>$14: T.class_of(Other) = alias <C Other>
-    <ifTemp>$12: TrueClass = <cfgAlias>$14: T.class_of(Other).===(x: Other)
-    <ifTemp>$12 -> (TrueClass ? bb4 : bb7)
+    <cfgAlias>$13: T.class_of(Other) = alias <C Other>
+    <ifTemp>$11: TrueClass = <cfgAlias>$13: T.class_of(Other).===(x: Other)
+    <ifTemp>$11 -> (TrueClass ? bb4 : bb7)
 
 # backedges
 # - bb3
 bb4[firstDead=-1](x: Other):
-    <cfgAlias>$17: T.class_of(Other) = alias <C Other>
-    keep_for_ide$16: T.class_of(Other) = <cfgAlias>$17
-    keep_for_ide$16: T.untyped = <keep-alive> keep_for_ide$16
-    <castTemp>$18: Other = x
-    <statTemp>$3: Other = cast(<castTemp>$18: Other, Other);
+    <cfgAlias>$16: T.class_of(Other) = alias <C Other>
+    keep_for_ide$15: T.class_of(Other) = <cfgAlias>$16
+    keep_for_ide$15: T.untyped = <keep-alive> keep_for_ide$15
+    <castTemp>$17: Other = x
+    <statTemp>$3: Other = cast(<castTemp>$17: Other, Other);
     <unconditional> -> bb7
 
 # backedges
@@ -124,27 +124,27 @@ bb4[firstDead=-1](x: Other):
 # - bb3
 # - bb4
 bb7[firstDead=-1](x: T.any(Concrete, Other)):
-    <cfgAlias>$23: T.class_of(Concrete) = alias <C Concrete>
-    <ifTemp>$20: T::Boolean = x: T.any(Concrete, Other).is_a?(<cfgAlias>$23: T.class_of(Concrete))
-    <ifTemp>$20 -> (T::Boolean ? bb8 : bb10)
+    <cfgAlias>$22: T.class_of(Concrete) = alias <C Concrete>
+    <ifTemp>$19: T::Boolean = x: T.any(Concrete, Other).is_a?(<cfgAlias>$22: T.class_of(Concrete))
+    <ifTemp>$19 -> (T::Boolean ? bb8 : bb10)
 
 # backedges
 # - bb7
 bb8[firstDead=-1](x: Concrete):
-    <cfgAlias>$25: T.class_of(Concrete) = alias <C Concrete>
-    keep_for_ide$24: T.class_of(Concrete) = <cfgAlias>$25
-    keep_for_ide$24: T.untyped = <keep-alive> keep_for_ide$24
-    <castTemp>$26: Concrete = x
-    <statTemp>$19: Concrete = cast(<castTemp>$26: Concrete, Concrete);
+    <cfgAlias>$24: T.class_of(Concrete) = alias <C Concrete>
+    keep_for_ide$23: T.class_of(Concrete) = <cfgAlias>$24
+    keep_for_ide$23: T.untyped = <keep-alive> keep_for_ide$23
+    <castTemp>$25: Concrete = x
+    <statTemp>$18: Concrete = cast(<castTemp>$25: Concrete, Concrete);
     <unconditional> -> bb10
 
 # backedges
 # - bb7
 # - bb8
 bb10[firstDead=-1](x: T.any(Other, Concrete)):
-    <cfgAlias>$30: T.class_of(Other) = alias <C Other>
-    <ifTemp>$27: T::Boolean = x: T.any(Other, Concrete).is_a?(<cfgAlias>$30: T.class_of(Other))
-    <ifTemp>$27 -> (T::Boolean ? bb11 : bb12)
+    <cfgAlias>$29: T.class_of(Other) = alias <C Other>
+    <ifTemp>$26: T::Boolean = x: T.any(Other, Concrete).is_a?(<cfgAlias>$29: T.class_of(Other))
+    <ifTemp>$26 -> (T::Boolean ? bb11 : bb12)
 
 # backedges
 # - bb10
@@ -155,11 +155,11 @@ bb11[firstDead=-1]():
 # backedges
 # - bb10
 bb12[firstDead=-1](x: Concrete):
-    <cfgAlias>$32: T.class_of(Concrete) = alias <C Concrete>
-    keep_for_ide$31: T.class_of(Concrete) = <cfgAlias>$32
-    keep_for_ide$31: T.untyped = <keep-alive> keep_for_ide$31
-    <castTemp>$33: Concrete = x
-    <returnMethodTemp>$2: Concrete = cast(<castTemp>$33: Concrete, Concrete);
+    <cfgAlias>$31: T.class_of(Concrete) = alias <C Concrete>
+    keep_for_ide$30: T.class_of(Concrete) = <cfgAlias>$31
+    keep_for_ide$30: T.untyped = <keep-alive> keep_for_ide$30
+    <castTemp>$32: Concrete = x
+    <returnMethodTemp>$2: Concrete = cast(<castTemp>$32: Concrete, Concrete);
     <unconditional> -> bb13
 
 # backedges
