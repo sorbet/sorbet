@@ -1,5 +1,7 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Test><<C <todo sym>>> < (::<todo sym>)
+    <self>.attr_reader(:a, :foo1, :foo2, :foo3, :test1, :test2, :test3)
+
     def test_case<<todo method>>(&<blk>)
       begin
         begin
