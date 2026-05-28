@@ -12,6 +12,7 @@
 #include "core/Symbols.h"
 #include "core/serialize/pickler.h"
 #include "lib/lz4.h"
+#include <bit>
 
 template class std::vector<uint32_t>;
 
@@ -680,11 +681,7 @@ Method SerializerImpl::unpickleMethod(UnPickler &p, const GlobalState *gs) {
     result.name = NameRef::fromRaw(*gs, p.getU4());
     result.rebind = ClassOrModuleRef::fromRaw(p.getU4());
     auto flagsU2 = static_cast<uint16_t>(p.getU4());
-    Method::Flags flags;
-    static_assert(sizeof(flags) == sizeof(flagsU2));
-    // Can replace this with std::bit_cast in C++20
-    memcpy(&flags, &flagsU2, sizeof(flags));
-    result.flags = flags;
+    result.flags = std::bit_cast<Method::Flags>(flagsU2);
 
     int typeParamsSize = p.getU4();
     if (typeParamsSize != 0) {
@@ -752,12 +749,8 @@ ClassOrModule SerializerImpl::unpickleClassOrModule(UnPickler &p, const GlobalSt
     result.owner = ClassOrModuleRef::fromRaw(p.getU4());
     result.name = NameRef::fromRaw(*gs, p.getU4());
     result.superClass_ = ClassOrModuleRef::fromRaw(p.getU4());
-    ClassOrModule::Flags flags;
     uint16_t flagsRaw = p.getU4();
-    static_assert(sizeof(flagsRaw) == sizeof(flags));
-    // Can replace this with std::bit_cast in C++20
-    memcpy(&flags, &flagsRaw, sizeof(flags));
-    result.flags = flags;
+    result.flags = std::bit_cast<ClassOrModule::Flags>(flagsRaw);
     int mixinsSize = p.getU4();
     result.mixins_.reserve(mixinsSize);
     for (int i = 0; i < mixinsSize; i++) {
@@ -810,11 +803,7 @@ Field SerializerImpl::unpickleField(UnPickler &p, const GlobalState *gs) {
     result.owner = ClassOrModuleRef::fromRaw(p.getU4());
     result.name = NameRef::fromRaw(*gs, p.getU4());
     auto flagsU1 = p.getU1();
-    Field::Flags flags;
-    static_assert(sizeof(flags) == sizeof(flagsU1));
-    // Can replace this with std::bit_cast in C++20
-    memcpy(&flags, &flagsU1, sizeof(flags));
-    result.flags = flags;
+    result.flags = std::bit_cast<Field::Flags>(flagsU1);
     result.resultType = unpickleType(p, gs);
     auto locCount = p.getU4();
     for (int i = 0; i < locCount; i++) {
@@ -840,11 +829,7 @@ TypeParameter SerializerImpl::unpickleTypeParameter(UnPickler &p, const GlobalSt
     result.name = NameRef::fromRaw(*gs, p.getU4());
 
     auto flagsU1 = p.getU1();
-    TypeParameter::Flags flags;
-    static_assert(sizeof(flags) == sizeof(flagsU1));
-    // Can replace this with std::bit_cast in C++20
-    memcpy(&flags, &flagsU1, sizeof(flags));
-    result.flags = flags;
+    result.flags = std::bit_cast<TypeParameter::Flags>(flagsU1);
     result.resultType = unpickleType(p, gs);
     auto locCount = p.getU4();
     for (int i = 0; i < locCount; i++) {
@@ -1297,11 +1282,7 @@ void SerializerImpl::pickle(Pickler &p, const File &f, const ast::ExpressionPtr 
             pickle(p, s.loc);
             p.putU4(s.fun.rawId());
             pickle(p, s.funLoc);
-            uint8_t flags;
-            static_assert(sizeof(flags) == sizeof(s.flags));
-            // Can replace this with std::bit_cast in C++20
-            memcpy(&flags, &s.flags, sizeof(flags));
-            p.putU1(flags);
+            p.putU1(std::bit_cast<uint8_t>(s.flags));
             p.putU4(s.numPosArgs());
 
             const auto hasBlock = s.hasBlock();
@@ -1479,11 +1460,7 @@ void SerializerImpl::pickle(Pickler &p, const File &f, const ast::ExpressionPtr 
             auto &c = ast::cast_tree_nonnull<ast::MethodDef>(what);
             pickle(p, c.loc);
             pickle(p, c.declLoc);
-            uint8_t flags;
-            static_assert(sizeof(flags) == sizeof(c.flags));
-            // Can replace this with std::bit_cast in C++20
-            memcpy(&flags, &c.flags, sizeof(flags));
-            p.putU1(flags);
+            p.putU1(std::bit_cast<uint8_t>(c.flags));
             p.putU4(c.name.rawId());
             p.putU4(c.symbol.id());
             p.putU4(c.params.size());
@@ -1631,10 +1608,7 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             NameRef fun = unpickleNameRef(p);
             auto funLoc = unpickleLocOffsets(p);
             auto flagsU1 = p.getU1();
-            ast::Send::Flags flags;
-            static_assert(sizeof(flags) == sizeof(flagsU1));
-            // Can replace this with std::bit_cast in C++20
-            memcpy(&flags, &flagsU1, sizeof(flags));
+            auto flags = std::bit_cast<ast::Send::Flags>(flagsU1);
             auto numPosArgs = static_cast<uint16_t>(p.getU4());
             auto argsSize = p.getU4();
             auto recv = unpickleExpr(p, gs);
@@ -1785,10 +1759,7 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             auto loc = unpickleLocOffsets(p);
             auto declLoc = unpickleLocOffsets(p);
             auto flagsU1 = p.getU1();
-            ast::MethodDef::Flags flags;
-            static_assert(sizeof(flags) == sizeof(flagsU1));
-            // Can replace this with std::bit_cast in C++20
-            memcpy(&flags, &flagsU1, sizeof(flags));
+            auto flags = std::bit_cast<ast::MethodDef::Flags>(flagsU1);
             NameRef name = unpickleNameRef(p);
             auto symbol = MethodRef::fromRaw(p.getU4());
             auto argsSize = p.getU4();

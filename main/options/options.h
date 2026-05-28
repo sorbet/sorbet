@@ -9,6 +9,7 @@
 #include "core/packages/PackageDB.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include "spdlog/spdlog.h"
+#include <bit>
 #include <optional>
 
 namespace sorbet::realmain::options {
@@ -217,9 +218,7 @@ struct Options {
         uint8_t serialize() const {
             static_assert(sizeof(CacheSensitiveOptions) == sizeof(uint8_t));
             static_assert(sizeof(CacheSensitiveOptions) == sizeof(VALID_BITS_MASK));
-            // Can replace this with std::bit_cast in C++20
-            auto rawBits = *reinterpret_cast<const uint8_t *>(this);
-            static_assert(sizeof(CacheSensitiveOptions) == sizeof(rawBits));
+            auto rawBits = std::bit_cast<uint8_t>(*this);
             // Mask the valid bits since uninitialized bits can be any value.
             return rawBits & VALID_BITS_MASK;
         }
