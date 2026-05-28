@@ -136,7 +136,10 @@ public:
         return make_expression<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Instance, name);
     }
 
+    // Create a new "read" node for the given reference read node.
     static ExpressionPtr cpRef(ExpressionPtr &name) {
+        ENFORCE(isa_reference(name), "Can only copy reference-like nodes with cpRef");
+
         if (auto nm = cast_tree<UnresolvedIdent>(name)) {
             return make_expression<UnresolvedIdent>(nm->loc, nm->kind, nm->name);
         } else if (auto nm = cast_tree<ast::Local>(name)) {
@@ -144,7 +147,8 @@ public:
         } else if (auto self = cast_tree<ast::Self>(name)) {
             return make_expression<ast::Self>(self->loc);
         }
-        Exception::notImplemented();
+
+        unreachable("MK::cpRef should handle every type that passes `isa_reference()`.");
     }
 
     static ExpressionPtr Assign(core::LocOffsets loc, ExpressionPtr lhs, ExpressionPtr rhs) {
@@ -681,8 +685,8 @@ public:
                 [&](const class BlockParam &blk) { cursor = &blk.expr; },
                 [&](const class ShadowArg &shadow) { cursor = &shadow.expr; },
                 // ENFORCES are last so that we don't pay the price of casting in the fast path.
-                [&](const ast::Local &opt) { ENFORCE(false, "Should only be called before local_vars.cc"); },
-                [&](const ExpressionPtr &expr) { ENFORCE(false, "Unexpected node type in argument position."); });
+                [&](const ast::Local &opt) { unreachable("Should only be called before local_vars.cc"); },
+                [&](const ExpressionPtr &expr) { unreachable("Unexpected node type in parameter position."); });
         }
     }
 
@@ -702,8 +706,8 @@ public:
                 [&](const class BlockParam &blk) { cursor = &blk.expr; },
                 [&](const class ShadowArg &shadow) { cursor = &shadow.expr; },
                 // ENFORCES are last so that we don't pay the price of casting in the fast path.
-                [&](const UnresolvedIdent &opt) { ENFORCE(false, "Namer should have created a Local for this arg."); },
-                [&](const ExpressionPtr &expr) { ENFORCE(false, "Unexpected node type in argument position."); });
+                [&](const UnresolvedIdent &opt) { unreachable("Namer should have created a Local for this arg."); },
+                [&](const ExpressionPtr &expr) { unreachable("Unexpected node type in parameter position."); });
         }
     }
 };
