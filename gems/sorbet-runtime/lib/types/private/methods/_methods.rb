@@ -592,6 +592,10 @@ module T::Private::Methods
       key, = first_wrapper
       run_sig_block_for_key(key, force_type_init: force_type_init)
     end
+
+    # Make sure that there are no lingering declaration blocks being kept alive
+    # (so we're not retaining any extra references for a possible GC)
+    T::Private::DeclState.current.reset!
   end
 
   def self.all_checked_tests_sigs
