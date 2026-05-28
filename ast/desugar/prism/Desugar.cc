@@ -3996,7 +3996,7 @@ core::LocOffsets Desugarer::findItParamUsageLoc(pm_statements_node *statements) 
         if (result.exists()) {
             return false;
         }
-        if (PM_NODE_TYPE_P(node, PM_IT_LOCAL_VARIABLE_READ_NODE)) {
+        if (isa_node<pm_it_local_variable_read_node_t>(const_cast<pm_node_t *>(node))) {
             result = this->translateLoc(node->location);
             // Found the first usage, stop walking
             return false;
@@ -4094,8 +4094,8 @@ Desugarer::DesugaredBlockArgument Desugarer::desugarBlock(pm_node_t *block, pm_a
     if (otherArgs != nullptr) {
         auto args = absl::MakeSpan(otherArgs->arguments.nodes, otherArgs->arguments.size);
         for (auto *arg : args) {
-            if (PM_NODE_TYPE_P(arg, PM_BLOCK_ARGUMENT_NODE)) {
-                blockArgInArgs = down_cast_nonnull<pm_block_argument_node>(arg);
+            if (auto *block = down_cast<pm_block_argument_node>(arg)) {
+                blockArgInArgs = block;
                 break;
             }
         }
