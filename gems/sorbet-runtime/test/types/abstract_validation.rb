@@ -50,7 +50,7 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
 
     assert_includes(
       err.message,
-      "Defining an overridable class method (via .abstract) on a module is not allowed.",
+      "Defining an overridable class method (via abstract) on a module is not allowed.",
     )
   end
 
