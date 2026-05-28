@@ -53,6 +53,65 @@ vector<ast::ParsedFile> sortParsedFiles(const core::GlobalState &gs, ErrorReport
 
     return parsedFiles;
 }
+
+/**
+ * This kvstore strategy holds the kvstore open for the duration of the slow path, during initialization. Ownership of
+ * the kvstore is threaded back and forth between the slow path and the InitKVStoreStrategy through the open and close
+ * methods.
+ */
+class InitKVStoreStrategy : public KVStoreStrategy {
+    unique_ptr<const OwnedKeyValueStore> kvstore;
+
+    InitKVStoreStrategy(unique_ptr<const OwnedKeyValueStore> kvstore) : kvstore{move(kvstore)} {}
+
+public:
+    static InitKVStoreStrategy build(const core::GlobalState &gs, unique_ptr<KeyValueStore> kvstore) {
+        return InitKVStoreStrategy(cache::ownIfUnchanged(gs, std::move(kvstore)));
+    }
+
+    unique_ptr<const OwnedKeyValueStore> openKVStore() {
+        return move(this->kvstore);
+    }
+
+    void closeKVStore(unique_ptr<const OwnedKeyValueStore> kvstore) {
+        this->kvstore = move(kvstore);
+    }
+};
+
+unique_ptr<OwnedKeyValueStore> openSessionCache(cache::SessionCache *cache, const LSPConfiguration &config) {
+    if (!cache) {
+        return nullptr;
+    }
+
+    auto kvstore = cache->open(config.logger, config.opts);
+    if (!kvstore) {
+        return nullptr;
+    }
+
+    return make_unique<OwnedKeyValueStore>(std::move(kvstore));
+}
+
+/**
+ * This kvstore strategy opens the kvstore at the beginning of each indexing pass, and closes the cache fully at the
+ * end. This minimizes memory usage by avoiding keeping the whole db mapped at any given point.
+ */
+class SessionKVStoreStrategy : public KVStoreStrategy {
+    cache::SessionCache *cache;
+    const LSPConfiguration &config;
+
+public:
+    SessionKVStoreStrategy(cache::SessionCache *cache, const LSPConfiguration &config) : cache{cache}, config{config} {}
+
+    unique_ptr<const OwnedKeyValueStore> openKVStore() {
+        return openSessionCache(this->cache, this->config);
+    }
+
+    void closeKVStore(unique_ptr<const OwnedKeyValueStore> kvstore) {
+        // We don't write in the cancelable slow path, and all our read operations have completed.
+        OwnedKeyValueStore::abort(std::move(kvstore));
+    }
+};
+
 } // namespace
 
 LSPTypechecker::LSPTypechecker(shared_ptr<const LSPConfiguration> config,
@@ -87,8 +146,8 @@ void LSPTypechecker::initialize(TaskQueue &queue, unique_ptr<core::GlobalState> 
         const bool isIncremental = false;
         ErrorEpoch epoch(*errorReporter, updates.epoch, isIncremental, {});
         auto errorFlusher = make_shared<ErrorFlusherLSP>(updates.epoch, errorReporter);
-        auto committed = runSlowPath(updates, cache::ownIfUnchanged(*this->gs, std::move(kvstore)), workers,
-                                     errorFlusher, SlowPathMode::Init);
+        auto handler = InitKVStoreStrategy::build(*this->gs, std::move(kvstore));
+        auto committed = runSlowPath(updates, handler, workers, errorFlusher, SlowPathMode::Init);
         ENFORCE(committed);
         epoch.committed = true;
     }
@@ -167,7 +226,8 @@ bool LSPTypechecker::typecheck(unique_ptr<LSPFileUpdates> updates, WorkerPool &w
 
             prodCategoryCounterInc("lsp.updates", "fastpath");
         } else {
-            committed = runSlowPath(*updates, this->getKvStore(), workers, errorFlusher, SlowPathMode::Cancelable);
+            SessionKVStoreStrategy kvstore(this->sessionCache.get(), *this->config);
+            committed = runSlowPath(*updates, kvstore, workers, errorFlusher, SlowPathMode::Cancelable);
         }
         epoch.committed = committed;
     }
@@ -428,9 +488,8 @@ void applyFileTableUpdates(core::GlobalState &gs, vector<core::FileRef> &workspa
 }
 } // namespace
 
-bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const OwnedKeyValueStore> ownedKvstore,
-                                 WorkerPool &workers, shared_ptr<core::ErrorFlusher> errorFlusher,
-                                 LSPTypechecker::SlowPathMode mode) {
+bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, KVStoreStrategy &kvstore, WorkerPool &workers,
+                                 shared_ptr<core::ErrorFlusher> errorFlusher, LSPTypechecker::SlowPathMode mode) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId,
             "runSlowPath can only be called from the typechecker thread.");
 
@@ -529,6 +588,8 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
         if (this->config->opts.cacheSensitiveOptions.sorbetPackages) {
             Timer timeit(this->config->logger, "buildPackageDB");
 
+            auto ownedKvstore = kvstore.openKVStore();
+
             // This is a bit of a lie: we haven't gotten the first stratum to a state where we could run preemption
             // tasks yet, but any errors raised by running a preemption action on this incomplete global state will be
             // transient.
@@ -558,6 +619,9 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
                     cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(std::move(ownedKvstore)),
                                                          this->config->opts, *this->gs, workers, packageIndexed));
             }
+
+            kvstore.closeKVStore(move(ownedKvstore));
+
             this->cacheUpdatedFiles(packageIndexed, openFiles);
 
             // Only need to compute FoundDefHashes when running to compute a FileHash
@@ -615,6 +679,8 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
                         break;
                 }
 
+                auto ownedKvstore = kvstore.openKVStore();
+
                 {
                     auto result = hashing::Hashing::indexAndComputeFileHashes(
                         *this->gs, this->config->opts, *this->config->logger, stratum.sourceFiles, workers,
@@ -644,11 +710,10 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, unique_ptr<const Owned
                                                                        this->config->opts);
 
                         this->initialized = true;
-                    } else {
-                        // We don't write in the cancelable slow path, and all our read operations have completed.
-                        OwnedKeyValueStore::abort(std::move(ownedKvstore));
                     }
                 }
+
+                kvstore.closeKVStore(move(ownedKvstore));
 
                 // Second namer run: all the other files (the packageDB shouldn't change)
                 auto foundHashes = nullptr;
@@ -885,19 +950,6 @@ ast::ExpressionPtr LSPTypechecker::getLocalVarTrees(core::FileRef fref) const {
     return local_vars::LocalVars::run(*gs, {move(afterDesugar), fref}).tree;
 }
 
-unique_ptr<OwnedKeyValueStore> LSPTypechecker::getKvStore() const {
-    if (this->sessionCache == nullptr) {
-        return nullptr;
-    }
-
-    auto kvstore = this->sessionCache->open(this->config->logger, this->config->opts);
-    if (kvstore == nullptr) {
-        return nullptr;
-    }
-
-    return make_unique<OwnedKeyValueStore>(std::move(kvstore));
-}
-
 vector<ast::ParsedFile> LSPTypechecker::getResolved(absl::Span<const core::FileRef> frefs, WorkerPool &workers) const {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     vector<ast::ParsedFile> updatedIndexed;
@@ -920,7 +972,7 @@ vector<ast::ParsedFile> LSPTypechecker::getResolved(absl::Span<const core::FileR
 
     if (!toIndex.empty()) {
         auto cancelable = false;
-        auto kvstore = this->getKvStore();
+        auto kvstore = openSessionCache(this->sessionCache.get(), *this->config);
         auto result = pipeline::index(*this->gs, toIndex, this->config->opts, workers, std::move(kvstore), cancelable);
         ENFORCE(result.hasResult());
         auto indexed = std::move(result.result());
