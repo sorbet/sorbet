@@ -17,7 +17,11 @@ then
  exit 0;
 fi
 
-main/sorbet --silence-dev-message --simulate-crash  &> "$outfile" || true
+if main/sorbet --silence-dev-message --simulate-crash  &> "$outfile"; then
+  echo "Expected to fail!"
+  exit 1
+fi
+
 if grep -q "realmain" "$outfile"
 then
     echo "$PASS_TEXT"
