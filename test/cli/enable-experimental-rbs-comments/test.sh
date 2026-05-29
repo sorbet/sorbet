@@ -22,15 +22,21 @@ common_args=(
 echo "==== test correct usage ===="
 main/sorbet "${common_args[@]}" --enable-experimental-rbs-comments --parser=prism 2>&1
 
-echo "==== test deprecated use with unset parser ===="
-main/sorbet "${common_args[@]}" --enable-experimental-rbs-comments 2>&1
+echo "==== test error with unset parser ===="
+if main/sorbet "${common_args[@]}" --enable-experimental-rbs-comments 2>&1; then
+  echo "Expected to fail!"
+  exit 1
+fi
 
-echo "==== test deprecated use with original parser ===="
-main/sorbet "${common_args[@]}" --enable-experimental-rbs-comments --parser=original 2>&1
+echo "==== test error with original parser ===="
+if main/sorbet "${common_args[@]}" --enable-experimental-rbs-comments --parser=original 2>&1; then
+  echo "Expected to fail!"
+  exit 1
+fi
 
 echo "==== test deprecated '--enable-experimental-rbs-signatures' ===="
-main/sorbet "${common_args[@]}" --enable-experimental-rbs-signatures 2>&1
+main/sorbet "${common_args[@]}" --enable-experimental-rbs-signatures --parser=prism 2>&1
 
 echo "==== test deprecated '--enable-experimental-rbs-assertions' ===="
-main/sorbet "${common_args[@]}" --enable-experimental-rbs-assertions 2>&1
+main/sorbet "${common_args[@]}" --enable-experimental-rbs-assertions --parser=prism 2>&1
 

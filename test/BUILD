@@ -272,8 +272,10 @@ pipeline_tests(
             "testdata/**/*.exp",
         ],
         exclude = [
+            # RBS is only supported with Prism. Run these with `//test:test_corpus_prism`.
             "testdata/rbs/**/*.rb",
             "testdata/rbs/**/*.exp",
+            "testdata/lsp/*_rbs*.rb",
 
             # Prism-specific variant of `missing_shadow_args.rb` (different parser errors and desugar tree).
             "testdata/parser/error_recovery/missing_shadow_args_prism.rb",
@@ -541,10 +543,15 @@ pipeline_tests(
             "testdata/**/*.rbi",
             "testdata/**/*.exp",
         ],
-        # package-directed is known to be incompatible with the LSP tests for now
-        # todo(gdritter): fix this!
         exclude = [
+            # package-directed is known to be incompatible with the LSP tests for now
+            # todo(gdritter): fix this!
             "testdata/packager/directed-*/**/*",
+
+            # RBS is only supported with Prism. Run these with `//test:test_corpus_lsp_prism`.
+            "testdata/rbs/**/*.rb",
+            "testdata/rbs/**/*.exp",
+            "testdata/lsp/*_rbs*.rb",
 
             # These test require support for RBS boolean literal types,
             # which will not be back-ported to the whitequark-based RBS rewriter.
@@ -623,27 +630,7 @@ pipeline_tests(
 )
 
 pipeline_tests(
-    "rbs_whitequark",
-    glob(
-        [
-            "testdata/rbs/**/*.rb",
-            "testdata/rbs/**/*.exp",
-        ],
-        exclude = [
-            # Specific test that is modified for Prism, contains minor differences in the exp file
-            "testdata/rbs/assertions_heredoc_modified.rb",
-
-            # These test require support for RBS boolean literal types,
-            # which will not be back-ported to the whitequark-based RBS rewriter.
-            "testdata/rbs/annotations_literal_types.rb",
-            "testdata/rbs/signatures_types.rb",
-        ],
-    ),
-    "PosTests",
-)
-
-pipeline_tests(
-    "rbs_prism",
+    "rbs",
     glob(
         [
             "testdata/rbs/**/*.rb",
@@ -661,7 +648,6 @@ pipeline_tests(
 test_suite(
     name = "test",
     tests = [
-        "rbs_whitequark",
         "test_corpus",
     ],
 )
@@ -669,7 +655,7 @@ test_suite(
 test_suite(
     name = "test_prism",
     tests = [
-        "rbs_prism",
+        "rbs",
         "test_corpus_prism",
     ],
 )
@@ -682,12 +668,4 @@ test_suite(
 test_suite(
     name = "prism_regression",
     tests = ["prism_regression_corpus"],
-)
-
-test_suite(
-    name = "rbs",
-    tests = [
-        "rbs_prism",
-        "rbs_whitequark",
-    ],
 )

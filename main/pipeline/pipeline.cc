@@ -40,9 +40,6 @@
 #include "parser/prism/Parser.h"
 #include "payload/binary/binary.h"
 #include "pipeline.h"
-#include "rbs/AssertionsRewriter.h"
-#include "rbs/CommentsAssociator.h"
-#include "rbs/SigsRewriter.h"
 #include "rbs/prism/RBSRewriterPrism.h"
 #include "resolver/resolver.h"
 #include "rewriter/rewriter.h"
@@ -236,8 +233,7 @@ parser::ParseResult runParser(core::GlobalState &gs, core::FileRef file, const o
         core::UnfreezeNameTable nameTableAccess(gs); // enters strings from source code as names
 
         auto indentationAware = false; // Don't start in indentation-aware error recovery mode
-        auto collectComments = gs.cacheSensitiveOptions.rbsEnabled; // Collect comments for RBS signature translation
-        auto settings = parser::Parser::Settings{traceLexer, traceParser, indentationAware, collectComments};
+        auto settings = parser::Parser::Settings{traceLexer, traceParser, indentationAware};
         result = parser::Parser::run(gs, file, settings);
     }
 
@@ -280,32 +276,6 @@ void runPrismRBSRewrite(core::GlobalState &gs, core::FileRef file, parser::Prism
     if (print.RBSRewriteTree.enabled) {
         print.RBSRewriteTree.fmt("{}\n", parseResult.prettyPrint());
     }
-}
-
-unique_ptr<parser::Node> runRBSRewrite(core::GlobalState &gs, core::FileRef file, parser::ParseResult &&parseResult,
-                                       const options::Printers &print) {
-    auto node = move(parseResult.tree);
-    auto commentLocations = move(parseResult.commentLocations);
-
-    if (gs.cacheSensitiveOptions.rbsEnabled) {
-        Timer timeit(gs.tracer(), "runRBSRewrite", {{"file", string(file.data(gs).path())}});
-        core::MutableContext ctx(gs, core::Symbols::root(), file);
-        core::UnfreezeNameTable nameTableAccess(gs);
-
-        auto associator = rbs::CommentsAssociator(ctx, commentLocations);
-        auto commentMap = associator.run(node);
-
-        auto sigsRewriter = rbs::SigsRewriter(ctx, commentMap.signaturesForNode);
-        node = sigsRewriter.run(move(node));
-
-        auto assertionsRewriter = rbs::AssertionsRewriter(ctx, commentMap.assertionsForNode);
-        node = assertionsRewriter.run(move(node));
-
-        if (print.RBSRewriteTree.enabled) {
-            print.RBSRewriteTree.fmt("{}\n", node->toStringWithTabs(gs, 0));
-        }
-    }
-    return node;
 }
 
 ast::ExpressionPtr runDesugar(core::GlobalState &gs, core::FileRef file, unique_ptr<parser::Node> parseTree,
@@ -389,9 +359,9 @@ ast::ExpressionPtr desugarOne(const options::Options &opts, core::GlobalState &g
         }
         auto parseResult = runParser(gs, file, print, opts.traceLexer, opts.traceParser);
 
-        auto parseTree = runRBSRewrite(gs, file, move(parseResult), print);
+        ENFORCE(!gs.cacheSensitiveOptions.rbsEnabled, "RBS mode is only supported with the Prism parser");
 
-        return runDesugar(gs, file, move(parseTree), print, preserveConcreteSyntax);
+        return runDesugar(gs, file, move(parseResult.tree), print, preserveConcreteSyntax);
     } catch (SorbetException &) {
         Exception::failInFuzzer();
         if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
@@ -424,12 +394,12 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
                         return emptyParsedFile(file);
                     }
 
-                    auto rbsRewrittenParseResult = runRBSRewrite(lgs, file, move(parseResult), print);
+                    ENFORCE(!lgs.cacheSensitiveOptions.rbsEnabled, "RBS mode is only supported with the Prism parser");
                     if (opts.stopAfterPhase == options::Phase::RBS_REWRITER) {
                         return emptyParsedFile(file);
                     }
 
-                    tree = runDesugar(lgs, file, move(rbsRewrittenParseResult), print, false);
+                    tree = runDesugar(lgs, file, move(parseResult.tree), print, false);
                     if (opts.stopAfterPhase == options::Phase::DESUGARER) {
                         return emptyParsedFile(file);
                     }

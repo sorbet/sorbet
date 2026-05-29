@@ -1046,9 +1046,9 @@ void readOptions(Options &opts,
         auto parser = extractParser(raw["parser"].as<string>(), logger).value_or(Parser::ORIGINAL);
         opts.cacheSensitiveOptions.usePrismParser = (parser == Parser::PRISM);
         if (opts.cacheSensitiveOptions.rbsEnabled && !opts.cacheSensitiveOptions.usePrismParser) {
-            logger->warn(
-                "⚠️ Going forward, Sorbet will only support RBS mode when parsing with Prism.\n"
-                "Please add `--parser=prism` to your Sorbet config. This will become an error at the end of May 2026.");
+            logger->error("RBS mode is only supported when parsing with Prism. "
+                          "Please add `--parser=prism` to your Sorbet config.");
+            throw EarlyReturnWithCode(1);
         }
 
         opts.silenceErrors = raw["quiet"].as<bool>();
