@@ -9,13 +9,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def self.test1<<todo method>>(x, &<blk>)
       begin
         <self>.puts("before")
-        begin
-          <assignTemp>$2 = x
-          if <emptyTree>::<C <ErrorNode>>.===(<assignTemp>$2)
-            <emptyTree>
-          else
-            <emptyTree>
-          end
+        if <emptyTree>::<C <ErrorNode>>.===(x)
+          <emptyTree>
+        else
+          <emptyTree>
         end
       end
     end
@@ -23,13 +20,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def self.test2<<todo method>>(x, &<blk>)
       begin
         <self>.puts("before")
-        begin
-          <assignTemp>$2 = x
-          if <emptyTree>::<C MethodCompletion>.puts("hello").===(<assignTemp>$2)
-            <emptyTree>
-          else
-            <emptyTree>
-          end
+        if <emptyTree>::<C MethodCompletion>.puts("hello").===(x)
+          <emptyTree>
+        else
+          <emptyTree>
         end
       end
     end
@@ -37,13 +31,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def self.test3<<todo method>>(x, &<blk>)
       begin
         <self>.puts("before")
-        begin
-          <assignTemp>$2 = x
-          if <emptyTree>::<C MethodCompletion>.Opus()::<C Log>.info("hello").===(<assignTemp>$2)
-            <emptyTree>
-          else
-            <emptyTree>
-          end
+        if <emptyTree>::<C MethodCompletion>.Opus()::<C Log>.info("hello").===(x)
+          <emptyTree>
+        else
+          <emptyTree>
         end
       end
     end
@@ -51,13 +42,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def self.test4<<todo method>>(x, &<blk>)
       begin
         <self>.puts("before")
-        begin
-          <assignTemp>$2 = x
-          if <emptyTree>::<C MethodCompletion>.y=(nil).===(<assignTemp>$2)
-            <emptyTree>
-          else
-            <emptyTree>
-          end
+        if <emptyTree>::<C MethodCompletion>.y=(nil).===(x)
+          <emptyTree>
+        else
+          <emptyTree>
         end
       end
     end

@@ -2087,20 +2087,30 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
                                 move(args));
             }
 
-            core::NameRef tempName;
             core::LocOffsets predicateLoc;
             // Check if the prism node has a predicate, not the desugared result,
             // because desugarNullable returns EmptyTree (not nullptr) for null nodes.
             bool hasPredicate = (caseNode->predicate != nullptr);
 
+            // If the predicate is already reference-like (local, ivar, self, etc.), reading it is side-effect-free,
+            // so we can read it directly in each `===`, skipping the synthetic `<assignTemp>` local.
+            bool needsTempLocal = hasPredicate && !ast::isa_reference(predicate);
+
+            core::NameRef tempName = core::NameRef::noName();
             if (hasPredicate) {
                 // Use the Prism node's loc directly (not the desugared expr's loc) so that
                 // e.g. `case (1)` retains the parens-inclusive loc rather than collapsing to `1`.
                 predicateLoc = translateLoc(caseNode->predicate->location);
-                tempName = nextUniqueDesugarName(core::Names::assignTemp());
-            } else {
-                tempName = core::NameRef::noName();
+
+                if (needsTempLocal) {
+                    tempName = nextUniqueDesugarName(core::Names::assignTemp());
+                }
             }
+
+            // Build an AST node that reads the case's predicate.
+            auto makePredicateRead = [&]() -> ExpressionPtr {
+                return needsTempLocal ? MK::Local(predicateLoc, tempName) : MK::cpRef(predicate);
+            };
 
             // The if/else ladder for the entire case statement, starting with the else clause as the final `else` when
             // building backwards
@@ -2124,17 +2134,15 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
                     if (isa_node<pm_splat_node>(prismPattern)) {
                         // splat pattern in when clause, predicate is required, `case a when *others`
                         ENFORCE(hasPredicate, "splats need something to test against");
-                        auto local = MK::Local(predicateLoc, tempName);
                         // Desugar `case x when *patterns` to `::Magic.<check-match-array>(x, patterns)`,
                         // which behaves like `patterns.any?(x)`
                         testExpr = MK::Send2(patternLoc, MK::Magic(location), core::Names::checkMatchArray(),
-                                             patternLoc.copyWithZeroLength(), move(local), move(pattern));
+                                             patternLoc.copyWithZeroLength(), makePredicateRead(), move(pattern));
                     } else if (hasPredicate) {
                         // regular pattern when case predicate is present, `case a when 1`
-                        auto local = MK::Local(predicateLoc, tempName);
                         // Desugar `case x when 1` to `1 === x`
                         testExpr = MK::Send1(patternLoc, move(pattern), core::Names::tripleEq(),
-                                             patternLoc.copyWithZeroLength(), move(local));
+                                             patternLoc.copyWithZeroLength(), makePredicateRead());
                     } else {
                         // regular pattern when case predicate is not present, `case when 1 then "one" end`
                         // case # no predicate present
@@ -2171,8 +2179,11 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
                 nextClauseLoc = core::LocOffsets{lineStart, whenLoc.endPos()};
             }
 
-            if (hasPredicate) {
+            if (needsTempLocal) {
+                // <assignTemp>$1 = predicate
                 auto assignExpr = MK::Assign(predicateLoc, tempName, move(predicate));
+
+                // Prepend the assignment to the `if`/`else` ladder we built.
                 resultExpr = MK::InsSeq1(location, move(assignExpr), move(resultExpr));
             }
 
