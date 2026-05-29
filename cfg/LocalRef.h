@@ -28,8 +28,9 @@ public:
     bool isSyntheticTemporary(const CFG &cfg) const;
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg) const;
-    bool operator==(const LocalRef &rhs) const;
-    bool operator!=(const LocalRef &rhs) const;
+
+    bool operator==(const LocalRef &rhs) const noexcept = default;
+    bool operator!=(const LocalRef &rhs) const noexcept = default;
 
     static LocalRef noVariable();
     static LocalRef blockCall();

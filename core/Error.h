@@ -17,13 +17,8 @@ public:
     constexpr ErrorClass(uint16_t code, StrictLevel minLevel) : code(code), minLevel(minLevel){};
     ErrorClass(const ErrorClass &rhs) = default;
 
-    bool operator==(const ErrorClass &rhs) const {
-        return code == rhs.code;
-    }
-
-    bool operator!=(const ErrorClass &rhs) const {
-        return !(*this == rhs);
-    }
+    bool operator==(const ErrorClass &rhs) const noexcept = default;
+    bool operator!=(const ErrorClass &rhs) const noexcept = default;
 };
 
 class ErrorColors {

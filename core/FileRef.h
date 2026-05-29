@@ -18,21 +18,7 @@ public:
     FileRef &operator=(const FileRef &f) = default;
     FileRef &operator=(FileRef &&f) = default;
 
-    bool operator==(const FileRef &rhs) const {
-        return _id == rhs._id;
-    }
-
-    bool operator!=(const FileRef &rhs) const {
-        return !(rhs == *this);
-    }
-
-    bool operator<(const FileRef &rhs) const {
-        return _id < rhs._id;
-    }
-
-    bool operator>(const FileRef &rhs) const {
-        return _id > rhs._id;
-    }
+    auto operator<=>(const FileRef &rhs) const = default;
 
     inline unsigned int id() const {
         return _id;

@@ -29,13 +29,8 @@ public:
     // (might not exist)
     static MangledName lookupMangledName(const core::GlobalState &gs, const std::vector<std::string> &parts);
 
-    bool operator==(const MangledName &rhs) const {
-        return owner == rhs.owner;
-    }
-
-    bool operator!=(const MangledName &rhs) const {
-        return !(rhs == *this);
-    }
+    bool operator==(const MangledName &rhs) const noexcept = default;
+    bool operator!=(const MangledName &rhs) const noexcept = default;
 
     bool exists() const {
         return this->owner.exists();

@@ -198,16 +198,11 @@ public:
         return ptr != 0;
     }
 
-    bool operator==(const ExpressionPtr &other) const noexcept {
-        return ptr == other.ptr;
-    }
+    bool operator==(const ExpressionPtr &other) const noexcept = default;
+    bool operator!=(const ExpressionPtr &other) const noexcept = default;
 
     bool operator==(std::nullptr_t) const noexcept {
         return ptr == 0;
-    }
-
-    bool operator!=(const ExpressionPtr &other) const noexcept {
-        return ptr != other.ptr;
     }
 
     bool operator!=(std::nullptr_t) const noexcept {
@@ -845,14 +840,9 @@ public:
 
         // In C++20 we can replace this with bit field initialzers
         Flags() : isPrivateOk(false), isRewriterSynthesized(false), hasBlock(false) {}
-        bool operator==(const Flags &other) const noexcept {
-            return isPrivateOk == other.isPrivateOk && isRewriterSynthesized == other.isRewriterSynthesized &&
-                   hasBlock == other.hasBlock;
-        }
 
-        bool operator!=(const Flags &other) const noexcept {
-            return !(*this == other);
-        }
+        bool operator==(const Flags &other) const noexcept = default;
+        bool operator!=(const Flags &other) const noexcept = default;
     };
     CheckSize(Flags, 1, 1);
 

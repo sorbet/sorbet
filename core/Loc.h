@@ -13,10 +13,14 @@ class Context;
 class MutableContext;
 
 class Loc final {
-    struct {
+    struct storage {
         LocOffsets offsets;
         core::FileRef fileRef;
+
+        bool operator==(const storage &other) const noexcept = default;
+        bool operator!=(const storage &other) const noexcept = default;
     } storage;
+
     template <typename H> friend H AbslHashValue(H h, const Loc &m);
     friend class sorbet::core::serialize::SerializerImpl;
 
@@ -96,9 +100,9 @@ public:
     std::string filePosToString(const GlobalState &gs, bool showFull = false) const;
     std::optional<std::string_view> source(const GlobalState &gs) const;
 
-    bool operator==(const Loc &rhs) const;
+    bool operator==(const Loc &rhs) const noexcept = default;
+    bool operator!=(const Loc &rhs) const noexcept = default;
 
-    bool operator!=(const Loc &rhs) const;
     static std::optional<uint32_t> detail2Pos(const File &file, Detail detail);
     static Detail pos2Detail(const File &file, uint32_t off);
     static std::optional<Loc> fromDetails(const GlobalState &gs, FileRef fileRef, Detail begin, Detail end);

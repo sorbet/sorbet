@@ -34,19 +34,7 @@ public:
 
     LocalVariable &operator=(const LocalVariable &) = default;
 
-    bool operator==(const LocalVariable &rhs) const;
-
-    bool operator!=(const LocalVariable &rhs) const;
-
-    inline bool operator<(const LocalVariable &rhs) const {
-        if (this->_name.rawId() < rhs._name.rawId()) {
-            return true;
-        }
-        if (this->_name.rawId() > rhs._name.rawId()) {
-            return false;
-        }
-        return this->unique < rhs.unique;
-    }
+    auto operator<=>(const LocalVariable &rhs) const noexcept = default;
 
     static inline LocalVariable noVariable() {
         return LocalVariable(NameRef::noName(), 0);

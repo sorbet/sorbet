@@ -1,6 +1,7 @@
 #ifndef SORBET_CORE_PACKAGES_STRATUM_H
 #define SORBET_CORE_PACKAGES_STRATUM_H
 
+#include <compare>
 #include <cstdint>
 
 namespace sorbet::core::packages {
@@ -21,29 +22,7 @@ public:
         return this->stratum;
     }
 
-    constexpr bool operator==(Stratum other) const {
-        return this->stratum == other.stratum;
-    }
-
-    constexpr bool operator!=(Stratum other) const {
-        return this->stratum != other.stratum;
-    }
-
-    constexpr bool operator<(Stratum other) const {
-        return this->stratum < other.stratum;
-    }
-
-    constexpr bool operator<=(Stratum other) const {
-        return this->stratum <= other.stratum;
-    }
-
-    constexpr bool operator>(Stratum other) const {
-        return this->stratum > other.stratum;
-    }
-
-    constexpr bool operator>=(Stratum other) const {
-        return this->stratum >= other.stratum;
-    }
+    constexpr auto operator<=>(const Stratum &other) const noexcept = default;
 };
 
 } // namespace sorbet::core::packages
