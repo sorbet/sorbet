@@ -23,13 +23,12 @@ module T::Private::Methods
     sig do
       params(
         mod: Module,
-        method_sig: Signature,
-        original_method: UnboundMethod,
+        method_name: Symbol,
         original_visibility: Symbol
       )
         .void
     end
-    def self.create_abstract_wrapper(mod, method_sig, original_method, original_visibility); end
+    def self.create_abstract_wrapper(mod, method_name, original_visibility); end
 
     sig do
       params(
