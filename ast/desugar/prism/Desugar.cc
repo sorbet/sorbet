@@ -131,6 +131,9 @@ private:
                                               pm_constant_id_t methodNameID, pm_location_t methodNamePrismLoc,
                                               Lambda &&body);
 
+    ast::ExpressionPtr desugarCallTargetNode(pm_call_target_node *callTargetNode, core::LocOffsets cloc,
+                                             ast::ExpressionPtr rhs);
+
     template <typename StoreType>
     StoreType desugarArguments(pm_arguments_node *node, pm_node *blockArgumentNode = nullptr);
 
@@ -704,6 +707,35 @@ ast::ExpressionPtr Desugarer::desugarConditionalSend(core::LocOffsets location, 
     return MK::InsSeq1(location, move(assignment), move(if_));
 }
 
+ast::ExpressionPtr Desugarer::desugarCallTargetNode(pm_call_target_node *node, core::LocOffsets cloc,
+                                                    ast::ExpressionPtr rhs) {
+    auto receiverNode = node->receiver;
+
+    auto methodName = translateConstantName(node->name);
+    auto methodNameLoc = translateLoc(node->message_loc);
+
+    if (PM_NODE_FLAG_P(node, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
+        auto body = [&rhs](ast::ExpressionPtr receiverTempLocal, core::LocOffsets parentLoc, core::NameRef methodName,
+                           core::LocOffsets methodNameLoc) {
+            return MK::Send1(parentLoc, move(receiverTempLocal), methodName, methodNameLoc, move(rhs));
+        };
+
+        return desugarConditionalSend(cloc, receiverNode, node->name, node->message_loc, body);
+    }
+
+    ast::ExpressionPtr receiver;
+    if (receiverNode == nullptr) { // Convert `foo()` to `self.foo()`
+        receiver = MK::Self(cloc.copyWithZeroLength());
+    } else {
+        receiver = desugar(receiverNode);
+    }
+
+    ast::Send::Flags flags;
+    flags.isPrivateOk = PM_NODE_FLAG_P(node, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
+
+    return MK::Send1(cloc, move(receiver), methodName, methodNameLoc, move(rhs), flags);
+}
+
 // Desugar multiple left hand side assignments into a sequence of assignments
 //
 // Considering this example:
@@ -763,37 +795,12 @@ ast::ExpressionPtr Desugarer::desugarMlhs(core::LocOffsets loc, PrismNode *lhs, 
             MK::Send1(zcloc, MK::Local(zcloc, tempExpanded), core::Names::squareBrackets(), zloc, MK::Int(zloc, i));
 
         if (auto *mlhs = down_cast<pm_multi_target_node>(c)) {
+            // A nested multi-target on the left hand side, like `a, (b, c) = []`
             stats.emplace_back(desugarMlhs(cloc, mlhs, move(val)));
         } else if (auto *callTargetNode = down_cast<pm_call_target_node>(c)) {
             // Target of an indirect write to the result of a method call
             // ... like `self.target1, self.target2 = 1, 2`, `rescue => self.target`, etc.
-            auto receiverNode = callTargetNode->receiver;
-
-            auto methodName = translateConstantName(callTargetNode->name);
-            auto methodNameLoc = translateLoc(callTargetNode->message_loc);
-
-            if (PM_NODE_FLAG_P(callTargetNode, PM_CALL_NODE_FLAGS_SAFE_NAVIGATION)) {
-                auto body = [&val](ast::ExpressionPtr receiverTempLocal, core::LocOffsets parentLoc,
-                                   core::NameRef methodName, core::LocOffsets methodNameLoc) {
-                    return MK::Send1(parentLoc, move(receiverTempLocal), methodName, methodNameLoc, move(val));
-                };
-
-                auto expr =
-                    desugarConditionalSend(cloc, receiverNode, callTargetNode->name, callTargetNode->message_loc, body);
-                stats.emplace_back(move(expr));
-            } else {
-                ast::ExpressionPtr receiver;
-                if (receiverNode == nullptr) { // Convert `foo()` to `self.foo()`
-                    receiver = MK::Self(zcloc);
-                } else {
-                    receiver = desugar(receiverNode);
-                }
-
-                ast::Send::Flags flags;
-                flags.isPrivateOk = PM_NODE_FLAG_P(callTargetNode, PM_CALL_NODE_FLAGS_IGNORE_VISIBILITY);
-
-                stats.emplace_back(MK::Send1(cloc, move(receiver), methodName, methodNameLoc, move(val), flags));
-            }
+            stats.emplace_back(desugarCallTargetNode(callTargetNode, cloc, move(val)));
         } else {
             ast::ExpressionPtr lh = desugar(c);
             if (auto restParam = ast::cast_tree<ast::RestParam>(lh)) {
@@ -4953,25 +4960,63 @@ ast::Rescue::RESCUE_CASE_store Desugarer::desugarRescueCases(pm_rescue_node *fir
         // Handle exception variable (e.g., the `e` in `rescue => e`)
         ast::ExpressionPtr varExpr;
         if (rescueNode->reference != nullptr) {
-            auto refExpr = desugar(rescueNode->reference);
-            bool isLocal = ast::isa_tree<ast::Local>(refExpr);
-            if (!isLocal) {
-                if (auto ident = ast::cast_tree<ast::UnresolvedIdent>(refExpr)) {
-                    isLocal = ident->kind == ast::UnresolvedIdent::Kind::Local;
-                }
-            }
-
-            if (isLocal) {
-                varExpr = move(refExpr);
-            } else {
-                // Non-local reference (e.g., @ex, @@ex, $ex) - create temp and wrap body
+            if (isa_node<pm_local_variable_target_node>(rescueNode->reference)) {
+                // Handle the common case of assigning to a local, like `rescue => ex`.
+                // In this case, we can just use the local variable directly, without introducing a synthetic temp
+                // variable.
+                varExpr = desugar(rescueNode->reference);
+            } else { // Handle cases that require a synthetic temporary variable, like `rescue => <rescueTemp>$123`
                 auto rescueTemp = nextUniqueDesugarName(core::Names::rescueTemp());
-                auto varLoc = refExpr.loc();
-                varExpr = ast::MK::Local(varLoc, rescueTemp);
+                auto referenceLoc = translateLoc(rescueNode->reference->location);
+                varExpr = ast::MK::Local(referenceLoc, rescueTemp);
+
+                ast::ExpressionPtr bodyStatement;
+                if (auto *callTargetNode = down_cast<pm_call_target_node>(rescueNode->reference)) {
+                    // Handle the uncommon case of sending to a call target, e.g.
+                    //
+                    //     begin
+                    //     rescue => self.ex
+                    //       "rescue body"
+                    //     end
+                    //
+                    // Desugars to:
+                    //
+                    //     begin
+                    //     rescue => $rescueTemp
+                    //       begin
+                    //         self.ex=($rescueTemp)
+                    //       end
+                    //       "rescue body"
+                    //     end
+                    auto rhs = ast::MK::Local(referenceLoc, rescueTemp);
+                    bodyStatement =
+                        desugarCallTargetNode(callTargetNode, translateLoc(callTargetNode->base.location), move(rhs));
+                } else {
+                    // Handle non-local variables (i.e. @ivar, @@cvar, $gvar), by creating a synthetic variable,
+                    // and assigning it to the non-local in the rescue body. E.g.
+                    //
+                    //     begin
+                    //     rescue => $ivar
+                    //       "rescue body"
+                    //     end
+                    //
+                    // Desugars to:
+                    //
+                    //     begin
+                    //     rescue => $rescueTemp
+                    //       begin
+                    //         $ivar = $rescueTemp
+                    //       end
+                    //       "rescue body"
+                    //     end
+                    auto lhs = desugar(rescueNode->reference);
+                    auto rhs = ast::MK::Local(referenceLoc, rescueTemp);
+                    bodyStatement = ast::MK::Assign(referenceLoc, move(lhs), move(rhs));
+                }
 
                 ast::InsSeq::STATS_store stats;
-                stats.emplace_back(ast::MK::Assign(varLoc, move(refExpr), ast::MK::Local(varLoc, rescueTemp)));
-                rescueBodyExpr = ast::MK::InsSeq(varLoc, move(stats), move(rescueBodyExpr));
+                stats.emplace_back(move(bodyStatement));
+                rescueBodyExpr = ast::MK::InsSeq(referenceLoc, move(stats), move(rescueBodyExpr));
             }
         } else {
             // Bare rescue clause with no variable - create synthetic temp variable
