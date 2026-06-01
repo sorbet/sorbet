@@ -40,6 +40,18 @@ class UndoState;
 class FileStratumMapping;
 
 /**
+ * Strategies for managing the kvstore over the duration of the slow path. Each stratum checked will first open the
+ * kvstore, and then close it at the end of its indexing phase.
+ */
+class KVStoreStrategy {
+public:
+    virtual ~KVStoreStrategy() {}
+
+    virtual std::unique_ptr<const OwnedKeyValueStore> openKVStore() = 0;
+    virtual void closeKVStore(std::unique_ptr<const OwnedKeyValueStore> kvstore) = 0;
+};
+
+/**
  * Encapsulates typechecker operations and enforces that they happen on a single thread.
  */
 class LSPTypechecker final {
@@ -101,8 +113,8 @@ class LSPTypechecker final {
 
     /** Conservatively reruns entire pipeline without caching any trees. Returns 'true' if committed, 'false' if
      * canceled. */
-    bool runSlowPath(LSPFileUpdates &updates, std::unique_ptr<const OwnedKeyValueStore> ownedKvstore,
-                     WorkerPool &workers, std::shared_ptr<core::ErrorFlusher> errorFlusher, SlowPathMode mode);
+    bool runSlowPath(LSPFileUpdates &updates, KVStoreStrategy &kvstore, WorkerPool &workers,
+                     std::shared_ptr<core::ErrorFlusher> errorFlusher, SlowPathMode mode);
 
     struct FastPathResult {
         // All of the files that we typechecked during the fast path.
@@ -115,11 +127,6 @@ class LSPTypechecker final {
     /** Runs incremental typechecking on the provided updates. Returns the final list of files typechecked. */
     FastPathResult runFastPath(LSPFileUpdates &updates, WorkerPool &workers,
                                std::shared_ptr<core::ErrorFlusher> errorFlusher, bool isNoopUpdateForRetypecheck) const;
-
-    /**
-     * Open the session-local kvstore.
-     */
-    std::unique_ptr<OwnedKeyValueStore> getKvStore() const;
 
     /**
      * Populate `this->indexedFinalGS` with copies of indexed trees from the `indexed` span, whose files are mentioned
