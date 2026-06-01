@@ -124,7 +124,6 @@ UnorderedSet<string> knownExpectations = {"parse-tree",
                                           "autogen",
                                           "document-symbols",
                                           "package-tree",
-                                          "document-formatting-rubyfmt",
                                           "autocorrects",
                                           "minimized-rbi",
                                           "rbi-gen"};

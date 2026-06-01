@@ -317,7 +317,6 @@ const UnorderedSet<string> ignoredAssertionLabels = {
     "NOTE",
     "See",
     "packaged",
-    "rubyfmt-force-exit",
     "compiled",
     "exclude-from-file-update",
 };

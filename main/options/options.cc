@@ -536,12 +536,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
 
     // ----- LSP FEATURES ------------------------------------------------- {{{
     section = groupToString(Group::LSP_FEATURE);
-    options.add_options(section)("enable-experimental-lsp-document-formatting-rubyfmt",
-                                 "Enable experimental LSP feature: Document Formatting with Rubyfmt");
-    options.add_options(section)("rubyfmt-path",
-                                 "Path to the rubyfmt executable used for document formatting. Will search on `PATH` "
-                                 "if <path> contains no slashes.",
-                                 cxxopts::value<string>()->default_value(empty.rubyfmtPath), "<path>");
     options.add_options(section)("enable-experimental-lsp-document-highlight",
                                  "Enable experimental LSP feature: Document Highlight");
     options.add_options(section)("enable-experimental-lsp-signature-help",
@@ -1010,14 +1004,6 @@ void readOptions(Options &opts,
             enableAllLSPFeatures || raw["enable-experimental-lsp-document-highlight"].as<bool>();
         opts.lspSignatureHelpEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-signature-help"].as<bool>();
         opts.forciblySilenceLspMultipleDirError = raw["forcibly-silence-lsp-multiple-dir-error"].as<bool>();
-        opts.rubyfmtPath = raw["rubyfmt-path"].as<string>();
-        if (enableAllLSPFeatures || raw["enable-experimental-lsp-document-formatting-rubyfmt"].as<bool>()) {
-            if (!FileOps::exists(opts.rubyfmtPath)) {
-                logger->error("`{}` does not exist, LSP rubyfmt integration will not be enabled", opts.rubyfmtPath);
-            } else {
-                opts.lspDocumentFormatRubyfmtEnabled = true;
-            }
-        }
         opts.outOfOrderReferenceChecksEnabled = raw["check-out-of-order-constant-references"].as<bool>();
         if (raw.count("track-untyped") > 0) {
             opts.trackUntyped = text2TrackUntyped(raw["track-untyped"].as<string>(), *logger);

@@ -480,10 +480,6 @@ pipeline_tests(
             "testdata/lsp/fast_path/not_enough_files/not_enough_files__*.rb",
             "testdata/lsp/fast_path/too_many_files/too_many_files__*.rb",
             "testdata/lsp/ripper_parse_error_formatting.rb",
-            "testdata/lsp/rubyfmt_init_error.rb",
-            "testdata/lsp/rubyfmt_io_error_formatting.rb",
-            "testdata/lsp/rubyfmt_ruby_error.rb",
-            "testdata/lsp/rubyfmt_unknown_error.rb",
             "testdata/lsp/successful_formatting.rb",
             "testdata/lsp/syntax_error_formatting.rb",
             "testdata/lsp/workspace_symbols_stdlib.rb",
@@ -560,7 +556,6 @@ pipeline_tests(
         ],
     ),
     "LSPTests",
-    extra_files = ["testdata/lsp/rubyfmt-stub/rubyfmt"],
 )
 
 pipeline_tests(
@@ -602,7 +597,6 @@ pipeline_tests(
         ],
     ),
     "PrismLSPTests",
-    extra_files = ["testdata/lsp/rubyfmt-stub/rubyfmt"],
     parser = "prism",
 )
 
