@@ -10,11 +10,15 @@ trap cleanup EXIT
 mkdir "$dir/cache"
 
 run_sorbet() {
-  main/sorbet --censor-for-snapshot-tests \
+  if main/sorbet --censor-for-snapshot-tests \
     --silence-dev-message \
     --cache-dir "$dir"/cache \
     test/cli/errors-skip-cache/"$1" \
-    2>&1 || true
+    2>&1
+  then
+    echo "Expected to fail!"
+    exit 1
+  fi
 }
 
 run_twice() {

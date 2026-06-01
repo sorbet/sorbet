@@ -11,10 +11,19 @@ args=(
 )
 
 echo --- implicit 'everywhere' ---
-main/sorbet "${args[@]}" --track-untyped 2>&1 || true
+if main/sorbet "${args[@]}" --track-untyped 2>&1; then
+  echo "Expected to fail!"
+  exit 1
+fi
 
 echo --- explicit 'nowhere' ---
-main/sorbet "${args[@]}" --track-untyped=nowhere 2>&1 || true
+if main/sorbet "${args[@]}" --track-untyped=nowhere 2>&1; then
+  echo "Expected to fail!"
+  exit 1
+fi
 
 echo --- explicit 'everywhere' ---
-main/sorbet "${args[@]}" --track-untyped=everywhere 2>&1 || true
+if main/sorbet "${args[@]}" --track-untyped=everywhere 2>&1; then
+  echo "Expected to fail!"
+  exit 1
+fi

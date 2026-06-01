@@ -11,7 +11,10 @@ main/sorbet --silence-dev-message -p file-table-json --no-stdlib foo.rb
 rm foo.rb
 
 echo '------------------------------------------------------------------------'
-main/sorbet --silence-dev-message -p file-table-json --no-stdlib --dir . --ignore external 2>&1 || true
+if main/sorbet --silence-dev-message -p file-table-json --no-stdlib --dir . --ignore external 2>&1; then
+  echo "Expected to fail!"
+  exit 1
+fi
 
 echo '------------------------------------------------------------------------'
 touch foo.rb
