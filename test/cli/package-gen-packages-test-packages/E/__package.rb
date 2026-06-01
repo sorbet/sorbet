@@ -5,4 +5,7 @@ class E < PackageSpec
   layer 'util'
 
   export E::CONSTANT_FROM_E
+
+  visible_to DoesNotExis
+  visible_to AlsoDoesNotExist::*
 end
