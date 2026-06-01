@@ -720,6 +720,21 @@ PackageInfo::aggregateMissingExports(const core::GlobalState &gs, vector<core::S
 std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingVisibleTo(
     const core::GlobalState &gs, UnorderedSet<core::packages::MangledName> &visibleTos, bool visibleToTests) const {
     std::vector<core::AutocorrectSuggestion::Edit> allEdits;
+
+    // Delete `visible_to`s that refer to constants/packages that don't exist
+    for (auto &v : visibleTo_) {
+        if (!v.mangledName.owner.exists()) {
+            auto visibleToLoc = core::Loc(file, v.loc);
+            auto [lineStart, numWhitespace] = visibleToLoc.findStartOfIndentation(gs);
+            // -numWhitespace - 1 for the indentation and previous new line
+            auto beginPos = lineStart.adjust(gs, -numWhitespace - 1, 0).beginPos();
+            auto endPos = visibleToLoc.endPos();
+            core::Loc replaceLoc(visibleToLoc.file(), beginPos, endPos);
+            core::AutocorrectSuggestion::Edit deleteEdit = {replaceLoc, ""};
+            allEdits.push_back(deleteEdit);
+        }
+    }
+
     for (auto &pkgName : visibleTos) {
         auto autocorrect = addVisibleTo(gs, pkgName);
         if (autocorrect.has_value()) {

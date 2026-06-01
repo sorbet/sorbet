@@ -236,10 +236,12 @@ void GenPackages::run(core::GlobalState &gs) {
         // over all files, and it doesn't make sense to rerun the loop for each package, so we do this work upfront
         auto exportsAutocorrect = pkgInfo.aggregateMissingExports(gs, toExport[pkgName]);
         // Similar idea for visible_to.
-        auto visibleToAutocorrect =
-            gs.packageDB().updateVisibilityFor(pkgName)
-                ? pkgInfo.aggregateMissingVisibleTo(gs, neededVisibleTo[pkgName], neededVisibleToTests[pkgName])
-                : nullopt;
+        // We always call aggregateMissingVisibleTo so that visible_to entries referencing non-existent packages
+        // get deleted, even if we're not adding new visible_to entries for this package.
+        auto emptyVisibleTos = UnorderedSet<core::packages::MangledName>{};
+        auto visibleToAutocorrect = pkgInfo.aggregateMissingVisibleTo(
+            gs, gs.packageDB().updateVisibilityFor(pkgName) ? neededVisibleTo[pkgName] : emptyVisibleTos,
+            gs.packageDB().updateVisibilityFor(pkgName) && neededVisibleToTests[pkgName]);
 
         auto autocorrects = vector<core::AutocorrectSuggestion>{};
         auto missingTypes = vector<string>{};
