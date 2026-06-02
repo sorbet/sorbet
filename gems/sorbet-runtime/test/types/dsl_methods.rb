@@ -161,6 +161,22 @@ class Opus::Types::Test::DSLMethodsTest < Critic::Unit::UnitTest
       T::Private::Abstract::Validate.validate_subclass(child)
     end
 
+    it "works with allow_incompatible using inline def" do
+      parent = Class.new do
+        extend T::Sig, T::Helpers
+        abstract!
+        sig { abstract.void }
+        def foo; end
+      end
+      child = Class.new(parent) do
+        extend T::Sig, T::DefMods
+        sig { void }
+        private override(def foo; end, allow_incompatible: true)
+      end
+
+      T::Private::Abstract::Validate.validate_subclass(child)
+    end
+
     it "works with allow_incompatible: :visibility" do
       parent = Class.new do
         extend T::Sig, T::Helpers
