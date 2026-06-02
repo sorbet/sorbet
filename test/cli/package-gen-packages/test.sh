@@ -47,7 +47,9 @@ echo
 echo "###### cat E/__package.rb ######"
 cat E/__package.rb
 
-
+echo
+echo "###### cat PackageWithIgnore/__package.rb ######"
+cat PackageWithIgnore/__package.rb
 
 echo "##############################"
 echo "###### Package directed ######"
@@ -86,3 +88,7 @@ cat D/ANestedPackage/__package.rb
 echo
 echo "###### cat E/__package.rb ######"
 cat E/__package.rb
+
+echo
+echo "###### cat PackageWithIgnore/__package.rb ######"
+cat PackageWithIgnore/__package.rb

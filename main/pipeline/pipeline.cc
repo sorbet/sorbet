@@ -192,6 +192,13 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
         level = core::StrictLevel::False;
     }
 
+    if (gs.packageDB().genPackagesMode() != core::packages::GenPackagesMode::Disabled &&
+        level < core::StrictLevel::False) {
+        // In gen-packages mode, we want to ensure we see all definitions and references, even if they're in
+        // # typed: ignore files, so that we can generate accurate __package.rb files
+        level = core::StrictLevel::False;
+    }
+
     return level;
 }
 
