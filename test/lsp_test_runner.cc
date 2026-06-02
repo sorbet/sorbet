@@ -440,52 +440,6 @@ void testDocumentSymbols(LSPWrapper &lspWrapper, Expectations &test, int &nextId
     }
 }
 
-void testDocumentFormatting(LSPWrapper &lspWrapper, Expectations &test, int &nextId, string_view uri,
-                            string_view testFile) {
-    auto expectationFileName = test.expectations["document-formatting-rubyfmt"][testFile];
-    if (expectationFileName.empty()) {
-        // No .exp file found; nothing to do.
-        return;
-    }
-
-    auto params = make_unique<DocumentFormattingParams>(make_unique<TextDocumentIdentifier>(string(uri)),
-                                                        make_unique<FormattingOptions>(4, 4));
-    auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentFormatting, move(params));
-    auto responses = getLSPResponsesFor(lspWrapper, make_unique<LSPMessage>(move(req)));
-
-    // successful response
-    if (responses.at(0)->isResponse()) {
-        INFO("Did not receive exactly one response for a documentFormatting request.");
-        REQUIRE_EQ(responses.size(), 1);
-        auto &msg = responses.at(0);
-        REQUIRE(msg->isResponse());
-        auto &response = msg->asResponse();
-        REQUIRE_MESSAGE(response.result, "Document formatting request returned error: " << msg->toJSON());
-        auto &receivedFormattingResponse = get<variant<JSONNullObject, vector<unique_ptr<TextEdit>>>>(*response.result);
-        auto expectedOutput = FileOps::read(test.folder + expectationFileName);
-        if (auto *edits = get_if<vector<unique_ptr<TextEdit>>>(&receivedFormattingResponse)) {
-            // We can support multiple edits, but right now the impl only returns one.
-            REQUIRE_EQ(1, edits->size());
-            auto formattedText = (*edits)[0]->newText;
-            REQUIRE_EQ(expectedOutput, formattedText);
-        } else {
-            // Syntax error responses return null
-            auto isJSONNullObject = std::holds_alternative<JSONNullObject>(receivedFormattingResponse);
-            REQUIRE(isJSONNullObject);
-            REQUIRE_EQ(expectedOutput, "");
-        }
-    } else {
-        // Error responses return both a user notification and an LSP error
-        REQUIRE_EQ(responses.size(), 2);
-        REQUIRE(responses.at(0)->isNotification());
-        auto &errorMsg = responses.at(1);
-        REQUIRE(errorMsg->isResponse());
-        auto &receivedErrorResponse = *errorMsg->asResponse().error;
-        auto expectedOutput = FileOps::read(test.folder + expectationFileName);
-        REQUIRE_EQ(expectedOutput, receivedErrorResponse->message);
-    }
-}
-
 enum class ExpectDiagnosticMessages {
     No = 0,
     Yes = 1,
@@ -552,7 +506,6 @@ TEST_CASE("LSPTest") {
             BooleanPropertyAssertion::getValue("enable-experimental-lsp-extract-to-variable", assertions)
                 .value_or(false);
         opts.disableWatchman = true;
-        opts.rubyfmtPath = "test/testdata/lsp/rubyfmt-stub/rubyfmt";
 
         // Set to a number that is reasonable large for tests, but small enough that we can have a test to handle
         // this edge case. If you change this number, `fast_path/{too_many_files,not_enough_files,initialize}` will
@@ -651,7 +604,6 @@ TEST_CASE("LSPTest") {
 
     for (auto &filename : filenames) {
         testDocumentSymbols(*lspWrapper, test, nextId, testFileUris[filename], filename);
-        testDocumentFormatting(*lspWrapper, test, nextId, testFileUris[filename], filename);
     }
     testQuickFixCodeActions(*lspWrapper, test, filenames, assertions, testFileUris, nextId);
 

@@ -1194,46 +1194,6 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                         },
                                         classTypes);
 
-    auto FormattingOptions = makeObject("FormattingOptions",
-                                        {
-                                            makeField("tabSize", JSONInt),
-                                            makeField("insertSpaces", JSONBool),
-                                        },
-                                        classTypes);
-
-    auto DocumentFormattingParams = makeObject("DocumentFormattingParams",
-                                               {
-                                                   makeField("textDocument", TextDocumentIdentifier),
-                                                   makeField("options", FormattingOptions),
-                                               },
-                                               classTypes);
-
-    auto DocumentRangeFormattingParams = makeObject("DocumentRangeFormattingParams",
-                                                    {
-                                                        makeField("textDocument", TextDocumentIdentifier),
-                                                        makeField("range", Range),
-                                                        makeField("options", FormattingOptions),
-                                                    },
-                                                    classTypes);
-
-    auto DocumentOnTypeFormattingParams = makeObject("DocumentOnTypeFormattingParams",
-                                                     {
-                                                         makeField("textDocument", TextDocumentIdentifier),
-                                                         makeField("position", Position),
-                                                         makeField("ch", JSONString),
-                                                         makeField("options", FormattingOptions),
-                                                     },
-                                                     classTypes);
-
-    auto DocumentOnTypeFormattingRegistrationOptions =
-        makeObject("DocumentOnTypeFormattingRegistrationOptions",
-                   {
-                       makeField("documentSelector", makeVariant({DocumentSelector, JSONNull})),
-                       makeField("firstTriggerCharacter", JSONString),
-                       makeField("moreTriggerCharacter", makeOptional(JSONString)),
-                   },
-                   classTypes);
-
     auto RenameParams = makeObject("RenameParams",
                                    {
                                        makeField("textDocument", TextDocumentIdentifier),
@@ -1429,7 +1389,6 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                      "textDocument/didOpen",
                                      "textDocument/documentHighlight",
                                      "textDocument/documentSymbol",
-                                     "textDocument/formatting",
                                      "textDocument/hover",
                                      "textDocument/prepareRename",
                                      "textDocument/publishDiagnostics",
@@ -1462,7 +1421,6 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                 {"textDocument/codeAction", CodeActionParams},
                                                 {"codeAction/resolve", CodeAction},
                                                 {"textDocument/implementation", ImplementationParams},
-                                                {"textDocument/formatting", DocumentFormattingParams},
                                                 {"workspace/symbol", WorkspaceSymbolParams},
                                                 {"sorbet/error", SorbetErrorParams},
                                                 {"sorbet/readFile", TextDocumentIdentifier},
@@ -1500,7 +1458,6 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
             {"textDocument/references", makeVariant({JSONNull, makeArray(Location)})},
             {"textDocument/rename", makeVariant({JSONNull, WorkspaceEdit})},
             {"textDocument/signatureHelp", makeVariant({JSONNull, SignatureHelp})},
-            {"textDocument/formatting", makeVariant({JSONNull, makeArray(TextEdit)})},
             // (CodeAction | Command)[] | null
             // Sorbet only sends CodeAction[].
             {"textDocument/codeAction", makeVariant({JSONNull, makeArray(CodeAction)})},

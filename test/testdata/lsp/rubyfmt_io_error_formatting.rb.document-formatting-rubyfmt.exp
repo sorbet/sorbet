@@ -1,2 +1,0 @@
-`rubyfmt` encountered an IO error while writing test/testdata/lsp/rubyfmt_io_error_formatting.rb.
-This is likely a bug in `rubyfmt`.

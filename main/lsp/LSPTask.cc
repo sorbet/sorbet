@@ -83,9 +83,6 @@ ResponseMessageStatus statusForResponse(const ResponseMessage &response) {
                 } else if constexpr (is_same_v<T, variant<JSONNullObject, unique_ptr<SignatureHelp>>>) {
                     // textDocument/signatureHelp
                     return ResponseMessageStatus::Unknown;
-                } else if constexpr (is_same_v<T, variant<JSONNullObject, vector<unique_ptr<TextEdit>>>>) {
-                    // textDocument/formatting
-                    return ResponseMessageStatus::Unknown;
                 } else if constexpr (is_same_v<T, variant<JSONNullObject, vector<unique_ptr<CodeAction>>>>) {
                     // textDocument/codeAction
                     return ResponseMessageStatus::Unknown;
@@ -185,8 +182,6 @@ ConstExprStr LSPTask::methodString() const {
             return "textDocument.documentHighlight";
         case LSPMethod::TextDocumentDocumentSymbol:
             return "textDocument.documentSymbol";
-        case LSPMethod::TextDocumentFormatting:
-            return "textDocument.formatting";
         case LSPMethod::TextDocumentHover:
             return "textDocument.hover";
         case LSPMethod::TextDocumentPrepareRename:

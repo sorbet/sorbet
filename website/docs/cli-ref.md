@@ -226,12 +226,6 @@ Usage:
 ## LSP FEATURE options
 
 ```plaintext
-      --enable-experimental-lsp-document-formatting-rubyfmt
-                                Enable experimental LSP feature: Document Formatting with
-                                Rubyfmt
-      --rubyfmt-path <path>     Path to the rubyfmt executable used for document
-                                formatting. Will search on `PATH` if <path> contains no
-                                slashes. (default: rubyfmt)
       --enable-experimental-lsp-document-highlight
                                 Enable experimental LSP feature: Document Highlight
       --enable-experimental-lsp-signature-help
