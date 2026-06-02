@@ -51,6 +51,36 @@ if defined? ::RSpec::Mocks
   end
 end
 
+# Allow using `sig {...}` on top of a `let`-defined method in an RSpec example group
+if defined? ::RSpec::Core::MemoizedHelpers::ClassMethods
+  module T
+    module CompatibilityPatches
+      module RSpecCompatibility
+        module MemoizedHelpers
+          def let(name, &block)
+            current_declaration = T::Private::DeclState.current.active_declaration
+            return super unless current_declaration
+
+            # Make sure that our method_added hook will fire
+            let_definitions = ::RSpec::Core::MemoizedHelpers.module_for(self)
+            return super unless let_definitions.is_a?(T::Private::Methods::MethodHooks)
+
+            # Make it behave like the `sig` had been written inside the
+            # `LetDefinitions` module, so that the runtime wrapping happens on
+            # the inner method (the one that's not memoized), so that the
+            # runtime type validation only happens once, not every time that
+            # the `let`-defined method is called.
+            current_declaration.mod = let_definitions
+
+            super
+          end
+        end
+        ::RSpec::Core::MemoizedHelpers::ClassMethods.prepend(MemoizedHelpers)
+      end
+    end
+  end
+end
+
 # Work around for sorbet-runtime wrapped methods.
 #
 # When a sig is defined, sorbet-runtime will replace the sigged method
