@@ -57,6 +57,8 @@ if defined? ::RSpec::Core::MemoizedHelpers::ClassMethods
     module CompatibilityPatches
       module RSpecCompatibility
         module MemoizedHelpers
+          # `let!`, `subject`, and `subject!` are implemented by dispatching to
+          # `let`, so this should cover those methods too.
           def let(name, &block)
             current_declaration = T::Private::DeclState.current.active_declaration
             return super unless current_declaration
