@@ -1,6 +1,6 @@
 test/cli/override-typed-bad/override-typed-bad.rb: Useless override of strictness level https://srb.help/2001
 
-test/cli/override-typed-bad/override-typed-bad.rb:2: Expected `Integer` but found `String("s")` for argument `arg0` https://srb.help/7002
+test/cli/override-typed-bad/override-typed-bad.rb:2: Expected `Integer` but found `String("s")` for argument `arg0` on `Integer#+ (overload.1)` component of `Integer(1)` https://srb.help/7002
      2 |1 + "s"
             ^^^
   Expected `Integer` for argument `arg0` of method `Integer#+ (overload.1)`:
@@ -13,7 +13,7 @@ test/cli/override-typed-bad/override-typed-bad.rb:2: Expected `Integer` but foun
             ^^^
 Errors: 2
 ----
-test/cli/override-typed-bad/override-typed-bad.rb:2: Expected `Integer` but found `String("s")` for argument `arg0` https://srb.help/7002
+test/cli/override-typed-bad/override-typed-bad.rb:2: Expected `Integer` but found `String("s")` for argument `arg0` on `Integer#+ (overload.1)` component of `Integer(1)` https://srb.help/7002
      2 |1 + "s"
             ^^^
   Expected `Integer` for argument `arg0` of method `Integer#+ (overload.1)`:
@@ -26,7 +26,7 @@ test/cli/override-typed-bad/override-typed-bad.rb:2: Expected `Integer` but foun
             ^^^
 Errors: 1
 ----
-test/cli/override-typed-bad/override-typed-bad.rb:2: Expected `Integer` but found `String("s")` for argument `arg0` https://srb.help/7002
+test/cli/override-typed-bad/override-typed-bad.rb:2: Expected `Integer` but found `String("s")` for argument `arg0` on `Integer#+ (overload.1)` component of `Integer(1)` https://srb.help/7002
      2 |1 + "s"
             ^^^
   Expected `Integer` for argument `arg0` of method `Integer#+ (overload.1)`:

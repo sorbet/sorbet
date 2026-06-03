@@ -10,7 +10,7 @@ suggest_t_must.rb:4: Method `[]` does not exist on `NilClass` component of `T.ni
      4 |foo[0]
         ^^^
 
-suggest_t_must.rb:6: Expected `String` but found `T.nilable(String)` for argument `arg0` https://srb.help/7002
+suggest_t_must.rb:6: Expected `String` but found `T.nilable(String)` for argument `arg0` on `String#+` component of `String("hi")` https://srb.help/7002
      6 |"hi" + foo
                ^^^
   Expected `String` for argument `arg0` of method `String#+`:

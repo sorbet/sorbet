@@ -35,7 +35,7 @@
      1 |# typed: strict
         ^
 
-[<none>] unpackaged.rb:4: Expected `Integer` but found `String("")` for argument `arg0` https://srb.help/7002
+[<none>] unpackaged.rb:4: Expected `Integer` but found `String("")` for argument `arg0` on `Integer#+ (overload.1)` component of `Integer(1)` https://srb.help/7002
      4 |  1 + ""
               ^^
   Expected `Integer` for argument `arg0` of method `Integer#+ (overload.1)`:

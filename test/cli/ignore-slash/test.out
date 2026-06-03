@@ -1,4 +1,4 @@
-bar.rb:4: Expected `Integer` but found `String("bar.rb")` for argument `arg0` https://srb.help/7002
+bar.rb:4: Expected `Integer` but found `String("bar.rb")` for argument `arg0` on `Integer#+ (overload.1)` component of `Integer(1)` https://srb.help/7002
      4 |1 + "bar.rb"
             ^^^^^^^^
   Expected `Integer` for argument `arg0` of method `Integer#+ (overload.1)`:

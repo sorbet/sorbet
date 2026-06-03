@@ -22,5 +22,5 @@ def target
   [A.new, B.new].sample
 end
 
-target.foo(:symbol) # error: Expected `String` but found `Symbol(:symbol)` for argument `x` on `A` component of `T.any(A, B)`
-target.foo("string") # error: Expected `Symbol` but found `String("string")` for argument `x` on `B` component of `T.any(A, B)`
+target.foo(:symbol) # error: Expected `String` but found `Symbol(:symbol)` for argument `x` on `A#foo` component of `T.any(A, B)`
+target.foo("string") # error: Expected `Symbol` but found `String("string")` for argument `x` on `B#foo` component of `T.any(A, B)`

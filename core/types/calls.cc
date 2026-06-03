@@ -370,7 +370,7 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
         } else {
             if (fullType.type != thisType) {
                 e.setHeader("Expected `{}` but found `{}` for argument `{}` on `{}` component of `{}`",
-                            expectedType.show(gs), argTpe.type.show(gs), argSym.parameterName(gs), thisType.show(gs),
+                            expectedType.show(gs), argTpe.type.show(gs), argSym.parameterName(gs), method.show(gs),
                             fullType.type.show(gs));
             } else {
                 e.setHeader("Expected `{}` but found `{}` for argument `{}`", expectedType.show(gs),

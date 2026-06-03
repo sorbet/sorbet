@@ -1,4 +1,4 @@
-test/cli/override-typed/override-typed.rb:1: Expected `Integer` but found `String("s")` for argument `arg0` https://srb.help/7002
+test/cli/override-typed/override-typed.rb:1: Expected `Integer` but found `String("s")` for argument `arg0` on `Integer#+ (overload.1)` component of `Integer(1)` https://srb.help/7002
      1 |1 + "s"
             ^^^
   Expected `Integer` for argument `arg0` of method `Integer#+ (overload.1)`:
@@ -10,7 +10,7 @@ test/cli/override-typed/override-typed.rb:1: Expected `Integer` but found `Strin
      1 |1 + "s"
             ^^^
 Errors: 1
-./test/cli/override-typed/override-typed.rb:1: Expected `Integer` but found `String("s")` for argument `arg0` https://srb.help/7002
+./test/cli/override-typed/override-typed.rb:1: Expected `Integer` but found `String("s")` for argument `arg0` on `Integer#+ (overload.1)` component of `Integer(1)` https://srb.help/7002
      1 |1 + "s"
             ^^^
   Expected `Integer` for argument `arg0` of method `Integer#+ (overload.1)`:
@@ -22,7 +22,7 @@ Errors: 1
      1 |1 + "s"
             ^^^
 Errors: 1
-test/cli/override-typed/override-typed.rb:1: Expected `Integer` but found `String("s")` for argument `arg0` https://srb.help/7002
+test/cli/override-typed/override-typed.rb:1: Expected `Integer` but found `String("s")` for argument `arg0` on `Integer#+ (overload.1)` component of `Integer(1)` https://srb.help/7002
      1 |1 + "s"
             ^^^
   Expected `Integer` for argument `arg0` of method `Integer#+ (overload.1)`:

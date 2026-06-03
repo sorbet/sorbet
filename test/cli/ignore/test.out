@@ -1,4 +1,4 @@
-subfolder2/subfolder/bar.rb:4: Expected `Integer` but found `String("subfolder2/subfolder/bar.rb")` for argument `arg0` https://srb.help/7002
+subfolder2/subfolder/bar.rb:4: Expected `Integer` but found `String("subfolder2/subfolder/bar.rb")` for argument `arg0` on `Integer#+ (overload.1)` component of `Integer(1)` https://srb.help/7002
      4 |1 + "subfolder2/subfolder/bar.rb"
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Expected `Integer` for argument `arg0` of method `Integer#+ (overload.1)`:
@@ -10,7 +10,7 @@ subfolder2/subfolder/bar.rb:4: Expected `Integer` but found `String("subfolder2/
      4 |1 + "subfolder2/subfolder/bar.rb"
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-bar.rb:4: Expected `Integer` but found `String("bar.rb")` for argument `arg0` https://srb.help/7002
+bar.rb:4: Expected `Integer` but found `String("bar.rb")` for argument `arg0` on `Integer#+ (overload.1)` component of `Integer(1)` https://srb.help/7002
      4 |1 + "bar.rb"
             ^^^^^^^^
   Expected `Integer` for argument `arg0` of method `Integer#+ (overload.1)`:
