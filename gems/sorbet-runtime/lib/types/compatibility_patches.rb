@@ -60,21 +60,31 @@ if defined? ::RSpec::Core::MemoizedHelpers::ClassMethods
           # `let!`, `subject`, and `subject!` are implemented by dispatching to
           # `let`, so this should cover those methods too.
           def let(name, &block)
+            # TODO(jez) This will need to use consume!
+
             current_declaration = T::Private::DeclState.current.active_declaration
             return super unless current_declaration
+            T::Private::DeclState.current.reset!
 
-            # Make sure that our method_added hook will fire
-            let_definitions = ::RSpec::Core::MemoizedHelpers.module_for(self)
-            return super unless let_definitions.is_a?(T::Private::Methods::MethodHooks)
-
-            # Make it behave like the `sig` had been written inside the
-            # `LetDefinitions` module, so that the runtime wrapping happens on
-            # the inner method (the one that's not memoized), so that the
-            # runtime type validation only happens once, not every time that
-            # the `let`-defined method is called.
-            current_declaration.mod = let_definitions
-
+            # Allow the `let`-defined methods to be defined
             super
+
+            # Stash the sig and re-define the method RSpec just defined. This
+            # ensures that the `sig` attaches to the outer method, not any
+            # method inside the LetDefinitions module.
+            #
+            # Unfortunately, this means that the runtime checks are not
+            # memoized (but they never were).
+            #
+            # (An alternative approach of pretending that the `sig` was actually
+            # written inside the `LetDefinitions` module didn't work, because
+            # things like `sig {override}` broke: the `LetDefinitions` module
+            # has no ancestors and thus does not override anything)
+
+            method = instance_method(name)
+            remove_method(name)
+            T::Private::DeclState.current.active_declaration = current_declaration
+            define_method(name, method)
           end
         end
         ::RSpec::Core::MemoizedHelpers::ClassMethods.prepend(MemoizedHelpers)
