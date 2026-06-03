@@ -323,8 +323,9 @@ namespace {
 
 unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Loc receiverLoc, ClassOrModuleRef inClass,
                                MethodRef method, const TypeAndOrigins &argTpe, const ParamInfo &argSym,
-                               const TypePtr &selfType, const vector<TypePtr> &targs, Loc argLoc,
-                               Loc originForUninitialized, bool mayBeSetter = false) {
+                               const TypePtr &selfType, const TypeAndOrigins &fullType, const TypePtr &thisType,
+                               const vector<TypePtr> &targs, Loc argLoc, Loc originForUninitialized,
+                               bool mayBeSetter = false) {
     TypePtr expectedType = Types::resultTypeAsSeenFrom(gs, argSym.type, method.data(gs)->owner, inClass, targs);
     if (!expectedType) {
         expectedType = Types::untyped(method);
@@ -367,8 +368,14 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
             e.setHeader("Assigning a value to `{}` that does not match expected type `{}`", argSym.parameterName(gs),
                         expectedType.show(gs));
         } else {
-            e.setHeader("Expected `{}` but found `{}` for argument `{}`", expectedType.show(gs), argTpe.type.show(gs),
-                        argSym.parameterName(gs));
+            if (fullType.type != thisType && isa_type<OrType>(fullType.type)) {
+                e.setHeader("Expected `{}` but found `{}` for argument `{}` on `{}` component of `{}`",
+                            expectedType.show(gs), argTpe.type.show(gs), argSym.parameterName(gs), method.show(gs),
+                            fullType.type.show(gs));
+            } else {
+                e.setHeader("Expected `{}` but found `{}` for argument `{}`", expectedType.show(gs),
+                            argTpe.type.show(gs), argSym.parameterName(gs));
+            }
             auto for_ = ErrorColors::format("argument `{}` of method `{}`", argSym.parameterName(gs), method.show(gs));
             e.addErrorSection(TypeAndOrigins::explainExpected(gs, expectedType, argSym.loc, for_));
         }
@@ -1078,8 +1085,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         }
 
         auto offset = ait - args.args.begin();
-        if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method, *arg, param, args.selfType, targs,
-                                  args.argLoc(offset), args.originForUninitialized, args.args.size() == 1)) {
+        if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method, *arg, param, args.selfType,
+                                  args.fullType, args.thisType, targs, args.argLoc(offset), args.originForUninitialized,
+                                  args.args.size() == 1)) {
             result.main.errors.emplace_back(std::move(e));
         }
 
@@ -1218,9 +1226,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
             // If there are positional arguments left to be filled, but there were keyword arguments present,
             // consume the keyword args hash as though it was a positional arg.
-            if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method,
-                                      TypeAndOrigins{kwargs, {kwargsLoc}}, *pit, args.selfType, targs, kwargsLoc,
-                                      args.originForUninitialized, args.args.size() == 1)) {
+            if (auto e =
+                    matchArgType(gs, *constr, args.receiverLoc(), symbol, method, TypeAndOrigins{kwargs, {kwargsLoc}},
+                                 *pit, args.selfType, args.fullType, args.thisType, targs, kwargsLoc,
+                                 args.originForUninitialized, args.args.size() == 1)) {
                 result.main.errors.emplace_back(std::move(e));
             }
 
@@ -1258,8 +1267,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
             if (hasKwSplatParam && !hasKwParam) {
                 if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method, kwSplatTPO, *kwSplatParam,
-                                          args.selfType, targs, kwargsLoc, args.originForUninitialized,
-                                          args.args.size() == 1)) {
+                                          args.selfType, args.fullType, args.thisType, targs, kwargsLoc,
+                                          args.originForUninitialized, args.args.size() == 1)) {
                     result.main.errors.emplace_back(std::move(e));
                 }
             } else if (hasKwParam) {
@@ -1409,7 +1418,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                         // keyword arguments separately from the ones that come from the kwsplat
                         TypeAndOrigins tpe{val, kwargsLoc};
                         if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method, tpe, kwParam,
-                                                  args.selfType, targs, kwargsLoc, args.originForUninitialized)) {
+                                                  args.selfType, args.fullType, args.thisType, targs, kwargsLoc,
+                                                  args.originForUninitialized)) {
                             result.main.errors.emplace_back(std::move(e));
                         }
                     }
@@ -1454,7 +1464,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 }
                 TypeAndOrigins tpe{hash->values[offset], originLoc};
                 if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method, tpe, kwParam, args.selfType,
-                                          targs, argLoc, args.originForUninitialized)) {
+                                          args.fullType, args.thisType, targs, argLoc, args.originForUninitialized)) {
                     result.main.errors.emplace_back(std::move(e));
                 }
 
