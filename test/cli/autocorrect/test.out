@@ -50,7 +50,7 @@ autocorrect.rb:4: Method `[]` does not exist on `NilClass` component of `T.nilab
      4 |foo[0]
         ^^^
 
-autocorrect.rb:6: Expected `String` but found `T.nilable(String)` for argument `arg0` on `String#+` component of `String("hi")` https://srb.help/7002
+autocorrect.rb:6: Expected `String` but found `T.nilable(String)` for argument `arg0` https://srb.help/7002
      6 |"hi" + foo
                ^^^
   Expected `String` for argument `arg0` of method `String#+`:

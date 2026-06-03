@@ -10,7 +10,7 @@ suggest_t_unsafe.rb:8: Method `[]` does not exist on `NilClass` component of `T.
      8 |foo[0]
         ^^^
 
-suggest_t_unsafe.rb:10: Expected `String` but found `T.nilable(String)` for argument `arg0` on `String#+` component of `String("hi")` https://srb.help/7002
+suggest_t_unsafe.rb:10: Expected `String` but found `T.nilable(String)` for argument `arg0` https://srb.help/7002
     10 |"hi" + foo
                ^^^
   Expected `String` for argument `arg0` of method `String#+`:
@@ -38,7 +38,7 @@ suggest_t_unsafe.rb:13: Method `even?` does not exist on `String` component of `
     13 |bar.even?
         ^^^
 
-suggest_t_unsafe.rb:15: Expected `String` but found `Integer(1)` for argument `arg0` on `String#+` component of `String("hi")` https://srb.help/7002
+suggest_t_unsafe.rb:15: Expected `String` but found `Integer(1)` for argument `arg0` https://srb.help/7002
     15 |"hi" + 1
                ^
   Expected `String` for argument `arg0` of method `String#+`:
@@ -126,7 +126,7 @@ suggest_t_unsafe.rb:8: Method `[]` does not exist on `NilClass` component of `T.
      8 |foo[0]
         ^^^
 
-suggest_t_unsafe.rb:10: Expected `String` but found `T.nilable(String)` for argument `arg0` on `String#+` component of `String("hi")` https://srb.help/7002
+suggest_t_unsafe.rb:10: Expected `String` but found `T.nilable(String)` for argument `arg0` https://srb.help/7002
     10 |"hi" + foo
                ^^^
   Expected `String` for argument `arg0` of method `String#+`:
@@ -154,7 +154,7 @@ suggest_t_unsafe.rb:13: Method `even?` does not exist on `String` component of `
     13 |bar.even?
         ^^^
 
-suggest_t_unsafe.rb:15: Expected `String` but found `Integer(1)` for argument `arg0` on `String#+` component of `String("hi")` https://srb.help/7002
+suggest_t_unsafe.rb:15: Expected `String` but found `Integer(1)` for argument `arg0` https://srb.help/7002
     15 |"hi" + 1
                ^
   Expected `String` for argument `arg0` of method `String#+`:
