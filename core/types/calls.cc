@@ -866,11 +866,21 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                                              : ".";
 
                         e.addErrorNote("`{}` is actually defined as a method on `{}`. To call it,\n"
-                                       "    `{}` in this module to ensure the method is always there{}",
+                                       "    `{}` in the module `{}` to ensure the method is always there{}",
                                        args.name.show(gs), ownerName, fmt::format("include {}", ownerName),
-                                       suggestKernelDot);
+                                       symbol.show(gs), suggestKernelDot);
                         if (args.receiverLoc().exists() && args.receiverLoc().empty()) {
                             e.replaceWith("Prefix with `Kernel.`", args.receiverLoc(), "Kernel.");
+                        } else {
+                            auto inCurrentFile = [&](const auto &loc) { return loc.file() == fileToEdit; };
+                            auto classLocs = symbol.locs();
+                            auto classLoc = absl::c_find_if(classLocs, inCurrentFile);
+                            auto [insertLoc, padding] =
+                                TypeErrorDiagnostics::getIndentationForClassLoc(gs, args.callLoc());
+                            if (insertLoc.exists()) {
+                                e.replaceWith("Insert at the correct indentation", insertLoc,
+                                              fmt::format("include {}", ownerName));
+                            }
                         }
                     }
                 } else if (!symbol.data(gs)->attachedClass(gs).exists() &&
