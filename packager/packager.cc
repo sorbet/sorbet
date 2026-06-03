@@ -492,6 +492,7 @@ struct PackageSpecBodyWalk {
     bool foundFirstPackageSpec = false;
     bool foundLayerDeclaration = false;
     bool foundStrictDependenciesDeclaration = false;
+    bool foundSorbetDeclaration = false;
 
     void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
@@ -645,7 +646,9 @@ struct PackageSpecBodyWalk {
                 }
             }
         } else if (send.fun == core::Names::strictDependencies()) {
-            foundStrictDependenciesDeclaration = true;
+            auto seenStrictDependenciesDecl = this->foundStrictDependenciesDeclaration;
+            this->foundStrictDependenciesDeclaration = true;
+
             if (!ctx.state.packageDB().enforceLayering()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidStrictDependencies)) {
                     e.setHeader("Found `{}` annotation, but `{}` was not passed", send.fun.show(ctx),
@@ -656,7 +659,18 @@ struct PackageSpecBodyWalk {
                 }
                 return;
             }
-            if (info.strictDependenciesLevel != StrictDependenciesLevel::None) {
+
+            auto parsedValue = StrictDependenciesLevel::None;
+            if (send.numPosArgs() > 0) {
+                parsedValue = parseStrictDependenciesOption(send.getPosArg(0));
+            }
+
+            // We explicitly disallow duplicate `strict_dependencies` declarations. Additionally, if we're processing a
+            // __package.rb file in an already populated PackageDB, we require that the declaration matches the value
+            // that's already present.
+            bool valueMatches =
+                !info.locs.strictDependenciesLevel.exists() || parsedValue == info.strictDependenciesLevel;
+            if (seenStrictDependenciesDecl || !valueMatches) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Packager::DuplicateDirective)) {
                     e.setHeader("Repeated declaration of `{}`", send.fun.show(ctx));
                     e.addErrorLine(ctx.locAt(info.locs.strictDependenciesLevel), "Previously declared here");
@@ -666,7 +680,6 @@ struct PackageSpecBodyWalk {
             }
 
             if (send.numPosArgs() > 0) {
-                auto parsedValue = parseStrictDependenciesOption(send.getPosArg(0));
                 if (parsedValue != StrictDependenciesLevel::None) {
                     info.strictDependenciesLevel = parsedValue;
                     info.locs.strictDependenciesLevel = send.getPosArg(0).loc();
@@ -678,7 +691,9 @@ struct PackageSpecBodyWalk {
                 }
             }
         } else if (send.fun == core::Names::layer()) {
-            foundLayerDeclaration = true;
+            bool seenLayerDecl = this->foundLayerDeclaration;
+            this->foundLayerDeclaration = true;
+
             if (!ctx.state.packageDB().enforceLayering()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidLayer)) {
                     e.setHeader("Found `{}` annotation, but `{}` was not passed", send.fun.show(ctx),
@@ -689,7 +704,17 @@ struct PackageSpecBodyWalk {
                 }
                 return;
             }
-            if (info.layer.exists()) {
+
+            core::NameRef parsedValue;
+            if (send.numPosArgs() > 0) {
+                parsedValue = parseLayerOption(ctx.state, send.getPosArg(0));
+            }
+
+            // We explicitly disallow duplicate `layer` declarations. Additionally, if we're processing a __package.rb
+            // file in an already populated PackageDB, we require that the declaration matches the value that's already
+            // present.
+            bool valueMatches = !info.locs.layer.exists() || parsedValue == info.layer;
+            if (seenLayerDecl || !valueMatches) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Packager::DuplicateDirective)) {
                     e.setHeader("Repeated declaration of `{}`", send.fun.show(ctx));
                     e.addErrorLine(ctx.locAt(info.locs.layer), "Previously declared here");
@@ -699,7 +724,6 @@ struct PackageSpecBodyWalk {
             }
 
             if (send.numPosArgs() > 0) {
-                auto parsedValue = parseLayerOption(ctx.state, send.getPosArg(0));
                 if (parsedValue.exists()) {
                     info.layer = parsedValue;
                     info.locs.layer = send.getPosArg(0).loc();
@@ -711,22 +735,17 @@ struct PackageSpecBodyWalk {
                 }
             }
         } else if (send.fun == core::Names::sorbet()) {
-            if (info.minTypedLevel != core::StrictLevel::None) {
-                if (auto e = ctx.beginError(send.loc, core::errors::Packager::DuplicateDirective)) {
-                    e.setHeader("Repeated declaration of `{}`", send.fun.show(ctx));
-                    e.addErrorLine(ctx.locAt(info.locs.minTypedLevel), "Previously declared here");
-                    e.replaceWith("Remove this declaration", ctx.locAt(send.loc), "");
-                }
-                return;
-            }
+            bool seenSorbetDecl = this->foundSorbetDeclaration;
+            this->foundSorbetDeclaration = true;
+
+            bool testsMinTypedLevelPresent = false;
+            core::StrictLevel minTypedLevel = core::StrictLevel::None;
+            core::LocOffsets minTypedLevelLoc;
+            core::StrictLevel testsMinTypedLevel = core::StrictLevel::None;
+            core::LocOffsets testsMinTypedLevelLoc;
 
             // TODO(trevor): after we fully commit to test-packages, this can be simplified quite a bit.
             if (send.numKwArgs() >= 1) {
-                bool testsMinTypedLevelPresent = false;
-                core::StrictLevel minTypedLevel = core::StrictLevel::None;
-                core::LocOffsets minTypedLevelLoc;
-                core::StrictLevel testsMinTypedLevel = core::StrictLevel::None;
-                core::LocOffsets testsMinTypedLevelLoc;
                 for (const auto [key, value] : send.kwArgPairs()) {
                     auto keyLit = ast::cast_tree<ast::Literal>(key);
                     ENFORCE(keyLit);
@@ -764,7 +783,24 @@ struct PackageSpecBodyWalk {
                         // Handled elsewhere
                     }
                 }
+            }
 
+            // We explicitly disallow duplicate `sorbet` declarations. Additionally, if we're processing a __package.rb
+            // file in an already populated PackageDB, we require that the declaration matches the values that are
+            // already present.
+            bool valueMatches = !info.locs.minTypedLevel.exists() ||
+                                (minTypedLevel == info.minTypedLevel && testsMinTypedLevel == info.testsMinTypedLevel);
+            if (seenSorbetDecl || !valueMatches) {
+                if (auto e = ctx.beginError(send.loc, core::errors::Packager::DuplicateDirective)) {
+                    e.setHeader("Repeated declaration of `{}`", send.fun.show(ctx));
+                    e.addErrorLine(ctx.locAt(info.locs.minTypedLevel), "Previously declared here");
+                    e.replaceWith("Remove this declaration", ctx.locAt(send.loc), "");
+                }
+                return;
+            }
+
+            // TODO(trevor): after we fully commit to test-packages, this can be simplified quite a bit.
+            if (send.numKwArgs() >= 1) {
                 if (testPackages) {
                     info.minTypedLevel = minTypedLevel;
                     info.locs.minTypedLevel = minTypedLevelLoc;
