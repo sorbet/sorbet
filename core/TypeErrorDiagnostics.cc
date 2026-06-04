@@ -122,15 +122,16 @@ optional<core::AutocorrectSuggestion::Edit> autocorrectEditForDSLMethod(const Gl
 }
 } // namespace
 
-// From the line of the class keyword (classLoc), returns the insertion location (the next line)
+// Given a location, returns the insertion location (the start of the line after the line of the given location)
 // and the correct indentation if you were to insert at the insertion location
-optional<pair<Loc, int>> TypeErrorDiagnostics::getIndentationForClassLoc(const GlobalState &gs, const Loc &classLoc) {
-    auto [classStart, classEnd] = classLoc.toDetails(gs);
+// Useful for calculating the indentation of the next line after a something like `class Foo`
+optional<pair<Loc, int>> TypeErrorDiagnostics::calculateIndentedNextLine(const GlobalState &gs, const Loc &loc) {
+    auto [classStart, classEnd] = loc.toDetails(gs);
 
-    auto [_, thisLinePadding] = classLoc.findStartOfIndentation(gs);
+    auto [_, thisLinePadding] = loc.findStartOfIndentation(gs);
 
     core::Loc::Detail nextLineStart = {classStart.line + 1, 1};
-    auto nextLineLoc = core::Loc::fromDetails(gs, classLoc.file(), nextLineStart, nextLineStart);
+    auto nextLineLoc = core::Loc::fromDetails(gs, loc.file(), nextLineStart, nextLineStart);
     if (!nextLineLoc.has_value()) {
         return nullopt;
     }
@@ -171,11 +172,11 @@ TypeErrorDiagnostics::editForDSLMethod(const GlobalState &gs, FileRef fileToEdit
         }
     }
 
-    auto indentation = getIndentationForClassLoc(gs, *classLoc);
-    if (!indentation.has_value()) {
+    auto nextLineRes = calculateIndentedNextLine(gs, *classLoc);
+    if (!nextLineRes.has_value()) {
         return nullopt;
     }
-    auto [insertLoc, padding] = indentation.value();
+    auto [insertLoc, padding] = nextLineRes.value();
     string prefix(padding, ' ');
     return autocorrectEditForDSLMethod(gs, insertLoc, prefix, dslOwner, dsl, needsDslOwner);
 }

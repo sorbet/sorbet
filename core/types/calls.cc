@@ -872,14 +872,20 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                         if (args.receiverLoc().exists() && args.receiverLoc().empty()) {
                             e.replaceWith("Prefix with `Kernel.`", args.receiverLoc(), "Kernel.");
                         } else {
+                            auto klass = symbol.data(gs);
+                            auto fileToEdit = args.locs.file;
                             auto inCurrentFile = [&](const auto &loc) { return loc.file() == fileToEdit; };
-                            auto classLocs = symbol.locs();
-                            auto classLoc = absl::c_find_if(classLocs, inCurrentFile);
-                            auto [insertLoc, padding] =
-                                TypeErrorDiagnostics::getIndentationForClassLoc(gs, args.callLoc());
-                            if (insertLoc.exists()) {
-                                e.replaceWith("Insert at the correct indentation", insertLoc,
-                                              fmt::format("include {}", ownerName));
+                            auto classLocs = klass->locs();
+                            auto classLocMaybe = absl::c_find_if(classLocs, inCurrentFile);
+                            if (classLocMaybe != classLocs.end()) {
+                                auto &classLoc = *classLocMaybe;
+                                auto insertResult = TypeErrorDiagnostics::calculateIndentedNextLine(gs, classLoc);
+                                if (insertResult.has_value()) {
+                                    auto [insertLoc, padding] = insertResult.value();
+                                    string prefix(padding, ' ');
+                                    e.replaceWith("Insert at the correct indentation", insertLoc, "{}include {}\n",
+                                                  prefix, ownerName);
+                                }
                             }
                         }
                     }
