@@ -48,7 +48,7 @@ module T::Private::Methods
   #   (This can matter for circular load-time behavior, where a method is
   #   called while its Signature is being built)
   # - It's `nil` if we've finished building the sig
-  DeclarationBlock = Struct.new(:mod, :method_name, :loc, :blk_or_decl, :final, :abstract, :override, :overridable)
+  DeclarationBlock = Struct.new(:mod, :loc, :blk_or_decl, :final)
 
   def self.declare_sig(mod, loc, arg, &blk)
     if T::Private::DeclState.current.active_declaration
@@ -60,122 +60,13 @@ module T::Private::Methods
       raise "Invalid argument to `sig`: #{arg}"
     end
 
-    method_name = nil # will be filled in once the next method is defined
-    abstract = nil
-    override = nil
-    overridable = nil
-    T::Private::DeclState.current.active_declaration = DeclarationBlock.new(mod, method_name, loc, blk, arg == :final, abstract, override, overridable)
-
-    nil
-  end
-
-  private_class_method def self.ensure_valid_declare_dsl!(mod, method_name, dsl_name)
-    previous_declaration = T::Private::DeclState.current.previous_declaration
-    if previous_declaration.nil?
-      # TODO(jez) Eventually, relax this and allow these DSLs without a preceding `sig`
-      raise DeclBuilder::BuilderError.new("You must declare a `sig` before using `#{dsl_name}` on the method `#{method_name}`")
-    end
-
-    if !previous_declaration.blk_or_decl.is_a?(Proc)
-      raise DeclBuilder::BuilderError.new("Cannot call `#{dsl_name} #{method_name.inspect}`, because the sig block has already run")
-    end
-
-    # previous_declaration.mod is the method owner (which for `def self.foo`
-    # is the singleton class). The DSL caller's `self` is the class itself,
-    # so we also accept mod.singleton_class == previous_declaration.mod.
-    mod_matches = previous_declaration.mod == mod || previous_declaration.mod == mod.singleton_class
-    if !mod_matches || previous_declaration.method_name != method_name
-      raise DeclBuilder::BuilderError.new(
-        "Can only call `#{dsl_name} #{method_name.inspect}` for the previously sig'd method. " \
-        "Expected: #{previous_declaration.mod}##{previous_declaration.method_name}"
-      )
-    end
-
-    previous_declaration
-  end
-
-  def self.declare_abstract(mod, method_name)
-    previous_declaration = ensure_valid_declare_dsl!(mod, method_name, :abstract)
-    return unless previous_declaration
-
-    if previous_declaration.abstract
-      raise DeclBuilder::BuilderError.new("Cannot call `abstract` twice for the method `#{method_name}`")
-    end
-
-    previous_declaration.abstract = true
-
-    # # TODO(jez) In the future, we will want some logic like this, but ONLY if
-    # # the method did not have a sig. The first-call sig wrapper is normally in
-    # # charge of running the sig block (even for abstract methods) If we know
-    # # for sure that we're not going to have a sig, but we want the runtime
-    # # `super` logic (possibly because there is an RBS method annotation), we
-    # # are safe to eagerly call `create_abstract_wrapper` to overwrite the
-    # # user's method.
-    # #
-    # # (Omitting this until we support DSL methods without runtime `sig`'s)
-    # original_visibility = T::Private::ClassUtils.visibility_method_name(mod, method_name)
-    # T::Private::Methods::CallValidation.create_abstract_wrapper(mod, method_name, original_visibility)
-
-    nil
-  end
-
-  def self.declare_override(mod, method_name, allow_incompatible:)
-    previous_declaration = ensure_valid_declare_dsl!(mod, method_name, :override)
-    return unless previous_declaration
-
-    if previous_declaration.override
-      raise DeclBuilder::BuilderError.new("Cannot call `override` twice for the method `#{method_name}`")
-    end
-
-    method = mod.instance_method(method_name)
-    super_method = method.super_method
-    if super_method.nil?
-      source_loc = Kernel.caller_locations(2, 1)&.map { |loc| [loc.path || "<unknown>", loc.lineno] }&.first
-      T::Private::Methods::SignatureValidation.validate_non_override_mode(Modes.override, method_name, method, source_loc)
-    end
-
-    previous_declaration.override = {allow_incompatible: allow_incompatible}
-
-    nil
-  end
-
-  def self.declare_final(mod, method_name)
-    previous_declaration = ensure_valid_declare_dsl!(mod, method_name, :final)
-    return unless previous_declaration
-
-    if previous_declaration.final
-      raise DeclBuilder::BuilderError.new("Cannot declare `#{method_name}` final twice (from `sig(:final)` nor `final def`)")
-    end
-
-    previous_declaration.final = true
-
-    # Register final bookkeeping that _on_method_added would have done if it
-    # had seen final=true at that time. Use previous_declaration.mod (the actual
-    # method owner, which is the singleton_class for `def self.foo`).
-    add_module_with_final_method(previous_declaration.mod, method_name)
-
-    nil
-  end
-
-  def self.declare_overridable(mod, method_name)
-    previous_declaration = ensure_valid_declare_dsl!(mod, method_name, :overridable)
-    return unless previous_declaration
-
-    if previous_declaration.overridable
-      raise DeclBuilder::BuilderError.new("Cannot call `overridable` twice for the method `#{method_name}`")
-    end
-
-    previous_declaration.overridable = true
+    T::Private::DeclState.current.active_declaration = DeclarationBlock.new(mod, loc, blk, arg == :final)
 
     nil
   end
 
   def self.start_proc
-    # abstract/override/overridable don't make sense on procs
-    abstract = false
-    override = nil
-    overridable = false
-    DeclBuilder.new(PROC_TYPE, abstract, override, overridable)
+    DeclBuilder.new(PROC_TYPE)
   end
 
   def self.finalize_proc(decl)
@@ -301,7 +192,7 @@ module T::Private::Methods
       return
     end
 
-    current_declaration = T::Private::DeclState.current.consume!
+    current_declaration = T::Private::DeclState.current.active_declaration
 
     if T::Private::Final.final_module?(mod) && (current_declaration.nil? || !current_declaration.final)
       raise "#{mod} was declared as final but its method `#{method_name}` was not declared as final"
@@ -317,8 +208,7 @@ module T::Private::Methods
     if current_declaration.nil?
       return
     end
-
-    current_declaration.method_name = method_name
+    T::Private::DeclState.current.reset!
 
     if method_name == :method_added || method_name == :singleton_method_added
       raise(
@@ -327,23 +217,9 @@ module T::Private::Methods
       )
     end
 
-    # We allow `sig` in the current module's context (normal case) and
-    if hook_mod != current_declaration.mod &&
-       # inside `class << self`, and
-       hook_mod.singleton_class != current_declaration.mod &&
-       # on `self` at the top level of a file
-       current_declaration.mod != TOP_SELF
-      raise "A method (#{method_name}) is being added on a different class/module (#{hook_mod}) than the " \
-            "last call to `sig` (#{current_declaration.mod}). Make sure each call " \
-            "to `sig` is immediately followed by a method definition on the same " \
-            "class/module."
-    end
-    # Overwrite the DeclarationBlock mod with `mod`, which is the Module that owns the method.
-    current_declaration.mod = mod
-
     original_method = mod.instance_method(method_name)
     sig_block = lambda do
-      T::Private::Methods.run_sig(method_name, original_method, current_declaration)
+      T::Private::Methods.run_sig(hook_mod, method_name, original_method, current_declaration)
     end
 
     # Always replace the original method with this wrapper,
@@ -422,7 +298,7 @@ module T::Private::Methods
 
   # Executes the `sig` block, and converts the resulting Declaration
   # to a Signature.
-  def self.run_sig(method_name, original_method, declaration_block)
+  def self.run_sig(hook_mod, method_name, original_method, declaration_block)
     current_declaration =
       begin
         run_builder(declaration_block)
@@ -436,7 +312,7 @@ module T::Private::Methods
 
     signature =
       if current_declaration
-        build_sig(method_name, original_method, current_declaration)
+        build_sig(hook_mod, method_name, original_method, current_declaration)
       else
         Signature.new_untyped(method: original_method)
       end
@@ -459,20 +335,27 @@ module T::Private::Methods
       raise "DeclarationBlock for #{declaration_block.mod} at #{declaration_block.loc} should have already been unwrapped"
     end
 
-    builder = DeclBuilder.new(
-      declaration_block.mod,
-      declaration_block.abstract,
-      declaration_block.override,
-      declaration_block.overridable
-    )
+    builder = DeclBuilder.new(declaration_block.mod)
     decl = builder.instance_exec(&blk_or_decl).finalize!.decl
     # Record that we've already run `blk` once and constructed a `Declaration`
     declaration_block.blk_or_decl = decl
     decl
   end
 
-  def self.build_sig(method_name, original_method, current_declaration)
+  def self.build_sig(hook_mod, method_name, original_method, current_declaration)
     begin
+      # We allow `sig` in the current module's context (normal case) and
+      if hook_mod != current_declaration.mod &&
+         # inside `class << self`, and
+         hook_mod.singleton_class != current_declaration.mod &&
+         # on `self` at the top level of a file
+         current_declaration.mod != TOP_SELF
+        raise "A method (#{method_name}) is being added on a different class/module (#{hook_mod}) than the " \
+              "last call to `sig` (#{current_declaration.mod}). Make sure each call " \
+              "to `sig` is immediately followed by a method definition on the same " \
+              "class/module."
+      end
+
       signature = Signature.new(
         method: original_method,
         method_name: method_name,
@@ -592,10 +475,6 @@ module T::Private::Methods
       key, = first_wrapper
       run_sig_block_for_key(key, force_type_init: force_type_init)
     end
-
-    # Make sure that there are no lingering declaration blocks being kept alive
-    # (so we're not retaining any extra references for a possible GC)
-    T::Private::DeclState.current.reset!
   end
 
   def self.all_checked_tests_sigs
