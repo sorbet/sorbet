@@ -58,10 +58,8 @@ public:
     std::vector<VariableUseSite> args;
     int id = 0;
     struct Flags {
-        bool isLoopHeader : 1;
-        bool wasJumpDestination : 1;
-        // In C++20 we can replace this with bit field initializers
-        Flags() : isLoopHeader(false), wasJumpDestination(false) {}
+        bool isLoopHeader : 1 = false;
+        bool wasJumpDestination : 1 = false;
     };
     Flags flags;
     int outerLoops = 0;

@@ -8,14 +8,11 @@ namespace sorbet::core {
 
 struct ParsedParam {
     struct Flags {
-        bool isKeyword : 1;
-        bool isRepeated : 1;
-        bool isDefault : 1;
-        bool isShadow : 1;
-        bool isBlock : 1;
-
-        // In C++20 we can replace this with bit field initialzers
-        Flags() : isKeyword(false), isRepeated(false), isDefault(false), isShadow(false), isBlock(false) {}
+        bool isKeyword : 1 = false;
+        bool isRepeated : 1 = false;
+        bool isDefault : 1 = false;
+        bool isShadow : 1 = false;
+        bool isBlock : 1 = false;
 
         void setFromU1(uint8_t flags);
         uint8_t toU1() const;

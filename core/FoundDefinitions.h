@@ -164,18 +164,13 @@ struct FoundMethod final {
     std::vector<core::ParsedParam> parsedParams;
     core::ArityHash arityHash;
     struct Flags {
-        bool isSelfMethod : 1;
-        bool isRewriterSynthesized : 1;
+        bool isSelfMethod : 1 = false;
+        bool isRewriterSynthesized : 1 = false;
         // Controls whether to display this as an attr_*/prop-defined method in the LSP client
         // This is best effort and thus UI-only! Should not be used for the sake of type checking.
-        bool isAttrBestEffortUIOnly : 1;
-        bool discardDef : 1;
-        bool genericPropGetter : 1;
-
-        // In C++20 we can replace this with bit field initialzers
-        Flags()
-            : isSelfMethod(false), isRewriterSynthesized(false), isAttrBestEffortUIOnly(false), discardDef(false),
-              genericPropGetter(false) {}
+        bool isAttrBestEffortUIOnly : 1 = false;
+        bool discardDef : 1 = false;
+        bool genericPropGetter : 1 = false;
 
         bool operator==(const Flags &other) const noexcept {
             return isSelfMethod == other.isSelfMethod && isRewriterSynthesized == other.isRewriterSynthesized &&
