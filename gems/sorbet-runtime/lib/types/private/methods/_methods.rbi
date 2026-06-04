@@ -5,6 +5,9 @@ module T::Private::Methods
     sig {returns(Module)}
     attr_accessor :mod
 
+    sig {returns(T.nilable(Symbol))}
+    attr_accessor :method_name
+
     sig {returns(T.nilable(Thread::Backtrace::Location))}
     attr_accessor :loc
 
@@ -14,16 +17,29 @@ module T::Private::Methods
     sig {returns(T::Boolean)}
     attr_accessor :final
 
+    sig {returns(T.nilable(T::Boolean))}
+    attr_accessor :abstract
+
+    sig {returns(T.nilable({allow_incompatible: T.any(T::Boolean, Symbol)}))}
+    attr_accessor :override
+
+    sig {returns(T.nilable(T::Boolean))}
+    attr_accessor :overridable
+
     sig do
       params(
         mod: Module,
+        method_name: T.nilable(Symbol),
         loc: T.nilable(Thread::Backtrace::Location),
         blk: Proc,
         final: T::Boolean,
+        abstract: T.nilable(T::Boolean),
+        override: T.nilable({allow_incompatible: T.any(T::Boolean, Symbol)}),
+        overridable: T.nilable(T::Boolean)
       )
         .void
     end
-    def initialize(mod, loc, blk, final); end
+    def initialize(mod, method_name, loc, blk, final, abstract, override, overridable); end
   end
 
   @installed_hooks = T.let({}, T::Hash[Module, TrueClass])
@@ -33,6 +49,21 @@ module T::Private::Methods
   @signatures_by_method = T.let({}, T::Hash[String, Signature])
   @sigs_that_raised = T.let({}, T::Hash[String, TrueClass])
   @old_hooks = T.let(nil, T.nilable([UnboundMethod, UnboundMethod, UnboundMethod]))
+
+  sig { params(mod: Module, method_name: Symbol, dsl_name: Symbol).returns(T.nilable(DeclarationBlock)) }
+  private_class_method def self.ensure_valid_declare_dsl!(mod, method_name, dsl_name); end
+
+  sig { params(mod: Module, method_name: Symbol).returns(NilClass) }
+  def self.declare_abstract(mod, method_name); end
+
+  sig { params(mod: Module, method_name: Symbol, allow_incompatible: T.any(T::Boolean, Symbol)).returns(NilClass) }
+  def self.declare_override(mod, method_name, allow_incompatible:); end
+
+  sig { params(mod: Module, method_name: Symbol).returns(NilClass) }
+  def self.declare_final(mod, method_name); end
+
+  sig { params(mod: Module, method_name: Symbol).returns(NilClass) }
+  def self.declare_overridable(mod, method_name); end
 
   sig {params(mod: Module, loc: T.nilable(Thread::Backtrace::Location), arg: T.nilable(Symbol), blk: T.untyped).returns(NilClass)}
   def self.declare_sig(mod, loc, arg, &blk); end
@@ -65,14 +96,14 @@ module T::Private::Methods
   sig {params(receiver: Object, original_method: UnboundMethod, callee: Symbol).returns(T::Private::Methods::Signature)}
   def self._handle_missing_method_signature(receiver, original_method, callee); end
 
-  sig {params(hook_mod: Module, method_name: Symbol, original_method: UnboundMethod, declaration_block: DeclarationBlock).returns(T::Private::Methods::Signature)}
-  def self.run_sig(hook_mod, method_name, original_method, declaration_block); end
+  sig {params(method_name: Symbol, original_method: UnboundMethod, declaration_block: DeclarationBlock).returns(T::Private::Methods::Signature)}
+  def self.run_sig(method_name, original_method, declaration_block); end
 
   sig {params(declaration_block: DeclarationBlock).returns(T::Private::Methods::Declaration)}
   def self.run_builder(declaration_block); end
 
-  sig {params(hook_mod: Module, method_name: Symbol, original_method: UnboundMethod, current_declaration: T::Private::Methods::Declaration).returns(T::Private::Methods::Signature)}
-  def self.build_sig(hook_mod, method_name, original_method, current_declaration); end
+  sig {params(method_name: Symbol, original_method: UnboundMethod, current_declaration: T::Private::Methods::Declaration).returns(T::Private::Methods::Signature)}
+  def self.build_sig(method_name, original_method, current_declaration); end
 
   sig {params(method: T.any(Method, UnboundMethod)).returns(T.nilable(T::Private::Methods::Signature))}
   def self.signature_for_method(method); end
