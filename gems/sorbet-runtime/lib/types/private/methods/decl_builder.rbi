@@ -72,15 +72,8 @@ module T::Private::Methods
     sig {returns(Declaration)}
     def decl; end
 
-    sig do
-      params(
-        mod: Module,
-        abstract: T.nilable(T::Boolean),
-        override: T.nilable({allow_incompatible: T.any(T::Boolean, Symbol)}),
-        overridable: T.nilable(T::Boolean)
-      ).void
-    end
-    def initialize(mod, abstract, override, overridable)
+    sig {params(mod: Module).void}
+    def initialize(mod)
       @decl = T.let(nil, Declaration)
     end
 
