@@ -8,19 +8,22 @@ class T::Private::DeclState
   def self.current=(other); end
 
   sig {returns(T.nilable(T::Private::Methods::DeclarationBlock))}
-  attr_accessor :active_declaration
+  def active_declaration; end
+
+  sig do
+    params(active_declaration: T.nilable(T::Private::Methods::DeclarationBlock))
+      .returns(T.nilable(T::Private::Methods::DeclarationBlock))
+  end
+  def active_declaration=(active_declaration); end
 
   sig {returns(T.nilable(TrueClass))}
-  attr_accessor :skip_on_method_added
+  def skip_on_method_added; end
 
-  sig { returns(T.nilable(T::Private::Methods::DeclarationBlock)) }
-  attr_accessor :previous_declaration
+  sig {params(skip_on_method_added: T.nilable(TrueClass)).returns(T.nilable(TrueClass))}
+  def skip_on_method_added=(skip_on_method_added); end
 
   sig {void}
   def reset!; end
-
-  sig { returns(T.nilable(T::Private::Methods::DeclarationBlock)) }
-  def consume!; end
 
   sig do
     type_parameters(:U)
