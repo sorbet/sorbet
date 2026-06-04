@@ -1,0 +1,15 @@
+ambiguous_this_module_include.rb:14: Method `is_a?` does not exist on `Parent` https://srb.help/7003
+    14 |    if parent.is_a?(Child)
+                      ^^^^^
+  Got `Parent` originating from:
+    ambiguous_this_module_include.rb:13:
+    13 |  def example(parent)
+                      ^^^^^^
+  Note:
+    `is_a?` is actually defined as a method on `Kernel`. To call it,
+    `include Kernel` in the module `Parent` to ensure the method is always there.
+  Autocorrect: Use `-a` to autocorrect
+    ambiguous_this_module_include.rb:4: Insert `include Kernel`
+     4 |end
+        ^
+Errors: 1
