@@ -33,10 +33,11 @@ using namespace std;
 namespace {
 
 void sendTypecheckInfo(const LSPConfiguration &config, const core::GlobalState &gs, SorbetTypecheckRunStatus status,
-                       TypecheckingPath typecheckingPath, vector<core::FileRef> filesTypechecked) {
+                       TypecheckingPath typecheckingPath, vector<core::FileRef> filesTypechecked,
+                       core::packages::Stratum startingStratum) {
     if (config.getClientConfig().enableTypecheckInfo) {
-        auto sorbetTypecheckInfo =
-            make_unique<SorbetTypecheckRunInfo>(status, typecheckingPath, config.frefsToPaths(gs, filesTypechecked));
+        auto sorbetTypecheckInfo = make_unique<SorbetTypecheckRunInfo>(
+            status, typecheckingPath, config.frefsToPaths(gs, filesTypechecked), startingStratum.rawId());
         config.output->write(make_unique<LSPMessage>(
             make_unique<NotificationMessage>("2.0", LSPMethod::SorbetTypecheckRunInfo, move(sorbetTypecheckInfo))));
     }
@@ -147,7 +148,7 @@ void LSPTypechecker::initialize(TaskQueue &queue, unique_ptr<core::GlobalState> 
         ErrorEpoch epoch(*errorReporter, updates.epoch, isIncremental, {});
         auto errorFlusher = make_shared<ErrorFlusherLSP>(updates.epoch, errorReporter);
         auto handler = InitKVStoreStrategy::build(*this->gs, std::move(kvstore));
-        auto committed = runSlowPath(updates, handler, workers, errorFlusher, SlowPathMode::Init);
+        auto [committed, _startingStratum] = runSlowPath(updates, handler, workers, errorFlusher, SlowPathMode::Init);
         ENFORCE(committed);
         epoch.committed = true;
     }
@@ -205,8 +206,9 @@ bool LSPTypechecker::typecheck(unique_ptr<LSPFileUpdates> updates, WorkerPool &w
 
     vector<core::FileRef> filesTypechecked;
     bool committed = true;
+    core::packages::Stratum startingStratum;
     const bool isFastPath = updates->typecheckingPath == TypecheckingPath::Fast;
-    sendTypecheckInfo(*config, *gs, SorbetTypecheckRunStatus::Started, updates->typecheckingPath, {});
+    sendTypecheckInfo(*config, *gs, SorbetTypecheckRunStatus::Started, updates->typecheckingPath, {}, startingStratum);
     {
         ErrorEpoch epoch(*errorReporter, updates->epoch, isFastPath, move(diagnosticLatencyTimers));
 
@@ -227,7 +229,8 @@ bool LSPTypechecker::typecheck(unique_ptr<LSPFileUpdates> updates, WorkerPool &w
             prodCategoryCounterInc("lsp.updates", "fastpath");
         } else {
             SessionKVStoreStrategy kvstore(this->sessionCache.get(), *this->config);
-            committed = runSlowPath(*updates, kvstore, workers, errorFlusher, SlowPathMode::Cancelable);
+            std::tie(committed, startingStratum) =
+                runSlowPath(*updates, kvstore, workers, errorFlusher, SlowPathMode::Cancelable);
         }
         epoch.committed = committed;
     }
@@ -239,7 +242,7 @@ bool LSPTypechecker::typecheck(unique_ptr<LSPFileUpdates> updates, WorkerPool &w
     }
 
     sendTypecheckInfo(*config, *gs, committed ? SorbetTypecheckRunStatus::Ended : SorbetTypecheckRunStatus::Cancelled,
-                      updates->typecheckingPath, move(filesTypechecked));
+                      updates->typecheckingPath, move(filesTypechecked), startingStratum);
     return committed;
 }
 
@@ -541,8 +544,10 @@ void applyFileTableUpdates(core::GlobalState &gs, vector<core::FileRef> &workspa
 }
 } // namespace
 
-bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, KVStoreStrategy &kvstore, WorkerPool &workers,
-                                 shared_ptr<core::ErrorFlusher> errorFlusher, LSPTypechecker::SlowPathMode mode) {
+pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &updates, KVStoreStrategy &kvstore,
+                                                                WorkerPool &workers,
+                                                                shared_ptr<core::ErrorFlusher> errorFlusher,
+                                                                LSPTypechecker::SlowPathMode mode) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId,
             "runSlowPath can only be called from the typechecker thread.");
 
@@ -561,7 +566,6 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, KVStoreStrategy &kvsto
         timeit.setTag("cancelable", "true");
 
         startingStratum = determineStartingStratum(*this->gs, this->fileToStratum, this->lastStratum, updates);
-        config->logger->error("Starting from stratum {}", startingStratum.rawId());
 
         auto savedGS =
             std::exchange(this->gs, pipeline::copyForSlowPath(*this->gs, this->config->opts, startingStratum));
@@ -898,7 +902,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, KVStoreStrategy &kvsto
         logger->debug("[Typechecker] Typecheck run for epoch {} was canceled.", updates.epoch);
     }
 
-    return committed;
+    return {committed, startingStratum};
 }
 
 void LSPTypechecker::cacheUpdatedFiles(absl::Span<const ast::ParsedFile> indexed,

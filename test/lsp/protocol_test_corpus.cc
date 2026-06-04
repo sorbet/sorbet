@@ -1190,4 +1190,402 @@ TEST_CASE_FIXTURE(ProtocolTest, "ShowOperationPackaged") {
     }
 }
 
+// Exercise cases where the slow path can reuse parts of the previous global state, and also show that any changes to
+// the package graph currently disable that optimization.
+TEST_CASE_FIXTURE(ProtocolTest, "SlowPathRestarts") {
+    auto initOpts = make_shared<realmain::options::Options>();
+    initOpts->cacheSensitiveOptions.sorbetPackages = true;
+    initOpts->packageDirected = true;
+    resetState(initOpts);
+
+    vector<pair<string, string>> files = {
+        {"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A"}).build()},
+        {"a.rb", "# typed: true\n"
+                 "module Root\n"
+                 "  class A\n"
+                 "    def fun\n"
+                 "    end\n"
+                 "  end\n"
+                 "end\n"},
+        {"foo/__package.rb",
+         PackageTextBuilder().withName("Root::Foo").withExports({"Root::Foo::A"}).withImports({"Root"}).build()},
+        {"foo/a.rb", "# typed: true\n"
+                     "module Root::Foo\n"
+                     "  class A\n"
+                     "    def foo\n"
+                     "      Root::A.new()\n"
+                     "    end\n"
+                     "  end\n"
+                     "end\n"},
+    };
+
+    writeFilesToFS(files);
+
+    for (auto &[path, _] : files) {
+        this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/{}", this->rootPath, path));
+    }
+
+    auto supportsMarkdown = true;
+    auto supportsCodeActionResolve = true;
+    auto opts = make_unique<SorbetInitializationOptions>();
+    opts->enableTypecheckInfo = true;
+
+    // The initial slow path.
+    assertErrorDiagnostics(initializeLSP(supportsMarkdown, supportsCodeActionResolve, move(opts)), {});
+
+    SUBCASE("NewFile") {
+        // Add a new file, kicking off a slow path
+        auto resps = send(*openFile("foo/b.rb", "# typed: true\n"
+                                                "module Root::Foo\n"
+                                                "  class B\n"
+                                                "  end\n"
+                                                "end\n"));
+
+        // We should see a starting and ending slow path message, with the end message indicating that the slow path
+        // started from stratum 1
+        REQUIRE_EQ(resps.size(), 2);
+        REQUIRE(absl::c_all_of(resps, [](auto &resp) { return resp->isNotification(); }));
+        REQUIRE(absl::c_all_of(
+            resps, [](auto &resp) { return resp->asNotification().method == LSPMethod::SorbetTypecheckRunInfo; }));
+
+        {
+            auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(resps[0]->asNotification().params);
+            CHECK_EQ(params->typecheckingPath, TypecheckingPath::Slow);
+            CHECK_EQ(params->status, SorbetTypecheckRunStatus::Started);
+        }
+
+        {
+            auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(resps[1]->asNotification().params);
+            CHECK_EQ(params->typecheckingPath, TypecheckingPath::Slow);
+            CHECK_EQ(params->status, SorbetTypecheckRunStatus::Ended);
+
+            // We're modifying package `Root::Foo`, which means we don't need to typecheck `Root` again.
+            CHECK_EQ(params->startingStratum, 1);
+        }
+    }
+
+    SUBCASE("ExistingFile") {
+        assertErrorDiagnostics(send(*openFile(files[3].first, files[3].second)), {});
+
+        // Make a slow path modification to an existing file.
+        auto resps = send(*changeFile(files[3].first,
+                                      "# typed: true\n"
+                                      "module Root::Foo\n"
+                                      "  class A\n"
+                                      "    module Foo\n"
+                                      "    end\n"
+                                      "\n"
+                                      "    def foo\n"
+                                      "      Root::A.new()\n"
+                                      "    end\n"
+                                      "  end\n"
+                                      "end\n",
+                                      2));
+
+        // We should see a starting and ending slow path message, with the end message indicating that the slow path
+        // started from stratum 1
+        REQUIRE_EQ(resps.size(), 2);
+        REQUIRE(absl::c_all_of(resps, [](auto &resp) { return resp->isNotification(); }));
+        REQUIRE(absl::c_all_of(
+            resps, [](auto &resp) { return resp->asNotification().method == LSPMethod::SorbetTypecheckRunInfo; }));
+
+        {
+            auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(resps[0]->asNotification().params);
+            CHECK_EQ(params->typecheckingPath, TypecheckingPath::Slow);
+            CHECK_EQ(params->status, SorbetTypecheckRunStatus::Started);
+        }
+
+        {
+            auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(resps[1]->asNotification().params);
+            CHECK_EQ(params->typecheckingPath, TypecheckingPath::Slow);
+            CHECK_EQ(params->status, SorbetTypecheckRunStatus::Ended);
+
+            // We're modifying package `Root::Foo`, which means we don't need to typecheck `Root` again.
+            CHECK_EQ(params->startingStratum, 1);
+        }
+    }
+
+    SUBCASE("AddPackage") {
+        // Add a new file, kicking off a slow path
+        auto resps = send(
+            *openFile("bar/__package.rb", PackageTextBuilder().withName("Root::Bar").withImports({"Root"}).build()));
+
+        // We should see a starting and ending slow path message, with the end message indicating that the slow path
+        // started from stratum 1
+        REQUIRE_EQ(resps.size(), 2);
+        REQUIRE(absl::c_all_of(resps, [](auto &resp) { return resp->isNotification(); }));
+        REQUIRE(absl::c_all_of(
+            resps, [](auto &resp) { return resp->asNotification().method == LSPMethod::SorbetTypecheckRunInfo; }));
+
+        {
+            auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(resps[0]->asNotification().params);
+            CHECK_EQ(params->typecheckingPath, TypecheckingPath::Slow);
+            CHECK_EQ(params->status, SorbetTypecheckRunStatus::Started);
+        }
+
+        {
+            auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(resps[1]->asNotification().params);
+            CHECK_EQ(params->typecheckingPath, TypecheckingPath::Slow);
+            CHECK_EQ(params->status, SorbetTypecheckRunStatus::Ended);
+
+            // We're modifying the package graph, which means we rebuild everything.
+            CHECK_EQ(params->startingStratum, 0);
+        }
+    }
+
+    SUBCASE("ModifyPackage") {
+        assertErrorDiagnostics(send(*openFile(files[2].first, files[2].second)), {});
+
+        // Remove the exports from Root::Foo's __package.rb, forcing a complete slow path
+        auto resps = send(
+            *changeFile(files[2].first, PackageTextBuilder().withName("Root::Foo").withImports({"Root"}).build(), 2));
+
+        // We should see a starting and ending slow path message, with the end message indicating that the slow path
+        // started from stratum 1
+        REQUIRE_EQ(resps.size(), 2);
+        REQUIRE(absl::c_all_of(resps, [](auto &resp) { return resp->isNotification(); }));
+        REQUIRE(absl::c_all_of(
+            resps, [](auto &resp) { return resp->asNotification().method == LSPMethod::SorbetTypecheckRunInfo; }));
+
+        {
+            auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(resps[0]->asNotification().params);
+            CHECK_EQ(params->typecheckingPath, TypecheckingPath::Slow);
+            CHECK_EQ(params->status, SorbetTypecheckRunStatus::Started);
+        }
+
+        {
+            auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(resps[1]->asNotification().params);
+            CHECK_EQ(params->typecheckingPath, TypecheckingPath::Slow);
+            CHECK_EQ(params->status, SorbetTypecheckRunStatus::Ended);
+
+            // We're modifying the package graph, which means we rebuild everything.
+            CHECK_EQ(params->startingStratum, 0);
+        }
+    }
+}
+
+// Tests that fast path operations on an earlier stratum work after a slow path reused that portion of the symbol table.
+TEST_CASE_FIXTURE(ProtocolTest, "FastPathAfterSlowPathRestarts") {
+    auto initOpts = make_shared<realmain::options::Options>();
+    initOpts->cacheSensitiveOptions.sorbetPackages = true;
+    initOpts->packageDirected = true;
+    resetState(initOpts);
+
+    vector<pair<string, string>> files = {
+        {"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A"}).build()},
+        {"a.rb", "# typed: true\n"
+                 "module Root\n"
+                 "  class A\n"
+                 "    def fun\n"
+                 "    end\n"
+                 "  end\n"
+                 "end\n"},
+        {"foo/__package.rb",
+         PackageTextBuilder().withName("Root::Foo").withExports({"Root::Foo::A"}).withImports({"Root"}).build()},
+        {"foo/a.rb", "# typed: true\n"
+                     "module Root::Foo\n"
+                     "  class A\n"
+                     "    def foo\n"
+                     "      Root::A.new()\n"
+                     "    end\n"
+                     "  end\n"
+                     "end\n"},
+    };
+
+    writeFilesToFS(files);
+
+    for (auto &[path, _] : files) {
+        this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/{}", this->rootPath, path));
+    }
+
+    auto supportsMarkdown = true;
+    auto supportsCodeActionResolve = true;
+    auto opts = make_unique<SorbetInitializationOptions>();
+    opts->enableTypecheckInfo = true;
+
+    // The initial slow path.
+    assertErrorDiagnostics(initializeLSP(supportsMarkdown, supportsCodeActionResolve, move(opts)), {});
+
+    // Make a slow path edit to Root::Foo::A
+    {
+        assertErrorDiagnostics(send(*openFile(files[1].first, files[1].second)), {});
+        assertErrorDiagnostics(send(*openFile(files[3].first, files[3].second)), {});
+
+        // Make a slow path modification to an existing file.
+        auto resps = send(*changeFile(files[3].first,
+                                      "# typed: true\n"
+                                      "module Root::Foo\n"
+                                      "  class A\n"
+                                      "    module Foo\n"
+                                      "    end\n"
+                                      "\n"
+                                      "    def foo\n"
+                                      "      Root::A.new()\n"
+                                      "    end\n"
+                                      "  end\n"
+                                      "end\n",
+                                      2));
+
+        // We should see a starting and ending slow path message, with the end message indicating that the slow path
+        // started from stratum 1
+        REQUIRE_EQ(resps.size(), 2);
+        REQUIRE(absl::c_all_of(resps, [](auto &resp) { return resp->isNotification(); }));
+        REQUIRE(absl::c_all_of(
+            resps, [](auto &resp) { return resp->asNotification().method == LSPMethod::SorbetTypecheckRunInfo; }));
+
+        {
+            auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(resps[0]->asNotification().params);
+            CHECK_EQ(params->typecheckingPath, TypecheckingPath::Slow);
+            CHECK_EQ(params->status, SorbetTypecheckRunStatus::Started);
+        }
+
+        {
+            auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(resps[1]->asNotification().params);
+            CHECK_EQ(params->typecheckingPath, TypecheckingPath::Slow);
+            CHECK_EQ(params->status, SorbetTypecheckRunStatus::Ended);
+
+            // We're modifying package `Root::Foo`, which means we don't need to typecheck `Root` again.
+            CHECK_EQ(params->startingStratum, 1);
+        }
+    }
+
+    // The following cases all happen in stratum 0 to ensure that the copied prefix is functioning as we would expect.
+
+    SUBCASE("HoverInRoot") {
+        auto resps = send(*hover(files[1].first, 2, 9));
+
+        REQUIRE_EQ(resps.size(), 1);
+        REQUIRE(resps.front()->isResponse());
+        REQUIRE_EQ(resps.front()->asResponse().requestMethod, LSPMethod::TextDocumentHover);
+    }
+
+    SUBCASE("FastPathErrorInRoot") {
+        auto resps = send(*changeFile(files[1].first,
+                                      "# typed: true\n"
+                                      "module Root\n"
+                                      "  class A\n"
+                                      "    def fun\n"
+                                      "      1 + :type_error\n"
+                                      "    end\n"
+                                      "  end\n"
+                                      "end\n",
+                                      2));
+
+        REQUIRE_EQ(resps.size(), 3);
+
+        REQUIRE(resps[0]->isNotification());
+        REQUIRE_EQ(resps[0]->asNotification().method, LSPMethod::SorbetTypecheckRunInfo);
+        REQUIRE_EQ(TypecheckingPath::Fast,
+                   get<unique_ptr<SorbetTypecheckRunInfo>>(resps[0]->asNotification().params)->typecheckingPath);
+
+        REQUIRE(resps[2]->isNotification());
+        REQUIRE_EQ(resps[2]->asNotification().method, LSPMethod::SorbetTypecheckRunInfo);
+        REQUIRE_EQ(TypecheckingPath::Fast,
+                   get<unique_ptr<SorbetTypecheckRunInfo>>(resps[2]->asNotification().params)->typecheckingPath);
+
+        assertErrorDiagnostics(move(resps), {{files[1].first, 4, "Expected `Integer`"}});
+    }
+}
+
+// Tests that fast path operations on an earlier stratum work after a slow path reused that portion of the symbol table.
+TEST_CASE_FIXTURE(ProtocolTest, "ErrorsRemainAfterSlowPathRestart") {
+    auto initOpts = make_shared<realmain::options::Options>();
+    initOpts->cacheSensitiveOptions.sorbetPackages = true;
+    initOpts->packageDirected = true;
+    resetState(initOpts);
+
+    vector<pair<string, string>> files = {
+        {"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A"}).build()},
+        {"a.rb", "# typed: true\n"
+                 "module Root\n"
+                 "  class A\n"
+                 "    def fun\n"
+                 "    end\n"
+                 "  end\n"
+                 "end\n"},
+        {"foo/__package.rb",
+         PackageTextBuilder().withName("Root::Foo").withExports({"Root::Foo::A"}).withImports({"Root"}).build()},
+        {"foo/a.rb", "# typed: true\n"
+                     "module Root::Foo\n"
+                     "  class A\n"
+                     "    def foo\n"
+                     "      Root::A.new()\n"
+                     "    end\n"
+                     "  end\n"
+                     "end\n"},
+    };
+
+    writeFilesToFS(files);
+
+    for (auto &[path, _] : files) {
+        this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/{}", this->rootPath, path));
+    }
+
+    auto supportsMarkdown = true;
+    auto supportsCodeActionResolve = true;
+    auto opts = make_unique<SorbetInitializationOptions>();
+    opts->enableTypecheckInfo = true;
+
+    // The initial slow path.
+    assertErrorDiagnostics(initializeLSP(supportsMarkdown, supportsCodeActionResolve, move(opts)), {});
+
+    // Add a fast-path error in a.rb
+    assertErrorDiagnostics(send(*openFile(files[1].first, files[1].second)), {});
+    assertErrorDiagnostics(send(*changeFile(files[1].first,
+                                            "# typed: true\n"
+                                            "module Root\n"
+                                            "  class A\n"
+                                            "    def fun\n"
+                                            "      1 + :type_error\n"
+                                            "    end\n"
+                                            "  end\n"
+                                            "end\n",
+                                            2)),
+                           {{files[1].first, 4, "Expected `Integer`"}});
+
+    // Make a slow path edit to Root::Foo::A
+    {
+        assertErrorDiagnostics(send(*openFile(files[3].first, files[3].second)),
+                               {{files[1].first, 4, "Expected `Integer`"}});
+
+        // Make a slow path modification to an existing file.
+        auto resps = send(*changeFile(files[3].first,
+                                      "# typed: true\n"
+                                      "module Root::Foo\n"
+                                      "  class A\n"
+                                      "    module Foo\n"
+                                      "    end\n"
+                                      "\n"
+                                      "    def foo\n"
+                                      "      Root::A.new() + :type_error\n"
+                                      "    end\n"
+                                      "  end\n"
+                                      "end\n",
+                                      2));
+
+        // We should see a starting and ending slow path message, with the end message indicating that the slow path
+        // started from stratum 1
+        REQUIRE_EQ(resps.size(), 3);
+        {
+            auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(resps[0]->asNotification().params);
+            CHECK_EQ(params->typecheckingPath, TypecheckingPath::Slow);
+            CHECK_EQ(params->status, SorbetTypecheckRunStatus::Started);
+        }
+
+        {
+            auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(resps[2]->asNotification().params);
+            CHECK_EQ(params->typecheckingPath, TypecheckingPath::Slow);
+            CHECK_EQ(params->status, SorbetTypecheckRunStatus::Ended);
+
+            // We're modifying package `Root::Foo`, which means we don't need to typecheck `Root` again.
+            CHECK_EQ(params->startingStratum, 1);
+        }
+
+        assertErrorDiagnostics(move(resps), {
+                                                {files[1].first, 4, "Expected `Integer`"},
+                                                {files[3].first, 7, "Method `+` does not exist"},
+                                            });
+    }
+}
+
 } // namespace sorbet::test::lsp

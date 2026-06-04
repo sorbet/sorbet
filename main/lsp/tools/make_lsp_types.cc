@@ -1349,6 +1349,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                  makeField("status", SorbetTypecheckRunStatus),
                                                  makeField("typecheckingPath", TypecheckingPath),
                                                  makeField("filesTypechecked", makeArray(JSONString)),
+                                                 makeField("startingStratum", JSONInt),
                                              },
                                              classTypes);
 

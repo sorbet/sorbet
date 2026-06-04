@@ -113,8 +113,10 @@ class LSPTypechecker final {
 
     /** Conservatively reruns entire pipeline without caching any trees. Returns 'true' if committed, 'false' if
      * canceled. */
-    bool runSlowPath(LSPFileUpdates &updates, KVStoreStrategy &kvstore, WorkerPool &workers,
-                     std::shared_ptr<core::ErrorFlusher> errorFlusher, SlowPathMode mode);
+    std::pair<bool, core::packages::Stratum> runSlowPath(LSPFileUpdates &updates, KVStoreStrategy &kvstore,
+                                                         WorkerPool &workers,
+                                                         std::shared_ptr<core::ErrorFlusher> errorFlusher,
+                                                         SlowPathMode mode);
 
     struct FastPathResult {
         // All of the files that we typechecked during the fast path.
