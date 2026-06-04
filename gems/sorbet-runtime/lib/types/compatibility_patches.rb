@@ -51,6 +51,48 @@ if defined? ::RSpec::Mocks
   end
 end
 
+# Allow using `sig {...}` on top of a `let`-defined method in an RSpec example group
+if defined? ::RSpec::Core::MemoizedHelpers::ClassMethods
+  module T
+    module CompatibilityPatches
+      module RSpecCompatibility
+        module MemoizedHelpers
+          # `let!`, `subject`, and `subject!` are implemented by dispatching to
+          # `let`, so this should cover those methods too.
+          def let(name, &block)
+            # TODO(jez) This will need to use consume!
+
+            current_declaration = T::Private::DeclState.current.active_declaration
+            return super unless current_declaration
+            T::Private::DeclState.current.reset!
+
+            # Allow the `let`-defined methods to be defined
+            super
+
+            # Stash the sig and re-define the method RSpec just defined. This
+            # ensures that the `sig` attaches to the outer method, not any
+            # method inside the LetDefinitions module.
+            #
+            # Unfortunately, this means that the runtime checks are not
+            # memoized (but they never were).
+            #
+            # (An alternative approach of pretending that the `sig` was actually
+            # written inside the `LetDefinitions` module didn't work, because
+            # things like `sig {override}` broke: the `LetDefinitions` module
+            # has no ancestors and thus does not override anything)
+
+            method = instance_method(name)
+            remove_method(name)
+            T::Private::DeclState.current.active_declaration = current_declaration
+            define_method(name, method)
+          end
+        end
+        ::RSpec::Core::MemoizedHelpers::ClassMethods.prepend(MemoizedHelpers)
+      end
+    end
+  end
+end
+
 # Work around for sorbet-runtime wrapped methods.
 #
 # When a sig is defined, sorbet-runtime will replace the sigged method
