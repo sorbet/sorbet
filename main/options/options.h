@@ -184,33 +184,28 @@ struct Options {
         // Ideally, we would have named this option something like `--stdlib=false`, because by
         // nature of this option being a boolean option with cxxopts, you can do `--no-stdlib=false`
         // which is a no-op, and also confusing.
-        bool noStdlib : 1;
+        bool noStdlib : 1 = false;
 
-        bool typedSuper : 1;
+        bool typedSuper : 1 = true;
 
         // Enable experimental support for RBS signatures and assertions
-        bool rbsEnabled : 1;
+        bool rbsEnabled : 1 = false;
 
         // Experimental feature `requires_ancestor`
-        bool requiresAncestorEnabled : 1;
+        bool requiresAncestorEnabled : 1 = false;
 
-        bool rspecRewriterEnabled : 1;
+        bool rspecRewriterEnabled : 1 = false;
 
-        bool runningUnderAutogen : 1;
+        bool runningUnderAutogen : 1 = false;
 
-        bool sorbetPackages : 1;
+        bool sorbetPackages : 1 = false;
 
         // The two parsers can produce slightly different desugar trees or
         // error messages, which we don't want to intermix.
-        bool usePrismParser : 1;
+        bool usePrismParser : 1 = false;
 
         // HELLO! adding/removing MUST also change this number!!
         constexpr static uint8_t NUMBER_OF_FLAGS = 8;
-
-        // In C++20 we can replace this with bit field initializers
-        CacheSensitiveOptions()
-            : noStdlib(false), typedSuper(true), rbsEnabled(false), requiresAncestorEnabled(false),
-              rspecRewriterEnabled(false), runningUnderAutogen(false), sorbetPackages(false), usePrismParser(false) {}
 
         constexpr static uint8_t VALID_BITS_MASK = (1 << NUMBER_OF_FLAGS) - 1;
 

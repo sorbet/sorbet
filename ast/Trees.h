@@ -834,12 +834,9 @@ public:
         // True if the receiver was self (either implicit like `foo()` or explicit like `self.foo()`)
         //   - Prior to Ruby 2.7, it was illegal to call a private method with an explicit receiver.
         //   - As of Ruby 2.7, it became legal to call private methods on self, e.g. `self.foo()`.
-        bool isPrivateOk : 1;
-        bool isRewriterSynthesized : 1;
-        bool hasBlock : 1;
-
-        // In C++20 we can replace this with bit field initialzers
-        Flags() : isPrivateOk(false), isRewriterSynthesized(false), hasBlock(false) {}
+        bool isPrivateOk : 1 = false;
+        bool isRewriterSynthesized : 1 = false;
+        bool hasBlock : 1 = false;
 
         bool operator==(const Flags &other) const noexcept = default;
         bool operator!=(const Flags &other) const noexcept = default;
