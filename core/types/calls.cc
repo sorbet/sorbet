@@ -883,8 +883,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                                 if (insertResult.has_value()) {
                                     auto [insertLoc, padding] = insertResult.value();
                                     string prefix(padding, ' ');
-                                    e.replaceWith("Insert at the correct indentation", insertLoc, "{}include {}\n",
-                                                  prefix, ownerName);
+                                    e.replaceWith("include Kernel", insertLoc, "{}include {}\n", prefix, ownerName);
                                 }
                             }
                         }
