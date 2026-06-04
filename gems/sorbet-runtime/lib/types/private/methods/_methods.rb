@@ -472,6 +472,12 @@ module T::Private::Methods
   end
 
   def self.run_all_sig_blocks(force_type_init: true)
+    current_declaration = T::Private::DeclState.current.active_declaration
+    if !current_declaration.nil?
+      T::Private::DeclState.current.reset!
+      raise "Cannot call `run_all_sig_blocks` while there is a pending `sig` block in #{current_declaration.mod} at #{current_declaration.loc}"
+    end
+
     loop do
       first_wrapper = @sig_wrappers.first
       break unless first_wrapper

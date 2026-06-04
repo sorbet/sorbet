@@ -58,5 +58,18 @@ module Opus::Types::Test
         end
       end
     end
+
+    describe 'run_all_sig_blocks' do
+      it 'raises if pending sigs' do
+        Module.new do
+          extend T::Sig
+          sig { void }
+        end
+        exn = assert_raises(RuntimeError) do
+          T::Utils.run_all_sig_blocks
+        end
+        assert_match(/pending `sig` block in/, exn.message)
+      end
+    end
   end
 end
