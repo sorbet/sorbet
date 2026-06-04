@@ -124,7 +124,7 @@ optional<core::AutocorrectSuggestion::Edit> autocorrectEditForDSLMethod(const Gl
 
 // Given a location, returns the insertion location (the start of the line after the line of the given location)
 // and the correct indentation if you were to insert at the insertion location
-// Useful for calculating the indentation of the next line after a something like `class Foo`
+// Useful for calculating the indentation of the next line after something like `class Foo`
 optional<pair<Loc, int>> TypeErrorDiagnostics::calculateIndentedNextLine(const GlobalState &gs, const Loc &loc) {
     auto [classStart, classEnd] = loc.toDetails(gs);
 
