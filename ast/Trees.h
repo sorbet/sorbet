@@ -838,6 +838,8 @@ public:
         bool isRewriterSynthesized : 1 = false;
         bool hasBlock : 1 = false;
 
+        Flags() {}
+
         bool operator==(const Flags &other) const noexcept = default;
         bool operator!=(const Flags &other) const noexcept = default;
     };
