@@ -298,10 +298,6 @@ bool File::isPackagedTest() const {
     return flags.isTestFile || flags.isTestPath;
 }
 
-bool File::isPackagedTestHelper() const {
-    return flags.isTestPath && !flags.isTestFile;
-}
-
 bool File::isPackageRBI() const {
     return flags.hasPackageRBIPath;
 }
