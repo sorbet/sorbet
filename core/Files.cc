@@ -290,10 +290,6 @@ string File::censorFilePathForSnapshotTests(string_view orig) {
     }
 }
 
-bool File::isTestPath() const {
-    return flags.isTestPath;
-}
-
 bool File::isPackagedTest() const {
     return flags.isTestFile || flags.isTestPath;
 }
