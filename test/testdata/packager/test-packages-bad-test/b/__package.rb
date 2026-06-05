@@ -1,6 +1,5 @@
 # typed: strict
 # enable-packager: true
-# enable-test-packages: true
 
 class Test::Root::B < PackageSpec
   test!
