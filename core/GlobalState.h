@@ -441,7 +441,7 @@ public:
                             const std::vector<std::string> &updateVisibilityFor,
                             const std::vector<std::string> &packagerLayers, std::string errorHint,
                             packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility,
-                            bool packageAttributedErrors, bool testPackages);
+                            bool packageAttributedErrors);
     packages::UnfreezePackages unfreezePackages();
 
     NameRef nextMangledName(ClassOrModuleRef owner, NameRef origName);
@@ -566,7 +566,7 @@ public:
         const std::vector<std::string> &allowRelaxedPackagerChecksFor,
         const std::vector<std::string> &updateVisibilityFor, const std::vector<std::string> &packagerLayers,
         std::string errorHint, packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility,
-        bool packageAttributedErrors, bool testPackages) const;
+        bool packageAttributedErrors) const;
 
     // Minimally copy the global state, including the file table, to initialize the LSPTypechecker.
     // NOTE: this very intentionally will not copy the symbol or name tables. The symbol tables aren't used or populated
@@ -578,8 +578,7 @@ public:
         const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
         const std::vector<std::string> &allowRelaxedPackagerChecksFor,
         const std::vector<std::string> &updateVisibilityFor, const std::vector<std::string> &packagerLayers,
-        std::string errorHint, packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility,
-        bool testPackages) const;
+        std::string errorHint, packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility) const;
 
     // Copy the name table, file table and other parts of GlobalState that are required to start the slow path. If the
     // `toStratum` value is passed as something other than the `0` stratum, the prefix of the symbol table leading up to
@@ -592,7 +591,7 @@ public:
                     const std::vector<std::string> &allowRelaxedPackagerChecksFor,
                     const std::vector<std::string> &updateVisibilityFor, const std::vector<std::string> &packagerLayers,
                     std::string errorHint, packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility,
-                    bool packageAttributedErrors, bool testPackages, core::packages::Stratum toStratum) const;
+                    bool packageAttributedErrors, core::packages::Stratum toStratum) const;
 
     // Contains a path prefix that should be stripped from all printed paths.
     std::string pathPrefix;
@@ -680,9 +679,6 @@ public:
         // Think very hard before looking at this value in namer / resolver!
         // (hint: probably you want to find an alternate solution)
         bool runningUnderAutogen = false;
-
-        // Whether to enable the new syntax and behavior for test-only packages.
-        bool testPackages = false;
     };
     CacheSensitiveOptions cacheSensitiveOptions;
 

@@ -295,7 +295,6 @@ void exportClassOrModule(const core::GlobalState &gs,
             auto &referencingPkgInfo = gs.packageDB().getPackageInfo(packageForF);
             auto *imp = referencingPkgInfo.importsPackage(owningPackage);
             if (imp != nullptr && imp->usesInternals) {
-                ENFORCE(gs.packageDB().testPackages());
                 continue;
             }
         }
@@ -329,7 +328,6 @@ void exportField(const core::GlobalState &gs,
             auto &referencingPkgInfo = gs.packageDB().getPackageInfo(packageForF);
             auto *imp = referencingPkgInfo.importsPackage(owningPackage);
             if (imp != nullptr && imp->usesInternals) {
-                ENFORCE(gs.packageDB().testPackages());
                 continue;
             }
         }
