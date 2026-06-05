@@ -141,7 +141,7 @@ using SimilarMethodsByName = UnorderedMap<core::NameRef, vector<SimilarMethod>>;
 
 // Checks if the class is sealed (including enums) by probing for the `sealed_subclasses` method
 optional<core::TypePtr> getSealedSubclassesUnion(const core::GlobalState &gs, const core::ClassOrModuleRef classRef) {
-    const auto &singletonClass = classRef.data(gs)->lookupSingletonClass(gs);
+   auto singletonClass = classRef.data(gs)->lookupSingletonClass(gs);
     auto sealedSubclasses = singletonClass.data(gs)->findMethod(gs, core::Names::sealedSubclasses());
     if (!sealedSubclasses.exists()) {
         // Given `MyEnum::X.`, the singleton will not be the `T.class_of(MyEnum)` but rather
