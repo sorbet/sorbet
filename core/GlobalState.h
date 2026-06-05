@@ -13,6 +13,7 @@
 #include "core/lsp/Query.h"
 #include "core/packages/PackageDB.h"
 #include "core/packages/PackageInfo.h"
+#include "core/packages/Stratum.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include <memory>
 
@@ -282,6 +283,8 @@ public:
 
 // A snapshot of the size of all of GlobalState's symbol tables at a point in time.
 class SymbolTableOffsets {
+    friend class GlobalState;
+
     // The defaults of `1` are because all of our symbol tables reserve index `0` for the invalid entry, so all valid
     // indices will start at offset `1` into their respective vector.
     unsigned int classAndModulesOffset = 1;
@@ -578,10 +581,10 @@ public:
         std::string errorHint, packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility,
         bool testPackages) const;
 
-    // Copy the name table, file table and other parts of GlobalState that are required to start the slow path.
-    // NOTE: this very intentionally will not copy the symbol table, and the expectation is that the symbol table will
-    // be overwritten by immediately deserializaing the payload over it.
-    std::unique_ptr<GlobalState>
+    // Copy the name table, file table and other parts of GlobalState that are required to start the slow path. If the
+    // `toStratum` value is passed as something other than the `0` stratum, the prefix of the symbol table leading up to
+    // that stratum will be copied over as well.
+    std::pair<std::unique_ptr<GlobalState>, bool>
     copyForSlowPath(const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
                     const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
                     const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
@@ -589,7 +592,7 @@ public:
                     const std::vector<std::string> &allowRelaxedPackagerChecksFor,
                     const std::vector<std::string> &updateVisibilityFor, const std::vector<std::string> &packagerLayers,
                     std::string errorHint, packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility,
-                    bool packageAttributedErrors, bool testPackages) const;
+                    bool packageAttributedErrors, bool testPackages, core::packages::Stratum toStratum) const;
 
     // Contains a path prefix that should be stripped from all printed paths.
     std::string pathPrefix;
@@ -698,7 +701,7 @@ public:
 
     // Symbol table offset information for the current stratum of files.
     const SymbolTableOffsets &newSymbols() const {
-        return this->symbolOffsets;
+        return this->symbolOffsets.back();
     }
 
     // ClassOrModules that have been introduced in the current stratum of files.
@@ -726,8 +729,13 @@ public:
         return this->newSymbols().typeParameterRefs(*this);
     }
 
+    // Reserve space for internal structures, under the assumption that we'll see `len` strata.
+    void preallocateForStrata(size_t len) {
+        this->symbolOffsets.reserve(len);
+    }
+
     void updateSymbolTableOffsets() {
-        this->symbolOffsets = SymbolTableOffsets(*this);
+        this->symbolOffsets.emplace_back(SymbolTableOffsets(*this));
     }
 
 private:
@@ -774,7 +782,8 @@ private:
     bool symbolTableFrozen = true;
     bool fileTableFrozen = true;
 
-    SymbolTableOffsets symbolOffsets;
+    // Symbol table offsets for each stratum of the package graph traversal.
+    std::vector<SymbolTableOffsets> symbolOffsets;
 
     // Copy options over from another GlobalState. Private, as it's only meant to be used as a helper to implement other
     // copying strategies.
@@ -788,6 +797,13 @@ private:
                                    SymbolRef defaultReturnValue, bool ignoreKind = false) const;
 
     std::string toStringWithOptions(bool showFull, bool showRaw) const;
+
+    // Copy the symbol table from other, planning to start typechecking at the given stratum. Returns `true` if the copy
+    // took place, or `false` if the symbol table was left un-initialized.
+    //
+    // This method requires that `this` be derived from `other`, as the copied symbol table prefix will assume that
+    // their name tables and file tables to match.
+    bool copySymbolTableFrom(const GlobalState &other, packages::Stratum toStratum);
 };
 // CheckSize(GlobalState, 152, 8);
 // Historically commented out because size of unordered_map was different between different versions of stdlib

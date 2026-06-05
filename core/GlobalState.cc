@@ -287,6 +287,8 @@ GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue, shared_ptr<lsp::Type
     int namesByHashSize = nextPowerOfTwo(
         2 * (PAYLOAD_MAX_UTF8_NAME_COUNT + PAYLOAD_MAX_CONSTANT_NAME_COUNT + PAYLOAD_MAX_UNIQUE_NAME_COUNT));
     namesByHash.resize(namesByHashSize);
+
+    this->symbolOffsets.emplace_back();
 }
 
 unique_ptr<GlobalState> GlobalState::makeEmptyGlobalStateForHashing(spdlog::logger &logger) {
@@ -2142,15 +2144,15 @@ unique_ptr<GlobalState> GlobalState::copyForLSPTypechecker(
 
     return result;
 }
-unique_ptr<GlobalState>
-GlobalState::copyForSlowPath(const vector<string> &extraPackageFilesDirectoryUnderscorePrefixes,
-                             const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                             const vector<string> &extraPackageFilesDirectorySlashPrefixes,
-                             const vector<string> &packageSkipRBIExportEnforcementDirs,
-                             const vector<string> &allowRelaxedPackagerChecksFor,
-                             const vector<string> &updateVisibilityFor, const vector<string> &packagerLayers,
-                             string errorHint, packages::GenPackagesMode genPackagesMode,
-                             bool allowRelaxingTestVisibility, bool packageAttributedErrors, bool testPackages) const {
+
+pair<unique_ptr<GlobalState>, bool> GlobalState::copyForSlowPath(
+    const vector<string> &extraPackageFilesDirectoryUnderscorePrefixes,
+    const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
+    const vector<string> &extraPackageFilesDirectorySlashPrefixes,
+    const vector<string> &packageSkipRBIExportEnforcementDirs, const vector<string> &allowRelaxedPackagerChecksFor,
+    const vector<string> &updateVisibilityFor, const vector<string> &packagerLayers, string errorHint,
+    packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility, bool packageAttributedErrors,
+    bool testPackages, core::packages::Stratum toStratum) const {
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
 
     // We omit a call to `initEmpty` here, as the only intended use of this function is to have its symbol table
@@ -2177,17 +2179,91 @@ GlobalState::copyForSlowPath(const vector<string> &extraPackageFilesDirectoryUnd
     result->typeParameters.reserve(this->typeParameters.capacity());
     result->typeMembers.reserve(this->typeMembers.capacity());
 
+    bool copiedSymbolTablePrefix = false;
     if (packageDB().enabled()) {
-        core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*result);
-        core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = result->unfreezePackages();
-        result->setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes,
-                                   extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                                   extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs,
-                                   allowRelaxedPackagerChecksFor, updateVisibilityFor, packagerLayers, errorHint,
-                                   genPackagesMode, allowRelaxingTestVisibility, packageAttributedErrors, testPackages);
+        {
+            core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*result);
+            core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = result->unfreezePackages();
+            result->setPackagerOptions(
+                extraPackageFilesDirectoryUnderscorePrefixes, extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs,
+                allowRelaxedPackagerChecksFor, updateVisibilityFor, packagerLayers, errorHint, genPackagesMode,
+                allowRelaxingTestVisibility, packageAttributedErrors, testPackages);
+        }
+
+        copiedSymbolTablePrefix = result->copySymbolTableFrom(*this, toStratum);
     }
 
-    return result;
+    return {move(result), copiedSymbolTablePrefix};
+}
+
+bool GlobalState::copySymbolTableFrom(const GlobalState &other, packages::Stratum toStratum) {
+    // Copying a prefix of the symbol tables assumes that this global state derives from `other`.
+    ENFORCE(this->files->size() == other.files->size());
+    ENFORCE(this->constantNames.size() == other.constantNames.size());
+    ENFORCE(this->uniqueNames.size() == other.uniqueNames.size());
+    ENFORCE(this->namesByHash.size() == other.namesByHash.size());
+    ENFORCE(other.packageDB().enabled(), "Copying a prefix of the symbol table requires --sorbet-packages");
+
+    // Exit early if there's nothing to copy, or if we don't have information about the stratum specified.
+    if (toStratum == packages::Stratum(0) || toStratum.rawId() >= other.symbolOffsets.size()) {
+        return false;
+    }
+
+    this->packageDB_ = other.packageDB().deepCopy();
+
+    this->symbolOffsets.clear();
+    this->symbolOffsets.reserve(other.symbolOffsets.size());
+    this->symbolOffsets.insert(this->symbolOffsets.begin(), other.symbolOffsets.begin(),
+                               other.symbolOffsets.begin() + toStratum.rawId() + 1);
+
+    auto offsets = other.symbolOffsets[toStratum.rawId()];
+
+    ENFORCE(this->classAndModules.empty());
+    for (auto i = 0; i < offsets.classAndModulesOffset; ++i) {
+        this->classAndModules.emplace_back(other.classAndModules[i].deepCopy(*this));
+    }
+
+    // TODO(trevor): multiplex this with the worker pool
+    for (auto &sym : this->classAndModules) {
+        absl::erase_if(sym.members(), [offsets](pair<NameRef, SymbolRef> e) {
+            auto sym = e.second;
+            switch (sym.kind()) {
+                case SymbolRef::Kind::ClassOrModule:
+                    return sym.asClassOrModuleRef().id() >= offsets.classAndModulesOffset;
+                case SymbolRef::Kind::Method:
+                    return sym.asMethodRef().id() >= offsets.methodsOffset;
+                case SymbolRef::Kind::FieldOrStaticField:
+                    return sym.asFieldRef().id() >= offsets.fieldsOffset;
+                case SymbolRef::Kind::TypeParameter:
+                    return sym.asTypeParameterRef().id() >= offsets.typeParametersOffset;
+                case SymbolRef::Kind::TypeMember:
+                    return sym.asTypeMemberRef().id() >= offsets.typeMembersOffset;
+            }
+        });
+    }
+
+    ENFORCE(this->methods.empty());
+    for (auto i = 0; i < offsets.methodsOffset; ++i) {
+        this->methods.emplace_back(other.methods[i].deepCopy(*this));
+    }
+
+    ENFORCE(this->fields.empty());
+    for (auto i = 0; i < offsets.fieldsOffset; ++i) {
+        this->fields.emplace_back(other.fields[i].deepCopy(*this));
+    }
+
+    ENFORCE(this->typeParameters.empty());
+    for (auto i = 0; i < offsets.typeParametersOffset; ++i) {
+        this->typeParameters.emplace_back(other.typeParameters[i].deepCopy(*this));
+    }
+
+    ENFORCE(this->typeMembers.empty());
+    for (auto i = 0; i < offsets.typeMembersOffset; ++i) {
+        this->typeMembers.emplace_back(other.typeMembers[i].deepCopy(*this));
+    }
+
+    return true;
 }
 
 string_view GlobalState::getPrintablePath(string_view path) const {

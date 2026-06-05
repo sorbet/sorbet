@@ -33,10 +33,11 @@ using namespace std;
 namespace {
 
 void sendTypecheckInfo(const LSPConfiguration &config, const core::GlobalState &gs, SorbetTypecheckRunStatus status,
-                       TypecheckingPath typecheckingPath, vector<core::FileRef> filesTypechecked) {
+                       TypecheckingPath typecheckingPath, vector<core::FileRef> filesTypechecked,
+                       core::packages::Stratum startingStratum) {
     if (config.getClientConfig().enableTypecheckInfo) {
-        auto sorbetTypecheckInfo =
-            make_unique<SorbetTypecheckRunInfo>(status, typecheckingPath, config.frefsToPaths(gs, filesTypechecked));
+        auto sorbetTypecheckInfo = make_unique<SorbetTypecheckRunInfo>(
+            status, typecheckingPath, config.frefsToPaths(gs, filesTypechecked), startingStratum.rawId());
         config.output->write(make_unique<LSPMessage>(
             make_unique<NotificationMessage>("2.0", LSPMethod::SorbetTypecheckRunInfo, move(sorbetTypecheckInfo))));
     }
@@ -147,7 +148,7 @@ void LSPTypechecker::initialize(TaskQueue &queue, unique_ptr<core::GlobalState> 
         ErrorEpoch epoch(*errorReporter, updates.epoch, isIncremental, {});
         auto errorFlusher = make_shared<ErrorFlusherLSP>(updates.epoch, errorReporter);
         auto handler = InitKVStoreStrategy::build(*this->gs, std::move(kvstore));
-        auto committed = runSlowPath(updates, handler, workers, errorFlusher, SlowPathMode::Init);
+        auto [committed, _startingStratum] = runSlowPath(updates, handler, workers, errorFlusher, SlowPathMode::Init);
         ENFORCE(committed);
         epoch.committed = true;
     }
@@ -205,8 +206,9 @@ bool LSPTypechecker::typecheck(unique_ptr<LSPFileUpdates> updates, WorkerPool &w
 
     vector<core::FileRef> filesTypechecked;
     bool committed = true;
+    core::packages::Stratum startingStratum;
     const bool isFastPath = updates->typecheckingPath == TypecheckingPath::Fast;
-    sendTypecheckInfo(*config, *gs, SorbetTypecheckRunStatus::Started, updates->typecheckingPath, {});
+    sendTypecheckInfo(*config, *gs, SorbetTypecheckRunStatus::Started, updates->typecheckingPath, {}, startingStratum);
     {
         ErrorEpoch epoch(*errorReporter, updates->epoch, isFastPath, move(diagnosticLatencyTimers));
 
@@ -227,7 +229,8 @@ bool LSPTypechecker::typecheck(unique_ptr<LSPFileUpdates> updates, WorkerPool &w
             prodCategoryCounterInc("lsp.updates", "fastpath");
         } else {
             SessionKVStoreStrategy kvstore(this->sessionCache.get(), *this->config);
-            committed = runSlowPath(*updates, kvstore, workers, errorFlusher, SlowPathMode::Cancelable);
+            std::tie(committed, startingStratum) =
+                runSlowPath(*updates, kvstore, workers, errorFlusher, SlowPathMode::Cancelable);
         }
         epoch.committed = committed;
     }
@@ -239,7 +242,7 @@ bool LSPTypechecker::typecheck(unique_ptr<LSPFileUpdates> updates, WorkerPool &w
     }
 
     sendTypecheckInfo(*config, *gs, committed ? SorbetTypecheckRunStatus::Ended : SorbetTypecheckRunStatus::Cancelled,
-                      updates->typecheckingPath, move(filesTypechecked));
+                      updates->typecheckingPath, move(filesTypechecked), startingStratum);
     return committed;
 }
 
@@ -414,6 +417,61 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
 
 namespace {
 
+// Determine how much of the symbol table we can copy when starting a slow path edit: any __package.rb modification
+// means that we can't reuse the symbol table.
+core::packages::Stratum determineStartingStratum(const core::GlobalState &gs,
+                                                 const vector<core::packages::Stratum> &fileToStratum,
+                                                 const core::packages::Stratum lastStratum,
+                                                 const LSPFileUpdates &update) {
+    // We start by assuming we can copy the whole previous symbol table.
+    auto editStratum = lastStratum;
+
+    int ix = -1;
+    for (auto &file : update.updatedFiles) {
+        ++ix;
+
+        auto fref = update.updatedFileRefs[ix];
+
+        core::packages::Stratum fileStratum;
+
+        // If this is a new file, we can still copy a prefix if we can determine what package it would belong to.
+        if (fref.id() >= fileToStratum.size()) {
+            // We can't keep any part of the symbol table if we see a new package file
+            if (file->hasPackageRbPath()) {
+                return core::packages::Stratum(0);
+            }
+
+            auto pkg = gs.packageDB().findPackageByPath(gs, *file);
+            if (!pkg.exists()) {
+                return core::packages::Stratum(0);
+            }
+
+            auto &info = gs.packageDB().getPackageInfo(pkg);
+            ENFORCE(info.exists());
+
+            // We have already checked for new package files above, so this should always be true.
+            ENFORCE(info.file.id() < fileToStratum.size());
+            fileStratum = fileToStratum[info.file.id()];
+        } else {
+            // We can't keep any part of the symbol table if the package file has changed. The byte-for-byte comparison
+            // is a little expensive here, but we could refactor LSPIndexer::getTypecheckingPathInternal to cache the
+            // results of this check on the LSPFileUpdates so that we could avoid the additional check here.
+            if (file->hasPackageRbPath() && fref.data(gs).source() != file->source()) {
+                return core::packages::Stratum(0);
+            }
+
+            fileStratum = fileToStratum[fref.id()];
+        }
+
+        // We need to find the earliest stratum involved in this edit to know what prefix of the symbol table will not
+        // be affected by it. This is the opposite of what we do for preemption, as in that case we need to know the
+        // point at which an edit's dependencies will all have been satisfied.
+        editStratum = std::min(editStratum, fileStratum);
+    }
+
+    return editStratum;
+}
+
 // Determine which files we need to copy into the open files cache (indexedFinalGS), and update the file table to point
 // to the updated files.
 void applyFileTableUpdates(core::GlobalState &gs, vector<core::FileRef> &workspaceFiles, const LSPConfiguration &config,
@@ -488,8 +546,10 @@ void applyFileTableUpdates(core::GlobalState &gs, vector<core::FileRef> &workspa
 }
 } // namespace
 
-bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, KVStoreStrategy &kvstore, WorkerPool &workers,
-                                 shared_ptr<core::ErrorFlusher> errorFlusher, LSPTypechecker::SlowPathMode mode) {
+pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &updates, KVStoreStrategy &kvstore,
+                                                                WorkerPool &workers,
+                                                                shared_ptr<core::ErrorFlusher> errorFlusher,
+                                                                LSPTypechecker::SlowPathMode mode) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId,
             "runSlowPath can only be called from the typechecker thread.");
 
@@ -501,12 +561,16 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, KVStoreStrategy &kvsto
     ENFORCE(updates.typecheckingPath != TypecheckingPath::Fast || config->disableFastPath);
     logger->debug("Taking slow path");
 
+    core::packages::Stratum startingStratum(0);
     UnorderedSet<core::FileRef> openFiles;
     ENFORCE(this->cancellationUndoState == nullptr);
     if (cancelable) {
         timeit.setTag("cancelable", "true");
 
-        auto savedGS = std::exchange(this->gs, pipeline::copyForSlowPath(*this->gs, this->config->opts));
+        startingStratum = determineStartingStratum(*this->gs, this->fileToStratum, this->lastStratum, updates);
+
+        auto savedGS =
+            std::exchange(this->gs, pipeline::copyForSlowPath(*this->gs, this->config->opts, startingStratum));
 
         // Seed open files with the previous set from `indexedFinalGS`
         for (auto &entry : this->indexedFinalGS) {
@@ -639,26 +703,25 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, KVStoreStrategy &kvsto
                                      workers);
         }
 
-        // This is cast to a uint16_t everywhere it's used. This seems bad, but it should be fine because:
-        // 1. we increment in the beginning of the loop before any use
-        // 2. overflowing a uint16_t would mean that we have a chain of dependencies that's >65535 packages long
-        int stratumIx = -1;
-
         auto strata = pipeline::computePackageStrata(*this->gs, packageIndexed, workspaceFilesSpan, this->config->opts);
+        const auto numStrata = strata.strata.size();
         this->fileToStratum = move(strata.fileToStratum);
-        this->lastStratum = core::packages::Stratum(strata.strata.size() - 1);
+        this->lastStratum = core::packages::Stratum(numStrata - 1);
+        this->gs->preallocateForStrata(numStrata);
 
         // Determine which stratum this edit will be checked at, so that we have a good reference for when to switch
         // to the SlowPathNonBlocking status. This isn't exactly correct, as you could switch to editing a file in an
         // earlier stratum and see requests handled by preemption before the status changes, or edit a file in a later
         // stratum and see `Loading...` despite the status.
-        auto editStratum = updatedFileRefs.empty() ? this->lastStratum
-                                                   : this->getFileStratumMapping().getStratumForFiles(updatedFileRefs);
+        auto editStratum =
+            updatedFileRefs.empty()
+                ? this->lastStratum
+                : std::max(startingStratum, this->getFileStratumMapping().getStratumForFiles(updatedFileRefs));
 
-        for (auto &stratum : strata.strata) {
+        for (auto stratumIx = startingStratum.rawId(); stratumIx < numStrata; ++stratumIx) {
+            auto &stratum = strata.strata[stratumIx];
+            core::packages::Stratum currentStratum(stratumIx);
             vector<ast::ParsedFile> stratumFiles, nonPackagedIndexed;
-
-            core::packages::Stratum currentStratum(++stratumIx);
 
             // When we unpartition the package and non-package files, we'll realloc stratumFiles to hold everything.
             stratumFiles.reserve(stratum.packageFiles.size() + stratum.sourceFiles.size());
@@ -818,7 +881,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, KVStoreStrategy &kvsto
             Exception::raise("Slow path failed to handle all expected preemptions");
         }
 
-        return core::packages::Stratum(stratumIx);
+        return this->lastStratum;
     });
 
     gs->lspQuery = core::lsp::Query::noQuery();
@@ -841,7 +904,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates &updates, KVStoreStrategy &kvsto
         logger->debug("[Typechecker] Typecheck run for epoch {} was canceled.", updates.epoch);
     }
 
-    return committed;
+    return {committed, startingStratum};
 }
 
 void LSPTypechecker::cacheUpdatedFiles(absl::Span<const ast::ParsedFile> indexed,

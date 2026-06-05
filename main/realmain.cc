@@ -650,6 +650,7 @@ int realmain(int argc, char *argv[]) {
         vector<ast::ParsedFile> stratumFiles;
         int currentStratum = -1;
         auto strata = pipeline::computePackageStrata(*gs, packageIndexed, inputFilesSpan, opts);
+        gs->preallocateForStrata(strata.strata.size());
         for (auto &stratum : strata.strata) {
             ++currentStratum;
 

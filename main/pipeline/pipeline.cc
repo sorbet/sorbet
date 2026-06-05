@@ -116,22 +116,27 @@ void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) 
 #endif
 }
 
-unique_ptr<core::GlobalState> copyForSlowPath(const core::GlobalState &from, const options::Options &opts) {
+unique_ptr<core::GlobalState> copyForSlowPath(const core::GlobalState &from, const options::Options &opts,
+                                              core::packages::Stratum forStratum) {
     if (opts.cacheSensitiveOptions.noStdlib) {
         auto result = make_unique<core::GlobalState>(from.errorQueue, from.epochManager);
         result->initEmpty();
         return result;
     }
 
-    auto result = from.copyForSlowPath(
+    auto [result, symbolTableInitialized] = from.copyForSlowPath(
         opts.extraPackageFilesDirectoryUnderscorePrefixes, opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
         opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
         opts.allowRelaxedPackagerChecksFor, opts.updateVisibilityFor, opts.packagerLayers, opts.sorbetPackagesHint,
-        opts.genPackagesMode, opts.allowRelaxingTestVisibility, opts.packageAttributedErrors, opts.testPackages);
+        opts.genPackagesMode, opts.allowRelaxingTestVisibility, opts.packageAttributedErrors, opts.testPackages,
+        forStratum);
 
-    core::serialize::Serializer::loadSymbolTable(*result, PAYLOAD_SYMBOL_TABLE);
+    // Fall back on initializing from the payload if we're not copying part of from's symbol table.
+    if (!symbolTableInitialized) {
+        core::serialize::Serializer::loadSymbolTable(*result, PAYLOAD_SYMBOL_TABLE);
+    }
 
-    return result;
+    return move(result);
 }
 
 vector<core::FileRef> reserveFiles(core::GlobalState &gs, const vector<string> &files) {
