@@ -656,35 +656,27 @@ struct PackageSpecBodyWalk {
             core::StrictLevel minTypedLevel = core::StrictLevel::None;
             core::LocOffsets minTypedLevelLoc;
 
-            // TODO(trevor): after we fully commit to test-packages, this can be simplified quite a bit.
             if (send.numKwArgs() >= 1) {
                 for (const auto [key, value] : send.kwArgPairs()) {
                     auto keyLit = ast::cast_tree<ast::Literal>(key);
                     ENFORCE(keyLit);
-                    auto typedLevel = parseTypedLevelOption(ctx, value);
 
+                    if (keyLit->asSymbol() != core::Names::minTypedLevel()) {
+                        // Reported as infer error
+                        continue;
+                    }
+
+                    auto typedLevel = parseTypedLevelOption(ctx, value);
                     if (typedLevel == core::StrictLevel::None) {
-                        if (keyLit->asSymbol() == core::Names::minTypedLevel()) {
-                            if (auto e = ctx.beginError(send.argsLoc(), core::errors::Packager::InvalidMinTypedLevel)) {
-                                e.setHeader("Argument to `{}` must be one of: `{}`, `{}`, `{}`, `{}`, or `{}`",
-                                            keyLit->asSymbol().show(ctx), "ignore", "false", "true", "strict",
-                                            "strong");
-                            }
+                        if (auto e = ctx.beginError(send.argsLoc(), core::errors::Packager::InvalidMinTypedLevel)) {
+                            e.setHeader("Argument to `{}` must be one of: `{}`, `{}`, `{}`, `{}`, or `{}`",
+                                        keyLit->asSymbol().show(ctx), "ignore", "false", "true", "strict", "strong");
                         }
                         continue;
                     }
-                    if (keyLit->asSymbol() == core::Names::minTypedLevel()) {
-                        minTypedLevel = typedLevel;
-                        minTypedLevelLoc = value.loc();
-                    } else if (keyLit->asSymbol() == core::Names::testsMinTypedLevel()) {
-                        if (auto e = ctx.beginError(keyLit->loc.join(value.loc()),
-                                                    core::errors::Packager::InvalidPackageExpression)) {
-                            e.setHeader("Invalid expression in package: the only valid argument for `{}` is `{}`",
-                                        "sorbet", core::Names::minTypedLevel().shortName(ctx));
-                        }
-                    } else {
-                        // Handled elsewhere
-                    }
+
+                    minTypedLevel = typedLevel;
+                    minTypedLevelLoc = value.loc();
                 }
             }
 
