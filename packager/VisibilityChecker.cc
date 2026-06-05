@@ -181,7 +181,9 @@ class PropagateVisibility final {
     //
     // This is very unsatisfying, because it looks a lot like us re-introducing FullyQualifiedName,
     // which was half of the point of moving Symbols into the package database in the first place.
-    pair<core::ClassOrModuleRef, core::ClassOrModuleRef> getScopesForPackage(const core::GlobalState &gs) {
+    //
+    // TODO(jez) Now that test packages are gone, we can actually establish a link if we want to.
+    core::ClassOrModuleRef getScopesForPackage(const core::GlobalState &gs) {
         vector<core::NameRef> parts;
         auto owner = package.mangledName().owner;
         while (owner != core::Symbols::root() && owner != core::Symbols::PackageSpecRegistry()) {
@@ -190,25 +192,18 @@ class PropagateVisibility final {
             owner = ownerData->owner;
         }
 
-        auto nonTestScope = getScopeForPackage(gs, parts, core::Symbols::root());
-
-        // TODO(trevor): we can remove the returned test scope after switching to test packages.
-        core::ClassOrModuleRef testScope;
-        return {nonTestScope, testScope};
+        return getScopeForPackage(gs, parts, core::Symbols::root());
     }
 
     void unsetAllExportedInPackage(core::MutableContext ctx) {
-        auto [nonTestScope, testScope] = getScopesForPackage(ctx);
+        auto scope = getScopesForPackage(ctx);
 
         auto setExportedTo = false;
 
         // loc is never used in `recursiveSetIsExported` if `setExportedTo` is false, so just say "none"
         auto currentExportLineLoc = core::LocOffsets::none();
-        if (nonTestScope.exists()) {
-            recursiveSetIsExported(ctx, setExportedTo, nonTestScope, currentExportLineLoc, nonTestScope);
-        }
-        if (testScope.exists()) {
-            recursiveSetIsExported(ctx, setExportedTo, testScope, currentExportLineLoc, testScope);
+        if (scope.exists()) {
+            recursiveSetIsExported(ctx, setExportedTo, scope, currentExportLineLoc, scope);
         }
 
         // Shouldn't have been touched, because currentExportLineLoc was none, but let's just clear it to be safe.
