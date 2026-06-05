@@ -699,13 +699,6 @@ struct PackageSpecBodyWalk {
             }
         } else if (send.fun == core::Names::test_bang()) {
             if (!send.hasNonBlockArgs()) {
-                // TODO(jez) Move this to this check to rubocop, delete this usage
-                if (!ctx.file.data(ctx).isTestPath()) {
-                    if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidPackageExpression)) {
-                        e.setHeader("`{}` is only valid for packages with `{}` in their path", "test!", "/test/");
-                    }
-                }
-
                 info.locs.testPackage = send.loc;
             }
         } else {

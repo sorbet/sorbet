@@ -4,11 +4,11 @@ class Test::Root < PackageSpec
   test!
 
   test_import Root
-  #           ^^^^ error: Invalid expression in package
-  #           ^^^^ error: Expected `T.class_of(Sorbet::Private::Static::PackageSpec)`
+# ^^^^^^^^^^^ error: Method `test_import` does not exist on `T.class_of(Test::Root)`
+  #           ^^^^ error: Invalid expression in package: Arguments to functions must be literals
 
   test_import Root, only: "test_rb"
-  #           ^^^^ error: Invalid expression in package
-  #           ^^^^ error: Expected `T.class_of(Sorbet::Private::Static::PackageSpec)`
+# ^^^^^^^^^^^ error: Method `test_import` does not exist on `T.class_of(Test::Root)`
+  #           ^^^^ error: Invalid expression in package: Arguments to functions must be literals
 
 end
