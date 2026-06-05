@@ -180,7 +180,10 @@ void GenPackages::run(core::GlobalState &gs) {
                             // referencedPackage's `visible_to`s
                             //
                             // In either case, we'll add a new `visible_to` to referencedPackage's __package.db
-                            if (gs.packageDB().allowRelaxingTestVisibility() && file.data(gs).isPackagedTest()) {
+                            auto pkg = gs.packageDB().findPackageByPath(gs, file);
+                            auto &pkgInfo = gs.packageDB().getPackageInfo(pkg);
+                            if (gs.packageDB().allowRelaxingTestVisibility() && pkgInfo.exists() &&
+                                pkgInfo.testPackage()) {
                                 // If --allow-relaxing-test-visibility, and this reference is in a test file, add
                                 // `visible_to 'tests'`
                                 neededVisibleToTests[referencedPackageName] = true;
