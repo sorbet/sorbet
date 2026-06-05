@@ -82,8 +82,8 @@ E/__package.rb:3: `E` is missing `visible_to`s https://srb.help/3734
     E/__package.rb:10: Deleted
     10 |  visible_to AlsoDoesNotExist::*
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    E/__package.rb:10: Inserted `visible_to 'tests'
-      visible_to C`
+    E/__package.rb:10: Inserted `visible_to C
+      visible_to D`
     10 |  visible_to AlsoDoesNotExist::*
                                         ^
 
@@ -204,8 +204,8 @@ class E < PackageSpec
 
   export E::CONSTANT_FROM_E
 
-  visible_to 'tests'
   visible_to C
+  visible_to D
 end
 
 ###### cat PackageWithIgnore/__package.rb ######
@@ -280,8 +280,8 @@ E/__package.rb:3: `E` is missing `visible_to`s https://srb.help/3734
     E/__package.rb:10: Deleted
     10 |  visible_to AlsoDoesNotExist::*
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    E/__package.rb:10: Inserted `visible_to 'tests'
-      visible_to C`
+    E/__package.rb:10: Inserted `visible_to C
+      visible_to D`
     10 |  visible_to AlsoDoesNotExist::*
                                         ^
 
@@ -415,8 +415,8 @@ class E < PackageSpec
 
   export E::CONSTANT_FROM_E
 
-  visible_to 'tests'
   visible_to C
+  visible_to D
 end
 
 ###### cat PackageWithIgnore/__package.rb ######
