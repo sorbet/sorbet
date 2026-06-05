@@ -146,6 +146,9 @@ class ComputePackageSCCs {
     }
 
 public:
+    // TODO(jez) We can make this not templated, because we're only running once now.
+    // Deferring until later.
+
     // NOTE: This function must be called every time an import is added or removed from a package.
     // It is relatively fast, so calling it on every __package.rb edit is an okay overapproximation for simplicity.
     template <typename P> static core::packages::Condensation run(core::GlobalState &gs, P &packageGraph) {
