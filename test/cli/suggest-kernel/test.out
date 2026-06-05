@@ -66,4 +66,19 @@ test/cli/suggest-kernel/suggest-kernel.rb:6: Method `Array` does not exist on `F
     test/cli/suggest-kernel/suggest-kernel.rb:6: Insert `Kernel.`
      .. |    Array(0)
             ^
-Errors: 4
+
+test/cli/suggest-kernel/suggest-kernel.rb:28: Method `is_a?` does not exist on `Parent` https://srb.help/7003
+    .. |    if parent.is_a?(Child)
+                      ^^^^^
+  Got `Parent` originating from:
+    test/cli/suggest-kernel/suggest-kernel.rb:27:
+    .. |  def example(parent)
+                      ^^^^^^
+  Note:
+    `is_a?` is actually defined as a method on `Kernel`. To call it,
+    `include Kernel` in the module `Parent` to ensure the method is always there.
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/suggest-kernel/suggest-kernel.rb:18: Insert `include Kernel`
+    .. |end
+        ^
+Errors: 5
