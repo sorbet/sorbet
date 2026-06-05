@@ -31,8 +31,6 @@ class PackageDB final {
     friend class core::GlobalState;
 
 public:
-    static constexpr NameRef TEST_NAMESPACE = core::Names::Constants::Test();
-
     MangledName enterPackage(std::unique_ptr<PackageInfo> pkg);
 
     // Fetch the mangled package name for a file, returning a MangledName that doesn't exist if there is no
@@ -85,11 +83,6 @@ public:
         return this->packageAttributedErrors_;
     }
 
-    // Whether we're using separate test packages, or the old-style inline test packages.
-    bool testPackages() const {
-        return this->testPackages_;
-    }
-
     absl::Span<const std::string> extraPackageFilesDirectoryUnderscorePrefixes() const;
     absl::Span<const std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes() const;
     absl::Span<const std::string> extraPackageFilesDirectorySlashPrefixes() const;
@@ -138,7 +131,6 @@ private:
     GenPackagesMode genPackagesMode_ = GenPackagesMode::Disabled;
     bool allowRelaxingTestVisibility_ = false;
     bool packageAttributedErrors_ = false;
-    bool testPackages_ = false;
     std::vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes_;
     std::vector<std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes_;
     std::vector<std::string> extraPackageFilesDirectorySlashPrefixes_;

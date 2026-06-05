@@ -33,13 +33,10 @@ public:
         // The SCC ID of this node.
         const int id = 0;
 
-        // Whether or not this is a node of application or test code.
-        const bool isTest = false;
-
         // True when this node contains prelude packages.
         const bool isPrelude = false;
 
-        Node(int id, bool isTest, bool isPrelude) : id{id}, isTest{isTest}, isPrelude{isPrelude} {}
+        Node(int id, bool isPrelude) : id{id}, isPrelude{isPrelude} {}
     };
 
 private:
@@ -64,9 +61,6 @@ public:
         std::vector<MangledName> packages;
 
         struct SCCInfo {
-            // True when this group of packages represents a cycle of test dependencies.
-            bool isTest = false;
-
             // A span of `this->packages` that's involved in this SCC.
             absl::Span<MangledName> members;
         };
@@ -87,9 +81,9 @@ public:
 
         // Using "stratum" instead of "layer" to avoid confusion with the modularity concept/package
         // DSL method of "layer" (utility, business, service, etc.)
+        // TODO(jez) Could consider flattening this struct?
         struct StratumInfo {
             uint32_t applicationStratum;
-            uint32_t testStratum;
         };
 
         // Build a mapping from package mangled name to the entry in `this->strata` that the application and test code
@@ -111,7 +105,7 @@ class CondensationBuilder {
     Condensation condensation;
 
 public:
-    Condensation::Node &pushNode(ImportType type, bool isPrelude);
+    Condensation::Node &pushNode(bool isPrelude);
 
     Condensation build();
 };
