@@ -194,8 +194,9 @@ SimilarMethodsByName similarMethodsForClass(const core::GlobalState &gs, core::C
     }
 
     // Special case for sealed classes to suggest the `.case` method
-    // getCompletionItemForMethod will check if the Symbol is T_Enum_caseAngles and will call getCompletionItemForCase,
-    // which works for both sealed classes and enums
+    // Saying `T_Enum_caseAngles()` is the `method` tricks `getCompletionItemForMethod` into taking
+    // the `getCompletionItemForCase` case. The only thing that matters from `SimilarMethod` is the
+    // contents of `receiver` in that case.
     if (isSealedClass(gs, receiver) && hasSimilarName(gs, core::Names::caseAngles(), prefix)) {
         result[core::Names::caseAngles()].emplace_back(
             SimilarMethod{depth, receiver, core::Symbols::T_Enum_caseAngles()});
