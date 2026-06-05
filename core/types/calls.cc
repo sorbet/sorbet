@@ -873,11 +873,14 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                                              : ".";
 
                         e.addErrorNote("`{}` is actually defined as a method on `{}`. To call it,\n"
-                                       "    `{}` in this module to ensure the method is always there{}",
+                                       "    `{}` in the module `{}` to ensure the method is always there{}",
                                        args.name.show(gs), ownerName, fmt::format("include {}", ownerName),
-                                       suggestKernelDot);
+                                       symbol.show(gs), suggestKernelDot);
                         if (args.receiverLoc().exists() && args.receiverLoc().empty()) {
                             e.replaceWith("Prefix with `Kernel.`", args.receiverLoc(), "Kernel.");
+                        } else {
+                            TypeErrorDiagnostics::maybeInsertDSLMethod(gs, e, args.locs.file, Loc::none(), symbol,
+                                                                       Symbols::noClassOrModule(), "include Kernel");
                         }
                     }
                 } else if (!symbol.data(gs)->attachedClass(gs).exists() &&
