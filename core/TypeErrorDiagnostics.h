@@ -32,8 +32,6 @@ public:
 
     static void maybeInsertDSLMethod(const GlobalState &gs, ErrorBuilder &e, FileRef fileToEdit, Loc defaultInsertLoc,
                                      ClassOrModuleRef inWhat, ClassOrModuleRef dslOwner, std::string_view dsl);
-
-    static std::optional<std::pair<Loc, int>> calculateIndentedNextLine(const GlobalState &gs, const Loc &classLoc);
 };
 
 } // namespace sorbet::core

@@ -122,10 +122,11 @@ optional<core::AutocorrectSuggestion::Edit> autocorrectEditForDSLMethod(const Gl
 }
 } // namespace
 
+namespace {
 // Given a location, returns the insertion location (the start of the line after the line of the given location)
 // and the correct indentation if you were to insert at the insertion location
 // Useful for calculating the indentation of the next line after something like `class Foo`
-optional<pair<Loc, int>> TypeErrorDiagnostics::calculateIndentedNextLine(const GlobalState &gs, const Loc &loc) {
+optional<pair<Loc, int>> calculateIndentedNextLine(const GlobalState &gs, const Loc &loc) {
     auto [classStart, classEnd] = loc.toDetails(gs);
 
     auto [_, thisLinePadding] = loc.findStartOfIndentation(gs);
@@ -139,6 +140,7 @@ optional<pair<Loc, int>> TypeErrorDiagnostics::calculateIndentedNextLine(const G
 
     return {{nextLineLoc.value(), max(thisLinePadding + 2, nextLinePadding)}};
 }
+} // namespace
 
 // dslOwner can be noClassOrModule() to simply unconditionally insert the `dsl` string
 // dsl can be `""` to simply insert `extend {dslOwner}` if dslOwner is not already an ancestor
