@@ -12,7 +12,7 @@ module A
   sig {params(parent: Parent).void}
   def example(parent)
     if parent.is_a?(Child)
-#              ^^^^^ error: Method `is_a?` does not exist on `Parent`
+#             ^^^^^ error: Method `is_a?` does not exist on `Parent`
     end
   end
 end

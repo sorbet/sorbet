@@ -7,7 +7,11 @@ test/cli/suggest-kernel/suggest-kernel.rb:14: Method `is_a?` does not exist on `
                     ^
   Note:
     `is_a?` is actually defined as a method on `Kernel`. To call it,
-    `include Kernel` in this module to ensure the method is always there.
+    `include Kernel` in the module `Foo` to ensure the method is always there.
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/suggest-kernel/suggest-kernel.rb:3: Insert `include Kernel`
+     .. |  def foo
+        ^
 
 test/cli/suggest-kernel/suggest-kernel.rb:4: Method `raise` does not exist on `Foo` https://srb.help/7003
      .. |    raise "hi"
@@ -18,7 +22,7 @@ test/cli/suggest-kernel/suggest-kernel.rb:4: Method `raise` does not exist on `F
           ^
   Note:
     `raise` is actually defined as a method on `Kernel`. To call it,
-    `include Kernel` in this module to ensure the method is always there, or
+    `include Kernel` in the module `Foo` to ensure the method is always there, or
     call the method using `Kernel.raise` instead.
   Autocorrect: Use `-a` to autocorrect
     test/cli/suggest-kernel/suggest-kernel.rb:4: Insert `Kernel.`
@@ -34,7 +38,7 @@ test/cli/suggest-kernel/suggest-kernel.rb:5: Method `Integer` does not exist on 
           ^
   Note:
     `Integer` is actually defined as a method on `Kernel`. To call it,
-    `include Kernel` in this module to ensure the method is always there, or
+    `include Kernel` in the module `Foo` to ensure the method is always there, or
     call the method using `Kernel.Integer` instead.
   Autocorrect: Use `-a` to autocorrect
     test/cli/suggest-kernel/suggest-kernel.rb:5: Insert `Kernel.`
@@ -56,7 +60,7 @@ test/cli/suggest-kernel/suggest-kernel.rb:6: Method `Array` does not exist on `F
           ^
   Note:
     `Array` is actually defined as a method on `Kernel`. To call it,
-    `include Kernel` in this module to ensure the method is always there, or
+    `include Kernel` in the module `Foo` to ensure the method is always there, or
     call the method using `Kernel.Array` instead.
   Autocorrect: Use `-a` to autocorrect
     test/cli/suggest-kernel/suggest-kernel.rb:6: Insert `Kernel.`
