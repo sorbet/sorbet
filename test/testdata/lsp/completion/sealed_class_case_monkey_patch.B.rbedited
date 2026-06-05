@@ -19,7 +19,12 @@ def example(parent)
   parent.cas
   #      ^^^ error: does not exist
   #         ^ apply-completion: [A] item: 0
-  parent.cas
+  case parent
+  when Child1${0}
+  when Child2
+  else
+    T.absurd(parent)
+  end
   #      ^^^ error: does not exist
   #         ^ apply-completion: [B] item: 1
 end

@@ -19,4 +19,7 @@ def example(parent)
   parent.case(${0})
   #      ^^^ error: does not exist
   #         ^ apply-completion: [A] item: 0
+  parent.cas
+  #      ^^^ error: does not exist
+  #         ^ apply-completion: [B] item: 1
 end
