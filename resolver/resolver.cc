@@ -182,7 +182,7 @@ private:
         core::FileRef file;
         vector<T> items;
 
-        ResolveItems(core::FileRef file, vector<T> &&items) : file(file), items(move(items)){};
+        ResolveItems(core::FileRef file, vector<T> &&items) : file(file), items(move(items)) {};
     };
 
     struct AncestorResolutionItem {
@@ -386,6 +386,10 @@ private:
             core::SymbolRef result;
             if (resolved.isClassOrModule()) {
                 result = resolved.asClassOrModuleRef().data(ctx)->findMemberNoDealias(c.cnst);
+
+                if (!result.exists() && resolved == core::Symbols::Object()) {
+                    result = core::Symbols::root().data(ctx)->findMemberNoDealias(c.cnst);
+                }
             }
 
             // Private constants are allowed to be resolved, when there is no scope set (the scope is checked above),
