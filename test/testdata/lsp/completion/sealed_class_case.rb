@@ -22,5 +22,5 @@ def example(parent)
   #              ^ apply-completion: [C] item: 0
 
   parent.
-  #      ^ apply-completion: [D] item: 121
+  #      ^ apply-completion: [D] item: 7
 end # error: unexpected token "end"
