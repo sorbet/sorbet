@@ -58,6 +58,7 @@ public:
     void setIsOpenInClient(bool isOpenInClient);
 
     // flag accessors
+    // TODO(jez) Delete this, replace with configurable patterns or accessing the packageDB
     bool isPackagedTest() const;
 
     bool hasIndexErrors() const;
