@@ -1061,7 +1061,6 @@ unique_ptr<CompletionItem> CompletionTask::getCompletionItemForUntyped(const cor
     return item;
 }
 
-// TODO(jez) Support all sealed! classes, not just T::Enum
 // TODO(jez) Could consider supporting all union types, but it would be tricky because not all
 // elements of a union type can be cased over (e.g., erased generics)
 // TODO(jez) Defer computing this until completionItem/resolve?
