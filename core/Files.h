@@ -60,7 +60,6 @@ public:
     void setIsOpenInClient(bool isOpenInClient);
 
     // flag accessors
-    bool isTestPath() const;
     bool isPackagedTest() const;
 
     bool hasIndexErrors() const;
