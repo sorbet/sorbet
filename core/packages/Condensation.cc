@@ -6,10 +6,9 @@ using namespace std;
 
 namespace sorbet::core::packages {
 
-Condensation::Node &Condensation::pushNode(ImportType type, bool isPrelude) {
+Condensation::Node &Condensation::pushNode(bool isPrelude) {
     auto id = this->nodes_.size();
-    auto isTest = type != ImportType::Normal;
-    auto &node = this->nodes_.emplace_back(id, isTest, isPrelude);
+    auto &node = this->nodes_.emplace_back(id, isPrelude);
     return node;
 }
 
@@ -86,8 +85,7 @@ struct TraversalBuilder {
             // Insert the members of the SCC into the packages vector.
             absl::c_copy(node.members, back_inserter(this->result.packages));
 
-            auto &scc = this->result.sccs.emplace_back();
-            scc.isTest = node.isTest;
+            this->result.sccs.emplace_back();
             this->sccLengths.emplace_back(node.members.size());
 
             // Queue up the dependents in the next frontier, decrementing their imports by one
@@ -172,14 +170,8 @@ Condensation::Traversal::buildStratumMapping(const core::GlobalState &gs) const 
     for (auto stratum : this->strata) {
         ++ix;
         for (auto &scc : stratum) {
-            if (scc.isTest) {
-                for (auto name : scc.members) {
-                    result[name].testStratum = ix;
-                }
-            } else {
-                for (auto name : scc.members) {
-                    result[name].applicationStratum = ix;
-                }
+            for (auto name : scc.members) {
+                result[name].applicationStratum = ix;
             }
         }
     }
