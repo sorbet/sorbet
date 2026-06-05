@@ -485,7 +485,6 @@ NameDef names[] = {
 
     // Packager
     {"import"},
-    {"testImport", "test_import"},
     {"export_", "export"},
     {"legacy"},
     {"strict"},
@@ -500,11 +499,8 @@ NameDef names[] = {
     {"dag"},
     {"sorbet"},
     {"minTypedLevel", "min_typed_level"},
-    {"testsMinTypedLevel", "tests_min_typed_level"},
     {"PackageSpec", "PackageSpec", true},
     {"PackageSpecRegistry", "<PackageSpecRegistry>", true},
-    {"only"},
-    {"testRb", "test_rb"},
     {"preludePackage", "prelude_package"},
     {"prelude_bang", "prelude!"},
     {"test_bang", "test!"},
