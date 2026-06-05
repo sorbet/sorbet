@@ -1082,28 +1082,6 @@ public:
     }
 };
 
-bool isTestExport(const ast::ExpressionPtr &expr) {
-    auto send = ast::cast_tree<ast::Send>(expr);
-    if (!send || send->fun != core::Names::export_() || send->numPosArgs() != 1) {
-        return false;
-    }
-
-    auto sym = ast::cast_tree<ast::UnresolvedConstantLit>(send->getPosArg(0));
-    while (sym) {
-        if (ast::isa_tree<ast::EmptyTree>(sym->scope)) {
-            return sym->cnst == core::Names::Constants::Test();
-        }
-
-        if (auto parent = ast::cast_tree<ast::UnresolvedConstantLit>(sym->scope)) {
-            sym = parent;
-        } else {
-            break;
-        }
-    }
-
-    return false;
-}
-
 } // namespace
 
 vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, vector<ast::ParsedFile> files,
@@ -1210,27 +1188,6 @@ void Packager::validatePackagedFiles(const core::GlobalState &gs, WorkerPool &wo
         ENFORCE(!job.file.data(gs).isPackage(gs));
         validatePackagedFile(ctx, job.tree);
     });
-}
-
-ast::ParsedFile Packager::copyPackageWithoutTestExports(const core::GlobalState &gs, const ast::ParsedFile &ast) {
-    ENFORCE(ast.file.isPackage(gs));
-
-    ast::ParsedFile result{ast.tree.deepCopy(), ast.file};
-
-    auto root = ast::cast_tree<ast::ClassDef>(result.tree);
-    if (!root || root->rhs.size() != 1) {
-        return result;
-    }
-
-    auto package = ast::cast_tree<ast::ClassDef>(root->rhs.front());
-    if (!package) {
-        return result;
-    }
-
-    auto it = std::remove_if(package->rhs.begin(), package->rhs.end(), isTestExport);
-    package->rhs.erase(it, package->rhs.end());
-
-    return result;
 }
 
 } // namespace sorbet::packager
