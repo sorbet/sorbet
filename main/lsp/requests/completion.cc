@@ -1072,8 +1072,8 @@ std::unique_ptr<CompletionItem> CompletionTask::getCompletionItemForCase(const c
                                                                          const core::ClassOrModuleRef receiver,
                                                                          core::Loc queryLoc, std::string_view prefix,
                                                                          size_t sortIdx) const {
-    const char *label = (receiver.data(gs)->derivesFrom(gs, core::Symbols::T_Enum())) ? "case: Expand for T::Enum"
-                                                                                      : "case: Expand for sealed class";
+    const auto label = (receiver.data(gs)->derivesFrom(gs, core::Symbols::T_Enum())) ? "case: Expand for T::Enum"
+                                                                                     : "case: Expand for sealed class";
     auto item = make_unique<CompletionItem>(label);
     item->sortText = formatSortIndex(sortIdx);
     item->kind = CompletionItemKind::Snippet;
