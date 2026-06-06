@@ -5,6 +5,7 @@
 #include "absl/types/span.h"
 #include "common/common.h"
 #include "core/packages/MangledName.h"
+#include "core/packages/Stratum.h"
 #include <string>
 #include <utility>
 #include <vector>
@@ -74,16 +75,9 @@ public:
         Traversal &operator=(const Traversal &other) = default;
         Traversal &operator=(Traversal &&other) = default;
 
-        // Using "stratum" instead of "layer" to avoid confusion with the modularity concept/package
-        // DSL method of "layer" (utility, business, service, etc.)
-        // TODO(jez) Could consider flattening this struct?
-        struct StratumInfo {
-            uint32_t applicationStratum;
-        };
-
         // Build a mapping from package mangled name to the entry in `this->strata` that the application and test code
         // belong to, respectively.
-        UnorderedMap<MangledName, StratumInfo> buildStratumMapping(const core::GlobalState &gs) const;
+        UnorderedMap<MangledName, Stratum> buildStratumMapping(const core::GlobalState &gs) const;
     };
 
     // Compute a traversal through the condensation graph, that yields groups of SCCs that have no dependencies on each
