@@ -438,8 +438,7 @@ string renderPath(const core::GlobalState &gs, const vector<MangledName> &path) 
 
 } // namespace
 
-// Returns a string representing the path to the given package from this package, if it exists. Note: this only
-// looks at non-test imports.
+// Returns a string representing the path to the given package from this package, if it exists.
 optional<string> PackageInfo::pathTo(const core::GlobalState &gs, const MangledName dest) const {
     ENFORCE(exists());
     // Note: This implements BFS.
