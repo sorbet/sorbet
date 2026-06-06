@@ -162,16 +162,15 @@ const Condensation::Traversal Condensation::computeTraversal(const core::GlobalS
     return builder.build();
 }
 
-UnorderedMap<MangledName, Condensation::Traversal::StratumInfo>
-Condensation::Traversal::buildStratumMapping(const core::GlobalState &gs) const {
-    UnorderedMap<MangledName, StratumInfo> result;
+UnorderedMap<MangledName, Stratum> Condensation::Traversal::buildStratumMapping(const core::GlobalState &gs) const {
+    UnorderedMap<MangledName, Stratum> result;
 
     int ix = -1;
     for (auto stratum : this->strata) {
         ++ix;
         for (auto &scc : stratum) {
             for (auto name : scc.members) {
-                result[name].applicationStratum = ix;
+                result[name] = Stratum(ix);
             }
         }
     }
