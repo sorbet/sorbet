@@ -336,7 +336,8 @@ public:
             ENFORCE(errorDepth == 0);
             errorDepth++;
             if (auto e = ctx.beginError(loc, core::errors::Packager::DefinitionPackageMismatch)) {
-                e.setHeader("This file must only define behavior in enclosing package `{}`", requiredNamespace(ctx));
+                e.setHeader("This file must only define behavior in enclosing package `{}`",
+                            pkg.mangledName_.owner.show(ctx));
                 const auto &[scopeSym, scopeLoc] = scope.back();
                 e.addErrorLine(ctx.locAt(scopeLoc), "Defining behavior in `{}` instead:", scopeSym.show(ctx));
                 e.addErrorLine(pkg.declLoc(), "Enclosing package `{}` declared here", pkg.mangledName_.owner.show(ctx));
@@ -395,20 +396,14 @@ private:
         }
     }
 
-    const string requiredNamespace(const core::GlobalState &gs) const {
-        auto result = pkg.mangledName_.owner.show(gs);
-        return result;
-    }
-
     bool hasParentClass(const ast::ClassDef &def) const {
         return def.kind == ast::ClassDef::Kind::Class && !def.ancestors.empty() &&
                ast::isa_tree<ast::UnresolvedConstantLit>(def.ancestors[0]);
     }
 
     void definitionPackageMismatch(const core::GlobalState &gs, core::ErrorBuilder &e, bool isOnPackagePath) const {
-        auto requiredName = requiredNamespace(gs);
         e.setHeader("File belongs to package `{}` but defines a constant that does not match this namespace",
-                    requiredName);
+                    pkg.mangledName_.owner.show(gs));
 
         e.addErrorLine(pkg.declLoc(), "Enclosing package declared here");
 
