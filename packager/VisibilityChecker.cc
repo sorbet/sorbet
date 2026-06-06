@@ -183,6 +183,7 @@ class PropagateVisibility final {
     // which was half of the point of moving Symbols into the package database in the first place.
     //
     // TODO(jez) Now that test packages are gone, we can actually establish a link if we want to.
+    // Would also be useful in getSymsToCheckWithinPackage in references.cc
     core::ClassOrModuleRef getScopesForPackage(const core::GlobalState &gs) {
         vector<core::NameRef> parts;
         auto owner = package.mangledName().owner;
