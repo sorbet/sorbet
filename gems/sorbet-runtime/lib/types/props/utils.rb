@@ -5,20 +5,27 @@ module T::Props::Utils
   # Deep copy an object. The object must consist of Ruby primitive
   # types and Hashes and Arrays.
   def self.deep_clone_object(what, freeze: false)
-    result = case what
-    when true
-      true
-    when false
-      false
-    when Symbol, NilClass, Numeric
+    freeze ? deep_clone_freeze(what) : deep_clone(what)
+  end
+
+  # deep_clone_object with freeze: false, as a positional, kwarg-free
+  # method: per-element recursion skips the keyword-call setup, drops the
+  # per-key/per-call freeze branches, and tests String (the most common
+  # serialized scalar, previously 8 `===` misses away) first. This is what
+  # generated serializers/deserializers emit for dynamic fallbacks, so it
+  # runs per element of every untyped container prop.
+  def self.deep_clone(what)
+    case what
+    when String
+      what.clone
+    when true, false, Symbol, NilClass, Numeric
       what
     when Array
-      what.map { |v| deep_clone_object(v, freeze: freeze) }
+      what.map { |v| deep_clone(v) }
     when Hash
       h = what.class.new
-      what.each do |k, v|
-        k.freeze if freeze
-        h[k] = deep_clone_object(v, freeze: freeze)
+      what.each_pair do |k, v|
+        h[k] = deep_clone(v)
       end
       h
     when Regexp
@@ -28,7 +35,30 @@ module T::Props::Utils
     else
       what.clone
     end
-    freeze ? result.freeze : result
+  end
+
+  # deep_clone_object with freeze: true, same shape as the original.
+  def self.deep_clone_freeze(what)
+    result = case what
+    when true, false, Symbol, NilClass, Numeric
+      what
+    when Array
+      what.map { |v| deep_clone_freeze(v) }
+    when Hash
+      h = what.class.new
+      what.each_pair do |k, v|
+        k.freeze
+        h[k] = deep_clone_freeze(v)
+      end
+      h
+    when Regexp
+      what.dup
+    when T::Enum
+      what
+    else
+      what.clone
+    end
+    result.freeze
   end
 
   # The prop_rules indicate whether we should check for reading a nil value for the prop/field.

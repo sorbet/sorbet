@@ -182,7 +182,7 @@ class T::Props::Decorator
     if !val.nil?
       val
     elsif (d = rules[:ifunset])
-      T::Props::Utils.deep_clone_object(d)
+      T::Props::Utils.deep_clone(d)
     else
       nil
     end

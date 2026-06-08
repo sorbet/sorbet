@@ -268,7 +268,7 @@ module T::Props
       @whitelisted_methods_for_serialize ||= {
         lvar: %i{dup map transform_values transform_keys each_with_object nil? []= serialize},
         ivar: %i[dup map transform_values transform_keys each_with_object serialize],
-        const: %i[checked_serialize deep_clone_object],
+        const: %i[checked_serialize deep_clone deep_clone_object],
       }
     end
 
@@ -276,7 +276,7 @@ module T::Props
     private_class_method def self.whitelisted_methods_for_deserialize
       @whitelisted_methods_for_deserialize ||= {
         lvar: %i{dup map transform_values transform_keys each_with_object nil? []= to_f},
-        const: %i[deserialize from_hash deep_clone_object],
+        const: %i[deserialize from_hash deep_clone deep_clone_object],
       }
     end
   end

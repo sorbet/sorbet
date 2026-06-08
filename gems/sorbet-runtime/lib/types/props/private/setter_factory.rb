@@ -34,7 +34,12 @@ module T::Props
 
         # Use separate methods in order to ensure that we only close over necessary
         # variables
-        if !T::Props::Utils.need_nil_write_check?(rules) || has_explicit_nil_default
+        if validate.nil? && non_nil_type.is_a?(T::Types::Untyped)
+          # T.untyped accepts every value (including nil, even on the
+          # "non-nil" branch below, where recursively_valid? is also
+          # tautologically true), so validation is pure overhead.
+          untyped_proc(accessor_key)
+        elsif !T::Props::Utils.need_nil_write_check?(rules) || has_explicit_nil_default
           if validate.nil? && non_nil_type.is_a?(T::Types::Simple)
             simple_nilable_proc(prop, accessor_key, non_nil_type.raw_type, klass)
           else
@@ -47,6 +52,26 @@ module T::Props
             non_nil_proc(prop, accessor_key, non_nil_type, klass, validate)
           end
         end
+      end
+
+      # Shared no-op value-validation proc for T.untyped props; every value
+      # is trivially valid, mirroring what the general procs do for Untyped.
+      NOOP_VALUE_VALIDATION = T.let(proc { |val| }, ValueValidationProc)
+      private_constant :NOOP_VALUE_VALIDATION
+
+      sig do
+        params(
+          accessor_key: Symbol,
+        )
+        .returns([SetterProc, ValueValidationProc])
+      end
+      private_class_method def self.untyped_proc(accessor_key)
+        [
+          proc do |val|
+            instance_variable_set(accessor_key, val)
+          end,
+          NOOP_VALUE_VALIDATION,
+        ]
       end
 
       sig do
