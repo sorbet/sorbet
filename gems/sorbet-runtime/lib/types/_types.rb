@@ -23,6 +23,13 @@
 #  - Any of the `T.foo` methods below
 
 module T
+  # Cache for `T.nilable(<Module>)`, so that inline call sites (e.g.
+  # `T.let(x, T.nilable(Integer))`) don't re-derive the union on every call.
+  # Keys and values are both weakly referenced: anonymous modules don't leak,
+  # and a collected value is simply re-derived. Racy concurrent writes are
+  # benign double-initializations, as in T::Types::Simple::Private::Pool.
+  @nilable_cache = ObjectSpace::WeakMap.new
+
   # T.any(<Type>, <Type>, ...) -- matches any of the types listed
   def self.any(type_a, type_b, *types)
     type_a = T::Utils.coerce(type_a)
@@ -33,7 +40,21 @@ module T
 
   # Shorthand for T.any(type, NilClass)
   def self.nilable(type)
-    T::Types::Union::Private::Pool.union_of_types(T::Utils.coerce(type), T::Utils::Nilable::NIL_TYPE)
+    if ::Module === type
+      cached = @nilable_cache[type]
+      return cached if cached
+
+      # Miss path: compute through the full existing derivation — including
+      # the DuplicateType rescue inside union_of_types, so that e.g.
+      # `T.nilable(NilClass)` still collapses to `Simple(NilClass)` — and
+      # cache whatever it produces.
+      @nilable_cache[type] = T::Types::Union::Private::Pool.union_of_types(T::Utils.coerce(type), T::Utils::Nilable::NIL_TYPE)
+    else
+      # Non-Module inputs (T::Types::Base instances, arrays, hashes, etc.) are
+      # typically fresh objects per call, so caching them would only bloat the
+      # map without ever hitting.
+      T::Types::Union::Private::Pool.union_of_types(T::Utils.coerce(type), T::Utils::Nilable::NIL_TYPE)
+    end
   end
 
   # Matches any object. In the static checker, T.untyped allows any
