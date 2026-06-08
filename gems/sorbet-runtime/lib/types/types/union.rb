@@ -11,15 +11,24 @@ module T::Types
     end
 
     def types
-      @types ||= @inner_types.flat_map do |type|
-        type = T::Utils.coerce(type)
-        if type.is_a?(Union)
-          # Simplify nested unions (mostly so `name` returns a nicer value)
-          type.types
-        else
-          type
-        end
-      end.uniq
+      @types ||= begin
+        built = @inner_types.flat_map do |type|
+          type = T::Utils.coerce(type)
+          if type.is_a?(Union)
+            # Simplify nested unions (mostly so `name` returns a nicer value)
+            type.types
+          else
+            type
+          end
+        end.uniq
+        # When every member is a plain Simple (whose valid? is exactly
+        # `obj.is_a?(raw_type)`), precompute the raw modules so valid? can
+        # skip per-member dispatch. instance_of? (not is_a?) so that any
+        # Simple subclass overriding valid? would be excluded. Note this
+        # snapshots the members at build time.
+        @raw_simple_types = built.all? { |t| t.instance_of?(T::Types::Simple) } ? built.map(&:raw_type).freeze : false
+        built
+      end
     end
 
     def build_type
@@ -58,12 +67,37 @@ module T::Types
 
     # overrides Base
     def recursively_valid?(obj)
-      types.any? { |type| type.recursively_valid?(obj) }
+      ts = types
+      i = 0
+      while i < ts.length
+        return true if ts[i].recursively_valid?(obj)
+        i += 1
+      end
+      false
     end
 
     # overrides Base
     def valid?(obj)
-      types.any? { |type| type.valid?(obj) }
+      raw_types = @raw_simple_types
+      if raw_types.nil?
+        # Force lazy initialization, which also computes @raw_simple_types
+        types
+        raw_types = @raw_simple_types
+      end
+      i = 0
+      if raw_types
+        while i < raw_types.length
+          return true if obj.is_a?(raw_types[i])
+          i += 1
+        end
+      else
+        ts = types
+        while i < ts.length
+          return true if ts[i].valid?(obj)
+          i += 1
+        end
+      end
+      false
     end
 
     # overrides Base
