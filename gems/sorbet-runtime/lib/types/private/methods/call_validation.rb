@@ -417,7 +417,9 @@ module T::Private::Methods::CallValidation
   end
 
   def self.create_validator_slow_skip_block_type(mod, original_method, method_sig, original_visibility)
-    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |*args, &blk|
+    # `ruby2_keywords: true`: the wrapper has a rest param and no keyword
+    # params, so tell def_with_visibility instead of having it introspect that.
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility, ruby2_keywords: true) do |*args, &blk|
       CallValidation.validate_call_skip_block_type(self, original_method, method_sig, args, blk)
     end
   end
@@ -499,7 +501,9 @@ module T::Private::Methods::CallValidation
   end
 
   def self.create_validator_slow(mod, original_method, method_sig, original_visibility)
-    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |*args, &blk|
+    # `ruby2_keywords: true`: the wrapper has a rest param and no keyword
+    # params, so tell def_with_visibility instead of having it introspect that.
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility, ruby2_keywords: true) do |*args, &blk|
       CallValidation.validate_call(self, original_method, method_sig, args, blk)
     end
   end

@@ -138,7 +138,7 @@ module T::Private::Methods::SignatureValidation
     end
   end
 
-  def self.validate_non_override_mode(mode, method_name, method, source_loc=method.source_location)
+  def self.validate_non_override_mode(mode, method_name, method, source_loc=nil)
     case mode
     when Modes.override
       if method_name == :each && method.owner < Enumerable
@@ -151,6 +151,10 @@ module T::Private::Methods::SignatureValidation
         # This is a one-off hack, and we should think carefully before adding more methods here.
         nil
       else
+        # `source_loc` is only consumed on this raise path; defaulting it
+        # lazily keeps `method.source_location` (which allocates) off the
+        # common, non-raising path.
+        source_loc ||= method.source_location
         raise "You marked `#{method_name}` as #{pretty_mode(mode)}, but that method doesn't already exist in this class/module to be overridden.\n" \
           "  Either check for typos and for missing includes or super classes to make the parent method shows up\n" \
           "  ... or remove #{pretty_mode(mode)} here: #{T::Private::Methods::Signature.method_desc(method, method_name, source_loc)}\n"

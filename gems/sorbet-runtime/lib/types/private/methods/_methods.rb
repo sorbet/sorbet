@@ -3,6 +3,15 @@
 
 module T::Private::Methods
   @installed_hooks = {}
+  # The method registries below (@signatures_by_method, @sig_wrappers,
+  # @sigs_that_raised) are flat (single-level) Hashes keyed by
+  # "#{owner.object_id}##{name}" Strings (see method_owner_and_name_to_key),
+  # so that every store/lookup/delete is a single Hash operation (atomic
+  # under the GVL on MRI, synchronized per-op on Concurrent::Hash). That
+  # keeps declaration and lazy first-call sig wrapping safe in any execution
+  # context (including signal trap handlers, where locks cannot be acquired),
+  # and preserves global declaration (insertion) order for
+  # run_all_sig_blocks. The owner module itself is not retained.
   if defined?(Concurrent::Hash)
     # Hide the Concurrent::Hash so that we get better typing by lying and saying it's a Hash
     instance_variable_set(:@signatures_by_method, Concurrent::Hash.new)
@@ -244,7 +253,10 @@ module T::Private::Methods
     # This wrapper is very slow, so it will subsequently re-wrap with a much faster wrapper
     # (or unwrap back to the original method).
     key = method_owner_and_name_to_key(mod, method_name)
-    T::Private::ClassUtils.replace_method(original_method, mod, method_name) do |*args, &blk|
+    # `ruby2_keywords: true`: the wrapper below has a rest param and no
+    # keyword params, so tell replace_method instead of having it introspect
+    # the freshly defined method to figure that out.
+    T::Private::ClassUtils.replace_method(original_method, mod, method_name, ruby2_keywords: true) do |*args, &blk|
       method_sig = T::Private::Methods.maybe_run_sig_block_for_key(key)
       method_sig ||= T::Private::Methods._handle_missing_method_signature(
         self,
@@ -433,7 +445,9 @@ module T::Private::Methods
 
   # use this directly if you don't want/need to box up the method into an object to pass to method_to_key.
   private_class_method def self.method_owner_and_name_to_key(owner, name)
-    "#{owner.object_id}##{name}"
+    # `.freeze` so that storing the key in the registries above does not
+    # re-dup-and-freeze it (Hash#[]= does that for unfrozen String keys).
+    "#{owner.object_id}##{name}".freeze
   end
 
   private_class_method def self.method_to_key(method)
@@ -475,9 +489,17 @@ module T::Private::Methods
 
   def self.run_all_sig_blocks(force_type_init: true)
     loop do
-      first_wrapper = @sig_wrappers.first
-      break unless first_wrapper
-      key, = first_wrapper
+      key = nil
+      # Peek the oldest pending key. Don't use Hash#first for this: it goes
+      # through Enumerable and allocates an enumerator plus a [key, value]
+      # pair per loop iteration; each_key with an immediate break allocates
+      # nothing. Iteration is in insertion order, so sig blocks still run in
+      # global declaration order.
+      @sig_wrappers.each_key do |k|
+        key = k
+        break
+      end
+      break unless key
       run_sig_block_for_key(key, force_type_init: force_type_init)
     end
   end

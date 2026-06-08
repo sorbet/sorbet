@@ -28,7 +28,13 @@ module T::Private::ClassUtils
     end
   end
 
-  def self.def_with_visibility(mod, name, visibility, method=nil, &block)
+  # `ruby2_keywords:` controls whether `Module#ruby2_keywords` is applied to a
+  # newly `define_method`ed block whose arity is negative: passing `true` or
+  # `false` skips the (allocating) `instance_method(name).parameters`
+  # introspection when the caller statically knows the answer; the default
+  # `:detect` derives it from the defined method's parameters (a rest param
+  # present and no keyword params).
+  def self.def_with_visibility(mod, name, visibility, method=nil, ruby2_keywords: :detect, &block)
     mod.module_exec do
       # Start a visibility (public/protected/private) region, so that
       # all of the method redefinitions happen with the right visibility
@@ -44,17 +50,21 @@ module T::Private::ClassUtils
       end
 
       if block && block.arity < 0 && respond_to?(:ruby2_keywords, true)
-        has_rest = false
-        has_keywords = false
-        instance_method(name).parameters.each do |type, _|
-          case type
-          when :rest
-            has_rest = true
-          when :keyrest, :keyreq, :key
-            has_keywords = true
+        apply_ruby2_keywords = ruby2_keywords
+        if apply_ruby2_keywords == :detect
+          has_rest = false
+          has_keywords = false
+          instance_method(name).parameters.each do |type, _|
+            case type
+            when :rest
+              has_rest = true
+            when :keyrest, :keyreq, :key
+              has_keywords = true
+            end
           end
+          apply_ruby2_keywords = has_rest && !has_keywords
         end
-        ruby2_keywords(name) if has_rest && !has_keywords
+        ruby2_keywords(name) if apply_ruby2_keywords
       end
     end
   end
@@ -70,7 +80,7 @@ module T::Private::ClassUtils
   #
   # Does not share code with `replace_method_with_handle`, for performance (do
   # not want to increase the call stack, as this is a very sensitive code path).
-  def self.replace_method(original_method, mod, name, &blk)
+  def self.replace_method(original_method, mod, name, ruby2_keywords: :detect, &blk)
     original_visibility = visibility_method_name(mod, name)
     original_owner = original_method.owner
 
@@ -96,7 +106,7 @@ module T::Private::ClassUtils
 
     T::Configuration.without_ruby_warnings do
       T::Private::DeclState.current.without_on_method_added do
-        def_with_visibility(mod, name, original_visibility, &blk)
+        def_with_visibility(mod, name, original_visibility, ruby2_keywords: ruby2_keywords, &blk)
       end
     end
 

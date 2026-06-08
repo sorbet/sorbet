@@ -20,7 +20,7 @@ module T::Private::Methods
       )
         .void
     end
-    def self.validate_non_override_mode(mode, method_name, method, source_loc = method.source_location); end
+    def self.validate_non_override_mode(mode, method_name, method, source_loc = nil); end
 
     sig {params(signature: Signature, super_signature: Signature).void}
     def self.validate_override_shape(signature, super_signature); end
