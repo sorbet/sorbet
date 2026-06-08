@@ -325,6 +325,31 @@ class String < Object
   # negative match.
   def []=(*_); end
 
+  # Concatenates each object in `objects` into `self` without any encoding
+  # validation or conversion and returns `self`. For each given object that is
+  # an [`Integer`](https://docs.ruby-lang.org/en/3.4/Integer.html), the value is
+  # considered a Byte. If the
+  # [`Integer`](https://docs.ruby-lang.org/en/3.4/Integer.html) is bigger than
+  # one byte, only the lower byte is considered, similar to
+  # [`String#setbyte`](https://docs.ruby-lang.org/en/3.4/String.html#method-i-setbyte).
+  #
+  # ```ruby
+  # s = ""
+  # s.append_as_bytes("foo \xE2\x82") # => "foo \xE2\x82"
+  # s.valid_encoding?                 # => false
+  # s.append_as_bytes("\xAC 12")
+  # s.valid_encoding?                 # => true
+  #
+  # s = ""
+  # s.append_as_bytes(0, 257)         # =>  "\u0000\u0001"
+  # ```
+  #
+  # see also [`String#<<`](https://docs.ruby-lang.org/en/3.4/String.html#method-i-3C-3C)
+  # and [`String#concat`](https://docs.ruby-lang.org/en/3.4/String.html#method-i-concat)
+  # for encoding-aware concatenation.
+  sig {params(objects: T.any(String, Integer)).returns(T.self_type)}
+  def append_as_bytes(*objects); end
+
   # Returns true for a string which has only ASCII characters.
   #
   # ```ruby
