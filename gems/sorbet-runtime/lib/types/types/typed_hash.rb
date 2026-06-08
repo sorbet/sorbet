@@ -57,6 +57,28 @@ module T::Types
       Hash.new(...)
     end
 
+    module Private
+      module Pool
+        # Two-level pool keyed on the (keys, values) module literals, so that
+        # inline `T::Hash[String, Integer]` call sites reuse one instance
+        # (and its lazily-coerced keys/values) instead of allocating a fresh
+        # TypedHash per evaluation. Weak keys and values at both levels:
+        # anonymous modules don't leak and GC-dropped entries re-derive.
+        @cache = ObjectSpace::WeakMap.new
+
+        def self.type_for_modules(keys_mod, values_mod)
+          inner = @cache[keys_mod]
+          cached = inner && inner[values_mod]
+          return cached if cached
+
+          type = TypedHash.new(keys: keys_mod, values: values_mod)
+          inner ||= (@cache[keys_mod] = ObjectSpace::WeakMap.new)
+          inner[values_mod] = type
+          type
+        end
+      end
+    end
+
     class Untyped < TypedHash
       def initialize
         super(keys: T.untyped, values: T.untyped)
@@ -72,6 +94,11 @@ module T::Types
       # entry walk is pure overhead.
       def recursively_valid?(obj)
         obj.is_a?(Hash)
+      end
+
+      def freeze
+        build_type # force lazy initialization before freezing the object
+        super
       end
     end
   end

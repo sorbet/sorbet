@@ -30,12 +30,31 @@ module T
   # benign double-initializations, as in T::Types::Simple::Private::Pool.
   @nilable_cache = ObjectSpace::WeakMap.new
 
+  # Two-level cache for `T.any(<Module>, <Module>)` (e.g. inline
+  # `T.cast(x, T.any(Integer, Float))`), keyed on the two module literals.
+  # Same weak-key/weak-value lifecycle as @nilable_cache; a miss computes
+  # through the byte-for-byte existing derivation (including the
+  # DuplicateType collapse inside union_of_types, so `T.any(X, X)` still
+  # yields Simple(X)) and caches whatever it produces.
+  @any_pair_cache = ObjectSpace::WeakMap.new
+
   # T.any(<Type>, <Type>, ...) -- matches any of the types listed
   def self.any(type_a, type_b, *types)
-    type_a = T::Utils.coerce(type_a)
-    type_b = T::Utils.coerce(type_b)
-    types = types.map { |t| T::Utils.coerce(t) } if !types.empty?
-    T::Types::Union::Private::Pool.union_of_types(type_a, type_b, types)
+    if types.empty? && ::Module === type_a && ::Module === type_b
+      inner = @any_pair_cache[type_a]
+      cached = inner && inner[type_b]
+      return cached if cached
+
+      derived = T::Types::Union::Private::Pool.union_of_types(T::Utils.coerce(type_a), T::Utils.coerce(type_b))
+      inner ||= (@any_pair_cache[type_a] = ObjectSpace::WeakMap.new)
+      inner[type_b] = derived
+      derived
+    else
+      type_a = T::Utils.coerce(type_a)
+      type_b = T::Utils.coerce(type_b)
+      types = types.map { |t| T::Utils.coerce(t) } if !types.empty?
+      T::Types::Union::Private::Pool.union_of_types(type_a, type_b, types)
+    end
   end
 
   # Shorthand for T.any(type, NilClass)
@@ -98,10 +117,23 @@ module T
     T::Types::AttachedClassType::Private::INSTANCE
   end
 
+  # Cache for `T.class_of(<Module>)`, so that inline call sites don't
+  # allocate a fresh ClassOf on every call. Weak keys and values, as above.
+  @class_of_cache = ObjectSpace::WeakMap.new
+
   # Matches any class that subclasses or includes the provided class
   # or module
   def self.class_of(klass)
-    T::Types::ClassOf.new(klass)
+    if ::Module === klass
+      cached = @class_of_cache[klass]
+      return cached if cached
+
+      @class_of_cache[klass] = T::Types::ClassOf.new(klass)
+    else
+      # Non-Module inputs are invalid, but preserve the lazy failure mode:
+      # construct the type here and let its use sites raise.
+      T::Types::ClassOf.new(klass)
+    end
   end
 
   ## END OF THE METHODS TO PASS TO `sig`.
@@ -312,9 +344,17 @@ module T
   end
 
   module Hash
+    # Lazily-created shared instance for `T::Hash[T.untyped, T.untyped]`.
+    # (Unlike TypedArray's, this can't be a load-time frozen constant:
+    # typed_hash.rb is required before T.untyped and T::Utils exist.)
+    # A racy double-init stores one of two equivalent frozen instances.
+    @untyped_instance = nil
+
     def self.[](keys, values)
       if keys.is_a?(T::Types::Untyped) && values.is_a?(T::Types::Untyped)
-        T::Types::TypedHash::Untyped.new
+        @untyped_instance ||= T::Types::TypedHash::Untyped.new.freeze
+      elsif ::Module === keys && ::Module === values
+        T::Types::TypedHash::Private::Pool.type_for_modules(keys, values)
       else
         T::Types::TypedHash.new(keys: keys, values: values)
       end
