@@ -179,6 +179,8 @@ module T::Types
     # Type equivalence, defined by serializing the type to a string (with
     # `#name`) and comparing the resulting strings for equality.
     def ==(other)
+      return true if other.equal?(self)
+
       case other
       when T::Types::Base
         other.name == self.name
