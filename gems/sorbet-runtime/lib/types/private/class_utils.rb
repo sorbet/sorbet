@@ -44,9 +44,16 @@ module T::Private::ClassUtils
       end
 
       if block && block.arity < 0 && respond_to?(:ruby2_keywords, true)
-        m = instance_method(name)
-        has_rest = m.parameters.any? { |type, _| type == :rest }
-        has_keywords = m.parameters.any? { |type, _| %i[keyrest keyreq key].include?(type) }
+        has_rest = false
+        has_keywords = false
+        instance_method(name).parameters.each do |type, _|
+          case type
+          when :rest
+            has_rest = true
+          when :keyrest, :keyreq, :key
+            has_keywords = true
+          end
+        end
         ruby2_keywords(name) if has_rest && !has_keywords
       end
     end
@@ -67,18 +74,23 @@ module T::Private::ClassUtils
     original_visibility = visibility_method_name(mod, name)
     original_owner = original_method.owner
 
-    mod.ancestors.each do |ancestor|
-      break if ancestor == mod
-      if ancestor == original_owner
-        # If we get here, that means the method we're trying to replace exists on a *prepended*
-        # mixin, which means in order to supersede it, we'd need to create a method on a new
-        # module that we'd prepend before `ancestor`. The problem with that approach is there'd
-        # be no way to remove that new module after prepending it, so we'd be left with these
-        # empty anonymous modules in the ancestor chain after calling `restore`.
-        #
-        # That's not necessarily a deal breaker, but for now, we're keeping it as unsupported.
-        raise "You're trying to replace `#{name}` on `#{mod}`, but that method exists in a " \
-              "prepended module (#{ancestor}), which we don't currently support."
+    # In the common case the method is owned by `mod` itself, in which case the loop below
+    # would always `break` before the raise could match (`mod` precedes any non-prepended
+    # ancestor in its own ancestor chain), so skip computing `mod.ancestors` entirely.
+    if original_owner != mod
+      mod.ancestors.each do |ancestor|
+        break if ancestor == mod
+        if ancestor == original_owner
+          # If we get here, that means the method we're trying to replace exists on a *prepended*
+          # mixin, which means in order to supersede it, we'd need to create a method on a new
+          # module that we'd prepend before `ancestor`. The problem with that approach is there'd
+          # be no way to remove that new module after prepending it, so we'd be left with these
+          # empty anonymous modules in the ancestor chain after calling `restore`.
+          #
+          # That's not necessarily a deal breaker, but for now, we're keeping it as unsupported.
+          raise "You're trying to replace `#{name}` on `#{mod}`, but that method exists in a " \
+                "prepended module (#{ancestor}), which we don't currently support."
+        end
       end
     end
 
