@@ -10,7 +10,9 @@ cc_library(
         exclude = ["flycheck_*"],
     ),
     hdrs = [
+        "ConcurrentIndex.h",
         "ConcurrentQueue.h",
+        "Parallel.h",
         "WorkerPool.h",
     ],
     linkopts = select({

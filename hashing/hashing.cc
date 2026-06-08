@@ -1,6 +1,7 @@
 #include "hashing/hashing.h"
 #include "ast/substitute/substitute.h"
 #include "ast/treemap/treemap.h"
+#include "common/concurrency/ConcurrentIndex.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "core/ErrorQueue.h"
 #include "core/FileHash.h"
@@ -121,10 +122,7 @@ unique_ptr<core::FileHash> computeFileHashForFile(shared_ptr<core::File> forWhat
 void Hashing::computeFileHashes(absl::Span<const shared_ptr<core::File>> files, spdlog::logger &logger,
                                 WorkerPool &workers, const realmain::options::Options &opts) {
     Timer timeit(logger, "computeFileHashes");
-    auto fileq = make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
-    for (size_t i = 0; i < files.size(); i++) {
-        fileq->push(i, 1);
-    }
+    auto fileq = make_shared<ConcurrentIndex>(files.size());
 
     logger.trace("Computing state hashes for {} files", files.size());
 
@@ -133,18 +131,16 @@ void Hashing::computeFileHashes(absl::Span<const shared_ptr<core::File>> files, 
     workers.multiplexJob("lspStateHash", [fileq, resultq, &files, &logger, &opts]() {
         vector<pair<size_t, unique_ptr<const core::FileHash>>> threadResult;
         int processedByThread = 0;
-        size_t job;
         {
-            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
-                if (result.gotItem()) {
-                    processedByThread++;
+            while (auto idx = fileq->next()) {
+                processedByThread++;
 
-                    if (!files[job] || files[job]->getFileHash() != nullptr) {
-                        continue;
-                    }
-
-                    threadResult.emplace_back(job, computeFileHashForFile(files[job], logger, opts));
+                auto &file = files[*idx];
+                if (!file || file->getFileHash() != nullptr) {
+                    continue;
                 }
+
+                threadResult.emplace_back(*idx, computeFileHashForFile(file, logger, opts));
             }
         }
 
@@ -179,10 +175,7 @@ Hashing::indexAndComputeFileHashes(core::GlobalState &gs, const realmain::option
     ENFORCE_NO_TIMER(asts.size() == files.size());
 
     // Below, we rewrite ASTs to an empty GlobalState and use them for hashing.
-    auto fileq = make_shared<ConcurrentBoundedQueue<size_t>>(asts.size());
-    for (size_t i = 0; i < asts.size(); i++) {
-        fileq->push(i, 1);
-    }
+    auto fileq = make_shared<ConcurrentIndex>(asts.size());
 
     logger.trace("Computing state hashes for {} files", asts.size());
 
@@ -193,29 +186,25 @@ Hashing::indexAndComputeFileHashes(core::GlobalState &gs, const realmain::option
         unique_ptr<Timer> timeit;
         vector<pair<core::FileRef, unique_ptr<const core::FileHash>>> threadResult;
         int processedByThread = 0;
-        size_t job;
-        {
-            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
-                if (result.gotItem()) {
-                    if (timeit == nullptr) {
-                        timeit = make_unique<Timer>(logger, "computeFileHashesWorker");
-                    }
-                    processedByThread++;
 
-                    const auto &ast = asts[job];
-
-                    if (!ast.file.exists() || ast.file.data(sharedGs).getFileHash() != nullptr) {
-                        continue;
-                    }
-
-                    unique_ptr<core::GlobalState> lgs;
-                    auto newFref = makeEmptyGlobalStateForFile(logger, sharedGs.getFiles()[ast.file.id()], lgs, opts);
-                    auto [rewrittenAST, usageHash] = rewriteAST(sharedGs, *lgs, newFref, ast);
-
-                    threadResult.emplace_back(ast.file,
-                                              computeFileHashForAST(logger, *lgs, move(usageHash), move(rewrittenAST)));
-                }
+        while (auto idx = fileq->next()) {
+            if (timeit == nullptr) {
+                timeit = make_unique<Timer>(logger, "computeFileHashesWorker");
             }
+            processedByThread++;
+
+            const auto &ast = asts[*idx];
+
+            if (!ast.file.exists() || ast.file.data(sharedGs).getFileHash() != nullptr) {
+                continue;
+            }
+
+            unique_ptr<core::GlobalState> lgs;
+            auto newFref = makeEmptyGlobalStateForFile(logger, sharedGs.getFiles()[ast.file.id()], lgs, opts);
+            auto [rewrittenAST, usageHash] = rewriteAST(sharedGs, *lgs, newFref, ast);
+
+            threadResult.emplace_back(ast.file,
+                                      computeFileHashForAST(logger, *lgs, move(usageHash), move(rewrittenAST)));
         }
 
         if (processedByThread > 0) {

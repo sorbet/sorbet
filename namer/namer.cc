@@ -7,6 +7,7 @@
 #include "ast/ParamParsing.h"
 #include "ast/packager/packager.h"
 #include "ast/treemap/treemap.h"
+#include "common/concurrency/ConcurrentIndex.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/concurrency/Parallel.h"
 #include "common/concurrency/WorkerPool.h"
@@ -2372,25 +2373,18 @@ public:
 
 AllFoundDefinitions findSymbols(const core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers) {
     Timer timeit(gs.tracer(), "naming.findSymbols");
-    auto taskq = make_shared<ConcurrentBoundedQueue<size_t>>(trees.size());
+    auto taskq = make_shared<ConcurrentIndex>(trees.size());
     AllFoundDefinitions allFoundDefinitions(trees.size());
-
-    for (size_t i = 0, size = trees.size(); i < size; ++i) {
-        taskq->push(i, 1);
-    }
 
     workers.multiplexJobWait("findSymbols", [&gs, &allFoundDefinitions, trees, taskq]() {
         Timer timeit(gs.tracer(), "naming.findSymbolsWorker");
         SymbolFinder finder;
-        size_t idx;
-        for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
-            if (result.gotItem()) {
-                auto &parsedFile = trees[idx];
-                Timer timeit(gs.tracer(), "naming.findSymbolsOne", {{"file", string(parsedFile.file.data(gs).path())}});
-                core::Context ctx(gs, core::Symbols::root(), parsedFile.file);
-                ast::TreeWalk::apply(ctx, finder, parsedFile.tree);
-                allFoundDefinitions[idx] = make_pair(parsedFile.file, finder.getAndClearFoundDefinitions());
-            }
+        while (auto idx = taskq->next()) {
+            auto &parsedFile = trees[*idx];
+            Timer timeit(gs.tracer(), "naming.findSymbolsOne", {{"file", string(parsedFile.file.data(gs).path())}});
+            core::Context ctx(gs, core::Symbols::root(), parsedFile.file);
+            ast::TreeWalk::apply(ctx, finder, parsedFile.tree);
+            allFoundDefinitions[*idx] = make_pair(parsedFile.file, finder.getAndClearFoundDefinitions());
         }
     });
 

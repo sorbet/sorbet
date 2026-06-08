@@ -1,6 +1,7 @@
 #include "main/cache/cache.h"
 #include "common/FileOps.h"
 #include "common/Random.h"
+#include "common/concurrency/ConcurrentIndex.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/exception/Exception.h"
 #include "common/kvstore/KeyValueStore.h"
@@ -118,38 +119,33 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, absl::
     Timer timeit(gs.tracer(), "pipeline::cacheTreesAndFiles");
 
     // Compress files in parallel.
-    auto fileq = make_shared<ConcurrentBoundedQueue<const ast::ParsedFile *>>(parsedFiles.size());
-    for (auto &parsedFile : parsedFiles) {
-        fileq->push(&parsedFile, 1);
-    }
+    auto fileq = make_shared<ConcurrentIndex>(parsedFiles.size());
 
     auto resultq = make_shared<BlockingBoundedQueue<vector<pair<string, vector<uint8_t>>>>>(parsedFiles.size());
-    workers.multiplexJob("compressTreesAndFiles", [fileq, resultq, &gs]() {
+    workers.multiplexJob("compressTreesAndFiles", [fileq, resultq, &gs, &parsedFiles]() {
         vector<pair<string, vector<uint8_t>>> threadResult;
         int processedByThread = 0;
-        const ast::ParsedFile *job = nullptr;
         unique_ptr<Timer> timeit;
         {
-            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
-                if (result.gotItem()) {
-                    processedByThread++;
-                    if (timeit == nullptr) {
-                        timeit = make_unique<Timer>(gs.tracer(), "cacheTreesAndFilesWorker");
-                    }
+            while (auto idx = fileq->next()) {
+                processedByThread++;
+                if (timeit == nullptr) {
+                    timeit = make_unique<Timer>(gs.tracer(), "cacheTreesAndFilesWorker");
+                }
 
-                    if (!job->file.exists()) {
-                        continue;
-                    }
+                auto &job = parsedFiles[*idx];
+                if (!job.file.exists()) {
+                    continue;
+                }
 
-                    auto &file = job->file.data(gs);
-                    if (!job->cached() && !file.hasIndexErrors()) {
-                        threadResult.emplace_back(core::serialize::Serializer::fileKey(file),
-                                                  core::serialize::Serializer::storeTree(file, *job));
-                        // Stream out compressed files so that writes happen in parallel with processing.
-                        if (processedByThread > 100) {
-                            resultq->push(move(threadResult), processedByThread);
-                            processedByThread = 0;
-                        }
+                auto &file = job.file.data(gs);
+                if (!job.cached() && !file.hasIndexErrors()) {
+                    threadResult.emplace_back(core::serialize::Serializer::fileKey(file),
+                                              core::serialize::Serializer::storeTree(file, job));
+                    // Stream out compressed files so that writes happen in parallel with processing.
+                    if (processedByThread > 100) {
+                        resultq->push(move(threadResult), processedByThread);
+                        processedByThread = 0;
                     }
                 }
             }

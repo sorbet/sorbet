@@ -20,6 +20,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
 #include "common/FileOps.h"
+#include "common/concurrency/ConcurrentIndex.h"
 #include "common/concurrency/Parallel.h"
 #include "common/timers/Timer.h"
 #include "core/Error.h"
@@ -264,11 +265,8 @@ void runAutogen(core::GlobalState &gs, options::Options &opts, WorkerPool &worke
     Timer timeit(logger, "autogen");
 
     auto resultq = make_shared<BlockingBoundedQueue<AutogenResult>>(indexed.size());
-    auto fileq = make_shared<ConcurrentBoundedQueue<int>>(indexed.size());
+    auto fileq = make_shared<ConcurrentIndex>(indexed.size());
     vector<AutogenResult::Serialized> merged(indexed.size());
-    for (int i = 0; i < indexed.size(); ++i) {
-        fileq->push(i, 1);
-    }
     auto crcBuilder = autogen::CRCBuilder::create();
     int autogenVersion = opts.autogenVersion == 0 ? autogen::AutogenVersion::MAX_VERSION : opts.autogenVersion;
 
@@ -278,11 +276,9 @@ void runAutogen(core::GlobalState &gs, options::Options &opts, WorkerPool &worke
             int n = 0;
             {
                 Timer timeit(logger, "autogenWorker");
-                int idx = 0;
-
-                for (auto result = fileq->try_pop(idx); !result.done(); result = fileq->try_pop(idx)) {
+                while (auto idx = fileq->next()) {
                     ++n;
-                    auto &tree = indexed[idx];
+                    auto &tree = indexed[*idx];
                     // This does package-specific behavior without checking `--sorbet-packages`!
                     if (tree.file.data(gs).hasPackageRbPath()) {
                         continue;
@@ -318,7 +314,7 @@ void runAutogen(core::GlobalState &gs, options::Options &opts, WorkerPool &worke
                         }
                     }
 
-                    out.prints.emplace_back(idx, move(serialized));
+                    out.prints.emplace_back(*idx, move(serialized));
                 }
             }
 

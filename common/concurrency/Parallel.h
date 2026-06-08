@@ -1,7 +1,8 @@
 #ifndef SORBET_CONCURRENCY_PARALLEL_H
 #define SORBET_CONCURRENCY_PARALLEL_H
 
-#include "common/concurrency/ConcurrentQueue.h"
+#include "absl/types/span.h"
+#include "common/concurrency/ConcurrentIndex.h"
 #include "common/concurrency/WorkerPool.h"
 
 namespace sorbet {
@@ -20,18 +21,14 @@ public:
                 std::invoke(body, arg);
             }
         } else {
-            auto taskq = std::make_shared<ConcurrentBoundedQueue<size_t>>(args.size());
-            for (size_t i = 0; i < args.size(); ++i) {
-                taskq->push(i, 1);
-            }
+            // We can avoid the use of a `shared_ptr` here because we're using `multiplexJobWait` below. That ensures
+            // that this function won't return before the workers have all completed.
+            ConcurrentIndex index(args.size());
 
-            workers.multiplexJobWait(taskName, [taskq, &args, body]() mutable {
-                size_t idx;
-                for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
-                    if (result.gotItem()) {
-                        T &arg = args[idx];
-                        std::invoke(body, arg);
-                    }
+            workers.multiplexJobWait(taskName, [&index, &args, body]() mutable {
+                while (auto ix = index.next()) {
+                    T &arg = args[*ix];
+                    std::invoke(body, arg);
                 }
             });
         }
