@@ -65,8 +65,8 @@ module T::Private::Methods
   sig {params(receiver: Object, original_method: UnboundMethod, callee: Symbol).returns(T::Private::Methods::Signature)}
   def self._handle_missing_method_signature(receiver, original_method, callee); end
 
-  sig {params(method_name: Symbol, original_method: UnboundMethod, declaration_block: DeclarationBlock).returns(T::Private::Methods::Signature)}
-  def self.run_sig(method_name, original_method, declaration_block); end
+  sig {params(method_name: Symbol, original_method: UnboundMethod, declaration_block: DeclarationBlock, key: T.nilable(String)).returns(T::Private::Methods::Signature)}
+  def self.run_sig(method_name, original_method, declaration_block, key=nil); end
 
   sig {params(declaration_block: DeclarationBlock).returns(T::Private::Methods::Declaration)}
   def self.run_builder(declaration_block); end
@@ -77,8 +77,8 @@ module T::Private::Methods
   sig {params(method: T.any(Method, UnboundMethod)).returns(T.nilable(T::Private::Methods::Signature))}
   def self.signature_for_method(method); end
 
-  sig {params(mod: Module, signature: T::Private::Methods::Signature, original_method: UnboundMethod).void}
-  def self.unwrap_method(mod, signature, original_method); end
+  sig {params(mod: Module, signature: T::Private::Methods::Signature, original_method: UnboundMethod, key: T.nilable(String)).void}
+  def self.unwrap_method(mod, signature, original_method, key: nil); end
 
   sig {params(method: UnboundMethod).returns(T::Boolean)}
   def self.has_sig_block_for_method(method); end

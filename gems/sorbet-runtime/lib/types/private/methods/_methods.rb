@@ -244,15 +244,18 @@ module T::Private::Methods
     current_declaration.mod = mod
 
     original_method = mod.instance_method(method_name)
+    # The key is computed before the lambda so the closure can thread it
+    # through run_sig -> unwrap_method, avoiding a re-derivation (and the
+    # UnboundMethod it would be derived from) when the sig block runs.
+    key = method_owner_and_name_to_key(mod, method_name)
     sig_block = lambda do
-      T::Private::Methods.run_sig(method_name, original_method, current_declaration)
+      T::Private::Methods.run_sig(method_name, original_method, current_declaration, key)
     end
 
     # Always replace the original method with this wrapper,
     # which is called only on the *first* invocation.
     # This wrapper is very slow, so it will subsequently re-wrap with a much faster wrapper
     # (or unwrap back to the original method).
-    key = method_owner_and_name_to_key(mod, method_name)
     # `ruby2_keywords: true`: the wrapper below has a rest param and no
     # keyword params, so tell replace_method instead of having it introspect
     # the freshly defined method to figure that out.
@@ -327,7 +330,7 @@ module T::Private::Methods
 
   # Executes the `sig` block, and converts the resulting Declaration
   # to a Signature.
-  def self.run_sig(method_name, original_method, declaration_block)
+  def self.run_sig(method_name, original_method, declaration_block, key=nil)
     current_declaration =
       begin
         run_builder(declaration_block)
@@ -346,7 +349,7 @@ module T::Private::Methods
         Signature.new_untyped(method: original_method)
       end
 
-    unwrap_method(signature.method.owner, signature, original_method)
+    unwrap_method(signature.method.owner, signature, original_method, key: key)
 
     # Drop this declaration. Only drop it after we've actually wrapped the
     # method and recorded the signature, because that might raise an exception,
@@ -417,9 +420,20 @@ module T::Private::Methods
     @signatures_by_method[key]
   end
 
-  private_class_method def self.unwrap_method(mod, signature, original_method)
-    maybe_wrapped_method = CallValidation.wrap_method_if_needed(mod, signature, original_method)
-    @signatures_by_method[method_to_key(maybe_wrapped_method)] = signature
+  # `key` may be supplied when the caller already holds the registry key for
+  # (mod, signature.method_name) — the _on_method_added sig-block flow, where
+  # every wrap_method_if_needed branch leaves the method owned by mod, so the
+  # precomputed key always equals the derived one. Callers without that
+  # guarantee (the alias flow in _handle_missing_method_signature) omit it
+  # and pay the derivation from the freshly wrapped method.
+  private_class_method def self.unwrap_method(mod, signature, original_method, key: nil)
+    if key
+      CallValidation.wrap_method_if_needed(mod, signature, original_method, fetch_method: false)
+      @signatures_by_method[key] = signature
+    else
+      maybe_wrapped_method = CallValidation.wrap_method_if_needed(mod, signature, original_method)
+      @signatures_by_method[method_to_key(maybe_wrapped_method)] = signature
+    end
   end
 
   def self.has_sig_block_for_method(method)

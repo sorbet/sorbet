@@ -2,15 +2,19 @@
 
 module T::Private::Methods
   module CallValidation
+    # NB: the return is declared non-nilable for the default fetch_method: true
+    # shape that all public callers use; the sole fetch_method: false caller
+    # (Methods.unwrap_method) discards the value.
     sig do
       params(
         mod: Module,
         method_sig: Signature,
-        original_method: UnboundMethod
+        original_method: UnboundMethod,
+        fetch_method: T::Boolean
       )
         .returns(UnboundMethod)
     end
-    def self.wrap_method_if_needed(mod, method_sig, original_method); end
+    def self.wrap_method_if_needed(mod, method_sig, original_method, fetch_method: true); end
 
     @is_allowed_to_have_fast_path = T.let(true, T::Boolean)
 

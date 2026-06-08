@@ -14,8 +14,10 @@ module T::Private::Methods::CallValidation
   # which was placed by `_on_method_added`.
   #
   # @param method_sig [T::Private::Methods::Signature]
+  # @param fetch_method pass false when the return value is unused, to skip
+  #   allocating the trailing UnboundMethod
   # @return [UnboundMethod] the new wrapper method (or the original one if we didn't wrap it)
-  def self.wrap_method_if_needed(mod, method_sig, original_method)
+  def self.wrap_method_if_needed(mod, method_sig, original_method, fetch_method: true)
     original_visibility = T::Private::ClassUtils.visibility_method_name(mod, method_sig.method_name)
     if method_sig.mode == T::Private::Methods::Modes.abstract
       create_abstract_wrapper(mod, method_sig.method_name, original_visibility)
@@ -37,7 +39,7 @@ module T::Private::Methods::CallValidation
       end
     end
     # Return the newly created method (or the original one if we didn't replace it)
-    mod.instance_method(method_sig.method_name)
+    mod.instance_method(method_sig.method_name) if fetch_method
   end
 
   @is_allowed_to_have_fast_path = true
