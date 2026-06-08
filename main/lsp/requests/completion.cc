@@ -149,6 +149,7 @@ optional<core::TypePtr> getSealedSubclassesUnion(const core::GlobalState &gs, co
     if (!sealedSubclasses.exists()) {
         // Given `MyEnum::X.`, the singleton will not be the `T.class_of(MyEnum)` but rather
         // `T.class_of(MyEnum::X)`, which will not have a `sealed_subclasses` method on it.
+        // Similarly, the singleton of a child class of a sealed class will not have a `sealed_subclasses` method on it.
         //
         // If we don't have a `sealed_subclasses` method directly on our singleton class, then it
         // doesn't make sense to show a `.case` completion.
