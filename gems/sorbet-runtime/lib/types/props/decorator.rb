@@ -71,7 +71,12 @@ class T::Props::Decorator
       raise ArgumentError.new("Attempted to redefine prop #{name.inspect} on class #{@class} that's already defined without specifying :override => true: #{prop_rules(name)}")
     end
 
-    @props = @props.merge(name => rules.freeze).freeze
+    # dup/store/freeze rather than merge: identical result without merge's
+    # temporary single-entry Hash and second insertion pass. The published
+    # hash stays frozen between adds.
+    new_props = @props.dup
+    new_props[name] = rules.freeze
+    @props = new_props.freeze
   end
 
   # Heads up!
@@ -644,12 +649,27 @@ class T::Props::Decorator
       T::Props::Plugin::Private.apply_class_methods(mod, child)
     end
 
-    props.each do |name, rules|
+    parent_props = props
+    # The empty? guard also keeps prop-less parents from forcing child
+    # decorator creation, exactly as before (the loop body was the only
+    # caller of child.decorator).
+    return if parent_props.empty?
+
+    # NB: Calling `child.decorator` here is a time bomb that's going to give someone a really bad
+    # time. Any class that defines props and also overrides the `decorator_class` method is going
+    # to reach this line before its override take effect, turning it into a no-op.
+    child_decorator = child.decorator
+
+    # Hoisted out of the loop from clobber_getter?/clobber_setter?: the
+    # owner comparison is invariant across it (the loop only defines prop
+    # accessors on child; it cannot redefine prop_get/prop_set or extend
+    # either decorator), and each Object#method call allocates a Method.
+    clobber_getters = child_decorator.method(:prop_get).owner != method(:prop_get).owner
+    clobber_setters = child_decorator.method(:prop_set).owner != method(:prop_set).owner
+
+    parent_props.each do |name, rules|
       copied_rules = rules.dup
-      # NB: Calling `child.decorator` here is a time bomb that's going to give someone a really bad
-      # time. Any class that defines props and also overrides the `decorator_class` method is going
-      # to reach this line before its override take effect, turning it into a no-op.
-      child.decorator.add_prop_definition(name, copied_rules)
+      child_decorator.add_prop_definition(name, copied_rules)
 
       # It's a bit tricky to support `prop_get` hooks added by plugins without
       # sacrificing the `attr_reader` fast path or clobbering customized getters
@@ -660,13 +680,13 @@ class T::Props::Decorator
       # (b) it's safe because the getter was defined by this file.
       #
       unless rules[:without_accessors]
-        if clobber_getter?(child, name)
+        if clobber_getters && child.instance_method(name).source_location&.first == __FILE__
           child.send(:define_method, name) do
             T.unsafe(self.class).decorator.prop_get(self, name, rules)
           end
         end
 
-        if !rules[:immutable] && clobber_setter?(child, name)
+        if !rules[:immutable] && clobber_setters && child.instance_method("#{name}=").source_location&.first == __FILE__
           child.send(:define_method, "#{name}=") do |val|
             T.unsafe(self.class).decorator.prop_set(self, name, val, rules)
           end
@@ -719,18 +739,6 @@ class T::Props::Decorator
     elaborate_override_entry(:reader, d, result)
     elaborate_override_entry(:writer, d, result)
     result
-  end
-
-  sig { params(child: DecoratedClassType, prop: Symbol).returns(T::Boolean).checked(:never) }
-  private def clobber_getter?(child, prop)
-    !!(child.decorator.method(:prop_get).owner != method(:prop_get).owner &&
-       child.instance_method(prop).source_location&.first == __FILE__)
-  end
-
-  sig { params(child: DecoratedClassType, prop: Symbol).returns(T::Boolean).checked(:never) }
-  private def clobber_setter?(child, prop)
-    !!(child.decorator.method(:prop_set).owner != method(:prop_set).owner &&
-       child.instance_method("#{prop}=").source_location&.first == __FILE__)
   end
 
   sig { params(mod: T::Module[T.anything]).void.checked(:never) }

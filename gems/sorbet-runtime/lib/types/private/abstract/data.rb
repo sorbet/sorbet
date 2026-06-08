@@ -11,16 +11,30 @@
 # `mod`, and we can't trust that arbitrary modules can be added to those, because there are lurky
 # modules that override the `hash` method with something completely broken.
 module T::Private::Abstract::Data
+  # The in-gem key set is closed, and these accessors run on every
+  # include/extend/inherit event of abstract-hooked or
+  # mixes_in_class_methods modules: pre-resolve the ivar-name Symbols so
+  # the per-call String interpolation (one allocation per access)
+  # disappears. Novel keys from external callers fall back to
+  # interpolation; the map itself is frozen (no runtime writes).
+  IVAR_NAMES = {
+    abstract_type: :@opus_abstract__abstract_type,
+    can_have_abstract_methods: :@opus_abstract__can_have_abstract_methods,
+    class_methods_mixins: :@opus_abstract__class_methods_mixins,
+    last_used_by: :@opus_abstract__last_used_by,
+  }.freeze
+  private_constant :IVAR_NAMES
+
   def self.get(mod, key)
-    mod.instance_variable_get("@opus_abstract__#{key}")
+    mod.instance_variable_get(IVAR_NAMES[key] || "@opus_abstract__#{key}")
   end
 
   def self.set(mod, key, value)
-    mod.instance_variable_set("@opus_abstract__#{key}", value)
+    mod.instance_variable_set(IVAR_NAMES[key] || "@opus_abstract__#{key}", value)
   end
 
   def self.key?(mod, key)
-    mod.instance_variable_defined?("@opus_abstract__#{key}")
+    mod.instance_variable_defined?(IVAR_NAMES[key] || "@opus_abstract__#{key}")
   end
 
   # Works like `setdefault` in Python. If key has already been set, return its value. If not,
