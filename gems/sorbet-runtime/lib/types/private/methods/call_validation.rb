@@ -430,15 +430,16 @@ module T::Private::Methods::CallValidation
     # This method is called for every `sig`. It's critical to keep it fast and
     # reduce number of allocations that happen here.
 
-    if method_sig.bind
-      message = method_sig.bind&.error_message_for_obj(instance)
+    bind = method_sig.bind
+    if bind
+      message = bind.error_message_for_obj(instance)
       if message
         CallValidation.report_error(
           method_sig,
           message,
           'Bind',
           nil,
-          method_sig.bind,
+          bind,
           instance
         )
       end
@@ -484,17 +485,18 @@ module T::Private::Methods::CallValidation
 
     # The only type that is allowed to change the return value is `.void`.
     # It ignores what you returned and changes it to be a private singleton.
-    if method_sig.effective_return_type.is_a?(T::Private::Types::Void)
+    if method_sig.return_void
       T::Private::Types::Void::VOID
     else
-      message = method_sig.effective_return_type.error_message_for_obj(return_value)
+      effective_return_type = method_sig.effective_return_type
+      message = effective_return_type.error_message_for_obj(return_value)
       if message
         CallValidation.report_error(
           method_sig,
           message,
           'Return value',
           nil,
-          method_sig.effective_return_type,
+          effective_return_type,
           return_value,
         )
       end
@@ -514,15 +516,16 @@ module T::Private::Methods::CallValidation
     # This method is called for every `sig`. It's critical to keep it fast and
     # reduce number of allocations that happen here.
 
-    if method_sig.bind
-      message = method_sig.bind.error_message_for_obj(instance)
+    bind = method_sig.bind
+    if bind
+      message = bind.error_message_for_obj(instance)
       if message
         CallValidation.report_error(
           method_sig,
           message,
           'Bind',
           nil,
-          method_sig.bind,
+          bind,
           instance
         )
       end
@@ -589,17 +592,18 @@ module T::Private::Methods::CallValidation
 
     # The only type that is allowed to change the return value is `.void`.
     # It ignores what you returned and changes it to be a private singleton.
-    if method_sig.effective_return_type.is_a?(T::Private::Types::Void)
+    if method_sig.return_void
       T::Private::Types::Void::VOID
     else
-      message = method_sig.effective_return_type.error_message_for_obj(return_value)
+      effective_return_type = method_sig.effective_return_type
+      message = effective_return_type.error_message_for_obj(return_value)
       if message
         CallValidation.report_error(
           method_sig,
           message,
           'Return value',
           nil,
-          method_sig.effective_return_type,
+          effective_return_type,
           return_value,
         )
       end

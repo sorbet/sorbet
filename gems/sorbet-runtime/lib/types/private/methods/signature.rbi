@@ -43,6 +43,10 @@ class T::Private::Methods::Signature
   attr_reader :override_allow_incompatible
   sig {returns(T::Boolean)}
   attr_reader :defined_raw
+  sig {returns(T::Boolean)}
+  attr_reader :accepts_kwargs
+  sig {returns(T::Boolean)}
+  attr_reader :return_void
 
   sig do
     params(
@@ -93,6 +97,8 @@ class T::Private::Methods::Signature
     @kwarg_types = T.let([], T::Hash[Symbol, T::Types::Base])
     @req_arg_count = T.let(0, Integer)
     @req_kwarg_names = T.let([], T::Array[Symbol])
+    @accepts_kwargs = T.let(false, T::Boolean)
+    @return_void = T.let(false, T::Boolean)
   end
 
   sig { params(method_name: Symbol).returns(Symbol) }

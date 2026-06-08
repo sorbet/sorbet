@@ -6,7 +6,7 @@ class T::Private::Methods::Signature
               :rest_type, :rest_name, :keyrest_type, :keyrest_name, :bind, :effective_return_type,
               :return_type, :mode, :req_arg_count, :req_kwarg_names,
               :check_level, :parameters, :on_failure, :override_allow_incompatible,
-              :defined_raw
+              :defined_raw, :accepts_kwargs, :return_void
 
   # T.unsafe: `UnboundMethod#parameters` lies and says `T::Array[[Symbol, Symbol]]`.
   # Sorbet can't lub tuple types, meaning that `T.any([Symbol], [Symbol,
@@ -166,6 +166,13 @@ class T::Private::Methods::Signature
     @kwarg_types = kwarg_types || EMPTY_HASH
     @req_arg_count = req_arg_count
     @req_kwarg_names = req_kwarg_names || EMPTY_LIST
+
+    # Precomputed invariants for the per-call slow path (each_args_value_type
+    # and validate_call). Everything they depend on is fixed by this point
+    # and Signature is never mutated after construction (the only writer is
+    # the protected method_name= used by as_alias, whose clone copies these).
+    @accepts_kwargs = !@kwarg_types.empty? || !@keyrest_type.nil?
+    @return_void = @effective_return_type.is_a?(T::Private::Types::Void)
   end
 
   attr_writer :method_name
@@ -198,48 +205,56 @@ class T::Private::Methods::Signature
     # can't) match the definition of the method we're validating. In addition, Ruby has a bug that
     # causes forwarding **kwargs to do the wrong thing: see https://bugs.ruby-lang.org/issues/10708
     # and https://bugs.ruby-lang.org/issues/11860.
+    # Ivars are hoisted into locals up front: this method loops, and every
+    # @ivar read inside a loop body re-pays the instance-variable lookup.
+    arg_types = @arg_types
+    arg_types_length = arg_types.length
+    req_arg_count = @req_arg_count
+    rest_type = @rest_type
+
     args_length = args.length
-    if (args_length > @req_arg_count) && (!@kwarg_types.empty? || !@keyrest_type.nil?) && (last_arg = args[-1]).is_a?(Hash)
+    if (args_length > req_arg_count) && @accepts_kwargs && (last_arg = args[-1]).is_a?(Hash)
       kwargs = last_arg
       args_length -= 1
     else
       kwargs = EMPTY_HASH
     end
 
-    if @rest_type.nil? && ((args_length < @req_arg_count) || (args_length > @arg_types.length))
-      expected_str = @req_arg_count.to_s
-      if @arg_types.length != @req_arg_count
-        expected_str += "..#{@arg_types.length}"
+    if rest_type.nil? && ((args_length < req_arg_count) || (args_length > arg_types_length))
+      expected_str = req_arg_count.to_s
+      if arg_types_length != req_arg_count
+        expected_str += "..#{arg_types_length}"
       end
       raise ArgumentError.new("wrong number of arguments (given #{args_length}, expected #{expected_str})")
     end
 
-    begin
-      it = 0
+    it = 0
 
-      # Process given pre-rest args. When there are no rest args,
-      # this is just the given number of args.
-      while it < args_length && it < @arg_types.length
-        arg_type = @arg_types.fetch(it)
-        yield arg_type[0], args[it], arg_type[1]
+    # Process given pre-rest args. When there are no rest args,
+    # this is just the given number of args.
+    while it < args_length && it < arg_types_length
+      arg_type = arg_types[it]
+      yield arg_type[0], args[it], arg_type[1]
+      it += 1
+    end
+
+    if !rest_type.nil?
+      # The pre-rest loop left `it == min(args_length, arg_types_length)`,
+      # so this bound yields exactly the (possibly zero) rest args without
+      # the old rest_count arithmetic or the Integer#times block frame.
+      rest_name = @rest_name
+      while it < args_length
+        yield rest_name, args[it], rest_type
         it += 1
-      end
-
-      if !@rest_type.nil?
-        rest_count = args_length - @arg_types.length
-        rest_count = 0 if rest_count.negative?
-
-        rest_count.times do
-          yield @rest_name, args[it], @rest_type
-          it += 1
-        end
       end
     end
 
+    kwarg_types = @kwarg_types
+    keyrest_type = @keyrest_type
     kwargs.each do |name, val|
-      type = @kwarg_types[name]
-      if !type && !@keyrest_type.nil?
-        type = @keyrest_type
+      type = kwarg_types[name]
+      if !type && !keyrest_type.nil?
+        type = keyrest_type
       end
 
       yield name, val, type if type
