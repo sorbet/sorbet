@@ -507,14 +507,42 @@ class Integer < Numeric
   sig {returns(Integer)}
   def abs2(); end
 
-  # Returns `true` if all bits of `int & mask` are 1.
-  def allbits?(_); end
+  # Returns `true` if all bits that are set (=1) in `mask` are also set in
+  # `self`; returns `false` otherwise.
+  #
+  # ```ruby
+  # 0b1010101  self
+  # 0b1010100  mask
+  # 0b1010100  self & mask
+  #      true  self.allbits?(mask)
+  #
+  # 0b1010100  self
+  # 0b1010101  mask
+  # 0b1010100  self & mask
+  #     false  self.allbits?(mask)
+  # ```
+  sig {params(mask: Integer).returns(T::Boolean)}
+  def allbits?(mask); end
 
   sig {returns(Numeric)}
   def angle(); end
 
-  # Returns `true` if any bits of `int & mask` are 1.
-  def anybits?(_); end
+  # Returns `true` if any bit that is set (=1) in `mask` is also set in `self`;
+  # returns `false` otherwise.
+  #
+  # ```ruby
+  # 0b10000010  self
+  # 0b11111111  mask
+  # 0b10000010  self & mask
+  #       true  self.anybits?(mask)
+  #
+  # 0b00000000  self
+  # 0b11111111  mask
+  # 0b00000000  self & mask
+  #      false  self.anybits?(mask)
+  # ```
+  sig {params(mask: Integer).returns(T::Boolean)}
+  def anybits?(mask); end
 
   sig {returns(Numeric)}
   def arg(); end
