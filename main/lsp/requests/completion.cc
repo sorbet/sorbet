@@ -139,6 +139,34 @@ bool hasPrefixedName(const core::GlobalState &gs, core::NameRef name, string_vie
 using SimilarMethod = CompletionTask::SimilarMethod;
 using SimilarMethodsByName = UnorderedMap<core::NameRef, vector<SimilarMethod>>;
 
+// Checks if the class is sealed (including enums) by probing for the `sealed_subclasses` method
+optional<core::TypePtr> getSealedSubclassesUnion(const core::GlobalState &gs, const core::ClassOrModuleRef classRef) {
+    auto singletonClass = classRef.data(gs)->lookupSingletonClass(gs);
+    if (!singletonClass.exists()) {
+        return nullopt;
+    }
+    auto sealedSubclasses = singletonClass.data(gs)->findMethod(gs, core::Names::sealedSubclasses());
+    if (!sealedSubclasses.exists()) {
+        // Given `MyEnum::X.`, the singleton will not be the `T.class_of(MyEnum)` but rather
+        // `T.class_of(MyEnum::X)`, which will not have a `sealed_subclasses` method on it.
+        // Similarly, the singleton of a child class of a sealed class will not have a `sealed_subclasses` method on it.
+        //
+        // If we don't have a `sealed_subclasses` method directly on our singleton class, then it
+        // doesn't make sense to show a `.case` completion.
+        return nullopt;
+    }
+    auto sealedSubclassesSet = core::cast_type<core::AppliedType>(sealedSubclasses.data(gs)->resultType);
+    if (sealedSubclassesSet == nullptr || sealedSubclassesSet->targs.empty()) {
+        // User could manually redefine the signature of this method; can't assume anything about it
+        return nullopt;
+    }
+    return {sealedSubclassesSet->targs[0]};
+}
+
+bool isSealedClass(const core::GlobalState &gs, const core::ClassOrModuleRef classRef) {
+    return getSealedSubclassesUnion(gs, classRef).has_value();
+}
+
 // First of pair is "found at this depth in the ancestor hierarchy"
 // Second of pair is method symbol found at that depth, with name similar to prefix.
 SimilarMethodsByName similarMethodsForClass(const core::GlobalState &gs, core::ClassOrModuleRef receiver,
@@ -163,10 +191,19 @@ SimilarMethodsByName similarMethodsForClass(const core::GlobalState &gs, core::C
             }
 
             if (hasSimilarName(gs, memberName, prefix)) {
-                // Creates the the list if it does not exist
+                // Creates the list if it does not exist
                 result[memberName].emplace_back(SimilarMethod{depth, receiver, memberSymbol.asMethodRef()});
             }
         }
+    }
+
+    // Special case for sealed classes to suggest the `.case` method
+    // Saying `T_Enum_caseAngles()` is the `method` tricks `getCompletionItemForMethod` into taking
+    // the `getCompletionItemForCase` case. The only thing that matters from `SimilarMethod` is the
+    // contents of `receiver` in that case.
+    if (hasSimilarName(gs, core::Names::caseAngles(), prefix) && isSealedClass(gs, receiver)) {
+        result[core::Names::caseAngles()].emplace_back(
+            SimilarMethod{depth, receiver, core::Symbols::T_Enum_caseAngles()});
     }
 
     return result;
@@ -1028,7 +1065,6 @@ unique_ptr<CompletionItem> CompletionTask::getCompletionItemForUntyped(const cor
     return item;
 }
 
-// TODO(jez) Support all sealed! classes, not just T::Enum
 // TODO(jez) Could consider supporting all union types, but it would be tricky because not all
 // elements of a union type can be cased over (e.g., erased generics)
 // TODO(jez) Defer computing this until completionItem/resolve?
@@ -1037,7 +1073,9 @@ std::unique_ptr<CompletionItem> CompletionTask::getCompletionItemForCase(const c
                                                                          const core::ClassOrModuleRef receiver,
                                                                          core::Loc queryLoc, std::string_view prefix,
                                                                          size_t sortIdx) const {
-    auto item = make_unique<CompletionItem>("case: Expand for T::Enum");
+    const auto label = (receiver.data(gs)->derivesFrom(gs, core::Symbols::T_Enum())) ? "case: Expand for T::Enum"
+                                                                                     : "case: Expand for sealed class";
+    auto item = make_unique<CompletionItem>(label);
     item->sortText = formatSortIndex(sortIdx);
     item->kind = CompletionItemKind::Snippet;
     if (config.getClientConfig().clientCompletionItemSnippetSupport) {
@@ -1046,25 +1084,13 @@ std::unique_ptr<CompletionItem> CompletionTask::getCompletionItemForCase(const c
         item->insertTextFormat = InsertTextFormat::PlainText;
     }
 
-    const auto &enumSingleton = receiver.data(gs)->lookupSingletonClass(gs).data(gs);
-    auto sealedSubclasses = enumSingleton->findMethod(gs, core::Names::sealedSubclasses());
-    if (!sealedSubclasses.exists()) {
-        // Given `MyEnum::X.`, the singleton will not be the `T.class_of(MyEnum)` but rather
-        // `T.class_of(MyEnum::X)`, which will not have a `sealed_subclasses` method on it.
-        //
-        // If we don't have a `sealed_subclasses` method directly on our singleton class, then it
-        // doesn't make sense to show a `.case` completion.
+    auto sealedSubclassesUnion = getSealedSubclassesUnion(gs, receiver);
+    if (!sealedSubclassesUnion.has_value()) {
         return nullptr;
     }
-    auto sealedSubclassesSet = core::cast_type<core::AppliedType>(sealedSubclasses.data(gs)->resultType);
-    if (sealedSubclassesSet == nullptr || sealedSubclassesSet->targs.empty()) {
-        // User could manually redefine the signature of this method; can't assume anything about it
-        return nullptr;
-    }
-    auto sealedSubclassesUnion = sealedSubclassesSet->targs[0];
 
     auto values = vector<core::ClassOrModuleRef>{};
-    const auto *iter = &sealedSubclassesUnion;
+    const auto *iter = &sealedSubclassesUnion.value();
 
     if (!iter->isBottom()) {
         const core::OrType *orT = nullptr;

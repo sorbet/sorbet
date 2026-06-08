@@ -407,6 +407,8 @@ pipeline_tests(
             "testdata/lsp/completion/self_receiver.rb",
             "testdata/lsp/completion/enum_case.rb",
             "testdata/lsp/completion/enum_case_crash.rb",
+            "testdata/lsp/completion/sealed_class_case.rb",
+            "testdata/lsp/completion/sealed_class_subclass_case.rb",
             "testdata/lsp/duplicate_kwarg.rb",
             "testdata/namer/fuzz_repeated_kwarg.rb",
             "testdata/deviations/keyword_method_names.rb",
