@@ -1,6 +1,7 @@
 #include "main/lsp/requests/code_action_resolve.h"
 #include "core/insert_method/insert_method.h"
 #include "main/lsp/ConvertToSingletonClassMethod.h"
+#include "main/lsp/CreateMissingMethod.h"
 #include "main/lsp/LSPLoop.h"
 #include "main/lsp/LSPQuery.h"
 #include "main/lsp/MoveMethod.h"
@@ -108,6 +109,15 @@ unique_ptr<ResponseMessage> CodeActionResolveTask::runRequest(LSPTypecheckerDele
             workspaceEdit->documentChanges = move(edits);
             action->edit = move(workspaceEdit);
         }
+        response->result = move(action);
+    }
+
+    if (auto *resp = isMissingMethodResponse(gs, queryResult.responses)) {
+        unique_ptr<CodeAction> action = make_unique<CodeAction>("Add method");
+        action->kind = CodeActionKind::Refactor;
+        auto workspaceEdit = make_unique<WorkspaceEdit>();
+        workspaceEdit->documentChanges = getAddMissingMethodEdits(typechecker, config, *resp);
+        action->edit = move(workspaceEdit);
         response->result = move(action);
     }
 
