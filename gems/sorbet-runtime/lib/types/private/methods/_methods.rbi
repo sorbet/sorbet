@@ -53,7 +53,7 @@ module T::Private::Methods
 
   IS_TYPECHECKING = T.let(false, T::Boolean)
 
-  sig {params(target: Module, source_method_names: T::Array[Symbol], source: T.nilable(Module)).void}
+  sig {params(target: Module, source_method_names: T::Array[Symbol], source: T.nilable(Module)).returns(T::Boolean)}
   def self._check_final_ancestors(target, source_method_names, source); end
 
   sig {params(mod: Module, method_name: Symbol).returns(NilClass)}
