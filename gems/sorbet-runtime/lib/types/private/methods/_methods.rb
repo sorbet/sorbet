@@ -105,12 +105,17 @@ module T::Private::Methods
   #
   # we assume that source_method_names has already been filtered to only include method
   # names that were declared final at one point.
+  #
+  # Returns a boolean indicating whether it's okay to define any of `source_method_names` in `target`
+  # (e.g. true if no final method violations)
   def self._check_final_ancestors(target, source_method_names, source)
     source_ancestors = nil
     if T::Private::IS_TYPECHECKING
       # Need to avoid a pinning error, but don't want to use runtime types in _methods.rb
       source_ancestors = T.let(nil, T.nilable(T::Array[T::Module[T.anything]]))
+      found_error = T.let(false, T::Boolean)
     end
+    found_error = false
     # use reverse_each to check farther-up ancestors first, for better error messages.
     target.ancestors.reverse_each do |ancestor|
       final_methods = @modules_with_final.fetch(ancestor, nil)
@@ -142,6 +147,8 @@ module T::Private::Methods
           next if defining_ancestor_idx && source_ancestors[defining_ancestor_idx] == ancestor
         end
 
+        found_error = true
+
         final_sig = T::Private::Methods.signature_for_method(ancestor.instance_method(method_name))
         definition_file, definition_line = final_sig&.method&.source_location
         is_redefined = target == ancestor
@@ -158,19 +165,14 @@ module T::Private::Methods
                          "#{extra_info}"
 
         begin
+          # raise + rescue to populate the backtrace
           raise pretty_message
         rescue => e
-          # sig_validation_error_handler raises by default; on the off chance that
-          # it doesn't raise, we need to ensure that the rest of signature building
-          # sees a consistent state.  This sig failed to validate, so we should get
-          # rid of it.  If we don't do this, errors of the form "You called sig
-          # twice without declaring a method in between" will non-deterministically
-          # crop up in tests.
-          T::Private::DeclState.current.reset!
           T::Configuration.sig_validation_error_handler(e, {})
         end
       end
     end
+    !found_error
   end
 
   def self.add_module_with_final_method(mod, method_name)
@@ -193,22 +195,22 @@ module T::Private::Methods
     end
 
     current_declaration = T::Private::DeclState.current.active_declaration
+    T::Private::DeclState.current.reset!
 
     if T::Private::Final.final_module?(mod) && (current_declaration.nil? || !current_declaration.final)
       raise "#{mod} was declared as final but its method `#{method_name}` was not declared as final"
     end
     # Don't compute mod.ancestors if we don't need to bother checking final-ness.
-    if @was_ever_final_names.include?(method_name) && @modules_with_final.include?(mod)
-      _check_final_ancestors(mod, [method_name], nil)
-      # We need to fetch the active declaration again, as _check_final_ancestors
-      # may have reset it (see the comment in that method for details).
-      current_declaration = T::Private::DeclState.current.active_declaration
+    if @was_ever_final_names.include?(method_name) && @modules_with_final.include?(mod) &&
+       !_check_final_ancestors(mod, [method_name], nil)
+      # We want to pretend like the method did not have a sig, so return.
+      # (This code is not dead, because some `sig_validation_error_handler`'s do not raise.)
+      return
     end
 
     if current_declaration.nil?
       return
     end
-    T::Private::DeclState.current.reset!
 
     if method_name == :method_added || method_name == :singleton_method_added
       raise(
@@ -507,6 +509,7 @@ module T::Private::Methods
     end
 
     _check_final_ancestors(target, methods, source)
+    nil
   end
 
   def self.set_final_checks_on_hooks(enable)
