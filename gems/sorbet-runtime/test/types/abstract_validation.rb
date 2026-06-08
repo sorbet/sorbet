@@ -526,4 +526,36 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
     end
     assert_equal("Called abstract! in parent", exn.message)
   end
+
+  it "finds abstract methods aliased into a sig-less module once the alias flow registers them" do
+    parent = Class.new do
+      extend T::Sig
+      extend T::Helpers
+      abstract!
+
+      sig { abstract.void }
+      def foo; end
+    end
+    # `middle` never declares a sig itself; its only signature arrives via
+    # the alias re-registration in _handle_missing_method_signature, which
+    # must also mark it as sig-bearing for declared_abstract_methods_for's
+    # sig-free-ancestor skip.
+    middle = Class.new(parent) do
+      alias_method :bar, :foo
+    end
+    concrete = Class.new(middle) do
+      def foo; end
+    end
+
+    instance = concrete.new
+    # Two calls: the first consumes the lazy sig block for `foo`; the second
+    # routes through _handle_missing_method_signature, registering the
+    # alias's signature under `middle`.
+    2.times do
+      assert_raises(NotImplementedError) { instance.bar }
+    end
+
+    declared = T::AbstractUtils.declared_abstract_methods_for(concrete)
+    assert_includes(declared.map(&:name), :bar)
+  end
 end

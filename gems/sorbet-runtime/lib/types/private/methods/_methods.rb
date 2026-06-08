@@ -11,7 +11,9 @@ module T::Private::Methods
   # keeps declaration and lazy first-call sig wrapping safe in any execution
   # context (including signal trap handlers, where locks cannot be acquired),
   # and preserves global declaration (insertion) order for
-  # run_all_sig_blocks. The owner module itself is not retained.
+  # run_all_sig_blocks. The string keys keep the registries themselves from
+  # retaining owner modules (though @modules_with_sigs below, like Signature
+  # objects, does retain them).
   if defined?(Concurrent::Hash)
     # Hide the Concurrent::Hash so that we get better typing by lying and saying it's a Hash
     instance_variable_set(:@signatures_by_method, Concurrent::Hash.new)
@@ -21,6 +23,19 @@ module T::Private::Methods
     @sig_wrappers = {}
   end
   @sigs_that_raised = {}
+  # Identity-keyed (so lurky user #hash overrides can't break it) membership
+  # set of every module that ever had a signature registered. INVARIANT:
+  # every key ever stored in @sig_wrappers or @signatures_by_method must
+  # have its owner written here FIRST (any new registration entry point must
+  # preserve this). module_has_sigs? lets whole-ObjectSpace scans like
+  # abstract validation skip the (overwhelmingly sig-free) modules without
+  # enumerating their methods. Entries are never deleted: a module whose sig
+  # blocks have all run still owns registered signatures.
+  if defined?(Concurrent::Hash)
+    instance_variable_set(:@modules_with_sigs, Concurrent::Hash.new.compare_by_identity)
+  else
+    @modules_with_sigs = {}.compare_by_identity
+  end
   # stores method names that were declared final without regard for where.
   # enables early rejection of names that we know can't induce final method violations.
   @was_ever_final_names = {}.compare_by_identity
@@ -285,10 +300,20 @@ module T::Private::Methods
       end
     end
 
+    # Membership write must precede the registry store (see the
+    # @modules_with_sigs invariant); key owner is mod by construction.
+    @modules_with_sigs[mod] = true
     @sig_wrappers[key] = sig_block
     if current_declaration.final
       add_module_with_final_method(mod, method_name)
     end
+  end
+
+  # Whether `mod` has ever had a signature registered (declared or
+  # materialized). A false result soundly implies no method defined on `mod`
+  # can carry a signature -- in particular, none can be abstract.
+  def self.module_has_sigs?(mod)
+    @modules_with_sigs.key?(mod)
   end
 
   def self._handle_missing_method_signature(receiver, original_method, callee)
@@ -429,9 +454,16 @@ module T::Private::Methods
   private_class_method def self.unwrap_method(mod, signature, original_method, key: nil)
     if key
       CallValidation.wrap_method_if_needed(mod, signature, original_method, fetch_method: false)
+      # Membership writes must precede the registry stores (see the
+      # @modules_with_sigs invariant). The supplied key's owner is mod by
+      # construction; the derived key below uses the wrapped method's owner
+      # (NOT the mod param -- the alias flow passes the aliasing module but
+      # the resolved owner can differ).
+      @modules_with_sigs[mod] = true
       @signatures_by_method[key] = signature
     else
       maybe_wrapped_method = CallValidation.wrap_method_if_needed(mod, signature, original_method)
+      @modules_with_sigs[maybe_wrapped_method.owner] = true
       @signatures_by_method[method_to_key(maybe_wrapped_method)] = signature
     end
   end

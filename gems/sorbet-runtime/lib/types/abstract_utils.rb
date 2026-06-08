@@ -39,7 +39,14 @@ module T::AbstractUtils
   def self.declared_abstract_methods_for(mod)
     methods = []
     mod.ancestors.each do |ancestor|
-      ancestor_methods = ancestor.private_instance_methods(false) + ancestor.instance_methods(false)
+      # A method can only be abstract via a signature registered under its
+      # defining owner, so a sig-free ancestor (the overwhelmingly common
+      # case for stdlib/gem ancestors in whole-ObjectSpace validation scans)
+      # can be skipped without enumerating its methods -- avoiding the
+      # per-method UnboundMethod and registry-key allocations below.
+      next unless Methods.module_has_sigs?(ancestor)
+
+      ancestor_methods = ancestor.private_instance_methods(false).concat(ancestor.instance_methods(false))
       ancestor_methods.each do |method_name|
         method = ancestor.instance_method(method_name)
         methods << method if abstract_method?(method)

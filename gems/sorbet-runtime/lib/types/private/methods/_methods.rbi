@@ -31,6 +31,7 @@ module T::Private::Methods
   @was_ever_final_names = T.let({}, T::Hash[Symbol, TrueClass])
   @sig_wrappers = T.let({}, T::Hash[String, T.proc.returns(Signature)])
   @signatures_by_method = T.let({}, T::Hash[String, Signature])
+  @modules_with_sigs = T.let({}, T::Hash[Module, TrueClass])
   @sigs_that_raised = T.let({}, T::Hash[String, TrueClass])
   @old_hooks = T.let(nil, T.nilable([UnboundMethod, UnboundMethod, UnboundMethod]))
 
@@ -79,6 +80,9 @@ module T::Private::Methods
 
   sig {params(mod: Module, signature: T::Private::Methods::Signature, original_method: UnboundMethod, key: T.nilable(String)).void}
   def self.unwrap_method(mod, signature, original_method, key: nil); end
+
+  sig {params(mod: Module).returns(T::Boolean)}
+  def self.module_has_sigs?(mod); end
 
   sig {params(method: UnboundMethod).returns(T::Boolean)}
   def self.has_sig_block_for_method(method); end
