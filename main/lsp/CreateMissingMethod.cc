@@ -42,7 +42,7 @@ string formatNewMethod(const core::GlobalState &gs, uint32_t indentLength, const
         paramSig += fmt::format("{}: {}",
                                 paramSuggestions[i].has_value() ? paramSuggestions[i].value().shortName(gs)
                                                                 : fmt::format("param{}", i),
-                                argTypes[i].show(gs));
+                                argTypes[i].show(gs, core::ShowOptions{}.withUseValidSyntax()));
     }
     string paramList = "";
     for (uint64_t i = 0; i < numPosArgs; i++) {
