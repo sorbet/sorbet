@@ -45,6 +45,14 @@ class T::Props::Decorator
       T::Props::Plugin::Private.apply_decorator_methods(mod, self)
     end
     @props = T.let(EMPTY_PROPS, T::Hash[Symbol, Rules], checked: false)
+
+    # Compiled-setter specialization queue; see
+    # T::Props::Private::SetterGenerator::DecoratorMethods. Initialized
+    # eagerly so the lock and registry never race their own creation.
+    # (@specialization_gens is only ever touched while holding
+    # @specialization_lock and is created lazily there.)
+    @specialized_methods = T.let({}, T::Hash[Symbol, T.untyped], checked: false)
+    @specialization_lock = T.let(Mutex.new, Mutex, checked: false)
   end
 
   # checked(:never) - O(prop accesses)
@@ -448,8 +456,10 @@ class T::Props::Decorator
           @class.send(:define_method, "#{name}=") do |val|
             d.prop_set(self, name, val, rules)
           end
-        else
-          # Fast path (~4x faster as of Ruby 2.6)
+        elsif !enqueue_compiled_setter!(name, rules)
+          # Fast path (~4x faster as of Ruby 2.6). Eligible props instead get
+          # a setter compiled into a plain `def` on first call (faster still);
+          # see T::Props::Private::SetterGenerator.
           @class.send(:define_method, "#{name}=", &rules.fetch(:setter_proc))
         end
 

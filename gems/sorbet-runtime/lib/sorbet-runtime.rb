@@ -101,6 +101,7 @@ require_relative 'types/props/utils'
 require_relative 'types/enum'
 # Props that run sigs statically so have to be after all the others :(
 require_relative 'types/props/private/setter_factory'
+require_relative 'types/props/private/setter_generator'
 require_relative 'types/props/private/apply_default'
 require_relative 'types/props/has_lazily_specialized_methods'
 require_relative 'types/props/optional'
