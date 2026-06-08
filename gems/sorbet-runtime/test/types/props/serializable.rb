@@ -1036,6 +1036,49 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       roundtripped = RedundantEnumStruct.from_hash(serialized)
       assert_equal(MyEnum::FOO, roundtripped.deprecated_enum)
     end
+
+    it 'serializes eligible enum props via a direct .serialize call' do
+      src = EnumStruct.decorator.send(:generate_serialize_source).to_s
+      assert_includes(src, '@enum.serialize')
+      refute_includes(src, 'checked_serialize(@enum)')
+      T::Props::GeneratedCodeValidation.validate_serialize(src)
+
+      # Deserialize emission is unchanged (external decoders reuse it).
+      deser_src = EnumStruct.decorator.send(:generate_deserialize_source).to_s
+      assert_includes(deser_src, "#{MyEnum}.deserialize(val)")
+    end
+
+    it 'keeps checked_serialize for enums that override instance serialize' do
+      overriding_enum = Class.new(T::Enum) do
+        def serialize
+          {code: super}
+        end
+      end
+      overriding_enum.enums { overriding_enum.const_set(:A, overriding_enum.new) }
+      struct = Class.new(T::Struct) do
+        prop :e, overriding_enum
+      end
+
+      src = struct.decorator.send(:generate_serialize_source).to_s
+      assert_includes(src, 'checked_serialize')
+
+      # And the per-call validation still raises for the non-scalar value.
+      e = assert_raises(TypeError) do
+        struct.new(e: overriding_enum.values.fetch(0)).serialize
+      end
+      assert_includes(e.message, 'did not serialize to a valid scalar type')
+    end
+
+    it 'keeps checked_serialize for enums with non-scalar serialized values' do
+      nonscalar_enum = Class.new(T::Enum)
+      nonscalar_enum.enums { nonscalar_enum.const_set(:A, nonscalar_enum.new([1, [2]])) }
+      struct = Class.new(T::Struct) do
+        prop :e, nonscalar_enum
+      end
+
+      src = struct.decorator.send(:generate_serialize_source).to_s
+      assert_includes(src, 'checked_serialize')
+    end
   end
 
   class SuperStruct

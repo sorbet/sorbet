@@ -75,6 +75,17 @@ module T::Props
             nil
           elsif raw < T::Props::Serializable
             handle_serializable_subtype(varname, raw, mode)
+          elsif raw < ::T::Enum && Serialize === mode && eligible_enum_serialize?(T.unsafe(raw))
+            # Fast path: a plain enum's serialize is a frozen-ivar read whose
+            # value set was checked scalar at codegen time below, so the
+            # checked_serialize machinery (T.cast singleton walk, class-method
+            # guards, per-call valid_serialization? scan) validates nothing
+            # that can still vary. Ineligible enums (serialize overrides,
+            # non-scalar values, mid-`enums do` codegen) fall through to the
+            # checked path; Deserialize mode always falls through, keeping
+            # its emitted source byte-identical (external BSON decoders
+            # consume those snippets).
+            "#{varname}.serialize"
           elsif raw.singleton_class < T::Props::CustomType
             handle_custom_type(varname, T.unsafe(raw), mode)
           elsif T::Configuration.scalar_types.include?(raw.name)
@@ -162,6 +173,27 @@ module T::Props
         else
           T.absurd(mode)
         end
+      end
+
+      # Whether an enum-typed prop may serialize via a direct `.serialize`
+      # call instead of T::Props::CustomType.checked_serialize. Evaluated
+      # once per prop at codegen time; any failure degrades to the checked
+      # path -- never raises (e.g. enums with non-scalar serialized values,
+      # or scalar_types not yet configured).
+      sig { params(type: T.untyped).returns(T::Boolean).checked(:never) }
+      private_class_method def self.eligible_enum_serialize?(type)
+        # Guards `type.values` below, and props whose codegen somehow runs
+        # mid-`enums do`.
+        return false unless type.fully_initialized?
+        # An instance-level serialize override may return dynamic values that
+        # only the per-call checked path validates.
+        return false unless type.instance_method(:serialize).owner.equal?(::T::Enum)
+        # checked_serialize dispatches through the class-level serialize, so
+        # an override of it is currently honored and must stay on that path.
+        return false unless type.singleton_class.instance_method(:serialize).owner.equal?(::T::Enum.singleton_class)
+        # Instances are frozen once bound, so a scalar value set is immutable
+        # after this check.
+        type.values.all? { |v| T::Props::CustomType.valid_serialization?(v.serialize) }
       end
 
       sig { params(varname: String, type: T::Module[T.anything], mode: ModeType).returns(String).checked(:never) }
