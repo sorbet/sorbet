@@ -186,6 +186,10 @@ module T
   # Compared to `T.let`, `T.cast` is _trusted_ by static system.
   def self.cast(value, type, checked: true)
     return value unless checked
+    # Inlined happy path for Module type literals (e.g. `T.cast(x, Foo)`),
+    # hoisted out of Private::Casts.cast to skip its call frame. Failures
+    # and non-Module type shapes take the full path below.
+    return value if ::Module === type && value.is_a?(type)
 
     Private::Casts.cast(value, type, "T.cast")
   end
@@ -201,6 +205,8 @@ module T
   # doesn't match the type.
   def self.let(value, type, checked: true)
     return value unless checked
+    # Inlined happy path for Module type literals; see T.cast.
+    return value if ::Module === type && value.is_a?(type)
 
     Private::Casts.cast(value, type, "T.let")
   end
@@ -220,6 +226,8 @@ module T
   # doesn't match the type (this is the default).
   def self.bind(value, type, checked: true)
     return value unless checked
+    # Inlined happy path for Module type literals; see T.cast.
+    return value if ::Module === type && value.is_a?(type)
 
     Private::Casts.cast(value, type, "T.bind")
   end
@@ -230,6 +238,8 @@ module T
   # runtime if the value doesn't match the type.
   def self.assert_type!(value, type, checked: true)
     return value unless checked
+    # Inlined happy path for Module type literals; see T.cast.
+    return value if ::Module === type && value.is_a?(type)
 
     Private::Casts.cast(value, type, "T.assert_type!")
   end
