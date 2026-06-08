@@ -121,6 +121,14 @@ module T::Types
         EMPTY_ARRAY = [].freeze
         private_constant :EMPTY_ARRAY
 
+        # Two-level pool of SimplePairUnion instances, keyed on the pair of
+        # raw modules (outer map on type_a's raw_type, inner map on type_b's),
+        # which fully determine a SimplePairUnion's state. Both levels are
+        # weak-keyed and weak-valued, so neither modules nor pooled unions
+        # leak; entries dropped by GC are transparently rebuilt through the
+        # constructor on the next miss.
+        @simple_pair_cache = ObjectSpace::WeakMap.new
+
         # Try to use `to_nilable` on a type to get memoization, or failing that
         # try to at least use SimplePairUnion to get faster init and typechecking.
         #
@@ -145,14 +153,36 @@ module T::Types
           begin
             # The `equal?` checks are an identity fast path: NIL_TYPE is the pooled
             # `coerce(NilClass)` instance, so it hits on every normal `T.nilable` call.
-            # The `==` fallbacks preserve semantics for hand-constructed
-            # `Simple.new(NilClass)` instances that bypass the pool.
-            if type_b.equal?(T::Utils::Nilable::NIL_TYPE) || type_b == T::Utils::Nilable::NIL_TYPE
+            if type_b.equal?(T::Utils::Nilable::NIL_TYPE)
               type_a.to_nilable
-            elsif type_a.equal?(T::Utils::Nilable::NIL_TYPE) || type_a == T::Utils::Nilable::NIL_TYPE
+            elsif type_a.equal?(T::Utils::Nilable::NIL_TYPE)
               type_b.to_nilable
             else
-              T::Private::Types::SimplePairUnion.new(type_a, type_b)
+              raw_a = type_a.raw_type
+              raw_b = type_b.raw_type
+              inner = @simple_pair_cache[raw_a]
+              cached = inner && inner[raw_b]
+              if cached
+                # A hit can skip the `==` nil checks below: pairs with a
+                # member `==` NIL_TYPE are routed to `to_nilable` before
+                # construction and so are never stored.
+                cached
+              # The `==` fallbacks preserve semantics for hand-constructed
+              # `Simple.new(NilClass)` instances that bypass the pool.
+              elsif type_b == T::Utils::Nilable::NIL_TYPE
+                type_a.to_nilable
+              elsif type_a == T::Utils::Nilable::NIL_TYPE
+                type_b.to_nilable
+              else
+                # Stored only after successful construction, so the
+                # DuplicateType outcome below is never cached. A racy
+                # double-init here is benign: both instances behave
+                # identically (same raw module pair).
+                pair = T::Private::Types::SimplePairUnion.new(type_a, type_b)
+                inner ||= (@simple_pair_cache[raw_a] = ObjectSpace::WeakMap.new)
+                inner[raw_b] = pair
+                pair
+              end
             end
           rescue T::Private::Types::SimplePairUnion::DuplicateType
             # Slow path
