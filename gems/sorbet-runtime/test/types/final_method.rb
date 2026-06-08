@@ -505,4 +505,78 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
     end
     assert_includes(err.message, "The syntax for declaring a method final is `sig(:final) {...}`, not `sig {final. ...}`")
   end
+
+  it 'does not drop signatures when _check_final_ancestors is triggered but finds no violation' do
+    Class.new do
+      extend T::Sig
+      sig(:final) { returns(String) }
+      def foo = "unrelated"
+    end
+
+    parent = Class.new do
+      extend T::Sig
+      sig(:final) { returns(String) }
+      def some_other_final_method = "hello"
+    end
+
+    child = Class.new(parent) do
+      sig { returns(String) }
+      def foo = "world"
+    end
+
+    sig = T::Utils.signature_for_method(child.instance_method(:foo))
+    refute_nil(sig)
+    assert_equal(:foo, sig.method_name)
+  end
+
+  it 'does not store sig when a swallowed final violation occurs' do
+    parent = Class.new do
+      extend T::Sig
+      sig(:final) { returns(String) }
+      def foo = "parent"
+    end
+
+    T::Configuration.sig_validation_error_handler = lambda do |error, opts|
+      # no-op to swallow the final error
+    end
+
+    begin
+      child = Class.new(parent) do
+        extend T::Sig
+        sig { returns(String) }
+        def foo = "child"
+      end
+    ensure
+      T::Configuration.sig_validation_error_handler = nil
+    end
+
+    sig = T::Utils.signature_for_method(child.instance_method(:foo))
+    assert_nil(sig)
+  end
+
+  it 'reports all final violations to the handler when including a module with multiple overrides' do
+    mod = Module.new do
+      def foo = "m2"
+      def bar = "m2"
+    end
+
+    violations = []
+    T::Configuration.sig_validation_error_handler = lambda do |error, _opts|
+      violations << error
+    end
+
+    Class.new do
+      extend T::Sig
+      sig(:final) { returns(String) }
+      def foo = "m1"
+      sig(:final) { returns(String) }
+      def bar = "m1"
+
+      include mod
+    end
+
+    assert_equal(2, violations.length)
+  ensure
+    T::Configuration.sig_validation_error_handler = nil
+  end
 end
