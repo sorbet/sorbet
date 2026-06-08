@@ -84,13 +84,13 @@ module T::Private::Methods::CallValidation
     # This formulation avoids a type error without introducing extra method calls or local vars
     can_skip_block_type = method_sig.block_type&.valid?(nil) != false
 
-    ok_for_fast_path = has_fixed_arity && can_skip_block_type && !method_sig.bind && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
+    ok_for_fast_path = has_fixed_arity && can_skip_block_type && !method_sig.bind && method_sig.arg_types.length < 7 && is_allowed_to_have_fast_path
 
     # Like `ok_for_fast_path`, but for the specialized wrappers below, each of
     # which supports exactly one extra call shape (kwargs, a required block, or
     # optional positional args) on top of what the fast/medium wrappers support.
     ok_for_specialized_path = !ok_for_fast_path && !method_sig.bind && method_sig.rest_type.nil? &&
-      method_sig.keyrest_type.nil? && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
+      method_sig.keyrest_type.nil? && method_sig.arg_types.length < 7 && is_allowed_to_have_fast_path
 
     kwargs_path = ok_for_specialized_path && can_skip_block_type && !method_sig.kwarg_types.empty? &&
       parameters.all? { |(kind, _name)| kind == :req || kind == :key || kind == :keyreq || kind == :block }
@@ -188,6 +188,21 @@ module T::Private::Methods::CallValidation
                                     arg_types[1][1],
                                     arg_types[2][1],
                                     arg_types[3][1])
+    when 5
+      create_validator_method_kwargs5(mod, original_method, method_sig, original_visibility, return_type, kwarg_types,
+                                    arg_types[0][1],
+                                    arg_types[1][1],
+                                    arg_types[2][1],
+                                    arg_types[3][1],
+                                    arg_types[4][1])
+    when 6
+      create_validator_method_kwargs6(mod, original_method, method_sig, original_visibility, return_type, kwarg_types,
+                                    arg_types[0][1],
+                                    arg_types[1][1],
+                                    arg_types[2][1],
+                                    arg_types[3][1],
+                                    arg_types[4][1],
+                                    arg_types[5][1])
     else
       raise 'should not happen'
     end
@@ -222,6 +237,21 @@ module T::Private::Methods::CallValidation
                                     arg_types[1][1],
                                     arg_types[2][1],
                                     arg_types[3][1])
+    when 5
+      create_validator_method_with_block5(mod, original_method, method_sig, original_visibility, return_type, block_type,
+                                    arg_types[0][1],
+                                    arg_types[1][1],
+                                    arg_types[2][1],
+                                    arg_types[3][1],
+                                    arg_types[4][1])
+    when 6
+      create_validator_method_with_block6(mod, original_method, method_sig, original_visibility, return_type, block_type,
+                                    arg_types[0][1],
+                                    arg_types[1][1],
+                                    arg_types[2][1],
+                                    arg_types[3][1],
+                                    arg_types[4][1],
+                                    arg_types[5][1])
     else
       raise 'should not happen'
     end
@@ -235,7 +265,7 @@ module T::Private::Methods::CallValidation
     # trampoline to reduce stack frame size
     arg_types = method_sig.arg_types
     arg_count = arg_types.length
-    if arg_count > 4 || method_sig.req_arg_count >= arg_count
+    if arg_count > 6 || method_sig.req_arg_count >= arg_count
       raise 'should not happen'
     end
     send(
@@ -293,7 +323,7 @@ module T::Private::Methods::CallValidation
     end
   RUBY
 
-  (0..4).each do |arity|
+  (0..6).each do |arity|
     args = (0...arity).map { |i| "arg#{i}, " }.join
     type_params = (0...arity).map { |i| ", arg#{i}_type" }.join
     arg_checks = (0...arity).map { |i| arg_check.call(i) }.join
@@ -347,7 +377,7 @@ module T::Private::Methods::CallValidation
     RUBY
   end
 
-  (1..4).each do |total|
+  (1..6).each do |total|
     (0...total).each do |req|
       params = (0...req).map { |i| "arg#{i}, " }.join +
         (req...total).map { |i| "arg#{i} = ARG_NOT_PROVIDED, " }.join

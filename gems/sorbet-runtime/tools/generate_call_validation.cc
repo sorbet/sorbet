@@ -42,7 +42,7 @@ string_view typeKindToString(TypeKind kind) {
     }
 }
 
-constexpr size_t MAX_ARITY = 4;
+constexpr size_t MAX_ARITY = 6;
 
 variant<Options, int> parseArgs(int argc, char **argv) {
     cxxopts::Options options("generate_call_validation");
