@@ -19,11 +19,6 @@ module T::Private
           return value unless coerced_type
         end
 
-        # error_message_for_obj is valid? plus error_message; calling valid?
-        # directly skips the wrapper dispatch on the happy path. The failure
-        # path below computes the identical error string.
-        return value if coerced_type.valid?(value)
-
         error = coerced_type.error_message_for_obj(value)
         return value unless error
 
