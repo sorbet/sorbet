@@ -41,3 +41,7 @@ m4 = "foo".match("o", 1) do |m|
 end
 T.assert_type!(m3, T.nilable(T::Array[MatchData]))
 T.assert_type!(m4, T.nilable(T::Array[MatchData]))
+
+# append_as_bytes
+T.assert_type!("".append_as_bytes("a", 0x62), String)
+"".append_as_bytes(:not_bytes) # error: Expected `T.any(String, Integer)` but found `Symbol(:not_bytes)` for argument `objects`
