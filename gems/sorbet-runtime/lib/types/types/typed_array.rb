@@ -13,8 +13,20 @@ module T::Types
     end
 
     # overrides Base
+    #
+    # Implemented directly (rather than `obj.is_a?(Array) && super`) so the
+    # per-call path skips the super dispatch and TypedEnumerable's
+    # `is_a?(Enumerable)` + `case obj` re-classification.
     def recursively_valid?(obj)
-      obj.is_a?(Array) && super
+      return false unless obj.is_a?(Array)
+      type_ = self.type
+      len = obj.length
+      i = 0
+      while i < len
+        return false unless type_.recursively_valid?(obj[i])
+        i += 1
+      end
+      true
     end
 
     # overrides Base
@@ -57,6 +69,14 @@ module T::Types
       end
 
       def valid?(obj)
+        obj.is_a?(Array)
+      end
+
+      # overrides TypedArray
+      #
+      # Every element trivially satisfies T.untyped, so the inherited O(n)
+      # element walk is pure overhead.
+      def recursively_valid?(obj)
         obj.is_a?(Array)
       end
 

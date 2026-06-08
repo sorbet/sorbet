@@ -32,8 +32,20 @@ module T::Types
     end
 
     # overrides Base
+    #
+    # Implemented directly (rather than `obj.is_a?(Hash) && super`) so the
+    # per-call path checks against `keys`/`values` without re-deriving them
+    # through TypedEnumerable's `case obj` + FixedArray pair plumbing.
     def recursively_valid?(obj)
-      obj.is_a?(Hash) && super
+      return false unless obj.is_a?(Hash)
+      key_type = keys
+      value_type = values
+      obj.each_pair do |key, val|
+        # Some objects (I'm looking at you Rack::Utils::HeaderHash) don't
+        # iterate over a [key, value] array, so we can't just use the type.recursively_valid?(v)
+        return false if !key_type.recursively_valid?(key) || !value_type.recursively_valid?(val)
+      end
+      true
     end
 
     # overrides Base
@@ -51,6 +63,14 @@ module T::Types
       end
 
       def valid?(obj)
+        obj.is_a?(Hash)
+      end
+
+      # overrides TypedHash
+      #
+      # Every entry trivially satisfies T.untyped, so the inherited O(n)
+      # entry walk is pure overhead.
+      def recursively_valid?(obj)
         obj.is_a?(Hash)
       end
     end

@@ -67,11 +67,26 @@ module T::Types
 
     # overrides Base
     def recursively_valid?(obj)
-      ts = types
+      raw_types = @raw_simple_types
+      if raw_types.nil?
+        # Force lazy initialization, which also computes @raw_simple_types
+        types
+        raw_types = @raw_simple_types
+      end
       i = 0
-      while i < ts.length
-        return true if ts[i].recursively_valid?(obj)
-        i += 1
+      if raw_types
+        # For an all-Simple union, recursively_valid? and valid? coincide
+        # (Simple's recursively_valid? is exactly `obj.is_a?(raw_type)`).
+        while i < raw_types.length
+          return true if obj.is_a?(raw_types[i])
+          i += 1
+        end
+      else
+        ts = types
+        while i < ts.length
+          return true if ts[i].recursively_valid?(obj)
+          i += 1
+        end
       end
       false
     end

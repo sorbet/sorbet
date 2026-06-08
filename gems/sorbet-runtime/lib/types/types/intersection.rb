@@ -32,12 +32,24 @@ module T::Types
 
     # overrides Base
     def recursively_valid?(obj)
-      types.all? { |type| type.recursively_valid?(obj) }
+      ts = types
+      i = 0
+      while i < ts.length
+        return false unless ts[i].recursively_valid?(obj)
+        i += 1
+      end
+      true
     end
 
     # overrides Base
     def valid?(obj)
-      types.all? { |type| type.valid?(obj) }
+      ts = types
+      i = 0
+      while i < ts.length
+        return false unless ts[i].valid?(obj)
+        i += 1
+      end
+      true
     end
 
     # overrides Base

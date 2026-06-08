@@ -32,6 +32,14 @@ module T::Types
     end
 
     # overrides Base
+    #
+    # Identical to valid?; defined directly so the leaf-type hot path (every
+    # element check in a typed collection walk) skips the Base delegator frame.
+    def recursively_valid?(obj)
+      obj.is_a?(@raw_type)
+    end
+
+    # overrides Base
     def valid?(obj)
       obj.is_a?(@raw_type)
     end

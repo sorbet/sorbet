@@ -180,6 +180,14 @@ module T::Types
       def valid?(obj)
         obj.is_a?(Enumerable)
       end
+
+      # overrides TypedEnumerable
+      #
+      # Every element trivially satisfies T.untyped, so the inherited
+      # element walk is pure overhead.
+      def recursively_valid?(obj)
+        obj.is_a?(Enumerable)
+      end
     end
   end
 end

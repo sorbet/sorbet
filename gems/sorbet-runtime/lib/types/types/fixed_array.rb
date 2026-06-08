@@ -26,10 +26,12 @@ module T::Types
 
     # overrides Base
     def recursively_valid?(obj)
-      if obj.is_a?(Array) && obj.length == types.length
+      ts = types
+      len = ts.length
+      if obj.is_a?(Array) && obj.length == len
         i = 0
-        while i < types.length
-          if !types.fetch(i).recursively_valid?(obj[i])
+        while i < len
+          if !ts[i].recursively_valid?(obj[i])
             return false
           end
           i += 1
@@ -42,10 +44,12 @@ module T::Types
 
     # overrides Base
     def valid?(obj)
-      if obj.is_a?(Array) && obj.length == types.length
+      ts = types
+      len = ts.length
+      if obj.is_a?(Array) && obj.length == len
         i = 0
-        while i < types.length
-          if !types.fetch(i).valid?(obj[i])
+        while i < len
+          if !ts[i].valid?(obj[i])
             return false
           end
           i += 1
