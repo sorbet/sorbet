@@ -19,8 +19,8 @@ def example(parent)
     
   x = parent.case
   #          ^^^^ error: does not exist
-  #              ^ apply-completion: [C] item: 0
+  #              ^ apply-completion: [B] item: 0
 
   parent.
-  #      ^ apply-completion: [D] item: 7
+  #      ^ apply-completion: [C] item: 7
 end # error: unexpected token "end"

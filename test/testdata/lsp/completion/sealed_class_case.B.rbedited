@@ -17,15 +17,15 @@ def example(parent)
   #      ^^^ error: does not exist
   #         ^ apply-completion: [A] item: 0
     
-  x = parent.case
-  #          ^^^^ error: does not exist
-  #              ^ apply-completion: [C] item: 0
-
-  case parent
+  x = case parent
   when Child1${0}
   when Child2
   else
     T.absurd(parent)
   end
-  #      ^ apply-completion: [D] item: 7
+  #          ^^^^ error: does not exist
+  #              ^ apply-completion: [B] item: 0
+
+  parent.
+  #      ^ apply-completion: [C] item: 7
 end # error: unexpected token "end"
