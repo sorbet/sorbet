@@ -38,9 +38,11 @@ module T::Types
       return false unless obj.is_a?(Enumerable)
       case obj
       when Array
+        type_ = self.type
+        len = obj.count
         it = 0
-        while it < obj.count
-          return false unless type.recursively_valid?(obj[it])
+        while it < len
+          return false unless type_.recursively_valid?(obj[it])
           it += 1
         end
         true
