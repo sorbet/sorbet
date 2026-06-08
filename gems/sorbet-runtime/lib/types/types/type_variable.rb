@@ -32,7 +32,9 @@ module T::Types
     end
 
     def name
-      Untyped.new.name
+      # Same string Untyped#name returns, without allocating a throwaway
+      # Untyped instance per call.
+      "T.untyped"
     end
   end
 end

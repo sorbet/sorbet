@@ -2026,6 +2026,33 @@ module Opus::Types::Test
         name = T.all(String, klass).name
         assert_equal(name, "T.all(String)")
       end
+
+      it 'reflects a later name assignment for T.any/T.all with anonymous members' do
+        # An incomplete name (anonymous member) must not be memoized: once the
+        # module is assigned to a constant, name must reflect it. Three union
+        # members so this exercises T::Types::Union itself (a two-Simple
+        # T.any builds a SimplePairUnion, which never memoizes).
+        any_klass = Class.new
+        any_type = T.any(any_klass, String, Symbol)
+        assert_equal("T.any(String, Symbol)", any_type.name)
+
+        all_klass = Class.new
+        all_type = T.all(all_klass, String)
+        assert_equal("T.all(String)", all_type.name)
+
+        begin
+          TypesTest.const_set(:LateNamedAny, any_klass)
+          TypesTest.const_set(:LateNamedAll, all_klass)
+          assert_equal("T.any(Opus::Types::Test::TypesTest::LateNamedAny, String, Symbol)", any_type.name)
+          assert_equal("T.all(Opus::Types::Test::TypesTest::LateNamedAll, String)", all_type.name)
+
+          # And once complete, the name memoizes stably.
+          assert_equal(any_type.name, any_type.name)
+        ensure
+          TypesTest.send(:remove_const, :LateNamedAny)
+          TypesTest.send(:remove_const, :LateNamedAll)
+        end
+      end
     end
   end
 end

@@ -40,6 +40,15 @@ class T::Private::Types::SimplePairUnion < T::Types::Union
     ]
   end
 
+  # @override Union
+  #
+  # Recomputes via the inherited type_shortcuts rather than taking Union's
+  # @name memoization: that ivar would be this class's 4th, breaking the
+  # 40-byte-slot budget documented in #types, and #name is off the hot path.
+  def name
+    type_shortcuts(types)
+  end
+
   # overrides Union
   def unwrap_nilable
     a_nil = @raw_a.equal?(NilClass)

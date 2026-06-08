@@ -40,5 +40,25 @@ module T::Types
         false
       end
     end
+
+    module Private
+      module Pool
+        # Enum values are frozen singletons (bound in `enums do`), so they
+        # fully determine a TEnum and make perfect weak keys: inline call
+        # sites like `T.cast(x, MyEnum::A)` stop allocating a fresh TEnum
+        # per evaluation. Weak-keyed and weak-valued (the enum class retains
+        # its values via @values, so entries live as long as the class);
+        # GC-dropped entries transparently re-derive, racy writes are benign
+        # double-inits, as in Simple::Private::Pool.
+        @cache = ObjectSpace::WeakMap.new
+
+        def self.type_for_enum(val)
+          cached = @cache[val]
+          return cached if cached
+
+          @cache[val] = TEnum.new(val)
+        end
+      end
+    end
   end
 end

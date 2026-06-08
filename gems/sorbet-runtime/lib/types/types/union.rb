@@ -38,8 +38,21 @@ module T::Types
 
     # overrides Base
     def name
+      cached = @name
+      return cached if cached
+
       # Use the attr_reader here so we can override it in SimplePairUnion
-      type_shortcuts(types)
+      computed = type_shortcuts(types)
+      # Memoize only when every member contributed a name: a member backed
+      # by an anonymous module has a nil name (dropped by the compact in
+      # type_shortcuts), and memoizing the incomplete string would freeze it
+      # past the point where the module later gets named. (Simple#name's
+      # `||=` self-heals because its nil result is falsy; the computed
+      # string here is always truthy, hence the explicit check.)
+      if types.all? { |t| t.name }
+        @name = computed.freeze
+      end
+      computed
     end
 
     private def type_shortcuts(types)
@@ -50,14 +63,41 @@ module T::Types
         # is why we don't just move the `uniq` into `Private::Pool.union_of_types`).
         return types.fetch(0).name
       end
-      nilable = T::Utils.coerce(NilClass)
+      # NIL_TYPE is the pooled coerce(NilClass) instance; the `==` comparisons
+      # below (never equal?) keep matching hand-constructed Simple.new(NilClass)
+      # instances that bypass the pool. Single partition pass instead of
+      # any?+reject (which scanned twice and re-paid name-based == per scan).
+      nilable = T::Utils::Nilable::NIL_TYPE
+      has_nil = false
+      non_nil_types = []
+      types.each do |t|
+        if t == nilable
+          has_nil = true
+        else
+          non_nil_types << t
+        end
+      end
+      if has_nil
+        return "T.nilable(#{type_shortcuts(non_nil_types)})"
+      end
+
+      # The TrueClass/FalseClass coercions are hoisted below the nilable
+      # branch (which never used them).
       trueclass = T::Utils.coerce(TrueClass)
       falseclass = T::Utils.coerce(FalseClass)
-      if types.any? { |t| t == nilable }
-        remaining_types = types.reject { |t| t == nilable }
-        "T.nilable(#{type_shortcuts(remaining_types)})"
-      elsif types.any? { |t| t == trueclass } && types.any? { |t| t == falseclass }
-        remaining_types = types.reject { |t| t == trueclass || t == falseclass }
+      has_true = false
+      has_false = false
+      remaining_types = []
+      types.each do |t|
+        if t == trueclass
+          has_true = true
+        elsif t == falseclass
+          has_false = true
+        else
+          remaining_types << t
+        end
+      end
+      if has_true && has_false
         type_shortcuts([T::Private::Types::StringHolder.new("T::Boolean")] + remaining_types)
       else
         names = types.map(&:name).compact.sort

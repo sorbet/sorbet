@@ -27,7 +27,16 @@ module T::Types
 
     # overrides Base
     def name
-      "T.all(#{types.map(&:name).compact.sort.join(', ')})"
+      cached = @name
+      return cached if cached
+
+      names = types.map(&:name)
+      computed = "T.all(#{names.compact.sort.join(', ')})"
+      # Memoize only when every member contributed a name; see Union#name.
+      if !names.include?(nil)
+        @name = computed.freeze
+      end
+      computed
     end
 
     # overrides Base

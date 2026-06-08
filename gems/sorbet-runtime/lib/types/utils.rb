@@ -3,6 +3,8 @@
 
 module T::Utils
   module Private
+    # NB: any change here must be mirrored in T::Utils.coerce below, which is
+    # a specialized copy of this method (Module branch first, no check_val).
     def self.coerce_and_check_module_types(val, check_val, check_module_type)
       # rubocop:disable Style/CaseLikeIf
       if val.is_a?(T::Types::Base)
@@ -24,7 +26,7 @@ module T::Utils
       elsif val.is_a?(T::Private::Methods::DeclBuilder)
         T::Private::Methods.finalize_proc(val.decl)
       elsif val.is_a?(::T::Enum)
-        T::Types::TEnum.new(val)
+        T::Types::TEnum::Private::Pool.type_for_enum(val)
       elsif val.is_a?(::String)
         raise "Invalid String literal for type constraint. Must be an #{T::Types::Base}, a " \
               "class/module, or an array. Got a String with value `#{val}`."
@@ -37,8 +39,38 @@ module T::Utils
   end
 
   # Used to convert from a type specification to a `T::Types::Base`.
+  #
+  # Specialized copy of Private.coerce_and_check_module_types (NB: the two
+  # must be kept in sync; see the comment there): tests Module first, since
+  # coerce's dominant input is raw Module literals (every sig param/return
+  # and collection element type coerced at first-call finalization), and
+  # drops the per-call check_val test that is statically false here.
   def self.coerce(val)
-    Private.coerce_and_check_module_types(val, nil, false)
+    # rubocop:disable Style/CaseLikeIf
+    if val.is_a?(Module)
+      T::Types::Simple::Private::Pool.type_for_module(val)
+    elsif val.is_a?(T::Types::Base)
+      if val.is_a?(T::Private::Types::TypeAlias)
+        val.aliased_type
+      else
+        val
+      end
+    elsif val.is_a?(::Array)
+      T::Types::FixedArray.new(val)
+    elsif val.is_a?(::Hash)
+      T::Types::FixedHash.new(val)
+    elsif val.is_a?(T::Private::Methods::DeclBuilder)
+      T::Private::Methods.finalize_proc(val.decl)
+    elsif val.is_a?(::T::Enum)
+      T::Types::TEnum::Private::Pool.type_for_enum(val)
+    elsif val.is_a?(::String)
+      raise "Invalid String literal for type constraint. Must be an #{T::Types::Base}, a " \
+            "class/module, or an array. Got a String with value `#{val}`."
+    else
+      raise "Invalid value for type constraint. Must be an #{T::Types::Base}, a " \
+            "class/module, or an array. Got a `#{val.class}`."
+    end
+    # rubocop:enable Style/CaseLikeIf
   end
 
   # Dynamically confirm that `value` is recursively a valid value of
