@@ -488,19 +488,28 @@ module T::Private::Methods
   end
 
   def self.run_all_sig_blocks(force_type_init: true)
-    loop do
-      key = nil
-      # Peek the oldest pending key. Don't use Hash#first for this: it goes
-      # through Enumerable and allocates an enumerator plus a [key, value]
-      # pair per loop iteration; each_key with an immediate break allocates
-      # nothing. Iteration is in insertion order, so sig blocks still run in
-      # global declaration order.
-      @sig_wrappers.each_key do |k|
-        key = k
-        break
+    # Mark this (fiber-local) context as eager, bulk wrapping: compiled
+    # dispatch defers its per-method source compilation behind a cheap
+    # first-call shim, so that eagerly-wrapped-but-never-called methods don't
+    # slow down boot (see CallValidation::Compiled). The counter nests.
+    Thread.current[:__t_sig_eager_depth] = (Thread.current[:__t_sig_eager_depth] || 0) + 1
+    begin
+      loop do
+        key = nil
+        # Peek the oldest pending key. Don't use Hash#first for this: it goes
+        # through Enumerable and allocates an enumerator plus a [key, value]
+        # pair per loop iteration; each_key with an immediate break allocates
+        # nothing. Iteration is in insertion order, so sig blocks still run in
+        # global declaration order.
+        @sig_wrappers.each_key do |k|
+          key = k
+          break
+        end
+        break unless key
+        run_sig_block_for_key(key, force_type_init: force_type_init)
       end
-      break unless key
-      run_sig_block_for_key(key, force_type_init: force_type_init)
+    ensure
+      Thread.current[:__t_sig_eager_depth] -= 1
     end
   end
 

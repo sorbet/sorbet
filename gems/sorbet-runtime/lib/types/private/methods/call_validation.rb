@@ -16,11 +16,20 @@ module T::Private::Methods::CallValidation
   # @param method_sig [T::Private::Methods::Signature]
   # @return [UnboundMethod] the new wrapper method (or the original one if we didn't wrap it)
   def self.wrap_method_if_needed(mod, method_sig, original_method)
+    # Re-entry gate for methods that already have a compiled wrapper (or a
+    # recorded install decision) in place: stale pre-wrap method handles and
+    # repeated public-API wraps re-enter here (via `unwrap_method`), and must
+    # not re-install anything (see Compiled.intercept_reentry).
+    if (live_method = Compiled.intercept_reentry(mod, method_sig, original_method))
+      return live_method
+    end
     original_visibility = T::Private::ClassUtils.visibility_method_name(mod, method_sig.method_name)
     if method_sig.mode == T::Private::Methods::Modes.abstract
       create_abstract_wrapper(mod, method_sig.method_name, original_visibility)
+      Compiled.note_install_decision(mod, method_sig.method_name, original_method, method_sig, original_visibility)
     # Do nothing in this case; this method was not wrapped in _on_method_added.
     elsif method_sig.defined_raw
+      Compiled.note_install_decision(mod, method_sig.method_name, original_method, method_sig, original_visibility)
     # Note, this logic is duplicated (intentionally, for micro-perf) at `Methods._on_method_added`,
     # make sure to keep changes in sync.
     # This is a trapdoor point for each method:
@@ -35,6 +44,7 @@ module T::Private::Methods::CallValidation
           T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility, original_method)
         end
       end
+      Compiled.note_install_decision(mod, method_sig.method_name, original_method, method_sig, original_visibility)
     end
     # Return the newly created method (or the original one if we didn't replace it)
     mod.instance_method(method_sig.method_name)
@@ -72,6 +82,20 @@ module T::Private::Methods::CallValidation
   end
 
   def self.create_validator_method(mod, original_method, method_sig, original_visibility)
+    # Source-compiled dispatch for eligible (fixed-arity positional) methods:
+    # a plain `def` wrapper with inlined checks and a direct call to a
+    # stashed copy of the original method, instead of a `define_method`
+    # wrapper dispatching via the much slower `UnboundMethod#bind_call`.
+    # Anything ineligible (and any compile failure) falls back to the
+    # existing validator families below.
+    if Compiled.try_compile(mod, original_method, method_sig, original_visibility)
+      return
+    end
+    install_family_validator(mod, original_method, method_sig, original_visibility)
+    Compiled.note_install_decision(mod, method_sig.method_name, original_method, method_sig, original_visibility)
+  end
+
+  def self.install_family_validator(mod, original_method, method_sig, original_visibility)
     # `method_sig.parameters` was saved off of `original_method.parameters` when
     # the sig was built; reusing it avoids re-allocating the parameters list.
     parameters = method_sig.parameters
@@ -647,3 +671,4 @@ module T::Private::Methods::CallValidation
 end
 
 require_relative './call_validation_2_7'
+require_relative './call_validation_compiled'

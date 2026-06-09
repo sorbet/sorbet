@@ -10,6 +10,13 @@ module T::Props
       ValueValidationProc = T.type_alias { T.proc.params(val: T.untyped).void }
       ValidateProc = T.type_alias { T.proc.params(prop: Symbol, value: T.untyped).void }
 
+      # The gem's lib root (with a trailing separator, so it matches as a
+      # directory prefix), for skipping gem-internal frames when attributing
+      # a setter type error to its caller. Same technique as
+      # `T::Private::Methods::SORBET_RUNTIME_LIB_PATH`.
+      LIB_PATH_PREFIX = T.let(File.expand_path("../../..", T.must(__dir__)) + File::SEPARATOR, String)
+      private_constant(:LIB_PATH_PREFIX)
+
       sig do
         params(
           klass: T.all(T::Module[T.anything], T::Props::ClassMethods),
@@ -236,7 +243,21 @@ module T::Props
         base_message = "Can't set #{klass.name}.#{prop} to #{val.inspect} (instance of #{val.class}) - need a #{type}"
 
         pretty_message = "Parameter '#{prop}': #{base_message}\n"
-        caller_loc = caller_locations.find { |l| !l.to_s.include?('sorbet-runtime/lib/types/props') }
+        # Attribute the error to the first frame OUTSIDE this gem. Frames
+        # inside the gem can never be the user call site: this skips the
+        # interpreted and compiled props frames (the original
+        # `lib/types/props` substring filter), and also the sig-validation
+        # wrapper frames for `raise_pretty_error` itself -- this method is
+        # sigged, so once its own sig wraps, a wrapper frame (a bmethod from
+        # the call_validation_2_7.rb families, the `validate_call`
+        # interpreter on the first call, or a source-compiled wrapper at a
+        # `call_validation_compiled.rb(compiled:...)` pseudo-path) sits
+        # directly above this one and must never be reported as "Caller".
+        # The legacy substring check is kept for vendored copies whose
+        # computed lib root may not prefix-match.
+        caller_loc = caller_locations.find do |l|
+          !l.path.to_s.start_with?(LIB_PATH_PREFIX) && !l.to_s.include?('sorbet-runtime/lib/types/props')
+        end
         if caller_loc
           pretty_message += "Caller: #{caller_loc.path}:#{caller_loc.lineno}\n"
         end

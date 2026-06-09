@@ -85,6 +85,17 @@ module T::Utils
     T::Private::Methods.run_all_sig_blocks(force_type_init: force_type_init)
   end
 
+  # Compiles the source-compiled sig wrappers for every method that
+  # `run_all_sig_blocks` wrapped but that has not been called yet. Like
+  # `T::Props::HasLazilySpecializedMethods.eagerly_define_lazy_methods!`,
+  # this is an explicit hook that works even after `disable_lazy_evaluation!`
+  # (all of its inputs are in version control). Hardened deployments that
+  # want compiled sig dispatch should call this after `run_all_sig_blocks`
+  # and before `disable_lazy_evaluation!`.
+  def self.compile_pending_sig_wrappers!
+    T::Private::Methods::CallValidation::Compiled.compile_pending!
+  end
+
   # Return the underlying type for a type alias. Otherwise returns type.
   def self.resolve_alias(type)
     case type

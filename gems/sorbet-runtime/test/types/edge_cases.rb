@@ -968,8 +968,16 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     assert_equal("protected", instance.send(:a_protected_method))
     assert_equal("private", instance.send(:a_private_method))
 
-    # We are not interested in repeated method redefinitions
-    unique_method_redefinitions = method_redefinitions.uniq
+    # We are not interested in repeated method redefinitions. Compiled sig
+    # dispatch also stashes the original method under a private
+    # `__t_sig_orig_*` alias (visible to `method_added` observers, always
+    # private from the beginning); filter those internal defines out, but
+    # assert their visibility was right too.
+    internal, user_visible = method_redefinitions.partition do |(name, _visibility)|
+      name.start_with?("__t_sig_orig_")
+    end
+    assert(internal.all? { |(_name, visibility)| visibility == :private })
+    unique_method_redefinitions = user_visible.uniq
 
     assert_equal([
       %i[a_private_method private],
