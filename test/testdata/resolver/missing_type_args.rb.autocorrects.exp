@@ -43,6 +43,6 @@ class A::B
     Elem = type_member
   end
 
-  X = T.let(C::D.new, A::B::C::D[T.untyped]) # error: Malformed type declaration. Generic class without type arguments `A::B::C::D`
+  X = T.let(C::D.new, C::D[T.untyped]) # error: Malformed type declaration. Generic class without type arguments `A::B::C::D`
 end
 # ------------------------------
