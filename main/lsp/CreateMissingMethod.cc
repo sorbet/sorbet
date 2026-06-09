@@ -62,13 +62,13 @@ string formatNewMethod(const core::GlobalState &gs, uint32_t indentLength, const
         }
         paramList += fmt::format("{}:", paramNames[numPosArgs + i]);
     }
-    string newText =
-        fmt::format("\n"
-                    "{}sig {{ params({}).returns(T.untyped) }}\n"
-                    "{}def {}({})\n"
-                    "{}Kernel.raise NotImplementedError\n"
-                    "{}end\n",
-                    indent, paramSig, indent, name.shortName(gs), paramList, string(indentLength + 2, ' '), indent);
+    string newText = fmt::format("\n"
+                                 "\n"
+                                 "{}sig {{ params({}).returns(T.untyped) }}\n"
+                                 "{}def {}({})\n"
+                                 "{}  Kernel.raise NotImplementedError\n"
+                                 "{}end",
+                                 indent, paramSig, indent, name.shortName(gs), paramList, indent, indent);
     return newText;
 }
 
@@ -136,6 +136,7 @@ vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerD
 
                                                                  const LSPConfiguration &config,
                                                                  const core::lsp::SendResponse &resp) {
+    // config.logger->debug("getCreateMissingMethodEdits");
     auto &gs = typechecker.state();
     auto file = resp.file;
     auto resolvedTree = typechecker.getResolved(file);
@@ -144,6 +145,7 @@ vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerD
     auto enclosingMethodRef = resp.enclosingMethod;
     auto enclosingMethod = enclosingMethodRef.data(gs);
     auto enclosingMethodDeclLoc = enclosingMethod->loc();
+    // config.logger->debug("enclosingMethodDeclLoc: {}", enclosingMethodDeclLoc.toString(gs));
     if (!enclosingMethodRef.exists()) {
         // TODO(bshu) handle this case
         return {};
@@ -154,9 +156,11 @@ vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerD
     if (finder.result == nullptr) {
         return {};
     }
+    // config.logger->debug("finder.result loc: {}", core::Loc(file, finder.result->loc).toString(gs));
     auto enclosingMethodLoc = core::Loc(file, finder.result->loc);
     auto [_, enclosingMethodEnd] = enclosingMethodLoc.toDetails(gs);
-    auto insertDetail = core::Loc::Detail{enclosingMethodEnd.line + 1, 1};
+    // auto insertDetail = core::Loc::Detail{enclosingMethodEnd.line, enclosingMethodEnd.column};
+    auto insertDetail = enclosingMethodEnd;
     auto insertLoc = core::Loc::fromDetails(gs, enclosingMethodLoc.file(), insertDetail, insertDetail);
     if (!insertLoc.has_value()) {
         return {};
@@ -168,6 +172,7 @@ vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerD
     if (sendFinder.result == nullptr) {
         return {};
     }
+    // config.logger->debug("sendFinder.result loc: {}", core::Loc(file, sendFinder.result->loc).toString(gs));
 
     auto paramNames = getParamNames(gs, "param", *sendFinder.result);
     auto newText = formatNewMethod(gs, indentLength, resp.originalName, paramNames, resp.argTypes,
