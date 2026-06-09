@@ -31,7 +31,7 @@ struct SendFinder {
 };
 
 string formatNewMethod(const core::GlobalState &gs, uint32_t indentLength, const core::NameRef name,
-                       vector<optional<core::NameRef>> paramSuggestions, absl::Span<const core::TypePtr> argTypes,
+                       const vector<string> &paramNames, absl::Span<const core::TypePtr> argTypes,
                        uint64_t numPosArgs) {
     string indent(indentLength, ' ');
     string paramSig = "";
@@ -39,26 +39,27 @@ string formatNewMethod(const core::GlobalState &gs, uint32_t indentLength, const
         if (i != 0) {
             paramSig += ", ";
         }
-        paramSig += fmt::format("{}: {}",
-                                paramSuggestions[i].has_value() ? paramSuggestions[i].value().shortName(gs)
-                                                                : fmt::format("param{}", i),
-                                argTypes[i].show(gs, core::ShowOptions{}.withUseValidSyntax()));
+        paramSig +=
+            fmt::format("{}: {}", paramNames[i], argTypes[i].show(gs, core::ShowOptions{}.withUseValidSyntax()));
     }
     string paramList = "";
     for (uint64_t i = 0; i < numPosArgs; i++) {
         if (i != 0) {
             paramList += ", ";
         }
-        paramList +=
-            paramSuggestions[i].has_value() ? paramSuggestions[i].value().shortName(gs) : fmt::format("param{}", i);
+        paramList += paramNames[i];
     }
-    string newText = fmt::format(
-        "\n{}sig {{ params({}).returns(T.untyped) }}\n{}def {}({})\n{}Kernel.raise NotImplementedError\n{}end\n",
-        indent, paramSig, indent, name.shortName(gs), paramList, string(indentLength + 2, ' '), indent);
+    string newText =
+        fmt::format("\n"
+                    "{}sig {{ params({}).returns(T.untyped) }}\n"
+                    "{}def {}({})\n"
+                    "{}Kernel.raise NotImplementedError\n"
+                    "{}end\n",
+                    indent, paramSig, indent, name.shortName(gs), paramList, string(indentLength + 2, ' '), indent);
     return newText;
 }
 
-optional<core::NameRef> getParamSuggestion(const core::GlobalState &gs, const ast::ExpressionPtr &arg) {
+optional<core::NameRef> getParamName(const ast::ExpressionPtr &arg) {
     if (auto local = ast::cast_tree<ast::Local>(arg)) {
         return local->localVariable._name;
     } else {
@@ -66,19 +67,28 @@ optional<core::NameRef> getParamSuggestion(const core::GlobalState &gs, const as
     }
 }
 
-vector<optional<core::NameRef>> getParamSuggestions(const core::GlobalState &gs, const ast::Send &send) {
-    vector<optional<core::NameRef>> suggestions;
-    UnorderedSet<core::NameRef> seen;
+string getFreshName(UnorderedMap<string, uint32_t> &seen, string_view name) {
+    if (seen.contains(name)) {
+        seen[name]++;
+        return fmt::format("{}{}", name, seen[name]);
+    } else {
+        seen[name] = 0;
+        return string(name);
+    }
+}
+
+vector<string> getParamNames(const core::GlobalState &gs, const string &defaultName, const ast::Send &send) {
+    vector<string> paramNames;
+    UnorderedMap<string, uint32_t> seen;
     for (auto &arg : send.posArgs()) {
-        auto suggestion = getParamSuggestion(gs, arg);
-        if (suggestion.has_value() && !seen.contains(suggestion.value())) {
-            seen.insert(suggestion.value());
-            suggestions.emplace_back(suggestion.value());
+        auto name = getParamName(arg);
+        if (name.has_value()) {
+            paramNames.emplace_back(getFreshName(seen, name.value().shortName(gs)));
         } else {
-            suggestions.emplace_back(nullopt);
+            paramNames.emplace_back(getFreshName(seen, defaultName));
         }
     }
-    return suggestions;
+    return paramNames;
 }
 
 } // namespace
@@ -138,9 +148,8 @@ vector<unique_ptr<TextDocumentEdit>> getAddMissingMethodEdits(LSPTypecheckerDele
         return {};
     }
 
-    vector<optional<core::NameRef>> paramSuggestions = getParamSuggestions(gs, *sendFinder.result);
-    auto newText =
-        formatNewMethod(gs, indentLength, resp.originalName, paramSuggestions, resp.argTypes, resp.numPosArgs);
+    auto paramNames = getParamNames(gs, "param", *sendFinder.result);
+    auto newText = formatNewMethod(gs, indentLength, resp.originalName, paramNames, resp.argTypes, resp.numPosArgs);
     vector<unique_ptr<TextEdit>> edits;
     edits.emplace_back(make_unique<TextEdit>(Range::fromLoc(gs, insertLoc.value()), newText));
 
