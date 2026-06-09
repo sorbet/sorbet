@@ -194,8 +194,7 @@ module T::Private::Methods
       return
     end
 
-    current_declaration = T::Private::DeclState.current.active_declaration
-    T::Private::DeclState.current.reset!
+    current_declaration = T::Private::DeclState.current.consume!
 
     if T::Private::Final.final_module?(mod) && (current_declaration.nil? || !current_declaration.final)
       raise "#{mod} was declared as final but its method `#{method_name}` was not declared as final"
@@ -473,12 +472,22 @@ module T::Private::Methods
   end
 
   def self.run_all_sig_blocks(force_type_init: true)
+    current_declaration = T::Private::DeclState.current.active_declaration
+    if !current_declaration.nil?
+      T::Private::DeclState.current.reset!
+      raise "Cannot call `run_all_sig_blocks` while there is a pending `sig` block in #{current_declaration.mod} at #{current_declaration.loc}"
+    end
+
     loop do
       first_wrapper = @sig_wrappers.first
       break unless first_wrapper
       key, = first_wrapper
       run_sig_block_for_key(key, force_type_init: force_type_init)
     end
+
+    # Make sure that there are no lingering declaration blocks being kept alive
+    # (so we're not retaining any extra references for a possible GC)
+    T::Private::DeclState.current.reset!
   end
 
   def self.all_checked_tests_sigs
