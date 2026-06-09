@@ -36,4 +36,13 @@ def example(a, b, c, d)
   T.reveal_type(b.elem) # error: `Integer`
   T.reveal_type(c.another) # error: `String`
 end
+
+class A::B
+  class C::D
+    extend T::Generic
+    Elem = type_member
+  end
+
+  X = T.let(C::D.new, C::D[T.untyped]) # error: Malformed type declaration. Generic class without type arguments `A::B::C::D`
+end
 # ------------------------------

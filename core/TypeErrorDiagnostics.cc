@@ -48,15 +48,16 @@ void TypeErrorDiagnostics::insertTypeArguments(const GlobalState &gs, ErrorBuild
     // if we're already looking at `T::Array` instead.
     klass = klass.maybeUnwrapBuiltinGenericForwarder();
     auto typePrefixSym = klass.forwarderForBuiltinGeneric();
-    if (!typePrefixSym.exists()) {
-        typePrefixSym = klass;
-    }
 
     auto loc = replaceLoc;
     if (loc.exists()) {
         if (klass == core::Symbols::Hash() || klass == core::Symbols::T_Hash()) {
             // Hash is special because it has arity 3 but you're only supposed to write the first 2
-            e.replaceWith("Add type arguments", loc, "{}[T.untyped, T.untyped]", typePrefixSym.show(gs));
+            if (typePrefixSym.exists()) {
+                e.replaceWith("Add type arguments", loc, "{}[T.untyped, T.untyped]", typePrefixSym.show(gs));
+            } else {
+                e.replaceWith("Add type arguments", loc.copyEndWithZeroLength(), "[T.untyped, T.untyped]");
+            }
         } else {
             auto numTypeArgs = klass.data(gs)->typeArity(gs);
             auto arg = ((klass == Symbols::Class() || klass == Symbols::T_Class()) ||
@@ -67,7 +68,12 @@ void TypeErrorDiagnostics::insertTypeArguments(const GlobalState &gs, ErrorBuild
             for (int i = 0; i < numTypeArgs; i++) {
                 untypeds.emplace_back(arg);
             }
-            e.replaceWith("Add type arguments", loc, "{}[{}]", typePrefixSym.show(gs), absl::StrJoin(untypeds, ", "));
+            if (typePrefixSym.exists()) {
+                e.replaceWith("Add type arguments", loc, "{}[{}]", typePrefixSym.show(gs),
+                              absl::StrJoin(untypeds, ", "));
+            } else {
+                e.replaceWith("Add type arguments", loc.copyEndWithZeroLength(), "[{}]", absl::StrJoin(untypeds, ", "));
+            }
         }
     }
 }
