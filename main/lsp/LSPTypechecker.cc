@@ -976,9 +976,7 @@ vector<ast::ParsedFile> LSPTypechecker::getResolved(absl::Span<const core::FileR
         auto result = pipeline::index(*this->gs, toIndex, this->config->opts, workers, std::move(kvstore), cancelable);
         ENFORCE(result.hasResult());
         auto indexed = std::move(result.result());
-        indexed.erase(
-            std::remove_if(indexed.begin(), indexed.end(), [](auto &indexed) { return indexed.tree == nullptr; }),
-            indexed.end());
+        erase_if(indexed, [](auto &indexed) { return indexed.tree == nullptr; });
         absl::c_move(std::move(indexed), std::back_inserter(updatedIndexed));
     }
 

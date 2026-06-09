@@ -322,9 +322,7 @@ LSPTask::getReferencesToSymbolsInFile(LSPTypecheckerDelegate &typechecker, core:
     if (!symbols.empty() && fref.exists()) {
         auto run2 = LSPQuery::bySymbolsInFiles(config, typechecker, move(symbols), {fref});
         // Ignore results in other files (which may have been picked up for typechecking purposes)
-        auto it = remove_if(run2.responses.begin(), run2.responses.end(),
-                            [fref](auto &resp) { return resp->getLoc().file() != fref; });
-        run2.responses.erase(it, run2.responses.end());
+        erase_if(run2.responses, [fref](auto &resp) { return resp->getLoc().file() != fref; });
         return move(run2.responses);
     }
     return {};

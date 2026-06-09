@@ -533,11 +533,9 @@ private:
                         // would be inherently invalid.
                         auto enclosingPackage = ctx.state.packageDB().getPackageNameForFile(ctx.file);
                         if (enclosingPackage.exists()) {
-                            auto it = std::remove_if(
-                                suggested.begin(), suggested.end(), [&enclosingPackage, &gs](auto &suggestion) {
-                                    return suggestion.symbol.enclosingClass(gs).data(gs)->package != enclosingPackage;
-                                });
-                            suggested.erase(it, suggested.end());
+                            erase_if(suggested, [&enclosingPackage, &gs](auto &suggestion) {
+                                   return suggestion.symbol.enclosingClass(gs).data(gs)->package != enclosingPackage;
+                            });
                         }
                     }
 
@@ -608,10 +606,9 @@ private:
                     processed++;
                     core::Context ictx(gs, core::Symbols::root(), job.file);
                     auto origSize = job.items.size();
-                    auto fileIt =
-                        remove_if(job.items.begin(), job.items.end(),
-                                  [&](ConstantResolutionItem &item) -> bool { return resolveConstantJob(ictx, item); });
-                    job.items.erase(fileIt, job.items.end());
+                    erase_if(job.items, [&](ConstantResolutionItem &item) -> bool {
+                        return resolveConstantJob(ictx, item);
+                    });
                     retries += origSize - job.items.size();
                     if (!job.items.empty()) {
                         leftover.emplace_back(move(job));
@@ -1713,13 +1710,11 @@ public:
                         auto resolved = resolveAncestorJob(ctx, item, suppressPayloadSuperclassRedefinitionFor, false);
                         return resolved;
                     };
-                    auto fileIt = remove_if(job.items.begin(), job.items.end(), std::move(g));
-                    job.items.erase(fileIt, job.items.end());
+                    erase_if(job.items, std::move(g));
                     retries += origSize - job.items.size();
                     return job.items.empty();
                 };
-                auto it = remove_if(todoAncestors.begin(), todoAncestors.end(), std::move(f));
-                todoAncestors.erase(it, todoAncestors.end());
+                erase_if(todoAncestors, std::move(f));
                 categoryCounterAdd("resolve.constants.ancestor", "retry", retries);
                 progress = retries > 0;
             }
@@ -1740,13 +1735,11 @@ public:
                     core::MutableContext ctx(gs, core::Symbols::root(), job.file);
                     auto origSize = job.items.size();
                     auto g = [&](ClassAliasResolutionItem &item) -> bool { return resolveClassAliasJob(ctx, item); };
-                    auto fileIt = remove_if(job.items.begin(), job.items.end(), std::move(g));
-                    job.items.erase(fileIt, job.items.end());
+                    erase_if(job.items, std::move(g));
                     retries += origSize - job.items.size();
                     return job.items.empty();
                 };
-                auto it = remove_if(todoClassAliases.begin(), todoClassAliases.end(), std::move(f));
-                todoClassAliases.erase(it, todoClassAliases.end());
+                erase_if(todoClassAliases, std::move(f));
                 categoryCounterAdd("resolve.constants.aliases", "retry", retries);
                 progress = progress || retries > 0;
             }
@@ -1757,13 +1750,11 @@ public:
                     core::MutableContext ctx(gs, core::Symbols::root(), job.file);
                     auto origSize = job.items.size();
                     auto g = [&](TypeAliasResolutionItem &item) -> bool { return resolveTypeAliasJob(ctx, item); };
-                    auto fileIt = remove_if(job.items.begin(), job.items.end(), std::move(g));
-                    job.items.erase(fileIt, job.items.end());
+                    erase_if(job.items, std::move(g));
                     retries += origSize - job.items.size();
                     return job.items.empty();
                 };
-                auto it = remove_if(todoTypeAliases.begin(), todoTypeAliases.end(), std::move(f));
-                todoTypeAliases.erase(it, todoTypeAliases.end());
+                erase_if(todoTypeAliases, std::move(f));
                 categoryCounterAdd("resolve.constants.typealiases", "retry", retries);
                 progress = progress || retries > 0;
             }
@@ -2558,7 +2549,7 @@ class ResolveTypeMembersAndFieldsWalk {
     static bool resolveAssign(core::MutableContext ctx, ResolveAssignItem &job, vector<bool> &resolvedAttachedClasses) {
         ENFORCE(job.lhs.isTypeAlias(ctx) || job.lhs.isTypeMember());
 
-        auto it = std::remove_if(job.dependencies.begin(), job.dependencies.end(), [&](core::SymbolRef dep) {
+        erase_if(job.dependencies, [&](core::SymbolRef dep) {
             if (isGenericResolved(ctx, dep)) {
                 if (dep.isClassOrModule()) {
                     // `dep`'s dependencies are resolved. Compute its externalType here so that we can resolve this
@@ -2569,7 +2560,6 @@ class ResolveTypeMembersAndFieldsWalk {
             }
             return false;
         });
-        job.dependencies.erase(it, job.dependencies.end());
         if (!job.dependencies.empty()) {
             return false;
         }
@@ -3152,19 +3142,15 @@ public:
         bool progress = true;
         while (progress && !combinedTodoAssigns.empty()) {
             progress = false;
-            auto it = std::remove_if(
-                combinedTodoAssigns.begin(), combinedTodoAssigns.end(), [&](vector<ResolveAssignItem> &threadTodos) {
+            erase_if(combinedTodoAssigns, [&](vector<ResolveAssignItem> &threadTodos) {
                     auto origSize = threadTodos.size();
-                    auto threadTodoIt =
-                        std::remove_if(threadTodos.begin(), threadTodos.end(), [&](ResolveAssignItem &job) -> bool {
+                    erase_if(threadTodos, [&](ResolveAssignItem &job) -> bool {
                             core::MutableContext ctx(gs, core::Symbols::root(), job.file);
                             return resolveAssign(ctx, job, resolvedAttachedClasses);
-                        });
-                    threadTodos.erase(threadTodoIt, threadTodos.end());
+                    });
                     progress = progress || threadTodos.size() != origSize;
                     return threadTodos.empty();
-                });
-            combinedTodoAssigns.erase(it, combinedTodoAssigns.end());
+            });
         }
 
         // If there was a step with no progress, there's a cycle in the

@@ -246,9 +246,7 @@ void CFGBuilder::fillInTopoSorts(core::Context ctx, CFG &cfg) {
                 bb->bexit.elseb->backEdges.end());
         }
     }
-    cfg.basicBlocks.erase(remove_if(cfg.basicBlocks.begin(), cfg.basicBlocks.end(),
-                                    [&forwardsIds](auto &bb) -> bool { return forwardsIds[bb->id] == -1; }),
-                          cfg.basicBlocks.end());
+    erase_if(cfg.basicBlocks, [&forwardsIds](auto &bb) -> bool { return forwardsIds[bb->id] == -1; });
 
     // needed to find loop headers.
     for (auto &bb : cfg.basicBlocks) {
