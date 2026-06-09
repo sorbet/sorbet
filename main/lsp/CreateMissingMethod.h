@@ -12,10 +12,10 @@ namespace sorbet::realmain::lsp {
 const core::lsp::SendResponse *isMissingMethodResponse(const core::GlobalState &gs,
                                                        const vector<unique_ptr<core::lsp::QueryResponse>> &responses);
 
-std::vector<std::unique_ptr<TextDocumentEdit>> getAddMissingMethodEdits(LSPTypecheckerDelegate &typechecker,
+std::vector<std::unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerDelegate &typechecker,
 
-                                                                        const LSPConfiguration &config,
-                                                                        const core::lsp::SendResponse &resp);
+                                                                           const LSPConfiguration &config,
+                                                                           const core::lsp::SendResponse &resp);
 } // namespace sorbet::realmain::lsp
 
 #endif

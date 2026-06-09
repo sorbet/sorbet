@@ -31,8 +31,8 @@ struct SendFinder {
 };
 
 string formatNewMethod(const core::GlobalState &gs, uint32_t indentLength, const core::NameRef name,
-                       const vector<string> &paramNames, absl::Span<const core::TypePtr> argTypes,
-                       uint64_t numPosArgs) {
+                       const vector<string> &paramNames, absl::Span<const core::TypePtr> argTypes, uint64_t numPosArgs,
+                       uint64_t numKwArgs) {
     string indent(indentLength, ' ');
     string paramSig = "";
     for (uint64_t i = 0; i < numPosArgs; i++) {
@@ -49,6 +49,12 @@ string formatNewMethod(const core::GlobalState &gs, uint32_t indentLength, const
         }
         paramList += paramNames[i];
     }
+    // for (uint64_t i = 0; i < numKwArgs; i++) {
+    //     if (!paramList.empty()) {
+    //         paramList += ", ";
+    //     }
+    //     paramList += fmt::format("{}:", paramNames[i]);
+    // }
     string newText =
         fmt::format("\n"
                     "{}sig {{ params({}).returns(T.untyped) }}\n"
@@ -79,7 +85,12 @@ string getFreshName(UnorderedMap<string, uint32_t> &seen, string_view name) {
 
 vector<string> getParamNames(const core::GlobalState &gs, const string &defaultName, const ast::Send &send) {
     vector<string> paramNames;
+    vector<string> kwParamNames;
     UnorderedMap<string, uint32_t> seen;
+    // for (auto [key, _arg] : send.kwArgPairs()) {
+    //     auto &lit = cast_tree_nonnull<ast::Literal>(key);
+    //     kwParamNames.emplace_back(getFreshName(seen, lit.asString().shortName(gs)));
+    // }
     for (auto &arg : send.posArgs()) {
         auto name = getParamName(arg);
         if (name.has_value()) {
@@ -88,6 +99,8 @@ vector<string> getParamNames(const core::GlobalState &gs, const string &defaultN
             paramNames.emplace_back(getFreshName(seen, defaultName));
         }
     }
+    paramNames.insert(paramNames.end(), make_move_iterator(kwParamNames.begin()),
+                      make_move_iterator(kwParamNames.end()));
     return paramNames;
 }
 
@@ -111,10 +124,10 @@ const core::lsp::SendResponse *isMissingMethodResponse(const core::GlobalState &
     return resp;
 }
 
-vector<unique_ptr<TextDocumentEdit>> getAddMissingMethodEdits(LSPTypecheckerDelegate &typechecker,
+vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerDelegate &typechecker,
 
-                                                              const LSPConfiguration &config,
-                                                              const core::lsp::SendResponse &resp) {
+                                                                 const LSPConfiguration &config,
+                                                                 const core::lsp::SendResponse &resp) {
     auto &gs = typechecker.state();
     auto file = resp.file;
     auto resolvedTree = typechecker.getResolved(file);
@@ -149,7 +162,8 @@ vector<unique_ptr<TextDocumentEdit>> getAddMissingMethodEdits(LSPTypecheckerDele
     }
 
     auto paramNames = getParamNames(gs, "param", *sendFinder.result);
-    auto newText = formatNewMethod(gs, indentLength, resp.originalName, paramNames, resp.argTypes, resp.numPosArgs);
+    auto newText =
+        formatNewMethod(gs, indentLength, resp.originalName, paramNames, resp.argTypes, resp.numPosArgs, resp.numArgs);
     vector<unique_ptr<TextEdit>> edits;
     edits.emplace_back(make_unique<TextEdit>(Range::fromLoc(gs, insertLoc.value()), newText));
 

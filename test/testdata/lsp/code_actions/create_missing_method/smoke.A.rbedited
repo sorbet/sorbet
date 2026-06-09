@@ -1,0 +1,22 @@
+# typed: true
+# selective-apply-code-action: refactor
+
+module Testing
+  extend T::Sig
+  extend T::Generic
+
+  sig do
+    type_parameters(:T)
+      .params(x: String, y: Integer, t: T.type_parameter(:T))
+      .void
+  end
+  def hello(x, y, t)
+      create_me!(true, "1234234", 1, x, x, y, t, hello: 1243234)
+#     ^^^^^^^^^^ apply-code-action: [A] Create missing method
+  end
+
+  sig { params(param: TrueClass, param1: String, param2: Integer, x: String, x1: String, y: Integer, t: T.type_parameter(:T)).returns(T.untyped) }
+  def create_me!(param, param1, param2, x, x1, y, t)
+    Kernel.raise NotImplementedError
+  end
+end

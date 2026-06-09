@@ -320,7 +320,8 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                     result.emplace_back(move(action));
                 }
             } else if (auto *resp = isMissingMethodResponse(gs, queryResult.responses)) {
-                auto action = make_unique<CodeAction>(fmt::format("Add method", resp->callerSideName.show(gs)));
+                auto action =
+                    make_unique<CodeAction>(fmt::format("Create missing method", resp->callerSideName.show(gs)));
                 action->kind = CodeActionKind::Refactor;
                 if (canResolveLazily) {
                     action->data = make_unique<CodeActionData>(move(params));
