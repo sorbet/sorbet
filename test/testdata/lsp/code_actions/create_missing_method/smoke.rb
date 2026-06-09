@@ -12,7 +12,7 @@ module Testing
   end
   def hello(x, y, t)
       create_me!(true, "1234234", 1, x, x, y, t, hello: 1243234)
+#       ^ apply-code-action: [A] Create missing method
 #     ^^^^^^^^^^ error: Method `create_me!` does not exist on `Testing`
-#     ^^^^^^^^^^ apply-code-action: [A] Create missing method
   end
 end

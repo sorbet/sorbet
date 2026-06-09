@@ -42,6 +42,13 @@ string formatNewMethod(const core::GlobalState &gs, uint32_t indentLength, const
         paramSig +=
             fmt::format("{}: {}", paramNames[i], argTypes[i].show(gs, core::ShowOptions{}.withUseValidSyntax()));
     }
+    for (int i = 0; i < numKwArgs; i++) {
+        if (!paramSig.empty()) {
+            paramSig += ", ";
+        }
+        paramSig += fmt::format("{}: {}", paramNames[numPosArgs + i],
+                                argTypes[numPosArgs + i * 2 + 1].show(gs, core::ShowOptions{}.withUseValidSyntax()));
+    }
     string paramList = "";
     for (uint64_t i = 0; i < numPosArgs; i++) {
         if (i != 0) {
@@ -49,12 +56,12 @@ string formatNewMethod(const core::GlobalState &gs, uint32_t indentLength, const
         }
         paramList += paramNames[i];
     }
-    // for (uint64_t i = 0; i < numKwArgs; i++) {
-    //     if (!paramList.empty()) {
-    //         paramList += ", ";
-    //     }
-    //     paramList += fmt::format("{}:", paramNames[i]);
-    // }
+    for (uint64_t i = 0; i < numKwArgs; i++) {
+        if (!paramList.empty()) {
+            paramList += ", ";
+        }
+        paramList += fmt::format("{}:", paramNames[numPosArgs + i]);
+    }
     string newText =
         fmt::format("\n"
                     "{}sig {{ params({}).returns(T.untyped) }}\n"
@@ -87,10 +94,11 @@ vector<string> getParamNames(const core::GlobalState &gs, const string &defaultN
     vector<string> paramNames;
     vector<string> kwParamNames;
     UnorderedMap<string, uint32_t> seen;
-    // for (auto [key, _arg] : send.kwArgPairs()) {
-    //     auto &lit = cast_tree_nonnull<ast::Literal>(key);
-    //     kwParamNames.emplace_back(getFreshName(seen, lit.asString().shortName(gs)));
-    // }
+    for (auto [key, _arg] : send.kwArgPairs()) {
+        auto &lit = cast_tree_nonnull<ast::Literal>(key);
+        auto kwName = lit.asSymbol();
+        kwParamNames.emplace_back(getFreshName(seen, kwName.shortName(gs)));
+    }
     for (auto &arg : send.posArgs()) {
         auto name = getParamName(arg);
         if (name.has_value()) {
@@ -162,8 +170,8 @@ vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerD
     }
 
     auto paramNames = getParamNames(gs, "param", *sendFinder.result);
-    auto newText =
-        formatNewMethod(gs, indentLength, resp.originalName, paramNames, resp.argTypes, resp.numPosArgs, resp.numArgs);
+    auto newText = formatNewMethod(gs, indentLength, resp.originalName, paramNames, resp.argTypes,
+                                   sendFinder.result->numPosArgs(), sendFinder.result->numKwArgs());
     vector<unique_ptr<TextEdit>> edits;
     edits.emplace_back(make_unique<TextEdit>(Range::fromLoc(gs, insertLoc.value()), newText));
 

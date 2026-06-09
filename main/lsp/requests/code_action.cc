@@ -326,8 +326,10 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                 if (canResolveLazily) {
                     action->data = make_unique<CodeActionData>(move(params));
                 } else {
-                    // TODO(bshu) remove this and apply the edit immediately
-                    action->data = make_unique<CodeActionData>(move(params));
+                    auto workspaceEdit = make_unique<WorkspaceEdit>();
+                    auto edits = getCreateMissingMethodEdits(typechecker, config, *resp);
+                    workspaceEdit->documentChanges = move(edits);
+                    action->edit = move(workspaceEdit);
                 }
 
                 result.emplace_back(move(action));
