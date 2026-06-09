@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 # typed: true
 
-# Source-compiled sig dispatch for fixed-arity positional methods.
+# Source-compiled sig dispatch for fixed-arity positional and keyword-arg
+# methods.
 #
 # Instead of installing a `define_method` wrapper (a bmethod) that re-dispatches
 # to the original method via the (slow) `UnboundMethod#bind_call`, eligible
@@ -13,6 +14,27 @@
 #     unless return_value.is_a?(SORBET_RT_SIG_foo_G1_Nxx::R) ... end
 #     return_value
 #   end
+#
+# Keyword args become REAL keyword parameters on the wrapper (never a
+# `**kwargs` collection on the happy path, which is what makes the kwargs
+# family wrappers allocate):
+#
+#   def bar(arg0, x:, y: SORBET_RT_SIG_bar_G1_Nxx::NP, &)
+#     ...checks (an optional kwarg still holding the NP sentinel was not
+#        provided and is not checked)...
+#     return_value = if SORBET_RT_SIG_bar_G1_Nxx::NP.equal?(y)
+#       __t_sig_orig_<owner_id>_g1_nxx_bar(arg0, x: x, &)
+#     else
+#       __t_sig_orig_<owner_id>_g1_nxx_bar(arg0, x: x, y: y, &)
+#     end
+#     ...return check...
+#   end
+#
+# Every keyword name must pass a strict identifier allowlist (it becomes a
+# local variable in the wrapper): reserved words like `if:`/`end:`/`self:`
+# parse fine as KEYWORD ARGUMENT names in Ruby, so the denylist below is
+# load-bearing -- such methods (and any other unsafe name) take the family
+# validators, where they work like today (correctness over coverage).
 #
 # The wrapper ALWAYS declares and forwards a block -- there is deliberately no
 # "does the original use its block?" analysis (no static analysis of a Ruby
@@ -29,13 +51,14 @@
 # inline-cached constant reads. Plain defs with inlined `is_a?` checks are
 # also YJIT-friendly, where bmethods and bind_call are not.
 #
-# Anything that does not provably fit (kwargs, rest, optional positionals,
-# required blocks, `.bind`, unsafe method names, refinements, methods whose
-# owner is not the wrap target, frozen owners, sig types whose raw module has
-# no permanent name -- binding an anonymous module in the container constant
-# would permanently rename it) falls back to the existing `define_method`
-# validator families, which remain intact. Compilation failures of any kind
-# also fall back; the compiled path is strictly an optimization.
+# Anything that does not provably fit (rest/keyrest, optional positionals,
+# required blocks, `.bind`, unsafe method or keyword names, refinements,
+# methods whose owner is not the wrap target, frozen owners, sig types whose
+# raw module has no permanent name -- binding an anonymous module in the
+# container constant would permanently rename it) falls back to the existing
+# `define_method` validator families, which remain intact. Compilation
+# failures of any kind also fall back; the compiled path is strictly an
+# optimization.
 #
 # Eval policy: compiling honors the same post-boot eval boundary as
 # `T::Props::HasLazilySpecializedMethods` (see go/M8yrvzX2). After
@@ -71,6 +94,36 @@ module T::Private::Methods::CallValidation::Compiled
   # Method names: a plain identifier with at most one trailing `?`, `!`, `=`.
   METHOD_NAME_RE = /\A[a-zA-Z_][a-zA-Z0-9_]*[?!=]?\z/
   private_constant(:METHOD_NAME_RE)
+
+  # Keyword-argument names: a plain ASCII identifier, no suffix. A kwarg name
+  # becomes a real keyword parameter -- a local variable -- in the emitted
+  # wrapper, so this is stricter than METHOD_NAME_RE (no `?`/`!`/`=`; those
+  # cannot appear in kwarg names anyway) and additionally excludes (in
+  # safe_kwarg_name?) every RESERVED_WORDS entry: `def m(if: 1)`, `end:`,
+  # `self:`, `nil:`, `__FILE__:` etc. all PARSE as keyword parameter names,
+  # but the name is not usable as a local in the wrapper body. Non-ASCII
+  # identifiers (legal in Ruby) are conservatively refused too.
+  KWARG_NAME_RE = /\A[a-z_][a-zA-Z0-9_]*\z/
+  private_constant(:KWARG_NAME_RE)
+
+  # Locals that wrapper templates bind (`return_value`, `message`, the
+  # `__t_`-prefixed ones are blocked by prefix) plus the locals sibling
+  # codegen templates use -- excluded from kwarg names wholesale, so a
+  # template change can never silently capture or shadow a keyword
+  # parameter.
+  TEMPLATE_LOCALS = %w[blk return_value message val found hash].to_h { |w| [w, true] }.freeze
+  private_constant(:TEMPLATE_LOCALS)
+
+  # The wrapper's synthetic positional locals (`arg0`, `arg1`, ...); a kwarg
+  # named like one would collide with them.
+  ARG_LOCAL_RE = /\Aarg\d+\z/
+  private_constant(:ARG_LOCAL_RE)
+
+  # Optional-kwarg count up to which the dispatch emits the full 2^k
+  # provided/not-provided branch tree (every call shape is a literal,
+  # zero-allocation keyword call). See `kwargs_dispatch`.
+  MAX_TREE_OPTIONALS = 4
+  private_constant(:MAX_TREE_OPTIONALS)
 
   # Whether to emit anonymous block forwarding (`def m(arg0, &)` forwarding
   # via `stash(arg0, &)`). The syntax parses only on Ruby >= 3.1, so the gate
@@ -171,6 +224,19 @@ module T::Private::Methods::CallValidation::Compiled
 
   EMPTY_ARGS = [].freeze
   private_constant(:EMPTY_ARGS)
+
+  # Sentinel bound into wrapper containers (slot `NP`) as the default value
+  # of optional keyword parameters: an optional kwarg still holding `NP` was
+  # not provided at the call site, so its check is skipped and the dispatch
+  # omits it -- the stashed original computes its own default lazily, in its
+  # own context, and defaults are never validated (exactly like the
+  # families). A private module can never collide with a legitimate argument
+  # value (same approach as `CallValidation::ARG_NOT_PROVIDED` in the
+  # optional-positional-args family). Permanently named right here by the
+  # constant assignment, so binding it into containers can never rename it
+  # (see PERMANENT_MODULE_NAME_RE).
+  ARG_NOT_PROVIDED = Module.new.freeze
+  private_constant(:ARG_NOT_PROVIDED)
 
   class << self
     # Kill switch. Provides eventual quiescence: no compile *begins* after the
@@ -534,23 +600,38 @@ module T::Private::Methods::CallValidation::Compiled
 
     def eligible?(mod, original_method, method_sig)
       # Ordered cheapest-and-most-discriminating first: this runs once per
-      # method wrap at boot, and most ineligible sigs fail on shape (kwargs,
-      # optionals, rest), which costs only attr reads -- the checks that
+      # method wrap at boot, and most ineligible sigs fail on shape
+      # (optionals, rest), which costs only attr reads -- the checks that
       # allocate (refinement_module?'s unbound to_s String, safe_method_name?,
       # types_bindable?'s Module#name reads) only run for shapes that pass.
       CallValidation.is_allowed_to_have_fast_path &&
         !method_sig.bind &&
-        method_sig.kwarg_types.empty? &&
         method_sig.rest_type.nil? &&
         method_sig.keyrest_type.nil? &&
         method_sig.arg_types.length < 7 &&
-        method_sig.parameters.all? { |(kind, _name)| kind == :req || kind == :block } &&
+        eligible_shape?(method_sig) &&
         method_sig.block_type&.valid?(nil) != false &&
         mod.equal?(original_method.owner) &&
         !mod.frozen? &&
         safe_method_name?(method_sig.method_name) &&
         !refinement_module?(mod) &&
         types_bindable?(method_sig)
+    end
+
+    # Positional shape: required positional args only (what the fast/medium
+    # bind_call families cover). Kwargs shape: required positional args plus
+    # keyword args (required or optional), where every keyword name passes
+    # the strict identifier allowlist -- each one becomes a real keyword
+    # parameter (a local variable) in the emitted wrapper.
+    def eligible_shape?(method_sig)
+      if method_sig.kwarg_types.empty?
+        method_sig.parameters.all? { |(kind, _name)| kind == :req || kind == :block }
+      else
+        method_sig.parameters.all? do |(kind, _name)|
+          kind == :req || kind == :keyreq || kind == :key || kind == :block
+        end &&
+          method_sig.kwarg_types.all? { |kw_name, _type| safe_kwarg_name?(kw_name) }
+      end
     end
 
     # Whether every Module value the wrapper would `const_set` into its
@@ -571,6 +652,9 @@ module T::Private::Methods::CallValidation::Compiled
     # here still passes when a deferred (shimmed) compile runs later.
     def types_bindable?(method_sig)
       method_sig.arg_types.each do |(_name, type)|
+        return false unless type_bindable?(type)
+      end
+      method_sig.kwarg_types.each_value do |type|
         return false unless type_bindable?(type)
       end
       type_bindable?(method_sig.effective_return_type)
@@ -624,6 +708,23 @@ module T::Private::Methods::CallValidation::Compiled
         return false if RESERVED_WORDS.key?(s[0..-2])
       end
       true
+    end
+
+    # Whether a keyword-argument name is safe to emit as a keyword parameter
+    # (a local variable) of a compiled wrapper. The RESERVED_WORDS entries
+    # are load-bearing here, not defense in depth: `if:`, `end:`, `self:`,
+    # `nil:`, `__FILE__:` and every other keyword all PARSE as kwarg names
+    # (only `BEGIN:` is parser-rejected), but referencing them as locals in
+    # the wrapper body would be a SyntaxError. Any unsafe name makes the
+    # whole method take the family validators (decided at wrap/enqueue time:
+    # calls 1..N take the identical path).
+    def safe_kwarg_name?(kw_name)
+      s = kw_name.name
+      KWARG_NAME_RE.match?(s) &&
+        !RESERVED_WORDS.key?(s) &&
+        !TEMPLATE_LOCALS.key?(s) &&
+        !ARG_LOCAL_RE.match?(s) &&
+        !s.start_with?("__t_", "__sorbet")
     end
 
     # `?`/`!`/`=` cannot appear inside identifiers, so escape them (and the
@@ -720,6 +821,27 @@ module T::Private::Methods::CallValidation::Compiled
           container.const_set(:"A#{i}B", raw_b)
         else
           container.const_set(:"A#{i}", type)
+        end
+      end
+      kwarg_types = method_sig.kwarg_types
+      unless kwarg_types.empty?
+        # `NP` is the not-provided sentinel default for optional keyword
+        # params (see ARG_NOT_PROVIDED); `K<i>` mirrors the `A<i>` slots, in
+        # `kwarg_types` (declaration) order.
+        container.const_set(:NP, ARG_NOT_PROVIDED)
+        kw_i = 0
+        kwarg_types.each_value do |type|
+          if type.is_a?(T::Types::Simple)
+            container.const_set(:"K#{kw_i}", type.raw_type)
+          elsif type.instance_of?(T::Private::Types::SimplePairUnion)
+            container.const_set(:"K#{kw_i}", type)
+            raw_a, raw_b = simple_pair_raw_types(type)
+            container.const_set(:"K#{kw_i}A", raw_a)
+            container.const_set(:"K#{kw_i}B", raw_b)
+          else
+            container.const_set(:"K#{kw_i}", type)
+          end
+          kw_i += 1
         end
       end
       effective_return_type = method_sig.effective_return_type
@@ -847,23 +969,51 @@ module T::Private::Methods::CallValidation::Compiled
       "#{arg_expr}.is_a?(#{const_ref})"
     end
 
-    # The wrapper bodies transcribe the generated validator families in
-    # `call_validation_2_7.rb` (fast/medium x method/procedure/skip_return):
-    # same checks, same `report_error` arguments (including which family's
-    # `type:` argument shape gets reported -- the raw type for the all-simple
-    # "fast" family, the `T::Types::Base` object otherwise), same
-    # caller_offset (the compiled wrapper is exactly one stack frame, like
-    # the bmethod wrappers it replaces).
+    # The wrapper bodies transcribe the validator families: the generated
+    # fast/medium families in `call_validation_2_7.rb` for positional-only
+    # shapes, and the `create_validator_method_kwargs*` family for
+    # keyword-arg shapes. Same checks, same `report_error` arguments
+    # (including which family's `type:` argument shape gets reported -- the
+    # raw type for the all-simple positional "fast" family, the
+    # `T::Types::Base` object otherwise; the kwargs family always reports
+    # type objects), same caller_offset (the compiled wrapper is exactly one
+    # stack frame, like the bmethod wrappers it replaces).
+    #
+    # Documented delta (deliberate, test-pinned): keyword checks run in
+    # DECLARATION order (the `kwarg_types` order they are emitted in), where
+    # the kwargs family iterates the caller's `**kwargs` Hash, i.e.
+    # PROVISION order. When two or more provided kwargs are invalid on one
+    # call, which one raises first (and the handler callback sequence under
+    # a soft `.on_failure`) can therefore differ; the reported SET of errors
+    # is identical, and with a single invalid kwarg there is no observable
+    # difference.
+    #
+    # Optional kwargs default to the container's `NP` sentinel. A param
+    # still holding the sentinel was not provided: its check is skipped and
+    # the dispatch omits it, so the stashed original computes its default
+    # lazily in its own context, never validated -- both exactly like the
+    # families. The sentinel test always dispatches `equal?` on the
+    # sentinel, never on the user value (see `kwargs_dispatch`). With <=
+    # MAX_TREE_OPTIONALS (4) optional kwargs the dispatch is a full
+    # provided/not-provided branch tree (up to 16 arms, every arm forwarding
+    # literal keywords: zero allocations); with >= 5 there are all-provided
+    # and none-provided literal fast arms plus one generic arm that builds a
+    # Hash of just the provided keywords (one Hash allocation, only for
+    # partial-provision calls of such sigs).
     def wrapper_source(install_name, container_name, stash_name, method_sig, return_kind, visibility)
       c = container_name
       arg_types = method_sig.arg_types
       n = arg_types.length
+      kwarg_types = method_sig.kwarg_types
       all_simple = arg_types.all? { |_name, type| type.is_a?(T::Types::Simple) }
-      # Matches the family routing in `install_family_validator`: the fast
-      # (all-simple) families report the *raw* type to the error handler.
-      fast_family = all_simple && (return_kind != :complex && return_kind != :simple_pair)
+      # Matches the family routing in `install_family_validator`: only the
+      # positional-only fast (all-simple) families report the *raw* type to
+      # the error handler; the kwargs family reports type objects for every
+      # parameter, keyword or positional.
+      fast_family = kwarg_types.empty? && all_simple &&
+        (return_kind != :complex && return_kind != :simple_pair)
 
-      bare_args = (0...n).map { |i| "arg#{i}" }.join(", ")
+      bare_args = (0...n).map { |i| "arg#{i}" }
       # ALWAYS declare and forward the block, exactly like the bind_call
       # families (`define_method(...) do |arg0, &blk| ... bind_call(self,
       # arg0, &blk)`). There is deliberately no attempt to prove the original
@@ -873,8 +1023,6 @@ module T::Private::Methods::CallValidation::Compiled
       # anonymous form costs nothing (no Proc materialization); on 3.0 the
       # named form matches today's wrapper cost.
       blk = ANONYMOUS_BLOCK_FORWARDING ? "&" : "&__t_blk"
-      params = n.zero? ? blk : "#{bare_args}, #{blk}"
-      dispatch = "#{stash_name}(#{params})"
 
       checks = +""
       arg_types.each_with_index do |(_name, type), i|
@@ -903,6 +1051,63 @@ module T::Private::Methods::CallValidation::Compiled
             )
           end
         RUBY
+      end
+
+      if kwarg_types.empty?
+        params = (bare_args + [blk]).join(", ")
+        dispatch = "#{stash_name}(#{params})"
+      else
+        req_kwarg_names = method_sig.req_kwarg_names
+        kw_names = [] # [name String, required?] in declaration order
+        param_decls = []
+        opt_names = []
+        kw_i = 0
+        kwarg_types.each do |kw_sym, type|
+          kw = kw_sym.name
+          required = req_kwarg_names.include?(kw_sym)
+          param_decls << (required ? "#{kw}:" : "#{kw}: #{c}::NP")
+          opt_names << kw unless required
+          kw_names << [kw, required]
+          if type.is_a?(T::Types::Simple)
+            test = "#{kw}.is_a?(#{c}::K#{kw_i})"
+            # The kwargs family looks the type object up per name; only the
+            # error path reads this.
+            reported = "#{c}::SIG.kwarg_types[:#{kw}]"
+          elsif type.instance_of?(T::Private::Types::SimplePairUnion)
+            test = "#{simple_pair_test(kw, "#{c}::K#{kw_i}A")} || " \
+              "#{simple_pair_test(kw, "#{c}::K#{kw_i}B")}"
+            reported = "#{c}::K#{kw_i}"
+          else
+            test = "#{c}::K#{kw_i}.valid?(#{kw})"
+            reported = "#{c}::K#{kw_i}"
+          end
+          # A not-provided optional kwarg (sentinel still in place) is not
+          # checked: the original's computed default is never validated,
+          # exactly like the families. The sentinel is always the RECEIVER of
+          # `equal?` (`NP.equal?(y)`, the family's
+          # `ARG_NOT_PROVIDED.equal?(arg0)` shape, never `y.equal?(NP)`): NP
+          # is our frozen Module, whose BasicObject identity check cannot be
+          # overridden, while a user value could define `equal?` to spoof
+          # "not provided" (skipping its type check and silently dropping the
+          # argument) or to run arbitrary code on the dispatch path.
+          guard = required ? test : "#{c}::NP.equal?(#{kw}) || (#{test})"
+          checks << <<~RUBY
+            unless #{guard}
+              ::T::Private::Methods::CallValidation.report_error(
+                #{c}::SIG,
+                #{c}::SIG.kwarg_types[:#{kw}].error_message_for_obj(#{kw}),
+                'Parameter',
+                :#{kw},
+                #{reported},
+                #{kw},
+                caller_offset: -1
+              )
+            end
+          RUBY
+          kw_i += 1
+        end
+        params = (bare_args + param_decls + [blk]).join(", ")
+        dispatch = kwargs_dispatch(stash_name, c, bare_args, kw_names, opt_names, blk)
       end
 
       tail =
@@ -974,6 +1179,70 @@ module T::Private::Methods::CallValidation::Compiled
       RUBY
     end
 
+    # The forwarding expression for a kwargs wrapper: every arm forwards the
+    # positional args, the required keywords, and exactly the optional
+    # keywords that were provided (sentinel-tested), as literal keywords --
+    # so the stashed original computes the defaults of the omitted ones
+    # itself. Used as an expression (its value is the original's return
+    # value in every arm).
+    #
+    # Every sentinel test emitted here (and in the check guards above) is
+    # `NP.equal?(kw)` / `!NP.equal?(kw)` -- the frozen sentinel Module is
+    # the RECEIVER, matching the family's `ARG_NOT_PROVIDED.equal?(arg0)`
+    # shape. `kw.equal?(NP)` would dispatch on the user's value, letting a
+    # user-defined `equal?` spoof "not provided" (silently dropping the
+    # argument and skipping its type check) or run arbitrary code inside
+    # the wrapper.
+    #
+    # Up to MAX_TREE_OPTIONALS optional kwargs get the full
+    # provided/not-provided branch tree: every call shape dispatches with
+    # literal keywords (zero allocations, no kwsplat). Beyond that the tree
+    # would double per optional, so the dispatch collapses to three arms:
+    # all-provided and none-provided literal fast arms (the overwhelmingly
+    # common shapes), plus a generic arm that builds a Hash of just the
+    # provided keywords and double-splats it (one Hash allocation plus the
+    # VM's kwsplat path; partial-provision calls of >= 5-optional sigs
+    # only -- the same order of work the family wrapper's `**kwargs`
+    # collection + `bind_call(self, **kwargs)` does on every call).
+    def kwargs_dispatch(stash_name, c, bare_args, kw_names, opt_names, blk)
+      leaf = lambda do |provided|
+        kw_args = kw_names.filter_map do |(kw, required)|
+          "#{kw}: #{kw}" if required || provided.include?(kw)
+        end
+        "#{stash_name}(#{(bare_args + kw_args + [blk]).join(', ')})"
+      end
+
+      if opt_names.empty?
+        leaf.call(EMPTY_ARGS)
+      elsif opt_names.length <= MAX_TREE_OPTIONALS
+        # Full provided/not-provided branch tree: 2^k arms of literal,
+        # zero-allocation calls (k <= 4, so at most 16).
+        build = lambda do |remaining, provided|
+          if remaining.empty?
+            leaf.call(provided)
+          else
+            kw = remaining[0]
+            rest = remaining[1..-1]
+            "if #{c}::NP.equal?(#{kw})\n#{build.call(rest, provided)}\n" \
+              "else\n#{build.call(rest, provided + [kw])}\nend"
+          end
+        end
+        build.call(opt_names, EMPTY_ARGS)
+      else
+        all_provided = opt_names.map { |kw| "!#{c}::NP.equal?(#{kw})" }.join(" && ")
+        none_provided = opt_names.map { |kw| "#{c}::NP.equal?(#{kw})" }.join(" && ")
+        req_pairs = kw_names.filter_map { |(kw, required)| "#{kw}: #{kw}" if required }
+        generic = +"__t_kw = {#{req_pairs.join(', ')}}\n"
+        opt_names.each do |kw|
+          generic << "__t_kw[:#{kw}] = #{kw} unless #{c}::NP.equal?(#{kw})\n"
+        end
+        generic << "#{stash_name}(#{(bare_args + ['**__t_kw', blk]).join(', ')})"
+        "if #{all_provided}\n#{leaf.call(opt_names)}\n" \
+          "elsif #{none_provided}\n#{leaf.call(EMPTY_ARGS)}\n" \
+          "else\n#{generic}\nend"
+      end
+    end
+
     # Cheap first-call shim used for boot-time (eager) wrapping: a
     # parameter-faithful bmethod that compiles on first call and validates
     # the in-flight call exactly like the first-call thunk in
@@ -982,41 +1251,57 @@ module T::Private::Methods::CallValidation::Compiled
       compiled = self
       cv = CallValidation
       shim =
-        case method_sig.arg_types.length
-        when 0
-          proc do |&blk|
+        if !method_sig.kwarg_types.empty?
+          # Kwargs shapes: `**kwargs` separates keywords from positionals at
+          # the shim boundary (the original has real keyword params and no
+          # rest, so this split is exact); `validate_call` then expects any
+          # keywords as a ruby2_keywords-flagged trailing Hash -- the same
+          # shape the lazy tier's first-call thunk (`|*args, &blk|` +
+          # `ruby2_keywords`) hands it -- so its `bind_call(self, *args,
+          # &blk)` re-splats them as keywords. The Hash copy is one-shot
+          # (first call only).
+          proc do |*args, **kwargs, &blk|
             compiled.shim_fired(mod, install_name, original_method, method_sig, visibility)
-            cv.validate_call(self, original_method, method_sig, EMPTY_ARGS, blk)
-          end
-        when 1
-          proc do |arg0, &blk|
-            compiled.shim_fired(mod, install_name, original_method, method_sig, visibility)
-            cv.validate_call(self, original_method, method_sig, [arg0], blk)
-          end
-        when 2
-          proc do |arg0, arg1, &blk|
-            compiled.shim_fired(mod, install_name, original_method, method_sig, visibility)
-            cv.validate_call(self, original_method, method_sig, [arg0, arg1], blk)
-          end
-        when 3
-          proc do |arg0, arg1, arg2, &blk|
-            compiled.shim_fired(mod, install_name, original_method, method_sig, visibility)
-            cv.validate_call(self, original_method, method_sig, [arg0, arg1, arg2], blk)
-          end
-        when 4
-          proc do |arg0, arg1, arg2, arg3, &blk|
-            compiled.shim_fired(mod, install_name, original_method, method_sig, visibility)
-            cv.validate_call(self, original_method, method_sig, [arg0, arg1, arg2, arg3], blk)
-          end
-        when 5
-          proc do |arg0, arg1, arg2, arg3, arg4, &blk|
-            compiled.shim_fired(mod, install_name, original_method, method_sig, visibility)
-            cv.validate_call(self, original_method, method_sig, [arg0, arg1, arg2, arg3, arg4], blk)
+            args << Hash.ruby2_keywords_hash(kwargs) unless kwargs.empty?
+            cv.validate_call(self, original_method, method_sig, args, blk)
           end
         else
-          proc do |arg0, arg1, arg2, arg3, arg4, arg5, &blk|
-            compiled.shim_fired(mod, install_name, original_method, method_sig, visibility)
-            cv.validate_call(self, original_method, method_sig, [arg0, arg1, arg2, arg3, arg4, arg5], blk)
+          case method_sig.arg_types.length
+          when 0
+            proc do |&blk|
+              compiled.shim_fired(mod, install_name, original_method, method_sig, visibility)
+              cv.validate_call(self, original_method, method_sig, EMPTY_ARGS, blk)
+            end
+          when 1
+            proc do |arg0, &blk|
+              compiled.shim_fired(mod, install_name, original_method, method_sig, visibility)
+              cv.validate_call(self, original_method, method_sig, [arg0], blk)
+            end
+          when 2
+            proc do |arg0, arg1, &blk|
+              compiled.shim_fired(mod, install_name, original_method, method_sig, visibility)
+              cv.validate_call(self, original_method, method_sig, [arg0, arg1], blk)
+            end
+          when 3
+            proc do |arg0, arg1, arg2, &blk|
+              compiled.shim_fired(mod, install_name, original_method, method_sig, visibility)
+              cv.validate_call(self, original_method, method_sig, [arg0, arg1, arg2], blk)
+            end
+          when 4
+            proc do |arg0, arg1, arg2, arg3, &blk|
+              compiled.shim_fired(mod, install_name, original_method, method_sig, visibility)
+              cv.validate_call(self, original_method, method_sig, [arg0, arg1, arg2, arg3], blk)
+            end
+          when 5
+            proc do |arg0, arg1, arg2, arg3, arg4, &blk|
+              compiled.shim_fired(mod, install_name, original_method, method_sig, visibility)
+              cv.validate_call(self, original_method, method_sig, [arg0, arg1, arg2, arg3, arg4], blk)
+            end
+          else
+            proc do |arg0, arg1, arg2, arg3, arg4, arg5, &blk|
+              compiled.shim_fired(mod, install_name, original_method, method_sig, visibility)
+              cv.validate_call(self, original_method, method_sig, [arg0, arg1, arg2, arg3, arg4, arg5], blk)
+            end
           end
         end
 
