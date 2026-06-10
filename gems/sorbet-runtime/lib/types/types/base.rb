@@ -52,6 +52,16 @@ module T::Types
     def subtype_of?(t2)
       t1 = self
 
+      # Fast path over the isSubType mirror below: the dominant pair during
+      # override validation is two plain Simples, which match none of the
+      # branches in the walk. instance_of? (never
+      # is_a?) so that any hypothetical Simple subclass takes the full walk,
+      # and the raw subtype_of_single? result is returned unmodified
+      # (Module#<= yields nil for unrelated modules, which callers observe).
+      if t1.instance_of?(T::Types::Simple) && t2.instance_of?(T::Types::Simple)
+        return subtype_of_single?(t2)
+      end
+
       if t2.is_a?(T::Private::Types::TypeAlias)
         t2 = t2.aliased_type
       end
@@ -181,7 +191,10 @@ module T::Types
     def ==(other)
       case other
       when T::Types::Base
-        other.name == self.name
+        # Performance fast path: pooled and memoized type instances (e.g. the
+        # results of repeated T.nilable(X) calls) are the same object, so they
+        # can compare equal without computing and comparing their names.
+        other.equal?(self) || other.name == self.name
       else
         false
       end

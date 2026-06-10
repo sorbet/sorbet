@@ -33,7 +33,7 @@ module T::Utils
       method_sig: T::Private::Methods::Signature,
       original_method: UnboundMethod
     )
-      .returns(UnboundMethod)
+      .void
   end
   def self.wrap_method_with_call_validation_if_needed(mod, method_sig, original_method); end
 

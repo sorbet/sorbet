@@ -48,7 +48,7 @@ class T::Enum
   private_constant :SerializedVal
 
   ### Enum class methods ###
-  sig { returns(T::Array[T.attached_class]) }
+  sig { returns(T::Array[T.attached_class]).checked(:never) }
   def self.values
     if @values.nil?
       raise "Attempting to access values of #{self.class} before it has been initialized." \
@@ -59,7 +59,7 @@ class T::Enum
 
   # This exists for compatibility with the interface of `Hash` & mostly to support
   # the HashEachMethods Rubocop.
-  sig { params(blk: T.nilable(T.proc.params(arg0: T.attached_class).void)).returns(T.any(T::Enumerator[T.attached_class], T::Array[T.attached_class])) }
+  sig { params(blk: T.nilable(T.proc.params(arg0: T.attached_class).void)).returns(T.any(T::Enumerator[T.attached_class], T::Array[T.attached_class])).checked(:never) }
   def self.each_value(&blk)
     if blk
       values.each(&blk)
@@ -149,7 +149,12 @@ class T::Enum
   # Note: Failed CriticalMethodsNoRuntimeTypingTest
   sig { returns(SerializedVal).checked(:never) }
   def serialize
-    assert_bound!
+    # Same check and message as assert_bound!, open-coded to avoid the extra
+    # method frame on this hot path.
+    if @const_name.nil?
+      raise "Attempting to access Enum value on #{self.class} before it has been initialized." \
+        " Enums are not initialized until the 'enums do' block they are defined in has finished running."
+    end
     @serialized_val
   end
 
@@ -165,17 +170,17 @@ class T::Enum
     serialized_val.as_json(*args)
   end
 
-  sig { returns(String) }
+  sig { returns(String).checked(:never) }
   def to_s
     inspect
   end
 
-  sig { returns(String) }
+  sig { returns(String).checked(:never) }
   def inspect
     "#<#{self.class.name}::#{@const_name || '__UNINITIALIZED__'}>"
   end
 
-  sig { params(other: BasicObject).returns(T.nilable(Integer)) }
+  sig { params(other: BasicObject).returns(T.nilable(Integer)).checked(:never) }
   def <=>(other)
     case other
     when self.class

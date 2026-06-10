@@ -134,6 +134,17 @@ module T
   def self.cast(value, type, checked: true)
     return value unless checked
 
+    # Happy paths for the two dominant type shapes at inline-cast sites,
+    # duplicated from Private::Casts.cast to skip its call frame: Module
+    # literals (e.g. `T.cast(x, Foo)`) and the SimplePairUnion that
+    # `T.nilable(SomeModule)` produces. Failures and other type shapes take
+    # the full path below.
+    if ::Module === type
+      return value if value.is_a?(type)
+    elsif type.instance_of?(T::Private::Types::SimplePairUnion)
+      return value if type.valid?(value)
+    end
+
     Private::Casts.cast(value, type, "T.cast")
   end
 
@@ -148,6 +159,13 @@ module T
   # doesn't match the type.
   def self.let(value, type, checked: true)
     return value unless checked
+
+    # Happy paths for Module literals and T.nilable; see T.cast.
+    if ::Module === type
+      return value if value.is_a?(type)
+    elsif type.instance_of?(T::Private::Types::SimplePairUnion)
+      return value if type.valid?(value)
+    end
 
     Private::Casts.cast(value, type, "T.let")
   end
@@ -168,6 +186,13 @@ module T
   def self.bind(value, type, checked: true)
     return value unless checked
 
+    # Happy paths for Module literals and T.nilable; see T.cast.
+    if ::Module === type
+      return value if value.is_a?(type)
+    elsif type.instance_of?(T::Private::Types::SimplePairUnion)
+      return value if type.valid?(value)
+    end
+
     Private::Casts.cast(value, type, "T.bind")
   end
 
@@ -177,6 +202,13 @@ module T
   # runtime if the value doesn't match the type.
   def self.assert_type!(value, type, checked: true)
     return value unless checked
+
+    # Happy paths for Module literals and T.nilable; see T.cast.
+    if ::Module === type
+      return value if value.is_a?(type)
+    elsif type.instance_of?(T::Private::Types::SimplePairUnion)
+      return value if type.valid?(value)
+    end
 
     Private::Casts.cast(value, type, "T.assert_type!")
   end
@@ -291,9 +323,15 @@ module T
   end
 
   module Hash
+    # Lazily-created shared instance for `T::Hash[T.untyped, T.untyped]`.
+    # (Unlike TypedArray's, this can't be a load-time frozen constant:
+    # typed_hash.rb is required before T.untyped and T::Utils exist.)
+    # A racy double-init stores one of two equivalent frozen instances.
+    @untyped_instance = nil
+
     def self.[](keys, values)
       if keys.is_a?(T::Types::Untyped) && values.is_a?(T::Types::Untyped)
-        T::Types::TypedHash::Untyped.new
+        @untyped_instance ||= T::Types::TypedHash::Untyped.new.freeze
       else
         T::Types::TypedHash.new(keys: keys, values: values)
       end

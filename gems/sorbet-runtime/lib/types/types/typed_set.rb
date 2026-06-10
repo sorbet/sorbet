@@ -3,6 +3,22 @@
 
 module T::Types
   class TypedSet < TypedEnumerable
+    # Latch holding the resolved ::Set module. nil while Set is
+    # autoload-pending or undefined (no object can be a Set until then, and
+    # the constant-table probes must re-run on each call); once Set loads,
+    # the latch holds ::Set forever and per-call valid? skips the
+    # Object.autoload?/const_defined? probes. A class variable so instance
+    # methods here and in subclasses (Untyped) read it without a singleton
+    # dispatch. Racy writes all store the same ::Set and are benign; no lock
+    # (trap-handler safe).
+    @@set_module = nil # rubocop:disable Style/ClassVars
+
+    private def resolve_set_module
+      return nil if Object.autoload?(:Set) # Set is meant to be autoloaded but not yet loaded, this value can't be a Set
+      return nil unless Object.const_defined?(:Set) # Set is not loaded yet
+      @@set_module = ::Set # rubocop:disable Style/ClassVars
+    end
+
     def underlying_class
       Set
     end
@@ -14,16 +30,16 @@ module T::Types
 
     # overrides Base
     def recursively_valid?(obj)
-      return false if Object.autoload?(:Set) # Set is meant to be autoloaded but not yet loaded, this value can't be a Set
-      return false unless Object.const_defined?(:Set) # Set is not loaded yet
-      obj.is_a?(Set) && super
+      set_module = @@set_module || resolve_set_module
+      return false if set_module.nil?
+      obj.is_a?(set_module) && super
     end
 
     # overrides Base
     def valid?(obj)
-      return false if Object.autoload?(:Set) # Set is meant to be autoloaded but not yet loaded, this value can't be a Set
-      return false unless Object.const_defined?(:Set) # Set is not loaded yet
-      obj.is_a?(Set)
+      set_module = @@set_module || resolve_set_module
+      return false if set_module.nil?
+      obj.is_a?(set_module)
     end
 
     def new(...)
@@ -39,9 +55,9 @@ module T::Types
       end
 
       def valid?(obj)
-        return false if Object.autoload?(:Set) # Set is meant to be autoloaded but not yet loaded, this value can't be a Set
-        return false unless Object.const_defined?(:Set) # Set is not loaded yet
-        obj.is_a?(Set)
+        set_module = @@set_module || resolve_set_module
+        return false if set_module.nil?
+        obj.is_a?(set_module)
       end
     end
   end

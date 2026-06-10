@@ -11,15 +11,30 @@ module T::Types
     end
 
     def types
-      @types ||= @inner_types.flat_map do |type|
-        type = T::Utils.coerce(type)
-        if type.is_a?(Union)
-          # Simplify nested unions (mostly so `name` returns a nicer value)
-          type.types
-        else
-          type
+      @types ||= begin
+        flattened = @inner_types.flat_map do |type|
+          type = T::Utils.coerce(type)
+          if type.is_a?(Union)
+            # Simplify nested unions (mostly so `name` returns a nicer value)
+            type.types
+          else
+            type
+          end
+        end.uniq
+        # When every member is a plain Simple (whose valid? is exactly
+        # `obj.is_a?(raw_type)`), precompute the members' raw modules so
+        # valid? can skip per-member dispatch. instance_of? (the is_a? only
+        # narrows for static checking) so that any Simple subclass overriding
+        # valid? would be excluded. Note this snapshots the members at build
+        # time.
+        member_modules = []
+        all_simple = flattened.all? do |type|
+          type.is_a?(T::Types::Simple) && type.instance_of?(T::Types::Simple) &&
+            member_modules << type.raw_type
         end
-      end.uniq
+        @member_modules = all_simple ? member_modules.freeze : false
+        flattened
+      end
     end
 
     def build_type
@@ -58,12 +73,52 @@ module T::Types
 
     # overrides Base
     def recursively_valid?(obj)
-      types.any? { |type| type.recursively_valid?(obj) }
+      member_modules = @member_modules
+      if member_modules.nil?
+        # Force the lazy types builder, which also computes @member_modules
+        types
+        member_modules = @member_modules
+      end
+      index = 0
+      if member_modules
+        # For an all-Simple union, recursively_valid? and valid? coincide
+        # (Simple's recursively_valid? is exactly `obj.is_a?(raw_type)`).
+        while index < member_modules.length
+          return true if obj.is_a?(member_modules[index])
+          index += 1
+        end
+      else
+        members = types
+        while index < members.length
+          return true if members.fetch(index).recursively_valid?(obj)
+          index += 1
+        end
+      end
+      false
     end
 
     # overrides Base
     def valid?(obj)
-      types.any? { |type| type.valid?(obj) }
+      member_modules = @member_modules
+      if member_modules.nil?
+        # Force the lazy types builder, which also computes @member_modules
+        types
+        member_modules = @member_modules
+      end
+      index = 0
+      if member_modules
+        while index < member_modules.length
+          return true if obj.is_a?(member_modules[index])
+          index += 1
+        end
+      else
+        members = types
+        while index < members.length
+          return true if members.fetch(index).valid?(obj)
+          index += 1
+        end
+      end
+      false
     end
 
     # overrides Base
@@ -87,6 +142,14 @@ module T::Types
         EMPTY_ARRAY = [].freeze
         private_constant :EMPTY_ARRAY
 
+        # Two-level pool of SimplePairUnion instances, keyed on the pair of
+        # raw modules (outer map on type_a's raw_type, inner map on type_b's),
+        # which fully determine a SimplePairUnion's state. Both levels are
+        # weak-keyed and weak-valued, so neither modules nor pooled unions
+        # leak; entries dropped by GC are transparently rebuilt through the
+        # constructor on the next miss.
+        @simple_pair_cache = ObjectSpace::WeakMap.new
+
         # Try to use `to_nilable` on a type to get memoization, or failing that
         # try to at least use SimplePairUnion to get faster init and typechecking.
         #
@@ -109,12 +172,38 @@ module T::Types
           end
 
           begin
-            if type_b == T::Utils::Nilable::NIL_TYPE
+            # The `equal?` checks are an identity fast path: NIL_TYPE is the pooled
+            # `coerce(NilClass)` instance, so it hits on every normal `T.nilable` call.
+            if type_b.equal?(T::Utils::Nilable::NIL_TYPE)
               type_a.to_nilable
-            elsif type_a == T::Utils::Nilable::NIL_TYPE
+            elsif type_a.equal?(T::Utils::Nilable::NIL_TYPE)
               type_b.to_nilable
             else
-              T::Private::Types::SimplePairUnion.new(type_a, type_b)
+              raw_a = type_a.raw_type
+              raw_b = type_b.raw_type
+              inner = @simple_pair_cache[raw_a]
+              cached = inner && inner[raw_b]
+              if cached
+                # A hit can skip the `==` nil checks below: pairs with a
+                # member `==` NIL_TYPE are routed to `to_nilable` before
+                # construction and so are never stored.
+                cached
+              # The `==` fallbacks preserve semantics for hand-constructed
+              # `Simple.new(NilClass)` instances that bypass the pool.
+              elsif type_b == T::Utils::Nilable::NIL_TYPE
+                type_a.to_nilable
+              elsif type_a == T::Utils::Nilable::NIL_TYPE
+                type_b.to_nilable
+              else
+                # Stored only after successful construction, so the
+                # DuplicateType outcome below is never cached. A racy
+                # double-init here is benign: both instances behave
+                # identically (same raw module pair).
+                pair = T::Private::Types::SimplePairUnion.new(type_a, type_b)
+                inner ||= (@simple_pair_cache[raw_a] = ObjectSpace::WeakMap.new)
+                inner[raw_b] = pair
+                pair
+              end
             end
           rescue T::Private::Types::SimplePairUnion::DuplicateType
             # Slow path

@@ -53,6 +53,11 @@ module T::Types
       def valid?(obj)
         obj.is_a?(Hash)
       end
+
+      def freeze
+        build_type # force lazy initialization before freezing the object
+        super
+      end
     end
   end
 end
