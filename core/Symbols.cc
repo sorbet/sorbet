@@ -1210,7 +1210,7 @@ string_view TypeMemberRef::showKind(const GlobalState &gs) const {
 }
 
 string_view TypeParameterRef::showKind(const GlobalState &gs) const {
-    return "type-argument"sv;
+    return "type-parameter"sv;
 }
 
 string ClassOrModuleRef::toStringWithOptions(const GlobalState &gs, int tabs, bool showFull, bool showRaw) const {
