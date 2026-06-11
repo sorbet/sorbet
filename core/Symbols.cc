@@ -715,6 +715,91 @@ MethodRef ClassOrModule::findConcreteMethodTransitive(const GlobalState &gs, Nam
     return findConcreteMethodTransitiveInternal(gs, this->ref(gs), name, 100);
 }
 
+namespace {
+enum class NewVisibilityOverrideLookupResultKind {
+    Found,
+    NotFound,
+    ReachedMethodOwner,
+};
+
+struct NewVisibilityOverrideLookupResult {
+    NewVisibilityOverrideLookupResultKind kind;
+    Visibility visibility;
+
+    static NewVisibilityOverrideLookupResult found(Visibility visibility) {
+        return {NewVisibilityOverrideLookupResultKind::Found, visibility};
+    }
+
+    static NewVisibilityOverrideLookupResult notFound() {
+        return {NewVisibilityOverrideLookupResultKind::NotFound, Visibility::Public};
+    }
+
+    static NewVisibilityOverrideLookupResult reachedMethodOwner() {
+        return {NewVisibilityOverrideLookupResultKind::ReachedMethodOwner, Visibility::Public};
+    }
+};
+
+NewVisibilityOverrideLookupResult findNewVisibilityOverrideTransitiveInternal(const GlobalState &gs,
+                                                                              ClassOrModuleRef owner,
+                                                                              ClassOrModuleRef methodOwner,
+                                                                              int maxDepth) {
+    if (maxDepth == 0) {
+        if (auto e = gs.beginError(Loc::none(), errors::Internal::InternalError)) {
+            e.setHeader("findNewVisibilityOverrideTransitive hit a loop while resolving in `{}`",
+                        owner.showFullName(gs));
+        }
+        Exception::raise("findNewVisibilityOverrideTransitive hit a loop while resolving");
+    }
+
+    auto ownerData = owner.data(gs);
+    if (owner == methodOwner) {
+        return NewVisibilityOverrideLookupResult::reachedMethodOwner();
+    }
+
+    if (auto visibility = ownerData->newVisibilityOverride()) {
+        return NewVisibilityOverrideLookupResult::found(*visibility);
+    }
+
+    if (ownerData->flags.isLinearizationComputed) {
+        for (auto it = ownerData->mixins().begin(), end = ownerData->mixins().end(); it != end; ++it) {
+            ENFORCE(it->exists());
+            if (*it == methodOwner) {
+                return NewVisibilityOverrideLookupResult::reachedMethodOwner();
+            }
+
+            auto mixinData = it->data(gs);
+            if (auto visibility = mixinData->newVisibilityOverride()) {
+                return NewVisibilityOverrideLookupResult::found(*visibility);
+            }
+        }
+    } else {
+        for (auto it = ownerData->mixins().rbegin(), end = ownerData->mixins().rend(); it != end; ++it) {
+            ENFORCE(it->exists());
+            auto result = findNewVisibilityOverrideTransitiveInternal(gs, *it, methodOwner, maxDepth - 1);
+            if (result.kind != NewVisibilityOverrideLookupResultKind::NotFound) {
+                return result;
+            }
+        }
+    }
+
+    if (ownerData->superClass().exists()) {
+        return findNewVisibilityOverrideTransitiveInternal(gs, ownerData->superClass(), methodOwner, maxDepth - 1);
+    }
+
+    return NewVisibilityOverrideLookupResult::notFound();
+}
+} // namespace
+
+optional<Visibility> ClassOrModule::findNewVisibilityOverrideTransitive(const GlobalState &gs,
+                                                                        ClassOrModuleRef methodOwner) const {
+    auto result = findNewVisibilityOverrideTransitiveInternal(gs, this->ref(gs), methodOwner, 100);
+    if (result.kind == NewVisibilityOverrideLookupResultKind::Found) {
+        return result.visibility;
+    }
+
+    return nullopt;
+}
+
 SymbolRef ClassOrModule::findParentMemberTransitiveInternal(const GlobalState &gs, NameRef name, int maxDepth,
                                                             bool dealias) const {
     SymbolRef result;

@@ -193,6 +193,30 @@ CheckSize(FoundMethodHash, 12, 4);
 
 using FoundMethodHashes = std::vector<FoundMethodHash>;
 
+struct FoundNewVisibilityModifierHash {
+    // The owner of this constructor visibility modifier.
+    FOUND_HASH_OWNER_INFO();
+
+    // Whether the modifier applies to the singleton class of the owner.
+    bool useSingletonClass : 1;
+
+    // Whether the modifier makes `new` private. False means public.
+    bool isPrivate : 1;
+
+    FoundNewVisibilityModifierHash(uint32_t ownerIdx, bool ownerIsSymbol, bool useSingletonClass, bool isPrivate)
+        : ownerIdx(ownerIdx), ownerIsSymbol(ownerIsSymbol), useSingletonClass(useSingletonClass), isPrivate(isPrivate) {
+        sanityCheck();
+    };
+
+    void sanityCheck() const;
+
+    // Debug string
+    std::string toString() const;
+};
+CheckSize(FoundNewVisibilityModifierHash, 4, 4);
+
+using FoundNewVisibilityModifierHashes = std::vector<FoundNewVisibilityModifierHash>;
+
 struct FoundFieldHash {
     // The owner of this field.
     FOUND_HASH_OWNER_INFO();
@@ -228,6 +252,7 @@ struct FoundDefHashes {
     FoundStaticFieldHashes staticFieldHashes;
     FoundTypeMemberHashes typeMemberHashes;
     FoundMethodHashes methodHashes;
+    FoundNewVisibilityModifierHashes newVisibilityModifierHashes;
     FoundFieldHashes fieldHashes;
 };
 

@@ -1134,6 +1134,60 @@ private:
         return symbol;
     }
 
+    bool isPrivateVisibilityModifier(core::NameRef name) {
+        return name == core::Names::privateClassMethod() || name == core::Names::private_();
+    }
+
+    bool isConstructorVisibilityModifier(core::Context ctx, core::ClassOrModuleRef owner,
+                                         const core::FoundModifier &mod) {
+        if (mod.target != core::Names::new_()) {
+            return false;
+        }
+
+        if (mod.name == core::Names::privateClassMethod() || mod.name == core::Names::publicClassMethod()) {
+            return true;
+        }
+
+        if (mod.name != core::Names::private_() && mod.name != core::Names::public_()) {
+            return false;
+        }
+
+        return owner.data(ctx)->isSingletonClass(ctx);
+    }
+
+    void applyMethodVisibility(core::MutableContext ctx, core::ClassOrModuleRef owner, core::MethodRef method,
+                               const core::FoundModifier &mod) {
+        switch (mod.name.rawId()) {
+            case core::Names::private_().rawId():
+            case core::Names::privateClassMethod().rawId():
+                method.data(ctx)->flags.isPrivate = true;
+                break;
+            case core::Names::packagePrivate().rawId():
+            case core::Names::packagePrivateClassMethod().rawId():
+                if (!owner.data(ctx)->package.exists()) {
+                    if (auto e = ctx.beginError(mod.loc, core::errors::Namer::PackagePrivateOutsidePackage)) {
+                        e.setHeader("Method `{}` is not in a package and so cannot be made `{}`", method.show(ctx),
+                                    mod.name.show(ctx));
+                        e.addErrorLine(owner.data(ctx)->loc(), "This class has no package");
+                        e.addErrorLine(method.data(ctx)->loc(), "Method defined here");
+                    }
+                    break;
+                }
+
+                method.data(ctx)->flags.isPackagePrivate = true;
+                break;
+            case core::Names::protected_().rawId():
+                method.data(ctx)->flags.isProtected = true;
+                break;
+            case core::Names::public_().rawId():
+            case core::Names::publicClassMethod().rawId():
+                method.data(ctx)->setMethodPublic();
+                break;
+            default:
+                break;
+        }
+    }
+
     void modifyMethod(core::MutableContext ctx, const core::FoundModifier &mod) {
         ENFORCE(mod.kind == core::FoundModifier::Kind::Method);
 
@@ -1147,35 +1201,10 @@ private:
 
         auto method = ctx.state.lookupMethodSymbol(owner, mod.target);
         if (method.exists()) {
-            switch (mod.name.rawId()) {
-                case core::Names::private_().rawId():
-                case core::Names::privateClassMethod().rawId():
-                    method.data(ctx)->flags.isPrivate = true;
-                    break;
-                case core::Names::packagePrivate().rawId():
-                case core::Names::packagePrivateClassMethod().rawId():
-                    if (!owner.data(ctx)->package.exists()) {
-                        if (auto e = ctx.beginError(mod.loc, core::errors::Namer::PackagePrivateOutsidePackage)) {
-                            e.setHeader("Method `{}` is not in a package and so cannot be made `{}`", method.show(ctx),
-                                        mod.name.show(ctx));
-                            e.addErrorLine(owner.data(ctx)->loc(), "This class has no package");
-                            e.addErrorLine(method.data(ctx)->loc(), "Method defined here");
-                        }
-                        break;
-                    }
-
-                    method.data(ctx)->flags.isPackagePrivate = true;
-                    break;
-                case core::Names::protected_().rawId():
-                    method.data(ctx)->flags.isProtected = true;
-                    break;
-                case core::Names::public_().rawId():
-                case core::Names::publicClassMethod().rawId():
-                    method.data(ctx)->setMethodPublic();
-                    break;
-                default:
-                    break;
-            }
+            applyMethodVisibility(ctx, owner, method, mod);
+        } else if (isConstructorVisibilityModifier(ctx, owner, mod)) {
+            owner.data(ctx)->setNewVisibilityOverride(isPrivateVisibilityModifier(mod.name) ? core::Visibility::Private
+                                                                                           : core::Visibility::Public);
         }
     }
 
@@ -1720,6 +1749,14 @@ private:
         deleteSymbolViaFullNameHash(ctx, owner, oldDefHash.nameHash);
     }
 
+    void deleteNewVisibilityModifierHash(core::MutableContext ctx, const SymbolDefiner::State &state,
+                                         const core::FoundNewVisibilityModifierHash &oldDefHash) {
+        auto ownerSymbol = getOwnerSymbol(state, oldDefHash.owner());
+        auto owner = oldDefHash.useSingletonClass ? ownerSymbol.data(ctx)->singletonClass(ctx) : ownerSymbol;
+
+        owner.data(ctx)->clearNewVisibilityOverride();
+    }
+
 public:
     void deleteOldDefinitions(core::MutableContext ctx, const SymbolDefiner::State &state,
                               const core::FoundDefHashes &oldFoundHashes) {
@@ -1772,6 +1809,10 @@ public:
             // guarantee that deleteViaFullNameHash can use getOwnerSymbol to lookup an old owner
             // ref in the new definedClasses vector.
             deleteMethodViaFullNameHash(ctx, state, oldMethodHash);
+        }
+
+        for (const auto &oldNewVisibilityModifierHash : oldFoundHashes.newVisibilityModifierHashes) {
+            deleteNewVisibilityModifierHash(ctx, state, oldNewVisibilityModifierHash);
         }
     }
 
@@ -1898,6 +1939,39 @@ public:
             auto fullNameHash = core::FullNameHash(ctx, method.name);
             foundHashesOut.methodHashes.emplace_back(owner.idx(), ownerIsSymbol, method.flags.isSelfMethod,
                                                      fullNameHash, method.arityHash);
+        }
+
+        ENFORCE(foundHashesOut.newVisibilityModifierHashes.empty());
+        for (const auto &modifier : foundDefs.modifiers()) {
+            if (modifier.target != core::Names::new_()) {
+                continue;
+            }
+
+            auto owner = modifier.owner;
+            ENFORCE(owner.kind() == core::FoundDefinitionRef::Kind::Class ||
+                        owner.kind() == core::FoundDefinitionRef::Kind::Symbol,
+                    "kind={}", core::FoundDefinitionRef::kindToString(owner.kind()));
+
+            auto ownerIsSymbol = owner.kind() == core::FoundDefinitionRef::Kind::Symbol;
+            bool useSingletonClass;
+            bool isPrivate;
+            if (modifier.name == core::Names::privateClassMethod() ||
+                modifier.name == core::Names::publicClassMethod()) {
+                useSingletonClass = true;
+                isPrivate = modifier.name == core::Names::privateClassMethod();
+            } else if (modifier.name == core::Names::private_() || modifier.name == core::Names::public_()) {
+                auto ownerSymbol = getOwnerSymbol(state, owner);
+                if (!ownerSymbol.data(ctx)->isSingletonClass(ctx)) {
+                    continue;
+                }
+                useSingletonClass = false;
+                isPrivate = modifier.name == core::Names::private_();
+            } else {
+                continue;
+            }
+
+            foundHashesOut.newVisibilityModifierHashes.emplace_back(owner.idx(), ownerIsSymbol, useSingletonClass,
+                                                                    isPrivate);
         }
 
         ENFORCE(foundHashesOut.fieldHashes.empty());

@@ -20,12 +20,10 @@ b = B.new # error: Non-private call to private method `new`
 b.initialize
 
 class C
-  # At time of writing, Sorbet doesn't support changing visibility of an
-  # inherited method.
   private_class_method :new
 end
 
-c = C.new
+c = C.new # error: Non-private call to private method `new`
 c.initialize # error: Non-private call to private method `initialize` on `C`
 
 class D

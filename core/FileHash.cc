@@ -149,6 +149,22 @@ string FoundMethodHash::toString() const {
                        ownerIdx, ownerIsSymbol, useSingletonClass, nameHash._hashValue, arityHash._hashValue);
 }
 
+FoundDefinitionRef FoundNewVisibilityModifierHash::owner() const {
+    if (this->ownerIsSymbol) {
+        return {FoundDefinitionRef::Kind::Symbol, this->ownerIdx};
+    } else {
+        return {FoundDefinitionRef::Kind::Class, this->ownerIdx};
+    }
+}
+
+void FoundNewVisibilityModifierHash::sanityCheck() const {}
+
+string FoundNewVisibilityModifierHash::toString() const {
+    return fmt::format("FoundNewVisibilityModifierHash {{ ownerIdx = {}, ownerIsSymbol = {}, useSingletonClass = {}, "
+                       "isPrivate = {} }}",
+                       ownerIdx, ownerIsSymbol, useSingletonClass, isPrivate);
+}
+
 FoundDefinitionRef FoundFieldHash::owner() const {
     if (this->ownerIsSymbol) {
         return {FoundDefinitionRef::Kind::Symbol, this->ownerIdx};

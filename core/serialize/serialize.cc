@@ -312,6 +312,13 @@ void SerializerImpl::pickle(Pickler &p, shared_ptr<const FileHash> fh) {
         p.putU4(fdh.nameHash._hashValue);
         p.putU4(fdh.arityHash._hashValue);
     }
+    p.putU4(fh->foundHashes.newVisibilityModifierHashes.size());
+    for (const auto &fvh : fh->foundHashes.newVisibilityModifierHashes) {
+        p.putU4(fvh.ownerIdx);
+        p.putU1(fvh.ownerIsSymbol);
+        p.putU1(fvh.useSingletonClass);
+        p.putU1(fvh.isPrivate);
+    }
     p.putU4(fh->foundHashes.fieldHashes.size());
     for (const auto &ffh : fh->foundHashes.fieldHashes) {
         p.putU4(ffh.ownerIdx);
@@ -381,6 +388,16 @@ unique_ptr<const FileHash> SerializerImpl::unpickleFileHash(UnPickler &p) {
         ArityHash arityHash;
         arityHash._hashValue = p.getU4();
         ret.foundHashes.methodHashes.emplace_back(ownerIdx, ownerIsSymbol, useSingletonClass, fullNameHash, arityHash);
+    }
+    auto foundNewVisibilityModifierHashesSize = p.getU4();
+    ret.foundHashes.newVisibilityModifierHashes.reserve(foundNewVisibilityModifierHashesSize);
+    for (int it = 0; it < foundNewVisibilityModifierHashesSize; it++) {
+        auto ownerIdx = p.getU4();
+        auto ownerIsSymbol = p.getU1();
+        auto useSingletonClass = p.getU1();
+        auto isPrivate = p.getU1();
+        ret.foundHashes.newVisibilityModifierHashes.emplace_back(ownerIdx, ownerIsSymbol, useSingletonClass,
+                                                                 isPrivate);
     }
     auto foundFieldHashesSize = p.getU4();
     ret.foundHashes.fieldHashes.reserve(foundFieldHashesSize);

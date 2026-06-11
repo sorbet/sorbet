@@ -1,0 +1,12 @@
+# typed: true
+# assert-slow-path: true
+
+class FastPathPrivateCtorParent
+  private_class_method :new
+end
+
+class FastPathPrivateCtorChild < FastPathPrivateCtorParent
+  private_class_method :new
+end
+
+FastPathPrivateCtorChild.new # error: Non-private call to private method `new`

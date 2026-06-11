@@ -400,14 +400,17 @@ public:
         bool isDeclaredInPackage : 1;
         bool isExported : 1;
         bool isBehaviorDefining : 1;
+        bool hasNewVisibilityOverride : 1;
+        bool isNewVisibilityOverridePrivate : 1;
 
-        constexpr static uint16_t NUMBER_OF_FLAGS = 12;
+        constexpr static uint16_t NUMBER_OF_FLAGS = 14;
         constexpr static uint16_t VALID_BITS_MASK = (1 << NUMBER_OF_FLAGS) - 1;
 
         Flags() noexcept
             : isClass(false), isModule(false), isAbstract(false), isInterface(false), isLinearizationComputed(false),
               isFinal(false), isSealed(false), isPrivate(false), isDeclared(false), isDeclaredInPackage(false),
-              isExported(false), isBehaviorDefining(false) {}
+              isExported(false), isBehaviorDefining(false), hasNewVisibilityOverride(false),
+              isNewVisibilityOverridePrivate(false) {}
 
         uint16_t serialize() const {
             static_assert(sizeof(Flags) == sizeof(uint16_t));
@@ -560,6 +563,27 @@ public:
     // instead looking only in the members of any parent.
     MethodRef findParentMethodTransitive(const GlobalState &gs, NameRef name) const;
     MethodRef findConcreteMethodTransitive(const GlobalState &gs, NameRef name) const;
+    std::optional<Visibility> findNewVisibilityOverrideTransitive(const GlobalState &gs,
+                                                                  ClassOrModuleRef methodOwner) const;
+
+    void setNewVisibilityOverride(Visibility visibility) {
+        ENFORCE(visibility == Visibility::Private || visibility == Visibility::Public);
+        flags.hasNewVisibilityOverride = true;
+        flags.isNewVisibilityOverridePrivate = visibility == Visibility::Private;
+    }
+
+    void clearNewVisibilityOverride() {
+        flags.hasNewVisibilityOverride = false;
+        flags.isNewVisibilityOverridePrivate = false;
+    }
+
+    std::optional<Visibility> newVisibilityOverride() const {
+        if (!flags.hasNewVisibilityOverride) {
+            return std::nullopt;
+        }
+
+        return flags.isNewVisibilityOverridePrivate ? Visibility::Private : Visibility::Public;
+    }
 
     /* transitively finds a member with the most similar name */
 

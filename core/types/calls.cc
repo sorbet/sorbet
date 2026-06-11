@@ -1026,7 +1026,14 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
     }
 
-    if (methodData->flags.isPrivate && !args.isPrivateOk) {
+    auto effectiveVisibility = methodData->methodVisibility();
+    if (args.name == core::Names::new_()) {
+        if (auto newVisibilityOverride = symbol.data(gs)->findNewVisibilityOverrideTransitive(gs, methodData->owner)) {
+            effectiveVisibility = *newVisibilityOverride;
+        }
+    }
+
+    if (effectiveVisibility == core::Visibility::Private && !args.isPrivateOk) {
         if (auto e = gs.beginError(args.errLoc(), core::errors::Infer::PrivateMethod)) {
             if (args.fullType.type != args.thisType) {
                 e.setHeader("Non-private call to private method `{}` on `{}` component of `{}`",
