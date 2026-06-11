@@ -51,7 +51,6 @@ require_relative 'types/types/type_parameter'
 require_relative 'types/types/typed_enumerator'
 require_relative 'types/types/typed_enumerator_chain'
 require_relative 'types/types/typed_enumerator_lazy'
-require_relative 'types/types/typed_hash'
 require_relative 'types/types/typed_range'
 require_relative 'types/types/typed_set'
 require_relative 'types/types/union'
@@ -87,6 +86,10 @@ require_relative 'types/utils'
 require_relative 'types/boolean'
 
 # Depends on types/utils
+# typed_hash must load after untyped + utils so TypedHash::Untyped::Private::INSTANCE
+# (a frozen, shared T::Hash[T.untyped, T.untyped]) can be built at load time, the same
+# way TypedArray::Untyped::Private::INSTANCE is.
+require_relative 'types/types/typed_hash'
 require_relative 'types/types/typed_array'
 require_relative 'types/types/typed_module'
 require_relative 'types/types/typed_class'

@@ -101,7 +101,7 @@ module T::Types
           type = if mod == ::Array
             TypedArray::Untyped::Private::INSTANCE
           elsif mod == ::Hash
-            TypedHash::Untyped.new
+            TypedHash::Untyped::Private::INSTANCE
           elsif mod == ::Enumerable
             TypedEnumerable::Untyped.new
           elsif mod == ::Enumerator

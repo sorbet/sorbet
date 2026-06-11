@@ -329,7 +329,7 @@ module T
   module Hash
     def self.[](keys, values)
       if keys.is_a?(T::Types::Untyped) && values.is_a?(T::Types::Untyped)
-        T::Types::TypedHash::Untyped.new
+        T::Types::TypedHash::Untyped::Private::INSTANCE
       else
         T::Types::TypedHash.new(keys: keys, values: values)
       end
