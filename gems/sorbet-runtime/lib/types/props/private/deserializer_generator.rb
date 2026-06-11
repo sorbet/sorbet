@@ -81,10 +81,16 @@ module T::Props
             raise_on_nil_write: !!rules[:raise_on_nil_write],
           )
 
+          # The `.freeze` on the `hash.key?` argument matters: when this source
+          # is eval'd lazily (without a frozen-string-literal prefix, unlike
+          # `eagerly_define_lazy_methods!`), a bare literal here would allocate
+          # a new String on every call for each nil/missing prop. `"str".freeze`
+          # compiles to a no-allocation VM instruction (opt_str_freeze). The
+          # `hash[...]` read doesn't need it because of opt_aref_with.
           <<~RUBY
             val = hash[#{hash_key.inspect}]
             #{ivar_name} = if val.nil?
-              found -= 1 unless hash.key?(#{hash_key.inspect})
+              found -= 1 unless hash.key?(#{hash_key.inspect}.freeze)
               #{nil_handler}
             else
               #{transformed_val}
