@@ -1726,4 +1726,931 @@ module T::Private::Methods::CallValidation
     end
   end
 
+  def self.create_validator_method_kwargs0(mod, original_method, method_sig, original_visibility, return_type, kwarg_types)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |**kwargs, &blk|
+      # This method is a manually sped-up version of more general code in `validate_call`
+      # NOTE: like `validate_call`, we don't validate for missing or extra
+      # kwargs; the `bind_call` below takes care of that.
+      kwargs.each do |name, val|
+        type = kwarg_types[name]
+        next unless type
+        next if type.valid?(val)
+        CallValidation.report_error(
+          method_sig,
+          type.error_message_for_obj(val),
+          'Parameter',
+          name,
+          type,
+          val,
+          caller_offset: 1
+        )
+      end
+      return_value = original_method.bind_call(self, **kwargs, &blk)
+      if return_type.nil?
+        T::Private::Types::Void::VOID
+      else
+        unless return_type.valid?(return_value)
+          message = method_sig.effective_return_type.error_message_for_obj(return_value)
+          if message
+            CallValidation.report_error(
+              method_sig,
+              message,
+              'Return value',
+              nil,
+              method_sig.effective_return_type,
+              return_value,
+              caller_offset: -1
+            )
+          end
+        end
+        return_value
+      end
+    end
+  end
+
+  def self.create_validator_method_with_block0(mod, original_method, method_sig, original_visibility, return_type, block_type)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |&blk|
+      # This method is a manually sped-up version of more general code in `validate_call`
+      if blk.nil?
+        CallValidation.report_error(
+          method_sig,
+          block_type.error_message_for_obj(blk),
+          'Block parameter',
+          method_sig.block_name,
+          block_type,
+          blk,
+          caller_offset: -1
+        )
+      end
+      return_value = original_method.bind_call(self, &blk)
+      if return_type.nil?
+        T::Private::Types::Void::VOID
+      else
+        unless return_type.valid?(return_value)
+          message = method_sig.effective_return_type.error_message_for_obj(return_value)
+          if message
+            CallValidation.report_error(
+              method_sig,
+              message,
+              'Return value',
+              nil,
+              method_sig.effective_return_type,
+              return_value,
+              caller_offset: -1
+            )
+          end
+        end
+        return_value
+      end
+    end
+  end
+
+  def self.create_validator_method_with_block1(mod, original_method, method_sig, original_visibility, return_type, block_type, arg0_type)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |arg0, &blk|
+      # This method is a manually sped-up version of more general code in `validate_call`
+      unless arg0_type.valid?(arg0)
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[0][1].error_message_for_obj(arg0),
+          'Parameter',
+          method_sig.arg_types[0][0],
+          arg0_type,
+          arg0,
+          caller_offset: -1
+        )
+      end
+      if blk.nil?
+        CallValidation.report_error(
+          method_sig,
+          block_type.error_message_for_obj(blk),
+          'Block parameter',
+          method_sig.block_name,
+          block_type,
+          blk,
+          caller_offset: -1
+        )
+      end
+      return_value = original_method.bind_call(self, arg0, &blk)
+      if return_type.nil?
+        T::Private::Types::Void::VOID
+      else
+        unless return_type.valid?(return_value)
+          message = method_sig.effective_return_type.error_message_for_obj(return_value)
+          if message
+            CallValidation.report_error(
+              method_sig,
+              message,
+              'Return value',
+              nil,
+              method_sig.effective_return_type,
+              return_value,
+              caller_offset: -1
+            )
+          end
+        end
+        return_value
+      end
+    end
+  end
+
+  def self.create_validator_method_with_block2(mod, original_method, method_sig, original_visibility, return_type, block_type, arg0_type, arg1_type)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |arg0, arg1, &blk|
+      # This method is a manually sped-up version of more general code in `validate_call`
+      unless arg0_type.valid?(arg0)
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[0][1].error_message_for_obj(arg0),
+          'Parameter',
+          method_sig.arg_types[0][0],
+          arg0_type,
+          arg0,
+          caller_offset: -1
+        )
+      end
+      unless arg1_type.valid?(arg1)
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[1][1].error_message_for_obj(arg1),
+          'Parameter',
+          method_sig.arg_types[1][0],
+          arg1_type,
+          arg1,
+          caller_offset: -1
+        )
+      end
+      if blk.nil?
+        CallValidation.report_error(
+          method_sig,
+          block_type.error_message_for_obj(blk),
+          'Block parameter',
+          method_sig.block_name,
+          block_type,
+          blk,
+          caller_offset: -1
+        )
+      end
+      return_value = original_method.bind_call(self, arg0, arg1, &blk)
+      if return_type.nil?
+        T::Private::Types::Void::VOID
+      else
+        unless return_type.valid?(return_value)
+          message = method_sig.effective_return_type.error_message_for_obj(return_value)
+          if message
+            CallValidation.report_error(
+              method_sig,
+              message,
+              'Return value',
+              nil,
+              method_sig.effective_return_type,
+              return_value,
+              caller_offset: -1
+            )
+          end
+        end
+        return_value
+      end
+    end
+  end
+
+  def self.create_validator_method_with_block3(mod, original_method, method_sig, original_visibility, return_type, block_type, arg0_type, arg1_type, arg2_type)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |arg0, arg1, arg2, &blk|
+      # This method is a manually sped-up version of more general code in `validate_call`
+      unless arg0_type.valid?(arg0)
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[0][1].error_message_for_obj(arg0),
+          'Parameter',
+          method_sig.arg_types[0][0],
+          arg0_type,
+          arg0,
+          caller_offset: -1
+        )
+      end
+      unless arg1_type.valid?(arg1)
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[1][1].error_message_for_obj(arg1),
+          'Parameter',
+          method_sig.arg_types[1][0],
+          arg1_type,
+          arg1,
+          caller_offset: -1
+        )
+      end
+      unless arg2_type.valid?(arg2)
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[2][1].error_message_for_obj(arg2),
+          'Parameter',
+          method_sig.arg_types[2][0],
+          arg2_type,
+          arg2,
+          caller_offset: -1
+        )
+      end
+      if blk.nil?
+        CallValidation.report_error(
+          method_sig,
+          block_type.error_message_for_obj(blk),
+          'Block parameter',
+          method_sig.block_name,
+          block_type,
+          blk,
+          caller_offset: -1
+        )
+      end
+      return_value = original_method.bind_call(self, arg0, arg1, arg2, &blk)
+      if return_type.nil?
+        T::Private::Types::Void::VOID
+      else
+        unless return_type.valid?(return_value)
+          message = method_sig.effective_return_type.error_message_for_obj(return_value)
+          if message
+            CallValidation.report_error(
+              method_sig,
+              message,
+              'Return value',
+              nil,
+              method_sig.effective_return_type,
+              return_value,
+              caller_offset: -1
+            )
+          end
+        end
+        return_value
+      end
+    end
+  end
+
+  def self.create_validator_method_with_block4(mod, original_method, method_sig, original_visibility, return_type, block_type, arg0_type, arg1_type, arg2_type, arg3_type)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |arg0, arg1, arg2, arg3, &blk|
+      # This method is a manually sped-up version of more general code in `validate_call`
+      unless arg0_type.valid?(arg0)
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[0][1].error_message_for_obj(arg0),
+          'Parameter',
+          method_sig.arg_types[0][0],
+          arg0_type,
+          arg0,
+          caller_offset: -1
+        )
+      end
+      unless arg1_type.valid?(arg1)
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[1][1].error_message_for_obj(arg1),
+          'Parameter',
+          method_sig.arg_types[1][0],
+          arg1_type,
+          arg1,
+          caller_offset: -1
+        )
+      end
+      unless arg2_type.valid?(arg2)
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[2][1].error_message_for_obj(arg2),
+          'Parameter',
+          method_sig.arg_types[2][0],
+          arg2_type,
+          arg2,
+          caller_offset: -1
+        )
+      end
+      unless arg3_type.valid?(arg3)
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[3][1].error_message_for_obj(arg3),
+          'Parameter',
+          method_sig.arg_types[3][0],
+          arg3_type,
+          arg3,
+          caller_offset: -1
+        )
+      end
+      if blk.nil?
+        CallValidation.report_error(
+          method_sig,
+          block_type.error_message_for_obj(blk),
+          'Block parameter',
+          method_sig.block_name,
+          block_type,
+          blk,
+          caller_offset: -1
+        )
+      end
+      return_value = original_method.bind_call(self, arg0, arg1, arg2, arg3, &blk)
+      if return_type.nil?
+        T::Private::Types::Void::VOID
+      else
+        unless return_type.valid?(return_value)
+          message = method_sig.effective_return_type.error_message_for_obj(return_value)
+          if message
+            CallValidation.report_error(
+              method_sig,
+              message,
+              'Return value',
+              nil,
+              method_sig.effective_return_type,
+              return_value,
+              caller_offset: -1
+            )
+          end
+        end
+        return_value
+      end
+    end
+  end
+
+  def self.create_validator_method_optional_args0_1(mod, original_method, method_sig, original_visibility, return_type, arg0_type)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |*args, &blk|
+      # This method is a manually sped-up version of more general code in `validate_call`
+      unless args.empty? || arg0_type.valid?(args[0])
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[0][1].error_message_for_obj(args[0]),
+          'Parameter',
+          method_sig.arg_types[0][0],
+          arg0_type,
+          args[0],
+          caller_offset: -1
+        )
+      end
+      return_value = original_method.bind_call(self, *args, &blk)
+      if return_type.nil?
+        T::Private::Types::Void::VOID
+      else
+        unless return_type.valid?(return_value)
+          message = method_sig.effective_return_type.error_message_for_obj(return_value)
+          if message
+            CallValidation.report_error(
+              method_sig,
+              message,
+              'Return value',
+              nil,
+              method_sig.effective_return_type,
+              return_value,
+              caller_offset: -1
+            )
+          end
+        end
+        return_value
+      end
+    end
+  end
+
+  def self.create_validator_method_optional_args0_2(mod, original_method, method_sig, original_visibility, return_type, arg0_type, arg1_type)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |*args, &blk|
+      # This method is a manually sped-up version of more general code in `validate_call`
+      unless args.empty? || arg0_type.valid?(args[0])
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[0][1].error_message_for_obj(args[0]),
+          'Parameter',
+          method_sig.arg_types[0][0],
+          arg0_type,
+          args[0],
+          caller_offset: -1
+        )
+      end
+      unless args.length <= 1 || arg1_type.valid?(args[1])
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[1][1].error_message_for_obj(args[1]),
+          'Parameter',
+          method_sig.arg_types[1][0],
+          arg1_type,
+          args[1],
+          caller_offset: -1
+        )
+      end
+      return_value = original_method.bind_call(self, *args, &blk)
+      if return_type.nil?
+        T::Private::Types::Void::VOID
+      else
+        unless return_type.valid?(return_value)
+          message = method_sig.effective_return_type.error_message_for_obj(return_value)
+          if message
+            CallValidation.report_error(
+              method_sig,
+              message,
+              'Return value',
+              nil,
+              method_sig.effective_return_type,
+              return_value,
+              caller_offset: -1
+            )
+          end
+        end
+        return_value
+      end
+    end
+  end
+
+  def self.create_validator_method_optional_args1_2(mod, original_method, method_sig, original_visibility, return_type, arg0_type, arg1_type)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |*args, &blk|
+      # This method is a manually sped-up version of more general code in `validate_call`
+      unless arg0_type.valid?(args[0])
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[0][1].error_message_for_obj(args[0]),
+          'Parameter',
+          method_sig.arg_types[0][0],
+          arg0_type,
+          args[0],
+          caller_offset: -1
+        )
+      end
+      unless args.length <= 1 || arg1_type.valid?(args[1])
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[1][1].error_message_for_obj(args[1]),
+          'Parameter',
+          method_sig.arg_types[1][0],
+          arg1_type,
+          args[1],
+          caller_offset: -1
+        )
+      end
+      return_value = original_method.bind_call(self, *args, &blk)
+      if return_type.nil?
+        T::Private::Types::Void::VOID
+      else
+        unless return_type.valid?(return_value)
+          message = method_sig.effective_return_type.error_message_for_obj(return_value)
+          if message
+            CallValidation.report_error(
+              method_sig,
+              message,
+              'Return value',
+              nil,
+              method_sig.effective_return_type,
+              return_value,
+              caller_offset: -1
+            )
+          end
+        end
+        return_value
+      end
+    end
+  end
+
+  def self.create_validator_method_optional_args0_3(mod, original_method, method_sig, original_visibility, return_type, arg0_type, arg1_type, arg2_type)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |*args, &blk|
+      # This method is a manually sped-up version of more general code in `validate_call`
+      unless args.empty? || arg0_type.valid?(args[0])
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[0][1].error_message_for_obj(args[0]),
+          'Parameter',
+          method_sig.arg_types[0][0],
+          arg0_type,
+          args[0],
+          caller_offset: -1
+        )
+      end
+      unless args.length <= 1 || arg1_type.valid?(args[1])
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[1][1].error_message_for_obj(args[1]),
+          'Parameter',
+          method_sig.arg_types[1][0],
+          arg1_type,
+          args[1],
+          caller_offset: -1
+        )
+      end
+      unless args.length <= 2 || arg2_type.valid?(args[2])
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[2][1].error_message_for_obj(args[2]),
+          'Parameter',
+          method_sig.arg_types[2][0],
+          arg2_type,
+          args[2],
+          caller_offset: -1
+        )
+      end
+      return_value = original_method.bind_call(self, *args, &blk)
+      if return_type.nil?
+        T::Private::Types::Void::VOID
+      else
+        unless return_type.valid?(return_value)
+          message = method_sig.effective_return_type.error_message_for_obj(return_value)
+          if message
+            CallValidation.report_error(
+              method_sig,
+              message,
+              'Return value',
+              nil,
+              method_sig.effective_return_type,
+              return_value,
+              caller_offset: -1
+            )
+          end
+        end
+        return_value
+      end
+    end
+  end
+
+  def self.create_validator_method_optional_args1_3(mod, original_method, method_sig, original_visibility, return_type, arg0_type, arg1_type, arg2_type)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |*args, &blk|
+      # This method is a manually sped-up version of more general code in `validate_call`
+      unless arg0_type.valid?(args[0])
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[0][1].error_message_for_obj(args[0]),
+          'Parameter',
+          method_sig.arg_types[0][0],
+          arg0_type,
+          args[0],
+          caller_offset: -1
+        )
+      end
+      unless args.length <= 1 || arg1_type.valid?(args[1])
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[1][1].error_message_for_obj(args[1]),
+          'Parameter',
+          method_sig.arg_types[1][0],
+          arg1_type,
+          args[1],
+          caller_offset: -1
+        )
+      end
+      unless args.length <= 2 || arg2_type.valid?(args[2])
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[2][1].error_message_for_obj(args[2]),
+          'Parameter',
+          method_sig.arg_types[2][0],
+          arg2_type,
+          args[2],
+          caller_offset: -1
+        )
+      end
+      return_value = original_method.bind_call(self, *args, &blk)
+      if return_type.nil?
+        T::Private::Types::Void::VOID
+      else
+        unless return_type.valid?(return_value)
+          message = method_sig.effective_return_type.error_message_for_obj(return_value)
+          if message
+            CallValidation.report_error(
+              method_sig,
+              message,
+              'Return value',
+              nil,
+              method_sig.effective_return_type,
+              return_value,
+              caller_offset: -1
+            )
+          end
+        end
+        return_value
+      end
+    end
+  end
+
+  def self.create_validator_method_optional_args2_3(mod, original_method, method_sig, original_visibility, return_type, arg0_type, arg1_type, arg2_type)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |*args, &blk|
+      # This method is a manually sped-up version of more general code in `validate_call`
+      unless arg0_type.valid?(args[0])
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[0][1].error_message_for_obj(args[0]),
+          'Parameter',
+          method_sig.arg_types[0][0],
+          arg0_type,
+          args[0],
+          caller_offset: -1
+        )
+      end
+      unless arg1_type.valid?(args[1])
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[1][1].error_message_for_obj(args[1]),
+          'Parameter',
+          method_sig.arg_types[1][0],
+          arg1_type,
+          args[1],
+          caller_offset: -1
+        )
+      end
+      unless args.length <= 2 || arg2_type.valid?(args[2])
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[2][1].error_message_for_obj(args[2]),
+          'Parameter',
+          method_sig.arg_types[2][0],
+          arg2_type,
+          args[2],
+          caller_offset: -1
+        )
+      end
+      return_value = original_method.bind_call(self, *args, &blk)
+      if return_type.nil?
+        T::Private::Types::Void::VOID
+      else
+        unless return_type.valid?(return_value)
+          message = method_sig.effective_return_type.error_message_for_obj(return_value)
+          if message
+            CallValidation.report_error(
+              method_sig,
+              message,
+              'Return value',
+              nil,
+              method_sig.effective_return_type,
+              return_value,
+              caller_offset: -1
+            )
+          end
+        end
+        return_value
+      end
+    end
+  end
+
+  def self.create_validator_method_optional_args0_4(mod, original_method, method_sig, original_visibility, return_type, arg0_type, arg1_type, arg2_type, arg3_type)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |*args, &blk|
+      # This method is a manually sped-up version of more general code in `validate_call`
+      unless args.empty? || arg0_type.valid?(args[0])
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[0][1].error_message_for_obj(args[0]),
+          'Parameter',
+          method_sig.arg_types[0][0],
+          arg0_type,
+          args[0],
+          caller_offset: -1
+        )
+      end
+      unless args.length <= 1 || arg1_type.valid?(args[1])
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[1][1].error_message_for_obj(args[1]),
+          'Parameter',
+          method_sig.arg_types[1][0],
+          arg1_type,
+          args[1],
+          caller_offset: -1
+        )
+      end
+      unless args.length <= 2 || arg2_type.valid?(args[2])
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[2][1].error_message_for_obj(args[2]),
+          'Parameter',
+          method_sig.arg_types[2][0],
+          arg2_type,
+          args[2],
+          caller_offset: -1
+        )
+      end
+      unless args.length <= 3 || arg3_type.valid?(args[3])
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[3][1].error_message_for_obj(args[3]),
+          'Parameter',
+          method_sig.arg_types[3][0],
+          arg3_type,
+          args[3],
+          caller_offset: -1
+        )
+      end
+      return_value = original_method.bind_call(self, *args, &blk)
+      if return_type.nil?
+        T::Private::Types::Void::VOID
+      else
+        unless return_type.valid?(return_value)
+          message = method_sig.effective_return_type.error_message_for_obj(return_value)
+          if message
+            CallValidation.report_error(
+              method_sig,
+              message,
+              'Return value',
+              nil,
+              method_sig.effective_return_type,
+              return_value,
+              caller_offset: -1
+            )
+          end
+        end
+        return_value
+      end
+    end
+  end
+
+  def self.create_validator_method_optional_args1_4(mod, original_method, method_sig, original_visibility, return_type, arg0_type, arg1_type, arg2_type, arg3_type)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |*args, &blk|
+      # This method is a manually sped-up version of more general code in `validate_call`
+      unless arg0_type.valid?(args[0])
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[0][1].error_message_for_obj(args[0]),
+          'Parameter',
+          method_sig.arg_types[0][0],
+          arg0_type,
+          args[0],
+          caller_offset: -1
+        )
+      end
+      unless args.length <= 1 || arg1_type.valid?(args[1])
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[1][1].error_message_for_obj(args[1]),
+          'Parameter',
+          method_sig.arg_types[1][0],
+          arg1_type,
+          args[1],
+          caller_offset: -1
+        )
+      end
+      unless args.length <= 2 || arg2_type.valid?(args[2])
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[2][1].error_message_for_obj(args[2]),
+          'Parameter',
+          method_sig.arg_types[2][0],
+          arg2_type,
+          args[2],
+          caller_offset: -1
+        )
+      end
+      unless args.length <= 3 || arg3_type.valid?(args[3])
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[3][1].error_message_for_obj(args[3]),
+          'Parameter',
+          method_sig.arg_types[3][0],
+          arg3_type,
+          args[3],
+          caller_offset: -1
+        )
+      end
+      return_value = original_method.bind_call(self, *args, &blk)
+      if return_type.nil?
+        T::Private::Types::Void::VOID
+      else
+        unless return_type.valid?(return_value)
+          message = method_sig.effective_return_type.error_message_for_obj(return_value)
+          if message
+            CallValidation.report_error(
+              method_sig,
+              message,
+              'Return value',
+              nil,
+              method_sig.effective_return_type,
+              return_value,
+              caller_offset: -1
+            )
+          end
+        end
+        return_value
+      end
+    end
+  end
+
+  def self.create_validator_method_optional_args2_4(mod, original_method, method_sig, original_visibility, return_type, arg0_type, arg1_type, arg2_type, arg3_type)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |*args, &blk|
+      # This method is a manually sped-up version of more general code in `validate_call`
+      unless arg0_type.valid?(args[0])
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[0][1].error_message_for_obj(args[0]),
+          'Parameter',
+          method_sig.arg_types[0][0],
+          arg0_type,
+          args[0],
+          caller_offset: -1
+        )
+      end
+      unless arg1_type.valid?(args[1])
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[1][1].error_message_for_obj(args[1]),
+          'Parameter',
+          method_sig.arg_types[1][0],
+          arg1_type,
+          args[1],
+          caller_offset: -1
+        )
+      end
+      unless args.length <= 2 || arg2_type.valid?(args[2])
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[2][1].error_message_for_obj(args[2]),
+          'Parameter',
+          method_sig.arg_types[2][0],
+          arg2_type,
+          args[2],
+          caller_offset: -1
+        )
+      end
+      unless args.length <= 3 || arg3_type.valid?(args[3])
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[3][1].error_message_for_obj(args[3]),
+          'Parameter',
+          method_sig.arg_types[3][0],
+          arg3_type,
+          args[3],
+          caller_offset: -1
+        )
+      end
+      return_value = original_method.bind_call(self, *args, &blk)
+      if return_type.nil?
+        T::Private::Types::Void::VOID
+      else
+        unless return_type.valid?(return_value)
+          message = method_sig.effective_return_type.error_message_for_obj(return_value)
+          if message
+            CallValidation.report_error(
+              method_sig,
+              message,
+              'Return value',
+              nil,
+              method_sig.effective_return_type,
+              return_value,
+              caller_offset: -1
+            )
+          end
+        end
+        return_value
+      end
+    end
+  end
+
+  def self.create_validator_method_optional_args3_4(mod, original_method, method_sig, original_visibility, return_type, arg0_type, arg1_type, arg2_type, arg3_type)
+    T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |*args, &blk|
+      # This method is a manually sped-up version of more general code in `validate_call`
+      unless arg0_type.valid?(args[0])
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[0][1].error_message_for_obj(args[0]),
+          'Parameter',
+          method_sig.arg_types[0][0],
+          arg0_type,
+          args[0],
+          caller_offset: -1
+        )
+      end
+      unless arg1_type.valid?(args[1])
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[1][1].error_message_for_obj(args[1]),
+          'Parameter',
+          method_sig.arg_types[1][0],
+          arg1_type,
+          args[1],
+          caller_offset: -1
+        )
+      end
+      unless arg2_type.valid?(args[2])
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[2][1].error_message_for_obj(args[2]),
+          'Parameter',
+          method_sig.arg_types[2][0],
+          arg2_type,
+          args[2],
+          caller_offset: -1
+        )
+      end
+      unless args.length <= 3 || arg3_type.valid?(args[3])
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[3][1].error_message_for_obj(args[3]),
+          'Parameter',
+          method_sig.arg_types[3][0],
+          arg3_type,
+          args[3],
+          caller_offset: -1
+        )
+      end
+      return_value = original_method.bind_call(self, *args, &blk)
+      if return_type.nil?
+        T::Private::Types::Void::VOID
+      else
+        unless return_type.valid?(return_value)
+          message = method_sig.effective_return_type.error_message_for_obj(return_value)
+          if message
+            CallValidation.report_error(
+              method_sig,
+              message,
+              'Return value',
+              nil,
+              method_sig.effective_return_type,
+              return_value,
+              caller_offset: -1
+            )
+          end
+        end
+        return_value
+      end
+    end
+  end
+
 end
