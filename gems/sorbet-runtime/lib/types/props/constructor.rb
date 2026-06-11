@@ -20,10 +20,10 @@ module T::Props::Constructor::DecoratorMethods
     # Use `each_pair` rather than `count` because, as of Ruby 2.6, the latter delegates to Enumerator
     # and therefore allocates for each entry.
     result = 0
-    props_without_defaults&.each_pair do |p, setter_proc|
+    props_without_defaults&.each_pair do |p, bound_setter|
       begin
         val = hash[p]
-        instance.instance_exec(val, &setter_proc)
+        bound_setter.call(instance, val)
         if val || hash.key?(p)
           result += 1
         end

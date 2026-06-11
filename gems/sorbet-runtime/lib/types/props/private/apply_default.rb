@@ -9,14 +9,14 @@ module T::Props
       abstract!
 
       # checked(:never) - O(object construction x prop count)
-      sig { returns(SetterFactory::SetterProc).checked(:never) }
-      attr_reader :setter_proc
+      sig { returns(SetterFactory::BoundSetterProc).checked(:never) }
+      attr_reader :bound_setter_proc
 
       # checked(:never) - We do this with `T.let` instead
-      sig { params(accessor_key: Symbol, setter_proc: SetterFactory::SetterProc).void.checked(:never) }
-      def initialize(accessor_key, setter_proc)
+      sig { params(accessor_key: Symbol, bound_setter_proc: SetterFactory::BoundSetterProc).void.checked(:never) }
+      def initialize(accessor_key, bound_setter_proc)
         @accessor_key = T.let(accessor_key, Symbol)
-        @setter_proc = T.let(setter_proc, SetterFactory::SetterProc)
+        @bound_setter_proc = T.let(bound_setter_proc, SetterFactory::BoundSetterProc)
       end
 
       # checked(:never) - O(object construction x prop count)
@@ -33,30 +33,30 @@ module T::Props
       sig { params(cls: T::Module[T.anything], rules: T::Hash[Symbol, T.untyped]).returns(T.nilable(ApplyDefault)).checked(:never) }
       def self.for(cls, rules)
         accessor_key = rules.fetch(:accessor_key)
-        setter = rules.fetch(:setter_proc)
+        bound_setter = rules.fetch(:_bound_setter_proc)
 
         if rules.key?(:factory)
-          ApplyDefaultFactory.new(cls, rules.fetch(:factory), accessor_key, setter)
+          ApplyDefaultFactory.new(cls, rules.fetch(:factory), accessor_key, bound_setter)
         elsif rules.key?(:default)
           default = rules.fetch(:default)
           case default
           when *NO_CLONE_TYPES
-            return ApplyPrimitiveDefault.new(default, accessor_key, setter)
+            return ApplyPrimitiveDefault.new(default, accessor_key, bound_setter)
           when String
             if default.frozen?
-              return ApplyPrimitiveDefault.new(default, accessor_key, setter)
+              return ApplyPrimitiveDefault.new(default, accessor_key, bound_setter)
             end
           when Array
             if default.empty? && default.class == Array
-              return ApplyEmptyArrayDefault.new(accessor_key, setter)
+              return ApplyEmptyArrayDefault.new(accessor_key, bound_setter)
             end
           when Hash
             if default.empty? && default.default.nil? && T.unsafe(default).default_proc.nil? && default.class == Hash
-              return ApplyEmptyHashDefault.new(accessor_key, setter)
+              return ApplyEmptyHashDefault.new(accessor_key, bound_setter)
             end
           end
 
-          ApplyComplexDefault.new(default, accessor_key, setter)
+          ApplyComplexDefault.new(default, accessor_key, bound_setter)
         else
           nil
         end
@@ -67,16 +67,16 @@ module T::Props
       abstract!
 
       # checked(:never) - We do this with `T.let` instead
-      sig { params(default: BasicObject, accessor_key: Symbol, setter_proc: SetterFactory::SetterProc).void.checked(:never) }
-      def initialize(default, accessor_key, setter_proc)
+      sig { params(default: BasicObject, accessor_key: Symbol, bound_setter_proc: SetterFactory::BoundSetterProc).void.checked(:never) }
+      def initialize(default, accessor_key, bound_setter_proc)
         # FIXME: Ideally we'd check here that the default is actually a valid
         # value for this field, but existing code relies on the fact that we don't.
         #
         # :(
         #
-        # setter_proc.call(default)
+        # bound_setter_proc.call(instance, default)
         @default = T.let(default, BasicObject)
-        super(accessor_key, setter_proc)
+        super(accessor_key, bound_setter_proc)
       end
 
       # checked(:never) - O(object construction x prop count)
@@ -141,15 +141,15 @@ module T::Props
           cls: T::Module[T.anything],
           factory: T.any(Proc, Method),
           accessor_key: Symbol,
-          setter_proc: SetterFactory::SetterProc,
+          bound_setter_proc: SetterFactory::BoundSetterProc,
         )
         .void
         .checked(:never)
       end
-      def initialize(cls, factory, accessor_key, setter_proc)
+      def initialize(cls, factory, accessor_key, bound_setter_proc)
         @class = T.let(cls, T::Module[T.anything])
         @factory = T.let(factory, T.any(Proc, Method))
-        super(accessor_key, setter_proc)
+        super(accessor_key, bound_setter_proc)
       end
 
       # checked(:never) - O(object construction x prop count)
@@ -157,7 +157,7 @@ module T::Props
       def set_default(instance)
         # Use the actual setter to validate the factory returns a legitimate
         # value every time
-        instance.instance_exec(default, &@setter_proc)
+        @bound_setter_proc.call(instance, default)
       end
 
       # checked(:never) - O(object construction x prop count)
