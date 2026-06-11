@@ -1196,10 +1196,10 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         fun = lit.name;
                     }
                     core::lsp::QueryResponse::pushQueryResponse(
-                        ctx, core::lsp::SendResponse(retainedResult, send.argLocs(), send.argTypes(), fun, send.fun,
-                                                     ctx.owner.asMethodRef(), send.isPrivateOk, send.numPosArgs,
-                                                     send.numArgs, ctx.file, bind.loc, send.receiverLoc, send.funLoc,
-                                                     locWithoutBlock));
+                        ctx,
+                        core::lsp::SendResponse(retainedResult, send.argLocs(), send.argTypes(), fun, send.fun,
+                                                ctx.owner.asMethodRef(), send.isPrivateOk, send.numPosArgs, ctx.file,
+                                                bind.loc, send.receiverLoc, send.funLoc, locWithoutBlock));
                 }
                 if (send.link.exists()) {
                     send.link.data(inWhat)->result = move(retainedResult);
