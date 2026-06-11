@@ -109,9 +109,13 @@ module T::Types
           end
 
           begin
-            if type_b == T::Utils::Nilable::NIL_TYPE
+            # The `equal?` checks are an identity fast path: NIL_TYPE is the pooled
+            # `coerce(NilClass)` instance, so it hits on every normal `T.nilable` call.
+            # The `==` fallbacks preserve semantics for hand-constructed
+            # `Simple.new(NilClass)` instances that bypass the pool.
+            if type_b.equal?(T::Utils::Nilable::NIL_TYPE) || type_b == T::Utils::Nilable::NIL_TYPE
               type_a.to_nilable
-            elsif type_a == T::Utils::Nilable::NIL_TYPE
+            elsif type_a.equal?(T::Utils::Nilable::NIL_TYPE) || type_a == T::Utils::Nilable::NIL_TYPE
               type_b.to_nilable
             else
               T::Private::Types::SimplePairUnion.new(type_a, type_b)
