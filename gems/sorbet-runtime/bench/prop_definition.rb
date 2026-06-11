@@ -68,6 +68,34 @@ module SorbetBenchmarks
 
       puts "Subclassing T::Struct, with ten props (ms/iter):"
       puts result
+
+      parent = Class.new do
+        include T::Props::Serializable
+
+        prop :prop1, T.nilable(Integer)
+        prop :prop2, Integer, default: 0
+        prop :prop3, Integer
+        prop :prop4, T::Array[Integer]
+        prop :prop5, T::Array[Integer], default: []
+        prop :prop6, T::Hash[String, Integer]
+        prop :prop7, T::Hash[String, Integer], default: {}
+        prop :prop8, T.nilable(String)
+        prop :prop9, T::Array[String], default: []
+        prop :prop10, T::Hash[String, String], default: {}
+      end
+
+      100.times do
+        Class.new(parent)
+      end
+
+      result = Benchmark.measure do
+        1_000.times do
+          Class.new(parent)
+        end
+      end
+
+      puts "Subclassing a 10-prop T::Props::Serializable class (ms/iter):"
+      puts result
     end
   end
 end

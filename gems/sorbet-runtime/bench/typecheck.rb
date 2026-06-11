@@ -115,9 +115,23 @@ module SorbetBenchmarks
         type.valid?('hi')
       end
 
+      type = T::Utils.coerce(T.any(Integer, Float, T::Array[String]))
+      time_block("T.any(Integer, Float, T::Array[String]).valid?", iterations_in_block: 5) do
+        type.valid?(0)
+        type.valid?(1)
+        type.valid?(2)
+        type.valid?(nil)
+        type.valid?('hi')
+      end
+
       time_block("T.let(..., Integer)") do
         T.let(0, Integer)
         T.let(1, Integer)
+      end
+
+      time_block("T.cast(..., Integer)") do
+        T.cast(0, Integer)
+        T.cast(1, Integer)
       end
 
       time_block("sig {params(x: Integer).void}") do
@@ -149,6 +163,17 @@ module SorbetBenchmarks
       time_block("T.let(..., T.nilable(Integer))") do
         T.let(nil, T.nilable(Integer))
         T.let(1, T.nilable(Integer))
+      end
+
+      nilable_integer = T.nilable(Integer)
+      time_block("T.let(..., predefined T.nilable(Integer))") do
+        T.let(nil, nilable_integer)
+        T.let(1, nilable_integer)
+      end
+
+      time_block("sig {params(x: T.nilable(T::Boolean)).void} (nil)") do
+        nilable_boolean_param(nil)
+        nilable_boolean_param(true)
       end
 
       time_block("sig {params(x: T.nilable(Integer)).void}") do
@@ -191,6 +216,11 @@ module SorbetBenchmarks
         arg_plus_kwargs(:bar, x: 1)
       end
 
+      time_block("sig {params(x: Integer, y: Integer).void} (optional positional)") do
+        optional_positional(0)
+        optional_positional(0, 1)
+      end
+
       time_block("direct call Object#class") do
         example.class
         example.class
@@ -219,6 +249,9 @@ module SorbetBenchmarks
     sig { params(x: T.nilable(Integer)).void }
     def self.nilable_integer_param(x); end
 
+    sig { params(x: T.nilable(T::Boolean)).void }
+    def self.nilable_boolean_param(x); end
+
     sig { params(x: Example).void }
     def self.application_class_param(x); end
 
@@ -233,5 +266,8 @@ module SorbetBenchmarks
 
     sig { params(s: Symbol, x: Integer, y: Integer).void }
     def self.arg_plus_kwargs(s, x:, y: 0); end
+
+    sig { params(x: Integer, y: Integer).void }
+    def self.optional_positional(x, y=0); end
   end
 end
