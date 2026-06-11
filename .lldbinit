@@ -1,1 +1,8 @@
 command script import lldbinit.py
+
+# Print std::string with the newlines
+#
+# If you're debugging the cache, where non-printables might be binary data,
+# maybe you want to change this
+settings set escape-non-printables false
+settings set target.max-string-summary-length 100000
