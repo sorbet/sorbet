@@ -48,7 +48,12 @@ class T::Enum
   private_constant :SerializedVal
 
   ### Enum class methods ###
-  sig { returns(T::Array[T.attached_class]) }
+  # WithoutRuntime on the hot accessors below installs no method wrapper at all
+  # (not even the one-time wrap a `checked(:never)` sig still pays on first
+  # call). Their bodies are type-safe by construction, so the wrapper validated
+  # nothing useful; Sorbet still reads these sigs statically. The
+  # override/overridable annotations remain as static-only signal.
+  T::Sig::WithoutRuntime.sig { returns(T::Array[T.attached_class]) }
   def self.values
     if @values.nil?
       raise "Attempting to access values of #{self.class} before it has been initialized." \
@@ -59,7 +64,7 @@ class T::Enum
 
   # This exists for compatibility with the interface of `Hash` & mostly to support
   # the HashEachMethods Rubocop.
-  sig { params(blk: T.nilable(T.proc.params(arg0: T.attached_class).void)).returns(T.any(T::Enumerator[T.attached_class], T::Array[T.attached_class])) }
+  T::Sig::WithoutRuntime.sig { params(blk: T.nilable(T.proc.params(arg0: T.attached_class).void)).returns(T.any(T::Enumerator[T.attached_class], T::Array[T.attached_class])) }
   def self.each_value(&blk)
     if blk
       values.each(&blk)
@@ -72,7 +77,7 @@ class T::Enum
   #
   # Note: It would have been nice to make this method final before people started overriding it.
   # Note: Failed CriticalMethodsNoRuntimeTypingTest
-  sig { params(serialized_val: SerializedVal).returns(T.nilable(T.attached_class)).checked(:never) }
+  T::Sig::WithoutRuntime.sig { params(serialized_val: SerializedVal).returns(T.nilable(T.attached_class)) }
   def self.try_deserialize(serialized_val)
     if @mapping.nil?
       raise "Attempting to access serialization map of #{self.class} before it has been initialized." \
@@ -88,7 +93,7 @@ class T::Enum
   #
   # @return [self]
   # @raise [KeyError] if serialized value does not match any instance.
-  sig { overridable.params(serialized_val: SerializedVal).returns(T.attached_class).checked(:never) }
+  T::Sig::WithoutRuntime.sig { overridable.params(serialized_val: SerializedVal).returns(T.attached_class) }
   def self.from_serialized(serialized_val)
     res = try_deserialize(serialized_val)
     if res.nil?
@@ -99,7 +104,7 @@ class T::Enum
 
   # Note: It would have been nice to make this method final before people started overriding it.
   # @return [Boolean] Does the given serialized value correspond with any of this enum's values.
-  sig { overridable.params(serialized_val: SerializedVal).returns(T::Boolean).checked(:never) }
+  T::Sig::WithoutRuntime.sig { overridable.params(serialized_val: SerializedVal).returns(T::Boolean) }
   def self.has_serialized?(serialized_val)
     if @mapping.nil?
       raise "Attempting to access serialization map of #{self.class} before it has been initialized." \
@@ -109,7 +114,7 @@ class T::Enum
   end
 
   # Note: Failed CriticalMethodsNoRuntimeTypingTest
-  sig { override.params(instance: T.nilable(T::Enum)).returns(SerializedVal).checked(:never) }
+  T::Sig::WithoutRuntime.sig { override.params(instance: T.nilable(T::Enum)).returns(SerializedVal) }
   def self.serialize(instance)
     # This is needed otherwise if a Chalk::ODM::Document with a property of the shape
     # T::Hash[T.nilable(MyEnum), Integer] and a value that looks like {nil => 0} is
@@ -126,7 +131,7 @@ class T::Enum
   end
 
   # Note: Failed CriticalMethodsNoRuntimeTypingTest
-  sig { override.params(mongo_value: SerializedVal).returns(T.attached_class).checked(:never) }
+  T::Sig::WithoutRuntime.sig { override.params(mongo_value: SerializedVal).returns(T.attached_class) }
   def self.deserialize(mongo_value)
     if self == T::Enum
       raise "Cannot call T::Enum.deserialize directly. You must call on a specific child class."
@@ -147,9 +152,14 @@ class T::Enum
   end
 
   # Note: Failed CriticalMethodsNoRuntimeTypingTest
-  sig { returns(SerializedVal).checked(:never) }
+  T::Sig::WithoutRuntime.sig { returns(SerializedVal) }
   def serialize
-    assert_bound!
+    # Same check and message as assert_bound!, open-coded to avoid the extra
+    # method frame on this hot path.
+    if @const_name.nil?
+      raise "Attempting to access Enum value on #{self.class} before it has been initialized." \
+        " Enums are not initialized until the 'enums do' block they are defined in has finished running."
+    end
     @serialized_val
   end
 
@@ -165,17 +175,20 @@ class T::Enum
     serialized_val.as_json(*args)
   end
 
-  sig { returns(String) }
+  # `to_s` keeps delegating to `inspect` rather than `alias_method :to_s,
+  # :inspect` so a subclass that overrides `inspect` still has its `to_s`
+  # reflect the override.
+  T::Sig::WithoutRuntime.sig { returns(String) }
   def to_s
     inspect
   end
 
-  sig { returns(String) }
+  T::Sig::WithoutRuntime.sig { returns(String) }
   def inspect
     "#<#{self.class.name}::#{@const_name || '__UNINITIALIZED__'}>"
   end
 
-  sig { params(other: BasicObject).returns(T.nilable(Integer)) }
+  T::Sig::WithoutRuntime.sig { params(other: BasicObject).returns(T.nilable(Integer)) }
   def <=>(other)
     case other
     when self.class
@@ -292,7 +305,7 @@ class T::Enum
     self.class._register_instance(self)
   end
 
-  sig { returns(NilClass).checked(:never) }
+  T::Sig::WithoutRuntime.sig { returns(NilClass) }
   private def assert_bound!
     if @const_name.nil?
       raise "Attempting to access Enum value on #{self.class} before it has been initialized." \
