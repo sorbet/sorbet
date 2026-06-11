@@ -1,0 +1,18 @@
+# typed: true
+# selective-apply-code-action: refactor
+
+module Testing
+  extend T::Sig
+  extend T::Generic
+
+  sig do
+    type_parameters(:T)
+      .params(x: String, y: Integer, t: T.type_parameter(:T))
+      .void
+  end
+  def hello(x, y, t)
+      create_me!(true, "1234234", 1, x, x, y, t, hello: 1243234)
+#       ^ apply-code-action: [A] Create missing method
+#     ^^^^^^^^^^ error: Method `create_me!` does not exist on `Testing`
+  end
+end

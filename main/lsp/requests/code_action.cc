@@ -4,6 +4,7 @@
 #include "common/sort/sort.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/ConvertToSingletonClassMethod.h"
+#include "main/lsp/CreateMissingMethod.h"
 #include "main/lsp/ExtractVariable.h"
 #include "main/lsp/LSPLoop.h"
 #include "main/lsp/LSPQuery.h"
@@ -218,11 +219,11 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
 
         // Generate "Move method" code actions only for class method definitions
         if (queryResult.error == nullptr) {
+            bool canResolveLazily = config.getClientConfig().clientCodeActionResolveEditSupport &&
+                                    config.getClientConfig().clientCodeActionDataSupport;
+
             if (auto *def = hasLoneMethodResponse(gs, queryResult.responses)) {
                 unique_ptr<CodeAction> action;
-                bool canResolveLazily = config.getClientConfig().clientCodeActionResolveEditSupport &&
-                                        config.getClientConfig().clientCodeActionDataSupport;
-
                 if (def->symbol.data(gs)->owner.data(gs)->isSingletonClass(gs)) {
                     auto action = make_unique<CodeAction>("Move method to a new module");
                     action->kind = CodeActionKind::RefactorExtract;
@@ -318,6 +319,20 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                     action->data = move(data);
                     result.emplace_back(move(action));
                 }
+            } else if (auto *resp = isMissingMethodResponse(gs, queryResult.responses)) {
+                auto action =
+                    make_unique<CodeAction>(fmt::format("Create missing method", resp->callerSideName.show(gs)));
+                action->kind = CodeActionKind::Refactor;
+                if (canResolveLazily) {
+                    action->data = make_unique<CodeActionData>(move(params));
+                } else {
+                    auto workspaceEdit = make_unique<WorkspaceEdit>();
+                    auto edits = getCreateMissingMethodEdits(typechecker, config, *resp);
+                    workspaceEdit->documentChanges = move(edits);
+                    action->edit = move(workspaceEdit);
+                }
+
+                result.emplace_back(move(action));
             }
         }
     } else {
