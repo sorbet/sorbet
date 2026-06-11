@@ -56,8 +56,7 @@ class T::Enum
   T::Sig::WithoutRuntime.sig { returns(T::Array[T.attached_class]) }
   def self.values
     if @values.nil?
-      raise "Attempting to access values of #{self.class} before it has been initialized." \
-        " Enums are not initialized until the 'enums do' block they are defined in has finished running."
+      raise(UNBOUND_VALUES_MESSAGE % self.class)
     end
     @values
   end
@@ -80,8 +79,7 @@ class T::Enum
   T::Sig::WithoutRuntime.sig { params(serialized_val: SerializedVal).returns(T.nilable(T.attached_class)) }
   def self.try_deserialize(serialized_val)
     if @mapping.nil?
-      raise "Attempting to access serialization map of #{self.class} before it has been initialized." \
-        " Enums are not initialized until the 'enums do' block they are defined in has finished running."
+      raise(UNBOUND_SERIALIZATION_MAP_MESSAGE % self.class)
     end
     @mapping[serialized_val]
   end
@@ -107,8 +105,7 @@ class T::Enum
   T::Sig::WithoutRuntime.sig { overridable.params(serialized_val: SerializedVal).returns(T::Boolean) }
   def self.has_serialized?(serialized_val)
     if @mapping.nil?
-      raise "Attempting to access serialization map of #{self.class} before it has been initialized." \
-        " Enums are not initialized until the 'enums do' block they are defined in has finished running."
+      raise(UNBOUND_SERIALIZATION_MAP_MESSAGE % self.class)
     end
     @mapping.include?(serialized_val)
   end
@@ -151,14 +148,27 @@ class T::Enum
     self
   end
 
+  # Format strings (`%s` is the class) for the "accessed before initialized"
+  # errors, so the various raise sites can't drift from each other.
+  UNBOUND_VALUE_MESSAGE = "Attempting to access Enum value on %s before it has been initialized." \
+    " Enums are not initialized until the 'enums do' block they are defined in has finished running."
+  private_constant :UNBOUND_VALUE_MESSAGE
+
+  UNBOUND_VALUES_MESSAGE = "Attempting to access values of %s before it has been initialized." \
+    " Enums are not initialized until the 'enums do' block they are defined in has finished running."
+  private_constant :UNBOUND_VALUES_MESSAGE
+
+  UNBOUND_SERIALIZATION_MAP_MESSAGE = "Attempting to access serialization map of %s before it has been initialized." \
+    " Enums are not initialized until the 'enums do' block they are defined in has finished running."
+  private_constant :UNBOUND_SERIALIZATION_MAP_MESSAGE
+
   # Note: Failed CriticalMethodsNoRuntimeTypingTest
   T::Sig::WithoutRuntime.sig { returns(SerializedVal) }
   def serialize
     # Same check and message as assert_bound!, open-coded to avoid the extra
     # method frame on this hot path.
     if @const_name.nil?
-      raise "Attempting to access Enum value on #{self.class} before it has been initialized." \
-        " Enums are not initialized until the 'enums do' block they are defined in has finished running."
+      raise(UNBOUND_VALUE_MESSAGE % self.class)
     end
     @serialized_val
   end
@@ -308,8 +318,7 @@ class T::Enum
   T::Sig::WithoutRuntime.sig { returns(NilClass) }
   private def assert_bound!
     if @const_name.nil?
-      raise "Attempting to access Enum value on #{self.class} before it has been initialized." \
-        " Enums are not initialized until the 'enums do' block they are defined in has finished running."
+      raise(UNBOUND_VALUE_MESSAGE % self.class)
     end
   end
 
