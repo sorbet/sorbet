@@ -5,9 +5,14 @@ module T::Props::WeakConstructor
   include T::Props::Optional
   extend T::Sig
 
+  # Shared default so zero-arg construction doesn't allocate a fresh Hash;
+  # the construct_props_* methods only ever read from `hash`.
+  EMPTY_HASH = T.let({}.freeze, T::Hash[Symbol, T.untyped])
+  private_constant :EMPTY_HASH
+
   # checked(:never) - O(runtime object construction)
   sig { params(hash: T::Hash[Symbol, T.untyped]).void.checked(:never) }
-  def initialize(hash={})
+  def initialize(hash=EMPTY_HASH)
     decorator = self.class.decorator
 
     hash_keys_matching_props = decorator.construct_props_with_defaults(self, hash) +
