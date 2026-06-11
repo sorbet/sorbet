@@ -41,9 +41,9 @@ module Simpsons
   end
 
   Test::Krabappel::Popquiz
-# ^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Krabappel::Popquiz` is defined in a test namespace
+# ^^^^^^^^^^^^^^^^^^^^^^^^ error: resolves but its package is not imported
+# ^^^^^^^^^^^^^^^^^^^^^^^^ error: may not reference `test!` packages
   #                ^^^^^^^ usage: popquiz
-# ^^^^^^^^^^^^^^^ importusage: krabappel-pkg
 
   class Private
     #   ^^^^^^^ def: s-private
