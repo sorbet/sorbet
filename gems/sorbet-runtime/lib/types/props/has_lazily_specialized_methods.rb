@@ -59,13 +59,23 @@ module T::Props
           raise SourceEvaluationDisabled.new
         end
 
-        source = lazily_defined_methods.fetch(name).call
+        blk = lazily_defined_methods[name]
+        # A concurrent first call can have already evaluated and removed
+        # this entry; the specialized method is installed, so the
+        # placeholder's retry dispatch will reach it directly.
+        return if blk.nil?
+
+        source = blk.call
 
         cls = decorated_class
         T::Configuration.without_ruby_warnings do
           cls.class_eval(source.to_s)
         end
         cls.send(:private, name)
+        # Removing the entry records that no placeholder is installed, so a
+        # later prop addition (possible, if unusual: props added after first
+        # use) re-enqueues a fresh placeholder instead of being skipped.
+        lazily_defined_methods.delete(name)
       end
 
       sig { params(name: Symbol).void }
@@ -74,15 +84,31 @@ module T::Props
           raise SourceEvaluationDisabled.new
         end
 
-        lazily_defined_vm_methods.fetch(name).call
+        blk = lazily_defined_vm_methods[name]
+        # See eval_lazily_defined_method!.
+        return if blk.nil?
+
+        blk.call
 
         cls = decorated_class
         cls.send(:private, name)
+        lazily_defined_vm_methods.delete(name)
       end
 
       sig { params(name: Symbol, blk: T.proc.returns(String)).void }
       private def enqueue_lazy_method_definition!(name, &blk)
-        lazily_defined_methods[name] = blk
+        methods = lazily_defined_methods
+        if methods.key?(name)
+          # The placeholder installed below is already in place (every prop
+          # addition lands here, so this is hit from the second prop of a
+          # class onward, and again for every prop re-added to a subclass).
+          # It reads the generator from the hash at call time, so updating
+          # the entry suffices; skipping the re-install avoids 2-4 method
+          # table writes (and their cache invalidations) per addition.
+          methods[name] = blk
+          return
+        end
+        methods[name] = blk
 
         cls = decorated_class
         if cls.method_defined?(name) || cls.private_method_defined?(name)
@@ -102,7 +128,13 @@ module T::Props
 
       sig { params(name: Symbol, blk: T.untyped).void }
       private def enqueue_lazy_vm_method_definition!(name, &blk)
-        lazily_defined_vm_methods[name] = blk
+        methods = lazily_defined_vm_methods
+        if methods.key?(name)
+          # See enqueue_lazy_method_definition!.
+          methods[name] = blk
+          return
+        end
+        methods[name] = blk
 
         cls = decorated_class
         cls.send(:define_method, name) do |*args|
