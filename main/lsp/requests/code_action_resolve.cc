@@ -112,11 +112,11 @@ unique_ptr<ResponseMessage> CodeActionResolveTask::runRequest(LSPTypecheckerDele
         response->result = move(action);
     }
 
-    if (auto *resp = isMissingMethodResponse(gs, queryResult.responses)) {
+    if (auto *resp = create_missing_method::isMissingMethodResponse(gs, queryResult.responses)) {
         unique_ptr<CodeAction> action = make_unique<CodeAction>("Create missing method");
         action->kind = CodeActionKind::Refactor;
         auto workspaceEdit = make_unique<WorkspaceEdit>();
-        workspaceEdit->documentChanges = getCreateMissingMethodEdits(typechecker, config, *resp);
+        workspaceEdit->documentChanges = create_missing_method::getCreateMissingMethodEdits(typechecker, config, *resp);
         action->edit = move(workspaceEdit);
         response->result = move(action);
     }

@@ -7,6 +7,7 @@
 
 namespace sorbet::realmain::lsp {
 
+namespace create_missing_method {
 const core::lsp::SendResponse *
 isMissingMethodResponse(const core::GlobalState &gs,
                         const std::vector<std::unique_ptr<core::lsp::QueryResponse>> &responses);
@@ -15,6 +16,7 @@ std::vector<std::unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTy
 
                                                                            const LSPConfiguration &config,
                                                                            const core::lsp::SendResponse &resp);
+} // namespace create_missing_method
 } // namespace sorbet::realmain::lsp
 
 #endif

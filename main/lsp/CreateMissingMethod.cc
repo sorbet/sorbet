@@ -114,6 +114,8 @@ vector<string> getParamNames(const core::GlobalState &gs, const string &defaultN
 
 } // namespace
 
+namespace create_missing_method {
+
 const core::lsp::SendResponse *isMissingMethodResponse(const core::GlobalState &gs,
                                                        const vector<unique_ptr<core::lsp::QueryResponse>> &responses) {
     if (responses.empty()) {
@@ -181,4 +183,7 @@ vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerD
     result.emplace_back(make_unique<TextDocumentEdit>(move(tdi), move(edits)));
     return result;
 }
+
+} // namespace create_missing_method
+
 } // namespace sorbet::realmain::lsp
