@@ -53,7 +53,7 @@ public:
 
     const std::optional<core::Loc> getMethodNameLoc(const core::GlobalState &gs) const;
 };
-CheckSize(SendResponse, 96, 8);
+CheckSize(SendResponse, 120, 8);
 
 class IdentResponse final {
 public:
