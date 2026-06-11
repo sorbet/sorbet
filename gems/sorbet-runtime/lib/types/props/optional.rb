@@ -47,7 +47,7 @@ module T::Props::Optional::DecoratorMethods
   attr_reader :props_with_defaults
 
   # checked(:never) - O(runtime object construction)
-  sig { returns(T::Hash[Symbol, T::Props::Private::SetterFactory::SetterProc]).checked(:never) }
+  sig { returns(T::Hash[Symbol, T::Props::Private::SetterFactory::BoundSetterProc]).checked(:never) }
   attr_reader :props_without_defaults
 
   def add_prop_definition(prop, rules)
@@ -62,7 +62,7 @@ module T::Props::Optional::DecoratorMethods
       rules[DEFAULT_SETTER_RULE_KEY] = default_setter
     else
       @props_without_defaults ||= {}
-      @props_without_defaults[prop] = rules.fetch(:setter_proc)
+      @props_without_defaults[prop] = rules.fetch(:_bound_setter_proc)
       props_with_defaults&.delete(prop) # Handle potential override
     end
 

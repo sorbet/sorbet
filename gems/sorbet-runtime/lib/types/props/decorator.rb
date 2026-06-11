@@ -131,7 +131,7 @@ class T::Props::Decorator
   # preexisting behavior).
   #
   # Note this path is NOT used by generated setters on instances,
-  # which are defined using `setter_proc` directly.
+  # which are defined using the 1-arity `:setter_proc` directly.
   #
   # checked(:never) - O(prop accesses)
   sig do
@@ -145,7 +145,9 @@ class T::Props::Decorator
     .checked(:never)
   end
   def prop_set(instance, prop, val, rules=prop_rules(prop))
-    instance.instance_exec(val, &rules.fetch(:setter_proc))
+    # The 2-arity bound proc does the same validation/assignment as the
+    # 1-arity setter proc without instance_exec's per-call self-rebinding.
+    rules.fetch(:_bound_setter_proc).call(instance, val)
   end
   alias_method :set, :prop_set
 
@@ -426,11 +428,20 @@ class T::Props::Decorator
       end
     end
 
-    setter_proc, value_validate_proc = T::Props::Private::SetterFactory.build_setter_proc(@class, name, rules)
+    setter_proc, value_validate_proc, bound_setter_proc = T::Props::Private::SetterFactory.build_setter_proc(@class, name, rules)
     setter_proc.freeze
     value_validate_proc.freeze
-    rules[:setter_proc] = setter_proc
+    bound_setter_proc.freeze
     rules[:value_validate_proc] = value_validate_proc
+    # :setter_proc is a pre-existing rules key and is preserved as-is: the
+    # 1-arity, self-bound proc used only to define the generated `name=`
+    # instance setter via `define_method(&proc)` (its fast path). The net-new
+    # :_bound_setter_proc is the 2-arity (instance, val) equivalent that every
+    # other write goes through without instance_exec's per-call self-rebinding;
+    # it is underscore-prefixed (like :_tnilable) so external code that replays
+    # rules hashes back into prop() filters it out as internal.
+    rules[:setter_proc] = setter_proc
+    rules[:_bound_setter_proc] = bound_setter_proc
 
     validate_overrides(name, rules)
     add_prop_definition(name, rules)
