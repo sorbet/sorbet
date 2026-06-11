@@ -1242,6 +1242,17 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       obj2 = DefaultStringProp.from_hash(h)
       refute_equal(obj1.stringprop.object_id, obj2.stringprop.object_id)
     end
+
+    it 'returns mutable string defaults from the lazily-eval\'d deserializer' do
+      # The generated deserializer inlines the default as a bare string
+      # literal, and the lazily-eval'd source must not carry a
+      # frozen_string_literal prefix: that would freeze (and dedupe) the
+      # literal, so instances would share one frozen default.
+      obj1 = DefaultStringProp.from_hash({})
+      refute_predicate(obj1.stringprop, :frozen?)
+      obj1.stringprop << ' mutated'
+      assert_equal('default', DefaultStringProp.from_hash({}).stringprop)
+    end
   end
 
   class ComplexStruct < T::Struct
