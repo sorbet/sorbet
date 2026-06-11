@@ -3,6 +3,13 @@
 
 module T::Utils
   module Private
+    # NOTE: the Module and SimplePairUnion branches of this method are inlined
+    # for speed in several hot paths. The `T.cast` / `T.let` / `T.bind` /
+    # `T.assert_type!` happy paths in `_types.rb` inline the value check and
+    # return early on success; `T::Private::Casts.cast` is only reached after
+    # that check has already failed, so it reproduces the coercion branches but
+    # skips the (now always-false) value check. If you change the behavior
+    # here, update those callers too.
     def self.coerce_and_check_module_types(val, check_val, check_module_type)
       # rubocop:disable Style/CaseLikeIf
       if val.is_a?(T::Types::Base)

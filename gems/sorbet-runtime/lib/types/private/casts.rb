@@ -5,8 +5,28 @@ module T::Private
   module Casts
     def self.cast(value, type, cast_method)
       begin
-        coerced_type = T::Utils::Private.coerce_and_check_module_types(type, value, true)
-        return value unless coerced_type
+        # Every caller (T.cast/let/bind/assert_type! in _types.rb) inlines the
+        # value check for the two dominant shapes -- a Module literal and the
+        # SimplePairUnion that `T.nilable(SomeModule)` produces -- and only
+        # falls through to here when that check already failed. So skip
+        # straight to coercing: re-checking `value.is_a?(type)` /
+        # `type.valid?(value)` here would always be false.
+        case type
+        when ::Module
+          coerced_type = T::Types::Simple::Private::Pool.type_for_module(type)
+        when T::Types::Base
+          # Mirrors the T::Types::Base branch of coerce_and_check_module_types,
+          # kept inline to avoid its call frame for every already-coerced type.
+          case type
+          when T::Private::Types::TypeAlias
+            coerced_type = type.aliased_type
+          else
+            coerced_type = type
+          end
+        else
+          coerced_type = T::Utils::Private.coerce_and_check_module_types(type, value, true)
+          return value unless coerced_type
+        end
 
         error = coerced_type.error_message_for_obj(value)
         return value unless error
