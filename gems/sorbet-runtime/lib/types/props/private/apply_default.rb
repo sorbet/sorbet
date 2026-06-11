@@ -96,7 +96,7 @@ module T::Props
       # checked(:never) - O(object construction x prop count)
       sig { override.returns(T.untyped).checked(:never) }
       def default
-        T::Props::Utils.deep_clone_object(@default)
+        T::Props::Utils.deep_clone(@default)
       end
     end
 
