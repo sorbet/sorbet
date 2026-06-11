@@ -5,12 +5,11 @@
 #include "main/lsp/LSPTypechecker.h"
 #include "main/lsp/json_types.h"
 
-using namespace std;
-
 namespace sorbet::realmain::lsp {
 
-const core::lsp::SendResponse *isMissingMethodResponse(const core::GlobalState &gs,
-                                                       const vector<unique_ptr<core::lsp::QueryResponse>> &responses);
+const core::lsp::SendResponse *
+isMissingMethodResponse(const core::GlobalState &gs,
+                        const std::vector<std::unique_ptr<core::lsp::QueryResponse>> &responses);
 
 std::vector<std::unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerDelegate &typechecker,
 
