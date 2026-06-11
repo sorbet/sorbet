@@ -67,7 +67,9 @@ module T::Private::Methods::SignatureValidation
     super_method = signature.method.super_method
 
     if super_method && super_method.owner != signature.method.owner
-      Methods.maybe_run_sig_block_for_method(super_method)
+      # No need to run the sig block for super_method explicitly:
+      # signature_for_method forces it internally (via signature_for_key ->
+      # maybe_run_sig_block_for_key on the identical registry key).
       super_signature = Methods.signature_for_method(super_method)
 
       # If the super_method has any kwargs we can't build a
@@ -200,7 +202,10 @@ module T::Private::Methods::SignatureValidation
             "#{base_override_loc_str(signature, super_signature)}"
     end
 
-    if signature.keyrest_type.nil?
+    # The kwarg_types.empty? guard is an exact implication (an empty super
+    # kwarg set can never yield missing kwargs) that skips two fresh
+    # `.keys` arrays plus the Array#- for the common kwarg-free method.
+    if signature.keyrest_type.nil? && !super_signature.kwarg_types.empty?
       # O(nm), but n and m are tiny here
       missing_kwargs = super_signature.kwarg_names - signature.kwarg_names
       if !missing_kwargs.empty?
@@ -216,12 +221,15 @@ module T::Private::Methods::SignatureValidation
             "#{base_override_loc_str(signature, super_signature)}"
     end
 
-    # O(nm), but n and m are tiny here
-    extra_req_kwargs = signature.req_kwarg_names - super_signature.req_kwarg_names
-    if !extra_req_kwargs.empty?
-      raise "Your definition of `#{method_name}` has extra required keyword arg(s) " \
-            "#{extra_req_kwargs} relative to the method it #{mode_verb}, making it incompatible: " \
-            "#{base_override_loc_str(signature, super_signature)}"
+    # Guard on the minuend: an empty req_kwarg_names can never yield extras.
+    if !signature.req_kwarg_names.empty?
+      # O(nm), but n and m are tiny here
+      extra_req_kwargs = signature.req_kwarg_names - super_signature.req_kwarg_names
+      if !extra_req_kwargs.empty?
+        raise "Your definition of `#{method_name}` has extra required keyword arg(s) " \
+              "#{extra_req_kwargs} relative to the method it #{mode_verb}, making it incompatible: " \
+              "#{base_override_loc_str(signature, super_signature)}"
+      end
     end
 
     if super_signature.block_name && !signature.block_name
@@ -231,16 +239,33 @@ module T::Private::Methods::SignatureValidation
     end
   end
 
+  # Evaluation order matters: check_tests? must only run for a :tests-checked
+  # sig (it side-effectfully arms the @wrapped_tests_with_validation trapdoor
+  # in RuntimeLevels).
+  private_class_method def self.check_level_active?(sig)
+    sig.check_level == :always || (sig.check_level == :tests && T::Private::RuntimeLevels.check_tests?)
+  end
+
   def self.validate_override_types(signature, super_signature)
     return if signature.override_allow_incompatible == true
     return if super_signature.mode == Modes.untyped
-    return unless [signature, super_signature].all? do |sig|
-      sig.check_level == :always || (sig.check_level == :tests && T::Private::RuntimeLevels.check_tests?)
-    end
+    return unless check_level_active?(signature) && check_level_active?(super_signature)
     mode_noun = super_signature.mode == Modes.abstract ? 'implementation' : 'override'
 
     # arg types must be contravariant
-    super_signature.arg_types.zip(signature.arg_types).each_with_index do |((_super_name, super_type), (name, type)), index|
+    #
+    # An index loop avoids allocating a pair array per positional arg.
+    # Iterating to super's length is deliberate: extra override positionals
+    # go unchecked, and when the override has a rest param and fewer named
+    # args than the base, the missing positions are checked as nil name/type.
+    super_arg_types = super_signature.arg_types
+    arg_types = signature.arg_types
+    index = 0
+    while index < super_arg_types.length
+      super_type = super_arg_types.fetch(index)[1]
+      pair = arg_types[index]
+      name = pair && pair[0]
+      type = pair && pair[1]
       if !super_type.subtype_of?(type)
         raise "Incompatible type for arg ##{index + 1} (`#{name}`) in signature for #{mode_noun} of method " \
               "`#{signature.method_name}`:\n" \
@@ -248,6 +273,7 @@ module T::Private::Methods::SignatureValidation
               "* #{mode_noun.capitalize}: `#{type}` (in #{signature.method_desc})\n" \
               "(The types must be contravariant.)"
       end
+      index += 1
     end
 
     # kwarg types must be contravariant
