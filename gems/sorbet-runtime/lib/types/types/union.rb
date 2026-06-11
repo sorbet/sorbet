@@ -73,11 +73,26 @@ module T::Types
 
     # overrides Base
     def recursively_valid?(obj)
-      members = types
+      member_modules = @member_modules
+      if member_modules.nil?
+        # Force the lazy types builder, which also computes @member_modules
+        types
+        member_modules = @member_modules
+      end
       index = 0
-      while index < members.length
-        return true if members.fetch(index).recursively_valid?(obj)
-        index += 1
+      if member_modules
+        # For an all-Simple union, recursively_valid? and valid? coincide
+        # (Simple's recursively_valid? is exactly `obj.is_a?(raw_type)`).
+        while index < member_modules.length
+          return true if obj.is_a?(member_modules[index])
+          index += 1
+        end
+      else
+        members = types
+        while index < members.length
+          return true if members.fetch(index).recursively_valid?(obj)
+          index += 1
+        end
       end
       false
     end
