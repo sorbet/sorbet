@@ -324,6 +324,12 @@ void GlobalState::initEmpty() {
     ENFORCE_NO_TIMER(klass == Symbols::top());
     klass = synthesizeClass(core::Names::Constants::Bottom(), 0);
     ENFORCE_NO_TIMER(klass == Symbols::bottom());
+
+    // > > Why store everything under `::<root>` instead of storing things in `Object` like the Ruby VM does?
+    // >
+    // > - at the time we might have implemented name loop not only through scoping but also through
+    // >   inheritance and I wanted to do that explicitly rather than implicitly
+    // > - This is similar to what Scala does
     klass = synthesizeClass(core::Names::Constants::Root(), 0);
     ENFORCE_NO_TIMER(klass == Symbols::root());
 
