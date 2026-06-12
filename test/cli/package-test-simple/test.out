@@ -1,28 +1,13 @@
-main_lib/lib.rb:8: Used `test_import` constant `Project::TestOnly::SomeHelper` in non-test file https://srb.help/3720
+main_lib/lib.rb:8: `Project::TestOnly::SomeHelper` resolves but its package is not imported https://srb.help/3718
      8 |  Project::TestOnly::SomeHelper.new
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    test_only/__package.rb:5: Defined here
+    test_only/__package.rb:5: Exported from package here
      5 |class Project::TestOnly < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
     main_lib/__package.rb:5: Insert `import Project::TestOnly`
      5 |class Project::MainLib < PackageSpec
                                             ^
-    main_lib/__package.rb:7: Delete
-     7 |  test_import Project::TestOnly
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Note:
     RUN SCRIPT HINT
-
-main_lib/__package.rb:8: Invalid expression in package: Arguments to functions must be literals https://srb.help/3710
-     8 |  export_for_test Project::MainLib::Lib
-                          ^^^^^^^^^^^^^^^^^^^^^
-
-main_lib/__package.rb:8: Method `export_for_test` does not exist on `T.class_of(Project::MainLib)` https://srb.help/7003
-     8 |  export_for_test Project::MainLib::Lib
-          ^^^^^^^^^^^^^^^
-  Got `T.class_of(Project::MainLib)` originating from:
-    main_lib/__package.rb:5:
-     5 |class Project::MainLib < PackageSpec
-        ^
-Errors: 3
+Errors: 1
