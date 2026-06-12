@@ -4,14 +4,15 @@
 
 class Importers::AllowedTest < PackageSpec
   # always allowed---no visibility usages
-  test_import Exporters::NoAnnotations
+  import Exporters::NoAnnotations
 
   # allowed---this package is explicitly referenced in `visible_to`
-  test_import Exporters::ExplicitVisibleTo
+  import Exporters::ExplicitVisibleTo
 
   # allowed---this package is explicitly referenced in `visible_to`
-  test_import Exporters::TestVisibleTo
+  import Exporters::TestVisibleTo
 
-  # allowed---not mentioned, but `visible_to 'tests'` permits this
-  test_import Exporters::OnlyTestVisibleTo
+  # not allowed---this package is a `test!` package
+  import Exporters::OnlyTestVisibleTo
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: includes explicit visibility modifiers
 end
