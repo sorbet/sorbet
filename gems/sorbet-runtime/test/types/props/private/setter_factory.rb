@@ -58,4 +58,45 @@ class Opus::Types::Test::Props::Private::SetterFactoryTest < Critic::Unit::UnitT
     end
   end
 
+  class TestSoftError
+    include T::Props
+    include T::Props::WeakConstructor
+
+    prop :i, Integer
+    prop :ni, T.nilable(Integer)
+  end
+
+  describe 'when call_validation_error_handler does not raise' do
+    # Pins the deliberate set-after-soft-error behavior across every setter
+    # entry point: the value must still be set when the handler returns.
+    before do
+      T::Configuration.call_validation_error_handler = ->(_signature, _opts) {}
+    end
+
+    after do
+      T::Configuration.call_validation_error_handler = nil
+    end
+
+    it 'still sets the value from the constructor' do
+      obj = TestSoftError.new(i: 'nope', ni: 'also nope')
+      assert_equal('nope', obj.i)
+      assert_equal('also nope', obj.ni)
+    end
+
+    it 'still sets the value via Decorator#prop_set' do
+      obj = TestSoftError.new
+      TestSoftError.decorator.prop_set(obj, :i, 'nope')
+      assert_equal('nope', obj.i)
+      TestSoftError.decorator.prop_set(obj, :ni, 'also nope')
+      assert_equal('also nope', obj.ni)
+    end
+
+    it 'still sets the value via the generated setter' do
+      obj = TestSoftError.new
+      obj.i = 'nope'
+      assert_equal('nope', obj.i)
+      obj.ni = 'also nope'
+      assert_equal('also nope', obj.ni)
+    end
+  end
 end
