@@ -11,11 +11,11 @@ class Test::Opus::Foo::FooTest
   Test::Opus::Util::TestUtil
   Opus::Util::Nesting::Public.public_method
 
-  # util/__package.rb exposed via export_for_test, cannot access from here:
+  # Not exported from util, and util is not imported with uses_internals
   Opus::Util::Nesting.nesting_method
 # ^^^^^^^^^^^^^^^^^^^ error: `Opus::Util::Nesting` resolves but is not exported from `Opus::Util`
 
-  # via test_import Opus::TestImported
+  # via import Opus::TestImported
   Opus::TestImported::TIClass
   Test::Opus::TestImported::TITestClass
 
@@ -24,9 +24,9 @@ class Test::Opus::Foo::FooTest
   Opus::Foo::FooClass
   Opus::Foo::FooClass::Inner
 
-  # via export_for_test Opus::Foo::Private::ImplDetail
+  # via uses_internals: true
   Opus::Foo::Private::ImplDetail.stub_stuff!
 
-  # Visible, as the test package is able to see all of the package it's testing
+  # Visible, as the test package uses_internals
   Opus::Foo::FooUnexported
 end

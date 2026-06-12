@@ -18,28 +18,31 @@ module Opus::Foo
   # via import Opus::Foo::Bar
   Opus::Foo::Bar::BarClass
   Test::Opus::Foo::Bar::BarClassTest
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Opus::Foo::Bar::BarClassTest` is defined in a test namespace
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Package `Opus::Foo` may not reference `test!` packages
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Opus::Foo::Bar::BarClassTest` resolves but its package is not imported
 
   # via import Opus::Util
   Opus::Util::UtilClass
   Test::Opus::Util::TestUtil
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Opus::Util::TestUtil` is defined in a test namespace
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Package `Opus::Foo` may not reference `test!` packages
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Opus::Util::TestUtil` resolves but its package is not imported
 
   Opus::Util::Nesting::Public.public_method
 
-  # util/__package.rb exposed via export_for_test, cannot access from here:
+  # Not exported from util
   Opus::Util::Nesting.nesting_method
 # ^^^^^^^^^^^^^^^^^^^ error: `Opus::Util::Nesting` resolves but is not exported from `Opus::Util`
 
 
-  # via test_import Opus::TestImported
+  # TestImported is not imported by this package
   Opus::TestImported::TIClass
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Used `test_import` constant `Opus::TestImported::TIClass` in non-test file
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Opus::TestImported::TIClass` resolves but its package is not imported
   Test::Opus::TestImported::TITestClass
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Opus::TestImported::TITestClass` is defined in a test namespace
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Package `Opus::Foo` may not reference `test!` packages
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Opus::TestImported::TITestClass` resolves but its package is not imported
 
 
-  # via export_for_test Opus::Foo::Private::ImplDetail
+  # Private::ImplDetail is local to this package
   Opus::Foo::Private::ImplDetail.stub_stuff!
 
   # Visible because it's local to this package
