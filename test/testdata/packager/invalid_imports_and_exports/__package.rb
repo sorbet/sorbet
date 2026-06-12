@@ -28,14 +28,32 @@ class A < PackageSpec
   export A::AModule
 
   test_import B
+# ^^^^^^^^^^^ error: Method `test_import` does not exist
+  #           ^ error: Invalid expression in package: Arguments to functions must be literals
   test_import C
+# ^^^^^^^^^^^ error: Method `test_import` does not exist
+  #           ^ error: Invalid expression in package: Arguments to functions must be literals
+  #           ^ error: Unable to resolve constant `C`
   test_import C, only: :A_MYSTERIOUS_PURPOSE
-  #                    ^^^^^^^^^^^^^^^^^^^^^ error: Invalid expression in package
-  #                    ^^^^^^^^^^^^^^^^^^^^^ error: Expected `T.nilable(String)` but found `Symbol(:A_MYSTERIOUS_PURPOSE)`
-  test_import C, only: "something else" # error: Invalid expression in package
+# ^^^^^^^^^^^ error: Method `test_import` does not exist
+  #           ^ error: Invalid expression in package: Arguments to functions must be literals
+  #           ^ error: Unable to resolve constant `C`
+  test_import C, only: "something else"
+# ^^^^^^^^^^^ error: Method `test_import` does not exist
+  #           ^ error: Invalid expression in package: Arguments to functions must be literals
+  #           ^ error: Unable to resolve constant `C`
   test_import C, only: -> { "naught" }
-  #                       ^^^^^^^^^^^^ error: Invalid expression in package
-  #                    ^^^^^^^^^^^^^^^ error: Expected `T.nilable(String)` but found `T.proc.returns(String)`
-  test_import C, only: "test_rb", only: "test_rb" # error: Hash key `only` is duplicated
-  test_import C, with: "cheese" # error: Unrecognized keyword argument
+# ^^^^^^^^^^^ error: Method `test_import` does not exist
+  #           ^ error: Invalid expression in package: Arguments to functions must be literals
+  #           ^ error: Unable to resolve constant `C`
+  #                       ^^^^^^^^^^^^ error: Invalid expression in package: `Block` not allowed
+  test_import C, only: "test_rb", only: "test_rb"
+# ^^^^^^^^^^^ error: Method `test_import` does not exist
+  #           ^ error: Invalid expression in package: Arguments to functions must be literals
+  #           ^ error: Unable to resolve constant `C`
+  #                               ^^^^ error: Hash key `only` is duplicated
+  test_import C, with: "cheese"
+# ^^^^^^^^^^^ error: Method `test_import` does not exist
+  #           ^ error: Invalid expression in package: Arguments to functions must be literals
+  #           ^ error: Unable to resolve constant `C`
 end
