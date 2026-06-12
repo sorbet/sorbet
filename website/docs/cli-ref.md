@@ -335,8 +335,6 @@ Usage:
       --experimental-package-directed
                                 Enable support for checking by package, instead of
                                 processing all files at once
-      --experimental-test-packages
-                                Enable support for tests as their own packages
 
 ```
 
