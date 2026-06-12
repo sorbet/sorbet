@@ -4,6 +4,5 @@
 
 class Project::MainLib < PackageSpec
   import Project::Util
-  test_import Project::TestOnly
-  export_for_test Project::MainLib::Lib
+  export Project::MainLib::Lib
 end
