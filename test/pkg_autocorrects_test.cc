@@ -182,7 +182,6 @@ TEST_CASE("Simple add import") {
     CHECK_EQ_DIFF(expected, replaced, "msg");
 }
 
-
 TEST_CASE("Add import with only existing exports") {
     core::GlobalState gs(errorQueue);
     makeDefaultPackagerGlobalState(gs);
@@ -209,8 +208,6 @@ TEST_CASE("Add import with only existing exports") {
     CHECK_EQ_DIFF(expected, replaced, "-expected,+replaced");
 }
 
-
-
 TEST_CASE("Add import to package with neither imports nor exports") {
     core::GlobalState gs(errorQueue);
     makeDefaultPackagerGlobalState(gs);
@@ -234,7 +231,6 @@ TEST_CASE("Add import to package with neither imports nor exports") {
     auto replaced = applySuggestion(gs, *addImport);
     CHECK_EQ_DIFF(expected, replaced, "-expected,+replaced");
 }
-
 
 TEST_CASE("Add export that goes before existing exports") {
     core::GlobalState gs(errorQueue);
@@ -621,8 +617,7 @@ TEST_CASE("Edge cases") {
                                  "end\n";
     string packageWithCommentsPath = "has_comments/__package.rb";
 
-    string packageWithTestImports =
-        makePackageRB("HasTestImports", "dag", "app", {"FalsePackageA", "LayeredPackageA"});
+    string packageWithTestImports = makePackageRB("HasTestImports", "dag", "app", {"FalsePackageA", "LayeredPackageA"});
     string packageWithTestImportsPath = "has_test_imports/__package.rb";
 
     string packageWithLayeringViolations = makePackageRB("HasLayeringViolations", "false", "lib", {"AppPackage"});
@@ -713,7 +708,6 @@ TEST_CASE("Edge cases") {
     }
 }
 
-
 TEST_CASE("Ordering by alphabetical") {
     core::GlobalState gs(errorQueue);
     makeDefaultPackagerGlobalState(gs, LAYERS_UTIL_LIB_APP);
@@ -767,7 +761,6 @@ TEST_CASE("Ordering by alphabetical") {
         CHECK_EQ_DIFF(expected, replaced, "-expected,+replaced");
     }
 }
-
 
 TEST_CASE("Add visible_to to package with no existing visible_to entries") {
     core::GlobalState gs(errorQueue);
