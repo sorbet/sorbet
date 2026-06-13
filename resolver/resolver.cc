@@ -534,7 +534,7 @@ private:
                         auto enclosingPackage = ctx.state.packageDB().getPackageNameForFile(ctx.file);
                         if (enclosingPackage.exists()) {
                             erase_if(suggested, [&enclosingPackage, &gs](auto &suggestion) {
-                                   return suggestion.symbol.enclosingClass(gs).data(gs)->package != enclosingPackage;
+                                return suggestion.symbol.enclosingClass(gs).data(gs)->package != enclosingPackage;
                             });
                         }
                     }
@@ -606,9 +606,8 @@ private:
                     processed++;
                     core::Context ictx(gs, core::Symbols::root(), job.file);
                     auto origSize = job.items.size();
-                    erase_if(job.items, [&](ConstantResolutionItem &item) -> bool {
-                        return resolveConstantJob(ictx, item);
-                    });
+                    erase_if(job.items,
+                             [&](ConstantResolutionItem &item) -> bool { return resolveConstantJob(ictx, item); });
                     retries += origSize - job.items.size();
                     if (!job.items.empty()) {
                         leftover.emplace_back(move(job));
@@ -3143,13 +3142,13 @@ public:
         while (progress && !combinedTodoAssigns.empty()) {
             progress = false;
             erase_if(combinedTodoAssigns, [&](vector<ResolveAssignItem> &threadTodos) {
-                    auto origSize = threadTodos.size();
-                    erase_if(threadTodos, [&](ResolveAssignItem &job) -> bool {
-                            core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                            return resolveAssign(ctx, job, resolvedAttachedClasses);
-                    });
-                    progress = progress || threadTodos.size() != origSize;
-                    return threadTodos.empty();
+                auto origSize = threadTodos.size();
+                erase_if(threadTodos, [&](ResolveAssignItem &job) -> bool {
+                    core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                    return resolveAssign(ctx, job, resolvedAttachedClasses);
+                });
+                progress = progress || threadTodos.size() != origSize;
+                return threadTodos.empty();
             });
         }
 
