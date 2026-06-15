@@ -164,12 +164,7 @@ vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerD
         return {};
     }
     auto enclosingMethodLoc = core::Loc(file, finder.result->loc);
-    auto [_, enclosingMethodEnd] = enclosingMethodLoc.toDetails(gs);
-    auto insertDetail = enclosingMethodEnd;
-    auto insertLoc = core::Loc::fromDetails(gs, enclosingMethodLoc.file(), insertDetail, insertDetail);
-    if (!insertLoc.has_value()) {
-        return {};
-    }
+    auto insertLoc = enclosingMethodLoc.copyEndWithZeroLength();
     auto [_loc, indentLength] = enclosingMethodLoc.copyEndWithZeroLength().findStartOfIndentation(gs);
 
     SendFinder sendFinder{resp.funLocOffsets};
@@ -186,7 +181,7 @@ vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerD
     auto newText = formatNewMethod(gs, indentLength, resp.originalName, paramNames, improvedArgTypes,
                                    sendFinder.result->numPosArgs(), sendFinder.result->numKwArgs());
     vector<unique_ptr<TextEdit>> edits;
-    edits.emplace_back(make_unique<TextEdit>(Range::fromLoc(gs, insertLoc.value()), newText));
+    edits.emplace_back(make_unique<TextEdit>(Range::fromLoc(gs, insertLoc), newText));
 
     auto tdi = make_unique<VersionedTextDocumentIdentifier>(config.fileRef2Uri(gs, enclosingMethodLoc.file()),
                                                             JSONNullObject());
