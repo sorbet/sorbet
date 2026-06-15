@@ -1,6 +1,6 @@
 # typed: true
 # selective-apply-code-action: refactor
-# enable-experimental-lsp-extract-to-variable: true
+# enable-experimental-lsp-create-missing-method: true
 # TODO(bshu): incorrect behavior
 
 module Testing
@@ -18,7 +18,7 @@ module Testing
 #       ^ apply-code-action: [A] Create missing method
   end
 
-  sig { params(param: TrueClass, param1: String, param2: Integer, x: String, x1: String, y: Integer, t: T.type_parameter(:T), hello: Integer).returns(T.untyped) }
+  sig { params(param: T::Boolean, param1: String, param2: Integer, x: String, x1: String, y: Integer, t: T.type_parameter(:T), hello: Integer).returns(T.untyped) }
   def create_me!(param, param1, param2, x, x1, y, t, hello:)
     Kernel.raise NotImplementedError
   end

@@ -505,6 +505,9 @@ TEST_CASE("LSPTest") {
         opts.lspExtractToVariableEnabled =
             BooleanPropertyAssertion::getValue("enable-experimental-lsp-extract-to-variable", assertions)
                 .value_or(false);
+        opts.lspCreateMissingMethodEnabled =
+            BooleanPropertyAssertion::getValue("enable-experimental-lsp-create-missing-method", assertions)
+                .value_or(false);
         opts.disableWatchman = true;
 
         // Set to a number that is reasonable large for tests, but small enough that we can have a test to handle

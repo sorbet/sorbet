@@ -1,6 +1,6 @@
 # typed: true
 # selective-apply-code-action: refactor
-# enable-experimental-lsp-extract-to-variable: true
+# enable-experimental-lsp-create-missing-method: true
 
 class NoArgs
   extend T::Sig
