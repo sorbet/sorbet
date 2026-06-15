@@ -49,19 +49,16 @@ use_other_package/foo.rb:8: `Foo::Bar::OtherPackage::OtherClass` resolves but it
      7 |  strict_dependencies 'layered'
                                        ^
 
-use_other_package/foo.rb:9: Used `test_import` constant `Foo::Bar::OtherPackageTest::OtherClass` in non-test file https://srb.help/3720
+use_other_package/foo.rb:9: `Foo::Bar::OtherPackageTest::OtherClass` resolves but its package is not imported https://srb.help/3718
      9 |      Foo::Bar::OtherPackageTest::OtherClass
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    other_test/__package.rb:3: Defined here
+    other_test/__package.rb:3: Exported from package here
      3 |class Foo::Bar::OtherPackageTest < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
     use_other_package/__package.rb:7: Inserted `import Foo::Bar::OtherPackageTest`
      7 |  strict_dependencies 'layered'
                                        ^
-    use_other_package/__package.rb:8: Deleted
-     8 |  test_import Foo::Bar::OtherPackageTest
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 use_other_package/foo.rb:15: `Foo::Bar::OtherPackage::OtherClass` resolves but its package is not imported https://srb.help/3718
     15 |  Foo::Bar::OtherPackage::OtherClass # resolves via root
@@ -74,27 +71,27 @@ use_other_package/foo.rb:15: `Foo::Bar::OtherPackage::OtherClass` resolves but i
      7 |  strict_dependencies 'layered'
                                        ^
 
-use_other_package/foo.test.rb:4: `Test::Foo::Bar::OtherPackage::TestUtil` resolves but its package is not imported https://srb.help/3718
+use_other_package/test/foo.test.rb:4: `Test::Foo::Bar::OtherPackage::TestUtil` resolves but its package is not imported https://srb.help/3718
      4 |  Test::Foo::Bar::OtherPackage::TestUtil
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    other/__package.rb:3: Exported from package here
-     3 |class Foo::Bar::OtherPackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    other/test/__package.rb:4: Exported from package here
+     4 |class Test::Foo::Bar::OtherPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    use_other_package/__package.rb:7: Inserted `test_import Foo::Bar::OtherPackage, only: "test_rb"`
-     7 |  strict_dependencies 'layered'
-                                       ^
+    use_other_package/test/__package.rb:9: Inserted `import Test::Foo::Bar::OtherPackage`
+     9 |
+        ^
 
-use_other_package/foo.test.rb:6: `Foo::Bar::OtherPackage::ImportMeTestOnly` resolves but its package is not imported https://srb.help/3718
+use_other_package/test/foo.test.rb:6: `Foo::Bar::OtherPackage::ImportMeTestOnly` resolves but its package is not imported https://srb.help/3718
      6 |  Foo::Bar::OtherPackage::ImportMeTestOnly
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     other/__package.rb:3: Exported from package here
      3 |class Foo::Bar::OtherPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    use_other_package/__package.rb:7: Inserted `test_import Foo::Bar::OtherPackage, only: "test_rb"`
-     7 |  strict_dependencies 'layered'
-                                       ^
+    use_other_package/test/__package.rb:9: Inserted `import Foo::Bar::OtherPackage`
+     9 |
+        ^
 Errors: 8
 # frozen_string_literal: true
 # typed: strict
@@ -104,7 +101,6 @@ class Foo::MyPackage < PackageSpec
   layer 'lib'
   strict_dependencies 'layered'
   import Foo::Bar::OtherPackage
-  test_import Foo::Bar::OtherPackageTest
 end
 
 --------------------------------------------------------------------------
@@ -149,18 +145,18 @@ use_app_package/foo.rb:7: `Foo::Bar::AppPackageTest::OtherClass` cannot be refer
      4 |  layer 'app'
                 ^^^^^
   Note:
-    `Foo::Bar::AppPackageTest::OtherClass`'s package is imported as `test_import`
+    `Foo::Bar::AppPackageTest::OtherClass`'s package is not imported
 
-use_app_package/foo.test.rb:6: `Foo::Bar::AppPackage::ImportMeTestOnly` resolves but its package is not imported https://srb.help/3718
+use_app_package/test/foo.test.rb:6: `Foo::Bar::AppPackage::ImportMeTestOnly` resolves but its package is not imported https://srb.help/3718
      6 |  Foo::Bar::AppPackage::ImportMeTestOnly
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     app_package/__package.rb:3: Exported from package here
      3 |class Foo::Bar::AppPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    use_app_package/__package.rb:7: Inserted `test_import Foo::Bar::AppPackage, only: "test_rb"`
-     7 |  strict_dependencies 'layered'
-                                       ^
+    use_app_package/test/__package.rb:9: Inserted `import Foo::Bar::AppPackage`
+     9 |
+        ^
 Errors: 4
 # frozen_string_literal: true
 # typed: strict
@@ -169,8 +165,6 @@ Errors: 4
 class Foo::MyPackage < PackageSpec
   layer 'lib'
   strict_dependencies 'layered'
-  test_import Foo::Bar::AppPackage, only: "test_rb"
-  test_import Foo::Bar::AppPackageTest
 end
 
 --------------------------------------------------------------------------
@@ -215,18 +209,18 @@ use_false_package/foo.rb:7: `Foo::Bar::FalsePackageTest::OtherClass` cannot be r
      5 |  strict_dependencies 'false'
                               ^^^^^^^
   Note:
-    `Foo::Bar::FalsePackageTest::OtherClass`'s package is imported as `test_import`
+    `Foo::Bar::FalsePackageTest::OtherClass`'s package is not imported
 
-use_false_package/foo.test.rb:4: `Test::Foo::Bar::FalsePackage::TestUtil` resolves but its package is not imported https://srb.help/3718
+use_false_package/test/foo.test.rb:4: `Test::Foo::Bar::FalsePackage::TestUtil` resolves but its package is not imported https://srb.help/3718
      4 |  Test::Foo::Bar::FalsePackage::TestUtil
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    false_package/__package.rb:3: Exported from package here
-     3 |class Foo::Bar::FalsePackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    false_package/test/__package.rb:4: Exported from package here
+     4 |class Test::Foo::Bar::FalsePackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    use_false_package/__package.rb:7: Inserted `test_import Foo::Bar::FalsePackage, only: "test_rb"`
-     7 |  strict_dependencies 'layered'
-                                       ^
+    use_false_package/test/__package.rb:11: Inserted `import Test::Foo::Bar::FalsePackage`
+    11 |  import Foo::Bar::FalsePackageTest
+                                           ^
 Errors: 4
 # frozen_string_literal: true
 # typed: strict
@@ -235,8 +229,6 @@ Errors: 4
 class Foo::MyPackage < PackageSpec
   layer 'lib'
   strict_dependencies 'layered'
-  test_import Foo::Bar::FalsePackage, only: "test_rb"
-  test_import Foo::Bar::FalsePackageTest
 end
 
 --------------------------------------------------------------------------
@@ -287,18 +279,18 @@ use_false_and_app_package/foo.rb:7: `Foo::Bar::FalseAndAppPackageTest::OtherClas
      5 |  strict_dependencies 'false'
                               ^^^^^^^
   Note:
-    `Foo::Bar::FalseAndAppPackageTest::OtherClass`'s package is imported as `test_import`
+    `Foo::Bar::FalseAndAppPackageTest::OtherClass`'s package is not imported
 
-use_false_and_app_package/foo.test.rb:4: `Test::Foo::Bar::FalseAndAppPackage::TestUtil` resolves but its package is not imported https://srb.help/3718
+use_false_and_app_package/test/foo.test.rb:4: `Test::Foo::Bar::FalseAndAppPackage::TestUtil` resolves but its package is not imported https://srb.help/3718
      4 |  Test::Foo::Bar::FalseAndAppPackage::TestUtil
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    false_and_app_package/__package.rb:3: Exported from package here
-     3 |class Foo::Bar::FalseAndAppPackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    false_and_app_package/test/__package.rb:4: Exported from package here
+     4 |class Test::Foo::Bar::FalseAndAppPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    use_false_and_app_package/__package.rb:7: Inserted `test_import Foo::Bar::FalseAndAppPackage, only: "test_rb"`
-     7 |  strict_dependencies 'layered'
-                                       ^
+    use_false_and_app_package/test/__package.rb:11: Inserted `import Test::Foo::Bar::FalseAndAppPackage`
+    11 |  import Foo::Bar::FalseAndAppPackageTest
+                                                 ^
 Errors: 4
 # frozen_string_literal: true
 # typed: strict
@@ -307,8 +299,6 @@ Errors: 4
 class Foo::MyPackage < PackageSpec
   layer 'lib'
   strict_dependencies 'layered'
-  test_import Foo::Bar::FalseAndAppPackage, only: "test_rb"
-  test_import Foo::Bar::FalseAndAppPackageTest
 end
 
 --------------------------------------------------------------------------
@@ -353,16 +343,16 @@ use_cycle_package/foo.rb:13: Unable to resolve constant `Test` https://srb.help/
     NN |module Net
         ^^^^^^^^^^
 
-use_cycle_package/foo.test.rb:4: Unable to resolve constant `Bar` https://srb.help/5002
+use_cycle_package/test/foo.test.rb:4: `Test::Foo::Bar::CyclePackage::TestUtil` resolves but its package is not imported https://srb.help/3718
      4 |  Test::Foo::Bar::CyclePackage::TestUtil
-          ^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    cycle_package/test/__package.rb:4: Exported from package here
+     4 |class Test::Foo::Bar::CyclePackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    use_cycle_package/foo.test.rb:4: Replaced with `Dir`
-     4 |  Test::Foo::Bar::CyclePackage::TestUtil
-          ^^^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/dir.rbi#LCENSORED: `Dir` defined here
-    NN |class Dir < Object
-        ^^^^^^^^^^^^^^^^^^
+    use_cycle_package/test/__package.rb:9: Inserted `import Test::Foo::Bar::CyclePackage`
+     9 |
+        ^
 Errors: 4
 # frozen_string_literal: true
 # typed: strict
@@ -371,7 +361,6 @@ Errors: 4
 class Foo::MyPackage < PackageSpec
   layer 'lib'
   strict_dependencies 'layered_dag'
-  test_import Foo::Bar::CyclePackageTest
 end
 
 --------------------------------------------------------------------------
@@ -416,16 +405,16 @@ use_app_cycle_package/foo.rb:13: Unable to resolve constant `Test` https://srb.h
     NN |module Net
         ^^^^^^^^^^
 
-use_app_cycle_package/foo.test.rb:4: Unable to resolve constant `Bar` https://srb.help/5002
+use_app_cycle_package/test/foo.test.rb:4: `Test::Foo::Bar::AppCyclePackage::TestUtil` resolves but its package is not imported https://srb.help/3718
      4 |  Test::Foo::Bar::AppCyclePackage::TestUtil
-          ^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    app_cycle_package/test/__package.rb:4: Exported from package here
+     4 |class Test::Foo::Bar::AppCyclePackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    use_app_cycle_package/foo.test.rb:4: Replaced with `Dir`
-     4 |  Test::Foo::Bar::AppCyclePackage::TestUtil
-          ^^^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/dir.rbi#LCENSORED: `Dir` defined here
-    NN |class Dir < Object
-        ^^^^^^^^^^^^^^^^^^
+    use_app_cycle_package/test/__package.rb:9: Inserted `import Test::Foo::Bar::AppCyclePackage`
+     9 |
+        ^
 Errors: 4
 # frozen_string_literal: true
 # typed: strict
@@ -434,7 +423,6 @@ Errors: 4
 class Foo::MyPackage < PackageSpec
   layer 'lib'
   strict_dependencies 'layered_dag'
-  test_import Foo::Bar::AppCyclePackageTest
 end
 
 --------------------------------------------------------------------------
@@ -479,16 +467,16 @@ use_false_cycle_package/foo.rb:13: Unable to resolve constant `Test` https://srb
     NN |module Net
         ^^^^^^^^^^
 
-use_false_cycle_package/foo.test.rb:4: Unable to resolve constant `Bar` https://srb.help/5002
+use_false_cycle_package/test/foo.test.rb:4: `Test::Foo::Bar::FalseCyclePackage::TestUtil` resolves but its package is not imported https://srb.help/3718
      4 |  Test::Foo::Bar::FalseCyclePackage::TestUtil
-          ^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    false_cycle_package/test/__package.rb:4: Exported from package here
+     4 |class Test::Foo::Bar::FalseCyclePackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    use_false_cycle_package/foo.test.rb:4: Replaced with `Dir`
-     4 |  Test::Foo::Bar::FalseCyclePackage::TestUtil
-          ^^^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/dir.rbi#LCENSORED: `Dir` defined here
-    NN |class Dir < Object
-        ^^^^^^^^^^^^^^^^^^
+    use_false_cycle_package/test/__package.rb:11: Inserted `import Test::Foo::Bar::FalseCyclePackage`
+    11 |  import Foo::Bar::FalseCyclePackageTest
+                                                ^
 Errors: 4
 # frozen_string_literal: true
 # typed: strict
@@ -497,7 +485,6 @@ Errors: 4
 class Foo::MyPackage < PackageSpec
   layer 'lib'
   strict_dependencies 'layered_dag'
-  test_import Foo::Bar::FalseCyclePackageTest
 end
 
 --------------------------------------------------------------------------
@@ -542,16 +529,16 @@ use_app_false_cycle_package/foo.rb:13: Unable to resolve constant `Test` https:/
     NN |module Net
         ^^^^^^^^^^
 
-use_app_false_cycle_package/foo.test.rb:4: Unable to resolve constant `Bar` https://srb.help/5002
+use_app_false_cycle_package/test/foo.test.rb:4: `Test::Foo::Bar::AppFalseCyclePackage::TestUtil` resolves but its package is not imported https://srb.help/3718
      4 |  Test::Foo::Bar::AppFalseCyclePackage::TestUtil
-          ^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    app_false_cycle_package/test/__package.rb:4: Exported from package here
+     4 |class Test::Foo::Bar::AppFalseCyclePackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    use_app_false_cycle_package/foo.test.rb:4: Replaced with `Dir`
-     4 |  Test::Foo::Bar::AppFalseCyclePackage::TestUtil
-          ^^^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/dir.rbi#LCENSORED: `Dir` defined here
-    NN |class Dir < Object
-        ^^^^^^^^^^^^^^^^^^
+    use_app_false_cycle_package/test/__package.rb:11: Inserted `import Test::Foo::Bar::AppFalseCyclePackage`
+    11 |  import Foo::Bar::AppFalseCyclePackageTest
+                                                   ^
 Errors: 4
 # frozen_string_literal: true
 # typed: strict
@@ -560,5 +547,4 @@ Errors: 4
 class Foo::MyPackage < PackageSpec
   layer 'lib'
   strict_dependencies 'layered_dag'
-  test_import Foo::Bar::AppFalseCyclePackageTest
 end
