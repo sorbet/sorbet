@@ -17,12 +17,13 @@ module T::Private
         when T::Types::Base
           # Mirrors the T::Types::Base branch of coerce_and_check_module_types,
           # kept inline to avoid its call frame for every already-coerced type.
-          case type
-          when T::Private::Types::TypeAlias
-            coerced_type = type.aliased_type
-          else
-            coerced_type = type
-          end
+          coerced_type =
+            case type
+            when T::Private::Types::TypeAlias
+              type.aliased_type
+            else
+              type
+            end
         else
           coerced_type = T::Utils::Private.coerce_and_check_module_types(type, value, true)
           return value unless coerced_type
