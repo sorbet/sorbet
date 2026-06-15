@@ -1,5 +1,6 @@
 # typed: true
 # selective-apply-code-action: refactor
+# TODO(bshu): incorrect behavior
 
 class Other
   extend T::Sig
