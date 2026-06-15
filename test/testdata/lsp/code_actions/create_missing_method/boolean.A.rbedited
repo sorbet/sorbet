@@ -11,7 +11,7 @@ class SingleArg
 #     ^ apply-code-action: [A] Create missing method
   end
 
-  sig { params(param: FalseClass).returns(T.untyped) }
+  sig { params(param: T::Boolean).returns(T.untyped) }
   def greet(param)
     Kernel.raise NotImplementedError
   end

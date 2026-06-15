@@ -30,6 +30,16 @@ struct SendFinder {
     }
 };
 
+core::TypePtr improveArgType(const core::GlobalState &gs, const core::TypePtr &argType) {
+    if (isa_type<core::ClassType>(argType)) {
+        auto ct = core::cast_type_nonnull<core::ClassType>(argType);
+        if (ct.symbol == core::Symbols::TrueClass() || ct.symbol == core::Symbols::FalseClass()) {
+            return core::Types::Boolean();
+        }
+    }
+    return argType;
+}
+
 string formatNewMethod(const core::GlobalState &gs, uint32_t indentLength, const core::NameRef name,
                        const vector<string> &paramNames, absl::Span<const core::TypePtr> argTypes, uint64_t numPosArgs,
                        uint64_t numKwArgs) {
@@ -169,7 +179,11 @@ vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerD
     }
 
     auto paramNames = getParamNames(gs, "param", *sendFinder.result);
-    auto newText = formatNewMethod(gs, indentLength, resp.originalName, paramNames, resp.argTypes,
+    vector<core::TypePtr> improvedArgTypes;
+    for (auto &argType : resp.argTypes) {
+        improvedArgTypes.emplace_back(improveArgType(gs, argType));
+    }
+    auto newText = formatNewMethod(gs, indentLength, resp.originalName, paramNames, improvedArgTypes,
                                    sendFinder.result->numPosArgs(), sendFinder.result->numKwArgs());
     vector<unique_ptr<TextEdit>> edits;
     edits.emplace_back(make_unique<TextEdit>(Range::fromLoc(gs, insertLoc.value()), newText));
