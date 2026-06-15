@@ -369,23 +369,25 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
         }
     }
 
-    // We allow displaying this code action even with a selection because this code action is only triggered with an
-    // error, and the lsp test runner will first query for code actions using the error range.
-    // If we don't accept selections, then the lsp test runner will fail.
-    // TODO(bshu): maybe update the test runner since this code action doesn't really make sense with selections?
-    if (auto *resp = create_missing_method::isMissingMethodResponse(gs, queryResult.responses)) {
-        auto action = make_unique<CodeAction>(fmt::format("Create missing method", resp->callerSideName.show(gs)));
-        action->kind = CodeActionKind::Refactor;
-        if (canResolveLazily) {
-            action->data = make_unique<CodeActionData>(move(params));
-        } else {
-            auto workspaceEdit = make_unique<WorkspaceEdit>();
-            auto edits = create_missing_method::getCreateMissingMethodEdits(typechecker, config, *resp);
-            workspaceEdit->documentChanges = move(edits);
-            action->edit = move(workspaceEdit);
-        }
+    if (config.opts.lspCreateMissingMethodEnabled) {
+        // We allow displaying this code action even with a selection because this code action is only triggered with an
+        // error, and the lsp test runner will first query for code actions using the error range.
+        // If we don't accept selections, then the lsp test runner will fail.
+        // TODO(bshu): maybe update the test runner since this code action doesn't really make sense with selections?
+        if (auto *resp = create_missing_method::isMissingMethodResponse(gs, queryResult.responses)) {
+            auto action = make_unique<CodeAction>(fmt::format("Create missing method", resp->callerSideName.show(gs)));
+            action->kind = CodeActionKind::Refactor;
+            if (canResolveLazily) {
+                action->data = make_unique<CodeActionData>(move(params));
+            } else {
+                auto workspaceEdit = make_unique<WorkspaceEdit>();
+                auto edits = create_missing_method::getCreateMissingMethodEdits(typechecker, config, *resp);
+                workspaceEdit->documentChanges = move(edits);
+                action->edit = move(workspaceEdit);
+            }
 
-        result.emplace_back(move(action));
+            result.emplace_back(move(action));
+        }
     }
 
     response->result = move(result);

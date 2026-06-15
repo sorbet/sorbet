@@ -290,6 +290,7 @@ struct Options {
     bool lspDocumentHighlightEnabled = false;
     bool lspSignatureHelpEnabled = false;
     bool lspExtractToVariableEnabled = false;
+    bool lspCreateMissingMethodEnabled = false;
     bool forciblySilenceLspMultipleDirError = false;
     // Enables out-of-order reference checking
     bool outOfOrderReferenceChecksEnabled = false;

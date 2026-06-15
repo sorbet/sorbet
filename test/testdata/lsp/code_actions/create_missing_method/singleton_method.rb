@@ -1,5 +1,6 @@
 # typed: true
 # selective-apply-code-action: refactor
+# enable-experimental-lsp-extract-to-variable: true
 # TODO(bshu): incorrect behavior
 
 class Other

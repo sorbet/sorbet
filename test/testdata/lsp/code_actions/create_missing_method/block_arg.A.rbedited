@@ -1,5 +1,6 @@
 # typed: true
 # selective-apply-code-action: refactor
+# enable-experimental-lsp-extract-to-variable: true
 
 class BlockArg
   extend T::Sig
