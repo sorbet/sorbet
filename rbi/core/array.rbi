@@ -1421,6 +1421,7 @@ class Array < Object
   #
   # See also
   # [`Object#hash`](https://docs.ruby-lang.org/en/2.7.0/Object.html#method-i-hash).
+  sig { returns(Integer) }
   def hash; end
 
   # Returns `true` if the given `object` is present in `self` (that is, if any
@@ -1857,7 +1858,8 @@ class Array < Object
   # X            | ---     | back up a byte
   # x            | ---     | null byte
   # ```
-  def pack(*_); end
+  sig { params(template: String, buffer: T.nilable(String)).returns(String) }
+  def pack(template, buffer: nil); end
 
   # When invoked with a block, yield all permutations of length `n` of the
   # elements of the array, then return the array itself.
