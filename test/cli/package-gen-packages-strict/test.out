@@ -7,6 +7,17 @@ A/__package.rb:3: `A` has changes https://srb.help/3734
         ^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
 
+A/test/__package.rb:9: Package `B` includes explicit visibility modifiers and cannot be imported from `Test::A` https://srb.help/3723
+     9 |  import B
+          ^^^^^^^^
+  Note:
+    Please consult with the owning team before adding a `visible_to` line to the package `B`
+
+A/test/__package.rb:3: `Test::A` has changes https://srb.help/3734
+     3 |class Test::A < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+
 E/__package.rb:7: Strict dependencies violation: All of `E`'s `import`s must be `layered` or higher https://srb.help/3727
      7 |  import D
           ^^^^^^^^
@@ -27,6 +38,17 @@ B/__package.rb:3: `B` has changes https://srb.help/3734
 D/__package.rb:3: `D` has changes https://srb.help/3734
      3 |class D < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+
+B/test/__package.rb:8: Package `B` includes explicit visibility modifiers and cannot be imported from `Test::B` https://srb.help/3723
+     8 |  import B
+          ^^^^^^^^
+  Note:
+    Please consult with the owning team before adding a `visible_to` line to the package `B`
+
+B/test/__package.rb:3: `Test::B` has changes https://srb.help/3734
+     3 |class Test::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
 
 C/__package.rb:8: Strict dependencies violation: All of `C`'s `import`s must be `dag` or higher https://srb.help/3727
@@ -50,7 +72,7 @@ C/__package.rb:8: Package `B` includes explicit visibility modifiers and cannot 
           ^^^^^^^^
   Note:
     Please consult with the owning team before adding a `visible_to` line to the package `B`
-Errors: 8
+Errors: 12
 
 ###### cat A/__package.rb ######
 # typed: strict
