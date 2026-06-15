@@ -144,12 +144,9 @@ vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerD
     auto &rootTree = resolvedTree.tree;
 
     auto enclosingMethodRef = resp.enclosingMethod;
+    // the enclosing method always exists
     auto enclosingMethod = enclosingMethodRef.data(gs);
     auto enclosingMethodDeclLoc = enclosingMethod->loc();
-    if (!enclosingMethodRef.exists()) {
-        // TODO(bshu) handle this case
-        return {};
-    }
     auto ctx = core::Context(gs, core::Symbols::root(), file);
     MethodDefFinder finder{enclosingMethodDeclLoc.offsets()};
     ast::ConstTreeWalk::apply(ctx, finder, rootTree);
