@@ -5,5 +5,4 @@ class Foo::Bar::OtherPackage < PackageSpec
   strict_dependencies 'layered'
   export Foo::Bar::OtherPackage::OtherClass
   export Foo::Bar::OtherPackage::ImportMeTestOnly
-  export Test::Foo::Bar::OtherPackage::TestUtil
 end
