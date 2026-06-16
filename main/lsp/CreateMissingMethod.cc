@@ -262,19 +262,28 @@ optional<pair<core::Loc, int>> calculateIndentedNextLine(const core::GlobalState
     return {{nextLineLoc.value(), max(thisLinePadding + 2, nextLinePadding)}};
 }
 
-pair<core::Loc, int> getInsertionLocationForClass(LSPTypecheckerDelegate &typechecker, const core::FileRef &file,
+pair<core::Loc, int> getInsertionLocationForClass(LSPTypecheckerDelegate &typechecker, const core::FileRef &currentFile,
+                                                  const ast::ParsedFile &currentAst,
                                                   const core::ClassOrModuleRef &classRef) {
     auto &gs = typechecker.state();
     auto classLocs = classRef.data(gs)->locs();
-    auto inCurrentFile = [&](const auto &loc) { return loc.file() == file; };
+    auto inCurrentFile = [&](const auto &loc) { return loc.file() == currentFile; };
     auto classLocIt = absl::c_find_if(classLocs, inCurrentFile);
-    auto classFile = (classLocIt != classLocs.end()) ? classLocIt->file() : classRef.data(gs)->loc().file();
-    auto classResolvedTree = typechecker.getResolved(classFile);
-    auto classCtx = core::Context(gs, core::Symbols::root(), classFile);
+    auto insertFile = (classLocIt != classLocs.end()) ? classLocIt->file() : classRef.data(gs)->loc().file();
+    ast::ParsedFile insertTreeStorage;
+    const ast::ParsedFile *insertTree;
+    if (classLocIt != classLocs.end()) {
+        insertTreeStorage = typechecker.getResolved(insertFile);
+        insertTree = &insertTreeStorage;
+    } else {
+        insertTree = &currentAst;
+    }
+    auto classCtx = core::Context(gs, core::Symbols::root(), insertFile);
     ClassDefFinder classFinder{classRef};
-    ast::ConstTreeWalk::apply(classCtx, classFinder, classResolvedTree.tree);
+    ast::ConstTreeWalk::apply(classCtx, classFinder, insertTree->tree);
     ENFORCE(classFinder.result != nullptr);
-    auto classLoc = core::Loc(classFile, classFinder.result->loc);
+    auto classLoc = core::Loc(insertFile, classFinder.result->loc);
+    // skip past the `end` keyword
     auto insertLoc = classLoc.copyEndWithZeroLength().adjust(gs, -3, -3);
     auto [_loc, indentLength] = classLoc.copyEndWithZeroLength().findStartOfIndentation(gs);
     return {insertLoc, indentLength};
@@ -306,7 +315,8 @@ vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerD
     }
     if (receiverClass.data(gs)->isSingletonClass(gs)) {
         auto attachedClassRef = receiverClass.data(gs)->attachedClass(gs);
-        auto [insertLoc1, indentLength1] = getInsertionLocationForClass(typechecker, file, attachedClassRef);
+        auto [insertLoc1, indentLength1] =
+            getInsertionLocationForClass(typechecker, file, resolvedTree, attachedClassRef);
         insertLoc = insertLoc1;
         indentLength = indentLength1 + 2;
         singletonClass = true;
@@ -327,7 +337,7 @@ vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerD
         extraTextBefore = "\n";
         extraTextAfter = "";
     } else {
-        auto [insertLoc1, indentLength1] = getInsertionLocationForClass(typechecker, file, receiverClass);
+        auto [insertLoc1, indentLength1] = getInsertionLocationForClass(typechecker, file, resolvedTree, receiverClass);
         insertLoc = insertLoc1;
         indentLength = indentLength1 + 2;
         singletonClass = false;
