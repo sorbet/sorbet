@@ -142,7 +142,7 @@ class Main
   extend T::Sig
 
   # (2) Use .on_failure in the sig for a method
-  #                                       ┌───────────────┐
+  #                                        ┌───────────────┐
   sig { params(argv: T::Array[String]).void.on_failure(:log) }
   def self.main(argv)
     puts argv
@@ -177,7 +177,7 @@ end
 
 # ...
 
-#                                       ┌─────────────────┐
+#                                        ┌─────────────────┐
 sig { params(argv: T::Array[String]).void.on_failure(:raise) }
 ```
 
