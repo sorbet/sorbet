@@ -1,4 +1,4 @@
-#include "rbs/prism/CommentsAssociatorPrism.h"
+#include "rbs/CommentsAssociator.h"
 
 #include "absl/strings/match.h"
 #include "absl/strings/str_split.h"

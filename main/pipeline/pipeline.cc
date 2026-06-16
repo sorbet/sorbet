@@ -40,7 +40,7 @@
 #include "parser/prism/Parser.h"
 #include "payload/binary/binary.h"
 #include "pipeline.h"
-#include "rbs/prism/RBSRewriterPrism.h"
+#include "rbs/RBSRewriter.h"
 #include "resolver/resolver.h"
 #include "rewriter/rewriter.h"
 

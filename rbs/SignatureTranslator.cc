@@ -1,8 +1,8 @@
-#include "rbs/prism/SignatureTranslatorPrism.h"
+#include "rbs/SignatureTranslator.h"
 #include "core/errors/rewriter.h"
-#include "rbs/prism/MethodTypeToParserNodePrism.h"
-#include "rbs/prism/TypeParamsToParserNodesPrism.h"
-#include "rbs/prism/TypeToParserNodePrism.h"
+#include "rbs/MethodTypeToParserNode.h"
+#include "rbs/TypeParamsToParserNodes.h"
+#include "rbs/TypeToParserNode.h"
 #include "rbs/rbs_common.h"
 
 using namespace std;

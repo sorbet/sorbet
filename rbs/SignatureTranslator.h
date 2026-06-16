@@ -1,5 +1,5 @@
-#ifndef SORBET_RBS_SIGNATURE_TRANSLATOR_PRISM_H
-#define SORBET_RBS_SIGNATURE_TRANSLATOR_PRISM_H
+#ifndef SORBET_RBS_SIGNATURE_TRANSLATOR_H
+#define SORBET_RBS_SIGNATURE_TRANSLATOR_H
 
 #include "parser/parser.h"
 #include "parser/prism/Parser.h"
@@ -40,4 +40,4 @@ private:
 
 } // namespace sorbet::rbs
 
-#endif // SORBET_RBS_SIGNATURE_TRANSLATOR_PRISM_H
+#endif // SORBET_RBS_SIGNATURE_TRANSLATOR_H

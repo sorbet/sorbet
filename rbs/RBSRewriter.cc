@@ -1,9 +1,9 @@
-#include "rbs/prism/RBSRewriterPrism.h"
+#include "rbs/RBSRewriter.h"
 
 #include "common/timers/Timer.h"
-#include "rbs/prism/AssertionsRewriterPrism.h"
-#include "rbs/prism/CommentsAssociatorPrism.h"
-#include "rbs/prism/SigsRewriterPrism.h"
+#include "rbs/AssertionsRewriter.h"
+#include "rbs/CommentsAssociator.h"
+#include "rbs/SigsRewriter.h"
 
 using namespace std;
 

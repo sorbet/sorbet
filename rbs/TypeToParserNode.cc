@@ -1,4 +1,4 @@
-#include "rbs/prism/TypeToParserNodePrism.h"
+#include "rbs/TypeToParserNode.h"
 
 #include "common/typecase.h"
 #include "core/GlobalState.h"

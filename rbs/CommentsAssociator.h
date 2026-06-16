@@ -1,5 +1,5 @@
-#ifndef SORBET_RBS_COMMENTS_ASSOCIATOR_PRISM_H
-#define SORBET_RBS_COMMENTS_ASSOCIATOR_PRISM_H
+#ifndef SORBET_RBS_COMMENTS_ASSOCIATOR_H
+#define SORBET_RBS_COMMENTS_ASSOCIATOR_H
 
 #include "common/common.h"
 #include "parser/parser.h"
@@ -81,4 +81,4 @@ private:
 };
 
 } // namespace sorbet::rbs
-#endif // SORBET_RBS_COMMENTS_ASSOCIATOR_PRISM_H
+#endif // SORBET_RBS_COMMENTS_ASSOCIATOR_H

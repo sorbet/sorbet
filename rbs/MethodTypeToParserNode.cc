@@ -1,9 +1,9 @@
-#include "rbs/prism/MethodTypeToParserNodePrism.h"
+#include "rbs/MethodTypeToParserNode.h"
 
 #include "absl/algorithm/container.h"
 #include "core/errors/rewriter.h"
 #include "parser/prism/Helpers.h"
-#include "rbs/prism/TypeToParserNodePrism.h"
+#include "rbs/TypeToParserNode.h"
 #include "rbs/rbs_method_common.h"
 
 extern "C" {

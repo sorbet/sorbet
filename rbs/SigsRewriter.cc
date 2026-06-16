@@ -1,4 +1,4 @@
-#include "rbs/prism/SigsRewriterPrism.h"
+#include "rbs/SigsRewriter.h"
 
 #include "absl/algorithm/container.h"
 #include "absl/strings/match.h"
@@ -10,7 +10,7 @@
 extern "C" {
 #include "prism.h"
 }
-#include "rbs/prism/SignatureTranslatorPrism.h"
+#include "rbs/SignatureTranslator.h"
 
 using namespace std;
 using namespace sorbet::parser::Prism;

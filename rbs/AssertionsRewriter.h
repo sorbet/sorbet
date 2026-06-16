@@ -1,9 +1,9 @@
-#ifndef SORBET_RBS_ASSERTIONS_REWRITER_PRISM_H
-#define SORBET_RBS_ASSERTIONS_REWRITER_PRISM_H
+#ifndef SORBET_RBS_ASSERTIONS_REWRITER_H
+#define SORBET_RBS_ASSERTIONS_REWRITER_H
 
 #include "parser/prism/Helpers.h"
 #include "parser/prism/Parser.h"
-#include "rbs/prism/CommentsAssociatorPrism.h"
+#include "rbs/CommentsAssociator.h"
 #include "rbs/rbs_common.h"
 
 extern "C" {
@@ -64,4 +64,4 @@ private:
 
 } // namespace sorbet::rbs
 
-#endif // SORBET_RBS_ASSERTIONS_REWRITER_PRISM_H
+#endif // SORBET_RBS_ASSERTIONS_REWRITER_H

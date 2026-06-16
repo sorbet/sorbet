@@ -1,5 +1,5 @@
-#ifndef SORBET_RBS_RBS_REWRITER_PRISM_H
-#define SORBET_RBS_RBS_REWRITER_PRISM_H
+#ifndef SORBET_RBS_RBS_REWRITER_H
+#define SORBET_RBS_RBS_REWRITER_H
 
 #include "core/Context.h"
 #include "core/LocOffsets.h"
@@ -18,4 +18,4 @@ void runPrismRBSRewrite(core::GlobalState &gs, core::FileRef file, pm_node_t *no
 
 } // namespace sorbet::rbs
 
-#endif // SORBET_RBS_RBS_REWRITER_PRISM_H
+#endif // SORBET_RBS_RBS_REWRITER_H

@@ -1,8 +1,8 @@
-#include "rbs/prism/AssertionsRewriterPrism.h"
+#include "rbs/AssertionsRewriter.h"
 
 #include "absl/strings/match.h"
 #include "core/errors/rewriter.h"
-#include "rbs/prism/SignatureTranslatorPrism.h"
+#include "rbs/SignatureTranslator.h"
 #include <cctype>
 #include <regex>
 

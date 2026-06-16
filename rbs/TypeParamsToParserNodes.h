@@ -1,5 +1,5 @@
-#ifndef SORBET_RBS_TYPE_PARAMS_TO_PARSER_NODES_PRISM_H
-#define SORBET_RBS_TYPE_PARAMS_TO_PARSER_NODES_PRISM_H
+#ifndef SORBET_RBS_TYPE_PARAMS_TO_PARSER_NODES_H
+#define SORBET_RBS_TYPE_PARAMS_TO_PARSER_NODES_H
 
 #include "parser/prism/Factory.h"
 #include "parser/prism/Parser.h"
@@ -27,4 +27,4 @@ public:
 
 } // namespace sorbet::rbs
 
-#endif // SORBET_RBS_TYPE_PARAMS_TO_PARSER_NODES_PRISM_H
+#endif // SORBET_RBS_TYPE_PARAMS_TO_PARSER_NODES_H

@@ -1,7 +1,7 @@
-#include "rbs/prism/TypeParamsToParserNodesPrism.h"
+#include "rbs/TypeParamsToParserNodes.h"
 
 #include "core/errors/rewriter.h"
-#include "rbs/prism/TypeToParserNodePrism.h"
+#include "rbs/TypeToParserNode.h"
 
 using namespace std;
 

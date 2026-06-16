@@ -1,5 +1,5 @@
-#ifndef RBS_METHOD_TYPE_TO_PARSER_NODE_PRISM_H
-#define RBS_METHOD_TYPE_TO_PARSER_NODE_PRISM_H
+#ifndef RBS_METHOD_TYPE_TO_PARSER_NODE_H
+#define RBS_METHOD_TYPE_TO_PARSER_NODE_H
 
 #include "parser/prism/Factory.h"
 #include "parser/prism/Parser.h"
@@ -46,4 +46,4 @@ private:
 
 } // namespace sorbet::rbs
 
-#endif // RBS_METHOD_TYPE_TO_PARSER_NODE_PRISM_H
+#endif // RBS_METHOD_TYPE_TO_PARSER_NODE_H
