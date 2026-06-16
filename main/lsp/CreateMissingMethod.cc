@@ -80,11 +80,11 @@ struct ClassDefFinder {
 };
 
 struct MethodDefFinder {
-    core::LocOffsets target;
+    core::MethodRef target;
     const ast::MethodDef *result = nullptr;
 
     void preTransformMethodDef(core::Context ctx, const ast::MethodDef &tree) {
-        if (tree.loc.contains(target)) {
+        if (tree.symbol == target) {
             result = &tree;
         }
     }
@@ -286,9 +286,9 @@ pair<core::Loc, int> getInsertionLocationForClass(LSPTypecheckerDelegate &typech
 }
 
 pair<core::Loc, int> getInsertionLocationAfterMethod(const core::GlobalState &gs, const ast::ParsedFile &rootTree,
-                                                     const core::Loc &enclosingMethodDeclLoc) {
+                                                     const core::MethodRef enclosingMethodRef) {
     auto ctx = core::Context(gs, core::Symbols::root(), rootTree.file);
-    MethodDefFinder finder{enclosingMethodDeclLoc.offsets()};
+    MethodDefFinder finder{enclosingMethodRef};
     ast::ConstTreeWalk::apply(ctx, finder, rootTree.tree);
     ENFORCE(finder.result != nullptr);
     auto enclosingMethodLoc = core::Loc(rootTree.file, finder.result->loc);
@@ -308,9 +308,6 @@ vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerD
 
     auto enclosingMethodRef = resp.enclosingMethod;
     ENFORCE(enclosingMethodRef.exists());
-    auto enclosingMethod = enclosingMethodRef.data(gs);
-    auto enclosingMethodDeclLoc = enclosingMethod->loc();
-
     core::Loc insertLoc;
     int indentLength;
     string extraTextBefore;
@@ -323,7 +320,7 @@ vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerD
     auto sourceClass = receiverIsSingleton ? receiverClass.data(gs)->attachedClass(gs) : receiverClass;
     // try to insert the missing method near the enclosing method if possible
     if (sourceClass == enclosingMethodRef.data(gs)->owner) {
-        auto [insertLoc1, indentLength1] = getInsertionLocationAfterMethod(gs, resolvedTree, enclosingMethodDeclLoc);
+        auto [insertLoc1, indentLength1] = getInsertionLocationAfterMethod(gs, resolvedTree, enclosingMethodRef);
         insertLoc = insertLoc1;
         indentLength = indentLength1;
         extraTextBefore = "\n";
