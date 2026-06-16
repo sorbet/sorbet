@@ -271,6 +271,18 @@ pair<core::Loc, int> getInsertionLocationForClass(LSPTypecheckerDelegate &typech
     return {insertLoc, indentLength};
 }
 
+pair<core::Loc, int> getInsertionLocationAfterMethod(const core::GlobalState &gs, const ast::ParsedFile &rootTree,
+                                                     const core::Loc &enclosingMethodDeclLoc) {
+    auto ctx = core::Context(gs, core::Symbols::root(), rootTree.file);
+    MethodDefFinder finder{enclosingMethodDeclLoc.offsets()};
+    ast::ConstTreeWalk::apply(ctx, finder, rootTree.tree);
+    ENFORCE(finder.result != nullptr);
+    auto enclosingMethodLoc = core::Loc(rootTree.file, finder.result->loc);
+    auto insertLoc1 = enclosingMethodLoc.copyEndWithZeroLength();
+    auto [_loc, indentLength1] = enclosingMethodLoc.copyEndWithZeroLength().findStartOfIndentation(gs);
+    return {insertLoc1, indentLength1};
+}
+
 vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerDelegate &typechecker,
 
                                                                  const LSPConfiguration &config,
@@ -279,7 +291,6 @@ vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerD
     auto file = resp.file;
     auto resolvedTree = typechecker.getResolved(file);
     auto &rootTree = resolvedTree.tree;
-    auto ctx = core::Context(gs, core::Symbols::root(), file);
 
     auto enclosingMethodRef = resp.enclosingMethod;
     // the enclosing method always exists
@@ -296,12 +307,7 @@ vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerD
         return {};
     }
     auto runInsertAfter = [&](bool isSingletonClass) {
-        MethodDefFinder finder{enclosingMethodDeclLoc.offsets()};
-        ast::ConstTreeWalk::apply(ctx, finder, rootTree);
-        ENFORCE(finder.result != nullptr);
-        auto enclosingMethodLoc = core::Loc(file, finder.result->loc);
-        auto insertLoc1 = enclosingMethodLoc.copyEndWithZeroLength();
-        auto [_loc, indentLength1] = enclosingMethodLoc.copyEndWithZeroLength().findStartOfIndentation(gs);
+        auto [insertLoc1, indentLength1] = getInsertionLocationAfterMethod(gs, resolvedTree, enclosingMethodDeclLoc);
         insertLoc = insertLoc1;
         indentLength = indentLength1;
         singletonClass = isSingletonClass;
@@ -333,6 +339,7 @@ vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerD
         }
     }
 
+    auto ctx = core::Context(gs, core::Symbols::root(), file);
     SendFinder sendFinder{resp.funLocOffsets};
     ast::ConstTreeWalk::apply(ctx, sendFinder, rootTree);
     if (sendFinder.result == nullptr) {
