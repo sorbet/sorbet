@@ -82,18 +82,31 @@ E/__package.rb:3: `E` is missing `visible_to`s https://srb.help/3734
     E/__package.rb:10: Deleted
     10 |  visible_to AlsoDoesNotExist::*
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    E/__package.rb:10: Inserted `visible_to C
-      visible_to D`
+    E/__package.rb:10: Inserted `visible_to 'tests'
+      visible_to C`
     10 |  visible_to AlsoDoesNotExist::*
                                         ^
 
-D/__package.rb:3: `D` is missing imports and exports https://srb.help/3734
+D/test/__package.rb:3: `Test::D` is missing imports https://srb.help/3734
+     3 |class Test::D < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    D/test/__package.rb:8: Inserted `import E`
+     8 |  import D, uses_internals: true
+                                        ^
+
+D/ANestedPackage/__package.rb:3: `D::ANestedPackage` is missing exports https://srb.help/3734
+     3 |class D::ANestedPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    D/ANestedPackage/__package.rb:5: Inserted `export D::ANestedPackage::Foo`
+     5 |  layer 'util'
+                      ^
+
+D/__package.rb:3: `D` is missing exports https://srb.help/3734
      3 |class D < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    D/__package.rb:7: Inserted `import E`
-     7 |  import B
-                  ^
     D/__package.rb:9: Deleted
      9 |  export D::ANestedPackage::Foo
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -105,21 +118,6 @@ D/__package.rb:3: `D` is missing imports and exports https://srb.help/3734
       export D::EnumFromD`
      9 |  export D::ANestedPackage::Foo
                                        ^
-
-D/ANestedPackage/__package.rb:3: `D::ANestedPackage` is missing exports https://srb.help/3734
-     3 |class D::ANestedPackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Done
-    D/ANestedPackage/__package.rb:5: Inserted `export D::ANestedPackage::Foo`
-     5 |  layer 'util'
-                      ^
-
-D/test/test_constants.rb:3: File belongs to package `D` but defines a constant that does not match this namespace https://srb.help/3713
-     3 |module Test::D
-               ^^^^^^^
-    D/__package.rb:3: Enclosing package declared here
-     3 |class D < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^
 
 C/app.rb:8: `F::CONSTANT_FROM_F` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
      8 |      puts F::CONSTANT_FROM_F
@@ -179,7 +177,6 @@ class D < PackageSpec
   layer 'util'
 
   import B
-  import E
   export D::AlreadyExportedClass
   export D::CONSTANT_FROM_D
   export D::ClassFromD
@@ -204,8 +201,8 @@ class E < PackageSpec
 
   export E::CONSTANT_FROM_E
 
+  visible_to 'tests'
   visible_to C
-  visible_to D
 end
 
 ###### cat PackageWithIgnore/__package.rb ######
@@ -280,18 +277,31 @@ E/__package.rb:3: `E` is missing `visible_to`s https://srb.help/3734
     E/__package.rb:10: Deleted
     10 |  visible_to AlsoDoesNotExist::*
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    E/__package.rb:10: Inserted `visible_to C
-      visible_to D`
+    E/__package.rb:10: Inserted `visible_to 'tests'
+      visible_to C`
     10 |  visible_to AlsoDoesNotExist::*
                                         ^
 
-D/__package.rb:3: `D` is missing imports and exports https://srb.help/3734
+D/test/__package.rb:3: `Test::D` is missing imports https://srb.help/3734
+     3 |class Test::D < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    D/test/__package.rb:8: Inserted `import E`
+     8 |  import D, uses_internals: true
+                                        ^
+
+D/ANestedPackage/__package.rb:3: `D::ANestedPackage` is missing exports https://srb.help/3734
+     3 |class D::ANestedPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    D/ANestedPackage/__package.rb:5: Inserted `export D::ANestedPackage::Foo`
+     5 |  layer 'util'
+                      ^
+
+D/__package.rb:3: `D` is missing exports https://srb.help/3734
      3 |class D < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    D/__package.rb:7: Inserted `import E`
-     7 |  import B
-                  ^
     D/__package.rb:9: Deleted
      9 |  export D::ANestedPackage::Foo
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -303,14 +313,6 @@ D/__package.rb:3: `D` is missing imports and exports https://srb.help/3734
       export D::EnumFromD`
      9 |  export D::ANestedPackage::Foo
                                        ^
-
-D/ANestedPackage/__package.rb:3: `D::ANestedPackage` is missing exports https://srb.help/3734
-     3 |class D::ANestedPackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Done
-    D/ANestedPackage/__package.rb:5: Inserted `export D::ANestedPackage::Foo`
-     5 |  layer 'util'
-                      ^
 
 A/constants.rb:5: Unable to resolve constant `G` https://srb.help/5002
      5 |  puts G::ANOTHER_CONSTANT_FROM_G
@@ -324,13 +326,6 @@ A/constants.rb:5: Unable to resolve constant `G` https://srb.help/5002
     A/constants.rb:3: `A` defined here
      3 |module A
         ^^^^^^^^
-
-D/test/test_constants.rb:3: File belongs to package `D` but defines a constant that does not match this namespace https://srb.help/3713
-     3 |module Test::D
-               ^^^^^^^
-    D/__package.rb:3: Enclosing package declared here
-     3 |class D < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^
 
 C/app.rb:8: `F::CONSTANT_FROM_F` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
      8 |      puts F::CONSTANT_FROM_F
@@ -390,7 +385,6 @@ class D < PackageSpec
   layer 'util'
 
   import B
-  import E
   export D::AlreadyExportedClass
   export D::CONSTANT_FROM_D
   export D::ClassFromD
@@ -415,8 +409,8 @@ class E < PackageSpec
 
   export E::CONSTANT_FROM_E
 
+  visible_to 'tests'
   visible_to C
-  visible_to D
 end
 
 ###### cat PackageWithIgnore/__package.rb ######
