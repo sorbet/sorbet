@@ -14,10 +14,10 @@ extern "C" {
 
 namespace sorbet::rbs {
 
-class SignatureTranslatorPrism final {
+class SignatureTranslator final {
 public:
-    SignatureTranslatorPrism(core::MutableContext ctx) : ctx(ctx), prismParser{nullptr} {}
-    SignatureTranslatorPrism(core::MutableContext ctx, parser::Prism::Parser &prismParser)
+    SignatureTranslator(core::MutableContext ctx) : ctx(ctx), prismParser{nullptr} {}
+    SignatureTranslator(core::MutableContext ctx, parser::Prism::Parser &prismParser)
         : ctx(ctx), prismParser{&prismParser} {}
 
     pm_node_t *translateMethodSignature(pm_node_t *methodDef, const RBSDeclaration &declaration,

@@ -18,7 +18,7 @@ namespace sorbet::rbs {
 /**
  * A collection of annotations and signatures comments found on a method definition.
  */
-struct CommentsPrism {
+struct Comments {
     /**
      * RBS annotation comments found on a method definition.
      *
@@ -34,10 +34,10 @@ struct CommentsPrism {
     std::vector<RBSDeclaration> signatures;
 };
 
-class SigsRewriterPrism {
+class SigsRewriter {
 public:
-    SigsRewriterPrism(core::MutableContext ctx, parser::Prism::Parser &parser,
-                      UnorderedMap<pm_node_t *, std::vector<rbs::CommentNodePrism>> &commentsByNode)
+    SigsRewriter(core::MutableContext ctx, parser::Prism::Parser &parser,
+                 UnorderedMap<pm_node_t *, std::vector<rbs::CommentNode>> &commentsByNode)
         : ctx{ctx}, parser{parser}, prism{parser}, commentsByNode{commentsByNode} {}
 
     // Rewrite the RBS signatures in the Prism AST, in-place.
@@ -47,7 +47,7 @@ private:
     core::MutableContext ctx;
     parser::Prism::Parser &parser;
     parser::Prism::Factory prism;
-    UnorderedMap<pm_node_t *, std::vector<rbs::CommentNodePrism>> &commentsByNode;
+    UnorderedMap<pm_node_t *, std::vector<rbs::CommentNode>> &commentsByNode;
 
     pm_node_t *rewriteBody(pm_node_t *node);
     void rewriteBody(pm_statements_node_t *stmts);
@@ -57,7 +57,7 @@ private:
     void rewriteArgumentsNode(pm_arguments_node_t *args);
     void rewriteClass(pm_node_t *node);
     std::unique_ptr<std::vector<pm_node_t *>> signaturesForNode(pm_node_t *node);
-    CommentsPrism commentsForNode(pm_node_t *node);
+    Comments commentsForNode(pm_node_t *node);
     void insertTypeParams(pm_node_t *node, pm_node_t *body);
     void processClassBody(pm_node_t *node, pm_node_t *&body, absl::Span<pm_node_t *const> helpers);
     pm_node_t *replaceSyntheticTypeAlias(pm_node_t *node);

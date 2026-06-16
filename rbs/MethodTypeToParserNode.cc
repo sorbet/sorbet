@@ -455,9 +455,9 @@ vector<pm_node_t *> getMethodParams(pm_def_node_t *def) {
 
 } // namespace
 
-pm_node_t *MethodTypeToParserNodePrism::attrSignature(pm_call_node_t *call, const rbs_node_t *type,
-                                                      const RBSDeclaration &declaration,
-                                                      absl::Span<const Comment> annotations) {
+pm_node_t *MethodTypeToParserNode::attrSignature(pm_call_node_t *call, const rbs_node_t *type,
+                                                 const RBSDeclaration &declaration,
+                                                 absl::Span<const Comment> annotations) {
     auto typeParams = vector<pair<core::LocOffsets, core::NameRef>>{};
     auto fullTypeLoc = declaration.fullTypeLoc();
     auto firstLineTypeLoc = declaration.firstLineTypeLoc();
@@ -474,7 +474,7 @@ pm_node_t *MethodTypeToParserNodePrism::attrSignature(pm_call_node_t *call, cons
         return nullptr;
     }
 
-    auto typeTranslator = TypeToParserNodePrism(ctx, typeParams, parser, prismParser);
+    auto typeTranslator = TypeToParserNode(ctx, typeParams, parser, prismParser);
 
     auto methodName = prismParser.resolveConstant(call->name);
 
@@ -522,9 +522,9 @@ pm_node_t *MethodTypeToParserNodePrism::attrSignature(pm_call_node_t *call, cons
     return prism.Call(fullTypeLoc, sigReceiver, "sig"sv, absl::MakeSpan(sigArgs), block);
 }
 
-pm_node_t *MethodTypeToParserNodePrism::methodSignature(pm_node_t *methodDef, const rbs_method_type_t *methodType,
-                                                        const RBSDeclaration &declaration,
-                                                        absl::Span<const Comment> annotations) {
+pm_node_t *MethodTypeToParserNode::methodSignature(pm_node_t *methodDef, const rbs_method_type_t *methodType,
+                                                   const RBSDeclaration &declaration,
+                                                   absl::Span<const Comment> annotations) {
     const auto &node = *methodType;
 
     // Collect type parameters
@@ -602,7 +602,7 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(pm_node_t *methodDef, co
         methodParams = getMethodParams(def);
     }
 
-    auto typeToPrismNode = TypeToParserNodePrism(ctx, typeParams, parser, prismParser);
+    auto typeToPrismNode = TypeToParserNode(ctx, typeParams, parser, prismParser);
 
     // Only error if RBS has more parameters than the method.
     // If RBS has fewer, generate a partial sig and let the resolver error on missing types.
@@ -708,7 +708,7 @@ pm_node_t *MethodTypeToParserNodePrism::methodSignature(pm_node_t *methodDef, co
     return prism.Call(fullTypeLoc, receiver, "sig"sv, absl::MakeSpan(sigArgs), block);
 }
 
-pm_node_t *MethodTypeToParserNodePrism::createSymbolNode(rbs_ast_symbol_t *name, core::LocOffsets nameLoc) {
+pm_node_t *MethodTypeToParserNode::createSymbolNode(rbs_ast_symbol_t *name, core::LocOffsets nameLoc) {
     if (!name) {
         return nullptr;
     }

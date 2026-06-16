@@ -9,18 +9,18 @@ using namespace std;
 
 namespace sorbet::rbs {
 
-void runPrismRBSRewrite(core::GlobalState &gs, core::FileRef file, pm_node_t *node,
-                        const vector<core::LocOffsets> &commentLocations, core::MutableContext &ctx,
-                        parser::Prism::Parser &parser) {
-    Timer timeit(gs.tracer(), "runPrismRBSRewrite", {{"file", string(file.data(gs).path())}});
+void runRBSRewrite(core::GlobalState &gs, core::FileRef file, pm_node_t *node,
+                   const vector<core::LocOffsets> &commentLocations, core::MutableContext &ctx,
+                   parser::Prism::Parser &parser) {
+    Timer timeit(gs.tracer(), "runRBSRewrite", {{"file", string(file.data(gs).path())}});
 
-    auto associator = CommentsAssociatorPrism(ctx, parser, commentLocations);
+    auto associator = CommentsAssociator(ctx, parser, commentLocations);
     auto commentMap = associator.run(node);
 
-    auto sigsRewriter = SigsRewriterPrism(ctx, parser, commentMap.signaturesForNode);
+    auto sigsRewriter = SigsRewriter(ctx, parser, commentMap.signaturesForNode);
     sigsRewriter.run(node);
 
-    auto assertionsRewriter = AssertionsRewriterPrism(ctx, parser, commentMap.assertionsForNode);
+    auto assertionsRewriter = AssertionsRewriter(ctx, parser, commentMap.assertionsForNode);
     assertionsRewriter.run(node);
 }
 

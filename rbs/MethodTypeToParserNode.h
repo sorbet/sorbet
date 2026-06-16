@@ -11,14 +11,14 @@ extern "C" {
 
 namespace sorbet::rbs {
 
-class MethodTypeToParserNodePrism {
+class MethodTypeToParserNode {
     core::MutableContext ctx;
     Parser parser;
     parser::Prism::Parser &prismParser; // For Prism node creation
     const parser::Prism::Factory prism;
 
 public:
-    MethodTypeToParserNodePrism(core::MutableContext ctx, Parser parser, parser::Prism::Parser &prismParser)
+    MethodTypeToParserNode(core::MutableContext ctx, Parser parser, parser::Prism::Parser &prismParser)
         : ctx(ctx), parser(parser), prismParser(prismParser), prism(prismParser) {}
 
     /**

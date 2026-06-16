@@ -261,16 +261,15 @@ parser::Prism::ParseResult runPrismParser(core::GlobalState &gs, core::FileRef f
     return parser::Prism::Parser::run(ctx);
 }
 
-void runPrismRBSRewrite(core::GlobalState &gs, core::FileRef file, parser::Prism::ParseResult &parseResult,
-                        const options::Printers &print) {
+void runRBSRewrite(core::GlobalState &gs, core::FileRef file, parser::Prism::ParseResult &parseResult,
+                   const options::Printers &print) {
     if (gs.cacheSensitiveOptions.rbsEnabled) {
         Timer timeit(gs.tracer(), "runRBSRewrite", {{"file", string(file.data(gs).path())}});
         core::MutableContext ctx(gs, core::Symbols::root(), file);
         core::UnfreezeNameTable nameTableAccess(gs);
 
         auto &parser = parseResult.getParser();
-        rbs::runPrismRBSRewrite(gs, file, parseResult.getRawNodePointer(), parseResult.getCommentLocations(), ctx,
-                                parser);
+        rbs::runRBSRewrite(gs, file, parseResult.getRawNodePointer(), parseResult.getCommentLocations(), ctx, parser);
     }
 
     if (print.RBSRewriteTree.enabled) {
@@ -418,7 +417,7 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
                         return emptyParsedFile(file);
                     }
 
-                    runPrismRBSRewrite(lgs, file, parseResult, print);
+                    runRBSRewrite(lgs, file, parseResult, print);
                     if (opts.stopAfterPhase == options::Phase::RBS_REWRITER) {
                         return emptyParsedFile(file);
                     }

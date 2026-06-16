@@ -12,7 +12,7 @@ extern "C" {
 
 namespace sorbet::rbs {
 
-struct InlineCommentPrism {
+struct InlineComment {
     enum class Kind {
         ABSURD,
         BIND,
@@ -26,10 +26,10 @@ struct InlineCommentPrism {
     Kind kind;
 };
 
-class AssertionsRewriterPrism {
+class AssertionsRewriter {
 public:
-    AssertionsRewriterPrism(core::MutableContext ctx, parser::Prism::Parser &parser,
-                            UnorderedMap<pm_node_t *, std::vector<CommentNodePrism>> &commentsByNode)
+    AssertionsRewriter(core::MutableContext ctx, parser::Prism::Parser &parser,
+                       UnorderedMap<pm_node_t *, std::vector<CommentNode>> &commentsByNode)
         : ctx(ctx), parser(parser), prism(parser), commentsByNode(commentsByNode){};
     // Rewrite the RBS assertions in the Prism AST, in-place.
     void run(pm_node_t *node);
@@ -38,14 +38,14 @@ private:
     core::MutableContext ctx;
     parser::Prism::Parser &parser;
     parser::Prism::Factory prism;
-    UnorderedMap<pm_node_t *, std::vector<CommentNodePrism>> &commentsByNode;
+    UnorderedMap<pm_node_t *, std::vector<CommentNode>> &commentsByNode;
     std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams = {};
     std::set<std::pair<uint32_t, uint32_t>> consumedComments = {};
     size_t totalComments = 0;
 
     void consumeComment(core::LocOffsets loc);
     bool hasConsumedComment(core::LocOffsets loc);
-    std::optional<InlineCommentPrism> commentForNode(pm_node_t *node);
+    std::optional<InlineComment> commentForNode(pm_node_t *node);
 
     core::LocOffsets translateLocation(pm_location_t location);
 
@@ -58,7 +58,7 @@ private:
 
     bool saveMethodTypeParams(pm_node_t *call);
     pm_node_t *maybeInsertCast(pm_node_t *node);
-    pm_node_t *insertCast(pm_node_t *node, std::optional<std::pair<pm_node_t *, InlineCommentPrism::Kind>> pair);
+    pm_node_t *insertCast(pm_node_t *node, std::optional<std::pair<pm_node_t *, InlineComment::Kind>> pair);
     pm_node_t *replaceSyntheticBind(pm_node_t *node);
 };
 

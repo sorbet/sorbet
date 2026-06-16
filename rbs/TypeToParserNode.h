@@ -9,7 +9,7 @@
 
 namespace sorbet::rbs {
 
-class TypeToParserNodePrism {
+class TypeToParserNode {
     core::MutableContext ctx;
     absl::Span<const std::pair<core::LocOffsets, core::NameRef>> typeParams;
     rbs::Parser parser;
@@ -17,9 +17,8 @@ class TypeToParserNodePrism {
     parser::Prism::Factory prism;
 
 public:
-    TypeToParserNodePrism(core::MutableContext ctx,
-                          absl::Span<const std::pair<core::LocOffsets, core::NameRef>> typeParams, Parser parser,
-                          parser::Prism::Parser &prismParser)
+    TypeToParserNode(core::MutableContext ctx, absl::Span<const std::pair<core::LocOffsets, core::NameRef>> typeParams,
+                     Parser parser, parser::Prism::Parser &prismParser)
         : ctx(ctx), typeParams(typeParams), parser(parser), prismParser(prismParser), prism(prismParser) {}
 
     /**
