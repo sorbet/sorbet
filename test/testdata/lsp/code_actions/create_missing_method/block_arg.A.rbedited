@@ -14,8 +14,8 @@ class BlockArg
     end
   end
 
-  sig { params(param: Integer).returns(T.untyped) }
-  def with_block(param)
+  sig { params(param: Integer, blk: T.untyped).returns(T.untyped) }
+  def with_block(param, &blk)
     Kernel.raise NotImplementedError
   end
 end

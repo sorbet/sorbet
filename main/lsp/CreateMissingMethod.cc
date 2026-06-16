@@ -113,7 +113,8 @@ core::TypePtr improveArgType(const core::GlobalState &gs, const core::TypePtr &a
 
 string formatNewMethod(const core::GlobalState &gs, uint32_t indentLength, const bool singletonClass,
                        const core::NameRef name, absl::Span<const string> paramNames,
-                       absl::Span<const core::TypePtr> argTypes, uint64_t numPosArgs, uint64_t numKwArgs) {
+                       absl::Span<const core::TypePtr> argTypes, uint64_t numPosArgs, uint64_t numKwArgs,
+                       bool hasBlock) {
     string indent(indentLength, ' ');
     string paramSig = "";
     for (uint64_t i = 0; i < numPosArgs; i++) {
@@ -142,6 +143,16 @@ string formatNewMethod(const core::GlobalState &gs, uint32_t indentLength, const
             paramList += ", ";
         }
         paramList += fmt::format("{}:", paramNames[numPosArgs + i]);
+    }
+    if (hasBlock) {
+        if (!paramSig.empty()) {
+            paramSig += ", ";
+        }
+        paramSig += fmt::format("{}: T.untyped", paramNames.back());
+        if (!paramList.empty()) {
+            paramList += ", ";
+        }
+        paramList += fmt::format("&blk", paramNames.back());
     }
     UnorderedSet<core::SymbolRef> selfTypeParams;
     for (auto &argType : argTypes) {
@@ -208,6 +219,9 @@ vector<string> getParamNames(const core::GlobalState &gs, const string &defaultN
     }
     paramNames.insert(paramNames.end(), make_move_iterator(kwParamNames.begin()),
                       make_move_iterator(kwParamNames.end()));
+    if (send.hasBlock()) {
+        paramNames.emplace_back(getFreshName(seen, "blk"));
+    }
     return paramNames;
 }
 
@@ -334,8 +348,9 @@ vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerD
     for (auto &argType : resp.argTypes) {
         improvedArgTypes.emplace_back(improveArgType(gs, argType));
     }
-    auto newText = formatNewMethod(gs, indentLength, receiverIsSingleton, resp.originalName, paramNames,
-                                   improvedArgTypes, sendFinder.result->numPosArgs(), sendFinder.result->numKwArgs());
+    auto newText =
+        formatNewMethod(gs, indentLength, receiverIsSingleton, resp.originalName, paramNames, improvedArgTypes,
+                        sendFinder.result->numPosArgs(), sendFinder.result->numKwArgs(), sendFinder.result->hasBlock());
     newText = fmt::format("{}{}{}", extraTextBefore, newText, extraTextAfter);
     vector<unique_ptr<TextEdit>> edits;
     edits.emplace_back(make_unique<TextEdit>(Range::fromLoc(gs, insertLoc), newText));
