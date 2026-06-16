@@ -299,44 +299,27 @@ vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerD
 
     core::Loc insertLoc;
     int indentLength;
-    bool singletonClass;
     string extraTextBefore;
     string extraTextAfter;
     auto receiverClass = getClass(gs, resp.dispatchResult->main.receiver);
     if (receiverClass == core::Symbols::noClassOrModule()) {
         return {};
     }
-    auto runInsertAfter = [&](bool isSingletonClass) {
+    bool receiverIsSingleton = receiverClass.data(gs)->isSingletonClass(gs);
+    auto sourceClass = receiverIsSingleton ? receiverClass.data(gs)->attachedClass(gs) : receiverClass;
+    // try to insert the missing method near the enclosing method if possible
+    if (sourceClass == enclosingMethodRef.data(gs)->owner) {
         auto [insertLoc1, indentLength1] = getInsertionLocationAfterMethod(gs, resolvedTree, enclosingMethodDeclLoc);
         insertLoc = insertLoc1;
         indentLength = indentLength1;
-        singletonClass = isSingletonClass;
         extraTextBefore = "\n";
         extraTextAfter = "";
-    };
-    auto runCalculateInsert = [&](bool isSingletonClass) {
-        auto attachedClassRef = receiverClass.data(gs)->attachedClass(gs);
-        auto classRef = isSingletonClass ? attachedClassRef : receiverClass;
-        auto [insertLoc1, indentLength1] = getInsertionLocationForClass(typechecker, file, resolvedTree, classRef);
+    } else {
+        auto [insertLoc1, indentLength1] = getInsertionLocationForClass(typechecker, file, resolvedTree, sourceClass);
         insertLoc = insertLoc1;
         indentLength = indentLength1 + 2;
-        singletonClass = isSingletonClass;
         extraTextBefore = "";
         extraTextAfter = "\n";
-    };
-    // try to insert the missing method near the enclosing method
-    if (receiverClass.data(gs)->isSingletonClass(gs)) {
-        if (receiverClass.data(gs)->attachedClass(gs) == enclosingMethodRef.data(gs)->owner) {
-            runInsertAfter(true);
-        } else {
-            runCalculateInsert(true);
-        }
-    } else {
-        if (receiverClass == enclosingMethodRef.data(gs)->owner) {
-            runInsertAfter(false);
-        } else {
-            runCalculateInsert(false);
-        }
     }
 
     auto ctx = core::Context(gs, core::Symbols::root(), file);
@@ -351,8 +334,8 @@ vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerD
     for (auto &argType : resp.argTypes) {
         improvedArgTypes.emplace_back(improveArgType(gs, argType));
     }
-    auto newText = formatNewMethod(gs, indentLength, singletonClass, resp.originalName, paramNames, improvedArgTypes,
-                                   sendFinder.result->numPosArgs(), sendFinder.result->numKwArgs());
+    auto newText = formatNewMethod(gs, indentLength, receiverIsSingleton, resp.originalName, paramNames,
+                                   improvedArgTypes, sendFinder.result->numPosArgs(), sendFinder.result->numKwArgs());
     newText = fmt::format("{}{}{}", extraTextBefore, newText, extraTextAfter);
     vector<unique_ptr<TextEdit>> edits;
     edits.emplace_back(make_unique<TextEdit>(Range::fromLoc(gs, insertLoc), newText));
