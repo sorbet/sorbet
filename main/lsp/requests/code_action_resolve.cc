@@ -2,6 +2,7 @@
 #include "core/insert_method/insert_method.h"
 #include "main/lsp/ConvertToSingletonClassMethod.h"
 #include "main/lsp/CreateMissingMethod.h"
+#include "main/lsp/ExtractMethod.h"
 #include "main/lsp/LSPLoop.h"
 #include "main/lsp/LSPQuery.h"
 #include "main/lsp/MoveMethod.h"
