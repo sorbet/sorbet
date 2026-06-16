@@ -1,0 +1,19 @@
+# typed: true
+# selective-apply-code-action: refactor
+# enable-experimental-lsp-create-missing-method: true
+
+class ExplicitSelf
+  extend T::Sig
+
+  sig { void }
+  def caller
+    self.do_something(42)
+#        ^^^^^^^^^^^^ error: Method `do_something` does not exist on `ExplicitSelf`
+#          ^ apply-code-action: [A] Create missing method
+  end
+
+  sig { params(param: Integer).returns(T.untyped) }
+  def do_something(param)
+    Kernel.raise NotImplementedError
+  end
+end

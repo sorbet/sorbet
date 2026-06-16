@@ -4,6 +4,7 @@
 #include "common/sort/sort.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/ConvertToSingletonClassMethod.h"
+#include "main/lsp/CreateMissingMethod.h"
 #include "main/lsp/ExtractVariable.h"
 #include "main/lsp/LSPLoop.h"
 #include "main/lsp/LSPQuery.h"
@@ -210,19 +211,18 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
             result.emplace_back(move(action));
         }
     }
+    auto queryResult = LSPQuery::byLoc(config, typechecker, params->textDocument->uri, *params->range->start,
+                                       LSPMethod::TextDocumentCodeAction, false);
+    bool canResolveLazily = config.getClientConfig().clientCodeActionResolveEditSupport &&
+                            config.getClientConfig().clientCodeActionDataSupport;
 
     if (loc.beginPos() == loc.endPos()) {
         // No selection
-        auto queryResult = LSPQuery::byLoc(config, typechecker, params->textDocument->uri, *params->range->start,
-                                           LSPMethod::TextDocumentCodeAction, false);
 
         // Generate "Move method" code actions only for class method definitions
         if (queryResult.error == nullptr) {
             if (auto *def = hasLoneMethodResponse(gs, queryResult.responses)) {
                 unique_ptr<CodeAction> action;
-                bool canResolveLazily = config.getClientConfig().clientCodeActionResolveEditSupport &&
-                                        config.getClientConfig().clientCodeActionDataSupport;
-
                 if (def->symbol.data(gs)->owner.data(gs)->isSingletonClass(gs)) {
                     auto action = make_unique<CodeAction>("Move method to a new module");
                     action->kind = CodeActionKind::RefactorExtract;
@@ -366,6 +366,27 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
 
                 // TODO(neil): trigger a rename for newVariable
             }
+        }
+    }
+
+    if (config.opts.lspCreateMissingMethodEnabled) {
+        // We allow displaying this code action even with a selection because this code action is only triggered with an
+        // error, and the lsp test runner will first query for code actions using the error range.
+        // If we don't accept selections, then the lsp test runner will fail.
+        // TODO(bshu): maybe update the test runner since this code action doesn't really make sense with selections?
+        if (auto *resp = create_missing_method::isMissingMethodResponse(gs, queryResult.responses)) {
+            auto action = make_unique<CodeAction>(fmt::format("Create missing method", resp->callerSideName.show(gs)));
+            action->kind = CodeActionKind::Refactor;
+            if (canResolveLazily) {
+                action->data = make_unique<CodeActionData>(move(params));
+            } else {
+                auto workspaceEdit = make_unique<WorkspaceEdit>();
+                auto edits = create_missing_method::getCreateMissingMethodEdits(typechecker, config, *resp);
+                workspaceEdit->documentChanges = move(edits);
+                action->edit = move(workspaceEdit);
+            }
+
+            result.emplace_back(move(action));
         }
     }
 

@@ -11,17 +11,18 @@ class TypeConstraint;
 class SendResponse final {
 public:
     SendResponse(std::shared_ptr<core::DispatchResult> dispatchResult, absl::Span<const core::LocOffsets> argLocOffsets,
-                 core::NameRef callerSideName, core::NameRef originalName, core::MethodRef enclosingMethod,
-                 bool isPrivateOk, uint16_t numPosArgs, core::FileRef file, core::LocOffsets termLocOffsets,
-                 core::LocOffsets receiverLocOffsets, core::LocOffsets funLocOffsets,
+                 absl::Span<const core::TypePtr> argTypes, core::NameRef callerSideName, core::NameRef originalName,
+                 core::MethodRef enclosingMethod, bool isPrivateOk, uint16_t numPosArgs, core::FileRef file,
+                 core::LocOffsets termLocOffsets, core::LocOffsets receiverLocOffsets, core::LocOffsets funLocOffsets,
                  core::LocOffsets locOffsetsWithoutBlock)
         : dispatchResult(std::move(dispatchResult)), argLocOffsets(argLocOffsets.begin(), argLocOffsets.end()),
-          callerSideName(callerSideName), originalName(originalName), enclosingMethod(enclosingMethod),
-          isPrivateOk(isPrivateOk), numPosArgs(numPosArgs), file(file), termLocOffsets(termLocOffsets),
-          receiverLocOffsets(receiverLocOffsets), funLocOffsets(funLocOffsets),
+          argTypes(argTypes.begin(), argTypes.end()), callerSideName(callerSideName), originalName(originalName),
+          enclosingMethod(enclosingMethod), isPrivateOk(isPrivateOk), numPosArgs(numPosArgs), file(file),
+          termLocOffsets(termLocOffsets), receiverLocOffsets(receiverLocOffsets), funLocOffsets(funLocOffsets),
           locOffsetsWithoutBlock(locOffsetsWithoutBlock){};
     const std::shared_ptr<core::DispatchResult> dispatchResult;
     const InlinedVector<core::LocOffsets, 2> argLocOffsets;
+    const InlinedVector<core::TypePtr, 2> argTypes;
     // The actual name we wind up invoking; in the case of `<Magic>` methods
     // like `<call-with-splat>`, this is the name that would be invoked.
     const core::NameRef callerSideName;
@@ -52,7 +53,7 @@ public:
 
     const std::optional<core::Loc> getMethodNameLoc(const core::GlobalState &gs) const;
 };
-CheckSize(SendResponse, 96, 8);
+CheckSize(SendResponse, 120, 8);
 
 class IdentResponse final {
 public:
