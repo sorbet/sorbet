@@ -5,8 +5,12 @@
 class Other
   extend T::Sig
 
+  sig { void }
+  def existing_method
+  end
+
   sig { params(param: String, param1: Integer).returns(T.untyped) }
-  def self.do_thing(param, param1)
+  def self.do_class_thing(param, param1)
     Kernel.raise NotImplementedError
   end
 end
@@ -15,9 +19,9 @@ class Caller
   extend T::Sig
 
   sig { void }
-  def call_it
-    Other.do_thing("hello", 42)
-#         ^^^^^^^^ error: Method `do_thing` does not exist on `T.class_of(Other)`
+  def caller
+    Other.do_class_thing("hello", 42)
+#         ^^^^^^^^^^^^^^ error: Method `do_class_thing` does not exist on `T.class_of(Other)`
 #           ^ apply-code-action: [A] Create missing method
   end
 end
