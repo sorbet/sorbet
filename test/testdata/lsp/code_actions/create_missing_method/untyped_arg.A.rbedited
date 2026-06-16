@@ -1,0 +1,20 @@
+# typed: true
+# selective-apply-code-action: refactor
+# enable-experimental-lsp-create-missing-method: true
+
+class MyClass
+  extend T::Sig
+
+  sig { params(x: T.untyped).void }
+  def caller(x)
+    y = T.cast(11234, T.untyped)
+    do_stuff(x, y, "hello")
+#   ^^^^^^^^ error: Method `do_stuff` does not exist on `MyClass`
+#     ^ apply-code-action: [A] Create missing method
+  end
+
+  sig { params(x: T.untyped, y: T.untyped, param: String).returns(T.untyped) }
+  def do_stuff(x, y, param)
+    Kernel.raise NotImplementedError
+  end
+end
