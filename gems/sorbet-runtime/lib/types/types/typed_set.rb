@@ -3,6 +3,11 @@
 
 module T::Types
   class TypedSet < TypedEnumerable
+    # We can reference `Set` directly without a load guard: as of Ruby 3.2 it
+    # ships as a default-autoloaded constant (Ruby registers `autoload :Set,
+    # "set"`), so the first reference here transparently loads it. Ruby 3.3 --
+    # the most recently supported release -- keeps this behavior, and Ruby 3.1
+    # and earlier (which required an explicit `require "set"`) are past EOL.
     def underlying_class
       Set
     end
@@ -14,22 +19,15 @@ module T::Types
 
     # overrides Base
     def recursively_valid?(obj)
-      return false if Object.autoload?(:Set) # Set is meant to be autoloaded but not yet loaded, this value can't be a Set
-      return false unless Object.const_defined?(:Set) # Set is not loaded yet
       obj.is_a?(Set) && super
     end
 
     # overrides Base
     def valid?(obj)
-      return false if Object.autoload?(:Set) # Set is meant to be autoloaded but not yet loaded, this value can't be a Set
-      return false unless Object.const_defined?(:Set) # Set is not loaded yet
       obj.is_a?(Set)
     end
 
     def new(...)
-      # Fine for this to blow up, because hopefully if they're trying to make a
-      # Set, they don't mind putting (or already have put) a `require 'set'` in
-      # their program directly.
       Set.new(...)
     end
 
@@ -39,8 +37,6 @@ module T::Types
       end
 
       def valid?(obj)
-        return false if Object.autoload?(:Set) # Set is meant to be autoloaded but not yet loaded, this value can't be a Set
-        return false unless Object.const_defined?(:Set) # Set is not loaded yet
         obj.is_a?(Set)
       end
     end
