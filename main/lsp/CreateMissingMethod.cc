@@ -112,7 +112,7 @@ core::TypePtr improveArgType(const core::GlobalState &gs, const core::TypePtr &a
 }
 
 string formatNewMethod(const core::GlobalState &gs, uint32_t indentLength, const bool singletonClass,
-                       const core::NameRef name, const vector<string> &paramNames,
+                       const core::NameRef name, absl::Span<const string> paramNames,
                        absl::Span<const core::TypePtr> argTypes, uint64_t numPosArgs, uint64_t numKwArgs) {
     string indent(indentLength, ' ');
     string paramSig = "";
@@ -293,7 +293,7 @@ vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerD
     auto &rootTree = resolvedTree.tree;
 
     auto enclosingMethodRef = resp.enclosingMethod;
-    // the enclosing method always exists
+    ENFORCE(enclosingMethodRef.exists());
     auto enclosingMethod = enclosingMethodRef.data(gs);
     auto enclosingMethodDeclLoc = enclosingMethod->loc();
 
