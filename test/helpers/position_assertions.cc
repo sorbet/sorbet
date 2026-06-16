@@ -276,6 +276,7 @@ const UnorderedMap<
         {"typed-super", BooleanPropertyAssertion::make},
         {"enable-suggest-unsafe", BooleanPropertyAssertion::make},
         {"enable-experimental-lsp-extract-to-variable", BooleanPropertyAssertion::make},
+        {"enable-experimental-lsp-extract-to-method", BooleanPropertyAssertion::make},
         {"enable-experimental-lsp-create-missing-method", BooleanPropertyAssertion::make},
         {"selective-apply-code-action", StringPropertyAssertions::make},
         {"use-code-action-resolve", BooleanPropertyAssertion::make},

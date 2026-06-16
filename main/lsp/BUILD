@@ -35,6 +35,7 @@ cc_library(
         "ConvertToSingletonClassMethod.h",
         "CreateMissingMethod.h",
         "DiagnosticSeverity.h",
+        "ExtractMethod.h",
         "ExtractVariable.h",
         "LSPConfiguration.h",
         "LSPInput.h",

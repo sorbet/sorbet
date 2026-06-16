@@ -543,6 +543,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
 
     options.add_options(section)("enable-experimental-lsp-extract-to-variable",
                                  "Enable experimental LSP feature: Extract To Variable");
+    options.add_options(section)("enable-experimental-lsp-extract-to-method",
+                                 "Enable experimental LSP feature: Extract To Method");
     options.add_options(section)("enable-experimental-lsp-create-missing-method",
                                  "Enable experimental LSP feature: Create Missing Method");
     options.add_options(section)(
@@ -1002,6 +1004,8 @@ void readOptions(Options &opts,
         opts.lspAllBetaFeaturesEnabled = enableAllLSPFeatures || raw["enable-all-beta-lsp-features"].as<bool>();
         opts.lspExtractToVariableEnabled =
             opts.lspAllBetaFeaturesEnabled || raw["enable-experimental-lsp-extract-to-variable"].as<bool>();
+        opts.lspExtractToMethodEnabled =
+            opts.lspAllBetaFeaturesEnabled || raw["enable-experimental-lsp-extract-to-method"].as<bool>();
         opts.lspCreateMissingMethodEnabled =
             opts.lspAllBetaFeaturesEnabled || raw["enable-experimental-lsp-create-missing-method"].as<bool>();
         opts.lspDocumentHighlightEnabled =
