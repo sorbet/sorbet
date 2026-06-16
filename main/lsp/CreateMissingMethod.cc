@@ -68,6 +68,17 @@ void collectSelfTypeParams(const core::TypePtr &type, UnorderedSet<core::SymbolR
     }
 }
 
+struct ClassDefFinder {
+    core::ClassOrModuleRef target;
+    const ast::ClassDef *result = nullptr;
+
+    void preTransformClassDef(core::Context ctx, const ast::ClassDef &tree) {
+        if (tree.symbol == target) {
+            result = &tree;
+        }
+    }
+};
+
 struct MethodDefFinder {
     core::LocOffsets target;
     const ast::MethodDef *result = nullptr;
@@ -100,9 +111,9 @@ core::TypePtr improveArgType(const core::GlobalState &gs, const core::TypePtr &a
     return argType;
 }
 
-string formatNewMethod(const core::GlobalState &gs, uint32_t indentLength, const core::NameRef name,
-                       const vector<string> &paramNames, absl::Span<const core::TypePtr> argTypes, uint64_t numPosArgs,
-                       uint64_t numKwArgs) {
+string formatNewMethod(const core::GlobalState &gs, uint32_t indentLength, const bool singletonClass,
+                       const core::NameRef name, const vector<string> &paramNames,
+                       absl::Span<const core::TypePtr> argTypes, uint64_t numPosArgs, uint64_t numKwArgs) {
     string indent(indentLength, ' ');
     string paramSig = "";
     for (uint64_t i = 0; i < numPosArgs; i++) {
@@ -149,13 +160,14 @@ string formatNewMethod(const core::GlobalState &gs, uint32_t indentLength, const
         }
         typeParams += ").";
     }
+    string singletonClassPrefix = singletonClass ? "self." : "";
     string newText = fmt::format("\n"
-                                 "\n"
                                  "{}sig {{ {}params({}).returns(T.untyped) }}\n"
-                                 "{}def {}({})\n"
+                                 "{}def {}{}({})\n"
                                  "{}  Kernel.raise NotImplementedError\n"
                                  "{}end",
-                                 indent, typeParams, paramSig, indent, name.shortName(gs), paramList, indent, indent);
+                                 indent, typeParams, paramSig, indent, singletonClassPrefix, name.shortName(gs),
+                                 paramList, indent, indent);
     return newText;
 }
 
@@ -221,6 +233,56 @@ const core::lsp::SendResponse *isMissingMethodResponse(const core::GlobalState &
     return resp;
 }
 
+core::ClassOrModuleRef getClass(const core::GlobalState &gs, const core::TypePtr &type) {
+    if (isa_type<core::ClassType>(type)) {
+        auto ct = cast_type_nonnull<core::ClassType>(type);
+        return ct.symbol;
+    } else if (isa_type<core::AppliedType>(type)) {
+        auto &ct = cast_type_nonnull<core::AppliedType>(type);
+        return ct.klass;
+    }
+    return core::Symbols::noClassOrModule();
+}
+
+pair<core::Loc, int> getInsertionLocationForClass(LSPTypecheckerDelegate &typechecker, const core::FileRef &currentFile,
+                                                  const ast::ParsedFile &currentAst,
+                                                  const core::ClassOrModuleRef &classRef) {
+    auto &gs = typechecker.state();
+    auto classLocs = classRef.data(gs)->locs();
+    auto inCurrentFile = [&](const auto &loc) { return loc.file() == currentFile; };
+    auto classLocIt = absl::c_find_if(classLocs, inCurrentFile);
+    auto insertFile = (classLocIt != classLocs.end()) ? classLocIt->file() : classRef.data(gs)->loc().file();
+    ast::ParsedFile insertTreeStorage;
+    const ast::ParsedFile *insertTree;
+    if (classLocIt != classLocs.end()) {
+        insertTreeStorage = typechecker.getResolved(insertFile);
+        insertTree = &insertTreeStorage;
+    } else {
+        insertTree = &currentAst;
+    }
+    auto classCtx = core::Context(gs, core::Symbols::root(), insertFile);
+    ClassDefFinder classFinder{classRef};
+    ast::ConstTreeWalk::apply(classCtx, classFinder, insertTree->tree);
+    ENFORCE(classFinder.result != nullptr);
+    auto classLoc = core::Loc(insertFile, classFinder.result->loc);
+    // skip past the `end` keyword
+    auto insertLoc = classLoc.copyEndWithZeroLength().adjust(gs, -3, -3);
+    auto [_loc, indentLength] = classLoc.copyEndWithZeroLength().findStartOfIndentation(gs);
+    return {insertLoc, indentLength};
+}
+
+pair<core::Loc, int> getInsertionLocationAfterMethod(const core::GlobalState &gs, const ast::ParsedFile &rootTree,
+                                                     const core::Loc &enclosingMethodDeclLoc) {
+    auto ctx = core::Context(gs, core::Symbols::root(), rootTree.file);
+    MethodDefFinder finder{enclosingMethodDeclLoc.offsets()};
+    ast::ConstTreeWalk::apply(ctx, finder, rootTree.tree);
+    ENFORCE(finder.result != nullptr);
+    auto enclosingMethodLoc = core::Loc(rootTree.file, finder.result->loc);
+    auto insertLoc1 = enclosingMethodLoc.copyEndWithZeroLength();
+    auto [_loc, indentLength1] = enclosingMethodLoc.copyEndWithZeroLength().findStartOfIndentation(gs);
+    return {insertLoc1, indentLength1};
+}
+
 vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerDelegate &typechecker,
 
                                                                  const LSPConfiguration &config,
@@ -234,16 +296,33 @@ vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerD
     // the enclosing method always exists
     auto enclosingMethod = enclosingMethodRef.data(gs);
     auto enclosingMethodDeclLoc = enclosingMethod->loc();
-    auto ctx = core::Context(gs, core::Symbols::root(), file);
-    MethodDefFinder finder{enclosingMethodDeclLoc.offsets()};
-    ast::ConstTreeWalk::apply(ctx, finder, rootTree);
-    if (finder.result == nullptr) {
+
+    core::Loc insertLoc;
+    int indentLength;
+    string extraTextBefore;
+    string extraTextAfter;
+    auto receiverClass = getClass(gs, resp.dispatchResult->main.receiver);
+    if (receiverClass == core::Symbols::noClassOrModule()) {
         return {};
     }
-    auto enclosingMethodLoc = core::Loc(file, finder.result->loc);
-    auto insertLoc = enclosingMethodLoc.copyEndWithZeroLength();
-    auto [_loc, indentLength] = enclosingMethodLoc.copyEndWithZeroLength().findStartOfIndentation(gs);
+    bool receiverIsSingleton = receiverClass.data(gs)->isSingletonClass(gs);
+    auto sourceClass = receiverIsSingleton ? receiverClass.data(gs)->attachedClass(gs) : receiverClass;
+    // try to insert the missing method near the enclosing method if possible
+    if (sourceClass == enclosingMethodRef.data(gs)->owner) {
+        auto [insertLoc1, indentLength1] = getInsertionLocationAfterMethod(gs, resolvedTree, enclosingMethodDeclLoc);
+        insertLoc = insertLoc1;
+        indentLength = indentLength1;
+        extraTextBefore = "\n";
+        extraTextAfter = "";
+    } else {
+        auto [insertLoc1, indentLength1] = getInsertionLocationForClass(typechecker, file, resolvedTree, sourceClass);
+        insertLoc = insertLoc1;
+        indentLength = indentLength1 + 2;
+        extraTextBefore = "";
+        extraTextAfter = "\n";
+    }
 
+    auto ctx = core::Context(gs, core::Symbols::root(), file);
     SendFinder sendFinder{resp.funLocOffsets};
     ast::ConstTreeWalk::apply(ctx, sendFinder, rootTree);
     if (sendFinder.result == nullptr) {
@@ -255,13 +334,13 @@ vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerD
     for (auto &argType : resp.argTypes) {
         improvedArgTypes.emplace_back(improveArgType(gs, argType));
     }
-    auto newText = formatNewMethod(gs, indentLength, resp.originalName, paramNames, improvedArgTypes,
-                                   sendFinder.result->numPosArgs(), sendFinder.result->numKwArgs());
+    auto newText = formatNewMethod(gs, indentLength, receiverIsSingleton, resp.originalName, paramNames,
+                                   improvedArgTypes, sendFinder.result->numPosArgs(), sendFinder.result->numKwArgs());
+    newText = fmt::format("{}{}{}", extraTextBefore, newText, extraTextAfter);
     vector<unique_ptr<TextEdit>> edits;
     edits.emplace_back(make_unique<TextEdit>(Range::fromLoc(gs, insertLoc), newText));
 
-    auto tdi = make_unique<VersionedTextDocumentIdentifier>(config.fileRef2Uri(gs, enclosingMethodLoc.file()),
-                                                            JSONNullObject());
+    auto tdi = make_unique<VersionedTextDocumentIdentifier>(config.fileRef2Uri(gs, insertLoc.file()), JSONNullObject());
     vector<unique_ptr<TextDocumentEdit>> result;
     result.emplace_back(make_unique<TextDocumentEdit>(move(tdi), move(edits)));
     return result;
