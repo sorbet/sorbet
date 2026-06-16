@@ -4,9 +4,69 @@
 #include "main/lsp/json_types.h"
 
 using namespace std;
+
 namespace sorbet::realmain::lsp {
 
 namespace {
+
+void collectSelfTypeParams(const core::TypePtr &type, UnorderedSet<core::SymbolRef> &result) {
+    switch (type.tag()) {
+        case core::TypePtr::Tag::ClassType:
+        case core::TypePtr::Tag::BlamedUntyped:
+        case core::TypePtr::Tag::UnresolvedClassType:
+        case core::TypePtr::Tag::UnresolvedAppliedType:
+        case core::TypePtr::Tag::LambdaParam:
+        case core::TypePtr::Tag::AliasType:
+        case core::TypePtr::Tag::SelfType:
+        case core::TypePtr::Tag::IntegerLiteralType:
+        case core::TypePtr::Tag::FloatLiteralType:
+        case core::TypePtr::Tag::NamedLiteralType:
+        case core::TypePtr::Tag::TypeVar:
+        case core::TypePtr::Tag::MetaType:
+            return;
+        case core::TypePtr::Tag::SelfTypeParam: {
+            auto def = cast_type_nonnull<core::SelfTypeParam>(type).definition;
+            if (def.isTypeMember()) {
+                return;
+            }
+            result.insert(def);
+            return;
+        }
+        case core::TypePtr::Tag::OrType: {
+            auto &o = cast_type_nonnull<core::OrType>(type);
+            collectSelfTypeParams(o.left, result);
+            collectSelfTypeParams(o.right, result);
+            return;
+        }
+        case core::TypePtr::Tag::AndType: {
+            auto &a = cast_type_nonnull<core::AndType>(type);
+            collectSelfTypeParams(a.left, result);
+            collectSelfTypeParams(a.right, result);
+            return;
+        }
+        case core::TypePtr::Tag::AppliedType: {
+            auto &app = cast_type_nonnull<core::AppliedType>(type);
+            for (auto &targ : app.targs) {
+                collectSelfTypeParams(targ, result);
+            }
+            return;
+        }
+        case core::TypePtr::Tag::TupleType: {
+            auto &tuple = cast_type_nonnull<core::TupleType>(type);
+            for (auto &elem : tuple.elems) {
+                collectSelfTypeParams(elem, result);
+            }
+            return;
+        }
+        case core::TypePtr::Tag::ShapeType: {
+            auto &shape = cast_type_nonnull<core::ShapeType>(type);
+            for (auto &val : shape.values) {
+                collectSelfTypeParams(val, result);
+            }
+            return;
+        }
+    }
+}
 
 struct MethodDefFinder {
     core::LocOffsets target;
@@ -72,13 +132,30 @@ string formatNewMethod(const core::GlobalState &gs, uint32_t indentLength, const
         }
         paramList += fmt::format("{}:", paramNames[numPosArgs + i]);
     }
+    UnorderedSet<core::SymbolRef> selfTypeParams;
+    for (auto &argType : argTypes) {
+        collectSelfTypeParams(argType, selfTypeParams);
+    }
+    string typeParams = "";
+    if (!selfTypeParams.empty()) {
+        typeParams += "T.type_parameters(";
+        bool first = true;
+        for (auto &param : selfTypeParams) {
+            if (!first) {
+                typeParams += ", ";
+            }
+            first = false;
+            typeParams += fmt::format(":{}", param.name(gs).show(gs));
+        }
+        typeParams += ").";
+    }
     string newText = fmt::format("\n"
                                  "\n"
-                                 "{}sig {{ params({}).returns(T.untyped) }}\n"
+                                 "{}sig {{ {}params({}).returns(T.untyped) }}\n"
                                  "{}def {}({})\n"
                                  "{}  Kernel.raise NotImplementedError\n"
                                  "{}end",
-                                 indent, paramSig, indent, name.shortName(gs), paramList, indent, indent);
+                                 indent, typeParams, paramSig, indent, name.shortName(gs), paramList, indent, indent);
     return newText;
 }
 
