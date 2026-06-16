@@ -165,67 +165,6 @@ module T::Private::Methods::CallValidation
     end
   end
 
-  def self.create_validator_method_kwargs(mod, original_method, method_sig, original_visibility)
-    # `kwargs_path` requires `arg_types.empty?`, so the wrapper only ever covers the all-kwargs shape.
-    # `nil` for `return_type` means the method is `.void` (the wrapper returns Void::VOID without
-    # validating the return).
-    return_type = method_sig.effective_return_type
-    return_type = nil if return_type.is_a?(T::Private::Types::Void)
-    create_validator_method_kwargs0(mod, original_method, method_sig, original_visibility, return_type, method_sig.kwarg_types)
-  end
-
-  def self.create_validator_method_with_block(mod, original_method, method_sig, original_visibility)
-    # `nil` for `return_type` means the method is `.void` (the wrapper then
-    # returns `T::Private::Types::Void::VOID` without validating the return).
-    return_type = method_sig.effective_return_type
-    return_type = nil if return_type.is_a?(T::Private::Types::Void)
-    block_type = method_sig.block_type
-    # trampoline to reduce stack frame size
-    arg_types = method_sig.arg_types
-    case arg_types.length
-    when 0
-      create_validator_method_with_block0(mod, original_method, method_sig, original_visibility, return_type, block_type)
-    when 1
-      create_validator_method_with_block1(mod, original_method, method_sig, original_visibility, return_type, block_type,
-                                          arg_types[0][1])
-    when 2
-      create_validator_method_with_block2(mod, original_method, method_sig, original_visibility, return_type, block_type,
-                                          arg_types[0][1],
-                                          arg_types[1][1])
-    when 3
-      create_validator_method_with_block3(mod, original_method, method_sig, original_visibility, return_type, block_type,
-                                          arg_types[0][1],
-                                          arg_types[1][1],
-                                          arg_types[2][1])
-    when 4
-      create_validator_method_with_block4(mod, original_method, method_sig, original_visibility, return_type, block_type,
-                                          arg_types[0][1],
-                                          arg_types[1][1],
-                                          arg_types[2][1],
-                                          arg_types[3][1])
-    else
-      raise 'should not happen'
-    end
-  end
-
-  def self.create_validator_method_optional_args(mod, original_method, method_sig, original_visibility)
-    # `nil` for `return_type` means the method is `.void` (the wrapper then
-    # returns `T::Private::Types::Void::VOID` without validating the return).
-    return_type = method_sig.effective_return_type
-    return_type = nil if return_type.is_a?(T::Private::Types::Void)
-    # trampoline to reduce stack frame size
-    arg_types = method_sig.arg_types
-    arg_count = arg_types.length
-    if arg_count > 4 || method_sig.req_arg_count >= arg_count
-      raise 'should not happen'
-    end
-    send(
-      :"create_validator_method_optional_args#{method_sig.req_arg_count}_#{arg_count}",
-      mod, original_method, method_sig, original_visibility, return_type,
-      *arg_types.map { |_name, type| type }
-    )
-  end
-
   def self.create_validator_slow_skip_block_type(mod, original_method, method_sig, original_visibility)
     T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |*args, &blk|
       CallValidation.validate_call_skip_block_type(self, original_method, method_sig, args, blk)

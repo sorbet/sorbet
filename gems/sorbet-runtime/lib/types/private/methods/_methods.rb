@@ -523,8 +523,8 @@ module T::Private::Methods
   end
 
   private_class_method def self.unwrap_method(mod, signature, original_method)
-    CallValidation.wrap_method_if_needed(mod, signature, original_method)
-    @signatures_by_method[method_to_key(mod.instance_method(signature.method_name))] = signature
+    maybe_wrapped_method = CallValidation.wrap_method_if_needed(mod, signature, original_method)
+    @signatures_by_method[method_to_key(maybe_wrapped_method)] = signature
   end
 
   def self.has_sig_block_for_method(method)

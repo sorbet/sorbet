@@ -294,6 +294,81 @@ void generateReturnTail() {
                "      end\n");
 }
 
+// Trampoline for the kwargs family. The kwargs path only covers the all-kwargs
+// shape, so it always dispatches to the single zero-positional `kwargs0` leaf.
+// `nil` for `return_type` means the method is `.void` (the leaf returns
+// Void::VOID without validating the return).
+void generateCreateValidatorKwargsDispatcher() {
+    fmt::print("  def self.create_validator_method_kwargs(mod, original_method, method_sig, original_visibility)\n");
+    fmt::print("    return_type = method_sig.effective_return_type\n"
+               "    return_type = nil if return_type.is_a?(T::Private::Types::Void)\n");
+    fmt::print("    create_validator_method_kwargs0(mod, original_method, method_sig, original_visibility, "
+               "return_type, method_sig.kwarg_types)\n");
+    fmt::print("  end\n"
+               "\n");
+}
+
+// Trampoline for the required-block family: dispatches on the positional arity to
+// the matching `with_blockN` leaf, forwarding each arg type. `nil` for
+// `return_type` means the method is `.void`.
+void generateCreateValidatorWithBlockDispatcher() {
+    fmt::print(
+        "  def self.create_validator_method_with_block(mod, original_method, method_sig, original_visibility)\n");
+    fmt::print("    return_type = method_sig.effective_return_type\n"
+               "    return_type = nil if return_type.is_a?(T::Private::Types::Void)\n"
+               "    block_type = method_sig.block_type\n");
+    fmt::print("    # trampoline to reduce stack frame size\n"
+               "    arg_types = method_sig.arg_types\n"
+               "    case arg_types.length\n");
+    for (size_t arity = 0; arity <= MAX_ARITY; arity++) {
+        fmt::print("    when {}\n", arity);
+        fmt::print("      create_validator_method_with_block{}(mod, original_method, method_sig, "
+                   "original_visibility, return_type, block_type",
+                   arity);
+        for (size_t i = 0; i < arity; i++) {
+            fmt::print(",\n");
+            fmt::print("                                          arg_types[{}][1]", i);
+        }
+        fmt::print(")\n");
+    }
+    fmt::print("    else\n"
+               "      raise 'should not happen'\n"
+               "    end\n"
+               "  end\n"
+               "\n");
+}
+
+// Trampoline for the optional-positional-args family: dispatches on the
+// (required-count, total-count) pair to the matching `optional_argsR_T` leaf,
+// forwarding each arg type. `nil` for `return_type` means the method is `.void`.
+void generateCreateValidatorOptionalArgsDispatcher() {
+    fmt::print(
+        "  def self.create_validator_method_optional_args(mod, original_method, method_sig, original_visibility)\n");
+    fmt::print("    return_type = method_sig.effective_return_type\n"
+               "    return_type = nil if return_type.is_a?(T::Private::Types::Void)\n");
+    fmt::print("    # trampoline to reduce stack frame size\n"
+               "    arg_types = method_sig.arg_types\n"
+               "    case [method_sig.req_arg_count, arg_types.length]\n");
+    for (size_t total = 1; total <= MAX_ARITY; total++) {
+        for (size_t req = 0; req < total; req++) {
+            fmt::print("    when [{}, {}]\n", req, total);
+            fmt::print("      create_validator_method_optional_args{}_{}(mod, original_method, method_sig, "
+                       "original_visibility, return_type",
+                       req, total);
+            for (size_t i = 0; i < total; i++) {
+                fmt::print(",\n");
+                fmt::print("                                                arg_types[{}][1]", i);
+            }
+            fmt::print(")\n");
+        }
+    }
+    fmt::print("    else\n"
+               "      raise 'should not happen'\n"
+               "    end\n"
+               "  end\n"
+               "\n");
+}
+
 // The kwargs path only covers the all-kwargs shape (`kwargs_path` requires
 // `arg_types.empty?`), so only the zero-positional `kwargs0` wrapper exists.
 void generateCreateValidatorKwargs(const Options &options) {
@@ -463,13 +538,17 @@ int generateCallValidation(const Options &options) {
 
     // Specialized wrappers that cover three call shapes the fast/medium families
     // do not: keyword args, required (non-nilable) blocks, and optional positional
-    // args. Dispatched from the matching trampolines in call_validation.rb.
+    // args. Each family is emitted as a trampoline (which unpacks method_sig and
+    // dispatches on arity) followed by its per-arity leaf wrappers.
+    generateCreateValidatorKwargsDispatcher();
     generateCreateValidatorKwargs(options);
 
+    generateCreateValidatorWithBlockDispatcher();
     for (size_t i = 0; i <= MAX_ARITY; i++) {
         generateCreateValidatorWithBlock(options, i);
     }
 
+    generateCreateValidatorOptionalArgsDispatcher();
     for (size_t total = 1; total <= MAX_ARITY; total++) {
         for (size_t req = 0; req < total; req++) {
             generateCreateValidatorOptionalArgs(options, req, total);

@@ -1726,6 +1726,12 @@ module T::Private::Methods::CallValidation
     end
   end
 
+  def self.create_validator_method_kwargs(mod, original_method, method_sig, original_visibility)
+    return_type = method_sig.effective_return_type
+    return_type = nil if return_type.is_a?(T::Private::Types::Void)
+    create_validator_method_kwargs0(mod, original_method, method_sig, original_visibility, return_type, method_sig.kwarg_types)
+  end
+
   def self.create_validator_method_kwargs0(mod, original_method, method_sig, original_visibility, return_type, kwarg_types)
     T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |**kwargs, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
@@ -1765,6 +1771,38 @@ module T::Private::Methods::CallValidation
         end
         return_value
       end
+    end
+  end
+
+  def self.create_validator_method_with_block(mod, original_method, method_sig, original_visibility)
+    return_type = method_sig.effective_return_type
+    return_type = nil if return_type.is_a?(T::Private::Types::Void)
+    block_type = method_sig.block_type
+    # trampoline to reduce stack frame size
+    arg_types = method_sig.arg_types
+    case arg_types.length
+    when 0
+      create_validator_method_with_block0(mod, original_method, method_sig, original_visibility, return_type, block_type)
+    when 1
+      create_validator_method_with_block1(mod, original_method, method_sig, original_visibility, return_type, block_type,
+                                          arg_types[0][1])
+    when 2
+      create_validator_method_with_block2(mod, original_method, method_sig, original_visibility, return_type, block_type,
+                                          arg_types[0][1],
+                                          arg_types[1][1])
+    when 3
+      create_validator_method_with_block3(mod, original_method, method_sig, original_visibility, return_type, block_type,
+                                          arg_types[0][1],
+                                          arg_types[1][1],
+                                          arg_types[2][1])
+    when 4
+      create_validator_method_with_block4(mod, original_method, method_sig, original_visibility, return_type, block_type,
+                                          arg_types[0][1],
+                                          arg_types[1][1],
+                                          arg_types[2][1],
+                                          arg_types[3][1])
+    else
+      raise 'should not happen'
     end
   end
 
@@ -2060,6 +2098,67 @@ module T::Private::Methods::CallValidation
         end
         return_value
       end
+    end
+  end
+
+  def self.create_validator_method_optional_args(mod, original_method, method_sig, original_visibility)
+    return_type = method_sig.effective_return_type
+    return_type = nil if return_type.is_a?(T::Private::Types::Void)
+    # trampoline to reduce stack frame size
+    arg_types = method_sig.arg_types
+    case [method_sig.req_arg_count, arg_types.length]
+    when [0, 1]
+      create_validator_method_optional_args0_1(mod, original_method, method_sig, original_visibility, return_type,
+                                                arg_types[0][1])
+    when [0, 2]
+      create_validator_method_optional_args0_2(mod, original_method, method_sig, original_visibility, return_type,
+                                                arg_types[0][1],
+                                                arg_types[1][1])
+    when [1, 2]
+      create_validator_method_optional_args1_2(mod, original_method, method_sig, original_visibility, return_type,
+                                                arg_types[0][1],
+                                                arg_types[1][1])
+    when [0, 3]
+      create_validator_method_optional_args0_3(mod, original_method, method_sig, original_visibility, return_type,
+                                                arg_types[0][1],
+                                                arg_types[1][1],
+                                                arg_types[2][1])
+    when [1, 3]
+      create_validator_method_optional_args1_3(mod, original_method, method_sig, original_visibility, return_type,
+                                                arg_types[0][1],
+                                                arg_types[1][1],
+                                                arg_types[2][1])
+    when [2, 3]
+      create_validator_method_optional_args2_3(mod, original_method, method_sig, original_visibility, return_type,
+                                                arg_types[0][1],
+                                                arg_types[1][1],
+                                                arg_types[2][1])
+    when [0, 4]
+      create_validator_method_optional_args0_4(mod, original_method, method_sig, original_visibility, return_type,
+                                                arg_types[0][1],
+                                                arg_types[1][1],
+                                                arg_types[2][1],
+                                                arg_types[3][1])
+    when [1, 4]
+      create_validator_method_optional_args1_4(mod, original_method, method_sig, original_visibility, return_type,
+                                                arg_types[0][1],
+                                                arg_types[1][1],
+                                                arg_types[2][1],
+                                                arg_types[3][1])
+    when [2, 4]
+      create_validator_method_optional_args2_4(mod, original_method, method_sig, original_visibility, return_type,
+                                                arg_types[0][1],
+                                                arg_types[1][1],
+                                                arg_types[2][1],
+                                                arg_types[3][1])
+    when [3, 4]
+      create_validator_method_optional_args3_4(mod, original_method, method_sig, original_visibility, return_type,
+                                                arg_types[0][1],
+                                                arg_types[1][1],
+                                                arg_types[2][1],
+                                                arg_types[3][1])
+    else
+      raise 'should not happen'
     end
   end
 
