@@ -244,24 +244,6 @@ core::ClassOrModuleRef getClass(const core::GlobalState &gs, const core::TypePtr
     return core::Symbols::noClassOrModule();
 }
 
-// Given a location, returns the insertion location (the start of the line after the line of the given location)
-// and the correct indentation if you were to insert at the insertion location
-// Useful for calculating the indentation of the next line after something like `class Foo`
-optional<pair<core::Loc, int>> calculateIndentedNextLine(const core::GlobalState &gs, const core::Loc &loc) {
-    auto [classStart, classEnd] = loc.toDetails(gs);
-
-    auto [_, thisLinePadding] = loc.findStartOfIndentation(gs);
-
-    core::Loc::Detail nextLineStart = {classStart.line + 1, 1};
-    auto nextLineLoc = core::Loc::fromDetails(gs, loc.file(), nextLineStart, nextLineStart);
-    if (!nextLineLoc.has_value()) {
-        return nullopt;
-    }
-    auto [_nextLineIndented, nextLinePadding] = nextLineLoc.value().findStartOfIndentation(gs);
-
-    return {{nextLineLoc.value(), max(thisLinePadding + 2, nextLinePadding)}};
-}
-
 pair<core::Loc, int> getInsertionLocationForClass(LSPTypecheckerDelegate &typechecker, const core::FileRef &currentFile,
                                                   const ast::ParsedFile &currentAst,
                                                   const core::ClassOrModuleRef &classRef) {
@@ -313,36 +295,42 @@ vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerD
     if (receiverClass == core::Symbols::noClassOrModule()) {
         return {};
     }
-    if (receiverClass.data(gs)->isSingletonClass(gs)) {
-        auto attachedClassRef = receiverClass.data(gs)->attachedClass(gs);
-        auto [insertLoc1, indentLength1] =
-            getInsertionLocationForClass(typechecker, file, resolvedTree, attachedClassRef);
-        insertLoc = insertLoc1;
-        indentLength = indentLength1 + 2;
-        singletonClass = true;
-        extraTextBefore = "";
-        extraTextAfter = "\n";
-    } else if (receiverClass == enclosingMethodRef.data(gs)->owner) {
+    auto runInsertAfter = [&](bool isSingletonClass) {
         MethodDefFinder finder{enclosingMethodDeclLoc.offsets()};
         ast::ConstTreeWalk::apply(ctx, finder, rootTree);
-        if (finder.result == nullptr) {
-            return {};
-        }
+        ENFORCE(finder.result != nullptr);
         auto enclosingMethodLoc = core::Loc(file, finder.result->loc);
         auto insertLoc1 = enclosingMethodLoc.copyEndWithZeroLength();
         auto [_loc, indentLength1] = enclosingMethodLoc.copyEndWithZeroLength().findStartOfIndentation(gs);
         insertLoc = insertLoc1;
         indentLength = indentLength1;
-        singletonClass = false;
+        singletonClass = isSingletonClass;
         extraTextBefore = "\n";
         extraTextAfter = "";
-    } else {
-        auto [insertLoc1, indentLength1] = getInsertionLocationForClass(typechecker, file, resolvedTree, receiverClass);
+    };
+    auto runCalculateInsert = [&](bool isSingletonClass) {
+        auto attachedClassRef = receiverClass.data(gs)->attachedClass(gs);
+        auto classRef = isSingletonClass ? attachedClassRef : receiverClass;
+        auto [insertLoc1, indentLength1] = getInsertionLocationForClass(typechecker, file, resolvedTree, classRef);
         insertLoc = insertLoc1;
         indentLength = indentLength1 + 2;
-        singletonClass = false;
+        singletonClass = isSingletonClass;
         extraTextBefore = "";
         extraTextAfter = "\n";
+    };
+    // try to insert the missing method near the enclosing method
+    if (receiverClass.data(gs)->isSingletonClass(gs)) {
+        if (receiverClass.data(gs)->attachedClass(gs) == enclosingMethodRef.data(gs)->owner) {
+            runInsertAfter(true);
+        } else {
+            runCalculateInsert(true);
+        }
+    } else {
+        if (receiverClass == enclosingMethodRef.data(gs)->owner) {
+            runInsertAfter(false);
+        } else {
+            runCalculateInsert(false);
+        }
     }
 
     SendFinder sendFinder{resp.funLocOffsets};
