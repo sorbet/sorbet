@@ -28,6 +28,14 @@ void ConstantAssumeType::run(core::MutableContext ctx, ast::Assign *asgn) {
         return;
     }
 
+    // Allow `A.new.freeze` to be treated the same as `A.new`
+    if (send->fun == core::Names::freeze() && !send->hasNonBlockArgs() && !send->hasBlock()) {
+        send = ast::cast_tree<ast::Send>(send->recv);
+        if (send == nullptr) {
+            return;
+        }
+    }
+
     if (send->fun != core::Names::new_()) {
         return;
     }
