@@ -91,7 +91,7 @@ D/__package.rb:3: `D` is missing imports and exports https://srb.help/3734
      3 |class D < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    D/__package.rb:7: Inserted `test_import E`
+    D/__package.rb:7: Inserted `import E`
      7 |  import B
                   ^
     D/__package.rb:9: Deleted
@@ -114,6 +114,13 @@ D/ANestedPackage/__package.rb:3: `D::ANestedPackage` is missing exports https://
      5 |  layer 'util'
                       ^
 
+D/test/test_constants.rb:3: File belongs to package `D` but defines a constant that does not match this namespace https://srb.help/3713
+     3 |module Test::D
+               ^^^^^^^
+    D/__package.rb:3: Enclosing package declared here
+     3 |class D < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+
 C/app.rb:8: `F::CONSTANT_FROM_F` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
      8 |      puts F::CONSTANT_FROM_F
                    ^^^^^^^^^^^^^^^^^^
@@ -131,7 +138,7 @@ C/app.rb:9: Package `G` includes explicit visibility modifiers and cannot be imp
                    ^^^^^^^^^^^^^^^^^^
   Note:
     Please consult with the owning team before adding a `visible_to` line to the package `G`
-Errors: 11
+Errors: 12
 
 ###### cat B/__package.rb ######
 # typed: strict
@@ -172,7 +179,7 @@ class D < PackageSpec
   layer 'util'
 
   import B
-  test_import E
+  import E
   export D::AlreadyExportedClass
   export D::CONSTANT_FROM_D
   export D::ClassFromD
@@ -282,18 +289,12 @@ D/__package.rb:3: `D` is missing imports and exports https://srb.help/3734
      3 |class D < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    D/__package.rb:7: Inserted `test_import E`
+    D/__package.rb:7: Inserted `import E`
      7 |  import B
                   ^
     D/__package.rb:9: Deleted
      9 |  export D::ANestedPackage::Foo
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    D/__package.rb:9: Deleted
-     9 |  export D::ANestedPackage::Foo
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    D/__package.rb:10: Deleted
-    10 |  export D::EnumFromD::Variant
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     D/__package.rb:10: Deleted
     10 |  export D::EnumFromD::Variant
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -324,6 +325,13 @@ A/constants.rb:5: Unable to resolve constant `G` https://srb.help/5002
      3 |module A
         ^^^^^^^^
 
+D/test/test_constants.rb:3: File belongs to package `D` but defines a constant that does not match this namespace https://srb.help/3713
+     3 |module Test::D
+               ^^^^^^^
+    D/__package.rb:3: Enclosing package declared here
+     3 |class D < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+
 C/app.rb:8: `F::CONSTANT_FROM_F` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
      8 |      puts F::CONSTANT_FROM_F
                    ^^^^^^^^^^^^^^^^^^
@@ -341,7 +349,7 @@ C/app.rb:9: Package `G` includes explicit visibility modifiers and cannot be imp
                    ^^^^^^^^^^^^^^^^^^
   Note:
     Please consult with the owning team before adding a `visible_to` line to the package `G`
-Errors: 10
+Errors: 11
 
 ###### cat B/__package.rb ######
 # typed: strict
@@ -382,7 +390,7 @@ class D < PackageSpec
   layer 'util'
 
   import B
-  test_import E
+  import E
   export D::AlreadyExportedClass
   export D::CONSTANT_FROM_D
   export D::ClassFromD
