@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+# typed: ignore
 
 # Ideally we might run tests with warnings enabled, but currently this triggers
 # a number of uninitialized instance variable warnings.

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+# typed: ignore
 require_relative '../../../test_helper'
 
 class Opus::Types::Test::Props::Private::SetterFactoryTest < Critic::Unit::UnitTest
