@@ -262,6 +262,24 @@ optional<pair<core::Loc, int>> calculateIndentedNextLine(const core::GlobalState
     return {{nextLineLoc.value(), max(thisLinePadding + 2, nextLinePadding)}};
 }
 
+pair<core::Loc, int> getInsertionLocationForClass(LSPTypecheckerDelegate &typechecker, const core::FileRef &file,
+                                                  const core::ClassOrModuleRef &classRef) {
+    auto &gs = typechecker.state();
+    auto classLocs = classRef.data(gs)->locs();
+    auto inCurrentFile = [&](const auto &loc) { return loc.file() == file; };
+    auto classLocIt = absl::c_find_if(classLocs, inCurrentFile);
+    auto classFile = (classLocIt != classLocs.end()) ? classLocIt->file() : classRef.data(gs)->loc().file();
+    auto classResolvedTree = typechecker.getResolved(classFile);
+    auto classCtx = core::Context(gs, core::Symbols::root(), classFile);
+    ClassDefFinder classFinder{classRef};
+    ast::ConstTreeWalk::apply(classCtx, classFinder, classResolvedTree.tree);
+    ENFORCE(classFinder.result != nullptr);
+    auto classLoc = core::Loc(classFile, classFinder.result->loc);
+    auto insertLoc = classLoc.copyEndWithZeroLength().adjust(gs, -3, -3);
+    auto [_loc, indentLength] = classLoc.copyEndWithZeroLength().findStartOfIndentation(gs);
+    return {insertLoc, indentLength};
+}
+
 vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerDelegate &typechecker,
 
                                                                  const LSPConfiguration &config,
@@ -276,9 +294,7 @@ vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerD
     // the enclosing method always exists
     auto enclosingMethod = enclosingMethodRef.data(gs);
     auto enclosingMethodDeclLoc = enclosingMethod->loc();
-    config.logger->debug("running create missing method");
 
-    core::FileRef insertFile;
     core::Loc insertLoc;
     int indentLength;
     bool singletonClass;
@@ -289,31 +305,14 @@ vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerD
         return {};
     }
     if (receiverClass.data(gs)->isSingletonClass(gs)) {
-        config.logger->debug("Singleton class detected");
         auto attachedClassRef = receiverClass.data(gs)->attachedClass(gs);
-        auto classLocs = attachedClassRef.data(gs)->locs();
-        auto inCurrentFile = [&](const auto &loc) { return loc.file() == file; };
-        auto classLocIt = absl::c_find_if(classLocs, inCurrentFile);
-        auto classFile = (classLocIt != classLocs.end()) ? classLocIt->file() : attachedClassRef.data(gs)->loc().file();
-        auto classResolvedTree = typechecker.getResolved(classFile);
-        auto classCtx = core::Context(gs, core::Symbols::root(), classFile);
-        ClassDefFinder classFinder{attachedClassRef};
-        ast::ConstTreeWalk::apply(classCtx, classFinder, classResolvedTree.tree);
-        if (classFinder.result == nullptr) {
-            return {};
-        }
-        auto classLoc = core::Loc(classFile, classFinder.result->loc);
-        auto insertLoc1 = classLoc.copyEndWithZeroLength().adjust(gs, -3, -3);
-        auto [_loc, indentLength1] = classLoc.copyEndWithZeroLength().findStartOfIndentation(gs);
+        auto [insertLoc1, indentLength1] = getInsertionLocationForClass(typechecker, file, attachedClassRef);
         insertLoc = insertLoc1;
         indentLength = indentLength1 + 2;
-        insertFile = classLoc.file();
         singletonClass = true;
         extraTextBefore = "";
         extraTextAfter = "\n";
     } else if (receiverClass == enclosingMethodRef.data(gs)->owner) {
-        config.logger->debug("No singleton class detected");
-
         MethodDefFinder finder{enclosingMethodDeclLoc.offsets()};
         ast::ConstTreeWalk::apply(ctx, finder, rootTree);
         if (finder.result == nullptr) {
@@ -324,10 +323,16 @@ vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerD
         auto [_loc, indentLength1] = enclosingMethodLoc.copyEndWithZeroLength().findStartOfIndentation(gs);
         insertLoc = insertLoc1;
         indentLength = indentLength1;
-        insertFile = enclosingMethodLoc.file();
         singletonClass = false;
         extraTextBefore = "\n";
         extraTextAfter = "";
+    } else {
+        auto [insertLoc1, indentLength1] = getInsertionLocationForClass(typechecker, file, receiverClass);
+        insertLoc = insertLoc1;
+        indentLength = indentLength1 + 2;
+        singletonClass = false;
+        extraTextBefore = "";
+        extraTextAfter = "\n";
     }
 
     SendFinder sendFinder{resp.funLocOffsets};
@@ -347,7 +352,7 @@ vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerD
     vector<unique_ptr<TextEdit>> edits;
     edits.emplace_back(make_unique<TextEdit>(Range::fromLoc(gs, insertLoc), newText));
 
-    auto tdi = make_unique<VersionedTextDocumentIdentifier>(config.fileRef2Uri(gs, insertFile), JSONNullObject());
+    auto tdi = make_unique<VersionedTextDocumentIdentifier>(config.fileRef2Uri(gs, insertLoc.file()), JSONNullObject());
     vector<unique_ptr<TextDocumentEdit>> result;
     result.emplace_back(make_unique<TextDocumentEdit>(move(tdi), move(edits)));
     return result;
