@@ -47,11 +47,22 @@ module T::Types
 
     class Untyped < TypedHash
       def initialize
-        super(keys: T.untyped, values: T.untyped)
+        # Use the INSTANCE constant directly (rather than `T.untyped`) so this
+        # can be built at load time, mirroring TypedArray::Untyped.
+        super(keys: T::Types::Untyped::Private::INSTANCE, values: T::Types::Untyped::Private::INSTANCE)
       end
 
       def valid?(obj)
         obj.is_a?(Hash)
+      end
+
+      def freeze
+        build_type # force lazy initialization before freezing the object
+        super
+      end
+
+      module Private
+        INSTANCE = Untyped.new.freeze
       end
     end
   end

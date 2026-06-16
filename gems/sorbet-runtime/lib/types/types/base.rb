@@ -181,7 +181,10 @@ module T::Types
     def ==(other)
       case other
       when T::Types::Base
-        other.name == self.name
+        # Performance fast path: pooled and memoized type instances (e.g. the
+        # results of repeated T.nilable(X) calls) are the same object, so they
+        # can compare equal without computing and comparing their names.
+        other.equal?(self) || other.name == self.name
       else
         false
       end

@@ -80,7 +80,8 @@ class T::Private::Methods::Signature
     # If sig params are declared but there is a single parameter with a missing name
     # **and** the method ends with a "=", assume it is a writer method generated
     # by attr_writer or attr_accessor
-    writer_method = !(raw_arg_types.size == 1 && raw_arg_types.key?(nil)) && parameters == UNNAMED_REQUIRED_PARAMETERS && method_name[-1] == "="
+    # (Checks are ordered so that the common, non-writer case short-circuits without allocating.)
+    writer_method = method_name.end_with?("=") && parameters == UNNAMED_REQUIRED_PARAMETERS && !(raw_arg_types.size == 1 && raw_arg_types.key?(nil))
     # For writer methods, map the single parameter to the method name without the "=" at the end
     parameters = [[:req, method_name[0...-1].to_sym]] if writer_method
     is_name_missing = parameters.any? { |_, name| !raw_arg_types.key?(name) }

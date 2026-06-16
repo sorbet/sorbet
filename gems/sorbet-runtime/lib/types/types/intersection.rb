@@ -32,12 +32,24 @@ module T::Types
 
     # overrides Base
     def recursively_valid?(obj)
-      types.all? { |type| type.recursively_valid?(obj) }
+      members = types
+      index = 0
+      while index < members.length
+        return false unless members.fetch(index).recursively_valid?(obj)
+        index += 1
+      end
+      true
     end
 
     # overrides Base
     def valid?(obj)
-      types.all? { |type| type.valid?(obj) }
+      members = types
+      index = 0
+      while index < members.length
+        return false unless members.fetch(index).valid?(obj)
+        index += 1
+      end
+      true
     end
 
     # overrides Base

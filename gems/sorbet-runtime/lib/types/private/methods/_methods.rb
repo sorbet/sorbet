@@ -299,11 +299,14 @@ module T::Private::Methods
 
   # Only public because it needs to get called below inside the replace_method blocks below.
   def self._on_method_added(hook_mod, mod, method_name)
-    if T::Private::DeclState.current.skip_on_method_added
+    # The thread-local DeclState object is stable for the duration of this call
+    # (nothing reassigns `DeclState.current=`), so fetch it once.
+    decl_state = T::Private::DeclState.current
+    if decl_state.skip_on_method_added
       return
     end
 
-    current_declaration = T::Private::DeclState.current.consume!
+    current_declaration = decl_state.consume!
 
     if T::Private::Final.final_module?(mod) && (current_declaration.nil? || !current_declaration.final)
       raise "#{mod} was declared as final but its method `#{method_name}` was not declared as final"
