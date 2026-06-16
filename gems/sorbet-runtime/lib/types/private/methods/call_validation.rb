@@ -72,8 +72,16 @@ module T::Private::Methods::CallValidation
   end
 
   def self.create_validator_method(mod, original_method, method_sig, original_visibility)
+    # Wrapper-shape decisions must read the parameters of the method actually being wrapped, not
+    # `method_sig.parameters` (captured at sig-build time). The two diverge when a sig'd method is
+    # re-wrapped over a different implementation: a stub redefined as `def m(*args, **kwargs, &blk)`
+    # then re-validated against the original fixed-arity sig would otherwise pick a fixed-arity wrapper,
+    # which binds args to named positionals and forwards them without the `ruby2_keywords` flag, turning
+    # a trailing `key: val` into a positional hash. Reading from `original_method` costs one array per
+    # wrap, off the hot path.
+    parameters = original_method.parameters
     has_fixed_arity = method_sig.kwarg_types.empty? && method_sig.rest_type.nil? && method_sig.keyrest_type.nil? &&
-      original_method.parameters.all? { |(kind, _name)| kind == :req || kind == :block }
+      parameters.all? { |(kind, _name)| kind == :req || kind == :block }
 
     # nil implies block_type.nil?
     # true implies !block_type.nil? and block_type.valid?(nil)
@@ -82,6 +90,29 @@ module T::Private::Methods::CallValidation
     can_skip_block_type = method_sig.block_type&.valid?(nil) != false
 
     ok_for_fast_path = has_fixed_arity && can_skip_block_type && !method_sig.bind && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
+
+    # Like `ok_for_fast_path`, but for the specialized wrappers below, each of
+    # which supports exactly one extra call shape (kwargs, a required block, or
+    # optional positional args) on top of what the fast/medium wrappers support.
+    ok_for_specialized_path = !ok_for_fast_path && !method_sig.bind && method_sig.rest_type.nil? &&
+      method_sig.keyrest_type.nil? && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
+
+    # Restricted to methods with no positional args. The kwargs wrapper's `|**kwargs, &blk|` declares a
+    # keyword-rest, which would capture a bare `key: val` hash that a method with a positional parameter
+    # expects to receive positionally, starving that parameter. All-kwargs methods have no such parameter,
+    # so the wrapper matches a direct call. (Most kwargs-shaped sigs take only kwargs.)
+    kwargs_path = ok_for_specialized_path && can_skip_block_type && !method_sig.kwarg_types.empty? &&
+      method_sig.arg_types.empty? &&
+      parameters.all? { |(kind, _name)| kind == :key || kind == :keyreq || kind == :block }
+
+    required_block_path = ok_for_specialized_path && !can_skip_block_type && has_fixed_arity
+
+    # At least one param is `:opt` here (otherwise `ok_for_fast_path` would hold). The wrapper forwards
+    # through a `ruby2_keywords`-flagged `|*args, &blk|` splat (see below), not named optional parameters:
+    # named params have no `*rest` for `def_with_visibility` to flag, so a trailing `key: val` that Ruby
+    # packs into an optional positional would lose the keyword flag the slow path preserves.
+    optional_args_path = ok_for_specialized_path && can_skip_block_type && method_sig.kwarg_types.empty? &&
+      parameters.all? { |(kind, _name)| kind == :req || kind == :opt || kind == :block }
 
     all_args_are_simple = ok_for_fast_path && method_sig.arg_types.all? { |_name, type| type.is_a?(T::Types::Simple) }
 
@@ -115,6 +146,12 @@ module T::Private::Methods::CallValidation
           create_validator_method_skip_return_medium(mod, original_method, method_sig, original_visibility)
         elsif ok_for_fast_path
           create_validator_method_medium(mod, original_method, method_sig, original_visibility)
+        elsif kwargs_path
+          create_validator_method_kwargs(mod, original_method, method_sig, original_visibility)
+        elsif required_block_path
+          create_validator_method_with_block(mod, original_method, method_sig, original_visibility)
+        elsif optional_args_path
+          create_validator_method_optional_args(mod, original_method, method_sig, original_visibility)
         elsif can_skip_block_type
           # The Ruby VM already validates that any block passed to a method
           # must be either `nil` or a `Proc` object, so there's no need to also
