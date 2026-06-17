@@ -264,29 +264,30 @@ core::ClassOrModuleRef getClass(const core::GlobalState &gs, const core::TypePtr
 }
 
 pair<core::Loc, int> getInsertionLocationForClass(LSPTypecheckerDelegate &typechecker, const core::FileRef &currentFile,
-                                                  const ast::ParsedFile &currentAst,
+                                                  const ast::ParsedFile &currentTree,
                                                   const core::ClassOrModuleRef &classRef) {
     auto &gs = typechecker.state();
     auto classLocs = classRef.data(gs)->locs();
     auto inCurrentFile = [&](const auto &loc) { return loc.file() == currentFile; };
     auto classLocIt = absl::c_find_if(classLocs, inCurrentFile);
-    auto insertFile = (classLocIt != classLocs.end()) ? classLocIt->file() : classRef.data(gs)->loc().file();
+    // A class can be redefined in multiple files. Check if the class was defined in the current file, so we can
+    // prioritize creating the missing method in the current file.
+    auto insertFile = (classLocIt != classLocs.end()) ? currentFile : classRef.data(gs)->loc().file();
     ast::ParsedFile insertTreeStorage;
     const ast::ParsedFile *insertTree;
-    if (classLocIt != classLocs.end()) {
+    if (insertFile == currentFile) {
+        insertTree = &currentTree;
+    } else {
         insertTreeStorage = typechecker.getResolved(insertFile);
         insertTree = &insertTreeStorage;
-    } else {
-        insertTree = &currentAst;
     }
-    auto classCtx = core::Context(gs, core::Symbols::root(), insertFile);
     ClassDefFinder classFinder{classRef};
-    ast::ConstTreeWalk::apply(classCtx, classFinder, insertTree->tree);
+    ast::ConstTreeWalk::apply(core::Context(gs, core::Symbols::root(), insertFile), classFinder, insertTree->tree);
     ENFORCE(classFinder.result != nullptr);
-    auto classLoc = core::Loc(insertFile, classFinder.result->loc);
+    auto insertClassLoc = core::Loc(insertFile, classFinder.result->loc);
     // skip past the `end` keyword
-    auto insertLoc = classLoc.copyEndWithZeroLength().adjust(gs, -3, -3);
-    auto [_loc, indentLength] = classLoc.copyEndWithZeroLength().findStartOfIndentation(gs);
+    auto insertLoc = insertClassLoc.copyEndWithZeroLength().adjust(gs, -3, -3);
+    auto [_loc, indentLength] = insertClassLoc.copyEndWithZeroLength().findStartOfIndentation(gs);
     return {insertLoc, indentLength};
 }
 
