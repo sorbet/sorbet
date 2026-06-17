@@ -49,6 +49,10 @@ if grep -q '^# enable-suggest-unsafe: true$' "${srcs[@]}"; then
   options+=("--suggest-unsafe")
 fi
 
+if grep -q '^# allow-redundant-t-let-in-initialize: false$' "${srcs[@]}"; then
+  options+=("--allow-redundant-t-let-in-initialize=false")
+fi
+
 cwd="$PWD"
 pushd "$tmpdir" &> /dev/null
 
