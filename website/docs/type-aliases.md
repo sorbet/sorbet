@@ -156,7 +156,7 @@ Note that types for lambdas and procs can be written in type aliases using [proc
 Some languages have recursive type aliases. For example, TypeScript allows writing type aliases like this one which vaguely describes the type of all JSON documents (example uses TypeScript syntax):
 
 ```typescript
-type JSON = null | number | string | JSON[] | { [arg: string]: JSON };
+type JSON = null | number | string | JSON[] | {[arg: string]: JSON};
 ```
 
 Sorbet does not support recursive type aliases. To have types that reference themselves, use [class types].
