@@ -386,6 +386,7 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
             }
         }
 
+        config.logger->debug("lspExtractToMethodEnabled: {}", config.opts.lspExtractToMethodEnabled);
         if (config.opts.lspExtractToMethodEnabled) {
             auto edits = extract_method::getExtractMethodEdits(typechecker, config, loc);
             if (!edits.empty()) {
