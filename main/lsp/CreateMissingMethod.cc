@@ -273,6 +273,7 @@ pair<core::Loc, int> getInsertionLocationForClass(LSPTypecheckerDelegate &typech
     // A class can be redefined in multiple files. Check if the class was defined in the current file, so we can
     // prioritize creating the missing method in the current file.
     auto insertFile = (classLocIt != classLocs.end()) ? currentFile : classRef.data(gs)->loc().file();
+    // The tree is either borrowed (if we use currentTree) or owned in this scope.
     ast::ParsedFile insertTreeStorage;
     const ast::ParsedFile *insertTree;
     if (insertFile == currentFile) {
