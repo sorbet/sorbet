@@ -152,7 +152,7 @@ string formatNewMethod(const core::GlobalState &gs, uint32_t indentLength, const
         if (!paramList.empty()) {
             paramList += ", ";
         }
-        paramList += fmt::format("&blk", paramNames.back());
+        paramList += fmt::format("&{}", paramNames.back());
     }
     UnorderedSet<core::SymbolRef> selfTypeParams;
     for (auto &argType : argTypes) {
