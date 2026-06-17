@@ -172,6 +172,7 @@ struct Options {
     bool enableCounters = false;
     std::string errorUrlBase = "https://srb.help/";
     bool ruby3KeywordArgs = false;
+    bool allowRedundantTLetInInitialize = true;
     std::vector<std::string> suppressPayloadSuperclassRedefinitionFor;
     std::set<int> isolateErrorCode;
     std::set<int> suppressErrorCode;

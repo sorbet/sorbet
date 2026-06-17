@@ -27,6 +27,7 @@
 #include "core/errors/namer.h"
 #include "core/errors/parser.h"
 #include "core/errors/resolver.h"
+#include "core/errors/rewriter.h"
 #include "core/lsp/PreemptionTaskManager.h"
 #include "core/lsp/TypecheckEpochManager.h"
 #include "core/serialize/serialize.h"
@@ -71,6 +72,9 @@ void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) 
     }
     for (auto code : opts.suppressErrorCode) {
         gs.suppressErrorClass(code);
+    }
+    if (opts.allowRedundantTLetInInitialize) {
+        gs.suppressErrorClass(core::errors::Rewriter::RedundantInitializeTLet.code);
     }
     if (opts.noErrorSections) {
         gs.includeErrorSections = false;

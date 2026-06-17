@@ -21,6 +21,7 @@ inline constexpr ErrorClass ContravariantHasAttachedClass{3514, StrictLevel::Fal
 inline constexpr ErrorClass DuplicateProp{3515, StrictLevel::True};
 inline constexpr ErrorClass VoidAttrReader{3516, StrictLevel::True};
 inline constexpr ErrorClass PropBadOverride{3517, StrictLevel::False};
+inline constexpr ErrorClass RedundantInitializeTLet{3518, StrictLevel::True};
 
 // Let's reserve 3550-3569 for RBS related errors
 inline constexpr ErrorClass RBSSyntaxError{3550, StrictLevel::False};
