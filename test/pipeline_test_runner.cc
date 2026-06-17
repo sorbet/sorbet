@@ -37,7 +37,7 @@
 #include "parser/prism/Parser.h"
 #include "payload/binary/binary.h"
 #include "payload/payload.h"
-#include "rbs/prism/RBSRewriterPrism.h"
+#include "rbs/RBSRewriter.h"
 #include "resolver/resolver.h"
 #include "rewriter/rewriter.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
@@ -269,8 +269,8 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
 
                     if (gs.cacheSensitiveOptions.rbsEnabled) {
                         auto &prismParser = prismParseResult->getParser();
-                        rbs::runPrismRBSRewrite(gs, file, prismParseResult->getRawNodePointer(),
-                                                prismParseResult->getCommentLocations(), ctx, prismParser);
+                        rbs::runRBSRewrite(gs, file, prismParseResult->getRawNodePointer(),
+                                           prismParseResult->getCommentLocations(), ctx, prismParser);
                         disableParserComparison = true;
 
                         handler.addObserved(gs, "rbs-rewrite-tree", [&]() { return prismParseResult->prettyPrint(); });
@@ -802,11 +802,11 @@ TEST_CASE("PerPhaseTest") {
             case realmain::options::Parser::PRISM: {
                 auto prismResult = parser::Prism::Parser::run(ctx);
 
-                // Run the Prism-level RBS rewriter
+                // Run the RBS rewriter
                 if (gs->cacheSensitiveOptions.rbsEnabled) {
                     auto &prismParser = prismResult.getParser();
-                    rbs::runPrismRBSRewrite(*gs, f, prismResult.getRawNodePointer(), prismResult.getCommentLocations(),
-                                            ctx, prismParser);
+                    rbs::runRBSRewrite(*gs, f, prismResult.getRawNodePointer(), prismResult.getCommentLocations(), ctx,
+                                       prismParser);
 
                     handler.addObserved(*gs, "rbs-rewrite-tree", [&]() { return prismResult.prettyPrint(); });
                 }

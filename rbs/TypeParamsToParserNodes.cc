@@ -1,14 +1,14 @@
-#include "rbs/prism/TypeParamsToParserNodesPrism.h"
+#include "rbs/TypeParamsToParserNodes.h"
 
 #include "core/errors/rewriter.h"
-#include "rbs/prism/TypeToParserNodePrism.h"
+#include "rbs/TypeToParserNode.h"
 
 using namespace std;
 
 namespace sorbet::rbs {
 
-vector<pm_node_t *> TypeParamsToParserNodesPrism::typeParams(const rbs_node_list_t *rbsTypeParams,
-                                                             const RBSDeclaration &declaration) {
+vector<pm_node_t *> TypeParamsToParserNodes::typeParams(const rbs_node_list_t *rbsTypeParams,
+                                                        const RBSDeclaration &declaration) {
     vector<pm_node_t *> result{};
     result.reserve(rbsTypeParams->length);
 
@@ -40,7 +40,7 @@ vector<pm_node_t *> TypeParamsToParserNodesPrism::typeParams(const rbs_node_list
 
         pm_node_t *block = nullptr;
         if (defaultType || upperBound || lowerBound) {
-            auto typeTranslator = TypeToParserNodePrism{ctx, {}, parser, prismParser};
+            auto typeTranslator = TypeToParserNode{ctx, {}, parser, prismParser};
             absl::InlinedVector<pm_node_t *, 3> pairs{};
 
             if (defaultType) {

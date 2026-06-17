@@ -1,4 +1,4 @@
-#include "rbs/prism/TypeToParserNodePrism.h"
+#include "rbs/TypeToParserNode.h"
 
 #include "common/typecase.h"
 #include "core/GlobalState.h"
@@ -35,8 +35,8 @@ bool isEnumerator(pm_node_t *node, parser::Prism::Parser &prismParser, core::Glo
 // Converts an RBS namespace to a Prism constant path node.
 //   Foo::Bar -> ConstantPathNode(ConstantReadNode(Foo), Bar)
 //   ::Foo    -> ConstantPathNode(nullptr, Foo)
-pm_node_t *TypeToParserNodePrism::namespaceConst(const rbs_namespace_t *rbsNamespace, const RBSDeclaration &declaration,
-                                                 core::LocOffsets loc) {
+pm_node_t *TypeToParserNode::namespaceConst(const rbs_namespace_t *rbsNamespace, const RBSDeclaration &declaration,
+                                            core::LocOffsets loc) {
     rbs_node_list *typePath = rbsNamespace->path;
 
     pm_node_t *parent = nullptr;
@@ -65,8 +65,8 @@ pm_node_t *TypeToParserNodePrism::namespaceConst(const rbs_namespace_t *rbsNames
     return parent;
 }
 
-pm_node_t *TypeToParserNodePrism::typeNameType(const rbs_type_name_t *typeName, bool isGeneric,
-                                               const RBSDeclaration &declaration) {
+pm_node_t *TypeToParserNode::typeNameType(const rbs_type_name_t *typeName, bool isGeneric,
+                                          const RBSDeclaration &declaration) {
     auto loc = declaration.typeLocFromRange(typeName->base.location);
 
     pm_node_t *parent = namespaceConst(typeName->rbs_namespace, declaration, loc);
@@ -114,8 +114,8 @@ pm_node_t *TypeToParserNodePrism::typeNameType(const rbs_type_name_t *typeName, 
     }
 }
 
-pm_node_t *TypeToParserNodePrism::aliasType(const rbs_types_alias_t *node, core::LocOffsets loc,
-                                            const RBSDeclaration &declaration) {
+pm_node_t *TypeToParserNode::aliasType(const rbs_types_alias_t *node, core::LocOffsets loc,
+                                       const RBSDeclaration &declaration) {
     pm_node_t *parent = namespaceConst(node->name->rbs_namespace, declaration, loc);
     auto nameView = parser.resolveConstant(node->name->name);
     auto nameStr = "type " + string(nameView);
@@ -127,8 +127,8 @@ pm_node_t *TypeToParserNodePrism::aliasType(const rbs_types_alias_t *node, core:
     }
 }
 
-pm_node_t *TypeToParserNodePrism::classInstanceType(const rbs_types_class_instance_t *node, core::LocOffsets loc,
-                                                    const RBSDeclaration &declaration) {
+pm_node_t *TypeToParserNode::classInstanceType(const rbs_types_class_instance_t *node, core::LocOffsets loc,
+                                               const RBSDeclaration &declaration) {
     auto argsValue = node->args;
     auto isGeneric = argsValue != nullptr && argsValue->length > 0;
     auto typeConstant = typeNameType(node->name, isGeneric, declaration);
@@ -142,8 +142,8 @@ pm_node_t *TypeToParserNodePrism::classInstanceType(const rbs_types_class_instan
     return typeConstant;
 }
 
-pm_node_t *TypeToParserNodePrism::classSingletonType(const rbs_types_class_singleton_t *node, core::LocOffsets loc,
-                                                     const RBSDeclaration &declaration) {
+pm_node_t *TypeToParserNode::classSingletonType(const rbs_types_class_singleton_t *node, core::LocOffsets loc,
+                                                const RBSDeclaration &declaration) {
     auto argsValue = node->args;
     auto isGeneric = argsValue != nullptr && argsValue->length > 0;
     auto innerType = typeNameType(node->name, false, declaration);
@@ -158,20 +158,20 @@ pm_node_t *TypeToParserNodePrism::classSingletonType(const rbs_types_class_singl
     return classOfNode;
 }
 
-pm_node_t *TypeToParserNodePrism::unionType(const rbs_types_union_t *node, core::LocOffsets loc,
-                                            const RBSDeclaration &declaration) {
+pm_node_t *TypeToParserNode::unionType(const rbs_types_union_t *node, core::LocOffsets loc,
+                                       const RBSDeclaration &declaration) {
     auto args = translateNodeList(node->types, declaration);
     return prism.TAny(loc, absl::MakeSpan(args));
 }
 
-pm_node_t *TypeToParserNodePrism::intersectionType(const rbs_types_intersection_t *node, core::LocOffsets loc,
-                                                   const RBSDeclaration &declaration) {
+pm_node_t *TypeToParserNode::intersectionType(const rbs_types_intersection_t *node, core::LocOffsets loc,
+                                              const RBSDeclaration &declaration) {
     auto args = translateNodeList(node->types, declaration);
     return prism.TAll(loc, absl::MakeSpan(args));
 }
 
-pm_node_t *TypeToParserNodePrism::optionalType(const rbs_types_optional_t *node, core::LocOffsets loc,
-                                               const RBSDeclaration &declaration) {
+pm_node_t *TypeToParserNode::optionalType(const rbs_types_optional_t *node, core::LocOffsets loc,
+                                          const RBSDeclaration &declaration) {
     auto innerType = toPrismNode(node->type, declaration);
     if (prismParser.isTUntyped(innerType)) {
         return innerType;
@@ -179,8 +179,8 @@ pm_node_t *TypeToParserNodePrism::optionalType(const rbs_types_optional_t *node,
     return prism.TNilable(loc, innerType);
 }
 
-pm_node_t *TypeToParserNodePrism::functionType(const rbs_types_function_t *node, core::LocOffsets loc,
-                                               const RBSDeclaration &declaration) {
+pm_node_t *TypeToParserNode::functionType(const rbs_types_function_t *node, core::LocOffsets loc,
+                                          const RBSDeclaration &declaration) {
     vector<pm_node_t *> pairs;
     pairs.reserve(node->required_positionals->length);
 
@@ -218,8 +218,8 @@ pm_node_t *TypeToParserNodePrism::functionType(const rbs_types_function_t *node,
     return prism.TProc(loc, argsHash, returnType);
 }
 
-pm_node_t *TypeToParserNodePrism::procType(const rbs_types_proc_t *node, core::LocOffsets loc,
-                                           const RBSDeclaration &declaration) {
+pm_node_t *TypeToParserNode::procType(const rbs_types_proc_t *node, core::LocOffsets loc,
+                                      const RBSDeclaration &declaration) {
     rbs_node_t *functionTypeNode = node->type;
     pm_node_t *function;
 
@@ -249,8 +249,8 @@ pm_node_t *TypeToParserNodePrism::procType(const rbs_types_proc_t *node, core::L
     return function;
 }
 
-pm_node_t *TypeToParserNodePrism::blockType(const rbs_types_block_t *node, core::LocOffsets loc,
-                                            const RBSDeclaration &declaration) {
+pm_node_t *TypeToParserNode::blockType(const rbs_types_block_t *node, core::LocOffsets loc,
+                                       const RBSDeclaration &declaration) {
     rbs_node_t *functionTypeNode = node->type;
     pm_node_t *function;
 
@@ -285,14 +285,14 @@ pm_node_t *TypeToParserNodePrism::blockType(const rbs_types_block_t *node, core:
     return function;
 }
 
-pm_node_t *TypeToParserNodePrism::tupleType(const rbs_types_tuple_t *node, core::LocOffsets loc,
-                                            const RBSDeclaration &declaration) {
+pm_node_t *TypeToParserNode::tupleType(const rbs_types_tuple_t *node, core::LocOffsets loc,
+                                       const RBSDeclaration &declaration) {
     auto types = translateNodeList(node->types, declaration);
     return prism.Array(loc, absl::MakeSpan(types));
 }
 
-pm_node_t *TypeToParserNodePrism::recordType(const rbs_types_record_t *node, core::LocOffsets loc,
-                                             const RBSDeclaration &declaration) {
+pm_node_t *TypeToParserNode::recordType(const rbs_types_record_t *node, core::LocOffsets loc,
+                                        const RBSDeclaration &declaration) {
     vector<pm_node_t *> pairs;
     pairs.reserve(node->all_fields->length);
 
@@ -335,11 +335,11 @@ pm_node_t *TypeToParserNodePrism::recordType(const rbs_types_record_t *node, cor
     return prism.Hash(loc, absl::MakeSpan(pairs));
 }
 
-pm_node_t *TypeToParserNodePrism::variableType(const rbs_types_variable_t *node, core::LocOffsets loc) {
+pm_node_t *TypeToParserNode::variableType(const rbs_types_variable_t *node, core::LocOffsets loc) {
     return prism.TTypeParameter(loc, prism.Symbol(loc, parser.resolveConstant(node->name)));
 }
 
-vector<pm_node_t *> TypeToParserNodePrism::translateNodeList(rbs_node_list *list, const RBSDeclaration &declaration) {
+vector<pm_node_t *> TypeToParserNode::translateNodeList(rbs_node_list *list, const RBSDeclaration &declaration) {
     vector<pm_node_t *> result;
     result.reserve(list->length);
     for (rbs_node_list_node *node = list->head; node != nullptr; node = node->next) {
@@ -348,7 +348,7 @@ vector<pm_node_t *> TypeToParserNodePrism::translateNodeList(rbs_node_list *list
     return result;
 }
 
-pm_node_t *TypeToParserNodePrism::toPrismNode(const rbs_node_t *node, const RBSDeclaration &declaration) {
+pm_node_t *TypeToParserNode::toPrismNode(const rbs_node_t *node, const RBSDeclaration &declaration) {
     auto nodeLoc = declaration.typeLocFromRange(node->location);
 
     switch (node->type) {

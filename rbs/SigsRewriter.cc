@@ -1,4 +1,4 @@
-#include "rbs/prism/SigsRewriterPrism.h"
+#include "rbs/SigsRewriter.h"
 
 #include "absl/algorithm/container.h"
 #include "absl/strings/match.h"
@@ -10,7 +10,7 @@
 extern "C" {
 #include "prism.h"
 }
-#include "rbs/prism/SignatureTranslatorPrism.h"
+#include "rbs/SignatureTranslator.h"
 
 using namespace std;
 using namespace sorbet::parser::Prism;
@@ -57,7 +57,7 @@ pm_node_t *extractHelperArgument(core::MutableContext ctx, parser::Prism::Parser
         annotation.string.substr(offset),
     };
 
-    return rbs::SignatureTranslatorPrism(ctx, parser).translateType(RBSDeclaration{{comment}});
+    return rbs::SignatureTranslator(ctx, parser).translateType(RBSDeclaration{{comment}});
 }
 
 /**
@@ -211,7 +211,7 @@ void insertHelpers(pm_node_t *body, absl::Span<pm_node_t *const> helpers) {
 
 } // namespace
 
-void SigsRewriterPrism::insertTypeParams(pm_node_t *node, pm_node_t *body) {
+void SigsRewriter::insertTypeParams(pm_node_t *node, pm_node_t *body) {
     ENFORCE(isa_node<pm_class_node_t>(node) || isa_node<pm_module_node_t>(node) ||
                 isa_node<pm_singleton_class_node_t>(node),
             "Type parameters can only exist on classes, singleton classes, and modules");
@@ -230,7 +230,7 @@ void SigsRewriterPrism::insertTypeParams(pm_node_t *node, pm_node_t *body) {
     }
 
     auto signature = comments.signatures[0];
-    auto typeParamsTranslator = SignatureTranslatorPrism{ctx, parser};
+    auto typeParamsTranslator = SignatureTranslator{ctx, parser};
     auto typeParams = typeParamsTranslator.translateTypeParams(signature);
 
     if (typeParams.empty()) {
@@ -244,8 +244,8 @@ void SigsRewriterPrism::insertTypeParams(pm_node_t *node, pm_node_t *body) {
     }
 }
 
-CommentsPrism SigsRewriterPrism::commentsForNode(pm_node_t *node) {
-    auto comments = CommentsPrism{};
+Comments SigsRewriter::commentsForNode(pm_node_t *node) {
+    auto comments = Comments{};
 
     if (node == nullptr) {
         return comments;
@@ -323,7 +323,7 @@ CommentsPrism SigsRewriterPrism::commentsForNode(pm_node_t *node) {
     return comments;
 }
 
-unique_ptr<vector<pm_node_t *>> SigsRewriterPrism::signaturesForNode(pm_node_t *node) {
+unique_ptr<vector<pm_node_t *>> SigsRewriter::signaturesForNode(pm_node_t *node) {
     auto comments = commentsForNode(node);
 
     if (comments.signatures.empty()) {
@@ -331,7 +331,7 @@ unique_ptr<vector<pm_node_t *>> SigsRewriterPrism::signaturesForNode(pm_node_t *
     }
 
     auto signatures = make_unique<vector<pm_node_t *>>();
-    auto signatureTranslator = rbs::SignatureTranslatorPrism{ctx, parser};
+    auto signatureTranslator = rbs::SignatureTranslator{ctx, parser};
 
     for (auto &declaration : comments.signatures) {
         if (isa_node<pm_def_node_t>(node)) {
@@ -366,7 +366,7 @@ unique_ptr<vector<pm_node_t *>> SigsRewriterPrism::signaturesForNode(pm_node_t *
 /**
  * Replace the synthetic type alias node with a `T.type_alias` call.
  */
-pm_node_t *SigsRewriterPrism::replaceSyntheticTypeAlias(pm_node_t *node) {
+pm_node_t *SigsRewriter::replaceSyntheticTypeAlias(pm_node_t *node) {
     auto comments = commentsForNode(node);
     ENFORCE(!comments.signatures.empty(), "No inline comment found for synthetic type alias");
     ENFORCE(comments.signatures.size() <= 1, "Multiple signatures found for synthetic type alias");
@@ -388,7 +388,7 @@ pm_node_t *SigsRewriterPrism::replaceSyntheticTypeAlias(pm_node_t *node) {
         .string = fullString.substr(typeBeginLoc + 1),
     }}};
 
-    auto signatureTranslator = rbs::SignatureTranslatorPrism{ctx, parser};
+    auto signatureTranslator = rbs::SignatureTranslator{ctx, parser};
     absl::Span<pair<core::LocOffsets, core::NameRef>> typeParams; // Empty for type aliases
     auto type = signatureTranslator.translateAssertionType(typeParams, typeDeclaration);
 
@@ -401,19 +401,19 @@ pm_node_t *SigsRewriterPrism::replaceSyntheticTypeAlias(pm_node_t *node) {
     return prism.TTypeAlias(loc, type);
 }
 
-void SigsRewriterPrism::rewriteNodes(pm_node_list_t &nodes) {
+void SigsRewriter::rewriteNodes(pm_node_list_t &nodes) {
     for (size_t i = 0; i < nodes.size; i++) {
         nodes.nodes[i] = rewriteBody(nodes.nodes[i]);
     }
 }
 
-void SigsRewriterPrism::rewriteArgumentsNode(pm_arguments_node_t *args) {
+void SigsRewriter::rewriteArgumentsNode(pm_arguments_node_t *args) {
     if (args) {
         rewriteNodes(args->arguments);
     }
 }
 
-pm_node_t *SigsRewriterPrism::rewriteBody(pm_node_t *node) {
+pm_node_t *SigsRewriter::rewriteBody(pm_node_t *node) {
     if (node == nullptr) {
         return node;
     }
@@ -464,11 +464,11 @@ pm_node_t *SigsRewriterPrism::rewriteBody(pm_node_t *node) {
     return node;
 }
 
-void SigsRewriterPrism::rewriteBody(pm_statements_node_t *stmts) {
+void SigsRewriter::rewriteBody(pm_statements_node_t *stmts) {
     rewriteBody(up_cast(stmts));
 }
 
-void SigsRewriterPrism::processClassBody(pm_node_t *node, pm_node_t *&body, absl::Span<pm_node_t *const> helpers) {
+void SigsRewriter::processClassBody(pm_node_t *node, pm_node_t *&body, absl::Span<pm_node_t *const> helpers) {
     auto loc = body ? parser.translateLocation(body->location) : parser.translateLocation(node->location);
 
     body = maybeWrapBody(body, loc, parser);
@@ -480,7 +480,7 @@ void SigsRewriterPrism::processClassBody(pm_node_t *node, pm_node_t *&body, absl
     insertTypeParams(node, body);
 }
 
-void SigsRewriterPrism::rewriteClass(pm_node_t *node) {
+void SigsRewriter::rewriteClass(pm_node_t *node) {
     if (node == nullptr) {
         return;
     }
@@ -507,13 +507,13 @@ void SigsRewriterPrism::rewriteClass(pm_node_t *node) {
     }
 }
 
-inline void SigsRewriterPrism::rewriteNullableNode(pm_node_t *node) {
+inline void SigsRewriter::rewriteNullableNode(pm_node_t *node) {
     if (node != nullptr) {
         rewriteNode(node);
     }
 }
 
-void SigsRewriterPrism::rewriteNode(pm_node_t *node) {
+void SigsRewriter::rewriteNode(pm_node_t *node) {
     switch (PM_NODE_TYPE(node)) {
         case PM_BEGIN_NODE: {
             auto *begin = down_cast_nonnull<pm_begin_node_t>(node);
@@ -728,7 +728,7 @@ void SigsRewriterPrism::rewriteNode(pm_node_t *node) {
     }
 }
 
-void SigsRewriterPrism::run(pm_node_t *node) {
+void SigsRewriter::run(pm_node_t *node) {
     // If there are no signature comments to process, we can skip the entire tree walk.
     if (commentsByNode.empty()) {
         return;
@@ -738,8 +738,8 @@ void SigsRewriterPrism::run(pm_node_t *node) {
 }
 
 // Helper method to create statements nodes with signatures
-pm_node_t *SigsRewriterPrism::createStatementsWithSignatures(pm_node_t *originalNode,
-                                                             unique_ptr<vector<pm_node_t *>> signatures) {
+pm_node_t *SigsRewriter::createStatementsWithSignatures(pm_node_t *originalNode,
+                                                        unique_ptr<vector<pm_node_t *>> signatures) {
     if (!signatures || signatures->empty()) {
         return originalNode;
     }

@@ -1,5 +1,5 @@
-#ifndef SORBET_RBS_COMMENTS_ASSOCIATOR_PRISM_H
-#define SORBET_RBS_COMMENTS_ASSOCIATOR_PRISM_H
+#ifndef SORBET_RBS_COMMENTS_ASSOCIATOR_H
+#define SORBET_RBS_COMMENTS_ASSOCIATOR_H
 
 #include "common/common.h"
 #include "parser/parser.h"
@@ -21,23 +21,23 @@ extern "C" {
 
 namespace sorbet::rbs {
 
-struct CommentNodePrism {
+struct CommentNode {
     core::LocOffsets loc;
     std::string_view string;
 };
 
-struct CommentMapPrism {
-    UnorderedMap<pm_node_t *, std::vector<CommentNodePrism>> signaturesForNode;
-    UnorderedMap<pm_node_t *, std::vector<CommentNodePrism>> assertionsForNode;
+struct CommentMap {
+    UnorderedMap<pm_node_t *, std::vector<CommentNode>> signaturesForNode;
+    UnorderedMap<pm_node_t *, std::vector<CommentNode>> assertionsForNode;
 };
 
-class CommentsAssociatorPrism {
+class CommentsAssociator {
 public:
     static const std::string_view RBS_PREFIX;
 
-    CommentsAssociatorPrism(core::MutableContext ctx, parser::Prism::Parser &parser,
-                            std::vector<core::LocOffsets> commentLocations);
-    CommentMapPrism run(pm_node_t *node);
+    CommentsAssociator(core::MutableContext ctx, parser::Prism::Parser &parser,
+                       std::vector<core::LocOffsets> commentLocations);
+    CommentMap run(pm_node_t *node);
 
 private:
     static const std::string_view ANNOTATION_PREFIX;
@@ -48,9 +48,9 @@ private:
     parser::Prism::Parser &parser;
     parser::Prism::Factory prism;
     std::vector<core::LocOffsets> commentLocations;
-    std::map<int, CommentNodePrism> commentByLine;
-    UnorderedMap<pm_node_t *, std::vector<CommentNodePrism>> signaturesForNode;
-    UnorderedMap<pm_node_t *, std::vector<CommentNodePrism>> assertionsForNode;
+    std::map<int, CommentNode> commentByLine;
+    UnorderedMap<pm_node_t *, std::vector<CommentNode>> signaturesForNode;
+    UnorderedMap<pm_node_t *, std::vector<CommentNode>> assertionsForNode;
     std::vector<std::pair<bool, core::LocOffsets>> contextAllowingTypeAlias;
     int lastLine;
 
@@ -77,8 +77,8 @@ private:
 
     bool typeAliasAllowedInContext() const;
     int maybeInsertStandalonePlaceholders(pm_node_list_t &nodes, int index, int lastLine, int currentLine);
-    pm_node_t *createSyntheticPlaceholder(const CommentNodePrism &comment, pm_constant_id_t marker);
+    pm_node_t *createSyntheticPlaceholder(const CommentNode &comment, pm_constant_id_t marker);
 };
 
 } // namespace sorbet::rbs
-#endif // SORBET_RBS_COMMENTS_ASSOCIATOR_PRISM_H
+#endif // SORBET_RBS_COMMENTS_ASSOCIATOR_H

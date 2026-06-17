@@ -1,8 +1,8 @@
-#include "rbs/prism/SignatureTranslatorPrism.h"
+#include "rbs/SignatureTranslator.h"
 #include "core/errors/rewriter.h"
-#include "rbs/prism/MethodTypeToParserNodePrism.h"
-#include "rbs/prism/TypeParamsToParserNodesPrism.h"
-#include "rbs/prism/TypeToParserNodePrism.h"
+#include "rbs/MethodTypeToParserNode.h"
+#include "rbs/TypeParamsToParserNodes.h"
+#include "rbs/TypeToParserNode.h"
 #include "rbs/rbs_common.h"
 
 using namespace std;
@@ -16,9 +16,8 @@ Parser makeParser(string_view str) {
 }
 } // namespace
 
-pm_node_t *
-SignatureTranslatorPrism::translateAssertionType(absl::Span<pair<core::LocOffsets, core::NameRef>> typeParams,
-                                                 const rbs::RBSDeclaration &assertion) {
+pm_node_t *SignatureTranslator::translateAssertionType(absl::Span<pair<core::LocOffsets, core::NameRef>> typeParams,
+                                                       const rbs::RBSDeclaration &assertion) {
     Parser rbsParser = makeParser(assertion.string);
     rbs_node_t *rbsType = rbsParser.parseType();
 
@@ -30,11 +29,11 @@ SignatureTranslatorPrism::translateAssertionType(absl::Span<pair<core::LocOffset
         return nullptr;
     }
 
-    auto typeToParserNodePrism = TypeToParserNodePrism{ctx, typeParams, move(rbsParser), *prismParser};
-    return typeToParserNodePrism.toPrismNode(rbsType, assertion);
+    auto typeToParserNode = TypeToParserNode{ctx, typeParams, move(rbsParser), *prismParser};
+    return typeToParserNode.toPrismNode(rbsType, assertion);
 }
 
-pm_node_t *SignatureTranslatorPrism::translateType(const RBSDeclaration &declaration) {
+pm_node_t *SignatureTranslator::translateType(const RBSDeclaration &declaration) {
     Parser rbsParser = makeParser(declaration.string);
     rbs_node_t *rbsType = rbsParser.parseType();
 
@@ -46,12 +45,12 @@ pm_node_t *SignatureTranslatorPrism::translateType(const RBSDeclaration &declara
         return nullptr;
     }
 
-    auto typeTranslator = TypeToParserNodePrism{ctx, {}, move(rbsParser), *prismParser};
+    auto typeTranslator = TypeToParserNode{ctx, {}, move(rbsParser), *prismParser};
     return typeTranslator.toPrismNode(rbsType, declaration);
 }
 
-pm_node_t *SignatureTranslatorPrism::translateAttrSignature(pm_call_node_t *call, const RBSDeclaration &declaration,
-                                                            absl::Span<const Comment> annotations) {
+pm_node_t *SignatureTranslator::translateAttrSignature(pm_call_node_t *call, const RBSDeclaration &declaration,
+                                                       absl::Span<const Comment> annotations) {
     Parser rbsParser = makeParser(declaration.string);
     rbs_node_t *rbsType = rbsParser.parseType();
 
@@ -74,12 +73,12 @@ pm_node_t *SignatureTranslatorPrism::translateAttrSignature(pm_call_node_t *call
         return nullptr;
     }
 
-    auto methodTypeToParserNode = MethodTypeToParserNodePrism{ctx, move(rbsParser), *prismParser};
+    auto methodTypeToParserNode = MethodTypeToParserNode{ctx, move(rbsParser), *prismParser};
     return methodTypeToParserNode.attrSignature(call, rbsType, declaration, annotations);
 }
 
-pm_node_t *SignatureTranslatorPrism::translateMethodSignature(pm_node_t *methodDef, const RBSDeclaration &declaration,
-                                                              absl::Span<const Comment> annotations) {
+pm_node_t *SignatureTranslator::translateMethodSignature(pm_node_t *methodDef, const RBSDeclaration &declaration,
+                                                         absl::Span<const Comment> annotations) {
     Parser rbsParser = makeParser(declaration.string);
     rbs_method_type_t *rbsMethodType = rbsParser.parseMethodType();
 
@@ -91,11 +90,11 @@ pm_node_t *SignatureTranslatorPrism::translateMethodSignature(pm_node_t *methodD
         return nullptr;
     }
 
-    auto methodTypeToParserNodePrism = MethodTypeToParserNodePrism{ctx, move(rbsParser), *prismParser};
-    return methodTypeToParserNodePrism.methodSignature(methodDef, rbsMethodType, declaration, annotations);
+    auto methodTypeToParserNode = MethodTypeToParserNode{ctx, move(rbsParser), *prismParser};
+    return methodTypeToParserNode.methodSignature(methodDef, rbsMethodType, declaration, annotations);
 }
 
-vector<pm_node_t *> SignatureTranslatorPrism::translateTypeParams(const RBSDeclaration &declaration) {
+vector<pm_node_t *> SignatureTranslator::translateTypeParams(const RBSDeclaration &declaration) {
     Parser rbsParser = makeParser(declaration.string);
     rbs_node_list_t *rbsTypeParams = rbsParser.parseTypeParams();
 
@@ -107,7 +106,7 @@ vector<pm_node_t *> SignatureTranslatorPrism::translateTypeParams(const RBSDecla
         return {};
     }
 
-    TypeParamsToParserNodesPrism typeParamsTranslator{ctx, rbsParser, *prismParser};
+    TypeParamsToParserNodes typeParamsTranslator{ctx, rbsParser, *prismParser};
     return typeParamsTranslator.typeParams(rbsTypeParams, declaration);
 }
 

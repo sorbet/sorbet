@@ -1,4 +1,4 @@
-#include "rbs/prism/CommentsAssociatorPrism.h"
+#include "rbs/CommentsAssociator.h"
 
 #include "absl/strings/match.h"
 #include "absl/strings/str_split.h"
@@ -12,10 +12,10 @@ using namespace sorbet::parser::Prism;
 
 namespace sorbet::rbs {
 
-const string_view CommentsAssociatorPrism::RBS_PREFIX = "#:";
-const string_view CommentsAssociatorPrism::ANNOTATION_PREFIX = "# @";
-const string_view CommentsAssociatorPrism::MULTILINE_RBS_PREFIX = "#|";
-const string_view CommentsAssociatorPrism::BIND_PREFIX = "#: self as ";
+const string_view CommentsAssociator::RBS_PREFIX = "#:";
+const string_view CommentsAssociator::ANNOTATION_PREFIX = "# @";
+const string_view CommentsAssociator::MULTILINE_RBS_PREFIX = "#|";
+const string_view CommentsAssociator::BIND_PREFIX = "#: self as ";
 
 namespace {
 
@@ -60,7 +60,7 @@ optional<uint32_t> hasHeredocMarker(const core::Context &ctx, uint32_t fromPos, 
 }
 } // namespace
 
-optional<uint32_t> CommentsAssociatorPrism::locateTargetLine(pm_node_t *node) {
+optional<uint32_t> CommentsAssociator::locateTargetLine(pm_node_t *node) {
     if (node == nullptr) {
         return nullopt;
     }
@@ -102,22 +102,22 @@ optional<uint32_t> CommentsAssociatorPrism::locateTargetLine(pm_node_t *node) {
     return nullopt;
 }
 
-core::LocOffsets CommentsAssociatorPrism::translateLocation(pm_location_t location) {
+core::LocOffsets CommentsAssociator::translateLocation(pm_location_t location) {
     return parser.translateLocation(location);
 }
 
-uint32_t CommentsAssociatorPrism::posToLine(uint32_t pos) {
+uint32_t CommentsAssociator::posToLine(uint32_t pos) {
     return core::Loc::pos2Detail(ctx.file.data(ctx), pos).line;
 }
 
-void CommentsAssociatorPrism::consumeCommentsInsideNode(pm_node_t *node, string_view kind) {
+void CommentsAssociator::consumeCommentsInsideNode(pm_node_t *node, string_view kind) {
     auto loc = translateLocation(node->location);
     auto beginLine = posToLine(loc.beginPos());
     auto endLine = posToLine(loc.endPos());
     consumeCommentsBetweenLines(beginLine, endLine, kind);
 }
 
-void CommentsAssociatorPrism::consumeCommentsBetweenLines(int startLine, int endLine, string_view kind) {
+void CommentsAssociator::consumeCommentsBetweenLines(int startLine, int endLine, string_view kind) {
     // Find the first comment on or after the startLine
     auto it = commentByLine.begin();
     while (it != commentByLine.end() && it->first < startLine) {
@@ -158,7 +158,7 @@ void CommentsAssociatorPrism::consumeCommentsBetweenLines(int startLine, int end
     commentByLine.erase(startIt, it);
 }
 
-void CommentsAssociatorPrism::consumeOrphanedSignatureComments(int startLine, int endLine) {
+void CommentsAssociator::consumeOrphanedSignatureComments(int startLine, int endLine) {
     auto source = ctx.file.data(ctx).source();
     for (auto it = commentByLine.begin(); it != commentByLine.end();) {
         if (it->first <= startLine) {
@@ -185,7 +185,7 @@ void CommentsAssociatorPrism::consumeOrphanedSignatureComments(int startLine, in
     }
 }
 
-void CommentsAssociatorPrism::consumeCommentsUntilLine(int line) {
+void CommentsAssociator::consumeCommentsUntilLine(int line) {
     auto it = commentByLine.begin();
     while (it != commentByLine.end()) {
         if (it->first < line) {
@@ -203,7 +203,7 @@ void CommentsAssociatorPrism::consumeCommentsUntilLine(int line) {
     commentByLine.erase(commentByLine.begin(), it);
 }
 
-void CommentsAssociatorPrism::associateAssertionCommentsToNode(pm_node_t *node, bool adjustLocForHeredoc) {
+void CommentsAssociator::associateAssertionCommentsToNode(pm_node_t *node, bool adjustLocForHeredoc) {
     auto loc = translateLocation(node->location);
     uint32_t targetLine = posToLine(loc.endPos());
     if (adjustLocForHeredoc) {
@@ -212,7 +212,7 @@ void CommentsAssociatorPrism::associateAssertionCommentsToNode(pm_node_t *node, 
         }
     }
 
-    vector<CommentNodePrism> comments;
+    vector<CommentNode> comments;
 
     auto it = commentByLine.find(targetLine);
     if (it != commentByLine.end() && absl::StartsWith(it->second.string, RBS_PREFIX)) {
@@ -223,11 +223,11 @@ void CommentsAssociatorPrism::associateAssertionCommentsToNode(pm_node_t *node, 
     }
 }
 
-void CommentsAssociatorPrism::associateSignatureCommentsToNode(pm_node_t *node) {
+void CommentsAssociator::associateSignatureCommentsToNode(pm_node_t *node) {
     auto loc = translateLocation(node->location);
     auto nodeStartLine = posToLine(loc.beginPos());
 
-    vector<CommentNodePrism> comments;
+    vector<CommentNode> comments;
 
     for (auto it = commentByLine.begin(); it != commentByLine.end();) {
         auto commentLine = it->first;
@@ -250,7 +250,7 @@ void CommentsAssociatorPrism::associateSignatureCommentsToNode(pm_node_t *node) 
     signaturesForNode[node] = move(comments);
 }
 
-bool CommentsAssociatorPrism::typeAliasAllowedInContext() const {
+bool CommentsAssociator::typeAliasAllowedInContext() const {
     return !contextAllowingTypeAlias.empty() && contextAllowingTypeAlias.back().first;
 }
 
@@ -259,8 +259,8 @@ bool CommentsAssociatorPrism::typeAliasAllowedInContext() const {
 // 1. Bind comments (#: self as Type): placeholders later replaced with T.bind(self, Type)
 // 2. Type alias comments (#: type foo = String): placeholders later replaced with T.type_alias { String }
 // Returns the number of placeholder nodes inserted.
-int CommentsAssociatorPrism::maybeInsertStandalonePlaceholders(pm_node_list_t &nodes, int index, int lastLine,
-                                                               int currentLine) {
+int CommentsAssociator::maybeInsertStandalonePlaceholders(pm_node_list_t &nodes, int index, int lastLine,
+                                                          int currentLine) {
     if (lastLine == currentLine) {
         return 0;
     }
@@ -294,7 +294,7 @@ int CommentsAssociatorPrism::maybeInsertStandalonePlaceholders(pm_node_list_t &n
             pm_node_t *placeholder = createSyntheticPlaceholder(it->second, RBS_SYNTHETIC_BIND_MARKER);
 
             // Register comment for later processing by AssertionsRewriter
-            assertionsForNode[placeholder] = vector<CommentNodePrism>{it->second};
+            assertionsForNode[placeholder] = vector<CommentNode>{it->second};
             it = commentByLine.erase(it);
 
             // Insert placeholder into statement list
@@ -336,7 +336,7 @@ int CommentsAssociatorPrism::maybeInsertStandalonePlaceholders(pm_node_list_t &n
             pm_node_t *placeholder = createSyntheticPlaceholder(it->second, RBS_SYNTHETIC_TYPE_ALIAS_MARKER);
 
             // Register comment for later processing by SigsRewriter
-            signaturesForNode[placeholder] = vector<CommentNodePrism>{it->second};
+            signaturesForNode[placeholder] = vector<CommentNode>{it->second};
 
             continuationFor = placeholder;
 
@@ -361,9 +361,8 @@ int CommentsAssociatorPrism::maybeInsertStandalonePlaceholders(pm_node_list_t &n
 
 // Walks a conditional node and associates RBS comments.
 // Handles if/unless/elsif/else conditionals (both block and modifier forms) and ternary operators.
-void CommentsAssociatorPrism::walkConditionalNode(pm_node_t *node, pm_node_t *predicate,
-                                                  pm_statements_node_t *&statements, pm_node_t *&elsePart,
-                                                  std::string_view kind) {
+void CommentsAssociator::walkConditionalNode(pm_node_t *node, pm_node_t *predicate, pm_statements_node_t *&statements,
+                                             pm_node_t *&elsePart, std::string_view kind) {
     auto nodeLoc = translateLocation(node->location);
     auto beginLine = posToLine(nodeLoc.beginPos());
     auto endLine = posToLine(nodeLoc.endPos());
@@ -396,7 +395,7 @@ void CommentsAssociatorPrism::walkConditionalNode(pm_node_t *node, pm_node_t *pr
     consumeCommentsInsideNode(node, kind);
 }
 
-void CommentsAssociatorPrism::processTrailingComments(pm_node_t *node, pm_node_list_t &nodes) {
+void CommentsAssociator::processTrailingComments(pm_node_t *node, pm_node_list_t &nodes) {
     if (node == nullptr || contextAllowingTypeAlias.empty()) {
         return;
     }
@@ -407,7 +406,7 @@ void CommentsAssociatorPrism::processTrailingComments(pm_node_t *node, pm_node_l
     lastLine = endLine;
 }
 
-pm_node_t *CommentsAssociatorPrism::walkBody(pm_node_t *node, pm_node_t *body) {
+pm_node_t *CommentsAssociator::walkBody(pm_node_t *node, pm_node_t *body) {
     // Empty class/module bodies can still contain RBS type alias comments.
     // Check for standalone placeholders before falling through to the general null-body path.
     if (typeAliasAllowedInContext() && body == nullptr) {
@@ -496,7 +495,7 @@ pm_node_t *CommentsAssociatorPrism::walkBody(pm_node_t *node, pm_node_t *body) {
     return body;
 }
 
-template <typename PrismNode> void CommentsAssociatorPrism::walkAssignmentNode(pm_node_t *untypedNode) {
+template <typename PrismNode> void CommentsAssociator::walkAssignmentNode(pm_node_t *untypedNode) {
     auto *assign = down_cast_nonnull<PrismNode>(untypedNode);
     associateAssertionCommentsToNode(assign->value, true);
     walkNode(assign->value);
@@ -504,7 +503,7 @@ template <typename PrismNode> void CommentsAssociatorPrism::walkAssignmentNode(p
 }
 
 template <typename PrismNode>
-void CommentsAssociatorPrism::walkCallAssignmentNode(pm_node_t *untypedNode, std::string_view label) {
+void CommentsAssociator::walkCallAssignmentNode(pm_node_t *untypedNode, std::string_view label) {
     auto *assign = down_cast_nonnull<PrismNode>(untypedNode);
     associateAssertionCommentsToNode(assign->value, true);
     walkNode(assign->value);
@@ -513,7 +512,7 @@ void CommentsAssociatorPrism::walkCallAssignmentNode(pm_node_t *untypedNode, std
 }
 
 template <typename PrismNode>
-void CommentsAssociatorPrism::walkIndexAssignmentNode(pm_node_t *untypedNode, std::string_view label) {
+void CommentsAssociator::walkIndexAssignmentNode(pm_node_t *untypedNode, std::string_view label) {
     auto *assign = down_cast_nonnull<PrismNode>(untypedNode);
     associateAssertionCommentsToNode(assign->value, true);
     walkNode(assign->receiver);
@@ -525,20 +524,20 @@ void CommentsAssociatorPrism::walkIndexAssignmentNode(pm_node_t *untypedNode, st
     consumeCommentsInsideNode(untypedNode, label);
 }
 
-void CommentsAssociatorPrism::walkNodes(pm_node_list_t &nodes) {
+void CommentsAssociator::walkNodes(pm_node_list_t &nodes) {
     for (size_t i = 0; i < nodes.size; i++) {
         auto node = nodes.nodes[i];
         walkNode(node);
     }
 }
 
-void CommentsAssociatorPrism::walkArgumentsNode(pm_arguments_node_t *args) {
+void CommentsAssociator::walkArgumentsNode(pm_arguments_node_t *args) {
     if (args) {
         walkNodes(args->arguments);
     }
 }
 
-void CommentsAssociatorPrism::walkStatements(pm_node_list_t &nodes) {
+void CommentsAssociator::walkStatements(pm_node_list_t &nodes) {
     for (size_t i = 0; i < nodes.size; i++) {
         auto *stmt = nodes.nodes[i];
 
@@ -564,7 +563,7 @@ void CommentsAssociatorPrism::walkStatements(pm_node_list_t &nodes) {
     }
 }
 
-void CommentsAssociatorPrism::walkNode(pm_node_t *node) {
+void CommentsAssociator::walkNode(pm_node_t *node) {
     if (node == nullptr) {
         return;
     }
@@ -1165,7 +1164,7 @@ void CommentsAssociatorPrism::walkNode(pm_node_t *node) {
     }
 }
 
-CommentMapPrism CommentsAssociatorPrism::run(pm_node_t *node) {
+CommentMap CommentsAssociator::run(pm_node_t *node) {
     // Remove any comments that don't start with RBS prefixes
     for (auto it = commentByLine.begin(); it != commentByLine.end();) {
         if (!absl::StartsWith(it->second.string, RBS_PREFIX) &&
@@ -1189,23 +1188,22 @@ CommentMapPrism CommentsAssociatorPrism::run(pm_node_t *node) {
         }
     }
 
-    return CommentMapPrism{signaturesForNode, assertionsForNode};
+    return CommentMap{signaturesForNode, assertionsForNode};
 }
 
-pm_node_t *CommentsAssociatorPrism::createSyntheticPlaceholder(const CommentNodePrism &comment,
-                                                               pm_constant_id_t marker) {
+pm_node_t *CommentsAssociator::createSyntheticPlaceholder(const CommentNode &comment, pm_constant_id_t marker) {
     return prism.ConstantReadNode(marker, comment.loc);
 }
 
-CommentsAssociatorPrism::CommentsAssociatorPrism(core::MutableContext ctx, parser::Prism::Parser &parser,
-                                                 vector<core::LocOffsets> commentLocations)
+CommentsAssociator::CommentsAssociator(core::MutableContext ctx, parser::Prism::Parser &parser,
+                                       vector<core::LocOffsets> commentLocations)
     : ctx(ctx), parser(parser), prism(parser), commentLocations(commentLocations), commentByLine() {
     auto source = ctx.file.data(ctx).source();
     for (auto &loc : commentLocations) {
         auto commentString = source.substr(loc.beginPos(), loc.endPos() - loc.beginPos());
         auto start32 = static_cast<uint32_t>(loc.beginPos());
         auto end32 = static_cast<uint32_t>(loc.endPos());
-        auto comment = CommentNodePrism{core::LocOffsets{start32, end32}, commentString};
+        auto comment = CommentNode{core::LocOffsets{start32, end32}, commentString};
 
         auto line = posToLine(start32);
         commentByLine[line] = comment;

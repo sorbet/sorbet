@@ -1,8 +1,8 @@
-#include "rbs/prism/AssertionsRewriterPrism.h"
+#include "rbs/AssertionsRewriter.h"
 
 #include "absl/strings/match.h"
 #include "core/errors/rewriter.h"
-#include "rbs/prism/SignatureTranslatorPrism.h"
+#include "rbs/SignatureTranslator.h"
 #include <cctype>
 #include <regex>
 
@@ -25,18 +25,18 @@ const regex absurdPattern("^\\s*absurd\\s*(#.*)?$");
  *
  * Returns `nullopt` if the comment is not a valid RBS expression (an error is produced).
  */
-optional<pair<pm_node_t *, InlineCommentPrism::Kind>>
-parseComment(core::MutableContext ctx, parser::Prism::Parser &parser, InlineCommentPrism comment,
+optional<pair<pm_node_t *, InlineComment::Kind>>
+parseComment(core::MutableContext ctx, parser::Prism::Parser &parser, InlineComment comment,
              absl::Span<pair<core::LocOffsets, core::NameRef>> typeParams) {
     Factory prism{parser};
 
-    if (comment.kind == InlineCommentPrism::Kind::MUST || comment.kind == InlineCommentPrism::Kind::UNSAFE ||
-        comment.kind == InlineCommentPrism::Kind::ABSURD) {
+    if (comment.kind == InlineComment::Kind::MUST || comment.kind == InlineComment::Kind::UNSAFE ||
+        comment.kind == InlineComment::Kind::ABSURD) {
         // The type should never be used but we need to hold the location...
         return pair{prism.Nil(comment.comment.typeLoc), comment.kind};
     }
 
-    auto type = rbs::SignatureTranslatorPrism(ctx, parser)
+    auto type = rbs::SignatureTranslator(ctx, parser)
                     .translateAssertionType(absl::MakeSpan(typeParams), RBSDeclaration({comment.comment}));
 
     if (type == nullptr) {
@@ -59,8 +59,8 @@ parseComment(core::MutableContext ctx, parser::Prism::Parser &parser, InlineComm
  *
  * We need to be aware of the type parameter `X` so we can use it to resolve the type of `y`.
  */
-vector<pair<core::LocOffsets, core::NameRef>>
-extractTypeParamsPrism(core::MutableContext ctx, const parser::Prism::Parser &parser, pm_node_t *block) {
+vector<pair<core::LocOffsets, core::NameRef>> extractTypeParams(core::MutableContext ctx,
+                                                                const parser::Prism::Parser &parser, pm_node_t *block) {
     vector<pair<core::LocOffsets, core::NameRef>> typeParams;
 
     auto *blockNode = down_cast<pm_block_node_t>(block);
@@ -296,7 +296,7 @@ void maybeSupplyGenericTypeArguments(core::MutableContext ctx, parser::Prism::Pa
  *
  * Returns `true` if the node is a `sig` call (so caller can skip further processing), `false` otherwise.
  */
-bool AssertionsRewriterPrism::saveMethodTypeParams(pm_node_t *call) {
+bool AssertionsRewriter::saveMethodTypeParams(pm_node_t *call) {
     auto *callNode = down_cast<pm_call_node_t>(call);
     if (!callNode) {
         return false;
@@ -313,7 +313,7 @@ bool AssertionsRewriterPrism::saveMethodTypeParams(pm_node_t *call) {
         return false;
     }
 
-    this->typeParams = extractTypeParamsPrism(ctx, parser, callNode->block);
+    this->typeParams = extractTypeParams(ctx, parser, callNode->block);
 
     return true;
 }
@@ -321,21 +321,21 @@ bool AssertionsRewriterPrism::saveMethodTypeParams(pm_node_t *call) {
 /**
  * Mark the given comment location as "consumed" so it won't be picked up by subsequent calls to `commentForNode`.
  */
-void AssertionsRewriterPrism::consumeComment(core::LocOffsets loc) {
+void AssertionsRewriter::consumeComment(core::LocOffsets loc) {
     consumedComments.emplace(make_pair(loc.beginPos(), loc.endPos()));
 }
 
 /**
  * Check if the given comment location has been consumed.
  */
-bool AssertionsRewriterPrism::hasConsumedComment(core::LocOffsets loc) {
+bool AssertionsRewriter::hasConsumedComment(core::LocOffsets loc) {
     return consumedComments.count(make_pair(loc.beginPos(), loc.endPos()));
 }
 
 /**
  * Helper to convert Prism location to core::LocOffsets.
  */
-core::LocOffsets AssertionsRewriterPrism::translateLocation(pm_location_t location) {
+core::LocOffsets AssertionsRewriter::translateLocation(pm_location_t location) {
     const uint8_t *sourceStart = (const uint8_t *)ctx.file.data(ctx).source().data();
     uint32_t start = static_cast<uint32_t>(location.start - sourceStart);
     uint32_t end = static_cast<uint32_t>(location.end - sourceStart);
@@ -347,7 +347,7 @@ core::LocOffsets AssertionsRewriterPrism::translateLocation(pm_location_t locati
  *
  * Returns `nullopt` if no comment is found or if the comment was already consumed.
  */
-optional<rbs::InlineCommentPrism> AssertionsRewriterPrism::commentForNode(pm_node_t *node) {
+optional<rbs::InlineComment> AssertionsRewriter::commentForNode(pm_node_t *node) {
     if (node == nullptr) {
         return nullopt;
     }
@@ -358,7 +358,7 @@ optional<rbs::InlineCommentPrism> AssertionsRewriterPrism::commentForNode(pm_nod
     }
 
     for (const auto &commentNode : it->second) {
-        if (!absl::StartsWith(commentNode.string, CommentsAssociatorPrism::RBS_PREFIX)) {
+        if (!absl::StartsWith(commentNode.string, CommentsAssociator::RBS_PREFIX)) {
             continue;
         }
 
@@ -371,21 +371,21 @@ optional<rbs::InlineCommentPrism> AssertionsRewriterPrism::commentForNode(pm_nod
             content = content.substr(1);
         }
 
-        auto kind = InlineCommentPrism::Kind::LET;
+        auto kind = InlineComment::Kind::LET;
         if (absl::StartsWith(content, "as ")) {
-            kind = InlineCommentPrism::Kind::CAST;
+            kind = InlineComment::Kind::CAST;
             contentStart += 3;
             content = content.substr(3);
 
             if (regex_match(content.begin(), content.end(), notNilPattern)) {
-                kind = InlineCommentPrism::Kind::MUST;
+                kind = InlineComment::Kind::MUST;
             } else if (regex_match(content.begin(), content.end(), untypedPattern)) {
-                kind = InlineCommentPrism::Kind::UNSAFE;
+                kind = InlineComment::Kind::UNSAFE;
             }
         } else if (regex_match(content.begin(), content.end(), absurdPattern)) {
-            kind = InlineCommentPrism::Kind::ABSURD;
+            kind = InlineComment::Kind::ABSURD;
         } else if (absl::StartsWith(content, "self as ")) {
-            kind = InlineCommentPrism::Kind::BIND;
+            kind = InlineComment::Kind::BIND;
             contentStart += 8;
             content = content.substr(8);
         }
@@ -395,7 +395,7 @@ optional<rbs::InlineCommentPrism> AssertionsRewriterPrism::commentForNode(pm_nod
         }
         consumeComment(commentNode.loc);
 
-        return InlineCommentPrism{
+        return InlineComment{
             rbs::Comment{
                 commentNode.loc,
                 core::LocOffsets{contentStart, commentNode.loc.endPos()},
@@ -418,8 +418,7 @@ optional<rbs::InlineCommentPrism> AssertionsRewriterPrism::commentForNode(pm_nod
  * - `x #: as !nil`: `T.must(x)`
  * - `x #: as untyped`: `T.unsafe(x)`
  */
-pm_node_t *AssertionsRewriterPrism::insertCast(pm_node_t *node,
-                                               optional<pair<pm_node_t *, InlineCommentPrism::Kind>> pair) {
+pm_node_t *AssertionsRewriter::insertCast(pm_node_t *node, optional<pair<pm_node_t *, InlineComment::Kind>> pair) {
     if (!pair) {
         return node;
     }
@@ -435,17 +434,17 @@ pm_node_t *AssertionsRewriterPrism::insertCast(pm_node_t *node,
     auto typeLoc = translateLocation(type->location);
 
     switch (kind) {
-        case InlineCommentPrism::Kind::LET:
+        case InlineComment::Kind::LET:
             return prism.TLet(typeLoc, node, type);
-        case InlineCommentPrism::Kind::CAST:
+        case InlineComment::Kind::CAST:
             return prism.TCast(typeLoc, node, type);
-        case InlineCommentPrism::Kind::MUST:
+        case InlineComment::Kind::MUST:
             return prism.TMust(typeLoc, node);
-        case InlineCommentPrism::Kind::UNSAFE:
+        case InlineComment::Kind::UNSAFE:
             return prism.TUnsafe(typeLoc, node);
-        case InlineCommentPrism::Kind::ABSURD:
+        case InlineComment::Kind::ABSURD:
             return prism.TAbsurd(typeLoc, node);
-        case InlineCommentPrism::Kind::BIND:
+        case InlineComment::Kind::BIND:
             if (auto e = ctx.beginIndexerError(typeLoc, core::errors::Rewriter::RBSUnsupported)) {
                 e.setHeader("`{}` binding can't be used as a trailing comment", "self");
             }
@@ -457,7 +456,7 @@ pm_node_t *AssertionsRewriterPrism::insertCast(pm_node_t *node,
 /**
  * Replace the synthetic RBS placeholder node with a `T.bind(self, Type)` call.
  */
-pm_node_t *AssertionsRewriterPrism::replaceSyntheticBind(pm_node_t *node) {
+pm_node_t *AssertionsRewriter::replaceSyntheticBind(pm_node_t *node) {
     auto inlineComment = commentForNode(node);
     ENFORCE(inlineComment, "No inline comment found for synthetic bind");
 
@@ -470,7 +469,7 @@ pm_node_t *AssertionsRewriterPrism::replaceSyntheticBind(pm_node_t *node) {
     }
 
     auto [type, kind] = *pair;
-    ENFORCE(kind == InlineCommentPrism::Kind::BIND, "Invalid inline comment for synthetic bind");
+    ENFORCE(kind == InlineComment::Kind::BIND, "Invalid inline comment for synthetic bind");
 
     auto typeLoc = translateLocation(type->location);
 
@@ -480,7 +479,7 @@ pm_node_t *AssertionsRewriterPrism::replaceSyntheticBind(pm_node_t *node) {
 /**
  * Insert a cast into the given Prism node if there is an not yet consumed RBS assertion comment.
  */
-pm_node_t *AssertionsRewriterPrism::maybeInsertCast(pm_node_t *node) {
+pm_node_t *AssertionsRewriter::maybeInsertCast(pm_node_t *node) {
     if (node == nullptr) {
         return node;
     }
@@ -494,20 +493,20 @@ pm_node_t *AssertionsRewriterPrism::maybeInsertCast(pm_node_t *node) {
     return node;
 }
 
-void AssertionsRewriterPrism::rewriteStatements(pm_statements_node_t *stmts) {
+void AssertionsRewriter::rewriteStatements(pm_statements_node_t *stmts) {
     rewriteNodes(stmts->body);
 }
 
 /**
  * Rewrite a collection of Prism nodes in place.
  */
-void AssertionsRewriterPrism::rewriteNodes(pm_node_list_t &nodes) {
+void AssertionsRewriter::rewriteNodes(pm_node_list_t &nodes) {
     for (size_t i = 0; i < nodes.size; i++) {
         nodes.nodes[i] = rewriteNode(nodes.nodes[i]);
     }
 }
 
-void AssertionsRewriterPrism::rewriteArgumentsNode(pm_arguments_node_t *args) {
+void AssertionsRewriter::rewriteArgumentsNode(pm_arguments_node_t *args) {
     if (args) {
         rewriteNodes(args->arguments);
     }
@@ -516,7 +515,7 @@ void AssertionsRewriterPrism::rewriteArgumentsNode(pm_arguments_node_t *args) {
 /**
  * Rewrite a collection of nodes, wrap them in an array and cast the array.
  */
-void AssertionsRewriterPrism::rewriteNodesAsArray(pm_node_t *node, pm_node_list_t &nodes) {
+void AssertionsRewriter::rewriteNodesAsArray(pm_node_t *node, pm_node_list_t &nodes) {
     if (auto inlineComment = commentForNode(node)) {
         if (nodes.size > 1) {
             auto nodeSpan = absl::MakeSpan(nodes.nodes, nodes.size);
@@ -545,7 +544,7 @@ void AssertionsRewriterPrism::rewriteNodesAsArray(pm_node_t *node, pm_node_list_
 /**
  * Rewrite a node.
  */
-inline pm_node_t *AssertionsRewriterPrism::rewriteNullableNode(pm_node_t *node) {
+inline pm_node_t *AssertionsRewriter::rewriteNullableNode(pm_node_t *node) {
     if (node == nullptr) {
         return node;
     }
@@ -553,7 +552,7 @@ inline pm_node_t *AssertionsRewriterPrism::rewriteNullableNode(pm_node_t *node) 
     return rewriteNode(node);
 }
 
-pm_node_t *AssertionsRewriterPrism::rewriteNode(pm_node_t *node) {
+pm_node_t *AssertionsRewriter::rewriteNode(pm_node_t *node) {
     // If all comments have been consumed, we can skip the rest of the tree.
     if (consumedComments.size() >= totalComments) {
         return node;
@@ -1064,7 +1063,7 @@ pm_node_t *AssertionsRewriterPrism::rewriteNode(pm_node_t *node) {
     }
 }
 
-void AssertionsRewriterPrism::run(pm_node_t *node) {
+void AssertionsRewriter::run(pm_node_t *node) {
     if (node == nullptr) {
         return;
     }
