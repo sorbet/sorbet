@@ -458,6 +458,10 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options(section)("experimental-ruby3-keyword-args",
                                  "Enforce use of new (Ruby 3.0-style) keyword arguments. (incomplete and experimental)",
                                  cxxopts::value<bool>());
+    options.add_options(section)("allow-redundant-t-let-in-initialize",
+                                 "Allow redundant T.let in initialize when the type would have been inferred by the "
+                                 "Initializer rewriter. Set to false to error on redundant annotations.",
+                                 cxxopts::value<bool>()->default_value("true"), "{[true],false}");
     options.add_options(section)("uniquely-defined-behavior",
                                  "Ensure that every class and module only defines 'behavior' in one file. Ensures "
                                  "that every class or module can be autoloaded by loading exactly one file.",
@@ -1427,6 +1431,8 @@ void readOptions(Options &opts,
             logger->error("You can't pass both `{}` and `{}`", "--isolate-error-code", "--suppress-error-code");
             throw EarlyReturnWithCode(1);
         }
+
+        opts.allowRedundantTLetInInitialize = raw["allow-redundant-t-let-in-initialize"].as<bool>();
 
         if (raw.count("e") == 0 && raw.count("e-rbi") == 0 && opts.inputFileNames.empty() &&
             !raw["version"].as<bool>() && !opts.runLSP && opts.storeState.empty() &&

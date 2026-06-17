@@ -148,6 +148,10 @@ Usage:
       --experimental-ruby3-keyword-args
                                 Enforce use of new (Ruby 3.0-style) keyword arguments.
                                 (incomplete and experimental)
+      --allow-redundant-t-let-in-initialize
+                                Allow redundant T.let in initialize when the type would
+                                have been inferred by the Initializer rewriter. Set to
+                                false to error on redundant annotations. (default: true)
       --uniquely-defined-behavior
                                 Ensure that every class and module only defines
                                 'behavior' in one file. Ensures that every class or
