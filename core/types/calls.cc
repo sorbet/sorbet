@@ -574,7 +574,7 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
     }
 
     { // keep only candidates that have a block iff we are passing one
-        auto it = std::remove_if(leftCandidates.begin(), leftCandidates.end(), [&gs, hasBlock](auto &c) -> bool {
+        erase_if(leftCandidates, [&gs, hasBlock](auto &c) -> bool {
             const auto &[candidate, _arity, constr] = c;
             const auto &params = candidate.data(gs)->parameters;
             ENFORCE(!params.empty(), "Should at least have a block parameter.");
@@ -592,7 +592,6 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
             }
             return false;
         });
-        leftCandidates.erase(it, leftCandidates.end());
     }
 
     { // keep only candidates with closest arity
