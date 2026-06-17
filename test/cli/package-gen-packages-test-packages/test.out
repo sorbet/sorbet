@@ -91,8 +91,8 @@ D/test/__package.rb:3: `Test::D` is missing imports https://srb.help/3734
      3 |class Test::D < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    D/test/__package.rb:9: Inserted `import E`
-     9 |  import D, uses_internals: true
+    D/test/__package.rb:8: Inserted `import E`
+     8 |  import D, uses_internals: true
                                         ^
 
 D/ANestedPackage/__package.rb:3: `D::ANestedPackage` is missing exports https://srb.help/3734
@@ -210,9 +210,8 @@ end
 
 class Test::D < PackageSpec
   test!
-
+  layer 'test'
   strict_dependencies 'dag'
-  layer 'util'
 
   import D, uses_internals: true
   import E
@@ -299,8 +298,8 @@ D/test/__package.rb:3: `Test::D` is missing imports https://srb.help/3734
      3 |class Test::D < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    D/test/__package.rb:9: Inserted `import E`
-     9 |  import D, uses_internals: true
+    D/test/__package.rb:8: Inserted `import E`
+     8 |  import D, uses_internals: true
                                         ^
 
 D/ANestedPackage/__package.rb:3: `D::ANestedPackage` is missing exports https://srb.help/3734
@@ -431,9 +430,8 @@ end
 
 class Test::D < PackageSpec
   test!
-
+  layer 'test'
   strict_dependencies 'dag'
-  layer 'util'
 
   import D, uses_internals: true
   import E
