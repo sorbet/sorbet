@@ -26,6 +26,8 @@ void collectSelfTypeParams(const core::TypePtr &type, UnorderedSet<core::SymbolR
             return;
         case core::TypePtr::Tag::SelfTypeParam: {
             auto def = cast_type_nonnull<core::SelfTypeParam>(type).definition;
+            // We don't collect type members since they are defined in class definitions and not in method
+            // signatures
             if (def.isTypeMember()) {
                 return;
             }
