@@ -205,6 +205,18 @@ class E < PackageSpec
   visible_to C
 end
 
+###### cat D/test/__package.rb ######
+# typed: strict
+
+class Test::D < PackageSpec
+  test!
+  layer 'test'
+  strict_dependencies 'dag'
+
+  import D, uses_internals: true
+  import E
+end
+
 ###### cat PackageWithIgnore/__package.rb ######
 # typed: strict
 
@@ -411,6 +423,18 @@ class E < PackageSpec
 
   visible_to 'tests'
   visible_to C
+end
+
+###### cat D/test/__package.rb ######
+# typed: strict
+
+class Test::D < PackageSpec
+  test!
+  layer 'test'
+  strict_dependencies 'dag'
+
+  import D, uses_internals: true
+  import E
 end
 
 ###### cat PackageWithIgnore/__package.rb ######
