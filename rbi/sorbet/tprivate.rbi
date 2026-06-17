@@ -15,11 +15,17 @@ class T::Private::Types::TypeAlias < T::Types::Base
   sig { params(callable: T.proc.returns(T.anything)).void }
   def initialize(callable); end
 
+  sig {params(arg: Symbol).returns(T::Private::Types::TypeAlias)}
+  def checked(arg); end
+
   sig { override.void }
   def build_type; end
 
   sig {returns(T::Types::Base)}
   def aliased_type; end
+
+  sig {returns(T::Types::Base)}
+  def effective_aliased_type; end
 
   sig { override.returns(String) }
   def name; end

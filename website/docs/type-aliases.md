@@ -103,6 +103,41 @@ def valid(x)
 end
 ```
 
+## `T.type_alias` and RBI files
+
+Type aliases defined in [RBI files](rbi.md) do not exist at runtime because RBI files are not loaded by the Ruby VM. For this reason, it's usually dangerous to put `T.type_alias` declarations in RBI files, because Sorbet would not catch code that actually uses it (e.g., inside a runtime-checked `sig`).
+
+To define a type alias that doesn't participate in runtime checking, a better alternative is to define the type alias in a Ruby source file with `.checked(:never)`:
+
+```ruby
+MyType = T.type_alias { T.any(Integer, String) }.checked(:never)
+```
+
+See below for more information on `.checked` in type aliases.
+
+## `.checked`: Controlling runtime checking
+
+Like [`.checked` on method signatures](runtime.md#checked-whether-to-check-in-the-first-place), type aliases allow configuring whether the type alias participates in runtime checking:
+
+```ruby
+# (1) Always validate (default)
+MyType = T.type_alias { T.any(Integer, String) }.checked(:always)
+
+# (2) Only validate in tests
+MyType = T.type_alias { T.any(Integer, String) }.checked(:tests)
+
+# (3) Never validate at runtime
+MyType = T.type_alias { T.any(Integer, String) }.checked(:never)
+```
+
+> **Note**: The `.checked` goes outside of the `{ ... }` block, unlike with `sig`, where it goes inside the block.
+
+When a type alias is not checked (either `.checked(:never)`, or `.checked(:tests)` outside of a test environment), the type alias accepts all values at runtime, similar to `T.anything`. Like with `.checked` on a `sig`, Sorbet always uses the real type when doing static checks, regardless of the runtime checked level.
+
+When omitted, type aliases use the `T::Configuration.default_checked_level`, which defaults to `:always`. See [`.checked` on method signatures](runtime.md#checked-whether-to-check-in-the-first-place) for more. Note in particular that `.checked(:tests)` requires special setup, documented there.
+
+The `.checked` annotation only affects runtime value checking: the actual type defined inside the block will still be used for things like runtime [override checking](override-checking.md).
+
 ## What about type aliases for method signatures?
 
 Sometimes a question arises like, "Is there a way to factor an entire method signature into a type alias, not just types for individual arguments?"
