@@ -200,6 +200,9 @@ string getFreshName(UnorderedMap<string, uint32_t> &seen, string_view name) {
     }
 }
 
+// We use `string` instead of `NameRef` since we can't intern anything as we are only given a `const GlobalState&` and
+// we would need to intern `defaultName`
+// This function isn't really performance critical so it's fine to use strings.
 vector<string> getParamNames(const core::GlobalState &gs, const string &defaultName, const ast::Send &send) {
     vector<string> paramNames;
     vector<string> kwParamNames;
