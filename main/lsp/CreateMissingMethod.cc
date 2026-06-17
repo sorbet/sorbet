@@ -292,9 +292,9 @@ pair<core::Loc, int> getInsertionLocationAfterMethod(const core::GlobalState &gs
     ast::ConstTreeWalk::apply(ctx, finder, rootTree.tree);
     ENFORCE(finder.result != nullptr);
     auto enclosingMethodLoc = core::Loc(rootTree.file, finder.result->loc);
-    auto insertLoc1 = enclosingMethodLoc.copyEndWithZeroLength();
-    auto [_loc, indentLength1] = enclosingMethodLoc.copyEndWithZeroLength().findStartOfIndentation(gs);
-    return {insertLoc1, indentLength1};
+    auto insertLoc = enclosingMethodLoc.copyEndWithZeroLength();
+    auto [_loc, indentLength] = enclosingMethodLoc.copyEndWithZeroLength().findStartOfIndentation(gs);
+    return {insertLoc, indentLength};
 }
 
 vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerDelegate &typechecker,
@@ -320,15 +320,12 @@ vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerD
     auto sourceClass = receiverIsSingleton ? receiverClass.data(gs)->attachedClass(gs) : receiverClass;
     // try to insert the missing method near the enclosing method if possible
     if (sourceClass == enclosingMethodRef.data(gs)->owner) {
-        auto [insertLoc1, indentLength1] = getInsertionLocationAfterMethod(gs, resolvedTree, enclosingMethodRef);
-        insertLoc = insertLoc1;
-        indentLength = indentLength1;
+        tie(insertLoc, indentLength) = getInsertionLocationAfterMethod(gs, resolvedTree, enclosingMethodRef);
         extraTextBefore = "\n";
         extraTextAfter = "";
     } else {
-        auto [insertLoc1, indentLength1] = getInsertionLocationForClass(typechecker, file, resolvedTree, sourceClass);
-        insertLoc = insertLoc1;
-        indentLength = indentLength1 + 2;
+        tie(insertLoc, indentLength) = getInsertionLocationForClass(typechecker, file, resolvedTree, sourceClass);
+        indentLength += 2;
         extraTextBefore = "";
         extraTextAfter = "\n";
     }
