@@ -5,6 +5,7 @@
 #include "absl/types/span.h"
 #include "common/common.h"
 #include "core/packages/MangledName.h"
+#include "core/packages/Stratum.h"
 #include <string>
 #include <utility>
 #include <vector>
@@ -26,13 +27,10 @@ public:
         // The SCC ID of this node.
         const int id = 0;
 
-        // Whether or not this is a node of application or test code.
-        const bool isTest = false;
-
         // True when this node contains prelude packages.
         const bool isPrelude = false;
 
-        Node(int id, bool isTest, bool isPrelude) : id{id}, isTest{isTest}, isPrelude{isPrelude} {}
+        Node(int id, bool isPrelude) : id{id}, isPrelude{isPrelude} {}
     };
 
 private:
@@ -49,7 +47,7 @@ public:
     Condensation &operator=(const Condensation &other) = delete;
     Condensation &operator=(Condensation &&other) = default;
 
-    Node &pushNode(ImportType type, bool isPrelude);
+    Node &pushNode(bool isPrelude);
 
     struct Traversal {
         // Packages ordered according to their dependencies in the package graph. It's safe to traverse this vector, and
@@ -59,9 +57,6 @@ public:
         std::vector<MangledName> packages;
 
         struct SCCInfo {
-            // True when this group of packages represents a cycle of test dependencies.
-            bool isTest = false;
-
             // A span of `this->packages` that's involved in this SCC.
             absl::Span<MangledName> members;
         };
@@ -80,16 +75,9 @@ public:
         Traversal &operator=(const Traversal &other) = default;
         Traversal &operator=(Traversal &&other) = default;
 
-        // Using "stratum" instead of "layer" to avoid confusion with the modularity concept/package
-        // DSL method of "layer" (utility, business, service, etc.)
-        struct StratumInfo {
-            uint32_t applicationStratum;
-            uint32_t testStratum;
-        };
-
         // Build a mapping from package mangled name to the entry in `this->strata` that the application and test code
         // belong to, respectively.
-        UnorderedMap<MangledName, StratumInfo> buildStratumMapping(const core::GlobalState &gs) const;
+        UnorderedMap<MangledName, Stratum> buildStratumMapping(const core::GlobalState &gs) const;
     };
 
     // Compute a traversal through the condensation graph, that yields groups of SCCs that have no dependencies on each

@@ -75,13 +75,26 @@ E/__package.rb:3: `E` is missing `visible_to`s https://srb.help/3734
      7 |  export E::CONSTANT_FROM_E
                                    ^
 
-D/__package.rb:3: `D` is missing imports and exports https://srb.help/3734
+D/test/__package.rb:3: `Test::D` is missing imports https://srb.help/3734
+     3 |class Test::D < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    D/test/__package.rb:8: Inserted `import E`
+     8 |  import D, uses_internals: true
+                                        ^
+
+D/ANestedPackage/__package.rb:3: `D::ANestedPackage` is missing exports https://srb.help/3734
+     3 |class D::ANestedPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    D/ANestedPackage/__package.rb:5: Inserted `export D::ANestedPackage::Foo`
+     5 |  layer 'util'
+                      ^
+
+D/__package.rb:3: `D` is missing exports https://srb.help/3734
      3 |class D < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    D/__package.rb:7: Inserted `test_import E`
-     7 |  import B
-                  ^
     D/__package.rb:9: Deleted
      9 |  export D::ANestedPackage::Foo
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -93,14 +106,6 @@ D/__package.rb:3: `D` is missing imports and exports https://srb.help/3734
       export D::EnumFromD`
      9 |  export D::ANestedPackage::Foo
                                        ^
-
-D/ANestedPackage/__package.rb:3: `D::ANestedPackage` is missing exports https://srb.help/3734
-     3 |class D::ANestedPackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Done
-    D/ANestedPackage/__package.rb:5: Inserted `export D::ANestedPackage::Foo`
-     5 |  layer 'util'
-                      ^
 
 C/app.rb:8: `F::CONSTANT_FROM_F` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
      8 |      puts F::CONSTANT_FROM_F
@@ -119,7 +124,7 @@ C/app.rb:9: Package `G` includes explicit visibility modifiers and cannot be imp
                    ^^^^^^^^^^^^^^^^^^
   Note:
     Please consult with the owning team before adding a `visible_to` line to the package `G`
-Errors: 11
+Errors: 12
 
 ###### cat B/__package.rb ######
 # typed: strict
@@ -159,7 +164,6 @@ class D < PackageSpec
   layer 'util'
 
   import B
-  test_import E
   export D::AlreadyExportedClass
   export D::CONSTANT_FROM_D
   export D::ClassFromD
@@ -185,6 +189,18 @@ class E < PackageSpec
   export E::CONSTANT_FROM_E
   visible_to 'tests'
   visible_to C
+end
+
+###### cat D/test/__package.rb ######
+# typed: strict
+
+class Test::D < PackageSpec
+  test!
+  layer 'test'
+  strict_dependencies 'dag'
+
+  import D, uses_internals: true
+  import E
 end
 
 ###### cat PackageWithIgnore/__package.rb ######
@@ -252,30 +268,13 @@ E/__package.rb:3: `E` is missing `visible_to`s https://srb.help/3734
      7 |  export E::CONSTANT_FROM_E
                                    ^
 
-D/__package.rb:3: `D` is missing imports and exports https://srb.help/3734
-     3 |class D < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^
+D/test/__package.rb:3: `Test::D` is missing imports https://srb.help/3734
+     3 |class Test::D < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    D/__package.rb:7: Inserted `test_import E`
-     7 |  import B
-                  ^
-    D/__package.rb:9: Deleted
-     9 |  export D::ANestedPackage::Foo
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    D/__package.rb:9: Deleted
-     9 |  export D::ANestedPackage::Foo
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    D/__package.rb:10: Deleted
-    10 |  export D::EnumFromD::Variant
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    D/__package.rb:10: Deleted
-    10 |  export D::EnumFromD::Variant
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    D/__package.rb:9: Inserted `export D::CONSTANT_FROM_D
-      export D::ClassFromD
-      export D::EnumFromD`
-     9 |  export D::ANestedPackage::Foo
-                                       ^
+    D/test/__package.rb:8: Inserted `import E`
+     8 |  import D, uses_internals: true
+                                        ^
 
 D/ANestedPackage/__package.rb:3: `D::ANestedPackage` is missing exports https://srb.help/3734
      3 |class D::ANestedPackage < PackageSpec
@@ -284,6 +283,22 @@ D/ANestedPackage/__package.rb:3: `D::ANestedPackage` is missing exports https://
     D/ANestedPackage/__package.rb:5: Inserted `export D::ANestedPackage::Foo`
      5 |  layer 'util'
                       ^
+
+D/__package.rb:3: `D` is missing exports https://srb.help/3734
+     3 |class D < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    D/__package.rb:9: Deleted
+     9 |  export D::ANestedPackage::Foo
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    D/__package.rb:10: Deleted
+    10 |  export D::EnumFromD::Variant
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    D/__package.rb:9: Inserted `export D::CONSTANT_FROM_D
+      export D::ClassFromD
+      export D::EnumFromD`
+     9 |  export D::ANestedPackage::Foo
+                                       ^
 
 A/constants.rb:5: Unable to resolve constant `G` https://srb.help/5002
      5 |  puts G::ANOTHER_CONSTANT_FROM_G
@@ -315,7 +330,7 @@ C/app.rb:9: Package `G` includes explicit visibility modifiers and cannot be imp
                    ^^^^^^^^^^^^^^^^^^
   Note:
     Please consult with the owning team before adding a `visible_to` line to the package `G`
-Errors: 10
+Errors: 11
 
 ###### cat B/__package.rb ######
 # typed: strict
@@ -355,7 +370,6 @@ class D < PackageSpec
   layer 'util'
 
   import B
-  test_import E
   export D::AlreadyExportedClass
   export D::CONSTANT_FROM_D
   export D::ClassFromD
@@ -381,6 +395,18 @@ class E < PackageSpec
   export E::CONSTANT_FROM_E
   visible_to 'tests'
   visible_to C
+end
+
+###### cat D/test/__package.rb ######
+# typed: strict
+
+class Test::D < PackageSpec
+  test!
+  layer 'test'
+  strict_dependencies 'dag'
+
+  import D, uses_internals: true
+  import E
 end
 
 ###### cat PackageWithIgnore/__package.rb ######

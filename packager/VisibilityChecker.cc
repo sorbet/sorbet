@@ -181,7 +181,10 @@ class PropagateVisibility final {
     //
     // This is very unsatisfying, because it looks a lot like us re-introducing FullyQualifiedName,
     // which was half of the point of moving Symbols into the package database in the first place.
-    pair<core::ClassOrModuleRef, core::ClassOrModuleRef> getScopesForPackage(const core::GlobalState &gs) {
+    //
+    // TODO(jez) Now that test packages are gone, we can actually establish a link if we want to.
+    // Would also be useful in getSymsToCheckWithinPackage in references.cc
+    core::ClassOrModuleRef getScopesForPackage(const core::GlobalState &gs) {
         vector<core::NameRef> parts;
         auto owner = package.mangledName().owner;
         while (owner != core::Symbols::root() && owner != core::Symbols::PackageSpecRegistry()) {
@@ -190,29 +193,18 @@ class PropagateVisibility final {
             owner = ownerData->owner;
         }
 
-        auto nonTestScope = getScopeForPackage(gs, parts, core::Symbols::root());
-        auto testNamespace = core::Symbols::root().data(gs)->findMember(gs, core::packages::PackageDB::TEST_NAMESPACE);
-        core::ClassOrModuleRef testScope;
-        if (!gs.packageDB().testPackages() && testNamespace.exists() && testNamespace.isClassOrModule()) {
-            testScope = getScopeForPackage(gs, parts, testNamespace.asClassOrModuleRef());
-        }
-
-        // TODO(trevor): we can remove the returned test scope after switching to test packages.
-        return {nonTestScope, testScope};
+        return getScopeForPackage(gs, parts, core::Symbols::root());
     }
 
     void unsetAllExportedInPackage(core::MutableContext ctx) {
-        auto [nonTestScope, testScope] = getScopesForPackage(ctx);
+        auto scope = getScopesForPackage(ctx);
 
         auto setExportedTo = false;
 
         // loc is never used in `recursiveSetIsExported` if `setExportedTo` is false, so just say "none"
         auto currentExportLineLoc = core::LocOffsets::none();
-        if (nonTestScope.exists()) {
-            recursiveSetIsExported(ctx, setExportedTo, nonTestScope, currentExportLineLoc, nonTestScope);
-        }
-        if (testScope.exists()) {
-            recursiveSetIsExported(ctx, setExportedTo, testScope, currentExportLineLoc, testScope);
+        if (scope.exists()) {
+            recursiveSetIsExported(ctx, setExportedTo, scope, currentExportLineLoc, scope);
         }
 
         // Shouldn't have been touched, because currentExportLineLoc was none, but let's just clear it to be safe.
@@ -493,22 +485,6 @@ public:
     }
 };
 
-enum class FileType {
-    ProdFile,
-    TestHelperFile,
-    TestUnitFile,
-};
-
-const FileType fileTypeFromCtx(const core::Context ctx) {
-    if (ctx.file.data(ctx).isPackagedTestHelper()) {
-        return FileType::TestHelperFile;
-    } else if (ctx.file.data(ctx).isPackagedTest()) {
-        return FileType::TestUnitFile;
-    } else {
-        return FileType::ProdFile;
-    }
-}
-
 class VisibilityCheckerPass final {
     void addExportInfo(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef litSymbol, bool definesBehavior) {
         auto definedHereLoc = litSymbol.loc(ctx);
@@ -549,7 +525,6 @@ class VisibilityCheckerPass final {
 
 public:
     const core::packages::PackageInfo &package;
-    const FileType fileType;
     UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo> referencedPackages;
     UnorderedSet<core::SymbolRef> referencedSymbols;
 
@@ -558,12 +533,7 @@ public:
     // ConstantLit was a definition.
     UnorderedSet<const void *> constantAssignmentDefinitions;
 
-    VisibilityCheckerPass(core::Context ctx, const core::packages::PackageInfo &package)
-        : package{package}, fileType{fileTypeFromCtx(ctx)} {}
-
-    bool isAnyTestFile() const {
-        return fileType != FileType::ProdFile;
-    }
+    VisibilityCheckerPass(core::Context ctx, const core::packages::PackageInfo &package) : package{package} {}
 
     void preTransformAssign(core::Context ctx, const ast::Assign &asgn) {
         auto lhs = ast::cast_tree<ast::ConstantLit>(asgn.lhs);
@@ -602,17 +572,6 @@ public:
             return;
         }
 
-        // If the imported symbol comes from the test namespace, we must also be in the test namespace.
-        // TODO(neil): is this check valid in --test-packages mode?
-        if ((otherFile.data(ctx).isPackagedTestHelper() || otherFile.data(ctx).isPackagedTest()) &&
-            !this->isAnyTestFile()) {
-            if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
-                e.setHeader("`{}` is defined in a test namespace and cannot be referenced in a non-test file",
-                            litSymbol.show(ctx));
-            }
-            return;
-        }
-
         auto &db = ctx.state.packageDB();
 
         // no need to check visibility for these cases
@@ -622,13 +581,11 @@ public:
         }
         auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
 
-        if (db.testPackages()) {
-            if (pkg.testPackage() && !this->package.testPackage()) {
-                if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::TestImportMismatch)) {
-                    e.setHeader("Package `{}` may not reference `{}` packages", this->package.show(ctx), "test!");
-                    e.addErrorLine(this->package.declLoc(), "Defined here");
-                    e.addErrorLine(pkg.declLoc(), "Referenced `{}` package defined here", "test!");
-                }
+        if (pkg.testPackage() && !this->package.testPackage()) {
+            if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::TestImportMismatch)) {
+                e.setHeader("Package `{}` may not reference `{}` packages", this->package.show(ctx), "test!");
+                e.addErrorLine(this->package.declLoc(), "Defined here");
+                e.addErrorLine(pkg.declLoc(), "Referenced `{}` package defined here", "test!");
             }
         }
 
@@ -643,44 +600,19 @@ public:
             !litSymbol.isClassOrModule() || litSymbol.asClassOrModuleRef().data(ctx)->flags.isBehaviorDefining;
         auto *import = this->package.importsPackage(otherPackage);
         auto wasImported = import != nullptr;
-        if (db.testPackages()) {
-            isExported = isExported || (wasImported && import->usesInternals);
-            if (wasImported) {
-                ENFORCE(import->type == core::packages::ImportType::Normal,
-                        "test_import found in --test-packages mode");
-            }
-        }
+        isExported = isExported || (wasImported && import->usesInternals);
 
-        // Is this a test import (whether test helper or not) used in a production context?
-        auto testImportInProd =
-            wasImported && import->type != core::packages::ImportType::Normal && this->fileType == FileType::ProdFile;
-        // Is this a test import not intended for use in helpers?
-        auto testUnitImportInHelper = wasImported && import->type == core::packages::ImportType::TestUnit &&
-                                      this->fileType != FileType::TestUnitFile;
-        bool importNeeded = !wasImported || testImportInProd || testUnitImportInHelper;
-        referencedPackages[otherPackage] = {.importNeeded = importNeeded, .causesModularityError = false};
+        referencedPackages[otherPackage] = {.importNeeded = !wasImported, .causesModularityError = false};
 
-        if (importNeeded || !isExported) {
-            bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || this->fileType != FileType::ProdFile;
-            if (db.testPackages()) {
-                isTestImport = false;
-            }
-            core::packages::ImportType autocorrectedImportType = core::packages::ImportType::Normal;
-            if (isTestImport) {
-                if (this->fileType == FileType::TestHelperFile) {
-                    autocorrectedImportType = core::packages::ImportType::TestHelper;
-                } else {
-                    autocorrectedImportType = core::packages::ImportType::TestUnit;
-                }
-            }
+        if (!wasImported || !isExported) {
             auto strictDepsLevel = this->package.strictDependenciesLevel;
             auto importStrictDepsLevel = pkg.strictDependenciesLevel;
             bool layeringViolation = false;
             bool strictDependenciesTooLow = false;
             bool causesCycle = false;
-            bool causesVisibilityError = !pkg.isVisibleTo(ctx, this->package, autocorrectedImportType);
+            bool causesVisibilityError = !pkg.isVisibleTo(ctx, this->package);
             optional<string> path;
-            if (!isTestImport && db.enforceLayering()) {
+            if (db.enforceLayering()) {
                 layeringViolation = strictDepsLevel > core::packages::StrictDependenciesLevel::False &&
                                     this->package.causesLayeringViolation(db, pkg);
                 strictDependenciesTooLow = importStrictDepsLevel != core::packages::StrictDependenciesLevel::None &&
@@ -699,8 +631,8 @@ public:
                 }
 
                 std::optional<core::AutocorrectSuggestion> importAutocorrect;
-                if (importNeeded) {
-                    if (auto exp = this->package.addImport(ctx, pkg, autocorrectedImportType)) {
+                if (!wasImported) {
+                    if (auto exp = this->package.addImport(ctx, pkg)) {
                         importAutocorrect.emplace(exp.value());
                     }
                 }
@@ -731,25 +663,6 @@ public:
                         addExportInfo(ctx, e, litSymbol, definesBehavior);
                         addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
                     }
-                } else if (!isExported && testImportInProd) {
-                    ENFORCE(!db.testPackages(), "test_import found in --test-packages mode");
-                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
-                        e.setHeader("`{}` resolves but is not exported from `{}` and `{}` is `{}`ed",
-                                    litSymbol.show(ctx), pkg.show(ctx), pkg.show(ctx), "test_import");
-                        addExportInfo(ctx, e, litSymbol, definesBehavior);
-                        addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
-                    }
-                } else if (!isExported && testUnitImportInHelper) {
-                    ENFORCE(!db.testPackages(), "test_import found in --test-packages mode");
-                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
-                        e.setHeader("`{}` resolves but is not exported from `{}` and `{}` is `{}`ed for only {} files",
-                                    litSymbol.show(ctx), pkg.show(ctx), pkg.show(ctx), "test_import", ".test.rb");
-                        e.addErrorNote("This is because this `{}` is declared with `{}`, which means the constant can "
-                                       "only be used in `{}` files.",
-                                       "test_import", "only: 'test_rb'", ".test.rb");
-                        addExportInfo(ctx, e, litSymbol, definesBehavior);
-                        addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
-                    }
                 } else if (!isExported) {
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedPackagePrivateName)) {
                         e.setHeader("`{}` resolves but is not exported from `{}`", litSymbol.show(ctx), pkg.show(ctx));
@@ -761,25 +674,6 @@ public:
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
                         e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
                         e.addErrorLine(pkg.declLoc(), "Exported from package here");
-                        addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
-                    }
-                } else if (testImportInProd) {
-                    ENFORCE(!isTestImport);
-                    ENFORCE(!db.testPackages(), "test_import found in --test-packages mode");
-                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
-                        e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", litSymbol.show(ctx));
-                        e.addErrorLine(pkg.declLoc(), "Defined here");
-                        addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
-                    }
-                } else if (testUnitImportInHelper) {
-                    ENFORCE(!db.testPackages(), "test_import found in --test-packages mode");
-                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
-                        e.setHeader("The `{}` constant `{}` can only be used in `{}` files", "test_import",
-                                    litSymbol.show(ctx), ".test.rb");
-                        e.addErrorLine(pkg.declLoc(), "Defined here");
-                        e.addErrorNote("This is because this `{}` is declared with `{}`, which means the constant can "
-                                       "only be used in `{}` files.",
-                                       "test_import", "only: 'test_rb'", ".test.rb");
                         addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
                     }
                 } else {
@@ -867,8 +761,6 @@ public:
                         e.addErrorNote("`{}` is not exported", lit.symbol().show(ctx));
                     } else if (!wasImported) {
                         e.addErrorNote("`{}`'s package is not imported", lit.symbol().show(ctx));
-                    } else if (testImportInProd || testUnitImportInHelper) {
-                        e.addErrorNote("`{}`'s package is imported as `{}`", lit.symbol().show(ctx), "test_import");
                     } else {
                         ENFORCE(false);
                     }

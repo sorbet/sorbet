@@ -224,48 +224,47 @@ nested/nested.test.rb:20: Cannot initialize the module `Nested` by constant assi
     Sorbet does not allow treating constant assignments as class or module definitions,
     even if the initializer computes a `Module` object at runtime. See the docs for more.
 
-nested/nested.test.rb:7: Tests in the `Root::Nested` package must define tests in the `Test::Root::Nested` namespace https://srb.help/3713
-     7 |  NOT_IN_MODULE = nil
-          ^^^^^^^^^^^^^
-    nested/__package.rb:3: Enclosing package declared here
-     3 |class Root::Nested < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    __package.rb:3: Must belong to this package, given constant name `Test::Root::NOT_IN_MODULE`
-     3 |class Root < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^
-
-nested/nested.test.rb:14: Tests in the `Root::Nested` package must define tests in the `Test::Root::Nested` namespace https://srb.help/3713
-    14 |module Root::Nested::ShouldBeInTestPrefix
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+nested/nested.test.rb:6: File belongs to package `Root::Nested` but defines a constant that does not match this namespace https://srb.help/3713
+     6 |module Test::Root
+               ^^^^^^^^^^
     nested/__package.rb:3: Enclosing package declared here
      3 |class Root::Nested < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-nested/nested.test.rb:17: Tests in the `Root::Nested` package must define tests in the `Test::Root::Nested` namespace https://srb.help/3713
+nested/nested.test.rb:17: File belongs to package `Root::Nested` but defines a constant that does not match this namespace https://srb.help/3713
     17 |Test::Root::X = 1
         ^^^^^^^^^^^^^
     nested/__package.rb:3: Enclosing package declared here
      3 |class Root::Nested < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    __package.rb:3: Must belong to this package, given constant name `Test::Root::X`
-     3 |class Root < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^
 
-critic_prefix/real.test.rb:3: Tests in the `Critic::SomePkg` package must define tests in the `Test::Critic::SomePkg` namespace https://srb.help/3713
-     3 |module Critic::SomePkg::Real
-               ^^^^^^^^^^^^^^^^^^^^^
+nested/nested.test.rb:18: File belongs to package `Root::Nested` but defines a constant that does not match this namespace https://srb.help/3713
+    18 |Test::Root::Nested::X = 1
+        ^^^^^^^^^^^^^^^^^^^^^
+    nested/__package.rb:3: Enclosing package declared here
+     3 |class Root::Nested < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+nested/nested.test.rb:9: Superclasses may only be set on constants in the package that owns them https://srb.help/5084
+     9 |    class MyTest < UnitTest
+                           ^^^^^^^^
+    nested/nested.test.rb:9: Symbol originally defined here
+     9 |    class MyTest < UnitTest
+            ^^^^^^^^^^^^^^^^^^^^^^^
+    nested/__package.rb:3: Package defined here is not a `prelude_package`
+     3 |class Root::Nested < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    `Test::Root::Nested::MyTest` is unpackaged, and may be reopened from a package marked `prelude_package`
+
+critic_prefix/real.test.rb:10: File belongs to package `Critic::SomePkg` but defines a constant that does not match this namespace https://srb.help/3713
+    10 |Test::Critic::SomePkg::SomeTestConst = 3
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     critic_prefix/__package.rb:3: Enclosing package declared here
      3 |class Critic::SomePkg < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-critic_prefix/real.test.rb:7: Tests in the `Critic::SomePkg` package must define tests in the `Test::Critic::SomePkg` namespace https://srb.help/3713
-     7 |Critic::SomePkg::RealConst = 2
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    critic_prefix/__package.rb:3: Enclosing package declared here
-     3 |class Critic::SomePkg < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-critic_prefix/real.test.rb:13: Tests in the `Critic::SomePkg` package must define tests in the `Test::Critic::SomePkg` namespace https://srb.help/3713
+critic_prefix/real.test.rb:13: File belongs to package `Critic::SomePkg` but defines a constant that does not match this namespace https://srb.help/3713
     13 |SomeOtherNamespace::SomePkg::SomeConst = 4
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     critic_prefix/__package.rb:3: Enclosing package declared here

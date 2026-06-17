@@ -49,7 +49,6 @@ void exportClassOrModule(const core::GlobalState &gs,
             auto &referencingPkgInfo = gs.packageDB().getPackageInfo(packageForF);
             auto *imp = referencingPkgInfo.importsPackage(owningPackage);
             if (imp != nullptr && imp->usesInternals) {
-                ENFORCE(gs.packageDB().testPackages());
                 continue;
             }
         }
@@ -83,7 +82,6 @@ void exportField(const core::GlobalState &gs,
             auto &referencingPkgInfo = gs.packageDB().getPackageInfo(packageForF);
             auto *imp = referencingPkgInfo.importsPackage(owningPackage);
             if (imp != nullptr && imp->usesInternals) {
-                ENFORCE(gs.packageDB().testPackages());
                 continue;
             }
         }
@@ -107,13 +105,13 @@ void exportField(const core::GlobalState &gs,
 
 vector<core::packages::Import> computeNewImports(const core::GlobalState &gs,
                                                  const core::packages::PackageInfo &pkgInfo) {
-    UnorderedMap<core::packages::MangledName, core::packages::ImportType> importMap;
+    UnorderedSet<core::packages::MangledName> importMap;
     for (auto &import : pkgInfo.importedPackageNames) {
         auto &impPkgInfo = gs.packageDB().getPackageInfo(import.mangledName);
         if (impPkgInfo.exists() && impPkgInfo.isPreludePackage()) {
             // If the `__package.rb` already imports a prelude package, we should keep that import, even if it's not
             // referenced anywhere.
-            importMap[import.mangledName] = import.type;
+            importMap.emplace(import.mangledName);
         }
     }
 
@@ -122,7 +120,6 @@ vector<core::packages::Import> computeNewImports(const core::GlobalState &gs,
     // !packageReferenceInfo.importNeeded or packageReferenceInfo.causesModularityError, as well if the import would
     // cause a visibility error. Maybe the common helper could take a function that filters?
     for (auto &[file, referencedPackages] : pkgInfo.packagesReferencedByFile) {
-        auto importType = core::packages::PackageInfo::fileToImportType(gs, file);
         for (auto &[packageName, packageReferenceInfo] : referencedPackages) {
             auto &pkgInfo = gs.packageDB().getPackageInfo(packageName);
             if (!pkgInfo.exists()) {
@@ -130,19 +127,14 @@ vector<core::packages::Import> computeNewImports(const core::GlobalState &gs,
             }
             // TODO(neil): this ignores strict dependencies/visibility violations and unconditionally adds an import.
             // Should we skip imports that would cause a strict dependencies/visibility error instead?
-            auto [it, inserted] = importMap.insert({packageName, importType});
-            if (!inserted) {
-                if (importType < it->second) {
-                    it->second = importType;
-                }
-            }
+            importMap.emplace(packageName);
         }
     }
 
     vector<core::packages::Import> newImports;
     newImports.reserve(importMap.size());
-    for (auto &[mangledName, importType] : importMap) {
-        newImports.emplace_back(mangledName, importType, core::LocOffsets::none());
+    for (auto &mangledName : importMap) {
+        newImports.emplace_back(mangledName, core::LocOffsets::none());
     }
 
     return newImports;
@@ -200,8 +192,7 @@ void GenPackages::run(core::GlobalState &gs) {
                     auto &referencedPackageInfo = gs.packageDB().getPackageInfo(referencedPackageName);
                     ENFORCE(referencedPackageInfo.exists());
                     if (gs.packageDB().updateVisibilityFor(referencedPackageName)) {
-                        if (!referencedPackageInfo.isVisibleTo(
-                                gs, pkgInfo, core::packages::PackageInfo::fileToImportType(gs, file)) ||
+                        if (!referencedPackageInfo.isVisibleTo(gs, pkgInfo) ||
                             referencedPackageInfo.visibleToEverything()) {
                             // either:
                             // - it is a visibility error for pkgName to reference referencedPackageName, and we want to
@@ -210,7 +201,10 @@ void GenPackages::run(core::GlobalState &gs) {
                             // referencedPackage's `visible_to`s
                             //
                             // In either case, we'll add a new `visible_to` to referencedPackage's __package.db
-                            if (gs.packageDB().allowRelaxingTestVisibility() && file.data(gs).isPackagedTest()) {
+                            auto pkg = gs.packageDB().findPackageByPath(gs, file);
+                            auto &pkgInfo = gs.packageDB().getPackageInfo(pkg);
+                            if (gs.packageDB().allowRelaxingTestVisibility() && pkgInfo.exists() &&
+                                pkgInfo.testPackage()) {
                                 // If --allow-relaxing-test-visibility, and this reference is in a test file, add
                                 // `visible_to 'tests'`
                                 neededVisibleToTests[referencedPackageName] = true;
