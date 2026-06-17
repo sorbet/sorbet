@@ -90,31 +90,31 @@ optional<core::NameRef> getParamName(const ast::ExpressionPtr &arg) {
     }
 }
 
-string getFreshName(UnorderedMap<string, uint32_t> &seen, string_view name) {
+string getFreshName(const core::GlobalState &gs, UnorderedMap<core::NameRef, uint32_t> &seen, core::NameRef name) {
     if (seen.contains(name)) {
         seen[name]++;
-        return fmt::format("{}{}", name, seen[name]);
+        return fmt::format("{}{}", name.shortName(gs), seen[name]);
     } else {
         seen[name] = 0;
-        return string(name);
+        return string(name.shortName(gs));
     }
 }
 
-vector<string> getParamNames(const core::GlobalState &gs, const string &defaultName, const ast::Send &send) {
+vector<string> getParamNames(const core::GlobalState &gs, core::NameRef defaultName, const ast::Send &send) {
     vector<string> paramNames;
     vector<string> kwParamNames;
-    UnorderedMap<string, uint32_t> seen;
+    UnorderedMap<core::NameRef, uint32_t> seen;
     for (auto [key, _arg] : send.kwArgPairs()) {
         auto &lit = cast_tree_nonnull<ast::Literal>(key);
         auto kwName = lit.asSymbol();
-        kwParamNames.emplace_back(getFreshName(seen, kwName.shortName(gs)));
+        kwParamNames.emplace_back(getFreshName(gs, seen, kwName));
     }
     for (auto &arg : send.posArgs()) {
         auto name = getParamName(arg);
         if (name.has_value()) {
-            paramNames.emplace_back(getFreshName(seen, name.value().shortName(gs)));
+            paramNames.emplace_back(getFreshName(gs, seen, name.value()));
         } else {
-            paramNames.emplace_back(getFreshName(seen, defaultName));
+            paramNames.emplace_back(getFreshName(gs, seen, defaultName));
         }
     }
     paramNames.insert(paramNames.end(), make_move_iterator(kwParamNames.begin()),
@@ -173,7 +173,7 @@ vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerD
         return {};
     }
 
-    auto paramNames = getParamNames(gs, "param", *sendFinder.result);
+    auto paramNames = getParamNames(gs, core::Names::param(), *sendFinder.result);
     vector<core::TypePtr> improvedArgTypes;
     for (auto &argType : resp.argTypes) {
         improvedArgTypes.emplace_back(improveArgType(gs, argType));

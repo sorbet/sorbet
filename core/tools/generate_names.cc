@@ -123,6 +123,7 @@ NameDef names[] = {
 
     // Sig builders
     {"bind"},
+    {"param"},
     {"params"},
     {"final_", "final"},
     {"returns"},
