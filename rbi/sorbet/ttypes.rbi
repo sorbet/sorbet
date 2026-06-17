@@ -17,6 +17,7 @@ class T::Types::Base
   sig { abstract.void }
   def build_type; end
 
+  sig { overridable.params(obj: Kernel).returns(T::Boolean) }
   def recursively_valid?(obj); end
 
   # Should return `String` but this is hard because technically
