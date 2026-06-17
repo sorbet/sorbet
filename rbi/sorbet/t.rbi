@@ -445,6 +445,18 @@ module T::Utils
   sig {params(val: T.untyped).returns(T::Types::Base)}
   def self.coerce(val); end
 
+  # Unwraps a TypeAlias object to its aliased type, or else returns the input
+  #
+  # ```ruby
+  # resolve_alias(Integer)         # => Integer
+  # resolve_alias(AliasToInteger)  # => Integer
+  # resolve_alias(T.any(A, B))     # => T.any(A, B)
+  # ```
+  sig {
+    type_parameters(:Type)
+      .params(type: T.any(T.type_parameter(:Type), T::Private::Types::TypeAlias))
+      .returns(T.any(T.type_parameter(:Type), T::Types::Base))
+  }
   def self.resolve_alias(type); end
 
   sig { params(force_type_init: T::Boolean).void }

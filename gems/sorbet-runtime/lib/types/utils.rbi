@@ -6,11 +6,6 @@ module T::Utils
   def self.methods_excluding_object(mod)
   end
 
-  # Should be in rbi/sorbet/t.rbi, but should this accept arbitrary type
-  # syntax? Unclear, leaving the type private for now.
-  sig { params(type: T.any(Module, T::Types::Base)).returns(T::Types::Base) }
-  def self.resolve_alias(type); end
-
   # Should be in rbi/sorbet/t.rbi, but that would require exposing
   # T::Private::Methods::Signature, which is bigger than I want to tackle rn
   sig { params(method: UnboundMethod).returns(T.nilable(T::Private::Methods::Signature)) }

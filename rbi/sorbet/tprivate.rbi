@@ -11,6 +11,26 @@ end
 class T::Private::Types::Void < T::Types::Base
 end
 
+class T::Private::Types::TypeAlias < T::Types::Base
+  sig { params(callable: T.proc.returns(T.anything)).void }
+  def initialize(callable); end
+
+  sig { override.void }
+  def build_type; end
+
+  sig {returns(T::Types::Base)}
+  def aliased_type; end
+
+  sig { override.returns(String) }
+  def name; end
+
+  sig { override.params(obj: Kernel).returns(T::Boolean) }
+  def recursively_valid?(obj); end
+
+  sig { override.params(obj: Kernel).returns(T::Boolean) }
+  def valid?(obj); end
+end
+
 module T::Private::Methods
   def self.signature_for_method(method); end
 end
