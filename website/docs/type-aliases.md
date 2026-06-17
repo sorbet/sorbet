@@ -130,11 +130,13 @@ MyType = T.type_alias { T.any(Integer, String) }.checked(:tests)
 MyType = T.type_alias { T.any(Integer, String) }.checked(:never)
 ```
 
+> **Note**: The `.checked` goes outside of the `{ ... }` block, unlike with `sig`, where it goes inside the block.
+
 When a type alias is not checked (either `.checked(:never)`, or `.checked(:tests)` outside of a test environment), the type alias accepts all values at runtime, similar to `T.anything`. Like with `.checked` on a `sig`, Sorbet always uses the real type when doing static checks, regardless of the runtime checked level.
 
 When omitted, type aliases use the `T::Configuration.default_checked_level`, which defaults to `:always`. See [`.checked` on method signatures](runtime.md#checked-whether-to-check-in-the-first-place) for more. Note in particular that `.checked(:tests)` requires special setup, documented there.
 
-Note that `.checked` only affects runtime value checking: the actual type defined inside the block will still be used for things like runtime [override checking](override-checking.md).
+The `.checked` annotation only affects runtime value checking: the actual type defined inside the block will still be used for things like runtime [override checking](override-checking.md).
 
 ## What about type aliases for method signatures?
 
@@ -154,7 +156,7 @@ Note that types for lambdas and procs can be written in type aliases using [proc
 Some languages have recursive type aliases. For example, TypeScript allows writing type aliases like this one which vaguely describes the type of all JSON documents (example uses TypeScript syntax):
 
 ```typescript
-type JSON = null | number | string | JSON[] | {[arg: string]: JSON};
+type JSON = null | number | string | JSON[] | { [arg: string]: JSON };
 ```
 
 Sorbet does not support recursive type aliases. To have types that reference themselves, use [class types].
