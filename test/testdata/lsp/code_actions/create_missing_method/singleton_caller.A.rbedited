@@ -12,12 +12,12 @@ class MyClass
 #     ^ apply-code-action: [A] Create missing method
   end
 
-  sig { void }
-  def self.other_method
-  end
-
   sig { params(param: String, param1: Integer).returns(T.untyped) }
   def self.do_class_thing(param, param1)
     Kernel.raise NotImplementedError
+  end
+
+  sig { void }
+  def self.other_method
   end
 end

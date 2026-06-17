@@ -297,6 +297,15 @@ pair<core::Loc, int> getInsertionLocationAfterMethod(const core::GlobalState &gs
     return {insertLoc, indentLength};
 }
 
+// Essentially normalizes a class. Since self may refer to the source class or singleton class, we normalize to the
+// source class so that we have a stable thing to compare against.
+core::ClassOrModuleRef getSourceClass(const core::GlobalState &gs, const core::ClassOrModuleRef klass) {
+    if (klass.data(gs)->isSingletonClass(gs)) {
+        return klass.data(gs)->attachedClass(gs);
+    }
+    return klass;
+}
+
 vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerDelegate &typechecker,
 
                                                                  const LSPConfiguration &config,
@@ -317,9 +326,14 @@ vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerD
         return {};
     }
     bool receiverIsSingleton = receiverClass.data(gs)->isSingletonClass(gs);
-    auto sourceClass = receiverIsSingleton ? receiverClass.data(gs)->attachedClass(gs) : receiverClass;
-    // try to insert the missing method near the enclosing method if possible
-    if (sourceClass == enclosingMethodRef.data(gs)->owner) {
+    auto sourceClass = getSourceClass(gs, receiverClass);
+    // Try to insert the missing method near the enclosing method if possible
+    // If the source class of the receiver matches the source class of the enclosing method, then we are able to insert
+    // the method directly after the enclosing method
+    // Otherwise, insert it at the end of the source class of the receiver, which may be defined in a different file
+    // We need to check with the source class of the enclosing method owner since it also may be a singleton class if we
+    // defined the enclosing method as `def self.meth ... end`.
+    if (sourceClass == getSourceClass(gs, enclosingMethodRef.data(gs)->owner)) {
         tie(insertLoc, indentLength) = getInsertionLocationAfterMethod(gs, resolvedTree, enclosingMethodRef);
         extraTextBefore = "\n";
         extraTextAfter = "";
