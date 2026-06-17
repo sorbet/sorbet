@@ -48,6 +48,10 @@ echo "###### cat E/__package.rb ######"
 cat E/__package.rb
 
 echo
+echo "###### cat D/test/__package.rb ######"
+cat D/test/__package.rb
+
+echo
 echo "###### cat PackageWithIgnore/__package.rb ######"
 cat PackageWithIgnore/__package.rb
 
@@ -88,6 +92,10 @@ cat D/ANestedPackage/__package.rb
 echo
 echo "###### cat E/__package.rb ######"
 cat E/__package.rb
+
+echo
+echo "###### cat D/test/__package.rb ######"
+cat D/test/__package.rb
 
 echo
 echo "###### cat PackageWithIgnore/__package.rb ######"
