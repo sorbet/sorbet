@@ -3,7 +3,9 @@
 # typed: strict
 
 class Minitest < PackageSpec
-  test_import Critic
+  test!
+
+  import Critic
 
   export Minitest::Tests
 end
