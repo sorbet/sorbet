@@ -162,7 +162,7 @@ string formatNewMethod(const core::GlobalState &gs, uint32_t indentLength, const
     }
     string typeParams = "";
     if (!selfTypeParams.empty()) {
-        typeParams += "T.type_parameters(";
+        typeParams += "type_parameters(";
         bool first = true;
         for (auto &param : selfTypeParams) {
             if (!first) {
