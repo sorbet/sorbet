@@ -31,12 +31,12 @@ module Opus::Types::Test
     end
 
     it '.checked(:tests) behavior, load order, and override checking' do
-      result, status = Open3.capture2e("ruby", "test/types/fixtures/type_alias_checked_tests.rb")
+      result, _status = Open3.capture2e("ruby", "test/types/fixtures/type_alias_checked_tests.rb")
       flunk(result) unless result.empty?
     end
 
     it 'enable_checking_for_sigs_marked_checked_tests raises if called too late' do
-      result, status = Open3.capture2e("ruby", "test/types/fixtures/type_alias_checked_tests_trapdoor.rb")
+      result, _status = Open3.capture2e("ruby", "test/types/fixtures/type_alias_checked_tests_trapdoor.rb")
       flunk(result) unless result.empty?
     end
 
@@ -116,7 +116,6 @@ module Opus::Types::Test
           sig { overridable.params(x: Integer).void }
           def foo(x); end
         end
-
 
         child = Class.new(parent) do
           string_alias = T.type_alias { String }.checked(:never)

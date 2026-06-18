@@ -21,6 +21,6 @@ check("checked(:tests) name preserved") { checked_alias.name == "Integer" }
 # a rejected proposal made it so that once one `.checked(:tests)` type alias
 # was evaluated, no new ones could be defined.
 another_one = T.type_alias { Integer }.checked(:tests)
-check("another type alias defined after the initial load") {
+check("another type alias defined after the initial load") do
   another_one.valid?(1) && !another_one.valid?("not an int")
-}
+end

@@ -15,7 +15,7 @@ module T::Private::Types
         raise "You can't call .checked multiple times on a type alias."
       end
       if !T::Private::RuntimeLevels::LEVELS.include?(level)
-        raise ArgumentError, "Invalid `checked` level '#{level}'. Use one of: #{T::Private::RuntimeLevels::LEVELS}."
+        raise ArgumentError.new("Invalid `checked` level '#{level}'. Use one of: #{T::Private::RuntimeLevels::LEVELS}.")
       end
       @checked_level = level
       self
