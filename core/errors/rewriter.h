@@ -3,7 +3,7 @@
 #include "core/Error.h"
 
 namespace sorbet::core::errors::Rewriter {
-inline constexpr ErrorClass BadAttrArg{3501, StrictLevel::True};
+inline constexpr ErrorClass BadAttrArg{3501, StrictLevel::False};
 // inline constexpr ErrorClass BadWrapInstance{3502, StrictLevel::True};
 inline constexpr ErrorClass PrivateMethodMismatch{3503, StrictLevel::False};
 inline constexpr ErrorClass BadAttrType{3504, StrictLevel::True};
