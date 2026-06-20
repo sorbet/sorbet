@@ -19,4 +19,19 @@ class B
     #      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `T.cast` is useless because `T.attached_class (of B)` is already a subtype of `T.nilable(T.attached_class (of B))`
   end
 end
+
+class C
+  extend T::Sig
+
+  sig {returns(String)}
+  attr_reader :name
+
+  sig {params(name: String).void}
+  def initialize(name)
+    @name = name
+  end
+
+  BOOLEAN = T.let(new("bool"), T.attached_class (of C))
+  #         ^^^^^^^^^^^ error: Constants must have type annotations with `T.let` when specifying `# typed: strict`
+end
 # ------------------------------
