@@ -31,7 +31,7 @@ module T::Props::Utils
     when T::Enum
       what
     else
-      what.clone
+      what.frozen? ? what : what.clone
     end
   end
 
@@ -54,7 +54,7 @@ module T::Props::Utils
     when T::Enum
       what
     else
-      what.clone
+      what.frozen? ? what : what.clone
     end
     result.freeze
   end
