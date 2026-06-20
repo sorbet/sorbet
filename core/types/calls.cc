@@ -3017,8 +3017,9 @@ public:
             if ((gs.suggestUnsafe || !ty.isUntyped()) && loc.exists() && argLocExists) {
                 // (skip the autocorrect if we had to fall back to using callLoc, because using that
                 // will suggest something syntactically invalid like `T.let(U = begin; end, NilClass))`
+                auto opts = ShowOptions().withUseValidSyntax();
                 e.replaceWith(fmt::format("Initialize as `{}`", ty.show(gs)), loc, "T.let({}, {})",
-                              loc.source(gs).value(), ty.show(gs));
+                              loc.source(gs).value(), ty.show(gs, opts));
             }
         }
         res.returnType = move(ty);
