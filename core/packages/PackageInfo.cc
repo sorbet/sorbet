@@ -198,11 +198,8 @@ optional<core::AutocorrectSuggestion> PackageInfo::addImport(const core::GlobalS
                     // edit to delete the existing line, and then use the regular logic for adding an import to
                     // insert the `import`.
                     auto importLoc = core::Loc(fullLoc().file(), import.loc);
-                    auto [lineStart, numWhitespace] = importLoc.findStartOfIndentation(gs);
-                    // -numWhitespace - 1 for the indentation and previous new line
-                    auto beginPos = lineStart.adjust(gs, -numWhitespace - 1, 0).beginPos();
-                    auto endPos = importLoc.endPos();
-                    core::Loc replaceLoc(importLoc.file(), beginPos, endPos);
+                    auto startDetail = importLoc.toDetails(gs).first;
+                    auto replaceLoc = importLoc.adjust(gs, -startDetail.column, 0);
 
                     deleteTestImportEdit = {replaceLoc, ""};
 
@@ -213,7 +210,7 @@ optional<core::AutocorrectSuggestion> PackageInfo::addImport(const core::GlobalS
                     // tricky
 
                     if (importType == ImportType::TestHelper) {
-                        insertionLoc = {importLoc.file(), beginPos - 1, beginPos - 1};
+                        insertionLoc = {importLoc.file(), replaceLoc.beginPos() - 1, replaceLoc.beginPos() - 1};
                         break;
                     }
                 } else {
@@ -619,11 +616,8 @@ std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingImports(
             // is used somewhere, then we're going to add an import to the correct name just below, so we can delete
             // this line.
             auto importLoc = core::Loc(fullLoc().file(), import.loc);
-            auto [lineStart, numWhitespace] = importLoc.findStartOfIndentation(gs);
-            // -numWhitespace - 1 for the indentation and previous new line
-            auto beginPos = lineStart.adjust(gs, -numWhitespace - 1, 0).beginPos();
-            auto endPos = importLoc.endPos();
-            core::Loc replaceLoc(importLoc.file(), beginPos, endPos);
+            auto startDetail = importLoc.toDetails(gs).first;
+            auto replaceLoc = importLoc.adjust(gs, -startDetail.column, 0);
             core::AutocorrectSuggestion::Edit deleteEdit = {replaceLoc, ""};
             allEdits.push_back(deleteEdit);
         }
@@ -677,11 +671,8 @@ PackageInfo::aggregateMissingExports(const core::GlobalState &gs, vector<core::S
         // trying to export is used somewhere, then we're going to add the correct export just below, so we can delete
         // this line.
         auto exportLoc = core::Loc(fullLoc().file(), export_.loc);
-        auto [lineStart, numWhitespace] = exportLoc.findStartOfIndentation(gs);
-        // -numWhitespace - 1 for the indentation and previous new line
-        auto beginPos = lineStart.adjust(gs, -numWhitespace - 1, 0).beginPos();
-        auto endPos = exportLoc.endPos();
-        core::Loc replaceLoc(exportLoc.file(), beginPos, endPos);
+        auto startDetail = exportLoc.toDetails(gs).first;
+        auto replaceLoc = exportLoc.adjust(gs, -startDetail.column, 0);
         core::AutocorrectSuggestion::Edit deleteEdit = {replaceLoc, ""};
         allEdits.push_back(deleteEdit);
     }
@@ -725,11 +716,8 @@ std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingVisibleT
     for (auto &v : visibleTo_) {
         if (!v.mangledName.owner.exists()) {
             auto visibleToLoc = core::Loc(file, v.loc);
-            auto [lineStart, numWhitespace] = visibleToLoc.findStartOfIndentation(gs);
-            // -numWhitespace - 1 for the indentation and previous new line
-            auto beginPos = lineStart.adjust(gs, -numWhitespace - 1, 0).beginPos();
-            auto endPos = visibleToLoc.endPos();
-            core::Loc replaceLoc(visibleToLoc.file(), beginPos, endPos);
+            auto startDetail = visibleToLoc.toDetails(gs).first;
+            auto replaceLoc = visibleToLoc.adjust(gs, -startDetail.column, 0);
             core::AutocorrectSuggestion::Edit deleteEdit = {replaceLoc, ""};
             allEdits.push_back(deleteEdit);
         }
