@@ -1,4 +1,5 @@
 #include "packager/GenPackages.h"
+#include "packager/ComputePackageSCCs.h"
 #include "core/errors/packager.h"
 
 using namespace std;
@@ -180,6 +181,43 @@ UnorderedMap<core::packages::MangledName, vector<core::SymbolRef>> computeToExpo
 
     return toExport;
 }
+
+class ReferencesPackageGraph {
+    core::packages::PackageDB &packageDB;
+    const core::GlobalState &gs;
+
+public:
+    struct SCCInfo {
+        int sccId;
+        int testSccId;
+    };
+    UnorderedMap<core::packages::MangledName, SCCInfo> nodeMap;
+
+    ReferencesPackageGraph(const core::GlobalState &gs, core::packages::PackageDB &packageDB)
+        : packageDB(packageDB), gs(gs) {}
+
+    vector<core::packages::Import> getImports(core::packages::MangledName packageName) {
+        auto &pkgInfo = packageDB.getPackageInfo(packageName);
+        ENFORCE(pkgInfo.exists());
+        return computeNewImports(gs, pkgInfo);
+    }
+
+    void setSCCId(core::packages::MangledName packageName, int sccId) {
+        nodeMap[packageName].sccId = sccId;
+    }
+
+    int getSCCId(core::packages::MangledName packageName) {
+        return nodeMap[packageName].sccId;
+    }
+
+    void setTestSCCId(core::packages::MangledName packageName, int sccId) {
+        nodeMap[packageName].testSccId = sccId;
+    }
+
+    int getTestSCCId(core::packages::MangledName packageName) {
+        return nodeMap[packageName].testSccId;
+    }
+};
 }; // namespace
 
 void GenPackages::run(core::GlobalState &gs) {
@@ -306,6 +344,9 @@ void GenPackages::run(core::GlobalState &gs) {
 
 void GenPackages::runStrict(core::GlobalState &gs) {
     Timer timeit(gs.tracer(), "gen_packages.run_strict");
+
+    ReferencesPackageGraph referencesPackageGraph{gs, gs.packageDB()};
+    auto condensation = ComputePackageSCCs::run(gs, referencesPackageGraph);
 
     auto toExport = computeToExport(gs);
 
