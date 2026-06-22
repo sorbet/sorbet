@@ -20,3 +20,9 @@ end
 
 example(f)
 #       ^ error: Expected `T.proc.params(arg0: Integer).void` but found `T.proc.params(arg0: T.untyped, arg1: T.untyped).returns(T.untyped)` for argument `f`
+
+# Proc#<< and Proc#>> compose two callables (added in Ruby 2.6).
+square = ->(x) { x * x }
+double = ->(x) { x + x }
+square << double
+square >> double

@@ -370,6 +370,30 @@ class Proc < Object
   # statement.
   def ===(*_); end
 
+  # Returns a proc that is the composition of this proc and the given *g*. The
+  # returned proc takes a variable number of arguments, calls *g* with them then
+  # calls this proc with the result.
+  #
+  # ```ruby
+  # f = proc {|x| x * x }
+  # g = proc {|x| x + x }
+  # p (f << g).call(2) #=> 16
+  # ```
+  sig {params(g: T.untyped).returns(T.untyped)}
+  def <<(g); end
+
+  # Returns a proc that is the composition of this proc and the given *g*. The
+  # returned proc takes a variable number of arguments, calls this proc with
+  # them then calls *g* with the result.
+  #
+  # ```ruby
+  # f = proc {|x| x * x }
+  # g = proc {|x| x + x }
+  # p (f >> g).call(2) #=> 8
+  # ```
+  sig {params(g: T.untyped).returns(T.untyped)}
+  def >>(g); end
+
   # Returns the number of mandatory arguments. If the block is declared to take
   # no arguments, returns 0. If the block is known to take exactly n arguments,
   # returns n. If the block has optional arguments, returns -n-1, where n is the
