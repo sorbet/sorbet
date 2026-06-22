@@ -51,6 +51,10 @@ echo
 echo "###### cat PackageWithIgnore/__package.rb ######"
 cat PackageWithIgnore/__package.rb
 
+echo
+echo "###### cat PackageWithNoImportsExports/__package.rb ######"
+cat PackageWithNoImportsExports/__package.rb
+
 echo "##############################"
 echo "###### Package directed ######"
 echo "##############################"
@@ -92,3 +96,7 @@ cat E/__package.rb
 echo
 echo "###### cat PackageWithIgnore/__package.rb ######"
 cat PackageWithIgnore/__package.rb
+
+echo
+echo "###### cat PackageWithNoImportsExports/__package.rb ######"
+cat PackageWithNoImportsExports/__package.rb
