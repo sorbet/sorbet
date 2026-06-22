@@ -19,10 +19,6 @@ PackageWithNoImportsExports/__package.rb:3: `PackageWithNoImportsExports` is mis
      3 |class PackageWithNoImportsExports < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    PackageWithNoImportsExports/__package.rb:5: Inserted `export PackageWithNoImportsExports::App
-      import B`
-     5 |  strict_dependencies 'dag'
-                                   ^
 
 PackageWithIgnore/__package.rb:3: `PackageWithIgnore` is missing imports https://srb.help/3734
      3 |class PackageWithIgnore < PackageSpec
@@ -227,8 +223,10 @@ end
 class PackageWithNoImportsExports < PackageSpec
   layer 'util'
   strict_dependencies 'dag'
-  export PackageWithNoImportsExports::App
+
+  # strict_dependencies 'dag':
   import B
+  export PackageWithNoImportsExports::App
 end
 ##############################
 ###### Package directed ######
@@ -239,10 +237,6 @@ PackageWithNoImportsExports/__package.rb:3: `PackageWithNoImportsExports` is mis
      3 |class PackageWithNoImportsExports < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    PackageWithNoImportsExports/__package.rb:5: Inserted `export PackageWithNoImportsExports::App
-      import B`
-     5 |  strict_dependencies 'dag'
-                                   ^
 
 PackageWithIgnore/__package.rb:3: `PackageWithIgnore` is missing imports https://srb.help/3734
      3 |class PackageWithIgnore < PackageSpec
@@ -458,6 +452,8 @@ end
 class PackageWithNoImportsExports < PackageSpec
   layer 'util'
   strict_dependencies 'dag'
-  export PackageWithNoImportsExports::App
+
+  # strict_dependencies 'dag':
   import B
+  export PackageWithNoImportsExports::App
 end

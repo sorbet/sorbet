@@ -261,7 +261,33 @@ void GenPackages::run(core::GlobalState &gs) {
             missingTypes.push_back(fmt::format("`{}`s", "visible_to"));
         }
 
-        if (autocorrects.size() == 1) {
+        if (autocorrects.empty()) {
+            continue;
+        }
+
+        if (importsAutocorrect && exportsAutocorrect && pkgInfo.importedPackageNames.empty() &&
+            pkgInfo.exports_.empty()) {
+            auto existingContentsLoc =
+                core::Loc(pkgInfo.file, pkgInfo.locs.loc)
+                    .adjust(gs, pkgInfo.locs.declLoc.length() + 1, -1 * (int32_t) "end"sv.size());
+            auto newContents =
+                pkgInfo.renderPackageRbContents(gs, computeNewImports(gs, pkgInfo), move(toExport[pkgName]));
+
+            string header;
+            if (missingTypes.size() == 2) {
+                header = fmt::format("`{}` is missing {} and {}", pkgInfo.show(gs), missingTypes[0], missingTypes[1]);
+            } else {
+                header = fmt::format("`{}` is missing {}, {} and {}", pkgInfo.show(gs), missingTypes[0],
+                                     missingTypes[1], missingTypes[2]);
+            }
+
+            if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectPackageRB)) {
+                e.setHeader("{}", header);
+                bool isDidYouMean = false;
+                bool hideEdit = true;
+                e.addAutocorrect({"Update __package.rb", {{existingContentsLoc, newContents}}, isDidYouMean, hideEdit});
+            }
+        } else if (autocorrects.size() == 1) {
             if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectPackageRB)) {
                 e.setHeader("`{}` is missing {}", pkgInfo.show(gs), missingTypes[0]);
                 e.addAutocorrect(move(autocorrects[0]));
@@ -297,11 +323,6 @@ void GenPackages::run(core::GlobalState &gs) {
         } else if (autocorrects.size() > 3) {
             ENFORCE(false);
         }
-        // TODO(neil): for a file with no imports or exports, if both imports and exports are missing, we'll produce
-        // something like:
-        //   export MyPkg::Foo
-        //   import OtherPkg
-        // because e < i
         // TODO(neil): we should also delete imports that are unused but have a modularity error here
     }
 }
