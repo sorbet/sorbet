@@ -4,6 +4,7 @@
 #include "core/Context.h"
 #include "core/Names.h"
 #include "core/core.h"
+#include "core/errors/rewriter.h"
 #include "rewriter/rewriter.h"
 #include "rewriter/util/Util.h"
 
@@ -42,15 +43,18 @@ void Command::run(core::MutableContext ctx, ast::ClassDef *klass) {
         if (mdef == nullptr) {
             continue;
         }
+
+        if (mdef->flags.isSelfMethod) {
+            continue;
+        }
+
         if (mdef->name == core::Names::call()) {
             i = &stat - &klass->rhs.front();
             call = mdef;
             callptr = &stat;
         }
 
-        if (!mdef->flags.isSelfMethod) {
-            instanceMethods.push_back(pair(mdef->name, mdef->loc.copyWithZeroLength()));
-        }
+        instanceMethods.push_back(pair(mdef->name, mdef->loc.copyWithZeroLength()));
     }
 
     // If we didn't find a `call` method, or if it was the first statement (and
