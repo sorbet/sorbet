@@ -1,7 +1,4 @@
 #include "sorbet_version/sorbet_version.h"
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
 /**
  * This file is *MAGIC*
  * When we compile it from Bazel, we do magical substitutions to some variables defined in CAPS in this file.
