@@ -389,7 +389,7 @@ template <> inline const ExpressionPtr &ExpressionPtr::cast<ExpressionPtr>(const
 
 EXPRESSION(ClassDef) {
 public:
-    const core::LocOffsets loc;
+    core::LocOffsets loc;
     core::LocOffsets declLoc;
     core::ClassOrModuleRef symbol;
 
@@ -431,7 +431,7 @@ CheckSize(ClassDef, 120, 8);
 
 EXPRESSION(MethodDef) {
 public:
-    const core::LocOffsets loc;
+    core::LocOffsets loc;
     core::LocOffsets declLoc;
     core::MethodRef symbol;
 
@@ -463,7 +463,7 @@ CheckSize(MethodDef, 64, 8);
 
 EXPRESSION(If) {
 public:
-    const core::LocOffsets loc;
+    core::LocOffsets loc;
 
     ExpressionPtr cond;
     ExpressionPtr thenp;
@@ -486,7 +486,7 @@ CheckSize(If, 32, 8);
 
 EXPRESSION(While) {
 public:
-    const core::LocOffsets loc;
+    core::LocOffsets loc;
 
     ExpressionPtr cond;
     ExpressionPtr body;
@@ -508,7 +508,7 @@ CheckSize(While, 24, 8);
 
 EXPRESSION(Break) {
 public:
-    const core::LocOffsets loc;
+    core::LocOffsets loc;
 
     ExpressionPtr expr;
 
@@ -529,7 +529,7 @@ CheckSize(Break, 16, 8);
 
 EXPRESSION(Retry) {
 public:
-    const core::LocOffsets loc;
+    core::LocOffsets loc;
 
     Retry(core::LocOffsets loc);
 
@@ -548,7 +548,7 @@ CheckSize(Retry, 8, 8);
 
 EXPRESSION(Next) {
 public:
-    const core::LocOffsets loc;
+    core::LocOffsets loc;
 
     ExpressionPtr expr;
 
@@ -569,7 +569,7 @@ CheckSize(Next, 16, 8);
 
 EXPRESSION(Return) {
 public:
-    const core::LocOffsets loc;
+    core::LocOffsets loc;
 
     ExpressionPtr expr;
 
@@ -590,7 +590,7 @@ CheckSize(Return, 16, 8);
 
 EXPRESSION(RescueCase) {
 public:
-    const core::LocOffsets loc;
+    core::LocOffsets loc;
 
     static constexpr int EXPECTED_EXCEPTION_COUNT = 2;
     using EXCEPTION_store = InlinedVector<ExpressionPtr, EXPECTED_EXCEPTION_COUNT>;
@@ -619,7 +619,7 @@ CheckSize(RescueCase, 48, 8);
 
 EXPRESSION(Rescue) {
 public:
-    const core::LocOffsets loc;
+    core::LocOffsets loc;
 
     static constexpr int EXPECTED_RESCUE_CASE_COUNT = 2;
     using RESCUE_CASE_store = InlinedVector<ExpressionPtr, EXPECTED_RESCUE_CASE_COUNT>;
@@ -647,7 +647,7 @@ CheckSize(Rescue, 56, 8);
 
 EXPRESSION(Local) {
 public:
-    const core::LocOffsets loc;
+    core::LocOffsets loc;
 
     core::LocalVariable localVariable;
 
@@ -668,7 +668,7 @@ CheckSize(Local, 16, 8);
 
 EXPRESSION(UnresolvedIdent) {
 public:
-    const core::LocOffsets loc;
+    core::LocOffsets loc;
 
     enum class Kind : uint8_t {
         Local,
@@ -696,7 +696,7 @@ CheckSize(UnresolvedIdent, 16, 8);
 
 EXPRESSION(RestParam) {
 public:
-    const core::LocOffsets loc;
+    core::LocOffsets loc;
 
     ExpressionPtr expr;
 
@@ -717,7 +717,7 @@ CheckSize(RestParam, 16, 8);
 
 EXPRESSION(KeywordArg) {
 public:
-    const core::LocOffsets loc;
+    core::LocOffsets loc;
 
     ExpressionPtr expr;
 
@@ -738,7 +738,7 @@ CheckSize(KeywordArg, 16, 8);
 
 EXPRESSION(OptionalParam) {
 public:
-    const core::LocOffsets loc;
+    core::LocOffsets loc;
 
     ExpressionPtr expr;
     ExpressionPtr default_;
@@ -760,7 +760,7 @@ CheckSize(OptionalParam, 24, 8);
 
 EXPRESSION(BlockParam) {
 public:
-    const core::LocOffsets loc;
+    core::LocOffsets loc;
 
     ExpressionPtr expr;
 
@@ -781,7 +781,7 @@ CheckSize(BlockParam, 16, 8);
 
 EXPRESSION(ShadowArg) {
 public:
-    const core::LocOffsets loc;
+    core::LocOffsets loc;
 
     ExpressionPtr expr;
 
@@ -802,7 +802,7 @@ CheckSize(ShadowArg, 16, 8);
 
 EXPRESSION(Assign) {
 public:
-    const core::LocOffsets loc;
+    core::LocOffsets loc;
 
     ExpressionPtr lhs;
     ExpressionPtr rhs;
@@ -825,7 +825,7 @@ CheckSize(Assign, 24, 8);
 class Block;
 EXPRESSION(Send) {
 public:
-    const core::LocOffsets loc;
+    core::LocOffsets loc;
 
     core::NameRef fun;
     const core::LocOffsets funLoc;
@@ -1058,7 +1058,7 @@ CheckSize(Send, 56, 8);
 
 EXPRESSION(Cast) {
 public:
-    const core::LocOffsets loc;
+    core::LocOffsets loc;
 
     // The name of the cast operator.
     core::NameRef cast;
@@ -1085,7 +1085,7 @@ CheckSize(Cast, 40, 8);
 
 EXPRESSION(Hash) {
 public:
-    const core::LocOffsets loc;
+    core::LocOffsets loc;
 
     static constexpr int EXPECTED_ENTRY_COUNT = 2;
     using ENTRY_store = InlinedVector<ExpressionPtr, EXPECTED_ENTRY_COUNT>;
@@ -1118,7 +1118,7 @@ CheckSize(Hash, 56, 8);
 
 EXPRESSION(Array) {
 public:
-    const core::LocOffsets loc;
+    core::LocOffsets loc;
 
     static constexpr int EXPECTED_ENTRY_COUNT = 4;
     using ENTRY_store = InlinedVector<ExpressionPtr, EXPECTED_ENTRY_COUNT>;
@@ -1142,7 +1142,7 @@ CheckSize(Array, 48, 8);
 
 EXPRESSION(Literal) {
 public:
-    const core::LocOffsets loc;
+    core::LocOffsets loc;
 
     core::TypePtr value;
 
@@ -1172,7 +1172,7 @@ CheckSize(Literal, 16, 8);
 
 EXPRESSION(UnresolvedConstantLit) {
 public:
-    const core::LocOffsets loc;
+    core::LocOffsets loc;
 
     core::NameRef cnst;
     ExpressionPtr scope;
@@ -1408,6 +1408,18 @@ private:
             }
         }
 
+        void setLoc(core::LocOffsets loc) {
+            switch (tag()) {
+                case Tag::KnownSymbol:
+                    *reinterpret_cast<core::LocOffsets *>(&ptr1) = loc;
+                    break;
+                case Tag::ResolvedSymbol:
+                case Tag::FailedResolutionSymbol:
+                    original()->loc = loc;
+                    break;
+            }
+        }
+
         core::SymbolRef symbol() const {
             switch (tag()) {
                 case Tag::KnownSymbol:
@@ -1473,6 +1485,10 @@ public:
         return storage.loc();
     }
 
+    void setLoc(core::LocOffsets loc) {
+        storage.setLoc(loc);
+    }
+
     core::SymbolRef symbol() const {
         return storage.symbol();
     }
@@ -1508,7 +1524,7 @@ CheckSize(ConstantLit, 16, 8);
 
 EXPRESSION(ZSuperArgs) {
 public:
-    const core::LocOffsets loc;
+    core::LocOffsets loc;
 
     // null if no block passed
     ZSuperArgs(core::LocOffsets loc);
@@ -1528,7 +1544,7 @@ CheckSize(ZSuperArgs, 8, 8);
 
 EXPRESSION(Block) {
 public:
-    const core::LocOffsets loc;
+    core::LocOffsets loc;
 
     MethodDef::PARAMS_store params;
     ExpressionPtr body;
@@ -1549,7 +1565,7 @@ CheckSize(Block, 40, 8);
 
 EXPRESSION(InsSeq) {
 public:
-    const core::LocOffsets loc;
+    core::LocOffsets loc;
 
     static constexpr int EXPECTED_STATS_COUNT = 4;
     using STATS_store = InlinedVector<ExpressionPtr, EXPECTED_STATS_COUNT>;
@@ -1578,7 +1594,7 @@ EXPRESSION(RuntimeMethodDefinition) {
 public:
     // This should be equivalent to MethodDef.declLoc.
     // It's called `loc` because every node in the AST has to have a `loc` field.
-    const core::LocOffsets loc;
+    core::LocOffsets loc;
     core::NameRef name;
     const bool isSelfMethod;
 
@@ -1599,7 +1615,7 @@ CheckSize(RuntimeMethodDefinition, 16, 8);
 
 EXPRESSION(Self) {
 public:
-    const core::LocOffsets loc;
+    core::LocOffsets loc;
 
     Self(core::LocOffsets loc);
 
