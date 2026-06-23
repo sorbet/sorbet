@@ -118,6 +118,7 @@ public:
     GENERATE_POSTPONE_PRECLASS(InsSeq, arg_types, VISITOR_ARG_TYPE(InsSeq));                                    \
     GENERATE_POSTPONE_PRECLASS(Cast, arg_types, VISITOR_ARG_TYPE(Cast));                                        \
                                                                                                                 \
+    GENERATE_POSTPONE_POSTCLASS(ExpressionPtr, arg_types, VISITOR_ARG_TYPE(ExpressionPtr));                     \
     GENERATE_POSTPONE_POSTCLASS(ClassDef, arg_types, VISITOR_ARG_TYPE(ClassDef));                               \
     GENERATE_POSTPONE_POSTCLASS(MethodDef, arg_types, VISITOR_ARG_TYPE(MethodDef));                             \
     GENERATE_POSTPONE_POSTCLASS(If, arg_types, VISITOR_ARG_TYPE(If));                                           \
@@ -577,6 +578,138 @@ private:
         CALL_POST(Self);
     }
 
+    return_type mapItInner(arg_type what, CTX ctx) {
+        // TODO: reorder by frequency
+        if constexpr (Funcs::template HAS_MEMBER_preTransformExpressionPtr<FUNC>()) {
+            if constexpr (Kind == TreeMapKind::Map) {
+                what = Funcs::template CALL_MEMBER_preTransformExpressionPtr<FUNC>::call(func, ctx, Funcs::pass(what));
+            } else if constexpr (Kind == TreeMapKind::Walk) {
+                Funcs::template CALL_MEMBER_preTransformExpressionPtr<FUNC>::call(func, ctx, Funcs::pass(what));
+            } else if constexpr (Kind == TreeMapKind::ConstWalk) {
+                Funcs::template CALL_MEMBER_preTransformExpressionPtr<FUNC>::call(func, ctx, Funcs::pass(what));
+            }
+        }
+
+        switch (what.tag()) {
+            case Tag::EmptyTree:
+                if constexpr (Kind == TreeMapKind::Map) {
+                    return what;
+                } else if constexpr (Kind == TreeMapKind::Walk) {
+                    return;
+                } else if constexpr (Kind == TreeMapKind::ConstWalk) {
+                    return;
+                } else if constexpr (Kind == TreeMapKind::Query) {
+                    return QueryControl::Continue;
+                }
+
+            case Tag::Send:
+                return mapSend(Funcs::pass(what), ctx);
+
+            case Tag::ClassDef:
+                return mapClassDef(Funcs::pass(what), ctx);
+
+            case Tag::MethodDef:
+                return mapMethodDef(Funcs::pass(what), ctx);
+
+            case Tag::If:
+                return mapIf(Funcs::pass(what), ctx);
+
+            case Tag::While:
+                return mapWhile(Funcs::pass(what), ctx);
+
+            case Tag::Break:
+                return mapBreak(Funcs::pass(what), ctx);
+
+            case Tag::Retry:
+                return mapRetry(Funcs::pass(what), ctx);
+
+            case Tag::Next:
+                return mapNext(Funcs::pass(what), ctx);
+
+            case Tag::Return:
+                return mapReturn(Funcs::pass(what), ctx);
+
+            case Tag::RescueCase:
+                Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
+                break;
+
+            case Tag::Rescue:
+                return mapRescue(Funcs::pass(what), ctx);
+
+            case Tag::Local:
+                return mapLocal(Funcs::pass(what), ctx);
+
+            case Tag::UnresolvedIdent:
+                return mapUnresolvedIdent(Funcs::pass(what), ctx);
+
+            case Tag::RestParam:
+                Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
+                break;
+
+            case Tag::KeywordArg:
+                Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
+                break;
+
+            case Tag::OptionalParam:
+                Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
+                break;
+
+            case Tag::BlockParam:
+                Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
+                break;
+
+            case Tag::ShadowArg:
+                Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
+                break;
+
+            case Tag::Assign:
+                return mapAssign(Funcs::pass(what), ctx);
+
+            case Tag::Cast:
+                return mapCast(Funcs::pass(what), ctx);
+
+            case Tag::Hash:
+                return mapHash(Funcs::pass(what), ctx);
+
+            case Tag::Array:
+                return mapArray(Funcs::pass(what), ctx);
+
+            case Tag::Literal:
+                return mapLiteral(Funcs::pass(what), ctx);
+
+            case Tag::UnresolvedConstantLit:
+                return mapUnresolvedConstantLit(Funcs::pass(what), ctx);
+
+            case Tag::ConstantLit:
+                return mapConstantLit(Funcs::pass(what), ctx);
+
+            case Tag::ZSuperArgs:
+                if constexpr (Kind == TreeMapKind::Map) {
+                    return what;
+                } else if constexpr (Kind == TreeMapKind::Walk) {
+                    return;
+                } else if constexpr (Kind == TreeMapKind::ConstWalk) {
+                    return;
+                } else if constexpr (Kind == TreeMapKind::Query) {
+                    return QueryControl::Continue;
+                }
+
+            case Tag::Block:
+                return mapBlock(Funcs::pass(what), ctx);
+
+            case Tag::InsSeq:
+                return mapInsSeq(Funcs::pass(what), ctx);
+
+            case Tag::RuntimeMethodDefinition:
+                return mapRuntimeMethodDefinition(Funcs::pass(what), ctx);
+
+            case Tag::Self:
+                return mapSelf(Funcs::pass(what), ctx);
+        }
+    }
+
+    // this is a little awkward because we can return void but we can't treat void like a value for example assign it
+    // to a variable
     return_type mapIt(arg_type what, CTX ctx) {
         if (what == nullptr) {
             if constexpr (Kind == TreeMapKind::Map) {
@@ -591,133 +724,22 @@ private:
         }
 
         try {
-            // TODO: reorder by frequency
-            if constexpr (Funcs::template HAS_MEMBER_preTransformExpressionPtr<FUNC>()) {
+            if constexpr (Funcs::template HAS_MEMBER_postTransformExpressionPtr<FUNC>()) {
                 if constexpr (Kind == TreeMapKind::Map) {
-                    what =
-                        Funcs::template CALL_MEMBER_preTransformExpressionPtr<FUNC>::call(func, ctx, Funcs::pass(what));
+                    what = mapItInner(Funcs::pass(what), ctx);
+                    return Funcs::template CALL_MEMBER_postTransformExpressionPtr<FUNC>::call(func, ctx,
+                                                                                              Funcs::pass(what));
                 } else if constexpr (Kind == TreeMapKind::Walk) {
-                    Funcs::template CALL_MEMBER_preTransformExpressionPtr<FUNC>::call(func, ctx, Funcs::pass(what));
+                    mapItInner(Funcs::pass(what), ctx);
+                    Funcs::template CALL_MEMBER_postTransformExpressionPtr<FUNC>::call(func, ctx, Funcs::pass(what));
                 } else if constexpr (Kind == TreeMapKind::ConstWalk) {
-                    Funcs::template CALL_MEMBER_preTransformExpressionPtr<FUNC>::call(func, ctx, Funcs::pass(what));
+                    mapItInner(Funcs::pass(what), ctx);
+                    Funcs::template CALL_MEMBER_postTransformExpressionPtr<FUNC>::call(func, ctx, Funcs::pass(what));
+                } else if constexpr (Kind == TreeMapKind::Query) {
+                    return mapItInner(Funcs::pass(what), ctx);
                 }
-            }
-
-            switch (what.tag()) {
-                case Tag::EmptyTree:
-                    if constexpr (Kind == TreeMapKind::Map) {
-                        return what;
-                    } else if constexpr (Kind == TreeMapKind::Walk) {
-                        return;
-                    } else if constexpr (Kind == TreeMapKind::ConstWalk) {
-                        return;
-                    } else if constexpr (Kind == TreeMapKind::Query) {
-                        return QueryControl::Continue;
-                    }
-
-                case Tag::Send:
-                    return mapSend(Funcs::pass(what), ctx);
-
-                case Tag::ClassDef:
-                    return mapClassDef(Funcs::pass(what), ctx);
-
-                case Tag::MethodDef:
-                    return mapMethodDef(Funcs::pass(what), ctx);
-
-                case Tag::If:
-                    return mapIf(Funcs::pass(what), ctx);
-
-                case Tag::While:
-                    return mapWhile(Funcs::pass(what), ctx);
-
-                case Tag::Break:
-                    return mapBreak(Funcs::pass(what), ctx);
-
-                case Tag::Retry:
-                    return mapRetry(Funcs::pass(what), ctx);
-
-                case Tag::Next:
-                    return mapNext(Funcs::pass(what), ctx);
-
-                case Tag::Return:
-                    return mapReturn(Funcs::pass(what), ctx);
-
-                case Tag::RescueCase:
-                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
-                    break;
-
-                case Tag::Rescue:
-                    return mapRescue(Funcs::pass(what), ctx);
-
-                case Tag::Local:
-                    return mapLocal(Funcs::pass(what), ctx);
-
-                case Tag::UnresolvedIdent:
-                    return mapUnresolvedIdent(Funcs::pass(what), ctx);
-
-                case Tag::RestParam:
-                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
-                    break;
-
-                case Tag::KeywordArg:
-                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
-                    break;
-
-                case Tag::OptionalParam:
-                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
-                    break;
-
-                case Tag::BlockParam:
-                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
-                    break;
-
-                case Tag::ShadowArg:
-                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
-                    break;
-
-                case Tag::Assign:
-                    return mapAssign(Funcs::pass(what), ctx);
-
-                case Tag::Cast:
-                    return mapCast(Funcs::pass(what), ctx);
-
-                case Tag::Hash:
-                    return mapHash(Funcs::pass(what), ctx);
-
-                case Tag::Array:
-                    return mapArray(Funcs::pass(what), ctx);
-
-                case Tag::Literal:
-                    return mapLiteral(Funcs::pass(what), ctx);
-
-                case Tag::UnresolvedConstantLit:
-                    return mapUnresolvedConstantLit(Funcs::pass(what), ctx);
-
-                case Tag::ConstantLit:
-                    return mapConstantLit(Funcs::pass(what), ctx);
-
-                case Tag::ZSuperArgs:
-                    if constexpr (Kind == TreeMapKind::Map) {
-                        return what;
-                    } else if constexpr (Kind == TreeMapKind::Walk) {
-                        return;
-                    } else if constexpr (Kind == TreeMapKind::ConstWalk) {
-                        return;
-                    } else if constexpr (Kind == TreeMapKind::Query) {
-                        return QueryControl::Continue;
-                    }
-
-                case Tag::Block:
-                    return mapBlock(Funcs::pass(what), ctx);
-
-                case Tag::InsSeq:
-                    return mapInsSeq(Funcs::pass(what), ctx);
-
-                case Tag::RuntimeMethodDefinition:
-                    return mapRuntimeMethodDefinition(Funcs::pass(what), ctx);
-
-                case Tag::Self:
-                    return mapSelf(Funcs::pass(what), ctx);
+            } else {
+                return mapItInner(Funcs::pass(what), ctx);
             }
         } catch (SorbetException &e) {
             auto loc = what.loc();
