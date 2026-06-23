@@ -7,6 +7,104 @@ namespace sorbet::realmain::lsp {
 
 namespace {
 
+void setExprLoc(ast::ExpressionPtr &expr, core::LocOffsets loc) {
+    switch (expr.tag()) {
+        case ast::Tag::ClassDef:
+            ast::cast_tree_nonnull<ast::ClassDef>(expr).loc = loc;
+            break;
+        case ast::Tag::MethodDef:
+            ast::cast_tree_nonnull<ast::MethodDef>(expr).loc = loc;
+            break;
+        case ast::Tag::If:
+            ast::cast_tree_nonnull<ast::If>(expr).loc = loc;
+            break;
+        case ast::Tag::While:
+            ast::cast_tree_nonnull<ast::While>(expr).loc = loc;
+            break;
+        case ast::Tag::Break:
+            ast::cast_tree_nonnull<ast::Break>(expr).loc = loc;
+            break;
+        case ast::Tag::Retry:
+            ast::cast_tree_nonnull<ast::Retry>(expr).loc = loc;
+            break;
+        case ast::Tag::Next:
+            ast::cast_tree_nonnull<ast::Next>(expr).loc = loc;
+            break;
+        case ast::Tag::Return:
+            ast::cast_tree_nonnull<ast::Return>(expr).loc = loc;
+            break;
+        case ast::Tag::RescueCase:
+            ast::cast_tree_nonnull<ast::RescueCase>(expr).loc = loc;
+            break;
+        case ast::Tag::Rescue:
+            ast::cast_tree_nonnull<ast::Rescue>(expr).loc = loc;
+            break;
+        case ast::Tag::Local:
+            ast::cast_tree_nonnull<ast::Local>(expr).loc = loc;
+            break;
+        case ast::Tag::UnresolvedIdent:
+            ast::cast_tree_nonnull<ast::UnresolvedIdent>(expr).loc = loc;
+            break;
+        case ast::Tag::RestParam:
+            ast::cast_tree_nonnull<ast::RestParam>(expr).loc = loc;
+            break;
+        case ast::Tag::KeywordArg:
+            ast::cast_tree_nonnull<ast::KeywordArg>(expr).loc = loc;
+            break;
+        case ast::Tag::OptionalParam:
+            ast::cast_tree_nonnull<ast::OptionalParam>(expr).loc = loc;
+            break;
+        case ast::Tag::BlockParam:
+            ast::cast_tree_nonnull<ast::BlockParam>(expr).loc = loc;
+            break;
+        case ast::Tag::ShadowArg:
+            ast::cast_tree_nonnull<ast::ShadowArg>(expr).loc = loc;
+            break;
+        case ast::Tag::Assign:
+            ast::cast_tree_nonnull<ast::Assign>(expr).loc = loc;
+            break;
+        case ast::Tag::Send:
+            ast::cast_tree_nonnull<ast::Send>(expr).loc = loc;
+            break;
+        case ast::Tag::Cast:
+            ast::cast_tree_nonnull<ast::Cast>(expr).loc = loc;
+            break;
+        case ast::Tag::Hash:
+            ast::cast_tree_nonnull<ast::Hash>(expr).loc = loc;
+            break;
+        case ast::Tag::Array:
+            ast::cast_tree_nonnull<ast::Array>(expr).loc = loc;
+            break;
+        case ast::Tag::Literal:
+            ast::cast_tree_nonnull<ast::Literal>(expr).loc = loc;
+            break;
+        case ast::Tag::UnresolvedConstantLit:
+            ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(expr).loc = loc;
+            break;
+        case ast::Tag::ConstantLit:
+            ast::cast_tree_nonnull<ast::ConstantLit>(expr).setLoc(loc);
+            break;
+        case ast::Tag::ZSuperArgs:
+            ast::cast_tree_nonnull<ast::ZSuperArgs>(expr).loc = loc;
+            break;
+        case ast::Tag::Block:
+            ast::cast_tree_nonnull<ast::Block>(expr).loc = loc;
+            break;
+        case ast::Tag::InsSeq:
+            ast::cast_tree_nonnull<ast::InsSeq>(expr).loc = loc;
+            break;
+        case ast::Tag::RuntimeMethodDefinition:
+            ast::cast_tree_nonnull<ast::RuntimeMethodDefinition>(expr).loc = loc;
+            break;
+        case ast::Tag::Self:
+            ast::cast_tree_nonnull<ast::Self>(expr).loc = loc;
+            break;
+        case ast::Tag::EmptyTree:
+            // There is only one EmptyTree created, so the loc is not mutable
+            break;
+    }
+}
+
 template <typename F> void iterChildren(const ast::ExpressionPtr &expr, F &&fn) {
     switch (expr.tag()) {
         case ast::Tag::ClassDef: {
@@ -170,143 +268,22 @@ template <typename F> void iterChildren(const ast::ExpressionPtr &expr, F &&fn) 
     }
 }
 
-void maybeUpdateLoc(const core::LocOffsets &loc, core::LocOffsets merged) {
-    if (!loc.exists() || !loc.contains(merged)) {
-        const_cast<core::LocOffsets &>(loc) = merged;
-    }
-}
-
 struct LocSumComputer {
-    void postTransformInsSeq(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &insSeq = ast::cast_tree_nonnull<ast::InsSeq>(tree);
-        auto merged = insSeq.expr.loc();
-        for (auto &stat : insSeq.stats) {
-            merged = merged.join(stat.loc());
-        }
-        maybeUpdateLoc(insSeq.loc, merged);
-    }
-
-    void postTransformIf(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &if_ = ast::cast_tree_nonnull<ast::If>(tree);
-        auto merged = if_.cond.loc().join(if_.thenp.loc()).join(if_.elsep.loc());
-        maybeUpdateLoc(if_.loc, merged);
-    }
-
-    void postTransformWhile(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &while_ = ast::cast_tree_nonnull<ast::While>(tree);
-        auto merged = while_.cond.loc().join(while_.body.loc());
-        maybeUpdateLoc(while_.loc, merged);
-    }
-
-    void postTransformBreak(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &break_ = ast::cast_tree_nonnull<ast::Break>(tree);
-        maybeUpdateLoc(break_.loc, break_.expr.loc());
-    }
-
-    void postTransformNext(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &next = ast::cast_tree_nonnull<ast::Next>(tree);
-        maybeUpdateLoc(next.loc, next.expr.loc());
-    }
-
-    void postTransformReturn(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &return_ = ast::cast_tree_nonnull<ast::Return>(tree);
-        maybeUpdateLoc(return_.loc, return_.expr.loc());
-    }
-
-    void postTransformAssign(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &assign = ast::cast_tree_nonnull<ast::Assign>(tree);
-        maybeUpdateLoc(assign.loc, assign.lhs.loc().join(assign.rhs.loc()));
-    }
-
-    void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
-        auto merged = send.recv.loc();
-        for (auto &arg : send.nonBlockArgs()) {
-            merged = merged.join(arg.loc());
-        }
-        if (auto *block = send.rawBlock()) {
-            merged = merged.join(block->loc());
-        }
-        maybeUpdateLoc(send.loc, merged);
-    }
-
-    void postTransformHash(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &hash = ast::cast_tree_nonnull<ast::Hash>(tree);
+    void postTransformExpressionPtr(core::Context ctx, ast::ExpressionPtr &tree) {
         core::LocOffsets merged;
-        for (auto &key : hash.keys) {
-            merged = merged.join(key.loc());
-        }
-        for (auto &val : hash.values) {
-            merged = merged.join(val.loc());
-        }
-        maybeUpdateLoc(hash.loc, merged);
-    }
-
-    void postTransformArray(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &array = ast::cast_tree_nonnull<ast::Array>(tree);
-        core::LocOffsets merged;
-        for (auto &elem : array.elems) {
-            merged = merged.join(elem.loc());
-        }
-        maybeUpdateLoc(array.loc, merged);
-    }
-
-    void postTransformCast(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &cast = ast::cast_tree_nonnull<ast::Cast>(tree);
-        maybeUpdateLoc(cast.loc, cast.arg.loc().join(cast.typeExpr.loc()));
-    }
-
-    void postTransformBlock(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &block = ast::cast_tree_nonnull<ast::Block>(tree);
-        auto merged = block.body.loc();
-        for (auto &param : block.params) {
-            merged = merged.join(param.loc());
-        }
-        maybeUpdateLoc(block.loc, merged);
-    }
-
-    void postTransformRescueCase(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &rescueCase = ast::cast_tree_nonnull<ast::RescueCase>(tree);
-        auto merged = rescueCase.var.loc().join(rescueCase.body.loc());
-        for (auto &exception : rescueCase.exceptions) {
-            merged = merged.join(exception.loc());
-        }
-        maybeUpdateLoc(rescueCase.loc, merged);
-    }
-
-    void postTransformRescue(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &rescue = ast::cast_tree_nonnull<ast::Rescue>(tree);
-        auto merged = rescue.body.loc().join(rescue.else_.loc()).join(rescue.ensure.loc());
-        for (auto &rescueCase : rescue.rescueCases) {
-            merged = merged.join(rescueCase.loc());
-        }
-        maybeUpdateLoc(rescue.loc, merged);
-    }
-
-    void postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
-        auto merged = methodDef.rhs.loc();
-        for (auto &param : methodDef.params) {
-            merged = merged.join(param.loc());
-        }
-        maybeUpdateLoc(methodDef.loc, merged);
-    }
-
-    void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
-        auto merged = classDef.name.loc();
-        for (auto &rhs : classDef.rhs) {
-            merged = merged.join(rhs.loc());
-        }
-        for (auto &ancestor : classDef.ancestors) {
-            merged = merged.join(ancestor.loc());
-        }
-        for (auto &ancestor : classDef.singletonAncestors) {
-            merged = merged.join(ancestor.loc());
-        }
-        maybeUpdateLoc(classDef.loc, merged);
+        iterChildren(tree, [&](const ast::ExpressionPtr &child) { merged = merged.join(child.loc()); });
+        setExprLoc(tree, tree.loc().join(merged));
     }
 };
+
+// Restore the invariant that locations of parent nodes enclose child nodes. We may still have locations that don't
+// exist, but we are guaranteed that child nodes will of parent nodes with non-existing locations will also have
+// non-existing locations
+void computeLocSums(const core::GlobalState &gs, ast::ExpressionPtr &expr) {
+    LocSumComputer computer;
+    core::Context ctx(gs, core::Symbols::root(), core::FileRef());
+    ast::TreeWalk::apply(ctx, computer, expr);
+}
 
 // returns the selection and an approximation of what code will run after the selection
 // for example if we select the condition of an if expression we will over approximate and say that the continuation is
@@ -544,6 +521,7 @@ vector<unique_ptr<TextDocumentEdit>> getExtractMethodEdits(LSPTypecheckerDelegat
     const auto file = selectionLoc.file();
 
     auto parsedFile = typechecker.getResolved(file);
+    computeLocSums(gs, parsedFile.tree);
 
     core::Context ctx(gs, core::Symbols::root(), file);
     EnclosingMethodWalk walk(selectionLoc, config.logger, gs, file);
