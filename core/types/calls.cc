@@ -1000,6 +1000,39 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
             auto attachedClass = symbol.data(gs)->attachedClass(gs);
             if (attachedClass.exists()) {
+                auto mixedInClassMethods =
+                    attachedClass.data(gs)->findMethod(gs, core::Names::mixedInClassMethods());
+
+                if (mixedInClassMethods.exists()) {
+                    auto resultType = mixedInClassMethods.data(gs)->resultType;
+
+                    if (resultType != nullptr && core::isa_type<core::TupleType>(resultType)) {
+                        auto mixedModules = core::cast_type<core::TupleType>(resultType);
+
+                        for (auto &type : mixedModules->elems) {
+                            if (!core::isa_type<core::ClassType>(type)) {
+                                continue;
+                            }
+
+                            auto classMethodsModule =
+                                core::cast_type_nonnull<core::ClassType>(type).symbol;
+                            auto classMethod =
+                                classMethodsModule.data(gs)->findMethodTransitive(gs, targetName);
+
+                            if (classMethod.exists()) {
+                                e.addErrorNote(
+                                    "`{}` is defined in `{}`, which is mixed in through "
+                                    "`mixes_in_class_methods` on `{}`.\n"
+                                    "    Consider using `T.all(T::Class[{}], {})` instead of "
+                                    "`T.class_of({})`",
+                                    targetName.show(gs), classMethodsModule.show(gs), attachedClass.show(gs),
+                                    attachedClass.show(gs), classMethodsModule.show(gs), attachedClass.show(gs));
+                                break;
+                            }
+                        }
+                    }
+                }
+
                 for (auto mixin : attachedClass.data(gs)->mixins()) {
                     if (mixin.data(gs)->findMethod(gs, targetName).exists()) {
                         e.addErrorNote("The method `{}` exists as an instance method in module `{}`\n"
