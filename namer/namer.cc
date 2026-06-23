@@ -604,11 +604,18 @@ public:
     }
 
     core::FoundDefinitionRef handleAssignment(core::Context ctx, const ast::Assign &asgn) {
-        auto &send = ast::cast_tree_nonnull<ast::Send>(asgn.rhs);
+        auto send = ast::cast_tree<ast::Send>(asgn.rhs);
+        ENFORCE(send != nullptr);
         auto foundRef = fillAssign(ctx, asgn);
         ENFORCE(foundRef.kind() == core::FoundDefinitionRef::Kind::StaticField);
         auto &staticField = foundRef.staticField(*foundDefs);
-        staticField.isTypeAlias = sendRecvIsT(send) && send.fun == core::Names::typeAlias();
+        if (send->fun == core::Names::checked() && send->numPosArgs() == 1 &&
+            ast::isa_tree<ast::Literal>(send->getPosArg(0))) {
+            if (auto inner = ast::cast_tree<ast::Send>(send->recv)) {
+                send = inner;
+            }
+        }
+        staticField.isTypeAlias = send->fun == core::Names::typeAlias() && sendRecvIsT(*send);
         return foundRef;
     }
 
