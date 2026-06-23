@@ -91,6 +91,32 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         assert_operator(allocs, :<, 5) if check_alloc_counts
       end
 
+      it 'resolves an alias signature from the stub, not the @signatures_by_method registry' do
+        klass = Class.new do
+          extend T::Sig
+          sig { params(x: Symbol).returns(Symbol) }
+          def foo(x=:foo)
+            x
+          end
+          alias_method :bar, :foo
+        end
+
+        # Run foo's sig block directly (as run_all_sig_blocks / finalize! does),
+        # so the alias's first call takes the `_handle_missing_method_signature`
+        # path -- then drop this class's registry entries to prove that path
+        # recovers the signature from the stub (`built_sig`) rather than the
+        # registry.
+        T::Private::Methods.run_sig_block_for_method(klass.instance_method(:foo))
+        registry = T::Private::Methods.instance_variable_get(:@signatures_by_method)
+        registry.keys.grep(/\A#{klass.object_id}#/).each { |key| registry.delete(key) }
+
+        # First call to the alias; must still resolve and validate.
+        assert_equal(:foo, klass.new.bar)
+        assert_raises(TypeError) do
+          klass.new.bar(1)
+        end
+      end
+
       it 'handles alias_method without runtime checking' do
         klass = Class.new do
           extend T::Sig

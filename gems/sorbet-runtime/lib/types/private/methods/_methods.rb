@@ -347,8 +347,15 @@ module T::Private::Methods
     current_declaration.mod = mod
 
     original_method = mod.instance_method(method_name)
+    # Memoizes the built signature in a variable shared between the `sig_block`
+    # and the stub below. It is set whenever the block runs -- on the stub's first
+    # invocation, or earlier via `run_all_sig_blocks`/`finalize!`. Because an
+    # alias of this method shares this same stub (and so this same closure), the
+    # alias can recover the signature from here when its stub runs, without
+    # consulting the `@signatures_by_method` registry.
+    built_sig = nil
     sig_block = lambda do
-      T::Private::Methods.run_sig(method_name, original_method, current_declaration)
+      built_sig = T::Private::Methods.run_sig(method_name, original_method, current_declaration)
     end
 
     # Always replace the original method with this wrapper,
@@ -362,6 +369,7 @@ module T::Private::Methods
         self,
         original_method,
         __callee__ || raise("Unknown __callee__ for method without a signature"),
+        built_sig,
       )
 
       # Should be the same logic as CallValidation.wrap_method_if_needed but we
@@ -388,8 +396,11 @@ module T::Private::Methods
     end
   end
 
-  def self._handle_missing_method_signature(receiver, original_method, callee)
-    method_sig = T::Private::Methods.signature_for_method(original_method)
+  # `method_sig` is the signature recovered from the stub's closure (the block has
+  # already run, here or via `run_all_sig_blocks`, which is the only way we reach
+  # this slow path). It lets us re-wrap aliases without reading the
+  # `@signatures_by_method` registry.
+  def self._handle_missing_method_signature(receiver, original_method, callee, method_sig)
     if !method_sig
       raise "`sig` not present for method `#{callee}` on #{receiver.inspect} but you're trying to run it anyways. " \
         "This should only be executed if you used `alias_method` to grab a handle to a method after `sig`ing it, but that clearly isn't what you are doing. " \
