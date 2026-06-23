@@ -286,7 +286,7 @@ pair<core::Loc, int> getInsertionLocationForClass(LSPTypecheckerDelegate &typech
     ast::ConstTreeWalk::apply(core::Context(gs, core::Symbols::root(), insertFile), classFinder, insertTree->tree);
     ENFORCE(classFinder.result != nullptr);
     auto insertClassLoc = core::Loc(insertFile, classFinder.result->loc);
-    // skip past the `end` keyword
+    // skip before the `end` keyword
     auto insertLoc = insertClassLoc.copyEndWithZeroLength().adjust(gs, -3, -3);
     auto [_loc, indentLength] = insertClassLoc.copyEndWithZeroLength().findStartOfIndentation(gs);
     return {insertLoc, indentLength};
