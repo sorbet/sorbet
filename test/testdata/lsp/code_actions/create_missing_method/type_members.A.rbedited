@@ -19,7 +19,7 @@ class MyGenericClass
 #     ^ apply-code-action: [A] Create missing method
   end
 
-  sig { T.type_parameters(:U).params(elem: Elem, u: T.type_parameter(:U), param: String).returns(T.untyped) }
+  sig { type_parameters(:U).params(elem: Elem, u: T.type_parameter(:U), param: String).returns(T.untyped) }
   def create_me!(elem, u, param)
     Kernel.raise NotImplementedError
   end
