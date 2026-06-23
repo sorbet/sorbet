@@ -1,0 +1,19 @@
+# typed: true
+# selective-apply-code-action: refactor
+# enable-experimental-lsp-create-missing-method: true
+
+class TypeParamInArray
+  extend T::Sig
+  extend T::Generic
+
+  sig do
+    type_parameters(:U)
+      .params(items: T::Array[T.type_parameter(:U)])
+      .void
+  end
+  def caller(items)
+    process_items!(items, "context")
+#   ^^^^^^^^^^^^^^ error: Method `process_items!` does not exist on `TypeParamInArray`
+#     ^ apply-code-action: [A] Create missing method
+  end
+end
