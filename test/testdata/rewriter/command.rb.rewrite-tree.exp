@@ -196,4 +196,34 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.private(:call, :foo)
   end
+
+  class <emptyTree>::<C BadCommand><<C <todo sym>>> < (<emptyTree>::<C Opus>::<C Command>)
+    <self>.sig() do ||
+      <self>.params(:x, <emptyTree>::<C Integer>).returns(<emptyTree>::<C String>)
+    end
+
+    def self.call<<todo method>>(x, &<blk>)
+      x.to_s()
+    end
+
+    <self>.sig() do ||
+      <self>.params(:x, <emptyTree>::<C Integer>).returns(<emptyTree>::<C String>)
+    end
+
+    def self.call<<todo method>>(x, &<blk>)
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    <self>.sig() do ||
+      <self>.params(:x, <emptyTree>::<C Integer>).returns(<emptyTree>::<C String>)
+    end
+
+    def self.foo<<todo method>>(x, &<blk>)
+      x.to_s()
+    end
+
+    <runtime method definition of self.call>
+
+    <runtime method definition of self.foo>
+  end
 end
