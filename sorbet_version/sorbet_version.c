@@ -58,30 +58,3 @@ const char sorbet_full_version_string[] = SORBET_VERSION "." QUOTED(STABLE_BUILD
 #endif
     ;
 
-const char *sorbet_getVersion() {
-    return sorbet_version;
-}
-const char *sorbet_getCodename() {
-    return sorbet_codename;
-}
-const char *sorbet_getBuildSCMRevision() {
-    return sorbet_build_scm_revision;
-}
-const int sorbet_getBuildSCMCommitCount() {
-    return sorbet_build_scm_commit_count;
-}
-const char *sorbet_getBuildSCMClean() {
-    return sorbet_build_scm_clean;
-}
-const long sorbet_getBuildTimestamp() {
-    return sorbet_build_timestamp;
-}
-const char *sorbet_getFullVersionString() {
-    return sorbet_full_version_string;
-}
-const int sorbet_getIsReleaseBuild() {
-    return sorbet_is_release_build;
-}
-const int sorbet_getIsWithDebugSymbols() {
-    return sorbet_is_with_debug_symbols;
-}
