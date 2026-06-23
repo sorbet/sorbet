@@ -493,6 +493,16 @@ end
 
 This error indicates that the `override` argument passed to a `prop` or `const` is ill-formed. See [prop overrides](override-checking.md#overrides-and-the-prop-dsl).
 
+## 3518
+
+> This error is specific to a Stripe-specific library called `Opus::Command`.
+
+`Opus::Command` subclasses cannot have singleton class methods. The intention behind a command is to expose a single public method, which is achieved by implementing a `def call` instance method, and letting the `Opus::Command` library forward public calls to the singleton class `call` method to the instance method `call` that the command defines.
+
+To define private helper functions in the implementation of a command, use instance methods.
+
+To define multiple public methods in a single namespace, do not use `Opus::Command` and instead define a normal Ruby class or module. Alternatively, create multiple commands, one per public method.
+
 ## 3550
 
 > This error is specific to RBS support when using the `--enable-experimental-rbs-comments` flag.
