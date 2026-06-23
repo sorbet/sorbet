@@ -98,12 +98,12 @@ end
 
 class BadCommand < Opus::Command
   sig {params(x: Integer).returns(String)}
-  def self.call(x)
+  def self.call(x) # error: Commands must only define instance methods, but `call` is a singleton class method
     x.to_s
   end
 
   sig {params(x: Integer).returns(String)}
-  def self.foo(x)
+  def self.foo(x) # error: Commands must only define instance methods, but `foo` is a singleton class method
     x.to_s
   end
 end

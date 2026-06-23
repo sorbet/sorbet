@@ -45,6 +45,20 @@ void Command::run(core::MutableContext ctx, ast::ClassDef *klass) {
         }
 
         if (mdef->flags.isSelfMethod) {
+            if (auto e = ctx.beginIndexerError(mdef->declLoc, core::errors::Rewriter::CommandSingletonMethod)) {
+                e.setHeader("Commands must only define instance methods, but `{}` is a singleton class method",
+                            mdef->name.show(ctx));
+                if (mdef->name == core::Names::call()) {
+                    auto expected = "def self.call"sv;
+                    auto replaceLoc = ctx.locAt(mdef->declLoc).adjustLen(ctx, 0, expected.size());
+                    if (replaceLoc.source(ctx) == expected) {
+                        e.replaceWith("Convert to instance method", replaceLoc, "def call");
+                    }
+                    e.addErrorNote("Define `{}` as an instance method in a Command; "
+                                   "it will be callable as a singleton class method",
+                                   mdef->name.show(ctx));
+                }
+            }
             continue;
         }
 
