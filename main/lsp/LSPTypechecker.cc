@@ -419,12 +419,12 @@ namespace {
 
 // Determine how much of the symbol table we can copy when starting a slow path edit: any __package.rb modification
 // means that we can't reuse the symbol table.
-core::packages::Stratum determineStartingStratum(const core::GlobalState &gs,
-                                                 const vector<core::packages::Stratum> &fileToStratum,
-                                                 const core::packages::Stratum lastStratum,
-                                                 const LSPFileUpdates &update) {
+pair<core::packages::Stratum, UnorderedSet<core::packages::MangledName>>
+determineStartingStratum(const core::GlobalState &gs, const vector<core::packages::Stratum> &fileToStratum,
+                         const core::packages::Stratum lastStratum, const LSPFileUpdates &update) {
     // We start by assuming we can copy the whole previous symbol table.
     auto editStratum = lastStratum;
+    UnorderedSet<core::packages::MangledName> relatedPackages;
 
     int ix = -1;
     for (auto &file : update.updatedFiles) {
@@ -438,12 +438,12 @@ core::packages::Stratum determineStartingStratum(const core::GlobalState &gs,
         if (fref.id() >= fileToStratum.size()) {
             // We can't keep any part of the symbol table if we see a new package file
             if (file->hasPackageRbPath()) {
-                return core::packages::Stratum(0);
+                return {core::packages::Stratum(0), {}};
             }
 
             auto pkg = gs.packageDB().findPackageByPath(gs, *file);
             if (!pkg.exists()) {
-                return core::packages::Stratum(0);
+                return {core::packages::Stratum(0), {}};
             }
 
             auto &info = gs.packageDB().getPackageInfo(pkg);
@@ -460,6 +460,7 @@ core::packages::Stratum determineStartingStratum(const core::GlobalState &gs,
                 return core::packages::Stratum(0);
             }
 
+            // find package of file here using packageDB
             fileStratum = fileToStratum[fref.id()];
         }
 
@@ -554,7 +555,6 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
             "runSlowPath can only be called from the typechecker thread.");
 
     const bool cancelable = mode == SlowPathMode::Cancelable;
-
     auto &logger = config->logger;
     auto slowPathOp = make_optional<ShowOperation>(*config, ShowOperation::Kind::SlowPathBlocking);
     Timer timeit(logger, "slow_path");
@@ -871,6 +871,21 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
                 }
                 return currentStratum;
             }
+
+            // set
+            UnorderedSet<core::packages::MangledName> relatedPackages;
+
+            auto maybeResolvedRelated = move(maybeResolved.result());
+            auto notRelatedFiles =
+                absl::c_partition(maybeResolvedRelated, [&relatedPackages, &gs = as_const(*gs)](auto &tree) {
+                    auto &packageDB = gs.packageDB();
+                    auto packageName = packageDB.getPackageNameForFile(tree.file);
+                    if (!packageName.exists()) {
+                        return true;
+                    }
+                    return relatedPackages.contains(packageName);
+                });
+            maybeResolvedRelated.erase(notRelatedFiles, maybeResolvedRelated.end());
 
             auto sorted = sortParsedFiles(*gs, *errorReporter, move(maybeResolved.result()));
             pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, currentStratum, preemptManager);

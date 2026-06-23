@@ -18,6 +18,7 @@ namespace {
 struct TraversalBuilder {
     absl::Span<const Condensation::Node> nodes;
     vector<uint32_t> remainingImports;
+    // transpose of the condensation graph
     vector<vector<uint32_t>> backEdges;
 
     vector<uint32_t> sccLengths;
