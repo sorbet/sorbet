@@ -6,6 +6,308 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 namespace {
+
+template <typename F> void iterChildren(const ast::ExpressionPtr &expr, F &&fn) {
+    switch (expr.tag()) {
+        case ast::Tag::ClassDef: {
+            auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(expr);
+            fn(classDef.name);
+            for (auto &rhs : classDef.rhs) {
+                fn(rhs);
+            }
+            for (auto &ancestor : classDef.ancestors) {
+                fn(ancestor);
+            }
+            for (auto &ancestor : classDef.singletonAncestors) {
+                fn(ancestor);
+            }
+            break;
+        }
+        case ast::Tag::MethodDef: {
+            auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(expr);
+            for (auto &param : methodDef.params) {
+                fn(param);
+            }
+            fn(methodDef.rhs);
+            break;
+        }
+        case ast::Tag::If: {
+            auto &if_ = ast::cast_tree_nonnull<ast::If>(expr);
+            fn(if_.cond);
+            fn(if_.thenp);
+            fn(if_.elsep);
+            break;
+        }
+        case ast::Tag::While: {
+            auto &while_ = ast::cast_tree_nonnull<ast::While>(expr);
+            fn(while_.cond);
+            fn(while_.body);
+            break;
+        }
+        case ast::Tag::Break: {
+            fn(ast::cast_tree_nonnull<ast::Break>(expr).expr);
+            break;
+        }
+        case ast::Tag::Next: {
+            fn(ast::cast_tree_nonnull<ast::Next>(expr).expr);
+            break;
+        }
+        case ast::Tag::Return: {
+            fn(ast::cast_tree_nonnull<ast::Return>(expr).expr);
+            break;
+        }
+        case ast::Tag::RescueCase: {
+            auto &rescueCase = ast::cast_tree_nonnull<ast::RescueCase>(expr);
+            for (auto &exception : rescueCase.exceptions) {
+                fn(exception);
+            }
+            fn(rescueCase.var);
+            fn(rescueCase.body);
+            break;
+        }
+        case ast::Tag::Rescue: {
+            auto &rescue = ast::cast_tree_nonnull<ast::Rescue>(expr);
+            fn(rescue.body);
+            for (auto &rescueCase : rescue.rescueCases) {
+                fn(rescueCase);
+            }
+            fn(rescue.else_);
+            fn(rescue.ensure);
+            break;
+        }
+        case ast::Tag::Assign: {
+            auto &assign = ast::cast_tree_nonnull<ast::Assign>(expr);
+            fn(assign.lhs);
+            fn(assign.rhs);
+            break;
+        }
+        case ast::Tag::Send: {
+            auto &send = ast::cast_tree_nonnull<ast::Send>(expr);
+            fn(send.recv);
+            for (auto &arg : send.nonBlockArgs()) {
+                fn(arg);
+            }
+            if (auto *block = send.rawBlock()) {
+                fn(*block);
+            }
+            break;
+        }
+        case ast::Tag::Hash: {
+            auto &hash = ast::cast_tree_nonnull<ast::Hash>(expr);
+            for (auto &key : hash.keys) {
+                fn(key);
+            }
+            for (auto &val : hash.values) {
+                fn(val);
+            }
+            break;
+        }
+        case ast::Tag::Array: {
+            auto &array = ast::cast_tree_nonnull<ast::Array>(expr);
+            for (auto &elem : array.elems) {
+                fn(elem);
+            }
+            break;
+        }
+        case ast::Tag::Cast: {
+            auto &cast = ast::cast_tree_nonnull<ast::Cast>(expr);
+            fn(cast.arg);
+            fn(cast.typeExpr);
+            break;
+        }
+        case ast::Tag::Block: {
+            auto &block = ast::cast_tree_nonnull<ast::Block>(expr);
+            for (auto &param : block.params) {
+                fn(param);
+            }
+            fn(block.body);
+            break;
+        }
+        case ast::Tag::InsSeq: {
+            auto &insSeq = ast::cast_tree_nonnull<ast::InsSeq>(expr);
+            for (auto &stat : insSeq.stats) {
+                fn(stat);
+            }
+            fn(insSeq.expr);
+            break;
+        }
+        case ast::Tag::UnresolvedConstantLit: {
+            fn(ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(expr).scope);
+            break;
+        }
+        case ast::Tag::RestParam: {
+            fn(ast::cast_tree_nonnull<ast::RestParam>(expr).expr);
+            break;
+        }
+        case ast::Tag::KeywordArg: {
+            fn(ast::cast_tree_nonnull<ast::KeywordArg>(expr).expr);
+            break;
+        }
+        case ast::Tag::OptionalParam: {
+            auto &opt = ast::cast_tree_nonnull<ast::OptionalParam>(expr);
+            fn(opt.expr);
+            fn(opt.default_);
+            break;
+        }
+        case ast::Tag::BlockParam: {
+            fn(ast::cast_tree_nonnull<ast::BlockParam>(expr).expr);
+            break;
+        }
+        case ast::Tag::ShadowArg: {
+            fn(ast::cast_tree_nonnull<ast::ShadowArg>(expr).expr);
+            break;
+        }
+        case ast::Tag::EmptyTree:
+        case ast::Tag::Retry:
+        case ast::Tag::Local:
+        case ast::Tag::UnresolvedIdent:
+        case ast::Tag::Literal:
+        case ast::Tag::ConstantLit:
+        case ast::Tag::ZSuperArgs:
+        case ast::Tag::RuntimeMethodDefinition:
+        case ast::Tag::Self:
+            break;
+    }
+}
+
+void maybeUpdateLoc(const core::LocOffsets &loc, core::LocOffsets merged) {
+    if (!loc.exists() || !loc.contains(merged)) {
+        const_cast<core::LocOffsets &>(loc) = merged;
+    }
+}
+
+struct LocSumComputer {
+    void postTransformInsSeq(core::Context ctx, ast::ExpressionPtr &tree) {
+        auto &insSeq = ast::cast_tree_nonnull<ast::InsSeq>(tree);
+        auto merged = insSeq.expr.loc();
+        for (auto &stat : insSeq.stats) {
+            merged = merged.join(stat.loc());
+        }
+        maybeUpdateLoc(insSeq.loc, merged);
+    }
+
+    void postTransformIf(core::Context ctx, ast::ExpressionPtr &tree) {
+        auto &if_ = ast::cast_tree_nonnull<ast::If>(tree);
+        auto merged = if_.cond.loc().join(if_.thenp.loc()).join(if_.elsep.loc());
+        maybeUpdateLoc(if_.loc, merged);
+    }
+
+    void postTransformWhile(core::Context ctx, ast::ExpressionPtr &tree) {
+        auto &while_ = ast::cast_tree_nonnull<ast::While>(tree);
+        auto merged = while_.cond.loc().join(while_.body.loc());
+        maybeUpdateLoc(while_.loc, merged);
+    }
+
+    void postTransformBreak(core::Context ctx, ast::ExpressionPtr &tree) {
+        auto &break_ = ast::cast_tree_nonnull<ast::Break>(tree);
+        maybeUpdateLoc(break_.loc, break_.expr.loc());
+    }
+
+    void postTransformNext(core::Context ctx, ast::ExpressionPtr &tree) {
+        auto &next = ast::cast_tree_nonnull<ast::Next>(tree);
+        maybeUpdateLoc(next.loc, next.expr.loc());
+    }
+
+    void postTransformReturn(core::Context ctx, ast::ExpressionPtr &tree) {
+        auto &return_ = ast::cast_tree_nonnull<ast::Return>(tree);
+        maybeUpdateLoc(return_.loc, return_.expr.loc());
+    }
+
+    void postTransformAssign(core::Context ctx, ast::ExpressionPtr &tree) {
+        auto &assign = ast::cast_tree_nonnull<ast::Assign>(tree);
+        maybeUpdateLoc(assign.loc, assign.lhs.loc().join(assign.rhs.loc()));
+    }
+
+    void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
+        auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
+        auto merged = send.recv.loc();
+        for (auto &arg : send.nonBlockArgs()) {
+            merged = merged.join(arg.loc());
+        }
+        if (auto *block = send.rawBlock()) {
+            merged = merged.join(block->loc());
+        }
+        maybeUpdateLoc(send.loc, merged);
+    }
+
+    void postTransformHash(core::Context ctx, ast::ExpressionPtr &tree) {
+        auto &hash = ast::cast_tree_nonnull<ast::Hash>(tree);
+        core::LocOffsets merged;
+        for (auto &key : hash.keys) {
+            merged = merged.join(key.loc());
+        }
+        for (auto &val : hash.values) {
+            merged = merged.join(val.loc());
+        }
+        maybeUpdateLoc(hash.loc, merged);
+    }
+
+    void postTransformArray(core::Context ctx, ast::ExpressionPtr &tree) {
+        auto &array = ast::cast_tree_nonnull<ast::Array>(tree);
+        core::LocOffsets merged;
+        for (auto &elem : array.elems) {
+            merged = merged.join(elem.loc());
+        }
+        maybeUpdateLoc(array.loc, merged);
+    }
+
+    void postTransformCast(core::Context ctx, ast::ExpressionPtr &tree) {
+        auto &cast = ast::cast_tree_nonnull<ast::Cast>(tree);
+        maybeUpdateLoc(cast.loc, cast.arg.loc().join(cast.typeExpr.loc()));
+    }
+
+    void postTransformBlock(core::Context ctx, ast::ExpressionPtr &tree) {
+        auto &block = ast::cast_tree_nonnull<ast::Block>(tree);
+        auto merged = block.body.loc();
+        for (auto &param : block.params) {
+            merged = merged.join(param.loc());
+        }
+        maybeUpdateLoc(block.loc, merged);
+    }
+
+    void postTransformRescueCase(core::Context ctx, ast::ExpressionPtr &tree) {
+        auto &rescueCase = ast::cast_tree_nonnull<ast::RescueCase>(tree);
+        auto merged = rescueCase.var.loc().join(rescueCase.body.loc());
+        for (auto &exception : rescueCase.exceptions) {
+            merged = merged.join(exception.loc());
+        }
+        maybeUpdateLoc(rescueCase.loc, merged);
+    }
+
+    void postTransformRescue(core::Context ctx, ast::ExpressionPtr &tree) {
+        auto &rescue = ast::cast_tree_nonnull<ast::Rescue>(tree);
+        auto merged = rescue.body.loc().join(rescue.else_.loc()).join(rescue.ensure.loc());
+        for (auto &rescueCase : rescue.rescueCases) {
+            merged = merged.join(rescueCase.loc());
+        }
+        maybeUpdateLoc(rescue.loc, merged);
+    }
+
+    void postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
+        auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
+        auto merged = methodDef.rhs.loc();
+        for (auto &param : methodDef.params) {
+            merged = merged.join(param.loc());
+        }
+        maybeUpdateLoc(methodDef.loc, merged);
+    }
+
+    void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
+        auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
+        auto merged = classDef.name.loc();
+        for (auto &rhs : classDef.rhs) {
+            merged = merged.join(rhs.loc());
+        }
+        for (auto &ancestor : classDef.ancestors) {
+            merged = merged.join(ancestor.loc());
+        }
+        for (auto &ancestor : classDef.singletonAncestors) {
+            merged = merged.join(ancestor.loc());
+        }
+        maybeUpdateLoc(classDef.loc, merged);
+    }
+};
+
 // returns the selection and an approximation of what code will run after the selection
 // for example if we select the condition of an if expression we will over approximate and say that the continuation is
 // an InsSeq of the then and else branch expressions
