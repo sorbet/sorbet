@@ -271,15 +271,20 @@ computeBestStrictness(const core::GlobalState &gs, const core::packages::Condens
                 // Can't break here, since a later import could still bring down the best strictness
             }
         }
+        if (bestStrictness[scc.id] == core::packages::StrictDependenciesLevel::False) {
+            continue;
+        }
+
+        if (scc.members.size() > 1) {
+            // More than one package in SCC, which implies cycle
+            bestStrictness[scc.id] = core::packages::StrictDependenciesLevel::Layered;
+            continue;
+        }
 
         if (bestStrictness[scc.id] == core::packages::StrictDependenciesLevel::None) {
             // We didn't encounter any import that brought down this SCC's strictness
-            if (scc.members.size() > 1) {
-                // More than one package in SCC, which implies cycle
-                bestStrictness[scc.id] = core::packages::StrictDependenciesLevel::Layered;
-            } else {
-                bestStrictness[scc.id] = core::packages::StrictDependenciesLevel::Dag;
-            }
+            ENFORCE(scc.members.size() == 1);
+            bestStrictness[scc.id] = core::packages::StrictDependenciesLevel::Dag;
         }
     }
     return bestStrictness;
