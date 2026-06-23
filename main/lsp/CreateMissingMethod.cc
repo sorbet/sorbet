@@ -263,9 +263,10 @@ core::ClassOrModuleRef getClass(const core::GlobalState &gs, const core::TypePtr
     return core::Symbols::noClassOrModule();
 }
 
-pair<core::Loc, int> getInsertionLocationForClass(LSPTypecheckerDelegate &typechecker, const core::FileRef &currentFile,
-                                                  const ast::ParsedFile &currentTree,
-                                                  const core::ClassOrModuleRef &classRef) {
+optional<pair<core::Loc, int>> getInsertionLocationForClass(LSPTypecheckerDelegate &typechecker,
+                                                            const core::FileRef &currentFile,
+                                                            const ast::ParsedFile &currentTree,
+                                                            const core::ClassOrModuleRef &classRef) {
     auto &gs = typechecker.state();
     auto classLocs = classRef.data(gs)->locs();
     auto inCurrentFile = [&](const auto &loc) { return loc.file() == currentFile; };
@@ -284,24 +285,32 @@ pair<core::Loc, int> getInsertionLocationForClass(LSPTypecheckerDelegate &typech
     }
     ClassDefFinder classFinder{classRef};
     ast::ConstTreeWalk::apply(core::Context(gs, core::Symbols::root(), insertFile), classFinder, insertTree->tree);
-    ENFORCE(classFinder.result != nullptr);
+    if (classFinder.result == nullptr) {
+        // in case this is called when classRef is not present in the source syntax.
+        return nullopt;
+    }
     auto insertClassLoc = core::Loc(insertFile, classFinder.result->loc);
     // skip before the `end` keyword
     auto insertLoc = insertClassLoc.copyEndWithZeroLength().adjust(gs, -3, -3);
     auto [_loc, indentLength] = insertClassLoc.copyEndWithZeroLength().findStartOfIndentation(gs);
-    return {insertLoc, indentLength};
+    return {{insertLoc, indentLength}};
 }
 
-pair<core::Loc, int> getInsertionLocationAfterMethod(const core::GlobalState &gs, const ast::ParsedFile &rootTree,
-                                                     const core::MethodRef enclosingMethodRef) {
+optional<pair<core::Loc, int>> getInsertionLocationAfterMethod(const core::GlobalState &gs,
+                                                               const ast::ParsedFile &rootTree,
+                                                               const core::MethodRef enclosingMethodRef) {
     auto ctx = core::Context(gs, core::Symbols::root(), rootTree.file);
     MethodDefFinder finder{enclosingMethodRef};
     ast::ConstTreeWalk::apply(ctx, finder, rootTree.tree);
-    ENFORCE(finder.result != nullptr);
+    if (finder.result == nullptr) {
+        // the method in the source syntax may not exist because enclosingMethodRef may be synthetic, for example
+        // <static-init>
+        return nullopt;
+    }
     auto enclosingMethodLoc = core::Loc(rootTree.file, finder.result->loc);
     auto insertLoc = enclosingMethodLoc.copyEndWithZeroLength();
     auto [_loc, indentLength] = enclosingMethodLoc.copyEndWithZeroLength().findStartOfIndentation(gs);
-    return {insertLoc, indentLength};
+    return {{insertLoc, indentLength}};
 }
 
 // Essentially normalizes a class. Since self may refer to the source class or singleton class, we normalize to the
@@ -341,14 +350,25 @@ vector<unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerD
     // We need to check with the source class of the enclosing method owner since it also may be a singleton class if we
     // defined the enclosing method as `def self.meth ... end`.
     if (sourceClass == getSourceClass(gs, enclosingMethodRef.data(gs)->owner)) {
-        tie(insertLoc, indentLength) = getInsertionLocationAfterMethod(gs, resolvedTree, enclosingMethodRef);
-        extraTextBefore = "\n";
-        extraTextAfter = "";
-    } else {
-        tie(insertLoc, indentLength) = getInsertionLocationForClass(typechecker, file, resolvedTree, sourceClass);
+        if (auto res = getInsertionLocationAfterMethod(gs, resolvedTree, enclosingMethodRef)) {
+            tie(insertLoc, indentLength) = res.value();
+            extraTextBefore = "\n";
+            extraTextAfter = "";
+        } else if (auto res = getInsertionLocationForClass(typechecker, file, resolvedTree, sourceClass)) {
+            tie(insertLoc, indentLength) = res.value();
+            indentLength += 2;
+            extraTextBefore = "";
+            extraTextAfter = "\n";
+        } else {
+            return {};
+        }
+    } else if (auto res = getInsertionLocationForClass(typechecker, file, resolvedTree, sourceClass)) {
+        tie(insertLoc, indentLength) = res.value();
         indentLength += 2;
         extraTextBefore = "";
         extraTextAfter = "\n";
+    } else {
+        return {};
     }
 
     auto ctx = core::Context(gs, core::Symbols::root(), file);
