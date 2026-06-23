@@ -1,4 +1,4 @@
-# typed: true
+# typed: strict
 # disable-parser-comparison: true
 # See <https://github.com/sorbet/sorbet/issues/10383>.
 # (This test happens to use syntax that Prism parses differently from Sorbet.)
@@ -36,3 +36,6 @@ sig { returns(MyAlias) }
 def wrong_return
   0 # error: Expected `String` but found `Integer(0)` for method result type
 end
+
+ForgotAliasBlock = T.type_alias.checked(:tests)
+#                  ^^^^^^^^^^^^ error: No block given
