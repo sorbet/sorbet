@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 cwd="$(pwd)"
 infile="$cwd/test/cli/call_on_unbounded_type_member/test.rb"

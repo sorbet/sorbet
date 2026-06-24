@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 tmp="$(mktemp -d)"
 cwd="$(pwd)"

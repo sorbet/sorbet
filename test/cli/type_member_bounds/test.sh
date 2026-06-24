@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 cwd="$(pwd)"
 infile="$cwd/test/cli/type_member_bounds/test.rb"

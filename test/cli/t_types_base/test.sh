@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 cwd="$(pwd)"
 infile="$cwd/test/cli/t_types_base/test.rb"

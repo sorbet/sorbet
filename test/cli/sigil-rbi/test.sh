@@ -1,4 +1,6 @@
 #!/bin/bash
+
+set -euo pipefail
 main/sorbet --silence-dev-message \
     --max-threads=0 \
     test/cli/sigil-rbi/no_type.rbi \

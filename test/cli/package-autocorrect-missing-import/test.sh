@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # TODO(neil): this test is slow because it invokes sorbet a bunch of times. Combine all the invokations into one sorbet invocation.
 

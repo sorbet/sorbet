@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 red=$'\x1b[0;31m'
 green=$'\x1b[0;32m'

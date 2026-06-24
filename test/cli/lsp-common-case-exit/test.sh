@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
 # we need to keep output & input pipes open
 # if we don't do anything special, they will be

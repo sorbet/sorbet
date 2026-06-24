@@ -1,4 +1,6 @@
 #!/bin/bash
+
+set -euo pipefail
 main/sorbet --silence-dev-message -e '
  foo(1 +
   2 +

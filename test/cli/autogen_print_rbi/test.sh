@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eu
+set -euo pipefail
 
 echo "Version 6:"
 main/sorbet --silence-dev-message --stop-after namer --autogen-version=6 \

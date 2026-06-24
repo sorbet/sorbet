@@ -1,4 +1,6 @@
 #!/bin/bash
+
+set -euo pipefail
 main/sorbet --censor-for-snapshot-tests --silence-dev-message --typed-override=test/cli/override-typed-bad/override-typed-bad.yaml test/cli/override-typed-bad/override-typed-bad.rb 2>&1
 echo ----
 main/sorbet --censor-for-snapshot-tests --silence-dev-message --typed=false --typed-override=test/cli/override-typed-bad/override-typed-bad.yaml test/cli/override-typed-bad/override-typed-bad.rb 2>&1

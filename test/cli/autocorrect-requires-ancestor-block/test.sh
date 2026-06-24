@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 tmp="$(mktemp -d)"
 cp "test/cli/autocorrect-requires-ancestor-block/autocorrect-requires-ancestor-block.rb" "$tmp"

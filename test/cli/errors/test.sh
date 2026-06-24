@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 censor_payload_locs() {
   sed -e 's/https:\/\/github.com\/sorbet\/sorbet.*: /...: /' | \

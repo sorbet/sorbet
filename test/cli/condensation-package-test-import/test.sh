@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 # This test exercises test helper dependencies in the condensation graph,
 # ensuring that we model those dependencies correctly. In the example, the test

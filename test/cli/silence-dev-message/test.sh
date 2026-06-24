@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 unset SORBET_SILENCE_DEV_MESSAGE
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 cwd="$(pwd)"
 infile="$cwd/test/cli/autocorrect-non-final-methods-final-module/autocorrect-non-final-methods-final-module.rb"

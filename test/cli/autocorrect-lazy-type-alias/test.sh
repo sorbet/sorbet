@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 cwd="$(pwd)"
 infile="$cwd/test/cli/autocorrect-lazy-type-alias/autocorrect-lazy-type-alias.rb"

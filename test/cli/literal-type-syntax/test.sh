@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 tmp="$(mktemp -d)"
 infile="test/cli/literal-type-syntax/literal-type-syntax.rb"

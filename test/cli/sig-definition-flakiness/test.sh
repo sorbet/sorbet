@@ -1,4 +1,6 @@
 #!/bin/bash
+
+set -euo pipefail
 exec 2>&1
 
 # Will flakily fail if sigs are not defined in a deterministic order.
