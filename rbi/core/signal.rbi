@@ -102,14 +102,14 @@ module Signal
         signal: T.any(Integer, String, Symbol),
         command: BasicObject,
     )
-    .returns(T.any(String, Proc))
+    .returns(T.any(String, T::Proc[T.untyped]))
   end
   sig do
     params(
         signal: T.any(Integer, String, Symbol),
         blk: T.proc.params(arg0: Integer).returns(BasicObject),
     )
-    .returns(T.any(String, Proc))
+    .returns(T.any(String, T::Proc[T.untyped]))
   end
   def self.trap(signal, command=T.unsafe(nil), &blk); end
 end
