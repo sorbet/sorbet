@@ -1,0 +1,47 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C IFoo><<C <todo sym>>> < ()
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.abstract().returns(<emptyTree>::<C String>)
+    end
+
+    def foo<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.abstract().params(:bar, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
+    end
+
+    def bar=<<todo method>>(bar, &<blk>)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.abstract().returns(<emptyTree>::<C String>)
+    end
+
+    def qux<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.params(:qux, <emptyTree>::<C String>).abstract().returns(<emptyTree>::<C String>)
+    end
+
+    def qux=<<todo method>>(qux, &<blk>)
+      <emptyTree>
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>, <emptyTree>::<C T>::<C Helpers>)
+
+    <self>.abstract!()
+
+    <runtime method definition of foo>
+
+    <runtime method definition of bar=>
+
+    <runtime method definition of qux>
+
+    <runtime method definition of qux=>
+  end
+end
