@@ -319,7 +319,11 @@ module T::Private::Methods
       return
     end
 
+    key = method_owner_and_name_to_key(mod, method_name)
     if current_declaration.nil?
+      if (_old_sig = @sig_wrappers.delete(key))
+        $stderr.puts("sorbet-runtime: Dropping unevaluated signature for #{mod}##{method_name} because it was redefined!")
+      end
       return
     end
 
@@ -355,7 +359,6 @@ module T::Private::Methods
     # which is called only on the *first* invocation.
     # This wrapper is very slow, so it will subsequently re-wrap with a much faster wrapper
     # (or unwrap back to the original method).
-    key = method_owner_and_name_to_key(mod, method_name)
     T::Private::ClassUtils.replace_method(original_method, mod, method_name) do |*args, &blk|
       method_sig = T::Private::Methods.maybe_run_sig_block_for_key(key)
       method_sig ||= T::Private::Methods._handle_missing_method_signature(
