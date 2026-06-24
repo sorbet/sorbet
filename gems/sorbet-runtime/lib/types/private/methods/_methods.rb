@@ -327,13 +327,15 @@ module T::Private::Methods
       # the original method.
       old_sig = @sig_wrappers.delete(key)
 
+      # Ruby only reports method redefinitions if `$VERBOSE` is truthy. Let's
+      # do the same for sigs.
       if old_sig && $VERBOSE
         # We can probably get away with not printing any location information
         # (like the Ruby VM would for method redefinition warnings) because the
         # Ruby VM itself will have printed the location information in its
         # method redefinition warning (and it does that faster, using functions
         # that constult the CFP directly).
-        T::Configuration.warn_handler(
+        Warning.warn(
           "sorbet-runtime: warning: Dropping unevaluated signature for #{mod}##{method_name} because it was redefined\n"
         )
       end

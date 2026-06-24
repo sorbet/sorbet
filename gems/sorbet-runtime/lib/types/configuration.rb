@@ -404,27 +404,6 @@ module T::Configuration
     end
   end
 
-  @warn_handler = nil
-  # Set a handler for warnings
-  #
-  # sorbet-runtime generally only reports warnings in places where the Ruby VM
-  # would also report a warning (e.g., for method redefinitions).
-  #
-  # The signature of a custom handler should match the signature of Ruby's
-  # `Warning.warn` method.
-  def self.warn_handler=(value)
-    validate_lambda_given!(value)
-    @warn_handler = value
-  end
-
-  def self.warn_handler(...)
-    if @warn_handler
-      @warn_handler.call(...)
-    else
-      Warning.warn(...)
-    end
-  end
-
   @scalar_types = nil
   # Set a list of class strings that are to be considered scalar.
   #   (pass nil to reset to default behavior)
