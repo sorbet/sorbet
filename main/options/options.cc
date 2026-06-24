@@ -573,7 +573,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     }
     options.add_options(section)("max-threads",
                                  "Set number of threads to use for fork/join worker pools. LSP will <n> threads plus "
-                                 "some extra threads to manage the connection with the client, watchman, etc.",
+                                 "some extra threads to manage the connection with the client, watchman, etc.\n"
+                                 "Defaults to the number of hardware threads detected (or 2 if unknown).",
                                  cxxopts::value<int>()->default_value(to_string(defaultThreads)), "<n>");
     options.add_options(section)(
         "reserve-class-table-capacity", "Preallocate <n> slots in the class and modules table",
@@ -941,8 +942,17 @@ void readOptions(Options &opts,
         }
 
         {
-            int maxInputFileThreads = raw["max-threads"].as<int>();
-            auto workerPool = WorkerPool::create(maxInputFileThreads, *logger);
+            if (raw.count("max-threads") > 0) {
+                opts.threads = raw["max-threads"].as<int>();
+            } else {
+                opts.threads = thread::hardware_concurrency();
+                if (opts.threads == 0) {
+                    logger->warn("⚠️ Cannot detect the number of hardware threads, defaulting to 2 threads for input file "
+                                 "processing. Please set `--max-threads` explicitly to silence this warning.");
+                    opts.threads = 2;
+                }
+            }
+            auto workerPool = WorkerPool::create(opts.threads, *logger);
 
             opts.pathPrefix = raw["remove-path-prefix"].as<string>();
             if (raw.count("files") > 0) {
@@ -1162,8 +1172,8 @@ void readOptions(Options &opts,
         opts.forceHashing = raw["force-hashing"].as<bool>();
 
         opts.threads = (opts.runLSP || !opts.storeState.empty())
-                           ? raw["max-threads"].as<int>()
-                           : min(raw["max-threads"].as<int>(), int(opts.inputFileNames.size() / 2));
+                           ? opts.threads
+                           : min(opts.threads, int(opts.inputFileNames.size() / 2));
 
         if (raw.count("h") > 0) {
             auto helpSections = raw["h"].as<vector<string>>();
