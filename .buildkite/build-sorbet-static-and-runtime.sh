@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eo pipefail
+set -euo pipefail
 
 pushd gems/sorbet-static-and-runtime
 
