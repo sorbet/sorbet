@@ -507,6 +507,7 @@ public:
 vector<unique_ptr<TextDocumentEdit>> getExtractMethodEdits(LSPTypecheckerDelegate &typechecker,
                                                            const LSPConfiguration &config,
                                                            const core::Loc selectionLoc) {
+    ENFORCE(selectionLoc.exists());
     const auto &gs = typechecker.state();
     const auto file = selectionLoc.file();
 
