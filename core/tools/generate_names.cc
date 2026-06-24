@@ -319,6 +319,8 @@ NameDef names[] = {
     {"Encryptable", "Encryptable", true},
     {"EncryptedValue", "EncryptedValue", true},
     {"Command", "Command", true},
+    {"configureCommand", "configure_command"},
+    {"loggingDisabled_p", "logging_disabled?"},
     {"Enum", "Enum", true},
 
     {"ActiveRecord", "ActiveRecord", true},
