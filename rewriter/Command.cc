@@ -12,6 +12,8 @@ using namespace std;
 
 namespace sorbet::rewriter {
 
+namespace {
+
 bool isCommand(const ast::ClassDef *klass) {
     if (klass->kind != ast::ClassDef::Kind::Class || klass->ancestors.empty()) {
         return false;
@@ -23,6 +25,18 @@ bool isCommand(const ast::ClassDef *klass) {
     };
     return ASTUtil::isRootScopedSyntacticConstant(klass->ancestors.front(), opusCommand);
 }
+
+bool allowedSingletonMethod(core::NameRef name) {
+    switch (name.rawId()) {
+        case core::Names::configureCommand().rawId():
+        case core::Names::loggingDisabled_p().rawId():
+            return true;
+        default:
+            return false;
+    }
+}
+
+} // namespace
 
 void Command::run(core::MutableContext ctx, ast::ClassDef *klass) {
     if (ctx.state.cacheSensitiveOptions.runningUnderAutogen) {
@@ -44,7 +58,7 @@ void Command::run(core::MutableContext ctx, ast::ClassDef *klass) {
             continue;
         }
 
-        if (mdef->flags.isSelfMethod) {
+        if (mdef->flags.isSelfMethod && !allowedSingletonMethod(mdef->name)) {
             if (auto e = ctx.beginIndexerError(mdef->declLoc, core::errors::Rewriter::CommandSingletonMethod)) {
                 e.setHeader("Commands must only define instance methods, but `{}` is a singleton class method",
                             mdef->name.show(ctx));
