@@ -110,6 +110,7 @@ enum class IterResult {
     Stop,
 };
 
+// This should match the behavior of treemap.h exactly with regard to the children iterated over
 template <typename F> void iterChildrenUntil(const ast::ExpressionPtr &expr, F &&fn) {
     switch (expr.tag()) {
         case ast::Tag::InsSeq: {
@@ -124,16 +125,6 @@ template <typename F> void iterChildrenUntil(const ast::ExpressionPtr &expr, F &
         }
         case ast::Tag::ClassDef: {
             auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(expr);
-            if (fn(classDef.name) == IterResult::Stop)
-                return;
-            for (auto &ancestor : classDef.ancestors) {
-                if (fn(ancestor) == IterResult::Stop)
-                    return;
-            }
-            for (auto &ancestor : classDef.singletonAncestors) {
-                if (fn(ancestor) == IterResult::Stop)
-                    return;
-            }
             for (auto &stat : classDef.rhs) {
                 if (fn(stat) == IterResult::Stop)
                     return;
@@ -143,8 +134,10 @@ template <typename F> void iterChildrenUntil(const ast::ExpressionPtr &expr, F &
         case ast::Tag::MethodDef: {
             auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(expr);
             for (auto &param : methodDef.params) {
-                if (fn(param) == IterResult::Stop)
-                    return;
+                if (auto optArg = ast::cast_tree<ast::OptionalParam>(param)) {
+                    if (fn(optArg->default_) == IterResult::Stop)
+                        return;
+                }
             }
             if (fn(methodDef.rhs) == IterResult::Stop)
                 return;
@@ -224,8 +217,12 @@ template <typename F> void iterChildrenUntil(const ast::ExpressionPtr &expr, F &
             auto &send = ast::cast_tree_nonnull<ast::Send>(expr);
             if (fn(send.recv) == IterResult::Stop)
                 return;
-            for (auto &arg : send.rawArgsDoNotUse()) {
+            for (auto &arg : send.nonBlockArgs()) {
                 if (fn(arg) == IterResult::Stop)
+                    return;
+            }
+            if (auto *block = send.rawBlock()) {
+                if (fn(*block) == IterResult::Stop)
                     return;
             }
             break;
@@ -261,8 +258,10 @@ template <typename F> void iterChildrenUntil(const ast::ExpressionPtr &expr, F &
         case ast::Tag::Block: {
             auto &block = ast::cast_tree_nonnull<ast::Block>(expr);
             for (auto &param : block.params) {
-                if (fn(param) == IterResult::Stop)
-                    return;
+                if (auto optArg = ast::cast_tree<ast::OptionalParam>(param)) {
+                    if (fn(optArg->default_) == IterResult::Stop)
+                        return;
+                }
             }
             if (fn(block.body) == IterResult::Stop)
                 return;
@@ -458,11 +457,14 @@ optional<vector<const ast::ExpressionPtr *>> getContinuationAfterSelection(const
         default: {
             optional<vector<const ast::ExpressionPtr *>> continuation;
             iterChildrenUntil(expr, [&](const ast::ExpressionPtr &child) {
-                if (continuation = getContinuationAfterSelection(expr, target); continuation.has_value()) {
+                if (continuation = getContinuationAfterSelection(child, target); continuation.has_value()) {
                     return IterResult::Stop;
                 }
                 return IterResult::Continue;
             });
+            if (continuation.has_value()) {
+                return continuation;
+            }
             break;
         }
     }
@@ -535,6 +537,7 @@ vector<unique_ptr<TextDocumentEdit>> getExtractMethodEdits(LSPTypecheckerDelegat
         config.logger->debug("ExtractMethod: no selection found");
         return {};
     }
+    config.logger->debug("ExtractMethod: selection found, size: {}", selection.size());
     auto continuation = getContinuationAfterSelection(parsedFile.tree, selectionLoc.offsets());
     ENFORCE(continuation.has_value());
     config.logger->debug("ExtractMethod: selection size: {}, continuation size: {}", selection.size(),
