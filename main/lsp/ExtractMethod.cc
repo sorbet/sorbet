@@ -342,6 +342,7 @@ void computeLocSums(const core::GlobalState &gs, ast::ExpressionPtr &expr) {
     ast::TreeWalk::apply(ctx, computer, expr);
 }
 
+// it may be the case that it1 > it2
 auto getStatsContainedInTarget(const vector<const ast::ExpressionPtr *> &stats, const core::LocOffsets target) {
     auto it1 = absl::c_find_if(stats, [target](const ast::ExpressionPtr *stat) {
         return stat->loc().exists() && target.beginPos() <= stat->loc().beginPos();
@@ -352,11 +353,10 @@ auto getStatsContainedInTarget(const vector<const ast::ExpressionPtr *> &stats, 
             it2 = std::next(it);
         }
     }
-    ENFORCE(it1 <= it2);
     return make_pair(it1, it2);
 }
 
-// A selection of nodes is defined as the deepest sequence of nodes contained in a target loc
+// A selection of nodes is defined as the largest sequence of nodes contained in a target loc
 // the return type is optional<nonempty_vector<const ast::ExpressionPtr *>>
 // which is equivalent to vector<const ast::ExpressionPtr *>
 // empty vector means this wasn't a valid selection.
@@ -364,29 +364,34 @@ vector<const ast::ExpressionPtr *> getSelection(const ast::ExpressionPtr &expr, 
     if (!expr.loc().exists()) {
         return {};
     }
+    // We shouldn't be able to select empty nodes, usually these are synthetic.
+    // For example a method send with implicit self creates a self node with a loc that exists but is empty
+    if (expr.loc().empty()) {
+        return {};
+    }
+    if (target.contains(expr.loc())) {
+        return {&expr};
+    }
     switch (expr.tag()) {
         case ast::Tag::InsSeq: {
-            // This case is special because InsSeq is essentially a cache friendly variant of the inductive
-            // representation of a sequence of expressions `InsSeq(ExpressionPtr, ExpressionPtr)`. If we represented
-            // InsSeq inductively, then the default case would naturally cover InsSeq also.
             auto &insSeq = ast::cast_tree_nonnull<ast::InsSeq>(expr);
             vector<const ast::ExpressionPtr *> stats;
             for (auto &stat : insSeq.stats) {
                 stats.push_back(&stat);
             }
             stats.push_back(&insSeq.expr);
+            auto [it1, it2] = getStatsContainedInTarget(stats, target);
+            if (it1 < it2) {
+                vector<const ast::ExpressionPtr *> selection;
+                for (auto it = it1; it < it2; it++) {
+                    selection.push_back(*it);
+                }
+                return selection;
+            }
             for (auto *stat : stats) {
                 if (auto selection = getSelection(*stat, target); !selection.empty()) {
                     return selection;
                 }
-            }
-            auto [it1, it2] = getStatsContainedInTarget(stats, target);
-            vector<const ast::ExpressionPtr *> selection;
-            for (auto it = it1; it < it2; it++) {
-                selection.push_back(*it);
-            }
-            if (!selection.empty()) {
-                return selection;
             }
             break;
         }
@@ -404,12 +409,7 @@ vector<const ast::ExpressionPtr *> getSelection(const ast::ExpressionPtr &expr, 
             break;
         }
     }
-    ENFORCE(expr.loc().exists());
-    if (target.contains(expr.loc())) {
-        return {&expr};
-    } else {
-        return {};
-    }
+    return {};
 }
 
 // We could merge these two functions together as getSelectionAndContinuation, but we choose not to so that in the
@@ -424,7 +424,13 @@ vector<const ast::ExpressionPtr *> getSelection(const ast::ExpressionPtr &expr, 
 optional<vector<const ast::ExpressionPtr *>> getContinuationAfterSelection(const ast::ExpressionPtr &expr,
                                                                            const core::LocOffsets target) {
     if (!expr.loc().exists()) {
-        return {};
+        return nullopt;
+    }
+    if (expr.loc().empty()) {
+        return nullopt;
+    }
+    if (target.contains(expr.loc())) {
+        return {{}};
     }
     switch (expr.tag()) {
         case ast::Tag::InsSeq: {
@@ -434,6 +440,14 @@ optional<vector<const ast::ExpressionPtr *>> getContinuationAfterSelection(const
                 stats.push_back(&stat);
             }
             stats.push_back(&insSeq.expr);
+            auto [it1, it2] = getStatsContainedInTarget(stats, target);
+            if (it1 < it2) {
+                vector<const ast::ExpressionPtr *> continuation;
+                for (auto it = it2; it < stats.end(); it++) {
+                    continuation.push_back(*it);
+                }
+                return {continuation};
+            }
             int i = 0;
             for (auto stat : stats) {
                 if (auto continuation = getContinuationAfterSelection(*stat, target); continuation.has_value()) {
@@ -443,14 +457,6 @@ optional<vector<const ast::ExpressionPtr *>> getContinuationAfterSelection(const
                     return {continuation};
                 }
                 i++;
-            }
-            auto [it1, it2] = getStatsContainedInTarget(stats, target);
-            if (it1 != it2) {
-                vector<const ast::ExpressionPtr *> continuation;
-                for (auto it = it2; it < stats.end(); it++) {
-                    continuation.push_back(*it);
-                }
-                return {continuation};
             }
             break;
         }
@@ -468,12 +474,7 @@ optional<vector<const ast::ExpressionPtr *>> getContinuationAfterSelection(const
             break;
         }
     }
-    ENFORCE(expr.loc().exists());
-    if (target.contains(expr.loc())) {
-        return {{}};
-    } else {
-        return nullopt;
-    }
+    return nullopt;
 }
 } // namespace
 
