@@ -2,6 +2,7 @@
 #include "ast/Helpers.h"
 #include "core/lsp/Query.h"
 #include "core/lsp/QueryResponse.h"
+#include "core/Types.h"
 
 using namespace std;
 namespace sorbet::realmain::lsp {
@@ -181,6 +182,42 @@ void DefLocSaver::preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tr
     if (classDef.declLoc != classDef.loc && lspQuery.matchesLoc(ctx.locAt(classDef.declLoc))) {
         core::lsp::QueryResponse::pushQueryResponse(
             ctx, core::lsp::ClassDefResponse(classDef.symbol, ctx.locAt(classDef.loc), ctx.locAt(classDef.declLoc)));
+    }
+}
+
+void DefLocSaver::postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
+    auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
+    if (send.fun != core::Names::aliasMethod() || send.numPosArgs() < 2) {
+        return;
+    }
+
+    // `alias_method :bar, :foo` -- the second arg (:foo) is a reference to the original method.
+    // If the LSP query is for that symbol, emit a response at the :foo location.
+    const core::lsp::Query &lspQuery = ctx.state.lspQuery;
+    auto &secondArg = send.getPosArg(1);
+    auto lit = ast::cast_tree<ast::Literal>(secondArg);
+    if (!lit || !lit->isSymbol()) {
+        return;
+    }
+
+    auto name = lit->asSymbol();
+    auto owner = ctx.owner.enclosingClass(ctx);
+    auto method = owner.data(ctx)->findMethodNoDealias(name);
+    if (!method.exists()) {
+        return;
+    }
+
+    auto litLoc = ctx.locAt(lit->loc);
+    if (lspQuery.matchesSymbol(method) || lspQuery.matchesLoc(litLoc)) {
+        core::TypeAndOrigins tp;
+        tp.type = method.data(ctx)->resultType;
+        if (tp.type == nullptr) {
+            tp.type = core::Types::untyped(method);
+        }
+        tp.origins.emplace_back(litLoc);
+        core::lsp::QueryResponse::pushQueryResponse(
+            ctx, core::lsp::MethodDefResponse(method, ctx.file, lit->loc, lit->loc,
+                                              name, false, tp));
     }
 }
 

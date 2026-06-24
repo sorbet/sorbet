@@ -16,5 +16,8 @@ public:
 
     // Handles loc and symbol requests for ClassDef names.
     void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &lit);
+
+    // Handles loc and symbol requests for alias_method calls.
+    void postTransformSend(core::Context ctx, ast::ExpressionPtr &send);
 };
 }; // namespace sorbet::realmain::lsp
