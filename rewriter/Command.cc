@@ -4,12 +4,15 @@
 #include "core/Context.h"
 #include "core/Names.h"
 #include "core/core.h"
+#include "core/errors/rewriter.h"
 #include "rewriter/rewriter.h"
 #include "rewriter/util/Util.h"
 
 using namespace std;
 
 namespace sorbet::rewriter {
+
+namespace {
 
 bool isCommand(const ast::ClassDef *klass) {
     if (klass->kind != ast::ClassDef::Kind::Class || klass->ancestors.empty()) {
@@ -22,6 +25,18 @@ bool isCommand(const ast::ClassDef *klass) {
     };
     return ASTUtil::isRootScopedSyntacticConstant(klass->ancestors.front(), opusCommand);
 }
+
+bool allowedSingletonMethod(core::NameRef name) {
+    switch (name.rawId()) {
+        case core::Names::configureCommand().rawId():
+        case core::Names::loggingDisabled_p().rawId():
+            return true;
+        default:
+            return false;
+    }
+}
+
+} // namespace
 
 void Command::run(core::MutableContext ctx, ast::ClassDef *klass) {
     if (ctx.state.cacheSensitiveOptions.runningUnderAutogen) {
@@ -42,15 +57,32 @@ void Command::run(core::MutableContext ctx, ast::ClassDef *klass) {
         if (mdef == nullptr) {
             continue;
         }
+
+        if (mdef->flags.isSelfMethod && !allowedSingletonMethod(mdef->name)) {
+            if (auto e = ctx.beginIndexerError(mdef->declLoc, core::errors::Rewriter::CommandSingletonMethod)) {
+                e.setHeader("Commands must only define instance methods, but `{}` is a singleton class method",
+                            mdef->name.show(ctx));
+                if (mdef->name == core::Names::call()) {
+                    auto expected = "def self.call"sv;
+                    auto replaceLoc = ctx.locAt(mdef->declLoc).adjustLen(ctx, 0, expected.size());
+                    if (replaceLoc.source(ctx) == expected) {
+                        e.replaceWith("Convert to instance method", replaceLoc, "def call");
+                    }
+                    e.addErrorNote("Define `{}` as an instance method in a Command; "
+                                   "it will be callable as a singleton class method",
+                                   mdef->name.show(ctx));
+                }
+            }
+            continue;
+        }
+
         if (mdef->name == core::Names::call()) {
             i = &stat - &klass->rhs.front();
             call = mdef;
             callptr = &stat;
         }
 
-        if (!mdef->flags.isSelfMethod) {
-            instanceMethods.push_back(pair(mdef->name, mdef->loc.copyWithZeroLength()));
-        }
+        instanceMethods.push_back(pair(mdef->name, mdef->loc.copyWithZeroLength()));
     }
 
     // If we didn't find a `call` method, or if it was the first statement (and

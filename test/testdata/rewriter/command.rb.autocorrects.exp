@@ -1,3 +1,4 @@
+# -- test/testdata/rewriter/command.rb --
 # typed: true
 class Opus::Command
   extend T::Sig
@@ -23,12 +24,12 @@ end
 
 T.assert_type!(OtherCommand.call("8"), Integer)
 
-class NotACommand < Llamas::Opus::Command # error: Unable to resolve constant
+class NotACommand < Class::Opus::Command # error: Unable to resolve constant
   extend T::Sig
 
   sig {params(x: String).returns(Integer)}
   def call(x)
-    Integer(x) # error: Method `Integer` does not exist on `NotACommand`
+    self.class.Integer(x) # error: Method `Integer` does not exist on `NotACommand`
   end
 end
 
@@ -98,7 +99,7 @@ end
 
 class BadCommand < Opus::Command
   sig {params(x: Integer).returns(String)}
-  def self.call(x) # error: Commands must only define instance methods, but `call` is a singleton class method
+  def call(x) # error: Commands must only define instance methods, but `call` is a singleton class method
     x.to_s
   end
 
@@ -107,3 +108,4 @@ class BadCommand < Opus::Command
     x.to_s
   end
 end
+# ------------------------------
