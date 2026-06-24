@@ -676,6 +676,13 @@ class Enumerator::Lazy < Enumerator
   end
   def collect_concat(&blk); end
 
+  # Like [`Enumerable#compact`](https://docs.ruby-lang.org/en/3.1/Enumerable.html#method-i-compact),
+  # but chains operation to be lazy-evaluated.
+  sig do
+    returns(T::Enumerator::Lazy[Elem])
+  end 
+  def compact; end
+
   # Like
   # [`Enumerable#drop`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-drop),
   # but chains operation to be lazy-evaluated.
