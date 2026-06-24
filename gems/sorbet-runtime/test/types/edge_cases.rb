@@ -979,6 +979,19 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     ], unique_method_redefinitions.sort)
   end
 
+  it 'drops an un-evaluated sig if the method is redefined' do
+    klass = Class.new do
+      extend T::Sig
+      sig { returns(Integer) }
+      def foo; 0; end
+
+      define_method(:foo) { "not an int" }
+    end
+
+    assert_equal("not an int", klass.new.foo)
+    assert_nil(T::Utils.signature_for_method(klass.instance_method(:foo)))
+  end
+
   it "can mark a class abstract! even if it defines a method called method" do
     Class.new do
       extend T::Helpers

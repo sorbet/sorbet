@@ -319,7 +319,27 @@ module T::Private::Methods
       return
     end
 
+    key = method_owner_and_name_to_key(mod, method_name)
     if current_declaration.nil?
+      # Drop any existing sig, because the `sig_block` closes over the
+      # `original_method` at the time that the sig wrapper was registered, and
+      # forcing the sig would thus redefine the the redefined method back to
+      # the original method.
+      old_sig = @sig_wrappers.delete(key)
+
+      # Ruby only reports method redefinitions if `$VERBOSE` is truthy. Let's
+      # do the same for sigs.
+      if old_sig && $VERBOSE
+        # We can probably get away with not printing any location information
+        # (like the Ruby VM would for method redefinition warnings) because the
+        # Ruby VM itself will have printed the location information in its
+        # method redefinition warning (and it does that faster, using functions
+        # that constult the CFP directly).
+        Warning.warn(
+          "sorbet-runtime: warning: Dropping unevaluated signature for #{mod}##{method_name} because it was redefined\n"
+        )
+      end
+
       return
     end
 
@@ -355,7 +375,6 @@ module T::Private::Methods
     # which is called only on the *first* invocation.
     # This wrapper is very slow, so it will subsequently re-wrap with a much faster wrapper
     # (or unwrap back to the original method).
-    key = method_owner_and_name_to_key(mod, method_name)
     T::Private::ClassUtils.replace_method(original_method, mod, method_name) do |*args, &blk|
       method_sig = T::Private::Methods.maybe_run_sig_block_for_key(key)
       method_sig ||= T::Private::Methods._handle_missing_method_signature(
