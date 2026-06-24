@@ -111,6 +111,7 @@ enum class IterResult {
 };
 
 // This should match the behavior of treemap.h exactly with regard to the children iterated over
+// The order of iteration should be left to right to match Ruby's order of evaluation when it matters.
 template <typename F> void iterChildrenUntil(const ast::ExpressionPtr &expr, F &&fn) {
     switch (expr.tag()) {
         case ast::Tag::InsSeq: {
@@ -395,6 +396,13 @@ vector<const ast::ExpressionPtr *> getSelection(const ast::ExpressionPtr &expr, 
             }
             break;
         }
+        case ast::Tag::Assign: {
+            auto &assign = ast::cast_tree_nonnull<ast::Assign>(expr);
+            if (auto selection = getSelection(assign.rhs, target); !selection.empty()) {
+                return selection;
+            }
+            break;
+        }
         default: {
             vector<const ast::ExpressionPtr *> selection;
             iterChildrenUntil(expr, [&selection, target](const ast::ExpressionPtr &child) {
@@ -420,9 +428,9 @@ vector<const ast::ExpressionPtr *> getSelection(const ast::ExpressionPtr &expr, 
 // deepest node contained in the target.
 // The continuation is an approximation of what code can run after the selection for the purposes of calculating
 // liveness.
-// invariant: if getSelection is nonempty, then getContinuationAfterSelection is nonnull
-optional<vector<const ast::ExpressionPtr *>> getContinuationAfterSelection(const ast::ExpressionPtr &expr,
-                                                                           const core::LocOffsets target) {
+// invariant: if getSelection is nonempty, then getContinuation is nonnull
+optional<vector<const ast::ExpressionPtr *>> getContinuation(const ast::ExpressionPtr &expr,
+                                                             const core::LocOffsets target) {
     if (!expr.loc().exists()) {
         return nullopt;
     }
@@ -450,7 +458,7 @@ optional<vector<const ast::ExpressionPtr *>> getContinuationAfterSelection(const
             }
             int i = 0;
             for (auto stat : stats) {
-                if (auto continuation = getContinuationAfterSelection(*stat, target); continuation.has_value()) {
+                if (auto continuation = getContinuation(*stat, target); continuation.has_value()) {
                     for (auto j = i + 1; j < stats.size(); j++) {
                         continuation->push_back(stats[j]);
                     }
@@ -460,13 +468,47 @@ optional<vector<const ast::ExpressionPtr *>> getContinuationAfterSelection(const
             }
             break;
         }
+        case ast::Tag::Assign: {
+            auto &assign = ast::cast_tree_nonnull<ast::Assign>(expr);
+            if (auto continuation = getContinuation(assign.rhs, target); continuation.has_value()) {
+                return continuation;
+            }
+            break;
+        }
+        case ast::Tag::If: {
+            auto &if_ = ast::cast_tree_nonnull<ast::If>(expr);
+            if (auto continuation = getContinuation(if_.cond, target); continuation.has_value()) {
+                continuation->push_back(&if_.thenp);
+                continuation->push_back(&if_.elsep);
+                return continuation;
+            }
+            if (auto continuation = getContinuation(if_.thenp, target); continuation.has_value()) {
+                return continuation;
+            }
+            if (auto continuation = getContinuation(if_.elsep, target); continuation.has_value()) {
+                return continuation;
+            }
+            break;
+        }
+        case ast::Tag::While: {
+            auto &while_ = ast::cast_tree_nonnull<ast::While>(expr);
+            if (auto continuation = getContinuation(while_.cond, target); continuation.has_value()) {
+                continuation->push_back(&while_.body);
+                return continuation;
+            }
+            if (auto continuation = getContinuation(while_.body, target); continuation.has_value()) {
+                return continuation;
+            }
+            break;
+        }
         default: {
             optional<vector<const ast::ExpressionPtr *>> continuation;
-            iterChildrenUntil(expr, [&](const ast::ExpressionPtr &child) {
-                if (continuation = getContinuationAfterSelection(child, target); continuation.has_value()) {
-                    return IterResult::Stop;
+            iterChildren(expr, [&continuation, target](const ast::ExpressionPtr &child) {
+                if (continuation.has_value()) {
+                    continuation.value().push_back(&child);
+                } else {
+                    continuation = getContinuation(child, target);
                 }
-                return IterResult::Continue;
             });
             if (continuation.has_value()) {
                 return continuation;
@@ -540,7 +582,7 @@ vector<unique_ptr<TextDocumentEdit>> getExtractMethodEdits(LSPTypecheckerDelegat
         return {};
     }
     config.logger->debug("ExtractMethod: selection found, size: {}", selection.size());
-    auto continuation = getContinuationAfterSelection(parsedFile.tree, selectionLoc.offsets());
+    auto continuation = getContinuation(parsedFile.tree, selectionLoc.offsets());
     ENFORCE(continuation.has_value());
     config.logger->debug("ExtractMethod: selection size: {}, continuation size: {}", selection.size(),
                          continuation.has_value() ? continuation->size() : 0);
