@@ -11,7 +11,7 @@ module SorbetBenchmarks
 
     class Example; end
 
-    def self.time_block(name, iterations_of_block: 1_000_000, iterations_in_block: 2, &blk)
+    def self.time_block(name, iterations_of_block: 1_000_000, &blk)
       1_000.times(&blk) # warmup
 
       GC.start
@@ -23,7 +23,7 @@ module SorbetBenchmarks
 
       GC.enable
 
-      ns_per_iter = duration_s * 1_000_000_000 / (iterations_of_block * iterations_in_block)
+      ns_per_iter = duration_s * 1_000_000_000 / iterations_of_block
       duration_str = ns_per_iter >= 1000 ? "#{(ns_per_iter / 1000).round(3)} μs" : "#{ns_per_iter.round(3)} ns"
       puts "#{name}: #{duration_str}"
     end
@@ -31,7 +31,7 @@ module SorbetBenchmarks
     def self.run
       example = Example.new
 
-      time_block("Vanilla Ruby method call", iterations_in_block: 10) do
+      time_block("Vanilla Ruby method call") do
         unchecked_param(0)
         unchecked_param(1)
         unchecked_param(2)
@@ -44,7 +44,7 @@ module SorbetBenchmarks
         unchecked_param(nil)
       end
 
-      time_block("Vanilla Ruby is_a?", iterations_in_block: 10) do
+      time_block("Vanilla Ruby is_a?") do
         0.is_a?(Integer)
         1.is_a?(Integer)
         'str'.is_a?(Integer)
@@ -84,7 +84,7 @@ module SorbetBenchmarks
       end
 
       type = T::Utils.coerce(Integer)
-      time_block("T::Types::Simple#valid?", iterations_in_block: 10) do
+      time_block("T::Types::Simple#valid?") do
         type.valid?(0)
         type.valid?(1)
         type.valid?(2)
@@ -98,7 +98,7 @@ module SorbetBenchmarks
       end
 
       type = T::Utils.coerce(T.nilable(Integer))
-      time_block("T.nilable(Integer).valid?", iterations_in_block: 5) do
+      time_block("T.nilable(Integer).valid?") do
         type.valid?(0)
         type.valid?(1)
         type.valid?(2)
@@ -107,7 +107,7 @@ module SorbetBenchmarks
       end
 
       type = T::Utils.coerce(T.any(Integer, Float, T::Boolean))
-      time_block("T.any(Integer, Float, T::Boolean).valid?", iterations_in_block: 5) do
+      time_block("T.any(Integer, Float, T::Boolean).valid?") do
         type.valid?(0)
         type.valid?(1)
         type.valid?(2)
