@@ -629,6 +629,9 @@ pipeline_tests(
         exclude = [
             # Specific test for the legacy pipeline. Prism has its own `testdata/rbs/assertions_heredoc_modified.rb`.
             "testdata/rbs/assertions_heredoc.rb",
+
+            # Specific test for the legacy pipeline. Prism has its own `testdata/rbs/signatures_types_modified.rb`.
+            "testdata/rbs/signatures_types.rb",
         ],
     ),
     "PrismPosTests",
