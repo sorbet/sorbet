@@ -289,8 +289,8 @@ void computeLocSums(const core::GlobalState &gs, ast::ExpressionPtr &expr) {
 // for example if we select the condition of an if expression we will over approximate and say that the continuation is
 // an InsSeq of the then and else branch expressions
 optional<pair<vector<ast::ExpressionPtr>, vector<ast::ExpressionPtr>>>
-getSelectionAndContinuation(const ast::ExpressionPtr &expr, const core::LocOffsets loc) {
-    ENFORCE(expr.loc().contains(loc));
+getSelectionAndContinuation(const ast::ExpressionPtr &expr, const core::LocOffsets target) {
+    ENFORCE(expr.loc().contains(target));
 
     switch (expr.tag()) {
         case ast::Tag::InsSeq: {
@@ -300,15 +300,17 @@ getSelectionAndContinuation(const ast::ExpressionPtr &expr, const core::LocOffse
                 stats.push_back(stat.deepCopy());
             }
             stats.push_back(insSeq.expr.deepCopy());
-            auto it =
-                absl::c_find_if(stats, [loc](const ast::ExpressionPtr &stat) { return stat.loc().contains(loc); });
+            auto it = absl::c_find_if(stats, [target](const ast::ExpressionPtr &stat) {
+                return stat.loc().exists() && stat.loc().contains(target);
+            });
             if (it == stats.end()) {
                 // TODO(bshu) review this part
-                auto it1 = absl::c_find_if(
-                    stats, [loc](const ast::ExpressionPtr &stat) { return loc.beginPos() <= stat.loc().beginPos(); });
+                auto it1 = absl::c_find_if(stats, [target](const ast::ExpressionPtr &stat) {
+                    return target.beginPos() <= stat.loc().beginPos();
+                });
                 auto it2 = stats.end();
                 for (auto it = stats.begin(); it < stats.end(); it++) {
-                    if (it->loc().endPos() <= loc.endPos()) {
+                    if (it->loc().endPos() <= target.endPos()) {
                         it2 = std::next(it);
                     }
                 }
@@ -329,7 +331,7 @@ getSelectionAndContinuation(const ast::ExpressionPtr &expr, const core::LocOffse
                 }
                 return {{move(selection), move(continuation)}};
             } else {
-                auto res = getSelectionAndContinuation(*it, loc);
+                auto res = getSelectionAndContinuation(*it, target);
                 if (!res) {
                     return nullopt;
                 }
@@ -353,8 +355,8 @@ getSelectionAndContinuation(const ast::ExpressionPtr &expr, const core::LocOffse
         }
         case ast::Tag::If: {
             auto &if_ = ast::cast_tree_nonnull<ast::If>(expr);
-            if (if_.cond.loc().contains(loc)) {
-                auto res = getSelectionAndContinuation(if_.cond, loc);
+            if (if_.cond.loc().contains(target)) {
+                auto res = getSelectionAndContinuation(if_.cond, target);
                 if (!res) {
                     return nullopt;
                 }
@@ -363,11 +365,11 @@ getSelectionAndContinuation(const ast::ExpressionPtr &expr, const core::LocOffse
                 continuation.push_back(if_.elsep.deepCopy());
                 return {{move(selection), move(continuation)}};
             }
-            if (if_.thenp.loc().contains(loc)) {
-                return getSelectionAndContinuation(if_.thenp, loc);
+            if (if_.thenp.loc().contains(target)) {
+                return getSelectionAndContinuation(if_.thenp, target);
             }
-            if (if_.elsep.loc().contains(loc)) {
-                return getSelectionAndContinuation(if_.elsep, loc);
+            if (if_.elsep.loc().contains(target)) {
+                return getSelectionAndContinuation(if_.elsep, target);
             }
             vector<ast::ExpressionPtr> selection;
             selection.emplace_back(expr.deepCopy());
@@ -376,8 +378,8 @@ getSelectionAndContinuation(const ast::ExpressionPtr &expr, const core::LocOffse
         }
         case ast::Tag::While: {
             auto &while_ = ast::cast_tree_nonnull<ast::While>(expr);
-            if (while_.cond.loc().contains(loc)) {
-                auto res = getSelectionAndContinuation(while_.cond, loc);
+            if (while_.cond.loc().contains(target)) {
+                auto res = getSelectionAndContinuation(while_.cond, target);
                 if (!res) {
                     return nullopt;
                 }
@@ -385,8 +387,8 @@ getSelectionAndContinuation(const ast::ExpressionPtr &expr, const core::LocOffse
                 continuation.push_back(while_.body.deepCopy());
                 return {{move(selection), move(continuation)}};
             }
-            if (while_.body.loc().contains(loc)) {
-                return getSelectionAndContinuation(while_.body, loc);
+            if (while_.body.loc().contains(target)) {
+                return getSelectionAndContinuation(while_.body, target);
             }
             vector<ast::ExpressionPtr> selection;
             selection.emplace_back(expr.deepCopy());
@@ -395,8 +397,8 @@ getSelectionAndContinuation(const ast::ExpressionPtr &expr, const core::LocOffse
         }
         case ast::Tag::Block: {
             auto &block = ast::cast_tree_nonnull<ast::Block>(expr);
-            if (block.body.loc().contains(loc)) {
-                return getSelectionAndContinuation(block.body, loc);
+            if (block.body.loc().contains(target)) {
+                return getSelectionAndContinuation(block.body, target);
             }
             vector<ast::ExpressionPtr> selection;
             selection.emplace_back(expr.deepCopy());
@@ -405,8 +407,8 @@ getSelectionAndContinuation(const ast::ExpressionPtr &expr, const core::LocOffse
         }
         case ast::Tag::Rescue: {
             auto &rescue = ast::cast_tree_nonnull<ast::Rescue>(expr);
-            if (rescue.body.loc().contains(loc)) {
-                auto res = getSelectionAndContinuation(rescue.body, loc);
+            if (rescue.body.loc().contains(target)) {
+                auto res = getSelectionAndContinuation(rescue.body, target);
                 if (!res) {
                     return nullopt;
                 }
@@ -416,8 +418,8 @@ getSelectionAndContinuation(const ast::ExpressionPtr &expr, const core::LocOffse
                 return {{move(selection), move(continuation)}};
             }
             for (auto &rescueCase : rescue.rescueCases) {
-                if (rescueCase.loc().contains(loc)) {
-                    auto res = getSelectionAndContinuation(rescueCase, loc);
+                if (rescueCase.loc().contains(target)) {
+                    auto res = getSelectionAndContinuation(rescueCase, target);
                     if (!res) {
                         return nullopt;
                     }
@@ -426,8 +428,8 @@ getSelectionAndContinuation(const ast::ExpressionPtr &expr, const core::LocOffse
                     return {{move(selection), move(continuation)}};
                 }
             }
-            if (rescue.else_.loc().contains(loc)) {
-                auto res = getSelectionAndContinuation(rescue.else_, loc);
+            if (rescue.else_.loc().contains(target)) {
+                auto res = getSelectionAndContinuation(rescue.else_, target);
                 if (!res) {
                     return nullopt;
                 }
@@ -435,8 +437,8 @@ getSelectionAndContinuation(const ast::ExpressionPtr &expr, const core::LocOffse
                 continuation.push_back(rescue.ensure.deepCopy());
                 return {{move(selection), move(continuation)}};
             }
-            if (rescue.ensure.loc().contains(loc)) {
-                return getSelectionAndContinuation(rescue.ensure, loc);
+            if (rescue.ensure.loc().contains(target)) {
+                return getSelectionAndContinuation(rescue.ensure, target);
             }
             vector<ast::ExpressionPtr> selection;
             selection.emplace_back(expr.deepCopy());
@@ -445,8 +447,8 @@ getSelectionAndContinuation(const ast::ExpressionPtr &expr, const core::LocOffse
         }
         case ast::Tag::RescueCase: {
             auto &rescueCase = ast::cast_tree_nonnull<ast::RescueCase>(expr);
-            if (rescueCase.body.loc().contains(loc)) {
-                return getSelectionAndContinuation(rescueCase.body, loc);
+            if (rescueCase.body.loc().contains(target)) {
+                return getSelectionAndContinuation(rescueCase.body, target);
             }
             vector<ast::ExpressionPtr> selection;
             selection.emplace_back(expr.deepCopy());
