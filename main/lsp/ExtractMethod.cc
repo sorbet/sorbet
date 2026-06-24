@@ -105,167 +105,225 @@ void setExprLoc(ast::ExpressionPtr &expr, core::LocOffsets loc) {
     }
 }
 
-template <typename F> void iterChildren(const ast::ExpressionPtr &expr, F &&fn) {
+enum class IterResult {
+    Continue,
+    Stop,
+};
+
+template <typename F> void iterChildrenUntil(const ast::ExpressionPtr &expr, F &&fn) {
     switch (expr.tag()) {
+        case ast::Tag::InsSeq: {
+            auto &insSeq = ast::cast_tree_nonnull<ast::InsSeq>(expr);
+            for (auto &stat : insSeq.stats) {
+                if (fn(stat) == IterResult::Stop)
+                    return;
+            }
+            if (fn(insSeq.expr) == IterResult::Stop)
+                return;
+            break;
+        }
         case ast::Tag::ClassDef: {
             auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(expr);
-            fn(classDef.name);
-            for (auto &rhs : classDef.rhs) {
-                fn(rhs);
-            }
+            if (fn(classDef.name) == IterResult::Stop)
+                return;
             for (auto &ancestor : classDef.ancestors) {
-                fn(ancestor);
+                if (fn(ancestor) == IterResult::Stop)
+                    return;
             }
             for (auto &ancestor : classDef.singletonAncestors) {
-                fn(ancestor);
+                if (fn(ancestor) == IterResult::Stop)
+                    return;
+            }
+            for (auto &stat : classDef.rhs) {
+                if (fn(stat) == IterResult::Stop)
+                    return;
             }
             break;
         }
         case ast::Tag::MethodDef: {
             auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(expr);
             for (auto &param : methodDef.params) {
-                fn(param);
+                if (fn(param) == IterResult::Stop)
+                    return;
             }
-            fn(methodDef.rhs);
+            if (fn(methodDef.rhs) == IterResult::Stop)
+                return;
             break;
         }
         case ast::Tag::If: {
             auto &if_ = ast::cast_tree_nonnull<ast::If>(expr);
-            fn(if_.cond);
-            fn(if_.thenp);
-            fn(if_.elsep);
+            if (fn(if_.cond) == IterResult::Stop)
+                return;
+            if (fn(if_.thenp) == IterResult::Stop)
+                return;
+            if (fn(if_.elsep) == IterResult::Stop)
+                return;
             break;
         }
         case ast::Tag::While: {
             auto &while_ = ast::cast_tree_nonnull<ast::While>(expr);
-            fn(while_.cond);
-            fn(while_.body);
+            if (fn(while_.cond) == IterResult::Stop)
+                return;
+            if (fn(while_.body) == IterResult::Stop)
+                return;
             break;
         }
         case ast::Tag::Break: {
-            fn(ast::cast_tree_nonnull<ast::Break>(expr).expr);
+            auto &break_ = ast::cast_tree_nonnull<ast::Break>(expr);
+            if (fn(break_.expr) == IterResult::Stop)
+                return;
             break;
         }
         case ast::Tag::Next: {
-            fn(ast::cast_tree_nonnull<ast::Next>(expr).expr);
+            auto &next = ast::cast_tree_nonnull<ast::Next>(expr);
+            if (fn(next.expr) == IterResult::Stop)
+                return;
             break;
         }
         case ast::Tag::Return: {
-            fn(ast::cast_tree_nonnull<ast::Return>(expr).expr);
+            auto &return_ = ast::cast_tree_nonnull<ast::Return>(expr);
+            if (fn(return_.expr) == IterResult::Stop)
+                return;
             break;
         }
         case ast::Tag::RescueCase: {
             auto &rescueCase = ast::cast_tree_nonnull<ast::RescueCase>(expr);
             for (auto &exception : rescueCase.exceptions) {
-                fn(exception);
+                if (fn(exception) == IterResult::Stop)
+                    return;
             }
-            fn(rescueCase.var);
-            fn(rescueCase.body);
+            if (fn(rescueCase.var) == IterResult::Stop)
+                return;
+            if (fn(rescueCase.body) == IterResult::Stop)
+                return;
             break;
         }
         case ast::Tag::Rescue: {
             auto &rescue = ast::cast_tree_nonnull<ast::Rescue>(expr);
-            fn(rescue.body);
+            if (fn(rescue.body) == IterResult::Stop)
+                return;
             for (auto &rescueCase : rescue.rescueCases) {
-                fn(rescueCase);
+                if (fn(rescueCase) == IterResult::Stop)
+                    return;
             }
-            fn(rescue.else_);
-            fn(rescue.ensure);
+            if (fn(rescue.else_) == IterResult::Stop)
+                return;
+            if (fn(rescue.ensure) == IterResult::Stop)
+                return;
             break;
         }
         case ast::Tag::Assign: {
             auto &assign = ast::cast_tree_nonnull<ast::Assign>(expr);
-            fn(assign.lhs);
-            fn(assign.rhs);
+            if (fn(assign.lhs) == IterResult::Stop)
+                return;
+            if (fn(assign.rhs) == IterResult::Stop)
+                return;
             break;
         }
         case ast::Tag::Send: {
             auto &send = ast::cast_tree_nonnull<ast::Send>(expr);
-            fn(send.recv);
-            for (auto &arg : send.nonBlockArgs()) {
-                fn(arg);
+            if (fn(send.recv) == IterResult::Stop)
+                return;
+            for (auto &arg : send.rawArgsDoNotUse()) {
+                if (fn(arg) == IterResult::Stop)
+                    return;
             }
-            if (auto *block = send.rawBlock()) {
-                fn(*block);
-            }
+            break;
+        }
+        case ast::Tag::Cast: {
+            auto &cast = ast::cast_tree_nonnull<ast::Cast>(expr);
+            if (fn(cast.arg) == IterResult::Stop)
+                return;
+            if (fn(cast.typeExpr) == IterResult::Stop)
+                return;
             break;
         }
         case ast::Tag::Hash: {
             auto &hash = ast::cast_tree_nonnull<ast::Hash>(expr);
             for (auto &key : hash.keys) {
-                fn(key);
+                if (fn(key) == IterResult::Stop)
+                    return;
             }
-            for (auto &val : hash.values) {
-                fn(val);
+            for (auto &value : hash.values) {
+                if (fn(value) == IterResult::Stop)
+                    return;
             }
             break;
         }
         case ast::Tag::Array: {
             auto &array = ast::cast_tree_nonnull<ast::Array>(expr);
             for (auto &elem : array.elems) {
-                fn(elem);
+                if (fn(elem) == IterResult::Stop)
+                    return;
             }
-            break;
-        }
-        case ast::Tag::Cast: {
-            auto &cast = ast::cast_tree_nonnull<ast::Cast>(expr);
-            fn(cast.arg);
-            fn(cast.typeExpr);
             break;
         }
         case ast::Tag::Block: {
             auto &block = ast::cast_tree_nonnull<ast::Block>(expr);
             for (auto &param : block.params) {
-                fn(param);
+                if (fn(param) == IterResult::Stop)
+                    return;
             }
-            fn(block.body);
-            break;
-        }
-        case ast::Tag::InsSeq: {
-            auto &insSeq = ast::cast_tree_nonnull<ast::InsSeq>(expr);
-            for (auto &stat : insSeq.stats) {
-                fn(stat);
-            }
-            fn(insSeq.expr);
+            if (fn(block.body) == IterResult::Stop)
+                return;
             break;
         }
         case ast::Tag::UnresolvedConstantLit: {
-            fn(ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(expr).scope);
+            auto &lit = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(expr);
+            if (fn(lit.scope) == IterResult::Stop)
+                return;
             break;
         }
         case ast::Tag::RestParam: {
-            fn(ast::cast_tree_nonnull<ast::RestParam>(expr).expr);
+            auto &param = ast::cast_tree_nonnull<ast::RestParam>(expr);
+            if (fn(param.expr) == IterResult::Stop)
+                return;
             break;
         }
         case ast::Tag::KeywordArg: {
-            fn(ast::cast_tree_nonnull<ast::KeywordArg>(expr).expr);
+            auto &kwarg = ast::cast_tree_nonnull<ast::KeywordArg>(expr);
+            if (fn(kwarg.expr) == IterResult::Stop)
+                return;
             break;
         }
         case ast::Tag::OptionalParam: {
-            auto &opt = ast::cast_tree_nonnull<ast::OptionalParam>(expr);
-            fn(opt.expr);
-            fn(opt.default_);
+            auto &param = ast::cast_tree_nonnull<ast::OptionalParam>(expr);
+            if (fn(param.expr) == IterResult::Stop)
+                return;
+            if (fn(param.default_) == IterResult::Stop)
+                return;
             break;
         }
         case ast::Tag::BlockParam: {
-            fn(ast::cast_tree_nonnull<ast::BlockParam>(expr).expr);
+            auto &param = ast::cast_tree_nonnull<ast::BlockParam>(expr);
+            if (fn(param.expr) == IterResult::Stop)
+                return;
             break;
         }
         case ast::Tag::ShadowArg: {
-            fn(ast::cast_tree_nonnull<ast::ShadowArg>(expr).expr);
+            auto &shadow = ast::cast_tree_nonnull<ast::ShadowArg>(expr);
+            if (fn(shadow.expr) == IterResult::Stop)
+                return;
             break;
         }
-        case ast::Tag::EmptyTree:
         case ast::Tag::Retry:
+        case ast::Tag::ZSuperArgs:
         case ast::Tag::Local:
         case ast::Tag::UnresolvedIdent:
         case ast::Tag::Literal:
         case ast::Tag::ConstantLit:
-        case ast::Tag::ZSuperArgs:
         case ast::Tag::RuntimeMethodDefinition:
         case ast::Tag::Self:
+        case ast::Tag::EmptyTree:
             break;
     }
+}
+
+template <typename F> void iterChildren(const ast::ExpressionPtr &expr, F &&fn) {
+    iterChildrenUntil(expr, [&](const ast::ExpressionPtr &child) {
+        fn(child);
+        return IterResult::Continue;
+    });
 }
 
 struct LocSumComputer {
@@ -285,208 +343,135 @@ void computeLocSums(const core::GlobalState &gs, ast::ExpressionPtr &expr) {
     ast::TreeWalk::apply(ctx, computer, expr);
 }
 
-// returns the selection and an approximation of what code will run after the selection
-// for example if we select the condition of an if expression we will over approximate and say that the continuation is
-// an InsSeq of the then and else branch expressions
-optional<pair<vector<ast::ExpressionPtr>, vector<ast::ExpressionPtr>>>
-getSelectionAndContinuation(const ast::ExpressionPtr &expr, const core::LocOffsets target) {
-    ENFORCE(expr.loc().contains(target));
+auto getStatsContainedInTarget(const vector<const ast::ExpressionPtr *> &stats, const core::LocOffsets target) {
+    auto it1 = absl::c_find_if(stats, [target](const ast::ExpressionPtr *stat) {
+        return stat->loc().exists() && target.beginPos() <= stat->loc().beginPos();
+    });
+    auto it2 = stats.end();
+    for (auto it = stats.begin(); it < stats.end(); it++) {
+        if ((*it)->loc().exists() && (*it)->loc().endPos() <= target.endPos()) {
+            it2 = std::next(it);
+        }
+    }
+    ENFORCE(it1 <= it2);
+    return make_pair(it1, it2);
+}
 
+// A selection of nodes is defined as the deepest sequence of nodes contained in a target loc
+// the return type is optional<nonempty_vector<const ast::ExpressionPtr *>>
+// which is equivalent to vector<const ast::ExpressionPtr *>
+// empty vector means this wasn't a valid selection.
+vector<const ast::ExpressionPtr *> getSelection(const ast::ExpressionPtr &expr, const core::LocOffsets target) {
+    if (!expr.loc().exists()) {
+        return {};
+    }
+    switch (expr.tag()) {
+        case ast::Tag::InsSeq: {
+            // This case is special because InsSeq is essentially a cache friendly variant of the inductive
+            // representation of a sequence of expressions `InsSeq(ExpressionPtr, ExpressionPtr)`. If we represented
+            // InsSeq inductively, then the default case would naturally cover InsSeq also.
+            auto &insSeq = ast::cast_tree_nonnull<ast::InsSeq>(expr);
+            vector<const ast::ExpressionPtr *> stats;
+            for (auto &stat : insSeq.stats) {
+                stats.push_back(&stat);
+            }
+            stats.push_back(&insSeq.expr);
+            for (auto *stat : stats) {
+                if (auto selection = getSelection(*stat, target); !selection.empty()) {
+                    return selection;
+                }
+            }
+            auto [it1, it2] = getStatsContainedInTarget(stats, target);
+            vector<const ast::ExpressionPtr *> selection;
+            for (auto it = it1; it < it2; it++) {
+                selection.push_back(*it);
+            }
+            if (!selection.empty()) {
+                return selection;
+            }
+            break;
+        }
+        default: {
+            vector<const ast::ExpressionPtr *> selection;
+            iterChildrenUntil(expr, [&selection, target](const ast::ExpressionPtr &child) {
+                if (selection = getSelection(child, target); !selection.empty()) {
+                    return IterResult::Stop;
+                }
+                return IterResult::Continue;
+            });
+            if (!selection.empty()) {
+                return selection;
+            }
+            break;
+        }
+    }
+    ENFORCE(expr.loc().exists());
+    if (target.contains(expr.loc())) {
+        return {&expr};
+    } else {
+        return {};
+    }
+}
+
+// We could merge these two functions together as getSelectionAndContinuation, but we choose not to so that in the
+// common case that a selection isn't valid, we don't have to allocate for the continuation
+// In this case we use optional in the return type since the continuation can actually be empty, but this doesn't
+// indicate that the selection is invalid
+// This function essentially duplicates the logic of getSelection but gets the continuation after the
+// deepest node contained in the target.
+// The continuation is an approximation of what code can run after the selection for the purposes of calculating
+// liveness.
+// invariant: if getSelection is nonempty, then getContinuationAfterSelection is nonnull
+optional<vector<const ast::ExpressionPtr *>> getContinuationAfterSelection(const ast::ExpressionPtr &expr,
+                                                                           const core::LocOffsets target) {
+    if (!expr.loc().exists()) {
+        return {};
+    }
     switch (expr.tag()) {
         case ast::Tag::InsSeq: {
             auto &insSeq = ast::cast_tree_nonnull<ast::InsSeq>(expr);
-            vector<ast::ExpressionPtr> stats;
+            vector<const ast::ExpressionPtr *> stats;
             for (auto &stat : insSeq.stats) {
-                stats.push_back(stat.deepCopy());
+                stats.push_back(&stat);
             }
-            stats.push_back(insSeq.expr.deepCopy());
-            auto it = absl::c_find_if(stats, [target](const ast::ExpressionPtr &stat) {
-                return stat.loc().exists() && stat.loc().contains(target);
-            });
-            if (it == stats.end()) {
-                // TODO(bshu) review this part
-                auto it1 = absl::c_find_if(stats, [target](const ast::ExpressionPtr &stat) {
-                    return target.beginPos() <= stat.loc().beginPos();
-                });
-                auto it2 = stats.end();
-                for (auto it = stats.begin(); it < stats.end(); it++) {
-                    if (it->loc().endPos() <= target.endPos()) {
-                        it2 = std::next(it);
+            stats.push_back(&insSeq.expr);
+            int i = 0;
+            for (auto stat : stats) {
+                if (auto continuation = getContinuationAfterSelection(*stat, target); continuation.has_value()) {
+                    for (auto j = i + 1; j < stats.size(); j++) {
+                        continuation->push_back(stats[j]);
                     }
+                    return {continuation};
                 }
-                ENFORCE(it1 <= it2);
-                if (it1 == it2) {
-                    return nullopt;
-                }
-                if (it1 == stats.end()) {
-                    return nullopt;
-                }
-                vector<ast::ExpressionPtr> selection;
-                for (auto it = it1; it < it2; it++) {
-                    selection.push_back(it->deepCopy());
-                }
-                vector<ast::ExpressionPtr> continuation;
+                i++;
+            }
+            auto [it1, it2] = getStatsContainedInTarget(stats, target);
+            if (it1 != it2) {
+                vector<const ast::ExpressionPtr *> continuation;
                 for (auto it = it2; it < stats.end(); it++) {
-                    continuation.push_back(it->deepCopy());
+                    continuation.push_back(*it);
                 }
-                return {{move(selection), move(continuation)}};
-            } else {
-                auto res = getSelectionAndContinuation(*it, target);
-                if (!res) {
-                    return nullopt;
-                }
-                auto [selection, continuation] = move(res.value());
-                for (auto it1 = it + 1; it1 < stats.end(); it1++) {
-                    continuation.push_back(it1->deepCopy());
-                }
-                return {{move(selection), move(continuation)}};
+                return {continuation};
             }
             break;
         }
-        case ast::Tag::ClassDef: {
-            // should be called in a method body, so no classes
-            return nullopt;
+        default: {
+            optional<vector<const ast::ExpressionPtr *>> continuation;
+            iterChildrenUntil(expr, [&](const ast::ExpressionPtr &child) {
+                if (continuation = getContinuationAfterSelection(expr, target); continuation.has_value()) {
+                    return IterResult::Stop;
+                }
+                return IterResult::Continue;
+            });
             break;
-        }
-        case ast::Tag::MethodDef: {
-            // should be lifted out by this point
-            return nullopt;
-            break;
-        }
-        case ast::Tag::If: {
-            auto &if_ = ast::cast_tree_nonnull<ast::If>(expr);
-            if (if_.cond.loc().contains(target)) {
-                auto res = getSelectionAndContinuation(if_.cond, target);
-                if (!res) {
-                    return nullopt;
-                }
-                auto [selection, continuation] = move(res.value());
-                continuation.push_back(if_.thenp.deepCopy());
-                continuation.push_back(if_.elsep.deepCopy());
-                return {{move(selection), move(continuation)}};
-            }
-            if (if_.thenp.loc().contains(target)) {
-                return getSelectionAndContinuation(if_.thenp, target);
-            }
-            if (if_.elsep.loc().contains(target)) {
-                return getSelectionAndContinuation(if_.elsep, target);
-            }
-            vector<ast::ExpressionPtr> selection;
-            selection.emplace_back(expr.deepCopy());
-            vector<ast::ExpressionPtr> continuation;
-            return {{move(selection), move(continuation)}};
-        }
-        case ast::Tag::While: {
-            auto &while_ = ast::cast_tree_nonnull<ast::While>(expr);
-            if (while_.cond.loc().contains(target)) {
-                auto res = getSelectionAndContinuation(while_.cond, target);
-                if (!res) {
-                    return nullopt;
-                }
-                auto [selection, continuation] = move(res.value());
-                continuation.push_back(while_.body.deepCopy());
-                return {{move(selection), move(continuation)}};
-            }
-            if (while_.body.loc().contains(target)) {
-                return getSelectionAndContinuation(while_.body, target);
-            }
-            vector<ast::ExpressionPtr> selection;
-            selection.emplace_back(expr.deepCopy());
-            vector<ast::ExpressionPtr> continuation;
-            return {{move(selection), move(continuation)}};
-        }
-        case ast::Tag::Block: {
-            auto &block = ast::cast_tree_nonnull<ast::Block>(expr);
-            if (block.body.loc().contains(target)) {
-                return getSelectionAndContinuation(block.body, target);
-            }
-            vector<ast::ExpressionPtr> selection;
-            selection.emplace_back(expr.deepCopy());
-            vector<ast::ExpressionPtr> continuation;
-            return {{move(selection), move(continuation)}};
-        }
-        case ast::Tag::Rescue: {
-            auto &rescue = ast::cast_tree_nonnull<ast::Rescue>(expr);
-            if (rescue.body.loc().contains(target)) {
-                auto res = getSelectionAndContinuation(rescue.body, target);
-                if (!res) {
-                    return nullopt;
-                }
-                auto [selection, continuation] = move(res.value());
-                continuation.push_back(rescue.else_.deepCopy());
-                continuation.push_back(rescue.ensure.deepCopy());
-                return {{move(selection), move(continuation)}};
-            }
-            for (auto &rescueCase : rescue.rescueCases) {
-                if (rescueCase.loc().contains(target)) {
-                    auto res = getSelectionAndContinuation(rescueCase, target);
-                    if (!res) {
-                        return nullopt;
-                    }
-                    auto [selection, continuation] = move(res.value());
-                    continuation.push_back(rescue.ensure.deepCopy());
-                    return {{move(selection), move(continuation)}};
-                }
-            }
-            if (rescue.else_.loc().contains(target)) {
-                auto res = getSelectionAndContinuation(rescue.else_, target);
-                if (!res) {
-                    return nullopt;
-                }
-                auto [selection, continuation] = move(res.value());
-                continuation.push_back(rescue.ensure.deepCopy());
-                return {{move(selection), move(continuation)}};
-            }
-            if (rescue.ensure.loc().contains(target)) {
-                return getSelectionAndContinuation(rescue.ensure, target);
-            }
-            vector<ast::ExpressionPtr> selection;
-            selection.emplace_back(expr.deepCopy());
-            vector<ast::ExpressionPtr> continuation;
-            return {{move(selection), move(continuation)}};
-        }
-        case ast::Tag::RescueCase: {
-            auto &rescueCase = ast::cast_tree_nonnull<ast::RescueCase>(expr);
-            if (rescueCase.body.loc().contains(target)) {
-                return getSelectionAndContinuation(rescueCase.body, target);
-            }
-            vector<ast::ExpressionPtr> selection;
-            selection.emplace_back(expr.deepCopy());
-            vector<ast::ExpressionPtr> continuation;
-            return {{move(selection), move(continuation)}};
-        }
-        // TODO(bshu) handle these cases
-        case ast::Tag::Send:
-        case ast::Tag::Assign:
-        case ast::Tag::Return:
-        case ast::Tag::Break:
-        case ast::Tag::Next:
-        case ast::Tag::Retry:
-        case ast::Tag::Cast:
-        case ast::Tag::Hash:
-        case ast::Tag::Array:
-        case ast::Tag::Literal:
-        case ast::Tag::Local:
-        case ast::Tag::UnresolvedIdent:
-        case ast::Tag::UnresolvedConstantLit:
-        case ast::Tag::ConstantLit:
-        case ast::Tag::ZSuperArgs:
-        case ast::Tag::EmptyTree:
-        case ast::Tag::RuntimeMethodDefinition:
-        case ast::Tag::RestParam:
-        case ast::Tag::KeywordArg:
-        case ast::Tag::OptionalParam:
-        case ast::Tag::BlockParam:
-        case ast::Tag::ShadowArg:
-        case ast::Tag::Self: {
-            vector<ast::ExpressionPtr> selection;
-            selection.emplace_back(expr.deepCopy());
-            vector<ast::ExpressionPtr> continuation;
-            return {{move(selection), move(continuation)}};
         }
     }
-
-    return nullopt;
+    ENFORCE(expr.loc().exists());
+    if (target.contains(expr.loc())) {
+        return {{}};
+    } else {
+        return nullopt;
+    }
 }
 } // namespace
 
@@ -545,24 +530,22 @@ vector<unique_ptr<TextDocumentEdit>> getExtractMethodEdits(LSPTypecheckerDelegat
         config.logger->debug("ExtractMethod: no intersection found");
         return {};
     }
-    auto intersectedLoc = core::LocOffsets{newStart, newEnd};
-    config.logger->debug("ExtractMethod: intersected loc: {}", intersectedLoc.showRaw(gs, file));
-    auto res = getSelectionAndContinuation(walk.enclosingMethod->rhs, intersectedLoc);
-    if (!res) {
-        config.logger->debug("ExtractMethod: could not determine selection and continuation");
+    auto selection = getSelection(parsedFile.tree, selectionLoc.offsets());
+    if (selection.empty()) {
+        config.logger->debug("ExtractMethod: no selection found");
         return {};
     }
-
-    auto &[selection, continuation] = *res;
+    auto continuation = getContinuationAfterSelection(parsedFile.tree, selectionLoc.offsets());
+    ENFORCE(continuation.has_value());
     config.logger->debug("ExtractMethod: selection size: {}, continuation size: {}", selection.size(),
-                         continuation.size());
+                         continuation.has_value() ? continuation->size() : 0);
+    config.logger->debug("ExtractMethod: selection loc: {}", selectionLoc.showRaw(gs));
     for (auto &expr : selection) {
-        config.logger->debug("ExtractMethod selection: {}", expr.toStringWithTabs(gs));
+        config.logger->debug("ExtractMethod selection: {}", expr->toStringWithTabs(gs));
     }
-    for (auto &expr : continuation) {
-        config.logger->debug("ExtractMethod continuation: {}", expr.toStringWithTabs(gs));
+    for (auto &expr : continuation.value()) {
+        config.logger->debug("ExtractMethod continuation: {}", expr->toStringWithTabs(gs));
     }
-
     return {};
 }
 
