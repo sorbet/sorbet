@@ -392,17 +392,18 @@ module T::Private::Methods
         # We can only use maybe_run_sig_block_for_key if there was no
         # redefinition, because it would otherwise call unwrap_method,
         # overwriting the redefinition.
-        if T::Private::Methods._sig_block_is_current?(key, sig_block)
-          method_sig = T::Private::Methods.maybe_run_sig_block_for_key(key)
-        else
-          # This is essentially a permanent slow path: since the method was
-          # redefined before the sig block had a chance to run, we can't unwrap
-          # the method, as that would overwrite the redefinition, effectively
-          # putting the method back to its original definition. (Note that
-          # `run_sig` is what we call in the `sig_block`, but this one just
-          # doesn't unwrap.)
-          method_sig = T::Private::Methods.run_sig(method_name, original_method, current_declaration, unwrap: false)
-        end
+        method_sig =
+          if T::Private::Methods._sig_block_is_current?(key, sig_block)
+            T::Private::Methods.maybe_run_sig_block_for_key(key)
+          else
+            # This is essentially a permanent slow path: since the method was
+            # redefined before the sig block had a chance to run, we can't unwrap
+            # the method, as that would overwrite the redefinition, effectively
+            # putting the method back to its original definition. (Note that
+            # `run_sig` is what we call in the `sig_block`, but this one just
+            # doesn't unwrap.)
+            T::Private::Methods.run_sig(method_name, original_method, current_declaration, unwrap: false)
+          end
         method_sig ||= T::Private::Methods._handle_missing_method_signature(
           self,
           original_method,
