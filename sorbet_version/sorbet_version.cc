@@ -57,4 +57,3 @@ const char sorbet_full_version_string[] = SORBET_VERSION "." QUOTED(STABLE_BUILD
     " untyped_blame=true"
 #endif
     ;
-
