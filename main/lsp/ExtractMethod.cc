@@ -591,7 +591,7 @@ optional<vector<ContItem>> getContinuation(const ast::ExpressionPtr &expr, const
 }
 
 struct ComputeWrites {
-    UnorderedSet<core::LocalVariable> writes;
+    UnorderedSet<core::LocalVariable> &writes;
 
     void postTransformAssign(core::Context ctx, const ast::Assign &assign) {
         auto local = ast::cast_tree<ast::Local>(assign.lhs);
@@ -609,10 +609,11 @@ UnorderedSet<core::LocalVariable> setUnion(const UnorderedSet<core::LocalVariabl
     return result;
 }
 
-[[maybe_unused]] UnorderedSet<core::LocalVariable> computeWrites(core::Context ctx, const ast::ExpressionPtr &expr) {
-    ComputeWrites walker;
+[[maybe_unused]] void computeWrites(const core::GlobalState &gs, const ast::ExpressionPtr &expr,
+                                    UnorderedSet<core::LocalVariable> &writes) {
+    ComputeWrites walker{writes};
+    core::Context ctx(gs, core::Symbols::root(), core::FileRef());
     ast::ConstTreeWalk::apply(ctx, walker, expr);
-    return std::move(walker.writes);
 }
 
 UnorderedSet<core::LocalVariable> computeExprLiveIn(const ast::ExpressionPtr &expr,
@@ -643,7 +644,7 @@ UnorderedSet<core::LocalVariable> computeExprLiveIn(const ast::ExpressionPtr &ex
             auto &assign = ast::cast_tree_nonnull<ast::Assign>(expr);
             if (auto local = ast::cast_tree<ast::Local>(assign.lhs)) {
                 liveOut.erase(local->localVariable);
-                return liveOut;
+                return computeExprLiveIn(assign.rhs, liveOut);
             } else {
                 liveOut = computeExprLiveIn(assign.rhs, liveOut);
                 return computeExprLiveIn(assign.lhs, liveOut);
@@ -775,13 +776,32 @@ vector<unique_ptr<TextDocumentEdit>> getExtractMethodEdits(LSPTypecheckerDelegat
         config.logger->debug("ExtractMethod continuation: {}", item.toStringWithTabs(gs));
     }
 
+    UnorderedSet<core::LocalVariable> writes;
+    for (auto &stat : selection) {
+        computeWrites(gs, *stat, writes);
+    }
+
     UnorderedSet<core::LocalVariable> liveOut;
     auto &cont = continuation.value();
     for (auto it = cont.rbegin(); it != cont.rend(); it++) {
         liveOut = computeContItemLiveIn(*it, liveOut);
     }
+
+    auto liveIn = liveOut;
+    for (auto it = selection.rbegin(); it != selection.rend(); it++) {
+        liveIn = computeExprLiveIn(*(*it), liveIn);
+    }
+
     for (auto &var : liveOut) {
         config.logger->debug("ExtractMethod liveOut: {}", var.toString(gs));
+    }
+
+    for (auto &var : liveIn) {
+        config.logger->debug("ExtractMethod liveIn: {}", var.toString(gs));
+    }
+
+    for (auto &var : writes) {
+        config.logger->debug("ExtractMethod writes: {}", var.toString(gs));
     }
 
     return {};
