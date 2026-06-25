@@ -1,0 +1,18 @@
+# typed: true
+# selective-apply-code-action: refactor
+# enable-experimental-lsp-create-missing-method: true
+
+class MyClass
+  extend T::Sig
+
+  sig { params(x: Integer).void }
+  def caller(x)
+    do_stuff(x, "hello")
+#   ^^^^^^^^ error: Method `do_stuff` does not exist on `MyClass`
+#     ^ apply-code-action: [A] Create missing method
+  end
+
+  sig { void }
+  def other_method
+  end
+end
