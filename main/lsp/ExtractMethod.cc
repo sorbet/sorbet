@@ -643,7 +643,7 @@ UnorderedSet<core::LocalVariable> computeExprLiveIn(const ast::ExpressionPtr &ex
             auto &assign = ast::cast_tree_nonnull<ast::Assign>(expr);
             if (auto local = ast::cast_tree<ast::Local>(assign.lhs)) {
                 liveOut.erase(local->localVariable);
-                return computeExprLiveIn(assign.rhs, liveOut);
+                return liveOut;
             } else {
                 liveOut = computeExprLiveIn(assign.rhs, liveOut);
                 return computeExprLiveIn(assign.lhs, liveOut);
@@ -774,6 +774,16 @@ vector<unique_ptr<TextDocumentEdit>> getExtractMethodEdits(LSPTypecheckerDelegat
     for (auto &item : continuation.value()) {
         config.logger->debug("ExtractMethod continuation: {}", item.toStringWithTabs(gs));
     }
+
+    UnorderedSet<core::LocalVariable> liveOut;
+    auto &cont = continuation.value();
+    for (auto it = cont.rbegin(); it != cont.rend(); it++) {
+        liveOut = computeContItemLiveIn(*it, liveOut);
+    }
+    for (auto &var : liveOut) {
+        config.logger->debug("ExtractMethod liveOut: {}", var.toString(gs));
+    }
+
     return {};
 }
 
