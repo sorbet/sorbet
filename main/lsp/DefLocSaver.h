@@ -15,13 +15,9 @@ public:
     void postTransformConstantLit(core::Context ctx, const ast::ConstantLit &lit);
 
     // Handles loc and symbol requests for ClassDef names.
-<<<<<<< HEAD
-    void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &lit);
+    void preTransformClassDef(core::Context ctx, const ast::ClassDef &classDef);
 
     // Handles loc and symbol requests for alias_method calls.
-    void postTransformSend(core::Context ctx, ast::ExpressionPtr &send);
-=======
-    void preTransformClassDef(core::Context ctx, const ast::ClassDef &classDef);
->>>>>>> upstream/master
+    void postTransformSend(core::Context ctx, const ast::Send &send);
 };
 }; // namespace sorbet::realmain::lsp
