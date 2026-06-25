@@ -1,0 +1,23 @@
+# typed: true
+# selective-apply-code-action: refactor.extract
+# enable-experimental-lsp-extract-to-method: true
+
+class LivenessOrAsgn
+  extend T::Sig
+
+  sig {void}
+  def read_only_in_selection
+    x = T.let(nil, T.nilable(Integer))
+    x ||= 42
+    puts x
+#   ^^^^^^ apply-code-action: [A] Extract Method
+  end
+
+  sig {void}
+  def modified_and_live
+    x = T.let(5, T.nilable(Integer))
+    x = x.to_i + 1
+#   ^^^^^^^^^^^^^^ apply-code-action: [B] Extract Method
+    puts x
+  end
+end

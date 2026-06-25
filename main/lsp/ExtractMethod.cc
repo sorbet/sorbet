@@ -815,7 +815,7 @@ string formatCall(bool isSingletonMethod, const vector<string> &args, const vect
         return call;
     }
 
-    string lhs = "new_method_return_value";
+    string lhs = "return_value";
     for (auto &ret : returns) {
         lhs += ", " + ret;
     }
@@ -962,7 +962,7 @@ vector<unique_ptr<TextDocumentEdit>> getExtractMethodEdits(LSPTypecheckerDelegat
 
     auto newMethodText = "\n\n" + indentString(indentLength, formatNewMethod(isSingletonMethod, dedentedSource,
                                                                              paramNames, returnNames));
-    auto callText = indentString(selectionIndent, formatCall(isSingletonMethod, paramNames, returnNames));
+    auto callText = formatCall(isSingletonMethod, paramNames, returnNames);
 
     config.logger->debug("ExtractMethod newMethod:\n{}", newMethodText);
     config.logger->debug("ExtractMethod call:\n{}", callText);

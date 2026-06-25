@@ -1,0 +1,30 @@
+# typed: true
+# selective-apply-code-action: refactor.extract
+# enable-experimental-lsp-extract-to-method: true
+
+class LivenessNestedLoops
+  extend T::Sig
+
+  sig {void}
+  def inner_loop_body
+    total = T.let(0, Integer)
+    i = T.let(0, Integer)
+    while total < 100
+      i = 0
+      while i < 10
+        total = total + 1; i = i + 1
+#       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [A] Extract Method
+      end
+    end
+  end
+
+  sig {void}
+  def outer_loop_side_effects
+    x = T.let(0, Integer)
+    while x < 10
+      puts x
+#     ^^^^^^ apply-code-action: [B] Extract Method
+      x = x + 1
+    end
+  end
+end
