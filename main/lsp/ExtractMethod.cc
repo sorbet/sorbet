@@ -427,47 +427,29 @@ vector<const ast::ExpressionPtr *> getSelection(const ast::ExpressionPtr &expr, 
 static const ast::ExpressionPtr emptyTreeStorage = ast::make_expression<ast::EmptyTree>();
 
 struct ContItem {
-    const ast::ExpressionPtr *branch1 = nullptr;
-    const ast::ExpressionPtr *branch2 = nullptr;
-    const ast::ExpressionPtr *branch2ExtraStat = nullptr;
+    InlinedVector<const ast::ExpressionPtr *, 1> branches;
+    const ast::ExpressionPtr *lastExtraStat = nullptr;
 
-    ContItem(const ast::ExpressionPtr *expr) : branch1{expr}, branch2{expr} {
-        ENFORCE(expr != nullptr);
-    }
-    ContItem(const ast::ExpressionPtr *branch1, const ast::ExpressionPtr *branch2)
-        : branch1{branch1}, branch2{branch2} {
-        ENFORCE(branch1 != nullptr && branch2 != nullptr);
-    }
+    ContItem(const ast::ExpressionPtr *expr) : branches{expr} {}
+    ContItem(const ast::ExpressionPtr *branch1, const ast::ExpressionPtr *branch2) : branches{branch1, branch2} {}
 
-    // a branch models a diamond in the cfg
-    bool isBranch() const {
-        return branch1 != branch2;
-    }
-
-    // a statment models an unconditional jump
     bool isStat() const {
-        return branch1 == branch2;
-    }
-
-    const ast::ExpressionPtr *getStat() const {
-        ENFORCE(isStat());
-        return branch1;
-    }
-
-    auto getBranches() const {
-        ENFORCE(isBranch());
-        return make_pair(branch1, branch2);
+        return branches.size() == 1;
     }
 
     string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const {
         if (isStat()) {
-            return branch1->toStringWithTabs(gs, tabs);
+            return branches[0]->toStringWithTabs(gs, tabs);
         }
         string result = string(tabs * 2, ' ') + "Branch(\n";
-        result += branch1->toStringWithTabs(gs, tabs + 1) + ",\n";
-        result += branch2->toStringWithTabs(gs, tabs + 1);
-        if (branch2ExtraStat != nullptr) {
-            result += ",\n" + branch2ExtraStat->toStringWithTabs(gs, tabs + 1);
+        for (int i = 0; i < branches.size(); i++) {
+            if (i > 0) {
+                result += ",\n";
+            }
+            result += branches[i]->toStringWithTabs(gs, tabs + 1);
+        }
+        if (lastExtraStat != nullptr) {
+            result += ",\n" + lastExtraStat->toStringWithTabs(gs, tabs + 1);
         }
         result += ")";
         return result;
@@ -505,7 +487,7 @@ optional<vector<ContItem>> getContinuation(const ast::ExpressionPtr &expr, const
             if (it1 < it2) {
                 vector<ContItem> continuation;
                 for (auto it = it2; it < stats.end(); it++) {
-                    continuation.push_back(ContItem(*it));
+                    continuation.emplace_back(*it);
                 }
                 return {continuation};
             }
@@ -513,7 +495,7 @@ optional<vector<ContItem>> getContinuation(const ast::ExpressionPtr &expr, const
             for (auto stat : stats) {
                 if (auto continuation = getContinuation(*stat, target); continuation.has_value()) {
                     for (auto j = i + 1; j < stats.size(); j++) {
-                        continuation->push_back(stats[j]);
+                        continuation->emplace_back(stats[j]);
                     }
                     return {continuation};
                 }
@@ -546,7 +528,7 @@ optional<vector<ContItem>> getContinuation(const ast::ExpressionPtr &expr, const
             auto &while_ = ast::cast_tree_nonnull<ast::While>(expr);
             if (auto continuation = getContinuation(while_.cond, target); continuation.has_value()) {
                 continuation->emplace_back(&emptyTreeStorage, &while_.body);
-                continuation->back().branch2ExtraStat = &while_.cond;
+                continuation->back().lastExtraStat = &while_.cond;
                 return continuation;
             }
             if (auto continuation = getContinuation(while_.body, target); continuation.has_value()) {
@@ -561,7 +543,7 @@ optional<vector<ContItem>> getContinuation(const ast::ExpressionPtr &expr, const
             optional<vector<ContItem>> continuation;
             iterChildren(expr, [&continuation, target](const ast::ExpressionPtr &child) {
                 if (continuation.has_value()) {
-                    continuation.value().emplace_back(&child);
+                    continuation->emplace_back(&child);
                 } else {
                     continuation = getContinuation(child, target);
                 }
@@ -654,16 +636,17 @@ UnorderedSet<core::LocalVariable> computeExprLiveIn(const ast::ExpressionPtr &ex
 [[maybe_unused]] UnorderedSet<core::LocalVariable> computeContItemLiveIn(const ContItem contItem,
                                                                          UnorderedSet<core::LocalVariable> liveOut) {
     if (contItem.isStat()) {
-        auto expr = contItem.getStat();
-        return computeExprLiveIn(*expr, liveOut);
-    } else {
-        auto [branch1, branch2] = contItem.getBranches();
-        auto liveOutBranch2 = liveOut;
-        if (contItem.branch2ExtraStat != nullptr) {
-            liveOutBranch2 = computeExprLiveIn(*contItem.branch2ExtraStat, liveOutBranch2);
-        }
-        return setUnion(computeExprLiveIn(*branch1, liveOut), computeExprLiveIn(*branch2, liveOutBranch2));
+        return computeExprLiveIn(*contItem.branches[0], liveOut);
     }
+    UnorderedSet<core::LocalVariable> result;
+    for (int i = 0; i < contItem.branches.size(); i++) {
+        auto branchLiveOut = liveOut;
+        if (i == contItem.branches.size() - 1 && contItem.lastExtraStat != nullptr) {
+            branchLiveOut = computeExprLiveIn(*contItem.lastExtraStat, branchLiveOut);
+        }
+        result = setUnion(result, computeExprLiveIn(*contItem.branches[i], branchLiveOut));
+    }
+    return result;
 }
 } // namespace
 
