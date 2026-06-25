@@ -206,6 +206,10 @@ public:
     // TODO(neil): once we track a list of files in this package, we can `.reserve(files.size())` in the constructor
     UnorderedMap<core::FileRef, std::vector<std::pair<MangledName, PackageReferenceInfo>>> packagesReferencedByFile;
 
+    int numFilesInPackage() const {
+        return packagesReferencedByFile.size();
+    }
+
     // The id of the SCC that this package's normal imports belong to.
     //
     // WARNING: Modifying the contents of the package DB after ComputePackageSCCs will cause this id to go out of
@@ -241,9 +245,12 @@ public:
     PackageInfo &operator=(const PackageInfo &) = delete;
 
     int orderImports(const core::GlobalState &gs, const PackageInfo &a, bool aIsTestImport, const PackageInfo &b,
-                     bool bIsTestImport) const;
+                     bool bIsTestImport,
+                     const std::optional<StrictDependenciesLevel> aStrictnessOverride = std::nullopt,
+                     const std::optional<StrictDependenciesLevel> bStrictnessOverride = std::nullopt) const;
 
-    int orderByStrictness(const PackageDB &packageDB, const PackageInfo &a, const PackageInfo &b) const;
+    int orderByStrictness(const PackageDB &packageDB, const PackageInfo &a, const StrictDependenciesLevel aStrictness,
+                          const PackageInfo &b, const StrictDependenciesLevel bStrictness) const;
 
     int orderByAlphabetical(const core::GlobalState &gs, const PackageInfo &a, const PackageInfo &b) const;
 
@@ -338,8 +345,9 @@ public:
     aggregateMissingVisibleTo(const core::GlobalState &gs, UnorderedSet<core::packages::MangledName> &visibleTos,
                               bool visibleToTests) const;
 
-    std::string renderPackageRbContents(const core::GlobalState &gs, std::vector<Import> newImports,
-                                        std::vector<core::SymbolRef> newExports) const;
+    std::string renderPackageRbContents(
+        const core::GlobalState &gs, std::vector<Import> newImports, std::vector<core::SymbolRef> newExports,
+        UnorderedMap<core::packages::MangledName, core::packages::StrictDependenciesLevel> newStrictnessByPkg) const;
 };
 CheckSize(PackageInfo, 280, 8);
 
