@@ -1,5 +1,7 @@
 #include "main/lsp/ExtractMethod.h"
 #include "ast/treemap/treemap.h"
+#include "common/sort/sort.h"
+#include "main/lsp/CreateMissingMethod.h"
 
 using namespace std;
 
@@ -700,6 +702,125 @@ UnorderedSet<core::LocalVariable> computeExprLiveIn(const ast::ExpressionPtr &ex
     }
     return result;
 }
+
+// TODO(bshu) AI
+string indentString(uint32_t indent, string_view str) {
+    string prefix(indent, ' ');
+    string result;
+    string_view remaining = str;
+    while (!remaining.empty()) {
+        auto newline = remaining.find('\n');
+        if (newline == string_view::npos) {
+            result += prefix + string(remaining) + "\n";
+            break;
+        }
+        result += prefix + string(remaining.substr(0, newline)) + "\n";
+        remaining = remaining.substr(newline + 1);
+    }
+    return result;
+}
+
+// TODO(bshu) AI
+string dedentString(uint32_t indent, string_view str) {
+    string result;
+    string_view remaining = str;
+    while (!remaining.empty()) {
+        auto newline = remaining.find('\n');
+        string_view line = (newline == string_view::npos) ? remaining : remaining.substr(0, newline);
+        uint32_t spaces = 0;
+        while (spaces < indent && spaces < line.size() && line[spaces] == ' ') {
+            spaces++;
+        }
+        result += string(line.substr(spaces));
+        if (newline == string_view::npos) {
+            result += "\n";
+            break;
+        }
+        result += "\n";
+        remaining = remaining.substr(newline + 1);
+    }
+    return result;
+}
+
+string formatNewMethod(bool isSingletonMethod, string_view selectionSource, const vector<string> &params,
+                       const vector<string> &returns) {
+    string methodName = isSingletonMethod ? "self.new_method" : "new_method";
+
+    // Build sig
+    string sig = "sig { params(";
+    for (int i = 0; i < params.size(); i++) {
+        if (i > 0) {
+            sig += ", ";
+        }
+        sig += params[i] + ": T.untyped";
+    }
+    sig += ").returns(";
+    if (returns.empty()) {
+        sig += "T.untyped";
+    } else {
+        sig += "[";
+        for (int i = 0; i < 1 + (int)returns.size(); i++) {
+            if (i > 0) {
+                sig += ", ";
+            }
+            sig += "T.untyped";
+        }
+        sig += "]";
+    }
+    sig += ") }";
+
+    // Build parameter list
+    string paramList;
+    for (int i = 0; i < params.size(); i++) {
+        if (i > 0) {
+            paramList += ", ";
+        }
+        paramList += params[i];
+    }
+
+    // Build method body
+    string result = sig + "\n";
+    result += "def " + methodName + "(" + paramList + ")\n";
+
+    if (returns.empty()) {
+        result += indentString(2, selectionSource);
+    } else {
+        result += indentString(2, "newMethodReturnValue = begin\n");
+        result += indentString(4, selectionSource);
+        result += indentString(2, "end\n");
+        string returnExpr = "[newMethodReturnValue";
+        for (auto &ret : returns) {
+            returnExpr += ", " + ret;
+        }
+        returnExpr += "]";
+        result += indentString(2, returnExpr);
+    }
+
+    result += "end";
+    return result;
+}
+
+string formatCall(bool isSingletonMethod, const vector<string> &args, const vector<string> &returns) {
+    string methodName = isSingletonMethod ? "self.new_method" : "new_method";
+    string call = methodName + "(";
+    for (int i = 0; i < args.size(); i++) {
+        if (i > 0) {
+            call += ", ";
+        }
+        call += args[i];
+    }
+    call += ")";
+
+    if (returns.empty()) {
+        return call;
+    }
+
+    string lhs = "new_method_return_value";
+    for (auto &ret : returns) {
+        lhs += ", " + ret;
+    }
+    return lhs + " = " + call;
+}
 } // namespace
 
 namespace extract_method {
@@ -804,7 +925,56 @@ vector<unique_ptr<TextDocumentEdit>> getExtractMethodEdits(LSPTypecheckerDelegat
         config.logger->debug("ExtractMethod writes: {}", var.toString(gs));
     }
 
-    return {};
+    auto enclosingMethodRef = walk.enclosingMethod->symbol;
+    auto isSingletonMethod = enclosingMethodRef.data(gs)->owner.data(gs)->isSingletonClass(gs);
+
+    auto res = create_missing_method::getInsertionLocationAfterMethod(gs, parsedFile, enclosingMethodRef);
+    if (!res.has_value()) {
+        return {};
+    }
+    auto [insertLoc, indentLength] = res.value();
+
+    auto selectionSource = selectionLoc.source(gs);
+    if (!selectionSource.has_value()) {
+        return {};
+    }
+
+    // Sort params and returns into string vectors
+    vector<string> paramNames;
+    for (auto &var : liveIn) {
+        if (var == core::LocalVariable::selfVariable()) {
+            continue;
+        }
+        paramNames.emplace_back(string(var._name.shortName(gs)));
+    }
+    fast_sort(paramNames);
+
+    vector<string> returnNames;
+    for (auto &var : writes) {
+        if (liveOut.contains(var)) {
+            returnNames.emplace_back(string(var._name.shortName(gs)));
+        }
+    }
+    fast_sort(returnNames);
+
+    auto [_, selectionIndent] = selectionLoc.findStartOfIndentation(gs);
+    auto dedentedSource = dedentString(selectionIndent, selectionSource.value());
+
+    auto newMethodText = "\n\n" + indentString(indentLength, formatNewMethod(isSingletonMethod, dedentedSource,
+                                                                             paramNames, returnNames));
+    auto callText = indentString(selectionIndent, formatCall(isSingletonMethod, paramNames, returnNames));
+
+    config.logger->debug("ExtractMethod newMethod:\n{}", newMethodText);
+    config.logger->debug("ExtractMethod call:\n{}", callText);
+
+    vector<unique_ptr<TextEdit>> edits;
+    edits.emplace_back(make_unique<TextEdit>(Range::fromLoc(gs, insertLoc), newMethodText));
+    edits.emplace_back(make_unique<TextEdit>(Range::fromLoc(gs, selectionLoc), callText));
+
+    auto tdi = make_unique<VersionedTextDocumentIdentifier>(config.fileRef2Uri(gs, file), JSONNullObject());
+    vector<unique_ptr<TextDocumentEdit>> result;
+    result.emplace_back(make_unique<TextDocumentEdit>(move(tdi), move(edits)));
+    return result;
 }
 
 } // namespace extract_method

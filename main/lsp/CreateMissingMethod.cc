@@ -230,6 +230,16 @@ vector<string> getParamNames(const core::GlobalState &gs, const string &defaultN
     return paramNames;
 }
 
+core::ClassOrModuleRef getClass(const core::GlobalState &gs, const core::TypePtr &type) {
+    if (isa_type<core::ClassType>(type)) {
+        auto ct = cast_type_nonnull<core::ClassType>(type);
+        return ct.symbol;
+    } else if (isa_type<core::AppliedType>(type)) {
+        auto &ct = cast_type_nonnull<core::AppliedType>(type);
+        return ct.klass;
+    }
+    return core::Symbols::noClassOrModule();
+}
 } // namespace
 
 namespace create_missing_method {
@@ -250,17 +260,6 @@ const core::lsp::SendResponse *isMissingMethodResponse(const core::GlobalState &
     }
 
     return resp;
-}
-
-core::ClassOrModuleRef getClass(const core::GlobalState &gs, const core::TypePtr &type) {
-    if (isa_type<core::ClassType>(type)) {
-        auto ct = cast_type_nonnull<core::ClassType>(type);
-        return ct.symbol;
-    } else if (isa_type<core::AppliedType>(type)) {
-        auto &ct = cast_type_nonnull<core::AppliedType>(type);
-        return ct.klass;
-    }
-    return core::Symbols::noClassOrModule();
 }
 
 optional<pair<core::Loc, int>> getInsertionLocationForClass(LSPTypecheckerDelegate &typechecker,
