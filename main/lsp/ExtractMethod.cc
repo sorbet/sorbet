@@ -538,6 +538,13 @@ optional<vector<ContItem>> getContinuation(const ast::ExpressionPtr &expr, const
             }
             break;
         }
+        case ast::Tag::RescueCase: {
+            auto &rescueCase = ast::cast_tree_nonnull<ast::RescueCase>(expr);
+            if (auto continuation = getContinuation(rescueCase.body, target); continuation.has_value()) {
+                return continuation;
+            }
+            break;
+        }
         case ast::Tag::Rescue: {
             auto &rescue = ast::cast_tree_nonnull<ast::Rescue>(expr);
             if (auto continuation = getContinuation(rescue.body, target); continuation.has_value()) {
@@ -564,6 +571,7 @@ optional<vector<ContItem>> getContinuation(const ast::ExpressionPtr &expr, const
             }
             break;
         }
+            // TODO: control flow like return etc.
         default: {
             optional<vector<ContItem>> continuation;
             iterChildren(expr, [&continuation, target](const ast::ExpressionPtr &child) {
@@ -646,6 +654,14 @@ UnorderedSet<core::LocalVariable> computeExprLiveIn(const ast::ExpressionPtr &ex
             liveOut.emplace(local.localVariable);
             return liveOut;
         }
+        case ast::Tag::RescueCase: {
+            auto &rescueCase = ast::cast_tree_nonnull<ast::RescueCase>(expr);
+            liveOut = computeExprLiveIn(rescueCase.body, liveOut);
+            if (auto local = ast::cast_tree<ast::Local>(rescueCase.var)) {
+                liveOut.erase(local->localVariable);
+            }
+            return liveOut;
+        }
         case ast::Tag::Rescue: {
             auto &rescue = ast::cast_tree_nonnull<ast::Rescue>(expr);
             liveOut = computeExprLiveIn(rescue.ensure, liveOut);
@@ -655,7 +671,9 @@ UnorderedSet<core::LocalVariable> computeExprLiveIn(const ast::ExpressionPtr &ex
             }
             return computeExprLiveIn(rescue.body, branchLiveIn);
         }
+            // TODO: control flow like return etc.
         default: {
+            // TODO: maybe don't allocate
             vector<const ast::ExpressionPtr *> children;
             iterChildren(expr, [&children](const ast::ExpressionPtr &child) { children.push_back(&child); });
             for (auto it = children.rbegin(); it != children.rend(); it++) {
