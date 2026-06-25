@@ -19,14 +19,14 @@ class LivenessBlock
   def side_effect_only
     total = T.let(0, Integer)
     10.times do |i|
-      new_method(i, total)
+      new_method(i)
 #     ^^^^^^ apply-code-action: [B] Extract Method
       total = total + i
     end
   end
 
-  sig { params(i: T.untyped, total: T.untyped).returns(T.untyped) }
-  def new_method(i, total)
+  sig { params(i: T.untyped).returns(T.untyped) }
+  def new_method(i)
     puts i
   end
 

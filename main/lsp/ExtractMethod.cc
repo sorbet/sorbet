@@ -902,22 +902,22 @@ vector<unique_ptr<TextDocumentEdit>> getExtractMethodEdits(LSPTypecheckerDelegat
         computeWrites(gs, *stat, writes);
     }
 
-    UnorderedSet<core::LocalVariable> liveOut;
+    UnorderedSet<core::LocalVariable> readByContinuation;
     auto &cont = continuation.value();
     for (auto it = cont.rbegin(); it != cont.rend(); it++) {
-        liveOut = computeContItemLiveIn(*it, liveOut);
+        readByContinuation = computeContItemLiveIn(*it, readByContinuation);
     }
 
-    auto liveIn = liveOut;
+    UnorderedSet<core::LocalVariable> readBySelection;
     for (auto it = selection.rbegin(); it != selection.rend(); it++) {
-        liveIn = computeExprLiveIn(*(*it), liveIn);
+        readBySelection = computeExprLiveIn(*(*it), readBySelection);
     }
 
-    for (auto &var : liveOut) {
+    for (auto &var : readByContinuation) {
         config.logger->debug("ExtractMethod liveOut: {}", var.toString(gs));
     }
 
-    for (auto &var : liveIn) {
+    for (auto &var : readBySelection) {
         config.logger->debug("ExtractMethod liveIn: {}", var.toString(gs));
     }
 
@@ -941,7 +941,7 @@ vector<unique_ptr<TextDocumentEdit>> getExtractMethodEdits(LSPTypecheckerDelegat
 
     // Sort params and returns into string vectors
     vector<string> paramNames;
-    for (auto &var : liveIn) {
+    for (auto &var : readBySelection) {
         if (var == core::LocalVariable::selfVariable()) {
             continue;
         }
@@ -951,7 +951,7 @@ vector<unique_ptr<TextDocumentEdit>> getExtractMethodEdits(LSPTypecheckerDelegat
 
     vector<string> returnNames;
     for (auto &var : writes) {
-        if (liveOut.contains(var)) {
+        if (readByContinuation.contains(var)) {
             returnNames.emplace_back(string(var._name.shortName(gs)));
         }
     }

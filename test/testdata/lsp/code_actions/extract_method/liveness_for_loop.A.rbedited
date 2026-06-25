@@ -9,14 +9,14 @@ class LivenessForLoop
   def for_loop_side_effect
     i = T.let(0, Integer)
     for i in 1..10
-      new_method(i, i)
+      new_method(i)
 #     ^^^^^^ apply-code-action: [A] Extract Method
     end
     puts i
   end
 
-  sig { params(i: T.untyped, i: T.untyped).returns(T.untyped) }
-  def new_method(i, i)
+  sig { params(i: T.untyped).returns(T.untyped) }
+  def new_method(i)
     puts i
   end
 

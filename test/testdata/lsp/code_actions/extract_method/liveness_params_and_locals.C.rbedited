@@ -22,13 +22,13 @@ class LivenessParamsAndLocals
   sig {params(multiplier: Integer).void}
   def reads_param_and_local(multiplier)
     base = 100
-    return_value, result = new_method(base, multiplier, n)
+    return_value, result = new_method(base, multiplier)
 #   ^^^^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [C] Extract Method
     puts result
   end
 
-  sig { params(base: T.untyped, multiplier: T.untyped, n: T.untyped).returns([T.untyped, T.untyped]) }
-  def new_method(base, multiplier, n)
+  sig { params(base: T.untyped, multiplier: T.untyped).returns([T.untyped, T.untyped]) }
+  def new_method(base, multiplier)
     newMethodReturnValue = begin
       result = base * multiplier
     end

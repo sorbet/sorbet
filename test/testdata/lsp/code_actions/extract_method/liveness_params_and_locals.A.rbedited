@@ -7,12 +7,12 @@ class LivenessParamsAndLocals
 
   sig {params(x: Integer, y: Integer).void}
   def reads_params_only(x, y)
-    new_method(multiplier, n, x, y)
+    new_method(x, y)
 #   ^^^^^^^^^^^^^^^^^ apply-code-action: [A] Extract Method
   end
 
-  sig { params(multiplier: T.untyped, n: T.untyped, x: T.untyped, y: T.untyped).returns(T.untyped) }
-  def new_method(multiplier, n, x, y)
+  sig { params(x: T.untyped, y: T.untyped).returns(T.untyped) }
+  def new_method(x, y)
     z = x + y; puts z
   end
 
