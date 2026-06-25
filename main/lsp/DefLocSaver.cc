@@ -7,9 +7,7 @@
 using namespace std;
 namespace sorbet::realmain::lsp {
 
-void DefLocSaver::postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
-    auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
-
+void DefLocSaver::postTransformMethodDef(core::Context ctx, const ast::MethodDef &methodDef) {
     const core::lsp::Query &lspQuery = ctx.state.lspQuery;
     bool lspQueryMatch = lspQuery.matchesLoc(ctx.locAt(methodDef.declLoc)) || lspQuery.matchesSymbol(methodDef.symbol);
 
@@ -50,8 +48,7 @@ void DefLocSaver::postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &
     }
 }
 
-void DefLocSaver::postTransformUnresolvedIdent(core::Context ctx, ast::ExpressionPtr &tree) {
-    auto &id = ast::cast_tree_nonnull<ast::UnresolvedIdent>(tree);
+void DefLocSaver::postTransformUnresolvedIdent(core::Context ctx, const ast::UnresolvedIdent &id) {
     if (id.kind == ast::UnresolvedIdent::Kind::Instance || id.kind == ast::UnresolvedIdent::Kind::Class) {
         core::ClassOrModuleRef klass;
         // Logic originally from `unresolvedIdent2Local` in `builder_walk.cc`, then modified.
@@ -96,7 +93,7 @@ core::MethodRef enclosingMethodFromContext(core::Context ctx) {
     }
 }
 
-void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Query &lspQuery,
+void matchesQuery(core::Context ctx, const ast::ConstantLit *lit, const core::lsp::Query &lspQuery,
                   core::SymbolRef symbolBeforeDealias) {
     // Iterate. Ensures that we match "Foo" in "Foo::Bar" references.
     auto symbol = symbolBeforeDealias.dealias(ctx);
@@ -153,14 +150,12 @@ bool shouldLeaveAncestorForIDE(const ast::ExpressionPtr &anc) {
 
 } // namespace
 
-void DefLocSaver::postTransformConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
-    auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
+void DefLocSaver::postTransformConstantLit(core::Context ctx, const ast::ConstantLit &lit) {
     const core::lsp::Query &lspQuery = ctx.state.lspQuery;
     matchesQuery(ctx, &lit, lspQuery, lit.symbol());
 }
 
-void DefLocSaver::preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
-    auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
+void DefLocSaver::preTransformClassDef(core::Context ctx, const ast::ClassDef &classDef) {
     const core::lsp::Query &lspQuery = ctx.state.lspQuery;
     if (ast::isa_tree<ast::EmptyTree>(classDef.name)) {
         ENFORCE(classDef.symbol == core::Symbols::root());
