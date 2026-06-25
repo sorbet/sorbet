@@ -343,7 +343,10 @@ void computeLocSums(const core::GlobalState &gs, ast::ExpressionPtr &expr) {
     ast::TreeWalk::apply(ctx, computer, expr);
 }
 
+// TODO(bshu), return indices and option to indicate not valid
+// this handles the case where it2 was not found but it1 was, so it will be nonempty.
 // it may be the case that it1 > it2
+// check that the selection doesn't intersect some other node not in the range, otherwise this is not valid
 auto getStatsContainedInTarget(const vector<const ast::ExpressionPtr *> &stats, const core::LocOffsets target) {
     auto it1 = absl::c_find_if(stats, [target](const ast::ExpressionPtr *stat) {
         return stat->loc().exists() && target.beginPos() <= stat->loc().beginPos();
@@ -420,6 +423,57 @@ vector<const ast::ExpressionPtr *> getSelection(const ast::ExpressionPtr &expr, 
     return {};
 }
 
+// TODO(bshu) better way to do this
+static const ast::ExpressionPtr emptyTreeStorage = ast::make_expression<ast::EmptyTree>();
+
+struct ContItem {
+    const ast::ExpressionPtr *branch1 = nullptr;
+    const ast::ExpressionPtr *branch2 = nullptr;
+    const ast::ExpressionPtr *branch2ExtraStat = nullptr;
+
+    ContItem(const ast::ExpressionPtr *expr) : branch1{expr}, branch2{expr} {
+        ENFORCE(expr != nullptr);
+    }
+    ContItem(const ast::ExpressionPtr *branch1, const ast::ExpressionPtr *branch2)
+        : branch1{branch1}, branch2{branch2} {
+        ENFORCE(branch1 != nullptr && branch2 != nullptr);
+    }
+
+    // a branch models a diamond in the cfg
+    bool isBranch() const {
+        return branch1 != branch2;
+    }
+
+    // a statment models an unconditional jump
+    bool isStat() const {
+        return branch1 == branch2;
+    }
+
+    const ast::ExpressionPtr *getStat() const {
+        ENFORCE(isStat());
+        return branch1;
+    }
+
+    auto getBranches() const {
+        ENFORCE(isBranch());
+        return make_pair(branch1, branch2);
+    }
+
+    string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const {
+        if (isStat()) {
+            return branch1->toStringWithTabs(gs, tabs);
+        }
+        string result = string(tabs * 2, ' ') + "Branch(\n";
+        result += branch1->toStringWithTabs(gs, tabs + 1) + ",\n";
+        result += branch2->toStringWithTabs(gs, tabs + 1);
+        if (branch2ExtraStat != nullptr) {
+            result += ",\n" + branch2ExtraStat->toStringWithTabs(gs, tabs + 1);
+        }
+        result += ")";
+        return result;
+    }
+};
+
 // We could merge these two functions together as getSelectionAndContinuation, but we choose not to so that in the
 // common case that a selection isn't valid, we don't have to allocate for the continuation
 // In this case we use optional in the return type since the continuation can actually be empty, but this doesn't
@@ -429,8 +483,7 @@ vector<const ast::ExpressionPtr *> getSelection(const ast::ExpressionPtr &expr, 
 // The continuation is an approximation of what code can run after the selection for the purposes of calculating
 // liveness.
 // invariant: if getSelection is nonempty, then getContinuation is nonnull
-optional<vector<const ast::ExpressionPtr *>> getContinuation(const ast::ExpressionPtr &expr,
-                                                             const core::LocOffsets target) {
+optional<vector<ContItem>> getContinuation(const ast::ExpressionPtr &expr, const core::LocOffsets target) {
     if (!expr.loc().exists()) {
         return nullopt;
     }
@@ -450,9 +503,9 @@ optional<vector<const ast::ExpressionPtr *>> getContinuation(const ast::Expressi
             stats.push_back(&insSeq.expr);
             auto [it1, it2] = getStatsContainedInTarget(stats, target);
             if (it1 < it2) {
-                vector<const ast::ExpressionPtr *> continuation;
+                vector<ContItem> continuation;
                 for (auto it = it2; it < stats.end(); it++) {
-                    continuation.push_back(*it);
+                    continuation.push_back(ContItem(*it));
                 }
                 return {continuation};
             }
@@ -478,8 +531,7 @@ optional<vector<const ast::ExpressionPtr *>> getContinuation(const ast::Expressi
         case ast::Tag::If: {
             auto &if_ = ast::cast_tree_nonnull<ast::If>(expr);
             if (auto continuation = getContinuation(if_.cond, target); continuation.has_value()) {
-                continuation->push_back(&if_.thenp);
-                continuation->push_back(&if_.elsep);
+                continuation->emplace_back(&if_.thenp, &if_.elsep);
                 return continuation;
             }
             if (auto continuation = getContinuation(if_.thenp, target); continuation.has_value()) {
@@ -493,19 +545,23 @@ optional<vector<const ast::ExpressionPtr *>> getContinuation(const ast::Expressi
         case ast::Tag::While: {
             auto &while_ = ast::cast_tree_nonnull<ast::While>(expr);
             if (auto continuation = getContinuation(while_.cond, target); continuation.has_value()) {
-                continuation->push_back(&while_.body);
+                continuation->emplace_back(&emptyTreeStorage, &while_.body);
+                continuation->back().branch2ExtraStat = &while_.cond;
                 return continuation;
             }
             if (auto continuation = getContinuation(while_.body, target); continuation.has_value()) {
+                continuation->emplace_back(&while_.cond);
+                continuation->emplace_back(&emptyTreeStorage, &while_.body);
                 return continuation;
             }
             break;
         }
+        // TODO(bshu) handle rescue case and some other stuff
         default: {
-            optional<vector<const ast::ExpressionPtr *>> continuation;
+            optional<vector<ContItem>> continuation;
             iterChildren(expr, [&continuation, target](const ast::ExpressionPtr &child) {
                 if (continuation.has_value()) {
-                    continuation.value().push_back(&child);
+                    continuation.value().emplace_back(&child);
                 } else {
                     continuation = getContinuation(child, target);
                 }
@@ -517,6 +573,97 @@ optional<vector<const ast::ExpressionPtr *>> getContinuation(const ast::Expressi
         }
     }
     return nullopt;
+}
+
+struct ComputeWrites {
+    UnorderedSet<core::LocalVariable> writes;
+
+    void postTransformAssign(core::Context ctx, const ast::Assign &assign) {
+        auto local = ast::cast_tree<ast::Local>(assign.lhs);
+        if (local == nullptr) {
+            return;
+        }
+        writes.emplace(local->localVariable);
+    }
+};
+
+UnorderedSet<core::LocalVariable> setUnion(const UnorderedSet<core::LocalVariable> &a,
+                                           const UnorderedSet<core::LocalVariable> &b) {
+    auto result = a;
+    result.insert(b.begin(), b.end());
+    return result;
+}
+
+[[maybe_unused]] UnorderedSet<core::LocalVariable> computeWrites(core::Context ctx, const ast::ExpressionPtr &expr) {
+    ComputeWrites walker;
+    ast::ConstTreeWalk::apply(ctx, walker, expr);
+    return std::move(walker.writes);
+}
+
+UnorderedSet<core::LocalVariable> computeExprLiveIn(const ast::ExpressionPtr &expr,
+                                                    UnorderedSet<core::LocalVariable> liveOut) {
+    switch (expr.tag()) {
+        case ast::Tag::If: {
+            auto &if_ = ast::cast_tree_nonnull<ast::If>(expr);
+            auto liveInThen = computeExprLiveIn(if_.thenp, liveOut);
+            auto liveInElse = computeExprLiveIn(if_.elsep, liveOut);
+            auto liveOutCond = setUnion(liveInThen, liveInElse);
+            return computeExprLiveIn(if_.cond, liveOutCond);
+        }
+        case ast::Tag::While: {
+            auto &while_ = ast::cast_tree_nonnull<ast::While>(expr);
+            auto liveInBody = computeExprLiveIn(while_.body, liveOut);
+            auto liveOutCond = setUnion(liveInBody, liveOut);
+            return computeExprLiveIn(while_.cond, liveOutCond);
+        }
+        case ast::Tag::InsSeq: {
+            auto &insSeq = ast::cast_tree_nonnull<ast::InsSeq>(expr);
+            liveOut = computeExprLiveIn(insSeq.expr, liveOut);
+            for (auto it = insSeq.stats.rbegin(); it != insSeq.stats.rend(); it++) {
+                liveOut = computeExprLiveIn(*it, liveOut);
+            }
+            return liveOut;
+        }
+        case ast::Tag::Assign: {
+            auto &assign = ast::cast_tree_nonnull<ast::Assign>(expr);
+            if (auto local = ast::cast_tree<ast::Local>(assign.lhs)) {
+                liveOut.erase(local->localVariable);
+                return computeExprLiveIn(assign.rhs, liveOut);
+            } else {
+                liveOut = computeExprLiveIn(assign.rhs, liveOut);
+                return computeExprLiveIn(assign.lhs, liveOut);
+            }
+        }
+        case ast::Tag::Local: {
+            auto &local = ast::cast_tree_nonnull<ast::Local>(expr);
+            liveOut.emplace(local.localVariable);
+            return liveOut;
+        }
+        // TODO(bshu) handle rescue case and some other stuff
+        default: {
+            vector<const ast::ExpressionPtr *> children;
+            iterChildren(expr, [&children](const ast::ExpressionPtr &child) { children.push_back(&child); });
+            for (auto it = children.rbegin(); it != children.rend(); it++) {
+                liveOut = computeExprLiveIn(**it, liveOut);
+            }
+            return liveOut;
+        }
+    }
+}
+
+[[maybe_unused]] UnorderedSet<core::LocalVariable> computeContItemLiveIn(const ContItem contItem,
+                                                                         UnorderedSet<core::LocalVariable> liveOut) {
+    if (contItem.isStat()) {
+        auto expr = contItem.getStat();
+        return computeExprLiveIn(*expr, liveOut);
+    } else {
+        auto [branch1, branch2] = contItem.getBranches();
+        auto liveOutBranch2 = liveOut;
+        if (contItem.branch2ExtraStat != nullptr) {
+            liveOutBranch2 = computeExprLiveIn(*contItem.branch2ExtraStat, liveOutBranch2);
+        }
+        return setUnion(computeExprLiveIn(*branch1, liveOut), computeExprLiveIn(*branch2, liveOutBranch2));
+    }
 }
 } // namespace
 
@@ -590,8 +737,8 @@ vector<unique_ptr<TextDocumentEdit>> getExtractMethodEdits(LSPTypecheckerDelegat
     for (auto &expr : selection) {
         config.logger->debug("ExtractMethod selection: {}", expr->toStringWithTabs(gs));
     }
-    for (auto &expr : continuation.value()) {
-        config.logger->debug("ExtractMethod continuation: {}", expr->toStringWithTabs(gs));
+    for (auto &item : continuation.value()) {
+        config.logger->debug("ExtractMethod continuation: {}", item.toStringWithTabs(gs));
     }
     return {};
 }
