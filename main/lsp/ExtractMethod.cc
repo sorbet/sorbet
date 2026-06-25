@@ -538,7 +538,32 @@ optional<vector<ContItem>> getContinuation(const ast::ExpressionPtr &expr, const
             }
             break;
         }
-        // TODO(bshu) handle rescue case and some other stuff
+        case ast::Tag::Rescue: {
+            auto &rescue = ast::cast_tree_nonnull<ast::Rescue>(expr);
+            if (auto continuation = getContinuation(rescue.body, target); continuation.has_value()) {
+                ContItem item(&rescue.else_);
+                for (auto &rescueCase : rescue.rescueCases) {
+                    item.branches.push_back(&rescueCase);
+                }
+                continuation->push_back(std::move(item));
+                continuation->emplace_back(&rescue.ensure);
+                return continuation;
+            }
+            for (auto &rescueCase : rescue.rescueCases) {
+                if (auto continuation = getContinuation(rescueCase, target); continuation.has_value()) {
+                    continuation->emplace_back(&rescue.ensure);
+                    return continuation;
+                }
+            }
+            if (auto continuation = getContinuation(rescue.else_, target); continuation.has_value()) {
+                continuation->emplace_back(&rescue.ensure);
+                return continuation;
+            }
+            if (auto continuation = getContinuation(rescue.ensure, target); continuation.has_value()) {
+                return continuation;
+            }
+            break;
+        }
         default: {
             optional<vector<ContItem>> continuation;
             iterChildren(expr, [&continuation, target](const ast::ExpressionPtr &child) {
@@ -621,7 +646,15 @@ UnorderedSet<core::LocalVariable> computeExprLiveIn(const ast::ExpressionPtr &ex
             liveOut.emplace(local.localVariable);
             return liveOut;
         }
-        // TODO(bshu) handle rescue case and some other stuff
+        case ast::Tag::Rescue: {
+            auto &rescue = ast::cast_tree_nonnull<ast::Rescue>(expr);
+            liveOut = computeExprLiveIn(rescue.ensure, liveOut);
+            auto branchLiveIn = computeExprLiveIn(rescue.else_, liveOut);
+            for (auto &rescueCase : rescue.rescueCases) {
+                branchLiveIn = setUnion(branchLiveIn, computeExprLiveIn(rescueCase, liveOut));
+            }
+            return computeExprLiveIn(rescue.body, branchLiveIn);
+        }
         default: {
             vector<const ast::ExpressionPtr *> children;
             iterChildren(expr, [&children](const ast::ExpressionPtr &child) { children.push_back(&child); });
