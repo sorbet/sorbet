@@ -1,0 +1,35 @@
+# -- test/testdata/infer/suggest_sig_default_value.rb --
+# typed: strict
+
+class A
+  extend T::Sig
+
+  sig {params(a: Integer).void}
+  def takes_int(a); end
+
+  sig { params(x: String).returns(T.untyped) }
+  def string_default(x = "hello") # error: does not have a `sig`
+    x
+  end
+
+  sig { params(x: Integer).returns(T.untyped) }
+  def int_default(x = 42) # error: does not have a `sig`
+    x
+  end
+
+  sig { params(x: T::Array[Integer]).returns(T.untyped) }
+  def array_default(x = [1, 2, 3]) # error: does not have a `sig`
+    x
+  end
+
+  sig { params(x: T.untyped, y: String).returns(T.untyped) }
+  def keyword_default(x:, y: "world") # error: does not have a `sig`
+    y
+  end
+
+  sig { params(x: Integer).void }
+  def usage_wins(x = "hello") # error: does not have a `sig`
+    takes_int(x)
+  end
+end
+# ------------------------------

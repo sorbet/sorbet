@@ -155,6 +155,51 @@ void extractSendArgumentKnowledge(core::Context ctx, cfg::CFG &cfg, core::LocOff
     }
 }
 
+UnorderedMap<core::NameRef, core::TypePtr> guessDefaultValueTypes(core::Context ctx, core::MethodRef methodSymbol,
+                                                                  cfg::CFG &cfg) {
+    UnorderedMap<core::NameRef, core::TypePtr> result;
+
+    // Build a map from LocalRef -> param name by finding LoadArg instructions
+    UnorderedMap<cfg::LocalRef, core::NameRef> localToParamName;
+    for (auto &bb : cfg.forwardsTopoSort) {
+        for (auto &bind : bb->exprs) {
+            if (auto load = cfg::cast_instruction<cfg::LoadArg>(bind.value)) {
+                localToParamName[bind.bind.variable] = load->argument(ctx).name;
+            }
+        }
+    }
+
+    // Find Ident bindings that assign to param locals (these are default value assignments).
+    // The CFG structure for a param with a default is:
+    //   ArgPresent check -> branch
+    //   present path: local = LoadArg(...)
+    //   default path: <evaluate default expr> -> result; local = Ident(result)
+    // After inference, the Ident binding's type is the type of the default value.
+    for (auto &bb : cfg.forwardsTopoSort) {
+        for (auto &bind : bb->exprs) {
+            if (cfg::cast_instruction<cfg::Ident>(bind.value) == nullptr) {
+                continue;
+            }
+            auto fnd = localToParamName.find(bind.bind.variable);
+            if (fnd == localToParamName.end()) {
+                continue;
+            }
+            auto paramName = fnd->second;
+            auto ty = bind.bind.type;
+            if (!ty || ty.isUntyped() || ty.isBottom()) {
+                continue;
+            }
+            // Don't overwrite if we already have a type (e.g., from a different path)
+            auto &existing = result[paramName];
+            if (!existing) {
+                existing = ty;
+            }
+        }
+    }
+
+    return result;
+}
+
 UnorderedMap<core::NameRef, core::TypePtr> guessArgumentTypes(core::Context ctx, core::MethodRef methodSymbol,
                                                               cfg::CFG &cfg) {
     // What variables by the end of basic block could plausibly contain what arguments.
@@ -362,6 +407,15 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
     }
 
     auto guessedArgumentTypes = guessArgumentTypes(ctx, methodSymbol, cfg);
+    auto defaultValueTypes = guessDefaultValueTypes(ctx, methodSymbol, cfg);
+
+    // Fill in gaps from default value types (only when no type was guessed from usage)
+    for (auto &[name, type] : defaultValueTypes) {
+        auto &guessed = guessedArgumentTypes[name];
+        if (!guessed || guessed.isBottom()) {
+            guessed = type;
+        }
+    }
 
     auto enclosingClass = methodSymbol.data(ctx)->owner;
     auto closestMethod = closestOverriddenMethod(ctx, enclosingClass, methodSymbol.data(ctx)->name);
