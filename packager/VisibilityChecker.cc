@@ -948,10 +948,8 @@ public:
                 }
                 nonConstPackageInfo->trackPackageReferences(file, references);
 
-                if (gs.packageDB().genPackagesMode() != core::packages::GenPackagesMode::Disabled) {
-                    auto &referencedSymbols = threadResult->referencedSymbols;
-                    nonConstGs.setSymbolsReferencedByFile(file, referencedSymbols);
-                }
+                auto &referencedSymbols = threadResult->referencedSymbols;
+                nonConstGs.setSymbolsReferencedByFile(file, referencedSymbols);
             }
         }
         barrier.Wait();
