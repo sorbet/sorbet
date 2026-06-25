@@ -955,7 +955,7 @@ void tryApplyDefLocSaver(const core::GlobalState &gs, vector<ast::ParsedFile> &i
     for (auto &t : indexedCopies) {
         DefLocSaver defLocSaver;
         core::Context ctx(gs, core::Symbols::root(), t.file);
-        ast::TreeWalk::apply(ctx, defLocSaver, t.tree);
+        ast::ConstTreeWalk::apply(ctx, defLocSaver, t.tree);
     }
 }
 } // namespace
