@@ -43,6 +43,18 @@ LocOffsets LocOffsets::join(LocOffsets other) const {
     return LocOffsets{min(this->beginPos(), other.beginPos()), max(this->endPos(), other.endPos())};
 }
 
+LocOffsets LocOffsets::intersection(const LocOffsets &other) const {
+    if (!this->exists() || !other.exists()) {
+        return LocOffsets::none();
+    }
+    auto begin = max(this->beginPos(), other.beginPos());
+    auto end = min(this->endPos(), other.endPos());
+    if (begin > end) {
+        return LocOffsets::none();
+    }
+    return LocOffsets{begin, end};
+}
+
 bool LocOffsets::contains(const LocOffsets &other) const {
     ENFORCE_NO_TIMER(this->exists());
     ENFORCE_NO_TIMER(other.exists());

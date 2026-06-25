@@ -345,21 +345,37 @@ void computeLocSums(const core::GlobalState &gs, ast::ExpressionPtr &expr) {
     ast::TreeWalk::apply(ctx, computer, expr);
 }
 
-// TODO(bshu), return indices and option to indicate not valid
-// this handles the case where it2 was not found but it1 was, so it will be nonempty.
-// it may be the case that it1 > it2
-// check that the selection doesn't intersect some other node not in the range, otherwise this is not valid
-auto getStatsContainedInTarget(const vector<const ast::ExpressionPtr *> &stats, const core::LocOffsets target) {
-    auto it1 = absl::c_find_if(stats, [target](const ast::ExpressionPtr *stat) {
-        return stat->loc().exists() && target.beginPos() <= stat->loc().beginPos();
-    });
-    auto it2 = stats.end();
-    for (auto it = stats.begin(); it < stats.end(); it++) {
-        if ((*it)->loc().exists() && (*it)->loc().endPos() <= target.endPos()) {
-            it2 = std::next(it);
+optional<pair<int, int>> getStatsContainedInTarget(const vector<const ast::ExpressionPtr *> &stats,
+                                                   const core::LocOffsets target) {
+    int i = -1;
+    int j = -1;
+    for (int k = 0; k < stats.size(); k++) {
+        if (stats[k]->loc().exists() && target.beginPos() <= stats[k]->loc().beginPos()) {
+            i = k;
+            break;
         }
     }
-    return make_pair(it1, it2);
+    if (i == -1)
+        return nullopt;
+    for (int k = stats.size() - 1; k >= 0; k--) {
+        if (stats[k]->loc().exists() && stats[k]->loc().endPos() <= target.endPos()) {
+            j = k + 1;
+            break;
+        }
+    }
+    if (j == -1)
+        return nullopt;
+    if (i >= j)
+        return nullopt;
+    for (int k = 0; k < i; k++) {
+        if (stats[k]->loc().exists() && stats[k]->loc().intersection(target).exists())
+            return nullopt;
+    }
+    for (int k = j; k < stats.size(); k++) {
+        if (stats[k]->loc().exists() && stats[k]->loc().intersection(target).exists())
+            return nullopt;
+    }
+    return {{i, j}};
 }
 
 // A selection of nodes is defined as the largest sequence of nodes contained in a target loc
@@ -386,11 +402,12 @@ vector<const ast::ExpressionPtr *> getSelection(const ast::ExpressionPtr &expr, 
                 stats.push_back(&stat);
             }
             stats.push_back(&insSeq.expr);
-            auto [it1, it2] = getStatsContainedInTarget(stats, target);
-            if (it1 < it2) {
+            auto result = getStatsContainedInTarget(stats, target);
+            if (result.has_value()) {
+                auto [i, j] = result.value();
                 vector<const ast::ExpressionPtr *> selection;
-                for (auto it = it1; it < it2; it++) {
-                    selection.push_back(*it);
+                for (int k = i; k < j; k++) {
+                    selection.push_back(stats[k]);
                 }
                 return selection;
             }
@@ -485,11 +502,12 @@ optional<vector<ContItem>> getContinuation(const ast::ExpressionPtr &expr, const
                 stats.push_back(&stat);
             }
             stats.push_back(&insSeq.expr);
-            auto [it1, it2] = getStatsContainedInTarget(stats, target);
-            if (it1 < it2) {
+            auto result = getStatsContainedInTarget(stats, target);
+            if (result.has_value()) {
+                auto [i, j] = result.value();
                 vector<ContItem> continuation;
-                for (auto it = it2; it < stats.end(); it++) {
-                    continuation.emplace_back(*it);
+                for (int k = j; k < stats.size(); k++) {
+                    continuation.emplace_back(stats[k]);
                 }
                 return {continuation};
             }
