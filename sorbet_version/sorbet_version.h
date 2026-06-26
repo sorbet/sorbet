@@ -33,7 +33,6 @@ inline constexpr bool fuzz_mode = false;
 inline constexpr bool fuzz_mode = true;
 #endif
 
-extern const char version[];
 extern const char build_scm_revision[];
 extern const int build_scm_commit_count;
 extern const char build_scm_clean[];
