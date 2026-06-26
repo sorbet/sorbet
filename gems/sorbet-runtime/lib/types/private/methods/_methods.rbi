@@ -11,8 +11,8 @@ module T::Private::Methods
     sig {returns(T.nilable(Thread::Backtrace::Location))}
     attr_accessor :loc
 
-    sig {returns(T.nilable(T.any(T.proc.returns(DeclBuilder), Declaration)))}
-    attr_accessor :blk_or_decl
+    sig {returns(T.any(T.proc.returns(DeclBuilder), Declaration, Signature))}
+    attr_accessor :sig_state
 
     sig {returns(T::Boolean)}
     attr_accessor :final
@@ -31,7 +31,7 @@ module T::Private::Methods
         mod: Module,
         method_name: T.nilable(Symbol),
         loc: T.nilable(Thread::Backtrace::Location),
-        blk: Proc,
+        sig_state: Proc,
         final: T::Boolean,
         abstract: T.nilable(T::Boolean),
         override: T.nilable({allow_incompatible: T.any(T::Boolean, Symbol)}),
@@ -39,7 +39,7 @@ module T::Private::Methods
       )
         .void
     end
-    def initialize(mod, method_name, loc, blk, final, abstract, override, overridable); end
+    def initialize(mod, method_name, loc, sig_state, final, abstract, override, overridable); end
   end
 
   @installed_hooks = T.let({}, T::Hash[Module, TrueClass])

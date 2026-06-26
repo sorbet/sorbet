@@ -42,13 +42,16 @@ module T::Private::Methods
   end
   # rubocop:enable Naming/ClassAndModuleCamelCase
 
-  # blk_or_decl:
+  # sig_state:
   # - It's a `Proc` if we haven't forced the thunk yet.
   # - It's a `Declaration` if we have, but we haven't finished building the sig
   #   (This can matter for circular load-time behavior, where a method is
   #   called while its Signature is being built)
-  # - It's `nil` if we've finished building the sig
-  DeclarationBlock = Struct.new(:mod, :method_name, :loc, :blk_or_decl, :final, :abstract, :override, :overridable)
+  # - It's a `Signature` if we've finished building the sig. This allows
+  #   the first-call wrapper to find its own signature even if it was
+  #   evaluated externally (e.g., by run_all_sig_blocks) and
+  #   @signatures_by_method[key] was overwritten by a redefinition.
+  DeclarationBlock = Struct.new(:mod, :method_name, :loc, :sig_state, :final, :abstract, :override, :overridable)
 
   def self.declare_sig(mod, loc, arg, &blk)
     if T::Private::DeclState.current.active_declaration
@@ -76,7 +79,7 @@ module T::Private::Methods
       raise DeclBuilder::BuilderError.new("You must declare a `sig` before using `#{dsl_name}` on the method `#{method_name}`")
     end
 
-    if !previous_declaration.blk_or_decl.is_a?(Proc)
+    if !previous_declaration.sig_state.is_a?(Proc)
       raise DeclBuilder::BuilderError.new("Cannot call `#{dsl_name} #{method_name.inspect}`, because the sig block has already run")
     end
 
@@ -395,7 +398,7 @@ module T::Private::Methods
         method_sig =
           if T::Private::Methods._sig_block_is_current?(key, sig_block)
             T::Private::Methods.maybe_run_sig_block_for_key(key)
-          else
+          elsif !(method_sig = current_declaration.sig_state).is_a?(Signature)
             # This is essentially a permanent slow path: since the method was
             # redefined before the sig block had a chance to run, we can't unwrap
             # the method, as that would overwrite the redefinition, effectively
@@ -403,6 +406,12 @@ module T::Private::Methods
             # `run_sig` is what we call in the `sig_block`, but this one just
             # doesn't unwrap.)
             T::Private::Methods.run_sig(method_name, original_method, current_declaration, unwrap: false)
+          else
+            # The declaration was already consumed (e.g., module_function copies
+            # the first-call wrapper to the singleton class, sharing the same
+            # DeclarationBlock; if the instance method's sig is evaluated first,
+            # sig_state is a Signature when the singleton copy runs).
+            method_sig
           end
         method_sig ||= T::Private::Methods._handle_missing_method_signature(
           self,
@@ -498,19 +507,25 @@ module T::Private::Methods
       unwrap_method(signature.method.owner, signature, original_method)
     end
 
-    # Drop this declaration. Only drop it after we've actually wrapped the
-    # method and recorded the signature, because that might raise an exception,
-    # leaving the declaration in a weird state if the program rescues that
-    # exception and continues.
-    declaration_block.blk_or_decl = nil
+    # Store the finished signature (dropping the Declaration in the process).
+    # Only do this after we've actually wrapped the method and recorded the
+    # signature, because that might raise an exception, leaving the
+    # declaration in a weird state if the program rescues that exception and
+    # continues.
+    #
+    # Storing the signature here allows the first-call wrapper to find its
+    # own signature even if it was evaluated externally (e.g., by
+    # run_all_sig_blocks) and @signatures_by_method[key] was later overwritten
+    # by a redefinition.
+    declaration_block.sig_state = signature
 
     signature
   end
 
   def self.run_builder(declaration_block)
-    blk_or_decl = declaration_block.blk_or_decl
-    return blk_or_decl if blk_or_decl.is_a?(Declaration)
-    if blk_or_decl.nil?
+    sig_state = declaration_block.sig_state
+    return sig_state if sig_state.is_a?(Declaration)
+    if !sig_state.is_a?(Proc)
       raise "DeclarationBlock for #{declaration_block.mod} at #{declaration_block.loc} should have already been unwrapped"
     end
 
@@ -520,9 +535,9 @@ module T::Private::Methods
       declaration_block.override,
       declaration_block.overridable
     )
-    decl = builder.instance_exec(&blk_or_decl).finalize!.decl
+    decl = builder.instance_exec(&sig_state).finalize!.decl
     # Record that we've already run `blk` once and constructed a `Declaration`
-    declaration_block.blk_or_decl = decl
+    declaration_block.sig_state = decl
     decl
   end
 
