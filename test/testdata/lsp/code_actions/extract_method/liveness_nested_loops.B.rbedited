@@ -28,7 +28,7 @@ class LivenessNestedLoops
     end
   end
 
-  sig { params(x: T.untyped).returns(T.untyped) }
+  sig { params(x: T.untyped).returns([]) }
   def new_method(x)
     puts x
   end

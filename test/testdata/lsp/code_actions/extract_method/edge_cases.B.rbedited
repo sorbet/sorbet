@@ -21,10 +21,10 @@ class EdgeCases
     y
   end
 
-  sig { params(x: T.untyped).returns([T.untyped]) }
+  sig { params(x: T.untyped).returns(T.untyped) }
   def new_method(x)
     y = x + 1
-    [y]
+    y
   end
 
 

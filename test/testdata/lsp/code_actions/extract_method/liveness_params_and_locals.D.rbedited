@@ -34,10 +34,10 @@ class LivenessParamsAndLocals
     puts result
   end
 
-  sig { params(n: T.untyped).returns([T.untyped]) }
+  sig { params(n: T.untyped).returns(T.untyped) }
   def new_method(n)
     temp = n * 2; result = temp + 1; temp = 0
-    [result]
+    result
   end
 
 end

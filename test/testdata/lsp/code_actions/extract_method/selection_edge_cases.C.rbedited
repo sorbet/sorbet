@@ -35,7 +35,7 @@ class SelectionEdgeCases
     puts "done"
   end
 
-  sig { params(x: T.untyped).returns(T.untyped) }
+  sig { params(x: T.untyped).returns([]) }
   def new_method(x)
     y = x + 1; puts y
   end

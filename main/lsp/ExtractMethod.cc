@@ -762,66 +762,73 @@ string dedentString(uint32_t indent, string_view str) {
     return result;
 }
 
+string tupleValue(const vector<string> &values) {
+    if (values.empty()) {
+        return "[]";
+    }
+    if (values.size() == 1) {
+        return values[0];
+    }
+    return fmt::format("[{}]", absl::StrJoin(values, ", "));
+}
+
+string tupleLhs(const vector<string> &lhsNames) {
+    if (lhsNames.empty()) {
+        return "_";
+    }
+    if (lhsNames.size() == 1) {
+        return lhsNames[0];
+    }
+    return absl::StrJoin(lhsNames, ", ");
+}
+string parens(string s) {
+    return fmt::format("({})", s);
+}
+
+string formatAssign(const string &lhs, const string &rhs, bool isInStatementContext) {
+    auto assign = fmt::format("{} = {}", lhs, rhs);
+    if (!isInStatementContext) {
+        assign = parens(assign);
+    }
+    return assign;
+}
+
 string formatNewMethod(bool isSingletonMethod, string_view selectionSource, const vector<string> &params,
-                       const vector<string> &tupleReturns, bool isReturnValueNeeded) {
+                       const vector<string> &updateReturns, bool isReturnValueNeeded) {
     string methodName = isSingletonMethod ? "self.new_method" : "new_method";
 
     // Build sig
     auto paramsSig =
         absl::StrJoin(params, ", ", [](string *out, const string &p) { absl::StrAppend(out, p, ": T.untyped"); });
-    string returnsSig;
-    if (tupleReturns.empty()) {
-        returnsSig = "T.untyped";
-    } else {
-        vector<string> returnTypes;
-        if (isReturnValueNeeded) {
-            returnTypes.push_back("T.untyped");
-        }
-        for (int i = 0; i < tupleReturns.size(); i++) {
-            returnTypes.push_back("T.untyped");
-        }
-        returnsSig = fmt::format("[{}]", absl::StrJoin(returnTypes, ", "));
+    vector<string> returnTypes;
+    if (isReturnValueNeeded) {
+        returnTypes.push_back("T.untyped");
     }
+    for (int i = 0; i < updateReturns.size(); i++) {
+        returnTypes.push_back("T.untyped");
+    }
+    string returnsSig = tupleValue(returnTypes);
     auto sig = fmt::format("sig {{ params({}).returns({}) }}", paramsSig, returnsSig);
 
-    // Build parameter list
-    string paramList;
-    for (int i = 0; i < params.size(); i++) {
-        if (i > 0) {
-            paramList += ", ";
-        }
-        paramList += params[i];
-    }
+    auto paramList = absl::StrJoin(params, ", ");
 
-    // Build method body
-    string result = sig + "\n";
-    result += "def " + methodName + "(" + paramList + ")\n";
+    string result = fmt::format("{}\ndef {}({})\n", sig, methodName, paramList);
 
-    if (tupleReturns.empty()) {
+    if (updateReturns.empty()) {
         result += indentString(2, selectionSource);
     } else {
         if (isReturnValueNeeded) {
             result += indentString(2, "newMethodReturnValue = begin\n");
             result += indentString(4, selectionSource);
             result += indentString(2, "end\n");
-            string returnExpr = "[newMethodReturnValue";
-            for (auto &ret : tupleReturns) {
-                returnExpr += ", " + ret;
+            vector<string> vals{"newMethodReturnValue"};
+            for (auto v : updateReturns) {
+                vals.push_back(v);
             }
-            returnExpr += "]";
-            result += indentString(2, returnExpr);
+            result += indentString(2, tupleValue(vals));
         } else {
             result += indentString(2, selectionSource);
-            string returnExpr = "[";
-            bool added = false;
-            for (auto &ret : tupleReturns) {
-                if (added) {
-                    returnExpr += ", ";
-                }
-                returnExpr += ret;
-                added = true;
-            }
-            returnExpr += "]";
+            auto returnExpr = tupleValue(updateReturns);
             result += indentString(2, returnExpr);
         }
     }
@@ -830,11 +837,7 @@ string formatNewMethod(bool isSingletonMethod, string_view selectionSource, cons
     return result;
 }
 
-string parens(string s) {
-    return fmt::format("({})", s);
-}
-
-string formatCall(bool isSingletonMethod, const vector<string> &args, const vector<string> &tupleReturns,
+string formatCall(bool isSingletonMethod, const vector<string> &args, const vector<string> &updateReturns,
                   bool isInStatementContext, bool isReturnValueNeeded) {
     string methodName = isSingletonMethod ? "self.new_method" : "new_method";
     string call = methodName + "(";
@@ -846,26 +849,27 @@ string formatCall(bool isSingletonMethod, const vector<string> &args, const vect
     }
     call += ")";
 
-    if (tupleReturns.empty()) {
+    if (updateReturns.empty()) {
         return call;
     }
 
-    vector<string> lhs;
+    vector<string> lhsNames;
     if (isReturnValueNeeded) {
-        lhs.emplace_back("_");
+        lhsNames.emplace_back("_");
     }
-    for (auto &ret : tupleReturns) {
-        lhs.push_back(ret);
+    for (auto &ret : updateReturns) {
+        lhsNames.push_back(ret);
     }
 
-    auto assign = fmt::format("{} = {}", absl::StrJoin(lhs, ", "), call);
+    auto assign = fmt::format("{} = {}", tupleLhs(lhsNames), call);
     if (isReturnValueNeeded) {
-        return fmt::format("({})[0]", assign);
-    } else {
-        if (!isInStatementContext) {
-            assign = parens(assign);
+        if (lhsNames.size() > 1) {
+            return fmt::format("{}[0]", formatAssign(tupleLhs(lhsNames), call, false));
+        } else {
+            return formatAssign(tupleLhs(lhsNames), call, isInStatementContext);
         }
-        return assign;
+    } else {
+        return formatAssign(tupleLhs(lhsNames), call, isInStatementContext);
     }
 }
 
@@ -1094,21 +1098,22 @@ vector<unique_ptr<TextDocumentEdit>> getExtractMethodEdits(LSPTypecheckerDelegat
     }
     fast_sort(paramNames);
 
-    vector<string> returnNames;
+    vector<string> updateReturnNames;
     for (auto &var : writes) {
         if (readByContinuation.contains(var)) {
-            returnNames.emplace_back(string(var._name.shortName(gs)));
+            updateReturnNames.emplace_back(string(var._name.shortName(gs)));
         }
     }
-    fast_sort(returnNames);
+    fast_sort(updateReturnNames);
 
     auto [_, selectionIndent] = selectionLoc.findStartOfIndentation(gs);
     auto dedentedSource = dedentString(selectionIndent, selectionSource.value());
 
     auto newMethodText =
-        "\n\n" + indentString(indentLength, formatNewMethod(isSingletonMethod, dedentedSource, paramNames, returnNames,
-                                                            isRetValueNeeded.value()));
-    auto callText = formatCall(isSingletonMethod, paramNames, returnNames, isInStat.value(), isRetValueNeeded.value());
+        "\n\n" + indentString(indentLength, formatNewMethod(isSingletonMethod, dedentedSource, paramNames,
+                                                            updateReturnNames, isRetValueNeeded.value()));
+    auto callText =
+        formatCall(isSingletonMethod, paramNames, updateReturnNames, isInStat.value(), isRetValueNeeded.value());
 
     config.logger->debug("ExtractMethod newMethod:\n{}", newMethodText);
     config.logger->debug("ExtractMethod call:\n{}", callText);

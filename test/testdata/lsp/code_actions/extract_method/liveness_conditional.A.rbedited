@@ -13,10 +13,10 @@ class LivenessConditional
     puts x
   end
 
-  sig { params(flag: T.untyped).returns([T.untyped]) }
+  sig { params(flag: T.untyped).returns(T.untyped) }
   def new_method(flag)
     if flag; x = 1 end
-    [x]
+    x
   end
 
 end

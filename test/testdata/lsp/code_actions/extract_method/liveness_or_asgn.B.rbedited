@@ -21,10 +21,10 @@ class LivenessOrAsgn
     puts x
   end
 
-  sig { params(x: T.untyped).returns([T.untyped]) }
+  sig { params(x: T.untyped).returns(T.untyped) }
   def new_method(x)
     x = x.to_i + 1
-    [x]
+    x
   end
 
 end

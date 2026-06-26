@@ -13,10 +13,10 @@ class LivenessBasic
     puts y
   end
 
-  sig { params().returns([T.untyped]) }
+  sig { params().returns(T.untyped) }
   def new_method()
     y = 5 + 1
-    [y]
+    y
   end
 
 

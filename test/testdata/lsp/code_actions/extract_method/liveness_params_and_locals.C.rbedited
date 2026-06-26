@@ -27,10 +27,10 @@ class LivenessParamsAndLocals
     puts result
   end
 
-  sig { params(base: T.untyped, multiplier: T.untyped).returns([T.untyped]) }
+  sig { params(base: T.untyped, multiplier: T.untyped).returns(T.untyped) }
   def new_method(base, multiplier)
     result = base * multiplier
-    [result]
+    result
   end
 
 

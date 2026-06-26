@@ -17,10 +17,10 @@ class SelectionEdgeCases
     puts sum
   end
 
-  sig { params(sum: T.untyped, x: T.untyped).returns([T.untyped]) }
+  sig { params(sum: T.untyped, x: T.untyped).returns(T.untyped) }
   def new_method(sum, x)
     sum = sum + x
-    [sum]
+    sum
   end
 
 
