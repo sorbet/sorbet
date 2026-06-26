@@ -20,7 +20,7 @@ class LivenessForLoop
     sum = T.let(0, Integer)
     i = T.let(0, Integer)
     for i in 1..10
-      return_value, sum = new_method(i, sum)
+      (_, sum = new_method(i, sum))[0]
 #     ^^^^^^^^^^^^^ apply-code-action: [B] Extract Method
     end
     puts sum

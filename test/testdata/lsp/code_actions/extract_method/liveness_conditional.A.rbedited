@@ -8,17 +8,15 @@ class LivenessConditional
   sig {params(flag: T::Boolean).void}
   def if_branch_assigns(flag)
     x = T.let(0, Integer)
-    return_value, x = new_method(flag)
+    x = new_method(flag)
 #   ^^^^^^^^^^^^^^^^^^ apply-code-action: [A] Extract Method
     puts x
   end
 
-  sig { params(flag: T.untyped).returns([T.untyped, T.untyped]) }
+  sig { params(flag: T.untyped).returns([T.untyped]) }
   def new_method(flag)
-    newMethodReturnValue = begin
-      if flag; x = 1 end
-    end
-    [newMethodReturnValue, x]
+    if flag; x = 1 end
+    [x]
   end
 
 end

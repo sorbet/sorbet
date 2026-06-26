@@ -1,4 +1,6 @@
 #include "main/lsp/ExtractMethod.h"
+#include "absl/strings/str_cat.h"
+#include "absl/strings/str_join.h"
 #include "ast/treemap/treemap.h"
 #include "common/sort/sort.h"
 #include "main/lsp/CreateMissingMethod.h"
@@ -761,31 +763,26 @@ string dedentString(uint32_t indent, string_view str) {
 }
 
 string formatNewMethod(bool isSingletonMethod, string_view selectionSource, const vector<string> &params,
-                       const vector<string> &returns) {
+                       const vector<string> &tupleReturns, bool isReturnValueNeeded) {
     string methodName = isSingletonMethod ? "self.new_method" : "new_method";
 
     // Build sig
-    string sig = "sig { params(";
-    for (int i = 0; i < params.size(); i++) {
-        if (i > 0) {
-            sig += ", ";
-        }
-        sig += params[i] + ": T.untyped";
-    }
-    sig += ").returns(";
-    if (returns.empty()) {
-        sig += "T.untyped";
+    auto paramsSig =
+        absl::StrJoin(params, ", ", [](string *out, const string &p) { absl::StrAppend(out, p, ": T.untyped"); });
+    string returnsSig;
+    if (tupleReturns.empty()) {
+        returnsSig = "T.untyped";
     } else {
-        sig += "[";
-        for (int i = 0; i < 1 + (int)returns.size(); i++) {
-            if (i > 0) {
-                sig += ", ";
-            }
-            sig += "T.untyped";
+        vector<string> returnTypes;
+        if (isReturnValueNeeded) {
+            returnTypes.push_back("T.untyped");
         }
-        sig += "]";
+        for (int i = 0; i < tupleReturns.size(); i++) {
+            returnTypes.push_back("T.untyped");
+        }
+        returnsSig = fmt::format("[{}]", absl::StrJoin(returnTypes, ", "));
     }
-    sig += ") }";
+    auto sig = fmt::format("sig {{ params({}).returns({}) }}", paramsSig, returnsSig);
 
     // Build parameter list
     string paramList;
@@ -800,25 +797,45 @@ string formatNewMethod(bool isSingletonMethod, string_view selectionSource, cons
     string result = sig + "\n";
     result += "def " + methodName + "(" + paramList + ")\n";
 
-    if (returns.empty()) {
+    if (tupleReturns.empty()) {
         result += indentString(2, selectionSource);
     } else {
-        result += indentString(2, "newMethodReturnValue = begin\n");
-        result += indentString(4, selectionSource);
-        result += indentString(2, "end\n");
-        string returnExpr = "[newMethodReturnValue";
-        for (auto &ret : returns) {
-            returnExpr += ", " + ret;
+        if (isReturnValueNeeded) {
+            result += indentString(2, "newMethodReturnValue = begin\n");
+            result += indentString(4, selectionSource);
+            result += indentString(2, "end\n");
+            string returnExpr = "[newMethodReturnValue";
+            for (auto &ret : tupleReturns) {
+                returnExpr += ", " + ret;
+            }
+            returnExpr += "]";
+            result += indentString(2, returnExpr);
+        } else {
+            result += indentString(2, selectionSource);
+            string returnExpr = "[";
+            bool added = false;
+            for (auto &ret : tupleReturns) {
+                if (added) {
+                    returnExpr += ", ";
+                }
+                returnExpr += ret;
+                added = true;
+            }
+            returnExpr += "]";
+            result += indentString(2, returnExpr);
         }
-        returnExpr += "]";
-        result += indentString(2, returnExpr);
     }
 
     result += "end";
     return result;
 }
 
-string formatCall(bool isSingletonMethod, const vector<string> &args, const vector<string> &returns) {
+string parens(string s) {
+    return fmt::format("({})", s);
+}
+
+string formatCall(bool isSingletonMethod, const vector<string> &args, const vector<string> &tupleReturns,
+                  bool isInStatementContext, bool isReturnValueNeeded) {
     string methodName = isSingletonMethod ? "self.new_method" : "new_method";
     string call = methodName + "(";
     for (int i = 0; i < args.size(); i++) {
@@ -829,19 +846,122 @@ string formatCall(bool isSingletonMethod, const vector<string> &args, const vect
     }
     call += ")";
 
-    if (returns.empty()) {
+    if (tupleReturns.empty()) {
         return call;
     }
 
-    string lhs = "return_value";
-    for (auto &ret : returns) {
-        lhs += ", " + ret;
+    vector<string> lhs;
+    if (isReturnValueNeeded) {
+        lhs.emplace_back("_");
     }
-    return lhs + " = " + call;
-}
-} // namespace
+    for (auto &ret : tupleReturns) {
+        lhs.push_back(ret);
+    }
 
-namespace extract_method {
+    auto assign = fmt::format("{} = {}", absl::StrJoin(lhs, ", "), call);
+    if (isReturnValueNeeded) {
+        return fmt::format("({})[0]", assign);
+    } else {
+        if (!isInStatementContext) {
+            assign = parens(assign);
+        }
+        return assign;
+    }
+}
+
+optional<bool> isInStatementContext(const ast::ExpressionPtr &expr, const core::LocOffsets target) {
+    if (!expr.loc().exists()) {
+        return nullopt;
+    }
+    if (expr.loc().empty()) {
+        return nullopt;
+    }
+    if (target.contains(expr.loc())) {
+        return {false};
+    }
+    switch (expr.tag()) {
+        case ast::Tag::InsSeq: {
+            auto &insSeq = ast::cast_tree_nonnull<ast::InsSeq>(expr);
+            vector<const ast::ExpressionPtr *> stats;
+            for (auto &stat : insSeq.stats) {
+                stats.push_back(&stat);
+            }
+            stats.push_back(&insSeq.expr);
+            auto result = getStatsContainedInTarget(stats, target);
+            if (result.has_value()) {
+                return {true};
+            }
+            for (auto *stat : stats) {
+                if (auto r = isInStatementContext(*stat, target); r.has_value()) {
+                    return r;
+                }
+            }
+            break;
+        }
+        default: {
+            optional<bool> found;
+            iterChildrenUntil(expr, [&found, target](const ast::ExpressionPtr &child) {
+                if (found = isInStatementContext(child, target); found.has_value()) {
+                    return IterResult::Stop;
+                }
+                return IterResult::Continue;
+            });
+            if (found.has_value()) {
+                return found;
+            }
+            break;
+        }
+    }
+    return nullopt;
+}
+
+optional<bool> isReturnValueNeeded(const ast::ExpressionPtr &expr, const core::LocOffsets target) {
+    if (!expr.loc().exists()) {
+        return nullopt;
+    }
+    if (expr.loc().empty()) {
+        return nullopt;
+    }
+    if (target.contains(expr.loc())) {
+        return {true};
+    }
+    switch (expr.tag()) {
+        case ast::Tag::InsSeq: {
+            auto &insSeq = ast::cast_tree_nonnull<ast::InsSeq>(expr);
+            vector<const ast::ExpressionPtr *> stats;
+            for (auto &stat : insSeq.stats) {
+                stats.push_back(&stat);
+            }
+            stats.push_back(&insSeq.expr);
+            auto result = getStatsContainedInTarget(stats, target);
+            if (result.has_value()) {
+                auto [i, j] = result.value();
+                bool includesLastExpr = (j == stats.size());
+                return {includesLastExpr};
+            }
+            for (auto *stat : stats) {
+                if (auto r = isReturnValueNeeded(*stat, target); r.has_value()) {
+                    return r;
+                }
+            }
+            break;
+        }
+        default: {
+            optional<bool> found;
+            iterChildrenUntil(expr, [&found, target](const ast::ExpressionPtr &child) {
+                if (found = isReturnValueNeeded(child, target); found.has_value()) {
+                    return IterResult::Stop;
+                }
+                return IterResult::Continue;
+            });
+            if (found.has_value()) {
+                return found;
+            }
+            break;
+        }
+    }
+    return nullopt;
+}
 
 class EnclosingMethodWalk {
 public:
@@ -866,6 +986,9 @@ public:
         }
     }
 };
+} // namespace
+
+namespace extract_method {
 
 vector<unique_ptr<TextDocumentEdit>> getExtractMethodEdits(LSPTypecheckerDelegate &typechecker,
                                                            const LSPConfiguration &config,
@@ -905,6 +1028,10 @@ vector<unique_ptr<TextDocumentEdit>> getExtractMethodEdits(LSPTypecheckerDelegat
     config.logger->debug("ExtractMethod: selection found, size: {}", selection.size());
     auto continuation = getContinuation(parsedFile.tree, selectionLoc.offsets());
     ENFORCE(continuation.has_value());
+    auto isInStat = isInStatementContext(parsedFile.tree, selectionLoc.offsets());
+    ENFORCE(isInStat.has_value());
+    auto isRetValueNeeded = isReturnValueNeeded(parsedFile.tree, selectionLoc.offsets());
+    ENFORCE(isRetValueNeeded.has_value());
     config.logger->debug("ExtractMethod: selection size: {}, continuation size: {}", selection.size(),
                          continuation.has_value() ? continuation->size() : 0);
     config.logger->debug("ExtractMethod: selection loc: {}", selectionLoc.showRaw(gs));
@@ -978,9 +1105,10 @@ vector<unique_ptr<TextDocumentEdit>> getExtractMethodEdits(LSPTypecheckerDelegat
     auto [_, selectionIndent] = selectionLoc.findStartOfIndentation(gs);
     auto dedentedSource = dedentString(selectionIndent, selectionSource.value());
 
-    auto newMethodText = "\n\n" + indentString(indentLength, formatNewMethod(isSingletonMethod, dedentedSource,
-                                                                             paramNames, returnNames));
-    auto callText = formatCall(isSingletonMethod, paramNames, returnNames);
+    auto newMethodText =
+        "\n\n" + indentString(indentLength, formatNewMethod(isSingletonMethod, dedentedSource, paramNames, returnNames,
+                                                            isRetValueNeeded.value()));
+    auto callText = formatCall(isSingletonMethod, paramNames, returnNames, isInStat.value(), isRetValueNeeded.value());
 
     config.logger->debug("ExtractMethod newMethod:\n{}", newMethodText);
     config.logger->debug("ExtractMethod call:\n{}", callText);

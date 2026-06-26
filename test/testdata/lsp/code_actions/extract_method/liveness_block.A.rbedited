@@ -9,7 +9,7 @@ class LivenessBlock
   def modified_in_block_used_after
     total = T.let(0, Integer)
     10.times do |i|
-      return_value, total = new_method(i, total)
+      (_, total = new_method(i, total))[0]
 #     ^^^^^^^^^^^^^^^^^ apply-code-action: [A] Extract Method
     end
     puts total

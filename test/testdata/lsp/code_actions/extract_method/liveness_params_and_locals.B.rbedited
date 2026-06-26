@@ -14,17 +14,15 @@ class LivenessParamsAndLocals
   sig {void}
   def reads_prior_local_writes_live_out
     x = 10
-    return_value, y = new_method(x)
+    y = new_method(x)
 #   ^^^^^^^^^ apply-code-action: [B] Extract Method
     puts y
   end
 
-  sig { params(x: T.untyped).returns([T.untyped, T.untyped]) }
+  sig { params(x: T.untyped).returns([T.untyped]) }
   def new_method(x)
-    newMethodReturnValue = begin
-      y = x * 2
-    end
-    [newMethodReturnValue, y]
+    y = x * 2
+    [y]
   end
 
 

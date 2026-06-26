@@ -36,7 +36,7 @@ class LivenessWhileBodyToCondition
   def body_live_to_condition_and_post
     x = 0
     while (y = x + 1; y < 10)
-      return_value, x = new_method(x)
+      (_, x = new_method(x))[0]
 #     ^^^^^^^^^ apply-code-action: [D] Extract Method
     end
     puts x

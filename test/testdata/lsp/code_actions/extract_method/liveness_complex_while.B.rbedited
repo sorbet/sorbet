@@ -18,7 +18,7 @@ class LivenessComplexWhile
   def body_modifies_condition_var
     x = T.let(0, Integer)
     while (x = x + 1; x < 10)
-      return_value, x = new_method(x)
+      (_, x = new_method(x))[0]
 #     ^^^^^^^^^ apply-code-action: [B] Extract Method
     end
     puts x

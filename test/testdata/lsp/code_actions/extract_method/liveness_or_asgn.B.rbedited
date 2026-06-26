@@ -16,17 +16,15 @@ class LivenessOrAsgn
   sig {void}
   def modified_and_live
     x = T.let(5, T.nilable(Integer))
-    return_value, x = new_method(x)
+    x = new_method(x)
 #   ^^^^^^^^^^^^^^ apply-code-action: [B] Extract Method
     puts x
   end
 
-  sig { params(x: T.untyped).returns([T.untyped, T.untyped]) }
+  sig { params(x: T.untyped).returns([T.untyped]) }
   def new_method(x)
-    newMethodReturnValue = begin
-      x = x.to_i + 1
-    end
-    [newMethodReturnValue, x]
+    x = x.to_i + 1
+    [x]
   end
 
 end

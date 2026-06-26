@@ -18,7 +18,7 @@ class LivenessWhileBodyToCondition
   def multi_var_body_to_condition
     a = 0; b = 1
     while (c = a + b; c < 50)
-      return_value, a, b = new_method(b, c)
+      (_, a, b = new_method(b, c))[0]
 #     ^^^^^^^^^^^^ apply-code-action: [B] Extract Method
     end
   end

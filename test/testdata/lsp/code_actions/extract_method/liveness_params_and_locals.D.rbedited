@@ -29,17 +29,15 @@ class LivenessParamsAndLocals
 
   sig {params(n: Integer).void}
   def mixed_live_and_dead(n)
-    return_value, result = new_method(n)
+    result = new_method(n)
 #   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [D] Extract Method
     puts result
   end
 
-  sig { params(n: T.untyped).returns([T.untyped, T.untyped]) }
+  sig { params(n: T.untyped).returns([T.untyped]) }
   def new_method(n)
-    newMethodReturnValue = begin
-      temp = n * 2; result = temp + 1; temp = 0
-    end
-    [newMethodReturnValue, result]
+    temp = n * 2; result = temp + 1; temp = 0
+    [result]
   end
 
 end

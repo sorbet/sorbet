@@ -10,7 +10,7 @@ class LivenessLoopIterations
     sum = T.let(0, Integer)
     i = T.let(0, Integer)
     while i < 10
-      return_value, i, sum = new_method(i, sum)
+      (_, i, sum = new_method(i, sum))[0]
 #     ^^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [A] Extract Method
     end
     puts sum

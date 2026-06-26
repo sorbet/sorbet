@@ -9,7 +9,7 @@ class LivenessWhileBodyToCondition
   def body_writes_condition_reads
     x = 0
     while (y = x * 2; y < 100)
-      return_value, x = new_method(x)
+      (_, x = new_method(x))[0]
 #     ^^^^^^^^^ apply-code-action: [A] Extract Method
     end
   end

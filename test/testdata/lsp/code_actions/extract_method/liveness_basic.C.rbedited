@@ -24,18 +24,16 @@ class LivenessBasic
   def two_vars_modified
     x = T.let(0, Integer)
     y = T.let(0, Integer)
-    return_value, x, y = new_method()
+    x, y = new_method()
 #   ^^^^^^^^^^^^ apply-code-action: [C] Extract Method
     puts x
     puts y
   end
 
-  sig { params().returns([T.untyped, T.untyped, T.untyped]) }
+  sig { params().returns([T.untyped, T.untyped]) }
   def new_method()
-    newMethodReturnValue = begin
-      x = 3; y = 4
-    end
-    [newMethodReturnValue, x, y]
+    x = 3; y = 4
+    [x, y]
   end
 
 end

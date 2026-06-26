@@ -8,17 +8,15 @@ class LivenessBasic
   sig {void}
   def variable_used_after
     y = T.let(0, Integer)
-    return_value, y = new_method()
+    y = new_method()
 #   ^^^^^^^^^ apply-code-action: [A] Extract Method
     puts y
   end
 
-  sig { params().returns([T.untyped, T.untyped]) }
+  sig { params().returns([T.untyped]) }
   def new_method()
-    newMethodReturnValue = begin
-      y = 5 + 1
-    end
-    [newMethodReturnValue, y]
+    y = 5 + 1
+    [y]
   end
 
 

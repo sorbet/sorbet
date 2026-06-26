@@ -21,7 +21,7 @@ class LivenessLoopIterations
     a = T.let(0, Integer)
     b = T.let(1, Integer)
     while a < 100
-      return_value, a, b = new_method(a, b)
+      (_, a, b = new_method(a, b))[0]
 #     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [B] Extract Method
     end
     puts a
