@@ -7,4 +7,7 @@ class C < PackageSpec
   import A
   import AnotherPack
   import D
+
+  visible_to DoesNotExist
+  visible_to AlsoDoesNotExist::*
 end

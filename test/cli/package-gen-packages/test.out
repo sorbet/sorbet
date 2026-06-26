@@ -50,7 +50,7 @@ C/__package.rb:7: Layering violation: cannot import `A` (in layer `app`) from `C
      5 |  layer 'app'
                 ^^^^^
 
-C/__package.rb:3: `C` is missing imports https://srb.help/3734
+C/__package.rb:3: `C` is missing imports and `visible_to`s https://srb.help/3734
      3 |class C < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
@@ -65,15 +65,27 @@ C/__package.rb:3: `C` is missing imports https://srb.help/3734
       import E`
      9 |  import D
                   ^
+    C/__package.rb:11: Deleted
+    11 |  visible_to DoesNotExist
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+    C/__package.rb:12: Deleted
+    12 |  visible_to AlsoDoesNotExist::*
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 E/__package.rb:3: `E` is missing `visible_to`s https://srb.help/3734
      3 |class E < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    E/__package.rb:7: Inserted `visible_to 'tests'
+    E/__package.rb:9: Deleted
+     9 |  visible_to DoesNotExis
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    E/__package.rb:10: Deleted
+    10 |  visible_to AlsoDoesNotExist::*
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    E/__package.rb:10: Inserted `visible_to 'tests'
       visible_to C`
-     7 |  export E::CONSTANT_FROM_E
-                                   ^
+    10 |  visible_to AlsoDoesNotExist::*
+                                        ^
 
 D/__package.rb:3: `D` is missing imports and exports https://srb.help/3734
      3 |class D < PackageSpec
@@ -149,6 +161,7 @@ class C < PackageSpec
   import D
   import D::ANestedPackage
   import E
+
 end
 
 ###### cat D/__package.rb ######
@@ -183,6 +196,7 @@ class E < PackageSpec
   layer 'util'
 
   export E::CONSTANT_FROM_E
+
   visible_to 'tests'
   visible_to C
 end
@@ -227,7 +241,7 @@ C/__package.rb:7: Layering violation: cannot import `A` (in layer `app`) from `C
      5 |  layer 'app'
                 ^^^^^
 
-C/__package.rb:3: `C` is missing imports https://srb.help/3734
+C/__package.rb:3: `C` is missing imports and `visible_to`s https://srb.help/3734
      3 |class C < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
@@ -242,15 +256,27 @@ C/__package.rb:3: `C` is missing imports https://srb.help/3734
       import E`
      9 |  import D
                   ^
+    C/__package.rb:11: Deleted
+    11 |  visible_to DoesNotExist
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+    C/__package.rb:12: Deleted
+    12 |  visible_to AlsoDoesNotExist::*
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 E/__package.rb:3: `E` is missing `visible_to`s https://srb.help/3734
      3 |class E < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    E/__package.rb:7: Inserted `visible_to 'tests'
+    E/__package.rb:9: Deleted
+     9 |  visible_to DoesNotExis
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    E/__package.rb:10: Deleted
+    10 |  visible_to AlsoDoesNotExist::*
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    E/__package.rb:10: Inserted `visible_to 'tests'
       visible_to C`
-     7 |  export E::CONSTANT_FROM_E
-                                   ^
+    10 |  visible_to AlsoDoesNotExist::*
+                                        ^
 
 D/__package.rb:3: `D` is missing imports and exports https://srb.help/3734
      3 |class D < PackageSpec
@@ -345,6 +371,7 @@ class C < PackageSpec
   import D
   import D::ANestedPackage
   import E
+
 end
 
 ###### cat D/__package.rb ######
@@ -379,6 +406,7 @@ class E < PackageSpec
   layer 'util'
 
   export E::CONSTANT_FROM_E
+
   visible_to 'tests'
   visible_to C
 end

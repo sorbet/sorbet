@@ -10,6 +10,7 @@
                 "--debug-log-file=sorbet-vscode.log",
                 "--lsp",
                 "--dir=.",
+                "--enable-experimental-lsp-create-missing-method",
             ]
         }
     ],

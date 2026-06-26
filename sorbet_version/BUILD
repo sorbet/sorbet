@@ -3,8 +3,8 @@ filegroup(
     srcs = [
         "sorbet_version.h",
     ] + select({
-        "be-versioned": ["sorbet_version_gen.c"],
-        "//conditions:default": ["sorbet_version.c"],
+        "be-versioned": ["sorbet_version_gen.cc"],
+        "//conditions:default": ["sorbet_version.cc"],
     }),
     visibility = ["//visibility:public"],
 )
@@ -29,9 +29,9 @@ config_setting(
 )
 
 genrule(
-    name = "sorbet_version_gen_c",
-    srcs = ["sorbet_version.c"],
-    outs = ["sorbet_version_gen.c"],
+    name = "sorbet_version_gen_cc",
+    srcs = ["sorbet_version.cc"],
+    outs = ["sorbet_version_gen.cc"],
     cmd = """
     scm_clean=$$(grep STABLE_BUILD_SCM_CLEAN bazel-out/stable-status.txt | sed 's/^STABLE_BUILD_SCM_CLEAN //')
     scm_revision=$$(grep STABLE_BUILD_SCM_REVISION bazel-out/stable-status.txt | sed 's/^STABLE_BUILD_SCM_REVISION //')

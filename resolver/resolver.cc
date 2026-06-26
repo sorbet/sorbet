@@ -1417,29 +1417,38 @@ public:
         }
 
         auto send = ast::cast_tree<ast::Send>(asgn.rhs);
-        if (send != nullptr && send->fun == core::Names::typeAlias()) {
-            if (!send->hasBlock()) {
-                // if we have an invalid (i.e. nullary) call to TypeAlias, then we'll treat it as a type alias for
-                // Untyped and report an error here: otherwise, we end up in a state at the end of constant resolution
-                // that won't match our expected invariants (and in fact will fail our sanity checks)
-                // auto temporaryUntyped = ast::MK::Untyped(asgn->lhs.get()->loc);
-                auto temporaryUntyped = ast::MK::Block0(asgn.lhs.loc(), ast::MK::Untyped(asgn.lhs.loc()));
-                send->setBlock(std::move(temporaryUntyped));
-
-                // because we're synthesizing a fake "untyped" here and actually adding it to the AST, we won't report
-                // an arity mismatch for `T.untyped` in the future, so report the arity mismatch now
-                if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidTypeAlias)) {
-                    e.setHeader("No block given to `{}`", "T.type_alias");
-                    CorrectTypeAlias::eagerToLazy(ctx, e, send);
+        if (send != nullptr) {
+            // Unwrap .checked(:sym) to find T.type_alias { ... }.checked(:sym)
+            if (send->fun == core::Names::checked() && send->numPosArgs() == 1 &&
+                ast::isa_tree<ast::Literal>(send->getPosArg(0))) {
+                if (auto inner = ast::cast_tree<ast::Send>(send->recv)) {
+                    send = inner;
                 }
             }
-            auto *block = send->block();
-            this->todoTypeAliases_.emplace_back(id->symbol(), ctx.file, &block->body);
+            if (send->fun == core::Names::typeAlias()) {
+                if (!send->hasBlock()) {
+                    // if we have an invalid (i.e. nullary) call to TypeAlias, then we'll treat it as a type alias for
+                    // Untyped and report an error here: otherwise, we end up in a state at the end of constant
+                    // resolution that won't match our expected invariants (and in fact will fail our sanity checks)
+                    // auto temporaryUntyped = ast::MK::Untyped(asgn->lhs.get()->loc);
+                    auto temporaryUntyped = ast::MK::Block0(asgn.lhs.loc(), ast::MK::Untyped(asgn.lhs.loc()));
+                    send->setBlock(std::move(temporaryUntyped));
 
-            // We also enter a ResolutionItem for the lhs of a type alias so even if the type alias isn't used,
-            // we'll still emit a warning when the rhs of a type alias doesn't resolve.
-            this->todo_.emplace_back(nesting_, id);
-            return;
+                    // because we're synthesizing a fake "untyped" here and actually adding it to the AST, we won't
+                    // report an arity mismatch for `T.untyped` in the future, so report the arity mismatch now
+                    if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidTypeAlias)) {
+                        e.setHeader("No block given to `{}`", "T.type_alias");
+                        CorrectTypeAlias::eagerToLazy(ctx, e, send);
+                    }
+                }
+                auto *block = send->block();
+                this->todoTypeAliases_.emplace_back(id->symbol(), ctx.file, &block->body);
+
+                // We also enter a ResolutionItem for the lhs of a type alias so even if the type alias isn't used,
+                // we'll still emit a warning when the rhs of a type alias doesn't resolve.
+                this->todo_.emplace_back(nesting_, id);
+                return;
+            }
         }
 
         // Check for ambiguous definitions.
@@ -2997,7 +3006,17 @@ public:
             ENFORCE(!sym.isTypeMember() ||
                     (send->recv.isSelfReference() || ast::MK::isSorbetPrivateStatic(send->recv)));
 
-            if ((sym.isTypeAlias(ctx) && send->fun != core::Names::typeAlias()) ||
+            auto innerSend = send;
+            if (innerSend->fun == core::Names::checked() && innerSend->numPosArgs() == 1 &&
+                ast::isa_tree<ast::Literal>(innerSend->getPosArg(0))) {
+                if (auto inner = ast::cast_tree<ast::Send>(innerSend->recv)) {
+                    // We store the innerSend (if any) in the ResolveAssignItem because the
+                    // type_alias case expects to be able to unwrap the `Block`.
+                    innerSend = inner;
+                }
+            }
+
+            if ((sym.isTypeAlias(ctx) && innerSend->fun != core::Names::typeAlias()) ||
                 (sym.isTypeMember() && send->fun != core::Names::typeMember() &&
                  send->fun != core::Names::typeTemplate())) {
                 // This is a reassignment of a constant that was declared as a type member or a type alias.
@@ -3013,7 +3032,7 @@ public:
                 dependencies_.emplace_back(mixin);
             }
 
-            todoAssigns_.emplace_back(ResolveAssignItem{ctx.owner, sym, send, std::move(dependencies_), ctx.file});
+            todoAssigns_.emplace_back(ResolveAssignItem{ctx.owner, sym, innerSend, std::move(dependencies_), ctx.file});
         } else if (sym.isStaticField(ctx)) {
             ResolveStaticFieldItem job{ctx.file, sym.asFieldRef(), &asgn};
             auto resultType = tryResolveStaticField(ctx, job);
