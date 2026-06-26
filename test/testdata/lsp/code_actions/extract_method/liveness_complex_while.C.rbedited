@@ -29,18 +29,16 @@ class LivenessComplexWhile
     i = T.let(0, Integer)
     sum = T.let(0, Integer)
     while i < 10
-      (_, i, sum = new_method(i, sum))[0]
+      (i, sum = new_method(i, sum))
 #     ^^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [C] Extract Method
     end
     puts sum
   end
 
-  sig { params(i: T.untyped, sum: T.untyped).returns([T.untyped, T.untyped, T.untyped]) }
+  sig { params(i: T.untyped, sum: T.untyped).returns([T.untyped, T.untyped]) }
   def new_method(i, sum)
-    newMethodReturnValue = begin
-      sum = sum + i; i = i + 1
-    end
-    [newMethodReturnValue, i, sum]
+    sum = sum + i; i = i + 1
+    [i, sum]
   end
 
 end

@@ -21,18 +21,16 @@ class LivenessLoopIterations
     a = T.let(0, Integer)
     b = T.let(1, Integer)
     while a < 100
-      (_, a, b = new_method(a, b))[0]
+      (a, b = new_method(a, b))
 #     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [B] Extract Method
     end
     puts a
   end
 
-  sig { params(a: T.untyped, b: T.untyped).returns([T.untyped, T.untyped, T.untyped]) }
+  sig { params(a: T.untyped, b: T.untyped).returns([T.untyped, T.untyped]) }
   def new_method(a, b)
-    newMethodReturnValue = begin
-      temp = a; a = b; b = temp + b
-    end
-    [newMethodReturnValue, a, b]
+    temp = a; a = b; b = temp + b
+    [a, b]
   end
 
 end

@@ -63,18 +63,16 @@ class SelectionEdgeCases
   def while_single_statement
     i = T.let(0, Integer)
     while i < 5
-      (_, i = new_method(i))[0]
+      (i = new_method(i))
 #     ^^^^^^^^^ apply-code-action: [F] Extract Method
     end
     puts i
   end
 
-  sig { params(i: T.untyped).returns([T.untyped, T.untyped]) }
+  sig { params(i: T.untyped).returns(T.untyped) }
   def new_method(i)
-    newMethodReturnValue = begin
-      i = i + 1
-    end
-    [newMethodReturnValue, i]
+    i = i + 1
+    i
   end
 
 end

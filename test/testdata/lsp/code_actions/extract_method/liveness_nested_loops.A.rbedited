@@ -12,18 +12,16 @@ class LivenessNestedLoops
     while total < 100
       i = 0
       while i < 10
-        (_, i, total = new_method(i, total))[0]
+        (i, total = new_method(i, total))
 #       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [A] Extract Method
       end
     end
   end
 
-  sig { params(i: T.untyped, total: T.untyped).returns([T.untyped, T.untyped, T.untyped]) }
+  sig { params(i: T.untyped, total: T.untyped).returns([T.untyped, T.untyped]) }
   def new_method(i, total)
-    newMethodReturnValue = begin
-      total = total + 1; i = i + 1
-    end
-    [newMethodReturnValue, i, total]
+    total = total + 1; i = i + 1
+    [i, total]
   end
 
 

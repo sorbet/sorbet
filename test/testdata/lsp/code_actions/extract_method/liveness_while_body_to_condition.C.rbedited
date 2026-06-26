@@ -27,17 +27,15 @@ class LivenessWhileBodyToCondition
   def body_to_simple_condition
     x = 0
     while x < 10
-      (_, x = new_method(x))[0]
+      (x = new_method(x))
 #     ^^^^^^^^^ apply-code-action: [C] Extract Method
     end
   end
 
-  sig { params(x: T.untyped).returns([T.untyped, T.untyped]) }
+  sig { params(x: T.untyped).returns(T.untyped) }
   def new_method(x)
-    newMethodReturnValue = begin
-      x = x + 1
-    end
-    [newMethodReturnValue, x]
+    x = x + 1
+    x
   end
 
 

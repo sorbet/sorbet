@@ -762,6 +762,7 @@ string dedentString(uint32_t indent, string_view str) {
     return result;
 }
 
+namespace rbfmt {
 string tupleValue(const vector<string> &values) {
     if (values.empty()) {
         return "[]";
@@ -786,7 +787,7 @@ string parens(string s) {
     return fmt::format("({})", s);
 }
 
-string formatAssign(const string &lhs, const string &rhs, bool isInStatementContext) {
+string assign(const string &lhs, const string &rhs, bool isInStatementContext) {
     auto assign = fmt::format("{} = {}", lhs, rhs);
     if (!isInStatementContext) {
         assign = parens(assign);
@@ -794,7 +795,7 @@ string formatAssign(const string &lhs, const string &rhs, bool isInStatementCont
     return assign;
 }
 
-string formatReturnSig(const vector<string> &types) {
+string returnSig(const vector<string> &types) {
     if (types.empty()) {
         return ".void()";
     }
@@ -803,6 +804,7 @@ string formatReturnSig(const vector<string> &types) {
     }
     return fmt::format(".returns([{}])", absl::StrJoin(types, ", "));
 }
+} // namespace rbfmt
 
 string formatNewMethod(bool isSingletonMethod, string_view selectionSource, const vector<string> &params,
                        const vector<string> &updateReturns, bool isReturnValueNeeded) {
@@ -818,7 +820,7 @@ string formatNewMethod(bool isSingletonMethod, string_view selectionSource, cons
     for (int i = 0; i < updateReturns.size(); i++) {
         returnTypes.push_back("T.untyped");
     }
-    string returnsSig = formatReturnSig(returnTypes);
+    string returnsSig = rbfmt::returnSig(returnTypes);
     auto sig = fmt::format("sig {{ params({}){} }}", paramsSig, returnsSig);
 
     auto paramList = absl::StrJoin(params, ", ");
@@ -836,10 +838,10 @@ string formatNewMethod(bool isSingletonMethod, string_view selectionSource, cons
             for (auto v : updateReturns) {
                 vals.push_back(v);
             }
-            result += indentString(2, tupleValue(vals));
+            result += indentString(2, rbfmt::tupleValue(vals));
         } else {
             result += indentString(2, selectionSource);
-            auto returnExpr = tupleValue(updateReturns);
+            auto returnExpr = rbfmt::tupleValue(updateReturns);
             result += indentString(2, returnExpr);
         }
     }
@@ -872,19 +874,19 @@ string formatCall(bool isSingletonMethod, const vector<string> &args, const vect
         lhsNames.push_back(ret);
     }
 
-    auto assign = fmt::format("{} = {}", tupleLhs(lhsNames), call);
+    auto assign = fmt::format("{} = {}", rbfmt::tupleValue(lhsNames), call);
     if (isReturnValueNeeded) {
         if (lhsNames.size() > 1) {
-            return fmt::format("{}[0]", formatAssign(tupleLhs(lhsNames), call, false));
+            return fmt::format("{}[0]", rbfmt::assign(rbfmt::tupleLhs(lhsNames), call, false));
         } else {
-            return formatAssign(tupleLhs(lhsNames), call, isInStatementContext);
+            return rbfmt::assign(rbfmt::tupleLhs(lhsNames), call, isInStatementContext);
         }
     } else {
-        return formatAssign(tupleLhs(lhsNames), call, isInStatementContext);
+        return rbfmt::assign(rbfmt::tupleLhs(lhsNames), call, isInStatementContext);
     }
 }
 
-optional<bool> isInStatementContext(const ast::ExpressionPtr &expr, const core::LocOffsets target) {
+optional<bool> isInStatementContext(const ast::ExpressionPtr &expr, const core::LocOffsets target, bool inStat) {
     if (!expr.loc().exists()) {
         return nullopt;
     }
@@ -892,7 +894,7 @@ optional<bool> isInStatementContext(const ast::ExpressionPtr &expr, const core::
         return nullopt;
     }
     if (target.contains(expr.loc())) {
-        return {false};
+        return {inStat};
     }
     switch (expr.tag()) {
         case ast::Tag::InsSeq: {
@@ -907,16 +909,26 @@ optional<bool> isInStatementContext(const ast::ExpressionPtr &expr, const core::
                 return {true};
             }
             for (auto *stat : stats) {
-                if (auto r = isInStatementContext(*stat, target); r.has_value()) {
+                if (auto r = isInStatementContext(*stat, target, true); r.has_value()) {
                     return r;
                 }
             }
             break;
         }
+        // case ast::Tag::While: {
+        //     auto &while_ = ast::cast_tree_nonnull<ast::While>(expr);
+        //     if (auto r = isInStatementContext(while_.cond, target, false); r.has_value()) {
+        //         return r;
+        //     }
+        //     if (auto r = isInStatementContext(while_.body, target, true); r.has_value()) {
+        //         return r;
+        //     }
+        //     break;
+        // }
         default: {
             optional<bool> found;
             iterChildrenUntil(expr, [&found, target](const ast::ExpressionPtr &child) {
-                if (found = isInStatementContext(child, target); found.has_value()) {
+                if (found = isInStatementContext(child, target, false); found.has_value()) {
                     return IterResult::Stop;
                 }
                 return IterResult::Continue;
@@ -930,7 +942,7 @@ optional<bool> isInStatementContext(const ast::ExpressionPtr &expr, const core::
     return nullopt;
 }
 
-optional<bool> isReturnValueNeeded(const ast::ExpressionPtr &expr, const core::LocOffsets target) {
+optional<bool> isReturnValueNeeded(const ast::ExpressionPtr &expr, const core::LocOffsets target, bool isNeeded) {
     if (!expr.loc().exists()) {
         return nullopt;
     }
@@ -938,7 +950,7 @@ optional<bool> isReturnValueNeeded(const ast::ExpressionPtr &expr, const core::L
         return nullopt;
     }
     if (target.contains(expr.loc())) {
-        return {true};
+        return {isNeeded};
     }
     switch (expr.tag()) {
         case ast::Tag::InsSeq: {
@@ -955,16 +967,26 @@ optional<bool> isReturnValueNeeded(const ast::ExpressionPtr &expr, const core::L
                 return {includesLastExpr};
             }
             for (auto *stat : stats) {
-                if (auto r = isReturnValueNeeded(*stat, target); r.has_value()) {
+                if (auto r = isReturnValueNeeded(*stat, target, stat == stats.back()); r.has_value()) {
                     return r;
                 }
+            }
+            break;
+        }
+        case ast::Tag::While: {
+            auto &while_ = ast::cast_tree_nonnull<ast::While>(expr);
+            if (auto r = isReturnValueNeeded(while_.cond, target, true); r.has_value()) {
+                return r;
+            }
+            if (auto r = isReturnValueNeeded(while_.body, target, false); r.has_value()) {
+                return r;
             }
             break;
         }
         default: {
             optional<bool> found;
             iterChildrenUntil(expr, [&found, target](const ast::ExpressionPtr &child) {
-                if (found = isReturnValueNeeded(child, target); found.has_value()) {
+                if (found = isReturnValueNeeded(child, target, true); found.has_value()) {
                     return IterResult::Stop;
                 }
                 return IterResult::Continue;
@@ -1043,9 +1065,9 @@ vector<unique_ptr<TextDocumentEdit>> getExtractMethodEdits(LSPTypecheckerDelegat
     config.logger->debug("ExtractMethod: selection found, size: {}", selection.size());
     auto continuation = getContinuation(parsedFile.tree, selectionLoc.offsets());
     ENFORCE(continuation.has_value());
-    auto isInStat = isInStatementContext(parsedFile.tree, selectionLoc.offsets());
+    auto isInStat = isInStatementContext(parsedFile.tree, selectionLoc.offsets(), true);
     ENFORCE(isInStat.has_value());
-    auto isRetValueNeeded = isReturnValueNeeded(parsedFile.tree, selectionLoc.offsets());
+    auto isRetValueNeeded = isReturnValueNeeded(parsedFile.tree, selectionLoc.offsets(), true);
     ENFORCE(isRetValueNeeded.has_value());
     config.logger->debug("ExtractMethod: selection size: {}, continuation size: {}", selection.size(),
                          continuation.has_value() ? continuation->size() : 0);

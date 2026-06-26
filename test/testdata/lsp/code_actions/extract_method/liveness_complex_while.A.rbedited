@@ -14,7 +14,7 @@ class LivenessComplexWhile
     end
   end
 
-  sig { params(x: T.untyped).returns(T.untyped) }
+  sig { params(x: T.untyped).void() }
   def new_method(x)
     puts x
   end

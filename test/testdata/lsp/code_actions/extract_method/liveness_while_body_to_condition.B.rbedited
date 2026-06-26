@@ -18,17 +18,15 @@ class LivenessWhileBodyToCondition
   def multi_var_body_to_condition
     a = 0; b = 1
     while (c = a + b; c < 50)
-      (_, a, b = new_method(b, c))[0]
+      (a, b = new_method(b, c))
 #     ^^^^^^^^^^^^ apply-code-action: [B] Extract Method
     end
   end
 
-  sig { params(b: T.untyped, c: T.untyped).returns([T.untyped, T.untyped, T.untyped]) }
+  sig { params(b: T.untyped, c: T.untyped).returns([T.untyped, T.untyped]) }
   def new_method(b, c)
-    newMethodReturnValue = begin
-      a = b; b = c
-    end
-    [newMethodReturnValue, a, b]
+    a = b; b = c
+    [a, b]
   end
 
 
