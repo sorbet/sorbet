@@ -29,7 +29,7 @@ class LivenessComplexWhile
     i = T.let(0, Integer)
     sum = T.let(0, Integer)
     while i < 10
-      (i, sum = new_method(i, sum))
+      i, sum = new_method(i, sum)
 #     ^^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [C] Extract Method
     end
     puts sum

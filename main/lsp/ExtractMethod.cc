@@ -915,16 +915,16 @@ optional<bool> isInStatementContext(const ast::ExpressionPtr &expr, const core::
             }
             break;
         }
-        // case ast::Tag::While: {
-        //     auto &while_ = ast::cast_tree_nonnull<ast::While>(expr);
-        //     if (auto r = isInStatementContext(while_.cond, target, false); r.has_value()) {
-        //         return r;
-        //     }
-        //     if (auto r = isInStatementContext(while_.body, target, true); r.has_value()) {
-        //         return r;
-        //     }
-        //     break;
-        // }
+        case ast::Tag::While: {
+            auto &while_ = ast::cast_tree_nonnull<ast::While>(expr);
+            if (auto r = isInStatementContext(while_.cond, target, false); r.has_value()) {
+                return r;
+            }
+            if (auto r = isInStatementContext(while_.body, target, true); r.has_value()) {
+                return r;
+            }
+            break;
+        }
         default: {
             optional<bool> found;
             iterChildrenUntil(expr, [&found, target](const ast::ExpressionPtr &child) {

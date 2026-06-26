@@ -27,7 +27,7 @@ class LivenessWhileConditionWrite
   def body_writes_var_used_after_loop
     x = T.let(0, Integer)
     while x < 10
-      (x = new_method(x))
+      x = new_method(x)
 #     ^^^^^^^^^ apply-code-action: [C] Extract Method
     end
     puts x

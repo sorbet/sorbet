@@ -12,7 +12,7 @@ class LivenessNestedLoops
     while total < 100
       i = 0
       while i < 10
-        (i, total = new_method(i, total))
+        i, total = new_method(i, total)
 #       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [A] Extract Method
       end
     end
