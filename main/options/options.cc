@@ -1501,7 +1501,7 @@ void readOptions(Options &opts,
 
         // Allow semanticExtensionProviders to print something when --version is given before we throw.
         if (raw["version"].as<bool>()) {
-            fmt::print("Sorbet typechecker {}\n", sorbet_full_version_string);
+            fmt::print("Sorbet typechecker {}\n", sorbet::full_version_string);
             throw EarlyReturnWithCode(0);
         }
 

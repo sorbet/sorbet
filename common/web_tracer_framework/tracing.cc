@@ -55,7 +55,7 @@ string Tracing::stateToJSONL(const CounterState &counters, pid_t pid, microsecon
         writer.String("args");
         writer.StartObject();
         writer.String("name");
-        writer.String(fmt::format("Sorbet v{}", sorbet_full_version_string));
+        writer.String(fmt::format("Sorbet v{}", sorbet::full_version_string));
         writer.EndObject();
 
         writer.EndObject();
