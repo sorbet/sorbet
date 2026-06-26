@@ -2,7 +2,6 @@
 #include "ast/Helpers.h"
 #include "core/lsp/Query.h"
 #include "core/lsp/QueryResponse.h"
-#include "core/Types.h"
 
 using namespace std;
 namespace sorbet::realmain::lsp {
@@ -180,15 +179,14 @@ void DefLocSaver::preTransformClassDef(core::Context ctx, const ast::ClassDef &c
     }
 }
 
-void DefLocSaver::postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
-    auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
-    if (send.fun != core::Names::aliasMethod() || send.numPosArgs() < 2) {
+void DefLocSaver::postTransformSend(core::Context ctx, const ast::Send &send) {
+    if (send.fun != core::Names::aliasMethod() || send.numPosArgs() != 2) {
         return;
     }
 
     // `alias_method :bar, :foo` -- the second arg (:foo) is a reference to the original method.
     // If the LSP query is for that symbol, emit a response at the :foo location.
-    const core::lsp::Query &lspQuery = ctx.state.lspQuery;
+    const auto &lspQuery = ctx.state.lspQuery;
     auto &secondArg = send.getPosArg(1);
     auto lit = ast::cast_tree<ast::Literal>(secondArg);
     if (!lit || !lit->isSymbol()) {

@@ -11,3 +11,13 @@ class A
   # ^ usage: A#foo
   end
 end
+
+class B
+  extend T::Sig
+  sig { returns(Symbol) }
+  def self.foo
+  #         ^ def: B.foo
+    alias_method :bar, :foo
+    #                   ^ usage: B.foo
+  end
+end
