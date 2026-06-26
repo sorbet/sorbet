@@ -11,7 +11,6 @@ namespace sorbet {
 
 // Manual configuration
 #define SORBET_VERSION "0.6"
-#define SORBET_CODENAME ""
 
 // Magic configuration
 #if BUILD_RELEASE
@@ -43,7 +42,6 @@ const int is_with_debug_symbols = 0;
 #endif
 
 const char version[] = SORBET_VERSION;   // 0.01 alpha
-const char codename[] = SORBET_CODENAME; // We Try Furiously
 
 const char full_version_string[] = SORBET_VERSION "." QUOTED(STABLE_BUILD_SCM_COMMIT_COUNT)
 #if BUILD_RELEASE
