@@ -1097,9 +1097,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
     # Call the singleton method version. Its first-call wrapper shares the same
     # DeclarationBlock, which has already been consumed.
-    assert_raises(RuntimeError) do
-      assert_equal(42, mod.foo(42))
-    end
+    assert_equal(42, mod.foo(42))
   end
 
   it 'does not validate module_function singleton call against a redefined sig' do
@@ -1125,11 +1123,9 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     # Call the original module_function singleton copy. It should validate
     # against the Integer sig not the String sig, because we only redefined the
     # instance method.
-    assert_raises(RuntimeError) do
-      assert_equal(42, mod.foo(42))
-      err = assert_raises(TypeError) { mod.foo("hello") }
-      assert_match(/Expected type Integer/, err.message)
-    end
+    assert_equal(42, mod.foo(42))
+    err = assert_raises(TypeError) { mod.foo("hello") }
+    assert_match(/Expected type Integer/, err.message)
   end
 
   it "can mark a class abstract! even if it defines a method called method" do
