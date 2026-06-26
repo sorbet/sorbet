@@ -2,6 +2,8 @@
 
 set -eo pipefail
 
+prefix=$(.buildkite/tools/sorbet-version-prefix.sh)
+
 pushd gems/sorbet-static-and-runtime
 
 echo "--- setup :ruby:"
@@ -13,7 +15,6 @@ ruby --version
 
 echo "--- build"
 git_commit_count=$(git rev-list --count HEAD)
-prefix=$(.buildkite/tools/sorbet-version-prefix.sh)
 release_version="${prefix}.${git_commit_count}"
 sed -i.bak "s/0\\.0\\.0/${release_version}/" sorbet-static-and-runtime.gemspec
 gem build sorbet-static-and-runtime.gemspec

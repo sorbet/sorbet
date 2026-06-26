@@ -55,10 +55,10 @@ cp sorbet_bin gems/sorbet-static/libexec/sorbet
 
 rbenv install --skip-existing
 
-pushd gems/sorbet-static
 git_commit_count=$(git rev-list --count HEAD)
 prefix=$(.buildkite/tools/sorbet-version-prefix.sh)
 release_version="${prefix}.${git_commit_count}"
+pushd gems/sorbet-static
 sed -i.bak "s/0\\.0\\.0/${release_version}/" sorbet-static.gemspec
 if [[ "darwin" == "$kernel_name" ]]; then
     sed -i.bak "s/Gem::Platform::CURRENT/'universal-darwin'/" sorbet-static.gemspec
