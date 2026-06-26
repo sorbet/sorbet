@@ -16,7 +16,7 @@
 #define Q_(x) #x
 #define QUOTED_(x) Q_(x)
 
-#define SORBET_VERSION "0.6"
+#define SORBET_VERSION_MAJOR_MINOR "0.6"
 
 namespace sorbet {
 
@@ -77,7 +77,7 @@ inline constexpr bool is_with_debug_symbols = true;
 inline constexpr bool is_with_debug_symbols = false;
 #endif
 
-inline constexpr char full_version_string[] = SORBET_VERSION "." QUOTED_(STABLE_BUILD_SCM_COMMIT_COUNT)
+inline constexpr char full_version_string[] = SORBET_VERSION_MAJOR_MINOR "." QUOTED_(STABLE_BUILD_SCM_COMMIT_COUNT)
 #if BUILD_RELEASE
     " git " STABLE_BUILD_SCM_REVISION
 #else

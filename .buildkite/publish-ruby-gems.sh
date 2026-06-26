@@ -13,7 +13,7 @@ if [ "${PUBLISH_TO_RUBYGEMS:-}" == "" ] && git diff --quiet HEAD^..HEAD -- gems/
 fi
 
 git_commit_count=$(git rev-list --count HEAD)
-prefix="0.6"
+prefix=$(.buildkite/tools/sorbet-version-prefix.sh)
 release_version="$prefix.${git_commit_count}"
 
 echo "--- Dowloading artifacts"
