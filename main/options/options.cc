@@ -499,6 +499,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  cxxopts::value<string>()->default_value(empty.statsdPrefix), "<prefix>");
     options.add_options(section)("statsd-port", "StatsD server port",
                                  cxxopts::value<int>()->default_value(fmt::format("{}", empty.statsdPort)), "<port>");
+    options.add_options(section)("statsd-tag-revision", "Tags some metrics with the revision Sorbet was built from",
+                                 cxxopts::value<bool>()->default_value(fmt::format("{}", empty.statsdTagRevision)));
     options.add_options(section)("metrics-extra-tags", "Extra tags to include in every statsd metric, comma separated.",
                                  cxxopts::value<string>()->default_value(""), "<key1>=<value1>,<key2>=<value2>");
     // }}}
@@ -1203,6 +1205,7 @@ void readOptions(Options &opts,
         opts.statsdHost = raw["statsd-host"].as<string>();
         opts.statsdPort = raw["statsd-port"].as<int>();
         opts.statsdPrefix = raw["statsd-prefix"].as<string>();
+        opts.statsdTagRevision = raw["statsd-tag-revision"].as<bool>();
         opts.metricsSha = raw["metrics-sha"].as<string>();
         opts.metricsFile = raw["metrics-file"].as<string>();
         opts.metricsRepo = raw["metrics-repo"].as<string>();

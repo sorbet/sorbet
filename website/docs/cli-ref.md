@@ -185,6 +185,8 @@ Usage:
       --statsd-host <host>      StatsD sever hostname (default: "")
       --statsd-prefix <prefix>  StatsD prefix (default: ruby_typer.unknown)
       --statsd-port <port>      StatsD server port (default: 8200)
+      --statsd-tag-revision     Tags some metrics with the revision Sorbet was built from
+                                (default: true)
       --metrics-extra-tags <key1>=<value1>,<key2>=<value2>
                                 Extra tags to include in every statsd metric, comma
                                 separated. (default: "")
