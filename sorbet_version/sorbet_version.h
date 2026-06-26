@@ -33,16 +33,16 @@ inline constexpr bool fuzz_mode = false;
 inline constexpr bool fuzz_mode = true;
 #endif
 
-} // namespace sorbet
+extern const char version[];
+extern const char codename[];
+extern const char build_scm_revision[];
+extern const int build_scm_commit_count;
+extern const char build_scm_clean[];
+extern const long build_timestamp;
+extern const char full_version_string[];
+extern const int is_release_build;
+extern const int is_with_debug_symbols;
 
-extern const char sorbet_version[];
-extern const char sorbet_codename[];
-extern const char sorbet_build_scm_revision[];
-extern const int sorbet_build_scm_commit_count;
-extern const char sorbet_build_scm_clean[];
-extern const long sorbet_build_timestamp;
-extern const char sorbet_full_version_string[];
-extern const int sorbet_is_release_build;
-extern const int sorbet_is_with_debug_symbols;
+} // namespace sorbet
 
 #endif // SORBET_VERSION_H

@@ -468,8 +468,8 @@ int realmain(int argc, char *argv[]) {
         for (int i = 1; i < argc; i++) {
             absl::StrAppend(&argsConcat, " ", argv[i]);
         }
-        logger->debug("Running sorbet version {} with arguments: {}", sorbet_full_version_string, argsConcat);
-        if (!sorbet_is_release_build && !opts.silenceDevMessage &&
+        logger->debug("Running sorbet version {} with arguments: {}", sorbet::full_version_string, argsConcat);
+        if (!sorbet::is_release_build && !opts.silenceDevMessage &&
             std::getenv("SORBET_SILENCE_DEV_MESSAGE") == nullptr) {
             logger->info("👋 Hey there! Heads up that this is not a release build of sorbet.\n"
                          "Release builds are faster and more well-supported by the Sorbet team.\n"
@@ -526,7 +526,7 @@ int realmain(int argc, char *argv[]) {
 
         // skip idx 0 (corresponds to File that does not exist, so it contains nullptr)
         for (auto &payloadFile : gs->getFiles().subspan(1)) {
-            auto payloadVersion = sorbet_is_release_build ? sorbet_build_scm_revision : "master";
+            auto payloadVersion = sorbet::is_release_build ? sorbet::build_scm_revision : "master";
             auto payloadPath = payloadFile->path();
             auto payloadPrefix = absl::StrCat("https://github.com/sorbet/sorbet/tree/", payloadVersion, "/rbi/");
 
@@ -562,7 +562,7 @@ int realmain(int argc, char *argv[]) {
                       "More details at https://microsoft.github.io/language-server-protocol/specification."
                       "If you're developing an LSP extension to some editor, make sure to run sorbet with `-v` flag,"
                       "it will enable outputting the LSP session to stderr(`Write: ` and `Read: ` log lines)",
-                      sorbet_full_version_string);
+                      sorbet::full_version_string);
 
         auto output = make_shared<lsp::LSPStdout>(logger);
         lsp::LSPLoop loop(move(gs), *workers, make_shared<lsp::LSPConfiguration>(opts, output, logger),

@@ -7,16 +7,18 @@
  *  This file takes them and packages them to a API that is more pleasant to work with.
  */
 
+namespace sorbet {
+
 // Manual configuration
 #define SORBET_VERSION "0.6"
 #define SORBET_CODENAME ""
 
 // Magic configuration
 #if BUILD_RELEASE
-const int sorbet_is_release_build = 1;
+const int is_release_build = 1;
 // all these defines should be provided externally
 #else
-const int sorbet_is_release_build = 0;
+const int is_release_build = 0;
 #define STABLE_BUILD_SCM_CLEAN "0"
 #define STABLE_BUILD_SCM_COMMIT_COUNT 0
 #define BUILD_TIMESTAMP 0
@@ -27,23 +29,23 @@ const int sorbet_is_release_build = 0;
 #define Q(x) #x
 #define QUOTED(x) Q(x)
 
-const char sorbet_build_scm_clean[] = STABLE_BUILD_SCM_CLEAN;
-const char sorbet_build_scm_revision[] = STABLE_BUILD_SCM_REVISION;
-const int sorbet_build_scm_commit_count = STABLE_BUILD_SCM_COMMIT_COUNT;
-const long sorbet_build_timestamp = BUILD_TIMESTAMP;
+const char build_scm_clean[] = STABLE_BUILD_SCM_CLEAN;
+const char build_scm_revision[] = STABLE_BUILD_SCM_REVISION;
+const int build_scm_commit_count = STABLE_BUILD_SCM_COMMIT_COUNT;
+const long build_timestamp = BUILD_TIMESTAMP;
 
 #ifdef DEBUG_SYMBOLS
 #define STABLE_BUILD_DEBUG_SYMBOLS "true"
-const int sorbet_is_with_debug_symbols = 1;
+const int is_with_debug_symbols = 1;
 #else
 #define STABLE_BUILD_DEBUG_SYMBOLS "false"
-const int sorbet_is_with_debug_symbols = 0;
+const int is_with_debug_symbols = 0;
 #endif
 
-const char sorbet_version[] = SORBET_VERSION;   // 0.01 alpha
-const char sorbet_codename[] = SORBET_CODENAME; // We Try Furiously
+const char version[] = SORBET_VERSION;   // 0.01 alpha
+const char codename[] = SORBET_CODENAME; // We Try Furiously
 
-const char sorbet_full_version_string[] = SORBET_VERSION "." QUOTED(STABLE_BUILD_SCM_COMMIT_COUNT)
+const char full_version_string[] = SORBET_VERSION "." QUOTED(STABLE_BUILD_SCM_COMMIT_COUNT)
 #if BUILD_RELEASE
     " git " STABLE_BUILD_SCM_REVISION
 #else
@@ -57,3 +59,5 @@ const char sorbet_full_version_string[] = SORBET_VERSION "." QUOTED(STABLE_BUILD
     " untyped_blame=true"
 #endif
     ;
+
+} // namespace sorbet

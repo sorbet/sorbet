@@ -150,8 +150,8 @@ void StatsD::addStandardMetrics() {
         prodCounterAdd("run.utilization.context_switch.voluntary", usage.ru_nvcsw);
         prodCounterAdd("run.utilization.context_switch.involuntary", usage.ru_nivcsw);
     }
-    prodCounterAdd("release.build_scm_commit_count", sorbet_build_scm_commit_count);
-    prodCounterAdd("release.build_timestamp", sorbet_build_timestamp);
+    prodCounterAdd("release.build_scm_commit_count", sorbet::build_scm_commit_count);
+    prodCounterAdd("release.build_timestamp", sorbet::build_timestamp);
 }
 
 } // namespace sorbet

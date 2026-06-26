@@ -24,7 +24,7 @@ unique_ptr<KeyValueStore> openCache(shared_ptr<::spdlog::logger> logger, string 
     // the number of files stored * the number of flavors used. For this reason, we need to be very careful when
     // considering adding a new cache flavor.
     auto flavor = "default";
-    auto version = fmt::format("{}|{}", sorbet_full_version_string, opts.cacheSensitiveOptions.serialize());
+    auto version = fmt::format("{}|{}", sorbet::full_version_string, opts.cacheSensitiveOptions.serialize());
     return make_unique<KeyValueStore>(std::move(logger), version, std::move(cacheDir), flavor, opts.maxCacheSizeBytes);
 }
 } // namespace
@@ -211,7 +211,7 @@ unique_ptr<KeyValueStore> maybeCacheGlobalStateAndFiles(unique_ptr<KeyValueStore
         size_t usedPercent = round((sizeBytes * 100.0) / opts.maxCacheSizeBytes);
         prodCounterSet("cache.used_bytes", sizeBytes);
         prodCounterSet("cache.used_percent", usedPercent);
-        gs.tracer().debug("sorbet_version={} cache_used_bytes={} cache_used_percent={}", sorbet_full_version_string,
+        gs.tracer().debug("sorbet_version={} cache_used_bytes={} cache_used_percent={}", sorbet::full_version_string,
                           sizeBytes, usedPercent);
     } else {
         prodCounterInc("cache.aborted");
