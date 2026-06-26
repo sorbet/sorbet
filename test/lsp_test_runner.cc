@@ -506,8 +506,7 @@ TEST_CASE("LSPTest") {
             BooleanPropertyAssertion::getValue("enable-experimental-lsp-extract-to-variable", assertions)
                 .value_or(false);
         opts.lspExtractToMethodEnabled =
-            BooleanPropertyAssertion::getValue("enable-experimental-lsp-extract-to-method", assertions)
-                .value_or(false);
+            BooleanPropertyAssertion::getValue("enable-experimental-lsp-extract-to-method", assertions).value_or(false);
         opts.lspCreateMissingMethodEnabled =
             BooleanPropertyAssertion::getValue("enable-experimental-lsp-create-missing-method", assertions)
                 .value_or(false);
