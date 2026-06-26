@@ -25,7 +25,7 @@ class LivenessBlock
     end
   end
 
-  sig { params(i: T.untyped).returns([]) }
+  sig { params(i: T.untyped).void() }
   def new_method(i)
     puts i
   end

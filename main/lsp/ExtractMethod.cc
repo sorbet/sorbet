@@ -781,6 +781,7 @@ string tupleLhs(const vector<string> &lhsNames) {
     }
     return absl::StrJoin(lhsNames, ", ");
 }
+
 string parens(string s) {
     return fmt::format("({})", s);
 }
@@ -791,6 +792,16 @@ string formatAssign(const string &lhs, const string &rhs, bool isInStatementCont
         assign = parens(assign);
     }
     return assign;
+}
+
+string formatReturnSig(const vector<string> &types) {
+    if (types.empty()) {
+        return ".void()";
+    }
+    if (types.size() == 1) {
+        return fmt::format(".returns({})", types[0]);
+    }
+    return fmt::format(".returns([{}])", absl::StrJoin(types, ", "));
 }
 
 string formatNewMethod(bool isSingletonMethod, string_view selectionSource, const vector<string> &params,
@@ -807,8 +818,8 @@ string formatNewMethod(bool isSingletonMethod, string_view selectionSource, cons
     for (int i = 0; i < updateReturns.size(); i++) {
         returnTypes.push_back("T.untyped");
     }
-    string returnsSig = tupleValue(returnTypes);
-    auto sig = fmt::format("sig {{ params({}).returns({}) }}", paramsSig, returnsSig);
+    string returnsSig = formatReturnSig(returnTypes);
+    auto sig = fmt::format("sig {{ params({}){} }}", paramsSig, returnsSig);
 
     auto paramList = absl::StrJoin(params, ", ");
 
