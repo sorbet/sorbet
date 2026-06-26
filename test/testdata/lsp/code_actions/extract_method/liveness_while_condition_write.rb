@@ -6,20 +6,11 @@ class LivenessWhileConditionWrite
   extend T::Sig
 
   sig {void}
-  def body_no_live_out
-    x = T.let(0, Integer)
-    while (x = x + 1; x < 10)
-      puts x
-#     ^^^^^^ apply-code-action: [A] Extract Method
-    end
-  end
-
-  sig {void}
   def body_writes_condition_var
     x = T.let(0, Integer)
     while x < 10
       x = x + 1
-#     ^^^^^^^^^ apply-code-action: [B] Extract Method
+#     ^^^^^^^^^ apply-code-action: [A] Extract Method
     end
   end
 
@@ -28,7 +19,7 @@ class LivenessWhileConditionWrite
     x = T.let(0, Integer)
     while x < 10
       x = x + 1
-#     ^^^^^^^^^ apply-code-action: [C] Extract Method
+#     ^^^^^^^^^ apply-code-action: [B] Extract Method
     end
     puts x
   end

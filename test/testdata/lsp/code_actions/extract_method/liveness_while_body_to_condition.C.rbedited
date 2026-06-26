@@ -24,28 +24,19 @@ class LivenessWhileBodyToCondition
   end
 
   sig {void}
-  def body_to_simple_condition
+  def body_live_to_condition_and_post
     x = 0
-    while x < 10
+    while (y = x + 1; y < 10)
       x = new_method(x)
 #     ^^^^^^^^^ apply-code-action: [C] Extract Method
     end
+    puts x
   end
 
   sig { params(x: T.untyped).returns(T.untyped) }
   def new_method(x)
-    x = x + 1
+    x = x + 2
     x
   end
 
-
-  sig {void}
-  def body_live_to_condition_and_post
-    x = 0
-    while (y = x + 1; y < 10)
-      x = x + 2
-#     ^^^^^^^^^ apply-code-action: [D] Extract Method
-    end
-    puts x
-  end
 end

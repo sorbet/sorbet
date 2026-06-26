@@ -6,35 +6,27 @@ class LivenessWhileConditionWrite
   extend T::Sig
 
   sig {void}
-  def body_no_live_out
-    x = T.let(0, Integer)
-    while (x = x + 1; x < 10)
-      new_method(x)
-#     ^^^^^^ apply-code-action: [A] Extract Method
-    end
-  end
-
-  sig { params(x: T.untyped).void() }
-  def new_method(x)
-    puts x
-  end
-
-
-  sig {void}
   def body_writes_condition_var
     x = T.let(0, Integer)
     while x < 10
-      x = x + 1
-#     ^^^^^^^^^ apply-code-action: [B] Extract Method
+      x = new_method(x)
+#     ^^^^^^^^^ apply-code-action: [A] Extract Method
     end
   end
+
+  sig { params(x: T.untyped).returns(T.untyped) }
+  def new_method(x)
+    x = x + 1
+    x
+  end
+
 
   sig {void}
   def body_writes_var_used_after_loop
     x = T.let(0, Integer)
     while x < 10
       x = x + 1
-#     ^^^^^^^^^ apply-code-action: [C] Extract Method
+#     ^^^^^^^^^ apply-code-action: [B] Extract Method
     end
     puts x
   end

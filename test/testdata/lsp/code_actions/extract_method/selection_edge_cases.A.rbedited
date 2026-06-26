@@ -66,13 +66,4 @@ class SelectionEdgeCases
 #   ^^^^^^ apply-code-action: [E] Extract Method
   end
 
-  sig {void}
-  def while_single_statement
-    i = T.let(0, Integer)
-    while i < 5
-      i = i + 1
-#     ^^^^^^^^^ apply-code-action: [F] Extract Method
-    end
-    puts i
-  end
 end
