@@ -1093,7 +1093,6 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     assert_match(/Expected type Integer/, err.message)
   end
 
-
   it "can mark a class abstract! even if it defines a method called method" do
     Class.new do
       extend T::Helpers
