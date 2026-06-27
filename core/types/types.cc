@@ -976,7 +976,7 @@ core::ClassOrModuleRef Types::getRepresentedClass(const GlobalState &gs, const T
     return singleton.data(gs)->attachedClass(gs);
 }
 
-TypePtr Types::unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
+TypePtr Types::unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp, bool suppressErrors) {
     if (auto metaType = cast_type<MetaType>(tp)) {
         return metaType->wrapped;
     }
@@ -991,18 +991,20 @@ TypePtr Types::unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
 
         auto attachedClass = classType.symbol.data(gs)->attachedClass(gs);
         if (!attachedClass.exists()) {
-            if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
-                e.setHeader("Unexpected bare `{}` value found in type position", tp.show(gs));
-                if (classType.symbol == core::Symbols::T_Types_Base() ||
-                    classType.symbol.data(gs)->derivesFrom(gs, core::Symbols::T_Types_Base())) {
-                    // T::Types::Base is the parent class for runtime type objects.
-                    // Give a more helpful error message
-                    e.addErrorNote("Sorbet only allows statically-analyzable types in type positions.\n"
-                                   "    To compute new runtime types, you must explicitly wrap with `{}`",
-                                   "T.unsafe");
-                    auto locSource = loc.source(gs);
-                    if (locSource.has_value()) {
-                        e.replaceWith("Wrap in `T.unsafe`", loc, "T.unsafe({})", locSource.value());
+            if (!suppressErrors) {
+                if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
+                    e.setHeader("Unexpected bare `{}` value found in type position", tp.show(gs));
+                    if (classType.symbol == core::Symbols::T_Types_Base() ||
+                        classType.symbol.data(gs)->derivesFrom(gs, core::Symbols::T_Types_Base())) {
+                        // T::Types::Base is the parent class for runtime type objects.
+                        // Give a more helpful error message
+                        e.addErrorNote("Sorbet only allows statically-analyzable types in type positions.\n"
+                                       "    To compute new runtime types, you must explicitly wrap with `{}`",
+                                       "T.unsafe");
+                        auto locSource = loc.source(gs);
+                        if (locSource.has_value()) {
+                            e.replaceWith("Wrap in `T.unsafe`", loc, "T.unsafe({})", locSource.value());
+                        }
                     }
                 }
             }
@@ -1016,8 +1018,10 @@ TypePtr Types::unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
     if (auto appType = cast_type<AppliedType>(tp)) {
         ClassOrModuleRef attachedClass = appType->klass.data(gs)->attachedClass(gs);
         if (!attachedClass.exists()) {
-            if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
-                e.setHeader("Unexpected bare `{}` value found in type position", tp.show(gs));
+            if (!suppressErrors) {
+                if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
+                    e.setHeader("Unexpected bare `{}` value found in type position", tp.show(gs));
+                }
             }
             return Types::untypedUntracked();
         }
@@ -1029,20 +1033,22 @@ TypePtr Types::unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
         vector<TypePtr> unwrappedValues;
         unwrappedValues.reserve(shapeType->values.size());
         for (auto &value : shapeType->values) {
-            unwrappedValues.emplace_back(unwrapType(gs, loc, value));
+            unwrappedValues.emplace_back(unwrapType(gs, loc, value, suppressErrors));
         }
         return make_type<ShapeType>(shapeType->keys, move(unwrappedValues));
     } else if (auto tupleType = cast_type<TupleType>(tp)) {
         vector<TypePtr> unwrappedElems;
         unwrappedElems.reserve(tupleType->elems.size());
         for (auto &elem : tupleType->elems) {
-            unwrappedElems.emplace_back(unwrapType(gs, loc, elem));
+            unwrappedElems.emplace_back(unwrapType(gs, loc, elem, suppressErrors));
         }
         return make_type<TupleType>(move(unwrappedElems));
     }
 
-    if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
-        e.setHeader("Unexpected bare `{}` value found in type position", tp.show(gs));
+    if (!suppressErrors) {
+        if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
+            e.setHeader("Unexpected bare `{}` value found in type position", tp.show(gs));
+        }
     }
     return Types::untypedUntracked();
 }

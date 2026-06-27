@@ -1054,6 +1054,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                                 recvType.type,   send.link.data(inWhat).get(),
                                                 ownerLoc,        send.isPrivateOk,
                                                 suppressErrors,  inWhat.symbol.data(ctx)->name};
+                dispatchArgs.isRewriterSynthesized = send.isRewriterSynthesized;
                 auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
 
                 auto it = &dispatched;
