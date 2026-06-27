@@ -828,7 +828,16 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
                 auto describedClassMethod =
                     ast::MK::SyntheticMethod0(arg.loc(), methodLoc, core::Names::describedClass(), arg.deepCopy());
                 ast::cast_tree_nonnull<ast::MethodDef>(describedClassMethod).flags.discardDef = true;
-                auto sig = ast::MK::Sig0(methodLoc, ast::MK::ClassOf(methodLoc, arg.deepCopy()));
+                // `arg` may be a constant bound to a value rather than a class/module (e.g.
+                // `KyJohnsonCountyOlf = ReferenceData::DepositKey.new(...)`, common in RSpec
+                // permutation specs). `T.class_of(<value constant>)` would otherwise raise error
+                // 5004 ("T.class_of can't be used with a constant field") -- an error the user
+                // can't act on, since they didn't write the `T.class_of`. Mark the synthesized
+                // send so the resolver degrades it to `T.untyped` silently instead. A real class
+                // arg still resolves to the precise `T.class_of(Klass)`.
+                auto classOfType = ast::MK::ClassOf(methodLoc, arg.deepCopy());
+                ast::cast_tree_nonnull<ast::Send>(classOfType).flags.isRewriterSynthesized = true;
+                auto sig = ast::MK::Sig0(methodLoc, std::move(classOfType));
                 classBody.emplace_back(std::move(sig));
                 classBody.emplace_back(std::move(describedClassMethod));
             }

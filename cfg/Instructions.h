@@ -264,6 +264,10 @@ INSN(Send) : public Instruction, private core::TrailingObjects<Send, LocalRef, c
 
 public:
     bool isPrivateOk;
+    // Mirrors `ast::Send::Flags::isRewriterSynthesized`: true when this call was synthesized by a
+    // rewriter pass rather than written by the user. Threaded into `core::DispatchArgs` so
+    // intrinsics can suppress diagnostics the user can't act on.
+    bool isRewriterSynthesized = false;
     const uint16_t numPosArgs;
     core::NameRef fun;
     VariableUseSite recv;
@@ -330,6 +334,11 @@ public:
 
         SlotInit<LocalRef> refs;
         SlotInit<core::LocOffsets> locs;
+
+        SendInitializer &setRewriterSynthesized(bool value) {
+            snd->isRewriterSynthesized = value;
+            return *this;
+        }
 
         InstructionPtr asInsnPtr() && {
             ENFORCE(refs.current == refs.end, "must have initialized all send arguments");
