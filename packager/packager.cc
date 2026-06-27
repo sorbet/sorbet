@@ -665,6 +665,18 @@ struct PackageSpecBodyWalk {
             auto parsedValue = StrictDependenciesLevel::None;
             if (send.numPosArgs() > 0) {
                 parsedValue = parseStrictDependenciesOption(send.getPosArg(0));
+
+                // TODO(trevor): remove this once we're fully migrated to test-packages.
+                // Force the strict deps level to `false` if this is a test package. We haven't factored test packages
+                // into our cycle-checking implementation, so if a test package is involved in a cycle with the test
+                // part of an old-style package, we'll not be able to construct the import path that forms the cycle.
+                if (info.file.data(ctx).isTestPackage(ctx) && parsedValue != StrictDependenciesLevel::False) {
+                    parsedValue = StrictDependenciesLevel::False;
+                    if (auto e = ctx.beginError(send.argsLoc(), core::errors::Packager::InvalidStrictDependencies)) {
+                        e.setHeader("Test packages must be be at `{}` level `{}`", "strict_dependencies", "false");
+                        e.replaceWith("Change to false", ctx.locAt(send.getPosArg(0).loc()), "'false'");
+                    }
+                }
             }
 
             // We explicitly disallow duplicate `strict_dependencies` declarations. Additionally, if we're processing a
