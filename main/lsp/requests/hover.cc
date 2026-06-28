@@ -134,6 +134,10 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
         }
 
         typeString = prettyTypeForConstant(gs, c->symbolBeforeDealias);
+        auto kind = prettyKindForConstant(gs, c->symbolBeforeDealias);
+        if (!kind.empty()) {
+            typeString = fmt::format("# {}\n{}", kind, typeString);
+        }
     } else if (auto d = resp->isMethodDef()) {
         for (auto loc : d->symbol.data(gs)->locs()) {
             if (loc.exists()) {
