@@ -176,6 +176,73 @@ module Opus::Types::Test
       end
     end
 
+    describe 'coerce_error_handler' do
+      describe 'when in default state' do
+        it 'raises a CoercionError for an invalid type constraint value' do
+          ex = assert_raises(T::Types::CoercionError) do
+            T::Utils.coerce(Object.new)
+          end
+          assert_includes(ex.message, "Invalid value for type constraint")
+        end
+
+        it 'raises a CoercionError for a String literal type constraint' do
+          ex = assert_raises(T::Types::CoercionError) do
+            T::Utils.coerce("nope")
+          end
+          assert_includes(ex.message, "Invalid String literal for type constraint")
+        end
+      end
+
+      describe 'when overridden' do
+        after do
+          T::Configuration.coerce_error_handler = nil
+        end
+
+        it 'calls the handler with the error and offending value' do
+          T::Configuration.coerce_error_handler = lambda do |*args|
+            CustomReceiver.receive(*args)
+          end
+          bad = Object.new
+          CustomReceiver.expects(:receive).once.with do |error, opts|
+            error.is_a?(T::Types::CoercionError) &&
+              opts[:value].equal?(bad)
+          end
+          T::Utils.coerce(bad)
+        end
+
+        it 'returns T.untyped when the handler does not raise' do
+          T::Configuration.coerce_error_handler = lambda do |error, opts|
+            # swallow the error
+          end
+          result = T::Utils.coerce(Object.new)
+          assert_instance_of(T::Types::Untyped, result)
+        end
+
+        it 'rejects a handler that does not respond to call' do
+          assert_raises(ArgumentError) do
+            T::Configuration.coerce_error_handler = "not callable"
+          end
+        end
+
+        it 'propagates an error raised by the handler' do
+          custom = Class.new(StandardError)
+          T::Configuration.coerce_error_handler = lambda do |_error, _opts|
+            raise custom
+          end
+          assert_raises(custom) do
+            T::Utils.coerce(Object.new)
+          end
+        end
+
+        it 'degrades a cast with an invalid type literal to the original value when swallowed' do
+          T::Configuration.coerce_error_handler = lambda do |error, opts|
+            # swallow the error
+          end
+          assert_equal(123, T.cast(123, "not a type"))
+        end
+      end
+    end
+
     describe 'sig_validation_error_handler' do
       describe 'when in default state' do
         it 'raises an error' do
