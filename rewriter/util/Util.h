@@ -47,8 +47,8 @@ public:
     static std::pair<core::NameRef, core::LocOffsets> getAttrName(core::MutableContext ctx, core::NameRef attrFun,
                                                                   const ast::ExpressionPtr &name);
 
-    /// Returns true if `name` is a valid Ruby method name (non-empty, starts with alpha or _, all alphanumeric or _).
-    /// Emits a BadAttrArg error and returns false if invalid.
+    // Approximates the validations that `attr_reader` does for attribute names.
+    // Emits a BadAttrArg error and returns false if invalid.
     static bool validAttrName(core::MutableContext ctx, core::LocOffsets loc, core::NameRef name);
 
     // Test if `expr` is a chain of `UnresolvedConstantLit` trees with names equal to `constantName`.
