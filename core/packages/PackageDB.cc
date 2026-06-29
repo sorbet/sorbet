@@ -18,7 +18,7 @@ UnfreezePackages::UnfreezePackages(PackageDB &db) : db(db) {
 
 UnfreezePackages::~UnfreezePackages() {
     ENFORCE(!db.frozen);
-    db.writerThread = std::thread::id();
+    db.writerThread = thread::id();
     db.frozen = true;
 }
 
@@ -140,7 +140,7 @@ absl::Span<const core::NameRef> PackageDB::layers() const {
 const int PackageDB::layerIndex(core::NameRef layer) const {
     auto findResult = absl::c_find(layers_, layer);
     ENFORCE(findResult != layers_.end());
-    return std::distance(layers_.begin(), findResult);
+    return distance(layers_.begin(), findResult);
 }
 
 const bool PackageDB::enforceLayering() const {
@@ -244,7 +244,7 @@ UnfreezePackages PackageDB::unfreeze() {
 }
 
 void PackageDB::setCondensation(Condensation &&condensation) {
-    this->condensation_ = std::move(condensation);
+    this->condensation_ = move(condensation);
 }
 
 const Condensation &PackageDB::condensation() const {
@@ -368,7 +368,7 @@ UnorderedMap<core::SymbolRef, vector<core::FileRef>> computeReferencingFiles(con
 }
 }; // namespace
 
-UnorderedMap<core::packages::MangledName, std::vector<core::SymbolRef>>
+UnorderedMap<core::packages::MangledName, vector<core::SymbolRef>>
 PackageDB::exportsByPackage(const core::GlobalState &gs) {
     auto referencingFiles = computeReferencingFiles(gs);
 
@@ -384,10 +384,10 @@ PackageDB::exportsByPackage(const core::GlobalState &gs) {
     return toExport;
 }
 
-std::optional<core::AutocorrectSuggestion> PackageDB::aggregateMissingExportsForFile(const core::GlobalState &gs,
-                                                                                     const core::FileRef fref) {
+optional<core::AutocorrectSuggestion> PackageDB::aggregateMissingExportsForFile(const core::GlobalState &gs,
+                                                                                const core::FileRef fref) {
     auto toExport = UnorderedMap<core::packages::MangledName, vector<core::SymbolRef>>{};
-    auto referencingFiles = std::vector<FileRef>{fref};
+    auto referencingFiles = vector<FileRef>{fref};
     for (auto &sym : gs.getSymbolsReferencedByFile(fref)) {
         if (sym.isFieldOrStaticField()) {
             exportField(gs, toExport, sym.asFieldRef(), referencingFiles);
@@ -398,7 +398,7 @@ std::optional<core::AutocorrectSuggestion> PackageDB::aggregateMissingExportsFor
         }
     }
 
-    std::vector<core::AutocorrectSuggestion::Edit> allEdits;
+    vector<core::AutocorrectSuggestion::Edit> allEdits;
     for (auto &[pkgName, syms] : toExport) {
         auto &pkgInfo = gs.packageDB().getPackageInfo(pkgName);
         ENFORCE(pkgInfo.exists());
@@ -432,6 +432,6 @@ std::optional<core::AutocorrectSuggestion> PackageDB::aggregateMissingExportsFor
     }
 
     AutocorrectSuggestion::mergeAdjacentEdits(allEdits);
-    return core::AutocorrectSuggestion{"Add missing exports", std::move(allEdits)};
+    return core::AutocorrectSuggestion{"Add missing exports", move(allEdits)};
 }
 } // namespace sorbet::core::packages
