@@ -18,7 +18,7 @@ UnfreezePackages::UnfreezePackages(PackageDB &db) : db(db) {
 
 UnfreezePackages::~UnfreezePackages() {
     ENFORCE(!db.frozen);
-    db.writerThread = std::thread::id();
+    db.writerThread = thread::id();
     db.frozen = true;
 }
 
@@ -140,7 +140,7 @@ absl::Span<const core::NameRef> PackageDB::layers() const {
 const int PackageDB::layerIndex(core::NameRef layer) const {
     auto findResult = absl::c_find(layers_, layer);
     ENFORCE(findResult != layers_.end());
-    return std::distance(layers_.begin(), findResult);
+    return distance(layers_.begin(), findResult);
 }
 
 const bool PackageDB::enforceLayering() const {
@@ -244,11 +244,194 @@ UnfreezePackages PackageDB::unfreeze() {
 }
 
 void PackageDB::setCondensation(Condensation &&condensation) {
-    this->condensation_ = std::move(condensation);
+    this->condensation_ = move(condensation);
 }
 
 const Condensation &PackageDB::condensation() const {
     return this->condensation_;
 }
 
+namespace {
+// TODO(neil): deduplicate, this helper is also declared in VisibilityChecker.cc
+core::SymbolRef getEnumClassForEnumValue(const core::GlobalState &gs, core::SymbolRef sym) {
+    if (sym.isStaticField(gs) && sym.owner(gs).isClassOrModule()) {
+        auto owner = sym.owner(gs);
+        // There's a hidden class like `MyEnum::X$1` between `MyEnum::X` and `T::Enum` in the ancestor chain.
+        if (owner.asClassOrModuleRef().data(gs)->superClass() == core::Symbols::T_Enum()) {
+            return owner;
+        }
+    }
+
+    return core::Symbols::noSymbol();
+}
+
+bool ownerWillBeExported(const core::GlobalState &gs, const vector<core::SymbolRef> &alreadyExported,
+                         core::ClassOrModuleRef owner) {
+    while (owner != core::Symbols::root()) {
+        if (absl::c_find(alreadyExported, owner) != alreadyExported.end()) {
+            return true;
+        }
+        owner = owner.data(gs)->owner;
+    }
+    return false;
+}
+
+void exportClassOrModule(const core::GlobalState &gs,
+                         UnorderedMap<core::packages::MangledName, vector<core::SymbolRef>> &toExport,
+                         core::ClassOrModuleRef symbol, vector<core::FileRef> &referencingFiles) {
+    auto data = symbol.data(gs);
+    auto owningPackage = data->package;
+    if (!owningPackage.exists() || gs.packageDB().getPackageInfo(owningPackage).locs.exportAll.exists()) {
+        return;
+    }
+
+    for (auto &f : referencingFiles) {
+        auto packageForF = gs.packageDB().getPackageNameForFile(f);
+        if (packageForF == owningPackage || gs.packageDB().allowRelaxedPackagerChecksFor(packageForF)) {
+            continue;
+        }
+
+        if (packageForF.exists()) {
+            auto &referencingPkgInfo = gs.packageDB().getPackageInfo(packageForF);
+            auto *imp = referencingPkgInfo.importsPackage(owningPackage);
+            if (imp != nullptr && imp->usesInternals) {
+                ENFORCE(gs.packageDB().testPackages());
+                continue;
+            }
+        }
+
+        if (ownerWillBeExported(gs, toExport[owningPackage], data->owner)) {
+            // No need to check the rest of referencingFiles, we're already going to export the owner
+            break;
+        }
+
+        toExport[owningPackage].push_back(symbol);
+        break;
+    }
+}
+
+void exportField(const core::GlobalState &gs,
+                 UnorderedMap<core::packages::MangledName, vector<core::SymbolRef>> &toExport, core::FieldRef symbol,
+                 vector<core::FileRef> &referencingFiles) {
+    auto data = symbol.data(gs);
+    auto owningPackage = data->owner.data(gs)->package;
+    if (!owningPackage.exists() || gs.packageDB().getPackageInfo(owningPackage).locs.exportAll.exists()) {
+        return;
+    }
+
+    for (auto &f : referencingFiles) {
+        auto packageForF = gs.packageDB().getPackageNameForFile(f);
+        if (packageForF == owningPackage || gs.packageDB().allowRelaxedPackagerChecksFor(packageForF)) {
+            continue;
+        }
+
+        if (packageForF.exists()) {
+            auto &referencingPkgInfo = gs.packageDB().getPackageInfo(packageForF);
+            auto *imp = referencingPkgInfo.importsPackage(owningPackage);
+            if (imp != nullptr && imp->usesInternals) {
+                ENFORCE(gs.packageDB().testPackages());
+                continue;
+            }
+        }
+
+        if (ownerWillBeExported(gs, toExport[owningPackage], data->owner)) {
+            // No need to check the rest of referencingFiles, we're already going to export the owner
+            break;
+        }
+
+        auto maybeEnumClass = getEnumClassForEnumValue(gs, core::SymbolRef(symbol));
+        if (maybeEnumClass.exists()) {
+            // No need to check if maybeEnumClass is already going to be exported since we have a ownerWillBeExported
+            // call above
+            toExport[owningPackage].push_back(maybeEnumClass);
+        } else {
+            toExport[owningPackage].push_back(symbol);
+        }
+        break;
+    }
+}
+
+UnorderedMap<core::SymbolRef, vector<core::FileRef>> computeReferencingFiles(const core::GlobalState &gs) {
+    auto referencingFiles = UnorderedMap<core::SymbolRef, vector<core::FileRef>>{};
+    // symbolsReferencedByFile is a map from file -> [symbol] referenced in that file
+    // This loop computes the inverse: referencingFiles is a map from symbol -> [file] that reference that symbol
+    Timer timeit(gs.tracer(), "gen_packages.compute_referencing_files");
+    auto numFiles = gs.getFiles().size();
+    for (auto i = 1; i < numFiles; i++) {
+        core::FileRef fref(i);
+        auto referencedSymbols = gs.getSymbolsReferencedByFile(fref);
+        for (auto &symbol : referencedSymbols) {
+            referencingFiles[symbol].push_back(fref);
+        }
+    }
+    return referencingFiles;
+}
+}; // namespace
+
+UnorderedMap<core::packages::MangledName, vector<core::SymbolRef>>
+PackageDB::exportsByPackage(const core::GlobalState &gs) {
+    auto referencingFiles = computeReferencingFiles(gs);
+
+    auto toExport = UnorderedMap<core::packages::MangledName, vector<core::SymbolRef>>{};
+    for (uint32_t i = 1; i < gs.classAndModulesUsed(); ++i) {
+        auto classOrModuleRef = core::ClassOrModuleRef(gs, i);
+        exportClassOrModule(gs, toExport, classOrModuleRef, referencingFiles[classOrModuleRef]);
+    }
+    for (uint32_t i = 1; i < gs.fieldsUsed(); ++i) {
+        auto fieldRef = core::FieldRef(gs, i);
+        exportField(gs, toExport, fieldRef, referencingFiles[fieldRef]);
+    }
+    return toExport;
+}
+
+optional<core::AutocorrectSuggestion> PackageDB::aggregateMissingExportsForFile(const core::GlobalState &gs,
+                                                                                const core::FileRef fref) {
+    auto toExport = UnorderedMap<core::packages::MangledName, vector<core::SymbolRef>>{};
+    auto referencingFiles = vector<FileRef>{fref};
+    for (auto &sym : gs.getSymbolsReferencedByFile(fref)) {
+        if (sym.isFieldOrStaticField()) {
+            exportField(gs, toExport, sym.asFieldRef(), referencingFiles);
+        } else if (sym.isClassOrModule()) {
+            exportClassOrModule(gs, toExport, sym.asClassOrModuleRef(), referencingFiles);
+        } else {
+            ENFORCE(false);
+        }
+    }
+
+    vector<core::AutocorrectSuggestion::Edit> allEdits;
+    for (auto &[pkgName, syms] : toExport) {
+        auto &pkgInfo = gs.packageDB().getPackageInfo(pkgName);
+        ENFORCE(pkgInfo.exists());
+        for (auto &symbol : syms) {
+            switch (symbol.kind()) {
+                case core::SymbolRef::Kind::ClassOrModule:
+                    if (symbol.asClassOrModuleRef().data(gs)->flags.isExported) {
+                        continue;
+                    }
+                    break;
+                case core::SymbolRef::Kind::FieldOrStaticField:
+                    if (symbol.asFieldRef().data(gs)->flags.isExported) {
+                        continue;
+                    }
+                    break;
+                case core::SymbolRef::Kind::TypeMember:
+                case core::SymbolRef::Kind::Method:
+                case core::SymbolRef::Kind::TypeParameter:
+                    ENFORCE(false, "trying to export something other than ClassOrModule or FieldOrStaticField");
+            }
+            auto autocorrect = pkgInfo.addExport(gs, symbol);
+            if (autocorrect.has_value()) {
+                allEdits.insert(allEdits.end(), make_move_iterator(autocorrect.value().edits.begin()),
+                                make_move_iterator(autocorrect.value().edits.end()));
+            }
+        }
+    }
+
+    if (allEdits.empty()) {
+        return nullopt;
+    }
+
+    AutocorrectSuggestion::mergeAdjacentEdits(allEdits);
+    return core::AutocorrectSuggestion{"Add missing exports", move(allEdits)};
+}
 } // namespace sorbet::core::packages

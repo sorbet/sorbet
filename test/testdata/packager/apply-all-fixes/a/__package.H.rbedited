@@ -5,6 +5,7 @@
 class A < PackageSpec
   layer 'lib'
   strict_dependencies 'layered'
-  test_import B, only: "test_rb"
-  test_import C, only: "test_rb"
+  import B
+  import C
+  import D
 end

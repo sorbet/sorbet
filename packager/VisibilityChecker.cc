@@ -537,7 +537,7 @@ class VisibilityCheckerPass final {
                                             make_move_iterator(exportAutocorrect->edits.end()));
             e.addAutocorrect(core::AutocorrectSuggestion{combinedTitle, move(importAutocorrect->edits),
                                                          false /* isDidYouMean */, false /* hideEdit */,
-                                                         false /* shouldSkipWhenAggregated */});
+                                                         /* shouldSkipWhenAggregated */ true});
         } else if (importAutocorrect.has_value()) {
             e.addAutocorrect(std::move(importAutocorrect.value()));
         } else if (exportAutocorrect.has_value()) {
@@ -948,10 +948,8 @@ public:
                 }
                 nonConstPackageInfo->trackPackageReferences(file, references);
 
-                if (gs.packageDB().genPackagesMode() != core::packages::GenPackagesMode::Disabled) {
-                    auto &referencedSymbols = threadResult->referencedSymbols;
-                    nonConstGs.setSymbolsReferencedByFile(file, referencedSymbols);
-                }
+                auto &referencedSymbols = threadResult->referencedSymbols;
+                nonConstGs.setSymbolsReferencedByFile(file, referencedSymbols);
             }
         }
         barrier.Wait();

@@ -359,7 +359,7 @@ optional<core::AutocorrectSuggestion> PackageInfo::addExport(const core::GlobalS
     core::AutocorrectSuggestion suggestion(
         fmt::format("Export `{}` in package `{}`", newExportName, mangledName_.owner.show(gs)),
         {{insertionLoc, fmt::format("\n  {}", exportLine)}}, false /* isDidYouMean */, false /* hideEdit */,
-        false /* shouldSkipWhenAggregated */);
+        true /* shouldSkipWhenAggregated */);
     return {suggestion};
 }
 
