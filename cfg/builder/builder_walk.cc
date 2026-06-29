@@ -689,6 +689,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                 const size_t numArgs = s.numNonBlockArgs();
                 auto snd =
                     Send::make(recv, s.recv.loc(), s.fun, s.funLoc, s.numPosArgs(), !!s.flags.isPrivateOk, numArgs);
+                snd.setRewriterSynthesized(!!s.flags.isRewriterSynthesized);
 
                 for (auto &exp : s.posArgs()) {
                     LocalRef temp = cctx.newTemporary(core::Names::statTemp());

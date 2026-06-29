@@ -1048,12 +1048,19 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 // This is the main place where we type check a method, so we default by assuming
                 // that we want to report all errors (suppressing nothing).
                 auto suppressErrors = false;
-                core::DispatchArgs dispatchArgs{send.fun,        locs,
-                                                send.numPosArgs, args,
-                                                recvType.type,   recvType,
-                                                recvType.type,   send.link.data(inWhat).get(),
-                                                ownerLoc,        send.isPrivateOk,
-                                                suppressErrors,  inWhat.symbol.data(ctx)->name};
+                core::DispatchArgs dispatchArgs{send.fun,
+                                                locs,
+                                                send.numPosArgs,
+                                                args,
+                                                recvType.type,
+                                                recvType,
+                                                recvType.type,
+                                                send.link.data(inWhat).get(),
+                                                ownerLoc,
+                                                send.isPrivateOk,
+                                                suppressErrors,
+                                                inWhat.symbol.data(ctx)->name,
+                                                send.isRewriterSynthesized};
                 auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
 
                 auto it = &dispatched;

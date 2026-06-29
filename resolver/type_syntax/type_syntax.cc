@@ -761,9 +761,17 @@ optional<core::ClassOrModuleRef> parseTClassOf(core::Context ctx, const ast::Sen
     }
     auto sym = maybeAliased.dealias(ctx);
     if (sym.isStaticField(ctx)) {
-        if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-            e.setHeader("T.class_of can't be used with a constant field");
-            maybeSuggestTClass(ctx, e, send.loc, obj->loc());
+        // Don't surface this to users for rewriter-synthesized `T.class_of`, where the argument
+        // is whatever constant the user wrote elsewhere (not in a type position). For example, the
+        // RSpec rewriter synthesizes `sig { returns(T.class_of(arg)) }` for `described_class` from
+        // `describe arg`; when `arg` is a constant bound to a value rather than a class/module
+        // (e.g. `Foo = SomeStruct.new`), there is nothing the user can fix at the `T.class_of`
+        // site. Degrade silently to `T.untyped` instead of emitting an unactionable error.
+        if (!send.flags.isRewriterSynthesized) {
+            if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                e.setHeader("T.class_of can't be used with a constant field");
+                maybeSuggestTClass(ctx, e, send.loc, obj->loc());
+            }
         }
         return core::Symbols::untyped();
     }
