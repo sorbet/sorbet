@@ -371,6 +371,8 @@ public:
     ~GlobalState() = default;
 
     ClassOrModuleRef enterClassSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
+    void setClassSymbolPackage(ClassOrModuleRef owner, ClassOrModuleRef sym);
+
     TypeMemberRef enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef name, Variance variance);
     TypeParameterRef enterTypeParameter(Loc loc, MethodRef owner, NameRef name, Variance variance);
     MethodRef enterMethodSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);

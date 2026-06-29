@@ -1,5 +1,6 @@
 #include "GlobalState.h"
 
+#include "SymbolRef.h"
 #include "common/sort/sort.h"
 #include "common/timers/Timer.h"
 #include "core/Error.h"
@@ -1185,29 +1186,13 @@ ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, 
         return ret;
     }
 
-    // TODO(trevor): This whole conditional can be removed after we've migrated fully to test-packages. Its whole
-    // purpose is to allow the old behavior of `<PSR>::Test::Foo` and `<PSR>::Foo` referring to the same package.
-    if (owner == Symbols::root() && name == packages::PackageDB::TEST_NAMESPACE) {
-        bool ownedByTestPackage = false;
-        auto fref = loc.file();
-        if (fref.exists()) {
-            // Either we're called from the namer while building the package DB, or the package DB will be built, and
-            // we'll know how to associate a file with a test package.
-            ownedByTestPackage = fref.dataAllowingUnsafe(*this).isTestPackage(*this);
-            if (!ownedByTestPackage) {
-                auto pkgName = this->packageDB().getPackageNameForFile(fref);
-                if (pkgName.exists()) {
-                    ownedByTestPackage = this->packageDB().getPackageInfo(pkgName).testPackage();
-                }
-            }
-        }
+    this->setClassSymbolPackage(owner, ret);
+    return ret;
+}
 
-        if (!ownedByTestPackage) {
-            // Leave packageRegistryOwner as `<PackageSpecRegistry>` (essentially, skip over `Test` when
-            // searching for package names). Leave `package` as the non-existent package name.
-            return ret;
-        }
-    }
+void GlobalState::setClassSymbolPackage(ClassOrModuleRef owner, ClassOrModuleRef ret) {
+    auto data = ret.data(*this);
+    auto name = data->name;
 
     auto ownerData = owner.data(*this);
     auto ownerPackageRegistryOwner = ownerData->packageRegistryOwner;
@@ -1216,7 +1201,7 @@ ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, 
         // Propogate that we are too, and mark us as being owned by whatever package our owner was.
         data->packageRegistryOwner = Symbols::noClassOrModule();
         data->package = ownerData->package;
-        return ret;
+        return;
     }
 
     auto registryName = name;
@@ -1235,7 +1220,7 @@ ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, 
 
     if (!data->packageRegistryOwner.exists()) {
         data->package = ownerData->package;
-        return ret;
+        return;
     }
 
     auto pkg = packages::MangledName(data->packageRegistryOwner);
@@ -1247,7 +1232,7 @@ ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, 
         data->package = ownerData->package;
     }
 
-    return ret;
+    return;
 }
 
 TypeMemberRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef name, Variance variance) {

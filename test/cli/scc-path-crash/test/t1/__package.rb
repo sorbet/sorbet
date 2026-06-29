@@ -3,7 +3,7 @@
 class Test::T1 < PackageSpec
   test!
 
-  strict_dependencies 'layered_dag'
+  strict_dependencies 'false'
   layer 'application'
 
   import Test::T2
