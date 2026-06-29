@@ -61,6 +61,8 @@ void LSPStdout::rawWrite(unique_ptr<LSPMessage> msg) {
 }
 
 void LSPOutputToVector::rawWrite(unique_ptr<LSPMessage> msg) {
+    // Exercise serialization so tests catch bugs like constructing invalid JSON objects.
+    msg->toJSONBuffer();
     output.push_back(move(msg));
 }
 

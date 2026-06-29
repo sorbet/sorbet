@@ -1588,24 +1588,4 @@ TEST_CASE_FIXTURE(ProtocolTest, "ErrorsRemainAfterSlowPathRestart") {
     }
 }
 
-TEST_CASE_FIXTURE(ProtocolTest, "CodeActionDoesNotCrashWithMissingMethodInDefaultArg") {
-    lspWrapper->opts->lspCreateMissingMethodEnabled = true;
-    assertErrorDiagnostics(initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */), {});
-
-    assertErrorDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
-                                                    "class Foo\n"
-                                                    "  def bar(x = baz())\n"
-                                                    "  end\n"
-                                                    "end\n")),
-                           {{"foo.rb", 2, "Method `baz` does not exist on `Foo`"}});
-
-    auto responses = send(*codeAction("foo.rb", 2, 18));
-    REQUIRE_EQ(responses.size(), 1);
-    REQUIRE(responses[0]->isResponse());
-    auto &result = *responses[0]->asResponse().result;
-    auto &codeActions =
-        get<vector<unique_ptr<CodeAction>>>(get<variant<JSONNullObject, vector<unique_ptr<CodeAction>>>>(result));
-    CHECK_FALSE(codeActions.empty());
-}
-
 } // namespace sorbet::test::lsp

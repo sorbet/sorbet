@@ -365,9 +365,12 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, const v
         auto fileUri = testFileUris[filename];
 
         if (ignoredCodeActionKinds.empty()) {
-            // Request code actions for each of this file's error.
+            // Request code actions for each of this file's error, using a zero-width range at the
+            // start of the error. This matches how editors send code action requests (cursor
+            // position, not a selection), and exercises the "No selection" branch in code_action.cc.
             for (auto &error : errorsByFilename[filename]) {
-                validateCodeActions(lspWrapper, test, fileUri, error->range->copy(), nextId, selectedCodeActionKinds,
+                auto cursorRange = make_unique<Range>(error->range->start->copy(), error->range->start->copy());
+                validateCodeActions(lspWrapper, test, fileUri, move(cursorRange), nextId, selectedCodeActionKinds,
                                     ignoredCodeActionKinds, applyCodeActionAssertions, error->toString(), false,
                                     omitApplyAll);
             }
