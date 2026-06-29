@@ -6,5 +6,5 @@ class Old::A < PackageSpec
   layer "lib"
   strict_dependencies "dag"
 
-  test_import Test::New
+  test_import Test::New::A
 end

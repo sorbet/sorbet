@@ -3,7 +3,7 @@
 class Test::T2 < PackageSpec
   test!
 
-  strict_dependencies 'layered'
+  strict_dependencies 'false'
   layer 'application'
 
   test_import Test::T1
