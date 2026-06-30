@@ -1,6 +1,12 @@
 # frozen_string_literal: true
 # typed: true
 
+module T::Types
+  # Raised when `T::Utils.coerce` is given a value that cannot be coerced into a
+  # type. Handled by `T::Configuration.coerce_error_handler`.
+  class CoercionError < ArgumentError; end
+end
+
 module T::Utils
   module Private
     # NOTE: the Module and SimplePairUnion branches of this method are inlined
@@ -33,13 +39,28 @@ module T::Utils
       elsif val.is_a?(::T::Enum)
         T::Types::TEnum.new(val)
       elsif val.is_a?(::String)
-        raise "Invalid String literal for type constraint. Must be an #{T::Types::Base}, a " \
-              "class/module, or an array. Got a String with value `#{val}`."
+        handle_coerce_error(
+          "Invalid String literal for type constraint. Must be an #{T::Types::Base}, a " \
+          "class/module, or an array. Got a String with value `#{val}`.",
+          val
+        )
       else
-        raise "Invalid value for type constraint. Must be an #{T::Types::Base}, a " \
-              "class/module, or an array. Got a `#{val.class}`."
+        handle_coerce_error(
+          "Invalid value for type constraint. Must be an #{T::Types::Base}, a " \
+          "class/module, or an array. Got a `#{val.class}`.",
+          val
+        )
       end
       # rubocop:enable Style/CaseLikeIf
+    end
+
+    # Reports a coercion failure through `T::Configuration.coerce_error_handler`.
+    # The default handler re-raises; a custom handler may swallow the error, in
+    # which case coercion degrades to `T.untyped`.
+    def self.handle_coerce_error(message, value)
+      error = T::Types::CoercionError.new(message)
+      T::Configuration.coerce_error_handler(error, value: value)
+      T::Types::Untyped::Private::INSTANCE
     end
   end
 

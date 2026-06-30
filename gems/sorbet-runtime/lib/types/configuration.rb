@@ -204,6 +204,48 @@ module T::Configuration
     nil
   end
 
+  @coerce_error_handler = nil
+  # Set a handler to handle `T::Types::CoercionError`s, which are raised when
+  # `T::Utils.coerce` is given a value that can't be coerced into a type (for
+  # example an instance of a class instead of the class itself).
+  #
+  # By default, a failed coercion raises a `T::Types::CoercionError`. Setting
+  # coerce_error_handler to an object that implements :call (e.g. proc or
+  # lambda) allows users to customize the behavior when a value can't be
+  # coerced. If the handler does not itself raise, `T::Utils.coerce` returns
+  # `T.untyped`.
+  #
+  # @param [Lambda, Proc, Object, nil] value Proc that handles the error (pass
+  #   nil to reset to default behavior)
+  #
+  # Parameters passed to value.call:
+  #
+  #  @param [T::Types::CoercionError] error The error that was raised
+  #  @param [Hash] opts A hash containing contextual information:
+  #    @option opts [Object] :value The value that could not be coerced
+  #
+  # @example
+  #   T::Configuration.coerce_error_handler = lambda do |error, opts|
+  #     puts error.message
+  #   end
+  def self.coerce_error_handler=(value)
+    validate_lambda_given!(value)
+    @coerce_error_handler = value
+  end
+
+  private_class_method def self.coerce_error_handler_default(error, opts)
+    raise error
+  end
+
+  def self.coerce_error_handler(error, opts={})
+    if @coerce_error_handler
+      @coerce_error_handler.call(error, opts)
+    else
+      coerce_error_handler_default(error, opts)
+    end
+    nil
+  end
+
   @sig_validation_error_handler = nil
   # Set a handler to handle sig validation errors.
   #
