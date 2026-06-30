@@ -101,6 +101,29 @@ string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef consta
     }
 }
 
+string prettyKindForConstant(const core::GlobalState &gs, core::SymbolRef constant) {
+    if (constant == core::Symbols::StubModule()) {
+        return "";
+    }
+
+    // Order matters: type aliases and class aliases are also static fields, so they
+    // must be checked before isStaticField.
+    if (constant.isTypeAlias(gs)) {
+        return "type alias";
+    } else if (constant.isClassAlias(gs)) {
+        return "class alias";
+    } else if (constant.isTypeMember()) {
+        return "type member";
+    } else if (constant.isTypeParameter()) {
+        return "type parameter";
+    } else if (constant.isClassOrModule()) {
+        return constant.asClassOrModuleRef().data(gs)->isModule() ? "module" : "class";
+    } else if (constant.isStaticField(gs)) {
+        return "static field";
+    }
+    return "";
+}
+
 SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef symbol, bool isAttrBestEffortUIOnly) {
     if (symbol.isClassOrModule()) {
         auto klass = symbol.asClassOrModuleRef();

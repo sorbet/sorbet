@@ -87,6 +87,7 @@ bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym);
 std::unique_ptr<MarkupContent> formatRubyMarkup(MarkupKind markupKind, std::string_view rubyMarkup,
                                                 std::optional<std::string_view> explanation);
 std::string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef constant);
+std::string prettyKindForConstant(const core::GlobalState &gs, core::SymbolRef constant);
 SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef sym, bool isAttrBestEffortUIOnly);
 
 std::vector<std::unique_ptr<TextDocumentEdit>>
