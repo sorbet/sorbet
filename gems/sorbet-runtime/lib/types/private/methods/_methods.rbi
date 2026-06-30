@@ -31,7 +31,7 @@ module T::Private::Methods
         mod: Module,
         method_name: T.nilable(Symbol),
         loc: T.nilable(Thread::Backtrace::Location),
-        blk: Proc,
+        blk: T.any(Proc, T.class_of(ARG_NOT_PROVIDED)),
         final: T::Boolean,
         abstract: T.nilable(T::Boolean),
         override: T.nilable({allow_incompatible: T.any(T::Boolean, Symbol)}),
