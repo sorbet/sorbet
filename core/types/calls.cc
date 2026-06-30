@@ -3017,8 +3017,22 @@ public:
             if ((gs.suggestUnsafe || !ty.isUntyped()) && loc.exists() && argLocExists) {
                 // (skip the autocorrect if we had to fall back to using callLoc, because using that
                 // will suggest something syntactically invalid like `T.let(U = begin; end, NilClass))`
-                e.replaceWith(fmt::format("Initialize as `{}`", ty.show(gs)), loc, "T.let({}, {})",
-                              loc.source(gs).value(), ty.show(gs));
+                auto opts = ShowOptions().withUseValidSyntax();
+                // Constants live in instance (not singleton) scope, where `T.attached_class` is not
+                // legal. If the inferred type is the enclosing class's `T.attached_class`, suggest the
+                // concrete attached class instead, so the autocorrect doesn't introduce a new error.
+                auto suggestType = ty;
+                if (isa_type<SelfTypeParam>(suggestType)) {
+                    auto selfTypeParam = cast_type_nonnull<SelfTypeParam>(suggestType);
+                    auto definition = selfTypeParam.definition;
+                    if (definition.isTypeMember() && definition.name(gs) == core::Names::Constants::AttachedClass()) {
+                        const auto &lambdaParam =
+                            cast_type_nonnull<LambdaParam>(definition.asTypeMemberRef().data(gs)->resultType);
+                        suggestType = lambdaParam.upperBound;
+                    }
+                }
+                e.replaceWith(fmt::format("Initialize as `{}`", suggestType.show(gs)), loc, "T.let({}, {})",
+                              loc.source(gs).value(), suggestType.show(gs, opts));
             }
         }
         res.returnType = move(ty);
