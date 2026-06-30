@@ -364,11 +364,35 @@ class Proc < Object
   sig {params(blk: Proc).returns(T.attached_class)}
   def self.new(&blk); end
 
+  # Returns a proc that is the composition of this proc and the given *g*. The
+  # returned proc takes a variable number of arguments, calls *g* with them then
+  # calls this proc with the result.
+  #
+  # ```ruby
+  # f = proc {|x| x * x }
+  # g = proc {|x| x + x }
+  # p (f << g).call(2) #=> 16
+  # ```
+  sig {params(g: T.untyped).returns(Proc)}
+  def <<(g); end
+
   # Invokes the block with `obj` as the proc's parameter like
   # [`Proc#call`](https://docs.ruby-lang.org/en/2.7.0/Proc.html#method-i-call).
   # This allows a proc object to be the target of a `when` clause in a case
   # statement.
   def ===(*_); end
+
+  # Returns a proc that is the composition of this proc and the given *g*. The
+  # returned proc takes a variable number of arguments, calls this proc with
+  # them then calls *g* with the result.
+  #
+  # ```ruby
+  # f = proc {|x| x * x }
+  # g = proc {|x| x + x }
+  # p (f >> g).call(2) #=> 8
+  # ```
+  sig {params(g: T.untyped).returns(Proc)}
+  def >>(g); end
 
   # Returns the number of mandatory arguments. If the block is declared to take
   # no arguments, returns 0. If the block is known to take exactly n arguments,
