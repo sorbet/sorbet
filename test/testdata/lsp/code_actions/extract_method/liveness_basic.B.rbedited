@@ -20,7 +20,7 @@ class LivenessBasic
     puts "done"
   end
 
-  sig { params().void() }
+  sig { params().void }
   def new_method()
     puts 1; puts 2
   end

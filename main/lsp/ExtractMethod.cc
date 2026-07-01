@@ -843,7 +843,7 @@ string assign(const string &lhs, const string &rhs, bool isInStat) {
 
 string returnSig(const vector<string> &types) {
     if (types.empty()) {
-        return ".void()";
+        return ".void";
     }
     if (types.size() == 1) {
         return fmt::format(".returns({})", types[0]);
