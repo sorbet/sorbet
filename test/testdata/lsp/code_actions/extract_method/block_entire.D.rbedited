@@ -1,0 +1,90 @@
+# typed: true
+# selective-apply-code-action: refactor.extract
+# enable-experimental-lsp-extract-to-method: true
+
+class BlockEntire
+  extend T::Sig
+
+  sig {params(items: T.untyped).void}
+  def no_outer_vars(items)
+    items.each { |x| puts x }
+#   ^^^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [A] Extract Method
+  end
+
+  sig {params(items: T.untyped).void}
+  def outer_accumulation(items)
+    total = T.let(0, Integer)
+    items.each { |x| total += x }
+#   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [B] Extract Method
+    puts total
+  end
+
+  sig {params(items: T.untyped).returns(T.untyped)}
+  def block_as_return_value(items)
+    items.map { |x| x * 2 }
+#   ^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [C] Extract Method
+  end
+
+  sig {params(items: T.untyped).void}
+  def multi_statement_block_body(items)
+    new_method(items, x)
+#   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [D] Extract Method
+  end
+
+  sig { params(items: T.untyped, x: T.untyped).returns(T.untyped) }
+  def new_method(items, x)
+    items.each { |x| y = x * 2; puts y }
+  end
+
+
+  sig {params(items: T.untyped, factor: Integer).void}
+  def reads_outer_vars(items, factor)
+    items.each { |x| puts x * factor }
+#   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [E] Extract Method
+  end
+
+  sig {params(items: T.untyped).void}
+  def block_not_last_statement(items)
+    items.each { |x| puts x }
+#   ^^^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [F] Extract Method
+    puts "done"
+  end
+
+  sig {params(items: T.untyped).void}
+  def multi_param_no_outer(items)
+    items.each { |a, b| puts a.to_s + b.to_s }
+#   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [G] Extract Method
+  end
+
+  sig {params(items: T.untyped).void}
+  def multi_param_outer_accumulated(items)
+    total = T.let(0, Integer)
+    items.each { |a, b| total += a + b }
+#   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [H] Extract Method
+    puts total
+  end
+
+  sig {params(items: T.untyped).void}
+  def shadow_block_outer_unchanged(items)
+    x = T.let(0, Integer)
+    items.each { |item; x| x = item * 2; puts x }
+#   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [I] Extract Method
+    puts x
+  end
+
+  sig {params(items: T.untyped).void}
+  def shadow_block_outer_accumulated(items)
+    total = T.let(0, Integer)
+    items.each { |item; x| x = item * 2; total += x }
+#   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [J] Extract Method
+    puts total
+  end
+
+  sig {params(items: T.untyped).void}
+  def shadow_block_never_written(items)
+    x = T.let(0, Integer)
+    items.each { |item; x| puts x }
+#   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [K] Extract Method
+    puts x
+  end
+end
