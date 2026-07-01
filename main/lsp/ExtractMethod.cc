@@ -380,11 +380,43 @@ optional<pair<int, int>> getStatsContainedInTarget(const vector<const ast::Expre
     return {{i, j}};
 }
 
-// A selection of nodes is defined as the largest sequence of nodes contained in a target loc
-// the return type is optional<nonempty_vector<const ast::ExpressionPtr *>>
-// which is equivalent to vector<const ast::ExpressionPtr *>
-// empty vector means this wasn't a valid selection.
-vector<const ast::ExpressionPtr *> getSelection(const ast::ExpressionPtr &expr, const core::LocOffsets target) {
+struct SelectionContext {
+    bool isInStat;
+    bool isRetValueNeeded;
+};
+
+class SelectionResult {
+public:
+    SelectionResult() {}
+
+    SelectionResult(vector<const ast::ExpressionPtr *> stats, SelectionContext selCx) : stats_{stats}, selCx_{selCx} {
+        ENFORCE(!stats_.empty());
+    }
+
+    bool has_value() const {
+        return !stats_.empty();
+    }
+
+    const vector<const ast::ExpressionPtr *> &stats() const {
+        ENFORCE(has_value());
+        return stats_;
+    }
+
+    SelectionContext selectionContext() const {
+        ENFORCE(has_value());
+        return selCx_;
+    }
+
+private:
+    vector<const ast::ExpressionPtr *> stats_;
+    SelectionContext selCx_;
+};
+
+// A selection of nodes is defined as the largest sequence of nodes contained in a target loc.
+// selCx carries the statement/return-value context at the current position and is stored in the
+// result when a match is found, eliminating separate isInStatementContext / isReturnValueNeeded walks.
+SelectionResult getSelection(const ast::ExpressionPtr &expr, const core::LocOffsets target,
+                             const SelectionContext selCx) {
     if (!expr.loc().exists()) {
         return {};
     }
@@ -394,7 +426,7 @@ vector<const ast::ExpressionPtr *> getSelection(const ast::ExpressionPtr &expr, 
         return {};
     }
     if (target.contains(expr.loc())) {
-        return {&expr};
+        return {{&expr}, selCx};
     }
     switch (expr.tag()) {
         case ast::Tag::InsSeq: {
@@ -407,36 +439,49 @@ vector<const ast::ExpressionPtr *> getSelection(const ast::ExpressionPtr &expr, 
             auto result = getStatsContainedInTarget(stats, target);
             if (result.has_value()) {
                 auto [i, j] = result.value();
+                bool includesLastExpr = (j == (int)stats.size());
+                SelectionContext multiStatCx{true, includesLastExpr};
                 vector<const ast::ExpressionPtr *> selection;
                 for (int k = i; k < j; k++) {
                     selection.push_back(stats[k]);
                 }
-                return selection;
+                return {selection, multiStatCx};
             }
             for (auto *stat : stats) {
-                if (auto selection = getSelection(*stat, target); !selection.empty()) {
-                    return selection;
+                SelectionContext statCx{true, stat == stats.back()};
+                if (auto sel = getSelection(*stat, target, statCx); sel.has_value()) {
+                    return sel;
                 }
+            }
+            break;
+        }
+        case ast::Tag::While: {
+            auto &while_ = ast::cast_tree_nonnull<ast::While>(expr);
+            if (auto sel = getSelection(while_.cond, target, SelectionContext{false, true}); sel.has_value()) {
+                return sel;
+            }
+            if (auto sel = getSelection(while_.body, target, SelectionContext{true, false}); sel.has_value()) {
+                return sel;
             }
             break;
         }
         case ast::Tag::Assign: {
             auto &assign = ast::cast_tree_nonnull<ast::Assign>(expr);
-            if (auto selection = getSelection(assign.rhs, target); !selection.empty()) {
-                return selection;
+            if (auto sel = getSelection(assign.rhs, target, SelectionContext{false, true}); sel.has_value()) {
+                return sel;
             }
             break;
         }
         default: {
-            vector<const ast::ExpressionPtr *> selection;
-            iterChildrenUntil(expr, [&selection, target](const ast::ExpressionPtr &child) {
-                if (selection = getSelection(child, target); !selection.empty()) {
+            SelectionResult found;
+            iterChildrenUntil(expr, [&found, target](const ast::ExpressionPtr &child) {
+                if (found = getSelection(child, target, SelectionContext{false, true}); found.has_value()) {
                     return IterResult::Stop;
                 }
                 return IterResult::Continue;
             });
-            if (!selection.empty()) {
-                return selection;
+            if (found.has_value()) {
+                return found;
             }
             break;
         }
@@ -787,9 +832,9 @@ string parens(string s) {
     return fmt::format("({})", s);
 }
 
-string assign(const string &lhs, const string &rhs, bool isInStatementContext) {
+string assign(const string &lhs, const string &rhs, bool isInStat) {
     auto assign = fmt::format("{} = {}", lhs, rhs);
-    if (!isInStatementContext) {
+    if (!isInStat) {
         assign = parens(assign);
     }
     return assign;
@@ -851,7 +896,7 @@ string formatNewMethod(bool isSingletonMethod, string_view selectionSource, cons
 }
 
 string formatCall(bool isSingletonMethod, const vector<string> &args, const vector<string> &updateReturns,
-                  bool isInStatementContext, bool isReturnValueNeeded) {
+                  SelectionContext selCx) {
     string methodName = isSingletonMethod ? "self.new_method" : "new_method";
     string call = methodName + "(";
     for (int i = 0; i < args.size(); i++) {
@@ -867,7 +912,7 @@ string formatCall(bool isSingletonMethod, const vector<string> &args, const vect
     }
 
     vector<string> lhsNames;
-    if (isReturnValueNeeded) {
+    if (selCx.isRetValueNeeded) {
         lhsNames.emplace_back("_");
     }
     for (auto &ret : updateReturns) {
@@ -875,129 +920,15 @@ string formatCall(bool isSingletonMethod, const vector<string> &args, const vect
     }
 
     auto assign = fmt::format("{} = {}", rbfmt::tupleValue(lhsNames), call);
-    if (isReturnValueNeeded) {
+    if (selCx.isRetValueNeeded) {
         if (lhsNames.size() > 1) {
             return fmt::format("{}[0]", rbfmt::assign(rbfmt::tupleLhs(lhsNames), call, false));
         } else {
-            return rbfmt::assign(rbfmt::tupleLhs(lhsNames), call, isInStatementContext);
+            return rbfmt::assign(rbfmt::tupleLhs(lhsNames), call, selCx.isInStat);
         }
     } else {
-        return rbfmt::assign(rbfmt::tupleLhs(lhsNames), call, isInStatementContext);
+        return rbfmt::assign(rbfmt::tupleLhs(lhsNames), call, selCx.isInStat);
     }
-}
-
-optional<bool> isInStatementContext(const ast::ExpressionPtr &expr, const core::LocOffsets target, bool inStat) {
-    if (!expr.loc().exists()) {
-        return nullopt;
-    }
-    if (expr.loc().empty()) {
-        return nullopt;
-    }
-    if (target.contains(expr.loc())) {
-        return {inStat};
-    }
-    switch (expr.tag()) {
-        case ast::Tag::InsSeq: {
-            auto &insSeq = ast::cast_tree_nonnull<ast::InsSeq>(expr);
-            vector<const ast::ExpressionPtr *> stats;
-            for (auto &stat : insSeq.stats) {
-                stats.push_back(&stat);
-            }
-            stats.push_back(&insSeq.expr);
-            auto result = getStatsContainedInTarget(stats, target);
-            if (result.has_value()) {
-                return {true};
-            }
-            for (auto *stat : stats) {
-                if (auto r = isInStatementContext(*stat, target, true); r.has_value()) {
-                    return r;
-                }
-            }
-            break;
-        }
-        case ast::Tag::While: {
-            auto &while_ = ast::cast_tree_nonnull<ast::While>(expr);
-            if (auto r = isInStatementContext(while_.cond, target, false); r.has_value()) {
-                return r;
-            }
-            if (auto r = isInStatementContext(while_.body, target, true); r.has_value()) {
-                return r;
-            }
-            break;
-        }
-        default: {
-            optional<bool> found;
-            iterChildrenUntil(expr, [&found, target](const ast::ExpressionPtr &child) {
-                if (found = isInStatementContext(child, target, false); found.has_value()) {
-                    return IterResult::Stop;
-                }
-                return IterResult::Continue;
-            });
-            if (found.has_value()) {
-                return found;
-            }
-            break;
-        }
-    }
-    return nullopt;
-}
-
-optional<bool> isReturnValueNeeded(const ast::ExpressionPtr &expr, const core::LocOffsets target, bool isNeeded) {
-    if (!expr.loc().exists()) {
-        return nullopt;
-    }
-    if (expr.loc().empty()) {
-        return nullopt;
-    }
-    if (target.contains(expr.loc())) {
-        return {isNeeded};
-    }
-    switch (expr.tag()) {
-        case ast::Tag::InsSeq: {
-            auto &insSeq = ast::cast_tree_nonnull<ast::InsSeq>(expr);
-            vector<const ast::ExpressionPtr *> stats;
-            for (auto &stat : insSeq.stats) {
-                stats.push_back(&stat);
-            }
-            stats.push_back(&insSeq.expr);
-            auto result = getStatsContainedInTarget(stats, target);
-            if (result.has_value()) {
-                auto [i, j] = result.value();
-                bool includesLastExpr = (j == stats.size());
-                return {includesLastExpr};
-            }
-            for (auto *stat : stats) {
-                if (auto r = isReturnValueNeeded(*stat, target, stat == stats.back()); r.has_value()) {
-                    return r;
-                }
-            }
-            break;
-        }
-        case ast::Tag::While: {
-            auto &while_ = ast::cast_tree_nonnull<ast::While>(expr);
-            if (auto r = isReturnValueNeeded(while_.cond, target, true); r.has_value()) {
-                return r;
-            }
-            if (auto r = isReturnValueNeeded(while_.body, target, false); r.has_value()) {
-                return r;
-            }
-            break;
-        }
-        default: {
-            optional<bool> found;
-            iterChildrenUntil(expr, [&found, target](const ast::ExpressionPtr &child) {
-                if (found = isReturnValueNeeded(child, target, true); found.has_value()) {
-                    return IterResult::Stop;
-                }
-                return IterResult::Continue;
-            });
-            if (found.has_value()) {
-                return found;
-            }
-            break;
-        }
-    }
-    return nullopt;
 }
 
 class EnclosingMethodWalk {
@@ -1057,18 +988,16 @@ vector<unique_ptr<TextDocumentEdit>> getExtractMethodEdits(LSPTypecheckerDelegat
         config.logger->debug("ExtractMethod: no intersection found");
         return {};
     }
-    auto selection = getSelection(parsedFile.tree, selectionLoc.offsets());
-    if (selection.empty()) {
+    auto selResult = getSelection(parsedFile.tree, selectionLoc.offsets(), SelectionContext{true, true});
+    if (!selResult.has_value()) {
         config.logger->debug("ExtractMethod: no selection found");
         return {};
     }
+    const auto &selection = selResult.stats();
     config.logger->debug("ExtractMethod: selection found, size: {}", selection.size());
     auto continuation = getContinuation(parsedFile.tree, selectionLoc.offsets());
     ENFORCE(continuation.has_value());
-    auto isInStat = isInStatementContext(parsedFile.tree, selectionLoc.offsets(), true);
-    ENFORCE(isInStat.has_value());
-    auto isRetValueNeeded = isReturnValueNeeded(parsedFile.tree, selectionLoc.offsets(), true);
-    ENFORCE(isRetValueNeeded.has_value());
+    auto selCx = selResult.selectionContext();
     config.logger->debug("ExtractMethod: selection size: {}, continuation size: {}", selection.size(),
                          continuation.has_value() ? continuation->size() : 0);
     config.logger->debug("ExtractMethod: selection loc: {}", selectionLoc.showRaw(gs));
@@ -1144,9 +1073,8 @@ vector<unique_ptr<TextDocumentEdit>> getExtractMethodEdits(LSPTypecheckerDelegat
 
     auto newMethodText =
         "\n\n" + indentString(indentLength, formatNewMethod(isSingletonMethod, dedentedSource, paramNames,
-                                                            updateReturnNames, isRetValueNeeded.value()));
-    auto callText =
-        formatCall(isSingletonMethod, paramNames, updateReturnNames, isInStat.value(), isRetValueNeeded.value());
+                                                            updateReturnNames, selCx.isRetValueNeeded));
+    auto callText = formatCall(isSingletonMethod, paramNames, updateReturnNames, selCx);
 
     config.logger->debug("ExtractMethod newMethod:\n{}", newMethodText);
     config.logger->debug("ExtractMethod call:\n{}", callText);
