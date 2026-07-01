@@ -7,6 +7,9 @@
 namespace sorbet::realmain::lsp {
 class CodeActionParams;
 class CodeActionTask final : public LSPRequestTask {
+    // WARNING: we currently do not support more than one lazily resolved code action since that would require copying
+    // params which we don't support
+    // TODO(bshu): investigate using shared pointers instead of unique pointers for lsp types
     std::unique_ptr<CodeActionParams> params;
 
 public:
