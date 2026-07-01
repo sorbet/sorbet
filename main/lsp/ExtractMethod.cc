@@ -525,13 +525,11 @@ struct ContItem {
 
 // We could merge these two functions together as getSelectionAndContinuation, but we choose not to so that in the
 // common case that a selection isn't valid, we don't have to allocate for the continuation
-// In this case we use optional in the return type since the continuation can actually be empty, but this doesn't
-// indicate that the selection is invalid
-// This function essentially duplicates the logic of getSelection but gets the continuation after the
-// deepest node contained in the target.
-// The continuation is an approximation of what code can run after the selection for the purposes of calculating
-// liveness.
-// invariant: if getSelection is nonempty, then getContinuation is nonnull
+// We use `optional` for the return type because it's possible for a valid selection to lead to a empty continuation and
+// we want distinguish between that and an invalid selection. This function essentially duplicates the logic of
+// getSelection but gets the continuation after the largest node contained in the target. The continuation is an
+// approximation of what code can run after the selection for the purposes of calculating liveness. invariant: if
+// getSelection is nonempty, then getContinuation is nonnull
 optional<vector<ContItem>> getContinuation(const ast::ExpressionPtr &expr, const core::LocOffsets target) {
     if (!expr.loc().exists()) {
         return nullopt;
