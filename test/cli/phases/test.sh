@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eu
+set -euo pipefail
 
 rm -rf out fileout
 mkdir -p out fileout

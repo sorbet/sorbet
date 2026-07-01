@@ -1,5 +1,5 @@
 #!/bin/bash
 
-set -e
+set -euo pipefail
 
 main/sorbet --silence-dev-message test/cli/ivar-with-cast/ivar-with-cast.rb 2>&1

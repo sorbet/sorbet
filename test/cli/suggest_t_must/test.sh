@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 tmp="$(mktemp -d)"
 infile="test/cli/suggest_t_must/suggest_t_must.rb"

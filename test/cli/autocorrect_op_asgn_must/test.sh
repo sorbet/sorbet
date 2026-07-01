@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 cwd="$(pwd)"
 infile="$cwd/test/cli/autocorrect_op_asgn_must/autocorrect_op_asgn_must.rb"

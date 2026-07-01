@@ -1,4 +1,6 @@
 #!/bin/bash
+
+set -euo pipefail
 script="$1"
 expect="$2"
 

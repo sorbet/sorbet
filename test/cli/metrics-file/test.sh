@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 main/sorbet --silence-dev-message -e 'class Foo; end' --metrics-file=metrics.json 2>&1
 grep status metrics.json

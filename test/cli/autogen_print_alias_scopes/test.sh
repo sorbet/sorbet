@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eu
+set -euo pipefail
 
 main/sorbet --silence-dev-message --stop-after namer \
   -p autogen \

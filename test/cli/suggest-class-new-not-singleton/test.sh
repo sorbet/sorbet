@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 tmp="$(mktemp -d)"
 infile="test/cli/suggest-class-new-not-singleton/suggest-class-new-not-singleton.rb"

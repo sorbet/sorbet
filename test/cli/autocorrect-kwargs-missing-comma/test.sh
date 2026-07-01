@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 tmp="$(mktemp -d)"
 infile="test/cli/autocorrect-kwargs-missing-comma/autocorrect-kwargs-missing-comma.rb"

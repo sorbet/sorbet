@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 dir="test/cli/allowed-extension/lib"
 

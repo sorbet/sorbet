@@ -6,7 +6,7 @@ cleanup() {
     rm "$outfile"
 }
 trap cleanup EXIT
-set -e
+set -euo pipefail
 
 
 main/sorbet --silence-dev-message --version &> "$outfile"
