@@ -684,8 +684,8 @@ UnorderedSet<core::LocalVariable> setUnion(const UnorderedSet<core::LocalVariabl
     return result;
 }
 
-[[maybe_unused]] void computeWrites(const core::GlobalState &gs, const ast::ExpressionPtr &expr,
-                                    UnorderedSet<core::LocalVariable> &writes) {
+void computeWrites(const core::GlobalState &gs, const ast::ExpressionPtr &expr,
+                   UnorderedSet<core::LocalVariable> &writes) {
     ComputeWrites walker{writes};
     core::Context ctx(gs, core::Symbols::root(), core::FileRef());
     ast::ConstTreeWalk::apply(ctx, walker, expr);
@@ -788,8 +788,8 @@ UnorderedSet<core::LocalVariable> computeExprLiveIn(const ast::ExpressionPtr &ex
     }
 }
 
-[[maybe_unused]] UnorderedSet<core::LocalVariable> computeContItemLiveIn(const ContItem contItem,
-                                                                         UnorderedSet<core::LocalVariable> liveOut) {
+UnorderedSet<core::LocalVariable> computeContItemLiveIn(const ContItem contItem,
+                                                        UnorderedSet<core::LocalVariable> liveOut) {
     if (contItem.isStat()) {
         return computeExprLiveIn(*contItem.branches[0], liveOut);
     }
