@@ -1705,6 +1705,41 @@ void GlobalState::mangleRenameMethod(MethodRef what, NameRef origName) {
     what.data(*this)->name = name;
 }
 
+void GlobalState::mangleRenameStaticField(FieldRef what, NameRef origName) {
+    ENFORCE_NO_TIMER(!symbolTableFrozen);
+    ENFORCE_NO_TIMER(what.data(*this)->flags.isStaticField);
+    auto owner = what.data(*this)->owner;
+    auto ownerData = owner.data(*this);
+    auto &ownerMembers = ownerData->members();
+    auto fnd = ownerMembers.find(origName);
+    ENFORCE_NO_TIMER(fnd != ownerMembers.end());
+    ENFORCE_NO_TIMER(fnd->second == what);
+    ENFORCE_NO_TIMER(what.data(*this)->name == origName);
+    NameRef name = nextMangledName(owner, origName);
+    ENFORCE(!ownerData->findMember(*this, name).exists(), "would overwrite the Symbol with name {}",
+            name.showRaw(*this));
+    ownerMembers.erase(fnd);
+    ownerMembers[name] = what;
+    what.data(*this)->name = name;
+}
+
+void GlobalState::mangleRenameTypeMember(TypeMemberRef what, NameRef origName) {
+    ENFORCE_NO_TIMER(!symbolTableFrozen);
+    auto owner = what.data(*this)->owner.asClassOrModuleRef();
+    auto ownerData = owner.data(*this);
+    auto &ownerMembers = ownerData->members();
+    auto fnd = ownerMembers.find(origName);
+    ENFORCE_NO_TIMER(fnd != ownerMembers.end());
+    ENFORCE_NO_TIMER(fnd->second == what);
+    ENFORCE_NO_TIMER(what.data(*this)->name == origName);
+    NameRef name = nextMangledName(owner, origName);
+    ENFORCE(!ownerData->findMember(*this, name).exists(), "would overwrite the Symbol with name {}",
+            name.showRaw(*this));
+    ownerMembers.erase(fnd);
+    ownerMembers[name] = what;
+    what.data(*this)->name = name;
+}
+
 // This method should be used sparingly, because using it correctly is tricky.
 // Consider using mangleRenameMethod (or defining a new constant with a name produced by nextMangledName)
 // instead, unless you absolutely know that you must use this method.

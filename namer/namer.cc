@@ -1212,10 +1212,21 @@ private:
             symbol = ctx.owner.asClassOrModuleRef().data(ctx)->singletonClass(ctx);
         } else {
             auto owner = getOwnerSymbol(state, klass.owner);
-            auto member = owner.data(ctx)->findMember(ctx, klass.name);
+            auto member = owner.data(ctx)->findMemberNoDealias(klass.name);
             if (member.exists()) {
-                // If member exists with this name, it must be a class or module, because we never mangle-rename them.
-                symbol = member.asClassOrModuleRef();
+                if (member.isClassOrModule()) {
+                    symbol = member.asClassOrModuleRef();
+                } else if (member.isStaticField(ctx)) {
+                    // This can happen when the payload already defines a static field that user code
+                    // later treats as a namespace, like `DATA::A`.
+                    ctx.state.mangleRenameStaticField(member.asFieldRef(), klass.name);
+                    symbol = ctx.state.enterClassSymbol(ctx.locAt(klass.declLoc), owner, klass.name);
+                } else if (member.isTypeMember()) {
+                    ctx.state.mangleRenameTypeMember(member.asTypeMemberRef(), klass.name);
+                    symbol = ctx.state.enterClassSymbol(ctx.locAt(klass.declLoc), owner, klass.name);
+                } else {
+                    ENFORCE(false, "Unexpected non-class member kind in class namespace: {}", member.show(ctx));
+                }
             } else {
                 auto newClass = ctx.state.enterClassSymbol(ctx.locAt(klass.declLoc), owner, klass.name);
                 symbol = newClass;
