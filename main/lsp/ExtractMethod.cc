@@ -369,18 +369,22 @@ optional<pair<int, int>> getStatsContainedInTarget(const vector<const ast::Expre
             break;
         }
     }
-    if (j == -1)
+    if (j == -1) {
         return nullopt;
-    if (i >= j)
+    }
+    if (i >= j) {
         return nullopt;
+    }
     // Then check that the selection doesn't intersect with any other statements contained within the selection.
     for (int k = 0; k < i; k++) {
-        if (stats[k]->loc().exists() && stats[k]->loc().intersection(target).exists())
+        if (stats[k]->loc().exists() && stats[k]->loc().intersection(target).exists()) {
             return nullopt;
+        }
     }
     for (int k = j; k < stats.size(); k++) {
-        if (stats[k]->loc().exists() && stats[k]->loc().intersection(target).exists())
+        if (stats[k]->loc().exists() && stats[k]->loc().intersection(target).exists()) {
             return nullopt;
+        }
     }
     return {{i, j}};
 }
