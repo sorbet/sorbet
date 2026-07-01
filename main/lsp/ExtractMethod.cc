@@ -347,10 +347,14 @@ void computeLocSums(const core::GlobalState &gs, ast::ExpressionPtr &expr) {
     ast::TreeWalk::apply(ctx, computer, expr);
 }
 
+// Checks whether the selection is a valid selection of statements.
+// A valid selection of statements is a selection that contains at least one statement and does not intersect any other
+// statements not contained within the selection.
 optional<pair<int, int>> getStatsContainedInTarget(const vector<const ast::ExpressionPtr *> &stats,
                                                    const core::LocOffsets target) {
     int i = -1;
     int j = -1;
+    // First find the statements contained in the selection
     for (int k = 0; k < stats.size(); k++) {
         if (stats[k]->loc().exists() && target.beginPos() <= stats[k]->loc().beginPos()) {
             i = k;
@@ -369,6 +373,7 @@ optional<pair<int, int>> getStatsContainedInTarget(const vector<const ast::Expre
         return nullopt;
     if (i >= j)
         return nullopt;
+    // Then check that the selection doesn't intersect with any other statements contained within the selection.
     for (int k = 0; k < i; k++) {
         if (stats[k]->loc().exists() && stats[k]->loc().intersection(target).exists())
             return nullopt;
