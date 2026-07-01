@@ -69,15 +69,15 @@ class BlockEntire
   sig {params(items: T.untyped).void}
   def shadow_block_outer_accumulated(items)
     total = T.let(0, Integer)
-    total, x = new_method(item, items, total)
+    total = new_method(items, total)
 #   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [J] Extract Method
     puts total
   end
 
-  sig { params(item: T.untyped, items: T.untyped, total: T.untyped).returns([T.untyped, T.untyped]) }
-  def new_method(item, items, total)
+  sig { params(items: T.untyped, total: T.untyped).returns(T.untyped) }
+  def new_method(items, total)
     items.each { |item; x| x = item * 2; total += x }
-    [total, x]
+    total
   end
 
 

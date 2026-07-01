@@ -33,12 +33,12 @@ class BlockEntire
 
   sig {params(items: T.untyped, factor: Integer).void}
   def reads_outer_vars(items, factor)
-    new_method(factor, items, x)
+    new_method(factor, items)
 #   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [E] Extract Method
   end
 
-  sig { params(factor: T.untyped, items: T.untyped, x: T.untyped).returns(T.untyped) }
-  def new_method(factor, items, x)
+  sig { params(factor: T.untyped, items: T.untyped).returns(T.untyped) }
+  def new_method(factor, items)
     items.each { |x| puts x * factor }
   end
 

@@ -77,13 +77,13 @@ class BlockEntire
   sig {params(items: T.untyped).void}
   def shadow_block_never_written(items)
     x = T.let(0, Integer)
-    new_method(items, x)
+    new_method(items)
 #   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [K] Extract Method
     puts x
   end
 
-  sig { params(items: T.untyped, x: T.untyped).void }
-  def new_method(items, x)
+  sig { params(items: T.untyped).void }
+  def new_method(items)
     items.each { |item; x| puts x }
   end
 

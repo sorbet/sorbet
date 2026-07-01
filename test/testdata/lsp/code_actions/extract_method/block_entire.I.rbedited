@@ -61,13 +61,13 @@ class BlockEntire
   sig {params(items: T.untyped).void}
   def shadow_block_outer_unchanged(items)
     x = T.let(0, Integer)
-    new_method(item, items)
+    new_method(items)
 #   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [I] Extract Method
     puts x
   end
 
-  sig { params(item: T.untyped, items: T.untyped).void }
-  def new_method(item, items)
+  sig { params(items: T.untyped).void }
+  def new_method(items)
     items.each { |item; x| x = item * 2; puts x }
   end
 

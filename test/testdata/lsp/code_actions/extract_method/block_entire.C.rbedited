@@ -21,12 +21,12 @@ class BlockEntire
 
   sig {params(items: T.untyped).returns(T.untyped)}
   def block_as_return_value(items)
-    new_method(items, x)
+    new_method(items)
 #   ^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [C] Extract Method
   end
 
-  sig { params(items: T.untyped, x: T.untyped).returns(T.untyped) }
-  def new_method(items, x)
+  sig { params(items: T.untyped).returns(T.untyped) }
+  def new_method(items)
     items.map { |x| x * 2 }
   end
 

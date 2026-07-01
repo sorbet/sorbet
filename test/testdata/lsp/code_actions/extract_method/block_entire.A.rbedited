@@ -7,12 +7,12 @@ class BlockEntire
 
   sig {params(items: T.untyped).void}
   def no_outer_vars(items)
-    new_method(items, x)
+    new_method(items)
 #   ^^^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [A] Extract Method
   end
 
-  sig { params(items: T.untyped, x: T.untyped).returns(T.untyped) }
-  def new_method(items, x)
+  sig { params(items: T.untyped).returns(T.untyped) }
+  def new_method(items)
     items.each { |x| puts x }
   end
 

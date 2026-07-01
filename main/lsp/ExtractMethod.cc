@@ -730,6 +730,34 @@ UnorderedSet<core::LocalVariable> computeExprLiveIn(const ast::ExpressionPtr &ex
             liveOut.emplace(local.localVariable);
             return liveOut;
         }
+        case ast::Tag::Block: {
+            auto &block = ast::cast_tree_nonnull<ast::Block>(expr);
+            liveOut = computeExprLiveIn(block.body, liveOut);
+            for (auto &param : block.params) {
+                const ast::ExpressionPtr *innerExpr = &param;
+                if (auto p = ast::cast_tree<ast::OptionalParam>(param)) {
+                    innerExpr = &p->expr;
+                } else if (auto p = ast::cast_tree<ast::RestParam>(param)) {
+                    innerExpr = &p->expr;
+                } else if (auto p = ast::cast_tree<ast::KeywordArg>(param)) {
+                    innerExpr = &p->expr;
+                } else if (auto p = ast::cast_tree<ast::BlockParam>(param)) {
+                    innerExpr = &p->expr;
+                } else if (auto p = ast::cast_tree<ast::ShadowArg>(param)) {
+                    innerExpr = &p->expr;
+                }
+                if (auto local = ast::cast_tree<ast::Local>(*innerExpr)) {
+                    liveOut.erase(local->localVariable);
+                }
+            }
+            for (auto it = block.params.rbegin(); it != block.params.rend(); it++) {
+                auto &param = *it;
+                if (auto p = ast::cast_tree<ast::OptionalParam>(param)) {
+                    liveOut = computeExprLiveIn(p->default_, liveOut);
+                }
+            }
+            return liveOut;
+        }
         case ast::Tag::RescueCase: {
             auto &rescueCase = ast::cast_tree_nonnull<ast::RescueCase>(expr);
             liveOut = computeExprLiveIn(rescueCase.body, liveOut);

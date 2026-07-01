@@ -14,13 +14,13 @@ class BlockEntire
   sig {params(items: T.untyped).void}
   def outer_accumulation(items)
     total = T.let(0, Integer)
-    total = new_method(items, total, x)
+    total = new_method(items, total)
 #   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [B] Extract Method
     puts total
   end
 
-  sig { params(items: T.untyped, total: T.untyped, x: T.untyped).returns(T.untyped) }
-  def new_method(items, total, x)
+  sig { params(items: T.untyped, total: T.untyped).returns(T.untyped) }
+  def new_method(items, total)
     items.each { |x| total += x }
     total
   end

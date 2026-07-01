@@ -53,13 +53,13 @@ class BlockEntire
   sig {params(items: T.untyped).void}
   def multi_param_outer_accumulated(items)
     total = T.let(0, Integer)
-    total = new_method(a, b, items, total)
+    total = new_method(items, total)
 #   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [H] Extract Method
     puts total
   end
 
-  sig { params(a: T.untyped, b: T.untyped, items: T.untyped, total: T.untyped).returns(T.untyped) }
-  def new_method(a, b, items, total)
+  sig { params(items: T.untyped, total: T.untyped).returns(T.untyped) }
+  def new_method(items, total)
     items.each { |a, b| total += a + b }
     total
   end

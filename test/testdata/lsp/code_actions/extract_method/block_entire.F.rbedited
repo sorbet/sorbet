@@ -39,13 +39,13 @@ class BlockEntire
 
   sig {params(items: T.untyped).void}
   def block_not_last_statement(items)
-    new_method(items, x)
+    new_method(items)
 #   ^^^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [F] Extract Method
     puts "done"
   end
 
-  sig { params(items: T.untyped, x: T.untyped).void }
-  def new_method(items, x)
+  sig { params(items: T.untyped).void }
+  def new_method(items)
     items.each { |x| puts x }
   end
 

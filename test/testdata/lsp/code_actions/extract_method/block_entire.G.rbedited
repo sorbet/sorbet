@@ -46,12 +46,12 @@ class BlockEntire
 
   sig {params(items: T.untyped).void}
   def multi_param_no_outer(items)
-    new_method(a, b, items)
+    new_method(items)
 #   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ apply-code-action: [G] Extract Method
   end
 
-  sig { params(a: T.untyped, b: T.untyped, items: T.untyped).returns(T.untyped) }
-  def new_method(a, b, items)
+  sig { params(items: T.untyped).returns(T.untyped) }
+  def new_method(items)
     items.each { |a, b| puts a.to_s + b.to_s }
   end
 
