@@ -947,8 +947,6 @@ public:
     EnclosingMethodWalk(core::Loc targetLoc) : targetLoc(targetLoc) {}
 
     void preTransformMethodDef(core::Context ctx, const ast::MethodDef &methodDef) {
-        // TODO(bshu) make this more precise. If we do rhs->loc instead, it will be annoying since it doesn't include
-        // leading and trailing whitespace.
         if (methodDef.loc.exists() && methodDef.loc.contains(targetLoc.offsets())) {
             enclosingMethod = &methodDef;
         }
