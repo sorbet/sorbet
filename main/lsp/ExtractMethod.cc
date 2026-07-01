@@ -943,18 +943,10 @@ class EnclosingMethodWalk {
 public:
     core::Loc targetLoc;
     const ast::MethodDef *enclosingMethod = nullptr;
-    const shared_ptr<spdlog::logger> &logger;
-    const core::GlobalState &gs;
-    core::FileRef file;
 
-    EnclosingMethodWalk(core::Loc targetLoc, const shared_ptr<spdlog::logger> &logger, const core::GlobalState &gs,
-                        core::FileRef file)
-        : targetLoc(targetLoc), logger(logger), gs(gs), file(file) {}
+    EnclosingMethodWalk(core::Loc targetLoc) : targetLoc(targetLoc) {}
 
     void preTransformMethodDef(core::Context ctx, const ast::MethodDef &methodDef) {
-        logger->debug("ExtractMethod: visiting method '{}', rhs loc: {}", methodDef.name.toString(gs),
-                      methodDef.rhs.loc().showRaw(gs, file));
-        logger->debug("ExtractMethod: targetLoc offsets: {}", targetLoc.offsets().showRaw(gs, file));
         // TODO(bshu) make this more precise. If we do rhs->loc instead, it will be annoying since it doesn't include
         // leading and trailing whitespace.
         if (methodDef.loc.contains(targetLoc.offsets())) {
@@ -977,44 +969,27 @@ vector<unique_ptr<TextDocumentEdit>> getExtractMethodEdits(LSPTypecheckerDelegat
     computeLocSums(gs, parsedFile.tree);
 
     core::Context ctx(gs, core::Symbols::root(), file);
-    EnclosingMethodWalk walk(selectionLoc, config.logger, gs, file);
+    EnclosingMethodWalk walk(selectionLoc);
     ast::ConstTreeWalk::apply(ctx, walk, parsedFile.tree);
 
     if (!walk.enclosingMethod) {
-        config.logger->debug("ExtractMethod: no enclosing method found");
         return {};
     }
-    config.logger->debug("ExtractMethod: found enclosing method");
-
-    config.logger->debug("Selection loc: {}", selectionLoc.showRaw(gs));
-    config.logger->debug("Method rhs loc: {}", walk.enclosingMethod->rhs.showRaw(gs));
     auto rhsLoc = walk.enclosingMethod->rhs.loc();
     auto selOffsets = selectionLoc.offsets();
     auto newStart = max(rhsLoc.beginPos(), selOffsets.beginPos());
     auto newEnd = min(rhsLoc.endPos(), selOffsets.endPos());
     if (newStart > newEnd) {
-        config.logger->debug("ExtractMethod: no intersection found");
         return {};
     }
     auto selResult = getSelection(parsedFile.tree, selectionLoc.offsets(), SelectionContext{true, true});
     if (!selResult.has_value()) {
-        config.logger->debug("ExtractMethod: no selection found");
         return {};
     }
     const auto &selection = selResult.stats();
-    config.logger->debug("ExtractMethod: selection found, size: {}", selection.size());
     auto continuation = getContinuation(parsedFile.tree, selectionLoc.offsets());
     ENFORCE(continuation.has_value());
     auto selCx = selResult.selectionContext();
-    config.logger->debug("ExtractMethod: selection size: {}, continuation size: {}", selection.size(),
-                         continuation.has_value() ? continuation->size() : 0);
-    config.logger->debug("ExtractMethod: selection loc: {}", selectionLoc.showRaw(gs));
-    for (auto &expr : selection) {
-        config.logger->debug("ExtractMethod selection: {}", expr->toStringWithTabs(gs));
-    }
-    for (auto &item : continuation.value()) {
-        config.logger->debug("ExtractMethod continuation: {}", item.toStringWithTabs(gs));
-    }
 
     UnorderedSet<core::LocalVariable> selectionWrites;
     for (auto &stat : selection) {
@@ -1030,18 +1005,6 @@ vector<unique_ptr<TextDocumentEdit>> getExtractMethodEdits(LSPTypecheckerDelegat
     UnorderedSet<core::LocalVariable> selectionReads;
     for (auto it = selection.rbegin(); it != selection.rend(); it++) {
         selectionReads = computeExprLiveIn(*(*it), selectionReads);
-    }
-
-    for (auto &var : continuationReads) {
-        config.logger->debug("ExtractMethod liveOut: {}", var.toString(gs));
-    }
-
-    for (auto &var : selectionReads) {
-        config.logger->debug("ExtractMethod liveIn: {}", var.toString(gs));
-    }
-
-    for (auto &var : selectionWrites) {
-        config.logger->debug("ExtractMethod writes: {}", var.toString(gs));
     }
 
     auto enclosingMethodRef = walk.enclosingMethod->symbol;
@@ -1083,9 +1046,6 @@ vector<unique_ptr<TextDocumentEdit>> getExtractMethodEdits(LSPTypecheckerDelegat
         "\n\n" + indentString(indentLength, formatNewMethod(isSingletonMethod, dedentedSource, selectionReadsNames,
                                                             selectionWritesNames, selCx.isRetValueNeeded));
     auto callText = formatCall(isSingletonMethod, selectionReadsNames, selectionWritesNames, selCx);
-
-    config.logger->debug("ExtractMethod newMethod:\n{}", newMethodText);
-    config.logger->debug("ExtractMethod call:\n{}", callText);
 
     vector<unique_ptr<TextEdit>> edits;
     edits.emplace_back(make_unique<TextEdit>(Range::fromLoc(gs, insertLoc), newMethodText));
