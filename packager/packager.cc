@@ -1377,6 +1377,7 @@ void Packager::buildPackageDB(core::GlobalState &gs, WorkerPool &workers, absl::
 
         PackageDBPackageGraph packageGraph{gs.packageDB()};
         gs.packageDB().setCondensation(ComputePackageSCCs::run(gs, packageGraph));
+        // TODO(bshu): set the transpose and mangled name to condensation id here
     }
 
     {

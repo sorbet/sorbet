@@ -416,12 +416,70 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
 }
 
 namespace {
+optional<UnorderedSet<core::packages::MangledName>> determineAffectedPackages(const core::GlobalState &gs,
+                                                                              const LSPFileUpdates &update) {
+    const auto &condensation = gs.packageDB().condensation();
+    auto nodes = condensation.nodes();
+
+    std::vector<std::vector<int>> backEdges(nodes.size());
+    // Map every package's MangledName to the ids of the SCC nodes that contain it. A package can live in more than one
+    // node (e.g. an application node and a test node), so map to a vector rather than a single id.
+    UnorderedMap<core::packages::MangledName, std::vector<int>> nameToNodes;
+    for (auto &node : nodes) {
+        for (auto imp : node.imports) {
+            backEdges[imp].push_back(node.id);
+        }
+        for (auto &member : node.members) {
+            nameToNodes[member].push_back(node.id);
+        }
+    }
+
+    // Collect the SCC ids of the edited packages.
+    std::vector<int> seedIds;
+    for (auto &file : update.updatedFiles) {
+        if (file->hasPackageRbPath()) {
+            return nullopt; // package definition changed -> can't scope the edit
+        }
+        auto pkg = gs.packageDB().findPackageByPath(gs, *file);
+        if (!pkg.exists()) {
+            return nullopt; // file not in any package
+        }
+        auto it = nameToNodes.find(pkg);
+        if (it != nameToNodes.end()) {
+            seedIds.insert(seedIds.end(), it->second.begin(), it->second.end());
+        }
+    }
+
+    // DFS
+    std::vector<bool> visited(nodes.size(), false);
+    std::vector<int> stack(seedIds.begin(), seedIds.end());
+    UnorderedSet<core::packages::MangledName> result;
+    while (!stack.empty()) {
+        auto id = stack.back();
+        stack.pop_back();
+        if (visited[id]) {
+            continue;
+        }
+        visited[id] = true;
+        for (auto &member : nodes[id].members) {
+            result.insert(member);
+        }
+        for (auto dependent : backEdges[id]) {
+            if (!visited[dependent]) {
+                stack.push_back(dependent);
+            }
+        }
+    }
+
+    return result;
+}
 
 // Determine how much of the symbol table we can copy when starting a slow path edit: any __package.rb modification
 // means that we can't reuse the symbol table.
-pair<core::packages::Stratum, UnorderedSet<core::packages::MangledName>>
-determineStartingStratum(const core::GlobalState &gs, const vector<core::packages::Stratum> &fileToStratum,
-                         const core::packages::Stratum lastStratum, const LSPFileUpdates &update) {
+core::packages::Stratum determineStartingStratum(const core::GlobalState &gs,
+                                                 const vector<core::packages::Stratum> &fileToStratum,
+                                                 const core::packages::Stratum lastStratum,
+                                                 const LSPFileUpdates &update) {
     // We start by assuming we can copy the whole previous symbol table.
     auto editStratum = lastStratum;
     UnorderedSet<core::packages::MangledName> relatedPackages;
@@ -438,12 +496,12 @@ determineStartingStratum(const core::GlobalState &gs, const vector<core::package
         if (fref.id() >= fileToStratum.size()) {
             // We can't keep any part of the symbol table if we see a new package file
             if (file->hasPackageRbPath()) {
-                return {core::packages::Stratum(0), {}};
+                return core::packages::Stratum(0);
             }
 
             auto pkg = gs.packageDB().findPackageByPath(gs, *file);
             if (!pkg.exists()) {
-                return {core::packages::Stratum(0), {}};
+                return core::packages::Stratum(0);
             }
 
             auto &info = gs.packageDB().getPackageInfo(pkg);
@@ -562,12 +620,14 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
     logger->debug("Taking slow path");
 
     core::packages::Stratum startingStratum(0);
+    optional<UnorderedSet<core::packages::MangledName>> affectedPackages;
     UnorderedSet<core::FileRef> openFiles;
     ENFORCE(this->cancellationUndoState == nullptr);
     if (cancelable) {
         timeit.setTag("cancelable", "true");
 
         startingStratum = determineStartingStratum(*this->gs, this->fileToStratum, this->lastStratum, updates);
+        affectedPackages = determineAffectedPackages(*this->gs, updates);
 
         auto savedGS =
             std::exchange(this->gs, pipeline::copyForSlowPath(*this->gs, this->config->opts, startingStratum));
@@ -872,23 +932,25 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
                 return currentStratum;
             }
 
-            // set
-            UnorderedSet<core::packages::MangledName> relatedPackages;
-
-            auto maybeResolvedRelated = move(maybeResolved.result());
-            auto notRelatedFiles =
-                absl::c_partition(maybeResolvedRelated, [&relatedPackages, &gs = as_const(*gs)](auto &tree) {
+            auto affectedFiles = move(maybeResolved.result());
+            auto notAffectedFiles =
+                absl::c_partition(affectedFiles, [&affectedPackages, &gs = as_const(*gs)](auto &tree) {
                     auto &packageDB = gs.packageDB();
                     auto packageName = packageDB.getPackageNameForFile(tree.file);
                     if (!packageName.exists()) {
                         return true;
                     }
-                    return relatedPackages.contains(packageName);
+                    if (!affectedPackages.has_value()) {
+                        // all packages were affected
+                        return true;
+                    }
+                    return affectedPackages.value().contains(packageName);
                 });
-            maybeResolvedRelated.erase(notRelatedFiles, maybeResolvedRelated.end());
+            affectedFiles.erase(notAffectedFiles, affectedFiles.end());
 
-            auto sorted = sortParsedFiles(*gs, *errorReporter, move(maybeResolved.result()));
-            pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, currentStratum, preemptManager);
+            auto sortedAffectedFiles = sortParsedFiles(*gs, *errorReporter, move(affectedFiles));
+            pipeline::typecheck(*gs, move(sortedAffectedFiles), config->opts, workers, cancelable, currentStratum,
+                                preemptManager);
         }
 
         // [Test only] Ensure that we handled all expected preemptions
