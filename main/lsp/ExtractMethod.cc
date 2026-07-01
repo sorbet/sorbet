@@ -408,13 +408,14 @@ public:
     }
 
 private:
+    // A selection cannot be empty, so we use an empty vector to indicate an invalid selection.
     vector<const ast::ExpressionPtr *> stats_;
     SelectionContext selCx_;
 };
 
 // A selection of nodes is defined as the largest sequence of nodes contained in a target loc.
 // selCx carries the statement/return-value context at the current position and is stored in the
-// result when a match is found, eliminating separate isInStatementContext / isReturnValueNeeded walks.
+// result when a match is found.
 SelectionResult getSelection(const ast::ExpressionPtr &expr, const core::LocOffsets target,
                              const SelectionContext selCx) {
     if (!expr.loc().exists()) {
