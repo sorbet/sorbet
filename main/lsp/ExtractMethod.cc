@@ -852,42 +852,42 @@ string returnSig(const vector<string> &types) {
 }
 } // namespace rbfmt
 
-string formatNewMethod(bool isSingletonMethod, string_view selectionSource, const vector<string> &params,
-                       const vector<string> &updateReturns, bool isReturnValueNeeded) {
+string formatNewMethod(bool isSingletonMethod, string_view selectionSource, const vector<string> &selectionReads,
+                       const vector<string> &selectionWrites, bool isRetValueNeeded) {
     string methodName = isSingletonMethod ? "self.new_method" : "new_method";
 
     // Build sig
-    auto paramsSig =
-        absl::StrJoin(params, ", ", [](string *out, const string &p) { absl::StrAppend(out, p, ": T.untyped"); });
+    auto paramsSig = absl::StrJoin(selectionReads, ", ",
+                                   [](string *out, const string &p) { absl::StrAppend(out, p, ": T.untyped"); });
     vector<string> returnTypes;
-    if (isReturnValueNeeded) {
+    if (isRetValueNeeded) {
         returnTypes.push_back("T.untyped");
     }
-    for (int i = 0; i < updateReturns.size(); i++) {
+    for (int i = 0; i < selectionWrites.size(); i++) {
         returnTypes.push_back("T.untyped");
     }
     string returnsSig = rbfmt::returnSig(returnTypes);
     auto sig = fmt::format("sig {{ params({}){} }}", paramsSig, returnsSig);
 
-    auto paramList = absl::StrJoin(params, ", ");
+    auto paramList = absl::StrJoin(selectionReads, ", ");
 
     string result = fmt::format("{}\ndef {}({})\n", sig, methodName, paramList);
 
-    if (updateReturns.empty()) {
+    if (selectionWrites.empty()) {
         result += indentString(2, selectionSource);
     } else {
-        if (isReturnValueNeeded) {
+        if (isRetValueNeeded) {
             result += indentString(2, "newMethodReturnValue = begin\n");
             result += indentString(4, selectionSource);
             result += indentString(2, "end\n");
             vector<string> vals{"newMethodReturnValue"};
-            for (auto v : updateReturns) {
+            for (auto v : selectionWrites) {
                 vals.push_back(v);
             }
             result += indentString(2, rbfmt::tupleValue(vals));
         } else {
             result += indentString(2, selectionSource);
-            auto returnExpr = rbfmt::tupleValue(updateReturns);
+            auto returnExpr = rbfmt::tupleValue(selectionWrites);
             result += indentString(2, returnExpr);
         }
     }
@@ -896,19 +896,19 @@ string formatNewMethod(bool isSingletonMethod, string_view selectionSource, cons
     return result;
 }
 
-string formatCall(bool isSingletonMethod, const vector<string> &args, const vector<string> &updateReturns,
+string formatCall(bool isSingletonMethod, const vector<string> &selectionReads, const vector<string> &selectionWrites,
                   SelectionContext selCx) {
     string methodName = isSingletonMethod ? "self.new_method" : "new_method";
     string call = methodName + "(";
-    for (int i = 0; i < args.size(); i++) {
+    for (int i = 0; i < selectionReads.size(); i++) {
         if (i > 0) {
             call += ", ";
         }
-        call += args[i];
+        call += selectionReads[i];
     }
     call += ")";
 
-    if (updateReturns.empty()) {
+    if (selectionWrites.empty()) {
         return call;
     }
 
@@ -916,7 +916,7 @@ string formatCall(bool isSingletonMethod, const vector<string> &args, const vect
     if (selCx.isRetValueNeeded) {
         lhsNames.emplace_back("_");
     }
-    for (auto &ret : updateReturns) {
+    for (auto &ret : selectionWrites) {
         lhsNames.push_back(ret);
     }
 
@@ -1009,31 +1009,31 @@ vector<unique_ptr<TextDocumentEdit>> getExtractMethodEdits(LSPTypecheckerDelegat
         config.logger->debug("ExtractMethod continuation: {}", item.toStringWithTabs(gs));
     }
 
-    UnorderedSet<core::LocalVariable> writes;
+    UnorderedSet<core::LocalVariable> selectionWrites;
     for (auto &stat : selection) {
-        computeWrites(gs, *stat, writes);
+        computeWrites(gs, *stat, selectionWrites);
     }
 
-    UnorderedSet<core::LocalVariable> readByContinuation;
+    UnorderedSet<core::LocalVariable> continuationReads;
     auto &cont = continuation.value();
     for (auto it = cont.rbegin(); it != cont.rend(); it++) {
-        readByContinuation = computeContItemLiveIn(*it, readByContinuation);
+        continuationReads = computeContItemLiveIn(*it, continuationReads);
     }
 
-    UnorderedSet<core::LocalVariable> readBySelection;
+    UnorderedSet<core::LocalVariable> selectionReads;
     for (auto it = selection.rbegin(); it != selection.rend(); it++) {
-        readBySelection = computeExprLiveIn(*(*it), readBySelection);
+        selectionReads = computeExprLiveIn(*(*it), selectionReads);
     }
 
-    for (auto &var : readByContinuation) {
+    for (auto &var : continuationReads) {
         config.logger->debug("ExtractMethod liveOut: {}", var.toString(gs));
     }
 
-    for (auto &var : readBySelection) {
+    for (auto &var : selectionReads) {
         config.logger->debug("ExtractMethod liveIn: {}", var.toString(gs));
     }
 
-    for (auto &var : writes) {
+    for (auto &var : selectionWrites) {
         config.logger->debug("ExtractMethod writes: {}", var.toString(gs));
     }
 
@@ -1052,30 +1052,30 @@ vector<unique_ptr<TextDocumentEdit>> getExtractMethodEdits(LSPTypecheckerDelegat
     }
 
     // Sort params and returns into string vectors
-    vector<string> paramNames;
-    for (auto &var : readBySelection) {
+    vector<string> selectionReadsNames;
+    for (auto &var : selectionReads) {
         if (var == core::LocalVariable::selfVariable()) {
             continue;
         }
-        paramNames.emplace_back(string(var._name.shortName(gs)));
+        selectionReadsNames.emplace_back(string(var._name.shortName(gs)));
     }
-    fast_sort(paramNames);
+    fast_sort(selectionReadsNames);
 
-    vector<string> updateReturnNames;
-    for (auto &var : writes) {
-        if (readByContinuation.contains(var)) {
-            updateReturnNames.emplace_back(string(var._name.shortName(gs)));
+    vector<string> selectionWritesNames;
+    for (auto &var : selectionWrites) {
+        if (continuationReads.contains(var)) {
+            selectionWritesNames.emplace_back(string(var._name.shortName(gs)));
         }
     }
-    fast_sort(updateReturnNames);
+    fast_sort(selectionWritesNames);
 
     auto [_, selectionIndent] = selectionLoc.findStartOfIndentation(gs);
     auto dedentedSource = dedentString(selectionIndent, selectionSource.value());
 
     auto newMethodText =
-        "\n\n" + indentString(indentLength, formatNewMethod(isSingletonMethod, dedentedSource, paramNames,
-                                                            updateReturnNames, selCx.isRetValueNeeded));
-    auto callText = formatCall(isSingletonMethod, paramNames, updateReturnNames, selCx);
+        "\n\n" + indentString(indentLength, formatNewMethod(isSingletonMethod, dedentedSource, selectionReadsNames,
+                                                            selectionWritesNames, selCx.isRetValueNeeded));
+    auto callText = formatCall(isSingletonMethod, selectionReadsNames, selectionWritesNames, selCx);
 
     config.logger->debug("ExtractMethod newMethod:\n{}", newMethodText);
     config.logger->debug("ExtractMethod call:\n{}", callText);
