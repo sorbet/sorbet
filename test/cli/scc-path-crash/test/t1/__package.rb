@@ -1,7 +1,9 @@
 # typed: strict
 
 class Test::T1 < PackageSpec
-  strict_dependencies 'layered_dag'
+  test!
+
+  strict_dependencies 'false'
   layer 'application'
 
   import Test::T2
