@@ -1,0 +1,73 @@
+# typed: true
+# selective-apply-code-action: refactor.extract
+# enable-experimental-lsp-extract-to-method: true
+
+class BlockParams
+  extend T::Sig
+
+  sig {params(items: T.untyped).void}
+  def multiple_params_no_outer(items)
+    items.each do |a, b|
+      puts a + b
+#     ^^^^^^^^^^ apply-code-action: [A] Extract Method
+    end
+  end
+
+  sig {params(items: T.untyped).void}
+  def multiple_params_outer_accumulated(items)
+    total = T.let(0, Integer)
+    items.each do |a, b|
+      total += a + b
+#     ^^^^^^^^^^^^^^ apply-code-action: [B] Extract Method
+    end
+    puts total
+  end
+
+  sig {params(items: T.untyped).void}
+  def shadow_arg_written_and_read(items)
+    x = T.let(0, Integer)
+    items.each do |item; x|
+      x = item * 2; puts x
+#     ^^^^^^^^^^^^^^^^^^^^ apply-code-action: [C] Extract Method
+    end
+    puts x
+  end
+
+  sig {params(items: T.untyped).void}
+  def shadow_arg_read_only(items)
+    x = T.let(0, Integer)
+    items.each do |item; x|
+      x = item * 2
+      puts x
+#     ^^^^^^ apply-code-action: [D] Extract Method
+    end
+    puts x
+  end
+
+  sig {params(items: T.untyped).void}
+  def shadow_arg_never_written(items)
+    x = T.let(0, Integer)
+    items.each do |item; x|
+      puts x
+#     ^^^^^^ apply-code-action: [E] Extract Method
+    end
+    puts x
+  end
+
+  sig {params(items: T.untyped).void}
+  def shadow_arg_written_after_selection(items)
+    x = T.let(0, Integer)
+    items.each do |item; x|
+      new_method(x)
+#     ^^^^^^ apply-code-action: [F] Extract Method
+      x = item * 2
+    end
+    puts x
+  end
+
+  sig { params(x: T.untyped).void }
+  def new_method(x)
+    puts x
+  end
+
+end
