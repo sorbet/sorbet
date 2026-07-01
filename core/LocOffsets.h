@@ -42,6 +42,7 @@ struct LocOffsets {
         return LocOffsets{INVALID_POS_LOC, INVALID_POS_LOC};
     }
     LocOffsets join(LocOffsets other) const;
+    LocOffsets intersection(const LocOffsets &other) const;
     // For a given LocOffsets, returns a zero-length version that starts at the same location.
     LocOffsets copyWithZeroLength() const {
         return LocOffsets{beginPos(), beginPos()};

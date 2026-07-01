@@ -1,0 +1,26 @@
+# typed: true
+# selective-apply-code-action: refactor.extract
+# enable-experimental-lsp-extract-to-method: true
+
+class LivenessWhileConditionWrite
+  extend T::Sig
+
+  sig {void}
+  def body_writes_condition_var
+    x = T.let(0, Integer)
+    while x < 10
+      x = x + 1
+#     ^^^^^^^^^ apply-code-action: [A] Extract Method
+    end
+  end
+
+  sig {void}
+  def body_writes_var_used_after_loop
+    x = T.let(0, Integer)
+    while x < 10
+      x = x + 1
+#     ^^^^^^^^^ apply-code-action: [B] Extract Method
+    end
+    puts x
+  end
+end

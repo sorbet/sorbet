@@ -1,0 +1,28 @@
+# typed: true
+# selective-apply-code-action: refactor.extract
+# enable-experimental-lsp-extract-to-method: true
+
+class LivenessForLoop
+  extend T::Sig
+
+  sig {void}
+  def for_loop_side_effect
+    i = T.let(0, Integer)
+    for i in 1..10
+      puts i
+#     ^^^^^^ apply-code-action: [A] Extract Method
+    end
+    puts i
+  end
+
+  sig {void}
+  def for_loop_accumulator
+    sum = T.let(0, Integer)
+    i = T.let(0, Integer)
+    for i in 1..10
+      sum = sum + i
+#     ^^^^^^^^^^^^^ apply-code-action: [B] Extract Method
+    end
+    puts sum
+  end
+end

@@ -1,0 +1,27 @@
+# typed: true
+# selective-apply-code-action: refactor.extract
+# enable-experimental-lsp-extract-to-method: true
+
+class LivenessBlock
+  extend T::Sig
+
+  sig {void}
+  def modified_in_block_used_after
+    total = T.let(0, Integer)
+    10.times do |i|
+      total = total + i
+#     ^^^^^^^^^^^^^^^^^ apply-code-action: [A] Extract Method
+    end
+    puts total
+  end
+
+  sig {void}
+  def side_effect_only
+    total = T.let(0, Integer)
+    10.times do |i|
+      puts i
+#     ^^^^^^ apply-code-action: [B] Extract Method
+      total = total + i
+    end
+  end
+end

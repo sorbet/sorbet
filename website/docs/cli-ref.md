@@ -232,6 +232,8 @@ Usage:
                                 Enable experimental LSP feature: Signature Help
       --enable-experimental-lsp-extract-to-variable
                                 Enable experimental LSP feature: Extract To Variable
+      --enable-experimental-lsp-extract-to-method
+                                Enable experimental LSP feature: Extract To Method
       --enable-experimental-lsp-create-missing-method
                                 Enable experimental LSP feature: Create Missing Method
       --enable-all-experimental-lsp-features

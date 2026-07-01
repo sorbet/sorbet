@@ -11,6 +11,8 @@
                 "--lsp",
                 "--dir=.",
                 "--enable-experimental-lsp-create-missing-method",
+                "--enable-experimental-lsp-extract-to-method",
+                "--enable-experimental-lsp-extract-to-variable",
             ]
         }
     ],

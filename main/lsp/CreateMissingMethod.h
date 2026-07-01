@@ -15,6 +15,14 @@ isMissingMethodResponse(const core::GlobalState &gs,
 std::vector<std::unique_ptr<TextDocumentEdit>> getCreateMissingMethodEdits(LSPTypecheckerDelegate &typechecker,
                                                                            const LSPConfiguration &config,
                                                                            const core::lsp::SendResponse &resp);
+std::optional<std::pair<core::Loc, int>> getInsertionLocationForClass(LSPTypecheckerDelegate &typechecker,
+                                                                      const core::FileRef &currentFile,
+                                                                      const ast::ParsedFile &currentTree,
+                                                                      const core::ClassOrModuleRef &classRef);
+
+std::optional<std::pair<core::Loc, int>> getInsertionLocationAfterMethod(const core::GlobalState &gs,
+                                                                         const ast::ParsedFile &rootTree,
+                                                                         const core::MethodRef enclosingMethodRef);
 } // namespace create_missing_method
 } // namespace sorbet::realmain::lsp
 
