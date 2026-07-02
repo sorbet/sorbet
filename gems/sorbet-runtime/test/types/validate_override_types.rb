@@ -95,10 +95,24 @@ module Opus::Types::Test
       assert_includes(err.message, "Incompatible type for arg `kw` in signature for override of method `foo`")
     end
 
-    it "raises if an override declares a rest param but fewer named positionals than the base" do
-      # The override's *rest skips the arity shape check, and the positional
-      # type walk pads the missing positions with nil (name and type): the
-      # base's second arg type is checked against nil and must still raise.
+    it "succeeds if an override folds extra base positionals into a contravariant rest param" do
+      base = Class.new do
+        extend T::Sig
+        sig { overridable.params(a: BaseFoo1, b: SubFoo2).returns(BaseFoo3) }
+        def foo(a, b); end
+      end
+      klass = Class.new(base) do
+        extend T::Sig
+        sig { override.params(a: BaseFoo1, rest: BaseFoo2).returns(BaseFoo3) }
+        def foo(a, *rest)
+          BaseFoo3.new
+        end
+      end
+
+      klass.new.foo(BaseFoo1.new, SubFoo2.new)
+    end
+
+    it "raises if an override's rest param type is not a supertype of a folded base positional" do
       base = Class.new do
         extend T::Sig
         sig { overridable.params(a: BaseFoo1, b: BaseFoo2).returns(BaseFoo3) }
@@ -106,7 +120,7 @@ module Opus::Types::Test
       end
       klass = Class.new(base) do
         extend T::Sig
-        sig { override.params(a: BaseFoo1, rest: BaseFoo2).returns(BaseFoo3) }
+        sig { override.params(a: BaseFoo1, rest: SubFoo2).returns(BaseFoo3) }
         def foo(a, *rest); end
       end
 
@@ -114,7 +128,7 @@ module Opus::Types::Test
         klass.new.foo(BaseFoo1.new, BaseFoo2.new)
       end
 
-      assert_includes(err.message, "Incompatible type for arg #2 (``) in signature for override of method `foo`")
+      assert_includes(err.message, "Incompatible type for arg #2 (`rest`) in signature for override of method `foo`")
     end
 
     it "raises if the return type is contravariant" do
