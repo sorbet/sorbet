@@ -646,6 +646,43 @@ optional<vector<ContItem>> getContinuation(const ast::ExpressionPtr &expr, const
             }
             break;
         }
+        case ast::Tag::Send: {
+            auto &send = ast::cast_tree_nonnull<ast::Send>(expr);
+            optional<vector<ContItem>> continuation;
+            auto handleChild = [&](const ast::ExpressionPtr &child) {
+                if (continuation.has_value()) {
+                    continuation->emplace_back(&child);
+                } else {
+                    continuation = getContinuation(child, target);
+                }
+            };
+            handleChild(send.recv);
+            for (auto &arg : send.nonBlockArgs()) {
+                handleChild(arg);
+            }
+            if (auto *block = send.rawBlock()) {
+                auto &blk = ast::cast_tree_nonnull<ast::Block>(*block);
+                // Block param defaults are evaluated before the body, like ordinary children.
+                for (auto &param : blk.params) {
+                    if (auto optArg = ast::cast_tree<ast::OptionalParam>(param)) {
+                        handleChild(optArg->default_);
+                    }
+                }
+                if (continuation.has_value()) {
+                    // Selection was before the block body; the body may or may not run afterward.
+                    continuation->emplace_back(&emptyTreeStorage, &blk.body);
+                } else if (auto blockCont = getContinuation(blk.body, target); blockCont.has_value()) {
+                    // Selection is inside the block body. Treat the block as a loop body: after the
+                    // selection the body may run again, or the loop may exit.
+                    blockCont->emplace_back(&emptyTreeStorage, &blk.body);
+                    continuation = std::move(blockCont);
+                }
+            }
+            if (continuation.has_value()) {
+                return continuation;
+            }
+            break;
+        }
             // TODO: control flow like return etc.
         default: {
             optional<vector<ContItem>> continuation;

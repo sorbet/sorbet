@@ -1,0 +1,25 @@
+# typed: true
+# selective-apply-code-action: refactor.extract
+# enable-experimental-lsp-extract-to-method: true
+
+class LivenessBlockLoopBack
+  extend T::Sig
+
+  sig {void}
+  def accumulate_loop_back
+    acc = T.let(0, Integer)
+    [1, 2, 3].each do |x|
+      acc = acc + x
+#     ^^^^^^^^^^^^^ apply-code-action: [A] Extract Method
+    end
+  end
+
+  sig {void}
+  def running_max_loop_back
+    m = T.let(0, Integer)
+    [3, 1, 2].each do |x|
+      m = [m, x].max
+#     ^^^^^^^^^^^^^^ apply-code-action: [B] Extract Method
+    end
+  end
+end
