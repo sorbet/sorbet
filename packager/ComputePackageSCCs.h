@@ -121,10 +121,14 @@ class ComputePackageSCCs {
                 } else if constexpr (EdgeType != core::packages::ImportType::Normal) {
                     packageGraph.setTestSCCId(poppedPkgName, sccId);
 
-                    // Add an implicit dependency from the test SCC to the application SCC.
-                    // All packages (including test-only) now have sccID_ set from the Normal pass.
-                    auto appSccId = packageGraph.getSCCId(poppedPkgName);
-                    condensationNode.imports.insert(appSccId);
+                    // TODO(trevor): when test-packages is fully rolled out, this can go away as we'll only have one
+                    // kind of SCC ID.
+                    if (!gs.packageDB().getPackageInfo(poppedPkgName).file.data(gs).isTestPackage(gs)) {
+                        // Add an implicit dependency from the test SCC to the application SCC.
+                        // All packages (including test-only) now have sccID_ set from the Normal pass.
+                        auto appSccId = packageGraph.getSCCId(poppedPkgName);
+                        condensationNode.imports.insert(appSccId);
+                    }
                 }
             } while (poppedPkgName != pkgName);
 
@@ -164,9 +168,25 @@ class ComputePackageSCCs {
 
     // Tarjan's algorithm for finding strongly connected components
     template <core::packages::ImportType EdgeType, typename P> void tarjan(P &packageGraph) {
-        this->nodeMap.clear();
         ENFORCE(this->stack.empty());
         for (auto package : gs.packageDB().packages()) {
+            // TODO(trevor): we can remove this check once we have migrated fully to test-packages.
+            if constexpr (EdgeType == core::packages::ImportType::Normal) {
+                // TODO(trevor): We only look at the path of the __package.rb file and not whether it had `test!` while
+                // we have both packaging systems present, as we might have a package in a test directory that lacks a
+                // `test!` annotation (an old-style test package).
+                if (gs.packageDB().getPackageInfo(package).file.data(gs).isTestPackage(gs)) {
+                    continue;
+                }
+            } else {
+                // We skip packages on the second pass if they are not test packages, but their package info marks them
+                // as using test packages, as that means they have a test package split out.
+                auto &info = gs.packageDB().getPackageInfo(package);
+                if (info.usesTestPackages && !info.file.data(gs).isTestPackage(gs)) {
+                    continue;
+                }
+            }
+
             auto &info = this->nodeMap[package];
             if (info.index == NodeInfo::UNVISITED) {
                 this->strongConnect<EdgeType>(package, info, packageGraph);
@@ -185,16 +205,38 @@ public:
         // SCCs, as test_import edges aren't subject to the same restrictions that import edges are.
         scc.tarjan<core::packages::ImportType::Normal>(packageGraph);
 
-        if (gs.packageDB().testPackages()) {
-            // TODO(trevor): once we have fully migrated to test packages, we can remove the testSCCId. For now, we make
-            // sure the two match.
-            for (auto pkg : gs.packageDB().packages()) {
-                packageGraph.setTestSCCId(pkg, packageGraph.getSCCId(pkg));
+        // TODO(trevor): we can remove everything up to the `return` after fully migrating to test-packages
+        // We clean out all nodes that aren't marked as `usesTestPackages`, as those will need to have their test SCCs
+        // computed. Everything that is marked `usesTestPackages` at this point will have an explicit test package, and
+        // its SCC can be reused as its test SCC.
+        absl::erase_if(scc.nodeMap, [&gs, &packageGraph](auto &pair) {
+            auto pkg = pair.first;
+            auto &info = gs.packageDB().getPackageInfo(pkg);
+            if (!info.exists() || !info.usesTestPackages) {
+                return true;
             }
-        } else {
-            // TODO(trevor): once we have fully migrated to test packages, this additional call to scc.tarjan can go
-            // away.
-            scc.tarjan<core::packages::ImportType::TestHelper>(packageGraph);
+
+            auto sccId = packageGraph.getSCCId(pkg);
+            packageGraph.setTestSCCId(pkg, sccId);
+
+            return false;
+        });
+
+        // TODO(trevor): once we have fully migrated to test packages, this additional call to scc.tarjan can go
+        // away.
+        scc.tarjan<core::packages::ImportType::TestHelper>(packageGraph);
+
+        // TODO(trevor): once we have fully migrated to test packages, we can remove the testSCCId. For now, we make
+        // sure the two match.
+        for (auto pkg : gs.packageDB().packages()) {
+            auto &info = gs.packageDB().getPackageInfo(pkg);
+            if (!info.usesTestPackages) {
+                continue;
+            }
+            if (!info.sccID().has_value()) {
+                auto testSCCId = packageGraph.getTestSCCId(pkg);
+                packageGraph.setSCCId(pkg, testSCCId);
+            }
         }
 
         return std::move(scc.condensation);

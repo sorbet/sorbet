@@ -209,7 +209,7 @@ class EnforcePackagePrefix final {
 
 public:
     EnforcePackagePrefix(core::Context ctx, const PackageInfo &pkg)
-        : pkg(pkg), mustUseTestNamespace(!ctx.state.packageDB().testPackages() && ctx.file.data(ctx).isPackagedTest() &&
+        : pkg(pkg), mustUseTestNamespace(!pkg.usesTestPackages && ctx.file.data(ctx).isPackagedTest() &&
                                          !isTestOnlyPackage(ctx, pkg)),
           maybeTestNamespace(core::Symbols::root().data(ctx)->findMember(ctx, PackageDB::TEST_NAMESPACE)) {
         ENFORCE(pkg.exists());
@@ -403,18 +403,31 @@ private:
         return scopeSym.enclosingClass(gs).data(gs)->package;
     }
 
-    bool onPackagePath(const core::GlobalState &gs) const {
+    bool onPackagePath(const core::Context &ctx) const {
         const auto &[scopeSym, _scopeLoc] = scope.back();
+
+        // TODO(trevor): We can remove this once the test-packages migration is complete. It's papering over the
+        // fact that you can do the following in an old-style package, despite the package not existing in `Test`
+        //
+        // > module Test
+        // >   module Foo
+        // >   end
+        // > end
+        if (scopeSym == maybeTestNamespace) {
+            if (!this->pkg.usesTestPackages) {
+                return ctx.file.data(ctx).isPackagedTest();
+            }
+        }
 
         core::ClassOrModuleRef klassSym;
         bool couldBePrefix = true;
         if (!scopeSym.isClassOrModule()) {
             couldBePrefix = false;
-            klassSym = scopeSym.enclosingClass(gs);
+            klassSym = scopeSym.enclosingClass(ctx);
         } else {
             klassSym = scopeSym.asClassOrModuleRef();
         }
-        auto klassData = klassSym.data(gs);
+        auto klassData = klassSym.data(ctx);
         auto pkgForScope = klassData->package;
         auto ownerForScope = klassData->packageRegistryOwner;
         if (!ownerForScope.exists()) {
@@ -424,7 +437,7 @@ private:
         if (pkgForScope == this->pkg.mangledName()) {
             return true;
         } else if (couldBePrefix) {
-            return ownsPackage(gs, ownerForScope, this->pkg.mangledName());
+            return ownsPackage(ctx, ownerForScope, this->pkg.mangledName());
         } else {
             return pkgForScope == this->pkg.mangledName();
         }
@@ -502,10 +515,10 @@ struct PackageSpecBodyWalk {
             return;
         }
 
-        const auto testPackages = ctx.state.packageDB().testPackages();
+        const auto testPackages = info.usesTestPackages;
 
         // Sanity check arguments for unrecognized methods
-        if (!isSpecMethod(testPackages, send)) {
+        if (!isSpecMethod(send)) {
             for (auto &arg : send.posArgs()) {
                 if (!ast::isa_tree<ast::Literal>(arg)) {
                     if (auto e = ctx.beginError(arg.loc(), core::errors::Packager::InvalidPackageExpression)) {
@@ -520,7 +533,7 @@ struct PackageSpecBodyWalk {
                 // null indicates an invalid export.
                 verifyConstant(ctx, core::Names::export_(), send.getPosArg(0));
             }
-        } else if ((send.fun == core::Names::import() || (!testPackages && send.fun == core::Names::testImport()))) {
+        } else if ((send.fun == core::Names::import() || send.fun == core::Names::testImport())) {
             if (send.numPosArgs() == 1) {
                 Import *imp = nullptr;
 
@@ -540,8 +553,18 @@ struct PackageSpecBodyWalk {
                         }
                     }
 
-                    imp = &info.importedPackageNames.emplace_back(importName, method2ImportType(send), send.loc);
+                    // TODO(trevor): this check can be removed after we've fully switched to test-packages, as
+                    // `test_import` will no longer exist
+                    if (info.usesTestPackages && send.fun == core::Names::testImport()) {
+                        if (auto e = ctx.beginError(send.funLoc, core::errors::Packager::InvalidPackageExpression)) {
+                            e.setHeader("Test imports must use `{}`", "import");
+                            e.replaceWith("Use import", ctx.locAt(send.funLoc), "import");
+                        }
+                    } else {
+                        imp = &info.importedPackageNames.emplace_back(importName, method2ImportType(send), send.loc);
+                    }
                 }
+
                 // also validate the keyword args, since one is valid
                 for (auto [key, value] : send.kwArgPairs()) {
                     auto keyLit = ast::cast_tree<ast::Literal>(key);
@@ -549,10 +572,6 @@ struct PackageSpecBodyWalk {
                     switch (keyLit->asSymbol().rawId()) {
                         // TODO(trevor): this case can go away when we only support test packages.
                         case core::Names::only().rawId():
-                            if (testPackages) {
-                                break;
-                            }
-
                             if (keyLit->asSymbol() == core::Names::only()) {
                                 auto valLit = ast::cast_tree<ast::Literal>(value);
                                 // if it's not a literal, then it'll get caught elsewhere
@@ -568,10 +587,6 @@ struct PackageSpecBodyWalk {
                             break;
 
                         case core::Names::usesInternals().rawId():
-                            if (!testPackages) {
-                                break;
-                            }
-
                             auto valLit = ast::cast_tree<ast::Literal>(value);
                             if (valLit && valLit->isTrue(ctx)) {
                                 if (imp) {
@@ -663,6 +678,18 @@ struct PackageSpecBodyWalk {
             auto parsedValue = StrictDependenciesLevel::None;
             if (send.numPosArgs() > 0) {
                 parsedValue = parseStrictDependenciesOption(send.getPosArg(0));
+
+                // TODO(trevor): remove this once we're fully migrated to test-packages.
+                // Force the strict deps level to `false` if this is a test package. We haven't factored test packages
+                // into our cycle-checking implementation, so if a test package is involved in a cycle with the test
+                // part of an old-style package, we'll not be able to construct the import path that forms the cycle.
+                if (info.file.data(ctx).isTestPackage(ctx) && parsedValue != StrictDependenciesLevel::False) {
+                    parsedValue = StrictDependenciesLevel::False;
+                    if (auto e = ctx.beginError(send.argsLoc(), core::errors::Packager::InvalidStrictDependencies)) {
+                        e.setHeader("Test packages must be be at `{}` level `{}`", "strict_dependencies", "false");
+                        e.replaceWith("Change to false", ctx.locAt(send.getPosArg(0).loc()), "'false'");
+                    }
+                }
             }
 
             // We explicitly disallow duplicate `strict_dependencies` declarations. Additionally, if we're processing a
@@ -823,7 +850,7 @@ struct PackageSpecBodyWalk {
                     }
                 }
             }
-        } else if (testPackages && send.fun == core::Names::test_bang()) {
+        } else if (send.fun == core::Names::test_bang()) {
             if (!send.hasNonBlockArgs()) {
                 if (!ctx.file.data(ctx).isTestPath()) {
                     if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidPackageExpression)) {
@@ -857,7 +884,7 @@ struct PackageSpecBodyWalk {
         illegalNode(ctx, tree);
     }
 
-    bool isSpecMethod(bool testPackages, const sorbet::ast::Send &send) const {
+    bool isSpecMethod(const sorbet::ast::Send &send) const {
         switch (send.fun.rawId()) {
             case core::Names::import().rawId():
             case core::Names::export_().rawId():
@@ -865,13 +892,9 @@ struct PackageSpecBodyWalk {
             case core::Names::exportAll().rawId():
             case core::Names::preludePackage().rawId():
             case core::Names::prelude_bang().rawId():
-                return true;
-
             case core::Names::testImport().rawId():
-                return !testPackages;
-
             case core::Names::test_bang().rawId():
-                return testPackages;
+                return true;
 
             default:
                 return false;
@@ -978,6 +1001,23 @@ private:
 };
 
 void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, PackageInfo &info) {
+    // We attempt to determine if this package is test-packages compatible before processing its body, as that changes
+    // the local interpretation of some of the package DSL. This doesn't work for `test!` packages though, as both
+    // packaging systems allow for `__package.rb` files to live inside of a `test` directory.
+    //
+    // TODO: all of this can go away once test-packages is fully rolled out
+    if (package.file.data(gs).isTestPackage(gs)) {
+        info.usesTestPackages = true;
+    } else {
+        auto path = package.file.data(gs).path();
+        auto lastSlash = path.rfind("/");
+        if (lastSlash != std::string_view::npos) {
+            auto dir = path.substr(0, lastSlash);
+            auto testPackagePath = fmt::format("{}/test/__package.rb", dir);
+            info.usesTestPackages = gs.findFileByPath(testPackagePath).exists();
+        }
+    }
+
     PackageSpecBodyWalk bodyWalk(info);
     core::Context ctx(gs, core::Symbols::root(), package.file);
     ast::TreeWalk::apply(ctx, bodyWalk, package.tree);
@@ -991,6 +1031,15 @@ void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, P
             if (auto e = gs.beginError(info.declLoc(), core::errors::Packager::InvalidStrictDependencies)) {
                 e.setHeader("This package does not declare a `{}` level", "strict_dependencies");
             }
+        }
+    }
+
+    // TODO(trevor): we can remove this check once we've fully migrated to test-packages, as it would be valuable to be
+    // able to mark packages in say a `spec` directory as `test!`. We can enforce the `test` directory convention with a
+    // rubocop rule elsewhere.
+    if (package.file.data(gs).isTestPackage(gs) && !info.locs.testPackage.exists()) {
+        if (auto e = gs.beginError(info.declLoc(), core::errors::Packager::InvalidPackageDefinition)) {
+            e.setHeader("This package exists in a `{}` directory, and must be marked `{}`", "test", "test!");
         }
     }
 }
@@ -1111,7 +1160,7 @@ void validatePackage(core::Context ctx) {
 
     bool pkgIsPrelude = pkgInfo.isPreludePackage();
     for (auto &i : pkgInfo.importedPackageNames) {
-        if (packageDB.testPackages()) {
+        if (pkgInfo.usesTestPackages) {
             ENFORCE(i.type == ImportType::Normal, "test_import found in --test-packages mode");
         }
 
@@ -1123,7 +1172,9 @@ void validatePackage(core::Context ctx) {
         }
 
         // It's not acceptable to import a `test!` package from application code
-        if (otherPkg.testPackage() && !pkgInfo.testPackage()) {
+        //
+        // TODO(trevor): we can remove the `isTestImport` case here after we've switched completely to test packages.
+        if (otherPkg.testPackage() && !pkgInfo.testPackage() && !i.isTestImport()) {
             if (auto e = ctx.beginError(i.loc, core::errors::Packager::TestImportMismatch)) {
                 e.setHeader("Package `{}` may not import `{}` packages", pkgInfo.show(ctx), "test!");
                 e.addErrorLine(pkgInfo.declLoc(), "Defined here");
@@ -1206,7 +1257,7 @@ void validatePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
 
     // NOTE: the loc where we report the error may be wrong, the first line could be another sigil like
     // frozen_string_literal Unfortunately, we don't store the loc of the typed sigil, so this is the best we can do
-    if (ctx.state.packageDB().testPackages()) {
+    if (pkgImpl.usesTestPackages) {
         ENFORCE(!pkgImpl.locs.testsMinTypedLevel.exists());
         if (pkgImpl.locs.minTypedLevel.exists() && file.originalSigil < pkgImpl.minTypedLevel) {
             if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::TypedSigilTooLow)) {
