@@ -1408,7 +1408,6 @@ TEST_CASE_FIXTURE(ProtocolTest, "FastPathAfterSlowPathRestarts") {
 
     // Make a slow path edit to Root::Foo::A
     {
-        assertErrorDiagnostics(send(*openFile(files[1].first, files[1].second)), {});
         assertErrorDiagnostics(send(*openFile(files[3].first, files[3].second)), {});
 
         // Make a slow path modification to an existing file.
@@ -1447,6 +1446,9 @@ TEST_CASE_FIXTURE(ProtocolTest, "FastPathAfterSlowPathRestarts") {
             // We're modifying package `Root::Foo`, which means we don't need to typecheck `Root` again.
             CHECK_EQ(params->startingStratum, 1);
         }
+
+        // As the fast path edit to `a.rb` will restrict the prefix we can copy to, open it after the slow path edit.
+        assertErrorDiagnostics(send(*openFile(files[1].first, files[1].second)), {});
     }
 
     // The following cases all happen in stratum 0 to ensure that the copied prefix is functioning as we would expect.
@@ -1564,8 +1566,8 @@ TEST_CASE_FIXTURE(ProtocolTest, "ErrorsRemainAfterSlowPathRestart") {
                                       2));
 
         // We should see a starting and ending slow path message, with the end message indicating that the slow path
-        // started from stratum 1
-        REQUIRE_EQ(resps.size(), 3);
+        // started from stratum 0. The messages inbetween are errors on both `Root::A` and `Root::Foo::A`
+        REQUIRE_EQ(resps.size(), 4);
         {
             auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(resps[0]->asNotification().params);
             CHECK_EQ(params->typecheckingPath, TypecheckingPath::Slow);
@@ -1573,12 +1575,14 @@ TEST_CASE_FIXTURE(ProtocolTest, "ErrorsRemainAfterSlowPathRestart") {
         }
 
         {
-            auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(resps[2]->asNotification().params);
+            auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(resps[3]->asNotification().params);
             CHECK_EQ(params->typecheckingPath, TypecheckingPath::Slow);
             CHECK_EQ(params->status, SorbetTypecheckRunStatus::Ended);
 
-            // We're modifying package `Root::Foo`, which means we don't need to typecheck `Root` again.
-            CHECK_EQ(params->startingStratum, 1);
+            // We're modifying package `Root::Foo`, which means that idealy we don't need to typecheck `Root` again.
+            // However, we made a fast-path edit to `Root::A` but don't have enough information to know that it's not an
+            // additive edit, and as a result need to check its package again.
+            CHECK_EQ(params->startingStratum, 0);
         }
 
         assertErrorDiagnostics(move(resps), {

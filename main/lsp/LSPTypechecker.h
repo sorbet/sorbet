@@ -106,6 +106,12 @@ class LSPTypechecker final {
 
     core::packages::Stratum lastStratum;
 
+    /**
+     * This is the stratum of the last fast-path edit, tracked so that we don't miss additive updates to existing
+     * packages.
+     */
+    core::packages::Stratum fastPathEditStratum;
+
     enum class SlowPathMode {
         Init,
         Cancelable,
