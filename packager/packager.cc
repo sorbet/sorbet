@@ -403,31 +403,18 @@ private:
         return scopeSym.enclosingClass(gs).data(gs)->package;
     }
 
-    bool onPackagePath(const core::Context &ctx) const {
+    bool onPackagePath(const core::GlobalState &gs) const {
         const auto &[scopeSym, _scopeLoc] = scope.back();
-
-        // TODO(trevor): We can remove this once the test-packages migration is complete. It's papering over the
-        // fact that you can do the following in an old-style package, despite the package not existing in `Test`
-        //
-        // > module Test
-        // >   module Foo
-        // >   end
-        // > end
-        if (scopeSym == maybeTestNamespace) {
-            if (!this->pkg.usesTestPackages) {
-                return ctx.file.data(ctx).isPackagedTest();
-            }
-        }
 
         core::ClassOrModuleRef klassSym;
         bool couldBePrefix = true;
         if (!scopeSym.isClassOrModule()) {
             couldBePrefix = false;
-            klassSym = scopeSym.enclosingClass(ctx);
+            klassSym = scopeSym.enclosingClass(gs);
         } else {
             klassSym = scopeSym.asClassOrModuleRef();
         }
-        auto klassData = klassSym.data(ctx);
+        auto klassData = klassSym.data(gs);
         auto pkgForScope = klassData->package;
         auto ownerForScope = klassData->packageRegistryOwner;
         if (!ownerForScope.exists()) {
@@ -437,7 +424,7 @@ private:
         if (pkgForScope == this->pkg.mangledName()) {
             return true;
         } else if (couldBePrefix) {
-            return ownsPackage(ctx, ownerForScope, this->pkg.mangledName());
+            return ownsPackage(gs, ownerForScope, this->pkg.mangledName());
         } else {
             return pkgForScope == this->pkg.mangledName();
         }
