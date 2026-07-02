@@ -10,19 +10,21 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 UndoState::UndoState(unique_ptr<core::GlobalState> evictedGs, UnorderedMap<int, ast::ParsedFile> evictedIndexedFinalGS,
                      vector<core::packages::Stratum> fileToStratum, core::packages::Stratum lastStratum,
-                     const vector<core::FileRef> &workspaceFiles, uint32_t epoch)
+                     core::packages::Stratum fastPathEditStratum, const vector<core::FileRef> &workspaceFiles,
+                     uint32_t epoch)
     : evictedGs(move(evictedGs)), evictedIndexedFinalGS(std::move(evictedIndexedFinalGS)),
-      fileToStratum{move(fileToStratum)}, lastStratum{lastStratum}, initialWorkspaceFilesSize{workspaceFiles.size()},
-      epoch(epoch) {}
+      fileToStratum{move(fileToStratum)}, lastStratum{lastStratum}, fastPathEditStratum{fastPathEditStratum},
+      initialWorkspaceFilesSize{workspaceFiles.size()}, epoch(epoch) {}
 
 void UndoState::restore(unique_ptr<core::GlobalState> &gs, UnorderedMap<int, ast::ParsedFile> &indexedFinalGS,
                         vector<core::packages::Stratum> &fileToStratum, core::packages::Stratum &lastStratum,
-                        vector<core::FileRef> &workspaceFiles) {
+                        core::packages::Stratum &fastPathEditStratum, vector<core::FileRef> &workspaceFiles) {
     indexedFinalGS = std::move(evictedIndexedFinalGS);
     gs = move(evictedGs);
 
     fileToStratum = move(this->fileToStratum);
     lastStratum = this->lastStratum;
+    fastPathEditStratum = this->fastPathEditStratum;
 
     if (workspaceFiles.size() != this->initialWorkspaceFilesSize) {
         workspaceFiles.erase(workspaceFiles.begin() + this->initialWorkspaceFilesSize, workspaceFiles.end());
