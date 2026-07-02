@@ -1,6 +1,6 @@
 # typed: strict
 
-class Test::D < PackageSpec
+class D::Test < PackageSpec
   test!
 
   strict_dependencies 'false'

@@ -1,6 +1,6 @@
 # typed: strict
 
-class Test::A < PackageSpec
+class A::Test < PackageSpec
   test!
 
   import A # allowed because A has `visible_to "tests"`

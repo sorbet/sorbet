@@ -421,6 +421,12 @@ private:
             couldBePrefix = false;
         }
 
+        // TODO(trevor) this can be removed once we've fully migrated to test-packages, as the special
+        // treatment of `Test::` will be gone.
+        if (this->pkg.usesTestPackages && inTestNamespace(gs)) {
+            return false;
+        }
+
         if (pkgForScope == this->pkg.mangledName()) {
             return true;
         } else if (couldBePrefix) {
@@ -430,7 +436,7 @@ private:
         }
     }
 
-    bool inTestNamespace(const core::GlobalState &gs) {
+    bool inTestNamespace(const core::GlobalState &gs) const {
         const auto &[scopeSym, _scopeLoc] = scope.back();
         auto cur = scopeSym;
         while (cur.exists() && cur != core::Symbols::root()) {

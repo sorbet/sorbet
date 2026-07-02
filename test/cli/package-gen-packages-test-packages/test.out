@@ -87,8 +87,8 @@ E/__package.rb:3: `E` is missing `visible_to`s https://srb.help/3734
     10 |  visible_to AlsoDoesNotExist::*
                                         ^
 
-D/test/__package.rb:3: `Test::D` is missing imports https://srb.help/3734
-     3 |class Test::D < PackageSpec
+D/test/__package.rb:3: `D::Test` is missing imports https://srb.help/3734
+     3 |class D::Test < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
     D/test/__package.rb:9: Inserted `import E`
@@ -208,7 +208,7 @@ end
 ###### cat D/test/__package.rb ######
 # typed: strict
 
-class Test::D < PackageSpec
+class D::Test < PackageSpec
   test!
 
   strict_dependencies 'false'
@@ -295,8 +295,8 @@ E/__package.rb:3: `E` is missing `visible_to`s https://srb.help/3734
     10 |  visible_to AlsoDoesNotExist::*
                                         ^
 
-D/test/__package.rb:3: `Test::D` is missing imports https://srb.help/3734
-     3 |class Test::D < PackageSpec
+D/test/__package.rb:3: `D::Test` is missing imports https://srb.help/3734
+     3 |class D::Test < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
     D/test/__package.rb:9: Inserted `import E`
@@ -429,7 +429,7 @@ end
 ###### cat D/test/__package.rb ######
 # typed: strict
 
-class Test::D < PackageSpec
+class D::Test < PackageSpec
   test!
 
   strict_dependencies 'false'

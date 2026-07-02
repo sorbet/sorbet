@@ -1,6 +1,6 @@
 # typed: strict
 
-class Test::Root < PackageSpec
+class Root::Test < PackageSpec
   test!
 
   test_import Root

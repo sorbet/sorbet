@@ -4,4 +4,7 @@ test/test/foo.test.rb:3: File belongs to package `Root` but defines a constant t
     test/__package.rb:3: Enclosing package declared here
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
+    test/__package.rb:3: Must belong to this package, given constant name `Test::Root`
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 1

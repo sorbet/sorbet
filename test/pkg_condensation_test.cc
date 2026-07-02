@@ -323,13 +323,13 @@ TEST_CASE("Condensation Graph - Two packages, one is test-only") {
     auto parsedFiles = PackageHelpers::enterPackages(
         gs, {
                 {"lib/foo/a/__package.rb", PackageHelpers::makePackageRB("Lib::Foo::A", "layered", "lib")},
-                {"lib/foo/test/b/__package.rb", PackageHelpers::makePackageRB("Test::Lib::Foo::B", "layered", "lib")},
+                {"lib/foo/test/b/__package.rb", PackageHelpers::makePackageRB("Lib::Foo::Test::B", "layered", "lib")},
             });
 
     auto &condensation = gs.packageDB().condensation();
     {
         INFO("The condensation graph should contain three nodes total (app + test for Lib::Foo::A, and "
-             "Test::Lib::Foo::B)");
+             "Lib::Foo::Test::B)");
         CHECK_EQ(3, condensation.nodes().size());
     }
 
