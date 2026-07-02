@@ -1,6 +1,5 @@
 #include "GlobalState.h"
 
-#include "SymbolRef.h"
 #include "common/sort/sort.h"
 #include "common/timers/Timer.h"
 #include "core/Error.h"
@@ -1186,13 +1185,12 @@ ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, 
         return ret;
     }
 
-    this->setClassSymbolPackage(owner, ret);
-    return ret;
-}
-
-void GlobalState::setClassSymbolPackage(ClassOrModuleRef owner, ClassOrModuleRef ret) {
-    auto data = ret.data(*this);
-    auto name = data->name;
+    if (owner == Symbols::root() &&
+        (!this->packageDB().testPackages() && name == packages::PackageDB::TEST_NAMESPACE)) {
+        // Leave packageRegistryOwner as `<PackageSpecRegistry>` (essentially, skip over `Test` when
+        // searching for package names). Leave `package` as the non-existent package name.
+        return ret;
+    }
 
     auto ownerData = owner.data(*this);
     auto ownerPackageRegistryOwner = ownerData->packageRegistryOwner;
@@ -1201,7 +1199,7 @@ void GlobalState::setClassSymbolPackage(ClassOrModuleRef owner, ClassOrModuleRef
         // Propogate that we are too, and mark us as being owned by whatever package our owner was.
         data->packageRegistryOwner = Symbols::noClassOrModule();
         data->package = ownerData->package;
-        return;
+        return ret;
     }
 
     auto registryName = name;
@@ -1220,7 +1218,7 @@ void GlobalState::setClassSymbolPackage(ClassOrModuleRef owner, ClassOrModuleRef
 
     if (!data->packageRegistryOwner.exists()) {
         data->package = ownerData->package;
-        return;
+        return ret;
     }
 
     auto pkg = packages::MangledName(data->packageRegistryOwner);
@@ -1232,7 +1230,7 @@ void GlobalState::setClassSymbolPackage(ClassOrModuleRef owner, ClassOrModuleRef
         data->package = ownerData->package;
     }
 
-    return;
+    return ret;
 }
 
 TypeMemberRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef name, Variance variance) {

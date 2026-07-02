@@ -1219,28 +1219,6 @@ private:
             } else {
                 auto newClass = ctx.state.enterClassSymbol(ctx.locAt(klass.declLoc), owner, klass.name);
                 symbol = newClass;
-
-                // TODO(trevor): all of the following can go away once we've landed test-packages. It exists to
-                // replicate the handling of the `Test::` namespace for old-style packages, where `Test::Foo` and
-                // `Foo` are owned by the same package.
-                if (ctx.state.packageDB().enabled()) {
-                    auto ownerData = owner.data(ctx);
-                    if (ownerData->owner == core::Symbols::root() &&
-                        ownerData->name == core::Names::Constants::Test()) {
-                        auto pkg = ctx.state.packageDB().getPackageNameForFile(ctx.file);
-                        if (pkg.exists()) {
-                            auto &info = ctx.state.packageDB().getPackageInfo(pkg);
-                            ENFORCE(info.exists());
-
-                            // If this file belongs to a package that doesn't use test-packages, we need to make sure
-                            // to rewrite its package and packageRegistryOwner to the corresponding position outside of
-                            // <PSR>::Test
-                            if (!info.usesTestPackages) {
-                                ctx.state.setClassSymbolPackage(core::Symbols::root(), symbol);
-                            }
-                        }
-                    }
-                }
             }
         }
         ENFORCE(symbol.exists());
