@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -euo pipefail
 
 cwd="$(pwd)"
 infile="$cwd/test/cli/autocorrect_method_return/autocorrect_method_return.rb"

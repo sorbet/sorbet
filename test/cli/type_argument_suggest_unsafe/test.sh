@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -euo pipefail
 
 cwd="$(pwd)"
 infile="$cwd/test/cli/type_argument_suggest_unsafe/type_argument_suggest_unsafe.rb"

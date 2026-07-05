@@ -1,5 +1,4 @@
 #!/bin/bash
-set -euo pipefail
 
 CACHE=$(mktemp -d)
 

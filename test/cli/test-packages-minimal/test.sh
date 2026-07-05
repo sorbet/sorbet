@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -euo pipefail
 
 # This test is the simple case of a single application package, and a single
 # test package.

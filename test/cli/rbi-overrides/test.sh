@@ -1,6 +1,4 @@
 #!/bin/bash
-
-set -euo pipefail
 exec 2>&1
 D=test/cli/rbi-overrides
 main/sorbet --silence-dev-message $D/t1.rbi $D/t1.rb

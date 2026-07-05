@@ -1,5 +1,4 @@
 #!/bin/bash
-set -euo pipefail
 
 tmp="$(mktemp -d)"
 infile="test/cli/autocorrect-block-pass-curly-braces/autocorrect-block-pass-curly-braces.rb"

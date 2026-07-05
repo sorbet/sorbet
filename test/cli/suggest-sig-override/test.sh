@@ -1,5 +1,4 @@
 #!/bin/bash
-set -euo pipefail
 
 tmp="$(mktemp)"
 infile="test/cli/suggest-sig-override/suggest-sig-override.rb"

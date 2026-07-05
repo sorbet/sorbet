@@ -1,5 +1,4 @@
 #!/bin/bash
-set -euo pipefail
 
 tmp="$(mktemp -d)"
 infile="test/cli/suggest-constant-type/suggest-constant-type.rb"

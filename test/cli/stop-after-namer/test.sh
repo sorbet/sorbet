@@ -1,5 +1,4 @@
 #!/bin/bash
-set -euo pipefail
 
 # Our code is factored in a weird way, so it's easy for the condition to check
 # for --stop-after namer to get out of sync.

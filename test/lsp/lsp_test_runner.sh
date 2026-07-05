@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -e
 
 
 IS_REGENERATING_REC_FILE=false

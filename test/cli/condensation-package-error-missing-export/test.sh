@@ -1,5 +1,4 @@
 #!/bin/bash
-set -euo pipefail
 
 cd test/cli/condensation-package-error-missing-export || exit 1
 

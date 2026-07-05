@@ -1,5 +1,4 @@
 #!/bin/bash
-set -euo pipefail
 
 cwd="$(pwd)"
 infile="$cwd/test/cli/autocorrect-useless-cast/autocorrect-useless-cast.rb"

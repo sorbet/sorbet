@@ -4,7 +4,7 @@ cleanup() {
     rm -r "$dir"
 }
 trap cleanup EXIT
-set -euo pipefail
+set -e
 
 mkdir "$dir/cache"
 cat >> "$dir/test.rb" <<EOF

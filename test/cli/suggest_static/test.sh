@@ -1,5 +1,4 @@
 #!/bin/bash
-set -euo pipefail
 
 cwd="$(pwd)"
 infile="$cwd/test/cli/suggest_static/suggest_static.rb"

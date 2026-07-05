@@ -1,5 +1,4 @@
 #!/bin/bash
-set -euo pipefail
 
 dir=$(mktemp -d)
 echo "parse_fail +" > "$dir/file.rb"

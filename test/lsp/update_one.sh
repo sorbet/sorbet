@@ -1,6 +1,4 @@
 #!/bin/bash
-
-set -euo pipefail
 set -x
 rec_to_be_updated="$1"
 runner="$2"

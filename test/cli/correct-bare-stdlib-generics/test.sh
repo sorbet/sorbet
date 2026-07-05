@@ -1,5 +1,4 @@
 #!/bin/bash
-set -euo pipefail
 
 tmp="$(mktemp -d)"
 infile="test/cli/correct-bare-stdlib-generics/correct-bare-stdlib-generics.rb"

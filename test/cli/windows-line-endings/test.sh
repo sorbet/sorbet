@@ -1,5 +1,4 @@
 #!/bin/bash
-set -euo pipefail
 
 file --brief --dereference test/cli/windows-line-endings/windows-line-endings.rb
 

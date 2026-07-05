@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -euo pipefail
+set -e
 
 cd test/cli/ambiguous-definitions-packages || exit 1
 

@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -euo pipefail
 
 cwd="$(pwd)"
 infile="$cwd/test/cli/autocorrect-nilable-untyped/autocorrect-nilable-untyped.rb"

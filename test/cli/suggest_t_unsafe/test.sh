@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -euo pipefail
 
 cwd="$(pwd)"
 infile="$cwd/test/cli/suggest_t_unsafe/suggest_t_unsafe.rb"

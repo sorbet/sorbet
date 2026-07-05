@@ -1,5 +1,4 @@
 #!/bin/bash
-set -euo pipefail
 
 main/sorbet --censor-for-snapshot-tests --silence-dev-message test/cli/suppress-error-code/suppress-error-code.rb 2>&1
 

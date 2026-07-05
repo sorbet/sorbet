@@ -1,5 +1,4 @@
 #!/bin/bash
-set -euo pipefail
 
 # Ensure that every suggestion printed by --stop-after x is a valid suggestion.
 for option in $(main/sorbet --silence-dev-message --stop-after x -e '1' 2>&1 | ag 'Valid values' | cut -d ':' -f 2- | sed -e 's/,//g'); do

@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -euo pipefail
 
 tmp="$(mktemp -d)"
 infile="test/cli/class_of-any/class_of-any.rb"

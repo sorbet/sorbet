@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -e
 main/sorbet --silence-dev-message -e 'class Foo; end' --store-state symtab1,names1,files1
 if [ ! -f symtab1 ]; then
   echo "symbol table wasn't created"

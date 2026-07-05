@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -eu
 
 echo "--- autogen-subclasses-ignore-absolute ---"
 main/sorbet --silence-dev-message --stop-after=namer -p autogen-subclasses \

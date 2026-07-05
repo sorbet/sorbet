@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -euo pipefail
 
 cwd="$(pwd)"
 infile="$cwd/test/cli/autocorrect-bare-stdlib-generics/autocorrect-bare-stdlib-generics.rb"

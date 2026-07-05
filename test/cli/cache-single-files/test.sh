@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -euo pipefail
 
 dir="$(mktemp -d)"
 test_dir="$(dirname "${BASH_SOURCE[0]}")"

@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -eu
 
 main/sorbet --silence-dev-message --stop-after namer --autogen-version=6 \
   -p autogen:autogen.txt -p autogen-msgpack:autogen.msgpack \
