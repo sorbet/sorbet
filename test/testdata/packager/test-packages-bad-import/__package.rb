@@ -3,7 +3,7 @@
 # enable-test-packages: true
 
 class Root < PackageSpec
-  import Test::Root
+  import Root::Test
 # ^^^^^^^^^^^^^^^^^ error: Package `Root` may not import `test!` packages
 
   export Root::A

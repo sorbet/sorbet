@@ -1,3 +1,7 @@
 #!/usr/bin/env bash
 
-main/sorbet --silence-dev-message --sorbet-packages . 2>&1
+root="$PWD"
+
+cd "$(dirname "${BASH_SOURCE[0]}")" || exit 1
+
+"$root/main/sorbet" --silence-dev-message --sorbet-packages . 2>&1

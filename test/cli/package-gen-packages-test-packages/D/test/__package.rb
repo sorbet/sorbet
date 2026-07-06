@@ -1,9 +1,9 @@
 # typed: strict
 
-class Test::D < PackageSpec
+class D::Test < PackageSpec
   test!
 
-  strict_dependencies 'dag'
+  strict_dependencies 'false'
   layer 'util'
 
   import D, uses_internals: true
