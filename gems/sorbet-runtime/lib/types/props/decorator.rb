@@ -89,7 +89,6 @@ class T::Props::Decorator
   # solve the problem you're encountering.
   VALID_RULE_KEYS = T.let(%i[
     enum
-    foreign
     ifunset
     immutable
     override
@@ -211,23 +210,6 @@ class T::Props::Decorator
   end
   alias_method :get, :prop_get_if_set # Alias for backwards compatibility
 
-  # checked(:never) - O(prop accesses)
-  sig do
-    params(
-      instance: DecoratedInstance,
-      prop: Symbol,
-      foreign_class: T::Module[T.anything],
-      rules: Rules,
-      opts: T::Hash[Symbol, T.untyped],
-    )
-    .returns(T.untyped)
-    .checked(:never)
-  end
-  def foreign_prop_get(instance, prop, foreign_class, rules=prop_rules(prop), opts={})
-    return if !(value = prop_get(instance, prop, rules))
-    T.unsafe(foreign_class).load(value, {}, opts)
-  end
-
   # TODO: we should really be checking all the methods on `cls`, not just Object
   BANNED_METHOD_NAMES = T.let(Object.instance_methods.each_with_object({}) { |x, acc| acc[x] = true }.freeze, T::Hash[Symbol, TrueClass], checked: false)
 
@@ -297,7 +279,7 @@ class T::Props::Decorator
       Set
     when T::Types::Union
       # The below unwraps our T.nilable types for T::Props if we can.
-      # This lets us do things like specify: const T.nilable(String), foreign: Opus::DB::Model::Merchant
+      # This lets us do things like specify `const :foo, T.nilable(String)`
       non_nil_type = T::Utils.unwrap_nilable(type)
       if non_nil_type
         convert_type_to_class(non_nil_type)
@@ -450,7 +432,6 @@ class T::Props::Decorator
     # get at the property (e.g., Chalk::ODM::Document exposes `get` and `set`).
     define_getter_and_setter(name, rules) unless rules[:without_accessors]
 
-    handle_foreign_option(name, cls, rules, rules[:foreign]) if rules[:foreign]
     handle_redaction_option(name, rules[:redaction]) if rules[:redaction]
   end
 
@@ -523,124 +504,6 @@ class T::Props::Decorator
       end
       handler.call(value, redaction)
     end
-  end
-
-  sig do
-    params(
-      option_sym: Symbol,
-      foreign: T.untyped,
-      valid_type_msg: String,
-    )
-    .void
-    .checked(:never)
-  end
-  private def validate_foreign_option(option_sym, foreign, valid_type_msg:)
-    if foreign.is_a?(Symbol) || foreign.is_a?(String)
-      raise ArgumentError.new(
-        "Using a symbol/string for `#{option_sym}` is no longer supported. Instead, use a Proc " \
-        "that returns the class, e.g., foreign: -> {Foo}"
-      )
-    end
-
-    if !foreign.is_a?(Proc) && !foreign.is_a?(Array) && !foreign.respond_to?(:load)
-      raise ArgumentError.new("The `#{option_sym}` option must be #{valid_type_msg}")
-    end
-  end
-
-  # checked(:never) - Rules hash is expensive to check
-  sig do
-    params(
-      prop_name: T.any(String, Symbol),
-      rules: Rules,
-      foreign: T.untyped,
-    )
-    .void
-    .checked(:never)
-  end
-  private def define_foreign_method(prop_name, rules, foreign)
-    fk_method = "#{prop_name}_"
-
-    # n.b. there's no clear reason *not* to allow additional options
-    # here, but we're baking in `allow_direct_mutation` since we
-    # *haven't* allowed additional options in the past and want to
-    # default to keeping this interface narrow.
-    foreign = T.let(foreign, T.untyped, checked: false)
-    @class.send(:define_method, fk_method) do |allow_direct_mutation: nil|
-      if foreign.is_a?(Proc)
-        resolved_foreign = foreign.call
-        if !resolved_foreign.respond_to?(:load)
-          raise ArgumentError.new(
-            "The `foreign` proc for `#{prop_name}` must return a model class. " \
-            "Got `#{resolved_foreign.inspect}` instead."
-          )
-        end
-        # `foreign` is part of the closure state, so this will persist to future invocations
-        # of the method, optimizing it so this only runs on the first invocation.
-        foreign = resolved_foreign
-      end
-      opts = if allow_direct_mutation.nil?
-        {}
-      else
-        {allow_direct_mutation: allow_direct_mutation}
-      end
-
-      T.unsafe(self.class).decorator.foreign_prop_get(self, prop_name, foreign, rules, opts)
-    end
-
-    force_fk_method = "#{fk_method}!"
-    @class.send(:define_method, force_fk_method) do |allow_direct_mutation: nil|
-      loaded_foreign = send(fk_method, allow_direct_mutation: allow_direct_mutation)
-      if !loaded_foreign
-        T::Configuration.hard_assert_handler(
-          'Failed to load foreign model',
-          storytime: {method: force_fk_method, class: self.class}
-        )
-      end
-      loaded_foreign
-    end
-  end
-
-  # checked(:never) - Rules hash is expensive to check
-  sig do
-    params(
-      prop_name: Symbol,
-      prop_cls: T::Module[T.anything],
-      rules: Rules,
-      foreign: T.untyped,
-    )
-    .void
-    .checked(:never)
-  end
-  private def handle_foreign_option(prop_name, prop_cls, rules, foreign)
-    validate_foreign_option(
-      :foreign, foreign, valid_type_msg: "a model class or a Proc that returns one"
-    )
-
-    if prop_cls != String
-      raise ArgumentError.new("`foreign` can only be used with a prop type of String")
-    end
-
-    if foreign.is_a?(Array)
-      # We don't support arrays with `foreign` because it's hard to both preserve ordering and
-      # keep them from being lurky performance hits by issuing a bunch of un-batched DB queries.
-      # We could potentially address that by porting over something like AmbiguousIDLoader.
-      raise ArgumentError.new(
-        "Using an array for `foreign` is no longer supported. Instead, please use a union type of " \
-        "token types for the prop type, e.g., T.any(Opus::Autogen::Tokens::FooModelToken, Opus::Autogen::Tokens::BarModelToken)"
-      )
-    end
-
-    unless foreign.is_a?(Proc)
-      raise ArgumentError.new(<<~MESSAGE)
-        Please use a Proc that returns a model class instead of the model class itself as the argument to `foreign`. In other words:
-
-          instead of `prop :foo, String, foreign: FooModel`
-          use `prop :foo, String, foreign: -> {FooModel}`
-
-      MESSAGE
-    end
-
-    define_foreign_method(prop_name, rules, foreign)
   end
 
   # TODO: rename this to props_inherited
