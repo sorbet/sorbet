@@ -158,7 +158,7 @@ module T::Props::Serializable
   end
 
   private def raise_deserialization_error(prop_name, value, orig_error)
-    T::Configuration.soft_assert_handler(
+    T::Configuration.hard_assert_handler(
       'Deserialization error (probably unexpected stored type)',
       storytime: {
         klass: self.class,
