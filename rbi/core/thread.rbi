@@ -809,7 +809,10 @@ class Thread < Object
   # b = Thread.new { raise 'something went wrong' }
   # b.value   #=> RuntimeError: something went wrong
   # ```
-  sig {returns(Object)}
+  # This returns whatever the thread's block returned, which is not necessarily
+  # an `Object` (e.g. it may return a `BasicObject`), so the return type is
+  # `T.untyped`.
+  sig {returns(T.untyped)}
   def value; end
 
   # Marks a given thread as eligible for scheduling, however it may still remain
