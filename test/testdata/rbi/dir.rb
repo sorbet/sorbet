@@ -6,10 +6,15 @@ sig {returns(T::Array[String])}
 def test_dir_brackets
   Dir['a', 'b']
   Dir['a', base: '.']
-  Dir['/*'] do |match|
-    T.assert_type!(match, String)
-  end
+  Dir['/*']
   Dir[Pathname.new('.')]
+end
+
+sig {void}
+def test_dir_brackets_no_block
+  # Dir.[] does not yield (unlike Dir.glob); a block is silently ignored at
+  # runtime, so passing one is a latent bug. Sorbet flags it.
+  Dir['*'] { |f| f } # error: does not take a block
 end
 
 sig {returns(T::Array[String])}
@@ -21,6 +26,10 @@ def test_dir_glob
   Dir.glob(Pathname.new('.')) do |match|
     T.assert_type!(match, String)
   end
+  Dir.glob('*.rb', base: 'lib')
+  Dir.glob('*.rb', base: Pathname.new('lib'))
+  Dir.glob('*.rb', sort: false)
+  Dir.glob('*.rb', File::FNM_DOTMATCH, base: 'lib', sort: true)
   Dir.glob('*.rb')
 end
 
@@ -28,7 +37,6 @@ sig {params(enc: T.nilable(Encoding)).void}
 def test_dir_children(enc)
   T.assert_type!(Dir.children('.'), T::Array[String])
   T.assert_type!(Dir.children(Pathname.new('.')), T::Array[String])
-  # encoding: accepts an Encoding, a String name, or nil
   Dir.children('.', encoding: Encoding::UTF_8)
   Dir.children('.', encoding: 'UTF-8')
   Dir.children('.', encoding: nil)
@@ -86,6 +94,20 @@ def test_dir_new
   T.assert_type!(Dir.new('.', encoding: Encoding::UTF_8), Dir)
   T.assert_type!(Dir.new('.', encoding: 'UTF-8'), Dir)
   T.assert_type!(Dir.new('.', encoding: nil), Dir)
+end
+
+sig {params(dir: Dir).void}
+def test_dir_instance_children(dir)
+  T.assert_type!(dir.children, T::Array[String])
+end
+
+sig {params(dir: Dir).void}
+def test_dir_instance_each_child(dir)
+  dir.each_child do |child|
+    T.assert_type!(child, String)
+  end
+  T.assert_type!(dir.each_child {|child| child}, Dir)
+  T.assert_type!(dir.each_child, T::Enumerator[String])
 end
 
 sig {void}

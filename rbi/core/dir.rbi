@@ -318,7 +318,8 @@ class Dir < Object
     params(
         pattern: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
         flags: T.nilable(Integer),
-        opts: T.nilable(T::Hash[Symbol, String]),
+        base: T.nilable(T.any(String, Pathname)),
+        sort: T::Boolean,
     )
     .returns(T::Array[String])
   end
@@ -326,27 +327,13 @@ class Dir < Object
     params(
         pattern: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
         flags: T.nilable(Integer),
-        opts: T.nilable(T::Hash[Symbol, String]),
+        base: T.nilable(T.any(String, Pathname)),
+        sort: T::Boolean,
         blk: T.proc.params(arg0: String).returns(BasicObject),
     )
     .returns(NilClass)
   end
-  sig do
-    params(
-        pattern: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
-        opts: T.nilable(T::Hash[Symbol, String]),
-        blk: T.proc.params(arg0: String).returns(BasicObject),
-    )
-    .returns(NilClass)
-  end
-  sig do
-    params(
-        pattern: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
-        opts: T.nilable(T::Hash[Symbol, String]),
-    )
-    .returns(T::Array[String])
-  end
-  def self.glob(pattern, flags=T.unsafe(nil), opts=T.unsafe(nil), &blk); end
+  def self.glob(pattern, flags=T.unsafe(nil), base: T.unsafe(nil), sort: T.unsafe(nil), &blk); end
 
   # Returns the home directory of the current user or the named user if given.
   sig do
@@ -442,6 +429,16 @@ class Dir < Object
   end
   def self.unlink(arg0); end
 
+  # Returns an array containing all of the filenames except for "." and ".." in
+  # this directory.
+  #
+  # ```ruby
+  # d = Dir.new("testdir")
+  # d.children   #=> ["config.h", "main.rb"]
+  # ```
+  sig {returns(T::Array[String])}
+  def children(); end
+
   # Closes the directory stream. Calling this method on closed
   # [`Dir`](https://docs.ruby-lang.org/en/2.7.0/Dir.html) object is ignored
   # since Ruby 2.3.
@@ -479,6 +476,24 @@ class Dir < Object
   end
   sig {returns(T::Enumerator[String])}
   def each(&blk); end
+
+  # Calls the block once for each entry except for "." and ".." in this
+  # directory, passing the filename of each entry as a parameter to the block.
+  #
+  # If no block is given, an enumerator is returned instead.
+  #
+  # ```ruby
+  # d = Dir.new("testdir")
+  # d.each_child  {|x| puts "Got #{x}" }
+  # ```
+  sig do
+    params(
+        blk: T.proc.params(arg0: String).returns(BasicObject),
+    )
+    .returns(T.self_type)
+  end
+  sig {returns(T::Enumerator[String])}
+  def each_child(&blk); end
 
   # Returns the file descriptor used in *dir*.
   #
@@ -618,9 +633,8 @@ class Dir < Object
         pattern: T.any(String, Pathname),
         base: T.nilable(T.any(String, Pathname)),
         sort: T::Boolean,
-        blk: T.nilable(T.proc.params(arg0: String).returns(BasicObject))
     )
     .returns(T::Array[String])
   end
-  def self.[](*pattern, base: nil, sort: true, &blk); end
+  def self.[](*pattern, base: nil, sort: true); end
 end
