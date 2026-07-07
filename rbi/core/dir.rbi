@@ -75,14 +75,21 @@ class Dir < Object
   # ```ruby
   # Dir.children("testdir")   #=> ["config.h", "main.rb"]
   # ```
-  def self.children(*_); end
+  sig do
+    params(
+        dir: T.any(String, Pathname),
+        encoding: T.nilable(T.any(String, Encoding)),
+    )
+    .returns(T::Array[String])
+  end
+  def self.children(dir, encoding: T.unsafe(nil)); end
 
   # Changes this process's idea of the file system root. Only a privileged
   # process may make this call. Not available on all platforms. On Unix systems,
   # see `chroot(2)` for more information.
   sig do
     params(
-        arg0: String,
+        arg0: T.any(String, Pathname),
     )
     .returns(Integer)
   end
@@ -93,7 +100,7 @@ class Dir < Object
   # if the directory isn't empty.
   sig do
     params(
-        arg0: String,
+        arg0: T.any(String, Pathname),
     )
     .returns(Integer)
   end
@@ -114,11 +121,32 @@ class Dir < Object
   # Got config.h
   # Got main.rb
   # ```
-  def self.each_child(*_, &blk); end
+  sig do
+    params(
+        dir: T.any(String, Pathname),
+        encoding: T.nilable(T.any(String, Encoding)),
+        blk: T.proc.params(arg0: String).returns(BasicObject),
+    )
+    .returns(NilClass)
+  end
+  sig do
+    params(
+        dir: T.any(String, Pathname),
+        encoding: T.nilable(T.any(String, Encoding)),
+    )
+    .returns(T::Enumerator[String])
+  end
+  def self.each_child(dir, encoding: T.unsafe(nil), &blk); end
 
   # Returns `true` if the named file is an empty directory, `false` if it is not
   # a directory or non-empty.
-  def self.empty?(_); end
+  sig do
+    params(
+        arg0: T.any(String, Pathname),
+    )
+    .returns(T::Boolean)
+  end
+  def self.empty?(arg0); end
 
   # Returns an array containing all of the filenames in the given directory.
   # Will raise a
@@ -134,11 +162,11 @@ class Dir < Object
   sig do
     params(
         arg0: T.any(String, Pathname),
-        arg1: Encoding,
+        encoding: T.nilable(T.any(String, Encoding)),
     )
     .returns(T::Array[String])
   end
-  def self.entries(arg0, arg1=T.unsafe(nil)); end
+  def self.entries(arg0, encoding: T.unsafe(nil)); end
 
   # Returns `true` if the named file is a directory, `false` otherwise.
   sig do
@@ -169,7 +197,7 @@ class Dir < Object
   sig do
     params(
         dir: T.any(String, Pathname),
-        arg0: Encoding,
+        encoding: T.nilable(T.any(String, Encoding)),
         blk: T.proc.params(arg0: String).returns(BasicObject),
     )
     .returns(NilClass)
@@ -177,11 +205,11 @@ class Dir < Object
   sig do
     params(
         dir: T.any(String, Pathname),
-        arg0: Encoding,
+        encoding: T.nilable(T.any(String, Encoding)),
     )
     .returns(T::Enumerator[String])
   end
-  def self.foreach(dir, arg0=T.unsafe(nil), &blk); end
+  def self.foreach(dir, encoding: T.unsafe(nil), &blk); end
 
   # Returns the path to the current working directory of this process as a
   # string.
@@ -363,19 +391,19 @@ class Dir < Object
   sig do
     params(
         arg0: T.any(String, Pathname),
-        arg1: Encoding,
+        encoding: T.nilable(T.any(String, Encoding)),
     )
     .returns(Dir)
   end
   sig do
     type_parameters(:U).params(
         arg0: T.any(String, Pathname),
-        arg1: Encoding,
+        encoding: T.nilable(T.any(String, Encoding)),
         blk: T.proc.params(arg0: Dir).returns(T.type_parameter(:U)),
     )
     .returns(T.type_parameter(:U))
   end
-  def self.open(arg0, arg1=T.unsafe(nil), &blk); end
+  def self.open(arg0, encoding: T.unsafe(nil), &blk); end
 
   # Returns the path to the current working directory of this process as a
   # string.
@@ -468,12 +496,12 @@ class Dir < Object
 
   sig do
     params(
-        arg0: String,
-        arg1: Encoding,
+        arg0: T.any(String, Pathname),
+        encoding: T.nilable(T.any(String, Encoding)),
     )
     .void
   end
-  def initialize(arg0, arg1=T.unsafe(nil)); end
+  def initialize(arg0, encoding: T.unsafe(nil)); end
 
   # Return a string describing this
   # [`Dir`](https://docs.ruby-lang.org/en/2.7.0/Dir.html) object.
