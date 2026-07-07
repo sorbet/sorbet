@@ -631,7 +631,7 @@ class T::Props::Decorator
     end
 
     unless foreign.is_a?(Proc)
-      T::Configuration.hard_assert_handler(<<~MESSAGE, storytime: {prop: prop_name, value: foreign})
+      raise ArgumentError.new(<<~MESSAGE)
         Please use a Proc that returns a model class instead of the model class itself as the argument to `foreign`. In other words:
 
           instead of `prop :foo, String, foreign: FooModel`
