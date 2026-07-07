@@ -917,21 +917,12 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
 
     it 'raises deserialize errors' do
-      msg_string = nil
-      extra_hash = nil
-      T::Configuration.hard_assert_handler = proc do |msg, extra|
-        msg_string = msg
-        extra_hash = extra
-      end
-
       obj = CustomType.new
       e = assert_raises(TypeError) do
         CustomSetPropStruct.from_hash({'set' => obj})
       end
 
       assert_includes(e.message, "value must be enumerable")
-    ensure
-      T::Configuration.hard_assert_handler = nil
     end
   end
 
