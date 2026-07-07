@@ -237,7 +237,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     it 'is only soft-assert by default for prop deserialize error' do
       msg_string = nil
       extra_hash = nil
-      T::Configuration.soft_assert_handler = proc do |msg, extra|
+      T::Configuration.hard_assert_handler = proc do |msg, extra|
         msg_string = msg
         extra_hash = extra
       end
@@ -251,10 +251,12 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_equal(MySerializable, storytime[:klass])
       assert_equal(:foo, storytime[:prop])
       assert_equal("Won't respond like hash", storytime[:value])
+    ensure
+      T::Configuration.hard_assert_handler = nil
     end
 
     it 'includes relevant generated code on deserialize when we raise' do
-      T::Configuration.soft_assert_handler = proc do |msg, extra|
+      T::Configuration.hard_assert_handler = proc do |msg, extra|
         raise "#{msg} #{extra.inspect}"
       end
 
@@ -265,6 +267,8 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_includes(e.message.tr("`", "'"), "undefined method 'transform_values'")
       assert_includes(e.message, "foo")
       assert_includes(e.message, "val.transform_values {|v| T::Props::Utils.deep_clone(v)}")
+    ensure
+      T::Configuration.hard_assert_handler = nil
     end
 
     it 'includes relevant generated code on serialize' do
@@ -786,7 +790,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     it 'raises deserialize errors when props with an array of a custom subtype store the wrong datatype' do
       msg_string = nil
       extra_hash = nil
-      T::Configuration.soft_assert_handler = proc do |msg, extra|
+      T::Configuration.hard_assert_handler = proc do |msg, extra|
         msg_string = msg
         extra_hash = extra
       end
@@ -802,6 +806,8 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_equal(:array, storytime[:prop])
       assert_equal(obj, storytime[:value])
       assert_includes(storytime[:error].tr("`", "'"), "undefined method 'map'")
+    ensure
+      T::Configuration.hard_assert_handler = nil
     end
 
     it 'round trips as hash key' do
@@ -822,7 +828,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     it 'raises deserialize errors when props with a hash with keys of a custom subtype store the wrong datatype' do
       msg_string = nil
       extra_hash = nil
-      T::Configuration.soft_assert_handler = proc do |msg, extra|
+      T::Configuration.hard_assert_handler = proc do |msg, extra|
         msg_string = msg
         extra_hash = extra
       end
@@ -838,6 +844,8 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_equal(:hash_key, storytime[:prop])
       assert_equal(obj, storytime[:value])
       assert_includes(storytime[:error].tr("`", "'"), "undefined method 'transform_keys'")
+    ensure
+      T::Configuration.hard_assert_handler = nil
     end
 
     it 'round trips as hash value' do
@@ -858,7 +866,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     it 'raises deserialize errors when props with a hash with values of a custom subtype store the wrong datatype' do
       msg_string = nil
       extra_hash = nil
-      T::Configuration.soft_assert_handler = proc do |msg, extra|
+      T::Configuration.hard_assert_handler = proc do |msg, extra|
         msg_string = msg
         extra_hash = extra
       end
@@ -874,6 +882,8 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_equal(:hash_value, storytime[:prop])
       assert_equal(obj, storytime[:value])
       assert_includes(storytime[:error].tr("`", "'"), "undefined method 'transform_values'")
+    ensure
+      T::Configuration.hard_assert_handler = nil
     end
 
     it 'round trips as hash key and value' do
@@ -894,7 +904,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     it 'raises deserialize errors when props with a hash with keys/values of a custom subtype store the wrong datatype' do
       msg_string = nil
       extra_hash = nil
-      T::Configuration.soft_assert_handler = proc do |msg, extra|
+      T::Configuration.hard_assert_handler = proc do |msg, extra|
         msg_string = msg
         extra_hash = extra
       end
@@ -910,6 +920,8 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_equal(:hash_both, storytime[:prop])
       assert_equal(obj, storytime[:value])
       assert_includes(storytime[:error].tr("`", "'"), "undefined method 'each_with_object'")
+    ensure
+      T::Configuration.hard_assert_handler = nil
     end
   end
 
@@ -986,7 +998,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     it 'raises deserialize errors' do
       msg_string = nil
       extra_hash = nil
-      T::Configuration.soft_assert_handler = proc do |msg, extra|
+      T::Configuration.hard_assert_handler = proc do |msg, extra|
         msg_string = msg
         extra_hash = extra
       end
@@ -997,6 +1009,8 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       end
 
       assert_includes(e.message, "value must be enumerable")
+    ensure
+      T::Configuration.hard_assert_handler = nil
     end
   end
 
