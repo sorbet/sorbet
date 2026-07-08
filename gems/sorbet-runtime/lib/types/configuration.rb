@@ -337,41 +337,6 @@ module T::Configuration
     end
   end
 
-  @hard_assert_handler = nil
-  # Set a handler for hard assertions
-  #
-  # These generally should stop execution of the program, and optionally inform
-  # some party of the assertion.
-  #
-  # @param [Lambda, Proc, Object, nil] value Proc that handles the error
-  #   report (pass nil to reset to default behavior)
-  #
-  # Parameters passed to value.call:
-  #
-  #  @param [String] str Assertion message
-  #  @param [Hash] extra A hash containing additional parameters to be passed along to the handler.
-  #
-  # @example
-  #   T::Configuration.hard_assert_handler = lambda do |str, extra|
-  #     raise "#{str}, context: #{extra}"
-  #   end
-  def self.hard_assert_handler=(value)
-    validate_lambda_given!(value)
-    @hard_assert_handler = value
-  end
-
-  private_class_method def self.hard_assert_handler_default(str, _)
-    raise str
-  end
-
-  def self.hard_assert_handler(str, extra={})
-    if @hard_assert_handler
-      @hard_assert_handler.call(str, extra)
-    else
-      hard_assert_handler_default(str, extra)
-    end
-  end
-
   @scalar_types = nil
   # Set a list of class strings that are to be considered scalar.
   #   (pass nil to reset to default behavior)
