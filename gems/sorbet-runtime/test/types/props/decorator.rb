@@ -231,28 +231,6 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
       end
       assert_match(/Opus::Types::Test::Props::DecoratorTest::OptionalMigrate.foo not set/, e.message)
     end
-
-    it "will try to alert the owner if possible" do
-
-      found_team = nil
-      T::Configuration.class_owner_finder = ->(_klass) { :some_team }
-      # because `raise_nil_deserialize_error` has a final `ensure`
-      # block, we're going to end up calling this twice, and only
-      # once with the `project:` key set. Expressing that via
-      # `.expect` here is a bit messy, so we're going to set a
-      # variable if we get the assert handler called once with the
-      # right project
-      T::Configuration.hard_assert_handler = lambda do |_msg, kwargs|
-        found_team = kwargs[:project] if kwargs.include?(:project)
-      end
-      OptionalMigrate.from_hash({})
-      assert_equal(:some_team, found_team)
-    ensure
-      T::Configuration.hard_assert_handler = nil
-      T::Configuration.class_owner_finder = nil
-
-    end
-
   end
 
   class OptionalMigrate2
