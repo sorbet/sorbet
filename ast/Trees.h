@@ -1478,6 +1478,7 @@ public:
     }
 
     void setSymbol(core::SymbolRef symbol) {
+        ENFORCE(symbol != core::Symbols::StubModule());
         storage.setSymbol(symbol);
     }
 
