@@ -1568,6 +1568,34 @@ public:
         vector<ResolveItems<ClassMethodsResolutionItem>> todoClassMethods_;
         vector<ResolveItems<RequireAncestorResolutionItem>> todoRequiredAncestors_;
         vector<ast::ParsedFile> trees;
+
+        // Consume the todos, and reset the internal state of the `ResolveConstantsWalk`.
+        void consume(core::FileRef file, ResolveConstantsWalk &constants) {
+            // Reset the internal state of the walk
+            constants.nesting_ = nullptr;
+            constants.loadScopeDepth_ = 0;
+
+            // We leave `constants.firstDefinitionLocs` alone here as it acts as a cache across trees.
+
+            if (!constants.todo_.empty()) {
+                this->todo_.emplace_back(file, move(constants.todo_));
+            }
+            if (!constants.todoAncestors_.empty()) {
+                this->todoAncestors_.emplace_back(file, move(constants.todoAncestors_));
+            }
+            if (!constants.todoClassAliases_.empty()) {
+                this->todoClassAliases_.emplace_back(file, move(constants.todoClassAliases_));
+            }
+            if (!constants.todoTypeAliases_.empty()) {
+                this->todoTypeAliases_.emplace_back(file, move(constants.todoTypeAliases_));
+            }
+            if (!constants.todoClassMethods_.empty()) {
+                this->todoClassMethods_.emplace_back(file, move(constants.todoClassMethods_));
+            }
+            if (!constants.todoRequiredAncestors_.empty()) {
+                this->todoRequiredAncestors_.emplace_back(file, move(constants.todoRequiredAncestors_));
+            }
+        }
     };
 
     static ast::ParsedFilesOrCancelled resolveConstants(core::GlobalState &gs, vector<ast::ParsedFile> trees,
@@ -1619,25 +1647,7 @@ public:
                     core::Context ictx(gs, core::Symbols::root(), job.file);
                     ast::TreeWalk::apply(ictx, constants, job.tree);
                     partiallyResolvedTrees.emplace_back(move(job));
-                    if (!constants.todo_.empty()) {
-                        walkResult.todo_.emplace_back(job.file, move(constants.todo_));
-                    }
-                    if (!constants.todoAncestors_.empty()) {
-                        walkResult.todoAncestors_.emplace_back(job.file, move(constants.todoAncestors_));
-                    }
-                    if (!constants.todoClassAliases_.empty()) {
-                        walkResult.todoClassAliases_.emplace_back(job.file, move(constants.todoClassAliases_));
-                    }
-                    if (!constants.todoTypeAliases_.empty()) {
-                        walkResult.todoTypeAliases_.emplace_back(job.file, move(constants.todoTypeAliases_));
-                    }
-                    if (!constants.todoClassMethods_.empty()) {
-                        walkResult.todoClassMethods_.emplace_back(job.file, move(constants.todoClassMethods_));
-                    }
-                    if (!constants.todoRequiredAncestors_.empty()) {
-                        walkResult.todoRequiredAncestors_.emplace_back(job.file,
-                                                                       move(constants.todoRequiredAncestors_));
-                    }
+                    walkResult.consume(job.file, constants);
                 }
             }
             if (!partiallyResolvedTrees.empty()) {
