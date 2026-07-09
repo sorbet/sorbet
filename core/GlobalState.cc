@@ -849,14 +849,6 @@ void GlobalState::initEmpty() {
     method = enterMethod(*this, Symbols::DeclBuilderForProcsSingleton(), Names::typeParameters())
                  .untypedArg(Names::arg0())
                  .buildWithResult(Types::declBuilderForProcsSingletonClass());
-    // Some of these are Modules
-    Symbols::StubModule().data(*this)->setIsModule(true);
-    Symbols::T().data(*this)->setIsModule(true);
-    Symbols::StubMixin().data(*this)->setIsModule(true);
-
-    // Some of these are Classes
-    Symbols::StubSuperClass().data(*this)->setIsModule(false);
-    Symbols::StubSuperClass().data(*this)->setSuperClass(Symbols::Object());
 
     klass = enterClassOrModuleSymbol(Loc::none(), Symbols::Magic(), core::Names::Constants::UntypedSource());
     ENFORCE_NO_TIMER(klass == Symbols::Magic_UntypedSource());
