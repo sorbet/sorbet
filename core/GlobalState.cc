@@ -261,6 +261,11 @@ ClassOrModuleRef GlobalState::synthesizeClass(NameRef name, uint32_t superclass,
     return symRef;
 }
 
+ClassOrModuleRef GlobalState::synthesizeModule(NameRef name) {
+    auto superclass = uint32_t{0};
+    return synthesizeClass(name, superclass, true);
+}
+
 atomic<int> globalStateIdCounter(1);
 const int Symbols::MAX_PROC_ARITY;
 
@@ -353,7 +358,7 @@ void GlobalState::initEmpty() {
     ENFORCE_NO_TIMER(klass == Symbols::NilClass());
     klass = synthesizeClass(core::Names::Constants::Untyped(), 0);
     ENFORCE_NO_TIMER(klass == Symbols::untyped());
-    klass = synthesizeClass(core::Names::Constants::T(), 0, true);
+    klass = synthesizeModule(core::Names::Constants::T());
     ENFORCE_NO_TIMER(klass == Symbols::T());
     klass = klass.data(*this)->singletonClass(*this);
     ENFORCE_NO_TIMER(klass == Symbols::TSingleton());
@@ -364,7 +369,7 @@ void GlobalState::initEmpty() {
     ENFORCE_NO_TIMER(klass == Symbols::BasicObject());
     method = enterMethod(*this, Symbols::BasicObject(), Names::initialize()).build();
     ENFORCE_NO_TIMER(method == Symbols::BasicObject_initialize());
-    klass = synthesizeClass(core::Names::Constants::Kernel(), 0, true);
+    klass = synthesizeModule(core::Names::Constants::Kernel());
     ENFORCE_NO_TIMER(klass == Symbols::Kernel());
     klass = synthesizeClass(core::Names::Constants::Range());
     ENFORCE_NO_TIMER(klass == Symbols::Range());
@@ -392,7 +397,7 @@ void GlobalState::initEmpty() {
     ENFORCE_NO_TIMER(klass == Symbols::T_Proc());
     klass = synthesizeClass(core::Names::Constants::Proc());
     ENFORCE_NO_TIMER(klass == Symbols::Proc());
-    klass = synthesizeClass(core::Names::Constants::Enumerable(), 0, true);
+    klass = synthesizeModule(core::Names::Constants::Enumerable());
     ENFORCE_NO_TIMER(klass == Symbols::Enumerable());
     klass = synthesizeClass(core::Names::Constants::Set());
     ENFORCE_NO_TIMER(klass == Symbols::Set());
@@ -519,7 +524,7 @@ void GlobalState::initEmpty() {
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::T_Struct());
 
-    klass = synthesizeClass(core::Names::Constants::Singleton(), 0, true);
+    klass = synthesizeModule(core::Names::Constants::Singleton());
     ENFORCE_NO_TIMER(klass == Symbols::Singleton());
 
     klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Enum());
