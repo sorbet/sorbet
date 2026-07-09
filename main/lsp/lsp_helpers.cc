@@ -101,7 +101,7 @@ string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef consta
     }
 }
 
-string prettyKindForConstant(const core::GlobalState &gs, core::SymbolRef constant) {
+string constantKindHeader(const core::GlobalState &gs, core::SymbolRef constant) {
     if (constant == core::Symbols::StubModule()) {
         return "";
     }
@@ -109,17 +109,62 @@ string prettyKindForConstant(const core::GlobalState &gs, core::SymbolRef consta
     // Order matters: type aliases and class aliases are also static fields, so they
     // must be checked before isStaticField.
     if (constant.isTypeAlias(gs)) {
-        return "type alias";
+        return fmt::format("# type alias {}", constant.show(gs));
     } else if (constant.isClassAlias(gs)) {
-        return "class alias";
+        // `prettyTypeForConstant` already renders the dealiased form (`Name = Target`),
+        // and a kind comment wouldn't add anything, so we don't emit a header for aliases.
+        return "";
     } else if (constant.isTypeMember()) {
-        return "type member";
-    } else if (constant.isTypeParameter()) {
-        return "type parameter";
+        // Render a skeleton of the enclosing definition so it's clear where the type
+        // member lives and how it's declared, e.g.
+        //   # class Box
+        //   #   Elem = type_member(:out) { {upper: Numeric} }
+        //   # end
+        auto tmData = constant.asTypeMemberRef().data(gs);
+        auto enclosing = constant.owner(gs).asClassOrModuleRef();
+        string keyword = "type_member";
+        if (enclosing.data(gs)->isSingletonClass(gs)) {
+            // A type_template is declared on the singleton class of its enclosing class.
+            keyword = "type_template";
+            enclosing = enclosing.data(gs)->attachedClass(gs);
+        }
+
+        // Variance: `:out` (covariant), `:in` (contravariant), or nothing (invariant).
+        string variance;
+        if (tmData->flags.isCovariant) {
+            variance = "(:out)";
+        } else if (tmData->flags.isContravariant) {
+            variance = "(:in)";
+        }
+
+        // Bounds: `{ {fixed: T} }`, or `lower:`/`upper:` (in canonical autocorrect order)
+        // when they aren't the trivial `<bottom>`/`<top>` defaults.
+        string bounds;
+        if (auto lambdaParam = core::cast_type<core::LambdaParam>(tmData->resultType)) {
+            if (tmData->flags.isFixed) {
+                bounds = absl::StrCat(" { {fixed: ", lambdaParam->upperBound.show(gs), "} }");
+            } else {
+                vector<string> parts;
+                if (!lambdaParam->lowerBound.isBottom()) {
+                    parts.emplace_back(absl::StrCat("lower: ", lambdaParam->lowerBound.show(gs)));
+                }
+                if (!lambdaParam->upperBound.isTop()) {
+                    parts.emplace_back(absl::StrCat("upper: ", lambdaParam->upperBound.show(gs)));
+                }
+                if (!parts.empty()) {
+                    bounds = absl::StrCat(" { {", absl::StrJoin(parts, ", "), "} }");
+                }
+            }
+        }
+
+        auto classOrModule = enclosing.data(gs)->isModule() ? "module" : "class";
+        return fmt::format("# {} {}\n#   {} = {}{}{}\n# end", classOrModule, enclosing.show(gs),
+                           constant.name(gs).show(gs), keyword, variance, bounds);
     } else if (constant.isClassOrModule()) {
-        return constant.asClassOrModuleRef().data(gs)->isModule() ? "module" : "class";
+        auto classOrModule = constant.asClassOrModuleRef().data(gs)->isModule() ? "module" : "class";
+        return fmt::format("# {} {}", classOrModule, constant.show(gs));
     } else if (constant.isStaticField(gs)) {
-        return "static field";
+        return fmt::format("# static field {}", constant.show(gs));
     }
     return "";
 }
