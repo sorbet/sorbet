@@ -192,6 +192,24 @@ cc_test(
 )
 
 cc_test(
+    name = "lsp_configuration_test",
+    size = "small",
+    srcs = ["test/lsp_configuration_test.cc"],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//tools:__pkg__"],
+    deps = [
+        "lsp",
+        "//payload",
+        "//test/helpers",
+        "@doctest//doctest",
+        "@doctest//doctest:main",
+    ],
+)
+
+cc_test(
     name = "lsp_preprocessor_test",
     size = "small",
     srcs = ["test/lsp_preprocessor_test.cc"],
