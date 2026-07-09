@@ -846,24 +846,31 @@ PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::Pars
 
     auto &db = gs.packageDB();
 
+    auto traversal = db.condensation().computeTraversal(gs);
+
+    // This can happen if we enabled packages and package-directed mode, but there were no packages defined.
+    if (traversal.strata.empty()) {
+        result.strata = {CondensationStratumInfo{absl::MakeSpan(packageFiles), sourceFiles}};
+        return result;
+    }
+
     auto numPackageFiles = packageFiles.size();
 
     // We move all the package files into a map, so that it's easy to go from package name to package file while
     // processing the strata of the traversal.
     UnorderedMap<core::packages::MangledName, ast::ParsedFile> packagesToPackageRb;
-    for (auto &ast : packageFiles) {
+    erase_if(packageFiles, [&db, &packagesToPackageRb](auto &ast) {
         auto pkgName = db.getPackageNameForFile(ast.file);
-        ENFORCE(pkgName.exists());
+        if (!pkgName.exists()) {
+            return false;
+        }
 
         packagesToPackageRb[pkgName] = move(ast);
-    }
+        return true;
+    });
 
     // We'll generate non-test variants of each package, so we need to double the storage of this vector.
-    packageFiles.clear();
     packageFiles.reserve(numPackageFiles * 2);
-
-    auto traversal = db.condensation().computeTraversal(gs);
-    ENFORCE(!traversal.strata.empty());
 
     {
         Timer timeit(gs.tracer(), "computePackageStrata.stratumMapping");
@@ -911,6 +918,11 @@ PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::Pars
 
     auto sourceSpan = sourceFiles;
 
+    // We want to capture any package files that didn't associate with a real package in the initial stratum, so we
+    // explicitly start it at zero and track it outside of the loop, rather than using `packageFiles.size()` inside of
+    // the loop.
+    auto packageFilesStart = 0;
+
     int currentStratum = -1;
     for (auto &stratum : traversal.strata) {
         ++currentStratum;
@@ -918,7 +930,6 @@ PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::Pars
         auto &resultStratum = result.strata.emplace_back();
 
         {
-            auto start = packageFiles.size();
             for (auto &scc : stratum) {
                 // TODO(trevor): this can be simplified when we switch to test-packages, as we won't need to emulate the
                 // behavior by copying package files to be valid in an application-only context anymore.
@@ -942,8 +953,9 @@ PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::Pars
                 }
             }
 
-            auto len = packageFiles.size() - start;
-            resultStratum.packageFiles = absl::MakeSpan(packageFiles).subspan(start, len);
+            auto len = packageFiles.size() - packageFilesStart;
+            resultStratum.packageFiles = absl::MakeSpan(packageFiles).subspan(packageFilesStart, len);
+            packageFilesStart = packageFiles.size();
         }
 
         {
