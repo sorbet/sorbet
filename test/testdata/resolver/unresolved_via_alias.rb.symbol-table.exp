@@ -9,6 +9,6 @@ class ::<root> < ::Object ()
       argument <blk><block> @ Loc {file=test/testdata/resolver/unresolved_via_alias.rb start=??? end=???}
   static-field ::AliasToA -> <Alias: ::A > @ test/testdata/resolver/unresolved_via_alias.rb:6
   class ::Object < ::BasicObject (Object, Kernel) @ (https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/json.rbi#LCENSORED, https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/psych.rbi#LCENSORED, https://github.com/sorbet/sorbet/tree/master/rbi/core/object.rbi#LCENSORED)
-    method ::Object#example : private (<blk>) -> A::B (unresolved) @ test/testdata/resolver/unresolved_via_alias.rb:10
+    method ::Object#example : private (<blk>) -> AliasToA::B (unresolved) @ test/testdata/resolver/unresolved_via_alias.rb:10
       argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/resolver/unresolved_via_alias.rb start=??? end=???}
 
