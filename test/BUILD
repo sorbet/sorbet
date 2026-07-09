@@ -539,10 +539,6 @@ pipeline_tests(
             "testdata/**/*.exp",
         ],
         exclude = [
-            # package-directed is known to be incompatible with the LSP tests for now
-            # todo(gdritter): fix this!
-            "testdata/packager/directed-*/**/*",
-
             # RBS is only supported with Prism. Run these with `//test:test_corpus_lsp_prism`.
             "testdata/rbs/**/*.rb",
             "testdata/rbs/**/*.exp",
@@ -592,10 +588,6 @@ pipeline_tests(
             # Prism LSP known failures: hover with RBS
             "testdata/lsp/hover_rbs.rb",
             "testdata/lsp/hover_rbs_assertions_let.rb",
-
-            # package-directed is known to be incompatible with the LSP tests for now
-            # todo(gdritter): fix this!
-            "testdata/packager/directed-*/**/*",
         ],
     ),
     "PrismLSPTests",
