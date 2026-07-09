@@ -18,9 +18,11 @@ void createInitialGlobalState(core::GlobalState &gs, const realmain::options::Op
     if (PAYLOAD_EMPTY) {
         Timer timeit(gs.tracer(), "read_global_state.source");
         sorbet::rbi::populateRBIsInto(gs);
+        gs.loadedFromRBIBinaryPayload = false;
     } else {
         Timer timeit(gs.tracer(), "read_global_state.binary");
         core::serialize::Serializer::loadGlobalState(gs, PAYLOAD_SYMBOL_TABLE, PAYLOAD_NAME_TABLE, PAYLOAD_FILE_TABLE);
+        gs.loadedFromRBIBinaryPayload = true;
     }
     ENFORCE(gs.utf8NamesUsed() < core::GlobalState::PAYLOAD_MAX_UTF8_NAME_COUNT,
             "Payload defined `{}` UTF8 names, which is greater than the expected maximum of `{}`. Consider updating "

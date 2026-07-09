@@ -1982,6 +1982,7 @@ void GlobalState::copyOptions(const core::GlobalState &other) {
     this->didYouMean = other.didYouMean;
     this->ensureCleanStrings = other.ensureCleanStrings;
     this->censorForSnapshotTests = other.censorForSnapshotTests;
+    this->loadedFromRBIBinaryPayload = other.loadedFromRBIBinaryPayload;
     this->sleepInSlowPathSeconds = other.sleepInSlowPathSeconds;
     this->cacheSensitiveOptions = other.cacheSensitiveOptions;
     this->ruby3KeywordArgs = other.ruby3KeywordArgs;

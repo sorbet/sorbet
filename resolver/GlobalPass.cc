@@ -1,6 +1,7 @@
 #include "common/timers/Timer.h"
 #include "core/Names.h"
 #include "core/core.h"
+#include "core/errors/internal.h"
 #include "core/errors/resolver.h"
 #include "resolver/resolver.h"
 #include <vector>
@@ -284,6 +285,16 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
     }
     for (auto ref : gs.newClassOrModules()) {
         if (!ref.data(gs)->isClassModuleSet()) {
+            if (!gs.loadedFromRBIBinaryPayload) { // We're running in `sorbet-orig`
+                if (auto e = gs.beginError(ref.data(gs)->loc(), core::errors::Internal::InternalError)) {
+                    e.setHeader("The core RBIs referenced `{}`, but did not explicitly declare it as a class or module",
+                                ref.show(gs));
+
+                    e.addErrorNote("Make sure the namespace is correct. If it is, declare it explicitly with "
+                                   "`{}` or `{}` in the core RBIs.",
+                                   "class " + ref.show(gs), "module " + ref.show(gs));
+                }
+            }
             // we did not see a declaration for this type not did we see it used. Default to module.
             ref.data(gs)->setIsModule(true);
             ref.data(gs)->singletonClass(gs); // force singleton class into existence

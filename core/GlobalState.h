@@ -548,6 +548,10 @@ public:
     bool ensureCleanStrings = false;
     bool censorForSnapshotTests = false;
 
+    // True when this GlobalState was loaded from the binary payload.
+    // False when it was loaded from the core RBI sources (i.e. we're running under `sorbet-orig` to build the payload.)
+    bool loadedFromRBIBinaryPayload = false;
+
     std::optional<int> sleepInSlowPathSeconds = std::nullopt;
 
     std::unique_ptr<GlobalState> deepCopyGlobalState(bool keepId = false) const;
