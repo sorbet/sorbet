@@ -182,7 +182,7 @@ private:
         core::FileRef file;
         vector<T> items;
 
-        ResolveItems(core::FileRef file, vector<T> &&items) : file(file), items(move(items)){};
+        ResolveItems(core::FileRef file, vector<T> &&items) : file(file), items(move(items)) {};
     };
 
     struct AncestorResolutionItem {
@@ -452,12 +452,19 @@ private:
         job.out->markUnresolved();
         auto &original = *job.out->original();
         if (auto id = ast::cast_tree<ast::ConstantLit>(original.scope)) {
-            auto originalScope = id->symbol().dealias(ctx);
+            auto originalSymbol = id->symbol();
+            auto originalScope = originalSymbol.dealias(ctx);
             if (originalScope == core::Symbols::StubModule()) {
-                // If we were trying to resolve some literal like C::D but `C` itself was already stubbed,
-                // no need to also report that `D` is missing.
-                alreadyReported = true;
-                job.out->resolutionScopes()->emplace_back(core::Symbols::noSymbol());
+                if (originalSymbol == originalScope) {
+                    // If we were trying to resolve some literal like C::D but `C` itself was already stubbed,
+                    // no need to also report that `D` is missing.
+                    alreadyReported = true;
+                    job.out->resolutionScopes()->emplace_back(core::Symbols::noSymbol());
+                } else {
+                    // If the original symbol aliased something that was stubbed, then we put the original symbol
+                    // here so that it's blamed as part of the resolution error
+                    job.out->resolutionScopes()->emplace_back(originalSymbol);
+                }
             } else {
                 // We were trying to resolve a constant literal that had an explicit scope.
                 // Since Sorbet doesn't combine ancestor resolution and explicit scope resolution,
