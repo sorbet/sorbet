@@ -332,7 +332,7 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
                 }
             } else {
                 ENFORCE(ref.data(gs)->isModule());
-                ENFORCE(!ref.data(gs)->superClass().exists() || ref.data(gs)->superClass() == core::Symbols::todo());
+                ENFORCE(!ref.data(gs)->superClass().exists());
 
                 ref.data(gs)->setSuperClass(core::Symbols::Sorbet_Private_Static_ImplicitModuleSuperClass());
             }

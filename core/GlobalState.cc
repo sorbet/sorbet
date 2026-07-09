@@ -353,7 +353,7 @@ void GlobalState::initEmpty() {
     ENFORCE_NO_TIMER(klass == Symbols::NilClass());
     klass = synthesizeClass(core::Names::Constants::Untyped(), 0);
     ENFORCE_NO_TIMER(klass == Symbols::untyped());
-    klass = synthesizeClass(core::Names::Constants::T(), Symbols::todo().id(), true);
+    klass = synthesizeClass(core::Names::Constants::T(), 0, true);
     ENFORCE_NO_TIMER(klass == Symbols::T());
     klass = klass.data(*this)->singletonClass(*this);
     ENFORCE_NO_TIMER(klass == Symbols::TSingleton());
