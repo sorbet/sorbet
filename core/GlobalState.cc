@@ -244,6 +244,7 @@ InlinedVector<core::ClassOrModuleRef, 4> ParentLinearizationInformation::fullLin
 ClassOrModuleRef enterModuleSymbol(GlobalState &gs, ClassOrModuleRef owner, NameRef name) {
     auto module = gs.enterClassOrModuleSymbol(Loc::none(), owner, name);
     module.data(gs)->setIsModule(true);
+    module.data(gs)->setSuperClass(core::Symbols::Sorbet_Private_Static_ImplicitModuleSuperClass());
     return module;
 }
 } // namespace
@@ -267,7 +268,7 @@ ClassOrModuleRef GlobalState::synthesizeClass(NameRef name, uint32_t superclass,
 }
 
 ClassOrModuleRef GlobalState::synthesizeModule(NameRef name) {
-    auto superclass = uint32_t{0};
+    auto superclass = Symbols::Sorbet_Private_Static_ImplicitModuleSuperClass().id();
     return synthesizeClass(name, superclass, true);
 }
 

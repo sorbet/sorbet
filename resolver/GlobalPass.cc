@@ -286,6 +286,7 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
         if (!ref.data(gs)->isClassModuleSet()) {
             // we did not see a declaration for this type not did we see it used. Default to module.
             ref.data(gs)->setIsModule(true);
+            ref.data(gs)->setSuperClass(core::Symbols::Sorbet_Private_Static_ImplicitModuleSuperClass());
             ref.data(gs)->singletonClass(gs); // force singleton class into existence
         }
     }
@@ -326,15 +327,11 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
                 ref.data(gs)->setSuperClass(singletonSuperClass);
             }
         } else {
-            if (ref.data(gs)->isClass()) {
-                if (core::Symbols::BasicObject() != ref && core::Symbols::top() != ref) {
-                    ref.data(gs)->setSuperClass(core::Symbols::Object());
-                }
-            } else {
-                ENFORCE(ref.data(gs)->isModule());
-                ENFORCE(!ref.data(gs)->superClass().exists());
-
-                ref.data(gs)->setSuperClass(core::Symbols::Sorbet_Private_Static_ImplicitModuleSuperClass());
+            ENFORCE(!ref.data(gs)->isModule(),
+                    "Modules should have a superclass upon creation, so it shouldn't need anything finalized here.");
+            ENFORCE(ref.data(gs)->isClass());
+            if (core::Symbols::BasicObject() != ref && core::Symbols::top() != ref) {
+                ref.data(gs)->setSuperClass(core::Symbols::Object());
             }
         }
     }
