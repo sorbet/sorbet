@@ -1,0 +1,7 @@
+# typed: strict
+# exclude-from-file-update: true
+# disable-fast-path: true
+
+class Namespace
+  AliasToLongProto = DoesNotExist # error: Unable to resolve constant
+end

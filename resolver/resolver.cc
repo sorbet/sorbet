@@ -452,7 +452,7 @@ private:
         job.out->markUnresolved();
         auto &original = *job.out->original();
         if (auto id = ast::cast_tree<ast::ConstantLit>(original.scope)) {
-            auto originalScope = id->symbol().dealias(ctx);
+            auto originalScope = id->symbol();
             if (originalScope == core::Symbols::StubModule()) {
                 // If we were trying to resolve some literal like C::D but `C` itself was already stubbed,
                 // no need to also report that `D` is missing.
@@ -1840,8 +1840,6 @@ public:
                 return compareLocOffsets(lhs.ancestor->loc(), rhs.ancestor->loc());
             });
         }
-
-        // Note that this is missing alias stubbing, thus resolveJob needs to be able to handle missing aliases.
 
         {
             Timer timeit(gs.tracer(), "resolver.resolve_constants.errors");

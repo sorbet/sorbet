@@ -1,0 +1,11 @@
+# typed: strict
+# assert-fast-path: bad_full_unresolved_path__2.rb
+
+class A
+  extend T::Sig
+
+  ATLP = Namespace::AliasToLongProto
+
+  sig { returns(ATLP::DoesNotExist2) } # error: Unable to resolve constant
+  def example = raise
+end
