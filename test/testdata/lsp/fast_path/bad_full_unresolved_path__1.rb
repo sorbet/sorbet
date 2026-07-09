@@ -1,0 +1,19 @@
+# typed: strict
+# spacer for exclude-from-file-update
+
+module Schema
+  module Leaf
+    class Response; end
+  end
+end
+
+module Interface
+  extend T::Sig
+  extend T::Helpers
+  interface!
+
+  Proto = Schema::NonExistent # error: Unable to resolve constant `NonExistent`
+
+  sig { abstract.returns(Proto::Response) } # error: Unable to resolve constant `Response`
+  def example; end
+end
