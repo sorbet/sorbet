@@ -329,13 +329,8 @@ RSpec.describe :user_symbol, :slow do
   end
 end
 
-# Test `describe` with a constant bound to a *value* (not a class or module).
-# RSpec permutation specs commonly `describe` such constants, e.g.
-# `describe ReferenceData::DepositKey::KyJohnsonCountyOlf` where the constant is
-# `= SomeClass.new`. `T.class_of(<value>)` is invalid, so rather than reporting
-# "T.class_of can't be used with a constant field" (5004) or a bare-value-in-type
-# error (7009) on a `T.class_of` the user never wrote, the synthesized
-# `described_class` degrades to `T.untyped`.
+# `describe` over a constant bound to a value (not a class/module) should degrade
+# `described_class` to `T.untyped` rather than error; see rewriter/Minitest.cc.
 class SomeValueClass; end
 SOME_VALUE_CONSTANT = SomeValueClass.new
 
@@ -355,11 +350,7 @@ RSpec.describe UserClass do
   end
 end
 
-# A `T.type_alias` constant is handled the same way as a value constant: the
-# synthesized `T.class_of(<type alias>)` would otherwise report "T.class_of
-# can't be used with a T.type_alias" (5004), which the user can't act on, so it
-# degrades to `T.untyped`. (RSpec specs describe type aliases in practice, e.g.
-# `describe Payments::Types::TransmissionRecord`.)
+# A `T.type_alias` constant is handled the same way as a value constant (see above).
 MyTypeAlias = T.type_alias { T.any(Integer, String) }
 
 RSpec.describe MyTypeAlias do
@@ -371,6 +362,20 @@ end
 RSpec.describe UserClass do
   describe MyTypeAlias do
     it "type-alias nested describe does not error" do
+      T.reveal_type(described_class) # error: Revealed type: `T.untyped`
+    end
+  end
+end
+
+# A `T.type_member` constant is handled the same way (see above). Unlike a value
+# constant or type alias, a type member can only be referenced from within the
+# class/module that defines it, so the describe block is nested there.
+class HasTypeMember
+  extend T::Generic
+  SomeTypeMember = type_member
+
+  RSpec.describe SomeTypeMember do
+    it "does not error on a type-member describe arg" do
       T.reveal_type(described_class) # error: Revealed type: `T.untyped`
     end
   end

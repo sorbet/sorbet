@@ -213,12 +213,10 @@ public:
      * integer values. This is what `unwrapType` does, it turns the value-level
      * expression back into a type-level one.
      */
-    // When `suppressErrors` is true, a non-type (bare value) argument silently returns
-    // `T.untyped` instead of reporting `Unexpected bare ... value found in type position` (7009).
-    // Used by callers that already report (or intentionally tolerate) a non-type argument
-    // elsewhere -- e.g. `T.class_of`, where type-syntax parsing is the canonical place to report a
-    // non-class argument, so re-reporting here would be a duplicate.
-    static TypePtr unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp, bool suppressErrors = false);
+    // When `tolerateBareValue` is true, a non-type argument silently returns `T.untyped` instead of
+    // reporting error 7009. See `rewriter/Minitest.cc`'s `described_class` synthesis for why a
+    // caller might want that.
+    static TypePtr unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp, bool tolerateBareValue = false);
 
     // Converts type syntax like `GenericClass[Arg0, Arg1]` into a TypePtr.
     //
@@ -1079,17 +1077,15 @@ struct DispatchArgs {
     // unreported errors is expensive!
     bool suppressErrors;
     NameRef enclosingMethodForSuper;
-    // True when the originating call was synthesized by a rewriter pass (i.e. the user did not
-    // write it). Intrinsics may use this to suppress diagnostics the user can't act on -- e.g.
-    // `T.class_of` over a value constant in the RSpec rewriter's synthesized `described_class` sig.
-    // Set directly on the constructed args (see infer/environment.cc) rather than via the
-    // constructor, so the common construction sites stay unchanged.
+    // True when the originating call was synthesized by a rewriter pass. See
+    // `rewriter/Minitest.cc`'s `described_class` synthesis for the motivating case.
     bool isRewriterSynthesized = false;
 
     DispatchArgs(NameRef name, const CallLocs &locs, uint16_t numPosArgs,
                  InlinedVector<const TypeAndOrigins *, 2> &args, const TypePtr &selfType,
                  const TypeAndOrigins &fullType, const TypePtr &thisType, const SendAndBlockLink *block,
-                 Loc originForUninitialized, bool isPrivateOk, bool suppressErrors, NameRef enclosingMethodForSuper);
+                 Loc originForUninitialized, bool isPrivateOk, bool suppressErrors, NameRef enclosingMethodForSuper,
+                 bool isRewriterSynthesized = false);
     DispatchArgs(const DispatchArgs &) = delete;
     DispatchArgs &operator=(const DispatchArgs &) = delete;
 

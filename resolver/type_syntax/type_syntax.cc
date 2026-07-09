@@ -750,13 +750,8 @@ optional<core::ClassOrModuleRef> parseTClassOf(core::Context ctx, const ast::Sen
     // Only meaningful to dealias once we've ruled out a type alias / type member.
     auto sym = (isTypeAlias || isTypeMember) ? maybeAliased : maybeAliased.dealias(ctx);
     if (isTypeAlias || isTypeMember || sym.isStaticField(ctx)) {
-        // For a rewriter-synthesized `T.class_of`, the argument is whatever constant the user wrote
-        // elsewhere, not in a type position, so none of these are actionable. For example, the
-        // RSpec rewriter synthesizes `sig { returns(T.class_of(arg)) }` for `described_class` from
-        // `describe arg`; when `arg` is bound to a value (`Foo = SomeStruct.new`), a `T.type_alias`,
-        // or a `T.type_member` rather than a class/module, there is nothing the user can fix at the
-        // `T.class_of` site. Degrade silently to `T.untyped` instead of emitting an unactionable
-        // error. A real class/module argument still resolves to the precise `T.class_of(Klass)`.
+        // For a rewriter-synthesized `T.class_of`, none of these are actionable by the user; see
+        // `rewriter/Minitest.cc`'s `described_class` synthesis for why.
         if (!send.flags.isRewriterSynthesized) {
             if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                 e.setHeader("T.class_of can't be used with a {}", isTypeAlias    ? "T.type_alias"

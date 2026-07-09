@@ -976,7 +976,7 @@ core::ClassOrModuleRef Types::getRepresentedClass(const GlobalState &gs, const T
     return singleton.data(gs)->attachedClass(gs);
 }
 
-TypePtr Types::unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp, bool suppressErrors) {
+TypePtr Types::unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp, bool tolerateBareValue) {
     if (auto metaType = cast_type<MetaType>(tp)) {
         return metaType->wrapped;
     }
@@ -991,7 +991,7 @@ TypePtr Types::unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp, boo
 
         auto attachedClass = classType.symbol.data(gs)->attachedClass(gs);
         if (!attachedClass.exists()) {
-            if (!suppressErrors) {
+            if (!tolerateBareValue) {
                 if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
                     e.setHeader("Unexpected bare `{}` value found in type position", tp.show(gs));
                     if (classType.symbol == core::Symbols::T_Types_Base() ||
@@ -1018,7 +1018,7 @@ TypePtr Types::unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp, boo
     if (auto appType = cast_type<AppliedType>(tp)) {
         ClassOrModuleRef attachedClass = appType->klass.data(gs)->attachedClass(gs);
         if (!attachedClass.exists()) {
-            if (!suppressErrors) {
+            if (!tolerateBareValue) {
                 if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
                     e.setHeader("Unexpected bare `{}` value found in type position", tp.show(gs));
                 }
@@ -1033,19 +1033,19 @@ TypePtr Types::unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp, boo
         vector<TypePtr> unwrappedValues;
         unwrappedValues.reserve(shapeType->values.size());
         for (auto &value : shapeType->values) {
-            unwrappedValues.emplace_back(unwrapType(gs, loc, value, suppressErrors));
+            unwrappedValues.emplace_back(unwrapType(gs, loc, value, tolerateBareValue));
         }
         return make_type<ShapeType>(shapeType->keys, move(unwrappedValues));
     } else if (auto tupleType = cast_type<TupleType>(tp)) {
         vector<TypePtr> unwrappedElems;
         unwrappedElems.reserve(tupleType->elems.size());
         for (auto &elem : tupleType->elems) {
-            unwrappedElems.emplace_back(unwrapType(gs, loc, elem, suppressErrors));
+            unwrappedElems.emplace_back(unwrapType(gs, loc, elem, tolerateBareValue));
         }
         return make_type<TupleType>(move(unwrappedElems));
     }
 
-    if (!suppressErrors) {
+    if (!tolerateBareValue) {
         if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
             e.setHeader("Unexpected bare `{}` value found in type position", tp.show(gs));
         }
@@ -1186,10 +1186,11 @@ DispatchArgs::DispatchArgs(NameRef name, const CallLocs &locs, uint16_t numPosAr
                            InlinedVector<const TypeAndOrigins *, 2> &args, const TypePtr &selfType,
                            const TypeAndOrigins &fullType, const TypePtr &thisType, const SendAndBlockLink *block,
                            Loc originForUninitialized, bool isPrivateOk, bool suppressErrors,
-                           NameRef enclosingMethodForSuper)
+                           NameRef enclosingMethodForSuper, bool isRewriterSynthesized)
     : name(name), locs(locs), numPosArgs(numPosArgs), args(args), selfType(selfType), fullType(fullType),
       thisType(thisType), block(block), originForUninitialized(originForUninitialized), isPrivateOk(isPrivateOk),
-      suppressErrors(suppressErrors), enclosingMethodForSuper(enclosingMethodForSuper) {}
+      suppressErrors(suppressErrors), enclosingMethodForSuper(enclosingMethodForSuper),
+      isRewriterSynthesized(isRewriterSynthesized) {}
 
 Loc DispatchArgs::argsLoc(const GlobalState &gs) const {
     if (!locs.args.empty()) {
@@ -1238,17 +1239,35 @@ Loc DispatchArgs::argsLoc(const GlobalState &gs) const {
 }
 
 DispatchArgs DispatchArgs::withSelfAndThisRef(const TypePtr &newSelfRef) const {
-    return DispatchArgs{name,        locs,           numPosArgs,
-                        args,        newSelfRef,     fullType,
-                        newSelfRef,  block,          originForUninitialized,
-                        isPrivateOk, suppressErrors, enclosingMethodForSuper};
+    return DispatchArgs{name,
+                        locs,
+                        numPosArgs,
+                        args,
+                        newSelfRef,
+                        fullType,
+                        newSelfRef,
+                        block,
+                        originForUninitialized,
+                        isPrivateOk,
+                        suppressErrors,
+                        enclosingMethodForSuper,
+                        isRewriterSynthesized};
 }
 
 DispatchArgs DispatchArgs::withThisRef(const TypePtr &newThisRef) const {
-    return DispatchArgs{name,        locs,           numPosArgs,
-                        args,        selfType,       fullType,
-                        newThisRef,  block,          originForUninitialized,
-                        isPrivateOk, suppressErrors, enclosingMethodForSuper};
+    return DispatchArgs{name,
+                        locs,
+                        numPosArgs,
+                        args,
+                        selfType,
+                        fullType,
+                        newThisRef,
+                        block,
+                        originForUninitialized,
+                        isPrivateOk,
+                        suppressErrors,
+                        enclosingMethodForSuper,
+                        isRewriterSynthesized};
 }
 
 DispatchResult DispatchResult::merge(const GlobalState &gs, DispatchResult::Combinator kind, DispatchResult &&left,

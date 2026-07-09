@@ -671,4 +671,27 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
   end
+
+  class <emptyTree>::<C HasTypeMember><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(<emptyTree>::<C T>::<C Generic>)
+
+    <emptyTree>::<C SomeTypeMember> = <self>.type_member()
+
+    begin
+      <emptyTree>::<C SomeTypeMember>
+      class <emptyTree>::<C <describe 'SomeTypeMember'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+        def <it 'does not error on a type-member describe arg'><<todo method>>(&<blk>)
+          <emptyTree>::<C T>.reveal_type(<self>.described_class())
+        end
+
+        ::T::Sig::WithoutRuntime.sig() do ||
+          <self>.returns(::T.class_of(<emptyTree>::<C SomeTypeMember>))
+        end
+
+        def described_class<<todo method>>(&<blk>)
+          <emptyTree>::<C SomeTypeMember>
+        end
+      end
+    end
+  end
 end
