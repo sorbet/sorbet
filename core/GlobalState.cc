@@ -241,6 +241,11 @@ InlinedVector<core::ClassOrModuleRef, 4> ParentLinearizationInformation::fullLin
     return res;
 }
 
+ClassOrModuleRef enterModuleSymbol(GlobalState &gs, ClassOrModuleRef owner, NameRef name) {
+    auto module = gs.enterClassOrModuleSymbol(Loc::none(), owner, name);
+    module.data(gs)->setIsModule(true);
+    return module;
+}
 } // namespace
 
 ClassOrModuleRef GlobalState::synthesizeClass(NameRef name, uint32_t superclass, bool isModule) {
@@ -409,22 +414,15 @@ void GlobalState::initEmpty() {
     ENFORCE_NO_TIMER(klass == Symbols::Sorbet());
     klass = enterClassOrModuleSymbol(Loc::none(), Symbols::Sorbet(), core::Names::Constants::Private());
     ENFORCE_NO_TIMER(klass == Symbols::Sorbet_Private());
-    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::Sorbet_Private(), core::Names::Constants::Static());
-    klass.data(*this)->setIsModule(true); // explicitly set isModule so we can immediately call singletonClass
+    klass = enterModuleSymbol(*this, Symbols::Sorbet_Private(), core::Names::Constants::Static());
     ENFORCE_NO_TIMER(klass == Symbols::Sorbet_Private_Static());
     klass = Symbols::Sorbet_Private_Static().data(*this)->singletonClass(*this);
     ENFORCE_NO_TIMER(klass == Symbols::Sorbet_Private_StaticSingleton());
-    klass =
-        enterClassOrModuleSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubModule());
-    klass.data(*this)->setIsModule(true);
+    klass = enterModuleSymbol(*this, Symbols::Sorbet_Private_Static(), core::Names::Constants::StubModule());
     ENFORCE_NO_TIMER(klass == Symbols::StubModule());
-    klass =
-        enterClassOrModuleSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubMixin());
-    klass.data(*this)->setIsModule(true);
+    klass = enterModuleSymbol(*this, Symbols::Sorbet_Private_Static(), core::Names::Constants::StubMixin());
     ENFORCE_NO_TIMER(klass == Symbols::StubMixin());
-    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::Sorbet_Private_Static(),
-                                     core::Names::Constants::PlaceholderMixin());
-    klass.data(*this)->setIsModule(true);
+    klass = enterModuleSymbol(*this, Symbols::Sorbet_Private_Static(), core::Names::Constants::PlaceholderMixin());
     ENFORCE_NO_TIMER(klass == Symbols::PlaceholderMixin());
     klass = enterClassOrModuleSymbol(Loc::none(), Symbols::Sorbet_Private_Static(),
                                      core::Names::Constants::StubSuperClass());
@@ -507,8 +505,7 @@ void GlobalState::initEmpty() {
     klass = Symbols::DeclBuilderForProcs().data(*this)->singletonClass(*this);
     ENFORCE_NO_TIMER(klass == Symbols::DeclBuilderForProcsSingleton());
 
-    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T_Sig(), core::Names::Constants::WithoutRuntime());
-    klass.data(*this)->setIsModule(true); // explicitly set isModule so we can immediately call singletonClass
+    klass = enterModuleSymbol(*this, Symbols::T_Sig(), core::Names::Constants::WithoutRuntime());
     ENFORCE_NO_TIMER(klass == Symbols::T_Sig_WithoutRuntime());
 
     klass = synthesizeClass(core::Names::Constants::Enumerator());
