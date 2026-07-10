@@ -842,6 +842,31 @@ int realmain(int argc, char *argv[]) {
 #endif
         }
 
+        if (!opts.storeState.empty()) {
+            // It's possible that we want to move this to GlobalPass and provide some way for users
+            // to opt into this check in their own codebases. Punting on that for now.
+            for (auto i = 1; i < gs->classAndModulesUsed(); i++) {
+                auto sym = core::ClassOrModuleRef(*gs, i);
+                auto data = sym.data(*gs);
+                auto loc = data->loc();
+                auto file = loc.file();
+                if (file.exists() && file.data(*gs).isPayload() && !data->isDeclared()) {
+                    if (data->isSingletonClass(*gs) && data->attachedClass(*gs).data(*gs)->isDeclared()) {
+                        // Have to treat singleton classes specially, because when they're created
+                        // synthetically they are not declared, but that's ~fine as long the
+                        // corresponding attached class is declared.
+                        continue;
+                    }
+
+                    if (auto e = gs->beginError(loc, core::errors::Internal::InternalError)) {
+                        // This usually represents a typo/omission.
+                        // It's best to figure out how it was defined in the stdlib and capture that.
+                        e.setHeader("Refusing to implicitly declare `{}` as a module in the payload", sym.show(*gs));
+                    }
+                }
+            }
+        }
+
         gs->errorQueue->flushAllErrors(*gs);
 
         if (!opts.noErrorCount) {
