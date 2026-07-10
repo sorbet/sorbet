@@ -3247,7 +3247,7 @@ class Gem::StreamUI
   def download_reporter(*args); end
 end
 
-class Gem::Stream::UI::SilentProgressReporter
+class Gem::StreamUI::SilentProgressReporter
   def count; end
 
   def initialize(out_stream, size, initial_message, terminal_message = nil); end
@@ -3257,7 +3257,7 @@ class Gem::Stream::UI::SilentProgressReporter
   def done; end
 end
 
-class Gem::Stream::UI::SimpleProgressReporter
+class Gem::StreamUI::SimpleProgressReporter
   include Gem::DefaultUserInteraction
 
   def count; end
@@ -3269,7 +3269,7 @@ class Gem::Stream::UI::SimpleProgressReporter
   def done; end
 end
 
-class Gem::Stream::UI::VerboseProgressReporter
+class Gem::StreamUI::VerboseProgressReporter
   include Gem::DefaultUserInteraction
 
   def count; end
@@ -3281,7 +3281,7 @@ class Gem::Stream::UI::VerboseProgressReporter
   def done; end
 end
 
-class Gem::Stream::UI::SilentDownloadReporter
+class Gem::StreamUI::SilentDownloadReporter
   def initialize(out_stream, *args); end
 
   def fetch(filename, filesize); end
@@ -3291,7 +3291,7 @@ class Gem::Stream::UI::SilentDownloadReporter
   def done; end
 end
 
-class Gem::Stream::UI::ThreadedDownloadReporter
+class Gem::StreamUI::ThreadedDownloadReporter
   MUTEX = Mutex.new
 
   def file_name; end
