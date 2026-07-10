@@ -89,6 +89,7 @@ class T::Props::Decorator
   # solve the problem you're encountering.
   VALID_RULE_KEYS = T.let(%i[
     enum
+    foreign
     ifunset
     immutable
     override
