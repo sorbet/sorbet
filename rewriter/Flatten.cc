@@ -159,6 +159,12 @@ class FlattenWalk {
     // need to move to the end, so we keep that below on the stack.
     vector<ClassScope> classScopes;
 
+    // How many blocks we are currently lexically nested inside of (e.g. `Foo.class_eval do ... end`).
+    // Method defs found inside blocks are flagged so that later passes (Namer) don't treat them as
+    // ordinary top-level definitions, which would incorrectly mark them implicitly private.
+    // See https://github.com/sorbet/sorbet/issues/10452
+    uint32_t blockDepth = 0;
+
     // compute the new scope information.
     ScopeInfo computeScopeInfo(ScopeType scopeType) {
         auto &methods = curMethodSet();
@@ -347,8 +353,23 @@ public:
         }
     }
 
+    void preTransformBlock(core::Context ctx, ast::ExpressionPtr &tree) {
+        blockDepth++;
+    }
+
+    void postTransformBlock(core::Context ctx, ast::ExpressionPtr &tree) {
+        ENFORCE(blockDepth > 0);
+        blockDepth--;
+    }
+
     void preTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
+        if (blockDepth > 0) {
+            // This method def is lexically nested inside a block (e.g. `Foo.class_eval do ... end`).
+            // Flatten is about to hoist it out of the block, which loses that information, so record
+            // it on the flags for Namer to consult when computing implicit visibility.
+            methodDef.flags.isInsideBlock = true;
+        }
         // add a new scope for this method def
         curMethodSet().pushScope(computeScopeInfo(methodDef.flags.isSelfMethod ? ScopeType::StaticMethodScope
                                                                                : ScopeType::InstanceMethodScope));
