@@ -1,4 +1,5 @@
 #include "main/lsp/LSPConfiguration.h"
+#include "absl/algorithm/container.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_join.h"
@@ -138,12 +139,32 @@ void LSPConfiguration::setClientConfig(const shared_ptr<const LSPClientConfigura
     this->clientConfig = clientConfig;
 }
 
+namespace {
+
+// Returns true if `prefix` is a whole-path-component prefix of `path` (e.g. "." is a prefix of
+// "./foo.rb" but not of ".gitignore").
+bool isPathPrefix(string_view path, string_view prefix) {
+    if (prefix.empty()) {
+        return true;
+    }
+    return absl::StartsWith(path, prefix) &&
+           (path.length() == prefix.length() || path[prefix.length()] == '/');
+}
+
+} // namespace
+
 string LSPConfiguration::localName2Remote(string_view filePath) const {
-    ENFORCE(absl::StartsWith(filePath, rootPath));
+    // With multiple input directories (--forcibly-silence-lsp-multiple-dir-error), rootPath is the
+    // first input directory, and files from the other directories are named relative to the
+    // working directory rather than to rootPath. Those names are already relative URIs.
+    ENFORCE(isPathPrefix(filePath, rootPath) || opts.forciblySilenceLspMultipleDirError);
     assertHasClientConfig();
-    string_view relativeUri = filePath.substr(rootPath.length());
-    if (relativeUri.at(0) == '/') {
-        relativeUri = relativeUri.substr(1);
+    string_view relativeUri = filePath;
+    if (isPathPrefix(filePath, rootPath)) {
+        relativeUri = filePath.substr(rootPath.length());
+        if (!relativeUri.empty() && relativeUri.at(0) == '/') {
+            relativeUri = relativeUri.substr(1);
+        }
     }
 
     // Special case: Root uri is '' (happens in Monaco)
@@ -202,6 +223,19 @@ string LSPConfiguration::remoteName2Local(string_view encodedUri) const {
     if (isHttps) {
         return path;
     } else if (rootPath.length() > 0) {
+        // With multiple input directories, files under directories other than the first are named
+        // relative to the working directory rather than under rootPath, so return the path as-is
+        // to match how those files were indexed.
+        if (opts.forciblySilenceLspMultipleDirError) {
+            for (size_t i = 1; i < opts.rawInputDirNames.size(); i++) {
+                if (isPathPrefix(path, opts.rawInputDirNames[i])) {
+                    return path;
+                }
+            }
+            if (absl::c_find(opts.rawInputFileNames, path) != opts.rawInputFileNames.end()) {
+                return path;
+            }
+        }
         return absl::StrCat(rootPath, "/", path);
     } else {
         // Special case: Folder is '' (current directory)
