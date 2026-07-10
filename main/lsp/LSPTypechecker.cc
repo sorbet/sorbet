@@ -778,8 +778,6 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
                         // Close and copy the global kvstore, so that we have unique access for the rest of the session.
                         this->sessionCache = cache::SessionCache::make(std::move(ownedKvstore), *this->config->logger,
                                                                        this->config->opts);
-
-                        this->initialized = true;
                     }
                 }
 
@@ -890,6 +888,11 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
 
         return this->lastStratum;
     });
+
+    if (mode == SlowPathMode::Init) {
+        // TODO: if we start supporting preemption in the init path, we'll need to rethink what this boolean means.
+        this->initialized = true;
+    }
 
     gs->lspQuery = core::lsp::Query::noQuery();
 
