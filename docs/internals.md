@@ -244,7 +244,7 @@ The file you'll want to see is [namer/namer.cc].
 Symbols are the canonical store of information about definitions in Sorbet.
 Namer walks the [`ast::Expression`] tree and calls various methods to create a
 `Symbol` which is owned by `GlobalState` and get back a reference to what was
-created (for example, `enterMethodSymbol` and `enterClassSymbol`). These methods
+created (for example, `enterMethodSymbol` and `enterClassOrModuleSymbol`). These methods
 return a `SymbolRef`, which is conceptually a newtype wrapper around a pointer
 to a `Symbol`. See below for a discussion of [`Symbol`s vs
 `SymbolRef`s](#refs-ie-symbol-vs-symbolref).

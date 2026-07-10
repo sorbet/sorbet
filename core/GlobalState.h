@@ -370,7 +370,7 @@ public:
 
     ~GlobalState() = default;
 
-    ClassOrModuleRef enterClassSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
+    ClassOrModuleRef enterClassOrModuleSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
     TypeMemberRef enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef name, Variance variance);
     TypeParameterRef enterTypeParameter(Loc loc, MethodRef owner, NameRef name, Variance variance);
     MethodRef enterMethodSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);

@@ -1667,11 +1667,11 @@ ClassOrModuleRef ClassOrModule::singletonClass(GlobalState &gs) {
     ClassOrModuleRef selfRef = this->ref(gs);
 
     NameRef singletonName = gs.freshNameUnique(UniqueNameKind::Singleton, this->name, 1);
-    singleton = gs.enterClassSymbol(this->loc(), this->owner, singletonName);
+    singleton = gs.enterClassOrModuleSymbol(this->loc(), this->owner, singletonName);
     ClassOrModuleData singletonInfo = singleton.data(gs);
 
     // --------
-    // Call to enterClassSymbol might have reallocated the memory that `*this` pointed to
+    // Call to enterClassOrModuleSymbol might have reallocated the memory that `*this` pointed to
     // It's not safe to use `this` anymore.
     // --------
     const auto &self = selfRef.data(gs);
@@ -2167,7 +2167,7 @@ void ClassOrModule::sanityCheck(const GlobalState &gs) const {
     ClassOrModuleRef current = this->ref(gs);
     if (current != Symbols::root()) {
         ClassOrModuleRef current2 =
-            const_cast<GlobalState &>(gs).enterClassSymbol(this->loc(), this->owner, this->name);
+            const_cast<GlobalState &>(gs).enterClassOrModuleSymbol(this->loc(), this->owner, this->name);
         ENFORCE_NO_TIMER(current == current2);
         for (auto &e : members()) {
             ENFORCE_NO_TIMER(e.first.exists(), "{} has a member symbol without a name", name.toString(gs));

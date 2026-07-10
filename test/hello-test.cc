@@ -115,7 +115,7 @@ TEST_CASE("CountTrees") {
     sorbet::core::UnfreezeSymbolTable st(cb);
 
     auto name = cb.enterNameUTF8(foo_str);
-    auto classSym = cb.enterClassSymbol(loc, sorbet::core::Symbols::root(), cb.enterNameConstant(name));
+    auto classSym = cb.enterClassOrModuleSymbol(loc, sorbet::core::Symbols::root(), cb.enterNameConstant(name));
 
     // see if it crashes via failed ENFORCE
     cb.enterTypeMember(loc, classSym, cb.enterNameConstant(name), sorbet::core::Variance::CoVariant);

@@ -384,11 +384,11 @@ void GlobalState::initEmpty() {
     ENFORCE_NO_TIMER(klass == Symbols::Complex());
     klass = synthesizeClass(core::Names::Constants::Rational());
     ENFORCE_NO_TIMER(klass == Symbols::Rational());
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Array());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Array());
     ENFORCE_NO_TIMER(klass == Symbols::T_Array());
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Hash());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Hash());
     ENFORCE_NO_TIMER(klass == Symbols::T_Hash());
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Proc());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Proc());
     ENFORCE_NO_TIMER(klass == Symbols::T_Proc());
     klass = synthesizeClass(core::Names::Constants::Proc());
     ENFORCE_NO_TIMER(klass == Symbols::Proc());
@@ -402,53 +402,58 @@ void GlobalState::initEmpty() {
     ENFORCE_NO_TIMER(klass == Symbols::File());
     klass = synthesizeClass(core::Names::Constants::Sorbet());
     ENFORCE_NO_TIMER(klass == Symbols::Sorbet());
-    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet(), core::Names::Constants::Private());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::Sorbet(), core::Names::Constants::Private());
     ENFORCE_NO_TIMER(klass == Symbols::Sorbet_Private());
-    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private(), core::Names::Constants::Static());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::Sorbet_Private(), core::Names::Constants::Static());
     klass.data(*this)->setIsModule(true); // explicitly set isModule so we can immediately call singletonClass
     ENFORCE_NO_TIMER(klass == Symbols::Sorbet_Private_Static());
     klass = Symbols::Sorbet_Private_Static().data(*this)->singletonClass(*this);
     ENFORCE_NO_TIMER(klass == Symbols::Sorbet_Private_StaticSingleton());
-    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubModule());
+    klass =
+        enterClassOrModuleSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubModule());
     klass.data(*this)->setIsModule(true);
     ENFORCE_NO_TIMER(klass == Symbols::StubModule());
-    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubMixin());
+    klass =
+        enterClassOrModuleSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubMixin());
     klass.data(*this)->setIsModule(true);
     ENFORCE_NO_TIMER(klass == Symbols::StubMixin());
-    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::PlaceholderMixin());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::Sorbet_Private_Static(),
+                                     core::Names::Constants::PlaceholderMixin());
     klass.data(*this)->setIsModule(true);
     ENFORCE_NO_TIMER(klass == Symbols::PlaceholderMixin());
-    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubSuperClass());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::Sorbet_Private_Static(),
+                                     core::Names::Constants::StubSuperClass());
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::StubSuperClass());
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Enumerable());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Enumerable());
     ENFORCE_NO_TIMER(klass == Symbols::T_Enumerable());
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Range());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Range());
     ENFORCE_NO_TIMER(klass == Symbols::T_Range());
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Set());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Set());
     ENFORCE_NO_TIMER(klass == Symbols::T_Set());
-    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Void());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Void());
     ENFORCE_NO_TIMER(klass == Symbols::void_());
     klass = synthesizeClass(core::Names::Constants::TypeAlias(), 0);
     ENFORCE_NO_TIMER(klass == Symbols::typeAliasTemp());
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), Names::Constants::Configuration());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), Names::Constants::Configuration());
     ENFORCE_NO_TIMER(klass == Symbols::T_Configuration());
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Generic());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Generic());
     ENFORCE_NO_TIMER(klass == Symbols::T_Generic());
-    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Tuple());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Tuple());
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::Tuple());
-    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Shape());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Shape());
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::Shape());
-    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Subclasses());
+    klass =
+        enterClassOrModuleSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Subclasses());
     ENFORCE_NO_TIMER(klass == Symbols::Subclasses());
-    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(),
-                             core::Names::Constants::ImplicitModuleSuperclass());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::Sorbet_Private_Static(),
+                                     core::Names::Constants::ImplicitModuleSuperclass());
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::Sorbet_Private_Static_ImplicitModuleSuperClass());
-    klass =
-        enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::ReturnTypeInference());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::Sorbet_Private_Static(),
+                                     core::Names::Constants::ReturnTypeInference());
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::Sorbet_Private_Static_ReturnTypeInference());
     typeParameter = enterTypeParameter(Loc::none(), Symbols::noMethod(), Names::Constants::TodoTypeParameter(),
@@ -474,7 +479,7 @@ void GlobalState::initEmpty() {
     ENFORCE_NO_TIMER(
         typeParameter ==
         Symbols::Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_covariant());
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Sig());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Sig());
     ENFORCE_NO_TIMER(klass == Symbols::T_Sig());
 
     // A magic non user-creatable class with methods to keep state between passes
@@ -488,7 +493,7 @@ void GlobalState::initEmpty() {
     ENFORCE_NO_TIMER(method == Symbols::Sorbet_Private_Static_badAliasMethodStub());
 
     // T::Helpers
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Helpers());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Helpers());
     ENFORCE_NO_TIMER(klass == Symbols::T_Helpers());
 
     // SigBuilder magic class
@@ -497,27 +502,27 @@ void GlobalState::initEmpty() {
     klass = Symbols::DeclBuilderForProcs().data(*this)->singletonClass(*this);
     ENFORCE_NO_TIMER(klass == Symbols::DeclBuilderForProcsSingleton());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::T_Sig(), core::Names::Constants::WithoutRuntime());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T_Sig(), core::Names::Constants::WithoutRuntime());
     klass.data(*this)->setIsModule(true); // explicitly set isModule so we can immediately call singletonClass
     ENFORCE_NO_TIMER(klass == Symbols::T_Sig_WithoutRuntime());
 
     klass = synthesizeClass(core::Names::Constants::Enumerator());
     ENFORCE_NO_TIMER(klass == Symbols::Enumerator());
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Enumerator());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Enumerator());
     ENFORCE_NO_TIMER(klass == Symbols::T_Enumerator());
-    klass = enterClassSymbol(Loc::none(), Symbols::T_Enumerator(), core::Names::Constants::Lazy());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T_Enumerator(), core::Names::Constants::Lazy());
     ENFORCE_NO_TIMER(klass == Symbols::T_Enumerator_Lazy());
-    klass = enterClassSymbol(Loc::none(), Symbols::T_Enumerator(), core::Names::Constants::Chain());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T_Enumerator(), core::Names::Constants::Chain());
     ENFORCE_NO_TIMER(klass == Symbols::T_Enumerator_Chain());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Struct());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Struct());
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::T_Struct());
 
     klass = synthesizeClass(core::Names::Constants::Singleton(), 0, true);
     ENFORCE_NO_TIMER(klass == Symbols::Singleton());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Enum());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Enum());
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::T_Enum());
 
@@ -531,30 +536,30 @@ void GlobalState::initEmpty() {
     ENFORCE_NO_TIMER(method == Symbols::sig());
 
     // Enumerator::Lazy
-    klass = enterClassSymbol(Loc::none(), Symbols::Enumerator(), core::Names::Constants::Lazy());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::Enumerator(), core::Names::Constants::Lazy());
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::Enumerator_Lazy());
 
     // Enumerator::Chain
-    klass = enterClassSymbol(Loc::none(), Symbols::Enumerator(), core::Names::Constants::Chain());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::Enumerator(), core::Names::Constants::Chain());
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::Enumerator_Chain());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), Names::Constants::Private());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), Names::Constants::Private());
     ENFORCE_NO_TIMER(klass == Symbols::T_Private());
-    klass = enterClassSymbol(Loc::none(), Symbols::T_Private(), Names::Constants::Types());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T_Private(), Names::Constants::Types());
     ENFORCE_NO_TIMER(klass == Symbols::T_Private_Types());
-    klass = enterClassSymbol(Loc::none(), Symbols::T_Private_Types(), Names::Constants::Void());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T_Private_Types(), Names::Constants::Void());
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::T_Private_Types_Void());
-    klass = enterClassSymbol(Loc::none(), Symbols::T_Private_Types_Void(), Names::Constants::VOID());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T_Private_Types_Void(), Names::Constants::VOID());
     klass.data(*this)->setIsModule(true); // explicitly set isModule so we can immediately call singletonClass
     ENFORCE_NO_TIMER(klass == Symbols::T_Private_Types_Void_VOID());
     klass = klass.data(*this)->singletonClass(*this);
     ENFORCE_NO_TIMER(klass == Symbols::T_Private_Types_Void_VOIDSingleton());
-    klass = enterClassSymbol(Loc::none(), Symbols::T_Private(), Names::Constants::Methods());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T_Private(), Names::Constants::Methods());
     ENFORCE_NO_TIMER(klass == Symbols::T_Private_Methods());
-    klass = enterClassSymbol(Loc::none(), Symbols::T_Private_Methods(), Names::Constants::DeclBuilder());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T_Private_Methods(), Names::Constants::DeclBuilder());
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::T_Private_Methods_DeclBuilder());
 
@@ -576,7 +581,7 @@ void GlobalState::initEmpty() {
         enterMethod(*this, Symbols::T_Sig_WithoutRuntimeSingleton(), Names::sig()).defaultArg(Names::arg0()).build();
     ENFORCE_NO_TIMER(method == Symbols::sigWithoutRuntime());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::root(), Names::Constants::PackageSpecRegistry());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::root(), Names::Constants::PackageSpecRegistry());
     ENFORCE_NO_TIMER(klass == Symbols::PackageSpecRegistry());
 
     // Ensure that we propagate packageRegistryOwner information by making PackageSpecRegistry own itself in the
@@ -584,7 +589,7 @@ void GlobalState::initEmpty() {
     klass.data(*this)->packageRegistryOwner = klass;
 
     // PackageSpec is a class that can be subclassed.
-    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), Names::Constants::PackageSpec());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), Names::Constants::PackageSpec());
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::PackageSpec());
 
@@ -606,27 +611,27 @@ void GlobalState::initEmpty() {
     ENFORCE_NO_TIMER(method == Symbols::rootStaticInit());
 
     // Magic classes for special proc bindings
-    klass = enterClassSymbol(Loc::none(), Symbols::Magic(), core::Names::Constants::BindToAttachedClass());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::Magic(), core::Names::Constants::BindToAttachedClass());
     ENFORCE_NO_TIMER(klass == Symbols::MagicBindToAttachedClass());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::Magic(), core::Names::Constants::BindToSelfType());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::Magic(), core::Names::Constants::BindToSelfType());
     ENFORCE_NO_TIMER(klass == Symbols::MagicBindToSelfType());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Types());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Types());
     ENFORCE_NO_TIMER(klass == Symbols::T_Types());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::T_Types(), core::Names::Constants::Base());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T_Types(), core::Names::Constants::Base());
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::T_Types_Base());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::root(), core::Names::Constants::Data());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::root(), core::Names::Constants::Data());
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::Data());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Class());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Class());
     ENFORCE_NO_TIMER(klass == Symbols::T_Class());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Module());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Module());
     ENFORCE_NO_TIMER(klass == Symbols::T_Module());
 
     method = enterMethod(*this, Symbols::T_Generic(), Names::squareBrackets()).repeatedTopArg(Names::args()).build();
@@ -848,7 +853,7 @@ void GlobalState::initEmpty() {
     Symbols::StubSuperClass().data(*this)->setIsModule(false);
     Symbols::StubSuperClass().data(*this)->setSuperClass(Symbols::Object());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::Magic(), core::Names::Constants::UntypedSource());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::Magic(), core::Names::Constants::UntypedSource());
     ENFORCE_NO_TIMER(klass == Symbols::Magic_UntypedSource());
 
     field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::super());
@@ -1153,7 +1158,7 @@ SymbolRef GlobalState::findRenamedSymbol(ClassOrModuleRef owner, SymbolRef sym) 
     }
 }
 
-ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, NameRef name) {
+ClassOrModuleRef GlobalState::enterClassOrModuleSymbol(Loc loc, ClassOrModuleRef owner, NameRef name) {
     // ENFORCE_NO_TIMER(!owner.exists()); // Owner may not exist on purely synthetic symbols.
     ENFORCE_NO_TIMER(name.isClassName(*this));
     // We should never enter mangled classes (incremental fast path relies on all constants being

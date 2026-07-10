@@ -156,7 +156,7 @@ const core::SymbolRef getConstantRef(core::GlobalState &gs, vector<string> rawNa
     core::ClassOrModuleRef sym = core::Symbols::root();
 
     for (auto &n : rawName) {
-        sym = gs.enterClassSymbol(core::Loc(), sym, gs.enterNameConstant(gs.enterNameUTF8(n)));
+        sym = gs.enterClassOrModuleSymbol(core::Loc(), sym, gs.enterNameConstant(gs.enterNameUTF8(n)));
     }
     return sym;
 }

@@ -345,7 +345,7 @@ TEST_CASE("isPackageSpecSymbol") {
 
     {
         UnfreezeSymbolTable unfreeze(gs);
-        auto testNamespace = gs.enterClassSymbol(Loc::none(), Symbols::root(), Names::Constants::Test());
+        auto testNamespace = gs.enterClassOrModuleSymbol(Loc::none(), Symbols::root(), Names::Constants::Test());
         REQUIRE(testNamespace.exists());
         CHECK_FALSE(testNamespace.isPackageSpecSymbol(gs));
     }

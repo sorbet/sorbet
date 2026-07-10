@@ -1217,7 +1217,7 @@ private:
                 // If member exists with this name, it must be a class or module, because we never mangle-rename them.
                 symbol = member.asClassOrModuleRef();
             } else {
-                auto newClass = ctx.state.enterClassSymbol(ctx.locAt(klass.declLoc), owner, klass.name);
+                auto newClass = ctx.state.enterClassOrModuleSymbol(ctx.locAt(klass.declLoc), owner, klass.name);
                 symbol = newClass;
             }
         }
