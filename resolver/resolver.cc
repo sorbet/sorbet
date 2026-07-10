@@ -1720,19 +1720,19 @@ public:
                 // We try to resolve most ancestors second because this makes us much more likely to resolve
                 // everything else.
                 long retries = 0;
-                auto f = [&gs, &retries, &suppressPayloadSuperclassRedefinitionFor](
+                erase_if(todoAncestors,
+                         [&gs, &retries, &suppressPayloadSuperclassRedefinitionFor](
                              ResolveItems<AncestorResolutionItem> &job) -> bool {
-                    core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                    const auto origSize = job.items.size();
-                    auto g = [&](AncestorResolutionItem &item) -> bool {
-                        auto resolved = resolveAncestorJob(ctx, item, suppressPayloadSuperclassRedefinitionFor, false);
-                        return resolved;
-                    };
-                    erase_if(job.items, std::move(g));
-                    retries += origSize - job.items.size();
-                    return job.items.empty();
-                };
-                erase_if(todoAncestors, std::move(f));
+                             core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                             const auto origSize = job.items.size();
+                             erase_if(job.items, [&](AncestorResolutionItem &item) -> bool {
+                                 auto resolved =
+                                     resolveAncestorJob(ctx, item, suppressPayloadSuperclassRedefinitionFor, false);
+                                 return resolved;
+                             });
+                             retries += origSize - job.items.size();
+                             return job.items.empty();
+                         });
                 categoryCounterAdd("resolve.constants.ancestor", "retry", retries);
                 progress = retries > 0;
             }
@@ -1749,30 +1749,28 @@ public:
                 // there would be no point in running the todoClassAliases step before todo
 
                 long retries = 0;
-                auto f = [&gs, &retries](ResolveItems<ClassAliasResolutionItem> &job) -> bool {
+                erase_if(todoClassAliases, [&gs, &retries](ResolveItems<ClassAliasResolutionItem> &job) -> bool {
                     core::MutableContext ctx(gs, core::Symbols::root(), job.file);
                     auto origSize = job.items.size();
-                    auto g = [&](ClassAliasResolutionItem &item) -> bool { return resolveClassAliasJob(ctx, item); };
-                    erase_if(job.items, std::move(g));
+                    erase_if(job.items,
+                             [&](ClassAliasResolutionItem &item) -> bool { return resolveClassAliasJob(ctx, item); });
                     retries += origSize - job.items.size();
                     return job.items.empty();
-                };
-                erase_if(todoClassAliases, std::move(f));
+                });
                 categoryCounterAdd("resolve.constants.aliases", "retry", retries);
                 progress = progress || retries > 0;
             }
             {
                 Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.type_aliases");
                 long retries = 0;
-                auto f = [&gs, &retries](ResolveItems<TypeAliasResolutionItem> &job) -> bool {
+                erase_if(todoTypeAliases, [&gs, &retries](ResolveItems<TypeAliasResolutionItem> &job) -> bool {
                     core::MutableContext ctx(gs, core::Symbols::root(), job.file);
                     auto origSize = job.items.size();
-                    auto g = [&](TypeAliasResolutionItem &item) -> bool { return resolveTypeAliasJob(ctx, item); };
-                    erase_if(job.items, std::move(g));
+                    erase_if(job.items,
+                             [&](TypeAliasResolutionItem &item) -> bool { return resolveTypeAliasJob(ctx, item); });
                     retries += origSize - job.items.size();
                     return job.items.empty();
-                };
-                erase_if(todoTypeAliases, std::move(f));
+                });
                 categoryCounterAdd("resolve.constants.typealiases", "retry", retries);
                 progress = progress || retries > 0;
             }
