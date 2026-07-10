@@ -695,16 +695,14 @@ TEST_CASE("LSPTest") {
 
             // Collect importUsageAssertions into a separate collection to handle them differently.
             vector<shared_ptr<RangeAssertion>> importUsageAssertions;
-            entryAssertions.erase(std::remove_if(entryAssertions.begin(), entryAssertions.end(),
-                                                 [&](auto &assertion) -> bool {
-                                                     if (dynamic_pointer_cast<ImportUsageAssertion>(assertion)) {
-                                                         importUsageAssertions.emplace_back(assertion);
-                                                         return true;
-                                                     }
+            std::erase_if(entryAssertions, [&](auto &assertion) -> bool {
+                if (dynamic_pointer_cast<ImportUsageAssertion>(assertion)) {
+                    importUsageAssertions.emplace_back(assertion);
+                    return true;
+                }
 
-                                                     return false;
-                                                 }),
-                                  entryAssertions.end());
+                return false;
+            });
 
             for (auto &assertion : entryAssertions) {
                 string_view symbol;
