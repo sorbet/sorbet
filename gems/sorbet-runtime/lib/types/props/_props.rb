@@ -76,21 +76,6 @@ module T::Props
     #
     #   ``:ifunset`` is considered **DEPRECATED** and should not be used
     #    in new code, in favor of just setting a default value.
-    # @option rules [Model, Symbol, Proc] :foreign A model class that this
-    #  property is a reference to. Passing `:foreign` will define a
-    #  `:"#{name}_"` method, that will load and return the
-    #  corresponding foreign model.
-    #
-    #  A symbol can be passed to avoid load-order dependencies; It
-    #  will be lazily resolved relative to the enclosing module of the
-    #  defining class.
-    #
-    #  A callable (proc or method) can be passed to dynamically specify the
-    #  foreign model. This will be passed the object instance so that other
-    #  properties of the object can be used to determine the relevant model
-    #  class. It should return a string/symbol class name or the foreign model
-    #  class directly.
-    #
     # @option rules [Object] :default A default value that will be set
     #   by `#initialize` if none is provided in the initialization
     #   hash. This will not affect objects loaded by {.from_hash}.
