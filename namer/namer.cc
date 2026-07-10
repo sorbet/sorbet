@@ -1424,14 +1424,7 @@ private:
             }
         }
         if (fun == core::Names::declarePackagePrivate()) {
-            // TODO(gdritter): Add something here when we switch to
-            // public-by-default! Right now, this is redundant because
-            // we're already private-by-default, and even setting
-            // `isExported` to `false` will get overruled by later
-            // changes. But once we switch, this is where we will make
-            // the change.
-
-            // symbolData->flags.isExported = false;
+            symbolData->flags.isPackagePrivate = true;
         }
     }
 

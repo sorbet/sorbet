@@ -394,6 +394,11 @@ public:
                                       ctx.locAt(send.loc), "{}",
                                       fmt::map_join(lines, "\n  ", [](string_view line) { return line; }));
                     }
+                } else if (klassData->flags.isPackagePrivate) {
+                    if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidExport)) {
+                        e.setHeader("Constant `{}` is declared `{}` and cannot be exported", sym.show(ctx),
+                                    "package_private!");
+                    }
                 }
 
                 checkExportPackage(ctx, send.loc, sym);
@@ -635,12 +640,16 @@ public:
         }
 
         bool isExported = pkg.locs.exportAll.exists();
+        bool isPackagePrivate = false;
         if (litSymbol.isClassOrModule()) {
-            isExported = isExported || litSymbol.asClassOrModuleRef().data(ctx)->flags.isExported;
+            auto flags = litSymbol.asClassOrModuleRef().data(ctx)->flags;
+            isExported = isExported || flags.isExported;
+            isPackagePrivate = flags.isPackagePrivate;
         } else if (litSymbol.isFieldOrStaticField()) {
             isExported = isExported || litSymbol.asFieldRef().data(ctx)->flags.isExported;
         }
         isExported = isExported || db.allowRelaxedPackagerChecksFor(this->package.mangledName());
+        isExported = isExported && !isPackagePrivate;
         bool definesBehavior =
             !litSymbol.isClassOrModule() || litSymbol.asClassOrModuleRef().data(ctx)->flags.isBehaviorDefining;
         auto *import = this->package.importsPackage(otherPackage);
@@ -726,7 +735,12 @@ public:
                     }
                 }
 
-                if (!isExported && !wasImported) {
+                if (isPackagePrivate) {
+                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
+                        e.setHeader("`{}` resolves but is declared `{}` in `{}`", litSymbol.show(ctx),
+                                    "package_private", pkg.show(ctx));
+                    }
+                } else if (!isExported && !wasImported) {
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
                         e.setHeader("`{}` resolves but is not exported from `{}` and `{}` is not imported",
                                     litSymbol.show(ctx), pkg.show(ctx), pkg.show(ctx));
