@@ -95,6 +95,13 @@ class SymbolFinder {
         }
 
         switch (send->fun.rawId()) {
+            case core::Names::declarePackagePrivate().rawId(): {
+                // This is special if we're using package mode
+                if (!ctx.state.packageDB().enabled()) {
+                    break;
+                }
+                [[fallthrough]];
+            }
             case core::Names::declareFinal().rawId():
             case core::Names::declareSealed().rawId():
             case core::Names::declareInterface().rawId():
@@ -1415,6 +1422,16 @@ private:
                     e.replaceWith("Change `interface!` to `abstract!`", ctx.locAt(mod.loc), "abstract!");
                 }
             }
+        }
+        if (fun == core::Names::declarePackagePrivate()) {
+            // TODO(gdritter): Add something here when we switch to
+            // public-by-default! Right now, this is redundant because
+            // we're already private-by-default, and even setting
+            // `isExported` to `false` will get overruled by later
+            // changes. But once we switch, this is where we will make
+            // the change.
+
+            // symbolData->flags.isExported = false;
         }
     }
 
