@@ -331,10 +331,10 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
                     ref.data(gs)->setSuperClass(core::Symbols::Object());
                 }
             } else {
-                if (!core::Symbols::BasicObject().data(gs)->derivesFrom(gs, ref) &&
-                    core::Symbols::BasicObject() != ref) {
-                    ref.data(gs)->setSuperClass(core::Symbols::Sorbet_Private_Static_ImplicitModuleSuperClass());
-                }
+                ENFORCE(ref.data(gs)->isModule());
+                ENFORCE(!ref.data(gs)->superClass().exists() || ref.data(gs)->superClass() == core::Symbols::todo());
+
+                ref.data(gs)->setSuperClass(core::Symbols::Sorbet_Private_Static_ImplicitModuleSuperClass());
             }
         }
     }
