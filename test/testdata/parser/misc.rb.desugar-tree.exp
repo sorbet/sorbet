@@ -76,8 +76,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  <self>.arr().each() do |x|
-    <emptyTree>
+  begin
+    forTemp$8 = <self>.arr()
+    if ::T.unsafe(nil)
+      x = forTemp$8.first()
+    else
+      <emptyTree>
+    end
+    forTemp$8.each() do |x|
+      <emptyTree>
+    end
   end
 
   while 0.!=(1)
@@ -107,8 +115,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   begin
-    <hashTemp>$8 = ::<Magic>.<to-hash-dup>(x)
-    <hashTemp>$8
+    <hashTemp>$9 = ::<Magic>.<to-hash-dup>(x)
+    <hashTemp>$9
   end
 
   87
@@ -152,16 +160,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   begin
-    <assignTemp>$9 = 1
-    <assignTemp>$10 = ::<Magic>.<expand-splat>(<assignTemp>$9, 2, 0)
-    a = <assignTemp>$10.[](0)
+    <assignTemp>$10 = 1
+    <assignTemp>$11 = ::<Magic>.<expand-splat>(<assignTemp>$10, 2, 0)
+    a = <assignTemp>$11.[](0)
     begin
-      <assignTemp>$11 = <assignTemp>$10.[](1)
-      <assignTemp>$12 = ::<Magic>.<expand-splat>(<assignTemp>$11, 1, 0)
-      x = <assignTemp>$12.[](0)
-      <assignTemp>$11
+      <assignTemp>$12 = <assignTemp>$11.[](1)
+      <assignTemp>$13 = ::<Magic>.<expand-splat>(<assignTemp>$12, 1, 0)
+      x = <assignTemp>$13.[](0)
+      <assignTemp>$12
     end
-    <assignTemp>$9
+    <assignTemp>$10
   end
 
   4
@@ -189,10 +197,10 @@ rescue <emptyTree>::<C E> => x
   nil
 
   begin
-    <assignTemp>$14 = ::<Magic>.<splat>(y)
-    <assignTemp>$15 = ::<Magic>.<expand-splat>(<assignTemp>$14, 0, 0)
-    x = <assignTemp>$15.to_ary()
-    <assignTemp>$14
+    <assignTemp>$15 = ::<Magic>.<splat>(y)
+    <assignTemp>$16 = ::<Magic>.<expand-splat>(<assignTemp>$15, 0, 0)
+    x = <assignTemp>$16.to_ary()
+    <assignTemp>$15
   end
 
   ::<Magic>.<string-interpolate>("foo", <self>.bar()).intern()

@@ -22,7 +22,7 @@ end
 class Main
     def self.main # error: does not have a `sig`
 
-        for a in A do
+        for a in A do # error: Method `first` does not exist on `T.class_of(A)`
             puts a.inspect
         end
         A.each do |*forTemp|
@@ -30,7 +30,7 @@ class Main
             puts a.inspect
         end
 
-        for a,b in A do
+        for a,b in A do # error: Method `first` does not exist on `T.class_of(A)`
             puts a.inspect
             puts b.inspect
         end

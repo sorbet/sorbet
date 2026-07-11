@@ -1801,25 +1801,43 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 }
 
                 ExpressionPtr block; // the body to the `each` loop we'll create
+
+                // In Ruby, `for` loops don't define a new scope (the way a block passed to `each` would),
+                // so the loop variable(s) continue to exist after the end of the loop, holding `nil` if the
+                // collection was empty. Because the block parameters in the desugared `each` call are
+                // block-local, we additionally seed the loop variable(s) in the enclosing scope from
+                // `<collection>.first`, guarded by an opaque condition, so that their post-loop type is
+                // `T.nilable(<element type>)` instead of `NilClass`.
+                // See https://github.com/sorbet/sorbet/issues/10265
+                unique_ptr<parser::Node> seedLhs;
                 if (canProvideNiceDesugar) {
                     MethodDef::PARAMS_store params;
-                    if (parser::isa_node<parser::LVarLhs>(forLoopVar.get())) { // single local
+                    if (auto *lvar = parser::cast_node<parser::LVarLhs>(forLoopVar.get())) { // single local
                         // Desugar:
-                        //     for a in []
+                        //     for a in <coll>
                         // into:
-                        //     [].each { |a| ... }
+                        //     <forTemp>$1 = <coll>
+                        //     a = <forTemp>$1.first() if <opaque condition>
+                        //     <forTemp>$1.each { |a| ... }
+                        seedLhs = make_unique<parser::LVarLhs>(lvar->loc, lvar->name);
 
                         auto localVar = node2TreeImpl(dctx, forLoopVar);
                         params.emplace_back(move(localVar));
                     } else if (auto *mlhs = parser::cast_node<parser::Mlhs>(forLoopVar.get())) { // mlhs of all locals
                         // Desugar:
-                        //     for a, b, c in []
+                        //     for a, b, c in <coll>
                         // into:
-                        //     [].each { |a, b, c| ... }
+                        //     <forTemp>$1 = <coll>
+                        //     a, b, c = <forTemp>$1.first() if <opaque condition>
+                        //     <forTemp>$1.each { |a, b, c| ... }
+                        parser::NodeVec seedVars;
                         for (auto &c : mlhs->exprs) {
-                            ENFORCE(parser::isa_node<parser::LVarLhs>(c.get()));
+                            auto *lvar = parser::cast_node<parser::LVarLhs>(c.get());
+                            ENFORCE(lvar != nullptr);
+                            seedVars.emplace_back(make_unique<parser::LVarLhs>(lvar->loc, lvar->name));
                             params.emplace_back(node2TreeImpl(dctx, c));
                         }
+                        seedLhs = make_unique<parser::Mlhs>(mlhs->loc, move(seedVars));
                     } else {
                         unreachable("Expected the `forLoopVar` to be either a LVarLhs or Mlhs");
                     }
@@ -1878,8 +1896,47 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     block = MK::Block(loc, move(loopBody), move(params));
                 }
 
-                auto res =
-                    MK::Send0Block(loc, node2TreeImpl(dctx, for_->expr), core::Names::each(), locZeroLen, move(block));
+                ExpressionPtr res;
+                if (canProvideNiceDesugar) {
+                    ENFORCE(seedLhs != nullptr);
+
+                    // Evaluate the collection expression once, into a temporary, so that we can
+                    // reference it both to seed the loop variable(s) and to call `each` on it.
+                    core::NameRef collectionTempName = dctx.freshNameUnique(core::Names::forTemp());
+                    auto collectionAssign =
+                        MK::Assign(loc, MK::Local(loc, collectionTempName), node2TreeImpl(dctx, for_->expr));
+
+                    unique_ptr<parser::Node> firstRecv = make_unique<parser::LVar>(loc, collectionTempName);
+                    unique_ptr<parser::Node> firstSend = make_unique<parser::Send>(
+                        loc, move(firstRecv), core::Names::first(), locZeroLen, parser::NodeVec{});
+
+                    unique_ptr<parser::Node> seedAssignNode;
+                    if (parser::isa_node<parser::Mlhs>(seedLhs.get())) {
+                        seedAssignNode = make_unique<parser::Masgn>(loc, move(seedLhs), move(firstSend));
+                    } else {
+                        seedAssignNode = make_unique<parser::Assign>(loc, move(seedLhs), move(firstSend));
+                    }
+                    auto seedAssign = node2TreeImpl(dctx, seedAssignNode);
+
+                    // Guard the seed assignment behind an opaque (untyped) condition. This makes the
+                    // post-loop type of the loop variable(s) be the lub of "possibly uninitialized"
+                    // (`NilClass`) and the seed's type, i.e. `T.nilable(<element type>)`. The lub also
+                    // conveniently drops overly-precise literal types (e.g. `Integer(1)` from calling
+                    // `first` on a tuple like `[1, 2, 3]`), which would otherwise cause spurious
+                    // dead-code errors after the loop.
+                    auto seedIf = MK::If(loc, MK::UntypedNil(locZeroLen), move(seedAssign), MK::EmptyTree());
+
+                    auto eachSend = MK::Send0Block(loc, MK::Local(loc, collectionTempName), core::Names::each(),
+                                                   locZeroLen, move(block));
+
+                    InsSeq::STATS_store stats;
+                    stats.emplace_back(move(collectionAssign));
+                    stats.emplace_back(move(seedIf));
+                    res = MK::InsSeq(loc, move(stats), move(eachSend));
+                } else {
+                    res = MK::Send0Block(loc, node2TreeImpl(dctx, for_->expr), core::Names::each(), locZeroLen,
+                                         move(block));
+                }
                 result = move(res);
             },
             [&](parser::Integer *integer) {

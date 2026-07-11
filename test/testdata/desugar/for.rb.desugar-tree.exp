@@ -23,51 +23,73 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Main><<C <todo sym>>> < (::<todo sym>)
     def self.main<<todo method>>(&<blk>)
       begin
-        <emptyTree>::<C A>.each() do |a|
-          <self>.puts(a.inspect())
+        begin
+          forTemp$2 = <emptyTree>::<C A>
+          if ::T.unsafe(nil)
+            a = forTemp$2.first()
+          else
+            <emptyTree>
+          end
+          forTemp$2.each() do |a|
+            <self>.puts(a.inspect())
+          end
         end
         <emptyTree>::<C A>.each() do |*forTemp|
           begin
             begin
-              <assignTemp>$2 = ::<Magic>.<splat>(forTemp)
-              <assignTemp>$3 = ::<Magic>.<expand-splat>(<assignTemp>$2, 1, 0)
-              a = <assignTemp>$3.[](0)
-              <assignTemp>$2
+              <assignTemp>$3 = ::<Magic>.<splat>(forTemp)
+              <assignTemp>$4 = ::<Magic>.<expand-splat>(<assignTemp>$3, 1, 0)
+              a = <assignTemp>$4.[](0)
+              <assignTemp>$3
             end
             <self>.puts(a.inspect())
           end
         end
-        <emptyTree>::<C A>.each() do |a, b|
-          begin
-            <self>.puts(a.inspect())
-            <self>.puts(b.inspect())
+        begin
+          forTemp$5 = <emptyTree>::<C A>
+          if ::T.unsafe(nil)
+            begin
+              <assignTemp>$6 = forTemp$5.first()
+              <assignTemp>$7 = ::<Magic>.<expand-splat>(<assignTemp>$6, 2, 0)
+              a = <assignTemp>$7.[](0)
+              b = <assignTemp>$7.[](1)
+              <assignTemp>$6
+            end
+          else
+            <emptyTree>
+          end
+          forTemp$5.each() do |a, b|
+            begin
+              <self>.puts(a.inspect())
+              <self>.puts(b.inspect())
+            end
           end
         end
         <emptyTree>::<C A>.each() do |*forTemp|
           begin
             begin
-              <assignTemp>$4 = ::<Magic>.<splat>(forTemp)
-              <assignTemp>$5 = ::<Magic>.<expand-splat>(<assignTemp>$4, 2, 0)
-              a = <assignTemp>$5.[](0)
-              b = <assignTemp>$5.[](1)
-              <assignTemp>$4
+              <assignTemp>$8 = ::<Magic>.<splat>(forTemp)
+              <assignTemp>$9 = ::<Magic>.<expand-splat>(<assignTemp>$8, 2, 0)
+              a = <assignTemp>$9.[](0)
+              b = <assignTemp>$9.[](1)
+              <assignTemp>$8
             end
             <self>.puts(a.inspect())
             <self>.puts(b.inspect())
           end
         end
         <self>.puts("main")
-        <emptyTree>::<C A>.each() do |forTemp$6|
+        <emptyTree>::<C A>.each() do |forTemp$10|
           begin
             begin
-              <assignTemp>$7 = forTemp$6
-              <assignTemp>$8 = ::<Magic>.<expand-splat>(<assignTemp>$7, 5, 0)
-              @a = <assignTemp>$8.[](0)
-              @@b = <assignTemp>$8.[](1)
-              $c = <assignTemp>$8.[](2)
-              d = <assignTemp>$8.[](3)
-              <emptyTree>::<C E>.e=(<assignTemp>$8.[](4))
-              <assignTemp>$7
+              <assignTemp>$11 = forTemp$10
+              <assignTemp>$12 = ::<Magic>.<expand-splat>(<assignTemp>$11, 5, 0)
+              @a = <assignTemp>$12.[](0)
+              @@b = <assignTemp>$12.[](1)
+              $c = <assignTemp>$12.[](2)
+              d = <assignTemp>$12.[](3)
+              <emptyTree>::<C E>.e=(<assignTemp>$12.[](4))
+              <assignTemp>$11
             end
             begin
               <self>.puts(@a.inspect())
@@ -81,14 +103,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>::<C A>.each() do |*forTemp|
           begin
             begin
-              <assignTemp>$9 = ::<Magic>.<splat>(forTemp)
-              <assignTemp>$10 = ::<Magic>.<expand-splat>(<assignTemp>$9, 5, 0)
-              @a = <assignTemp>$10.[](0)
-              @@b = <assignTemp>$10.[](1)
-              $c = <assignTemp>$10.[](2)
-              d = <assignTemp>$10.[](3)
-              <emptyTree>::<C E>.e=(<assignTemp>$10.[](4))
-              <assignTemp>$9
+              <assignTemp>$13 = ::<Magic>.<splat>(forTemp)
+              <assignTemp>$14 = ::<Magic>.<expand-splat>(<assignTemp>$13, 5, 0)
+              @a = <assignTemp>$14.[](0)
+              @@b = <assignTemp>$14.[](1)
+              $c = <assignTemp>$14.[](2)
+              d = <assignTemp>$14.[](3)
+              <emptyTree>::<C E>.e=(<assignTemp>$14.[](4))
+              <assignTemp>$13
             end
             <self>.puts(@a.inspect())
             <self>.puts(@@b.inspect())
