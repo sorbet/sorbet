@@ -19,6 +19,26 @@
 # declaration to discover the most-recently-defined method, instead of needing
 # `*_class_method` variants, like `private_class_method`.
 module T::DefMods
+  # ===== NOTE: Must keep in sync with `T::Sig`! ==============================
+  include T::Private::Methods::MethodHooks
+  include T::Private::Methods::SingletonMethodHooks
+
+  private_class_method def self.included(other)
+    return unless Module == other
+    other.prepend(T::Private::Methods::MethodHooks)
+  end
+
+  private_class_method def self.extended(other)
+    if other == T::Private::Methods::TOP_SELF
+      Object.extend(T::Private::Methods::MethodHooks)
+      return
+    end
+
+    return unless Module.===(other) && other.singleton_class?
+    other.include(T::Private::Methods::SingletonMethodHooks)
+  end
+  # ===========================================================================
+
   def abstract(method_name)
     Kernel.raise TypeError.new("abstract accepts a Symbol, got #{method_name.class}") unless method_name.is_a?(Symbol)
 
