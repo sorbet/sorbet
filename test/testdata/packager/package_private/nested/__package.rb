@@ -2,5 +2,5 @@
 # enable-packager: true
 
 class Nested < PackageSpec
-  export Nested::Outer
+  export_all!
 end
