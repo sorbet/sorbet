@@ -26,6 +26,7 @@ class ClassOrModule;
 class TypeVar;
 class SendAndBlockLink;
 class TypeAndOrigins;
+class EnumUnion;
 
 class ParamInfo {
 public:
@@ -270,6 +271,7 @@ inline bool is_ground_type(const TypePtr &what) {
         case TypePtr::Tag::UnresolvedAppliedType:
         case TypePtr::Tag::OrType:
         case TypePtr::Tag::AndType:
+        case TypePtr::Tag::EnumUnion:
             return true;
         case TypePtr::Tag::NamedLiteralType:
         case TypePtr::Tag::IntegerLiteralType:
@@ -311,6 +313,7 @@ inline bool is_proxy_type(const TypePtr &what) {
         case TypePtr::Tag::AppliedType:
         case TypePtr::Tag::TypeVar:
         case TypePtr::Tag::MetaType:
+        case TypePtr::Tag::EnumUnion:
             return false;
     }
 }
@@ -405,6 +408,10 @@ template <> inline TypePtr make_type<ClassType, core::ClassOrModuleRef>(core::Cl
 }
 
 template <> inline TypePtr make_type<ClassType, core::ClassOrModuleRef &>(core::ClassOrModuleRef &ref) {
+    return TypePtr(TypePtr::Tag::ClassType, ref.id());
+}
+
+template <> inline TypePtr make_type<ClassType, const core::ClassOrModuleRef &>(const core::ClassOrModuleRef &ref) {
     return TypePtr(TypePtr::Tag::ClassType, ref.id());
 }
 
@@ -819,6 +826,7 @@ private:
     friend TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &t1);
     friend class ClassOrModule; // the actual method is `recordSealedSubclass(Mutableconst GlobalState &gs, SymbolRef
                                 // subclass)`, but referring to it introduces a cycle
+    friend class EnumUnion;
 
     static TypePtr make_shared(const TypePtr &left, const TypePtr &right);
 };
@@ -996,6 +1004,34 @@ public:
     void _sanityCheck(const GlobalState &gs) const;
 };
 CheckSize(MetaType, 16, 8);
+
+TYPE(EnumUnion) final : public Refcounted {
+public:
+    std::vector<ClassOrModuleRef> members;
+
+    EnumUnion(std::vector<ClassOrModuleRef> members);
+    EnumUnion(const EnumUnion &) = delete;
+    EnumUnion &operator=(const EnumUnion &) = delete;
+
+    std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
+    std::string show(const GlobalState &gs) const {
+        return show(gs, {});
+    };
+    std::string show(const GlobalState &gs, ShowOptions options) const;
+    uint32_t hash(const GlobalState &gs) const;
+    DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
+    bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
+    void _sanityCheck(const GlobalState &gs) const;
+
+    // If `sym` is a T::Enum variant class (e.g., X$1 < MyEnum), returns the parent enum class.
+    // Otherwise returns a non-existent ClassOrModuleRef.
+    static ClassOrModuleRef parentEnumClass(const GlobalState &gs, ClassOrModuleRef sym);
+
+    // Returns the parent enum class shared by all members.
+    ClassOrModuleRef parentEnumClass(const GlobalState &gs) const;
+
+    TypePtr toOrType(const GlobalState &gs) const;
+};
 
 class SendAndBlockLink {
     SendAndBlockLink(const SendAndBlockLink &) = default;
