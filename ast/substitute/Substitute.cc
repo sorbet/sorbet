@@ -125,15 +125,17 @@ public:
             [[maybe_unused]] auto _substituted = subst.substituteSymbolName(name);
         }
 
-        send.fun = subst.substituteSymbolName(send.fun);
-
-        // Some intrinsic method dispatch to other methods. Defensively assume that any method that
-        // shares a name with an intrinsic might be an intrinsic method.
-        for (const auto &[source, targets] : core::intrinsicMethodsDispatchMap()) {
-            for (const auto target : targets) {
+        // Some intrinsic methods dispatch to other methods. Defensively assume that any method that
+        // shares a name with an intrinsic might be an intrinsic method, and substitute its dispatch
+        // targets so their names survive into the merged GlobalState.
+        const auto &dispatchMap = core::intrinsicMethodsDispatchMap();
+        if (auto it = dispatchMap.find(send.fun); it != dispatchMap.end()) {
+            for (const auto target : it->second) {
                 [[maybe_unused]] auto _substituted = subst.substituteSymbolName(target);
             }
         }
+
+        send.fun = subst.substituteSymbolName(send.fun);
     }
 
     void postTransformLiteral(core::Context ctx, ExpressionPtr &tree) {
