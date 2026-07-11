@@ -16,7 +16,7 @@ Aliased = Foo
 # ^ hover-line: 2 Aliased = Foo
 
 StaticField = T.let(Foo, T.class_of(Foo))
-# ^ hover: # static field StaticField
+# ^ hover: # StaticField = T.let(…, T.class_of(Foo))
 # ^ hover: T.class_of(Foo)
 
 MyType = T.type_alias { Integer }
@@ -91,11 +91,37 @@ module GenericModule
   # ^ hover: # end
 end
 
-# Nested static fields render their fully-qualified name.
+# Nested static fields render a reconstructed definition in context.
 module Foo2
   NESTED_FIELD = T.let(1, Integer)
-  # ^ hover: # static field Foo2::NESTED_FIELD
+  # ^ hover: # module Foo2
+  # ^ hover: #   NESTED_FIELD = T.let(…, Integer)
+  # ^ hover: # end
   # ^ hover: Integer
+end
+
+# Multi-line definitions render the same reconstructed form.
+class MultilineField
+  LONG = T.let(
+  # ^ hover: # class MultilineField
+  # ^ hover: #   LONG = T.let(…, T::Array[Integer])
+  # ^ hover: # end
+    [1, 2, 3],
+    T::Array[Integer]
+  )
+end
+
+# Static fields declared inside `class << self` render a nested singleton block.
+class Settings
+  class << self
+    DEFAULT_LIMIT = T.let(100, Integer)
+    # ^ hover: # class Settings
+    # ^ hover: #   class << self
+    # ^ hover: #     DEFAULT_LIMIT = T.let(…, Integer)
+    # ^ hover: #   end
+    # ^ hover: # end
+    # ^ hover: Integer
+  end
 end
 
 # Usage-site hovers (not just definition sites) get the same headers.
@@ -105,4 +131,6 @@ usage1 = Generic::Elem
 #                 ^ hover: # end
 
 usage2 = Foo2::NESTED_FIELD
-#              ^ hover: # static field Foo2::NESTED_FIELD
+#              ^ hover: # module Foo2
+#              ^ hover: #   NESTED_FIELD = T.let(…, Integer)
+#              ^ hover: # end

@@ -1,3 +1,4 @@
+#include "absl/strings/ascii.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
@@ -164,7 +165,29 @@ string constantKindHeader(const core::GlobalState &gs, core::SymbolRef constant)
         auto classOrModule = constant.asClassOrModuleRef().data(gs)->isModule() ? "module" : "class";
         return fmt::format("# {} {}", classOrModule, constant.show(gs));
     } else if (constant.isStaticField(gs)) {
-        return fmt::format("# static field {}", constant.show(gs));
+        // Reconstruct the definition in the context of its enclosing scope, eliding
+        // the value like method hover does for default arguments, e.g.
+        //   # class Config
+        //   #   TIMEOUT = T.let(…, Integer)
+        //   # end
+        const auto &resultType = constant.resultType(gs);
+        auto type = resultType == nullptr ? core::Types::untyped(constant) : resultType;
+        auto definition = fmt::format("{} = T.let(…, {})", constant.name(gs).show(gs), type.show(gs));
+
+        auto owner = constant.owner(gs).asClassOrModuleRef();
+        if (owner == core::Symbols::root()) {
+            return fmt::format("# {}", definition);
+        }
+        if (owner.data(gs)->isSingletonClass(gs)) {
+            // A static field declared inside `class << self` is owned by the singleton
+            // class; render the attached class with a nested `class << self` block.
+            auto attached = owner.data(gs)->attachedClass(gs);
+            auto classOrModule = attached.data(gs)->isModule() ? "module" : "class";
+            return fmt::format("# {} {}\n#   class << self\n#     {}\n#   end\n# end", classOrModule, attached.show(gs),
+                               definition);
+        }
+        auto classOrModule = owner.data(gs)->isModule() ? "module" : "class";
+        return fmt::format("# {} {}\n#   {}\n# end", classOrModule, owner.show(gs), definition);
     }
     return "";
 }
