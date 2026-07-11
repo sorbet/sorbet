@@ -246,7 +246,16 @@ string KnowledgeFact::toString(const core::GlobalState &gs, const cfg::CFG &cfg)
     return fmt::format("{}{}", fmt::join(buf1, ""), fmt::join(buf2, ""));
 }
 
-KnowledgeRef::KnowledgeRef() : knowledge(make_shared<KnowledgeFact>()) {}
+namespace {
+const shared_ptr<KnowledgeFact> &emptyKnowledgeFact() {
+    // Shared, never-mutated empty fact. Because its use_count is always > 1, KnowledgeRef::mutate()
+    // will always copy-on-write before any modification, so aliasing it is safe.
+    static const shared_ptr<KnowledgeFact> empty = make_shared<KnowledgeFact>();
+    return empty;
+}
+} // namespace
+
+KnowledgeRef::KnowledgeRef() : knowledge(emptyKnowledgeFact()) {}
 
 const KnowledgeFact &KnowledgeRef::operator*() const {
     return *knowledge.get();
