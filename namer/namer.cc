@@ -519,7 +519,17 @@ public:
             }
             return sym->asSymbol();
         } else if (auto def = ast::cast_tree<ast::RuntimeMethodDefinition>(expr)) {
+            // this handles the `private def foo` case
             return def->name;
+        } else if (auto send = ast::cast_tree<ast::Send>(expr)) {
+            // Handles combinations of modifiers like
+            // - `private abstract def foo` (`private(abstract(def foo; end))`)
+            // - `abstract private def foo` (`abstract(private(def foo; end))`)
+            if (send->numPosArgs() == 1 && send->fun.isMethodDefModifierName()) {
+                return unwrapLiteralToMethodName(ctx, send->getPosArg(0));
+            }
+
+            return core::NameRef::noName();
         } else {
             ENFORCE(!ast::isa_tree<ast::MethodDef>(expr), "methods inside sends should be gone");
             return core::NameRef::noName();
