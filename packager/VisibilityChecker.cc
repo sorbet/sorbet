@@ -49,6 +49,36 @@ core::ClassOrModuleRef getScopeForPackage(const core::GlobalState &gs, absl::Spa
     return result;
 }
 
+class PropagatePrivacy final {
+    void recursiveSetPrivate(core::MutableContext ctx, core::ClassOrModuleRef klass) {
+        klass.data(ctx)->flags.isPackagePrivate = true;
+
+        // recurse onto relevant children
+        for (auto &[_, child] : klass.data(ctx)->members()) {
+            if (child.isClassOrModule()) {
+                auto childRef = child.asClassOrModuleRef();
+                if (childRef.data(ctx)->flags.isPackagePrivate) {
+                    // if it's already private, we don't need to keep
+                    // recursing: either it's already been done, or it will be
+                    // done when we come across the definition of this one
+                    return;
+                }
+                recursiveSetPrivate(ctx, childRef);
+            }
+        }
+    }
+
+public:
+    void postTransformClassDef(core::MutableContext ctx, const ast::ClassDef &tree) {
+        auto klass = tree.symbol;
+        // if it's not package-private, then there's nothing to do
+        if (!klass.data(ctx)->flags.isPackagePrivate) {
+            return;
+        }
+        recursiveSetPrivate(ctx, klass);
+    }
+};
+
 // For each __package.rb file, traverse the resolved tree and apply the visibility annotations to the symbols.
 class PropagateVisibility final {
     core::packages::PackageInfo &package;
@@ -445,6 +475,10 @@ public:
 
     static void run(core::GlobalState &gs, const ast::ParsedFile &f) {
         if (!f.file.data(gs).isPackage(gs)) {
+            // this is a source file, not a package, so we do the much simpler privacy propagation pass
+            core::MutableContext ctx{gs, core::Symbols::root(), f.file};
+            PropagatePrivacy pass;
+            ast::ConstShallowWalk::apply(ctx, pass, f.tree);
             return;
         }
 
