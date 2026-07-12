@@ -511,3 +511,19 @@ module T::Utils::Nilable
   }
   def self.get_underlying_type_object(prop_type); end
 end
+
+module T::Packages
+  sig {
+    type_parameters(:U)
+      .params(arg0: T.all(T.type_parameter(:U), T.any(Symbol, String)))
+      .returns(T.type_parameter(:U))
+  }
+  private def package_private(*arg0); end
+
+  sig {
+    type_parameters(:U)
+      .params(arg0: T.all(T.type_parameter(:U), T.any(Symbol, String)))
+      .returns(T.type_parameter(:U))
+  }
+  private def package_private_class_method(*arg0); end
+end
