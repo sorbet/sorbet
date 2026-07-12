@@ -78,11 +78,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   begin
     forTemp$8 = <self>.arr()
-    if ::T.unsafe(nil)
-      x = forTemp$8.first()
-    else
-      <emptyTree>
-    end
+    x = ::<Magic>.<element-or-nil>(forTemp$8)
     forTemp$8.each() do |x|
       <emptyTree>
     end

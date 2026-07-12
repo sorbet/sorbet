@@ -1806,7 +1806,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 // so the loop variable(s) continue to exist after the end of the loop, holding `nil` if the
                 // collection was empty. Because the block parameters in the desugared `each` call are
                 // block-local, we additionally seed the loop variable(s) in the enclosing scope from
-                // `<collection>.first`, guarded by an opaque condition, so that their post-loop type is
+                // `<Magic>.<element-or-nil>(<collection>)`, so that their post-loop type is
                 // `T.nilable(<element type>)` instead of `NilClass`.
                 // See https://github.com/sorbet/sorbet/issues/10265
                 unique_ptr<parser::Node> seedLhs;
@@ -1817,7 +1817,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                         //     for a in <coll>
                         // into:
                         //     <forTemp>$1 = <coll>
-                        //     a = <forTemp>$1.first() if <opaque condition>
+                        //     a = ::<Magic>.<element-or-nil>(<forTemp>$1)
                         //     <forTemp>$1.each { |a| ... }
                         seedLhs = make_unique<parser::LVarLhs>(lvar->loc, lvar->name);
 
@@ -1828,7 +1828,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                         //     for a, b, c in <coll>
                         // into:
                         //     <forTemp>$1 = <coll>
-                        //     a, b, c = <forTemp>$1.first() if <opaque condition>
+                        //     a, b, c = ::<Magic>.<element-or-nil>(<forTemp>$1)
                         //     <forTemp>$1.each { |a, b, c| ... }
                         parser::NodeVec seedVars;
                         for (auto &c : mlhs->exprs) {
@@ -1906,32 +1906,25 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     auto collectionAssign =
                         MK::Assign(loc, MK::Local(loc, collectionTempName), node2TreeImpl(dctx, for_->expr));
 
-                    unique_ptr<parser::Node> firstRecv = make_unique<parser::LVar>(loc, collectionTempName);
-                    unique_ptr<parser::Node> firstSend = make_unique<parser::Send>(
-                        loc, move(firstRecv), core::Names::first(), locZeroLen, parser::NodeVec{});
+                    // `<Magic>.<element-or-nil>(<forTemp>$1)` types as `T.nilable(<element type>)`, or
+                    // `T.untyped` if the collection doesn't respond to `first` (Ruby's `for` only
+                    // requires `each`, so a missing `first` must not be an error).
+                    auto seedRhs = MK::Send1(loc, MK::Magic(locZeroLen), core::Names::elementOrNil(), locZeroLen,
+                                             MK::Local(loc, collectionTempName));
 
-                    unique_ptr<parser::Node> seedAssignNode;
-                    if (parser::isa_node<parser::Mlhs>(seedLhs.get())) {
-                        seedAssignNode = make_unique<parser::Masgn>(loc, move(seedLhs), move(firstSend));
+                    ExpressionPtr seedAssign;
+                    if (auto *mlhs = parser::cast_node<parser::Mlhs>(seedLhs.get())) {
+                        seedAssign = desugarMlhs(dctx, loc, mlhs, move(seedRhs));
                     } else {
-                        seedAssignNode = make_unique<parser::Assign>(loc, move(seedLhs), move(firstSend));
+                        seedAssign = MK::Assign(loc, node2TreeImpl(dctx, seedLhs), move(seedRhs));
                     }
-                    auto seedAssign = node2TreeImpl(dctx, seedAssignNode);
-
-                    // Guard the seed assignment behind an opaque (untyped) condition. This makes the
-                    // post-loop type of the loop variable(s) be the lub of "possibly uninitialized"
-                    // (`NilClass`) and the seed's type, i.e. `T.nilable(<element type>)`. The lub also
-                    // conveniently drops overly-precise literal types (e.g. `Integer(1)` from calling
-                    // `first` on a tuple like `[1, 2, 3]`), which would otherwise cause spurious
-                    // dead-code errors after the loop.
-                    auto seedIf = MK::If(loc, MK::UntypedNil(locZeroLen), move(seedAssign), MK::EmptyTree());
 
                     auto eachSend = MK::Send0Block(loc, MK::Local(loc, collectionTempName), core::Names::each(),
                                                    locZeroLen, move(block));
 
                     InsSeq::STATS_store stats;
                     stats.emplace_back(move(collectionAssign));
-                    stats.emplace_back(move(seedIf));
+                    stats.emplace_back(move(seedAssign));
                     res = MK::InsSeq(loc, move(stats), move(eachSend));
                 } else {
                     res = MK::Send0Block(loc, node2TreeImpl(dctx, for_->expr), core::Names::each(), locZeroLen,

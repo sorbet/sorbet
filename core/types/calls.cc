@@ -2497,6 +2497,74 @@ public:
     }
 } Magic_expandSplat;
 
+// <Magic>.<element-or-nil>(recv)
+//
+// Used when desugaring `for` loops. In Ruby, `for` doesn't define a new scope, so the loop
+// variable continues to exist after the loop, holding `nil` if the collection was empty. We
+// approximate that post-loop type by dispatching `first` on the collection and returning
+// `T.nilable(<result>)`.
+//
+// Ruby's `for` only requires the collection to respond to `each`, so if the receiver doesn't
+// respond to `first` (an `each`-only class that doesn't include `Enumerable`), we silently fall
+// back to `T.untyped` instead of reporting a "method does not exist" error.
+//
+// We also drop literal types (e.g. `Integer(1)` from `Tuple#first` on `[1, 2, 3]`), which would
+// otherwise cause spurious dead-code errors in comparisons after the loop.
+class Magic_elementOrNil : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        if (args.args.size() != 1) {
+            res.returnType = Types::untypedUntracked();
+            return;
+        }
+
+        auto &recv = *args.args.front();
+        if (recv.type.isUntyped()) {
+            res.returnType = recv.type;
+            return;
+        }
+
+        // Special-case tuples: the loop can end early via `break`, so after the loop the variable
+        // may hold *any* element (or `nil`), not specifically the first one. For heterogeneous
+        // tuples like `[1, "one"]`, dispatching `first` would unsoundly yield `T.nilable(Integer)`;
+        // the union of the element types is the sound, precise answer.
+        if (auto tuple = cast_type<TupleType>(recv.type)) {
+            res.returnType = Types::any(gs, Types::nilClass(), Types::dropLiteral(gs, tuple->elementType(gs)));
+            return;
+        }
+
+        InlinedVector<const TypeAndOrigins *, 2> sendArgs;
+        CallLocs sendLocs{
+            .file = args.locs.file,
+            .call = args.locs.call,
+            .receiver = args.locs.call,
+            .fun = args.locs.call.copyWithZeroLength(),
+            .args = absl::Span<const core::LocOffsets>(nullptr, 0),
+        };
+        DispatchArgs innerArgs{Names::first(),
+                               sendLocs,
+                               0,
+                               sendArgs,
+                               recv.type,
+                               recv,
+                               recv.type,
+                               nullptr,
+                               args.originForUninitialized,
+                               /* isPrivateOk */ false,
+                               /* suppressErrors */ true,
+                               core::NameRef::noName()};
+        auto dispatched = recv.type.dispatchCall(gs, innerArgs);
+        // Intentionally drop `dispatched.main.errors`: a missing `first` is not an error here.
+
+        if (dispatched.returnType == nullptr || !dispatched.main.method.exists()) {
+            res.returnType = Types::untypedUntracked();
+            return;
+        }
+
+        res.returnType = Types::any(gs, Types::nilClass(), Types::dropLiteral(gs, dispatched.returnType));
+    }
+} Magic_elementOrNil;
+
 class Magic_callWithSplat : public IntrinsicMethod {
     friend class Magic_callWithSplatAndBlockPass;
 
@@ -4665,6 +4733,7 @@ const vector<Intrinsic> intrinsics{
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildArray(), &Magic_buildArray},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildRange(), &Magic_buildRange},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::expandSplat(), &Magic_expandSplat},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::elementOrNil(), &Magic_elementOrNil},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplat(), &Magic_callWithSplat},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithBlockPass(), &Magic_callWithBlockPass},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplatAndBlockPass(),

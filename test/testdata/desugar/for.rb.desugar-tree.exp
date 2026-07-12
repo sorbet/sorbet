@@ -25,11 +25,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       begin
         begin
           forTemp$2 = <emptyTree>::<C A>
-          if ::T.unsafe(nil)
-            a = forTemp$2.first()
-          else
-            <emptyTree>
-          end
+          a = ::<Magic>.<element-or-nil>(forTemp$2)
           forTemp$2.each() do |a|
             <self>.puts(a.inspect())
           end
@@ -47,16 +43,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         end
         begin
           forTemp$5 = <emptyTree>::<C A>
-          if ::T.unsafe(nil)
-            begin
-              <assignTemp>$6 = forTemp$5.first()
-              <assignTemp>$7 = ::<Magic>.<expand-splat>(<assignTemp>$6, 2, 0)
-              a = <assignTemp>$7.[](0)
-              b = <assignTemp>$7.[](1)
-              <assignTemp>$6
-            end
-          else
-            <emptyTree>
+          begin
+            <assignTemp>$6 = ::<Magic>.<element-or-nil>(forTemp$5)
+            <assignTemp>$7 = ::<Magic>.<expand-splat>(<assignTemp>$6, 2, 0)
+            a = <assignTemp>$7.[](0)
+            b = <assignTemp>$7.[](1)
+            <assignTemp>$6
           end
           forTemp$5.each() do |a, b|
             begin

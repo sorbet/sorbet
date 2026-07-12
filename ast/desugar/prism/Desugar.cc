@@ -2524,21 +2524,33 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
             }
 
             ExpressionPtr block; // the body to the `each` loop we'll create
+
+            // In Ruby, `for` loops don't define a new scope (the way a block passed to `each` would),
+            // so the loop variable(s) continue to exist after the end of the loop, holding `nil` if the
+            // collection was empty. Because the block parameters in the desugared `each` call are
+            // block-local, we additionally seed the loop variable(s) in the enclosing scope from
+            // `<Magic>.<element-or-nil>(<collection>)`, so that their post-loop type is
+            // `T.nilable(<element type>)` instead of `NilClass`.
+            // See https://github.com/sorbet/sorbet/issues/10265
             if (canProvideNiceDesugar) {
                 ast::MethodDef::PARAMS_store params;
                 if (isa_node<pm_local_variable_target_node>(forLoopVar)) { // single local
                     // Desugar:
-                    //     for a in []
+                    //     for a in <coll>
                     // into:
-                    //     [].each { |a| ... }
+                    //     <forTemp>$1 = <coll>
+                    //     a = ::<Magic>.<element-or-nil>(<forTemp>$1)
+                    //     <forTemp>$1.each { |a| ... }
 
                     auto localVar = desugar(forLoopVar);
                     params.emplace_back(move(localVar));
                 } else if (auto *mlhs = down_cast<pm_multi_target_node>(forLoopVar)) { // mlhs of all locals
                     // Desugar:
-                    //     for a, b, c in []
+                    //     for a, b, c in <coll>
                     // into:
-                    //     [].each { |a, b, c| ... }
+                    //     <forTemp>$1 = <coll>
+                    //     a, b, c = ::<Magic>.<element-or-nil>(<forTemp>$1)
+                    //     <forTemp>$1.each { |a, b, c| ... }
                     auto targets = absl::MakeSpan(mlhs->lefts.nodes, mlhs->lefts.size);
                     for (auto *target : targets) {
                         ENFORCE(isa_node<pm_local_variable_target_node>(target));
@@ -2614,6 +2626,36 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
             }
 
             auto locZeroLen = location.copyWithZeroLength();
+
+            if (canProvideNiceDesugar) {
+                // Evaluate the collection expression once, into a temporary, so that we can
+                // reference it both to seed the loop variable(s) and to call `each` on it.
+                core::NameRef collectionTempName = nextUniqueDesugarName(core::Names::forTemp());
+                auto collectionAssign =
+                    MK::Assign(location, MK::Local(location, collectionTempName), desugar(forNode->collection));
+
+                // `<Magic>.<element-or-nil>(<forTemp>$1)` types as `T.nilable(<element type>)`, or
+                // `T.untyped` if the collection doesn't respond to `first` (Ruby's `for` only
+                // requires `each`, so a missing `first` must not be an error).
+                auto seedRhs = MK::Send1(location, MK::Magic(locZeroLen), core::Names::elementOrNil(), locZeroLen,
+                                         MK::Local(location, collectionTempName));
+
+                ExpressionPtr seedAssign;
+                if (auto *mlhs = down_cast<pm_multi_target_node>(forLoopVar)) {
+                    seedAssign = desugarMlhs(location, mlhs, move(seedRhs));
+                } else {
+                    seedAssign = MK::Assign(location, desugar(forLoopVar), move(seedRhs));
+                }
+
+                auto eachSend = MK::Send0Block(location, MK::Local(location, collectionTempName), core::Names::each(),
+                                               locZeroLen, move(block));
+
+                ast::InsSeq::STATS_store stats;
+                stats.emplace_back(move(collectionAssign));
+                stats.emplace_back(move(seedAssign));
+                return MK::InsSeq(location, move(stats), move(eachSend));
+            }
+
             return MK::Send0Block(location, desugar(forNode->collection), core::Names::each(), locZeroLen, move(block));
         }
         case PM_FORWARDING_ARGUMENTS_NODE: { // The `...` argument in a method call, like `foo(...)`

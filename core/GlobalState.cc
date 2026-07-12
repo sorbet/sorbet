@@ -750,6 +750,11 @@ void GlobalState::initEmpty() {
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::nilForSafeNavigation())
                  .untypedArg(Names::arg0())
                  .buildWithResult(Types::nilClass());
+    // Synthesize <Magic>.<element-or-nil>(recv: T.untyped) => T.untyped
+    // Used when desugaring `for` loops to give the loop variable its post-loop type.
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::elementOrNil())
+                 .untypedArg(Names::arg0())
+                 .buildWithResultUntyped();
     // Synthesize <Magic>.<string-interpolate>(arg: *T.untyped) => String
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::stringInterpolate())
                  .repeatedUntypedArg(Names::arg0())
