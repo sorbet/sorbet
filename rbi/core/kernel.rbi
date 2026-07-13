@@ -835,7 +835,7 @@ module Kernel
         digits: Integer,
         exception: T::Boolean
     )
-    .returns(BigDecimal)
+    .returns(T.nilable(BigDecimal))
   end
   def BigDecimal(initial, digits=0, exception: true); end
   ### As of 2.6, all these numeric conversion methods *can* return `nil` iff given the kwarg `exception: false`, which
@@ -885,7 +885,7 @@ module Kernel
         y: T.any(Numeric, String),
         exception: T::Boolean
     )
-    .returns(Complex)
+    .returns(T.nilable(Complex))
   end
   def Complex(x, y=T.unsafe(nil), exception: false); end
   ### As of 2.6, all these numeric conversion methods *can* return `nil` iff given the kwarg `exception: false`, which
@@ -917,7 +917,7 @@ module Kernel
         x: T.any(Numeric, String),
         exception: T::Boolean
     )
-    .returns(Float)
+    .returns(T.nilable(Float))
   end
   def Float(x, exception: true); end
   ### As of 2.6, all these numeric conversion methods *can* return `nil` iff given the kwarg `exception: false`, which
@@ -984,7 +984,7 @@ module Kernel
         base: Integer,
         exception: T::Boolean
     )
-    .returns(Integer)
+    .returns(T.nilable(Integer))
   end
   def Integer(arg, base=T.unsafe(nil), exception: true); end
   ### As of 2.6, all these numeric conversion methods *can* return `nil` iff given the kwarg `exception: false`, which
@@ -1035,7 +1035,7 @@ module Kernel
         y: T.any(Numeric, String),
         exception: T::Boolean
     )
-    .returns(Rational)
+    .returns(T.nilable(Rational))
   end
   def Rational(x, y=T.unsafe(nil), exception: true); end
   ### As of 2.6, all these numeric conversion methods *can* return `nil` iff given the kwarg `exception: false`, which
