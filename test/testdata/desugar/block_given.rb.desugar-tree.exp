@@ -32,7 +32,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  def method_with_anonymous_block_param<<todo method>>(&&)
+  def method_with_anonymous_block_param<<todo method>>(&<&>)
     begin
       if &
         <self>.block_given?()

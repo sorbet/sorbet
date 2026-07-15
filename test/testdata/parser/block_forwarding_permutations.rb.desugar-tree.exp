@@ -7,7 +7,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     ::<Magic>.<call-with-block-pass>(<self>, :bar, block)
   end
 
-  def case3_anonymous_block_param<<todo method>>(&&)
+  def case3_anonymous_block_param<<todo method>>(&<&>)
     ::<Magic>.<call-with-block-pass>(<self>, :bar, &)
   end
 
@@ -33,7 +33,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  def case8_anonymous_block_pass_and_literal<<todo method>>(&&)
+  def case8_anonymous_block_pass_and_literal<<todo method>>(&<&>)
     ::<Magic>.<call-with-block-pass>(<self>, :foo, &) do ||
       "literal block"
     end

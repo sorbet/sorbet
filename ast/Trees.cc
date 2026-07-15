@@ -1294,11 +1294,31 @@ string Block::showRaw(const core::GlobalState &gs, int tabs) const {
     return fmt::to_string(buf);
 }
 
+namespace {
+core::NameRef extractIdentName(const ExpressionPtr &expr) {
+    if (auto unresolvedIdent = cast_tree<UnresolvedIdent>(expr)) {
+        return unresolvedIdent->name;
+    } else {
+        return core::NameRef::noName();
+    }
+}
+} // namespace
+
 string RestParam::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     if (auto kwargSplat = cast_tree<KeywordArg>(this->expr)) { // Handle keyword arg splat, like `def foo(**kwargs)`
-        return "**" + kwargSplat->expr.toStringWithTabs(gs, tabs);
+        auto name = extractIdentName(kwargSplat->expr);
+        if (name == core::Names::starStar()) {
+            return "**<**>";
+        } else {
+            return "**" + kwargSplat->expr.toStringWithTabs(gs, tabs);
+        }
     } else { // Handle rest arg splat, like `def foo(*args)`
-        return "*" + this->expr.toStringWithTabs(gs, tabs);
+        auto name = extractIdentName(this->expr);
+        if (name == core::Names::star()) {
+            return "*<*>";
+        } else {
+            return "*" + this->expr.toStringWithTabs(gs, tabs);
+        }
     }
 }
 
@@ -1320,7 +1340,11 @@ string ShadowArg::toStringWithTabs(const core::GlobalState &gs, int tabs) const 
 }
 
 string BlockParam::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
-    return "&" + this->expr.toStringWithTabs(gs, tabs);
+    if (extractIdentName(this->expr) == core::Names::ampersand()) { // Anonymous block param, like `def foo(&)`
+        return "&<&>";
+    } else {
+        return "&" + this->expr.toStringWithTabs(gs, tabs);
+    }
 }
 
 string_view RescueCase::nodeName() const {
