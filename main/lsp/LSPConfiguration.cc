@@ -142,7 +142,9 @@ string LSPConfiguration::localName2Remote(string_view filePath) const {
     ENFORCE(absl::StartsWith(filePath, rootPath));
     assertHasClientConfig();
     string_view relativeUri = filePath.substr(rootPath.length());
-    if (relativeUri.at(0) == '/') {
+    // relativeUri is empty when filePath == rootPath (e.g. rootPath is ""); guard against
+    // indexing into an empty string_view before stripping a leading slash.
+    if (absl::StartsWith(relativeUri, "/")) {
         relativeUri = relativeUri.substr(1);
     }
 
