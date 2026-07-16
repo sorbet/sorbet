@@ -72,6 +72,7 @@ compilation_database(
         "//main/lsp:generate_lsp_messages",
         "//main/lsp:generate_lsp_messages_test",
         "//main/lsp:lsp",
+        "//main/lsp:lsp_configuration_test",
         "//main/lsp:lsp_file_updates_test",
         "//main/lsp:lsp_preprocessor_test",
         "//main/lsp:lsp_test",
