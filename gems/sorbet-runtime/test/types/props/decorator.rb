@@ -116,7 +116,7 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
     end
 
     it 'Validates you pass a type' do
-      assert_prop_error(/Invalid String literal for type constraint.*Got a String with value `goat`/, error: RuntimeError) do
+      assert_prop_error(/Invalid String literal for type constraint.*Got a String with value `goat`/, error: T::Types::CoercionError) do
         prop :foo, "goat"
       end
     end
