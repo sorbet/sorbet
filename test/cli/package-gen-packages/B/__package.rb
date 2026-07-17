@@ -8,4 +8,5 @@ class B < PackageSpec
 
   visible_to A
   visible_to G
+  visible_to PackageWithNoImportsExports
 end
