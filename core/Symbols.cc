@@ -729,6 +729,14 @@ SymbolRef ClassOrModule::findParentMemberTransitiveInternal(const GlobalState &g
     } else {
         for (auto it = this->mixins().rbegin(), end = this->mixins().rend(); it != end; ++it) {
             ENFORCE(it->exists());
+
+            // If at any point in the mixin chain, we hit a placeholder for an unresolved module or a module alias,
+            // we can't continue the search.
+            // This might be "hiding" resolution to a module that redeclares the member in question.
+            if (*it == core::Symbols::PlaceholderMixin()) {
+                break;
+            }
+
             result = it->data(gs)->findMemberTransitiveInternal(gs, name, maxDepth - 1, dealias);
             if (result.exists()) {
                 return result;
