@@ -52,6 +52,7 @@ public:
         TypeMembers::run(ctx, classDef);
         Concern::run(ctx, classDef);
         TestCase::run(ctx, classDef);
+        Minitest::runOnClassDef(ctx, classDef);
 
         PackageSpec::run(ctx, classDef);
 
