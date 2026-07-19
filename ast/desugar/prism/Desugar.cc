@@ -2630,9 +2630,11 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
             if (canProvideNiceDesugar) {
                 // Evaluate the collection expression once, into a temporary, so that we can
                 // reference it both to seed the loop variable(s) and to call `each` on it.
+                // The synthesized lhs gets a zero-length loc so that tooling (e.g. extract to
+                // variable) doesn't attribute the whole `for` loop to it.
                 core::NameRef collectionTempName = nextUniqueDesugarName(core::Names::forTemp());
                 auto collectionAssign =
-                    MK::Assign(location, MK::Local(location, collectionTempName), desugar(forNode->collection));
+                    MK::Assign(location, MK::Local(locZeroLen, collectionTempName), desugar(forNode->collection));
 
                 // `<Magic>.<element-or-nil>(<forTemp>$1)` types as `T.nilable(<element type>)`, or
                 // `T.untyped` if the collection doesn't respond to `first` (Ruby's `for` only
@@ -2642,7 +2644,7 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
 
                 ExpressionPtr seedAssign;
                 if (auto *mlhs = down_cast<pm_multi_target_node>(forLoopVar)) {
-                    seedAssign = desugarMlhs(location, mlhs, move(seedRhs));
+                    seedAssign = desugarMlhs(locZeroLen, mlhs, move(seedRhs));
                 } else {
                     seedAssign = MK::Assign(location, desugar(forLoopVar), move(seedRhs));
                 }

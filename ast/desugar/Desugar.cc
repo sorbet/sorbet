@@ -1902,9 +1902,11 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
 
                     // Evaluate the collection expression once, into a temporary, so that we can
                     // reference it both to seed the loop variable(s) and to call `each` on it.
+                    // The synthesized lhs gets a zero-length loc so that tooling (e.g. extract to
+                    // variable) doesn't attribute the whole `for` loop to it.
                     core::NameRef collectionTempName = dctx.freshNameUnique(core::Names::forTemp());
                     auto collectionAssign =
-                        MK::Assign(loc, MK::Local(loc, collectionTempName), node2TreeImpl(dctx, for_->expr));
+                        MK::Assign(loc, MK::Local(locZeroLen, collectionTempName), node2TreeImpl(dctx, for_->expr));
 
                     // `<Magic>.<element-or-nil>(<forTemp>$1)` types as `T.nilable(<element type>)`, or
                     // `T.untyped` if the collection doesn't respond to `first` (Ruby's `for` only
@@ -1914,7 +1916,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
 
                     ExpressionPtr seedAssign;
                     if (auto *mlhs = parser::cast_node<parser::Mlhs>(seedLhs.get())) {
-                        seedAssign = desugarMlhs(dctx, loc, mlhs, move(seedRhs));
+                        seedAssign = desugarMlhs(dctx, locZeroLen, mlhs, move(seedRhs));
                     } else {
                         seedAssign = MK::Assign(loc, node2TreeImpl(dctx, seedLhs), move(seedRhs));
                     }
