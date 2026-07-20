@@ -234,31 +234,16 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
   end
 
   describe 'error message' do
-    it 'is only soft-assert by default for prop deserialize error' do
-      msg_string = nil
-      extra_hash = nil
-      T::Configuration.soft_assert_handler = proc do |msg, extra|
-        msg_string = msg
-        extra_hash = extra
+    it 'raises NoMethodError for prop deserialize error' do
+      e = assert_raises(NoMethodError) do
+        MySerializable.from_hash({'foo' => "Won't respond like hash"})
       end
 
-      result = MySerializable.from_hash({'foo' => "Won't respond like hash"})
-      assert_equal("Won't respond like hash", result.foo)
-
-      refute_nil(msg_string)
-      refute_nil(extra_hash)
-      storytime = extra_hash[:storytime]
-      assert_equal(MySerializable, storytime[:klass])
-      assert_equal(:foo, storytime[:prop])
-      assert_equal("Won't respond like hash", storytime[:value])
+      assert_includes(e.message.tr("`", "'"), "undefined method 'transform_values'")
     end
 
     it 'includes relevant generated code on deserialize when we raise' do
-      T::Configuration.soft_assert_handler = proc do |msg, extra|
-        raise "#{msg} #{extra.inspect}"
-      end
-
-      e = assert_raises(RuntimeError) do
+      e = assert_raises(NoMethodError) do
         MySerializable.from_hash({'foo' => "Won't respond like hash"})
       end
 
@@ -784,24 +769,11 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
 
     it 'raises deserialize errors when props with an array of a custom subtype store the wrong datatype' do
-      msg_string = nil
-      extra_hash = nil
-      T::Configuration.soft_assert_handler = proc do |msg, extra|
-        msg_string = msg
-        extra_hash = extra
+      e = assert_raises(NoMethodError) do
+        CustomTypeStruct.from_hash({'array' => CustomType.new})
       end
 
-      obj = CustomType.new
-      result = CustomTypeStruct.from_hash({'array' => obj})
-      assert_equal(obj, result.array)
-
-      refute_nil(msg_string)
-      refute_nil(extra_hash)
-      storytime = extra_hash[:storytime]
-      assert_equal(CustomTypeStruct, storytime[:klass])
-      assert_equal(:array, storytime[:prop])
-      assert_equal(obj, storytime[:value])
-      assert_includes(storytime[:error].tr("`", "'"), "undefined method 'map'")
+      assert_includes(e.message.tr("`", "'"), "undefined method 'map'")
     end
 
     it 'round trips as hash key' do
@@ -820,24 +792,11 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
 
     it 'raises deserialize errors when props with a hash with keys of a custom subtype store the wrong datatype' do
-      msg_string = nil
-      extra_hash = nil
-      T::Configuration.soft_assert_handler = proc do |msg, extra|
-        msg_string = msg
-        extra_hash = extra
+      e = assert_raises(NoMethodError) do
+        CustomTypeStruct.from_hash({'hash_key' => 'not a hash'})
       end
 
-      obj = 'not a hash'
-      result = CustomTypeStruct.from_hash({'hash_key' => obj})
-      assert_equal('not a hash', result.hash_key)
-
-      refute_nil(msg_string)
-      refute_nil(extra_hash)
-      storytime = extra_hash[:storytime]
-      assert_equal(CustomTypeStruct, storytime[:klass])
-      assert_equal(:hash_key, storytime[:prop])
-      assert_equal(obj, storytime[:value])
-      assert_includes(storytime[:error].tr("`", "'"), "undefined method 'transform_keys'")
+      assert_includes(e.message.tr("`", "'"), "undefined method 'transform_keys'")
     end
 
     it 'round trips as hash value' do
@@ -856,24 +815,11 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
 
     it 'raises deserialize errors when props with a hash with values of a custom subtype store the wrong datatype' do
-      msg_string = nil
-      extra_hash = nil
-      T::Configuration.soft_assert_handler = proc do |msg, extra|
-        msg_string = msg
-        extra_hash = extra
+      e = assert_raises(NoMethodError) do
+        CustomTypeStruct.from_hash({'hash_value' => 'not a hash'})
       end
 
-      obj = 'not a hash'
-      result = CustomTypeStruct.from_hash({'hash_value' => obj})
-      assert_equal('not a hash', result.hash_value)
-
-      refute_nil(msg_string)
-      refute_nil(extra_hash)
-      storytime = extra_hash[:storytime]
-      assert_equal(CustomTypeStruct, storytime[:klass])
-      assert_equal(:hash_value, storytime[:prop])
-      assert_equal(obj, storytime[:value])
-      assert_includes(storytime[:error].tr("`", "'"), "undefined method 'transform_values'")
+      assert_includes(e.message.tr("`", "'"), "undefined method 'transform_values'")
     end
 
     it 'round trips as hash key and value' do
@@ -892,24 +838,11 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
 
     it 'raises deserialize errors when props with a hash with keys/values of a custom subtype store the wrong datatype' do
-      msg_string = nil
-      extra_hash = nil
-      T::Configuration.soft_assert_handler = proc do |msg, extra|
-        msg_string = msg
-        extra_hash = extra
+      e = assert_raises(NoMethodError) do
+        CustomTypeStruct.from_hash({'hash_both' => 'not a hash'})
       end
 
-      obj = 'not a hash'
-      result = CustomTypeStruct.from_hash({'hash_both' => obj})
-      assert_equal('not a hash', result.hash_both)
-
-      refute_nil(msg_string)
-      refute_nil(extra_hash)
-      storytime = extra_hash[:storytime]
-      assert_equal(CustomTypeStruct, storytime[:klass])
-      assert_equal(:hash_both, storytime[:prop])
-      assert_equal(obj, storytime[:value])
-      assert_includes(storytime[:error].tr("`", "'"), "undefined method 'each_with_object'")
+      assert_includes(e.message.tr("`", "'"), "undefined method 'each_with_object'")
     end
   end
 
@@ -984,13 +917,6 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
 
     it 'raises deserialize errors' do
-      msg_string = nil
-      extra_hash = nil
-      T::Configuration.soft_assert_handler = proc do |msg, extra|
-        msg_string = msg
-        extra_hash = extra
-      end
-
       obj = CustomType.new
       e = assert_raises(TypeError) do
         CustomSetPropStruct.from_hash({'set' => obj})

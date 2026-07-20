@@ -52,26 +52,7 @@ module T::Props
             SerdeTransform::Mode::DESERIALIZE,
             'val'
           )
-          transformed_val = if transformation
-            # Rescuing exactly NoMethodError is intended as a temporary hack
-            # to preserve the semantics from before codegen. More generally
-            # we are inconsistent about typechecking on deser and need to decide
-            # our strategy here.
-            <<~RUBY
-              begin
-                #{transformation}
-              rescue NoMethodError => e
-                raise_deserialization_error(
-                  #{prop.inspect},
-                  val,
-                  e,
-                )
-                val
-              end
-            RUBY
-          else
-            'val'
-          end
+          transformed_val = transformation || 'val'
 
           nil_handler = generate_nil_handler(
             prop: prop,
