@@ -300,7 +300,10 @@ puts(A) <span class="hljs-comment"># =&gt; in Ruby: ❌ NameError</span>
 <p>Sorbet does not track <code>require</code>, <code>require_relative</code>, or <code>autoload</code> declarations.</p>
 <p>This means that Sorbet does not report errors for these errors or warnings from the Ruby VM:</p>
 <ul>
-<li>Accessing constants that are defined somewhere in the project but haven’t been loaded yet when the code runs.</li>
+<li>Accessing constants that are defined somewhere in the project but haven’t been loaded yet when the code runs.
+<ul>
+<li>This includes constants that appear to resolve statically, but which rely on an assumption that all <code>include</code> and <code>extend</code> lines will have run by the time a constant is accessed.</li>
+</ul></li>
 <li>Reassigning a constant (<code>X = 1; X = 2</code>), which are warnings in the Ruby VM, so long as the declared type of the constant is the same in both definitions.</li>
 <li>Redefining a method (<code>def f; end; def f; end</code>), so long as the arity of the method is the same in both definitions</li>
 <li>Accessing an instance variable before it’s been initialized.</li>
