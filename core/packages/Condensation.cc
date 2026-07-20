@@ -6,13 +6,6 @@ using namespace std;
 
 namespace sorbet::core::packages {
 
-Condensation::Node &Condensation::pushNode(ImportType type, bool isPrelude) {
-    auto id = this->nodes_.size();
-    auto isTest = type != ImportType::Normal;
-    auto &node = this->nodes_.emplace_back(id, isTest, isPrelude);
-    return node;
-}
-
 namespace {
 
 struct TraversalBuilder {
@@ -185,6 +178,17 @@ Condensation::Traversal::buildStratumMapping(const core::GlobalState &gs) const 
     }
 
     return result;
+}
+
+Condensation::Node &CondensationBuilder::pushNode(ImportType type, bool isPrelude) {
+    auto id = this->condensation.nodes_.size();
+    auto isTest = type != ImportType::Normal;
+    auto &node = this->condensation.nodes_.emplace_back(id, isTest, isPrelude);
+    return node;
+}
+
+Condensation CondensationBuilder::build() {
+    return move(this->condensation);
 }
 
 } // namespace sorbet::core::packages
