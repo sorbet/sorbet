@@ -47,10 +47,11 @@ public:
     std::string toString(const GlobalState &gs) const;
     std::string show(const GlobalState &gs) const;
     std::string_view parameterName(const GlobalState &gs) const;
-    ParamInfo(const ParamInfo &) = delete;
-    ParamInfo() = default;
+    ParamInfo() noexcept = default;
     ParamInfo(ParamInfo &&) noexcept = default;
     ParamInfo &operator=(ParamInfo &&) noexcept = default;
+    ParamInfo(const ParamInfo &) = delete;
+    ParamInfo &operator=(const ParamInfo &) = delete;
     ParamInfo deepCopy() const;
 };
 CheckSize(ParamInfo, 32, 8);
