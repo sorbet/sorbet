@@ -84,6 +84,7 @@ public:
 
     void removeReferencesToVar(cfg::LocalRef ref);
 };
+CheckSize(KnowledgeRef, 16, 8);
 
 /** Almost a named pair of two KnowledgeFact-s. One holds knowledge that is true when a variable is falsy,
  * the other holds knowledge which is true if the same variable is falsy->
@@ -123,6 +124,7 @@ public:
     void sanityCheck() const;
     void emitKnowledgeSizeMetric() const;
 };
+CheckSize(TestedKnowledge, 40, 8);
 
 class Environment {
     const core::TypeAndOrigins uninitialized;
