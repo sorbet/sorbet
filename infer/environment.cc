@@ -76,6 +76,7 @@ struct KnowledgeFact {
 
     string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
 };
+CheckSize(KnowledgeFact, 56, 8);
 
 KnowledgeFilter::KnowledgeFilter(core::Context ctx, cfg::CFG &cfg) {
     used_vars.resize(cfg.numLocalVariables());
