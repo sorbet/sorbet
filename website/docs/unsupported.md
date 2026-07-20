@@ -326,6 +326,7 @@ Sorbet does not track `require`, `require_relative`, or `autoload` declarations.
 This means that Sorbet does not report errors for these errors or warnings from the Ruby VM:
 
 - Accessing constants that are defined somewhere in the project but haven't been loaded yet when the code runs.
+  - This includes constants that appear to resolve statically, but which rely on an assumption that all `include` and `extend` lines will have run by the time a constant is accessed.
 - Reassigning a constant (`X = 1; X = 2`), which are warnings in the Ruby VM, so long as the declared type of the constant is the same in both definitions.
 - Redefining a method (`def f; end; def f; end`), so long as the arity of the method is the same in both definitions
 - Accessing an instance variable before it's been initialized.
