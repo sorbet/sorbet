@@ -1,7 +1,9 @@
 # typed: strict
 
 class Test::T2 < PackageSpec
-  strict_dependencies 'layered'
+  test!
+
+  strict_dependencies 'false'
   layer 'application'
 
   test_import Test::T1

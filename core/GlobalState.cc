@@ -1190,8 +1190,8 @@ ClassOrModuleRef GlobalState::enterClassOrModuleSymbol(Loc loc, ClassOrModuleRef
         return ret;
     }
 
-    if (owner == Symbols::root() &&
-        (!this->packageDB().testPackages() && name == packages::PackageDB::TEST_NAMESPACE)) {
+    // TODO(trevor) remove this once we've fully migrated to test-packages
+    if (owner == Symbols::root() && name == packages::PackageDB::TEST_NAMESPACE) {
         // Leave packageRegistryOwner as `<PackageSpecRegistry>` (essentially, skip over `Test` when
         // searching for package names). Leave `package` as the non-existent package name.
         return ret;

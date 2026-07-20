@@ -193,7 +193,7 @@ class PropagateVisibility final {
         auto nonTestScope = getScopeForPackage(gs, parts, core::Symbols::root());
         auto testNamespace = core::Symbols::root().data(gs)->findMember(gs, core::packages::PackageDB::TEST_NAMESPACE);
         core::ClassOrModuleRef testScope;
-        if (!gs.packageDB().testPackages() && testNamespace.exists() && testNamespace.isClassOrModule()) {
+        if (!this->package.usesTestPackages && testNamespace.exists() && testNamespace.isClassOrModule()) {
             testScope = getScopeForPackage(gs, parts, testNamespace.asClassOrModuleRef());
         }
 
@@ -624,7 +624,7 @@ public:
         }
         auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
 
-        if (db.testPackages()) {
+        if (this->package.usesTestPackages) {
             if (pkg.testPackage() && !this->package.testPackage()) {
                 if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::TestImportMismatch)) {
                     e.setHeader("Package `{}` may not reference `{}` packages", this->package.show(ctx), "test!");
@@ -645,7 +645,7 @@ public:
             !litSymbol.isClassOrModule() || litSymbol.asClassOrModuleRef().data(ctx)->flags.isBehaviorDefining;
         auto *import = this->package.importsPackage(otherPackage);
         auto wasImported = import != nullptr;
-        if (db.testPackages()) {
+        if (this->package.usesTestPackages) {
             isExported = isExported || (wasImported && import->usesInternals);
             if (wasImported) {
                 ENFORCE(import->type == core::packages::ImportType::Normal,
@@ -664,7 +664,7 @@ public:
 
         if (importNeeded || !isExported) {
             bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || this->fileType != FileType::ProdFile;
-            if (db.testPackages()) {
+            if (this->package.usesTestPackages) {
                 isTestImport = false;
             }
             core::packages::ImportType autocorrectedImportType = core::packages::ImportType::Normal;
@@ -734,7 +734,7 @@ public:
                         addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
                     }
                 } else if (!isExported && testImportInProd) {
-                    ENFORCE(!db.testPackages(), "test_import found in --test-packages mode");
+                    ENFORCE(!this->package.usesTestPackages, "test_import found in --test-packages mode");
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
                         e.setHeader("`{}` resolves but is not exported from `{}` and `{}` is `{}`ed",
                                     litSymbol.show(ctx), pkg.show(ctx), pkg.show(ctx), "test_import");
@@ -742,7 +742,7 @@ public:
                         addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
                     }
                 } else if (!isExported && testUnitImportInHelper) {
-                    ENFORCE(!db.testPackages(), "test_import found in --test-packages mode");
+                    ENFORCE(!this->package.usesTestPackages, "test_import found in --test-packages mode");
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
                         e.setHeader("`{}` resolves but is not exported from `{}` and `{}` is `{}`ed for only {} files",
                                     litSymbol.show(ctx), pkg.show(ctx), pkg.show(ctx), "test_import", ".test.rb");
@@ -767,14 +767,14 @@ public:
                     }
                 } else if (testImportInProd) {
                     ENFORCE(!isTestImport);
-                    ENFORCE(!db.testPackages(), "test_import found in --test-packages mode");
+                    ENFORCE(!this->package.usesTestPackages, "test_import found in --test-packages mode");
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
                         e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", litSymbol.show(ctx));
                         e.addErrorLine(pkg.declLoc(), "Defined here");
                         addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
                     }
                 } else if (testUnitImportInHelper) {
-                    ENFORCE(!db.testPackages(), "test_import found in --test-packages mode");
+                    ENFORCE(!this->package.usesTestPackages, "test_import found in --test-packages mode");
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
                         e.setHeader("The `{}` constant `{}` can only be used in `{}` files", "test_import",
                                     litSymbol.show(ctx), ".test.rb");

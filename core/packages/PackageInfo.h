@@ -184,6 +184,10 @@ public:
 
     MangledName mangledName_;
 
+    // Whether this package has been migrated either to a `test!` package, or to have a `test!` package instead of a
+    // test namespace.
+    bool usesTestPackages = false;
+
     // Whether `visible_to` directives should be ignored for test code
     bool visibleToTests_ = false;
 
@@ -330,7 +334,7 @@ public:
     // imported `other` with `uses_internals: true`.
     bool canAccessInternalsOf(bool testPackages, MangledName other) const;
 
-    static core::packages::ImportType fileToImportType(const core::GlobalState &gs, core::FileRef file);
+    core::packages::ImportType fileToImportType(const core::GlobalState &gs, core::FileRef file) const;
 
     // Track that `file` references the packages in `references`, along with some metadata about each reference
     void trackPackageReferences(const core::FileRef file,
