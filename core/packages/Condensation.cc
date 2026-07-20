@@ -11,7 +11,6 @@ namespace {
 struct TraversalBuilder {
     absl::Span<const Condensation::Node> nodes;
     vector<uint32_t> remainingImports;
-    vector<vector<uint32_t>> backEdges;
 
     vector<uint32_t> sccLengths;
     vector<uint32_t> stratumLengths;
@@ -19,7 +18,7 @@ struct TraversalBuilder {
     Condensation::Traversal result;
 
     TraversalBuilder(const core::GlobalState &gs, absl::Span<const Condensation::Node> nodes)
-        : nodes{nodes}, remainingImports(this->nodes.size(), 0), backEdges(this->nodes.size()) {
+        : nodes{nodes}, remainingImports(this->nodes.size(), 0) {
         result.packages.reserve(gs.packageDB().packages().size());
     }
 
@@ -38,14 +37,13 @@ struct TraversalBuilder {
         // Seed the needed imports for the traversal from the roots.
         for (auto &node : this->nodes) {
             // Prelude packages behave a little differently from normal packages: we put them all into the first stratum
-            // regardless of their imports. This has interesting effects on the `remainingImports` and `backEdges`
-            // vectors that we track in the builder:
+            // regardless of their imports. This has interesting effects on the `remainingImports` we track in the
+            // builder, and how we use the `backEdges` of the condensation graph:
             // 1. `remainingImports` must be set to `0` to indicate that all imports have been satisfied. This is true,
             //    as all prelude packages will be processed in the same stratum.
-            // 2. `backEdges` must not be populated for the imports of prelude packages. As prelude packages may only
-            //    import other prelude packages populating `backEdges` would cause prelude packages to be queued into
-            //    the next stratum. Skipping the imports of prelude packages when we're populating `backEdges` ensures
-            //    that we don't accidentally requeue a prelude package for a future stratum.
+            // 2. `backEdges` must be filtered for prelude packages to ignore any other packages present in the prelude
+            //    subgraph. We do this during `recordStratum` for the prelude layer only, skipping any back edges to
+            //    other prelude packages.
             if (node.isPrelude) {
                 // We collect all prelude nodes here, as they will all show up in the first stratum if there are any.
                 result.prelude.emplace_back(node.id);
@@ -56,19 +54,20 @@ struct TraversalBuilder {
                 if (numImports == 0) {
                     result.roots.emplace_back(node.id);
                 }
-
-                for (auto imp : node.imports) {
-                    this->backEdges[imp].push_back(node.id);
-                }
             }
         }
 
         return result;
     }
 
+    enum class IsPrelude {
+        True,
+        False,
+    };
+
     // Record a single stratum by processing each SCC id, marking the imports of those ids as satisfied. If any
     // dependent package no longer has any outstanding imports, its id will be added to `next`.
-    void recordStratum(absl::Span<const uint32_t> stratum, vector<uint32_t> &next) {
+    template <IsPrelude PreludeStratum> void recordStratum(absl::Span<const uint32_t> stratum, vector<uint32_t> &next) {
         stratumLengths.emplace_back(stratum.size());
         ENFORCE(!stratum.empty());
 
@@ -84,8 +83,15 @@ struct TraversalBuilder {
             this->sccLengths.emplace_back(node.members.size());
 
             // Queue up the dependents in the next frontier, decrementing their imports by one
-            for (auto dep : this->backEdges[sccId]) {
+            for (auto dep : this->nodes[sccId].backEdges) {
                 auto &remaining = this->remainingImports[dep];
+
+                // Prelude packages are processed all in one go, so we ignore any dependencies within that subgraph.
+                if constexpr (PreludeStratum == IsPrelude::True) {
+                    if (this->nodes[dep].isPrelude) {
+                        continue;
+                    }
+                }
 
                 // Having a `remaining` value of <= 0 at this point implies that the scc should have been in this or a
                 // previous stratum already. This would only be possible if there were a cycle in the condensation
@@ -137,7 +143,7 @@ const Condensation::Traversal Condensation::computeTraversal(const core::GlobalS
     if (!prelude.empty()) {
         // Record a single stratum for all prelude SCCs, emitting any packages whose imports were satisfied by the
         // prelude set to the roots.
-        builder.recordStratum(prelude, roots);
+        builder.recordStratum<TraversalBuilder::IsPrelude::True>(prelude, roots);
     }
 
     // Insert the non-prelude SCCs that are ready but were skipped into the frontier, so that we process all of the
@@ -146,7 +152,7 @@ const Condensation::Traversal Condensation::computeTraversal(const core::GlobalS
     while (!roots.empty()) {
         next.clear();
 
-        builder.recordStratum(roots, next);
+        builder.recordStratum<TraversalBuilder::IsPrelude::False>(roots, next);
 
         // The content of `next` isn't important at this point, and it will be cleared on the next iteration of the
         // loop. Morally this is `roots = next`, but we swap and clear instead to avoid any ambiguity about
@@ -188,6 +194,13 @@ Condensation::Node &CondensationBuilder::pushNode(ImportType type, bool isPrelud
 }
 
 Condensation CondensationBuilder::build() {
+    // Now that we're finalizing the condensation graph, build the back edges for each node.
+    for (auto &node : this->condensation.nodes_) {
+        for (auto imp : node.imports) {
+            this->condensation.nodes_[imp].backEdges.push_back(node.id);
+        }
+    }
+
     return move(this->condensation);
 }
 

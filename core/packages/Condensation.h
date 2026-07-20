@@ -27,6 +27,9 @@ public:
         // The SCC IDs of the packages this SCC depends on.
         UnorderedSet<int> imports;
 
+        // The SCC IDs of the packages that depend on this SCC.
+        std::vector<int> backEdges;
+
         // The SCC ID of this node.
         const int id = 0;
 
