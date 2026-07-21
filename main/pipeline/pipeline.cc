@@ -111,7 +111,7 @@ void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) 
             opts.extraPackageFilesDirectoryUnderscorePrefixes, opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
             opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
             opts.allowRelaxedPackagerChecksFor, opts.updateVisibilityFor, opts.packagerLayers, opts.sorbetPackagesHint,
-            opts.genPackagesMode, opts.allowRelaxingTestVisibility, opts.packageAttributedErrors, opts.testPackages);
+            opts.genPackagesMode, opts.allowRelaxingTestVisibility, opts.packageAttributedErrors);
     }
 #endif
 }
@@ -128,8 +128,7 @@ unique_ptr<core::GlobalState> copyForSlowPath(const core::GlobalState &from, con
         opts.extraPackageFilesDirectoryUnderscorePrefixes, opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
         opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
         opts.allowRelaxedPackagerChecksFor, opts.updateVisibilityFor, opts.packagerLayers, opts.sorbetPackagesHint,
-        opts.genPackagesMode, opts.allowRelaxingTestVisibility, opts.packageAttributedErrors, opts.testPackages,
-        forStratum);
+        opts.genPackagesMode, opts.allowRelaxingTestVisibility, opts.packageAttributedErrors, forStratum);
 
     // Fall back on initializing from the payload if we're not copying part of from's symbol table.
     if (!symbolTableInitialized) {
@@ -717,7 +716,7 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
         opts.extraPackageFilesDirectorySlashDeprecatedPrefixes, opts.extraPackageFilesDirectorySlashPrefixes,
         opts.packageSkipRBIExportEnforcementDirs, opts.allowRelaxedPackagerChecksFor, opts.updateVisibilityFor,
         opts.packagerLayers, opts.sorbetPackagesHint, opts.genPackagesMode, opts.allowRelaxingTestVisibility,
-        opts.packageAttributedErrors, opts.testPackages);
+        opts.packageAttributedErrors);
 
     workers.multiplexJob("indexSuppliedFiles", [emptyGs, &opts, fileq, resultq, &kvstore, cancelable]() {
         Timer timeit(emptyGs->tracer(), "indexSuppliedFilesWorker");
@@ -729,7 +728,7 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
             opts.extraPackageFilesDirectorySlashDeprecatedPrefixes, opts.extraPackageFilesDirectorySlashPrefixes,
             opts.packageSkipRBIExportEnforcementDirs, opts.allowRelaxedPackagerChecksFor, opts.updateVisibilityFor,
             opts.packagerLayers, opts.sorbetPackagesHint, opts.genPackagesMode, opts.allowRelaxingTestVisibility,
-            opts.packageAttributedErrors, opts.testPackages);
+            opts.packageAttributedErrors);
         auto &epochManager = *localGs->epochManager;
 
         IndexThreadResultPack threadResult;
@@ -877,9 +876,8 @@ PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::Pars
 
         auto stratumMapping = traversal.buildStratumMapping(gs);
 
-        int ix = 0;
-        for (auto &file : gs.getFiles().subspan(1)) {
-            ++ix;
+        auto numFiles = gs.getFiles().size();
+        for (int ix = 1; ix < numFiles; ix++) {
             core::FileRef fref(ix);
             auto pkgName = db.getPackageNameForFile(fref);
             if (!pkgName.exists()) {
@@ -891,17 +889,7 @@ PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::Pars
 
             ENFORCE(stratumMapping.find(pkgName) != stratumMapping.end(),
                     "All packages must be present in the condensation graph");
-            auto &info = stratumMapping[pkgName];
-
-            // TODO(trevor): after we switch fully over to test packges, this conditional can go away as we won't have
-            // the distinction between a test and application node in the condensation graph.
-            if (file->isPackagedTest() || file->isPackagedTestHelper()) {
-                ENFORCE(info.testStratum < USHRT_MAX);
-                result.fileToStratum[ix] = core::packages::Stratum(info.testStratum);
-            } else {
-                ENFORCE(info.applicationStratum < USHRT_MAX);
-                result.fileToStratum[ix] = core::packages::Stratum(info.applicationStratum);
-            }
+            result.fileToStratum[ix] = stratumMapping[pkgName];
         }
 
         fast_sort(sourceFiles,
@@ -934,28 +922,8 @@ PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::Pars
 
         {
             for (auto &scc : stratum) {
-                // TODO(trevor): this can be simplified when we switch to test-packages, as we won't need to emulate the
-                // behavior by copying package files to be valid in an application-only context anymore.
-                if (scc.isTest) {
-                    for (auto member : scc.members) {
-                        auto &tree = packageFiles.emplace_back(std::move(packagesToPackageRb[member]));
-                        ENFORCE(tree.tree);
-                    }
-                } else {
-                    // When processing the application source of a package, we need to make a copy of the package file,
-                    // and edit out any reference to test symbols.
-                    for (auto member : scc.members) {
-                        const auto &package = packagesToPackageRb[member];
-
-                        // Test-only packages don't have any application code, so we can safely skip them at this point.
-                        if (package.file.isTestPackage(gs)) {
-                            continue;
-                        }
-
-                        auto &tree =
-                            packageFiles.emplace_back(packager::Packager::copyPackageWithoutTestExports(gs, package));
-                        ENFORCE(tree.tree);
-                    }
+                for (auto member : scc.members) {
+                    packageFiles.emplace_back(std::move(packagesToPackageRb[member]));
                 }
             }
 

@@ -9,6 +9,7 @@ ErrorClass errorClassForUntyped(const GlobalState &gs, FileRef file, const TypeP
         return UntypedValue;
     }
 
+    // TODO(jez) Consider making this use `test!` packages, or a configurable file path pattern
     const auto &fileData = file.data(gs);
     if (gs.trackUntyped == TrackUntyped::EverywhereButTests && fileData.isPackagedTest()) {
         return UntypedValue;

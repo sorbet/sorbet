@@ -1,14 +1,13 @@
 # typed: true
 
-module Helpers::Test
+module Test::Helpers
   class TestCase
     def test_a
       Root::A.new
     # ^^^^ importusage: rootpkg
 
-      Root::Test::B.new
-    # ^^^^^^^^^^ error: Unable to resolve constant `Test`
-    # ^^^^ importusage: rootpkg
+      Test::Root::B.new
+    # ^^^^^^^^^^ error: Unable to resolve constant `Root`
     end
   end
 end

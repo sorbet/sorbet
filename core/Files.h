@@ -50,7 +50,6 @@ public:
 
     bool hasPackageRbPath() const;
     bool isPackage(const GlobalState &gs) const;
-    bool isTestPackage(const GlobalState &gs) const;
 
     // Whether the file is open in the LSP client. (Always false if not running under LSP.)
     bool isOpenInClient() const;
@@ -59,9 +58,8 @@ public:
     void setIsOpenInClient(bool isOpenInClient);
 
     // flag accessors
-    bool isTestPath() const;
+    // TODO(jez) Delete this, replace with configurable patterns or accessing the packageDB
     bool isPackagedTest() const;
-    bool isPackagedTestHelper() const;
 
     bool hasIndexErrors() const;
     void setHasIndexErrors(bool value);

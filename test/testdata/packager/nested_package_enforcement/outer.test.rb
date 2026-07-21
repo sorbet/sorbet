@@ -2,15 +2,14 @@
 # typed: strict
 
 module Test::Outer
+#      ^^^^^^^^^^^ error: File belongs to package `Outer` but defines a constant that does not match this namespace
   class OK; end
 
   MY_CONST = 1
 
   module Inner
-#        ^^^^^ error: Tests in the `Outer` package must define tests in the `Test::Outer` namespace
     module Foo; end
   end
 
   module Inner::Bar; end
-#        ^^^^^^^^^^ error: Tests in the `Outer` package must define tests in the `Test::Outer` namespace
 end

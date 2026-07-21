@@ -1,16 +1,16 @@
-__package.rb:3: Invalid expression in package: Arguments to functions must be literals https://srb.help/3710
+test/cli/packager_export_self/__package.rb:3: Invalid expression in package: Arguments to functions must be literals https://srb.help/3710
      3 |  export_for_test Opus::Deploy
                           ^^^^^^^^^^^^
 
-__package.rb:3: Unable to resolve constant `Opus` https://srb.help/5002
+test/cli/packager_export_self/__package.rb:3: Unable to resolve constant `Opus` https://srb.help/5002
      3 |  export_for_test Opus::Deploy
                           ^^^^
 
-__package.rb:3: Method `export_for_test` does not exist on `T.class_of(Opus::Deploy)` https://srb.help/7003
+test/cli/packager_export_self/__package.rb:3: Method `export_for_test` does not exist on `T.class_of(Opus::Deploy)` https://srb.help/7003
      3 |  export_for_test Opus::Deploy
           ^^^^^^^^^^^^^^^
   Got `T.class_of(Opus::Deploy)` originating from:
-    __package.rb:2:
+    test/cli/packager_export_self/__package.rb:2:
      2 |class Opus::Deploy < PackageSpec
         ^
 Errors: 3

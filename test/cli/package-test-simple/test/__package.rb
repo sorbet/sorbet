@@ -2,5 +2,4 @@
 # typed: strict
 
 class Critic < PackageSpec
-  test!
 end

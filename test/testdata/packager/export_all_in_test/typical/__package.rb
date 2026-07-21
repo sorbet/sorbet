@@ -2,5 +2,4 @@
 # typed: strict
 
 class Typical < PackageSpec
-  export Test::Typical::Example
 end
