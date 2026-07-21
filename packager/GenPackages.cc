@@ -7,7 +7,6 @@ using namespace std;
 namespace sorbet::packager {
 
 namespace {
-
 vector<core::packages::Import> computeNewImports(const core::GlobalState &gs,
                                                  const core::packages::PackageInfo &pkgInfo) {
     UnorderedMap<core::packages::MangledName, core::packages::ImportType> importMap;
@@ -25,7 +24,7 @@ vector<core::packages::Import> computeNewImports(const core::GlobalState &gs,
     // !packageReferenceInfo.importNeeded or packageReferenceInfo.causesModularityError, as well if the import would
     // cause a visibility error. Maybe the common helper could take a function that filters?
     for (auto &[file, referencedPackages] : pkgInfo.packagesReferencedByFile) {
-        auto importType = pkgInfo.fileToImportType(gs, file);
+        auto importType = core::packages::PackageInfo::fileToImportType(gs, file);
         for (auto &[packageName, packageReferenceInfo] : referencedPackages) {
             auto &pkgInfo = gs.packageDB().getPackageInfo(packageName);
             if (!pkgInfo.exists()) {
@@ -178,7 +177,8 @@ void GenPackages::run(core::GlobalState &gs) {
                     auto &referencedPackageInfo = gs.packageDB().getPackageInfo(referencedPackageName);
                     ENFORCE(referencedPackageInfo.exists());
                     if (gs.packageDB().updateVisibilityFor(referencedPackageName)) {
-                        if (!referencedPackageInfo.isVisibleTo(gs, pkgInfo, pkgInfo.fileToImportType(gs, file)) ||
+                        if (!referencedPackageInfo.isVisibleTo(
+                                gs, pkgInfo, core::packages::PackageInfo::fileToImportType(gs, file)) ||
                             referencedPackageInfo.visibleToEverything()) {
                             // either:
                             // - it is a visibility error for pkgName to reference referencedPackageName, and we want to

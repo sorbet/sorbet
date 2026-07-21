@@ -4,7 +4,5 @@
 # enable-packager: true
 
 class Critic < PackageSpec
-  test!
-
   export Critic::Core
 end

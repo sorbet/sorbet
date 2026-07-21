@@ -1,4 +1,4 @@
 # typed: false
 
-class Project::MyPackage::Test::TestTooLow
+class Test::Project::MyPackage::TestTooLow
 end

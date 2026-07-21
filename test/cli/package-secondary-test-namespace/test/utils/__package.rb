@@ -3,9 +3,7 @@
 # typed: strict
 
 class Critic::Utils < PackageSpec
-  test!
-
-  import Critic
+  test_import Critic
 
   export Critic::Utils::UnitTest
 end

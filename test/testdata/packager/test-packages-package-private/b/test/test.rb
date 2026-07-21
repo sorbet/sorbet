@@ -1,6 +1,6 @@
 # typed: true
 
-module Root::B::Test
+module Test::Root::B
   class BTest
     def test_b
       Root::A.new.foo

@@ -1,6 +1,6 @@
 # typed: strict
 
-class Root::Test < PackageSpec
+class Test::Root < PackageSpec
   test!
 
   import Root, uses_internals: true

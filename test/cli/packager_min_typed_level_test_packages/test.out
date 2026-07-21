@@ -1,4 +1,4 @@
-test/test_too_low.rb:1: All files in package `Project::MyPackage::Test` must be at least `typed: true` https://srb.help/3736
+test/test_too_low.rb:1: All files in package `Test::Project::MyPackage` must be at least `typed: true` https://srb.help/3736
      1 |# typed: false
         ^
     test/__package.rb:7: Minimum typed level for files in this package declared here
