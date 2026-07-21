@@ -8,6 +8,7 @@
 #include "common/sort/sort.h"
 #include "dtl/dtl.hpp"
 #include "test/helpers/expectations.h"
+#include <filesystem>
 #include <sstream>
 
 using namespace std;
@@ -106,12 +107,19 @@ bool addToExpectations(Expectations &exp, string_view filePath, bool isDirectory
 
 vector<string> listTrimmedTestFilesInDir(string_view dir, bool recursive) {
     unique_ptr<WorkerPool> workerPool = WorkerPool::create(0, *spdlog::default_logger());
-    vector<string> names = sorbet::FileOps::listFilesInDir(dir, {".rb", ".rbi", ".rbupdate", ".rbiupdate", ".exp"},
-                                                           *workerPool, recursive, {}, {});
-    const int prefixLen = dir.length() + 1;
+
+    // We normalize the trailing slashes on the directory so that it's easier to remove the prefix from all the entries
+    // returned by `listFilesInDir`. We use substr to remove the prefix instead of `std::filesystem::relative`, as that
+    // avoids any issues we might run into with symlinks in the bazel sandbox during testing.
+    string normalizedPath = filesystem::proximate(filesystem::weakly_canonical(dir));
+    auto prefixLen = normalizedPath.size() + 1;
+
+    vector<string> names = sorbet::FileOps::listFilesInDir(
+        normalizedPath, {".rb", ".rbi", ".rbupdate", ".rbiupdate", ".exp"}, *workerPool, recursive, {}, {});
+
     // Trim off the input directory from the name.
     transform(names.begin(), names.end(), names.begin(),
-              [&prefixLen](auto &name) -> string { return name.substr(prefixLen); });
+              [prefixLen](auto &name) -> string { return name.substr(prefixLen); });
     fast_sort(names, compareNames);
     return names;
 }
