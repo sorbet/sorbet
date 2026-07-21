@@ -14,6 +14,7 @@
 #include <cxxabi.h>
 #include <dirent.h>
 #include <exception>
+#include <filesystem>
 #include <memory>
 #include <variant>
 #include <vector>
@@ -281,7 +282,7 @@ bool sorbet::FileOps::isFileIgnored(string_view basePath, string_view filePath,
 }
 
 struct QuitToken {};
-using Job = variant<QuitToken, string>;
+using Job = variant<QuitToken, filesystem::path>;
 // We record all classes of exceptions we can throw separately, rather than one single `SorbetException`.
 //
 // We do this for two reasons: one is that when looking for a `catch` handler, C++ will only look for
@@ -294,7 +295,7 @@ using Job = variant<QuitToken, string>;
 // dynamic type of the original exception would be lost.
 using JobOutput = variant<std::monostate, sorbet::FileNotFoundException, sorbet::FileNotDirException, vector<string>>;
 
-void appendFilesInDir(string_view basePath, const string &path, const sorbet::UnorderedSet<string> &extensions,
+void appendFilesInDir(const string &basePath, const sorbet::UnorderedSet<string> &extensions,
                       sorbet::WorkerPool &workers, bool recursive, vector<string> &allPaths,
                       const vector<string> &absoluteIgnorePatterns, const vector<string> &relativeIgnorePatterns) {
     auto numWorkers = max(workers.size(), 1);
@@ -310,7 +311,7 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
     // In practice, all it takes to maintain this invariant is that pendingJobs
     // must be incremented prior to pushing work onto jobq.
     ++pendingJobs;
-    jobq->push(path, 1);
+    jobq->push(basePath, 1);
 
     workers.multiplexJob("options.findFiles", [numWorkers, jobq, resultq, &pendingJobs, &basePath, &extensions,
                                                &recursive, &absoluteIgnorePatterns, &relativeIgnorePatterns]() {
@@ -327,56 +328,50 @@ void appendFilesInDir(string_view basePath, const string &path, const sorbet::Un
                     break;
                 }
 
-                auto *strvariant = std::get_if<string>(&job);
+                auto *strvariant = std::get_if<filesystem::path>(&job);
                 ENFORCE(strvariant != nullptr);
                 auto &path = *strvariant;
 
-                DIR *dir;
-                struct dirent *entry;
-
-                if ((dir = opendir(path.c_str())) == nullptr) {
-                    switch (errno) {
-                        case ENOTDIR: {
-                            throw sorbet::FileNotDirException();
-                        }
-                        default:
-                            // Mirrors other FileOps functions: Assume other errors are from FileNotFound.
-                            auto msg = fmt::format("Couldn't open directory `{}`", path);
-                            throw sorbet::FileNotFoundException(msg);
-                    }
-                }
-
-                while ((entry = readdir(dir)) != nullptr) {
-                    const auto namelen = strlen(entry->d_name);
-                    string_view nameview{entry->d_name, namelen};
-                    if (entry->d_type == DT_DIR) {
-                        if (!recursive) {
-                            continue;
-                        }
-                        if (nameview == "."sv || nameview == ".."sv) {
+                std::error_code ec;
+                for (auto &entry : filesystem::directory_iterator(path, ec)) {
+                    string pathStr = entry.path();
+                    if (entry.is_directory()) {
+                        if (!recursive || entry.is_symlink()) {
                             continue;
                         }
                     } else {
-                        if (!sorbet::FileOps::hasAllowedExtension(nameview, extensions)) {
+                        if (!sorbet::FileOps::hasAllowedExtension(pathStr, extensions)) {
                             continue;
                         }
                     }
 
-                    auto fullPath = fmt::format("{}/{}", path, nameview);
-                    if (sorbet::FileOps::isFileIgnored(basePath, fullPath, absoluteIgnorePatterns,
+                    if (sorbet::FileOps::isFileIgnored(basePath, pathStr, absoluteIgnorePatterns,
                                                        relativeIgnorePatterns)) {
                         continue;
                     }
 
-                    if (entry->d_type == DT_DIR) {
+                    if (sorbet::FileOps::isFileIgnored(basePath, pathStr, absoluteIgnorePatterns,
+                                                       relativeIgnorePatterns)) {
+                        continue;
+                    }
+
+                    if (entry.is_directory()) {
                         ++pendingJobs;
-                        jobq->push(move(fullPath), 1);
+                        jobq->push(entry.path(), 1);
                     } else {
-                        output.push_back(move(fullPath));
+                        output.push_back(move(pathStr));
                     }
                 }
 
-                closedir(dir);
+                if (ec) {
+                    switch (ec.value()) {
+                        case ENOTDIR:
+                            throw sorbet::FileNotDirException();
+
+                        default:
+                            throw sorbet::FileNotFoundException(fmt::format("Couldn't open directory `{}`", basePath));
+                    }
+                }
 
                 // Now that we've finished with this directory, we can decrement.
                 auto remaining = --pendingJobs;
@@ -456,10 +451,7 @@ vector<string> sorbet::FileOps::listFilesInDir(string_view path, const Unordered
                                                const vector<string> &absoluteIgnorePatterns,
                                                const vector<string> &relativeIgnorePatterns) {
     vector<string> result;
-    // Mini-optimization: appendFilesInDir needs to grab a c_str from path, so we pass in a string reference to avoid
-    // copying.
-    string pathStr(path);
-    appendFilesInDir(path, pathStr, extensions, workerPool, recursive, result, absoluteIgnorePatterns,
+    appendFilesInDir(string(path), extensions, workerPool, recursive, result, absoluteIgnorePatterns,
                      relativeIgnorePatterns);
     fast_sort(result);
     return result;
