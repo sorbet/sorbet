@@ -328,9 +328,8 @@ TEST_CASE("Condensation Graph - Two packages, one is test-only") {
 
     auto &condensation = gs.packageDB().condensation();
     {
-        INFO("The condensation graph should contain three nodes total (app + test for Lib::Foo::A, and "
-             "Lib::Foo::Test::B)");
-        CHECK_EQ(3, condensation.nodes().size());
+        INFO("The condensation graph should contain two nodes for each package (app + test)");
+        CHECK_EQ(4, condensation.nodes().size());
     }
 
     auto traversal = condensation.computeTraversal(gs);
@@ -346,16 +345,15 @@ TEST_CASE("Condensation Graph - Two packages, one is test-only") {
     }
 
     {
-        INFO("The first stratum will be a mix of application and test code");
+        INFO("The first stratum should be all application code");
         CHECK_EQ(2, traversal.strata[0].size());
-        CHECK_EQ(1, absl::c_count_if(traversal.strata[0], [](auto &scc) { return !scc.isTest; }));
-        CHECK_EQ(1, absl::c_count_if(traversal.strata[0], [](auto &scc) { return scc.isTest; }));
+        CHECK_EQ(2, absl::c_count_if(traversal.strata[0], [](auto &scc) { return !scc.isTest; }));
     }
 
     {
         INFO("The second stratum should be all test code");
-        CHECK_EQ(1, traversal.strata[1].size());
-        CHECK_EQ(1, absl::c_count_if(traversal.strata[1], [](auto &scc) { return scc.isTest; }));
+        CHECK_EQ(2, traversal.strata[1].size());
+        CHECK_EQ(2, absl::c_count_if(traversal.strata[1], [](auto &scc) { return scc.isTest; }));
     }
 }
 

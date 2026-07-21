@@ -1,6 +1,6 @@
 # typed: strict
 
-module Root::Test
+module Test::Root
   class ATest
     extend T::Sig
     sig { void }

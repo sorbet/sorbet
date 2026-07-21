@@ -1,5 +1,5 @@
 # typed: strict
 
-module App::Test
+module Test::App
   puts App::MyClass
 end

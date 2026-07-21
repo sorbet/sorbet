@@ -1,9 +1,13 @@
 # typed: true
 
-module Critic::Utils
-  class UnitTestTest
-    include Critic::Core
+module Test; module Critic; end; end
 
-    Critic::Utils::UnitTest.foo
+module Test::Critic
+  module Utils
+    class UnitTestTest
+      include Critic::Core
+
+      Critic::Utils::UnitTest.foo
+    end
   end
 end

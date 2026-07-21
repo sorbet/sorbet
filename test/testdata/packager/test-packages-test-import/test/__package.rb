@@ -1,12 +1,14 @@
 # typed: strict
 
-class Root::Test < PackageSpec
+class Test::Root < PackageSpec
   test!
 
   test_import Root
-# ^^^^^^^^^^^ error: Test imports must use `import`
+  #           ^^^^ error: Invalid expression in package
+  #           ^^^^ error: Expected `T.class_of(Sorbet::Private::Static::PackageSpec)`
 
   test_import Root, only: "test_rb"
-# ^^^^^^^^^^^ error: Test imports must use `import`
+  #           ^^^^ error: Invalid expression in package
+  #           ^^^^ error: Expected `T.class_of(Sorbet::Private::Static::PackageSpec)`
 
 end

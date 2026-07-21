@@ -892,10 +892,7 @@ PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::Pars
             ENFORCE(stratumMapping.find(pkgName) != stratumMapping.end(),
                     "All packages must be present in the condensation graph");
             auto &info = stratumMapping[pkgName];
-
-            // TODO(trevor): after we switch fully over to test packges, this conditional can go away as we won't have
-            // the distinction between a test and application node in the condensation graph.
-            if (file->isPackagedTest() || file->isPackagedTestHelper()) {
+            if (!db.testPackages() && (file->isPackagedTest() || file->isPackagedTestHelper())) {
                 ENFORCE(info.testStratum < USHRT_MAX);
                 result.fileToStratum[ix] = core::packages::Stratum(info.testStratum);
             } else {
@@ -936,10 +933,9 @@ PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::Pars
             for (auto &scc : stratum) {
                 // TODO(trevor): this can be simplified when we switch to test-packages, as we won't need to emulate the
                 // behavior by copying package files to be valid in an application-only context anymore.
-                if (scc.isTest) {
+                if (scc.isTest || gs.packageDB().testPackages()) {
                     for (auto member : scc.members) {
-                        auto &tree = packageFiles.emplace_back(std::move(packagesToPackageRb[member]));
-                        ENFORCE(tree.tree);
+                        packageFiles.emplace_back(std::move(packagesToPackageRb[member]));
                     }
                 } else {
                     // When processing the application source of a package, we need to make a copy of the package file,
@@ -952,9 +948,7 @@ PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::Pars
                             continue;
                         }
 
-                        auto &tree =
-                            packageFiles.emplace_back(packager::Packager::copyPackageWithoutTestExports(gs, package));
-                        ENFORCE(tree.tree);
+                        packageFiles.emplace_back(packager::Packager::copyPackageWithoutTestExports(gs, package));
                     }
                 }
             }

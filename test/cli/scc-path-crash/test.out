@@ -1,8 +1,1 @@
-test/t2/__package.rb:9: Test imports must use `import` https://srb.help/3710
-     9 |  test_import Test::T1
-          ^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    test/t2/__package.rb:9: Replace with `import`
-     9 |  test_import Test::T1
-          ^^^^^^^^^^^
-Errors: 1
+No errors! Great job.

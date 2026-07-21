@@ -1,6 +1,6 @@
 # typed: strict
 
-class App::Test < PackageSpec
+class Test::App < PackageSpec
   test!
 
   import App
