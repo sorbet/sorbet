@@ -243,6 +243,7 @@ struct Options {
     std::string statsdHost;
     std::string statsdPrefix = "ruby_typer.unknown";
     int statsdPort = 8200;
+    bool statsdTagRevision = true;
 
     std::string metricsFile;
     std::string metricsRepo = "none";

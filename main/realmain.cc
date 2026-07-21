@@ -579,6 +579,12 @@ int realmain(int argc, char *argv[]) {
 #endif
     } else {
         Timer timeall(logger, "wall_time");
+        if constexpr (sorbet::is_release_build) {
+            if (opts.statsdTagRevision) {
+                timeall.setTag("version", sorbet::build_scm_revision);
+            }
+        }
+
         vector<core::FileRef> inputFiles;
         logger->trace("Files: ");
 
