@@ -347,6 +347,11 @@
 #
 # Numbered parameters were introduced in Ruby 2.7.
 class Proc < Object
+  # The return type of this proc. It accepts any and all arguments. To
+  # constraint the list of arguments that this proc can take, use a `T.proc`
+  # type.
+  Return = type_member(:out)
+
   # Creates a new [`Proc`](https://docs.ruby-lang.org/en/3.2/Proc.html)
   # object, bound to the current context.
   #
@@ -361,8 +366,8 @@ class Proc < Object
   # ```ruby
   # Proc.new    #=> ArgumentError
   # ```
-  sig {params(blk: Proc).returns(T.attached_class)}
-  def self.new(&blk); end
+  sig {params(blk: T::Proc[T.untyped]).void}
+  def initialize(&blk); end
 
   # Returns a proc that is the composition of this proc and the given *g*. The
   # returned proc takes a variable number of arguments, calls *g* with them then
@@ -486,7 +491,7 @@ class Proc < Object
         arg0: T.untyped,
         blk: T.untyped,
     )
-    .returns(T.untyped)
+    .returns(Return)
   end
   def call(*arg0, &blk); end
 
@@ -528,7 +533,7 @@ class Proc < Object
     params(
         arg0: BasicObject,
     )
-    .returns(T.untyped)
+    .returns(Return)
   end
   def [](*arg0); end
 
@@ -573,7 +578,7 @@ class Proc < Object
     params(
         arity: Integer,
     )
-    .returns(Proc)
+    .returns(T::Proc[T.untyped])
   end
   def curry(arity=T.unsafe(nil)); end
 
@@ -833,4 +838,19 @@ class Proc < Object
   # See also
   # [`Proc#lambda?`](https://docs.ruby-lang.org/en/2.7.0/Proc.html#method-i-lambda-3F).
   def yield(*_); end
+
+  sig do
+    type_parameters(:Return2)
+      .params(g: T::Proc[T.type_parameter(:Return2)])
+      .returns(T::Proc[T.type_parameter(:Return2)])
+  end
+  sig do
+     params(g: T.anything).returns(T::Proc[T.untyped])
+  end
+  def >>(g); end
+
+  sig do
+    params(g: T.anything).returns(T::Proc[Return])
+  end
+  def <<(g); end
 end
