@@ -15,13 +15,20 @@ class GlobalState;
 
 namespace sorbet::core::packages {
 
+class CondensationBuilder;
+
 class Condensation {
+    friend class CondensationBuilder;
+
 public:
     struct Node {
         std::vector<core::packages::MangledName> members;
 
         // The SCC IDs of the packages this SCC depends on.
         UnorderedSet<int> imports;
+
+        // The SCC IDs of the packages that depend on this SCC.
+        std::vector<int> backEdges;
 
         // The SCC ID of this node.
         const int id = 0;
@@ -48,8 +55,6 @@ public:
 
     Condensation &operator=(const Condensation &other) = delete;
     Condensation &operator=(Condensation &&other) = default;
-
-    Node &pushNode(ImportType type, bool isPrelude);
 
     struct Traversal {
         // Packages ordered according to their dependencies in the package graph. It's safe to traverse this vector, and
@@ -100,6 +105,15 @@ public:
     absl::Span<const Node> nodes() const {
         return this->nodes_;
     }
+};
+
+class CondensationBuilder {
+    Condensation condensation;
+
+public:
+    Condensation::Node &pushNode(ImportType type, bool isPrelude);
+
+    Condensation build();
 };
 
 } // namespace sorbet::core::packages

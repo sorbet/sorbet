@@ -34,7 +34,7 @@ class ComputePackageSCCs {
     // determine all packages in the SCC.
     std::vector<core::packages::MangledName> stack;
 
-    core::packages::Condensation condensation;
+    core::packages::CondensationBuilder condensation;
 
     ComputePackageSCCs(core::GlobalState &gs) : gs{gs} {
         auto numPackages = gs.packageDB().packages().size();
@@ -239,7 +239,7 @@ public:
             }
         }
 
-        return std::move(scc.condensation);
+        return scc.condensation.build();
     }
 };
 
