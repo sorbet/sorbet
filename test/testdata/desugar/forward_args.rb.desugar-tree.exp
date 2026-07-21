@@ -63,13 +63,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foo10<<todo method>>(&)
-      [1, 2, 3].each() do |&&$2|
+      [1, 2, 3].each() do |&|
         ::<Magic>.<call-with-block-pass>(<emptyTree>::<C T>.unsafe(<self>), :p, &)
       end
     end
 
     def foo11<<todo method>>(&block)
-      [1, 2, 3].each() do |&&$3|
+      [1, 2, 3].each() do |&|
         ::<Magic>.<call-with-block-pass>(<emptyTree>::<C T>.unsafe(<self>), :p, &)
       end
     end
