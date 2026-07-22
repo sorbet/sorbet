@@ -144,16 +144,28 @@ TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr 
     return OrType::make_shared(move(remainingTypes), underlying(gs, t2));
 }
 
+// t1 => T.all(Unrelated, Child)
+// t2 => T.all(Unrelated, Parent)
 TypePtr glbDistributeAnd(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     auto a1 = cast_type<AndType>(t1);
     ENFORCE(t1 != nullptr);
+    // n1
+    // => glb(Unrelated, T.all(Unrelated, Parent))
+    // => T.all(Unrelated, Parent)
     TypePtr n1 = Types::all(gs, a1->left, t2);
     if (n1 == a1->left) {
         categoryCounterInc("lubDistributeOr.outcome", "t1");
         return t1;
     }
+    // n2
+    // => glb(Child, T.all(Unrelated, Parent))
+    // => T.all(Unrelated, Child)
     TypePtr n2 = Types::all(gs, a1->right, t2);
     if (n1 == t2) {
+        if (Types::isAsSpecificAs(gs, t1, t2)) {
+            categoryCounterInc("glbDistributeAnd.outcome", "Zn2t1");
+            return t1;
+        }
         categoryCounterInc("glbDistributeAnd.outcome", "Zn2");
         return n2;
     }
@@ -162,6 +174,10 @@ TypePtr glbDistributeAnd(const GlobalState &gs, const TypePtr &t1, const TypePtr
         return t1;
     }
     if (n2 == t2) {
+        if (Types::isAsSpecificAs(gs, t1, t2)) {
+            categoryCounterInc("glbDistributeAnd.outcome", "Zn1t1");
+            return t1;
+        }
         categoryCounterInc("glbDistributeAnd.outcome", "Zn1");
         return n1;
     }
