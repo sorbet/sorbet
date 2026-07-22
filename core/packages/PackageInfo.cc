@@ -1350,6 +1350,31 @@ bool PackageInfo::ownsNamespace(const core::GlobalState &gs, MangledName namespa
     return false;
 }
 
+PackageInfo::CanOpenScopeResult PackageInfo::canOpenScope(const core::GlobalState &gs, ClassOrModuleRef sym) const {
+    ENFORCE(this->exists());
+    ENFORCE(sym.exists());
+
+    // Normalize away singleton classes, matching canModifySymbol.
+    sym = sym.data(gs)->topAttachedClass(gs);
+    auto symData = sym.data(gs);
+
+    auto symPackage = symData->package;
+
+    if (symPackage == this->mangledName_) {
+        return CanOpenScopeResult::CanOpen;
+    }
+
+    if (!symPackage.exists()) {
+        return CanOpenScopeResult::NotAPackage;
+    }
+
+    if (this->importsPackage(symPackage) != nullptr) {
+        return CanOpenScopeResult::CanOpen;
+    }
+
+    return CanOpenScopeResult::NotImported;
+}
+
 bool PackageInfo::canAccessInternalsOf(bool testPackages, MangledName other) const {
     ENFORCE(this->exists());
     ENFORCE(other.exists());

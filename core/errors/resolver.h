@@ -91,6 +91,7 @@ inline constexpr ErrorClass UnnamedBlockParameter{5082, StrictLevel::False};
 inline constexpr ErrorClass PackageNamespaceMixin{5083, StrictLevel::False};
 inline constexpr ErrorClass ModifyingUnpackagedConstant{5084, StrictLevel::False};
 inline constexpr ErrorClass InvalidPackageExpression{5085, StrictLevel::False};
+inline constexpr ErrorClass PackageScopeViolation{5086, StrictLevel::False};
 } // namespace sorbet::core::errors::Resolver
 
 #endif
