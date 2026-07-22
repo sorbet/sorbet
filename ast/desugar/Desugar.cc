@@ -1908,9 +1908,9 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     auto collectionAssign =
                         MK::Assign(loc, MK::Local(locZeroLen, collectionTempName), node2TreeImpl(dctx, for_->expr));
 
-                    // `<Magic>.<element-or-nil>(<forTemp>$1)` types as `T.nilable(<element type>)`, or
-                    // `T.untyped` if the collection doesn't respond to `first` (Ruby's `for` only
-                    // requires `each`, so a missing `first` must not be an error).
+                    // `<Magic>.<element-or-nil>(<forTemp>$1)` types as `T.nilable(<element type>)`,
+                    // where the element type comes from the declared block parameter type of the
+                    // collection's `each`, or `T.untyped` if `each` has no signature.
                     auto seedRhs = MK::Send1(loc, MK::Magic(locZeroLen), core::Names::elementOrNil(), locZeroLen,
                                              MK::Local(loc, collectionTempName));
 

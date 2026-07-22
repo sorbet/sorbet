@@ -2500,16 +2500,16 @@ public:
 // <Magic>.<element-or-nil>(recv)
 //
 // Used when desugaring `for` loops. In Ruby, `for` doesn't define a new scope, so the loop
-// variable continues to exist after the loop, holding `nil` if the collection was empty. We
-// approximate that post-loop type by dispatching `first` on the collection and returning
-// `T.nilable(<result>)`.
+// variable continues to exist after the loop, holding `nil` if the collection was empty.
 //
-// Ruby's `for` only requires the collection to respond to `each`, so if the receiver doesn't
-// respond to `first` (an `each`-only class that doesn't include `Enumerable`), we silently fall
-// back to `T.untyped` instead of reporting a "method does not exist" error.
+// The element type is derived from what the collection's `each` yields: we simulate dispatching
+// `each` with a block and read the declared type of the block's parameter(s) -- the same
+// information inference uses to type block parameters. `each` is the only method `for` calls at
+// runtime, so this is the only source of type information that reflects what actually happens.
+// If `each` has no signature (or the receiver is untyped), we fall back to `T.untyped`.
 //
-// We also drop literal types (e.g. `Integer(1)` from `Tuple#first` on `[1, 2, 3]`), which would
-// otherwise cause spurious dead-code errors in comparisons after the loop.
+// We also drop literal types (e.g. from `for x in [1, 2, 3]`), which would otherwise cause
+// spurious dead-code errors in comparisons after the loop.
 class Magic_elementOrNil : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
@@ -2524,44 +2524,91 @@ public:
             return;
         }
 
-        // Special-case tuples: the loop can end early via `break`, so after the loop the variable
-        // may hold *any* element (or `nil`), not specifically the first one. For heterogeneous
-        // tuples like `[1, "one"]`, dispatching `first` would unsoundly yield `T.nilable(Integer)`;
-        // the union of the element types is the sound, precise answer.
-        if (auto tuple = cast_type<TupleType>(recv.type)) {
-            res.returnType = Types::any(gs, Types::nilClass(), Types::dropLiteral(gs, tuple->elementType(gs)));
-            return;
-        }
-
+        // Simulate `recv.each { |x| }`. Dispatching with a block link makes overload resolution
+        // pick the block-taking overload of `each` (instead of the `Enumerator`-returning one)
+        // and computes `blockPreType`, the block's declared proc type instantiated for this
+        // receiver's type arguments.
         InlinedVector<const TypeAndOrigins *, 2> sendArgs;
+        auto zeroLengthCallLoc = args.locs.call.copyWithZeroLength();
         CallLocs sendLocs{
             .file = args.locs.file,
             .call = args.locs.call,
             .receiver = args.locs.call,
-            .fun = args.locs.call.copyWithZeroLength(),
+            .fun = zeroLengthCallLoc,
             .args = absl::Span<const core::LocOffsets>(nullptr, 0),
         };
-        DispatchArgs innerArgs{Names::first(),
+        vector<ParamInfo::Flags> paramFlags;
+        paramFlags.emplace_back();
+        // The zero-length block loc also suppresses the "does not take a block" error when the
+        // collection's `each` is declared without a block parameter.
+        SendAndBlockLink link(Names::each(), zeroLengthCallLoc, move(paramFlags));
+        DispatchArgs innerArgs{Names::each(),
                                sendLocs,
                                0,
                                sendArgs,
                                recv.type,
                                recv,
                                recv.type,
-                               nullptr,
+                               &link,
                                args.originForUninitialized,
                                /* isPrivateOk */ false,
                                /* suppressErrors */ true,
                                core::NameRef::noName()};
         auto dispatched = recv.type.dispatchCall(gs, innerArgs);
-        // Intentionally drop `dispatched.main.errors`: a missing `first` is not an error here.
+        // Intentionally drop `dispatched.main.errors`: any problem with the `each` call itself
+        // (e.g. the method not existing) is reported on the `each` send the loop desugars to.
 
-        if (dispatched.returnType == nullptr || !dispatched.main.method.exists()) {
+        // What `each` yields is the parameter list of its block's proc type. Union and
+        // intersection receivers spread across `secondary` components; combine them the same way
+        // inference does for block parameters (see LoadYieldParams in infer).
+        TypePtr params;
+        auto *component = &dispatched;
+        while (component != nullptr) {
+            auto &blockPreType = component->main.blockPreType;
+            if (blockPreType != nullptr && !blockPreType.isBottom()) {
+                auto componentParams = Types::dropNil(gs, blockPreType).getCallArguments(gs, Names::call());
+                if (componentParams != nullptr) {
+                    if (params == nullptr) {
+                        params = componentParams;
+                    } else {
+                        switch (dispatched.secondaryKind) {
+                            case DispatchResult::Combinator::OR:
+                                params = Types::any(gs, params, componentParams);
+                                break;
+                            case DispatchResult::Combinator::AND:
+                                params = Types::all(gs, params, componentParams);
+                                break;
+                        }
+                    }
+                }
+            }
+            component = component->secondary.get();
+        }
+
+        if (params == nullptr) {
             res.returnType = Types::untypedUntracked();
             return;
         }
 
-        res.returnType = Types::any(gs, Types::nilClass(), Types::dropLiteral(gs, dispatched.returnType));
+        // `each` yielding a single value is the common case: the loop variable holds that value.
+        // For `each` yielding multiple values (`yield k, v`), keep the tuple: the seed for
+        // `for k, v in ...` destructures it exactly like the block parameters would.
+        TypePtr element;
+        if (auto tuple = cast_type<TupleType>(params)) {
+            if (tuple->elems.empty()) {
+                // `each` yields no values: the loop variable is never assigned.
+                res.returnType = Types::nilClass();
+                return;
+            } else if (tuple->elems.size() == 1) {
+                element = tuple->elems.front();
+            } else {
+                element = params;
+            }
+        } else {
+            element = params;
+        }
+
+        res.returnType = Types::any(gs, Types::nilClass(), Types::dropLiteral(gs, element));
     }
 } Magic_elementOrNil;
 

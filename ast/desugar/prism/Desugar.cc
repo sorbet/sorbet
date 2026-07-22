@@ -2636,9 +2636,9 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
                 auto collectionAssign =
                     MK::Assign(location, MK::Local(locZeroLen, collectionTempName), desugar(forNode->collection));
 
-                // `<Magic>.<element-or-nil>(<forTemp>$1)` types as `T.nilable(<element type>)`, or
-                // `T.untyped` if the collection doesn't respond to `first` (Ruby's `for` only
-                // requires `each`, so a missing `first` must not be an error).
+                // `<Magic>.<element-or-nil>(<forTemp>$1)` types as `T.nilable(<element type>)`,
+                // where the element type comes from the declared block parameter type of the
+                // collection's `each`, or `T.untyped` if `each` has no signature.
                 auto seedRhs = MK::Send1(location, MK::Magic(locZeroLen), core::Names::elementOrNil(), locZeroLen,
                                          MK::Local(location, collectionTempName));
 

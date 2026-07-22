@@ -44,9 +44,10 @@ end
 
 T.reveal_type(r) # error: Revealed type: `T.nilable(Integer)`
 
-# Ruby's `for` only requires the collection to respond to `each`. An
-# `each`-only class (no `Enumerable`, no `first`) must not report an error;
-# the loop variable's post-loop type falls back to `T.untyped`.
+# Ruby's `for` only requires the collection to respond to `each`, and the
+# element type comes from the declared block parameter type of `each` --
+# the only method `for` actually calls at runtime. A plain `each`-only
+# class (no `Enumerable`) works as long as `each` has a signature.
 class EachOnly
   extend T::Sig
 
@@ -60,4 +61,36 @@ for e in EachOnly
   T.reveal_type(e) # error: Revealed type: `Integer`
 end
 
-T.reveal_type(e) # error: Revealed type: `T.untyped`
+T.reveal_type(e) # error: Revealed type: `T.nilable(Integer)`
+
+# If `each` has no signature, we know nothing about what it yields, and the
+# loop variable's post-loop type falls back to `T.untyped`.
+class UntypedEach
+  def self.each(&blk)
+    yield 1
+  end
+end
+
+for u in UntypedEach
+end
+
+T.reveal_type(u) # error: Revealed type: `T.untyped`
+
+# An `each` that yields multiple values destructures into the loop
+# variables the same way the block parameters would.
+class PairEach
+  extend T::Sig
+
+  sig { params(blk: T.proc.params(arg0: String, arg1: Integer).void).void }
+  def self.each(&blk)
+    yield "one", 1
+  end
+end
+
+for s, n in PairEach
+  T.reveal_type(s) # error: Revealed type: `String`
+  T.reveal_type(n) # error: Revealed type: `Integer`
+end
+
+T.reveal_type(s) # error: Revealed type: `T.nilable(String)`
+T.reveal_type(n) # error: Revealed type: `T.nilable(Integer)`
