@@ -228,8 +228,12 @@ UnorderedMap<core::NameRef, core::TypePtr> guessArgumentTypes(core::Context ctx,
         }
     }
 
+    // TODO: there's an assumption in the loop below that `core::Types::glb` for a given variable will converge after
+    // enough traversals of the CFG. That appears to be not true, so we bound argument guessing to 10 iterations over
+    // the CFG. The choice of 10 is arbitrary, and a more reasonable bound might be the maximum loop depth of the CFG,
+    // but 10 is probably good enough for most cases.
     bool changed = true;
-    while (changed) {
+    for (int attempt = 0; changed && attempt < 10; ++attempt) {
         changed = false;
         for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
             cfg::BasicBlock *bb = *it;
