@@ -11,8 +11,8 @@ module T::Private::Methods
     sig {returns(T.nilable(Thread::Backtrace::Location))}
     attr_accessor :loc
 
-    sig {returns(T.nilable(T.any(T.proc.returns(DeclBuilder), Declaration)))}
-    attr_accessor :blk_or_decl
+    sig {returns(T.any(T.proc.returns(DeclBuilder), Declaration, Signature))}
+    attr_accessor :sig_state
 
     sig {returns(T::Boolean)}
     attr_accessor :final
@@ -31,7 +31,7 @@ module T::Private::Methods
         mod: Module,
         method_name: T.nilable(Symbol),
         loc: T.nilable(Thread::Backtrace::Location),
-        blk: Proc,
+        sig_state: Proc,
         final: T::Boolean,
         abstract: T.nilable(T::Boolean),
         override: T.nilable({allow_incompatible: T.any(T::Boolean, Symbol)}),
@@ -39,7 +39,7 @@ module T::Private::Methods
       )
         .void
     end
-    def initialize(mod, method_name, loc, blk, final, abstract, override, overridable); end
+    def initialize(mod, method_name, loc, sig_state, final, abstract, override, overridable); end
   end
 
   @installed_hooks = T.let({}, T::Hash[Module, TrueClass])
@@ -96,8 +96,11 @@ module T::Private::Methods
   sig {params(receiver: Object, original_method: UnboundMethod, callee: Symbol).returns(T::Private::Methods::Signature)}
   def self._handle_missing_method_signature(receiver, original_method, callee); end
 
-  sig {params(method_name: Symbol, original_method: UnboundMethod, declaration_block: DeclarationBlock).returns(T::Private::Methods::Signature)}
-  def self.run_sig(method_name, original_method, declaration_block); end
+  sig {params(method_name: Symbol, original_method: UnboundMethod, declaration_block: DeclarationBlock, unwrap: T::Boolean).returns(T::Private::Methods::Signature)}
+  def self.run_sig(method_name, original_method, declaration_block, unwrap:); end
+
+  sig {params(key: String, sig_block: T.proc.returns(Signature)).returns(T::Boolean)}
+  def self._sig_block_is_current?(key, sig_block); end
 
   sig {params(declaration_block: DeclarationBlock).returns(T::Private::Methods::Declaration)}
   def self.run_builder(declaration_block); end

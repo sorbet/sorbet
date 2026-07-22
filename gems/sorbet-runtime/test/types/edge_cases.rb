@@ -979,6 +979,120 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     ], unique_method_redefinitions.sort)
   end
 
+  it 'drops an un-evaluated sig if the method is redefined' do
+    klass = Class.new do
+      extend T::Sig
+      sig { returns(Integer) }
+      def foo; 0; end
+
+      define_method(:foo) { "not an int" }
+    end
+
+    assert_equal("not an int", klass.new.foo)
+    assert_nil(T::Utils.signature_for_method(klass.instance_method(:foo)))
+  end
+
+  it 'does not validate a captured old method against a new sig' do
+    orig_foo = nil
+    klass = Class.new do
+      extend T::Sig
+
+      sig { params(bad: T::Boolean).returns(Integer) }
+      def self.foo(bad)
+        bad ? "not an int" : 0
+      end
+
+      orig_foo = method(:foo)
+
+      sig { params(bad: T::Boolean).returns(Float) }
+      def self.foo(bad)
+        bad ? "not a float" : 0.0
+      end
+    end
+
+    # Call new method first, to be sure that the new method doesn't overwrite
+    # the old method.
+
+    # New method validates against Float sig
+    assert_equal(0.0, klass.foo(false))
+    err = assert_raises(TypeError) { klass.foo(true) }
+    assert_match(/Expected type Float/, err.message)
+
+    # Old captured method validates against Integer sig (its own), not Float
+    assert_equal(0, orig_foo.call(false))
+    err = assert_raises(TypeError) { orig_foo.call(true) }
+    assert_match(/Expected type Integer/, err.message)
+  end
+
+  it 'preserves define_method wrapper when sig is evaluated via bind_call' do
+    klass = Class.new do
+      extend T::Sig
+
+      sig { returns(String) }
+      def foo
+        "original"
+      end
+
+      orig_foo = instance_method(:foo)
+
+      define_method(:foo) do
+        "wrapped(#{orig_foo.bind_call(self)})"
+      end
+    end
+
+    obj = klass.new
+    assert_equal("wrapped(original)", obj.foo)
+    assert_equal("wrapped(original)", obj.foo)
+  end
+
+  it 'handles module_function when instance sig is evaluated before singleton call' do
+    mod = Module.new do
+      extend T::Sig
+
+      sig { params(x: Integer).returns(Integer) }
+      module_function def foo(x)
+        x
+      end
+    end
+
+    # Evaluate the instance method's sig first, but don't actually call the
+    # method. This just touches the `sig_block`, but doesn't actually update
+    # the built sig in the wrapper method's closure.
+    T::Utils.signature_for_method(mod.instance_method(:foo))
+
+    # Call the singleton method version. Its first-call wrapper shares the same
+    # DeclarationBlock, which has already been consumed.
+    assert_equal(42, mod.foo(42))
+  end
+
+  it 'does not validate module_function singleton call against a redefined sig' do
+    mod = Module.new do
+      extend T::Sig
+
+      sig { params(x: Integer).returns(Integer) }
+      module_function def foo(x)
+        x
+      end
+
+      T::Utils.signature_for_method(instance_method(:foo))
+
+      # Redefine foo with a new sig that has a different return type.
+      sig { params(x: String).returns(String) }
+      def foo(x)
+        x
+      end
+    end
+
+    T::Utils.signature_for_method(mod.instance_method(:foo))
+
+    # Call the original module_function singleton copy. It should validate
+    # against the Integer sig not the String sig, because we only redefined the
+    # instance method.
+    assert_equal(42, mod.foo(42))
+    err = assert_raises(TypeError) { mod.foo("hello") }
+    assert_match(/Expected type Integer/, err.message)
+  end
+
   it "can mark a class abstract! even if it defines a method called method" do
     Class.new do
       extend T::Helpers
