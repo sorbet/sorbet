@@ -14,7 +14,7 @@ class TypeConstraint;
 struct DispatchResult;
 struct DispatchArgs;
 
-class Refcounted {
+class Refcountable {
     friend class TypePtrTestHelper;
     std::atomic<uint32_t> counter{0};
 
@@ -124,7 +124,7 @@ private:
         return val;
     }
 
-    static tagged_storage tagPtr(Tag tag, Refcounted *expr) {
+    static tagged_storage tagPtr(Tag tag, Refcountable *expr) {
         auto val = tagToMask(tag);
 
         auto maskedPtr = reinterpret_cast<tagged_storage>(expr) << 16;
@@ -170,9 +170,9 @@ private:
         return val;
     }
 
-    Refcounted *get() const {
+    Refcountable *get() const {
         auto val = store & PTR_MASK;
-        return reinterpret_cast<Refcounted *>(val >> 16);
+        return reinterpret_cast<Refcountable *>(val >> 16);
     }
 
 public:
@@ -217,7 +217,7 @@ public:
         return *this;
     };
 
-    explicit TypePtr(Tag tag, Refcounted *expr) noexcept : store(tagPtr(tag, expr)) {
+    explicit TypePtr(Tag tag, Refcountable *expr) noexcept : store(tagPtr(tag, expr)) {
         expr->addref();
     }
 

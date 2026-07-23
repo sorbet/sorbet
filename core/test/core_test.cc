@@ -221,12 +221,12 @@ public:
         return ptr.store;
     }
 
-    static Refcounted *get(const TypePtr &ptr) {
+    static Refcountable *get(const TypePtr &ptr) {
         CHECK(ptr.containsPtr());
         return ptr.get();
     }
 
-    static TypePtr create(TypePtr::Tag tag, Refcounted *type) {
+    static TypePtr create(TypePtr::Tag tag, Refcountable *type) {
         return TypePtr(tag, type);
     }
 
