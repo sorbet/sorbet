@@ -130,6 +130,9 @@ class LSPTypechecker final {
 
         // Copies of the indexed trees that were updated during the fast path, for updating the cache of open files.
         std::vector<ast::ParsedFile> indexedTrees;
+
+        // The stratum that the edit took place, or lastStratum if it didn't affect anything.
+        core::packages::Stratum editStratum;
     };
 
     /** Runs incremental typechecking on the provided updates. Returns the final list of files typechecked. */
