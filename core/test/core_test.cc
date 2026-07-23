@@ -352,7 +352,7 @@ TEST_SUITE("RefPtr") {
     TEST_CASE("Constructs from raw pointer and releases") {
         int dtor_count = 0;
         {
-            auto ptr = sorbet::core::MakeRefPtr<TestRefCounted>(42, dtor_count);
+            auto ptr = sorbet::core::makeRefPtr<TestRefCounted>(42, dtor_count);
             CHECK(ptr != nullptr);
             CHECK_EQ(42, ptr->value);
             CHECK_EQ(42, (*ptr).value);
@@ -363,7 +363,7 @@ TEST_SUITE("RefPtr") {
     TEST_CASE("Copy increments refcount") {
         int dtor_count = 0;
         {
-            auto ptr = sorbet::core::MakeRefPtr<TestRefCounted>(7, dtor_count);
+            auto ptr = sorbet::core::makeRefPtr<TestRefCounted>(7, dtor_count);
             CHECK(!ptr->hasMultipleRefs());
             {
                 sorbet::core::RefPtr<TestRefCounted> copy(ptr);
@@ -379,7 +379,7 @@ TEST_SUITE("RefPtr") {
     TEST_CASE("Move does not increment refcount") {
         int dtor_count = 0;
         {
-            auto ptr = sorbet::core::MakeRefPtr<TestRefCounted>(9, dtor_count);
+            auto ptr = sorbet::core::makeRefPtr<TestRefCounted>(9, dtor_count);
             auto *raw = ptr.get();
             CHECK(!raw->hasMultipleRefs());
 
@@ -395,8 +395,8 @@ TEST_SUITE("RefPtr") {
     TEST_CASE("Copy assignment") {
         int dtor_count = 0;
         {
-            auto a = sorbet::core::MakeRefPtr<TestRefCounted>(1, dtor_count);
-            auto b = sorbet::core::MakeRefPtr<TestRefCounted>(2, dtor_count);
+            auto a = sorbet::core::makeRefPtr<TestRefCounted>(1, dtor_count);
+            auto b = sorbet::core::makeRefPtr<TestRefCounted>(2, dtor_count);
             auto *rawB = b.get();
 
             a = b;
@@ -410,8 +410,8 @@ TEST_SUITE("RefPtr") {
     TEST_CASE("Move assignment") {
         int dtor_count = 0;
         {
-            auto a = sorbet::core::MakeRefPtr<TestRefCounted>(1, dtor_count);
-            auto b = sorbet::core::MakeRefPtr<TestRefCounted>(2, dtor_count);
+            auto a = sorbet::core::makeRefPtr<TestRefCounted>(1, dtor_count);
+            auto b = sorbet::core::makeRefPtr<TestRefCounted>(2, dtor_count);
             auto *rawB = b.get();
 
             a = std::move(b);
@@ -426,7 +426,7 @@ TEST_SUITE("RefPtr") {
     TEST_CASE("Assign nullptr releases") {
         int dtor_count = 0;
         {
-            auto ptr = sorbet::core::MakeRefPtr<TestRefCounted>(5, dtor_count);
+            auto ptr = sorbet::core::makeRefPtr<TestRefCounted>(5, dtor_count);
             ptr = nullptr;
             CHECK(!ptr);
             CHECK_EQ(1, dtor_count);

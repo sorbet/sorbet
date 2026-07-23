@@ -143,7 +143,7 @@ public:
     }
 };
 
-template <typename T, typename... Args> RefPtr<T> MakeRefPtr(Args &&...args) {
+template <typename T, typename... Args> RefPtr<T> makeRefPtr(Args &&...args) {
     return RefPtr<T>(new T(std::forward<Args>(args)...));
 }
 
