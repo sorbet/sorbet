@@ -47,6 +47,10 @@ public:
     static std::pair<core::NameRef, core::LocOffsets> getAttrName(core::MutableContext ctx, core::NameRef attrFun,
                                                                   const ast::ExpressionPtr &name);
 
+    // Approximates the validations that `attr_reader` does for attribute names.
+    // Emits a BadAttrArg error and returns false if invalid.
+    static bool validAttrName(core::MutableContext ctx, core::LocOffsets loc, core::NameRef name);
+
     // Test if `expr` is a chain of `UnresolvedConstantLit` trees with names equal to `constantName`.
     //
     // 1. Opus::Command as `expr` would match {Constants::Opus(), Constants::Command()}

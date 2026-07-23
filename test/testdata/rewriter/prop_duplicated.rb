@@ -13,7 +13,6 @@ class A < T::Struct
   const :age, Float
 # ^^^^^^^^^^^^^^^^^ error: The `const :age` is defined multiple times
 
-  prop :"foo 'bar", Integer
-  prop :"foo 'bar", Integer
-# ^^^^^^^^^^^^^^^^^^^^^^^^^ error: The `prop :"foo \'bar"` is defined multiple times
+  prop :"foo 'bar", Integer # error: Bad attribute name `foo 'bar`
+  prop :"foo 'bar", Integer # error: Bad attribute name `foo 'bar`
 end

@@ -326,9 +326,7 @@ ast::ExpressionPtr ASTUtil::thunkBody(core::MutableContext ctx, ast::ExpressionP
     return std::move(block->body);
 }
 
-namespace {
-
-bool validAttrName(core::MutableContext ctx, core::LocOffsets loc, core::NameRef name) {
+bool ASTUtil::validAttrName(core::MutableContext ctx, core::LocOffsets loc, core::NameRef name) {
     auto shortName = name.shortName(ctx);
 
     auto validName = !shortName.empty() && (isalpha(shortName.front()) || shortName.front() == '_') &&
@@ -346,8 +344,6 @@ bool validAttrName(core::MutableContext ctx, core::LocOffsets loc, core::NameRef
 
     return validName;
 }
-
-} // namespace
 
 pair<core::NameRef, core::LocOffsets> ASTUtil::getAttrName(core::MutableContext ctx, core::NameRef attrFun,
                                                            const ast::ExpressionPtr &name) {
