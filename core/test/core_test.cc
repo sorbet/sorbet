@@ -364,13 +364,13 @@ TEST_SUITE("RefPtr") {
         int dtor_count = 0;
         {
             auto ptr = sorbet::core::MakeRefPtr<TestRefCounted>(7, dtor_count);
-            CHECK(!ptr.get()->hasMultipleRefs());
+            CHECK(!ptr->hasMultipleRefs());
             {
                 sorbet::core::RefPtr<TestRefCounted> copy(ptr);
-                CHECK(ptr.get()->hasMultipleRefs());
+                CHECK(ptr->hasMultipleRefs());
                 CHECK_EQ(ptr.get(), copy.get());
             }
-            CHECK(!ptr.get()->hasMultipleRefs());
+            CHECK(!ptr->hasMultipleRefs());
             CHECK_EQ(0, dtor_count);
         }
         CHECK_EQ(1, dtor_count);
