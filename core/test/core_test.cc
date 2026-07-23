@@ -207,11 +207,6 @@ TEST_CASE("Substitute") {
 // Privileged class that is friends with TypePtr
 class TypePtrTestHelper {
 public:
-    static std::atomic<uint32_t> *counter(const TypePtr &ptr) {
-        CHECK(ptr.containsPtr());
-        return &ptr.get()->counter;
-    }
-
     static uint64_t inlinedValue(const TypePtr &ptr) {
         CHECK(!ptr.containsPtr());
         return ptr.inlinedValue();
@@ -243,29 +238,30 @@ TEST_SUITE("TypePtr") {
 
     TEST_CASE("Properly manages counter") {
         auto ptr = make_type<UnresolvedClassType>(Symbols::untyped(), vector<NameRef>{});
-        auto counter = TypePtrTestHelper::counter(ptr);
-        REQUIRE_NE(nullptr, counter);
-        CHECK_EQ(1, counter->load());
+        auto refptr = TypePtrTestHelper::get(ptr);
+        REQUIRE_NE(nullptr, refptr);
+        REQUIRE(!refptr->hasMultipleRefs());
 
         {
             // Copy should increment counter
             TypePtr ptrCopy(ptr);
-            REQUIRE_EQ(counter, TypePtrTestHelper::counter(ptrCopy));
-            CHECK_EQ(2, counter->load());
+            auto refptrCopy = TypePtrTestHelper::get(ptrCopy);
+            REQUIRE_EQ(refptr, refptrCopy);
+            REQUIRE(refptr->hasMultipleRefs());
         }
 
         // Destruction of copy should decrement counter
-        CHECK_EQ(1, counter->load());
+        REQUIRE(!refptr->hasMultipleRefs());
 
         {
             TypePtr ptrCopy(ptr);
             // Assigning/overwriting should decrement counter
             ptr = TypePtr();
-            CHECK_EQ(1, counter->load());
+            REQUIRE(!refptr->hasMultipleRefs());
 
             // Moving should keep counter the same
             ptr = move(ptrCopy);
-            CHECK_EQ(1, counter->load());
+            REQUIRE(!refptr->hasMultipleRefs());
 
             // Moving should clear counter from ptrCopy and make it an empty TypePtr
             CHECK_EQ(0, TypePtrTestHelper::store(ptrCopy));
@@ -274,9 +270,9 @@ TEST_SUITE("TypePtr") {
             // Assigning to nullptr should increment counter (and not try to increment the null counter field in
             // ptrCopy)
             ptrCopy = ptr;
-            CHECK_EQ(2, counter->load());
+            REQUIRE(refptr->hasMultipleRefs());
         }
-        CHECK_EQ(1, counter->load());
+        REQUIRE(!refptr->hasMultipleRefs());
     }
 
     TEST_CASE("Tagging works as expected") {
