@@ -505,9 +505,6 @@ pipeline_tests(
             "testdata/cfg/rescue_var_expression.rb",
             "testdata/parser/misc.rb",
 
-            # The Prism desugarer doesn't check for block-local variables if there are no other parameters
-            "testdata/desugar/shadow_args.rb",
-
             # Legacy-parser variant of `missing_shadow_args_prism.rb` (different parser errors and desugar tree).
             "testdata/parser/error_recovery/missing_shadow_args.rb",
 
