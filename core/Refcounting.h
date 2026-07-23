@@ -134,23 +134,12 @@ public:
         return ptr_ != nullptr;
     }
 
-    bool operator==(const RefPtr &other) const noexcept {
-        return ptr_ == other.ptr_;
-    }
-    bool operator!=(const RefPtr &other) const noexcept {
-        return ptr_ != other.ptr_;
-    }
+    bool operator<=>(const RefPtr &other) const noexcept = default;
     bool operator==(std::nullptr_t) const noexcept {
         return ptr_ == nullptr;
     }
     bool operator!=(std::nullptr_t) const noexcept {
         return ptr_ != nullptr;
-    }
-    bool operator==(T *p) const noexcept {
-        return ptr_ == p;
-    }
-    bool operator!=(T *p) const noexcept {
-        return ptr_ != p;
     }
 };
 
