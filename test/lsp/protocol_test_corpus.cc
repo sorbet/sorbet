@@ -1568,9 +1568,9 @@ TEST_CASE_FIXTURE(ProtocolTest, "ErrorsRemainAfterSlowPathRestart") {
         // We should see at a minimum the start/end typechecking messages.
         REQUIRE(resps.size() >= 2);
 
-        // We should see a starting and ending slow path message, with the end message indicating that the slow path
-        // started from stratum 0. The message inbetween is the error on `Root::Foo::A`.
-        CHECK_EQ(resps.size(), 3);
+        // We should see a starting and ending slow path message, with errors between. The error messages between are
+        // the error on `Root::Foo::A` and the fast-path error from `Root::A`.
+        CHECK_EQ(resps.size(), 4);
         {
             auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(resps.front()->asNotification().params);
             CHECK_EQ(params->typecheckingPath, TypecheckingPath::Slow);
@@ -1582,8 +1582,9 @@ TEST_CASE_FIXTURE(ProtocolTest, "ErrorsRemainAfterSlowPathRestart") {
             CHECK_EQ(params->typecheckingPath, TypecheckingPath::Slow);
             CHECK_EQ(params->status, SorbetTypecheckRunStatus::Ended);
 
-            // We're modifying package `Root::Foo`, which means that we don't need to typecheck `Root` again.
-            CHECK_EQ(params->startingStratum, 1);
+            // We're modifying package `Root::Foo`, but we had made a fast-path edit that changed a file in `Root`. As a
+            // result, we start back in stratum `0`.
+            CHECK_EQ(params->startingStratum, 0);
         }
 
         assertErrorDiagnostics(move(resps), {

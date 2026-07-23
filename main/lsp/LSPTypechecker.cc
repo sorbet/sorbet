@@ -312,11 +312,12 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
             // errors (because no-op edits will not run incremental namer), but that's fine because
             // GlobalState doesn't change for no-op edits, and retypecheck already drops all errors.
             oldFoundHashesForFiles.emplace(fref, oldFile->getFileHash());
-
-            // Since this is a real edit, update the edit stratum to reflect the stratum of this file's
-            // package.
-            editStratum = std::min(this->fileToStratum[fref.id()], editStratum);
         }
+
+        // We track the edit stratum for all files that were updated by the edit. Unfortunately this
+        // will include files that were opened, but not changed. In the future, if we can tell if the
+        // file was changed by the edit, we should make this update to `editStratum` conditional.
+        editStratum = std::min(this->fileToStratum[fref.id()], editStratum);
 
         // If file doesn't have a typed: sigil, then we need to ensure it's typechecked using typed: false.
         fref.data(*gs).strictLevel = pipeline::decideStrictLevel(*gs, fref, config->opts);
