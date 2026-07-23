@@ -549,8 +549,10 @@ NameDef names[] = {
     {"Regexp", "Regexp", true},
     {"Exception", "Exception", true},
     {"StandardError", "StandardError", true},
-    {"Complex", "Complex", true},
-    {"Rational", "Rational", true},
+    {"Complex", "Complex", true},   // The `::Complex` class
+    {"KernelComplex", "Complex"},   // The `Kernel.Complex` method
+    {"Rational", "Rational", true}, // The `::Rational` class
+    {"KernelRational", "Rational"}, // The `Kernel.Rational` method
     // A magic non user-creatable class with methods to keep state between passes
     {"Magic", "<Magic>", true},
     // A magic non user-creatable class to attach symbols for blaming untyped to
@@ -669,14 +671,25 @@ void emit_register(ostream &out) {
 }
 
 int main(int argc, char **argv) {
-    int constantI = 0;
     int utf8I = 0;
+    sorbet::UnorderedMap<string, int> utf8Ids;
+    // Deduplicates the given name, so a constant and non-constant entry
+    // with the same string will reuse the same id.
+    auto enterUTF8Name = [&utf8Ids, &utf8I](NameDef &name) {
+        auto [it, inserted] = utf8Ids.emplace(name.val, utf8I);
+        if (inserted) {
+            utf8I++;
+        }
+        return it->second;
+    };
+
+    int constantI = 0;
     for (auto &name : names) {
         if (name.isConstant) {
-            utf8I++;
+            enterUTF8Name(name);
             name.id = constantI++;
         } else {
-            name.id = utf8I++;
+            name.id = enterUTF8Name(name);
         }
     }
     int lastConstantId = constantI;

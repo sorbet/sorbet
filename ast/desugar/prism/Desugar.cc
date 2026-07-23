@@ -2724,7 +2724,7 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
                 // The `i` is already stripped out of `value`, but there is still an `r`, so strip that off too.
                 auto rationalValue = value.substr(0, value.size() - "r"sv.size());
                 auto kernel = MK::Constant(numberLoc, core::Symbols::Kernel());
-                core::NameRef rationalName = core::Names::Constants::Rational().dataCnst(ctx)->original;
+                core::NameRef rationalName = core::Names::KernelRational();
                 core::NameRef valueName = ctx.state.enterNameUTF8(rationalValue);
                 imaginaryPart = MK::Send1(numberLoc, move(kernel), rationalName, numberLoc.copyWithZeroLength(),
                                           MK::String(numberLoc, valueName));
@@ -2735,7 +2735,7 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
 
             // Create the desugared Complex call: `Kernel.Complex(0, imaginary_part)`
             auto kernel = MK::Constant(numberLoc, core::Symbols::Kernel());
-            core::NameRef complexName = core::Names::Constants::Complex().dataCnst(ctx)->original;
+            core::NameRef complexName = core::Names::KernelComplex();
             auto complexCall = MK::Send2(numberLoc, move(kernel), complexName, numberLoc.copyWithZeroLength(),
                                          MK::Int(numberLoc, 0), move(imaginaryPart));
 
@@ -3186,7 +3186,7 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
             value = value.substr(0, value.size() - "r"sv.size()); // drop the `r` suffix
 
             auto kernel = MK::Constant(location, core::Symbols::Kernel());
-            core::NameRef rationalName = core::Names::Constants::Rational().dataCnst(ctx)->original;
+            core::NameRef rationalName = core::Names::KernelRational();
             core::NameRef valueName = ctx.state.enterNameUTF8(value);
 
             // Desugar to `123r` to `::Kernel.Rational("123")`
