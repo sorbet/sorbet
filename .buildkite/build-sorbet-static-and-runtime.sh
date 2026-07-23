@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eo pipefail
+set -euo pipefail
 
 prefix=$(.buildkite/tools/sorbet-version-prefix.sh)
 
