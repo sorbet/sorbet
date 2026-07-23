@@ -221,8 +221,7 @@ bool LSPTypechecker::typecheck(unique_ptr<LSPFileUpdates> updates, WorkerPool &w
 
             // Remember where in the package graph we're making this change, as that will determine how much we can
             // copy on the next slow path.
-            this->fastPathEditStratum =
-                std::min(this->fastPathEditStratum, this->getFileStratumMapping().getStratumForFiles(filesTypechecked));
+            this->fastPathEditStratum = std::min(this->fastPathEditStratum, result.editStratum);
 
             ENFORCE(updates->updatedFiles.empty());
             ENFORCE(updates->updatedFileRefs.empty());
@@ -286,6 +285,7 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
     }
 
     config->logger->debug("Added {} files that were not part of the edit to the update set", toTypecheck.size());
+    auto editStratum = this->lastStratum;
     UnorderedMap<core::FileRef, shared_ptr<const core::FileHash>> oldFoundHashesForFiles;
     auto ix = -1;
     for (auto &file : updates.updatedFiles) {
@@ -312,6 +312,10 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
             // errors (because no-op edits will not run incremental namer), but that's fine because
             // GlobalState doesn't change for no-op edits, and retypecheck already drops all errors.
             oldFoundHashesForFiles.emplace(fref, oldFile->getFileHash());
+
+            // Since this is a real edit, update the edit stratum to reflect the stratum of this file's
+            // package.
+            editStratum = std::min(this->fileToStratum[fref.id()], editStratum);
         }
 
         // If file doesn't have a typed: sigil, then we need to ensure it's typechecked using typed: false.
@@ -417,7 +421,7 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
         "Running fast path over num_files={} incrementalNamer={} preemption={} duration={} files=[{}]",
         toTypecheck.size(), shouldRunIncrementalNamer, isPreemption, duration.usec, files);
 
-    return FastPathResult{move(toTypecheck), move(toCache)};
+    return FastPathResult{move(toTypecheck), move(toCache), editStratum};
 }
 
 namespace {
