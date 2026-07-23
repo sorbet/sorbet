@@ -1944,25 +1944,24 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 if (absl::EndsWith(complex->value, "r")) {
                     auto rationalValue = complex->value.substr(0, complex->value.size() - "r"sv.size());
                     auto kernel = MK::Constant(loc, core::Symbols::Kernel());
-                    core::NameRef rationalName = core::Names::KernelRational();
                     core::NameRef value = dctx.ctx.state.enterNameUTF8(rationalValue);
-                    imaginaryPart = MK::Send1(loc, move(kernel), rationalName, locZeroLen, MK::String(loc, value));
+                    imaginaryPart =
+                        MK::Send1(loc, move(kernel), core::Names::KernelRational(), locZeroLen, MK::String(loc, value));
                 } else {
                     core::NameRef value = dctx.ctx.state.enterNameUTF8(complex->value);
                     imaginaryPart = MK::String(loc, value);
                 }
 
                 auto kernel = MK::Constant(loc, core::Symbols::Kernel());
-                core::NameRef complex_name = core::Names::KernelComplex();
-                auto send =
-                    MK::Send2(loc, move(kernel), complex_name, locZeroLen, MK::Int(loc, 0), move(imaginaryPart));
+                auto send = MK::Send2(loc, move(kernel), core::Names::KernelComplex(), locZeroLen, MK::Int(loc, 0),
+                                      move(imaginaryPart));
                 result = move(send);
             },
             [&](parser::Rational *complex) {
                 auto kernel = MK::Constant(loc, core::Symbols::Kernel());
-                core::NameRef complex_name = core::Names::KernelRational();
                 core::NameRef value = dctx.ctx.state.enterNameUTF8(complex->val);
-                auto send = MK::Send1(loc, move(kernel), complex_name, locZeroLen, MK::String(loc, value));
+                auto send =
+                    MK::Send1(loc, move(kernel), core::Names::KernelRational(), locZeroLen, MK::String(loc, value));
                 result = move(send);
             },
             [&](parser::Array *array) {
