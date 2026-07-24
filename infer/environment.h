@@ -6,6 +6,7 @@
 #include "core/Context.h"
 #include "core/Error.h"
 #include "core/Names.h"
+#include "core/Refcounting.h"
 #include "core/Symbols.h"
 #include "core/errors/infer.h"
 #include "core/errors/internal.h"
@@ -37,7 +38,33 @@ public:
 };
 
 class Environment;
-struct KnowledgeFact;
+
+/**
+ * Encode things that we know hold and don't hold.
+ */
+struct KnowledgeFact : public core::RefCounted<KnowledgeFact> {
+    KnowledgeFact() = default;
+
+    bool isDead = false;
+    /* the following type tests are known to be true */
+    InlinedVector<std::pair<cfg::LocalRef, core::TypePtr>, 1> yesTypeTests;
+    /* the following type tests are known to be false */
+    InlinedVector<std::pair<cfg::LocalRef, core::TypePtr>, 1> noTypeTests;
+
+    /* this is a "merge" of two knowledges - computes a "lub" of knowledges */
+    void min(core::Context ctx, const KnowledgeFact &other);
+
+    void sanityCheck() const;
+
+    std::string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
+
+    // Can't use the regular copy constructor because `core::RefCounted` isn't copyable.
+    core::RefPtr<KnowledgeFact> freshCopy();
+
+    KnowledgeFact(bool isDead, const InlinedVector<std::pair<cfg::LocalRef, core::TypePtr>, 1> &yesTypeTests,
+                  const InlinedVector<std::pair<cfg::LocalRef, core::TypePtr>, 1> &noTypeTests);
+};
+CheckSize(KnowledgeFact, 56, 8);
 
 // storing all the knowledge is slow
 // it only makes sense for us to store it if we are going to use it
@@ -59,7 +86,7 @@ class KnowledgeRef {
     // Is private to ensure that yes/no type test updates go through trusted paths that keep TypeTestReverseIndex
     // updated.
     KnowledgeFact &mutate();
-    std::shared_ptr<KnowledgeFact> knowledge;
+    core::RefPtr<KnowledgeFact> knowledge;
 
 public:
     KnowledgeRef();
@@ -84,7 +111,7 @@ public:
 
     void removeReferencesToVar(cfg::LocalRef ref);
 };
-CheckSize(KnowledgeRef, 16, 8);
+CheckSize(KnowledgeRef, 8, 8);
 
 /** Almost a named pair of two KnowledgeFact-s. One holds knowledge that is true when a variable is falsy,
  * the other holds knowledge which is true if the same variable is falsy->
@@ -124,7 +151,7 @@ public:
     void sanityCheck() const;
     void emitKnowledgeSizeMetric() const;
 };
-CheckSize(TestedKnowledge, 40, 8);
+CheckSize(TestedKnowledge, 24, 8);
 
 class Environment {
     const core::TypeAndOrigins uninitialized;
