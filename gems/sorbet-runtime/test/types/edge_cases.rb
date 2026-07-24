@@ -126,6 +126,8 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         # Shouldn't add overhead
         obj = klass.new
         allocs = counting_allocations { obj.bar }
+        assert_equal(1, allocs)
+        allocs = counting_allocations { obj.bar }
         assert_equal(0, allocs)
       end
 
@@ -168,6 +170,8 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
         # Shouldn't add overhead
         obj = klass.new
+        allocs = counting_allocations { obj.bar }
+        assert_equal(1, allocs)
         allocs = counting_allocations { obj.bar }
         assert_equal(0, allocs)
       end
@@ -222,6 +226,8 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         # Shouldn't add overhead
         obj = subclass.new
         allocs = counting_allocations { obj.bar }
+        assert_equal(1, allocs)
+        allocs = counting_allocations { obj.bar }
         assert_equal(0, allocs)
       end
 
@@ -275,6 +281,8 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         # Shouldn't add overhead
         obj = klass.new
         allocs = counting_allocations { obj.bar }
+        assert_equal(1, allocs)
+        allocs = counting_allocations { obj.bar }
         assert_equal(0, allocs)
       end
     end
@@ -323,6 +331,8 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         # Shouldn't add overhead
         klass.bar # Need extra call since first one came before `foo` unwrap
         allocs = counting_allocations { klass.bar }
+        assert_equal(1, allocs)
+        allocs = counting_allocations { klass.bar }
         assert_equal(0, allocs)
       end
 
@@ -368,6 +378,8 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
         # Shouldn't add overhead
         klass.bar # Need extra call since first one came before `foo` unwrap
+        allocs = counting_allocations { klass.bar }
+        assert_equal(1, allocs)
         allocs = counting_allocations { klass.bar }
         assert_equal(0, allocs)
       end
@@ -423,6 +435,8 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         assert_equal(:foo, superclass.foo)
 
         # Shouldn't add overhead
+        allocs = counting_allocations { subclass.bar }
+        assert_equal(1, allocs)
         allocs = counting_allocations { subclass.bar }
         assert_equal(0, allocs)
       end
@@ -480,6 +494,8 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         assert_equal(:foo, klass.bar)
 
         # Shouldn't add overhead
+        allocs = counting_allocations { klass.bar }
+        assert_equal(1, allocs)
         allocs = counting_allocations { klass.bar }
         assert_equal(0, allocs)
       end
