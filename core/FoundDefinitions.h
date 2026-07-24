@@ -171,11 +171,19 @@ struct FoundMethod final {
         bool isAttrBestEffortUIOnly : 1 = false;
         bool discardDef : 1 = false;
         bool genericPropGetter : 1 = false;
+        // True if this method definition was lexically nested inside a block
+        // (e.g. `Foo.class_eval do ... end` or `Class.new do ... end`).
+        // Set by the Flatten rewriter pass (which hoists method defs out of blocks,
+        // losing the lexical nesting information) and used by Namer to avoid treating
+        // such defs as implicitly-private top-level definitions.
+        // See https://github.com/sorbet/sorbet/issues/10436
+        // See https://github.com/sorbet/sorbet/issues/10452
+        bool isInsideBlock : 1 = false;
 
         bool operator==(const Flags &other) const noexcept {
             return isSelfMethod == other.isSelfMethod && isRewriterSynthesized == other.isRewriterSynthesized &&
                    isAttrBestEffortUIOnly == other.isAttrBestEffortUIOnly && discardDef == other.discardDef &&
-                   genericPropGetter == other.genericPropGetter;
+                   genericPropGetter == other.genericPropGetter && isInsideBlock == other.isInsideBlock;
         }
 
         bool operator!=(const Flags &other) const noexcept {

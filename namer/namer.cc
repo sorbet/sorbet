@@ -1129,8 +1129,15 @@ private:
 
         // Methods defined at the top level default to private (on Object)
         // Also, the `initialize` method defaults to private
+        //
+        // Methods that were lexically nested inside a block (e.g. `Range.class_eval do ... end` or
+        // `Class.new do ... end`) are excluded from the top-level heuristic: in Ruby, the default
+        // visibility inside such blocks is public, and marking them private here would clobber the
+        // visibility of methods like `Object#==` or `Module#name` for the entire program.
+        // See https://github.com/sorbet/sorbet/issues/10452 and
+        // https://github.com/sorbet/sorbet/issues/10436
         auto implicitlyPrivate =
-            (ctx.owner.enclosingClass(ctx) == core::Symbols::root()) ||
+            (ctx.owner.enclosingClass(ctx) == core::Symbols::root() && !method.flags.isInsideBlock) ||
             (!symbol.data(ctx)->owner.data(ctx)->attachedClass(ctx).exists() && name == core::Names::initialize());
         if (implicitlyPrivate) {
             symbol.data(ctx)->flags.isPrivate = true;
