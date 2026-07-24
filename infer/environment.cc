@@ -228,7 +228,7 @@ string KnowledgeFact::toString(const core::GlobalState &gs, const cfg::CFG &cfg)
     return fmt::format("{}{}", fmt::join(buf1, ""), fmt::join(buf2, ""));
 }
 
-KnowledgeRef::KnowledgeRef() : knowledge(make_shared<KnowledgeFact>()) {}
+KnowledgeRef::KnowledgeRef() : knowledge(core::makeRefPtr<KnowledgeFact>()) {}
 
 const KnowledgeFact &KnowledgeRef::operator*() const {
     return *knowledge.get();
@@ -239,10 +239,10 @@ const KnowledgeFact *KnowledgeRef::operator->() const {
 }
 
 KnowledgeFact &KnowledgeRef::mutate() {
-    if (knowledge.use_count() > 1) {
-        knowledge = make_shared<KnowledgeFact>(*knowledge);
+    if (knowledge->hasMultipleRefs()) {
+        knowledge = core::makeRefPtr<KnowledgeFact>(*knowledge);
     }
-    ENFORCE(knowledge.use_count() == 1);
+    ENFORCE(!knowledge->hasMultipleRefs());
     return *knowledge.get();
 }
 

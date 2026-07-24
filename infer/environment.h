@@ -6,6 +6,7 @@
 #include "core/Context.h"
 #include "core/Error.h"
 #include "core/Names.h"
+#include "core/Refcounting.h"
 #include "core/Symbols.h"
 #include "core/errors/infer.h"
 #include "core/errors/internal.h"
@@ -41,7 +42,7 @@ class Environment;
 /**
  * Encode things that we know hold and don't hold.
  */
-struct KnowledgeFact {
+struct KnowledgeFact : public core::RefCounted<KnowledgeFact> {
     bool isDead = false;
     /* the following type tests are known to be true */
     InlinedVector<std::pair<cfg::LocalRef, core::TypePtr>, 1> yesTypeTests;
@@ -77,7 +78,7 @@ class KnowledgeRef {
     // Is private to ensure that yes/no type test updates go through trusted paths that keep TypeTestReverseIndex
     // updated.
     KnowledgeFact &mutate();
-    std::shared_ptr<KnowledgeFact> knowledge;
+    core::RefPtr<KnowledgeFact> knowledge;
 
 public:
     KnowledgeRef();
