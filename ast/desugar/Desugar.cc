@@ -1718,24 +1718,24 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                         : MK::While(loc, move(cond), move(body));
                 result = move(res);
             },
-            [&](parser::Until *wl) {
-                auto cond = node2TreeImpl(dctx, wl->cond);
-                auto body = node2TreeImpl(dctx, wl->body);
+            [&](parser::Until *until) {
+                auto cond = node2TreeImpl(dctx, until->cond);
+                auto body = node2TreeImpl(dctx, until->body);
                 ExpressionPtr res =
                     MK::While(loc, MK::Send0(loc, move(cond), core::Names::bang(), locZeroLen), move(body));
                 result = move(res);
             },
             // This is the same as WhilePost, but the cond negation is in the other branch.
-            [&](parser::UntilPost *wl) {
-                bool isKwbegin = parser::isa_node<parser::Kwbegin>(wl->body.get());
-                auto cond = node2TreeImpl(dctx, wl->cond);
-                auto body = node2TreeImpl(dctx, wl->body);
+            [&](parser::UntilPost *untilPost) {
+                bool isKwbegin = parser::isa_node<parser::Kwbegin>(untilPost->body.get());
+                auto cond = node2TreeImpl(dctx, untilPost->cond);
+                auto body = node2TreeImpl(dctx, untilPost->body);
                 ExpressionPtr res =
                     isKwbegin ? doUntil(dctx, loc, move(cond), move(body))
                               : MK::While(loc, MK::Send0(loc, move(cond), core::Names::bang(), locZeroLen), move(body));
                 result = move(res);
             },
-            [&](parser::Nil *wl) {
+            [&](parser::Nil *nil) {
                 ExpressionPtr res = MK::Nil(loc);
                 result = move(res);
             },
@@ -1957,9 +1957,9 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                                       move(imaginaryPart));
                 result = move(send);
             },
-            [&](parser::Rational *complex) {
+            [&](parser::Rational *rational) {
                 auto kernel = MK::Constant(loc, core::Symbols::Kernel());
-                core::NameRef value = dctx.ctx.state.enterNameUTF8(complex->val);
+                core::NameRef value = dctx.ctx.state.enterNameUTF8(rational->val);
                 auto send =
                     MK::Send1(loc, move(kernel), core::Names::KernelRational(), locZeroLen, MK::String(loc, value));
                 result = move(send);
@@ -2106,14 +2106,15 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     result = move(res);
                 }
             },
-            [&](parser::Break *ret) {
-                if (ret->exprs.size() > 1) {
-                    auto arrayLoc = ret->exprs.front()->loc.join(ret->exprs.back()->loc);
+            [&](parser::Break *break_) {
+                if (break_->exprs.size() > 1) {
+                    auto arrayLoc = break_->exprs.front()->loc.join(break_->exprs.back()->loc);
                     Array::ENTRY_store elems;
-                    elems.reserve(ret->exprs.size());
-                    for (auto &stat : ret->exprs) {
+                    elems.reserve(break_->exprs.size());
+                    for (auto &stat : break_->exprs) {
                         if (parser::isa_node<parser::BlockPass>(stat.get())) {
-                            if (auto e = dctx.ctx.beginIndexerError(ret->loc, core::errors::Desugar::UnsupportedNode)) {
+                            if (auto e =
+                                    dctx.ctx.beginIndexerError(break_->loc, core::errors::Desugar::UnsupportedNode)) {
                                 e.setHeader("Block argument should not be given");
                             }
                             continue;
@@ -2123,15 +2124,15 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     ExpressionPtr arr = MK::Array(arrayLoc, move(elems));
                     ExpressionPtr res = MK::Break(loc, move(arr));
                     result = move(res);
-                } else if (ret->exprs.size() == 1) {
-                    if (parser::isa_node<parser::BlockPass>(ret->exprs[0].get())) {
-                        if (auto e = dctx.ctx.beginIndexerError(ret->loc, core::errors::Desugar::UnsupportedNode)) {
+                } else if (break_->exprs.size() == 1) {
+                    if (parser::isa_node<parser::BlockPass>(break_->exprs[0].get())) {
+                        if (auto e = dctx.ctx.beginIndexerError(break_->loc, core::errors::Desugar::UnsupportedNode)) {
                             e.setHeader("Block argument should not be given");
                         }
                         ExpressionPtr res = MK::Break(loc, MK::EmptyTree());
                         result = move(res);
                     } else {
-                        ExpressionPtr res = MK::Break(loc, node2TreeImpl(dctx, ret->exprs[0]));
+                        ExpressionPtr res = MK::Break(loc, node2TreeImpl(dctx, break_->exprs[0]));
                         result = move(res);
                     }
                 } else {
@@ -2139,14 +2140,15 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     result = move(res);
                 }
             },
-            [&](parser::Next *ret) {
-                if (ret->exprs.size() > 1) {
-                    auto arrayLoc = ret->exprs.front()->loc.join(ret->exprs.back()->loc);
+            [&](parser::Next *next) {
+                if (next->exprs.size() > 1) {
+                    auto arrayLoc = next->exprs.front()->loc.join(next->exprs.back()->loc);
                     Array::ENTRY_store elems;
-                    elems.reserve(ret->exprs.size());
-                    for (auto &stat : ret->exprs) {
+                    elems.reserve(next->exprs.size());
+                    for (auto &stat : next->exprs) {
                         if (parser::isa_node<parser::BlockPass>(stat.get())) {
-                            if (auto e = dctx.ctx.beginIndexerError(ret->loc, core::errors::Desugar::UnsupportedNode)) {
+                            if (auto e =
+                                    dctx.ctx.beginIndexerError(next->loc, core::errors::Desugar::UnsupportedNode)) {
                                 e.setHeader("Block argument should not be given");
                             }
                             continue;
@@ -2156,15 +2158,15 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     ExpressionPtr arr = MK::Array(arrayLoc, move(elems));
                     ExpressionPtr res = MK::Next(loc, move(arr));
                     result = move(res);
-                } else if (ret->exprs.size() == 1) {
-                    if (parser::isa_node<parser::BlockPass>(ret->exprs[0].get())) {
-                        if (auto e = dctx.ctx.beginIndexerError(ret->loc, core::errors::Desugar::UnsupportedNode)) {
+                } else if (next->exprs.size() == 1) {
+                    if (parser::isa_node<parser::BlockPass>(next->exprs[0].get())) {
+                        if (auto e = dctx.ctx.beginIndexerError(next->loc, core::errors::Desugar::UnsupportedNode)) {
                             e.setHeader("Block argument should not be given");
                         }
                         ExpressionPtr res = MK::Break(loc, MK::EmptyTree());
                         result = move(res);
                     } else {
-                        ExpressionPtr res = MK::Next(loc, node2TreeImpl(dctx, ret->exprs[0]));
+                        ExpressionPtr res = MK::Next(loc, node2TreeImpl(dctx, next->exprs[0]));
                         result = move(res);
                     }
                 } else {
@@ -2172,14 +2174,14 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     result = move(res);
                 }
             },
-            [&](parser::Retry *ret) {
+            [&](parser::Retry *retry) {
                 ExpressionPtr res = make_expression<Retry>(loc);
                 result = move(res);
             },
-            [&](parser::Yield *ret) {
+            [&](parser::Yield *yield) {
                 Send::ARGS_store args;
-                args.reserve(ret->exprs.size());
-                for (auto &stat : ret->exprs) {
+                args.reserve(yield->exprs.size());
+                for (auto &stat : yield->exprs) {
                     args.emplace_back(node2TreeImpl(dctx, stat));
                 };
 
