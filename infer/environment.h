@@ -44,16 +44,16 @@ class Environment;
 struct KnowledgeFact {
     bool isDead = false;
     /* the following type tests are known to be true */
-    InlinedVector<pair<cfg::LocalRef, core::TypePtr>, 1> yesTypeTests;
+    InlinedVector<std::pair<cfg::LocalRef, core::TypePtr>, 1> yesTypeTests;
     /* the following type tests are known to be false */
-    InlinedVector<pair<cfg::LocalRef, core::TypePtr>, 1> noTypeTests;
+    InlinedVector<std::pair<cfg::LocalRef, core::TypePtr>, 1> noTypeTests;
 
     /* this is a "merge" of two knowledges - computes a "lub" of knowledges */
     void min(core::Context ctx, const KnowledgeFact &other);
 
     void sanityCheck() const;
 
-    string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
+    std::string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
 };
 CheckSize(KnowledgeFact, 56, 8);
 
