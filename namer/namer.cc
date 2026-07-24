@@ -95,6 +95,13 @@ class SymbolFinder {
         }
 
         switch (send->fun.rawId()) {
+            case core::Names::declarePackagePrivate().rawId(): {
+                // This is special if we're using package mode
+                if (!ctx.state.packageDB().enabled()) {
+                    break;
+                }
+                [[fallthrough]];
+            }
             case core::Names::declareFinal().rawId():
             case core::Names::declareSealed().rawId():
             case core::Names::declareInterface().rawId():
@@ -1415,6 +1422,9 @@ private:
                     e.replaceWith("Change `interface!` to `abstract!`", ctx.locAt(mod.loc), "abstract!");
                 }
             }
+        }
+        if (fun == core::Names::declarePackagePrivate()) {
+            symbolData->flags.isPackagePrivate = true;
         }
     }
 
