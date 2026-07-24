@@ -79,3 +79,13 @@ x = [[3.4], [1, "a"]]
 T.reveal_type(x.transpose) # error: Revealed type: `T::Array[T::Array[T.untyped]]`
 x = [[3.4, "a"], [:a, 5]]
 T.reveal_type(x.transpose) # error: Revealed type: `[T::Array[T.any(Float, Symbol)], T::Array[T.any(Integer, String)]] (2-tuple)`
+
+# rfind
+# block only -> T.nilable(Elem)
+T.reveal_type([1, 2, 3].rfind { |x| x > 1 }) # error: Revealed type: `T.nilable(Integer)`
+# no block -> Enumerator
+T.reveal_type([1, 2, 3].rfind) # error: Revealed type: `T::Enumerator[Integer]`
+# ifnone proc + block -> T.any(U, Elem)
+T.reveal_type([1, 2, 3].rfind(proc { 'none' }) { |x| x > 5 }) # error: Revealed type: `T.any(Integer, String)`
+# ifnone proc, no block -> Enumerator with union
+T.reveal_type([1, 2, 3].rfind(proc { 'none' })) # error: Revealed type: `T::Enumerator[T.any(Integer, String)]`

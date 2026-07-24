@@ -2165,6 +2165,53 @@ class Array < Object
   sig {returns(T::Enumerator[Elem])}
   def reverse_each(&blk); end
 
+  # Returns the last element for which the block returns a truthy value.
+  #
+  # With a block given, calls the block with successive elements of the array
+  # in reverse order; returns the first element for which the block returns a
+  # truthy value:
+  #
+  # ```ruby
+  # [1, 2, 3, 4, 5, 6].rfind {|element| element < 5}       # => 4
+  # ```
+  #
+  # If no such element is found, calls `if_none_proc` and returns its return
+  # value:
+  #
+  # ```ruby
+  # [1, 2, 3, 4].rfind(proc {0}) {|element| element < -2}  # => 0
+  # ```
+  #
+  # With no block given, returns an Enumerator.
+  #
+  # See also
+  # [`Array#find`](https://docs.ruby-lang.org/en/4.0/Array.html#method-i-find).
+  sig do
+    type_parameters(:U)
+      .params(
+        ifnone: T.proc.returns(T.type_parameter(:U)),
+        blk: T.proc.params(arg0: Elem).returns(BasicObject),
+      )
+      .returns(T.any(T.type_parameter(:U), Elem))
+  end
+  sig do
+    type_parameters(:U)
+      .params(
+        ifnone: T.proc.returns(T.type_parameter(:U)),
+      )
+      .returns(T::Enumerator[T.any(T.type_parameter(:U), Elem)])
+  end
+  sig do
+    params(
+      blk: T.proc.params(arg0: Elem).returns(BasicObject),
+    )
+    .returns(T.nilable(Elem))
+  end
+  sig do
+    returns(T::Enumerator[Elem])
+  end
+  def rfind(ifnone=T.unsafe(nil), &blk); end
+
   # Returns the *index* of the last object in `self` `==` to `obj`.
   #
   # If a block is given instead of an argument, returns the *index* of the first
