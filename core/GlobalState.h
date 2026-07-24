@@ -791,6 +791,7 @@ private:
     void expandNames(uint32_t utf8NameSize, uint32_t constantNameSize, uint32_t uniqueNameSize);
 
     ClassOrModuleRef synthesizeClass(NameRef nameID, uint32_t superclass = Symbols::todo().id(), bool isModule = false);
+    ClassOrModuleRef synthesizeModule(NameRef name);
 
     SymbolRef lookupSymbolWithKind(ClassOrModuleRef owner, NameRef name, SymbolRef::Kind kind,
                                    SymbolRef defaultReturnValue, bool ignoreKind = false) const;
