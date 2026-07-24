@@ -55,10 +55,15 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     assert_equal('bar', mod.foo('bar'))
   end
 
-  private def counting_allocations
-    before = GC.stat[:total_allocated_objects]
+  def counting_allocations(&blk)
+    # This might trigger a constcache object to get allocated, depending on
+    # whether any intervening methods/classes have been defined.
+    # We don't want to include allocations from the instrumentation itself.
+    gc = GC
+
+    before = gc.stat(:total_allocated_objects)
     yield
-    GC.stat[:total_allocated_objects] - before - 1 # Subtract one for the allocation by GC.stat itself
+    gc.stat(:total_allocated_objects) - before
   end
 
   describe 'aliasing' do
