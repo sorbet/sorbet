@@ -1,0 +1,36 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    Send{
+      flags = {privateOk}
+      recv = Self
+      fun = <U foo>
+      block = Block {
+        params = [
+          RestParam{ expr = UnresolvedIdent{
+            kind = Local
+            name = <U *>
+          } }
+          RestParam{ expr = KeywordArg{ expr = UnresolvedIdent{
+            kind = Local
+            name = <U **>
+          } } }
+          BlockParam{ expr = UnresolvedIdent{
+            kind = Local
+            name = <U &>
+          } }
+        ]
+        body = Literal{ value = "block with anonymous rest, kwrest and block params" }
+      }
+      pos_args = 0
+      args = [
+      ]
+    }
+  ]
+}

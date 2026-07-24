@@ -47,9 +47,6 @@ string NameRef::showRaw(const GlobalState &gs) const {
             auto unique = dataUnique(gs);
             string kind;
             switch (unique->uniqueNameKind) {
-                case UniqueNameKind::Parser:
-                    kind = "P";
-                    break;
                 case UniqueNameKind::Desugar:
                     kind = "D";
                     break;
@@ -222,7 +219,6 @@ bool NameRef::isClassName(const GlobalState &gs) const {
                     return dataUnique(gs)->original.isClassName(gs);
                 case UniqueNameKind::ResolverMissingClass:
                 case UniqueNameKind::Packager:
-                case UniqueNameKind::Parser:
                 case UniqueNameKind::Desugar:
                 case UniqueNameKind::Namer:
                 case UniqueNameKind::Overload:
@@ -259,7 +255,6 @@ bool NameRef::isValidConstantName(const GlobalState &gs) const {
                 case UniqueNameKind::Struct:
                 case UniqueNameKind::Packager:
                     return true;
-                case UniqueNameKind::Parser:
                 case UniqueNameKind::Desugar:
                 case UniqueNameKind::Namer:
                 case UniqueNameKind::MangleRename:

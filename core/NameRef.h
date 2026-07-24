@@ -21,7 +21,6 @@ enum class NameKind : uint8_t {
 CheckSize(NameKind, 1, 1);
 
 enum class UniqueNameKind : uint8_t {
-    Parser,
     Desugar,
     Namer,
     MangleRename,
