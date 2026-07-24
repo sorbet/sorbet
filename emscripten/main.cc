@@ -1,3 +1,4 @@
+#include "common/EarlyReturnWithCode.h"
 #include "main/lsp/wrapper.h"
 #include "main/realmain.h"
 
@@ -12,9 +13,17 @@ using namespace std;
 
 namespace {
 
+void runSorbet(int argc, char *argv[]) {
+    try {
+        sorbet::realmain::realmain(argc, argv);
+    } catch (sorbet::EarlyReturnWithCode &) {
+        // Prevent handled Sorbet exits from aborting the wasm module and leaving the UI stuck.
+    }
+}
+
 void typecheckString(const char *rubySrc) {
     const char *argv[] = {"sorbet", "--color=always", "--silence-dev-message", "-e", rubySrc};
-    sorbet::realmain::realmain(size(argv), const_cast<char **>(reinterpret_cast<const char **>(argv)));
+    runSorbet(size(argv), const_cast<char **>(reinterpret_cast<const char **>(argv)));
 }
 
 } // namespace
@@ -53,7 +62,7 @@ void EMSCRIPTEN_KEEPALIVE typecheck(const char *optionsJson) {
         argCharStars.push_back(const_cast<char *>(argStrings[i].c_str()));
     }
 
-    sorbet::realmain::realmain(argCharStars.size(), argCharStars.data());
+    runSorbet(argCharStars.size(), argCharStars.data());
 }
 
 void EMSCRIPTEN_KEEPALIVE lsp(void (*respond)(const char *), const char *message) {
