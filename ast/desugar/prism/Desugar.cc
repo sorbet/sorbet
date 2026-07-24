@@ -2723,10 +2723,9 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
                 // The `i` is already stripped out of `value`, but there is still an `r`, so strip that off too.
                 auto rationalValue = value.substr(0, value.size() - "r"sv.size());
                 auto kernel = MK::Constant(numberLoc, core::Symbols::Kernel());
-                core::NameRef rationalName = core::Names::Constants::Rational().dataCnst(ctx)->original;
                 core::NameRef valueName = ctx.state.enterNameUTF8(rationalValue);
-                imaginaryPart = MK::Send1(numberLoc, move(kernel), rationalName, numberLoc.copyWithZeroLength(),
-                                          MK::String(numberLoc, valueName));
+                imaginaryPart = MK::Send1(numberLoc, move(kernel), core::Names::KernelRational(),
+                                          numberLoc.copyWithZeroLength(), MK::String(numberLoc, valueName));
             } else {
                 core::NameRef valueName = ctx.state.enterNameUTF8(value);
                 imaginaryPart = MK::String(numberLoc, valueName);
@@ -2734,9 +2733,8 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
 
             // Create the desugared Complex call: `Kernel.Complex(0, imaginary_part)`
             auto kernel = MK::Constant(numberLoc, core::Symbols::Kernel());
-            core::NameRef complexName = core::Names::Constants::Complex().dataCnst(ctx)->original;
-            auto complexCall = MK::Send2(numberLoc, move(kernel), complexName, numberLoc.copyWithZeroLength(),
-                                         MK::Int(numberLoc, 0), move(imaginaryPart));
+            auto complexCall = MK::Send2(numberLoc, move(kernel), core::Names::KernelComplex(),
+                                         numberLoc.copyWithZeroLength(), MK::Int(numberLoc, 0), move(imaginaryPart));
 
             // If there was a sign, wrap in unary operation
             // E.g. desugar `+42` to `42.+()`
@@ -3185,11 +3183,10 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
             value = value.substr(0, value.size() - "r"sv.size()); // drop the `r` suffix
 
             auto kernel = MK::Constant(location, core::Symbols::Kernel());
-            core::NameRef rationalName = core::Names::Constants::Rational().dataCnst(ctx)->original;
             core::NameRef valueName = ctx.state.enterNameUTF8(value);
 
             // Desugar to `123r` to `::Kernel.Rational("123")`
-            return MK::Send1(location, move(kernel), rationalName, location.copyWithZeroLength(),
+            return MK::Send1(location, move(kernel), core::Names::KernelRational(), location.copyWithZeroLength(),
                              MK::String(location, valueName));
         }
         case PM_REDO_NODE: { // The `redo` keyword
