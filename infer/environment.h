@@ -43,6 +43,8 @@ class Environment;
  * Encode things that we know hold and don't hold.
  */
 struct KnowledgeFact : public core::RefCounted<KnowledgeFact> {
+    KnowledgeFact() = default;
+
     bool isDead = false;
     /* the following type tests are known to be true */
     InlinedVector<std::pair<cfg::LocalRef, core::TypePtr>, 1> yesTypeTests;
@@ -55,6 +57,12 @@ struct KnowledgeFact : public core::RefCounted<KnowledgeFact> {
     void sanityCheck() const;
 
     std::string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
+
+    // Can't use the regular copy constructor because `core::RefCounted` isn't copyable.
+    core::RefPtr<KnowledgeFact> freshCopy();
+
+    KnowledgeFact(bool isDead, const InlinedVector<std::pair<cfg::LocalRef, core::TypePtr>, 1> &yesTypeTests,
+                  const InlinedVector<std::pair<cfg::LocalRef, core::TypePtr>, 1> &noTypeTests);
 };
 CheckSize(KnowledgeFact, 56, 8);
 

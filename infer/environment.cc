@@ -238,9 +238,17 @@ const KnowledgeFact *KnowledgeRef::operator->() const {
     return knowledge.get();
 }
 
+KnowledgeFact::KnowledgeFact(bool isDead, const InlinedVector<std::pair<cfg::LocalRef, core::TypePtr>, 1> &yesTypeTests,
+                             const InlinedVector<std::pair<cfg::LocalRef, core::TypePtr>, 1> &noTypeTests)
+    : isDead(isDead), yesTypeTests(yesTypeTests), noTypeTests(noTypeTests) {}
+
+core::RefPtr<KnowledgeFact> KnowledgeFact::freshCopy() {
+    return core::makeRefPtr<KnowledgeFact>(isDead, yesTypeTests, noTypeTests);
+}
+
 KnowledgeFact &KnowledgeRef::mutate() {
     if (knowledge->hasMultipleRefs()) {
-        knowledge = core::makeRefPtr<KnowledgeFact>(*knowledge);
+        knowledge = knowledge->freshCopy();
     }
     ENFORCE(!knowledge->hasMultipleRefs());
     return *knowledge.get();
