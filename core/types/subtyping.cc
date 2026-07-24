@@ -486,7 +486,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
     } else if (is_proxy_type(t2)) {
         // only 2nd is proxy
         bool allowProxyInLub = isa_type<TupleType>(t2) || isa_type<ShapeType>(t2);
-        // only 1st is proxy
+
         TypePtr und = t2.underlying(gs);
         if (isSubType(gs, und, t1)) {
             return t1;
