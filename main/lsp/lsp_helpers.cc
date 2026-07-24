@@ -1,3 +1,4 @@
+#include "absl/strings/ascii.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
@@ -99,6 +100,96 @@ string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef consta
     } else {
         return result.showWithMoreInfo(gs);
     }
+}
+
+string constantKindHeader(const core::GlobalState &gs, core::SymbolRef constant) {
+    if (constant == core::Symbols::StubModule()) {
+        return "";
+    }
+
+    // Order matters: type aliases and class aliases are also static fields, so they
+    // must be checked before isStaticField.
+    if (constant.isTypeAlias(gs)) {
+        return fmt::format("# type alias {}", constant.show(gs));
+    } else if (constant.isClassAlias(gs)) {
+        // `prettyTypeForConstant` already renders the dealiased form (`Name = Target`),
+        // and a kind comment wouldn't add anything, so we don't emit a header for aliases.
+        return "";
+    } else if (constant.isTypeMember()) {
+        // Render a skeleton of the enclosing definition so it's clear where the type
+        // member lives and how it's declared, e.g.
+        //   # class Box
+        //   #   Elem = type_member(:out) { {upper: Numeric} }
+        //   # end
+        auto tmData = constant.asTypeMemberRef().data(gs);
+        auto enclosing = constant.owner(gs).asClassOrModuleRef();
+        string keyword = "type_member";
+        if (enclosing.data(gs)->isSingletonClass(gs)) {
+            // A type_template is declared on the singleton class of its enclosing class.
+            keyword = "type_template";
+            enclosing = enclosing.data(gs)->attachedClass(gs);
+        }
+
+        // Variance: `:out` (covariant), `:in` (contravariant), or nothing (invariant).
+        string variance;
+        if (tmData->flags.isCovariant) {
+            variance = "(:out)";
+        } else if (tmData->flags.isContravariant) {
+            variance = "(:in)";
+        }
+
+        // Bounds: `{ {fixed: T} }`, or `lower:`/`upper:` (in canonical autocorrect order)
+        // when they aren't the trivial `<bottom>`/`<top>` defaults.
+        string bounds;
+        if (auto lambdaParam = core::cast_type<core::LambdaParam>(tmData->resultType)) {
+            if (tmData->flags.isFixed) {
+                bounds = absl::StrCat(" { {fixed: ", lambdaParam->upperBound.show(gs), "} }");
+            } else {
+                vector<string> parts;
+                if (!lambdaParam->lowerBound.isBottom()) {
+                    parts.emplace_back(absl::StrCat("lower: ", lambdaParam->lowerBound.show(gs)));
+                }
+                if (!lambdaParam->upperBound.isTop()) {
+                    parts.emplace_back(absl::StrCat("upper: ", lambdaParam->upperBound.show(gs)));
+                }
+                if (!parts.empty()) {
+                    bounds = absl::StrCat(" { {", absl::StrJoin(parts, ", "), "} }");
+                }
+            }
+        }
+
+        auto classOrModule = enclosing.data(gs)->isModule() ? "module" : "class";
+        return fmt::format("# {} {}\n#   {} = {}{}{}\n# end", classOrModule, enclosing.show(gs),
+                           constant.name(gs).show(gs), keyword, variance, bounds);
+    } else if (constant.isClassOrModule()) {
+        auto classOrModule = constant.asClassOrModuleRef().data(gs)->isModule() ? "module" : "class";
+        return fmt::format("# {} {}", classOrModule, constant.show(gs));
+    } else if (constant.isStaticField(gs)) {
+        // Reconstruct the definition in the context of its enclosing scope, eliding
+        // the value like method hover does for default arguments, e.g.
+        //   # class Config
+        //   #   TIMEOUT = T.let(…, Integer)
+        //   # end
+        const auto &resultType = constant.resultType(gs);
+        auto type = resultType == nullptr ? core::Types::untyped(constant) : resultType;
+        auto definition = fmt::format("{} = T.let(…, {})", constant.name(gs).show(gs), type.show(gs));
+
+        auto owner = constant.owner(gs).asClassOrModuleRef();
+        if (owner == core::Symbols::root()) {
+            return fmt::format("# {}", definition);
+        }
+        if (owner.data(gs)->isSingletonClass(gs)) {
+            // A static field declared inside `class << self` is owned by the singleton
+            // class; render the attached class with a nested `class << self` block.
+            auto attached = owner.data(gs)->attachedClass(gs);
+            auto classOrModule = attached.data(gs)->isModule() ? "module" : "class";
+            return fmt::format("# {} {}\n#   class << self\n#     {}\n#   end\n# end", classOrModule, attached.show(gs),
+                               definition);
+        }
+        auto classOrModule = owner.data(gs)->isModule() ? "module" : "class";
+        return fmt::format("# {} {}\n#   {}\n# end", classOrModule, owner.show(gs), definition);
+    }
+    return "";
 }
 
 SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef symbol, bool isAttrBestEffortUIOnly) {
