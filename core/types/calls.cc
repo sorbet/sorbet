@@ -2497,6 +2497,121 @@ public:
     }
 } Magic_expandSplat;
 
+// <Magic>.<element-or-nil>(recv)
+//
+// Used when desugaring `for` loops. In Ruby, `for` doesn't define a new scope, so the loop
+// variable continues to exist after the loop, holding `nil` if the collection was empty.
+//
+// The element type is derived from what the collection's `each` yields: we simulate dispatching
+// `each` with a block and read the declared type of the block's parameter(s) -- the same
+// information inference uses to type block parameters. `each` is the only method `for` calls at
+// runtime, so this is the only source of type information that reflects what actually happens.
+// If `each` has no signature (or the receiver is untyped), we fall back to `T.untyped`.
+//
+// We also drop literal types (e.g. from `for x in [1, 2, 3]`), which would otherwise cause
+// spurious dead-code errors in comparisons after the loop.
+class Magic_elementOrNil : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        if (args.args.size() != 1) {
+            res.returnType = Types::untypedUntracked();
+            return;
+        }
+
+        auto &recv = *args.args.front();
+        if (recv.type.isUntyped()) {
+            res.returnType = recv.type;
+            return;
+        }
+
+        // Simulate `recv.each { |x| }`. Dispatching with a block link makes overload resolution
+        // pick the block-taking overload of `each` (instead of the `Enumerator`-returning one)
+        // and computes `blockPreType`, the block's declared proc type instantiated for this
+        // receiver's type arguments.
+        InlinedVector<const TypeAndOrigins *, 2> sendArgs;
+        auto zeroLengthCallLoc = args.locs.call.copyWithZeroLength();
+        CallLocs sendLocs{
+            .file = args.locs.file,
+            .call = args.locs.call,
+            .receiver = args.locs.call,
+            .fun = zeroLengthCallLoc,
+            .args = absl::Span<const core::LocOffsets>(nullptr, 0),
+        };
+        vector<ParamInfo::Flags> paramFlags;
+        paramFlags.emplace_back();
+        // The zero-length block loc also suppresses the "does not take a block" error when the
+        // collection's `each` is declared without a block parameter.
+        SendAndBlockLink link(Names::each(), zeroLengthCallLoc, move(paramFlags));
+        DispatchArgs innerArgs{Names::each(),
+                               sendLocs,
+                               0,
+                               sendArgs,
+                               recv.type,
+                               recv,
+                               recv.type,
+                               &link,
+                               args.originForUninitialized,
+                               /* isPrivateOk */ false,
+                               /* suppressErrors */ true,
+                               core::NameRef::noName()};
+        auto dispatched = recv.type.dispatchCall(gs, innerArgs);
+        // Intentionally drop `dispatched.main.errors`: any problem with the `each` call itself
+        // (e.g. the method not existing) is reported on the `each` send the loop desugars to.
+
+        // What `each` yields is the parameter list of its block's proc type. Union and
+        // intersection receivers spread across `secondary` components; combine them the same way
+        // inference does for block parameters (see LoadYieldParams in infer).
+        TypePtr params;
+        auto *component = &dispatched;
+        while (component != nullptr) {
+            auto &blockPreType = component->main.blockPreType;
+            if (blockPreType != nullptr && !blockPreType.isBottom()) {
+                auto componentParams = Types::dropNil(gs, blockPreType).getCallArguments(gs, Names::call());
+                if (componentParams != nullptr) {
+                    if (params == nullptr) {
+                        params = componentParams;
+                    } else {
+                        switch (dispatched.secondaryKind) {
+                            case DispatchResult::Combinator::OR:
+                                params = Types::any(gs, params, componentParams);
+                                break;
+                            case DispatchResult::Combinator::AND:
+                                params = Types::all(gs, params, componentParams);
+                                break;
+                        }
+                    }
+                }
+            }
+            component = component->secondary.get();
+        }
+
+        if (params == nullptr) {
+            res.returnType = Types::untypedUntracked();
+            return;
+        }
+
+        // `each` yielding a single value is the common case: the loop variable holds that value.
+        // For `each` yielding multiple values (`yield k, v`), keep the tuple: the seed for
+        // `for k, v in ...` destructures it exactly like the block parameters would.
+        TypePtr element;
+        if (auto tuple = cast_type<TupleType>(params)) {
+            if (tuple->elems.empty()) {
+                // `each` yields no values: the loop variable is never assigned.
+                res.returnType = Types::nilClass();
+                return;
+            } else if (tuple->elems.size() == 1) {
+                element = tuple->elems.front();
+            } else {
+                element = params;
+            }
+        } else {
+            element = params;
+        }
+
+        res.returnType = Types::any(gs, Types::nilClass(), Types::dropLiteral(gs, element));
+    }
+} Magic_elementOrNil;
+
 class Magic_callWithSplat : public IntrinsicMethod {
     friend class Magic_callWithSplatAndBlockPass;
 
@@ -4665,6 +4780,7 @@ const vector<Intrinsic> intrinsics{
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildArray(), &Magic_buildArray},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildRange(), &Magic_buildRange},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::expandSplat(), &Magic_expandSplat},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::elementOrNil(), &Magic_elementOrNil},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplat(), &Magic_callWithSplat},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithBlockPass(), &Magic_callWithBlockPass},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplatAndBlockPass(),
