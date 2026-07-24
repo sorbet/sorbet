@@ -1946,10 +1946,25 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
         case Names::errorMessageForObj().rawId():
         case Names::errorMessageForObjRecursive().rawId():
         case Names::validate_bang().rawId(): {
-            // These are methods on `T::Types::Base`. Don't report an error, but also for the time
-            // being don't even attempt to type the result properly. We can break these out and
-            // handle them better in the future if we want to.
-            return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
+            // These are methods on `T::Types::Base`. Dispatch to the underlying type as if the
+            // receiver were a `T::Types::Base` instance.
+            auto receiver = Symbols::T_Types_Base().data(gs)->externalType();
+            const TypeAndOrigins receiverFullType{receiver, args.fullType.origins};
+            DispatchArgs innerArgs{
+                args.name,
+                args.locs,
+                args.numPosArgs,
+                args.args,
+                receiver,
+                receiverFullType,
+                receiver,
+                args.block,
+                args.originForUninitialized,
+                args.isPrivateOk,
+                args.suppressErrors,
+                args.enclosingMethodForSuper,
+            };
+            return receiver.dispatchCall(gs, innerArgs);
         }
         default:
             return badMetaTypeCall(gs, args, errLoc, this->wrapped);
