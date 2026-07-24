@@ -59,25 +59,6 @@ void TypeTestReverseIndex::cloneFrom(const TypeTestReverseIndex &index) {
 
 const InlinedVector<cfg::LocalRef, 1> TypeTestReverseIndex::empty;
 
-/**
- * Encode things that we know hold and don't hold.
- */
-struct KnowledgeFact {
-    bool isDead = false;
-    /* the following type tests are known to be true */
-    InlinedVector<pair<cfg::LocalRef, core::TypePtr>, 1> yesTypeTests;
-    /* the following type tests are known to be false */
-    InlinedVector<pair<cfg::LocalRef, core::TypePtr>, 1> noTypeTests;
-
-    /* this is a "merge" of two knowledges - computes a "lub" of knowledges */
-    void min(core::Context ctx, const KnowledgeFact &other);
-
-    void sanityCheck() const;
-
-    string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
-};
-CheckSize(KnowledgeFact, 56, 8);
-
 KnowledgeFilter::KnowledgeFilter(core::Context ctx, cfg::CFG &cfg) {
     used_vars.resize(cfg.numLocalVariables());
     for (auto &bb : cfg.basicBlocks) {
