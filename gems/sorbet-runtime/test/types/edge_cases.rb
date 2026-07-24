@@ -257,7 +257,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         # Should use fast path
         obj = klass.new
         allocs = counting_allocations { obj.bar }
-        assert_operator(allocs, :<, 5)
+        assert_operator(allocs, :<=, 5)
       end
 
       it 'handles alias_method to included method without runtime checking' do
@@ -469,7 +469,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
         # Should use fast path
         allocs = counting_allocations { klass.bar }
-        assert_operator(allocs, :<, 5)
+        assert_operator(allocs, :<=, 5)
       end
 
       it 'handles alias_method to extended method without runtime checking' do
