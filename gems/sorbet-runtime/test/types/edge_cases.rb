@@ -66,6 +66,24 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     gc.stat(:total_allocated_objects) - before
   end
 
+  def trace_counting_allocations(&blk)
+    require 'objspace'
+    gc = GC
+    object_space = ObjectSpace
+    gc.start
+    generation = gc.count
+    allocs = 0
+    object_space.trace_object_allocations do
+      before = gc.stat(:total_allocated_objects)
+      yield
+      allocs = gc.stat(:total_allocated_objects) - before
+    end
+    puts
+    object_space.dump_all(output: :stdout, since: generation)
+    puts "------------------------------------------------------------"
+    allocs
+  end
+
   describe 'aliasing' do
     describe 'instance method' do
       it 'handles alias_method with runtime checking' do
