@@ -4,6 +4,7 @@
 #include "common/common.h"
 #include "core/NameRef.h"
 #include "core/Polarity.h"
+#include "core/Refcounting.h"
 #include "core/ShowOptions.h"
 #include "core/SymbolRef.h"
 #include "core/UntaggedPtr.h"
@@ -13,27 +14,6 @@ namespace sorbet::core {
 class TypeConstraint;
 struct DispatchResult;
 struct DispatchArgs;
-
-class Refcountable {
-    std::atomic<uint32_t> counter{0};
-
-public:
-    void addref() {
-        this->counter.fetch_add(1);
-    }
-
-    uint32_t release() {
-        // fetch_sub returns value prior to subtract
-        return this->counter.fetch_sub(1) - 1;
-    }
-
-    // You typically should not need to call this; it is mostly for tests to
-    // verify that things manipulating `Refcountable` are getting the counting
-    // logic correct.
-    bool hasMultipleRefs() const {
-        return this->counter.load() > 1;
-    }
-};
 
 class TypePtr final {
     template <class To> static To &const_cast_type(const To &what) {

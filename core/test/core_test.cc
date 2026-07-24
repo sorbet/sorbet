@@ -4,6 +4,7 @@
 #include "core/ErrorCollector.h"
 #include "core/ErrorQueue.h"
 #include "core/NameSubstitution.h"
+#include "core/Refcounting.h"
 #include "core/TrailingObjects.h"
 #include "core/TypePtr.h"
 #include "core/Unfreeze.h"
@@ -325,6 +326,112 @@ TEST_SUITE("TrailingObjects") {
         CHECK_EQ(8, TOTestSufficientlyAligned::totalSizeToAlloc<int>(0));
         CHECK_EQ(12, TOTestSufficientlyAligned::totalSizeToAlloc<int>(1));
         CHECK_EQ(16, TOTestSufficientlyAligned::totalSizeToAlloc<int>(2));
+    }
+}
+
+namespace {
+class TestRefCounted final : public sorbet::core::RefCounted<TestRefCounted> {
+public:
+    int value;
+    int *destructor_count;
+    TestRefCounted(int v, int &count) : value(v), destructor_count(&count) {}
+    ~TestRefCounted() {
+        (*destructor_count)++;
+    }
+};
+} // namespace
+
+TEST_SUITE("RefPtr") {
+    TEST_CASE("Default constructs to null") {
+        sorbet::core::RefPtr<TestRefCounted> ptr;
+        CHECK(!ptr);
+        CHECK(ptr == nullptr);
+        CHECK(ptr.get() == nullptr);
+    }
+
+    TEST_CASE("Constructs from raw pointer and releases") {
+        int dtor_count = 0;
+        {
+            auto ptr = sorbet::core::makeRefPtr<TestRefCounted>(42, dtor_count);
+            CHECK(ptr != nullptr);
+            CHECK_EQ(42, ptr->value);
+            CHECK_EQ(42, (*ptr).value);
+        }
+        CHECK_EQ(1, dtor_count);
+    }
+
+    TEST_CASE("Copy increments refcount") {
+        int dtor_count = 0;
+        {
+            auto ptr = sorbet::core::makeRefPtr<TestRefCounted>(7, dtor_count);
+            CHECK(!ptr->hasMultipleRefs());
+            {
+                sorbet::core::RefPtr<TestRefCounted> copy(ptr);
+                CHECK(ptr->hasMultipleRefs());
+                CHECK_EQ(ptr.get(), copy.get());
+            }
+            CHECK(!ptr->hasMultipleRefs());
+            CHECK_EQ(0, dtor_count);
+        }
+        CHECK_EQ(1, dtor_count);
+    }
+
+    TEST_CASE("Move does not increment refcount") {
+        int dtor_count = 0;
+        {
+            auto ptr = sorbet::core::makeRefPtr<TestRefCounted>(9, dtor_count);
+            auto *raw = ptr.get();
+            CHECK(!raw->hasMultipleRefs());
+
+            sorbet::core::RefPtr<TestRefCounted> moved(std::move(ptr));
+            CHECK(!ptr);
+            CHECK(moved);
+            CHECK_EQ(raw, moved.get());
+            CHECK(!raw->hasMultipleRefs());
+        }
+        CHECK_EQ(1, dtor_count);
+    }
+
+    TEST_CASE("Copy assignment") {
+        int dtor_count = 0;
+        {
+            auto a = sorbet::core::makeRefPtr<TestRefCounted>(1, dtor_count);
+            auto b = sorbet::core::makeRefPtr<TestRefCounted>(2, dtor_count);
+            auto *rawB = b.get();
+
+            a = b;
+            CHECK_EQ(rawB, a.get());
+            CHECK(rawB->hasMultipleRefs());
+            CHECK_EQ(1, dtor_count); // old 'a' destroyed
+        }
+        CHECK_EQ(2, dtor_count);
+    }
+
+    TEST_CASE("Move assignment") {
+        int dtor_count = 0;
+        {
+            auto a = sorbet::core::makeRefPtr<TestRefCounted>(1, dtor_count);
+            auto b = sorbet::core::makeRefPtr<TestRefCounted>(2, dtor_count);
+            auto *rawB = b.get();
+
+            a = std::move(b);
+            CHECK(!b);
+            CHECK_EQ(rawB, a.get());
+            CHECK(!rawB->hasMultipleRefs());
+            CHECK_EQ(1, dtor_count); // old 'a' destroyed
+        }
+        CHECK_EQ(2, dtor_count);
+    }
+
+    TEST_CASE("Assign nullptr releases") {
+        int dtor_count = 0;
+        {
+            auto ptr = sorbet::core::makeRefPtr<TestRefCounted>(5, dtor_count);
+            ptr = nullptr;
+            CHECK(!ptr);
+            CHECK_EQ(1, dtor_count);
+        }
+        CHECK_EQ(1, dtor_count);
     }
 }
 
