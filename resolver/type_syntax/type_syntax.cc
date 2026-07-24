@@ -745,25 +745,20 @@ optional<core::ClassOrModuleRef> parseTClassOf(core::Context ctx, const ast::Sen
         return core::Symbols::untyped();
     }
     auto maybeAliased = obj->symbol();
-    if (maybeAliased.isTypeAlias(ctx)) {
-        if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-            e.setHeader("T.class_of can't be used with a T.type_alias");
-            maybeSuggestTClass(ctx, e, send.loc, obj->loc());
-        }
-        return core::Symbols::untyped();
-    }
-    if (maybeAliased.isTypeMember()) {
-        if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-            e.setHeader("T.class_of can't be used with a T.type_member");
-            maybeSuggestTClass(ctx, e, send.loc, obj->loc());
-        }
-        return core::Symbols::untyped();
-    }
-    auto sym = maybeAliased.dealias(ctx);
-    if (sym.isStaticField(ctx)) {
-        if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-            e.setHeader("T.class_of can't be used with a constant field");
-            maybeSuggestTClass(ctx, e, send.loc, obj->loc());
+    auto isTypeAlias = maybeAliased.isTypeAlias(ctx);
+    auto isTypeMember = maybeAliased.isTypeMember();
+    // Only meaningful to dealias once we've ruled out a type alias / type member.
+    auto sym = (isTypeAlias || isTypeMember) ? maybeAliased : maybeAliased.dealias(ctx);
+    if (isTypeAlias || isTypeMember || sym.isStaticField(ctx)) {
+        // For a rewriter-synthesized `T.class_of`, none of these are actionable by the user; see
+        // `rewriter/Minitest.cc`'s `described_class` synthesis for why.
+        if (!send.flags.isRewriterSynthesized) {
+            if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                e.setHeader("T.class_of can't be used with a {}", isTypeAlias    ? "T.type_alias"
+                                                                  : isTypeMember ? "T.type_member"
+                                                                                 : "constant field");
+                maybeSuggestTClass(ctx, e, send.loc, obj->loc());
+            }
         }
         return core::Symbols::untyped();
     }

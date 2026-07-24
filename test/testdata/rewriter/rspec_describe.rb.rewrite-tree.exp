@@ -567,4 +567,131 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <runtime method definition of result>
     end
   end
+
+  class <emptyTree>::<C SomeValueClass><<C <todo sym>>> < (::<todo sym>)
+  end
+
+  <emptyTree>::<C SOME_VALUE_CONSTANT> = <cast:<assume type>>(<emptyTree>::<C SomeValueClass>.new(), <todo sym>, <emptyTree>::<C SomeValueClass>)
+
+  begin
+    <emptyTree>::<C SOME_VALUE_CONSTANT>
+    class <emptyTree>::<C <describe 'SOME_VALUE_CONSTANT'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      def <it 'does not error on a value-constant describe arg'><<todo method>>(&<blk>)
+        begin
+          <emptyTree>::<C T>.reveal_type(<self>.described_class())
+          <self>.described_class().anything_at_all()
+        end
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.returns(::T.class_of(<emptyTree>::<C SOME_VALUE_CONSTANT>))
+      end
+
+      def described_class<<todo method>>(&<blk>)
+        <emptyTree>::<C SOME_VALUE_CONSTANT>
+      end
+    end
+  end
+
+  begin
+    <emptyTree>::<C UserClass>
+    class <emptyTree>::<C <describe 'UserClass'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.returns(::T.class_of(<emptyTree>::<C UserClass>))
+      end
+
+      def described_class<<todo method>>(&<blk>)
+        <emptyTree>::<C UserClass>
+      end
+
+      <emptyTree>::<C SOME_VALUE_CONSTANT>
+
+      class <emptyTree>::<C <describe 'SOME_VALUE_CONSTANT'>><<C <todo sym>>> < (<self>)
+        def <it 'value-constant nested describe does not error'><<todo method>>(&<blk>)
+          <emptyTree>::<C T>.reveal_type(<self>.described_class())
+        end
+
+        ::T::Sig::WithoutRuntime.sig() do ||
+          <self>.returns(::T.class_of(<emptyTree>::<C SOME_VALUE_CONSTANT>))
+        end
+
+        def described_class<<todo method>>(&<blk>)
+          <emptyTree>::<C SOME_VALUE_CONSTANT>
+        end
+      end
+    end
+  end
+
+  <emptyTree>::<C MyTypeAlias> = <emptyTree>::<C T>.type_alias() do ||
+    <emptyTree>::<C T>.any(<emptyTree>::<C Integer>, <emptyTree>::<C String>)
+  end
+
+  begin
+    <emptyTree>::<C MyTypeAlias>
+    class <emptyTree>::<C <describe 'MyTypeAlias'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      def <it 'does not error on a type-alias describe arg'><<todo method>>(&<blk>)
+        <emptyTree>::<C T>.reveal_type(<self>.described_class())
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.returns(::T.class_of(<emptyTree>::<C MyTypeAlias>))
+      end
+
+      def described_class<<todo method>>(&<blk>)
+        <emptyTree>::<C MyTypeAlias>
+      end
+    end
+  end
+
+  begin
+    <emptyTree>::<C UserClass>
+    class <emptyTree>::<C <describe 'UserClass'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.returns(::T.class_of(<emptyTree>::<C UserClass>))
+      end
+
+      def described_class<<todo method>>(&<blk>)
+        <emptyTree>::<C UserClass>
+      end
+
+      <emptyTree>::<C MyTypeAlias>
+
+      class <emptyTree>::<C <describe 'MyTypeAlias'>><<C <todo sym>>> < (<self>)
+        def <it 'type-alias nested describe does not error'><<todo method>>(&<blk>)
+          <emptyTree>::<C T>.reveal_type(<self>.described_class())
+        end
+
+        ::T::Sig::WithoutRuntime.sig() do ||
+          <self>.returns(::T.class_of(<emptyTree>::<C MyTypeAlias>))
+        end
+
+        def described_class<<todo method>>(&<blk>)
+          <emptyTree>::<C MyTypeAlias>
+        end
+      end
+    end
+  end
+
+  class <emptyTree>::<C HasTypeMember><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(<emptyTree>::<C T>::<C Generic>)
+
+    <emptyTree>::<C SomeTypeMember> = <self>.type_member()
+
+    begin
+      <emptyTree>::<C SomeTypeMember>
+      class <emptyTree>::<C <describe 'SomeTypeMember'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+        def <it 'does not error on a type-member describe arg'><<todo method>>(&<blk>)
+          <emptyTree>::<C T>.reveal_type(<self>.described_class())
+        end
+
+        ::T::Sig::WithoutRuntime.sig() do ||
+          <self>.returns(::T.class_of(<emptyTree>::<C SomeTypeMember>))
+        end
+
+        def described_class<<todo method>>(&<blk>)
+          <emptyTree>::<C SomeTypeMember>
+        end
+      end
+    end
+  end
 end

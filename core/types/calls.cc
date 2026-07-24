@@ -2020,8 +2020,11 @@ public:
         }
 
         // The argument to `T.class_of(...)` is a value, but has a type meaning. That means we need
-        // to  `unwrapType` to handle things like type aliases and constant literal types.
-        auto unwrappedType = Types::unwrapType(gs, args.argLoc(0), args.args[0]->type);
+        // to `unwrapType` to handle things like type aliases and constant literal types. For
+        // rewriter-synthesized calls, tolerate a non-type argument instead of reporting error 7009;
+        // see `rewriter/Minitest.cc`'s `described_class` synthesis for why.
+        auto unwrappedType = Types::unwrapType(gs, args.argLoc(0), args.args[0]->type,
+                                               /*tolerateBareValue*/ args.isRewriterSynthesized);
         auto mustExist = false;
         auto classSymbol = unwrapSymbol(gs, unwrappedType, mustExist);
         if (!classSymbol.exists()) {

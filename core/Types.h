@@ -214,7 +214,10 @@ public:
      * integer values. This is what `unwrapType` does, it turns the value-level
      * expression back into a type-level one.
      */
-    static TypePtr unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp);
+    // When `tolerateBareValue` is true, a non-type argument silently returns `T.untyped` instead of
+    // reporting error 7009. See `rewriter/Minitest.cc`'s `described_class` synthesis for why a
+    // caller might want that.
+    static TypePtr unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp, bool tolerateBareValue = false);
 
     // Converts type syntax like `GenericClass[Arg0, Arg1]` into a TypePtr.
     //
@@ -1075,11 +1078,15 @@ struct DispatchArgs {
     // unreported errors is expensive!
     bool suppressErrors;
     NameRef enclosingMethodForSuper;
+    // True when the originating call was synthesized by a rewriter pass. See
+    // `rewriter/Minitest.cc`'s `described_class` synthesis for the motivating case.
+    bool isRewriterSynthesized = false;
 
     DispatchArgs(NameRef name, const CallLocs &locs, uint16_t numPosArgs,
                  InlinedVector<const TypeAndOrigins *, 2> &args, const TypePtr &selfType,
                  const TypeAndOrigins &fullType, const TypePtr &thisType, const SendAndBlockLink *block,
-                 Loc originForUninitialized, bool isPrivateOk, bool suppressErrors, NameRef enclosingMethodForSuper);
+                 Loc originForUninitialized, bool isPrivateOk, bool suppressErrors, NameRef enclosingMethodForSuper,
+                 bool isRewriterSynthesized = false);
     DispatchArgs(const DispatchArgs &) = delete;
     DispatchArgs &operator=(const DispatchArgs &) = delete;
 
