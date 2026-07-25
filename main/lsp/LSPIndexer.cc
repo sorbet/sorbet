@@ -119,7 +119,7 @@ LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &ch
         // working in `__package.rb` since every edit causes a slow path.
         // Note: We don't use File::isPackage because we have not necessarily set the packager options on initialGS yet
         if (this->config->opts.cacheSensitiveOptions.sorbetPackages && oldFile.hasPackageRbPath() &&
-            oldFile.source() != f->source()) {
+            oldFile.sourceHash() != f->sourceHash()) {
             logger.debug("Taking slow path because {} is a package file", f->path());
             prodCategoryCounterInc("lsp.slow_path_reason", "package_file");
             timeit.setTag("path_chosen", "slow");

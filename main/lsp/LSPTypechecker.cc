@@ -298,6 +298,7 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
         ENFORCE(fref.exists(), "New files are not supported in the fast path");
         ENFORCE(fref == gs->findFileByPath(file->path()));
 
+        auto newHash = file->sourceHash();
         auto oldFile = gs->replaceFile(fref, std::move(file));
 
         if (shouldRunIncrementalNamer) {
@@ -318,10 +319,12 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
             oldFoundHashesForFiles.emplace(fref, oldFile->getFileHash());
         }
 
-        // We track the edit stratum for all files that were updated by the edit. Unfortunately this
-        // will include files that were opened, but not changed. In the future, if we can tell if the
-        // file was changed by the edit, we should make this update to `editStratum` conditional.
-        editStratum = std::min(this->fileToStratum[fref.id()], editStratum);
+        // We track the edit stratum for all files that were updated by the edit, if their source hashes differ. This
+        // will avoid bumping the fastPathEditStratum down when the file was opened by a query like go-to-definition,
+        // but is still fairly coarse grained, as any change will mark the package as needing to be re-typechecked.
+        if (oldFile->sourceHash() != newHash) {
+            editStratum = std::min(this->fileToStratum[fref.id()], editStratum);
+        }
 
         // If file doesn't have a typed: sigil, then we need to ensure it's typechecked using typed: false.
         fref.data(*gs).strictLevel = pipeline::decideStrictLevel(*gs, fref, config->opts);
@@ -471,7 +474,7 @@ core::packages::Stratum determineStartingStratum(const core::GlobalState &gs,
             // We can't keep any part of the symbol table if the package file has changed. The byte-for-byte comparison
             // is a little expensive here, but we could refactor LSPIndexer::getTypecheckingPathInternal to cache the
             // results of this check on the LSPFileUpdates so that we could avoid the additional check here.
-            if (file->hasPackageRbPath() && fref.data(gs).source() != file->source()) {
+            if (file->hasPackageRbPath() && fref.data(gs).sourceHash() != file->sourceHash()) {
                 return core::packages::Stratum(0);
             }
 
