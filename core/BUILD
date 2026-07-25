@@ -35,6 +35,7 @@ cc_library(
     deps = [
         "//common",
         "//common/concurrency",
+        "//common/crypto_hashing",
         "//core/hashing",
         "//main/pipeline/semantic_extension:interface",
         "@com_google_absl//absl/strings",

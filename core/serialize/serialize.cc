@@ -3,7 +3,6 @@
 #include "absl/strings/escaping.h" // BytesToHexString
 #include "absl/types/span.h"
 #include "ast/Helpers.h"
-#include "common/crypto_hashing/crypto_hashing.h"
 #include "common/sort/sort.h"
 #include "common/timers/Timer.h"
 #include "core/Error.h"
@@ -1234,7 +1233,7 @@ vector<uint8_t> Serializer::storeTree(const core::File &file, const ast::ParsedF
 
     // See comment in `serialize.h` above `loadTree`.
     p.putU4(file.source().size());
-    p.putBytes(crypto_hashing::hash64(file.source()));
+    p.putBytes(file.sourceHash());
 
     SerializerImpl::pickle(p, file.getFileHash());
     SerializerImpl::pickle(p, file, tree.tree);
@@ -1251,7 +1250,7 @@ ast::ExpressionPtr Serializer::loadTree(const core::GlobalState &gs, core::File 
         return nullptr;
     }
 
-    auto expectedHash = crypto_hashing::hash64(file.source());
+    auto expectedHash = file.sourceHash();
     auto hashBytes = p.getBytes();
     if (hashBytes != expectedHash) {
         return nullptr;
