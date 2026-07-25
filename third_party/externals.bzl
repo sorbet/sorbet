@@ -163,10 +163,10 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "xxhash",
-        url = "https://github.com/Cyan4973/xxHash/archive/v0.8.0.zip",
-        sha256 = "064333c754f166837bbefefa497642a60b3f8035e54bae52eb304d3cb3ceb655",
+        url = "https://github.com/Cyan4973/xxHash/archive/v0.8.3.zip",
+        sha256 = "db2c12e6f05d45546d3581b6881b25090fd65ab5194891da0b2a1a9c49beda66",
         build_file = "@com_stripe_ruby_typer//third_party:xxhash.BUILD",
-        strip_prefix = "xxHash-0.8.0",
+        strip_prefix = "xxHash-0.8.3",
     )
 
     http_archive(
