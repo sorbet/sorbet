@@ -674,6 +674,14 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
             whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, ref, klassType);
             whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, ref, klassType);
         }
+
+        if(
+            core::isa_type<core::NamedLiteralType>(klassType) ||
+            core::isa_type<core::IntegerLiteralType>(klassType) ||
+            core::isa_type<core::FloatLiteralType>(klassType)
+          ) {
+            whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, ref, klassType);
+        }
         whoKnows.sanityCheck();
         return;
     }
