@@ -7,7 +7,34 @@
 
 namespace sorbet::core {
 
-class Refcountable {
+enum class RefCountAtomicity {
+    Atomic,
+    NonAtomic,
+};
+
+template <RefCountAtomicity Atomic> class Refcountable;
+
+template <> class Refcountable<RefCountAtomicity::NonAtomic> {
+    uint32_t counter{0};
+
+public:
+    void addref() {
+        this->counter++;
+    }
+
+    uint32_t release() {
+        return --this->counter;
+    }
+
+    // You typically should not need to call this; it is mostly for tests to
+    // verify that things manipulating `Refcountable` are getting the counting
+    // logic correct.
+    bool hasMultipleRefs() const {
+        return this->counter > 1;
+    }
+};
+
+template <> class Refcountable<RefCountAtomicity::Atomic> {
     std::atomic<uint32_t> counter{0};
 
 public:
@@ -29,14 +56,14 @@ public:
 };
 
 // CRTP base for classes that want to be used with RefPtr<T>.
-template <typename T> class RefCounted : public Refcountable {
+template <typename T, RefCountAtomicity Atomic> class RefCounted : public Refcountable<Atomic> {
 public:
     void addref() {
-        Refcountable::addref();
+        Refcountable<Atomic>::addref();
     }
 
     void release() {
-        uint32_t remaining = Refcountable::release();
+        uint32_t remaining = Refcountable<Atomic>::release();
         if (remaining == 0) {
             delete static_cast<T *>(this);
         }

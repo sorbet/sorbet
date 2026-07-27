@@ -42,7 +42,7 @@ class Environment;
 /**
  * Encode things that we know hold and don't hold.
  */
-struct KnowledgeFact : public core::RefCounted<KnowledgeFact> {
+struct KnowledgeFact : public core::RefCounted<KnowledgeFact, core::RefCountAtomicity::Atomic> {
     KnowledgeFact() = default;
 
     bool isDead = false;
