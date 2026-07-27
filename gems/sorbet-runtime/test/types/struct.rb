@@ -115,26 +115,30 @@ class Opus::Types::Test::StructValidationTest < Critic::Unit::UnitTest
 
     it "inspects in a single line" do
       struct = make_nested_struct
+      # rubocop:disable Lint/LiteralInInterpolation
       expected_result = "<Opus::Types::Test::StructValidationTest::NestedStruct " \
-      "custom=\"Inspected 'something' (opts: {:multiline=>false})\" data={:one=>\"one\", :two=>\"two\"} " \
-      "nested=<Opus::Types::Test::StructValidationTest::NestedStruct custom=nil data={:three=>\"three\"} " \
+      "custom=\"Inspected 'something' (opts: #{{multiline: false}})\" data=#{{one: 'one', two: 'two'}} " \
+      "nested=<Opus::Types::Test::StructValidationTest::NestedStruct custom=nil data=#{{three: 'three'}} " \
       "nested=nil sensitive=<REDACTED reason>> sensitive=nil>"
+      # rubocop:enable Lint/LiteralInInterpolation
       assert_equal(expected_result, struct.inspect)
     end
 
     it "pretty inspects" do
       struct = make_nested_struct
+      # rubocop:disable Lint/LiteralInInterpolation
       expected_result = <<~INSPECT
         <Opus::Types::Test::StructValidationTest::NestedStruct
-         custom="Inspected 'something' (opts: {:multiline=>true})"
-         data={:one=>"one", :two=>"two"}
+         custom="Inspected 'something' (opts: #{{multiline: true}})"
+         data=#{{one: 'one', two: 'two'}}
          nested=<Opus::Types::Test::StructValidationTest::NestedStruct
           custom=nil
-          data={:three=>"three"}
+          data=#{{three: 'three'}}
           nested=nil
           sensitive=<REDACTED reason>>
          sensitive=nil>
       INSPECT
+      # rubocop:enable Lint/LiteralInInterpolation
       assert_equal(expected_result, struct.pretty_inspect)
     end
 
