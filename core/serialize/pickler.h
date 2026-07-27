@@ -1,6 +1,7 @@
 #ifndef SORBET_PICKLER_H
 #define SORBET_PICKLER_H
 
+#include "absl/base/casts.h"
 #include "absl/types/span.h"
 #include "common/common.h"
 
@@ -12,7 +13,10 @@ class Pickler {
 public:
     void putU4(uint32_t u);
     void putU1(const uint8_t u);
-    void putS8(const int64_t i);
+    void putU8(const uint64_t i);
+    void putS8(const int64_t i) {
+        this->putU8(absl::bit_cast<uint64_t>(i));
+    }
     void putStr(std::string_view s);
     void putBytes(absl::Span<const uint8_t> bytes);
     std::vector<uint8_t> result();
@@ -27,7 +31,10 @@ class UnPickler {
 public:
     uint32_t getU4();
     uint8_t getU1();
-    int64_t getS8();
+    uint64_t getU8();
+    int64_t getS8() {
+        return absl::bit_cast<int64_t>(this->getU8());
+    }
     std::string_view getStr();
     absl::Span<const uint8_t> getBytes();
     explicit UnPickler(const uint8_t *const compressed, spdlog::logger &tracer);
