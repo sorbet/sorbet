@@ -42,7 +42,7 @@ class Environment;
 /**
  * Encode things that we know hold and don't hold.
  */
-struct KnowledgeFact : public core::RefCounted<KnowledgeFact> {
+struct KnowledgeFact : public core::RefCounted<KnowledgeFact, core::RefCountAtomicity::NonAtomic> {
     KnowledgeFact() = default;
 
     bool isDead = false;
@@ -145,7 +145,7 @@ public:
 
     std::string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
 
-    static TestedKnowledge empty; // optimization
+    static thread_local TestedKnowledge empty; // optimization
 
     void removeReferencesToVar(cfg::LocalRef ref);
     void sanityCheck() const;

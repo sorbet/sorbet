@@ -1985,5 +1985,5 @@ core::TypeAndOrigins nilTypesWithOriginWithLoc(core::Loc loc) {
 
 Environment::Environment(core::Loc ownerLoc) : uninitialized(nilTypesWithOriginWithLoc(ownerLoc)), ownerLoc(ownerLoc) {}
 
-TestedKnowledge TestedKnowledge::empty;
+thread_local TestedKnowledge TestedKnowledge::empty;
 } // namespace sorbet::infer
