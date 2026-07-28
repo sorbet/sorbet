@@ -18,6 +18,10 @@ template <> class Refcountable<RefCountAtomicity::NonAtomic> {
     uint32_t counter{0};
 
 public:
+    Refcountable() noexcept = default;
+    Refcountable(const Refcountable&) = delete;
+    Refcountable& operator=(const Refcountable&) = delete;
+
     void addref() {
         this->counter++;
     }
