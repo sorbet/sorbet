@@ -3559,11 +3559,11 @@ public:
             auto valueType = shape.values[*idx];
             auto expectedType = valueType;
             auto actualType = *args.args[1];
-            // This check (with the dropLiteral's) mimics what we do for pinning errors in environment.cc
+            // The literal broadening here mimics what we do for pinning errors in environment.cc.
             // TODO(jez) How should this interact with highlight untyped?
             core::ErrorSection::Collector errorDetailsCollector;
-            if (!Types::isSubType(gs, Types::dropLiteral(gs, actualType.type), Types::dropLiteral(gs, expectedType),
-                                  errorDetailsCollector)) {
+            if (!Types::isSubType(gs, Types::dropLiteralRecursive(gs, actualType.type),
+                                  Types::dropLiteralRecursive(gs, expectedType), errorDetailsCollector)) {
                 auto argLoc = args.argLoc(1);
 
                 if (auto e = gs.beginError(argLoc, errors::Infer::MethodArgumentMismatch)) {

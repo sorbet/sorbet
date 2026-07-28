@@ -68,7 +68,10 @@ TypePtr Types::any(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
     return ret;
 }
 
-const TypePtr underlying(const GlobalState &gs, const TypePtr &t1) {
+const TypePtr underlying(const GlobalState &gs, const TypePtr &t1, LiteralTypesMode literalTypesMode) {
+    if (literalTypesMode == LiteralTypesMode::preserve && is_literal_type(t1)) {
+        return t1; // Preserve the literal type, e.g. keep `:abc` as `:abc`
+    }
     if (is_proxy_type(t1)) {
         return t1.underlying(gs); // Broaden e.g. `:abc` to `Symbol`
     }
@@ -108,7 +111,8 @@ TypePtr filterOrComponents(const TypePtr &originalType, absl::Span<const TypePtr
     }
 }
 
-TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
+TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2,
+                        LiteralTypesMode literalTypesMode) {
     InlinedVector<TypePtr, 4> originalOrComponents;
     InlinedVector<TypePtr, 4> typesConsumed;
     auto o1 = cast_type<OrType>(t1);
@@ -117,7 +121,7 @@ TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr 
     fillInOrComponents(originalOrComponents, o1->right);
 
     for (auto &component : originalOrComponents) {
-        auto lubbed = Types::any(gs, component, t2);
+        auto lubbed = Types::lub(gs, component, t2, literalTypesMode);
         if (lubbed == component) {
             // lubbed == component, so t2 <: component and t2 <: t1
             categoryCounterInc("lubDistributeOr.outcome", "t1");
@@ -131,7 +135,7 @@ TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr 
     if (typesConsumed.empty()) {
         // t1 has no components that overlap with t2
         categoryCounterInc("lubDistributeOr.outcome", "worst");
-        return OrType::make_shared(t1, underlying(gs, t2));
+        return OrType::make_shared(t1, underlying(gs, t2, literalTypesMode));
     }
     // lub back everything except typesConsumed
     auto remainingTypes = filterOrComponents(t1, typesConsumed);
@@ -141,7 +145,7 @@ TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr 
         return t2;
     }
     categoryCounterInc("lubDistributeOr.outcome", "consumedComponent");
-    return OrType::make_shared(move(remainingTypes), underlying(gs, t2));
+    return OrType::make_shared(move(remainingTypes), underlying(gs, t2, literalTypesMode));
 }
 
 TypePtr glbDistributeAnd(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
@@ -210,14 +214,16 @@ TypePtr dropLubComponents(const GlobalState &gs, const TypePtr &t1, const TypePt
     return t1;
 }
 
-TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
+TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2, LiteralTypesMode literalTypesMode) {
+    const bool preserveLiteralTypes = literalTypesMode == LiteralTypesMode::preserve;
+
     if (t1 == t2) {
         categoryCounterInc("lub", "ref-eq");
         return t1;
     }
 
     if (t1.kind() > t2.kind()) { // force the relation to be symmentric and half the implementation
-        return lub(gs, t2, t1);
+        return lub(gs, t2, t1, literalTypesMode);
     }
 
     if (isa_type<ClassType>(t1)) {
@@ -254,7 +260,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
 
     if (isa_type<OrType>(t2)) { // 3, 5, 6
         categoryCounterInc("lub", "or>");
-        return lubDistributeOr(gs, t2, t1);
+        return lubDistributeOr(gs, t2, t1, literalTypesMode);
     } else if (auto a2 = cast_type<AndType>(t2)) { // 2, 4
         if (auto a1 = cast_type<AndType>(t1)) {
             // Check if the members of a1 and a2 are referentially equivalent. This helps simplify T.all types created
@@ -266,18 +272,18 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         }
 
         categoryCounterInc("lub", "and>");
-        auto t1d = underlying(gs, t1);
+        auto t1d = underlying(gs, t1, literalTypesMode);
         auto t2filtered = dropLubComponents(gs, t2, t1d);
         if (t2filtered != t2) {
-            return lub(gs, t1d, t2filtered);
+            return lub(gs, t1d, t2filtered, literalTypesMode);
         }
         if (isa_type<OrType>(t1)) {
-            return lubDistributeOr(gs, t1, t2);
+            return lubDistributeOr(gs, t1, t2, literalTypesMode);
         }
         return OrType::make_shared(t1, t2filtered);
     } else if (isa_type<OrType>(t1)) {
         categoryCounterInc("lub", "<or");
-        return lubDistributeOr(gs, t1, t2);
+        return lubDistributeOr(gs, t1, t2, literalTypesMode);
     }
 
     if (auto a1 = cast_type<AppliedType>(t1)) {
@@ -320,7 +326,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             }
             ENFORCE(i < a1->klass.data(gs)->typeMembers().size());
             if (idxTypeMember.data(gs)->flags.isCovariant) {
-                newTargs.emplace_back(Types::any(gs, a1->targs[i], a2->targs[j]));
+                newTargs.emplace_back(lub(gs, a1->targs[i], a2->targs[j], literalTypesMode));
             } else if (idxTypeMember.data(gs)->flags.isInvariant) {
                 if (!Types::equiv(gs, a1->targs[i], a2->targs[j])) {
                     return OrType::make_shared(t1s, t2s);
@@ -367,7 +373,8 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                             bool differ2 = false;
                             for (auto &el2 : a2->elems) {
                                 ++i;
-                                auto &inserted = elemLubs.emplace_back(lub(gs, a1.elems[i], el2));
+                                auto &inserted =
+                                    elemLubs.emplace_back(lub(gs, a1.elems[i], el2, LiteralTypesMode::broaden));
                                 differ1 = differ1 || inserted != a1.elems[i];
                                 differ2 = differ2 || inserted != el2;
                             }
@@ -382,7 +389,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                             result = Types::arrayOfUntyped(Symbols::Magic_UntypedSource_tupleLub());
                         }
                     } else {
-                        result = lub(gs, a1.underlying(gs), t2.underlying(gs));
+                        result = lub(gs, a1.underlying(gs), t2.underlying(gs), literalTypesMode);
                     }
                 },
                 [&](const ShapeType &h1) { // Warning: this implements COVARIANT hashes
@@ -401,8 +408,8 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                                     result = Types::hashOfUntyped(Symbols::Magic_UntypedSource_shapeLub());
                                     return;
                                 }
-                                auto &inserted =
-                                    valueLubs.emplace_back(lub(gs, h1.values[optind.value()], h2->values[i]));
+                                auto &inserted = valueLubs.emplace_back(
+                                    lub(gs, h1.values[optind.value()], h2->values[i], LiteralTypesMode::broaden));
                                 differ1 = differ1 || inserted != h1.values[optind.value()];
                                 differ2 = differ2 || inserted != h2->values[i];
                             }
@@ -421,7 +428,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                         if (allowProxyInLub) {
                             result = OrType::make_shared(t1, t2);
                         } else {
-                            result = lub(gs, h1.underlying(gs), t2.underlying(gs));
+                            result = lub(gs, h1.underlying(gs), t2.underlying(gs), literalTypesMode);
                         }
                     }
                 },
@@ -435,15 +442,22 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                         if (class1.symbol == class2.symbol) {
                             if (l1.equals(l2)) {
                                 result = t1; // lub(:abc, :abc) = :abc
+                            } else if (preserveLiteralTypes) {
+                                result = OrType::make_shared(t1, t2); // preserving lub(:abc, :def) = :abc | :def
                             } else {
                                 result = l1.underlying(gs); // broadening lub(:abc, :def) = Symbol
                             }
+                        } else if (preserveLiteralTypes) {
+                            result = OrType::make_shared(t1, t2); // preserving lub(:abc, "def") = :abc | "def"
                         } else {
                             // broadening lub(:abc, "def") = lub(Symbol, String)
                             result = lubGround(gs, l1.underlying(gs), l2.underlying(gs));
                         }
+                    } else if (preserveLiteralTypes) {
+                        result = OrType::make_shared(t1, t2); // preserving lub(:abc, _) = :abc | _
                     } else {
-                        result = lub(gs, l1.underlying(gs), t2.underlying(gs)); // broadening lub(:abc, _) = Symbol | _
+                        result = lub(gs, l1.underlying(gs), t2.underlying(gs), literalTypesMode);
+                        // broadening lub(:abc, _) = Symbol | _
                     }
                 },
                 [&](const IntegerLiteralType &l1) {
@@ -451,11 +465,16 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                         auto &l2 = cast_type_nonnull<IntegerLiteralType>(t2);
                         if (l1.equals(l2)) {
                             result = t1; // lub(123, 123) = 123
+                        } else if (preserveLiteralTypes) {
+                            result = OrType::make_shared(t1, t2); // preserving lub(1, 2) = 1 | 2
                         } else {
                             result = l1.underlying(gs); // broadening lub(1, 2) = Integer
                         }
+                    } else if (preserveLiteralTypes) {
+                        result = OrType::make_shared(t1, t2); // preserving lub(1, _) = 1 | _
                     } else {
-                        result = lub(gs, l1.underlying(gs), t2.underlying(gs)); // broadening lub(1, _) = Integer | _
+                        result = lub(gs, l1.underlying(gs), t2.underlying(gs), literalTypesMode);
+                        // broadening lub(1, _) = Integer | _
                     }
                 },
                 [&](const FloatLiteralType &l1) {
@@ -463,17 +482,22 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                         auto &l2 = cast_type_nonnull<FloatLiteralType>(t2);
                         if (l1.equals(l2)) {
                             result = t1; // lub(1.23, 1.23) = 1.23
+                        } else if (preserveLiteralTypes) {
+                            result = OrType::make_shared(t1, t2); // lub(1.23, 4.56) = 1.23 | 4.56
                         } else {
                             result = l1.underlying(gs); // broadening lub(1.23, 4.56) = Float
                         }
+                    } else if (preserveLiteralTypes) {
+                        result = OrType::make_shared(t1, t2); // preserving lub(1.23, t2) = 1.23 | t2
                     } else {
-                        result = lub(gs, l1.underlying(gs), t2.underlying(gs)); // broadening lub(1.23, t2) = Float | t2
+                        result = lub(gs, l1.underlying(gs), t2.underlying(gs), literalTypesMode);
+                        // broadening lub(1.23, t2) = Float | t2
                     }
                 });
             ENFORCE(result != nullptr);
             return result;
         } else { // only t1 is proxy
-            bool allowProxyInLub = isa_type<TupleType>(t1) || isa_type<ShapeType>(t1);
+            bool allowProxyInLub = isa_type<TupleType>(t1) || isa_type<ShapeType>(t1) || preserveLiteralTypes;
 
             TypePtr und = t1.underlying(gs);
             if (isSubType(gs, und, t2)) {
@@ -481,11 +505,11 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             } else if (allowProxyInLub) {
                 return OrType::make_shared(t1, t2); // lub(:abc, Unrelated) = :abc | Unrelated
             } else {
-                return lub(gs, t2, und); // broadening lub(:abc, Foo) = Symbol | Foo
+                return lub(gs, t2, und, literalTypesMode); // broadening lub(:abc, Foo) = Symbol | Foo
             }
         }
     } else if (is_proxy_type(t2)) { // only t2 is proxy
-        bool allowProxyInLub = isa_type<TupleType>(t2) || isa_type<ShapeType>(t2);
+        bool allowProxyInLub = isa_type<TupleType>(t2) || isa_type<ShapeType>(t2) || preserveLiteralTypes;
 
         TypePtr und = t2.underlying(gs);
         if (isSubType(gs, und, t1)) {
@@ -493,7 +517,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         } else if (allowProxyInLub) {
             return OrType::make_shared(t1, t2); // lub(Unrelated, :abc) =  Unrelated | :abc
         } else {
-            return lub(gs, t1, und); // broadening lub(Foo, :abc) = Foo | Symbol
+            return lub(gs, t1, und, literalTypesMode); // broadening lub(Foo, :abc) = Foo | Symbol
         }
     }
 
@@ -511,7 +535,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             // We should at least treat it like T::Types::Base, not Object, but again: another day.
             auto m1underlying = m1 == nullptr ? t1 : Types::Object();
             auto m2underlying = m2 == nullptr ? t2 : Types::Object();
-            return lub(gs, m1underlying, m2underlying);
+            return lub(gs, m1underlying, m2underlying, literalTypesMode);
         }
     }
 
