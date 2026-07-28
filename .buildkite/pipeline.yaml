@@ -27,7 +27,7 @@ steps:
             # supported linux architectures.
             #
             # [0]: https://docs.docker.com/reference/cli/docker/manifest/#create-and-push-a-manifest-list
-            image: "stripe/sorbet-build-image:jez-test"
+            image: "stripe/sorbet-build-image:latest"
             workdir: /app
             always-pull: false
             init: true
