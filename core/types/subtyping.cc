@@ -352,9 +352,9 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
 
     if (is_proxy_type(t1)) {
         categoryCounterInc("lub", "<proxy");
-        if (is_proxy_type(t2)) {
+        if (is_proxy_type(t2)) { // t1 and t2 are both proxy types
             categoryCounterInc("lub", "proxy>");
-            // both are proxy
+
             TypePtr result;
             typecase(
                 t1,
@@ -471,9 +471,9 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                 });
             ENFORCE(result != nullptr);
             return result;
-        } else {
+        } else { // only t1 is proxy
             bool allowProxyInLub = isa_type<TupleType>(t1) || isa_type<ShapeType>(t1);
-            // only 1st is proxy
+
             TypePtr und = t1.underlying(gs);
             if (isSubType(gs, und, t2)) {
                 return t2;
@@ -483,8 +483,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                 return lub(gs, t2, und);
             }
         }
-    } else if (is_proxy_type(t2)) {
-        // only 2nd is proxy
+    } else if (is_proxy_type(t2)) { // only t2 is proxy
         bool allowProxyInLub = isa_type<TupleType>(t2) || isa_type<ShapeType>(t2);
 
         TypePtr und = t2.underlying(gs);
@@ -742,7 +741,7 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
     }
 
     if (is_proxy_type(t1)) {
-        if (is_proxy_type(t2)) {
+        if (is_proxy_type(t2)) { // t1 and t2 are both proxy types
             if (t1.tag() != t2.tag()) {
                 return Types::bottom();
             }
@@ -850,16 +849,14 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                 });
             ENFORCE(result != nullptr);
             return result;
-        } else {
-            // only 1st is proxy
+        } else { // only t1 is proxy
             if (Types::isSubType(gs, t1, t2)) {
                 return t1;
             } else {
                 return Types::bottom();
             }
         }
-    } else if (is_proxy_type(t2)) {
-        // only 1st is proxy
+    } else if (is_proxy_type(t2)) { // only t2 is proxy
         if (Types::isSubType(gs, t2, t1)) {
             return t2;
         } else {
@@ -1434,8 +1431,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
     }
 
     if (is_proxy_type(t1)) {
-        if (is_proxy_type(t2)) {
-            // both are proxy
+        if (is_proxy_type(t2)) { // t1 and t2 are both proxy types
             bool result;
             // TODO: simply compare as memory regions
             typecase(
@@ -1537,16 +1533,14 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                     result = l1.equals(l2);
                 });
             return result;
-        } else {
-            // only 1st is proxy
+        } else { // only t1 is proxy
             TypePtr und = t1.underlying(gs);
             return isSubTypeUnderConstraintSingle(gs, constr, mode, und, t2, errorDetailsCollector);
         }
-    } else if (is_proxy_type(t2)) {
-        // only 2nd is proxy
+    } else if (is_proxy_type(t2)) { // only t2 is proxy
         // non-proxies are never subtypes of proxies.
         return false;
-    } else {
+    } else { // neither are proxies
         if (isa_type<ClassType>(t1)) {
             if (isa_type<ClassType>(t2)) {
                 auto c1 = cast_type_nonnull<ClassType>(t1);
