@@ -665,7 +665,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
           string_key_shape: {not_a_string: 0}
         )
       end
-      assert_includes(exn.message, ".string_key_shape to #{{not_a_string: 0}} (instance of Hash) - need a #{{'foo' => Integer}}") # rubocop:disable Lint/LiteralInInterpolation
+      assert_includes(exn.message, ".string_key_shape to #{{not_a_string: 0}} (instance of Hash) - need a {\"foo\" => Integer}") # rubocop:disable Lint/LiteralInInterpolation
     end
 
     it 'roundtrips' do
