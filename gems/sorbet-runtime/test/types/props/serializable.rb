@@ -166,14 +166,14 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     it 'inspects' do
       obj = a_serializable
       str = obj.inspect
-      assert_equal('<Opus::Types::Test::Props::SerializableTest::MySerializable foo={"age"=>7, "color"=>"red"} name="Bob">', str)
+      assert_equal("<Opus::Types::Test::Props::SerializableTest::MySerializable foo=#{obj.foo} name=\"Bob\">", str)
     end
 
     it 'inspects with extra props' do
       obj = a_serializable
       obj = obj.class.from_hash(obj.serialize.merge('not_a_prop' => 'but_here_anyway'))
       str = obj.inspect
-      assert_equal('<Opus::Types::Test::Props::SerializableTest::MySerializable foo={"age"=>7, "color"=>"red"} name="Bob" @_extra_props=<not_a_prop="but_here_anyway">>', str)
+      assert_equal("<Opus::Types::Test::Props::SerializableTest::MySerializable foo=#{obj.foo} name=\"Bob\" @_extra_props=<not_a_prop=\"but_here_anyway\">>", str)
     end
 
     it 'inspects with custom extra props' do
@@ -186,17 +186,17 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     it 'inspects frozen structs' do
       obj = a_serializable.freeze
       str = obj.inspect
-      assert_equal('<Opus::Types::Test::Props::SerializableTest::MySerializable foo={"age"=>7, "color"=>"red"} name="Bob">', str)
+      assert_equal("<Opus::Types::Test::Props::SerializableTest::MySerializable foo=#{obj.foo} name=\"Bob\">", str)
     end
   end
 
   describe '.pretty_inspect' do
     it 'excludes extra props' do
-      obj = a_serializable
-      obj = obj.class.from_hash(obj.serialize.merge('not_a_prop' => 'but_here_anyway'))
+      orig_obj = a_serializable
+      obj = orig_obj.class.from_hash(orig_obj.serialize.merge('not_a_prop' => 'but_here_anyway'))
       expected_result = <<~INSPECT
         <Opus::Types::Test::Props::SerializableTest::MySerializable
-         foo={"age"=>7, "color"=>"red"}
+         foo=#{orig_obj.foo}
          name="Bob">
       INSPECT
       str = obj.pretty_inspect
@@ -534,13 +534,13 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       e = assert_raises(ArgumentError) do
         a.with(non_bar: 10)
       end
-      assert_equal('Unexpected arguments: input({:non_bar=>10}), unexpected({"non_bar"=>10})', e.to_s)
+      assert_equal("Unexpected arguments: input(#{{non_bar: 10}}), unexpected(#{{'non_bar' => 10}})", e.to_s) # rubocop:disable Lint/LiteralInInterpolation
 
       a = WithModel1.from_hash({'foo' => 'foo', 'foo1' => 'foo1'})
       e = assert_raises(ArgumentError) do
         a.with(non_bar: 10)
       end
-      assert_equal('Unexpected arguments: input({:non_bar=>10}), unexpected({"non_bar"=>10})', e.to_s)
+      assert_equal("Unexpected arguments: input(#{{non_bar: 10}}), unexpected(#{{'non_bar' => 10}})", e.to_s) # rubocop:disable Lint/LiteralInInterpolation
     end
 
     it 'with overwrite fields' do
@@ -665,7 +665,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
           string_key_shape: {not_a_string: 0}
         )
       end
-      assert_includes(exn.message, '.string_key_shape to {:not_a_string=>0} (instance of Hash) - need a {"foo" => Integer}')
+      assert_includes(exn.message, ".string_key_shape to #{{not_a_string: 0}} (instance of Hash) - need a {\"foo\" => Integer}") # rubocop:disable Lint/LiteralInInterpolation
     end
 
     it 'roundtrips' do
@@ -1159,7 +1159,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
   class DefaultStringProp
     include T::Props::Serializable
 
-    prop :stringprop, String, default: "default"
+    prop :stringprop, String, default: +"default"
   end
 
   describe 'with defaulted string props' do

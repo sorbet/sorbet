@@ -32,19 +32,6 @@ source .buildkite/tools/with_backoff.sh
 
 rbenv install --skip-existing
 
-echo "--- Patching rubygems/package.rb"
-# There's a bug in rubygems/package.rb where if there's a GZip reader error, in
-# the process of reporting a good error saying what failed, there's a
-# NoMethodError.
-# https://github.com/rubygems/rubygems/pull/7539
-package_rb="$HOME/.rbenv/versions/3.1.2/lib/ruby/3.1.0/rubygems/package.rb"
-if [ -f "$package_rb" ]; then
-  echo "Using sed to patch rubygems/package.rb"
-  sed -i 's/@path = source.path/@path = source.is_a?(String) ? source : source.path/' "$package_rb"
-else
-  echo "Could not find rubygems/package.rb, skipping"
-fi
-
 publish_sorbet_static_gem() {
   gem_archive=$1
   platform=$2
