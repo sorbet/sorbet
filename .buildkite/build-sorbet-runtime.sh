@@ -12,7 +12,12 @@ eval "$(rbenv init -)"
 runtime_versions=(3.3.12 3.4.9)
 
 for runtime_version in "${runtime_versions[@]}"; do
-  rbenv install --skip-existing "$runtime_version"
+  # Only uncomment this to iterate on something. Uncommenting this will make
+  # all builds needlessly slower.
+  # Prefer updating sorbet-build-image to pre-install the Ruby version.
+
+  # rbenv install --skip-existing "$runtime_version"
+
   rbenv shell "$runtime_version"
   rbenv exec bundle config set path 'vendor/bundle'
   rbenv exec bundle install
