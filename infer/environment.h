@@ -145,7 +145,7 @@ public:
 
     std::string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
 
-    static TestedKnowledge empty; // optimization
+    static thread_local TestedKnowledge empty; // optimization
 
     void removeReferencesToVar(cfg::LocalRef ref);
     void sanityCheck() const;
