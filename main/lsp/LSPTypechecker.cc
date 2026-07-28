@@ -236,13 +236,17 @@ bool LSPTypechecker::typecheck(unique_ptr<LSPFileUpdates> updates, WorkerPool &w
             std::tie(committed, startingStratum) =
                 runSlowPath(*updates, kvstore, workers, errorFlusher, SlowPathMode::Cancelable);
         }
-        epoch.committed = committed;
-    }
 
-    if (gs->hadCriticalError()) {
-        gs->errorQueue->flushAllErrors(*gs);
-        // If flushing the critical error didn't crash the entire process, let's reset the bit for the next typecheck.
-        gs->errorQueue->hadCritical = false;
+        // We flush errors while `epoch` is still active, to ensure that we don't accidentally report errors about an
+        // epoch that has ended.
+        if (gs->hadCriticalError()) {
+            gs->errorQueue->flushAllErrors(*gs);
+            // If flushing the critical error didn't crash the entire process, let's reset the bit for the next
+            // typecheck.
+            gs->errorQueue->hadCritical = false;
+        }
+
+        epoch.committed = committed;
     }
 
     sendTypecheckInfo(*config, *gs, committed ? SorbetTypecheckRunStatus::Ended : SorbetTypecheckRunStatus::Cancelled,
