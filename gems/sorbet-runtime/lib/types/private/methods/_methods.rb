@@ -359,10 +359,12 @@ module T::Private::Methods
     T::Private::ClassUtils.replace_method(original_method, mod, method_name) do |*args, &blk|
       method_sig = T::Private::Methods.maybe_run_sig_block_for_key(key)
       if !method_sig
+        receiver = self
+        callee = __callee__ || raise("Unknown __callee__ for method without a signature")
         method_sig = T::Private::Methods._handle_missing_method_signature(
-          self,
+          receiver,
           original_method,
-          __callee__ || raise("Unknown __callee__ for method without a signature"),
+          callee,
         )
       end
 
