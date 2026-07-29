@@ -368,7 +368,7 @@ module T::Private::Methods
             "Maybe look to see if an exception was thrown in your `sig` lambda or somehow else your `sig` wasn't actually applied to the method."
         end
 
-        method_sig = T::Private::Methods._handle_missing_method_signature(
+        method_sig = T::Private::Methods._unwrap_alias(
           method_sig,
           receiver,
           original_method,
@@ -400,7 +400,8 @@ module T::Private::Methods
     end
   end
 
-  def self._handle_missing_method_signature(method_sig, receiver, original_method, callee)
+  # Only public so that it can be accessed in the closure for _on_method_added
+  def self._unwrap_alias(method_sig, receiver, original_method, callee)
     if receiver.class <= original_method.owner
       receiving_class = receiver.class
     elsif receiver.singleton_class <= original_method.owner
