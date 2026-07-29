@@ -93,8 +93,8 @@ module T::Private::Methods
   sig {params(hook_mod: Module, mod: Module, method_name: Symbol).void}
   def self._on_method_added(hook_mod, mod, method_name); end
 
-  sig {params(receiver: Object, original_method: UnboundMethod, callee: Symbol).returns(T::Private::Methods::Signature)}
-  def self._handle_missing_method_signature(receiver, original_method, callee); end
+  sig {params(method_sig: Signature, receiver: Object, original_method: UnboundMethod, callee: Symbol).returns(T::Private::Methods::Signature)}
+  def self._unwrap_alias(method_sig, receiver, original_method, callee); end
 
   sig {params(method_name: Symbol, original_method: UnboundMethod, declaration_block: DeclarationBlock).returns(T::Private::Methods::Signature)}
   def self.run_sig(method_name, original_method, declaration_block); end
