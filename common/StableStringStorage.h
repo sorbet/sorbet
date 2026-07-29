@@ -8,6 +8,11 @@
 namespace sorbet {
 
 template <size_t PageSize = 4096> class StableStringStorage {
+    std::shared_ptr<char> &addPage(size_t size) {
+        auto page = std::unique_ptr<char[]>(new char[size]);
+        return strings.emplace_back(page.release(), page.get_deleter());
+    }
+
 public:
     StableStringStorage() = default;
 
@@ -24,7 +29,7 @@ public:
     std::string_view enterString(std::string_view str);
 
 private:
-    std::vector<std::shared_ptr<std::vector<char>>> strings;
+    std::vector<std::shared_ptr<char>> strings;
     size_t currentPagePosition = PageSize + 1;
 };
 
@@ -42,8 +47,8 @@ StableStringStorage<PageSize> &StableStringStorage<PageSize>::operator=(const St
 template <size_t PageSize> std::string_view StableStringStorage<PageSize>::enterString(std::string_view str) {
     char *from = nullptr;
     if (str.size() > PageSize) {
-        auto &inserted = strings.emplace_back(std::make_unique<std::vector<char>>(str.size()));
-        from = inserted->data();
+        auto &inserted = addPage(str.size());
+        from = inserted.get();
         if (strings.size() > 1) {
             // last page wasn't full, keep it in the end
             swap(*(strings.end() - 1), *(strings.end() - 2));
@@ -53,15 +58,15 @@ template <size_t PageSize> std::string_view StableStringStorage<PageSize>::enter
         } else {
             // Insert a new empty page at the end to enforce the invariant that inserting a huge string will always
             // leave a page that can be written to at the end of the table.
-            strings.emplace_back(std::make_unique<std::vector<char>>(PageSize));
+            addPage(PageSize);
             currentPagePosition = 0;
         }
     } else {
         if (currentPagePosition + str.size() > PageSize) {
-            strings.emplace_back(std::make_unique<std::vector<char>>(PageSize));
+            addPage(PageSize);
             currentPagePosition = 0;
         }
-        from = strings.back()->data() + currentPagePosition;
+        from = strings.back().get() + currentPagePosition;
         currentPagePosition += str.size();
     }
 
