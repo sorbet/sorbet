@@ -4,9 +4,11 @@
 # Used as a mixin to any class so that you can call `sig`.
 # Docs at https://sorbet.org/docs/sigs
 module T::Sig
+  # NOTE: Must keep in sync with `T::DefMods!`
   include T::Private::Methods::MethodHooks
   include T::Private::Methods::SingletonMethodHooks
 
+  # NOTE: Must keep in sync with `T::DefMods!`
   private_class_method def self.included(other)
     return unless Module == other
 
@@ -21,6 +23,7 @@ module T::Sig
     other.prepend(T::Private::Methods::MethodHooks)
   end
 
+  # NOTE: Must keep in sync with `T::DefMods!`
   private_class_method def self.extended(other)
     if other == T::Private::Methods::TOP_SELF
       # Methods defined via `def foo; end` at the top-level of a file are
