@@ -69,9 +69,11 @@ private:
                 auto members = app.klass.data(ctx)->typeMembers();
                 auto params = app.targs;
 
-                ENFORCE(members.size() == params.size(),
-                        "types should be fully saturated, but there are {} members and {} params", members.size(),
-                        params.size());
+                if (members.size() != params.size()) [[unlikely]] {
+                    fatalLogger->error(R"(msg="types should be fully saturated" loc="{}" members={} params={})",
+                                       this->loc.showRaw(ctx), members.size(), params.size());
+                    ENFORCE(false);
+                }
 
                 for (int i = 0; i < members.size(); ++i) {
                     auto memberVariance = members[i].data(ctx)->variance();
