@@ -384,6 +384,7 @@ module T::Private::Methods
       built_sig = T.let(nil, T.nilable(Signature))
     end
     T::Private::ClassUtils.replace_method(original_method, mod, method_name) do |*args, &blk|
+      callee = __callee__ || raise("Unknown __callee__ for method without a signature")
       method_sig = built_sig
       if !method_sig
         # Check if this wrapper's sig_block is still the active one for this key
@@ -414,22 +415,20 @@ module T::Private::Methods
             method_sig
           end
         if !method_sig
-          callee = __callee__ || raise("Unknown __callee__ for method without a signature")
           method_sig = T::Private::Methods.signature_for_method(original_method)
           if !method_sig
             raise "`sig` not present for method `#{callee}` on #{self.inspect} but you're trying to run it anyways. " \
               "This should only be executed if you used `alias_method` to grab a handle to a method after `sig`ing it, but that clearly isn't what you are doing. " \
               "Maybe look to see if an exception was thrown in your `sig` lambda or somehow else your `sig` wasn't actually applied to the method."
           end
-
-          method_sig = T::Private::Methods._unwrap_alias(
-            method_sig,
-            self,
-            original_method,
-            callee,
-          )
         end
         built_sig = method_sig
+      end
+
+      # If this wrapper is being called via an alias, unwrap the alias so
+      # subsequent calls bypass the wrapper entirely.
+      if callee != method_name
+        T::Private::Methods._unwrap_alias(method_sig, self, original_method, callee)
       end
 
       # Should be the same logic as CallValidation.wrap_method_if_needed but we
