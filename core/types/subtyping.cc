@@ -70,7 +70,7 @@ TypePtr Types::any(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
 
 const TypePtr underlying(const GlobalState &gs, const TypePtr &t1) {
     if (is_proxy_type(t1)) {
-        return t1.underlying(gs);
+        return t1.underlying(gs); // Broaden e.g. `:abc` to `Symbol`
     }
     return t1;
 }
@@ -434,39 +434,40 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                         auto class2 = cast_type_nonnull<ClassType>(underlyingL2);
                         if (class1.symbol == class2.symbol) {
                             if (l1.equals(l2)) {
-                                result = t1;
+                                result = t1; // lub(:abc, :abc) = :abc
                             } else {
-                                result = l1.underlying(gs);
+                                result = l1.underlying(gs); // broadening lub(:abc, :def) = Symbol
                             }
                         } else {
+                            // broadening lub(:abc, "def") = lub(Symbol, String)
                             result = lubGround(gs, l1.underlying(gs), l2.underlying(gs));
                         }
                     } else {
-                        result = lub(gs, l1.underlying(gs), t2.underlying(gs));
+                        result = lub(gs, l1.underlying(gs), t2.underlying(gs)); // broadening lub(:abc, _) = Symbol | _
                     }
                 },
                 [&](const IntegerLiteralType &l1) {
                     if (isa_type<IntegerLiteralType>(t2)) {
                         auto &l2 = cast_type_nonnull<IntegerLiteralType>(t2);
                         if (l1.equals(l2)) {
-                            result = t1;
+                            result = t1; // lub(123, 123) = 123
                         } else {
-                            result = l1.underlying(gs);
+                            result = l1.underlying(gs); // broadening lub(1, 2) = Integer
                         }
                     } else {
-                        result = lub(gs, l1.underlying(gs), t2.underlying(gs));
+                        result = lub(gs, l1.underlying(gs), t2.underlying(gs)); // broadening lub(1, _) = Integer | _
                     }
                 },
                 [&](const FloatLiteralType &l1) {
                     if (isa_type<FloatLiteralType>(t2)) {
                         auto &l2 = cast_type_nonnull<FloatLiteralType>(t2);
                         if (l1.equals(l2)) {
-                            result = t1;
+                            result = t1; // lub(1.23, 1.23) = 1.23
                         } else {
-                            result = l1.underlying(gs);
+                            result = l1.underlying(gs); // broadening lub(1.23, 4.56) = Float
                         }
                     } else {
-                        result = lub(gs, l1.underlying(gs), t2.underlying(gs));
+                        result = lub(gs, l1.underlying(gs), t2.underlying(gs)); // broadening lub(1.23, t2) = Float | t2
                     }
                 });
             ENFORCE(result != nullptr);
@@ -476,11 +477,11 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
 
             TypePtr und = t1.underlying(gs);
             if (isSubType(gs, und, t2)) {
-                return t2;
+                return t2; // lub(:abc, Symbol) = Symbol, lub([Foo], Array) = Array, etc.
             } else if (allowProxyInLub) {
-                return OrType::make_shared(t1, t2);
+                return OrType::make_shared(t1, t2); // lub(:abc, Unrelated) = :abc | Unrelated
             } else {
-                return lub(gs, t2, und);
+                return lub(gs, t2, und); // broadening lub(:abc, Foo) = Symbol | Foo
             }
         }
     } else if (is_proxy_type(t2)) { // only t2 is proxy
@@ -488,11 +489,11 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
 
         TypePtr und = t2.underlying(gs);
         if (isSubType(gs, und, t1)) {
-            return t1;
+            return t1; // lub(Symbol, :abc) = Symbol, lub(Array, [Foo]) = Array, etc.
         } else if (allowProxyInLub) {
-            return OrType::make_shared(t1, t2);
+            return OrType::make_shared(t1, t2); // lub(Unrelated, :abc) =  Unrelated | :abc
         } else {
-            return lub(gs, t1, und);
+            return lub(gs, t1, und); // broadening lub(Foo, :abc) = Foo | Symbol
         }
     }
 
