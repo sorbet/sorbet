@@ -359,11 +359,11 @@ module T::Private::Methods
     T::Private::ClassUtils.replace_method(original_method, mod, method_name) do |*args, &blk|
       method_sig = T::Private::Methods.maybe_run_sig_block_for_key(key)
       if !method_sig
-      method_sig = T::Private::Methods._handle_missing_method_signature(
-        self,
-        original_method,
-        __callee__ || raise("Unknown __callee__ for method without a signature"),
-      )
+        method_sig = T::Private::Methods._handle_missing_method_signature(
+          self,
+          original_method,
+          __callee__ || raise("Unknown __callee__ for method without a signature"),
+        )
       end
 
       # Should be the same logic as CallValidation.wrap_method_if_needed but we
