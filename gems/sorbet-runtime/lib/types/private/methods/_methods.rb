@@ -361,12 +361,12 @@ module T::Private::Methods
       if !method_sig
         receiver = self
         callee = __callee__ || raise("Unknown __callee__ for method without a signature")
-    method_sig = T::Private::Methods.signature_for_method(original_method)
-    if !method_sig
-      raise "`sig` not present for method `#{callee}` on #{receiver.inspect} but you're trying to run it anyways. " \
-        "This should only be executed if you used `alias_method` to grab a handle to a method after `sig`ing it, but that clearly isn't what you are doing. " \
-        "Maybe look to see if an exception was thrown in your `sig` lambda or somehow else your `sig` wasn't actually applied to the method."
-    end
+        method_sig = T::Private::Methods.signature_for_method(original_method)
+        if !method_sig
+          raise "`sig` not present for method `#{callee}` on #{receiver.inspect} but you're trying to run it anyways. " \
+            "This should only be executed if you used `alias_method` to grab a handle to a method after `sig`ing it, but that clearly isn't what you are doing. " \
+            "Maybe look to see if an exception was thrown in your `sig` lambda or somehow else your `sig` wasn't actually applied to the method."
+        end
 
         method_sig = T::Private::Methods._handle_missing_method_signature(
           method_sig,
