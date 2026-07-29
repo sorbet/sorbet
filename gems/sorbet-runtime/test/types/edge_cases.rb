@@ -1154,7 +1154,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
     obj = klass.new
     3.times do
-      assert_equal([:patch, :unpatch], obj.test_alias_method)
+      assert_equal(%i[patch unpatch], obj.test_alias_method)
     end
   end
 
@@ -1201,7 +1201,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     assert_equal([:unpatch], obj.test_alias_method_old)
     # Then the patched method must still work (calling through _old)
     3.times do
-      assert_equal([:patch, :unpatch], obj.test_alias_method)
+      assert_equal(%i[patch unpatch], obj.test_alias_method)
     end
   end
 
@@ -1222,7 +1222,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
     obj = klass.new
     # Patched calls through _old (triggers wrapper on _old via that path)
-    assert_equal([:patch, :unpatch], obj.test_alias_method)
+    assert_equal(%i[patch unpatch], obj.test_alias_method)
     # Then calling _old directly must still return the original behavior
     3.times do
       assert_equal([:unpatch], obj.test_alias_method_old)
@@ -1252,7 +1252,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     end
     # The patched method still works
     3.times do
-      assert_equal([:patch, :unpatch], obj.test_patch_method)
+      assert_equal(%i[patch unpatch], obj.test_patch_method)
     end
   end
 end
