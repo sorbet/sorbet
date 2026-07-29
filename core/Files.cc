@@ -1,5 +1,6 @@
 #include "core/Files.h"
 #include "common/FileOps.h"
+#include "common/crypto_hashing/crypto_hashing.h"
 #include "core/Context.h"
 #include "core/FileHash.h"
 #include "core/GlobalState.h"
@@ -312,6 +313,11 @@ bool File::hasIndexErrors() const {
 
 void File::setHasIndexErrors(bool value) {
     flags.hasIndexErrors = value;
+}
+
+std::array<uint8_t, 64> File::sourceHash() const {
+    ENFORCE(this->sourceType != File::Type::NotYetRead);
+    return crypto_hashing::hash64(this->source_);
 }
 
 } // namespace sorbet::core

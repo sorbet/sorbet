@@ -5,6 +5,7 @@
 #include "core/LocOffsets.h"
 #include "core/Names.h"
 #include "core/StrictLevel.h"
+#include <array>
 #include <string>
 #include <string_view>
 
@@ -92,6 +93,9 @@ public:
 
     static constexpr std::string_view URL_PREFIX = "https://github.com/sorbet/sorbet/tree/master/";
     static std::string censorFilePathForSnapshotTests(std::string_view orig);
+
+    // Returns the hash of the file content. Requires that the file has been read.
+    std::array<uint8_t, 64> sourceHash() const;
 
 private:
     struct Flags {
