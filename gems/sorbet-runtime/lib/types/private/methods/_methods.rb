@@ -384,7 +384,7 @@ module T::Private::Methods
       built_sig = T.let(nil, T.nilable(Signature))
     end
     T::Private::ClassUtils.replace_method(original_method, mod, method_name) do |*args, &blk|
-      callee = __callee__ || raise("Unknown __callee__ for method without a signature")
+      callee = Kernel.__callee__ || raise("Unknown __callee__ for method without a signature")
       method_sig = built_sig
       if !method_sig
         # Check if this wrapper's sig_block is still the active one for this key

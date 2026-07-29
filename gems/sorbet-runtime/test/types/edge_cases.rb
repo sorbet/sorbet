@@ -1128,6 +1128,24 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     assert_match(/Expected type Integer/, err.message)
   end
 
+  it 'works with BasicObject subclass' do
+    mod = Module.new do
+      extend T::Sig
+      sig { returns(Integer) }
+      def foo
+        42
+      end
+    end
+
+    klass = Class.new(BasicObject) do
+      include mod
+    end
+
+    obj = klass.new
+    assert_equal(42, obj.foo)
+    assert_equal(42, obj.foo)
+  end
+
   it "can mark a class abstract! even if it defines a method called method" do
     Class.new do
       extend T::Helpers
