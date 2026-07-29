@@ -4,7 +4,7 @@
 using namespace ruby_parser;
 using namespace std::literals::string_view_literals;
 
-literal::literal(lexer &lexer, literal_type type, std::string delimiter, const char *str_s, const char *heredoc_e,
+literal::literal(lexer &lexer, literal_type type, std::string_view delimiter, const char *str_s, const char *heredoc_e,
                  bool indent, bool dedent_body, bool label_allowed)
     : _lexer(lexer), _nesting(1), _type(type), indent(indent), dedent_body(dedent_body), label_allowed(label_allowed),
       _interp_braces(0), space_emitted(true), str_s(str_s), saved_herebody_s(nullptr), heredoc_e(heredoc_e) {

@@ -1749,7 +1749,7 @@ void lexer::set_state_expr_value() {
       '%s' c_any
       => {
         if (version == ruby_version::RUBY_23) {
-          fgoto *push_literal(literal_type::LOWERS_SYMBOL, std::string(ts + 2, 1), ts);
+          fgoto *push_literal(literal_type::LOWERS_SYMBOL, std::string_view(ts + 2, 1), ts);
         } else {
           p = ts - 1;
           fgoto expr_end;
@@ -2164,13 +2164,13 @@ void lexer::set_state_expr_value() {
       # /=/ (disambiguation with /=)
       '/' c_any
       => {
-        fhold; fgoto *push_literal(literal_type::SLASH_REGEXP, std::string(ts + 0, 1), ts);
+        fhold; fgoto *push_literal(literal_type::SLASH_REGEXP, std::string_view(ts, 1), ts);
       };
 
       # %<string>
       '%' ( any - [A-Za-z] )
       => {
-        fgoto *push_literal(literal_type::PERCENT_STRING, std::string(ts + 1, 1), ts);
+        fgoto *push_literal(literal_type::PERCENT_STRING, std::string_view(ts + 1, 1), ts);
       };
 
       # %w(we are the people)
@@ -2203,7 +2203,7 @@ void lexer::set_state_expr_value() {
           diagnostic_(dlevel::ERROR, dclass::UnexpectedPercentStr, range(ts, te - 1), tok(ts, te-1));
         }
 
-        fgoto *push_literal(type, std::string(te - 1, 1), ts);
+        fgoto *push_literal(type, std::string_view(te - 1, 1), ts);
       };
 
       '%' c_eof
@@ -2268,7 +2268,7 @@ void lexer::set_state_expr_value() {
           p = ts + 1;
           fnext expr_beg; fbreak;
         } else {
-          fnext *push_literal(type, std::string(delim_s, (size_t)(delim_e - delim_s)), ts, heredoc_e, indent, dedent_body);
+          fnext *push_literal(type, std::string_view(delim_s, (size_t)(delim_e - delim_s)), ts, heredoc_e, indent, dedent_body);
 
           if (!herebody_s) {
             herebody_s = new_herebody_s;
@@ -2300,7 +2300,7 @@ void lexer::set_state_expr_value() {
           type = literal_type::DQUOTE_SYMBOL;
         }
 
-        fgoto *push_literal(type, std::string(ts + 1, 1), ts);
+        fgoto *push_literal(type, std::string_view(ts + 1, 1), ts);
       };
 
       # :!@ is :!
@@ -2630,7 +2630,7 @@ void lexer::set_state_expr_value() {
           type = literal_type::DQUOTE_STRING;
         }
 
-        fgoto *push_literal(type, tok(), ts);
+        fgoto *push_literal(type, tok_view(), ts);
       };
 
       w_space_comment;
@@ -2834,7 +2834,7 @@ void lexer::set_state_expr_value() {
           type = literal_type::DQUOTE_STRING;
         }
 
-        fgoto *push_literal(type, std::string(te - 1, 1), ts, nullptr, false, false, true);
+        fgoto *push_literal(type, std::string_view(te - 1, 1), ts, nullptr, false, false, true);
       };
 
       #
