@@ -3,5 +3,4 @@
 
 class Application < PackageSpec
   import Prelude::First
-  test_import Prelude::Second
 end

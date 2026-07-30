@@ -1,4 +1,4 @@
 # typed: strict
 
-class Project::MyPackage::Test::TestHighEnoug
+class Test::Project::MyPackage::TestHighEnough
 end

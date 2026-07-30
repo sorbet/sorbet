@@ -78,8 +78,7 @@ struct TraversalBuilder {
             // Insert the members of the SCC into the packages vector.
             absl::c_copy(node.members, back_inserter(this->result.packages));
 
-            auto &scc = this->result.sccs.emplace_back();
-            scc.isTest = node.isTest;
+            this->result.sccs.emplace_back();
             this->sccLengths.emplace_back(node.members.size());
 
             // Queue up the dependents in the next frontier, decrementing their imports by one
@@ -163,22 +162,15 @@ const Condensation::Traversal Condensation::computeTraversal(const core::GlobalS
     return builder.build();
 }
 
-UnorderedMap<MangledName, Condensation::Traversal::StratumInfo>
-Condensation::Traversal::buildStratumMapping(const core::GlobalState &gs) const {
-    UnorderedMap<MangledName, StratumInfo> result;
+UnorderedMap<MangledName, Stratum> Condensation::Traversal::buildStratumMapping(const core::GlobalState &gs) const {
+    UnorderedMap<MangledName, Stratum> result;
 
     int ix = -1;
     for (auto stratum : this->strata) {
         ++ix;
         for (auto &scc : stratum) {
-            if (scc.isTest) {
-                for (auto name : scc.members) {
-                    result[name].testStratum = ix;
-                }
-            } else {
-                for (auto name : scc.members) {
-                    result[name].applicationStratum = ix;
-                }
+            for (auto name : scc.members) {
+                result[name] = Stratum(ix);
             }
         }
     }
@@ -186,10 +178,9 @@ Condensation::Traversal::buildStratumMapping(const core::GlobalState &gs) const 
     return result;
 }
 
-Condensation::Node &CondensationBuilder::pushNode(ImportType type, bool isPrelude) {
+Condensation::Node &CondensationBuilder::pushNode(bool isPrelude) {
     auto id = this->condensation.nodes_.size();
-    auto isTest = type != ImportType::Normal;
-    auto &node = this->condensation.nodes_.emplace_back(id, isTest, isPrelude);
+    auto &node = this->condensation.nodes_.emplace_back(id, isPrelude);
     return node;
 }
 

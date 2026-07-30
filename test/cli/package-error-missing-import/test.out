@@ -37,16 +37,16 @@ foo_class.rb:14: `Foo::Bar::OtherPackage::OtherClass` resolves but its package i
   Note:
     Try running generate-packages.sh
 
-foo.test.rb:4: `Test::Foo::Bar::OtherPackage::TestUtil` resolves but its package is not imported https://srb.help/3718
+test/foo.test.rb:4: `Test::Foo::Bar::OtherPackage::TestUtil` resolves but its package is not imported https://srb.help/3718
      4 |  Test::Foo::Bar::OtherPackage::TestUtil
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    other/__package.rb:3: Exported from package here
-     3 |class Foo::Bar::OtherPackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    other/test/__package.rb:4: Exported from package here
+     4 |class Test::Foo::Bar::OtherPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    __package.rb:6: Insert `test_import Foo::Bar::OtherPackage, only: "test_rb"`
-     6 |  # import Foo::Bar::OtherPackage ## MISSING!
-                                                     ^
+    test/__package.rb:7: Insert `import Test::Foo::Bar::OtherPackage`
+     7 |  import Foo::MyPackage
+                               ^
   Note:
     Try running generate-packages.sh
 Errors: 4

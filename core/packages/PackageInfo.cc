@@ -52,36 +52,23 @@ unique_ptr<PackageInfo> PackageInfo::deepCopy() const {
 // - layering violations
 // - imports to 'false' packages
 // - imports to 'layered' or stricter packages
-// - test imports
 // For strictDependenciesLevel::Layered and LayeredDag:
 // - layering violations
 // - imports to 'false' packages
 // - imports to 'layered' or 'layered_dag' packages
 // - imports to 'dag' packages
-// - test imports
 // For strictDependenciesLevel::Dag:
 // - layering violations
 // - imports to 'false', 'layered', or 'layered_dag' packages
 // - imports to 'dag' packages
-// - test imports
 // TODO(neil): explain the rationale behind this ordering (ie. why is not the simple "false < layered < layered_dag
 // < dag" ordering)
 // aStrictnessOverride/bStrictnessOverride, when provided, replace the strictness level that would
 // otherwise be read from a.strictDependenciesLevel / b.strictDependenciesLevel. This is used when
 // sorting imports against a newly-computed strictness that hasn't been persisted to the package yet.
-int PackageInfo::orderImports(const core::GlobalState &gs, const PackageInfo &a, bool aIsTestImport,
-                              const PackageInfo &b, bool bIsTestImport,
+int PackageInfo::orderImports(const core::GlobalState &gs, const PackageInfo &a, const PackageInfo &b,
                               const std::optional<StrictDependenciesLevel> aStrictnessOverride,
                               const std::optional<StrictDependenciesLevel> bStrictnessOverride) const {
-    // Test imports always come last, and aren't sorted by `strict_dependencies`
-    if (aIsTestImport && bIsTestImport) {
-        return orderByAlphabetical(gs, a, b);
-    } else if (aIsTestImport && !bIsTestImport) {
-        return 1;
-    } else if (!aIsTestImport && bIsTestImport) {
-        return -1;
-    } // Neither is a test import
-
     auto strictnessCompareResult =
         orderByStrictness(gs.packageDB(), a, aStrictnessOverride.value_or(a.strictDependenciesLevel), b,
                           bStrictnessOverride.value_or(b.strictDependenciesLevel));
@@ -185,47 +172,16 @@ int PackageInfo::orderByAlphabetical(const core::GlobalState &gs, const PackageI
 
 // autocorrects
 
-optional<core::AutocorrectSuggestion> PackageInfo::addImport(const core::GlobalState &gs, const PackageInfo &info,
-                                                             ImportType importType) const {
-    if (this->usesTestPackages) {
-        if (importType != ImportType::Normal) {
-            ENFORCE(false, "addImport called to add test_import when --test-packages is enabled");
-            return nullopt;
-        }
-    }
+optional<core::AutocorrectSuggestion> PackageInfo::addImport(const core::GlobalState &gs,
+                                                             const PackageInfo &info) const {
     auto insertionLoc = core::Loc::none(this->file);
-    optional<core::AutocorrectSuggestion::Edit> deleteTestImportEdit = nullopt;
 
     if (!importedPackageNames.empty()) {
         core::LocOffsets importToInsertAfter;
         for (auto &import : importedPackageNames) {
             if (import.mangledName == info.mangledName()) {
-                if ((importType == ImportType::Normal && import.type != ImportType::Normal) ||
-                    (importType == ImportType::TestHelper && import.type == ImportType::TestUnit)) {
-                    // There's already an import for this package, so we'll "upgrade" it to the desired import.
-                    // importToInsertAfter already tracks where we need to insert the import.  So we can craft an
-                    // edit to delete the existing line, and then use the regular logic for adding an import to
-                    // insert the `import`.
-                    auto importLoc = core::Loc(fullLoc().file(), import.loc);
-                    auto startDetail = importLoc.toDetails(gs).first;
-                    auto replaceLoc = importLoc.adjust(gs, -startDetail.column, 0);
-
-                    deleteTestImportEdit = {replaceLoc, ""};
-
-                    // as a special-case: if we're converting a `test_import` to remove `only:`, then we want to
-                    // re-insert it at this exact same point (since we sort those together.) Let's find the previous
-                    // import!
-                    // TODO: we should find and delete just the `, only: ...` in this case, but that's slightly
-                    // tricky
-
-                    if (importType == ImportType::TestHelper) {
-                        insertionLoc = {importLoc.file(), replaceLoc.beginPos() - 1, replaceLoc.beginPos() - 1};
-                        break;
-                    }
-                } else {
-                    // we already import this, and if so, don't return an autocorrect
-                    return nullopt;
-                }
+                // we already import this, and if so, don't return an autocorrect
+                return nullopt;
             }
 
             auto &importInfo = gs.packageDB().getPackageInfo(import.mangledName);
@@ -234,8 +190,7 @@ optional<core::AutocorrectSuggestion> PackageInfo::addImport(const core::GlobalS
                 continue;
             }
 
-            auto compareResult =
-                orderImports(gs, info, importType != ImportType::Normal, importInfo, import.isTestImport());
+            auto compareResult = orderImports(gs, info, importInfo);
             if (compareResult == 1 || compareResult == 0) {
                 importToInsertAfter = import.loc;
             }
@@ -283,32 +238,8 @@ optional<core::AutocorrectSuggestion> PackageInfo::addImport(const core::GlobalS
     ENFORCE(insertionLoc.exists());
 
     auto packageToImport = info.mangledName_.owner.show(gs);
-    string_view importTypeHuman;
-    string_view importTypeMethod;
-    string_view importTypeTrailing = "";
-    switch (importType) {
-        case ImportType::Normal:
-            importTypeHuman = "Import";
-            importTypeMethod = "import";
-            break;
-        case ImportType::TestUnit:
-            importTypeHuman = "Test Import";
-            importTypeMethod = "test_import";
-            importTypeTrailing = ", only: \"test_rb\"";
-            break;
-        case ImportType::TestHelper:
-            importTypeHuman = "Test Import";
-            importTypeMethod = "test_import";
-            break;
-    }
-    auto suggestionTitle =
-        fmt::format("{} `{}` in package `{}`", importTypeHuman, packageToImport, mangledName_.owner.show(gs));
-    vector<core::AutocorrectSuggestion::Edit> edits = {
-        {insertionLoc, fmt::format("\n  {} {}{}", importTypeMethod, packageToImport, importTypeTrailing)}};
-    if (deleteTestImportEdit.has_value()) {
-        edits.push_back(deleteTestImportEdit.value());
-        suggestionTitle = fmt::format("Convert existing import to `{}`", importTypeMethod);
-    }
+    auto suggestionTitle = fmt::format("Import `{}` in package `{}`", packageToImport, mangledName_.owner.show(gs));
+    vector<core::AutocorrectSuggestion::Edit> edits = {{insertionLoc, fmt::format("\n  import {}", packageToImport)}};
 
     core::AutocorrectSuggestion suggestion(suggestionTitle, edits, false /* isDidYouMean */, false /* hideEdit */,
                                            true /* shouldSkipWhenAggregated */);
@@ -507,8 +438,7 @@ string renderPath(const core::GlobalState &gs, const vector<MangledName> &path) 
 
 } // namespace
 
-// Returns a string representing the path to the given package from this package, if it exists. Note: this only
-// looks at non-test imports.
+// Returns a string representing the path to the given package from this package, if it exists.
 optional<string> PackageInfo::pathTo(const core::GlobalState &gs, const MangledName dest) const {
     ENFORCE(exists());
     // Note: This implements BFS.
@@ -545,7 +475,7 @@ optional<string> PackageInfo::pathTo(const core::GlobalState &gs, const MangledN
         auto &currInfo = gs.packageDB().getPackageInfo(curr);
         for (auto &import : currInfo.importedPackageNames) {
             auto &importInfo = gs.packageDB().getPackageInfo(import.mangledName);
-            if (!importInfo.exists() || import.isTestImport() || visited.contains(import.mangledName)) {
+            if (!importInfo.exists() || visited.contains(import.mangledName)) {
                 continue;
             }
             if (!prev.contains(import.mangledName)) {
@@ -559,21 +489,13 @@ optional<string> PackageInfo::pathTo(const core::GlobalState &gs, const MangledN
     return nullopt;
 }
 
-bool PackageInfo::isVisibleTo(const core::GlobalState &gs, const PackageInfo &importingPkgInfo,
-                              const ImportType importType) const {
+bool PackageInfo::isVisibleTo(const core::GlobalState &gs, const PackageInfo &importingPkgInfo) const {
     if (visibleToEverything()) {
         return true;
     }
 
-    if (importingPkgInfo.usesTestPackages) {
-        ENFORCE(importType == ImportType::Normal);
-        if (visibleToTests() && importingPkgInfo.testPackage()) {
-            return true;
-        }
-    } else {
-        if (visibleToTests() && importType != ImportType::Normal) {
-            return true;
-        }
+    if (visibleToTests() && importingPkgInfo.testPackage()) {
+        return true;
     }
 
     auto importingPkgName = importingPkgInfo.mangledName();
@@ -602,27 +524,13 @@ void PackageInfo::trackPackageReferences(FileRef file, vector<pair<MangledName, 
     packagesReferencedByFile[file].swap(references);
 }
 
-core::packages::ImportType PackageInfo::fileToImportType(const core::GlobalState &gs, core::FileRef file) const {
-    if (this->usesTestPackages) {
-        return core::packages::ImportType::Normal;
-    }
-
-    if (file.data(gs).isPackagedTestHelper()) {
-        return core::packages::ImportType::TestHelper;
-    } else if (file.data(gs).isPackagedTest()) {
-        return core::packages::ImportType::TestUnit;
-    } else {
-        return core::packages::ImportType::Normal;
-    }
-}
-
 std::vector<core::AutocorrectSuggestion::Edit>
 computeImportEdits(const core::GlobalState &gs, const core::packages::PackageInfo &thisPkgInfo,
-                   UnorderedMap<core::packages::MangledName, core::packages::ImportType> toImport) {
+                   const UnorderedSet<core::packages::MangledName> &toImport) {
     std::vector<core::AutocorrectSuggestion::Edit> allEdits;
-    for (auto &[packageName, importType] : toImport) {
+    for (auto &packageName : toImport) {
         auto &otherPkgInfo = gs.packageDB().getPackageInfo(packageName);
-        auto autocorrect = thisPkgInfo.addImport(gs, otherPkgInfo, importType);
+        auto autocorrect = thisPkgInfo.addImport(gs, otherPkgInfo);
         if (autocorrect.has_value()) {
             allEdits.insert(allEdits.end(), make_move_iterator(autocorrect.value().edits.begin()),
                             make_move_iterator(autocorrect.value().edits.end()));
@@ -632,7 +540,7 @@ computeImportEdits(const core::GlobalState &gs, const core::packages::PackageInf
 }
 
 std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingImports(const core::GlobalState &gs) const {
-    UnorderedMap<core::packages::MangledName, core::packages::ImportType> toImport;
+    UnorderedSet<core::packages::MangledName> toImport;
     std::vector<core::AutocorrectSuggestion::Edit> allEdits;
 
     for (auto &import : importedPackageNames) {
@@ -650,7 +558,6 @@ std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingImports(
     }
 
     for (auto &[file, referencedPackages] : packagesReferencedByFile) {
-        auto importType = fileToImportType(gs, file);
         for (auto &[packageName, packageReferenceInfo] : referencedPackages) {
             auto &pkgInfo = gs.packageDB().getPackageInfo(packageName);
             if (!packageReferenceInfo.importNeeded || packageReferenceInfo.causesModularityError || !pkgInfo.exists()) {
@@ -659,19 +566,11 @@ std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingImports(
 
             // We should only skip adding the import if we're not going to add a visible_to to the package, since it
             // will be valid to import the package after the new visible_to is added
-            if (!pkgInfo.isVisibleTo(gs, *this, importType) && !gs.packageDB().updateVisibilityFor(packageName)) {
+            if (!pkgInfo.isVisibleTo(gs, *this) && !gs.packageDB().updateVisibilityFor(packageName)) {
                 continue;
             }
 
-            auto it = toImport.find(packageName);
-            if (it != toImport.end()) {
-                auto currentBroadestImport = it->second;
-                if (importType < currentBroadestImport) {
-                    it->second = importType;
-                }
-            } else {
-                toImport[packageName] = importType;
-            }
+            toImport.emplace(packageName);
         }
     }
     auto importEdits = computeImportEdits(gs, *this, toImport);
@@ -690,14 +589,13 @@ std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingImportsF
         return std::nullopt;
     }
 
-    UnorderedMap<core::packages::MangledName, core::packages::ImportType> toImport;
+    UnorderedSet<core::packages::MangledName> toImport;
     for (auto &[packageName, packageReferenceInfo] : it->second) {
         auto &pkgInfo = gs.packageDB().getPackageInfo(packageName);
         if (!packageReferenceInfo.importNeeded || packageReferenceInfo.causesModularityError || !pkgInfo.exists()) {
             continue;
         }
-        auto importType = fileToImportType(gs, fref);
-        toImport[packageName] = importType;
+        toImport.emplace(packageName);
     }
 
     auto allEdits = computeImportEdits(gs, *this, toImport);
@@ -814,13 +712,7 @@ std::string PackageInfo::renderPackageRbContents(
         fmt::format_to(std::back_inserter(result), "  strict_dependencies '{}'\n",
                        strictDependenciesLevelToString(thisPackageStrictness));
     }
-    if (locs.minTypedLevel.exists() && locs.testsMinTypedLevel.exists()) {
-        ENFORCE(!this->usesTestPackages);
-        fmt::format_to(std::back_inserter(result), "  sorbet min_typed_level: '{}', tests_min_typed_level: '{}'\n",
-                       core::SigilTraits<core::StrictLevel>::toString(minTypedLevel),
-                       core::SigilTraits<core::StrictLevel>::toString(testsMinTypedLevel));
-    } else if (locs.minTypedLevel.exists() && !locs.testsMinTypedLevel.exists()) {
-        ENFORCE(this->usesTestPackages);
+    if (locs.minTypedLevel.exists()) {
         fmt::format_to(std::back_inserter(result), "  sorbet min_typed_level: '{}'\n",
                        core::SigilTraits<core::StrictLevel>::toString(minTypedLevel));
     }
@@ -864,12 +756,11 @@ std::string PackageInfo::renderPackageRbContents(
         auto &bPkgInfo = gs.packageDB().getPackageInfo(b.mangledName);
         ENFORCE(aPkgInfo.exists());
         ENFORCE(bPkgInfo.exists());
-        return orderImports(gs, aPkgInfo, a.isTestImport(), bPkgInfo, b.isTestImport(),
-                            newStrictnessByPkg[a.mangledName], newStrictnessByPkg[b.mangledName]) < 0;
+        return orderImports(gs, aPkgInfo, bPkgInfo, newStrictnessByPkg[a.mangledName],
+                            newStrictnessByPkg[b.mangledName]) < 0;
     });
 
     bool layeringViolationsHeaderShown = false;
-    bool testImportNewLineAdded = false;
 
     ENFORCE(headerMap.find(thisPackageStrictness) != headerMap.end(),
             "should not happen, was a new StrictDependenciesLevel added?");
@@ -880,7 +771,7 @@ std::string PackageInfo::renderPackageRbContents(
         auto &impPkgInfo = gs.packageDB().getPackageInfo(import.mangledName);
         ENFORCE(impPkgInfo.exists());
 
-        if (gs.packageDB().enforceLayering() && import.type == ImportType::Normal) {
+        if (gs.packageDB().enforceLayering()) {
             if (!layeringViolationsHeaderShown && causesLayeringViolation(gs.packageDB(), impPkgInfo)) {
                 fmt::format_to(std::back_inserter(result), "\n  # layering violations:\n");
                 layeringViolationsHeaderShown = true;
@@ -904,30 +795,11 @@ std::string PackageInfo::renderPackageRbContents(
             }
         }
 
-        if (!testImportNewLineAdded && import.type != ImportType::Normal) {
-            fmt::format_to(std::back_inserter(result), "\n");
-            testImportNewLineAdded = true;
-        }
-
-        switch (import.type) {
-            case ImportType::Normal: {
-                auto *existingImport = importsPackage(import.mangledName);
-                if (existingImport != nullptr && existingImport->usesInternals) {
-                    ENFORCE(this->usesTestPackages);
-                    fmt::format_to(std::back_inserter(result), "  import {}, uses_internals: true\n", impPackageName);
-                } else {
-                    fmt::format_to(std::back_inserter(result), "  import {}\n", impPackageName);
-                }
-                break;
-            }
-            case ImportType::TestHelper:
-                ENFORCE(!this->usesTestPackages);
-                fmt::format_to(std::back_inserter(result), "  test_import {}\n", impPackageName);
-                break;
-            case ImportType::TestUnit:
-                ENFORCE(!this->usesTestPackages);
-                fmt::format_to(std::back_inserter(result), "  test_import {}, only: \"test_rb\"\n", impPackageName);
-                break;
+        auto *existingImport = importsPackage(import.mangledName);
+        if (existingImport != nullptr && existingImport->usesInternals) {
+            fmt::format_to(std::back_inserter(result), "  import {}, uses_internals: true\n", impPackageName);
+        } else {
+            fmt::format_to(std::back_inserter(result), "  import {}\n", impPackageName);
         }
     }
 
@@ -1079,16 +951,12 @@ PackageInfo::CanModifyResult PackageInfo::canModifySymbol(const core::GlobalStat
     return CanModifyResult::NotOwner;
 }
 
-bool PackageInfo::canAccessInternalsOf(bool testPackages, MangledName other) const {
+bool PackageInfo::canAccessInternalsOf(MangledName other) const {
     ENFORCE(this->exists());
     ENFORCE(other.exists());
 
     if (this->mangledName_ == other) {
         return true;
-    }
-
-    if (!testPackages) {
-        return false;
     }
 
     auto *imp = this->importsPackage(other);

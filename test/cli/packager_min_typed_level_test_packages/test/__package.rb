@@ -1,7 +1,7 @@
 # typed: strict
 # enable-packager: true
 
-class Project::MyPackage::Test < PackageSpec
+class Test::Project::MyPackage < PackageSpec
   test!
 
   sorbet min_typed_level: 'true'

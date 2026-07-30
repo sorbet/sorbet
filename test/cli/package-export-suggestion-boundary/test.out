@@ -1,3 +1,14 @@
+example/test/__package.rb:9: Unable to resolve constant `A` https://srb.help/5002
+     9 |  export Test::Some::Example::A
+                 ^^^^^^^^^^^^^^^^^^^^^^
+  Did you mean `Test::Some::Example::B`? Use `-a` to autocorrect
+    example/test/__package.rb:9: Replace with `Test::Some::Example::B`
+     9 |  export Test::Some::Example::A
+                 ^^^^^^^^^^^^^^^^^^^^^^
+    example/test/b.rb:4: `Test::Some::Example::B` defined here
+     4 |  class B
+          ^^^^^^^
+
 example/__package.rb:4: Unable to resolve constant `A` https://srb.help/5002
      4 |  export Some::Example::A
                  ^^^^^^^^^^^^^^^^
@@ -6,17 +17,6 @@ example/__package.rb:4: Unable to resolve constant `A` https://srb.help/5002
      4 |  export Some::Example::A
                  ^^^^^^^^^^^^^^^^
     example/b.rb:4: `Some::Example::B` defined here
-     4 |  class B
-          ^^^^^^^
-
-example/__package.rb:5: Unable to resolve constant `A` https://srb.help/5002
-     5 |  export Test::Some::Example::A
-                 ^^^^^^^^^^^^^^^^^^^^^^
-  Did you mean `Test::Some::Example::B`? Use `-a` to autocorrect
-    example/__package.rb:5: Replace with `Test::Some::Example::B`
-     5 |  export Test::Some::Example::A
-                 ^^^^^^^^^^^^^^^^^^^^^^
-    example/test/b.rb:4: `Test::Some::Example::B` defined here
      4 |  class B
           ^^^^^^^
 

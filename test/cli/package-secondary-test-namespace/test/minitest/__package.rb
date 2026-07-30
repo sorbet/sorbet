@@ -3,8 +3,6 @@
 # typed: strict
 
 class Minitest < PackageSpec
-  test!
-
   import Critic
 
   export Minitest::Tests

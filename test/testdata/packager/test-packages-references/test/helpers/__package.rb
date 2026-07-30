@@ -1,6 +1,6 @@
 # typed: strict
 
-class Helpers::Test < PackageSpec
+class Test::Helpers < PackageSpec
   test!
 
   import Root, uses_internals: true

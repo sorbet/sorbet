@@ -18,33 +18,27 @@ TEST_CASE("Condensation Graph - One package") {
     core::GlobalState gs(errorQueue);
     PackageHelpers::makeDefaultPackagerGlobalState(gs, PackageHelpers::LAYERS_UTIL_LIB_APP);
 
-    // Enter a single package, and verify that we get out a condensation with two strata.
+    // Enter a single package, and verify that we get out a condensation with one node.
     auto parsedFiles = PackageHelpers::enterPackages(
         gs, {{"lib/foo/a/__package.rb", PackageHelpers::makePackageRB("Lib::Foo::A", "layered", "lib")}});
 
     auto &condensation = gs.packageDB().condensation();
     {
-        INFO("The condensation graph should contain two packages: one for application code and one for test code");
-        CHECK_EQ(2, condensation.nodes().size());
+        INFO("The condensation graph should contain one node");
+        CHECK_EQ(1, condensation.nodes().size());
     }
 
     auto traversal = condensation.computeTraversal(gs);
 
     {
-        INFO("The traversal should include two strata, each with a single SCC");
-        CHECK_EQ(2, traversal.strata.size());
-        CHECK_EQ(2, traversal.sccs.size());
+        INFO("The traversal should include one stratum with a single SCC");
+        CHECK_EQ(1, traversal.strata.size());
+        CHECK_EQ(1, traversal.sccs.size());
         for (auto stratum : traversal.strata) {
             for (auto scc : stratum) {
                 CHECK_EQ(1, scc.members.size());
             }
         }
-    }
-
-    {
-        INFO("Test packages must come after application code in the traversal");
-        CHECK(!traversal.sccs[0].isTest);
-        CHECK(traversal.sccs[1].isTest);
     }
 }
 
@@ -59,34 +53,26 @@ TEST_CASE("Condensation Graph - Two packages") {
 
     auto &condensation = gs.packageDB().condensation();
     {
-        INFO("The condensation graph should contain two nodes for each package");
-        CHECK_EQ(4, condensation.nodes().size());
+        INFO("The condensation graph should contain one node for each package");
+        CHECK_EQ(2, condensation.nodes().size());
     }
 
     auto traversal = condensation.computeTraversal(gs);
 
     {
-        INFO("The traversal should include three strata, and four SCCs");
-        REQUIRE_EQ(3, traversal.strata.size());
-        CHECK_EQ(4, traversal.sccs.size());
+        INFO("The traversal should include two strata, and two SCCs");
+        REQUIRE_EQ(2, traversal.strata.size());
+        CHECK_EQ(2, traversal.sccs.size());
     }
 
     {
-        INFO("The first stratum should be B's application code");
-        CHECK_EQ(1, absl::c_count_if(traversal.strata[0], [](auto &scc) { return !scc.isTest; }));
-        CHECK_EQ(0, absl::c_count_if(traversal.strata[0], [](auto &scc) { return scc.isTest; }));
+        INFO("The first stratum should be B (no deps)");
+        CHECK_EQ(1, traversal.strata[0].size());
     }
 
     {
-        INFO("The second stratum should be A's application code and B's test");
-        CHECK_EQ(1, absl::c_count_if(traversal.strata[1], [](auto &scc) { return !scc.isTest; }));
-        CHECK_EQ(1, absl::c_count_if(traversal.strata[1], [](auto &scc) { return scc.isTest; }));
-    }
-
-    {
-        INFO("The third stratum should be A's application code");
-        CHECK_EQ(0, absl::c_count_if(traversal.strata[2], [](auto &scc) { return !scc.isTest; }));
-        CHECK_EQ(1, absl::c_count_if(traversal.strata[2], [](auto &scc) { return scc.isTest; }));
+        INFO("The second stratum should be A (depends on B)");
+        CHECK_EQ(1, traversal.strata[1].size());
     }
 }
 
@@ -104,35 +90,21 @@ TEST_CASE("Condensation Graph - Four packages without deps") {
 
     auto &condensation = gs.packageDB().condensation();
     {
-        INFO("The condensation graph should contain two nodes for each package");
-        CHECK_EQ(8, condensation.nodes().size());
+        INFO("The condensation graph should contain one node for each package");
+        CHECK_EQ(4, condensation.nodes().size());
     }
 
     auto traversal = condensation.computeTraversal(gs);
 
     {
-        INFO("The traversal should include two strata, each with four SCCs");
-        REQUIRE_EQ(2, traversal.strata.size());
-        CHECK_EQ(8, traversal.sccs.size());
+        INFO("The traversal should include one stratum with four SCCs");
+        REQUIRE_EQ(1, traversal.strata.size());
+        CHECK_EQ(4, traversal.sccs.size());
         for (auto stratum : traversal.strata) {
             CHECK_EQ(4, stratum.size());
             for (auto scc : stratum) {
                 CHECK_EQ(1, scc.members.size());
             }
-        }
-    }
-
-    {
-        INFO("The first stratum should be all application code");
-        for (auto scc : traversal.strata[0]) {
-            CHECK(!scc.isTest);
-        }
-    }
-
-    {
-        INFO("The second stratum should be all test code");
-        for (auto scc : traversal.strata[1]) {
-            CHECK(scc.isTest);
         }
     }
 }
@@ -160,21 +132,19 @@ TEST_CASE("Condensation Graph - Four packages with a cycle of three") {
     auto pkgD = PackageHelpers::packageInfoFor(gs, parsedFiles[3].file).mangledName();
 
     {
-        INFO("There should be three strata in the resulting traversal");
-        REQUIRE_EQ(3, traversal.strata.size());
+        INFO("There should be two strata in the resulting traversal");
+        REQUIRE_EQ(2, traversal.strata.size());
     }
 
     {
-        INFO("The first stratum should be the A->B->D->A application code cycle");
+        INFO("The first stratum should be the A->B->D->A cycle (one SCC with 3 members)");
         REQUIRE_EQ(1, traversal.strata[0].size());
-        CHECK_EQ(1, absl::c_count_if(traversal.strata[0], [](auto &scc) { return !scc.isTest; }));
 
         for (auto pkg : {pkgA, pkgB, pkgD}) {
-            INFO("Checking for application package " << pkg.owner.showFullName(gs));
+            INFO("Checking for package " << pkg.owner.showFullName(gs));
 
             auto found = false;
             for (auto scc : traversal.strata[0]) {
-                CHECK(!scc.isTest);
                 auto it = absl::c_find(scc.members, pkg);
                 if (it != scc.members.end()) {
                     found = true;
@@ -186,41 +156,14 @@ TEST_CASE("Condensation Graph - Four packages with a cycle of three") {
     }
 
     {
-        INFO("The second stratum should include only the application code of C");
+        INFO("The second stratum should include only C (depends on B which is in the cycle)");
         REQUIRE_EQ(1, traversal.strata[1].size());
-        CHECK_EQ(1, absl::c_count_if(traversal.strata[1], [](auto &scc) { return !scc.isTest; }));
 
         for (auto pkg : {pkgC}) {
-            INFO("Checking for application package " << pkg.owner.showFullName(gs));
+            INFO("Checking for package " << pkg.owner.showFullName(gs));
 
             auto found = false;
             for (auto scc : traversal.strata[1]) {
-                if (scc.isTest) {
-                    continue;
-                }
-                auto it = absl::c_find(scc.members, pkg);
-                if (it != scc.members.end()) {
-                    found = true;
-                    break;
-                }
-            }
-            CHECK(found);
-        }
-    }
-
-    {
-        INFO("The third stratum should include all of the test packages");
-        REQUIRE_EQ(1, traversal.strata[2].size());
-        CHECK_EQ(1, absl::c_count_if(traversal.strata[2], [](auto &scc) { return scc.isTest; }));
-
-        for (auto pkg : {pkgA, pkgB, pkgC, pkgD}) {
-            INFO("Checking for test package " << pkg.owner.showFullName(gs));
-
-            auto found = false;
-            for (auto scc : traversal.strata[2]) {
-                if (!scc.isTest) {
-                    continue;
-                }
                 auto it = absl::c_find(scc.members, pkg);
                 if (it != scc.members.end()) {
                     found = true;
@@ -262,27 +205,25 @@ TEST_CASE("Condensation Graph - Two prelude packages, two normal packages") {
 
     auto &condensation = gs.packageDB().condensation();
     {
-        INFO("The condensation graph should contain two nodes for each package");
-        CHECK_EQ(8, condensation.nodes().size());
+        INFO("The condensation graph should contain one node for each package");
+        CHECK_EQ(4, condensation.nodes().size());
     }
 
     auto traversal = condensation.computeTraversal(gs);
 
     {
-        REQUIRE_EQ(3, traversal.strata.size());
+        REQUIRE_EQ(2, traversal.strata.size());
         CHECK_EQ(condensation.nodes().size(), traversal.sccs.size());
     }
 
     {
         INFO("The first stratum should be all prelude packages");
-        REQUIRE_EQ(4, traversal.strata[0].size());
+        REQUIRE_EQ(2, traversal.strata[0].size());
         for (auto scc : traversal.strata[0]) {
             for (auto pkg : scc.members) {
                 CHECK(gs.packageDB().getPackageInfo(pkg).isPreludePackage());
             }
         }
-        CHECK_EQ(2, absl::c_count_if(traversal.strata[0], [](auto &scc) { return scc.isTest; }));
-        CHECK_EQ(2, absl::c_count_if(traversal.strata[0], [](auto &scc) { return !scc.isTest; }));
     }
 
     {
@@ -300,19 +241,8 @@ TEST_CASE("Condensation Graph - Two prelude packages, two normal packages") {
         // Lib::Foo::A is here because it's the first stratum where a non-prelude package could show up.
         // Lib::Foo::B is here because all of its imports have been satisfied while traversing the prelude set, and it's
         // the first stratum where a non-prelude package could show up.
-        INFO("The second stratum should be the application code of Lib::Foo::A and Lib::Foo::B");
+        INFO("The second stratum should be Lib::Foo::A and Lib::Foo::B");
         REQUIRE_EQ(2, traversal.strata[1].size());
-        for (auto scc : traversal.strata[1]) {
-            CHECK(!scc.isTest);
-        }
-    }
-
-    {
-        INFO("The third stratum should be the test code of Lib::Foo::A and Lib::Foo::B");
-        REQUIRE_EQ(2, traversal.strata[2].size());
-        for (auto scc : traversal.strata[2]) {
-            CHECK(scc.isTest);
-        }
     }
 }
 
@@ -328,9 +258,8 @@ TEST_CASE("Condensation Graph - Two packages, one is test-only") {
 
     auto &condensation = gs.packageDB().condensation();
     {
-        INFO("The condensation graph should contain three nodes total (app + test for Lib::Foo::A, and "
-             "Lib::Foo::Test::B)");
-        CHECK_EQ(3, condensation.nodes().size());
+        INFO("The condensation graph should contain one node for each package");
+        CHECK_EQ(2, condensation.nodes().size());
     }
 
     auto traversal = condensation.computeTraversal(gs);
@@ -341,21 +270,13 @@ TEST_CASE("Condensation Graph - Two packages, one is test-only") {
     }
 
     {
-        INFO("The traversal should include two strata");
-        REQUIRE_EQ(2, traversal.strata.size());
+        INFO("The traversal should include one stratum (no deps between the packages)");
+        REQUIRE_EQ(1, traversal.strata.size());
     }
 
     {
-        INFO("The first stratum will be a mix of application and test code");
+        INFO("The stratum should contain both packages");
         CHECK_EQ(2, traversal.strata[0].size());
-        CHECK_EQ(1, absl::c_count_if(traversal.strata[0], [](auto &scc) { return !scc.isTest; }));
-        CHECK_EQ(1, absl::c_count_if(traversal.strata[0], [](auto &scc) { return scc.isTest; }));
-    }
-
-    {
-        INFO("The second stratum should be all test code");
-        CHECK_EQ(1, traversal.strata[1].size());
-        CHECK_EQ(1, absl::c_count_if(traversal.strata[1], [](auto &scc) { return scc.isTest; }));
     }
 }
 
