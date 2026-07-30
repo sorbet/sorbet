@@ -279,7 +279,9 @@ has_attached_class! { {upper: SomeInterface} }
 has_attached_class!(:out) { {upper: SomeInterface} }
 ```
 
-(Note that this type member cannot be declared contravariant, as that would make it impossible to mix this module into a class.)
+Note that this type member cannot be declared contravariant, as that would make it impossible to mix this module into a class.
+
+An invariant `has_attached_class!` _is_ allowed, but note that a module with this annotation can only be extended into a [`final!`](final.md) class.
 
 > Note: you may also find this external blog post useful, which discusses similar topics:
 >
