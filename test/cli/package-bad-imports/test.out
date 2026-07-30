@@ -28,3 +28,41 @@ example/__package.rb:11: Unable to resolve constant `A` https://srb.help/5002
     11 |  import A::B::C
                  ^
 Errors: 4
+class ::<root> < ::Object ()
+  module ::<PackageSpecRegistry> < ::Sorbet::Private::Static::ImplicitModuleSuperclass ()
+    class ::<PackageSpecRegistry>::DoNot < ::Sorbet::Private::Static::PackageSpec () @ do_not/__package.rb:3
+    class ::<PackageSpecRegistry>::<Class:DoNot>[<AttachedClass>] < ::Sorbet::Private::Static::<Class:PackageSpec> () @ do_not/__package.rb:3
+      type-member(+) ::<PackageSpecRegistry>::<Class:DoNot>::<AttachedClass> -> T.attached_class (of DoNot) @ do_not/__package.rb:3
+      method ::<PackageSpecRegistry>::<Class:DoNot>#<static-init> (<blk>) @ do_not/suggest_this.rb:3
+        argument <blk><block> @ Loc {file=./do_not/suggest_this.rb start=??? end=???}
+      method ::<PackageSpecRegistry>::<Class:DoNot>#<static-init> (<blk>) @ do_not/__package.rb:3
+        argument <blk><block> @ Loc {file=./do_not/__package.rb start=??? end=???}
+    module ::<PackageSpecRegistry>::Some < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ example/__package.rb:3
+      class ::<PackageSpecRegistry>::Some::Example < ::Sorbet::Private::Static::PackageSpec () @ example/__package.rb:3
+      class ::<PackageSpecRegistry>::Some::<Class:Example>[<AttachedClass>] < ::Sorbet::Private::Static::<Class:PackageSpec> () @ example/__package.rb:3
+        type-member(+) ::<PackageSpecRegistry>::Some::<Class:Example>::<AttachedClass> -> T.attached_class (of Some::Example) @ example/__package.rb:3
+        method ::<PackageSpecRegistry>::Some::<Class:Example>#<static-init> (<blk>) @ example/__package.rb:3
+          argument <blk><block> @ Loc {file=./example/__package.rb start=??? end=???}
+    class ::<PackageSpecRegistry>::<Class:Some>[<AttachedClass>] < ::Module () @ example/__package.rb:3
+      type-member(+) ::<PackageSpecRegistry>::<Class:Some>::<AttachedClass> -> T.attached_class (of Some) @ example/__package.rb:3
+    class ::<PackageSpecRegistry>::Suggestion < ::Sorbet::Private::Static::PackageSpec () @ suggestion/__package.rb:3
+    class ::<PackageSpecRegistry>::<Class:Suggestion>[<AttachedClass>] < ::Sorbet::Private::Static::<Class:PackageSpec> () @ suggestion/__package.rb:3
+      type-member(+) ::<PackageSpecRegistry>::<Class:Suggestion>::<AttachedClass> -> T.attached_class (of Suggestion) @ suggestion/__package.rb:3
+      method ::<PackageSpecRegistry>::<Class:Suggestion>#<static-init> (<blk>) @ suggestion/__package.rb:3
+        argument <blk><block> @ Loc {file=./suggestion/__package.rb start=??? end=???}
+  class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> ()
+    method ::<Class:<root>>#<static-init> (<blk>) @ do_not/__package.rb:3
+      argument <blk><block> @ Loc {file=./do_not/__package.rb start=??? end=???}
+    method ::<Class:<root>>#<static-init> (<blk>) @ example/__package.rb:3
+      argument <blk><block> @ Loc {file=./example/__package.rb start=??? end=???}
+    method ::<Class:<root>>#<static-init> (<blk>) @ suggestion/__package.rb:3
+      argument <blk><block> @ Loc {file=./suggestion/__package.rb start=??? end=???}
+  module ::DoNot < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ do_not/suggest_this.rb:3
+    module ::DoNot::SuggestThis < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ do_not/suggest_this.rb:3
+    class ::DoNot::<Class:SuggestThis>[<AttachedClass>] < ::Module () @ do_not/suggest_this.rb:3
+      type-member(+) ::DoNot::<Class:SuggestThis>::<AttachedClass> -> T.attached_class (of DoNot::SuggestThis) @ do_not/suggest_this.rb:3
+      method ::DoNot::<Class:SuggestThis>#<static-init> (<blk>) @ do_not/suggest_this.rb:3
+        argument <blk><block> @ Loc {file=./do_not/suggest_this.rb start=??? end=???}
+  class ::<Class:DoNot>[<AttachedClass>] < ::Module () @ do_not/suggest_this.rb:3
+    type-member(+) ::<Class:DoNot>::<AttachedClass> -> T.attached_class (of DoNot) @ do_not/suggest_this.rb:3
+
