@@ -712,7 +712,7 @@ private:
     }
 
     static bool resolveAncestorJob(core::MutableContext ctx, AncestorResolutionItem &job,
-                                   const UnorderedSet<core::ClassOrModuleRef> suppressPayloadSuperclassRedefinitionFor,
+                                   const UnorderedSet<core::ClassOrModuleRef> &suppressPayloadSuperclassRedefinitionFor,
                                    bool lastRun) {
         auto ancestorSym = job.ancestor->symbol();
         if (!ancestorSym.exists()) {
