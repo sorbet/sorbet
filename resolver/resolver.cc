@@ -3124,9 +3124,6 @@ public:
                     combinedTodoUntypedResultTypes.emplace_back(move(threadResult.todoUntypedResultTypes));
                     combinedTodoResolveCastItems.emplace_back(move(threadResult.todoResolveCastItems));
                     combinedTodoResolveFieldItems.emplace_back(move(threadResult.todoResolveFieldItems));
-                    combinedTodoAttachedClassItems.emplace_back(move(threadResult.todoAttachedClassItems));
-                    combinedTodoAttachedClassItems.emplace_back(move(threadResult.todoAttachedClassItems));
-                    combinedTodoAttachedClassItems.emplace_back(move(threadResult.todoAttachedClassItems));
                     combinedTodoResolveStaticFieldItems.emplace_back(move(threadResult.todoResolveStaticFieldItems));
                     combinedTodoResolveSimpleStaticFieldItems.emplace_back(
                         move(threadResult.todoResolveSimpleStaticFieldItems));
