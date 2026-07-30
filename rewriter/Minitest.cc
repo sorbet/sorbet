@@ -189,7 +189,6 @@ bool hasUserDefinedDescribedClass(const ast::ClassDef::RHS_store &classBody) {
 
 string to_s(core::Context ctx, const ast::ExpressionPtr &arg) {
     auto argLit = ast::cast_tree<ast::Literal>(arg);
-    string argString;
     if (argLit != nullptr && argLit->isName()) {
         return argLit->asName().show(ctx);
     }
