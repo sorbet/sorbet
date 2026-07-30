@@ -20,7 +20,7 @@ public:
     LocalRef variable;
     core::TypePtr type;
     VariableUseSite() = default;
-    VariableUseSite(LocalRef local) : variable(local){};
+    explicit VariableUseSite(LocalRef local) : variable(local){};
     VariableUseSite(LocalRef local, core::TypePtr type) : variable(local), type(std::move(type)){};
     VariableUseSite(const VariableUseSite &) = delete;
     const VariableUseSite &operator=(const VariableUseSite &rhs) = delete;
