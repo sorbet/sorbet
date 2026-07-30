@@ -18,7 +18,7 @@ void CFGBuilder::conditionalJump(BasicBlock *from, LocalRef cond, BasicBlock *th
         ENFORCE(!from->bexit.isCondSet(), "condition for block already set");
         ENFORCE(from->bexit.thenb == nullptr, "thenb already set");
         ENFORCE(from->bexit.elseb == nullptr, "elseb already set");
-        from->bexit.cond = cond;
+        from->bexit.cond.variable = cond;
         from->bexit.thenb = thenb;
         from->bexit.elseb = elseb;
         from->bexit.loc = loc;
@@ -33,7 +33,7 @@ void CFGBuilder::unconditionalJump(BasicBlock *from, BasicBlock *to, CFG &inWhat
         ENFORCE(!from->bexit.isCondSet(), "condition for block already set");
         ENFORCE(from->bexit.thenb == nullptr, "thenb already set");
         ENFORCE(from->bexit.elseb == nullptr, "elseb already set");
-        from->bexit.cond = LocalRef::unconditional();
+        from->bexit.cond.variable = LocalRef::unconditional();
         from->bexit.elseb = to;
         from->bexit.thenb = to;
         from->bexit.loc = loc;
@@ -201,7 +201,7 @@ void CFGBuilder::jumpToDead(BasicBlock *from, CFG &inWhat, core::LocOffsets loc)
         ENFORCE(!from->bexit.isCondSet(), "condition for block already set");
         ENFORCE(from->bexit.thenb == nullptr, "thenb already set");
         ENFORCE(from->bexit.elseb == nullptr, "elseb already set");
-        from->bexit.cond = LocalRef::unconditional();
+        from->bexit.cond.variable = LocalRef::unconditional();
         from->bexit.elseb = db;
         from->bexit.thenb = db;
         from->bexit.loc = loc;
@@ -930,8 +930,6 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                     auto magic = cctx.newTemporary(core::Names::magic());
                     synthesizeExpr(current, magic, core::LocOffsets::none(), make_insn<Alias>(core::Symbols::Magic()));
                     auto retryTemp = cctx.newTemporary(core::Names::retryTemp());
-                    InlinedVector<cfg::LocalRef, 2> args{};
-                    InlinedVector<core::LocOffsets, 2> argLocs{};
                     const size_t numArgs = 0;
                     auto isPrivateOk = false;
                     auto snd = Send::make(magic, what.loc(), core::Names::retry(), core::LocOffsets::none(), numArgs,

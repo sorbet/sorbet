@@ -46,7 +46,7 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
 
             if (thenb == elseb) {
                 // Remove condition from unconditional jumps
-                bb->bexit.cond = LocalRef::unconditional();
+                bb->bexit.cond.variable = LocalRef::unconditional();
 
                 // These two simplifications only apply on unconditional jumps that:
                 //
