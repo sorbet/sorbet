@@ -19,8 +19,8 @@ class Ractor
   sig { params(blk: T.proc.params(message: T.untyped).returns(T.nilable(T::Boolean))).returns(T.untyped) }
   def self.receive_if(&blk); end
 
-  sig { params(rest: T.untyped, blk: T.proc.params(arg: T.untyped).returns(T.untyped)).void }
-  def self.initialize(**rest, &blk); end
+  sig { params(args: T.untyped, name: T.nilable(String), blk: T.proc.params(arg: T.untyped).returns(T.untyped)).void }
+  def initialize(*args, name: nil, &blk); end
 
   sig { returns(Integer) }
   def self.count; end
