@@ -5,6 +5,7 @@
 #include "core/LocOffsets.h"
 #include "core/Names.h"
 #include "core/StrictLevel.h"
+#include "xxhash.h"
 #include <array>
 #include <string>
 #include <string_view>
@@ -95,7 +96,7 @@ public:
     static std::string censorFilePathForSnapshotTests(std::string_view orig);
 
     // Returns the hash of the file content. Requires that the file has been read.
-    std::array<uint8_t, 64> sourceHash() const;
+    absl::Span<const uint8_t> sourceHash() const;
 
 private:
     struct Flags {
@@ -128,6 +129,10 @@ private:
     // for that file, and computing lazily allows saving space.
     mutable std::shared_ptr<std::vector<uint32_t>> lineBreaks_;
 
+    // This is the XXH128 hash of the source, lazily computed.
+    mutable XXH128_hash_t sourceHash_;
+
+    mutable bool sourceHashComputed_ = false;
     mutable StrictLevel minErrorLevel_ = StrictLevel::Max;
 
 public:
@@ -138,7 +143,7 @@ private:
     std::shared_ptr<const FileHash> hash_;
 };
 
-CheckSize(File, 96, 8);
+CheckSize(File, 112, 8);
 
 template <typename H> H AbslHashValue(H h, const FileRef &m) {
     return H::combine(std::move(h), m.id());
