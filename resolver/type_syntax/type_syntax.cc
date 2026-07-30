@@ -401,7 +401,7 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
                         core::Loc loc{ctx.file, send->loc};
                         if (auto orig = loc.source(ctx)) {
                             auto dot = orig->rfind(".");
-                            if (orig->rfind(".") == string::npos) {
+                            if (dot == string::npos) {
                                 e.replaceWith("Remove this use of `params`", loc, "");
                             } else {
                                 e.replaceWith("Remove this use of `params`", loc, "{}", orig->substr(0, dot));
