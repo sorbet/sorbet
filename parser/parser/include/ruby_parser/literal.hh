@@ -39,8 +39,8 @@ class literal {
     lexer &_lexer;
     size_t _nesting;
     literal_type _type;
-    std::string start_delim;
-    std::string end_delim;
+    std::string_view start_delim;
+    std::string_view end_delim;
     bool indent;
     bool dedent_body;
     bool label_allowed;

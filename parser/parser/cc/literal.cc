@@ -262,7 +262,7 @@ bool literal::nest_and_try_closing(std::string_view delimiter, const char *ts, c
         // error location ends on the newline character, inclusive.)
         auto end_of_line = this->_lexer.range(ts, ts);
         // end_delim is pre-populated to be the end delimiter we're looking for, not that we found
-        this->_lexer.diagnostics.emplace_back(dlevel::ERROR, dclass::EscapeEofHint, end_of_line, this->end_delim);
+        this->_lexer.diagnostics.emplace_back(dlevel::ERROR, dclass::EscapeEofHint, end_of_line, std::string{this->end_delim});
         return true;
     }
 
