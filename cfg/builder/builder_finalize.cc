@@ -247,14 +247,14 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
                 if (auto v = cast_instruction<Ident>(bind.value)) {
                     v->what = maybeDealias(ctx, cfg, v->what, current);
                 } else if (auto v = cast_instruction<Send>(bind.value)) {
-                    v->recv = maybeDealias(ctx, cfg, v->recv.variable, current);
+                    v->recv.variable = maybeDealias(ctx, cfg, v->recv.variable, current);
                     for (auto &arg : v->argRefs()) {
                         arg = maybeDealias(ctx, cfg, arg, current);
                     }
                 } else if (auto v = cast_instruction<TAbsurd>(bind.value)) {
-                    v->what = maybeDealias(ctx, cfg, v->what.variable, current);
+                    v->what.variable = maybeDealias(ctx, cfg, v->what.variable, current);
                 } else if (auto v = cast_instruction<Return>(bind.value)) {
-                    v->what = maybeDealias(ctx, cfg, v->what.variable, current);
+                    v->what.variable = maybeDealias(ctx, cfg, v->what.variable, current);
                 }
             }
 
@@ -265,7 +265,7 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
             }
         }
         if (bb->bexit.cond.variable != LocalRef::unconditional()) {
-            bb->bexit.cond = maybeDealias(ctx, cfg, bb->bexit.cond.variable, current);
+            bb->bexit.cond.variable = maybeDealias(ctx, cfg, bb->bexit.cond.variable, current);
         }
     }
 }
