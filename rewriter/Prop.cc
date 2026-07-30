@@ -243,6 +243,9 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             return nullopt;
         }
         ret.name = sym->asSymbol();
+        if (!ASTUtil::validAttrName(ctx, sym->loc, ret.name)) {
+            return nullopt;
+        }
         ENFORCE(ctx.locAt(sym->loc).exists());
         ENFORCE(!ctx.locAt(sym->loc).source(ctx).value().empty() && ctx.locAt(sym->loc).source(ctx).value()[0] == ':');
         ret.nameLoc = core::LocOffsets{sym->loc.beginPos() + 1, sym->loc.endPos()};
