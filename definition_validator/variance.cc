@@ -1,3 +1,4 @@
+#include "common/strings/formatting.h"
 #include "common/typecase.h"
 #include "core/Polarity.h"
 #include "core/Symbols.h"
@@ -70,8 +71,10 @@ private:
                 auto params = app.targs;
 
                 if (members.size() != params.size()) [[unlikely]] {
-                    fatalLogger->error(R"(msg="types should be fully saturated" loc="{}" members={} params={})",
-                                       this->loc.showRaw(ctx), members.size(), params.size());
+                    auto memberNames =
+                        fmt::map_join(members, ", ", [&](auto m) { return m.data(ctx)->name.show(ctx); });
+                    fatalLogger->error(R"(msg="types should be fully saturated" loc="{}" members="[{}]" app="{}")",
+                                       this->loc.showRaw(ctx), memberNames, app.show(ctx));
                     ENFORCE(false);
                 }
 
