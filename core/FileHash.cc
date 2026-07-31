@@ -1,4 +1,5 @@
 #include "core/FileHash.h"
+#include "absl/algorithm/container.h"
 #include "common/sort/sort.h"
 #include "core/FoundDefinitions.h"
 #include "core/GlobalState.h"
@@ -86,6 +87,47 @@ void WithoutUniqueNameHash::sortAndDedupe(vector<core::WithoutUniqueNameHash> &h
     fast_sort(hashes);
     hashes.resize(std::distance(hashes.begin(), std::unique(hashes.begin(), hashes.end())));
     hashes.shrink_to_fit();
+}
+
+// This is adapted from
+// https://github.com/llvm/llvm-project/blob/b89e774672678ef26baf8f94c616f43551d29428/libcxx/include/__algorithm/set_intersection.h#L47-L123
+bool WithoutUniqueNameHash::sortedIntersects(const vector<WithoutUniqueNameHash> &a,
+                                             const vector<WithoutUniqueNameHash> &b) {
+    ENFORCE_NO_TIMER(absl::c_is_sorted(a));
+    ENFORCE_NO_TIMER(absl::c_is_sorted(b));
+
+    auto aIt = a.begin();
+    auto aEnd = a.end();
+    auto bIt = b.begin();
+    auto bEnd = b.end();
+
+    bool prevEqual = false;
+
+    while (bIt != bEnd) {
+        auto aNext = std::lower_bound(aIt, aEnd, *bIt);
+        std::swap(aNext, aIt);
+        bool aEqual = aNext == aIt;
+
+        if (aEqual && prevEqual) {
+            return true;
+        }
+        prevEqual = aEqual;
+
+        if (aIt == aEnd) {
+            break;
+        }
+
+        auto bNext = std::lower_bound(bIt, bEnd, *aIt);
+        std::swap(bNext, bIt);
+        bool bEqual = bNext == bIt;
+
+        if (bEqual && prevEqual) {
+            return true;
+        }
+        prevEqual = bEqual;
+    }
+
+    return false;
 }
 
 FullNameHash::FullNameHash(const GlobalState &gs, NameRef nm) : _hashValue(incZero(hashFullNameRef(gs, nm))) {}

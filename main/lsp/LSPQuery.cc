@@ -110,6 +110,7 @@ LSPQueryResult LSPQuery::bySymbol(const LSPConfiguration &config, LSPTypechecker
     absl::c_transform(symbols, back_inserter(symShortNameHashes), [&gs](auto symbol) {
         return core::WithoutUniqueNameHash{gs, symbol.name(gs)};
     });
+    fast_sort(symShortNameHashes);
     // Locate files that contain the same Name as the symbol. Is an overapproximation, but a good first filter.
     size_t i = 0;
     // skip idx 0 (corresponds to File that does not exist, so it contains nullptr)
@@ -129,9 +130,7 @@ LSPQueryResult LSPQuery::bySymbol(const LSPConfiguration &config, LSPTypechecker
         const auto &hash = *file->getFileHash();
         const auto &usedSymbolNameHashes = hash.usages.nameHashes;
 
-        if (absl::c_any_of(symShortNameHashes, [&](const auto &symShortNameHash) {
-                return absl::c_contains(usedSymbolNameHashes, symShortNameHash);
-            })) {
+        if (core::WithoutUniqueNameHash::sortedIntersects(symShortNameHashes, usedSymbolNameHashes)) {
             frefs.emplace_back(ref);
         }
     }

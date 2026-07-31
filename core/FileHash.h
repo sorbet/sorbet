@@ -14,6 +14,11 @@ class SerializerImpl;
 class WithoutUniqueNameHash {
 public:
     static void sortAndDedupe(std::vector<core::WithoutUniqueNameHash> &hashes);
+    // Returns `true` if the two vectors share a value, and `false` otherwise. This requires that the two vectors are
+    // sorted, which is also a requirement of using `absl::c_set_intersetion`, so this is a drop-in replacement when the
+    // resulting set isn't needed.
+    static bool sortedIntersects(const std::vector<WithoutUniqueNameHash> &a,
+                                 const std::vector<WithoutUniqueNameHash> &b);
 
     WithoutUniqueNameHash(const GlobalState &gs, NameRef nm);
     inline bool isDefined() const {
