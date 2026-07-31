@@ -360,6 +360,8 @@ end
 
 Constructs like `Class.new`, `Module.new`, `class_exec`, `module_eval`, `module_exec`, `instance_eval`, `instance_exec`, and others which dynamically evaluate code to define methods or constants in the context of another class or module is not supported. When Sorbet sees a method defined in a block, regardless of what the block does, it defines it in the enclosing lexical scope, ignoring any dynamic behavior. This means that methods defined dynamically but at the lexical top-level of a file will appear no different than a method defined literally at the top-level, i.e., on `::Object` as a `private` method. This extends to user-defined or library-defined methods which wrap these methods' functionality.
 
+As a limited special case, Sorbet supports `A = Class.new { ... }` and `M = Module.new { ... }`, where the dynamically created module is assigned directly to a constant.
+
 ### Alternative
 
 1.  Hide the definitions from Sorbet using `define_method`:
