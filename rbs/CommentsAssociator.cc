@@ -310,16 +310,14 @@ int CommentsAssociator::maybeInsertStandalonePlaceholders(pm_node_list_t &nodes,
         auto commentString = it->second.string;
         std::match_results<std::string_view::const_iterator> matches;
         if (std::regex_match(commentString.begin(), commentString.end(), matches, TYPE_ALIAS_PATTERN)) {
-            // Type aliases are only allowed in class/module bodies
+            // Type aliases are only allowed at top level or in class/module bodies
             if (!typeAliasAllowedInContext()) {
                 if (auto e = ctx.beginError(it->second.loc, core::errors::Rewriter::RBSUnusedComment)) {
                     e.setHeader("Unexpected RBS type alias comment");
+                    e.addErrorNote("RBS type aliases are only allowed at top level or in class and module bodies");
                     if (!contextAllowingTypeAlias.empty()) {
                         auto loc = contextAllowingTypeAlias.back().second;
-                        e.addErrorLine(ctx.locAt(loc),
-                                       "RBS type aliases are only allowed in class and module bodies. Found in:");
-                    } else {
-                        e.addErrorNote("RBS type aliases are only allowed in class and module bodies");
+                        e.addErrorLine(ctx.locAt(loc), "Enclosing context:");
                     }
                 }
 
@@ -400,8 +398,10 @@ void CommentsAssociator::processTrailingComments(pm_node_t *node, pm_node_list_t
         return;
     }
 
-    auto loc = translateLocation(node->location);
-    int endLine = core::Loc::pos2Detail(ctx.file.data(ctx), loc.endPos()).line;
+    // The program node location only spans until the last statement end (or (0, 0) for comment-only files)
+    // In order to find all top level RBS type alias comments, we need to scan every line of the program.
+    int endLine = isa_node<pm_program_node_t>(node) ? INT32_MAX : posToLine(translateLocation(node->location).endPos());
+
     maybeInsertStandalonePlaceholders(nodes, nodes.size, lastLine, endLine);
     lastLine = endLine;
 }
@@ -1059,9 +1059,14 @@ void CommentsAssociator::walkNode(pm_node_t *node) {
         }
         case PM_PROGRAM_NODE: {
             auto *program = down_cast_nonnull<pm_program_node_t>(node);
-            if (program->statements) {
-                walkStatements(program->statements->body);
-            }
+
+            // A program may contain top level RBS type alias comments
+            auto programLoc = translateLocation(node->location);
+            contextAllowingTypeAlias.emplace_back(true, programLoc);
+
+            program->statements = down_cast_nonnull<pm_statements_node_t>(walkBody(node, up_cast(program->statements)));
+
+            contextAllowingTypeAlias.pop_back();
             break;
         }
         case PM_STATEMENTS_NODE: {
