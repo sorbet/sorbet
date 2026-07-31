@@ -33,6 +33,10 @@ module Opus::Types::Test
       include Readable
     end
 
+    # An instance where a class was meant, i.e. the mistake from
+    # https://github.com/sorbet/sorbet/issues/2673
+    NOT_A_TYPE = Object.new
+
     describe 'inline_type_error_handler' do
       describe 'when in default state' do
         it 'T.must raises an error' do
@@ -148,6 +152,17 @@ module Opus::Types::Test
             "You can't call .void after calling .returns."
           )
         end
+
+        it 'raises an error for a value that is not a type' do
+          @mod.sig { returns(NOT_A_TYPE) }
+          def @mod.foo
+            :bar
+          end
+          ex = assert_raises(ArgumentError) do
+            @mod.foo
+          end
+          assert_includes(ex.message, "Invalid value for type constraint")
+        end
       end
 
       describe 'when overridden' do
@@ -168,6 +183,33 @@ module Opus::Types::Test
               location.is_a?(Thread::Backtrace::Location)
           end
           @mod.sig { returns(Symbol).void }
+          def @mod.foo
+            :bar
+          end
+          assert_equal(:bar, @mod.foo)
+        end
+
+        it 'handles a value that is not a type' do
+          CustomReceiver.expects(:receive).once.with do |error, location|
+            error.is_a?(T::Utils::CoerceError) &&
+              error.message.include?("Invalid value for type constraint") &&
+              location.is_a?(Thread::Backtrace::Location)
+          end
+          @mod.sig { returns(NOT_A_TYPE) }
+          def @mod.foo
+            :bar
+          end
+          assert_equal(:bar, @mod.foo)
+        end
+
+        # `T.nilable` and friends coerce eagerly, so this one blows up while the
+        # sig block is still running, not while the signature is being built.
+        it 'handles a value that is not a type inside a type combinator' do
+          CustomReceiver.expects(:receive).once.with do |error, location|
+            error.is_a?(T::Utils::CoerceError) &&
+              location.is_a?(Thread::Backtrace::Location)
+          end
+          @mod.sig { returns(T.nilable(NOT_A_TYPE)) }
           def @mod.foo
             :bar
           end
