@@ -428,11 +428,15 @@ module T::Private::Methods
   # Executes the `sig` block, and converts the resulting Declaration
   # to a Signature.
   def self.run_sig(method_name, original_method, declaration_block)
+    loc = declaration_block.loc
+
     current_declaration =
       begin
         run_builder(declaration_block)
-      rescue DeclBuilder::BuilderError => e
-        T::Configuration.sig_builder_error_handler(e, declaration_block.loc)
+      # A `CoerceError` can escape the sig block itself, because combinators like
+      # `T.nilable` coerce their arguments eagerly.
+      rescue DeclBuilder::BuilderError, T::Utils::CoerceError => e
+        T::Configuration.sig_builder_error_handler(e, loc)
         nil
       end
 
@@ -441,7 +445,7 @@ module T::Private::Methods
 
     signature =
       if current_declaration
-        build_sig(method_name, original_method, current_declaration)
+        build_sig(method_name, original_method, current_declaration, loc)
       else
         Signature.new_untyped(method: original_method)
       end
@@ -476,7 +480,7 @@ module T::Private::Methods
     decl
   end
 
-  def self.build_sig(method_name, original_method, current_declaration)
+  def self.build_sig(method_name, original_method, current_declaration, loc)
     begin
       signature = Signature.new(
         method: original_method,
@@ -493,6 +497,12 @@ module T::Private::Methods
 
       SignatureValidation.validate(signature)
       signature
+    # A bad type annotation is a problem with how the `sig` was written, not
+    # with how it lines up against other sigs, so it belongs to the builder
+    # handler rather than the validation one.
+    rescue T::Utils::CoerceError => e
+      T::Configuration.sig_builder_error_handler(e, loc)
+      Signature.new_untyped(method: original_method)
     rescue => e
       super_method = original_method.super_method
       super_signature = signature_for_method(super_method) if super_method
