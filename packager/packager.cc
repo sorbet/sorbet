@@ -679,7 +679,7 @@ struct PackageSpecBodyWalk {
                 if (info.file.data(ctx).isTestPackage(ctx) && parsedValue != StrictDependenciesLevel::False) {
                     parsedValue = StrictDependenciesLevel::False;
                     if (auto e = ctx.beginError(send.argsLoc(), core::errors::Packager::InvalidStrictDependencies)) {
-                        e.setHeader("Test packages must be be at `{}` level `{}`", "strict_dependencies", "false");
+                        e.setHeader("Test packages must be at `{}` level `{}`", "strict_dependencies", "false");
                         e.replaceWith("Change to false", ctx.locAt(send.getPosArg(0).loc()), "'false'");
                     }
                 }
