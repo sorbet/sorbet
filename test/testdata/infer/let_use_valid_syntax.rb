@@ -33,3 +33,24 @@ class C
   BOOLEAN = new("bool")
   #         ^^^^^^^^^^^ error: Constants must have type annotations with `T.let` when specifying `# typed: strict`
 end
+
+class GenericClass
+  extend T::Sig
+  extend T::Generic
+
+  TypeTemplate = type_template
+
+  sig {returns(TypeTemplate)}
+  def self.returns_template; raise; end
+
+  X = returns_template
+  #   ^^^^^^^^^^^^^^^^ error: Constants must have type annotations with `T.let` when specifying `# typed: strict`
+
+  TypeTemplateUpper = type_template {{upper: Integer}}
+
+  sig {returns(TypeTemplateUpper)}
+  def self.returns_template_upper; raise; end
+
+  Y = returns_template_upper
+  #   ^^^^^^^^^^^^^^^^^^^^^^ error: Constants must have type annotations with `T.let` when specifying `# typed: strict`
+end
