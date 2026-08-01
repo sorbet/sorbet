@@ -4,7 +4,7 @@
   "description": "Ruby IDE features, powered by Sorbet.",
   "author": "Stripe Inc.",
   "license": "Apache-2.0",
-  "version": "0.3.46",
+  "version": "0.3.47",
   "publisher": "sorbet",
   "icon": "icon.png",
   "repository": {
@@ -34,7 +34,7 @@
     "onCommand:sorbet.toggleHighlightUntyped",
     "onCommand:sorbet.toggleTypedFalseCompletionNudges",
     "onLanguage:ruby",
-    "workspaceContains:sorbet/*"
+    "workspaceContains:sorbet/config"
   ],
   "languages": [
     {
