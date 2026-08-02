@@ -123,10 +123,10 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "mimalloc",
-        url = "https://github.com/microsoft/mimalloc/archive/refs/tags/v3.3.2.zip",  # 3.3.2
-        sha256 = "66539a07c48eb868a7186b03db3fd8b56dd97453b7eab8aef8695ac93a5a743f",
+        url = "https://github.com/microsoft/mimalloc/archive/refs/tags/v3.4.4.zip",  # 3.4.4
+        sha256 = "586e2fbe471057e9a395c7ba1e81867be162ec3d1b39e87f530e59e40ccc08d6",
         build_file = "@com_stripe_ruby_typer//third_party:mimalloc.BUILD",
-        strip_prefix = "mimalloc-3.3.2",
+        strip_prefix = "mimalloc-3.4.4",
     )
 
     http_archive(
