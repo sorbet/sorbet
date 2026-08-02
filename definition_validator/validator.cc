@@ -601,12 +601,15 @@ optional<core::AutocorrectSuggestion>
 constructOverrideAutocorrect(const core::Context ctx, const ast::ExpressionPtr &tree, const ast::MethodDef &methodDef) {
     auto methodLoc = ctx.locAt(methodDef.declLoc);
 
-    auto parsedSig = sig_finder::SigFinder::findSignature(ctx, tree, methodLoc.copyWithZeroLength());
-    if (!parsedSig.has_value()) {
+    // Only the send's syntax is needed here (its location, flags, and block), so look it up
+    // without parsing it: parsing has the side effect of reporting type errors on it, which we
+    // don't want to trigger just to find where it is.
+    auto *origSendPtr = sig_finder::SigFinder::findSignatureSend(ctx, tree, methodLoc.copyWithZeroLength());
+    if (origSendPtr == nullptr) {
         return nullopt;
     }
 
-    auto &origSend = parsedSig->origSend;
+    auto &origSend = *origSendPtr;
 
     // If the sig itself is generated, it doesn't make much sense to suggest an autocorrect for it.
     if (origSend.flags.isRewriterSynthesized) {
@@ -794,10 +797,15 @@ void validateFinalMethodHelper(core::Context ctx, const core::ClassOrModuleRef k
             e.setHeader("`{}` was declared as final but its method `{}` was not declared as final",
                         errMsgClass.show(ctx), sym.name(ctx).show(ctx));
             auto queryLoc = defLoc.copyWithZeroLength();
-            auto parsedSig = sig_finder::SigFinder::findSignature(ctx, classDef, queryLoc);
+            // Only the send's location is needed here, so look it up without parsing it: parsing
+            // has the side effect of reporting type errors on it (e.g. `T.attached_class` errors
+            // based on the wrong owner, since this helper doesn't know about `self.` methods),
+            // which we don't want to trigger just to find where the `sig` is.
+            // See https://github.com/sorbet/sorbet/issues/9460
+            auto *origSend = sig_finder::SigFinder::findSignatureSend(ctx, classDef, queryLoc);
 
-            if (parsedSig.has_value() && parsedSig->origSend.funLoc.exists()) {
-                auto funLoc = ctx.locAt(parsedSig->origSend.funLoc);
+            if (origSend != nullptr && origSend->funLoc.exists()) {
+                auto funLoc = ctx.locAt(origSend->funLoc);
                 e.replaceWith("Mark it as `sig(:final)`", funLoc, "sig(:final)");
             }
         }
