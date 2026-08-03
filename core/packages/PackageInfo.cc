@@ -409,8 +409,8 @@ bool PackageInfo::causesLayeringViolation(const PackageDB &packageDB, core::Name
 }
 
 // Returns whether the reference causes a modularity error
-bool PackageInfo::reportImportError(core::Context ctx, const core::packages::PackageInfo &pkg, core::LocOffsets errLoc,
-                                    core::SymbolRef litSymbol) const {
+bool PackageInfo::reportImportError(core::Context ctx, const core::packages::PackageInfo &pkg,
+                                    core::LocOffsets errLoc) const {
     auto &db = ctx.state.packageDB();
     auto otherPackage = pkg.mangledName();
     auto strictDepsLevel = this->strictDependenciesLevel;
@@ -442,7 +442,7 @@ bool PackageInfo::reportImportError(core::Context ctx, const core::packages::Pac
         }
 
         if (auto e = ctx.beginError(errLoc, core::errors::Packager::MissingImport)) {
-            e.setHeader("`{}` resolves but its package is not imported", litSymbol.show(ctx));
+            e.setHeader("`{}` is not imported", pkg.show(ctx));
             e.addErrorLine(pkg.declLoc(), "Exported from package here");
             if (auto importAutocorrect = this->addImport(ctx, pkg)) {
                 e.maybeAddAutocorrect(move(importAutocorrect));
@@ -534,8 +534,8 @@ bool PackageInfo::reportImportError(core::Context ctx, const core::packages::Pac
             } else {
                 ENFORCE(false, "At most five reasons should be present");
             }
-            e.setHeader("`{}` cannot be referenced here because {}", litSymbol.show(ctx), reason);
-            e.addErrorNote("`{}`'s package is not imported", litSymbol.show(ctx));
+            e.setHeader("`{}` cannot be referenced here because {}", pkg.show(ctx), reason);
+            e.addErrorNote("`{}` is not imported", pkg.show(ctx));
         }
     }
     return causesModularityError;

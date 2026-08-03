@@ -10,6 +10,7 @@
 #include "core/StrictLevel.h"
 #include "core/core.h"
 #include "core/errors/internal.h"
+#include "core/errors/packager.h"
 #include "core/lsp/TypecheckEpochManager.h"
 #include "resolver/CorrectTypeAlias.h"
 #include "resolver/resolver.h"
@@ -167,10 +168,14 @@ private:
     struct ConstantResolutionItem {
         shared_ptr<Nesting> scope;
         ast::ConstantLit *out;
+        bool isTopLevel;
         bool resolutionFailed = false;
+        bool blameScope = false;
+        core::packages::MangledName blockedOnPackage;
 
         ConstantResolutionItem() = default;
-        ConstantResolutionItem(const shared_ptr<Nesting> &scope, ast::ConstantLit *lit) : scope(scope), out(lit) {}
+        ConstantResolutionItem(const shared_ptr<Nesting> &scope, ast::ConstantLit *lit, bool isTopLevel)
+            : scope(scope), out(lit), isTopLevel(isTopLevel) {}
         ConstantResolutionItem(ConstantResolutionItem &&rhs) noexcept = default;
         ConstantResolutionItem &operator=(ConstantResolutionItem &&rhs) noexcept = default;
 
@@ -359,10 +364,81 @@ private:
         }
     }
 
+    static bool canReferencePackage(core::Context ctx, core::packages::MangledName otherPackage) {
+        auto &packageDB = ctx.state.packageDB();
+        ENFORCE(packageDB.enabled());
+
+        if (!otherPackage.exists()) {
+            return true;
+        }
+
+        auto currentPackage = packageDB.getPackageNameForFile(ctx.file);
+        if (!currentPackage.exists() || currentPackage == otherPackage) {
+            return true;
+        }
+
+        auto &currentPackageInfo = packageDB.getPackageInfo(currentPackage);
+        ENFORCE(currentPackageInfo.exists());
+
+        return currentPackageInfo.importsPackage(otherPackage) != nullptr;
+    }
+
+    static bool isPrefixOfImportedPackage(core::Context ctx, core::packages::MangledName otherPackage) {
+        auto &packageDB = ctx.state.packageDB();
+        auto currentPackage = packageDB.getPackageNameForFile(ctx.file);
+        if (!currentPackage.exists()) {
+            return false;
+        }
+
+        auto &currentPackageInfo = packageDB.getPackageInfo(currentPackage);
+        ENFORCE(currentPackageInfo.exists());
+
+        auto otherOwner = otherPackage.owner;
+        // TODO(jez) This could be more efficient if we somehow had a trie of imported package names,
+        // but for the time being this at least works.
+        for (const auto &import : currentPackageInfo.importedPackageNames) {
+            auto cur = import.mangledName.owner;
+            while (cur != core::Symbols::root()) {
+                cur = cur.data(ctx)->owner;
+                if (cur == otherOwner) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    static bool shouldSkipPackageCheck(core::Context ctx, core::SymbolRef result) {
+        return
+            // Only need to check if packageDB enabled
+            !ctx.state.packageDB().enabled()
+            // If it doesn't exist, we don't have to check
+            || !result.exists()
+            // Only have to check class or module symbols, because only class or module symbols have a package
+            // (other symbols will be accessed through class or modules, or be checked via nesting scope restrictions)
+            || !result.isClassOrModule()
+            // We can't check package references when resolving `__package.rb` files, because imports won't
+            // be populated until after constant resolution in these files!
+            || ctx.file.data(ctx).isPackage(ctx)
+            // Unpackaged code is exempted
+            || !ctx.state.packageDB().getPackageNameForFile(ctx.file).exists();
+    }
+
     static core::SymbolRef resolveConstant(core::Context ctx, ConstantResolutionItem &job) {
         auto &c = *job.out->original();
         if (ast::isa_tree<ast::EmptyTree>(c.scope)) {
             auto result = resolveLhs(ctx, job.scope, c.cnst);
+            if (shouldSkipPackageCheck(ctx, result)) {
+                return result;
+            }
+
+            auto otherPackage = result.asClassOrModuleRef().data(ctx)->package;
+            if (!canReferencePackage(ctx, otherPackage)) {
+                if (job.isTopLevel || !isPrefixOfImportedPackage(ctx, otherPackage)) {
+                    job.blockedOnPackage = otherPackage;
+                    return core::Symbols::noSymbol();
+                }
+            }
 
             return result;
         }
@@ -396,6 +472,44 @@ private:
                 !ctx.file.data(ctx).isRBI()) {
                 if (auto e = ctx.beginError(c.loc, core::errors::Resolver::PrivateConstantReferenced)) {
                     e.setHeader("Non-private reference to private constant `{}` referenced", result.show(ctx));
+                }
+            }
+
+            // When `!result.exists()`, we need to look back at the already-resolved scope to
+            // see whether we only allowed the scope to resolve because it was a prefix on the
+            // path toward an imported package. We report the constant resolution error on the
+            // scope in that case instead of on the current job's literal, because this constant
+            // might actually resolve, but we can't tell due to that package not being imported.
+            auto packageCheckTarget = result.exists() ? result : sym;
+            if (!shouldSkipPackageCheck(ctx, packageCheckTarget)) {
+                if (result.exists()) {
+                    auto otherPackage = packageCheckTarget.asClassOrModuleRef().data(ctx)->package;
+                    if (!canReferencePackage(ctx, otherPackage)) {
+                        if (job.isTopLevel || !isPrefixOfImportedPackage(ctx, otherPackage)) {
+                            job.blockedOnPackage = otherPackage;
+                            return core::Symbols::noSymbol();
+                        }
+                    }
+                } else if (sym.isClassOrModule()) {
+                    auto scopePackage = sym.asClassOrModuleRef().data(ctx)->package;
+                    if (!canReferencePackage(ctx, scopePackage)) {
+                        job.blameScope = true;
+                        // Try to find a more specific package to suggest importing via
+                        // the PackageSpecRegistry hierarchy.
+                        auto registryOwner = sym.asClassOrModuleRef().data(ctx)->packageRegistryOwner;
+                        if (registryOwner.exists()) {
+                            auto registryMember = registryOwner.data(ctx)->findMemberNoDealias(c.cnst);
+                            if (registryMember.exists() && registryMember.isClassOrModule()) {
+                                auto memberPackage = registryMember.asClassOrModuleRef().data(ctx)->package;
+                                if (memberPackage.exists()) {
+                                    job.blockedOnPackage = memberPackage;
+                                    return core::Symbols::noSymbol();
+                                }
+                            }
+                        }
+                        job.blockedOnPackage = scopePackage;
+                        return core::Symbols::noSymbol();
+                    }
                 }
             }
 
@@ -507,8 +621,26 @@ private:
             silenceError = true;
         }
         if (!silenceError) {
-            if (auto e = ctx.beginError(original.loc, core::errors::Resolver::StubConstant)) {
-                e.setHeader("Unable to resolve constant `{}`", original.cnst.show(ctx));
+            // When the scope resolved but we blocked because the scope's package isn't imported,
+            // report the error at the scope's location rather than the member's.
+            auto errorLoc = original.loc;
+            auto errorName = original.cnst;
+            if (job.blameScope) {
+                auto &id = ast::cast_tree_nonnull<ast::ConstantLit>(original.scope);
+                errorLoc = id.loc();
+                errorName = id.original()->cnst;
+            }
+
+            auto thisPkg = ctx.state.packageDB().getPackageNameForFile(file);
+            if (thisPkg.exists() && job.blockedOnPackage.exists()) {
+                auto &currentPackage = ctx.state.packageDB().getPackageInfo(thisPkg);
+                auto &otherPackage = ctx.state.packageDB().getPackageInfo(job.blockedOnPackage);
+                currentPackage.reportImportError(ctx, otherPackage, errorLoc);
+                return;
+            }
+
+            if (auto e = ctx.beginError(errorLoc, core::errors::Resolver::StubConstant)) {
+                e.setHeader("Unable to resolve constant `{}`", errorName.show(ctx));
                 auto foundCommonTypo = false;
                 if (ast::isa_tree<ast::EmptyTree>(original.scope)) {
                     for (const auto &[from, to] : COMMON_TYPOS) {
@@ -524,8 +656,13 @@ private:
                     suggestScope.isClassOrModule()) {
                     suggestionCount++;
 
-                    auto suggested =
-                        suggestScope.asClassOrModuleRef().data(ctx)->findMemberFuzzyMatch(ctx, original.cnst);
+                    core::packages::MangledName packageFilter;
+                    if (!isPackage && gs.packageDB().enabled()) {
+                        packageFilter = gs.packageDB().getPackageNameForFile(file);
+                    }
+
+                    auto suggested = suggestScope.asClassOrModuleRef().data(ctx)->findMemberFuzzyMatch(
+                        ctx, original.cnst, /* betterThan */ -1, packageFilter);
 
                     if (isExport) {
                         // If the resolution error is for an export, suggestions must be restricted to within the
@@ -1168,13 +1305,13 @@ private:
         todoAncestors_.emplace_back(std::move(job));
     }
 
-    void walkUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
+    void walkUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr &tree, bool isTopLevel = true) {
         if (auto c = ast::cast_tree<ast::UnresolvedConstantLit>(tree)) {
-            walkUnresolvedConstantLit(ctx, c->scope);
+            walkUnresolvedConstantLit(ctx, c->scope, /* isTopLevel */ false);
             auto out = ast::make_expression<ast::ConstantLit>(core::Symbols::noSymbol(),
                                                               tree.toUnique<ast::UnresolvedConstantLit>());
             auto constant = ast::cast_tree<ast::ConstantLit>(out);
-            ConstantResolutionItem job{nesting_, constant};
+            ConstantResolutionItem job{nesting_, constant, isTopLevel};
             if (resolveConstantJob(ctx, job)) {
                 categoryCounterInc("resolve.constants.nonancestor", "firstpass");
                 if (this->loadTimeScope() && (!constant->symbol().isClassOrModule() ||
@@ -1446,7 +1583,7 @@ public:
 
                 // We also enter a ResolutionItem for the lhs of a type alias so even if the type alias isn't used,
                 // we'll still emit a warning when the rhs of a type alias doesn't resolve.
-                this->todo_.emplace_back(nesting_, id);
+                this->todo_.emplace_back(nesting_, id, true);
                 return;
             }
         }
