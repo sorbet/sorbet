@@ -933,20 +933,31 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
             }
 
             auto affectedFiles = move(maybeResolved.result());
-            auto notAffectedFiles =
-                absl::c_partition(affectedFiles, [&affectedPackages, &gs = as_const(*gs)](auto &tree) {
-                    auto &packageDB = gs.packageDB();
-                    auto packageName = packageDB.getPackageNameForFile(tree.file);
-                    if (!packageName.exists()) {
-                        return true;
-                    }
-                    if (!affectedPackages.has_value()) {
-                        // all packages were affected
-                        return true;
-                    }
-                    return affectedPackages.value().contains(packageName);
-                });
-            affectedFiles.erase(notAffectedFiles, affectedFiles.end());
+            {
+                Timer timeit(logger, "removing not affected files");
+                auto notAffectedFiles =
+                    absl::c_partition(affectedFiles, [&affectedPackages, &gs = as_const(*gs)](auto &tree) {
+                        auto &packageDB = gs.packageDB();
+                        auto packageName = packageDB.getPackageNameForFile(tree.file);
+                        if (!packageName.exists()) {
+                            return true;
+                        }
+                        if (!affectedPackages.has_value()) {
+                            // all packages were affected
+                            return true;
+                        }
+                        return affectedPackages.value().contains(packageName);
+                    });
+                // Move the not-affected files out and free their AST trees in parallel. Destroying this many
+                // trees serially on the typechecker thread can take tens of seconds in a large workspace.
+                vector<ast::ParsedFile> notAffected(make_move_iterator(notAffectedFiles),
+                                                    make_move_iterator(affectedFiles.end()));
+                auto numRemoved = notAffected.size();
+                affectedFiles.erase(notAffectedFiles, affectedFiles.end());
+                ast::ParsedFilesOrCancelled::cancel(move(notAffected), workers);
+                logger->debug("Removed {} not affected file(s); affectedPackages had a value: {}", numRemoved,
+                              affectedPackages.has_value());
+            }
 
             auto sortedAffectedFiles = sortParsedFiles(*gs, *errorReporter, move(affectedFiles));
             pipeline::typecheck(*gs, move(sortedAffectedFiles), config->opts, workers, cancelable, currentStratum,
