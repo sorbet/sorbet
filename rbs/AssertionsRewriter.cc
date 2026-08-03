@@ -596,6 +596,35 @@ pm_node_t *AssertionsRewriter::rewriteNode(pm_node_t *node) {
             return node;
         }
 
+        case PM_INTERPOLATED_STRING_NODE: {
+            auto *string = down_cast_nonnull<pm_interpolated_string_node_t>(node);
+            node = maybeInsertCast(node);
+            rewriteNodes(string->parts);
+            return node;
+        }
+        case PM_INTERPOLATED_SYMBOL_NODE: {
+            auto *symbol = down_cast_nonnull<pm_interpolated_symbol_node_t>(node);
+            node = maybeInsertCast(node);
+            rewriteNodes(symbol->parts);
+            return node;
+        }
+        case PM_INTERPOLATED_REGULAR_EXPRESSION_NODE: {
+            auto *regexp = down_cast_nonnull<pm_interpolated_regular_expression_node_t>(node);
+            node = maybeInsertCast(node);
+            rewriteNodes(regexp->parts);
+            return node;
+        }
+        case PM_INTERPOLATED_X_STRING_NODE: {
+            auto *string = down_cast_nonnull<pm_interpolated_x_string_node_t>(node);
+            node = maybeInsertCast(node);
+            rewriteNodes(string->parts);
+            return node;
+        }
+        case PM_EMBEDDED_STATEMENTS_NODE: {
+            auto *embedded = down_cast_nonnull<pm_embedded_statements_node_t>(node);
+            rewriteNullableNode(up_cast(embedded->statements));
+            return node;
+        }
         // Simple write assignments
         case PM_LOCAL_VARIABLE_WRITE_NODE: {
             auto *write = down_cast_nonnull<pm_local_variable_write_node_t>(node);
