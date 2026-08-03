@@ -350,11 +350,6 @@ void appendFilesInDir(const string &basePath, const sorbet::UnorderedSet<string>
                         continue;
                     }
 
-                    if (sorbet::FileOps::isFileIgnored(basePath, pathStr, absoluteIgnorePatterns,
-                                                       relativeIgnorePatterns)) {
-                        continue;
-                    }
-
                     if (entry.is_directory()) {
                         ++pendingJobs;
                         jobq->push(entry.path(), 1);
