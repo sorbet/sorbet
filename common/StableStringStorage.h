@@ -24,6 +24,13 @@ public:
     std::string_view enterString(std::string_view str);
 
 private:
+    // XXX(froydnj): it would save a pointer indirection for this to be
+    // shared_ptr<char[]>, but it would require proper sizing of PageSize to avoid
+    // wasting space in the allocation (e.g. PageSize=4096 would result in a
+    // just-over 4096-byte allocation inside shared_ptr, which would get rounded
+    // up to 8192 bytes, which wastes about half of the allocation).  We can
+    // probably make it work since we always use libc++ and are OK with reaching
+    // into the internals, but it still feels a little gross.
     std::vector<std::shared_ptr<std::vector<char>>> strings;
     size_t currentPagePosition = PageSize + 1;
 };
@@ -41,8 +48,11 @@ StableStringStorage<PageSize> &StableStringStorage<PageSize>::operator=(const St
 
 template <size_t PageSize> std::string_view StableStringStorage<PageSize>::enterString(std::string_view str) {
     char *from = nullptr;
+    // Use `make_shared` below to merge the control-block for sharedness with
+    // the allocate required for the vector, cf.
+    // https://herbsutter.com/2013/05/29/gotw-89-solution-smart-pointers/
     if (str.size() > PageSize) {
-        auto &inserted = strings.emplace_back(std::make_unique<std::vector<char>>(str.size()));
+        auto &inserted = strings.emplace_back(std::make_shared<std::vector<char>>(str.size()));
         from = inserted->data();
         if (strings.size() > 1) {
             // last page wasn't full, keep it in the end
@@ -53,12 +63,12 @@ template <size_t PageSize> std::string_view StableStringStorage<PageSize>::enter
         } else {
             // Insert a new empty page at the end to enforce the invariant that inserting a huge string will always
             // leave a page that can be written to at the end of the table.
-            strings.emplace_back(std::make_unique<std::vector<char>>(PageSize));
+            strings.emplace_back(std::make_shared<std::vector<char>>(PageSize));
             currentPagePosition = 0;
         }
     } else {
         if (currentPagePosition + str.size() > PageSize) {
-            strings.emplace_back(std::make_unique<std::vector<char>>(PageSize));
+            strings.emplace_back(std::make_shared<std::vector<char>>(PageSize));
             currentPagePosition = 0;
         }
         from = strings.back()->data() + currentPagePosition;
