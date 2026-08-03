@@ -1,6 +1,8 @@
+// Must go before xxhash include. Makes a noticeable performance improvement (~10%).
+#define XXH_INLINE_ALL
+
 #include "core/Files.h"
 #include "common/FileOps.h"
-#include "common/crypto_hashing/crypto_hashing.h"
 #include "core/Context.h"
 #include "core/FileHash.h"
 #include "core/GlobalState.h"
@@ -315,9 +317,15 @@ void File::setHasIndexErrors(bool value) {
     flags.hasIndexErrors = value;
 }
 
-std::array<uint8_t, 64> File::sourceHash() const {
+absl::Span<const uint8_t> File::sourceHash() const {
     ENFORCE(this->sourceType != File::Type::NotYetRead);
-    return crypto_hashing::hash64(this->source_);
+    if (!this->sourceHashComputed_) {
+        XXH64_hash_t seed = 0L;
+        this->sourceHash_ = XXH3_128bits_withSeed(this->source_.data(), this->source_.size(), seed);
+        this->sourceHashComputed_ = true;
+    }
+
+    return absl::Span(reinterpret_cast<uint8_t *>(&this->sourceHash_), sizeof(XXH128_hash_t));
 }
 
 } // namespace sorbet::core
