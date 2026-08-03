@@ -565,7 +565,7 @@ public:
 
         if (!wasImported) {
             referencedPackages[otherPackage].causesModularityError =
-                this->package.reportImportError(ctx, pkg, lit.loc(), lit.symbol());
+                this->package.reportImportError(ctx, pkg, lit.loc());
             return;
         }
 

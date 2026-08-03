@@ -251,8 +251,7 @@ public:
     bool causesLayeringViolation(const PackageDB &packageDB, core::NameRef otherPkgLayer) const;
 
     // Returns whether the reference causes a modularity error
-    bool reportImportError(core::Context ctx, const core::packages::PackageInfo &pkg, core::LocOffsets errLoc,
-                           core::SymbolRef litSymbol) const;
+    bool reportImportError(core::Context ctx, const core::packages::PackageInfo &pkg, core::LocOffsets errLoc) const;
 
     // What is the minimum strict dependencies level that this package's imports must have?
     StrictDependenciesLevel minimumStrictDependenciesLevel() const;
