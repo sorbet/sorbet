@@ -149,6 +149,7 @@ private:
 
         Nesting(shared_ptr<Nesting> parent, core::SymbolRef scope) : parent(std::move(parent)), scope(scope) {}
     };
+    CheckSize(Nesting, 24, 8);
 
     shared_ptr<Nesting> nesting_;
 
