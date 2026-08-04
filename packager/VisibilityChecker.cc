@@ -583,9 +583,12 @@ public:
                 causesCycle =
                     strictDepsLevel >= core::packages::StrictDependenciesLevel::LayeredDag && path.has_value();
             }
-            bool hasModularityError = layeringViolation || strictDependenciesTooLow || causesCycle || badTestReference;
-            referencedPackages[otherPackage].causesModularityError = hasModularityError;
-            if (!hasModularityError && !causesVisibilityError) {
+            bool hasModularityError = layeringViolation || strictDependenciesTooLow || causesCycle ||
+                                      badTestReference || causesVisibilityError;
+            // visible_to errors are handled separately (by `updateVisibilityFor`),
+            // so they're not included in this causesModularityError field of referencedPackages
+            referencedPackages[otherPackage].causesModularityError = hasModularityError && !causesVisibilityError;
+            if (!hasModularityError) {
                 if (db.genPackagesMode() != core::packages::GenPackagesMode::Disabled) {
                     return;
                 }
@@ -600,20 +603,7 @@ public:
                         }
                     }
                 }
-            }
-
-            // We should only report a visibility error if we're not going to add a visible_to to the package
-            // Otherwise the error is pointless since it'll go away after the new visible_to is added
-            if (causesVisibilityError && !ctx.state.packageDB().updateVisibilityFor(otherPackage)) {
-                if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::ImportNotVisible)) {
-                    e.setHeader("Package `{}` includes explicit visibility modifiers and cannot be imported from `{}`",
-                                pkg.show(ctx), this->package.show(ctx));
-                    e.addErrorNote("Please consult with the owning team before adding a `{}` line to the package `{}`",
-                                   "visible_to", pkg.show(ctx));
-                }
-            }
-
-            if (hasModularityError) {
+            } else {
                 // TODO(neil): Provide actionable advice and/or link to a doc that would help the user resolve these
                 // layering/strict_dependencies issues.
                 auto error = causesCycle         ? core::errors::Packager::StrictDependenciesViolation
@@ -623,6 +613,18 @@ public:
                 if (auto e = ctx.beginError(lit.loc(), error)) {
                     vector<string> reasons;
                     e.addErrorLine(this->package.declLoc(), "Enclosing package declared here");
+
+                    // We should only report a visibility error if we're not going to add a visible_to to the package
+                    // Otherwise the error is pointless since it'll go away after the new visible_to is added
+                    if (causesVisibilityError && !ctx.state.packageDB().updateVisibilityFor(otherPackage)) {
+                        reasons.emplace_back(core::ErrorColors::format(
+                            "Package `{}` includes explicit visibility modifiers and cannot be imported from `{}`",
+                            pkg.show(ctx), this->package.show(ctx)));
+                        e.addErrorNote(
+                            "Please consult with the owning team before adding a `{}` line to the package `{}`",
+                            "visible_to", pkg.show(ctx));
+                    }
+
                     if (badTestReference) {
                         reasons.emplace_back(core::ErrorColors::format("`{}` may not reference `{}` packages",
                                                                        this->package.show(ctx), "test!"));
@@ -671,6 +673,13 @@ public:
                                        requiredStrictDepsLevel, currentStrictDepsLevel);
                     }
 
+                    if (reasons.empty() && causesVisibilityError &&
+                        ctx.state.packageDB().updateVisibilityFor(otherPackage)) {
+                        // Force the error to build here, so that we don't report an error
+                        e.build();
+                        return;
+                    }
+
                     ENFORCE(!reasons.empty(), "At least one reason should be present");
                     string reason;
                     if (reasons.size() == 1) {
@@ -681,8 +690,11 @@ public:
                         reason = fmt::format("{}, {}, and {}", reasons[0], reasons[1], reasons[2]);
                     } else if (reasons.size() == 4) {
                         reason = fmt::format("{}, {}, {}, and {}", reasons[0], reasons[1], reasons[2], reasons[3]);
+                    } else if (reasons.size() == 5) {
+                        reason = fmt::format("{}, {}, {}, {}, and {}", reasons[0], reasons[1], reasons[2], reasons[3],
+                                             reasons[4]);
                     } else {
-                        ENFORCE(false, "At most four reasons should be present");
+                        ENFORCE(false, "At most five reasons should be present");
                     }
                     e.setHeader("`{}` cannot be referenced here because {}", lit.symbol().show(ctx), reason);
                     e.addErrorNote("`{}`'s package is not imported", lit.symbol().show(ctx));
