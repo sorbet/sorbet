@@ -583,6 +583,9 @@ public:
             }
         }
 
+        auto *import = this->package.importsPackage(otherPackage);
+        auto wasImported = import != nullptr;
+
         bool isExported = pkg.locs.exportAll.exists();
         if (litSymbol.isClassOrModule()) {
             isExported = isExported || litSymbol.asClassOrModuleRef().data(ctx)->flags.isExported;
@@ -590,8 +593,6 @@ public:
             isExported = isExported || litSymbol.asFieldRef().data(ctx)->flags.isExported;
         }
         isExported = isExported || db.allowRelaxedPackagerChecksFor(this->package.mangledName());
-        auto *import = this->package.importsPackage(otherPackage);
-        auto wasImported = import != nullptr;
         isExported = isExported || (wasImported && import->usesInternals);
 
         referencedPackages[otherPackage] = {.importNeeded = !wasImported, .causesModularityError = false};
