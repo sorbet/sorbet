@@ -526,7 +526,9 @@ public:
         }
     }
 
-    static void reportImportError(core::Context ctx, const core::packages::PackageInfo &thisPkg) {
+    static void reportImportError(core::Context ctx, const core::packages::PackageInfo &thisPkg, const core::packages::PackageInfo &pkg, core::LocOffsets errLoc, core::SymbolRef litSymbol) {
+        auto &db = ctx.state.packageDB();
+        auto otherPackage = pkg.mangledName();
         auto strictDepsLevel = thisPkg.strictDependenciesLevel;
         auto importStrictDepsLevel = pkg.strictDependenciesLevel;
         bool layeringViolation = false;
@@ -555,8 +557,8 @@ public:
                 return;
             }
 
-            if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
-                e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
+            if (auto e = ctx.beginError(errLoc, core::errors::Packager::MissingImport)) {
+                e.setHeader("`{}` resolves but its package is not imported", litSymbol.show(ctx));
                 e.addErrorLine(pkg.declLoc(), "Exported from package here");
                 if (auto importAutocorrect = thisPkg.addImport(ctx, pkg)) {
                     e.maybeAddAutocorrect(move(importAutocorrect));
@@ -572,7 +574,7 @@ public:
                          : layeringViolation ? core::errors::Packager::LayeringViolation
                          : badTestReference  ? core::errors::Packager::TestImportMismatch
                                              : core::errors::Packager::StrictDependenciesViolation;
-            if (auto e = ctx.beginError(lit.loc(), error)) {
+            if (auto e = ctx.beginError(errLoc, error)) {
                 vector<string> reasons;
                 e.addErrorLine(thisPkg.declLoc(), "Enclosing package declared here");
 
@@ -651,8 +653,8 @@ public:
                 } else {
                     ENFORCE(false, "At most five reasons should be present");
                 }
-                e.setHeader("`{}` cannot be referenced here because {}", lit.symbol().show(ctx), reason);
-                e.addErrorNote("`{}`'s package is not imported", lit.symbol().show(ctx));
+                e.setHeader("`{}` cannot be referenced here because {}", litSymbol.show(ctx), reason);
+                e.addErrorNote("`{}`'s package is not imported", litSymbol.show(ctx));
             }
         }
     }
@@ -695,7 +697,7 @@ public:
         referencedPackages[otherPackage] = {.importNeeded = !wasImported, .causesModularityError = false};
 
         if (!wasImported) {
-            reportImportError(ctx, this->package);
+            reportImportError(ctx, this->package, pkg, lit.loc(), lit.symbol());
             return;
         }
 
