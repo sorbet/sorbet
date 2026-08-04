@@ -569,15 +569,6 @@ public:
         auto *import = this->package.importsPackage(otherPackage);
         auto wasImported = import != nullptr;
 
-        bool isExported = pkg.locs.exportAll.exists();
-        if (litSymbol.isClassOrModule()) {
-            isExported = isExported || litSymbol.asClassOrModuleRef().data(ctx)->flags.isExported;
-        } else if (litSymbol.isFieldOrStaticField()) {
-            isExported = isExported || litSymbol.asFieldRef().data(ctx)->flags.isExported;
-        }
-        isExported = isExported || db.allowRelaxedPackagerChecksFor(this->package.mangledName());
-        isExported = isExported || (wasImported && import->usesInternals);
-
         referencedPackages[otherPackage] = {.importNeeded = !wasImported, .causesModularityError = false};
 
         if (!wasImported) {
@@ -697,7 +688,19 @@ public:
                     e.addErrorNote("`{}`'s package is not imported", lit.symbol().show(ctx));
                 }
             }
-        } else if (!isExported) {
+            return;
+        }
+
+        bool isExported = pkg.locs.exportAll.exists();
+        if (litSymbol.isClassOrModule()) {
+            isExported = isExported || litSymbol.asClassOrModuleRef().data(ctx)->flags.isExported;
+        } else if (litSymbol.isFieldOrStaticField()) {
+            isExported = isExported || litSymbol.asFieldRef().data(ctx)->flags.isExported;
+        }
+        isExported = isExported || db.allowRelaxedPackagerChecksFor(this->package.mangledName());
+        isExported = isExported || (wasImported && import->usesInternals);
+
+        if (!isExported) {
             if (db.genPackagesMode() != core::packages::GenPackagesMode::Disabled) {
                 return;
             }
