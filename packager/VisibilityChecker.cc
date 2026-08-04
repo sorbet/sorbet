@@ -506,15 +506,7 @@ class VisibilityCheckerPass final {
         auto &db = ctx.state.packageDB();
         auto hasAutocorrect = importAutocorrect.has_value() || exportAutocorrect.has_value();
 
-        if (importAutocorrect.has_value() && exportAutocorrect.has_value()) {
-            auto combinedTitle = fmt::format("{} and {}", importAutocorrect->title, exportAutocorrect->title);
-            importAutocorrect->edits.insert(importAutocorrect->edits.end(),
-                                            make_move_iterator(exportAutocorrect->edits.begin()),
-                                            make_move_iterator(exportAutocorrect->edits.end()));
-            e.addAutocorrect(core::AutocorrectSuggestion{combinedTitle, move(importAutocorrect->edits),
-                                                         false /* isDidYouMean */, false /* hideEdit */,
-                                                         /* shouldSkipWhenAggregated */ true});
-        } else if (importAutocorrect.has_value()) {
+        if (importAutocorrect.has_value()) {
             e.addAutocorrect(std::move(importAutocorrect.value()));
         } else if (exportAutocorrect.has_value()) {
             e.addAutocorrect(std::move(exportAutocorrect.value()));
