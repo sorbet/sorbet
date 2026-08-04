@@ -179,7 +179,7 @@ private:
         ConstantResolutionItem(const ConstantResolutionItem &rhs) = delete;
         const ConstantResolutionItem &operator=(const ConstantResolutionItem &rhs) = delete;
     };
-    CheckSize(ConstantResolutionItem, 32, 8);
+    CheckSize(ConstantResolutionItem, 24, 8);
 
     template <class T> struct ResolveItems {
         core::FileRef file;
