@@ -526,44 +526,7 @@ public:
         }
     }
 
-    void postTransformConstantLit(core::Context ctx, const ast::ConstantLit &lit) {
-        if (constantAssignmentDefinitions.contains(&lit)) {
-            return;
-        }
-
-        auto litSymbol = lit.symbol();
-        if (!litSymbol.isClassOrModule() && !litSymbol.isFieldOrStaticField()) {
-            return;
-        }
-
-        // NOTE: this only tracks the information required for computing what symbols needed to be exported, and not for
-        // find all references. For example, if the current symbol is A::B::C::D, then only A::B::C::D will be added to
-        // symbolsReferenced, and not A, A::B, A::B::C.
-        // TODO(neil): we should also track A, A::B, A::B::C, so that we can use this for find all references too.
-        referencedSymbols.insert(litSymbol);
-
-        auto loc = litSymbol.loc(ctx);
-
-        auto otherFile = loc.file();
-        if (!otherFile.exists()) {
-            return;
-        }
-
-        auto &db = ctx.state.packageDB();
-
-        // no need to check visibility for these cases
-        auto otherPackage = litSymbol.enclosingClass(ctx).data(ctx)->package;
-        if (!otherPackage.exists() || this->package.mangledName() == otherPackage) {
-            return;
-        }
-        auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-
-        auto *import = this->package.importsPackage(otherPackage);
-        auto wasImported = import != nullptr;
-
-        referencedPackages[otherPackage] = {.importNeeded = !wasImported, .causesModularityError = false};
-
-        if (!wasImported) {
+    static void reportImportError(core::Context ctx) {
             auto strictDepsLevel = this->package.strictDependenciesLevel;
             auto importStrictDepsLevel = pkg.strictDependenciesLevel;
             bool layeringViolation = false;
@@ -700,6 +663,47 @@ public:
                     e.addErrorNote("`{}`'s package is not imported", lit.symbol().show(ctx));
                 }
             }
+    }
+
+    void postTransformConstantLit(core::Context ctx, const ast::ConstantLit &lit) {
+        if (constantAssignmentDefinitions.contains(&lit)) {
+            return;
+        }
+
+        auto litSymbol = lit.symbol();
+        if (!litSymbol.isClassOrModule() && !litSymbol.isFieldOrStaticField()) {
+            return;
+        }
+
+        // NOTE: this only tracks the information required for computing what symbols needed to be exported, and not for
+        // find all references. For example, if the current symbol is A::B::C::D, then only A::B::C::D will be added to
+        // symbolsReferenced, and not A, A::B, A::B::C.
+        // TODO(neil): we should also track A, A::B, A::B::C, so that we can use this for find all references too.
+        referencedSymbols.insert(litSymbol);
+
+        auto loc = litSymbol.loc(ctx);
+
+        auto otherFile = loc.file();
+        if (!otherFile.exists()) {
+            return;
+        }
+
+        auto &db = ctx.state.packageDB();
+
+        // no need to check visibility for these cases
+        auto otherPackage = litSymbol.enclosingClass(ctx).data(ctx)->package;
+        if (!otherPackage.exists() || this->package.mangledName() == otherPackage) {
+            return;
+        }
+        auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
+
+        auto *import = this->package.importsPackage(otherPackage);
+        auto wasImported = import != nullptr;
+
+        referencedPackages[otherPackage] = {.importNeeded = !wasImported, .causesModularityError = false};
+
+        if (!wasImported) {
+            reportImportError(ctx);
             return;
         }
 
