@@ -606,16 +606,16 @@ public:
                     return;
                 }
 
-                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
-                        e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
-                        e.addErrorLine(pkg.declLoc(), "Exported from package here");
-                        if (auto importAutocorrect = this->package.addImport(ctx, pkg)) {
-                            e.maybeAddAutocorrect(move(importAutocorrect));
-                            if (!db.errorHint().empty()) {
-                                e.addErrorNote("{}", db.errorHint());
-                            }
+                if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
+                    e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
+                    e.addErrorLine(pkg.declLoc(), "Exported from package here");
+                    if (auto importAutocorrect = this->package.addImport(ctx, pkg)) {
+                        e.maybeAddAutocorrect(move(importAutocorrect));
+                        if (!db.errorHint().empty()) {
+                            e.addErrorNote("{}", db.errorHint());
                         }
                     }
+                }
             }
 
             // We should only report a visibility error if we're not going to add a visible_to to the package
@@ -694,44 +694,44 @@ public:
                         ENFORCE(false, "At most three reasons should be present");
                     }
                     e.setHeader("`{}` cannot be referenced here because {}", lit.symbol().show(ctx), reason);
-                        e.addErrorNote("`{}`'s package is not imported", lit.symbol().show(ctx));
+                    e.addErrorNote("`{}`'s package is not imported", lit.symbol().show(ctx));
                 }
             }
         } else if (!isExported) {
-                if (db.genPackagesMode() != core::packages::GenPackagesMode::Disabled) {
-                    return;
+            if (db.genPackagesMode() != core::packages::GenPackagesMode::Disabled) {
+                return;
+            }
+            std::optional<core::AutocorrectSuggestion> exportAutocorrect;
+            auto symToExport = litSymbol;
+            auto enumClass = getEnumClassForEnumValue(ctx.state, symToExport);
+            if (enumClass.exists()) {
+                symToExport = enumClass;
+            }
+            bool definesBehavior =
+                !litSymbol.isClassOrModule() || litSymbol.asClassOrModuleRef().data(ctx)->flags.isBehaviorDefining;
+            if (definesBehavior) {
+                // For compatibility with gen-packages, we do _not_ add an export if it doesn't define
+                // behavior. This is mostly because it's easier to get Sorbet to behave like gen-packages
+                // than the other way around.
+                //
+                // If we move to a world where all __package.rb edits are done via Sorbet autocorrects,
+                // we could make this addExport call unconditional.
+                if (auto exp = pkg.addExport(ctx, symToExport)) {
+                    exportAutocorrect.emplace(exp.value());
                 }
-                    std::optional<core::AutocorrectSuggestion> exportAutocorrect;
-                    auto symToExport = litSymbol;
-                    auto enumClass = getEnumClassForEnumValue(ctx.state, symToExport);
-                    if (enumClass.exists()) {
-                        symToExport = enumClass;
-                    }
-                    bool definesBehavior = !litSymbol.isClassOrModule() ||
-                                           litSymbol.asClassOrModuleRef().data(ctx)->flags.isBehaviorDefining;
-                    if (definesBehavior) {
-                        // For compatibility with gen-packages, we do _not_ add an export if it doesn't define
-                        // behavior. This is mostly because it's easier to get Sorbet to behave like gen-packages
-                        // than the other way around.
-                        //
-                        // If we move to a world where all __package.rb edits are done via Sorbet autocorrects,
-                        // we could make this addExport call unconditional.
-                        if (auto exp = pkg.addExport(ctx, symToExport)) {
-                            exportAutocorrect.emplace(exp.value());
-                        }
-                    }
+            }
 
-                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedPackagePrivateName)) {
-                        e.setHeader("`{}` resolves but is not exported from `{}`", litSymbol.show(ctx), pkg.show(ctx));
-                        addExportInfo(ctx, e, litSymbol, definesBehavior);
+            if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedPackagePrivateName)) {
+                e.setHeader("`{}` resolves but is not exported from `{}`", litSymbol.show(ctx), pkg.show(ctx));
+                addExportInfo(ctx, e, litSymbol, definesBehavior);
 
-                        if (exportAutocorrect.has_value()) {
-                            e.maybeAddAutocorrect(move(exportAutocorrect));
-                            if (!db.errorHint().empty()) {
-                                e.addErrorNote("{}", db.errorHint());
-                            }
-                        }
+                if (exportAutocorrect.has_value()) {
+                    e.maybeAddAutocorrect(move(exportAutocorrect));
+                    if (!db.errorHint().empty()) {
+                        e.addErrorNote("{}", db.errorHint());
                     }
+                }
+            }
         }
     }
 
