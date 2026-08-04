@@ -8,10 +8,8 @@ class Project::MainLib::Lib
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Project::TestOnly::SomeHelper` resolves but its package is not imported
 
   Test::Project::Util::UtilHelper
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Project::Util::UtilHelper` resolves but its package is not imported
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Package `Project::MainLib` may not reference `test!` packages
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Project::Util::UtilHelper` cannot be referenced here because `Project::MainLib` may not reference `test!` packages
 
   Test::Project::Util::Unexported
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Project::Util::Unexported` resolves but its package is not imported
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Package `Project::MainLib` may not reference `test!` packages
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Project::Util::Unexported` cannot be referenced here because `Project::MainLib` may not reference `test!` packages
 end

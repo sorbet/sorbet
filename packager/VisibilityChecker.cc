@@ -558,14 +558,6 @@ public:
         }
         auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
 
-        if (pkg.testPackage() && !this->package.testPackage()) {
-            if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::TestImportMismatch)) {
-                e.setHeader("Package `{}` may not reference `{}` packages", this->package.show(ctx), "test!");
-                e.addErrorLine(this->package.declLoc(), "Defined here");
-                e.addErrorLine(pkg.declLoc(), "Referenced `{}` package defined here", "test!");
-            }
-        }
-
         auto *import = this->package.importsPackage(otherPackage);
         auto wasImported = import != nullptr;
 
@@ -578,6 +570,7 @@ public:
             bool strictDependenciesTooLow = false;
             bool causesCycle = false;
             bool causesVisibilityError = !pkg.isVisibleTo(ctx, this->package);
+            bool badTestReference = pkg.testPackage() && !this->package.testPackage();
             optional<string> path;
             if (db.enforceLayering()) {
                 layeringViolation = strictDepsLevel > core::packages::StrictDependenciesLevel::False &&
@@ -590,7 +583,7 @@ public:
                 causesCycle =
                     strictDepsLevel >= core::packages::StrictDependenciesLevel::LayeredDag && path.has_value();
             }
-            bool hasModularityError = layeringViolation || strictDependenciesTooLow || causesCycle;
+            bool hasModularityError = layeringViolation || strictDependenciesTooLow || causesCycle || badTestReference;
             referencedPackages[otherPackage].causesModularityError = hasModularityError;
             if (!hasModularityError && !causesVisibilityError) {
                 if (db.genPackagesMode() != core::packages::GenPackagesMode::Disabled) {
@@ -623,13 +616,18 @@ public:
             if (hasModularityError) {
                 // TODO(neil): Provide actionable advice and/or link to a doc that would help the user resolve these
                 // layering/strict_dependencies issues.
-                core::ErrorClass error =
-                    causesCycle ? core::errors::Packager::StrictDependenciesViolation
-                                : (layeringViolation ? core::errors::Packager::LayeringViolation
-                                                     : core::errors::Packager::StrictDependenciesViolation);
+                auto error = causesCycle         ? core::errors::Packager::StrictDependenciesViolation
+                             : layeringViolation ? core::errors::Packager::LayeringViolation
+                             : badTestReference  ? core::errors::Packager::TestImportMismatch
+                                                 : core::errors::Packager::StrictDependenciesViolation;
                 if (auto e = ctx.beginError(lit.loc(), error)) {
                     vector<string> reasons;
                     e.addErrorLine(this->package.declLoc(), "Enclosing package declared here");
+                    if (badTestReference) {
+                        reasons.emplace_back(core::ErrorColors::format("`{}` may not reference `{}` packages",
+                                                                       this->package.show(ctx), "test!"));
+                        e.addErrorLine(pkg.declLoc(), "Referenced `{}` package defined here", "test!");
+                    }
                     if (causesCycle) {
                         reasons.emplace_back(core::ErrorColors::format(
                             "importing its package would put `{}` into a cycle", this->package.show(ctx)));
@@ -681,8 +679,10 @@ public:
                         reason = fmt::format("{}, and {}", reasons[0], reasons[1]);
                     } else if (reasons.size() == 3) {
                         reason = fmt::format("{}, {}, and {}", reasons[0], reasons[1], reasons[2]);
+                    } else if (reasons.size() == 4) {
+                        reason = fmt::format("{}, {}, {}, and {}", reasons[0], reasons[1], reasons[2], reasons[3]);
                     } else {
-                        ENFORCE(false, "At most three reasons should be present");
+                        ENFORCE(false, "At most four reasons should be present");
                     }
                     e.setHeader("`{}` cannot be referenced here because {}", lit.symbol().show(ctx), reason);
                     e.addErrorNote("`{}`'s package is not imported", lit.symbol().show(ctx));
