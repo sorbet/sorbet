@@ -587,8 +587,8 @@ public:
                 }
 
                 if (badTestReference) {
-                    reasons.emplace_back(core::ErrorColors::format("`{}` may not reference `{}` packages",
-                                                                   thisPkg.show(ctx), "test!"));
+                    reasons.emplace_back(
+                        core::ErrorColors::format("`{}` may not reference `{}` packages", thisPkg.show(ctx), "test!"));
                     e.addErrorLine(pkg.declLoc(), "Referenced `{}` package defined here", "test!");
                 }
                 if (causesCycle) {
@@ -597,23 +597,19 @@ public:
                     auto currentStrictDepsLevel = fmt::format(
                         "strict_dependencies '{}'", core::packages::strictDependenciesLevelToString(strictDepsLevel));
                     e.addErrorLine(core::Loc(thisPkg.file, thisPkg.locs.strictDependenciesLevel),
-                                   "`{}` is `{}`, which disallows cycles", thisPkg.show(ctx),
-                                   currentStrictDepsLevel);
-                    ENFORCE(path.has_value(),
-                            "Path from pkg to thisPkg should always exist if causesCycle is true");
+                                   "`{}` is `{}`, which disallows cycles", thisPkg.show(ctx), currentStrictDepsLevel);
+                    ENFORCE(path.has_value(), "Path from pkg to thisPkg should always exist if causesCycle is true");
                     e.addErrorNote("Path from `{}` to `{}`:\n{}", pkg.show(ctx), thisPkg.show(ctx), path.value());
                 }
 
                 if (layeringViolation) {
                     reasons.emplace_back("importing its package would cause a layering violation");
                     ENFORCE(pkg.layer.exists(), "causesLayeringViolation should return false if layer is not set");
-                    ENFORCE(thisPkg.layer.exists(),
-                            "causesLayeringViolation should return false if layer is not set");
+                    ENFORCE(thisPkg.layer.exists(), "causesLayeringViolation should return false if layer is not set");
                     e.addErrorLine(core::Loc(pkg.file, pkg.locs.layer),
                                    "Package `{}` must be at most layer `{}` (to match package `{}`) but is "
                                    "currently layer `{}`",
-                                   pkg.show(ctx), thisPkg.layer.show(ctx), thisPkg.show(ctx),
-                                   pkg.layer.show(ctx));
+                                   pkg.show(ctx), thisPkg.layer.show(ctx), thisPkg.show(ctx), pkg.layer.show(ctx));
                 }
 
                 if (strictDependenciesTooLow) {
@@ -621,9 +617,9 @@ public:
                         core::ErrorColors::format("its `{}` is not strict enough", "strict_dependencies"));
                     ENFORCE(importStrictDepsLevel != core::packages::StrictDependenciesLevel::None,
                             "strictDependenciesTooLow should be false if strict_dependencies level is not set");
-                    auto requiredStrictDepsLevel =
-                        fmt::format("strict_dependencies '{}'", core::packages::strictDependenciesLevelToString(
-                                                                    thisPkg.minimumStrictDependenciesLevel()));
+                    auto requiredStrictDepsLevel = fmt::format(
+                        "strict_dependencies '{}'",
+                        core::packages::strictDependenciesLevelToString(thisPkg.minimumStrictDependenciesLevel()));
                     auto currentStrictDepsLevel =
                         fmt::format("strict_dependencies '{}'",
                                     core::packages::strictDependenciesLevelToString(importStrictDepsLevel));
