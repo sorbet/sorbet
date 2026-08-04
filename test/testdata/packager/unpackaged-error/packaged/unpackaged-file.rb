@@ -9,6 +9,6 @@ class ::UnpackagedTheSequel
     puts MyPackage::MyClass.new
     puts OtherPackageImported::ExportedClass.new
     puts OtherPackageNotImported::ExportedClass.new
-    #    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `OtherPackageNotImported::ExportedClass` resolves but its package is not imported
+    #    ^^^^^^^^^^^^^^^^^^^^^^^ error: `OtherPackageNotImported` is not imported
   end
 end
