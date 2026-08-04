@@ -1,9 +1,9 @@
-[App] app/main.rb:5: `Lib::Nested::SomeClass` resolves but is not exported from `Lib::Nested` and `Lib::Nested` is not imported https://srb.help/3718
+[App] app/main.rb:5: `Lib::Nested::SomeClass` resolves but its package is not imported https://srb.help/3718
      5 |    Lib::Nested::SomeClass
             ^^^^^^^^^^^^^^^^^^^^^^
-    lib/nested/some_class.rb:3: Defined here
-     3 |class Lib::Nested::SomeClass
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    lib/nested/__package.rb:3: Exported from package here
+     3 |class Lib::Nested < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
     app/__package.rb:3: Insert `import Lib::Nested`
      3 |class App < PackageSpec

@@ -12,6 +12,6 @@ class Project::MainLib::Lib
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Package `Project::MainLib` may not reference `test!` packages
 
   Test::Project::Util::Unexported
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Project::Util::Unexported` resolves but is not exported from `Test::Project::Util` and `Test::Project::Util` is not imported
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Project::Util::Unexported` resolves but its package is not imported
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Package `Project::MainLib` may not reference `test!` packages
 end
