@@ -590,8 +590,6 @@ public:
             isExported = isExported || litSymbol.asFieldRef().data(ctx)->flags.isExported;
         }
         isExported = isExported || db.allowRelaxedPackagerChecksFor(this->package.mangledName());
-        bool definesBehavior =
-            !litSymbol.isClassOrModule() || litSymbol.asClassOrModuleRef().data(ctx)->flags.isBehaviorDefining;
         auto *import = this->package.importsPackage(otherPackage);
         auto wasImported = import != nullptr;
         isExported = isExported || (wasImported && import->usesInternals);
@@ -638,6 +636,8 @@ public:
                     if (enumClass.exists()) {
                         symToExport = enumClass;
                     }
+                    bool definesBehavior = !litSymbol.isClassOrModule() ||
+                                           litSymbol.asClassOrModuleRef().data(ctx)->flags.isBehaviorDefining;
                     if (definesBehavior) {
                         // For compatibility with gen-packages, we do _not_ add an export if it doesn't define
                         // behavior. This is mostly because it's easier to get Sorbet to behave like gen-packages
