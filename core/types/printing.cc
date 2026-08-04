@@ -81,7 +81,7 @@ string NamedLiteralType::show(const GlobalState &gs, ShowOptions options) const 
 string NamedLiteralType::showValue(const GlobalState &gs) const {
     switch (kind) {
         case NamedLiteralType::Kind::String:
-            return fmt::format("\"{}\"", absl::CEscape(name.show(gs)));
+            return fmt::format("\"{}\"", absl::Utf8SafeCEscape(name.show(gs)));
         case NamedLiteralType::Kind::Symbol: {
             return name.showAsSymbolLiteral(gs);
         }

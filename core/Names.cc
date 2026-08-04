@@ -158,7 +158,7 @@ string NameRef::show(const GlobalState &gs) const {
 string NameRef::showAsSymbolLiteral(const GlobalState &gs) const {
     auto shown = this->show(gs);
     if (absl::StrContains(shown, " ")) {
-        return fmt::format(":\"{}\"", absl::CEscape(shown));
+        return fmt::format(":\"{}\"", absl::Utf8SafeCEscape(shown));
     } else {
         return fmt::format(":{}", shown);
     }
