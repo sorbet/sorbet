@@ -145,12 +145,12 @@ class ResolveConstantsWalk {
 
 private:
     struct Nesting : public core::RefCounted<Nesting> {
-        const core::RefPtr<Nesting> parent;
         const core::SymbolRef scope;
+        const core::RefPtr<Nesting> parent;
 
-        Nesting(core::RefPtr<Nesting> parent, core::SymbolRef scope) : parent(std::move(parent)), scope(scope) {}
+        Nesting(core::RefPtr<Nesting> parent, core::SymbolRef scope) : scope(scope), parent(std::move(parent)) {}
     };
-    CheckSize(Nesting, 24, 8);
+    CheckSize(Nesting, 16, 8);
 
     core::RefPtr<Nesting> nesting_;
 
