@@ -658,11 +658,10 @@ public:
                     }
                 }
 
-                if (!isExported && !wasImported) {
+                if (!wasImported) {
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
-                        e.setHeader("`{}` resolves but is not exported from `{}` and `{}` is not imported",
-                                    litSymbol.show(ctx), pkg.show(ctx), pkg.show(ctx));
-                        addExportInfo(ctx, e, litSymbol, definesBehavior);
+                        e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
+                        e.addErrorLine(pkg.declLoc(), "Exported from package here");
                         addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
                     }
                 } else if (!isExported) {
@@ -670,12 +669,6 @@ public:
                         e.setHeader("`{}` resolves but is not exported from `{}`", litSymbol.show(ctx), pkg.show(ctx));
                         addExportInfo(ctx, e, litSymbol, definesBehavior);
 
-                        addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
-                    }
-                } else if (!wasImported) {
-                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
-                        e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
-                        e.addErrorLine(pkg.declLoc(), "Exported from package here");
                         addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
                     }
                 } else {
