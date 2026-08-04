@@ -8,9 +8,6 @@
     app/__package.rb:3: Insert `import Lib::Nested`
      3 |class App < PackageSpec
                                ^
-    lib/nested/__package.rb:4: Insert `export Lib::Nested::SomeClass`
-     4 |  bad
-             ^
 
 [Lib::Nested] lib/nested/some_class.rb:4: The method `foo` does not have a `sig` https://srb.help/7017
      4 |  def foo; end

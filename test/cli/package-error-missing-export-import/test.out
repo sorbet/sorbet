@@ -8,9 +8,6 @@ missing_import/foo_class.rb:5: `Other::OtherClass` resolves but its package is n
     missing_import/__package.rb:3: Insert `import Other`
      3 |class Foo::MissingImport < PackageSpec
                                               ^
-    other/__package.rb:3: Insert `export Other::OtherClass`
-     3 |class Other < PackageSpec
-                                 ^
   Note:
     Try running generate-packages.sh
 Errors: 1
@@ -24,9 +21,6 @@ imported_as_test/foo_class.rb:5: `Other::OtherClass` resolves but its package is
     imported_as_test/__package.rb:3: Insert `import Other`
      3 |class Foo::MissingImport < PackageSpec
                                               ^
-    other/__package.rb:3: Insert `export Other::OtherClass`
-     3 |class Other < PackageSpec
-                                 ^
   Note:
     Try running generate-packages.sh
 Errors: 1

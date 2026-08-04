@@ -632,14 +632,15 @@ public:
                     return;
                 }
 
-                std::optional<core::AutocorrectSuggestion> importAutocorrect;
                 if (!wasImported) {
-                    if (auto exp = this->package.addImport(ctx, pkg)) {
-                        importAutocorrect.emplace(exp.value());
+                    auto importAutocorrect = this->package.addImport(ctx, pkg);
+                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
+                        e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
+                        e.addErrorLine(pkg.declLoc(), "Exported from package here");
+                        addImportExportAutocorrect(ctx, e, move(importAutocorrect), nullopt);
                     }
-                }
-                std::optional<core::AutocorrectSuggestion> exportAutocorrect;
-                if (!isExported) {
+                } else if (!isExported) {
+                    std::optional<core::AutocorrectSuggestion> exportAutocorrect;
                     auto symToExport = litSymbol;
                     auto enumClass = getEnumClassForEnumValue(ctx.state, symToExport);
                     if (enumClass.exists()) {
@@ -656,20 +657,12 @@ public:
                             exportAutocorrect.emplace(exp.value());
                         }
                     }
-                }
 
-                if (!wasImported) {
-                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
-                        e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
-                        e.addErrorLine(pkg.declLoc(), "Exported from package here");
-                        addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
-                    }
-                } else if (!isExported) {
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedPackagePrivateName)) {
                         e.setHeader("`{}` resolves but is not exported from `{}`", litSymbol.show(ctx), pkg.show(ctx));
                         addExportInfo(ctx, e, litSymbol, definesBehavior);
 
-                        addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
+                        addImportExportAutocorrect(ctx, e, nullopt, move(exportAutocorrect));
                     }
                 } else {
                     ENFORCE(false);

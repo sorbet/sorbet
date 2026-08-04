@@ -8,7 +8,4 @@ consumer_auth/data/identifier_struct.rb:6: `Project::ConsumerAuth::IdentifierTyp
     consumer_auth/data/__package.rb:4: Insert `import Project::ConsumerAuth`
      4 |class Project::ConsumerAuth::Data < PackageSpec
                                                        ^
-    consumer_auth/__package.rb:6: Insert `export Project::ConsumerAuth::IdentifierType`
-     6 |  import Project::ConsumerAuth::Data
-                                            ^
 Errors: 1
