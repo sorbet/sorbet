@@ -1,4 +1,5 @@
 #include "rewriter/AttrReader.h"
+#include "absl/strings/match.h"
 #include "ast/Helpers.h"
 #include "core/Context.h"
 #include "core/Names.h"
@@ -63,6 +64,22 @@ ast::ExpressionPtr dupReturnsType(ast::Send *sharedSig) {
         return nullptr;
     }
     return body->getPosArg(0).deepCopy();
+}
+
+// The loc of the type inside the sig's `returns(...)`, so that later phases can suggest widening
+// it to `T.nilable(...)`. See where this is used in the `makeWriter` case below.
+core::LocOffsets returnsTypeLoc(ast::Send *sharedSig) {
+    auto *sig = ASTUtil::castSig(sharedSig);
+
+    ENFORCE(sig != nullptr, "We weren't given a send node that's a valid signature");
+
+    auto *body = findReturnsSend(sig);
+
+    ENFORCE(body->fun == core::Names::returns());
+    if (body->numPosArgs() != 1) {
+        return core::LocOffsets::none();
+    }
+    return body->getPosArg(0).loc();
 }
 
 // This will raise an error if we've given a type that's not what we want
@@ -276,7 +293,27 @@ vector<ast::ExpressionPtr> AttrReader::run(core::MutableContext ctx, ast::Send *
                 body = ast::MK::Assign(loc, ast::MK::Instance(argLoc, varName),
                                        ast::MK::Let(loc, ast::MK::Local(loc, name), dupReturnsType(sig)));
             } else {
-                body = ast::MK::Assign(loc, ast::MK::Instance(argLoc, varName), ast::MK::Local(loc, name));
+                // We're not declaring the ivar, so `# typed: strict` will report an error on this
+                // assignment. Point the RHS at the type in the sig's `returns(...)` so that infer
+                // can suggest widening it to `T.nilable`, which makes the branch above apply.
+                //
+                // Only do this when the type comes before the attr name: that ordering is what lets
+                // infer tell this synthesized assignment apart from one the user wrote. An RBS
+                // comment (`#: Integer`) synthesizes a sig whose locs point inside the comment, and
+                // widening one of those would produce `#: T.nilable(Integer)`, which isn't valid
+                // RBS, so skip a type that lives on a comment line too. Failing either check just
+                // means no autocorrect, so fall back to the loc of the `attr_` send itself.
+                auto rhsLoc = loc;
+                if (sig != nullptr) {
+                    auto typeLoc = returnsTypeLoc(sig);
+                    if (typeLoc.exists() && typeLoc.endPos() < argLoc.beginPos()) {
+                        auto lineStart = ctx.locAt(typeLoc).findStartOfIndentation(ctx).first.adjustLen(ctx, 0, 1);
+                        if (lineStart.exists() && !absl::StartsWith(lineStart.source(ctx).value_or("#"), "#")) {
+                            rhsLoc = typeLoc;
+                        }
+                    }
+                }
+                body = ast::MK::Assign(loc, ast::MK::Instance(argLoc, varName), ast::MK::Local(rhsLoc, name));
             }
             ast::MethodDef::Flags flags;
             flags.isAttrBestEffortUIOnly = true;
