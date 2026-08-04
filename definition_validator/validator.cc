@@ -798,10 +798,8 @@ void validateFinalMethodHelper(core::Context ctx, const core::ClassOrModuleRef k
                         errMsgClass.show(ctx), sym.name(ctx).show(ctx));
             auto queryLoc = defLoc.copyWithZeroLength();
             // Only the send's location is needed here, so look it up without parsing it: parsing
-            // has the side effect of reporting type errors on it (e.g. `T.attached_class` errors
-            // based on the wrong owner, since this helper doesn't know about `self.` methods),
-            // which we don't want to trigger just to find where the `sig` is.
-            // See https://github.com/sorbet/sorbet/issues/9460
+            // has the side effect of reporting type errors on it, which we don't want to trigger
+            // just to find where it is.
             auto *origSend = sig_finder::SigFinder::findSignatureSend(ctx, classDef, queryLoc);
 
             if (origSend != nullptr && origSend->funLoc.exists()) {

@@ -145,8 +145,9 @@ struct SigFinderTraversal {
         if (this->bestSend_ == nullptr) {
             return nullopt;
         }
+        ENFORCE(this->bestOwner_.exists());
         auto parsedSig = resolver::TypeSyntax::parseSigTop(ctx.withOwner(this->bestOwner_), *this->bestSend_,
-                                                            core::Symbols::untyped());
+                                                           core::Symbols::untyped());
         return SigFinder::Result(move(parsedSig), *this->bestSend_);
     }
 };

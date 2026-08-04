@@ -33,3 +33,23 @@ class MultipleNonFinalMethods
   sig { void }
   def other; end # error: `MultipleNonFinalMethods` was declared as final but its method `other` was not declared as final
 end
+
+# With several `sig` blocks in the same class, the search for "which `sig` belongs to this
+# method" has to walk past earlier, unrelated `sig`s to find the right one. Make sure each
+# non-final method's autocorrect still points at its own `sig`, and not at an earlier one
+# (which, before the fix, could also mean re-parsing--and re-erroring on--that earlier `sig`).
+class MultipleSigBlocks
+  extend T::Sig, T::Helpers
+  final!
+
+  sig { void }
+  def self.first; end # error: `MultipleSigBlocks` was declared as final but its method `first` was not declared as final
+
+  sig { returns(T.attached_class) }
+  def self.second # error: `MultipleSigBlocks` was declared as final but its method `second` was not declared as final
+    raise
+  end
+
+  sig(:final) { void }
+  def self.third; end
+end
