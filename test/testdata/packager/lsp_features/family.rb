@@ -41,7 +41,7 @@ module Simpsons
   end
 
   Test::Krabappel::Popquiz
-# ^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Krabappel::Popquiz` cannot be referenced here because `Simpsons` may not reference `test!` packages
+# ^^^^^^^^^^^^^^^ error: `Test::Krabappel` cannot be referenced here because `Simpsons` may not reference `test!` packages
   #                ^^^^^^^ usage: popquiz
 
   class Private

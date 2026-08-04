@@ -1,6 +1,6 @@
-foo_class.rb:7: `Foo::Bar::OtherPackage::OtherClass` resolves but its package is not imported https://srb.help/3718
+foo_class.rb:7: `Foo::Bar::OtherPackage` is not imported https://srb.help/3718
      7 |      Foo::Bar::OtherPackage::OtherClass # resolves via root
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+              ^^^^^^^^^^^^^^^^^^^^^^
     other/__package.rb:3: Exported from package here
      3 |class Foo::Bar::OtherPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -11,9 +11,9 @@ foo_class.rb:7: `Foo::Bar::OtherPackage::OtherClass` resolves but its package is
   Note:
     Try running generate-packages.sh
 
-foo_class.rb:8: `Foo::Bar::OtherPackage::OtherClass` resolves but its package is not imported https://srb.help/3718
+foo_class.rb:8: `Foo::Bar::OtherPackage` is not imported https://srb.help/3718
      8 |      Bar::OtherPackage::OtherClass # resolves via `module Foo`
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+              ^^^^^^^^^^^^^^^^^
     other/__package.rb:3: Exported from package here
      3 |class Foo::Bar::OtherPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -24,9 +24,9 @@ foo_class.rb:8: `Foo::Bar::OtherPackage::OtherClass` resolves but its package is
   Note:
     Try running generate-packages.sh
 
-foo_class.rb:14: `Foo::Bar::OtherPackage::OtherClass` resolves but its package is not imported https://srb.help/3718
+foo_class.rb:14: `Foo::Bar::OtherPackage` is not imported https://srb.help/3718
     14 |  Foo::Bar::OtherPackage::OtherClass # resolves via root
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^^
     other/__package.rb:3: Exported from package here
      3 |class Foo::Bar::OtherPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -37,9 +37,9 @@ foo_class.rb:14: `Foo::Bar::OtherPackage::OtherClass` resolves but its package i
   Note:
     Try running generate-packages.sh
 
-test/foo.test.rb:4: `Test::Foo::Bar::OtherPackage::TestUtil` resolves but its package is not imported https://srb.help/3718
+test/foo.test.rb:4: `Test::Foo::Bar::OtherPackage` is not imported https://srb.help/3718
      4 |  Test::Foo::Bar::OtherPackage::TestUtil
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     other/test/__package.rb:4: Exported from package here
      4 |class Test::Foo::Bar::OtherPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
