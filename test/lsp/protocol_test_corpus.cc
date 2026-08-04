@@ -1594,4 +1594,94 @@ TEST_CASE_FIXTURE(ProtocolTest, "ErrorsRemainAfterSlowPathRestart") {
     }
 }
 
+// Tests that no-op fast path edits don't push the fastPathEditStratum down, affecting where we can start the next slow
+// path from.
+TEST_CASE_FIXTURE(ProtocolTest, "ViewingFilesDoesntAffectFastPathEditStratum") {
+    auto initOpts = make_shared<realmain::options::Options>();
+    initOpts->cacheSensitiveOptions.sorbetPackages = true;
+    initOpts->packageDirected = true;
+    resetState(initOpts);
+
+    vector<pair<string, string>> files = {
+        {"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A"}).build()},
+        {"a.rb", "# typed: true\n"
+                 "module Root\n"
+                 "  class A\n"
+                 "    def fun\n"
+                 "    end\n"
+                 "  end\n"
+                 "end\n"},
+        {"foo/__package.rb",
+         PackageTextBuilder().withName("Root::Foo").withExports({"Root::Foo::A"}).withImports({"Root"}).build()},
+        {"foo/a.rb", "# typed: true\n"
+                     "module Root::Foo\n"
+                     "  class A\n"
+                     "    def foo\n"
+                     "      Root::A.new()\n"
+                     "    end\n"
+                     "  end\n"
+                     "end\n"},
+    };
+
+    writeFilesToFS(files);
+
+    for (auto &[path, _] : files) {
+        this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/{}", this->rootPath, path));
+    }
+
+    auto supportsMarkdown = true;
+    auto supportsCodeActionResolve = true;
+    auto opts = make_unique<SorbetInitializationOptions>();
+    opts->enableTypecheckInfo = true;
+
+    // The initial slow path.
+    assertErrorDiagnostics(initializeLSP(supportsMarkdown, supportsCodeActionResolve, move(opts)), {});
+
+    // Only open a.rb, to test that we skip this stratum on the next slow path
+    assertErrorDiagnostics(send(*openFile(files[1].first, files[1].second)), {});
+
+    // Make a slow path edit to Root::Foo::A
+    {
+        assertErrorDiagnostics(send(*openFile(files[3].first, files[3].second)), {});
+
+        // Make a slow path modification to an existing file.
+        auto resps = send(*changeFile(files[3].first,
+                                      "# typed: true\n"
+                                      "module Root::Foo\n"
+                                      "  class A\n"
+                                      "    module Foo\n"
+                                      "    end\n"
+                                      "\n"
+                                      "    def foo\n"
+                                      "      Root::A.new() + :type_error\n"
+                                      "    end\n"
+                                      "  end\n"
+                                      "end\n",
+                                      2));
+
+        // We should see at a minimum the start/end typechecking messages.
+        REQUIRE(resps.size() >= 2);
+
+        // We should see a starting and ending slow path message, with errors between. The error message between is the
+        // error on `Root::Foo::A`.
+        CHECK_EQ(resps.size(), 3);
+        {
+            auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(resps.front()->asNotification().params);
+            CHECK_EQ(params->typecheckingPath, TypecheckingPath::Slow);
+            CHECK_EQ(params->status, SorbetTypecheckRunStatus::Started);
+        }
+
+        {
+            auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(resps.back()->asNotification().params);
+            CHECK_EQ(params->typecheckingPath, TypecheckingPath::Slow);
+            CHECK_EQ(params->status, SorbetTypecheckRunStatus::Ended);
+
+            // We're modifying package `Root::Foo`, after a no-op edit to `Root`. As a result, we should restart at
+            // stratum 1.
+            CHECK_EQ(params->startingStratum, 1);
+        }
+
+        assertErrorDiagnostics(move(resps), {{files[3].first, 7, "Method `+` does not exist"}});
+    }
+}
 } // namespace sorbet::test::lsp
