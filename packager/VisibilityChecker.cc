@@ -500,23 +500,6 @@ class VisibilityCheckerPass final {
         }
     }
 
-    void addImportExportAutocorrect(core::Context ctx, core::ErrorBuilder &e,
-                                    optional<core::AutocorrectSuggestion> &&importAutocorrect,
-                                    optional<core::AutocorrectSuggestion> &&exportAutocorrect) {
-        auto &db = ctx.state.packageDB();
-        auto hasAutocorrect = importAutocorrect.has_value() || exportAutocorrect.has_value();
-
-        if (importAutocorrect.has_value()) {
-            e.addAutocorrect(std::move(importAutocorrect.value()));
-        } else if (exportAutocorrect.has_value()) {
-            e.addAutocorrect(std::move(exportAutocorrect.value()));
-        }
-
-        if (hasAutocorrect && !db.errorHint().empty()) {
-            e.addErrorNote("{}", db.errorHint());
-        }
-    }
-
 public:
     const core::packages::PackageInfo &package;
     UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo> referencedPackages;
@@ -624,11 +607,15 @@ public:
                 }
 
                 if (!wasImported) {
-                    auto importAutocorrect = this->package.addImport(ctx, pkg);
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
                         e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
                         e.addErrorLine(pkg.declLoc(), "Exported from package here");
-                        addImportExportAutocorrect(ctx, e, move(importAutocorrect), nullopt);
+                        if (auto importAutocorrect = this->package.addImport(ctx, pkg)) {
+                            e.maybeAddAutocorrect(move(importAutocorrect));
+                            if (!db.errorHint().empty()) {
+                                e.addErrorNote("{}", db.errorHint());
+                            }
+                        }
                     }
                 } else if (!isExported) {
                     std::optional<core::AutocorrectSuggestion> exportAutocorrect;
@@ -655,7 +642,12 @@ public:
                         e.setHeader("`{}` resolves but is not exported from `{}`", litSymbol.show(ctx), pkg.show(ctx));
                         addExportInfo(ctx, e, litSymbol, definesBehavior);
 
-                        addImportExportAutocorrect(ctx, e, nullopt, move(exportAutocorrect));
+                        if (exportAutocorrect.has_value()) {
+                            e.maybeAddAutocorrect(move(exportAutocorrect));
+                            if (!db.errorHint().empty()) {
+                                e.addErrorNote("{}", db.errorHint());
+                            }
+                        }
                     }
                 } else {
                     ENFORCE(false);
