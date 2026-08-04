@@ -20,8 +20,8 @@ StaticField = T.let(Foo, T.class_of(Foo))
 # ^ hover: T.class_of(Foo)
 
 MyType = T.type_alias { Integer }
-# ^ hover: # type alias MyType
-# ^ hover: T.type_alias {Integer}
+# ^ hover: MyType = T.type_alias {Integer}
+# ^ hover-line: 2 MyType = T.type_alias {Integer}
 
 class Generic
   extend T::Generic

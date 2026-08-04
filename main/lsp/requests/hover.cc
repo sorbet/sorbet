@@ -133,11 +133,7 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
             }
         }
 
-        typeString = prettyTypeForConstant(gs, c->symbolBeforeDealias);
-        auto header = constantKindHeader(gs, c->symbolBeforeDealias);
-        if (!header.empty()) {
-            typeString = fmt::format("{}\n{}", header, typeString);
-        }
+        typeString = prettyConstantForHover(gs, c->symbolBeforeDealias);
     } else if (auto d = resp->isMethodDef()) {
         for (auto loc : d->symbol.data(gs)->locs()) {
             if (loc.exists()) {

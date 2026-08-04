@@ -1,4 +1,3 @@
-#include "absl/strings/ascii.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
@@ -102,6 +101,10 @@ string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef consta
     }
 }
 
+namespace {
+
+// A comment describing what kind of constant this is, rendered above the constant's type.
+// Empty when the type itself already spells out the definition (aliases).
 string constantKindHeader(const core::GlobalState &gs, core::SymbolRef constant) {
     if (constant == core::Symbols::StubModule()) {
         return "";
@@ -109,11 +112,9 @@ string constantKindHeader(const core::GlobalState &gs, core::SymbolRef constant)
 
     // Order matters: type aliases and class aliases are also static fields, so they
     // must be checked before isStaticField.
-    if (constant.isTypeAlias(gs)) {
-        return fmt::format("# type alias {}", constant.show(gs));
-    } else if (constant.isClassAlias(gs)) {
-        // `prettyTypeForConstant` already renders the dealiased form (`Name = Target`),
-        // and a kind comment wouldn't add anything, so we don't emit a header for aliases.
+    if (constant.isTypeAlias(gs) || constant.isClassAlias(gs)) {
+        // Aliases render as their definition (`Name = Target`, `Name = T.type_alias {...}`),
+        // so a kind comment wouldn't add anything.
         return "";
     } else if (constant.isTypeMember()) {
         // Render a skeleton of the enclosing definition so it's clear where the type
@@ -190,6 +191,25 @@ string constantKindHeader(const core::GlobalState &gs, core::SymbolRef constant)
         return fmt::format("# {} {}\n#   {}\n# end", classOrModule, owner.show(gs), definition);
     }
     return "";
+}
+
+} // namespace
+
+string prettyConstantForHover(const core::GlobalState &gs, core::SymbolRef constant) {
+    auto type = prettyTypeForConstant(gs, constant);
+
+    if (constant != core::Symbols::StubModule() && constant.isTypeAlias(gs)) {
+        // Render the alias the way it's written in source, e.g. `X = T.type_alias {Y}`.
+        // Only hover does this: `prettyTypeForConstant` is shared with completion, where
+        // the name is already shown next to the documentation.
+        return fmt::format("{} = {}", constant.name(gs).show(gs), type);
+    }
+
+    auto header = constantKindHeader(gs, constant);
+    if (header.empty()) {
+        return type;
+    }
+    return fmt::format("{}\n{}", header, type);
 }
 
 SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef symbol, bool isAttrBestEffortUIOnly) {
