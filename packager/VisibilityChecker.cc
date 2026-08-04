@@ -527,142 +527,138 @@ public:
     }
 
     static void reportImportError(core::Context ctx) {
-            auto strictDepsLevel = this->package.strictDependenciesLevel;
-            auto importStrictDepsLevel = pkg.strictDependenciesLevel;
-            bool layeringViolation = false;
-            bool strictDependenciesTooLow = false;
-            bool causesCycle = false;
-            bool causesVisibilityError = !pkg.isVisibleTo(ctx, this->package);
-            bool badTestReference = pkg.testPackage() && !this->package.testPackage();
-            optional<string> path;
-            if (db.enforceLayering()) {
-                layeringViolation = strictDepsLevel > core::packages::StrictDependenciesLevel::False &&
-                                    this->package.causesLayeringViolation(db, pkg);
-                strictDependenciesTooLow = importStrictDepsLevel != core::packages::StrictDependenciesLevel::None &&
-                                           importStrictDepsLevel < this->package.minimumStrictDependenciesLevel();
-                // If there's a path from the imported packaged to this package, then adding the import will close
-                // the loop and cause a cycle.
-                path = pkg.pathTo(ctx, this->package.mangledName());
-                causesCycle =
-                    strictDepsLevel >= core::packages::StrictDependenciesLevel::LayeredDag && path.has_value();
+        auto strictDepsLevel = this->package.strictDependenciesLevel;
+        auto importStrictDepsLevel = pkg.strictDependenciesLevel;
+        bool layeringViolation = false;
+        bool strictDependenciesTooLow = false;
+        bool causesCycle = false;
+        bool causesVisibilityError = !pkg.isVisibleTo(ctx, this->package);
+        bool badTestReference = pkg.testPackage() && !this->package.testPackage();
+        optional<string> path;
+        if (db.enforceLayering()) {
+            layeringViolation = strictDepsLevel > core::packages::StrictDependenciesLevel::False &&
+                                this->package.causesLayeringViolation(db, pkg);
+            strictDependenciesTooLow = importStrictDepsLevel != core::packages::StrictDependenciesLevel::None &&
+                                       importStrictDepsLevel < this->package.minimumStrictDependenciesLevel();
+            // If there's a path from the imported packaged to this package, then adding the import will close
+            // the loop and cause a cycle.
+            path = pkg.pathTo(ctx, this->package.mangledName());
+            causesCycle = strictDepsLevel >= core::packages::StrictDependenciesLevel::LayeredDag && path.has_value();
+        }
+        bool hasModularityError =
+            layeringViolation || strictDependenciesTooLow || causesCycle || badTestReference || causesVisibilityError;
+        // visible_to errors are handled separately (by `updateVisibilityFor`),
+        // so they're not included in this causesModularityError field of referencedPackages
+        referencedPackages[otherPackage].causesModularityError = hasModularityError && !causesVisibilityError;
+        if (!hasModularityError) {
+            if (db.genPackagesMode() != core::packages::GenPackagesMode::Disabled) {
+                return;
             }
-            bool hasModularityError = layeringViolation || strictDependenciesTooLow || causesCycle ||
-                                      badTestReference || causesVisibilityError;
-            // visible_to errors are handled separately (by `updateVisibilityFor`),
-            // so they're not included in this causesModularityError field of referencedPackages
-            referencedPackages[otherPackage].causesModularityError = hasModularityError && !causesVisibilityError;
-            if (!hasModularityError) {
-                if (db.genPackagesMode() != core::packages::GenPackagesMode::Disabled) {
+
+            if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
+                e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
+                e.addErrorLine(pkg.declLoc(), "Exported from package here");
+                if (auto importAutocorrect = this->package.addImport(ctx, pkg)) {
+                    e.maybeAddAutocorrect(move(importAutocorrect));
+                    if (!db.errorHint().empty()) {
+                        e.addErrorNote("{}", db.errorHint());
+                    }
+                }
+            }
+        } else {
+            // TODO(neil): Provide actionable advice and/or link to a doc that would help the user resolve these
+            // layering/strict_dependencies issues.
+            auto error = causesCycle         ? core::errors::Packager::StrictDependenciesViolation
+                         : layeringViolation ? core::errors::Packager::LayeringViolation
+                         : badTestReference  ? core::errors::Packager::TestImportMismatch
+                                             : core::errors::Packager::StrictDependenciesViolation;
+            if (auto e = ctx.beginError(lit.loc(), error)) {
+                vector<string> reasons;
+                e.addErrorLine(this->package.declLoc(), "Enclosing package declared here");
+
+                // We should only report a visibility error if we're not going to add a visible_to to the package
+                // Otherwise the error is pointless since it'll go away after the new visible_to is added
+                if (causesVisibilityError && !ctx.state.packageDB().updateVisibilityFor(otherPackage)) {
+                    reasons.emplace_back(core::ErrorColors::format(
+                        "Package `{}` includes explicit visibility modifiers and cannot be imported from `{}`",
+                        pkg.show(ctx), this->package.show(ctx)));
+                    e.addErrorNote("Please consult with the owning team before adding a `{}` line to the package `{}`",
+                                   "visible_to", pkg.show(ctx));
+                }
+
+                if (badTestReference) {
+                    reasons.emplace_back(core::ErrorColors::format("`{}` may not reference `{}` packages",
+                                                                   this->package.show(ctx), "test!"));
+                    e.addErrorLine(pkg.declLoc(), "Referenced `{}` package defined here", "test!");
+                }
+                if (causesCycle) {
+                    reasons.emplace_back(core::ErrorColors::format("importing its package would put `{}` into a cycle",
+                                                                   this->package.show(ctx)));
+                    auto currentStrictDepsLevel = fmt::format(
+                        "strict_dependencies '{}'", core::packages::strictDependenciesLevelToString(strictDepsLevel));
+                    e.addErrorLine(core::Loc(this->package.file, this->package.locs.strictDependenciesLevel),
+                                   "`{}` is `{}`, which disallows cycles", this->package.show(ctx),
+                                   currentStrictDepsLevel);
+                    ENFORCE(path.has_value(),
+                            "Path from pkg to this->package should always exist if causesCycle is true");
+                    e.addErrorNote("Path from `{}` to `{}`:\n{}", pkg.show(ctx), this->package.show(ctx), path.value());
+                }
+
+                if (layeringViolation) {
+                    reasons.emplace_back("importing its package would cause a layering violation");
+                    ENFORCE(pkg.layer.exists(), "causesLayeringViolation should return false if layer is not set");
+                    ENFORCE(this->package.layer.exists(),
+                            "causesLayeringViolation should return false if layer is not set");
+                    e.addErrorLine(core::Loc(pkg.file, pkg.locs.layer),
+                                   "Package `{}` must be at most layer `{}` (to match package `{}`) but is "
+                                   "currently layer `{}`",
+                                   pkg.show(ctx), this->package.layer.show(ctx), this->package.show(ctx),
+                                   pkg.layer.show(ctx));
+                }
+
+                if (strictDependenciesTooLow) {
+                    reasons.emplace_back(
+                        core::ErrorColors::format("its `{}` is not strict enough", "strict_dependencies"));
+                    ENFORCE(importStrictDepsLevel != core::packages::StrictDependenciesLevel::None,
+                            "strictDependenciesTooLow should be false if strict_dependencies level is not set");
+                    auto requiredStrictDepsLevel =
+                        fmt::format("strict_dependencies '{}'", core::packages::strictDependenciesLevelToString(
+                                                                    this->package.minimumStrictDependenciesLevel()));
+                    auto currentStrictDepsLevel =
+                        fmt::format("strict_dependencies '{}'",
+                                    core::packages::strictDependenciesLevelToString(importStrictDepsLevel));
+                    e.addErrorLine(core::Loc(pkg.file, pkg.locs.strictDependenciesLevel),
+                                   "`{}` must be at least `{}` but is currently `{}`", pkg.show(ctx),
+                                   requiredStrictDepsLevel, currentStrictDepsLevel);
+                }
+
+                if (reasons.empty() && causesVisibilityError &&
+                    ctx.state.packageDB().updateVisibilityFor(otherPackage)) {
+                    // Force the error to build here, so that we don't report an error
+                    e.build();
                     return;
                 }
 
-                if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
-                    e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
-                    e.addErrorLine(pkg.declLoc(), "Exported from package here");
-                    if (auto importAutocorrect = this->package.addImport(ctx, pkg)) {
-                        e.maybeAddAutocorrect(move(importAutocorrect));
-                        if (!db.errorHint().empty()) {
-                            e.addErrorNote("{}", db.errorHint());
-                        }
-                    }
+                ENFORCE(!reasons.empty(), "At least one reason should be present");
+                string reason;
+                if (reasons.size() == 1) {
+                    reason = reasons[0];
+                } else if (reasons.size() == 2) {
+                    reason = fmt::format("{}, and {}", reasons[0], reasons[1]);
+                } else if (reasons.size() == 3) {
+                    reason = fmt::format("{}, {}, and {}", reasons[0], reasons[1], reasons[2]);
+                } else if (reasons.size() == 4) {
+                    reason = fmt::format("{}, {}, {}, and {}", reasons[0], reasons[1], reasons[2], reasons[3]);
+                } else if (reasons.size() == 5) {
+                    reason = fmt::format("{}, {}, {}, {}, and {}", reasons[0], reasons[1], reasons[2], reasons[3],
+                                         reasons[4]);
+                } else {
+                    ENFORCE(false, "At most five reasons should be present");
                 }
-            } else {
-                // TODO(neil): Provide actionable advice and/or link to a doc that would help the user resolve these
-                // layering/strict_dependencies issues.
-                auto error = causesCycle         ? core::errors::Packager::StrictDependenciesViolation
-                             : layeringViolation ? core::errors::Packager::LayeringViolation
-                             : badTestReference  ? core::errors::Packager::TestImportMismatch
-                                                 : core::errors::Packager::StrictDependenciesViolation;
-                if (auto e = ctx.beginError(lit.loc(), error)) {
-                    vector<string> reasons;
-                    e.addErrorLine(this->package.declLoc(), "Enclosing package declared here");
-
-                    // We should only report a visibility error if we're not going to add a visible_to to the package
-                    // Otherwise the error is pointless since it'll go away after the new visible_to is added
-                    if (causesVisibilityError && !ctx.state.packageDB().updateVisibilityFor(otherPackage)) {
-                        reasons.emplace_back(core::ErrorColors::format(
-                            "Package `{}` includes explicit visibility modifiers and cannot be imported from `{}`",
-                            pkg.show(ctx), this->package.show(ctx)));
-                        e.addErrorNote(
-                            "Please consult with the owning team before adding a `{}` line to the package `{}`",
-                            "visible_to", pkg.show(ctx));
-                    }
-
-                    if (badTestReference) {
-                        reasons.emplace_back(core::ErrorColors::format("`{}` may not reference `{}` packages",
-                                                                       this->package.show(ctx), "test!"));
-                        e.addErrorLine(pkg.declLoc(), "Referenced `{}` package defined here", "test!");
-                    }
-                    if (causesCycle) {
-                        reasons.emplace_back(core::ErrorColors::format(
-                            "importing its package would put `{}` into a cycle", this->package.show(ctx)));
-                        auto currentStrictDepsLevel =
-                            fmt::format("strict_dependencies '{}'",
-                                        core::packages::strictDependenciesLevelToString(strictDepsLevel));
-                        e.addErrorLine(core::Loc(this->package.file, this->package.locs.strictDependenciesLevel),
-                                       "`{}` is `{}`, which disallows cycles", this->package.show(ctx),
-                                       currentStrictDepsLevel);
-                        ENFORCE(path.has_value(),
-                                "Path from pkg to this->package should always exist if causesCycle is true");
-                        e.addErrorNote("Path from `{}` to `{}`:\n{}", pkg.show(ctx), this->package.show(ctx),
-                                       path.value());
-                    }
-
-                    if (layeringViolation) {
-                        reasons.emplace_back("importing its package would cause a layering violation");
-                        ENFORCE(pkg.layer.exists(), "causesLayeringViolation should return false if layer is not set");
-                        ENFORCE(this->package.layer.exists(),
-                                "causesLayeringViolation should return false if layer is not set");
-                        e.addErrorLine(core::Loc(pkg.file, pkg.locs.layer),
-                                       "Package `{}` must be at most layer `{}` (to match package `{}`) but is "
-                                       "currently layer `{}`",
-                                       pkg.show(ctx), this->package.layer.show(ctx), this->package.show(ctx),
-                                       pkg.layer.show(ctx));
-                    }
-
-                    if (strictDependenciesTooLow) {
-                        reasons.emplace_back(
-                            core::ErrorColors::format("its `{}` is not strict enough", "strict_dependencies"));
-                        ENFORCE(importStrictDepsLevel != core::packages::StrictDependenciesLevel::None,
-                                "strictDependenciesTooLow should be false if strict_dependencies level is not set");
-                        auto requiredStrictDepsLevel = fmt::format("strict_dependencies '{}'",
-                                                                   core::packages::strictDependenciesLevelToString(
-                                                                       this->package.minimumStrictDependenciesLevel()));
-                        auto currentStrictDepsLevel =
-                            fmt::format("strict_dependencies '{}'",
-                                        core::packages::strictDependenciesLevelToString(importStrictDepsLevel));
-                        e.addErrorLine(core::Loc(pkg.file, pkg.locs.strictDependenciesLevel),
-                                       "`{}` must be at least `{}` but is currently `{}`", pkg.show(ctx),
-                                       requiredStrictDepsLevel, currentStrictDepsLevel);
-                    }
-
-                    if (reasons.empty() && causesVisibilityError &&
-                        ctx.state.packageDB().updateVisibilityFor(otherPackage)) {
-                        // Force the error to build here, so that we don't report an error
-                        e.build();
-                        return;
-                    }
-
-                    ENFORCE(!reasons.empty(), "At least one reason should be present");
-                    string reason;
-                    if (reasons.size() == 1) {
-                        reason = reasons[0];
-                    } else if (reasons.size() == 2) {
-                        reason = fmt::format("{}, and {}", reasons[0], reasons[1]);
-                    } else if (reasons.size() == 3) {
-                        reason = fmt::format("{}, {}, and {}", reasons[0], reasons[1], reasons[2]);
-                    } else if (reasons.size() == 4) {
-                        reason = fmt::format("{}, {}, {}, and {}", reasons[0], reasons[1], reasons[2], reasons[3]);
-                    } else if (reasons.size() == 5) {
-                        reason = fmt::format("{}, {}, {}, {}, and {}", reasons[0], reasons[1], reasons[2], reasons[3],
-                                             reasons[4]);
-                    } else {
-                        ENFORCE(false, "At most five reasons should be present");
-                    }
-                    e.setHeader("`{}` cannot be referenced here because {}", lit.symbol().show(ctx), reason);
-                    e.addErrorNote("`{}`'s package is not imported", lit.symbol().show(ctx));
-                }
+                e.setHeader("`{}` cannot be referenced here because {}", lit.symbol().show(ctx), reason);
+                e.addErrorNote("`{}`'s package is not imported", lit.symbol().show(ctx));
             }
+        }
     }
 
     void postTransformConstantLit(core::Context ctx, const ast::ConstantLit &lit) {
