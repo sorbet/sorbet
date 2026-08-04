@@ -526,7 +526,10 @@ public:
         }
     }
 
-    static void reportImportError(core::Context ctx, const core::packages::PackageInfo &thisPkg, const core::packages::PackageInfo &pkg, core::LocOffsets errLoc, core::SymbolRef litSymbol) {
+    // Returns whether the reference causes a modularity error
+    static bool reportImportError(core::Context ctx, const core::packages::PackageInfo &thisPkg,
+                                  const core::packages::PackageInfo &pkg, core::LocOffsets errLoc,
+                                  core::SymbolRef litSymbol) {
         auto &db = ctx.state.packageDB();
         auto otherPackage = pkg.mangledName();
         auto strictDepsLevel = thisPkg.strictDependenciesLevel;
@@ -551,10 +554,10 @@ public:
             layeringViolation || strictDependenciesTooLow || causesCycle || badTestReference || causesVisibilityError;
         // visible_to errors are handled separately (by `updateVisibilityFor`),
         // so they're not included in this causesModularityError field of referencedPackages
-        referencedPackages[otherPackage].causesModularityError = hasModularityError && !causesVisibilityError;
+        bool causesModularityError = hasModularityError && !causesVisibilityError;
         if (!hasModularityError) {
             if (db.genPackagesMode() != core::packages::GenPackagesMode::Disabled) {
-                return;
+                return causesModularityError;
             }
 
             if (auto e = ctx.beginError(errLoc, core::errors::Packager::MissingImport)) {
@@ -634,7 +637,7 @@ public:
                     ctx.state.packageDB().updateVisibilityFor(otherPackage)) {
                     // Force the error to build here, so that we don't report an error
                     e.build();
-                    return;
+                    return causesModularityError;
                 }
 
                 ENFORCE(!reasons.empty(), "At least one reason should be present");
@@ -657,6 +660,7 @@ public:
                 e.addErrorNote("`{}`'s package is not imported", litSymbol.show(ctx));
             }
         }
+        return causesModularityError;
     }
 
     void postTransformConstantLit(core::Context ctx, const ast::ConstantLit &lit) {
@@ -697,7 +701,8 @@ public:
         referencedPackages[otherPackage] = {.importNeeded = !wasImported, .causesModularityError = false};
 
         if (!wasImported) {
-            reportImportError(ctx, this->package, pkg, lit.loc(), lit.symbol());
+            referencedPackages[otherPackage].causesModularityError =
+                reportImportError(ctx, this->package, pkg, lit.loc(), lit.symbol());
             return;
         }
 
