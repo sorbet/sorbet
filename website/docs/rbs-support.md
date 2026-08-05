@@ -6,7 +6,7 @@ sidebar_label: RBS Comments
 
 ## Signature comments
 
-> This feature is experimental and might be changed or removed without notice. To enable it pass the `--enable-experimental-rbs-comments` option to Sorbet or add it to your `sorbet/config`.
+> This feature is experimental and might be changed or removed without notice. To enable it pass the `--enable-experimental-rbs-comments` and `--parser=prism` options to Sorbet, or add them to your `sorbet/config`. RBS comments only work with the Prism parser. Passing `--enable-experimental-rbs-comments` without `--parser=prism` is an error.
 
 Sorbet has experimental support for comment-only type syntax, powered by [RBS](https://github.com/ruby/rbs) annotations.
 
@@ -103,9 +103,9 @@ In fairness, these are technical, implementation considerations, and thus could 
 
 The chosen implementation for RBS annotations in comments is:
 
-1.  Scan and parse the file, like normal.
-2.  Using the parsed file contents, re-scan the file, looking for comments, because Sorbet does not feed parsed comments throughout its pipeline.
-3.  Parse the RBS comments, using a third-party RBS parser, which manages memory allocations using it's own internal data structures.
+1.  Scan and parse the file, like normal. The parser hands back the file's comments along with the parse tree.
+2.  Walk the parse tree, associating each RBS comment with the definition or expression it annotates.
+3.  Parse the RBS comments, using a third-party RBS parser, which manages memory allocations using its own internal data structures.
 4.  Translate the parsed RBS types to equivalent Ruby ASTs, and splice those ASTs into the parse result.
 5.  Allow Sorbet to continue, where signatures and type annotations will be analyzed later in the pipeline.
 
@@ -115,9 +115,9 @@ The chosen implementation for RBS annotations in comments is:
 └──────┬───────┘
        ├──────────────────────────┐
        │                          ▼
-       │                   ┌──────────────┐
-       │                   │  scan again  │
-       │                   └──────┬───────┘
+       │               ┌──────────────────────┐
+       │               │  associate comments  │
+       │               └──────────┬───────────┘
        │                          ▼
        │                   ┌─────────────┐
        │                   │  parse RBS  │
@@ -135,9 +135,9 @@ The chosen implementation for RBS annotations in comments is:
 
 This implementation is simple, making it easy to verify correctness. The RBS parser can be developed as a library and tested independently. As long as the translation produces Sorbet ASTs equivalent to `sig` annotations that a user would have written, ingesting the types will work correctly.
 
-But steps 2 and 4 are pure overhead (step 3 is a wash). Not only does this implementation scan every file which _might_ use RBS comments twice, but it does not parse straight into Sorbet's internal type representation.
+Steps 2 and 4 are overhead that `sig` syntax does not pay (step 3 is a wash). Step 2 costs little for files that don't use RBS, because the walk is skipped when a file has no RBS comments, and it stops as soon as the last one has been associated. Step 4 is where the remaining cost sits. RBS annotations get translated into synthetic Ruby ASTs equivalent to hand-written `sig`s and are analyzed by the resolver from there, instead of parsing straight into Sorbet's internal type representation.
 
-In large codebases, this adds nontrivial overhead, and is a blocker in the way of being able to advocate for using this syntax more widely.
+In large codebases, this still adds overhead relative to `sig` syntax, though much less than it used to.
 
 #### Runtime checking is a feature
 
@@ -932,7 +932,7 @@ box = Box.new #: Box[untyped]
 
 ## Type assertions comments
 
-> This feature is experimental and might be changed or removed without notice. To enable it pass the `--enable-experimental-rbs-comments` option to Sorbet or add it to your `sorbet/config`.
+> This feature is experimental and might be changed or removed without notice. To enable it pass the `--enable-experimental-rbs-comments` and `--parser=prism` options to Sorbet, or add them to your `sorbet/config`. RBS comments only work with the Prism parser. Passing `--enable-experimental-rbs-comments` without `--parser=prism` is an error.
 
 ### `T.let` assertions
 
