@@ -1,6 +1,6 @@
-a/foo.rb:4: `B::Foo` resolves but its package is not imported https://srb.help/3718
+a/foo.rb:4: `B` is not imported https://srb.help/3718
      4 |  B::Foo.new
-          ^^^^^^
+          ^
     b/__package.rb:3: Exported from package here
      3 |class B < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^

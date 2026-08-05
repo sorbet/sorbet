@@ -569,7 +569,8 @@ public:
         int distance;
     };
 
-    std::vector<FuzzySearchResult> findMemberFuzzyMatch(const GlobalState &gs, NameRef name, int betterThan = -1) const;
+    std::vector<FuzzySearchResult> findMemberFuzzyMatch(const GlobalState &gs, NameRef name, int betterThan = -1,
+                                                        packages::MangledName filterToPackage = {}) const;
 
     // Returns true if the symbol or any of its children are not in the symbol table. False otherwise.
     bool isPrintable(const GlobalState &gs) const;
@@ -726,7 +727,8 @@ private:
     FuzzySearchResult findMemberFuzzyMatchUTF8(const GlobalState &gs, NameRef name, Levenstein &levenstein,
                                                int betterThan = -1) const;
     std::vector<FuzzySearchResult> findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
-                                                                int betterThan = -1) const;
+                                                                int betterThan = -1,
+                                                                packages::MangledName filterToPackage = {}) const;
 
     /*
      * mixins and superclasses: `superClass` is *not* included in the

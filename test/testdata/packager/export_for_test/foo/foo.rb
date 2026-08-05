@@ -18,12 +18,12 @@ module Opus::Foo
   # via import Opus::Foo::Bar
   Opus::Foo::Bar::BarClass
   Test::Opus::Foo::Bar::BarClassTest
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Opus::Foo::Bar::BarClassTest` cannot be referenced here because `Opus::Foo` may not reference `test!` packages
+# ^^^^^^^^^^^^^^^ error: `Test::Opus::Foo` cannot be referenced here because `Opus::Foo` may not reference `test!` packages
 
   # via import Opus::Util
   Opus::Util::UtilClass
   Test::Opus::Util::TestUtil
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Opus::Util::TestUtil` cannot be referenced here because `Opus::Foo` may not reference `test!` packages
+# ^^^^^^^^^^^^^^^^ error: `Test::Opus::Util` cannot be referenced here because `Opus::Foo` may not reference `test!` packages
 
   Opus::Util::Nesting::Public.public_method
 
@@ -34,9 +34,9 @@ module Opus::Foo
 
   # TestImported is not imported by this package
   Opus::TestImported::TIClass
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Opus::TestImported::TIClass` resolves but its package is not imported
+# ^^^^^^^^^^^^^^^^^^ error: `Opus::TestImported` is not imported
   Test::Opus::TestImported::TITestClass
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Opus::TestImported::TITestClass` cannot be referenced here because `Opus::Foo` may not reference `test!` packages
+# ^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Opus::TestImported` cannot be referenced here because `Opus::Foo` may not reference `test!` packages
 
 
   # Private::ImplDetail is local to this package

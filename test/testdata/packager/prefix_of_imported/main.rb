@@ -1,0 +1,14 @@
+# frozen_string_literal: true
+# typed: strict
+
+module Opus::Main
+  p(Opus::OuterPackage)
+  # ^^^^^^^^^^^^^^^^^^ error: `Opus::OuterPackage` is not imported
+
+  p(Opus::OuterPackage::InnerPackage)
+
+  p(Opus::OuterPackage::InnerPackage::SomeClass)
+
+  p(Opus::OuterPackage::DoesNotExist)
+  # ^^^^^^^^^^^^^^^^^^ error: `Opus::OuterPackage` is not imported
+end

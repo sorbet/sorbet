@@ -38,8 +38,9 @@ module Root
 
     sig { void }
     def example
+      # TODO(jez) This is an example where the constant resolves through a scope that is not imported
       NOT_IN_PACKAGE
-    # ^^^^^^^^^^^^^^ error: `Root::NOT_IN_PACKAGE` resolves but its package is not imported
+    # ^^^^^^^^^^^^^^ error: `Root` is not imported
     end
   end
 end

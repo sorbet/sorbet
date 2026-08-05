@@ -1,6 +1,6 @@
-main_lib/lib.rb:8: `Project::TestOnly::SomeHelper` resolves but its package is not imported https://srb.help/3718
+main_lib/lib.rb:8: `Project::TestOnly` is not imported https://srb.help/3718
      8 |  Project::TestOnly::SomeHelper.new
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^
     test_only/__package.rb:5: Exported from package here
      5 |class Project::TestOnly < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

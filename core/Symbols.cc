@@ -774,8 +774,9 @@ SymbolRef ClassOrModule::findMemberTransitiveInternal(const GlobalState &gs, Nam
     return findParentMemberTransitiveInternal(gs, name, maxDepth, dealias);
 }
 
-vector<ClassOrModule::FuzzySearchResult> ClassOrModule::findMemberFuzzyMatch(const GlobalState &gs, NameRef name,
-                                                                             int betterThan) const {
+vector<ClassOrModule::FuzzySearchResult>
+ClassOrModule::findMemberFuzzyMatch(const GlobalState &gs, NameRef name, int betterThan,
+                                    packages::MangledName filterToPackage) const {
     vector<ClassOrModule::FuzzySearchResult> res;
     // Don't run under the fuzzer, as otherwise fuzzy match dominates runtime.
     // N.B.: There are benefits to running this method under the fuzzer; we have found bugs in this method before
@@ -810,18 +811,18 @@ vector<ClassOrModule::FuzzySearchResult> ClassOrModule::findMemberFuzzyMatch(con
         }
         auto shortName = name.shortName(gs);
         if (!shortName.empty() && std::isupper(shortName.front())) {
-            vector<ClassOrModule::FuzzySearchResult> constant_matches =
-                findMemberFuzzyMatchConstant(gs, name, betterThan);
+            auto constant_matches = findMemberFuzzyMatchConstant(gs, name, betterThan, filterToPackage);
             res.insert(res.end(), constant_matches.begin(), constant_matches.end());
         }
     } else if (name.kind() == NameKind::CONSTANT) {
-        res = findMemberFuzzyMatchConstant(gs, name, betterThan);
+        res = findMemberFuzzyMatchConstant(gs, name, betterThan, filterToPackage);
     }
     return res;
 }
 
 vector<ClassOrModule::FuzzySearchResult>
-ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name, int betterThan) const {
+ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name, int betterThan,
+                                            packages::MangledName filterToPackage) const {
     // This function is somewhat expensive, as it will crawl all owners to determine if there's a reasonable match for
     // `name`.
     vector<ClassOrModule::FuzzySearchResult> result;
@@ -836,6 +837,10 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
     }
 
     bool onlySuggestPackageSpecs = ref(gs).isPackageSpecSymbol(gs);
+    const packages::PackageInfo *withinPkg = nullptr;
+    if (filterToPackage.exists()) {
+        withinPkg = &gs.packageDB().getPackageInfo(filterToPackage);
+    }
     Levenstein levenstein;
     vector<ClassOrModuleRef> candidateScopes;
     vector<ClassOrModule::FuzzySearchResult> scopeBest;
@@ -873,10 +878,23 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
             scopeBest.clear();
             for (auto member : scope.data(gs)->members()) {
                 if (member.first.kind() == NameKind::CONSTANT &&
-                    member.first.dataCnst(gs)->original.kind() == NameKind::UTF8 && member.second.exists()) {
+                    member.first.dataCnst(gs)->original.kind() == NameKind::UTF8 && member.second.exists() &&
+                    member.second != core::Symbols::todo()) {
                     if (onlySuggestPackageSpecs) {
                         if (!member.second.isClassOrModule() ||
                             !member.second.asClassOrModuleRef().isPackageSpecSymbol(gs)) {
+                            continue;
+                        }
+                    }
+
+                    // TODO(jez) Is there a way to hoist this out further, e.g. to the candidateScopes?
+                    if (withinPkg != nullptr) {
+                        auto memberPkg = member.second.enclosingClass(gs).data(gs)->package;
+                        if (memberPkg.exists() && memberPkg != filterToPackage &&
+                            withinPkg->importsPackage(memberPkg) == nullptr) {
+                            // Make "Did you mean" suggestions respect the packages that have necessarily been loaded.
+                            // Don't suggest things which would require adding new imports to load
+                            // (because package-directed mode might not have seen them yet)
                             continue;
                         }
                     }
