@@ -39,11 +39,19 @@ untyped_proc do |a|
   T.reveal_type(a) # error: Revealed type: `T.untyped`
 end
 
-module NilableStringParam
+module NilableProcStringParam
   extend T::Sig
   extend T::Helpers
   interface!
   sig { abstract.params(block: T.nilable(T.proc.params(a: String).void)).void }
+  def foo(&block); end
+end
+
+module NilableProcNilableStringParam
+  extend T::Sig
+  extend T::Helpers
+  interface!
+  sig { abstract.params(block: T.nilable(T.proc.params(a: T.nilable(String)).void)).void }
   def foo(&block); end
 end
 
@@ -79,21 +87,21 @@ module IntegerParam
   def foo(&block); end
 end
 
-sig { params(x: T.any(NilableStringParam, IntegerParam)).void }
+sig { params(x: T.any(NilableProcNilableStringParam, IntegerParam)).void }
 def union_different_block_args(x)
   x.foo do |a|
-    T.reveal_type(a) # error: Revealed type: `T.any(T.nilable(String), Integer)`
+    T.reveal_type(a) # error: Revealed type: `T.nilable(T.any(String, Integer))`
   end
 end
 
-sig { params(x: T.any(NilableStringParam, StringParam)).void }
+sig { params(x: T.any(NilableProcNilableStringParam, StringParam)).void }
 def union_same_block_args(x)
   x.foo do |a|
     T.reveal_type(a) # error: Revealed type: `T.nilable(String)`
   end
 end
 
-sig { params(x: T.all(NilableStringParam, StringParam)).void }
+sig { params(x: T.all(NilableProcStringParam, StringParam)).void }
 def intersection_same_block_args(x)
   x.foo do |a|
     T.reveal_type(a) # error: Revealed type: `String`
@@ -108,21 +116,21 @@ def intersection_compatible_block_args(x)
   end
 end
 
-sig { params(x: T.all(T.any(NilableStringParam, StringParam), NilableStringParam)).void }
+sig { params(x: T.all(T.any(NilableProcNilableStringParam, StringParam), NilableProcNilableStringParam)).void }
 def interleaved_all_any(x)
   x.foo do |a|
     T.reveal_type(a) # error: Revealed type: `T.nilable(String)`
   end
 end
 
-sig { params(x: T.any(T.all(NilableStringParam, StringParam), NilableIntegerParam)).void }
+sig { params(x: T.any(T.all(NilableProcStringParam, StringParam), NilableIntegerParam)).void }
 def interleaved_any_all(x)
   x.foo do |a|
     T.reveal_type(a) # error: Revealed type: `T.any(Integer, String)`
   end
 end
 
-sig { params(x: T.all(NilableStringParam, IntegerParam)).void }
+sig { params(x: T.all(NilableProcStringParam, IntegerParam)).void }
 def intersection_incompatible_block_args(x)
   # Even with dropNil, AND of [String] and [Integer] is bottom, so the block
   # body is unreachable. This is independent of Object#call pollution.
