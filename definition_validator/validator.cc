@@ -167,26 +167,33 @@ constructAllowIncompatibleAutocorrect(const core::Context ctx, const ast::Expres
 
     auto methodLoc = ctx.locAt(methodDef.declLoc);
 
-    // XXX cwong: This causes a duplicate error to be reported if the signature is syntactically
-    // malformed (e.g. `allow_incompatible: :bad`). There are a few ways to resolve this (e.g.
-    // have `findSignature` return an error vector and make it the caller's responsibility to
-    // display them).
-    auto parsedSig = sig_finder::SigFinder::findSignature(ctx, tree, methodLoc.copyWithZeroLength());
-    if (!parsedSig.has_value()) {
+    auto *origSend = sig_finder::SigFinder::findSignatureSend(ctx, tree, methodLoc.copyWithZeroLength());
+    if (origSend == nullptr) {
         return nullopt;
     }
 
-    auto *block = parsedSig->origSend.block();
+    auto *block = origSend->block();
     if (!block) {
+        return nullopt;
+    }
+
+    // Walk the send chain in the sig block body to find the `override` call.
+    const ast::Send *overrideSend = nullptr;
+    for (auto cursor = ast::cast_tree<ast::Send>(block->body); cursor != nullptr;
+         cursor = ast::cast_tree<ast::Send>(cursor->recv)) {
+        if (cursor->fun == core::Names::override_()) {
+            overrideSend = cursor;
+            break;
+        }
+    }
+
+    if (overrideSend == nullptr) {
         return nullopt;
     }
 
     didReport = true;
 
-    auto blockBody = ast::cast_tree<ast::Send>(block->body);
-    ENFORCE(blockBody != nullptr);
-
-    auto replaceLoc = ctx.locAt(parsedSig->sig.seen.override_);
+    auto replaceLoc = ctx.locAt(overrideSend->funLoc.join(overrideSend->loc.copyEndWithZeroLength()));
 
     if (!replaceLoc.exists()) {
         return nullopt;
