@@ -422,8 +422,8 @@ bool PackageInfo::reportImportError(core::Context ctx, const core::packages::Pac
     bool badTestReference = pkg.testPackage() && !this->testPackage();
     optional<string> path;
     if (db.enforceLayering()) {
-        layeringViolation = strictDepsLevel > core::packages::StrictDependenciesLevel::False &&
-                            this->causesLayeringViolation(db, pkg);
+        layeringViolation =
+            strictDepsLevel > core::packages::StrictDependenciesLevel::False && this->causesLayeringViolation(db, pkg);
         strictDependenciesTooLow = importStrictDepsLevel != core::packages::StrictDependenciesLevel::None &&
                                    importStrictDepsLevel < this->minimumStrictDependenciesLevel();
         // If there's a path from the imported packaged to this package, then adding the import will close
