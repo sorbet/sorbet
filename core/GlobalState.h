@@ -300,6 +300,10 @@ public:
 
     SymbolRange<ClassOrModuleRef> classOrModuleRefs(const GlobalState &gs) const;
 
+    unsigned int classOrModuleStart() const {
+        return this->classAndModulesOffset;
+    }
+
     SymbolRange<MethodRef> methodRefs(const GlobalState &gs) const;
 
     SymbolRange<FieldRef> fieldRefs(const GlobalState &gs) const;

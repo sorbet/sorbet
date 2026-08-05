@@ -126,11 +126,17 @@ void reportRedeclarationError(core::GlobalState &gs, core::ClassOrModuleRef pare
 } // namespace
 
 bool resolveTypeMember(core::GlobalState &gs, core::ClassOrModuleRef parent, core::TypeMemberRef parentTypeMember,
-                       core::ClassOrModuleRef sym,
+                       bool fromEarlierStratum, core::ClassOrModuleRef sym,
                        vector<vector<pair<core::TypeMemberRef, core::TypeMemberRef>>> &typeAliases) {
     core::NameRef name = parentTypeMember.data(gs)->name;
     core::SymbolRef my = sym.data(gs)->findMemberNoDealias(name);
     if (!my.exists()) {
+        if (fromEarlierStratum) [[unlikely]] {
+            gs.tracer().error(R"(msg="Modifying symbol from earlier stratum" symbol="{}" case="missing member")",
+                              sym.show(gs));
+            ENFORCE(false);
+        }
+
         reportRedeclarationError(gs, parent, parentTypeMember, sym);
 
         auto typeMember = gs.enterTypeMember(sym.data(gs)->loc(), sym, name, parentTypeMember.data(gs)->variance());
@@ -141,6 +147,12 @@ bool resolveTypeMember(core::GlobalState &gs, core::ClassOrModuleRef parent, cor
         return false;
     }
     if (!my.isTypeMember()) {
+        if (fromEarlierStratum) [[unlikely]] {
+            gs.tracer().error(R"(msg="Modifying symbol from earlier stratum" symbol="{}" case="not type member")",
+                              sym.show(gs));
+            ENFORCE(false);
+        }
+
         if (auto e = gs.beginError(my.loc(gs), core::errors::Resolver::NotATypeVariable)) {
             auto defaultError = true;
             if (my.isClassAlias(gs)) {
@@ -200,6 +212,8 @@ void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym,
     }
     resolved[sym.id()] = true;
 
+    bool fromEarlierStratum = sym.id() < gs.newSymbols().classOrModuleStart();
+
     if (sym.data(gs)->superClass().exists()) {
         auto parent = sym.data(gs)->superClass();
         resolveTypeMembers(gs, parent, typeAliases, resolved);
@@ -207,7 +221,7 @@ void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym,
         auto parentTypeMembers = parent.data(gs)->typeMembers();
         bool foundAll = true;
         for (auto parentTypeMember : parentTypeMembers) {
-            bool foundThis = resolveTypeMember(gs, parent, parentTypeMember, sym, typeAliases);
+            bool foundThis = resolveTypeMember(gs, parent, parentTypeMember, fromEarlierStratum, sym, typeAliases);
             foundAll = foundAll && foundThis;
         }
         if (foundAll) {
@@ -217,6 +231,13 @@ void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym,
                 auto my = dealiasAt(gs, parentTypeMember, sym, typeAliases);
                 ENFORCE(my.exists(), "resolver failed to register type member aliases sym={}", sym.show(gs));
                 if (sym.data(gs)->typeMembers()[parentIdx] != my) {
+                    if (fromEarlierStratum) [[unlikely]] {
+                        gs.tracer().error(
+                            R"(msg="Modifying symbol from earlier stratum" symbol="{}" case="parent member mismatch")",
+                            sym.show(gs));
+                        ENFORCE(false);
+                    }
+
                     if (auto e = gs.beginError(my.data(gs)->loc(), core::errors::Resolver::TypeMembersInWrongOrder)) {
                         e.setHeader("Type members for `{}` repeated in wrong order", sym.show(gs));
                         e.addErrorLine(my.data(gs)->loc(), "Found type member with name `{}`",
@@ -244,7 +265,7 @@ void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym,
         resolveTypeMembers(gs, mixin, typeAliases, resolved);
         auto typeMembers = mixin.data(gs)->typeMembers();
         for (auto tm : typeMembers) {
-            resolveTypeMember(gs, mixin, tm, sym, typeAliases);
+            resolveTypeMember(gs, mixin, tm, fromEarlierStratum, sym, typeAliases);
         }
     }
 
@@ -415,13 +436,20 @@ void Resolver::finalizeSymbols(core::GlobalState &gs,
         // when we don't have a known set of symbols that need to be updated.
         gs.computeLinearization();
 
-        Timer timer(gs.tracer(), "resolver.resolve_type_members");
-        for (auto sym : gs.newClassOrModules()) {
-            resolveTypeMembers(gs, sym, typeAliases, resolved);
+        for (int i = 0; i < 2; ++i) {
+            typeAliases.clear();
+            typeAliases.resize(gs.classAndModulesUsed());
+            resolved.clear();
+            resolved.resize(gs.classAndModulesUsed());
 
-            if (gs.cacheSensitiveOptions.requiresAncestorEnabled) {
-                // Precompute the list of all required ancestors for this symbol
-                sym.data(gs)->computeRequiredAncestorLinearization(gs);
+            Timer timer(gs.tracer(), "resolver.resolve_type_members");
+            for (auto sym : gs.newClassOrModules()) {
+                resolveTypeMembers(gs, sym, typeAliases, resolved);
+
+                if (gs.cacheSensitiveOptions.requiresAncestorEnabled) {
+                    // Precompute the list of all required ancestors for this symbol
+                    sym.data(gs)->computeRequiredAncestorLinearization(gs);
+                }
             }
         }
     }
