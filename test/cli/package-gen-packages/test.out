@@ -119,7 +119,7 @@ D/__package.rb:3: `D` is missing exports https://srb.help/3734
      9 |  export D::ANestedPackage::Foo
                                        ^
 
-C/app.rb:8: `F::CONSTANT_FROM_F` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
+C/app.rb:8: `F` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
      8 |      puts F::CONSTANT_FROM_F
                    ^^^^^^^^^^^^^^^^^^
     C/__package.rb:3: Enclosing package declared here
@@ -129,9 +129,9 @@ C/app.rb:8: `F::CONSTANT_FROM_F` cannot be referenced here because its `strict_d
      4 |  strict_dependencies 'layered'
                               ^^^^^^^^^
   Note:
-    `F::CONSTANT_FROM_F`'s package is not imported
+    `F` is not imported
 
-C/app.rb:9: `G::CONSTANT_FROM_G` cannot be referenced here because Package `G` includes explicit visibility modifiers and cannot be imported from `C` https://srb.help/3727
+C/app.rb:9: `G` cannot be referenced here because Package `G` includes explicit visibility modifiers and cannot be imported from `C` https://srb.help/3727
      9 |      puts G::CONSTANT_FROM_G
                    ^^^^^^^^^^^^^^^^^^
     C/__package.rb:3: Enclosing package declared here
@@ -140,7 +140,7 @@ C/app.rb:9: `G::CONSTANT_FROM_G` cannot be referenced here because Package `G` i
   Note:
     Please consult with the owning team before adding a `visible_to` line to the package `G`
   Note:
-    `G::CONSTANT_FROM_G`'s package is not imported
+    `G` is not imported
 Errors: 12
 
 ###### cat B/__package.rb ######
@@ -344,7 +344,7 @@ A/constants.rb:5: Unable to resolve constant `G` https://srb.help/5002
      3 |module A
         ^^^^^^^^
 
-C/app.rb:8: `F::CONSTANT_FROM_F` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
+C/app.rb:8: `F` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
      8 |      puts F::CONSTANT_FROM_F
                    ^^^^^^^^^^^^^^^^^^
     C/__package.rb:3: Enclosing package declared here
@@ -354,9 +354,9 @@ C/app.rb:8: `F::CONSTANT_FROM_F` cannot be referenced here because its `strict_d
      4 |  strict_dependencies 'layered'
                               ^^^^^^^^^
   Note:
-    `F::CONSTANT_FROM_F`'s package is not imported
+    `F` is not imported
 
-C/app.rb:9: `G::CONSTANT_FROM_G` cannot be referenced here because Package `G` includes explicit visibility modifiers and cannot be imported from `C` https://srb.help/3727
+C/app.rb:9: `G` cannot be referenced here because Package `G` includes explicit visibility modifiers and cannot be imported from `C` https://srb.help/3727
      9 |      puts G::CONSTANT_FROM_G
                    ^^^^^^^^^^^^^^^^^^
     C/__package.rb:3: Enclosing package declared here
@@ -365,7 +365,7 @@ C/app.rb:9: `G::CONSTANT_FROM_G` cannot be referenced here because Package `G` i
   Note:
     Please consult with the owning team before adding a `visible_to` line to the package `G`
   Note:
-    `G::CONSTANT_FROM_G`'s package is not imported
+    `G` is not imported
 Errors: 11
 
 ###### cat B/__package.rb ######
