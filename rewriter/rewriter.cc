@@ -4,6 +4,7 @@
 #include "common/typecase.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include "rewriter/AttrReader.h"
+#include "rewriter/ClassEval.h"
 #include "rewriter/ClassNew.h"
 #include "rewriter/Cleanup.h"
 #include "rewriter/Command.h"
@@ -92,6 +93,18 @@ public:
 
                 [&](ast::Send &send) {
                     vector<ast::ExpressionPtr> nodes;
+
+                    // Only applies to top-level statements (the synthetic root ClassDef), where
+                    // `Foo.class_eval` and a synthesized `class Foo` resolve `Foo` identically.
+                    // The send stays in place (with the method defs removed from its block); the
+                    // synthesized class definition is inserted after it.
+                    if (classDef->symbol == core::Symbols::root()) {
+                        nodes = ClassEval::run(ctx, &send);
+                        if (!nodes.empty()) {
+                            insertNodes[stat.get()] = std::move(nodes);
+                            return;
+                        }
+                    }
 
                     nodes = MixinEncryptedProp::run(ctx, &send);
                     if (!nodes.empty()) {

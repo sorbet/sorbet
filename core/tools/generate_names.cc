@@ -377,6 +377,8 @@ NameDef names[] = {
     {"blockPassTemp", "<block-pass>"},
     {"forTemp"},
     {"new_", "new"},
+    {"classEval", "class_eval"},
+    {"classExec", "class_exec"},
     {"blockCall", "<block-call>"},
     {"blockBreakAssign", "<block-break-assign>"},
     {"arg", "<arg>"},
