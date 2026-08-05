@@ -2302,6 +2302,19 @@ class ResolveTypeMembersAndFieldsWalk {
         return result;
     }
 
+    // Whether the type of this static field is given by an explicit annotation (`X = T.let(..., Type)`),
+    // instead of being inferred from the right hand side of the assignment.
+    //
+    // Looks through `InsSeq`s, like `resolveConstantType` does.
+    static bool isExplicitlyAnnotatedStaticField(const ast::ExpressionPtr &rhs) {
+        const ast::ExpressionPtr *expr = &rhs;
+        while (auto insSeq = ast::cast_tree<ast::InsSeq>(*expr)) {
+            expr = &insSeq->expr;
+        }
+
+        return ast::isa_tree<ast::Cast>(*expr);
+    }
+
     // Tries to resolve the given static field. Returns Types::todo() if it is unable to resolve the field.
     [[nodiscard]] static core::TypePtr tryResolveStaticField(core::Context ctx, ResolveStaticFieldItem &job) {
         ENFORCE(job.sym.data(ctx)->flags.isStaticField);
@@ -3230,11 +3243,34 @@ public:
                 resolveField(ctx, job);
             }
         }
-        for (auto &threadTodos : combinedTodoResolveStaticFieldItems) {
-            for (auto &job : threadTodos) {
-                core::Context ctx(gs, job.sym, job.file);
-                if (auto resultType = resolveStaticField(ctx, job)) {
-                    job.sym.data(gs)->resultType = resultType;
+        // Resolve explicitly annotated static fields before the ones whose type has to be inferred from
+        // the right hand side of the assignment.
+        //
+        // A constant can be assigned in one file and annotated in another one, which is how an RBI file
+        // declares the type of a constant defined in a `.rb` file:
+        //
+        //     # foo.rb
+        //     X = {"a" => "b"}.freeze
+        //
+        //     # foo.rbi
+        //     X = T.let(T.unsafe(nil), T::Hash[String, String])
+        //
+        // `resolveStaticField` asks for a type annotation (error 7027) when the symbol's `resultType` is
+        // still unset by the time its job runs, so resolving the annotation last would report that the
+        // constant needs an annotation, even though it has one. These jobs are grouped by the worker
+        // thread that produced them, so which one runs first would otherwise depend on how the files
+        // were distributed across threads.
+        for (auto annotatedPass : {true, false}) {
+            for (auto &threadTodos : combinedTodoResolveStaticFieldItems) {
+                for (auto &job : threadTodos) {
+                    if (isExplicitlyAnnotatedStaticField(job.asgn->rhs) != annotatedPass) {
+                        continue;
+                    }
+
+                    core::Context ctx(gs, job.sym, job.file);
+                    if (auto resultType = resolveStaticField(ctx, job)) {
+                        job.sym.data(gs)->resultType = resultType;
+                    }
                 }
             }
         }
