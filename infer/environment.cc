@@ -1390,13 +1390,20 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 ENFORCE(link->result);
                 ENFORCE(link->result->main.blockPreType);
 
+                // Drop nil before asking for call arguments. `blockPreType` keeps nilability so
+                // optional blocks type-check correctly at the call site, but once we're inside a
+                // block body the block was definitely provided. Leaving NilClass in the union makes
+                // getCallArguments glb against NilClass#call (often inherited from a polluted
+                // Object#call, e.g. via Class.new), which can produce T.noreturn and mark the block
+                // unreachable. See https://github.com/sorbet/sorbet/issues/8304
                 auto &procType = link->result->main.blockPreType;
-                auto params = procType.getCallArguments(ctx, core::Names::call());
+                auto params = core::Types::dropNil(ctx, procType).getCallArguments(ctx, core::Names::call());
                 auto it = link->result->secondary.get();
                 while (it != nullptr) {
                     auto &secondaryProcType = it->main.blockPreType;
                     if (secondaryProcType != nullptr) {
-                        auto secondaryParams = secondaryProcType.getCallArguments(ctx, core::Names::call());
+                        auto secondaryParams =
+                            core::Types::dropNil(ctx, secondaryProcType).getCallArguments(ctx, core::Names::call());
                         switch (link->result->secondaryKind) {
                             case core::DispatchResult::Combinator::OR:
                                 params = core::Types::any(ctx, params, secondaryParams);
