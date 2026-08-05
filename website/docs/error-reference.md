@@ -421,7 +421,7 @@ end
 
 ## 3508
 
-The argument to the `foreign:` attribute on a `prop` declaration must be a lambda function. This prevents the other model class from needing to be loaded eagerly. Use the autocorrect to fix the error.
+This error code is no longer used.
 
 ## 3509
 

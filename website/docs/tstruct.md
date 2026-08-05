@@ -436,7 +436,7 @@ Added in haste, the implementation of `with` uses `from_hash` to merge the new a
 
 ## Legacy and Stripe-specific options
 
-There are a number of other legacy or Stripe-internal options in the `prop` DSL. Those include `dont_store`, `enum`, `foreign`, `ifunset`, `immutable`, `raise_on_nil_write`, `redaction`, and `sensitivity`. Stripe employees can reference [these docs](http://go/chalk-odm-docs) to learn more.
+There are a number of other legacy or Stripe-internal options in the `prop` DSL. Those include `dont_store`, `enum`, `ifunset`, `immutable`, `raise_on_nil_write`, `redaction`, and `sensitivity`. Stripe employees can reference [these docs](http://go/chalk-odm-docs) to learn more.
 
 Other users of `sorbet-runtime` are not encouraged to use these options.
 

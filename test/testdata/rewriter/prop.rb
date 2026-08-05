@@ -32,9 +32,6 @@ class SomeODM
     def foo2=(arg0); T.cast(nil, String); end
 end
 
-class ForeignClass
-end
-
 class AdvancedODM
     include T::Props
     prop :default, String, default: ""
@@ -48,11 +45,6 @@ class AdvancedODM
     const :const, String
 
     prop :enum_prop, String, enum: ["hello", "goodbye"]
-
-    prop :foreign, String, foreign: ForeignClass # error: must be a lambda
-    prop :foreign_lazy, String, foreign: -> {ForeignClass}
-    prop :foreign_proc, String, foreign: proc {ForeignClass}
-    prop :foreign_invalid, String, foreign: proc { :not_a_type }
 
     prop :ifunset, String, ifunset: ''
     prop :ifunset_nilable, T.nilable(String), ifunset: ''
@@ -112,13 +104,6 @@ def main
 
     T.reveal_type(AdvancedODM.new.enum_prop) # error: Revealed type: `String`
     AdvancedODM.new.enum_prop = "hello"
-
-    T.reveal_type(AdvancedODM.new.foreign_) # error: Revealed type: `T.nilable(ForeignClass)`
-    T.reveal_type(AdvancedODM.new.foreign_!) # error: Revealed type: `ForeignClass`
-    T.reveal_type(AdvancedODM.new.foreign_lazy_) # error: Revealed type: `T.nilable(ForeignClass)`
-
-    # Check that the method still exists even if we can't parse the type
-    AdvancedODM.new.foreign_invalid_
 
     T.reveal_type(PropHelpers.new.token) # error: Revealed type: `String`
     PropHelpers.new.token = "tok_token"

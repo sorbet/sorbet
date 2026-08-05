@@ -15,10 +15,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>::<C AdvancedODM>.new().const=("b")
       <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().enum_prop())
       <emptyTree>::<C AdvancedODM>.new().enum_prop=("hello")
-      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().foreign_())
-      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().foreign_!())
-      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().foreign_lazy_())
-      <emptyTree>::<C AdvancedODM>.new().foreign_invalid_()
       <emptyTree>::<C T>.reveal_type(<emptyTree>::<C PropHelpers>.new().token())
       <emptyTree>::<C PropHelpers>.new().token=("tok_token")
       <emptyTree>::<C PropHelpers>.new().token=(nil)
@@ -116,9 +112,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <runtime method definition of foo2>
 
     <runtime method definition of foo2=>
-  end
-
-  class <emptyTree>::<C ForeignClass><<C <todo sym>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C AdvancedODM><<C <todo sym>>> < (::<todo sym>)
@@ -238,134 +231,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C String>)
     end
 
-    def foreign<<todo method>>(&<blk>)
-      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
-    end
-
-    ::T::Sig::WithoutRuntime.sig() do ||
-      <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
-    end
-
-    def foreign=<<todo method>>(arg0, &<blk>)
-      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
-    end
-
-    ::T::Sig::WithoutRuntime.sig() do ||
-      <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(::T.nilable(<emptyTree>::<C ForeignClass>))
-    end
-
-    def foreign_<<todo method>>(allow_direct_mutation: = nil, &<blk>)
-      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
-    end
-
-    ::T::Sig::WithoutRuntime.sig() do ||
-      <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(<emptyTree>::<C ForeignClass>)
-    end
-
-    def foreign_!<<todo method>>(allow_direct_mutation: = nil, &<blk>)
-      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
-    end
-
-    ::T::Sig::WithoutRuntime.sig() do ||
-      <self>.returns(<emptyTree>::<C String>)
-    end
-
-    def foreign_lazy<<todo method>>(&<blk>)
-      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
-    end
-
-    ::T::Sig::WithoutRuntime.sig() do ||
-      <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
-    end
-
-    def foreign_lazy=<<todo method>>(arg0, &<blk>)
-      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
-    end
-
-    ::T::Sig::WithoutRuntime.sig() do ||
-      <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(::T.nilable(<emptyTree>::<C ForeignClass>))
-    end
-
-    def foreign_lazy_<<todo method>>(allow_direct_mutation: = nil, &<blk>)
-      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
-    end
-
-    ::T::Sig::WithoutRuntime.sig() do ||
-      <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(<emptyTree>::<C ForeignClass>)
-    end
-
-    def foreign_lazy_!<<todo method>>(allow_direct_mutation: = nil, &<blk>)
-      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
-    end
-
-    ::T::Sig::WithoutRuntime.sig() do ||
-      <self>.returns(<emptyTree>::<C String>)
-    end
-
-    def foreign_proc<<todo method>>(&<blk>)
-      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
-    end
-
-    ::T::Sig::WithoutRuntime.sig() do ||
-      <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
-    end
-
-    def foreign_proc=<<todo method>>(arg0, &<blk>)
-      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
-    end
-
-    ::T::Sig::WithoutRuntime.sig() do ||
-      <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(::T.nilable(<emptyTree>::<C ForeignClass>))
-    end
-
-    def foreign_proc_<<todo method>>(allow_direct_mutation: = nil, &<blk>)
-      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
-    end
-
-    ::T::Sig::WithoutRuntime.sig() do ||
-      <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(<emptyTree>::<C ForeignClass>)
-    end
-
-    def foreign_proc_!<<todo method>>(allow_direct_mutation: = nil, &<blk>)
-      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
-    end
-
-    ::T::Sig::WithoutRuntime.sig() do ||
-      <self>.returns(<emptyTree>::<C String>)
-    end
-
-    def foreign_invalid<<todo method>>(&<blk>)
-      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
-    end
-
-    ::T::Sig::WithoutRuntime.sig() do ||
-      <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
-    end
-
-    def foreign_invalid=<<todo method>>(arg0, &<blk>)
-      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
-    end
-
-    ::T::Sig::WithoutRuntime.sig() do ||
-      <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(::T.untyped())
-    end
-
-    def foreign_invalid_<<todo method>>(allow_direct_mutation: = nil, &<blk>)
-      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
-    end
-
-    ::T::Sig::WithoutRuntime.sig() do ||
-      <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(::T.untyped())
-    end
-
-    def foreign_invalid_!<<todo method>>(allow_direct_mutation: = nil, &<blk>)
-      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
-    end
-
-    ::T::Sig::WithoutRuntime.sig() do ||
-      <self>.returns(<emptyTree>::<C String>)
-    end
-
     def ifunset<<todo method>>(&<blk>)
       ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
     end
@@ -471,36 +336,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <runtime method definition of enum_prop>
 
     <runtime method definition of enum_prop=>
-
-    <self>.prop(:foreign, <emptyTree>::<C String>, :foreign, <emptyTree>::<C ForeignClass>)
-
-    <runtime method definition of foreign>
-
-    <runtime method definition of foreign=>
-
-    <self>.prop(:foreign_lazy, <emptyTree>::<C String>, :foreign, ::Kernel.lambda() do ||
-        <emptyTree>::<C ForeignClass>
-      end)
-
-    <runtime method definition of foreign_lazy>
-
-    <runtime method definition of foreign_lazy=>
-
-    <self>.prop(:foreign_proc, <emptyTree>::<C String>, :foreign, <self>.proc() do ||
-        <emptyTree>::<C ForeignClass>
-      end)
-
-    <runtime method definition of foreign_proc>
-
-    <runtime method definition of foreign_proc=>
-
-    <self>.prop(:foreign_invalid, <emptyTree>::<C String>, :foreign, <self>.proc() do ||
-        :not_a_type
-      end)
-
-    <runtime method definition of foreign_invalid>
-
-    <runtime method definition of foreign_invalid=>
 
     <self>.prop(:ifunset, <emptyTree>::<C String>, :ifunset, "")
 

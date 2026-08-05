@@ -60,7 +60,6 @@ class T::Props::Decorator
   def add_prop_definition(prop, rules); end
   def all_props; end
   def decorated_class; end
-  def foreign_prop_get(instance, prop, foreign_class, rules = {}, opts = {}); end
   def initialize(klass); end
   def model_inherited(child); end
   def plugin(mod); end
