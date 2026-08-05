@@ -71,5 +71,5 @@ use_app_false_cycle_package/foo.rb:6: `Foo::Bar::AppFalseCyclePackage::OtherClas
      7 |  strict_dependencies 'false'
                               ^^^^^^^
   Note:
-    `Foo::Bar::AppFalseCyclePackage::OtherClass` is not exported
+    `Foo::Bar::AppFalseCyclePackage::OtherClass`'s package is not imported
 Errors: 1
