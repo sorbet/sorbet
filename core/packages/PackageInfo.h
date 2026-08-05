@@ -271,7 +271,7 @@ public:
     std::optional<core::AutocorrectSuggestion> addVisibleTo(const core::GlobalState &gs,
                                                             const MangledName &targetPackage) const;
 
-    std::vector<VisibleTo> visibleTo() const {
+    absl::Span<const VisibleTo> visibleTo() const {
         return visibleTo_;
     }
 
