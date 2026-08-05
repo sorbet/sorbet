@@ -42,7 +42,6 @@ module Simpsons
 
   Test::Krabappel::Popquiz
 # ^^^^^^^^^^^^^^^ error: `Test::Krabappel` cannot be referenced here because `Simpsons` may not reference `test!` packages
-  #                ^^^^^^^ usage: popquiz
 
   class Private
     #   ^^^^^^^ def: s-private
