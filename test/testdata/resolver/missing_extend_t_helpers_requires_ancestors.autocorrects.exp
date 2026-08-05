@@ -1,0 +1,10 @@
+# -- test/testdata/resolver/missing_extend_t_helpers_requires_ancestors.rb --
+# typed: true
+# enable-experimental-requires-ancestor: true
+
+module RequiresAncestor
+  extend T::Helpers
+  requires_ancestor { Kernel }
+# ^^^^^^^^^^^^^^^^^ error: Method `requires_ancestor` does not exist on `T.class_of(RequiresAncestor)`
+end
+# ------------------------------
