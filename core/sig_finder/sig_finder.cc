@@ -36,11 +36,17 @@ struct SigFinderTraversal {
     // Track whether the current scope has the queryLoc.
     std::vector<bool> scopeContainsQueryLoc;
 
-    std::optional<SigFinder::Result> result_;
+    // The best `sig` send found so far, and the owner it should be parsed in (i.e., a singleton
+    // class, for a `sig` on a `self.` method). We deliberately do NOT parse this send as we find
+    // it: parsing a `sig` has the side effect of reporting type errors on it, so it must only
+    // ever be parsed once, for the single winning candidate, and only if the caller actually asked
+    // for the parsed result (see parseBestSend, findSignature, and findSignatureSend below).
+    const ast::Send *bestSend_;
+    core::SymbolRef bestOwner_;
 
     SigFinderTraversal(core::Loc queryLoc)
         : queryLoc(queryLoc), narrowestClassDefRange(core::Loc::none()), scopeContainsQueryLoc(std::vector<bool>{}),
-          result_(std::nullopt) {}
+          bestSend_(nullptr) {}
 
     void preTransformClassDef(core::Context ctx, const ast::ClassDef &tree) {
         auto loc = ctx.locAt(tree.loc);
@@ -54,10 +60,10 @@ struct SigFinderTraversal {
             // `loc` is contained in the current narrowestClassDefRange, and still contains `queryLoc`
             this->narrowestClassDefRange = loc;
 
-            if (this->result_.has_value() && !loc.contains(ctx.locAt(this->result_->origSend.loc))) {
+            if (this->bestSend_ != nullptr && !loc.contains(ctx.locAt(this->bestSend_->loc))) {
                 // If there's a result and it's not contained in the new narrowest range, we have to toss it out
                 // (Method defs and class defs are not necessarily sorted by their locs)
-                this->result_ = nullopt;
+                this->bestSend_ = nullptr;
             }
         }
 
@@ -70,23 +76,21 @@ struct SigFinderTraversal {
     }
 
     void preTransformMethodDef(core::Context ctx, const ast::MethodDef &tree) {
-        if (this->result_.has_value()) {
-            if (this->result_->origSend.loc.endPos() <= tree.loc.beginPos() &&
-                tree.loc.endPos() <= queryLoc.beginPos()) {
+        if (this->bestSend_ != nullptr) {
+            if (this->bestSend_->loc.endPos() <= tree.loc.beginPos() && tree.loc.endPos() <= queryLoc.beginPos()) {
                 // There is a method definition between the current result sig and the queryLoc,
                 // so the sig we found is not for the right method.
-                this->result_ = nullopt;
+                this->bestSend_ = nullptr;
             }
         }
     }
 
     void postTransformRuntimeMethodDefinition(core::Context ctx, const ast::RuntimeMethodDefinition &tree) {
-        if (this->result_.has_value()) {
-            if (this->result_->origSend.loc.endPos() <= tree.loc.beginPos() &&
-                tree.loc.endPos() <= queryLoc.beginPos()) {
+        if (this->bestSend_ != nullptr) {
+            if (this->bestSend_->loc.endPos() <= tree.loc.beginPos() && tree.loc.endPos() <= queryLoc.beginPos()) {
                 // There is a method definition between the current result sig and the queryLoc,
                 // so the sig we found is not for the right method.
-                this->result_ = nullopt;
+                this->bestSend_ = nullptr;
             }
         }
     }
@@ -122,25 +126,29 @@ struct SigFinderTraversal {
             return;
         }
 
-        if (this->result_.has_value()) {
-            // Method defs are not guaranteed to be sorted in order by their declLocs
-            auto resultLoc = this->result_->origSend.loc;
-            if (resultLoc.beginPos() < currentLoc.beginPos()) {
-                // Found a method defined before the query but later than previous result: overwrite previous result
-                auto owner = getEffectiveOwner(ctx);
-                auto parsedSig =
-                    resolver::TypeSyntax::parseSigTop(ctx.withOwner(owner), send, core::Symbols::untyped());
-                this->result_.emplace(move(parsedSig), send);
-            } else {
-                // We've already found an earlier result, so the current is not the first
-            }
+        // Note: we deliberately do not parse `send` here. Parsing a `sig` has the side effect of
+        // reporting type errors on it, and this loop may pass over the same `sig` (or an unrelated,
+        // syntactically-invalid one) many times while searching for the best candidate. We only ever
+        // want to parse the single, final winning candidate, and only when the caller actually asked
+        // for the parsed result--see parseBestSend, findSignature, and findSignatureSend below.
+        if (this->bestSend_ == nullptr || this->bestSend_->loc.beginPos() < currentLoc.beginPos()) {
+            // Either we haven't found a candidate yet, or this send is a method defined before the
+            // query but later than the previous candidate: replace the previous candidate.
+            this->bestSend_ = &send;
+            this->bestOwner_ = getEffectiveOwner(ctx);
         } else {
-            // Haven't found a result yet, so this one is the best so far.
-            auto owner = getEffectiveOwner(ctx);
-            auto parsedSig = resolver::TypeSyntax::parseSigTop(ctx.withOwner(owner), send, core::Symbols::untyped());
-
-            this->result_.emplace(move(parsedSig), send);
+            // We've already found a later candidate, so the current send is not the best one.
         }
+    }
+
+    optional<SigFinder::Result> parseBestSend(core::Context ctx) const {
+        if (this->bestSend_ == nullptr) {
+            return nullopt;
+        }
+        ENFORCE(this->bestOwner_.exists());
+        auto parsedSig = resolver::TypeSyntax::parseSigTop(ctx.withOwner(this->bestOwner_), *this->bestSend_,
+                                                           core::Symbols::untyped());
+        return SigFinder::Result(move(parsedSig), *this->bestSend_);
     }
 };
 
@@ -150,12 +158,23 @@ optional<SigFinder::Result> SigFinder::findSignature(core::Context ctx, const as
                                                      core::Loc queryLoc) {
     SigFinderTraversal sigFinder(queryLoc);
     ast::ConstTreeWalk::apply(ctx, sigFinder, tree);
-    return move(sigFinder.result_);
+    return sigFinder.parseBestSend(ctx);
 }
 optional<SigFinder::Result> SigFinder::findSignature(core::Context ctx, const ast::ClassDef &tree, core::Loc queryLoc) {
     SigFinderTraversal sigFinder(queryLoc);
     ast::ConstTreeWalk::apply(ctx, sigFinder, tree);
-    return move(sigFinder.result_);
+    return sigFinder.parseBestSend(ctx);
+}
+
+const ast::Send *SigFinder::findSignatureSend(core::Context ctx, const ast::ExpressionPtr &tree, core::Loc queryLoc) {
+    SigFinderTraversal sigFinder(queryLoc);
+    ast::ConstTreeWalk::apply(ctx, sigFinder, tree);
+    return sigFinder.bestSend_;
+}
+const ast::Send *SigFinder::findSignatureSend(core::Context ctx, const ast::ClassDef &tree, core::Loc queryLoc) {
+    SigFinderTraversal sigFinder(queryLoc);
+    ast::ConstTreeWalk::apply(ctx, sigFinder, tree);
+    return sigFinder.bestSend_;
 }
 
 } // namespace sorbet::sig_finder
