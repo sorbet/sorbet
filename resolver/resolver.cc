@@ -421,7 +421,9 @@ private:
             // be populated until after constant resolution in these files!
             || ctx.file.data(ctx).isPackage(ctx)
             // Unpackaged code is exempted
-            || !ctx.state.packageDB().getPackageNameForFile(ctx.file).exists();
+            || !ctx.state.packageDB().getPackageNameForFile(ctx.file).exists()
+            // TODO(jez) Get this working in --gen-packages mode
+            || ctx.state.packageDB().genPackagesMode() != core::packages::GenPackagesMode::Disabled;
     }
 
     static core::SymbolRef resolveConstant(core::Context ctx, ConstantResolutionItem &job) {
