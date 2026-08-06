@@ -13,7 +13,6 @@ y = Bar
 
 Aliased = Foo
 # ^ hover: Aliased = Foo
-# ^ hover-line: 2 Aliased = Foo
 
 StaticField = T.let(Foo, T.class_of(Foo))
 # ^ hover: # StaticField = T.let(…, T.class_of(Foo))
@@ -21,7 +20,6 @@ StaticField = T.let(Foo, T.class_of(Foo))
 
 MyType = T.type_alias { Integer }
 # ^ hover: MyType = T.type_alias {Integer}
-# ^ hover-line: 2 MyType = T.type_alias {Integer}
 
 class Generic
   extend T::Generic
