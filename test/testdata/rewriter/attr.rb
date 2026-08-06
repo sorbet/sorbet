@@ -51,7 +51,7 @@ class TestAttr
   attr_writer :v4, :v5
 # ^^^^^^^^^^^^^^^^^^^^ error: The method `v4=` does not have a `sig`
 # ^^^^^^^^^^^^^^^^^^^^ error: The method `v5=` does not have a `sig`
-  #            ^^        error: The instance variable `@v4` must be declared using `T.let` when specifying `# typed: strict`
+  #            ^^ error: The instance variable `@v4` must be declared using `T.let` when specifying `# typed: strict`
   #                 ^^   error: The instance variable `@v5` must be declared using `T.let` when specifying `# typed: strict`
 
   sig {returns(Float)}
