@@ -105,14 +105,18 @@ end
 class G4; end
 
 g4 = G4.new #: G4[Integer]
-#                 ^^^^^^^ error-with-dupes: `Integer` is not a subtype of upper bound of type member `::G4::U`
+#                 ^^^^^^^ error: `Integer` is not a subtype of upper bound of type member `::G4::U`
+#                 ^^^^^^^ error: `Integer` is not a subtype of upper bound of type member `::G4::U`
+#                 ^^^^^^^ error: `Integer` is not a subtype of upper bound of type member `::G4::U`
 T.reveal_type(g4) # error: Revealed type: `G4[T.untyped]`
 
 #: [U > BasicObject]
 class G5; end
 
 g5 = G5.new #: G5[String]
-#                 ^^^^^^ error-with-dupes: `String` is not a supertype of lower bound of type member `::G5::U`
+#                 ^^^^^^ error: `String` is not a supertype of lower bound of type member `::G5::U`
+#                 ^^^^^^ error: `String` is not a supertype of lower bound of type member `::G5::U`
+#                 ^^^^^^ error: `String` is not a supertype of lower bound of type member `::G5::U`
 T.reveal_type(g5) # error: Revealed type: `G5[T.untyped]`
 
 #: [U]
@@ -172,7 +176,8 @@ class G11; end
 class G12; end
 
 #: (G12[Object]) -> void
-#       ^^^^^^ error-with-dupes: `Object` is not a subtype of upper bound of type member `::G12::U`
+#       ^^^^^^ error: `Object` is not a subtype of upper bound of type member `::G12::U`
+#       ^^^^^^ error: `Object` is not a subtype of upper bound of type member `::G12::U`
 def take_g12(g12); end
 
 #: [

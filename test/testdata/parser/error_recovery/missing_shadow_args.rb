@@ -10,4 +10,4 @@ lambda { |;| }
 #          ^ error: unexpected token "|"
 
 -> (;) {}
-#    ^ error-with-dupes: unexpected token ")"
+#    ^ error: unexpected token ")"
