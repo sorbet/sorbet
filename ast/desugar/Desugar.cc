@@ -840,10 +840,10 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 if (!send->args.empty() && parser::isa_node<parser::BlockPass>(send->args.back().get())) {
                     auto *bp = parser::cast_node<parser::BlockPass>(send->args.back().get());
                     blockPassLoc = bp->loc;
-                    if (bp->block == nullptr) {
-                        // Replace an anonymous block pass like `f(&)` with a local variable reference, like `f(&&)`.
+                    if (bp->block == nullptr) { // Anonymous block pass, like `f(&)`
+                        // Treat it as a block pass of a local variable literally named `&`.
                         blockPassArg = MK::Local(bp->loc.copyEndWithZeroLength(), core::Names::ampersand());
-                    } else {
+                    } else { // Block pass with an explicit expression, like `f(&block)`
                         blockPassArg = node2TreeImpl(dctx, bp->block);
                     }
 

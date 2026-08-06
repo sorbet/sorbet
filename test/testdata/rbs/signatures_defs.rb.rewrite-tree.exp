@@ -87,7 +87,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.params(:p, <emptyTree>::<C Integer>).void()
   end
 
-  def sig_mismatch10<<todo method>>(*p:, &<blk>)
+  def sig_mismatch10<<todo method>>(**p, &<blk>)
     <emptyTree>
   end
 
@@ -253,7 +253,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.params(:p1, <emptyTree>::<C P1>, :p2, ::<root>::<C T>.nilable(<emptyTree>::<C P2>), :p3, <emptyTree>::<C P3>, :p4, <emptyTree>::<C P4>, :p5, ::<root>::<C T>.nilable(<emptyTree>::<C P5>), :p6, <emptyTree>::<C P6>, :block, ::<root>::<C T>.proc().void()).void()
   end
 
-  def method17<<todo method>>(p1, p2 = nil, *p3, p4:, p5: = nil, *p6:, &block)
+  def method17<<todo method>>(p1, p2 = nil, *p3, p4:, p5: = nil, **p6, &block)
     begin
       <emptyTree>::<C T>.reveal_type(p1)
       <emptyTree>::<C T>.reveal_type(p2)

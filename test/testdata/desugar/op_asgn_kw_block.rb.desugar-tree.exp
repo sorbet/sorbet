@@ -9,14 +9,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
-    def []<<todo method>>(*args, *kwargs:, &blk)
+    def []<<todo method>>(*args, **kwargs, &blk)
       begin
         <self>.p([args, kwargs, blk])
         0
       end
     end
 
-    def []=<<todo method>>(*args, *kwargs:, &blk)
+    def []=<<todo method>>(*args, **kwargs, &blk)
       begin
         <self>.p([args, kwargs, blk])
         0
