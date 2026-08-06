@@ -1037,6 +1037,13 @@ void CommentsAssociator::walkNode(pm_node_t *node) {
             }
             break;
         }
+        case PM_FORWARDING_SUPER_NODE: {
+            auto *super_ = down_cast_nonnull<pm_forwarding_super_node_t>(node);
+            associateAssertionCommentsToNode(node);
+            walkNode(up_cast(super_->block));
+            consumeCommentsInsideNode(node, "super");
+            break;
+        }
         case PM_SUPER_NODE: {
             auto *super_ = down_cast_nonnull<pm_super_node_t>(node);
             associateAssertionCommentsToNode(node);
