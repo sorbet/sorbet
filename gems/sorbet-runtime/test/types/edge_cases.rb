@@ -1027,6 +1027,20 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     assert_nil(T::Utils.signature_for_method(klass.instance_method(:foo)))
   end
 
+  it 'does not drop sig when method_added fires multiple times for one def' do
+    # When `extend T::Sig` is called on a class before `Module.include(T::Sig)`,
+    # the method_added super chain ends up with two MethodHooks entries
+    # (one from the class, one from Module's prepend). This causes
+    # _on_method_added to fire twice for a single `def`.
+    #
+    # This must be tested in a subprocess because `Module.include(T::Sig)`
+    # irreversibly changes the method_added chain for all classes.
+    fixture = "#{__dir__}/fixtures/duplicate_method_added.rb"
+    result, status = Open3.capture2("ruby", fixture)
+    assert(status.success?, "fixture failed (exit #{status.exitstatus}): #{result}")
+    assert_equal("PASS\n", result)
+  end
+
   it 'does not validate a captured old method against a new sig' do
     orig_foo = nil
     klass = Class.new do
