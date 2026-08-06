@@ -96,11 +96,10 @@ public:
                          std::string errorPrefix = "");
 
     const std::string message;
-    const bool matchesDuplicateErrors;
     static constexpr DiagnosticSeverity severity = DiagnosticSeverity::Error;
 
     ErrorAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
-                   std::string_view message, bool matchesDuplicateErrors);
+                   std::string_view message);
 
     std::string toString() const override;
 
@@ -119,9 +118,6 @@ public:
     std::string toString() const override;
     const std::string message;
 
-    // this exists solely to allow us to reuse ErrorAssertion's checkAll
-    // for UntypedAssertion. It should *always* be false.
-    static constexpr bool matchesDuplicateErrors = false;
     static constexpr DiagnosticSeverity severity = DiagnosticSeverity::Information;
 
     static bool checkAll(const UnorderedMap<std::string, std::shared_ptr<core::File>> &files,
