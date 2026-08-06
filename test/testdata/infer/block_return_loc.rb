@@ -6,7 +6,7 @@ def example(&blk)
 end
 
 example {0}
-#        ^  error: Expected `String` but found `Integer(0)` for block result type
+#        ^ error: Expected `String` but found `Integer(0)` for block result type
 
 example do 0 end
 #          ^ error: Expected `String` but found `Integer(0)` for block result type

@@ -15,7 +15,7 @@ takes_one_arg(0)
 takes_one_arg(0, 0)
 #                ^ error: Too many arguments
 takes_one_arg(0, 0, 0)
-#                ^^^^  error: Too many arguments
+#                ^^^^ error: Too many arguments
 
 takes_one_arg(0) do
   nil
