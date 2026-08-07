@@ -15,15 +15,15 @@ class MyStruct < T::Struct
   prop :age, Integer
 end
 
-check("lazy methods pending before") {
+check("lazy methods pending before") do
   !MyStruct.decorator.lazily_defined_methods.empty?
-}
+end
 
 T::Utils.eagerly_define_all_lazy_props_methods!
 
-check("lazy methods resolved after") {
+check("lazy methods resolved after") do
   MyStruct.decorator.lazily_defined_methods.empty?
-}
+end
 
 # After eager definition, serialization should still work correctly
 instance = MyStruct.new(name: "Alice", age: 30)
