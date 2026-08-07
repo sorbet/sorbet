@@ -90,7 +90,7 @@ module T::Private::Methods
   sig {params(mod: Module, method_name: Symbol).returns(NilClass)}
   def self.add_module_with_final_method(mod, method_name); end
 
-  sig {params(hook_mod: Module, mod: Module, method_name: Symbol).void}
+  sig {params(hook_mod: Module, mod: Module, method_name: Symbol).returns(T.nilable(String))}
   def self._on_method_added(hook_mod, mod, method_name); end
 
   sig {params(method_sig: Signature, receiver: Object, original_method: UnboundMethod, callee: Symbol).returns(T::Private::Methods::Signature)}

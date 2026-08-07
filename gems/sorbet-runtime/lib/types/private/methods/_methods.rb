@@ -324,6 +324,23 @@ module T::Private::Methods
 
     if current_declaration.nil?
       key = method_owner_and_name_to_key(mod, method_name)
+
+      # `last_method_key` guards against multiple calls to `_on_method_added`,
+      # from having multiple copies of the method in the ancestor chain (this
+      # can happen commonly if `Module` is monkey patched, because various
+      # files in sorbet-runtime itself run `extend T::Sig` before a monkey
+      # patch has a chance to fire).
+      #
+      # This is a performance optimization, to guarantee that methods with
+      # `.checked(:never)` sigs are unwrapped on first call rather than
+      # permanently trapped behind the first-call wrapper (which allocates via
+      # `|*args, &blk|` on every call). Without this guard, the duplicate
+      # `_on_method_added` deletes the key from `@sig_wrappers`, so the wrapper
+      # can never find its sig block and never unwraps.
+      if decl_state.last_method_key == key
+        return
+      end
+
       # Drop any existing sig, because the `sig_block` closes over the
       # `original_method` at the time that the sig wrapper was registered, and
       # forcing the sig would thus redefine the the redefined method back to
@@ -453,6 +470,8 @@ module T::Private::Methods
     if current_declaration.final
       add_module_with_final_method(mod, method_name)
     end
+
+    key
   end
 
   # Only public so that it can be accessed in the closure for _on_method_added
@@ -754,15 +773,19 @@ module T::Private::Methods
 
   module MethodHooks
     def method_added(name)
-      ::T::Private::Methods._on_method_added(T.unsafe(self), T.unsafe(self), name)
+      key = ::T::Private::Methods._on_method_added(T.unsafe(self), T.unsafe(self), name)
+      T::Private::DeclState.current.last_method_key = key if key
       super(name)
+      T::Private::DeclState.current.last_method_key = nil if key
     end
   end
 
   module SingletonMethodHooks
     def singleton_method_added(name)
-      ::T::Private::Methods._on_method_added(T.unsafe(self), singleton_class, name)
+      key = ::T::Private::Methods._on_method_added(T.unsafe(self), singleton_class, name)
+      T::Private::DeclState.current.last_method_key = key if key
       super(name)
+      T::Private::DeclState.current.last_method_key = nil if key
     end
   end
 

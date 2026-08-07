@@ -16,6 +16,9 @@ class T::Private::DeclState
   sig { returns(T.nilable(T::Private::Methods::DeclarationBlock)) }
   attr_accessor :previous_declaration
 
+  sig { returns(T.nilable(String)) }
+  attr_accessor :last_method_key
+
   sig {void}
   def reset!; end
 
