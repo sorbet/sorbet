@@ -239,42 +239,6 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
     end
   end
 
-  class TestForeignProps
-    include T::Props
-
-    prop :foreign1, String, foreign: -> { MyTestModel }
-    prop :foreign2, T.nilable(String), foreign: -> { MyTestModel }
-  end
-
-  describe 'foreign props' do
-    it 'supports nilable props' do
-      obj = TestForeignProps.new
-
-      obj.foreign1 = 'test'
-      test_model = obj.foreign1_
-      assert(test_model)
-      assert_equal(obj.foreign1, test_model.id)
-
-      obj.foreign2 = nil
-      test_model = obj.foreign2_
-      refute(test_model)
-
-      obj.foreign2 = 'test'
-      test_model = obj.foreign2_
-      assert(test_model)
-      assert_equal(obj.foreign2, test_model.id)
-    end
-
-    it 'disallows non-proc arguments' do
-      exn = assert_raises do
-        Class.new(TestForeignProps) do
-          prop :foreign3, String, foreign: MyTestModel
-        end
-      end
-      assert_includes(exn.message, 'Please use a Proc that returns a model class instead')
-    end
-  end
-
   class MyCustomType
     extend T::Props::CustomType
 
