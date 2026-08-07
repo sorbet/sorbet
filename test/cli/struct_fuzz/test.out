@@ -29,6 +29,10 @@ test/cli/struct_fuzz/struct_fuzz.rb:2: Method `type_member` does not exist on `T
     test/cli/struct_fuzz/struct_fuzz.rb:2:
      2 |::B=Struct.new:x
         ^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/struct_fuzz/struct_fuzz.rb:3: Insert `extend T::Generic`
+     3 |# these errors aren't actually what we're checking for, we just want to make sure sorbet doesn't crash on this input
+        ^
 
 test/cli/struct_fuzz/struct_fuzz.rb:2: Method `raise` does not exist on `T.class_of(Kernel)` https://srb.help/7003
      2 |::B=Struct.new:x
@@ -60,5 +64,9 @@ test/cli/struct_fuzz/struct_fuzz.rb:2: Method `type_member` does not exist on `T
   Got `T.class_of(B)` originating from:
     test/cli/struct_fuzz/struct_fuzz.rb:2:
      2 |::B=Struct.new:x
+        ^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/struct_fuzz/struct_fuzz.rb:3: Insert `extend T::Generic`
+     3 |# these errors aren't actually what we're checking for, we just want to make sure sorbet doesn't crash on this input
         ^
 Errors: 8
