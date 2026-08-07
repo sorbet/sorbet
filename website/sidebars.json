@@ -12,6 +12,7 @@
       "gradual",
       "static",
       "runtime",
+      "load-time-tuning",
       "rbi",
       "cli",
       "cli-ref",
