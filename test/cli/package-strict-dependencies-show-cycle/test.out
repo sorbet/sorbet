@@ -1,3 +1,39 @@
+a/foo.rb:5: `Y` is not imported https://srb.help/3718
+     5 |    Y::Foo.new
+            ^
+    y/__package.rb:3: Exported from package here
+     3 |class Y < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    a/__package.rb:7: Insert `import Y`
+     7 |  import B
+                  ^
+
+a/foo.rb:7: Unable to resolve constant `G` https://srb.help/5002
+     7 |    G::Foo.new
+            ^
+  Did you mean `T`? Use `-a` to autocorrect
+    a/foo.rb:7: Replace with `T`
+     7 |    G::Foo.new
+            ^
+    https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/t.rbi#L16: `T` defined here
+    16 |module T
+        ^^^^^^^^
+  Did you mean `GC`? Use `-a` to autocorrect
+    a/foo.rb:7: Replace with `GC`
+     7 |    G::Foo.new
+            ^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/gc.rbi#L12: `GC` defined here
+    12 |module GC
+        ^^^^^^^^^
+  Did you mean `A`? Use `-a` to autocorrect
+    a/foo.rb:7: Replace with `A`
+     7 |    G::Foo.new
+            ^
+    a/foo.rb:3: `A` defined here
+     3 |module A
+        ^^^^^^^^
+
 a/__package.rb:7: Strict dependencies violation: importing `B` will put `A` into a cycle, which is not valid at `strict_dependencies 'layered_dag'` https://srb.help/3727
      7 |  import B
           ^^^^^^^^
@@ -11,15 +47,4 @@ a/__package.rb:7: Strict dependencies violation: importing `B` will put `A` into
     `G` →
     `A`
 
-
-a/foo.rb:5: `Y` is not imported https://srb.help/3718
-     5 |    Y::Foo.new
-            ^
-    y/__package.rb:3: Exported from package here
-     3 |class Y < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    a/__package.rb:7: Insert `import Y`
-     7 |  import B
-                  ^
-Errors: 2
+Errors: 3
