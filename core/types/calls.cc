@@ -1250,13 +1250,29 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             const ParamInfo *kwSplatParam = nullptr;
             auto hasRequiredKwParam = false;
             auto kwParams = vector<const ParamInfo *>{};
+
+            // Keyword args written at the call site have a precisely known type, unlike whatever the splat
+            // might supply. Locating them lets us check them directly, and lets a required parameter that
+            // one of them already satisfies stop counting as being left up to the splat.
+            auto explicitIndexForParam = [&keys](NameRef name) -> optional<size_t> {
+                for (size_t i = 0; i < keys.size(); i++) {
+                    if (!isa_type<NamedLiteralType>(keys[i])) {
+                        continue;
+                    }
+                    if (cast_type_nonnull<NamedLiteralType>(keys[i]).name == name) {
+                        return i;
+                    }
+                }
+                return nullopt;
+            };
+
             for (auto &param : methodData->parameters) {
                 if (param.flags.isKeyword && param.flags.isRepeated) {
                     ENFORCE(kwSplatParam == nullptr);
                     kwSplatParam = &param;
                 } else if (param.flags.isKeyword && !param.flags.isRepeated) {
                     kwParams.emplace_back(&param);
-                    hasRequiredKwParam |= !param.flags.isDefault;
+                    hasRequiredKwParam |= !param.flags.isDefault && !explicitIndexForParam(param.name).has_value();
                 }
             }
 
@@ -1317,7 +1333,42 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                         result.main.errors.emplace_back(e.build());
                     }
                 } else {
+                    // Check the keyword args that were written at the call site against their parameters
+                    // directly, rather than against the much wider type covering everything in the splat.
+                    UnorderedSet<NameRef> reportedExplicitly;
                     for (const auto &kwParam : kwParams) {
+                        auto explicitIdx = explicitIndexForParam(kwParam->name);
+                        if (!explicitIdx.has_value()) {
+                            continue;
+                        }
+
+                        Loc originLoc = kwargsLoc;
+                        Loc argLoc = args.callLoc();
+                        auto kwargLocsIt = kwargLocs.find(kwParam->name);
+                        if (kwargLocsIt != kwargLocs.end()) {
+                            auto [kwKeyLoc, kwValLoc] = kwargLocsIt->second;
+                            originLoc = core::Loc(args.locs.file, kwValLoc);
+                            argLoc = originLoc;
+                        }
+
+                        TypeAndOrigins tpe{values[*explicitIdx], originLoc};
+                        if (auto e = matchArgType(gs, *constr, args.receiverLoc(), symbol, method, tpe, *kwParam,
+                                                  args.selfType, args.fullType, args.thisType, targs, argLoc,
+                                                  args.originForUninitialized)) {
+                            reportedExplicitly.insert(kwParam->name);
+                            result.main.errors.emplace_back(std::move(e));
+                        }
+                    }
+
+                    // The splat trails the explicitly-passed keys, so it can overwrite them too. That means
+                    // its values have to fit every keyword parameter, not only the ones it's the sole
+                    // possible source for. Parameters already reported on above are skipped to avoid
+                    // stacking a second error on the same argument.
+                    for (const auto &kwParam : kwParams) {
+                        if (reportedExplicitly.contains(kwParam->name)) {
+                            continue;
+                        }
+
                         auto kwParamType =
                             Types::resultTypeAsSeenFrom(gs, kwParam->type, methodData->owner, symbol, targs);
                         if (kwParamType == nullptr) {

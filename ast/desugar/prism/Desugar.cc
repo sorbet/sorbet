@@ -140,7 +140,7 @@ private:
     template <typename StoreType> StoreType nodeListToStore(const pm_node_list &nodeList);
 
     // Flattens key/value pairs from a keyword hash into the destination, or desugars the whole hash if there are splats
-    template <typename Container> void flattenKwargs(pm_keyword_hash_node *kwargsHashNode, Container &destination);
+    template <typename Container> bool flattenKwargs(pm_keyword_hash_node *kwargsHashNode, Container &destination);
 
     // Helper for Break/Next/Return nodes that take optional arguments
     ast::ExpressionPtr desugarBreakNextReturn(pm_arguments_node *argsNode);
@@ -528,26 +528,53 @@ bool isCallToBlockGivenP(pm_call_node *callNode, core::NameRef methodName, ast::
            MK::isKernelApproximate(receiverExpr);
 };
 
+// A `**kwsplat` argument is converted with `to_hash` before it's passed along. This is also what gives
+// `f(**nil)` its meaning of "no keyword arguments at all".
+void wrapKwsplatArg(ast::ExpressionPtr &arg, core::LocOffsets locZeroLen) {
+    auto loc = arg.loc();
+    arg = MK::Send1(loc, MK::Magic(loc), core::Names::toHashDup(), locZeroLen, move(arg));
+}
+
 // Flattens the key/value pairs from the Kwargs Hash into the destination container.
-// If Kwargs Hash contains any splats, we skip the flattening and desugar the hash as-is.
+//
+// When the only splat is a `**kwsplat` in trailing position (e.g. `foo(x: 1, **opts)`), the pairs are
+// flattened and the splat's inner expression is appended after them. Keeping the explicitly-passed keys
+// visible lets the type checker check them against the method's keyword parameters, instead of merging
+// everything into one opaque hash. Returns true in that case, to signal that the caller has to wrap the
+// trailing argument in `<Magic>.<to-hash-dup>`.
+//
+// Anything else -- a splat in the middle, more than one splat, a lone splat, or an anonymous `**` forward
+// -- keeps the old behavior of desugaring the hash as-is, and returns false.
 template <typename Container>
-void Desugarer::flattenKwargs(pm_keyword_hash_node *kwargsHashNode, Container &destination) {
+bool Desugarer::flattenKwargs(pm_keyword_hash_node *kwargsHashNode, Container &destination) {
     ENFORCE(kwargsHashNode != nullptr);
 
     auto elements = absl::MakeSpan(kwargsHashNode->elements.nodes, kwargsHashNode->elements.size);
 
-    // Check if there are any splats - if so, can't flatten
-    bool hasKwsplat = absl::c_any_of(elements, [](auto *node) { return isa_node<pm_assoc_splat_node>(node); });
+    auto splatIt = absl::c_find_if(elements, [](auto *node) { return isa_node<pm_assoc_splat_node>(node); });
 
-    if (hasKwsplat) {
+    // A keyword splat is detected downstream by the parity of the argument count, so it can only be
+    // inlined when it's the sole splat and comes last. There's also nothing to gain from inlining unless
+    // some keys are passed explicitly alongside it, so a lone splat keeps going through the merging path.
+    // An anonymous `**` forward has no expression to inline, so it stays on that path as well.
+    auto inlineTrailingKwsplat = elements.size() > 1 && splatIt != elements.end() && splatIt + 1 == elements.end() &&
+                                 down_cast_nonnull<pm_assoc_splat_node>(*splatIt)->value != nullptr;
+
+    // Skip inlining the kwargs if there are any other splats present
+    if (splatIt != elements.end() && !inlineTrailingKwsplat) {
         // Desugar the whole hash using desugarKeyValuePairs which handles kwsplats properly
         auto loc = translateLoc(kwargsHashNode->base.location);
         destination.emplace_back(desugarKeyValuePairs(loc, kwargsHashNode->elements));
-        return;
+        return false;
     }
 
     // Flatten each key/value pair directly
     for (auto *element : elements) {
+        if (auto *splat = down_cast<pm_assoc_splat_node>(element)) {
+            destination.emplace_back(desugar(splat->value));
+            continue;
+        }
+
         auto *assoc = down_cast_nonnull<pm_assoc_node>(element);
 
         // Special handling for symbol keys with trailing colon (like `a: 1` instead of `:a => 1`)
@@ -572,6 +599,8 @@ void Desugarer::flattenKwargs(pm_keyword_hash_node *kwargsHashNode, Container &d
         destination.emplace_back(desugar(assoc->key));
         destination.emplace_back(desugar(assoc->value));
     }
+
+    return inlineTrailingKwsplat;
 }
 
 // Helper function to merge multiple string literals into one
@@ -4478,14 +4507,16 @@ ast::ExpressionPtr Desugarer::desugarMethodCall(ast::ExpressionPtr receiver, cor
         }
 
         // Build up an array that represents the keyword args for the send.
-        // When there is a Kwsplat, treat all keyword arguments as a single argument.
+        // When the keyword args can't be inlined, they're all treated as a single argument.
         // If the kwargs hash is not present, make a `nil` to put in the place of that argument.
         // This will be used in the implementation of the intrinsic to tell the difference between keyword
-        // args, keyword args with kw splats, and no keyword args at all.
+        // args and no keyword args at all.
         ExpressionPtr kwargsExpr;
         if (kwargsHashNode != nullptr) {
             ast::Array::ENTRY_store kwargElements;
-            flattenKwargs(kwargsHashNode, kwargElements);
+            if (flattenKwargs(kwargsHashNode, kwargElements)) {
+                wrapKwsplatArg(kwargElements.back(), sendLoc0);
+            }
             ast::desugar::DuplicateHashKeyCheck::checkSendArgs(ctx, 0, kwargElements);
 
             kwargsExpr = MK::Array(sendWithBlockLoc, move(kwargElements));
@@ -4566,7 +4597,9 @@ ast::ExpressionPtr Desugarer::desugarMethodCall(ast::ExpressionPtr receiver, cor
         }
 
         if (kwargsHashNode) {
-            flattenKwargs(kwargsHashNode, magicSendArgs);
+            if (flattenKwargs(kwargsHashNode, magicSendArgs)) {
+                wrapKwsplatArg(magicSendArgs.back(), sendLoc0);
+            }
             ast::desugar::DuplicateHashKeyCheck::checkSendArgs(ctx, magicNumPosArgs, magicSendArgs);
         }
 
@@ -4586,7 +4619,9 @@ ast::ExpressionPtr Desugarer::desugarMethodCall(ast::ExpressionPtr receiver, cor
     }
 
     if (kwargsHashNode) {
-        flattenKwargs(kwargsHashNode, sendArgs);
+        if (flattenKwargs(kwargsHashNode, sendArgs)) {
+            wrapKwsplatArg(sendArgs.back(), sendLoc0);
+        }
         ast::desugar::DuplicateHashKeyCheck::checkSendArgs(ctx, numPosArgs, sendArgs);
     }
 
