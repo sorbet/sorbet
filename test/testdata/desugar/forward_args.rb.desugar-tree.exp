@@ -43,6 +43,36 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         ::<Magic>.<call-with-splat>(<emptyTree>::<C T>.unsafe(<self>), :p, [].concat(::T.unsafe(<fwd-args>.to_a())), nil)
       end
     end
+
+    def foo8<<todo method>>(**, &<blk>)
+      [1, 2, 3].each() do |**|
+        <emptyTree>::<C T>.unsafe(<self>).p(begin
+            <hashTemp>$2 = ::<Magic>.<to-hash-dup>(::T.unsafe(<fwd-kwargs>))
+            <hashTemp>$2
+          end)
+      end
+    end
+
+    def foo9<<todo method>>(**kwargs, &<blk>)
+      [1, 2, 3].each() do |**|
+        <emptyTree>::<C T>.unsafe(<self>).p(begin
+            <hashTemp>$2 = ::<Magic>.<to-hash-dup>(::T.unsafe(<fwd-kwargs>))
+            <hashTemp>$2
+          end)
+      end
+    end
+
+    def foo10<<todo method>>(&)
+      [1, 2, 3].each() do |&|
+        ::<Magic>.<call-with-block-pass>(<emptyTree>::<C T>.unsafe(<self>), :p, &)
+      end
+    end
+
+    def foo11<<todo method>>(&block)
+      [1, 2, 3].each() do |&|
+        ::<Magic>.<call-with-block-pass>(<emptyTree>::<C T>.unsafe(<self>), :p, &)
+      end
+    end
   end
 
   <emptyTree>::<C Foo>.new().foo()
