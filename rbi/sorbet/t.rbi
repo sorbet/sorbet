@@ -468,6 +468,21 @@ module T::Utils
 
   # only one caller; delete
   def self.methods_excluding_object(mod); end
+
+  # Force all TypeAlias instances to resolve their effective_aliased_type eagerly.
+  #
+  # Call this while eagerly preloading a codebase (e.g. at service startup) to
+  # optimize for first-call/first-request latency.
+  sig { void }
+  def self.run_all_type_alias_blocks; end
+
+  # Force all T::Props::Serializable decorators to eagerly define their lazily
+  # specialized methods (serialization, deserialization, etc.).
+  #
+  # Call this while eagerly preloading a codebase (e.g. at service startup) to
+  # optimize for first-call/first-request latency.
+  sig { void }
+  def self.eagerly_define_all_lazy_props_methods!; end
 end
 
 

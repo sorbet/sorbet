@@ -157,6 +157,27 @@ module T::Utils
     "#{start_part}#{ellipsis}#{end_part}"
   end
 
+  # Force all TypeAlias instances to resolve their effective_aliased_type eagerly.
+  #
+  # Call this while eagerly preloading a codebase (e.g. at service startup) to
+  # optimize for first-call/first-request latency.
+  def self.run_all_type_alias_blocks
+    require 'objspace'
+    ObjectSpace.each_object(T::Private::Types::TypeAlias, &:effective_aliased_type)
+    nil
+  end
+
+  # Force all T::Props::Serializable decorators to eagerly define their lazily
+  # specialized methods (serialization, deserialization, etc.).
+  #
+  # Call this while eagerly preloading a codebase (e.g. at service startup) to
+  # optimize for first-call/first-request latency.
+  def self.eagerly_define_all_lazy_props_methods!
+    require 'objspace'
+    ObjectSpace.each_object(T::Props::Serializable::DecoratorMethods, &:eagerly_define_lazy_methods!)
+    nil
+  end
+
   def self.lift_enum(enum)
     unless enum.is_a?(T::Types::Enum)
       raise ArgumentError.new("#{enum.inspect} is not a T.deprecated_enum")
