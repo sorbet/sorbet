@@ -2,6 +2,11 @@
 # typed: true
 
 module T::Utils
+  # Raised when `T::Utils.coerce` is handed something that isn't a type. When
+  # this happens while a `sig` is being built, it is rescued and reported
+  # through `T::Configuration.sig_builder_error_handler`.
+  class CoerceError < StandardError; end
+
   module Private
     # NOTE: the Module and SimplePairUnion branches of this method are inlined
     # for speed in several hot paths. The `T.cast` / `T.let` / `T.bind` /
@@ -33,11 +38,15 @@ module T::Utils
       elsif val.is_a?(::T::Enum)
         T::Types::TEnum.new(val)
       elsif val.is_a?(::String)
-        raise "Invalid String literal for type constraint. Must be an #{T::Types::Base}, a " \
-              "class/module, or an array. Got a String with value `#{val}`."
+        raise CoerceError.new(
+          "Invalid String literal for type constraint. Must be an #{T::Types::Base}, a " \
+          "class/module, or an array. Got a String with value `#{val}`."
+        )
       else
-        raise "Invalid value for type constraint. Must be an #{T::Types::Base}, a " \
-              "class/module, or an array. Got a `#{val.class}`."
+        raise CoerceError.new(
+          "Invalid value for type constraint. Must be an #{T::Types::Base}, a " \
+          "class/module, or an array. Got a `#{val.class}`."
+        )
       end
       # rubocop:enable Style/CaseLikeIf
     end

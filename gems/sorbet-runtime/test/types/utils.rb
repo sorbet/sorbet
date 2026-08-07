@@ -19,6 +19,22 @@ module Opus::Types::Test
       end
     end
 
+    describe 'T::Utils.coerce' do
+      it 'raises a CoerceError for a value that is not a type' do
+        ex = assert_raises(T::Utils::CoerceError) do
+          T::Utils.coerce(Object.new)
+        end
+        assert_includes(ex.message, 'Invalid value for type constraint')
+      end
+
+      it 'raises a CoerceError for a String literal' do
+        ex = assert_raises(T::Utils::CoerceError) do
+          T::Utils.coerce('nope')
+        end
+        assert_includes(ex.message, 'Invalid String literal for type constraint')
+      end
+    end
+
     describe 'T::Utils.signature_for_method' do
       it 'returns nil on methods without sigs' do
         c = Class.new do

@@ -102,8 +102,8 @@ module T::Private::Methods
   sig {params(declaration_block: DeclarationBlock).returns(T::Private::Methods::Declaration)}
   def self.run_builder(declaration_block); end
 
-  sig {params(method_name: Symbol, original_method: UnboundMethod, current_declaration: T::Private::Methods::Declaration).returns(T::Private::Methods::Signature)}
-  def self.build_sig(method_name, original_method, current_declaration); end
+  sig {params(method_name: Symbol, original_method: UnboundMethod, current_declaration: T::Private::Methods::Declaration, loc: T.nilable(Thread::Backtrace::Location)).returns(T::Private::Methods::Signature)}
+  def self.build_sig(method_name, original_method, current_declaration, loc); end
 
   sig {params(method: T.any(Method, UnboundMethod)).returns(T.nilable(T::Private::Methods::Signature))}
   def self.signature_for_method(method); end
