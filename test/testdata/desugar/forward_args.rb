@@ -39,6 +39,30 @@ class Foo
       T.unsafe(self).p(*)
     end
   end
+
+  def foo8(**)
+    [1,2,3].each do |**|
+      T.unsafe(self).p(**)
+    end
+  end
+
+  def foo9(**kwargs)
+    [1,2,3].each do |**|
+      T.unsafe(self).p(**)
+    end
+  end
+
+  def foo10(&)
+    [1,2,3].each do |&|
+      T.unsafe(self).p(&)
+    end
+  end
+
+  def foo11(&block)
+    [1,2,3].each do |&|
+      T.unsafe(self).p(&)
+    end
+  end
 end
 
 Foo.new.foo
