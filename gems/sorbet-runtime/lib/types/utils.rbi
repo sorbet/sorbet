@@ -32,6 +32,21 @@ module T::Utils
   end
   def self.wrap_method_with_call_validation_if_needed(mod, method_sig, original_method); end
 
+  # Force all TypeAlias instances to resolve their effective_aliased_type eagerly.
+  #
+  # Call this while eagerly preloading a codebase (e.g. at service startup) to
+  # optimize for first-call/first-request latency.
+  sig { void }
+  def self.run_all_type_alias_blocks; end
+
+  # Force all T::Props::Serializable decorators to eagerly define their lazily
+  # specialized methods (serialization, deserialization, etc.).
+  #
+  # Call this while eagerly preloading a codebase (e.g. at service startup) to
+  # optimize for first-call/first-request latency.
+  sig { void }
+  def self.eagerly_define_all_lazy_props_methods!; end
+
   # TODO(jez) If we were to move this to the public rbi/ folder, we would
   # probably want the types to all be non-nil. Maybe we should just make this a
   # private helper.
