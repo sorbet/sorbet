@@ -16,13 +16,15 @@ class MyStruct < T::Struct
 end
 
 check("lazy methods pending before") do
-  !MyStruct.decorator.lazily_defined_methods.empty?
+  # private method call
+  !MyStruct.decorator.send(:lazily_defined_methods).empty?
 end
 
 T::Utils.eagerly_define_all_lazy_props_methods!
 
 check("lazy methods resolved after") do
-  MyStruct.decorator.lazily_defined_methods.empty?
+  # private method call
+  MyStruct.decorator.send(:lazily_defined_methods).empty?
 end
 
 # After eager definition, serialization should still work correctly
