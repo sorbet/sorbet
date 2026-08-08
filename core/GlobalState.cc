@@ -1991,6 +1991,7 @@ void GlobalState::copyOptions(const core::GlobalState &other) {
     this->cacheSensitiveOptions = other.cacheSensitiveOptions;
     this->ruby3KeywordArgs = other.ruby3KeywordArgs;
     this->parseWithPrism = other.parseWithPrism;
+    this->experimentalMethodModifiers = other.experimentalMethodModifiers;
     this->suppressPayloadSuperclassRedefinitionFor = other.suppressPayloadSuperclassRedefinitionFor;
     this->trackUntyped = other.trackUntyped;
     this->highlightUntypedDiagnosticSeverity = other.highlightUntypedDiagnosticSeverity;
