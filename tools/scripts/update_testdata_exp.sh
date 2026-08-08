@@ -185,6 +185,10 @@ for this_src in "${rb_src[@]}" DUMMY; do
       args+=("--enable-experimental-rbs-comments")
     fi
 
+    if grep -q '^# enable-experimental-method-modifiers: true' "${srcs[@]}"; then
+      args+=("--enable-experimental-method-modifiers")
+    fi
+
     if grep -q '^# typed-super: false' "${srcs[@]}"; then
       args+=("--typed-super=false")
     fi
