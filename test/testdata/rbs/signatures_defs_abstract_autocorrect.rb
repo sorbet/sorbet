@@ -47,3 +47,49 @@ class Abstract
     puts
   end
 end
+
+module ShimForAbstractModifierSupport
+  # We can't use `T::DefMods` directly (since it's not in Sorbet's payload), so we provide a no-op shim just like it.
+  def abstract(method_name) = method_name
+end
+
+# @abstract
+class AbstractKeyword
+  extend ShimForAbstractModifierSupport
+
+  #: -> void
+  abstract def foo; end
+
+  #: -> void
+  abstract def bar
+  end
+
+  #: -> void
+  abstract def baz
+    puts # error: Abstract methods must not contain any code in their body
+  end
+
+  #: -> void
+  abstract def qux
+    puts # error: Abstract methods must not contain any code in their body
+    puts
+  end
+
+  #: -> void
+  abstract def self.foo; end
+
+  #: -> void
+  abstract def self.bar
+  end
+
+  #: -> void
+  abstract def self.baz
+    puts # error: Abstract methods must not contain any code in their body
+  end
+
+  #: -> void
+  abstract def self.qux
+    puts # error: Abstract methods must not contain any code in their body
+    puts
+  end
+end

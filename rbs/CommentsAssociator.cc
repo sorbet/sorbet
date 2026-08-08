@@ -746,7 +746,7 @@ void CommentsAssociator::walkNode(pm_node_t *node) {
             auto *call = down_cast_nonnull<pm_call_node_t>(node);
 
             if (parser.isMethodDefModifierCall(node, ctx.state)) {
-                // This is a modifier wrapping a method definition, like `private def foo; end`
+                // This is a modifier wrapping a method definition, like `abstract private def foo; end`
                 associateSignatureCommentsToNode(node);
                 associateAssertionCommentsToNode(node);
                 walkNode(call->receiver);
