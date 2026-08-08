@@ -9,6 +9,7 @@ end
 
 class B
   extend T::Sig
-  sig do end # error-with-dupes: Malformed `sig`
+  sig do end # error: Malformed `sig`
+# ^^^^^^^^^^ error: Malformed `sig`
     #   ^ completion: (nothing)
 end

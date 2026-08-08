@@ -41,8 +41,12 @@ class Wrap1
 #                         ^ error: Unknown parameter name
   def arg_in_sig_but_not_method(x:, &blk); end # error: against an overloaded signature
 
-  sig {params(x: Integer, y: String).void} # error-with-dupes: Overloaded functions cannot have keyword arguments
-  sig {params(y: String, x: Integer).void} # error-with-dupes: Overloaded functions cannot have keyword arguments
+  sig {params(x: Integer, y: String).void}
+  #           ^ error: Overloaded functions cannot have keyword arguments
+  #                       ^ error: Overloaded functions cannot have keyword arguments
+  sig {params(y: String, x: Integer).void}
+  #           ^ error: Overloaded functions cannot have keyword arguments
+  #                      ^ error: Overloaded functions cannot have keyword arguments
   def keyword_ordering_matters(x:, y:); end # error: against an overloaded signature
   #                            ^^ error: Bad parameter ordering
   #                                ^^ error: Bad parameter ordering
@@ -129,18 +133,27 @@ class Wrap2
   extend T::Sig
 
   sig {params(x: Integer).void} # error: Overloaded functions cannot have keyword arguments
-  sig {params(x: Integer, y: String).void} # error-with-dupes: Overloaded functions cannot have keyword arguments
+  sig {params(x: Integer, y: String).void}
+  #           ^ error: Overloaded functions cannot have keyword arguments
+  #                       ^ error: Overloaded functions cannot have keyword arguments
   def missing_kw1(x:, y: ''); end # error: against an overloaded signature
 
-  sig {params(x: Integer, y: String).void} # error-with-dupes: Overloaded functions cannot have keyword arguments
+  sig {params(x: Integer, y: String).void}
+  #           ^ error: Overloaded functions cannot have keyword arguments
+  #                       ^ error: Overloaded functions cannot have keyword arguments
   sig {params(x: Integer).void} # error: Overloaded functions cannot have keyword arguments
   def missing_kw2(x:, y: ''); end # error: against an overloaded signature
 
   # Same pattern as the above, but 3 sigs will error where two will not.
   # TODO(froydnj): can we test what happens when the relevant error is suppressed?
   sig {params(x: Integer).void} # error: Overloaded functions cannot have keyword arguments
-  sig {params(x: Integer, y: String).void} # error-with-dupes: Overloaded functions cannot have keyword arguments
-  sig {params(x: Integer, y: String, z: Float).void} # error-with-dupes: Overloaded functions cannot have keyword arguments
+  sig {params(x: Integer, y: String).void}
+  #           ^ error: Overloaded functions cannot have keyword arguments
+  #                       ^ error: Overloaded functions cannot have keyword arguments
+  sig {params(x: Integer, y: String, z: Float).void}
+  #           ^ error: Overloaded functions cannot have keyword arguments
+  #                       ^ error: Overloaded functions cannot have keyword arguments
+  #                                  ^ error: Overloaded functions cannot have keyword arguments
   def multiple_missing_kw(x:, y: '', z: 0.0); end # error: against an overloaded signature
 
   sig {params(z: String, x: Integer).void} # error: Overloaded functions cannot have keyword arguments
@@ -158,7 +171,9 @@ Wrap2.new.missing_kw2(x: 0, y: 'foo') # error: Unrecognized keyword argument
 Wrap2.new.missing_kw2(x: 0)
 
 Wrap2.new.multiple_missing_kw(x: 1)
-Wrap2.new.multiple_missing_kw(x: 1, y: 'bar', z: 0.1) # error-with-dupes: Unrecognized keyword argument
+Wrap2.new.multiple_missing_kw(x: 1, y: 'bar', z: 0.1)
+#                                   ^^^^^^^^ error: Unrecognized keyword argument
+#                                             ^^^^^^ error: Unrecognized keyword argument
 
 # These errors are wrong; they are artifacts of overload matching ignoring keyword arguments.
 Wrap2.new.mismatched_positional_args1('z', x: 0) # error: Too many positional arguments

@@ -1,4 +1,5 @@
 # typed: true
 class Object
-  include(E) # error-with-dupes: Unable to resolve constant `E`
+  include(E) # error: Unable to resolve constant `E`
+        # ^ error: Unable to resolve constant `E`
 end

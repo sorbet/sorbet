@@ -8,4 +8,4 @@ lambda { |;| }
 #          ^ error: expected a local variable name in the block parameters
 
 -> (;) {}
-#    ^ error-with-dupes: expected a local variable name in the block parameters
+#    ^ error: expected a local variable name in the block parameters
