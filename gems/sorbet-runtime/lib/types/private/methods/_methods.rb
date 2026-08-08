@@ -12,6 +12,7 @@ module T::Private::Methods
     @sig_wrappers = {}
   end
   @sigs_that_raised = {}
+  @aliases_of_sigs = {}  # key of original method -> Array of [mod, alias_name]
   # stores method names that were declared final without regard for where.
   # enables early rejection of names that we know can't induce final method violations.
   @was_ever_final_names = {}.compare_by_identity
@@ -341,6 +342,21 @@ module T::Private::Methods
         return
       end
 
+      # If this method is an alias of a method with a pending sig, track it
+      # so that when the original sig is forced (e.g., by run_all_sig_blocks),
+      # we also unwrap the alias method. Without this, the alias retains the
+      # first-call wrapper and incurs extra allocations on its first invocation.
+      method_obj = mod.instance_method(method_name)
+      original_name = method_obj.original_name
+      if original_name != method_name
+        original_owner = method_obj.owner
+        original_key = method_owner_and_name_to_key(original_owner, original_name)
+        if @sig_wrappers.key?(original_key)
+          (@aliases_of_sigs[original_key] ||= []) << [mod, method_name]
+          return
+        end
+      end
+
       # Drop any existing sig, because the `sig_block` closes over the
       # `original_method` at the time that the sig wrapper was registered, and
       # forcing the sig would thus redefine the the redefined method back to
@@ -613,6 +629,18 @@ module T::Private::Methods
   private_class_method def self.unwrap_method(mod, signature, original_method)
     maybe_wrapped_method = CallValidation.wrap_method_if_needed(mod, signature, original_method)
     @signatures_by_method[method_to_key(maybe_wrapped_method)] = signature
+
+    # Also unwrap any aliases that were registered before this sig was forced.
+    key = method_owner_and_name_to_key(mod, signature.method_name)
+    aliases = @aliases_of_sigs.delete(key)
+    if aliases
+      aliases.each do |alias_mod, alias_name|
+        alias_sig = signature.as_alias(alias_name)
+        CallValidation.wrap_method_if_needed(alias_mod, alias_sig, original_method)
+        alias_key = method_owner_and_name_to_key(alias_mod, alias_name)
+        @signatures_by_method[alias_key] = alias_sig
+      end
+    end
   end
 
   def self.has_sig_block_for_method(method)
