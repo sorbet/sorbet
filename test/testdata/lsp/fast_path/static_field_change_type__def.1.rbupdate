@@ -4,3 +4,4 @@
 STATIC_FIELD = T.let({}, T::Hash[Symbol, ])
 #                                      ^ error: Not enough arguments provided
 #                                ^^^^^^ error: Wrong number of type parameters
+#                                ^^^^^^ error: Wrong number of type parameters
