@@ -1046,10 +1046,19 @@ pm_node_t *AssertionsRewriter::rewriteNode(pm_node_t *node) {
         }
 
         // Super
+        case PM_FORWARDING_SUPER_NODE: {
+            auto *super_ = down_cast_nonnull<pm_forwarding_super_node_t>(node);
+            node = maybeInsertCast(node);
+            if (super_->block != nullptr) {
+                super_->block = down_cast_nonnull<pm_block_node_t>(rewriteNode(up_cast(super_->block)));
+            }
+            return node;
+        }
         case PM_SUPER_NODE: {
             auto *super_ = down_cast_nonnull<pm_super_node_t>(node);
             rewriteArgumentsNode(super_->arguments);
             node = maybeInsertCast(node);
+            super_->block = rewriteNullableNode(super_->block);
             return node;
         }
 

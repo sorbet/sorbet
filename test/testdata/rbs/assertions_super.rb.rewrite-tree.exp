@@ -46,4 +46,42 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of foo>
   end
+
+  class <emptyTree>::<C SuperBlockParent><<C <todo sym>>> < (::<todo sym>)
+    def forwarding_super<<todo method>>(*args, &<blk>)
+      <emptyTree>
+    end
+
+    def explicit_super<<todo method>>(arg, &<blk>)
+      <emptyTree>
+    end
+
+    <runtime method definition of forwarding_super>
+
+    <runtime method definition of explicit_super>
+  end
+
+  class <emptyTree>::<C SuperBlockChild><<C <todo sym>>> < (<emptyTree>::<C SuperBlockParent>)
+    def forwarding_super<<todo method>>(*args, &<blk>)
+      <self>.<super>(ZSuperArgs) do |local_record|
+        begin
+          return_value = <cast:let>(nil, <todo sym>, ::<root>::<C T>.nilable(::<root>::<C T>::<C Hash>.<syntheticSquareBrackets>(<emptyTree>::<C Symbol>, ::<root>::<C T>.untyped())))
+          <emptyTree>::<C T>.reveal_type(return_value)
+        end
+      end
+    end
+
+    def explicit_super<<todo method>>(arg, &<blk>)
+      <self>.<super>(arg) do |local_record|
+        begin
+          return_value = <cast:let>(nil, <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C String>))
+          <emptyTree>::<C T>.reveal_type(return_value)
+        end
+      end
+    end
+
+    <runtime method definition of forwarding_super>
+
+    <runtime method definition of explicit_super>
+  end
 end
