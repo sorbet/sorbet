@@ -97,7 +97,6 @@ void reportRedeclarationError(core::GlobalState &gs, core::ClassOrModuleRef pare
         }
     }
 }
-} // namespace
 
 core::TypeMemberRef resolveTypeMember(core::GlobalState &gs, core::ClassOrModuleRef parent,
                                       core::TypeMemberRef parentTypeMember, core::ClassOrModuleRef sym) {
@@ -160,7 +159,7 @@ core::TypeMemberRef resolveTypeMember(core::GlobalState &gs, core::ClassOrModule
         return myTypeMember;
     }
     return myTypeMember;
-} // namespace
+}
 
 void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym, vector<bool> &resolved) {
     if (resolved[sym.id()]) {
@@ -240,7 +239,7 @@ void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym, vecto
     }
 }
 
-}; // namespace
+} // namespace
 
 void Resolver::finalizeAncestors(core::GlobalState &gs) {
     Timer timer(gs.tracer(), "resolver.finalize_ancestors");
