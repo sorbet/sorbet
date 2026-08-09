@@ -14,7 +14,7 @@ inline constexpr ErrorClass UndefUsage{3008, StrictLevel::Strict};
 inline constexpr ErrorClass UnsupportedRestArgsDestructure{3009, StrictLevel::True};
 inline constexpr ErrorClass CodeInRBI{3010, StrictLevel::False};
 inline constexpr ErrorClass DuplicatedHashKeys{3011, StrictLevel::False};
-inline constexpr ErrorClass BlockAnonymousRestParam{3012, StrictLevel::False};
+inline constexpr ErrorClass BlockAnonymousParam{3012, StrictLevel::False};
 } // namespace sorbet::core::errors::Desugar
 
 #endif
