@@ -100,7 +100,7 @@ void reportRedeclarationError(core::GlobalState &gs, core::ClassOrModuleRef pare
 } // namespace
 
 core::TypeMemberRef resolveTypeMember(core::GlobalState &gs, core::ClassOrModuleRef parent,
-                                       core::TypeMemberRef parentTypeMember, core::ClassOrModuleRef sym) {
+                                      core::TypeMemberRef parentTypeMember, core::ClassOrModuleRef sym) {
     core::NameRef name = parentTypeMember.data(gs)->name;
     core::SymbolRef my = sym.data(gs)->findMemberNoDealias(name);
     if (!my.exists()) {
