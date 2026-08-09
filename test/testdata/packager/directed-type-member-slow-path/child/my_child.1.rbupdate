@@ -1,0 +1,15 @@
+# typed: strict
+# frozen_string_literal: true
+# assert-fast-path: child/my_child.rb,child/__package.rb
+
+class Child::MyChild
+  extend T::Generic
+  Elem = type_template
+
+  extend T::Sig
+
+  sig {returns(String)}
+  def self.foo
+    "hello"
+  end
+end

@@ -1,0 +1,15 @@
+# typed: strict
+# frozen_string_literal: true
+# assert-slow-path: true
+
+class Grandchild::UsesChild
+  extend T::Sig
+
+  sig {returns(Child::MyChild[Integer])}
+  def self.example
+    T.unsafe(nil)
+  end
+end
+
+class Grandchild::NewClass
+end
