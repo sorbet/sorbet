@@ -77,13 +77,16 @@ private:
                         }
 
                         if (m.id() >= ctx.state.typeMembersUsed()) {
-                            return "<type member from a future stratum>"s;
+                            return fmt::format("<type member id={} from a future stratum (typeMembersUsed={})>", m.id(),
+                                               ctx.state.typeMembersUsed());
                         }
 
                         return m.data(ctx)->name.show(ctx);
                     });
-                    fatalLogger->error(R"(msg="types should be fully saturated" loc="{}" members="[{}]" app="{}")",
-                                       this->loc.showRaw(ctx), memberNames, app.show(ctx));
+                    fatalLogger->error(
+                        R"(msg="types should be fully saturated" klass="{}" loc="{}" params_size={} members="[{}]" owning_method="{}")",
+                        app.klass.show(ctx), this->loc.showRaw(ctx), params.size(), memberNames,
+                        this->owningMethod.show(ctx));
                     ENFORCE(false);
                 }
 
