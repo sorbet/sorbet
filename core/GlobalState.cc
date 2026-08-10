@@ -2259,6 +2259,18 @@ bool GlobalState::copySymbolTableFrom(const GlobalState &other, packages::Stratu
                     return sym.asTypeMemberRef().id() >= offsets.typeMembersOffset;
             }
         });
+
+        if (!sym.typeMembers().empty()) {
+            auto &typeParams = sym.existingTypeMembers();
+            auto sizeBefore = typeParams.size();
+            typeParams.erase(
+                std::remove_if(typeParams.begin(), typeParams.end(),
+                               [offsets](core::TypeMemberRef tm) { return tm.id() >= offsets.typeMembersOffset; }),
+                typeParams.end());
+            if (typeParams.size() != sizeBefore) {
+                sym.resultType = nullptr;
+            }
+        }
     }
 
     ENFORCE(this->methods.empty());

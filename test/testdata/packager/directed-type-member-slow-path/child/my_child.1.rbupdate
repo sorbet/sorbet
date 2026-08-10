@@ -1,6 +1,6 @@
 # typed: strict
 # frozen_string_literal: true
-# assert-fast-path: child/my_child.rb,child/__package.rb
+# assert-fast-path: child/my_child.rb,child/__package.rb,grandchild/__package.rb,grandchild/uses_child.rb
 
 class Child::MyChild
   extend T::Generic

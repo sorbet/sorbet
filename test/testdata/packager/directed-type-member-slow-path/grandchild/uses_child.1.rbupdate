@@ -1,6 +1,5 @@
 # typed: strict
 # frozen_string_literal: true
-# assert-slow-path: true
 
 class Grandchild::UsesChild
   extend T::Sig
@@ -10,7 +9,4 @@ class Grandchild::UsesChild
   def self.example
     T.unsafe(nil)
   end
-end
-
-class Grandchild::NewClass
 end
