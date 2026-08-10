@@ -49,7 +49,7 @@ class AdvancedODM
 
     prop :enum_prop, String, enum: ["hello", "goodbye"]
 
-    prop :foreign, String, foreign: ForeignClass # error: must be a lambda
+    prop :foreign, String, foreign: ForeignClass
     prop :foreign_lazy, String, foreign: -> {ForeignClass}
     prop :foreign_proc, String, foreign: proc {ForeignClass}
     prop :foreign_invalid, String, foreign: proc { :not_a_type }
@@ -113,12 +113,12 @@ def main
     T.reveal_type(AdvancedODM.new.enum_prop) # error: Revealed type: `String`
     AdvancedODM.new.enum_prop = "hello"
 
-    T.reveal_type(AdvancedODM.new.foreign_) # error: Revealed type: `T.nilable(ForeignClass)`
-    T.reveal_type(AdvancedODM.new.foreign_!) # error: Revealed type: `ForeignClass`
-    T.reveal_type(AdvancedODM.new.foreign_lazy_) # error: Revealed type: `T.nilable(ForeignClass)`
+    AdvancedODM.new.foreign_ # error: does not exist
+    AdvancedODM.new.foreign_! # error: does not exist
+    AdvancedODM.new.foreign_lazy_ # error: does not exist
 
     # Check that the method still exists even if we can't parse the type
-    AdvancedODM.new.foreign_invalid_
+    AdvancedODM.new.foreign_invalid_ # error: does not exist
 
     T.reveal_type(PropHelpers.new.token) # error: Revealed type: `String`
     PropHelpers.new.token = "tok_token"

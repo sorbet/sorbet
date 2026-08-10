@@ -435,98 +435,62 @@ ClassDef{
           }
           Send{
             flags = {}
-            recv = UnresolvedConstantLit{
-              cnst = <C <U T>>
-              scope = EmptyTree
-            }
-            fun = <U reveal_type>
-            block = nullptr
-            pos_args = 1
-            args = [
-              Send{
-                flags = {}
-                recv = Send{
-                  flags = {}
-                  recv = UnresolvedConstantLit{
-                    cnst = <C <U AdvancedODM>>
-                    scope = EmptyTree
-                  }
-                  fun = <U new>
-                  block = nullptr
-                  pos_args = 0
-                  args = [
-                  ]
-                }
-                fun = <U foreign_>
-                block = nullptr
-                pos_args = 0
-                args = [
-                ]
+            recv = Send{
+              flags = {}
+              recv = UnresolvedConstantLit{
+                cnst = <C <U AdvancedODM>>
+                scope = EmptyTree
               }
+              fun = <U new>
+              block = nullptr
+              pos_args = 0
+              args = [
+              ]
+            }
+            fun = <U foreign_>
+            block = nullptr
+            pos_args = 0
+            args = [
             ]
           }
           Send{
             flags = {}
-            recv = UnresolvedConstantLit{
-              cnst = <C <U T>>
-              scope = EmptyTree
-            }
-            fun = <U reveal_type>
-            block = nullptr
-            pos_args = 1
-            args = [
-              Send{
-                flags = {}
-                recv = Send{
-                  flags = {}
-                  recv = UnresolvedConstantLit{
-                    cnst = <C <U AdvancedODM>>
-                    scope = EmptyTree
-                  }
-                  fun = <U new>
-                  block = nullptr
-                  pos_args = 0
-                  args = [
-                  ]
-                }
-                fun = <U foreign_!>
-                block = nullptr
-                pos_args = 0
-                args = [
-                ]
+            recv = Send{
+              flags = {}
+              recv = UnresolvedConstantLit{
+                cnst = <C <U AdvancedODM>>
+                scope = EmptyTree
               }
+              fun = <U new>
+              block = nullptr
+              pos_args = 0
+              args = [
+              ]
+            }
+            fun = <U foreign_!>
+            block = nullptr
+            pos_args = 0
+            args = [
             ]
           }
           Send{
             flags = {}
-            recv = UnresolvedConstantLit{
-              cnst = <C <U T>>
-              scope = EmptyTree
-            }
-            fun = <U reveal_type>
-            block = nullptr
-            pos_args = 1
-            args = [
-              Send{
-                flags = {}
-                recv = Send{
-                  flags = {}
-                  recv = UnresolvedConstantLit{
-                    cnst = <C <U AdvancedODM>>
-                    scope = EmptyTree
-                  }
-                  fun = <U new>
-                  block = nullptr
-                  pos_args = 0
-                  args = [
-                  ]
-                }
-                fun = <U foreign_lazy_>
-                block = nullptr
-                pos_args = 0
-                args = [
-                ]
+            recv = Send{
+              flags = {}
+              recv = UnresolvedConstantLit{
+                cnst = <C <U AdvancedODM>>
+                scope = EmptyTree
               }
+              fun = <U new>
+              block = nullptr
+              pos_args = 0
+              args = [
+              ]
+            }
+            fun = <U foreign_lazy_>
+            block = nullptr
+            pos_args = 0
+            args = [
             ]
           }
           Send{
