@@ -16,6 +16,7 @@
 #include <utility>
 
 #include "absl/strings/str_cat.h"
+#include "absl/strings/str_replace.h"
 #include "absl/strings/str_split.h"
 #include "core/ErrorQueue.h"
 #include "core/errors/infer.h"
@@ -1263,6 +1264,16 @@ TypeMemberRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, Name
     }
 
     ENFORCE_NO_TIMER(!symbolTableFrozen);
+    if (ownerIsFromPreviousStratum(owner)) {
+        auto ownerResultType = owner.data(*this)->resultType;
+        auto resultTypeStr =
+            ownerResultType ? absl::StrReplaceAll(ownerResultType.toString(*this), {{"\n", " "}}) : "<nullptr>"s;
+        fatalLogger->error(
+            R"(msg="entering type member into owner from previous stratum" name="{}" owner="{}" owner_id={} stratum_offset={} resultType="{}" loc="{}")",
+            name.show(*this), owner.show(*this), owner.id(), this->symbolOffsets.back().classAndModulesOffset,
+            resultTypeStr, loc.showRaw(*this));
+        ENFORCE(false);
+    }
     auto result = TypeMemberRef(*this, typeMembers.size());
     store = result; // DO NOT MOVE this assignment down. emplace_back on typeMembers invalidates `store`
     typeMembers.emplace_back();
@@ -2627,6 +2638,13 @@ MethodRef GlobalState::lookupStaticInitForFile(FileRef file) const {
 
 spdlog::logger &GlobalState::tracer() const {
     return errorQueue->tracer;
+}
+
+bool GlobalState::ownerIsFromPreviousStratum(ClassOrModuleRef owner) const {
+    if (!owner.exists()) {
+        return false;
+    }
+    return owner.id() < this->symbolOffsets.back().classAndModulesOffset;
 }
 
 SymbolTableOffsets::SymbolTableOffsets(const core::GlobalState &gs)

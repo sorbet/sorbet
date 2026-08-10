@@ -740,6 +740,11 @@ public:
         this->symbolOffsets.emplace_back(SymbolTableOffsets(*this));
     }
 
+    // Returns true if the given ClassOrModuleRef was introduced in a stratum prior to the current
+    // one. Used to enforce that type members are not entered into classes from previous strata, as
+    // copyForSlowPath does not strip entries from the typeParams vector.
+    bool ownerIsFromPreviousStratum(ClassOrModuleRef owner) const;
+
 private:
     uint32_t nameTableDiffCount = 0;
 
