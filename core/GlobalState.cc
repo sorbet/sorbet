@@ -18,6 +18,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_replace.h"
 #include "absl/strings/str_split.h"
+#include "common/strings/formatting.h"
 #include "core/ErrorQueue.h"
 #include "core/errors/infer.h"
 #include "core/packages/MangledName.h"
@@ -2278,6 +2279,23 @@ bool GlobalState::copySymbolTableFrom(const GlobalState &other, packages::Stratu
     ENFORCE(this->typeMembers.empty());
     for (auto i = 0; i < offsets.typeMembersOffset; ++i) {
         this->typeMembers.emplace_back(other.typeMembers[i].deepCopy(*this));
+    }
+
+    for (auto &sym : this->classAndModules) {
+        for (auto tm : sym.typeMembers()) {
+            if (tm.id() >= offsets.typeMembersOffset) {
+                auto memberNames = fmt::map_join(sym.typeMembers(), ", ", [&](core::TypeMemberRef m) {
+                    if (!m.exists()) {
+                        return "<missing member>"s;
+                    }
+                    return m.data(other)->name.show(other);
+                });
+                fatalLogger->error(
+                    R"(msg="typeParams vector contains a TypeMemberRef from a future stratum after copySymbolTableFrom" owner="{}" members_size={} typeMembersOffset={} members="[{}]")",
+                    sym.name.show(*this), sym.typeMembers().size(), offsets.typeMembersOffset, memberNames);
+                ENFORCE(false);
+            }
+        }
     }
 
     return true;
