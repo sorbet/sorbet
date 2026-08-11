@@ -17,6 +17,20 @@ const string_view CommentsAssociator::ANNOTATION_PREFIX = "# @";
 const string_view CommentsAssociator::MULTILINE_RBS_PREFIX = "#|";
 const string_view CommentsAssociator::BIND_PREFIX = "#: self as ";
 
+bool isMethodDefSignatureTarget(pm_node_t *node, const parser::Prism::Parser &parser, const core::GlobalState &gs) {
+    if (parser.isMethodDefModifierCall(node, gs)) {
+        return true;
+    }
+
+    auto *call = down_cast<pm_call_node_t>(node);
+    if (call == nullptr || call->receiver != nullptr || call->arguments == nullptr ||
+        call->arguments->arguments.size != 1 || parser.resolveConstant(call->name) != "module_function") {
+        return false;
+    }
+
+    return isa_node<pm_def_node>(call->arguments->arguments.nodes[0]);
+}
+
 namespace {
 
 // Static regex patterns to avoid recompilation
@@ -745,8 +759,8 @@ void CommentsAssociator::walkNode(pm_node_t *node) {
         case PM_CALL_NODE: {
             auto *call = down_cast_nonnull<pm_call_node_t>(node);
 
-            if (parser.isMethodDefModifierCall(node, ctx.state)) {
-                // This is a modifier wrapping a method definition, like `private def foo; end`
+            if (isMethodDefSignatureTarget(node, parser, ctx.state)) {
+                // This call wraps a method definition, like `private def foo; end` or `module_function def foo; end`.
                 associateSignatureCommentsToNode(node);
                 associateAssertionCommentsToNode(node);
                 walkNode(call->receiver);

@@ -31,6 +31,8 @@ struct CommentMap {
     UnorderedMap<pm_node_t *, std::vector<CommentNode>> assertionsForNode;
 };
 
+bool isMethodDefSignatureTarget(pm_node_t *node, const parser::Prism::Parser &parser, const core::GlobalState &gs);
+
 class CommentsAssociator {
 public:
     static const std::string_view RBS_PREFIX;
