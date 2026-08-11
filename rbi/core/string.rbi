@@ -2899,6 +2899,18 @@ class String < Object
   end
   def self.try_convert(obj); end
 
+  # Returns a frozen, possibly pre-existing copy of the string.
+  #
+  # The string will be deduplicated as long as it does not have any instance
+  # variables set on it.
+  sig do
+    params(
+        string: String,
+    )
+    .returns(String)
+  end
+  def self.dedup(string); end
+
   # Element Reference --- If passed a single `index`, returns a substring of one
   # character at that index. If passed a `start` index and a `length`, returns a
   # substring containing `length` characters starting at the `start` index. If
