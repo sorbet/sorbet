@@ -42,6 +42,18 @@ module T::Configuration
     T::Private::Methods.set_final_checks_on_hooks(false)
   end
 
+  # Free the signatures whose runtime checks never run: the `.checked(:never)`
+  # sigs, plus the `.checked(:tests)` sigs outside of a test environment. Those
+  # methods carry no wrapper, so their signatures only serve introspection, and
+  # `T::Utils.signature_for_method` returns `nil` for them after this call.
+  #
+  # A freed signature cannot be rebuilt, so there is no way back. Call this
+  # after the application has loaded all of its code, in the same way as
+  # `T::Utils.run_all_sig_blocks`, and again if more code loads later.
+  def self.drop_unchecked_sigs!
+    T::Private::Methods.drop_unchecked_sigs!
+  end
+
   @include_value_in_type_errors = true
   # Whether to include values in TypeError messages.
   #

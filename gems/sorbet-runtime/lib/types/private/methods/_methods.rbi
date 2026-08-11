@@ -49,6 +49,7 @@ module T::Private::Methods
   @signatures_by_method = T.let({}, T::Hash[String, Signature])
   @sigs_that_raised = T.let({}, T::Hash[String, TrueClass])
   @old_hooks = T.let(nil, T.nilable([UnboundMethod, UnboundMethod, UnboundMethod]))
+  @drop_unchecked_sigs = T.let(false, T::Boolean)
 
   sig { params(mod: Module, method_name: Symbol, dsl_name: Symbol).returns(T.nilable(DeclarationBlock)) }
   private_class_method def self.ensure_valid_declare_dsl!(mod, method_name, dsl_name); end
@@ -111,8 +112,8 @@ module T::Private::Methods
   sig {params(method: T.any(Method, UnboundMethod)).returns(T.nilable(T::Private::Methods::Signature))}
   def self.signature_for_method(method); end
 
-  sig {params(mod: Module, signature: T::Private::Methods::Signature, original_method: UnboundMethod).void}
-  def self.unwrap_method(mod, signature, original_method); end
+  sig {params(mod: Module, signature: T::Private::Methods::Signature, original_method: UnboundMethod, record: T::Boolean).void}
+  def self.unwrap_method(mod, signature, original_method, record: true); end
 
   sig {params(method: UnboundMethod).returns(T::Boolean)}
   def self.has_sig_block_for_method(method); end
@@ -132,6 +133,9 @@ module T::Private::Methods
   sig {returns(T::Array[T::Private::Methods::Signature])}
   def self.all_checked_tests_sigs; end
 
+  sig {void}
+  def self.drop_unchecked_sigs!; end
+
   sig {params(target: Module, source: Module).void}
   def self._hook_impl(target, source); end
 
@@ -143,6 +147,9 @@ module T::Private::Methods
 
   sig {params(key: String).returns(T.nilable(T::Private::Methods::Signature))}
   private_class_method def self.signature_for_key(key); end
+
+  sig {params(signature: T::Private::Methods::Signature).returns(T::Boolean)}
+  private_class_method def self.drop_sig?(signature); end
 
   sig {params(key: String).returns(T::Boolean)}
   private_class_method def self.has_sig_block_for_key(key); end

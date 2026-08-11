@@ -400,6 +400,8 @@ module T::Configuration
   def self.enable_final_checks_on_hooks; end
   def self.enable_legacy_t_enum_migration_mode; end
   def self.reset_final_checks_on_hooks; end
+  sig {void}
+  def self.drop_unchecked_sigs!; end
   sig {returns(T::Boolean)}
   def self.include_value_in_type_errors?; end
   sig {void}
