@@ -30,7 +30,7 @@ bool canHaveSignature(pm_node_t *node, const parser::Prism::Parser &parser, cons
             // (singleton methods have a receiver field set)
             return true;
         case PM_CALL_NODE: {
-            return parser.isAttrAccessorCall(node) || parser.isMethodDefModifierCall(node, gs);
+            return parser.isAttrAccessorCall(node) || isMethodDefSignatureTarget(node, parser, gs);
         }
         default:
             return false;
@@ -340,8 +340,8 @@ unique_ptr<vector<pm_node_t *>> SigsRewriter::signaturesForNode(pm_node_t *node)
                 signatures->emplace_back(sig);
             }
         } else if (auto *call = down_cast<pm_call_node_t>(node)) {
-            if (parser.isMethodDefModifierCall(node, ctx.state)) {
-                // For method definition modifiers, translate the signature for the inner method definition
+            if (isMethodDefSignatureTarget(node, parser, ctx.state)) {
+                // Translate the signature for the wrapped method definition.
                 auto sig = signatureTranslator.translateMethodSignature(call->arguments->arguments.nodes[0],
                                                                         declaration, comments.annotations);
                 if (sig) {
