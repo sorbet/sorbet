@@ -227,8 +227,6 @@ NameDef names[] = {
     {"created"},
     {"updated"},
     {"merchant"},
-    {"foreign"},
-    {"allowDirectMutation", "allow_direct_mutation"},
     {"ifunset"},
     {"instanceVariableGet", "instance_variable_get"},
     {"instanceVariableSet", "instance_variable_set"},

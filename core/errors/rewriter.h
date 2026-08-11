@@ -10,7 +10,7 @@ inline constexpr ErrorClass BadAttrType{3504, StrictLevel::True};
 inline constexpr ErrorClass BadModuleFunction{3505, StrictLevel::True};
 inline constexpr ErrorClass BadTEnumSyntax{3506, StrictLevel::False};
 inline constexpr ErrorClass BadTestEach{3507, StrictLevel::True};
-inline constexpr ErrorClass PropForeignStrict{3508, StrictLevel::False};
+// inline constexpr ErrorClass PropForeignStrict{3508, StrictLevel::False};
 inline constexpr ErrorClass ComputedBySymbol{3509, StrictLevel::False};
 inline constexpr ErrorClass InitializeReturnType{3510, StrictLevel::False};
 inline constexpr ErrorClass InvalidStructMember{3511, StrictLevel::False};

@@ -95,8 +95,6 @@ struct PropInfo {
     ast::ExpressionPtr default_;
     core::NameRef computedByMethodName;
     core::LocOffsets computedByMethodNameLoc;
-    ast::ExpressionPtr foreignKwLit;
-    ast::ExpressionPtr foreign;
     ast::ExpressionPtr enum_;
     ast::ExpressionPtr ifunset;
 };
@@ -329,23 +327,6 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             }
         }
 
-        auto [fk, foreignTree] = ASTUtil::extractHashValue(ctx, *rules, core::Names::foreign());
-        if (foreignTree != nullptr) {
-            ret.foreign = move(foreignTree);
-            ret.foreignKwLit = move(fk);
-            if (auto body = ASTUtil::thunkBody(ctx, ret.foreign)) {
-                ret.foreign = std::move(body);
-            } else {
-                if (auto e = ctx.beginIndexerError(ret.foreign.loc(), core::errors::Rewriter::PropForeignStrict)) {
-                    e.setHeader("The argument to `{}` must be a lambda", "foreign:");
-                    auto foreignLoc = core::Loc{ctx.file, ret.foreign.loc()};
-                    if (auto foreignSource = foreignLoc.source(ctx)) {
-                        e.replaceWith("Convert to lambda", foreignLoc, "-> {{ {} }}", foreignSource.value());
-                    }
-                }
-            }
-        }
-
         auto [enumKey, enum_] = ASTUtil::extractHashValue(ctx, *rules, core::Names::enum_());
         if (enum_ != nullptr) {
             ret.enum_ = std::move(enum_);
@@ -525,61 +506,6 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &prop,
         }
 
         nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, std::move(writerBody)));
-    }
-
-    // Compute the `_` foreign accessor
-    if (prop.foreign) {
-        ast::ExpressionPtr type;
-        ast::ExpressionPtr nonNilType;
-        if (ASTUtil::dupType(prop.foreign) == nullptr) {
-            // If it's not a valid type, just use untyped
-            type = ast::MK::Untyped(loc);
-            nonNilType = ast::MK::Untyped(loc);
-        } else {
-            type = ast::MK::Nilable(loc, ASTUtil::dupType(prop.foreign));
-            nonNilType = ASTUtil::dupType(prop.foreign);
-        }
-
-        // sig {params(allow_direct_mutation: T.nilable(T::Boolean)).returns(T.nilable($foreign))}
-        nodes.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::allowDirectMutation()),
-                                         ast::MK::Nilable(loc, ast::MK::T_Boolean(loc)), std::move(type)));
-
-        // def $fk_method(allow_direct_mutation: nil)
-        //  T.unsafe(nil)
-        // end
-
-        auto fkMethod = ctx.state.enterNameUTF8(name.show(ctx) + "_");
-
-        auto arg = ast::MK::KeywordArgWithDefault(nameLoc, core::Names::allowDirectMutation(), ast::MK::Nil(loc));
-        ast::MethodDef::Flags fkFlags;
-        fkFlags.discardDef = true;
-
-        core::LocOffsets methodLoc;
-        if (prop.foreignKwLit != nullptr) {
-            methodLoc = prop.foreignKwLit.loc();
-        } else {
-            methodLoc = loc;
-        }
-
-        auto fkMethodDef = ast::MK::SyntheticMethod1(loc, methodLoc, fkMethod, std::move(arg),
-                                                     ast::MK::RaiseTypedUnimplemented(loc), fkFlags);
-        nodes.emplace_back(std::move(fkMethodDef));
-
-        // sig {params(opts: T.untyped).returns($foreign)}
-        nodes.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::allowDirectMutation()),
-                                         ast::MK::Nilable(loc, ast::MK::T_Boolean(loc)), std::move(nonNilType)));
-
-        // def $fk_method_!(**opts)
-        //  T.unsafe(nil)
-        // end
-
-        auto fkMethodBang = ctx.state.enterNameUTF8(name.show(ctx) + "_!");
-        auto arg2 = ast::MK::KeywordArgWithDefault(nameLoc, core::Names::allowDirectMutation(), ast::MK::Nil(loc));
-        ast::MethodDef::Flags fkBangFlags;
-        fkBangFlags.discardDef = true;
-        auto fkMethodDefBang = ast::MK::SyntheticMethod1(loc, loc, fkMethodBang, std::move(arg2),
-                                                         ast::MK::RaiseTypedUnimplemented(loc), fkBangFlags);
-        nodes.emplace_back(std::move(fkMethodDefBang));
     }
 
     return nodes;
