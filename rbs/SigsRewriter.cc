@@ -589,6 +589,11 @@ void SigsRewriter::rewriteNode(pm_node_t *node) {
             rewriteNodes(hash->elements);
             break;
         }
+        case PM_KEYWORD_HASH_NODE: {
+            auto *hash = down_cast_nonnull<pm_keyword_hash_node_t>(node);
+            rewriteNodes(hash->elements);
+            break;
+        }
         case PM_ASSOC_NODE: {
             auto *pair = down_cast_nonnull<pm_assoc_node_t>(node);
             rewriteNode(pair->key);
