@@ -76,6 +76,25 @@ void EMSCRIPTEN_KEEPALIVE typecheck(const char *optionsJson) {
     runSorbet(argCharStars.size(), argCharStars.data());
 }
 
+void EMSCRIPTEN_KEEPALIVE initializeLsp(const char *optionsJson) {
+    rapidjson::Document options;
+    options.Parse(optionsJson);
+    if (options.HasParseError() || !options.IsArray()) {
+        fmt::print(stderr, "emscripten/main.cc: LSP options were not a valid JSON array: '{}'. Using defaults.\n",
+                   optionsJson);
+        return;
+    }
+
+    for (rapidjson::SizeType i = 0; i < options.Size(); i++) {
+        if (!options[i].IsString()) {
+            fmt::print(stderr, "emscripten/main.cc: LSP option {} was not a string. Using defaults.\n", i);
+            return;
+        }
+    }
+
+    initializeLSPWrapper();
+}
+
 void EMSCRIPTEN_KEEPALIVE lsp(void (*respond)(const char *), const char *message) {
     initializeLSPWrapper();
 
