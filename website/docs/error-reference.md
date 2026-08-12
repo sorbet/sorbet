@@ -594,6 +594,31 @@ def baz
 end
 ```
 
+## 3559
+
+> This error is specific to RBS support when using the `--enable-experimental-rbs-comments` flag.
+
+RBS `absurd` assertions must annotate a `raise` and name the variable whose type should be checked for exhaustiveness:
+
+```ruby
+#: (Integer | String) -> void
+def handle(value)
+  case value
+  when Integer
+  when String
+  else
+    raise #: absurd(value)
+  end
+end
+```
+
+Annotating the variable directly, or omitting the variable name, raises this error:
+
+```ruby
+value #: absurd
+raise #: absurd
+```
+
 ## 3702
 
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
