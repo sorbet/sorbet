@@ -15,6 +15,15 @@ namespace {
 
 unique_ptr<sorbet::realmain::lsp::SingleThreadedLSPWrapper> lspWrapper;
 
+void initializeLSPWrapper() {
+    if (lspWrapper) {
+        return;
+    }
+
+    lspWrapper = sorbet::realmain::lsp::SingleThreadedLSPWrapper::create();
+    lspWrapper->enableAllExperimentalFeatures();
+}
+
 void runSorbet(int argc, char *argv[]) {
     try {
         sorbet::realmain::realmain(argc, argv);
@@ -68,10 +77,7 @@ void EMSCRIPTEN_KEEPALIVE typecheck(const char *optionsJson) {
 }
 
 void EMSCRIPTEN_KEEPALIVE lsp(void (*respond)(const char *), const char *message) {
-    if (!lspWrapper) {
-        lspWrapper = sorbet::realmain::lsp::SingleThreadedLSPWrapper::create();
-        lspWrapper->enableAllExperimentalFeatures();
-    }
+    initializeLSPWrapper();
 
     auto responses = lspWrapper->getLSPResponsesFor(message);
     for (auto &response : responses) {
