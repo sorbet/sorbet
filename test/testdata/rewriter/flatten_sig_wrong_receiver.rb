@@ -28,24 +28,49 @@ class UsesHasSigMethod
   end
 end
 
+# A receiver whose constant chain looks superficially similar to
+# `T::Sig::WithoutRuntime` (same leaf name and nesting depth) but isn't --
+# Flatten must not treat this as a real signature either.
+module NotSorbet
+  module Sig
+    module WithoutRuntime
+      def self.sig(&blk); end
+    end
+  end
+end
+
+class UsesFakeWithoutRuntime
+  def outer
+    NotSorbet::Sig::WithoutRuntime.sig { void } # error: Method `void` does not exist on `UsesFakeWithoutRuntime`
+    def inner(x)
+      T.reveal_type(x) # error: Revealed type: `T.untyped`
+    end
+  end
+end
+
+# Real signatures must still be found and flattened alongside their nested
+# `def`, with the type info actually applying to the resulting method (not
+# just the method existing).
 class RealSigStillFlattened
   extend T::Sig
 
   def outer
-    sig { void }
-    def inner; end
+    sig { params(x: Integer).void }
+    def inner(x); end
   end
 end
 
 RealSigStillFlattened.new.outer
-RealSigStillFlattened.new.inner
+RealSigStillFlattened.new.inner(1)
+RealSigStillFlattened.new.inner("nope") # error: Expected `Integer` but found `String("nope")` for argument `x`
 
 class WithoutRuntimeSigStillFlattened
   def outer
-    T::Sig::WithoutRuntime.sig { void }
-    def inner; end
+    T::Sig::WithoutRuntime.sig { params(x: Integer).void }
+    def inner(x); end
   end
 end
 
 WithoutRuntimeSigStillFlattened.new.outer
-WithoutRuntimeSigStillFlattened.new.inner
+WithoutRuntimeSigStillFlattened.new.inner(1)
+WithoutRuntimeSigStillFlattened.new.inner("nope") # error: Expected `Integer` but found `String("nope")` for argument `x`

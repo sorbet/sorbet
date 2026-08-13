@@ -320,6 +320,25 @@ public:
         tree = ast::MK::EmptyTree();
     };
 
+    // Detects a receiver of `T::Sig::WithoutRuntime`. Flatten runs before the namer/resolver, so a source-level
+    // constant reference like this is still an `UnresolvedConstantLit` scope chain, not a resolved `ConstantLit`
+    // (that only happens later); we still also check the resolved form since some earlier-running rewriter passes
+    // synthesize sigs with an already-resolved receiver (see ast::MK::Sig/SigVoid/Sig0 in ast/Helpers.h).
+    static bool isWithoutRuntimeSigReceiver(const ast::ExpressionPtr &recv) {
+        if (auto unresolved = ast::cast_tree<ast::UnresolvedConstantLit>(recv)) {
+            if (unresolved->cnst != core::Names::Constants::WithoutRuntime()) {
+                return false;
+            }
+            auto scope = ast::cast_tree<ast::UnresolvedConstantLit>(unresolved->scope);
+            return scope != nullptr && scope->cnst == core::Names::Constants::Sig() &&
+                   ast::MK::isTApproximate(scope->scope);
+        }
+        if (auto resolved = ast::cast_tree<ast::ConstantLit>(recv)) {
+            return resolved->symbol() == core::Symbols::T_Sig_WithoutRuntime();
+        }
+        return false;
+    }
+
     // This mirrors (a subset of) resolver::TypeSyntax::isSig, which we can't call directly here because `rewriter`
     // runs before `resolver` exists in the pipeline. We only want to treat a `sig` call as a real Sorbet signature
     // when it's shaped like one: a bare `sig { ... }` (implicit self receiver) or `T::Sig::WithoutRuntime.sig { ... }`
@@ -334,10 +353,7 @@ public:
         if (send.recv.isSelfReference()) {
             return true;
         }
-        if (auto recv = ast::cast_tree<ast::ConstantLit>(send.recv)) {
-            return recv->symbol() == core::Symbols::T_Sig_WithoutRuntime();
-        }
-        return false;
+        return isWithoutRuntimeSigReceiver(send.recv);
     }
 
     void preTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
