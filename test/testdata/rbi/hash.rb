@@ -79,6 +79,13 @@ T.assert_type!(transformed_keys_hash2, T::Hash[Symbol, Float])
 transformed_keys_bang_hash2 = initial_hash.dup.transform_keys!({ a: :A, b: :B })
 T.assert_type!(transformed_keys_bang_hash2, T::Hash[Symbol, Float])
 
+key_map = T.let({ a: "a", b: "b" }, T::Hash[Symbol, String])
+transformed_keys_hash3 = initial_hash.dup.transform_keys(key_map)
+T.assert_type!(transformed_keys_hash3, T::Hash[String, Float])
+
+transformed_keys_bang_hash3 = initial_hash.dup.transform_keys!(key_map)
+T.assert_type!(transformed_keys_bang_hash3, T::Hash[String, Float])
+
 transformed_values_hash = initial_hash.transform_values(&:to_s)
 T.assert_type!(transformed_values_hash, T::Hash[Symbol, String])
 initial_hash.transform_values(&:size) # error: Method `size` does not exist on `Float`

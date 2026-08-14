@@ -1331,14 +1331,14 @@ class Hash < Object
   # If no block is given, an enumerator is returned instead.
   sig do
     type_parameters(:A).params(
-      hash2: T.nilable(T::Hash[T.type_parameter(:A), V]),
+      hash2: T.nilable(T::Hash[K, T.type_parameter(:A)]),
       blk: T.proc.params(arg0: K).returns(T.type_parameter(:A))
     )
     .returns(T::Hash[T.type_parameter(:A), V])
   end
   sig do
     type_parameters(:A).params(
-      hash2: T::Hash[T.type_parameter(:A), V],
+      hash2: T::Hash[K, T.type_parameter(:A)],
     )
     .returns(T::Hash[T.type_parameter(:A), V])
   end
@@ -1367,14 +1367,14 @@ class Hash < Object
   # If no block is given, an enumerator is returned instead.
   sig do
     type_parameters(:A).params(
-      hash2: T.nilable(T::Hash[T.type_parameter(:A), V]),
+      hash2: T.nilable(T::Hash[K, T.type_parameter(:A)]),
       blk: T.proc.params(arg0: K).returns(T.type_parameter(:A))
     )
     .returns(T::Hash[T.type_parameter(:A), V])
   end
   sig do
     type_parameters(:A).params(
-      hash2: T::Hash[T.type_parameter(:A), V],
+      hash2: T::Hash[K, T.type_parameter(:A)],
     )
     .returns(T::Hash[T.type_parameter(:A), V])
   end
