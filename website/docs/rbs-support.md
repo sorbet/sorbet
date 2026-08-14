@@ -917,16 +917,13 @@ def takes_foo(x); end
 
 ### Literal types
 
-Sorbet does not support RBS's concept of "literal types". The next best thing is to use the literal's underlying type instead:
+Sorbet does not represent RBS literal types as singleton values. It handles them as follows:
 
-- `1` is `Integer`
-- `"foo"` is `String`
-- `:foo` is `Symbol`
-- `true` is `TrueClass`
-- `false` is `FalseClass`
-- `nil` is `NilClass`
+- The boolean literals `true` and `false` are accepted but widened to `TrueClass` and `FalseClass`, respectively.
+- Integer, string, and symbol literals, such as `1`, `"foo"`, and `:foo`, are not supported. Sorbet reports [error 3551](error-reference.md#3551) and treats the type as `T.untyped`.
+- `nil` is not a literal type in RBS. It is a supported base type that Sorbet translates to `NilClass`.
 
-You can also consider using [`T::Enum`](tenum.md).
+For unsupported literals, use the underlying type (`Integer`, `String`, or `Symbol`) instead. You can also consider using [`T::Enum`](tenum.md).
 
 ### Unchecked generics
 
