@@ -4,11 +4,20 @@ title: RBS Comments Support
 sidebar_label: RBS Comments
 ---
 
-## Signature comments
-
-> This feature is experimental and might be changed or removed without notice. To enable it pass the `--enable-experimental-rbs-comments` option to Sorbet or add it to your `sorbet/config`.
-
 Sorbet has experimental support for comment-only type syntax, powered by [RBS](https://github.com/ruby/rbs) annotations.
+
+## Enabling RBS comments
+
+> This feature is experimental and might be changed or removed without notice.
+>
+> RBS comment support requires the Prism parser. Add both options to your `sorbet/config`:
+>
+> ```text
+> --parser=prism
+> --enable-experimental-rbs-comments
+> ```
+
+## Signature comments
 
 The syntax looks like this:
 
@@ -931,8 +940,6 @@ box = Box.new #: Box[untyped]
 ```
 
 ## Type assertions comments
-
-> This feature is experimental and might be changed or removed without notice. To enable it pass the `--enable-experimental-rbs-comments` option to Sorbet or add it to your `sorbet/config`.
 
 ### `T.let` assertions
 
