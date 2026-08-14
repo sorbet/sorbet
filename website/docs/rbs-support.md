@@ -729,6 +729,12 @@ sig(:final) { params(x: Integer).void }
 def qux2(x); end
 ```
 
+The following method annotations are also supported:
+
+- `# @overridable` translates to `overridable`.
+- `# @override(allow_incompatible: false)` translates to `override(allow_incompatible: false)`.
+- `# @override(allow_incompatible: :visibility)` translates to `override(allow_incompatible: :visibility)`.
+
 Note: these annotations like `@override` use normal comments, like `# @override` (not the special `#:` comment). This makes it possible to reuse any existing YARD or RDoc annotations.
 
 ## Class and module annotations
