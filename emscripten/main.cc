@@ -16,10 +16,13 @@ namespace {
 
 unique_ptr<sorbet::realmain::lsp::SingleThreadedLSPWrapper> lspWrapper;
 
-void initializeLSPWrapper(
-    shared_ptr<sorbet::realmain::options::Options> options = make_shared<sorbet::realmain::options::Options>()) {
+void initializeLSPWrapper(shared_ptr<sorbet::realmain::options::Options> options = nullptr) {
     if (lspWrapper) {
         return;
+    }
+
+    if (!options) {
+        options = make_shared<sorbet::realmain::options::Options>();
     }
 
     lspWrapper = sorbet::realmain::lsp::SingleThreadedLSPWrapper::create(string_view(), move(options));
@@ -170,6 +173,7 @@ void EMSCRIPTEN_KEEPALIVE initializeLsp(const char *optionsJson) {
     if (options.HasParseError() || !options.IsArray()) {
         fmt::print(stderr, "emscripten/main.cc: LSP options were not a valid JSON array: '{}'. Using defaults.\n",
                    optionsJson);
+        initializeLSPWrapper();
         return;
     }
 
@@ -179,6 +183,7 @@ void EMSCRIPTEN_KEEPALIVE initializeLsp(const char *optionsJson) {
         const auto &argument = options[i];
         if (!argument.IsString()) {
             fmt::print(stderr, "emscripten/main.cc: LSP option {} was not a string. Using defaults.\n", i);
+            initializeLSPWrapper();
             return;
         }
         arguments.emplace_back(argument.GetString());
@@ -187,6 +192,7 @@ void EMSCRIPTEN_KEEPALIVE initializeLsp(const char *optionsJson) {
     auto lspOptions = make_shared<sorbet::realmain::options::Options>();
     if (auto error = applyLSPOptions(*lspOptions, arguments)) {
         fmt::print(stderr, "emscripten/main.cc: Invalid LSP options: {}. Using defaults.\n", *error);
+        initializeLSPWrapper();
         return;
     }
 
