@@ -233,6 +233,46 @@ T.class_of(Foo)[Integer]
 
 <tr><td>
 
+[Self type]
+
+</td><td>
+
+```plaintext
+self
+```
+
+</td><td><a href="self-type">
+
+```ruby
+T.self_type
+```
+
+</a></td></tr>
+
+<!-- end of Self type -->
+
+<tr><td>
+
+[Instance type]
+
+</td><td>
+
+```plaintext
+instance
+```
+
+</td><td><a href="attached-class">
+
+```ruby
+T.attached_class
+```
+
+</a></td></tr>
+
+<!-- end of Instance type -->
+
+<tr><td>
+
 [Union type]
 
 </td><td>
@@ -430,6 +470,26 @@ Foo[Bar]
 </a></td></tr>
 
 <!-- end of Generic type -->
+
+<tr><td>
+
+[Generic module type]
+
+</td><td>
+
+```plaintext
+Module[Foo]
+```
+
+</td><td><a href="class-of#tmodule-vs-tclass">
+
+```ruby
+T::Module[Foo]
+```
+
+</a></td></tr>
+
+<!-- end of Generic module type -->
 
 <tr><td>
 
@@ -879,6 +939,7 @@ Generic types like `Array` or `Hash` are translated to their `T::` Sorbet types 
 
 - `Array[Integer]` is translated to `T::Array[Integer]`
 - `Class[Integer]` is translated to `T::Class[Integer]`
+- `Module[Integer]` is translated to `T::Module[Integer]`
 - `Enumerable[Integer]` is translated to `T::Enumerable[Integer]`
 - `Enumerator[Integer]` is translated to `T::Enumerator[Integer]`
 - `Enumerator::Lazy[Integer]` is translated to `T::Enumerator::Lazy[Integer]`
@@ -1151,6 +1212,9 @@ the manual `self as` in client code would be unnecessary.
 [Top type]: https://github.com/ruby/rbs/blob/master/docs/syntax.md#base-types
 [Bottom type]: https://github.com/ruby/rbs/blob/master/docs/syntax.md#base-types
 [Void type]: https://github.com/ruby/rbs/blob/master/docs/syntax.md#base-types
+[Self type]: https://github.com/ruby/rbs/blob/master/docs/syntax.md#base-types
+[Instance type]: https://github.com/ruby/rbs/blob/master/docs/syntax.md#base-types
+[Generic module type]: https://github.com/ruby/rbs/blob/master/docs/syntax.md#class-instance-type
 [Generic type]: https://github.com/ruby/rbs/blob/master/docs/syntax.md#type-variable
 [Generic method]: https://github.com/ruby/rbs/blob/master/docs/syntax.md#type-variable
 [Tuple type]: https://github.com/ruby/rbs/blob/master/docs/syntax.md#tuple-type
