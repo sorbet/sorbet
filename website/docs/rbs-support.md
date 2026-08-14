@@ -873,7 +873,7 @@ def baz(x); end
 
 ## Special behaviors
 
-The `#:` comment must come **immediately** before the following method definition. If there is a blank line between the comment and method definition, the comment will be ignored.
+RBS signature comments follow the same association rules as [`sig`](sigs.md) blocks: blank lines and regular comments may appear before the method definition, but an intervening Ruby statement breaks the association and causes Sorbet to report the RBS signature as unused.
 
 Generic types like `Array` or `Hash` are translated to their `T::` Sorbet types equivalent:
 
