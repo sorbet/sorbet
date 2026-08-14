@@ -52,6 +52,52 @@ Long signatures can be broken into multiple lines using the `#|` continuation co
 def foo(x, y); end
 ```
 
+### Method parameters
+
+The parameter kinds in an RBS signature must match those in the Ruby method definition:
+
+| Ruby parameter              | RBS syntax                                    |
+| --------------------------- | --------------------------------------------- |
+| Required positional `x`     | `Integer` or `Integer x`                      |
+| Optional positional `x = 0` | `?Integer` or `?Integer x`                    |
+| Rest positional `*xs`       | `*Integer` or `*Integer xs`                   |
+| Trailing positional `x`     | `Integer` or `Integer x`, after the rest type |
+| Required keyword `x:`       | `x: Integer`                                  |
+| Optional keyword `x: 0`     | `?x: Integer`                                 |
+| Rest keyword `**xs`         | `**Integer` or `**Integer xs`                 |
+| Required block `&block`     | `{ (String) -> void }`                        |
+| Optional block `&block`     | `?{ (String) -> void }`                       |
+
+Positional and rest parameter names are optional in RBS signatures. When present, they must match the Ruby parameter names. Sorbet reports an error when a parameter's name or kind does not match the method definition.
+
+A block type can specify the type of `self` inside the block by placing `[self: Type]` before the return arrow, for example `{ (String) [self: Handler] -> void }`.
+
+The following example combines all of these forms:
+
+```ruby
+class Handler; end
+
+#: (
+#|   Integer id,
+#|   ?String label,
+#|   *Symbol tags,
+#|   Integer trailing,
+#|   enabled: bool,
+#|   ?limit: Integer,
+#|   **untyped options
+#| ) ?{ (String) [self: Handler] -> void } -> void
+def process(
+  id,
+  label = "default",
+  *tags,
+  trailing,
+  enabled:,
+  limit: 10,
+  **options,
+  &block
+); end
+```
+
 ## Caveats
 
 > Support for this feature is experimental, and we actively discourage depending on it for anything other than to offer feedback to the Sorbet developers.
