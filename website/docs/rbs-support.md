@@ -698,7 +698,7 @@ def baz
 end
 ```
 
-Note that contrary to Sorbet's `abstract` methods, methods annotated with `@abstract` must always raise an error.
+Unlike Sorbet's `abstract` methods, methods annotated with `@abstract` must have a body that consists of a single recognized `raise` call.
 
 ## Method annotations
 
