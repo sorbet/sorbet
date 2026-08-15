@@ -1263,9 +1263,20 @@ private:
                                        bool willDeleteOldDefs, ClassBehaviorLocsMap &classBehaviorLocs) {
         auto symbol = getClassSymbol(ctx, state, klass);
 
-        if (klass.classKind == core::FoundClass::Kind::Class && !symbol.data(ctx)->superClass().exists() &&
-            symbol != core::Symbols::BasicObject()) {
-            symbol.data(ctx)->setSuperClass(core::Symbols::todo());
+        switch (klass.classKind) {
+            case core::FoundClass::Kind::Class: {
+                if (!symbol.data(ctx)->superClass().exists() && symbol != core::Symbols::BasicObject()) {
+                    symbol.data(ctx)->setSuperClass(core::Symbols::todo());
+                }
+                break;
+            }
+            case core::FoundClass::Kind::Module: {
+                symbol.data(ctx)->setSuperClass(core::Symbols::Sorbet_Private_Static_ImplicitModuleSuperClass());
+                break;
+            }
+            case core::FoundClass::Kind::Unknown: {
+                break;
+            }
         }
 
         const bool isUnknown = klass.classKind == core::FoundClass::Kind::Unknown;
