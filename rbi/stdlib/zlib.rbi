@@ -755,7 +755,7 @@ class Zlib::GzipFile::NoFooter < ::Zlib::GzipFile::Error; end
 class Zlib::GzipReader < ::Zlib::GzipFile
   include(::Enumerable)
 
-  Elem = type_member(:out)
+  Elem = type_member { { fixed: String } }
 
   # Creates a
   # [`GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
@@ -772,122 +772,162 @@ class Zlib::GzipReader < ::Zlib::GzipFile
   # If the gzip file header is incorrect, raises an
   # [`Zlib::GzipFile::Error`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipFile/Error.html)
   # exception.
-  def self.new(*_); end
+  sig {
+    params(
+      io: T.untyped,
+      external_encoding: T.any(String, Encoding),
+      internal_encoding: T.any(String, Encoding),
+      encoding: T.any(String, Encoding),
+    ).void
+  }
+  def initialize(io, external_encoding: T.unsafe(nil), internal_encoding: T.unsafe(nil), encoding: T.unsafe(nil)); end
 
   # This is a deprecated alias for `each_byte`.
-  def bytes; end
+  sig { params(blk: T.proc.params(arg0: Integer).returns(T.anything)).returns(T.self_type) }
+  sig { returns(T::Enumerator[Integer]) }
+  def bytes(&blk); end
 
   # See
   # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
   # documentation for a description.
-  def each(*_); end
+  sig { params(sep: String, limit: Integer, chomp: T::Boolean, blk: T.proc.params(arg0: String).returns(T.anything)).returns(T.self_type) }
+  sig { params(sep: String, limit: Integer, chomp: T::Boolean).returns(T::Enumerator[String]) }
+  def each(sep="", limit=0, chomp: false, &blk); end
 
   # See
   # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
   # documentation for a description.
-  def each_byte; end
+  sig { params(blk: T.proc.params(arg0: Integer).returns(T.anything)).returns(T.self_type) }
+  sig { returns(T::Enumerator[Integer]) }
+  def each_byte(&blk); end
 
   # See
   # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
   # documentation for a description.
-  def each_char; end
+  sig { params(blk: T.proc.params(arg0: String).returns(T.anything)).returns(T.self_type) }
+  sig { returns(T::Enumerator[String]) }
+  def each_char(&blk); end
 
   # See
   # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
   # documentation for a description.
-  def each_line(*_); end
+  sig { params(sep: String, limit: Integer, chomp: T::Boolean, blk: T.proc.params(arg0: String).returns(T.anything)).returns(T.self_type) }
+  sig { params(sep: String, limit: Integer, chomp: T::Boolean).returns(T::Enumerator[String]) }
+  def each_line(sep="", limit: 0, chomp: false, &blk); end
 
   # Returns `true` or `false` whether the stream has reached the end.
+  sig { returns(T::Boolean) }
   def eof; end
 
   # Returns `true` or `false` whether the stream has reached the end.
+  sig { returns(T::Boolean) }
   def eof?; end
 
   # See
   # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
   # documentation for a description.
+  sig { returns(Encoding) }
   def external_encoding; end
 
   # See
   # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
   # documentation for a description.
+  sig { returns(T.nilable(Integer)) }
   def getbyte; end
 
   # See
   # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
   # documentation for a description.
+  sig { returns(T.nilable(String)) }
   def getc; end
 
   # See
   # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
   # documentation for a description.
-  def gets(*_); end
+  sig { params(sep: T.nilable(String), limit: Integer, chomp: T::Boolean).returns(T.nilable(String)) }
+  def gets(sep=nil, limit=0, chomp: false); end
 
   # The line number of the last row read from this file.
+  sig { returns(Integer) }
   def lineno; end
 
   # Specify line number of the last row read from this file.
-  def lineno=(_); end
+  sig { params(l: Integer).returns(Integer) }
+  def lineno=(l); end
 
   # This is a deprecated alias for `each_line`.
-  def lines(*_); end
+  sig { params(sep: String, limit: Integer, chomp: T::Boolean, blk: T.proc.params(arg0: String).returns(T.anything)).returns(T.self_type) }
+  sig { params(sep: String, limit: Integer, chomp: T::Boolean).returns(T::Enumerator[String]) }
+  def lines(sep="", limit: 0, chomp: false, &blk); end
 
   # Total number of output bytes output so far.
+  sig { returns(Integer) }
   def pos; end
 
   # See
   # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
   # documentation for a description.
-  def read(*_); end
+  sig { params(length: Integer, outbuf: String).returns(T.nilable(String)) }
+  def read(length, outbuf); end
 
   # See
   # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
   # documentation for a description.
+  sig { returns(Integer) }
   def readbyte; end
 
   # See
   # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
   # documentation for a description.
+  sig { returns(String) }
   def readchar; end
 
   # See
   # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
   # documentation for a description.
-  def readline(*_); end
+  sig { params(sep: String, limit: Integer, chomp: T::Boolean).returns(String) }
+  def readline(sep=nil, limit=0, chomp: false); end
 
   # See
   # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
   # documentation for a description.
-  def readlines(*_); end
+  sig { params(sep: String, limit: Integer).returns(T::Array[String]) }
+  def readlines(sep, limit); end
 
   # Reads at most *maxlen* bytes from the gzipped stream but it blocks only if
   # *gzipreader* has no data immediately available. If the optional *outbuf*
   # argument is present, it must reference a
   # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html), which will
   # receive the data. It raises `EOFError` on end of file.
-  def readpartial(*_); end
+  sig { params(maxlen: Integer, outbuf: String).returns(String) }
+  def readpartial(maxlen, outbuf=""); end
 
   # Resets the position of the file pointer to the point created the
   # [`GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
   # object. The associated [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
   # object needs to respond to the `seek` method.
+  sig { returns(Integer) }
   def rewind; end
 
   # Total number of output bytes output so far.
+  sig { returns(Integer) }
   def tell; end
 
   # See
   # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
   # documentation for a description.
-  def ungetbyte(_); end
+  sig { params(b: T.any(String, Integer)).returns(NilClass) }
+  def ungetbyte(b); end
 
   # See
   # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
   # documentation for a description.
-  def ungetc(_); end
+  sig { params(b: T.any(String, Integer)).returns(NilClass) }
+  def ungetc(b); end
 
   # Returns the rest of the data which had read for parsing gzip format, or
   # `nil` if the whole gzip file is not parsed yet.
+  sig { returns(T.nilable(String)) }
   def unused; end
 
   # Opens a file specified by `filename` as a gzipped file, and returns a
@@ -895,7 +935,12 @@ class Zlib::GzipReader < ::Zlib::GzipFile
   # object associated with that file. Further details of this method are in
   # [`Zlib::GzipReader.new`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html#method-c-new)
   # and ZLib::GzipFile.wrap.
-  def self.open(*_, &blk); end
+  sig {
+    type_parameters(:U)
+      .params(filename: String, blk: T.proc.params(arg0: Zlib::GzipReader).returns(T.type_parameter(:U)))
+      .returns(T.type_parameter(:U))
+  }
+  def self.open(filename, &blk); end
 end
 
 # [`Zlib::GzipWriter`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipWriter.html)
