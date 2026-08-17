@@ -1801,25 +1801,43 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 }
 
                 ExpressionPtr block; // the body to the `each` loop we'll create
+
+                // In Ruby, `for` loops don't define a new scope (the way a block passed to `each` would),
+                // so the loop variable(s) continue to exist after the end of the loop, holding `nil` if the
+                // collection was empty. Because the block parameters in the desugared `each` call are
+                // block-local, we additionally seed the loop variable(s) in the enclosing scope from
+                // `<Magic>.<element-or-nil>(<collection>)`, so that their post-loop type is
+                // `T.nilable(<element type>)` instead of `NilClass`.
+                // See https://github.com/sorbet/sorbet/issues/10265
+                unique_ptr<parser::Node> seedLhs;
                 if (canProvideNiceDesugar) {
                     MethodDef::PARAMS_store params;
-                    if (parser::isa_node<parser::LVarLhs>(forLoopVar.get())) { // single local
+                    if (auto *lvar = parser::cast_node<parser::LVarLhs>(forLoopVar.get())) { // single local
                         // Desugar:
-                        //     for a in []
+                        //     for a in <coll>
                         // into:
-                        //     [].each { |a| ... }
+                        //     <forTemp>$1 = <coll>
+                        //     a = ::<Magic>.<element-or-nil>(<forTemp>$1)
+                        //     <forTemp>$1.each { |a| ... }
+                        seedLhs = make_unique<parser::LVarLhs>(lvar->loc, lvar->name);
 
                         auto localVar = node2TreeImpl(dctx, forLoopVar);
                         params.emplace_back(move(localVar));
                     } else if (auto *mlhs = parser::cast_node<parser::Mlhs>(forLoopVar.get())) { // mlhs of all locals
                         // Desugar:
-                        //     for a, b, c in []
+                        //     for a, b, c in <coll>
                         // into:
-                        //     [].each { |a, b, c| ... }
+                        //     <forTemp>$1 = <coll>
+                        //     a, b, c = ::<Magic>.<element-or-nil>(<forTemp>$1)
+                        //     <forTemp>$1.each { |a, b, c| ... }
+                        parser::NodeVec seedVars;
                         for (auto &c : mlhs->exprs) {
-                            ENFORCE(parser::isa_node<parser::LVarLhs>(c.get()));
+                            auto *lvar = parser::cast_node<parser::LVarLhs>(c.get());
+                            ENFORCE(lvar != nullptr);
+                            seedVars.emplace_back(make_unique<parser::LVarLhs>(lvar->loc, lvar->name));
                             params.emplace_back(node2TreeImpl(dctx, c));
                         }
+                        seedLhs = make_unique<parser::Mlhs>(mlhs->loc, move(seedVars));
                     } else {
                         unreachable("Expected the `forLoopVar` to be either a LVarLhs or Mlhs");
                     }
@@ -1878,8 +1896,42 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     block = MK::Block(loc, move(loopBody), move(params));
                 }
 
-                auto res =
-                    MK::Send0Block(loc, node2TreeImpl(dctx, for_->expr), core::Names::each(), locZeroLen, move(block));
+                ExpressionPtr res;
+                if (canProvideNiceDesugar) {
+                    ENFORCE(seedLhs != nullptr);
+
+                    // Evaluate the collection expression once, into a temporary, so that we can
+                    // reference it both to seed the loop variable(s) and to call `each` on it.
+                    // The synthesized lhs gets a zero-length loc so that tooling (e.g. extract to
+                    // variable) doesn't attribute the whole `for` loop to it.
+                    core::NameRef collectionTempName = dctx.freshNameUnique(core::Names::forTemp());
+                    auto collectionAssign =
+                        MK::Assign(loc, MK::Local(locZeroLen, collectionTempName), node2TreeImpl(dctx, for_->expr));
+
+                    // `<Magic>.<element-or-nil>(<forTemp>$1)` types as `T.nilable(<element type>)`,
+                    // where the element type comes from the declared block parameter type of the
+                    // collection's `each`, or `T.untyped` if `each` has no signature.
+                    auto seedRhs = MK::Send1(loc, MK::Magic(locZeroLen), core::Names::elementOrNil(), locZeroLen,
+                                             MK::Local(loc, collectionTempName));
+
+                    ExpressionPtr seedAssign;
+                    if (auto *mlhs = parser::cast_node<parser::Mlhs>(seedLhs.get())) {
+                        seedAssign = desugarMlhs(dctx, locZeroLen, mlhs, move(seedRhs));
+                    } else {
+                        seedAssign = MK::Assign(loc, node2TreeImpl(dctx, seedLhs), move(seedRhs));
+                    }
+
+                    auto eachSend = MK::Send0Block(loc, MK::Local(loc, collectionTempName), core::Names::each(),
+                                                   locZeroLen, move(block));
+
+                    InsSeq::STATS_store stats;
+                    stats.emplace_back(move(collectionAssign));
+                    stats.emplace_back(move(seedAssign));
+                    res = MK::InsSeq(loc, move(stats), move(eachSend));
+                } else {
+                    res = MK::Send0Block(loc, node2TreeImpl(dctx, for_->expr), core::Names::each(), locZeroLen,
+                                         move(block));
+                }
                 result = move(res);
             },
             [&](parser::Integer *integer) {
