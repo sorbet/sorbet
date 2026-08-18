@@ -336,7 +336,7 @@ class Time < Object
   # ```
   sig do
     params(
-        arg0: BasicObject,
+        arg0: Numeric,
     )
     .returns(Time)
   end
@@ -361,7 +361,7 @@ class Time < Object
   end
   sig do
     params(
-        arg0: BasicObject,
+        arg0: Numeric,
     )
     .returns(Time)
   end
