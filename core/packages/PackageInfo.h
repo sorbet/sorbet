@@ -3,6 +3,7 @@
 
 #include "absl/types/span.h"
 
+#include "core/Context.h"
 #include "core/Loc.h"
 #include "core/NameRef.h"
 #include "core/StrictLevel.h"
@@ -323,12 +324,15 @@ public:
 
         // The symbol is unpackaged, and the context is not a prelude package.
         UnpackagedSymbol,
+
+        // The file is on the test side of the package but the symbol was defined on the non-test side.
+        TestModifyingNonTest,
     };
 
     // True when it's safe to modify this symbol from the context of a file owned by this package. Modification in this
     // case is something that fundamentally changes the meaning of the symbol (adding type members or mixins, for
     // example).
-    CanModifyResult canModifySymbol(const core::GlobalState &gs, ClassOrModuleRef sym) const;
+    CanModifyResult canModifySymbol(core::Context ctx, ClassOrModuleRef sym) const;
 
     // It's okay to access the internals of `other` if it's this package, or if test packages are enabled and we
     // imported `other` with `uses_internals: true`.

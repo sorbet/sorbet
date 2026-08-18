@@ -831,27 +831,35 @@ private:
                     }
                     break;
 
+                case core::packages::PackageInfo::CanModifyResult::TestModifyingNonTest:
                 case core::packages::PackageInfo::CanModifyResult::NotOwner:
                 case core::packages::PackageInfo::CanModifyResult::UnpackagedSymbol:
                     if (auto e =
                             ctx.beginError(job.ancestor->loc(), core::errors::Resolver::ModifyingUnpackagedConstant)) {
-                        e.setHeader("Superclasses may only be set on constants in the package that owns them");
-
-                        e.addErrorLine(job.klass.data(ctx)->loc(), "Symbol originally defined here");
-
-                        if (canModify == core::packages::PackageInfo::CanModifyResult::NotOwner) {
-                            e.addErrorLine(filePackageInfo.declLoc(), "Package where the `{}` occurs",
-                                           job.isInclude ? "include" : "extend");
-
-                            auto &ownerPackage = ctx.state.packageDB().getPackageInfo(job.klass.data(ctx)->package);
-                            ENFORCE(ownerPackage.exists());
-                            e.addErrorLine(ownerPackage.declLoc(), "Package where `{}` is defined",
+                        if (canModify == core::packages::PackageInfo::CanModifyResult::TestModifyingNonTest) {
+                            e.setHeader(
+                                "Superclasses in a test file cannot modify a non-test class in the same package");
+                            e.addErrorLine(job.klass.data(ctx)->loc(), "`{}` defined here (non-test)",
                                            job.klass.show(ctx));
                         } else {
-                            e.addErrorLine(filePackageInfo.declLoc(), "Package defined here is not a `{}`",
-                                           "prelude_package");
-                            e.addErrorNote("`{}` is unpackaged, and may be reopened from a package marked `{}`",
-                                           job.klass.show(ctx), "prelude_package");
+                            e.setHeader("Superclasses may only be set on constants in the package that owns them");
+
+                            e.addErrorLine(job.klass.data(ctx)->loc(), "Symbol originally defined here");
+
+                            if (canModify == core::packages::PackageInfo::CanModifyResult::NotOwner) {
+                                e.addErrorLine(filePackageInfo.declLoc(), "Package where the `{}` occurs",
+                                               job.isInclude ? "include" : "extend");
+
+                                auto &ownerPackage = ctx.state.packageDB().getPackageInfo(job.klass.data(ctx)->package);
+                                ENFORCE(ownerPackage.exists());
+                                e.addErrorLine(ownerPackage.declLoc(), "Package where `{}` is defined",
+                                               job.klass.show(ctx));
+                            } else {
+                                e.addErrorLine(filePackageInfo.declLoc(), "Package defined here is not a `{}`",
+                                               "prelude_package");
+                                e.addErrorNote("`{}` is unpackaged, and may be reopened from a package marked `{}`",
+                                               job.klass.show(ctx), "prelude_package");
+                            }
                         }
                     }
                     break;
@@ -893,28 +901,36 @@ private:
                     }
                     break;
 
+                case core::packages::PackageInfo::CanModifyResult::TestModifyingNonTest:
                 case core::packages::PackageInfo::CanModifyResult::NotOwner:
                 case core::packages::PackageInfo::CanModifyResult::UnpackagedSymbol:
                     if (auto e =
                             ctx.beginError(job.ancestor->loc(), core::errors::Resolver::ModifyingUnpackagedConstant)) {
-                        e.setHeader("`{}` may only be used on constants in the package that owns them",
-                                    job.isInclude ? "include" : "extend");
-
-                        e.addErrorLine(job.klass.data(ctx)->loc(), "Symbol originally defined here");
-
-                        if (canModify == core::packages::PackageInfo::CanModifyResult::NotOwner) {
-                            e.addErrorLine(filePackageInfo.declLoc(), "Package where the `{}` occurs",
-                                           job.isInclude ? "include" : "extend");
-
-                            auto &ownerPackage = ctx.state.packageDB().getPackageInfo(job.klass.data(ctx)->package);
-                            ENFORCE(ownerPackage.exists());
-                            e.addErrorLine(ownerPackage.declLoc(), "Package where `{}` is defined",
+                        if (canModify == core::packages::PackageInfo::CanModifyResult::TestModifyingNonTest) {
+                            e.setHeader("`{}` in a test file cannot modify a non-test class in the same package",
+                                        job.isInclude ? "include" : "extend");
+                            e.addErrorLine(job.klass.data(ctx)->loc(), "`{}` defined here (non-test)",
                                            job.klass.show(ctx));
                         } else {
-                            e.addErrorLine(filePackageInfo.declLoc(), "Package defined here is not a `{}`",
-                                           "prelude_package");
-                            e.addErrorNote("`{}` is unpackaged, and may be reopened from a package marked `{}`",
-                                           job.klass.show(ctx), "prelude_package");
+                            e.setHeader("`{}` may only be used on constants in the package that owns them",
+                                        job.isInclude ? "include" : "extend");
+
+                            e.addErrorLine(job.klass.data(ctx)->loc(), "Symbol originally defined here");
+
+                            if (canModify == core::packages::PackageInfo::CanModifyResult::NotOwner) {
+                                e.addErrorLine(filePackageInfo.declLoc(), "Package where the `{}` occurs",
+                                               job.isInclude ? "include" : "extend");
+
+                                auto &ownerPackage = ctx.state.packageDB().getPackageInfo(job.klass.data(ctx)->package);
+                                ENFORCE(ownerPackage.exists());
+                                e.addErrorLine(ownerPackage.declLoc(), "Package where `{}` is defined",
+                                               job.klass.show(ctx));
+                            } else {
+                                e.addErrorLine(filePackageInfo.declLoc(), "Package defined here is not a `{}`",
+                                               "prelude_package");
+                                e.addErrorNote("`{}` is unpackaged, and may be reopened from a package marked `{}`",
+                                               job.klass.show(ctx), "prelude_package");
+                            }
                         }
                     }
                     break;

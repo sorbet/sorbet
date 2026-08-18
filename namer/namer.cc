@@ -2226,6 +2226,20 @@ public:
                 }
                 return ignoreBadTypeMember(ctx, move(tree));
 
+            case core::packages::PackageInfo::CanModifyResult::TestModifyingNonTest: {
+                if (auto e = ctx.beginError(send->loc, core::errors::Namer::ModifyingUnpackagedConstant)) {
+                    e.setHeader("`{}` in a test file cannot modify a non-test class in the same package",
+                                isTypeTemplate ? "type_template" : "type_member");
+                    for (auto &loc : onSymbol.data(ctx)->locs()) {
+                        if (loc.exists() && !loc.file().data(ctx).isPackagedTest()) {
+                            e.addErrorLine(loc, "`{}` defined here (non-test)", ctx.owner.show(ctx));
+                            break;
+                        }
+                    }
+                }
+                return ignoreBadTypeMember(ctx, move(tree));
+            }
+
             case core::packages::PackageInfo::CanModifyResult::NotOwner:
             case core::packages::PackageInfo::CanModifyResult::UnpackagedSymbol:
                 if (auto e = ctx.beginError(send->loc, core::errors::Namer::ModifyingUnpackagedConstant)) {

@@ -1033,13 +1033,15 @@ vector<MangledName> PackageInfo::directSubPackages(const core::GlobalState &gs) 
     return subpackages;
 }
 
-PackageInfo::CanModifyResult PackageInfo::canModifySymbol(const core::GlobalState &gs, ClassOrModuleRef sym) const {
+PackageInfo::CanModifyResult PackageInfo::canModifySymbol(core::Context ctx, ClassOrModuleRef sym) const {
     ENFORCE(sym.exists());
 
     // Unpackaged code is allowed to modify anything.
     if (!this->exists()) {
         return CanModifyResult::CanModify;
     }
+
+    auto &gs = ctx.state;
 
     // Ensure we're not working with a singleton class before performing any further checks.
     sym = sym.data(gs)->topAttachedClass(gs);
@@ -1058,11 +1060,22 @@ PackageInfo::CanModifyResult PackageInfo::canModifySymbol(const core::GlobalStat
     // namespace, and if so that there aren't any subpackages, as that could introduce ordering dependencies that don't
     // work with package-directed type checking.
     if (symPackage == this->mangledName_) {
-        if (!this->hasSubPackages || !symData->isPackageNamespace()) {
-            return CanModifyResult::CanModify;
-        } else {
+        if (this->hasSubPackages && symData->isPackageNamespace()) {
             return CanModifyResult::Subpackages;
         }
+
+        // In package-directed mode, test files must not modify symbols that were defined on the non-test side of
+        // the package. Doing so would create type members (or mixins) at the test stratum that dangle after
+        // copySymbolTableFrom filters by stratum boundary.
+        if (ctx.file.exists() && ctx.file.data(gs).isPackagedTest()) {
+            for (auto &loc : symData->locs()) {
+                if (loc.exists() && !loc.file().data(gs).isPackagedTest()) {
+                    return CanModifyResult::TestModifyingNonTest;
+                }
+            }
+        }
+
+        return CanModifyResult::CanModify;
     }
 
     // Modifying an unpackaged symbol is only allowed from prelude packages.
