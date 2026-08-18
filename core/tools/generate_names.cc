@@ -106,6 +106,7 @@ NameDef names[] = {
     {"extend"},
     {"currentFile", "__FILE__"},
     {"merge"},
+    {"mergeBang", "merge!"},
 
     // T keywords
     {"sig"},

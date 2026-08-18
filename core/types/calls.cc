@@ -4694,6 +4694,7 @@ const vector<Intrinsic> intrinsics{
 
     {Symbols::Shape(), Intrinsic::Kind::Instance, Names::squareBracketsEq(), &Shape_squareBracketsEq},
     {Symbols::Shape(), Intrinsic::Kind::Instance, Names::merge(), &Shape_merge},
+    {Symbols::Shape(), Intrinsic::Kind::Instance, Names::mergeBang(), &Shape_merge},
     {Symbols::Shape(), Intrinsic::Kind::Instance, Names::toHash(), &Shape_to_hash},
     {Symbols::Shape(), Intrinsic::Kind::Instance, Names::toH(), &Shape_to_h},
 
