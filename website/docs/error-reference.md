@@ -507,25 +507,25 @@ To define multiple public methods in a single namespace, do not use `Opus::Comma
 
 > This error is specific to RBS support when using the `--enable-experimental-rbs-comments` flag.
 
-This error is raised when a RBS signature comment contains a syntax error. See the [RBS syntax reference](https://github.com/ruby/rbs/blob/master/docs/syntax.md) for more details on the RBS syntax.
+This error is raised when an RBS signature comment contains a syntax error. See the [RBS syntax reference](https://github.com/ruby/rbs/blob/master/docs/syntax.md) for more details on the RBS syntax.
 
 ## 3551
 
 > This error is specific to RBS support when using the `--enable-experimental-rbs-comments` flag.
 
-This error is raised when a RBS signature comment contains a feature not supported by Sorbet. See the page on [RBS comments support](rbs-support.md) for a list of supported features.
+This error is raised when an RBS signature comment contains a feature not supported by Sorbet. See the page on [RBS comments support](rbs-support.md) for a list of supported features.
 
 ## 3552
 
 > This error is specific to RBS support when using the `--enable-experimental-rbs-comments` flag.
 
-This error is raised when a RBS signature comment has more parameters than the method definition it represents.
+This error is raised when an RBS signature comment has more parameters than the method definition it represents.
 
 ## 3553
 
 > This error is specific to RBS support when using the `--enable-experimental-rbs-comments` flag.
 
-This error is raised when a RBS assertion comment is found in a place where it is not allowed.
+This error is raised when an RBS assertion comment is found in a place where it is not allowed.
 
 For example this snippet will raise this error:
 
@@ -538,7 +538,7 @@ end
 
 > This error is specific to RBS support when using the `--enable-experimental-rbs-comments` flag.
 
-This error is raised when Sorbet couldn't match a RBS comment with a method definition or a type assertion.
+This error is raised when Sorbet couldn't match an RBS comment with a method definition or a type assertion.
 
 ## 3555
 
@@ -552,7 +552,7 @@ This error is raised when Sorbet encounters an incorrect ordering of signature c
 
 This error is raised when the kind of parameter in the method definition does not match the kind of parameter in the RBS signature.
 
-For example, this method expect the parameter to be defined as a keyword parameter, while the RBS signature declares it as a positional parameter:
+For example, this method expects the parameter to be defined as a keyword parameter, while the RBS signature declares it as a positional parameter:
 
 ```ruby
 #: (Integer) -> void

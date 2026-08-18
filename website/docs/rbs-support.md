@@ -688,7 +688,7 @@ attr_reader :foo
 
 ## Abstract methods
 
-Methods can be marked as abstract with using the `@abstract` annotation comment:
+Methods can be marked as abstract using the `@abstract` annotation comment:
 
 ```ruby
 # @abstract
@@ -1125,7 +1125,7 @@ This is equivalent to:
 foo(T.cast(x, Integer))
 ```
 
-Casts comments can be used in any context where a type assertion is valid:
+Cast comments can be used in any context where a type assertion is valid:
 
 ```ruby
 foo
