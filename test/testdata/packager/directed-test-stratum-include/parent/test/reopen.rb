@@ -1,0 +1,8 @@
+# typed: strict
+# frozen_string_literal: true
+
+# stratum: 2
+
+class Parent::MyClass # error: Tests in the `Parent` package must define tests in the `Test::Parent` namespace
+  include Parent::TestMixin # error: `include` in a test file cannot modify a non-test class in the same package
+end
