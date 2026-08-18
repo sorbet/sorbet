@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # exit on the first error
 # this makes sure we don't create a java gem missing
