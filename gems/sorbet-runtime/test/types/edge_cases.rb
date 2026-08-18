@@ -126,7 +126,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         # Shouldn't add overhead
         obj = klass.new
         allocs = counting_allocations { obj.bar }
-        assert_equal(1, allocs)
+        assert_equal(0, allocs)
         allocs = counting_allocations { obj.bar }
         assert_equal(0, allocs)
       end
@@ -171,7 +171,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         # Shouldn't add overhead
         obj = klass.new
         allocs = counting_allocations { obj.bar }
-        assert_equal(1, allocs)
+        assert_equal(0, allocs)
         allocs = counting_allocations { obj.bar }
         assert_equal(0, allocs)
       end
@@ -226,7 +226,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         # Shouldn't add overhead
         obj = subclass.new
         allocs = counting_allocations { obj.bar }
-        assert_equal(1, allocs)
+        assert_equal(0, allocs)
         allocs = counting_allocations { obj.bar }
         assert_equal(0, allocs)
       end
@@ -285,6 +285,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         allocs = counting_allocations { obj.bar }
         assert_equal(0, allocs)
       end
+
     end
 
     describe 'singleton method' do
@@ -436,7 +437,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
         # Shouldn't add overhead
         allocs = counting_allocations { subclass.bar }
-        assert_equal(1, allocs)
+        assert_equal(0, allocs)
         allocs = counting_allocations { subclass.bar }
         assert_equal(0, allocs)
       end
@@ -549,6 +550,15 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         assert_equal([1, 2, 3], klass.foo([-1, -2, -3]))
         assert_equal(["-1", "-2", "-3"], klass.foo(["-1", "-2", "-3"]))
       end
+    end
+
+    it 'alias has same first-call allocations as non-aliased method after run_all_sig_blocks' do
+      # This must be tested in a subprocess because run_all_sig_blocks
+      # affects global state and we want to measure allocations in isolation.
+      fixture = "#{__dir__}/fixtures/alias_method_allocations.rb"
+      result, status = Open3.capture2("ruby", fixture)
+      assert(status.success?, "fixture failed (exit #{status.exitstatus}): #{result}")
+      assert_equal("PASS\n", result)
     end
   end
 
