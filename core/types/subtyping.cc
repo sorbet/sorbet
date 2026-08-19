@@ -1,3 +1,4 @@
+#include "absl/algorithm/container.h"
 #include "common/common.h"
 #include "common/typecase.h"
 #include "core/Symbols.h"
@@ -359,24 +360,46 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             typecase(
                 t1,
                 [&](const TupleType &a1) { // Warning: this implements COVARIANT arrays
-                    if (auto a2 = cast_type<TupleType>(t2);
-                        a2 && a1.elems.size() == a2->elems.size()) { // lub arrays only if they have same element count
-                        vector<TypePtr> elemLubs;
-                        int i = -1;
-                        bool differ1 = false;
-                        bool differ2 = false;
-                        for (auto &el2 : a2->elems) {
-                            ++i;
-                            auto &inserted = elemLubs.emplace_back(lub(gs, a1.elems[i], el2));
-                            differ1 = differ1 || inserted != a1.elems[i];
-                            differ2 = differ2 || inserted != el2;
-                        }
-                        if (!differ1) {
-                            result = t1;
-                        } else if (!differ2) {
-                            result = t2;
-                        } else {
-                            result = make_type<TupleType>(move(elemLubs));
+                    if (auto a2 = cast_type<TupleType>(t2)) {
+                        if (a1.elems.size() == a2->elems.size()) { // lub same lengths
+                            // lub([a, b, c], [x, y, z]) = [lub(a, x), lub(b, y), lub(c, z)]
+                            vector<TypePtr> elemLubs;
+                            int i = -1;
+                            bool differ1 = false;
+                            bool differ2 = false;
+                            for (auto &el2 : a2->elems) {
+                                ++i;
+                                auto &inserted = elemLubs.emplace_back(lub(gs, a1.elems[i], el2));
+                                differ1 = differ1 || inserted != a1.elems[i];
+                                differ2 = differ2 || inserted != el2;
+                            }
+                            if (!differ1) {
+                                result = t1;
+                            } else if (!differ2) {
+                                result = t2;
+                            } else {
+                                result = make_type<TupleType>(move(elemLubs));
+                            }
+                        } else { // try to lub different lengths
+                            optional<TypePtr> elementType;
+                            auto isHomogeneous = [&](const vector<TypePtr> &elems) {
+                                return absl::c_all_of(elems, [&](const TypePtr &elem) {
+                                    auto widened = Types::dropLiteral(gs, elem);
+                                    if (!elementType.has_value()) {
+                                        elementType = widened;
+                                        return true;
+                                    }
+                                    return Types::equivNoUntyped(gs, elementType.value(), widened);
+                                });
+                            };
+
+                            if (isHomogeneous(a1.elems) && isHomogeneous(a2->elems) && elementType.has_value()) {
+                                // e.g. lub([1, 2], [3, 4, 5]) = T::Array[Integer]
+                                result = Types::arrayOf(gs, elementType.value());
+                            } else {
+                                // Different lengths, different types, e.g. lub([1], [:a, :b]) = T::Array[T.untyped]
+                                result = Types::arrayOfUntyped(Symbols::Magic_UntypedSource_tupleLub());
+                            }
                         }
                     } else {
                         result = lub(gs, a1.underlying(gs), t2.underlying(gs));
@@ -411,7 +434,27 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                                 result = make_type<ShapeType>(h2->keys, move(valueLubs));
                             }
                         } else {
-                            result = Types::hashOfUntyped(Symbols::Magic_UntypedSource_shapeLub());
+                            optional<TypePtr> keyType;
+                            optional<TypePtr> valueType;
+                            auto isHomogeneous = [&](const vector<TypePtr> &types, optional<TypePtr> &commonType) {
+                                return absl::c_all_of(types, [&](const TypePtr &type) {
+                                    auto widened = Types::dropLiteral(gs, type);
+                                    if (!commonType.has_value()) {
+                                        commonType = widened;
+                                        return true;
+                                    }
+                                    return Types::equivNoUntyped(gs, commonType.value(), widened);
+                                });
+                            };
+
+                            if (isHomogeneous(h1.keys, keyType) && isHomogeneous(h2->keys, keyType) &&
+                                isHomogeneous(h1.values, valueType) && isHomogeneous(h2->values, valueType) &&
+                                keyType.has_value() && valueType.has_value()) {
+                                // e.g. lub({a: 1}, {b: 2, c: 3}) = T::Hash[Symbol, Integer]
+                                result = Types::hashOf(gs, keyType.value(), valueType.value());
+                            } else {
+                                result = Types::hashOfUntyped(Symbols::Magic_UntypedSource_shapeLub());
+                            }
                         }
                     } else {
                         bool allowProxyInLub = isa_type<TupleType>(t2);
