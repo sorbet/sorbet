@@ -2080,6 +2080,7 @@ unique_ptr<GlobalState> GlobalState::deepCopyGlobalState(bool keepId) const {
         result->creation = timeit2.getFlowEdge();
     }
     result->symbolOffsets = this->symbolOffsets;
+    result->earliestReopenedStratum = this->earliestReopenedStratum;
     return result;
 }
 
@@ -2215,6 +2216,10 @@ bool GlobalState::copySymbolTableFrom(const GlobalState &other, packages::Stratu
     if (toStratum == packages::Stratum(0) || toStratum.rawId() >= other.symbolOffsets.size()) {
         return false;
     }
+
+    ENFORCE(!other.earliestReopenedStratum.has_value() || toStratum <= other.earliestReopenedStratum.value(),
+            "Copying the symbol table up to stratum {}, but stratum {} was re-populated by a fast path",
+            toStratum.rawId(), other.earliestReopenedStratum.value_or(packages::Stratum(0)).rawId());
 
     this->packageDB_ = other.packageDB().deepCopy();
 

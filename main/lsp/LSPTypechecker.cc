@@ -219,10 +219,6 @@ bool LSPTypechecker::typecheck(unique_ptr<LSPFileUpdates> updates, WorkerPool &w
 
             filesTypechecked = move(result.filesTypechecked);
 
-            // Remember where in the package graph we're making this change, as that will determine how much we can
-            // copy on the next slow path.
-            this->fastPathEditStratum = std::min(this->fastPathEditStratum, result.editStratum);
-
             ENFORCE(updates->updatedFiles.empty());
             ENFORCE(updates->updatedFileRefs.empty());
 
@@ -320,7 +316,7 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
         }
 
         // We track the edit stratum for all files that were updated by the edit, if their source hashes differ. This
-        // will avoid bumping the fastPathEditStratum down when the file was opened by a query like go-to-definition,
+        // will avoid bumping the reopened stratum down when the file was opened by a query like go-to-definition,
         // but is still fairly coarse grained, as any change will mark the package as needing to be re-typechecked.
         if (oldFile->sourceHash() != newHash) {
             editStratum = std::min(this->fileToStratum[fref.id()], editStratum);
@@ -334,6 +330,10 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
 
     updates.updatedFiles.clear();
     updates.updatedFileRefs.clear();
+
+    // Remember where in the package graph we're making this change, as that will determine how much we can
+    // copy on the next slow path.
+    gs->reopenStratum(editStratum);
 
     if (shouldRunIncrementalNamer && gs->packageDB().enabled()) {
         vector<core::FileRef> packageFiles;
@@ -429,7 +429,7 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
         "Running fast path over num_files={} incrementalNamer={} preemption={} duration={} files=[{}]",
         toTypecheck.size(), shouldRunIncrementalNamer, isPreemption, duration.usec, files);
 
-    return FastPathResult{move(toTypecheck), move(toCache), editStratum};
+    return FastPathResult{move(toTypecheck), move(toCache)};
 }
 
 namespace {
@@ -438,11 +438,12 @@ namespace {
 // means that we can't reuse the symbol table.
 core::packages::Stratum determineStartingStratum(const core::GlobalState &gs,
                                                  const vector<core::packages::Stratum> &fileToStratum,
-                                                 const core::packages::Stratum fastPathEditStratum,
+                                                 const core::packages::Stratum lastStratum,
                                                  const LSPFileUpdates &update) {
-    // We start by assuming we can copy up to the last fast path edit stratum, as that may have introduced new
-    // symbols.
-    auto editStratum = fastPathEditStratum;
+    // We start by assuming we can copy as much of the symbol table as GlobalState says is still a self-contained
+    // prefix, which any fast path edit since the last slow path will have lowered. The clamp is because a completed
+    // slow path records an offsets entry for the end of the last stratum, and there is no stratum to start from there.
+    auto editStratum = std::min(lastStratum, gs.firstIncompleteStratum());
 
     int ix = -1;
     for (auto &file : update.updatedFiles) {
@@ -585,7 +586,7 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
     if (cancelable) {
         timeit.setTag("cancelable", "true");
 
-        startingStratum = determineStartingStratum(*this->gs, this->fileToStratum, this->fastPathEditStratum, updates);
+        startingStratum = determineStartingStratum(*this->gs, this->fileToStratum, this->lastStratum, updates);
 
         auto savedGS =
             std::exchange(this->gs, pipeline::copyForSlowPath(*this->gs, this->config->opts, startingStratum));
@@ -597,7 +598,7 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
 
         this->cancellationUndoState =
             make_unique<UndoState>(std::move(savedGS), std::move(this->indexedFinalGS), move(this->fileToStratum),
-                                   this->lastStratum, this->fastPathEditStratum, this->workspaceFiles, updates.epoch);
+                                   this->lastStratum, this->workspaceFiles, updates.epoch);
     } else {
         timeit.setTag("cancelable", "false");
     }
@@ -725,7 +726,6 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
         const auto numStrata = strata.strata.size();
         this->fileToStratum = move(strata.fileToStratum);
         this->lastStratum = core::packages::Stratum(numStrata - 1);
-        this->fastPathEditStratum = this->lastStratum;
         this->gs->preallocateForStrata(numStrata);
 
         // Determine which stratum this edit will be checked at, so that we have a good reference for when to switch
@@ -922,7 +922,7 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
         // arbitrarily long time. The next update will be responsible for freeing the underlying UndoState after it
         // makes use of the epoch field to determine additional files to include in the edit.
         cancellationUndoState->restore(this->gs, this->indexedFinalGS, this->fileToStratum, this->lastStratum,
-                                       this->fastPathEditStratum, this->workspaceFiles);
+                                       this->workspaceFiles);
         logger->debug("[Typechecker] Typecheck run for epoch {} was canceled.", updates.epoch);
     }
 

@@ -740,6 +740,34 @@ public:
         this->symbolOffsets.emplace_back(SymbolTableOffsets(*this));
     }
 
+    // The earliest stratum whose symbols are no longer a contiguous range of ids. Every stratum
+    // before it forms a self-contained prefix of the symbol table, in the sense that no symbol in
+    // it refers to a symbol outside it.
+    //
+    // Outside of LSP mode, this is the stratum we are in the middle of populating.
+    // In LSP, it might be earlier than the current stratum once a fast path has re-processed an earlier stratum.
+    packages::Stratum firstIncompleteStratum() const {
+        auto recorded = packages::Stratum(this->symbolOffsets.size() - 1);
+        return this->earliestReopenedStratum.has_value() ? std::min(this->earliestReopenedStratum.value(), recorded)
+                                                         : recorded;
+    }
+
+    // Records that a fast path will have entered new symbols for this stratum, so we cannot copy a
+    // prefix for this stratum anymore (because its symbols will live partly in the middle of the
+    // symbol table and partly at the end of the symbol table).
+    //
+    // This deliberately does not truncate `symbolOffsets` to make the fast & slow path
+    // representations "uniform", because a fast path can preempt a running slow path.
+    //
+    // This is also why symbolOffsets is not exposed to callers directly, only these helpers,
+    // because the size of `symbolOffsets` will be different on e.g. the first traversal through the
+    // strata and a fast path edit that revisits an earlier stratum.
+    void reopenStratum(packages::Stratum stratum) {
+        this->earliestReopenedStratum = this->earliestReopenedStratum.has_value()
+                                            ? std::min(this->earliestReopenedStratum.value(), stratum)
+                                            : stratum;
+    }
+
 private:
     uint32_t nameTableDiffCount = 0;
 
@@ -786,6 +814,9 @@ private:
 
     // Symbol table offsets for each stratum of the package graph traversal.
     std::vector<SymbolTableOffsets> symbolOffsets;
+
+    // The earliest stratum passed to `reopenStratum`, if any.
+    std::optional<packages::Stratum> earliestReopenedStratum;
 
     // Copy options over from another GlobalState. Private, as it's only meant to be used as a helper to implement other
     // copying strategies.
