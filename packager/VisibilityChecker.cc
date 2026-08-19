@@ -604,17 +604,6 @@ public:
             return;
         }
 
-        // If the imported symbol comes from the test namespace, we must also be in the test namespace.
-        // TODO(neil): is this check valid in --test-packages mode?
-        if ((otherFile.data(ctx).isPackagedTestHelper() || otherFile.data(ctx).isPackagedTest()) &&
-            !this->isAnyTestFile()) {
-            if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
-                e.setHeader("`{}` is defined in a test namespace and cannot be referenced in a non-test file",
-                            litSymbol.show(ctx));
-            }
-            return;
-        }
-
         auto &db = ctx.state.packageDB();
 
         // no need to check visibility for these cases
@@ -622,7 +611,20 @@ public:
         if (!otherPackage.exists() || this->package.mangledName() == otherPackage) {
             return;
         }
+
         auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
+
+        // If the imported symbol comes from the test namespace, we must also be in the test namespace.
+        // TODO(trevor): this check is redundant with import checking after the test-packages migration is complete.
+        if (!pkg.usesTestPackages &&
+            (otherFile.data(ctx).isPackagedTestHelper() || otherFile.data(ctx).isPackagedTest()) &&
+            !this->isAnyTestFile()) {
+            if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
+                e.setHeader("`{}` is defined in a test namespace and cannot be referenced in a non-test file",
+                            litSymbol.show(ctx));
+            }
+            return;
+        }
 
         if (this->package.usesTestPackages) {
             if (pkg.testPackage() && !this->package.testPackage()) {
