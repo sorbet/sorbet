@@ -548,4 +548,23 @@ string MetaType::show(const GlobalState &gs, ShowOptions options) const {
     return fmt::format("Runtime object representing type: {}", wrapped.show(gs, options));
 }
 
+string EnumUnion::toStringWithTabs(const GlobalState &gs, int tabs) const {
+    fmt::memory_buffer buf;
+    fmt::format_to(std::back_inserter(buf), "EnumUnion {{");
+    bool first = true;
+    for (auto &member : members) {
+        if (!first) {
+            fmt::format_to(std::back_inserter(buf), ", ");
+        }
+        first = false;
+        fmt::format_to(std::back_inserter(buf), "{}", member.toString(gs));
+    }
+    fmt::format_to(std::back_inserter(buf), "}}");
+    return to_string(buf);
+}
+
+string EnumUnion::show(const GlobalState &gs, ShowOptions options) const {
+    return fmt::format("T.any({})", fmt::map_join(members, ", ", [&](auto member) { member.show(gs, options); }));
+}
+
 } // namespace sorbet::core

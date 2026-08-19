@@ -560,6 +560,56 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         }
     }
 
+    if (auto eu2 = cast_type<EnumUnion>(t2)) {
+        if (auto eu1 = cast_type<EnumUnion>(t1)) {
+            auto parent1 = eu1->parentEnumClass(gs);
+            auto parent2 = eu2->parentEnumClass(gs);
+            if (parent1.exists() && parent1 == parent2) {
+                vector<ClassOrModuleRef> combined;
+                combined.reserve(eu1->members.size() + eu2->members.size());
+                combined.insert(combined.end(), eu1->members.begin(), eu1->members.end());
+                // TODO(neil): this is quadratic, should we use a set to dedup and convert to vector after?
+                for (auto &m : eu2->members) {
+                    if (absl::c_find(combined, m) == combined.end()) {
+                        combined.emplace_back(m);
+                    }
+                }
+                if (combined.size() == eu1->members.size()) {
+                    // eu2 is a subset of eu1
+                    return t1;
+                }
+                if (combined.size() == eu2->members.size()) {
+                    // eu2 is a superset of eu1
+                    return t2;
+                }
+                ENFORCE(combined.size() > eu1->members.size() && combined.size() > eu2->members.size());
+                return make_type<EnumUnion>(move(combined));
+            }
+            return OrType::make_shared(eu1->toOrType(gs), eu2->toOrType(gs));
+        }
+
+        if (isa_type<ClassType>(t1)) {
+            auto sym1 = cast_type_nonnull<ClassType>(t1).symbol;
+            auto parent1 = EnumUnion::parentEnumClass(gs, sym1);
+            if (parent1.exists()) {
+                auto parent2 = eu2->parentEnumClass(gs);
+                ENFORCE(parent2.exists());
+                if (parent1 == parent2) {
+                    if (absl::c_find(eu2->members, sym1) != eu2->members.end()) {
+                        return t2;
+                    }
+                    vector<ClassOrModuleRef> combined;
+                    combined.reserve(eu2->members.size() + 1);
+                    combined.emplace_back(sym1);
+                    combined.insert(combined.end(), eu2->members.begin(), eu2->members.end());
+                    return make_type<EnumUnion>(move(combined));
+                }
+            }
+        }
+
+        return OrType::make_shared(t1, eu2->toOrType(gs));
+    }
+
     // none is proxy
     return lubGround(gs, t1, t2);
 }
@@ -604,6 +654,10 @@ TypePtr lubGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
         return t2;
     } else {
         categoryCounterInc("lub.<class>.collapsed", "no");
+        auto parent1 = EnumUnion::parentEnumClass(gs, sym1);
+        if (parent1.exists() && parent1 == EnumUnion::parentEnumClass(gs, sym2)) {
+            return make_type<EnumUnion>(vector<ClassOrModuleRef>{sym1, sym2});
+        }
         return OrType::make_shared(t1, t2);
     }
 }
@@ -877,6 +931,26 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
 
             return Types::bottom();
         }
+    }
+
+    if (auto eu2 = cast_type<EnumUnion>(t2)) {
+        vector<ClassOrModuleRef> kept;
+        for (auto &member : eu2->members) {
+            auto res = Types::all(gs, t1, make_type<ClassType>(member));
+            if (!res.isBottom()) {
+                kept.emplace_back(member);
+            }
+        }
+        if (kept.empty()) {
+            return Types::bottom();
+        }
+        if (kept.size() == eu2->members.size()) {
+            return t2;
+        }
+        if (kept.size() == 1) {
+            return make_type<ClassType>(kept[0]);
+        }
+        return make_type<EnumUnion>(move(kept));
     }
 
     if (auto o2 = cast_type<OrType>(t2)) { // 3, 6
@@ -1591,6 +1665,27 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
 
     // Note: order of cases here matters! We can't lose "and" information in t1 early and we can't
     // lose "or" information in t2 early.
+    if (auto eu1 = cast_type<EnumUnion>(t1)) { // 7, 8, 9
+        return isSubTypeUnderConstraint(gs, constr, eu1->toOrType(gs), t2, mode, errorDetailsCollector);
+    }
+    if (auto eu2 = cast_type<EnumUnion>(t2)) {
+        if (isa_type<ClassType>(t1)) {
+            auto c1 = cast_type_nonnull<ClassType>(t1);
+            if (c1.symbol == Symbols::untyped()) {
+                return mode == UntypedMode::AlwaysCompatible;
+            }
+            if (c1.symbol == Symbols::bottom()) {
+                return true;
+            }
+            if (isSubTypeUnderConstraint(gs, constr, make_type<ClassType>(eu2->parentEnumClass(gs)), t1, mode, errorDetailsCollector)) {
+                // TODO: add a test case for this
+                return true;
+            }
+            return absl::c_any_of(eu2->members, [&c1](auto member) { return c1.symbol == member; });
+        }
+        return isSubTypeUnderConstraint(gs, constr, t1, eu2->toOrType(gs), mode, errorDetailsCollector);
+    }
+
     if (auto o1 = cast_type<OrType>(t1)) { // 7, 8, 9
         auto subCollectorLeft = errorDetailsCollector.newCollector();
         auto isSubTypeOfLeft = Types::isSubTypeUnderConstraint(gs, constr, o1->left, t2, mode, subCollectorLeft);

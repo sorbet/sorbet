@@ -35,6 +35,10 @@ private:
             case core::TypePtr::Tag::TypeVar:
                 break;
 
+            case core::TypePtr::Tag::EnumUnion:
+                // Essentially an OrType, but all members are concrete types (enum class variants)
+                break;
+
             case core::TypePtr::Tag::OrType: {
                 auto &any = core::cast_type_nonnull<core::OrType>(type);
                 validate(ctx, polarity, any.left);
