@@ -863,9 +863,6 @@ private:
     void emitRedefinedConstantError(core::MutableContext ctx, core::LocOffsets errorLoc, core::NameRef name,
                                     core::SymbolRef::Kind kind, core::SymbolRef prevSymbol) {
         using Kind = core::SymbolRef::Kind;
-        ENFORCE(
-            kind != Kind::ClassOrModule,
-            "ClassOrModule symbols should always be entered first, so they should never need to mangle something else");
         if (auto e = ctx.beginError(errorLoc, core::errors::Namer::ConstantKindRedefinition)) {
             auto prevSymbolKind = prettySymbolKind(ctx, prevSymbol.kind());
             if (prevSymbol.kind() == Kind::ClassOrModule && prevSymbol.asClassOrModuleRef().data(ctx)->isDeclared()) {
@@ -1208,20 +1205,33 @@ private:
         core::ClassOrModuleRef symbol;
         if (klass.name == core::Names::Constants::Root()) {
             symbol = core::Symbols::root();
+        } else if (ctx.owner == core::Symbols::StubModule()) {
+            // A parent scope failed to resolve as a class/module. Keep poisoning nested definitions with StubModule,
+            // but don't create symbols under StubModule for invalid user code.
+            symbol = core::Symbols::StubModule();
         } else if (klass.name == core::Names::singleton()) {
             symbol = ctx.owner.asClassOrModuleRef().data(ctx)->singletonClass(ctx);
         } else {
             auto owner = getOwnerSymbol(state, klass.owner);
             auto member = owner.data(ctx)->findMember(ctx, klass.name);
             if (member.exists()) {
-                // If member exists with this name, it must be a class or module, because we never mangle-rename them.
-                symbol = member.asClassOrModuleRef();
+                if (member.isClassOrModule()) {
+                    symbol = member.asClassOrModuleRef();
+                } else {
+                    emitRedefinedConstantError(ctx, klass.declLoc, klass.name,
+                                               core::SymbolRef::Kind::ClassOrModule, member);
+                    symbol = core::Symbols::StubModule();
+                }
             } else {
                 auto newClass = ctx.state.enterClassOrModuleSymbol(ctx.locAt(klass.declLoc), owner, klass.name);
                 symbol = newClass;
             }
         }
         ENFORCE(symbol.exists());
+
+        if (symbol == core::Symbols::StubModule()) {
+            return symbol;
+        }
 
         const bool isUnknown = klass.classKind == core::FoundClass::Kind::Unknown;
         const bool isModule = klass.classKind == core::FoundClass::Kind::Module;
@@ -1262,6 +1272,9 @@ private:
     core::ClassOrModuleRef insertClass(core::MutableContext ctx, const State &state, const core::FoundClass &klass,
                                        bool willDeleteOldDefs, ClassBehaviorLocsMap &classBehaviorLocs) {
         auto symbol = getClassSymbol(ctx, state, klass);
+        if (symbol == core::Symbols::StubModule()) {
+            return symbol;
+        }
 
         if (klass.classKind == core::FoundClass::Kind::Class && !symbol.data(ctx)->superClass().exists() &&
             symbol != core::Symbols::BasicObject()) {
@@ -1813,12 +1826,20 @@ public:
             switch (ref.kind()) {
                 case core::FoundDefinitionRef::Kind::StaticField: {
                     const auto &staticField = ref.staticField(foundDefs);
-                    insertStaticField(ctx.withOwner(getOwnerSymbol(state, staticField.owner)), state, staticField);
+                    auto owner = getOwnerSymbol(state, staticField.owner);
+                    if (owner == core::Symbols::StubModule()) {
+                        break;
+                    }
+                    insertStaticField(ctx.withOwner(owner), state, staticField);
                     break;
                 }
                 case core::FoundDefinitionRef::Kind::TypeMember: {
                     const auto &typeMember = ref.typeMember(foundDefs);
-                    insertTypeMember(ctx.withOwner(getOwnerSymbol(state, typeMember.owner)), state, typeMember);
+                    auto owner = getOwnerSymbol(state, typeMember.owner);
+                    if (owner == core::Symbols::StubModule()) {
+                        break;
+                    }
+                    insertTypeMember(ctx.withOwner(owner), state, typeMember);
                     break;
                 }
                 case core::FoundDefinitionRef::Kind::Class:
@@ -1838,15 +1859,26 @@ public:
                 // to delete on the fast path. Alias methods will be defined later, in resolver.
                 continue;
             }
-            insertMethod(ctx.withOwner(getOwnerSymbol(state, method.owner)), method);
+            auto owner = getOwnerSymbol(state, method.owner);
+            if (owner == core::Symbols::StubModule()) {
+                continue;
+            }
+            insertMethod(ctx.withOwner(owner), method);
         }
 
         for (auto &field : foundDefs.fields()) {
-            insertField(ctx.withOwner(getOwnerSymbol(state, field.owner)), field);
+            auto owner = getOwnerSymbol(state, field.owner);
+            if (owner == core::Symbols::StubModule()) {
+                continue;
+            }
+            insertField(ctx.withOwner(owner), field);
         }
 
         for (const auto &modifier : foundDefs.modifiers()) {
             const auto owner = getOwnerSymbol(state, modifier.owner);
+            if (owner == core::Symbols::StubModule()) {
+                continue;
+            }
             switch (modifier.kind) {
                 case core::FoundModifier::Kind::Method:
                     modifyMethod(ctx.withOwner(owner), modifier);
@@ -1959,11 +1991,26 @@ class TreeSymbolizer {
         auto newOwner = squashNamesInner(ctx, owner, constLit->scope, firstNameRecursive);
         ENFORCE(newOwner.exists());
 
+        if (newOwner == core::Symbols::StubModule()) {
+            node = ast::make_expression<ast::ConstantLit>(core::Symbols::StubModule(),
+                                                          node.toUnique<ast::UnresolvedConstantLit>());
+            return core::Symbols::StubModule();
+        }
+
         core::SymbolRef existing = ctx.state.lookupClassSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
         if (firstName && !existing.exists() && newOwner.isClassOrModule()) {
             existing = ctx.state.lookupStaticFieldSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
             if (existing.exists()) {
                 existing = existing.dealias(ctx.state);
+            }
+        }
+
+        if (existing.exists() && !existing.isClassOrModule()) {
+            existing = core::Symbols::StubModule();
+        } else if (!existing.exists()) {
+            auto member = newOwner.asClassOrModuleRef().data(ctx)->findMember(ctx, constLit->cnst);
+            if (member.exists() && !member.isClassOrModule()) {
+                existing = core::Symbols::StubModule();
             }
         }
 
@@ -1996,7 +2043,9 @@ public:
 
         auto ident = ast::cast_tree<ast::UnresolvedIdent>(klass.name);
 
-        if ((ident != nullptr) && ident->name == core::Names::singleton()) {
+        if (ctx.owner == core::Symbols::StubModule()) {
+            klass.symbol = core::Symbols::StubModule();
+        } else if ((ident != nullptr) && ident->name == core::Names::singleton()) {
             ENFORCE(ident->kind == ast::UnresolvedIdent::Kind::Class);
             klass.symbol = ctx.owner.enclosingClass(ctx).data(ctx)->lookupSingletonClass(ctx);
             ENFORCE(klass.symbol.exists());
@@ -2012,19 +2061,24 @@ public:
                 ENFORCE(symbol == core::Symbols::root());
             }
         }
+
+        if (klass.symbol == core::Symbols::StubModule()) {
+            klass.rhs.clear();
+            klass.ancestors.clear();
+            klass.singletonAncestors.clear();
+        }
     }
 
-#ifdef DEBUG_MODE
-    // After some refactors, the only thing left in this callback is a bunch of ENFORCEs, so I've
-    // compiled the entire callback out unless DEBUG_MODE is set.
-    //
-    // If you're changing this to put load bearing logic back into this method, feel free to remove
-    // the #ifdef above.
     void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         ENFORCE(klass.symbol != core::Symbols::todo());
+        if (klass.symbol == core::Symbols::StubModule()) {
+            tree = ast::MK::EmptyTree();
+            return;
+        }
 
+#ifdef DEBUG_MODE
         // NameDefiner should have forced this class's singleton class into existence.
         ENFORCE(klass.symbol.data(ctx)->lookupSingletonClass(ctx).exists());
 
@@ -2032,8 +2086,8 @@ public:
         // ENFORCE'ing it here makes certain errors apparent earlier.
         auto allowMissing = true;
         ENFORCE(ctx.state.lookupStaticInitForClass(klass.symbol, allowMissing).exists());
-    }
 #endif
+    }
 
     ast::MethodDef::PARAMS_store fillInParams(const vector<core::ParsedParam> &parsedParams,
                                               ast::MethodDef::PARAMS_store oldParams) {
