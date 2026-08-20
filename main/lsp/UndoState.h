@@ -22,9 +22,6 @@ class UndoState final {
     // The saved file-to-stratum mapping from the previous slow path.
     std::vector<core::packages::Stratum> fileToStratum;
 
-    // The id of the last stratum in the previous slow path.
-    const core::packages::Stratum lastStratum;
-
     // The size of the workspaceFiles vector when the slow path started. Tracked so that we can roll back additions to
     // the vector from new files added in the canceled edit.
     const size_t initialWorkspaceFilesSize;
@@ -34,15 +31,14 @@ public:
     const uint32_t epoch;
 
     UndoState(std::unique_ptr<core::GlobalState> evictedGs, UnorderedMap<int, ast::ParsedFile> evictedIndexedFinalGS,
-              std::vector<core::packages::Stratum> fileToStratum, core::packages::Stratum lastStratum,
-              const std::vector<core::FileRef> &workspaceFiles, uint32_t epoch);
+              std::vector<core::packages::Stratum> fileToStratum, const std::vector<core::FileRef> &workspaceFiles,
+              uint32_t epoch);
 
     /**
      * Undoes the slow path changes represented by this class.
      */
     void restore(std::unique_ptr<core::GlobalState> &gs, UnorderedMap<int, ast::ParsedFile> &indexedFinalGS,
-                 std::vector<core::packages::Stratum> &fileToStratum, core::packages::Stratum &lastStratum,
-                 std::vector<core::FileRef> &workspaceFiles);
+                 std::vector<core::packages::Stratum> &fileToStratum, std::vector<core::FileRef> &workspaceFiles);
 
     /**
      * Retrieves the evicted global state.

@@ -104,8 +104,6 @@ class LSPTypechecker final {
 
     std::vector<core::packages::Stratum> fileToStratum;
 
-    core::packages::Stratum lastStratum;
-
     enum class SlowPathMode {
         Init,
         Cancelable,
@@ -272,7 +270,7 @@ public:
      * Get the id of the last stratum in the condensation graph.
      */
     core::packages::Stratum getLastStratum() const {
-        return this->tc.lastStratum;
+        return this->tc.gs->lastStratum();
     }
 };
 

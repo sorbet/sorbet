@@ -285,7 +285,7 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
     }
 
     config->logger->debug("Added {} files that were not part of the edit to the update set", toTypecheck.size());
-    auto editStratum = this->lastStratum;
+    auto editStratum = this->gs->lastStratum();
     UnorderedMap<core::FileRef, shared_ptr<const core::FileHash>> oldFoundHashesForFiles;
     auto ix = -1;
     for (auto &file : updates.updatedFiles) {
@@ -409,7 +409,7 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
                         : pipeline::incrementalResolve(*gs, move(updatedIndexed), nullopt, config->opts, workers);
     auto sorted = sortParsedFiles(*gs, *errorReporter, move(resolved));
     const auto cancelable = false;
-    pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, this->lastStratum, nullptr);
+    pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, this->gs->lastStratum(), nullptr);
 
     auto duration = timeit.setEndTime();
     std::string files;
@@ -601,7 +601,7 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
 
         this->cancellationUndoState =
             make_unique<UndoState>(std::move(savedGS), std::move(this->indexedFinalGS), move(this->fileToStratum),
-                                   this->lastStratum, this->workspaceFiles, updates.epoch);
+                                   this->workspaceFiles, updates.epoch);
     } else {
         timeit.setTag("cancelable", "false");
     }
@@ -727,8 +727,8 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
 
         auto strata = pipeline::computePackageStrata(*this->gs, packageIndexed, workspaceFilesSpan, this->config->opts);
         const auto numStrata = strata.strata.size();
+        auto lastStratum = core::packages::Stratum(numStrata - 1);
         this->fileToStratum = move(strata.fileToStratum);
-        this->lastStratum = core::packages::Stratum(numStrata - 1);
         this->gs->preallocateForStrata(numStrata);
 
         // Determine which stratum this edit will be checked at, so that we have a good reference for when to switch
@@ -737,7 +737,7 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
         // stratum and see `Loading...` despite the status.
         auto editStratum =
             updatedFileRefs.empty()
-                ? this->lastStratum
+                ? lastStratum
                 : std::max(startingStratum, this->getFileStratumMapping().getStratumForFiles(updatedFileRefs));
 
         for (auto stratumIx = startingStratum.rawId(); stratumIx < numStrata; ++stratumIx) {
@@ -788,7 +788,7 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
                                        *this->gs, workers, nonPackagedIndexed));
                 }
 
-                if (currentStratum == this->lastStratum) {
+                if (currentStratum == lastStratum) {
                     if (mode == SlowPathMode::Init) {
                         // Close and copy the global kvstore, so that we have unique access for the rest of the session.
                         this->sessionCache = cache::SessionCache::make(std::move(ownedKvstore), *this->config->logger,
@@ -901,7 +901,7 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
             Exception::raise("Slow path failed to handle all expected preemptions");
         }
 
-        return this->lastStratum;
+        return lastStratum;
     });
 
     if (mode == SlowPathMode::Init) {
@@ -924,8 +924,7 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
         // Eagerly restore the state to how it was before this slow path, so that we're not holding the old state for an
         // arbitrarily long time. The next update will be responsible for freeing the underlying UndoState after it
         // makes use of the epoch field to determine additional files to include in the edit.
-        cancellationUndoState->restore(this->gs, this->indexedFinalGS, this->fileToStratum, this->lastStratum,
-                                       this->workspaceFiles);
+        cancellationUndoState->restore(this->gs, this->indexedFinalGS, this->fileToStratum, this->workspaceFiles);
         logger->debug("[Typechecker] Typecheck run for epoch {} was canceled.", updates.epoch);
     }
 
@@ -1133,7 +1132,7 @@ core::packages::Stratum FileStratumMapping::getStratumForFiles(absl::Span<const 
     for (auto ref : refs) {
         // Fall back on the last stratum for new files.
         if (!ref.exists() || ref.id() >= this->tc.fileToStratum.size()) {
-            return this->tc.lastStratum;
+            return this->tc.gs->lastStratum();
         }
 
         stratum = std::max(stratum, this->tc.fileToStratum[ref.id()]);
@@ -1162,7 +1161,7 @@ core::packages::Stratum FileStratumMapping::getStratumForUris(absl::Span<const s
 core::packages::Stratum FileStratumMapping::getStratumForFile(core::FileRef ref) const {
     // Fall back on the last stratum for new files.
     if (!ref.exists() || ref.id() >= this->tc.fileToStratum.size()) {
-        return this->tc.lastStratum;
+        return this->tc.gs->lastStratum();
     }
 
     return this->tc.fileToStratum[ref.id()];

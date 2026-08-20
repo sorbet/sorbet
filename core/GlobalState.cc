@@ -2090,6 +2090,7 @@ unique_ptr<GlobalState> GlobalState::deepCopyGlobalState(bool keepId) const {
     }
     result->symbolOffsets = this->symbolOffsets;
     result->earliestReopenedStratum = this->earliestReopenedStratum;
+    result->numStrata_ = this->numStrata_;
     return result;
 }
 
@@ -2175,6 +2176,7 @@ unique_ptr<GlobalState> GlobalState::copyForSlowPath(
     // immediately overwritten by deserializing the payload's symbol table.
 
     result->copyOptions(*this);
+    result->numStrata_ = this->numStrata_;
 
     // We share the file table entries with the original GlobalState, and then copy the content of the name table,
     // string storage, and uuid to ensure that we remain compatible with the session cache.

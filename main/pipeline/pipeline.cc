@@ -122,6 +122,7 @@ unique_ptr<core::GlobalState> copyForSlowPath(const core::GlobalState &from, con
     if (opts.cacheSensitiveOptions.noStdlib && forStratum == core::packages::Stratum(0)) {
         auto result = make_unique<core::GlobalState>(from.errorQueue, from.epochManager);
         result->initEmpty();
+        result->preallocateForStrata(from.numStrata());
         return result;
     }
 

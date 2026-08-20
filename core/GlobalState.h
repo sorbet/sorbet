@@ -733,7 +733,17 @@ public:
 
     // Reserve space for the boundary before the first stratum and one boundary after each stratum.
     void preallocateForStrata(size_t len) {
+        this->numStrata_ = len;
         this->symbolOffsets.reserve(len + 1);
+    }
+
+    packages::Stratum lastStratum() const {
+        ENFORCE(this->numStrata_ > 0);
+        return packages::Stratum(this->numStrata_ - 1);
+    }
+
+    size_t numStrata() const {
+        return this->numStrata_;
     }
 
     void updateSymbolTableOffsets() {
@@ -822,6 +832,9 @@ private:
 
     // The earliest stratum passed to `reopenStratum`, if any.
     std::optional<packages::Stratum> earliestReopenedStratum;
+
+    // The number of strata in the most recently computed package graph traversal.
+    size_t numStrata_ = 0;
 
     // Copy options over from another GlobalState. Private, as it's only meant to be used as a helper to implement other
     // copying strategies.
