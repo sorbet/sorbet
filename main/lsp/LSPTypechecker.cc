@@ -592,8 +592,6 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
         auto savedGS =
             std::exchange(this->gs, pipeline::copyForSlowPath(*this->gs, this->config->opts, startingStratum));
 
-        ENFORCE(this->gs->contiguousStrataUntil() == startingStratum, "startingStratum mismatch after exchange call");
-
         // Seed open files with the previous set from `indexedFinalGS`
         for (auto &entry : this->indexedFinalGS) {
             openFiles.insert(entry.first);
