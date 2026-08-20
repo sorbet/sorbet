@@ -2909,7 +2909,7 @@ class String < Object
     )
     .returns(String)
   end
-  def self.dedup(string); end
+  def dedup(string); end
 
   # Element Reference --- If passed a single `index`, returns a substring of one
   # character at that index. If passed a `start` index and a `length`, returns a
