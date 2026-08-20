@@ -2152,7 +2152,7 @@ unique_ptr<GlobalState> GlobalState::copyForLSPTypechecker(
     return result;
 }
 
-pair<unique_ptr<GlobalState>, bool> GlobalState::copyForSlowPath(
+unique_ptr<GlobalState> GlobalState::copyForSlowPath(
     const vector<string> &extraPackageFilesDirectoryUnderscorePrefixes,
     const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
     const vector<string> &extraPackageFilesDirectorySlashPrefixes,
@@ -2186,7 +2186,6 @@ pair<unique_ptr<GlobalState>, bool> GlobalState::copyForSlowPath(
     result->typeParameters.reserve(this->typeParameters.capacity());
     result->typeMembers.reserve(this->typeMembers.capacity());
 
-    bool copiedSymbolTablePrefix = false;
     if (packageDB().enabled()) {
         {
             core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*result);
@@ -2198,13 +2197,16 @@ pair<unique_ptr<GlobalState>, bool> GlobalState::copyForSlowPath(
                 allowRelaxingTestVisibility, packageAttributedErrors, testPackages);
         }
 
-        copiedSymbolTablePrefix = result->copySymbolTableFrom(*this, toStratum);
+        result->copySymbolTableFrom(*this, toStratum);
+    } else {
+        ENFORCE(toStratum == packages::Stratum(0),
+                "Cannot copy a nonzero symbol table prefix when packages are disabled");
     }
 
-    return {move(result), copiedSymbolTablePrefix};
+    return result;
 }
 
-bool GlobalState::copySymbolTableFrom(const GlobalState &other, packages::Stratum toStratum) {
+void GlobalState::copySymbolTableFrom(const GlobalState &other, packages::Stratum toStratum) {
     // Copying a prefix of the symbol tables assumes that this global state derives from `other`.
     ENFORCE(this->files->size() == other.files->size());
     ENFORCE(this->constantNames.size() == other.constantNames.size());
@@ -2212,10 +2214,12 @@ bool GlobalState::copySymbolTableFrom(const GlobalState &other, packages::Stratu
     ENFORCE(this->namesByHash.size() == other.namesByHash.size());
     ENFORCE(other.packageDB().enabled(), "Copying a prefix of the symbol table requires --sorbet-packages");
 
-    // Exit early if there's nothing to copy, or if we don't have information about the stratum specified.
-    if (toStratum == packages::Stratum(0) || toStratum.rawId() >= other.symbolOffsets.size()) {
-        return false;
+    // At stratum zero there is no prefix to copy.
+    if (toStratum == packages::Stratum(0)) {
+        return;
     }
+    ENFORCE(toStratum.rawId() < other.symbolOffsets.size(), "No symbol table offset recorded for stratum {}",
+            toStratum.rawId());
 
     ENFORCE(!other.earliestReopenedStratum.has_value() || toStratum <= other.earliestReopenedStratum.value(),
             "Copying the symbol table up to stratum {}, but stratum {} was re-populated by a fast path",
@@ -2273,8 +2277,6 @@ bool GlobalState::copySymbolTableFrom(const GlobalState &other, packages::Stratu
     for (auto i = 0; i < offsets.typeMembersOffset; ++i) {
         this->typeMembers.emplace_back(other.typeMembers[i].deepCopy(*this));
     }
-
-    return true;
 }
 
 string_view GlobalState::getPrintablePath(string_view path) const {

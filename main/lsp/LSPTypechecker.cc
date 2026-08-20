@@ -439,6 +439,9 @@ namespace {
 core::packages::Stratum determineMaximumPrefix(const core::GlobalState &gs,
                                                const vector<core::packages::Stratum> &fileToStratum,
                                                const LSPFileUpdates &update) {
+    // SorbetWorkspaceEditTask filters out empty workspace edits before they reach the indexer or typechecker.
+    ENFORCE(!update.updatedFiles.empty());
+
     // We start by assuming we can copy as much of the symbol table as GlobalState says is still a self-contained
     // prefix, which any fast path edit since the last slow path will have lowered.
     auto editStratum = gs.contiguousStrataUntil();
@@ -584,14 +587,12 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
     if (cancelable) {
         timeit.setTag("cancelable", "true");
 
-        auto requestedPrefix = determineMaximumPrefix(*this->gs, this->fileToStratum, updates);
+        startingStratum = determineMaximumPrefix(*this->gs, this->fileToStratum, updates);
 
         auto savedGS =
-            std::exchange(this->gs, pipeline::copyForSlowPath(*this->gs, this->config->opts, requestedPrefix));
+            std::exchange(this->gs, pipeline::copyForSlowPath(*this->gs, this->config->opts, startingStratum));
 
-        // Check how much of the symbol table we copied to know the starting strata.
-        // (Non-package-directed won't have copied anything, thus less than the requested prefix)
-        startingStratum = this->gs->contiguousStrataUntil();
+        ENFORCE(this->gs->contiguousStrataUntil() == startingStratum, "startingStratum mismatch after exchange call");
 
         // Seed open files with the previous set from `indexedFinalGS`
         for (auto &entry : this->indexedFinalGS) {

@@ -584,7 +584,7 @@ public:
     // Copy the name table, file table and other parts of GlobalState that are required to start the slow path. If the
     // `toStratum` value is passed as something other than the `0` stratum, the prefix of the symbol table leading up to
     // that stratum will be copied over as well.
-    std::pair<std::unique_ptr<GlobalState>, bool>
+    std::unique_ptr<GlobalState>
     copyForSlowPath(const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
                     const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
                     const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
@@ -841,7 +841,7 @@ private:
     //
     // This method requires that `this` be derived from `other`, as the copied symbol table prefix will assume that
     // their name tables and file tables to match.
-    bool copySymbolTableFrom(const GlobalState &other, packages::Stratum toStratum);
+    void copySymbolTableFrom(const GlobalState &other, packages::Stratum toStratum);
 };
 // CheckSize(GlobalState, 152, 8);
 // Historically commented out because size of unordered_map was different between different versions of stdlib
