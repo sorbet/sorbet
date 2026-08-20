@@ -385,22 +385,22 @@ test_each(new_values) <span class="hljs-keyword">do</span> <span class="hljs-par
 <blockquote>
 <p>This error is specific to RBS support when using the <code>--enable-experimental-rbs-comments</code> flag.</p>
 </blockquote>
-<p>This error is raised when a RBS signature comment contains a syntax error. See the <a href="https://github.com/ruby/rbs/blob/master/docs/syntax.md">RBS syntax reference</a> for more details on the RBS syntax.</p>
+<p>This error is raised when an RBS signature comment contains a syntax error. See the <a href="https://github.com/ruby/rbs/blob/master/docs/syntax.md">RBS syntax reference</a> for more details on the RBS syntax.</p>
 <h2><a class="anchor" aria-hidden="true" id="3551"></a><a href="#3551" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3551</h2>
 <blockquote>
 <p>This error is specific to RBS support when using the <code>--enable-experimental-rbs-comments</code> flag.</p>
 </blockquote>
-<p>This error is raised when a RBS signature comment contains a feature not supported by Sorbet. See the page on <a href="/docs/rbs-support">RBS comments support</a> for a list of supported features.</p>
+<p>This error is raised when an RBS signature comment contains a feature not supported by Sorbet. See the page on <a href="/docs/rbs-support">RBS comments support</a> for a list of supported features.</p>
 <h2><a class="anchor" aria-hidden="true" id="3552"></a><a href="#3552" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3552</h2>
 <blockquote>
 <p>This error is specific to RBS support when using the <code>--enable-experimental-rbs-comments</code> flag.</p>
 </blockquote>
-<p>This error is raised when a RBS signature comment has more parameters than the method definition it represents.</p>
+<p>This error is raised when an RBS signature comment has more parameters than the method definition it represents.</p>
 <h2><a class="anchor" aria-hidden="true" id="3553"></a><a href="#3553" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3553</h2>
 <blockquote>
 <p>This error is specific to RBS support when using the <code>--enable-experimental-rbs-comments</code> flag.</p>
 </blockquote>
-<p>This error is raised when a RBS assertion comment is found in a place where it is not allowed.</p>
+<p>This error is raised when an RBS assertion comment is found in a place where it is not allowed.</p>
 <p>For example this snippet will raise this error:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">A</span> <span class="hljs-comment">#: as String</span></span>
 <span class="hljs-keyword">end</span>
@@ -409,7 +409,7 @@ test_each(new_values) <span class="hljs-keyword">do</span> <span class="hljs-par
 <blockquote>
 <p>This error is specific to RBS support when using the <code>--enable-experimental-rbs-comments</code> flag.</p>
 </blockquote>
-<p>This error is raised when Sorbet couldn’t match a RBS comment with a method definition or a type assertion.</p>
+<p>This error is raised when Sorbet couldn’t match an RBS comment with a method definition or a type assertion.</p>
 <h2><a class="anchor" aria-hidden="true" id="3555"></a><a href="#3555" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3555</h2>
 <blockquote>
 <p>This error is specific to RBS support when using the <code>--enable-experimental-rbs-comments</code> flag.</p>
@@ -420,7 +420,7 @@ test_each(new_values) <span class="hljs-keyword">do</span> <span class="hljs-par
 <p>This error is specific to RBS support when using the <code>--enable-experimental-rbs-comments</code> flag.</p>
 </blockquote>
 <p>This error is raised when the kind of parameter in the method definition does not match the kind of parameter in the RBS signature.</p>
-<p>For example, this method expect the parameter to be defined as a keyword parameter, while the RBS signature declares it as a positional parameter:</p>
+<p>For example, this method expects the parameter to be defined as a keyword parameter, while the RBS signature declares it as a positional parameter:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment">#: (Integer) -&gt; void</span>
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">method</span><span class="hljs-params">(<span class="hljs-symbol">param:</span>)</span></span>; <span class="hljs-keyword">end</span>
 </code></pre>
