@@ -1067,7 +1067,7 @@ PackageInfo::CanModifyResult PackageInfo::canModifySymbol(core::Context ctx, Cla
         // In package-directed mode, test files must not modify symbols that were defined on the non-test side of
         // the package. Doing so would create type members (or mixins) at the test stratum that dangle after
         // copySymbolTableFrom filters by stratum boundary.
-        if (ctx.file.exists() && ctx.file.data(gs).isPackagedTest()) {
+        if (ctx.file.exists() && !gs.packageDB().testPackages() && ctx.file.data(gs).isPackagedTest()) {
             for (auto &loc : symData->locs()) {
                 if (loc.exists() && !loc.file().data(gs).isPackagedTest()) {
                     return CanModifyResult::TestModifyingNonTest;
