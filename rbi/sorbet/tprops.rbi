@@ -152,7 +152,6 @@ module T::Props::Serializable
   def deserialize(hash, strict = nil); end
   def recursive_stringify_keys(obj); end
   def serialize(strict = nil); end
-  sig {params(changed_props: T.untyped).returns(T.self_type)}
   include T::Props::Optional
   include T::Props::Plugin
   include T::Props::PrettyPrintable
