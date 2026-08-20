@@ -731,9 +731,9 @@ public:
         return this->newSymbols().typeParameterRefs(*this);
     }
 
-    // Reserve space for internal structures, under the assumption that we'll see `len` strata.
+    // Reserve space for the boundary before the first stratum and one boundary after each stratum.
     void preallocateForStrata(size_t len) {
-        this->symbolOffsets.reserve(len);
+        this->symbolOffsets.reserve(len + 1);
     }
 
     void updateSymbolTableOffsets() {
@@ -744,24 +744,27 @@ public:
     // before it forms a self-contained prefix of the symbol table, in the sense that no symbol in
     // it refers to a symbol outside it.
     //
-    // Outside of LSP mode, this is the stratum we are in the middle of populating.
-    // In LSP, it might be earlier than the current stratum once a fast path has re-processed an earlier stratum.
-    packages::Stratum firstIncompleteStratum() const {
+    // That is, the range from from [0, contiguousStrataUntil()) is a contiguous prefix, and
+    // contiguousStrataUntil() is the first stratum that's not necessarily contiguous.
+    //
+    // A fast path can make this shorter than the number of boundaries recorded in symbolOffsets by
+    // re-processing an earlier stratum and entering its new symbols at the end of the symbol table.
+    packages::Stratum contiguousStrataUntil() const {
         auto recorded = packages::Stratum(this->symbolOffsets.size() - 1);
         return this->earliestReopenedStratum.has_value() ? std::min(this->earliestReopenedStratum.value(), recorded)
                                                          : recorded;
     }
 
-    // Records that a fast path will have entered new symbols for this stratum, so we cannot copy a
-    // prefix for this stratum anymore (because its symbols will live partly in the middle of the
-    // symbol table and partly at the end of the symbol table).
+    // Records that a fast path will have entered new symbols for this stratum, so the reusable
+    // symbol table prefix must end before this stratum (because its symbols will live partly in the
+    // middle of the symbol table and partly at the end of the symbol table).
     //
     // This deliberately does not truncate `symbolOffsets` to make the fast & slow path
     // representations "uniform", because a fast path can preempt a running slow path.
     //
-    // This is also why symbolOffsets is not exposed to callers directly, only these helpers,
-    // because the size of `symbolOffsets` will be different on e.g. the first traversal through the
-    // strata and a fast path edit that revisits an earlier stratum.
+    // This is also why only these helpers (not symbolOffsets itself) is exposed publicly, because
+    // the size of `symbolOffsets` will be different on e.g. the first traversal through the strata
+    // and a fast path edit that revisits an earlier stratum.
     void reopenStratum(packages::Stratum stratum) {
         this->earliestReopenedStratum = this->earliestReopenedStratum.has_value()
                                             ? std::min(this->earliestReopenedStratum.value(), stratum)
@@ -812,7 +815,9 @@ private:
     bool symbolTableFrozen = true;
     bool fileTableFrozen = true;
 
-    // Symbol table offsets for each stratum of the package graph traversal.
+    // Symbol table offsets at the boundaries of the package graph traversal. symbolOffsets[k]
+    // records the symbol table boundary after the prefix of strata [0, k), equivalently before
+    // stratum k. A completed traversal of N strata therefore records N + 1 entries.
     std::vector<SymbolTableOffsets> symbolOffsets;
 
     // The earliest stratum passed to `reopenStratum`, if any.

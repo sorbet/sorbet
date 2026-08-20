@@ -436,14 +436,12 @@ namespace {
 
 // Determine how much of the symbol table we can copy when starting a slow path edit: any __package.rb modification
 // means that we can't reuse the symbol table.
-core::packages::Stratum determineStartingStratum(const core::GlobalState &gs,
-                                                 const vector<core::packages::Stratum> &fileToStratum,
-                                                 const core::packages::Stratum lastStratum,
-                                                 const LSPFileUpdates &update) {
+core::packages::Stratum determineMaximumPrefix(const core::GlobalState &gs,
+                                               const vector<core::packages::Stratum> &fileToStratum,
+                                               const LSPFileUpdates &update) {
     // We start by assuming we can copy as much of the symbol table as GlobalState says is still a self-contained
-    // prefix, which any fast path edit since the last slow path will have lowered. The clamp is because a completed
-    // slow path records an offsets entry for the end of the last stratum, and there is no stratum to start from there.
-    auto editStratum = std::min(lastStratum, gs.firstIncompleteStratum());
+    // prefix, which any fast path edit since the last slow path will have lowered.
+    auto editStratum = gs.contiguousStrataUntil();
 
     int ix = -1;
     for (auto &file : update.updatedFiles) {
@@ -586,10 +584,14 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
     if (cancelable) {
         timeit.setTag("cancelable", "true");
 
-        startingStratum = determineStartingStratum(*this->gs, this->fileToStratum, this->lastStratum, updates);
+        auto requestedPrefix = determineMaximumPrefix(*this->gs, this->fileToStratum, updates);
 
         auto savedGS =
-            std::exchange(this->gs, pipeline::copyForSlowPath(*this->gs, this->config->opts, startingStratum));
+            std::exchange(this->gs, pipeline::copyForSlowPath(*this->gs, this->config->opts, requestedPrefix));
+
+        // Check how much of the symbol table we copied to know the starting strata.
+        // (Non-package-directed won't have copied anything, thus less than the requested prefix)
+        startingStratum = this->gs->contiguousStrataUntil();
 
         // Seed open files with the previous set from `indexedFinalGS`
         for (auto &entry : this->indexedFinalGS) {
