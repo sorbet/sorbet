@@ -1,0 +1,22 @@
+# typed: true
+# enable-experimental-method-modifiers: true
+
+class Abstract
+  abstract def foo; end
+# ^^^^^^^^ error: Method `abstract` does not exist on `T.class_of(Abstract)`
+end
+
+class Override
+  override def foo; end
+# ^^^^^^^^ error: Method `override` does not exist on `T.class_of(Override)`
+end
+
+class Final
+  final def foo; end
+# ^^^^^ error: Method `final` does not exist on `T.class_of(Final)`
+end
+
+class Overridable
+  overridable def foo; end
+# ^^^^^^^^^^^ error: Method `overridable` does not exist on `T.class_of(Overridable)`
+end

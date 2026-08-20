@@ -604,6 +604,7 @@ NameDef names[] = {
     {"UndeclaredFieldStub", "<undeclared-field-stub>", true},
     {"badAliasMethodStub", "<bad-method-alias-stub>"},
     {"Helpers", "Helpers", true},
+    {"DefMods", "DefMods", true},
     {"Net", "Net", true},
     {"IMAP", "IMAP", true},
     {"Protocol", "Protocol", true},

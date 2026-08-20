@@ -835,10 +835,17 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 auto attachedClass = symbol.data(gs)->attachedClass(gs);
                 TypeErrorDiagnostics::maybeInsertDSLMethod(gs, e, args.locs.file, args.callLoc(), attachedClass,
                                                            Symbols::T_Helpers(), "");
-            } else if (args.name == core::Names::sig()) {
+            } else if (args.name == core::Names::sig()) { // Suggest `extend T::Sig`
                 auto attachedClass = symbol.data(gs)->attachedClass(gs);
                 TypeErrorDiagnostics::maybeInsertDSLMethod(gs, e, args.locs.file, args.callLoc(), attachedClass,
                                                            Symbols::T_Sig(), "");
+            } else if (gs.experimentalMethodModifiers &&
+                       (args.name == core::Names::abstract() || args.name == core::Names::overridable() ||
+                        args.name == core::Names::final_() ||
+                        args.name == core::Names::override_())) { // Suggest `extend T::DefMods`
+                auto attachedClass = symbol.data(gs)->attachedClass(gs);
+                TypeErrorDiagnostics::maybeInsertDSLMethod(gs, e, args.locs.file, args.callLoc(), attachedClass,
+                                                           Symbols::T_DefMods(), "");
             } else if (args.name == Names::super()) {
                 // TODO(jez) Special error for super.
                 // - If identical name exists as self/instance method in parent but we're currently
