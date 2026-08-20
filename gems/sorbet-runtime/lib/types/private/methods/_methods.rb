@@ -12,6 +12,9 @@ module T::Private::Methods
     @sig_wrappers = {}
   end
   @sigs_that_raised = {}
+  # Whether the app asked us to drop the signatures whose runtime checks never
+  # run. See `T::Configuration.drop_unchecked_sigs!`.
+  @drop_unchecked_sigs = false
   # stores method names that were declared final without regard for where.
   # enables early rejection of names that we know can't induce final method violations.
   @was_ever_final_names = {}.compare_by_identity
@@ -499,7 +502,10 @@ module T::Private::Methods
     if receiving_method != original_method && receiving_method.original_name == original_method.name
       aliasing_mod = receiving_method.owner
       method_sig = method_sig.as_alias(callee)
-      unwrap_method(aliasing_mod, method_sig, original_method)
+      # An alias is the only way a signature that `drop_unchecked_sigs` already
+      # swept away could come back into `@signatures_by_method`, so skip the
+      # bookkeeping here too. The alias is still wrapped (or unwrapped) as usual.
+      unwrap_method(aliasing_mod, method_sig, original_method, record: !drop_sig?(method_sig))
     end
 
     method_sig
@@ -610,9 +616,31 @@ module T::Private::Methods
     @signatures_by_method[key]
   end
 
-  private_class_method def self.unwrap_method(mod, signature, original_method)
+  # `@signatures_by_method` is only read for introspection (e.g.
+  # `T::Utils.signature_for_method` and the `Method#parameters` patch), never to
+  # dispatch a call, so `record: false` skips it to save memory.
+  private_class_method def self.unwrap_method(mod, signature, original_method, record: true)
     maybe_wrapped_method = CallValidation.wrap_method_if_needed(mod, signature, original_method)
-    @signatures_by_method[method_to_key(maybe_wrapped_method)] = signature
+    @signatures_by_method[method_to_key(maybe_wrapped_method)] = signature if record
+  end
+
+  # Whether `signature` is one that `drop_unchecked_sigs` frees: a signature
+  # whose runtime checks never run, either `.checked(:never)` or
+  # `.checked(:tests)` outside of a test environment.
+  #
+  # Signatures on `abstract` methods are never dropped: `T::AbstractUtils` reads
+  # them to detect unimplemented abstract methods long after load time.
+  #
+  # Note this only reads `RuntimeLevels.check_tests?` for a `:tests` signature,
+  # which is exactly when `CallValidation.wrap_method_if_needed` already read it.
+  # That keeps `T::Configuration.enable_checking_for_sigs_marked_checked_tests`
+  # usable for as long as it was usable before.
+  private_class_method def self.drop_sig?(signature)
+    return false if !@drop_unchecked_sigs
+    return false if signature.mode == Modes.abstract
+
+    signature.check_level == :never ||
+      (signature.check_level == :tests && !T::Private::RuntimeLevels.check_tests?)
   end
 
   def self.has_sig_block_for_method(method)
@@ -704,6 +732,12 @@ module T::Private::Methods
 
   def self.all_checked_tests_sigs
     @signatures_by_method.values.select { |sig| sig.check_level == :tests }
+  end
+
+  # Sweeps rather than never recording, so the `run_sig_block_for_key` race fallback still works.
+  def self.drop_unchecked_sigs!
+    @drop_unchecked_sigs = true
+    @signatures_by_method.delete_if { |_key, sig| drop_sig?(sig) }
   end
 
   # the module target is adding the methods from the module source to itself. we need to check that for all instance
