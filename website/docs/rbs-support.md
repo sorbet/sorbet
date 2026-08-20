@@ -4,11 +4,20 @@ title: RBS Comments Support
 sidebar_label: RBS Comments
 ---
 
-## Signature comments
-
-> This feature is experimental and might be changed or removed without notice. To enable it pass the `--enable-experimental-rbs-comments` option to Sorbet or add it to your `sorbet/config`.
-
 Sorbet has experimental support for comment-only type syntax, powered by [RBS](https://github.com/ruby/rbs) annotations.
+
+## Enabling RBS comments
+
+> This feature is experimental and might be changed or removed without notice.
+>
+> RBS comment support requires the Prism parser. Add both options to your `sorbet/config`:
+>
+> ```text
+> --parser=prism
+> --enable-experimental-rbs-comments
+> ```
+
+## Signature comments
 
 The syntax looks like this:
 
@@ -41,6 +50,52 @@ Long signatures can be broken into multiple lines using the `#|` continuation co
 #|  String
 #| ) -> Float
 def foo(x, y); end
+```
+
+### Method parameters
+
+The parameter kinds in an RBS signature must match those in the Ruby method definition:
+
+| Ruby parameter              | RBS syntax                                    |
+| --------------------------- | --------------------------------------------- |
+| Required positional `x`     | `Integer` or `Integer x`                      |
+| Optional positional `x = 0` | `?Integer` or `?Integer x`                    |
+| Rest positional `*xs`       | `*Integer` or `*Integer xs`                   |
+| Trailing positional `x`     | `Integer` or `Integer x`, after the rest type |
+| Required keyword `x:`       | `x: Integer`                                  |
+| Optional keyword `x: 0`     | `?x: Integer`                                 |
+| Rest keyword `**xs`         | `**Integer` or `**Integer xs`                 |
+| Required block `&block`     | `{ (String) -> void }`                        |
+| Optional block `&block`     | `?{ (String) -> void }`                       |
+
+Positional and rest parameter names are optional in RBS signatures. When present, they must match the Ruby parameter names. Sorbet reports an error when a parameter's name or kind does not match the method definition.
+
+A block type can specify the type of `self` inside the block by placing `[self: Type]` before the return arrow, for example `{ (String) [self: Handler] -> void }`.
+
+The following example combines all of these forms:
+
+```ruby
+class Handler; end
+
+#: (
+#|   Integer id,
+#|   ?String label,
+#|   *Symbol tags,
+#|   Integer trailing,
+#|   enabled: bool,
+#|   ?limit: Integer,
+#|   **untyped options
+#| ) ?{ (String) [self: Handler] -> void } -> void
+def process(
+  id,
+  label = "default",
+  *tags,
+  trailing,
+  enabled:,
+  limit: 10,
+  **options,
+  &block
+); end
 ```
 
 ## Caveats
@@ -221,6 +276,46 @@ T.class_of(Foo)[Integer]
 </a></td></tr>
 
 <!-- end of Class singleton type (generic) -->
+
+<tr><td>
+
+[Self type]
+
+</td><td>
+
+```plaintext
+self
+```
+
+</td><td><a href="self-type">
+
+```ruby
+T.self_type
+```
+
+</a></td></tr>
+
+<!-- end of Self type -->
+
+<tr><td>
+
+[Instance type]
+
+</td><td>
+
+```plaintext
+instance
+```
+
+</td><td><a href="attached-class">
+
+```ruby
+T.attached_class
+```
+
+</a></td></tr>
+
+<!-- end of Instance type -->
 
 <tr><td>
 
@@ -424,6 +519,26 @@ Foo[Bar]
 
 <tr><td>
 
+[Generic module type]
+
+</td><td>
+
+```plaintext
+Module[Foo]
+```
+
+</td><td><a href="class-of#tmodule-vs-tclass">
+
+```ruby
+T::Module[Foo]
+```
+
+</a></td></tr>
+
+<!-- end of Generic module type -->
+
+<tr><td>
+
 [Generic method]
 
 </td><td>
@@ -573,7 +688,7 @@ attr_reader :foo
 
 ## Abstract methods
 
-Methods can be marked as abstract with using the `@abstract` annotation comment:
+Methods can be marked as abstract using the `@abstract` annotation comment:
 
 ```ruby
 # @abstract
@@ -583,7 +698,7 @@ def baz
 end
 ```
 
-Note that contrary to Sorbet's `abstract` methods, methods annotated with `@abstract` must always raise an error.
+Unlike Sorbet's `abstract` methods, methods annotated with `@abstract` must have a body that consists of a single recognized `raise` call.
 
 ## Method annotations
 
@@ -613,6 +728,12 @@ def qux1(x); end
 sig(:final) { params(x: Integer).void }
 def qux2(x); end
 ```
+
+The following method annotations are also supported:
+
+- `# @overridable` translates to `overridable`.
+- `# @override(allow_incompatible: false)` translates to `override(allow_incompatible: false)`.
+- `# @override(allow_incompatible: :visibility)` translates to `override(allow_incompatible: :visibility)`.
 
 Note: these annotations like `@override` use normal comments, like `# @override` (not the special `#:` comment). This makes it possible to reuse any existing YARD or RDoc annotations.
 
@@ -864,12 +985,13 @@ def baz(x); end
 
 ## Special behaviors
 
-The `#:` comment must come **immediately** before the following method definition. If there is a blank line between the comment and method definition, the comment will be ignored.
+RBS signature comments follow the same association rules as [`sig`](sigs.md) blocks: blank lines and regular comments may appear before the method definition, but an intervening Ruby statement breaks the association and causes Sorbet to report the RBS signature as unused.
 
 Generic types like `Array` or `Hash` are translated to their `T::` Sorbet types equivalent:
 
 - `Array[Integer]` is translated to `T::Array[Integer]`
 - `Class[Integer]` is translated to `T::Class[Integer]`
+- `Module[Integer]` is translated to `T::Module[Integer]`
 - `Enumerable[Integer]` is translated to `T::Enumerable[Integer]`
 - `Enumerator[Integer]` is translated to `T::Enumerator[Integer]`
 - `Enumerator::Lazy[Integer]` is translated to `T::Enumerator::Lazy[Integer]`
@@ -908,16 +1030,13 @@ def takes_foo(x); end
 
 ### Literal types
 
-Sorbet does not support RBS's concept of "literal types". The next best thing is to use the literal's underlying type instead:
+Sorbet does not represent RBS literal types as singleton values. It handles them as follows:
 
-- `1` is `Integer`
-- `"foo"` is `String`
-- `:foo` is `Symbol`
-- `true` is `TrueClass`
-- `false` is `FalseClass`
-- `nil` is `NilClass`
+- The boolean literals `true` and `false` are accepted but widened to `TrueClass` and `FalseClass`, respectively.
+- Integer, string, and symbol literals, such as `1`, `"foo"`, and `:foo`, are not supported. Sorbet reports [error 3551](error-reference.md#3551) and treats the type as `T.untyped`.
+- `nil` is not a literal type in RBS. It is a supported base type that Sorbet translates to `NilClass`.
 
-You can also consider using [`T::Enum`](tenum.md).
+For unsupported literals, use the underlying type (`Integer`, `String`, or `Symbol`) instead. You can also consider using [`T::Enum`](tenum.md).
 
 ### Unchecked generics
 
@@ -931,8 +1050,6 @@ box = Box.new #: Box[untyped]
 ```
 
 ## Type assertions comments
-
-> This feature is experimental and might be changed or removed without notice. To enable it pass the `--enable-experimental-rbs-comments` option to Sorbet or add it to your `sorbet/config`.
 
 ### `T.let` assertions
 
@@ -1008,7 +1125,7 @@ This is equivalent to:
 foo(T.cast(x, Integer))
 ```
 
-Casts comments can be used in any context where a type assertion is valid:
+Cast comments can be used in any context where a type assertion is valid:
 
 ```ruby
 foo
@@ -1147,6 +1264,9 @@ the manual `self as` in client code would be unnecessary.
 [Top type]: https://github.com/ruby/rbs/blob/master/docs/syntax.md#base-types
 [Bottom type]: https://github.com/ruby/rbs/blob/master/docs/syntax.md#base-types
 [Void type]: https://github.com/ruby/rbs/blob/master/docs/syntax.md#base-types
+[Self type]: https://github.com/ruby/rbs/blob/master/docs/syntax.md#base-types
+[Instance type]: https://github.com/ruby/rbs/blob/master/docs/syntax.md#base-types
+[Generic module type]: https://github.com/ruby/rbs/blob/master/docs/syntax.md#class-instance-type
 [Generic type]: https://github.com/ruby/rbs/blob/master/docs/syntax.md#type-variable
 [Generic method]: https://github.com/ruby/rbs/blob/master/docs/syntax.md#type-variable
 [Tuple type]: https://github.com/ruby/rbs/blob/master/docs/syntax.md#tuple-type
