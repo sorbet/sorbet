@@ -45,3 +45,7 @@ T.assert_type!(m4, T.nilable(T::Array[MatchData]))
 # append_as_bytes
 T.assert_type!("".append_as_bytes("a", 0x62), String)
 "".append_as_bytes(:not_bytes) # error: Expected `T.any(String, Integer)` but found `Symbol(:not_bytes)` for argument `objects`
+
+# String#dedup
+T.assert_type!( "abc".dedup, String)
+T.assert_type!(-"abc",       String)
