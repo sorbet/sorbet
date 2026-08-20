@@ -438,23 +438,16 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       struct = NilSingleFieldStruct.from_hash({})
       assert_nil(struct.foo)
 
-      msg_string = nil
-      extra_hash = nil
-
-      T::Configuration.log_info_handler = proc do |msg, extra|
-        msg_string = msg
-        extra_hash = extra
+      h = nil
+      _stdout, msg_string = capture_io do
+        h = struct.serialize
       end
-
-      h = struct.serialize
 
       assert_instance_of(Hash, h)
       assert(h.empty?)
-      refute_nil(msg_string)
-      refute_nil(extra_hash)
       assert_includes(msg_string, "missing required property in serialize")
-      assert_equal(:foo, extra_hash[:prop])
-      assert_includes(extra_hash[:class], "NilSingleFieldStruct")
+      assert_includes(msg_string, "prop=:foo")
+      assert_includes(msg_string, "class=Opus::Types::Test::Props::SerializableTest::NilSingleFieldStruct")
     end
 
     describe 'with weak constructor' do

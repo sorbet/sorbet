@@ -270,38 +270,6 @@ module T::Configuration
     nil
   end
 
-  @log_info_handler = nil
-  # Set a handler for logging
-  #
-  # @param [Lambda, Proc, Object, nil] value Proc that handles the error
-  #   report (pass nil to reset to default behavior)
-  #
-  # Parameters passed to value.call:
-  #
-  #  @param [String] str Message to be logged
-  #  @param [Hash] extra A hash containing additional parameters to be passed along to the logger.
-  #
-  # @example
-  #   T::Configuration.log_info_handler = lambda do |str, extra|
-  #     puts "#{str}, context: #{extra}"
-  #   end
-  def self.log_info_handler=(value)
-    validate_lambda_given!(value)
-    @log_info_handler = value
-  end
-
-  private_class_method def self.log_info_handler_default(str, extra)
-    puts "#{str}, extra: #{extra}"
-  end
-
-  def self.log_info_handler(str, extra)
-    if @log_info_handler
-      @log_info_handler.call(str, extra)
-    else
-      log_info_handler_default(str, extra)
-    end
-  end
-
   @soft_assert_handler = nil
   # Set a handler for soft assertions
   #

@@ -412,8 +412,6 @@ module T::Configuration
   def self.disable_vm_prop_serde; end
   def self.inline_type_error_handler(error, opts={}); end
   def self.inline_type_error_handler=(value); end
-  def self.log_info_handler(str, extra); end
-  def self.log_info_handler=(value); end
   def self.module_name_mangler; end
   def self.module_name_mangler=(value); end
   def self.scalar_types; end
