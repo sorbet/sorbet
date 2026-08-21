@@ -261,7 +261,7 @@ public:
         }
         // Check all scopes except the current (top) one
         return absl::c_any_of(absl::MakeConstSpan(stack.data(), stack.size() - 1),
-            [](auto const& scope) { return scope.max == IT_PARAM_MARKER; });
+                              [](auto const &scope) { return scope.max == IT_PARAM_MARKER; });
     }
 
     // Register a numparam in the current scope
@@ -359,8 +359,8 @@ public:
     // Stores a lambda that can be called to clear Bison's current lookahead token.
     std::function<void()> clear_lookahead;
 
-    base_driver(ruby_version version, std::string_view source, sorbet::StableStringStorage<> &scratch,
-                const struct builder &builder, bool traceLexer, bool indentationAware);
+    base_driver(std::string_view source, sorbet::StableStringStorage<> &scratch, const struct builder &builder,
+                bool traceLexer, bool indentationAware);
     virtual ~base_driver() {}
     virtual ForeignPtr parse(SelfPtr self, bool traceParser) = 0;
 

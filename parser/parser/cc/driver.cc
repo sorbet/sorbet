@@ -7,10 +7,10 @@
 
 namespace ruby_parser {
 
-base_driver::base_driver(ruby_version version, std::string_view source, sorbet::StableStringStorage<> &scratch,
-                         const struct builder &builder, bool traceLexer, bool indentationAware)
-    : build(builder), lex(diagnostics, version, source, scratch, traceLexer), pending_error(false), def_level(0),
-      ast(nullptr), indentationAware(indentationAware) {}
+base_driver::base_driver(std::string_view source, sorbet::StableStringStorage<> &scratch, const struct builder &builder,
+                         bool traceLexer, bool indentationAware)
+    : build(builder), lex(diagnostics, source, scratch, traceLexer), pending_error(false), def_level(0), ast(nullptr),
+      indentationAware(indentationAware) {}
 
 const char *const base_driver::token_name(token_type type) {
     // We have several tokens that have the same human-readable string, but Bison won't
@@ -225,7 +225,7 @@ void base_driver::local_pop() {
 
 typedruby_release::typedruby_release(std::string_view source, sorbet::StableStringStorage<> &scratch,
                                      const struct builder &builder, bool traceLexer, bool indentationAware)
-    : base_driver(ruby_version::RUBY_31, source, scratch, builder, traceLexer, indentationAware) {}
+    : base_driver(source, scratch, builder, traceLexer, indentationAware) {}
 
 ForeignPtr typedruby_release::parse(SelfPtr self, bool) {
     bison::typedruby_release::parser p(*this, self);
@@ -235,7 +235,7 @@ ForeignPtr typedruby_release::parse(SelfPtr self, bool) {
 
 typedruby_debug::typedruby_debug(std::string_view source, sorbet::StableStringStorage<> &scratch,
                                  const struct builder &builder, bool traceLexer, bool indentationAware)
-    : base_driver(ruby_version::RUBY_31, source, scratch, builder, traceLexer, indentationAware) {}
+    : base_driver(source, scratch, builder, traceLexer, indentationAware) {}
 
 ForeignPtr typedruby_debug::parse(SelfPtr self, bool traceParser) {
     bison::typedruby_debug::parser p(*this, self);
