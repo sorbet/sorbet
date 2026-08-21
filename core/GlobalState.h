@@ -584,7 +584,7 @@ public:
     // Copy the name table, file table and other parts of GlobalState that are required to start the slow path. If the
     // `toStratum` value is passed as something other than the `0` stratum, the prefix of the symbol table leading up to
     // that stratum will be copied over as well.
-    std::pair<std::unique_ptr<GlobalState>, bool>
+    std::unique_ptr<GlobalState>
     copyForSlowPath(const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
                     const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
                     const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
@@ -731,13 +731,44 @@ public:
         return this->newSymbols().typeParameterRefs(*this);
     }
 
-    // Reserve space for internal structures, under the assumption that we'll see `len` strata.
+    // Reserve space for the boundary before the first stratum and one boundary after each stratum.
     void preallocateForStrata(size_t len) {
-        this->symbolOffsets.reserve(len);
+        this->symbolOffsets.reserve(len + 1);
     }
 
     void updateSymbolTableOffsets() {
         this->symbolOffsets.emplace_back(SymbolTableOffsets(*this));
+    }
+
+    // The earliest stratum whose symbols are no longer a contiguous range of ids. Every stratum
+    // before it forms a self-contained prefix of the symbol table, in the sense that no symbol in
+    // it refers to a symbol outside it.
+    //
+    // That is, the range from from [0, contiguousStrataUntil()) is a contiguous prefix, and
+    // contiguousStrataUntil() is the first stratum that's not necessarily contiguous.
+    //
+    // A fast path can make this shorter than the number of boundaries recorded in symbolOffsets by
+    // re-processing an earlier stratum and entering its new symbols at the end of the symbol table.
+    packages::Stratum contiguousStrataUntil() const {
+        auto recorded = packages::Stratum(this->symbolOffsets.size() - 1);
+        return this->earliestReopenedStratum.has_value() ? std::min(this->earliestReopenedStratum.value(), recorded)
+                                                         : recorded;
+    }
+
+    // Records that a fast path will have entered new symbols for this stratum, so the reusable
+    // symbol table prefix must end before this stratum (because its symbols will live partly in the
+    // middle of the symbol table and partly at the end of the symbol table).
+    //
+    // This deliberately does not truncate `symbolOffsets` to make the fast & slow path
+    // representations "uniform", because a fast path can preempt a running slow path.
+    //
+    // This is also why only these helpers (not symbolOffsets itself) is exposed publicly, because
+    // the size of `symbolOffsets` will be different on e.g. the first traversal through the strata
+    // and a fast path edit that revisits an earlier stratum.
+    void reopenStratum(packages::Stratum stratum) {
+        this->earliestReopenedStratum = this->earliestReopenedStratum.has_value()
+                                            ? std::min(this->earliestReopenedStratum.value(), stratum)
+                                            : stratum;
     }
 
 private:
@@ -784,8 +815,13 @@ private:
     bool symbolTableFrozen = true;
     bool fileTableFrozen = true;
 
-    // Symbol table offsets for each stratum of the package graph traversal.
+    // Symbol table offsets at the boundaries of the package graph traversal. symbolOffsets[k]
+    // records the symbol table boundary after the prefix of strata [0, k), equivalently before
+    // stratum k. A completed traversal of N strata therefore records N + 1 entries.
     std::vector<SymbolTableOffsets> symbolOffsets;
+
+    // The earliest stratum passed to `reopenStratum`, if any.
+    std::optional<packages::Stratum> earliestReopenedStratum;
 
     // Copy options over from another GlobalState. Private, as it's only meant to be used as a helper to implement other
     // copying strategies.
@@ -805,7 +841,7 @@ private:
     //
     // This method requires that `this` be derived from `other`, as the copied symbol table prefix will assume that
     // their name tables and file tables to match.
-    bool copySymbolTableFrom(const GlobalState &other, packages::Stratum toStratum);
+    void copySymbolTableFrom(const GlobalState &other, packages::Stratum toStratum);
 };
 // CheckSize(GlobalState, 152, 8);
 // Historically commented out because size of unordered_map was different between different versions of stdlib

@@ -120,7 +120,8 @@ void printGlobalTables(const core::GlobalState &gs, const options::Options &opts
 void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, long> &untypedBlames,
                         const options::Options &opts);
 
-// Create a copy of `from` that has its symbol table reset to the payload.
+// Create a copy of `from` containing the requested contiguous prefix of its symbol table.
+// A request for stratum zero initializes the symbol table from the payload (or an empty state under --no-stdlib).
 std::unique_ptr<core::GlobalState> copyForSlowPath(const core::GlobalState &from, const options::Options &opts,
                                                    core::packages::Stratum forStratum);
 
