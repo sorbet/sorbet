@@ -120,9 +120,8 @@ using namespace std::string_literals;
 
 %% prepush { check_stack_capacity(); }
 
-lexer::lexer(diagnostics_t &diag, ruby_version version, std::string_view source_buffer, sorbet::StableStringStorage<> &scratch, bool traceLexer)
+lexer::lexer(diagnostics_t &diag, std::string_view source_buffer, sorbet::StableStringStorage<> &scratch, bool traceLexer)
   : diagnostics(diag)
-  , version(version)
   , source_buffer(source_buffer)
   , scratch(scratch)
   , lineBreaks(sorbet::findLineBreaks(source_buffer))
@@ -1152,8 +1151,8 @@ void lexer::set_state_expr_value() {
     auto str = tok_view();
     std::string_view lookahead;
 
-    // tLABEL_END is only possible in non-cond context on >= 2.2
-    if (version >= ruby_version::RUBY_22 && !cond.active()) {
+    // tLABEL_END is only possible in non-cond context.
+    if (!cond.active()) {
       const char* lookahead_s = te;
       const char* lookahead_e = te + 2;
 
@@ -1273,15 +1272,6 @@ void lexer::set_state_expr_value() {
         line.pop_back();
       }
 
-      if (version <= ruby_version::RUBY_20) {
-        // See ruby:c48b4209c
-        auto riter = line.rfind('\r');
-
-        if (riter != std::string::npos) {
-          line.erase(riter);
-        }
-      }
-
       // Try ending the heredoc with the complete most recently
       // scanned line. @herebody_s always refers to the start of such line.
       if (current_literal.nest_and_try_closing(line, herebody_s, ts)) {
@@ -1359,23 +1349,14 @@ void lexer::set_state_expr_value() {
     fcall expr_variable;
   }
 
-  # Special case for Ruby > 2.7
   # If interpolated instance/class variable starts with a digit we parse it as a plain substring
   # However, "#$1" is still a regular interpolation
   interp_digit_var = '#' ('@' | '@@') digit c_alpha*;
 
   action extend_interp_digit_var {
-    if (version >= ruby_version::RUBY_27) {
-      auto& current_literal = literal_();
-      std::string_view str = tok_view();
-      current_literal.extend_string(str, ts, te);
-    } else {
-      if (ts[0] == '#' && ts[1] == '@' && ts[2] == '@') {
-        diagnostic_(dlevel::ERROR, dclass::CvarName, tok(ts, te));
-      } else {
-        diagnostic_(dlevel::ERROR, dclass::IvarName, tok(ts, te));
-      }
-    }
+    auto& current_literal = literal_();
+    std::string_view str = tok_view();
+    current_literal.extend_string(str, ts, te);
   }
 
   # Interpolations with code blocks must match nested curly braces, as
@@ -1405,11 +1386,7 @@ void lexer::set_state_expr_value() {
       auto& current_literal = literal_();
 
       if (current_literal.end_interp_brace_and_try_closing()) {
-        if (version == ruby_version::RUBY_18 || version == ruby_version::RUBY_19) {
-          emit(token_type::tRCURLY, "}", p - 1, p);
-        } else {
-          emit(token_type::tSTRING_DEND, "}", p - 1, p);
-        }
+        emit(token_type::tSTRING_DEND, "}", p - 1, p);
 
         if (current_literal.saved_herebody_s) {
           herebody_s = current_literal.saved_herebody_s;
@@ -1748,12 +1725,8 @@ void lexer::set_state_expr_value() {
 
       '%s' c_any
       => {
-        if (version == ruby_version::RUBY_23) {
-          fgoto *push_literal(literal_type::LOWERS_SYMBOL, std::string_view(ts + 2, 1), ts);
-        } else {
-          p = ts - 1;
-          fgoto expr_end;
-        }
+        p = ts - 1;
+        fgoto expr_end;
       };
 
       w_any;
@@ -1776,7 +1749,7 @@ void lexer::set_state_expr_value() {
 
       '...'
       => {
-        if (version >= ruby_version::RUBY_31 && context.inArgDef) {
+        if (context.inArgDef) {
           auto ident = tok_view(ts, te - 2);
           emit(token_type::tBDOT3, ident);
           fnext expr_end; fbreak;
@@ -1904,13 +1877,8 @@ void lexer::set_state_expr_value() {
       # See below the rationale about expr_endarg.
       w_space+ e_lparen
       => {
-        if (version == ruby_version::RUBY_18) {
-          emit(token_type::tLPAREN2, "(", te - 1, te);
-          fnext expr_value; fbreak;
-        } else {
-          emit(token_type::tLPAREN_ARG, "(", te - 1, te);
-          fnext expr_beg; fbreak;
-        }
+        emit(token_type::tLPAREN_ARG, "(", te - 1, te);
+        fnext expr_beg; fbreak;
       };
 
       # meth(1 + 2)
@@ -2037,19 +2005,12 @@ void lexer::set_state_expr_value() {
   # The previous token was an identifier which was seen while in the
   # command mode (that is, the state at the beginning of #advance was
   # expr_value). This state is very similar to expr_arg, but disambiguates
-  # two very rare and specific condition:
-  #   * In 1.8 mode, "foo (lambda do end)".
-  #   * In 1.9+ mode, "f x: -> do foo do end end".
+  # "f x: -> do foo do end end".
   expr_cmdarg := |*
       w_space+ e_lparen
       => {
         emit(token_type::tLPAREN_ARG, "(", te - 1, te);
-
-        if (version == ruby_version::RUBY_18) {
-          fnext expr_value; fbreak;
-        } else {
-          fnext expr_beg; fbreak;
-        }
+        fnext expr_beg; fbreak;
       };
 
       w_space* 'do'
@@ -2259,23 +2220,13 @@ void lexer::set_state_expr_value() {
           type = literal_type::DQUOTE_HEREDOC;
         }
 
-        if (dedent_body && (version == ruby_version::RUBY_18 ||
-                            version == ruby_version::RUBY_19 ||
-                            version == ruby_version::RUBY_20 ||
-                            version == ruby_version::RUBY_21 ||
-                            version == ruby_version::RUBY_22)) {
-          emit(token_type::tLSHFT, "<<", ts, ts + 2);
-          p = ts + 1;
-          fnext expr_beg; fbreak;
-        } else {
-          fnext *push_literal(type, std::string_view(delim_s, (size_t)(delim_e - delim_s)), ts, heredoc_e, indent, dedent_body);
+        fnext *push_literal(type, std::string_view(delim_s, (size_t)(delim_e - delim_s)), ts, heredoc_e, indent, dedent_body);
 
-          if (!herebody_s) {
-            herebody_s = new_herebody_s;
-          }
-
-          p = herebody_s - 1;
+        if (!herebody_s) {
+          herebody_s = new_herebody_s;
         }
+
+        p = herebody_s - 1;
       };
 
       #
@@ -2329,15 +2280,10 @@ void lexer::set_state_expr_value() {
           | '@@' %{ tm = p - 2; }
           ) [0-9]*
       => {
-        if (version >= ruby_version::RUBY_27) {
-          if (ts[0] == ':' && ts[1] == '@' && ts[2] == '@') {
-            diagnostic_(dlevel::ERROR, dclass::CvarName, tok(ts + 1, te));
-          } else {
-            diagnostic_(dlevel::ERROR, dclass::IvarName, tok(ts + 1, te));
-          }
+        if (ts[0] == ':' && ts[1] == '@' && ts[2] == '@') {
+          diagnostic_(dlevel::ERROR, dclass::CvarName, tok(ts + 1, te));
         } else {
-          emit(token_type::tCOLON, tok_view(ts, ts + 1), ts, ts + 1);
-          p = ts;
+          diagnostic_(dlevel::ERROR, dclass::IvarName, tok(ts + 1, te));
         }
         fnext expr_end; fbreak;
       };
@@ -2352,11 +2298,7 @@ void lexer::set_state_expr_value() {
           | (c_any - c_space_nl - e_bs) % { escape = nullptr; }
           )
       => {
-        if (version == ruby_version::RUBY_18) {
-          emit(token_type::tINTEGER, std::to_string(static_cast<unsigned char>(ts[1])));
-        } else {
-          emit(token_type::tCHARACTER, escape ? *escape : tok(ts + 1));
-        }
+        emit(token_type::tCHARACTER, escape ? *escape : tok(ts + 1));
 
         fnext expr_end; fbreak;
       };
@@ -2400,18 +2342,12 @@ void lexer::set_state_expr_value() {
       # KEYWORDS AND PUNCTUATION
       #
 
-      # Ruby >= 2.7 emits it as two tPIPE terminals
-      # while Ruby < 2.7 as a single tOROP (like in `a || b`)
+      # In this context, emit `||` as two tPIPE terminals.
       '||'
       => {
-        if (version >= ruby_version::RUBY_27) {
-          emit(token_type::tPIPE, tok_view(ts, ts + 1), ts, ts + 1);
-          fhold;
-          fnext expr_beg; fbreak;
-        } else {
-          p -= 2;
-          fgoto expr_end;
-        }
+        emit(token_type::tPIPE, tok_view(ts, ts + 1), ts, ts + 1);
+        fhold;
+        fnext expr_beg; fbreak;
       };
 
       # a({b=>c})
@@ -2456,47 +2392,24 @@ void lexer::set_state_expr_value() {
            fnext expr_value; fbreak; };
 
       #
-      # RUBY 1.9 HASH LABELS
+      # HASH LABELS
       #
 
       label ( any - ':' )
       => {
         fhold;
-
-        if (version == ruby_version::RUBY_18) {
-          auto ident = tok_view(ts, te - 2);
-
-          if (*ts >= 'A' && *ts <= 'Z') {
-            emit(token_type::tCONSTANT, ident, ts, te - 2);
-          } else {
-            emit(token_type::tIDENTIFIER, ident, ts, te - 2);
-          }
-          fhold; // continue as a symbol
-
-          if (is_declared(ident)) {
-            fnext expr_end;
-          } else {
-            fnext *arg_or_cmdarg(cmd_state);
-          }
-        } else {
-          emit(token_type::tLABEL, tok_view(ts, te - 2), ts, te - 1);
-          fnext expr_labelarg;
-        }
-
+        emit(token_type::tLABEL, tok_view(ts, te - 2), ts, te - 1);
+        fnext expr_labelarg;
         fbreak;
       };
 
       #
-      # RUBY 2.7 BEGINLESS RANGE
+      # BEGINLESS RANGE
 
       '..'
       => {
         auto ident = tok_view(ts, te - 2);
-        if (version >= ruby_version::RUBY_27) {
-          emit(token_type::tBDOT2, ident, ts, te);
-        } else {
-          emit(token_type::tDOT2, ident, ts, te);
-        }
+        emit(token_type::tBDOT2, ident, ts, te);
 
         fnext expr_beg; fbreak;
       };
@@ -2513,21 +2426,15 @@ void lexer::set_state_expr_value() {
         auto dots_te = followed_by_nl ? te - 1 : te;
 
         auto ident = tok_view(ts, te - 2);
-        if (version >= ruby_version::RUBY_30) {
-          if (!lambda_stack.empty() && lambda_stack.top() == paren_nest) {
-            emit(token_type::tDOT3, ident, ts, dots_te);
-          } else {
-            emit(token_type::tBDOT3, ident, ts, dots_te);
-
-            if (version >= ruby_version::RUBY_31 && followed_by_nl && context.inArgDef) {
-              emit(token_type::tNL, "", newline_s, newline_s + 1);
-              nl_emitted = true;
-            }
-          }
-        } else if (version >= ruby_version::RUBY_27) {
-          emit(token_type::tBDOT3, ident, ts, dots_te);
-        } else {
+        if (!lambda_stack.empty() && lambda_stack.top() == paren_nest) {
           emit(token_type::tDOT3, ident, ts, dots_te);
+        } else {
+          emit(token_type::tBDOT3, ident, ts, dots_te);
+
+          if (followed_by_nl && context.inArgDef) {
+            emit(token_type::tNL, "", newline_s, newline_s + 1);
+            nl_emitted = true;
+          }
         }
 
          if (followed_by_nl && !nl_emitted) {
@@ -2710,27 +2617,12 @@ void lexer::set_state_expr_value() {
       keyword_with_arg
       => {
         emit_table(KEYWORDS);
-
-        if (version == ruby_version::RUBY_18 && ts + 3 == te && ts[0] == 'n' && ts[1] == 'o' && ts[2] == 't') {
-          fnext expr_beg; fbreak;
-        } else {
-          fnext expr_arg; fbreak;
-        }
+        fnext expr_arg; fbreak;
       };
 
       '__ENCODING__'
       => {
-        if (version == ruby_version::RUBY_18) {
-          auto ident = tok_view();
-
-          emit(token_type::tIDENTIFIER, ident);
-
-          if (!is_declared(ident)) {
-            fnext *arg_or_cmdarg(cmd_state);
-          }
-        } else {
-          emit(token_type::k__ENCODING__, "__ENCODING__");
-        }
+        emit(token_type::k__ENCODING__, "__ENCODING__");
         fbreak;
       };
 
@@ -2754,8 +2646,6 @@ void lexer::set_state_expr_value() {
 
         if (num_suffix_s[-1] == '_') {
           diagnostic_(dlevel::ERROR, dclass::TrailingInNumber, range(te - 1, te), "_");
-        } else if (num_digits_s == num_suffix_s && num_base == 8 && version == ruby_version::RUBY_18) {
-          // 1.8 did not raise an error on 0o.
         } else if (num_digits_s == num_suffix_s) {
           diagnostic_(dlevel::ERROR, dclass::EmptyNumeric);
         } else if (num_base == 8) {
@@ -2767,12 +2657,7 @@ void lexer::set_state_expr_value() {
           }
         }
 
-        if (version == ruby_version::RUBY_18 || version == ruby_version::RUBY_19 || version == ruby_version::RUBY_20) {
-          emit(token_type::tINTEGER, convert_base(digits, num_base), ts, num_suffix_s);
-          p = num_suffix_s - 1;
-        } else {
-          emit_num(convert_base(digits, num_base));
-        }
+        emit_num(convert_base(digits, num_base));
         fbreak;
       };
 
@@ -2783,22 +2668,14 @@ void lexer::set_state_expr_value() {
 
       flo_int [eE]
       => {
-        if (version == ruby_version::RUBY_18 || version == ruby_version::RUBY_19 || version == ruby_version::RUBY_20) {
-          diagnostic_(dlevel::ERROR, dclass::TrailingInNumber, range(te - 1, te), tok(te-1, te));
-        } else {
-          emit(token_type::tINTEGER, tok_view(ts, te - 1), ts, te - 1);
-          fhold; fbreak;
-        }
+        emit(token_type::tINTEGER, tok_view(ts, te - 1), ts, te - 1);
+        fhold; fbreak;
       };
 
       flo_int flo_frac [eE]
       => {
-        if (version == ruby_version::RUBY_18 || version == ruby_version::RUBY_19 || version == ruby_version::RUBY_20) {
-          diagnostic_(dlevel::ERROR, dclass::TrailingInNumber, range(te - 1, te), tok(te - 1, te));
-        } else {
-          emit(token_type::tFLOAT, tok_view(ts, te - 1), ts, te - 1);
-          fhold; fbreak;
-        }
+        emit(token_type::tFLOAT, tok_view(ts, te - 1), ts, te - 1);
+        fhold; fbreak;
       };
 
       flo_int
@@ -2808,12 +2685,7 @@ void lexer::set_state_expr_value() {
       => {
         auto digits = tok(ts, num_suffix_s);
 
-        if (version == ruby_version::RUBY_18 || version == ruby_version::RUBY_19 || version == ruby_version::RUBY_20) {
-          emit(token_type::tFLOAT, digits, ts, num_suffix_s);
-          p = num_suffix_s - 1;
-        } else {
-          emit_num(digits);
-        }
+        emit_num(digits);
         fbreak;
       };
 
@@ -2959,18 +2831,7 @@ void lexer::set_state_expr_value() {
       #  .b: a.b
 
       (c_space* w_space_comment '\n')+
-      => {
-        if (version < ruby_version::RUBY_27) {
-          // Ruby before 2.7 doesn't support comments before leading dot.
-          // If a line after "a" starts with a comment then "a" is a self-contained statement.
-          // So in that case we emit a special tNL token and start reading the
-          // next line as a separate statement.
-          //
-          // Note: block comments before leading dot are not supported on any version of Ruby.
-          emit(token_type::tNL, "", newline_s, newline_s + 1);
-          fhold; fnext line_begin; fbreak;
-        }
-      };
+      ;
 
       c_space* %{ tm = p; } ('.' | '&.')
       => { p = tm - 1; fgoto expr_end; };
