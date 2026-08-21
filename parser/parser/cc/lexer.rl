@@ -157,19 +157,6 @@ lexer::lexer(diagnostics_t &diag, std::string_view source_buffer, sorbet::Stable
   cs_before_block_comment = lex_en_line_begin;
 }
 
-bool lexer::newline_follows_dot() const {
-  auto cursor = newline_s;
-  auto source_begin = source_buffer.data();
-  while (cursor > source_begin) {
-    auto previous = cursor[-1];
-    if (previous != ' ' && previous != '\t' && previous != '\r' && previous != '\f' && previous != '\v') {
-      return previous == '.';
-    }
-    cursor--;
-  }
-  return false;
-}
-
 // At the moment, having a method like this instead of using Ragel to properly
 // track indentation at the time we emit a token could be a recipe for really
 // bad performance (having a function like this makes lexing accidentally
@@ -1852,7 +1839,8 @@ void lexer::set_state_expr_value() {
 
       # This is different from expr_dot. Here, keywords are NOT identifiers.
       keyword
-      => { emit_table(KEYWORDS);
+      => { keywordsAfterDotNewline.insert((size_t)(ts - source_buffer.data()));
+           emit_table(KEYWORDS);
            fnext expr_end; fbreak; };
 
       call_or_var
@@ -2854,7 +2842,12 @@ void lexer::set_state_expr_value() {
       # win for identifiers like `andfoo` and `orfoo`.
       c_space* %{ tm = p; } ('and' | 'or')
       => {
-        if (newline_follows_dot()) {
+        // Normally, `x.\n and` transitions from expr_dot to
+        // expr_dot_after_newline, which emits `and` as a keyword for better
+        // error recovery. Parser recovery can rewind the lexer to expr_beg,
+        // losing that state, so preserve the decision made on the first pass.
+        auto offset = (size_t)(tm - source_buffer.data());
+        if (keywordsAfterDotNewline.contains(offset)) {
           emit(token_type::tNL, "", newline_s, newline_s + 1);
           p = tm - 1; fnext line_begin; fbreak;
         } else {

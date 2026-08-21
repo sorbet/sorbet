@@ -48,6 +48,7 @@ private:
     std::stack<environment> static_env;
     std::stack<literal> literal_stack;
     std::deque<token_t> token_queue;
+    std::set<size_t> keywordsAfterDotNewline;
 
     // Required by Ragel to implement its finite state machine.
     // It uses an int to keep track of the state machine's internal state.
@@ -126,8 +127,6 @@ private:
     optional_size dedentLevel_;
 
     bool traceLexer;
-
-    bool newline_follows_dot() const;
 
     size_t line_start(token_type type, size_t beginPos);
     void check_stack_capacity();
