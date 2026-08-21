@@ -1,4 +1,3 @@
-#include "common/strings/formatting.h"
 #include "common/typecase.h"
 #include "core/Polarity.h"
 #include "core/Symbols.h"
@@ -70,22 +69,9 @@ private:
                 auto members = app.klass.data(ctx)->typeMembers();
                 auto params = app.targs;
 
-                if (members.size() != params.size()) [[unlikely]] {
-                    auto memberNames = fmt::map_join(members, ", ", [&](core::TypeMemberRef m) {
-                        if (!m.exists()) {
-                            return "<missing member>"s;
-                        }
-
-                        if (m.id() >= ctx.state.typeMembersUsed()) {
-                            return "<type member from a future stratum>"s;
-                        }
-
-                        return m.data(ctx)->name.show(ctx);
-                    });
-                    fatalLogger->error(R"(msg="types should be fully saturated" loc="{}" members="[{}]" app="{}")",
-                                       this->loc.showRaw(ctx), memberNames, app.show(ctx));
-                    ENFORCE(false);
-                }
+                ENFORCE(members.size() == params.size(),
+                        "types should be fully saturated, but there are {} members and {} params", members.size(),
+                        params.size());
 
                 for (int i = 0; i < members.size(); ++i) {
                     auto memberVariance = members[i].data(ctx)->variance();
