@@ -127,6 +127,8 @@ private:
 
     bool traceLexer;
 
+    bool newline_follows_dot() const;
+
     size_t line_start(token_type type, size_t beginPos);
     void check_stack_capacity();
     int stack_pop();

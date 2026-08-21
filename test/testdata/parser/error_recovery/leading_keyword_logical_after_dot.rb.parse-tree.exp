@@ -50,10 +50,27 @@ Begin {
           }
         ]
       }
-      body = Send {
-        receiver = NULL
-        method = <U after_commented_and>
-        args = [
+      body = Begin {
+        stmts = [
+          And {
+            left = Send {
+              receiver = LVar {
+                name = <U x>
+              }
+              method = <U <method-name-missing>>
+              args = [
+              ]
+            }
+            right = LVar {
+              name = <U y>
+            }
+          }
+          Send {
+            receiver = NULL
+            method = <U after_commented_and>
+            args = [
+            ]
+          }
         ]
       }
     }
@@ -69,10 +86,27 @@ Begin {
           }
         ]
       }
-      body = Send {
-        receiver = NULL
-        method = <U after_commented_or>
-        args = [
+      body = Begin {
+        stmts = [
+          Or {
+            left = Send {
+              receiver = LVar {
+                name = <U x>
+              }
+              method = <U <method-name-missing>>
+              args = [
+              ]
+            }
+            right = LVar {
+              name = <U y>
+            }
+          }
+          Send {
+            receiver = NULL
+            method = <U after_commented_or>
+            args = [
+            ]
+          }
         ]
       }
     }

@@ -1,7 +1,7 @@
 # typed: false
 
 1
-and 2 # error: unexpected token
+and 2
 and 3
 
 1
@@ -18,7 +18,7 @@ orfoo
 # Comments may appear before a leading keyword operator.
 true
   # comment before and
-  and false # error: unexpected token
+  and false
 
 false
   # comment before or

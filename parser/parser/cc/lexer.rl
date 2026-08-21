@@ -157,6 +157,19 @@ lexer::lexer(diagnostics_t &diag, std::string_view source_buffer, sorbet::Stable
   cs_before_block_comment = lex_en_line_begin;
 }
 
+bool lexer::newline_follows_dot() const {
+  auto cursor = newline_s;
+  auto source_begin = source_buffer.data();
+  while (cursor > source_begin) {
+    auto previous = cursor[-1];
+    if (previous != ' ' && previous != '\t' && previous != '\r' && previous != '\f' && previous != '\v') {
+      return previous == '.';
+    }
+    cursor--;
+  }
+  return false;
+}
+
 // At the moment, having a method like this instead of using Ragel to properly
 // track indentation at the time we emit a token could be a recipe for really
 // bad performance (having a function like this makes lexing accidentally
@@ -2835,6 +2848,25 @@ void lexer::set_state_expr_value() {
 
       c_space* %{ tm = p; } ('.' | '&.' | '&&' | '||')
       => { p = tm - 1; fgoto expr_end; };
+
+      # Unlike the symbolic operators, keyword operators need an identifier
+      # boundary. Ragel's longest-match behavior lets the bareword rule below
+      # win for identifiers like `andfoo` and `orfoo`.
+      c_space* %{ tm = p; } ('and' | 'or')
+      => {
+        if (newline_follows_dot()) {
+          emit(token_type::tNL, "", newline_s, newline_s + 1);
+          p = tm - 1; fnext line_begin; fbreak;
+        } else {
+          p = tm - 1; fgoto expr_end;
+        }
+      };
+
+      c_space* %{ tm = p; } bareword
+      => {
+        emit(token_type::tNL, "", newline_s, newline_s + 1);
+        p = tm - 1; fnext line_begin; fbreak;
+      };
 
       any
       => { emit(token_type::tNL, "", newline_s, newline_s + 1);
