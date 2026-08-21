@@ -218,3 +218,15 @@ module T::Props::GeneratedCodeValidation
   def self.validate_deserialize(source); end
   def self.validate_serialize(source); end
 end
+
+module T::Props::Serializable::LegacyWith
+  sig { params(changed_props: T.untyped).returns(T.self_type) }
+  def with(**changed_props)
+  end
+end
+
+module T::Props::Serializable::ShallowWith
+  sig { params(changed_props: T.untyped).returns(T.self_type) }
+  def with(**changed_props)
+  end
+end
