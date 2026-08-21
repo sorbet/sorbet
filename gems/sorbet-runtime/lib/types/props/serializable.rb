@@ -327,3 +327,36 @@ module T::Props::Serializable::ClassMethods
     self.decorator.from_hash(hash, true)
   end
 end
+
+module T::Props::Serializable::LegacyWith
+  def with(changed_props)
+    with_existing_hash(changed_props, existing_hash: self.serialize)
+  end
+
+  private def with_existing_hash(changed_props, existing_hash:)
+    serialized = existing_hash
+    new_val = self.class.from_hash(serialized.merge(recursive_stringify_keys(changed_props)))
+    old_extra = self.instance_variable_get(:@_extra_props)
+    new_extra = new_val.instance_variable_get(:@_extra_props)
+    if old_extra != new_extra
+      difference =
+        if old_extra
+          new_extra.reject { |k, v| old_extra[k] == v }
+        else
+          new_extra
+        end
+      raise ArgumentError.new("Unexpected arguments: input(#{changed_props}), unexpected(#{difference})")
+    end
+    new_val
+  end
+end
+
+module T::Props::Serializable::ShallowWith
+  def with(**changed_props)
+    new_val = clone
+    changed_props.each do |name, value|
+      new_val.send(:"#{name}=", value)
+    end
+    new_val
+  end
+end

@@ -509,13 +509,114 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
   end
 
   class WithModel1 < T::Struct
+    include T::Props::Serializable::LegacyWith
+
     prop :foo, String
     prop :bar, T.nilable(Integer)
   end
 
   class WithModel2 < T::Struct
+    include T::Props::Serializable::LegacyWith
+
     prop :f1, String
     prop :f2, T.nilable(WithModel1)
+  end
+
+  describe 'legacy with function' do
+    it 'with simple fields' do
+      a = WithModel1.new(foo: 'foo')
+      b = a.with(bar: 10)
+
+      assert_equal('foo', a.foo)
+      assert_nil(a.bar)
+      assert_equal('foo', b.foo)
+      assert_equal(10, b.bar)
+    end
+
+    it 'with invalid fields' do
+      a = WithModel1.new(foo: 'foo')
+      e = assert_raises(ArgumentError) do
+        a.with(non_bar: 10)
+      end
+      assert_equal("Unexpected arguments: input(#{{non_bar: 10}}), unexpected(#{{'non_bar' => 10}})", e.to_s) # rubocop:disable Lint/LiteralInInterpolation
+
+      a = WithModel1.from_hash({'foo' => 'foo', 'foo1' => 'foo1'})
+      e = assert_raises(ArgumentError) do
+        a.with(non_bar: 10)
+      end
+      assert_equal("Unexpected arguments: input(#{{non_bar: 10}}), unexpected(#{{'non_bar' => 10}})", e.to_s) # rubocop:disable Lint/LiteralInInterpolation
+    end
+
+    it 'with overwrite fields' do
+      a = WithModel1.new(foo: 'foo', bar: 10)
+      b = a.with(bar: 20)
+
+      assert_equal('foo', a.foo)
+      assert_equal(10, a.bar)
+      assert_equal('foo', b.foo)
+      assert_equal(20, b.bar)
+    end
+
+    it 'with nested fields' do
+      a = WithModel2.new(f1: 'foo')
+      b = a.with(f2: {foo: 'foo', bar: 10})
+
+      assert_equal('foo', a.f1)
+      assert_nil(a.f2)
+      assert_equal('foo', b.f1)
+      refute_nil(b.f2)
+      assert_equal('foo', b.f2.foo)
+      assert_equal(10, b.f2.bar)
+    end
+
+    it 'fails with nested fields' do
+      a = WithModel2.new(f1: 'foo')
+      assert_raises(TypeError) do
+        a.with(f2: WithModel1.new(foo: 'foo', bar: 10))
+      end
+    end
+  end
+
+  class ShallowWithModel1 < T::Struct
+    include T::Props::Serializable::ShallowWith
+
+    prop :foo, String
+    prop :bar, T.nilable(Integer)
+  end
+
+  class ShallowWithModel2 < T::Struct
+    include T::Props::Serializable::ShallowWith
+
+    prop :f1, String
+    prop :f2, T.nilable(ShallowWithModel1)
+  end
+
+  describe "ShallowWith#with" do
+    it "succeeds with nested updates" do
+      a = ShallowWithModel2.new(f1: 'foo')
+      b = a.with(f2: ShallowWithModel1.new(foo: 'foo', bar: 10))
+
+      assert_equal('foo', a.f1)
+      assert_nil(a.f2)
+      assert_equal('foo', b.f1)
+      refute_nil(b.f2)
+      assert_equal('foo', b.f2.foo)
+      assert_equal(10, b.f2.bar)
+    end
+
+    it "does not deep copy shared state" do
+      inner = ShallowWithModel1.new(foo: 'x', bar: 0)
+      a = ShallowWithModel2.new(f1: 'foo', f2: inner)
+      b = a.with(f1: 'bar')
+      assert_equal('foo', a.f1)
+      assert_equal('bar', b.f1)
+      assert_same(inner, a.f2)
+      assert_same(inner, b.f2)
+
+      # and to demonstrate why this matters, for a curious reader
+      a.f2.bar = 10
+      assert_equal(10, b.f2.bar)
+    end
   end
 
   class BooleanStruct < T::Struct
@@ -1411,8 +1512,20 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
   end
 
   class ConstDefault < T::Struct
+    include T::Props::Serializable::LegacyWith
+
     const :required_at_some_point, NilClass, default: nil
     const :still_required_prop, Integer
+  end
+
+  describe 'const NilClass' do
+    it 'round-trip serializes' do
+      h = {'still_required_prop' => 5}
+      x = ConstDefault.from_hash!(h)
+      assert_nil(x.required_at_some_point)
+      x = x.with(still_required_prop: 6)
+      assert_nil(x.required_at_some_point)
+    end
   end
 
   class MuckAboutWithPropInternals
