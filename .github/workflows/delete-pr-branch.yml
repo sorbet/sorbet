@@ -1,0 +1,50 @@
+name: Delete PR branch
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write
+
+jobs:
+  delete-branch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Delete branches ending with the PR number
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const suffix = `-${context.payload.pull_request.number}`;
+            const branches = await github.paginate(
+              github.rest.repos.listBranches,
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                per_page: 100,
+              },
+            );
+            const matches = branches.filter(({name}) => name.endsWith(suffix));
+
+            if (matches.length === 0) {
+              core.info(`No branches end with ${suffix}`);
+              return;
+            }
+
+            for (const {name} of matches) {
+              try {
+                await github.rest.git.deleteRef({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ref: `heads/${name}`,
+                });
+                core.info(`Deleted branch ${name}`);
+              } catch (error) {
+                if (error.status === 422) {
+                  core.warning(`Branch ${name} no longer exists or cannot be deleted`);
+                } else {
+                  throw error;
+                }
+              }
+            }
