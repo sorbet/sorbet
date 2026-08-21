@@ -1199,6 +1199,16 @@ ClassOrModuleRef GlobalState::enterClassOrModuleSymbol(Loc loc, ClassOrModuleRef
 
     auto ownerData = owner.data(*this);
     auto ownerPackageRegistryOwner = ownerData->packageRegistryOwner;
+    auto ownerCanStartPackageLookup =
+        owner == Symbols::root() || owner.isPackageSpecSymbol(*this) ||
+        (ownerData->owner == Symbols::root() && ownerData->name == packages::PackageDB::TEST_NAMESPACE);
+    if (!ownerCanStartPackageLookup && !ownerData->package.exists() &&
+        ownerPackageRegistryOwner == Symbols::PackageSpecRegistry()) {
+        // This owner is implicitly unpackaged. Definitions nested under it must remain unpackaged rather than
+        // resuming a package-name search below the unpackaged namespace.
+        ownerPackageRegistryOwner = Symbols::noClassOrModule();
+    }
+
     if (!ownerPackageRegistryOwner.exists()) {
         // Our owner was already past the end of the PackageSpecRegistry namespace.
         // Propogate that we are too, and mark us as being owned by whatever package our owner was.
