@@ -2804,7 +2804,7 @@ void lexer::set_state_expr_value() {
       w_space_comment;
 
       w_newline
-      => { fgoto leading_dot; };
+      => { fgoto leading_operator; };
 
       ';'
       => { emit(token_type::tSEMI, ";");
@@ -2824,7 +2824,7 @@ void lexer::set_state_expr_value() {
       c_eof => do_eof;
   *|;
 
-  leading_dot := |*
+  leading_operator := |*
       # Insane leading dots:
       # a #comment
       #  # post-2.7 comment
@@ -2833,7 +2833,7 @@ void lexer::set_state_expr_value() {
       (c_space* w_space_comment '\n')+
       ;
 
-      c_space* %{ tm = p; } ('.' | '&.')
+      c_space* %{ tm = p; } ('.' | '&.' | '&&' | '||')
       => { p = tm - 1; fgoto expr_end; };
 
       any
