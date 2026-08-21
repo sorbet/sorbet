@@ -1,0 +1,87 @@
+other/absolute_regexp_parser.rbi:6: Superclasses may only be set on constants in the package that owns them https://srb.help/5084
+     6 |class ::Regexp::Parser::AbsoluteError < StandardError
+                                                ^^^^^^^^^^^^^
+    other/absolute_regexp_parser.rbi:6: Symbol originally defined here
+     6 |class ::Regexp::Parser::AbsoluteError < StandardError
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    other/__package.rb:3: Package where the `include` occurs
+     3 |class Other < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+    parser/__package.rb:3: Package where `Regexp::Parser::AbsoluteError` is defined
+     3 |class Parser < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+other/absolute_regexp_parser.rbi:9: `Regexp::Parser::AbsoluteError` resolves but is not exported from `Parser` and `Parser` is not imported https://srb.help/3718
+     9 |class ::Regexp::AbsoluteScannerError < ::Regexp::Parser::AbsoluteError
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  `Regexp::Parser::AbsoluteError` does not define behavior and thus will not be automatically exported
+    other/absolute_regexp_parser.rbi:6:
+     6 |class ::Regexp::Parser::AbsoluteError < StandardError
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Either export it manually, or better, restructure the code so that package namespaces do not define behavior.
+  Autocorrect: Use `-a` to autocorrect
+    other/__package.rb:4: Insert `import Parser`
+     4 |  prelude_package
+                         ^
+
+other/regexp_parser.rbi:3: File belongs to package `Other` but defines a constant that does not match this namespace https://srb.help/3713
+     3 |class Regexp::Parser
+              ^^^^^^^^^^^^^^
+    other/__package.rb:3: Enclosing package declared here
+     3 |class Other < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+    parser/__package.rb:3: Must belong to this package, given constant name `Regexp::Parser`
+     3 |class Parser < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+other/regexp_parser.rbi:6: This file must only define behavior in enclosing package `Other` https://srb.help/3713
+     6 |class Regexp::Parser::Error < StandardError
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    other/regexp_parser.rbi:6: Defining behavior in `Regexp::Parser::Error` instead:
+     6 |class Regexp::Parser::Error < StandardError
+              ^^^^^^^^^^^^^^^^^^^^^
+    other/__package.rb:3: Enclosing package `Other` declared here
+     3 |class Other < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+    parser/__package.rb:3: Package `Regexp::Parser::Error` declared here
+     3 |class Parser < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+other/regexp_parser.rbi:9: This file must only define behavior in enclosing package `Other` https://srb.help/3713
+     9 |class Regexp::ScannerError < Regexp::Parser::Error
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    other/regexp_parser.rbi:9: Defining behavior in `Regexp::ScannerError` instead:
+     9 |class Regexp::ScannerError < Regexp::Parser::Error
+              ^^^^^^^^^^^^^^^^^^^^
+    other/__package.rb:3: Enclosing package `Other` declared here
+     3 |class Other < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+other/regexp_parser.rbi:6: Superclasses may only be set on constants in the package that owns them https://srb.help/5084
+     6 |class Regexp::Parser::Error < StandardError
+                                      ^^^^^^^^^^^^^
+    other/regexp_parser.rbi:6: Symbol originally defined here
+     6 |class Regexp::Parser::Error < StandardError
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    other/__package.rb:3: Package where the `include` occurs
+     3 |class Other < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+    parser/__package.rb:3: Package where `Regexp::Parser::Error` is defined
+     3 |class Parser < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+other/regexp_parser.rbi:9: `Regexp::Parser::Error` resolves but is not exported from `Parser` and `Parser` is not imported https://srb.help/3718
+     9 |class Regexp::ScannerError < Regexp::Parser::Error
+                                     ^^^^^^^^^^^^^^^^^^^^^
+  `Regexp::Parser::Error` does not define behavior and thus will not be automatically exported
+    other/regexp_parser.rbi:6:
+     6 |class Regexp::Parser::Error < StandardError
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Either export it manually, or better, restructure the code so that package namespaces do not define behavior.
+  Autocorrect: Use `-a` to autocorrect
+    other/__package.rb:4: Insert `import Parser`
+     4 |  prelude_package
+                         ^
+Errors: 7
