@@ -1,0 +1,80 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U keyword_and>
+      params = Params {
+        params = [
+          Param {
+            name = <U x>
+          }
+          Param {
+            name = <U y>
+          }
+        ]
+      }
+      body = Send {
+        receiver = NULL
+        method = <U after_and>
+        args = [
+        ]
+      }
+    }
+    DefMethod {
+      name = <U keyword_or>
+      params = Params {
+        params = [
+          Param {
+            name = <U x>
+          }
+          Param {
+            name = <U y>
+          }
+        ]
+      }
+      body = Send {
+        receiver = NULL
+        method = <U after_or>
+        args = [
+        ]
+      }
+    }
+    DefMethod {
+      name = <U commented_keyword_and>
+      params = Params {
+        params = [
+          Param {
+            name = <U x>
+          }
+          Param {
+            name = <U y>
+          }
+        ]
+      }
+      body = Send {
+        receiver = NULL
+        method = <U after_commented_and>
+        args = [
+        ]
+      }
+    }
+    DefMethod {
+      name = <U commented_keyword_or>
+      params = Params {
+        params = [
+          Param {
+            name = <U x>
+          }
+          Param {
+            name = <U y>
+          }
+        ]
+      }
+      body = Send {
+        receiver = NULL
+        method = <U after_commented_or>
+        args = [
+        ]
+      }
+    }
+  ]
+}
