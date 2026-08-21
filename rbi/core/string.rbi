@@ -75,7 +75,7 @@ class String < Object
   #
   # If the string is not frozen, then return the string itself.
   sig do
-    returns(String)
+    returns(T.self_type)
   end
   def +@; end
 
@@ -84,7 +84,7 @@ class String < Object
   # The string will be deduplicated as long as it does not have any instance
   # variables set on it.
   sig do
-    returns(String)
+    returns(T.self_type)
   end
   def -@; end
 
@@ -105,7 +105,7 @@ class String < Object
     params(
         arg0: Object,
     )
-    .returns(String)
+    .returns(T.self_type)
   end
   def <<(arg0); end
 
@@ -199,7 +199,7 @@ class String < Object
   #
   # If the string is not frozen, then return the string itself.
   sig do
-    returns(String)
+    returns(T.self_type)
   end
   def +@; end
 
@@ -208,7 +208,7 @@ class String < Object
   # The string will be deduplicated as long as it does not have any instance
   # variables set on it.
   sig do
-    returns(String)
+    returns(T.self_type)
   end
   def -@; end
 
@@ -570,14 +570,14 @@ class String < Object
       arg1: Integer,
       arg2: String,
     )
-    .returns(String)
+    .returns(T.self_type)
   end
   sig do
     params(
       arg0: T::Range[Integer],
       arg1: String,
     )
-    .returns(String)
+    .returns(T.self_type)
   end
   def bytesplice(arg0, arg1, arg2=T.unsafe(nil)); end
 
@@ -766,7 +766,7 @@ class String < Object
   # a = "abcde"
   # a.clear    #=> ""
   # ```
-  sig {returns(String)}
+  sig {returns(T.self_type)}
   def clear(); end
 
   # Returns an array of the
@@ -807,7 +807,7 @@ class String < Object
     params(
         arg0: T.any(Integer, Object),
     )
-    .returns(String)
+    .returns(T.self_type)
   end
   def concat(arg0); end
 
@@ -1060,7 +1060,7 @@ class String < Object
     params(
         blk: T.proc.params(arg0: Integer).returns(BasicObject),
     )
-    .returns(String)
+    .returns(T.self_type)
   end
   sig {returns(T::Enumerator[Integer])}
   def each_byte(&blk); end
@@ -1081,7 +1081,7 @@ class String < Object
     params(
         blk: T.proc.params(arg0: String).returns(BasicObject),
     )
-    .returns(String)
+    .returns(T.self_type)
   end
   sig {returns(T::Enumerator[String])}
   def each_char(&blk); end
@@ -1107,7 +1107,7 @@ class String < Object
     params(
         blk: T.proc.params(arg0: Integer).returns(BasicObject),
     )
-    .returns(String)
+    .returns(T.self_type)
   end
   sig {returns(T::Enumerator[Integer])}
   def each_codepoint(&blk); end
@@ -1169,7 +1169,7 @@ class String < Object
         chomp: T::Boolean,
         blk: T.proc.params(arg0: String).returns(BasicObject),
     )
-    .returns(String)
+    .returns(T.self_type)
   end
   sig do
     params(
@@ -1252,7 +1252,7 @@ class String < Object
       arg1: T.any(String, Encoding),
       arg2: T.untyped
     )
-    .returns(String)
+    .returns(T.self_type)
   end
   def encode(arg0=T.unsafe(nil), arg1=T.unsafe(nil), **arg2); end
 
@@ -1274,7 +1274,7 @@ class String < Object
       arg1: T.any(String, Encoding),
       arg2: T.untyped
     )
-    .returns(String)
+    .returns(T.self_type)
   end
   def encode!(arg0, arg1=T.unsafe(nil), **arg2); end
 
@@ -1309,11 +1309,11 @@ class String < Object
     params(
         arg0: T.any(String, Encoding),
     )
-    .returns(String)
+    .returns(T.self_type)
   end
   def force_encoding(arg0); end
 
-  sig {returns(String)}
+  sig {returns(T.self_type)}
   def freeze; end
 
   # returns the *index*th byte as an integer.
@@ -1532,7 +1532,7 @@ class String < Object
         arg0: Integer,
         arg1: String,
     )
-    .returns(String)
+    .returns(T.self_type)
   end
   def insert(arg0, arg1); end
 
@@ -1749,7 +1749,7 @@ class String < Object
   # Equivalent to
   # [`String#succ`](https://docs.ruby-lang.org/en/2.7.0/String.html#method-i-succ),
   # but modifies the receiver in place.
-  sig {returns(String)}
+  sig {returns(T.self_type)}
   def next!(); end
 
   # Treats leading characters of *str* as a string of octal digits (with an
@@ -1807,7 +1807,7 @@ class String < Object
     params(
         arg0: String,
     )
-    .returns(String)
+    .returns(T.self_type)
   end
   def prepend(arg0); end
 
@@ -1822,7 +1822,7 @@ class String < Object
     params(
         arg0: String,
     )
-    .returns(String)
+    .returns(T.self_type)
   end
   def replace(arg0); end
 
@@ -2011,14 +2011,14 @@ class String < Object
     params(
         arg0: String,
     )
-    .returns(String)
+    .returns(T.self_type)
   end
   sig do
     params(
         arg0: String,
         blk: T.proc.params(arg0: T.untyped).returns(BasicObject),
     )
-    .returns(String)
+    .returns(T.self_type)
   end
   def scrub!(arg0=T.unsafe(nil), &blk); end
 
@@ -2867,7 +2867,7 @@ class String < Object
         arg1: T.type_parameter(:Bool),
         blk: T.proc.params(arg0: String).returns(BasicObject),
     )
-    .returns(String)
+    .returns(T.self_type)
   end
   def upto(arg0, arg1=T.unsafe(nil), &blk); end
 
@@ -2909,7 +2909,7 @@ class String < Object
     )
     .returns(String)
   end
-  def self.dedup(string); end
+  def dedup(string); end
 
   # Element Reference --- If passed a single `index`, returns a substring of one
   # character at that index. If passed a `start` index and a `length`, returns a
