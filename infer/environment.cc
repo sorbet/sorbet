@@ -854,7 +854,9 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, cfg::CF
         const auto &otherTO = other.getTypeAndOrigin(var);
         auto &thisTO = pair.second.typeAndOrigins;
         if (thisTO.type != nullptr) {
-            thisTO.type = core::Types::any(ctx, thisTO.type, otherTO.type);
+            auto literalTypesMode =
+                var.isSyntheticTemporary(inWhat) ? core::LiteralTypesMode::preserve : core::LiteralTypesMode::broaden;
+            thisTO.type = core::Types::lub(ctx, thisTO.type, otherTO.type, literalTypesMode);
             thisTO.type.sanityCheck(ctx);
             for (auto origin : otherTO.origins) {
                 if (!absl::c_linear_search(thisTO.origins, origin)) {
@@ -1772,8 +1774,11 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
 
             // TODO(jez) What should we do about untyped code and pinning?
             core::ErrorSection::Collector errorDetailsCollector;
-            bool asGoodAs = core::Types::isSubType(ctx, core::Types::dropLiteral(ctx, tp.type),
-                                                   core::Types::dropLiteral(ctx, cur.type), errorDetailsCollector);
+            // Flow-sensitive joins retain literal facts, but inferred loop pins use their broader assignment type.
+            auto expectedType = pin != pinnedTypes.end() ? core::Types::dropLiteral(ctx, cur.type)
+                                                         : core::Types::dropLiteralRecursive(ctx, cur.type);
+            bool asGoodAs = core::Types::isSubType(ctx, core::Types::dropLiteral(ctx, tp.type), expectedType,
+                                                   errorDetailsCollector);
 
             {
                 switch (bindMinLoops) {
