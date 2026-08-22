@@ -3070,11 +3070,23 @@ public:
                 auto title = fmt::format("Initialize as `{}`", suggestType.show(gs));
 
                 if (replaceLoc.adjustLen(gs, -2, 1).source(gs) == "=") {
-                    // Defensive; might be an ivar assignment from `attr_accessor` or `prop`, which
-                    // we don't want an autocorrect for.
+                    // Defensive; might be an ivar assignment from `prop`, which we don't want an
+                    // autocorrect for.
                     auto opts = ShowOptions().withUseValidSyntax();
                     e.replaceWith(title, replaceLoc, "T.let({}, {})", replaceLoc.source(gs).value(),
                                   suggestType.show(gs, opts));
+                } else if (replaceLoc.endPos() < args.callLoc().beginPos()) {
+                    // An `attr_writer` points the RHS of its synthesized `@foo = foo` at the type in
+                    // the sig's `returns(...)`, which always comes before the attr name. Widening
+                    // that type makes the rewriter declare the ivar for us.
+                    //
+                    // Comparing offsets is fine here: both locs are built from `locs.file`.
+                    //
+                    // We wrap the source instead of showing `suggestType`, so that things like type
+                    // aliases keep the spelling the user chose.
+                    auto source = replaceLoc.source(gs).value();
+                    e.replaceWith(fmt::format("Change the type to `T.nilable({})`", source), replaceLoc,
+                                  "T.nilable({})", source);
                 }
             }
         }
