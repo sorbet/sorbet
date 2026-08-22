@@ -167,17 +167,27 @@ UnorderedMap<MangledName, Condensation::Traversal::StratumInfo>
 Condensation::Traversal::buildStratumMapping(const core::GlobalState &gs) const {
     UnorderedMap<MangledName, StratumInfo> result;
 
+    auto &db = gs.packageDB();
+
     int ix = -1;
     for (auto stratum : this->strata) {
         ++ix;
         for (auto &scc : stratum) {
-            if (scc.isTest) {
-                for (auto name : scc.members) {
-                    result[name].testStratum = ix;
-                }
-            } else {
-                for (auto name : scc.members) {
-                    result[name].applicationStratum = ix;
+            for (auto name : scc.members) {
+                // TODO(trevor): we can switch to maintaining a single stratum once we've fully migrated to
+                // test-packages.
+                auto &info = result[name];
+                if (db.getPackageInfo(name).usesTestPackages) {
+                    ENFORCE(info.applicationStratum == INT32_MAX);
+                    ENFORCE(info.testStratum == INT32_MAX);
+                    info.applicationStratum = ix;
+                    info.testStratum = ix;
+                } else if (scc.isTest) {
+                    ENFORCE(info.testStratum == INT32_MAX);
+                    info.testStratum = ix;
+                } else {
+                    ENFORCE(info.applicationStratum == INT32_MAX);
+                    info.applicationStratum = ix;
                 }
             }
         }

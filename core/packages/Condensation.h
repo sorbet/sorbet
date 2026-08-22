@@ -5,6 +5,7 @@
 #include "absl/types/span.h"
 #include "common/common.h"
 #include "core/packages/MangledName.h"
+#include <cstdint>
 #include <string>
 #include <utility>
 #include <vector>
@@ -85,11 +86,13 @@ public:
         Traversal &operator=(const Traversal &other) = default;
         Traversal &operator=(Traversal &&other) = default;
 
+        // TODO(trevor): We can replace `StratumInfo` with a single uint32_t once we've fully migrated
+        // to test-packages.
         // Using "stratum" instead of "layer" to avoid confusion with the modularity concept/package
         // DSL method of "layer" (utility, business, service, etc.)
         struct StratumInfo {
-            uint32_t applicationStratum;
-            uint32_t testStratum;
+            uint32_t applicationStratum = INT32_MAX;
+            uint32_t testStratum = INT32_MAX;
         };
 
         // Build a mapping from package mangled name to the entry in `this->strata` that the application and test code
