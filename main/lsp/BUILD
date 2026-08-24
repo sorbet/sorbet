@@ -174,6 +174,24 @@ cc_test(
 )
 
 cc_test(
+    name = "undo_state_test",
+    size = "small",
+    srcs = ["test/undo_state_test.cc"],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//tools:__pkg__"],
+    deps = [
+        "lsp",
+        "//payload",
+        "//test/helpers",
+        "@doctest//doctest",
+        "@doctest//doctest:main",
+    ],
+)
+
+cc_test(
     name = "lsp_file_updates_test",
     size = "small",
     srcs = ["test/lsp_file_updates_test.cc"],

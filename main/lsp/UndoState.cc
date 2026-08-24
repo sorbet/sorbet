@@ -12,8 +12,7 @@ UndoState::UndoState(unique_ptr<core::GlobalState> evictedGs, UnorderedMap<int, 
                      vector<core::packages::Stratum> fileToStratum, core::packages::Stratum lastStratum,
                      const vector<core::FileRef> &workspaceFiles, uint32_t epoch)
     : evictedGs(move(evictedGs)), evictedIndexedFinalGS(std::move(evictedIndexedFinalGS)),
-      fileToStratum{move(fileToStratum)}, lastStratum{lastStratum}, initialWorkspaceFilesSize{workspaceFiles.size()},
-      epoch(epoch) {}
+      fileToStratum{move(fileToStratum)}, lastStratum{lastStratum}, savedWorkspaceFiles(workspaceFiles), epoch(epoch) {}
 
 void UndoState::restore(unique_ptr<core::GlobalState> &gs, UnorderedMap<int, ast::ParsedFile> &indexedFinalGS,
                         vector<core::packages::Stratum> &fileToStratum, core::packages::Stratum &lastStratum,
@@ -24,9 +23,10 @@ void UndoState::restore(unique_ptr<core::GlobalState> &gs, UnorderedMap<int, ast
     fileToStratum = move(this->fileToStratum);
     lastStratum = this->lastStratum;
 
-    if (workspaceFiles.size() != this->initialWorkspaceFilesSize) {
-        workspaceFiles.erase(workspaceFiles.begin() + this->initialWorkspaceFilesSize, workspaceFiles.end());
-    }
+    // Restore the snapshot wholesale. The slow path appends new files to the live vector and then permutes it in place
+    // (partitionPackageFiles), so rolling back by truncating to the old size would erase whatever ended up at the tail,
+    // not the new files.
+    workspaceFiles = std::move(this->savedWorkspaceFiles);
 }
 
 const unique_ptr<core::GlobalState> &UndoState::getEvictedGs() {
