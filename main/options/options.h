@@ -236,8 +236,8 @@ struct Options {
     uint32_t reserveConstantNameTableCapacity = 0;
     uint32_t reserveUniqueNameTableCapacity = 0;
 
-    /* The maximum number of files that are permitted to typecheck on the fast path concurrently. Not exposed on CLI.
-     * Placed on Options for convenience so tests can override. */
+    /* The maximum number of files that are permitted to typecheck on the fast path concurrently. Exposed as
+     * `--lsp-max-files-on-fast-path`; tests override it directly. */
     uint32_t lspMaxFilesOnFastPath = 50;
     /* The maximum number of errors to report to the client when in LSP mode. Prevents editor UI slowdown
      * related to large error lists. 0 means no limit. */

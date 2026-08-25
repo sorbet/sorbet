@@ -202,12 +202,15 @@ Usage:
                                 prevent slowdown triggered by large diagnostic lists. A
                                 <cap> of 0 means no limit. (default: 1000)
       --lsp-max-files-on-fast-path <count>
-                                An edit that changes more than <count> files, or whose
-                                changes would require re-typechecking more than <count>
-                                files, takes the slow path (a full re-typecheck of the
-                                workspace) instead of the fast path. Tools that
-                                regenerate many files at once can make a higher <count>
-                                worthwhile. (default: 50)
+                                File budget for the fast path: an edit that changes more
+                                than <count> files, or whose changes would require
+                                re-typechecking more than <count> files, takes the slow
+                                path (a full re-typecheck of the workspace). Edits the
+                                fast path cannot handle at all (new files, package files,
+                                syntax errors, changed definitions) take the slow path
+                                regardless of <count>. Tools that regenerate many files
+                                at once can make a higher <count> worthwhile. (default:
+                                number of cores on the system)
       --disable-watchman        When in LSP mode, disable file watching via Watchman
       --watchman-path <path>    Path to watchman executable. Will search on `PATH` if
                                 <path> contains no slashes. (default: watchman)

@@ -92,4 +92,11 @@ TEST_CASE("LspMaxFilesOnFastPathIsConfigurable") {
                                            extensionProviders, logger);
 
     CHECK_EQ(200, opts.lspMaxFilesOnFastPath);
+
+    // The largest value the option accepts must round-trip too (its users multiply it; see LSPFileUpdates.cc).
+    sorbet::realmain::options::Options maxOpts;
+    const char *maxArgv[] = {"sorbet", "--lsp-max-files-on-fast-path", "4294967295", "-e", ""};
+    sorbet::realmain::options::readOptions(maxOpts, extensions, std::size(maxArgv), const_cast<char **>(maxArgv),
+                                           extensionProviders, logger);
+    CHECK_EQ(4294967295u, maxOpts.lspMaxFilesOnFastPath);
 }

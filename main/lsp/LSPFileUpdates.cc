@@ -169,7 +169,8 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
         result.extraFiles.emplace_back(ref);
         result.totalChanged += 1;
 
-        if (result.totalChanged > (2 * config.opts.lspMaxFilesOnFastPath)) {
+        // (64-bit so that a very large --lsp-max-files-on-fast-path cannot wrap this to a tiny budget.)
+        if (result.totalChanged > 2 * static_cast<uint64_t>(config.opts.lspMaxFilesOnFastPath)) {
             // Short circuit, as a performance optimization.
             // (gs.getFiles() is usually 3-4 orders of magnitude larger than lspMaxFilesOnFastPath)
             //

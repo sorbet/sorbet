@@ -121,7 +121,7 @@ A short list of useful LSP-related command line flags:
 
 - `--lsp-max-files-on-fast-path`
 
-  After an edit, Sorbet takes the "fast path" (re-typechecking only the affected files) when at most this many files changed and at most this many files would need re-typechecking; otherwise it takes the "slow path" (re-typechecking the whole workspace). The default is 50. Projects whose tooling regenerates many files at once may want a higher value so that those regenerations stay on the fast path.
+  The file budget for the "fast path" (re-typechecking only the affected files after an edit): when more than this many files changed, or more than this many files would need re-typechecking, Sorbet takes the "slow path" (re-typechecking the whole workspace) instead. The default is 50. This is a budget, not a guarantee: edits the fast path cannot handle at all — new files, changes to `__package.rb` files, syntax errors, changed definitions — take the slow path whatever the value. Projects whose tooling regenerates many files at once without changing their definitions may want a higher value so that those regenerations stay on the fast path.
 
 For all Sorbet flags, be sure to check `srb tc --help`.
 
