@@ -17,6 +17,48 @@ TEST_CASE_FIXTURE(ProtocolTest, "UpdateFileOnFileSystem") {
     assertErrorDiagnostics(send(*watchmanFileUpdate({"foo.rb"})), {d});
 }
 
+// Watchman reports every write, and tools like autogen or `git checkout` rewrite many files without changing them.
+// Such files must not count against lspMaxFilesOnFastPath: a batch of unchanged files takes no slow path, and a real
+// change hidden among them still takes the fast path.
+TEST_CASE_FIXTURE(ProtocolTest, "UnchangedFilesDoNotCountTowardsTheSlowPath") {
+    auto opts = make_shared<realmain::options::Options>();
+    opts->lspMaxFilesOnFastPath = 2;
+    resetState(opts);
+
+    vector<pair<string, string>> files;
+    vector<string> paths;
+    for (int i = 0; i < 5; i++) {
+        auto path = fmt::format("foo{}.rb", i);
+        files.emplace_back(path, fmt::format("# typed: true\nclass Foo{}\n  def foo\n    1\n  end\nend\n", i));
+        paths.emplace_back(path);
+        this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/{}", this->rootPath, path));
+    }
+    writeFilesToFS(files);
+    assertErrorDiagnostics(initializeLSP(), {});
+    getCounters();
+
+    // All five files rewritten byte-for-byte: nothing to typecheck, and in particular no slow path.
+    writeFilesToFS(files);
+    assertErrorDiagnostics(send(*watchmanFileUpdate(paths)), {});
+    {
+        auto counters = getCounters();
+        CHECK_EQ(counters.getCounter("lsp.edit.unchanged_files_dropped"), 5);
+        CHECK_EQ(counters.getCategoryCounter("lsp.slow_path_reason", "too_many_files"), 0);
+        CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 0);
+    }
+
+    // One real change among the five takes the fast path.
+    files[2].second = "# typed: true\nclass Foo2\n  def foo\n    1 + \"stuff\"\n  end\nend\n";
+    writeFilesToFS({files[2]});
+    assertErrorDiagnostics(send(*watchmanFileUpdate(paths)), {{"foo2.rb", 3, "Expected `Integer`"}});
+    {
+        auto counters = getCounters();
+        CHECK_EQ(counters.getCounter("lsp.edit.unchanged_files_dropped"), 4);
+        CHECK_EQ(counters.getCategoryCounter("lsp.updates", "fastpath"), 1);
+        CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 0);
+    }
+}
+
 // Creates an empty file and deletes it.
 TEST_CASE_FIXTURE(ProtocolTest, "CreateAndDeleteEmptyFile") {
     assertErrorDiagnostics(initializeLSP(), {});

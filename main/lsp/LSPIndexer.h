@@ -75,6 +75,17 @@ public:
      * Determines if the given files can take the fast path relative to the latest committed edit.
      */
     TypecheckingPath getTypecheckingPath(const std::vector<std::shared_ptr<core::File>> &changedFiles) const;
+    /**
+     * Whether `file` is identical to the version of that file already committed to the indexer (same content, same
+     * editor-open status). Watchman reports every write, and tools like autogen, `git checkout` or a build regenerating
+     * its outputs rewrite many files byte-for-byte; such files need no typechecking and must not count against
+     * `lspMaxFilesOnFastPath`.
+     */
+    bool fileIsUnchanged(const core::File &file) const;
+    /**
+     * The number of `files` that are not `fileIsUnchanged`.
+     */
+    size_t countChangedFiles(const std::vector<std::shared_ptr<core::File>> &files) const;
 
     /**
      * Computes state hashes for the given set of files. Is a no-op if the provided files all have hashes.

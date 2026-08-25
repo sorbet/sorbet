@@ -1,5 +1,6 @@
 #include "main/lsp/LSPIndexer.h"
 #include "LSPFileUpdates.h"
+#include "absl/algorithm/container.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "core/ErrorQueue.h"
 #include "core/FileHash.h"
@@ -15,6 +16,7 @@
 #include "main/lsp/notifications/sorbet_workspace_edit.h"
 #include "main/pipeline/pipeline.h"
 #include "payload/payload.h"
+#include <algorithm>
 
 using namespace std;
 
@@ -252,8 +254,27 @@ LSPIndexer::getTypecheckingPath(LSPFileUpdates &edit,
     return path;
 }
 
-TypecheckingPath LSPIndexer::getTypecheckingPath(const vector<shared_ptr<core::File>> &changedFiles) const {
+bool LSPIndexer::fileIsUnchanged(const core::File &file) const {
+    auto fref = gs->findFileByPath(file.path());
+    if (!fref.exists()) {
+        return false;
+    }
+    const auto &current = fref.data(*gs);
+    return current.sourceType == core::File::Type::Normal && file.sourceType == core::File::Type::Normal &&
+           current.isOpenInClient() == file.isOpenInClient() && current.sourceHash() == file.sourceHash();
+}
+
+size_t LSPIndexer::countChangedFiles(const vector<shared_ptr<core::File>> &files) const {
+    return absl::c_count_if(files, [this](const auto &file) { return !fileIsUnchanged(*file); });
+}
+
+TypecheckingPath LSPIndexer::getTypecheckingPath(const vector<shared_ptr<core::File>> &files) const {
     static UnorderedMap<core::FileRef, shared_ptr<core::File>> emptyMap;
+
+    // Files that did not change need no typechecking, so they must not count against the fast path's file budget.
+    vector<shared_ptr<core::File>> changedFiles;
+    changedFiles.reserve(files.size());
+    absl::c_copy_if(files, back_inserter(changedFiles), [this](const auto &file) { return !fileIsUnchanged(*file); });
 
     // Avoid expensively computing file hashes if there are too many files and it's likely that we'd
     // do a lot of hashing just to realize that something changed, requiring a slowpath anyways.
@@ -331,6 +352,19 @@ unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edi
     update.epoch = edit.epoch;
     update.editCount = edit.mergeCount + 1;
     update.updatedFiles = move(edit.updates);
+    {
+        // Watchman reports every write, and tools like autogen, `git checkout` or a build regenerating its outputs
+        // rewrite many files byte-for-byte. Those files have nothing to typecheck; dropping them here keeps them from
+        // being re-indexed and, above all, from counting against `lspMaxFilesOnFastPath` and forcing a slow path.
+        auto unchanged = update.updatedFiles.size() - countChangedFiles(update.updatedFiles);
+        if (unchanged > 0) {
+            update.updatedFiles.erase(remove_if(update.updatedFiles.begin(), update.updatedFiles.end(),
+                                                [this](const auto &file) { return fileIsUnchanged(*file); }),
+                                      update.updatedFiles.end());
+            config->logger->debug("Dropped {} unchanged file(s) from the edit", unchanged);
+            prodCounterAdd("lsp.edit.unchanged_files_dropped", unchanged);
+        }
+    }
     update.cancellationExpected = edit.sorbetCancellationExpected;
     update.preemptionsExpected = edit.sorbetPreemptionsExpected;
     // _Wait_ to compute `getTypecheckingPath` until after we compute hashes.
@@ -431,7 +465,7 @@ unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edi
 }
 
 unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit) {
-    ENFORCE(edit.updates.size() <= config->opts.lspMaxFilesOnFastPath, "Too many files to index serially");
+    ENFORCE(countChangedFiles(edit.updates) <= config->opts.lspMaxFilesOnFastPath, "Too many files to index serially");
     return commitEdit(edit, *emptyWorkers);
 }
 
