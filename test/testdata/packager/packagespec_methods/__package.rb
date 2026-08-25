@@ -2,6 +2,8 @@
 # enable-packager: true
 
 class MyPkg < PackageSpec
+  prelude!
+
   custom_method 'abc'
   custom_method 'abc', 'too_many_args'
   #                    ^^^^^^^^^^^^^^^ error: Too many arguments provided for method `Sorbet::Private::Static::PackageSpec.custom_method`. Expected: `1`, got: `2`
