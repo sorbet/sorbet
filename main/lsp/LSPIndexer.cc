@@ -379,7 +379,7 @@ unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edi
         // it defines nothing, and entering it would force a "new file" slow path for a phantom file.
         size_t unchanged = 0;
         size_t unknownEmpty = 0;
-        auto changedEnd = remove_if(update.updatedFiles.begin(), update.updatedFiles.end(), [&](const auto &file) {
+        auto dropped = erase_if(update.updatedFiles, [&](const auto &file) {
             if (fileIsUnchanged(*file)) {
                 unchanged++;
                 return true;
@@ -390,8 +390,7 @@ unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edi
             }
             return false;
         });
-        if (changedEnd != update.updatedFiles.end()) {
-            update.updatedFiles.erase(changedEnd, update.updatedFiles.end());
+        if (dropped > 0) {
             config->logger->debug("Dropped {} unchanged and {} unknown empty file(s) from the edit", unchanged,
                                   unknownEmpty);
             prodCounterAdd("lsp.edit.unchanged_files_dropped", unchanged);
