@@ -265,7 +265,6 @@ const UnorderedMap<
         {"hierarchy-ref-set", HierarchyRefSetAssertion::make},
         {"find-hierarchy-refs", FindHierarchyRefsAssertion::make},
         {"hierarchy-ref", HierarchyRefAssertion::make},
-        {"enable-test-packages", BooleanPropertyAssertion::make},
         {"stratum", StratumAssertion::make},
 };
 
@@ -661,8 +660,6 @@ realmain::options::Options RangeAssertion::parseOptions(vector<shared_ptr<RangeA
     if (extraDirUnderscore.has_value()) {
         opts.extraPackageFilesDirectoryUnderscorePrefixes.emplace_back(extraDirUnderscore.value());
     }
-
-    opts.testPackages = BooleanPropertyAssertion::getValue("enable-test-packages", assertions).value_or(false);
 
     auto extraDirSlashDeprecated =
         StringPropertyAssertion::getValue("extra-package-files-directory-prefix-slash-deprecated", assertions);

@@ -1,6 +1,5 @@
 # typed: strict
 # enable-packager: true
-# enable-test-packages: true
 
 class Root < PackageSpec
   test!
