@@ -2208,11 +2208,11 @@ unique_ptr<GlobalState> GlobalState::copyForSlowPath(
         {
             core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*result);
             core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = result->unfreezePackages();
-            result->setPackagerOptions(
-                extraPackageFilesDirectoryUnderscorePrefixes, extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs,
-                allowRelaxedPackagerChecksFor, updateVisibilityFor, packagerLayers, errorHint, genPackagesMode,
-                allowRelaxingTestVisibility, packageAttributedErrors);
+            result->setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes,
+                                       extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                                       extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs,
+                                       allowRelaxedPackagerChecksFor, updateVisibilityFor, packagerLayers, errorHint,
+                                       genPackagesMode, allowRelaxingTestVisibility, packageAttributedErrors);
         }
 
         result->copySymbolTableFrom(*this, toStratum);
