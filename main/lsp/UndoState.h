@@ -25,10 +25,9 @@ class UndoState final {
     // The id of the last stratum in the previous slow path.
     const core::packages::Stratum lastStratum;
 
-    // The workspaceFiles vector as it was when the slow path started. The slow path appends new files to the live
-    // vector and then permutes it in place (partitionPackageFiles), so rolling back by truncating to the old size
-    // would erase whatever ended up at the tail rather than the new files; restoring the snapshot is order-independent.
-    std::vector<core::FileRef> savedWorkspaceFiles;
+    // The size of the workspaceFiles vector when the slow path started, so that `restore` can check it removed exactly
+    // the files the canceled edit added.
+    const size_t initialWorkspaceFilesSize;
 
 public:
     // Epoch of the running slow path

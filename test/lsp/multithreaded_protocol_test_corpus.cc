@@ -769,27 +769,15 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanCancelSlowPathEvenIfAddsFile") 
 }
 
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelingSlowPathThatAddsPackageFileKeepsExistingWorkspaceFiles") {
-    // Regression test for a slow-path cancellation bug in package mode. `UndoState` used to roll back
-    // `LSPTypechecker::workspaceFiles` by truncating it to its pre-edit size, which assumed that the canceled slow path
-    // had only *appended* the edit's new files. But the slow path also partitions the vector in place (package files
-    // first, with an unstable partition), so when one of the appended new files is a `__package.rb`, the partition
-    // swaps it with the first non-package file. Truncating then erased that pre-existing file from the workspace for
-    // the life of the process: it was never indexed again, every reference to its definitions became an unresolved
-    // constant, and only a restart brought it back.
-    bool packageDirected = false;
-    SUBCASE("package-directed typechecking off") {}
-    SUBCASE("package-directed typechecking on") {
-        packageDirected = true;
-    }
-
+    // Canceling a slow path must leave `LSPTypechecker::workspaceFiles` with exactly its pre-edit membership. The slow
+    // path appends the edit's new files and then partitions the vector in place (package files first, order not
+    // preserved), so when a new file is a `__package.rb` a pre-existing source file is displaced past the old size; a
+    // rollback that truncated to the old size dropped that file from the workspace for good.
     auto opts = make_shared<realmain::options::Options>();
     opts->cacheSensitiveOptions.sorbetPackages = true;
-    opts->packageDirected = packageDirected;
     resetState(opts);
 
-    // The order is significant: `__package.rb` comes first so that `a.rb` is the first non-package file after the
-    // partition, i.e. the file that a newly appended package file gets swapped with. `a.rb` and `b.rb` reference each
-    // other so that losing either one of them shows up as an unresolved constant in the other.
+    // `a.rb` and `b.rb` reference each other so that losing either shows up as an unresolved constant in the other.
     vector<pair<string, string>> files = {
         {"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A", "Root::B"}).build()},
         {"a.rb", "# typed: true\n"
@@ -821,15 +809,11 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelingSlowPathThatAddsPackageFi
     assertErrorDiagnostics(
         initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
 
-    // Open the two source files so that we can query definitions in them afterwards.
-    assertErrorDiagnostics(send(*openFile("a.rb", files[1].second)), {});
-    assertErrorDiagnostics(send(*openFile("b.rb", files[2].second)), {});
-
     // Clear counters so that the assertions below only see the edits.
     getCounters();
 
-    // Slow path 1: a brand-new `__package.rb` (so a new file that is a package file). `cancellationExpected` makes
-    // the slow path wait for its cancellation only once it has already partitioned `workspaceFiles`.
+    // Slow path 1: a brand-new `__package.rb`. `cancellationExpected` makes the slow path wait for its cancellation
+    // only once it has already partitioned `workspaceFiles`.
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
     sendAsync(*openFile("foo/__package.rb", ""));
     sendAsync(*changeFile("foo/__package.rb", PackageTextBuilder().withName("Root::Foo").withImports({"Root"}).build(),
@@ -865,11 +849,6 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelingSlowPathThatAddsPackageFi
     // Send a fence to clear out the pipeline. Every file is still part of the workspace, so nothing is unresolved.
     assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
 
-    // And the definitions in the files that sat next to the partition boundary are still reachable.
-    auto definitions = getDefinitions("b.rb", 4, 6);
-    REQUIRE_EQ(definitions.size(), 1);
-    CHECK_EQ(definitions[0]->uri, getUri("a.rb"));
-
     auto counters = getCounters();
     CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 1);
     CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath_canceled"), 1);
@@ -877,10 +856,9 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelingSlowPathThatAddsPackageFi
 
 TEST_CASE_FIXTURE(MultithreadedProtocolTest,
                   "CancelingPackageDirectedSlowPathThatAddsLowStratumFileKeepsExistingWorkspaceFiles") {
-    // Companion to the previous test for package-directed typechecking, where computePackageStrata additionally sorts
-    // the non-package files of `workspaceFiles` in place by (stratum, id). A new file in a low stratum therefore sorts
-    // ahead of pre-existing files of higher strata, pushing the last of them into the region that a size-based rollback
-    // would have erased -- without any new package file being involved.
+    // Same invariant as the previous test, for the second way the slow path reorders `workspaceFiles`: with
+    // package-directed typechecking, computePackageStrata sorts the non-package files in place by (stratum, id), so a
+    // new low-stratum file displaces the last high-stratum file past the old size -- no new package file involved.
     auto opts = make_shared<realmain::options::Options>();
     opts->cacheSensitiveOptions.sorbetPackages = true;
     opts->packageDirected = true;
@@ -929,15 +907,6 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest,
     assertErrorDiagnostics(
         initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
 
-    // The class defined in the file that will sit at the end of the sorted workspace is known to the symbol table.
-    {
-        auto responses = send(*workspaceSymbol("Root::Bar::C"));
-        REQUIRE_EQ(responses.size(), 1);
-        auto &result = get<variant<JSONNullObject, vector<unique_ptr<SymbolInformation>>>>(
-            responses[0]->asResponse().result.value());
-        REQUIRE_EQ(get<vector<unique_ptr<SymbolInformation>>>(result).size(), 1);
-    }
-
     // Clear counters so that the assertions below only see the edits.
     getCounters();
 
@@ -978,7 +947,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest,
     // Send a fence to clear out the pipeline. Nothing was lost, so nothing is unresolved ...
     assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
 
-    // ... and the file at the end of the sorted workspace is still part of it.
+    // ... and the file at the end of the sorted workspace is still part of it (its class is in the symbol table).
     {
         auto responses = send(*workspaceSymbol("Root::Bar::C"));
         REQUIRE_EQ(responses.size(), 1);

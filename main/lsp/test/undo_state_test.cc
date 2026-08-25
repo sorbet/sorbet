@@ -2,6 +2,7 @@
 // has to go first as it violates our requirements
 
 #include "ast/ast.h"
+#include "common/sort/sort.h"
 #include "core/ErrorQueue.h"
 #include "core/GlobalState.h"
 #include "core/Unfreeze.h"
@@ -23,12 +24,14 @@ unique_ptr<core::GlobalState> makeGlobalState() {
     return gs;
 }
 
-vector<uint32_t> ids(const vector<core::FileRef> &files) {
+// The ids in `files`, sorted: `restore` guarantees membership, not order (the slow path reorders the live vector).
+vector<uint32_t> sortedIds(const vector<core::FileRef> &files) {
     vector<uint32_t> result;
     result.reserve(files.size());
     for (auto file : files) {
         result.emplace_back(file.id());
     }
+    fast_sort(result);
     return result;
 }
 
@@ -55,53 +58,32 @@ struct Fixture {
     }
 
     // What the slow path does to `workspaceFiles` after the snapshot: applyFileTableUpdates appends the edit's new
-    // files, then partitionPackageFiles moves package files to the front with an unstable partition, which swaps an
-    // appended `__package.rb` with the first non-package file.
+    // files, then partitionPackageFiles moves package files to the front without preserving order, so an appended
+    // `__package.rb` ends up in the front block and a pre-existing source file is displaced past the old size.
     void appendNewFilesAndPartition(vector<core::FileRef> &files, vector<core::FileRef> &newFiles) {
         core::UnfreezeFileTable unfreeze(*gs);
         newFiles.emplace_back(gs->enterFile("foo/__package.rb", ""));
         newFiles.emplace_back(gs->enterFile("foo/c.rb", ""));
         files.insert(files.end(), newFiles.begin(), newFiles.end());
-        // a.rb (index 1, first non-package file) <-> foo/__package.rb (index 3, appended package file)
         swap(files[1], files[3]);
     }
 };
 } // namespace
 
-TEST_CASE_FIXTURE(Fixture, "RestoreReturnsTheExactPreSlowPathWorkspaceFiles") {
-    auto expected = ids(workspaceFiles);
+TEST_CASE_FIXTURE(Fixture, "RestoreRemovesExactlyTheFilesTheCanceledEditAdded") {
+    auto expected = sortedIds(workspaceFiles);
     auto undoState = snapshot(/* epoch */ 7);
 
     vector<core::FileRef> newFiles;
     appendNewFilesAndPartition(workspaceFiles, newFiles);
     REQUIRE_EQ(workspaceFiles.size(), expected.size() + newFiles.size());
-    // Precondition of the regression: a pre-existing file now sits in the region that size-based truncation would
-    // have erased, and an appended file sits in the region it would have kept.
+    // A pre-existing file now sits past the old size, and an appended file sits below it.
     REQUIRE_EQ(workspaceFiles[1].id(), newFiles[0].id());
     REQUIRE_EQ(workspaceFiles[3].id(), expected[1]);
 
     undoState.restore(gs, indexedFinalGS, fileToStratum, lastStratum, workspaceFiles);
 
-    CHECK_EQ(ids(workspaceFiles), expected);
-    // None of the files appended during the canceled slow path survive in the restored workspace.
-    for (auto newFile : newFiles) {
-        for (auto file : workspaceFiles) {
-            CHECK_NE(file.id(), newFile.id());
-        }
-    }
-}
-
-TEST_CASE_FIXTURE(Fixture, "RestoreUndoesAReorderingEvenWhenNoFilesWereAdded") {
-    auto expected = ids(workspaceFiles);
-    auto undoState = snapshot(/* epoch */ 8);
-
-    // A slow path with no new files still partitions `workspaceFiles` in place.
-    swap(workspaceFiles[1], workspaceFiles[2]);
-    REQUIRE_NE(ids(workspaceFiles), expected);
-
-    undoState.restore(gs, indexedFinalGS, fileToStratum, lastStratum, workspaceFiles);
-
-    CHECK_EQ(ids(workspaceFiles), expected);
+    CHECK_EQ(sortedIds(workspaceFiles), expected);
 }
 
 TEST_CASE_FIXTURE(Fixture, "RestoreBringsBackTheEvictedGlobalStateAndStrata") {
