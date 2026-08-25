@@ -409,7 +409,9 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
                         : pipeline::incrementalResolve(*gs, move(updatedIndexed), nullopt, config->opts, workers);
     auto sorted = sortParsedFiles(*gs, *errorReporter, move(resolved));
     const auto cancelable = false;
-    pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, this->lastStratum, nullptr);
+    auto relevantPackages = nullptr;
+    pipeline::typecheck(*gs, move(sorted), config->opts, workers, relevantPackages, cancelable, this->lastStratum,
+                        nullptr);
 
     auto duration = timeit.setEndTime();
     std::string files;
@@ -891,7 +893,9 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
             }
 
             auto sorted = sortParsedFiles(*gs, *errorReporter, move(maybeResolved.result()));
-            pipeline::typecheck(*gs, move(sorted), config->opts, workers, cancelable, currentStratum, preemptManager);
+            auto relevantPackages = nullptr;
+            pipeline::typecheck(*gs, move(sorted), config->opts, workers, relevantPackages, cancelable, currentStratum,
+                                preemptManager);
         }
 
         // [Test only] Ensure that we handled all expected preemptions
@@ -1001,8 +1005,9 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const vector<cor
     tryApplyLocalVarSaver(*gs, resolved);
 
     const auto cancelable = true;
+    auto relevantPackages = nullptr;
     pipeline::sortBySize(*gs, resolved);
-    pipeline::typecheck(*gs, move(resolved), config->opts, workers, cancelable);
+    pipeline::typecheck(*gs, move(resolved), config->opts, workers, relevantPackages, cancelable);
     gs->lspQuery = core::lsp::Query::noQuery();
     return LSPQueryResult{queryCollector->drainQueryResponses(), nullptr};
 }

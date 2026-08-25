@@ -1482,10 +1482,21 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
     return;
 }
 
+bool shouldTypecheck(const core::GlobalState &gs, const UnorderedSet<core::packages::MangledName> &relevantPackages,
+                     core::FileRef file) {
+    auto pkg = gs.packageDB().getPackageNameForFile(file);
+    if (!pkg.exists()) {
+        return true;
+    }
+
+    return relevantPackages.contains(pkg);
+}
+
 } // namespace
 
 void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> &&what, const options::Options &opts,
-               WorkerPool &workers, bool cancelable, core::packages::Stratum currentStratum,
+               WorkerPool &workers, const UnorderedSet<core::packages::MangledName> *const relevantPackages,
+               bool cancelable, core::packages::Stratum currentStratum,
                shared_ptr<core::lsp::PreemptionTaskManager> preemptionManager, bool intentionallyLeakASTs) {
     // Unless the error queue had a critical error, only typecheck should flush errors to the client, otherwise we will
     // drop errors in LSP mode.
@@ -1509,10 +1520,13 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> &&what, cons
             fileq->push(move(resolved), 1);
         }
 
+        bool checkRelevantPackages = gs.packageDB().enabled() && relevantPackages != nullptr;
+
         {
             ProgressIndicator cfgInferProgress(opts.showProgress, "CFG+Inference", what.size());
             workers.multiplexJob("typecheck", [&gs, &opts, epoch, &epochManager, &preemptionManager, fileq, outputq,
-                                               cancelable, intentionallyLeakASTs]() {
+                                               cancelable, relevantPackages, checkRelevantPackages,
+                                               intentionallyLeakASTs]() {
                 ast::ParsedFile job;
                 int processedByThread = 0;
 
@@ -1536,13 +1550,17 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> &&what, cons
                             const bool fileWasChanged = preemptionManager && job.file.data(gs).epoch > epoch;
                             if (!isCanceled && !fileWasChanged && gs.errorQueue->wouldFlushErrorsForFile(job.file)) {
                                 core::FileRef file = job.file;
-                                try {
-                                    core::Context ctx(gs, core::Symbols::root(), file);
-                                    typecheckOne(ctx, move(job), opts, intentionallyLeakASTs);
-                                } catch (SorbetException &) {
-                                    Exception::failInFuzzer();
-                                    gs.tracer().error("Exception typing file: {} (backtrace is above)",
-                                                      file.data(gs).path());
+                                if (!checkRelevantPackages || shouldTypecheck(gs, *relevantPackages, file)) {
+                                    try {
+                                        core::Context ctx(gs, core::Symbols::root(), file);
+                                        typecheckOne(ctx, move(job), opts, intentionallyLeakASTs);
+                                    } catch (SorbetException &) {
+                                        Exception::failInFuzzer();
+                                        gs.tracer().error("Exception typing file: {} (backtrace is above)",
+                                                          file.data(gs).path());
+                                    }
+                                } else if (intentionallyLeakASTs) {
+                                    intentionallyLeakMemory(job.tree.release());
                                 }
                                 // Stream out errors
                                 outputq->push(file, processedByThread);

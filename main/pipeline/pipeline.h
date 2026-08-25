@@ -107,8 +107,8 @@ std::vector<ast::ParsedFile> incrementalResolve(
 // If `intentionallyLeakASTs` is `true`, typecheck will leak the ASTs rather than pay the cost of deleting them
 // properly, which is a significant speedup on large codebases.
 void typecheck(const core::GlobalState &gs, std::vector<ast::ParsedFile> &&what, const options::Options &opts,
-               WorkerPool &workers, bool cancelable = false,
-               core::packages::Stratum currentStratum = core::packages::Stratum(),
+               WorkerPool &workers, const UnorderedSet<core::packages::MangledName> *relevantPackages,
+               bool cancelable = false, core::packages::Stratum currentStratum = core::packages::Stratum(),
                std::shared_ptr<core::lsp::PreemptionTaskManager> preemptionManager = nullptr,
                bool intentionallyLeakASTs = false);
 
