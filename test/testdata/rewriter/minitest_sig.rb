@@ -4,7 +4,7 @@ module MustTestFoo
   extend T::Sig, T::Helpers
   abstract!
 
-  sig { abstract.void } # error: Unused type annotation. No method def before next annotation
+  sig { abstract.void }
   it "foo" do
   end
 end
