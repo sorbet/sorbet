@@ -1,10 +1,10 @@
 #include "main/lsp/UndoState.h"
 #include "common/sort/sort.h"
+#include "common/timers/Timer.h"
 #include "main/lsp/LSPConfiguration.h"
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/LSPOutput.h"
 #include "main/lsp/json_types.h"
-#include <algorithm>
 
 using namespace std;
 
@@ -19,6 +19,7 @@ UndoState::UndoState(unique_ptr<core::GlobalState> evictedGs, UnorderedMap<int, 
 void UndoState::restore(unique_ptr<core::GlobalState> &gs, UnorderedMap<int, ast::ParsedFile> &indexedFinalGS,
                         vector<core::packages::Stratum> &fileToStratum, core::packages::Stratum &lastStratum,
                         vector<core::FileRef> &workspaceFiles) {
+    Timer timeit(evictedGs->tracer(), "undo_state.restore");
     indexedFinalGS = std::move(evictedIndexedFinalGS);
     gs = move(evictedGs);
 
@@ -29,9 +30,7 @@ void UndoState::restore(unique_ptr<core::GlobalState> &gs, UnorderedMap<int, ast
     // wherever the slow path's in-place partitioning of `workspaceFiles` moved them. Truncating to the old size instead
     // would drop whichever pre-existing files the partition displaced past it.
     auto usedFiles = gs->filesUsed();
-    workspaceFiles.erase(
-        remove_if(workspaceFiles.begin(), workspaceFiles.end(), [usedFiles](auto f) { return f.id() >= usedFiles; }),
-        workspaceFiles.end());
+    erase_if(workspaceFiles, [usedFiles](auto f) { return f.id() >= usedFiles; });
     ENFORCE(workspaceFiles.size() == this->initialWorkspaceFilesSize);
 }
 
