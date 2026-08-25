@@ -49,10 +49,8 @@ core::lsp::Query::Symbol::STORAGE getSymsToCheckWithinPackage(const core::Global
     namespacesToCheck.emplace_back(core::Symbols::root());
 
     // TODO(trevor): we can remove this case once we have switched to test-packages
-    if (!gs.packageDB().testPackages()) {
-        namespacesToCheck.emplace_back(
-            core::Symbols::root().data(gs)->findMember(gs, core::packages::PackageDB::TEST_NAMESPACE));
-    }
+    namespacesToCheck.emplace_back(
+        core::Symbols::root().data(gs)->findMember(gs, core::packages::PackageDB::TEST_NAMESPACE));
 
     for (auto &namespaceToCheck : namespacesToCheck) {
         if (!namespaceToCheck.exists()) {
