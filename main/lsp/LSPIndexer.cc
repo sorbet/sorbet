@@ -482,4 +482,27 @@ bool LSPIndexer::preemptionPossible(const TaskQueue::QueueType &tasks) const {
     return true;
 }
 
+bool LSPIndexer::wouldUpdateFileTable(const core::File &newer) const {
+    auto fref = this->gs->findFileByPath(newer.path());
+    if (!fref.exists()) {
+        return true;
+    }
+
+    auto &existing = this->getFile(fref);
+
+    if (existing.sourceType != core::File::Type::Normal) {
+        return true;
+    }
+
+    if (newer.sourceType != existing.sourceType) {
+        return true;
+    }
+
+    if (newer.isOpenInClient() != existing.isOpenInClient()) {
+        return true;
+    }
+
+    return newer.source().size() != existing.source().size() || newer.sourceHash() != existing.sourceHash();
+}
+
 } // namespace sorbet::realmain::lsp

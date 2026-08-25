@@ -57,6 +57,15 @@ void SorbetWorkspaceEditTask::preprocess(LSPPreprocessor &preprocessor) {
 }
 
 void SorbetWorkspaceEditTask::index(LSPIndexer &indexer) {
+    // This is the first time that we're able to compare the files in the update set to
+    // the indexer's file table. We should determine if any of the updates we've received
+    // are no-ops from background notifications, and filter them out to not artificially
+    // inflate the number of files that are actually making changes.
+    std::erase_if(this->params->updates, [&indexer](auto &file) {
+        ENFORCE(file != nullptr);
+        return !indexer.wouldUpdateFileTable(*file);
+    });
+
     if (params->updates.size() <= config.opts.lspMaxFilesOnFastPath) {
         updates = indexer.commitEdit(*params);
     } else {
