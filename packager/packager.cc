@@ -239,14 +239,9 @@ public:
         }
 
         auto isOnPackagePath = onPackagePath(ctx);
+        auto hasNamespaceMismatch = !isOnPackagePath || (mustUseTestNamespace && !inTestNamespace(ctx));
 
-        if (!isOnPackagePath) {
-            ENFORCE(errorDepth == 0);
-            errorDepth++;
-            if (auto e = ctx.beginError(constantLit->loc(), core::errors::Packager::DefinitionPackageMismatch)) {
-                definitionPackageMismatch(ctx, e, isOnPackagePath);
-            }
-        } else if (mustUseTestNamespace && !inTestNamespace(ctx)) {
+        if (hasNamespaceMismatch) {
             ENFORCE(errorDepth == 0);
             errorDepth++;
             if (auto e = ctx.beginError(constantLit->loc(), core::errors::Packager::DefinitionPackageMismatch)) {
@@ -303,13 +298,8 @@ public:
 
         if (rootConsts == 0) {
             auto isOnPackagePath = packageForNamespace(ctx) == pkg.mangledName();
-            if (!isOnPackagePath) {
-                ENFORCE(errorDepth == 0);
-                errorDepth++;
-                if (auto e = ctx.beginError(lhs->loc(), core::errors::Packager::DefinitionPackageMismatch)) {
-                    definitionPackageMismatch(ctx, e, isOnPackagePath);
-                }
-            } else if (mustUseTestNamespace && !inTestNamespace(ctx)) {
+            auto hasNamespaceMismatch = !isOnPackagePath || (mustUseTestNamespace && !inTestNamespace(ctx));
+            if (hasNamespaceMismatch) {
                 ENFORCE(errorDepth == 0);
                 errorDepth++;
                 if (auto e = ctx.beginError(lhs->loc(), core::errors::Packager::DefinitionPackageMismatch)) {
