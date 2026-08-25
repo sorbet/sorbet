@@ -1,5 +1,6 @@
 # typed: strict
 # spacer for exclude-from-file-update
+# Changed on purpose: an update identical to the file's contents does not count as a changed file.
 
 module Root
   class Main
