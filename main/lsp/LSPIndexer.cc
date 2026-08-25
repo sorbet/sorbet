@@ -278,8 +278,10 @@ bool LSPIndexer::fileIsUnknownAndEmpty(const core::File &file) const {
 }
 
 bool LSPIndexer::fileIsUnknownAndIgnored(const core::File &file) const {
-    return file.sourceType == core::File::Type::Normal && !file.isOpenInClient() && !file.hasPackageRbPath() &&
-           !gs->findFileByPath(file.path()).exists() &&
+    // `hasPackageRbPath()` is deliberately false for an ignored file, so test the path itself: a `__package.rb` is
+    // always entered, whatever its sigil.
+    return file.sourceType == core::File::Type::Normal && !file.isOpenInClient() &&
+           !core::File::isPackagePath(file.path()) && !gs->findFileByPath(file.path()).exists() &&
            pipeline::decideStrictLevel(*gs, file, config->opts) == core::StrictLevel::Ignore;
 }
 

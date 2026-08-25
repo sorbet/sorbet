@@ -1,6 +1,7 @@
 #include "doctest/doctest.h"
 // ^ Violates linting rules, so include first.
 #include "ProtocolTest.h"
+#include "absl/strings/match.h"
 #include "common/common.h"
 #include "test/helpers/lsp.h"
 
@@ -157,6 +158,45 @@ TEST_CASE_FIXTURE(ProtocolTest, "OpeningAnUnknownIgnoredFileEntersIt") {
     string contents = "# typed: ignore\nclass Gen\nend\n";
     writeFilesToFS({{"gen.rb", contents}});
     assertErrorDiagnostics(send(*openFile("gen.rb", contents)), {});
+    auto counters = getCounters();
+    CHECK_EQ(counters.getCounter("lsp.edit.unknown_ignored_files_dropped"), 0);
+    CHECK_EQ(counters.getCategoryCounter("lsp.slow_path_reason", "new_file"), 1);
+
+    auto responses = send(*hover("gen.rb", 1, 6));
+    REQUIRE_EQ(responses.size(), 1);
+    auto &r = responses.at(0)->asResponse();
+    REQUIRE(r.result);
+    auto &hoverResult = get<variant<JSONNullObject, unique_ptr<Hover>>>(*r.result);
+    REQUIRE(holds_alternative<unique_ptr<Hover>>(hoverResult));
+    CHECK(absl::StrContains(get<unique_ptr<Hover>>(hoverResult)->contents->value, "`# typed: ignore`"));
+}
+
+// Until it is opened (or stops being ignored), a `# typed: ignore` file the watcher reported is not in Sorbet's file
+// table at all, so a request against it without a preceding `didOpen` is answered "Did not find file" instead of as
+// an ignored file. Nothing can navigate into such a file (it defines no symbols), so only a request naming the path
+// directly can observe this.
+TEST_CASE_FIXTURE(ProtocolTest, "UnopenedIgnoredFileIsUnknownToRequests") {
+    assertErrorDiagnostics(initializeLSP(), {});
+    getCounters();
+
+    writeFilesToFS({{"gen.rb", "# typed: ignore\nclass Gen\nend\n"}});
+    assertErrorDiagnostics(send(*watchmanFileUpdate({"gen.rb"})), {});
+    CHECK_EQ(getCounters().getCounter("lsp.edit.unknown_ignored_files_dropped"), 1);
+
+    auto responses = send(*hover("gen.rb", 1, 6));
+    REQUIRE_EQ(responses.size(), 1);
+    auto &r = responses.at(0)->asResponse();
+    REQUIRE(r.error);
+    CHECK(absl::StrContains((*r.error)->message, "Did not find file"));
+}
+
+// A `__package.rb` is entered whatever its sigil: the package DB is keyed on it.
+TEST_CASE_FIXTURE(ProtocolTest, "NewIgnoredPackageFileIsStillANewFile") {
+    assertErrorDiagnostics(initializeLSP(), {});
+    getCounters();
+
+    writeFilesToFS({{"__package.rb", "# typed: ignore\n"}});
+    assertErrorDiagnostics(send(*watchmanFileUpdate({"__package.rb"})), {});
     auto counters = getCounters();
     CHECK_EQ(counters.getCounter("lsp.edit.unknown_ignored_files_dropped"), 0);
     CHECK_EQ(counters.getCategoryCounter("lsp.slow_path_reason", "new_file"), 1);

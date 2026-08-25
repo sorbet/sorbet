@@ -91,9 +91,11 @@ public:
      */
     bool fileIsUnknownAndEmpty(const core::File &file) const;
     /**
-     * Whether `file` is a path the indexer has never seen, is not open in the editor, and would be `# typed: ignore`.
-     * Sorbet reads nothing from an ignored file, so entering it would only force a "new file" slow path for nothing;
-     * it becomes a new file when its sigil changes (or when it is opened in the editor).
+     * Whether `file` is a path the indexer has never seen, is not open in the editor, is not a `__package.rb`, and
+     * would be `# typed: ignore`. Sorbet reads nothing from an ignored file, so entering it would only force a "new
+     * file" slow path for nothing. Until its sigil changes or it is opened in the editor (either makes it a new file)
+     * Sorbet does not know the path at all: a request against it without a preceding `didOpen` -- `sorbet/readFile`,
+     * or a position request -- is answered "Did not find file" rather than as an ignored file.
      */
     bool fileIsUnknownAndIgnored(const core::File &file) const;
     /**
