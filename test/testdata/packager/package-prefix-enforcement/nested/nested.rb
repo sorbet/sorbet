@@ -45,7 +45,7 @@ module Root
 end
 
   class Root::Stringy < String
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: This file must only define behavior in enclosing package `Root::Nested`
+#       ^^^^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
 #                       ^^^^^^ error: Superclasses may only be set on constants in the package that owns them
 end
 

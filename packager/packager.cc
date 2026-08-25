@@ -238,13 +238,6 @@ public:
             return;
         }
 
-        if (hasParentClass(classDef)) {
-            // A class definition that includes a parent `class Foo::Bar < Baz`
-            // must be made in that package
-            checkBehaviorLoc(ctx, classDef.declLoc);
-            return;
-        }
-
         auto isOnPackagePath = onPackagePath(ctx);
 
         if (!isOnPackagePath) {
@@ -259,6 +252,10 @@ public:
             if (auto e = ctx.beginError(constantLit->loc(), core::errors::Packager::DefinitionPackageMismatch)) {
                 definitionPackageMismatch(ctx, e, isOnPackagePath);
             }
+        } else if (hasParentClass(classDef)) {
+            // A class definition that includes a parent `class Foo::Bar < Baz`
+            // must be made in that package
+            checkBehaviorLoc(ctx, classDef.declLoc);
         }
     }
 
