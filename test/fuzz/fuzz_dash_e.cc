@@ -75,7 +75,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     indexed =
         move(realmain::pipeline::nameAndResolve(*gs, move(indexed.result()), *opts, *workers, foundHashes).result());
     realmain::pipeline::sortBySize(*gs, indexed.result());
-    auto relevantPackages = std::nullopt;
+    auto relevantPackages = nullptr;
     realmain::pipeline::typecheck(*gs, move(indexed.result()), *opts, *workers, relevantPackages);
     return 0;
 }

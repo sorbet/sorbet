@@ -409,7 +409,7 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
                         : pipeline::incrementalResolve(*gs, move(updatedIndexed), nullopt, config->opts, workers);
     auto sorted = sortParsedFiles(*gs, *errorReporter, move(resolved));
     const auto cancelable = false;
-    auto relevantPackages = std::nullopt;
+    auto relevantPackages = nullptr;
     pipeline::typecheck(*gs, move(sorted), config->opts, workers, relevantPackages, cancelable, this->lastStratum,
                         nullptr);
 
@@ -893,7 +893,7 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
             }
 
             auto sorted = sortParsedFiles(*gs, *errorReporter, move(maybeResolved.result()));
-            auto relevantPackages = std::nullopt;
+            auto relevantPackages = nullptr;
             pipeline::typecheck(*gs, move(sorted), config->opts, workers, relevantPackages, cancelable, currentStratum,
                                 preemptManager);
         }
@@ -1005,7 +1005,7 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const vector<cor
     tryApplyLocalVarSaver(*gs, resolved);
 
     const auto cancelable = true;
-    auto relevantPackages = std::nullopt;
+    auto relevantPackages = nullptr;
     pipeline::sortBySize(*gs, resolved);
     pipeline::typecheck(*gs, move(resolved), config->opts, workers, relevantPackages, cancelable);
     gs->lspQuery = core::lsp::Query::noQuery();

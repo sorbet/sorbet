@@ -1495,7 +1495,7 @@ bool shouldTypecheck(const core::GlobalState &gs, const UnorderedSet<core::packa
 } // namespace
 
 void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> &&what, const options::Options &opts,
-               WorkerPool &workers, const optional<UnorderedSet<core::packages::MangledName>> &relevantPackages,
+               WorkerPool &workers, const UnorderedSet<core::packages::MangledName> *const relevantPackages,
                bool cancelable, core::packages::Stratum currentStratum,
                shared_ptr<core::lsp::PreemptionTaskManager> preemptionManager, bool intentionallyLeakASTs) {
     // Unless the error queue had a critical error, only typecheck should flush errors to the client, otherwise we will
@@ -1520,12 +1520,12 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> &&what, cons
             fileq->push(move(resolved), 1);
         }
 
-        bool checkRelevantPackages = gs.packageDB().enabled() && relevantPackages.has_value();
+        bool checkRelevantPackages = gs.packageDB().enabled() && relevantPackages != nullptr;
 
         {
             ProgressIndicator cfgInferProgress(opts.showProgress, "CFG+Inference", what.size());
-            workers.multiplexJob("typecheck", [&gs, &opts, epoch, &epochManager, &relevantPackages, &preemptionManager,
-                                               fileq, outputq, cancelable, checkRelevantPackages,
+            workers.multiplexJob("typecheck", [&gs, &opts, epoch, &epochManager, &preemptionManager, fileq, outputq,
+                                               cancelable, relevantPackages, checkRelevantPackages,
                                                intentionallyLeakASTs]() {
                 ast::ParsedFile job;
                 int processedByThread = 0;

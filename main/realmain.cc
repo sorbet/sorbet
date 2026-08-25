@@ -723,7 +723,7 @@ int realmain(int argc, char *argv[]) {
                     pipeline::sortBySize(*gs, stratumFiles);
 
                     bool cancelable = false;
-                    auto relevantPackages = std::nullopt;
+                    auto relevantPackages = nullptr;
                     auto preemptionManager = nullptr;
                     pipeline::typecheck(*gs, move(stratumFiles), opts, *workers, relevantPackages, cancelable,
                                         core::packages::Stratum(currentStratum), preemptionManager,
