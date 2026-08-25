@@ -364,11 +364,8 @@ unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edi
         // Watchman reports every write, and tools like autogen, `git checkout` or a build regenerating its outputs
         // rewrite many files byte-for-byte. Those files have nothing to typecheck; dropping them here keeps them from
         // being re-indexed and, above all, from counting against `lspMaxFilesOnFastPath` and forcing a slow path.
-        auto changedEnd = remove_if(update.updatedFiles.begin(), update.updatedFiles.end(),
-                                    [this](const auto &file) { return fileIsUnchanged(*file); });
-        auto unchanged = distance(changedEnd, update.updatedFiles.end());
+        auto unchanged = erase_if(update.updatedFiles, [this](const auto &file) { return fileIsUnchanged(*file); });
         if (unchanged > 0) {
-            update.updatedFiles.erase(changedEnd, update.updatedFiles.end());
             config->logger->debug("Dropped {} unchanged file(s) from the edit", unchanged);
             prodCounterAdd("lsp.edit.unchanged_files_dropped", unchanged);
         }
