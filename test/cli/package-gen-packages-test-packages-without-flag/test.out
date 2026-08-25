@@ -1,0 +1,29 @@
+Exception::raise() msg="core/packages/PackageDB.cc:298 enforced condition gs.packageDB().testPackages() has failed: (no message provided)"
+
+Backtrace:
+  #3 0xb879046063a4 absl::lts_20240722::Span<>::begin()
+  #4 0xb87905294248 sorbet::core::packages::(anonymous namespace)::exportClassOrModule()
+  #5 0xb87905293c5c sorbet::core::packages::PackageDB::exportsByPackage()
+  #6 0xb87904c55eec sorbet::packager::GenPackages::run()
+  #7 0xb879045fcd04 sorbet::realmain::realmain()
+  #8 0xb879045d2574 main
+  #9 0xef790b6b84c4 
+  #10 0xef790b6b8598 __libc_start_main
+  #11 0xb879045d2430 _start
+
+Sorbet raised uncaught exception type="sorbet::SorbetException" what="core/packages/PackageDB.cc:298 enforced condition gs.packageDB().testPackages() has failed: (no message provided)"
+Backtrace:
+  #3 0xb879045d2864 __cxa_get_exception_ptr
+  #4 0xb879045d27e0 __cxxabiv1::exception_cleanup_func()
+  #5 0xb8790462dc60 sorbet::Exception::raise<>()
+  #6 0xb87904602b44 sorbet::Exception::enforce_handler<>()
+  #7 0xb879046063a4 absl::lts_20240722::Span<>::begin()
+  #8 0xb87905294248 sorbet::core::packages::(anonymous namespace)::exportClassOrModule()
+  #9 0xb87905293c5c sorbet::core::packages::PackageDB::exportsByPackage()
+  #10 0xb87904c55eec sorbet::packager::GenPackages::run()
+  #11 0xb879045fcd04 sorbet::realmain::realmain()
+  #12 0xb879045d2574 main
+  #13 0xef790b6b84c4 
+  #14 0xef790b6b8598 __libc_start_main
+  #15 0xb879045d2430 _start
+
