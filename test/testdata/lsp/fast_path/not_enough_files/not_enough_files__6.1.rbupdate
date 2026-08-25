@@ -1,1 +1,3 @@
 # typed: strict
+
+# Changed on purpose: an update whose contents are identical to the file's does not count as a changed file.
