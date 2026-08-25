@@ -25,8 +25,8 @@ class UndoState final {
     // The id of the last stratum in the previous slow path.
     const core::packages::Stratum lastStratum;
 
-    // The size of the workspaceFiles vector when the slow path started. Tracked so that we can roll back additions to
-    // the vector from new files added in the canceled edit.
+    // The size of the workspaceFiles vector when the slow path started, so that `restore` can check it removed exactly
+    // the files the canceled edit added.
     const size_t initialWorkspaceFilesSize;
 
 public:
