@@ -513,6 +513,12 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
         "Reports no more than <cap> diagnostics (e.g. errors and informations) to the language client, like VS Code. "
         "Can prevent slowdown triggered by large diagnostic lists. A <cap> of 0 means no limit.",
         cxxopts::value<int>()->default_value(to_string(empty.lspErrorCap)), "<cap>");
+    options.add_options(section)(
+        "lsp-max-files-on-fast-path",
+        "An edit that changes more than <count> files, or whose changes would require re-typechecking more than "
+        "<count> files, takes the slow path (a full re-typecheck of the workspace) instead of the fast path. "
+        "Tools that regenerate many files at once can make a higher <count> worthwhile.",
+        cxxopts::value<uint32_t>()->default_value(to_string(empty.lspMaxFilesOnFastPath)), "<count>");
     options.add_options(section)("disable-watchman", "When in LSP mode, disable file watching via Watchman");
     options.add_options(section)("watchman-path",
                                  "Path to watchman executable. Will search on `PATH` if <path> contains no slashes.",
@@ -1039,6 +1045,7 @@ void readOptions(Options &opts,
         }
 
         opts.lspErrorCap = raw["lsp-error-cap"].as<int>();
+        opts.lspMaxFilesOnFastPath = raw["lsp-max-files-on-fast-path"].as<uint32_t>();
 
         opts.maxCacheSizeBytes = raw["max-cache-size-bytes"].as<size_t>();
         if (!extractPrinters(raw, opts, logger)) {

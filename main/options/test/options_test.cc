@@ -77,5 +77,19 @@ TEST_CASE("DefaultConstructorMatchesReadOptions") {
     CHECK_EQ(empty.uniquelyDefinedBehavior, opts.uniquelyDefinedBehavior);
     CHECK_EQ(empty.forceHashing, opts.forceHashing);
     CHECK_EQ(empty.lspErrorCap, opts.lspErrorCap);
+    CHECK_EQ(empty.lspMaxFilesOnFastPath, opts.lspMaxFilesOnFastPath);
     CHECK_EQ(empty.forciblySilenceLspMultipleDirError, opts.forciblySilenceLspMultipleDirError);
+}
+
+TEST_CASE("LspMaxFilesOnFastPathIsConfigurable") {
+    vector<sorbet::pipeline::semantic_extension::SemanticExtensionProvider *> extensionProviders;
+    vector<unique_ptr<sorbet::pipeline::semantic_extension::SemanticExtension>> extensions;
+    sorbet::realmain::options::Options opts;
+    const char *argv[] = {"sorbet", "--lsp-max-files-on-fast-path", "200", "-e", ""};
+    auto sink = make_shared<spdlog::sinks::null_sink_mt>();
+    auto logger = make_shared<spdlog::logger>("null", sink);
+    sorbet::realmain::options::readOptions(opts, extensions, std::size(argv), const_cast<char **>(argv),
+                                           extensionProviders, logger);
+
+    CHECK_EQ(200, opts.lspMaxFilesOnFastPath);
 }
