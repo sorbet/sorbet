@@ -272,17 +272,28 @@ bool LSPIndexer::fileIsUnchanged(const core::File &file) const {
            current.isOpenInClient() == file.isOpenInClient() && current.sourceHash() == file.sourceHash();
 }
 
+bool LSPIndexer::fileIsUnknownAndEmpty(const core::File &file) const {
+    return file.sourceType == core::File::Type::Normal && !file.isOpenInClient() && file.source().empty() &&
+           !gs->findFileByPath(file.path()).exists();
+}
+
+bool LSPIndexer::fileContributesNothing(const core::File &file) const {
+    return fileIsUnchanged(file) || fileIsUnknownAndEmpty(file);
+}
+
 size_t LSPIndexer::countChangedFiles(const vector<shared_ptr<core::File>> &files) const {
-    return absl::c_count_if(files, [this](const auto &file) { return !fileIsUnchanged(*file); });
+    return absl::c_count_if(files, [this](const auto &file) { return !fileContributesNothing(*file); });
 }
 
 TypecheckingPath LSPIndexer::getTypecheckingPath(const vector<shared_ptr<core::File>> &files) const {
     static UnorderedMap<core::FileRef, shared_ptr<core::File>> emptyMap;
 
-    // Files that did not change need no typechecking, so they must not count against the fast path's file budget.
+    // Files that did not change (or never existed) need no typechecking, so they must not count against the fast
+    // path's file budget.
     vector<shared_ptr<core::File>> changedFiles;
     changedFiles.reserve(files.size());
-    absl::c_copy_if(files, back_inserter(changedFiles), [this](const auto &file) { return !fileIsUnchanged(*file); });
+    absl::c_copy_if(files, back_inserter(changedFiles),
+                    [this](const auto &file) { return !fileContributesNothing(*file); });
 
     // Avoid expensively computing file hashes if there are too many files and it's likely that we'd
     // do a lot of hashing just to realize that something changed, requiring a slowpath anyways.
@@ -364,13 +375,27 @@ unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edi
         // Watchman reports every write, and tools like autogen, `git checkout` or a build regenerating its outputs
         // rewrite many files byte-for-byte. Those files have nothing to typecheck; dropping them here keeps them from
         // being re-indexed and, above all, from counting against `lspMaxFilesOnFastPath` and forcing a slow path.
-        auto changedEnd = remove_if(update.updatedFiles.begin(), update.updatedFiles.end(),
-                                    [this](const auto &file) { return fileIsUnchanged(*file); });
-        auto unchanged = distance(changedEnd, update.updatedFiles.end());
-        if (unchanged > 0) {
+        // Likewise a path Sorbet has never indexed that reads back empty (created and deleted before Sorbet saw it):
+        // it defines nothing, and entering it would force a "new file" slow path for a phantom file.
+        size_t unchanged = 0;
+        size_t unknownEmpty = 0;
+        auto changedEnd = remove_if(update.updatedFiles.begin(), update.updatedFiles.end(), [&](const auto &file) {
+            if (fileIsUnchanged(*file)) {
+                unchanged++;
+                return true;
+            }
+            if (fileIsUnknownAndEmpty(*file)) {
+                unknownEmpty++;
+                return true;
+            }
+            return false;
+        });
+        if (changedEnd != update.updatedFiles.end()) {
             update.updatedFiles.erase(changedEnd, update.updatedFiles.end());
-            config->logger->debug("Dropped {} unchanged file(s) from the edit", unchanged);
+            config->logger->debug("Dropped {} unchanged and {} unknown empty file(s) from the edit", unchanged,
+                                  unknownEmpty);
             prodCounterAdd("lsp.edit.unchanged_files_dropped", unchanged);
+            prodCounterAdd("lsp.edit.unknown_empty_files_dropped", unknownEmpty);
         }
     }
     update.cancellationExpected = edit.sorbetCancellationExpected;

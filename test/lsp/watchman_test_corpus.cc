@@ -104,13 +104,26 @@ TEST_CASE_FIXTURE(ProtocolTest, "IdenticalTextOpenAndCloseAreNotUnchangedFiles")
 }
 
 // Creates an empty file and deletes it.
+// An empty file Sorbet has never indexed defines nothing: neither its creation nor its deletion is worth a slow path
+// (or a phantom entry in the file table). Its first real contents are a new file.
 TEST_CASE_FIXTURE(ProtocolTest, "CreateAndDeleteEmptyFile") {
     assertErrorDiagnostics(initializeLSP(), {});
+    getCounters();
     writeFilesToFS({{"foo.rb", ""}});
     assertErrorDiagnostics(send(*watchmanFileUpdate({"foo.rb"})), {});
 
     deleteFileFromFS("foo.rb");
     assertErrorDiagnostics(send(*watchmanFileUpdate({"foo.rb"})), {});
+    {
+        auto counters = getCounters();
+        CHECK_EQ(counters.getCounter("lsp.edit.unknown_empty_files_dropped"), 2);
+        CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 0);
+        CHECK_EQ(counters.getCategoryCounter("lsp.updates", "fastpath"), 2);
+    }
+
+    writeFilesToFS({{"foo.rb", "# typed: true\nclass Foo\n  def foo\n    1 + \"stuff\"\n  end\nend\n"}});
+    assertErrorDiagnostics(send(*watchmanFileUpdate({"foo.rb"})), {{"foo.rb", 3, "Expected `Integer`"}});
+    CHECK_EQ(getCounters().getCategoryCounter("lsp.slow_path_reason", "new_file"), 1);
 }
 
 // Adds a file with an error, and then deletes that file. Asserts that Sorbet no longer complains about the file.
@@ -124,10 +137,17 @@ TEST_CASE_FIXTURE(ProtocolTest, "DeleteFileWithErrors") {
     assertErrorDiagnostics(send(*watchmanFileUpdate({"foo.rb"})), {});
 }
 
-// Informs Sorbet about a file update for a file it does not know about and is deleted on disk. Should be a no-op.
+// Informs Sorbet about a file update for a file it does not know about and is deleted on disk (the watcher saw it
+// created and deleted before Sorbet read it). Must be a no-op: no slow path, no phantom file in the file table.
 TEST_CASE_FIXTURE(ProtocolTest, "DeleteFileUnknownToSorbet") {
     assertErrorDiagnostics(initializeLSP(), {});
+    getCounters();
     assertErrorDiagnostics(send(*watchmanFileUpdate({"foo.rb"})), {});
+    auto counters = getCounters();
+    CHECK_EQ(counters.getCounter("lsp.edit.unknown_empty_files_dropped"), 1);
+    CHECK_EQ(counters.getCategoryCounter("lsp.slow_path_reason", "new_file"), 0);
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 0);
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "fastpath"), 1);
 }
 
 // Updates a file, opens it in editor (but it's empty), closes file without saving to disk.

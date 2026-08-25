@@ -83,7 +83,20 @@ public:
      */
     bool fileIsUnchanged(const core::File &file) const;
     /**
-     * The number of `files` that are not `fileIsUnchanged`.
+     * Whether `file` is a path the indexer has never seen, is not open in the editor, and has no contents. The file
+     * watcher reports every path it saw change, including one that was created and deleted (or renamed away) before
+     * Sorbet read it; such a path reads back as an empty file (see `readFile` in LSPPreprocessor.cc). It defines
+     * nothing, so entering it would only add a phantom file to the file table and, because it is "new", force a slow
+     * path.
+     */
+    bool fileIsUnknownAndEmpty(const core::File &file) const;
+    /**
+     * Whether committing `file` would change nothing: it is `fileIsUnchanged` or `fileIsUnknownAndEmpty`. Such files
+     * are dropped from edits and do not count against `lspMaxFilesOnFastPath`.
+     */
+    bool fileContributesNothing(const core::File &file) const;
+    /**
+     * The number of `files` that are not `fileContributesNothing`.
      */
     size_t countChangedFiles(const std::vector<std::shared_ptr<core::File>> &files) const;
 
