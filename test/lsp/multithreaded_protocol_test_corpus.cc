@@ -55,6 +55,51 @@ public:
         REQUIRE(msg == nullptr);
         setSlowPathBlocked(false);
     }
+
+    // Initializes Sorbet in package mode over `files` (written to the workspace, in this order) and clears the
+    // counters.
+    void initializePackagedWorkspace(bool packageDirected, const vector<pair<string, string>> &files) {
+        auto opts = make_shared<realmain::options::Options>();
+        opts->cacheSensitiveOptions.sorbetPackages = true;
+        opts->packageDirected = packageDirected;
+        resetState(opts);
+
+        writeFilesToFS(files);
+        for (auto &[path, _] : files) {
+            lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/{}", rootPath, path));
+        }
+
+        auto initOptions = make_unique<SorbetInitializationOptions>();
+        initOptions->enableTypecheckInfo = true;
+        assertErrorDiagnostics(
+            initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
+        getCounters();
+    }
+
+    // Starts a slow path by creating `newFile`, cancels it by creating `cancelFile` once it has started, and returns
+    // the messages of a fence sent afterwards. `cancellationExpected` on the first edit makes the slow path wait for
+    // the cancellation only once it has rearranged `workspaceFiles`.
+    vector<unique_ptr<LSPMessage>> cancelSlowPathWithNewFile(const pair<string, string> &newFile,
+                                                             const pair<string, string> &cancelFile) {
+        sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
+        sendAsync(*openFile(newFile.first, ""));
+        sendAsync(*changeFile(newFile.first, newFile.second, 2, /* cancellationExpected */ true));
+        sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt)));
+        {
+            auto status = getTypecheckRunStatus(*readAsync());
+            REQUIRE(status.has_value());
+            REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+        }
+
+        sendAsync(*openFile(cancelFile.first, cancelFile.second));
+        {
+            auto status = getTypecheckRunStatus(*readAsync());
+            REQUIRE(status.has_value());
+            REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Cancelled);
+        }
+
+        return send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20)));
+    }
 };
 
 } // namespace
@@ -769,85 +814,48 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanCancelSlowPathEvenIfAddsFile") 
 }
 
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelingSlowPathThatAddsPackageFileKeepsExistingWorkspaceFiles") {
-    // Canceling a slow path must leave `LSPTypechecker::workspaceFiles` with exactly its pre-edit membership. The slow
-    // path appends the edit's new files and then partitions the vector in place (package files first, order not
-    // preserved), so when a new file is a `__package.rb` a pre-existing source file is displaced past the old size; a
-    // rollback that truncated to the old size dropped that file from the workspace for good.
-    auto opts = make_shared<realmain::options::Options>();
-    opts->cacheSensitiveOptions.sorbetPackages = true;
-    resetState(opts);
+    // Canceling a slow path must leave `LSPTypechecker::workspaceFiles` with its pre-edit membership. The slow path
+    // appends the edit's new files and then partitions the vector in place (package files first, order not preserved),
+    // so a new `__package.rb` displaces a pre-existing source file past the old size; a rollback that truncated to the
+    // old size dropped that file from the workspace for good.
+    initializePackagedWorkspace(
+        /* packageDirected */ false,
+        {
+            {"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A", "Root::B"}).build()},
+            // `a.rb` and `b.rb` reference each other, so losing either is an unresolved
+            // constant in the other.
+            {"a.rb", "# typed: true\n"
+                     "module Root\n"
+                     "  class A\n"
+                     "    def fun\n"
+                     "      B.new.bar\n"
+                     "    end\n"
+                     "  end\n"
+                     "end\n"},
+            {"b.rb", "# typed: true\n"
+                     "module Root\n"
+                     "  class B\n"
+                     "    def bar\n"
+                     "      A.new.fun\n"
+                     "    end\n"
+                     "  end\n"
+                     "end\n"},
+        });
 
-    // `a.rb` and `b.rb` reference each other so that losing either shows up as an unresolved constant in the other.
-    vector<pair<string, string>> files = {
-        {"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A", "Root::B"}).build()},
-        {"a.rb", "# typed: true\n"
-                 "module Root\n"
-                 "  class A\n"
-                 "    def fun\n"
-                 "      B.new.bar\n"
-                 "    end\n"
-                 "  end\n"
-                 "end\n"},
-        {"b.rb", "# typed: true\n"
-                 "module Root\n"
-                 "  class B\n"
-                 "    def bar\n"
-                 "      A.new.fun\n"
-                 "    end\n"
-                 "  end\n"
-                 "end\n"},
-    };
-
-    writeFilesToFS(files);
-
-    for (auto &[path, _] : files) {
-        this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/{}", this->rootPath, path));
-    }
-
-    auto initOptions = make_unique<SorbetInitializationOptions>();
-    initOptions->enableTypecheckInfo = true;
+    // The canceling edit lives in the new package and uses the root package's exports, so it only typechecks cleanly
+    // if nothing was lost along the way.
     assertErrorDiagnostics(
-        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
-
-    // Clear counters so that the assertions below only see the edits.
-    getCounters();
-
-    // Slow path 1: a brand-new `__package.rb`. `cancellationExpected` makes the slow path wait for its cancellation
-    // only once it has already partitioned `workspaceFiles`.
-    sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
-    sendAsync(*openFile("foo/__package.rb", ""));
-    sendAsync(*changeFile("foo/__package.rb", PackageTextBuilder().withName("Root::Foo").withImports({"Root"}).build(),
-                          2,
-                          /* cancellationExpected */ true));
-    sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt)));
-
-    // Wait for typechecking to begin to avoid races.
-    {
-        auto status = getTypecheckRunStatus(*readAsync());
-        REQUIRE(status.has_value());
-        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
-    }
-
-    // Slow path 2: another new file, which cancels slow path 1. It lives in the new package and uses the exports of
-    // the root package, so it only typechecks cleanly if nothing was lost along the way.
-    sendAsync(*openFile("foo/c.rb", "# typed: true\n"
-                                    "module Root::Foo\n"
-                                    "  class C\n"
-                                    "    def c\n"
-                                    "      Root::A.new.fun\n"
-                                    "    end\n"
-                                    "  end\n"
-                                    "end\n"));
-
-    // Wait for the first typecheck run to get canceled.
-    {
-        auto status = getTypecheckRunStatus(*readAsync());
-        REQUIRE(status.has_value());
-        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Cancelled);
-    }
-
-    // Send a fence to clear out the pipeline. Every file is still part of the workspace, so nothing is unresolved.
-    assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
+        cancelSlowPathWithNewFile(
+            {"foo/__package.rb", PackageTextBuilder().withName("Root::Foo").withImports({"Root"}).build()},
+            {"foo/c.rb", "# typed: true\n"
+                         "module Root::Foo\n"
+                         "  class C\n"
+                         "    def c\n"
+                         "      Root::A.new.fun\n"
+                         "    end\n"
+                         "  end\n"
+                         "end\n"}),
+        {});
 
     auto counters = getCounters();
     CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 1);
@@ -856,105 +864,47 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelingSlowPathThatAddsPackageFi
 
 TEST_CASE_FIXTURE(MultithreadedProtocolTest,
                   "CancelingPackageDirectedSlowPathThatAddsLowStratumFileKeepsExistingWorkspaceFiles") {
-    // Same invariant as the previous test, for the second way the slow path reorders `workspaceFiles`: with
-    // package-directed typechecking, computePackageStrata sorts the non-package files in place by (stratum, id), so a
-    // new low-stratum file displaces the last high-stratum file past the old size -- no new package file involved.
-    auto opts = make_shared<realmain::options::Options>();
-    opts->cacheSensitiveOptions.sorbetPackages = true;
-    opts->packageDirected = true;
-    resetState(opts);
-
-    // Three packages in a chain, so that the strata are Root (0) < Root::Foo (1) < Root::Bar (2) and `bar/c.rb` is the
-    // last non-package file after the stratum sort.
-    vector<pair<string, string>> files = {
-        {"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A"}).build()},
-        {"a.rb", "# typed: true\n"
-                 "module Root\n"
-                 "  class A\n"
-                 "    def fun\n"
-                 "    end\n"
-                 "  end\n"
-                 "end\n"},
-        {"foo/__package.rb",
-         PackageTextBuilder().withName("Root::Foo").withImports({"Root"}).withExports({"Root::Foo::B"}).build()},
-        {"foo/b.rb", "# typed: true\n"
-                     "module Root::Foo\n"
-                     "  class B\n"
-                     "    def bar\n"
-                     "      Root::A.new.fun\n"
-                     "    end\n"
+    // Same invariant for the second way the slow path reorders `workspaceFiles`: with package-directed typechecking,
+    // computePackageStrata sorts the non-package files in place by (stratum, id), so a new low-stratum file displaces
+    // the last high-stratum file past the old size -- no new package file involved.
+    initializePackagedWorkspace(
+        /* packageDirected */ true,
+        {
+            {"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A"}).build()},
+            {"a.rb", "# typed: true\n"
+                     "module Root\n"
+                     "  class A\n"
                      "  end\n"
                      "end\n"},
-        {"bar/__package.rb", PackageTextBuilder().withName("Root::Bar").withImports({"Root::Foo"}).build()},
-        {"bar/c.rb", "# typed: true\n"
-                     "module Root::Bar\n"
-                     "  class C\n"
-                     "    def c\n"
-                     "      Root::Foo::B.new.bar\n"
-                     "    end\n"
-                     "  end\n"
-                     "end\n"},
-    };
+            {"foo/__package.rb",
+             PackageTextBuilder().withName("Root::Foo").withImports({"Root"}).withExports({"Root::Foo::B"}).build()},
+            // Root::Foo depends on Root, so `foo/b.rb` is the last file after the stratum
+            // sort and the one a new file in Root displaces.
+            {"foo/b.rb", "# typed: true\n"
+                         "module Root::Foo\n"
+                         "  class B\n"
+                         "  end\n"
+                         "end\n"},
+        });
 
-    writeFilesToFS(files);
+    assertErrorDiagnostics(cancelSlowPathWithNewFile({"d.rb", "# typed: true\n"
+                                                              "module Root\n"
+                                                              "  class D\n"
+                                                              "  end\n"
+                                                              "end\n"},
+                                                     {"e.rb", "# typed: true\n"
+                                                              "module Root\n"
+                                                              "  class E\n"
+                                                              "  end\n"
+                                                              "end\n"}),
+                           {});
 
-    for (auto &[path, _] : files) {
-        this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/{}", this->rootPath, path));
-    }
-
-    auto initOptions = make_unique<SorbetInitializationOptions>();
-    initOptions->enableTypecheckInfo = true;
-    assertErrorDiagnostics(
-        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
-
-    // Clear counters so that the assertions below only see the edits.
-    getCounters();
-
-    // Slow path 1: a brand-new source file in the lowest stratum (the root package). `cancellationExpected` makes the
-    // slow path wait for its cancellation only once `workspaceFiles` has been partitioned and sorted.
-    sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
-    sendAsync(*openFile("d.rb", ""));
-    sendAsync(*changeFile("d.rb",
-                          "# typed: true\n"
-                          "module Root\n"
-                          "  class D\n"
-                          "  end\n"
-                          "end\n",
-                          2, /* cancellationExpected */ true));
-    sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt)));
-
-    // Wait for typechecking to begin to avoid races.
-    {
-        auto status = getTypecheckRunStatus(*readAsync());
-        REQUIRE(status.has_value());
-        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
-    }
-
-    // Slow path 2: another new file, which cancels slow path 1.
-    sendAsync(*openFile("e.rb", "# typed: true\n"
-                                "module Root\n"
-                                "  class E\n"
-                                "  end\n"
-                                "end\n"));
-
-    // Wait for the first typecheck run to get canceled.
-    {
-        auto status = getTypecheckRunStatus(*readAsync());
-        REQUIRE(status.has_value());
-        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Cancelled);
-    }
-
-    // Send a fence to clear out the pipeline. Nothing was lost, so nothing is unresolved ...
-    assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
-
-    // ... and the file at the end of the sorted workspace is still part of it (its class is in the symbol table).
-    {
-        auto responses = send(*workspaceSymbol("Root::Bar::C"));
-        REQUIRE_EQ(responses.size(), 1);
-        auto &result = get<variant<JSONNullObject, vector<unique_ptr<SymbolInformation>>>>(
-            responses[0]->asResponse().result.value());
-        REQUIRE_EQ(get<vector<unique_ptr<SymbolInformation>>>(result).size(), 1);
-    }
+    // `foo/b.rb` is still part of the workspace: its class is in the symbol table.
+    auto responses = send(*workspaceSymbol("Root::Foo::B"));
+    REQUIRE_EQ(responses.size(), 1);
+    auto &result =
+        get<variant<JSONNullObject, vector<unique_ptr<SymbolInformation>>>>(responses[0]->asResponse().result.value());
+    CHECK_EQ(get<vector<unique_ptr<SymbolInformation>>>(result).size(), 1);
 
     auto counters = getCounters();
     CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 1);
