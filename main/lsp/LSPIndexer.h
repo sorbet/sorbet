@@ -91,8 +91,14 @@ public:
      */
     bool fileIsUnknownAndEmpty(const core::File &file) const;
     /**
-     * Whether committing `file` would change nothing: it is `fileIsUnchanged` or `fileIsUnknownAndEmpty`. Such files
-     * are dropped from edits and do not count against `lspMaxFilesOnFastPath`.
+     * Whether `file` is a path the indexer has never seen, is not open in the editor, and would be `# typed: ignore`.
+     * Sorbet reads nothing from an ignored file, so entering it would only force a "new file" slow path for nothing;
+     * it becomes a new file when its sigil changes (or when it is opened in the editor).
+     */
+    bool fileIsUnknownAndIgnored(const core::File &file) const;
+    /**
+     * Whether committing `file` would change nothing: it is `fileIsUnchanged`, `fileIsUnknownAndEmpty` or
+     * `fileIsUnknownAndIgnored`. Such files are dropped from edits and do not count against `lspMaxFilesOnFastPath`.
      */
     bool fileContributesNothing(const core::File &file) const;
     /**

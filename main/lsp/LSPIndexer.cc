@@ -277,8 +277,14 @@ bool LSPIndexer::fileIsUnknownAndEmpty(const core::File &file) const {
            !gs->findFileByPath(file.path()).exists();
 }
 
+bool LSPIndexer::fileIsUnknownAndIgnored(const core::File &file) const {
+    return file.sourceType == core::File::Type::Normal && !file.isOpenInClient() && !file.hasPackageRbPath() &&
+           !gs->findFileByPath(file.path()).exists() &&
+           pipeline::decideStrictLevel(*gs, file, config->opts) == core::StrictLevel::Ignore;
+}
+
 bool LSPIndexer::fileContributesNothing(const core::File &file) const {
-    return fileIsUnchanged(file) || fileIsUnknownAndEmpty(file);
+    return fileIsUnchanged(file) || fileIsUnknownAndEmpty(file) || fileIsUnknownAndIgnored(file);
 }
 
 size_t LSPIndexer::countChangedFiles(const vector<shared_ptr<core::File>> &files) const {
@@ -377,8 +383,11 @@ unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edi
         // being re-indexed and, above all, from counting against `lspMaxFilesOnFastPath` and forcing a slow path.
         // Likewise a path Sorbet has never indexed that reads back empty (created and deleted before Sorbet saw it):
         // it defines nothing, and entering it would force a "new file" slow path for a phantom file.
+        // And a new `# typed: ignore` file: Sorbet reads nothing from it, so entering it would force a "new file"
+        // slow path for nothing.
         size_t unchanged = 0;
         size_t unknownEmpty = 0;
+        size_t unknownIgnored = 0;
         auto changedEnd = remove_if(update.updatedFiles.begin(), update.updatedFiles.end(), [&](const auto &file) {
             if (fileIsUnchanged(*file)) {
                 unchanged++;
@@ -388,14 +397,19 @@ unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edi
                 unknownEmpty++;
                 return true;
             }
+            if (fileIsUnknownAndIgnored(*file)) {
+                unknownIgnored++;
+                return true;
+            }
             return false;
         });
         if (changedEnd != update.updatedFiles.end()) {
             update.updatedFiles.erase(changedEnd, update.updatedFiles.end());
-            config->logger->debug("Dropped {} unchanged and {} unknown empty file(s) from the edit", unchanged,
-                                  unknownEmpty);
+            config->logger->debug("Dropped {} unchanged, {} unknown empty and {} unknown ignored file(s) from the edit",
+                                  unchanged, unknownEmpty, unknownIgnored);
             prodCounterAdd("lsp.edit.unchanged_files_dropped", unchanged);
             prodCounterAdd("lsp.edit.unknown_empty_files_dropped", unknownEmpty);
+            prodCounterAdd("lsp.edit.unknown_ignored_files_dropped", unknownIgnored);
         }
     }
     update.cancellationExpected = edit.sorbetCancellationExpected;

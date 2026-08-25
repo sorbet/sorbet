@@ -160,10 +160,44 @@ vector<core::FileRef> reserveFiles(core::GlobalState &gs, const vector<string> &
 
 // ----- indexer --------------------------------------------------------------
 
+namespace {
+
+// The strictness override `opts` has for `path`, if any.
+optional<core::StrictLevel> strictnessOverrideFor(const options::Options &opts, string_view path) {
+    if (opts.strictnessOverrides.empty()) {
+        return nullopt;
+    }
+    string filePath = string(path);
+    // make sure all relative file paths start with ./
+    if (!absl::StartsWith(filePath, "/") && !absl::StartsWith(filePath, "./")) {
+        filePath.insert(0, "./");
+    }
+    auto fnd = opts.strictnessOverrides.find(filePath);
+    if (fnd == opts.strictnessOverrides.end()) {
+        return nullopt;
+    }
+    return fnd->second;
+}
+
+} // namespace
+
 core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::FileRef file,
                                     const options::Options &opts) {
     auto &fileData = file.data(gs);
 
+    if (auto override = strictnessOverrideFor(opts, fileData.path())) {
+        if (*override == fileData.originalSigil && *override > opts.forceMinStrict && *override < opts.forceMaxStrict) {
+            if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Parser::ParserError)) {
+                e.setHeader("Useless override of strictness level");
+            }
+        }
+    }
+
+    return decideStrictLevel(gs, fileData, opts);
+}
+
+core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::File &fileData,
+                                    const options::Options &opts) {
     core::StrictLevel level;
 
     if (fileData.originalSigil == core::StrictLevel::None) {
@@ -178,22 +212,8 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
         level = max(min(level, maxStrict), minStrict);
     }
 
-    if (!opts.strictnessOverrides.empty()) {
-        string filePath = string(fileData.path());
-        // make sure all relative file paths start with ./
-        if (!absl::StartsWith(filePath, "/") && !absl::StartsWith(filePath, "./")) {
-            filePath.insert(0, "./");
-        }
-        auto fnd = opts.strictnessOverrides.find(filePath);
-        if (fnd != opts.strictnessOverrides.end()) {
-            if (fnd->second == fileData.originalSigil && fnd->second > opts.forceMinStrict &&
-                fnd->second < opts.forceMaxStrict) {
-                if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Parser::ParserError)) {
-                    e.setHeader("Useless override of strictness level");
-                }
-            }
-            level = fnd->second;
-        }
+    if (auto override = strictnessOverrideFor(opts, fileData.path())) {
+        level = *override;
     }
 
     if (gs.cacheSensitiveOptions.runningUnderAutogen) {

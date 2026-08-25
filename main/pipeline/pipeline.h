@@ -30,6 +30,10 @@ std::vector<core::FileRef> reserveFiles(core::GlobalState &gs, const std::vector
 core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::FileRef file,
                                     const options::Options &opts);
 
+// The strict level `file` gets from its sigil and `opts`, for a file that has no FileRef yet (it reports no
+// "Useless override of strictness level" error; the FileRef overload does).
+core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::File &file, const options::Options &opts);
+
 // Primarily exposed for LSP—outside of LSP, you probably want `indexOne`.
 ast::ExpressionPtr desugarOne(const options::Options &opts, core::GlobalState &gs, core::FileRef file,
                               bool preserveConcreteSyntax);

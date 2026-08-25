@@ -126,6 +126,42 @@ TEST_CASE_FIXTURE(ProtocolTest, "CreateAndDeleteEmptyFile") {
     CHECK_EQ(getCounters().getCategoryCounter("lsp.slow_path_reason", "new_file"), 1);
 }
 
+// A new `# typed: ignore` file defines nothing Sorbet will look at: it is not worth a slow path (or a file-table
+// entry) until its sigil changes, at which point it is a new file like any other.
+TEST_CASE_FIXTURE(ProtocolTest, "NewIgnoredFilesDoNotTakeTheSlowPath") {
+    writeFilesToFS({{"foo.rb", "# typed: true\nclass Foo\nend\n"}});
+    this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/foo.rb", this->rootPath));
+    assertErrorDiagnostics(initializeLSP(), {});
+    getCounters();
+
+    writeFilesToFS({{"gen.rb", "# typed: ignore\nclass Gen\n  def gen\n    1 + \"stuff\"\n  end\nend\n"}});
+    assertErrorDiagnostics(send(*watchmanFileUpdate({"gen.rb"})), {});
+    {
+        auto counters = getCounters();
+        CHECK_EQ(counters.getCounter("lsp.edit.unknown_ignored_files_dropped"), 1);
+        CHECK_EQ(counters.getCategoryCounter("lsp.slow_path_reason", "new_file"), 0);
+        CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 0);
+    }
+
+    writeFilesToFS({{"gen.rb", "# typed: true\nclass Gen\n  def gen\n    1 + \"stuff\"\n  end\nend\n"}});
+    assertErrorDiagnostics(send(*watchmanFileUpdate({"gen.rb"})), {{"gen.rb", 3, "Expected `Integer`"}});
+    CHECK_EQ(getCounters().getCategoryCounter("lsp.slow_path_reason", "new_file"), 1);
+}
+
+// Opening an unknown `# typed: ignore` file in the editor still enters it (as a new file), so requests against it
+// behave as for any ignored file.
+TEST_CASE_FIXTURE(ProtocolTest, "OpeningAnUnknownIgnoredFileEntersIt") {
+    assertErrorDiagnostics(initializeLSP(), {});
+    getCounters();
+
+    string contents = "# typed: ignore\nclass Gen\nend\n";
+    writeFilesToFS({{"gen.rb", contents}});
+    assertErrorDiagnostics(send(*openFile("gen.rb", contents)), {});
+    auto counters = getCounters();
+    CHECK_EQ(counters.getCounter("lsp.edit.unknown_ignored_files_dropped"), 0);
+    CHECK_EQ(counters.getCategoryCounter("lsp.slow_path_reason", "new_file"), 1);
+}
+
 // Adds a file with an error, and then deletes that file. Asserts that Sorbet no longer complains about the file.
 TEST_CASE_FIXTURE(ProtocolTest, "DeleteFileWithErrors") {
     assertErrorDiagnostics(initializeLSP(), {});
