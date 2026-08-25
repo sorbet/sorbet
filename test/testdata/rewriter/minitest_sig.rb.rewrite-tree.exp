@@ -1,0 +1,31 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C MustTestFoo><<C <todo sym>>> < ()
+    <self>.sig() do ||
+      <self>.abstract().void()
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.void()
+    end
+
+    def <it 'foo'><<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>, <emptyTree>::<C T>::<C Helpers>)
+
+    <self>.abstract!()
+  end
+
+  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.void()
+    end
+
+    def <it 'foo'><<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.include(<emptyTree>::<C MustTestFoo>)
+  end
+end
