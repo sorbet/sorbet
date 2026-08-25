@@ -911,6 +911,44 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest,
     CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath_canceled"), 1);
 }
 
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "UnchangedDuplicateFileUpdateDuringSlowPathIsDroppedAndHarmless") {
+    // A watchman event that re-reports a file with the content the indexer already holds is dropped from the edit; if
+    // it arrives while a slow path is in flight, the resulting zero-file fast path preempts that slow path and must
+    // leave its result intact.
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->enableTypecheckInfo = true;
+    assertErrorDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
+
+    writeFilesToFS({{"bar.rb", "# typed: true\nclass Bar\nend\n"}});
+    assertErrorDiagnostics(send(*watchmanFileUpdate({"bar.rb"})), {});
+    assertErrorDiagnostics(send(*openFile("foo.rb", "")), {});
+    getCounters();
+
+    // Slow path: a new class with an error, expecting one preemption.
+    sendAsync(*changeFile("foo.rb",
+                          "# typed: true\nclass Foo\nextend T::Sig\nsig{returns(String)}\ndef bar\n3\nend\nend\n", 2,
+                          false, 1));
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // Duplicate: bar.rb re-reported with the content Sorbet already has.
+    sendAsync(*watchmanFileUpdate({"bar.rb"}));
+
+    // Send a fence to clear out the pipeline. The slow path's error is reported; nothing else changed.
+    assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
+                           {{"foo.rb", 5, "Expected `String` but found `Integer(3)` for method result type"}});
+
+    auto counters = getCounters();
+    CHECK_EQ(counters.getCounter("lsp.edit.unchanged_files_dropped"), 1);
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "fastpath"), 1);
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 1);
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath_canceled"), 0);
+}
+
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "SlowFooThenFastBarThenUndoSlowFoo") {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;

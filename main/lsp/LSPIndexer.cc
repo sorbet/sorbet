@@ -90,6 +90,14 @@ LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &ch
     Timer timeit(config->logger, "fast_path_decision");
     auto &logger = *config->logger;
     logger.debug("Trying to see if fast path is available after {} file changes", changedFiles.size());
+    if (changedFiles.empty()) {
+        // Nothing to typecheck (every file in the edit was unchanged): a no-op fast path, regardless of
+        // `disableFastPath` -- the slow path requires at least one file.
+        logger.debug("Taking fast path because no files changed");
+        result.path = TypecheckingPath::Fast;
+        timeit.setTag("path_chosen", "fast");
+        return result;
+    }
     if (config->disableFastPath) {
         logger.debug("Taking slow path because fast path is disabled.");
         prodCategoryCounterInc("lsp.slow_path_reason", "fast_path_disabled");
@@ -356,11 +364,11 @@ unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edi
         // Watchman reports every write, and tools like autogen, `git checkout` or a build regenerating its outputs
         // rewrite many files byte-for-byte. Those files have nothing to typecheck; dropping them here keeps them from
         // being re-indexed and, above all, from counting against `lspMaxFilesOnFastPath` and forcing a slow path.
-        auto unchanged = update.updatedFiles.size() - countChangedFiles(update.updatedFiles);
+        auto changedEnd = remove_if(update.updatedFiles.begin(), update.updatedFiles.end(),
+                                    [this](const auto &file) { return fileIsUnchanged(*file); });
+        auto unchanged = distance(changedEnd, update.updatedFiles.end());
         if (unchanged > 0) {
-            update.updatedFiles.erase(remove_if(update.updatedFiles.begin(), update.updatedFiles.end(),
-                                                [this](const auto &file) { return fileIsUnchanged(*file); }),
-                                      update.updatedFiles.end());
+            update.updatedFiles.erase(changedEnd, update.updatedFiles.end());
             config->logger->debug("Dropped {} unchanged file(s) from the edit", unchanged);
             prodCounterAdd("lsp.edit.unchanged_files_dropped", unchanged);
         }

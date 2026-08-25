@@ -19,7 +19,7 @@ bool isTypecheckRun(const LSPMessage &msg) {
 }
 } // namespace
 
-void ProtocolTest::resetState(shared_ptr<realmain::options::Options> opts) {
+void ProtocolTest::resetState(shared_ptr<realmain::options::Options> opts, bool disableFastPath) {
     fs = make_shared<MockFileSystem>(rootPath);
     diagnostics.clear();
     sourceFileContents.clear();
@@ -36,9 +36,9 @@ void ProtocolTest::resetState(shared_ptr<realmain::options::Options> opts) {
     }
 
     if (useMultithreading) {
-        lspWrapper = MultiThreadedLSPWrapper::create(rootPath, opts);
+        lspWrapper = MultiThreadedLSPWrapper::create(rootPath, opts, disableFastPath);
     } else {
-        lspWrapper = SingleThreadedLSPWrapper::create(rootPath, opts);
+        lspWrapper = SingleThreadedLSPWrapper::create(rootPath, opts, disableFastPath);
     }
     lspWrapper->opts->fs = fs;
     lspWrapper->enableAllExperimentalFeatures();

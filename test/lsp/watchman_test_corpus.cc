@@ -37,13 +37,14 @@ TEST_CASE_FIXTURE(ProtocolTest, "UnchangedFilesDoNotCountTowardsTheSlowPath") {
     assertErrorDiagnostics(initializeLSP(), {});
     getCounters();
 
-    // All five files rewritten byte-for-byte: nothing to typecheck, and in particular no slow path.
+    // All five files rewritten byte-for-byte: nothing to typecheck, so a fast path over no files and no slow path.
     writeFilesToFS(files);
     assertErrorDiagnostics(send(*watchmanFileUpdate(paths)), {});
     {
         auto counters = getCounters();
         CHECK_EQ(counters.getCounter("lsp.edit.unchanged_files_dropped"), 5);
         CHECK_EQ(counters.getCategoryCounter("lsp.slow_path_reason", "too_many_files"), 0);
+        CHECK_EQ(counters.getCategoryCounter("lsp.updates", "fastpath"), 1);
         CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 0);
     }
 
@@ -57,6 +58,49 @@ TEST_CASE_FIXTURE(ProtocolTest, "UnchangedFilesDoNotCountTowardsTheSlowPath") {
         CHECK_EQ(counters.getCategoryCounter("lsp.updates", "fastpath"), 1);
         CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 0);
     }
+}
+
+// With the fast path disabled, an edit whose files are all unchanged still has nothing to typecheck: it must not be
+// sent down the slow path (which requires at least one file).
+TEST_CASE_FIXTURE(ProtocolTest, "UnchangedFilesAreANoOpEvenWhenTheFastPathIsDisabled") {
+    auto opts = make_shared<realmain::options::Options>();
+    resetState(opts, /* disableFastPath */ true);
+
+    vector<pair<string, string>> files = {{"foo.rb", "# typed: true\nclass Foo\n  def foo\n    1\n  end\nend\n"}};
+    writeFilesToFS(files);
+    this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/foo.rb", this->rootPath));
+    assertErrorDiagnostics(initializeLSP(), {});
+    getCounters();
+
+    writeFilesToFS(files);
+    assertErrorDiagnostics(send(*watchmanFileUpdate({"foo.rb"})), {});
+    {
+        auto counters = getCounters();
+        CHECK_EQ(counters.getCounter("lsp.edit.unchanged_files_dropped"), 1);
+        CHECK_EQ(counters.getCategoryCounter("lsp.updates", "fastpath"), 1);
+        CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 0);
+    }
+
+    // A real change takes the slow path, as the option demands.
+    writeFilesToFS({{"foo.rb", "# typed: true\nclass Foo\n  def foo\n    1 + \"stuff\"\n  end\nend\n"}});
+    assertErrorDiagnostics(send(*watchmanFileUpdate({"foo.rb"})), {{"foo.rb", 3, "Expected `Integer`"}});
+    CHECK_EQ(getCounters().getCategoryCounter("lsp.updates", "slowpath"), 1);
+}
+
+// Opening or closing a file whose editor text equals the text on disk changes its editor-open status, so it is an
+// edit Sorbet must process, not an unchanged file.
+TEST_CASE_FIXTURE(ProtocolTest, "IdenticalTextOpenAndCloseAreNotUnchangedFiles") {
+    string contents = "# typed: true\nclass Foo\n  def foo\n    1\n  end\nend\n";
+    writeFilesToFS({{"foo.rb", contents}});
+    this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/foo.rb", this->rootPath));
+    assertErrorDiagnostics(initializeLSP(), {});
+    getCounters();
+
+    assertErrorDiagnostics(send(*openFile("foo.rb", contents)), {});
+    assertErrorDiagnostics(send(*closeFile("foo.rb")), {});
+    auto counters = getCounters();
+    CHECK_EQ(counters.getCounter("lsp.edit.unchanged_files_dropped"), 0);
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "fastpath"), 2);
 }
 
 // Creates an empty file and deletes it.
