@@ -489,20 +489,9 @@ bool LSPIndexer::wouldUpdateFileTable(const core::File &newer) const {
     }
 
     auto &existing = this->getFile(fref);
-
-    if (existing.sourceType != core::File::Type::Normal) {
-        return true;
-    }
-
-    if (newer.sourceType != existing.sourceType) {
-        return true;
-    }
-
-    if (newer.isOpenInClient() != existing.isOpenInClient()) {
-        return true;
-    }
-
-    return newer.source().size() != existing.source().size() || newer.sourceHash() != existing.sourceHash();
+    return existing.sourceType != core::File::Type::Normal || existing.sourceType != newer.sourceType ||
+           existing.isOpenInClient() != newer.isOpenInClient() || existing.source().size() != newer.source().size() ||
+           existing.sourceHash() != newer.sourceHash();
 }
 
 } // namespace sorbet::realmain::lsp
