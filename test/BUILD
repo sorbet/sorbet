@@ -298,6 +298,9 @@ pipeline_tests(
             "testdata/rbs/**/*.rb",
             "testdata/rbs/**/*.exp",
 
+            # Will require a prism bump
+            "testdata/parser/leading_symbolic_logical_operators.rb",
+
             # Prism allows a new line between `.` and `end` as a way to call a method called literally `#end`.
             # The legacy parser treats this as an incomplete call to `x.<method-name-missing>()`, which is much
             # nicer behaviour, which we eventually want to support with Prism as well.
@@ -352,6 +355,7 @@ pipeline_tests(
             "testdata/parser/error_recovery/if_indent_4.rb",
             "testdata/parser/error_recovery/if_indent_5.rb",
             "testdata/parser/error_recovery/if_no_end.rb",
+            "testdata/parser/error_recovery/leading_symbolic_logical_after_dot.rb",
             "testdata/parser/error_recovery/lonely_def_01.rb",
             "testdata/parser/error_recovery/lonely_def_02.rb",
             "testdata/parser/error_recovery/lonely_def_03.rb",
@@ -445,6 +449,7 @@ pipeline_tests(
             "testdata/lsp/completion/if_empty.rb",
             "testdata/lsp/completion/instance_var.rb",
             "testdata/lsp/completion/instance_var_strict.rb",
+            "testdata/lsp/completion/leading_symbolic_logical_after_dot.rb",
             "testdata/lsp/completion/method_kwargs.rb",
             "testdata/lsp/completion/method_kwargs_extra.rb",
             "testdata/lsp/completion/missing_assign_rhs.rb",
