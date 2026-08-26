@@ -798,7 +798,7 @@ std::string PackageInfo::renderPackageRbContents(
     fmt::memory_buffer result;
 
     if (isPreludePackage()) {
-        fmt::format_to(std::back_inserter(result), "  prelude_package\n\n");
+        fmt::format_to(std::back_inserter(result), "  prelude!\n\n");
     }
 
     for (auto &directive : extraDirectives_) {

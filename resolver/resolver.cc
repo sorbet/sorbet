@@ -855,10 +855,10 @@ private:
                                 e.addErrorLine(ownerPackage.declLoc(), "Package where `{}` is defined",
                                                job.klass.show(ctx));
                             } else {
-                                e.addErrorLine(filePackageInfo.declLoc(), "Package defined here is not a `{}`",
-                                               "prelude_package");
+                                e.addErrorLine(filePackageInfo.declLoc(), "Package defined here is not marked `{}`",
+                                               "prelude!");
                                 e.addErrorNote("`{}` is unpackaged, and may be reopened from a package marked `{}`",
-                                               job.klass.show(ctx), "prelude_package");
+                                               job.klass.show(ctx), "prelude!");
                             }
                         }
                     }
@@ -926,10 +926,10 @@ private:
                                 e.addErrorLine(ownerPackage.declLoc(), "Package where `{}` is defined",
                                                job.klass.show(ctx));
                             } else {
-                                e.addErrorLine(filePackageInfo.declLoc(), "Package defined here is not a `{}`",
-                                               "prelude_package");
+                                e.addErrorLine(filePackageInfo.declLoc(), "Package defined here is not marked `{}`",
+                                               "prelude!");
                                 e.addErrorNote("`{}` is unpackaged, and may be reopened from a package marked `{}`",
-                                               job.klass.show(ctx), "prelude_package");
+                                               job.klass.show(ctx), "prelude!");
                             }
                         }
                     }

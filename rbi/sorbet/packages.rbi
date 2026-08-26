@@ -25,9 +25,6 @@ class Sorbet::Private::Static::PackageSpec
   def self.sorbet(min_typed_level:, tests_min_typed_level: nil); end
 
   sig { void }
-  def self.prelude_package; end
-
-  sig { void }
   def self.prelude!; end
 
   sig { void }
