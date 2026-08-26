@@ -108,6 +108,10 @@ public:
     absl::Span<const Node> nodes() const {
         return this->nodes_;
     }
+
+    // Fetch the set of packages that depend on the set of packages provided.
+    UnorderedSet<MangledName> transitiveDependentsOf(const PackageDB &db,
+                                                     const UnorderedSet<MangledName> &packages) const;
 };
 
 class CondensationBuilder {

@@ -1,6 +1,7 @@
 #include "core/packages/Condensation.h"
 #include "common/strings/formatting.h"
 #include "core/GlobalState.h"
+#include <algorithm>
 
 using namespace std;
 
@@ -212,6 +213,55 @@ Condensation CondensationBuilder::build() {
     }
 
     return move(this->condensation);
+}
+
+UnorderedSet<MangledName> Condensation::transitiveDependentsOf(const PackageDB &db,
+                                                               const UnorderedSet<MangledName> &packages) const {
+    vector<int> frontier, next;
+    absl::c_transform(packages, back_inserter(frontier), [&db](auto pkg) {
+        auto &info = db.getPackageInfo(pkg);
+        ENFORCE(info.exists());
+
+        // TODO(trevor) remove this comment once we've fully migrated to test-packages
+        // Right now this is an over approximation, as we can't tell if the package specified in `packages` is
+        // referring to the tests, or the application code.
+        auto scc = info.sccID();
+        ENFORCE(scc.has_value());
+        return scc.value();
+    });
+
+    vector<bool> visited(this->nodes_.size(), false);
+    while (!frontier.empty()) {
+        next.clear();
+
+        for (auto scc : frontier) {
+            if (visited[scc]) {
+                continue;
+            }
+
+            visited[scc] = true;
+
+            auto &node = this->nodes_[scc];
+
+            next.insert(next.end(), node.backEdges.begin(), node.backEdges.end());
+        }
+
+        std::swap(frontier, next);
+    }
+
+    UnorderedSet<MangledName> downstream;
+
+    for (auto &node : this->nodes_) {
+        if (!visited[node.id]) {
+            continue;
+        }
+
+        for (auto pkg : node.members) {
+            downstream.insert(pkg);
+        }
+    }
+
+    return downstream;
 }
 
 } // namespace sorbet::core::packages
