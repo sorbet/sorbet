@@ -5,24 +5,14 @@
 
 namespace sorbet {
 template <typename F> void UIntSet::forEach(F each) const {
-    uint32_t id = 0;
+    uint32_t base = 0;
     for (auto entry : _members) {
-        uint32_t startIdForNextU4 = id + 32;
         while (entry != 0) {
-            uint32_t startIdForNextU1 = id + 8;
-            // Process 1 byte at a time so we can check 8 places at once.
-            uint32_t byte = entry & 0xFF;
-            while (byte != 0) {
-                if ((byte & 0x1) == 1) {
-                    each(id);
-                }
-                byte >>= 1;
-                id++;
-            }
-            entry >>= 8;
-            id = startIdForNextU1;
+            uint32_t bit = __builtin_ctz(entry);
+            each(base + bit);
+            entry &= entry - 1; // clear lowest set bit
         }
-        id = startIdForNextU4;
+        base += 32;
     }
 }
 
