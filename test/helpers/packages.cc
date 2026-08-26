@@ -24,7 +24,7 @@ string PackageTextBuilder::build() {
     string out = fmt::format("# typed: strict\n\nclass {} < PackageSpec\n", this->name);
 
     if (this->preludePackage) {
-        fmt::format_to(back_inserter(out), "  prelude_package\n");
+        fmt::format_to(back_inserter(out), "  prelude!\n");
     }
 
     if (!this->strictDeps.empty()) {

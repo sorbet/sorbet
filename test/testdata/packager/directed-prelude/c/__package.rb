@@ -5,6 +5,6 @@
 # stratum: 0
 
 class C < PackageSpec
-  prelude_package
+  prelude!
   import A
 end

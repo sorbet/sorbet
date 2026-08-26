@@ -7,5 +7,5 @@
 # stratum: 0
 
 class A < PackageSpec
-  prelude_package
+  prelude!
 end

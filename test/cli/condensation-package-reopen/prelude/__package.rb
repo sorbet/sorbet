@@ -1,7 +1,7 @@
 # typed: strict
 
 class Prelude < PackageSpec
-  prelude_package
+  prelude!
 
   export Prelude::A
 end

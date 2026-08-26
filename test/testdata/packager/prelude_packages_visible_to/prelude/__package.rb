@@ -3,7 +3,7 @@
 # enable-packager: true
 
 class Prelude < PackageSpec
-  prelude_package
+  prelude!
 
   visible_to Application::A
 
