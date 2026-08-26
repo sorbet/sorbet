@@ -6,6 +6,8 @@
 #include "common/UIntSetForEach.h"
 #include "common/common.h"
 
+#include <array>
+
 namespace sorbet::common {
 
 TEST_CASE("Levenstein") {
@@ -211,6 +213,22 @@ TEST_SUITE("UIntSet") {
             callCount++;
         });
         CHECK_EQ(2, callCount);
+
+        // Multiple bits in words, not at word boundaries.
+        callCount = 0;
+        a.remove(0);
+        a.remove(64);
+        std::array<uint32_t, 7> bits = {5, 8, 13, 21, 34, 55, 89};
+        for (auto bit : bits) {
+            a.add(bit);
+        }
+
+        a.forEach([&bits, &callCount](uint32_t bit) -> void {
+            CHECK(callCount < bits.size());
+            CHECK_EQ(bits[callCount], bit);
+            callCount++;
+        });
+        CHECK_EQ(bits.size(), callCount);
 
         // Full case
         for (int i = 0; i < 128; i++) {
