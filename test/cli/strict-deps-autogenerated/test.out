@@ -1,0 +1,21 @@
+------ monolithic -------------------------------
+a/main.rb:3: `B::MyClass` cannot be referenced here because importing its package would put `A` into a cycle https://srb.help/3727
+     3 |puts(B::MyClass)
+             ^^^^^^^^^^
+    a/__package.rb:3: Enclosing package declared here
+     3 |class A < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+    a/__package.rb:5: `A` is `strict_dependencies 'dag'`, which disallows cycles
+     5 |  strict_dependencies 'dag'
+                              ^^^^^
+  Note:
+    Path from `B` to `A`:
+    `B` →
+    `A`
+
+  Note:
+    `B::MyClass`'s package is not imported
+Errors: 1
+------ package-directed -------------------------
+No errors! Great job.
+expected to fail!
