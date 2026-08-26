@@ -104,6 +104,11 @@ public:
     const core::File &getFile(core::FileRef fref) const;
 
     /**
+     * Given a File, return true if it is new, or differs from the version currently in the indexer's file table.
+     */
+    bool wouldUpdateFileTable(const core::File &file) const;
+
+    /**
      * Given a reference to the InitializedTask, transfer ownership of the global state out for initialization in the
      * typechecker thread. The task argument is unused, and is present only to make it difficult to get the global state
      * out in a context that's not the InitializedTask's index function.

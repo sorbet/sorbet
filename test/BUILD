@@ -481,6 +481,7 @@ pipeline_tests(
             "testdata/lsp/fast_path/alias_stub_module__*.rb",
             "testdata/lsp/fast_path/not_enough_files/not_enough_files__*.rb",
             "testdata/lsp/fast_path/too_many_files/too_many_files__*.rb",
+            "testdata/lsp/fast_path/too_many_files_no_op/too_many_files_no_op__*.rb",
             "testdata/lsp/ripper_parse_error_formatting.rb",
             "testdata/lsp/successful_formatting.rb",
             "testdata/lsp/syntax_error_formatting.rb",
