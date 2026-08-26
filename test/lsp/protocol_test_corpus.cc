@@ -874,6 +874,44 @@ TEST_CASE_FIXTURE(ProtocolTest, "ReportsSyntaxErrors") {
     CHECK_EQ(counters.getCategoryCounter("lsp.slow_path_reason", "changed_definition"), 0);
 }
 
+TEST_CASE_FIXTURE(ProtocolTest, "HandlesEmptyUpdates") {
+    assertErrorDiagnostics(initializeLSP(), {});
+
+    // Create a new file.
+    assertErrorDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
+                                                    "class A\n"
+                                                    "def foo; end\n"
+                                                    "end\n"
+                                                    "\n")),
+                           {});
+
+    // clear counters
+    {
+        auto counters = getCounters();
+        CHECK_EQ(counters.getCategoryCounter("lsp.updates", "fastpath"), 0);
+
+        // Initialization, and the new file makes two slow path updates
+        CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 2);
+    }
+
+    // Send the exact same file as a change, to exercise the behavior where we prune the file when indexing the
+    // workspace edit.
+    assertErrorDiagnostics(send(*changeFile("foo.rb",
+                                            "# typed: true\n"
+                                            "class A\n"
+                                            "def foo; end\n"
+                                            "end\n"
+                                            "\n",
+                                            2)),
+                           {});
+
+    {
+        auto counters = getCounters();
+        CHECK_EQ(counters.getCategoryCounter("lsp.updates", "fastpath"), 1);
+        CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 0);
+    }
+}
+
 TEST_CASE_FIXTURE(ProtocolTest, "DidChangeConfigurationNotificationUpdatesHighlightUntypedSetting") {
     assertErrorDiagnostics(initializeLSP(), {});
 
