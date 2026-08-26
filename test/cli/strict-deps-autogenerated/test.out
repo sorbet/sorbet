@@ -17,5 +17,14 @@ a/main.rb:3: `B::MyClass` cannot be referenced here because importing its packag
     `B::MyClass`'s package is not imported
 Errors: 1
 ------ package-directed -------------------------
-No errors! Great job.
-expected to fail!
+a/main.rb:3: Unable to resolve constant `B` https://srb.help/5002
+     3 |puts(B::MyClass)
+             ^
+  Did you mean `T`? Use `-a` to autocorrect
+    a/main.rb:3: Replace with `T`
+     3 |puts(B::MyClass)
+             ^
+    https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/t.rbi#LCENSORED: `T` defined here
+    NN |module T
+        ^^^^^^^^
+Errors: 1
