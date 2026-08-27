@@ -631,8 +631,6 @@ public:
             isExported = isExported || litSymbol.asFieldRef().data(ctx)->flags.isExported;
         }
         isExported = isExported || db.allowRelaxedPackagerChecksFor(this->package.mangledName());
-        bool definesBehavior =
-            !litSymbol.isClassOrModule() || litSymbol.asClassOrModuleRef().data(ctx)->flags.isBehaviorDefining;
         auto *import = this->package.importsPackage(otherPackage);
         auto wasImported = import != nullptr;
         if (this->package.usesTestPackages) {
@@ -723,6 +721,8 @@ public:
                         ENFORCE(false);
                     }
                 } else {
+                    bool definesBehavior = !litSymbol.isClassOrModule() ||
+                                           litSymbol.asClassOrModuleRef().data(ctx)->flags.isBehaviorDefining;
                     std::optional<core::AutocorrectSuggestion> exportAutocorrect;
                     auto symToExport = litSymbol;
                     auto enumClass = getEnumClassForEnumValue(ctx.state, symToExport);
