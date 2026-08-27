@@ -724,12 +724,12 @@ public:
                     bool definesBehavior = !litSymbol.isClassOrModule() ||
                                            litSymbol.asClassOrModuleRef().data(ctx)->flags.isBehaviorDefining;
                     std::optional<core::AutocorrectSuggestion> exportAutocorrect;
-                    auto symToExport = litSymbol;
-                    auto enumClass = getEnumClassForEnumValue(ctx.state, symToExport);
-                    if (enumClass.exists()) {
-                        symToExport = enumClass;
-                    }
                     if (definesBehavior) {
+                        auto symToExport = litSymbol;
+                        auto enumClass = getEnumClassForEnumValue(ctx.state, symToExport);
+                        if (enumClass.exists()) {
+                            symToExport = enumClass;
+                        }
                         // For compatibility with gen-packages, we do _not_ add an export if it doesn't define
                         // behavior. This is mostly because it's easier to get Sorbet to behave like gen-packages
                         // than the other way around.
