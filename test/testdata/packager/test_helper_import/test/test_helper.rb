@@ -11,6 +11,6 @@ module Test::RootPkg
     C::Thing # not allowed---test-only import
   # ^^^^^^^^ error: The `test_import` constant `C::Thing` can only be used in `.test.rb` files
     C::PrivateThing
-  # ^^^^^^^^^^^^^^^ error: `C::PrivateThing` resolves but is not exported from `C` and `C` is `test_import`ed for only .test.rb files
+  # ^^^^^^^^^^^^^^^ error: The `test_import` constant `C::PrivateThing` can only be used in `.test.rb` files
   end
 end
