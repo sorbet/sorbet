@@ -29,7 +29,7 @@ bad_test/a.rb:15: `include` may only be used on constants in the package that ow
     bad_test/subpackage/foo.rb:3: Symbol originally defined here
      3 |module Test::BadTest
         ^^^^^^^^^^^^^^^^^^^^
-    bad_test/__package.rb:3: Package defined here is not a `prelude!`
+    bad_test/__package.rb:3: Package defined here is not marked `prelude!`
      3 |class Test::BadTest < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Note:
@@ -41,7 +41,7 @@ bad_test/a.rb:12: `extend` may only be used on constants in the package that own
     bad_test/subpackage/foo.rb:3: Symbol originally defined here
      3 |module Test::BadTest
         ^^^^^^^^^^^^^^^^^^^^
-    bad_test/__package.rb:3: Package defined here is not a `prelude!`
+    bad_test/__package.rb:3: Package defined here is not marked `prelude!`
      3 |class Test::BadTest < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Note:

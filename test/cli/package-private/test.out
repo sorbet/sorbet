@@ -44,7 +44,7 @@ a/a.rb:23: `extend` may only be used on constants in the package that owns them 
     a/a.rb:22: Symbol originally defined here
     22 |  class ::Global
           ^^^^^^^^^^^^^^
-    a/__package.rb:3: Package defined here is not a `prelude!`
+    a/__package.rb:3: Package defined here is not marked `prelude!`
      3 |class A < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^
   Note:
@@ -164,7 +164,7 @@ a/a.rbi:3: Superclasses may only be set on constants in the package that owns th
     https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Symbol originally defined here
     NN |class Module < Object
         ^^^^^^^^^^^^^^^^^^^^^
-    a/__package.rb:3: Package defined here is not a `prelude!`
+    a/__package.rb:3: Package defined here is not marked `prelude!`
      3 |class A < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^
   Note:
