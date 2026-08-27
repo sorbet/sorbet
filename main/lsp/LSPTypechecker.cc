@@ -626,6 +626,8 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
     logger->debug("Taking slow path");
 
     core::packages::Stratum startingStratum(0);
+    unique_ptr<UnorderedSet<core::packages::MangledName>> transitiveAffectedPackages;
+
     UnorderedSet<core::FileRef> openFiles;
     ENFORCE(this->cancellationUndoState == nullptr);
     if (cancelable) {
@@ -633,6 +635,7 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
 
         auto editInfo = determineMaximumPrefix(*this->gs, this->fileToStratum, updates);
         startingStratum = editInfo.editStratum;
+        transitiveAffectedPackages = editInfo.transitiveAffectedPackages(this->gs->packageDB());
 
         auto savedGS =
             std::exchange(this->gs, pipeline::copyForSlowPath(*this->gs, this->config->opts, startingStratum));
@@ -936,9 +939,8 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
             }
 
             auto sorted = sortParsedFiles(*gs, *errorReporter, move(maybeResolved.result()));
-            auto relevantPackages = nullptr;
-            pipeline::typecheck(*gs, move(sorted), config->opts, workers, relevantPackages, cancelable, currentStratum,
-                                preemptManager);
+            pipeline::typecheck(*gs, move(sorted), config->opts, workers, transitiveAffectedPackages.get(), cancelable,
+                                currentStratum, preemptManager);
         }
 
         // [Test only] Ensure that we handled all expected preemptions
