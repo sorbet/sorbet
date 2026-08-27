@@ -709,34 +709,35 @@ public:
                         importAutocorrect.emplace(exp.value());
                     }
 
-                if (!wasImported) {
-                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
-                        e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
-                        e.addErrorLine(pkg.declLoc(), "Package defined here");
-                        addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
+                    if (!wasImported) {
+                        if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
+                            e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
+                            e.addErrorLine(pkg.declLoc(), "Package defined here");
+                            addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
+                        }
+                    } else if (testImportInProd) {
+                        ENFORCE(!isTestImport);
+                        ENFORCE(!this->package.usesTestPackages, "test_import found in --test-packages mode");
+                        if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
+                            e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", litSymbol.show(ctx));
+                            e.addErrorLine(pkg.declLoc(), "Defined here");
+                            addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
+                        }
+                    } else if (testUnitImportInHelper) {
+                        ENFORCE(!this->package.usesTestPackages, "test_import found in --test-packages mode");
+                        if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
+                            e.setHeader("The `{}` constant `{}` can only be used in `{}` files", "test_import",
+                                        litSymbol.show(ctx), ".test.rb");
+                            e.addErrorLine(pkg.declLoc(), "Defined here");
+                            e.addErrorNote(
+                                "This is because this `{}` is declared with `{}`, which means the constant can "
+                                "only be used in `{}` files.",
+                                "test_import", "only: 'test_rb'", ".test.rb");
+                            addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
+                        }
+                    } else {
+                        ENFORCE(false);
                     }
-                } else if (testImportInProd) {
-                    ENFORCE(!isTestImport);
-                    ENFORCE(!this->package.usesTestPackages, "test_import found in --test-packages mode");
-                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
-                        e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", litSymbol.show(ctx));
-                        e.addErrorLine(pkg.declLoc(), "Defined here");
-                        addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
-                    }
-                } else if (testUnitImportInHelper) {
-                    ENFORCE(!this->package.usesTestPackages, "test_import found in --test-packages mode");
-                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
-                        e.setHeader("The `{}` constant `{}` can only be used in `{}` files", "test_import",
-                                    litSymbol.show(ctx), ".test.rb");
-                        e.addErrorLine(pkg.declLoc(), "Defined here");
-                        e.addErrorNote("This is because this `{}` is declared with `{}`, which means the constant can "
-                                       "only be used in `{}` files.",
-                                       "test_import", "only: 'test_rb'", ".test.rb");
-                        addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
-                    }
-                } else {
-                    ENFORCE(false);
-                }
                 } else {
                     auto symToExport = litSymbol;
                     auto enumClass = getEnumClassForEnumValue(ctx.state, symToExport);
@@ -840,11 +841,11 @@ public:
                     }
                     e.setHeader("`{}` cannot be referenced here because {}", lit.symbol().show(ctx), reason);
                     if (importNeeded) {
-                    if (!wasImported) {
-                        e.addErrorNote("`{}`'s package is not imported", lit.symbol().show(ctx));
-                    } else if (testImportInProd || testUnitImportInHelper) {
-                        e.addErrorNote("`{}`'s package is imported as `{}`", lit.symbol().show(ctx), "test_import");
-                    }
+                        if (!wasImported) {
+                            e.addErrorNote("`{}`'s package is not imported", lit.symbol().show(ctx));
+                        } else if (testImportInProd || testUnitImportInHelper) {
+                            e.addErrorNote("`{}`'s package is imported as `{}`", lit.symbol().show(ctx), "test_import");
+                        }
                     } else {
                         ENFORCE(!isExported);
                         e.addErrorNote("`{}` is not exported", lit.symbol().show(ctx));
