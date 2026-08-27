@@ -1625,10 +1625,9 @@ TEST_CASE_FIXTURE(ProtocolTest, "ErrorsRemainAfterSlowPathRestart") {
             CHECK_EQ(params->startingStratum, 0);
         }
 
-        assertErrorDiagnostics(move(resps), {
-                                                {files[1].first, 4, "Expected `Integer`"},
-                                                {files[3].first, 7, "Method `+` does not exist"},
-                                            });
+        // As we will skip typechecking `Root` when only `Root::A` changed, we will only see the error that was
+        // introduced in the slow path edit to foo/a.rb.
+        assertErrorDiagnostics(move(resps), {{files[3].first, 7, "Method `+` does not exist"}});
     }
 }
 
