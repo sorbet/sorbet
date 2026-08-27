@@ -94,6 +94,15 @@ nested/nested.rb:56: File belongs to package `Root::Nested` but defines a consta
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
 
+nested/nested.rb:59: Defining a root-scoped constant requires this package to be marked `prelude!` https://srb.help/3713
+    59 |module ::TopLevel
+               ^^^^^^^^^^
+    nested/__package.rb:3: This package is missing a `prelude!` declaration
+     3 |class Root::Nested < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Root-scoped constants are exempt from package namespace checks only in `prelude!` packages
+
 nested/nested.rb:67: File belongs to package `Root::Nested` but defines a constant that does not match this namespace https://srb.help/3713
     67 |Root::X = 1
         ^^^^^^^
@@ -224,6 +233,15 @@ nested/nested.test.rb:20: Cannot initialize the module `Nested` by constant assi
     Sorbet does not allow treating constant assignments as class or module definitions,
     even if the initializer computes a `Module` object at runtime. See the docs for more.
 
+nested/nested.test.rb:3: Defining a root-scoped constant requires this package to be marked `prelude!` https://srb.help/3713
+     3 |class ::UnitTest; end
+              ^^^^^^^^^^
+    nested/__package.rb:3: This package is missing a `prelude!` declaration
+     3 |class Root::Nested < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Root-scoped constants are exempt from package namespace checks only in `prelude!` packages
+
 nested/nested.test.rb:7: Tests in the `Root::Nested` package must define tests in the `Test::Root::Nested` namespace https://srb.help/3713
      7 |  NOT_IN_MODULE = nil
           ^^^^^^^^^^^^^
@@ -250,6 +268,15 @@ nested/nested.test.rb:17: Tests in the `Root::Nested` package must define tests 
     __package.rb:3: Must belong to this package, given constant name `Test::Root::X`
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
+
+nested/root_scoped_missing_test_namespace.test.rb:5: Defining a root-scoped constant requires this package to be marked `prelude!` https://srb.help/3713
+     5 |class ::Root::Nested::MissingTestNamespace
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    nested/__package.rb:3: This package is missing a `prelude!` declaration
+     3 |class Root::Nested < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Root-scoped constants are exempt from package namespace checks only in `prelude!` packages
 
 critic_prefix/real.test.rb:3: Tests in the `Critic::SomePkg` package must define tests in the `Test::Critic::SomePkg` namespace https://srb.help/3713
      3 |module Critic::SomePkg::Real
@@ -282,6 +309,16 @@ commands/foo_command.rb:4: File belongs to package `Root::Commands::Foo` but def
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
 
+extend_sig.rb:4: This file must only define behavior in enclosing package `Root` https://srb.help/3713
+     4 |  include T::Sig
+          ^^^^^^^^^^^^^^
+    extend_sig.rb:3: Defining behavior in `Module` instead:
+     3 |class ::Module
+              ^^^^^^^^
+    __package.rb:3: Enclosing package `Root` declared here
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+
 extend_sig.rb:4: `include` may only be used on constants in the package that owns them https://srb.help/5084
      4 |  include T::Sig
                   ^^^^^^
@@ -293,4 +330,4 @@ extend_sig.rb:4: `include` may only be used on constants in the package that own
         ^^^^^^^^^^^^^^^^^^^^^^^^
   Note:
     `Module` is unpackaged, and may be reopened from a package marked `prelude!`
-Errors: 29
+Errors: 33
