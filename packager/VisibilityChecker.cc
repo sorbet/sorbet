@@ -690,12 +690,8 @@ public:
                     return;
                 }
 
-                std::optional<core::AutocorrectSuggestion> importAutocorrect;
-                std::optional<core::AutocorrectSuggestion> exportAutocorrect;
                 if (importNeeded) {
-                    if (auto exp = this->package.addImport(ctx, pkg, autocorrectedImportType)) {
-                        importAutocorrect.emplace(exp.value());
-                    }
+                    auto importAutocorrect = this->package.addImport(ctx, pkg, autocorrectedImportType);
 
                     if (!wasImported) {
                         if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
@@ -727,6 +723,7 @@ public:
                         ENFORCE(false);
                     }
                 } else {
+                    std::optional<core::AutocorrectSuggestion> exportAutocorrect;
                     auto symToExport = litSymbol;
                     auto enumClass = getEnumClassForEnumValue(ctx.state, symToExport);
                     if (enumClass.exists()) {
