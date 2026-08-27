@@ -1071,9 +1071,9 @@ PackageInfo::CanModifyResult PackageInfo::canModifySymbol(core::Context ctx, Cla
         // Migrated packages (usesTestPackages) have applicationStratum == testStratum, so there is no cross-stratum
         // violation and this check is unnecessary (and unreachable in practice, since test files belong to the test
         // package and hit NotOwner above).
-        if (ctx.file.exists() && !this->usesTestPackages && ctx.file.data(gs).isPackagedTest()) {
+        if (ctx.file.exists() && !this->usesTestPackages && ctx.file.data(gs).isTestPath()) {
             for (auto &loc : symData->locs()) {
-                if (loc.exists() && !loc.file().data(gs).isPackagedTest()) {
+                if (loc.exists() && !loc.file().data(gs).isTestPath()) {
                     return CanModifyResult::TestModifyingNonTest;
                 }
             }
