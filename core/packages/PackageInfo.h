@@ -168,7 +168,7 @@ public:
         // Set to non-none loc when this package is marked `test!`
         core::LocOffsets testPackage;
 
-        // Set to non-none loc when this package is marked `prelude_package`
+        // Set to non-none loc when this package is marked `prelude!`
         core::LocOffsets preludePackage;
     } locs;
 
@@ -293,7 +293,7 @@ public:
     // looks at non-test imports.
     std::optional<std::string> pathTo(const core::GlobalState &gs, const MangledName dest) const;
 
-    // True when the package is marked with a `prelude_package` annotation. This requires that the package only import
+    // True when the package is marked with a `prelude!` annotation. This requires that the package only import
     // other prelude packages and markes it as an implicit dependency of all non-prelude packages.
     bool isPreludePackage() const {
         return this->locs.preludePackage.exists();

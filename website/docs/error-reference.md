@@ -913,16 +913,16 @@ The `sorbet` directive in `__package.rb` specifies what the minimum sigil must b
 
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) and [go/strict-dependencies](http://go/strict-dependencies) for more.
 
-If a package is marked with `prelude_package`, it is restricted to only importing other packages marked as `prelude_package`. This error indicates that a `prelude_package` is importing a non-prelude package.
+If a package is marked with `prelude!`, it is restricted to only importing other packages marked as `prelude!`. This error indicates that a prelude package is importing a non-prelude package.
 
 ```ruby
 class A < PackageSpec
 end
 
 class B < PackageSpec
-  prelude_package
+  prelude!
 
-  import A # error: Importing A, which is not marked as `prelude_package`
+  import A # error: Importing A, which is not marked as `prelude!`
 end
 ```
 
@@ -1347,7 +1347,7 @@ Each package must have only one definition. A package definition is the place wh
 
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
 
-If your package reopens constants from the stdlib or gems to add type members, your package must be marked as a `prelude_package`. This is to ensure that the constant remains in a consistent state throughout typechecking, even when checking in package dependency order. If we allowed type members to be added on stdlib/gem constants in any package, two parts of the codebase may see the constant with or without that type member present--before or after the type member declaration on the reopened constant.
+If your package reopens constants from the stdlib or gems to add type members, your package must be marked with `prelude!`. This is to ensure that the constant remains in a consistent state throughout typechecking, even when checking in package dependency order. If we allowed type members to be added on stdlib/gem constants in any package, two parts of the codebase may see the constant with or without that type member present--before or after the type member declaration on the reopened constant.
 
 ## 4029
 
@@ -2975,7 +2975,7 @@ end
 
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
 
-If your package reopens constants from the stdlib or gems to add mixins, your package must be must be marked as a `prelude_package`. This ensures that the constant remains consistent throughout type checking, even when checking in package dependency order. If we allowed mixins on stdlib/gem constants to be added in any package, two parts of the codebase may see that constant in different states--before and after the mixin was applied.
+If your package reopens constants from the stdlib or gems to add mixins, your package must be must be marked with `prelude!`. This ensures that the constant remains consistent throughout type checking, even when checking in package dependency order. If we allowed mixins on stdlib/gem constants to be added in any package, two parts of the codebase may see that constant in different states--before and after the mixin was applied.
 
 ## 5085
 

@@ -2255,9 +2255,9 @@ public:
                         e.addErrorLine(ownerPackage.declLoc(), "Owning package defined here", ctx.owner.show(ctx));
                     } else {
                         e.addErrorLine(filePackageInfo.declLoc(), "Package containing the `{}` is not a `{}`",
-                                       isTypeTemplate ? "type_template" : "type_member", "prelude_package");
+                                       isTypeTemplate ? "type_template" : "type_member", "prelude!");
                         e.addErrorNote("`{}` is unpackaged, and may be reopened from a package marked `{}`",
-                                       ctx.owner.show(ctx), "prelude_package");
+                                       ctx.owner.show(ctx), "prelude!");
                     }
                 }
                 return ignoreBadTypeMember(ctx, move(tree));

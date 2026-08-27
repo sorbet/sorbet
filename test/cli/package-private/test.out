@@ -44,11 +44,11 @@ a/a.rb:23: `extend` may only be used on constants in the package that owns them 
     a/a.rb:22: Symbol originally defined here
     22 |  class ::Global
           ^^^^^^^^^^^^^^
-    a/__package.rb:3: Package defined here is not a `prelude_package`
+    a/__package.rb:3: Package defined here is not marked `prelude!`
      3 |class A < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^
   Note:
-    `T.class_of(Global)` is unpackaged, and may be reopened from a package marked `prelude_package`
+    `T.class_of(Global)` is unpackaged, and may be reopened from a package marked `prelude!`
 
 a/a.rb:24: Method `sig` does not exist on `T.class_of(Global)` https://srb.help/7003
     24 |    sig { void }
@@ -164,11 +164,11 @@ a/a.rbi:3: Superclasses may only be set on constants in the package that owns th
     https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Symbol originally defined here
     NN |class Module < Object
         ^^^^^^^^^^^^^^^^^^^^^
-    a/__package.rb:3: Package defined here is not a `prelude_package`
+    a/__package.rb:3: Package defined here is not marked `prelude!`
      3 |class A < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^
   Note:
-    `Module` is unpackaged, and may be reopened from a package marked `prelude_package`
+    `Module` is unpackaged, and may be reopened from a package marked `prelude!`
 
 b/b.rb:8: Method `foo` on `T.class_of(A)` is package-private and cannot be called from package `B` https://srb.help/7036
      8 |    A.foo

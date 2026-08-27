@@ -2,7 +2,7 @@
 # typed: strict
 
 class Prelude::Second < PackageSpec
-  prelude_package
+  prelude!
 
   layer 'a'
   strict_dependencies 'layered'

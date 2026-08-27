@@ -505,7 +505,6 @@ NameDef names[] = {
     {"PackageSpecRegistry", "<PackageSpecRegistry>", true},
     {"only"},
     {"testRb", "test_rb"},
-    {"preludePackage", "prelude_package"},
     {"prelude_bang", "prelude!"},
     {"test_bang", "test!"},
     {"usesInternals", "uses_internals"},

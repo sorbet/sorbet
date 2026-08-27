@@ -1,7 +1,7 @@
 # typed: strict
 
 class Prelude < PackageSpec
-  prelude_package
+  prelude!
 
   layer 'app'
   strict_dependencies 'dag'
