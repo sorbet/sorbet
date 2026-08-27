@@ -188,10 +188,14 @@ class EnforcePackagePrefix final {
 
     // Meant to track when we're inside something like `class ::A; class B; end; end` instead of
     // `class A; class B; end; end`. Classes that start from an absolutely qualified "cbase" with a
-    // leading `::` are opted out of the EnforcePackagePrefix checks in prelude packages.
+    // leading `::` are opted out of the EnforcePackagePrefix checks.
     //
     // TODO(jez) Document this in the public docs for the packager
     //   (at least in the error reference, but also in any eventual docs on the package system).
+    //
+    //   It's not clear what the long term behavior for this should be. I think that we're going to
+    //   have to invent a concept of "prelude packages" and have all root-scoped stuff like this
+    //   live in those prelude packages.
     //
     //   (The motivation is: if 100% of code in a repo is packaged, where do monkey patches live,
     //   because the stdlib and gems are unpackaged?)
@@ -228,30 +232,33 @@ public:
 
         pushScope(constantLit);
 
-        if (rootConsts > 0 && pkg.isPreludePackage()) {
+        if (rootConsts > 0) {
             // This is a root-scoped constant, like `class ::A; end`.
             // These are exempted from package prefix checking.
             return;
         }
 
-        auto isOnPackagePath = onPackagePath(ctx);
-        auto hasNamespaceMismatch = !isOnPackagePath || (mustUseTestNamespace && !inTestNamespace(ctx));
-
-        if (hasNamespaceMismatch) {
-            ENFORCE(errorDepth == 0);
-            errorDepth++;
-            if (auto e = ctx.beginError(constantLit->loc(), core::errors::Packager::DefinitionPackageMismatch)) {
-                if (rootConsts > 0) {
-                    ENFORCE(!pkg.isPreludePackage(), "Prelude root scopes should have been exempted above");
-                    rootScopedConstantInNonPreludePackage(ctx, e);
-                } else {
-                    definitionPackageMismatch(ctx, e, isOnPackagePath);
-                }
-            }
-        } else if (hasParentClass(classDef)) {
+        if (hasParentClass(classDef)) {
             // A class definition that includes a parent `class Foo::Bar < Baz`
             // must be made in that package
             checkBehaviorLoc(ctx, classDef.declLoc);
+            return;
+        }
+
+        auto isOnPackagePath = onPackagePath(ctx);
+
+        if (!isOnPackagePath) {
+            ENFORCE(errorDepth == 0);
+            errorDepth++;
+            if (auto e = ctx.beginError(constantLit->loc(), core::errors::Packager::DefinitionPackageMismatch)) {
+                definitionPackageMismatch(ctx, e, isOnPackagePath);
+            }
+        } else if (mustUseTestNamespace && !inTestNamespace(ctx)) {
+            ENFORCE(errorDepth == 0);
+            errorDepth++;
+            if (auto e = ctx.beginError(constantLit->loc(), core::errors::Packager::DefinitionPackageMismatch)) {
+                definitionPackageMismatch(ctx, e, isOnPackagePath);
+            }
         }
     }
 
@@ -286,7 +293,7 @@ public:
         }
         auto lhs = ast::cast_tree<ast::ConstantLit>(asgn.lhs);
 
-        if (lhs == nullptr || (rootConsts > 0 && pkg.isPreludePackage())) {
+        if (lhs == nullptr || rootConsts > 0) {
             return;
         }
 
@@ -297,19 +304,19 @@ public:
 
         pushScope(lhs);
 
-        if (rootConsts == 0 || !pkg.isPreludePackage()) {
+        if (rootConsts == 0) {
             auto isOnPackagePath = packageForNamespace(ctx) == pkg.mangledName();
-            auto hasNamespaceMismatch = !isOnPackagePath || (mustUseTestNamespace && !inTestNamespace(ctx));
-            if (hasNamespaceMismatch) {
+            if (!isOnPackagePath) {
                 ENFORCE(errorDepth == 0);
                 errorDepth++;
                 if (auto e = ctx.beginError(lhs->loc(), core::errors::Packager::DefinitionPackageMismatch)) {
-                    if (rootConsts > 0) {
-                        ENFORCE(!pkg.isPreludePackage(), "Prelude root scopes should have been exempted above");
-                        rootScopedConstantInNonPreludePackage(ctx, e);
-                    } else {
-                        definitionPackageMismatch(ctx, e, isOnPackagePath);
-                    }
+                    definitionPackageMismatch(ctx, e, isOnPackagePath);
+                }
+            } else if (mustUseTestNamespace && !inTestNamespace(ctx)) {
+                ENFORCE(errorDepth == 0);
+                errorDepth++;
+                if (auto e = ctx.beginError(lhs->loc(), core::errors::Packager::DefinitionPackageMismatch)) {
+                    definitionPackageMismatch(ctx, e, isOnPackagePath);
                 }
             }
         }
@@ -353,7 +360,7 @@ public:
 
     void checkBehaviorLoc(core::Context ctx, core::LocOffsets loc) {
         ENFORCE(errorDepth == 0);
-        if ((rootConsts > 0 && pkg.isPreludePackage()) || scope.empty()) {
+        if (rootConsts > 0 || scope.empty()) {
             // Doing `class ::A; end` to monkey patch something lets you define behavior (monkey patch)
             // You can also do arbitrary behavior at the top-level outside of any definitions.
             // (Stripe's codebase enforces that the )
@@ -454,13 +461,6 @@ private:
     bool hasParentClass(const ast::ClassDef &def) const {
         return def.kind == ast::ClassDef::Kind::Class && !def.ancestors.empty() &&
                ast::isa_tree<ast::UnresolvedConstantLit>(def.ancestors[0]);
-    }
-
-    void rootScopedConstantInNonPreludePackage(const core::GlobalState &gs, core::ErrorBuilder &e) const {
-        e.setHeader("Defining a root-scoped constant requires this package to be marked `{}`", "prelude!");
-        e.addErrorLine(pkg.declLoc(), "This package is missing a `{}` declaration", "prelude!");
-        e.addErrorNote("Root-scoped constants are exempt from package namespace checks only in `{}` packages",
-                       "prelude!");
     }
 
     void definitionPackageMismatch(const core::GlobalState &gs, core::ErrorBuilder &e, bool isOnPackagePath) const {

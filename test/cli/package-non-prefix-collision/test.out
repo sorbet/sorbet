@@ -5,17 +5,23 @@ other/regexp_parser.rbi:3: File belongs to package `Other` but defines a constan
      3 |class Other < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-other/regexp_parser.rbi:6: File belongs to package `Other` but defines a constant that does not match this namespace https://srb.help/3713
+other/regexp_parser.rbi:6: This file must only define behavior in enclosing package `Other` https://srb.help/3713
+     6 |class Regexp::Parser::Error < StandardError
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    other/regexp_parser.rbi:6: Defining behavior in `Regexp::Parser::Error` instead:
      6 |class Regexp::Parser::Error < StandardError
               ^^^^^^^^^^^^^^^^^^^^^
-    other/__package.rb:3: Enclosing package declared here
+    other/__package.rb:3: Enclosing package `Other` declared here
      3 |class Other < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-other/regexp_parser.rbi:9: File belongs to package `Other` but defines a constant that does not match this namespace https://srb.help/3713
+other/regexp_parser.rbi:9: This file must only define behavior in enclosing package `Other` https://srb.help/3713
+     9 |class Regexp::ScannerError < Regexp::Parser::Error
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    other/regexp_parser.rbi:9: Defining behavior in `Regexp::ScannerError` instead:
      9 |class Regexp::ScannerError < Regexp::Parser::Error
               ^^^^^^^^^^^^^^^^^^^^
-    other/__package.rb:3: Enclosing package declared here
+    other/__package.rb:3: Enclosing package `Other` declared here
      3 |class Other < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 3

@@ -38,15 +38,6 @@ a/a.rb:37: Method `Global.bar` is not in a package and so cannot be made `packag
     34 |    def self.bar; end
             ^^^^^^^^^^^^
 
-a/a.rb:22: Defining a root-scoped constant requires this package to be marked `prelude!` https://srb.help/3713
-    22 |  class ::Global
-                ^^^^^^^^
-    a/__package.rb:3: This package is missing a `prelude!` declaration
-     3 |class A < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^
-  Note:
-    Root-scoped constants are exempt from package namespace checks only in `prelude!` packages
-
 a/a.rb:23: `extend` may only be used on constants in the package that owns them https://srb.help/5084
     23 |    extend T::Sig
                    ^^^^^^
@@ -167,16 +158,6 @@ a/a.rb:33: Method `void` does not exist on `T.class_of(Global)` https://srb.help
       NN |  def load(filename, arg0=T.unsafe(nil)); end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-a/a.rbi:3: This file must only define behavior in enclosing package `A` https://srb.help/3713
-     3 |class ::Module < Object
-        ^^^^^^^^^^^^^^^^^^^^^^^
-    a/a.rbi:3: Defining behavior in `Module` instead:
-     3 |class ::Module < Object
-              ^^^^^^^^
-    a/__package.rb:3: Enclosing package `A` declared here
-     3 |class A < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^
-
 a/a.rbi:3: Superclasses may only be set on constants in the package that owns them https://srb.help/5084
      3 |class ::Module < Object
                          ^^^^^^
@@ -216,4 +197,4 @@ b/b.rb:19: Method `foo` on `A` is package-private and cannot be called from pack
     a/a.rb:12: Defined in `A` here
     12 |  package_private def foo
                           ^^^^^^^
-Errors: 20
+Errors: 18
