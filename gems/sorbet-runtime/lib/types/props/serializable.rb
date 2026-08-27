@@ -78,16 +78,22 @@ module T::Props::Serializable
 
     if hash.size > hash_keys_matching_props
       serialized_forms = self.class.decorator.prop_by_serialized_forms
-      extra = hash.reject { |k, _| serialized_forms.key?(k) }
+      # `any?` is specialized for Hash and therefore faster than the
+      # generic `Enumerator#all?`.  We expect the common case to not require
+      # the construction of `extra` below.
+      has_extra_keys = hash.any? { |k, _| !serialized_forms.key?(k) }
+
+      return unless has_extra_keys
 
       # `extra` could still be empty here if the input matches a `dont_store` prop;
       # historically, we just ignore those
-      if !extra.empty?
-        if strict
-          raise "Unknown properties for #{self.class.name}: #{extra.keys.inspect}"
-        else
-          @_extra_props = extra
-        end
+      extra = hash.reject { |k, _| serialized_forms.key?(k) }
+      return if extra.empty?
+
+      if strict
+        raise "Unknown properties for #{self.class.name}: #{extra.keys.inspect}"
+      else
+        @_extra_props = extra
       end
     end
   end
