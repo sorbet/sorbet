@@ -524,24 +524,12 @@ class VisibilityCheckerPass final {
         }
     }
 
-    void addImportExportAutocorrect(core::Context ctx, core::ErrorBuilder &e,
-                                    optional<core::AutocorrectSuggestion> &&importAutocorrect,
-                                    optional<core::AutocorrectSuggestion> &&exportAutocorrect) {
+    void addAutocorrect(core::Context ctx, core::ErrorBuilder &e, optional<core::AutocorrectSuggestion> &&autocorrect) {
         auto &db = ctx.state.packageDB();
-        auto hasAutocorrect = importAutocorrect.has_value() || exportAutocorrect.has_value();
+        auto hasAutocorrect = autocorrect.has_value();
 
-        if (importAutocorrect.has_value() && exportAutocorrect.has_value()) {
-            auto combinedTitle = fmt::format("{} and {}", importAutocorrect->title, exportAutocorrect->title);
-            importAutocorrect->edits.insert(importAutocorrect->edits.end(),
-                                            make_move_iterator(exportAutocorrect->edits.begin()),
-                                            make_move_iterator(exportAutocorrect->edits.end()));
-            e.addAutocorrect(core::AutocorrectSuggestion{combinedTitle, move(importAutocorrect->edits),
-                                                         false /* isDidYouMean */, false /* hideEdit */,
-                                                         /* shouldSkipWhenAggregated */ true});
-        } else if (importAutocorrect.has_value()) {
-            e.addAutocorrect(std::move(importAutocorrect.value()));
-        } else if (exportAutocorrect.has_value()) {
-            e.addAutocorrect(std::move(exportAutocorrect.value()));
+        if (autocorrect.has_value()) {
+            e.addAutocorrect(std::move(autocorrect.value()));
         }
 
         if (hasAutocorrect && !db.errorHint().empty()) {
@@ -713,7 +701,7 @@ public:
                         if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
                             e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
                             e.addErrorLine(pkg.declLoc(), "Package defined here");
-                            addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
+                            addAutocorrect(ctx, e, move(importAutocorrect));
                         }
                     } else if (testImportInProd) {
                         ENFORCE(!isTestImport);
@@ -721,7 +709,7 @@ public:
                         if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
                             e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", litSymbol.show(ctx));
                             e.addErrorLine(pkg.declLoc(), "Defined here");
-                            addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
+                            addAutocorrect(ctx, e, move(importAutocorrect));
                         }
                     } else if (testUnitImportInHelper) {
                         ENFORCE(!this->package.usesTestPackages, "test_import found in --test-packages mode");
@@ -733,7 +721,7 @@ public:
                                 "This is because this `{}` is declared with `{}`, which means the constant can "
                                 "only be used in `{}` files.",
                                 "test_import", "only: 'test_rb'", ".test.rb");
-                            addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
+                            addAutocorrect(ctx, e, move(importAutocorrect));
                         }
                     } else {
                         ENFORCE(false);
@@ -759,7 +747,7 @@ public:
                         e.setHeader("`{}` resolves but is not exported from `{}`", litSymbol.show(ctx), pkg.show(ctx));
                         addExportInfo(ctx, e, litSymbol, definesBehavior);
 
-                        addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
+                        addAutocorrect(ctx, e, move(exportAutocorrect));
                     }
                 }
             }
