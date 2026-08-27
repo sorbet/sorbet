@@ -81,15 +81,17 @@ module T::Props::Serializable
       # `any?` is specialized for Hash and therefore faster than the
       # generic `Enumerator#all?`.  We expect the common case to not require
       # the construction of `extra` below.
+      #
+      # It's possible to get to this line and still have `has_extra_keys` be
+      # false if we have a `:dont_store` prop in the class definition and that
+      # prop appears in the input we were asked to deserialize.  We will pass
+      # over that prop during deserialization, and so `hash_keys_matching_props`
+      # will be less than the hash's size.  Historically, we have ignored this
+      # case.
       has_extra_keys = hash.any? { |k, _| !serialized_forms.key?(k) }
-
       return unless has_extra_keys
 
-      # `extra` could still be empty here if the input matches a `dont_store` prop;
-      # historically, we just ignore those
       extra = hash.reject { |k, _| serialized_forms.key?(k) }
-      return if extra.empty?
-
       if strict
         raise "Unknown properties for #{self.class.name}: #{extra.keys.inspect}"
       else
