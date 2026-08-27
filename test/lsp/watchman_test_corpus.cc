@@ -197,8 +197,8 @@ TEST_CASE_FIXTURE(ProtocolTest, "ZeroingOutPackageFiles") {
     requests.push_back(watchmanFileUpdate({"c/__package.rb", "c/impl.rb"}));
     assertErrorDiagnostics(send(move(requests)), {
                                                      {"b/__package.rb", 4, "Unable to resolve constant"},
-                                                     {"b/impl.rb", 5, "resolves but is not exported"},
-                                                     {"b/impl.rb", 7, "resolves but is not exported"},
+                                                     {"b/impl.rb", 5, "resolves but its package is not imported"},
+                                                     {"b/impl.rb", 7, "resolves but its package is not imported"},
                                                      {"c/__package.rb", 0, "must contain a package definition"},
                                                  });
 }
