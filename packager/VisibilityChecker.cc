@@ -524,7 +524,7 @@ class VisibilityCheckerPass final {
         }
     }
 
-    void addAutocorrect(core::Context ctx, core::ErrorBuilder &e, optional<core::AutocorrectSuggestion> &&autocorrect) {
+    static void addAutocorrect(core::Context ctx, core::ErrorBuilder &e, optional<core::AutocorrectSuggestion> &&autocorrect) {
         auto &db = ctx.state.packageDB();
         auto hasAutocorrect = autocorrect.has_value();
 
@@ -569,14 +569,16 @@ public:
         }
     }
 
-    static void reportImportError(core::Context ctx, const core::packages::PackageInfo &thisPkg) {
-        bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || this->fileType != FileType::ProdFile;
+    static void reportImportError(core::Context ctx, const core::packages::PackageInfo &thisPkg, const core::packages::PackageInfo &pkg, core::LocOffsets errLoc, core::SymbolRef litSymbol, core::FileRef otherFile, FileType fileType, bool wasImported, bool testImportInProd, bool testUnitImportInHelper) {
+        auto &db = ctx.state.packageDB();
+        auto otherPackage = pkg.mangledName();
+        bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || fileType != FileType::ProdFile;
         if (thisPkg.usesTestPackages) {
             isTestImport = false;
         }
         core::packages::ImportType autocorrectedImportType = core::packages::ImportType::Normal;
         if (isTestImport) {
-            if (this->fileType == FileType::TestHelperFile) {
+            if (fileType == FileType::TestHelperFile) {
                 autocorrectedImportType = core::packages::ImportType::TestHelper;
             } else {
                 autocorrectedImportType = core::packages::ImportType::TestUnit;
@@ -613,22 +615,22 @@ public:
             auto importAutocorrect = thisPkg.addImport(ctx, pkg, autocorrectedImportType);
 
             if (!wasImported) {
-                if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
-                    e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
+                if (auto e = ctx.beginError(errLoc, core::errors::Packager::MissingImport)) {
+                    e.setHeader("`{}` resolves but its package is not imported", litSymbol.show(ctx));
                     e.addErrorLine(pkg.declLoc(), "Package defined here");
                     addAutocorrect(ctx, e, move(importAutocorrect));
                 }
             } else if (testImportInProd) {
                 ENFORCE(!isTestImport);
                 ENFORCE(!thisPkg.usesTestPackages, "test_import found in --test-packages mode");
-                if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
+                if (auto e = ctx.beginError(errLoc, core::errors::Packager::UsedTestOnlyName)) {
                     e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", litSymbol.show(ctx));
                     e.addErrorLine(pkg.declLoc(), "Defined here");
                     addAutocorrect(ctx, e, move(importAutocorrect));
                 }
             } else if (testUnitImportInHelper) {
                 ENFORCE(!thisPkg.usesTestPackages, "test_import found in --test-packages mode");
-                if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
+                if (auto e = ctx.beginError(errLoc, core::errors::Packager::UsedTestOnlyName)) {
                     e.setHeader("The `{}` constant `{}` can only be used in `{}` files", "test_import",
                                 litSymbol.show(ctx), ".test.rb");
                     e.addErrorLine(pkg.declLoc(), "Defined here");
@@ -647,7 +649,7 @@ public:
                          : layeringViolation ? core::errors::Packager::LayeringViolation
                          : badTestReference  ? core::errors::Packager::TestImportMismatch
                                              : core::errors::Packager::StrictDependenciesViolation;
-            if (auto e = ctx.beginError(lit.loc(), error)) {
+            if (auto e = ctx.beginError(errLoc, error)) {
                 vector<string> reasons;
                 e.addErrorLine(thisPkg.declLoc(), "Enclosing package declared here");
 
@@ -725,11 +727,11 @@ public:
                 } else {
                     ENFORCE(false, "At most five reasons should be present");
                 }
-                e.setHeader("`{}` cannot be referenced here because {}", lit.symbol().show(ctx), reason);
+                e.setHeader("`{}` cannot be referenced here because {}", litSymbol.show(ctx), reason);
                 if (!wasImported) {
-                    e.addErrorNote("`{}`'s package is not imported", lit.symbol().show(ctx));
+                    e.addErrorNote("`{}`'s package is not imported", litSymbol.show(ctx));
                 } else if (testImportInProd || testUnitImportInHelper) {
-                    e.addErrorNote("`{}`'s package is imported as `{}`", lit.symbol().show(ctx), "test_import");
+                    e.addErrorNote("`{}`'s package is imported as `{}`", litSymbol.show(ctx), "test_import");
                 }
             }
         }
@@ -796,7 +798,8 @@ public:
         referencedPackages[otherPackage] = {.importNeeded = importNeeded, .causesModularityError = false};
 
         if (importNeeded) {
-            reportImportError(ctx, this->package);
+            reportImportError(ctx, this->package, pkg, lit.loc(), litSymbol, otherFile, this->fileType, wasImported,
+                              testImportInProd, testUnitImportInHelper);
             return;
         }
 
