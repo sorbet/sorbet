@@ -630,17 +630,6 @@ public:
             ENFORCE(import->type == core::packages::ImportType::Normal, "test_import found in --test-packages mode");
         }
 
-        bool isExported = pkg.locs.exportAll.exists();
-        if (litSymbol.isClassOrModule()) {
-            isExported = isExported || litSymbol.asClassOrModuleRef().data(ctx)->flags.isExported;
-        } else if (litSymbol.isFieldOrStaticField()) {
-            isExported = isExported || litSymbol.asFieldRef().data(ctx)->flags.isExported;
-        }
-        isExported = isExported || db.allowRelaxedPackagerChecksFor(this->package.mangledName());
-        if (this->package.usesTestPackages) {
-            isExported = isExported || (wasImported && import->usesInternals);
-        }
-
         // Is this a test import (whether test helper or not) used in a production context?
         auto testImportInProd =
             wasImported && import->type != core::packages::ImportType::Normal && this->fileType == FileType::ProdFile;
@@ -803,7 +792,21 @@ public:
                     }
                 }
             }
-        } else if (!isExported) {
+            return;
+        }
+
+        bool isExported = pkg.locs.exportAll.exists();
+        if (litSymbol.isClassOrModule()) {
+            isExported = isExported || litSymbol.asClassOrModuleRef().data(ctx)->flags.isExported;
+        } else if (litSymbol.isFieldOrStaticField()) {
+            isExported = isExported || litSymbol.asFieldRef().data(ctx)->flags.isExported;
+        }
+        isExported = isExported || db.allowRelaxedPackagerChecksFor(this->package.mangledName());
+        if (this->package.usesTestPackages) {
+            isExported = isExported || (wasImported && import->usesInternals);
+        }
+
+        if (!isExported) {
             if (db.genPackagesMode() != core::packages::GenPackagesMode::Disabled) {
                 return;
             }
