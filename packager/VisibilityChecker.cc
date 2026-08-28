@@ -570,7 +570,8 @@ public:
         }
     }
 
-    static void reportImportError(core::Context ctx, const core::packages::PackageInfo &thisPkg,
+    // Returns whether the reference causes a modularity error
+    static bool reportImportError(core::Context ctx, const core::packages::PackageInfo &thisPkg,
                                   const core::packages::PackageInfo &pkg, core::LocOffsets errLoc,
                                   core::SymbolRef litSymbol, core::FileRef otherFile, FileType fileType,
                                   bool wasImported, bool testImportInProd, bool testUnitImportInHelper) {
@@ -610,10 +611,10 @@ public:
             layeringViolation || strictDependenciesTooLow || causesCycle || badTestReference || causesVisibilityError;
         // visible_to errors are handled separately (by `updateVisibilityFor`),
         // so they're not included in this causesModularityError field of referencedPackages
-        referencedPackages[otherPackage].causesModularityError = hasModularityError && !causesVisibilityError;
+        bool causesModularityError = hasModularityError && !causesVisibilityError;
         if (!hasModularityError) {
             if (db.genPackagesMode() != core::packages::GenPackagesMode::Disabled) {
-                return;
+                return causesModularityError;
             }
 
             auto importAutocorrect = thisPkg.addImport(ctx, pkg, autocorrectedImportType);
@@ -712,7 +713,7 @@ public:
                     ctx.state.packageDB().updateVisibilityFor(otherPackage)) {
                     // Force the error to build here, so that we don't report an error
                     e.build();
-                    return;
+                    return causesModularityError;
                 }
 
                 ENFORCE(!reasons.empty(), "At least one reason should be present");
@@ -739,6 +740,7 @@ public:
                 }
             }
         }
+        return causesModularityError;
     }
 
     void postTransformConstantLit(core::Context ctx, const ast::ConstantLit &lit) {
@@ -802,8 +804,9 @@ public:
         referencedPackages[otherPackage] = {.importNeeded = importNeeded, .causesModularityError = false};
 
         if (importNeeded) {
-            reportImportError(ctx, this->package, pkg, lit.loc(), litSymbol, otherFile, this->fileType, wasImported,
-                              testImportInProd, testUnitImportInHelper);
+            referencedPackages[otherPackage].causesModularityError =
+                reportImportError(ctx, this->package, pkg, lit.loc(), litSymbol, otherFile, this->fileType, wasImported,
+                                  testImportInProd, testUnitImportInHelper);
             return;
         }
 
