@@ -131,11 +131,16 @@ C/app.rb:8: `F::CONSTANT_FROM_F` cannot be referenced here because its `strict_d
   Note:
     `F::CONSTANT_FROM_F`'s package is not imported
 
-C/app.rb:9: Package `G` includes explicit visibility modifiers and cannot be imported from `C` https://srb.help/3723
+C/app.rb:9: `G::CONSTANT_FROM_G` cannot be referenced here because package `G` includes explicit visibility modifiers and cannot be imported from `C` https://srb.help/3727
      9 |      puts G::CONSTANT_FROM_G
                    ^^^^^^^^^^^^^^^^^^
+    C/__package.rb:3: Enclosing package declared here
+     3 |class C < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
   Note:
     Please consult with the owning team before adding a `visible_to` line to the package `G`
+  Note:
+    `G::CONSTANT_FROM_G`'s package is not imported
 Errors: 12
 
 ###### cat B/__package.rb ######
@@ -352,11 +357,16 @@ C/app.rb:8: `F::CONSTANT_FROM_F` cannot be referenced here because its `strict_d
   Note:
     `F::CONSTANT_FROM_F`'s package is not imported
 
-C/app.rb:9: Package `G` includes explicit visibility modifiers and cannot be imported from `C` https://srb.help/3723
+C/app.rb:9: `G::CONSTANT_FROM_G` cannot be referenced here because package `G` includes explicit visibility modifiers and cannot be imported from `C` https://srb.help/3727
      9 |      puts G::CONSTANT_FROM_G
                    ^^^^^^^^^^^^^^^^^^
+    C/__package.rb:3: Enclosing package declared here
+     3 |class C < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
   Note:
     Please consult with the owning team before adding a `visible_to` line to the package `G`
+  Note:
+    `G::CONSTANT_FROM_G`'s package is not imported
 Errors: 11
 
 ###### cat B/__package.rb ######

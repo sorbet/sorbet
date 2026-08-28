@@ -529,11 +529,16 @@ end
 
 --------------------------------------------------------------------------
 
-use_visible_to_package/foo.rb:6: Package `Foo::Bar::OtherPackage` includes explicit visibility modifiers and cannot be imported from `Foo::MyPackage` https://srb.help/3723
+use_visible_to_package/foo.rb:6: `Foo::Bar::OtherPackage::OtherClass` cannot be referenced here because package `Foo::Bar::OtherPackage` includes explicit visibility modifiers and cannot be imported from `Foo::MyPackage` https://srb.help/3727
      6 |      Foo::Bar::OtherPackage::OtherClass
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_visible_to_package/__package.rb:5: Enclosing package declared here
+     5 |class Foo::MyPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Note:
     Please consult with the owning team before adding a `visible_to` line to the package `Foo::Bar::OtherPackage`
+  Note:
+    `Foo::Bar::OtherPackage::OtherClass`'s package is imported as `test_import`
 Errors: 1
 # frozen_string_literal: true
 # typed: strict
