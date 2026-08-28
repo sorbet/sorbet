@@ -569,67 +569,7 @@ public:
         }
     }
 
-    void postTransformConstantLit(core::Context ctx, const ast::ConstantLit &lit) {
-        if (constantAssignmentDefinitions.contains(&lit)) {
-            return;
-        }
-
-        auto litSymbol = lit.symbol();
-        if (!litSymbol.isClassOrModule() && !litSymbol.isFieldOrStaticField()) {
-            return;
-        }
-
-        // NOTE: this only tracks the information required for computing what symbols needed to be exported, and not for
-        // find all references. For example, if the current symbol is A::B::C::D, then only A::B::C::D will be added to
-        // symbolsReferenced, and not A, A::B, A::B::C.
-        // TODO(neil): we should also track A, A::B, A::B::C, so that we can use this for find all references too.
-        referencedSymbols.insert(litSymbol);
-
-        auto loc = litSymbol.loc(ctx);
-
-        auto otherFile = loc.file();
-        if (!otherFile.exists()) {
-            return;
-        }
-
-        auto &db = ctx.state.packageDB();
-
-        // no need to check visibility for these cases
-        auto otherPackage = litSymbol.enclosingClass(ctx).data(ctx)->package;
-        if (!otherPackage.exists() || this->package.mangledName() == otherPackage) {
-            return;
-        }
-
-        auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-
-        // If the imported symbol comes from the test namespace, we must also be in the test namespace.
-        // TODO(trevor): this check is redundant with import checking after the test-packages migration is complete.
-        if (!pkg.usesTestPackages &&
-            (otherFile.data(ctx).isPackagedTestHelper() || otherFile.data(ctx).isPackagedTest()) &&
-            !this->isAnyTestFile()) {
-            if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
-                e.setHeader("`{}` is defined in a test namespace and cannot be referenced in a non-test file",
-                            litSymbol.show(ctx));
-            }
-            return;
-        }
-
-        auto *import = this->package.importsPackage(otherPackage);
-        auto wasImported = import != nullptr;
-        if (wasImported && this->package.usesTestPackages) {
-            ENFORCE(import->type == core::packages::ImportType::Normal, "test_import found in --test-packages mode");
-        }
-
-        // Is this a test import (whether test helper or not) used in a production context?
-        auto testImportInProd =
-            wasImported && import->type != core::packages::ImportType::Normal && this->fileType == FileType::ProdFile;
-        // Is this a test import not intended for use in helpers?
-        auto testUnitImportInHelper = wasImported && import->type == core::packages::ImportType::TestUnit &&
-                                      this->fileType != FileType::TestUnitFile;
-        bool importNeeded = !wasImported || testImportInProd || testUnitImportInHelper;
-        referencedPackages[otherPackage] = {.importNeeded = importNeeded, .causesModularityError = false};
-
-        if (importNeeded) {
+    static void reportImportError(core::Context ctx) {
             bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || this->fileType != FileType::ProdFile;
             if (this->package.usesTestPackages) {
                 isTestImport = false;
@@ -801,6 +741,70 @@ public:
                     }
                 }
             }
+    }
+
+    void postTransformConstantLit(core::Context ctx, const ast::ConstantLit &lit) {
+        if (constantAssignmentDefinitions.contains(&lit)) {
+            return;
+        }
+
+        auto litSymbol = lit.symbol();
+        if (!litSymbol.isClassOrModule() && !litSymbol.isFieldOrStaticField()) {
+            return;
+        }
+
+        // NOTE: this only tracks the information required for computing what symbols needed to be exported, and not for
+        // find all references. For example, if the current symbol is A::B::C::D, then only A::B::C::D will be added to
+        // symbolsReferenced, and not A, A::B, A::B::C.
+        // TODO(neil): we should also track A, A::B, A::B::C, so that we can use this for find all references too.
+        referencedSymbols.insert(litSymbol);
+
+        auto loc = litSymbol.loc(ctx);
+
+        auto otherFile = loc.file();
+        if (!otherFile.exists()) {
+            return;
+        }
+
+        auto &db = ctx.state.packageDB();
+
+        // no need to check visibility for these cases
+        auto otherPackage = litSymbol.enclosingClass(ctx).data(ctx)->package;
+        if (!otherPackage.exists() || this->package.mangledName() == otherPackage) {
+            return;
+        }
+
+        auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
+
+        // If the imported symbol comes from the test namespace, we must also be in the test namespace.
+        // TODO(trevor): this check is redundant with import checking after the test-packages migration is complete.
+        if (!pkg.usesTestPackages &&
+            (otherFile.data(ctx).isPackagedTestHelper() || otherFile.data(ctx).isPackagedTest()) &&
+            !this->isAnyTestFile()) {
+            if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
+                e.setHeader("`{}` is defined in a test namespace and cannot be referenced in a non-test file",
+                            litSymbol.show(ctx));
+            }
+            return;
+        }
+
+        auto *import = this->package.importsPackage(otherPackage);
+        auto wasImported = import != nullptr;
+        if (wasImported && this->package.usesTestPackages) {
+            ENFORCE(import->type == core::packages::ImportType::Normal, "test_import found in --test-packages mode");
+        }
+
+        // Is this a test import (whether test helper or not) used in a production context?
+        auto testImportInProd =
+            wasImported && import->type != core::packages::ImportType::Normal && this->fileType == FileType::ProdFile;
+        // Is this a test import not intended for use in helpers?
+        auto testUnitImportInHelper = wasImported && import->type == core::packages::ImportType::TestUnit &&
+                                      this->fileType != FileType::TestUnitFile;
+        bool importNeeded = !wasImported || testImportInProd || testUnitImportInHelper;
+        referencedPackages[otherPackage] = {.importNeeded = importNeeded, .causesModularityError = false};
+
+        if (importNeeded) {
+            reportImportError(ctx);
             return;
         }
 
