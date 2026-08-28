@@ -569,9 +569,9 @@ public:
         }
     }
 
-    static void reportImportError(core::Context ctx) {
+    static void reportImportError(core::Context ctx, const core::packages::PackageInfo &thisPkg) {
         bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || this->fileType != FileType::ProdFile;
-        if (this->package.usesTestPackages) {
+        if (thisPkg.usesTestPackages) {
             isTestImport = false;
         }
         core::packages::ImportType autocorrectedImportType = core::packages::ImportType::Normal;
@@ -582,22 +582,22 @@ public:
                 autocorrectedImportType = core::packages::ImportType::TestUnit;
             }
         }
-        auto strictDepsLevel = this->package.strictDependenciesLevel;
+        auto strictDepsLevel = thisPkg.strictDependenciesLevel;
         auto importStrictDepsLevel = pkg.strictDependenciesLevel;
         bool layeringViolation = false;
         bool strictDependenciesTooLow = false;
         bool causesCycle = false;
-        bool causesVisibilityError = !pkg.isVisibleTo(ctx, this->package, autocorrectedImportType);
-        bool badTestReference = this->package.usesTestPackages && pkg.testPackage() && !this->package.testPackage();
+        bool causesVisibilityError = !pkg.isVisibleTo(ctx, thisPkg, autocorrectedImportType);
+        bool badTestReference = thisPkg.usesTestPackages && pkg.testPackage() && !thisPkg.testPackage();
         optional<string> path;
         if (!isTestImport && db.enforceLayering()) {
             layeringViolation = strictDepsLevel > core::packages::StrictDependenciesLevel::False &&
-                                this->package.causesLayeringViolation(db, pkg);
+                                thisPkg.causesLayeringViolation(db, pkg);
             strictDependenciesTooLow = importStrictDepsLevel != core::packages::StrictDependenciesLevel::None &&
-                                       importStrictDepsLevel < this->package.minimumStrictDependenciesLevel();
+                                       importStrictDepsLevel < thisPkg.minimumStrictDependenciesLevel();
             // If there's a path from the imported packaged to this package, then adding the import will close
             // the loop and cause a cycle.
-            path = pkg.pathTo(ctx, this->package.mangledName());
+            path = pkg.pathTo(ctx, thisPkg.mangledName());
             causesCycle = strictDepsLevel >= core::packages::StrictDependenciesLevel::LayeredDag && path.has_value();
         }
         bool hasModularityError =
@@ -610,7 +610,7 @@ public:
                 return;
             }
 
-            auto importAutocorrect = this->package.addImport(ctx, pkg, autocorrectedImportType);
+            auto importAutocorrect = thisPkg.addImport(ctx, pkg, autocorrectedImportType);
 
             if (!wasImported) {
                 if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
@@ -620,14 +620,14 @@ public:
                 }
             } else if (testImportInProd) {
                 ENFORCE(!isTestImport);
-                ENFORCE(!this->package.usesTestPackages, "test_import found in --test-packages mode");
+                ENFORCE(!thisPkg.usesTestPackages, "test_import found in --test-packages mode");
                 if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
                     e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", litSymbol.show(ctx));
                     e.addErrorLine(pkg.declLoc(), "Defined here");
                     addAutocorrect(ctx, e, move(importAutocorrect));
                 }
             } else if (testUnitImportInHelper) {
-                ENFORCE(!this->package.usesTestPackages, "test_import found in --test-packages mode");
+                ENFORCE(!thisPkg.usesTestPackages, "test_import found in --test-packages mode");
                 if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
                     e.setHeader("The `{}` constant `{}` can only be used in `{}` files", "test_import",
                                 litSymbol.show(ctx), ".test.rb");
@@ -649,44 +649,44 @@ public:
                                              : core::errors::Packager::StrictDependenciesViolation;
             if (auto e = ctx.beginError(lit.loc(), error)) {
                 vector<string> reasons;
-                e.addErrorLine(this->package.declLoc(), "Enclosing package declared here");
+                e.addErrorLine(thisPkg.declLoc(), "Enclosing package declared here");
 
                 // We should only report a visibility error if we're not going to add a visible_to to the package
                 // Otherwise the error is pointless since it'll go away after the new visible_to is added
                 if (causesVisibilityError && !ctx.state.packageDB().updateVisibilityFor(otherPackage)) {
                     reasons.emplace_back(core::ErrorColors::format(
                         "package `{}` includes explicit visibility modifiers and cannot be imported from `{}`",
-                        pkg.show(ctx), this->package.show(ctx)));
+                        pkg.show(ctx), thisPkg.show(ctx)));
                     e.addErrorNote("Please consult with the owning team before adding a `{}` line to the package `{}`",
                                    "visible_to", pkg.show(ctx));
                 }
                 if (badTestReference) {
                     reasons.emplace_back(core::ErrorColors::format("`{}` may not reference `{}` packages",
-                                                                   this->package.show(ctx), "test!"));
+                                                                   thisPkg.show(ctx), "test!"));
                     e.addErrorLine(pkg.declLoc(), "Referenced `{}` package defined here", "test!");
                 }
                 if (causesCycle) {
                     reasons.emplace_back(core::ErrorColors::format("importing its package would put `{}` into a cycle",
-                                                                   this->package.show(ctx)));
+                                                                   thisPkg.show(ctx)));
                     auto currentStrictDepsLevel = fmt::format(
                         "strict_dependencies '{}'", core::packages::strictDependenciesLevelToString(strictDepsLevel));
-                    e.addErrorLine(core::Loc(this->package.file, this->package.locs.strictDependenciesLevel),
-                                   "`{}` is `{}`, which disallows cycles", this->package.show(ctx),
+                    e.addErrorLine(core::Loc(thisPkg.file, thisPkg.locs.strictDependenciesLevel),
+                                   "`{}` is `{}`, which disallows cycles", thisPkg.show(ctx),
                                    currentStrictDepsLevel);
                     ENFORCE(path.has_value(),
-                            "Path from pkg to this->package should always exist if causesCycle is true");
-                    e.addErrorNote("Path from `{}` to `{}`:\n{}", pkg.show(ctx), this->package.show(ctx), path.value());
+                            "Path from pkg to thisPkg should always exist if causesCycle is true");
+                    e.addErrorNote("Path from `{}` to `{}`:\n{}", pkg.show(ctx), thisPkg.show(ctx), path.value());
                 }
 
                 if (layeringViolation) {
                     reasons.emplace_back("importing its package would cause a layering violation");
                     ENFORCE(pkg.layer.exists(), "causesLayeringViolation should return false if layer is not set");
-                    ENFORCE(this->package.layer.exists(),
+                    ENFORCE(thisPkg.layer.exists(),
                             "causesLayeringViolation should return false if layer is not set");
                     e.addErrorLine(core::Loc(pkg.file, pkg.locs.layer),
                                    "Package `{}` must be at most layer `{}` (to match package `{}`) but is "
                                    "currently layer `{}`",
-                                   pkg.show(ctx), this->package.layer.show(ctx), this->package.show(ctx),
+                                   pkg.show(ctx), thisPkg.layer.show(ctx), thisPkg.show(ctx),
                                    pkg.layer.show(ctx));
                 }
 
@@ -697,7 +697,7 @@ public:
                             "strictDependenciesTooLow should be false if strict_dependencies level is not set");
                     auto requiredStrictDepsLevel =
                         fmt::format("strict_dependencies '{}'", core::packages::strictDependenciesLevelToString(
-                                                                    this->package.minimumStrictDependenciesLevel()));
+                                                                    thisPkg.minimumStrictDependenciesLevel()));
                     auto currentStrictDepsLevel =
                         fmt::format("strict_dependencies '{}'",
                                     core::packages::strictDependenciesLevelToString(importStrictDepsLevel));
@@ -800,7 +800,7 @@ public:
         referencedPackages[otherPackage] = {.importNeeded = importNeeded, .causesModularityError = false};
 
         if (importNeeded) {
-            reportImportError(ctx);
+            reportImportError(ctx, this->package);
             return;
         }
 
