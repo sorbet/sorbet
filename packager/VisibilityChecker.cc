@@ -650,7 +650,7 @@ public:
         bool importNeeded = !wasImported || testImportInProd || testUnitImportInHelper;
         referencedPackages[otherPackage] = {.importNeeded = importNeeded, .causesModularityError = false};
 
-        if (importNeeded || !isExported) {
+        if (importNeeded) {
             bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || this->fileType != FileType::ProdFile;
             if (this->package.usesTestPackages) {
                 isTestImport = false;
@@ -688,7 +688,6 @@ public:
                     return;
                 }
 
-                if (importNeeded) {
                     auto importAutocorrect = this->package.addImport(ctx, pkg, autocorrectedImportType);
 
                     if (!wasImported) {
@@ -720,33 +719,6 @@ public:
                     } else {
                         ENFORCE(false);
                     }
-                } else {
-                    bool definesBehavior = !litSymbol.isClassOrModule() ||
-                                           litSymbol.asClassOrModuleRef().data(ctx)->flags.isBehaviorDefining;
-                    std::optional<core::AutocorrectSuggestion> exportAutocorrect;
-                    if (definesBehavior) {
-                        auto symToExport = litSymbol;
-                        auto enumClass = getEnumClassForEnumValue(ctx.state, symToExport);
-                        if (enumClass.exists()) {
-                            symToExport = enumClass;
-                        }
-                        // For compatibility with gen-packages, we do _not_ add an export if it doesn't define
-                        // behavior. This is mostly because it's easier to get Sorbet to behave like gen-packages
-                        // than the other way around.
-                        //
-                        // If we move to a world where all __package.rb edits are done via Sorbet autocorrects,
-                        // we could make this addExport call unconditional.
-                        if (auto exp = pkg.addExport(ctx, symToExport)) {
-                            exportAutocorrect.emplace(exp.value());
-                        }
-                    }
-                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedPackagePrivateName)) {
-                        e.setHeader("`{}` resolves but is not exported from `{}`", litSymbol.show(ctx), pkg.show(ctx));
-                        addExportInfo(ctx, e, litSymbol, definesBehavior);
-
-                        addAutocorrect(ctx, e, move(exportAutocorrect));
-                    }
-                }
             }
 
             // We should only report a visibility error if we're not going to add a visible_to to the package
@@ -825,18 +797,43 @@ public:
                         ENFORCE(false, "At most three reasons should be present");
                     }
                     e.setHeader("`{}` cannot be referenced here because {}", lit.symbol().show(ctx), reason);
-                    if (importNeeded) {
                         if (!wasImported) {
                             e.addErrorNote("`{}`'s package is not imported", lit.symbol().show(ctx));
                         } else if (testImportInProd || testUnitImportInHelper) {
                             e.addErrorNote("`{}`'s package is imported as `{}`", lit.symbol().show(ctx), "test_import");
-                        }
-                    } else {
-                        ENFORCE(!isExported);
-                        e.addErrorNote("`{}` is not exported", lit.symbol().show(ctx));
                     }
                 }
             }
+        } else if (!isExported) {
+                    if (db.genPackagesMode() != core::packages::GenPackagesMode::Disabled) {
+                        return;
+                    }
+
+                    bool definesBehavior = !litSymbol.isClassOrModule() ||
+                                           litSymbol.asClassOrModuleRef().data(ctx)->flags.isBehaviorDefining;
+                    std::optional<core::AutocorrectSuggestion> exportAutocorrect;
+                    if (definesBehavior) {
+                        auto symToExport = litSymbol;
+                        auto enumClass = getEnumClassForEnumValue(ctx.state, symToExport);
+                        if (enumClass.exists()) {
+                            symToExport = enumClass;
+                        }
+                        // For compatibility with gen-packages, we do _not_ add an export if it doesn't define
+                        // behavior. This is mostly because it's easier to get Sorbet to behave like gen-packages
+                        // than the other way around.
+                        //
+                        // If we move to a world where all __package.rb edits are done via Sorbet autocorrects,
+                        // we could make this addExport call unconditional.
+                        if (auto exp = pkg.addExport(ctx, symToExport)) {
+                            exportAutocorrect.emplace(exp.value());
+                        }
+                    }
+                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedPackagePrivateName)) {
+                        e.setHeader("`{}` resolves but is not exported from `{}`", litSymbol.show(ctx), pkg.show(ctx));
+                        addExportInfo(ctx, e, litSymbol, definesBehavior);
+
+                        addAutocorrect(ctx, e, move(exportAutocorrect));
+                    }
         }
     }
 
