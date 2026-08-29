@@ -172,17 +172,11 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
     {
         Timer timeit(ctx.state.tracer(), "privates2");
         auto local = 0;
-        vector<UIntSet> writesToRemove(maxBasicBlockId, UIntSet(numLocalVariables()));
         for (const auto &usages : usageCounts) {
             if (usages.first == 1) {
-                writesToRemove[usages.second].add(local);
+                target.writes[usages.second].remove(local);
             }
             local++;
-        }
-        auto blockId = 0;
-        for (const auto &blockWritesToRemove : writesToRemove) {
-            target.writes[blockId].remove(blockWritesToRemove);
-            blockId++;
         }
     }
 
