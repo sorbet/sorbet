@@ -45,10 +45,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     class <emptyTree>::<C UnsupportedError1><<C <todo sym>>> < (::<todo sym>)
-      <emptyTree>::<C T> = ::Sorbet::Private::Static.type_member()
+      <emptyTree>::<C A> = ::Sorbet::Private::Static.type_member()
     end
 
     class <emptyTree>::<C UselessSignature1><<C <todo sym>>> < (::<todo sym>)
+    end
+
+    class <emptyTree>::<C UnsupportedTypeParamName><<C <todo sym>>> < (::<todo sym>)
+      <emptyTree>::<C T> = ::Sorbet::Private::Static.type_member()
     end
   end
 
@@ -326,7 +330,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C T>.reveal_type(g16)
 
   class <emptyTree>::<C G17><<C <todo sym>>> < (::<todo sym>)
-    <emptyTree>::<C T> = ::Sorbet::Private::Static.type_member()
+    <emptyTree>::<C A> = ::Sorbet::Private::Static.type_member()
 
     <emptyTree>::<C U> = ::Sorbet::Private::Static.type_member()
   end
