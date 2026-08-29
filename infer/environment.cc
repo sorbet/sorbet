@@ -277,6 +277,24 @@ void KnowledgeRef::markDead() {
 }
 
 void KnowledgeRef::min(core::Context ctx, const KnowledgeFact &other) {
+    // `KnowledgeFact::min` intersects the type tests and leaves `isDead` alone, so two cases need no work (and, more
+    // importantly, no copy-on-write allocation): when this fact has no tests, the result is this fact; when `other`
+    // has no tests, the result has none either.
+    const auto &self = **this;
+    if (self.yesTypeTests.empty() && self.noTypeTests.empty()) {
+        return;
+    }
+    if (other.yesTypeTests.empty() && other.noTypeTests.empty()) {
+        if (!self.isDead) {
+            // The empty, not-dead fact.
+            this->knowledge = nullptr;
+            return;
+        }
+        auto &fact = this->mutate();
+        fact.yesTypeTests.clear();
+        fact.noTypeTests.clear();
+        return;
+    }
     this->mutate().min(ctx, other);
 }
 

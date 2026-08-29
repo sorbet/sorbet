@@ -21,6 +21,17 @@ class NameSubstitution final {
 public:
     NameSubstitution(const GlobalState &from, GlobalState &to);
 
+    // Creates a substitution into `to` that has not entered any names yet. Use `extend` to enter names in batches
+    // (each call picks up the names added to `from` since the previous call) and `mergeExtensions` once at the end.
+    explicit NameSubstitution(const GlobalState &to);
+
+    // Enters into `to` every name of `from` that this substitution has not seen yet, and extends the lookup table
+    // accordingly. `from` must be the same GlobalState on every call, and names are only ever appended to it.
+    void extend(const GlobalState &from, GlobalState &to);
+
+    // Gives `to`'s semantic extensions a chance to merge their state from `from`. Call once, after the last `extend`.
+    void mergeExtensions(const GlobalState &from, GlobalState &to);
+
     NameRef substitute(NameRef from) const {
         from.sanityCheckSubstitution(*this);
         switch (from.kind()) {

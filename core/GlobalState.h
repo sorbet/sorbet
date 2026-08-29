@@ -203,6 +203,7 @@ public:
 
     void reserve(size_t size) {
         this->files.reserve(size);
+        this->fileRefByPath.reserve(size);
     }
 
     size_t size() const {
@@ -434,6 +435,8 @@ public:
     FileRef enterFile(std::string_view path, std::string_view source);
     FileRef enterFile(std::shared_ptr<File> file);
     FileRef reserveFileRef(std::string path);
+    // Pre-sizes the file table for `additionalFiles` more files, to avoid repeated rehashing when entering many.
+    void reserveFileTable(size_t additionalFiles);
     std::shared_ptr<File> replaceFile(FileRef whatFile, std::shared_ptr<File> withWhat);
     FileRef findFileByPath(std::string_view path) const {
         return this->files->findFileByPath(path);

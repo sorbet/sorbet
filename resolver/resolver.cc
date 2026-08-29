@@ -4110,13 +4110,59 @@ vector<ast::ParsedFile> resolveSigs(core::GlobalState &gs, vector<ast::ParsedFil
 
     {
         Timer timeit(gs.tracer(), "resolver.resolve_sigs");
+
+        // Resolving a signature writes only to its own method symbol (flags, result type, parameter types) and to
+        // the error queue, so most files can be processed in parallel. A file has to be handled serially, in file
+        // order, if any of its signatures
+        //  - is for a generic method (`type_parameters` enters new type parameter symbols),
+        //  - is one of several signatures on a method (overloads enter new method symbols), or
+        //  - is for a method that also has a signature in another file (e.g. an RBI shadowing a source file):
+        //    the last file's signature wins, which needs a deterministic order.
+        // Keeping whole files together preserves the order of a file's errors.
+        vector<bool> seen(gs.methodsUsed());
+        vector<bool> duplicated(gs.methodsUsed());
+        auto record = [&](core::MethodRef method) {
+            if (seen[method.id()]) {
+                duplicated[method.id()] = true;
+            } else {
+                seen[method.id()] = true;
+            }
+        };
         for (auto &file : combinedFileJobs) {
             for (auto &job : file.sigs) {
-                core::MutableContext ctx(gs, job.owner, file.file);
-                ResolveSignaturesWalk::resolveSignatureJob(ctx, job);
+                record(job.mdef->symbol);
             }
             for (auto &job : file.multiSigs) {
-                core::MutableContext ctx(gs, job.owner, file.file);
+                record(job.mdef->symbol);
+            }
+        }
+
+        vector<ResolveSignaturesWalk::ResolveFileSignatures *> parallelFiles;
+        vector<ResolveSignaturesWalk::ResolveFileSignatures *> serialFiles;
+        for (auto &file : combinedFileJobs) {
+            auto serial = !file.multiSigs.empty() ||
+                          absl::c_any_of(file.sigs, [&](const ResolveSignaturesWalk::ResolveSignatureJob &job) {
+                              return duplicated[job.mdef->symbol.id()] || !job.sig.typeParams.empty();
+                          });
+            (serial ? serialFiles : parallelFiles).emplace_back(&file);
+        }
+
+        // Only the error queue and the jobs' own method symbols are written to here.
+        Parallel::iterate(workers, "resolveSigs", absl::MakeSpan(parallelFiles),
+                          [&gs](ResolveSignaturesWalk::ResolveFileSignatures *file) {
+                              for (auto &job : file->sigs) {
+                                  core::MutableContext ctx(gs, job.owner, file->file);
+                                  ResolveSignaturesWalk::resolveSignatureJob(ctx, job);
+                              }
+                          });
+
+        for (auto *file : serialFiles) {
+            for (auto &job : file->sigs) {
+                core::MutableContext ctx(gs, job.owner, file->file);
+                ResolveSignaturesWalk::resolveSignatureJob(ctx, job);
+            }
+            for (auto &job : file->multiSigs) {
+                core::MutableContext ctx(gs, job.owner, file->file);
                 ResolveSignaturesWalk::resolveMultiSignatureJob(ctx, job);
             }
         }

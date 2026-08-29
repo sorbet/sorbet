@@ -34,6 +34,9 @@ public:
     static constexpr NameRef TEST_NAMESPACE = core::Names::Constants::Test();
 
     MangledName enterPackage(std::unique_ptr<PackageInfo> pkg);
+    // Pre-sizes the package tables for `numPackages` more packages (each of which registers one path prefix per
+    // extra package files directory), to avoid repeated rehashing while entering them.
+    void reserve(size_t numPackages);
 
     // Fetch the mangled package name for a file, returning a MangledName that doesn't exist if there is no
     // associated package for the file.

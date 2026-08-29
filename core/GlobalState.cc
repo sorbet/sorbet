@@ -1698,6 +1698,12 @@ FileRef GlobalState::reserveFileRef(string path) {
     return GlobalState::enterFile(make_shared<File>(move(path), "", File::Type::NotYetRead));
 }
 
+void GlobalState::reserveFileTable(size_t additionalFiles) {
+    ENFORCE_NO_TIMER(!fileTableFrozen);
+    files->reserve(files->size() + additionalFiles);
+    symbolsReferencedByFile.reserve(symbolsReferencedByFile.size() + additionalFiles);
+}
+
 NameRef GlobalState::nextMangledName(ClassOrModuleRef owner, NameRef origName) {
     auto ownerData = owner.data(*this);
     uint32_t collisionCount = 1;

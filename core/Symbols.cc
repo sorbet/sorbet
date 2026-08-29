@@ -64,13 +64,15 @@ TypePtr ClassOrModule::selfType(const GlobalState &gs) const {
 
 // ClassOrModule::resultType is computed by unsafeComputeExternalType,
 // so that it can be computed once and cached (see below).
-TypePtr ClassOrModule::externalType() const {
+const TypePtr &ClassOrModule::externalType() const {
     ENFORCE_NO_TIMER(resultType);
     if (resultType == nullptr) {
         // Don't return nullptr in prod builds, which would cause a disruptive crash
         // Emit a metric and return untyped instead.
         prodCounterInc("symbol.externalType.nullptr");
-        return Types::untypedUntracked();
+        // Returned by reference, so it needs a home. (An inlined type: no reference counting is involved.)
+        static const TypePtr untypedUntracked = Types::untypedUntracked();
+        return untypedUntracked;
     }
     return resultType;
 }
@@ -1838,12 +1840,13 @@ bool derivesFromAny(const GlobalState &gs, ClassOrModuleRef klass, const Unorder
 // type is a plain class or applied type (`lub` treats `T.untyped` and the other kinds of types specially) and no
 // subclass derives from another. Then the result of the fold has a fixed shape that can be built directly.
 bool lubCollapsesNothing(const GlobalState &gs, absl::Span<const ClassOrModuleRef> subclasses,
-                         absl::Span<const TypePtr> externalTypes) {
+                         absl::Span<const TypePtr *const> externalTypes) {
     if (subclasses.size() < 2) {
         return false;
     }
-    for (auto &externalType : externalTypes) {
-        if (externalType.isUntyped() || !(isa_type<ClassType>(externalType) || isa_type<AppliedType>(externalType))) {
+    for (const auto *externalType : externalTypes) {
+        if (externalType->isUntyped() ||
+            !(isa_type<ClassType>(*externalType) || isa_type<AppliedType>(*externalType))) {
             return false;
         }
     }
@@ -1879,10 +1882,11 @@ TypePtr ClassOrModule::sealedSubclassesToUnion(const GlobalState &gs) const {
     }
     subclasses.emplace_back(sealedSubclassFromSingletonType(gs, currentClasses));
 
-    InlinedVector<TypePtr, 8> externalTypes;
+    // Pointers into the symbol table, to avoid touching reference counts until the union is built.
+    InlinedVector<const TypePtr *, 8> externalTypes;
     externalTypes.reserve(subclasses.size());
     for (auto subclass : subclasses) {
-        externalTypes.emplace_back(subclass.data(gs)->externalType());
+        externalTypes.emplace_back(&subclass.data(gs)->externalType());
     }
 
     // The result is defined as folding `Types::any` over the external types, newest first. Doing that literally is
@@ -1898,20 +1902,20 @@ TypePtr ClassOrModule::sealedSubclassesToUnion(const GlobalState &gs) const {
     // `OrType(secondNewest, newest)` otherwise. Each further step `any(next, acc)` with `acc` an `OrType` distributes
     // over `acc` and, finding nothing to collapse, appends `next` on the right: `OrType(acc, next)`.
     if (lubCollapsesNothing(gs, subclasses, externalTypes)) {
-        const auto &newest = externalTypes[0];
-        const auto &secondNewest = externalTypes[1];
+        const auto &newest = *externalTypes[0];
+        const auto &secondNewest = *externalTypes[1];
         auto result = isa_type<AppliedType>(newest) && !isa_type<AppliedType>(secondNewest)
                           ? OrType::make_shared(newest, secondNewest)
                           : OrType::make_shared(secondNewest, newest);
         for (size_t i = 2; i < externalTypes.size(); i++) {
-            result = OrType::make_shared(result, externalTypes[i]);
+            result = OrType::make_shared(result, *externalTypes[i]);
         }
         return result;
     }
 
     auto result = Types::bottom();
-    for (auto &externalType : externalTypes) {
-        result = Types::any(gs, externalType, result);
+    for (const auto *externalType : externalTypes) {
+        result = Types::any(gs, *externalType, result);
     }
     return result;
 }

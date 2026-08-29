@@ -639,6 +639,10 @@ int realmain(int argc, char *argv[]) {
                                                           packageIndexed));
 
             // Populate the packageDB by processing only the __package.rb files.
+            {
+                auto packagesAccess = gs->unfreezePackages();
+                gs->packageDB().reserve(inputPackageFiles.size());
+            }
             // Only need to compute hashes when running to compute a FileHash
             auto foundHashes = nullptr;
             auto canceled =

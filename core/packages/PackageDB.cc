@@ -45,6 +45,17 @@ MangledName PackageDB::enterPackage(unique_ptr<PackageInfo> pkg) {
     return nr;
 }
 
+void PackageDB::reserve(size_t numPackages) {
+    ENFORCE(!frozen);
+    ENFORCE(writerThread == this_thread::get_id(), "PackageDB writes are not thread safe");
+    auto prefixesPerPackage = 1 + extraPackageFilesDirectoryUnderscorePrefixes_.size() +
+                              extraPackageFilesDirectorySlashDeprecatedPrefixes_.size() +
+                              extraPackageFilesDirectorySlashPrefixes_.size();
+    packages_.reserve(packages_.size() + numPackages);
+    mangledNames.reserve(mangledNames.size() + numPackages);
+    packagesByPathPrefix.reserve(packagesByPathPrefix.size() + numPackages * prefixesPerPackage);
+}
+
 const MangledName PackageDB::getPackageNameForFile(FileRef file) const {
     if (this->packageForFile_.size() <= file.id()) {
         return MangledName();

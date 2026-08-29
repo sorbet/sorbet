@@ -205,6 +205,51 @@ TEST_CASE("Substitute") {
     REQUIRE_EQ("<U other>", other2.showRaw(gs2));
 }
 
+TEST_CASE("SubstituteIncrementally") {
+    GlobalState gs1(errorQueue);
+    gs1.initEmpty();
+
+    GlobalState gs2(errorQueue);
+    gs2.initEmpty();
+
+    // Names entered before the first `extend`, then more of every kind entered before the second.
+    NameRef foo1, cnstBaz1, uniqueBaz1;
+    {
+        UnfreezeNameTable thaw1(gs1);
+        foo1 = gs1.enterNameUTF8("foo");
+        cnstBaz1 = gs1.enterNameConstant("Baz");
+        uniqueBaz1 = gs1.freshNameUnique(UniqueNameKind::Namer, cnstBaz1, 1);
+    }
+
+    NameSubstitution subst(gs2);
+    subst.extend(gs1, gs2);
+
+    NameRef bar1, cnstQux1, uniqueQux1, uniqueFoo1;
+    {
+        UnfreezeNameTable thaw1(gs1);
+        bar1 = gs1.enterNameUTF8("bar");
+        cnstQux1 = gs1.enterNameConstant("Qux");
+        uniqueQux1 = gs1.freshNameUnique(UniqueNameKind::Namer, cnstQux1, 1);
+        uniqueFoo1 = gs1.freshNameUnique(UniqueNameKind::Namer, foo1, 2);
+    }
+    subst.extend(gs1, gs2);
+    subst.mergeExtensions(gs1, gs2);
+
+    // Every name from either batch substitutes to the same-looking name in `gs2`, including the ones from the second
+    // batch that refer to names from the first.
+    for (auto name1 : {foo1, cnstBaz1, uniqueBaz1, bar1, cnstQux1, uniqueQux1, uniqueFoo1}) {
+        auto name2 = subst.substitute(name1);
+        REQUIRE(name2.exists());
+        CHECK_EQ(name1.showRaw(gs1), name2.showRaw(gs2));
+    }
+
+    // The result is the same as one substitution made after the fact.
+    NameSubstitution oneShot(gs1, gs2);
+    for (auto name1 : {foo1, cnstBaz1, uniqueBaz1, bar1, cnstQux1, uniqueQux1, uniqueFoo1}) {
+        CHECK_EQ(oneShot.substitute(name1), subst.substitute(name1));
+    }
+}
+
 // Privileged class that is friends with TypePtr
 class TypePtrTestHelper {
 public:

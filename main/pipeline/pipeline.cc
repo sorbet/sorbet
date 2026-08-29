@@ -8,6 +8,7 @@
 #endif
 #include "ProgressIndicator.h"
 #include "absl/strings/match.h"
+#include "absl/synchronization/mutex.h"
 #include "ast/Helpers.h"
 #include "ast/desugar/Desugar.h"
 #include "ast/desugar/prism/Desugar.h"
@@ -147,6 +148,7 @@ vector<core::FileRef> reserveFiles(core::GlobalState &gs, const vector<string> &
     vector<core::FileRef> ret;
     ret.reserve(files.size());
     core::UnfreezeFileTable unfreezeFiles(gs);
+    gs.reserveFileTable(files.size());
     for (auto &f : files) {
         auto fileRef = gs.findFileByPath(f);
         if (!fileRef.exists()) {
@@ -585,7 +587,6 @@ ast::ExpressionPtr readFileWithStrictnessOverrides(core::GlobalState &gs, core::
 }
 
 struct IndexResult {
-    unique_ptr<core::GlobalState> gs;
     vector<ast::ParsedFile> trees;
 
     // The number of trees that were processed by the thread that produced this result. This can be greater than
@@ -600,102 +601,24 @@ struct IndexThreadResultPack {
     IndexResult res;
 };
 
-struct IndexSubstitutionJob {
-    // Not necessary for substitution, but passing this through to the worker means it's freed in that thread, instead
-    // of serially in the main thread.
-    unique_ptr<core::GlobalState> threadGs;
-
-    optional<core::NameSubstitution> subst;
-    vector<ast::ParsedFile> trees;
-
-    // Please see the comment on `IndexResult::numTreesProcessed` for a more thorough description about why this might
-    // be greater than `trees.size()`.
-    int numTreesProcessed = 0;
-
-    IndexSubstitutionJob() {}
-
-    IndexSubstitutionJob(core::GlobalState &to, IndexResult res)
-        : threadGs{std::move(res.gs)}, subst{}, trees{std::move(res.trees)}, numTreesProcessed{res.numTreesProcessed} {
-        if (absl::c_any_of(this->trees, [](auto &parsed) { return !parsed.cached(); })) {
-            this->subst.emplace(*this->threadGs, to);
-        }
-    }
-
-    IndexSubstitutionJob(IndexSubstitutionJob &&other) = default;
-    IndexSubstitutionJob &operator=(IndexSubstitutionJob &&other) = default;
-};
-
 ast::ParsedFilesOrCancelled mergeIndexResults(core::GlobalState &cgs, const options::Options &opts,
                                               shared_ptr<BlockingBoundedQueue<IndexThreadResultPack>> input,
-                                              WorkerPool &workers, const unique_ptr<const OwnedKeyValueStore> &kvstore,
-                                              bool cancelable) {
+                                              WorkerPool &workers, bool cancelable) {
     ProgressIndicator progress(opts.showProgress, "Indexing", input->bound);
 
-    auto batchq = make_shared<ConcurrentBoundedQueue<IndexSubstitutionJob>>(input->bound);
     vector<ast::ParsedFile> ret;
-    size_t totalNumTrees = 0;
+    ret.reserve(input->bound);
 
     {
-        Timer timeit(cgs.tracer(), "mergeGlobalStates");
+        Timer timeit(cgs.tracer(), "mergeIndexResults");
         IndexThreadResultPack threadResult;
         for (auto result = input->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), cgs.tracer());
              !result.done(); result = input->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), cgs.tracer())) {
             if (result.gotItem()) {
                 counterConsume(move(threadResult.counters));
-                auto numTrees = threadResult.res.numTreesProcessed;
-                batchq->push(IndexSubstitutionJob{cgs, std::move(threadResult.res)}, numTrees);
-                totalNumTrees += numTrees;
-            }
-        }
-    }
-
-    {
-        Timer timeit(cgs.tracer(), "substituteTrees");
-        auto resultq = make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(batchq->bound);
-
-        workers.multiplexJob(
-            "substituteTrees", [&cgs = as_const(cgs), &logger = cgs.tracer(), batchq, resultq, cancelable]() {
-                Timer timeit(logger, "substituteTreesWorker");
-                IndexSubstitutionJob job;
-                int numTreesProcessed = 0;
-                vector<ast::ParsedFile> trees;
-                for (auto result = batchq->try_pop(job); !result.done(); result = batchq->try_pop(job)) {
-                    if (result.gotItem()) {
-                        // Unconditionally update the total to avoid starving the consumer thread
-                        numTreesProcessed += job.numTreesProcessed;
-
-                        // If the slow path has been cancelled, skip substitution to handle the tree dropping in once
-                        // place.
-                        if (cancelable && cgs.epochManager->wasTypecheckingCanceled()) {
-                            continue;
-                        }
-
-                        if (job.subst.has_value()) {
-                            for (auto &tree : job.trees) {
-                                if (!tree.cached()) {
-                                    core::Context ctx(cgs, core::Symbols::root(), tree.file);
-                                    tree = ast::Substitute::run(ctx, *job.subst, move(tree));
-                                }
-                            }
-                        }
-
-                        trees.insert(trees.end(), std::make_move_iterator(job.trees.begin()),
-                                     std::make_move_iterator(job.trees.end()));
-                    }
-                }
-
-                if (numTreesProcessed > 0) {
-                    resultq->push(std::move(trees), numTreesProcessed);
-                }
-            });
-
-        ret.reserve(totalNumTrees);
-        vector<ast::ParsedFile> trees;
-        for (auto result = resultq->wait_pop_timed(trees, WorkerPool::BLOCK_INTERVAL(), cgs.tracer()); !result.done();
-             result = resultq->wait_pop_timed(trees, WorkerPool::BLOCK_INTERVAL(), cgs.tracer())) {
-            if (result.gotItem()) {
-                ret.insert(ret.end(), std::make_move_iterator(trees.begin()), std::make_move_iterator(trees.end()));
-                progress.reportProgress(resultq->doneEstimate());
+                ret.insert(ret.end(), std::make_move_iterator(threadResult.res.trees.begin()),
+                           std::make_move_iterator(threadResult.res.trees.end()));
+                progress.reportProgress(input->doneEstimate());
             }
         }
     }
@@ -706,6 +629,11 @@ ast::ParsedFilesOrCancelled mergeIndexResults(core::GlobalState &cgs, const opti
 
     return ret;
 }
+
+// How many files an indexing thread processes between merging its names into the shared GlobalState. Merging is
+// serialized across threads, so this trades lock traffic against the amount of un-merged work left when the last file
+// is indexed.
+constexpr size_t INDEX_MERGE_BATCH_SIZE = 512;
 
 ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::Span<const core::FileRef> files,
                                                const options::Options &opts, WorkerPool &workers,
@@ -723,49 +651,107 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
         opts.packagerLayers, opts.sorbetPackagesHint, opts.genPackagesMode, opts.allowRelaxingTestVisibility,
         opts.packageAttributedErrors);
 
-    workers.multiplexJob("indexSuppliedFiles", [emptyGs, &opts, fileq, resultq, &kvstore, cancelable]() {
-        Timer timeit(emptyGs->tracer(), "indexSuppliedFilesWorker");
+    // Every indexing thread enters names into its own GlobalState, which have to be merged into `baseGs` (and the
+    // trees rewritten to use the merged names) before the result can be used. Doing all of that once every thread has
+    // finished serializes the merge of every thread's whole name table onto the main thread, at the point where
+    // nothing else can run. Instead, each thread merges its new names every `INDEX_MERGE_BATCH_SIZE` files, under
+    // this mutex, and rewrites the trees it indexed since the previous merge itself, while the other threads keep
+    // indexing. Merging a batch is short (a few thousand names) so the mutex is rarely contended, and what's left
+    // to do serially after the last file is indexed is one small batch per thread.
+    absl::Mutex mergeMutex;
 
-        // clone the empty global state to avoid manually re-entering everything, and copy the base filetable so that
-        // file sources are available.
-        auto localGs = emptyGs->copyForIndexThread(
-            opts.cacheSensitiveOptions.sorbetPackages, opts.extraPackageFilesDirectoryUnderscorePrefixes,
-            opts.extraPackageFilesDirectorySlashDeprecatedPrefixes, opts.extraPackageFilesDirectorySlashPrefixes,
-            opts.packageSkipRBIExportEnforcementDirs, opts.allowRelaxedPackagerChecksFor, opts.updateVisibilityFor,
-            opts.packagerLayers, opts.sorbetPackagesHint, opts.genPackagesMode, opts.allowRelaxingTestVisibility,
-            opts.packageAttributedErrors);
-        auto &epochManager = *localGs->epochManager;
+    workers.multiplexJob(
+        "indexSuppliedFiles", [emptyGs, &baseGs, &opts, fileq, resultq, &kvstore, cancelable, &mergeMutex]() {
+            Timer timeit(emptyGs->tracer(), "indexSuppliedFilesWorker");
 
-        IndexThreadResultPack threadResult;
+            // clone the empty global state to avoid manually re-entering everything, and copy the base filetable so
+            // that file sources are available.
+            auto localGs = emptyGs->copyForIndexThread(
+                opts.cacheSensitiveOptions.sorbetPackages, opts.extraPackageFilesDirectoryUnderscorePrefixes,
+                opts.extraPackageFilesDirectorySlashDeprecatedPrefixes, opts.extraPackageFilesDirectorySlashPrefixes,
+                opts.packageSkipRBIExportEnforcementDirs, opts.allowRelaxedPackagerChecksFor, opts.updateVisibilityFor,
+                opts.packagerLayers, opts.sorbetPackagesHint, opts.genPackagesMode, opts.allowRelaxingTestVisibility,
+                opts.packageAttributedErrors);
+            auto &epochManager = *localGs->epochManager;
 
-        {
-            core::FileRef job;
-            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
-                if (result.gotItem()) {
-                    // Increment the count even if we're cancelled to ensure that we indicate downstream that all inputs
-                    // have been processed.
-                    threadResult.res.numTreesProcessed++;
+            IndexThreadResultPack threadResult;
+            // `baseGs` is only guaranteed to outlive this thread once the thread has taken a file: the main thread
+            // returns (and, on a cancelled slow path, the caller frees `baseGs`) as soon as every file has been
+            // reported, and a thread that starts after the queue was drained reports nothing. So nothing here may
+            // touch `baseGs` before the first file, which is why the substitution is created on first use.
+            optional<core::NameSubstitution> subst;
+            // Trees indexed since this thread last merged its names into `baseGs`.
+            vector<ast::ParsedFile> pending;
+            pending.reserve(INDEX_MERGE_BATCH_SIZE);
 
-                    // Drain the queue if the slow path gets canceled.
-                    if (cancelable && epochManager.wasTypecheckingCanceled()) {
-                        continue;
+            auto mergePending = [&]() {
+                if (absl::c_any_of(pending, [](auto &parsed) { return !parsed.cached(); })) {
+                    if (!subst.has_value()) {
+                        subst.emplace(baseGs);
                     }
-                    core::FileRef file = job;
-                    auto cachedTree = readFileWithStrictnessOverrides(*localGs, file, opts, kvstore);
-                    auto parsedFile = indexOne(opts, *localGs, file, move(cachedTree));
-                    threadResult.res.trees.emplace_back(move(parsedFile));
+                    {
+                        absl::MutexLock lock(&mergeMutex);
+                        subst->extend(*localGs, baseGs);
+                    }
+
+                    // If the slow path has been cancelled, skip substitution to handle the tree dropping in one place.
+                    if (!cancelable || !epochManager.wasTypecheckingCanceled()) {
+                        for (auto &tree : pending) {
+                            if (!tree.cached()) {
+                                core::Context ctx(baseGs, core::Symbols::root(), tree.file);
+                                tree = ast::Substitute::run(ctx, *subst, move(tree));
+                            }
+                        }
+                    }
+                }
+
+                threadResult.res.trees.insert(threadResult.res.trees.end(), std::make_move_iterator(pending.begin()),
+                                              std::make_move_iterator(pending.end()));
+                pending.clear();
+            };
+
+            {
+                core::FileRef job;
+                for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+                    if (result.gotItem()) {
+                        // Increment the count even if we're cancelled to ensure that we indicate downstream that all
+                        // inputs have been processed.
+                        threadResult.res.numTreesProcessed++;
+
+                        // Drain the queue if the slow path gets canceled.
+                        if (cancelable && epochManager.wasTypecheckingCanceled()) {
+                            continue;
+                        }
+                        core::FileRef file = job;
+                        auto cachedTree = readFileWithStrictnessOverrides(*localGs, file, opts, kvstore);
+                        auto parsedFile = indexOne(opts, *localGs, file, move(cachedTree));
+                        pending.emplace_back(move(parsedFile));
+
+                        if (pending.size() >= INDEX_MERGE_BATCH_SIZE) {
+                            mergePending();
+                        }
+                    }
                 }
             }
-        }
 
-        if (threadResult.res.numTreesProcessed > 0) {
-            threadResult.counters = getAndClearThreadCounters();
-            threadResult.res.gs = move(localGs);
-            resultq->push(move(threadResult), threadResult.res.numTreesProcessed);
-        }
-    });
+            if (threadResult.res.numTreesProcessed > 0) {
+                mergePending();
+                if (!subst.has_value()) {
+                    subst.emplace(baseGs);
+                }
+                {
+                    absl::MutexLock lock(&mergeMutex);
+                    subst->mergeExtensions(*localGs, baseGs);
+                }
 
-    return mergeIndexResults(baseGs, opts, resultq, workers, kvstore, cancelable);
+                threadResult.counters = getAndClearThreadCounters();
+                resultq->push(move(threadResult), threadResult.res.numTreesProcessed);
+            }
+
+            // `localGs` is destroyed here, on the worker thread, rather than serially on the main thread.
+        });
+
+    return mergeIndexResults(baseGs, opts, resultq, workers, cancelable);
 }
 
 } // namespace
@@ -1785,9 +1771,25 @@ void sortBySize(const core::GlobalState &gs, vector<ast::ParsedFile> &trees) {
     Timer timeit(gs.tracer(), "sortBySize");
     // If files are not already sorted, we want to start typeckecking big files first because it helps with
     // better work distribution
-    fast_sort(trees, [&](const auto &lhs, const auto &rhs) -> bool {
-        return lhs.file.data(gs).source().size() > rhs.file.data(gs).source().size();
+    //
+    // Sort (size, index) pairs rather than the trees themselves: looking up a file's size chases two pointers into
+    // the file table, which is far slower than the comparison itself once there are hundreds of thousands of files.
+    vector<pair<size_t, uint32_t>> order;
+    order.reserve(trees.size());
+    for (uint32_t i = 0; i < trees.size(); i++) {
+        order.emplace_back(trees[i].file.data(gs).source().size(), i);
+    }
+    fast_sort(order, [](const auto &lhs, const auto &rhs) -> bool {
+        // Break ties by position so that the result does not depend on the sort algorithm.
+        return lhs.first != rhs.first ? lhs.first > rhs.first : lhs.second < rhs.second;
     });
+
+    vector<ast::ParsedFile> sorted;
+    sorted.reserve(trees.size());
+    for (auto &[size, index] : order) {
+        sorted.emplace_back(move(trees[index]));
+    }
+    trees = move(sorted);
 }
 
 } // namespace sorbet::realmain::pipeline

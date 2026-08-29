@@ -5,8 +5,29 @@
 using namespace std;
 namespace sorbet::core {
 
-NameSubstitution::NameSubstitution(const GlobalState &from, GlobalState &to) : toGlobalStateId(to.globalStateId) {
+NameSubstitution::NameSubstitution(const GlobalState &from, GlobalState &to) : NameSubstitution(to) {
     Timer timeit(to.tracer(), "NameSubstitution.new", from.creation);
+    extend(from, to);
+    mergeExtensions(from, to);
+}
+
+NameSubstitution::NameSubstitution(const GlobalState &to) : toGlobalStateId(to.globalStateId) {}
+
+void NameSubstitution::mergeExtensions(const GlobalState &from, GlobalState &to) {
+    ENFORCE_NO_TIMER(to.globalStateId == toGlobalStateId);
+    for (auto &extension : to.semanticExtensions) {
+        extension->merge(from, to, *this);
+    }
+
+    SLOW_DEBUG_ONLY(to.sanityCheck());
+}
+
+void NameSubstitution::extend(const GlobalState &from, GlobalState &to) {
+    Timer timeit(to.tracer(), "NameSubstitution.extend");
+    ENFORCE_NO_TIMER(to.globalStateId == toGlobalStateId);
+    ENFORCE_NO_TIMER(utf8NameSubstitution.size() <= from.utf8Names.size());
+    ENFORCE_NO_TIMER(constantNameSubstitution.size() <= from.constantNames.size());
+    ENFORCE_NO_TIMER(uniqueNameSubstitution.size() <= from.uniqueNames.size());
 
     SLOW_DEBUG_ONLY(from.sanityCheck());
 
@@ -15,35 +36,36 @@ NameSubstitution::NameSubstitution(const GlobalState &from, GlobalState &to) : t
         utf8NameSubstitution.reserve(from.utf8Names.size());
         constantNameSubstitution.reserve(from.constantNames.size());
         uniqueNameSubstitution.reserve(from.uniqueNames.size());
-        // Hash the names first, so that we can prefetch the bucket in `to` that each lookup will probe. With millions
-        // of names `to`'s table is far larger than the caches, so this loop is otherwise bound by one cache miss per
-        // name.
+        // Hash the whole batch first, so that we can prefetch the bucket in `to` that each lookup will probe. With
+        // millions of names `to`'s table is far larger than the caches, so this loop is otherwise bound by one cache
+        // miss per name.
+        const auto utf8Begin = utf8NameSubstitution.size();
+        const auto utf8End = from.utf8Names.size();
         vector<NameHash::Hash> hashes;
-        hashes.reserve(from.utf8Names.size());
-        for (const UTF8Name &nm : from.utf8Names) {
-            hashes.emplace_back(NameHash::hashMixUTF8(nm.utf8));
+        hashes.reserve(utf8End - utf8Begin);
+        for (auto i = utf8Begin; i < utf8End; i++) {
+            hashes.emplace_back(NameHash::hashMixUTF8(from.utf8Names[i].utf8));
         }
         constexpr size_t prefetchDistance = 8;
-        for (size_t i = 0; i < from.utf8Names.size(); i++) {
-            if (i + prefetchDistance < from.utf8Names.size()) {
-                to.namesByHash.prefetch(hashes[i + prefetchDistance]);
+        for (auto i = utf8Begin; i < utf8End; i++) {
+            if (i + prefetchDistance < utf8End) {
+                to.namesByHash.prefetch(hashes[i + prefetchDistance - utf8Begin]);
             }
             ENFORCE_NO_TIMER(utf8NameSubstitution.size() == i, "UTF8 name substitution has wrong size");
-            utf8NameSubstitution.emplace_back(to.enterNameUTF8(from.utf8Names[i].utf8, hashes[i]));
+            utf8NameSubstitution.emplace_back(to.enterNameUTF8(from.utf8Names[i].utf8, hashes[i - utf8Begin]));
         }
         // UniqueNames and ConstantNames may reference each other, necessitating some special logic here to avoid
         // crashing. We process UniqueNames first because there are fewer of them, so fewer loop iterations require
         // this special check. Tested in `core_test.cc`.
-        int i = -1;
-        for (const UniqueName &nm : from.uniqueNames) {
-            i++;
+        for (auto i = uniqueNameSubstitution.size(); i < from.uniqueNames.size(); i++) {
+            const UniqueName &nm = from.uniqueNames[i];
             ENFORCE(uniqueNameSubstitution.size() == i, "Unique name substitution has wrong size");
             if (nm.original.kind() == NameKind::CONSTANT &&
                 nm.original.constantIndex() >= constantNameSubstitution.size()) {
                 // Note: Duplicate of loop body below. If you change one, change the other!
-                for (uint32_t i = constantNameSubstitution.size(); i <= nm.original.constantIndex(); i++) {
-                    auto &cnst = from.constantNames[i];
-                    ENFORCE_NO_TIMER(constantNameSubstitution.size() == i, "Constant name substitution has wrong size");
+                for (auto j = constantNameSubstitution.size(); j <= nm.original.constantIndex(); j++) {
+                    auto &cnst = from.constantNames[j];
+                    ENFORCE_NO_TIMER(constantNameSubstitution.size() == j, "Constant name substitution has wrong size");
                     // N.B.: cnst may reference a UniqueName, but since names are linearizeable we should have
                     // already substituted it by now.
                     constantNameSubstitution.emplace_back(to.enterNameConstant(substitute(cnst.original)));
@@ -52,18 +74,12 @@ NameSubstitution::NameSubstitution(const GlobalState &from, GlobalState &to) : t
 
             uniqueNameSubstitution.emplace_back(to.freshNameUnique(nm.uniqueNameKind, substitute(nm.original), nm.num));
         }
-        for (i = constantNameSubstitution.size(); i < from.constantNames.size(); i++) {
+        for (auto i = constantNameSubstitution.size(); i < from.constantNames.size(); i++) {
             ENFORCE_NO_TIMER(constantNameSubstitution.size() == i, "Constant name substitution has wrong size");
             auto &nm = from.constantNames[i];
             constantNameSubstitution.emplace_back(to.enterNameConstant(substitute(nm.original)));
         }
     }
-
-    for (auto &extension : to.semanticExtensions) {
-        extension->merge(from, to, *this);
-    }
-
-    SLOW_DEBUG_ONLY(to.sanityCheck());
 }
 
 LazyNameSubstitution::LazyNameSubstitution(const GlobalState &fromGS, GlobalState &toGS) : fromGS(fromGS), toGS(toGS) {
