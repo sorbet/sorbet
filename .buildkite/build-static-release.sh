@@ -12,7 +12,8 @@ processor_name="$(uname -m)"
 platform="${kernel_name}-${processor_name}"
 case "$platform" in
   linux-x86_64)
-    CONFIG_OPTS="--config=release-linux"
+    # release-linux plus the profile in tools/pgo/ (see tools/pgo/README.md).
+    CONFIG_OPTS="--config=pgo-linux"
     ;;
   linux-aarch64)
     CONFIG_OPTS="--config=release-${platform}"

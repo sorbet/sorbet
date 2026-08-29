@@ -152,6 +152,26 @@ build:cross-to-darwin-arm64 --platforms=@//tools/platforms:darwin_arm64
 build:cross-to-darwin-arm64 --extra_toolchains=@llvm_toolchain_15_0_7//:cc-toolchain-aarch64-darwin
 build:cross-to-darwin-arm64 --copt=-stdlib=libc++ --linkopt=-lc++
 
+##
+## Profile-guided optimization
+##
+# `--config=pgo-linux` is `release-linux` plus the profile in tools/pgo/. On the 600k-file codebase it was trained on
+# it is about 15% faster than `release-linux` and uses about 16% less CPU; a stale profile still produces a correct
+# binary, it just helps less. To regenerate the profile: build with `--config=pgo-instrument-linux`, run the binary
+# over a large, representative codebase with `LLVM_PROFILE_FILE=<dir>/sorbet-%p.profraw`, then
+# `llvm-profdata merge -output=tools/pgo/linux-x86_64.profdata <dir>/*.profraw` (llvm-profdata comes with the
+# toolchain under bazel-<workspace>/external/llvm_toolchain_15_0_7/bin/). See tools/pgo/README.md.
+build:pgo-instrument-linux --config=release-linux
+build:pgo-instrument-linux --copt=-fprofile-generate --linkopt=-fprofile-generate
+
+build:pgo-linux --config=release-linux
+build:pgo-linux --fdo_profile=//tools/pgo:linux-x86_64
+# The toolchain's fdo_optimize feature also passes GCC's -fprofile-correction, which clang only warns about.
+build:pgo-linux --copt=-Wno-ignored-optimization-argument
+# Functions that changed since the profile was taken, or that were never executed by the training run, are expected.
+build:pgo-linux --copt=-Wno-profile-instr-unprofiled --copt=-Wno-profile-instr-out-of-date
+build:pgo-linux --copt=-Wno-backend-plugin --linkopt=-Wno-backend-plugin
+
 build:release-debug-linux --config=release-linux
 build:release-debug-linux --config=release-debug-common
 
