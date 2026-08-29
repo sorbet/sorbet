@@ -18,6 +18,23 @@ TEST_CASE("Levenstein") {
     CHECK_EQ(INT_MAX, levenstein.distance("Java", "S", 1));
 }
 
+TEST_CASE("FileOps::read") {
+    const std::string path = "common_test_read.txt";
+    // A file larger than the stdio buffer was, with every byte value in it.
+    std::string contents;
+    for (int i = 0; i < 10000; i++) {
+        contents.push_back(static_cast<char>(i));
+    }
+    FileOps::write(path, contents);
+    CHECK_EQ(contents, FileOps::read(path));
+
+    FileOps::write(path, "");
+    CHECK_EQ("", FileOps::read(path));
+    FileOps::removeFile(path);
+
+    CHECK_THROWS_AS(FileOps::read("common_test_does_not_exist.txt"), FileNotFoundException);
+}
+
 TEST_CASE("FileOps::ensureDir") {
     if (FileOps::dirExists("common_test_dir")) {
         FileOps::removeDir("common_test_dir");

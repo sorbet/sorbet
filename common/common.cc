@@ -19,7 +19,9 @@
 #include <variant>
 #include <vector>
 
+#include <fcntl.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 using namespace std;
 
@@ -40,23 +42,46 @@ bool sorbet::FileOps::exists(const string &filename) {
 }
 
 string sorbet::FileOps::read(const string &filename) {
-    FILE *fp = std::fopen(filename.c_str(), "rb");
-    if (fp) {
-        fseek(fp, 0, SEEK_END);
-        auto sz = ftell(fp);
-        string contents(sz, '\0');
-        rewind(fp);
-        auto readBytes = fread(&contents[0], 1, sz, fp);
-        fclose(fp);
-        if (readBytes != contents.size()) {
-            // Error reading file?
-            auto msg = fmt::format("Error reading file: `{}`: {}", filename, errno);
-            throw sorbet::FileNotFoundException(msg);
-        }
-        return contents;
+    // Use the raw POSIX calls rather than stdio: this runs once per input file, and the stdio version
+    // (fopen/fseek/ftell/rewind/fread/fclose) costs roughly twice as many syscalls plus a stdio buffer allocation.
+    int fd = ::open(filename.c_str(), O_RDONLY | O_CLOEXEC);
+    if (fd == -1) {
+        auto msg = fmt::format("Cannot open file `{}`", filename);
+        throw sorbet::FileNotFoundException(msg);
     }
-    auto msg = fmt::format("Cannot open file `{}`", filename);
-    throw sorbet::FileNotFoundException(msg);
+
+    struct stat st;
+    if (::fstat(fd, &st) != 0) {
+        auto err = errno;
+        ::close(fd);
+        auto msg = fmt::format("Error reading file: `{}`: {}", filename, err);
+        throw sorbet::FileNotFoundException(msg);
+    }
+
+    string contents(st.st_size, '\0');
+    size_t readBytes = 0;
+    while (readBytes < contents.size()) {
+        auto n = ::read(fd, &contents[readBytes], contents.size() - readBytes);
+        if (n < 0) {
+            if (errno == EINTR) {
+                continue;
+            }
+            break;
+        }
+        if (n == 0) {
+            break;
+        }
+        readBytes += n;
+    }
+    auto err = errno;
+    ::close(fd);
+
+    if (readBytes != contents.size()) {
+        // Error reading file?
+        auto msg = fmt::format("Error reading file: `{}`: {}", filename, err);
+        throw sorbet::FileNotFoundException(msg);
+    }
+    return contents;
 }
 
 void sorbet::FileOps::write(const string &filename, const vector<uint8_t> &data) {

@@ -152,6 +152,12 @@ public:
 
     void expandNames(uint32_t utf8NameSize, uint32_t constantNameSize, uint32_t uniqueNameSize);
 
+    // Prefetch the bucket that a lookup for `hash` will probe first. The table is far larger than the caches, so a
+    // batch of lookups is otherwise bound by one cache miss per lookup.
+    void prefetch(Hash hash) const {
+        __builtin_prefetch(&buckets_[hash & (buckets_.size() - 1)]);
+    }
+
     template <typename Pred> const Bucket &lookupBucket(Hash hash, Pred &&pred) const {
         unsigned int hashTableSize = buckets_.size();
         unsigned int mask = hashTableSize - 1;
@@ -413,6 +419,8 @@ public:
     MethodRef lookupStaticInitForClass(ClassOrModuleRef klass, bool allowMissing = false) const;
 
     NameRef enterNameUTF8(std::string_view nm);
+    // Same as `enterNameUTF8(nm)`, for callers that already know `NameHash::hashMixUTF8(nm)`.
+    NameRef enterNameUTF8(std::string_view nm, NameHash::Hash hash);
     NameRef lookupNameUTF8(std::string_view nm) const;
 
     NameRef lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef original, uint32_t num) const;

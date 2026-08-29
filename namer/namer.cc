@@ -2407,7 +2407,8 @@ AllFoundDefinitions findSymbols(const core::GlobalState &gs, absl::Span<ast::Par
         for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
             if (result.gotItem()) {
                 auto &parsedFile = trees[idx];
-                Timer timeit(gs.tracer(), "naming.findSymbolsOne", {{"file", string(parsedFile.file.data(gs).path())}});
+                Timer timeit(gs.tracer(), "naming.findSymbolsOne", "file",
+                             [&gs, file = parsedFile.file]() { return string(file.data(gs).path()); });
                 core::Context ctx(gs, core::Symbols::root(), parsedFile.file);
                 ast::TreeWalk::apply(ctx, finder, parsedFile.tree);
                 allFoundDefinitions[idx] = make_pair(parsedFile.file, finder.getAndClearFoundDefinitions());
@@ -2503,7 +2504,8 @@ void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinition
 void symbolizeTrees(const core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers) {
     Timer timeit(gs.tracer(), "naming.symbolizeTrees");
     Parallel::iterate(workers, "symbolizeTrees", trees, [&gs, inserter = TreeSymbolizer()](auto &parsedFile) mutable {
-        Timer timeit(gs.tracer(), "naming.symbolizeTreesOne", {{"file", string(parsedFile.file.data(gs).path())}});
+        Timer timeit(gs.tracer(), "naming.symbolizeTreesOne", "file",
+                     [&gs, file = parsedFile.file]() { return string(file.data(gs).path()); });
         core::Context ctx(gs, core::Symbols::root(), parsedFile.file);
         ast::TreeWalk::apply(ctx, inserter, parsedFile.tree);
     });

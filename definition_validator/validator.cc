@@ -1319,7 +1319,8 @@ public:
 } // namespace
 
 void runOne(core::Context ctx, const ast::ParsedFile &tree) {
-    Timer timeit(ctx.state.tracer(), "validateSymbols", {{"file", string(tree.file.data(ctx).path())}});
+    Timer timeit(ctx.state.tracer(), "validateSymbols", "file",
+                 [&gs = ctx.state, file = tree.file]() { return string(file.data(gs).path()); });
 
     ValidateWalk validate(tree.tree);
     ast::ConstShallowWalk::apply(ctx, validate, tree.tree);

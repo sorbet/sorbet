@@ -244,7 +244,7 @@ parser::ParseResult runParser(core::GlobalState &gs, core::FileRef file, const o
                               bool traceLexer, bool traceParser) {
     parser::ParseResult result;
     {
-        Timer timeit(gs.tracer(), "runParser", {{"file", string(file.data(gs).path())}});
+        Timer timeit(gs.tracer(), "runParser", "file", [&gs, file]() { return string(file.data(gs).path()); });
         core::UnfreezeNameTable nameTableAccess(gs); // enters strings from source code as names
 
         auto indentationAware = false; // Don't start in indentation-aware error recovery mode
@@ -269,7 +269,7 @@ parser::ParseResult runParser(core::GlobalState &gs, core::FileRef file, const o
 
 parser::Prism::ParseResult runPrismParser(core::GlobalState &gs, core::FileRef file, const options::Options &opts,
                                           bool preserveConcreteSyntax = false) {
-    Timer timeit(gs.tracer(), "runParser", {{"file", string(file.data(gs).path())}});
+    Timer timeit(gs.tracer(), "runParser", "file", [&gs, file]() { return string(file.data(gs).path()); });
     core::UnfreezeNameTable nameTableAccess(gs); // enters strings from source code as names
 
     core::MutableContext ctx(gs, core::Symbols::root(), file);
@@ -279,7 +279,7 @@ parser::Prism::ParseResult runPrismParser(core::GlobalState &gs, core::FileRef f
 void runRBSRewrite(core::GlobalState &gs, core::FileRef file, parser::Prism::ParseResult &parseResult,
                    const options::Printers &print) {
     if (gs.cacheSensitiveOptions.rbsEnabled) {
-        Timer timeit(gs.tracer(), "runRBSRewrite", {{"file", string(file.data(gs).path())}});
+        Timer timeit(gs.tracer(), "runRBSRewrite", "file", [&gs, file]() { return string(file.data(gs).path()); });
         core::MutableContext ctx(gs, core::Symbols::root(), file);
         core::UnfreezeNameTable nameTableAccess(gs);
 
@@ -301,7 +301,7 @@ ast::ExpressionPtr runDesugar(core::GlobalState &gs, core::FileRef file, unique_
         core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
         core::MutableContext ctx(gs, core::Symbols::root(), file);
 
-        Timer timeit(gs.tracer(), "runDesugar", {{"file", string(file.data(gs).path())}});
+        Timer timeit(gs.tracer(), "runDesugar", "file", [&gs, file]() { return string(file.data(gs).path()); });
         ast = ast::desugar::node2Tree(ctx, move(parseTree), preserveConcreteSyntax);
     }
 
@@ -325,7 +325,7 @@ ast::ExpressionPtr runPrismDesugar(core::GlobalState &gs, core::FileRef file, pa
         core::UnfreezeNameTable nameTableAccess(gs);
         core::MutableContext ctx(gs, core::Symbols::root(), file);
 
-        Timer timeit(gs.tracer(), "runDesugar", {{"file", string(file.data(gs).path())}});
+        Timer timeit(gs.tracer(), "runDesugar", "file", [&gs, file]() { return string(file.data(gs).path()); });
         ast = ast::Desugar::Prism::node2Tree(ctx, move(parseResult));
     }
 
@@ -344,14 +344,15 @@ ast::ExpressionPtr runPrismDesugar(core::GlobalState &gs, core::FileRef file, pa
 
 ast::ExpressionPtr runRewriter(core::GlobalState &gs, core::FileRef file, ast::ExpressionPtr ast) {
     core::MutableContext ctx(gs, core::Symbols::root(), file);
-    Timer timeit(gs.tracer(), "runRewriter", {{"file", string(file.data(gs).path())}});
+    Timer timeit(gs.tracer(), "runRewriter", "file", [&gs, file]() { return string(file.data(gs).path()); });
     core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
     return rewriter::Rewriter::run(ctx, move(ast));
 }
 
 ast::ParsedFile runLocalVars(core::GlobalState &gs, ast::ParsedFile tree) {
     core::MutableContext ctx(gs, core::Symbols::root(), tree.file);
-    Timer timeit(gs.tracer(), "runLocalVars", {{"file", string(tree.file.data(gs).path())}});
+    Timer timeit(gs.tracer(), "runLocalVars", "file",
+                 [&gs, file = tree.file]() { return string(file.data(gs).path()); });
     core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries when resolving duplicate arguments
     return sorbet::local_vars::LocalVars::run(ctx, move(tree));
 }
@@ -366,7 +367,7 @@ ast::ExpressionPtr desugarOne(const options::Options &opts, core::GlobalState &g
                               bool preserveConcreteSyntax) {
     auto &print = opts.print;
 
-    Timer timeit(gs.tracer(), "desugarOne", {{"file", string(file.data(gs).path())}});
+    Timer timeit(gs.tracer(), "desugarOne", "file", [&gs, file]() { return string(file.data(gs).path()); });
     try {
         if (file.data(gs).strictLevel == core::StrictLevel::Ignore) {
             return ast::MK::EmptyTree();
@@ -393,7 +394,7 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
     ast::ParsedFile rewritten{nullptr, file};
     rewritten.setCached(tree != nullptr);
 
-    Timer timeit(lgs.tracer(), "indexOne", {{"file", string(file.data(lgs).path())}});
+    Timer timeit(lgs.tracer(), "indexOne", "file", [&lgs, file]() { return string(file.data(lgs).path()); });
     try {
         if (!rewritten.cached()) {
             // tree isn't cached. Need to start from parser
@@ -524,7 +525,7 @@ ast::ExpressionPtr readFileWithStrictnessOverrides(core::GlobalState &gs, core::
     switch (file.dataAllowingUnsafe(gs).sourceType) {
         case core::File::Type::NotYetRead: {
             string fileName{file.dataAllowingUnsafe(gs).path()};
-            Timer timeit(gs.tracer(), "readFileWithStrictnessOverrides", {{"file", fileName}});
+            Timer timeit(gs.tracer(), "readFileWithStrictnessOverrides", "file", [&fileName]() { return fileName; });
             string src;
             bool fileFound = true;
             try {
@@ -1441,7 +1442,8 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
         return;
     }
 
-    Timer timeit(ctx.state.tracer(), "typecheckOne", {{"file", string(f.data(ctx).path())}});
+    Timer timeit(ctx.state.tracer(), "typecheckOne", "file",
+                 [&gs = ctx.state, f]() { return string(f.data(gs).path()); });
     try {
         if (opts.print.CFG.enabled) {
             opts.print.CFG.fmt("digraph \"{}\" {{\n", FileOps::getFileName(f.data(ctx).path()));

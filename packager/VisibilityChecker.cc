@@ -168,8 +168,10 @@ class PropagateVisibility final {
         // Implicitly export parent namespace (symbol owner) until we hit the root of the package.
         // NOTE that we make an exception for namespaces that define behavior: these CANNOT get exported implicitly,
         // as that violates the private-by-default paradigm.
-        while (owner.exists() && !owner.data(gs)->flags.isExported && !owner.data(gs)->flags.isBehaviorDefining &&
-               this->package.mangledName() == owner.data(gs)->package) {
+        // Check the package first: this runs in parallel across packages, and we must not read the flags of symbols
+        // that belong to (and are concurrently being updated by) another package.
+        while (owner.exists() && this->package.mangledName() == owner.data(gs)->package &&
+               !owner.data(gs)->flags.isExported && !owner.data(gs)->flags.isBehaviorDefining) {
             owner.data(gs)->flags.isExported = true;
             owner = owner.data(gs)->owner;
         }
@@ -964,9 +966,13 @@ void VisibilityChecker::run(core::GlobalState &gs, WorkerPool &workers, absl::Sp
 
     {
         Timer timeit(gs.tracer(), "visibility_checker.propagate_visibility");
-        for (auto &f : files) {
-            PropagateVisibility::run(gs, f);
-        }
+        // Each `__package.rb` only touches the `isExported` flags of symbols in its own package (recursion stops at
+        // package boundaries, and a package has exactly one package file), its own `PackageInfo`, and the (thread
+        // safe) error queue, so packages can be processed independently.
+        //
+        // Errors are reported in file order, so processing packages in parallel does not change the output.
+        Parallel::iterate(workers, "propagateVisibility", files,
+                          [&gs](const ast::ParsedFile &f) { PropagateVisibility::run(gs, f); });
     }
     VisibilityCheckerPass::run(gs, workers, files);
 }

@@ -16,16 +16,20 @@ private:
                                          absl::Span<const ast::ExpressionPtr> stats, const ast::ExpressionPtr &expr);
 
     static BasicBlock *walk(CFGContext cctx, const ast::ExpressionPtr &what, BasicBlock *current);
-    static void fillInTopoSorts(core::Context ctx, CFG &cfg);
+    // Returns true if the CFG is acyclic (has no back edges).
+    static bool fillInTopoSorts(core::Context ctx, CFG &cfg);
     static void dealias(core::Context ctx, CFG &cfg);
     static void simplify(core::Context ctx, CFG &cfg);
     static void sanityCheck(core::Context ctx, CFG &cfg);
-    static std::vector<UIntSet> fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrites &RnW, const CFG &cfg);
+    static std::vector<UIntSet> fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrites &RnW, const CFG &cfg,
+                                                     bool isAcyclic);
     static void computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg);
     static void removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg,
                                   const std::vector<UIntSet> &blockArgs);
     static void markLoopHeaders(core::Context ctx, CFG &cfg);
-    static std::vector<int> topoSortFwd(std::vector<BasicBlock *> &target, int numBlocks, BasicBlock *currentBB);
+    // Clears `isAcyclic` if the graph reachable from `currentBB` has a back edge.
+    static std::vector<int> topoSortFwd(std::vector<BasicBlock *> &target, int numBlocks, BasicBlock *currentBB,
+                                        bool &isAcyclic);
     static void conditionalJump(BasicBlock *from, LocalRef cond, BasicBlock *thenb, BasicBlock *elseb, CFG &inWhat,
                                 core::LocOffsets loc);
     static void unconditionalJump(BasicBlock *from, BasicBlock *to, CFG &inWhat, core::LocOffsets loc);

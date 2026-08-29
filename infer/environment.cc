@@ -110,7 +110,7 @@ bool KnowledgeFilter::isNeeded(cfg::LocalRef var) {
 
 KnowledgeRef KnowledgeRef::under(core::Context ctx, const Environment &env, cfg::CFG &inWhat, cfg::BasicBlock *bb,
                                  bool isNeeded) const {
-    if (knowledge->yesTypeTests.empty() && !isNeeded) {
+    if ((*this)->yesTypeTests.empty() && !isNeeded) {
         return *this;
     }
     KnowledgeRef copy = *this;
@@ -119,14 +119,19 @@ KnowledgeRef KnowledgeRef::under(core::Context ctx, const Environment &env, cfg:
         return copy;
     }
     bool enteringLoop = bb->flags.isLoopHeader;
+    // Only the type tests already present can mention `local`: the entries appended in the loop below are for other
+    // locals (an environment has one entry per local), so searching them too would make this loop quadratic in the
+    // number of variables.
+    const auto originalYesTypeTestCount = copy->yesTypeTests.size();
     for (auto &pair : env.vars()) {
         auto local = pair.first;
         auto &state = pair.second;
         if (enteringLoop && bb->outerLoops <= local.maxLoopWrite(inWhat)) {
             continue;
         }
-        auto fnd = absl::c_find_if(copy->yesTypeTests, [&](auto const &e) -> bool { return e.first == local; });
-        if (fnd == copy->yesTypeTests.end()) {
+        auto originalYesTypeTests = absl::MakeConstSpan(copy->yesTypeTests.data(), originalYesTypeTestCount);
+        auto fnd = absl::c_find_if(originalYesTypeTests, [&](auto const &e) -> bool { return e.first == local; });
+        if (fnd == originalYesTypeTests.end()) {
             // add info from env to knowledge
             ENFORCE(state.typeAndOrigins.type != nullptr);
             // This handles code snippets such as
@@ -228,14 +233,14 @@ string KnowledgeFact::toString(const core::GlobalState &gs, const cfg::CFG &cfg)
     return fmt::format("{}{}", fmt::join(buf1, ""), fmt::join(buf2, ""));
 }
 
-KnowledgeRef::KnowledgeRef() : knowledge(core::makeRefPtr<KnowledgeFact>()) {}
+const KnowledgeFact KnowledgeRef::emptyFact;
 
 const KnowledgeFact &KnowledgeRef::operator*() const {
-    return *knowledge.get();
+    return knowledge != nullptr ? *knowledge.get() : emptyFact;
 }
 
 const KnowledgeFact *KnowledgeRef::operator->() const {
-    return knowledge.get();
+    return knowledge != nullptr ? knowledge.get() : &emptyFact;
 }
 
 KnowledgeFact::KnowledgeFact(bool isDead, const InlinedVector<std::pair<cfg::LocalRef, core::TypePtr>, 1> &yesTypeTests,
@@ -247,7 +252,9 @@ core::RefPtr<KnowledgeFact> KnowledgeFact::freshCopy() {
 }
 
 KnowledgeFact &KnowledgeRef::mutate() {
-    if (knowledge->hasMultipleRefs()) {
+    if (knowledge == nullptr) {
+        knowledge = core::makeRefPtr<KnowledgeFact>();
+    } else if (knowledge->hasMultipleRefs()) {
         knowledge = knowledge->freshCopy();
     }
     ENFORCE(!knowledge->hasMultipleRefs());
@@ -274,7 +281,7 @@ void KnowledgeRef::min(core::Context ctx, const KnowledgeFact &other) {
 }
 
 void KnowledgeRef::removeReferencesToVar(cfg::LocalRef var) {
-    if (typeTestReferencesVar(knowledge->yesTypeTests, var) || typeTestReferencesVar(knowledge->noTypeTests, var)) {
+    if (typeTestReferencesVar((*this)->yesTypeTests, var) || typeTestReferencesVar((*this)->noTypeTests, var)) {
         auto &typeTests = this->mutate();
         // No requirement to update Environment::typeTestsWithVar, which is an overapproximation.
         typeTests.yesTypeTests.erase(remove_if(typeTests.yesTypeTests.begin(), typeTests.yesTypeTests.end(),

@@ -15,16 +15,26 @@ NameSubstitution::NameSubstitution(const GlobalState &from, GlobalState &to) : t
         utf8NameSubstitution.reserve(from.utf8Names.size());
         constantNameSubstitution.reserve(from.constantNames.size());
         uniqueNameSubstitution.reserve(from.uniqueNames.size());
-        int i = -1;
+        // Hash the names first, so that we can prefetch the bucket in `to` that each lookup will probe. With millions
+        // of names `to`'s table is far larger than the caches, so this loop is otherwise bound by one cache miss per
+        // name.
+        vector<NameHash::Hash> hashes;
+        hashes.reserve(from.utf8Names.size());
         for (const UTF8Name &nm : from.utf8Names) {
-            i++;
+            hashes.emplace_back(NameHash::hashMixUTF8(nm.utf8));
+        }
+        constexpr size_t prefetchDistance = 8;
+        for (size_t i = 0; i < from.utf8Names.size(); i++) {
+            if (i + prefetchDistance < from.utf8Names.size()) {
+                to.namesByHash.prefetch(hashes[i + prefetchDistance]);
+            }
             ENFORCE_NO_TIMER(utf8NameSubstitution.size() == i, "UTF8 name substitution has wrong size");
-            utf8NameSubstitution.emplace_back(to.enterNameUTF8(nm.utf8));
+            utf8NameSubstitution.emplace_back(to.enterNameUTF8(from.utf8Names[i].utf8, hashes[i]));
         }
         // UniqueNames and ConstantNames may reference each other, necessitating some special logic here to avoid
         // crashing. We process UniqueNames first because there are fewer of them, so fewer loop iterations require
         // this special check. Tested in `core_test.cc`.
-        i = -1;
+        int i = -1;
         for (const UniqueName &nm : from.uniqueNames) {
             i++;
             ENFORCE(uniqueNameSubstitution.size() == i, "Unique name substitution has wrong size");

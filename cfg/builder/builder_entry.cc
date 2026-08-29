@@ -212,11 +212,11 @@ unique_ptr<CFG> CFGBuilder::buildFor(CFGContext cctx, unique_ptr<CFG> res, absl:
                         make_move_iterator(aliasesPrefix.end()));
     res->sanityCheck(ctx);
     sanityCheck(ctx, *res);
-    fillInTopoSorts(ctx, *res);
+    auto isAcyclic = fillInTopoSorts(ctx, *res);
     dealias(ctx, *res);
     CFG::ReadsAndWrites RnW = res->findAllReadsAndWrites(ctx);
     computeMinMaxLoops(ctx, RnW, *res);
-    auto blockArgs = fillInBlockArguments(ctx, RnW, *res);
+    auto blockArgs = fillInBlockArguments(ctx, RnW, *res, isAcyclic);
     removeDeadAssigns(ctx, RnW, *res, blockArgs); // requires block arguments to be filled
     simplify(ctx, *res);
     histogramInc("cfgbuilder.basicBlocksSimplified", basicBlockCreated - res->basicBlocks.size());
@@ -227,9 +227,10 @@ unique_ptr<CFG> CFGBuilder::buildFor(CFGContext cctx, unique_ptr<CFG> res, absl:
     return res;
 }
 
-void CFGBuilder::fillInTopoSorts(core::Context ctx, CFG &cfg) {
+bool CFGBuilder::fillInTopoSorts(core::Context ctx, CFG &cfg) {
     // A map from the index space of the basicBlocks index to forwardsTopoSort index.
-    auto forwardsIds = topoSortFwd(cfg.forwardsTopoSort, cfg.maxBasicBlockId, cfg.entry());
+    bool isAcyclic = true;
+    auto forwardsIds = topoSortFwd(cfg.forwardsTopoSort, cfg.maxBasicBlockId, cfg.entry(), isAcyclic);
 
     // Remove unreachable blocks (which were not found by the toposort)
     for (auto &bb : cfg.basicBlocks) {
@@ -254,6 +255,8 @@ void CFGBuilder::fillInTopoSorts(core::Context ctx, CFG &cfg) {
             return forwardsIds[a->id] > forwardsIds[b->id];
         });
     }
+
+    return isAcyclic;
 }
 
 CFGContext CFGContext::withTarget(LocalRef target) {

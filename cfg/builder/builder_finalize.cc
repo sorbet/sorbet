@@ -350,7 +350,8 @@ void CFGBuilder::computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites
     }
 }
 
-vector<UIntSet> CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrites &RnW, const CFG &cfg) {
+vector<UIntSet> CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrites &RnW, const CFG &cfg,
+                                                 bool isAcyclic) {
     // Dmitry's algorithm for adding basic block arguments
     // I don't remember this version being described in any book.
     //
@@ -362,6 +363,11 @@ vector<UIntSet> CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::R
     //
     // This solution is  (|BB| + |symbols-mentioned|) * (|cycles|) + |answer_size| in complexity.
     // making this quadratic in anything will be bad.
+    //
+    // Both accumulations visit the blocks in an order where every block's relevant neighbors (successors for the
+    // reads, predecessors for the writes) have already been visited, so for an acyclic CFG a single pass already
+    // reaches the fixed point. Only CFGs with cycles need to iterate; for the (very common) acyclic case, skip the
+    // extra pass that would merely confirm nothing changed.
 
     const auto &readsByBlock = RnW.reads;
     const auto &writesByBlock = RnW.writes;
@@ -406,6 +412,9 @@ vector<UIntSet> CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::R
                 }
                 changed = changed || (upperBoundsForBlock.size() != sz);
             }
+            if (isAcyclic) {
+                break;
+            }
         }
     }
 
@@ -426,6 +435,9 @@ vector<UIntSet> CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::R
                     }
                 }
                 changed = changed || sz != upperBoundsForBlock.size();
+            }
+            if (isAcyclic) {
+                break;
             }
         }
     }
@@ -469,7 +481,7 @@ struct WorkItem {
 
 } // namespace
 
-vector<int> CFGBuilder::topoSortFwd(vector<BasicBlock *> &target, int numBlocks, BasicBlock *entryBB) {
+vector<int> CFGBuilder::topoSortFwd(vector<BasicBlock *> &target, int numBlocks, BasicBlock *entryBB, bool &isAcyclic) {
     ENFORCE(target.empty(), "The output vector must be empty to start with");
 
     target.reserve(numBlocks);
@@ -498,12 +510,21 @@ vector<int> CFGBuilder::topoSortFwd(vector<BasicBlock *> &target, int numBlocks,
 
                 forwardIndex[block->id] = PROCESSING;
 
-                if (forwardIndex[block->bexit.thenb->id] == UNVISITED) {
+                // A successor that is still being processed is an ancestor in the DFS tree, i.e. this is a back edge.
+                auto thenIndex = forwardIndex[block->bexit.thenb->id];
+                if (thenIndex == UNVISITED) {
                     work.emplace_back(block->bexit.thenb);
+                } else if (thenIndex == PROCESSING) {
+                    isAcyclic = false;
                 }
 
-                if (!block->bexit.isUnconditional() && forwardIndex[block->bexit.elseb->id] == UNVISITED) {
-                    work.emplace_back(block->bexit.elseb);
+                if (!block->bexit.isUnconditional()) {
+                    auto elseIndex = forwardIndex[block->bexit.elseb->id];
+                    if (elseIndex == UNVISITED) {
+                        work.emplace_back(block->bexit.elseb);
+                    } else if (elseIndex == PROCESSING) {
+                        isAcyclic = false;
+                    }
                 }
 
                 break;

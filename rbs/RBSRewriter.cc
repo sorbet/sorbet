@@ -12,7 +12,7 @@ namespace sorbet::rbs {
 void runRBSRewrite(core::GlobalState &gs, core::FileRef file, pm_node_t *node,
                    const vector<core::LocOffsets> &commentLocations, core::MutableContext &ctx,
                    parser::Prism::Parser &parser) {
-    Timer timeit(gs.tracer(), "runRBSRewrite", {{"file", string(file.data(gs).path())}});
+    Timer timeit(gs.tracer(), "runRBSRewrite", "file", [&gs, file]() { return string(file.data(gs).path()); });
 
     auto associator = CommentsAssociator(ctx, parser, commentLocations);
     auto commentMap = associator.run(node);

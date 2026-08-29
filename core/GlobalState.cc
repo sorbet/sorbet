@@ -1520,7 +1520,11 @@ NameRef GlobalState::lookupNameUTF8(string_view nm) const {
 }
 
 NameRef GlobalState::enterNameUTF8(string_view nm) {
-    auto hash = NameHash::hashMixUTF8(nm);
+    return enterNameUTF8(nm, NameHash::hashMixUTF8(nm));
+}
+
+NameRef GlobalState::enterNameUTF8(string_view nm, NameHash::Hash hash) {
+    ENFORCE_NO_TIMER(hash == NameHash::hashMixUTF8(nm));
     auto *bucket = &this->namesByHash.lookupBucket(hash, NameHash::Bucket::isUtf8(*this, nm));
     if (bucket->present()) {
         return NameRef::fromRaw(*this, bucket->rawId);

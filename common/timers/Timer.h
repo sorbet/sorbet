@@ -1,6 +1,7 @@
 #ifndef SORBET_TIMER_H
 #define SORBET_TIMER_H
 #include "common/counters/Counters.h"
+#include <functional>
 #include <memory>
 #include <string>
 #include <thread>
@@ -13,7 +14,15 @@ class Timer {
           std::initializer_list<int> histogramBuckets);
 
 public:
+    // Computes the value of a timer arg on demand. Only invoked if the timer is actually reported, which is rare:
+    // most timers finish below the reporting threshold (see `clock_threshold_coarse`). Prefer this over eager
+    // `args` for timers on hot paths (once per file, once per method) where computing the arg is comparable in
+    // cost to the work being timed. Keep the captures within two machine words (a reference and an id, say; a
+    // `Context` is already two) so that `std::function` stores the lambda inline rather than allocating.
+    using LazyArg = std::function<std::string()>;
+
     Timer(spdlog::logger &log, ConstExprStr name);
+    Timer(spdlog::logger &log, ConstExprStr name, ConstExprStr lazyArgName, LazyArg lazyArg);
     Timer(spdlog::logger &log, ConstExprStr name, std::initializer_list<int> histogramBuckets);
     Timer(spdlog::logger &log, ConstExprStr name, FlowId prev);
     Timer(spdlog::logger &log, ConstExprStr name, std::initializer_list<std::pair<ConstExprStr, std::string>> args);
@@ -70,6 +79,9 @@ private:
     FlowId self;
     // 'args' appear in traces, but not in statsd metrics because they can cause an explosion in cardinality
     std::unique_ptr<std::vector<std::pair<ConstExprStr, std::string>>> args;
+    // An extra arg whose value is only computed (and appended to `args`) when the timer is reported.
+    ConstExprStr lazyArgName{""};
+    LazyArg lazyArg;
     // 'tags' appear in statsd metrics but not in traces. They are ConstExprStr to limit cardinality.
     std::unique_ptr<std::vector<std::pair<ConstExprStr, ConstExprStr>>> tags;
     // It would be far better for type safety to store this as a std::chrono::time_point,

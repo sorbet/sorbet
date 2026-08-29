@@ -18,6 +18,7 @@
 #include "absl/algorithm/container.h"
 #include "absl/strings/str_split.h"
 #include "common/concurrency/ConcurrentQueue.h"
+#include "common/concurrency/Parallel.h"
 #include "common/timers/Timer.h"
 #include "core/Symbols.h"
 #include <utility>
@@ -3227,18 +3228,25 @@ public:
         }
 
         // Resolve the remaining casts and fields.
+        //
+        // Resolving a cast only reads the (now stable) symbol table and writes the resolved type into that cast's
+        // own tree node, so the per-worker lists can be processed in parallel. Keeping each list whole preserves the
+        // order of errors within a file (all of a file's casts are in the same list).
+        Parallel::iterate(workers, "resolveCastItems", absl::MakeSpan(combinedTodoResolveCastItems),
+                          [&gs = as_const(gs)](vector<ResolveCastItem> &threadTodos) {
+                              // Some cast items, like those using `T.type_parameter(:U)` have to resolve
+                              // after resolveSigs.
+                              // We're guaranteed that resolveSigs won't depend on these, because things like
+                              // `T.type_parameter(:U)` are not valid in static fields and type aliases.
+                              auto lastTry = false;
+                              erase_if(threadTodos,
+                                       [&](ResolveCastItem &job) { return resolveCastItem(gs, job, lastTry); });
+                          });
         vector<ResolveCastItem> stillPendingTodoResolveCastItems;
         for (auto &threadTodos : combinedTodoResolveCastItems) {
-            for (auto &job : threadTodos) {
-                auto lastTry = false;
-                if (!resolveCastItem(gs, job, lastTry)) {
-                    // Some cast items, like those using `T.type_parameter(:U)` have to resolve
-                    // after resolveSigs.
-                    // We're guaranteed that resolveSigs won't depend on these, because things like
-                    // `T.type_parameter(:U)` are not valid in static fields and type aliases.
-                    stillPendingTodoResolveCastItems.emplace_back(move(job));
-                }
-            }
+            stillPendingTodoResolveCastItems.insert(stillPendingTodoResolveCastItems.end(),
+                                                    make_move_iterator(threadTodos.begin()),
+                                                    make_move_iterator(threadTodos.end()));
         }
         for (auto &threadTodos : combinedTodoResolveFieldItems) {
             for (auto &job : threadTodos) {

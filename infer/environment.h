@@ -86,10 +86,14 @@ class KnowledgeRef {
     // Is private to ensure that yes/no type test updates go through trusted paths that keep TypeTestReverseIndex
     // updated.
     KnowledgeFact &mutate();
+    // `nullptr` stands for the empty fact (no type tests, not dead). The overwhelming majority of variables never
+    // accumulate any knowledge, so representing "empty" without an allocation avoids creating (and refcounting, and
+    // destroying) a KnowledgeFact per variable per Environment.
     core::RefPtr<KnowledgeFact> knowledge;
+    static const KnowledgeFact emptyFact;
 
 public:
-    KnowledgeRef();
+    KnowledgeRef() = default;
     KnowledgeRef(const KnowledgeRef &) = default;
     KnowledgeRef &operator=(const KnowledgeRef &) = default;
     KnowledgeRef(KnowledgeRef &&) = default;

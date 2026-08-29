@@ -1798,6 +1798,61 @@ absl::Span<const Loc> ClassOrModule::sealedLocs(const GlobalState &gs) const {
     return result;
 }
 
+namespace {
+
+// Returns the class whose singleton class is represented by an element of `sealedSubclasses`'s `T::Set` type.
+ClassOrModuleRef sealedSubclassFromSingletonType(const GlobalState &gs, const TypePtr &type) {
+    core::ClassOrModuleRef subclass;
+    if (auto applied = cast_type<AppliedType>(type)) {
+        subclass = applied->klass.data(gs)->attachedClass(gs);
+    } else if (isa_type<ClassType>(type)) {
+        auto klass = cast_type_nonnull<ClassType>(type);
+        subclass = klass.symbol.data(gs)->attachedClass(gs);
+    } else {
+        ENFORCE(false, "Unexpected type in sealedSubclasses!")
+    }
+    ENFORCE(subclass.exists());
+    return subclass;
+}
+
+// Mirrors the traversal in `ClassOrModule::derivesFrom`: returns true if any (proper) ancestor of `klass` is in
+// `candidates`, i.e. if `klass.derivesFrom(gs, c)` would hold for some `c` in `candidates`.
+bool derivesFromAny(const GlobalState &gs, ClassOrModuleRef klass, const UnorderedSet<ClassOrModuleRef> &candidates) {
+    auto data = klass.data(gs);
+    for (auto mixin : data->mixins()) {
+        if (candidates.contains(mixin)) {
+            return true;
+        }
+        if (!data->flags.isLinearizationComputed && derivesFromAny(gs, mixin, candidates)) {
+            return true;
+        }
+    }
+    auto superClass = data->superClass();
+    if (superClass.exists()) {
+        return candidates.contains(superClass) || derivesFromAny(gs, superClass, candidates);
+    }
+    return false;
+}
+
+// Whether folding `lub` over `externalTypes`, the external types of the sealed `subclasses`, collapses nothing: every
+// type is a plain class or applied type (`lub` treats `T.untyped` and the other kinds of types specially) and no
+// subclass derives from another. Then the result of the fold has a fixed shape that can be built directly.
+bool lubCollapsesNothing(const GlobalState &gs, absl::Span<const ClassOrModuleRef> subclasses,
+                         absl::Span<const TypePtr> externalTypes) {
+    if (subclasses.size() < 2) {
+        return false;
+    }
+    for (auto &externalType : externalTypes) {
+        if (externalType.isUntyped() || !(isa_type<ClassType>(externalType) || isa_type<AppliedType>(externalType))) {
+            return false;
+        }
+    }
+    UnorderedSet<ClassOrModuleRef> subclassSet(subclasses.begin(), subclasses.end());
+    return absl::c_none_of(subclasses, [&](auto subclass) { return derivesFromAny(gs, subclass, subclassSet); });
+}
+
+} // namespace
+
 TypePtr ClassOrModule::sealedSubclassesToUnion(const GlobalState &gs) const {
     ENFORCE(this->flags.isSealed, "Class is not marked sealed: {}", ref(gs).show(gs));
 
@@ -1815,35 +1870,49 @@ TypePtr ClassOrModule::sealedSubclassesToUnion(const GlobalState &gs) const {
         return Types::bottom();
     }
 
-    auto result = Types::bottom();
+    // `recordSealedSubclass` builds a left-nested `OrType` chain, appending each new subclass on the right, so
+    // walking the chain yields the subclasses newest first.
+    InlinedVector<ClassOrModuleRef, 8> subclasses;
     while (auto orType = cast_type<OrType>(currentClasses)) {
-        core::ClassOrModuleRef subclass;
-        if (auto right = cast_type<AppliedType>(orType->right)) {
-            subclass = right->klass.data(gs)->attachedClass(gs);
-        } else if (isa_type<ClassType>(orType->right)) {
-            auto right = cast_type_nonnull<ClassType>(orType->right);
-            subclass = right.symbol.data(gs)->attachedClass(gs);
-        } else {
-            ENFORCE(false, "Unexpected type in sealedSubclasses!")
-        }
-
-        ENFORCE(subclass.exists());
-        result = Types::any(gs, subclass.data(gs)->externalType(), result);
+        subclasses.emplace_back(sealedSubclassFromSingletonType(gs, orType->right));
         currentClasses = orType->left;
     }
+    subclasses.emplace_back(sealedSubclassFromSingletonType(gs, currentClasses));
 
-    core::ClassOrModuleRef subclass;
-    if (auto lastType = cast_type<AppliedType>(currentClasses)) {
-        subclass = lastType->klass.data(gs)->attachedClass(gs);
-    } else if (isa_type<ClassType>(currentClasses)) {
-        auto lastType = cast_type_nonnull<ClassType>(currentClasses);
-        subclass = lastType.symbol.data(gs)->attachedClass(gs);
-    } else {
-        ENFORCE(false, "Last element of sealedSubclasses must be AppliedType")
+    InlinedVector<TypePtr, 8> externalTypes;
+    externalTypes.reserve(subclasses.size());
+    for (auto subclass : subclasses) {
+        externalTypes.emplace_back(subclass.data(gs)->externalType());
     }
-    ENFORCE(subclass.exists());
-    result = Types::any(gs, subclass.data(gs)->externalType(), result);
 
+    // The result is defined as folding `Types::any` over the external types, newest first. Doing that literally is
+    // quadratic in the number of subclasses: every step re-checks `derivesFrom` between the new element and every
+    // element already in the union. Sealed hierarchies with hundreds of subclasses are common, and this runs on every
+    // narrowing of a sealed type during inference.
+    //
+    // In the overwhelmingly common case where the fold collapses nothing (checked in linear time, with one ancestor
+    // walk per subclass), reproduce exactly what it would build, so that the result is indistinguishable (including
+    // the order in which the members print). The fold starts from the two newest subclasses,
+    // `any(secondNewest, newest)`. `lub` orders its arguments by `TypePtr::kind`, and `AppliedType` sorts before
+    // `ClassType`, so that pair comes out as `OrType(newest, secondNewest)` if only `newest` is an `AppliedType`, and
+    // `OrType(secondNewest, newest)` otherwise. Each further step `any(next, acc)` with `acc` an `OrType` distributes
+    // over `acc` and, finding nothing to collapse, appends `next` on the right: `OrType(acc, next)`.
+    if (lubCollapsesNothing(gs, subclasses, externalTypes)) {
+        const auto &newest = externalTypes[0];
+        const auto &secondNewest = externalTypes[1];
+        auto result = isa_type<AppliedType>(newest) && !isa_type<AppliedType>(secondNewest)
+                          ? OrType::make_shared(newest, secondNewest)
+                          : OrType::make_shared(secondNewest, newest);
+        for (size_t i = 2; i < externalTypes.size(); i++) {
+            result = OrType::make_shared(result, externalTypes[i]);
+        }
+        return result;
+    }
+
+    auto result = Types::bottom();
+    for (auto &externalType : externalTypes) {
+        result = Types::any(gs, externalType, result);
+    }
     return result;
 }
 

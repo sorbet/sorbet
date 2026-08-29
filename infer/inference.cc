@@ -43,7 +43,10 @@ bool silenceDeadCodeError(const cfg::InstructionPtr &value) {
 }
 
 unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg) {
-    Timer timeit(ctx.state.tracer(), "Inference::run", {{"func", cfg->symbol.toStringFullName(ctx)}});
+    // Computing the full name of every method eagerly is measurably expensive (it runs once per method in the
+    // codebase), so defer it to the rare case where the timer is actually reported.
+    Timer timeit(ctx.state.tracer(), "Inference::run", "func",
+                 [&gs = ctx.state, method = cfg->symbol]() { return method.toStringFullName(gs); });
     ENFORCE(cfg->symbol == ctx.owner.asMethodRef());
     auto methodLoc = ctx.locAt(cfg->declLoc);
     prodCounterInc("types.input.methods.typechecked");

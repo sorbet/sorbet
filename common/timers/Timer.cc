@@ -79,11 +79,17 @@ Timer::Timer(spdlog::logger &log, ConstExprStr name)
     : Timer(log, name, initializer_list<pair<ConstExprStr, string>>{}){};
 Timer::Timer(spdlog::logger &log, ConstExprStr name, FlowId prev) : Timer(log, name, prev, {}, {}){};
 
+Timer::Timer(spdlog::logger &log, ConstExprStr name, ConstExprStr lazyArgName, LazyArg lazyArg)
+    : Timer(log, name, initializer_list<pair<ConstExprStr, string>>{}) {
+    this->lazyArgName = lazyArgName;
+    this->lazyArg = move(lazyArg);
+}
+
 // Explicitly define to avoid reporting the timer twice.
 Timer::Timer(Timer &&timer)
     : log(timer.log), name(timer.name), prev(timer.prev), self(timer.self), args(move(timer.args)),
-      tags(move(timer.tags)), start(timer.start), histogramBuckets(move(timer.histogramBuckets)),
-      canceled(timer.canceled), endTime(microseconds{0}) {
+      lazyArgName(timer.lazyArgName), lazyArg(move(timer.lazyArg)), tags(move(timer.tags)), start(timer.start),
+      histogramBuckets(move(timer.histogramBuckets)), canceled(timer.canceled), endTime(microseconds{0}) {
     // Don't report a latency metric for the moved timer.
     timer.cancel();
 }
@@ -113,6 +119,8 @@ Timer Timer::clone(ConstExprStr name) const {
     if (this->args != nullptr) {
         forked.args = make_unique<vector<pair<ConstExprStr, string>>>(*args);
     }
+    forked.lazyArgName = lazyArgName;
+    forked.lazyArg = lazyArg;
     if (this->tags != nullptr) {
         forked.tags = make_unique<vector<pair<ConstExprStr, ConstExprStr>>>(*tags);
     }
@@ -151,6 +159,12 @@ Timer::~Timer() {
     auto dur = microseconds{clock.usec - start.usec};
     if (!canceled && dur.usec > clock_threshold_coarse.usec) {
         // the trick ^^^ is to skip double comparison in the common case and use the most efficient representation.
+        if (lazyArg) {
+            if (args == nullptr) {
+                args = make_unique<vector<pair<ConstExprStr, string>>>();
+            }
+            args->emplace_back(lazyArgName, lazyArg());
+        }
         sorbet::timingAdd(this->name, start, clock, move(args), move(tags), self, prev, move(histogramBuckets));
         auto one_week = microseconds{24LL * 60 * 60 * 1000 * 1000};
         if (dur.usec > one_week.usec) {
