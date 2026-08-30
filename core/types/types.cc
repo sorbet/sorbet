@@ -323,9 +323,53 @@ bool Types::canBeTruthy(const GlobalState &gs, const TypePtr &what) {
     return isTruthy;
 }
 
+namespace {
+
+// Whether the class `symbol` admits a falsy value without consulting its ancestors: it is one of the falsy classes, or
+// one of the special classes that admit everything.
+bool admitsFalsyDirectly(ClassOrModuleRef symbol) {
+    return symbol == Symbols::NilClass() || symbol == Symbols::FalseClass() || symbol == Symbols::untyped() ||
+           symbol == Symbols::top() || symbol == Symbols::void_();
+}
+
+// Whether `pred` holds for some leaf of the union `type` (or for `type` itself if it is not a union).
+template <class Pred> bool anyOrComponent(const TypePtr &type, const Pred &pred) {
+    if (auto o = cast_type<OrType>(type)) {
+        return anyOrComponent(o->left, pred) || anyOrComponent(o->right, pred);
+    }
+    return pred(type);
+}
+
+} // namespace
+
 bool Types::canBeFalsy(const GlobalState &gs, const TypePtr &what) {
     if (what.isUntyped()) {
         return true;
+    }
+    // Inference asks this for every variable at every merge, so the common cases are answered here rather than by the
+    // generic subtype checks below, which compute the same thing after their dispatch: both falsy classes are subtypes
+    // of a union when either component admits them, and of a plain class when it is one of them or one of their
+    // ancestors (`T.anything` and `void` admit everything).
+    if (isa_type<OrType>(what)) {
+        // `T.nilable(X)` is decided by its `NilClass` component: look for a component that admits a falsy value on its
+        // own before walking the ancestors of the falsy classes for the others.
+        return anyOrComponent(what,
+                              [](const TypePtr &component) {
+                                  return isa_type<ClassType>(component) &&
+                                         admitsFalsyDirectly(cast_type_nonnull<ClassType>(component).symbol);
+                              }) ||
+               anyOrComponent(what, [&gs](const TypePtr &component) { return canBeFalsy(gs, component); });
+    }
+    if (isa_type<ClassType>(what)) {
+        auto symbol = cast_type_nonnull<ClassType>(what).symbol;
+        if (admitsFalsyDirectly(symbol)) {
+            return true;
+        }
+        if (symbol == Symbols::bottom()) {
+            return false;
+        }
+        return Symbols::FalseClass().data(gs)->derivesFrom(gs, symbol) ||
+               Symbols::NilClass().data(gs)->derivesFrom(gs, symbol);
     }
     return Types::isSubType(gs, Types::falseClass(), what) ||
            Types::isSubType(gs, Types::nilClass(), what); // check if inhabited by falsy values
@@ -357,20 +401,6 @@ TypePtr Types::dropLiteral(const GlobalState &gs, const TypePtr &tp) {
         return f.underlying(gs);
     }
     return tp;
-}
-
-TypePtr Types::lubAll(const GlobalState &gs, const vector<TypePtr> &elements) {
-    TypePtr acc = Types::bottom();
-    for (auto &el : elements) {
-        // The only time that `Types::lub` produces a proxy_type is if the two proxy types are
-        // equivalent: `:foo | :foo`. If they're not equivalent, we widen. There are no
-        // `:foo | :bar` types produced by `lub`, so `widen` is unnecessary.
-        //
-        // Which means that to remove all literals, it's sufficient to do a single `dropLiteral`
-        // at the call `lubAll` call site.
-        acc = Types::lub(gs, acc, el);
-    }
-    return acc;
 }
 
 TypePtr Types::arrayOf(const GlobalState &gs, const TypePtr &elem) {

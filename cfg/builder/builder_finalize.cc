@@ -197,7 +197,14 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
 
         if (!bb->backEdges.empty()) {
             // Take the intersection of all of the back edges' aliases.
-            current = outAliases[bb->backEdges[0]->id];
+            auto *first = bb->backEdges[0];
+            if (bb->backEdges.size() == 1 && first != bb && first->bexit.thenb == first->bexit.elseb) {
+                // `first` jumps here unconditionally, so nothing else reads its aliases: take them instead of copying.
+                // (A conditional jump with both targets here records the edge twice, hence the single-edge check.)
+                current = std::move(outAliases[first->id]);
+            } else {
+                current = outAliases[first->id];
+            }
             for (auto i = 1; i < bb->backEdges.size(); i++) {
                 auto *parent = bb->backEdges[i];
                 const auto &other = outAliases[parent->id];

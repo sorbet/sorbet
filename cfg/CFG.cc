@@ -69,6 +69,15 @@ LinkRef CFG::enterLink(core::NameRef fun, core::LocOffsets loc, vector<core::Par
 }
 
 CFG::CFG() {
+    // Five locals are entered below and most methods have a handful more (every temporary is one); sizing for them
+    // avoids rehashing the map and regrowing the vectors a few times per method.
+    constexpr size_t expectedLocals = 16;
+    localVariableToLocalRef.reserve(expectedLocals);
+    localVariables.reserve(expectedLocals);
+    minLoops.reserve(expectedLocals);
+    maxLoopWrite.reserve(expectedLocals);
+    basicBlocks.reserve(8);
+
     freshBlock(0); // entry;
     freshBlock(0); // dead code;
     deadBlock()->bexit.elseb = deadBlock();

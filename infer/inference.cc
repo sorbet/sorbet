@@ -152,15 +152,16 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         if (bb->backEdges.size() == 1) {
             auto *parent = bb->backEdges[0];
             bool isTrueBranch = parent->bexit.thenb == bb;
-            if (!outEnvironments[parent->id].isDead) {
-                Environment tempEnv(methodLoc);
-                auto &envAsSeenFromBranch =
-                    Environment::withCond(ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current.vars());
-                current.populateFrom(ctx, envAsSeenFromBranch);
+            auto &parentEnv = outEnvironments[parent->id];
+            if (!parentEnv.isDead) {
+                // `populateFrom` takes over the parent's pinned types, which is all `computePins` would find here.
+                current.populateFrom(ctx, parentEnv);
+                current.assumeKnowledge(ctx, parentEnv, isTrueBranch, current.vars());
 
                 parentUpdateKnowledgeReceiver = parent->maybeGetUpdateKnowledgeReceiver(*cfg);
             } else {
                 current.isDead = true;
+                current.computePins(ctx, outEnvironments, *cfg.get(), bb);
             }
         } else {
             current.isDead = (bb != cfg->entry());
@@ -177,9 +178,9 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     current.mergeWith(ctx, envAsSeenFromBranch, *cfg.get(), bb, knowledgeFilter, localMarks);
                 }
             }
+            current.computePins(ctx, outEnvironments, *cfg.get(), bb);
         }
 
-        current.computePins(ctx, outEnvironments, *cfg.get(), bb);
         current.setUninitializedVarsToNil(ctx, ctx.locAt(cfg->declLoc));
 
         for (auto &blockArg : bb->args) {

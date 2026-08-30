@@ -260,9 +260,6 @@ class Environment {
 
     void setTypeAndOrigin(cfg::LocalRef symbol, const core::TypeAndOrigins &typeAndOrigins);
 
-    void assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef cond, core::Loc loc,
-                         const UnorderedMap<cfg::LocalRef, VariableState> &filter);
-
     void cloneFrom(const Environment &rhs);
 
     core::TypeAndOrigins getTypeFromRebind(core::Context ctx, const core::DispatchComponent &main,
@@ -312,6 +309,14 @@ public:
                      const cfg::BasicBlock *bb);
 
     void populateFrom(core::Context ctx, const Environment &other);
+
+    // Narrows the variables of `filter`, and the condition itself if this environment holds it, under the exit
+    // condition of `source`'s block being `isTrue`. The condition's type, truthiness and knowledge are read from
+    // `source`; the variables narrowed are this environment's, which must hold the same types as `source` for the
+    // variables of `filter`: a clone of `source` (see `withCond`), or a block's own environment just populated from
+    // its only predecessor.
+    void assumeKnowledge(core::Context ctx, const Environment &source, bool isTrue,
+                         const UnorderedMap<cfg::LocalRef, VariableState> &filter);
 
     core::TypePtr
     processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Binding &bind, int loopCount, int bindMinLoops,

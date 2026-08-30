@@ -766,21 +766,31 @@ const Environment &Environment::withCond(core::Context ctx, const Environment &e
         return env;
     }
     copy.cloneFrom(env);
-    copy.assumeKnowledge(ctx, isTrue, env.bb->bexit.cond.variable, ctx.locAt(env.bb->bexit.loc), filter);
+    copy.assumeKnowledge(ctx, env, isTrue, filter);
     return copy;
 }
 
-void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef cond, core::Loc loc,
+void Environment::assumeKnowledge(core::Context ctx, const Environment &source, bool isTrue,
                                   const UnorderedMap<cfg::LocalRef, VariableState> &filter) {
-    const auto &thisKnowledge = getKnowledge(cond, false);
+    auto cond = source.bb->bexit.cond.variable;
+    ENFORCE(cond.exists());
+    if (cond == cfg::LocalRef::unconditional() || cond == cfg::LocalRef::blockCall()) {
+        return;
+    }
+    auto loc = ctx.locAt(source.bb->bexit.loc);
+    const auto &thisKnowledge = source.getKnowledge(cond, false);
     thisKnowledge.sanityCheck();
+    // The condition is narrowed when this environment holds it. A clone of `source` always does; a block's own
+    // environment usually does not (the condition is rarely live after the branch), and then the narrowed type is not
+    // needed.
+    auto condHere = _vars.find(cond);
     if (!isTrue) {
-        if (getKnownTruthy(cond)) {
+        if (source.getKnownTruthy(cond)) {
             isDead = true;
             return;
         }
 
-        core::TypeAndOrigins tp = getTypeAndOrigin(cond);
+        core::TypeAndOrigins tp = source.getTypeAndOrigin(cond);
         tp.origins.emplace_back(loc);
         if (tp.type.isUntyped()) {
             tp.type = core::Types::falsyTypes();
@@ -791,28 +801,25 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef 
                 return;
             }
         }
-        setTypeAndOrigin(cond, tp);
+        if (condHere != _vars.end()) {
+            condHere->second.typeAndOrigins = tp;
+        }
     } else {
-        core::TypeAndOrigins tp = getTypeAndOrigin(cond);
+        core::TypeAndOrigins tp = source.getTypeAndOrigin(cond);
         tp.origins.emplace_back(loc);
         tp.type = core::Types::dropSubtypesOf(ctx, tp.type, core::Types::falsySymbols());
         if (tp.type.isBottom()) {
             isDead = true;
             return;
         }
-        setTypeAndOrigin(cond, tp);
-        _vars[cond].knownTruthy = true;
-    }
-
-    if (isDead) {
-        return;
+        if (condHere != _vars.end()) {
+            condHere->second.typeAndOrigins = tp;
+            condHere->second.knownTruthy = true;
+        }
     }
 
     auto &knowledgeToChoose = isTrue ? thisKnowledge.truthy() : thisKnowledge.falsy();
-    auto &yesTests = knowledgeToChoose->yesTypeTests;
-    auto &noTests = knowledgeToChoose->noTypeTests;
-
-    for (auto &typeTested : yesTests) {
+    for (auto &typeTested : knowledgeToChoose->yesTypeTests) {
         if (!filter.contains(typeTested.first)) {
             continue;
         }
@@ -829,20 +836,20 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef 
         }
     }
 
-    for (auto &typeTested : noTests) {
+    for (auto &typeTested : knowledgeToChoose->noTypeTests) {
         if (!filter.contains(typeTested.first)) {
             continue;
         }
         core::TypeAndOrigins tp = getTypeAndOrigin(typeTested.first);
+        if (tp.type.isUntyped()) {
+            continue;
+        }
         tp.origins.emplace_back(loc);
-
-        if (!tp.type.isUntyped()) {
-            tp.type = core::Types::approximateSubtract(ctx, tp.type, typeTested.second);
-            setTypeAndOrigin(typeTested.first, tp);
-            if (tp.type.isBottom()) {
-                isDead = true;
-                return;
-            }
+        tp.type = core::Types::approximateSubtract(ctx, tp.type, typeTested.second);
+        setTypeAndOrigin(typeTested.first, tp);
+        if (tp.type.isBottom()) {
+            isDead = true;
+            return;
         }
     }
 }
@@ -912,6 +919,12 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, cfg::CF
 void Environment::computePins(core::Context ctx, const vector<Environment> &envs, const cfg::CFG &inWhat,
                               const cfg::BasicBlock *bb) {
     if (bb->backEdges.empty()) {
+        return;
+    }
+    // A pin here can only come from a predecessor's pins; most blocks have none, and the loop below would only look
+    // every variable up in every predecessor to find that out.
+    if (absl::c_all_of(bb->backEdges,
+                       [&envs](const cfg::BasicBlock *parent) { return envs[parent->id].pinnedTypes.empty(); })) {
         return;
     }
 

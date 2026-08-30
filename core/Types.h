@@ -824,6 +824,7 @@ private:
     friend TypePtr filterOrComponents(const TypePtr &originalType,
                                       absl::Span<const TypePtr::tagged_storage> typeFilter);
     friend TypePtr leftLeaningChainOfSiblingClasses(const GlobalState &gs, const TypePtr &type);
+    friend TypePtr chainOfSiblingClasses(absl::Span<const TypePtr> leaves);
     friend TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from,
                                          absl::Span<const ClassOrModuleRef> klasses);
     friend TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &t1);

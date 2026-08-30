@@ -164,6 +164,34 @@ TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr 
             typesConsumed.emplace_back(component.identity());
             continue;
         }
+        if (isa_type<ClassType>(component) && isa_type<ClassType>(t2)) {
+            // `lub` of two ordinary classes collapses to one of them or is their plain union; decide which without
+            // building (and then dropping) that union, which is what folding a class into a large union spends its
+            // time on. Distinct classes with the same superclass cannot derive from each other.
+            auto c1 = cast_type_nonnull<ClassType>(component).symbol;
+            auto c2 = cast_type_nonnull<ClassType>(t2).symbol;
+            if (isOrdinaryClassOrModule(c1) && isOrdinaryClassOrModule(c2)) {
+                auto d1 = c1.data(gs);
+                auto d2 = c2.data(gs);
+                if (c1 == c2) {
+                    categoryCounterInc("lubDistributeOr.outcome", "t1");
+                    return t1;
+                }
+                auto siblings =
+                    d1->isClass() && d2->isClass() && d1->superClass().exists() && d1->superClass() == d2->superClass();
+                if (siblings) {
+                    continue;
+                }
+                if (d2->derivesFrom(gs, c1)) {
+                    categoryCounterInc("lubDistributeOr.outcome", "t1");
+                    return t1;
+                }
+                if (d1->derivesFrom(gs, c2)) {
+                    typesConsumed.emplace_back(component.identity());
+                }
+                continue;
+            }
+        }
         auto lubbed = Types::any(gs, component, t2);
         if (lubbed == component) {
             // lubbed == component, so t2 <: component and t2 <: t1
@@ -787,6 +815,14 @@ bool unionOfClassesUnrelatedTo(const GlobalState &gs, ClassOrModuleRef klass, co
            !klass.data(gs)->derivesFrom(gs, symbol);
 }
 
+// Whether `leaf` is, by reference, a component of the union `type`.
+bool unionContains(const TypePtr &type, const TypePtr &leaf) {
+    if (auto o = cast_type<OrType>(type)) {
+        return unionContains(o->left, leaf) || unionContains(o->right, leaf);
+    }
+    return type == leaf;
+}
+
 // Whether `glb(classType, orType)` is `T.noreturn` because the class is unrelated to every class in the union: the
 // recursive glb finds no collapse at any level and every leaf glb is empty (Ruby has single inheritance), so this
 // decides in one pass what the recursion re-checks at each of its levels.
@@ -993,9 +1029,17 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
     }
 
     if (auto o2 = cast_type<OrType>(t2)) { // 3, 6
-        if (isa_type<ClassType>(t1) && glbOfClassAndUnrelatedClassesIsEmpty(gs, t1, t2)) {
-            categoryCounterInc("glb", "unrelatedClasses");
-            return Types::bottom();
+        if (isa_type<ClassType>(t1) || isa_type<AppliedType>(t1)) {
+            if (unionContains(t2, t1)) {
+                // `t1` is one of the components, so it is as specific as the union (the check below would find so
+                // after comparing it with every component up to itself).
+                categoryCounterInc("glb", "Zor");
+                return t1;
+            }
+            if (isa_type<ClassType>(t1) && glbOfClassAndUnrelatedClassesIsEmpty(gs, t1, t2)) {
+                categoryCounterInc("glb", "unrelatedClasses");
+                return Types::bottom();
+            }
         }
         bool collapseInLeft = Types::isAsSpecificAs(gs, t1, t2);
         if (collapseInLeft) {
@@ -1302,44 +1346,161 @@ bool collectOrLeaves(const TypePtr &type, InlinedVector<TypePtr, 8> &leaves) {
     return leansLeft && rightIsLeaf;
 }
 
+// A class type other than the special `T.untyped`, `T.anything`, `T.noreturn` and `void` ones: one whose subtyping
+// against another such type is decided by `classSymbolIsAsGoodAs` alone, without side effects.
+bool isPlainClassType(const TypePtr &type) {
+    if (!isa_type<ClassType>(type)) {
+        return false;
+    }
+    auto symbol = cast_type_nonnull<ClassType>(type).symbol;
+    return isOrdinaryClassOrModule(symbol) && symbol != Symbols::void_();
+}
+
+// Collects the leaves of the union `type` in order into `leaves` if they are all plain class types.
+bool collectPlainClassLeaves(const TypePtr &type, InlinedVector<TypePtr, 8> &leaves) {
+    if (auto o = cast_type<OrType>(type)) {
+        return collectPlainClassLeaves(o->left, leaves) && collectPlainClassLeaves(o->right, leaves);
+    }
+    if (!isPlainClassType(type)) {
+        return false;
+    }
+    leaves.emplace_back(type);
+    return true;
+}
+
+// Whether the plain class `c1` is a subtype of the union `o2`, decided in one pass over the leaves when they are all
+// plain class types: the recursion over the union checks the leaves in the same order and stops at the first that `c1`
+// is as good as, with no side effects along the way. `nullopt` when some leaf is not a plain class type.
+optional<bool> plainClassIsSubTypeOfUnion(const GlobalState &gs, ClassOrModuleRef c1, const OrType &o2) {
+    InlinedVector<TypePtr, 8> leaves;
+    if (!collectPlainClassLeaves(o2.left, leaves) || !collectPlainClassLeaves(o2.right, leaves)) {
+        return nullopt;
+    }
+    for (auto &leaf : leaves) {
+        if (classSymbolIsAsGoodAs(gs, c1, cast_type_nonnull<ClassType>(leaf).symbol)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// Whether the union `o1` is a subtype of the union `o2` when both are unions of plain class types: every class of `o1`
+// is a class of `o2`, or derives from one. Checking each class of `o1` against `o2` in turn scans `o2` for each of
+// them, quadratic for the unions of hundreds of classes that `T::Enum`s and sealed classes expand to; a class that
+// `o2` contains outright needs no scan. `nullopt` when some leaf is not a plain class type.
+optional<bool> unionOfPlainClassesIsSubTypeOfUnion(const GlobalState &gs, const OrType &o1, const OrType &o2) {
+    InlinedVector<TypePtr, 8> leaves1;
+    InlinedVector<TypePtr, 8> leaves2;
+    if (!collectPlainClassLeaves(o1.left, leaves1) || !collectPlainClassLeaves(o1.right, leaves1) ||
+        !collectPlainClassLeaves(o2.left, leaves2) || !collectPlainClassLeaves(o2.right, leaves2)) {
+        return nullopt;
+    }
+    InlinedVector<TypePtr::tagged_storage, 8> identities2;
+    identities2.reserve(leaves2.size());
+    for (auto &leaf : leaves2) {
+        identities2.emplace_back(leaf.identity());
+    }
+    fast_sort(identities2);
+    for (auto &leaf1 : leaves1) {
+        if (absl::c_binary_search(identities2, leaf1.identity())) {
+            continue;
+        }
+        auto c1 = cast_type_nonnull<ClassType>(leaf1).symbol;
+        if (!absl::c_any_of(leaves2, [&](const TypePtr &leaf2) {
+                return classSymbolIsAsGoodAs(gs, c1, cast_type_nonnull<ClassType>(leaf2).symbol);
+            })) {
+            return false;
+        }
+    }
+    return true;
+}
+
 } // namespace
 
-// If `type` is a union of distinct classes that all share the same superclass (so that no two are related and `lub` of
-// any two of them is their plain union), the left-leaning chain of its components that folding `lub` over them
-// builds: `type` itself when it already has that shape. Otherwise `nullptr`.
-TypePtr leftLeaningChainOfSiblingClasses(const GlobalState &gs, const TypePtr &type) {
-    InlinedVector<TypePtr, 8> leaves;
-    auto leansLeft = collectOrLeaves(type, leaves);
+// Whether `leaves` are classes that all share the same superclass, so that no two different ones are related and `lub`
+// of any two of them is their plain union, or the class itself when they are the same class.
+bool areSiblingClasses(const GlobalState &gs, absl::Span<const TypePtr> leaves) {
     auto superClass = Symbols::noClassOrModule();
-    InlinedVector<TypePtr::tagged_storage, 8> identities;
-    identities.reserve(leaves.size());
     for (auto &leaf : leaves) {
         if (!isa_type<ClassType>(leaf)) {
-            return nullptr;
+            return false;
         }
         auto symbol = cast_type_nonnull<ClassType>(leaf).symbol;
         if (!isOrdinaryClass(gs, symbol) || !symbol.data(gs)->superClass().exists()) {
-            return nullptr;
+            return false;
         }
         if (!superClass.exists()) {
             superClass = symbol.data(gs)->superClass();
         } else if (symbol.data(gs)->superClass() != superClass) {
-            return nullptr;
+            return false;
         }
+    }
+    return true;
+}
+
+// Whether some leaf repeats an earlier one. Class types are stored inline in a `TypePtr`, so equal identities are the
+// same class.
+bool hasRepeatedLeaves(absl::Span<const TypePtr> leaves) {
+    InlinedVector<TypePtr::tagged_storage, 8> identities;
+    identities.reserve(leaves.size());
+    for (auto &leaf : leaves) {
         identities.emplace_back(leaf.identity());
     }
     fast_sort(identities);
-    if (absl::c_adjacent_find(identities) != identities.end()) {
-        return nullptr;
-    }
-    if (leansLeft) {
-        return type;
-    }
+    return absl::c_adjacent_find(identities) != identities.end();
+}
+
+// Whether `leaves` are distinct classes that all share the same superclass, so that no two are related and `lub` of
+// any two of them is their plain union.
+bool areDistinctSiblingClasses(const GlobalState &gs, absl::Span<const TypePtr> leaves) {
+    return areSiblingClasses(gs, leaves) && !hasRepeatedLeaves(leaves);
+}
+
+// The left-leaning chain that folding `lub` over `leaves`, distinct sibling classes, builds.
+TypePtr chainOfSiblingClasses(absl::Span<const TypePtr> leaves) {
     TypePtr chain = leaves[0];
     for (size_t i = 1; i < leaves.size(); i++) {
         chain = OrType::make_shared(chain, leaves[i]);
     }
     return chain;
+}
+
+// If `type` is a union of distinct sibling classes, the left-leaning chain of its components that folding `lub` over
+// them builds: `type` itself when it already has that shape. Otherwise `nullptr`.
+TypePtr leftLeaningChainOfSiblingClasses(const GlobalState &gs, const TypePtr &type) {
+    InlinedVector<TypePtr, 8> leaves;
+    auto leansLeft = collectOrLeaves(type, leaves);
+    if (!areDistinctSiblingClasses(gs, leaves)) {
+        return nullptr;
+    }
+    return leansLeft ? type : chainOfSiblingClasses(leaves);
+}
+
+TypePtr Types::lubAll(const GlobalState &gs, const vector<TypePtr> &elements) {
+    // Folding `lub` over N sibling classes (the elements of a large array literal of enum values, say) costs N^2 class
+    // comparisons and builds the union one element at a time; its result is known directly: the union of the distinct
+    // classes, each where it first occurs.
+    if (elements.size() >= 2 && areSiblingClasses(gs, elements)) {
+        InlinedVector<TypePtr, 8> distinct;
+        UnorderedSet<TypePtr::tagged_storage> seen;
+        for (auto &element : elements) {
+            if (seen.insert(element.identity()).second) {
+                distinct.emplace_back(element);
+            }
+        }
+        return chainOfSiblingClasses(distinct);
+    }
+    TypePtr acc = Types::bottom();
+    for (auto &el : elements) {
+        // The only time that `Types::lub` produces a proxy_type is if the two proxy types are
+        // equivalent: `:foo | :foo`. If they're not equivalent, we widen. There are no
+        // `:foo | :bar` types produced by `lub`, so `widen` is unnecessary.
+        //
+        // Which means that to remove all literals, it's sufficient to do a single `dropLiteral`
+        // at the call `lubAll` call site.
+        acc = Types::lub(gs, acc, el);
+    }
+    return acc;
 }
 
 // "Single" means "ClassType or ProxyType"; since ProxyTypes are constrained to
@@ -1784,6 +1945,12 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
                 return constr.rememberIsSubtype(gs, chain, t2);
             }
         }
+        if (auto o2 = cast_type<OrType>(t2)) {
+            // Success has no side effects to reproduce; failure takes the general path below, which explains it.
+            if (unionOfPlainClassesIsSubTypeOfUnion(gs, *o1, *o2) == true) {
+                return true;
+            }
+        }
         auto subCollectorLeft = errorDetailsCollector.newCollector();
         auto isSubTypeOfLeft = Types::isSubTypeUnderConstraint(gs, constr, o1->left, t2, mode, subCollectorLeft);
         if (!isSubTypeOfLeft) {
@@ -1910,6 +2077,12 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
     if (o2 != nullptr) { // 3
         if (isa_type<TypeVar>(t1) && !constr.isSolved()) {
             return constr.rememberIsSubtype(gs, t1, t2);
+        }
+        if (isPlainClassType(t1)) {
+            // Neither outcome has side effects or error details to reproduce.
+            if (auto result = plainClassIsSubTypeOfUnion(gs, cast_type_nonnull<ClassType>(t1).symbol, *o2)) {
+                return *result;
+            }
         }
 
         // This is a hack. isSubTypeUnderConstraint is trying to do double duty as constraint generation and constraint
