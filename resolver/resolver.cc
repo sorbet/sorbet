@@ -21,6 +21,7 @@
 #include "common/concurrency/Parallel.h"
 #include "common/timers/Timer.h"
 #include "core/Symbols.h"
+#include <atomic>
 #include <utility>
 #include <vector>
 
@@ -1922,6 +1923,10 @@ class ResolveTypeMembersAndFieldsWalk {
         core::FileRef file;
     };
 
+    // One flag per class: whether its `<AttachedClass>` has been resolved. Atomic because resolveAttachedClass runs
+    // on the workers in `run`.
+    using ResolvedAttachedClasses = vector<std::atomic<bool>>;
+
     struct ResolveCastItem {
         core::FileRef file;
         core::SymbolRef owner;
@@ -2361,7 +2366,7 @@ class ResolveTypeMembersAndFieldsWalk {
     }
 
     static void resolveTypeMember(core::MutableContext ctx, core::TypeMemberRef lhs, ast::Send *rhs,
-                                  vector<bool> &resolvedAttachedClasses) {
+                                  ResolvedAttachedClasses &resolvedAttachedClasses) {
         auto data = lhs.data(ctx);
         auto owner = data->owner.asClassOrModuleRef();
 
@@ -2520,14 +2525,13 @@ class ResolveTypeMembersAndFieldsWalk {
     }
 
     static void resolveAttachedClass(core::MutableContext ctx, core::ClassOrModuleRef sym,
-                                     vector<bool> &resolvedAttachedClasses) {
+                                     ResolvedAttachedClasses &resolvedAttachedClasses) {
         // Avoid trying to re-resolve symbols that are already resolved.
-        // This avoids (relatively) expensive findMember operations.
-        if (resolvedAttachedClasses[sym.id()] == true) {
+        // This avoids (relatively) expensive findMember operations. When the jobs run on the workers (see run), the
+        // exchange also makes exactly one thread resolve each class.
+        if (resolvedAttachedClasses[sym.id()].exchange(true)) {
             return;
         }
-
-        resolvedAttachedClasses[sym.id()] = true;
 
         auto singleton = sym.data(ctx)->lookupSingletonClass(ctx);
         if (!singleton.exists()) {
@@ -2579,7 +2583,8 @@ class ResolveTypeMembersAndFieldsWalk {
                                                                         allowUnspecifiedTypeParameter, lhs}));
     }
 
-    static bool resolveAssign(core::MutableContext ctx, ResolveAssignItem &job, vector<bool> &resolvedAttachedClasses) {
+    static bool resolveAssign(core::MutableContext ctx, ResolveAssignItem &job,
+                              ResolvedAttachedClasses &resolvedAttachedClasses) {
         ENFORCE(job.lhs.isTypeAlias(ctx) || job.lhs.isTypeMember());
 
         erase_if(job.dependencies, [&](core::SymbolRef dep) {
@@ -2715,12 +2720,25 @@ class ResolveTypeMembersAndFieldsWalk {
         return true;
     }
 
-    static void computeExternalTypes(core::GlobalState &gs) {
+    static void computeExternalTypes(core::GlobalState &gs, WorkerPool &workers) {
         Timer timeit(gs.tracer(), "resolver.computeExternalType");
-        // Ensure all symbols have `externalType` computed.
-        for (auto ref : gs.newClassOrModules()) {
-            ref.data(gs)->unsafeComputeExternalType(gs);
+        // Ensure all symbols have `externalType` computed. Computing a class's external type writes only that class's
+        // own result type (and reads its type members' bounds, which are final by now), so the classes are split into
+        // ranges that the workers process independently.
+        auto range = gs.newClassOrModules();
+        const uint32_t begin = (*range.begin()).id();
+        const uint32_t end = (*range.end()).id();
+        constexpr uint32_t chunkSize = 4096;
+        vector<uint32_t> chunkStarts;
+        for (auto start = begin; start < end; start += chunkSize) {
+            chunkStarts.emplace_back(start);
         }
+        Parallel::iterate(workers, "computeExternalTypes", absl::MakeSpan(chunkStarts), [&gs, end](uint32_t start) {
+            const auto stop = min(start + chunkSize, end);
+            for (auto id = start; id < stop; id++) {
+                core::ClassOrModuleRef::fromRaw(id).data(gs)->unsafeComputeExternalType(gs);
+            }
+        });
     }
 
     core::ClassOrModuleRef methodOwner(core::Context ctx) {
@@ -3161,12 +3179,20 @@ public:
             }
         }
 
-        vector<bool> resolvedAttachedClasses(gs.classAndModulesUsed());
-        for (auto &threadTodo : combinedTodoAttachedClassItems) {
-            for (auto &job : threadTodo) {
-                core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                resolveAttachedClass(ctx, job.klass, resolvedAttachedClasses);
-            }
+        ResolvedAttachedClasses resolvedAttachedClasses(gs.classAndModulesUsed());
+        {
+            Timer timeit(gs.tracer(), "resolver.resolve_attached_classes");
+            // Resolving a class's `<AttachedClass>` writes only that class's own external type and the bounds of its
+            // singleton's type member, and the flag in resolvedAttachedClasses lets exactly one thread do it (a class
+            // reopened in many files has one job per file). Nothing here reports an error, so the order of the jobs
+            // is not observable. Hence the per-worker lists can be processed in parallel.
+            Parallel::iterate(workers, "resolveAttachedClasses", absl::MakeSpan(combinedTodoAttachedClassItems),
+                              [&gs, &resolvedAttachedClasses](vector<ResolveAttachedClassItem> &threadTodo) {
+                                  for (auto &job : threadTodo) {
+                                      core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                                      resolveAttachedClass(ctx, job.klass, resolvedAttachedClasses);
+                                  }
+                              });
         }
 
         // Resolve simple field declarations. Required so that `type_alias` can refer to an enum value type
@@ -3224,7 +3250,7 @@ public:
                 symbol.data(gs)->unsafeComputeExternalType(gs);
             }
         } else {
-            computeExternalTypes(gs);
+            computeExternalTypes(gs, workers);
         }
 
         // Resolve the remaining casts and fields.

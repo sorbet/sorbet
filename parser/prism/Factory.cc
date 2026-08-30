@@ -568,6 +568,7 @@ pm_node_t *Factory::StatementsNode(core::LocOffsets loc, absl::Span<pm_node_t *>
 }
 
 void *Factory::malloc(size_t size) const {
+    auto scope = parser.scopedArena();
     void *p = ::xmalloc(size); // see Prism's `include/prism/defines.h`
     if (!p) {
         throw std::bad_alloc{};
@@ -576,6 +577,7 @@ void *Factory::malloc(size_t size) const {
 }
 
 void *Factory::realloc(void *ptr, size_t size) const {
+    auto scope = parser.scopedArena();
     void *p = ::xrealloc(ptr, size); // see Prism's `include/prism/defines.h`
     if (!p) {
         throw std::bad_alloc{};

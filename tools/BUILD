@@ -94,6 +94,8 @@ compilation_database(
         "//parser/parser:generate_diagnostics",
         "//parser/parser:parser",
         "//parser/prism:prism",
+        "//parser/prism:xallocator",
+        "//parser/prism:xallocator_test",
         "//payload:interface",
         "//payload:payload",
         "//payload:text",

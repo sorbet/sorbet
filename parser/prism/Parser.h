@@ -12,6 +12,7 @@ extern "C" {
 #include "core/LocOffsets.h"
 #include "core/SymbolRef.h"
 #include "parser/Node.h" // To clarify: these are Sorbet Parser nodes, not Prism ones.
+#include "parser/prism/PrismArena.h"
 
 namespace sorbet::parser::Prism {
 
@@ -33,6 +34,12 @@ class Parser final {
     // The version of Ruby syntax that we're parsing with Prism. This determines what syntax is supported or not.
     static constexpr std::string_view ParsedRubyVersion = "3.4.0";
 
+    // Where Prism's allocations for this parse go (see PrismArena.h). Declared first so that it outlives the parser
+    // struct and the tree, which point into it.
+    PrismArena arena;
+    // The value of PrismArena::foreignAllocations() once the parse was complete. If it has not changed by the time
+    // the tree is destroyed, every block of the tree is in `arena` and destroying it node by node would free nothing.
+    uint64_t foreignAllocationsAfterParse = 0;
     pm_parser_t parser;
     pm_options_t options;
 
@@ -46,14 +53,21 @@ class Parser final {
 
 public:
     Parser(std::string_view sourceCode) : parser{}, options{} {
+        ArenaScope scope(arena);
         pm_options_version_set(&options, ParsedRubyVersion.data(), ParsedRubyVersion.size());
 
         pm_parser_init(&parser, reinterpret_cast<const uint8_t *>(sourceCode.data()), sourceCode.size(), &options);
     }
 
     ~Parser() {
+        // Frees of arena blocks are no-ops; the arena itself goes away with this object.
         pm_parser_free(&parser);
         pm_options_free(&options);
+    }
+
+    // Prism's allocations on the current thread go to this parse's arena while the returned scope is alive.
+    ArenaScope scopedArena() {
+        return ArenaScope(arena);
     }
 
     Parser(const Parser &) = delete;

@@ -21,6 +21,11 @@ cc_binary(
     srcs = [
         "main.cc",
     ],
+    # main.cc tunes mimalloc for batch runs when it is the allocator (see there).
+    copts = select({
+        ":mimalloc": ["-DSORBET_MIMALLOC"],
+        "//conditions:default": [],
+    }),
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
@@ -35,7 +40,10 @@ cc_binary(
         "realmain",
         "//main/pipeline/semantic_extension:none",
         "//payload",
-    ],
+    ] + select({
+        ":mimalloc": ["@mimalloc//:mimalloc"],
+        "//conditions:default": [],
+    }),
 )
 
 cc_binary(

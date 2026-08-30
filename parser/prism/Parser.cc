@@ -11,7 +11,12 @@ using namespace std::literals::string_view_literals;
 
 Prism::ParseResult Parser::run(core::MutableContext ctx, bool preserveConcreteSyntax) {
     auto parser = make_unique<Prism::Parser>(ctx.file.data(ctx).source());
-    pm_node_t *root = pm_parse(parser->getRawParserPointer());
+    pm_node_t *root;
+    {
+        auto scope = parser->scopedArena();
+        root = pm_parse(parser->getRawParserPointer());
+    }
+    parser->foreignAllocationsAfterParse = PrismArena::foreignAllocations();
 
     bool collectComments = ctx.state.cacheSensitiveOptions.rbsEnabled;
     vector<core::LocOffsets> comments;
@@ -194,6 +199,11 @@ string Parser::prettyPrint(pm_node_t *node) const {
 }
 
 void Parser::destroyNode(pm_node_t *node) {
+    if (PrismArena::foreignAllocations() == foreignAllocationsAfterParse) {
+        // Nothing has been allocated outside an arena on this thread since the parse, so every block reachable from
+        // the tree is in this parse's arena and freeing it would be a no-op: skip walking the tree.
+        return;
+    }
     pm_node_destroy(&parser, node);
 }
 }; // namespace sorbet::parser::Prism

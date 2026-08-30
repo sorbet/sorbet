@@ -4,6 +4,7 @@
 #include "absl/types/span.h"
 #include "common/common.h"
 #include "core/LocOffsets.h"
+#include "parser/prism/Parser.h"
 #include <string_view>
 #include <vector>
 extern "C" {
@@ -11,9 +12,6 @@ extern "C" {
 }
 
 namespace sorbet::parser::Prism {
-
-// Forward declarations
-class Parser;
 
 class Factory {
 private:
@@ -28,6 +26,7 @@ public:
     }
 
     template <typename T> T *calloc(size_t count) const {
+        auto scope = parser.scopedArena();
         void *p = ::xcalloc(count, sizeof(T));
         if (!p) {
             throw std::bad_alloc{};

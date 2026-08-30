@@ -443,8 +443,9 @@ pm_node_t *SigsRewriter::rewriteBody(pm_node_t *node) {
             pm_node_list_append(&statements->body, stmt);
         }
 
-        // Free the old list structure (not the nodes themselves, as they were moved)
-        free(oldStmts.nodes);
+        // Free the old list structure (not the nodes themselves, as they were moved). Prism allocated it, so it has to
+        // go back through Prism's allocator hooks (see parser/prism/prism_xallocator.h), not the system `free`.
+        xfree(oldStmts.nodes);
 
         return node;
     }

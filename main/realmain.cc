@@ -49,6 +49,7 @@ using namespace std;
 namespace sorbet::realmain {
 shared_ptr<spdlog::logger> logger;
 int returnCode;
+void (*batchAllocatorHook)() = nullptr;
 
 shared_ptr<spdlog::sinks::ansicolor_stderr_sink_mt> make_stderrColorSink() {
     auto color_sink = make_shared<spdlog::sinks::ansicolor_stderr_sink_mt>();
@@ -478,6 +479,11 @@ int realmain(int argc, char *argv[]) {
                          "To forcibly silence this error, either pass --silence-dev-message,\n"
                          "or set SORBET_SILENCE_DEV_MESSAGE=1 in your shell environment.\n");
         }
+    }
+
+    if (!opts.runLSP && batchAllocatorHook != nullptr) {
+        // Everything of size (the symbol tables, the trees, the CFGs) is allocated from here on.
+        batchAllocatorHook();
     }
 
     prodCounterSet("worker_pool_size", opts.threads);
