@@ -4166,6 +4166,16 @@ vector<ast::ParsedFile> resolveSigs(core::GlobalState &gs, vector<ast::ParsedFil
                 ResolveSignaturesWalk::resolveMultiSignatureJob(ctx, job);
             }
         }
+
+        // The parsed signatures are done with; free them (millions of small vectors on a large codebase) on the
+        // workers rather than on this thread when they go out of scope.
+        constexpr size_t chunkSize = 512;
+        Parallel::iterateChunked(workers, "freeResolvedSigs", absl::MakeSpan(combinedFileJobs), chunkSize,
+                                 [](auto chunk) {
+                                     for (auto &file : chunk) {
+                                         file = ResolveSignaturesWalk::ResolveFileSignatures{};
+                                     }
+                                 });
     }
 
     return trees;

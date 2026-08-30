@@ -1,6 +1,7 @@
 #ifndef SORBET_INSTRUCTIONS_H
 #define SORBET_INSTRUCTIONS_H
 
+#include "cfg/Arena.h"
 #include "cfg/LinkRef.h"
 #include "cfg/LocalRef.h"
 #include "core/Context.h"
@@ -82,7 +83,7 @@ class InstructionPtr final {
 
     tagged_storage ptr;
 
-    template <typename T, typename... Args> friend InstructionPtr make_insn(Args &&...);
+    template <typename T, typename... Args> friend InstructionPtr make_insn(Arena &arena, Args &&...);
     friend Send;
 
     static tagged_storage tagPtr(Tag tag, void *i) noexcept {
@@ -92,6 +93,8 @@ class InstructionPtr final {
         return maskedPtr | val;
     }
 
+    // Runs the instruction's destructor. Its memory belongs to the CFG's `Arena`, which frees it with the
+    // CFG.
     static void deleteTagged(Tag tag, void *ptr) noexcept;
 
     InstructionPtr(Tag tag, Instruction *i) noexcept : ptr(tagPtr(tag, i)) {}
@@ -338,8 +341,9 @@ public:
         }
     };
 
+    // `arena` is the arena of the CFG the instruction is for (see `make_insn`).
     static SendInitializer make(LocalRef recv, core::LocOffsets receiverLoc, core::NameRef fun, core::LocOffsets funLoc,
-                                uint16_t numPosArgs, bool isPrivateOk, uint32_t numArgs);
+                                uint16_t numPosArgs, bool isPrivateOk, uint32_t numArgs, Arena &arena);
 
     absl::Span<LocalRef> argRefs() {
         return span<LocalRef>();
@@ -567,8 +571,10 @@ template <> inline const InstructionPtr &InstructionPtr::cast(const InstructionP
     return what;
 }
 
-template <typename T, class... Args> InstructionPtr make_insn(Args &&...arg) {
-    return InstructionPtr(InsnToTag<T>::value, new T(std::forward<Args>(arg)...));
+// Creates an instruction in `arena`, the arena of the CFG the instruction is for.
+template <typename T, class... Args> InstructionPtr make_insn(Arena &arena, Args &&...arg) {
+    static_assert(alignof(T) <= Arena::ALIGNMENT, "the arena cannot align this instruction");
+    return InstructionPtr(InsnToTag<T>::value, new (arena.allocate(sizeof(T))) T(std::forward<Args>(arg)...));
 }
 
 } // namespace sorbet::cfg

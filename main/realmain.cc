@@ -21,6 +21,7 @@
 #include "absl/strings/str_split.h"
 #include "common/FileOps.h"
 #include "common/concurrency/Parallel.h"
+#include "common/os/os.h"
 #include "common/timers/Timer.h"
 #include "core/Error.h"
 #include "core/ErrorQueue.h"
@@ -502,6 +503,9 @@ int realmain(int argc, char *argv[]) {
                           opts.reserveFieldTableCapacity, opts.reserveTypeParameterTableCapacity,
                           opts.reserveTypeMemberTableCapacity, opts.reserveUtf8NameTableCapacity,
                           opts.reserveConstantNameTableCapacity, opts.reserveUniqueNameTableCapacity);
+    // Backs the reserved tables with pages while indexing runs, off the serial path that fills them (see below; joined
+    // when it goes out of scope, long after it finishes).
+    unique_ptr<Joinable> prefaultTables;
 
     if (opts.cacheSensitiveOptions.runningUnderAutogen) {
         gs->cacheSensitiveOptions.runningUnderAutogen = true;
@@ -594,6 +598,15 @@ int realmain(int argc, char *argv[]) {
         }
 
         inputFiles = pipeline::reserveFiles(*gs, opts.inputFileNames);
+
+        // A run over tens of thousands of files fills most of a table reservation sized for it, and its symbol
+        // definition phase would otherwise fault the pages in serially. A small run would only pay to back memory it
+        // never touches.
+        if (inputFiles.size() >= 10000) {
+            prefaultTables = runInAThread("prefaultTables", [ranges = gs->preallocatedTableRanges()]() {
+                core::GlobalState::prefaultRanges(ranges);
+            });
+        }
 
         // We explicitly free the input names here, as we won't use them for the remainder of execution, and on large
         // codebases they take up a non-trivial amount of memory.

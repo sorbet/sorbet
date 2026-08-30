@@ -243,6 +243,8 @@ public:
     static thread_local TestedKnowledge empty; // optimization
 
     void removeReferencesToVar(cfg::LocalRef ref);
+    // Whether either option has a type test on `ref` (what `removeReferencesToVar` would remove).
+    bool referencesVar(cfg::LocalRef ref) const;
     void sanityCheck() const;
     void emitKnowledgeSizeMetric() const;
 
@@ -258,30 +260,158 @@ public:
 };
 CheckSize(TestedKnowledge, 24, 8);
 
+// The state of one variable in one environment. States are shared between the environments of consecutive blocks
+// (a block starts with its predecessor's states and changes a few) and cloned on the first write, so they are
+// reference counted. An environment is only ever touched by the one thread inferring its method, so the count is a
+// plain integer rather than the atomic one of `core::RefPtr`.
 struct VariableState {
+    uint32_t refcount = 0;
     core::TypeAndOrigins typeAndOrigins;
     TestedKnowledge knowledge;
-    bool knownTruthy;
+    bool knownTruthy = false;
 };
+
+// Storage for `VariableState`s: a per-thread free list, so that giving a variable its own state (once per binding, and
+// once per variable at every merge) is a pop rather than a heap allocation, and releasing an environment a push. The
+// list is bounded; beyond that states go back to the heap.
+class StatePool {
+    static constexpr size_t MAX_FREE = 4096;
+    std::vector<VariableState *> free;
+
+public:
+    ~StatePool() {
+        for (auto *s : free) {
+            ::operator delete(s);
+        }
+    }
+
+    VariableState *acquire() {
+        VariableState *s;
+        if (free.empty()) {
+            s = static_cast<VariableState *>(::operator new(sizeof(VariableState)));
+        } else {
+            s = free.back();
+            free.pop_back();
+        }
+        return new (s) VariableState();
+    }
+
+    void recycle(VariableState *s) {
+        s->~VariableState();
+        if (free.size() < MAX_FREE) {
+            free.emplace_back(s);
+        } else {
+            ::operator delete(s);
+        }
+    }
+
+    static StatePool &forThisThread() {
+        thread_local StatePool pool;
+        return pool;
+    }
+};
+
+// A reference to a shared `VariableState` with copy-on-write access: reads go through `operator->`, writes through
+// `mutate`, which clones a state that another environment also holds. A null reference is a variable the environment
+// holds but has not given a state yet (a block argument before the predecessor's state is taken over).
+class StateRef {
+    VariableState *state = nullptr;
+
+    static void addref(VariableState *s) {
+        if (s != nullptr) {
+            s->refcount++;
+        }
+    }
+    static void release(VariableState *s) {
+        if (s == nullptr) {
+            return;
+        }
+        ENFORCE(s->refcount > 0);
+        if (--s->refcount == 0) {
+            StatePool::forThisThread().recycle(s);
+        }
+    }
+
+public:
+    StateRef() = default;
+    StateRef(const StateRef &other) : state(other.state) {
+        addref(state);
+    }
+    StateRef(StateRef &&other) noexcept : state(other.state) {
+        other.state = nullptr;
+    }
+    StateRef &operator=(const StateRef &other) {
+        if (state != other.state) {
+            addref(other.state);
+            release(state);
+            state = other.state;
+        }
+        return *this;
+    }
+    StateRef &operator=(StateRef &&other) noexcept {
+        if (this != &other) {
+            release(state);
+            state = other.state;
+            other.state = nullptr;
+        }
+        return *this;
+    }
+    ~StateRef() {
+        release(state);
+    }
+
+    bool isNull() const {
+        return state == nullptr;
+    }
+    const VariableState *get() const {
+        return state;
+    }
+    const VariableState *operator->() const {
+        ENFORCE(state != nullptr);
+        return state;
+    }
+    const VariableState &operator*() const {
+        ENFORCE(state != nullptr);
+        return *state;
+    }
+
+    // The state, owned by this reference alone: a fresh one when null, a copy when shared.
+    VariableState &mutate() {
+        if (state == nullptr) {
+            state = StatePool::forThisThread().acquire();
+            state->refcount = 1;
+        } else if (state->refcount > 1) {
+            auto *copy = StatePool::forThisThread().acquire();
+            copy->typeAndOrigins = state->typeAndOrigins;
+            copy->knowledge = state->knowledge;
+            copy->knownTruthy = state->knownTruthy;
+            copy->refcount = 1;
+            release(state);
+            state = copy;
+        }
+        return *state;
+    }
+};
+CheckSize(StateRef, 8, 8);
 
 // The variables an environment holds, with their states. A block's environment holds the variables live into the block
 // and those assigned in it, looked up by local; a table indexed by local id with the present locals listed replaces a
 // hash map: no hashing, and the per-block passes over the variables walk a contiguous list.
 class VariableTable {
     // The states of the present locals, in insertion order, and the locals themselves.
-    std::vector<VariableState> states;
+    std::vector<StateRef> states;
     std::vector<cfg::LocalRef> locals;
     // One entry per local of the method: 1 + the index in `states` of a present local, 0 for an absent one.
     std::vector<uint32_t> positions;
 
 public:
-    // A present local and its state, as iteration yields them.
-    template <class State> struct Entry {
+    // A present local and its state reference, as iteration yields them.
+    template <class Ref> struct Entry {
         cfg::LocalRef local;
-        State &state;
+        Ref &state;
     };
 
-    template <class Table, class State> class Iterator {
+    template <class Table, class Ref> class Iterator {
         Table &table;
         size_t index;
 
@@ -294,46 +424,25 @@ public:
             index++;
             return *this;
         }
-        Entry<State> operator*() const {
-            return Entry<State>{table.locals[index], table.states[index]};
+        Entry<Ref> operator*() const {
+            return Entry<Ref>{table.locals[index], table.states[index]};
         }
     };
 
-private:
-    // References into `states` are handed out and held across insertions, so `states` must never reallocate: it is
-    // reserved for every local of the method up front (the memory is not touched until used). A table can hold at
-    // most every local once.
-    void reserveAll() {
-        states.reserve(positions.size());
-        locals.reserve(positions.size());
-    }
-
-public:
-    VariableTable() = default;
-    VariableTable(const VariableTable &other) : states(other.states), locals(other.locals), positions(other.positions) {
-        reserveAll();
-    }
-    VariableTable &operator=(const VariableTable &other) {
-        states = other.states;
-        locals = other.locals;
-        positions = other.positions;
-        reserveAll();
-        return *this;
-    }
-    VariableTable(VariableTable &&) = default;
-    VariableTable &operator=(VariableTable &&) = default;
-
-    // Empties the table and sizes it for the `numLocals` locals of the method.
-    void init(size_t numLocals) {
+    // Empties the table, sizes its index for the `numLocals` locals of the method, and makes room for `expected`
+    // variables (a block holds the variables live into it and those its bindings assign; more just grows the lists,
+    // since the states themselves live on the heap and references to them stay valid).
+    void init(size_t numLocals, size_t expected) {
         states.clear();
         locals.clear();
         positions.assign(numLocals, 0);
-        reserveAll();
+        states.reserve(expected);
+        locals.reserve(expected);
     }
 
-    // Frees the table's storage.
+    // Frees the table's storage (dropping its references to the states).
     void release() {
-        states = std::vector<VariableState>();
+        states = std::vector<StateRef>();
         locals = std::vector<cfg::LocalRef>();
         positions = std::vector<uint32_t>();
     }
@@ -346,38 +455,51 @@ public:
         return local.id() < positions.size() && positions[local.id()] != 0;
     }
 
-    VariableState *find(cfg::LocalRef local) {
+    // The reference held for `local`, or `nullptr` when the table does not hold it.
+    const StateRef *findRef(cfg::LocalRef local) const {
         return contains(local) ? &states[positions[local.id()] - 1] : nullptr;
     }
 
+    // The state of `local` for reading: `nullptr` when the table does not hold it or has not given it a state.
     const VariableState *find(cfg::LocalRef local) const {
-        return contains(local) ? &states[positions[local.id()] - 1] : nullptr;
+        auto ref = findRef(local);
+        return ref == nullptr ? nullptr : ref->get();
     }
 
-    // The state of `local`, inserted (value-initialized) if absent.
-    VariableState &operator[](cfg::LocalRef local) {
+    // The state of `local` for writing (cloned if shared, created if not given yet): `nullptr` when the table does not
+    // hold it.
+    VariableState *findMutable(cfg::LocalRef local) {
+        return contains(local) ? &states[positions[local.id()] - 1].mutate() : nullptr;
+    }
+
+    // Holds `local` with no state yet, if not held already.
+    void insert(cfg::LocalRef local) {
         ENFORCE(local.id() < positions.size());
         auto &position = positions[local.id()];
         if (position == 0) {
-            ENFORCE(states.size() < states.capacity(), "Environment holds more variables than it was sized for");
             states.emplace_back();
             locals.emplace_back(local);
             position = states.size();
         }
-        return states[position - 1];
+    }
+
+    // The state of `local` for writing, holding `local` first if absent.
+    VariableState &operator[](cfg::LocalRef local) {
+        insert(local);
+        return states[positions[local.id()] - 1].mutate();
     }
 
     auto begin() {
-        return Iterator<VariableTable, VariableState>(*this, 0);
+        return Iterator<VariableTable, StateRef>(*this, 0);
     }
     auto end() {
-        return Iterator<VariableTable, VariableState>(*this, states.size());
+        return Iterator<VariableTable, StateRef>(*this, states.size());
     }
     auto begin() const {
-        return Iterator<const VariableTable, const VariableState>(*this, 0);
+        return Iterator<const VariableTable, const StateRef>(*this, 0);
     }
     auto end() const {
-        return Iterator<const VariableTable, const VariableState>(*this, states.size());
+        return Iterator<const VariableTable, const StateRef>(*this, states.size());
     }
 };
 
@@ -416,8 +538,15 @@ class Environment {
 
     bool hasType(core::Context ctx, cfg::LocalRef symbol) const;
 
+    // For writing: the variable's state is cloned first if another environment shares it.
     TestedKnowledge &getKnowledge(cfg::LocalRef symbol, bool shouldFail = true) {
-        return const_cast<TestedKnowledge &>(const_cast<const Environment *>(this)->getKnowledge(symbol, shouldFail));
+        auto fnd = _vars.findMutable(symbol);
+        if (fnd == nullptr) {
+            ENFORCE(!shouldFail, "Missing knowledge?");
+            return TestedKnowledge::empty;
+        }
+        fnd->knowledge.sanityCheck();
+        return fnd->knowledge;
     }
 
     const TestedKnowledge &getKnowledge(cfg::LocalRef symbol, bool shouldFail = true) const;

@@ -15,10 +15,6 @@ using namespace std;
 
 namespace sorbet::cfg {
 
-CFG::ReadsAndWrites::ReadsAndWrites(uint32_t maxBasicBlockId, uint32_t numLocalVariables)
-    : reads(maxBasicBlockId, UIntSet(numLocalVariables)), writes(maxBasicBlockId, UIntSet(numLocalVariables)),
-      dead(maxBasicBlockId, UIntSet(numLocalVariables)) {}
-
 CFG::UnfreezeCFGLocalVariables::UnfreezeCFGLocalVariables(CFG &cfg) : cfg(cfg) {
     this->cfg.localVariablesFrozen = false;
 }
@@ -33,7 +29,8 @@ int CFG::numLocalVariables() const {
 
 BasicBlock *CFG::freshBlock(int outerLoops) {
     int id = this->maxBasicBlockId++;
-    auto &r = this->basicBlocks.emplace_back(make_unique<BasicBlock>());
+    static_assert(alignof(BasicBlock) <= Arena::ALIGNMENT, "the arena cannot align a BasicBlock");
+    auto &r = this->basicBlocks.emplace_back(new (cfgArena.allocate(sizeof(BasicBlock))) BasicBlock(cfgArena));
     r->id = id;
     r->outerLoops = outerLoops;
     return r.get();
@@ -107,11 +104,11 @@ CFG::CFG() {
     ENFORCE(finalReturn == LocalRef::finalReturn());
 }
 
-CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
+template <class Set> CFG::ReadsAndWritesT<Set> CFG::findAllReadsAndWrites(core::Context ctx) {
     Timer timeit(ctx.state.tracer(), "findAllReadsAndWrites");
-    CFG::ReadsAndWrites target(maxBasicBlockId, numLocalVariables());
+    CFG::ReadsAndWritesT<Set> target(maxBasicBlockId, numLocalVariables());
 
-    for (unique_ptr<BasicBlock> &bb : this->basicBlocks) {
+    for (auto &bb : this->basicBlocks) {
         auto &blockWrites = target.writes[bb->id];
         auto &blockReads = target.reads[bb->id];
         auto &blockDead = target.dead[bb->id];
@@ -167,7 +164,7 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
     {
         Timer timeit(ctx.state.tracer(), "privates1");
 
-        UIntSet blockReadsAndWrites(this->numLocalVariables());
+        Set blockReadsAndWrites(this->numLocalVariables());
         for (auto blockId = 0; blockId < maxBasicBlockId; blockId++) {
             blockReadsAndWrites.overwriteWithUnion(target.reads[blockId], target.writes[blockId]);
             blockReadsAndWrites.forEach([&usageCounts, blockId](uint32_t local) -> void {
@@ -191,6 +188,8 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
 
     return target;
 }
+template CFG::ReadsAndWritesT<UIntSet> CFG::findAllReadsAndWrites<UIntSet>(core::Context ctx);
+template CFG::ReadsAndWritesT<SparseUIntSet> CFG::findAllReadsAndWrites<SparseUIntSet>(core::Context ctx);
 
 void CFG::sanityCheck(core::Context ctx) {
     if constexpr (!debug_mode) {

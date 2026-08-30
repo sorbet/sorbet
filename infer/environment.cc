@@ -187,7 +187,7 @@ KnowledgeRef KnowledgeRef::under(core::Context ctx, const Environment &env, cfg:
     }
     for (const auto &entry : env.vars()) {
         auto local = entry.local;
-        auto &state = entry.state;
+        const auto &state = *entry.state;
         if (marks.get(local) != LocalMarks::UNSET || skipsLoopWrites(local)) {
             continue;
         }
@@ -370,6 +370,11 @@ void TestedKnowledge::removeReferencesToVar(cfg::LocalRef var) {
     this->_falsy.removeReferencesToVar(var);
 }
 
+bool TestedKnowledge::referencesVar(cfg::LocalRef var) const {
+    return typeTestReferencesVar(_truthy->yesTypeTests, var) || typeTestReferencesVar(_truthy->noTypeTests, var) ||
+           typeTestReferencesVar(_falsy->yesTypeTests, var) || typeTestReferencesVar(_falsy->noTypeTests, var);
+}
+
 void TestedKnowledge::emitKnowledgeSizeMetric() const {
     // Counting these turns out to be rather slow for tests; if you're curious to
     // see the numbers, you can uncomment these and recompile.
@@ -398,7 +403,7 @@ string Environment::toString(const core::GlobalState &gs, const cfg::CFG &cfg) c
     }
     vector<pair<cfg::LocalRef, VariableState>> sorted;
     for (const auto &entry : _vars) {
-        sorted.emplace_back(entry.local, entry.state);
+        sorted.emplace_back(entry.local, *entry.state);
     }
     fast_sort(sorted, [&cfg](const auto &lhs, const auto &rhs) -> bool {
         return lhs.first.data(cfg)._name.rawId() < rhs.first.data(cfg)._name.rawId() ||
@@ -487,13 +492,19 @@ void Environment::clearKnowledge(core::Context ctx, cfg::LocalRef reassigned, Kn
     for (auto owner : knowledgeOwners) {
         auto fnd = _vars.find(owner);
         ENFORCE(fnd != nullptr);
-        fnd->knowledge.removeReferencesToVar(reassigned);
-        fnd->knowledge.sanityCheck();
+        // Only a state that changes is written to (and so unshared from the predecessor's).
+        if (fnd->knowledge.referencesVar(reassigned)) {
+            auto &state = *_vars.findMutable(owner);
+            state.knowledge.removeReferencesToVar(reassigned);
+            state.knowledge.sanityCheck();
+        }
     }
 
     auto fnd = _vars.find(reassigned);
     ENFORCE(fnd != nullptr);
-    fnd->knownTruthy = false;
+    if (fnd->knownTruthy) {
+        _vars.findMutable(reassigned)->knownTruthy = false;
+    }
 }
 
 void Environment::noteKnowledgeOwner(cfg::LocalRef var) {
@@ -610,7 +621,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
     noteKnowledgeOwner(local);
 
     if (send->fun == core::Names::bang()) {
-        auto fnd = _vars.find(send->recv.variable);
+        auto fnd = _vars.findMutable(send->recv.variable);
         if (fnd != nullptr) {
             whoKnows.replaceTruthy(fnd->knowledge.falsy());
             whoKnows.replaceFalsy(fnd->knowledge.truthy());
@@ -817,8 +828,8 @@ void Environment::assumeKnowledge(core::Context ctx, const Environment &source, 
     thisKnowledge.sanityCheck();
     // The condition is narrowed when this environment holds it. A clone of `source` always does; a block's own
     // environment usually does not (the condition is rarely live after the branch), and then the narrowed type is not
-    // needed.
-    auto condHere = _vars.find(cond);
+    // needed. Writes go through `findMutable`, which unshares a state held by the predecessor's environment too.
+    auto narrowCond = _vars.contains(cond);
     if (!isTrue) {
         if (source.getKnownTruthy(cond)) {
             isDead = true;
@@ -836,8 +847,8 @@ void Environment::assumeKnowledge(core::Context ctx, const Environment &source, 
                 return;
             }
         }
-        if (condHere != nullptr) {
-            condHere->typeAndOrigins = tp;
+        if (narrowCond) {
+            _vars.findMutable(cond)->typeAndOrigins = tp;
         }
     } else {
         core::TypeAndOrigins tp = source.getTypeAndOrigin(cond);
@@ -847,9 +858,10 @@ void Environment::assumeKnowledge(core::Context ctx, const Environment &source, 
             isDead = true;
             return;
         }
-        if (condHere != nullptr) {
-            condHere->typeAndOrigins = tp;
-            condHere->knownTruthy = true;
+        if (narrowCond) {
+            auto &condState = *_vars.findMutable(cond);
+            condState.typeAndOrigins = tp;
+            condState.knownTruthy = true;
         }
     }
 
@@ -858,14 +870,16 @@ void Environment::assumeKnowledge(core::Context ctx, const Environment &source, 
         if (!filter.contains(typeTested.first)) {
             continue;
         }
-        core::TypeAndOrigins tp = getTypeAndOrigin(typeTested.first);
-        auto glbbed = core::Types::all(ctx, tp.type, typeTested.second);
-        if (tp.type != glbbed) {
+        const auto &current = getTypeAndOrigin(typeTested.first);
+        auto glbbed = core::Types::all(ctx, current.type, typeTested.second);
+        if (current.type != glbbed) {
+            // Written only when the type changes, so that an unchanged state stays shared with the predecessor's.
+            core::TypeAndOrigins tp = current;
             tp.origins.emplace_back(loc);
-            tp.type = std::move(glbbed);
+            tp.type = glbbed;
+            setTypeAndOrigin(typeTested.first, tp);
         }
-        setTypeAndOrigin(typeTested.first, tp);
-        if (tp.type.isBottom()) {
+        if (glbbed.isBottom()) {
             isDead = true;
             return;
         }
@@ -902,7 +916,9 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, cfg::CF
         auto otherKnownTruthy = otherHasVar && fnd->knownTruthy;
         const auto &otherKnowledge = otherHasVar ? fnd->knowledge : TestedKnowledge::empty;
         otherKnowledge.sanityCheck();
-        auto &thisTO = entry.state.typeAndOrigins;
+        // A merged state is this environment's own (fresh for the first predecessor, unshared afterwards).
+        auto &thisState = entry.state.mutate();
+        auto &thisTO = thisState.typeAndOrigins;
         if (thisTO.type != nullptr) {
             thisTO.type = core::Types::any(ctx, thisTO.type, otherTO.type);
             thisTO.type.sanityCheck(ctx);
@@ -911,20 +927,20 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, cfg::CF
                     thisTO.origins.emplace_back(origin);
                 }
             }
-            entry.state.knownTruthy = entry.state.knownTruthy && otherKnownTruthy;
+            thisState.knownTruthy = thisState.knownTruthy && otherKnownTruthy;
         } else {
             thisTO = otherTO;
-            entry.state.knownTruthy = otherKnownTruthy;
+            thisState.knownTruthy = otherKnownTruthy;
         }
 
         if (bb->flags.isLoopHeader && bb->outerLoops <= var.maxLoopWrite(inWhat)) {
             continue;
         }
-        if (!knowledgeFilter.isNeeded(var) && entry.state.knowledge.isTrivial() && otherKnowledge.isTrivial()) {
+        if (!knowledgeFilter.isNeeded(var) && thisState.knowledge.isTrivial() && otherKnowledge.isTrivial()) {
             // Trivial knowledge that is not needed is its own `under`, and merging it into trivial knowledge leaves
             // that trivial; all that the general path below would change is the record of the options seen. Most
             // variables at most merges are in this position.
-            auto &thisKnowledge = entry.state.knowledge;
+            auto &thisKnowledge = thisState.knowledge;
             if (!thisKnowledge.seenTruthyOption && core::Types::canBeTruthy(ctx, otherTO.type)) {
                 thisKnowledge.seenTruthyOption = true;
             }
@@ -937,7 +953,7 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, cfg::CF
         bool canBeTruthy = core::Types::canBeTruthy(ctx, otherTO.type);
 
         if (canBeTruthy) {
-            auto &thisKnowledge = entry.state.knowledge;
+            auto &thisKnowledge = thisState.knowledge;
             auto otherTruthy =
                 otherKnowledge.truthy().under(ctx, other, inWhat, bb, knowledgeFilter.isNeeded(var), marks);
             if (!otherTruthy->isDead) {
@@ -951,7 +967,7 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, cfg::CF
         }
 
         if (canBeFalsy) {
-            auto &thisKnowledge = entry.state.knowledge;
+            auto &thisKnowledge = thisState.knowledge;
             auto otherFalsy =
                 otherKnowledge.falsy().under(ctx, other, inWhat, bb, knowledgeFilter.isNeeded(var), marks);
             if (!otherFalsy->isDead) {
@@ -963,7 +979,7 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, cfg::CF
                 }
             }
         }
-        if (!entry.state.knowledge.isEmpty()) {
+        if (!thisState.knowledge.isEmpty()) {
             noteKnowledgeOwner(var);
         }
     }
@@ -1041,20 +1057,19 @@ void Environment::populateFrom(core::Context ctx, const Environment &other) {
     this->isDead = other.isDead;
     for (auto entry : _vars) {
         auto var = entry.local;
-        auto fnd = other._vars.find(var);
-        if (fnd == nullptr) {
-            entry.state.typeAndOrigins = other.uninitialized;
-            entry.state.knowledge.replace(TestedKnowledge::empty);
-            entry.state.knownTruthy = false;
+        auto otherRef = other._vars.findRef(var);
+        if (otherRef == nullptr || otherRef->isNull()) {
+            auto &state = entry.state.mutate();
+            state.typeAndOrigins = other.uninitialized;
+            state.knowledge.replace(TestedKnowledge::empty);
+            state.knownTruthy = false;
             continue;
         }
-        const auto &otherState = *fnd;
-        ENFORCE(otherState.typeAndOrigins.type != nullptr);
-        otherState.knowledge.sanityCheck();
-        entry.state.typeAndOrigins = otherState.typeAndOrigins;
-        entry.state.knowledge.replace(otherState.knowledge);
-        entry.state.knownTruthy = otherState.knownTruthy;
-        if (!entry.state.knowledge.isEmpty()) {
+        // Take over the predecessor's state; a write to it here clones it first.
+        ENFORCE((*otherRef)->typeAndOrigins.type != nullptr);
+        (*otherRef)->knowledge.sanityCheck();
+        entry.state = *otherRef;
+        if (!entry.state->knowledge.isEmpty()) {
             noteKnowledgeOwner(var);
         }
     }
@@ -2080,19 +2095,20 @@ const TestedKnowledge &Environment::getKnowledge(cfg::LocalRef symbol, bool shou
 }
 
 void Environment::initializeBasicBlockArgs(const cfg::BasicBlock &bb, size_t numLocals) {
-    _vars.init(numLocals);
+    _vars.init(numLocals, bb.args.size() + bb.exprs.size());
     for (const cfg::VariableUseSite &arg : bb.args) {
-        _vars[arg.variable].typeAndOrigins.type = nullptr;
+        _vars.insert(arg.variable);
     }
 }
 
 void Environment::setUninitializedVarsToNil(core::Context ctx, core::Loc origin) {
     for (auto entry : _vars) {
-        if (entry.state.typeAndOrigins.type == nullptr) {
-            entry.state.typeAndOrigins.type = core::Types::nilClass();
-            entry.state.typeAndOrigins.origins.emplace_back(origin);
+        if (entry.state.isNull() || entry.state->typeAndOrigins.type == nullptr) {
+            auto &state = entry.state.mutate();
+            state.typeAndOrigins.type = core::Types::nilClass();
+            state.typeAndOrigins.origins.emplace_back(origin);
         } else {
-            entry.state.typeAndOrigins.type.sanityCheck(ctx);
+            entry.state->typeAndOrigins.type.sanityCheck(ctx);
         }
     }
 }

@@ -1,5 +1,4 @@
 #include "GlobalState.h"
-
 #include "common/sort/sort.h"
 #include "common/timers/Timer.h"
 #include "core/Error.h"
@@ -21,6 +20,10 @@
 #include "core/errors/infer.h"
 #include "core/packages/MangledName.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
+#ifdef __linux__
+#include <sys/mman.h>
+#include <unistd.h>
+#endif
 
 template class std::vector<std::pair<unsigned int, unsigned int>>;
 template class std::shared_ptr<sorbet::core::GlobalState>;
@@ -1043,6 +1046,45 @@ void GlobalState::preallocateTables(uint32_t classAndModulesSize, uint32_t metho
                       "typeMembers={} utf8Names={} constantNames={} uniqueNames={}",
                       classAndModules.capacity(), methods.capacity(), fields.capacity(), typeParameters.capacity(),
                       typeMembers.capacity(), utf8Names.capacity(), constantNames.capacity(), uniqueNames.capacity()));
+}
+
+namespace {
+template <class T> GlobalState::MemoryRange reservedRange(const std::vector<T> &table) {
+    return {table.data(), table.capacity() * sizeof(T)};
+}
+} // namespace
+
+std::vector<GlobalState::MemoryRange> GlobalState::preallocatedTableRanges() const {
+    return {
+        reservedRange(classAndModules), reservedRange(methods),     reservedRange(fields),
+        reservedRange(typeParameters),  reservedRange(typeMembers), reservedRange(utf8Names),
+        reservedRange(constantNames),   reservedRange(uniqueNames),
+    };
+}
+
+void GlobalState::prefaultRanges(const std::vector<MemoryRange> &ranges) {
+#ifdef __linux__
+#ifndef MADV_POPULATE_WRITE
+#define MADV_POPULATE_WRITE 23
+#endif
+    auto pageSizeResult = sysconf(_SC_PAGESIZE);
+    if (pageSizeResult <= 0) {
+        return;
+    }
+    auto pageSize = static_cast<uintptr_t>(pageSizeResult);
+    for (auto &range : ranges) {
+        if (range.begin == nullptr || range.bytes == 0) {
+            continue;
+        }
+        // Rounded inward to whole pages; on a kernel without `MADV_POPULATE_WRITE` (before 5.14) the call fails and the
+        // pages fault in on first use as before.
+        auto start = (reinterpret_cast<uintptr_t>(range.begin) + pageSize - 1) & ~(pageSize - 1);
+        auto stop = (reinterpret_cast<uintptr_t>(range.begin) + range.bytes) & ~(pageSize - 1);
+        if (stop > start) {
+            madvise(reinterpret_cast<void *>(start), stop - start, MADV_POPULATE_WRITE);
+        }
+    }
+#endif
 }
 
 constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZE;

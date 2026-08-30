@@ -187,7 +187,7 @@ TEST_CASE("VariableTable") {
     auto local = [](uint32_t id) { return cfg::LocalRef(id); };
 
     VariableTable table;
-    table.init(numLocals);
+    table.init(numLocals, numLocals);
     CHECK_EQ(0, table.size());
     CHECK_FALSE(table.contains(local(3)));
     CHECK_EQ(nullptr, table.find(local(3)));
@@ -217,7 +217,7 @@ TEST_CASE("VariableTable") {
         CHECK_EQ(std::vector<uint32_t>{3, 7, 1}, order);
     }
 
-    SUBCASE("references into the table stay valid across insertions") {
+    SUBCASE("references to states stay valid across insertions") {
         auto &first = table[local(0)];
         for (uint32_t id = 1; id < numLocals; id++) {
             table[local(id)];
@@ -228,20 +228,35 @@ TEST_CASE("VariableTable") {
         CHECK_EQ(&first, table.find(local(0)));
     }
 
-    SUBCASE("copies are independent") {
+    SUBCASE("a copy shares states until one side writes") {
         table[local(2)].knownTruthy = true;
         VariableTable copy = table;
+        CHECK_EQ(table.find(local(2)), copy.find(local(2)));
+
         copy[local(2)].knownTruthy = false;
         copy[local(5)];
+        CHECK_NE(table.find(local(2)), copy.find(local(2)));
         CHECK(table.find(local(2))->knownTruthy);
         CHECK_FALSE(copy.find(local(2))->knownTruthy);
         CHECK_EQ(1, table.size());
         CHECK_EQ(2, copy.size());
     }
 
+    SUBCASE("a variable held without a state reads as absent until written") {
+        table.insert(local(6));
+        CHECK(table.contains(local(6)));
+        CHECK_EQ(nullptr, table.find(local(6)));
+        REQUIRE_NE(nullptr, table.findRef(local(6)));
+        CHECK(table.findRef(local(6))->isNull());
+
+        table.findMutable(local(6))->knownTruthy = true;
+        REQUIRE_NE(nullptr, table.find(local(6)));
+        CHECK(table.find(local(6))->knownTruthy);
+    }
+
     SUBCASE("init empties the table and release frees it") {
         table[local(4)];
-        table.init(numLocals);
+        table.init(numLocals, numLocals);
         CHECK_EQ(0, table.size());
         CHECK_FALSE(table.contains(local(4)));
         table[local(4)];

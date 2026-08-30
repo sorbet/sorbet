@@ -36,6 +36,20 @@ public:
             });
         }
     }
+
+    // Like `iterate`, but `body` receives runs of up to `chunkSize` consecutive elements of `args` (as an
+    // `absl::Span<T>`), for work that is far cheaper per element than a queue operation.
+    template <typename T, typename Fn>
+    static void iterateChunked(WorkerPool &workers, std::string_view taskName, absl::Span<T> args, size_t chunkSize,
+                               Fn body) {
+        ENFORCE(chunkSize > 0);
+        std::vector<absl::Span<T>> chunks;
+        chunks.reserve((args.size() + chunkSize - 1) / chunkSize);
+        for (size_t start = 0; start < args.size(); start += chunkSize) {
+            chunks.emplace_back(args.subspan(start, chunkSize));
+        }
+        iterate(workers, taskName, absl::MakeSpan(chunks), [&body](absl::Span<T> &chunk) { std::invoke(body, chunk); });
+    }
 };
 
 } // namespace sorbet

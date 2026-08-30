@@ -2450,7 +2450,7 @@ void findConflictingClassDefs(const core::GlobalState &gs, ClassBehaviorLocsMap 
     }
 }
 
-void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinitions,
+void defineSymbols(core::GlobalState &gs, AllFoundDefinitions &allFoundDefinitions,
                    UnorderedMap<core::FileRef, shared_ptr<const core::FileHash>> &&oldFoundHashesForFiles,
                    core::FoundDefHashesResult *foundHashesOut, vector<core::ClassOrModuleRef> &updatedSymbols) {
     Timer timeit(gs.tracer(), "naming.defineSymbols");
@@ -2501,6 +2501,21 @@ void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinition
     return;
 }
 
+// Frees every file's found definitions on the workers. Freeing them where they went out of scope took the main thread
+// about a second on a large codebase (hundreds of thousands of files, millions of small vectors), between two phases
+// that the workers spend idle.
+void freeFoundDefinitions(const core::GlobalState &gs, AllFoundDefinitions &allFoundDefinitions, WorkerPool &workers) {
+    Timer timeit(gs.tracer(), "naming.freeFoundDefinitions");
+    constexpr size_t chunkSize = 512;
+    Parallel::iterateChunked(workers, "freeFoundDefinitions", absl::MakeSpan(allFoundDefinitions), chunkSize,
+                             [](auto chunk) {
+                                 for (auto &foundDefinitions : chunk) {
+                                     foundDefinitions.second.reset();
+                                 }
+                             });
+    allFoundDefinitions.clear();
+}
+
 void symbolizeTrees(const core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers) {
     Timer timeit(gs.tracer(), "naming.symbolizeTrees");
     Parallel::iterate(workers, "symbolizeTrees", trees, [&gs, inserter = TreeSymbolizer()](auto &parsedFile) mutable {
@@ -2526,7 +2541,8 @@ Namer::runInternal(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, Wor
         ENFORCE(foundDefs.size() == 1,
                 "Producing foundMethodHashes is meant to only happen when hashing a single file");
     }
-    defineSymbols(gs, move(foundDefs), std::move(oldFoundHashesForFiles), foundHashesOut, updatedSymbols);
+    defineSymbols(gs, foundDefs, std::move(oldFoundHashesForFiles), foundHashesOut, updatedSymbols);
+    freeFoundDefinitions(gs, foundDefs, workers);
     if (gs.epochManager->wasTypecheckingCanceled()) {
         return true;
     }

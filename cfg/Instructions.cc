@@ -68,7 +68,7 @@ string InstructionPtr::showRaw(const core::GlobalState &gs, const CFG &cfg, int 
 void InstructionPtr::deleteTagged(Tag tag, void *expr) noexcept {
     ENFORCE(expr != nullptr);
 
-#define DELETE_INSN(name) delete static_cast<name *>(expr);
+#define DELETE_INSN(name) static_cast<name *>(expr)->~name();
     GENERATE_TAG_SWITCH(tag, DELETE_INSN)
 #undef DELETE_INSN
 }
@@ -123,9 +123,11 @@ string LoadSelf::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) 
 Send::SendInitializer::SendInitializer(Send *snd) : snd(snd), refs(snd->argRefs()), locs(snd->argLocs()) {}
 
 Send::SendInitializer Send::make(LocalRef recv, core::LocOffsets receiverLoc, core::NameRef fun,
-                                 core::LocOffsets funLoc, uint16_t numPosArgs, bool isPrivateOk, uint32_t numArgs) {
+                                 core::LocOffsets funLoc, uint16_t numPosArgs, bool isPrivateOk, uint32_t numArgs,
+                                 Arena &arena) {
+    static_assert(alignof(Send) <= Arena::ALIGNMENT, "the arena cannot align a Send");
     size_t totalSize = Parent::totalSizeToAlloc<LocalRef, core::TypePtr, core::LocOffsets>(numArgs, numArgs, numArgs);
-    void *p = ::operator new(totalSize);
+    void *p = arena.allocate(totalSize);
     Send *snd = new (p) Send(recv, receiverLoc, fun, funLoc, numPosArgs, isPrivateOk, numArgs);
     // Go ahead and initialize all the TypePtrs; we will assign real values in infer.
     for (auto &t : snd->argTypes()) {

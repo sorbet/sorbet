@@ -87,7 +87,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(CFGContext cctx, unique_ptr<CFG> res, absl:
             selfClaz = res->symbol.data(ctx)->owner;
         }
         synthesizeExpr(entry, LocalRef::selfVariable(), res->declLoc.copyWithZeroLength(),
-                       make_insn<Cast>(LocalRef::selfVariable(), res->declLoc.copyWithZeroLength(),
+                       make_insn<Cast>(res->arena(), LocalRef::selfVariable(), res->declLoc.copyWithZeroLength(),
                                        selfClaz.data(ctx)->selfType(ctx), core::Names::cast()));
 
         BasicBlock *presentCont = entry;
@@ -122,14 +122,14 @@ unique_ptr<CFG> CFGBuilder::buildFor(CFGContext cctx, unique_ptr<CFG> res, absl:
                     auto [result, presentNext, defaultNext] =
                         walkDefault(cctx, i, paramInfo, local, p->loc, opt->default_, presentCont, defaultCont);
 
-                    synthesizeExpr(defaultNext, local, p->loc, make_insn<Ident>(result));
+                    synthesizeExpr(defaultNext, local, p->loc, make_insn<Ident>(res->arena(), result));
 
                     presentCont = presentNext;
                     defaultCont = defaultNext;
                 }
             }
 
-            synthesizeExpr(presentCont, local, p->loc, make_insn<LoadArg>(res->symbol, i));
+            synthesizeExpr(presentCont, local, p->loc, make_insn<LoadArg>(res->arena(), res->symbol, i));
         }
 
         // Join the presentCont and defaultCont paths together
@@ -178,14 +178,14 @@ unique_ptr<CFG> CFGBuilder::buildFor(CFGContext cctx, unique_ptr<CFG> res, absl:
     } else {
         rvLoc = cont->exprs.back().loc;
     }
-    synthesizeExpr(cont, retSym1, rvLoc, make_insn<Return>(retSym, rvLoc)); // dead assign.
+    synthesizeExpr(cont, retSym1, rvLoc, make_insn<Return>(res->arena(), retSym, rvLoc)); // dead assign.
     jumpToDead(cont, *res.get(), rvLoc);
 
     vector<Binding> aliasesPrefix;
     for (auto kv : cctx.aliases) {
         core::SymbolRef global = kv.first;
         LocalRef local = kv.second;
-        aliasesPrefix.emplace_back(local, core::LocOffsets::none(), make_insn<Alias>(global));
+        aliasesPrefix.emplace_back(local, core::LocOffsets::none(), make_insn<Alias>(res->arena(), global));
         if (global.isFieldOrStaticField()) {
             res->minLoops[local.id()] = CFG::MIN_LOOP_FIELD;
         } else {
@@ -198,8 +198,9 @@ unique_ptr<CFG> CFGBuilder::buildFor(CFGContext cctx, unique_ptr<CFG> res, absl:
         }
     }
     for (auto kv : cctx.discoveredUndeclaredFields) {
-        aliasesPrefix.emplace_back(kv.second, core::LocOffsets::none(),
-                                   make_insn<Alias>(core::Symbols::Magic_undeclaredFieldStub(), kv.first));
+        aliasesPrefix.emplace_back(
+            kv.second, core::LocOffsets::none(),
+            make_insn<Alias>(res->arena(), core::Symbols::Magic_undeclaredFieldStub(), kv.first));
         res->minLoops[kv.second.id()] = CFG::MIN_LOOP_FIELD;
     }
     histogramInc("cfgbuilder.aliases", aliasesPrefix.size());
@@ -214,10 +215,11 @@ unique_ptr<CFG> CFGBuilder::buildFor(CFGContext cctx, unique_ptr<CFG> res, absl:
     sanityCheck(ctx, *res);
     auto isAcyclic = fillInTopoSorts(ctx, *res);
     dealias(ctx, *res);
-    CFG::ReadsAndWrites RnW = res->findAllReadsAndWrites(ctx);
-    computeMinMaxLoops(ctx, RnW, *res);
-    auto blockArgs = fillInBlockArguments(ctx, RnW, *res, isAcyclic);
-    removeDeadAssigns(ctx, RnW, *res, blockArgs); // requires block arguments to be filled
+    if (res->numLocalVariables() > CFG::SPARSE_LIVENESS_MIN_LOCALS) {
+        fillInLiveness<SparseUIntSet>(ctx, *res, isAcyclic);
+    } else {
+        fillInLiveness<UIntSet>(ctx, *res, isAcyclic);
+    }
     simplify(ctx, *res);
     histogramInc("cfgbuilder.basicBlocksSimplified", basicBlockCreated - res->basicBlocks.size());
     markLoopHeaders(ctx, *res);

@@ -411,7 +411,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         }
         histogramInc("infer.environment.size", current.vars().size());
         for (const auto &entry : current.vars()) {
-            entry.state.knowledge.emitKnowledgeSizeMetric();
+            entry.state->knowledge.emitKnowledgeSizeMetric();
         }
     }
     if (startErrorCount == ctx.state.totalErrors()) {

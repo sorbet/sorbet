@@ -367,6 +367,18 @@ public:
     void installIntrinsics();
     void computeLinearization();
 
+    struct MemoryRange {
+        const void *begin;
+        size_t bytes;
+    };
+    // The memory `preallocateTables` reserved for the symbol and name tables, for `prefaultRanges`. Take it on the
+    // thread that owns this GlobalState, before handing it to a helper thread: a table that is reallocated later only
+    // makes prefaulting its old range moot (the pages are populated or the call fails), never unsafe.
+    std::vector<MemoryRange> preallocatedTableRanges() const;
+    // Asks the OS to back `ranges` with pages now (Linux 5.14 and later; a no-op elsewhere), so that the (serial)
+    // phases that fill the tables do not page-fault their way through gigabytes. Meant to run on a helper thread while
+    // the (parallel) indexing phase runs. Touches no memory contents.
+    static void prefaultRanges(const std::vector<MemoryRange> &ranges);
     // Expand symbol and name tables to the given lengths. Does nothing if the value is <= current capacity.
     void preallocateTables(uint32_t classAndModulesSize, uint32_t methodsSize, uint32_t fieldsSize,
                            uint32_t typeParametersSize, uint32_t typeMembersSize, uint32_t utf8NameSize,

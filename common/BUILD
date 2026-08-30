@@ -59,7 +59,9 @@ cc_test(
     visibility = ["//tools:__pkg__"],
     deps = [
         ":common",
+        "//common/concurrency",
         "@doctest//doctest",
         "@doctest//doctest:main",
+        "@spdlog",
     ],
 )

@@ -21,11 +21,17 @@ private:
     static void dealias(core::Context ctx, CFG &cfg);
     static void simplify(core::Context ctx, CFG &cfg);
     static void sanityCheck(core::Context ctx, CFG &cfg);
-    static std::vector<UIntSet> fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrites &RnW, const CFG &cfg,
-                                                     bool isAcyclic);
-    static void computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg);
-    static void removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg,
-                                  const std::vector<UIntSet> &blockArgs);
+    // `Set` is `UIntSet` or `SparseUIntSet`, see `CFG::SPARSE_LIVENESS_MIN_LOCALS`.
+    template <class Set>
+    static std::vector<Set> fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWritesT<Set> &RnW,
+                                                 const CFG &cfg, bool isAcyclic);
+    template <class Set>
+    static void computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWritesT<Set> &RnW, CFG &cfg);
+    template <class Set>
+    static void removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWritesT<Set> &RnW, CFG &cfg,
+                                  const std::vector<Set> &blockArgs);
+    // The liveness passes above, in order, with the set representation `Set`.
+    template <class Set> static void fillInLiveness(core::Context ctx, CFG &cfg, bool isAcyclic);
     static void markLoopHeaders(core::Context ctx, CFG &cfg);
     // Clears `isAcyclic` if the graph reachable from `currentBB` has a back edge.
     static std::vector<int> topoSortFwd(std::vector<BasicBlock *> &target, int numBlocks, BasicBlock *currentBB,

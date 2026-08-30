@@ -47,6 +47,18 @@ public:
 
     // Returns the number of elements in the set.
     size_t size() const;
+
+    // The 32-bit word holding items `32 * index .. 32 * index + 31`.
+    uint32_t word(uint32_t index) const {
+        ENFORCE_NO_TIMER(index < _members.size());
+        return _members[index];
+    }
+
+    // Ors `bits` into the word holding items `32 * index .. 32 * index + 31`.
+    void addWord(uint32_t index, uint32_t bits) {
+        ENFORCE_NO_TIMER(index < _members.size());
+        _members[index] |= bits;
+    }
 };
 
 } // namespace sorbet

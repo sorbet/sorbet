@@ -327,7 +327,7 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
 }
 
 void CFGBuilder::markLoopHeaders(core::Context ctx, CFG &cfg) {
-    for (unique_ptr<BasicBlock> &bb : cfg.basicBlocks) {
+    for (auto &bb : cfg.basicBlocks) {
         for (auto *parent : bb->backEdges) {
             if (parent->outerLoops < bb->outerLoops) {
                 bb->flags.isLoopHeader = true;
@@ -336,8 +336,9 @@ void CFGBuilder::markLoopHeaders(core::Context ctx, CFG &cfg) {
         }
     }
 }
-void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg,
-                                   const vector<UIntSet> &blockArgs) {
+template <class Set>
+void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWritesT<Set> &RnW, CFG &cfg,
+                                   const vector<Set> &blockArgs) {
     ENFORCE_NO_TIMER(blockArgs.size() == cfg.maxBasicBlockId);
     if (!ctx.state.lspQuery.isEmpty()) {
         return;
@@ -371,7 +372,8 @@ void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites 
     }
 }
 
-void CFGBuilder::computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg) {
+template <class Set>
+void CFGBuilder::computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWritesT<Set> &RnW, CFG &cfg) {
     for (const auto &bb : cfg.basicBlocks) {
         if (bb.get() == cfg.deadBlock()) {
             continue;
@@ -406,8 +408,28 @@ void CFGBuilder::computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites
     }
 }
 
-vector<UIntSet> CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWrites &RnW, const CFG &cfg,
-                                                 bool isAcyclic) {
+namespace {
+// `into |= writes | bound`, for the writes in either set representation and the (always dense) second bound.
+void addWritesAndBound(UIntSet &into, const UIntSet &writes, const UIntSet &bound) {
+    into.add(writes, bound);
+}
+void addWritesAndBound(UIntSet &into, const SparseUIntSet &writes, const UIntSet &bound) {
+    writes.forEachWord([&into](uint32_t index, uint32_t bits) { into.addWord(index, bits); });
+    into.add(bound);
+}
+
+// `set &= bound`, for the first bound in either representation and the (always dense) second bound.
+void intersectWithBound(UIntSet &set, const UIntSet &bound) {
+    set.intersect(bound);
+}
+void intersectWithBound(SparseUIntSet &set, const UIntSet &bound) {
+    set.intersectWords([&bound](uint32_t index) { return bound.word(index); });
+}
+} // namespace
+
+template <class Set>
+vector<Set> CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::ReadsAndWritesT<Set> &RnW, const CFG &cfg,
+                                             bool isAcyclic) {
     // Dmitry's algorithm for adding basic block arguments
     // I don't remember this version being described in any book.
     //
@@ -430,12 +452,12 @@ vector<UIntSet> CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::R
     const auto &deadByBlock = RnW.dead;
 
     // iterate over basic blocks in reverse and found upper bounds on what could a block need.
-    vector<UIntSet> upperBounds1;
+    vector<Set> upperBounds1;
     bool changed = true;
     {
         Timer timeit(ctx.state.tracer(), "upperBounds1");
         upperBounds1 = readsByBlock;
-        UIntSet toRemove(cfg.numLocalVariables());
+        Set toRemove(cfg.numLocalVariables());
         while (changed) {
             changed = false;
             for (BasicBlock *bb : cfg.forwardsTopoSort) {
@@ -474,6 +496,8 @@ vector<UIntSet> CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::R
         }
     }
 
+    // The second bound accumulates every local written on some path to the block, so unlike the reads and the first
+    // bound it is dense for every representation of the others: it is always a bitset.
     vector<UIntSet> upperBounds2(cfg.maxBasicBlockId, UIntSet(cfg.numLocalVariables()));
 
     changed = true;
@@ -487,7 +511,7 @@ vector<UIntSet> CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::R
                 const auto sz = upperBoundsForBlock.size();
                 for (BasicBlock *edge : bb->backEdges) {
                     if (edge != cfg.deadBlock()) {
-                        upperBoundsForBlock.add(writesByBlock[edge->id], upperBounds2[edge->id]);
+                        addWritesAndBound(upperBoundsForBlock, writesByBlock[edge->id], upperBounds2[edge->id]);
                     }
                 }
                 changed = changed || sz != upperBoundsForBlock.size();
@@ -503,7 +527,7 @@ vector<UIntSet> CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::R
         for (auto &it : cfg.basicBlocks) {
             // Intentionally mutate upperBounds1 here for return value.
             auto &intersection = upperBounds1[it->id];
-            intersection.intersect(upperBounds2[it->id]);
+            intersectWithBound(intersection, upperBounds2[it->id]);
             // Note: forEach enqueues arguments in sorted order. We assume that args is empty so we don't need to sort.
             ENFORCE_NO_TIMER(it->args.empty());
             it->args.reserve(intersection.size());
@@ -517,6 +541,15 @@ vector<UIntSet> CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::R
     // upperBounds1 now contains the intersection of upperBounds2 and 1.
     return upperBounds1;
 }
+
+template <class Set> void CFGBuilder::fillInLiveness(core::Context ctx, CFG &cfg, bool isAcyclic) {
+    auto RnW = cfg.findAllReadsAndWrites<Set>(ctx);
+    computeMinMaxLoops(ctx, RnW, cfg);
+    auto blockArgs = fillInBlockArguments(ctx, RnW, cfg, isAcyclic);
+    removeDeadAssigns(ctx, RnW, cfg, blockArgs); // requires block arguments to be filled
+}
+template void CFGBuilder::fillInLiveness<UIntSet>(core::Context ctx, CFG &cfg, bool isAcyclic);
+template void CFGBuilder::fillInLiveness<SparseUIntSet>(core::Context ctx, CFG &cfg, bool isAcyclic);
 
 namespace {
 

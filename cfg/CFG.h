@@ -1,6 +1,7 @@
 #ifndef SORBET_CFG_H
 #define SORBET_CFG_H
 
+#include "common/SparseUIntSet.h"
 #include "common/UIntSet.h"
 #include "core/Context.h"
 #include "core/LocalVariable.h"
@@ -55,7 +56,8 @@ public:
 
 class BasicBlock final {
 public:
-    std::vector<VariableUseSite> args;
+    // The block's lists live in its CFG's arena (see `Arena`).
+    std::vector<VariableUseSite, ArenaAllocator<VariableUseSite>> args;
     int id = 0;
     struct Flags {
         bool isLoopHeader : 1 = false;
@@ -64,10 +66,12 @@ public:
     Flags flags;
     int outerLoops = 0;
     int firstDeadInstructionIdx = -1;
-    std::vector<Binding> exprs;
+    std::vector<Binding, ArenaAllocator<Binding>> exprs;
     BlockExit bexit;
-    std::vector<BasicBlock *> backEdges;
-    BasicBlock() {
+    std::vector<BasicBlock *, ArenaAllocator<BasicBlock *>> backEdges;
+    explicit BasicBlock(Arena &arena)
+        : args(ArenaAllocator<VariableUseSite>(arena)), exprs(ArenaAllocator<Binding>(arena)),
+          backEdges(ArenaAllocator<BasicBlock *>(arena)) {
         counterInc("basicblocks");
     };
 
@@ -97,7 +101,15 @@ public:
 class CFGContext;
 
 class CFG final {
+    // Declared first so that it is destroyed last: the blocks below, their lists and their instructions live in it.
+    Arena cfgArena;
+
 public:
+    // The arena the CFG's blocks and instructions are created in (see `make_insn`).
+    Arena &arena() {
+        return cfgArena;
+    }
+
     class UnfreezeCFGLocalVariables final {
         CFG &cfg;
 
@@ -132,7 +144,13 @@ public:
     // Stores MethodDef::declLoc
     core::LocOffsets declLoc;
 
-    std::vector<std::unique_ptr<BasicBlock>> basicBlocks;
+    // Destroys a block that lives in the CFG's arena: its memory is freed with the arena.
+    struct BasicBlockDeleter {
+        void operator()(BasicBlock *block) const {
+            block->~BasicBlock();
+        }
+    };
+    std::vector<std::unique_ptr<BasicBlock, BasicBlockDeleter>> basicBlocks;
 
     // Special loc that corresponds to implicit method return.
     core::LocOffsets implicitReturnLoc;
@@ -174,19 +192,28 @@ public:
 
     void sanityCheck(core::Context ctx);
 
-    class ReadsAndWrites {
+    // `Set` is the representation of a set of locals: `UIntSet` (a bitset over the method's locals) or `SparseUIntSet`
+    // (only its non-zero words), see `SPARSE_LIVENESS_MIN_LOCALS`.
+    template <class Set> class ReadsAndWritesT {
     public:
-        ReadsAndWrites(uint32_t maxBasicBlockId, uint32_t numLocalVariables);
-        std::vector<UIntSet> reads;
-        std::vector<UIntSet> writes;
+        ReadsAndWritesT(uint32_t maxBasicBlockId, uint32_t numLocalVariables)
+            : reads(maxBasicBlockId, Set(numLocalVariables)), writes(maxBasicBlockId, Set(numLocalVariables)),
+              dead(maxBasicBlockId, Set(numLocalVariables)) {}
+        std::vector<Set> reads;
+        std::vector<Set> writes;
 
         // The "dead" set reports, for each block, variables that are *only*
         // read in that block after being written; they are thus dead on entry,
         // which we take advantage of when building dataflow information for
         // inference.
-        std::vector<UIntSet> dead;
+        std::vector<Set> dead;
     };
-    ReadsAndWrites findAllReadsAndWrites(core::Context ctx);
+    using ReadsAndWrites = ReadsAndWritesT<UIntSet>;
+    template <class Set> ReadsAndWritesT<Set> findAllReadsAndWrites(core::Context ctx);
+
+    // A method with more locals than this has its liveness computed with `SparseUIntSet`s. Its blocks each mention a
+    // handful of the locals, and with bitsets the passes over them cost in proportion to blocks times locals.
+    static constexpr int SPARSE_LIVENESS_MIN_LOCALS = 1024;
     LocalRef enterLocal(core::LocalVariable variable);
 
     LinkRef enterLink(core::NameRef fun, core::LocOffsets loc, std::vector<core::ParamInfo::Flags> &&paramFlags);
