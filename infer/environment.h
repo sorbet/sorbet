@@ -115,6 +115,64 @@ public:
     bool isNeeded(cfg::LocalRef var);
 };
 
+// A pinned type is only ever consulted when a variable is assigned at a loop depth other than the one it was introduced
+// at (see the loop checking in `Environment::processBinding`). Most pins are never consulted: every constant reference
+// pins a fresh temporary, and every field is pinned by the alias that introduces it. Recording only the pins that some
+// binding can consult keeps the pin table that flows from block to block small.
+class PinFilter {
+    std::vector<bool> consulted;
+
+public:
+    explicit PinFilter(const cfg::CFG &cfg);
+
+    PinFilter(const PinFilter &) = delete;
+    PinFilter(PinFilter &&) = delete;
+
+    bool isConsulted(cfg::LocalRef var) const;
+};
+
+// The pinned types of an environment, a table shared by the environments of consecutive blocks until one of them pins
+// a variable (copy-on-write): most blocks pin nothing, and a method that pins hundreds of fields would otherwise copy
+// the table into every one of its blocks.
+class PinnedTypes {
+    std::shared_ptr<UnorderedMap<cfg::LocalRef, core::TypeAndOrigins>> table;
+
+public:
+    bool empty() const {
+        return table == nullptr || table->empty();
+    }
+
+    // The pin of `var`, or `nullptr`.
+    const core::TypeAndOrigins *find(cfg::LocalRef var) const {
+        if (table == nullptr) {
+            return nullptr;
+        }
+        auto fnd = table->find(var);
+        return fnd == table->end() ? nullptr : &fnd->second;
+    }
+
+    void set(cfg::LocalRef var, const core::TypeAndOrigins &tp) {
+        if (table == nullptr) {
+            table = std::make_shared<UnorderedMap<cfg::LocalRef, core::TypeAndOrigins>>();
+        } else if (table.use_count() > 1) {
+            table = std::make_shared<UnorderedMap<cfg::LocalRef, core::TypeAndOrigins>>(*table);
+        }
+        (*table)[var] = tp;
+    }
+
+    // Whether `f` holds for every pin.
+    template <class F> bool allOf(F f) const {
+        if (table == nullptr) {
+            return true;
+        }
+        return absl::c_all_of(*table, [&f](const auto &pair) { return f(pair.first, pair.second); });
+    }
+
+    void clear() {
+        table = nullptr;
+    }
+};
+
 // KnowledgeRef wraps a `KnowledgeFact` with copy-on-write semantics
 class KnowledgeRef {
     // Is private to ensure that yes/no type test updates go through trusted paths.
@@ -192,8 +250,136 @@ public:
         return _truthy->yesTypeTests.empty() && _truthy->noTypeTests.empty() && _falsy->yesTypeTests.empty() &&
                _falsy->noTypeTests.empty();
     }
+
+    // Empty and alive on both options: knowledge that says nothing at all.
+    bool isTrivial() const {
+        return isEmpty() && !_truthy->isDead && !_falsy->isDead;
+    }
 };
 CheckSize(TestedKnowledge, 24, 8);
+
+struct VariableState {
+    core::TypeAndOrigins typeAndOrigins;
+    TestedKnowledge knowledge;
+    bool knownTruthy;
+};
+
+// The variables an environment holds, with their states. A block's environment holds the variables live into the block
+// and those assigned in it, looked up by local; a table indexed by local id with the present locals listed replaces a
+// hash map: no hashing, and the per-block passes over the variables walk a contiguous list.
+class VariableTable {
+    // The states of the present locals, in insertion order, and the locals themselves.
+    std::vector<VariableState> states;
+    std::vector<cfg::LocalRef> locals;
+    // One entry per local of the method: 1 + the index in `states` of a present local, 0 for an absent one.
+    std::vector<uint32_t> positions;
+
+public:
+    // A present local and its state, as iteration yields them.
+    template <class State> struct Entry {
+        cfg::LocalRef local;
+        State &state;
+    };
+
+    template <class Table, class State> class Iterator {
+        Table &table;
+        size_t index;
+
+    public:
+        Iterator(Table &table, size_t index) : table(table), index(index) {}
+        bool operator!=(const Iterator &other) const {
+            return index != other.index;
+        }
+        Iterator &operator++() {
+            index++;
+            return *this;
+        }
+        Entry<State> operator*() const {
+            return Entry<State>{table.locals[index], table.states[index]};
+        }
+    };
+
+private:
+    // References into `states` are handed out and held across insertions, so `states` must never reallocate: it is
+    // reserved for every local of the method up front (the memory is not touched until used). A table can hold at
+    // most every local once.
+    void reserveAll() {
+        states.reserve(positions.size());
+        locals.reserve(positions.size());
+    }
+
+public:
+    VariableTable() = default;
+    VariableTable(const VariableTable &other) : states(other.states), locals(other.locals), positions(other.positions) {
+        reserveAll();
+    }
+    VariableTable &operator=(const VariableTable &other) {
+        states = other.states;
+        locals = other.locals;
+        positions = other.positions;
+        reserveAll();
+        return *this;
+    }
+    VariableTable(VariableTable &&) = default;
+    VariableTable &operator=(VariableTable &&) = default;
+
+    // Empties the table and sizes it for the `numLocals` locals of the method.
+    void init(size_t numLocals) {
+        states.clear();
+        locals.clear();
+        positions.assign(numLocals, 0);
+        reserveAll();
+    }
+
+    // Frees the table's storage.
+    void release() {
+        states = std::vector<VariableState>();
+        locals = std::vector<cfg::LocalRef>();
+        positions = std::vector<uint32_t>();
+    }
+
+    size_t size() const {
+        return states.size();
+    }
+
+    bool contains(cfg::LocalRef local) const {
+        return local.id() < positions.size() && positions[local.id()] != 0;
+    }
+
+    VariableState *find(cfg::LocalRef local) {
+        return contains(local) ? &states[positions[local.id()] - 1] : nullptr;
+    }
+
+    const VariableState *find(cfg::LocalRef local) const {
+        return contains(local) ? &states[positions[local.id()] - 1] : nullptr;
+    }
+
+    // The state of `local`, inserted (value-initialized) if absent.
+    VariableState &operator[](cfg::LocalRef local) {
+        ENFORCE(local.id() < positions.size());
+        auto &position = positions[local.id()];
+        if (position == 0) {
+            ENFORCE(states.size() < states.capacity(), "Environment holds more variables than it was sized for");
+            states.emplace_back();
+            locals.emplace_back(local);
+            position = states.size();
+        }
+        return states[position - 1];
+    }
+
+    auto begin() {
+        return Iterator<VariableTable, VariableState>(*this, 0);
+    }
+    auto end() {
+        return Iterator<VariableTable, VariableState>(*this, states.size());
+    }
+    auto begin() const {
+        return Iterator<const VariableTable, const VariableState>(*this, 0);
+    }
+    auto end() const {
+        return Iterator<const VariableTable, const VariableState>(*this, states.size());
+    }
+};
 
 class Environment {
     const core::TypeAndOrigins uninitialized;
@@ -219,15 +405,9 @@ class Environment {
      * simple subtyping check suffices to represent that one.
      */
 
-    struct VariableState {
-        core::TypeAndOrigins typeAndOrigins;
-        TestedKnowledge knowledge;
-        bool knownTruthy;
-    };
-    // TODO(jvilk): Use vectors.
-    UnorderedMap<cfg::LocalRef, VariableState> _vars;
+    VariableTable _vars;
 
-    UnorderedMap<cfg::LocalRef, core::TypeAndOrigins> pinnedTypes;
+    PinnedTypes pinnedTypes;
 
     // Variables whose knowledge may hold type tests (an overapproximation: entries are never removed), so that
     // `clearKnowledge` visits only them rather than every variable of a block with thousands of bindings.
@@ -273,11 +453,11 @@ public:
     bool isDead = false;
     cfg::BasicBlock *bb;
 
-    const UnorderedMap<cfg::LocalRef, VariableState> &vars() const {
+    const VariableTable &vars() const {
         return _vars;
     }
 
-    void initializeBasicBlockArgs(const cfg::BasicBlock &bb);
+    void initializeBasicBlockArgs(const cfg::BasicBlock &bb, size_t numLocals);
 
     void setUninitializedVarsToNil(core::Context ctx, core::Loc origin);
 
@@ -300,7 +480,7 @@ public:
      * then discard it, so the mixed lifetimes are not a problem in practice.
      */
     static const Environment &withCond(core::Context ctx, const Environment &env, Environment &copy, bool isTrue,
-                                       const UnorderedMap<cfg::LocalRef, VariableState> &filter);
+                                       const VariableTable &filter);
 
     void mergeWith(core::Context ctx, const Environment &other, cfg::CFG &inWhat, cfg::BasicBlock *bb,
                    KnowledgeFilter &knowledgeFilter, LocalMarks &marks);
@@ -310,17 +490,20 @@ public:
 
     void populateFrom(core::Context ctx, const Environment &other);
 
+    // Frees the variable and pin tables. Once every successor block has been processed nothing reads them again; only
+    // `isDead` is consulted afterwards.
+    void release();
+
     // Narrows the variables of `filter`, and the condition itself if this environment holds it, under the exit
     // condition of `source`'s block being `isTrue`. The condition's type, truthiness and knowledge are read from
     // `source`; the variables narrowed are this environment's, which must hold the same types as `source` for the
     // variables of `filter`: a clone of `source` (see `withCond`), or a block's own environment just populated from
     // its only predecessor.
-    void assumeKnowledge(core::Context ctx, const Environment &source, bool isTrue,
-                         const UnorderedMap<cfg::LocalRef, VariableState> &filter);
+    void assumeKnowledge(core::Context ctx, const Environment &source, bool isTrue, const VariableTable &filter);
 
     core::TypePtr
     processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Binding &bind, int loopCount, int bindMinLoops,
-                   KnowledgeFilter &knowledgeFilter, core::TypeConstraint &constr,
+                   KnowledgeFilter &knowledgeFilter, const PinFilter &pinFilter, core::TypeConstraint &constr,
                    const core::TypePtr &methodReturnType,
                    const std::optional<cfg::BasicBlock::BlockExitCondInfo> &parentUpdateKnowledgeReceiver);
 

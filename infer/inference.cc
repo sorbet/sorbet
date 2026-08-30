@@ -114,9 +114,28 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
     vector<bool> visited;
     visited.resize(cfg->maxBasicBlockId);
     KnowledgeFilter knowledgeFilter(ctx, *cfg);
+    PinFilter pinFilter(*cfg);
     LocalMarks localMarks(cfg->numLocalVariables());
+    // A block's environment is read only while its successors are processed. Once the last of them has been, free it:
+    // a method with thousands of blocks that each carry hundreds of live variables otherwise holds every environment
+    // until the end. The candidates after processing a block are the block itself (when its successors all precede
+    // it, as at the end of a loop body) and its predecessors.
+    auto processed = [&](const cfg::BasicBlock *succ) { return succ == cfg->deadBlock() || visited[succ->id]; };
+    auto releaseIfFinished = [&](const cfg::BasicBlock *block) {
+        if (processed(block->bexit.thenb) && processed(block->bexit.elseb)) {
+            outEnvironments[block->id].release();
+        }
+    };
+    const cfg::BasicBlock *previous = nullptr;
     for (auto it = cfg->forwardsTopoSort.rbegin(); it != cfg->forwardsTopoSort.rend(); ++it) {
         cfg::BasicBlock *bb = *it;
+        if (previous != nullptr) {
+            releaseIfFinished(previous);
+            for (auto *parent : previous->backEdges) {
+                releaseIfFinished(parent);
+            }
+        }
+        previous = bb;
         if (bb == cfg->deadBlock()) {
             for (const auto &bind : bb->exprs) {
                 if (bind.value.isSynthetic() || bind.loc.empty()) {
@@ -133,7 +152,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             continue;
         }
         Environment &current = outEnvironments[bb->id];
-        current.initializeBasicBlockArgs(*bb);
+        current.initializeBasicBlockArgs(*bb, cfg->numLocalVariables());
 
         // We very much want to limit access to "global" data structures downstream.
         // In particular, processBinding should only need to know about the current binding (nothing
@@ -341,9 +360,9 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         for (cfg::Binding &bind : bb->exprs) {
             i++;
             if (!current.isDead || !ctx.state.lspQuery.isEmpty()) {
-                bind.bind.type =
-                    current.processBinding(ctx, *cfg, bind, bb->outerLoops, bind.bind.variable.minLoops(*cfg),
-                                           knowledgeFilter, *constr, methodReturnType, parentUpdateKnowledgeReceiver);
+                bind.bind.type = current.processBinding(ctx, *cfg, bind, bb->outerLoops,
+                                                        bind.bind.variable.minLoops(*cfg), knowledgeFilter, pinFilter,
+                                                        *constr, methodReturnType, parentUpdateKnowledgeReceiver);
                 if (cfg::isa_instruction<cfg::Send>(bind.value)) {
                     totalSendCount++;
                     if (bind.bind.type && !bind.bind.type.isUntyped()) {
@@ -391,8 +410,8 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             ENFORCE(bb->firstDeadInstructionIdx != -1);
         }
         histogramInc("infer.environment.size", current.vars().size());
-        for (auto &pair : current.vars()) {
-            pair.second.knowledge.emitKnowledgeSizeMetric();
+        for (const auto &entry : current.vars()) {
+            entry.state.knowledge.emitKnowledgeSizeMetric();
         }
     }
     if (startErrorCount == ctx.state.totalErrors()) {

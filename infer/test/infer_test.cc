@@ -7,6 +7,7 @@
 #include "core/ErrorQueue.h"
 #include "core/Names.h"
 #include "core/Unfreeze.h"
+#include "infer/environment.h"
 #include "infer/infer.h"
 #include "local_vars/local_vars.h"
 #include "namer/namer.h"
@@ -178,6 +179,75 @@ TEST_CASE("Infer") {
         REQUIRE(core::Types::equiv(gs, barOrfoo2, foo2Orbar));
         REQUIRE(core::Types::equiv(gs, barOrfoo1, foo1Orbar));
         REQUIRE(core::Types::equiv(gs, foo1Orfoo2, foo2Orfoo1));
+    }
+}
+
+TEST_CASE("VariableTable") {
+    const auto numLocals = 10;
+    auto local = [](uint32_t id) { return cfg::LocalRef(id); };
+
+    VariableTable table;
+    table.init(numLocals);
+    CHECK_EQ(0, table.size());
+    CHECK_FALSE(table.contains(local(3)));
+    CHECK_EQ(nullptr, table.find(local(3)));
+
+    SUBCASE("holds variables in insertion order, looked up by local") {
+        table[local(3)].knownTruthy = true;
+        table[local(7)].knownTruthy = false;
+        table[local(1)].knownTruthy = true;
+        CHECK_EQ(3, table.size());
+        CHECK(table.contains(local(3)));
+        CHECK(table.contains(local(7)));
+        CHECK(table.contains(local(1)));
+        CHECK_FALSE(table.contains(local(2)));
+        CHECK_FALSE(table.contains(local(9)));
+
+        // A second `operator[]` finds the same state rather than inserting another.
+        table[local(3)].knownTruthy = false;
+        CHECK_EQ(3, table.size());
+        REQUIRE_NE(nullptr, table.find(local(3)));
+        CHECK_FALSE(table.find(local(3))->knownTruthy);
+        CHECK(table.find(local(1))->knownTruthy);
+
+        std::vector<uint32_t> order;
+        for (auto entry : table) {
+            order.emplace_back(entry.local.id());
+        }
+        CHECK_EQ(std::vector<uint32_t>{3, 7, 1}, order);
+    }
+
+    SUBCASE("references into the table stay valid across insertions") {
+        auto &first = table[local(0)];
+        for (uint32_t id = 1; id < numLocals; id++) {
+            table[local(id)];
+        }
+        first.knownTruthy = true;
+        CHECK_EQ(numLocals, table.size());
+        CHECK(table.find(local(0))->knownTruthy);
+        CHECK_EQ(&first, table.find(local(0)));
+    }
+
+    SUBCASE("copies are independent") {
+        table[local(2)].knownTruthy = true;
+        VariableTable copy = table;
+        copy[local(2)].knownTruthy = false;
+        copy[local(5)];
+        CHECK(table.find(local(2))->knownTruthy);
+        CHECK_FALSE(copy.find(local(2))->knownTruthy);
+        CHECK_EQ(1, table.size());
+        CHECK_EQ(2, copy.size());
+    }
+
+    SUBCASE("init empties the table and release frees it") {
+        table[local(4)];
+        table.init(numLocals);
+        CHECK_EQ(0, table.size());
+        CHECK_FALSE(table.contains(local(4)));
+        table[local(4)];
+        table.release();
+        CHECK_EQ(0, table.size());
+        CHECK_FALSE(table.contains(local(4)));
     }
 }
 

@@ -188,6 +188,50 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
     vector<UnorderedMap<LocalRef, LocalRef>> outAliases;
     outAliases.resize(cfg.maxBasicBlockId);
 
+    // An alias is consulted only where its temporary is read, at the sites dealiased below. Count those reads up front
+    // and record no alias for a temporary with none left: the temporaries that load constants are read once, right
+    // after being assigned, and their aliases would otherwise stay in the table for the rest of the method, copied at
+    // every branch and scanned at every invalidation.
+    vector<uint32_t> remainingReads(cfg.numLocalVariables(), 0);
+    auto noteRead = [&](LocalRef var) {
+        if (var.isSyntheticTemporary(cfg)) {
+            remainingReads[var.id()]++;
+        }
+    };
+    for (auto &bb : cfg.basicBlocks) {
+        if (bb.get() == cfg.deadBlock()) {
+            continue;
+        }
+        for (auto &bind : bb->exprs) {
+            if (auto i = cast_instruction<Ident>(bind.value)) {
+                noteRead(i->what);
+            }
+            if (!bind.value.isSynthetic()) {
+                if (auto v = cast_instruction<Send>(bind.value)) {
+                    noteRead(v->recv.variable);
+                    for (auto &arg : v->argRefs()) {
+                        noteRead(arg);
+                    }
+                } else if (auto v = cast_instruction<TAbsurd>(bind.value)) {
+                    noteRead(v->what.variable);
+                } else if (auto v = cast_instruction<Return>(bind.value)) {
+                    noteRead(v->what.variable);
+                }
+            }
+        }
+        if (bb->bexit.cond.variable != LocalRef::unconditional()) {
+            noteRead(bb->bexit.cond.variable);
+        }
+    }
+    // Dealiases a read of `var`, counting it off.
+    auto dealiasRead = [&](LocalRef var, UnorderedMap<LocalRef, LocalRef> &aliases) {
+        if (var.isSyntheticTemporary(cfg)) {
+            ENFORCE(remainingReads[var.id()] > 0);
+            remainingReads[var.id()]--;
+        }
+        return maybeDealias(ctx, cfg, var, aliases);
+    };
+
     for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
         auto &bb = *it;
         if (bb == cfg.deadBlock()) {
@@ -234,7 +278,7 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
 
         for (Binding &bind : bb->exprs) {
             if (auto i = cast_instruction<Ident>(bind.value)) {
-                i->what = maybeDealias(ctx, cfg, i->what, current);
+                i->what = dealiasRead(i->what, current);
             }
             if (mayHaveAlias.contains(bind.bind.variable.id())) {
                 /* invalidate a stale record (uncommon) */
@@ -252,27 +296,32 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
                 // we don't allow dealiasing values into synthetic instructions
                 // as otherwise it fools dead code analysis.
                 if (auto v = cast_instruction<Ident>(bind.value)) {
+                    // Already dealiased above; an alias's target is never itself aliased, so this finds nothing.
                     v->what = maybeDealias(ctx, cfg, v->what, current);
                 } else if (auto v = cast_instruction<Send>(bind.value)) {
-                    v->recv.variable = maybeDealias(ctx, cfg, v->recv.variable, current);
+                    v->recv.variable = dealiasRead(v->recv.variable, current);
                     for (auto &arg : v->argRefs()) {
-                        arg = maybeDealias(ctx, cfg, arg, current);
+                        arg = dealiasRead(arg, current);
                     }
                 } else if (auto v = cast_instruction<TAbsurd>(bind.value)) {
-                    v->what.variable = maybeDealias(ctx, cfg, v->what.variable, current);
+                    v->what.variable = dealiasRead(v->what.variable, current);
                 } else if (auto v = cast_instruction<Return>(bind.value)) {
-                    v->what.variable = maybeDealias(ctx, cfg, v->what.variable, current);
+                    v->what.variable = dealiasRead(v->what.variable, current);
                 }
             }
 
-            // record new aliases
+            // record new aliases (only a synthetic temporary's alias is ever consulted; see `maybeDealias`). A
+            // variable with no read left (checked first: a target the builder never reads may have no proper name)
+            // gets none.
             if (auto i = cast_instruction<Ident>(bind.value)) {
-                current[bind.bind.variable] = i->what;
-                mayHaveAlias.add(i->what.id());
+                if (remainingReads[bind.bind.variable.id()] > 0 && bind.bind.variable.isSyntheticTemporary(cfg)) {
+                    current[bind.bind.variable] = i->what;
+                    mayHaveAlias.add(i->what.id());
+                }
             }
         }
         if (bb->bexit.cond.variable != LocalRef::unconditional()) {
-            bb->bexit.cond.variable = maybeDealias(ctx, cfg, bb->bexit.cond.variable, current);
+            bb->bexit.cond.variable = dealiasRead(bb->bexit.cond.variable, current);
         }
     }
 }
@@ -457,6 +506,7 @@ vector<UIntSet> CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::R
             intersection.intersect(upperBounds2[it->id]);
             // Note: forEach enqueues arguments in sorted order. We assume that args is empty so we don't need to sort.
             ENFORCE_NO_TIMER(it->args.empty());
+            it->args.reserve(intersection.size());
             intersection.forEach([&it](uint32_t local) -> void { it->args.emplace_back(local); });
             // it->args is now sorted in LocalRef ID order.
             ENFORCE(absl::c_is_sorted(it->args,
