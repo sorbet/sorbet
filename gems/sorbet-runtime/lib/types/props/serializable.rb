@@ -289,6 +289,10 @@ module T::Props::Serializable::DecoratorMethods
       raise ArgumentError.new("The value of `raise_on_nil_write` if specified must be `true` (given: #{rules[:raise_on_nil_write]}).")
     end
 
+    if rules[:raise_on_nil_write] && !rules[:_tnilable]
+      raise ArgumentError.new("`raise_on_nil_write` requires that the type of `#{name}` be `T.nilable(...)` (given: #{type})")
+    end
+
     result
   end
 
