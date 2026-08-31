@@ -524,24 +524,12 @@ class VisibilityCheckerPass final {
         }
     }
 
-    void addImportExportAutocorrect(core::Context ctx, core::ErrorBuilder &e,
-                                    optional<core::AutocorrectSuggestion> &&importAutocorrect,
-                                    optional<core::AutocorrectSuggestion> &&exportAutocorrect) {
+    void addAutocorrect(core::Context ctx, core::ErrorBuilder &e, optional<core::AutocorrectSuggestion> &&autocorrect) {
         auto &db = ctx.state.packageDB();
-        auto hasAutocorrect = importAutocorrect.has_value() || exportAutocorrect.has_value();
+        auto hasAutocorrect = autocorrect.has_value();
 
-        if (importAutocorrect.has_value() && exportAutocorrect.has_value()) {
-            auto combinedTitle = fmt::format("{} and {}", importAutocorrect->title, exportAutocorrect->title);
-            importAutocorrect->edits.insert(importAutocorrect->edits.end(),
-                                            make_move_iterator(exportAutocorrect->edits.begin()),
-                                            make_move_iterator(exportAutocorrect->edits.end()));
-            e.addAutocorrect(core::AutocorrectSuggestion{combinedTitle, move(importAutocorrect->edits),
-                                                         false /* isDidYouMean */, false /* hideEdit */,
-                                                         /* shouldSkipWhenAggregated */ true});
-        } else if (importAutocorrect.has_value()) {
-            e.addAutocorrect(std::move(importAutocorrect.value()));
-        } else if (exportAutocorrect.has_value()) {
-            e.addAutocorrect(std::move(exportAutocorrect.value()));
+        if (autocorrect.has_value()) {
+            e.addAutocorrect(std::move(autocorrect.value()));
         }
 
         if (hasAutocorrect && !db.errorHint().empty()) {
@@ -626,33 +614,10 @@ public:
             return;
         }
 
-        if (this->package.usesTestPackages) {
-            if (pkg.testPackage() && !this->package.testPackage()) {
-                if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::TestImportMismatch)) {
-                    e.setHeader("Package `{}` may not reference `{}` packages", this->package.show(ctx), "test!");
-                    e.addErrorLine(this->package.declLoc(), "Defined here");
-                    e.addErrorLine(pkg.declLoc(), "Referenced `{}` package defined here", "test!");
-                }
-            }
-        }
-
-        bool isExported = pkg.locs.exportAll.exists();
-        if (litSymbol.isClassOrModule()) {
-            isExported = isExported || litSymbol.asClassOrModuleRef().data(ctx)->flags.isExported;
-        } else if (litSymbol.isFieldOrStaticField()) {
-            isExported = isExported || litSymbol.asFieldRef().data(ctx)->flags.isExported;
-        }
-        isExported = isExported || db.allowRelaxedPackagerChecksFor(this->package.mangledName());
-        bool definesBehavior =
-            !litSymbol.isClassOrModule() || litSymbol.asClassOrModuleRef().data(ctx)->flags.isBehaviorDefining;
         auto *import = this->package.importsPackage(otherPackage);
         auto wasImported = import != nullptr;
-        if (this->package.usesTestPackages) {
-            isExported = isExported || (wasImported && import->usesInternals);
-            if (wasImported) {
-                ENFORCE(import->type == core::packages::ImportType::Normal,
-                        "test_import found in --test-packages mode");
-            }
+        if (wasImported && this->package.usesTestPackages) {
+            ENFORCE(import->type == core::packages::ImportType::Normal, "test_import found in --test-packages mode");
         }
 
         // Is this a test import (whether test helper or not) used in a production context?
@@ -664,7 +629,7 @@ public:
         bool importNeeded = !wasImported || testImportInProd || testUnitImportInHelper;
         referencedPackages[otherPackage] = {.importNeeded = importNeeded, .causesModularityError = false};
 
-        if (importNeeded || !isExported) {
+        if (importNeeded) {
             bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || this->fileType != FileType::ProdFile;
             if (this->package.usesTestPackages) {
                 isTestImport = false;
@@ -683,6 +648,7 @@ public:
             bool strictDependenciesTooLow = false;
             bool causesCycle = false;
             bool causesVisibilityError = !pkg.isVisibleTo(ctx, this->package, autocorrectedImportType);
+            bool badTestReference = this->package.usesTestPackages && pkg.testPackage() && !this->package.testPackage();
             optional<string> path;
             if (!isTestImport && db.enforceLayering()) {
                 layeringViolation = strictDepsLevel > core::packages::StrictDependenciesLevel::False &&
@@ -695,77 +661,23 @@ public:
                 causesCycle =
                     strictDepsLevel >= core::packages::StrictDependenciesLevel::LayeredDag && path.has_value();
             }
-            bool hasModularityError = layeringViolation || strictDependenciesTooLow || causesCycle;
-            referencedPackages[otherPackage].causesModularityError = hasModularityError;
-            if (!hasModularityError && !causesVisibilityError) {
+            bool hasModularityError = layeringViolation || strictDependenciesTooLow || causesCycle ||
+                                      badTestReference || causesVisibilityError;
+            // visible_to errors are handled separately (by `updateVisibilityFor`),
+            // so they're not included in this causesModularityError field of referencedPackages
+            referencedPackages[otherPackage].causesModularityError = hasModularityError && !causesVisibilityError;
+            if (!hasModularityError) {
                 if (db.genPackagesMode() != core::packages::GenPackagesMode::Disabled) {
                     return;
                 }
 
-                std::optional<core::AutocorrectSuggestion> importAutocorrect;
-                if (importNeeded) {
-                    if (auto exp = this->package.addImport(ctx, pkg, autocorrectedImportType)) {
-                        importAutocorrect.emplace(exp.value());
-                    }
-                }
-                std::optional<core::AutocorrectSuggestion> exportAutocorrect;
-                if (!isExported) {
-                    auto symToExport = litSymbol;
-                    auto enumClass = getEnumClassForEnumValue(ctx.state, symToExport);
-                    if (enumClass.exists()) {
-                        symToExport = enumClass;
-                    }
-                    if (definesBehavior) {
-                        // For compatibility with gen-packages, we do _not_ add an export if it doesn't define
-                        // behavior. This is mostly because it's easier to get Sorbet to behave like gen-packages
-                        // than the other way around.
-                        //
-                        // If we move to a world where all __package.rb edits are done via Sorbet autocorrects,
-                        // we could make this addExport call unconditional.
-                        if (auto exp = pkg.addExport(ctx, symToExport)) {
-                            exportAutocorrect.emplace(exp.value());
-                        }
-                    }
-                }
+                auto importAutocorrect = this->package.addImport(ctx, pkg, autocorrectedImportType);
 
-                if (!isExported && !wasImported) {
-                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
-                        e.setHeader("`{}` resolves but is not exported from `{}` and `{}` is not imported",
-                                    litSymbol.show(ctx), pkg.show(ctx), pkg.show(ctx));
-                        addExportInfo(ctx, e, litSymbol, definesBehavior);
-                        addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
-                    }
-                } else if (!isExported && testImportInProd) {
-                    ENFORCE(!this->package.usesTestPackages, "test_import found in --test-packages mode");
-                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
-                        e.setHeader("`{}` resolves but is not exported from `{}` and `{}` is `{}`ed",
-                                    litSymbol.show(ctx), pkg.show(ctx), pkg.show(ctx), "test_import");
-                        addExportInfo(ctx, e, litSymbol, definesBehavior);
-                        addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
-                    }
-                } else if (!isExported && testUnitImportInHelper) {
-                    ENFORCE(!this->package.usesTestPackages, "test_import found in --test-packages mode");
-                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
-                        e.setHeader("`{}` resolves but is not exported from `{}` and `{}` is `{}`ed for only {} files",
-                                    litSymbol.show(ctx), pkg.show(ctx), pkg.show(ctx), "test_import", ".test.rb");
-                        e.addErrorNote("This is because this `{}` is declared with `{}`, which means the constant can "
-                                       "only be used in `{}` files.",
-                                       "test_import", "only: 'test_rb'", ".test.rb");
-                        addExportInfo(ctx, e, litSymbol, definesBehavior);
-                        addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
-                    }
-                } else if (!isExported) {
-                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedPackagePrivateName)) {
-                        e.setHeader("`{}` resolves but is not exported from `{}`", litSymbol.show(ctx), pkg.show(ctx));
-                        addExportInfo(ctx, e, litSymbol, definesBehavior);
-
-                        addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
-                    }
-                } else if (!wasImported) {
+                if (!wasImported) {
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
                         e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
-                        e.addErrorLine(pkg.declLoc(), "Exported from package here");
-                        addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
+                        e.addErrorLine(pkg.declLoc(), "Package defined here");
+                        addAutocorrect(ctx, e, move(importAutocorrect));
                     }
                 } else if (testImportInProd) {
                     ENFORCE(!isTestImport);
@@ -773,7 +685,7 @@ public:
                     if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
                         e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", litSymbol.show(ctx));
                         e.addErrorLine(pkg.declLoc(), "Defined here");
-                        addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
+                        addAutocorrect(ctx, e, move(importAutocorrect));
                     }
                 } else if (testUnitImportInHelper) {
                     ENFORCE(!this->package.usesTestPackages, "test_import found in --test-packages mode");
@@ -784,34 +696,37 @@ public:
                         e.addErrorNote("This is because this `{}` is declared with `{}`, which means the constant can "
                                        "only be used in `{}` files.",
                                        "test_import", "only: 'test_rb'", ".test.rb");
-                        addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
+                        addAutocorrect(ctx, e, move(importAutocorrect));
                     }
                 } else {
                     ENFORCE(false);
                 }
-            }
-
-            // We should only report a visibility error if we're not going to add a visible_to to the package
-            // Otherwise the error is pointless since it'll go away after the new visible_to is added
-            if (causesVisibilityError && !ctx.state.packageDB().updateVisibilityFor(otherPackage)) {
-                if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::ImportNotVisible)) {
-                    e.setHeader("Package `{}` includes explicit visibility modifiers and cannot be imported from `{}`",
-                                pkg.show(ctx), this->package.show(ctx));
-                    e.addErrorNote("Please consult with the owning team before adding a `{}` line to the package `{}`",
-                                   "visible_to", pkg.show(ctx));
-                }
-            }
-
-            if (hasModularityError) {
+            } else {
                 // TODO(neil): Provide actionable advice and/or link to a doc that would help the user resolve these
                 // layering/strict_dependencies issues.
-                core::ErrorClass error =
-                    causesCycle ? core::errors::Packager::StrictDependenciesViolation
-                                : (layeringViolation ? core::errors::Packager::LayeringViolation
-                                                     : core::errors::Packager::StrictDependenciesViolation);
+                auto error = causesCycle         ? core::errors::Packager::StrictDependenciesViolation
+                             : layeringViolation ? core::errors::Packager::LayeringViolation
+                             : badTestReference  ? core::errors::Packager::TestImportMismatch
+                                                 : core::errors::Packager::StrictDependenciesViolation;
                 if (auto e = ctx.beginError(lit.loc(), error)) {
                     vector<string> reasons;
                     e.addErrorLine(this->package.declLoc(), "Enclosing package declared here");
+
+                    // We should only report a visibility error if we're not going to add a visible_to to the package
+                    // Otherwise the error is pointless since it'll go away after the new visible_to is added
+                    if (causesVisibilityError && !ctx.state.packageDB().updateVisibilityFor(otherPackage)) {
+                        reasons.emplace_back(core::ErrorColors::format(
+                            "package `{}` includes explicit visibility modifiers and cannot be imported from `{}`",
+                            pkg.show(ctx), this->package.show(ctx)));
+                        e.addErrorNote(
+                            "Please consult with the owning team before adding a `{}` line to the package `{}`",
+                            "visible_to", pkg.show(ctx));
+                    }
+                    if (badTestReference) {
+                        reasons.emplace_back(core::ErrorColors::format("`{}` may not reference `{}` packages",
+                                                                       this->package.show(ctx), "test!"));
+                        e.addErrorLine(pkg.declLoc(), "Referenced `{}` package defined here", "test!");
+                    }
                     if (causesCycle) {
                         reasons.emplace_back(core::ErrorColors::format(
                             "importing its package would put `{}` into a cycle", this->package.show(ctx)));
@@ -855,6 +770,13 @@ public:
                                        requiredStrictDepsLevel, currentStrictDepsLevel);
                     }
 
+                    if (reasons.empty() && causesVisibilityError &&
+                        ctx.state.packageDB().updateVisibilityFor(otherPackage)) {
+                        // Force the error to build here, so that we don't report an error
+                        e.build();
+                        return;
+                    }
+
                     ENFORCE(!reasons.empty(), "At least one reason should be present");
                     string reason;
                     if (reasons.size() == 1) {
@@ -863,20 +785,65 @@ public:
                         reason = fmt::format("{}, and {}", reasons[0], reasons[1]);
                     } else if (reasons.size() == 3) {
                         reason = fmt::format("{}, {}, and {}", reasons[0], reasons[1], reasons[2]);
+                    } else if (reasons.size() == 4) {
+                        reason = fmt::format("{}, {}, {}, and {}", reasons[0], reasons[1], reasons[2], reasons[3]);
+                    } else if (reasons.size() == 5) {
+                        reason = fmt::format("{}, {}, {}, {}, and {}", reasons[0], reasons[1], reasons[2], reasons[3],
+                                             reasons[4]);
                     } else {
-                        ENFORCE(false, "At most three reasons should be present");
+                        ENFORCE(false, "At most five reasons should be present");
                     }
                     e.setHeader("`{}` cannot be referenced here because {}", lit.symbol().show(ctx), reason);
-                    if (!isExported) {
-                        e.addErrorNote("`{}` is not exported", lit.symbol().show(ctx));
-                    } else if (!wasImported) {
+                    if (!wasImported) {
                         e.addErrorNote("`{}`'s package is not imported", lit.symbol().show(ctx));
                     } else if (testImportInProd || testUnitImportInHelper) {
                         e.addErrorNote("`{}`'s package is imported as `{}`", lit.symbol().show(ctx), "test_import");
-                    } else {
-                        ENFORCE(false);
                     }
                 }
+            }
+            return;
+        }
+
+        bool isExported = pkg.locs.exportAll.exists();
+        if (litSymbol.isClassOrModule()) {
+            isExported = isExported || litSymbol.asClassOrModuleRef().data(ctx)->flags.isExported;
+        } else if (litSymbol.isFieldOrStaticField()) {
+            isExported = isExported || litSymbol.asFieldRef().data(ctx)->flags.isExported;
+        }
+        isExported = isExported || db.allowRelaxedPackagerChecksFor(this->package.mangledName());
+        if (this->package.usesTestPackages) {
+            isExported = isExported || (wasImported && import->usesInternals);
+        }
+
+        if (!isExported) {
+            if (db.genPackagesMode() != core::packages::GenPackagesMode::Disabled) {
+                return;
+            }
+
+            bool definesBehavior =
+                !litSymbol.isClassOrModule() || litSymbol.asClassOrModuleRef().data(ctx)->flags.isBehaviorDefining;
+            std::optional<core::AutocorrectSuggestion> exportAutocorrect;
+            if (definesBehavior) {
+                auto symToExport = litSymbol;
+                auto enumClass = getEnumClassForEnumValue(ctx.state, symToExport);
+                if (enumClass.exists()) {
+                    symToExport = enumClass;
+                }
+                // For compatibility with gen-packages, we do _not_ add an export if it doesn't define
+                // behavior. This is mostly because it's easier to get Sorbet to behave like gen-packages
+                // than the other way around.
+                //
+                // If we move to a world where all __package.rb edits are done via Sorbet autocorrects,
+                // we could make this addExport call unconditional.
+                if (auto exp = pkg.addExport(ctx, symToExport)) {
+                    exportAutocorrect.emplace(exp.value());
+                }
+            }
+            if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedPackagePrivateName)) {
+                e.setHeader("`{}` resolves but is not exported from `{}`", litSymbol.show(ctx), pkg.show(ctx));
+                addExportInfo(ctx, e, litSymbol, definesBehavior);
+
+                addAutocorrect(ctx, e, move(exportAutocorrect));
             }
         }
     }
