@@ -24,6 +24,15 @@ vector<pm_node_t *> TypeParamsToParserNodes::typeParams(const rbs_node_list_t *r
 
         auto nameStr = parser.resolveConstant(rbsTypeParam->name);
 
+        if (nameStr == core::Names::Constants::T().shortName(ctx.state)) {
+            auto nameLoc = declaration.typeLocFromRange(rbsTypeParam->name_range);
+
+            if (auto e = ctx.beginIndexerError(nameLoc, core::errors::Rewriter::RBSUnsupported)) {
+                e.setHeader("`{}` is not a valid type parameter name", nameStr);
+                e.addErrorNote("It conflicts with Sorbet's own namespace");
+            }
+        }
+
         absl::InlinedVector<pm_node_t *, 1> args{};
         if (rbsTypeParam->variance) {
             auto variance = rbsTypeParam->variance;
