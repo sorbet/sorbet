@@ -532,8 +532,7 @@ public:
     // ConstantLit was a definition.
     UnorderedSet<const void *> constantAssignmentDefinitions;
 
-    VisibilityCheckerPass(core::Context ctx, const core::packages::PackageInfo &package)
-        : package{package} {}
+    VisibilityCheckerPass(core::Context ctx, const core::packages::PackageInfo &package) : package{package} {}
 
     void preTransformAssign(core::Context ctx, const ast::Assign &asgn) {
         auto lhs = ast::cast_tree<ast::ConstantLit>(asgn.lhs);
@@ -552,8 +551,8 @@ public:
     // Returns whether the reference causes a modularity error
     static bool reportImportError(core::Context ctx, const core::packages::PackageInfo &thisPkg,
                                   const core::packages::PackageInfo &pkg, core::LocOffsets errLoc,
-                                  core::SymbolRef litSymbol, core::FileRef otherFile,
-                                  bool wasImported, bool testImportInProd, bool testUnitImportInHelper) {
+                                  core::SymbolRef litSymbol, core::FileRef otherFile, bool wasImported,
+                                  bool testImportInProd, bool testUnitImportInHelper) {
         auto &db = ctx.state.packageDB();
         auto otherPackage = pkg.mangledName();
         bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || ctx.file.data(ctx).isPackagedTest();
