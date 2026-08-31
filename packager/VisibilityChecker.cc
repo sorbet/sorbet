@@ -579,7 +579,7 @@ public:
         }
         core::packages::ImportType autocorrectedImportType = core::packages::ImportType::Normal;
         if (isTestImport) {
-            if (fileType == FileType::TestHelperFile) {
+            if (ctx.file.data(ctx).isPackagedTestHelper()) {
                 autocorrectedImportType = core::packages::ImportType::TestHelper;
             } else {
                 autocorrectedImportType = core::packages::ImportType::TestUnit;
@@ -795,7 +795,7 @@ public:
             wasImported && import->type != core::packages::ImportType::Normal && !ctx.file.data(ctx).isPackagedTest();
         // Is this a test import not intended for use in helpers?
         auto testUnitImportInHelper = wasImported && import->type == core::packages::ImportType::TestUnit &&
-                                      this->fileType != FileType::TestUnitFile;
+                                      ctx.file.data(ctx).isPackagedTestHelper();
         bool importNeeded = !wasImported || testImportInProd || testUnitImportInHelper;
         referencedPackages[otherPackage] = {.importNeeded = importNeeded, .causesModularityError = false};
 
