@@ -18,26 +18,60 @@
 
 namespace sorbet::infer {
 
-class TypeTestReverseIndex final {
-    // Note: vectors are sorted and are treated as sets.
-    UnorderedMap<cfg::LocalRef, InlinedVector<cfg::LocalRef, 1>> index;
-    static const InlinedVector<cfg::LocalRef, 1> empty;
+class Environment;
+
+// Per-local scratch marks for one inference run, so that merging knowledge neither allocates nor sorts:
+// `KnowledgeRef::under` marks the locals that already have a test, `KnowledgeFact::min` records the first position of
+// each local among the other fact's tests. Users clear their marks when done.
+class LocalMarks final {
+    size_t numLocals;
+    // Allocated on first use: most methods never merge knowledge.
+    std::vector<uint32_t> values;
+    std::vector<uint32_t> touched;
 
 public:
-    TypeTestReverseIndex() = default;
-    TypeTestReverseIndex(const TypeTestReverseIndex &rhs) = delete;
-    TypeTestReverseIndex(TypeTestReverseIndex &&rhs) = default;
+    static constexpr uint32_t UNSET = UINT32_MAX;
 
-    TypeTestReverseIndex &operator=(const TypeTestReverseIndex &rhs) = delete;
-    TypeTestReverseIndex &operator=(TypeTestReverseIndex &&rhs) = delete;
+    explicit LocalMarks(size_t numLocals) : numLocals(numLocals) {}
+    LocalMarks(const LocalMarks &) = delete;
+    LocalMarks &operator=(const LocalMarks &) = delete;
 
-    void addToIndex(cfg::LocalRef from, cfg::LocalRef to);
-    const InlinedVector<cfg::LocalRef, 1> &get(cfg::LocalRef from) const;
-    void replace(cfg::LocalRef from, InlinedVector<cfg::LocalRef, 1> &&list);
-    void cloneFrom(const TypeTestReverseIndex &index);
+    uint32_t get(cfg::LocalRef ref) const {
+        ENFORCE(ref.id() < numLocals);
+        return values.empty() ? UNSET : values[ref.id()];
+    }
+
+    // Marks `ref` with `value` unless it is marked already; returns whether it was unmarked.
+    bool setIfUnset(cfg::LocalRef ref, uint32_t value) {
+        ENFORCE(ref.id() < numLocals);
+        if (values.empty()) {
+            values.assign(numLocals, UNSET);
+        }
+        auto &slot = values[ref.id()];
+        if (slot != UNSET) {
+            return false;
+        }
+        slot = value;
+        touched.emplace_back(ref.id());
+        return true;
+    }
+
+    void clear() {
+        for (auto id : touched) {
+            values[id] = UNSET;
+        }
+        touched.clear();
+    }
+
+    // Clears the marks when it goes out of scope.
+    struct Clearer {
+        LocalMarks &marks;
+        explicit Clearer(LocalMarks &marks) : marks(marks) {}
+        ~Clearer() {
+            marks.clear();
+        }
+    };
 };
-
-class Environment;
 
 /**
  * Encode things that we know hold and don't hold.
@@ -52,7 +86,7 @@ struct KnowledgeFact : public core::RefCounted<KnowledgeFact> {
     InlinedVector<std::pair<cfg::LocalRef, core::TypePtr>, 1> noTypeTests;
 
     /* this is a "merge" of two knowledges - computes a "lub" of knowledges */
-    void min(core::Context ctx, const KnowledgeFact &other);
+    void min(core::Context ctx, const KnowledgeFact &other, LocalMarks &marks);
 
     void sanityCheck() const;
 
@@ -83,8 +117,7 @@ public:
 
 // KnowledgeRef wraps a `KnowledgeFact` with copy-on-write semantics
 class KnowledgeRef {
-    // Is private to ensure that yes/no type test updates go through trusted paths that keep TypeTestReverseIndex
-    // updated.
+    // Is private to ensure that yes/no type test updates go through trusted paths.
     KnowledgeFact &mutate();
     // `nullptr` stands for the empty fact (no type tests, not dead). The overwhelming majority of variables never
     // accumulate any knowledge, so representing "empty" without an allocation avoids creating (and refcounting, and
@@ -102,16 +135,16 @@ public:
     const KnowledgeFact &operator*() const;
     const KnowledgeFact *operator->() const;
 
-    void addYesTypeTest(cfg::LocalRef of, TypeTestReverseIndex &index, cfg::LocalRef ref, core::TypePtr type);
-    void addNoTypeTest(cfg::LocalRef of, TypeTestReverseIndex &index, cfg::LocalRef ref, core::TypePtr type);
+    void addYesTypeTest(cfg::LocalRef ref, core::TypePtr type);
+    void addNoTypeTest(cfg::LocalRef ref, core::TypePtr type);
     void markDead();
-    void min(core::Context ctx, const KnowledgeFact &other);
+    void min(core::Context ctx, const KnowledgeFact &other, LocalMarks &marks);
 
     /**
      * Computes all possible implications of this knowledge holding as an exit from environment env in block bb
      */
-    KnowledgeRef under(core::Context ctx, const Environment &env, cfg::CFG &inWhat, cfg::BasicBlock *bb,
-                       bool isNeeded) const;
+    KnowledgeRef under(core::Context ctx, const Environment &env, cfg::CFG &inWhat, cfg::BasicBlock *bb, bool isNeeded,
+                       LocalMarks &marks) const;
 
     void removeReferencesToVar(cfg::LocalRef ref);
 };
@@ -121,7 +154,7 @@ CheckSize(KnowledgeRef, 8, 8);
  * the other holds knowledge which is true if the same variable is falsy->
  */
 class TestedKnowledge {
-    // Hide to prevent direct assignment so that all mutations go thru methods that keep TypeTestReverseIndex updated.
+    // Hide to prevent direct assignment so that all mutations go thru methods.
     KnowledgeRef _truthy, _falsy;
 
 public:
@@ -143,9 +176,9 @@ public:
         return _falsy;
     }
 
-    void replaceTruthy(cfg::LocalRef of, TypeTestReverseIndex &index, const KnowledgeRef &newTruthy);
-    void replaceFalsy(cfg::LocalRef of, TypeTestReverseIndex &index, const KnowledgeRef &newFalsy);
-    void replace(cfg::LocalRef of, TypeTestReverseIndex &index, const TestedKnowledge &knowledge);
+    void replaceTruthy(const KnowledgeRef &newTruthy);
+    void replaceFalsy(const KnowledgeRef &newFalsy);
+    void replace(const TestedKnowledge &knowledge);
 
     std::string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
 
@@ -154,6 +187,11 @@ public:
     void removeReferencesToVar(cfg::LocalRef ref);
     void sanityCheck() const;
     void emitKnowledgeSizeMetric() const;
+
+    bool isEmpty() const {
+        return _truthy->yesTypeTests.empty() && _truthy->noTypeTests.empty() && _falsy->yesTypeTests.empty() &&
+               _falsy->noTypeTests.empty();
+    }
 };
 CheckSize(TestedKnowledge, 24, 8);
 
@@ -191,8 +229,10 @@ class Environment {
 
     UnorderedMap<cfg::LocalRef, core::TypeAndOrigins> pinnedTypes;
 
-    // Map from LocalRef to LocalRefs that _may_ contain it in yes/no type tests (overapproximation).
-    TypeTestReverseIndex typeTestsWithVar;
+    // Variables whose knowledge may hold type tests (an overapproximation: entries are never removed), so that
+    // `clearKnowledge` visits only them rather than every variable of a block with thousands of bindings.
+    InlinedVector<cfg::LocalRef, 8> knowledgeOwners;
+    void noteKnowledgeOwner(cfg::LocalRef var);
 
     bool hasType(core::Context ctx, cfg::LocalRef symbol) const;
 
@@ -266,7 +306,7 @@ public:
                                        const UnorderedMap<cfg::LocalRef, VariableState> &filter);
 
     void mergeWith(core::Context ctx, const Environment &other, cfg::CFG &inWhat, cfg::BasicBlock *bb,
-                   KnowledgeFilter &knowledgeFilter);
+                   KnowledgeFilter &knowledgeFilter, LocalMarks &marks);
 
     void computePins(core::Context ctx, const std::vector<Environment> &envs, const cfg::CFG &inWhat,
                      const cfg::BasicBlock *bb);

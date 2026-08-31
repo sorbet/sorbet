@@ -1,4 +1,5 @@
 #include "common/common.h"
+#include "common/sort/sort.h"
 #include "common/typecase.h"
 #include "core/Symbols.h"
 #include "core/TypeConstraint.h"
@@ -11,6 +12,12 @@ namespace sorbet::core {
 using namespace std;
 
 namespace {
+// A class or module symbol other than the special `T.untyped`, `T.anything` and `T.noreturn` ones, which subtyping,
+// `lub` and `glb` all handle before looking at the symbols involved.
+bool isOrdinaryClassOrModule(ClassOrModuleRef symbol) {
+    return symbol != Symbols::untyped() && symbol != Symbols::top() && symbol != Symbols::bottom();
+}
+
 bool compositeTypeDeepRefEqual(const OrType &o1, const OrType &o2);
 bool compositeTypeDeepRefEqual(const AndType &a1, const AndType &a2);
 bool compositeTypeDeepRefEqualHelper(const TypePtr &t1, const TypePtr &t2) {
@@ -85,10 +92,22 @@ void fillInOrComponents(InlinedVector<TypePtr, 4> &orComponents, const TypePtr &
     }
 }
 
-TypePtr filterOrComponents(const TypePtr &originalType, absl::Span<const TypePtr> typeFilter) {
+// The identities (see `TypePtr::identity`) of the components of `type`, a leaf or a tree of `OrType`s.
+void fillInOrComponentIdentities(InlinedVector<TypePtr::tagged_storage, 4> &identities, const TypePtr &type) {
+    auto o = cast_type<OrType>(type);
+    if (o == nullptr) {
+        identities.emplace_back(type.identity());
+    } else {
+        fillInOrComponentIdentities(identities, o->left);
+        fillInOrComponentIdentities(identities, o->right);
+    }
+}
+
+// `typeFilter` holds sorted identities.
+TypePtr filterOrComponents(const TypePtr &originalType, absl::Span<const TypePtr::tagged_storage> typeFilter) {
     auto o = cast_type<OrType>(originalType);
     if (o == nullptr) {
-        if (absl::c_linear_search(typeFilter, originalType)) {
+        if (absl::c_binary_search(typeFilter, originalType.identity())) {
             return nullptr;
         }
         return originalType;
@@ -108,15 +127,43 @@ TypePtr filterOrComponents(const TypePtr &originalType, absl::Span<const TypePtr
     }
 }
 
+// Whether `lub(component, t2)` for a union `t2` is decided by distributing over `t2`'s components alone, so that it is
+// `t2` itself as soon as `component` is one of them. `T.all` and `T.self_type` components are lubbed the other way
+// around, and the special classes collapse with everything.
+bool lubsByDistributingOverUnion(const TypePtr &component) {
+    if (isa_type<AndType>(component) || isa_type<SelfType>(component)) {
+        return false;
+    }
+    if (isa_type<ClassType>(component)) {
+        return isOrdinaryClassOrModule(cast_type_nonnull<ClassType>(component).symbol);
+    }
+    return true;
+}
+
 TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     InlinedVector<TypePtr, 4> originalOrComponents;
-    InlinedVector<TypePtr, 4> typesConsumed;
+    InlinedVector<TypePtr::tagged_storage, 4> typesConsumed;
     auto o1 = cast_type<OrType>(t1);
     ENFORCE(o1 != nullptr);
     fillInOrComponents(originalOrComponents, o1->left);
     fillInOrComponents(originalOrComponents, o1->right);
 
+    // A component of t1 that is also a component of a union t2 is subsumed by t2 without lubbing it against every
+    // component of t2 in turn, which made this quadratic for the unions of hundreds of classes that sealed classes and
+    // enums expand to.
+    InlinedVector<TypePtr::tagged_storage, 4> t2Components;
+    if (isa_type<OrType>(t2)) {
+        fillInOrComponentIdentities(t2Components, t2);
+        fast_sort(t2Components);
+    }
+
     for (auto &component : originalOrComponents) {
+        if (!t2Components.empty() && lubsByDistributingOverUnion(component) &&
+            absl::c_binary_search(t2Components, component.identity())) {
+            categoryCounterInc("lubDistributeOr.component", "shared");
+            typesConsumed.emplace_back(component.identity());
+            continue;
+        }
         auto lubbed = Types::any(gs, component, t2);
         if (lubbed == component) {
             // lubbed == component, so t2 <: component and t2 <: t1
@@ -125,7 +172,7 @@ TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr 
         } else if (lubbed == t2) {
             // lubbed == t2, so component <: t2
             // Thus, we don't need to include component in the final OrType; it's subsumed by t2.
-            typesConsumed.emplace_back(component);
+            typesConsumed.emplace_back(component.identity());
         }
     }
     if (typesConsumed.empty()) {
@@ -134,6 +181,7 @@ TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr 
         return OrType::make_shared(t1, underlying(gs, t2));
     }
     // lub back everything except typesConsumed
+    fast_sort(typesConsumed);
     auto remainingTypes = filterOrComponents(t1, typesConsumed);
     if (remainingTypes == nullptr) {
         categoryCounterInc("lubDistributeOr.outcome", "t2");
@@ -181,6 +229,42 @@ TypePtr glbDistributeAnd(const GlobalState &gs, const TypePtr &t1, const TypePtr
 
     categoryCounterInc("glbDistributeAnd.outcome", "worst");
     return AndType::make_shared(t1, t2);
+}
+
+namespace {
+// Collects the components of `type` (a leaf, or the leaves of an `OrType` tree) that can witness a non-empty glb by
+// reference equality: an ordinary class or module, or an applied type.
+void collectSharedComponentCandidates(InlinedVector<const TypePtr *, 8> &out, const TypePtr &type) {
+    if (auto o = cast_type<OrType>(type)) {
+        collectSharedComponentCandidates(out, o->left);
+        collectSharedComponentCandidates(out, o->right);
+    } else if (isa_type<AppliedType>(type)) {
+        out.emplace_back(&type);
+    } else if (isa_type<ClassType>(type) && isOrdinaryClassOrModule(cast_type_nonnull<ClassType>(type).symbol)) {
+        out.emplace_back(&type);
+    }
+}
+} // namespace
+
+bool Types::glbIsKnownNonEmpty(const TypePtr &t1, const TypePtr &t2) {
+    if (!isa_type<OrType>(t1) && !isa_type<OrType>(t2)) {
+        // `glb` itself handles the non-union cases cheaply.
+        return false;
+    }
+    // `glb` only produces `T.noreturn` for a union when it does for every pair of components (the union cases
+    // distribute, and the class/applied cases collapse to a component they share), so one shared component decides.
+    InlinedVector<const TypePtr *, 8> components1;
+    InlinedVector<const TypePtr *, 8> components2;
+    collectSharedComponentCandidates(components1, t1);
+    collectSharedComponentCandidates(components2, t2);
+    for (auto *c1 : components1) {
+        for (auto *c2 : components2) {
+            if (*c1 == *c2) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 // only keep knowledge in t1 that is not already present in t2. Return the same reference if unchanged
@@ -683,6 +767,35 @@ TypePtr Types::all(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
     return ret;
 }
 
+namespace {
+// An ordinary class or module (see `isOrdinaryClassOrModule`) that is a class, and not `void` either.
+bool isOrdinaryClass(const GlobalState &gs, ClassOrModuleRef symbol) {
+    return isOrdinaryClassOrModule(symbol) && symbol != Symbols::void_() && symbol.data(gs)->isClass();
+}
+
+// Whether every component of the union `type` is an ordinary class that neither derives from nor is derived from
+// `klass`, itself an ordinary class.
+bool unionOfClassesUnrelatedTo(const GlobalState &gs, ClassOrModuleRef klass, const TypePtr &type) {
+    if (auto o = cast_type<OrType>(type)) {
+        return unionOfClassesUnrelatedTo(gs, klass, o->left) && unionOfClassesUnrelatedTo(gs, klass, o->right);
+    }
+    if (!isa_type<ClassType>(type)) {
+        return false;
+    }
+    auto symbol = cast_type_nonnull<ClassType>(type).symbol;
+    return symbol != klass && isOrdinaryClass(gs, symbol) && !symbol.data(gs)->derivesFrom(gs, klass) &&
+           !klass.data(gs)->derivesFrom(gs, symbol);
+}
+
+// Whether `glb(classType, orType)` is `T.noreturn` because the class is unrelated to every class in the union: the
+// recursive glb finds no collapse at any level and every leaf glb is empty (Ruby has single inheritance), so this
+// decides in one pass what the recursion re-checks at each of its levels.
+bool glbOfClassAndUnrelatedClassesIsEmpty(const GlobalState &gs, const TypePtr &classType, const TypePtr &orType) {
+    auto klass = cast_type_nonnull<ClassType>(classType).symbol;
+    return isOrdinaryClass(gs, klass) && unionOfClassesUnrelatedTo(gs, klass, orType);
+}
+} // namespace
+
 TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     if (t1 == t2) {
         categoryCounterInc("glb", "ref-eq");
@@ -880,6 +993,10 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
     }
 
     if (auto o2 = cast_type<OrType>(t2)) { // 3, 6
+        if (isa_type<ClassType>(t1) && glbOfClassAndUnrelatedClassesIsEmpty(gs, t1, t2)) {
+            categoryCounterInc("glb", "unrelatedClasses");
+            return Types::bottom();
+        }
         bool collapseInLeft = Types::isAsSpecificAs(gs, t1, t2);
         if (collapseInLeft) {
             categoryCounterInc("glb", "Zor");
@@ -1157,6 +1274,72 @@ void compareToUntyped(const GlobalState &gs, TypeConstraint &constr, const TypeP
         constr.rememberIsSubtype(gs, ty, blame);
         constr.rememberIsSubtype(gs, blame, ty);
     }
+}
+
+namespace {
+
+// Whether recording a lower bound for `sym` would start from nothing: `rememberIsSubtype` treats a missing or empty
+// bound as the first recorded type, and `lub(T.noreturn, t)` is `t`.
+bool lowerBoundIsUnset(const TypeConstraint &constr, TypeParameterRef sym) {
+    if (!constr.hasLowerBound(sym)) {
+        return true;
+    }
+    auto bound = constr.findLowerBound(sym);
+    return bound == nullptr || bound.isBottom();
+}
+
+// Collects the leaves of the `OrType` tree `type` in order, and reports whether the tree leans left (every right child
+// is a leaf), the shape that folding `lub` over the leaves produces.
+bool collectOrLeaves(const TypePtr &type, InlinedVector<TypePtr, 8> &leaves) {
+    auto o = cast_type<OrType>(type);
+    if (o == nullptr) {
+        leaves.emplace_back(type);
+        return true;
+    }
+    auto leansLeft = collectOrLeaves(o->left, leaves);
+    auto rightIsLeaf = !isa_type<OrType>(o->right);
+    collectOrLeaves(o->right, leaves);
+    return leansLeft && rightIsLeaf;
+}
+
+} // namespace
+
+// If `type` is a union of distinct classes that all share the same superclass (so that no two are related and `lub` of
+// any two of them is their plain union), the left-leaning chain of its components that folding `lub` over them
+// builds: `type` itself when it already has that shape. Otherwise `nullptr`.
+TypePtr leftLeaningChainOfSiblingClasses(const GlobalState &gs, const TypePtr &type) {
+    InlinedVector<TypePtr, 8> leaves;
+    auto leansLeft = collectOrLeaves(type, leaves);
+    auto superClass = Symbols::noClassOrModule();
+    InlinedVector<TypePtr::tagged_storage, 8> identities;
+    identities.reserve(leaves.size());
+    for (auto &leaf : leaves) {
+        if (!isa_type<ClassType>(leaf)) {
+            return nullptr;
+        }
+        auto symbol = cast_type_nonnull<ClassType>(leaf).symbol;
+        if (!isOrdinaryClass(gs, symbol) || !symbol.data(gs)->superClass().exists()) {
+            return nullptr;
+        }
+        if (!superClass.exists()) {
+            superClass = symbol.data(gs)->superClass();
+        } else if (symbol.data(gs)->superClass() != superClass) {
+            return nullptr;
+        }
+        identities.emplace_back(leaf.identity());
+    }
+    fast_sort(identities);
+    if (absl::c_adjacent_find(identities) != identities.end()) {
+        return nullptr;
+    }
+    if (leansLeft) {
+        return type;
+    }
+    TypePtr chain = leaves[0];
+    for (size_t i = 1; i < leaves.size(); i++) {
+        chain = OrType::make_shared(chain, leaves[i]);
+    }
+    return chain;
 }
 
 // "Single" means "ClassType or ProxyType"; since ProxyTypes are constrained to
@@ -1592,6 +1775,15 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
     // Note: order of cases here matters! We can't lose "and" information in t1 early and we can't
     // lose "or" information in t2 early.
     if (auto o1 = cast_type<OrType>(t1)) { // 7, 8, 9
+        if (!constr.isSolved() && isa_type<TypeVar>(t2) &&
+            lowerBoundIsUnset(constr, cast_type_nonnull<TypeVar>(t2).sym)) {
+            // Recording the components one at a time lubs each into the growing lower bound, quadratic work for the
+            // unions of hundreds of values that `T::Enum`s expand to. When they are distinct sibling classes, that
+            // fold only rebuilds the union as a left-leaning chain, so record that chain in one step.
+            if (auto chain = leftLeaningChainOfSiblingClasses(gs, t1)) {
+                return constr.rememberIsSubtype(gs, chain, t2);
+            }
+        }
         auto subCollectorLeft = errorDetailsCollector.newCollector();
         auto isSubTypeOfLeft = Types::isSubTypeUnderConstraint(gs, constr, o1->left, t2, mode, subCollectorLeft);
         if (!isSubTypeOfLeft) {

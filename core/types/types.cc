@@ -221,6 +221,14 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, absl::
             auto cdata = c.symbol.data(gs);
             if (c.symbol == core::Symbols::untyped() || c.symbol == core::Symbols::top()) {
                 result = from;
+            } else if (cdata->isClass() && cdata->superClass().exists() && absl::c_all_of(klasses, [&](auto klass) {
+                           auto kdata = klass.data(gs);
+                           return klass != c.symbol && kdata->isClass() && kdata->superClass() == cdata->superClass();
+                       })) {
+                // Distinct classes with the same superclass cannot derive from each other; this is the case for all
+                // but one component when a `T::Enum` value (or a sealed subclass) is subtracted from the union of its
+                // siblings, and it saves walking both ancestor chains per component.
+                result = from;
             } else if (absl::c_any_of(klasses,
                                       [&](auto klass) { return c.symbol == klass || c.derivesFrom(gs, klass); })) {
                 result = Types::bottom();

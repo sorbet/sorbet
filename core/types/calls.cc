@@ -74,11 +74,54 @@ DispatchResult FloatLiteralType::dispatchCall(const GlobalState &gs, const Dispa
     return dispatchCallProxyType(gs, underlying(gs), args);
 }
 
+namespace {
+
+// A dispatch result together with the last node of its `secondary` chain (`nullptr` when the chain is empty, i.e.
+// the result itself is the last node).
+struct DispatchResultWithTail {
+    DispatchResult result;
+    DispatchResult *tail = nullptr;
+};
+
+// `DispatchResult::merge` with `Combinator::OR`, in constant time: `merge` walks the left chain to append the right
+// one, which is quadratic over the components of a large union such as a `T::Enum` with a thousand values.
+DispatchResultWithTail mergeOr(const GlobalState &gs, DispatchResultWithTail &&left, DispatchResultWithTail &&right) {
+    DispatchResultWithTail ret;
+    ret.result.returnType = Types::any(gs, left.result.returnType, right.result.returnType);
+    ret.result.main = std::move(left.result.main);
+    ret.result.secondary = std::move(left.result.secondary);
+    ret.result.secondaryKind = DispatchResult::Combinator::OR;
+    auto rightNode = make_unique<DispatchResult>(std::move(right.result));
+    ret.tail = right.tail != nullptr ? right.tail : rightNode.get();
+    if (left.tail != nullptr) {
+        left.tail->secondary = std::move(rightNode);
+    } else {
+        ret.result.secondary = std::move(rightNode);
+    }
+    return ret;
+}
+
+DispatchResultWithTail dispatchCallOrComponent(const GlobalState &gs, const TypePtr &type, const DispatchArgs &args) {
+    auto o = cast_type<OrType>(type);
+    if (o == nullptr) {
+        DispatchResultWithTail ret{type.dispatchCall(gs, args), nullptr};
+        for (auto *it = ret.result.secondary.get(); it != nullptr; it = it->secondary.get()) {
+            ret.tail = it;
+        }
+        return ret;
+    }
+    categoryCounterInc("dispatch_call", "ortype");
+    return mergeOr(gs, dispatchCallOrComponent(gs, o->left, args.withSelfAndThisRef(o->left)),
+                   dispatchCallOrComponent(gs, o->right, args.withSelfAndThisRef(o->right)));
+}
+
+} // namespace
+
 DispatchResult OrType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     categoryCounterInc("dispatch_call", "ortype");
-    auto leftRet = left.dispatchCall(gs, args.withSelfAndThisRef(left));
-    auto rightRet = right.dispatchCall(gs, args.withSelfAndThisRef(right));
-    return DispatchResult::merge(gs, DispatchResult::Combinator::OR, std::move(leftRet), std::move(rightRet));
+    return mergeOr(gs, dispatchCallOrComponent(gs, left, args.withSelfAndThisRef(left)),
+                   dispatchCallOrComponent(gs, right, args.withSelfAndThisRef(right)))
+        .result;
 }
 
 TypePtr OrType::getCallArguments(const GlobalState &gs, NameRef name) const {

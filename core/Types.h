@@ -72,6 +72,13 @@ public:
     /** Greater lower bound: the widest type that is subtype of both t1 and t2 */
     static TypePtr all(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
 
+    /**
+     * Whether `all(t1, t2)` is known not to be `T.noreturn` without computing it: true when the two types, seen as
+     * unions, share a component by reference. `false` means "unknown", not "empty". Two unions of a hundred classes
+     * take quadratic work to glb, so callers that only need to detect a contradiction check this first.
+     */
+    static bool glbIsKnownNonEmpty(const TypePtr &t1, const TypePtr &t2);
+
     /** Lower upper bound: the narrowest type that is supertype of both t1 and t2 */
     static TypePtr any(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
 
@@ -814,7 +821,9 @@ private:
     friend TypePtr lubGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
-    friend TypePtr filterOrComponents(const TypePtr &originalType, absl::Span<const TypePtr> typeFilter);
+    friend TypePtr filterOrComponents(const TypePtr &originalType,
+                                      absl::Span<const TypePtr::tagged_storage> typeFilter);
+    friend TypePtr leftLeaningChainOfSiblingClasses(const GlobalState &gs, const TypePtr &type);
     friend TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from,
                                          absl::Span<const ClassOrModuleRef> klasses);
     friend TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &t1);

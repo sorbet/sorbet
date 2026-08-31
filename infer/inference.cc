@@ -114,6 +114,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
     vector<bool> visited;
     visited.resize(cfg->maxBasicBlockId);
     KnowledgeFilter knowledgeFilter(ctx, *cfg);
+    LocalMarks localMarks(cfg->numLocalVariables());
     for (auto it = cfg->forwardsTopoSort.rbegin(); it != cfg->forwardsTopoSort.rend(); ++it) {
         cfg::BasicBlock *bb = *it;
         if (bb == cfg->deadBlock()) {
@@ -173,7 +174,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     Environment::withCond(ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current.vars());
                 if (!envAsSeenFromBranch.isDead) {
                     current.isDead = false;
-                    current.mergeWith(ctx, envAsSeenFromBranch, *cfg.get(), bb, knowledgeFilter);
+                    current.mergeWith(ctx, envAsSeenFromBranch, *cfg.get(), bb, knowledgeFilter, localMarks);
                 }
             }
         }

@@ -224,6 +224,11 @@ public:
     bool operator==(const TypePtr &other) const {
         return store == other.store;
     }
+    // The raw tagged representation: two TypePtrs have the same identity exactly when they compare `==`. For
+    // ordering or hashing types by identity (not by structure; see `hash`).
+    tagged_storage identity() const noexcept {
+        return store;
+    }
     bool operator!=(std::nullptr_t n) const {
         return store != 0;
     }
