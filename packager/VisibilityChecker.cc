@@ -552,10 +552,6 @@ public:
     VisibilityCheckerPass(core::Context ctx, const core::packages::PackageInfo &package)
         : package{package}, fileType{fileTypeFromCtx(ctx)} {}
 
-    bool isAnyTestFile() const {
-        return fileType != FileType::ProdFile;
-    }
-
     void preTransformAssign(core::Context ctx, const ast::Assign &asgn) {
         auto lhs = ast::cast_tree<ast::ConstantLit>(asgn.lhs);
         if (lhs != nullptr) {
@@ -780,7 +776,7 @@ public:
         // TODO(trevor): this check is redundant with import checking after the test-packages migration is complete.
         if (!pkg.usesTestPackages &&
             (otherFile.data(ctx).isPackagedTestHelper() || otherFile.data(ctx).isPackagedTest()) &&
-            !this->isAnyTestFile()) {
+            !ctx.file.data(ctx).isPackagedTest()) {
             if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
                 e.setHeader("`{}` is defined in a test namespace and cannot be referenced in a non-test file",
                             litSymbol.show(ctx));
