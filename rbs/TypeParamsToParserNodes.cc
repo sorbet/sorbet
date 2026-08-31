@@ -29,7 +29,7 @@ vector<pm_node_t *> TypeParamsToParserNodes::typeParams(const rbs_node_list_t *r
 
             if (auto e = ctx.beginIndexerError(nameLoc, core::errors::Rewriter::RBSUnsupported)) {
                 e.setHeader("`{}` is not a valid type parameter name", nameStr);
-                e.addErrorNote("It may conflict with Sorbet's own namespace");
+                e.addErrorNote("It conflicts with Sorbet's own namespace");
             }
         }
 

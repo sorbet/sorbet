@@ -27,7 +27,7 @@ module Errors
   end
 
   #: [T]
-  #   ^ error: `T` is not a valid type parameter name as it may conflict with Sorbet's own namespace
+  #   ^ error: `T` is not a valid type parameter name. It conflicts with Sorbet's own namespace
   class UnsupportedTypeParamName
   end
 end
