@@ -493,22 +493,6 @@ public:
     }
 };
 
-enum class FileType {
-    ProdFile,
-    TestHelperFile,
-    TestUnitFile,
-};
-
-const FileType fileTypeFromCtx(const core::Context ctx) {
-    if (ctx.file.data(ctx).isPackagedTestHelper()) {
-        return FileType::TestHelperFile;
-    } else if (ctx.file.data(ctx).isPackagedTest()) {
-        return FileType::TestUnitFile;
-    } else {
-        return FileType::ProdFile;
-    }
-}
-
 class VisibilityCheckerPass final {
     void addExportInfo(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef litSymbol, bool definesBehavior) {
         auto definedHereLoc = litSymbol.loc(ctx);
@@ -540,7 +524,6 @@ class VisibilityCheckerPass final {
 
 public:
     const core::packages::PackageInfo &package;
-    const FileType fileType;
     UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo> referencedPackages;
     UnorderedSet<core::SymbolRef> referencedSymbols;
 
@@ -549,12 +532,7 @@ public:
     // ConstantLit was a definition.
     UnorderedSet<const void *> constantAssignmentDefinitions;
 
-    VisibilityCheckerPass(core::Context ctx, const core::packages::PackageInfo &package)
-        : package{package}, fileType{fileTypeFromCtx(ctx)} {}
-
-    bool isAnyTestFile() const {
-        return fileType != FileType::ProdFile;
-    }
+    VisibilityCheckerPass(core::Context ctx, const core::packages::PackageInfo &package) : package{package} {}
 
     void preTransformAssign(core::Context ctx, const ast::Assign &asgn) {
         auto lhs = ast::cast_tree<ast::ConstantLit>(asgn.lhs);
@@ -573,17 +551,17 @@ public:
     // Returns whether the reference causes a modularity error
     static bool reportImportError(core::Context ctx, const core::packages::PackageInfo &thisPkg,
                                   const core::packages::PackageInfo &pkg, core::LocOffsets errLoc,
-                                  core::SymbolRef litSymbol, core::FileRef otherFile, FileType fileType,
-                                  bool wasImported, bool testImportInProd, bool testUnitImportInHelper) {
+                                  core::SymbolRef litSymbol, core::FileRef otherFile, bool wasImported,
+                                  bool testImportInProd, bool testUnitImportInHelper) {
         auto &db = ctx.state.packageDB();
         auto otherPackage = pkg.mangledName();
-        bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || fileType != FileType::ProdFile;
+        bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || ctx.file.data(ctx).isPackagedTest();
         if (thisPkg.usesTestPackages) {
             isTestImport = false;
         }
         core::packages::ImportType autocorrectedImportType = core::packages::ImportType::Normal;
         if (isTestImport) {
-            if (fileType == FileType::TestHelperFile) {
+            if (ctx.file.data(ctx).isPackagedTestHelper()) {
                 autocorrectedImportType = core::packages::ImportType::TestHelper;
             } else {
                 autocorrectedImportType = core::packages::ImportType::TestUnit;
@@ -780,7 +758,7 @@ public:
         // TODO(trevor): this check is redundant with import checking after the test-packages migration is complete.
         if (!pkg.usesTestPackages &&
             (otherFile.data(ctx).isPackagedTestHelper() || otherFile.data(ctx).isPackagedTest()) &&
-            !this->isAnyTestFile()) {
+            !ctx.file.data(ctx).isPackagedTest()) {
             if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
                 e.setHeader("`{}` is defined in a test namespace and cannot be referenced in a non-test file",
                             litSymbol.show(ctx));
@@ -796,16 +774,16 @@ public:
 
         // Is this a test import (whether test helper or not) used in a production context?
         auto testImportInProd =
-            wasImported && import->type != core::packages::ImportType::Normal && this->fileType == FileType::ProdFile;
+            wasImported && import->type != core::packages::ImportType::Normal && !ctx.file.data(ctx).isPackagedTest();
         // Is this a test import not intended for use in helpers?
         auto testUnitImportInHelper = wasImported && import->type == core::packages::ImportType::TestUnit &&
-                                      this->fileType != FileType::TestUnitFile;
+                                      ctx.file.data(ctx).isPackagedTestHelper();
         bool importNeeded = !wasImported || testImportInProd || testUnitImportInHelper;
         referencedPackages[otherPackage] = {.importNeeded = importNeeded, .causesModularityError = false};
 
         if (importNeeded) {
             referencedPackages[otherPackage].causesModularityError =
-                reportImportError(ctx, this->package, pkg, lit.loc(), litSymbol, otherFile, this->fileType, wasImported,
+                reportImportError(ctx, this->package, pkg, lit.loc(), litSymbol, otherFile, wasImported,
                                   testImportInProd, testUnitImportInHelper);
             return;
         }
