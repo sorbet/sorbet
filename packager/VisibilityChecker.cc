@@ -493,22 +493,6 @@ public:
     }
 };
 
-enum class FileType {
-    ProdFile,
-    TestHelperFile,
-    TestUnitFile,
-};
-
-const FileType fileTypeFromCtx(const core::Context ctx) {
-    if (ctx.file.data(ctx).isPackagedTestHelper()) {
-        return FileType::TestHelperFile;
-    } else if (ctx.file.data(ctx).isPackagedTest()) {
-        return FileType::TestUnitFile;
-    } else {
-        return FileType::ProdFile;
-    }
-}
-
 class VisibilityCheckerPass final {
     void addExportInfo(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef litSymbol, bool definesBehavior) {
         auto definedHereLoc = litSymbol.loc(ctx);
@@ -540,7 +524,6 @@ class VisibilityCheckerPass final {
 
 public:
     const core::packages::PackageInfo &package;
-    const FileType fileType;
     UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo> referencedPackages;
     UnorderedSet<core::SymbolRef> referencedSymbols;
 
@@ -550,7 +533,7 @@ public:
     UnorderedSet<const void *> constantAssignmentDefinitions;
 
     VisibilityCheckerPass(core::Context ctx, const core::packages::PackageInfo &package)
-        : package{package}, fileType{fileTypeFromCtx(ctx)} {}
+        : package{package} {}
 
     void preTransformAssign(core::Context ctx, const ast::Assign &asgn) {
         auto lhs = ast::cast_tree<ast::ConstantLit>(asgn.lhs);
@@ -569,7 +552,7 @@ public:
     // Returns whether the reference causes a modularity error
     static bool reportImportError(core::Context ctx, const core::packages::PackageInfo &thisPkg,
                                   const core::packages::PackageInfo &pkg, core::LocOffsets errLoc,
-                                  core::SymbolRef litSymbol, core::FileRef otherFile, FileType fileType,
+                                  core::SymbolRef litSymbol, core::FileRef otherFile,
                                   bool wasImported, bool testImportInProd, bool testUnitImportInHelper) {
         auto &db = ctx.state.packageDB();
         auto otherPackage = pkg.mangledName();
@@ -801,7 +784,7 @@ public:
 
         if (importNeeded) {
             referencedPackages[otherPackage].causesModularityError =
-                reportImportError(ctx, this->package, pkg, lit.loc(), litSymbol, otherFile, this->fileType, wasImported,
+                reportImportError(ctx, this->package, pkg, lit.loc(), litSymbol, otherFile, wasImported,
                                   testImportInProd, testUnitImportInHelper);
             return;
         }
