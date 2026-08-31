@@ -573,7 +573,7 @@ public:
                                   bool wasImported, bool testImportInProd, bool testUnitImportInHelper) {
         auto &db = ctx.state.packageDB();
         auto otherPackage = pkg.mangledName();
-        bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || fileType != FileType::ProdFile;
+        bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || ctx.file.data(ctx).isPackagedTest();
         if (thisPkg.usesTestPackages) {
             isTestImport = false;
         }
@@ -792,7 +792,7 @@ public:
 
         // Is this a test import (whether test helper or not) used in a production context?
         auto testImportInProd =
-            wasImported && import->type != core::packages::ImportType::Normal && this->fileType == FileType::ProdFile;
+            wasImported && import->type != core::packages::ImportType::Normal && !ctx.file.data(ctx).isPackagedTest();
         // Is this a test import not intended for use in helpers?
         auto testUnitImportInHelper = wasImported && import->type == core::packages::ImportType::TestUnit &&
                                       this->fileType != FileType::TestUnitFile;
