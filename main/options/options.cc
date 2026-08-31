@@ -517,13 +517,11 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options(section)("watchman-path",
                                  "Path to watchman executable. Will search on `PATH` if <path> contains no slashes.",
                                  cxxopts::value<string>()->default_value(empty.watchmanPath), "<path>");
-    options.add_options(section)(
-        "watchman-pause-state-name",
-        "Watchman state name (see `watchman state-enter`); may be repeated. While a client holds one of these states "
-        "on the watched root, Watchman defers Sorbet's file change notifications and delivers them as one batch when "
-        "the state is left, so a tool that writes many files can assert a state around its writes instead of "
-        "causing a cascade of typecheck restarts.",
-        cxxopts::value<vector<string>>(), "<state>");
+    options.add_options(section)("watchman-pause-state-name",
+                                 "Defer file change notifications while a client holds this watchman state (see "
+                                 "`watchman state-enter`) on the watched root; they arrive as one batch when the "
+                                 "state is left. May be repeated.",
+                                 cxxopts::value<vector<string>>(), "<state>");
     options.add_options(section)("watchman-namespace", "Namespace for watchman",
                                  cxxopts::value<string>()->default_value(empty.watchmanNamespace), "<namespace>");
     options.add_options(section)(
@@ -1076,7 +1074,7 @@ void readOptions(Options &opts,
         if (raw.count("watchman-pause-state-name") > 0) {
             opts.watchmanPauseStateNames = raw["watchman-pause-state-name"].as<vector<string>>();
             if (opts.disableWatchman) {
-                logger->error("--watchman-pause-state-name has no effect with --disable-watchman");
+                logger->error("--watchman-pause-state-name cannot be used with --disable-watchman");
                 throw EarlyReturnWithCode(1);
             }
         }

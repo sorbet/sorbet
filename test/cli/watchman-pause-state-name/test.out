@@ -1,4 +1,4 @@
---watchman-pause-state-name has no effect with --disable-watchman
+--watchman-pause-state-name cannot be used with --disable-watchman
 
 --------------------------------------------------------------------------
 No errors! Great job.

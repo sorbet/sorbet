@@ -205,13 +205,10 @@ Usage:
       --watchman-path <path>    Path to watchman executable. Will search on `PATH` if
                                 <path> contains no slashes. (default: watchman)
       --watchman-pause-state-name <state>
-                                Watchman state name (see `watchman state-enter`); may be
-                                repeated. While a client holds one of these states on the
-                                watched root, Watchman defers Sorbet's file change
-                                notifications and delivers them as one batch when the
-                                state is left, so a tool that writes many files can
-                                assert a state around its writes instead of causing a
-                                cascade of typecheck restarts.
+                                Defer file change notifications while a client holds this
+                                watchman state (see `watchman state-enter`) on the
+                                watched root; they arrive as one batch when the state is
+                                left. May be repeated.
       --watchman-namespace <namespace>
                                 Namespace for watchman (default: "")
       --lsp-directories-missing-from-client <path>
