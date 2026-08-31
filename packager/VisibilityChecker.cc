@@ -712,15 +712,16 @@ public:
                     vector<string> reasons;
                     e.addErrorLine(this->package.declLoc(), "Enclosing package declared here");
 
-            // We should only report a visibility error if we're not going to add a visible_to to the package
-            // Otherwise the error is pointless since it'll go away after the new visible_to is added
-            if (causesVisibilityError && !ctx.state.packageDB().updateVisibilityFor(otherPackage)) {
-                reasons.emplace_back(core::ErrorColors::format(
-                    "package `{}` includes explicit visibility modifiers and cannot be imported from `{}`",
-                                pkg.show(ctx), this->package.show(ctx)));
-                    e.addErrorNote("Please consult with the owning team before adding a `{}` line to the package `{}`",
-                                   "visible_to", pkg.show(ctx));
-            }
+                    // We should only report a visibility error if we're not going to add a visible_to to the package
+                    // Otherwise the error is pointless since it'll go away after the new visible_to is added
+                    if (causesVisibilityError && !ctx.state.packageDB().updateVisibilityFor(otherPackage)) {
+                        reasons.emplace_back(core::ErrorColors::format(
+                            "package `{}` includes explicit visibility modifiers and cannot be imported from `{}`",
+                            pkg.show(ctx), this->package.show(ctx)));
+                        e.addErrorNote(
+                            "Please consult with the owning team before adding a `{}` line to the package `{}`",
+                            "visible_to", pkg.show(ctx));
+                    }
                     if (badTestReference) {
                         reasons.emplace_back(core::ErrorColors::format("`{}` may not reference `{}` packages",
                                                                        this->package.show(ctx), "test!"));
