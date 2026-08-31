@@ -33,7 +33,7 @@ class AutogenWalk {
     vector<NestingStackEntry> nestingStack;
     const AutogenConfig *autogenCfg;
 
-    enum class ScopeType { Class, Block };
+    enum class ScopeType { Class, Block, Method };
     vector<const ast::Send *> ignoring;
     vector<ScopeType> scopeTypes;
 
@@ -197,6 +197,14 @@ public:
 
         // remove the stuff added to handle the class scope here
         nestingStack.pop_back();
+        scopeTypes.pop_back();
+    }
+
+    void preTransformMethodDef(core::Context ctx, const ast::MethodDef &original) {
+        scopeTypes.emplace_back(ScopeType::Method);
+    }
+
+    void postTransformMethodDef(core::Context ctx, const ast::MethodDef &original) {
         scopeTypes.pop_back();
     }
 
@@ -378,10 +386,11 @@ public:
 
     void preTransformSend(core::Context ctx, const ast::Send &original) {
         bool inBlock = !scopeTypes.empty() && scopeTypes.back() == ScopeType::Block;
+        bool inMethod = !scopeTypes.empty() && scopeTypes.back() == ScopeType::Method;
         // Ignore include/extend sends iff they are directly at the class/module level.
         // These cases are handled in `preTransformClassDef`.
         // Do not ignore in block scope so that we a ref to the included module is still rendered.
-        if (!inBlock && original.recv.isSelfReference() &&
+        if (!inBlock && !inMethod && original.recv.isSelfReference() &&
             (original.fun == core::Names::include() || original.fun == core::Names::extend())) {
             ignoring.emplace_back(&original);
         }
