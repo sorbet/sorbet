@@ -524,7 +524,8 @@ class VisibilityCheckerPass final {
         }
     }
 
-    static void addAutocorrect(core::Context ctx, core::ErrorBuilder &e, optional<core::AutocorrectSuggestion> &&autocorrect) {
+    static void addAutocorrect(core::Context ctx, core::ErrorBuilder &e,
+                               optional<core::AutocorrectSuggestion> &&autocorrect) {
         auto &db = ctx.state.packageDB();
         auto hasAutocorrect = autocorrect.has_value();
 
@@ -569,7 +570,10 @@ public:
         }
     }
 
-    static void reportImportError(core::Context ctx, const core::packages::PackageInfo &thisPkg, const core::packages::PackageInfo &pkg, core::LocOffsets errLoc, core::SymbolRef litSymbol, core::FileRef otherFile, FileType fileType, bool wasImported, bool testImportInProd, bool testUnitImportInHelper) {
+    static void reportImportError(core::Context ctx, const core::packages::PackageInfo &thisPkg,
+                                  const core::packages::PackageInfo &pkg, core::LocOffsets errLoc,
+                                  core::SymbolRef litSymbol, core::FileRef otherFile, FileType fileType,
+                                  bool wasImported, bool testImportInProd, bool testUnitImportInHelper) {
         auto &db = ctx.state.packageDB();
         auto otherPackage = pkg.mangledName();
         bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || fileType != FileType::ProdFile;
