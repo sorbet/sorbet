@@ -44,56 +44,41 @@ private:
     const std::shared_ptr<const LSPConfiguration> config;
     std::string watchmanNamespace;
 
-    // The fields below are only touched by the watchman reader thread.
-
-    // Notifications that arrived before the LSP loop finished initializing. The preprocessor rejects messages
-    // that arrive before then, and blocking the reader instead would stall the watchman CLI's stdout, so they
-    // are held here and released once `initializedNotification` fires.
+    // Only ever touched by the watchman reader thread.
     std::vector<std::unique_ptr<LSPMessage>> heldUntilInitialized;
-    // The clock of the most recent watchman response. After the CLI dies, the changes since this clock are what
-    // the replacement subscription would otherwise have missed.
     std::optional<std::string> lastClock;
 
-    // Why one `watchman -j -p` child stopped being useful.
     enum class SubscriptionEnd {
-        // `exitWithCode` ran (Sorbet is shutting down).
+        // Sorbet is shutting down.
         Stopped,
-        // The child exited or its stdout hit EOF, watchman answered a command with an error, or the changes made
-        // while the previous child was down could not be fetched.
+        // The child is unusable and a replacement may be able to pick up from `lastClock`.
         ChildExited,
-        // The clock of the previous child belonged to a different watchman instance, so the changes made while
-        // the child was down cannot be recovered.
+        // `lastClock` predates the watchman instance now answering, so the missed changes are unknowable.
         DeltaLost,
     };
 
     struct SubscriptionRun {
         SubscriptionEnd end;
-        // Whether watchman acknowledged the subscription during this run.
         bool subscribed;
     };
-
-    enum class DeltaFetch { Delivered, Lost, Failed };
 
     /**
      * Starts up a Watchman subprocess and begins processing file changes. Runs in a dedicated thread.
      */
     void start();
 
-    // Resolves the directory watchman should watch, honoring `watchmanNamespace` (cleared when it does not apply).
+    // Clears `watchmanNamespace` when it does not apply to the workspace.
     std::string resolveWatchRoot();
 
-    // Runs one watchman CLI child to completion: spawns it, subscribes and forwards its responses until it exits
-    // or Sorbet stops. When a previous child had delivered a clock, the changes since that clock are fetched and
-    // forwarded right after watchman acknowledges the new subscription.
+    // Runs one watchman CLI child until it stops being useful, forwarding its responses.
     SubscriptionRun runSubscription(const std::string &watchRoot, const std::string &subscriptionName);
 
-    // Asks watchman (a one-shot `watchman -j` child) for the files that changed after `since` and forwards them.
-    DeltaFetch fetchChangesSince(const std::string &watchRoot, const std::string &since);
+    // Forwards the files that changed after `since`. Returns nullopt once they have been delivered.
+    std::optional<SubscriptionEnd> fetchChangesSince(const std::string &watchRoot, const std::string &since);
 
-    // Removes the namespace directory from the paths watchman reports, when namespacing is active.
     void stripNamespace(WatchmanQueryResponse &response) const;
 
-    // Sleeps for `delay` in small steps, returning early once stopped.
+    // Returns early once stopped.
     void sleepUnlessStopped(std::chrono::milliseconds delay);
 
     void exitWithCode(int code, const std::optional<std::string> &);
@@ -102,7 +87,6 @@ private:
 
     void enqueueNotification(std::unique_ptr<NotificationMessage> notification);
 
-    // Moves every held notification onto the message queue once the LSP loop has initialized.
     void releaseHeldNotifications();
 
     void processQueryResponse(std::unique_ptr<sorbet::realmain::lsp::WatchmanQueryResponse>);

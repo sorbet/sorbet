@@ -17,8 +17,7 @@ void writeString(Writer &w, string_view s) {
     w.String(s.data(), s.size());
 }
 
-// The `expression` shared by the subscription and the changes-since query: regular files with one of `extensions`,
-// inside `watchmanNamespace` when set, excluding rsync tmpfiles.
+// Shared by both commands: a narrower delta than the subscription would silently lose files.
 void writeExpression(Writer &w, const vector<string> &extensions, string_view watchmanNamespace) {
     w.String("expression");
     w.StartArray();

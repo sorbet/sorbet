@@ -12,9 +12,6 @@
 #include "rapidjson/document.h"
 #include "subprocess.hpp"
 
-#include <algorithm>
-#include <thread>
-
 using namespace std;
 
 namespace sorbet::realmain::lsp::watchman {
@@ -44,7 +41,6 @@ template <typename F> void catchDeserializationError(spdlog::logger &logger, con
     }
 }
 
-// Reaps a watchman CLI child on every exit path out of the scope that declared it.
 struct ShutdownGuard {
     subprocess::Popen &p;
     ~ShutdownGuard() noexcept {
@@ -52,14 +48,7 @@ struct ShutdownGuard {
     }
 };
 
-optional<string> clockOf(const rapidjson::Document &d) {
-    if (d.HasMember("clock") && d["clock"].IsString()) {
-        return string(d["clock"].GetString(), d["clock"].GetStringLength());
-    }
-    return nullopt;
-}
-
-// How long a one-shot `watchman -j` query may take. Watchman's own file system synchronization gives up after 60s.
+// Longer than the 60s watchman spends synchronizing with the file system before it gives up on a query.
 constexpr auto CHANGES_SINCE_QUERY_TIMEOUT = chrono::seconds(90);
 
 } // namespace
@@ -103,7 +92,7 @@ void WatchmanProcess::start() {
         string subscriptionName = fmt::format("ruby-typer-{}", getpid());
         string watchRoot = resolveWatchRoot();
 
-        // Consecutive children that died without watchman ever acknowledging their subscription.
+        // Counts only children that died before watchman acknowledged their subscription.
         int failedRestarts = 0;
         while (!isStopped()) {
             auto run = runSubscription(watchRoot, subscriptionName);
@@ -167,9 +156,8 @@ WatchmanProcess::SubscriptionRun WatchmanProcess::runSubscription(const string &
     // always reaped before this thread returns.
     ShutdownGuard shutdownGuard{p};
 
-    // Set when a previous child delivered responses: the changes made since then have to be fetched separately,
-    // because they were never delivered to us. A subscription's own `since` would not do: its initial results are
-    // computed without synchronizing with the file system, so they can miss a change watchman was still digesting.
+    // Fetched by query rather than by giving the subscription a `since`: watchman runs a subscription's initial
+    // results with sync_timeout 0, so they can miss a change it was still digesting at subscribe time.
     const optional<string> sinceClock = lastClock;
 
     logger->debug("Starting monitoring path {} with watchman for files with extensions {}. Subscription id: {}",
@@ -186,7 +174,6 @@ WatchmanProcess::SubscriptionRun WatchmanProcess::runSubscription(const string &
     SubscriptionRun run{SubscriptionEnd::ChildExited, false};
 
     while (!isStopped()) {
-        // The LSP loop may have finished initializing while we were waiting on watchman.
         releaseHeldNotifications();
 
         errno = 0;
@@ -201,8 +188,6 @@ WatchmanProcess::SubscriptionRun WatchmanProcess::runSubscription(const string &
                 continue;
             }
 
-            // Unable to read from the Watchman process: it exited, or its connection to the daemon was severed
-            // and it exited on the resulting decode error.
             logger->error("Watchman CLI stdout closed (errno={})", errno);
             return run;
         }
@@ -217,13 +202,11 @@ WatchmanProcess::SubscriptionRun WatchmanProcess::runSubscription(const string &
         if (d.Parse(line.c_str(), line.size()).HasParseError()) {
             logger->error("Error parsing Watchman response: `{}` is not a valid json object", line);
         } else if (d.HasMember("error")) {
-            // Watchman rejected a command. The only command we send is the subscribe, so without a subscription
-            // this child is useless; the caller decides whether to try again.
+            // Subscribing is the only command we send, so an error leaves this child with nothing to deliver.
             logger->error("Watchman returned an error: {}", line);
             return run;
         } else if (d.HasMember("canceled")) {
-            // The watch behind our subscription was deleted (`watchman watch-del`). Nothing further arrives on this
-            // child, so treat it like an exit and let the caller resubscribe.
+            // `watchman watch-del` drops the watch behind the subscription; nothing further arrives on this child.
             logger->error("Watchman canceled our subscription: {}", line);
             return run;
         } else if (d.HasMember("is_fresh_instance")) {
@@ -252,25 +235,19 @@ WatchmanProcess::SubscriptionRun WatchmanProcess::runSubscription(const string &
                 processStateLeave(move(stateLeave));
             });
         } else if (d.HasMember("subscribe")) {
-            // The acknowledgement of our subscribe command. Its clock is the point from which the subscription
-            // reports changes.
             run.subscribed = true;
-            if (auto clock = clockOf(d)) {
-                lastClock = *clock;
+            if (d.HasMember("clock") && d["clock"].IsString()) {
+                lastClock = string(d["clock"].GetString(), d["clock"].GetStringLength());
             }
 
             if (sinceClock.has_value()) {
-                switch (fetchChangesSince(watchRoot, *sinceClock)) {
-                    case DeltaFetch::Delivered:
-                        break;
-                    case DeltaFetch::Lost:
-                        run.end = SubscriptionEnd::DeltaLost;
-                        return run;
-                    case DeltaFetch::Failed:
-                        // Roll `lastClock` back so that the next attempt asks for the changes since the previous
-                        // child's last clock again, a superset of the delta this attempt failed to fetch.
+                if (auto failure = fetchChangesSince(watchRoot, *sinceClock)) {
+                    if (*failure == SubscriptionEnd::ChildExited) {
+                        // Rewind so the next attempt asks for a superset of the delta this one failed to fetch.
                         lastClock = sinceClock;
-                        return run;
+                    }
+                    run.end = *failure;
+                    return run;
                 }
             }
         } else {
@@ -283,7 +260,8 @@ WatchmanProcess::SubscriptionRun WatchmanProcess::runSubscription(const string &
     return run;
 }
 
-WatchmanProcess::DeltaFetch WatchmanProcess::fetchChangesSince(const string &watchRoot, const string &since) {
+optional<WatchmanProcess::SubscriptionEnd> WatchmanProcess::fetchChangesSince(const string &watchRoot,
+                                                                              const string &since) {
     auto p = subprocess::Popen({watchmanPath.c_str(), "-j", "--no-pretty"}, subprocess::output{subprocess::PIPE},
                                subprocess::input{subprocess::PIPE});
     ShutdownGuard shutdownGuard{p};
@@ -300,7 +278,7 @@ WatchmanProcess::DeltaFetch WatchmanProcess::fetchChangesSince(const string &wat
         if (chrono::steady_clock::now() > deadline) {
             logger->error("Watchman did not answer the changes-since query within {}s",
                           chrono::duration_cast<chrono::seconds>(CHANGES_SINCE_QUERY_TIMEOUT).count());
-            return DeltaFetch::Failed;
+            return SubscriptionEnd::ChildExited;
         }
 
         errno = 0;
@@ -314,7 +292,7 @@ WatchmanProcess::DeltaFetch WatchmanProcess::fetchChangesSince(const string &wat
                 continue;
             }
             logger->error("Watchman exited without answering the changes-since query (errno={})", errno);
-            return DeltaFetch::Failed;
+            return SubscriptionEnd::ChildExited;
         }
 
         const string &line = *maybeLine.output;
@@ -323,21 +301,20 @@ WatchmanProcess::DeltaFetch WatchmanProcess::fetchChangesSince(const string &wat
         rapidjson::Document d(&alloc);
         if (d.Parse(line.c_str(), line.size()).HasParseError()) {
             logger->error("Error parsing Watchman response: `{}` is not a valid json object", line);
-            return DeltaFetch::Failed;
+            return SubscriptionEnd::ChildExited;
         }
 
         if (d.HasMember("error") || !d.HasMember("is_fresh_instance")) {
             logger->error("Watchman rejected the changes-since query: {}", line);
-            return DeltaFetch::Failed;
+            return SubscriptionEnd::ChildExited;
         }
 
-        auto result = DeltaFetch::Failed;
-        catchDeserializationError(*logger, line, [&d, &result, this]() {
+        optional<SubscriptionEnd> failure = SubscriptionEnd::ChildExited;
+        catchDeserializationError(*logger, line, [&d, &failure, this]() {
             auto queryResponse = sorbet::realmain::lsp::WatchmanQueryResponse::fromJSONValue(d);
             if (queryResponse->isFreshInstance) {
-                // The clock belongs to another watchman instance (the daemon restarted, or the watch was deleted
-                // and re-created), so nothing is known about what changed in between.
-                result = DeltaFetch::Lost;
+                // A clock from an earlier watchman instance, so what changed in between is unknowable.
+                failure = SubscriptionEnd::DeltaLost;
                 return;
             }
 
@@ -345,12 +322,12 @@ WatchmanProcess::DeltaFetch WatchmanProcess::fetchChangesSince(const string &wat
             lastClock = queryResponse->clock;
             stripNamespace(*queryResponse);
             processQueryResponse(move(queryResponse));
-            result = DeltaFetch::Delivered;
+            failure = nullopt;
         });
-        return result;
+        return failure;
     }
 
-    return DeltaFetch::Failed;
+    return SubscriptionEnd::ChildExited;
 }
 
 void WatchmanProcess::stripNamespace(WatchmanQueryResponse &response) const {
@@ -371,13 +348,8 @@ void WatchmanProcess::stripNamespace(WatchmanQueryResponse &response) const {
 }
 
 void WatchmanProcess::sleepUnlessStopped(chrono::milliseconds delay) {
-    constexpr auto step = chrono::milliseconds(100);
-    auto remaining = delay;
-    while (remaining.count() > 0 && !isStopped()) {
-        auto nap = min(step, remaining);
-        this_thread::sleep_for(nap);
-        remaining -= nap;
-    }
+    absl::MutexLock lck(&mutex);
+    mutex.AwaitWithTimeout(absl::Condition(&stopped), absl::Milliseconds(delay.count()));
 }
 
 bool WatchmanProcess::isStopped() {
@@ -395,15 +367,14 @@ void WatchmanProcess::exitWithCode(int code, const optional<string> &msg) {
 
 void WatchmanProcess::enqueueNotification(unique_ptr<NotificationMessage> notification) {
     auto msg = make_unique<LSPMessage>(move(notification));
-    // The preprocessor rejects file updates that arrive before the LSP loop has initialized (which includes the
-    // initial typecheck). Hold them instead of blocking: a blocked reader stops draining the watchman CLI's stdout,
-    // the CLI then stops reading from the watchman daemon, and the daemon drops a client that has not accepted its
-    // output for 60s — mid-message, which kills the CLI once it resumes.
+    // Waiting here for the LSP loop to initialize would stop this thread draining the CLI's stdout, and watchman
+    // drops a client that has not accepted its output for 60s, mid-message.
     if (!initializedNotification.HasBeenNotified()) {
         heldUntilInitialized.push_back(move(msg));
         return;
     }
 
+    // Held notifications first, or this one overtakes them.
     releaseHeldNotifications();
     absl::MutexLock lck(&messageQueueMutex);
     msg->tagNewRequest(*logger);
