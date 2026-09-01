@@ -136,6 +136,17 @@ public:
     bool hasAllowedExtension(std::string_view filePath) const;
 
     /**
+     * Reads the contents of a workspace file, treating a file that does not exist as one that is completely empty.
+     *
+     * NOTE: It is not appropriate to raise for a missing file here. Sorbet does not differentiate between file
+     * updates that say a file has changed and ones that say it has been deleted, so this is the 'golden path' for
+     * deleted files. An alternative would be to track deleted files in the file table as tombstoned. If we go that
+     * direction, we'll need to make sure to update the handling of those files in the `workspaceFiles` vector that
+     * the LSPTypechecker manages.
+     */
+    std::string readFileFromDisk(const std::string &filePath) const;
+
+    /**
      * Returns 'true' if the URI corresponds to a path within the active workspace.
      * Note: Does *not* return 'true' for URIs corresponding to sorbet: URIs. While these are valid URIs, they are not
      * actually within the workspace.

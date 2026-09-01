@@ -1335,6 +1335,11 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                        "std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers;",
                        "// File updates contained in this edit.",
                        "std::vector<std::shared_ptr<core::File>> updates;",
+                       "// Set when Watchman told us that it could not compute a delta (`is_fresh_instance`), so we",
+                       "// have to assume that any file may have changed without us being told about it. `updates`",
+                       "// does not name those files, so the indexer expands this edit to cover every file it",
+                       "// tracks. See LSPIndexer::resyncAllFilesFromDisk.",
+                       "bool resyncAllFiles = false;",
                        "// Merge newerParams into this object, which mutates `epoch` and `updates`",
                        "void merge(SorbetWorkspaceEditParams &newerParams);",
                    });

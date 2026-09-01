@@ -125,6 +125,67 @@ TEST_CASE_FIXTURE(ProtocolTest, "MergesMultipleWatchmanUpdates") {
     CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath_canceled"), 0);
 }
 
+// A fresh instance is Watchman saying that it could not compute a delta, so it may have dropped changes. Sorbet only
+// reads a file from disk when something tells it to, and its slow path re-indexes out of the file table rather than
+// off disk, so a dropped change would otherwise sit in the file table for the life of the process.
+TEST_CASE_FIXTURE(ProtocolTest, "ResyncsFilesChangedWhileWatchmanWasNotLooking") {
+    assertErrorDiagnostics(initializeLSP(), {});
+
+    writeFilesToFS({{"foo.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + 2\n  end\nend\n"}});
+    assertErrorDiagnostics(send(*watchmanFileUpdate({"foo.rb"})), {});
+
+    // Break the file without telling Sorbet, standing in for a change Watchman never delivered.
+    writeFilesToFS({{"foo.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n"}});
+
+    // Clear counters so we can also check that the resync took the slow path. It has to: the edit is indexed on the
+    // typechecker thread, by which point the epoch has already been opened for a slow path.
+    getCounters();
+    assertErrorDiagnostics(send(*watchmanFreshInstance()), {{"foo.rb", 3, "Expected `Integer`"}});
+
+    auto counters = getCounters();
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 1);
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "fastpath"), 0);
+    CHECK_EQ(counters.getCategoryCounter("lsp.slow_path_reason", "resynced_all_files"), 1);
+}
+
+// A file created while Watchman was not looking is on disk but absent from the file table, so only walking the
+// workspace can turn it up.
+TEST_CASE_FIXTURE(ProtocolTest, "ResyncsFilesCreatedWhileWatchmanWasNotLooking") {
+    assertErrorDiagnostics(initializeLSP(), {});
+
+    writeFilesToFS({{"foo.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n"}});
+    assertErrorDiagnostics(send(*watchmanFreshInstance()), {{"foo.rb", 3, "Expected `Integer`"}});
+}
+
+// A file deleted while Watchman was not looking is the mirror image: it is in the file table but no longer on disk,
+// so only walking the file table can turn it up.
+TEST_CASE_FIXTURE(ProtocolTest, "ResyncsFilesDeletedWhileWatchmanWasNotLooking") {
+    assertErrorDiagnostics(initializeLSP(), {});
+
+    writeFilesToFS({{"foo.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n"}});
+    assertErrorDiagnostics(send(*watchmanFileUpdate({"foo.rb"})), {{"foo.rb", 3, "Expected `Integer`"}});
+
+    deleteFileFromFS("foo.rb");
+    assertErrorDiagnostics(send(*watchmanFreshInstance()), {});
+}
+
+// A file open in the editor belongs to the editor: its (possibly unsaved) contents supersede what is on disk, so a
+// resync must not read over them.
+TEST_CASE_FIXTURE(ProtocolTest, "FreshInstanceLeavesFilesOpenInEditorAlone") {
+    assertErrorDiagnostics(initializeLSP(), {});
+
+    ExpectedDiagnostic d = {"foo.rb", 3, "Expected `Integer`"};
+    writeFilesToFS({{"foo.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n"}});
+    assertErrorDiagnostics(send(*watchmanFileUpdate({"foo.rb"})), {d});
+
+    assertErrorDiagnostics(
+        send(*openFile("foo.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + 2\n  end\nend\n")), {});
+    assertErrorDiagnostics(send(*watchmanFreshInstance()), {});
+
+    // Sorbet goes back to the version on disk once the editor gives the file up.
+    assertErrorDiagnostics(send(*closeFile("foo.rb")), {d});
+}
+
 TEST_CASE_FIXTURE(ProtocolTest, "ZeroingOutPackageFiles") {
     auto opts = make_shared<realmain::options::Options>();
     opts->cacheSensitiveOptions.sorbetPackages = true;

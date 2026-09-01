@@ -11,6 +11,7 @@ void LSPFileUpdates::mergeOlder(const LSPFileUpdates &older) {
     editCount += older.editCount;
     committedEditCount += older.committedEditCount;
     hasNewFiles = hasNewFiles || older.hasNewFiles;
+    resyncedAllFiles = resyncedAllFiles || older.resyncedAllFiles;
     cancellationExpected = cancellationExpected || older.cancellationExpected;
     preemptionsExpected += older.preemptionsExpected;
 
@@ -38,6 +39,7 @@ LSPFileUpdates LSPFileUpdates::copy() const {
     copy.committedEditCount = committedEditCount;
     copy.typecheckingPath = typecheckingPath;
     copy.hasNewFiles = hasNewFiles;
+    copy.resyncedAllFiles = resyncedAllFiles;
     copy.updatedFileRefs = updatedFileRefs;
     copy.updatedFiles = updatedFiles;
     copy.cancellationExpected = cancellationExpected;

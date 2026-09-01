@@ -12,15 +12,21 @@ SorbetWorkspaceEditTask::SorbetWorkspaceEditTask(const LSPConfiguration &config,
                                                  unique_ptr<SorbetWorkspaceEditParams> params)
     : LSPDangerousTypecheckerTask(config, LSPMethod::SorbetWorkspaceEdit),
       latencyCancelSlowPath(make_unique<Timer>(*config.logger, "latency.cancel_slow_path")), params(move(params)) {
-    if (this->params->updates.empty()) {
+    if (isNoop()) {
         latencyCancelSlowPath->cancel();
     }
 };
 
 SorbetWorkspaceEditTask::~SorbetWorkspaceEditTask() = default;
 
+bool SorbetWorkspaceEditTask::isNoop() const {
+    // A resync only looks like a no-op edit: `updates` is empty because Watchman did not tell us which files
+    // changed, and the indexer is what fills it in from disk.
+    return params->updates.empty() && !params->resyncAllFiles;
+}
+
 LSPTask::Phase SorbetWorkspaceEditTask::finalPhase() const {
-    if (params->updates.empty()) {
+    if (isNoop()) {
         // Early-dispatch no-op edits. These can happen if the user opens or changes a file that is not within the
         // current workspace.
         return LSPTask::Phase::PREPROCESS;
@@ -50,7 +56,7 @@ void SorbetWorkspaceEditTask::mergeNewer(SorbetWorkspaceEditTask &task) {
 
 void SorbetWorkspaceEditTask::preprocess(LSPPreprocessor &preprocessor) {
     // latencyTimer is assigned prior to preprocess.
-    if (this->latencyTimer != nullptr && !params->updates.empty()) {
+    if (this->latencyTimer != nullptr && !isNoop()) {
         params->diagnosticLatencyTimers.push_back(
             make_unique<Timer>(this->latencyTimer->clone("last_diagnostic_latency")));
     }
@@ -66,7 +72,9 @@ void SorbetWorkspaceEditTask::index(LSPIndexer &indexer) {
         return !indexer.wouldUpdateFileTable(*file);
     });
 
-    if (params->updates.size() <= config.opts.lspMaxFilesOnFastPath) {
+    // A resync also has to be indexed in `runSpecial`, because expanding it means reading the whole workspace off
+    // disk, which wants a worker pool and must not happen while this thread holds the task queue's lock.
+    if (!params->resyncAllFiles && params->updates.size() <= config.opts.lspMaxFilesOnFastPath) {
         updates = indexer.commitEdit(*params);
     } else {
         // HACK: Too many files to `commitEdit` serially. Index in `runSpecial`.
@@ -155,6 +163,11 @@ void SorbetWorkspaceEditTask::schedulerWaitUntilReady() {
 TypecheckingPath SorbetWorkspaceEditTask::getTypecheckingPath(const LSPIndexer &index) const {
     if (updates != nullptr) {
         return updates->typecheckingPath;
+    }
+    if (params->resyncAllFiles) {
+        // Which files this edit really contains is not known until the indexer has read the workspace off disk, so
+        // there is nothing to decide from yet. It takes the slow path either way; see LSPFileUpdates::resyncedAllFiles.
+        return TypecheckingPath::Slow;
     }
     if (!cachedFastPathDecisionValid) {
         cachedFastPathDecision = index.getTypecheckingPath(params->updates);

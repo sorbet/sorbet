@@ -141,6 +141,13 @@ unique_ptr<LSPMessage> ProtocolTest::watchmanFileUpdate(vector<string> updatedFi
     return make_unique<LSPMessage>(move(req));
 }
 
+unique_ptr<LSPMessage> ProtocolTest::watchmanFreshInstance() {
+    auto req = make_unique<NotificationMessage>(
+        "2.0", LSPMethod::SorbetWatchmanFileChange,
+        make_unique<WatchmanQueryResponse>("", "", /* isFreshInstance */ true, vector<string>{}));
+    return make_unique<LSPMessage>(move(req));
+}
+
 void ProtocolTest::writeFilesToFS(vector<pair<string, string>> files) {
     for (auto &file : files) {
         sourceFileContents[file.first] =

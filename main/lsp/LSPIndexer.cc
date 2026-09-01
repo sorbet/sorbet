@@ -1,6 +1,8 @@
 #include "main/lsp/LSPIndexer.h"
 #include "LSPFileUpdates.h"
 #include "common/concurrency/ConcurrentQueue.h"
+#include "common/concurrency/WorkerPool.h"
+#include "common/sort/sort.h"
 #include "core/ErrorQueue.h"
 #include "core/FileHash.h"
 #include "core/NullFlusher.h"
@@ -75,6 +77,115 @@ void LSPIndexer::computeFileHashes(const vector<shared_ptr<core::File>> &files, 
 
 void LSPIndexer::computeFileHashes(const vector<shared_ptr<core::File>> &files) const {
     computeFileHashes(files, *emptyWorkers);
+}
+
+void LSPIndexer::resyncAllFilesFromDisk(SorbetWorkspaceEditParams &edit, WorkerPool &workers) const {
+    ENFORCE(edit.resyncAllFiles);
+    Timer timeit(config->logger, "resync_all_files_from_disk");
+    auto &logger = *config->logger;
+
+    // Paths that must not be read, whichever of the two sources below turns them up.
+    UnorderedSet<string_view> ignored;
+    // This edit already names these, and they were read from disk moments ago. Two updates for one path would also
+    // make `commitEdit` evict the same file twice, leaving it comparing the new hashes against the wrong "old" ones.
+    for (auto &file : edit.updates) {
+        ignored.insert(file->path());
+    }
+
+    UnorderedSet<string> candidates;
+    // Skip id 0, which is a FileRef that does not exist.
+    for (auto &file : gs->getFiles().subspan(1)) {
+        // Payload files are compiled into Sorbet rather than read from the workspace.
+        if (file->isPayload()) {
+            continue;
+        }
+
+        if (file->isOpenInClient()) {
+            // A file open in the client belongs to the editor: its (possibly unsaved) contents supersede whatever is
+            // on disk. Note that this has to go in `ignored` rather than just being skipped here, because the walk
+            // below would otherwise turn the file up again.
+            ignored.insert(file->path());
+        } else {
+            candidates.insert(string(file->path()));
+        }
+    }
+
+    // This is the same walk that Sorbet does at startup to turn its input directory into a file list, and it is what
+    // lets the resync notice files that were created while Watchman was not looking. Files it reports that Sorbet
+    // does not track yet will make this edit take the slow path via `hasNewFiles`. Walking `rootPath` (rather than
+    // every raw input dir) is what keeps these paths spelled the same way as the ones already in the file table:
+    // it is both the single input directory the language server insists on and the prefix that the preprocessor
+    // puts on paths coming from Watchman.
+    try {
+        for (auto &path : config->opts.fs->listFilesInDir(config->rootPath, config->opts.allowedExtensions, workers,
+                                                          /* recursive */ true, config->opts.absoluteIgnorePatterns,
+                                                          config->opts.relativeIgnorePatterns)) {
+            candidates.insert(move(path));
+        }
+    } catch (FileNotFoundException &e) {
+        // The directory Sorbet was pointed at has gone away. Everything under it is still in the file table, so it
+        // gets zeroed out below, which is what happens to any other deleted file.
+        logger.error("Unable to list files in `{}` while resynchronizing with disk: {}", config->rootPath, e.what());
+    } catch (FileNotDirException &e) {
+        logger.error("Path `{}` is not a directory", config->rootPath);
+    }
+
+    vector<string> paths;
+    paths.reserve(candidates.size());
+    for (auto &path : candidates) {
+        if (!ignored.contains(path)) {
+            paths.emplace_back(path);
+        }
+    }
+
+    auto fileq = make_shared<ConcurrentBoundedQueue<size_t>>(paths.size());
+    for (size_t i = 0; i < paths.size(); i++) {
+        fileq->push(i, 1);
+    }
+
+    auto resultq = make_shared<BlockingBoundedQueue<vector<shared_ptr<core::File>>>>(paths.size());
+    workers.multiplexJob("resyncAllFilesFromDisk", [this, fileq, resultq, &paths, epoch = edit.epoch]() {
+        vector<shared_ptr<core::File>> threadResult;
+        int processedByThread = 0;
+        size_t job;
+        for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+            if (!result.gotItem()) {
+                continue;
+            }
+            processedByThread++;
+
+            auto file = make_shared<core::File>(string(paths[job]), config->readFileFromDisk(paths[job]),
+                                                core::File::Type::Normal, epoch);
+            // Only the files that actually drifted belong in the edit. The rest already agree with the file table,
+            // and carrying them would inflate the edit (and the work the fast path decision has to do) for nothing.
+            if (wouldUpdateFileTable(*file)) {
+                threadResult.emplace_back(move(file));
+            }
+        }
+
+        if (processedByThread > 0) {
+            resultq->push(move(threadResult), processedByThread);
+        }
+    });
+
+    vector<shared_ptr<core::File>> resynced;
+    {
+        vector<shared_ptr<core::File>> threadResult;
+        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger); !result.done();
+             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger)) {
+            if (result.gotItem()) {
+                absl::c_move(threadResult, back_inserter(resynced));
+            }
+        }
+    }
+
+    // The workers finish in whatever order they finish in, so sort to keep an edit's contents a function of the
+    // workspace alone.
+    fast_sort(resynced, [](const auto &left, const auto &right) { return left->path() < right->path(); });
+
+    logger.debug("Resynchronized with disk after a Watchman fresh instance: read={} changed={}", paths.size(),
+                 resynced.size());
+    absl::c_move(resynced, back_inserter(edit.updates));
 }
 
 // This function was previously called canTakeFastPath, but we changed it in ancitipation of adding
@@ -237,6 +348,12 @@ LSPIndexer::getTypecheckingPath(LSPFileUpdates &edit,
         return TypecheckingPath::Slow;
     }
 
+    if (edit.resyncedAllFiles) {
+        logger.debug("Taking slow path because the file table was resynchronized with disk");
+        prodCategoryCounterInc("lsp.slow_path_reason", "resynced_all_files");
+        return TypecheckingPath::Slow;
+    }
+
     auto [path, result] = getTypecheckingPathInternal(edit.updatedFiles, evictedFiles);
     switch (path) {
         case TypecheckingPath::Fast: {
@@ -325,11 +442,16 @@ void LSPIndexer::initialize(IndexerInitializationTask &task, vector<shared_ptr<c
 
 unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit, WorkerPool &workers) {
     Timer timeit(config->logger, "LSPIndexer::commitEdit");
+    if (edit.resyncAllFiles) {
+        resyncAllFilesFromDisk(edit, workers);
+    }
+
     auto result = make_unique<LSPFileUpdates>();
     auto &update = *result;
     update.epoch = edit.epoch;
     update.editCount = edit.mergeCount + 1;
     update.updatedFiles = move(edit.updates);
+    update.resyncedAllFiles = edit.resyncAllFiles;
     update.cancellationExpected = edit.sorbetCancellationExpected;
     update.preemptionsExpected = edit.sorbetPreemptionsExpected;
     // _Wait_ to compute `getTypecheckingPath` until after we compute hashes.
@@ -431,6 +553,7 @@ unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edi
 
 unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit) {
     ENFORCE(edit.updates.size() <= config->opts.lspMaxFilesOnFastPath, "Too many files to index serially");
+    ENFORCE(!edit.resyncAllFiles, "Resynchronizing with disk reads the whole workspace, so it needs a worker pool");
     return commitEdit(edit, *emptyWorkers);
 }
 

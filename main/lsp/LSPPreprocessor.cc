@@ -12,21 +12,6 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 namespace {
-string readFile(const string &path, const FileSystem &fs) {
-    try {
-        return fs.readFile(path);
-    } catch (FileNotFoundException e) {
-        // Act as if file is completely empty.
-        // NOTE: It is not appropriate to throw an error here. Sorbet does not differentiate between Watchman
-        // updates that specify if a file has changed or has been deleted, so this is the 'golden path' for deleted
-        // files.
-        // An alternative would be to track deleted files in the file table as tombstoned. If we go that direction,
-        // we'll need to make sure to update the handling of those files in the `workspaceFiles` vector that the
-        // LSPTypechecker manages.
-        return "";
-    }
-}
-
 class TerminateOnDestruction final {
     TaskQueue &queue;
 
@@ -481,7 +466,7 @@ LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<DidCloseTextDocumentPa
             openFiles.erase(localPath);
             // Use contents of file on disk.
             auto fileType = core::File::Type::Normal;
-            auto fileContents = readFile(localPath, *config->opts.fs);
+            auto fileContents = config->readFileFromDisk(localPath);
             edit->updates.push_back(make_shared<core::File>(move(localPath), move(fileContents), fileType, v));
         }
     }
@@ -492,6 +477,17 @@ unique_ptr<SorbetWorkspaceEditParams>
 LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<WatchmanQueryResponse> queryResponse) const {
     auto edit = make_unique<SorbetWorkspaceEditParams>();
     edit->epoch = v;
+    // We subscribe with `empty_on_fresh_instance`, so a fresh instance arrives with no files in it: Watchman is
+    // telling us that it could not compute a delta (it was restarted, or the watch was re-established, so the
+    // clock we asked about is from a previous instance) and that we should resynchronize ourselves. Watchman only
+    // suppresses the file list, not the flag, so the changes we missed are unrecoverable from this response alone.
+    //
+    // Sorbet reads a file from disk only when something tells it to, and the slow path re-indexes out of the file
+    // table rather than off disk, so ignoring this would leave stale contents in the file table for the life of
+    // the process: every subsequent typecheck, fast or slow, would report errors for source that is no longer on
+    // disk. Note that the initial subscription result is not a fresh instance for these purposes, because
+    // `empty_on_fresh_instance` makes Watchman send nothing at all for it.
+    edit->resyncAllFiles = queryResponse->isFreshInstance;
     for (auto &file : queryResponse->files) {
         // Don't append rootPath if it is empty.
         string localPath = !config->rootPath.empty() ? absl::StrCat(config->rootPath, "/", file) : file;
@@ -499,7 +495,7 @@ LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<WatchmanQueryResponse>
         if (!config->isFileIgnored(localPath) && config->hasAllowedExtension(localPath) &&
             !openFiles.contains(localPath)) {
             auto fileType = core::File::Type::Normal;
-            auto fileContents = readFile(localPath, *config->opts.fs);
+            auto fileContents = config->readFileFromDisk(localPath);
             edit->updates.push_back(make_shared<core::File>(move(localPath), move(fileContents), fileType, v));
         }
     }

@@ -282,6 +282,15 @@ bool LSPConfiguration::hasAllowedExtension(string_view filePath) const {
     return FileOps::hasAllowedExtension(filePath, this->opts.allowedExtensions);
 }
 
+string LSPConfiguration::readFileFromDisk(const string &filePath) const {
+    try {
+        return this->opts.fs->readFile(filePath);
+    } catch (FileNotFoundException e) {
+        // Act as if file is completely empty. See the docs on this method for why.
+        return "";
+    }
+}
+
 bool LSPConfiguration::isSorbetUri(string_view uri) const {
     assertHasClientConfig();
     return clientConfig->enableSorbetURIs && absl::StartsWith(uri, sorbetScheme);

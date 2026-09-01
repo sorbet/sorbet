@@ -89,6 +89,13 @@ protected:
 
     std::unique_ptr<LSPMessage> watchmanFileUpdate(std::vector<std::string> updatedFilePaths);
 
+    /**
+     * A Watchman subscription result saying that Watchman could not compute a delta, so it may have dropped changes
+     * and Sorbet has to resynchronize itself against disk. Sorbet subscribes with `empty_on_fresh_instance`, so such
+     * a result names no files at all.
+     */
+    std::unique_ptr<LSPMessage> watchmanFreshInstance();
+
     std::vector<std::unique_ptr<LSPMessage>> sendRaw(const std::string &json);
 
     std::vector<std::unique_ptr<LSPMessage>> send(const LSPMessage &message);

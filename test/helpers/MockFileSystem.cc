@@ -1,4 +1,8 @@
 #include "test/helpers/MockFileSystem.h"
+#include "absl/strings/match.h"
+#include "absl/strings/str_cat.h"
+#include "common/FileOps.h"
+#include "common/sort/sort.h"
 
 using namespace std;
 
@@ -44,13 +48,35 @@ void MockFileSystem::deleteFile(string_view filename) {
 vector<string> MockFileSystem::listFilesInDir(string_view path, const UnorderedSet<string> &extensions, bool recursive,
                                               const vector<string> &absoluteIgnorePatterns,
                                               const vector<string> &relativeIgnorePatterns) const {
-    Exception::raise("Not implemented.");
+    if (!recursive) {
+        Exception::raise("MockFileSystem only implements recursive listings.");
+    }
+
+    auto dir = makeAbsolute(rootPath, path);
+    // `writeFile` stores keys with no trailing slash, so a directory only prefixes its contents once one is added.
+    // Guard against doubling it up for a path that already ends in a slash.
+    auto prefix = absl::EndsWith(dir, "/") ? dir : absl::StrCat(dir, "/");
+
+    vector<string> result;
+    for (auto &[filePath, _contents] : contents) {
+        if (!absl::StartsWith(filePath, prefix) || !FileOps::hasAllowedExtension(filePath, extensions) ||
+            FileOps::isFileIgnored(rootPath, filePath, absoluteIgnorePatterns, relativeIgnorePatterns)) {
+            continue;
+        }
+        result.emplace_back(filePath);
+    }
+
+    // The real implementation walks the directory tree, so it does not hand back the arbitrary order that iterating
+    // a hash map would. Sort so that tests do not depend on it either.
+    fast_sort(result);
+    return result;
 }
 
 vector<string> MockFileSystem::listFilesInDir(string_view path, const UnorderedSet<string> &extensions,
                                               WorkerPool &workerPool, bool recursive,
                                               const vector<string> &absoluteIgnorePatterns,
                                               const vector<string> &relativeIgnorePatterns) const {
-    Exception::raise("Not implemented.");
+    // There is nothing here worth parallelizing.
+    return listFilesInDir(path, extensions, recursive, absoluteIgnorePatterns, relativeIgnorePatterns);
 }
 } // namespace sorbet::test
