@@ -16,6 +16,7 @@ require_relative 'deep_clone'
 require_relative 'typecheck'
 require_relative 'typecheck_kwargs_splat'
 require_relative 'enum'
+require_relative 'abstract'
 
 namespace :bench do
   task :getters do
@@ -88,6 +89,10 @@ namespace :bench do
 
   task :enum do
     SorbetBenchmarks::Enum.run
+  end
+
+  task :abstract do
+    SorbetBenchmarks::Abstract.run
   end
 
   task all: %i[getters setters constructor deserialize prop_definition serialize_custom_type sigs tutils typecheck]
