@@ -707,6 +707,66 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathAndB
                          /* assertUniqueStartTimes */ false);
 }
 
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PreemptingFastPathWithIncrementalNamerDoesNotLeaveSlowPathPhantoms") {
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->enableTypecheckInfo = true;
+    assertErrorDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
+
+    // foo.rb defines a constant and a method. bar.rb reads the constant but never mentions the method's name, so a
+    // change to the method's signature does not make bar.rb one of the fast path's extra files.
+    assertErrorDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
+                                                    "class Foo\n"
+                                                    "  extend T::Sig\n"
+                                                    "  CONST = T.let(1, T.nilable(Integer))\n"
+                                                    "  sig {returns(Integer)}\n"
+                                                    "  def method_only_in_foo\n"
+                                                    "    1\n"
+                                                    "  end\n"
+                                                    "end\n")),
+                           {});
+    assertErrorDiagnostics(send(*openFile("bar.rb", "# typed: strict\n"
+                                                    "class Bar\n"
+                                                    "  extend T::Sig\n"
+                                                    "  sig {returns(Integer)}\n"
+                                                    "  def use_const\n"
+                                                    "    T.must(Foo::CONST)\n"
+                                                    "  end\n"
+                                                    "end\n")),
+                           {});
+    assertErrorDiagnostics(send(*openFile("baz.rb", "# typed: true\nclass Baz\nend\n")), {});
+
+    // Slow path: baz.rb gains a class. The slow path resolves every file (bar.rb's tree now points at the
+    // `Foo::CONST` symbol) and then waits for one preemption before typechecking.
+    sendAsync(*changeFile("baz.rb", "# typed: true\nclass Baz\nend\nclass Qux\nend\n", 2, false, 1));
+
+    // Wait for typechecking to begin to avoid races.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // Fast path [preempt]: change the signature of Foo#method_only_in_foo. This runs the incremental namer, which
+    // deletes and re-enters every symbol foo.rb defines -- including `Foo::CONST`, whose old symbol is what bar.rb's
+    // already-resolved tree refers to.
+    sendAsync(*changeFile("foo.rb",
+                          "# typed: true\n"
+                          "class Foo\n"
+                          "  extend T::Sig\n"
+                          "  CONST = T.let(1, T.nilable(Integer))\n"
+                          "  sig {returns(String)}\n"
+                          "  def method_only_in_foo\n"
+                          "    'one'\n"
+                          "  end\n"
+                          "end\n",
+                          3));
+
+    // When the slow path resumes and typechecks bar.rb, `Foo::CONST` must still be `T.nilable(Integer)`; a stale
+    // symbol would make it `T.untyped` and produce a `T.must` is redundant error out of thin air.
+    assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
+}
+
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanCancelSlowPathWithFastPathThatReintroducesOldError") {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;

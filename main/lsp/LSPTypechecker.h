@@ -106,10 +106,26 @@ class LSPTypechecker final {
 
     core::packages::Stratum lastStratum;
 
+    /**
+     * Names of the constants (static fields, type aliases, type members) that fast paths preempting the running slow
+     * path deleted and re-entered through the incremental namer. The slow path resolves a whole stratum before it
+     * typechecks any of it, so trees it resolved before such a preemption still point at the deleted symbols; the files
+     * that mention these names get their diagnostics re-derived from freshly resolved trees before the slow path
+     * commits. Mutable because runFastPath is const.
+     */
+    mutable std::vector<core::WithoutUniqueNameHash> constantsRedefinedByPreemption;
+
     enum class SlowPathMode {
         Init,
         Cancelable,
     };
+
+    /**
+     * Retypechecks, from freshly indexed and resolved trees, every file whose usages mention a constant in
+     * `constantsRedefinedByPreemption`, reporting under the slow path's `epoch`. Files a later epoch already reported
+     * (the preempting fast path's own files) are left alone.
+     */
+    void rederiveAfterPreemption(uint32_t epoch, WorkerPool &workers, std::shared_ptr<core::ErrorFlusher> errorFlusher);
 
     /** Conservatively reruns entire pipeline without caching any trees. Returns 'true' if committed, 'false' if
      * canceled. */
