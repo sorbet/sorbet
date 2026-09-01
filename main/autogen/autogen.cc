@@ -142,6 +142,13 @@ public:
             // we need to do name resolution for that class "outside" of the class body, so handle this before we've
             // modified the current scoping
             ast::ConstTreeWalk::apply(ctx, *this, original.ancestors.front());
+            auto parent = ast::cast_tree<ast::ConstantLit>(original.ancestors.front());
+            if (parent != nullptr) {
+                auto it = refMap.find(parent);
+                if (it != refMap.end()) {
+                    refs[it->second.id()].parentKind = ClassKind::Class;
+                }
+            }
         }
 
         // Mixins also appear naturally in the class body as arguments to `include` or `extend`. Let the normal tree
@@ -261,10 +268,6 @@ public:
             ref.resolved = QualifiedName::fromFullName(symbolName(ctx, sym));
         }
         ref.is_defining_ref = false;
-        // A superclass is pre-traversed before entering the class's scope, so mark it as a class parent.
-        if (!defs.empty() && !nestingStack.empty() && defs.back().id._id != nestingStack.back().ref._id) {
-            ref.parentKind = ClassKind::Class;
-        }
         // now, add it to the refmap
         refMap[&original] = ref.id;
         refsByLoc.emplace(move(entry), ref.id);
