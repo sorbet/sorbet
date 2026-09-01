@@ -41,7 +41,7 @@ module Simpsons
   end
 
   Test::Krabappel::Popquiz
-# ^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Krabappel::Popquiz` is defined in a test namespace
+# ^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Krabappel::Popquiz` cannot be referenced here because it is defined in a test namespace and cannot be referenced in a non-test file
   #                ^^^^^^^ usage: popquiz
 # ^^^^^^^^^^^^^^^ importusage: krabappel-pkg
 
