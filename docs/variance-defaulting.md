@@ -193,6 +193,23 @@ please edit this doc. But at a high level:
 - If a type member is `fixed`, default it to whatever the type member is fixed
   to, regardless of variance.
 
+- If a type member's bounds are equal (according to `TypePtr::operator==`, not
+  `Types::equiv`), default it to the type member's upper bound.
+
+  `TypePtr::operator==` is usually a reference (not structural) equality check.
+  However, there are some types that are "inlined," which do not have identity
+  and are thus compared for structural equality. The set of types that are
+  inlined is is an implementation detail.
+
+  This case is mostly meant to be a way to make certain uses of `lower: A,
+  upper: A` behave the same way as `fixed: A`. (Originally, to preserve the
+  defaulting behavior of `T.attached_class` inside `final!` classes when they
+  started being treated as invariant instead of covariant).
+
+  (This rule could be extended to use `Types::equiv`, but it's not clear that
+  `lower: A, upper: A` is a common enough pattern to justify how expensive
+  `Types::equiv` is to call.)
+
 - Otherwise, we're going to have to use the variance:
 
   - Invariant? -> `T.untyped`
