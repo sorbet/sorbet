@@ -2,6 +2,7 @@
 #include "WatchmanShutdown.h"
 #include "WatchmanSubscription.h"
 #include "absl/strings/strip.h"
+#include "absl/time/time.h"
 #include "common/FileOps.h"
 #include "common/common.h"
 #include "common/strings/formatting.h"
@@ -202,8 +203,14 @@ WatchmanProcess::SubscriptionRun WatchmanProcess::runSubscription(const string &
         if (d.Parse(line.c_str(), line.size()).HasParseError()) {
             logger->error("Error parsing Watchman response: `{}` is not a valid json object", line);
         } else if (d.HasMember("error")) {
-            // Subscribing is the only command we send, so an error leaves this child with nothing to deliver.
-            logger->error("Watchman returned an error: {}", line);
+            // Subscribing is the only command we send, so a rejection will not go away if we send it again.
+            auto msg = fmt::format("Watchman rejected Sorbet's subscription: {}\nSorbet cannot detect changes to "
+                                   "files made outside of your code editor. Don't need Watchman? Run Sorbet with "
+                                   "`--disable-watchman`.",
+                                   line);
+            logger->error(msg);
+            exitWithCode(1, msg);
+            run.end = SubscriptionEnd::Stopped;
             return run;
         } else if (d.HasMember("canceled")) {
             // `watchman watch-del` drops the watch behind the subscription; nothing further arrives on this child.
