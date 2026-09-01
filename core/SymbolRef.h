@@ -15,9 +15,11 @@ class Loc;
 class TypePtr;
 struct SymbolDataDebugCheck {
     const GlobalState &gs;
+    typedef unsigned int (GlobalState::*SymbolsUsedFunc)() const;
+    const SymbolsUsedFunc fn;
     const unsigned int symbolCountAtCreation;
 
-    SymbolDataDebugCheck(const GlobalState &gs);
+    SymbolDataDebugCheck(const GlobalState &gs, SymbolsUsedFunc fn);
     void check() const;
 };
 
