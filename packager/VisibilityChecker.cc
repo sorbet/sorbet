@@ -548,13 +548,38 @@ public:
         }
     }
 
-    // Returns whether the reference causes a modularity error
-    static bool reportImportError(core::Context ctx, const core::packages::PackageInfo &thisPkg,
-                                  const core::packages::PackageInfo &pkg, core::LocOffsets errLoc,
-                                  core::SymbolRef litSymbol, core::FileRef otherFile, bool wasImported,
-                                  bool testImportInProd, bool testUnitImportInHelper, bool testNamespaceInProd) {
+    // Returns `std::nullopt` if it's okay to use the symbol.
+    // Returns a `PackageReferenceInfo` if the usage was not okay (e.g. missing import, modularity error, etc.)
+    static optional<core::packages::PackageReferenceInfo>
+    reportImportError(core::Context ctx, const core::packages::PackageInfo &thisPkg,
+                      const core::packages::PackageInfo &pkg, core::LocOffsets errLoc, core::SymbolRef litSymbol,
+                      core::FileRef otherFile, const core::packages::Import *import) {
         auto &db = ctx.state.packageDB();
         auto otherPackage = pkg.mangledName();
+        auto wasImported = import != nullptr;
+        if (wasImported && thisPkg.usesTestPackages) {
+            ENFORCE(import->type == core::packages::ImportType::Normal, "test_import found in --test-packages mode");
+        }
+
+        // Is this a test import (whether test helper or not) used in a production context?
+        auto testImportInProd =
+            wasImported && import->type != core::packages::ImportType::Normal && !ctx.file.data(ctx).isPackagedTest();
+        // Is this a test import not intended for use in helpers?
+        auto testUnitImportInHelper = wasImported && import->type == core::packages::ImportType::TestUnit &&
+                                      ctx.file.data(ctx).isPackagedTestHelper();
+        bool importNeeded = !wasImported || testImportInProd || testUnitImportInHelper;
+
+        // If the imported symbol comes from the test namespace, we must also be in the test namespace.
+        // TODO(trevor): this check is redundant with import checking after the test-packages migration is complete.
+        bool testNamespaceInProd =
+            !pkg.usesTestPackages &&
+            (otherFile.data(ctx).isPackagedTestHelper() || otherFile.data(ctx).isPackagedTest()) &&
+            !ctx.file.data(ctx).isPackagedTest();
+
+        if (!importNeeded && !testNamespaceInProd) {
+            return nullopt;
+        }
+
         bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || ctx.file.data(ctx).isPackagedTest();
         if (thisPkg.usesTestPackages) {
             isTestImport = false;
@@ -592,7 +617,7 @@ public:
         bool causesModularityError = hasModularityError && !causesVisibilityError;
         if (!hasModularityError) {
             if (db.genPackagesMode() != core::packages::GenPackagesMode::Disabled) {
-                return causesModularityError;
+                return {{.importNeeded = importNeeded, .causesModularityError = causesModularityError}};
             }
 
             auto importAutocorrect = thisPkg.addImport(ctx, pkg, autocorrectedImportType);
@@ -696,7 +721,7 @@ public:
                     ctx.state.packageDB().updateVisibilityFor(otherPackage)) {
                     // Force the error to build here, so that we don't report an error
                     e.build();
-                    return causesModularityError;
+                    return {{.importNeeded = importNeeded, .causesModularityError = causesModularityError}};
                 }
 
                 ENFORCE(!reasons.empty(), "At least one reason should be present");
@@ -728,7 +753,7 @@ public:
                 }
             }
         }
-        return causesModularityError;
+        return {{.importNeeded = importNeeded, .causesModularityError = causesModularityError}};
     }
 
     void postTransformConstantLit(core::Context ctx, const ast::ConstantLit &lit) {
@@ -764,34 +789,15 @@ public:
 
         auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
 
-        // If the imported symbol comes from the test namespace, we must also be in the test namespace.
-        // TODO(trevor): this check is redundant with import checking after the test-packages migration is complete.
-        bool testNamespaceInProd =
-            !pkg.usesTestPackages &&
-            (otherFile.data(ctx).isPackagedTestHelper() || otherFile.data(ctx).isPackagedTest()) &&
-            !ctx.file.data(ctx).isPackagedTest();
-
         auto *import = this->package.importsPackage(otherPackage);
-        auto wasImported = import != nullptr;
-        if (wasImported && this->package.usesTestPackages) {
-            ENFORCE(import->type == core::packages::ImportType::Normal, "test_import found in --test-packages mode");
-        }
-
-        // Is this a test import (whether test helper or not) used in a production context?
-        auto testImportInProd =
-            wasImported && import->type != core::packages::ImportType::Normal && !ctx.file.data(ctx).isPackagedTest();
-        // Is this a test import not intended for use in helpers?
-        auto testUnitImportInHelper = wasImported && import->type == core::packages::ImportType::TestUnit &&
-                                      ctx.file.data(ctx).isPackagedTestHelper();
-        bool importNeeded = !wasImported || testImportInProd || testUnitImportInHelper;
-        referencedPackages[otherPackage] = {.importNeeded = importNeeded, .causesModularityError = false};
-
-        if (importNeeded || testNamespaceInProd) {
-            referencedPackages[otherPackage].causesModularityError =
-                reportImportError(ctx, this->package, pkg, lit.loc(), litSymbol, otherFile, wasImported,
-                                  testImportInProd, testUnitImportInHelper, testNamespaceInProd);
+        auto importError = reportImportError(ctx, this->package, pkg, lit.loc(), litSymbol, otherFile, import);
+        referencedPackages[otherPackage] = importError.value_or(core::packages::PackageReferenceInfo{});
+        if (importError.has_value()) {
+            // An error was reported already
             return;
         }
+
+        ENFORCE(import != nullptr);
 
         bool isExported = pkg.locs.exportAll.exists();
         if (litSymbol.isClassOrModule()) {
