@@ -90,9 +90,6 @@ string buildSubscribeCommand(string_view root, string_view subscriptionName, con
             w.String("empty_on_fresh_instance");
             w.Bool(true);
 
-            // While any of these states is asserted on the root, Watchman holds back this subscription's
-            // notifications and delivers them in one PDU when the state is left. See "Advanced Settling" in
-            // https://facebook.github.io/watchman/docs/cmd/subscribe.html
             if (!deferStates.empty()) {
                 w.String("defer");
                 {
@@ -110,7 +107,7 @@ string buildSubscribeCommand(string_view root, string_view subscriptionName, con
         w.EndArray();
     }
 
-    return string(buffer.GetString(), buffer.GetSize());
+    return buffer.GetString();
 }
 
 } // namespace sorbet::realmain::lsp::watchman
