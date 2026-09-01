@@ -288,9 +288,8 @@ public:
 
     // Returns `std::nullopt` if it's okay to use the symbol.
     // Returns a `PackageReferenceInfo` if the usage was not okay (e.g. missing import, modularity error, etc.)
-    static std::optional<core::packages::PackageReferenceInfo>
-    checkReferenceAgainstImports(core::Context ctx, const core::packages::PackageInfo &thisPkg, core::LocOffsets errLoc,
-                                 core::SymbolRef litSymbol);
+    std::optional<core::packages::PackageReferenceInfo>
+    checkReferenceAgainstImports(core::Context ctx, core::LocOffsets errLoc, core::SymbolRef litSymbol) const;
 
     // What is the minimum strict dependencies level that this package's imports must have?
     StrictDependenciesLevel minimumStrictDependenciesLevel() const;

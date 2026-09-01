@@ -508,20 +508,6 @@ class VisibilityCheckerPass final {
         }
     }
 
-    static void addAutocorrect(core::Context ctx, core::ErrorBuilder &e,
-                               optional<core::AutocorrectSuggestion> &&autocorrect) {
-        auto &db = ctx.state.packageDB();
-        auto hasAutocorrect = autocorrect.has_value();
-
-        if (autocorrect.has_value()) {
-            e.addAutocorrect(std::move(autocorrect.value()));
-        }
-
-        if (hasAutocorrect && !db.errorHint().empty()) {
-            e.addErrorNote("{}", db.errorHint());
-        }
-    }
-
 public:
     const core::packages::PackageInfo &package;
     UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo> referencedPackages;
@@ -577,7 +563,7 @@ public:
             return;
         }
 
-        auto importError = checkReferenceAgainstImports(ctx, this->package, lit.loc(), litSymbol);
+        auto importError = this->package.checkReferenceAgainstImports(ctx, lit.loc(), litSymbol);
         referencedPackages[otherPackage] = importError.value_or(core::packages::PackageReferenceInfo{});
         if (importError.has_value()) {
             // An error was reported already
@@ -626,7 +612,11 @@ public:
                 e.setHeader("`{}` resolves but is not exported from `{}`", litSymbol.show(ctx), pkg.show(ctx));
                 addExportInfo(ctx, e, litSymbol, definesBehavior);
 
-                addAutocorrect(ctx, e, move(exportAutocorrect));
+                auto hasAutocorrect = exportAutocorrect.has_value();
+                e.maybeAddAutocorrect(move(exportAutocorrect));
+                if (hasAutocorrect && !db.errorHint().empty()) {
+                    e.addErrorNote("{}", db.errorHint());
+                }
             }
         }
     }
