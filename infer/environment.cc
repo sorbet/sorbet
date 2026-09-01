@@ -1669,6 +1669,12 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 } else if (!expectedReturnType.isUntyped() && !expectedReturnType.isTop() &&
                            typeAndOrigin.type.isUntyped()) {
                     auto what = core::errors::Infer::errorClassForUntyped(ctx, ctx.file, typeAndOrigin.type);
+                    // Truncating the loc to its first line wants the file's line breaks (and so its text), which is
+                    // only worth computing if the error is going to be reported: below `typed: strong` it is not, and
+                    // returning an untyped value from a method with a signature is common.
+                    if (!ctx.state.shouldReportErrorOn(ctx.file, what)) {
+                        return;
+                    }
                     auto errLoc = ctx.locAt(bind.loc).truncateToFirstLine(ctx);
                     if (auto e = ctx.state.beginError(errLoc, what)) {
                         e.setHeader("Value returned from method `{}` is `{}`", ctx.owner.name(ctx).show(ctx),
