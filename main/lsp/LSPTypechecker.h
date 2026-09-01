@@ -107,8 +107,8 @@ class LSPTypechecker final {
     core::packages::Stratum lastStratum;
 
     /**
-     * Constants that fast paths preempting the running slow path have re-entered, so that the trees the slow path
-     * resolved earlier still point at the symbols they replaced. Emptied by the slow path that consumes it.
+     * Constants that fast paths preempting the running slow path have deleted and re-entered. The trees the slow path
+     * resolved earlier still point at the deleted symbols. Emptied by the slow path that consumes it.
      */
     std::vector<core::WithoutUniqueNameHash> constantsRedefinedByPreemption;
 
@@ -117,18 +117,18 @@ class LSPTypechecker final {
         Cancelable,
     };
 
-    /**
-     * Retypechecks every file whose usages mention `constantsRedefinedByPreemption` from freshly resolved trees,
-     * reporting under the slow path's `epoch`. Files a later epoch already reported are left alone.
-     */
-    void rederiveAfterPreemption(uint32_t epoch, WorkerPool &workers, std::shared_ptr<core::ErrorFlusher> errorFlusher);
-
     /** Conservatively reruns entire pipeline without caching any trees. Returns 'true' if committed, 'false' if
      * canceled. */
     std::pair<bool, core::packages::Stratum> runSlowPath(LSPFileUpdates &updates, KVStoreStrategy &kvstore,
                                                          WorkerPool &workers,
                                                          std::shared_ptr<core::ErrorFlusher> errorFlusher,
                                                          SlowPathMode mode);
+
+    /**
+     * Retypechecks every file whose usages mention `constantsRedefinedByPreemption` from freshly resolved trees,
+     * reporting under the slow path's `epoch`.
+     */
+    void rederiveAfterPreemption(uint32_t epoch, WorkerPool &workers, std::shared_ptr<core::ErrorFlusher> errorFlusher);
 
     struct FastPathResult {
         // All of the files that we typechecked during the fast path.

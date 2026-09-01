@@ -707,14 +707,14 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathAndB
                          /* assertUniqueStartTimes */ false);
 }
 
-TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PreemptingFastPathWithIncrementalNamerDoesNotLeaveSlowPathPhantoms") {
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PreemptingFastPathWithIncrementalNamerDoesNotReportStaleErrors") {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;
     assertErrorDiagnostics(
         initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
 
-    // foo.rb defines a constant and a method. bar.rb reads the constant but never mentions the method's name, so a
-    // change to the method's signature does not make bar.rb one of the fast path's extra files.
+    // bar.rb reads `Foo::CONST` but never mentions `method_only_in_foo`, so changing that method's sig does not make
+    // bar.rb one of the fast path's extra files.
     assertErrorDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
                                                     "class Foo\n"
                                                     "  extend T::Sig\n"

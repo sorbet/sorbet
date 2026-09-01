@@ -115,11 +115,11 @@ public:
 
 // Before namer runs, a static field, type alias, class alias and type member are all `Constant = ...`, which is
 // exactly the set the incremental namer deletes and re-enters.
-class ConstantDefinitionNames {
+class ConstantDefinitionFinder {
     vector<core::WithoutUniqueNameHash> &names;
 
 public:
-    ConstantDefinitionNames(vector<core::WithoutUniqueNameHash> &names) : names(names) {}
+    ConstantDefinitionFinder(vector<core::WithoutUniqueNameHash> &names) : names(names) {}
 
     void postTransformAssign(core::Context ctx, const ast::Assign &assign) {
         if (auto lhs = ast::cast_tree<ast::UnresolvedConstantLit>(assign.lhs)) {
@@ -418,14 +418,14 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
         }
     }
 
-    const auto isPreemption = gs->epochManager->getStatus().slowPathRunning;
+    auto isPreemption = gs->epochManager->getStatus().slowPathRunning;
     vector<core::WithoutUniqueNameHash> constantsRedefined;
     if (shouldRunIncrementalNamer && isPreemption) {
         // Collected before incrementalResolve deletes the old symbols, while the trees still name them.
-        ConstantDefinitionNames collector(constantsRedefined);
+        ConstantDefinitionFinder finder(constantsRedefined);
         for (auto &tree : updatedIndexed) {
             core::Context ctx(*gs, core::Symbols::root(), tree.file);
-            ast::ConstTreeWalk::apply(ctx, collector, tree.tree);
+            ast::ConstTreeWalk::apply(ctx, finder, tree.tree);
         }
     }
 
@@ -1001,7 +1001,7 @@ void LSPTypechecker::rederiveAfterPreemption(uint32_t epoch, WorkerPool &workers
 
     // A no-op update re-indexes and re-resolves against the symbol table as it now stands.
     auto noop = getNoopUpdate(stale);
-    const bool isNoopUpdateForRetypecheck = true;
+    bool isNoopUpdateForRetypecheck = true;
     runFastPath(*noop, workers, errorFlusher, isNoopUpdateForRetypecheck);
     prodCounterAdd("lsp.slow_path.rederived_after_preemption", stale.size());
 }
