@@ -1276,11 +1276,12 @@ TypeMemberRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, Name
 
     auto contiguousStrataUntil = this->contiguousStrataUntil();
     const auto &boundary = this->symbolOffsets[contiguousStrataUntil.rawId()];
-    ENFORCE(!owner.exists() || owner.id() >= boundary.classAndModulesOffset,
-            "Entering type member `{}` at {} into `{}`, which belongs to an earlier stratum: owner_id={} "
-            "contiguous_strata_until={} class_boundary={}",
-            name.show(*this), loc.showRaw(*this), owner.show(*this), owner.id(), contiguousStrataUntil.rawId(),
-            boundary.classAndModulesOffset);
+    if (owner.exists() && owner.id() < boundary.classAndModulesOffset) {
+        Exception::raise("Entering type member `{}` at {} into `{}`, which belongs to an earlier stratum: owner_id={} "
+                         "contiguous_strata_until={} class_boundary={}",
+                         name.show(*this), loc.showRaw(*this), owner.show(*this), owner.id(),
+                         contiguousStrataUntil.rawId(), boundary.classAndModulesOffset);
+    }
 
     auto result = TypeMemberRef(*this, typeMembers.size());
     store = result; // DO NOT MOVE this assignment down. emplace_back on typeMembers invalidates `store`
