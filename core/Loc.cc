@@ -344,6 +344,10 @@ optional<string_view> Loc::source(const GlobalState &gs) const {
     }
 }
 
+bool Loc::sourceEquals(const GlobalState &gs, string_view expected) const {
+    return exists() && this->file().data(gs).sourceEquals(offsets(), expected);
+}
+
 bool Loc::contains(const Loc &other) const {
     ENFORCE_NO_TIMER(this->exists());
     ENFORCE_NO_TIMER(other.exists());

@@ -169,7 +169,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(CFGContext cctx, unique_ptr<CFG> res, absl:
     if (cont->exprs.empty() || isa_instruction<LoadArg>(cont->exprs.back().value)) {
         auto beginAdjust = res->loc.length() - 3;
         auto endLoc = ctx.locAt(res->loc).adjust(ctx, beginAdjust, 0);
-        if (endLoc.source(ctx) == "end") {
+        if (endLoc.sourceEquals(ctx, "end")) {
             rvLoc = endLoc.offsets();
             res->implicitReturnLoc = rvLoc;
         } else {

@@ -43,6 +43,25 @@ TEST_CASE("FileOps::read") {
     CHECK_THROWS_AS(FileOps::read("common_test_does_not_exist.txt"), FileNotFoundException);
 }
 
+TEST_CASE("FileOps::readRange") {
+    const std::string path = "common_test_read_range.txt";
+    FileOps::write(path, "0123456789");
+
+    CHECK_EQ("0123456789", FileOps::readRange(path, 0, 10));
+    CHECK_EQ("345", FileOps::readRange(path, 3, 3));
+    CHECK_EQ("", FileOps::readRange(path, 3, 0));
+
+    // A range that runs off the end gives what is there, and one that starts off the end gives nothing. Unlike `read`,
+    // a short answer is not an error: the caller asked to peek, not to read the file.
+    CHECK_EQ("89", FileOps::readRange(path, 8, 4));
+    CHECK_EQ("", FileOps::readRange(path, 10, 4));
+    CHECK_EQ("", FileOps::readRange(path, 20, 4));
+
+    FileOps::removeFile(path);
+
+    CHECK_EQ("", FileOps::readRange("common_test_does_not_exist.txt", 0, 4));
+}
+
 TEST_CASE("FileOps::ensureDir") {
     if (FileOps::dirExists("common_test_dir")) {
         FileOps::removeDir("common_test_dir");

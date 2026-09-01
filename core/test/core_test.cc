@@ -215,6 +215,32 @@ TEST_CASE("FileReleaseSource") {
     CHECK_EQ(source, string(synthesized.source()));
 }
 
+TEST_CASE("FileSourceEquals") {
+    const string path = "core_test_source_equals.rb";
+    const string source = "class Foo\n  def bar; end\nend\n";
+    const LocOffsets classKeyword{0, 5};
+    const LocOffsets pastTheEnd{static_cast<uint32_t>(source.size() - 1), static_cast<uint32_t>(source.size() + 3)};
+
+    FileOps::write(path, source);
+    File file{string(path), string(source), File::Type::Normal, /* epoch */ 0, /* sourceIsPathContents */ true};
+
+    // The answer is `source() == expected`, against resident text and against released text alike.
+    for (auto released : {false, true}) {
+        if (released) {
+            file.releaseSource();
+        }
+        CHECK(file.sourceEquals(classKeyword, "class"));
+        CHECK_FALSE(file.sourceEquals(classKeyword, "Class"));
+        // Nothing of a different length can be equal, nor anything outside the file.
+        CHECK_FALSE(file.sourceEquals(classKeyword, "cla"));
+        CHECK_FALSE(file.sourceEquals(classKeyword, "classy"));
+        CHECK_FALSE(file.sourceEquals(LocOffsets::none(), "class"));
+        CHECK_FALSE(file.sourceEquals(pastTheEnd, "end\n"));
+    }
+
+    FileOps::removeFile(path);
+}
+
 TEST_CASE("NameHashSizeFor") {
     const vector<size_t> nameCounts = {0, 1, 2, 3, 1000, 1 << 20, 19'000'000};
     for (auto names : nameCounts) {

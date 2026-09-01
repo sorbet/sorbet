@@ -84,6 +84,32 @@ string sorbet::FileOps::read(const string &filename) {
     return contents;
 }
 
+string sorbet::FileOps::readRange(const string &filename, size_t offset, size_t length) {
+    int fd = ::open(filename.c_str(), O_RDONLY | O_CLOEXEC);
+    if (fd == -1) {
+        return "";
+    }
+
+    string contents(length, '\0');
+    size_t readBytes = 0;
+    while (readBytes < length) {
+        auto n = ::pread(fd, &contents[readBytes], length - readBytes, offset + readBytes);
+        if (n < 0) {
+            if (errno == EINTR) {
+                continue;
+            }
+            break;
+        }
+        if (n == 0) {
+            break;
+        }
+        readBytes += n;
+    }
+    ::close(fd);
+    contents.resize(readBytes);
+    return contents;
+}
+
 void sorbet::FileOps::write(const string &filename, const vector<uint8_t> &data) {
     FILE *fp = std::fopen(filename.c_str(), "wb");
     if (fp) {

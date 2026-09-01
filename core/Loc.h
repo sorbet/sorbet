@@ -99,6 +99,8 @@ public:
     std::string fileShortPosToString(const GlobalState &gs) const;
     std::string filePosToString(const GlobalState &gs, bool showFull = false) const;
     std::optional<std::string_view> source(const GlobalState &gs) const;
+    // `source(gs) == expected`, without reading a released file's text back in full (see `File::sourceEquals`).
+    bool sourceEquals(const GlobalState &gs, std::string_view expected) const;
 
     bool operator==(const Loc &rhs) const noexcept = default;
     bool operator!=(const Loc &rhs) const noexcept = default;

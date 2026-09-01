@@ -829,9 +829,9 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                             auto blockEndPos = blockReturnLoc.copyEndWithZeroLength();
                             auto endKwLoc = cctx.ctx.locAt(blockEndPos).adjustLen(cctx.ctx, -3, 3);
                             auto endBraceLoc = cctx.ctx.locAt(blockEndPos).adjustLen(cctx.ctx, -1, 1);
-                            if (endKwLoc.source(cctx.ctx) == "end") {
+                            if (endKwLoc.sourceEquals(cctx.ctx, "end")) {
                                 blockReturnLoc = endKwLoc.offsets();
-                            } else if (endBraceLoc.source(cctx.ctx) == "}") {
+                            } else if (endBraceLoc.sourceEquals(cctx.ctx, "}")) {
                                 blockReturnLoc = endBraceLoc.offsets();
                             }
                         } else {

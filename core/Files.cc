@@ -210,6 +210,17 @@ string_view File::source() const {
     return *source;
 }
 
+bool File::sourceEquals(LocOffsets range, string_view expected) const {
+    ENFORCE(this->sourceType != File::Type::NotYetRead);
+    if (!range.exists() || range.endPos() > this->sourceSize_ || range.length() != expected.size()) {
+        return false;
+    }
+    if (auto source = atomic_load(&this->source_)) {
+        return source->compare(range.beginPos(), range.length(), expected) == 0;
+    }
+    return FileOps::readRange(this->path_, range.beginPos(), range.length()) == expected;
+}
+
 void File::releaseSource() const {
     if (!this->sourceIsPathContents_) {
         return;

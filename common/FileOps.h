@@ -21,6 +21,9 @@ public:
     static bool isFile(std::string_view path, std::string_view ignorePattern, const int pos);
     static bool isFolder(std::string_view path, std::string_view ignorePattern, const int pos);
     static std::string read(const std::string &filename);
+    // The `length` bytes of `filename` starting at `offset`, or fewer if the file is shorter, or nothing if it cannot
+    // be opened: a peek at a few bytes of a file that is not otherwise in memory (see `core::File::sourceEquals`).
+    static std::string readRange(const std::string &filename, size_t offset, size_t length);
     static void write(const std::string &filename, const std::vector<uint8_t> &data);
     static void append(const std::string &filename, std::string_view text);
     static void write(const std::string &filename, std::string_view text);

@@ -42,6 +42,9 @@ public:
     uint32_t sourceSize() const {
         return this->sourceSize_;
     }
+    // Whether the text at `range` is exactly `expected`. Unlike `source()`, this does not read a released text back in
+    // full: it compares against the resident text when there is one and otherwise reads back just those bytes.
+    bool sourceEquals(LocOffsets range, std::string_view expected) const;
     Type sourceType;
 
     bool isPayload() const;
