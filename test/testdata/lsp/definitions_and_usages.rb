@@ -51,6 +51,15 @@ class TestClass
     # ^^^ usage: var
     end
   end
+  def method_with_rescue_var
+    begin
+      puts("hi")
+    rescue => err
+            # ^^^ def: err
+      puts(err)
+         # ^^^ usage: err
+    end
+  end
 end
 
 # Introduced to avoid awkward indenting.
