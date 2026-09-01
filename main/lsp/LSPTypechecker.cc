@@ -113,9 +113,8 @@ public:
     }
 };
 
-// Collects the names of the constants an indexed (pre-namer) tree assigns: static fields, type aliases, class aliases
-// and type members alike are all `Constant = ...` at this stage. The incremental namer deletes and re-enters those
-// symbols when it re-processes the file, so this is the set of names whose old symbols other trees may still hold.
+// Before namer runs, a static field, type alias, class alias and type member are all `Constant = ...`, which is
+// exactly the set the incremental namer deletes and re-enters.
 class ConstantDefinitionNames {
     vector<core::WithoutUniqueNameHash> &names;
 
@@ -234,6 +233,7 @@ bool LSPTypechecker::typecheck(unique_ptr<LSPFileUpdates> updates, WorkerPool &w
             auto result = runFastPath(*updates, workers, errorFlusher, isNoopUpdateForRetypecheck);
 
             filesTypechecked = move(result.filesTypechecked);
+            absl::c_move(result.constantsRedefined, back_inserter(this->constantsRedefinedByPreemption));
 
             ENFORCE(updates->updatedFiles.empty());
             ENFORCE(updates->updatedFileRefs.empty());
@@ -419,12 +419,10 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
     }
 
     const auto isPreemption = gs->epochManager->getStatus().slowPathRunning;
+    vector<core::WithoutUniqueNameHash> constantsRedefined;
     if (shouldRunIncrementalNamer && isPreemption) {
-        // The incremental namer is about to delete and re-enter every symbol these files define. The slow path we are
-        // preempting resolved its trees before that, so the ones mentioning these constants point at the symbols we
-        // are deleting; it re-derives those files' diagnostics once it is done typechecking (see
-        // `rederiveAfterPreemption`).
-        ConstantDefinitionNames collector(this->constantsRedefinedByPreemption);
+        // Collected before incrementalResolve deletes the old symbols, while the trees still name them.
+        ConstantDefinitionNames collector(constantsRedefined);
         for (auto &tree : updatedIndexed) {
             core::Context ctx(*gs, core::Symbols::root(), tree.file);
             ast::ConstTreeWalk::apply(ctx, collector, tree.tree);
@@ -459,7 +457,7 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
         "Running fast path over num_files={} incrementalNamer={} preemption={} duration={} files=[{}]",
         toTypecheck.size(), shouldRunIncrementalNamer, isPreemption, duration.usec, files);
 
-    return FastPathResult{move(toTypecheck), move(toCache)};
+    return FastPathResult{move(toTypecheck), move(toCache), move(constantsRedefined)};
 }
 
 namespace {
@@ -934,7 +932,7 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
         return this->lastStratum;
     });
 
-    // Whether the slow path committed or was canceled, the trees it resolved are gone with it.
+    // Cleared on cancellation too: the next slow path re-resolves from scratch.
     this->constantsRedefinedByPreemption.clear();
 
     if (mode == SlowPathMode::Init) {
@@ -980,8 +978,7 @@ void LSPTypechecker::rederiveAfterPreemption(uint32_t epoch, WorkerPool &workers
             continue;
         }
 
-        // Files the preempting fast path typechecked itself were reported under its (later) epoch and hold current
-        // symbols; the slow path would not report them either way.
+        // The preempting fast path reported its own files under a later epoch, and they hold current symbols.
         if (!errorReporter->wouldReportForFile(epoch, fref)) {
             continue;
         }
@@ -996,15 +993,13 @@ void LSPTypechecker::rederiveAfterPreemption(uint32_t epoch, WorkerPool &workers
         }
     }
 
-    config->logger->debug("Re-deriving diagnostics for {} files whose trees may point at symbols a preempting fast "
-                          "path redefined ({} constant names)",
-                          stale.size(), names.size());
+    config->logger->debug("Re-deriving diagnostics for {} files over {} redefined constants", stale.size(),
+                          names.size());
     if (stale.empty()) {
         return;
     }
 
-    // A no-op update re-indexes and re-resolves these files against the symbol table as it stands now, and reports
-    // them under the slow path's own epoch, replacing whatever the stale trees produced.
+    // A no-op update re-indexes and re-resolves against the symbol table as it now stands.
     auto noop = getNoopUpdate(stale);
     const bool isNoopUpdateForRetypecheck = true;
     runFastPath(*noop, workers, errorFlusher, isNoopUpdateForRetypecheck);

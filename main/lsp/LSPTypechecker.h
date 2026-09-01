@@ -107,13 +107,10 @@ class LSPTypechecker final {
     core::packages::Stratum lastStratum;
 
     /**
-     * Names of the constants (static fields, type aliases, type members) that fast paths preempting the running slow
-     * path deleted and re-entered through the incremental namer. The slow path resolves a whole stratum before it
-     * typechecks any of it, so trees it resolved before such a preemption still point at the deleted symbols; the files
-     * that mention these names get their diagnostics re-derived from freshly resolved trees before the slow path
-     * commits. Mutable because runFastPath is const.
+     * Constants that fast paths preempting the running slow path have re-entered, so that the trees the slow path
+     * resolved earlier still point at the symbols they replaced. Emptied by the slow path that consumes it.
      */
-    mutable std::vector<core::WithoutUniqueNameHash> constantsRedefinedByPreemption;
+    std::vector<core::WithoutUniqueNameHash> constantsRedefinedByPreemption;
 
     enum class SlowPathMode {
         Init,
@@ -121,9 +118,8 @@ class LSPTypechecker final {
     };
 
     /**
-     * Retypechecks, from freshly indexed and resolved trees, every file whose usages mention a constant in
-     * `constantsRedefinedByPreemption`, reporting under the slow path's `epoch`. Files a later epoch already reported
-     * (the preempting fast path's own files) are left alone.
+     * Retypechecks every file whose usages mention `constantsRedefinedByPreemption` from freshly resolved trees,
+     * reporting under the slow path's `epoch`. Files a later epoch already reported are left alone.
      */
     void rederiveAfterPreemption(uint32_t epoch, WorkerPool &workers, std::shared_ptr<core::ErrorFlusher> errorFlusher);
 
@@ -140,6 +136,9 @@ class LSPTypechecker final {
 
         // Copies of the indexed trees that were updated during the fast path, for updating the cache of open files.
         std::vector<ast::ParsedFile> indexedTrees;
+
+        // Non-empty only when this run preempted a slow path and re-entered constants out from under its trees.
+        std::vector<core::WithoutUniqueNameHash> constantsRedefined;
     };
 
     /** Runs incremental typechecking on the provided updates. Returns the final list of files typechecked. */
