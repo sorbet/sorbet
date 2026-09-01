@@ -478,21 +478,21 @@ bool PackageInfo::causesLayeringViolation(const PackageDB &packageDB, core::Name
 }
 
 namespace {
-    static void addAutocorrect(core::Context ctx, core::ErrorBuilder &e,
-                               optional<core::AutocorrectSuggestion> &&autocorrect) {
-        auto &db = ctx.state.packageDB();
-        auto hasAutocorrect = autocorrect.has_value();
+static void addAutocorrect(core::Context ctx, core::ErrorBuilder &e,
+                           optional<core::AutocorrectSuggestion> &&autocorrect) {
+    auto &db = ctx.state.packageDB();
+    auto hasAutocorrect = autocorrect.has_value();
 
-        if (autocorrect.has_value()) {
-            e.addAutocorrect(std::move(autocorrect.value()));
-        }
-
-        if (hasAutocorrect && !db.errorHint().empty()) {
-            e.addErrorNote("{}", db.errorHint());
-        }
+    if (autocorrect.has_value()) {
+        e.addAutocorrect(std::move(autocorrect.value()));
     }
 
+    if (hasAutocorrect && !db.errorHint().empty()) {
+        e.addErrorNote("{}", db.errorHint());
+    }
 }
+
+} // namespace
 
 // Returns `std::nullopt` if it's okay to use the symbol.
 // Returns a `PackageReferenceInfo` if the usage was not okay (e.g. missing import, modularity error, etc.)
