@@ -7,6 +7,7 @@
 #include "core/core.h"
 #include "main/lsp/MessageQueueState.h"
 #include "spdlog/spdlog.h"
+#include <chrono>
 
 namespace sorbet::realmain::lsp {
 class WatchmanQueryResponse;
@@ -37,10 +38,56 @@ private:
     const std::shared_ptr<const LSPConfiguration> config;
     std::string watchmanNamespace;
 
+    // The most recent clock watchman has told us this subscription is caught up to. Set only from responses that
+    // establish or advance that view — the `subscribe` ack and the file change responses — and used as the `since` of
+    // the next subscription. Touched only by the watchman thread, so it needs no lock.
+    std::optional<std::string> lastClock;
+
+    // How one watchman CLI session — one child process, one subscription — came to an end.
+    enum class SessionOutcome {
+        // Sorbet is shutting down, or has decided to stop watching. Do not spawn watchman again.
+        Stopped,
+        // Lost the connection to the CLI child. Recoverable by subscribing again.
+        Disconnected,
+    };
+
     /**
-     * Starts up a Watchman subprocess and begins processing file changes. Runs in a dedicated thread.
+     * Starts up a Watchman subprocess and begins processing file changes, replacing it if the connection to it is lost.
+     * Runs in a dedicated thread.
      */
     void start();
+
+    /**
+     * Resolves the path to hand watchman as the subscription root, and decides whether namespacing applies to this
+     * workspace. Clears `watchmanNamespace` when it does not.
+     */
+    std::string resolveWatchmanRoot();
+
+    /**
+     * Spawns one watchman CLI child, subscribes, and pumps its responses into the message queue until either Sorbet
+     * stops or the child does. Reaps the child before returning.
+     */
+    SessionOutcome runSubscription(std::string_view root, std::string_view subscriptionName);
+
+    /**
+     * Asks watchman, over a connection of its own, for the changes that landed since `sinceClock` — the window a
+     * replacement subscription does not cover. Best effort: logs and returns if watchman cannot answer.
+     */
+    void catchUpSince(std::string_view root, std::string_view sinceClock);
+
+    /**
+     * Remembers the clock a watchman response was stamped with, if it carries one, as the point a replacement
+     * subscription resumes from. Only responses that mean "you have been told everything up to here" — the `subscribe`
+     * ack and the file change responses — carry a clock that is safe to resume from; a state-enter/state-leave clock
+     * does not, since watchman can still owe us file changes from before it.
+     */
+    void rememberClock(std::optional<std::string> clock);
+
+    /**
+     * Sleeps for `duration`, in short slices, returning early once stopped so that shutdown does not have to wait out a
+     * restart delay.
+     */
+    void sleepUnlessStopped(std::chrono::milliseconds duration);
 
     void exitWithCode(int code, const std::optional<std::string> &);
 

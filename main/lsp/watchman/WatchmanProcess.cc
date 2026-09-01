@@ -1,5 +1,7 @@
 #include "WatchmanProcess.h"
+#include "WatchmanRestartPolicy.h"
 #include "WatchmanShutdown.h"
+#include "WatchmanSubscription.h"
 #include "absl/strings/strip.h"
 #include "common/FileOps.h"
 #include "common/common.h"
@@ -9,8 +11,8 @@
 #include "main/lsp/LSPOutput.h"
 #include "main/lsp/json_types.h"
 #include "rapidjson/document.h"
-#include "rapidjson/writer.h"
 #include "subprocess.hpp"
+#include <thread>
 
 using namespace std;
 
@@ -41,218 +43,86 @@ template <typename F> void catchDeserializationError(spdlog::logger &logger, con
     }
 }
 
+// The clock a watchman response was generated at, if it carries one.
+optional<string> clockOf(const rapidjson::Document &d) {
+    auto clock = d.FindMember("clock");
+    if (clock == d.MemberEnd() || !clock->value.IsString()) {
+        return nullopt;
+    }
+    return string(clock->value.GetString(), clock->value.GetStringLength());
+}
+
+// Deserializes one watchman file change response, with the namespace prefix stripped off its paths. Returns nullptr if
+// it could not be deserialized, having logged why. Shared by the subscription and by the catch-up query, which produce
+// the same shape of response.
+unique_ptr<sorbet::realmain::lsp::WatchmanQueryResponse> parseQueryResponse(spdlog::logger &logger,
+                                                                            const rapidjson::Document &d,
+                                                                            const string &line,
+                                                                            string_view watchmanNamespace) {
+    unique_ptr<sorbet::realmain::lsp::WatchmanQueryResponse> parsed;
+    catchDeserializationError(logger, line, [&]() {
+        auto queryResponse = sorbet::realmain::lsp::WatchmanQueryResponse::fromJSONValue(d);
+        if (!watchmanNamespace.empty()) {
+            string prefix(watchmanNamespace);
+            prefix += "/";
+
+            for (auto &file : queryResponse->files) {
+                string_view view(file);
+                if (!absl::ConsumePrefix(&view, prefix)) {
+                    continue;
+                }
+                file = view;
+            }
+        }
+        parsed = move(queryResponse);
+    });
+    return parsed;
+}
+
+// How long to wait for watchman to report the changes made while Sorbet had no subscription. Generous because the
+// answer can be the whole tree (if watchman cannot honor our clock) on a codebase where that is hundreds of thousands
+// of files, and because giving up here means Sorbet is stale until each of those files is touched again.
+constexpr chrono::seconds CATCH_UP_TIMEOUT{120};
+
 } // namespace
 
 void WatchmanProcess::start() {
     auto mainPid = getpid();
     try {
         string subscriptionName = fmt::format("ruby-typer-{}", getpid());
+        string root = resolveWatchmanRoot();
 
-        auto p = subprocess::Popen({watchmanPath.c_str(), "-j", "-p", "--no-pretty"},
-                                   subprocess::output{subprocess::PIPE}, subprocess::input{subprocess::PIPE});
-
-        // Declared after `p` so it only runs if construction succeeded. Runs on every exit path
-        // out of this scope — normal return, break, or exception — so the watchman child is
-        // always reaped before this thread returns.
-        struct ShutdownGuard {
-            subprocess::Popen &p;
-            ~ShutdownGuard() noexcept {
-                shutdownWatchmanChild(p);
-            }
-        } shutdownGuard{p};
-
-        string modifiedWorkspace = workSpace;
-        if (!watchmanNamespace.empty()) {
-            const optional<string> maybeResolved = FileOps::realpath(workSpace);
-            if (!maybeResolved.has_value()) {
-                logger->debug("Unable to resolve workspace path {} for namespacing", workSpace);
-                watchmanNamespace.clear();
-            } else {
-                string_view root(*maybeResolved);
-                logger->debug("realpath({}) = {}", workSpace, root);
-                if (absl::ConsumeSuffix(&root, watchmanNamespace)) {
-                    string gitDirectory(root);
-                    gitDirectory += "/.git";
-                    if (FileOps::dirExists(gitDirectory)) {
-                        logger->debug("Using {} as watchman root", root);
-                        modifiedWorkspace = root;
-                    } else {
-                        logger->debug(
-                            "Parent directory {} of namespace {} is not a git repository, disabling namespacing", root,
-                            watchmanNamespace);
-                        watchmanNamespace.clear();
-                    }
-                } else {
-                    logger->debug("Watched directory {} is not in namespace {}, disabling namespacing", root,
-                                  watchmanNamespace);
-                    watchmanNamespace.clear();
-                }
-            }
-        }
-
-        logger->debug("Starting monitoring path {} with watchman for files with extensions {}. Subscription id: {}",
-                      modifiedWorkspace, fmt::join(extensions, ","), subscriptionName);
-
-        rapidjson::StringBuffer subscribeCommandBuffer;
-        rapidjson::Writer<rapidjson::StringBuffer> w(subscribeCommandBuffer);
-        {
-            w.StartArray();
-            w.String("subscribe");
-            w.String(modifiedWorkspace);
-            w.String(subscriptionName);
-
-            {
-                w.StartObject();
-
-                w.String("expression");
-                {
-                    w.StartArray();
-                    w.String("allof");
-                    {
-                        w.StartArray();
-                        w.String("type");
-                        w.String("f");
-                        w.EndArray();
-                    }
-
-                    if (!watchmanNamespace.empty()) {
-                        w.StartArray();
-                        w.String("dirname");
-                        w.String(watchmanNamespace);
-                        w.EndArray();
-                    }
-
-                    // Note: Newer versions of Watchman (post 4.9.0) support ["suffix", ["suffix1", "suffix2", ...]],
-                    // but Stripe laptops have 4.9.0. Thus, we use [ "anyof", [ "suffix", "suffix1" ], [ "suffix",
-                    // "suffix2" ], ... ].
-                    {
-                        w.StartArray();
-                        w.String("anyof");
-
-                        for (auto &extension : extensions) {
-                            w.StartArray();
-                            w.String("suffix");
-                            w.String(extension);
-                            w.EndArray();
-                        }
-
-                        w.EndArray();
-                    }
-
-                    // Exclude rsync tmpfiles
-                    {
-                        w.StartArray();
-                        w.String("not");
-                        {
-                            w.StartArray();
-                            w.String("match");
-                            w.String("**/.~tmp~/**");
-                            w.String("wholename");
-                            {
-                                w.StartObject();
-                                w.String("includedotfiles");
-                                w.Bool(true);
-                                w.EndObject();
-                            }
-                            w.EndArray();
-                        }
-                        w.EndArray();
-                    }
-
-                    w.EndArray();
-                }
-
-                w.String("fields");
-                {
-                    w.StartArray();
-                    w.String("name");
-                    w.EndArray();
-                }
-
-                // Note 2: `empty_on_fresh_instance` prevents Watchman from sending entire contents of folder if this
-                // subscription starts the daemon / causes the daemon to watch this folder for the first time.
-                w.String("empty_on_fresh_instance");
-                w.Bool(true);
-
-                w.EndObject();
-            }
-
-            w.EndArray();
-        }
-
-        string subscribeCommand = subscribeCommandBuffer.GetString();
-        p.send(subscribeCommand.c_str(), subscribeCommand.size());
-        logger->debug(subscribeCommand);
-
-        auto file = p.output();
-        auto fd = fileno(file);
-
-        string buffer;
-
+        // Losing the watchman CLI used to end the Sorbet process, which on a large codebase means the editor spends
+        // minutes without a language server for something a resubscribe fixes in milliseconds. See
+        // WatchmanRestartPolicy for why an exited CLI is usually not a broken watchman, and for when we do give up.
+        WatchmanRestartPolicy restartPolicy;
         while (!isStopped()) {
-            errno = 0;
-            auto maybeLine = FileOps::readLineFromFd(fd, buffer);
-            if (maybeLine.result == FileOps::ReadResult::Timeout) {
-                // Timeout occurred. See if we should abort before reading further.
-                continue;
-            }
+            auto startedAt = chrono::steady_clock::now();
+            auto outcome = runSubscription(root, subscriptionName);
+            auto ranFor = chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - startedAt);
 
-            if (maybeLine.result == FileOps::ReadResult::ErrorOrEof) {
-                if (errno == EINTR) {
-                    continue;
-                }
-
-                // Exit loop; unable to read from Watchman process.
-                exitWithCode(1, nullopt);
+            if (outcome == SessionOutcome::Stopped || isStopped()) {
                 break;
             }
 
-            ENFORCE(maybeLine.result == FileOps::ReadResult::Success);
-
-            const string &line = *maybeLine.output;
-            // Line found!
-            rapidjson::MemoryPoolAllocator<> alloc;
-            rapidjson::Document d(&alloc);
-            logger->debug(line);
-            if (d.Parse(line.c_str(), line.size()).HasParseError()) {
-                logger->error("Error parsing Watchman response: `{}` is not a valid json object", line);
-            } else if (d.HasMember("is_fresh_instance")) {
-                catchDeserializationError(*logger, line, [&d, this]() {
-                    auto queryResponse = sorbet::realmain::lsp::WatchmanQueryResponse::fromJSONValue(d);
-                    if (!watchmanNamespace.empty()) {
-                        auto prefix(watchmanNamespace);
-                        prefix += "/";
-
-                        for (auto &file : queryResponse->files) {
-                            string_view view(file);
-                            if (!absl::ConsumePrefix(&view, prefix)) {
-                                continue;
-                            }
-                            file = view;
-                        }
-                    }
-                    processQueryResponse(move(queryResponse));
-                });
-            } else if (d.HasMember("state-enter")) {
-                // These are messages from "state-enter" commands.  See
-                // https://facebook.github.io/watchman/docs/cmd/state-enter.html
-                // for more information.
-                catchDeserializationError(*logger, line, [&d, this]() {
-                    auto stateEnter = sorbet::realmain::lsp::WatchmanStateEnter::fromJSONValue(d);
-                    processStateEnter(move(stateEnter));
-                });
-            } else if (d.HasMember("state-leave")) {
-                // These are messages from "state-leave" commands.  See
-                // https://facebook.github.io/watchman/docs/cmd/state-leave.html
-                // for more information.
-                catchDeserializationError(*logger, line, [&d, this]() {
-                    auto stateLeave = sorbet::realmain::lsp::WatchmanStateLeave::fromJSONValue(d);
-                    processStateLeave(move(stateLeave));
-                });
-            } else if (!d.HasMember("subscribe")) {
-                // Something we don't understand yet.
-                logger->debug("Unknown Watchman response:\n{}", line);
+            auto delay = restartPolicy.delayBeforeRestart(ranFor);
+            if (!delay.has_value()) {
+                auto msg = fmt::format(
+                    "Lost the connection to Watchman (`{} -j -p --no-pretty`) {} times in a row, the last after only "
+                    "{}ms.\nWatchman is required for Sorbet to detect changes to files made outside of your code "
+                    "editor.\nDon't need Watchman? Run Sorbet with `--disable-watchman`.",
+                    watchmanPath, restartPolicy.shortSessionCount(), ranFor.count());
+                logger->error(msg);
+                exitWithCode(1, msg);
+                break;
             }
+
+            // Worth saying out loud even though we recover from it: across a resubscribe the file changes come from a
+            // `since` query rather than from watchman pushing them to us, so this line is the first thing to look for
+            // if an edit around this time went unnoticed.
+            logger->error("Lost the connection to Watchman after {}ms. Subscribing again in {}ms.", ranFor.count(),
+                          delay->count());
+            sleepUnlessStopped(*delay);
         }
     } catch (exception e) {
         // Ignore exceptions thrown on forked process.
@@ -271,6 +141,226 @@ void WatchmanProcess::start() {
     }
 
     ENFORCE(isStopped());
+}
+
+string WatchmanProcess::resolveWatchmanRoot() {
+    string modifiedWorkspace = workSpace;
+    if (!watchmanNamespace.empty()) {
+        const optional<string> maybeResolved = FileOps::realpath(workSpace);
+        if (!maybeResolved.has_value()) {
+            logger->debug("Unable to resolve workspace path {} for namespacing", workSpace);
+            watchmanNamespace.clear();
+        } else {
+            string_view root(*maybeResolved);
+            logger->debug("realpath({}) = {}", workSpace, root);
+            if (absl::ConsumeSuffix(&root, watchmanNamespace)) {
+                string gitDirectory(root);
+                gitDirectory += "/.git";
+                if (FileOps::dirExists(gitDirectory)) {
+                    logger->debug("Using {} as watchman root", root);
+                    modifiedWorkspace = root;
+                } else {
+                    logger->debug("Parent directory {} of namespace {} is not a git repository, disabling namespacing",
+                                  root, watchmanNamespace);
+                    watchmanNamespace.clear();
+                }
+            } else {
+                logger->debug("Watched directory {} is not in namespace {}, disabling namespacing", root,
+                              watchmanNamespace);
+                watchmanNamespace.clear();
+            }
+        }
+    }
+    return modifiedWorkspace;
+}
+
+WatchmanProcess::SessionOutcome WatchmanProcess::runSubscription(string_view root, string_view subscriptionName) {
+    // Where the last session got to, captured before this one can advance it. Empty for the first subscription of the
+    // process, in which case there is no window to catch up on: Sorbet is about to read the tree itself.
+    const optional<string> resumeFrom = lastClock;
+
+    auto p = subprocess::Popen({watchmanPath.c_str(), "-j", "-p", "--no-pretty"}, subprocess::output{subprocess::PIPE},
+                               subprocess::input{subprocess::PIPE});
+
+    // Declared after `p` so it only runs if construction succeeded. Runs on every exit path
+    // out of this scope — normal return, break, or exception — so the watchman child is
+    // always reaped before we spawn a replacement for it or return.
+    struct ShutdownGuard {
+        subprocess::Popen &p;
+        ~ShutdownGuard() noexcept {
+            shutdownWatchmanChild(p);
+        }
+    } shutdownGuard{p};
+
+    logger->debug("Starting monitoring path {} with watchman for files with extensions {}. Subscription id: {}", root,
+                  fmt::join(extensions, ","), subscriptionName);
+
+    string subscribeCommand = buildSubscribeCommand(root, subscriptionName, extensions, watchmanNamespace);
+    p.send(subscribeCommand.c_str(), subscribeCommand.size());
+    logger->debug(subscribeCommand);
+
+    if (resumeFrom.has_value()) {
+        // This subscription only reports what changes from here on, so the changes that landed while Sorbet had none
+        // have to be asked for separately -- see buildCatchUpQueryCommand for why the subscribe's own `since` is not
+        // enough. Done before reading anything from the subscription, and deliberately not after waiting for its ack:
+        // overlapping the two costs a file re-read, where a gap between them costs Sorbet's view of whatever changed in
+        // it until somebody touches those files again.
+        catchUpSince(root, *resumeFrom);
+    }
+
+    auto file = p.output();
+    auto fd = fileno(file);
+
+    // Holds the part of a response that arrived without its terminating newline. Per-session on purpose: a session that
+    // dies mid-response leaves a fragment of it here, and prepending half of a dead session's PDU to the first response
+    // of the next one would not parse.
+    string buffer;
+
+    while (!isStopped()) {
+        errno = 0;
+        auto maybeLine = FileOps::readLineFromFd(fd, buffer);
+        if (maybeLine.result == FileOps::ReadResult::Timeout) {
+            // Timeout occurred. See if we should abort before reading further.
+            continue;
+        }
+
+        if (maybeLine.result == FileOps::ReadResult::ErrorOrEof) {
+            if (errno == EINTR) {
+                continue;
+            }
+
+            // The CLI is gone: either it exited, or the daemon closed the socket under it. Neither means watchman is
+            // unusable, so leave it to the caller to decide whether to subscribe again.
+            return SessionOutcome::Disconnected;
+        }
+
+        ENFORCE(maybeLine.result == FileOps::ReadResult::Success);
+
+        const string &line = *maybeLine.output;
+        // Line found!
+        rapidjson::MemoryPoolAllocator<> alloc;
+        rapidjson::Document d(&alloc);
+        logger->debug(line);
+        if (d.Parse(line.c_str(), line.size()).HasParseError()) {
+            logger->error("Error parsing Watchman response: `{}` is not a valid json object", line);
+        } else if (d.HasMember("is_fresh_instance")) {
+            rememberClock(clockOf(d));
+            if (auto queryResponse = parseQueryResponse(*logger, d, line, watchmanNamespace);
+                queryResponse != nullptr) {
+                processQueryResponse(move(queryResponse));
+            }
+        } else if (d.HasMember("state-enter")) {
+            // These are messages from "state-enter" commands.  See
+            // https://facebook.github.io/watchman/docs/cmd/state-enter.html
+            // for more information.
+            catchDeserializationError(*logger, line, [&d, this]() {
+                auto stateEnter = sorbet::realmain::lsp::WatchmanStateEnter::fromJSONValue(d);
+                processStateEnter(move(stateEnter));
+            });
+        } else if (d.HasMember("state-leave")) {
+            // These are messages from "state-leave" commands.  See
+            // https://facebook.github.io/watchman/docs/cmd/state-leave.html
+            // for more information.
+            catchDeserializationError(*logger, line, [&d, this]() {
+                auto stateLeave = sorbet::realmain::lsp::WatchmanStateLeave::fromJSONValue(d);
+                processStateLeave(move(stateLeave));
+            });
+        } else if (d.HasMember("subscribe")) {
+            // The ack for the command we just sent. Its clock is where this subscription begins, and so where a
+            // replacement for it has to resume from if the connection dies before any file changes arrive.
+            rememberClock(clockOf(d));
+        } else {
+            // Something we don't understand yet.
+            logger->debug("Unknown Watchman response:\n{}", line);
+        }
+    }
+
+    return SessionOutcome::Stopped;
+}
+
+void WatchmanProcess::catchUpSince(string_view root, string_view sinceClock) {
+    string queryCommand = buildCatchUpQueryCommand(root, extensions, watchmanNamespace, sinceClock);
+
+    // A connection of its own: `-j` reads one command per process, so this cannot share the subscription's. Without
+    // `-p` it answers once and exits, which is all we want.
+    auto p = subprocess::Popen({watchmanPath.c_str(), "-j", "--no-pretty"}, subprocess::output{subprocess::PIPE},
+                               subprocess::input{subprocess::PIPE});
+    struct ShutdownGuard {
+        subprocess::Popen &p;
+        ~ShutdownGuard() noexcept {
+            shutdownWatchmanChild(p);
+        }
+    } shutdownGuard{p};
+
+    p.send(queryCommand.c_str(), queryCommand.size());
+    logger->debug(queryCommand);
+
+    auto fd = fileno(p.output());
+    string buffer;
+    const auto deadline = chrono::steady_clock::now() + CATCH_UP_TIMEOUT;
+
+    while (!isStopped() && chrono::steady_clock::now() < deadline) {
+        errno = 0;
+        auto maybeLine = FileOps::readLineFromFd(fd, buffer);
+        if (maybeLine.result == FileOps::ReadResult::Timeout) {
+            continue;
+        }
+
+        if (maybeLine.result == FileOps::ReadResult::ErrorOrEof) {
+            if (errno == EINTR) {
+                continue;
+            }
+            logger->error("Watchman exited without reporting the changes Sorbet missed since {}. Sorbet may be out of "
+                          "date on files that changed while it was not watching, until they change again.",
+                          sinceClock);
+            return;
+        }
+
+        const string &line = *maybeLine.output;
+        rapidjson::MemoryPoolAllocator<> alloc;
+        rapidjson::Document d(&alloc);
+        logger->debug(line);
+        if (d.Parse(line.c_str(), line.size()).HasParseError()) {
+            logger->error("Error parsing Watchman response: `{}` is not a valid json object", line);
+            return;
+        }
+
+        if (!d.HasMember("is_fresh_instance")) {
+            // An `error` response, most likely: the clock was rejected, or the root is no longer watched.
+            logger->error("Watchman could not report the changes Sorbet missed since {}: {}", sinceClock, line);
+            return;
+        }
+
+        rememberClock(clockOf(d));
+        if (auto queryResponse = parseQueryResponse(*logger, d, line, watchmanNamespace); queryResponse != nullptr) {
+            logger->debug("Caught up on {} file(s) changed since {}", queryResponse->files.size(), sinceClock);
+            processQueryResponse(move(queryResponse));
+        }
+        return;
+    }
+
+    if (!isStopped()) {
+        logger->error("Timed out after {}s asking Watchman for the changes Sorbet missed since {}. Sorbet may be out "
+                      "of date on files that changed while it was not watching, until they change again.",
+                      CATCH_UP_TIMEOUT.count(), sinceClock);
+    }
+}
+
+void WatchmanProcess::rememberClock(optional<string> clock) {
+    if (clock.has_value()) {
+        lastClock = move(clock);
+    }
+}
+
+void WatchmanProcess::sleepUnlessStopped(chrono::milliseconds duration) {
+    // Sliced so that a shutdown arriving mid-delay does not have to wait the delay out.
+    constexpr chrono::milliseconds slice{20};
+    for (auto remaining = duration; remaining > chrono::milliseconds{0}; remaining -= slice) {
+        if (isStopped()) {
+            return;
+        }
+        this_thread::sleep_for(remaining < slice ? remaining : slice);
+    }
 }
 
 bool WatchmanProcess::isStopped() {
