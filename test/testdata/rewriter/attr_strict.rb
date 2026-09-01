@@ -25,4 +25,18 @@ class Test
   attr_writer :nilable_writer
   sig {params(untyped_writer: T.untyped).returns(T.untyped)}
   attr_writer :untyped_writer
+
+  # One sig shared by many names only needs widening once.
+  sig {returns(String)}
+  attr_accessor :multi_one, :multi_two
+  #              ^^^^^^^^^ error: Use of undeclared variable `@multi_one`
+  #              ^^^^^^^^^ error: The instance variable `@multi_one` must be declared using `T.let` when specifying `# typed: strict`
+  #                          ^^^^^^^^^ error: Use of undeclared variable `@multi_two`
+  #                          ^^^^^^^^^ error: The instance variable `@multi_two` must be declared using `T.let` when specifying `# typed: strict`
+
+  MyAlias = T.type_alias {Integer}
+  sig {returns(MyAlias)}
+  attr_accessor :aliased
+  #              ^^^^^^^ error: Use of undeclared variable `@aliased`
+  #              ^^^^^^^ error: The instance variable `@aliased` must be declared using `T.let` when specifying `# typed: strict`
 end
