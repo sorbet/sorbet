@@ -43,3 +43,24 @@ def example3(x:)
   # effectively uninitialized
   T.reveal_type(e) # error: `NilClass`
 end
+
+sig { params(success: T::Boolean).void }
+def assignment_before_reraise(success)
+  status = "default"
+  begin
+    if success
+      status = "ok"
+    else
+      begin
+        raise
+      rescue
+        status = "special"
+        raise
+      end
+    end
+  rescue
+    T.reveal_type(status) # error: Revealed type: `String`
+    raise unless status == "special"
+    puts("handled")
+  end
+end
