@@ -552,9 +552,11 @@ public:
     // Returns a `PackageReferenceInfo` if the usage was not okay (e.g. missing import, modularity error, etc.)
     static optional<core::packages::PackageReferenceInfo>
     reportImportError(core::Context ctx, const core::packages::PackageInfo &thisPkg,
-                      const core::packages::PackageInfo &pkg, core::LocOffsets errLoc, core::SymbolRef litSymbol) {
+                      core::LocOffsets errLoc, core::SymbolRef litSymbol) {
         auto &db = ctx.state.packageDB();
-        auto otherPackage = pkg.mangledName();
+        auto otherPackage = litSymbol.enclosingClass(ctx).data(ctx)->package;
+        ENFORCE(otherPackage.exists() && thisPkg.mangledName() != otherPackage);
+        auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
 
         auto otherFile = litSymbol.loc(ctx).file();
         if (!otherFile.exists()) {
@@ -794,15 +796,14 @@ public:
             return;
         }
 
-        auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-
-        auto importError = reportImportError(ctx, this->package, pkg, lit.loc(), litSymbol);
+        auto importError = reportImportError(ctx, this->package, lit.loc(), litSymbol);
         referencedPackages[otherPackage] = importError.value_or(core::packages::PackageReferenceInfo{});
         if (importError.has_value()) {
             // An error was reported already
             return;
         }
 
+        auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
         bool isExported = pkg.locs.exportAll.exists();
         if (litSymbol.isClassOrModule()) {
             isExported = isExported || litSymbol.asClassOrModuleRef().data(ctx)->flags.isExported;
