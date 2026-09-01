@@ -1227,7 +1227,7 @@ void validatePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
         return;
     }
 
-    if (file.source().size() == 0) {
+    if (file.sourceSize() == 0) {
         // Either this is an empty file, or it's a file that was deleted. In both cases, we don't need to validate it.
         // TODO(neil): we might want to move this logic to skip files like this somewhere higher up.
         return;

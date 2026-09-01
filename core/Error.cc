@@ -88,7 +88,7 @@ string ErrorLine::toString(const GlobalState &gs, bool color) const {
     }
 
     if (loc.exists()) {
-        auto fileLength = loc.file().data(gs).source().size();
+        auto fileLength = loc.file().data(gs).sourceSize();
         if (loc.beginPos() > fileLength || loc.endPos() > fileLength) {
             fatalLogger->error(R"(msg="Bad ErrorLine::toString loc" path="{}" loc="{}" formattedMessage={}")",
                                absl::CEscape(loc.file().data(gs).path()), loc.showRaw(gs), formattedMessage);
@@ -185,7 +185,7 @@ string Error::toString(const GlobalState &gs) const {
         << restoreColors(header, autocorrectApplied ? RESET_COLOR : ERROR_COLOR) << RESET_COLOR << LOW_NOISE_COLOR
         << " " << gs.errorUrlBase << what.code << RESET_COLOR;
     if (loc.exists()) {
-        auto fileLength = loc.file().data(gs).source().size();
+        auto fileLength = loc.file().data(gs).sourceSize();
         if (loc.beginPos() > fileLength || loc.endPos() > fileLength) {
             fatalLogger->error(R"(msg="Bad Error::toString loc" path="{}" loc="{}" header={}")",
                                absl::CEscape(loc.file().data(gs).path()), loc.showRaw(gs), header);

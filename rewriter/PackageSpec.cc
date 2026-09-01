@@ -15,7 +15,7 @@ namespace {
 void mustContainPackageDef(core::MutableContext ctx, core::LocOffsets loc) {
     // HACKFIX: Tolerate completely empty packages. LSP does not support the notion of a deleted file, and
     // instead replaces deleted files with the empty string. It should really mark files as Tombstones instead.
-    if (!ctx.file.data(ctx).source().empty()) {
+    if (ctx.file.data(ctx).sourceSize() > 0) {
         if (auto e = ctx.beginIndexerError(loc, core::errors::Packager::InvalidPackageDefinition)) {
             e.setHeader("`{}` file must contain a package definition", "__package.rb");
             e.addErrorNote("Package definitions are class definitions like `{}`.\n"

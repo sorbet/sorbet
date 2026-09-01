@@ -3579,7 +3579,7 @@ optional<Loc> locOfValueForKey(const GlobalState &gs, const Loc origin, const Na
     // TODO(jez) Use Loc::adjust here
     uint32_t valueBegin = origin.beginPos() + keyStart + keySymbol.size() + char_traits<char>::length(" ");
     uint32_t valueEnd = valueBegin + char_traits<char>::length(valueStr);
-    if (valueEnd <= origin.file().data(gs).source().size()) {
+    if (valueEnd <= origin.file().data(gs).sourceSize()) {
         auto loc = Loc{origin.file(), valueBegin, valueEnd};
         if (loc.exists() && loc.source(gs).value() == valueStr) {
             return loc;

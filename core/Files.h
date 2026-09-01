@@ -38,6 +38,10 @@ public:
 
     std::string_view path() const;
     std::string_view source() const;
+    // The length of `source()`, without reading the text back if it has been released.
+    uint32_t sourceSize() const {
+        return this->sourceSize_;
+    }
     Type sourceType;
 
     bool isPayload() const;
@@ -68,7 +72,12 @@ public:
     bool hasIndexErrors() const;
     void setHasIndexErrors(bool value);
 
-    File(std::string &&path_, std::string &&source_, Type sourceType, uint32_t epoch = 0);
+    // `sourceIsPathContents` says that the text is exactly what `path_` holds on disk, so that the text may be
+    // dropped once the file has been indexed and read back if an error in it has to be rendered (see
+    // `releaseSource`). The indexer passes true for the files it reads; anything synthesised -- the payload, `-e`
+    // input, a buffer an editor sent us -- leaves it false, because there is nothing to read back.
+    File(std::string &&path_, std::string &&source_, Type sourceType, uint32_t epoch = 0,
+         bool sourceIsPathContents = false);
     File(File &&other) = delete;
     File(const File &other) = delete;
     File() = delete;
@@ -98,6 +107,15 @@ public:
     // Returns the hash of the file content. Requires that the file has been read.
     absl::Span<const uint8_t> sourceHash() const;
 
+    // Drops the file's text, which `source()` then reads back from `path()` on demand. Sorbet holds every file's text
+    // from the moment it is read until the process exits, which is gigabytes on a large codebase, and the only thing
+    // that wants it after indexing is rendering an error in the file -- true of a few thousand files, not all of them.
+    // A no-op unless the text is known to be exactly what is on disk (see the constructor).
+    //
+    // Call this from the thread that has just finished with the file, as the indexer does: a `std::string_view` handed
+    // out by `source()` on another thread does not keep the text alive.
+    void releaseSource() const;
+
 private:
     struct Flags {
         // some reasonable invariants don't hold for invalid files
@@ -122,7 +140,11 @@ private:
     Flags flags;
 
     const std::string path_;
-    const std::string source_;
+    // The text, once read. `releaseSource` may drop it and `source()` read it back, so this is loaded atomically; it is
+    // only ever replaced by an equal-length string (see `source()`).
+    mutable std::shared_ptr<const std::string> source_;
+    const uint32_t sourceSize_;
+    const bool sourceIsPathContents_;
 
     // This is always a pure function of the `source_` string, so it is computed lazily, thus the
     // `mutable`. We generally don't need `lineBreaks_` for every file, unless we're showing errors

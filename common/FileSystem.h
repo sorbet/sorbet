@@ -20,6 +20,15 @@ public:
     /** Read the file at the given path. Throws a `FileNotFoundException` if not found. */
     virtual std::string readFile(const std::string &path) const = 0;
 
+    /**
+     * Whether `readFile(path)` returns what the OS holds at `path`, so that a caller may drop the text it read and
+     * read it back from `path` later (see `core::File::releaseSource`). False for anything that answers from memory or
+     * that resolves paths against a root of its own.
+     */
+    virtual bool readsFilesFromDisk() const {
+        return false;
+    }
+
     /** Writes the specified data to the given file. */
     virtual void writeFile(const std::string &filename, std::string_view text) = 0;
 
@@ -51,6 +60,9 @@ public:
     OSFileSystem() = default;
 
     std::string readFile(const std::string &path) const override;
+    bool readsFilesFromDisk() const override {
+        return true;
+    }
     void writeFile(const std::string &filename, std::string_view text) override;
     std::vector<std::string> listFilesInDir(std::string_view path, const UnorderedSet<std::string> &extensions,
                                             WorkerPool &workerPool, bool recursive,

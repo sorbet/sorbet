@@ -116,18 +116,20 @@ File::Flags::Flags(string_view path)
       isTestFile(absl::EndsWith(path, ".test.rb")), hasPackageRBIPath(isPackageRBIPath(path)),
       hasPackageRbPath(isPackagePath(path)), isOpenInClient(false) {}
 
-File::File(string &&path_, string &&source_, Type sourceType, uint32_t epoch)
-    : epoch(epoch), sourceType(sourceType), flags(path_), path_(move(path_)), source_(move(source_)),
-      originalSigil(fileStrictSigil(this->source_)), strictLevel(originalSigil) {
-    if (this->source_.size() >= INVALID_POS_LOC) [[unlikely]] {
-        Exception::raise("File not less than {} bytes. Got: {}", UINT32_MAX, this->source_.size());
+File::File(string &&path_, string &&source_, Type sourceType, uint32_t epoch, bool sourceIsPathContents)
+    : epoch(epoch), sourceType(sourceType), flags(path_), path_(move(path_)),
+      source_(make_shared<const string>(move(source_))), sourceSize_(this->source_->size()),
+      sourceIsPathContents_(sourceIsPathContents), originalSigil(fileStrictSigil(*this->source_)),
+      strictLevel(originalSigil) {
+    if (this->source_->size() >= INVALID_POS_LOC) [[unlikely]] {
+        Exception::raise("File not less than {} bytes. Got: {}", UINT32_MAX, this->source_->size());
     }
 }
 
 unique_ptr<File> File::deepCopy(GlobalState &gs) const {
-    string sourceCopy = source_;
+    string sourceCopy{source()};
     string pathCopy = path_;
-    auto ret = make_unique<File>(move(pathCopy), move(sourceCopy), sourceType, epoch);
+    auto ret = make_unique<File>(move(pathCopy), move(sourceCopy), sourceType, epoch, sourceIsPathContents_);
     ret->lineBreaks_ = lineBreaks_;
     ret->minErrorLevel_ = minErrorLevel_;
     ret->strictLevel = strictLevel;
@@ -186,7 +188,34 @@ string_view File::path() const {
 
 string_view File::source() const {
     ENFORCE(this->sourceType != File::Type::NotYetRead);
-    return this->source_;
+    auto source = atomic_load(&this->source_);
+    if (source != nullptr) {
+        return *source;
+    }
+
+    // `releaseSource` dropped it: read it back. Every `Loc` in this file was recorded against the text we parsed, so
+    // trim or pad what we read to that length -- a file someone edited since can make a snippet stale, but it cannot
+    // put a `Loc` out of range. A file that has since gone reads as blank rather than as an error at this depth.
+    string reread;
+    try {
+        reread = FileOps::read(this->path_);
+    } catch (FileNotFoundException &) {
+    }
+    reread.resize(this->sourceSize_, '\n');
+    auto published = make_shared<const string>(move(reread));
+    if (atomic_compare_exchange_strong(&this->source_, &source, published)) {
+        return *published;
+    }
+    // Another thread read it back first; `source` holds what it published.
+    return *source;
+}
+
+void File::releaseSource() const {
+    if (!this->sourceIsPathContents_) {
+        return;
+    }
+    shared_ptr<const string> none;
+    atomic_store(&this->source_, none);
 }
 
 StrictLevel File::minErrorLevel() const {
@@ -251,7 +280,7 @@ absl::Span<const uint32_t> File::lineBreaks() const {
     if (ptr != nullptr) {
         return absl::MakeSpan(*ptr);
     } else {
-        auto my = make_shared<vector<uint32_t>>(findLineBreaks(this->source_));
+        auto my = make_shared<vector<uint32_t>>(findLineBreaks(this->source()));
         atomic_compare_exchange_weak(&lineBreaks_, &ptr, my);
         return lineBreaks();
     }
@@ -321,7 +350,8 @@ absl::Span<const uint8_t> File::sourceHash() const {
     ENFORCE(this->sourceType != File::Type::NotYetRead);
     if (!this->sourceHashComputed_) {
         XXH64_hash_t seed = 0L;
-        this->sourceHash_ = XXH3_128bits_withSeed(this->source_.data(), this->source_.size(), seed);
+        auto source = this->source();
+        this->sourceHash_ = XXH3_128bits_withSeed(source.data(), source.size(), seed);
         this->sourceHashComputed_ = true;
     }
 

@@ -545,7 +545,13 @@ ast::ExpressionPtr readFileWithStrictnessOverrides(core::GlobalState &gs, core::
                 counterInc("types.input.rbi.files");
             }
 
-            gs.replaceFile(file, make_shared<core::File>(move(fileName), move(src), core::File::Type::Normal));
+            // The text of a file we read is exactly what is on disk, so it can be dropped after indexing and read
+            // back if an error has to be rendered in it (see `core::File::releaseSource`) -- unless we did not read it
+            // from disk, or unless we are the language server, where the editor's buffer is the truth and the file on
+            // disk may no longer be the file we were given.
+            bool sourceIsPathContents = !opts.runLSP && opts.fs->readsFilesFromDisk();
+            gs.replaceFile(file, make_shared<core::File>(move(fileName), move(src), core::File::Type::Normal,
+                                                         /* epoch */ 0, sourceIsPathContents));
 
             if constexpr (enable_counters) {
                 counterAdd("types.input.lines", file.data(gs).lineCount());
@@ -725,6 +731,9 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
                         core::FileRef file = job;
                         auto cachedTree = readFileWithStrictnessOverrides(*localGs, file, opts, kvstore);
                         auto parsedFile = indexOne(opts, *localGs, file, move(cachedTree));
+                        // Nothing wants this file's text again unless an error has to be rendered in it, and holding
+                        // every file's text to the end of the run is gigabytes on a large codebase.
+                        file.data(*localGs).releaseSource();
                         pending.emplace_back(move(parsedFile));
 
                         if (pending.size() >= INDEX_MERGE_BATCH_SIZE) {
@@ -1774,10 +1783,11 @@ void sortBySize(const core::GlobalState &gs, vector<ast::ParsedFile> &trees) {
     //
     // Sort (size, index) pairs rather than the trees themselves: looking up a file's size chases two pointers into
     // the file table, which is far slower than the comparison itself once there are hundreds of thousands of files.
+    // `sourceSize` rather than `source().size()`: the text itself is long gone by now (core::File::releaseSource).
     vector<pair<size_t, uint32_t>> order;
     order.reserve(trees.size());
     for (uint32_t i = 0; i < trees.size(); i++) {
-        order.emplace_back(trees[i].file.data(gs).source().size(), i);
+        order.emplace_back(trees[i].file.data(gs).sourceSize(), i);
     }
     fast_sort(order, [](const auto &lhs, const auto &rhs) -> bool {
         // Break ties by position so that the result does not depend on the sort algorithm.

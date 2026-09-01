@@ -669,7 +669,7 @@ ast::ExpressionPtr Desugarer::desugarConditionalSend(core::LocOffsets location, 
     // check is a bit of a hack. It's intentionally one character too short so that for
     // completion requests it doesn't match `x&.|` (which would defeat completion requests.)
     auto csendLoc = recvLoc.copyEndWithZeroLength();
-    if (recvLoc.endPos() + 1 <= ctx.file.data(ctx).source().size()) {
+    if (recvLoc.endPos() + 1 <= ctx.file.data(ctx).sourceSize()) {
         auto ampersandLoc = core::LocOffsets{recvLoc.endPos(), recvLoc.endPos() + 1};
         if (ctx.locAt(ampersandLoc).source(ctx) == "&") {
             csendLoc = ampersandLoc;

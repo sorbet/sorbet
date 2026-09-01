@@ -145,6 +145,9 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, absl::
                     if (!job->cached() && !file.hasIndexErrors()) {
                         threadResult.emplace_back(core::serialize::Serializer::fileKey(file),
                                                   core::serialize::Serializer::storeTree(file, *job));
+                        // Storing the tree read this file's text back; drop it again now that nothing but an error in
+                        // this file wants it.
+                        file.releaseSource();
                         // Stream out compressed files so that writes happen in parallel with processing.
                         if (processedByThread > 100) {
                             resultq->push(move(threadResult), processedByThread);

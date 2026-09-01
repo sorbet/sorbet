@@ -166,6 +166,55 @@ TEST_CASE("FileIsTyped") {
     }
 }
 
+// The text of a file that is exactly what its path holds can be dropped and read back on demand; see
+// `File::releaseSource`.
+TEST_CASE("FileReleaseSource") {
+    const string path = "core_test_release_source.rb";
+    const string source = "class Foo\n  def bar; end\nend\n";
+    auto ofPath = [&path, &source]() {
+        return File{string(path), string(source), File::Type::Normal, /* epoch */ 0, /* sourceIsPathContents */ true};
+    };
+
+    FileOps::write(path, source);
+
+    // Releasing changes neither what the file says its text is nor what its text is.
+    {
+        auto file = ofPath();
+        CHECK_EQ(source.size(), file.sourceSize());
+        CHECK_EQ(source, string(file.source()));
+        file.releaseSource();
+        CHECK_EQ(source.size(), file.sourceSize());
+        CHECK_EQ(source, string(file.source()));
+    }
+
+    // A file that grew since it was read is trimmed back to the length that was parsed, and one that shrank or that
+    // went away is padded to it, so that a stale snippet cannot put a `Loc` out of range.
+    {
+        auto grown = ofPath();
+        grown.releaseSource();
+        FileOps::write(path, source + "# and more\n");
+        CHECK_EQ(source, string(grown.source()));
+    }
+    {
+        auto shrunk = ofPath();
+        shrunk.releaseSource();
+        FileOps::write(path, "class Foo\n");
+        CHECK_EQ(source.size(), shrunk.source().size());
+        CHECK_EQ("class Foo\n", string(shrunk.source().substr(0, 10)));
+    }
+    {
+        auto deleted = ofPath();
+        deleted.releaseSource();
+        FileOps::removeFile(path);
+        CHECK_EQ(string(source.size(), '\n'), string(deleted.source()));
+    }
+
+    // Text that is not the contents of a path has nothing to read back, so it is never dropped.
+    File synthesized{"core_test_synthesized.rb", string(source), File::Type::Normal};
+    synthesized.releaseSource();
+    CHECK_EQ(source, string(synthesized.source()));
+}
+
 TEST_CASE("NameHashSizeFor") {
     const vector<size_t> nameCounts = {0, 1, 2, 3, 1000, 1 << 20, 19'000'000};
     for (auto names : nameCounts) {
