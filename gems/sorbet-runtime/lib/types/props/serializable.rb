@@ -107,11 +107,11 @@ module T::Props::Serializable
       if difference.size == 1
         raise ArgumentError.new("Unexpected arguments: #{self.class} does not have prop #{difference.first}")
       else
-        raise ArgumentError.new("Unexpected arguments: #{self.class} does not have props #{difference.join(", ")}")
+        raise ArgumentError.new("Unexpected arguments: #{self.class} does not have props #{difference.join(', ')}")
       end
     end
 
-    args = self.class.props.to_h do |name, value|
+    args = self.class.props.to_h do |name, _|
       [name, changed_props.fetch(name, self.send(name))]
     end
 
