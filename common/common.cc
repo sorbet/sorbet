@@ -359,21 +359,14 @@ void appendFilesInDir(const string &basePath, const sorbet::UnorderedSet<string>
                 }
 
                 if (ec) {
-                    // A directory found while listing its parent can be gone (or replaced by a file) by the time we
-                    // get to it when something else is rewriting the tree — a branch checkout, say. There is nothing
-                    // to list then, and the file watcher reports whatever took its place, so only the root directory
-                    // has to be there.
-                    const bool vanishedSubdirectory =
-                        path != basePath && (ec.value() == ENOENT || ec.value() == ENOTDIR);
-                    if (!vanishedSubdirectory) {
-                        switch (ec.value()) {
-                            case ENOTDIR:
-                                throw sorbet::FileNotDirException();
-
-                            default:
-                                throw sorbet::FileNotFoundException(
-                                    fmt::format("Couldn't open directory `{}`", path.string()));
+                    // A checkout can replace a subdirectory between its parent's listing and this one. The file
+                    // watcher reports whatever took its place, so only the root has to exist.
+                    const bool vanished = path != basePath && (ec.value() == ENOENT || ec.value() == ENOTDIR);
+                    if (!vanished) {
+                        if (ec.value() == ENOTDIR) {
+                            throw sorbet::FileNotDirException();
                         }
+                        throw sorbet::FileNotFoundException(fmt::format("Couldn't open directory `{}`", path.string()));
                     }
                 }
 

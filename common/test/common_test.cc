@@ -62,6 +62,26 @@ TEST_CASE("FileOps::listFilesInDir") {
             CHECK_EQ(std::string(e.what()), "Couldn't open directory `common_test_missing_dir`");
         }
     }
+
+    SUBCASE("an unreadable subdirectory still raises, naming itself") {
+        const std::string root = "common_test_unreadable_dir";
+        const std::string nested = root + "/nested";
+        std::filesystem::remove_all(root);
+        FileOps::ensureDir(root);
+        FileOps::ensureDir(nested);
+        FileOps::write(nested + "/a.rb", "");
+        std::filesystem::permissions(nested, std::filesystem::perms::none);
+
+        try {
+            FileOps::listFilesInDir(root, {".rb"}, *workers, true, {}, {});
+            FAIL("expected listFilesInDir to throw");
+        } catch (FileNotFoundException &e) {
+            CHECK_EQ(std::string(e.what()), "Couldn't open directory `" + nested + "`");
+        }
+
+        std::filesystem::permissions(nested, std::filesystem::perms::owner_all);
+        std::filesystem::remove_all(root);
+    }
 }
 
 TEST_SUITE("UIntSet") {
