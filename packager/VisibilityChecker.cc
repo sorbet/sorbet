@@ -575,7 +575,7 @@ public:
         bool causesVisibilityError = !pkg.isVisibleTo(ctx, thisPkg, autocorrectedImportType);
         bool badTestReference = thisPkg.usesTestPackages && pkg.testPackage() && !thisPkg.testPackage();
         optional<string> path;
-        if (!isTestImport && db.enforceLayering()) {
+        if (!isTestImport && !testNamespaceInProd && db.enforceLayering()) {
             layeringViolation = strictDepsLevel > core::packages::StrictDependenciesLevel::False &&
                                 thisPkg.causesLayeringViolation(db, pkg);
             strictDependenciesTooLow = importStrictDepsLevel != core::packages::StrictDependenciesLevel::None &&
