@@ -551,7 +551,7 @@ public:
     // Returns `std::nullopt` if it's okay to use the symbol.
     // Returns a `PackageReferenceInfo` if the usage was not okay (e.g. missing import, modularity error, etc.)
     static optional<core::packages::PackageReferenceInfo>
-    reportImportError(core::Context ctx, const core::packages::PackageInfo &thisPkg,
+    checkReferenceAgainstImports(core::Context ctx, const core::packages::PackageInfo &thisPkg,
                       core::LocOffsets errLoc, core::SymbolRef litSymbol) {
         auto &db = ctx.state.packageDB();
         auto otherPackage = litSymbol.enclosingClass(ctx).data(ctx)->package;
@@ -796,7 +796,7 @@ public:
             return;
         }
 
-        auto importError = reportImportError(ctx, this->package, lit.loc(), litSymbol);
+        auto importError = checkReferenceAgainstImports(ctx, this->package, lit.loc(), litSymbol);
         referencedPackages[otherPackage] = importError.value_or(core::packages::PackageReferenceInfo{});
         if (importError.has_value()) {
             // An error was reported already
