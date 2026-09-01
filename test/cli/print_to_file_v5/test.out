@@ -209,26 +209,26 @@ requires: []
  is_defining_ref=1
 [ref id=2]
  scope=[MyClass]
- name=[MyMixin]
- nesting=[[MyClass]]
- resolved=[MyMixin]
- loc=test/cli/print_to_file_v5/d.rb:6
- is_defining_ref=0
- parent_of=[MyClass]
-[ref id=3]
- scope=[MyClass]
  name=[X]
  nesting=[[MyClass]]
  resolved=[MyClass X]
  loc=test/cli/print_to_file_v5/d.rb:5
  is_defining_ref=1
-[ref id=4]
+[ref id=3]
  scope=[MyClass]
  name=[Y]
  nesting=[[MyClass]]
  resolved=[]
  loc=test/cli/print_to_file_v5/d.rb:5
  is_defining_ref=0
+[ref id=4]
+ scope=[MyClass]
+ name=[MyMixin]
+ nesting=[[MyClass]]
+ resolved=[MyMixin]
+ loc=test/cli/print_to_file_v5/d.rb:6
+ is_defining_ref=0
+ parent_of=[MyClass]
 [ref id=5]
  scope=[MyClass]
  name=[Z]
@@ -252,6 +252,6 @@ requires: []
  is_defining_ref=0
 --- autogen.txt end ---
 
-864944fae72cc92fd47e7e7fca13b49aa68ebd96  autogen.msgpack
+378cdb6183bb93b946780b777154029e8b1632c1  autogen.msgpack
 
 --print=cfg specified multiple times with inconsistent output options
