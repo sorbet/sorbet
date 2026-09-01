@@ -718,35 +718,62 @@ ExpressionPtr doUntil(DesugarContext dctx, core::LocOffsets loc, ExpressionPtr c
 }
 
 // Flattens the key/value pairs from the Kwargs Hash into the destination container.
-// If Kwargs Hash contains any splats, we skip the flattening and append the hash as-is.
-template <typename Container> void flattenKwargs(unique_ptr<parser::Hash> kwargsHash, Container &destination) {
+//
+// When the only splat is a `**kwsplat` in trailing position (e.g. `foo(x: 1, **opts)`), the pairs are
+// flattened and the splat's inner expression is appended after them. Keeping the explicitly-passed keys
+// visible lets the type checker check them against the method's keyword parameters, instead of merging
+// everything into one opaque hash. Returns true in that case, to signal that the caller has to wrap the
+// trailing argument in `<Magic>.<to-hash-dup>`.
+//
+// Anything else -- a splat in the middle, more than one splat, a lone splat, or an anonymous `**` forward
+// -- keeps the old behavior of appending the hash as-is, and returns false.
+template <typename Container> bool flattenKwargs(unique_ptr<parser::Hash> kwargsHash, Container &destination) {
     ENFORCE(kwargsHash != nullptr);
 
-    // Skip inlining the kwargs if there are any kwsplat nodes present
-    if (absl::c_any_of(kwargsHash->pairs, [](auto &node) {
-            // the parser guarantees that if we see a kwargs hash it only contains pair,
-            // kwsplat, or forwarded kwrest arg nodes
-            ENFORCE(parser::isa_node<parser::Kwsplat>(node.get()) || parser::isa_node<parser::Pair>(node.get()) ||
-                    parser::isa_node<parser::ForwardedKwrestArg>(node.get()));
+    auto &pairs = kwargsHash->pairs;
 
-            return parser::isa_node<parser::Kwsplat>(node.get()) ||
-                   parser::isa_node<parser::ForwardedKwrestArg>(node.get());
-        })) {
+    auto splatIt = absl::c_find_if(pairs, [](auto &node) {
+        // the parser guarantees that if we see a kwargs hash it only contains pair,
+        // kwsplat, or forwarded kwrest arg nodes
+        ENFORCE(parser::isa_node<parser::Kwsplat>(node.get()) || parser::isa_node<parser::Pair>(node.get()) ||
+                parser::isa_node<parser::ForwardedKwrestArg>(node.get()));
+
+        return parser::isa_node<parser::Kwsplat>(node.get()) ||
+               parser::isa_node<parser::ForwardedKwrestArg>(node.get());
+    });
+
+    // A keyword splat is detected downstream by the parity of the argument count, so it can only be
+    // inlined when it's the sole splat and comes last. There's also nothing to gain from inlining unless
+    // some keys are passed explicitly alongside it, so a lone splat keeps going through the merging path.
+    auto inlineTrailingKwsplat = pairs.size() > 1 && splatIt != pairs.end() && splatIt + 1 == pairs.end() &&
+                                 parser::isa_node<parser::Kwsplat>(splatIt->get());
+
+    // Skip inlining the kwargs if there are any other kwsplat nodes present
+    if (splatIt != pairs.end() && !inlineTrailingKwsplat) {
         destination.emplace_back(move(kwargsHash));
-        return;
+        return false;
     }
 
     // Flatten the key/value pairs into the destination
-    for (auto &entry : kwargsHash->pairs) {
+    for (auto &entry : pairs) {
         if (auto pair = parser::cast_node<parser::Pair>(entry.get())) {
             destination.emplace_back(move(pair->key));
             destination.emplace_back(move(pair->value));
+        } else if (auto splat = parser::cast_node<parser::Kwsplat>(entry.get())) {
+            destination.emplace_back(move(splat->expr));
         } else {
             Exception::raise("Unhandled case");
         }
     }
 
-    return;
+    return inlineTrailingKwsplat;
+}
+
+// A `**kwsplat` argument is converted with `to_hash` before it's passed along. This is also what gives
+// `f(**nil)` its meaning of "no keyword arguments at all".
+void wrapKwsplatArg(ExpressionPtr &arg, core::LocOffsets locZeroLen) {
+    auto loc = arg.loc();
+    arg = MK::Send1(loc, MK::Magic(loc), core::Names::toHashDup(), locZeroLen, move(arg));
 }
 
 // Detects calls to `block_given?`
@@ -936,20 +963,25 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     }
 
                     // Build up an array that represents the keyword args for the send.
-                    // When there is a Kwsplat, treat all keyword arguments as a single argument.
+                    // When the keyword args can't be inlined, they're all treated as a single argument.
                     // If the kwargs hash is not present, make a `nil` to put in the place of that argument.
                     // This will be used in the implementation of the intrinsic to tell the difference between keyword
-                    // args, keyword args with kw splats, and no keyword args at all.
+                    // args and no keyword args at all.
                     ExpressionPtr kwargs;
                     if (kwargsHash != nullptr) {
                         parser::NodeVec kwargElements;
-                        flattenKwargs(move(kwargsHash), kwargElements);
+                        auto inlinedKwsplat = flattenKwargs(move(kwargsHash), kwargElements);
 
                         unique_ptr<parser::Node> kwArray = make_unique<parser::Array>(loc, move(kwargElements));
 
                         kwargs = node2TreeImpl(dctx, kwArray);
 
-                        DuplicateHashKeyCheck::checkSendArgs(dctx.ctx, 0, cast_tree<Array>(kwargs)->elems);
+                        auto &kwargElems = cast_tree<Array>(kwargs)->elems;
+                        if (inlinedKwsplat) {
+                            wrapKwsplatArg(kwargElems.back(), locZeroLen);
+                        }
+
+                        DuplicateHashKeyCheck::checkSendArgs(dctx.ctx, 0, kwargElems);
                     } else {
                         kwargs = MK::Nil(loc);
                     }
@@ -992,10 +1024,11 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     // Count the arguments before we concat in the Kwarg key/value pairs
                     int numPosArgs = send->args.size();
 
+                    auto inlinedKwsplat = false;
                     if (kwargsHash != nullptr) {
                         // Deconstruct the kwargs hash if it's present,
                         // concating the key/value pairs to the end of the args list
-                        flattenKwargs(move(kwargsHash), send->args);
+                        inlinedKwsplat = flattenKwargs(move(kwargsHash), send->args);
                     }
 
                     Send::ARGS_store args;
@@ -1003,6 +1036,10 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     for (auto &stat : send->args) {
                         args.emplace_back(node2TreeImpl(dctx, stat));
                     };
+
+                    if (inlinedKwsplat) {
+                        wrapKwsplatArg(args.back(), locZeroLen);
+                    }
 
                     DuplicateHashKeyCheck::checkSendArgs(dctx.ctx, numPosArgs, args);
 
