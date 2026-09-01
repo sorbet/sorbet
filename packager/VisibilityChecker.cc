@@ -552,10 +552,18 @@ public:
     // Returns a `PackageReferenceInfo` if the usage was not okay (e.g. missing import, modularity error, etc.)
     static optional<core::packages::PackageReferenceInfo>
     reportImportError(core::Context ctx, const core::packages::PackageInfo &thisPkg,
-                      const core::packages::PackageInfo &pkg, core::LocOffsets errLoc, core::SymbolRef litSymbol,
-                      core::FileRef otherFile) {
+                      const core::packages::PackageInfo &pkg, core::LocOffsets errLoc, core::SymbolRef litSymbol) {
         auto &db = ctx.state.packageDB();
         auto otherPackage = pkg.mangledName();
+
+        auto otherFile = litSymbol.loc(ctx).file();
+        if (!otherFile.exists()) {
+            // This is unfortunate--we only need otherFile to determine weird --test-packages stuff
+            // (because we need to look at whether the file that the constant is defined in `isPackagedTest`, etc.)
+            // We can delete this after that migration.
+            return nullopt;
+        }
+
         auto *import = thisPkg.importsPackage(otherPackage);
         auto wasImported = import != nullptr;
         if (wasImported && thisPkg.usesTestPackages) {
@@ -766,19 +774,17 @@ public:
         if (!litSymbol.isClassOrModule() && !litSymbol.isFieldOrStaticField()) {
             return;
         }
+        if (litSymbol == core::Symbols::todo()) {
+            // The symbol will be `<todo sym>` when traversing to a ClassDef which omits a superclass.
+            // TODO(jez) Should we change put the real superclass in the tree once GlobalPass resolves it?
+            return;
+        }
 
         // NOTE: this only tracks the information required for computing what symbols needed to be exported, and not for
         // find all references. For example, if the current symbol is A::B::C::D, then only A::B::C::D will be added to
         // symbolsReferenced, and not A, A::B, A::B::C.
         // TODO(neil): we should also track A, A::B, A::B::C, so that we can use this for find all references too.
         referencedSymbols.insert(litSymbol);
-
-        auto loc = litSymbol.loc(ctx);
-
-        auto otherFile = loc.file();
-        if (!otherFile.exists()) {
-            return;
-        }
 
         auto &db = ctx.state.packageDB();
 
@@ -790,7 +796,7 @@ public:
 
         auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
 
-        auto importError = reportImportError(ctx, this->package, pkg, lit.loc(), litSymbol, otherFile);
+        auto importError = reportImportError(ctx, this->package, pkg, lit.loc(), litSymbol);
         referencedPackages[otherPackage] = importError.value_or(core::packages::PackageReferenceInfo{});
         if (importError.has_value()) {
             // An error was reported already
