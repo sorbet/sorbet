@@ -1,5 +1,6 @@
 #include "doctest/doctest.h"
 // has to go first as it violates our requirements
+#include "common/FileOps.h"
 #include "core/Error.h"
 #include "core/ErrorCollector.h"
 #include "core/ErrorQueue.h"
@@ -162,6 +163,17 @@ TEST_CASE("FileIsTyped") {
     };
     for (auto &tc : cases) {
         CHECK_EQ(tc.strict, File::fileStrictSigil(tc.src));
+    }
+}
+
+TEST_CASE("NameHashSizeFor") {
+    const vector<size_t> nameCounts = {0, 1, 2, 3, 1000, 1 << 20, 19'000'000};
+    for (auto names : nameCounts) {
+        auto size = NameHash::sizeFor(names);
+        // A power of two, so that a lookup masks instead of dividing.
+        CHECK_EQ(0u, size & (size - 1));
+        // Room for half again as many buckets as names, so that the open addressing stays at or under two thirds full.
+        CHECK_GE(size, names + names / 2);
     }
 }
 

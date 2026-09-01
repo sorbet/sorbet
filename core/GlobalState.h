@@ -95,6 +95,14 @@ private:
     void moveNames(Bucket *from, Bucket *to, unsigned int szFrom, unsigned int szTo);
 
 public:
+    // How many buckets to hold `names` names. The table is open-addressed, so it needs slack: half again as many
+    // buckets as names keeps the load factor at or under two thirds, and a power of two lets a lookup mask instead of
+    // divide. (Rounding twice as many names up to a power of two, as this did before, left the table between a quarter
+    // and half full: 256 MiB of empty buckets on a codebase with 19 million names.)
+    static uint32_t sizeFor(size_t names) {
+        return nextPowerOfTwo(static_cast<uint32_t>(names + names / 2));
+    }
+
     static inline Hash hashMixUTF8(std::string_view name) {
         return _hash(name);
     }
@@ -371,9 +379,9 @@ public:
         const void *begin;
         size_t bytes;
     };
-    // The memory `preallocateTables` reserved for the symbol and name tables, for `prefaultRanges`. Take it on the
-    // thread that owns this GlobalState, before handing it to a helper thread: a table that is reallocated later only
-    // makes prefaulting its old range moot (the pages are populated or the call fails), never unsafe.
+    // The part of each table `preallocateTables` reserved that is expected to be filled, for `prefaultRanges`. Take it
+    // on the thread that owns this GlobalState, before handing it to a helper thread: a table that is reallocated later
+    // only makes prefaulting its old range moot (the pages are populated or the call fails), never unsafe.
     std::vector<MemoryRange> preallocatedTableRanges() const;
     // Asks the OS to back `ranges` with pages now (Linux 5.14 and later; a no-op elsewhere), so that the (serial)
     // phases that fill the tables do not page-fault their way through gigabytes. Meant to run on a helper thread while
@@ -792,6 +800,21 @@ public:
 
 private:
     uint32_t nameTableDiffCount = 0;
+
+    // How many entries `preallocateTables` was asked to make room for. Each reservation is rounded up to a power of
+    // two, so a table's capacity is up to twice this; only this much of it is expected to be filled, and that is the
+    // part `preallocatedTableRanges` offers for prefaulting.
+    struct PreallocatedTableSizes {
+        uint32_t classAndModules = 0;
+        uint32_t methods = 0;
+        uint32_t fields = 0;
+        uint32_t typeParameters = 0;
+        uint32_t typeMembers = 0;
+        uint32_t utf8Names = 0;
+        uint32_t constantNames = 0;
+        uint32_t uniqueNames = 0;
+    };
+    PreallocatedTableSizes preallocatedTableSizes;
 
     struct DeepCloneHistoryEntry {
         int globalStateId;

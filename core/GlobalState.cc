@@ -287,9 +287,8 @@ GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue, shared_ptr<lsp::Type
     typeParameters.reserve(PAYLOAD_MAX_TYPE_ARGUMENT_COUNT);
     typeMembers.reserve(PAYLOAD_MAX_TYPE_MEMBER_COUNT);
 
-    int namesByHashSize = nextPowerOfTwo(
-        2 * (PAYLOAD_MAX_UTF8_NAME_COUNT + PAYLOAD_MAX_CONSTANT_NAME_COUNT + PAYLOAD_MAX_UNIQUE_NAME_COUNT));
-    namesByHash.resize(namesByHashSize);
+    namesByHash.resize(NameHash::sizeFor(PAYLOAD_MAX_UTF8_NAME_COUNT + PAYLOAD_MAX_CONSTANT_NAME_COUNT +
+                                         PAYLOAD_MAX_UNIQUE_NAME_COUNT));
 
     this->symbolOffsets.emplace_back();
 }
@@ -1027,6 +1026,17 @@ void GlobalState::preallocateTables(uint32_t classAndModulesSize, uint32_t metho
     uint32_t constantNameSizeScaled = nextPowerOfTwo(constantNameSize);
     uint32_t uniqueNameSizeScaled = nextPowerOfTwo(uniqueNameSize);
 
+    preallocatedTableSizes = {
+        .classAndModules = classAndModulesSize,
+        .methods = methodsSize,
+        .fields = fieldsSize,
+        .typeParameters = typeParametersSize,
+        .typeMembers = typeMembersSize,
+        .utf8Names = utf8NameSize,
+        .constantNames = constantNameSize,
+        .uniqueNames = uniqueNameSize,
+    };
+
     // When preallocating in release builds, large initial reservations aren't necessarily a problem on hosts with lots
     // of cores available as we use jemalloc as the allocator. An effect of this is that larger allocations will be
     // mapped with MAP_NORESERVE, and will only be backed by real memory if they're used. As a result, the large number
@@ -1049,16 +1059,24 @@ void GlobalState::preallocateTables(uint32_t classAndModulesSize, uint32_t metho
 }
 
 namespace {
-template <class T> GlobalState::MemoryRange reservedRange(const std::vector<T> &table) {
-    return {table.data(), table.capacity() * sizeof(T)};
+// The prefix of `table` that `entries` of it occupy. Rounding a reservation up to a power of two can leave the second
+// half of a table untouched for a whole run, and prefaulting a page is only worth it for a page that gets written.
+template <class T> GlobalState::MemoryRange reservedRange(const std::vector<T> &table, uint32_t entries) {
+    return {table.data(), std::min<size_t>(entries, table.capacity()) * sizeof(T)};
 }
 } // namespace
 
 std::vector<GlobalState::MemoryRange> GlobalState::preallocatedTableRanges() const {
+    const auto &sizes = preallocatedTableSizes;
     return {
-        reservedRange(classAndModules), reservedRange(methods),     reservedRange(fields),
-        reservedRange(typeParameters),  reservedRange(typeMembers), reservedRange(utf8Names),
-        reservedRange(constantNames),   reservedRange(uniqueNames),
+        reservedRange(classAndModules, sizes.classAndModules),
+        reservedRange(methods, sizes.methods),
+        reservedRange(fields, sizes.fields),
+        reservedRange(typeParameters, sizes.typeParameters),
+        reservedRange(typeMembers, sizes.typeMembers),
+        reservedRange(utf8Names, sizes.utf8Names),
+        reservedRange(constantNames, sizes.constantNames),
+        reservedRange(uniqueNames, sizes.uniqueNames),
     };
 }
 
@@ -1660,7 +1678,7 @@ void NameHash::moveNames(Bucket *from, Bucket *to, unsigned int szFrom, unsigned
 }
 
 void NameHash::expandNames(uint32_t utf8NameSize, uint32_t constantNameSize, uint32_t uniqueNameSize) {
-    uint32_t hashTableSize = 2 * nextPowerOfTwo(utf8NameSize + constantNameSize + uniqueNameSize);
+    uint32_t hashTableSize = NameHash::sizeFor(utf8NameSize + constantNameSize + uniqueNameSize);
 
     if (hashTableSize > buckets_.size()) {
         vector<Bucket> new_namesByHash(hashTableSize);
@@ -1918,7 +1936,7 @@ void GlobalState::sanityCheckTableSizes() const {
     ENFORCE_NO_TIMER(!namesByHash.empty(), "empty name hash table size");
     ENFORCE_NO_TIMER((namesByHash.size() & (namesByHash.size() - 1)) == 0,
                      "name hash table size is not a power of two");
-    ENFORCE_NO_TIMER(nextPowerOfTwo(utf8Names.capacity() + constantNames.capacity() + uniqueNames.capacity()) * 2 ==
+    ENFORCE_NO_TIMER(NameHash::sizeFor(utf8Names.capacity() + constantNames.capacity() + uniqueNames.capacity()) ==
                          namesByHash.capacity(),
                      "name table and hash name table sizes out of sync names.capacity={} namesByHash.capacity={}",
                      namesUsedTotal(), namesByHash.capacity());
