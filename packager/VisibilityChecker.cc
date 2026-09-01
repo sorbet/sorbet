@@ -801,7 +801,7 @@ public:
         }
         isExported = isExported || db.allowRelaxedPackagerChecksFor(this->package.mangledName());
         if (this->package.usesTestPackages) {
-            isExported = isExported || (wasImported && import->usesInternals);
+            isExported = isExported || import->usesInternals;
         }
 
         if (!isExported) {
