@@ -772,6 +772,21 @@ private:
                 e.addErrorLine(resolvedClass.data(ctx)->loc(), "Other definition");
             }
             resolvedClass = stubSymbolForAncestor(job);
+        } else if (resolvedClass.data(ctx)->isPackageNamespace() &&
+                   ctx.state.packageDB().getPackageInfo(resolvedClass.data(ctx)->package).hasSubPackages) {
+            if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::PackageAsSuperclassOrMixin)) {
+                auto &pkgInfo = ctx.state.packageDB().getPackageInfo(resolvedClass.data(ctx)->package);
+                if (job.isSuperclass) {
+                    e.setHeader("Package namespace use as superclass");
+                    e.addErrorLine(job.klass.data(ctx)->loc(), "Class definition");
+                    e.addErrorLine(pkgInfo.declLoc(), "Package definition");
+                } else {
+                    e.setHeader("Package namespaces may not be used with `{}`", job.isInclude ? "include" : "extend");
+                    e.addErrorLine(job.klass.data(ctx)->loc(), "Class definition");
+                    e.addErrorLine(pkgInfo.declLoc(), "Package definition");
+                }
+            }
+            resolvedClass = stubSymbolForAncestor(job);
         }
 
         bool ancestorPresent = true;
