@@ -11,7 +11,7 @@ module Shared
         # resolver never stops at package boundaries; the packager then flags the cross-package
         # reference because `Shared` is neither imported here nor exports `Secret`.
         Secret
-      # ^^^^^^ error: `Shared::Secret` resolves but is not exported from `Shared` and `Shared` is not imported
+      # ^^^^^^ error: `Shared::Secret` resolves but its package is not imported
 
         # `Secret2` is exported from `Shared`, but `Shared::Consumer` still doesn't import `Shared`,
         # so the cross-package reference is flagged for the missing import rather than the export.

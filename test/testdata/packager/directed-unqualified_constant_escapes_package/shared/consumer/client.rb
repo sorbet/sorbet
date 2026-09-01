@@ -10,7 +10,7 @@ module Shared
         # into the parent package's `Shared` namespace). Package-directed mode changes how strata are
         # named and resolved, not the cross-package visibility rule, so the same error still fires.
         Secret
-      # ^^^^^^ error: `Shared::Secret` resolves but is not exported from `Shared` and `Shared` is not imported
+      # ^^^^^^ error: `Shared::Secret` resolves but its package is not imported
       end
     end
   end
