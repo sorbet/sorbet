@@ -553,9 +553,10 @@ public:
     static optional<core::packages::PackageReferenceInfo>
     reportImportError(core::Context ctx, const core::packages::PackageInfo &thisPkg,
                       const core::packages::PackageInfo &pkg, core::LocOffsets errLoc, core::SymbolRef litSymbol,
-                      core::FileRef otherFile, const core::packages::Import *import) {
+                      core::FileRef otherFile) {
         auto &db = ctx.state.packageDB();
         auto otherPackage = pkg.mangledName();
+        auto *import = thisPkg.importsPackage(otherPackage);
         auto wasImported = import != nullptr;
         if (wasImported && thisPkg.usesTestPackages) {
             ENFORCE(import->type == core::packages::ImportType::Normal, "test_import found in --test-packages mode");
@@ -789,15 +790,12 @@ public:
 
         auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
 
-        auto *import = this->package.importsPackage(otherPackage);
-        auto importError = reportImportError(ctx, this->package, pkg, lit.loc(), litSymbol, otherFile, import);
+        auto importError = reportImportError(ctx, this->package, pkg, lit.loc(), litSymbol, otherFile);
         referencedPackages[otherPackage] = importError.value_or(core::packages::PackageReferenceInfo{});
         if (importError.has_value()) {
             // An error was reported already
             return;
         }
-
-        ENFORCE(import != nullptr);
 
         bool isExported = pkg.locs.exportAll.exists();
         if (litSymbol.isClassOrModule()) {
@@ -806,7 +804,9 @@ public:
             isExported = isExported || litSymbol.asFieldRef().data(ctx)->flags.isExported;
         }
         isExported = isExported || db.allowRelaxedPackagerChecksFor(this->package.mangledName());
-        if (this->package.usesTestPackages) {
+        if (this->package.usesTestPackages && !isExported) {
+            auto *import = this->package.importsPackage(otherPackage);
+            ENFORCE(import != nullptr, "If it wasn't imported, we should not be dealing with exports");
             isExported = isExported || import->usesInternals;
         }
 
