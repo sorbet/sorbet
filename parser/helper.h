@@ -389,7 +389,7 @@ public:
     }
 
     /**
-     * Is `send` a method definition modifier (private, protected, public, etc.)?
+     * Is `send` a method definition modifier (private, protected, public, abstract, etc.)?
      */
     static bool isMethodDefModifierSend(const parser::Send *send) {
         return send->receiver == nullptr && send->args.size() == 1 &&
