@@ -446,6 +446,8 @@ public:
 
     NameRef nextMangledName(ClassOrModuleRef owner, NameRef origName);
     void mangleRenameMethod(MethodRef what, NameRef origName);
+    void mangleRenameStaticField(FieldRef what, NameRef origName);
+    void mangleRenameTypeMember(TypeMemberRef what, NameRef origName);
     // NOTE: You likely want to use mangleRenameMethod not deleteMethodSymbol, unless you know what you're doing.
     // See the comment on the implementation for more.
     void deleteMethodSymbol(MethodRef what);
