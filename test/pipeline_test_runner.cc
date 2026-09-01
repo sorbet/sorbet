@@ -540,7 +540,7 @@ TEST_CASE("PerPhaseTest") {
             stratumFiles = move(resolver::Resolver::run(*gs, move(stratumFiles), *workers).result());
 
             if (opts.cacheSensitiveOptions.sorbetPackages) {
-                packager::VisibilityChecker::run(*gs, *workers, stratumFiles);
+                packager::VisibilityChecker::run(*gs, *workers, stratumFiles, /* recordReferences */ true);
             }
 
             handler.drainErrors(*gs);
@@ -881,7 +881,7 @@ TEST_CASE("PerPhaseTest") {
     }
 
     if (opts.cacheSensitiveOptions.sorbetPackages) {
-        packager::VisibilityChecker::run(*gs, *workers, trees);
+        packager::VisibilityChecker::run(*gs, *workers, trees, /* recordReferences */ true);
     }
 
     for (auto &resolvedTree : trees) {

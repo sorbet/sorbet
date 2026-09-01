@@ -1160,6 +1160,16 @@ ast::ParsedFile checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, a
     return canceled;
 }
 
+#ifndef SORBET_REALMAIN_MIN
+namespace {
+// Whether the visibility checker should record what every file references. Only `--gen-packages` and the language
+// server's "add missing export" code action read those records (see `VisibilityChecker::run`).
+bool recordFileReferences(const core::GlobalState &gs, const options::Options &opts) {
+    return opts.runLSP || gs.packageDB().genPackagesMode() != core::packages::GenPackagesMode::Disabled;
+}
+} // namespace
+#endif
+
 ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
                                     WorkerPool &workers) {
     try {
@@ -1179,7 +1189,7 @@ ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, vector<ast::ParsedFil
 #ifndef SORBET_REALMAIN_MIN
             if (opts.cacheSensitiveOptions.sorbetPackages) {
                 Timer timeit(gs.tracer(), "visibility_checker");
-                packager::VisibilityChecker::run(gs, workers, what);
+                packager::VisibilityChecker::run(gs, workers, what, recordFileReferences(gs, opts));
             }
 #endif
 
@@ -1307,7 +1317,7 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
 
 #ifndef SORBET_REALMAIN_MIN
         if (opts.cacheSensitiveOptions.sorbetPackages) {
-            packager::VisibilityChecker::run(gs, workers, what);
+            packager::VisibilityChecker::run(gs, workers, what, recordFileReferences(gs, opts));
         }
 #endif
 

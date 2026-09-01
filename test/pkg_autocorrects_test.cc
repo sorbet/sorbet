@@ -141,7 +141,7 @@ vector<ast::ParsedFile> enterPackages(core::GlobalState &gs, vector<pair<string,
         parsedFiles = move(maybeResult.result());
     }
 
-    packager::VisibilityChecker::run(gs, *workers, parsedFiles);
+    packager::VisibilityChecker::run(gs, *workers, parsedFiles, /* recordReferences */ true);
 
     return parsedFiles;
 }

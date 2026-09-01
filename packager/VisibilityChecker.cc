@@ -554,6 +554,9 @@ class VisibilityCheckerPass final {
 public:
     const core::packages::PackageInfo &package;
     const FileType fileType;
+    // Whether to collect `referencedSymbols` for the caller to record (see `VisibilityChecker::run`). The pass needs
+    // `referencedPackages` for its own errors either way.
+    const bool recordReferences;
     UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo> referencedPackages;
     UnorderedSet<core::SymbolRef> referencedSymbols;
 
@@ -562,8 +565,8 @@ public:
     // ConstantLit was a definition.
     UnorderedSet<const void *> constantAssignmentDefinitions;
 
-    VisibilityCheckerPass(core::Context ctx, const core::packages::PackageInfo &package)
-        : package{package}, fileType{fileTypeFromCtx(ctx)} {}
+    VisibilityCheckerPass(core::Context ctx, const core::packages::PackageInfo &package, bool recordReferences)
+        : package{package}, fileType{fileTypeFromCtx(ctx)}, recordReferences{recordReferences} {}
 
     bool isAnyTestFile() const {
         return fileType != FileType::ProdFile;
@@ -597,7 +600,9 @@ public:
         // find all references. For example, if the current symbol is A::B::C::D, then only A::B::C::D will be added to
         // symbolsReferenced, and not A, A::B, A::B::C.
         // TODO(neil): we should also track A, A::B, A::B::C, so that we can use this for find all references too.
-        referencedSymbols.insert(litSymbol);
+        if (recordReferences) {
+            referencedSymbols.insert(litSymbol);
+        }
 
         auto loc = litSymbol.loc(ctx);
 
@@ -890,7 +895,8 @@ public:
         }
     }
 
-    static void run(core::GlobalState &nonConstGs, WorkerPool &workers, absl::Span<const ast::ParsedFile> filesSpan) {
+    static void run(core::GlobalState &nonConstGs, WorkerPool &workers, absl::Span<const ast::ParsedFile> filesSpan,
+                    bool recordReferences) {
         const core::GlobalState &gs = nonConstGs;
         core::packages::PackageDB &nonConstPackageDB = nonConstGs.packageDB();
         struct ThreadResult {
@@ -908,7 +914,7 @@ public:
         // N.B.: `workers.size()` can be `0` when threads are disabled, which would result in undefined behavior for
         // `BlockingCounter`.
         absl::BlockingCounter barrier(std::max(workers.size(), 1));
-        workers.multiplexJob("VisibilityChecker", [taskq, &filesSpan, &gs, resultq, &barrier]() {
+        workers.multiplexJob("VisibilityChecker", [taskq, &filesSpan, &gs, resultq, &barrier, recordReferences]() {
             size_t idx;
             for (auto result = taskq->try_pop(idx); !result.done(); result = taskq->try_pop(idx)) {
                 if (!result.gotItem()) {
@@ -925,7 +931,7 @@ public:
                     continue;
                 }
                 core::Context ctx{gs, core::Symbols::root(), f.file};
-                VisibilityCheckerPass pass{ctx, gs.packageDB().getPackageInfo(pkgName)};
+                VisibilityCheckerPass pass{ctx, gs.packageDB().getPackageInfo(pkgName), recordReferences};
                 ast::ConstTreeWalk::apply(ctx, pass, f.tree);
                 resultq->push(
                     ThreadResult{f.file, std::move(pass.referencedPackages), std::move(pass.referencedSymbols)}, 1);
@@ -938,6 +944,11 @@ public:
              !result.done();
              result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
             if (result.gotItem() && threadResult.has_value()) {
+                // Nothing but recording is left to do with a result, but the queue still has to be drained.
+                if (!recordReferences) {
+                    continue;
+                }
+
                 auto &file = threadResult->file;
                 auto pkgName = gs.packageDB().getPackageNameForFile(file);
                 if (!pkgName.exists()) {
@@ -961,7 +972,8 @@ public:
 };
 } // namespace
 
-void VisibilityChecker::run(core::GlobalState &gs, WorkerPool &workers, absl::Span<const ast::ParsedFile> files) {
+void VisibilityChecker::run(core::GlobalState &gs, WorkerPool &workers, absl::Span<const ast::ParsedFile> files,
+                            bool recordReferences) {
     Timer timeit(gs.tracer(), "visibility_checker.run");
 
     {
@@ -974,7 +986,7 @@ void VisibilityChecker::run(core::GlobalState &gs, WorkerPool &workers, absl::Sp
         Parallel::iterate(workers, "propagateVisibility", files,
                           [&gs](const ast::ParsedFile &f) { PropagateVisibility::run(gs, f); });
     }
-    VisibilityCheckerPass::run(gs, workers, files);
+    VisibilityCheckerPass::run(gs, workers, files, recordReferences);
 }
 
 } // namespace sorbet::packager
