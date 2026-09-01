@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -euo pipefail
 [ "$DEBUG" = "" ] || set -x;
 
 usage() {

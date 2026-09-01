@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 dot=$(mktemp)
 svg=$(mktemp).svg
