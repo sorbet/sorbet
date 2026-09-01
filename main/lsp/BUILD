@@ -30,7 +30,6 @@ cc_library(
         "lsp_messages_gen_helpers.h",
         "watchman/WatchmanProcess.h",
         "watchman/WatchmanShutdown.h",
-        "watchman/WatchmanSubscription.h",
     ],
     hdrs = [
         "ConvertToSingletonClassMethod.h",
@@ -277,22 +276,5 @@ cc_test(
         "lsp",
         "@doctest//doctest",
         "@doctest//doctest:main",
-    ],
-)
-
-cc_test(
-    name = "watchman_subscription_test",
-    size = "small",
-    srcs = ["test/watchman_subscription_test.cc"],
-    linkstatic = select({
-        "//tools/config:linkshared": 0,
-        "//conditions:default": 1,
-    }),
-    visibility = ["//tools:__pkg__"],
-    deps = [
-        "lsp",
-        "@doctest//doctest",
-        "@doctest//doctest:main",
-        "@rapidjson",
     ],
 )

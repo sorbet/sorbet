@@ -78,7 +78,6 @@ compilation_database(
         "//main/lsp:lsp_test",
         "//main/lsp:undo_state_test",
         "//main/lsp:watchman_shutdown_test",
-        "//main/lsp:watchman_subscription_test",
         "//main/minimize:minimize",
         "//main/options:options",
         "//main/options:options_test",
