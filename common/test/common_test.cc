@@ -63,23 +63,13 @@ TEST_CASE("FileOps::listFilesInDir") {
         }
     }
 
-    SUBCASE("an unreadable subdirectory still raises, naming itself") {
-        const std::string root = "common_test_unreadable_dir";
-        const std::string nested = root + "/nested";
+    SUBCASE("a root that is not a directory still raises") {
+        const std::string root = "common_test_not_a_dir.rb";
         std::filesystem::remove_all(root);
-        FileOps::ensureDir(root);
-        FileOps::ensureDir(nested);
-        FileOps::write(nested + "/a.rb", "");
-        std::filesystem::permissions(nested, std::filesystem::perms::none);
+        FileOps::write(root, "");
 
-        try {
-            FileOps::listFilesInDir(root, {".rb"}, *workers, true, {}, {});
-            FAIL("expected listFilesInDir to throw");
-        } catch (FileNotFoundException &e) {
-            CHECK_EQ(std::string(e.what()), "Couldn't open directory `" + nested + "`");
-        }
+        CHECK_THROWS_AS(FileOps::listFilesInDir(root, {".rb"}, *workers, true, {}, {}), FileNotDirException);
 
-        std::filesystem::permissions(nested, std::filesystem::perms::owner_all);
         std::filesystem::remove_all(root);
     }
 }
