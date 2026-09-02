@@ -1608,7 +1608,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "ErrorsRemainAfterSlowPathRestart") {
 
         // We should see a starting and ending slow path message, with errors between. The error messages between are
         // the error on `Root::Foo::A` and the fast-path error from `Root::A`.
-        CHECK_EQ(resps.size(), 4);
+        CHECK_EQ(resps.size(), 3);
         {
             auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(resps.front()->asNotification().params);
             CHECK_EQ(params->typecheckingPath, TypecheckingPath::Slow);
@@ -1627,7 +1627,13 @@ TEST_CASE_FIXTURE(ProtocolTest, "ErrorsRemainAfterSlowPathRestart") {
 
         // As we will skip typechecking `Root` when only `Root::A` changed, we will only see the error that was
         // introduced in the slow path edit to foo/a.rb.
-        assertErrorDiagnostics(move(resps), {{files[3].first, 7, "Method `+` does not exist"}});
+        assertErrorDiagnostics(move(resps), {
+                                                {files[1].first, 4, "Expected `Integer`"},
+                                                {files[3].first, 7, "Method `+` does not exist"},
+                                            });
+        // We would still expect the client to show the errors from `a.rb`, but we assert that they were not generated
+        // by this slow path.
+        assertStale({files[1].first});
     }
 }
 
@@ -1818,6 +1824,8 @@ TEST_CASE_FIXTURE(ProtocolTest, "EarlyErrorsForceInfer") {
                                {files[1].first, 4, "Expected `Integer`"},
                                {files[3].first, 7, "Method `+` does not exist"},
                            });
+    // Fast path edit that doesn't affect foo/a.rb
+    assertStale({files[3].first});
 
     // Make a slow path edit to Root::Foo::A, and note that we only report infer errors on foo/a.rb now.
     assertErrorDiagnostics(send(*changeFile(files[3].first,
@@ -1834,8 +1842,12 @@ TEST_CASE_FIXTURE(ProtocolTest, "EarlyErrorsForceInfer") {
                                             "end\n",
                                             5)),
                            {
+                               {files[1].first, 4, "Expected `Integer`"},
                                {files[3].first, 7, "Method `+` does not exist"},
                            });
+
+    // We still see the same messages, but we know the ones in `a.rb` are stale.
+    assertStale({files[1].first});
 }
 
 } // namespace sorbet::test::lsp
