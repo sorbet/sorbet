@@ -1567,12 +1567,13 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> &&what, cons
                                         gs.tracer().error("Exception typing file: {} (backtrace is above)",
                                                           file.data(gs).path());
                                     }
+
+                                    // Stream out errors for this file, as it has made it through the whole pipeline.
+                                    outputq->push(file, processedByThread);
+                                    processedByThread = 0;
                                 } else if (intentionallyLeakASTs) {
                                     intentionallyLeakMemory(job.tree.release());
                                 }
-                                // Stream out errors
-                                outputq->push(file, processedByThread);
-                                processedByThread = 0;
                             }
                         }
                     }
