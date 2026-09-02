@@ -534,13 +534,13 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       e = assert_raises(ArgumentError) do
         a.with(non_bar: 10)
       end
-      assert_equal("Unexpected arguments: input(#{{non_bar: 10}}), unexpected(#{{'non_bar' => 10}})", e.to_s) # rubocop:disable Lint/LiteralInInterpolation
+      assert_equal("Unexpected arguments: Opus::Types::Test::Props::SerializableTest::WithModel1 does not have prop `non_bar`", e.to_s)
 
       a = WithModel1.from_hash({'foo' => 'foo', 'foo1' => 'foo1'})
       e = assert_raises(ArgumentError) do
         a.with(non_bar: 10)
       end
-      assert_equal("Unexpected arguments: input(#{{non_bar: 10}}), unexpected(#{{'non_bar' => 10}})", e.to_s) # rubocop:disable Lint/LiteralInInterpolation
+      assert_equal("Unexpected arguments: Opus::Types::Test::Props::SerializableTest::WithModel1 does not have prop `non_bar`", e.to_s)
     end
 
     it 'with overwrite fields' do
@@ -555,7 +555,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
 
     it 'with nested fields' do
       a = WithModel2.new(f1: 'foo')
-      b = a.with(f2: {foo: 'foo', bar: 10})
+      b = a.with(f2: WithModel1.new(foo: 'foo', bar: 10))
 
       assert_equal('foo', a.f1)
       assert_nil(a.f2)
