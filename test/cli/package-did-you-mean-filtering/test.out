@@ -1,0 +1,18 @@
+root.rb:4: Unable to resolve constant `SomePkg` https://srb.help/5002
+     4 |  SomePkg
+          ^^^^^^^
+  Did you mean `Project::SomePkg1`? Use `-a` to autocorrect
+    root.rb:4: Replace with `Project::SomePkg1`
+     4 |  SomePkg
+          ^^^^^^^
+    some_pkg1/helper.rb:3: `Project::SomePkg1` defined here
+     3 |class Project::SomePkg1::Helper; end
+              ^^^^^^^^^^^^^^^^^
+  Did you mean `Project::SomePkg2`? Use `-a` to autocorrect
+    root.rb:4: Replace with `Project::SomePkg2`
+     4 |  SomePkg
+          ^^^^^^^
+    some_pkg2/helper.rb:3: `Project::SomePkg2` defined here
+     3 |class Project::SomePkg2::Helper; end
+              ^^^^^^^^^^^^^^^^^
+Errors: 1
