@@ -943,7 +943,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                             possibleSymbol.asClassOrModuleRef().data(gs)->typeArity(gs) == 0) {
                             e.addErrorNote("Ruby uses `.new` to invoke a class's constructor");
                             if (possibleSymbol.asClassOrModuleRef().data(gs)->owner == constantScope) {
-                            e.replaceWith("Insert `.new`", args.funLoc().copyEndWithZeroLength(), ".new");
+                                e.replaceWith("Insert `.new`", args.funLoc().copyEndWithZeroLength(), ".new");
                             } else {
                                 // Sorbet doesn't resolve constants through inheritance with explicit scopes.
                                 // If we relied on transitivity to find the constant, there's a good chance that
