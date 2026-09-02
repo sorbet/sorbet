@@ -527,7 +527,7 @@ private:
                     suggestionCount++;
 
                     auto suggested =
-                        suggestScope.asClassOrModuleRef().data(ctx)->findMemberFuzzyMatch(ctx, original.cnst);
+                        suggestScope.asClassOrModuleRef().data(ctx)->findConstantFuzzyMatch(ctx, original.cnst);
 
                     if (isExport) {
                         // If the resolution error is for an export, suggestions must be restricted to within the

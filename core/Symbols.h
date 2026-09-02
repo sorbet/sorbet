@@ -561,7 +561,7 @@ public:
     MethodRef findParentMethodTransitive(const GlobalState &gs, NameRef name) const;
     MethodRef findConcreteMethodTransitive(const GlobalState &gs, NameRef name) const;
 
-    /* transitively finds a member with the most similar name */
+    /* transitively finds methods or constants with the most similar name */
 
     struct FuzzySearchResult {
         SymbolRef symbol;
@@ -569,7 +569,9 @@ public:
         int distance;
     };
 
-    std::vector<FuzzySearchResult> findMemberFuzzyMatch(const GlobalState &gs, NameRef name, int betterThan = -1) const;
+    std::vector<FuzzySearchResult> findMethodFuzzyMatch(const GlobalState &gs, NameRef name, int betterThan = -1) const;
+    std::vector<FuzzySearchResult> findConstantFuzzyMatch(const GlobalState &gs, NameRef name,
+                                                          int betterThan = -1) const;
 
     // Returns true if the symbol or any of its children are not in the symbol table. False otherwise.
     bool isPrintable(const GlobalState &gs) const;
@@ -723,10 +725,8 @@ private:
     friend class serialize::SerializerImpl;
     friend class GlobalState;
 
-    FuzzySearchResult findMemberFuzzyMatchUTF8(const GlobalState &gs, NameRef name, Levenstein &levenstein,
+    FuzzySearchResult findMethodFuzzyMatchUTF8(const GlobalState &gs, NameRef name, Levenstein &levenstein,
                                                int betterThan = -1) const;
-    std::vector<FuzzySearchResult> findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
-                                                                int betterThan = -1) const;
 
     /*
      * mixins and superclasses: `superClass` is *not* included in the
