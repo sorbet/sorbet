@@ -1,4 +1,5 @@
 #include "rewriter/rewriter.h"
+#include "ast/Helpers.h"
 #include "ast/treemap/treemap.h"
 #include "ast/verifier/verifier.h"
 #include "common/typecase.h"
@@ -38,7 +39,40 @@ namespace sorbet::rewriter {
 class Rewriterer {
     friend class Rewriter;
 
+    int blockDepth = 0;
+
 public:
+    void preTransformBlock(core::MutableContext ctx, ast::ExpressionPtr &tree) {
+        blockDepth++;
+    }
+
+    void postTransformAssign(core::MutableContext ctx, ast::ExpressionPtr &tree) {
+        if (blockDepth == 0) {
+            return;
+        }
+
+        auto assign = ast::cast_tree<ast::Assign>(tree);
+        auto nodes = Struct::run(ctx, assign);
+        if (nodes.empty()) {
+            return;
+        }
+
+        auto loc = assign->loc;
+        auto expr = std::move(nodes.back());
+        nodes.pop_back();
+
+        ast::InsSeq::STATS_store stats;
+        stats.reserve(nodes.size());
+        for (auto &node : nodes) {
+            stats.emplace_back(std::move(node));
+        }
+        tree = ast::MK::InsSeq(loc, std::move(stats), std::move(expr));
+    }
+
+    void postTransformBlock(core::MutableContext ctx, ast::ExpressionPtr &tree) {
+        blockDepth--;
+    }
+
     void postTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         auto classDef = ast::cast_tree<ast::ClassDef>(tree);
 
