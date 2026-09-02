@@ -47,13 +47,9 @@ class LSPIndexer final {
     void computeFileHashes(const std::vector<std::shared_ptr<core::File>> &files, WorkerPool &workers) const;
 
     /**
-     * Expands an edit whose `resyncAllFiles` is set to name every file that no longer matches disk.
-     *
-     * Sorbet reads a file from disk only when something tells it to, and the slow path re-indexes out of the file
-     * table rather than off disk, so a change that Watchman never delivered would otherwise persist in the file
-     * table for the life of the process. This walks both the file table and the workspace root, because a file that
-     * was deleted while Watchman was not looking only appears in the former and one that was created only appears
-     * in the latter.
+     * Expands an edit whose `resyncAllFiles` is set to name every file that no longer matches disk. Walks both the file
+     * table and the workspace root, because a file deleted while Watchman was not looking appears only in the former
+     * and one that was created appears only in the latter.
      */
     void resyncAllFilesFromDisk(SorbetWorkspaceEditParams &edit, WorkerPool &workers) const;
 

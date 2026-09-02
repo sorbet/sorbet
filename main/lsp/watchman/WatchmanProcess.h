@@ -41,18 +41,17 @@ private:
     const std::shared_ptr<const LSPConfiguration> config;
     std::string watchmanNamespace;
 
-    // Notifications that arrived before the LSP loop was initialized. Held rather than blocked on so that this thread
-    // keeps draining the watchman CLI; see `enqueueNotification`. Touched only by the watchman thread.
+    // Notifications that arrived before the LSP loop was initialized. See `enqueueNotification`.
     std::vector<std::unique_ptr<LSPMessage>> heldUntilInitialized;
 
-    // The most recent clock watchman has told us this subscription is caught up to. Set only from responses that
-    // establish or advance that view — the `subscribe` ack and the file change responses — and used as the `since` of
-    // the next subscription. Touched only by the watchman thread, so it needs no lock.
+    // Where a replacement subscription resumes from. See `rememberClock`.
     std::optional<std::string> lastClock;
 
-    // How one watchman CLI session — one child process, one subscription — came to an end.
+    // The two fields below are touched only by the watchman thread, so they need no lock.
+
+    // How one watchman CLI session, meaning one child process and one subscription, came to an end.
     enum class SessionOutcome {
-        // Sorbet is shutting down, or has decided to stop watching. Do not spawn watchman again.
+        // Sorbet is shutting down. Do not spawn watchman again.
         Stopped,
         // Lost the connection to the CLI child. Recoverable by subscribing again.
         Disconnected,
@@ -60,8 +59,7 @@ private:
 
     struct SessionResult {
         SessionOutcome outcome;
-        // Whether watchman acknowledged this session's subscription. Together with how long the session lasted, this is
-        // what WatchmanRestartPolicy reads as evidence that watchman is working.
+        // Whether watchman acknowledged this session's subscription; see WatchmanRestartPolicy.
         bool subscribed;
     };
 
@@ -71,36 +69,23 @@ private:
      */
     void start();
 
-    /**
-     * Resolves the path to hand watchman as the subscription root, and decides whether namespacing applies to this
-     * workspace. Clears `watchmanNamespace` when it does not.
-     */
+    // Clears `watchmanNamespace` when it does not apply to this workspace.
     std::string resolveWatchmanRoot();
 
-    /**
-     * Spawns one watchman CLI child, subscribes, and pumps its responses into the message queue until either Sorbet
-     * stops or the child does. Reaps the child before returning.
-     */
+    // Spawns one watchman CLI child, subscribes, and pumps its responses into the message queue until either Sorbet
+    // stops or the child does. Reaps the child before returning.
     SessionResult runSubscription(std::string_view root, std::string_view subscriptionName);
 
-    /**
-     * Asks watchman, over a connection of its own, for the changes that landed since `sinceClock` — the window a
-     * replacement subscription does not cover. Best effort: logs and returns if watchman cannot answer.
-     */
+    // Asks watchman for the changes since `sinceClock`, the window a replacement subscription does not cover. Best
+    // effort: logs and returns if watchman cannot answer.
     void catchUpSince(std::string_view root, std::string_view sinceClock);
 
-    /**
-     * Remembers the clock a watchman response was stamped with, if it carries one, as the point a replacement
-     * subscription resumes from. Only responses that mean "you have been told everything up to here" — the `subscribe`
-     * ack and the file change responses — carry a clock that is safe to resume from; a state-enter/state-leave clock
-     * does not, since watchman can still owe us file changes from before it.
-     */
+    // Records the clock a response was stamped with, if it carries one. Only the `subscribe` ack and file change
+    // responses mean "you have been told everything up to here"; a state-enter or state-leave clock does not, because
+    // watchman can still owe us file changes from before it.
     void rememberClock(std::optional<std::string> clock);
 
-    /**
-     * Sleeps for `duration`, in short slices, returning early once stopped so that shutdown does not have to wait out a
-     * restart delay.
-     */
+    // Returns early once stopped, so that shutdown does not wait out a restart delay.
     void sleepUnlessStopped(std::chrono::milliseconds duration);
 
     void exitWithCode(int code, const std::optional<std::string> &);

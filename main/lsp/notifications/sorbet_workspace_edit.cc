@@ -20,8 +20,7 @@ SorbetWorkspaceEditTask::SorbetWorkspaceEditTask(const LSPConfiguration &config,
 SorbetWorkspaceEditTask::~SorbetWorkspaceEditTask() = default;
 
 bool SorbetWorkspaceEditTask::isNoop() const {
-    // A resync only looks like a no-op edit: `updates` is empty because Watchman did not tell us which files
-    // changed, and the indexer is what fills it in from disk.
+    // A resync only looks like a no-op: Watchman did not say which files changed, so the indexer fills `updates` in.
     return params->updates.empty() && !params->resyncAllFiles;
 }
 
@@ -72,8 +71,8 @@ void SorbetWorkspaceEditTask::index(LSPIndexer &indexer) {
         return !indexer.wouldUpdateFileTable(*file);
     });
 
-    // A resync also has to be indexed in `runSpecial`, because expanding it means reading the whole workspace off
-    // disk, which wants a worker pool and must not happen while this thread holds the task queue's lock.
+    // A resync is also indexed in `runSpecial`: expanding it reads the whole workspace, which wants a worker pool and
+    // must not happen while this thread holds the task queue's lock.
     if (!params->resyncAllFiles && params->updates.size() <= config.opts.lspMaxFilesOnFastPath) {
         updates = indexer.commitEdit(*params);
     } else {
@@ -165,8 +164,8 @@ TypecheckingPath SorbetWorkspaceEditTask::getTypecheckingPath(const LSPIndexer &
         return updates->typecheckingPath;
     }
     if (params->resyncAllFiles) {
-        // Which files this edit really contains is not known until the indexer has read the workspace off disk, so
-        // there is nothing to decide from yet. It takes the slow path either way; see LSPFileUpdates::resyncedAllFiles.
+        // What this edit contains is unknown until the indexer has read the workspace, and it takes the slow path
+        // either way; see LSPFileUpdates::resyncedAllFiles.
         return TypecheckingPath::Slow;
     }
     if (!cachedFastPathDecisionValid) {

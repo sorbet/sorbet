@@ -50,14 +50,9 @@ public:
     // fast path.
     bool hasNewFiles = false;
 
-    // Indicates that this update came from resynchronizing the file table with disk, after Watchman told us that it
-    // could not compute a delta. Such an update has to take the slow path: it is indexed on the typechecker thread
-    // (see the `resyncAllFiles` branch in SorbetWorkspaceEditTask::index) and by then the epoch has already been
-    // opened for a slow path, so running a fast path instead would leave the epoch uncommitted.
-    //
-    // That holds even when nothing turned out to have drifted, so a resync always costs one slow path. Watchman
-    // reports a fresh instance rarely enough for that to be the right trade against the alternative, which is
-    // teaching `SorbetWorkspaceEditTask::runSpecial` to abandon an edit after it has already been scheduled.
+    // Indicates that this update came from resynchronizing the file table with disk. Such an update always takes the
+    // slow path, even when nothing had drifted: it is indexed on the typechecker thread, by which point the epoch has
+    // been opened for a slow path, and running a fast path would leave that epoch uncommitted.
     bool resyncedAllFiles = false;
 
     // If true, this update caused a slow path to be canceled.

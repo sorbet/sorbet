@@ -54,15 +54,6 @@ TEST_CASE("buildSubscribeCommand names the root and the subscription") {
     CHECK(string(d[3]["fields"][0].GetString()) == "name");
 }
 
-// Sorbet reads the tree itself at startup, so a fresh instance listing every file would tell it nothing, and asking a
-// cold watchman daemon for one is expensive.
-TEST_CASE("buildSubscribeCommand suppresses the fresh instance listing") {
-    auto d = parseSubscribe(buildSubscribeCommand("/pay/src", "ruby-typer-1234", EXTENSIONS, ""));
-
-    REQUIRE(d[3].HasMember("empty_on_fresh_instance"));
-    CHECK(d[3]["empty_on_fresh_instance"].GetBool());
-}
-
 TEST_CASE("buildSubscribeCommand matches every watched extension") {
     auto d = parseSubscribe(buildSubscribeCommand("/pay/src", "ruby-typer-1234", EXTENSIONS, ""));
 
@@ -93,19 +84,16 @@ TEST_CASE("buildCatchUpQueryCommand asks for the changes since the given clock")
     CHECK(string(d[2]["since"].GetString()) == CLOCK);
 }
 
-// Both commands suppress it, because `is_fresh_instance` means the same thing on either: there is no delta to be had,
-// and the recovery is for Sorbet to re-read the workspace itself rather than to work through a list watchman attaches.
-// That list could not do the job anyway, since what exists now cannot mention a file deleted while Sorbet was not
-// listening. See LSPIndexer::resyncAllFilesFromDisk.
-TEST_CASE("buildCatchUpQueryCommand suppresses the fresh instance listing") {
-    auto d = parseQuery(buildCatchUpQueryCommand("/pay/src", EXTENSIONS, "", CLOCK));
+TEST_CASE("both commands suppress the fresh instance listing") {
+    auto subscribe = parseSubscribe(buildSubscribeCommand("/pay/src", "ruby-typer-1234", EXTENSIONS, ""));
+    auto query = parseQuery(buildCatchUpQueryCommand("/pay/src", EXTENSIONS, "", CLOCK));
 
-    REQUIRE(d[2].HasMember("empty_on_fresh_instance"));
-    CHECK(d[2]["empty_on_fresh_instance"].GetBool());
+    CHECK(subscribe[3]["empty_on_fresh_instance"].GetBool());
+    CHECK(query[2]["empty_on_fresh_instance"].GetBool());
 }
 
 // The query stands in for the subscription over the window it cannot cover, so it has to select the same files. If the
-// two drifted apart, the gap would be invisible: Sorbet would simply never hear about whatever the query left out.
+// two drifted apart, Sorbet would simply never hear about whatever the query left out.
 TEST_CASE("buildCatchUpQueryCommand selects the same files as the subscription") {
     auto subscribe = parseSubscribe(buildSubscribeCommand("/pay/src", "ruby-typer-1234", EXTENSIONS, "pay-server"));
     auto query = parseQuery(buildCatchUpQueryCommand("/pay/src", EXTENSIONS, "pay-server", CLOCK));

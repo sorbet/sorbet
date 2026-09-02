@@ -12,9 +12,10 @@ namespace {
 
 using Writer = rapidjson::Writer<rapidjson::StringBuffer>;
 
-// The files Sorbet wants to hear about, and the field it wants them named by. Shared by the subscription and by the
-// catch-up query that covers for it, so that the two cannot drift apart.
-void writeExpressionAndFields(Writer &w, const vector<string> &extensions, string_view watchmanNamespace) {
+// Everything the subscription and the catch-up query that covers for it have in common, so that the two cannot drift
+// apart: which files Sorbet wants to hear about, what to call them, and that a fresh instance must not come with a
+// listing of the whole tree.
+void writeSharedQueryBody(Writer &w, const vector<string> &extensions, string_view watchmanNamespace) {
     w.String("expression");
     {
         w.StartArray();
@@ -79,6 +80,13 @@ void writeExpressionAndFields(Writer &w, const vector<string> &extensions, strin
         w.String("name");
         w.EndArray();
     }
+
+    // Sorbet reads the tree itself at startup, and recovers from a fresh instance by re-reading it again, so the
+    // listing of every matching file that watchman would otherwise attach is work nobody consumes. It could not do the
+    // whole job anyway: what exists now cannot name a file deleted while Sorbet was not listening. See
+    // LSPIndexer::resyncAllFilesFromDisk.
+    w.String("empty_on_fresh_instance");
+    w.Bool(true);
 }
 
 } // namespace
@@ -96,12 +104,7 @@ string buildSubscribeCommand(string_view root, string_view subscriptionName, con
         {
             w.StartObject();
 
-            writeExpressionAndFields(w, extensions, watchmanNamespace);
-
-            // Note 2: `empty_on_fresh_instance` prevents Watchman from sending entire contents of folder if this
-            // subscription starts the daemon / causes the daemon to watch this folder for the first time.
-            w.String("empty_on_fresh_instance");
-            w.Bool(true);
+            writeSharedQueryBody(w, extensions, watchmanNamespace);
 
             w.EndObject();
         }
@@ -124,20 +127,10 @@ string buildCatchUpQueryCommand(string_view root, const vector<string> &extensio
         {
             w.StartObject();
 
-            writeExpressionAndFields(w, extensions, watchmanNamespace);
+            writeSharedQueryBody(w, extensions, watchmanNamespace);
 
             w.String("since");
             w.String(sinceClock.data(), sinceClock.size());
-
-            // Same as the subscription, and for the same reason. If watchman cannot honor this clock -- it restarted,
-            // or the watch was recrawled past it -- there is no delta to be had, and it says so with
-            // `is_fresh_instance`. Sorbet recovers from that flag by re-reading the workspace itself, so the whole-tree
-            // file list watchman would otherwise attach is work nobody consumes: a multi-megabyte response to parse,
-            // then a serial read of every path in it on the preprocessor thread. Worse, it could not do the whole job
-            // anyway, because a list of what exists now cannot mention a file that was deleted while Sorbet was not
-            // listening. See LSPIndexer::resyncAllFilesFromDisk, which walks the file table as well as the workspace.
-            w.String("empty_on_fresh_instance");
-            w.Bool(true);
 
             w.EndObject();
         }

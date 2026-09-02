@@ -13,8 +13,7 @@ constexpr chrono::milliseconds INSTANT{0};
 constexpr bool SUBSCRIBED = true;
 constexpr bool NEVER_SUBSCRIBED = false;
 
-// The case this whole class exists for: a subscription that ran for minutes and then lost its connection is evidence
-// that watchman works, so it is worth resubscribing right now rather than after a delay.
+// The case this class exists for: a subscription that worked and then lost its connection resubscribes at once.
 TEST_CASE("delayBeforeRestart retries a long-lived subscribed session immediately") {
     WatchmanRestartPolicy policy;
 
@@ -22,7 +21,7 @@ TEST_CASE("delayBeforeRestart retries a long-lived subscribed session immediatel
     CHECK(policy.unhealthySessionCount() == 0);
 }
 
-// A session exactly at the threshold counts as healthy: the boundary belongs to the side that keeps Sorbet alive.
+// The boundary belongs to the side that keeps Sorbet alive.
 TEST_CASE("delayBeforeRestart treats a session at the threshold as healthy") {
     WatchmanRestartPolicy policy;
 
@@ -30,8 +29,7 @@ TEST_CASE("delayBeforeRestart treats a session at the threshold as healthy") {
     CHECK(policy.delayBeforeRestart(HEALTHY - chrono::milliseconds{1}, SUBSCRIBED) == chrono::milliseconds{100});
 }
 
-// Length alone is not health. A session that sat there without watchman ever accepting the subscription was not
-// watching anything, however long it lasted, so it must not refill the budget.
+// Length alone is not health: a session that never subscribed was not watching anything, however long it lasted.
 TEST_CASE("delayBeforeRestart does not trust a long session that was never subscribed") {
     WatchmanRestartPolicy policy;
 
@@ -39,8 +37,7 @@ TEST_CASE("delayBeforeRestart does not trust a long session that was never subsc
     CHECK(policy.unhealthySessionCount() == 1);
 }
 
-// And acknowledgement alone is not health either. A subscription watchman accepts and then drops immediately, over and
-// over, has to back off rather than spin.
+// Nor is the acknowledgement alone: one watchman accepts and drops immediately has to back off rather than spin.
 TEST_CASE("delayBeforeRestart does not trust a subscribed session that died immediately") {
     WatchmanRestartPolicy policy;
 
@@ -48,8 +45,7 @@ TEST_CASE("delayBeforeRestart does not trust a subscribed session that died imme
     CHECK(policy.delayBeforeRestart(INSTANT, SUBSCRIBED) == chrono::milliseconds{200});
 }
 
-// Sessions that die on arrival are the crash-loop case. Back off, but only far enough to tell "broken" from "unlucky",
-// then stop so that Sorbet exits with an error the editor can show instead of respawning watchman forever.
+// The crash-loop case: back off only far enough to tell "broken" from "unlucky", then let Sorbet exit with an error.
 TEST_CASE("delayBeforeRestart backs off over consecutive unhealthy sessions, then gives up") {
     WatchmanRestartPolicy policy;
 
@@ -62,8 +58,7 @@ TEST_CASE("delayBeforeRestart backs off over consecutive unhealthy sessions, the
     CHECK(policy.unhealthySessionCount() == WatchmanRestartPolicy::MAX_CONSECUTIVE_UNHEALTHY_SESSIONS);
 }
 
-// Giving up is meant for a watchman that cannot hold a subscription at all, not for one that has had a bad minute over
-// the course of a long editor session. One session that lasts spends nothing from the budget and refills it.
+// Giving up is for a watchman that cannot hold a subscription at all, not one that had a bad minute hours ago.
 TEST_CASE("delayBeforeRestart forgives unhealthy sessions once one is healthy") {
     WatchmanRestartPolicy policy;
 

@@ -477,16 +477,9 @@ unique_ptr<SorbetWorkspaceEditParams>
 LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<WatchmanQueryResponse> queryResponse) const {
     auto edit = make_unique<SorbetWorkspaceEditParams>();
     edit->epoch = v;
-    // We subscribe with `empty_on_fresh_instance`, so a fresh instance arrives with no files in it: Watchman is
-    // telling us that it could not compute a delta (it was restarted, or the watch was re-established, so the
-    // clock we asked about is from a previous instance) and that we should resynchronize ourselves. Watchman only
-    // suppresses the file list, not the flag, so the changes we missed are unrecoverable from this response alone.
-    //
-    // Sorbet reads a file from disk only when something tells it to, and the slow path re-indexes out of the file
-    // table rather than off disk, so ignoring this would leave stale contents in the file table for the life of
-    // the process: every subsequent typecheck, fast or slow, would report errors for source that is no longer on
-    // disk. Note that the initial subscription result is not a fresh instance for these purposes, because
-    // `empty_on_fresh_instance` makes Watchman send nothing at all for it.
+    // A fresh instance means Watchman could not compute a delta, so it may have dropped changes, and the response
+    // names no files because we subscribe with `empty_on_fresh_instance`. Sorbet reads a file from disk only when
+    // something tells it to, so the only way back to a correct file table is to re-read it.
     edit->resyncAllFiles = queryResponse->isFreshInstance;
     for (auto &file : queryResponse->files) {
         // Don't append rootPath if it is empty.

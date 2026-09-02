@@ -125,9 +125,8 @@ TEST_CASE_FIXTURE(ProtocolTest, "MergesMultipleWatchmanUpdates") {
     CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath_canceled"), 0);
 }
 
-// A fresh instance is Watchman saying that it could not compute a delta, so it may have dropped changes. Sorbet only
-// reads a file from disk when something tells it to, and its slow path re-indexes out of the file table rather than
-// off disk, so a dropped change would otherwise sit in the file table for the life of the process.
+// A fresh instance means Watchman may have dropped changes. Sorbet reads a file only when told to, and its slow path
+// re-indexes out of the file table, so a dropped change would sit there for the life of the process.
 TEST_CASE_FIXTURE(ProtocolTest, "ResyncsFilesChangedWhileWatchmanWasNotLooking") {
     assertErrorDiagnostics(initializeLSP(), {});
 
@@ -137,8 +136,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "ResyncsFilesChangedWhileWatchmanWasNotLooking")
     // Break the file without telling Sorbet, standing in for a change Watchman never delivered.
     writeFilesToFS({{"foo.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n"}});
 
-    // Clear counters so we can also check that the resync took the slow path. It has to: the edit is indexed on the
-    // typechecker thread, by which point the epoch has already been opened for a slow path.
+    // A resync has to take the slow path; see LSPFileUpdates::resyncedAllFiles.
     getCounters();
     assertErrorDiagnostics(send(*watchmanFreshInstance()), {{"foo.rb", 3, "Expected `Integer`"}});
 
@@ -148,8 +146,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "ResyncsFilesChangedWhileWatchmanWasNotLooking")
     CHECK_EQ(counters.getCategoryCounter("lsp.slow_path_reason", "resynced_all_files"), 1);
 }
 
-// A file created while Watchman was not looking is on disk but absent from the file table, so only walking the
-// workspace can turn it up.
+// A file created while Watchman was not looking is on disk but not in the file table, so only the walk turns it up.
 TEST_CASE_FIXTURE(ProtocolTest, "ResyncsFilesCreatedWhileWatchmanWasNotLooking") {
     assertErrorDiagnostics(initializeLSP(), {});
 
@@ -157,8 +154,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "ResyncsFilesCreatedWhileWatchmanWasNotLooking")
     assertErrorDiagnostics(send(*watchmanFreshInstance()), {{"foo.rb", 3, "Expected `Integer`"}});
 }
 
-// A file deleted while Watchman was not looking is the mirror image: it is in the file table but no longer on disk,
-// so only walking the file table can turn it up.
+// A deleted one is the mirror image: in the file table but not on disk, so only the file table turns it up.
 TEST_CASE_FIXTURE(ProtocolTest, "ResyncsFilesDeletedWhileWatchmanWasNotLooking") {
     assertErrorDiagnostics(initializeLSP(), {});
 
@@ -169,8 +165,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "ResyncsFilesDeletedWhileWatchmanWasNotLooking")
     assertErrorDiagnostics(send(*watchmanFreshInstance()), {});
 }
 
-// A file open in the editor belongs to the editor: its (possibly unsaved) contents supersede what is on disk, so a
-// resync must not read over them.
+// The editor's copy of an open file supersedes what is on disk, so a resync must not read over it.
 TEST_CASE_FIXTURE(ProtocolTest, "FreshInstanceLeavesFilesOpenInEditorAlone") {
     assertErrorDiagnostics(initializeLSP(), {});
 

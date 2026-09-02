@@ -19,8 +19,7 @@ class SorbetWorkspaceEditTask final : public LSPDangerousTypecheckerTask {
     // HACK: In the event that this edit is too large to index serially, stash the indexer here for use in `runSpecial`.
     LSPIndexer *indexer = nullptr;
 
-    // Whether this edit will neither update the file table nor need the typechecker, and so can be dropped after the
-    // preprocess phase.
+    // Whether this edit can be dropped after the preprocess phase, updating nothing and needing no typecheck.
     bool isNoop() const;
 
 public:

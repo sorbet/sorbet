@@ -52,9 +52,8 @@ optional<string> clockOf(const rapidjson::Document &d) {
     return string(clock->value.GetString(), clock->value.GetStringLength());
 }
 
-// Deserializes one watchman file change response, with the namespace prefix stripped off its paths. Returns nullptr if
-// it could not be deserialized, having logged why. Shared by the subscription and by the catch-up query, which produce
-// the same shape of response.
+// Deserializes a file change response, stripping the namespace prefix off its paths. Returns nullptr if it could not
+// be deserialized, having logged why.
 unique_ptr<sorbet::realmain::lsp::WatchmanQueryResponse> parseQueryResponse(spdlog::logger &logger,
                                                                             const rapidjson::Document &d,
                                                                             const string &line,
@@ -79,9 +78,17 @@ unique_ptr<sorbet::realmain::lsp::WatchmanQueryResponse> parseQueryResponse(spdl
     return parsed;
 }
 
-// How long to wait for watchman to report the changes made while Sorbet had no subscription. Generous because the
-// answer can be the whole tree (if watchman cannot honor our clock) on a codebase where that is hundreds of thousands
-// of files, and because giving up here means Sorbet is stale until each of those files is touched again.
+// Reaps a watchman child on every exit path out of a scope, including an exception. Declare after the Popen so that it
+// only runs if construction succeeded.
+struct ShutdownGuard {
+    subprocess::Popen &p;
+    ~ShutdownGuard() noexcept {
+        shutdownWatchmanChild(p);
+    }
+};
+
+// Generous: giving up here leaves Sorbet stale on whatever changed while it had no subscription, until those files
+// change again.
 constexpr chrono::seconds CATCH_UP_TIMEOUT{120};
 
 } // namespace
@@ -92,9 +99,6 @@ void WatchmanProcess::start() {
         string subscriptionName = fmt::format("ruby-typer-{}", getpid());
         string root = resolveWatchmanRoot();
 
-        // Losing the watchman CLI used to end the Sorbet process, which on a large codebase means the editor spends
-        // minutes without a language server for something a resubscribe fixes in milliseconds. See
-        // WatchmanRestartPolicy for why an exited CLI is usually not a broken watchman, and for when we do give up.
         WatchmanRestartPolicy restartPolicy;
         while (!isStopped()) {
             auto startedAt = chrono::steady_clock::now();
@@ -119,9 +123,8 @@ void WatchmanProcess::start() {
                 break;
             }
 
-            // Worth saying out loud even though we recover from it: across a resubscribe the file changes come from a
-            // `since` query rather than from watchman pushing them to us, so this line is the first thing to look for
-            // if an edit around this time went unnoticed.
+            // At error level on purpose: this is the first line to look for if an edit around this time went
+            // unnoticed.
             logger->error("Lost the connection to Watchman after {}ms. Subscribing again in {}ms.", ranFor.count(),
                           delay->count());
             sleepUnlessStopped(*delay);
@@ -177,25 +180,16 @@ string WatchmanProcess::resolveWatchmanRoot() {
 }
 
 WatchmanProcess::SessionResult WatchmanProcess::runSubscription(string_view root, string_view subscriptionName) {
-    // Set once watchman acknowledges the subscription below; see SessionResult.
     bool subscribed = false;
 
-    // Where the last session got to, captured before this one can advance it. Empty for the first subscription of the
-    // process, in which case there is no window to catch up on: Sorbet is about to read the tree itself.
+    // Captured before this session can advance it. Empty for the first subscription of the process, where there is no
+    // window to catch up on: Sorbet is about to read the tree itself.
     const optional<string> resumeFrom = lastClock;
 
     auto p = subprocess::Popen({watchmanPath.c_str(), "-j", "-p", "--no-pretty"}, subprocess::output{subprocess::PIPE},
                                subprocess::input{subprocess::PIPE});
 
-    // Declared after `p` so it only runs if construction succeeded. Runs on every exit path
-    // out of this scope — normal return, break, or exception — so the watchman child is
-    // always reaped before we spawn a replacement for it or return.
-    struct ShutdownGuard {
-        subprocess::Popen &p;
-        ~ShutdownGuard() noexcept {
-            shutdownWatchmanChild(p);
-        }
-    } shutdownGuard{p};
+    ShutdownGuard shutdownGuard{p};
 
     logger->debug("Starting monitoring path {} with watchman for files with extensions {}. Subscription id: {}", root,
                   fmt::join(extensions, ","), subscriptionName);
@@ -205,26 +199,19 @@ WatchmanProcess::SessionResult WatchmanProcess::runSubscription(string_view root
     logger->debug(subscribeCommand);
 
     if (resumeFrom.has_value()) {
-        // This subscription only reports what changes from here on, so the changes that landed while Sorbet had none
-        // have to be asked for separately -- see buildCatchUpQueryCommand for why the subscribe's own `since` is not
-        // enough. Done before reading anything from the subscription, and deliberately not after waiting for its ack:
-        // overlapping the two costs a file re-read, where a gap between them costs Sorbet's view of whatever changed in
-        // it until somebody touches those files again.
+        // A subscription only reports what changes once watchman creates it, so the window before that has to be asked
+        // for separately. Overlapping the two costs a redundant file read; a gap between them costs Sorbet's view of
+        // whatever changed in it.
         catchUpSince(root, *resumeFrom);
     }
 
     auto file = p.output();
     auto fd = fileno(file);
 
-    // Holds the part of a response that arrived without its terminating newline. Per-session on purpose: a session that
-    // dies mid-response leaves a fragment of it here, and prepending half of a dead session's PDU to the first response
-    // of the next one would not parse.
+    // Per-session on purpose: prepending half of a dead session's response to the first of the next would not parse.
     string buffer;
 
     while (!isStopped()) {
-        // Initialization may have finished since the last response, in which case anything held during it is now safe
-        // to hand over. Doing it here rather than only on the next response means a quiet workspace does not sit on
-        // held notifications indefinitely.
         releaseHeldNotifications();
 
         errno = 0;
@@ -239,8 +226,7 @@ WatchmanProcess::SessionResult WatchmanProcess::runSubscription(string_view root
                 continue;
             }
 
-            // The CLI is gone: either it exited, or the daemon closed the socket under it. Neither means watchman is
-            // unusable, so leave it to the caller to decide whether to subscribe again.
+            // Either the CLI exited or the daemon closed the socket under it. Neither means watchman is unusable.
             return {SessionOutcome::Disconnected, subscribed};
         }
 
@@ -276,8 +262,8 @@ WatchmanProcess::SessionResult WatchmanProcess::runSubscription(string_view root
                 processStateLeave(move(stateLeave));
             });
         } else if (d.HasMember("subscribe")) {
-            // The ack for the command we just sent. Its clock is where this subscription begins, and so where a
-            // replacement for it has to resume from if the connection dies before any file changes arrive.
+            // The ack. Its clock is where a replacement subscription resumes from if this one dies before any file
+            // changes arrive.
             subscribed = true;
             rememberClock(clockOf(d));
         } else {
@@ -292,16 +278,11 @@ WatchmanProcess::SessionResult WatchmanProcess::runSubscription(string_view root
 void WatchmanProcess::catchUpSince(string_view root, string_view sinceClock) {
     string queryCommand = buildCatchUpQueryCommand(root, extensions, watchmanNamespace, sinceClock);
 
-    // A connection of its own: `-j` reads one command per process, so this cannot share the subscription's. Without
-    // `-p` it answers once and exits, which is all we want.
+    // A connection of its own: `-j` reads one command per process, so this cannot share the subscription's, and
+    // without `-p` it answers once and exits.
     auto p = subprocess::Popen({watchmanPath.c_str(), "-j", "--no-pretty"}, subprocess::output{subprocess::PIPE},
                                subprocess::input{subprocess::PIPE});
-    struct ShutdownGuard {
-        subprocess::Popen &p;
-        ~ShutdownGuard() noexcept {
-            shutdownWatchmanChild(p);
-        }
-    } shutdownGuard{p};
+    ShutdownGuard shutdownGuard{p};
 
     p.send(queryCommand.c_str(), queryCommand.size());
     logger->debug(queryCommand);
@@ -390,11 +371,9 @@ void WatchmanProcess::exitWithCode(int code, const optional<string> &msg) {
 void WatchmanProcess::enqueueNotification(unique_ptr<NotificationMessage> notification) {
     auto msg = make_unique<LSPMessage>(move(notification));
 
-    // Sorbet does not want these until the LSP loop is initialized, but waiting for that here would stop this thread
-    // draining the CLI's stdout, and watchman gives up on a client that has not accepted its output for 60 seconds
-    // (`kWriteTimeout`), mid-message. That is the single biggest reason a healthy watchman appears to die on us: the
-    // initial typecheck of a large codebase takes minutes, and every second of it is a second this thread was not
-    // reading. Hold them here instead and let the loop below keep reading.
+    // Sorbet cannot use these until the LSP loop is initialized, but waiting for that here would stop this thread
+    // draining the CLI, and watchman drops a client that has not accepted its output for 60 seconds (`kWriteTimeout`).
+    // The initial typecheck of a large codebase takes minutes, so hold them and keep reading instead.
     if (!initializedNotification.HasBeenNotified()) {
         heldUntilInitialized.push_back(move(msg));
         return;

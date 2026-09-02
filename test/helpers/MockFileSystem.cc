@@ -53,8 +53,7 @@ vector<string> MockFileSystem::listFilesInDir(string_view path, const UnorderedS
     }
 
     auto dir = makeAbsolute(rootPath, path);
-    // `writeFile` stores keys with no trailing slash, so a directory only prefixes its contents once one is added.
-    // Guard against doubling it up for a path that already ends in a slash.
+    // `writeFile` stores keys with no trailing slash, so one has to be added to make a directory a prefix.
     auto prefix = absl::EndsWith(dir, "/") ? dir : absl::StrCat(dir, "/");
 
     vector<string> result;
@@ -66,8 +65,7 @@ vector<string> MockFileSystem::listFilesInDir(string_view path, const UnorderedS
         result.emplace_back(filePath);
     }
 
-    // The real implementation walks the directory tree, so it does not hand back the arbitrary order that iterating
-    // a hash map would. Sort so that tests do not depend on it either.
+    // The real implementation walks a directory tree, so do not leak this hash map's arbitrary order to callers.
     fast_sort(result);
     return result;
 }

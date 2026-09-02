@@ -441,9 +441,8 @@ namespace {
 core::packages::Stratum determineMaximumPrefix(const core::GlobalState &gs,
                                                const vector<core::packages::Stratum> &fileToStratum,
                                                const LSPFileUpdates &update) {
-    // SorbetWorkspaceEditTask filters out empty workspace edits before they reach the indexer or typechecker. The one
-    // exception is an edit that resynchronized the file table with disk and found that nothing had drifted, which is
-    // empty but still runs, and for which the loop below correctly leaves the prefix alone.
+    // SorbetWorkspaceEditTask filters out empty workspace edits before they reach the indexer or typechecker, except
+    // for a resync that found nothing had drifted, which the loop below correctly leaves the prefix alone for.
     ENFORCE(!update.updatedFiles.empty() || update.resyncedAllFiles);
 
     // We start by assuming we can copy as much of the symbol table as GlobalState says is still a self-contained

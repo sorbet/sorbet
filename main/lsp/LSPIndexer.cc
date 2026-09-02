@@ -84,10 +84,9 @@ void LSPIndexer::resyncAllFilesFromDisk(SorbetWorkspaceEditParams &edit, WorkerP
     Timer timeit(config->logger, "resync_all_files_from_disk");
     auto &logger = *config->logger;
 
-    // Paths that must not be read, whichever of the two sources below turns them up.
+    // Paths not to read, whichever of the two sources below turns them up. This edit already names these, and two
+    // updates for one path would make `commitEdit` evict the same file twice and compare against the wrong old hashes.
     UnorderedSet<string_view> ignored;
-    // This edit already names these, and they were read from disk moments ago. Two updates for one path would also
-    // make `commitEdit` evict the same file twice, leaving it comparing the new hashes against the wrong "old" ones.
     for (auto &file : edit.updates) {
         ignored.insert(file->path());
     }
@@ -101,21 +100,17 @@ void LSPIndexer::resyncAllFilesFromDisk(SorbetWorkspaceEditParams &edit, WorkerP
         }
 
         if (file->isOpenInClient()) {
-            // A file open in the client belongs to the editor: its (possibly unsaved) contents supersede whatever is
-            // on disk. Note that this has to go in `ignored` rather than just being skipped here, because the walk
-            // below would otherwise turn the file up again.
+            // The editor's copy supersedes what is on disk. Has to be `ignored` rather than skipped, or the walk below
+            // turns the file up again.
             ignored.insert(file->path());
         } else {
             candidates.insert(string(file->path()));
         }
     }
 
-    // This is the same walk that Sorbet does at startup to turn its input directory into a file list, and it is what
-    // lets the resync notice files that were created while Watchman was not looking. Files it reports that Sorbet
-    // does not track yet will make this edit take the slow path via `hasNewFiles`. Walking `rootPath` (rather than
-    // every raw input dir) is what keeps these paths spelled the same way as the ones already in the file table:
-    // it is both the single input directory the language server insists on and the prefix that the preprocessor
-    // puts on paths coming from Watchman.
+    // The same walk Sorbet does at startup, which is what turns up files created while Watchman was not looking.
+    // `rootPath` is both the one input directory the language server allows and the prefix the preprocessor puts on
+    // Watchman's paths, so walking it spells these the same way the file table already does.
     try {
         for (auto &path : config->opts.fs->listFilesInDir(config->rootPath, config->opts.allowedExtensions, workers,
                                                           /* recursive */ true, config->opts.absoluteIgnorePatterns,
@@ -123,10 +118,9 @@ void LSPIndexer::resyncAllFilesFromDisk(SorbetWorkspaceEditParams &edit, WorkerP
             candidates.insert(move(path));
         }
     } catch (FileNotFoundException &e) {
-        // The directory Sorbet was pointed at has gone away. Everything under it is still in the file table, so it
-        // gets zeroed out below, which is what happens to any other deleted file.
+        // Everything under it is still in the file table, so it gets zeroed out below like any other deleted file.
         logger.error("Unable to list files in `{}` while resynchronizing with disk: {}", config->rootPath, e.what());
-    } catch (FileNotDirException &e) {
+    } catch (FileNotDirException) {
         logger.error("Path `{}` is not a directory", config->rootPath);
     }
 
@@ -156,8 +150,7 @@ void LSPIndexer::resyncAllFilesFromDisk(SorbetWorkspaceEditParams &edit, WorkerP
 
             auto file = make_shared<core::File>(string(paths[job]), config->readFileFromDisk(paths[job]),
                                                 core::File::Type::Normal, epoch);
-            // Only the files that actually drifted belong in the edit. The rest already agree with the file table,
-            // and carrying them would inflate the edit (and the work the fast path decision has to do) for nothing.
+            // Only the files that drifted belong in the edit; the rest already agree with the file table.
             if (wouldUpdateFileTable(*file)) {
                 threadResult.emplace_back(move(file));
             }
@@ -179,8 +172,7 @@ void LSPIndexer::resyncAllFilesFromDisk(SorbetWorkspaceEditParams &edit, WorkerP
         }
     }
 
-    // The workers finish in whatever order they finish in, so sort to keep an edit's contents a function of the
-    // workspace alone.
+    // Workers finish in any order; sort so an edit's contents are a function of the workspace alone.
     fast_sort(resynced, [](const auto &left, const auto &right) { return left->path() < right->path(); });
 
     logger.debug("Resynchronized with disk after a Watchman fresh instance: read={} changed={}", paths.size(),
