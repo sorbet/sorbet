@@ -440,23 +440,21 @@ struct EditInfo {
     // The minimum stratum in the package graph traversal file modifications begin.
     core::packages::Stratum editStratum;
 
-    // The set of packages directly affected by the edit.
-    UnorderedSet<core::packages::MangledName> affectedPackages;
-
-    // Indicates whether or not we should skip computing affected packages. This can happen if the package graph was
-    // modified, or we encounter a file that we can't attribute to an existing package.
-    bool skipAffectedPackages = false;
+    // The set of packages directly affected by the edit. An empty value indicates that we couldn't restrict the
+    // set of packages down beyond the whole set. This can happen if the package graph was modified, or we encountered
+    // a file that we couldn't attribute to an existing package.
+    optional<UnorderedSet<core::packages::MangledName>> affectedPackages;
 
     // Compute the set of transitive dependent packages from the set involved in the slow path edit. If a new package
     // was added, no packages were identified, or a `prelude!` package was part of the edit set, return `nullptr` to
     // indicate that everything must be checked.
     unique_ptr<UnorderedSet<core::packages::MangledName>>
     transitiveAffectedPackages(const core::packages::PackageDB &db) const {
-        if (this->skipAffectedPackages || this->affectedPackages.empty()) {
+        if (!this->affectedPackages.has_value() || this->affectedPackages->empty()) {
             return nullptr;
         }
 
-        auto updateIncludesPreludePackage = absl::c_any_of(this->affectedPackages, [&db](auto pkg) {
+        auto updateIncludesPreludePackage = absl::c_any_of(this->affectedPackages.value(), [&db](auto pkg) {
             auto &info = db.getPackageInfo(pkg);
             return info.exists() && info.isPreludePackage();
         });
@@ -465,7 +463,7 @@ struct EditInfo {
         }
 
         return make_unique<UnorderedSet<core::packages::MangledName>>(
-            db.condensation().transitiveDependentsOf(db, this->affectedPackages));
+            db.condensation().transitiveDependentsOf(db, this->affectedPackages.value()));
     }
 };
 
@@ -481,6 +479,8 @@ EditInfo determineMaximumPrefix(const core::GlobalState &gs, const vector<core::
     // We start by assuming we can copy as much of the symbol table as GlobalState says is still a self-contained
     // prefix, which any fast path edit since the last slow path will have lowered.
     result.editStratum = gs.contiguousStrataUntil();
+
+    result.affectedPackages.emplace();
 
     int ix = -1;
     for (auto &file : update.updatedFiles) {
@@ -519,12 +519,12 @@ EditInfo determineMaximumPrefix(const core::GlobalState &gs, const vector<core::
             }
         }
 
-        if (pkg.exists()) {
-            result.affectedPackages.insert(pkg);
+        if (result.affectedPackages.has_value() && pkg.exists()) {
+            result.affectedPackages->insert(pkg);
         } else {
             // The affected package set becomes invalid as soon as we detect a modification to the package graph, or
             // can't attribute a file to a known package.
-            result.skipAffectedPackages = true;
+            result.affectedPackages = std::nullopt;
         }
 
         // We need to find the earliest stratum involved in this edit to know what prefix of the symbol table will not
