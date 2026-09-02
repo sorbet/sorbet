@@ -965,13 +965,13 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                             continue;
                         }
 
-                            auto possibleMethod = possibleSymbol.asMethodRef().data(gs);
-                            if ((possibleMethod->flags.isPrivate || possibleMethod->owner == Symbols::Kernel()) &&
-                                !args.isPrivateOk) {
-                                // Special-case Kernel methods, which should be treated as private, but aren't due to
-                                // this bug: https://github.com/sorbet/sorbet/issues/4434
-                                // (If we fix that bug, we can delete the `Kernel` reference above.)
-                                continue;
+                        auto possibleMethod = possibleSymbol.asMethodRef().data(gs);
+                        if ((possibleMethod->flags.isPrivate || possibleMethod->owner == Symbols::Kernel()) &&
+                            !args.isPrivateOk) {
+                            // Special-case Kernel methods, which should be treated as private, but aren't due to
+                            // this bug: https://github.com/sorbet/sorbet/issues/4434
+                            // (If we fix that bug, we can delete the `Kernel` reference above.)
+                            continue;
                         }
 
                         if (isSetter && possibleSymbol.name(gs).lookupWithEq(gs) == args.name) {
@@ -986,8 +986,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                             toReplace.remove_suffix(1);
                         }
                         if (args.funLoc().source(gs) != toReplace) {
-                            auto suggestedName = possibleSymbol.show(gs);
-                            e.addErrorLine(possibleSymbol.loc(gs), "Did you mean: `{}`", suggestedName);
+                            e.addErrorLine(possibleSymbol.loc(gs), "Did you mean: `{}`", possibleSymbol.show(gs));
                             continue;
                         }
 
