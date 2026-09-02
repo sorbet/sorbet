@@ -286,6 +286,11 @@ public:
 
     bool causesLayeringViolation(const PackageDB &packageDB, core::NameRef otherPkgLayer) const;
 
+    // Returns `std::nullopt` if it's okay to use the symbol.
+    // Returns a `PackageReferenceInfo` if the usage was not okay (e.g. missing import, modularity error, etc.)
+    std::optional<core::packages::PackageReferenceInfo>
+    checkReferenceAgainstImports(core::Context ctx, core::LocOffsets errLoc, core::SymbolRef litSymbol) const;
+
     // What is the minimum strict dependencies level that this package's imports must have?
     StrictDependenciesLevel minimumStrictDependenciesLevel() const;
 

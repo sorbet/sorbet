@@ -508,20 +508,6 @@ class VisibilityCheckerPass final {
         }
     }
 
-    static void addAutocorrect(core::Context ctx, core::ErrorBuilder &e,
-                               optional<core::AutocorrectSuggestion> &&autocorrect) {
-        auto &db = ctx.state.packageDB();
-        auto hasAutocorrect = autocorrect.has_value();
-
-        if (autocorrect.has_value()) {
-            e.addAutocorrect(std::move(autocorrect.value()));
-        }
-
-        if (hasAutocorrect && !db.errorHint().empty()) {
-            e.addErrorNote("{}", db.errorHint());
-        }
-    }
-
 public:
     const core::packages::PackageInfo &package;
     UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo> referencedPackages;
@@ -548,189 +534,6 @@ public:
         }
     }
 
-    // Returns whether the reference causes a modularity error
-    static bool reportImportError(core::Context ctx, const core::packages::PackageInfo &thisPkg,
-                                  const core::packages::PackageInfo &pkg, core::LocOffsets errLoc,
-                                  core::SymbolRef litSymbol, core::FileRef otherFile, bool wasImported,
-                                  bool testImportInProd, bool testUnitImportInHelper, bool testNamespaceInProd) {
-        auto &db = ctx.state.packageDB();
-        auto otherPackage = pkg.mangledName();
-        bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || ctx.file.data(ctx).isPackagedTest();
-        if (thisPkg.usesTestPackages) {
-            isTestImport = false;
-        }
-        core::packages::ImportType autocorrectedImportType = core::packages::ImportType::Normal;
-        if (isTestImport) {
-            if (ctx.file.data(ctx).isPackagedTestHelper()) {
-                autocorrectedImportType = core::packages::ImportType::TestHelper;
-            } else {
-                autocorrectedImportType = core::packages::ImportType::TestUnit;
-            }
-        }
-        auto strictDepsLevel = thisPkg.strictDependenciesLevel;
-        auto importStrictDepsLevel = pkg.strictDependenciesLevel;
-        bool layeringViolation = false;
-        bool strictDependenciesTooLow = false;
-        bool causesCycle = false;
-        bool causesVisibilityError = !pkg.isVisibleTo(ctx, thisPkg, autocorrectedImportType);
-        bool badTestReference = thisPkg.usesTestPackages && pkg.testPackage() && !thisPkg.testPackage();
-        optional<string> path;
-        if (!isTestImport && !testNamespaceInProd && db.enforceLayering()) {
-            layeringViolation = strictDepsLevel > core::packages::StrictDependenciesLevel::False &&
-                                thisPkg.causesLayeringViolation(db, pkg);
-            strictDependenciesTooLow = importStrictDepsLevel != core::packages::StrictDependenciesLevel::None &&
-                                       importStrictDepsLevel < thisPkg.minimumStrictDependenciesLevel();
-            // If there's a path from the imported packaged to this package, then adding the import will close
-            // the loop and cause a cycle.
-            path = pkg.pathTo(ctx, thisPkg.mangledName());
-            causesCycle = strictDepsLevel >= core::packages::StrictDependenciesLevel::LayeredDag && path.has_value();
-        }
-        bool hasModularityError = layeringViolation || strictDependenciesTooLow || causesCycle || badTestReference ||
-                                  causesVisibilityError || testNamespaceInProd;
-        // visible_to errors are handled separately (by `updateVisibilityFor`),
-        // so they're not included in this causesModularityError field of referencedPackages
-        bool causesModularityError = hasModularityError && !causesVisibilityError;
-        if (!hasModularityError) {
-            if (db.genPackagesMode() != core::packages::GenPackagesMode::Disabled) {
-                return causesModularityError;
-            }
-
-            auto importAutocorrect = thisPkg.addImport(ctx, pkg, autocorrectedImportType);
-
-            if (!wasImported) {
-                if (auto e = ctx.beginError(errLoc, core::errors::Packager::MissingImport)) {
-                    e.setHeader("`{}` resolves but its package is not imported", litSymbol.show(ctx));
-                    e.addErrorLine(pkg.declLoc(), "Package defined here");
-                    addAutocorrect(ctx, e, move(importAutocorrect));
-                }
-            } else if (testImportInProd) {
-                ENFORCE(!isTestImport);
-                ENFORCE(!thisPkg.usesTestPackages, "test_import found in --test-packages mode");
-                if (auto e = ctx.beginError(errLoc, core::errors::Packager::UsedTestOnlyName)) {
-                    e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", litSymbol.show(ctx));
-                    e.addErrorLine(pkg.declLoc(), "Defined here");
-                    addAutocorrect(ctx, e, move(importAutocorrect));
-                }
-            } else if (testUnitImportInHelper) {
-                ENFORCE(!thisPkg.usesTestPackages, "test_import found in --test-packages mode");
-                if (auto e = ctx.beginError(errLoc, core::errors::Packager::UsedTestOnlyName)) {
-                    e.setHeader("The `{}` constant `{}` can only be used in `{}` files", "test_import",
-                                litSymbol.show(ctx), ".test.rb");
-                    e.addErrorLine(pkg.declLoc(), "Defined here");
-                    e.addErrorNote("This is because this `{}` is declared with `{}`, which means the constant can "
-                                   "only be used in `{}` files.",
-                                   "test_import", "only: 'test_rb'", ".test.rb");
-                    addAutocorrect(ctx, e, move(importAutocorrect));
-                }
-            } else {
-                ENFORCE(false);
-            }
-        } else {
-            // TODO(neil): Provide actionable advice and/or link to a doc that would help the user resolve these
-            // layering/strict_dependencies issues.
-            auto error = causesCycle           ? core::errors::Packager::StrictDependenciesViolation
-                         : layeringViolation   ? core::errors::Packager::LayeringViolation
-                         : badTestReference    ? core::errors::Packager::TestImportMismatch
-                         : testNamespaceInProd ? core::errors::Packager::UsedTestOnlyName
-                                               : core::errors::Packager::StrictDependenciesViolation;
-            if (auto e = ctx.beginError(errLoc, error)) {
-                vector<string> reasons;
-                e.addErrorLine(thisPkg.declLoc(), "Enclosing package declared here");
-
-                // We should only report a visibility error if we're not going to add a visible_to to the package
-                // Otherwise the error is pointless since it'll go away after the new visible_to is added
-                if (causesVisibilityError && !ctx.state.packageDB().updateVisibilityFor(otherPackage)) {
-                    reasons.emplace_back(core::ErrorColors::format(
-                        "package `{}` includes explicit visibility modifiers and cannot be imported from `{}`",
-                        pkg.show(ctx), thisPkg.show(ctx)));
-                    e.addErrorNote("Please consult with the owning team before adding a `{}` line to the package `{}`",
-                                   "visible_to", pkg.show(ctx));
-                }
-                if (badTestReference) {
-                    reasons.emplace_back(
-                        core::ErrorColors::format("`{}` may not reference `{}` packages", thisPkg.show(ctx), "test!"));
-                    e.addErrorLine(pkg.declLoc(), "Referenced `{}` package defined here", "test!");
-                }
-                if (testNamespaceInProd) {
-                    reasons.emplace_back(
-                        "it is defined in a test namespace and cannot be referenced in a non-test file");
-                }
-                if (causesCycle) {
-                    reasons.emplace_back(core::ErrorColors::format("importing its package would put `{}` into a cycle",
-                                                                   thisPkg.show(ctx)));
-                    auto currentStrictDepsLevel = fmt::format(
-                        "strict_dependencies '{}'", core::packages::strictDependenciesLevelToString(strictDepsLevel));
-                    e.addErrorLine(core::Loc(thisPkg.file, thisPkg.locs.strictDependenciesLevel),
-                                   "`{}` is `{}`, which disallows cycles", thisPkg.show(ctx), currentStrictDepsLevel);
-                    ENFORCE(path.has_value(), "Path from pkg to thisPkg should always exist if causesCycle is true");
-                    e.addErrorNote("Path from `{}` to `{}`:\n{}", pkg.show(ctx), thisPkg.show(ctx), path.value());
-                }
-
-                if (layeringViolation) {
-                    reasons.emplace_back("importing its package would cause a layering violation");
-                    ENFORCE(pkg.layer.exists(), "causesLayeringViolation should return false if layer is not set");
-                    ENFORCE(thisPkg.layer.exists(), "causesLayeringViolation should return false if layer is not set");
-                    e.addErrorLine(core::Loc(pkg.file, pkg.locs.layer),
-                                   "Package `{}` must be at most layer `{}` (to match package `{}`) but is "
-                                   "currently layer `{}`",
-                                   pkg.show(ctx), thisPkg.layer.show(ctx), thisPkg.show(ctx), pkg.layer.show(ctx));
-                }
-
-                if (strictDependenciesTooLow) {
-                    reasons.emplace_back(
-                        core::ErrorColors::format("its `{}` is not strict enough", "strict_dependencies"));
-                    ENFORCE(importStrictDepsLevel != core::packages::StrictDependenciesLevel::None,
-                            "strictDependenciesTooLow should be false if strict_dependencies level is not set");
-                    auto requiredStrictDepsLevel = fmt::format(
-                        "strict_dependencies '{}'",
-                        core::packages::strictDependenciesLevelToString(thisPkg.minimumStrictDependenciesLevel()));
-                    auto currentStrictDepsLevel =
-                        fmt::format("strict_dependencies '{}'",
-                                    core::packages::strictDependenciesLevelToString(importStrictDepsLevel));
-                    e.addErrorLine(core::Loc(pkg.file, pkg.locs.strictDependenciesLevel),
-                                   "`{}` must be at least `{}` but is currently `{}`", pkg.show(ctx),
-                                   requiredStrictDepsLevel, currentStrictDepsLevel);
-                }
-
-                if (reasons.empty() && causesVisibilityError &&
-                    ctx.state.packageDB().updateVisibilityFor(otherPackage)) {
-                    // Force the error to build here, so that we don't report an error
-                    e.build();
-                    return causesModularityError;
-                }
-
-                ENFORCE(!reasons.empty(), "At least one reason should be present");
-                string reason;
-                if (reasons.size() == 1) {
-                    reason = reasons[0];
-                } else if (reasons.size() == 2) {
-                    reason = fmt::format("{}, and {}", reasons[0], reasons[1]);
-                } else if (reasons.size() == 3) {
-                    reason = fmt::format("{}, {}, and {}", reasons[0], reasons[1], reasons[2]);
-                } else if (reasons.size() == 4) {
-                    reason = fmt::format("{}, {}, {}, and {}", reasons[0], reasons[1], reasons[2], reasons[3]);
-                } else if (reasons.size() == 5) {
-                    reason = fmt::format("{}, {}, {}, {}, and {}", reasons[0], reasons[1], reasons[2], reasons[3],
-                                         reasons[4]);
-                } else if (reasons.size() == 6) {
-                    reason = fmt::format("{}, {}, {}, {}, {}, and {}", reasons[0], reasons[1], reasons[2], reasons[3],
-                                         reasons[4], reasons[5]);
-                } else {
-                    ENFORCE(false, "At most six reasons should be present");
-                }
-                e.setHeader("`{}` cannot be referenced here because {}", litSymbol.show(ctx), reason);
-                if (!testNamespaceInProd) {
-                    if (!wasImported) {
-                        e.addErrorNote("`{}`'s package is not imported", litSymbol.show(ctx));
-                    } else if (testImportInProd || testUnitImportInHelper) {
-                        e.addErrorNote("`{}`'s package is imported as `{}`", litSymbol.show(ctx), "test_import");
-                    }
-                }
-            }
-        }
-        return causesModularityError;
-    }
-
     void postTransformConstantLit(core::Context ctx, const ast::ConstantLit &lit) {
         if (constantAssignmentDefinitions.contains(&lit)) {
             return;
@@ -740,19 +543,17 @@ public:
         if (!litSymbol.isClassOrModule() && !litSymbol.isFieldOrStaticField()) {
             return;
         }
+        if (litSymbol == core::Symbols::todo()) {
+            // The symbol will be `<todo sym>` when traversing to a ClassDef which omits a superclass.
+            // TODO(jez) Should we change put the real superclass in the tree once GlobalPass resolves it?
+            return;
+        }
 
         // NOTE: this only tracks the information required for computing what symbols needed to be exported, and not for
         // find all references. For example, if the current symbol is A::B::C::D, then only A::B::C::D will be added to
         // symbolsReferenced, and not A, A::B, A::B::C.
         // TODO(neil): we should also track A, A::B, A::B::C, so that we can use this for find all references too.
         referencedSymbols.insert(litSymbol);
-
-        auto loc = litSymbol.loc(ctx);
-
-        auto otherFile = loc.file();
-        if (!otherFile.exists()) {
-            return;
-        }
 
         auto &db = ctx.state.packageDB();
 
@@ -762,37 +563,14 @@ public:
             return;
         }
 
-        auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-
-        // If the imported symbol comes from the test namespace, we must also be in the test namespace.
-        // TODO(trevor): this check is redundant with import checking after the test-packages migration is complete.
-        bool testNamespaceInProd =
-            !pkg.usesTestPackages &&
-            (otherFile.data(ctx).isPackagedTestHelper() || otherFile.data(ctx).isPackagedTest()) &&
-            !ctx.file.data(ctx).isPackagedTest();
-
-        auto *import = this->package.importsPackage(otherPackage);
-        auto wasImported = import != nullptr;
-        if (wasImported && this->package.usesTestPackages) {
-            ENFORCE(import->type == core::packages::ImportType::Normal, "test_import found in --test-packages mode");
-        }
-
-        // Is this a test import (whether test helper or not) used in a production context?
-        auto testImportInProd =
-            wasImported && import->type != core::packages::ImportType::Normal && !ctx.file.data(ctx).isPackagedTest();
-        // Is this a test import not intended for use in helpers?
-        auto testUnitImportInHelper = wasImported && import->type == core::packages::ImportType::TestUnit &&
-                                      ctx.file.data(ctx).isPackagedTestHelper();
-        bool importNeeded = !wasImported || testImportInProd || testUnitImportInHelper;
-        referencedPackages[otherPackage] = {.importNeeded = importNeeded, .causesModularityError = false};
-
-        if (importNeeded || testNamespaceInProd) {
-            referencedPackages[otherPackage].causesModularityError =
-                reportImportError(ctx, this->package, pkg, lit.loc(), litSymbol, otherFile, wasImported,
-                                  testImportInProd, testUnitImportInHelper, testNamespaceInProd);
+        auto importError = this->package.checkReferenceAgainstImports(ctx, lit.loc(), litSymbol);
+        referencedPackages[otherPackage] = importError.value_or(core::packages::PackageReferenceInfo{});
+        if (importError.has_value()) {
+            // An error was reported already
             return;
         }
 
+        auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
         bool isExported = pkg.locs.exportAll.exists();
         if (litSymbol.isClassOrModule()) {
             isExported = isExported || litSymbol.asClassOrModuleRef().data(ctx)->flags.isExported;
@@ -800,8 +578,10 @@ public:
             isExported = isExported || litSymbol.asFieldRef().data(ctx)->flags.isExported;
         }
         isExported = isExported || db.allowRelaxedPackagerChecksFor(this->package.mangledName());
-        if (this->package.usesTestPackages) {
-            isExported = isExported || (wasImported && import->usesInternals);
+        if (this->package.usesTestPackages && !isExported) {
+            auto *import = this->package.importsPackage(otherPackage);
+            ENFORCE(import != nullptr, "If it wasn't imported, we should not be dealing with exports");
+            isExported = isExported || import->usesInternals;
         }
 
         if (!isExported) {
@@ -832,7 +612,11 @@ public:
                 e.setHeader("`{}` resolves but is not exported from `{}`", litSymbol.show(ctx), pkg.show(ctx));
                 addExportInfo(ctx, e, litSymbol, definesBehavior);
 
-                addAutocorrect(ctx, e, move(exportAutocorrect));
+                auto hasAutocorrect = exportAutocorrect.has_value();
+                e.maybeAddAutocorrect(move(exportAutocorrect));
+                if (hasAutocorrect && !db.errorHint().empty()) {
+                    e.addErrorNote("{}", db.errorHint());
+                }
             }
         }
     }
