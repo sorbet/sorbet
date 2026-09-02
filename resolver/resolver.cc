@@ -526,8 +526,12 @@ private:
                     suggestScope.isClassOrModule()) {
                     suggestionCount++;
 
-                    auto suggested =
-                        suggestScope.asClassOrModuleRef().data(ctx)->findConstantFuzzyMatch(ctx, original.cnst);
+                    core::packages::MangledName filterToPackage;
+                    if (!isPackage && gs.packageDB().enabled()) {
+                        filterToPackage = gs.packageDB().getPackageNameForFile(file);
+                    }
+                    auto suggested = suggestScope.asClassOrModuleRef().data(ctx)->findConstantFuzzyMatch(
+                        ctx, original.cnst, filterToPackage);
 
                     if (isExport) {
                         // If the resolution error is for an export, suggestions must be restricted to within the

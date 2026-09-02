@@ -812,8 +812,10 @@ vector<ClassOrModule::FuzzySearchResult> ClassOrModule::findMethodFuzzyMatch(con
     return res;
 }
 
-vector<ClassOrModule::FuzzySearchResult> ClassOrModule::findConstantFuzzyMatch(const GlobalState &gs, NameRef name,
+vector<ClassOrModule::FuzzySearchResult> ClassOrModule::findConstantFuzzyMatch(Context ctx, NameRef name,
+                                                                               packages::MangledName filterToPackage,
                                                                                int betterThan) const {
+    const auto &gs = ctx.state;
     vector<ClassOrModule::FuzzySearchResult> result;
     // Don't run under the fuzzer, as otherwise fuzzy match dominates runtime.
     if constexpr (fuzz_mode) {
@@ -832,6 +834,10 @@ vector<ClassOrModule::FuzzySearchResult> ClassOrModule::findConstantFuzzyMatch(c
     }
 
     bool onlySuggestPackageSpecs = ref(gs).isPackageSpecSymbol(gs);
+    const packages::PackageInfo *withinPackage = nullptr;
+    if (filterToPackage.exists()) {
+        withinPackage = &gs.packageDB().getPackageInfo(filterToPackage);
+    }
     Levenstein levenstein;
     vector<ClassOrModuleRef> candidateScopes;
     vector<ClassOrModule::FuzzySearchResult> scopeBest;
@@ -869,11 +875,29 @@ vector<ClassOrModule::FuzzySearchResult> ClassOrModule::findConstantFuzzyMatch(c
             scopeBest.clear();
             for (auto member : scope.data(gs)->members()) {
                 if (member.first.kind() == NameKind::CONSTANT &&
-                    member.first.dataCnst(gs)->original.kind() == NameKind::UTF8 && member.second.exists()) {
+                    member.first.dataCnst(gs)->original.kind() == NameKind::UTF8 && member.second.exists() &&
+                    member.second != core::Symbols::todo()) {
                     if (onlySuggestPackageSpecs) {
                         if (!member.second.isClassOrModule() ||
                             !member.second.asClassOrModuleRef().isPackageSpecSymbol(gs)) {
                             continue;
+                        }
+                    }
+
+                    if (withinPackage != nullptr) {
+                        auto availableImportType = withinPackage->fileToImportType(gs, ctx.file);
+                        auto memberPkg = member.second.enclosingClass(gs).data(gs)->package;
+                        if (memberPkg.exists() && memberPkg != filterToPackage) {
+                            auto *import = withinPackage->importsPackage(memberPkg);
+                            if (import == nullptr) {
+                                continue;
+                            }
+                            if (!(import->type == packages::ImportType::Normal ||
+                                  availableImportType == packages::ImportType::TestUnit ||
+                                  (availableImportType == packages::ImportType::TestHelper &&
+                                   import->type == packages::ImportType::TestHelper))) {
+                                continue;
+                            }
                         }
                     }
 

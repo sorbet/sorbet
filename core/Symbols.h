@@ -570,8 +570,8 @@ public:
     };
 
     std::vector<FuzzySearchResult> findMethodFuzzyMatch(const GlobalState &gs, NameRef name, int betterThan = -1) const;
-    std::vector<FuzzySearchResult> findConstantFuzzyMatch(const GlobalState &gs, NameRef name,
-                                                          int betterThan = -1) const;
+    std::vector<FuzzySearchResult>
+    findConstantFuzzyMatch(Context ctx, NameRef name, packages::MangledName filterToPackage, int betterThan = -1) const;
 
     // Returns true if the symbol or any of its children are not in the symbol table. False otherwise.
     bool isPrintable(const GlobalState &gs) const;
