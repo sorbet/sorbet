@@ -9,7 +9,7 @@ def normal_usage(x)
   when String
     puts x
   else
-    x #: absurd
+    raise #: absurd(x)
   end
 end
 
@@ -19,7 +19,7 @@ def forgotten_case(x)
   when Integer
     puts x
   else
-    x #: absurd # error: Control flow could reach `T.absurd` because the type `String` wasn't handled
+    raise #: absurd(x) # error: Control flow could reach `T.absurd` because the type `String` wasn't handled
   end
 end
 
@@ -32,7 +32,7 @@ def got_all_cases_but_untyped(x)
   when String
     puts y
   else
-    y #: absurd # error: Control flow could reach `T.absurd` because argument was `T.untyped`
+    raise RuntimeError #: absurd(y) # error: Control flow could reach `T.absurd` because argument was `T.untyped`
   end
 end
 
@@ -42,7 +42,7 @@ def forgotten_two_cases(x)
   when Integer
     puts x
   else
-    x #: absurd # error: Control flow could reach `T.absurd` because the type `T.any(String, T::Array[Integer])` wasn't handled
+    raise RuntimeError, "Unhandled value" #: absurd(x) # error: Control flow could reach `T.absurd` because the type `T.any(String, T::Array[Integer])` wasn't handled
   end
 end
 
@@ -52,7 +52,7 @@ def missing_case_with_generic(x)
   when Array
     puts x
   else
-    x #: absurd # error: Control flow could reach `T.absurd` because the type `String` wasn't handled
+    raise #: absurd(x) # error: Control flow could reach `T.absurd` because the type `String` wasn't handled
   end
 end
 
@@ -62,7 +62,7 @@ def ok_when_generic_cases_overlap(x)
   when Array
     puts x
   else
-    x #: absurd
+    raise #: absurd(x)
   end
 end
 
@@ -75,7 +75,7 @@ def dead_code_before(x)
     puts x
   else
     puts 1 # error: This code is unreachable
-    x #: absurd
+    raise #: absurd(x)
   end
 end
 
@@ -87,7 +87,7 @@ def dead_code_after(x)
   when String
     puts x
   else
-    x #: absurd
+    raise #: absurd(x)
     puts 1 # error: This code is unreachable
   end
 end
@@ -105,7 +105,7 @@ def cant_alias_local_variables(x)
     # with it, and couldn't see a simple solution that avoided emitting one.
     y = x
     #   ^ error: This code is unreachable
-    y #: absurd
+    raise #: absurd(y)
   end
 end
 
@@ -116,7 +116,7 @@ def normal_usage_with_isa(x)
   elsif x.is_a?(String)
     puts x
   else
-    x #: absurd
+    raise #: absurd(x)
   end
 end
 
@@ -125,7 +125,7 @@ def missing_case_with_isa(x)
   if x.is_a?(Integer)
     puts x
   else
-    x #: absurd # error: Control flow could reach `T.absurd` because the type `String` wasn't handled
+    raise #: absurd(x) # error: Control flow could reach `T.absurd` because the type `String` wasn't handled
   end
 end
 
@@ -134,7 +134,7 @@ def enforce_something_is_always_non_nil(x)
   if !x.nil?
     puts x
   else
-    x #: absurd
+    raise #: absurd(x)
   end
 end
 
@@ -143,7 +143,7 @@ def error_when_predicate_always_true(x)
   if !x.nil?
     puts 1 # not a dead code error, because it's always true!
     # This is a strange error message given the test case.
-    x #: absurd # error: Control flow could reach `T.absurd` because the type `Integer` wasn't handled
+    raise #: absurd(x) # error: Control flow could reach `T.absurd` because the type `Integer` wasn't handled
   end
 end
 
@@ -151,27 +151,27 @@ end
 
 def only_absurd
   temp1 = T.let(T.unsafe(nil), T.noreturn)
-  temp1 #: absurd
+  raise #: absurd(temp1)
 end
 
 #: (bot) -> void
 def allows_arg_noreturn(x)
-  x #: absurd
+  raise #: absurd(x)
   puts(x)
 # ^^^^^^^ error: This code is unreachable
 end
 
 #: (bot, bot) -> void
 def allows_args_noreturn(x, y)
-  x #: absurd
-  y #: absurd
+  raise #: absurd(x)
+  raise #: absurd(y)
   puts(x)
 # ^^^^^^^ error: This code is unreachable
 end
 
 #: (Integer & String) -> void
 def intersects_to_bottom(x)
-  x #: absurd
+  raise #: absurd(x)
   puts(x)
 # ^^^^^^^ error: This code is unreachable
 end
@@ -184,14 +184,14 @@ def absurd_not_reached_on_global_var
   case $some_global
   when TrueClass
   when FalseClass
-  else $some_global #: absurd # error: Control flow could reach `T.absurd` because argument was `T.untyped`
+  else raise #: absurd($some_global) # error: Control flow could reach `T.absurd` because argument was `T.untyped`
   end
 end
 
 #: -> void
 def absurd_reached_on_global_var
   if !$some_global
-    $some_global #: absurd # error: Control flow could reach `T.absurd` because the type `T.nilable(FalseClass)` wasn't handled
+    raise #: absurd($some_global) # error: Control flow could reach `T.absurd` because the type `T.nilable(FalseClass)` wasn't handled
   end
 end
 
@@ -209,14 +209,14 @@ class SomeClass
     when TrueClass
     when FalseClass
     else
-      @@some_class_var #: absurd
+      raise #: absurd(@@some_class_var)
     end
   end
 
   #: -> void
   def absurd_reached_on_class_var
     if !@@some_class_var
-      @@some_class_var #: absurd # error: Control flow could reach `T.absurd` because the type `FalseClass` wasn't handled
+      raise #: absurd(@@some_class_var) # error: Control flow could reach `T.absurd` because the type `FalseClass` wasn't handled
     end
   end
 
@@ -226,14 +226,14 @@ class SomeClass
     when TrueClass
     when FalseClass
     else
-      @some_instance_var #: absurd
+      raise #: absurd(@some_instance_var)
     end
   end
 
   #: -> void
   def absurd_reached_on_instance_var
     if !@some_instance_var
-      @some_instance_var #: absurd # error: Control flow could reach `T.absurd` because the type `FalseClass` wasn't handled
+      raise #: absurd(@some_instance_var) # error: Control flow could reach `T.absurd` because the type `FalseClass` wasn't handled
     end
   end
 end
@@ -241,20 +241,28 @@ end
 #: (bool) -> void
 def absurd_reached_on_local_var(some_local_var)
   if !some_local_var
-    some_local_var #: absurd # error: Control flow could reach `T.absurd` because the type `FalseClass` wasn't handled
+    raise #: absurd(some_local_var) # error: Control flow could reach `T.absurd` because the type `FalseClass` wasn't handled
   end
 end
 
 # --- incorrect usage ---------------------------------------------------------
 
 #: (Integer) -> void
-def not_enough_args(x)
-  #: absurd # error: Unexpected RBS assertion comment found in `method`
+def old_syntax(x)
+  x #: absurd # error: RBS `absurd` must annotate a `raise`
+end
+
+#: -> void
+def missing_variable
+  raise #: absurd # error: RBS `absurd` requires a variable name
 end
 
 #: (Integer) -> void
-def too_many_args(x)
-  if x.nil?
-    nil #: absurd # error: `T.absurd` expects to be called on a variable
-  end
+def invalid_variable(x)
+  raise #: absurd(x.to_s) # error: RBS `absurd` requires a variable name
+end
+
+#: (Integer) -> void
+def not_a_raise(x)
+  puts #: absurd(x) # error: RBS `absurd` must annotate a `raise`
 end
