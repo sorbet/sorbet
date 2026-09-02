@@ -132,6 +132,9 @@ module T::Private::Methods
   sig {returns(T::Array[T::Private::Methods::Signature])}
   def self.all_checked_tests_sigs; end
 
+  sig {void}
+  def self.drop_unchecked_sigs!; end
+
   sig {params(target: Module, source: Module).void}
   def self._hook_impl(target, source); end
 
@@ -143,6 +146,9 @@ module T::Private::Methods
 
   sig {params(key: String).returns(T.nilable(T::Private::Methods::Signature))}
   private_class_method def self.signature_for_key(key); end
+
+  sig {params(signature: T::Private::Methods::Signature).returns(T::Boolean)}
+  private_class_method def self.drop_sig?(signature); end
 
   sig {params(key: String).returns(T::Boolean)}
   private_class_method def self.has_sig_block_for_key(key); end

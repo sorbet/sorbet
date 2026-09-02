@@ -483,6 +483,9 @@ module T::Utils
   # optimize for first-call/first-request latency.
   sig { void }
   def self.eagerly_define_all_lazy_props_methods!; end
+
+  sig { void }
+  def self.drop_unchecked_sigs!; end
 end
 
 
