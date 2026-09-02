@@ -30,3 +30,11 @@ class ClassInBlock
     end
   end
 end
+
+class StructAsBlockValue
+  result = [nil].map do
+    Generated = Struct.new(:value)
+  end
+
+  T.assert_type!(result, T::Array[T.class_of(Generated)])
+end

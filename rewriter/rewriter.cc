@@ -57,21 +57,23 @@ public:
         }
 
         auto assign = ast::cast_tree<ast::Assign>(tree);
+        if (!ast::isa_tree<ast::UnresolvedConstantLit>(assign->lhs)) {
+            return;
+        }
+
+        auto result = assign->lhs.deepCopy();
         auto nodes = Struct::run(ctx, assign);
         if (nodes.empty()) {
             return;
         }
 
         auto loc = assign->loc;
-        auto expr = std::move(nodes.back());
-        nodes.pop_back();
-
         ast::InsSeq::STATS_store stats;
         stats.reserve(nodes.size());
         for (auto &node : nodes) {
             stats.emplace_back(std::move(node));
         }
-        tree = ast::MK::InsSeq(loc, std::move(stats), std::move(expr));
+        tree = ast::MK::InsSeq(loc, std::move(stats), std::move(result));
     }
 
     void postTransformBlock(core::MutableContext ctx, ast::ExpressionPtr &tree) {

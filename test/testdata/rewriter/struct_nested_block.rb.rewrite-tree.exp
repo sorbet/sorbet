@@ -42,6 +42,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             {:fixed => ::T.untyped()}
           end
         end
+        <emptyTree>::<C Generated>
       end
     end
 
@@ -98,6 +99,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
                   {:fixed => ::T.untyped()}
                 end
               end
+              <emptyTree>::<C Generated>
             end
             <cast:assert_type!>(<emptyTree>::<C Generated>.new(1), <todo sym>, <emptyTree>::<C Generated>)
             <emptyTree>::<C Generated>.new(1).value()
@@ -113,5 +115,55 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>::<C Duplicate> = <cast:<assume type>>(<emptyTree>::<C Struct>.new(:value, :value), <todo sym>, <emptyTree>::<C Struct>)
       end
     end
+  end
+
+  class <emptyTree>::<C StructAsBlockValue><<C <todo sym>>> < (::<todo sym>)
+    result = [nil].map() do ||
+      begin
+        class <emptyTree>::<C Generated$1><<C <todo sym>>> < (::<root>::<C Struct>)
+          ::T::Sig::WithoutRuntime.sig() do ||
+            <self>.returns(::T.untyped())
+          end
+
+          def value<<todo method>>(&<blk>)
+            ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
+          end
+
+          ::T::Sig::WithoutRuntime.sig() do ||
+            <self>.params(:value, ::T.untyped()).returns(::T.untyped())
+          end
+
+          def value=<<todo method>>(value, &<blk>)
+            ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
+          end
+
+          ::T::Sig::WithoutRuntime.sig() do ||
+            <self>.params(:value, ::BasicObject).void()
+          end
+
+          def initialize<<todo method>>(value = nil, &<blk>)
+            ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
+          end
+
+          <runtime method definition of value>
+
+          <runtime method definition of value=>
+
+          <emptyTree>::<C Elem> = <self>.type_member() do ||
+            {:fixed => ::T.untyped()}
+          end
+
+          <runtime method definition of initialize>
+        end
+        class <emptyTree>::<C Generated><<C <todo sym>>> < (<emptyTree>::<C Generated$1>)
+          <emptyTree>::<C Elem> = <self>.type_member() do ||
+            {:fixed => ::T.untyped()}
+          end
+        end
+        <emptyTree>::<C Generated>
+      end
+    end
+
+    <cast:assert_type!>(result, <todo sym>, <emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C T>.class_of(<emptyTree>::<C Generated>)))
   end
 end
