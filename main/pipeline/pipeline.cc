@@ -1488,6 +1488,11 @@ bool shouldTypecheck(const core::GlobalState &gs, const UnorderedSet<core::packa
         return true;
     }
 
+    // We override any potential skipping decision if the file has already had other errors raised.
+    if (gs.errorQueue->hasCollectedErrors(file)) {
+        return true;
+    }
+
     return relevantPackages.contains(pkg);
 }
 
@@ -1500,6 +1505,10 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> &&what, cons
     // Unless the error queue had a critical error, only typecheck should flush errors to the client, otherwise we will
     // drop errors in LSP mode.
     ENFORCE(gs.hadCriticalError() || gs.errorQueue->filesFlushedCount == 0);
+
+    // Collect all outstanding errors eagerly, so that we have an up-to-date picture of what files have had errors
+    // aready.
+    gs.errorQueue->collectAll();
 
     const auto &epochManager = *gs.epochManager;
     // Record epoch at start of typechecking before any preemption occurs.
@@ -1558,12 +1567,13 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> &&what, cons
                                         gs.tracer().error("Exception typing file: {} (backtrace is above)",
                                                           file.data(gs).path());
                                     }
+
+                                    // Stream out errors for this file, as it has made it through the whole pipeline.
+                                    outputq->push(file, processedByThread);
+                                    processedByThread = 0;
                                 } else if (intentionallyLeakASTs) {
                                     intentionallyLeakMemory(job.tree.release());
                                 }
-                                // Stream out errors
-                                outputq->push(file, processedByThread);
-                                processedByThread = 0;
                             }
                         }
                     }

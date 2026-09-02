@@ -11,6 +11,19 @@ using namespace std;
 ErrorQueue::ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer, shared_ptr<ErrorFlusher> errorFlusher)
     : errorFlusher(errorFlusher), owner(this_thread::get_id()), logger(logger), tracer(tracer){};
 
+void ErrorQueue::collectAllInternal() {
+    core::ErrorQueueMessage msg;
+    for (auto result = queue.try_pop(msg); result.gotItem(); result = queue.try_pop(msg)) {
+        collected[msg.whatFile].emplace_back(make_unique<ErrorQueueMessage>(move(msg)));
+    }
+}
+
+bool ErrorQueue::hasCollectedErrors(core::FileRef file) const {
+    // NOTE: we only check for membership in collected here: flushing moves the error list out, but that doesn't mean
+    // that there weren't errors present for `file` for the lifetime of this queue.
+    return this->collected.contains(file);
+}
+
 void ErrorQueue::flushAllErrors(const GlobalState &gs) {
     checkOwned();
 
@@ -35,10 +48,7 @@ void ErrorQueue::flushErrorsForFile(const GlobalState &gs, FileRef file) {
     filesFlushedCount.fetch_add(1);
     Timer timeit(tracer, "ErrorQueue::flushErrorsForFile");
 
-    core::ErrorQueueMessage msg;
-    for (auto result = queue.try_pop(msg); result.gotItem(); result = queue.try_pop(msg)) {
-        collected[msg.whatFile].emplace_back(make_unique<ErrorQueueMessage>(move(msg)));
-    }
+    this->collectAllInternal();
 
     errorFlusher->flushErrors(logger, gs, file, move(collected[file]));
 }
@@ -76,10 +86,7 @@ bool ErrorQueue::isEmpty() {
 UnorderedMap<core::FileRef, vector<unique_ptr<core::ErrorQueueMessage>>> ErrorQueue::drainAll() {
     checkOwned();
 
-    core::ErrorQueueMessage msg;
-    for (auto result = queue.try_pop(msg); result.gotItem(); result = queue.try_pop(msg)) {
-        collected[msg.whatFile].emplace_back(make_unique<ErrorQueueMessage>(move(msg)));
-    }
+    this->collectAllInternal();
 
     auto out = std::move(collected);
 

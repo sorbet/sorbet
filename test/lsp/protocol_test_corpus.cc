@@ -1608,7 +1608,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "ErrorsRemainAfterSlowPathRestart") {
 
         // We should see a starting and ending slow path message, with errors between. The error messages between are
         // the error on `Root::Foo::A` and the fast-path error from `Root::A`.
-        CHECK_EQ(resps.size(), 4);
+        CHECK_EQ(resps.size(), 3);
         {
             auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(resps.front()->asNotification().params);
             CHECK_EQ(params->typecheckingPath, TypecheckingPath::Slow);
@@ -1625,10 +1625,15 @@ TEST_CASE_FIXTURE(ProtocolTest, "ErrorsRemainAfterSlowPathRestart") {
             CHECK_EQ(params->startingStratum, 0);
         }
 
+        // As we will skip typechecking `Root` when only `Root::A` changed, we will only see the error that was
+        // introduced in the slow path edit to foo/a.rb.
         assertErrorDiagnostics(move(resps), {
                                                 {files[1].first, 4, "Expected `Integer`"},
                                                 {files[3].first, 7, "Method `+` does not exist"},
                                             });
+        // We would still expect the client to show the errors from `a.rb`, but we assert that they were not generated
+        // by this slow path.
+        assertStale({files[1].first});
     }
 }
 
@@ -1722,4 +1727,127 @@ TEST_CASE_FIXTURE(ProtocolTest, "ViewingFilesDoesntAffectFastPathEditStratum") {
         assertErrorDiagnostics(move(resps), {{files[3].first, 7, "Method `+` does not exist"}});
     }
 }
+
+// Shows how skipping infer for packages unrelated to the current edit interacts with errors in earlier passes.
+TEST_CASE_FIXTURE(ProtocolTest, "EarlyErrorsForceInfer") {
+    auto initOpts = make_shared<realmain::options::Options>();
+    initOpts->cacheSensitiveOptions.sorbetPackages = true;
+    initOpts->packageDirected = true;
+    resetState(initOpts);
+
+    vector<pair<string, string>> files = {
+        {"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A"}).build()},
+        {"a.rb", "# typed: true\n"
+                 "module Root\n"
+                 "  class A\n"
+                 "    def fun\n"
+                 "    end\n"
+                 "  end\n"
+                 "end\n"},
+        {"foo/__package.rb",
+         PackageTextBuilder().withName("Root::Foo").withExports({"Root::Foo::A"}).withImports({"Root"}).build()},
+        {"foo/a.rb", "# typed: true\n"
+                     "module Root::Foo\n"
+                     "  class A\n"
+                     "    def foo\n"
+                     "      Root::A.new()\n"
+                     "    end\n"
+                     "  end\n"
+                     "end\n"},
+    };
+
+    writeFilesToFS(files);
+
+    for (auto &[path, _] : files) {
+        this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/{}", this->rootPath, path));
+    }
+
+    auto supportsMarkdown = true;
+    auto supportsCodeActionResolve = true;
+    auto opts = make_unique<SorbetInitializationOptions>();
+
+    // The initial slow path.
+    assertErrorDiagnostics(initializeLSP(supportsMarkdown, supportsCodeActionResolve, move(opts)), {});
+
+    assertErrorDiagnostics(send(*openFile(files[1].first, files[1].second)), {});
+    assertErrorDiagnostics(send(*openFile(files[3].first, files[3].second)), {});
+
+    // Make a resolver error and an inference error to Root::A
+    assertErrorDiagnostics(send(*changeFile(files[1].first,
+                                            "# typed: true\n"
+                                            "module Root\n"
+                                            "  class A\n"
+                                            "    def foo\n"
+                                            "      DoesNotExist.new\n"
+                                            "      1 + :sym\n"
+                                            "    end\n"
+                                            "  end\n"
+                                            "end\n",
+                                            2)),
+                           {
+                               {files[1].first, 4, "Unable to resolve constant `DoesNotExist`"},
+                               {files[1].first, 5, "Expected `Integer`"},
+                           });
+
+    // Make a slow path edit to Root::Foo::A, and note that we retain all errors.
+    assertErrorDiagnostics(send(*changeFile(files[3].first,
+                                            "# typed: true\n"
+                                            "module Root::Foo\n"
+                                            "  class A\n"
+                                            "    module Foo\n"
+                                            "    end\n"
+                                            "\n"
+                                            "    def foo\n"
+                                            "      Root::A.new() + :type_error\n"
+                                            "    end\n"
+                                            "  end\n"
+                                            "end\n",
+                                            3)),
+                           {
+                               {files[1].first, 4, "Unable to resolve constant `DoesNotExist`"},
+                               {files[1].first, 5, "Expected `Integer`"},
+                               {files[3].first, 7, "Method `+` does not exist"},
+                           });
+
+    // Correct the resolver error in a.rb, so that only infer errors remain
+    assertErrorDiagnostics(send(*changeFile(files[1].first,
+                                            "# typed: true\n"
+                                            "module Root\n"
+                                            "  class A\n"
+                                            "    def foo\n"
+                                            "      1 + :sym\n"
+                                            "    end\n"
+                                            "  end\n"
+                                            "end\n",
+                                            4)),
+                           {
+                               {files[1].first, 4, "Expected `Integer`"},
+                               {files[3].first, 7, "Method `+` does not exist"},
+                           });
+    // Fast path edit that doesn't affect foo/a.rb
+    assertStale({files[3].first});
+
+    // Make a slow path edit to Root::Foo::A, and note that we only report infer errors on foo/a.rb now.
+    assertErrorDiagnostics(send(*changeFile(files[3].first,
+                                            "# typed: true\n"
+                                            "module Root::Foo\n"
+                                            "  class A\n"
+                                            "    module Foo2\n"
+                                            "    end\n"
+                                            "\n"
+                                            "    def foo\n"
+                                            "      Root::A.new() + :type_error\n"
+                                            "    end\n"
+                                            "  end\n"
+                                            "end\n",
+                                            5)),
+                           {
+                               {files[1].first, 4, "Expected `Integer`"},
+                               {files[3].first, 7, "Method `+` does not exist"},
+                           });
+
+    // We still see the same messages, but we know the ones in `a.rb` are stale.
+    assertStale({files[1].first});
+}
+
 } // namespace sorbet::test::lsp
