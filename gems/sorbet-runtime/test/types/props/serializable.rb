@@ -390,6 +390,26 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       end
     end
 
+    it 'requires the prop type to be nilable' do
+      assert_prop_error(/requires that the type of `foo` be `T.nilable\(\.\.\.\)` \(given: String\)/) do
+        prop :foo, String, raise_on_nil_write: true
+      end
+
+      assert_prop_error(/requires that the type of `foo` be `T.nilable\(\.\.\.\)` \(given: NilClass\)/) do
+        prop :foo, NilClass, raise_on_nil_write: true
+      end
+    end
+
+    it 'allows underspecified prop types' do
+      Class.new do
+        include T::Props::Serializable
+        prop :untyped, T.untyped, raise_on_nil_write: true
+        prop :object, Object, raise_on_nil_write: true
+        prop :basic_object, BasicObject, raise_on_nil_write: true
+        prop :interface, Kernel, raise_on_nil_write: true
+      end
+    end
+
     it 'forbids nil in setter' do
       struct = NilFieldStruct.new(foo: 1, bar: 'something')
       ex = assert_raises(TypeError) do
