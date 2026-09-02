@@ -527,9 +527,8 @@ PackageInfo::checkReferenceAgainstImports(core::Context ctx, core::LocOffsets er
 
     // If the imported symbol comes from the test namespace, we must also be in the test namespace.
     // TODO(trevor): this check is redundant with import checking after the test-packages migration is complete.
-    bool testNamespaceInProd = !pkg.usesTestPackages &&
-                               (otherFile.data(ctx).isPackagedTestHelper() || otherFile.data(ctx).isPackagedTest()) &&
-                               !ctx.file.data(ctx).isPackagedTest();
+    bool testNamespaceInProd =
+        !pkg.usesTestPackages && otherFile.data(ctx).isPackagedTest() && !ctx.file.data(ctx).isPackagedTest();
 
     if (!importNeeded && !testNamespaceInProd) {
         return nullopt;
