@@ -359,12 +359,14 @@ void appendFilesInDir(const string &basePath, const sorbet::UnorderedSet<string>
                 }
 
                 if (ec) {
-                    switch (ec.value()) {
-                        case ENOTDIR:
+                    // A checkout can replace a subdirectory between its parent's listing and this one. The file
+                    // watcher reports whatever took its place, so only the root has to exist.
+                    const bool vanished = path != basePath && (ec.value() == ENOENT || ec.value() == ENOTDIR);
+                    if (!vanished) {
+                        if (ec.value() == ENOTDIR) {
                             throw sorbet::FileNotDirException();
-
-                        default:
-                            throw sorbet::FileNotFoundException(fmt::format("Couldn't open directory `{}`", basePath));
+                        }
+                        throw sorbet::FileNotFoundException(fmt::format("Couldn't open directory `{}`", path.string()));
                     }
                 }
 

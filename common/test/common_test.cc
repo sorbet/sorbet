@@ -5,8 +5,11 @@
 #include "common/UIntSet.h"
 #include "common/UIntSetForEach.h"
 #include "common/common.h"
+#include "common/concurrency/WorkerPool.h"
+#include "spdlog/spdlog.h"
 
 #include <array>
+#include <filesystem>
 
 namespace sorbet::common {
 
@@ -27,6 +30,48 @@ TEST_CASE("FileOps::ensureDir") {
     CHECK_FALSE(FileOps::ensureDir("common_test_dir"));
 
     FileOps::removeDir("common_test_dir");
+}
+
+TEST_CASE("FileOps::listFilesInDir") {
+    auto logger = spdlog::default_logger();
+    auto workers = WorkerPool::create(0, *logger);
+
+    SUBCASE("lists files recursively") {
+        const std::string root = "common_test_list_dir";
+        std::filesystem::remove_all(root);
+        FileOps::ensureDir(root);
+        FileOps::ensureDir(root + "/nested");
+        FileOps::write(root + "/a.rb", "");
+        FileOps::write(root + "/nested/b.rb", "");
+        FileOps::write(root + "/nested/c.txt", "");
+
+        auto files = FileOps::listFilesInDir(root, {".rb"}, *workers, true, {}, {});
+        CHECK_EQ(files, std::vector<std::string>{root + "/a.rb", root + "/nested/b.rb"});
+
+        std::filesystem::remove_all(root);
+    }
+
+    SUBCASE("a missing root names itself in the error") {
+        const std::string root = "common_test_missing_dir";
+        std::filesystem::remove_all(root);
+
+        try {
+            FileOps::listFilesInDir(root, {".rb"}, *workers, true, {}, {});
+            FAIL("expected listFilesInDir to throw");
+        } catch (FileNotFoundException &e) {
+            CHECK_EQ(std::string(e.what()), "Couldn't open directory `common_test_missing_dir`");
+        }
+    }
+
+    SUBCASE("a root that is not a directory still raises") {
+        const std::string root = "common_test_not_a_dir.rb";
+        std::filesystem::remove_all(root);
+        FileOps::write(root, "");
+
+        CHECK_THROWS_AS(FileOps::listFilesInDir(root, {".rb"}, *workers, true, {}, {}), FileNotDirException);
+
+        std::filesystem::remove_all(root);
+    }
 }
 
 TEST_SUITE("UIntSet") {
