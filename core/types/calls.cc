@@ -928,15 +928,43 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 }
 
                 canSkipFuzzyMatch = canSkipFuzzyMatch || !args.funLoc().exists() || args.funLoc().empty();
+
+                if (!canSkipFuzzyMatch) {
+                    // This kind of does a crude constant resolution. Some problems with it:
+                    // - It has to be aware of the `<root>` / `Object` distinction at the top-level
+                    // - It ignores the syntactic scope and always does a transitive lookup (even
+                    //   when Sorbet would otherwise ban that)
+                    // but it lets us avoid the findMemberFuzzyMatch call below.
+                    auto constantScope = symbol == Symbols::root() ? symbol : symbol.data(gs)->attachedClass(gs);
+                    NameRef constantName;
+                    if (constantScope.exists() && (constantName = gs.lookupNameConstant(targetName)).exists()) {
+                        auto possibleSymbol = constantScope.data(gs)->findMemberTransitive(gs, constantName);
+                        if (possibleSymbol.exists() && possibleSymbol.isClassOrModule() &&
+                            possibleSymbol.asClassOrModuleRef().data(gs)->typeArity(gs) == 0) {
+                            e.addErrorNote("Ruby uses `.new` to invoke a class's constructor");
+                            if (possibleSymbol.asClassOrModuleRef().data(gs)->owner == constantScope) {
+                            e.replaceWith("Insert `.new`", args.funLoc().copyEndWithZeroLength(), ".new");
+                            } else {
+                                // Sorbet doesn't resolve constants through inheritance with explicit scopes.
+                                // If we relied on transitivity to find the constant, there's a good chance that
+                                // there was an explicit scope, and we need to expand the absolute constant.
+                                auto constantLoc = args.receiverLoc().exists() ? args.receiverLoc().join(args.funLoc())
+                                                                               : args.funLoc();
+                                e.replaceWith("Construct with `.new`", constantLoc, "{}.new", possibleSymbol.show(gs));
+                            }
+                            canSkipFuzzyMatch = true;
+                        }
+                    }
+                }
+
                 if (!canSkipFuzzyMatch) {
                     auto alternatives = symbol.data(gs)->findMemberFuzzyMatch(gs, targetName);
                     for (auto alternative : alternatives) {
                         auto possibleSymbol = alternative.symbol;
-                        if (!possibleSymbol.isClassOrModule() && !possibleSymbol.isMethod()) {
+                        if (!possibleSymbol.isMethod()) {
                             continue;
                         }
 
-                        if (possibleSymbol.isMethod()) {
                             auto possibleMethod = possibleSymbol.asMethodRef().data(gs);
                             if ((possibleMethod->flags.isPrivate || possibleMethod->owner == Symbols::Kernel()) &&
                                 !args.isPrivateOk) {
@@ -944,7 +972,6 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                                 // this bug: https://github.com/sorbet/sorbet/issues/4434
                                 // (If we fix that bug, we can delete the `Kernel` reference above.)
                                 continue;
-                            }
                         }
 
                         if (isSetter && possibleSymbol.name(gs).lookupWithEq(gs) == args.name) {
@@ -959,20 +986,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                             toReplace.remove_suffix(1);
                         }
                         if (args.funLoc().source(gs) != toReplace) {
-                            auto suggestedName = possibleSymbol.isClassOrModule() ? possibleSymbol.show(gs) + ".new"
-                                                                                  : possibleSymbol.show(gs);
+                            auto suggestedName = possibleSymbol.show(gs);
                             e.addErrorLine(possibleSymbol.loc(gs), "Did you mean: `{}`", suggestedName);
-                            continue;
-                        }
-
-                        if (possibleSymbol.isClassOrModule()) {
-                            if (possibleSymbol.asClassOrModuleRef().data(gs)->typeArity(gs) > 0) {
-                                // If this call was in type syntax, we might have already have built an
-                                // autocorrect to turn this from `MyClass(...)` to `MyClass[...]`.
-                                continue;
-                            }
-                            e.addErrorNote("Ruby uses `.new` to invoke a class's constructor");
-                            e.replaceWith("Insert `.new`", args.funLoc().copyEndWithZeroLength(), ".new");
                             continue;
                         }
 
