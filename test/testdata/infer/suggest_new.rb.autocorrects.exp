@@ -7,7 +7,7 @@ end
 
 ABF = 123
 
-ABC.new(1) # error: Method `ABC` does not exist on `T.class_of(<root>)`
+ABC(1) # error: Method `ABC` does not exist on `T.class_of(<root>)`
 ABD.new(1) # error: Method `ABD` does not exist on `T.class_of(<root>)`
 
 class Container
@@ -25,8 +25,8 @@ class Parent
 end
 
 class Child < Parent
-  Inner.new(1) # error: Method `Inner` does not exist on `T.class_of(Child)`
+  Parent::Inner.new(1) # error: Method `Inner` does not exist on `T.class_of(Child)`
 end
 
-Child::Inner.new(1) # error: Method `Inner` does not exist on `T.class_of(Child)`
+Parent::Inner.new(1) # error: Method `Inner` does not exist on `T.class_of(Child)`
 # ------------------------------
