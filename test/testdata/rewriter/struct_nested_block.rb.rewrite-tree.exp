@@ -106,4 +106,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
   end
+
+  class <emptyTree>::<C ClassInBlock><<C <todo sym>>> < (::<todo sym>)
+    1.times() do ||
+      class <emptyTree>::<C Inner><<C <todo sym>>> < (::<todo sym>)
+        <emptyTree>::<C Duplicate> = <cast:<assume type>>(<emptyTree>::<C Struct>.new(:value, :value), <todo sym>, <emptyTree>::<C Struct>)
+      end
+    end
+  end
 end

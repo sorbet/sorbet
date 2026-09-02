@@ -40,14 +40,19 @@ class Rewriterer {
     friend class Rewriter;
 
     int blockDepth = 0;
+    vector<int> classBlockDepths;
 
 public:
+    void preTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
+        classBlockDepths.emplace_back(blockDepth);
+    }
+
     void preTransformBlock(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         blockDepth++;
     }
 
     void postTransformAssign(core::MutableContext ctx, ast::ExpressionPtr &tree) {
-        if (blockDepth == 0) {
+        if (classBlockDepths.empty() || blockDepth <= classBlockDepths.back()) {
             return;
         }
 
@@ -74,6 +79,9 @@ public:
     }
 
     void postTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
+        ENFORCE(!classBlockDepths.empty());
+        classBlockDepths.pop_back();
+
         auto classDef = ast::cast_tree<ast::ClassDef>(tree);
 
         auto isClass = classDef->kind == ast::ClassDef::Kind::Class;

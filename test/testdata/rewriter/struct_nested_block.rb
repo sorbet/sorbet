@@ -22,3 +22,11 @@ class StructInNestedBlock
     end
   end
 end
+
+class ClassInBlock
+  1.times do
+    class Inner
+      Duplicate = Struct.new(:value, :value) # error: Duplicate member `value` in Struct definition
+    end
+  end
+end
