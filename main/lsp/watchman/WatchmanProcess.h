@@ -8,12 +8,15 @@
 #include "main/lsp/MessageQueueState.h"
 #include "spdlog/spdlog.h"
 #include <chrono>
+#include <memory>
+#include <vector>
 
 namespace sorbet::realmain::lsp {
 class WatchmanQueryResponse;
 class WatchmanStateEnter;
 class WatchmanStateLeave;
 class LSPConfiguration;
+class LSPMessage;
 class NotificationMessage;
 } // namespace sorbet::realmain::lsp
 
@@ -38,6 +41,10 @@ private:
     const std::shared_ptr<const LSPConfiguration> config;
     std::string watchmanNamespace;
 
+    // Notifications that arrived before the LSP loop was initialized. Held rather than blocked on so that this thread
+    // keeps draining the watchman CLI; see `enqueueNotification`. Touched only by the watchman thread.
+    std::vector<std::unique_ptr<LSPMessage>> heldUntilInitialized;
+
     // The most recent clock watchman has told us this subscription is caught up to. Set only from responses that
     // establish or advance that view — the `subscribe` ack and the file change responses — and used as the `since` of
     // the next subscription. Touched only by the watchman thread, so it needs no lock.
@@ -49,6 +56,13 @@ private:
         Stopped,
         // Lost the connection to the CLI child. Recoverable by subscribing again.
         Disconnected,
+    };
+
+    struct SessionResult {
+        SessionOutcome outcome;
+        // Whether watchman acknowledged this session's subscription. Together with how long the session lasted, this is
+        // what WatchmanRestartPolicy reads as evidence that watchman is working.
+        bool subscribed;
     };
 
     /**
@@ -67,7 +81,7 @@ private:
      * Spawns one watchman CLI child, subscribes, and pumps its responses into the message queue until either Sorbet
      * stops or the child does. Reaps the child before returning.
      */
-    SessionOutcome runSubscription(std::string_view root, std::string_view subscriptionName);
+    SessionResult runSubscription(std::string_view root, std::string_view subscriptionName);
 
     /**
      * Asks watchman, over a connection of its own, for the changes that landed since `sinceClock` — the window a
@@ -94,6 +108,9 @@ private:
     bool isStopped();
 
     void enqueueNotification(std::unique_ptr<NotificationMessage> notification);
+
+    // Hands over anything `enqueueNotification` held, once the LSP loop is initialized. A no-op until then.
+    void releaseHeldNotifications();
 
     void processQueryResponse(std::unique_ptr<sorbet::realmain::lsp::WatchmanQueryResponse>);
 

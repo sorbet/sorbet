@@ -16,44 +16,53 @@ namespace sorbet::realmain::lsp::watchman {
 // that path, so from Sorbet's side an entirely healthy watchman is indistinguishable from a broken one except by how
 // long the subscription lasted before it died.
 //
-// So: a session that ran long enough to have been doing its job earns an immediate resubscribe and resets the budget. A
-// session that died on arrival spends from a small budget of increasingly-delayed retries, and when that runs out we
-// stop and let Sorbet exit with an error the editor shows. A watchman that cannot hold a subscription for a few seconds
-// is not something a retry loop should paper over.
+// So: a session that was demonstrably doing its job earns an immediate resubscribe and resets the budget. A session
+// that was not spends from a small budget of increasingly-delayed retries, and when that runs out we stop and let
+// Sorbet exit with an error the editor shows. A watchman that cannot hold a working subscription for a few seconds is
+// not something a retry loop should paper over.
+//
+// "Doing its job" takes both of the things that can go wrong to answer, because neither alone bounds the loop:
+//
+//   - Long enough. A subscription that watchman acknowledged and then dropped in milliseconds, over and over, would
+//     spin without delay if the acknowledgement were the whole test.
+//   - Acknowledged. A session that sat there for a minute without watchman ever accepting the subscription was never
+//     watching anything, so its length is not evidence of health.
 class WatchmanRestartPolicy {
 public:
-    // A session at least this long is evidence that spawning watchman and subscribing both work.
+    // A session at least this long *and* carrying a subscription acknowledgement is evidence that spawning watchman
+    // and subscribing both work.
     static constexpr std::chrono::milliseconds HEALTHY_SESSION = std::chrono::seconds{10};
 
-    // How many too-short sessions in a row we tolerate before giving up. Four retries, so at most
+    // How many unhealthy sessions in a row we tolerate before giving up. Four retries, so at most
     // 100 + 200 + 400 + 800 = 1.5s of delay is spent proving that watchman is broken rather than unlucky.
-    static constexpr int MAX_CONSECUTIVE_SHORT_SESSIONS = 5;
+    static constexpr int MAX_CONSECUTIVE_UNHEALTHY_SESSIONS = 5;
 
-    // Delay before retrying the nth consecutive too-short session: FIRST_RETRY_DELAY * 2^(n-1).
+    // Delay before retrying the nth consecutive unhealthy session: FIRST_RETRY_DELAY * 2^(n-1).
     static constexpr std::chrono::milliseconds FIRST_RETRY_DELAY{100};
 
-    // Call once per ended session, with how long that session lasted. Returns how long to wait before spawning watchman
-    // again, or `nullopt` to stop trying.
-    std::optional<std::chrono::milliseconds> delayBeforeRestart(std::chrono::milliseconds sessionDuration) {
-        if (sessionDuration >= HEALTHY_SESSION) {
-            consecutiveShortSessions = 0;
+    // Call once per ended session, with how long it lasted and whether watchman ever acknowledged its subscription.
+    // Returns how long to wait before spawning watchman again, or `nullopt` to stop trying.
+    std::optional<std::chrono::milliseconds> delayBeforeRestart(std::chrono::milliseconds sessionDuration,
+                                                                bool subscribed) {
+        if (subscribed && sessionDuration >= HEALTHY_SESSION) {
+            consecutiveUnhealthySessions = 0;
             return std::chrono::milliseconds{0};
         }
 
-        consecutiveShortSessions++;
-        if (consecutiveShortSessions >= MAX_CONSECUTIVE_SHORT_SESSIONS) {
+        consecutiveUnhealthySessions++;
+        if (consecutiveUnhealthySessions >= MAX_CONSECUTIVE_UNHEALTHY_SESSIONS) {
             return std::nullopt;
         }
 
-        return FIRST_RETRY_DELAY * (1 << (consecutiveShortSessions - 1));
+        return FIRST_RETRY_DELAY * (1 << (consecutiveUnhealthySessions - 1));
     }
 
-    int shortSessionCount() const {
-        return consecutiveShortSessions;
+    int unhealthySessionCount() const {
+        return consecutiveUnhealthySessions;
     }
 
 private:
-    int consecutiveShortSessions = 0;
+    int consecutiveUnhealthySessions = 0;
 };
 
 } // namespace sorbet::realmain::lsp::watchman

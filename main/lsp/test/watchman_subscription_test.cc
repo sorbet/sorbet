@@ -93,13 +93,15 @@ TEST_CASE("buildCatchUpQueryCommand asks for the changes since the given clock")
     CHECK(string(d[2]["since"].GetString()) == CLOCK);
 }
 
-// The pair that has to stay apart. `empty_on_fresh_instance` on the catch-up query would mean that whenever watchman
-// could not honor our clock — it restarted, or recrawled past the clock — it would answer with an empty file list, and
-// Sorbet would go on believing its view of every one of those files was current.
-TEST_CASE("buildCatchUpQueryCommand does not suppress the fresh instance listing") {
+// Both commands suppress it, because `is_fresh_instance` means the same thing on either: there is no delta to be had,
+// and the recovery is for Sorbet to re-read the workspace itself rather than to work through a list watchman attaches.
+// That list could not do the job anyway, since what exists now cannot mention a file deleted while Sorbet was not
+// listening. See LSPIndexer::resyncAllFilesFromDisk.
+TEST_CASE("buildCatchUpQueryCommand suppresses the fresh instance listing") {
     auto d = parseQuery(buildCatchUpQueryCommand("/pay/src", EXTENSIONS, "", CLOCK));
 
-    CHECK_FALSE(d[2].HasMember("empty_on_fresh_instance"));
+    REQUIRE(d[2].HasMember("empty_on_fresh_instance"));
+    CHECK(d[2]["empty_on_fresh_instance"].GetBool());
 }
 
 // The query stands in for the subscription over the window it cannot cover, so it has to select the same files. If the

@@ -129,11 +129,16 @@ string buildCatchUpQueryCommand(string_view root, const vector<string> &extensio
             w.String("since");
             w.String(sinceClock.data(), sinceClock.size());
 
-            // Deliberately no `empty_on_fresh_instance` here, unlike the subscription. If watchman cannot honor this
-            // clock -- it restarted, or the watch was recrawled past the clock -- it answers `is_fresh_instance` with
-            // every file matching the expression, and that list is the only thing that can tell Sorbet what to
-            // re-read. Suppressing it would trade a slow path we can measure for a Sorbet that is quietly wrong about
-            // every file that changed while it was not listening.
+            // Same as the subscription, and for the same reason. If watchman cannot honor this clock -- it restarted,
+            // or the watch was recrawled past it -- there is no delta to be had, and it says so with
+            // `is_fresh_instance`. Sorbet recovers from that flag by re-reading the workspace itself, so the whole-tree
+            // file list watchman would otherwise attach is work nobody consumes: a multi-megabyte response to parse,
+            // then a serial read of every path in it on the preprocessor thread. Worse, it could not do the whole job
+            // anyway, because a list of what exists now cannot mention a file that was deleted while Sorbet was not
+            // listening. See LSPIndexer::resyncAllFilesFromDisk, which walks the file table as well as the workspace.
+            w.String("empty_on_fresh_instance");
+            w.Bool(true);
+
             w.EndObject();
         }
 

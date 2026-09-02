@@ -98,20 +98,22 @@ void WatchmanProcess::start() {
         WatchmanRestartPolicy restartPolicy;
         while (!isStopped()) {
             auto startedAt = chrono::steady_clock::now();
-            auto outcome = runSubscription(root, subscriptionName);
+            auto session = runSubscription(root, subscriptionName);
             auto ranFor = chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - startedAt);
 
-            if (outcome == SessionOutcome::Stopped || isStopped()) {
+            if (session.outcome == SessionOutcome::Stopped || isStopped()) {
                 break;
             }
 
-            auto delay = restartPolicy.delayBeforeRestart(ranFor);
+            auto delay = restartPolicy.delayBeforeRestart(ranFor, session.subscribed);
             if (!delay.has_value()) {
                 auto msg = fmt::format(
-                    "Lost the connection to Watchman (`{} -j -p --no-pretty`) {} times in a row, the last after only "
-                    "{}ms.\nWatchman is required for Sorbet to detect changes to files made outside of your code "
-                    "editor.\nDon't need Watchman? Run Sorbet with `--disable-watchman`.",
-                    watchmanPath, restartPolicy.shortSessionCount(), ranFor.count());
+                    "Lost the connection to Watchman (`{} -j -p --no-pretty`) {} times in a row without it holding a "
+                    "working subscription; the last lasted {}ms and was{} acknowledged.\nWatchman is required for "
+                    "Sorbet to detect changes to files made outside of your code editor.\nDon't need Watchman? Run "
+                    "Sorbet with `--disable-watchman`.",
+                    watchmanPath, restartPolicy.unhealthySessionCount(), ranFor.count(),
+                    session.subscribed ? "" : " never");
                 logger->error(msg);
                 exitWithCode(1, msg);
                 break;
@@ -174,7 +176,10 @@ string WatchmanProcess::resolveWatchmanRoot() {
     return modifiedWorkspace;
 }
 
-WatchmanProcess::SessionOutcome WatchmanProcess::runSubscription(string_view root, string_view subscriptionName) {
+WatchmanProcess::SessionResult WatchmanProcess::runSubscription(string_view root, string_view subscriptionName) {
+    // Set once watchman acknowledges the subscription below; see SessionResult.
+    bool subscribed = false;
+
     // Where the last session got to, captured before this one can advance it. Empty for the first subscription of the
     // process, in which case there is no window to catch up on: Sorbet is about to read the tree itself.
     const optional<string> resumeFrom = lastClock;
@@ -217,6 +222,11 @@ WatchmanProcess::SessionOutcome WatchmanProcess::runSubscription(string_view roo
     string buffer;
 
     while (!isStopped()) {
+        // Initialization may have finished since the last response, in which case anything held during it is now safe
+        // to hand over. Doing it here rather than only on the next response means a quiet workspace does not sit on
+        // held notifications indefinitely.
+        releaseHeldNotifications();
+
         errno = 0;
         auto maybeLine = FileOps::readLineFromFd(fd, buffer);
         if (maybeLine.result == FileOps::ReadResult::Timeout) {
@@ -231,7 +241,7 @@ WatchmanProcess::SessionOutcome WatchmanProcess::runSubscription(string_view roo
 
             // The CLI is gone: either it exited, or the daemon closed the socket under it. Neither means watchman is
             // unusable, so leave it to the caller to decide whether to subscribe again.
-            return SessionOutcome::Disconnected;
+            return {SessionOutcome::Disconnected, subscribed};
         }
 
         ENFORCE(maybeLine.result == FileOps::ReadResult::Success);
@@ -268,6 +278,7 @@ WatchmanProcess::SessionOutcome WatchmanProcess::runSubscription(string_view roo
         } else if (d.HasMember("subscribe")) {
             // The ack for the command we just sent. Its clock is where this subscription begins, and so where a
             // replacement for it has to resume from if the connection dies before any file changes arrive.
+            subscribed = true;
             rememberClock(clockOf(d));
         } else {
             // Something we don't understand yet.
@@ -275,7 +286,7 @@ WatchmanProcess::SessionOutcome WatchmanProcess::runSubscription(string_view roo
         }
     }
 
-    return SessionOutcome::Stopped;
+    return {SessionOutcome::Stopped, subscribed};
 }
 
 void WatchmanProcess::catchUpSince(string_view root, string_view sinceClock) {
@@ -378,14 +389,39 @@ void WatchmanProcess::exitWithCode(int code, const optional<string> &msg) {
 
 void WatchmanProcess::enqueueNotification(unique_ptr<NotificationMessage> notification) {
     auto msg = make_unique<LSPMessage>(move(notification));
-    // Don't start enqueueing requests until LSP is initialized.
-    initializedNotification.WaitForNotification();
-    {
-        absl::MutexLock lck(&messageQueueMutex);
+
+    // Sorbet does not want these until the LSP loop is initialized, but waiting for that here would stop this thread
+    // draining the CLI's stdout, and watchman gives up on a client that has not accepted its output for 60 seconds
+    // (`kWriteTimeout`), mid-message. That is the single biggest reason a healthy watchman appears to die on us: the
+    // initial typecheck of a large codebase takes minutes, and every second of it is a second this thread was not
+    // reading. Hold them here instead and let the loop below keep reading.
+    if (!initializedNotification.HasBeenNotified()) {
+        heldUntilInitialized.push_back(move(msg));
+        return;
+    }
+
+    // Held notifications first, or this one overtakes them.
+    releaseHeldNotifications();
+
+    absl::MutexLock lck(&messageQueueMutex);
+    msg->tagNewRequest(*logger);
+    messageQueue.counters = mergeCounters(move(messageQueue.counters));
+    messageQueue.pendingRequests.push_back(move(msg));
+}
+
+void WatchmanProcess::releaseHeldNotifications() {
+    if (heldUntilInitialized.empty() || !initializedNotification.HasBeenNotified()) {
+        return;
+    }
+
+    logger->debug("Releasing {} Watchman notification(s) held during initialization", heldUntilInitialized.size());
+    absl::MutexLock lck(&messageQueueMutex);
+    for (auto &msg : heldUntilInitialized) {
         msg->tagNewRequest(*logger);
-        messageQueue.counters = mergeCounters(move(messageQueue.counters));
         messageQueue.pendingRequests.push_back(move(msg));
     }
+    heldUntilInitialized.clear();
+    messageQueue.counters = mergeCounters(move(messageQueue.counters));
 }
 
 void WatchmanProcess::processQueryResponse(unique_ptr<WatchmanQueryResponse> response) {
