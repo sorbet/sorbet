@@ -643,7 +643,7 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
             for (auto &elem : elems) {
                 elem = ClassOrModuleRef::fromRaw(p.getU4());
             }
-            auto result = make_type<EnumUnion>(std::move(elems));
+            auto result = Types::enumUnion(std::move(elems));
             return result;
         }
     }

@@ -582,23 +582,18 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             if (parent1.exists() && parent1 == parent2) {
                 vector<ClassOrModuleRef> combined;
                 combined.reserve(eu1->members.size() + eu2->members.size());
-                combined.insert(combined.end(), eu1->members.begin(), eu1->members.end());
-                // TODO(neil): this is quadratic, should we use a set to dedup and convert to vector after?
-                for (auto &m : eu2->members) {
-                    if (absl::c_find(combined, m) == combined.end()) {
-                        combined.emplace_back(m);
-                    }
-                }
-                if (combined.size() == eu1->members.size()) {
+                set_union(eu1->members.begin(), eu1->members.end(), eu2->members.begin(), eu2->members.end(),
+                          back_inserter(combined), [](auto lhs, auto rhs) { return lhs.id() < rhs.id(); });
+                if (combined == eu1->members) {
                     // eu2 is a subset of eu1
                     return t1;
                 }
-                if (combined.size() == eu2->members.size()) {
+                if (combined == eu2->members) {
                     // eu2 is a superset of eu1
                     return t2;
                 }
                 ENFORCE(combined.size() > eu1->members.size() && combined.size() > eu2->members.size());
-                return make_type<EnumUnion>(move(combined));
+                return Types::enumUnion(move(combined));
             }
             return OrType::make_shared(eu1->toOrType(gs), eu2->toOrType(gs));
         }
@@ -613,11 +608,11 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                     if (absl::c_find(eu2->members, sym1) != eu2->members.end()) {
                         return t2;
                     }
-                    vector<ClassOrModuleRef> combined;
-                    combined.reserve(eu2->members.size() + 1);
-                    combined.emplace_back(sym1);
-                    combined.insert(combined.end(), eu2->members.begin(), eu2->members.end());
-                    return make_type<EnumUnion>(move(combined));
+                    auto combined = eu2->members;
+                    auto insertionPoint = lower_bound(combined.begin(), combined.end(), sym1,
+                                                      [](auto lhs, auto rhs) { return lhs.id() < rhs.id(); });
+                    combined.insert(insertionPoint, sym1);
+                    return Types::enumUnion(move(combined));
                 }
             }
         }
@@ -672,7 +667,7 @@ TypePtr lubGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
         categoryCounterInc("lub.<class>.collapsed", "no");
         auto parent1 = EnumUnion::parentEnumClass(gs, sym1);
         if (parent1.exists() && parent1 == EnumUnion::parentEnumClass(gs, sym2)) {
-            return make_type<EnumUnion>(vector<ClassOrModuleRef>{sym1, sym2});
+            return Types::enumUnion(sym1, sym2);
         }
         // t1 and t2 aren't same enum instances
         return OrType::make_shared(t1, t2);
@@ -967,7 +962,7 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         if (kept.size() == 1) {
             return make_type<ClassType>(kept[0]);
         }
-        return make_type<EnumUnion>(move(kept));
+        return Types::enumUnion(move(kept));
     }
 
     if (auto o2 = cast_type<OrType>(t2)) { // 3, 6

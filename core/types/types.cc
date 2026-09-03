@@ -282,7 +282,7 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, absl::
                 } else if (kept.size() == 1) {
                     result = make_type<ClassType>(kept[0]);
                 } else {
-                    result = make_type<EnumUnion>(move(kept));
+                    result = Types::enumUnion(move(kept));
                 }
             }
         },
@@ -812,8 +812,32 @@ EnumUnion::EnumUnion(vector<ClassOrModuleRef> members) : members(move(members)) 
     recordAllocatedType("enumunion");
 }
 
+TypePtr EnumUnion::make_shared(vector<ClassOrModuleRef> members) {
+    return TypePtr(TypePtr::Tag::EnumUnion, new EnumUnion(move(members)));
+}
+
+TypePtr Types::enumUnion(vector<ClassOrModuleRef> members) {
+    ENFORCE(members.size() >= 2);
+    DEBUG_ONLY(for (size_t i = 1; i < members.size(); i++) {
+        ENFORCE(members[i - 1].id() < members[i].id(), "EnumUnion members must be sorted and unique");
+    });
+    return EnumUnion::make_shared(move(members));
+}
+
+TypePtr Types::enumUnion(ClassOrModuleRef member1, ClassOrModuleRef member2) {
+    ENFORCE(member1 != member2);
+    if (member2.id() < member1.id()) {
+        swap(member1, member2);
+    }
+    return Types::enumUnion(vector<ClassOrModuleRef>{member1, member2});
+}
+
 void EnumUnion::_sanityCheck(const GlobalState &gs) const {
     ENFORCE(members.size() >= 2);
+
+    for (size_t i = 1; i < members.size(); i++) {
+        ENFORCE(members[i - 1].id() < members[i].id(), "EnumUnion members must be sorted and unique");
+    }
 
     ENFORCE(members[0].data(gs)->name.isTEnumName(gs));
     auto firstParent = EnumUnion::parentEnumClass(gs, members[0]);

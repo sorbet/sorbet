@@ -76,6 +76,10 @@ public:
     /** Lower upper bound: the narrowest type that is supertype of both t1 and t2 */
     static TypePtr any(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
 
+    /** Constructs a compact union from sorted, unique T::Enum variants. */
+    static TypePtr enumUnion(std::vector<ClassOrModuleRef> members);
+    static TypePtr enumUnion(ClassOrModuleRef member1, ClassOrModuleRef member2);
+
     /**
      * is every instance of  t1 an  instance of t2?
      *
@@ -1010,7 +1014,6 @@ TYPE(EnumUnion) final : public Refcountable {
 public:
     const std::vector<ClassOrModuleRef> members;
 
-    EnumUnion(std::vector<ClassOrModuleRef> members);
     EnumUnion(const EnumUnion &) = delete;
     EnumUnion &operator=(const EnumUnion &) = delete;
 
@@ -1032,6 +1035,15 @@ public:
     ClassOrModuleRef parentEnumClass(const GlobalState &gs) const;
 
     TypePtr toOrType(const GlobalState &gs) const;
+
+private:
+    /*
+     * You probably want Types::enumUnion() instead.
+     */
+    EnumUnion(std::vector<ClassOrModuleRef> members);
+
+    friend TypePtr Types::enumUnion(std::vector<ClassOrModuleRef> members);
+    static TypePtr make_shared(std::vector<ClassOrModuleRef> members);
 };
 
 class SendAndBlockLink {
