@@ -14,9 +14,13 @@ class A::Gen
 
   sig { void }
   def takes_other
-    # This send is only here so that this file's usage hashes mention the name
-    # `other`, which will pull this file into the fast path when a method named
-    # `other` is added in another package.
+    # These sends are only here so that this file's usage hashes mention the
+    # names `other` and `other2`, which will pull this file into the fast path
+    # when a method with one of those names is added in another package.
+    #
+    # (`other2` lets us do the same thing a second time, after the slow path in
+    # version 2 has reset the reopened stratum.)
     T.unsafe(nil).other
+    T.unsafe(nil).other2
   end
 end
