@@ -272,6 +272,9 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
     }
 
     // Replace error queue with one that is owned by this thread.
+    // NOTE: If the fast path is running in a preemption context, the `errorQueue` of the running slow path will be
+    // saved in the preemption manager; it's always fine at this point to replace the queue, as we will either be
+    // replacing an inactive queue from the idle state, or a dummy queue from the preemption manager.
     gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, errorFlusher);
 
     vector<core::FileRef> toTypecheck;
