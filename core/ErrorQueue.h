@@ -38,17 +38,8 @@ public:
     void pushQueryResponse(core::FileRef fromFile, std::unique_ptr<lsp::QueryResponse> response);
     bool isEmpty();
 
-    /** Collect all errors in the queue, so that we have an accurate picture of what files have raised errors. */
-    void collectAll() {
-        this->checkOwned();
-        this->collectAllInternal();
-    }
-
-    /**
-     * Checks if file currently has errors cached in the queue. This is only as up-to-date as the last call to
-     * this->collectAll().
-     */
-    bool hasCollectedErrors(core::FileRef file) const;
+    /** Collect all errors in the queue, returning a set of files that recorded errors at this point in time. */
+    UnorderedSet<FileRef> collectAll();
 
     void flushAllErrors(const GlobalState &gs);
     void flushErrorsForFile(const GlobalState &gs, FileRef file);

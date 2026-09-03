@@ -18,10 +18,17 @@ void ErrorQueue::collectAllInternal() {
     }
 }
 
-bool ErrorQueue::hasCollectedErrors(core::FileRef file) const {
-    // NOTE: we only check for membership in collected here: flushing moves the error list out, but that doesn't mean
-    // that there weren't errors present for `file` for the lifetime of this queue.
-    return this->collected.contains(file);
+UnorderedSet<FileRef> ErrorQueue::collectAll() {
+    checkOwned();
+
+    this->collectAllInternal();
+
+    UnorderedSet<FileRef> hasErrors;
+    for (auto &entry : this->collected) {
+        hasErrors.insert(entry.first);
+    }
+
+    return hasErrors;
 }
 
 void ErrorQueue::flushAllErrors(const GlobalState &gs) {
