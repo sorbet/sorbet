@@ -1006,7 +1006,7 @@ public:
 };
 CheckSize(MetaType, 16, 8);
 
-TYPE(EnumUnion) final : public Refcounted {
+TYPE(EnumUnion) final : public Refcountable {
 public:
     const std::vector<ClassOrModuleRef> members;
 

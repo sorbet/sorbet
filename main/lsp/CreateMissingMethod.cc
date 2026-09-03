@@ -23,6 +23,7 @@ void collectSelfTypeParams(const core::TypePtr &type, UnorderedSet<core::SymbolR
         case core::TypePtr::Tag::NamedLiteralType:
         case core::TypePtr::Tag::TypeVar:
         case core::TypePtr::Tag::MetaType:
+        case core::TypePtr::Tag::EnumUnion:
             return;
         case core::TypePtr::Tag::SelfTypeParam: {
             auto def = cast_type_nonnull<core::SelfTypeParam>(type).definition;
