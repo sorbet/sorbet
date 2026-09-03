@@ -1515,16 +1515,27 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> &&what, cons
         auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(what.size());
         auto outputq = make_shared<BlockingBoundedQueue<core::FileRef>>(what.size());
 
+        bool checkRelevantPackages = gs.packageDB().enabled() && relevantPackages != nullptr;
+        auto filesToTypecheck = make_shared<UnorderedSet<core::FileRef>>();
+        if (checkRelevantPackages) {
+            // ErrorQueue::flushErrorsForFile mutates the collected-errors map while workers run, so compute this
+            // before starting them rather than having shouldTypecheck read that map concurrently.
+            filesToTypecheck->reserve(what.size());
+            for (const auto &resolved : what) {
+                if (shouldTypecheck(gs, *relevantPackages, resolved.file)) {
+                    filesToTypecheck->insert(resolved.file);
+                }
+            }
+        }
+
         for (auto &resolved : what) {
             fileq->push(move(resolved), 1);
         }
 
-        bool checkRelevantPackages = gs.packageDB().enabled() && relevantPackages != nullptr;
-
         {
             ProgressIndicator cfgInferProgress(opts.showProgress, "CFG+Inference", what.size());
             workers.multiplexJob("typecheck", [&gs, &opts, epoch, &epochManager, &preemptionManager, fileq, outputq,
-                                               cancelable, relevantPackages, checkRelevantPackages,
+                                               cancelable, filesToTypecheck, checkRelevantPackages,
                                                intentionallyLeakASTs]() {
                 ast::ParsedFile job;
                 int processedByThread = 0;
@@ -1549,7 +1560,7 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> &&what, cons
                             const bool fileWasChanged = preemptionManager && job.file.data(gs).epoch > epoch;
                             if (!isCanceled && !fileWasChanged && gs.errorQueue->wouldFlushErrorsForFile(job.file)) {
                                 core::FileRef file = job.file;
-                                if (!checkRelevantPackages || shouldTypecheck(gs, *relevantPackages, file)) {
+                                if (!checkRelevantPackages || filesToTypecheck->contains(file)) {
                                     try {
                                         core::Context ctx(gs, core::Symbols::root(), file);
                                         typecheckOne(ctx, move(job), opts, intentionallyLeakASTs);
