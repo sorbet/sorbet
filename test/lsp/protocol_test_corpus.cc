@@ -1637,9 +1637,8 @@ TEST_CASE_FIXTURE(ProtocolTest, "ErrorsRemainAfterSlowPathRestart") {
     }
 }
 
-// Tests that no-op fast path edits don't push the fastPathEditStratum down, affecting where we can start the next slow
-// path from.
-TEST_CASE_FIXTURE(ProtocolTest, "ViewingFilesDoesntAffectFastPathEditStratum") {
+// Show that no-op fast path edits still shrink the copyable prefix of the symbol table.
+TEST_CASE_FIXTURE(ProtocolTest, "ViewingFilesAffectsFastPathEditStratum") {
     auto initOpts = make_shared<realmain::options::Options>();
     initOpts->cacheSensitiveOptions.sorbetPackages = true;
     initOpts->packageDirected = true;
@@ -1680,7 +1679,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "ViewingFilesDoesntAffectFastPathEditStratum") {
     // The initial slow path.
     assertErrorDiagnostics(initializeLSP(supportsMarkdown, supportsCodeActionResolve, move(opts)), {});
 
-    // Only open a.rb, to test that we skip this stratum on the next slow path
+    // Only open a.rb, which will reset the editable prefix to stratum `0`.
     assertErrorDiagnostics(send(*openFile(files[1].first, files[1].second)), {});
 
     // Make a slow path edit to Root::Foo::A
@@ -1719,8 +1718,52 @@ TEST_CASE_FIXTURE(ProtocolTest, "ViewingFilesDoesntAffectFastPathEditStratum") {
             CHECK_EQ(params->typecheckingPath, TypecheckingPath::Slow);
             CHECK_EQ(params->status, SorbetTypecheckRunStatus::Ended);
 
-            // We're modifying package `Root::Foo`, after a no-op edit to `Root`. As a result, we should restart at
-            // stratum 1.
+            // We're modifying package `Root::Foo`, after a no-op edit to `Root`. However, as fast-path edits will
+            // always shrink the copyable prefix of the symbol table, we restart at stratum `0`.
+            CHECK_EQ(params->startingStratum, 0);
+        }
+
+        assertErrorDiagnostics(move(resps), {{files[3].first, 7, "Method `+` does not exist"}});
+    }
+
+    // Make another slow path edit to Root::Foo::A
+    {
+        assertErrorDiagnostics(send(*openFile(files[3].first, files[3].second)), {});
+
+        // Make a slow path modification to an existing file.
+        auto resps = send(*changeFile(files[3].first,
+                                      "# typed: true\n"
+                                      "module Root::Foo\n"
+                                      "  class A\n"
+                                      "    module Foo2\n"
+                                      "    end\n"
+                                      "\n"
+                                      "    def foo\n"
+                                      "      Root::A.new() + :type_error\n"
+                                      "    end\n"
+                                      "  end\n"
+                                      "end\n",
+                                      2));
+
+        // We should see at a minimum the start/end typechecking messages.
+        REQUIRE(resps.size() >= 2);
+
+        // We should see a starting and ending slow path message, with errors between. The error message between is the
+        // error on `Root::Foo::A`.
+        CHECK_EQ(resps.size(), 3);
+        {
+            auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(resps.front()->asNotification().params);
+            CHECK_EQ(params->typecheckingPath, TypecheckingPath::Slow);
+            CHECK_EQ(params->status, SorbetTypecheckRunStatus::Started);
+        }
+
+        {
+            auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(resps.back()->asNotification().params);
+            CHECK_EQ(params->typecheckingPath, TypecheckingPath::Slow);
+            CHECK_EQ(params->status, SorbetTypecheckRunStatus::Ended);
+
+            // We're modifying package `Root::Foo` from a fresh state, so the next slow path should start at the stratum
+            // that defines `Root::Foo`.
             CHECK_EQ(params->startingStratum, 1);
         }
 

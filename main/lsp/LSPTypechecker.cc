@@ -288,7 +288,6 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
     }
 
     config->logger->debug("Added {} files that were not part of the edit to the update set", toTypecheck.size());
-    auto editStratum = this->lastStratum;
     UnorderedMap<core::FileRef, shared_ptr<const core::FileHash>> oldFoundHashesForFiles;
     auto ix = -1;
     for (auto &file : updates.updatedFiles) {
@@ -297,7 +296,6 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
         ENFORCE(fref.exists(), "New files are not supported in the fast path");
         ENFORCE(fref == gs->findFileByPath(file->path()));
 
-        auto newHash = file->sourceHash();
         auto oldFile = gs->replaceFile(fref, std::move(file));
 
         if (shouldRunIncrementalNamer) {
@@ -318,13 +316,6 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
             oldFoundHashesForFiles.emplace(fref, oldFile->getFileHash());
         }
 
-        // We track the edit stratum for all files that were updated by the edit, if their source hashes differ. This
-        // will avoid bumping the reopened stratum down when the file was opened by a query like go-to-definition,
-        // but is still fairly coarse grained, as any change will mark the package as needing to be re-typechecked.
-        if (oldFile->sourceHash() != newHash) {
-            editStratum = std::min(this->fileToStratum[fref.id()], editStratum);
-        }
-
         // If file doesn't have a typed: sigil, then we need to ensure it's typechecked using typed: false.
         fref.data(*gs).strictLevel = pipeline::decideStrictLevel(*gs, fref, config->opts);
 
@@ -334,8 +325,13 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
     updates.updatedFiles.clear();
     updates.updatedFileRefs.clear();
 
-    // Remember where in the package graph we're making this change, as that will determine how much we can
-    // copy on the next slow path.
+    // Remember where in the package graph we're making this change, as that will determine how much we can copy on the
+    // next slow path. We consider all parts of the edit, not just changed files, as running the fast path will mutate
+    // the symbols of the stratum the files belong to.
+    auto editStratum = this->lastStratum;
+    for (auto fref : toTypecheck) {
+        editStratum = std::min(editStratum, this->fileToStratum[fref.id()]);
+    }
     gs->reopenStratum(editStratum);
 
     if (shouldRunIncrementalNamer && gs->packageDB().enabled()) {
