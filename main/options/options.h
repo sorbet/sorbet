@@ -162,6 +162,7 @@ struct Options {
     std::vector<std::string> allowRelaxedPackagerChecksFor;
     std::vector<std::string> updateVisibilityFor;
     std::vector<std::string> packagerLayers;
+    bool testPackages = false;
     std::string typedSource = "";
     std::string cacheDir = "";
     // This configured both maximum filesystem db size and max virtual memory usage
