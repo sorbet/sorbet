@@ -997,7 +997,7 @@ void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, P
     // packaging systems allow for `__package.rb` files to live inside of a `test` directory.
     //
     // TODO: all of this can go away once test-packages is fully rolled out
-    if (package.file.data(gs).isTestPackage(gs)) {
+    if (gs.packageDB().testPackages() || package.file.data(gs).isTestPackage(gs)) {
         info.usesTestPackages = true;
     } else {
         auto path = package.file.data(gs).path();
