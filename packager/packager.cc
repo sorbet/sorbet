@@ -523,8 +523,12 @@ struct PackageSpecBodyWalk {
 
         if (send.fun == core::Names::export_()) {
             if (send.numPosArgs() == 1) {
-                // null indicates an invalid export.
-                verifyConstant(ctx, core::Names::export_(), send.getPosArg(0));
+                // Record every syntactically valid export. verifyConstant only checks that the argument is a constant
+                // path, so this also records constants that will fail to resolve later. The rest of the pipeline uses
+                // these locations for autocorrects.
+                if (verifyConstant(ctx, core::Names::export_(), send.getPosArg(0)) != nullptr) {
+                    info.exports_.emplace_back(send.loc);
+                }
             }
         } else if ((send.fun == core::Names::import() || send.fun == core::Names::testImport())) {
             if (send.numPosArgs() == 1) {
@@ -1012,6 +1016,7 @@ void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, P
     PackageSpecBodyWalk bodyWalk(info);
     core::Context ctx(gs, core::Symbols::root(), package.file);
     ast::TreeWalk::apply(ctx, bodyWalk, package.tree);
+
     if (gs.packageDB().enforceLayering()) {
         if (!bodyWalk.foundLayerDeclaration) {
             if (auto e = gs.beginError(info.declLoc(), core::errors::Packager::InvalidLayer)) {
