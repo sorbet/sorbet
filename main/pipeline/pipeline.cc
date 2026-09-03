@@ -1482,14 +1482,14 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
 }
 
 bool shouldTypecheck(const core::GlobalState &gs, const UnorderedSet<core::packages::MangledName> &relevantPackages,
-                     core::FileRef file) {
+                     const UnorderedSet<core::FileRef> hadErrors, core::FileRef file) {
     auto pkg = gs.packageDB().getPackageNameForFile(file);
     if (!pkg.exists()) {
         return true;
     }
 
     // We override any potential skipping decision if the file has already had other errors raised.
-    if (gs.errorQueue->hasCollectedErrors(file)) {
+    if (hadErrors.contains(file)) {
         return true;
     }
 
@@ -1508,7 +1508,7 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> &&what, cons
 
     // Collect all outstanding errors eagerly, so that we have an up-to-date picture of what files have had errors
     // aready.
-    gs.errorQueue->collectAll();
+    auto recordedErrors = gs.errorQueue->collectAll();
 
     const auto &epochManager = *gs.epochManager;
     // Record epoch at start of typechecking before any preemption occurs.
@@ -1532,8 +1532,8 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> &&what, cons
 
         {
             ProgressIndicator cfgInferProgress(opts.showProgress, "CFG+Inference", what.size());
-            workers.multiplexJob("typecheck", [&gs, &opts, epoch, &epochManager, &preemptionManager, fileq, outputq,
-                                               cancelable, relevantPackages, checkRelevantPackages,
+            workers.multiplexJob("typecheck", [&gs, &opts, epoch, &epochManager, &preemptionManager, &recordedErrors,
+                                               fileq, outputq, cancelable, relevantPackages, checkRelevantPackages,
                                                intentionallyLeakASTs]() {
                 ast::ParsedFile job;
                 int processedByThread = 0;
@@ -1558,7 +1558,8 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> &&what, cons
                             const bool fileWasChanged = preemptionManager && job.file.data(gs).epoch > epoch;
                             if (!isCanceled && !fileWasChanged && gs.errorQueue->wouldFlushErrorsForFile(job.file)) {
                                 core::FileRef file = job.file;
-                                if (!checkRelevantPackages || shouldTypecheck(gs, *relevantPackages, file)) {
+                                if (!checkRelevantPackages ||
+                                    shouldTypecheck(gs, *relevantPackages, recordedErrors, file)) {
                                     try {
                                         core::Context ctx(gs, core::Symbols::root(), file);
                                         typecheckOne(ctx, move(job), opts, intentionallyLeakASTs);
