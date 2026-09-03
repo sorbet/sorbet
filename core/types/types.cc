@@ -258,32 +258,22 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, absl::
             }
         },
         [&](const EnumUnion &eu) {
-            if (absl::c_any_of(klasses, [&](auto klass) {
-                    return isSubType(gs, make_type<ClassType>(eu.parentEnumClass(gs)), make_type<ClassType>(klass));
-                })) {
-                // One of the klasses is a superclass of the parentEnumClass.
-                // This means every element in the EnumUnion will be a subtype of that klass, and thus will be dropped.
+            vector<ClassOrModuleRef> kept;
+            for (auto member : eu.members) {
+                if (absl::c_all_of(klasses, [&](auto klass) {
+                        return member != klass && !member.data(gs)->derivesFrom(gs, klass);
+                    })) {
+                    kept.emplace_back(member);
+                }
+            }
+            if (kept.size() == eu.members.size()) {
+                result = from;
+            } else if (kept.empty()) {
                 result = Types::bottom();
+            } else if (kept.size() == 1) {
+                result = make_type<ClassType>(kept[0]);
             } else {
-                // None of the klasses are a superclass of the parent enum. This means, for each, either:
-                // - they are exactly equal to one of the EnumUnion members
-                // - they are not superclass of any of the EnumUnion members
-                // So we can check for equality of the ClassOrModuleRef directly instead of using isSubType
-                vector<ClassOrModuleRef> kept;
-                for (auto &member : eu.members) {
-                    if (absl::c_all_of(klasses, [&](auto klass) { return klass != member; })) {
-                        kept.emplace_back(member);
-                    }
-                }
-                if (kept.size() == eu.members.size()) {
-                    result = from;
-                } else if (kept.empty()) {
-                    result = Types::bottom();
-                } else if (kept.size() == 1) {
-                    result = make_type<ClassType>(kept[0]);
-                } else {
-                    result = Types::enumUnion(move(kept));
-                }
+                result = Types::enumUnion(move(kept));
             }
         },
         [&](const SelfTypeParam &p) {
@@ -850,12 +840,7 @@ void EnumUnion::_sanityCheck(const GlobalState &gs) const {
 }
 
 bool EnumUnion::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
-    if (parentEnumClass(gs).data(gs)->derivesFrom(gs, klass)) {
-        return true;
-    }
-    // The common ancestor of all members of EnumUnion is parentEnumClass, so if it doesn't derive from klass, there's
-    // no way all of the members can derive from it too
-    return false;
+    return absl::c_all_of(members, [&](auto member) { return member.data(gs)->derivesFrom(gs, klass); });
 }
 
 ClassOrModuleRef EnumUnion::parentEnumClass(const GlobalState &gs, ClassOrModuleRef sym) {

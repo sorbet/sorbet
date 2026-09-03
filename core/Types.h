@@ -276,6 +276,8 @@ inline bool is_ground_type(const TypePtr &what) {
         case TypePtr::Tag::UnresolvedAppliedType:
         case TypePtr::Tag::OrType:
         case TypePtr::Tag::AndType:
+            return true;
+        // EnumUnion only stores concrete class symbols, so it cannot contain type parameters or other non-ground types.
         case TypePtr::Tag::EnumUnion:
             return true;
         case TypePtr::Tag::NamedLiteralType:

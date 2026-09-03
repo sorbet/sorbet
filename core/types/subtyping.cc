@@ -104,7 +104,6 @@ TypePtr filterOrComponents(const TypePtr &originalType, absl::Span<const TypePtr
         if (left == o->left && right == o->right) {
             return originalType;
         }
-        // Original type is an or, so can't make enumunion
         return OrType::make_shared(move(left), move(right));
     }
 }
@@ -132,7 +131,6 @@ TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr 
     if (typesConsumed.empty()) {
         // t1 has no components that overlap with t2
         categoryCounterInc("lubDistributeOr.outcome", "worst");
-        // TODO
         return OrType::make_shared(t1, underlying(gs, t2));
     }
     // lub back everything except typesConsumed
@@ -143,7 +141,6 @@ TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr 
         return t2;
     }
     categoryCounterInc("lubDistributeOr.outcome", "consumedComponent");
-    // TODO
     return OrType::make_shared(move(remainingTypes), underlying(gs, t2));
 }
 
@@ -255,6 +252,45 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         }
     }
 
+    // EnumUnion is a compact representation of an OrType. Preserve it when combining variants of the same enum, and
+    // otherwise expand it before entering the existing OrType implementation so that all distribution and collapsing
+    // rules continue to apply.
+    if (auto eu1 = cast_type<EnumUnion>(t1)) {
+        if (auto eu2 = cast_type<EnumUnion>(t2)) {
+            if (eu1->parentEnumClass(gs) == eu2->parentEnumClass(gs)) {
+                vector<ClassOrModuleRef> combined;
+                combined.reserve(eu1->members.size() + eu2->members.size());
+                set_union(eu1->members.begin(), eu1->members.end(), eu2->members.begin(), eu2->members.end(),
+                          back_inserter(combined), [](auto lhs, auto rhs) { return lhs.id() < rhs.id(); });
+                if (combined == eu1->members) {
+                    return t1;
+                }
+                if (combined == eu2->members) {
+                    return t2;
+                }
+                return Types::enumUnion(move(combined));
+            }
+        }
+        return lub(gs, eu1->toOrType(gs), t2);
+    }
+    if (auto eu2 = cast_type<EnumUnion>(t2)) {
+        if (isa_type<ClassType>(t1)) {
+            auto c1 = cast_type_nonnull<ClassType>(t1);
+            auto parent = EnumUnion::parentEnumClass(gs, c1.symbol);
+            if (parent.exists() && parent == eu2->parentEnumClass(gs)) {
+                auto combined = eu2->members;
+                auto insertionPoint = lower_bound(combined.begin(), combined.end(), c1.symbol,
+                                                  [](auto lhs, auto rhs) { return lhs.id() < rhs.id(); });
+                if (insertionPoint != combined.end() && *insertionPoint == c1.symbol) {
+                    return t2;
+                }
+                combined.insert(insertionPoint, c1.symbol);
+                return Types::enumUnion(move(combined));
+            }
+        }
+        return lub(gs, t1, eu2->toOrType(gs));
+    }
+
     if (isa_type<OrType>(t2)) { // 3, 5, 6
         categoryCounterInc("lub", "or>");
         return lubDistributeOr(gs, t2, t1);
@@ -277,7 +313,6 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         if (isa_type<OrType>(t1)) {
             return lubDistributeOr(gs, t1, t2);
         }
-        // EnumUnion can't have and
         return OrType::make_shared(t1, t2filtered);
     } else if (isa_type<OrType>(t1)) {
         categoryCounterInc("lub", "<or");
@@ -293,14 +328,12 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             if (isSubType(gs, t1, t2)) {
                 return t2;
             }
-            // EnumUnion can't have applied type
             return OrType::make_shared(t1, t2);
         }
 
         bool rtl = a1->klass == a2->klass || a1->klass.data(gs)->derivesFrom(gs, a2->klass);
         bool ltr = !rtl && a2->klass.data(gs)->derivesFrom(gs, a1->klass);
         if (!rtl && !ltr) {
-            // EnumUnion can't have applied type
             return OrType::make_shared(t1, t2);
         }
         if (ltr) {
@@ -329,7 +362,6 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                 newTargs.emplace_back(Types::any(gs, a1->targs[i], a2->targs[j]));
             } else if (idxTypeMember.data(gs)->flags.isInvariant) {
                 if (!Types::equiv(gs, a1->targs[i], a2->targs[j])) {
-                    // EnumUnion can't have applied type
                     return OrType::make_shared(t1s, t2s);
                 }
                 // We don't need to check the idxTypeMember upper/lower bounds like the corresponding case in glb
@@ -426,7 +458,6 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                     } else {
                         bool allowProxyInLub = isa_type<TupleType>(t2);
                         if (allowProxyInLub) {
-                            // EnumUnion can't have tuple type
                             result = OrType::make_shared(t1, t2);
                         } else {
                             result = lub(gs, h1.underlying(gs), t2.underlying(gs));
@@ -486,7 +517,6 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             if (isSubType(gs, und, t2)) {
                 return t2;
             } else if (allowProxyInLub) {
-                // enum union can't have proxy type
                 return OrType::make_shared(t1, t2);
             } else {
                 return lub(gs, t2, und);
@@ -500,7 +530,6 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         if (isSubType(gs, und, t1)) {
             return t1;
         } else if (allowProxyInLub) {
-            // enum union can't have proxy type
             return OrType::make_shared(t1, t2);
         } else {
             return lub(gs, t1, und);
@@ -530,7 +559,6 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
 
     {
         if (isa_type<TypeVar>(t1) || isa_type<TypeVar>(t2)) {
-            // enum union can't have type var
             return OrType::make_shared(t1, t2);
         }
     }
@@ -542,7 +570,6 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         // NOTE: SelfTypeParam is an inlined type, so TypePtr equality is type equality.
         if (isSelfTypeParamT1 && isSelfTypeParamT2) {
             if (t1 != t2) {
-                // enum union can't have SelfTypeParam
                 return OrType::make_shared(t1, t2);
             } else {
                 return t1;
@@ -555,10 +582,8 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                     return t2;
                 }
             }
-            // enum union can't have SelfTypeParam
             return OrType::make_shared(t1, t2);
         } else if (isSelfTypeParamT1) {
-            // enum union can't have SelfTypeParam
             return OrType::make_shared(t1, t2);
         }
     }
@@ -567,58 +592,11 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         if (isa_type<SelfType>(t1) || isa_type<SelfType>(t2)) {
             // NOTE: SelfType is an inlined type, so TypePtr equality is type equality.
             if (t1 != t2) {
-                // enum union can't have SelfType
                 return OrType::make_shared(t1, t2);
             } else {
                 return t1;
             }
         }
-    }
-
-    if (auto eu2 = cast_type<EnumUnion>(t2)) {
-        if (auto eu1 = cast_type<EnumUnion>(t1)) {
-            auto parent1 = eu1->parentEnumClass(gs);
-            auto parent2 = eu2->parentEnumClass(gs);
-            if (parent1.exists() && parent1 == parent2) {
-                vector<ClassOrModuleRef> combined;
-                combined.reserve(eu1->members.size() + eu2->members.size());
-                set_union(eu1->members.begin(), eu1->members.end(), eu2->members.begin(), eu2->members.end(),
-                          back_inserter(combined), [](auto lhs, auto rhs) { return lhs.id() < rhs.id(); });
-                if (combined == eu1->members) {
-                    // eu2 is a subset of eu1
-                    return t1;
-                }
-                if (combined == eu2->members) {
-                    // eu2 is a superset of eu1
-                    return t2;
-                }
-                ENFORCE(combined.size() > eu1->members.size() && combined.size() > eu2->members.size());
-                return Types::enumUnion(move(combined));
-            }
-            return OrType::make_shared(eu1->toOrType(gs), eu2->toOrType(gs));
-        }
-
-        if (isa_type<ClassType>(t1)) {
-            auto sym1 = cast_type_nonnull<ClassType>(t1).symbol;
-            auto parent1 = EnumUnion::parentEnumClass(gs, sym1);
-            if (parent1.exists()) {
-                auto parent2 = eu2->parentEnumClass(gs);
-                ENFORCE(parent2.exists());
-                if (parent1 == parent2) {
-                    if (absl::c_find(eu2->members, sym1) != eu2->members.end()) {
-                        return t2;
-                    }
-                    auto combined = eu2->members;
-                    auto insertionPoint = lower_bound(combined.begin(), combined.end(), sym1,
-                                                      [](auto lhs, auto rhs) { return lhs.id() < rhs.id(); });
-                    combined.insert(insertionPoint, sym1);
-                    return Types::enumUnion(move(combined));
-                }
-            }
-        }
-
-        // t1 is not class type
-        return OrType::make_shared(t1, eu2->toOrType(gs));
     }
 
     // none is proxy
@@ -669,7 +647,6 @@ TypePtr lubGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
         if (parent1.exists() && parent1 == EnumUnion::parentEnumClass(gs, sym2)) {
             return Types::enumUnion(sym1, sym2);
         }
-        // t1 and t2 aren't same enum instances
         return OrType::make_shared(t1, t2);
     }
 }
@@ -794,6 +771,15 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             categoryCounterInc("glb", "bottom>");
             return t2;
         }
+    }
+
+    // Preserve all of the existing OrType distribution behavior. In particular, filtering members merely by whether
+    // their intersection is inhabited would lose constraints from types like T.all(type_parameter, EnumUnion).
+    if (auto eu1 = cast_type<EnumUnion>(t1)) {
+        return glb(gs, eu1->toOrType(gs), t2);
+    }
+    if (auto eu2 = cast_type<EnumUnion>(t2)) {
+        return glb(gs, t1, eu2->toOrType(gs));
     }
 
     if (t1.kind() > t2.kind()) { // force the relation to be symmentric and half the implementation
@@ -943,26 +929,6 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
 
             return Types::bottom();
         }
-    }
-
-    if (auto eu2 = cast_type<EnumUnion>(t2)) {
-        vector<ClassOrModuleRef> kept;
-        for (auto &member : eu2->members) {
-            auto res = Types::all(gs, t1, make_type<ClassType>(member));
-            if (!res.isBottom()) {
-                kept.emplace_back(member);
-            }
-        }
-        if (kept.empty()) {
-            return Types::bottom();
-        }
-        if (kept.size() == eu2->members.size()) {
-            return t2;
-        }
-        if (kept.size() == 1) {
-            return make_type<ClassType>(kept[0]);
-        }
-        return Types::enumUnion(move(kept));
     }
 
     if (auto o2 = cast_type<OrType>(t2)) { // 3, 6
@@ -1678,6 +1644,11 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
     // Note: order of cases here matters! We can't lose "and" information in t1 early and we can't
     // lose "or" information in t2 early.
     if (auto eu1 = cast_type<EnumUnion>(t1)) { // 7, 8, 9
+        if (auto eu2 = cast_type<EnumUnion>(t2)) {
+            return eu1->parentEnumClass(gs) == eu2->parentEnumClass(gs) &&
+                   includes(eu2->members.begin(), eu2->members.end(), eu1->members.begin(), eu1->members.end(),
+                            [](auto lhs, auto rhs) { return lhs.id() < rhs.id(); });
+        }
         return isSubTypeUnderConstraint(gs, constr, eu1->toOrType(gs), t2, mode, errorDetailsCollector);
     }
     if (auto eu2 = cast_type<EnumUnion>(t2)) {
@@ -1800,7 +1771,6 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
 
             // this could be using lub, but we _know_ that we already tried to collapse it (prior
             // construction of types did). Thus we use OrType::make_shared instead
-            // enum union can't have and types
             return Types::isSubTypeUnderConstraint(gs, constr, t1, OrType::make_shared(o2a->left, *r), mode,
                                                    errorDetailsCollector) &&
                    Types::isSubTypeUnderConstraint(gs, constr, t1, OrType::make_shared(o2a->right, *r), mode,
@@ -1841,7 +1811,8 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
         } else if (isa_type<SelfTypeParam>(t1)) {
             auto selfTypeParam1 = cast_type_nonnull<SelfTypeParam>(t1);
             if (const auto lambdaParam = cast_type<LambdaParam>(selfTypeParam1.definition.resultType(gs))) {
-                if (isa_type<OrType>(lambdaParam->upperBound) || isa_type<AndType>(lambdaParam->upperBound)) {
+                if (isa_type<OrType>(lambdaParam->upperBound) || isa_type<AndType>(lambdaParam->upperBound) ||
+                    isa_type<EnumUnion>(lambdaParam->upperBound)) {
                     return Types::isSubTypeUnderConstraint(gs, constr, lambdaParam->upperBound, t2, mode,
                                                            errorDetailsCollector);
                 }
@@ -1872,7 +1843,8 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
         } else if (isa_type<SelfTypeParam>(t2)) {
             auto selfTypeParam2 = cast_type_nonnull<SelfTypeParam>(t2);
             if (const auto lambdaParam = cast_type<LambdaParam>(selfTypeParam2.definition.resultType(gs))) {
-                if (isa_type<OrType>(lambdaParam->lowerBound) || isa_type<AndType>(lambdaParam->lowerBound)) {
+                if (isa_type<OrType>(lambdaParam->lowerBound) || isa_type<AndType>(lambdaParam->lowerBound) ||
+                    isa_type<EnumUnion>(lambdaParam->lowerBound)) {
                     return Types::isSubTypeUnderConstraint(gs, constr, t1, lambdaParam->lowerBound, mode,
                                                            errorDetailsCollector);
                 }

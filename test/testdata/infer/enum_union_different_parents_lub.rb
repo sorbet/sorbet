@@ -28,7 +28,7 @@ def test_different_enum_lub(cond)
     T.must(res)
   end
 
-  T.reveal_type(x) # error: Revealed type: `T.any(Suit::Hearts, Suit::Diamonds, Color::Red, Color::Blue)`
+  T.reveal_type(x) # error: Revealed type: `T.any(Color::Red, Color::Blue, Suit::Hearts, Suit::Diamonds)`
 
   case x
   when Suit::Hearts, Suit::Diamonds

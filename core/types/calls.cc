@@ -1786,7 +1786,7 @@ namespace {
 // Determines whether we will allow `new` on a type wrapped by a `MetaType`. Note that this function is conservative,
 // in that there are some cases we want to reject but cannot detect here.
 bool canCallNew(const GlobalState &gs, const TypePtr &wrapped) {
-    if (isa_type<OrType>(wrapped) || isa_type<AndType>(wrapped)) {
+    if (isa_type<OrType>(wrapped) || isa_type<AndType>(wrapped) || isa_type<EnumUnion>(wrapped)) {
         return false;
     }
 

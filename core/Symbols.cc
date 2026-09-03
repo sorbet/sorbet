@@ -1865,7 +1865,7 @@ bool ClassOrModule::hasSingleSealedSubclass(const GlobalState &gs) const {
 
     // There is exactly one subclass when the sealedSubclasses field is a set with a single non-bottom type in it
     auto currentClasses = appliedType->targs[0];
-    return !currentClasses.isBottom() && !isa_type<OrType>(currentClasses);
+    return !currentClasses.isBottom() && !isa_type<OrType>(currentClasses) && !isa_type<EnumUnion>(currentClasses);
 }
 
 // Record a required ancestor for this class of module
