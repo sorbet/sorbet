@@ -205,8 +205,10 @@ Usage:
       --watchman-path <path>    Path to watchman executable. Will search on `PATH` if
                                 <path> contains no slashes. (default: watchman)
       --watchman-pause-state-name <state>
-                                Name of watchman state that halts processing for its
-                                duration (default: "")
+                                Defer file change notifications while a client holds this
+                                watchman state (see `watchman state-enter`) on the
+                                watched root; they arrive as one batch when the state is
+                                left. May be repeated.
       --watchman-namespace <namespace>
                                 Namespace for watchman (default: "")
       --lsp-directories-missing-from-client <path>

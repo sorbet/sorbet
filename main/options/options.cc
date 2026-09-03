@@ -518,8 +518,10 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  "Path to watchman executable. Will search on `PATH` if <path> contains no slashes.",
                                  cxxopts::value<string>()->default_value(empty.watchmanPath), "<path>");
     options.add_options(section)("watchman-pause-state-name",
-                                 "Name of watchman state that halts processing for its duration",
-                                 cxxopts::value<string>()->default_value(empty.watchmanPauseStateName), "<state>");
+                                 "Defer file change notifications while a client holds this watchman state (see "
+                                 "`watchman state-enter`) on the watched root; they arrive as one batch when the "
+                                 "state is left. May be repeated.",
+                                 cxxopts::value<vector<string>>(), "<state>");
     options.add_options(section)("watchman-namespace", "Namespace for watchman",
                                  cxxopts::value<string>()->default_value(empty.watchmanNamespace), "<namespace>");
     options.add_options(section)(
@@ -1069,10 +1071,12 @@ void readOptions(Options &opts,
         opts.runLSP = raw["lsp"].as<bool>();
         opts.disableWatchman = raw["disable-watchman"].as<bool>();
         opts.watchmanPath = raw["watchman-path"].as<string>();
-        opts.watchmanPauseStateName = raw["watchman-pause-state-name"].as<string>();
-        if (!opts.watchmanPauseStateName.empty() && !opts.disableWatchman) {
-            logger->error("watchman-pause-state-name must be used with watchman enabled");
-            throw EarlyReturnWithCode(1);
+        if (raw.count("watchman-pause-state-name") > 0) {
+            opts.watchmanPauseStateNames = raw["watchman-pause-state-name"].as<vector<string>>();
+            if (opts.disableWatchman) {
+                logger->error("--watchman-pause-state-name cannot be used with --disable-watchman");
+                throw EarlyReturnWithCode(1);
+            }
         }
         opts.watchmanNamespace = raw["watchman-namespace"].as<string>();
 

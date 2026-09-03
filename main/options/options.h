@@ -140,7 +140,7 @@ struct Options {
     bool disableWatchman = false;
     std::string watchmanNamespace;
     std::string watchmanPath = "watchman";
-    std::string watchmanPauseStateName;
+    std::vector<std::string> watchmanPauseStateNames;
     bool stressIncrementalResolver = false;
     std::optional<int> sleepInSlowPathSeconds = std::nullopt;
     bool traceLexer = false;
