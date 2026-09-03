@@ -381,7 +381,7 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
             e.setHeader("Assigning a value to `{}` that does not match expected type `{}`", argSym.parameterName(gs),
                         expectedType.show(gs));
         } else {
-            if (fullType.type != thisType && isa_type<OrType>(fullType.type)) {
+            if (fullType.type != thisType && is_union_type(fullType.type)) {
                 e.setHeader("Expected `{}` but found `{}` for argument `{}` on `{}` component of `{}`",
                             expectedType.show(gs), argTpe.type.show(gs), argSym.parameterName(gs), method.show(gs),
                             fullType.type.show(gs));
@@ -1786,7 +1786,7 @@ namespace {
 // Determines whether we will allow `new` on a type wrapped by a `MetaType`. Note that this function is conservative,
 // in that there are some cases we want to reject but cannot detect here.
 bool canCallNew(const GlobalState &gs, const TypePtr &wrapped) {
-    if (isa_type<OrType>(wrapped) || isa_type<AndType>(wrapped) || isa_type<EnumUnion>(wrapped)) {
+    if (is_union_type(wrapped) || isa_type<AndType>(wrapped)) {
         return false;
     }
 

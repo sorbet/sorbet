@@ -27,6 +27,7 @@ class TypeVar;
 class SendAndBlockLink;
 class TypeAndOrigins;
 class EnumUnion;
+class OrType;
 
 class ParamInfo {
 public:
@@ -294,6 +295,13 @@ inline bool is_ground_type(const TypePtr &what) {
         case TypePtr::Tag::TypeVar:
             return false;
     }
+}
+
+// Use this when the distinction between the binary OrType representation and the compact EnumUnion representation
+// does not matter. Direct OrType casts should be reserved for code that specifically traverses or constructs its
+// binary tree representation.
+inline bool is_union_type(const TypePtr &what) {
+    return isa_type<OrType>(what) || isa_type<EnumUnion>(what);
 }
 
 inline bool is_proxy_type(const TypePtr &what) {

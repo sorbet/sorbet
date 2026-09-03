@@ -1811,8 +1811,7 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
         } else if (isa_type<SelfTypeParam>(t1)) {
             auto selfTypeParam1 = cast_type_nonnull<SelfTypeParam>(t1);
             if (const auto lambdaParam = cast_type<LambdaParam>(selfTypeParam1.definition.resultType(gs))) {
-                if (isa_type<OrType>(lambdaParam->upperBound) || isa_type<AndType>(lambdaParam->upperBound) ||
-                    isa_type<EnumUnion>(lambdaParam->upperBound)) {
+                if (is_union_type(lambdaParam->upperBound) || isa_type<AndType>(lambdaParam->upperBound)) {
                     return Types::isSubTypeUnderConstraint(gs, constr, lambdaParam->upperBound, t2, mode,
                                                            errorDetailsCollector);
                 }
@@ -1843,8 +1842,7 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
         } else if (isa_type<SelfTypeParam>(t2)) {
             auto selfTypeParam2 = cast_type_nonnull<SelfTypeParam>(t2);
             if (const auto lambdaParam = cast_type<LambdaParam>(selfTypeParam2.definition.resultType(gs))) {
-                if (isa_type<OrType>(lambdaParam->lowerBound) || isa_type<AndType>(lambdaParam->lowerBound) ||
-                    isa_type<EnumUnion>(lambdaParam->lowerBound)) {
+                if (is_union_type(lambdaParam->lowerBound) || isa_type<AndType>(lambdaParam->lowerBound)) {
                     return Types::isSubTypeUnderConstraint(gs, constr, t1, lambdaParam->lowerBound, mode,
                                                            errorDetailsCollector);
                 }
