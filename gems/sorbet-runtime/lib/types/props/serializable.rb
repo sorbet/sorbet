@@ -289,6 +289,18 @@ module T::Props::Serializable::DecoratorMethods
       raise ArgumentError.new("The value of `raise_on_nil_write` if specified must be `true` (given: #{rules[:raise_on_nil_write]}).")
     end
 
+    if rules[:raise_on_nil_write] && !rules[:_tnilable]
+      is_nilclass_parent = type.is_a?(T::Types::Simple) &&
+                           (type.raw_type.equal?(Object) || type.raw_type.equal?(BasicObject))
+      # Use `instance_of?` because modules can be mixed into NilClass, but classes cannot.
+      is_module = type.is_a?(T::Types::Simple) && type.raw_type.instance_of?(Module)
+      underspecified_type = type.equal?(T.untyped) || is_nilclass_parent || is_module
+
+      unless underspecified_type
+        raise ArgumentError.new("`raise_on_nil_write` requires that the type of `#{name}` be `T.nilable(...)` (given: #{type})")
+      end
+    end
+
     result
   end
 
