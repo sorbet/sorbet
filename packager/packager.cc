@@ -423,7 +423,9 @@ private:
 
         // TODO(trevor) this can be removed once we've fully migrated to test-packages, as the special
         // treatment of `Test::` will be gone.
-        if (this->pkg.usesTestPackages && inTestNamespace(gs)) {
+        // TODO(trevor) we consider `testPackages` here so that we only raise an error for the `Test::`
+        // namespace if we're not forcing test-packages everywhere.
+        if (this->pkg.usesTestPackages && !gs.packageDB().testPackages() && inTestNamespace(gs)) {
             return false;
         }
 
