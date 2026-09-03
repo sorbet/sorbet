@@ -42,7 +42,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             {:fixed => ::T.untyped()}
           end
         end
-        <emptyTree>::<C Generated>
       end
     end
 
@@ -99,7 +98,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
                   {:fixed => ::T.untyped()}
                 end
               end
-              <emptyTree>::<C Generated>
             end
             <cast:assert_type!>(<emptyTree>::<C Generated>.new(1), <todo sym>, <emptyTree>::<C Generated>)
             <emptyTree>::<C Generated>.new(1).value()
@@ -117,8 +115,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  class <emptyTree>::<C StructAsBlockValue><<C <todo sym>>> < (::<todo sym>)
-    result = [nil].map() do ||
+  class <emptyTree>::<C StructInConditional><<C <todo sym>>> < (::<todo sym>)
+    if <emptyTree>::<C Kernel>.rand().>(0.500000)
       begin
         class <emptyTree>::<C Generated$1><<C <todo sym>>> < (::<root>::<C Struct>)
           ::T::Sig::WithoutRuntime.sig() do ||
@@ -160,10 +158,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             {:fixed => ::T.untyped()}
           end
         end
-        <emptyTree>::<C Generated>
       end
+    else
+      <emptyTree>
     end
 
-    <cast:assert_type!>(result, <todo sym>, <emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C T>.class_of(<emptyTree>::<C Generated>)))
+    <cast:assert_type!>(<emptyTree>::<C Generated>.new(1), <todo sym>, <emptyTree>::<C Generated>)
+
+    <emptyTree>::<C Generated>.new(1).value()
   end
 end

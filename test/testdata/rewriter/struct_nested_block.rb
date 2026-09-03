@@ -31,10 +31,11 @@ class ClassInBlock
   end
 end
 
-class StructAsBlockValue
-  result = [nil].map do
+class StructInConditional
+  if Kernel.rand > 0.5
     Generated = Struct.new(:value)
   end
 
-  T.assert_type!(result, T::Array[T.class_of(Generated)])
+  T.assert_type!(Generated.new(1), Generated)
+  Generated.new(1).value
 end
