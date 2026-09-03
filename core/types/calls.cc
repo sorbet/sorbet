@@ -934,7 +934,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     // - It has to be aware of the `<root>` / `Object` distinction at the top-level
                     // - It ignores the syntactic scope and always does a transitive lookup (even
                     //   when Sorbet would otherwise ban that)
-                    // but it lets us avoid the findMemberFuzzyMatch call below.
+                    // but it lets us avoid the findMethodFuzzyMatch call below.
                     auto constantScope = symbol == Symbols::root() ? symbol : symbol.data(gs)->attachedClass(gs);
                     NameRef constantName;
                     if (constantScope.exists() && (constantName = gs.lookupNameConstant(targetName)).exists()) {
@@ -958,7 +958,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 }
 
                 if (!canSkipFuzzyMatch) {
-                    auto alternatives = symbol.data(gs)->findMemberFuzzyMatch(gs, targetName);
+                    auto alternatives = symbol.data(gs)->findMethodFuzzyMatch(gs, targetName);
                     for (auto alternative : alternatives) {
                         auto possibleSymbol = alternative.symbol;
                         if (!possibleSymbol.isMethod()) {
