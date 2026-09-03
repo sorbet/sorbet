@@ -1,0 +1,18 @@
+# typed: strict
+# frozen_string_literal: true
+# assert-slow-path: true
+
+class B::Uses
+  extend T::Sig
+
+  sig { returns(A::Gen[Integer, Integer, Integer, Integer]) }
+  def self.gen = raise
+
+  sig { returns(Integer) }
+  def self.other = 0
+end
+
+# A new class forces this edit to take the slow path, which will copy the
+# symbol table prefix up to stratum 1, dropping the type member that the
+# version 1 fast path re-entered at the end of the symbol table.
+class B::NewClass; end
