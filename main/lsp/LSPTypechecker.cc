@@ -328,7 +328,11 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
     // Remember where in the package graph we're making this change, as that will determine how much we can copy on the
     // next slow path. We consider all parts of the edit, not just changed files, as running the fast path will mutate
     // the symbols of the stratum the files belong to.
-    gs->reopenStratum(this->getFileStratumMapping().getStratumForFiles(toTypecheck));
+    auto editStratum = this->lastStratum;
+    for (auto fref : toTypecheck) {
+        editStratum = std::min(editStratum, this->fileToStratum[fref.id()]);
+    }
+    gs->reopenStratum(editStratum);
 
     if (shouldRunIncrementalNamer && gs->packageDB().enabled()) {
         vector<core::FileRef> packageFiles;
