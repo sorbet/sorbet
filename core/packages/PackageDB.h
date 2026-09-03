@@ -29,6 +29,7 @@ public:
 
 class PackageDB final {
     friend class core::GlobalState;
+    friend class UnfreezePackages;
 
 public:
     static constexpr NameRef TEST_NAMESPACE = core::Names::Constants::Test();
@@ -156,8 +157,6 @@ private:
     std::thread::id writerThread;
 
     Condensation condensation_;
-
-    friend class UnfreezePackages;
 };
 
 } // namespace sorbet::core::packages
