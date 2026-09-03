@@ -549,9 +549,15 @@ struct PackageSpecBodyWalk {
                     // TODO(trevor): this check can be removed after we've fully switched to test-packages, as
                     // `test_import` will no longer exist
                     if (info.usesTestPackages && send.fun == core::Names::testImport()) {
-                        if (auto e = ctx.beginError(send.funLoc, core::errors::Packager::InvalidPackageExpression)) {
-                            e.setHeader("Test imports must use `{}`", "import");
-                            e.replaceWith("Use import", ctx.locAt(send.funLoc), "import");
+                        // TODO(trevor) we completely ignore `test_import` if we're in test-packages mode. As part of
+                        // the migration is swapping in test files without modifying the originals, this gives us a good
+                        // path forward for not making a lot of potentially conflicting changes all at once.
+                        if (!ctx.state.packageDB().testPackages()) {
+                            if (auto e =
+                                    ctx.beginError(send.funLoc, core::errors::Packager::InvalidPackageExpression)) {
+                                e.setHeader("Test imports must use `{}`", "import");
+                                e.replaceWith("Use import", ctx.locAt(send.funLoc), "import");
+                            }
                         }
                     } else {
                         imp = &info.importedPackageNames.emplace_back(importName, method2ImportType(send), send.loc);
