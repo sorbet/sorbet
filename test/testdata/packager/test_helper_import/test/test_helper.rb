@@ -9,8 +9,8 @@ module Test::RootPkg
   # ^^^^^^^^^^^^^^^ error: `B::PrivateThing` resolves but is not exported from `B`
 
     C::Thing # not allowed---test-only import
-  # ^^^^^^^^ error: The `test_import` constant `C::Thing` can only be used in `.test.rb` files
+  # ^ error: The `test_import` package `C` can only be used in `.test.rb` files
     C::PrivateThing
-  # ^^^^^^^^^^^^^^^ error: The `test_import` constant `C::PrivateThing` can only be used in `.test.rb` files
+  # ^ error: The `test_import` package `C` can only be used in `.test.rb` files
   end
 end

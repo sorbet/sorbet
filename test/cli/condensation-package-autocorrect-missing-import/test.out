@@ -49,9 +49,9 @@ use_other_package/foo.rb:8: `Foo::Bar::OtherPackage` is not imported https://srb
      7 |  strict_dependencies 'layered'
                                        ^
 
-use_other_package/foo.rb:9: Used `test_import` constant `Foo::Bar::OtherPackageTest::OtherClass` in non-test file https://srb.help/3720
+use_other_package/foo.rb:9: Used `test_import` package `Foo::Bar::OtherPackageTest` in non-test file https://srb.help/3720
      9 |      Foo::Bar::OtherPackageTest::OtherClass
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
     other_test/__package.rb:3: Defined here
      3 |class Foo::Bar::OtherPackageTest < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

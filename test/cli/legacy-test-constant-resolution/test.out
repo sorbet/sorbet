@@ -43,9 +43,9 @@ unit_none/test/use.test.rb:3: `Target` is not imported https://srb.help/3718
      3 |class UnitNone < PackageSpec
                                     ^
 
-helper_unit_import/test/helper.rb:3: The `test_import` constant `Test::Target::TestCase` can only be used in `.test.rb` files https://srb.help/3720
+helper_unit_import/test/helper.rb:3: The `test_import` package `Target` can only be used in `.test.rb` files https://srb.help/3720
      3 |Test::Target::TestCase
-        ^^^^^^^^^^^^^^^^^^^^^^
+        ^^^^^^^^^^^^
     target/__package.rb:3: Defined here
      3 |class Target < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -168,9 +168,9 @@ No errors! Great job.
 ------ package-directed: isolated helper, helper import ------
 No errors! Great job.
 ------ package-directed: isolated helper, test-unit import ------
-helper_unit_import/test/helper.rb:3: The `test_import` constant `Test::Target::TestCase` can only be used in `.test.rb` files https://srb.help/3720
+helper_unit_import/test/helper.rb:3: The `test_import` package `Target` can only be used in `.test.rb` files https://srb.help/3720
      3 |Test::Target::TestCase
-        ^^^^^^^^^^^^^^^^^^^^^^
+        ^^^^^^^^^^^^
     target/__package.rb:3: Defined here
      3 |class Target < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -247,9 +247,9 @@ prod_normal/use.rb:3: `Test::Target::Helper` is defined in a test namespace and 
      3 |Test::Target::Helper
         ^^^^^^^^^^^^^^^^^^^^
 
-helper_unit_import/test/helper.rb:3: The `test_import` constant `Test::Target::TestCase` can only be used in `.test.rb` files https://srb.help/3720
+helper_unit_import/test/helper.rb:3: The `test_import` package `Target` can only be used in `.test.rb` files https://srb.help/3720
      3 |Test::Target::TestCase
-        ^^^^^^^^^^^^^^^^^^^^^^
+        ^^^^^^^^^^^^
     target/__package.rb:3: Defined here
      3 |class Target < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^

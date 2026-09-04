@@ -34,7 +34,7 @@ module Opus::Foo
 
   # via test_import Opus::TestImported
   Opus::TestImported::TIClass
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Used `test_import` constant `Opus::TestImported::TIClass` in non-test file
+# ^^^^^^^^^^^^^^^^^^ error: Used `test_import` package `Opus::TestImported` in non-test file
   Test::Opus::TestImported::TITestClass
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Used `test_import` constant `Test::Opus::TestImported::TITestClass` in non-test file
 
