@@ -577,22 +577,6 @@ public:
         }
 
         auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-        auto otherFile = litSymbol.loc(ctx).file();
-        if (!otherFile.exists()) {
-            return;
-        }
-
-        // If the referenced symbol comes from the legacy test namespace, we must also be in a test file. This check
-        // depends on the resolved symbol's definition file, so it cannot be part of package import checking.
-        // TODO(trevor): this check is redundant with import checking after the test-packages migration is complete.
-        if (!pkg.usesTestPackages && otherFile.data(ctx).isPackagedTest() && !ctx.file.data(ctx).isPackagedTest()) {
-            if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
-                e.setHeader("`{}` is defined in a test namespace and cannot be referenced in a non-test file",
-                            litSymbol.show(ctx));
-            }
-            return;
-        }
-
         bool isExported = pkg.locs.exportAll.exists();
         if (litSymbol.isClassOrModule()) {
             isExported = isExported || litSymbol.asClassOrModuleRef().data(ctx)->flags.isExported;
