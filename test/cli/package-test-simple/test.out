@@ -1,6 +1,6 @@
-main_lib/lib.rb:8: Used `test_import` constant `Project::TestOnly::SomeHelper` in non-test file https://srb.help/3720
+main_lib/lib.rb:8: Used `test_import` package `Project::TestOnly` in non-test file https://srb.help/3720
      8 |  Project::TestOnly::SomeHelper.new
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^
     test_only/__package.rb:5: Defined here
      5 |class Project::TestOnly < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

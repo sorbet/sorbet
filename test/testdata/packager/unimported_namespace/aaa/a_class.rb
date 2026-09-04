@@ -3,10 +3,10 @@
 
 class AAA::AClass
   BBB
-# ^^^ error: `BBB` resolves but its package is not imported
+# ^^^ error: `BBB` is not imported
 
   CCC
-# ^^^ error: Unable to resolve constant `CCC`
+# ^^^ error: `CCC` is not imported
 
   C
 # ^ error: Unable to resolve constant `C`

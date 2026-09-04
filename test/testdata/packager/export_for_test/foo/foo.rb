@@ -18,12 +18,12 @@ module Opus::Foo
   # via import Opus::Foo::Bar
   Opus::Foo::Bar::BarClass
   Test::Opus::Foo::Bar::BarClassTest
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Opus::Foo::Bar::BarClassTest` cannot be referenced here because it is defined in a test namespace and cannot be referenced in a non-test file
+# ^^^^ error: Unable to resolve constant `Test`
 
   # via import Opus::Util
   Opus::Util::UtilClass
   Test::Opus::Util::TestUtil
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Opus::Util::TestUtil` cannot be referenced here because it is defined in a test namespace and cannot be referenced in a non-test file
+# ^^^^ error: Unable to resolve constant `Test`
 
   Opus::Util::Nesting::Public.public_method
 
@@ -34,9 +34,9 @@ module Opus::Foo
 
   # via test_import Opus::TestImported
   Opus::TestImported::TIClass
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Used `test_import` constant `Opus::TestImported::TIClass` in non-test file
+# ^^^^^^^^^^^^^^^^^^ error: Used `test_import` package `Opus::TestImported` in non-test file
   Test::Opus::TestImported::TITestClass
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Opus::TestImported::TITestClass` cannot be referenced here because it is defined in a test namespace and cannot be referenced in a non-test file
+# ^^^^ error: Unable to resolve constant `Test`
 
 
   # via export_for_test Opus::Foo::Private::ImplDetail
