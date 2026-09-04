@@ -551,8 +551,8 @@ PackageInfo::checkReferenceAgainstImports(core::Context ctx, core::LocOffsets er
         path = pkg.pathTo(ctx, this->mangledName());
         causesCycle = strictDepsLevel >= core::packages::StrictDependenciesLevel::LayeredDag && path.has_value();
     }
-    bool hasModularityError = layeringViolation || strictDependenciesTooLow || causesCycle || badTestReference ||
-                              causesVisibilityError;
+    bool hasModularityError =
+        layeringViolation || strictDependenciesTooLow || causesCycle || badTestReference || causesVisibilityError;
     // visible_to errors are handled separately (by `updateVisibilityFor`),
     // so they're not included in this causesModularityError field of referencedPackages
     bool causesModularityError = hasModularityError && !causesVisibilityError;
@@ -594,10 +594,10 @@ PackageInfo::checkReferenceAgainstImports(core::Context ctx, core::LocOffsets er
     } else {
         // TODO(neil): Provide actionable advice and/or link to a doc that would help the user resolve these
         // layering/strict_dependencies issues.
-        auto error = causesCycle           ? core::errors::Packager::StrictDependenciesViolation
-                     : layeringViolation   ? core::errors::Packager::LayeringViolation
-                     : badTestReference    ? core::errors::Packager::TestImportMismatch
-                                           : core::errors::Packager::StrictDependenciesViolation;
+        auto error = causesCycle         ? core::errors::Packager::StrictDependenciesViolation
+                     : layeringViolation ? core::errors::Packager::LayeringViolation
+                     : badTestReference  ? core::errors::Packager::TestImportMismatch
+                                         : core::errors::Packager::StrictDependenciesViolation;
         if (auto e = ctx.beginError(errLoc, error)) {
             vector<string> reasons;
             e.addErrorLine(this->declLoc(), "Enclosing package declared here");
@@ -677,10 +677,10 @@ PackageInfo::checkReferenceAgainstImports(core::Context ctx, core::LocOffsets er
                 ENFORCE(false, "At most six reasons should be present");
             }
             e.setHeader("`{}` cannot be referenced here because {}", litSymbol.show(ctx), reason);
-                if (!wasImported) {
-                    e.addErrorNote("`{}`'s package is not imported", litSymbol.show(ctx));
-                } else if (testImportInProd || testUnitImportInHelper) {
-                    e.addErrorNote("`{}`'s package is imported as `{}`", litSymbol.show(ctx), "test_import");
+            if (!wasImported) {
+                e.addErrorNote("`{}`'s package is not imported", litSymbol.show(ctx));
+            } else if (testImportInProd || testUnitImportInHelper) {
+                e.addErrorNote("`{}`'s package is imported as `{}`", litSymbol.show(ctx), "test_import");
             }
         }
     }
