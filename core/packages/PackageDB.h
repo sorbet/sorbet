@@ -72,6 +72,12 @@ public:
         return this->enabled_;
     }
 
+    // Whether the --experimental-test-packages mode is active. This controls whether all packages are treated as having
+    // been migrated to `test!` packages; if this returns `false` there still may be test packages present.
+    bool testPackages() const {
+        return this->testPackages_;
+    }
+
     GenPackagesMode genPackagesMode() const {
         return this->genPackagesMode_;
     }
@@ -155,6 +161,8 @@ private:
 
     bool frozen = true;
     std::thread::id writerThread;
+
+    bool testPackages_ = false;
 
     Condensation condensation_;
 };
