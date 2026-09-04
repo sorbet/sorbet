@@ -2537,8 +2537,9 @@ Namer::runInternal(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, Wor
                               core::FoundDefHashesResult *foundHashesOut) {
     // In non-incremental namer, there are no old FoundDefHashes; just defineSymbols like normal.
     vector<core::ClassOrModuleRef> updatedSymbols;
-    return runInternal(gs, trees, workers, {}, foundHashesOut, updatedSymbols);
+    auto canceled = runInternal(gs, trees, workers, {}, foundHashesOut, updatedSymbols);
     ENFORCE(updatedSymbols.empty());
+    return canceled;
 }
 
 [[nodiscard]] bool
