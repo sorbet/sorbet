@@ -494,14 +494,13 @@ static void addAutocorrect(core::Context ctx, core::ErrorBuilder &e,
 
 } // namespace
 
-// Returns `std::nullopt` if it's okay to use the symbol.
+// Returns `std::nullopt` if it's okay to reference the package from this file.
 // Returns a `PackageReferenceInfo` if the usage was not okay (e.g. missing import, modularity error, etc.)
 optional<core::packages::PackageReferenceInfo>
-PackageInfo::checkReferenceAgainstImports(core::Context ctx, core::LocOffsets errLoc, core::SymbolRef litSymbol) const {
+PackageInfo::checkReferenceAgainstImports(core::Context ctx, core::LocOffsets errLoc, MangledName otherPackage) const {
     auto &db = ctx.state.packageDB();
-    auto otherPackage = litSymbol.enclosingClass(ctx).data(ctx)->package;
     ENFORCE(otherPackage.exists() && this->mangledName() != otherPackage);
-    auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
+    auto &pkg = db.getPackageInfo(otherPackage);
 
     auto *import = this->importsPackage(otherPackage);
     auto wasImported = import != nullptr;
@@ -565,7 +564,7 @@ PackageInfo::checkReferenceAgainstImports(core::Context ctx, core::LocOffsets er
 
         if (!wasImported) {
             if (auto e = ctx.beginError(errLoc, core::errors::Packager::MissingImport)) {
-                e.setHeader("`{}` resolves but its package is not imported", litSymbol.show(ctx));
+                e.setHeader("`{}` is not imported", pkg.show(ctx));
                 e.addErrorLine(pkg.declLoc(), "Package defined here");
                 addAutocorrect(ctx, e, move(importAutocorrect));
             }
@@ -573,14 +572,14 @@ PackageInfo::checkReferenceAgainstImports(core::Context ctx, core::LocOffsets er
             ENFORCE(!isTestImport);
             ENFORCE(!this->usesTestPackages, "test_import found in --test-packages mode");
             if (auto e = ctx.beginError(errLoc, core::errors::Packager::UsedTestOnlyName)) {
-                e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", litSymbol.show(ctx));
+                e.setHeader("Used `{}` package `{}` in non-test file", "test_import", pkg.show(ctx));
                 e.addErrorLine(pkg.declLoc(), "Defined here");
                 addAutocorrect(ctx, e, move(importAutocorrect));
             }
         } else if (testUnitImportInHelper) {
             ENFORCE(!this->usesTestPackages, "test_import found in --test-packages mode");
             if (auto e = ctx.beginError(errLoc, core::errors::Packager::UsedTestOnlyName)) {
-                e.setHeader("The `{}` constant `{}` can only be used in `{}` files", "test_import", litSymbol.show(ctx),
+                e.setHeader("The `{}` package `{}` can only be used in `{}` files", "test_import", pkg.show(ctx),
                             ".test.rb");
                 e.addErrorLine(pkg.declLoc(), "Defined here");
                 e.addErrorNote("This is because this `{}` is declared with `{}`, which means the constant can "
@@ -618,7 +617,7 @@ PackageInfo::checkReferenceAgainstImports(core::Context ctx, core::LocOffsets er
             }
             if (causesCycle) {
                 reasons.emplace_back(
-                    core::ErrorColors::format("importing its package would put `{}` into a cycle", this->show(ctx)));
+                    core::ErrorColors::format("importing it would put `{}` into a cycle", this->show(ctx)));
                 auto currentStrictDepsLevel = fmt::format(
                     "strict_dependencies '{}'", core::packages::strictDependenciesLevelToString(strictDepsLevel));
                 e.addErrorLine(core::Loc(this->file, this->locs.strictDependenciesLevel),
@@ -628,7 +627,7 @@ PackageInfo::checkReferenceAgainstImports(core::Context ctx, core::LocOffsets er
             }
 
             if (layeringViolation) {
-                reasons.emplace_back("importing its package would cause a layering violation");
+                reasons.emplace_back("importing it would cause a layering violation");
                 ENFORCE(pkg.layer.exists(), "causesLayeringViolation should return false if layer is not set");
                 ENFORCE(this->layer.exists(), "causesLayeringViolation should return false if layer is not set");
                 e.addErrorLine(core::Loc(pkg.file, pkg.locs.layer),
@@ -676,11 +675,11 @@ PackageInfo::checkReferenceAgainstImports(core::Context ctx, core::LocOffsets er
             } else {
                 ENFORCE(false, "At most six reasons should be present");
             }
-            e.setHeader("`{}` cannot be referenced here because {}", litSymbol.show(ctx), reason);
+            e.setHeader("`{}` cannot be referenced here because {}", pkg.show(ctx), reason);
             if (!wasImported) {
-                e.addErrorNote("`{}`'s package is not imported", litSymbol.show(ctx));
+                e.addErrorNote("`{}` is not imported", pkg.show(ctx));
             } else if (testImportInProd || testUnitImportInHelper) {
-                e.addErrorNote("`{}`'s package is imported as `{}`", litSymbol.show(ctx), "test_import");
+                e.addErrorNote("`{}` is imported as `{}`", pkg.show(ctx), "test_import");
             }
         }
     }
