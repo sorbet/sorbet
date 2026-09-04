@@ -503,14 +503,6 @@ PackageInfo::checkReferenceAgainstImports(core::Context ctx, core::LocOffsets er
     ENFORCE(otherPackage.exists() && this->mangledName() != otherPackage);
     auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
 
-    auto otherFile = litSymbol.loc(ctx).file();
-    if (!otherFile.exists()) {
-        // This is unfortunate--we only need otherFile to determine weird --test-packages stuff
-        // (because we need to look at whether the file that the constant is defined in `isPackagedTest`, etc.)
-        // We can delete this after that migration.
-        return nullopt;
-    }
-
     auto *import = this->importsPackage(otherPackage);
     auto wasImported = import != nullptr;
     if (wasImported && this->usesTestPackages) {
@@ -525,16 +517,11 @@ PackageInfo::checkReferenceAgainstImports(core::Context ctx, core::LocOffsets er
                                   ctx.file.data(ctx).isPackagedTestHelper();
     bool importNeeded = !wasImported || testImportInProd || testUnitImportInHelper;
 
-    // If the imported symbol comes from the test namespace, we must also be in the test namespace.
-    // TODO(trevor): this check is redundant with import checking after the test-packages migration is complete.
-    bool testNamespaceInProd =
-        !pkg.usesTestPackages && otherFile.data(ctx).isPackagedTest() && !ctx.file.data(ctx).isPackagedTest();
-
-    if (!importNeeded && !testNamespaceInProd) {
+    if (!importNeeded) {
         return nullopt;
     }
 
-    bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || ctx.file.data(ctx).isPackagedTest();
+    bool isTestImport = ctx.file.data(ctx).isPackagedTest();
     if (this->usesTestPackages) {
         isTestImport = false;
     }
@@ -554,7 +541,7 @@ PackageInfo::checkReferenceAgainstImports(core::Context ctx, core::LocOffsets er
     bool causesVisibilityError = !pkg.isVisibleTo(ctx, *this, autocorrectedImportType);
     bool badTestReference = this->usesTestPackages && pkg.testPackage() && !this->testPackage();
     optional<string> path;
-    if (!isTestImport && !testNamespaceInProd && db.enforceLayering()) {
+    if (!isTestImport && db.enforceLayering()) {
         layeringViolation =
             strictDepsLevel > core::packages::StrictDependenciesLevel::False && this->causesLayeringViolation(db, pkg);
         strictDependenciesTooLow = importStrictDepsLevel != core::packages::StrictDependenciesLevel::None &&
@@ -565,7 +552,7 @@ PackageInfo::checkReferenceAgainstImports(core::Context ctx, core::LocOffsets er
         causesCycle = strictDepsLevel >= core::packages::StrictDependenciesLevel::LayeredDag && path.has_value();
     }
     bool hasModularityError = layeringViolation || strictDependenciesTooLow || causesCycle || badTestReference ||
-                              causesVisibilityError || testNamespaceInProd;
+                              causesVisibilityError;
     // visible_to errors are handled separately (by `updateVisibilityFor`),
     // so they're not included in this causesModularityError field of referencedPackages
     bool causesModularityError = hasModularityError && !causesVisibilityError;
@@ -610,7 +597,6 @@ PackageInfo::checkReferenceAgainstImports(core::Context ctx, core::LocOffsets er
         auto error = causesCycle           ? core::errors::Packager::StrictDependenciesViolation
                      : layeringViolation   ? core::errors::Packager::LayeringViolation
                      : badTestReference    ? core::errors::Packager::TestImportMismatch
-                     : testNamespaceInProd ? core::errors::Packager::UsedTestOnlyName
                                            : core::errors::Packager::StrictDependenciesViolation;
         if (auto e = ctx.beginError(errLoc, error)) {
             vector<string> reasons;
@@ -629,9 +615,6 @@ PackageInfo::checkReferenceAgainstImports(core::Context ctx, core::LocOffsets er
                 reasons.emplace_back(
                     core::ErrorColors::format("`{}` may not reference `{}` packages", this->show(ctx), "test!"));
                 e.addErrorLine(pkg.declLoc(), "Referenced `{}` package defined here", "test!");
-            }
-            if (testNamespaceInProd) {
-                reasons.emplace_back("it is defined in a test namespace and cannot be referenced in a non-test file");
             }
             if (causesCycle) {
                 reasons.emplace_back(
@@ -694,12 +677,10 @@ PackageInfo::checkReferenceAgainstImports(core::Context ctx, core::LocOffsets er
                 ENFORCE(false, "At most six reasons should be present");
             }
             e.setHeader("`{}` cannot be referenced here because {}", litSymbol.show(ctx), reason);
-            if (!testNamespaceInProd) {
                 if (!wasImported) {
                     e.addErrorNote("`{}`'s package is not imported", litSymbol.show(ctx));
                 } else if (testImportInProd || testUnitImportInHelper) {
                     e.addErrorNote("`{}`'s package is imported as `{}`", litSymbol.show(ctx), "test_import");
-                }
             }
         }
     }
