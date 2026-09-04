@@ -64,6 +64,8 @@ struct Import {
     bool isTestImport() const {
         return type != ImportType::Normal;
     }
+
+    bool isAvailableTo(const core::GlobalState &gs, core::FileRef file) const;
 };
 
 struct Export {

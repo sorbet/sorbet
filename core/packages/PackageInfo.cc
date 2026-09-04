@@ -12,6 +12,16 @@
 using namespace std;
 
 namespace sorbet::core::packages {
+bool Import::isAvailableTo(const core::GlobalState &gs, core::FileRef file) const {
+    if (this->type == ImportType::Normal) {
+        return true;
+    }
+    if (!file.data(gs).isPackagedTest()) {
+        return false;
+    }
+    return this->type != ImportType::TestUnit || !file.data(gs).isPackagedTestHelper();
+}
+
 string_view strictDependenciesLevelToString(StrictDependenciesLevel level) {
     switch (level) {
         case StrictDependenciesLevel::None:
@@ -514,7 +524,7 @@ PackageInfo::checkReferenceAgainstImports(core::Context ctx, core::LocOffsets er
     // Is this a test import not intended for use in helpers?
     auto testUnitImportInHelper = wasImported && import->type == core::packages::ImportType::TestUnit &&
                                   ctx.file.data(ctx).isPackagedTestHelper();
-    bool importNeeded = !wasImported || testImportInProd || testUnitImportInHelper;
+    bool importNeeded = !wasImported || !import->isAvailableTo(ctx.state, ctx.file);
 
     if (!importNeeded) {
         return nullopt;
