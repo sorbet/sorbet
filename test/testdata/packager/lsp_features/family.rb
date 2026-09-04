@@ -41,9 +41,7 @@ module Simpsons
   end
 
   Test::Krabappel::Popquiz
-# ^^^^^^^^^^^^^^^^^^^^^^^^ error: Used `test_import` constant `Test::Krabappel::Popquiz` in non-test file
-  #                ^^^^^^^ usage: popquiz
-# ^^^^^^^^^^^^^^^ importusage: krabappel-pkg
+# ^^^^ error: Unable to resolve constant `Test`
 
   class Private
     #   ^^^^^^^ def: s-private
