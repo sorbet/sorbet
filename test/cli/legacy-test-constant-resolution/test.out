@@ -1,14 +1,7 @@
 ------ monolithic -------------------------------
-prod_none/use.rb:3: `Test::Target::Helper` resolves but its package is not imported https://srb.help/3718
+prod_none/use.rb:3: Unable to resolve constant `Test` https://srb.help/5002
      3 |Test::Target::Helper
-        ^^^^^^^^^^^^^^^^^^^^
-    target/__package.rb:3: Package defined here
-     3 |class Target < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    prod_none/__package.rb:3: Insert `import Target`
-     3 |class ProdNone < PackageSpec
-                                    ^
+        ^^^^
 
 unit_early/test/use.test.rb:3: `EarlyTarget` is not imported https://srb.help/3718
      3 |Test::EarlyTarget::Value
@@ -59,66 +52,28 @@ helper_unit_import/test/helper.rb:3: The `test_import` package `Target` can only
      4 |  test_import Target, only: "test_rb"
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-prod_test/use.rb:3: Used `test_import` constant `Test::Target::Helper` in non-test file https://srb.help/3720
+prod_test/use.rb:3: Unable to resolve constant `Test` https://srb.help/5002
      3 |Test::Target::Helper
-        ^^^^^^^^^^^^^^^^^^^^
-    target/__package.rb:3: Defined here
-     3 |class Target < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    prod_test/__package.rb:3: Insert `import Target`
-     3 |class ProdTest < PackageSpec
-                                    ^
-    prod_test/__package.rb:4: Delete
-     4 |  test_import Target
-        ^^^^^^^^^^^^^^^^^^^^
+        ^^^^
 
-prod_normal/use.rb:3: `Test::Target::Helper` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
+prod_normal/use.rb:3: Unable to resolve constant `Test` https://srb.help/5002
      3 |Test::Target::Helper
-        ^^^^^^^^^^^^^^^^^^^^
+        ^^^^
 Errors: 7
 ------ package-directed: isolated production, no import ------
 prod_none/use.rb:3: Unable to resolve constant `Test` https://srb.help/5002
      3 |Test::Target::Helper
         ^^^^
-  Did you mean `Set`? Use `-a` to autocorrect
-    prod_none/use.rb:3: Replace with `Set`
-     3 |Test::Target::Helper
-        ^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/set.rbi#LCENSORED: `Set` defined here
-      NN |class Set < Object
-          ^^^^^^^^^^^^^^^^^^
-  Did you mean `Net`? Use `-a` to autocorrect
-    prod_none/use.rb:3: Replace with `Net`
-     3 |Test::Target::Helper
-        ^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/net.rbi#LCENSORED: `Net` defined here
-    NN |module Net
-        ^^^^^^^^^^
 Errors: 1
 ------ package-directed: isolated production, normal import ------
-prod_normal/use.rb:3: `Test::Target::Helper` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
+prod_normal/use.rb:3: Unable to resolve constant `Test` https://srb.help/5002
      3 |Test::Target::Helper
-        ^^^^^^^^^^^^^^^^^^^^
+        ^^^^
 Errors: 1
 ------ package-directed: isolated production, test import ------
 prod_test/use.rb:3: Unable to resolve constant `Test` https://srb.help/5002
      3 |Test::Target::Helper
         ^^^^
-  Did you mean `Set`? Use `-a` to autocorrect
-    prod_test/use.rb:3: Replace with `Set`
-     3 |Test::Target::Helper
-        ^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/set.rbi#LCENSORED: `Set` defined here
-      NN |class Set < Object
-          ^^^^^^^^^^^^^^^^^^
-  Did you mean `Net`? Use `-a` to autocorrect
-    prod_test/use.rb:3: Replace with `Net`
-     3 |Test::Target::Helper
-        ^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/net.rbi#LCENSORED: `Net` defined here
-    NN |module Net
-        ^^^^^^^^^^
 Errors: 1
 ------ package-directed: isolated test unit, no import ------
 unit_none/test/use.test.rb:3: `Target` is not imported https://srb.help/3718
@@ -188,38 +143,10 @@ Errors: 1
 prod_none/use.rb:3: Unable to resolve constant `Test` https://srb.help/5002
      3 |Test::Target::Helper
         ^^^^
-  Did you mean `Set`? Use `-a` to autocorrect
-    prod_none/use.rb:3: Replace with `Set`
-     3 |Test::Target::Helper
-        ^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/set.rbi#LCENSORED: `Set` defined here
-      NN |class Set < Object
-          ^^^^^^^^^^^^^^^^^^
-  Did you mean `Net`? Use `-a` to autocorrect
-    prod_none/use.rb:3: Replace with `Net`
-     3 |Test::Target::Helper
-        ^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/net.rbi#LCENSORED: `Net` defined here
-    NN |module Net
-        ^^^^^^^^^^
 
 prod_test/use.rb:3: Unable to resolve constant `Test` https://srb.help/5002
      3 |Test::Target::Helper
         ^^^^
-  Did you mean `Set`? Use `-a` to autocorrect
-    prod_test/use.rb:3: Replace with `Set`
-     3 |Test::Target::Helper
-        ^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/set.rbi#LCENSORED: `Set` defined here
-      NN |class Set < Object
-          ^^^^^^^^^^^^^^^^^^
-  Did you mean `Net`? Use `-a` to autocorrect
-    prod_test/use.rb:3: Replace with `Net`
-     3 |Test::Target::Helper
-        ^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/net.rbi#LCENSORED: `Net` defined here
-    NN |module Net
-        ^^^^^^^^^^
 
 unit_late/test/use.test.rb:3: `LateTarget` is not imported https://srb.help/3718
      3 |Test::LateTarget::Value
@@ -243,9 +170,9 @@ unit_none/test/use.test.rb:3: `Target` is not imported https://srb.help/3718
      3 |class UnitNone < PackageSpec
                                     ^
 
-prod_normal/use.rb:3: `Test::Target::Helper` is defined in a test namespace and cannot be referenced in a non-test file https://srb.help/3720
+prod_normal/use.rb:3: Unable to resolve constant `Test` https://srb.help/5002
      3 |Test::Target::Helper
-        ^^^^^^^^^^^^^^^^^^^^
+        ^^^^
 
 helper_unit_import/test/helper.rb:3: The `test_import` package `Target` can only be used in `.test.rb` files https://srb.help/3720
      3 |Test::Target::TestCase
