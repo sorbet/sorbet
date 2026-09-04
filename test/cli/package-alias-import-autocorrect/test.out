@@ -1,0 +1,25 @@
+consumer/use.rb:3: `TargetPackage::Container::Thing` resolves but its package is not imported https://srb.help/3718
+     3 |AliasPackage::Alias::Thing.new
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    target/__package.rb:3: Package defined here
+     3 |class TargetPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    consumer/__package.rb:3: Inserted `import TargetPackage`
+     3 |class Consumer < PackageSpec
+                                    ^
+Errors: 1
+# typed: strict
+
+class Consumer < PackageSpec
+  import TargetPackage
+end
+
+--------------------------------------------------------------------------
+
+No errors! Great job.
+# typed: strict
+
+class Consumer < PackageSpec
+  import TargetPackage
+end
