@@ -799,8 +799,10 @@ private:
                     }
                 }
 
-                if (!foundCommonTypo && suggestionCount < MAX_SUGGESTION_COUNT && suggestScope.exists() &&
-                    suggestScope.isClassOrModule()) {
+                auto suppressLegacyTestSuggestion =
+                    legacyTestRoot && !ctx.file.data(ctx).isPackagedTest() && shouldCheckPackage(ctx);
+                if (!foundCommonTypo && !suppressLegacyTestSuggestion && suggestionCount < MAX_SUGGESTION_COUNT &&
+                    suggestScope.exists() && suggestScope.isClassOrModule()) {
                     suggestionCount++;
 
                     core::packages::MangledName filterToPackage;
