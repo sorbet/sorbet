@@ -3035,7 +3035,12 @@ public:
         if (auto e = gs.beginError(loc, core::errors::Infer::UntypedConstantSuggestion)) {
             e.setHeader("Constants must have type annotations with `{}` when specifying `{}`", "T.let",
                         "# typed: strict");
-            if ((gs.suggestUnsafe || !ty.isUntyped()) && loc.exists() && argLocExists) {
+            auto isClassTypeStruct =
+                isa_type<ClassType>(ty) && cast_type_nonnull<ClassType>(ty).symbol == Symbols::Struct();
+            auto isAppliedTypeStruct =
+                isa_type<AppliedType>(ty) && cast_type_nonnull<AppliedType>(ty).klass == Symbols::Struct();
+            auto isStruct = isClassTypeStruct || isAppliedTypeStruct;
+            if ((gs.suggestUnsafe || !ty.isUntyped()) && loc.exists() && argLocExists && !isStruct) {
                 // (skip the autocorrect if we had to fall back to using callLoc, because using that
                 // will suggest something syntactically invalid like `T.let(U = begin; end, NilClass))`
                 e.replaceWith(fmt::format("Initialize as `{}`", ty.show(gs)), loc, "T.let({}, {})",
