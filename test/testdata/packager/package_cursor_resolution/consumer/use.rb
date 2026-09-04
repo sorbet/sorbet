@@ -10,9 +10,9 @@ module Consumer
 
   # A package declaration does not define the corresponding runtime namespace.
   UnmistakablePackageCursorRoot::Nested::EmptyPackage
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `UnmistakablePackageCursorRoot`
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `UnmistakablePackageCursorRoot::Nested::EmptyPackage` is not imported
 
   # Neither the root nor `Nested` exists as a runtime namespace, even though they exist in the package registry.
   UnmistakablePackageCursorRoot::Nested::EmptyPackage::Missing
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `UnmistakablePackageCursorRoot`
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `UnmistakablePackageCursorRoot::Nested::EmptyPackage` is not imported
 end
