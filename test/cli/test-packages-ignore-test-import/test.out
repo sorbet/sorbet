@@ -1,15 +1,7 @@
-in_between/__package.rb:4: Invalid expression in package: the only valid argument for `sorbet` is `min_typed_level` https://srb.help/3710
-     4 |  sorbet min_typed_level: "true", tests_min_typed_level: "true"
-                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-old_style/__package.rb:6: Invalid expression in package: the only valid argument for `sorbet` is `min_typed_level` https://srb.help/3710
-     6 |  sorbet min_typed_level: "true", tests_min_typed_level: "true"
-                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 old_style/test/foo.test.rb:3: File belongs to package `OldStyle` but defines a constant that does not match this namespace https://srb.help/3713
      3 |module Test::OldStyle
                ^^^^^^^^^^^^^^
     old_style/__package.rb:3: Enclosing package declared here
      3 |class OldStyle < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 3
+Errors: 1
