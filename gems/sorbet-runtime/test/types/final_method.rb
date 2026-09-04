@@ -645,7 +645,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
     parent = Class.new do
       extend T::Sig
       sig(:final) { returns(String) }
-      def foo = puts "hello"
+      def foo = "hello"
     end
 
     good_mod = Module.new do
@@ -663,7 +663,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
       abstract!
 
       sig { returns(String) }
-      def foo = puts "goodbye"
+      def foo = "goodbye"
     end
 
     assert_raises(RuntimeError) do
