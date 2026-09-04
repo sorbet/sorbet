@@ -121,13 +121,12 @@ int TypePtr::kind() const {
         case Tag::AliasType:
             return 11;
         case Tag::OrType:
+        case Tag::EnumUnion:
             return 12;
         case Tag::AndType:
             return 13;
         case Tag::SelfType:
             return 14;
-        case Tag::EnumUnion:
-            return 15;
     }
 }
 
