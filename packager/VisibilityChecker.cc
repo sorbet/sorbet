@@ -569,7 +569,7 @@ public:
             return;
         }
 
-        auto importError = this->package.checkReferenceAgainstImports(ctx, lit.loc(), litSymbol);
+        auto importError = this->package.checkReferenceAgainstImports(ctx, lit.loc(), otherPackage);
         referencedPackages[otherPackage] = importError.value_or(core::packages::PackageReferenceInfo{});
         if (importError.has_value()) {
             // An error was reported already
