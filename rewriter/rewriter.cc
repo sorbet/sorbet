@@ -1,4 +1,5 @@
 #include "rewriter/rewriter.h"
+#include "ast/Helpers.h"
 #include "ast/treemap/treemap.h"
 #include "ast/verifier/verifier.h"
 #include "common/typecase.h"
@@ -38,7 +39,31 @@ namespace sorbet::rewriter {
 class Rewriterer {
     friend class Rewriter;
 
+    // Direct class-body assignments were already expanded into multiple statements. Track Struct replacements so the
+    // class rewriter below can preserve that AST shape.
+    UnorderedSet<void *> structRewrites;
+
 public:
+    void postTransformAssign(core::MutableContext ctx, ast::ExpressionPtr &tree) {
+        auto assign = ast::cast_tree<ast::Assign>(tree);
+        auto nodes = Struct::run(ctx, assign);
+        if (nodes.empty()) {
+            return;
+        }
+
+        auto loc = assign->loc;
+        auto expr = std::move(nodes.back());
+        nodes.pop_back();
+
+        ast::InsSeq::STATS_store stats;
+        stats.reserve(nodes.size());
+        for (auto &node : nodes) {
+            stats.emplace_back(std::move(node));
+        }
+        tree = ast::MK::InsSeq(loc, std::move(stats), std::move(expr));
+        structRewrites.emplace(tree.get());
+    }
+
     void postTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         auto classDef = ast::cast_tree<ast::ClassDef>(tree);
 
@@ -63,16 +88,24 @@ public:
         UnorderedMap<void *, vector<ast::ExpressionPtr>> replaceNodes;
         UnorderedMap<void *, vector<ast::ExpressionPtr>> insertNodes;
         for (auto &stat : classDef->rhs) {
+            if (structRewrites.erase(stat.get()) != 0) {
+                auto &insSeq = ast::cast_tree_nonnull<ast::InsSeq>(stat);
+
+                vector<ast::ExpressionPtr> nodes;
+                nodes.reserve(insSeq.stats.size() + 1);
+                for (auto &node : insSeq.stats) {
+                    nodes.emplace_back(std::move(node));
+                }
+                nodes.emplace_back(std::move(insSeq.expr));
+                replaceNodes[stat.get()] = std::move(nodes);
+                prevStat = &stat;
+                continue;
+            }
+
             typecase(
                 stat,
                 [&](ast::Assign &assign) {
                     vector<ast::ExpressionPtr> nodes;
-
-                    nodes = Struct::run(ctx, &assign);
-                    if (!nodes.empty()) {
-                        replaceNodes[stat.get()] = std::move(nodes);
-                        return;
-                    }
 
                     nodes = Data::run(ctx, &assign);
                     if (!nodes.empty()) {
