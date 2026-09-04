@@ -801,10 +801,15 @@ struct PackageSpecBodyWalk {
                         minTypedLevelLoc = value.loc();
                     } else if (keyLit->asSymbol() == core::Names::testsMinTypedLevel()) {
                         if (testPackages) {
-                            if (auto e = ctx.beginError(keyLit->loc.join(value.loc()),
-                                                        core::errors::Packager::InvalidPackageExpression)) {
-                                e.setHeader("Invalid expression in package: the only valid argument for `{}` is `{}`",
-                                            "sorbet", core::Names::minTypedLevel().shortName(ctx));
+                            // TODO(trevor) we suppress the error about `tests_min_typed_level` for the test-packages
+                            // migration.
+                            if (!ctx.state.packageDB().testPackages()) {
+                                if (auto e = ctx.beginError(keyLit->loc.join(value.loc()),
+                                                            core::errors::Packager::InvalidPackageExpression)) {
+                                    e.setHeader(
+                                        "Invalid expression in package: the only valid argument for `{}` is `{}`",
+                                        "sorbet", core::Names::minTypedLevel().shortName(ctx));
+                                }
                             }
                         } else {
                             testsMinTypedLevel = typedLevel;
