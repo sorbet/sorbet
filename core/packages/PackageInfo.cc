@@ -822,6 +822,21 @@ void PackageInfo::trackPackageReferences(FileRef file, vector<pair<MangledName, 
     packagesReferencedByFile[file].swap(references);
 }
 
+void PackageInfo::trackPackageReference(FileRef file, MangledName package, PackageReferenceInfo referenceInfo) {
+    auto &references = packagesReferencedByFile[file];
+    auto existing = absl::c_find_if(references, [package](const auto &entry) { return entry.first == package; });
+    if (existing == references.end()) {
+        references.emplace_back(package, referenceInfo);
+    } else {
+        existing->second.importNeeded |= referenceInfo.importNeeded;
+        existing->second.causesModularityError |= referenceInfo.causesModularityError;
+    }
+}
+
+void PackageInfo::resetPackageReferences(FileRef file) {
+    packagesReferencedByFile.erase(file);
+}
+
 core::packages::ImportType PackageInfo::fileToImportType(const core::GlobalState &gs, core::FileRef file) const {
     if (this->usesTestPackages) {
         return core::packages::ImportType::Normal;

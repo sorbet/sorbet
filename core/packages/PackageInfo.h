@@ -350,6 +350,8 @@ public:
     // Track that `file` references the packages in `references`, along with some metadata about each reference
     void trackPackageReferences(const core::FileRef file,
                                 std::vector<std::pair<core::packages::MangledName, PackageReferenceInfo>> &references);
+    void trackPackageReference(const core::FileRef file, MangledName package, PackageReferenceInfo referenceInfo);
+    void resetPackageReferences(const core::FileRef file);
 
     std::optional<core::AutocorrectSuggestion> aggregateMissingImports(const core::GlobalState &gs) const;
     std::optional<core::AutocorrectSuggestion> aggregateMissingImportsForFile(const core::GlobalState &gs,

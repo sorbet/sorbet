@@ -763,10 +763,12 @@ private:
             case PackageResolutionAction::ReportPackageError: {
                 auto cursorPackage = core::packages::MangledName(job.packageRegistryCursor);
                 auto currentPackage = gs.packageDB().getPackageNameForFile(file);
-                auto &currentPackageInfo = gs.packageDB().getPackageInfo(currentPackage);
+                auto currentPackageInfo = gs.packageDB().getPackageInfoNonConst(currentPackage);
                 auto errorLoc = packageBoundaryLoc(ctx, original, cursorPackage);
                 // TODO(jez) This call is still duplicated in VisibilityChecker--remove it after GenPackages cleanups
-                currentPackageInfo.checkReferenceAgainstImports(ctx, errorLoc, cursorPackage);
+                auto referenceInfo = currentPackageInfo->checkReferenceAgainstImports(ctx, errorLoc, cursorPackage);
+                ENFORCE(referenceInfo.has_value());
+                currentPackageInfo->trackPackageReference(file, cursorPackage, referenceInfo.value());
                 return;
             }
             case PackageResolutionAction::DeferToOutermost:
@@ -1996,6 +1998,13 @@ public:
 
     static ast::ParsedFilesOrCancelled resolveConstants(core::GlobalState &gs, vector<ast::ParsedFile> trees,
                                                         WorkerPool &workers) {
+        for (const auto &tree : trees) {
+            auto package = gs.packageDB().getPackageNameForFile(tree.file);
+            if (package.exists()) {
+                gs.packageDB().getPackageInfoNonConst(package)->resetPackageReferences(tree.file);
+            }
+        }
+
         UnorderedSet<core::ClassOrModuleRef> suppressPayloadSuperclassRedefinitionFor;
         for (string_view className : gs.suppressPayloadSuperclassRedefinitionFor) {
             auto klass = resolvePayloadSuperclassClassName(gs, className);
