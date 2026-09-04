@@ -1,18 +1,3 @@
-use_other_package/foo.rb:16: Unable to resolve constant `MyClass` https://srb.help/5002
-    16 |  Foo::Bar::MyClass::SUBCLASSES # resolves via root
-          ^^^^^^^^^^^^^^^^^
-  Autocorrect: Done
-    use_other_package/foo.rb:16: Replaced with `Class`
-    16 |  Foo::Bar::MyClass::SUBCLASSES # resolves via root
-          ^^^^^^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#LCENSORED: `Class` defined here
-    NN |class Class < Module
-        ^^^^^^^^^^^^^^^^^^^^
-
-use_other_package/foo.rb:18: Unable to resolve constant `Test` https://srb.help/5002
-    18 |  Test::Foo::Bar::OtherPackage::TestUtil
-          ^^^^
-
 use_other_package/foo.rb:7: `Foo::Bar::OtherPackage` is not imported https://srb.help/3718
      7 |      Foo::Bar::OtherPackage::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^
@@ -60,6 +45,21 @@ use_other_package/foo.rb:15: `Foo::Bar::OtherPackage` is not imported https://sr
      7 |  strict_dependencies 'layered'
                                        ^
 
+use_other_package/foo.rb:16: Unable to resolve constant `MyClass` https://srb.help/5002
+    16 |  Foo::Bar::MyClass::SUBCLASSES # resolves via root
+          ^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    use_other_package/foo.rb:16: Replaced with `Class`
+    16 |  Foo::Bar::MyClass::SUBCLASSES # resolves via root
+          ^^^^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#LCENSORED: `Class` defined here
+    NN |class Class < Module
+        ^^^^^^^^^^^^^^^^^^^^
+
+use_other_package/foo.rb:18: Unable to resolve constant `Test` https://srb.help/5002
+    18 |  Test::Foo::Bar::OtherPackage::TestUtil
+          ^^^^
+
 use_other_package/foo.test.rb:4: `Foo::Bar::OtherPackage` is not imported https://srb.help/3718
      4 |  Test::Foo::Bar::OtherPackage::TestUtil
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -95,10 +95,6 @@ end
 
 --------------------------------------------------------------------------
 
-use_app_package/foo.rb:13: Unable to resolve constant `Test` https://srb.help/5002
-    13 |  Test::Foo::Bar::AppPackage::TestUtil
-          ^^^^
-
 use_app_package/foo.rb:6: `Foo::Bar::AppPackage` cannot be referenced here because importing it would cause a layering violation https://srb.help/3726
      6 |      Foo::Bar::AppPackage::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^
@@ -122,6 +118,10 @@ use_app_package/foo.rb:7: `Foo::Bar::AppPackageTest` cannot be referenced here b
                 ^^^^^
   Note:
     `Foo::Bar::AppPackageTest` is imported as `test_import`
+
+use_app_package/foo.rb:13: Unable to resolve constant `Test` https://srb.help/5002
+    13 |  Test::Foo::Bar::AppPackage::TestUtil
+          ^^^^
 
 use_app_package/foo.test.rb:6: `Foo::Bar::AppPackage` is not imported https://srb.help/3718
      6 |  Foo::Bar::AppPackage::ImportMeTestOnly
@@ -147,10 +147,6 @@ end
 
 --------------------------------------------------------------------------
 
-use_false_package/foo.rb:13: Unable to resolve constant `Test` https://srb.help/5002
-    13 |  Test::Foo::Bar::FalsePackage::TestUtil
-          ^^^^
-
 use_false_package/foo.rb:6: `Foo::Bar::FalsePackage` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
      6 |      Foo::Bar::FalsePackage::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^
@@ -175,6 +171,10 @@ use_false_package/foo.rb:7: `Foo::Bar::FalsePackageTest` cannot be referenced he
   Note:
     `Foo::Bar::FalsePackageTest` is imported as `test_import`
 
+use_false_package/foo.rb:13: Unable to resolve constant `Test` https://srb.help/5002
+    13 |  Test::Foo::Bar::FalsePackage::TestUtil
+          ^^^^
+
 use_false_package/foo.test.rb:4: `Foo::Bar::FalsePackage` is not imported https://srb.help/3718
      4 |  Test::Foo::Bar::FalsePackage::TestUtil
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -198,10 +198,6 @@ class Foo::MyPackage < PackageSpec
 end
 
 --------------------------------------------------------------------------
-
-use_false_and_app_package/foo.rb:13: Unable to resolve constant `Test` https://srb.help/5002
-    13 |  Test::Foo::Bar::FalseAndAppPackage::TestUtil
-          ^^^^
 
 use_false_and_app_package/foo.rb:6: `Foo::Bar::FalseAndAppPackage` cannot be referenced here because importing it would cause a layering violation, and its `strict_dependencies` is not strict enough https://srb.help/3726
      6 |      Foo::Bar::FalseAndAppPackage::OtherClass # resolves via root
@@ -232,6 +228,10 @@ use_false_and_app_package/foo.rb:7: `Foo::Bar::FalseAndAppPackageTest` cannot be
                               ^^^^^^^
   Note:
     `Foo::Bar::FalseAndAppPackageTest` is imported as `test_import`
+
+use_false_and_app_package/foo.rb:13: Unable to resolve constant `Test` https://srb.help/5002
+    13 |  Test::Foo::Bar::FalseAndAppPackage::TestUtil
+          ^^^^
 
 use_false_and_app_package/foo.test.rb:4: `Foo::Bar::FalseAndAppPackage` is not imported https://srb.help/3718
      4 |  Test::Foo::Bar::FalseAndAppPackage::TestUtil
