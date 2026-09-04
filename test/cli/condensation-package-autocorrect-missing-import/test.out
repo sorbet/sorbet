@@ -316,24 +316,36 @@ end
 use_cycle_package/foo.rb:6: `Foo::Bar::CyclePackage` cannot be referenced here because importing it would put `Foo::MyPackage` into a cycle https://srb.help/3727
      6 |      Foo::Bar::CyclePackage::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Done
-    use_cycle_package/foo.rb:6: Replaced with `Dir`
-     6 |      Foo::Bar::CyclePackage::OtherClass # resolves via root
-              ^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/dir.rbi#LCENSORED: `Dir` defined here
-    NN |class Dir < Object
-        ^^^^^^^^^^^^^^^^^^
+    use_cycle_package/__package.rb:5: Enclosing package declared here
+     5 |class Foo::MyPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
+     7 |  strict_dependencies 'layered_dag'
+                              ^^^^^^^^^^^^^
+  Note:
+    Path from `Foo::Bar::CyclePackage` to `Foo::MyPackage`:
+    `Foo::Bar::CyclePackage` →
+    `Foo::MyPackage`
+
+  Note:
+    `Foo::Bar::CyclePackage` is not imported
 
 use_cycle_package/foo.rb:7: `Foo::Bar::CyclePackageTest` cannot be referenced here because importing it would put `Foo::MyPackage` into a cycle https://srb.help/3727
      7 |      Foo::Bar::CyclePackageTest::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Done
-    use_cycle_package/foo.rb:7: Replaced with `Dir`
-     7 |      Foo::Bar::CyclePackageTest::OtherClass # resolves via root
-              ^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/dir.rbi#LCENSORED: `Dir` defined here
-    NN |class Dir < Object
-        ^^^^^^^^^^^^^^^^^^
+    use_cycle_package/__package.rb:5: Enclosing package declared here
+     5 |class Foo::MyPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
+     7 |  strict_dependencies 'layered_dag'
+                              ^^^^^^^^^^^^^
+  Note:
+    Path from `Foo::Bar::CyclePackageTest` to `Foo::MyPackage`:
+    `Foo::Bar::CyclePackageTest` →
+    `Foo::MyPackage`
+
+  Note:
+    `Foo::Bar::CyclePackageTest` is imported as `test_import`
 
 use_cycle_package/foo.rb:13: Unable to resolve constant `Test` https://srb.help/5002
     13 |  Test::Foo::Bar::CyclePackage::TestUtil
@@ -356,13 +368,13 @@ use_cycle_package/foo.rb:13: Unable to resolve constant `Test` https://srb.help/
 use_cycle_package/foo.test.rb:4: `Foo::Bar::CyclePackage` is not imported https://srb.help/3718
      4 |  Test::Foo::Bar::CyclePackage::TestUtil
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    cycle_package/__package.rb:5: Package defined here
+     5 |class Foo::Bar::CyclePackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    use_cycle_package/foo.test.rb:4: Replaced with `Dir`
-     4 |  Test::Foo::Bar::CyclePackage::TestUtil
-          ^^^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/dir.rbi#LCENSORED: `Dir` defined here
-    NN |class Dir < Object
-        ^^^^^^^^^^^^^^^^^^
+    use_cycle_package/__package.rb:7: Inserted `test_import Foo::Bar::CyclePackage, only: "test_rb"`
+     7 |  strict_dependencies 'layered_dag'
+                                           ^
 Errors: 4
 # frozen_string_literal: true
 # typed: strict
@@ -371,6 +383,7 @@ Errors: 4
 class Foo::MyPackage < PackageSpec
   layer 'lib'
   strict_dependencies 'layered_dag'
+  test_import Foo::Bar::CyclePackage, only: "test_rb"
   test_import Foo::Bar::CyclePackageTest
 end
 
@@ -379,24 +392,42 @@ end
 use_app_cycle_package/foo.rb:6: `Foo::Bar::AppCyclePackage` cannot be referenced here because importing it would put `Foo::MyPackage` into a cycle, and importing it would cause a layering violation https://srb.help/3727
      6 |      Foo::Bar::AppCyclePackage::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Done
-    use_app_cycle_package/foo.rb:6: Replaced with `Dir`
-     6 |      Foo::Bar::AppCyclePackage::OtherClass # resolves via root
-              ^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/dir.rbi#LCENSORED: `Dir` defined here
-    NN |class Dir < Object
-        ^^^^^^^^^^^^^^^^^^
+    use_app_cycle_package/__package.rb:5: Enclosing package declared here
+     5 |class Foo::MyPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_app_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
+     7 |  strict_dependencies 'layered_dag'
+                              ^^^^^^^^^^^^^
+  Note:
+    Path from `Foo::Bar::AppCyclePackage` to `Foo::MyPackage`:
+    `Foo::Bar::AppCyclePackage` →
+    `Foo::MyPackage`
+
+    app_cycle_package/__package.rb:6: Package `Foo::Bar::AppCyclePackage` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
+     6 |  layer 'app'
+                ^^^^^
+  Note:
+    `Foo::Bar::AppCyclePackage` is not imported
 
 use_app_cycle_package/foo.rb:7: `Foo::Bar::AppCyclePackageTest` cannot be referenced here because importing it would put `Foo::MyPackage` into a cycle, and importing it would cause a layering violation https://srb.help/3727
      7 |      Foo::Bar::AppCyclePackageTest::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Done
-    use_app_cycle_package/foo.rb:7: Replaced with `Dir`
-     7 |      Foo::Bar::AppCyclePackageTest::OtherClass # resolves via root
-              ^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/dir.rbi#LCENSORED: `Dir` defined here
-    NN |class Dir < Object
-        ^^^^^^^^^^^^^^^^^^
+    use_app_cycle_package/__package.rb:5: Enclosing package declared here
+     5 |class Foo::MyPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_app_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
+     7 |  strict_dependencies 'layered_dag'
+                              ^^^^^^^^^^^^^
+  Note:
+    Path from `Foo::Bar::AppCyclePackageTest` to `Foo::MyPackage`:
+    `Foo::Bar::AppCyclePackageTest` →
+    `Foo::MyPackage`
+
+    app_cycle_package_test/__package.rb:6: Package `Foo::Bar::AppCyclePackageTest` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
+     6 |  layer 'app'
+                ^^^^^
+  Note:
+    `Foo::Bar::AppCyclePackageTest` is imported as `test_import`
 
 use_app_cycle_package/foo.rb:13: Unable to resolve constant `Test` https://srb.help/5002
     13 |  Test::Foo::Bar::AppCyclePackage::TestUtil
@@ -419,13 +450,13 @@ use_app_cycle_package/foo.rb:13: Unable to resolve constant `Test` https://srb.h
 use_app_cycle_package/foo.test.rb:4: `Foo::Bar::AppCyclePackage` is not imported https://srb.help/3718
      4 |  Test::Foo::Bar::AppCyclePackage::TestUtil
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    app_cycle_package/__package.rb:5: Package defined here
+     5 |class Foo::Bar::AppCyclePackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    use_app_cycle_package/foo.test.rb:4: Replaced with `Dir`
-     4 |  Test::Foo::Bar::AppCyclePackage::TestUtil
-          ^^^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/dir.rbi#LCENSORED: `Dir` defined here
-    NN |class Dir < Object
-        ^^^^^^^^^^^^^^^^^^
+    use_app_cycle_package/__package.rb:7: Inserted `test_import Foo::Bar::AppCyclePackage, only: "test_rb"`
+     7 |  strict_dependencies 'layered_dag'
+                                           ^
 Errors: 4
 # frozen_string_literal: true
 # typed: strict
@@ -434,6 +465,7 @@ Errors: 4
 class Foo::MyPackage < PackageSpec
   layer 'lib'
   strict_dependencies 'layered_dag'
+  test_import Foo::Bar::AppCyclePackage, only: "test_rb"
   test_import Foo::Bar::AppCyclePackageTest
 end
 
@@ -442,24 +474,42 @@ end
 use_false_cycle_package/foo.rb:6: `Foo::Bar::FalseCyclePackage` cannot be referenced here because importing it would put `Foo::MyPackage` into a cycle, and its `strict_dependencies` is not strict enough https://srb.help/3727
      6 |      Foo::Bar::FalseCyclePackage::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Done
-    use_false_cycle_package/foo.rb:6: Replaced with `Dir`
-     6 |      Foo::Bar::FalseCyclePackage::OtherClass # resolves via root
-              ^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/dir.rbi#LCENSORED: `Dir` defined here
-    NN |class Dir < Object
-        ^^^^^^^^^^^^^^^^^^
+    use_false_cycle_package/__package.rb:5: Enclosing package declared here
+     5 |class Foo::MyPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_false_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
+     7 |  strict_dependencies 'layered_dag'
+                              ^^^^^^^^^^^^^
+  Note:
+    Path from `Foo::Bar::FalseCyclePackage` to `Foo::MyPackage`:
+    `Foo::Bar::FalseCyclePackage` →
+    `Foo::MyPackage`
+
+    false_cycle_package/__package.rb:7: `Foo::Bar::FalseCyclePackage` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
+     7 |  strict_dependencies 'false'
+                              ^^^^^^^
+  Note:
+    `Foo::Bar::FalseCyclePackage` is not imported
 
 use_false_cycle_package/foo.rb:7: `Foo::Bar::FalseCyclePackageTest` cannot be referenced here because importing it would put `Foo::MyPackage` into a cycle, and its `strict_dependencies` is not strict enough https://srb.help/3727
      7 |      Foo::Bar::FalseCyclePackageTest::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Done
-    use_false_cycle_package/foo.rb:7: Replaced with `Dir`
-     7 |      Foo::Bar::FalseCyclePackageTest::OtherClass # resolves via root
-              ^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/dir.rbi#LCENSORED: `Dir` defined here
-    NN |class Dir < Object
-        ^^^^^^^^^^^^^^^^^^
+    use_false_cycle_package/__package.rb:5: Enclosing package declared here
+     5 |class Foo::MyPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_false_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
+     7 |  strict_dependencies 'layered_dag'
+                              ^^^^^^^^^^^^^
+  Note:
+    Path from `Foo::Bar::FalseCyclePackageTest` to `Foo::MyPackage`:
+    `Foo::Bar::FalseCyclePackageTest` →
+    `Foo::MyPackage`
+
+    false_cycle_package_test/__package.rb:7: `Foo::Bar::FalseCyclePackageTest` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
+     7 |  strict_dependencies 'false'
+                              ^^^^^^^
+  Note:
+    `Foo::Bar::FalseCyclePackageTest` is imported as `test_import`
 
 use_false_cycle_package/foo.rb:13: Unable to resolve constant `Test` https://srb.help/5002
     13 |  Test::Foo::Bar::FalseCyclePackage::TestUtil
@@ -482,13 +532,13 @@ use_false_cycle_package/foo.rb:13: Unable to resolve constant `Test` https://srb
 use_false_cycle_package/foo.test.rb:4: `Foo::Bar::FalseCyclePackage` is not imported https://srb.help/3718
      4 |  Test::Foo::Bar::FalseCyclePackage::TestUtil
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    false_cycle_package/__package.rb:5: Package defined here
+     5 |class Foo::Bar::FalseCyclePackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    use_false_cycle_package/foo.test.rb:4: Replaced with `Dir`
-     4 |  Test::Foo::Bar::FalseCyclePackage::TestUtil
-          ^^^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/dir.rbi#LCENSORED: `Dir` defined here
-    NN |class Dir < Object
-        ^^^^^^^^^^^^^^^^^^
+    use_false_cycle_package/__package.rb:7: Inserted `test_import Foo::Bar::FalseCyclePackage, only: "test_rb"`
+     7 |  strict_dependencies 'layered_dag'
+                                           ^
 Errors: 4
 # frozen_string_literal: true
 # typed: strict
@@ -497,6 +547,7 @@ Errors: 4
 class Foo::MyPackage < PackageSpec
   layer 'lib'
   strict_dependencies 'layered_dag'
+  test_import Foo::Bar::FalseCyclePackage, only: "test_rb"
   test_import Foo::Bar::FalseCyclePackageTest
 end
 
@@ -505,24 +556,48 @@ end
 use_app_false_cycle_package/foo.rb:6: `Foo::Bar::AppFalseCyclePackage` cannot be referenced here because importing it would put `Foo::MyPackage` into a cycle, importing it would cause a layering violation, and its `strict_dependencies` is not strict enough https://srb.help/3727
      6 |      Foo::Bar::AppFalseCyclePackage::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Done
-    use_app_false_cycle_package/foo.rb:6: Replaced with `Dir`
-     6 |      Foo::Bar::AppFalseCyclePackage::OtherClass # resolves via root
-              ^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/dir.rbi#LCENSORED: `Dir` defined here
-    NN |class Dir < Object
-        ^^^^^^^^^^^^^^^^^^
+    use_app_false_cycle_package/__package.rb:5: Enclosing package declared here
+     5 |class Foo::MyPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_app_false_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
+     7 |  strict_dependencies 'layered_dag'
+                              ^^^^^^^^^^^^^
+  Note:
+    Path from `Foo::Bar::AppFalseCyclePackage` to `Foo::MyPackage`:
+    `Foo::Bar::AppFalseCyclePackage` →
+    `Foo::MyPackage`
+
+    app_false_cycle_package/__package.rb:6: Package `Foo::Bar::AppFalseCyclePackage` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
+     6 |  layer 'app'
+                ^^^^^
+    app_false_cycle_package/__package.rb:7: `Foo::Bar::AppFalseCyclePackage` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
+     7 |  strict_dependencies 'false'
+                              ^^^^^^^
+  Note:
+    `Foo::Bar::AppFalseCyclePackage` is not imported
 
 use_app_false_cycle_package/foo.rb:7: `Foo::Bar::AppFalseCyclePackageTest` cannot be referenced here because importing it would put `Foo::MyPackage` into a cycle, importing it would cause a layering violation, and its `strict_dependencies` is not strict enough https://srb.help/3727
      7 |      Foo::Bar::AppFalseCyclePackageTest::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Done
-    use_app_false_cycle_package/foo.rb:7: Replaced with `Dir`
-     7 |      Foo::Bar::AppFalseCyclePackageTest::OtherClass # resolves via root
-              ^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/dir.rbi#LCENSORED: `Dir` defined here
-    NN |class Dir < Object
-        ^^^^^^^^^^^^^^^^^^
+    use_app_false_cycle_package/__package.rb:5: Enclosing package declared here
+     5 |class Foo::MyPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_app_false_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
+     7 |  strict_dependencies 'layered_dag'
+                              ^^^^^^^^^^^^^
+  Note:
+    Path from `Foo::Bar::AppFalseCyclePackageTest` to `Foo::MyPackage`:
+    `Foo::Bar::AppFalseCyclePackageTest` →
+    `Foo::MyPackage`
+
+    app_false_cycle_package_test/__package.rb:6: Package `Foo::Bar::AppFalseCyclePackageTest` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
+     6 |  layer 'app'
+                ^^^^^
+    app_false_cycle_package_test/__package.rb:7: `Foo::Bar::AppFalseCyclePackageTest` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
+     7 |  strict_dependencies 'false'
+                              ^^^^^^^
+  Note:
+    `Foo::Bar::AppFalseCyclePackageTest` is imported as `test_import`
 
 use_app_false_cycle_package/foo.rb:13: Unable to resolve constant `Test` https://srb.help/5002
     13 |  Test::Foo::Bar::AppFalseCyclePackage::TestUtil
@@ -545,13 +620,13 @@ use_app_false_cycle_package/foo.rb:13: Unable to resolve constant `Test` https:/
 use_app_false_cycle_package/foo.test.rb:4: `Foo::Bar::AppFalseCyclePackage` is not imported https://srb.help/3718
      4 |  Test::Foo::Bar::AppFalseCyclePackage::TestUtil
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    app_false_cycle_package/__package.rb:5: Package defined here
+     5 |class Foo::Bar::AppFalseCyclePackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    use_app_false_cycle_package/foo.test.rb:4: Replaced with `Dir`
-     4 |  Test::Foo::Bar::AppFalseCyclePackage::TestUtil
-          ^^^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/dir.rbi#LCENSORED: `Dir` defined here
-    NN |class Dir < Object
-        ^^^^^^^^^^^^^^^^^^
+    use_app_false_cycle_package/__package.rb:7: Inserted `test_import Foo::Bar::AppFalseCyclePackage, only: "test_rb"`
+     7 |  strict_dependencies 'layered_dag'
+                                           ^
 Errors: 4
 # frozen_string_literal: true
 # typed: strict
@@ -560,5 +635,6 @@ Errors: 4
 class Foo::MyPackage < PackageSpec
   layer 'lib'
   strict_dependencies 'layered_dag'
+  test_import Foo::Bar::AppFalseCyclePackage, only: "test_rb"
   test_import Foo::Bar::AppFalseCyclePackageTest
 end
