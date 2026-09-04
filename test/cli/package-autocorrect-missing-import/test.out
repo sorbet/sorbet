@@ -1,14 +1,3 @@
-use_other_package/foo.rb:16: Unable to resolve constant `MyClass` https://srb.help/5002
-    16 |  Foo::Bar::MyClass::SUBCLASSES # resolves via root
-          ^^^^^^^^^^^^^^^^^
-  Autocorrect: Done
-    use_other_package/foo.rb:16: Replaced with `Class`
-    16 |  Foo::Bar::MyClass::SUBCLASSES # resolves via root
-          ^^^^^^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#LCENSORED: `Class` defined here
-    NN |class Class < Module
-        ^^^^^^^^^^^^^^^^^^^^
-
 use_other_package/foo.rb:7: `Foo::Bar::OtherPackage` is not imported https://srb.help/3718
      7 |      Foo::Bar::OtherPackage::OtherClass # resolves via root
               ^^^^^^^^^^^^^^^^^^^^^^
@@ -55,6 +44,17 @@ use_other_package/foo.rb:15: `Foo::Bar::OtherPackage` is not imported https://sr
     use_other_package/__package.rb:7: Inserted `import Foo::Bar::OtherPackage`
      7 |  strict_dependencies 'layered'
                                        ^
+
+use_other_package/foo.rb:16: Unable to resolve constant `MyClass` https://srb.help/5002
+    16 |  Foo::Bar::MyClass::SUBCLASSES # resolves via root
+          ^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    use_other_package/foo.rb:16: Replaced with `Class`
+    16 |  Foo::Bar::MyClass::SUBCLASSES # resolves via root
+          ^^^^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#LCENSORED: `Class` defined here
+    NN |class Class < Module
+        ^^^^^^^^^^^^^^^^^^^^
 
 use_other_package/foo.rb:18: Unable to resolve constant `Test` https://srb.help/5002
     18 |  Test::Foo::Bar::OtherPackage::TestUtil
