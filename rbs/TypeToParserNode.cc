@@ -329,6 +329,18 @@ pm_node_t *TypeToParserNode::recordType(const rbs_types_record_t *node, core::Lo
         }
 
         auto *valueNode = (rbs_types_record_field_type_t *)hash_node->value;
+        if (!valueNode->required) {
+            auto keyLoc = declaration.typeLocFromRange(hash_node->key->location);
+            auto source = ctx.file.data(ctx).source();
+            auto optionalKeyBegin = keyLoc.beginPos();
+            for (; source[optionalKeyBegin] != '?'; optionalKeyBegin--) {
+                ENFORCE(optionalKeyBegin > loc.beginPos(), "Failed to find `?` before optional RBS record key");
+            }
+            auto optionalFieldLoc = core::LocOffsets{optionalKeyBegin, keyLoc.endPos()};
+            if (auto e = ctx.beginIndexerError(optionalFieldLoc, core::errors::Rewriter::RBSOptionalRecordKey)) {
+                e.setHeader("Optional keys in Hash shapes are not supported");
+            }
+        }
         pairs.push_back(prism.AssocNode(loc, key, toPrismNode(valueNode->type, declaration)));
     }
 
