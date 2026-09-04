@@ -1,6 +1,6 @@
-consumer_auth/data/identifier_struct.rb:6: `Project::ConsumerAuth::IdentifierType` resolves but its package is not imported https://srb.help/3718
+consumer_auth/data/identifier_struct.rb:6: `Project::ConsumerAuth` is not imported https://srb.help/3718
      6 |    puts(Project::ConsumerAuth::IdentifierType)
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 ^^^^^^^^^^^^^^^^^^^^^
     consumer_auth/__package.rb:5: Package defined here
      5 |class Project::ConsumerAuth < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

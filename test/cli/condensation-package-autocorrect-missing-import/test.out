@@ -27,9 +27,9 @@ use_other_package/foo.rb:18: Unable to resolve constant `Test` https://srb.help/
     NN |module Net
         ^^^^^^^^^^
 
-use_other_package/foo.rb:7: `Foo::Bar::OtherPackage::OtherClass` resolves but its package is not imported https://srb.help/3718
+use_other_package/foo.rb:7: `Foo::Bar::OtherPackage` is not imported https://srb.help/3718
      7 |      Foo::Bar::OtherPackage::OtherClass # resolves via root
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+              ^^^^^^^^^^^^^^^^^^^^^^
     other/__package.rb:3: Package defined here
      3 |class Foo::Bar::OtherPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -38,9 +38,9 @@ use_other_package/foo.rb:7: `Foo::Bar::OtherPackage::OtherClass` resolves but it
      7 |  strict_dependencies 'layered'
                                        ^
 
-use_other_package/foo.rb:8: `Foo::Bar::OtherPackage::OtherClass` resolves but its package is not imported https://srb.help/3718
+use_other_package/foo.rb:8: `Foo::Bar::OtherPackage` is not imported https://srb.help/3718
      8 |      Bar::OtherPackage::OtherClass # resolves via `module Foo`
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+              ^^^^^^^^^^^^^^^^^
     other/__package.rb:3: Package defined here
      3 |class Foo::Bar::OtherPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -63,9 +63,9 @@ use_other_package/foo.rb:9: Used `test_import` constant `Foo::Bar::OtherPackageT
      8 |  test_import Foo::Bar::OtherPackageTest
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-use_other_package/foo.rb:15: `Foo::Bar::OtherPackage::OtherClass` resolves but its package is not imported https://srb.help/3718
+use_other_package/foo.rb:15: `Foo::Bar::OtherPackage` is not imported https://srb.help/3718
     15 |  Foo::Bar::OtherPackage::OtherClass # resolves via root
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^^
     other/__package.rb:3: Package defined here
      3 |class Foo::Bar::OtherPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -74,9 +74,9 @@ use_other_package/foo.rb:15: `Foo::Bar::OtherPackage::OtherClass` resolves but i
      7 |  strict_dependencies 'layered'
                                        ^
 
-use_other_package/foo.test.rb:4: `Test::Foo::Bar::OtherPackage::TestUtil` resolves but its package is not imported https://srb.help/3718
+use_other_package/foo.test.rb:4: `Foo::Bar::OtherPackage` is not imported https://srb.help/3718
      4 |  Test::Foo::Bar::OtherPackage::TestUtil
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     other/__package.rb:3: Package defined here
      3 |class Foo::Bar::OtherPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -85,9 +85,9 @@ use_other_package/foo.test.rb:4: `Test::Foo::Bar::OtherPackage::TestUtil` resolv
      7 |  strict_dependencies 'layered'
                                        ^
 
-use_other_package/foo.test.rb:6: `Foo::Bar::OtherPackage::ImportMeTestOnly` resolves but its package is not imported https://srb.help/3718
+use_other_package/foo.test.rb:6: `Foo::Bar::OtherPackage` is not imported https://srb.help/3718
      6 |  Foo::Bar::OtherPackage::ImportMeTestOnly
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^^
     other/__package.rb:3: Package defined here
      3 |class Foo::Bar::OtherPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -127,9 +127,9 @@ use_app_package/foo.rb:13: Unable to resolve constant `Test` https://srb.help/50
     NN |module Net
         ^^^^^^^^^^
 
-use_app_package/foo.rb:6: `Foo::Bar::AppPackage::OtherClass` cannot be referenced here because importing its package would cause a layering violation https://srb.help/3726
+use_app_package/foo.rb:6: `Foo::Bar::AppPackage` cannot be referenced here because importing it would cause a layering violation https://srb.help/3726
      6 |      Foo::Bar::AppPackage::OtherClass # resolves via root
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+              ^^^^^^^^^^^^^^^^^^^^
     use_app_package/__package.rb:5: Enclosing package declared here
      5 |class Foo::MyPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -137,11 +137,11 @@ use_app_package/foo.rb:6: `Foo::Bar::AppPackage::OtherClass` cannot be reference
      4 |  layer 'app'
                 ^^^^^
   Note:
-    `Foo::Bar::AppPackage::OtherClass`'s package is not imported
+    `Foo::Bar::AppPackage` is not imported
 
-use_app_package/foo.rb:7: `Foo::Bar::AppPackageTest::OtherClass` cannot be referenced here because importing its package would cause a layering violation https://srb.help/3726
+use_app_package/foo.rb:7: `Foo::Bar::AppPackageTest` cannot be referenced here because importing it would cause a layering violation https://srb.help/3726
      7 |      Foo::Bar::AppPackageTest::OtherClass # resolves via root
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+              ^^^^^^^^^^^^^^^^^^^^^^^^
     use_app_package/__package.rb:5: Enclosing package declared here
      5 |class Foo::MyPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -149,11 +149,11 @@ use_app_package/foo.rb:7: `Foo::Bar::AppPackageTest::OtherClass` cannot be refer
      4 |  layer 'app'
                 ^^^^^
   Note:
-    `Foo::Bar::AppPackageTest::OtherClass`'s package is imported as `test_import`
+    `Foo::Bar::AppPackageTest` is imported as `test_import`
 
-use_app_package/foo.test.rb:6: `Foo::Bar::AppPackage::ImportMeTestOnly` resolves but its package is not imported https://srb.help/3718
+use_app_package/foo.test.rb:6: `Foo::Bar::AppPackage` is not imported https://srb.help/3718
      6 |  Foo::Bar::AppPackage::ImportMeTestOnly
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^
     app_package/__package.rb:3: Package defined here
      3 |class Foo::Bar::AppPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -193,9 +193,9 @@ use_false_package/foo.rb:13: Unable to resolve constant `Test` https://srb.help/
     NN |module Net
         ^^^^^^^^^^
 
-use_false_package/foo.rb:6: `Foo::Bar::FalsePackage::OtherClass` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
+use_false_package/foo.rb:6: `Foo::Bar::FalsePackage` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
      6 |      Foo::Bar::FalsePackage::OtherClass # resolves via root
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+              ^^^^^^^^^^^^^^^^^^^^^^
     use_false_package/__package.rb:5: Enclosing package declared here
      5 |class Foo::MyPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -203,11 +203,11 @@ use_false_package/foo.rb:6: `Foo::Bar::FalsePackage::OtherClass` cannot be refer
      5 |  strict_dependencies 'false'
                               ^^^^^^^
   Note:
-    `Foo::Bar::FalsePackage::OtherClass`'s package is not imported
+    `Foo::Bar::FalsePackage` is not imported
 
-use_false_package/foo.rb:7: `Foo::Bar::FalsePackageTest::OtherClass` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
+use_false_package/foo.rb:7: `Foo::Bar::FalsePackageTest` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
      7 |      Foo::Bar::FalsePackageTest::OtherClass # resolves via root
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
     use_false_package/__package.rb:5: Enclosing package declared here
      5 |class Foo::MyPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -215,11 +215,11 @@ use_false_package/foo.rb:7: `Foo::Bar::FalsePackageTest::OtherClass` cannot be r
      5 |  strict_dependencies 'false'
                               ^^^^^^^
   Note:
-    `Foo::Bar::FalsePackageTest::OtherClass`'s package is imported as `test_import`
+    `Foo::Bar::FalsePackageTest` is imported as `test_import`
 
-use_false_package/foo.test.rb:4: `Test::Foo::Bar::FalsePackage::TestUtil` resolves but its package is not imported https://srb.help/3718
+use_false_package/foo.test.rb:4: `Foo::Bar::FalsePackage` is not imported https://srb.help/3718
      4 |  Test::Foo::Bar::FalsePackage::TestUtil
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     false_package/__package.rb:3: Package defined here
      3 |class Foo::Bar::FalsePackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -259,9 +259,9 @@ use_false_and_app_package/foo.rb:13: Unable to resolve constant `Test` https://s
     NN |module Net
         ^^^^^^^^^^
 
-use_false_and_app_package/foo.rb:6: `Foo::Bar::FalseAndAppPackage::OtherClass` cannot be referenced here because importing its package would cause a layering violation, and its `strict_dependencies` is not strict enough https://srb.help/3726
+use_false_and_app_package/foo.rb:6: `Foo::Bar::FalseAndAppPackage` cannot be referenced here because importing it would cause a layering violation, and its `strict_dependencies` is not strict enough https://srb.help/3726
      6 |      Foo::Bar::FalseAndAppPackage::OtherClass # resolves via root
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     use_false_and_app_package/__package.rb:5: Enclosing package declared here
      5 |class Foo::MyPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -272,11 +272,11 @@ use_false_and_app_package/foo.rb:6: `Foo::Bar::FalseAndAppPackage::OtherClass` c
      5 |  strict_dependencies 'false'
                               ^^^^^^^
   Note:
-    `Foo::Bar::FalseAndAppPackage::OtherClass`'s package is not imported
+    `Foo::Bar::FalseAndAppPackage` is not imported
 
-use_false_and_app_package/foo.rb:7: `Foo::Bar::FalseAndAppPackageTest::OtherClass` cannot be referenced here because importing its package would cause a layering violation, and its `strict_dependencies` is not strict enough https://srb.help/3726
+use_false_and_app_package/foo.rb:7: `Foo::Bar::FalseAndAppPackageTest` cannot be referenced here because importing it would cause a layering violation, and its `strict_dependencies` is not strict enough https://srb.help/3726
      7 |      Foo::Bar::FalseAndAppPackageTest::OtherClass # resolves via root
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     use_false_and_app_package/__package.rb:5: Enclosing package declared here
      5 |class Foo::MyPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -287,11 +287,11 @@ use_false_and_app_package/foo.rb:7: `Foo::Bar::FalseAndAppPackageTest::OtherClas
      5 |  strict_dependencies 'false'
                               ^^^^^^^
   Note:
-    `Foo::Bar::FalseAndAppPackageTest::OtherClass`'s package is imported as `test_import`
+    `Foo::Bar::FalseAndAppPackageTest` is imported as `test_import`
 
-use_false_and_app_package/foo.test.rb:4: `Test::Foo::Bar::FalseAndAppPackage::TestUtil` resolves but its package is not imported https://srb.help/3718
+use_false_and_app_package/foo.test.rb:4: `Foo::Bar::FalseAndAppPackage` is not imported https://srb.help/3718
      4 |  Test::Foo::Bar::FalseAndAppPackage::TestUtil
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     false_and_app_package/__package.rb:3: Package defined here
      3 |class Foo::Bar::FalseAndAppPackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

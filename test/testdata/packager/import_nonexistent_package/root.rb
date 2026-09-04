@@ -2,5 +2,5 @@
 
 module Root
   Root::A::Foo
-# ^^^^^^^^^^^^ error: `Root::A::Foo` resolves but its package is not imported
+# ^^^^^^^ error: `Root::A` is not imported
 end
