@@ -34,7 +34,7 @@ private:
             case core::TypePtr::Tag::TypeVar:
                 break;
 
-            case core::TypePtr::Tag::EnumUnion:
+            case core::TypePtr::Tag::EnumUnionType:
                 // Essentially an OrType, but all members are concrete types (enum class variants)
                 break;
 

@@ -81,7 +81,7 @@ DispatchResult OrType::dispatchCall(const GlobalState &gs, const DispatchArgs &a
     return DispatchResult::merge(gs, DispatchResult::Combinator::OR, std::move(leftRet), std::move(rightRet));
 }
 
-DispatchResult EnumUnion::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
+DispatchResult EnumUnionType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     categoryCounterInc("dispatch_call", "enumunion");
     ENFORCE(members.size() >= 2);
     auto memberType = members[0].data(gs)->externalType();
@@ -2474,7 +2474,8 @@ public:
 
 class Magic_expandSplat : public IntrinsicMethod {
     static TypePtr expandArray(const GlobalState &gs, const TypePtr &type, int expandTo) {
-        // EnumUnion members are always enum singleton types, never tuples or arrays, so they can take the scalar path.
+        // EnumUnionType members are always enum singleton types, never tuples or arrays, so they can take the scalar
+        // path.
         if (auto ot = cast_type<OrType>(type)) {
             return Types::any(gs, expandArray(gs, ot->left, expandTo), expandArray(gs, ot->right, expandTo));
         }

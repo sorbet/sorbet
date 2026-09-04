@@ -46,7 +46,7 @@ public:
         TupleType,
         AppliedType,
         MetaType,
-        EnumUnion,
+        EnumUnionType,
     };
 
     // A mapping from type to its corresponding tag.

@@ -32,7 +32,7 @@ using namespace std;
         CASE_STATEMENT(CASE_BODY, BlamedUntyped)         \
         CASE_STATEMENT(CASE_BODY, UnresolvedClassType)   \
         CASE_STATEMENT(CASE_BODY, UnresolvedAppliedType) \
-        CASE_STATEMENT(CASE_BODY, EnumUnion)             \
+        CASE_STATEMENT(CASE_BODY, EnumUnionType)         \
     }
 
 namespace sorbet::core {
@@ -121,7 +121,7 @@ int TypePtr::kind() const {
         case Tag::AliasType:
             return 11;
         case Tag::OrType:
-        case Tag::EnumUnion:
+        case Tag::EnumUnionType:
             return 12;
         case Tag::AndType:
             return 13;
@@ -182,7 +182,7 @@ bool TypePtr::isFullyDefined() const {
             auto &app = cast_type_nonnull<AppliedType>(*this);
             return absl::c_all_of(app.targs, [](const TypePtr &t) { return t.isFullyDefined(); });
         }
-        case Tag::EnumUnion:
+        case Tag::EnumUnionType:
             return true;
     }
 }
@@ -228,7 +228,7 @@ bool TypePtr::hasUntyped() const {
             auto &shape = cast_type_nonnull<ShapeType>(*this);
             return absl::c_any_of(shape.values, [](const TypePtr &t) { return t.hasUntyped(); });
         }
-        case Tag::EnumUnion:
+        case Tag::EnumUnionType:
             return false;
     }
 }
@@ -268,7 +268,7 @@ bool TypePtr::hasTopLevelVoid() const {
             auto &a = cast_type_nonnull<AndType>(*this);
             return a.left.hasTopLevelVoid() || a.right.hasTopLevelVoid();
         }
-        case Tag::EnumUnion:
+        case Tag::EnumUnionType:
             return false;
     }
 }
@@ -326,7 +326,7 @@ TypePtr TypePtr::getCallArguments(const GlobalState &gs, NameRef name) const {
         case Tag::LambdaParam:
         case Tag::TypeVar:
         case Tag::AliasType:
-        case Tag::EnumUnion: {
+        case Tag::EnumUnionType: {
             Exception::raise("should never happen: getCallArguments on `{}`", typeName());
         }
     }
@@ -378,7 +378,7 @@ TypePtr TypePtr::_instantiateLambdaParams(const GlobalState &gs, InstantiationCo
         case Tag::FloatLiteralType:
         case Tag::SelfTypeParam:
         case Tag::SelfType:
-        case Tag::EnumUnion:
+        case Tag::EnumUnionType:
             // nullptr is a special value meaning that nothing changed (e.g., we didn't find a
             // LambdaParam that needed to be instantiated), so as an optimization the caller doesn't
             // have to allocate another type.

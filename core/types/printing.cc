@@ -548,9 +548,9 @@ string MetaType::show(const GlobalState &gs, ShowOptions options) const {
     return fmt::format("Runtime object representing type: {}", wrapped.show(gs, options));
 }
 
-string EnumUnion::toStringWithTabs(const GlobalState &gs, int tabs) const {
+string EnumUnionType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
-    fmt::format_to(std::back_inserter(buf), "EnumUnion {{");
+    fmt::format_to(std::back_inserter(buf), "EnumUnionType {{");
     bool first = true;
     for (auto &member : members) {
         if (!first) {
@@ -563,7 +563,7 @@ string EnumUnion::toStringWithTabs(const GlobalState &gs, int tabs) const {
     return to_string(buf);
 }
 
-string EnumUnion::show(const GlobalState &gs, ShowOptions options) const {
+string EnumUnionType::show(const GlobalState &gs, ShowOptions options) const {
     return fmt::format("T.any({})",
                        fmt::map_join(members, ", ", [&](auto member) -> string { return member.show(gs, options); }));
 }

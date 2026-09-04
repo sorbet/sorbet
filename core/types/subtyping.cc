@@ -252,11 +252,11 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         }
     }
 
-    // EnumUnion is a compact representation of an OrType. Preserve it when combining variants of the same enum, and
+    // EnumUnionType is a compact representation of an OrType. Preserve it when combining variants of the same enum, and
     // otherwise expand it before entering the existing OrType implementation so that all distribution and collapsing
     // rules continue to apply.
-    if (auto eu1 = cast_type<EnumUnion>(t1)) {
-        if (auto eu2 = cast_type<EnumUnion>(t2)) {
+    if (auto eu1 = cast_type<EnumUnionType>(t1)) {
+        if (auto eu2 = cast_type<EnumUnionType>(t2)) {
             if (eu1->parentEnumClass(gs) == eu2->parentEnumClass(gs)) {
                 vector<ClassOrModuleRef> combined;
                 combined.reserve(eu1->members.size() + eu2->members.size());
@@ -273,10 +273,10 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         }
         return lub(gs, eu1->toOrType(gs), t2);
     }
-    if (auto eu2 = cast_type<EnumUnion>(t2)) {
+    if (auto eu2 = cast_type<EnumUnionType>(t2)) {
         if (isa_type<ClassType>(t1)) {
             auto c1 = cast_type_nonnull<ClassType>(t1);
-            auto parent = EnumUnion::parentEnumClass(gs, c1.symbol);
+            auto parent = EnumUnionType::parentEnumClass(gs, c1.symbol);
             if (parent.exists() && parent == eu2->parentEnumClass(gs)) {
                 auto combined = eu2->members;
                 auto insertionPoint = lower_bound(combined.begin(), combined.end(), c1.symbol,
@@ -643,8 +643,8 @@ TypePtr lubGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
         return t2;
     } else {
         categoryCounterInc("lub.<class>.collapsed", "no");
-        auto parent1 = EnumUnion::parentEnumClass(gs, sym1);
-        if (parent1.exists() && parent1 == EnumUnion::parentEnumClass(gs, sym2)) {
+        auto parent1 = EnumUnionType::parentEnumClass(gs, sym1);
+        if (parent1.exists() && parent1 == EnumUnionType::parentEnumClass(gs, sym2)) {
             return Types::enumUnion(sym1, sym2);
         }
         return OrType::make_shared(t1, t2);
@@ -774,11 +774,11 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
     }
 
     // Preserve all of the existing OrType distribution behavior. In particular, filtering members merely by whether
-    // their intersection is inhabited would lose constraints from types like T.all(type_parameter, EnumUnion).
-    if (auto eu1 = cast_type<EnumUnion>(t1)) {
+    // their intersection is inhabited would lose constraints from types like T.all(type_parameter, EnumUnionType).
+    if (auto eu1 = cast_type<EnumUnionType>(t1)) {
         return glb(gs, eu1->toOrType(gs), t2);
     }
-    if (auto eu2 = cast_type<EnumUnion>(t2)) {
+    if (auto eu2 = cast_type<EnumUnionType>(t2)) {
         return glb(gs, t1, eu2->toOrType(gs));
     }
 
@@ -1643,15 +1643,15 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
 
     // Note: order of cases here matters! We can't lose "and" information in t1 early and we can't
     // lose "or" information in t2 early.
-    if (auto eu1 = cast_type<EnumUnion>(t1)) { // 7, 8, 9
-        if (auto eu2 = cast_type<EnumUnion>(t2)) {
+    if (auto eu1 = cast_type<EnumUnionType>(t1)) { // 7, 8, 9
+        if (auto eu2 = cast_type<EnumUnionType>(t2)) {
             return eu1->parentEnumClass(gs) == eu2->parentEnumClass(gs) &&
                    includes(eu2->members.begin(), eu2->members.end(), eu1->members.begin(), eu1->members.end(),
                             [](auto lhs, auto rhs) { return lhs.id() < rhs.id(); });
         }
         return isSubTypeUnderConstraint(gs, constr, eu1->toOrType(gs), t2, mode, errorDetailsCollector);
     }
-    if (auto eu2 = cast_type<EnumUnion>(t2)) {
+    if (auto eu2 = cast_type<EnumUnionType>(t2)) {
         if (isa_type<ClassType>(t1)) {
             auto c1 = cast_type_nonnull<ClassType>(t1);
             if (c1.symbol == Symbols::untyped()) {
