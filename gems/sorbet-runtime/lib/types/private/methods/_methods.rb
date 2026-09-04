@@ -267,7 +267,7 @@ module T::Private::Methods
           # but rather implementing an interface that would defer back
           # to this implementation.
           source_sig = T::Private::Methods.signature_for_method(source.instance_method(method_name))
-          if source_sig.mode == T::Private::Methods::Modes.abstract
+          if source_sig&.mode == T::Private::Methods::Modes.abstract
             next
           end
         end
