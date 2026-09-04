@@ -271,7 +271,7 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, absl::
             } else if (kept.empty()) {
                 result = Types::bottom();
             } else if (kept.size() == 1) {
-                result = make_type<ClassType>(kept[0]);
+                result = kept[0].data(gs)->externalType();
             } else {
                 result = Types::enumUnion(move(kept));
             }
@@ -350,7 +350,7 @@ TypePtr Types::approximateSubtract(const GlobalState &gs, const TypePtr &from, c
         [&](const OrType &o) {
             result = Types::approximateSubtract(gs, Types::approximateSubtract(gs, from, o.left), o.right);
         },
-        [&](const EnumUnion &e) { result = Types::dropSubtypesOf(gs, from, absl::MakeSpan(e.members)); },
+        [&](const EnumUnion &e) { result = Types::dropSubtypesOf(gs, from, e.members); },
 
         [&](const TypePtr &) { result = from; });
     return result;
@@ -798,11 +798,11 @@ bool MetaType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const 
     return false;
 }
 
-EnumUnion::EnumUnion(vector<ClassOrModuleRef> members) : members(move(members)) {
+EnumUnion::EnumUnion(vector<ClassOrModuleRef> &&members) : members(move(members)) {
     recordAllocatedType("enumunion");
 }
 
-TypePtr EnumUnion::make_shared(vector<ClassOrModuleRef> members) {
+TypePtr EnumUnion::make_shared(vector<ClassOrModuleRef> &&members) {
     return TypePtr(TypePtr::Tag::EnumUnion, new EnumUnion(move(members)));
 }
 
@@ -852,16 +852,16 @@ ClassOrModuleRef EnumUnion::parentEnumClass(const GlobalState &gs, ClassOrModule
 
 ClassOrModuleRef EnumUnion::parentEnumClass(const GlobalState &gs) const {
     ENFORCE(!members.empty());
-    auto result = parentEnumClass(gs, members[0]);
+    auto result = members[0].data(gs)->superClass();
     ENFORCE(result.exists());
     return result;
 }
 
 TypePtr EnumUnion::toOrType(const GlobalState &gs) const {
     ENFORCE(members.size() >= 2);
-    auto result = make_type<ClassType>(members[0]);
+    auto result = members[0].data(gs)->externalType();
     for (size_t i = 1; i < members.size(); i++) {
-        result = OrType::make_shared(result, make_type<ClassType>(members[i]));
+        result = OrType::make_shared(result, members[i].data(gs)->externalType());
     }
     return result;
 }

@@ -84,10 +84,10 @@ DispatchResult OrType::dispatchCall(const GlobalState &gs, const DispatchArgs &a
 DispatchResult EnumUnion::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     categoryCounterInc("dispatch_call", "enumunion");
     ENFORCE(members.size() >= 2);
-    auto memberType = make_type<ClassType>(members[0]);
+    auto memberType = members[0].data(gs)->externalType();
     auto result = memberType.dispatchCall(gs, args.withSelfAndThisRef(memberType));
     for (size_t i = 1; i < members.size(); i++) {
-        memberType = make_type<ClassType>(members[i]);
+        memberType = members[i].data(gs)->externalType();
         auto memberRet = memberType.dispatchCall(gs, args.withSelfAndThisRef(memberType));
         result = DispatchResult::merge(gs, DispatchResult::Combinator::OR, std::move(result), std::move(memberRet));
     }

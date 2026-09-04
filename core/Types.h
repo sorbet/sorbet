@@ -1044,16 +1044,17 @@ public:
     // Returns the parent enum class shared by all members.
     ClassOrModuleRef parentEnumClass(const GlobalState &gs) const;
 
+    // Avoid converting to OrType when possible: doing so gives up EnumUnion's compact representation.
     TypePtr toOrType(const GlobalState &gs) const;
 
 private:
     /*
      * You probably want Types::enumUnion() instead.
      */
-    EnumUnion(std::vector<ClassOrModuleRef> members);
+    EnumUnion(std::vector<ClassOrModuleRef> && members);
 
     friend TypePtr Types::enumUnion(std::vector<ClassOrModuleRef> members);
-    static TypePtr make_shared(std::vector<ClassOrModuleRef> members);
+    static TypePtr make_shared(std::vector<ClassOrModuleRef> && members);
 };
 
 class SendAndBlockLink {
