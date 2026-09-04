@@ -1294,15 +1294,19 @@ void readOptions(Options &opts,
             }
         }
 
-        if (raw.count("gen-packages")) {
-            auto genPackagesMode = raw["gen-packages"].as<string>();
-            if (genPackagesMode == "normal") {
-                opts.genPackagesMode = core::packages::GenPackagesMode::Normal;
-            } else if (genPackagesMode == "strict") {
-                opts.genPackagesMode = core::packages::GenPackagesMode::Strict;
-            } else {
-                logger->error("--gen-packages must be 'normal' or 'strict', got '{}'", genPackagesMode);
-                throw EarlyReturnWithCode(1);
+        if constexpr (debug_mode) {
+            // TODO(jez) We're no-op'ing the `--gen-packages` flag outside of `dbg` builds of Sorbet
+            // because it's not stable enough yet, and we think that it's causing adverse memory usage
+            if (raw.count("gen-packages")) {
+                auto genPackagesMode = raw["gen-packages"].as<string>();
+                if (genPackagesMode == "normal") {
+                    opts.genPackagesMode = core::packages::GenPackagesMode::Normal;
+                } else if (genPackagesMode == "strict") {
+                    opts.genPackagesMode = core::packages::GenPackagesMode::Strict;
+                } else {
+                    logger->error("--gen-packages must be 'normal' or 'strict', got '{}'", genPackagesMode);
+                    throw EarlyReturnWithCode(1);
+                }
             }
         }
         auto genPackagesEnabled = opts.genPackagesMode != core::packages::GenPackagesMode::Disabled;
