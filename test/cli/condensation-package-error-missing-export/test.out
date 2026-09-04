@@ -38,9 +38,9 @@ use_other/foo_class.rb:13: `Foo::Bar::OtherPackage::Inner::AlsoNotExported` reso
   Note:
     Either export it manually, or better, restructure the code so that package namespaces do not define behavior.
 Errors: 4
-use_app_false_cycle_package/foo.rb:6: Unable to resolve constant `Bar` https://srb.help/5002
+use_app_false_cycle_package/foo.rb:6: `Foo::Bar::AppFalseCyclePackage` cannot be referenced here because importing it would put `Foo::MyPackage` into a cycle, importing it would cause a layering violation, and its `strict_dependencies` is not strict enough https://srb.help/3727
      6 |      Foo::Bar::AppFalseCyclePackage::OtherClass
-              ^^^^^^^^
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Did you mean `Dir`? Use `-a` to autocorrect
     use_app_false_cycle_package/foo.rb:6: Replace with `Dir`
      6 |      Foo::Bar::AppFalseCyclePackage::OtherClass

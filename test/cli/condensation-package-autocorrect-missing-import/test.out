@@ -313,9 +313,9 @@ end
 
 --------------------------------------------------------------------------
 
-use_cycle_package/foo.rb:6: Unable to resolve constant `Bar` https://srb.help/5002
+use_cycle_package/foo.rb:6: `Foo::Bar::CyclePackage` cannot be referenced here because importing it would put `Foo::MyPackage` into a cycle https://srb.help/3727
      6 |      Foo::Bar::CyclePackage::OtherClass # resolves via root
-              ^^^^^^^^
+              ^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
     use_cycle_package/foo.rb:6: Replaced with `Dir`
      6 |      Foo::Bar::CyclePackage::OtherClass # resolves via root
@@ -324,9 +324,9 @@ use_cycle_package/foo.rb:6: Unable to resolve constant `Bar` https://srb.help/50
     NN |class Dir < Object
         ^^^^^^^^^^^^^^^^^^
 
-use_cycle_package/foo.rb:7: Unable to resolve constant `Bar` https://srb.help/5002
+use_cycle_package/foo.rb:7: `Foo::Bar::CyclePackageTest` cannot be referenced here because importing it would put `Foo::MyPackage` into a cycle https://srb.help/3727
      7 |      Foo::Bar::CyclePackageTest::OtherClass # resolves via root
-              ^^^^^^^^
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
     use_cycle_package/foo.rb:7: Replaced with `Dir`
      7 |      Foo::Bar::CyclePackageTest::OtherClass # resolves via root
@@ -353,9 +353,9 @@ use_cycle_package/foo.rb:13: Unable to resolve constant `Test` https://srb.help/
     NN |module Net
         ^^^^^^^^^^
 
-use_cycle_package/foo.test.rb:4: Unable to resolve constant `Bar` https://srb.help/5002
+use_cycle_package/foo.test.rb:4: `Foo::Bar::CyclePackage` is not imported https://srb.help/3718
      4 |  Test::Foo::Bar::CyclePackage::TestUtil
-          ^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
     use_cycle_package/foo.test.rb:4: Replaced with `Dir`
      4 |  Test::Foo::Bar::CyclePackage::TestUtil
@@ -376,9 +376,9 @@ end
 
 --------------------------------------------------------------------------
 
-use_app_cycle_package/foo.rb:6: Unable to resolve constant `Bar` https://srb.help/5002
+use_app_cycle_package/foo.rb:6: `Foo::Bar::AppCyclePackage` cannot be referenced here because importing it would put `Foo::MyPackage` into a cycle, and importing it would cause a layering violation https://srb.help/3727
      6 |      Foo::Bar::AppCyclePackage::OtherClass # resolves via root
-              ^^^^^^^^
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
     use_app_cycle_package/foo.rb:6: Replaced with `Dir`
      6 |      Foo::Bar::AppCyclePackage::OtherClass # resolves via root
@@ -387,9 +387,9 @@ use_app_cycle_package/foo.rb:6: Unable to resolve constant `Bar` https://srb.hel
     NN |class Dir < Object
         ^^^^^^^^^^^^^^^^^^
 
-use_app_cycle_package/foo.rb:7: Unable to resolve constant `Bar` https://srb.help/5002
+use_app_cycle_package/foo.rb:7: `Foo::Bar::AppCyclePackageTest` cannot be referenced here because importing it would put `Foo::MyPackage` into a cycle, and importing it would cause a layering violation https://srb.help/3727
      7 |      Foo::Bar::AppCyclePackageTest::OtherClass # resolves via root
-              ^^^^^^^^
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
     use_app_cycle_package/foo.rb:7: Replaced with `Dir`
      7 |      Foo::Bar::AppCyclePackageTest::OtherClass # resolves via root
@@ -416,9 +416,9 @@ use_app_cycle_package/foo.rb:13: Unable to resolve constant `Test` https://srb.h
     NN |module Net
         ^^^^^^^^^^
 
-use_app_cycle_package/foo.test.rb:4: Unable to resolve constant `Bar` https://srb.help/5002
+use_app_cycle_package/foo.test.rb:4: `Foo::Bar::AppCyclePackage` is not imported https://srb.help/3718
      4 |  Test::Foo::Bar::AppCyclePackage::TestUtil
-          ^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
     use_app_cycle_package/foo.test.rb:4: Replaced with `Dir`
      4 |  Test::Foo::Bar::AppCyclePackage::TestUtil
@@ -439,9 +439,9 @@ end
 
 --------------------------------------------------------------------------
 
-use_false_cycle_package/foo.rb:6: Unable to resolve constant `Bar` https://srb.help/5002
+use_false_cycle_package/foo.rb:6: `Foo::Bar::FalseCyclePackage` cannot be referenced here because importing it would put `Foo::MyPackage` into a cycle, and its `strict_dependencies` is not strict enough https://srb.help/3727
      6 |      Foo::Bar::FalseCyclePackage::OtherClass # resolves via root
-              ^^^^^^^^
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
     use_false_cycle_package/foo.rb:6: Replaced with `Dir`
      6 |      Foo::Bar::FalseCyclePackage::OtherClass # resolves via root
@@ -450,9 +450,9 @@ use_false_cycle_package/foo.rb:6: Unable to resolve constant `Bar` https://srb.h
     NN |class Dir < Object
         ^^^^^^^^^^^^^^^^^^
 
-use_false_cycle_package/foo.rb:7: Unable to resolve constant `Bar` https://srb.help/5002
+use_false_cycle_package/foo.rb:7: `Foo::Bar::FalseCyclePackageTest` cannot be referenced here because importing it would put `Foo::MyPackage` into a cycle, and its `strict_dependencies` is not strict enough https://srb.help/3727
      7 |      Foo::Bar::FalseCyclePackageTest::OtherClass # resolves via root
-              ^^^^^^^^
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
     use_false_cycle_package/foo.rb:7: Replaced with `Dir`
      7 |      Foo::Bar::FalseCyclePackageTest::OtherClass # resolves via root
@@ -479,9 +479,9 @@ use_false_cycle_package/foo.rb:13: Unable to resolve constant `Test` https://srb
     NN |module Net
         ^^^^^^^^^^
 
-use_false_cycle_package/foo.test.rb:4: Unable to resolve constant `Bar` https://srb.help/5002
+use_false_cycle_package/foo.test.rb:4: `Foo::Bar::FalseCyclePackage` is not imported https://srb.help/3718
      4 |  Test::Foo::Bar::FalseCyclePackage::TestUtil
-          ^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
     use_false_cycle_package/foo.test.rb:4: Replaced with `Dir`
      4 |  Test::Foo::Bar::FalseCyclePackage::TestUtil
@@ -502,9 +502,9 @@ end
 
 --------------------------------------------------------------------------
 
-use_app_false_cycle_package/foo.rb:6: Unable to resolve constant `Bar` https://srb.help/5002
+use_app_false_cycle_package/foo.rb:6: `Foo::Bar::AppFalseCyclePackage` cannot be referenced here because importing it would put `Foo::MyPackage` into a cycle, importing it would cause a layering violation, and its `strict_dependencies` is not strict enough https://srb.help/3727
      6 |      Foo::Bar::AppFalseCyclePackage::OtherClass # resolves via root
-              ^^^^^^^^
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
     use_app_false_cycle_package/foo.rb:6: Replaced with `Dir`
      6 |      Foo::Bar::AppFalseCyclePackage::OtherClass # resolves via root
@@ -513,9 +513,9 @@ use_app_false_cycle_package/foo.rb:6: Unable to resolve constant `Bar` https://s
     NN |class Dir < Object
         ^^^^^^^^^^^^^^^^^^
 
-use_app_false_cycle_package/foo.rb:7: Unable to resolve constant `Bar` https://srb.help/5002
+use_app_false_cycle_package/foo.rb:7: `Foo::Bar::AppFalseCyclePackageTest` cannot be referenced here because importing it would put `Foo::MyPackage` into a cycle, importing it would cause a layering violation, and its `strict_dependencies` is not strict enough https://srb.help/3727
      7 |      Foo::Bar::AppFalseCyclePackageTest::OtherClass # resolves via root
-              ^^^^^^^^
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
     use_app_false_cycle_package/foo.rb:7: Replaced with `Dir`
      7 |      Foo::Bar::AppFalseCyclePackageTest::OtherClass # resolves via root
@@ -542,9 +542,9 @@ use_app_false_cycle_package/foo.rb:13: Unable to resolve constant `Test` https:/
     NN |module Net
         ^^^^^^^^^^
 
-use_app_false_cycle_package/foo.test.rb:4: Unable to resolve constant `Bar` https://srb.help/5002
+use_app_false_cycle_package/foo.test.rb:4: `Foo::Bar::AppFalseCyclePackage` is not imported https://srb.help/3718
      4 |  Test::Foo::Bar::AppFalseCyclePackage::TestUtil
-          ^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
     use_app_false_cycle_package/foo.test.rb:4: Replaced with `Dir`
      4 |  Test::Foo::Bar::AppFalseCyclePackage::TestUtil
