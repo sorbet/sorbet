@@ -272,7 +272,6 @@ module T::Private::Methods
           end
         end
 
-
         found_error = true
 
         final_sig = T::Private::Methods.signature_for_method(ancestor.instance_method(method_name))

@@ -600,8 +600,8 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   it 'allows final "overriding" when the override is abstract' do
     parent = Class.new do
       extend T::Sig
-      sig(:final) { void }
-      def foo = puts "hello"
+      sig(:final) { returns(String) }
+      def foo = "hello"
     end
 
     ifoo = Module.new do
@@ -609,7 +609,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
       extend T::Helpers
       abstract!
 
-      sig { abstract.void }
+      sig { abstract.returns(String) }
       def foo; end
     end
 
@@ -621,8 +621,8 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   it 'only allows "final overriding" if the method is actually abstract' do
     parent = Class.new do
       extend T::Sig
-      sig(:final) { void }
-      def foo = puts "hello"
+      sig(:final) { returns(String) }
+      def foo = "hello"
     end
 
     ifoo = Module.new do
@@ -644,7 +644,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   it 'doesnt let one "final override" stop us from finding another' do
     parent = Class.new do
       extend T::Sig
-      sig(:final) { void }
+      sig(:final) { returns(String) }
       def foo = puts "hello"
     end
 
@@ -653,7 +653,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
       extend T::Helpers
       abstract!
 
-      sig { abstract.void }
+      sig { abstract.returns(String) }
       def foo; end
     end
 
@@ -662,7 +662,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
       extend T::Helpers
       abstract!
 
-      sig { void }
+      sig { returns(String) }
       def foo = puts "goodbye"
     end
 
