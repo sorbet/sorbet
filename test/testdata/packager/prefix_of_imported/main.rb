@@ -3,7 +3,7 @@
 
 module Opus::Main
   p(Opus::OuterPackage)
-  # ^^^^^^^^^^^^^^^^^^ error: `Opus::OuterPackage` resolves but its package is not imported
+  # ^^^^^^^^^^^^^^^^^^ error: `Opus::OuterPackage` is not imported
 
   p(Opus::OuterPackage::InnerPackage)
 

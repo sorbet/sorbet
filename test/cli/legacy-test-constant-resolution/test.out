@@ -10,9 +10,9 @@ prod_none/use.rb:3: `Test::Target::Helper` resolves but its package is not impor
      3 |class ProdNone < PackageSpec
                                     ^
 
-unit_early/test/use.test.rb:3: `Test::EarlyTarget::Value` resolves but its package is not imported https://srb.help/3718
+unit_early/test/use.test.rb:3: `EarlyTarget` is not imported https://srb.help/3718
      3 |Test::EarlyTarget::Value
-        ^^^^^^^^^^^^^^^^^^^^^^^^
+        ^^^^^^^^^^^^^^^^^
     early_target/__package.rb:3: Package defined here
      3 |class EarlyTarget < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -21,9 +21,9 @@ unit_early/test/use.test.rb:3: `Test::EarlyTarget::Value` resolves but its packa
      5 |  test_import EarlyBridge
                                  ^
 
-unit_late/test/use.test.rb:3: `Test::LateTarget::Value` resolves but its package is not imported https://srb.help/3718
+unit_late/test/use.test.rb:3: `LateTarget` is not imported https://srb.help/3718
      3 |Test::LateTarget::Value
-        ^^^^^^^^^^^^^^^^^^^^^^^
+        ^^^^^^^^^^^^^^^^
     late_target/__package.rb:3: Package defined here
      3 |class LateTarget < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -32,9 +32,9 @@ unit_late/test/use.test.rb:3: `Test::LateTarget::Value` resolves but its package
      3 |class UnitLate < PackageSpec
                                     ^
 
-unit_none/test/use.test.rb:3: `Test::Target::TestCase` resolves but its package is not imported https://srb.help/3718
+unit_none/test/use.test.rb:3: `Target` is not imported https://srb.help/3718
      3 |Test::Target::TestCase
-        ^^^^^^^^^^^^^^^^^^^^^^
+        ^^^^^^^^^^^^
     target/__package.rb:3: Package defined here
      3 |class Target < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -121,9 +121,9 @@ prod_test/use.rb:3: Unable to resolve constant `Test` https://srb.help/5002
         ^^^^^^^^^^
 Errors: 1
 ------ package-directed: isolated test unit, no import ------
-unit_none/test/use.test.rb:3: `Test::Target::TestCase` resolves but its package is not imported https://srb.help/3718
+unit_none/test/use.test.rb:3: `Target` is not imported https://srb.help/3718
      3 |Test::Target::TestCase
-        ^^^^^^^^^^^^^^^^^^^^^^
+        ^^^^^^^^^^^^
     target/__package.rb:3: Package defined here
      3 |class Target < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -152,9 +152,9 @@ unit_late/test/use.test.rb:3: Unable to resolve constant `Test` https://srb.help
         ^^^^^^^^^^
 Errors: 1
 ------ package-directed: unimported target test SCC is earlier ------
-unit_early/test/use.test.rb:3: `Test::EarlyTarget::Value` resolves but its package is not imported https://srb.help/3718
+unit_early/test/use.test.rb:3: `EarlyTarget` is not imported https://srb.help/3718
      3 |Test::EarlyTarget::Value
-        ^^^^^^^^^^^^^^^^^^^^^^^^
+        ^^^^^^^^^^^^^^^^^
     early_target/__package.rb:3: Package defined here
      3 |class EarlyTarget < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -221,20 +221,20 @@ prod_test/use.rb:3: Unable to resolve constant `Test` https://srb.help/5002
     NN |module Net
         ^^^^^^^^^^
 
-unit_late/test/use.test.rb:3: Unable to resolve constant `LateTarget` https://srb.help/5002
+unit_late/test/use.test.rb:3: `LateTarget` is not imported https://srb.help/3718
      3 |Test::LateTarget::Value
         ^^^^^^^^^^^^^^^^
-  Did you mean `DateTime`? Use `-a` to autocorrect
-    unit_late/test/use.test.rb:3: Replace with `DateTime`
-     3 |Test::LateTarget::Value
-        ^^^^^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/date_time.rbi#LCENSORED: `DateTime` defined here
-      NN |class DateTime < Date
-          ^^^^^^^^^^^^^^^^^^^^^
+    late_target/__package.rb:3: Package defined here
+     3 |class LateTarget < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    unit_late/__package.rb:3: Insert `test_import LateTarget, only: "test_rb"`
+     3 |class UnitLate < PackageSpec
+                                    ^
 
-unit_none/test/use.test.rb:3: `Test::Target::TestCase` resolves but its package is not imported https://srb.help/3718
+unit_none/test/use.test.rb:3: `Target` is not imported https://srb.help/3718
      3 |Test::Target::TestCase
-        ^^^^^^^^^^^^^^^^^^^^^^
+        ^^^^^^^^^^^^
     target/__package.rb:3: Package defined here
      3 |class Target < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -263,9 +263,9 @@ helper_unit_import/test/helper.rb:3: The `test_import` constant `Test::Target::T
      4 |  test_import Target, only: "test_rb"
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-unit_early/test/use.test.rb:3: `Test::EarlyTarget::Value` resolves but its package is not imported https://srb.help/3718
+unit_early/test/use.test.rb:3: `EarlyTarget` is not imported https://srb.help/3718
      3 |Test::EarlyTarget::Value
-        ^^^^^^^^^^^^^^^^^^^^^^^^
+        ^^^^^^^^^^^^^^^^^
     early_target/__package.rb:3: Package defined here
      3 |class EarlyTarget < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

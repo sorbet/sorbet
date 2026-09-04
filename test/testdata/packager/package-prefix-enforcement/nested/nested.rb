@@ -39,7 +39,7 @@ module Root
     sig { void }
     def example
       NOT_IN_PACKAGE
-    # ^^^^^^^^^^^^^^ error: `Root::NOT_IN_PACKAGE` resolves but its package is not imported
+    # ^^^^^^^^^^^^^^ error: `Root` is not imported
     end
   end
 end

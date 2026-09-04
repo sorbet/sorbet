@@ -4,5 +4,5 @@
 
 module Consumer
   Only::Test::Thing
-# ^^^^^^^^^^^^^^^^^ error: `Only::Test::Thing` cannot be referenced here because `Consumer` may not reference `test!` packages
+# ^^^^^^^^^^ error: `Only::Test` cannot be referenced here because `Consumer` may not reference `test!` packages
 end

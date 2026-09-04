@@ -20,6 +20,6 @@ class ::UnpackagedTheSequel
 
     # this is defined in a non-imported package
     puts OtherPackageNotImported::ExportedClass.new
-    #    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `OtherPackageNotImported::ExportedClass` resolves but its package is not imported
+    #    ^^^^^^^^^^^^^^^^^^^^^^^ error: `OtherPackageNotImported` is not imported
   end
 end
