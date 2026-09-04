@@ -1,6 +1,6 @@
-missing_import/foo_class.rb:5: `Other::OtherClass` resolves but its package is not imported https://srb.help/3718
+missing_import/foo_class.rb:5: `Other` is not imported https://srb.help/3718
      5 |    Other::OtherClass
-            ^^^^^^^^^^^^^^^^^
+            ^^^^^
     other/__package.rb:3: Package defined here
      3 |class Other < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -11,9 +11,9 @@ missing_import/foo_class.rb:5: `Other::OtherClass` resolves but its package is n
   Note:
     Try running generate-packages.sh
 Errors: 1
-imported_as_test/foo_class.rb:5: Used `test_import` constant `Other::OtherClass` in non-test file https://srb.help/3720
+imported_as_test/foo_class.rb:5: Used `test_import` package `Other` in non-test file https://srb.help/3720
      5 |    Other::OtherClass
-            ^^^^^^^^^^^^^^^^^
+            ^^^^^
     other/__package.rb:3: Defined here
      3 |class Other < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -27,9 +27,9 @@ imported_as_test/foo_class.rb:5: Used `test_import` constant `Other::OtherClass`
   Note:
     Try running generate-packages.sh
 Errors: 1
-imported_as_test_unit/test/foo_class.rb:5: The `test_import` constant `Other::OtherClass` can only be used in `.test.rb` files https://srb.help/3720
+imported_as_test_unit/test/foo_class.rb:5: The `test_import` package `Other` can only be used in `.test.rb` files https://srb.help/3720
      5 |    Other::OtherClass
-            ^^^^^^^^^^^^^^^^^
+            ^^^^^
     other/__package.rb:3: Defined here
      3 |class Other < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^

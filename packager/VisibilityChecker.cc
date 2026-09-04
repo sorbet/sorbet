@@ -569,7 +569,7 @@ public:
             return;
         }
 
-        auto importError = this->package.checkReferenceAgainstImports(ctx, lit.loc(), litSymbol);
+        auto importError = this->package.checkReferenceAgainstImports(ctx, lit.loc(), otherPackage);
         referencedPackages[otherPackage] = importError.value_or(core::packages::PackageReferenceInfo{});
         if (importError.has_value()) {
             // An error was reported already
@@ -694,7 +694,16 @@ public:
                 for (auto &[packageName, packageReferenceInfo] : referencedPackages) {
                     references.emplace_back(make_pair(packageName, packageReferenceInfo));
                 }
-                nonConstPackageInfo->trackPackageReferences(file, references);
+                if (gs.packageDB().genPackagesMode() == core::packages::GenPackagesMode::Disabled) {
+                    // Resolver has already recorded references that it rejected at package boundaries. Merge the
+                    // successfully resolved references found here into the same per-file entry.
+                    for (auto &[packageName, packageReferenceInfo] : references) {
+                        nonConstPackageInfo->trackPackageReference(file, packageName, packageReferenceInfo);
+                    }
+                } else {
+                    // Resolver package checking is disabled in gen-packages mode, so this pass owns the complete set.
+                    nonConstPackageInfo->trackPackageReferences(file, references);
+                }
 
                 auto &referencedSymbols = threadResult->referencedSymbols;
                 nonConstGs.setSymbolsReferencedByFile(file, referencedSymbols);

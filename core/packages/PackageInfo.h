@@ -64,6 +64,8 @@ struct Import {
     bool isTestImport() const {
         return type != ImportType::Normal;
     }
+
+    bool isAvailableTo(const core::GlobalState &gs, core::FileRef file) const;
 };
 
 struct Export {
@@ -286,10 +288,10 @@ public:
 
     bool causesLayeringViolation(const PackageDB &packageDB, core::NameRef otherPkgLayer) const;
 
-    // Returns `std::nullopt` if it's okay to use the symbol.
+    // Returns `std::nullopt` if it's okay to reference the package from this file.
     // Returns a `PackageReferenceInfo` if the usage was not okay (e.g. missing import, modularity error, etc.)
     std::optional<core::packages::PackageReferenceInfo>
-    checkReferenceAgainstImports(core::Context ctx, core::LocOffsets errLoc, core::SymbolRef litSymbol) const;
+    checkReferenceAgainstImports(core::Context ctx, core::LocOffsets errLoc, MangledName otherPackage) const;
 
     // What is the minimum strict dependencies level that this package's imports must have?
     StrictDependenciesLevel minimumStrictDependenciesLevel() const;
@@ -348,6 +350,8 @@ public:
     // Track that `file` references the packages in `references`, along with some metadata about each reference
     void trackPackageReferences(const core::FileRef file,
                                 std::vector<std::pair<core::packages::MangledName, PackageReferenceInfo>> &references);
+    void trackPackageReference(const core::FileRef file, MangledName package, PackageReferenceInfo referenceInfo);
+    void resetPackageReferences(const core::FileRef file);
 
     std::optional<core::AutocorrectSuggestion> aggregateMissingImports(const core::GlobalState &gs) const;
     std::optional<core::AutocorrectSuggestion> aggregateMissingImportsForFile(const core::GlobalState &gs,
