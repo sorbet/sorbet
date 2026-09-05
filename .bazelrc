@@ -181,13 +181,16 @@ build:release-sanitized-mac --define jemalloc=false
 build:test-sanitized-linux --config=release-sanitized-linux --config=dbg --nostamp --define release=false
 common:test-sanitized-linux --test_env="UBSAN_OPTIONS=print_stacktrace=1"
 common:test-sanitized-linux --test_env="ASAN_OPTIONS=detect_leaks=0"
+test:test-sanitized-linux --run_under=//tools:sanitizer_test_wrapper
 
 build:test-sanitized-linux-aarch64 --config=release-sanitized-linux-aarch64 --config=dbg --nostamp --define release=false
 common:test-sanitized-linux-aarch64 --test_env="UBSAN_OPTIONS=print_stacktrace=1"
 common:test-sanitized-linux-aarch64 --test_env="ASAN_OPTIONS=detect_leaks=0"
+test:test-sanitized-linux-aarch64 --run_under=//tools:sanitizer_test_wrapper
 
 build:test-sanitized-mac --config=release-sanitized-mac --config=dbg --nostamp --define release=false
 common:test-sanitized-mac --test_env="UBSAN_OPTIONS=print_stacktrace=1"
+test:test-sanitized-mac --run_under=//tools:sanitizer_test_wrapper
 
 build:reduce-intermediate-file-size-base --copt=-g0 --linkopt=-g0 # used by buildfarm to have less debug information on disk
 build:reduce-intermediate-file-size-base --strip=always

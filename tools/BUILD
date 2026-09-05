@@ -6,6 +6,12 @@ clang_tool("clang-format")
 
 clang_tool("clang-tidy")
 
+sh_binary(
+    name = "sanitizer_test_wrapper",
+    srcs = ["sanitizer_test_wrapper.sh"],
+    data = ["@llvm_toolchain_15_0_7//:bin/llvm-symbolizer"],
+)
+
 compilation_database(
     name = "compdb",
     testonly = True,
