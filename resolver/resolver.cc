@@ -7,6 +7,7 @@
 #include "common/sort/sort.h"
 #include "core/Error.h"
 #include "core/Names.h"
+#include "core/Refcounting.h"
 #include "core/StrictLevel.h"
 #include "core/core.h"
 #include "core/errors/internal.h"
@@ -143,15 +144,15 @@ class ResolveConstantsWalk {
     friend class ResolveSanityCheckWalk;
 
 private:
-    struct Nesting {
-        const shared_ptr<Nesting> parent;
+    struct Nesting : public core::RefCounted<Nesting> {
         const core::SymbolRef scope;
+        const core::RefPtr<Nesting> parent;
 
-        Nesting(shared_ptr<Nesting> parent, core::SymbolRef scope) : parent(std::move(parent)), scope(scope) {}
+        Nesting(core::RefPtr<Nesting> parent, core::SymbolRef scope) : scope(scope), parent(std::move(parent)) {}
     };
-    CheckSize(Nesting, 24, 8);
+    CheckSize(Nesting, 16, 8);
 
-    shared_ptr<Nesting> nesting_;
+    core::RefPtr<Nesting> nesting_;
 
     // Map of SymbolRef to first location of a symbol definition in a file. This is used for out-of-order reference
     // checking. When present in this map, the loc stored is different than a symbol's canonical loc. Specifically,
@@ -166,19 +167,19 @@ private:
     }
 
     struct ConstantResolutionItem {
-        shared_ptr<Nesting> scope;
+        core::RefPtr<Nesting> scope;
         ast::ConstantLit *out;
         bool resolutionFailed = false;
 
         ConstantResolutionItem() = default;
-        ConstantResolutionItem(const shared_ptr<Nesting> &scope, ast::ConstantLit *lit) : scope(scope), out(lit) {}
+        ConstantResolutionItem(const core::RefPtr<Nesting> &scope, ast::ConstantLit *lit) : scope(scope), out(lit) {}
         ConstantResolutionItem(ConstantResolutionItem &&rhs) noexcept = default;
         ConstantResolutionItem &operator=(ConstantResolutionItem &&rhs) noexcept = default;
 
         ConstantResolutionItem(const ConstantResolutionItem &rhs) = delete;
         const ConstantResolutionItem &operator=(const ConstantResolutionItem &rhs) = delete;
     };
-    CheckSize(ConstantResolutionItem, 32, 8);
+    CheckSize(ConstantResolutionItem, 24, 8);
 
     template <class T> struct ResolveItems {
         core::FileRef file;
@@ -269,7 +270,7 @@ private:
     vector<ClassMethodsResolutionItem> todoClassMethods_;
     vector<RequireAncestorResolutionItem> todoRequiredAncestors_;
 
-    static core::SymbolRef resolveLhs(core::Context ctx, const shared_ptr<Nesting> &nesting, core::NameRef name) {
+    static core::SymbolRef resolveLhs(core::Context ctx, const core::RefPtr<Nesting> &nesting, core::NameRef name) {
         Nesting *scope = nesting.get();
         while (scope != nullptr) {
             if (scope->scope.isClassOrModule()) {
@@ -1284,7 +1285,7 @@ public:
             }
         }
 
-        nesting_ = make_unique<Nesting>(std::move(nesting_), sym);
+        nesting_ = core::makeRefPtr<Nesting>(std::move(nesting_), sym);
     }
 
     void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
@@ -1326,7 +1327,7 @@ public:
     }
 
     const bool checkAmbiguousDefinition(core::Context ctx, core::SymbolRef curSym,
-                                        const shared_ptr<Nesting> &curNesting) {
+                                        const core::RefPtr<Nesting> &curNesting) {
         if (!ctx.state.shouldReportErrorOn(ctx.file, core::errors::Resolver::AmbiguousDefinitionError)) {
             // no need to check if suppressed
             return false;
@@ -1352,7 +1353,7 @@ public:
     }
 
     const core::SymbolRef findAnyDefinitionAmbiguousWithCurrent(core::Context ctx, core::SymbolRef curSym,
-                                                                const shared_ptr<Nesting> &curNesting) {
+                                                                const core::RefPtr<Nesting> &curNesting) {
         const core::SymbolRef defaultSymbol;
         if (curNesting == nullptr || curNesting->scope == core::Symbols::root()) {
             // can't be ambiguous if nested directly under root scope
