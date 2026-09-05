@@ -335,6 +335,13 @@ pair<OrInfo, optional<string>> showOrElem(const GlobalState &gs, ShowOptions opt
         }
     } else if (auto orType = cast_type<OrType>(ty)) {
         return showOrs(gs, options, orType->left, orType->right);
+    } else if (auto enumUnion = cast_type<EnumUnionType>(ty)) {
+        auto info = OrInfo::otherInfo();
+        info.markContainsMultiple();
+        return make_pair(
+            info, make_optional(fmt::format("{}", fmt::map_join(enumUnion->members, ", ", [&](auto member) -> string {
+                                                return member.show(gs, options);
+                                            }))));
     }
 
     return make_pair(OrInfo::otherInfo(), make_optional(ty.show(gs, options)));

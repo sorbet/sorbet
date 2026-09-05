@@ -270,8 +270,24 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                 }
                 return Types::enumUnion(move(combined));
             }
+        } else if (isa_type<ClassType>(t2)) {
+            auto c2 = cast_type_nonnull<ClassType>(t2);
+            auto parent = EnumUnionType::parentEnumClass(gs, c2.symbol);
+            if (parent.exists() && parent == eu1->parentEnumClass(gs)) {
+                auto combined = eu1->members;
+                auto insertionPoint = lower_bound(combined.begin(), combined.end(), c2.symbol,
+                                                  [](auto lhs, auto rhs) { return lhs.id() < rhs.id(); });
+                if (insertionPoint != combined.end() && *insertionPoint == c2.symbol) {
+                    return t1;
+                }
+                combined.insert(insertionPoint, c2.symbol);
+                return Types::enumUnion(move(combined));
+            }
+            if (eu1->derivesFrom(gs, c2.symbol)) {
+                return t2;
+            }
         }
-        return lub(gs, eu1->toOrType(gs), t2);
+        return OrType::make_shared(t1, t2);
     }
     if (auto eu2 = cast_type<EnumUnionType>(t2)) {
         if (isa_type<ClassType>(t1)) {
@@ -287,8 +303,11 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                 combined.insert(insertionPoint, c1.symbol);
                 return Types::enumUnion(move(combined));
             }
+            if (eu2->derivesFrom(gs, c1.symbol)) {
+                return t1;
+            }
         }
-        return lub(gs, t1, eu2->toOrType(gs));
+        return OrType::make_shared(t1, t2);
     }
 
     if (isa_type<OrType>(t2)) { // 3, 5, 6

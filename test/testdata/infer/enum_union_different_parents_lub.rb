@@ -28,7 +28,7 @@ def test_different_enum_lub(cond)
     T.must(res)
   end
 
-  T.reveal_type(x) # error: Revealed type: `T.any(Color::Red, Color::Blue, Suit::Hearts, Suit::Diamonds)`
+  T.reveal_type(x) # error: Revealed type: `T.any(Suit::Hearts, Suit::Diamonds, Color::Red, Color::Blue)`
 
   case x
   when Suit::Hearts, Suit::Diamonds
@@ -36,4 +36,11 @@ def test_different_enum_lub(cond)
   when Color::Red, Color::Blue
     T.reveal_type(x) # error: Revealed type: `T.any(Color::Red, Color::Blue)`
   end
+end
+
+sig {params(cond1: T::Boolean, cond2: T::Boolean).void}
+def test_enum_union_with_nil(cond1, cond2)
+  x = cond1 ? Suit::Hearts : Suit::Diamonds
+  nilable = cond2 ? x : nil
+  T.reveal_type(nilable) # error: Revealed type: `T.nilable(T.any(Suit::Hearts, Suit::Diamonds))`
 end
