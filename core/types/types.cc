@@ -257,6 +257,25 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, absl::
                 result = from;
             }
         },
+        [&](const EnumUnionType &eu) {
+            vector<ClassOrModuleRef> kept;
+            for (auto member : eu.members) {
+                if (absl::c_all_of(klasses, [&](auto klass) {
+                        return member != klass && !member.data(gs)->derivesFrom(gs, klass);
+                    })) {
+                    kept.emplace_back(member);
+                }
+            }
+            if (kept.size() == eu.members.size()) {
+                result = from;
+            } else if (kept.empty()) {
+                result = Types::bottom();
+            } else if (kept.size() == 1) {
+                result = kept[0].data(gs)->externalType();
+            } else {
+                result = Types::enumUnion(move(kept));
+            }
+        },
         [&](const SelfTypeParam &p) {
             if (!p.definition.isTypeMember()) {
                 // Only type members have upper bounds--type parameters do not
@@ -331,6 +350,8 @@ TypePtr Types::approximateSubtract(const GlobalState &gs, const TypePtr &from, c
         [&](const OrType &o) {
             result = Types::approximateSubtract(gs, Types::approximateSubtract(gs, from, o.left), o.right);
         },
+        [&](const EnumUnionType &e) { result = Types::dropSubtypesOf(gs, from, e.members); },
+
         [&](const TypePtr &) { result = from; });
     return result;
 }
@@ -777,6 +798,74 @@ bool MetaType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const 
     return false;
 }
 
+EnumUnionType::EnumUnionType(vector<ClassOrModuleRef> &&members) : members(move(members)) {
+    recordAllocatedType("enumunion");
+}
+
+TypePtr EnumUnionType::make_shared(vector<ClassOrModuleRef> &&members) {
+    return TypePtr(TypePtr::Tag::EnumUnionType, new EnumUnionType(move(members)));
+}
+
+TypePtr Types::enumUnion(vector<ClassOrModuleRef> members) {
+    ENFORCE(members.size() >= 2);
+    DEBUG_ONLY(for (size_t i = 1; i < members.size(); i++) {
+        ENFORCE(members[i - 1].id() < members[i].id(), "EnumUnionType members must be sorted and unique");
+    });
+    return EnumUnionType::make_shared(move(members));
+}
+
+TypePtr Types::enumUnion(ClassOrModuleRef member1, ClassOrModuleRef member2) {
+    ENFORCE(member1 != member2);
+    if (member2.id() < member1.id()) {
+        swap(member1, member2);
+    }
+    return Types::enumUnion(vector<ClassOrModuleRef>{member1, member2});
+}
+
+void EnumUnionType::_sanityCheck(const GlobalState &gs) const {
+    ENFORCE(members.size() >= 2);
+
+    for (size_t i = 1; i < members.size(); i++) {
+        ENFORCE(members[i - 1].id() < members[i].id(), "EnumUnionType members must be sorted and unique");
+    }
+
+    ENFORCE(members[0].data(gs)->name.isTEnumName(gs));
+    auto firstParent = EnumUnionType::parentEnumClass(gs, members[0]);
+    ENFORCE(firstParent.exists());
+
+    for (auto &member : members) {
+        ENFORCE(member.data(gs)->name.isTEnumName(gs));
+        ENFORCE(firstParent == EnumUnionType::parentEnumClass(gs, member));
+    }
+}
+
+bool EnumUnionType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
+    return absl::c_all_of(members, [&](auto member) { return member.data(gs)->derivesFrom(gs, klass); });
+}
+
+ClassOrModuleRef EnumUnionType::parentEnumClass(const GlobalState &gs, ClassOrModuleRef sym) {
+    if (!sym.data(gs)->name.isTEnumName(gs)) {
+        return ClassOrModuleRef();
+    }
+    return sym.data(gs)->superClass();
+}
+
+ClassOrModuleRef EnumUnionType::parentEnumClass(const GlobalState &gs) const {
+    ENFORCE(!members.empty());
+    auto result = members[0].data(gs)->superClass();
+    ENFORCE(result.exists());
+    return result;
+}
+
+TypePtr EnumUnionType::toOrType(const GlobalState &gs) const {
+    ENFORCE(members.size() >= 2);
+    auto result = members[0].data(gs)->externalType();
+    for (size_t i = 1; i < members.size(); i++) {
+        result = OrType::make_shared(result, members[i].data(gs)->externalType());
+    }
+    return result;
+}
+
 TypeVar::TypeVar(TypeParameterRef sym) : sym(sym) {
     recordAllocatedType("typevar");
 }
@@ -920,9 +1009,9 @@ TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
     TypePtr ret;
     typecase(
         type, [&](const ClassType &klass) { ret = type; }, [&](const TypeVar &tv) { ret = type; },
-        [&](const LambdaParam &tv) { ret = type; }, [&](const SelfType &self) { ret = type; },
-        [&](const NamedLiteralType &lit) { ret = type; }, [&](const IntegerLiteralType &i) { ret = type; },
-        [&](const FloatLiteralType &i) { ret = type; },
+        [&](const EnumUnionType &enumUnion) { ret = type; }, [&](const LambdaParam &tv) { ret = type; },
+        [&](const SelfType &self) { ret = type; }, [&](const NamedLiteralType &lit) { ret = type; },
+        [&](const IntegerLiteralType &i) { ret = type; }, [&](const FloatLiteralType &i) { ret = type; },
         [&](const AndType &andType) {
             ret = AndType::make_shared(unwrapSelfTypeParam(ctx, andType.left), unwrapSelfTypeParam(ctx, andType.right));
         },

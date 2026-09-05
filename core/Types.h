@@ -26,6 +26,8 @@ class ClassOrModule;
 class TypeVar;
 class SendAndBlockLink;
 class TypeAndOrigins;
+class EnumUnionType;
+class OrType;
 
 class ParamInfo {
 public:
@@ -74,6 +76,10 @@ public:
 
     /** Lower upper bound: the narrowest type that is supertype of both t1 and t2 */
     static TypePtr any(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
+
+    /** Constructs a compact union from sorted, unique T::Enum variants. */
+    static TypePtr enumUnion(std::vector<ClassOrModuleRef> members);
+    static TypePtr enumUnion(ClassOrModuleRef member1, ClassOrModuleRef member2);
 
     /**
      * is every instance of  t1 an  instance of t2?
@@ -272,6 +278,10 @@ inline bool is_ground_type(const TypePtr &what) {
         case TypePtr::Tag::OrType:
         case TypePtr::Tag::AndType:
             return true;
+        // EnumUnionType only stores concrete class symbols, so it cannot contain type parameters or other non-ground
+        // types.
+        case TypePtr::Tag::EnumUnionType:
+            return true;
         case TypePtr::Tag::NamedLiteralType:
         case TypePtr::Tag::IntegerLiteralType:
         case TypePtr::Tag::FloatLiteralType:
@@ -286,6 +296,13 @@ inline bool is_ground_type(const TypePtr &what) {
         case TypePtr::Tag::TypeVar:
             return false;
     }
+}
+
+// Use this when the distinction between the binary OrType representation and the compact EnumUnionType representation
+// does not matter. Direct OrType casts should be reserved for code that specifically traverses or constructs its
+// binary tree representation.
+inline bool is_union_type(const TypePtr &what) {
+    return isa_type<OrType>(what) || isa_type<EnumUnionType>(what);
 }
 
 inline bool is_proxy_type(const TypePtr &what) {
@@ -312,6 +329,7 @@ inline bool is_proxy_type(const TypePtr &what) {
         case TypePtr::Tag::AppliedType:
         case TypePtr::Tag::TypeVar:
         case TypePtr::Tag::MetaType:
+        case TypePtr::Tag::EnumUnionType:
             return false;
     }
 }
@@ -820,6 +838,7 @@ private:
     friend TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &t1);
     friend class ClassOrModule; // the actual method is `recordSealedSubclass(Mutableconst GlobalState &gs, SymbolRef
                                 // subclass)`, but referring to it introduces a cycle
+    friend class EnumUnionType;
 
     static TypePtr make_shared(const TypePtr &left, const TypePtr &right);
 };
@@ -997,6 +1016,43 @@ public:
     void _sanityCheck(const GlobalState &gs) const;
 };
 CheckSize(MetaType, 16, 8);
+
+TYPE(EnumUnionType) final : public Refcountable {
+public:
+    const std::vector<ClassOrModuleRef> members;
+
+    EnumUnionType(const EnumUnionType &) = delete;
+    EnumUnionType &operator=(const EnumUnionType &) = delete;
+
+    std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
+    std::string show(const GlobalState &gs) const {
+        return show(gs, {});
+    };
+    std::string show(const GlobalState &gs, ShowOptions options) const;
+    uint32_t hash(const GlobalState &gs) const;
+    DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
+    bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
+    void _sanityCheck(const GlobalState &gs) const;
+
+    // If `sym` is a T::Enum variant class (e.g., X$1 < MyEnum), returns the parent enum class.
+    // Otherwise returns a non-existent ClassOrModuleRef.
+    static ClassOrModuleRef parentEnumClass(const GlobalState &gs, ClassOrModuleRef sym);
+
+    // Returns the parent enum class shared by all members.
+    ClassOrModuleRef parentEnumClass(const GlobalState &gs) const;
+
+    // Avoid converting to OrType when possible: doing so gives up EnumUnionType's compact representation.
+    TypePtr toOrType(const GlobalState &gs) const;
+
+private:
+    /*
+     * You probably want Types::enumUnion() instead.
+     */
+    EnumUnionType(std::vector<ClassOrModuleRef> && members);
+
+    friend TypePtr Types::enumUnion(std::vector<ClassOrModuleRef> members);
+    static TypePtr make_shared(std::vector<ClassOrModuleRef> && members);
+};
 
 class SendAndBlockLink {
     SendAndBlockLink(const SendAndBlockLink &) = default;

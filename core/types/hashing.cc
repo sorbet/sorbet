@@ -135,4 +135,12 @@ uint32_t MetaType::hash(const GlobalState &gs) const {
     return mix(result, this->wrapped.hash(gs));
 }
 
+uint32_t EnumUnionType::hash(const GlobalState &gs) const {
+    uint32_t result = static_cast<uint32_t>(TypePtr::Tag::EnumUnionType);
+    for (auto &member : members) {
+        result = mix(result, member.id());
+    }
+    return result;
+}
+
 } // namespace sorbet::core
