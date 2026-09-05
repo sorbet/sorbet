@@ -78,7 +78,7 @@ public:
     static TypePtr any(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
 
     /** Constructs a compact union from sorted, unique T::Enum variants. */
-    static TypePtr enumUnion(std::vector<ClassOrModuleRef> members);
+    static TypePtr enumUnion(std::vector<ClassOrModuleRef> &&members);
     static TypePtr enumUnion(ClassOrModuleRef member1, ClassOrModuleRef member2);
 
     /**
@@ -1050,7 +1050,7 @@ private:
      */
     EnumUnionType(std::vector<ClassOrModuleRef> && members);
 
-    friend TypePtr Types::enumUnion(std::vector<ClassOrModuleRef> members);
+    friend TypePtr Types::enumUnion(std::vector<ClassOrModuleRef> && members);
     static TypePtr make_shared(std::vector<ClassOrModuleRef> && members);
 };
 

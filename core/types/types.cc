@@ -806,7 +806,7 @@ TypePtr EnumUnionType::make_shared(vector<ClassOrModuleRef> &&members) {
     return TypePtr(TypePtr::Tag::EnumUnionType, new EnumUnionType(move(members)));
 }
 
-TypePtr Types::enumUnion(vector<ClassOrModuleRef> members) {
+TypePtr Types::enumUnion(vector<ClassOrModuleRef> &&members) {
     ENFORCE(members.size() >= 2);
     DEBUG_ONLY(for (size_t i = 1; i < members.size(); i++) {
         ENFORCE(members[i - 1].id() < members[i].id(), "EnumUnionType members must be sorted and unique");
