@@ -217,12 +217,12 @@ public:
         return ptr.store;
     }
 
-    static Refcountable *get(const TypePtr &ptr) {
+    static TypePtrRefcountable *get(const TypePtr &ptr) {
         CHECK(ptr.containsPtr());
         return ptr.get();
     }
 
-    static TypePtr create(TypePtr::Tag tag, Refcountable *type) {
+    static TypePtr create(TypePtr::Tag tag, TypePtrRefcountable *type) {
         return TypePtr(tag, type);
     }
 
@@ -330,7 +330,7 @@ TEST_SUITE("TrailingObjects") {
 }
 
 namespace {
-class TestRefCounted final : public sorbet::core::RefCounted<TestRefCounted> {
+class TestRefCounted final : public sorbet::core::RefCounted<TestRefCounted, sorbet::core::RefCountAtomicity::Atomic> {
 public:
     int value;
     int *destructor_count;
