@@ -613,8 +613,7 @@ public:
             [&](Node *n) { Exception::raise("Unexpected send node: {}", n->nodeName()); });
 
         auto &send = exprs->front();
-        unique_ptr<Node> block =
-            make_unique<Block>(blockLoc, std::move(send), std::move(args), std::move(body), style);
+        unique_ptr<Node> block = make_unique<Block>(blockLoc, std::move(send), std::move(args), std::move(body), style);
         exprs->front().swap(block);
         return methodCall;
     }

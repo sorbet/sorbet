@@ -322,8 +322,7 @@ public:
 private:
     // Hide the constructor, in favour of named factory methods, so that we can add validation logic if needed.
     DesugaredBlockArgument(ast::ExpressionPtr literalBlockExpr, ast::ExpressionPtr blockPassExpr,
-                           core::LocOffsets blockPassLoc,
-                           ast::Send::BlockType blockType = ast::Send::BlockType::None)
+                           core::LocOffsets blockPassLoc, ast::Send::BlockType blockType = ast::Send::BlockType::None)
         : literalBlockExpr(move(literalBlockExpr)), blockPassExpr(move(blockPassExpr)), blockPassLoc(blockPassLoc),
           blockType(blockType) {}
 
@@ -4135,8 +4134,7 @@ Desugarer::DesugaredBlockArgument Desugarer::desugarBlock(pm_node_t *block, pm_a
         if (blockArgInArgs != nullptr) {
             auto blockPassResult = desugarBlockPassArgument(blockArgInArgs);
             if (blockPassResult.hasBlockPass()) {
-                return DesugaredBlockArgument::both(move(literalBlock), blockType,
-                                                    move(blockPassResult.blockPassExpr),
+                return DesugaredBlockArgument::both(move(literalBlock), blockType, move(blockPassResult.blockPassExpr),
                                                     blockPassResult.blockPassLoc);
             } else if (blockPassResult.hasLiteralBlock()) {
                 // Handle an error case like `a.map(&:foo) { "literal" }`

@@ -944,8 +944,8 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                     << ");\n";
                 break;
             case FieldType::BlockStyle:
-                out << "    fmt::format_to(std::back_inserter(buf), \"" << arg.name
-                    << " = {}\\n\", showBlockStyle(" << arg.name << "));\n";
+                out << "    fmt::format_to(std::back_inserter(buf), \"" << arg.name << " = {}\\n\", showBlockStyle("
+                    << arg.name << "));\n";
                 break;
         }
     }
