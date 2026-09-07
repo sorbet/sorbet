@@ -81,7 +81,7 @@ ClassDef{
               }
             ],
             expr = Send{
-              flags = {privateOk}
+              flags = {privateOk, doEndBlock}
               recv = Self
               fun = <U proc>
               block = Block {

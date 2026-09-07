@@ -49,7 +49,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = Self
           fun = <U <untypedSuper>>
           block = Block {
@@ -139,7 +139,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = ConstantLit{
             symbol = (class ::<Magic>)
             orig = nullptr
@@ -275,7 +275,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = ConstantLit{
             symbol = (class ::<Magic>)
             orig = nullptr
@@ -434,7 +434,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = ConstantLit{
             symbol = (class ::<Magic>)
             orig = nullptr
@@ -618,7 +618,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = ConstantLit{
             symbol = (class ::<Magic>)
             orig = nullptr
@@ -756,7 +756,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = Self
           fun = <U <untypedSuper>>
           block = Block {
@@ -846,7 +846,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = ConstantLit{
             symbol = (class ::<Magic>)
             orig = nullptr
@@ -982,7 +982,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = ConstantLit{
             symbol = (class ::<Magic>)
             orig = nullptr
@@ -1141,7 +1141,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = ConstantLit{
             symbol = (class ::<Magic>)
             orig = nullptr
@@ -1325,7 +1325,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = ConstantLit{
             symbol = (class ::<Magic>)
             orig = nullptr
@@ -1475,7 +1475,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = Self
           fun = <U <untypedSuper>>
           block = Block {
@@ -1588,7 +1588,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = ConstantLit{
             symbol = (class ::<Magic>)
             orig = nullptr
@@ -1750,7 +1750,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = ConstantLit{
             symbol = (class ::<Magic>)
             orig = nullptr
@@ -1935,7 +1935,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = ConstantLit{
             symbol = (class ::<Magic>)
             orig = nullptr
@@ -2145,7 +2145,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = ConstantLit{
             symbol = (class ::<Magic>)
             orig = nullptr
@@ -2311,7 +2311,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = Self
           fun = <U <untypedSuper>>
           block = Block {
@@ -2436,7 +2436,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = ConstantLit{
             symbol = (class ::<Magic>)
             orig = nullptr
@@ -2610,7 +2610,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = ConstantLit{
             symbol = (class ::<Magic>)
             orig = nullptr
@@ -2807,7 +2807,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = ConstantLit{
             symbol = (class ::<Magic>)
             orig = nullptr
@@ -3029,7 +3029,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = ConstantLit{
             symbol = (class ::<Magic>)
             orig = nullptr
@@ -3230,7 +3230,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = Self
           fun = <U <untypedSuper>>
           block = Block {
@@ -3407,7 +3407,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = ConstantLit{
             symbol = (class ::<Magic>)
             orig = nullptr
@@ -3633,7 +3633,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = ConstantLit{
             symbol = (class ::<Magic>)
             orig = nullptr
@@ -3882,7 +3882,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = ConstantLit{
             symbol = (class ::<Magic>)
             orig = nullptr
@@ -4156,7 +4156,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = ConstantLit{
             symbol = (class ::<Magic>)
             orig = nullptr
@@ -4348,7 +4348,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = Self
           fun = <U <untypedSuper>>
           block = Block {
@@ -4461,7 +4461,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = ConstantLit{
             symbol = (class ::<Magic>)
             orig = nullptr
@@ -4623,7 +4623,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = ConstantLit{
             symbol = (class ::<Magic>)
             orig = nullptr
@@ -4808,7 +4808,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = ConstantLit{
             symbol = (class ::<Magic>)
             orig = nullptr
@@ -5018,7 +5018,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = ConstantLit{
             symbol = (class ::<Magic>)
             orig = nullptr
@@ -5184,7 +5184,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = Self
           fun = <U <untypedSuper>>
           block = Block {
@@ -5309,7 +5309,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = ConstantLit{
             symbol = (class ::<Magic>)
             orig = nullptr
@@ -5483,7 +5483,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = ConstantLit{
             symbol = (class ::<Magic>)
             orig = nullptr
@@ -5680,7 +5680,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = ConstantLit{
             symbol = (class ::<Magic>)
             orig = nullptr
@@ -5902,7 +5902,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = ConstantLit{
             symbol = (class ::<Magic>)
             orig = nullptr
@@ -6103,7 +6103,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = Self
           fun = <U <untypedSuper>>
           block = Block {
@@ -6280,7 +6280,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = ConstantLit{
             symbol = (class ::<Magic>)
             orig = nullptr
@@ -6506,7 +6506,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = ConstantLit{
             symbol = (class ::<Magic>)
             orig = nullptr
@@ -6755,7 +6755,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = ConstantLit{
             symbol = (class ::<Magic>)
             orig = nullptr
@@ -7029,7 +7029,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = ConstantLit{
             symbol = (class ::<Magic>)
             orig = nullptr

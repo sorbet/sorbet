@@ -18,7 +18,7 @@ ClassDef{
     }
 
     Send{
-      flags = {privateOk}
+      flags = {privateOk, bracesBlock}
       recv = Self
       fun = <U foo>
       block = Block {
@@ -39,7 +39,7 @@ ClassDef{
     }
 
     Send{
-      flags = {privateOk}
+      flags = {privateOk, bracesBlock}
       recv = Self
       fun = <U foo>
       block = Block {
@@ -92,7 +92,7 @@ ClassDef{
     }
 
     Send{
-      flags = {privateOk}
+      flags = {privateOk, bracesBlock}
       recv = Self
       fun = <U foo>
       block = Block {
@@ -129,7 +129,7 @@ ClassDef{
     }
 
     Send{
-      flags = {privateOk}
+      flags = {privateOk, doEndBlock}
       recv = Self
       fun = <U foo>
       block = Block {
@@ -150,7 +150,7 @@ ClassDef{
     }
 
     Send{
-      flags = {privateOk}
+      flags = {privateOk, doEndBlock}
       recv = Self
       fun = <U foo>
       block = Block {
@@ -203,7 +203,7 @@ ClassDef{
     }
 
     Send{
-      flags = {privateOk}
+      flags = {privateOk, doEndBlock}
       recv = Self
       fun = <U foo>
       block = Block {
@@ -240,7 +240,7 @@ ClassDef{
     }
 
     Send{
-      flags = {}
+      flags = {bracesBlock}
       recv = ConstantLit{
         symbol = (module ::Kernel)
         orig = nullptr
@@ -264,7 +264,7 @@ ClassDef{
     }
 
     Send{
-      flags = {}
+      flags = {bracesBlock}
       recv = ConstantLit{
         symbol = (module ::Kernel)
         orig = nullptr
@@ -320,7 +320,7 @@ ClassDef{
     }
 
     Send{
-      flags = {}
+      flags = {bracesBlock}
       recv = ConstantLit{
         symbol = (module ::Kernel)
         orig = nullptr
@@ -360,7 +360,7 @@ ClassDef{
     }
 
     Send{
-      flags = {privateOk}
+      flags = {privateOk, doEndBlock}
       recv = Self
       fun = <U foo>
       block = Block {

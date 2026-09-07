@@ -648,7 +648,7 @@ ClassDef{
     }
 
     Send{
-      flags = {}
+      flags = {doEndBlock}
       recv = UnresolvedConstantLit{
         cnst = <C <U Proc>>
         scope = EmptyTree
@@ -2484,7 +2484,7 @@ ClassDef{
     }
 
     Send{
-      flags = {privateOk}
+      flags = {privateOk, doEndBlock}
       recv = Self
       fun = <U block_empty>
       block = Block {
@@ -2586,7 +2586,7 @@ ClassDef{
     }
 
     Send{
-      flags = {privateOk}
+      flags = {privateOk, doEndBlock}
       recv = Self
       fun = <U block_single>
       block = Block {
@@ -2696,7 +2696,7 @@ ClassDef{
     }
 
     Send{
-      flags = {privateOk}
+      flags = {privateOk, doEndBlock}
       recv = Self
       fun = <U block_multi>
       block = Block {
@@ -2819,7 +2819,7 @@ ClassDef{
     }
 
     Send{
-      flags = {}
+      flags = {bracesBlock}
       recv = ConstantLit{
         symbol = (module ::Kernel)
         orig = nullptr
@@ -2924,7 +2924,7 @@ ClassDef{
     }
 
     Send{
-      flags = {}
+      flags = {bracesBlock}
       recv = ConstantLit{
         symbol = (module ::Kernel)
         orig = nullptr
@@ -3037,7 +3037,7 @@ ClassDef{
     }
 
     Send{
-      flags = {}
+      flags = {bracesBlock}
       recv = ConstantLit{
         symbol = (module ::Kernel)
         orig = nullptr
