@@ -39,3 +39,17 @@ class StructInConditional
   T.assert_type!(Generated.new(1), Generated)
   Generated.new(1).value
 end
+
+class StructAsBlockValue
+  result = [nil].map do
+    Generated = Struct.new(:value)
+  end
+
+  T.assert_type!(result, T::Array[T.class_of(Generated)])
+
+  self_qualified_result = [nil].map do
+    self::SelfQualified = Struct.new(:value)
+  end
+
+  T.assert_type!(self_qualified_result, T::Array[T.class_of(SelfQualified)])
+end

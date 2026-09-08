@@ -36,6 +36,30 @@ using namespace std;
 
 namespace sorbet::rewriter {
 
+namespace {
+
+ast::ExpressionPtr copyConstantReference(const ast::ExpressionPtr &constant) {
+    if (ast::isa_tree<ast::EmptyTree>(constant)) {
+        return ast::MK::EmptyTree();
+    }
+    if (ast::isa_tree<ast::Self>(constant)) {
+        // Sorbet treats `self::Foo` as a dynamic constant when it is read, so use the equivalent lexical reference.
+        return ast::MK::EmptyTree();
+    }
+    if (auto resolved = ast::cast_tree<ast::ConstantLit>(constant)) {
+        return ast::MK::Constant(resolved->loc(), resolved->symbol());
+    }
+    if (auto unresolved = ast::cast_tree<ast::UnresolvedConstantLit>(constant)) {
+        auto scope = copyConstantReference(unresolved->scope);
+        if (scope != nullptr) {
+            return ast::MK::UnresolvedConstant(unresolved->loc, std::move(scope), unresolved->cnst);
+        }
+    }
+    return nullptr;
+}
+
+} // namespace
+
 class Rewriterer {
     friend class Rewriter;
 
@@ -46,21 +70,23 @@ class Rewriterer {
 public:
     void postTransformAssign(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         auto assign = ast::cast_tree<ast::Assign>(tree);
+        auto result = copyConstantReference(assign->lhs);
+        if (result == nullptr) {
+            return;
+        }
+
         auto nodes = Struct::run(ctx, assign);
         if (nodes.empty()) {
             return;
         }
 
         auto loc = assign->loc;
-        auto expr = std::move(nodes.back());
-        nodes.pop_back();
-
         ast::InsSeq::STATS_store stats;
         stats.reserve(nodes.size());
         for (auto &node : nodes) {
             stats.emplace_back(std::move(node));
         }
-        tree = ast::MK::InsSeq(loc, std::move(stats), std::move(expr));
+        tree = ast::MK::InsSeq(loc, std::move(stats), std::move(result));
         structRewrites.emplace(tree.get());
     }
 
@@ -92,11 +118,10 @@ public:
                 auto &insSeq = ast::cast_tree_nonnull<ast::InsSeq>(stat);
 
                 vector<ast::ExpressionPtr> nodes;
-                nodes.reserve(insSeq.stats.size() + 1);
+                nodes.reserve(insSeq.stats.size());
                 for (auto &node : insSeq.stats) {
                     nodes.emplace_back(std::move(node));
                 }
-                nodes.emplace_back(std::move(insSeq.expr));
                 replaceNodes[stat.get()] = std::move(nodes);
                 prevStat = &stat;
                 continue;
