@@ -32,7 +32,8 @@ namespace sorbet::rewriter {
  */
 class Minitest final {
 public:
-    static std::vector<ast::ExpressionPtr> run(core::MutableContext ctx, bool isClass, ast::Send *send);
+    static std::vector<ast::ExpressionPtr> run(core::MutableContext ctx, bool isClass, ast::Send *send,
+                                               const ast::ExpressionPtr *prevStat);
 
     Minitest() = delete;
 };
