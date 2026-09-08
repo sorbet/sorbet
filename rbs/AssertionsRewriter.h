@@ -60,6 +60,7 @@ private:
     pm_node_t *maybeInsertCast(pm_node_t *node);
     pm_node_t *insertCast(pm_node_t *node, std::optional<std::pair<pm_node_t *, InlineComment::Kind>> pair);
     pm_node_t *replaceSyntheticBind(pm_node_t *node);
+    pm_node_t *rewriteAbsurd(pm_node_t *node, const InlineComment &comment);
 };
 
 } // namespace sorbet::rbs

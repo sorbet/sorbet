@@ -3,6 +3,7 @@
 #include "absl/algorithm/container.h"
 #include "core/errors/rewriter.h"
 #include "parser/prism/Helpers.h"
+#include "rbs/PrismUtils.h"
 #include "rbs/TypeToParserNode.h"
 #include "rbs/rbs_method_common.h"
 
@@ -16,29 +17,6 @@ using namespace sorbet::parser::Prism;
 namespace sorbet::rbs {
 
 namespace {
-
-bool isSelfOrKernel(pm_node_t *node, const parser::Prism::Parser *prismParser) {
-    if (isa_node<pm_self_node>(node)) {
-        return true;
-    }
-
-    if (auto *constant = down_cast<pm_constant_read_node_t>(node)) {
-        auto name = prismParser->resolveConstant(constant->name);
-        // Check if it's Kernel constant with no scope (::Kernel or bare Kernel)
-        return name == "Kernel";
-    }
-
-    if (auto *constantPath = down_cast<pm_constant_path_node_t>(node)) {
-        // Check if it's ::Kernel (parent is nullptr, representing root ::)
-        // We reject Foo::Kernel or any other scoped constant
-        if (constantPath->parent == nullptr) {
-            auto name = prismParser->resolveConstant(constantPath->name);
-            return name == "Kernel";
-        }
-    }
-
-    return false;
-}
 
 core::AutocorrectSuggestion autocorrectAbstractBody(core::MutableContext ctx, pm_node_t *method,
                                                     const parser::Prism::Parser *prismParser, pm_node_t *method_body) {
@@ -91,15 +69,7 @@ bool isValidAbstractMethod(pm_node_t *node, const parser::Prism::Parser *prismPa
         bodyNode = stmts->body.nodes[0];
     }
 
-    auto *call = down_cast<pm_call_node_t>(bodyNode);
-    if (call == nullptr) {
-        return false;
-    }
-
-    auto methodName = prismParser->resolveConstant(call->name);
-
-    // Check if it's a raise call with no receiver or self/Kernel receiver
-    return methodName == "raise" && (call->receiver == nullptr || isSelfOrKernel(call->receiver, prismParser));
+    return isRaiseCall(bodyNode, *prismParser);
 }
 
 void ensureAbstractMethodRaises(core::MutableContext ctx, pm_node_t *node, parser::Prism::Parser *prismParser) {

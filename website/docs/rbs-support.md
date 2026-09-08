@@ -1186,7 +1186,7 @@ x.undefined_method
 
 ### `T.absurd`
 
-[`T.absurd`](exhaustiveness.md) can be expressed using RBS comments:
+[`T.absurd`](exhaustiveness.md) can be expressed with an `absurd(variable)` comment on a `raise`:
 
 ```ruby
 #: (Integer | String) -> void
@@ -1195,16 +1195,24 @@ def foo(x)
   when Integer
   when String
   else
-    x #: absurd
+    raise #: absurd(x)
   end
 end
 ```
 
-This is equivalent to:
+Sorbet rewrites the annotated `raise` to the following expression internally:
 
 ```ruby
 T.absurd(x)
 ```
+
+The `raise` can include an exception type and message. These are used when the Ruby program runs, while Sorbet still uses the variable named by `absurd` to check exhaustiveness:
+
+```ruby
+raise ArgumentError, "Unexpected value: #{x}" #: absurd(x)
+```
+
+The `absurd` comment must annotate a `raise`, and it must name exactly one variable.
 
 ### `T.bind`
 
