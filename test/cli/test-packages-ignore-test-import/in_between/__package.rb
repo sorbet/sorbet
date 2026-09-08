@@ -6,4 +6,6 @@ class InBetween < PackageSpec
   import Migrated
 
   test_import Migrated::Test
+
+  export Test::InBetween::FooTest
 end

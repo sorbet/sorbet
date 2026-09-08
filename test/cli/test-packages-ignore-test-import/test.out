@@ -1,7 +1,29 @@
+in_between/__package.rb:10: Cannot export `Test::InBetween::FooTest` because it is owned by another package https://srb.help/3721
+    10 |  export Test::InBetween::FooTest
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    in_between/test/foo.test.rb:4: Defined here
+     4 |  class FooTest
+          ^^^^^^^^^^^^^
+
+old_style/__package.rb:10: Constant `Test::OldStyle::FooTest` lacks a declaration in this package and cannot be exported https://srb.help/3721
+    10 |  export Test::OldStyle::FooTest
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    old_style/__package.rb:10: Delete
+    10 |  export Test::OldStyle::FooTest
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+old_style/__package.rb:10: Cannot export `Test::OldStyle::FooTest` because it is owned by another package https://srb.help/3721
+    10 |  export Test::OldStyle::FooTest
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    old_style/test/foo.test.rb:4: Defined here
+     4 |  class FooTest
+          ^^^^^^^^^^^^^
+
 old_style/test/foo.test.rb:3: File belongs to package `OldStyle` but defines a constant that does not match this namespace https://srb.help/3713
      3 |module Test::OldStyle
                ^^^^^^^^^^^^^^
     old_style/__package.rb:3: Enclosing package declared here
      3 |class OldStyle < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 1
+Errors: 4
