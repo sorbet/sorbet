@@ -1398,7 +1398,7 @@ class Module < Object
   sig { type_parameters(:U).params(method_name: T.all(T.type_parameter(:U), T.any(Symbol, String))).returns(T.type_parameter(:U)) }
   sig { type_parameters(:U).params(method_name: T::Array[T.all(T.type_parameter(:U), T.any(Symbol, String))]).returns(T::Array[T.type_parameter(:U)]) }
   sig { type_parameters(:U).params(rest: T.all(T.type_parameter(:U), T.any(Symbol, String))).returns(T::Array[T.type_parameter(:U)]) }
-  def private_class_method(method_name=T.unsafe(nil), rest); end
+  def private_class_method(method_name=T.unsafe(nil), *rest); end
 
   # Makes a list of existing constants private.
   sig do
