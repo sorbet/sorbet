@@ -1372,9 +1372,9 @@ class Module < Object
   # Note that to show a private method on
   # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html), use `:doc:`.
   sig { returns(NilClass) }
-  sig { params(method_name: Symbol).returns(Symbol) }
-  sig { params(method_name: String).returns(String) }
-  sig { params(method_name: T.any(Symbol, String), rest: T.any(Symbol, String)).returns(T::Array[T.any(Symbol, String)]) }
+  sig { type_parameters(:U).params(method_name: T.all(T.type_parameter(:U), T.any(Symbol, String))).returns(T.type_parameter(:U)) }
+  sig { type_parameters(:U).params(method_name: T::Array[T.all(T.type_parameter(:U), T.any(Symbol, String))]).returns(T::Array[T.type_parameter(:U)]) }
+  sig { type_parameters(:U).params(rest: T.all(T.type_parameter(:U), T.any(Symbol, String))).returns(T::Array[T.type_parameter(:U)]) }
   private def private(method_name=T.unsafe(nil), *rest); end
 
   # Makes existing class methods private. Often used to hide the default
