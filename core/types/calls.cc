@@ -390,10 +390,10 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
 unique_ptr<Error> reportMissingKwargs(const GlobalState &gs, const DispatchArgs &args, MethodRef method,
                                       const vector<const ParamInfo *> &missingKwargs, ClassOrModuleRef inClass,
                                       const vector<TypePtr> &targs) {
-    auto errLoc = args.argsLoc(gs).copyEndWithZeroLength();
     if (missingKwargs.empty()) {
         return nullptr;
     }
+    auto errLoc = args.argsLoc(gs).copyEndWithZeroLength();
     if (auto e = gs.beginError(errLoc, errors::Infer::MethodArgumentCountMismatch)) {
         if (missingKwargs.size() == 1) {
             e.setHeader("Missing required keyword argument `{}` for method `{}`", missingKwargs[0]->name.show(gs),
