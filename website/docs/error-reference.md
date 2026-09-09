@@ -594,6 +594,14 @@ def baz
 end
 ```
 
+## 3559
+
+> This error is specific to RBS support when using the `--enable-experimental-rbs-comments` flag.
+
+This error is raised when an RBS record type contains an optional key, like `{ ?k: String }`.
+
+The underlying feature (Sorbet's Hash [Shapes](https://sorbet.org/docs/shapes)) [does not support optional keys](https://github.com/sorbet/sorbet/issues/1160#issuecomment-507889702).
+
 ## 3702
 
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.

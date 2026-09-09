@@ -496,6 +496,22 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns({:optional => <emptyTree>::<C String>, :required => <emptyTree>::<C String>})
+  end
+
+  def shape_type4<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns({:k1 => <emptyTree>::<C String>, :k2 => <emptyTree>::<C Integer>})
+  end
+
+  def shape_type5<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
     <self>.returns(::<root>::<C T>.proc().params(:arg0, <emptyTree>::<C Integer>, :arg1, <emptyTree>::<C String>).returns(<emptyTree>::<C String>))
   end
 
@@ -872,6 +888,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <runtime method definition of shape_type3>
 
   <emptyTree>::<C T>.reveal_type(<self>.shape_type3())
+
+  <runtime method definition of shape_type4>
+
+  <runtime method definition of shape_type5>
 
   <runtime method definition of proc_type1>
 

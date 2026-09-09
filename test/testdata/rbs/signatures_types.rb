@@ -323,6 +323,15 @@ T.reveal_type(shape_type2) # error: Revealed type: `{a: String, b: Integer} (sha
 def shape_type3; T.unsafe(nil); end
 T.reveal_type(shape_type3) # error: Revealed type: `{String("a") => String, b: Integer} (shape of T::Hash[T.untyped, T.untyped])`
 
+#: -> { ?optional: String, required: String }
+#       ^^^^^^^^^ error: Optional keys in Hash shapes are not supported
+def shape_type4; T.unsafe(nil); end
+
+#: -> { ? k1: String, ?  k2: Integer }
+#       ^^^^ error: Optional keys in Hash shapes are not supported
+#                     ^^^^^ error: Optional keys in Hash shapes are not supported
+def shape_type5; T.unsafe(nil); end
+
 # Proc types
 
 #: -> ^(Integer, String) -> String
