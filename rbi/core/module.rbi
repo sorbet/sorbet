@@ -1372,9 +1372,9 @@ class Module < Object
   # Note that to show a private method on
   # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html), use `:doc:`.
   sig { returns(NilClass) }
-  sig { params(method_name: Symbol).returns(Symbol) }
-  sig { params(method_name: String).returns(String) }
-  sig { params(method_name: T.any(Symbol, String), rest: T.any(Symbol, String)).returns(T::Array[T.any(Symbol, String)]) }
+  sig { type_parameters(:U).params(method_name: T.all(T.type_parameter(:U), T.any(Symbol, String))).returns(T.type_parameter(:U)) }
+  sig { type_parameters(:U).params(method_name: T::Array[T.all(T.type_parameter(:U), T.any(Symbol, String))]).returns(T::Array[T.type_parameter(:U)]) }
+  sig { type_parameters(:U).params(rest: T.all(T.type_parameter(:U), T.any(Symbol, String))).returns(T::Array[T.type_parameter(:U)]) }
   private def private(method_name=T.unsafe(nil), *rest); end
 
   # Makes existing class methods private. Often used to hide the default
@@ -1394,13 +1394,11 @@ class Module < Object
   #   end
   # end
   # ```
-  sig do
-    params(
-        arg0: T.any(T::Array[Symbol], T::Array[String], Symbol, String),
-    )
-    .returns(T.self_type)
-  end
-  def private_class_method(*arg0); end
+  sig { returns(NilClass) }
+  sig { type_parameters(:U).params(method_name: T.all(T.type_parameter(:U), T.any(Symbol, String))).returns(T.type_parameter(:U)) }
+  sig { type_parameters(:U).params(method_name: T::Array[T.all(T.type_parameter(:U), T.any(Symbol, String))]).returns(T::Array[T.type_parameter(:U)]) }
+  sig { type_parameters(:U).params(rest: T.all(T.type_parameter(:U), T.any(Symbol, String))).returns(T::Array[T.type_parameter(:U)]) }
+  def private_class_method(method_name=T.unsafe(nil), *rest); end
 
   # Makes a list of existing constants private.
   sig do
@@ -1487,9 +1485,9 @@ class Module < Object
   # [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html), use `:doc:` instead
   # of this.
   sig { returns(NilClass) }
-  sig { params(method_name: Symbol).returns(Symbol) }
-  sig { params(method_name: String).returns(String) }
-  sig { params(method_name: T.any(Symbol, String), rest: T.any(Symbol, String)).returns(T::Array[T.any(Symbol, String)]) }
+  sig { type_parameters(:U).params(method_name: T.all(T.type_parameter(:U), T.any(Symbol, String))).returns(T.type_parameter(:U)) }
+  sig { type_parameters(:U).params(method_name: T::Array[T.all(T.type_parameter(:U), T.any(Symbol, String))]).returns(T::Array[T.type_parameter(:U)]) }
+  sig { type_parameters(:U).params(rest: T.all(T.type_parameter(:U), T.any(Symbol, String))).returns(T::Array[T.type_parameter(:U)]) }
   private def protected(method_name=T.unsafe(nil), *rest); end
 
   # Returns a list of the protected instance methods defined in *mod*. If the
@@ -1546,9 +1544,9 @@ class Module < Object
   # no argument is passed, nil is returned. If multiple arguments are passed,
   # the arguments are returned as an array.
   sig { returns(NilClass) }
-  sig { params(method_name: Symbol).returns(Symbol) }
-  sig { params(method_name: String).returns(String) }
-  sig { params(method_name: T.any(Symbol, String), rest: T.any(Symbol, String)).returns(T::Array[T.any(Symbol, String)]) }
+  sig { type_parameters(:U).params(method_name: T.all(T.type_parameter(:U), T.any(Symbol, String))).returns(T.type_parameter(:U)) }
+  sig { type_parameters(:U).params(method_name: T::Array[T.all(T.type_parameter(:U), T.any(Symbol, String))]).returns(T::Array[T.type_parameter(:U)]) }
+  sig { type_parameters(:U).params(rest: T.all(T.type_parameter(:U), T.any(Symbol, String))).returns(T::Array[T.type_parameter(:U)]) }
   private def public(method_name=T.unsafe(nil), *rest); end
 
   # Makes a list of existing class methods public.
@@ -1557,13 +1555,11 @@ class Module < Object
   # converted to symbols. An
   # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of Symbols and/or
   # Strings is also accepted.
-  sig do
-    params(
-        arg0: T.any(T::Array[Symbol], T::Array[String], Symbol, String),
-    )
-    .returns(T.self_type)
-  end
-  def public_class_method(*arg0); end
+  sig { returns(NilClass) }
+  sig { type_parameters(:U).params(method_name: T.all(T.type_parameter(:U), T.any(Symbol, String))).returns(T.type_parameter(:U)) }
+  sig { type_parameters(:U).params(method_name: T::Array[T.all(T.type_parameter(:U), T.any(Symbol, String))]).returns(T::Array[T.type_parameter(:U)]) }
+  sig { type_parameters(:U).params(rest: T.all(T.type_parameter(:U), T.any(Symbol, String))).returns(T::Array[T.type_parameter(:U)]) }
+  def public_class_method(method_name=T.unsafe(nil), *rest); end
 
   # Makes a list of existing constants public.
   sig do
