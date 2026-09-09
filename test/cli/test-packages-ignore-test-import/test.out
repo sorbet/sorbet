@@ -1,7 +1,104 @@
+------ monolithic -------------------------------
+consumer/test/use.rb:5: Unable to resolve constant `Migrated` https://srb.help/5002
+     5 |  Test::Migrated::Helper
+          ^^^^^^^^^^^^^^
+  Did you mean `BigMath`? Use `-a` to autocorrect
+    consumer/test/use.rb:5: Replace with `BigMath`
+     5 |  Test::Migrated::Helper
+          ^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/big_math.rbi#LCENSORED: `BigMath` defined here
+    NN |module BigMath
+        ^^^^^^^^^^^^^^
+
+consumer/test/use.rb:6: Unable to resolve constant `Migrated` https://srb.help/5002
+     6 |  Test::Migrated::Foo
+          ^^^^^^^^^^^^^^
+  Did you mean `BigMath`? Use `-a` to autocorrect
+    consumer/test/use.rb:6: Replace with `BigMath`
+     6 |  Test::Migrated::Foo
+          ^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/big_math.rbi#LCENSORED: `BigMath` defined here
+    NN |module BigMath
+        ^^^^^^^^^^^^^^
+
+consumer/test/use.rb:7: Unable to resolve constant `Migrated` https://srb.help/5002
+     7 |  Test::Migrated::Test::Helper
+          ^^^^^^^^^^^^^^
+  Did you mean `BigMath`? Use `-a` to autocorrect
+    consumer/test/use.rb:7: Replace with `BigMath`
+     7 |  Test::Migrated::Test::Helper
+          ^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/big_math.rbi#LCENSORED: `BigMath` defined here
+    NN |module BigMath
+        ^^^^^^^^^^^^^^
+
+consumer/test/use.rb:4: `Test::InBetween::FooTest` resolves but its package is not imported https://srb.help/3718
+     4 |  Test::InBetween::FooTest
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+    in_between/test/__package.rb:3: Package defined here
+     3 |class Test::InBetween < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    consumer/test/__package.rb:6: Insert `import Test::InBetween`
+     6 |  import Consumer
+                         ^
+
 old_style/test/foo.test.rb:3: File belongs to package `OldStyle` but defines a constant that does not match this namespace https://srb.help/3713
      3 |module Test::OldStyle
                ^^^^^^^^^^^^^^
     old_style/__package.rb:3: Enclosing package declared here
      3 |class OldStyle < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 1
+Errors: 5
+------ package-directed -------------------------
+consumer/test/use.rb:4: Unable to resolve constant `InBetween` https://srb.help/5002
+     4 |  Test::InBetween::FooTest
+          ^^^^^^^^^^^^^^^
+  Did you mean `Integer`? Use `-a` to autocorrect
+    consumer/test/use.rb:4: Replace with `Integer`
+     4 |  Test::InBetween::FooTest
+          ^^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#LCENSORED: `Integer` defined here
+    NN |class Integer < Numeric
+        ^^^^^^^^^^^^^^^^^^^^^^^
+
+consumer/test/use.rb:5: Unable to resolve constant `Migrated` https://srb.help/5002
+     5 |  Test::Migrated::Helper
+          ^^^^^^^^^^^^^^
+  Did you mean `BigMath`? Use `-a` to autocorrect
+    consumer/test/use.rb:5: Replace with `BigMath`
+     5 |  Test::Migrated::Helper
+          ^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/big_math.rbi#LCENSORED: `BigMath` defined here
+    NN |module BigMath
+        ^^^^^^^^^^^^^^
+
+consumer/test/use.rb:6: Unable to resolve constant `Migrated` https://srb.help/5002
+     6 |  Test::Migrated::Foo
+          ^^^^^^^^^^^^^^
+  Did you mean `BigMath`? Use `-a` to autocorrect
+    consumer/test/use.rb:6: Replace with `BigMath`
+     6 |  Test::Migrated::Foo
+          ^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/big_math.rbi#LCENSORED: `BigMath` defined here
+    NN |module BigMath
+        ^^^^^^^^^^^^^^
+
+consumer/test/use.rb:7: Unable to resolve constant `Migrated` https://srb.help/5002
+     7 |  Test::Migrated::Test::Helper
+          ^^^^^^^^^^^^^^
+  Did you mean `BigMath`? Use `-a` to autocorrect
+    consumer/test/use.rb:7: Replace with `BigMath`
+     7 |  Test::Migrated::Test::Helper
+          ^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/big_math.rbi#LCENSORED: `BigMath` defined here
+    NN |module BigMath
+        ^^^^^^^^^^^^^^
+
+old_style/test/foo.test.rb:3: File belongs to package `OldStyle` but defines a constant that does not match this namespace https://srb.help/3713
+     3 |module Test::OldStyle
+               ^^^^^^^^^^^^^^
+    old_style/__package.rb:3: Enclosing package declared here
+     3 |class OldStyle < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 5
