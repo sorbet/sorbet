@@ -839,6 +839,25 @@ public:
         Braces = 3,
     };
 
+    static void constexpr validateBlockTypeBits(BlockType b) {
+        // Unfortunately, we can't collapse these cases because the compiler isn't smart
+        // enough to see what the value of b is.
+        switch (b) {
+            case BlockType::None:
+                static_assert(int(BlockType::None) < (1 << 2), "BlockType must fit into two bits");
+                break;
+            case BlockType::Present:
+                static_assert(int(BlockType::Present) < (1 << 2), "BlockType must fit into two bits");
+                break;
+            case BlockType::DoEnd:
+                static_assert(int(BlockType::DoEnd) < (1 << 2), "BlockType must fit into two bits");
+                break;
+            case BlockType::Braces:
+                static_assert(int(BlockType::Braces) < (1 << 2), "BlockType must fit into two bits");
+                break;
+        }
+    }
+
     struct Flags {
         // True if the receiver was self (either implicit like `foo()` or explicit like `self.foo()`)
         //   - Prior to Ruby 2.7, it was illegal to call a private method with an explicit receiver.
