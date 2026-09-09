@@ -6,7 +6,7 @@ module Wrong
 end
 
 Root::Nested::Foo::Bar = nil
-::Allowed::TopLevel = nil
+::Allowed::TopLevel = nil # error: requires this package to be marked `prelude!`
 
   NotAllowed::Foo::Bar = nil
 # ^^^^^^^^^^^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
@@ -45,7 +45,7 @@ module Root
 end
 
   class Root::Stringy < String
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: This file must only define behavior in enclosing package `Root::Nested`
+#       ^^^^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
 #                       ^^^^^^ error: Superclasses may only be set on constants in the package that owns them
 end
 
@@ -80,7 +80,7 @@ class Root::ClassNotInPackage
     # ^^^^^^^^^^^^^^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
 end
 
-module ::TopLevel
+module ::TopLevel # error: requires this package to be marked `prelude!`
   class Foo
     sig {void}
     def foo

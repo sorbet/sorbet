@@ -2,7 +2,7 @@
 
 # Because this constant has a leading `::`, the packager allows us to
 # define things on it despite it not belonging to the enclosing namespace
-class ::UnpackagedTheSequel
+class ::UnpackagedTheSequel # error: requires this package to be marked `prelude!`
   # despite being in a constant not governed by this package, we still
   # subject the internals to import restrictions:
   def test
