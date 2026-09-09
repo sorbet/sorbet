@@ -863,9 +863,6 @@ private:
     void emitRedefinedConstantError(core::MutableContext ctx, core::LocOffsets errorLoc, core::NameRef name,
                                     core::SymbolRef::Kind kind, core::SymbolRef prevSymbol) {
         using Kind = core::SymbolRef::Kind;
-        ENFORCE(
-            kind != Kind::ClassOrModule,
-            "ClassOrModule symbols should always be entered first, so they should never need to mangle something else");
         if (auto e = ctx.beginError(errorLoc, core::errors::Namer::ConstantKindRedefinition)) {
             auto prevSymbolKind = prettySymbolKind(ctx, prevSymbol.kind());
             if (prevSymbol.kind() == Kind::ClassOrModule && prevSymbol.asClassOrModuleRef().data(ctx)->isDeclared()) {
@@ -1214,8 +1211,19 @@ private:
             auto owner = getOwnerSymbol(state, klass.owner);
             auto member = owner.data(ctx)->findMember(ctx, klass.name);
             if (member.exists()) {
-                // If member exists with this name, it must be a class or module, because we never mangle-rename them.
-                symbol = member.asClassOrModuleRef();
+                if (member.isClassOrModule()) {
+                    symbol = member.asClassOrModuleRef();
+                } else {
+                    emitRedefinedConstantError(ctx, klass.declLoc, klass.name, core::SymbolRef::Kind::ClassOrModule,
+                                               member);
+                    // Payload constants already exist before namer runs. Enter the conflicting class under a
+                    // mangled name so that we can still symbolize and visit its body.
+                    symbol = ctx.state.lookupClassSymbol(owner, klass.name);
+                    if (!symbol.exists()) {
+                        auto mangledName = ctx.state.nextMangledName(owner, klass.name);
+                        symbol = ctx.state.enterClassOrModuleSymbol(ctx.locAt(klass.declLoc), owner, mangledName);
+                    }
+                }
             } else {
                 auto newClass = ctx.state.enterClassOrModuleSymbol(ctx.locAt(klass.declLoc), owner, klass.name);
                 symbol = newClass;
