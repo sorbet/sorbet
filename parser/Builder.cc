@@ -592,6 +592,7 @@ public:
         auto blockLoc = tokLoc(begin).join(tokLoc(end));
 
         auto style = BlockStyle::Present;
+        ENFORCE(end != nullptr);
         if (end != nullptr) {
             style = end->type() == ruby_parser::token_type::tRCURLY ? BlockStyle::Braces : BlockStyle::DoEnd;
         }
