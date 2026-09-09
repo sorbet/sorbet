@@ -46,6 +46,17 @@ And some quick notes:
 
 1.  Sorbet will error statically if the condition to a case statement using `T.absurd` is `T.untyped`. This prevents against losing exhaustiveness checking due to a change in the code that weakens static type information.
 
+To raise a custom exception at runtime while keeping Sorbet's exhaustiveness check, put the `raise` before `T.absurd`:
+
+```ruby
+else
+  raise ArgumentError, "Unexpected value: #{x}"
+  T.absurd(x)
+end
+```
+
+Sorbet still checks the trailing `T.absurd`, while Ruby executes the custom `raise` first if the branch is reached.
+
 Now let's walk through an example explaining not only **how** Sorbet provides exhaustiveness checking, but also **why** it's useful:
 
 ## Example

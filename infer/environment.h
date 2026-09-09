@@ -228,7 +228,7 @@ class Environment {
     void setTypeAndOrigin(cfg::LocalRef symbol, const core::TypeAndOrigins &typeAndOrigins);
 
     void assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef cond, core::Loc loc,
-                         const UnorderedMap<cfg::LocalRef, VariableState> &filter);
+                         const UnorderedMap<cfg::LocalRef, VariableState> &filter, bool applyKnowledgeInDeadBranch);
 
     void cloneFrom(const Environment &rhs);
 
@@ -262,7 +262,11 @@ public:
 
     /*
      * Create an Environment out of this one that holds if final condition in
-     * this environment was isTrue
+     * this environment was isTrue.
+     *
+     * When applyKnowledgeInDeadBranch is true, apply the branch's knowledge
+     * even if the condition proves that branch unreachable. This supplies the
+     * counterfactual types needed to check T.absurd in a dead branch.
      *
      * Either returns a reference to `env` unchanged, or populates `copy` and
      * returns a reference to that. This odd calling convention is used to avoid
@@ -270,7 +274,8 @@ public:
      * then discard it, so the mixed lifetimes are not a problem in practice.
      */
     static const Environment &withCond(core::Context ctx, const Environment &env, Environment &copy, bool isTrue,
-                                       const UnorderedMap<cfg::LocalRef, VariableState> &filter);
+                                       const UnorderedMap<cfg::LocalRef, VariableState> &filter,
+                                       bool applyKnowledgeInDeadBranch);
 
     void mergeWith(core::Context ctx, const Environment &other, cfg::CFG &inWhat, cfg::BasicBlock *bb,
                    KnowledgeFilter &knowledgeFilter);
