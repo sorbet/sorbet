@@ -1548,6 +1548,8 @@ private:
             PackageCursorState cursor;
             if (scopeWasEmpty && constant->original()->cnst == core::packages::PackageDB::TEST_NAMESPACE &&
                 shouldCheckPackage(ctx)) {
+                ENFORCE(!scopeCursor.cursor.exists() && !scopeCursor.legacyTestPath &&
+                        scopeCursor.position == PackageCursorPosition::None);
                 cursor.cursor = core::Symbols::PackageSpecRegistry();
                 cursor.position = PackageCursorPosition::NamespacePrefix;
             } else if (scopeWasEmpty) {
