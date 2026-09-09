@@ -737,6 +737,10 @@ public:
         this->symbolOffsets.emplace_back(SymbolTableOffsets(*this));
     }
 
+    packages::Stratum currentStratum() const {
+        return packages::Stratum(this->symbolOffsets.size() - 1);
+    }
+
     // The earliest stratum whose symbols are no longer a contiguous range of ids. Every stratum
     // before it forms a self-contained prefix of the symbol table, in the sense that no symbol in
     // it refers to a symbol outside it.

@@ -20,12 +20,44 @@
 #include "core/errors/namer.h"
 #include "core/hashing/hashing.h"
 #include "core/lsp/TypecheckEpochManager.h"
+#include <type_traits>
 
 using namespace std;
 
 namespace sorbet::namer {
 
 namespace {
+
+// If packages are enabled, we need to determine if this name is part of the package hierarchy, or if it could be a
+// symbol that's owned by a package. If it's the latter, we mangle it out of the way, introducing a name that's unique
+// to this stratum.
+template <typename CTX>
+core::NameRef guardUnownedName(CTX ctx, core::ClassOrModuleRef owner, core::NameRef name) {
+    auto ownerPackage = owner.data(ctx)->package;
+    if (ownerPackage.exists()) {
+        // If the package that `owner` belongs to does not match the package that owns this file,
+        // and `name` is not on a path in the registry, mangle name.
+        auto ownerRegistry = owner.data(ctx)->packageRegistryOwner;
+        if (ownerPackage != ctx.state.packageDB().getPackageNameForFile(ctx.file) &&
+            (!ownerRegistry.exists() || !owner.data(ctx)->packageRegistryOwner.data(ctx)->members().contains(name))) {
+
+            // We rename to a fresh name whose index is the current stratum, so that we always know how to reconstruct
+            // the mangled class names.
+            // TODO: document why +1
+            auto stratum = ctx.state.currentStratum().rawId()+1;
+
+            if constexpr (std::is_same_v<CTX, core::MutableContext>) {
+                name = ctx.state.freshNameUnique(core::UniqueNameKind::MangleRename, name, stratum);
+            } else {
+                static_assert(std::is_same_v<CTX, core::Context>);
+                name = ctx.state.lookupNameUnique(core::UniqueNameKind::MangleRename, name, stratum);
+            }
+
+        }
+    }
+
+    return name;
+}
 
 struct ParsedFileWithIdx {
     ast::ParsedFile parsedFile;
@@ -1217,7 +1249,8 @@ private:
                 // If member exists with this name, it must be a class or module, because we never mangle-rename them.
                 symbol = member.asClassOrModuleRef();
             } else {
-                auto newClass = ctx.state.enterClassOrModuleSymbol(ctx.locAt(klass.declLoc), owner, klass.name);
+                auto name = guardUnownedName<core::MutableContext>(ctx, owner, klass.name);
+                auto newClass = ctx.state.enterClassOrModuleSymbol(ctx.locAt(klass.declLoc), owner, name);
                 symbol = newClass;
             }
         }
@@ -1958,6 +1991,8 @@ class TreeSymbolizer {
         const bool firstNameRecursive = false;
         auto newOwner = squashNamesInner(ctx, owner, constLit->scope, firstNameRecursive);
         ENFORCE(newOwner.exists());
+
+        constLit->cnst = guardUnownedName<core::Context>(ctx, newOwner.asClassOrModuleRef(), constLit->cnst);
 
         core::SymbolRef existing = ctx.state.lookupClassSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
         if (firstName && !existing.exists() && newOwner.isClassOrModule()) {
