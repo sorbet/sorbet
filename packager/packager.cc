@@ -22,6 +22,23 @@ namespace {
 
 constexpr string_view PACKAGE_FILE_NAME = "__package.rb"sv;
 
+bool isTestConstant(const ast::ExpressionPtr &expr) {
+    auto sym = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
+    while (sym) {
+        if (ast::isa_tree<ast::EmptyTree>(sym->scope)) {
+            return sym->cnst == core::Names::Constants::Test();
+        }
+
+        if (auto parent = ast::cast_tree<ast::UnresolvedConstantLit>(sym->scope)) {
+            sym = parent;
+        } else {
+            break;
+        }
+    }
+
+    return false;
+}
+
 string buildValidLayersStr(const core::GlobalState &gs) {
     auto validLayers = gs.packageDB().layers();
     ENFORCE(validLayers.size() > 0);
@@ -525,11 +542,20 @@ struct PackageSpecBodyWalk {
 
         if (send.fun == core::Names::export_()) {
             if (send.numPosArgs() == 1) {
-                // Record every syntactically valid export. verifyConstant only checks that the argument is a constant
-                // path, so this also records constants that will fail to resolve later. The rest of the pipeline uses
-                // these locations for autocorrects.
-                if (verifyConstant(ctx, core::Names::export_(), send.getPosArg(0)) != nullptr) {
-                    info.exports_.emplace_back(send.loc);
+                auto &expr = send.getPosArg(0);
+                // TODO(trevor) If the experimental-test-packages migration flag is enabled, we remove exports of
+                // `Test::` symbols from non-test packages. This allows the original files to remain unchanged during
+                // the migration period, and the newly introduced test-packages to be the source of truth for what they
+                // export. This should be removed once we're fully migrated.
+                if (ctx.state.packageDB().testPackages() && !this->info.testPackage() && isTestConstant(expr)) {
+                    tree = ast::make_expression<ast::EmptyTree>();
+                } else {
+                    // Record every syntactically valid export. verifyConstant only checks that the argument is a
+                    // constant path, so this also records constants that will fail to resolve later. The rest of the
+                    // pipeline uses these locations for autocorrects.
+                    if (verifyConstant(ctx, core::Names::export_(), expr) != nullptr) {
+                        info.exports_.emplace_back(send.loc);
+                    }
                 }
             }
         } else if ((send.fun == core::Names::import() || send.fun == core::Names::testImport())) {
@@ -1351,20 +1377,7 @@ bool isTestExport(const ast::ExpressionPtr &expr) {
         return false;
     }
 
-    auto sym = ast::cast_tree<ast::UnresolvedConstantLit>(send->getPosArg(0));
-    while (sym) {
-        if (ast::isa_tree<ast::EmptyTree>(sym->scope)) {
-            return sym->cnst == core::Names::Constants::Test();
-        }
-
-        if (auto parent = ast::cast_tree<ast::UnresolvedConstantLit>(sym->scope)) {
-            sym = parent;
-        } else {
-            break;
-        }
-    }
-
-    return false;
+    return isTestConstant(send->getPosArg(0));
 }
 
 } // namespace
