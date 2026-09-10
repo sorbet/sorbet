@@ -1189,7 +1189,8 @@ ClassOrModuleRef GlobalState::enterClassOrModuleSymbol(Loc loc, ClassOrModuleRef
     return ret;
 }
 
-GlobalState::ClassOrModulePackageInfo GlobalState::packageInfoForClassOrModule(ClassOrModuleRef owner, NameRef name) const {
+GlobalState::ClassOrModulePackageInfo GlobalState::packageInfoForClassOrModule(ClassOrModuleRef owner,
+                                                                               NameRef name) const {
     if (!this->packageDB().enabled()) {
         // Note that this case also initializes `<PackageSpecRegistry>` itself as being not owned by
         // a package. We manually set it back to Symbols::PackageSpecRegistry() in `initEmpty` to
@@ -1229,13 +1230,13 @@ GlobalState::ClassOrModulePackageInfo GlobalState::packageInfoForClassOrModule(C
     }
     auto packageRegistryMember = ownerPackageRegistryOwner.data(*this)->findMember(*this, registryName);
     auto packageRegistryOwner = packageRegistryMember.exists() && packageRegistryMember.isClassOrModule()
-                                     // Found narrower entry in <PackageSpecRegistry> hierarchy
-                                     ? packageRegistryMember.asClassOrModuleRef()
-                                     // Set to `noClassOrModule()` to ensure that we don't keep
-                                     // looking for something (e.g., don't want Opus::A::B::C::D
-                                     // to find <PackageSpecRegistry>::Opus::A::D even if it
-                                     // exists--the intermediate namespaces were missing).
-                                     : Symbols::noClassOrModule();
+                                    // Found narrower entry in <PackageSpecRegistry> hierarchy
+                                    ? packageRegistryMember.asClassOrModuleRef()
+                                    // Set to `noClassOrModule()` to ensure that we don't keep
+                                    // looking for something (e.g., don't want Opus::A::B::C::D
+                                    // to find <PackageSpecRegistry>::Opus::A::D even if it
+                                    // exists--the intermediate namespaces were missing).
+                                    : Symbols::noClassOrModule();
 
     if (!packageRegistryOwner.exists()) {
         return {packageRegistryOwner, ownerData->package};
