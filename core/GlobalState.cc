@@ -1182,6 +1182,12 @@ ClassOrModuleRef GlobalState::enterClassOrModuleSymbol(Loc loc, ClassOrModuleRef
     data->addLoc(*this, loc);
     DEBUG_ONLY(categoryCounterInc("symbols", "class"));
 
+    packageInfoForClassOrModule(owner, name);
+
+    return ret;
+}
+
+void GlobalState::packageInfoForClassOrModule(ClassOrModuleRef owner, NameRef name) const {
     if (!this->packageDB().enabled()) {
         // Note that this case also initializes `<PackageSpecRegistry>` itself as being not owned by
         // a package. We manually set it back to Symbols::PackageSpecRegistry() in `initEmpty` to
@@ -1245,8 +1251,6 @@ ClassOrModuleRef GlobalState::enterClassOrModuleSymbol(Loc loc, ClassOrModuleRef
         // so our package is still the same as the package of our owner.
         data->package = ownerData->package;
     }
-
-    return ret;
 }
 
 TypeMemberRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef name, Variance variance) {
