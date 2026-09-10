@@ -786,6 +786,7 @@ private:
             // TODO(neil): Should we add an autocorrect to delete this import outside of gen-packages mode?
             return;
         }
+
         if (auto e = ctx.beginError(original.loc, core::errors::Resolver::StubConstant)) {
             e.setHeader("Unable to resolve constant `{}`", original.cnst.show(ctx));
             auto foundCommonTypo = false;
