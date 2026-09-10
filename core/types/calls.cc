@@ -3038,8 +3038,28 @@ public:
             if ((gs.suggestUnsafe || !ty.isUntyped()) && loc.exists() && argLocExists) {
                 // (skip the autocorrect if we had to fall back to using callLoc, because using that
                 // will suggest something syntactically invalid like `T.let(U = begin; end, NilClass))`
-                e.replaceWith(fmt::format("Initialize as `{}`", ty.show(gs)), loc, "T.let({}, {})",
-                              loc.source(gs).value(), ty.show(gs));
+                auto opts = ShowOptions().withUseValidSyntax();
+                auto suggestType = ty;
+                bool canAutocorrect = true;
+                if (isa_type<SelfTypeParam>(suggestType)) {
+                    auto selfTypeParam = cast_type_nonnull<SelfTypeParam>(suggestType);
+                    auto definition = selfTypeParam.definition;
+                    if (definition.isTypeMember()) {
+                        const auto &lambdaParam =
+                            cast_type_nonnull<LambdaParam>(definition.asTypeMemberRef().data(gs)->resultType);
+                        if (lambdaParam.upperBound.isTop()) {
+                            // Constants are accessible from both singleton and instance scopes, so an unbounded
+                            // type_template cannot be used as an annotation that is valid in both scopes.
+                            canAutocorrect = false;
+                        } else {
+                            suggestType = lambdaParam.upperBound;
+                        }
+                    }
+                }
+                if (canAutocorrect) {
+                    e.replaceWith(fmt::format("Initialize as `{}`", suggestType.show(gs)), loc, "T.let({}, {})",
+                                  loc.source(gs).value(), suggestType.show(gs, opts));
+                }
             }
         }
         res.returnType = move(ty);

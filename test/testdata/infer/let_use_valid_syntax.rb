@@ -18,3 +18,39 @@ class B
     #      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `T.cast` is useless because `T.attached_class (of B)` is already a subtype of `T.nilable(T.attached_class (of B))`
   end
 end
+
+class C
+  extend T::Sig
+
+  sig {returns(String)}
+  attr_reader :name
+
+  sig {params(name: String).void}
+  def initialize(name)
+    @name = name
+  end
+
+  BOOLEAN = new("bool")
+  #         ^^^^^^^^^^^ error: Constants must have type annotations with `T.let` when specifying `# typed: strict`
+end
+
+class GenericClass
+  extend T::Sig
+  extend T::Generic
+
+  TypeTemplate = type_template
+
+  sig {returns(TypeTemplate)}
+  def self.returns_template; raise; end
+
+  X = returns_template
+  #   ^^^^^^^^^^^^^^^^ error: Constants must have type annotations with `T.let` when specifying `# typed: strict`
+
+  TypeTemplateUpper = type_template {{upper: Integer}}
+
+  sig {returns(TypeTemplateUpper)}
+  def self.returns_template_upper; raise; end
+
+  Y = returns_template_upper
+  #   ^^^^^^^^^^^^^^^^^^^^^^ error: Constants must have type annotations with `T.let` when specifying `# typed: strict`
+end
