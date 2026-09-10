@@ -777,17 +777,15 @@ private:
                 break;
         }
 
-        bool silenceError = false;
         if (constantNameMissing || alreadyReported) {
-            silenceError = true;
+            return;
         }
         if (isImport && gs.packageDB().genPackagesMode() != core::packages::GenPackagesMode::Disabled) {
             // The user has added an import for a package that does not exist. However, in gen-packages mode, we'll
             // delete this import and add the correct import, so no need to report an error here.
             // TODO(neil): Should we add an autocorrect to delete this import outside of gen-packages mode?
-            silenceError = true;
+            return;
         }
-        if (!silenceError) {
             if (auto e = ctx.beginError(original.loc, core::errors::Resolver::StubConstant)) {
                 e.setHeader("Unable to resolve constant `{}`", original.cnst.show(ctx));
                 auto foundCommonTypo = false;
@@ -845,7 +843,6 @@ private:
                     }
                 }
             }
-        }
     }
 
     static bool resolveConstantJob(core::Context ctx, ConstantResolutionItem &job) {
