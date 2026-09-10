@@ -98,8 +98,16 @@ void matchesQuery(core::Context ctx, const ast::ConstantLit *lit, const core::ls
     auto symbol = symbolBeforeDealias.dealias(ctx);
     while (lit && symbol.exists() && lit->original()) {
         auto &unresolved = *lit->original();
-        if (lspQuery.matchesLoc(ctx.locAt(lit->loc())) || lspQuery.matchesSymbol(symbol) ||
-            lspQuery.matchesSymbol(symbolBeforeDealias)) {
+
+        // `<PackageSpecRegistry>` symbols can show up in non-`__package.rb` files now (only in
+        // files with resolver errors), so we have to filter them out of reference results to
+        // pretend that they're not there.
+        auto isPackageCursor = symbolBeforeDealias.isClassOrModule() &&
+                               symbolBeforeDealias.asClassOrModuleRef().isPackageSpecSymbol(ctx) &&
+                               !ctx.file.data(ctx).isPackage(ctx);
+
+        if (!isPackageCursor && (lspQuery.matchesLoc(ctx.locAt(lit->loc())) || lspQuery.matchesSymbol(symbol) ||
+                                 lspQuery.matchesSymbol(symbolBeforeDealias))) {
             // This basically approximates the cfg::Alias case from Environment::processBinding.
             core::TypeAndOrigins tp;
             tp.origins.emplace_back(symbol.loc(ctx));

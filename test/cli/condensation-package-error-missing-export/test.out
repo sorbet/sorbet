@@ -38,14 +38,26 @@ use_other/foo_class.rb:13: `Foo::Bar::OtherPackage::Inner::AlsoNotExported` reso
   Note:
     Either export it manually, or better, restructure the code so that package namespaces do not define behavior.
 Errors: 4
-use_app_false_cycle_package/foo.rb:6: Unable to resolve constant `Bar` https://srb.help/5002
+use_app_false_cycle_package/foo.rb:6: `Foo::Bar::AppFalseCyclePackage` cannot be referenced here because importing it would put `Foo::MyPackage` into a cycle, importing it would cause a layering violation, and its `strict_dependencies` is not strict enough https://srb.help/3727
      6 |      Foo::Bar::AppFalseCyclePackage::OtherClass
-              ^^^^^^^^
-  Did you mean `Dir`? Use `-a` to autocorrect
-    use_app_false_cycle_package/foo.rb:6: Replace with `Dir`
-     6 |      Foo::Bar::AppFalseCyclePackage::OtherClass
-              ^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/dir.rbi#L11: `Dir` defined here
-    11 |class Dir < Object
-        ^^^^^^^^^^^^^^^^^^
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_app_false_cycle_package/__package.rb:5: Enclosing package declared here
+     5 |class Foo::MyPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    use_app_false_cycle_package/__package.rb:7: `Foo::MyPackage` is `strict_dependencies 'layered_dag'`, which disallows cycles
+     7 |  strict_dependencies 'layered_dag'
+                              ^^^^^^^^^^^^^
+  Note:
+    Path from `Foo::Bar::AppFalseCyclePackage` to `Foo::MyPackage`:
+    `Foo::Bar::AppFalseCyclePackage` →
+    `Foo::MyPackage`
+
+    app_false_cycle_package/__package.rb:6: Package `Foo::Bar::AppFalseCyclePackage` must be at most layer `lib` (to match package `Foo::MyPackage`) but is currently layer `app`
+     6 |  layer 'app'
+                ^^^^^
+    app_false_cycle_package/__package.rb:7: `Foo::Bar::AppFalseCyclePackage` must be at least `strict_dependencies 'layered'` but is currently `strict_dependencies 'false'`
+     7 |  strict_dependencies 'false'
+                              ^^^^^^^
+  Note:
+    `Foo::Bar::AppFalseCyclePackage` is not imported
 Errors: 1
