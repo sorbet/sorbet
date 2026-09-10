@@ -153,18 +153,6 @@ bool isRootScopedDefinition(const ast::ConstantLit *lit) {
     return false;
 }
 
-struct PackageForSymbolResult {
-    // The closest package for `sym`
-    MangledName bestPkg;
-
-    // The closest owner symbol inside `<PackageSpecRegistry>`. Might not actually correspond to a
-    // package if it's just a namespace, e.g. `<PSR>::Pkg1::NS` for `::Pkg1::Inner::NS::A`
-    core::ClassOrModuleRef bestOwner;
-
-    // Could be a prefix if `sym` is a `ClassOrModuleRef`
-    bool couldBePrefix;
-};
-
 bool ownsPackage(const core::GlobalState &gs, const core::ClassOrModuleRef ownerForScope, MangledName pkg) {
     auto owner = pkg.owner;
     while (owner != core::Symbols::root()) {
