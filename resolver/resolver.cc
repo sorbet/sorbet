@@ -777,72 +777,70 @@ private:
                 break;
         }
 
-        bool silenceError = false;
         if (constantNameMissing || alreadyReported) {
-            silenceError = true;
+            return;
         }
         if (isImport && gs.packageDB().genPackagesMode() != core::packages::GenPackagesMode::Disabled) {
             // The user has added an import for a package that does not exist. However, in gen-packages mode, we'll
             // delete this import and add the correct import, so no need to report an error here.
             // TODO(neil): Should we add an autocorrect to delete this import outside of gen-packages mode?
-            silenceError = true;
+            return;
         }
-        if (!silenceError) {
-            if (auto e = ctx.beginError(original.loc, core::errors::Resolver::StubConstant)) {
-                e.setHeader("Unable to resolve constant `{}`", original.cnst.show(ctx));
-                auto foundCommonTypo = false;
-                if (ast::isa_tree<ast::EmptyTree>(original.scope)) {
-                    for (const auto &[from, to] : COMMON_TYPOS) {
-                        if (from == original.cnst) {
-                            e.didYouMean(to, ctx.locAt(job.out->loc()));
-                            foundCommonTypo = true;
-                            break;
-                        }
+
+        if (auto e = ctx.beginError(original.loc, core::errors::Resolver::StubConstant)) {
+            e.setHeader("Unable to resolve constant `{}`", original.cnst.show(ctx));
+            auto foundCommonTypo = false;
+            if (ast::isa_tree<ast::EmptyTree>(original.scope)) {
+                for (const auto &[from, to] : COMMON_TYPOS) {
+                    if (from == original.cnst) {
+                        e.didYouMean(to, ctx.locAt(job.out->loc()));
+                        foundCommonTypo = true;
+                        break;
+                    }
+                }
+            }
+
+            auto suppressLegacyTestSuggestion =
+                legacyTestRoot && !ctx.file.data(ctx).isPackagedTest() && shouldCheckPackage(ctx);
+            if (!foundCommonTypo && !suppressLegacyTestSuggestion && suggestionCount < MAX_SUGGESTION_COUNT &&
+                suggestScope.exists() && suggestScope.isClassOrModule()) {
+                suggestionCount++;
+
+                core::packages::MangledName filterToPackage;
+                if (!isPackage && gs.packageDB().enabled()) {
+                    filterToPackage = gs.packageDB().getPackageNameForFile(file);
+                }
+                auto suggested = suggestScope.asClassOrModuleRef().data(ctx)->findConstantFuzzyMatch(ctx, original.cnst,
+                                                                                                     filterToPackage);
+
+                if (isExport) {
+                    // If the resolution error is for an export, suggestions must be restricted to within the
+                    // current package only. They must not cross package boundaries as out-of-package suggestions
+                    // would be inherently invalid.
+                    auto enclosingPackage = ctx.state.packageDB().getPackageNameForFile(ctx.file);
+                    if (enclosingPackage.exists()) {
+                        erase_if(suggested, [&enclosingPackage, &gs](auto &suggestion) {
+                            return suggestion.symbol.enclosingClass(gs).data(gs)->package != enclosingPackage;
+                        });
                     }
                 }
 
-                auto suppressLegacyTestSuggestion =
-                    legacyTestRoot && !ctx.file.data(ctx).isPackagedTest() && shouldCheckPackage(ctx);
-                if (!foundCommonTypo && !suppressLegacyTestSuggestion && suggestionCount < MAX_SUGGESTION_COUNT &&
-                    suggestScope.exists() && suggestScope.isClassOrModule()) {
-                    suggestionCount++;
-
-                    core::packages::MangledName filterToPackage;
-                    if (!isPackage && gs.packageDB().enabled()) {
-                        filterToPackage = gs.packageDB().getPackageNameForFile(file);
+                if (suggested.size() > 3) {
+                    suggested.resize(3);
+                }
+                for (auto suggestion : suggested) {
+                    const auto replacement = suggestion.symbol.show(ctx);
+                    auto replaceLoc = ctx.locAt(job.out->loc());
+                    if (replaceLoc.source(ctx) == replacement) {
+                        // The replacement is the same as the original.
+                        // This can happen for a number of reasons, usually due to things
+                        // where one of the names has an unprintable name from a rewriter.
+                        // It's confusing to see those bad did you mean and they don't
+                        // provide value.
+                        continue;
                     }
-                    auto suggested = suggestScope.asClassOrModuleRef().data(ctx)->findConstantFuzzyMatch(
-                        ctx, original.cnst, filterToPackage);
-
-                    if (isExport) {
-                        // If the resolution error is for an export, suggestions must be restricted to within the
-                        // current package only. They must not cross package boundaries as out-of-package suggestions
-                        // would be inherently invalid.
-                        auto enclosingPackage = ctx.state.packageDB().getPackageNameForFile(ctx.file);
-                        if (enclosingPackage.exists()) {
-                            erase_if(suggested, [&enclosingPackage, &gs](auto &suggestion) {
-                                return suggestion.symbol.enclosingClass(gs).data(gs)->package != enclosingPackage;
-                            });
-                        }
-                    }
-
-                    if (suggested.size() > 3) {
-                        suggested.resize(3);
-                    }
-                    for (auto suggestion : suggested) {
-                        const auto replacement = suggestion.symbol.show(ctx);
-                        auto replaceLoc = ctx.locAt(job.out->loc());
-                        if (replaceLoc.source(ctx) == replacement) {
-                            // The replacement is the same as the original.
-                            // This can happen for a number of reasons, usually due to things
-                            // where one of the names has an unprintable name from a rewriter.
-                            // It's confusing to see those bad did you mean and they don't
-                            // provide value.
-                            continue;
-                        }
-                        e.didYouMean(replacement, replaceLoc);
-                        e.addErrorLine(suggestion.symbol.loc(ctx), "`{}` defined here", replacement);
-                    }
+                    e.didYouMean(replacement, replaceLoc);
+                    e.addErrorLine(suggestion.symbol.loc(ctx), "`{}` defined here", replacement);
                 }
             }
         }
