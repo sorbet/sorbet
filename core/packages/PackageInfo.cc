@@ -1331,6 +1331,25 @@ PackageInfo::CanModifyResult PackageInfo::canModifySymbol(core::Context ctx, Cla
     return CanModifyResult::NotOwner;
 }
 
+bool PackageInfo::ownsNamespace(const core::GlobalState &gs, MangledName namespacePackage,
+                                ClassOrModuleRef packageRegistryOwner, bool couldBePrefix) const {
+    if (namespacePackage == this->mangledName()) {
+        return true;
+    }
+    if (!couldBePrefix || !packageRegistryOwner.exists()) {
+        return false;
+    }
+
+    auto owner = this->mangledName().owner;
+    while (owner != core::Symbols::root()) {
+        if (owner == packageRegistryOwner) {
+            return true;
+        }
+        owner = owner.data(gs)->owner;
+    }
+    return false;
+}
+
 bool PackageInfo::canAccessInternalsOf(bool testPackages, MangledName other) const {
     ENFORCE(this->exists());
     ENFORCE(other.exists());
