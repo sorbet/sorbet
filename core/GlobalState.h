@@ -444,7 +444,13 @@ public:
                             bool packageAttributedErrors, bool testPackages);
     packages::UnfreezePackages unfreezePackages();
 
-    void packageInfoForClassOrModule(ClassOrModuleRef owner, NameRef name) const;
+    struct ClassOrModulePackageInfo final {
+        ClassOrModuleRef packageRegistryOwner;
+        packages::MangledName package;
+    };
+
+    // Computes the package metadata that enterClassOrModuleSymbol will assign to a new symbol.
+    ClassOrModulePackageInfo packageInfoForClassOrModule(ClassOrModuleRef owner, NameRef name) const;
 
     NameRef nextMangledName(ClassOrModuleRef owner, NameRef origName);
     void mangleRenameMethod(MethodRef what, NameRef origName);
