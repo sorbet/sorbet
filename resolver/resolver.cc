@@ -21,6 +21,7 @@
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/timers/Timer.h"
 #include "core/Symbols.h"
+#include <iterator>
 #include <utility>
 #include <vector>
 
@@ -147,6 +148,10 @@ private:
     struct Nesting {
         const shared_ptr<Nesting> parent;
         const core::SymbolRef scope;
+
+        // Marked `true` if we see a constant lit used under this scope. If it's true, this will trigger validation of
+        // the scope as it's being popped in `postTransformClassDef`.
+        bool runtimeResolutionPresent = false;
 
         Nesting(shared_ptr<Nesting> parent, core::SymbolRef scope) : parent(std::move(parent)), scope(scope) {}
     };
@@ -1628,6 +1633,7 @@ public:
     }
 
     void postTransformUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
+        this->nesting_->runtimeResolutionPresent = true;
         walkUnresolvedConstantLit(ctx, tree);
     }
 
@@ -1718,7 +1724,6 @@ public:
             }
         }
 
-        checkScopePackage(ctx, sym, original.declLoc);
         nesting_ = make_unique<Nesting>(std::move(nesting_), sym);
     }
 
@@ -1755,6 +1760,22 @@ public:
                     e.addErrorLine(ambigDef.loc(ctx), "Or could mean `{}` if nested under here", option2);
                 }
             }
+        }
+
+        // Check the name we're introducing for a scope, as that counts for requiring a package namespace
+        // opening check.
+        if (auto name = ast::cast_tree<ast::ConstantLit>(original.name)) {
+            if (!ast::isa_tree<ast::EmptyTree>(name->original()->scope)) {
+                nesting_->runtimeResolutionPresent = true;
+            }
+        }
+
+        if (this->nesting_->runtimeResolutionPresent) {
+            // Ensure that the same scope check is applied to the parent scope as well.
+            if (auto &parent = this->nesting_->parent) {
+                parent->runtimeResolutionPresent = true;
+            }
+            checkScopePackage(ctx, klass, original.declLoc);
         }
 
         nesting_ = nesting_->parent;
