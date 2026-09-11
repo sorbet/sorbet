@@ -47,7 +47,7 @@ bool isTestOnlyPackage(const core::GlobalState &gs, const PackageInfo &pkg) {
     return pkg.file.data(gs).isPackagedTest();
 }
 
-bool isRootScopedDefinition(const ast::ConstantLit *lit) {
+bool hasExplicitRootScope(const ast::ConstantLit *lit) {
     while (lit != nullptr && lit->original() != nullptr) {
         lit = ast::cast_tree<ast::ConstantLit>(lit->original()->scope);
         if (lit != nullptr && lit->symbol() == core::Symbols::root()) {
@@ -276,13 +276,13 @@ public:
 private:
     void pushScope(const ast::ConstantLit *lit) {
         scope.emplace_back(lit->symbol(), lit->loc());
-        if (isRootScopedDefinition(lit)) {
+        if (hasExplicitRootScope(lit)) {
             rootConsts++;
         }
     }
 
     void popScope(const ast::ConstantLit *lit) {
-        if (isRootScopedDefinition(lit)) {
+        if (hasExplicitRootScope(lit)) {
             rootConsts--;
         }
         scope.pop_back();
