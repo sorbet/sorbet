@@ -21,7 +21,6 @@ x = Demo.new
 x.public_public
 x.public_protected
 x.public_private
-# ^^^^^^^^^^^^^^ error: Non-private call to private method `public_private` on `Demo`
 
 x.protected_public
 x.protected_protected
@@ -30,7 +29,9 @@ x.protected_private
 # TODO: `protected` is not properly clearing the `isPrivate` flag https://github.com/sorbet/sorbet/issues/10089
 
 x.private_public
+# ^^^^^^^^^^^^^^ error: Non-private call to private method `private_public` on `Demo`
 x.private_protected
+# ^^^^^^^^^^^^^^^^^ error: Non-private call to private method `private_protected` on `Demo`
 x.private_private
 # ^^^^^^^^^^^^^^^ error: Non-private call to private method `private_private` on `Demo`
 
