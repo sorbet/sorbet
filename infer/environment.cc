@@ -774,25 +774,30 @@ void Environment::setTypeAndOrigin(cfg::LocalRef symbol, const core::TypeAndOrig
 }
 
 const Environment &Environment::withCond(core::Context ctx, const Environment &env, Environment &copy, bool isTrue,
-                                         const UnorderedMap<cfg::LocalRef, VariableState> &filter) {
+                                         const UnorderedMap<cfg::LocalRef, VariableState> &filter,
+                                         bool applyKnowledgeInDeadBranch) {
     ENFORCE(env.bb->bexit.cond.variable.exists());
     if (env.bb->bexit.cond.variable == cfg::LocalRef::unconditional() ||
         env.bb->bexit.cond.variable == cfg::LocalRef::blockCall()) {
         return env;
     }
     copy.cloneFrom(env);
-    copy.assumeKnowledge(ctx, isTrue, env.bb->bexit.cond.variable, ctx.locAt(env.bb->bexit.loc), filter);
+    copy.assumeKnowledge(ctx, isTrue, env.bb->bexit.cond.variable, ctx.locAt(env.bb->bexit.loc), filter,
+                         applyKnowledgeInDeadBranch);
     return copy;
 }
 
 void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef cond, core::Loc loc,
-                                  const UnorderedMap<cfg::LocalRef, VariableState> &filter) {
+                                  const UnorderedMap<cfg::LocalRef, VariableState> &filter,
+                                  bool applyKnowledgeInDeadBranch) {
     const auto &thisKnowledge = getKnowledge(cond, false);
     thisKnowledge.sanityCheck();
     if (!isTrue) {
         if (getKnownTruthy(cond)) {
             isDead = true;
-            return;
+            if (!applyKnowledgeInDeadBranch) {
+                return;
+            }
         }
 
         core::TypeAndOrigins tp = getTypeAndOrigin(cond);
@@ -803,7 +808,9 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef 
             tp.type = core::Types::all(ctx, tp.type, core::Types::falsyTypes());
             if (tp.type.isBottom()) {
                 isDead = true;
-                return;
+                if (!applyKnowledgeInDeadBranch) {
+                    return;
+                }
             }
         }
         setTypeAndOrigin(cond, tp);
@@ -813,13 +820,15 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef 
         tp.type = core::Types::dropSubtypesOf(ctx, tp.type, core::Types::falsySymbols());
         if (tp.type.isBottom()) {
             isDead = true;
-            return;
+            if (!applyKnowledgeInDeadBranch) {
+                return;
+            }
         }
         setTypeAndOrigin(cond, tp);
         _vars[cond].knownTruthy = true;
     }
 
-    if (isDead) {
+    if (isDead && !applyKnowledgeInDeadBranch) {
         return;
     }
 
@@ -840,7 +849,9 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef 
         setTypeAndOrigin(typeTested.first, tp);
         if (tp.type.isBottom()) {
             isDead = true;
-            return;
+            if (!applyKnowledgeInDeadBranch) {
+                return;
+            }
         }
     }
 
@@ -856,7 +867,9 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef 
             setTypeAndOrigin(typeTested.first, tp);
             if (tp.type.isBottom()) {
                 isDead = true;
-                return;
+                if (!applyKnowledgeInDeadBranch) {
+                    return;
+                }
             }
         }
     }
@@ -1626,14 +1639,24 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
             [&](cfg::TAbsurd &i) {
                 const core::TypeAndOrigins &typeAndOrigin = getTypeAndOrigin(i.what.variable);
 
-                if (auto e = ctx.beginError(bind.loc, core::errors::Infer::NotExhaustive)) {
-                    if (typeAndOrigin.type.isUntyped()) {
-                        e.setHeader("Control flow could reach `{}` because argument was `{}`", "T.absurd", "T.untyped");
-                    } else {
-                        e.setHeader("Control flow could reach `{}` because the type `{}` wasn't handled", "T.absurd",
-                                    typeAndOrigin.type.show(ctx));
+                // Inference normally visits T.absurd only while control flow is live. Raise-before-absurd blocks
+                // are also checked when dead, where an exhaustive argument can be represented as either bottom
+                // directly or a type semantically equivalent to bottom (for example, T.noreturn).
+
+                const bool isBottom = typeAndOrigin.type.isBottom() ||
+                                      (!typeAndOrigin.type.isUntyped() &&
+                                       core::Types::isSubType(ctx, typeAndOrigin.type, core::Types::bottom()));
+                if (!isBottom) {
+                    if (auto e = ctx.beginError(bind.loc, core::errors::Infer::NotExhaustive)) {
+                        if (typeAndOrigin.type.isUntyped()) {
+                            e.setHeader("Control flow could reach `{}` because argument was `{}`", "T.absurd",
+                                        "T.untyped");
+                        } else {
+                            e.setHeader("Control flow could reach `{}` because the type `{}` wasn't handled",
+                                        "T.absurd", typeAndOrigin.type.show(ctx));
+                        }
+                        e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
                     }
-                    e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
                 }
 
                 tp.type = core::Types::bottom();
