@@ -2360,7 +2360,7 @@ public:
         return tree;
     }
 
-    void postTransformAssign(core::Context ctx, ast::ExpressionPtr &tree) {
+    void preTransformAssign(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
 
         auto lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
