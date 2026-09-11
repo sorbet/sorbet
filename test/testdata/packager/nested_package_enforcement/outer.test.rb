@@ -12,5 +12,6 @@ module Test::Outer
   end
 
   module Inner::Bar; end
+# ^^^^^^^^^^^^^^^^^ error: `Test::Outer::Inner::Bar` may not be opened
 #        ^^^^^^^^^^ error: Tests in the `Outer` package must define tests in the `Test::Outer` namespace
 end

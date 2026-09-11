@@ -22,7 +22,7 @@ module A::B
 end
 
 # This is an error because the scope on `C::D` would cause constant lookup to occur.
-module A::B # error: `A::B` belongs to package `A::B`
+module A::B # error: `A::B` may not be opened
   module C::D
   end
 end

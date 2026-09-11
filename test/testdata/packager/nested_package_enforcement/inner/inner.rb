@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 # typed: true
 
-module Outer
+module Outer # error: `Outer` may not be opened
   def self.bad
 # ^^^^^^^^^^^^ error: This file must only define behavior in enclosing package `Outer::Inner`
   end

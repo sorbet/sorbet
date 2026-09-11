@@ -1,6 +1,6 @@
 # typed: true
 
-module Shared
+module Shared # error: `Shared` may not be opened
   module Consumer
     class Client
       def call

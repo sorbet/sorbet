@@ -1,7 +1,7 @@
 # typed: true
 # stratum: 0
 
-module Shared
+module Shared # error: `Shared` may not be opened
   module Consumer
     class Client
       def call

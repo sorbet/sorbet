@@ -1,6 +1,6 @@
 # typed: strict
 
-module Root
+module Root # error: `Root` may not be opened
   module Nested
     class Example
       p(Root)
