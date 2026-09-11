@@ -12,5 +12,6 @@ module Test::Outer
   end
 
   module Inner::Bar; end
+# ^^^^^^^^^^^^^^^^^ error: `Test::Outer::Inner::Bar` belongs to package `Outer::Inner`
 #        ^^^^^^^^^^ error: Tests in the `Outer` package must define tests in the `Test::Outer` namespace
 end

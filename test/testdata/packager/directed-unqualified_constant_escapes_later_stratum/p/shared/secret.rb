@@ -1,7 +1,7 @@
 # typed: true
 # stratum: 2
 
-module P
+module P # error: `P` belongs to package `P`
   module Shared
     class Secret
       def base

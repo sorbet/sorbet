@@ -1,6 +1,6 @@
 # typed: strict
 
-module Root
+module Root # error: `Root` belongs to package `Root`
   module Nested
     class Example
       p(Root)

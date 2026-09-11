@@ -1,6 +1,6 @@
 # typed: true
 
-module Shared
+module Shared # error: `Shared` belongs to package `Shared`
   module Consumer
     class Client
       def call
