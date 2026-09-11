@@ -1,5 +1,6 @@
 #include "common/statsd/statsd.h"
 #include "common/counters/Counters_impl.h"
+#include "common/os/os.h"
 #include "common/strings/formatting.h"
 #include "sorbet_version/sorbet_version.h"
 
@@ -149,6 +150,9 @@ void StatsD::addStandardMetrics() {
         prodCounterAdd("run.utilization.oublock", usage.ru_oublock);
         prodCounterAdd("run.utilization.context_switch.voluntary", usage.ru_nvcsw);
         prodCounterAdd("run.utilization.context_switch.involuntary", usage.ru_nivcsw);
+    }
+    if (auto swapKb = getCurrentProcessSwapUsageKb()) {
+        prodCounterAdd("run.current_swap", *swapKb);
     }
     prodCounterAdd("release.build_scm_commit_count", sorbet::build_scm_commit_count);
     prodCounterAdd("release.build_timestamp", sorbet::build_timestamp);
