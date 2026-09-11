@@ -41,6 +41,349 @@ struct ParsedFileWithIdx {
 
 using AllFoundDefinitions = vector<pair<core::FileRef, unique_ptr<core::FoundDefinitions>>>;
 
+// If the __package.rb file itself is a test file, then the whole package is a test-only package.
+// For example, `test/__package.rb` is a test-only package (e.g. Critic in Stripe's codebase).
+bool isTestOnlyPackage(const core::GlobalState &gs, const PackageInfo &pkg) {
+    return pkg.file.data(gs).isPackagedTest();
+}
+
+bool isRootScopedDefinition(const ast::ConstantLit *lit) {
+    while (lit != nullptr && lit->original() != nullptr) {
+        lit = ast::cast_tree<ast::ConstantLit>(lit->original()->scope);
+        if (lit != nullptr && lit->symbol() == core::Symbols::root()) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+// Visitor that ensures for constants defined within a package that all have the package as a
+// prefix.
+class EnforcePackagePrefix final {
+    const PackageInfo &pkg;
+
+    // Whether code in this file must use the `Test::` namespace.
+    //
+    // Obviously tests *can* use the `Test::` namespace, but tests in test-only packages don't have to.
+    //
+    // (This is a wart of the original implementation, not an intentional design choice. It would
+    // probably be good in the future to require that runnable tests live in the `Test::` namespace
+    // for the package.)
+    const bool mustUseTestNamespace;
+
+    // So that we only have to compute this once (makes certain comparisons easier)
+    // Note that we don't enter this in GlobalState::initEmpty with a well-known ID,
+    // because Sorbet does not always run with --sorbet-packages.
+    const core::SymbolRef maybeTestNamespace;
+
+    // By contrast with `Context::owner`, this `scope` field:
+    //
+    // - Only tracks constant symbols (`owner` will be a MethodRef inside `{pre,post}TransformMethodDef`)
+    // - `Context::owner` does not track a loc
+    vector<pair<core::SymbolRef, core::LocOffsets>> scope;
+
+    // Meant to track when we're inside something like `class ::A; class B; end; end` instead of
+    // `class A; class B; end; end`. Classes that start from an absolutely qualified "cbase" with a
+    // leading `::` are opted out of the EnforcePackagePrefix checks in prelude packages.
+    //
+    // TODO(jez) Document this in the public docs for the packager
+    //   (at least in the error reference, but also in any eventual docs on the package system).
+    //
+    //   (The motivation is: if 100% of code in a repo is packaged, where do monkey patches live,
+    //   because the stdlib and gems are unpackaged?)
+    size_t rootConsts = 0;
+
+    // Counter to avoid duplicate errors:
+    // - Only emit errors when depth is 0
+    // - Upon emitting an error increment
+    // - Once greater than 0, all preTransform* increment, postTransform* decrement
+    int errorDepth = 0;
+
+public:
+    EnforcePackagePrefix(core::Context ctx, const PackageInfo &pkg)
+        : pkg(pkg), mustUseTestNamespace(!pkg.usesTestPackages && ctx.file.data(ctx).isPackagedTest() &&
+                                         !isTestOnlyPackage(ctx, pkg)),
+          maybeTestNamespace(core::Symbols::root().data(ctx)->findMember(ctx, PackageDB::TEST_NAMESPACE)) {
+        ENFORCE(pkg.exists());
+    }
+
+    void preTransformClassDef(core::Context ctx, const ast::ClassDef &classDef) {
+        if (classDef.symbol == core::Symbols::root()) {
+            // Ignore top-level <root>
+            return;
+        }
+        if (errorDepth > 0) {
+            errorDepth++;
+            return;
+        }
+
+        auto constantLit = ast::cast_tree<ast::ConstantLit>(classDef.name);
+        if (constantLit == nullptr) {
+            return;
+        }
+
+        pushScope(constantLit);
+
+        if (rootConsts > 0 && pkg.isPreludePackage()) {
+            // This is a root-scoped constant, like `class ::A; end`.
+            // These are exempted from package prefix checking.
+            return;
+        }
+
+        auto isOnPackagePath = onPackagePath(ctx);
+        auto hasNamespaceMismatch = !isOnPackagePath || (mustUseTestNamespace && !inTestNamespace(ctx));
+
+        if (hasNamespaceMismatch) {
+            ENFORCE(errorDepth == 0);
+            errorDepth++;
+            if (auto e = ctx.beginError(constantLit->loc(), core::errors::Packager::DefinitionPackageMismatch)) {
+                if (rootConsts > 0) {
+                    ENFORCE(!pkg.isPreludePackage(), "Prelude root scopes should have been exempted above");
+                    rootScopedConstantInNonPreludePackage(ctx, e);
+                } else {
+                    definitionPackageMismatch(ctx, e, isOnPackagePath);
+                }
+            }
+        } else if (hasParentClass(classDef)) {
+            // A class definition that includes a parent `class Foo::Bar < Baz`
+            // must be made in that package
+            checkBehaviorLoc(ctx, classDef.declLoc);
+        }
+    }
+
+    void postTransformClassDef(core::Context ctx, const ast::ClassDef &classDef) {
+        if (classDef.symbol == core::Symbols::root()) {
+            // Sanity check bookkeeping
+            ENFORCE(rootConsts == 0);
+            ENFORCE(errorDepth == 0);
+            return;
+        }
+
+        if (errorDepth > 0) {
+            errorDepth--;
+            // only continue if this was the first occurrence of the error
+            if (errorDepth > 0) {
+                return;
+            }
+        }
+
+        auto constantLit = ast::cast_tree<ast::ConstantLit>(classDef.name);
+        if (constantLit == nullptr) {
+            return;
+        }
+
+        popScope(constantLit);
+    }
+
+    void preTransformAssign(core::Context ctx, const ast::Assign &asgn) {
+        if (errorDepth > 0) {
+            errorDepth++;
+            return;
+        }
+        auto lhs = ast::cast_tree<ast::ConstantLit>(asgn.lhs);
+
+        if (lhs == nullptr || (rootConsts > 0 && pkg.isPreludePackage())) {
+            return;
+        }
+
+        if (lhs->symbol().name(ctx).hasUniqueNameKind(ctx, core::UniqueNameKind::MangleRename)) {
+            // Don't need to report definitionPackageMismatch if the symbol was mangle renamed
+            return;
+        }
+
+        pushScope(lhs);
+
+        if (rootConsts == 0 || !pkg.isPreludePackage()) {
+            auto isOnPackagePath = packageForNamespace(ctx) == pkg.mangledName();
+            auto hasNamespaceMismatch = !isOnPackagePath || (mustUseTestNamespace && !inTestNamespace(ctx));
+            if (hasNamespaceMismatch) {
+                ENFORCE(errorDepth == 0);
+                errorDepth++;
+                if (auto e = ctx.beginError(lhs->loc(), core::errors::Packager::DefinitionPackageMismatch)) {
+                    if (rootConsts > 0) {
+                        ENFORCE(!pkg.isPreludePackage(), "Prelude root scopes should have been exempted above");
+                        rootScopedConstantInNonPreludePackage(ctx, e);
+                    } else {
+                        definitionPackageMismatch(ctx, e, isOnPackagePath);
+                    }
+                }
+            }
+        }
+
+        popScope(lhs);
+    }
+
+    void postTransformAssign(core::Context ctx, const ast::Assign &asgn) {
+        if (errorDepth > 0) {
+            errorDepth--;
+        }
+    }
+
+    void preTransformMethodDef(core::Context ctx, const ast::MethodDef &def) {
+        if (errorDepth > 0) {
+            errorDepth++;
+            return;
+        }
+        checkBehaviorLoc(ctx, def.declLoc);
+    }
+
+    void postTransformMethodDef(core::Context ctx, const ast::MethodDef &def) {
+        if (errorDepth > 0) {
+            errorDepth--;
+        }
+    }
+
+    void preTransformSend(core::Context ctx, const ast::Send &send) {
+        if (errorDepth > 0) {
+            errorDepth++;
+            return;
+        }
+        checkBehaviorLoc(ctx, send.loc);
+    }
+
+    void postTransformSend(core::Context ctx, const ast::Send &send) {
+        if (errorDepth > 0) {
+            errorDepth--;
+        }
+    }
+
+    void checkBehaviorLoc(core::Context ctx, core::LocOffsets loc) {
+        ENFORCE(errorDepth == 0);
+        if ((rootConsts > 0 && pkg.isPreludePackage()) || scope.empty()) {
+            // Doing `class ::A; end` to monkey patch something lets you define behavior (monkey patch)
+            // You can also do arbitrary behavior at the top-level outside of any definitions.
+            // (Stripe's codebase enforces that the )
+            return;
+        }
+        auto pkgForNamespace = packageForNamespace(ctx);
+        if (pkgForNamespace != pkg.mangledName()) {
+            ENFORCE(errorDepth == 0);
+            errorDepth++;
+            if (auto e = ctx.beginError(loc, core::errors::Packager::DefinitionPackageMismatch)) {
+                e.setHeader("This file must only define behavior in enclosing package `{}`", requiredNamespace(ctx));
+                const auto &[scopeSym, scopeLoc] = scope.back();
+                e.addErrorLine(ctx.locAt(scopeLoc), "Defining behavior in `{}` instead:", scopeSym.show(ctx));
+                e.addErrorLine(pkg.declLoc(), "Enclosing package `{}` declared here", pkg.mangledName_.owner.show(ctx));
+                if (pkgForNamespace.exists()) {
+                    auto &packageInfo = ctx.state.packageDB().getPackageInfo(pkgForNamespace);
+                    e.addErrorLine(packageInfo.declLoc(), "Package `{}` declared here", scopeSym.show(ctx));
+                }
+            }
+        }
+    }
+
+private:
+    void pushScope(const ast::ConstantLit *lit) {
+        scope.emplace_back(lit->symbol(), lit->loc());
+        if (isRootScopedDefinition(lit)) {
+            rootConsts++;
+        }
+    }
+
+    void popScope(const ast::ConstantLit *lit) {
+        if (isRootScopedDefinition(lit)) {
+            rootConsts--;
+        }
+        scope.pop_back();
+    }
+
+    MangledName packageForNamespace(const core::GlobalState &gs) const {
+        const auto &[scopeSym, _scopeLoc] = scope.back();
+        return scopeSym.enclosingClass(gs).data(gs)->package;
+    }
+
+    bool onPackagePath(const core::GlobalState &gs) const {
+        const auto &[scopeSym, _scopeLoc] = scope.back();
+
+        core::ClassOrModuleRef klassSym;
+        bool couldBePrefix = true;
+        if (!scopeSym.isClassOrModule()) {
+            couldBePrefix = false;
+            klassSym = scopeSym.enclosingClass(gs);
+        } else {
+            klassSym = scopeSym.asClassOrModuleRef();
+        }
+        auto klassData = klassSym.data(gs);
+        auto pkgForScope = klassData->package;
+        auto ownerForScope = klassData->packageRegistryOwner;
+        if (!ownerForScope.exists()) {
+            couldBePrefix = false;
+        }
+
+        // TODO(trevor) this can be removed once we've fully migrated to test-packages, as the special
+        // treatment of `Test::` will be gone.
+        // TODO(trevor) we consider `testPackages` here so that we only raise an error for the `Test::`
+        // namespace if we're not forcing test-packages everywhere.
+        if (this->pkg.usesTestPackages && !gs.packageDB().testPackages() && inTestNamespace(gs)) {
+            return false;
+        }
+
+        return this->pkg.ownsNamespace(gs, pkgForScope, ownerForScope, couldBePrefix);
+    }
+
+    bool inTestNamespace(const core::GlobalState &gs) const {
+        const auto &[scopeSym, _scopeLoc] = scope.back();
+        auto cur = scopeSym;
+        while (cur.exists() && cur != core::Symbols::root()) {
+            if (cur == maybeTestNamespace) {
+                return true;
+            }
+
+            cur = cur.owner(gs);
+        }
+
+        return false;
+    }
+
+    const string requiredNamespace(const core::GlobalState &gs) const {
+        auto result = pkg.mangledName_.owner.show(gs);
+        if (mustUseTestNamespace) {
+            result = fmt::format("{}::{}", PackageDB::TEST_NAMESPACE.show(gs), result);
+        }
+        return result;
+    }
+
+    bool hasParentClass(const ast::ClassDef &def) const {
+        return def.kind == ast::ClassDef::Kind::Class && !def.ancestors.empty() &&
+               ast::isa_tree<ast::UnresolvedConstantLit>(def.ancestors[0]);
+    }
+
+    void rootScopedConstantInNonPreludePackage(const core::GlobalState &gs, core::ErrorBuilder &e) const {
+        e.setHeader("Defining a root-scoped constant requires this package to be marked `{}`", "prelude!");
+        e.addErrorLine(pkg.declLoc(), "This package is missing a `{}` declaration", "prelude!");
+        e.addErrorNote("Root-scoped constants are exempt from package namespace checks only in `{}` packages",
+                       "prelude!");
+    }
+
+    void definitionPackageMismatch(const core::GlobalState &gs, core::ErrorBuilder &e, bool isOnPackagePath) const {
+        auto requiredName = requiredNamespace(gs);
+        if (mustUseTestNamespace) {
+            e.setHeader("Tests in the `{}` package must define tests in the `{}` namespace", pkg.show(gs),
+                        requiredName);
+            // TODO: If the only thing missing is a `Test::` prefix (e.g., if this were not a test
+            // file there would not have been an error), then we could suggest an autocorrect.
+        } else {
+            e.setHeader("File belongs to package `{}` but defines a constant that does not match this namespace",
+                        requiredName);
+        }
+
+        e.addErrorLine(pkg.declLoc(), "Enclosing package declared here");
+
+        if (!isOnPackagePath) {
+            auto reqMangledName = packageForNamespace(gs);
+            if (reqMangledName.exists()) {
+                auto &reqPkg = gs.packageDB().getPackageInfo(reqMangledName);
+                if (reqPkg.exists()) {
+                    const auto &[scopeSym, _scopeLoc] = scope.back();
+                    e.addErrorLine(reqPkg.declLoc(), "Must belong to this package, given constant name `{}`",
+                                   scopeSym.show(gs));
+                }
+            }
+        }
+    }
+};
+
 core::ClassOrModuleRef methodOwner(core::Context ctx, core::SymbolRef owner, bool isSelfMethod) {
     ENFORCE(owner.exists() && owner != core::Symbols::todo());
     auto enclosingClass = owner.enclosingClass(ctx);
