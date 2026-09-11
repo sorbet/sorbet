@@ -205,7 +205,7 @@ private:
         core::FileRef file;
         vector<T> items;
 
-        ResolveItems(core::FileRef file, vector<T> &&items) : file(file), items(move(items)){};
+        ResolveItems(core::FileRef file, vector<T> &&items) : file(file), items(move(items)) {};
     };
 
     struct AncestorResolutionItem {
@@ -1631,6 +1631,78 @@ public:
         walkUnresolvedConstantLit(ctx, tree);
     }
 
+    // Enforces that a file owned by a package may only open (define a class/module scope named after)
+    // a symbol that belongs to the current package or to a package that the current package imports.
+    // See the package-scope-nesting rule. Called for each scope pushed onto `nesting_`.
+    void checkScopePackage(core::Context ctx, core::ClassOrModuleRef scopeKlass, core::LocOffsets declLoc) {
+        if (!ctx.state.packageDB().enabled()) {
+            return;
+        }
+
+        if (scopeKlass == core::Symbols::root()) {
+            return;
+        }
+
+        // Skip anything that's rooted in the `<PackageSpecRegistry>` shadow hierarchy
+        if (scopeKlass.data(ctx)->packageRegistryOwner == scopeKlass) {
+            return;
+        }
+
+        // If the file isn't associated with a package, we reject any modification to a packaged constant.
+        auto curPkgName = ctx.state.packageDB().getPackageNameForFile(ctx.file);
+        if (!curPkgName.exists()) {
+            if (scopeKlass.data(ctx)->package.exists()) {
+                auto scopePkgName = scopeKlass.data(ctx)->package;
+                const auto &scopePkg = ctx.state.packageDB().getPackageInfo(scopePkgName);
+                if (auto e = ctx.beginError(declLoc, core::errors::Resolver::PackageScopeViolation)) {
+                    e.setHeader("`{}` belongs to package `{}`, which cannot be opened by unpackaged code",
+                                scopeKlass.show(ctx), scopePkgName.owner.show(ctx));
+                    e.addErrorLine(scopePkg.declLoc(), "Defined here");
+                }
+            }
+
+            return;
+        }
+
+        const auto &curPkg = ctx.state.packageDB().getPackageInfo(curPkgName);
+        ENFORCE(curPkg.exists());
+
+        auto canOpen = curPkg.canOpenScope(ctx, scopeKlass);
+        if (canOpen == core::packages::PackageInfo::CanOpenScopeResult::CanOpen) {
+            return;
+        }
+
+        if (auto e = ctx.beginError(declLoc, core::errors::Resolver::PackageScopeViolation)) {
+            auto scopePkgName = scopeKlass.data(ctx)->package;
+            const auto &scopePkg = ctx.state.packageDB().getPackageInfo(scopePkgName);
+            switch (canOpen) {
+                case core::packages::PackageInfo::CanOpenScopeResult::CanOpen:
+                    ENFORCE(false);
+                    return;
+
+                case core::packages::PackageInfo::CanOpenScopeResult::NotImported: {
+                    e.setHeader("`{}` belongs to package `{}`", scopeKlass.show(ctx), scopePkgName.owner.show(ctx));
+                    e.addErrorLine(scopePkg.declLoc(), "defined here");
+                    e.addErrorNote("Either `import {}` in this package's `__package.rb`, or define this class\n"
+                                   "    using its fully-qualified name in a single declaration.",
+                                   scopePkgName.owner.show(ctx));
+                    if (auto suggestion = curPkg.addImport(ctx, scopePkg, core::packages::ImportType::Normal)) {
+                        e.addAutocorrect(std::move(*suggestion));
+                    }
+                    return;
+                }
+
+                case core::packages::PackageInfo::CanOpenScopeResult::NotAPackage: {
+                    e.setHeader("`{}` is not a package ", scopeKlass.show(ctx));
+                    e.addErrorNote("`{}` is only a namespace prefix. Open classes in this package using their\n"
+                                   "    fully-qualified names in a single declaration, not by nesting under `{}`.",
+                                   scopeKlass.show(ctx), scopeKlass.show(ctx));
+                    return;
+                }
+            }
+        }
+    }
+
     void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         auto sym = original.symbol;
@@ -1660,6 +1732,7 @@ public:
             }
         }
 
+        checkScopePackage(ctx, sym, original.declLoc);
         nesting_ = make_unique<Nesting>(std::move(nesting_), sym);
     }
 

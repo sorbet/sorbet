@@ -1331,6 +1331,43 @@ PackageInfo::CanModifyResult PackageInfo::canModifySymbol(core::Context ctx, Cla
     return CanModifyResult::NotOwner;
 }
 
+PackageInfo::CanOpenScopeResult PackageInfo::canOpenScope(const core::GlobalState &gs, ClassOrModuleRef sym) const {
+    ENFORCE(this->exists());
+    ENFORCE(sym.exists());
+
+    // Normalize away singleton classes, matching canModifySymbol.
+    sym = sym.data(gs)->topAttachedClass(gs);
+    auto symData = sym.data(gs);
+
+    auto symPackage = symData->package;
+
+    // If we already own this package, we know we can exit early.
+    if (symPackage == this->mangledName_) {
+        return CanOpenScopeResult::CanOpen;
+    }
+
+    if (!symPackage.exists()) {
+        // Prelude packages are allowed to open unpackaged constants
+        if (this->isPreludePackage()) {
+            return CanOpenScopeResult::CanOpen;
+        }
+        return CanOpenScopeResult::NotAPackage;
+    }
+
+    // We can only reopen the namespace of another package if:
+    // 
+    // 1. We are a subpackage of it
+    // 2. We have imported it
+    // 
+    // Because we have already checked 1 during an earlier pass, it's sufficient to ensure that we have imported the
+    // package.
+    if (this->importsPackage(symPackage) == nullptr) {
+        return CanOpenScopeResult::NotImported;
+    }
+
+    return CanOpenScopeResult::CanOpen;
+}
+
 bool PackageInfo::canAccessInternalsOf(bool testPackages, MangledName other) const {
     ENFORCE(this->exists());
     ENFORCE(other.exists());
