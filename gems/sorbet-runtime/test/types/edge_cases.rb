@@ -126,7 +126,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         # Shouldn't add overhead
         obj = klass.new
         allocs = counting_allocations { obj.bar }
-        assert_equal(1, allocs)
+        assert_equal(0, allocs)
         allocs = counting_allocations { obj.bar }
         assert_equal(0, allocs)
       end
@@ -171,7 +171,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         # Shouldn't add overhead
         obj = klass.new
         allocs = counting_allocations { obj.bar }
-        assert_equal(1, allocs)
+        assert_equal(0, allocs)
         allocs = counting_allocations { obj.bar }
         assert_equal(0, allocs)
       end
@@ -226,7 +226,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         # Shouldn't add overhead
         obj = subclass.new
         allocs = counting_allocations { obj.bar }
-        assert_equal(1, allocs)
+        assert_equal(0, allocs)
         allocs = counting_allocations { obj.bar }
         assert_equal(0, allocs)
       end
@@ -436,7 +436,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
         # Shouldn't add overhead
         allocs = counting_allocations { subclass.bar }
-        assert_equal(1, allocs)
+        assert_equal(0, allocs)
         allocs = counting_allocations { subclass.bar }
         assert_equal(0, allocs)
       end
@@ -549,6 +549,93 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         assert_equal([1, 2, 3], klass.foo([-1, -2, -3]))
         assert_equal(["-1", "-2", "-3"], klass.foo(["-1", "-2", "-3"]))
       end
+    end
+
+    it 'alias has same steady-state allocations as non-aliased method after run_all_sig_blocks' do
+      # This must be tested in a subprocess because run_all_sig_blocks
+      # affects global state and we want to measure allocations in isolation.
+      fixture = "#{__dir__}/fixtures/alias_method_allocations.rb"
+      result, status = Open3.capture2("ruby", fixture)
+      assert(status.success?, "fixture failed (exit #{status.exitstatus}): #{result}")
+      assert_equal("PASS\n", result)
+    end
+
+    it 'does not overwrite an alias that was redefined before run_all_sig_blocks' do
+      # This must be tested in a subprocess because run_all_sig_blocks affects
+      # global state for the remainder of the process.
+      fixture = "#{__dir__}/fixtures/alias_redefined_before_run_all_sig_blocks.rb"
+      result, status = Open3.capture2e("ruby", fixture)
+      assert(status.success?, "fixture failed (exit #{status.exitstatus}): #{result}")
+      assert_equal("PASS\n", result)
+    end
+
+    it 'allows an alias to be removed before run_all_sig_blocks' do
+      # This must be tested in a subprocess because run_all_sig_blocks affects
+      # global state for the remainder of the process.
+      fixture = "#{__dir__}/fixtures/alias_removed_before_run_all_sig_blocks.rb"
+      result, status = Open3.capture2e("ruby", fixture)
+      assert(status.success?, "fixture failed (exit #{status.exitstatus}): #{result}")
+      assert_equal("PASS\n", result)
+    end
+
+    it 'allows an alias to be undefined before run_all_sig_blocks' do
+      # This must be tested in a subprocess because run_all_sig_blocks affects
+      # global state for the remainder of the process.
+      fixture = "#{__dir__}/fixtures/alias_undefined_before_run_all_sig_blocks.rb"
+      result, status = Open3.capture2e("ruby", fixture)
+      assert(status.success?, "fixture failed (exit #{status.exitstatus}): #{result}")
+      assert_equal("PASS\n", result)
+    end
+
+    it 'does not replace a removed alias with an inherited alias' do
+      # This must be tested in a subprocess because run_all_sig_blocks affects
+      # global state for the remainder of the process.
+      fixture = "#{__dir__}/fixtures/alias_removed_reveals_inherited_alias.rb"
+      result, status = Open3.capture2e("ruby", fixture)
+      assert(status.success?, "fixture failed (exit #{status.exitstatus}): #{result}")
+      assert_equal("PASS\n", result)
+    end
+
+    it 'handles mixed mutations to multiple aliases before run_all_sig_blocks' do
+      fixture = "#{__dir__}/fixtures/multiple_alias_mutations_before_run_all_sig_blocks.rb"
+      result, status = Open3.capture2e("ruby", fixture)
+      assert(status.success?, "fixture failed (exit #{status.exitstatus}): #{result}")
+      assert_equal("PASS\n", result)
+    end
+
+    it 'does not unwrap an alias that was redirected to another method' do
+      fixture = "#{__dir__}/fixtures/alias_redirected_before_run_all_sig_blocks.rb"
+      result, status = Open3.capture2e("ruby", fixture)
+      assert(status.success?, "fixture failed (exit #{status.exitstatus}): #{result}")
+      assert_equal("PASS\n", result)
+    end
+
+    it 'handles mutations to singleton aliases before run_all_sig_blocks' do
+      fixture = "#{__dir__}/fixtures/singleton_alias_mutations_before_run_all_sig_blocks.rb"
+      result, status = Open3.capture2e("ruby", fixture)
+      assert(status.success?, "fixture failed (exit #{status.exitstatus}): #{result}")
+      assert_equal("PASS\n", result)
+    end
+
+    it 'handles mutations to aliases of included and extended methods' do
+      fixture = "#{__dir__}/fixtures/included_and_extended_alias_mutations.rb"
+      result, status = Open3.capture2e("ruby", fixture)
+      assert(status.success?, "fixture failed (exit #{status.exitstatus}): #{result}")
+      assert_equal("PASS\n", result)
+    end
+
+    it 'does not retain an aliasing subclass after the original sig is dropped' do
+      fixture = "#{__dir__}/fixtures/dropped_sig_alias_retention.rb"
+      result, status = Open3.capture2e("ruby", fixture)
+      assert(status.success?, "fixture failed (exit #{status.exitstatus}): #{result}")
+      assert_equal("PASS\n", result)
+    end
+
+    it 'does not associate an alias with a later sig for the original method name' do
+      fixture = "#{__dir__}/fixtures/alias_of_previous_method_definition.rb"
+      result, status = Open3.capture2e("ruby", fixture)
+      assert(status.success?, "fixture failed (exit #{status.exitstatus}): #{result}")
+      assert_equal("PASS\n", result)
     end
   end
 
