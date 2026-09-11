@@ -1,11 +1,17 @@
 # typed: strict
 
 class ::Module < Object
+  sig do
+    type_parameters(:U)
+      .params(args: T.all(T.type_parameter(:U), T.any(Symbol, String)))
+      .returns(T::Array[T.type_parameter(:U)])
+  end
+  private def package_private(*args); end # = args
 
-  sig { params( arg0: T.any(Symbol, String)).returns(T.self_type) }
-  def package_private(*arg0); end
-
-  sig { params(arg0: T.any(Symbol, String)).returns(T.self_type) }
-  def package_private_class_method(*arg0); end
-
+  sig do
+    type_parameters(:U)
+      .params(args: T.all(T.type_parameter(:U), T.any(Symbol, String)))
+      .returns(T::Array[T.type_parameter(:U)])
+  end
+  private def package_private_class_method(*args); end # = args
 end
