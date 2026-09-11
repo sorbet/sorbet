@@ -112,6 +112,12 @@ public:
     // Fetch the set of packages that depend on the set of packages provided.
     UnorderedSet<MangledName> transitiveDependentsOf(const PackageDB &db,
                                                      const UnorderedSet<MangledName> &packages) const;
+
+    // Select whole packages (both application and test code): first their transitive consumers, then all
+    // dependencies of that set. Includes implicit prelude dependencies without selecting unrelated consumers
+    // of dependencies. Requires the package DB corresponding to this condensation graph.
+    UnorderedSet<MangledName> expandPackageSelection(const PackageDB &db,
+                                                     const UnorderedSet<MangledName> &packages) const;
 };
 
 class CondensationBuilder {

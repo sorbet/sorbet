@@ -53,60 +53,6 @@ const MangledName PackageDB::getPackageNameForFile(FileRef file) const {
     return this->packageForFile_[file.id()];
 }
 
-UnorderedSet<MangledName> PackageDB::expandPackageSelection(UnorderedSet<MangledName> selected) const {
-    UnorderedMap<MangledName, vector<MangledName>> consumers;
-    vector<MangledName> preludes;
-    for (auto name : packages()) {
-        const auto &info = getPackageInfo(name);
-        if (info.isPreludePackage()) {
-            // All packages implicitly depend on every prelude package.
-            if (selected.contains(name)) {
-                return UnorderedSet<MangledName>(packages().begin(), packages().end());
-            }
-            preludes.emplace_back(name);
-        }
-        for (const auto &import : info.importedPackageNames) {
-            if (getPackageInfo(import.mangledName).exists()) {
-                consumers[import.mangledName].emplace_back(name);
-            }
-        }
-    }
-
-    vector<MangledName> pending(selected.begin(), selected.end());
-    for (size_t i = 0; i < pending.size(); ++i) {
-        auto it = consumers.find(pending[i]);
-        if (it == consumers.end()) {
-            continue;
-        }
-        for (auto consumer : it->second) {
-            // A prelude consumer makes the original selection an implicit dependency of every package.
-            if (getPackageInfo(consumer).isPreludePackage()) {
-                return UnorderedSet<MangledName>(packages().begin(), packages().end());
-            }
-            if (selected.insert(consumer).second) {
-                pending.emplace_back(consumer);
-            }
-        }
-    }
-
-    for (auto prelude : preludes) {
-        if (selected.insert(prelude).second) {
-            pending.emplace_back(prelude);
-        }
-    }
-
-    // Start again from the entire consumer closure. Consumers can have additional dependencies that the
-    // originally requested packages do not use. Keep this traversal separate to avoid selecting siblings.
-    for (size_t i = 0; i < pending.size(); ++i) {
-        for (const auto &import : getPackageInfo(pending[i]).importedPackageNames) {
-            if (getPackageInfo(import.mangledName).exists() && selected.insert(import.mangledName).second) {
-                pending.emplace_back(import.mangledName);
-            }
-        }
-    }
-    return selected;
-}
-
 MangledName PackageDB::getParentPackage(const GlobalState &gs, MangledName pkg) const {
     ENFORCE(pkg.exists());
 

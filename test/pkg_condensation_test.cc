@@ -328,6 +328,15 @@ TEST_CASE("Condensation Graph - Two packages, one is test-only") {
 
     auto &condensation = gs.packageDB().condensation();
     {
+        const auto &testPackage = PackageHelpers::packageInfoFor(gs, parsedFiles[1].file);
+        auto scc = testPackage.sccID();
+        REQUIRE(scc.has_value());
+        CHECK(testPackage.testSccID() == scc);
+        CHECK(condensation.nodes()[scc.value()].isTest);
+        CHECK(condensation.expandPackageSelection(gs.packageDB(), {testPackage.mangledName()}) ==
+              UnorderedSet<core::packages::MangledName>{testPackage.mangledName()});
+    }
+    {
         INFO("The condensation graph should contain three nodes total (app + test for Lib::Foo::A, and "
              "Lib::Foo::Test::B)");
         CHECK_EQ(3, condensation.nodes().size());

@@ -264,4 +264,71 @@ UnorderedSet<MangledName> Condensation::transitiveDependentsOf(const PackageDB &
     return downstream;
 }
 
+UnorderedSet<MangledName> Condensation::expandPackageSelection(const PackageDB &db,
+                                                               const UnorderedSet<MangledName> &packages) const {
+    if (packages.empty()) {
+        return {};
+    }
+
+    UnorderedSet<MangledName> selected;
+    vector<int> pending;
+    vector<bool> visited(this->nodes_.size(), false);
+    auto enqueue = [&](int scc) {
+        if (!visited[scc]) {
+            visited[scc] = true;
+            pending.emplace_back(scc);
+        }
+    };
+    auto includePackage = [&](MangledName pkg) {
+        if (!selected.insert(pkg).second) {
+            return;
+        }
+        const auto &info = db.getPackageInfo(pkg);
+        // A package can have separate application and test SCCs, or only a test SCC. Visiting either part
+        // selects the whole package, including consumers and dependencies of the other part.
+        for (auto scc : {info.sccID(), info.testSccID()}) {
+            if (scc.has_value()) {
+                enqueue(scc.value());
+            }
+        }
+    };
+    for (auto pkg : packages) {
+        includePackage(pkg);
+    }
+
+    for (size_t i = 0; i < pending.size(); ++i) {
+        const auto &node = this->nodes_[pending[i]];
+        if (node.isPrelude) {
+            // Every package is an implicit consumer of every prelude package.
+            return UnorderedSet<MangledName>(db.packages().begin(), db.packages().end());
+        }
+        for (auto pkg : node.members) {
+            includePackage(pkg);
+        }
+        for (auto consumer : node.backEdges) {
+            enqueue(consumer);
+        }
+    }
+
+    // Prelude dependencies are implicit, so add them explicitly before walking imports.
+    for (const auto &node : this->nodes_) {
+        if (node.isPrelude) {
+            enqueue(node.id);
+        }
+    }
+
+    // Revisit the entire consumer closure, following imports this time. Keeping the two walks separate
+    // avoids pulling in unrelated consumers of shared dependencies.
+    for (size_t i = 0; i < pending.size(); ++i) {
+        const auto &node = this->nodes_[pending[i]];
+        for (auto pkg : node.members) {
+            includePackage(pkg);
+        }
+        for (auto dependency : node.imports) {
+            enqueue(dependency);
+        }
+    }
+    return selected;
+}
+
 } // namespace sorbet::core::packages

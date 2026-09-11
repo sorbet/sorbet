@@ -658,7 +658,7 @@ int realmain(int argc, char *argv[]) {
                 }
                 selectedPackages.insert(pkg);
             }
-            selectedPackages = gs->packageDB().expandPackageSelection(move(selectedPackages));
+            selectedPackages = gs->packageDB().condensation().expandPackageSelection(gs->packageDB(), selectedPackages);
         }
         auto inPackageSelection = [&](core::FileRef file) {
             if (opts.typecheckPackages.empty()) {

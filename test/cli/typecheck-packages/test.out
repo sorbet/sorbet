@@ -103,6 +103,17 @@ test_support/value.rb:4: Argument does not have asserted type `Integer` https://
 test_top/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 top/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 exit: 100
+--- Migrated root includes implicit tests of dependencies ---
+base/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+consumer/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+extra/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+extra_dep/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+root/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+target/test/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+target/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+test_support/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+top/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+exit: 100
 --- Cold cache ---
 base/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 consumer/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007

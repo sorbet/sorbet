@@ -11,6 +11,7 @@ cd test/cli/typecheck-packages || exit 1
 #   TestTop --test_import (test_rb)--> TestConsumer --test_import--> Target
 #   CycleA <-> CycleB, CycleA -> Target
 #   Sibling -> Lib::Base; Other is disconnected.
+# Top has an explicit test package; its dependencies still use implicit tests.
 
 run() {
   local output status
@@ -41,7 +42,11 @@ echo '--- Cycle: dependencies do not pull in their other consumers ---'
 run --stripe-packages --typecheck-packages=CycleB
 
 echo '--- Test-only import chains are dependencies and consumers ---'
+# This must reach Top even though the first edge reaches only Target's test SCC.
 run --stripe-packages --typecheck-packages=TestSupport
+
+echo '--- Migrated root includes implicit tests of dependencies ---'
+run --stripe-packages --typecheck-packages=Top
 
 cache_dir=$(mktemp -d)
 trap 'rm -rf "$cache_dir"' EXIT
