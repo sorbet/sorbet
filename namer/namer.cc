@@ -18,8 +18,10 @@
 #include "core/Names.h"
 #include "core/Symbols.h"
 #include "core/errors/namer.h"
+#include "core/errors/packager.h"
 #include "core/hashing/hashing.h"
 #include "core/lsp/TypecheckEpochManager.h"
+#include "core/packages/PackageInfo.h"
 
 using namespace std;
 
@@ -40,6 +42,8 @@ struct ParsedFileWithIdx {
 };
 
 using AllFoundDefinitions = vector<pair<core::FileRef, unique_ptr<core::FoundDefinitions>>>;
+
+using namespace core::packages;
 
 // If the __package.rb file itself is a test file, then the whole package is a test-only package.
 // For example, `test/__package.rb` is a test-only package (e.g. Critic in Stripe's codebase).
@@ -2270,6 +2274,7 @@ public:
  */
 class TreeSymbolizer {
     friend class Namer;
+    unique_ptr<EnforcePackagePrefix> packageNamespaceChecker;
 
     core::SymbolRef squashNamesInner(core::Context ctx, core::SymbolRef owner, ast::ExpressionPtr &node,
                                      bool firstName) {
@@ -2332,7 +2337,22 @@ class TreeSymbolizer {
     }
 
 public:
-    TreeSymbolizer() {}
+    TreeSymbolizer(core::Context ctx) {
+        auto &file = ctx.file.data(ctx);
+        if (!ctx.state.packageDB().enabled() || file.isPackage(ctx) || file.isPayload() || file.source().empty()) {
+            return;
+        }
+
+        auto packageName = ctx.state.packageDB().getPackageNameForFile(ctx.file);
+        if (!packageName.exists()) {
+            return;
+        }
+
+        auto &package = ctx.state.packageDB().getPackageInfo(packageName);
+        if (package.exists()) {
+            packageNamespaceChecker = make_unique<EnforcePackagePrefix>(ctx, package);
+        }
+    }
 
     void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
@@ -2355,14 +2375,12 @@ public:
                 ENFORCE(symbol == core::Symbols::root());
             }
         }
+
+        if (packageNamespaceChecker != nullptr) {
+            packageNamespaceChecker->preTransformClassDef(ctx, klass);
+        }
     }
 
-#ifdef DEBUG_MODE
-    // After some refactors, the only thing left in this callback is a bunch of ENFORCEs, so I've
-    // compiled the entire callback out unless DEBUG_MODE is set.
-    //
-    // If you're changing this to put load bearing logic back into this method, feel free to remove
-    // the #ifdef above.
     void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
@@ -2375,8 +2393,11 @@ public:
         // ENFORCE'ing it here makes certain errors apparent earlier.
         auto allowMissing = true;
         ENFORCE(ctx.state.lookupStaticInitForClass(klass.symbol, allowMissing).exists());
+
+        if (packageNamespaceChecker != nullptr) {
+            packageNamespaceChecker->postTransformClassDef(ctx, klass);
+        }
     }
-#endif
 
     ast::MethodDef::PARAMS_store fillInParams(const vector<core::ParsedParam> &parsedParams,
                                               ast::MethodDef::PARAMS_store oldParams) {
@@ -2409,6 +2430,10 @@ public:
         ENFORCE(sym.exists());
         method.symbol = sym;
         method.params = fillInParams(move(parsedParams), move(method.params));
+
+        if (packageNamespaceChecker != nullptr) {
+            packageNamespaceChecker->preTransformMethodDef(ctx, method);
+        }
     }
 
     void postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
@@ -2417,6 +2442,22 @@ public:
 
         ENFORCE(method.params.size() == method.symbol.data(ctx)->parameters.size(), "{}: {} != {}",
                 method.name.showRaw(ctx), method.params.size(), method.symbol.data(ctx)->parameters.size());
+
+        if (packageNamespaceChecker != nullptr) {
+            packageNamespaceChecker->postTransformMethodDef(ctx, method);
+        }
+    }
+
+    void preTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
+        if (packageNamespaceChecker != nullptr) {
+            packageNamespaceChecker->preTransformSend(ctx, ast::cast_tree_nonnull<ast::Send>(tree));
+        }
+    }
+
+    void postTransformSend(core::Context ctx, ast::ExpressionPtr &tree) {
+        if (packageNamespaceChecker != nullptr) {
+            packageNamespaceChecker->postTransformSend(ctx, ast::cast_tree_nonnull<ast::Send>(tree));
+        }
     }
 
     ast::ExpressionPtr handleAssignment(core::Context ctx, ast::ExpressionPtr tree) {
@@ -2708,6 +2749,9 @@ public:
 
         auto lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
         if (lhs == nullptr) {
+            if (packageNamespaceChecker != nullptr) {
+                packageNamespaceChecker->preTransformAssign(ctx, asgn);
+            }
             return;
         }
 
@@ -2730,6 +2774,16 @@ public:
                     break;
                 }
             }
+        }
+
+        if (packageNamespaceChecker != nullptr) {
+            packageNamespaceChecker->preTransformAssign(ctx, ast::cast_tree_nonnull<ast::Assign>(tree));
+        }
+    }
+
+    void postTransformAssign(core::Context ctx, ast::ExpressionPtr &tree) {
+        if (packageNamespaceChecker != nullptr) {
+            packageNamespaceChecker->postTransformAssign(ctx, ast::cast_tree_nonnull<ast::Assign>(tree));
         }
     }
 };
@@ -2845,9 +2899,10 @@ void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinition
 
 void symbolizeTrees(const core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers) {
     Timer timeit(gs.tracer(), "naming.symbolizeTrees");
-    Parallel::iterate(workers, "symbolizeTrees", trees, [&gs, inserter = TreeSymbolizer()](auto &parsedFile) mutable {
+    Parallel::iterate(workers, "symbolizeTrees", trees, [&gs](auto &parsedFile) {
         Timer timeit(gs.tracer(), "naming.symbolizeTreesOne", {{"file", string(parsedFile.file.data(gs).path())}});
         core::Context ctx(gs, core::Symbols::root(), parsedFile.file);
+        TreeSymbolizer inserter(ctx);
         ast::TreeWalk::apply(ctx, inserter, parsedFile.tree);
     });
 }

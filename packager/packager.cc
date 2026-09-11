@@ -948,9 +948,6 @@ void validatePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
         }
     }
     // TODO(neil): Autocorrect to update the sigil?
-
-    EnforcePackagePrefix enforcePrefix(ctx, pkgImpl);
-    ast::ConstShallowWalk::apply(ctx, enforcePrefix, tree);
 }
 
 } // namespace

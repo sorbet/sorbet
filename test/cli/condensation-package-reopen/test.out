@@ -1,3 +1,10 @@
+bad_test/a.rb:3: File belongs to package `Test::BadTest` but defines a constant that does not match this namespace https://srb.help/3713
+     3 |module Test::BadTest
+               ^^^^^^^^^^^^^
+    bad_test/__package.rb:3: Enclosing package declared here
+     3 |class Test::BadTest < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 bad_test/a.rb:17: `type_member` may only be used on constants in the package that owns them https://srb.help/4028
     17 |  X = type_member
               ^^^^^^^^^^^
@@ -15,13 +22,6 @@ bad_test/a.rb:19: `type_template` may only be used on constants in the package t
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Note:
     `Test::BadTest` is unpackaged, and may be reopened from a package marked `prelude!`
-
-bad_test/a.rb:3: File belongs to package `Test::BadTest` but defines a constant that does not match this namespace https://srb.help/3713
-     3 |module Test::BadTest
-               ^^^^^^^^^^^^^
-    bad_test/__package.rb:3: Enclosing package declared here
-     3 |class Test::BadTest < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 bad_test/a.rb:15: `include` may only be used on constants in the package that owns them https://srb.help/5084
     15 |  include ClassMethods
@@ -65,6 +65,13 @@ bad_test/__package.rb:4: Unable to resolve constant `Root` https://srb.help/5002
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
 
+bad_test/a.rbi:3: File belongs to package `Test::BadTest` but defines a constant that does not match this namespace https://srb.help/3713
+     3 |module Test::BadTest
+               ^^^^^^^^^^^^^
+    bad_test/__package.rb:3: Enclosing package declared here
+     3 |class Test::BadTest < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 bad_test/a.rbi:4: `type_member` may only be used on constants in the package that owns them https://srb.help/4028
      4 |  X = type_member
               ^^^^^^^^^^^
@@ -82,13 +89,6 @@ bad_test/a.rbi:5: `type_template` may only be used on constants in the package t
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Note:
     `Test::BadTest` is unpackaged, and may be reopened from a package marked `prelude!`
-
-bad_test/a.rbi:3: File belongs to package `Test::BadTest` but defines a constant that does not match this namespace https://srb.help/3713
-     3 |module Test::BadTest
-               ^^^^^^^^^^^^^
-    bad_test/__package.rb:3: Enclosing package declared here
-     3 |class Test::BadTest < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 root/root.rb:17: Package `Root` has subpackages, so its corresponding class must not be generic https://srb.help/4016
     17 |  X = type_member
