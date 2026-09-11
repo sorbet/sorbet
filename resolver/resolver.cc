@@ -205,7 +205,7 @@ private:
         core::FileRef file;
         vector<T> items;
 
-        ResolveItems(core::FileRef file, vector<T> &&items) : file(file), items(move(items)){};
+        ResolveItems(core::FileRef file, vector<T> &&items) : file(file), items(move(items)) {};
     };
 
     struct AncestorResolutionItem {
@@ -1643,50 +1643,63 @@ public:
             return;
         }
 
+        // Skip anything that's rooted in the `<PackageSpecRegistry>` shadow hierarchy
         if (scopeKlass.data(ctx)->packageRegistryOwner == scopeKlass) {
             return;
         }
 
+        // If the file isn't associated with a package, we reject any modification to a packaged constant.
         auto curPkgName = ctx.state.packageDB().getPackageNameForFile(ctx.file);
         if (!curPkgName.exists()) {
-            return;
-        }
-        const auto &curPkg = ctx.state.packageDB().getPackageInfo(curPkgName);
-        ENFORCE(curPkg.exists());
-
-        if (curPkg.isPreludePackage()) {
-            return;
-        }
-
-        switch (curPkg.canOpenScope(ctx, scopeKlass)) {
-            case core::packages::PackageInfo::CanOpenScopeResult::CanOpen:
-                return;
-
-            case core::packages::PackageInfo::CanOpenScopeResult::NotImported: {
+            if (scopeKlass.data(ctx)->package.exists()) {
                 auto scopePkgName = scopeKlass.data(ctx)->package;
                 const auto &scopePkg = ctx.state.packageDB().getPackageInfo(scopePkgName);
                 if (auto e = ctx.beginError(declLoc, core::errors::Resolver::PackageScopeViolation)) {
-                    e.setHeader("`{}` belongs to package `{}`, which package `{}` does not import",
-                                scopeKlass.show(ctx), scopePkgName.owner.show(ctx), curPkgName.owner.show(ctx));
-                    e.addErrorLine(scopePkg.declLoc(), "`{}` defined here", scopePkgName.owner.show(ctx));
+                    e.setHeader("`{}` belongs to package `{}`, which cannot be opened by unpackaged code",
+                                scopeKlass.show(ctx), scopePkgName.owner.show(ctx));
+                    e.addErrorLine(scopePkg.declLoc(), "Defined here");
+                }
+            }
+
+            return;
+        }
+
+        const auto &curPkg = ctx.state.packageDB().getPackageInfo(curPkgName);
+        ENFORCE(curPkg.exists());
+
+        auto canOpen = curPkg.canOpenScope(ctx, scopeKlass);
+        if (canOpen == core::packages::PackageInfo::CanOpenScopeResult::CanOpen) {
+            return;
+        }
+
+        if (auto e = ctx.beginError(declLoc, core::errors::Resolver::PackageScopeViolation)) {
+            auto scopePkgName = scopeKlass.data(ctx)->package;
+            const auto &scopePkg = ctx.state.packageDB().getPackageInfo(scopePkgName);
+            switch (canOpen) {
+                case core::packages::PackageInfo::CanOpenScopeResult::CanOpen:
+                    ENFORCE(false);
+                    return;
+
+                case core::packages::PackageInfo::CanOpenScopeResult::NotImported: {
+                    e.setHeader("`{}` belongs to package `{}`", scopeKlass.show(ctx), scopePkgName.owner.show(ctx));
+                    e.addErrorLine(scopePkg.declLoc(), "defined here");
                     e.addErrorNote("Either `import {}` in this package's `__package.rb`, or define this class\n"
                                    "    using its fully-qualified name in a single declaration.",
                                    scopePkgName.owner.show(ctx));
                     if (auto suggestion = curPkg.addImport(ctx, scopePkg, core::packages::ImportType::Normal)) {
                         e.addAutocorrect(std::move(*suggestion));
                     }
+                    return;
                 }
-                return;
-            }
 
-            case core::packages::PackageInfo::CanOpenScopeResult::NotAPackage:
-                if (auto e = ctx.beginError(declLoc, core::errors::Resolver::PackageScopeViolation)) {
+                case core::packages::PackageInfo::CanOpenScopeResult::NotAPackage: {
                     e.setHeader("`{}` is not a package ", scopeKlass.show(ctx));
                     e.addErrorNote("`{}` is only a namespace prefix. Open classes in this package using their\n"
                                    "    fully-qualified names in a single declaration, not by nesting under `{}`.",
                                    scopeKlass.show(ctx), scopeKlass.show(ctx));
+                    return;
                 }
-                return;
+            }
         }
     }
 
