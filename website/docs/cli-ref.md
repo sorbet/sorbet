@@ -301,6 +301,10 @@ Usage:
       --sorbet-packages-hint-message arg
                                 Optional hint message to add to all packaging related
                                 errors (default: "")
+      --typecheck-packages <name>
+                                Typecheck these packages, their transitive consumers, and
+                                all dependencies of that set. Accepts comma-separated
+                                package names and can be repeated.
       --extra-package-files-directory-prefix-underscore <dir>
                                 Extra parent directories which contain package files.
                                 Files are associated to a package using a package's
