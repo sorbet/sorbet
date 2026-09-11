@@ -169,24 +169,32 @@ ExpressionPtr desugarBody(DesugarContext dctx, core::LocOffsets loc, unique_ptr<
     return body;
 }
 
-// It's not possible to use an anonymous rest parameter in a block, as it always refers to the forwarded arguments
-// from the method. This function raises an error if the anonymous rest arg is present in a parameter list.
-void checkBlockRestParam(DesugarContext dctx, const MethodDef::PARAMS_store &args) {
-    auto it = absl::c_find_if(args, [](const auto &arg) { return isa_tree<RestParam>(arg); });
-    if (it == args.end()) {
-        return;
-    }
-
-    auto &rest = cast_tree_nonnull<RestParam>(*it);
-    if (auto local = cast_tree<UnresolvedIdent>(rest.expr)) {
-        if (local->name != core::Names::star()) {
-            return;
+// Anonymous forwarding parameters in a block always refer to the enclosing method's parameters. Naming them avoids
+// runtime syntax errors when the forwarded parameters are used in the block.
+void checkBlockAnonymousParams(DesugarContext dctx, const MethodDef::PARAMS_store &args) {
+    auto report = [&](core::LocOffsets loc, string_view kind, string_view autocorrectTitle) {
+        if (auto e = dctx.ctx.beginIndexerError(loc, core::errors::Desugar::BlockAnonymousParam)) {
+            e.setHeader("Anonymous {} parameter in block args", kind);
+            e.addErrorNote("Naming the {} parameter will ensure you can access it in the block", kind);
+            e.replaceWith(autocorrectTitle, dctx.ctx.locAt(loc.copyEndWithZeroLength()), "_");
         }
+    };
 
-        if (auto e = dctx.ctx.beginIndexerError(it->loc(), core::errors::Desugar::BlockAnonymousRestParam)) {
-            e.setHeader("Anonymous rest parameter in block args");
-            e.addErrorNote("Naming the rest parameter will ensure you can access it in the block");
-            e.replaceWith("Name the rest parameter", dctx.ctx.locAt(it->loc().copyEndWithZeroLength()), "_");
+    for (const auto &arg : args) {
+        if (auto rest = cast_tree<RestParam>(arg)) {
+            if (auto local = cast_tree<UnresolvedIdent>(rest->expr); local && local->name == core::Names::star()) {
+                report(arg.loc(), "rest", "Name the rest parameter");
+            } else if (auto keyword = cast_tree<KeywordArg>(rest->expr)) {
+                if (auto local = cast_tree<UnresolvedIdent>(keyword->expr);
+                    local && local->name == core::Names::starStar()) {
+                    report(arg.loc(), "keyword rest", "Name the keyword rest parameter");
+                }
+            }
+        } else if (auto block = cast_tree<BlockParam>(arg)) {
+            if (auto local = cast_tree<UnresolvedIdent>(block->expr);
+                local && local->name == core::Names::ampersand()) {
+                report(arg.loc(), "block", "Name the block parameter");
+            }
         }
     }
 }
@@ -219,7 +227,7 @@ ExpressionPtr desugarBlock(DesugarContext dctx, parser::Block *block) {
     }
     auto [Params, destructures] = desugarParams(dctx, block->params.get());
 
-    checkBlockRestParam(dctx, Params);
+    checkBlockAnonymousParams(dctx, Params);
 
     auto inBlock = true;
     DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockParamLoc, dctx.enclosingBlockParamName,

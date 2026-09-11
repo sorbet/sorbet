@@ -113,6 +113,8 @@ private:
     ast::ExpressionPtr desugarLiteralBlock(pm_node *blockBodyNode, pm_node *blockParameters,
                                            pm_location_t blockLocation, pm_location_t blockNodeOpeningLoc);
 
+    void checkBlockAnonymousParams(const ast::MethodDef::PARAMS_store &args);
+
     DesugaredBlockArgument desugarBlockPassArgument(pm_block_argument_node *bp);
 
     ast::ExpressionPtr desugarSymbolProc(pm_symbol_node *symbol);
@@ -4159,6 +4161,35 @@ Desugarer::DesugaredBlockArgument Desugarer::desugarBlock(pm_node_t *block, pm_a
     }
 }
 
+void Desugarer::checkBlockAnonymousParams(const ast::MethodDef::PARAMS_store &args) {
+    auto report = [&](core::LocOffsets loc, string_view kind, string_view autocorrectTitle) {
+        if (auto e = ctx.beginIndexerError(loc, core::errors::Desugar::BlockAnonymousParam)) {
+            e.setHeader("Anonymous {} parameter in block args", kind);
+            e.addErrorNote("Naming the {} parameter will ensure you can access it in the block", kind);
+            e.replaceWith(autocorrectTitle, ctx.locAt(loc.copyEndWithZeroLength()), "_");
+        }
+    };
+
+    for (const auto &arg : args) {
+        if (auto rest = ast::cast_tree<ast::RestParam>(arg)) {
+            if (auto local = ast::cast_tree<ast::UnresolvedIdent>(rest->expr);
+                local && local->name == core::Names::star()) {
+                report(arg.loc(), "rest", "Name the rest parameter");
+            } else if (auto keyword = ast::cast_tree<ast::KeywordArg>(rest->expr)) {
+                if (auto local = ast::cast_tree<ast::UnresolvedIdent>(keyword->expr);
+                    local && local->name == core::Names::starStar()) {
+                    report(arg.loc(), "keyword rest", "Name the keyword rest parameter");
+                }
+            }
+        } else if (auto block = ast::cast_tree<ast::BlockParam>(arg)) {
+            if (auto local = ast::cast_tree<ast::UnresolvedIdent>(block->expr);
+                local && local->name == core::Names::ampersand()) {
+                report(arg.loc(), "block", "Name the block parameter");
+            }
+        }
+    }
+}
+
 ast::ExpressionPtr Desugarer::desugarLiteralBlock(pm_node *blockBodyNode, pm_node *blockParameters,
                                                   pm_location_t blockLocation, pm_location_t blockNodeOpeningLoc) {
     auto blockBody = this->enterBlockContext().desugarNullable(blockBodyNode);
@@ -4239,6 +4270,8 @@ ast::ExpressionPtr Desugarer::desugarLiteralBlock(pm_node *blockBodyNode, pm_nod
             }
         }
     }
+
+    checkBlockAnonymousParams(blockParamsStore);
 
     return MK::Block(blockLoc, move(blockBody), move(blockParamsStore));
 }
