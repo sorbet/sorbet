@@ -350,6 +350,11 @@ Usage:
                                 In package-directed mode, split strata above this file
                                 count (including `__package.rb` files) into their
                                 component SCCs
+      --focus-packages P1,P2,P3,...
+                                Focus typechecking to these packages
+      --focus-skip-upstream     Skip upstream packages during inference, when checking a
+                                focused set
+      --focus-skip-downstream   Skip checking packages that depend on the focused set
 
 ```
 
