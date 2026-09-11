@@ -22,7 +22,6 @@
 #include "rewriter/MixinEncryptedProp.h"
 #include "rewriter/ModuleFunction.h"
 #include "rewriter/PackageSpec.h"
-#include "rewriter/Private.h"
 #include "rewriter/Prop.h"
 #include "rewriter/Rails.h"
 #include "rewriter/Struct.h"
@@ -106,12 +105,6 @@ public:
                     }
 
                     nodes = DSLBuilder::run(ctx, &send);
-                    if (!nodes.empty()) {
-                        replaceNodes[stat.get()] = std::move(nodes);
-                        return;
-                    }
-
-                    nodes = Private::run(ctx, &send);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;

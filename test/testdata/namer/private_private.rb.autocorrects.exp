@@ -1,0 +1,13 @@
+# -- test/testdata/namer/private_private.rb --
+# typed: true
+
+class A
+  private public def foo; end
+# ^^^^^^^^^^^^^^^^^^^^ error: Use `private` to define private instance methods
+end
+
+class B
+  private_class_method private_class_method def self.foo; end
+# ^^^^^^^ error: Use `private_class_method` to define private class methods
+end
+# ------------------------------

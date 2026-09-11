@@ -304,14 +304,9 @@ If you are attempting to dynamically compute the name of an `attr_*` method, you
 
 ## 3503
 
-Ruby has separate syntax for marking instance methods and singleton class methods private:
+This error code is from an old Sorbet version. It's equivalent to error 4030:
 
-```ruby
-private def some_instance_method; end
-private_class_method def self.some_singleton_class_method; end
-```
-
-Note that the `self.` keyword in the method declaration changes the method from being an instance method to being a class method. In Ruby this `self.` prefix is similar to the `static` keyword on method definitions in languages like C++ or Java.
+[→ 4030](#4030)
 
 ## 3504
 
@@ -1368,6 +1363,17 @@ Even though `__package.rb` files use Ruby syntax, they do not allow arbitrary Ru
 - Sorbet can support things like jump-to-definition inside `__package.rb` files
 
 But despite that, `__package.rb` files must be completely statically analyzable, which means most forms of Ruby expressions are not allowed in these files.
+
+## 4030
+
+Ruby has separate syntax for marking instance methods and singleton class methods private:
+
+```ruby
+private def some_instance_method; end
+private_class_method def self.some_singleton_class_method; end
+```
+
+Note that the `self.` keyword in the method declaration changes the method from being an instance method to being a class method. In Ruby this `self.` prefix is similar to the `static` keyword on method definitions in languages like C++ or Java.
 
 ## 5001
 
