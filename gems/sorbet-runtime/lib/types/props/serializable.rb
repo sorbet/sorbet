@@ -141,7 +141,7 @@ module T::Props::Serializable
       # If the prop was already missing during deserialization, that means the application
       # code already had to deal with a nil value, which means we wouldn't be accomplishing
       # much by raising here (other than causing an unnecessary breakage).
-      $stderr.puts("chalk-odm: missing required property in serialize prop=#{prop.inspect} class=#{self.class.name} id=#{self.class.decorator.get_id(self).inspect}")
+      warn("chalk-odm: missing required property in serialize prop=#{prop.inspect} class=#{self.class.name} id=#{self.class.decorator.get_id(self).inspect}")
     else
       raise TypeError.new("#{self.class.name}.#{prop} not set for non-optional prop")
     end
