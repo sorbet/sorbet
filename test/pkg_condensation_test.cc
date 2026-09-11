@@ -29,7 +29,7 @@ TEST_CASE("Condensation Graph - One package") {
         CHECK_EQ(1, condensation.nodes().size());
     }
 
-    auto traversal = condensation.computeTraversal(gs);
+    auto traversal = condensation.computeTraversal(gs, nullptr, false);
 
     {
         INFO("The traversal should include one stratum with a single SCC");
@@ -58,7 +58,7 @@ TEST_CASE("Condensation Graph - Two packages") {
         CHECK_EQ(2, condensation.nodes().size());
     }
 
-    auto traversal = condensation.computeTraversal(gs);
+    auto traversal = condensation.computeTraversal(gs, nullptr, false);
 
     {
         INFO("The traversal should include two strata, and two SCCs");
@@ -95,7 +95,7 @@ TEST_CASE("Condensation Graph - Four packages without deps") {
         CHECK_EQ(4, condensation.nodes().size());
     }
 
-    auto traversal = condensation.computeTraversal(gs);
+    auto traversal = condensation.computeTraversal(gs, nullptr, false);
 
     {
         INFO("The traversal should include one stratum with four SCCs");
@@ -122,7 +122,7 @@ TEST_CASE("Condensation Graph - Four packages with a cycle of three") {
          {"lib/foo/d/__package.rb", PackageHelpers::makePackageRB("Lib::Foo::D", "layered", "lib", {"Lib::Foo::A"})}});
 
     auto &condensation = gs.packageDB().condensation();
-    auto traversal = condensation.computeTraversal(gs);
+    auto traversal = condensation.computeTraversal(gs, nullptr, false);
 
     auto pkgA = PackageHelpers::packageInfoFor(gs, parsedFiles[0].file).mangledName();
     auto pkgB = PackageHelpers::packageInfoFor(gs, parsedFiles[1].file).mangledName();
@@ -173,6 +173,35 @@ TEST_CASE("Condensation Graph - Four packages with a cycle of three") {
     }
 }
 
+TEST_CASE("Condensation Graph - Focused traversal classifies packages") {
+    core::GlobalState gs(errorQueue);
+    PackageHelpers::makeDefaultPackagerGlobalState(gs, PackageHelpers::LAYERS_UTIL_LIB_APP);
+
+    // A <-> B is the focused cycle, C is upstream, D is downstream, and E is unrelated.
+    auto parsedFiles = PackageHelpers::enterPackages(
+        gs,
+        {{"lib/foo/a/__package.rb", PackageHelpers::makePackageRB("Lib::Foo::A", "layered", "lib", {"Lib::Foo::B"})},
+         {"lib/foo/b/__package.rb",
+          PackageHelpers::makePackageRB("Lib::Foo::B", "layered", "lib", {"Lib::Foo::A", "Lib::Foo::C"})},
+         {"lib/foo/c/__package.rb", PackageHelpers::makePackageRB("Lib::Foo::C", "layered", "lib")},
+         {"lib/foo/d/__package.rb", PackageHelpers::makePackageRB("Lib::Foo::D", "layered", "lib", {"Lib::Foo::A"})},
+         {"lib/foo/e/__package.rb", PackageHelpers::makePackageRB("Lib::Foo::E", "layered", "lib")}});
+
+    auto pkgA = PackageHelpers::packageInfoFor(gs, parsedFiles[0].file).mangledName();
+    auto pkgB = PackageHelpers::packageInfoFor(gs, parsedFiles[1].file).mangledName();
+    auto pkgC = PackageHelpers::packageInfoFor(gs, parsedFiles[2].file).mangledName();
+    auto pkgD = PackageHelpers::packageInfoFor(gs, parsedFiles[3].file).mangledName();
+
+    UnorderedSet<core::packages::MangledName> focused = {pkgA};
+    auto traversal = gs.packageDB().condensation().computeTraversal(gs, &focused, false);
+
+    // computeTraversal mutates the supplied focus set to include all members of each focused SCC.
+    CHECK(focused == UnorderedSet<core::packages::MangledName>{pkgA, pkgB});
+    CHECK(traversal.upstream == UnorderedSet<core::packages::MangledName>{pkgC});
+    CHECK(traversal.downstream == UnorderedSet<core::packages::MangledName>{pkgD});
+    CHECK(absl::c_is_permutation(traversal.packages, vector<core::packages::MangledName>{pkgA, pkgB, pkgC, pkgD}));
+}
+
 // A imports B and C, and both import A, forming one SCC.
 // Reversing A's imports changes discovery order within the SCC, but its member order should stay the same.
 TEST_CASE("Condensation Graph - Stable package ordering within an SCC when imports are reordered") {
@@ -189,7 +218,7 @@ TEST_CASE("Condensation Graph - Stable package ordering within an SCC when impor
                  {"lib/foo/b/__package.rb",
                   PackageHelpers::makePackageRB("Lib::Foo::B", "layered", "lib", {"Lib::Foo::A"})}});
 
-        auto traversal = gs.packageDB().condensation().computeTraversal(gs);
+        auto traversal = gs.packageDB().condensation().computeTraversal(gs, nullptr, false);
         REQUIRE_EQ(1, traversal.strata.size());
         REQUIRE_EQ(1, traversal.sccs.size());
 
@@ -232,7 +261,7 @@ TEST_CASE("Condensation Graph - Stable SCC ordering within a stratum when import
         auto pkgB = PackageHelpers::packageInfoFor(gs, parsedFiles[3].file).mangledName();
         auto pkgD = PackageHelpers::packageInfoFor(gs, parsedFiles[4].file).mangledName();
 
-        auto traversal = gs.packageDB().condensation().computeTraversal(gs);
+        auto traversal = gs.packageDB().condensation().computeTraversal(gs, nullptr, false);
         vector<vector<core::packages::MangledName>> expectedCycles = {{pkgB, pkgD}, {pkgC, pkgE}};
         for (auto &members : expectedCycles) {
             fast_sort(members, [](auto left, auto right) { return left.owner.id() < right.owner.id(); });
@@ -298,7 +327,7 @@ TEST_CASE("Condensation Graph - Two prelude packages, two normal packages") {
         CHECK_EQ(4, condensation.nodes().size());
     }
 
-    auto traversal = condensation.computeTraversal(gs);
+    auto traversal = condensation.computeTraversal(gs, nullptr, false);
 
     {
         REQUIRE_EQ(2, traversal.strata.size());
