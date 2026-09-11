@@ -57,6 +57,11 @@ public:
     // namespaces.
     absl::Span<const MangledName> packages() const;
 
+    // Expand a set of packages to their transitive consumers, then include all dependencies of that set.
+    // Includes every kind of import and implicit dependencies on prelude packages. Does not include other
+    // consumers of the dependencies added in the second step. Requires a fully populated package DB.
+    UnorderedSet<MangledName> expandPackageSelection(UnorderedSet<MangledName> selected) const;
+
     PackageDB deepCopy() const;
 
     UnfreezePackages unfreeze();
