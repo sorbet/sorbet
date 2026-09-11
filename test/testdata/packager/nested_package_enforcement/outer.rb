@@ -12,5 +12,6 @@ module Outer
   end
 
   module Inner::Bar; end
+# ^^^^^^^^^^^^^^^^^ error: `Outer::Inner::Bar` belongs to package `Outer::Inner`
 #        ^^^^^^^^^^ error: File belongs to package `Outer` but defines a constant that does not match this namespace
 end

@@ -1,6 +1,6 @@
 # typed: strict
 
-module Test::Root
+module Test::Root # error: `Test::Root` belongs to package `Root`
   BAD = 1
 # ^^^ error: Tests in the `Root::Nested` package must define tests in the `Test::Root::Nested` namespace
   #

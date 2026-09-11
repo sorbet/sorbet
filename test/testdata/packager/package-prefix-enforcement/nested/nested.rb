@@ -26,7 +26,7 @@ module Root::Nested
   end
 end
 
-module Root
+module Root # error: `Root` belongs to package `Root`
   module Nested
     class SomeClass
       class Deeper; end
@@ -45,6 +45,7 @@ module Root
 end
 
   class Root::Stringy < String
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Root::Stringy` belongs to package `Root`
 #       ^^^^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
 #                       ^^^^^^ error: Superclasses may only be set on constants in the package that owns them
 end
@@ -52,7 +53,7 @@ end
 class Root::Nested::Stringy < String
 end
 
-module Root
+module Root # error: `Root` belongs to package `Root`
   NOT_IN_PACKAGE = T.let(1, Integer)
 # ^^^^^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
 
@@ -72,11 +73,11 @@ def top_level_method
   'top'
 end
 
-module Root::ModNotInPackage
+module Root::ModNotInPackage # error: `Root::ModNotInPackage` belongs to package `Root`
      # ^^^^^^^^^^^^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
 end
 
-class Root::ClassNotInPackage
+class Root::ClassNotInPackage # error: `Root::ClassNotInPackage` belongs to package `Root`
     # ^^^^^^^^^^^^^^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
 end
 
