@@ -617,6 +617,10 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options(section)("sorbet-packages-hint-message",
                                  "Optional hint message to add to all packaging related errors",
                                  cxxopts::value<string>()->default_value(""));
+    options.add_options(section)("typecheck-packages",
+                                 "Typecheck these packages, their transitive consumers, and all dependencies of that "
+                                 "set. Accepts comma-separated package names and can be repeated.",
+                                 cxxopts::value<vector<string>>(), "<name>");
     options.add_options(section)("extra-package-files-directory-prefix-underscore",
                                  "Extra parent directories which contain package files. Files are associated to a "
                                  "package using a package's namespace joined by underscores. That is, files in "
@@ -1326,6 +1330,22 @@ void readOptions(Options &opts,
         if (genPackagesEnabled && opts.runLSP) {
             logger->error("--gen-packages can not be used when --lsp is also enabled");
             throw EarlyReturnWithCode(1);
+        }
+        if (raw.count("typecheck-packages")) {
+            if (!opts.cacheSensitiveOptions.sorbetPackages) {
+                logger->error("--typecheck-packages requires --stripe-packages or --sorbet-packages");
+                throw EarlyReturnWithCode(1);
+            }
+            if (opts.runLSP || !opts.storeState.empty() || genPackagesEnabled) {
+                logger->error("--typecheck-packages cannot be combined with --lsp, --store-state, or --gen-packages");
+                throw EarlyReturnWithCode(1);
+            }
+            opts.typecheckPackages = raw["typecheck-packages"].as<vector<string>>();
+            if (opts.typecheckPackages.empty() ||
+                absl::c_any_of(opts.typecheckPackages, [](const auto &name) { return name.empty(); })) {
+                logger->error("--typecheck-packages requires non-empty package names");
+                throw EarlyReturnWithCode(1);
+            }
         }
         if (opts.genPackagesMode == core::packages::GenPackagesMode::Strict) {
             if (raw.count("gen-packages-update-visibility-for")) {
