@@ -349,11 +349,6 @@ public:
         // The symbol belongs to another package that this package does NOT import.
         // (e.g. opening a parent package `A::B` from `A::B::C` without importing it)
         NotImported,
-
-        // The symbol belongs to no package at all -- it is a bare namespace segment
-        // (e.g. `A`, when `A` is only a namespace prefix, not a package).
-        // Such a scope can never be legally opened from a packaged file.
-        NotAPackage,
     };
 
     // True when it's legal for a file owned by this package to *open* (define a

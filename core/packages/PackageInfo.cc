@@ -1341,19 +1341,29 @@ PackageInfo::CanOpenScopeResult PackageInfo::canOpenScope(const core::GlobalStat
 
     auto symPackage = symData->package;
 
+    // If we already own this package, we know we can exit early.
     if (symPackage == this->mangledName_) {
         return CanOpenScopeResult::CanOpen;
     }
 
+    // We will have checked for this case in the packager already, as only `prelude!` packages are allowed to reopen
+    // unpackaged constants.
     if (!symPackage.exists()) {
-        return CanOpenScopeResult::NotAPackage;
-    }
-
-    if (this->importsPackage(symPackage) != nullptr) {
         return CanOpenScopeResult::CanOpen;
     }
 
-    return CanOpenScopeResult::NotImported;
+    // We can only reopen the namespace of another package if:
+    // 
+    // 1. We are a subpackage of it
+    // 2. We have imported it
+    // 
+    // Because we have already checked 1 during an earlier pass, it's sufficient to ensure that we have imported the
+    // package.
+    if (this->importsPackage(symPackage) == nullptr) {
+        return CanOpenScopeResult::NotImported;
+    }
+
+    return CanOpenScopeResult::CanOpen;
 }
 
 bool PackageInfo::canAccessInternalsOf(bool testPackages, MangledName other) const {
