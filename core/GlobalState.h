@@ -444,6 +444,14 @@ public:
                             bool packageAttributedErrors, bool testPackages);
     packages::UnfreezePackages unfreezePackages();
 
+    struct ClassOrModulePackageInfo final {
+        ClassOrModuleRef packageRegistryOwner;
+        packages::MangledName package;
+    };
+
+    // Computes the package metadata that enterClassOrModuleSymbol will assign to a new symbol.
+    ClassOrModulePackageInfo packageInfoForClassOrModule(ClassOrModuleRef owner, NameRef name) const;
+
     NameRef nextMangledName(ClassOrModuleRef owner, NameRef origName);
     void mangleRenameMethod(MethodRef what, NameRef origName);
     // NOTE: You likely want to use mangleRenameMethod not deleteMethodSymbol, unless you know what you're doing.

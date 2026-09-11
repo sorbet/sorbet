@@ -153,19 +153,6 @@ bool isRootScopedDefinition(const ast::ConstantLit *lit) {
     return false;
 }
 
-bool ownsPackage(const core::GlobalState &gs, const core::ClassOrModuleRef ownerForScope, MangledName pkg) {
-    auto owner = pkg.owner;
-    while (owner != core::Symbols::root()) {
-        if (owner == ownerForScope) {
-            return true;
-        }
-
-        owner = owner.data(gs)->owner;
-    }
-
-    return false;
-}
-
 // Visitor that ensures for constants defined within a package that all have the package as a
 // prefix.
 class EnforcePackagePrefix final {
@@ -427,13 +414,7 @@ private:
             return false;
         }
 
-        if (pkgForScope == this->pkg.mangledName()) {
-            return true;
-        } else if (couldBePrefix) {
-            return ownsPackage(gs, ownerForScope, this->pkg.mangledName());
-        } else {
-            return pkgForScope == this->pkg.mangledName();
-        }
+        return this->pkg.ownsNamespace(gs, pkgForScope, ownerForScope, couldBePrefix);
     }
 
     bool inTestNamespace(const core::GlobalState &gs) const {

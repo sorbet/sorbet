@@ -341,6 +341,11 @@ public:
     // example).
     CanModifyResult canModifySymbol(core::Context ctx, ClassOrModuleRef sym) const;
 
+    // Whether a constant with this package metadata is on this package's namespace path. Class and module symbols can
+    // be prefixes of a package namespace; other constants must belong to the package exactly.
+    bool ownsNamespace(const core::GlobalState &gs, MangledName namespacePackage, ClassOrModuleRef packageRegistryOwner,
+                       bool couldBePrefix) const;
+
     // It's okay to access the internals of `other` if it's this package, or if test packages are enabled and we
     // imported `other` with `uses_internals: true`.
     bool canAccessInternalsOf(bool testPackages, MangledName other) const;
