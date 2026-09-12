@@ -105,7 +105,7 @@ fi
 rb_src=()
 while IFS='' read -r line; do
   rb_src+=("$line")
-done < <(find "${paths[@]}" -name '*.rb*' | LC_COLLATE=C sort)
+done < <(find "${paths[@]}" \( -name '*.rb' -o -name '*.rbi' -o -name '*.rbupdate' -o -name '*.rbiupdate' \) | LC_COLLATE=C sort)
 
 basename=
 srcs=()
@@ -131,6 +131,16 @@ for this_src in "${rb_src[@]}" DUMMY; do
   fi
 
   if [ -n "$basename" ]; then
+    all_srcs=("${srcs[@]}")
+    srcs=()
+    for src in "${all_srcs[@]}"; do
+      case "$src" in
+        *.rb|*.rbi)
+          srcs+=("$src")
+          ;;
+      esac
+    done
+
     args=()
 
     case "${srcs[0]}" in
@@ -141,6 +151,9 @@ for this_src in "${rb_src[@]}" DUMMY; do
 
     if grep -q '^# enable-packager: true' "${srcs[@]}"; then
       args+=("--sorbet-packages")
+      if grep -q '^# enable-package-directed: true' "${srcs[@]}"; then
+        args+=("--experimental-package-directed")
+      fi
 
       extra_underscore_prefixes=()
       while IFS='' read -r prefix; do
@@ -254,9 +267,9 @@ for this_src in "${rb_src[@]}" DUMMY; do
           # See above for why this case is weird.
           for exp in "${document_symbols_candidates[@]}"; do
             wanted_file="${exp%.document-symbols.exp}"
-            # `srcs` contains all of the exp files, too, but including them should be harmless.
+            # Keep update files in `all_srcs` so that document symbol expectations for them can be regenerated.
             echo bazel-bin/test/print_document_symbols \
-              "$wanted_file" "${srcs[@]}" \
+              "$wanted_file" "${all_srcs[@]}" \
               \> "$exp" \
               2\>/dev/null \
               >>"$COMMAND_FILE"
