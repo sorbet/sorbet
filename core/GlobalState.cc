@@ -1161,9 +1161,8 @@ SymbolRef GlobalState::findRenamedSymbol(ClassOrModuleRef owner, SymbolRef sym) 
 ClassOrModuleRef GlobalState::enterClassOrModuleSymbol(Loc loc, ClassOrModuleRef owner, NameRef name) {
     // ENFORCE_NO_TIMER(!owner.exists()); // Owner may not exist on purely synthetic symbols.
     ENFORCE_NO_TIMER(name.isClassName(*this));
-    // We should never enter mangled classes (incremental fast path relies on all constants being
-    // defined first).
-    ENFORCE_NO_TIMER(!name.hasUniqueNameKind(*this, core::UniqueNameKind::MangleRename));
+    // Package namespace violations are entered with mangled names so that they cannot claim a constant belonging to
+    // another package.
     ClassOrModuleData ownerScope = owner.dataAllowingNone(*this);
 
     auto &store = ownerScope->members()[name];
@@ -1225,7 +1224,8 @@ GlobalState::ClassOrModulePackageInfo GlobalState::packageInfoForClassOrModule(C
     }
 
     auto registryName = name;
-    while (registryName.hasUniqueNameKind(*this, UniqueNameKind::Singleton)) {
+    while (registryName.hasUniqueNameKind(*this, UniqueNameKind::Singleton) ||
+           registryName.hasUniqueNameKind(*this, UniqueNameKind::MangleRename)) {
         registryName = registryName.dataUnique(*this)->original;
     }
     auto packageRegistryMember = ownerPackageRegistryOwner.data(*this)->findMember(*this, registryName);
