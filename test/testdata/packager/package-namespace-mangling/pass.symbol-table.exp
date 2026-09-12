@@ -1,0 +1,49 @@
+class ::<root> < ::Object ()
+  module ::<PackageSpecRegistry> < ::Sorbet::Private::Static::ImplicitModuleSuperclass ()
+    class ::<PackageSpecRegistry>::First < ::Sorbet::Private::Static::PackageSpec () @ test/testdata/packager/package-namespace-mangling/first/__package.rb:5
+    class ::<PackageSpecRegistry>::<Class:First>[<AttachedClass>] < ::Sorbet::Private::Static::<Class:PackageSpec> () @ test/testdata/packager/package-namespace-mangling/first/__package.rb:5
+      type-member(+) ::<PackageSpecRegistry>::<Class:First>::<AttachedClass> -> T.attached_class (of First) @ test/testdata/packager/package-namespace-mangling/first/__package.rb:5
+      method ::<PackageSpecRegistry>::<Class:First>#<static-init> (<blk>) @ test/testdata/packager/package-namespace-mangling/first/__package.rb:5
+        argument <blk><block> @ Loc {file=test/testdata/packager/package-namespace-mangling/first/__package.rb start=??? end=???}
+    class ::<PackageSpecRegistry>::Second < ::Sorbet::Private::Static::PackageSpec () @ test/testdata/packager/package-namespace-mangling/second/__package.rb:3
+    class ::<PackageSpecRegistry>::<Class:Second>[<AttachedClass>] < ::Sorbet::Private::Static::<Class:PackageSpec> () @ test/testdata/packager/package-namespace-mangling/second/__package.rb:3
+      type-member(+) ::<PackageSpecRegistry>::<Class:Second>::<AttachedClass> -> T.attached_class (of Second) @ test/testdata/packager/package-namespace-mangling/second/__package.rb:3
+      method ::<PackageSpecRegistry>::<Class:Second>#<static-init> (<blk>) @ test/testdata/packager/package-namespace-mangling/second/__package.rb:3
+        argument <blk><block> @ Loc {file=test/testdata/packager/package-namespace-mangling/second/__package.rb start=??? end=???}
+  class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> ()
+    method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/packager/package-namespace-mangling/first/__package.rb:5
+      argument <blk><block> @ Loc {file=test/testdata/packager/package-namespace-mangling/first/__package.rb start=??? end=???}
+    method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/packager/package-namespace-mangling/first/bad_open.rb:3
+      argument <blk><block> @ Loc {file=test/testdata/packager/package-namespace-mangling/first/bad_open.rb start=??? end=???}
+    method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/packager/package-namespace-mangling/first/unreferenced_bad_open.rb:4
+      argument <blk><block> @ Loc {file=test/testdata/packager/package-namespace-mangling/first/unreferenced_bad_open.rb start=??? end=???}
+    method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/packager/package-namespace-mangling/second/__package.rb:3
+      argument <blk><block> @ Loc {file=test/testdata/packager/package-namespace-mangling/second/__package.rb start=??? end=???}
+    method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/packager/package-namespace-mangling/second/definition.rb:3
+      argument <blk><block> @ Loc {file=test/testdata/packager/package-namespace-mangling/second/definition.rb start=??? end=???}
+  module ::Second < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/testdata/packager/package-namespace-mangling/second/definition.rb:3
+    class ::Second::FromSecond < ::Object () @ test/testdata/packager/package-namespace-mangling/second/definition.rb:4
+    class ::Second::<Class:FromSecond>[<AttachedClass>] < ::<Class:Object> () @ test/testdata/packager/package-namespace-mangling/second/definition.rb:4
+      type-member(+) ::Second::<Class:FromSecond>::<AttachedClass> -> T.attached_class (of Second::FromSecond) @ test/testdata/packager/package-namespace-mangling/second/definition.rb:4
+      method ::Second::<Class:FromSecond>#<static-init> (<blk>) @ test/testdata/packager/package-namespace-mangling/second/definition.rb:4
+        argument <blk><block> @ Loc {file=test/testdata/packager/package-namespace-mangling/second/definition.rb start=??? end=???}
+  module ::Second < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/testdata/packager/package-namespace-mangling/first/bad_open.rb:3
+    class ::Second::FromFirst < ::Object () @ test/testdata/packager/package-namespace-mangling/first/bad_open.rb:5
+    class ::Second::<Class:FromFirst>[<AttachedClass>] < ::<Class:Object> () @ test/testdata/packager/package-namespace-mangling/first/bad_open.rb:5
+      type-member(+) ::Second::<Class:FromFirst>::<AttachedClass> -> T.attached_class (of Second::FromFirst) @ test/testdata/packager/package-namespace-mangling/first/bad_open.rb:5
+      method ::Second::<Class:FromFirst>#<static-init> (<blk>) @ test/testdata/packager/package-namespace-mangling/first/bad_open.rb:5
+        argument <blk><block> @ Loc {file=test/testdata/packager/package-namespace-mangling/first/bad_open.rb start=??? end=???}
+  module ::Second < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/testdata/packager/package-namespace-mangling/first/unreferenced_bad_open.rb:4
+  class ::<Class:Second>[<AttachedClass>] < ::Module () @ test/testdata/packager/package-namespace-mangling/second/definition.rb:3
+    type-member(+) ::<Class:Second>::<AttachedClass> -> T.attached_class (of Second) @ test/testdata/packager/package-namespace-mangling/second/definition.rb:3
+    method ::<Class:Second>#<static-init> (<blk>) @ test/testdata/packager/package-namespace-mangling/second/definition.rb:3
+      argument <blk><block> @ Loc {file=test/testdata/packager/package-namespace-mangling/second/definition.rb start=??? end=???}
+  class ::<Class:Second>[<AttachedClass>] < ::Module () @ test/testdata/packager/package-namespace-mangling/first/bad_open.rb:3
+    type-member(+) ::<Class:Second>::<AttachedClass> -> T.attached_class (of Second) @ test/testdata/packager/package-namespace-mangling/first/bad_open.rb:3
+    method ::<Class:Second>#<static-init> (<blk>) @ test/testdata/packager/package-namespace-mangling/first/bad_open.rb:3
+      argument <blk><block> @ Loc {file=test/testdata/packager/package-namespace-mangling/first/bad_open.rb start=??? end=???}
+  class ::<Class:Second>[<AttachedClass>] < ::Module () @ test/testdata/packager/package-namespace-mangling/first/unreferenced_bad_open.rb:4
+    type-member(+) ::<Class:Second>::<AttachedClass> -> T.attached_class (of Second) @ test/testdata/packager/package-namespace-mangling/first/unreferenced_bad_open.rb:4
+    method ::<Class:Second>#<static-init> (<blk>) @ test/testdata/packager/package-namespace-mangling/first/unreferenced_bad_open.rb:4
+      argument <blk><block> @ Loc {file=test/testdata/packager/package-namespace-mangling/first/unreferenced_bad_open.rb start=??? end=???}
+
