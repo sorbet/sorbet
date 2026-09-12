@@ -348,6 +348,7 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
         trees.emplace_back(move(localNamed));
     }
 
+    fast_sort(trees, [](const auto &lhs, const auto &rhs) { return lhs.file < rhs.file; });
     return trees;
 }
 
@@ -587,10 +588,11 @@ TEST_CASE("PerPhaseTest") {
     }
 
     vector<ast::ParsedFile> trees;
+    absl::Span<core::FileRef> inputPackageFiles;
     auto filesSpan = absl::Span<core::FileRef>(files);
     if (opts.cacheSensitiveOptions.sorbetPackages) {
         auto numPackageFiles = realmain::pipeline::partitionPackageFiles(*gs, filesSpan);
-        auto inputPackageFiles = filesSpan.first(numPackageFiles);
+        inputPackageFiles = filesSpan.first(numPackageFiles);
         filesSpan = filesSpan.subspan(numPackageFiles);
 
         trees = index(*gs, inputPackageFiles, handler, test, assertions);
@@ -843,7 +845,12 @@ TEST_CASE("PerPhaseTest") {
     handler.clear(*gs);
     auto symbolsBefore = gs->symbolsUsedTotal();
 
-    trees = indexForStressIncremental(gs.get(), absl::MakeSpan(files), handler);
+    trees = indexForStressIncremental(gs.get(), inputPackageFiles, handler);
+    trees.reserve(files.size());
+    for (auto &stratum : strata.strata) {
+        auto batch = indexForStressIncremental(gs.get(), stratum.sourceFiles, handler);
+        absl::c_move(batch, back_inserter(trees));
+    }
 
     bool ranIncrementalNamer = false;
     {
