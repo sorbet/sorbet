@@ -55,6 +55,7 @@ string rbFile2BaseTestName(string rbFileName) {
     if (lastDirSeparator != string::npos) {
         basename = basename.substr(lastDirSeparator + 1);
     }
+    auto fullBasename = basename;
     auto split = basename.find(".");
     if (split != string::npos) {
         basename = basename.substr(0, split);
@@ -62,6 +63,9 @@ string rbFile2BaseTestName(string rbFileName) {
     split = basename.find("__");
     if (split != string::npos) {
         basename = basename.substr(0, split);
+    }
+    if (absl::StartsWith(string_view(fullBasename).substr(basename.size()), ".prism.")) {
+        basename += ".prism";
     }
     string testName = basename;
     if (lastDirSeparator != string::npos) {

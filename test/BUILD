@@ -273,9 +273,6 @@ pipeline_tests(
             "testdata/rbs/**/*.rb",
             "testdata/rbs/**/*.exp",
             "testdata/lsp/*_rbs*.rb",
-
-            # Prism-specific variant of `missing_shadow_args.rb` (different parser errors and desugar tree).
-            "testdata/parser/error_recovery/missing_shadow_args_prism.rb",
         ],
     ),
     "PosTests",
@@ -508,9 +505,6 @@ pipeline_tests(
             "testdata/cfg/rescue_var_expression.rb",
             "testdata/parser/misc.rb",
 
-            # Legacy-parser variant of `missing_shadow_args_prism.rb` (different parser errors and desugar tree).
-            "testdata/parser/error_recovery/missing_shadow_args.rb",
-
             # Fixing a bug in pipeline_test_runner.cc revealed that these tests
             # were not actually running because they have RBS support enabled
             "testdata/lsp/hover_rbs.rb",
@@ -548,9 +542,6 @@ pipeline_tests(
             # which will not be back-ported to the whitequark-based RBS rewriter.
             "testdata/rbs/annotations_literal_types.rb",
             "testdata/rbs/signatures_types.rb",
-
-            # Prism-specific variant of `missing_shadow_args.rb` (different parser errors).
-            "testdata/parser/error_recovery/missing_shadow_args_prism.rb",
         ],
     ),
     "LSPTests",
