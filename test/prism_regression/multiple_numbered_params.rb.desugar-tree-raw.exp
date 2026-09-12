@@ -18,7 +18,7 @@ ClassDef{
           name = <U <blk>>
         } }]
       rhs = Send{
-        flags = {}
+        flags = {bracesBlock}
         recv = UnresolvedConstantLit{
           cnst = <C <U RATCHET>>
           scope = EmptyTree

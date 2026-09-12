@@ -830,13 +830,41 @@ public:
     core::NameRef fun;
     const core::LocOffsets funLoc;
 
+    // Whether a block is present on the send, and if the style of the block argument is known (do/end vs braces). A
+    // value of `Present` is always valid here if it's not known if the block was defined with do/end or braces.
+    enum class BlockType : uint8_t {
+        None = 0,
+        Present = 1,
+        DoEnd = 2,
+        Braces = 3,
+    };
+
+    static void constexpr validateBlockTypeBits(BlockType b) {
+        // Unfortunately, we can't collapse these cases because the compiler isn't smart
+        // enough to see what the value of b is.
+        switch (b) {
+            case BlockType::None:
+                static_assert(int(BlockType::None) < (1 << 2), "BlockType must fit into two bits");
+                break;
+            case BlockType::Present:
+                static_assert(int(BlockType::Present) < (1 << 2), "BlockType must fit into two bits");
+                break;
+            case BlockType::DoEnd:
+                static_assert(int(BlockType::DoEnd) < (1 << 2), "BlockType must fit into two bits");
+                break;
+            case BlockType::Braces:
+                static_assert(int(BlockType::Braces) < (1 << 2), "BlockType must fit into two bits");
+                break;
+        }
+    }
+
     struct Flags {
         // True if the receiver was self (either implicit like `foo()` or explicit like `self.foo()`)
         //   - Prior to Ruby 2.7, it was illegal to call a private method with an explicit receiver.
         //   - As of Ruby 2.7, it became legal to call private methods on self, e.g. `self.foo()`.
         bool isPrivateOk : 1 = false;
         bool isRewriterSynthesized : 1 = false;
-        bool hasBlock : 1 = false;
+        BlockType blockType : 2 = BlockType::None;
 
         Flags() {}
 
@@ -898,7 +926,7 @@ public:
     const ExpressionPtr *kwSplat() const;
     ExpressionPtr *kwSplat();
 
-    void setBlock(ExpressionPtr block);
+    void setBlock(ExpressionPtr block, BlockType type);
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -1005,7 +1033,7 @@ public:
 
     // True when this send contains a block argument.
     bool hasBlock() const {
-        return flags.hasBlock;
+        return flags.blockType != BlockType::None;
     }
 
     // True when this send contains at least 1 position argument.

@@ -472,6 +472,20 @@ void printArgs(const core::GlobalState &gs, fmt::memory_buffer &buf, absl::Span<
     fmt::format_to(std::back_inserter(buf), ")");
 }
 
+// The name used for a block type in the `flags` list of a raw `Send`. Blocks without a known syntax aren't named at
+// all, as the `block` field already shows whether a block is present.
+string_view showBlockType(Send::BlockType type) {
+    switch (type) {
+        case Send::BlockType::None:
+        case Send::BlockType::Present:
+            return ""sv;
+        case Send::BlockType::DoEnd:
+            return "doEndBlock"sv;
+        case Send::BlockType::Braces:
+            return "bracesBlock"sv;
+    }
+}
+
 } // namespace
 
 core::FoundClass::Kind ClassDef::kindToFoundClassKind(Kind kind) {
@@ -1003,6 +1017,9 @@ string Send::showRaw(const core::GlobalState &gs, int tabs) const {
     if (this->flags.isRewriterSynthesized) {
         stringifiedFlags.emplace_back("rewriterSynthesized");
     }
+    if (auto blockType = showBlockType(this->flags.blockType); !blockType.empty()) {
+        stringifiedFlags.emplace_back(blockType);
+    }
 
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "flags = {{{}}}\n", fmt::join(stringifiedFlags, ", "));
@@ -1127,7 +1144,7 @@ ExpressionPtr *Send::kwSplat() {
 
 void Send::clearArgs() {
     this->args.clear();
-    this->flags.hasBlock = false;
+    this->flags.blockType = BlockType::None;
     this->numPosArgs_ = 0;
 }
 
@@ -1142,15 +1159,15 @@ void Send::insertPosArg(uint16_t index, ExpressionPtr arg) {
     this->numPosArgs_++;
 }
 
-void Send::setBlock(ExpressionPtr block) {
+void Send::setBlock(ExpressionPtr block, BlockType type) {
     if (hasBlock()) {
         this->args.pop_back();
-        flags.hasBlock = false;
+        flags.blockType = BlockType::None;
     }
 
     if (block != nullptr) {
         this->args.emplace_back(move(block));
-        flags.hasBlock = true;
+        flags.blockType = type;
         ENFORCE(this->block() != nullptr);
     }
 }
@@ -1160,7 +1177,7 @@ ExpressionPtr Send::withNewBody(core::LocOffsets loc, ExpressionPtr recv, core::
 
     // Reset important metadata on this function.
     this->numPosArgs_ = 0;
-    this->flags.hasBlock = false;
+    this->flags.blockType = BlockType::None;
 
     return rv;
 }
@@ -1766,6 +1783,9 @@ string Send::showRawWithLocs(const core::GlobalState &gs, core::FileRef file, in
     }
     if (this->flags.isRewriterSynthesized) {
         stringifiedFlags.emplace_back("rewriterSynthesized");
+    }
+    if (auto blockType = showBlockType(this->flags.blockType); !blockType.empty()) {
+        stringifiedFlags.emplace_back(blockType);
     }
 
     printTabs(buf, tabs + 1);

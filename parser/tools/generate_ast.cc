@@ -14,6 +14,7 @@ enum class FieldType {
     Uint,
     Loc,
     Bool,
+    BlockStyle,
     Symbol,
 };
 
@@ -93,7 +94,10 @@ NodeDef nodes[] = {
     {
         "Block",
         "block",
-        vector<FieldDef>({{"send", FieldType::Node}, {"params", FieldType::Node}, {"body", FieldType::Node}}),
+        vector<FieldDef>({{"send", FieldType::Node},
+                          {"params", FieldType::Node},
+                          {"body", FieldType::Node},
+                          {"style", FieldType::BlockStyle}}),
     },
     // Wraps a `&foo` parameter in a parameter list
     {
@@ -815,6 +819,8 @@ string constructorArgType(FieldType arg) {
             return "core::LocOffsets";
         case FieldType::Bool:
             return "bool";
+        case FieldType::BlockStyle:
+            return "BlockStyle";
     }
 }
 
@@ -836,6 +842,8 @@ string fieldType(FieldType arg) {
             return "core::LocOffsets";
         case FieldType::Bool:
             return "bool";
+        case FieldType::BlockStyle:
+            return "BlockStyle";
     }
 }
 
@@ -935,6 +943,10 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 out << "    fmt::format_to(std::back_inserter(buf), \"" << arg.name << " = {}\\n\", " << arg.name
                     << ");\n";
                 break;
+            case FieldType::BlockStyle:
+                out << "    fmt::format_to(std::back_inserter(buf), \"" << arg.name << " = {}\\n\", showBlockStyle("
+                    << arg.name << "));\n";
+                break;
         }
     }
     out << "    printTabs(buf, tabs);\n";
@@ -1014,6 +1026,10 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
             case FieldType::Bool:
                 out << "    fmt::format_to(std::back_inserter(buf), \"" << arg.name << " = {}\\n\", " << arg.name
                     << ");\n";
+                break;
+            case FieldType::BlockStyle:
+                out << R"(    fmt::format_to(std::back_inserter(buf),  "\")" << arg.name << R"(\" : \"{}\")"
+                    << maybeComma << "\\n\", showBlockStyle(" << arg.name << "));\n";
                 break;
         }
     }
@@ -1098,6 +1114,10 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 out << R"(    fmt::format_to(std::back_inserter(buf),  "\")" << arg.name << R"(\" : \"{}\")"
                     << maybeComma << "\\n\", " << arg.name << ");\n";
                 break;
+            case FieldType::BlockStyle:
+                out << R"(    fmt::format_to(std::back_inserter(buf),  "\")" << arg.name << R"(\" : \"{}\")"
+                    << maybeComma << "\\n\", showBlockStyle(" << arg.name << "));\n";
+                break;
         }
     }
     out << "    printTabs(buf, tabs);" << '\n';
@@ -1157,6 +1177,9 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
             case FieldType::Loc:
                 continue;
             case FieldType::Bool:
+                continue;
+            case FieldType::BlockStyle:
+                // The whitequark format has no notion of the syntax used to write a block.
                 continue;
         }
     }

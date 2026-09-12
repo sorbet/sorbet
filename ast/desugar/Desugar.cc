@@ -191,6 +191,22 @@ void checkBlockRestParam(DesugarContext dctx, const MethodDef::PARAMS_store &arg
     }
 }
 
+namespace {
+
+// Translate the block syntax recorded by the parser to the representation used on `ast::Send`.
+ast::Send::BlockType blockStyleToType(parser::BlockStyle style) {
+    switch (style) {
+        case parser::BlockStyle::Present:
+            return ast::Send::BlockType::Present;
+        case parser::BlockStyle::DoEnd:
+            return ast::Send::BlockType::DoEnd;
+        case parser::BlockStyle::Braces:
+            return ast::Send::BlockType::Braces;
+    }
+}
+
+} // namespace
+
 ExpressionPtr desugarBlock(DesugarContext dctx, parser::Block *block) {
     block->send->loc = block->send->loc.join(block->loc);
     auto recv = node2TreeImpl(dctx, block->send);
@@ -226,7 +242,7 @@ ExpressionPtr desugarBlock(DesugarContext dctx, parser::Block *block) {
                          dctx.enclosingMethodName, inBlock, dctx.inModule, dctx.preserveConcreteSyntax);
     auto desugaredBody = desugarBody(dctx1, block->loc, block->body, move(destructures));
 
-    send->setBlock(MK::Block(block->loc, move(desugaredBody), move(Params)));
+    send->setBlock(MK::Block(block->loc, move(desugaredBody), move(Params)), blockStyleToType(block->style));
     return res;
 }
 
@@ -973,8 +989,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                             // E.g. `foo(*splat, &:to_s)`
 
                             auto desugaredBlockLiteral = symbol2Proc(dctx, move(blockPassArg));
+                            flags.blockType = ast::Send::BlockType::Present;
                             sendargs.emplace_back(move(desugaredBlockLiteral));
-                            flags.hasBlock = true;
 
                             res = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplat(), send->methodLoc, 4,
                                            move(sendargs), flags);
@@ -1018,8 +1034,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                             // E.g. `a.map(:to_s)`
 
                             auto desugaredBlockLiteral = symbol2Proc(dctx, move(blockPassArg));
+                            flags.blockType = ast::Send::BlockType::Present;
                             args.emplace_back(move(desugaredBlockLiteral));
-                            flags.hasBlock = true;
 
                             res =
                                 MK::Send(loc, move(rec), send->method, send->methodLoc, numPosArgs, move(args), flags);

@@ -21,7 +21,7 @@ ClassDef{
         name = <U result>
       }
       rhs = Send{
-        flags = {}
+        flags = {bracesBlock}
         recv = Array{
           elems = [
             Literal{ value = 1 }

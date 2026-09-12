@@ -25,7 +25,7 @@ ClassDef{
     }
 
     Send{
-      flags = {privateOk}
+      flags = {privateOk, doEndBlock}
       recv = Self
       fun = <U sig>
       block = Block {

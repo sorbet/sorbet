@@ -9,6 +9,18 @@
 
 namespace sorbet::parser {
 
+// The syntax used to write the block argument of a send, when it's known.
+//
+// A value of `Present` means that a block is present, but the syntax used to write it isn't known (usually because the
+// block was synthesized, rather than parsed from source).
+enum class BlockStyle : uint8_t {
+    Present = 0,
+    DoEnd = 1,
+    Braces = 2,
+};
+
+std::string_view showBlockStyle(BlockStyle style);
+
 class Node {
 public:
     Node(core::LocOffsets loc) : loc(loc) {

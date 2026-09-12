@@ -13,7 +13,7 @@ ClassDef{
         name = <U result1>
       }
       rhs = Send{
-        flags = {}
+        flags = {doEndBlock}
         recv = Array{
           elems = [
             Literal{ value = 1 }
@@ -55,7 +55,7 @@ ClassDef{
         name = <U result2>
       }
       rhs = Send{
-        flags = {}
+        flags = {bracesBlock}
         recv = Array{
           elems = [
             Literal{ value = 1 }
@@ -101,7 +101,7 @@ ClassDef{
         name = <U result3>
       }
       rhs = Send{
-        flags = {}
+        flags = {doEndBlock}
         recv = Array{
           elems = [
             Literal{ value = 1 }

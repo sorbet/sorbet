@@ -60,7 +60,7 @@ ClassDef{
             ]
           }
           Send{
-            flags = {privateOk}
+            flags = {privateOk, doEndBlock}
             recv = Self
             fun = <U <super>>
             block = Block {
@@ -84,7 +84,7 @@ ClassDef{
             ]
           }
           Send{
-            flags = {privateOk}
+            flags = {privateOk, doEndBlock}
             recv = Self
             fun = <U <super>>
             block = Block {
@@ -111,7 +111,7 @@ ClassDef{
             ]
           }
           Send{
-            flags = {privateOk}
+            flags = {privateOk, doEndBlock}
             recv = Self
             fun = <U <super>>
             block = Block {
@@ -139,7 +139,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, doEndBlock}
           recv = Self
           fun = <U <super>>
           block = Block {

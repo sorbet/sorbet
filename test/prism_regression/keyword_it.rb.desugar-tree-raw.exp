@@ -8,7 +8,7 @@ ClassDef{
     }]
   rhs = [
     Send{
-      flags = {}
+      flags = {doEndBlock}
       recv = UnresolvedConstantLit{
         cnst = <C <U Proc>>
         scope = EmptyTree
@@ -32,7 +32,7 @@ ClassDef{
     }
 
     Send{
-      flags = {}
+      flags = {doEndBlock}
       recv = UnresolvedConstantLit{
         cnst = <C <U Proc>>
         scope = EmptyTree

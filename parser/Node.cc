@@ -9,6 +9,17 @@ using namespace std;
 
 namespace sorbet::parser {
 
+string_view showBlockStyle(BlockStyle style) {
+    switch (style) {
+        case BlockStyle::Present:
+            return "present";
+        case BlockStyle::DoEnd:
+            return "do-end";
+        case BlockStyle::Braces:
+            return "braces";
+    }
+}
+
 void Node::printTabs(fmt::memory_buffer &to, int count) const {
     int i = 0;
     while (i < count) {

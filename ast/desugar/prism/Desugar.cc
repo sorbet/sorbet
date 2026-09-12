@@ -257,6 +257,8 @@ private:
 
     std::string_view sliceLocation(pm_location_t loc) const;
 
+    ast::Send::BlockType blockTypeOf(pm_location_t loc) const;
+
     std::pair<core::NameRef, core::LocOffsets> translateSymbol(pm_symbol_node *symbol);
 
     // String interpolation desugaring
@@ -314,11 +316,15 @@ public:
     // or a zero-length loc for forwarding like `...`
     core::LocOffsets blockPassLoc;
 
+    // The syntax used to write the literal block, if there is one.
+    ast::Send::BlockType blockType;
+
 private:
     // Hide the constructor, in favour of named factory methods, so that we can add validation logic if needed.
     DesugaredBlockArgument(ast::ExpressionPtr literalBlockExpr, ast::ExpressionPtr blockPassExpr,
-                           core::LocOffsets blockPassLoc)
-        : literalBlockExpr(move(literalBlockExpr)), blockPassExpr(move(blockPassExpr)), blockPassLoc(blockPassLoc) {}
+                           core::LocOffsets blockPassLoc, ast::Send::BlockType blockType = ast::Send::BlockType::None)
+        : literalBlockExpr(move(literalBlockExpr)), blockPassExpr(move(blockPassExpr)), blockPassLoc(blockPassLoc),
+          blockType(blockType) {}
 
 public:
     // Move-only type
@@ -335,13 +341,13 @@ public:
         return DesugaredBlockArgument(nullptr, move(blockPassExpr), blockPassLoc);
     }
 
-    static DesugaredBlockArgument literalBlock(ast::ExpressionPtr block) {
-        return DesugaredBlockArgument(move(block), nullptr, core::LocOffsets::none());
+    static DesugaredBlockArgument literalBlock(ast::ExpressionPtr block, ast::Send::BlockType blockType) {
+        return DesugaredBlockArgument(move(block), nullptr, core::LocOffsets::none(), blockType);
     }
 
-    static DesugaredBlockArgument both(ast::ExpressionPtr block, ast::ExpressionPtr blockPassExpr,
-                                       core::LocOffsets blockPassLoc) {
-        return DesugaredBlockArgument(move(block), move(blockPassExpr), blockPassLoc);
+    static DesugaredBlockArgument both(ast::ExpressionPtr block, ast::Send::BlockType blockType,
+                                       ast::ExpressionPtr blockPassExpr, core::LocOffsets blockPassLoc) {
+        return DesugaredBlockArgument(move(block), move(blockPassExpr), blockPassLoc, blockType);
     }
 
     bool exists() const {
@@ -2642,7 +2648,7 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
 
                 ast::Send::Flags flags;
                 flags.isPrivateOk = true;
-                flags.hasBlock = true;
+                flags.blockType = blockTypeOf(blockNode->closing_loc);
 
                 return MK::Send(location, move(receiver), methodName, location, posArgs, move(args), flags);
             }
@@ -2928,7 +2934,8 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
             auto receiver = MK::Constant(operatorLoc, core::Symbols::Kernel());
             pm_arguments_node *args = nullptr;
             auto block = DesugaredBlockArgument::literalBlock(
-                desugarLiteralBlock(lambdaNode->body, lambdaNode->parameters, blockLoc, lambdaNode->operator_loc));
+                desugarLiteralBlock(lambdaNode->body, lambdaNode->parameters, blockLoc, lambdaNode->operator_loc),
+                blockTypeOf(lambdaNode->closing_loc));
             auto isPrivateOk = false; // `Kernel.lambda` is not a private call
             return desugarMethodCall(move(receiver), core::Names::lambda(), operatorLoc, args, lambdaNode->closing_loc,
                                      move(block), location, isPrivateOk);
@@ -4120,13 +4127,14 @@ Desugarer::DesugaredBlockArgument Desugarer::desugarBlock(pm_node_t *block, pm_a
     if (auto *blockNode = down_cast<pm_block_node>(block)) { // a literal block with `{ ... }` or `do ... end`
         auto literalBlock = desugarLiteralBlock(blockNode->body, blockNode->parameters, blockNode->base.location,
                                                 blockNode->opening_loc);
+        auto blockType = blockTypeOf(blockNode->closing_loc);
 
         // Handle combination of block pass argument AND a literal block.
         // e.g., `foo(&block) { "literal" }` - both need to be kept.
         if (blockArgInArgs != nullptr) {
             auto blockPassResult = desugarBlockPassArgument(blockArgInArgs);
             if (blockPassResult.hasBlockPass()) {
-                return DesugaredBlockArgument::both(move(literalBlock), move(blockPassResult.blockPassExpr),
+                return DesugaredBlockArgument::both(move(literalBlock), blockType, move(blockPassResult.blockPassExpr),
                                                     blockPassResult.blockPassLoc);
             } else if (blockPassResult.hasLiteralBlock()) {
                 // Handle an error case like `a.map(&:foo) { "literal" }`
@@ -4134,7 +4142,7 @@ Desugarer::DesugaredBlockArgument Desugarer::desugarBlock(pm_node_t *block, pm_a
                 // We keep both, moving the Symbol proc to the literal block position.
                 auto symbolProc = move(blockPassResult.literalBlockExpr);
                 auto symbolProcLoc = symbolProc.loc();
-                return DesugaredBlockArgument::both(move(literalBlock), move(symbolProc), symbolProcLoc);
+                return DesugaredBlockArgument::both(move(literalBlock), blockType, move(symbolProc), symbolProcLoc);
             } else {
                 unreachable("Expected either a block pass or a literal block, but got neither");
             }
@@ -4146,11 +4154,11 @@ Desugarer::DesugaredBlockArgument Desugarer::desugarBlock(pm_node_t *block, pm_a
             // The local variable uses the full call location, but the Magic node uses zero-length at END
             auto fullLoc = translateLoc(parentLoc);
             auto magicLoc = fullLoc.copyEndWithZeroLength();
-            return DesugaredBlockArgument::both(move(literalBlock), MK::Local(fullLoc, core::Names::fwdBlock()),
-                                                magicLoc);
+            return DesugaredBlockArgument::both(move(literalBlock), blockType,
+                                                MK::Local(fullLoc, core::Names::fwdBlock()), magicLoc);
         }
 
-        return DesugaredBlockArgument::literalBlock(move(literalBlock));
+        return DesugaredBlockArgument::literalBlock(move(literalBlock), blockType);
 
     } else if (auto *bp = down_cast<pm_block_argument_node>(block)) { // the `&b` in `a.map(&b)`
         return desugarBlockPassArgument(bp);
@@ -4248,8 +4256,9 @@ Desugarer::DesugaredBlockArgument Desugarer::desugarBlockPassArgument(pm_block_a
 
     if (bp->expression) { // Block pass with an explicit expression, like `f(&block)`
         if (auto *symbol = down_cast<pm_symbol_node>(bp->expression)) {
-            // Symbol proc, e.g. `&:foo` - desugar to a literal block
-            return DesugaredBlockArgument::literalBlock(desugarSymbolProc(symbol));
+            // Symbol proc, e.g. `&:foo` - desugar to a literal block.
+            // There's no block syntax in the source to record for these.
+            return DesugaredBlockArgument::literalBlock(desugarSymbolProc(symbol), ast::Send::BlockType::Present);
         } else {
             return DesugaredBlockArgument::blockPass(desugar(bp->expression), blockPassLoc);
         }
@@ -4507,7 +4516,7 @@ ast::ExpressionPtr Desugarer::desugarMethodCall(ast::ExpressionPtr receiver, cor
             if (block.hasLiteralBlock()) {
                 // Both block pass AND literal block: `foo(...) { "literal" }`
                 magicSendArgs.emplace_back(move(block.literalBlockExpr));
-                flags.hasBlock = true;
+                flags.blockType = block.blockType;
             }
 
             return MK::Send(sendWithBlockLoc, MK::Magic(blockPassLoc), core::Names::callWithSplatAndBlockPass(),
@@ -4517,7 +4526,7 @@ ast::ExpressionPtr Desugarer::desugarMethodCall(ast::ExpressionPtr receiver, cor
         if (block.hasLiteralBlock()) {
             // Just a literal block, no block pass
             magicSendArgs.emplace_back(move(block.literalBlockExpr));
-            flags.hasBlock = true;
+            flags.blockType = block.blockType;
         }
 
         // Desugar any call with a splat and without a block pass argument.
@@ -4549,7 +4558,7 @@ ast::ExpressionPtr Desugarer::desugarMethodCall(ast::ExpressionPtr receiver, cor
         if (block.hasLiteralBlock()) {
             // This supports the invalid case of having both a block pass AND a literal block
             magicSendArgs.emplace_back(move(block.literalBlockExpr));
-            flags.hasBlock = true;
+            flags.blockType = block.blockType;
         }
 
         for (auto *arg : prismArgs) {
@@ -4586,7 +4595,7 @@ ast::ExpressionPtr Desugarer::desugarMethodCall(ast::ExpressionPtr receiver, cor
 
     if (block.hasLiteralBlock()) {
         sendArgs.emplace_back(move(block.literalBlockExpr));
-        flags.hasBlock = true;
+        flags.blockType = block.blockType;
     }
 
     return MK::Send(sendWithBlockLoc, move(receiver), methodName, messageLoc, numPosArgs, move(sendArgs), flags);
@@ -5336,6 +5345,22 @@ ast::ExpressionPtr Desugarer::desugarRegexp(core::LocOffsets location, core::Loc
 
 string_view Desugarer::sliceLocation(pm_location_t loc) const {
     return cast_prism_string(loc.start, loc.end - loc.start);
+}
+
+// Determine the syntax that was used to write a block, based on the token that closes it.
+//
+// Synthesized blocks (like the ones the RBS rewriters create) have a zero-width closing loc, and so they're only known
+// to be `Present`.
+ast::Send::BlockType Desugarer::blockTypeOf(pm_location_t loc) const {
+    auto token = sliceLocation(loc);
+
+    if (token == "}"sv) {
+        return ast::Send::BlockType::Braces;
+    } else if (token == "end"sv) {
+        return ast::Send::BlockType::DoEnd;
+    } else {
+        return ast::Send::BlockType::Present;
+    }
 }
 
 // Handle invalid or missing constant paths in class/module declarations.
