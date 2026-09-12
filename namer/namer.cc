@@ -20,6 +20,7 @@
 #include "core/errors/namer.h"
 #include "core/hashing/hashing.h"
 #include "core/lsp/TypecheckEpochManager.h"
+#include "core/packages/PackageInfo.h"
 
 using namespace std;
 
@@ -40,6 +41,12 @@ struct ParsedFileWithIdx {
 };
 
 using AllFoundDefinitions = vector<pair<core::FileRef, unique_ptr<core::FoundDefinitions>>>;
+
+using namespace core::packages;
+
+// [file, owner, originalName] → owner::mangledName
+using MangledClasses =
+    UnorderedMap<tuple<core::FileRef, core::ClassOrModuleRef, core::NameRef>, core::ClassOrModuleRef>;
 
 core::ClassOrModuleRef methodOwner(core::Context ctx, core::SymbolRef owner, bool isSelfMethod) {
     ENFORCE(owner.exists() && owner != core::Symbols::todo());
@@ -792,6 +799,8 @@ private:
     const core::FoundDefinitions &foundDefs;
 
     vector<core::ClassOrModuleRef> &symbolsToRecompute;
+    MangledClasses &mangledClasses;
+    const PackageInfo *package = nullptr;
 
     // Get the symbol for an already-defined owner. Limited to refs that can own things (classes and methods).
     core::ClassOrModuleRef getOwnerSymbol(const SymbolDefiner::State &state, core::FoundDefinitionRef ref) {
@@ -1204,6 +1213,43 @@ private:
         }
     }
 
+    bool shouldMangleClassDefinition(core::MutableContext ctx, core::ClassOrModuleRef owner, core::NameRef name) {
+        if (this->package == nullptr) {
+            return false;
+        }
+
+        // An enclosing mangled name has already isolated this entire subtree from the source-level namespace, so
+        // mangling classes nested more deeply provides no additional protection.
+        for (auto enclosing = owner; enclosing != core::Symbols::root(); enclosing = enclosing.data(ctx)->owner) {
+            if (enclosing.data(ctx)->name.hasUniqueNameKind(ctx, core::UniqueNameKind::MangleRename)) {
+                return false;
+            }
+        }
+
+        auto packageInfo = ctx.state.packageInfoForClassOrModule(owner, name);
+        return packageInfo.packageRegistryOwner.exists() && packageInfo.package.exists() &&
+               !this->package->ownsNamespace(ctx, packageInfo.package, packageInfo.packageRegistryOwner, true);
+    }
+
+    core::NameRef mangledClassName(core::MutableContext ctx, core::ClassOrModuleRef owner,
+                                   const core::FoundClass &klass) {
+        // We can't always call `nextMangledName` because on the fast path we need to reuse the previous name.
+        // To do that, we search the owner's members for a matching mangled symbol defined in this file.
+        // This intentionally gives subsequent reopenings within the same file the same mangled name. It also
+        // makes us resilient to fast path edits, like whitespace changes, that preserve the definition.
+        for (const auto &[candidateName, candidateSymbol] : owner.data(ctx)->members()) {
+            if (!candidateName.hasUniqueNameKind(ctx, core::UniqueNameKind::MangleRename) ||
+                candidateName.dataUnique(ctx)->original != klass.name || !candidateSymbol.isClassOrModule()) {
+                continue;
+            }
+            auto locs = candidateSymbol.asClassOrModuleRef().data(ctx)->locs();
+            if (absl::c_any_of(locs, [&ctx](core::Loc loc) { return loc.file() == ctx.file; })) {
+                return candidateName;
+            }
+        }
+        return ctx.state.nextMangledName(owner, klass.name);
+    }
+
     core::ClassOrModuleRef getClassSymbol(core::MutableContext ctx, const State &state, const core::FoundClass &klass) {
         core::ClassOrModuleRef symbol;
         if (klass.name == core::Names::Constants::Root()) {
@@ -1212,13 +1258,24 @@ private:
             symbol = ctx.owner.asClassOrModuleRef().data(ctx)->singletonClass(ctx);
         } else {
             auto owner = getOwnerSymbol(state, klass.owner);
-            auto member = owner.data(ctx)->findMember(ctx, klass.name);
+            auto name = klass.name;
+
+            auto shouldMangle = shouldMangleClassDefinition(ctx, owner, klass.name);
+            if (shouldMangle) {
+                name = mangledClassName(ctx, owner, klass);
+            }
+
+            auto member = owner.data(ctx)->findMember(ctx, name);
             if (member.exists()) {
-                // If member exists with this name, it must be a class or module, because we never mangle-rename them.
+                // Class/module definitions are entered before other constants, so this member has the right kind.
                 symbol = member.asClassOrModuleRef();
             } else {
-                auto newClass = ctx.state.enterClassOrModuleSymbol(ctx.locAt(klass.declLoc), owner, klass.name);
+                auto newClass = ctx.state.enterClassOrModuleSymbol(ctx.locAt(klass.declLoc), owner, name);
                 symbol = newClass;
+            }
+
+            if (shouldMangle) {
+                mangledClasses[{ctx.file, owner, klass.name}] = symbol;
             }
         }
         ENFORCE(symbol.exists());
@@ -1782,8 +1839,22 @@ public:
         }
     }
 
-    SymbolDefiner(const core::FoundDefinitions &foundDefs, vector<core::ClassOrModuleRef> &symbolsToRecompute)
-        : foundDefs(foundDefs), symbolsToRecompute{symbolsToRecompute} {}
+    SymbolDefiner(core::Context ctx, const core::FoundDefinitions &foundDefs, vector<core::ClassOrModuleRef> &symbolsToRecompute, MangledClasses &mangledClasses)
+        : foundDefs(foundDefs), symbolsToRecompute{symbolsToRecompute}, mangledClasses(mangledClasses) {
+        // TODO(jez) Should this be a helper somewhere?
+        auto &file = ctx.file.data(ctx);
+        if (!ctx.state.packageDB().enabled() || file.isPackage(ctx)) {
+            return;
+        }
+
+        auto packageName = ctx.state.packageDB().getPackageNameForFile(ctx.file);
+        if (!packageName.exists()) {
+            return;
+        }
+
+        auto &package = ctx.state.packageDB().getPackageInfo(packageName);
+        this->package = package.exists() ? &package : nullptr;
+    }
 
     SymbolDefiner::State enterClassDefinitions(core::MutableContext ctx, bool willDeleteOldDefs,
                                                ClassBehaviorLocsMap &classBehaviorLocs) {
@@ -1927,6 +1998,7 @@ public:
  */
 class TreeSymbolizer {
     friend class Namer;
+    const MangledClasses &mangledClasses;
 
     core::SymbolRef squashNamesInner(core::Context ctx, core::SymbolRef owner, ast::ExpressionPtr &node,
                                      bool firstName) {
@@ -1959,7 +2031,10 @@ class TreeSymbolizer {
         auto newOwner = squashNamesInner(ctx, owner, constLit->scope, firstNameRecursive);
         ENFORCE(newOwner.exists());
 
-        core::SymbolRef existing = ctx.state.lookupClassSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
+        auto mangled = mangledClasses.find({ctx.file, newOwner.asClassOrModuleRef(), constLit->cnst});
+        core::SymbolRef existing = mangled != mangledClasses.end()
+                                       ? mangled->second
+                                       : ctx.state.lookupClassSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
         if (firstName && !existing.exists() && newOwner.isClassOrModule()) {
             existing = ctx.state.lookupStaticFieldSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
             if (existing.exists()) {
@@ -1989,7 +2064,7 @@ class TreeSymbolizer {
     }
 
 public:
-    TreeSymbolizer() {}
+    TreeSymbolizer(const MangledClasses &mangledClasses) : mangledClasses(mangledClasses) {}
 
     void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
@@ -2451,7 +2526,7 @@ void findConflictingClassDefs(const core::GlobalState &gs, ClassBehaviorLocsMap 
 
 void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinitions,
                    UnorderedMap<core::FileRef, shared_ptr<const core::FileHash>> &&oldFoundHashesForFiles,
-                   core::FoundDefHashesResult *foundHashesOut, vector<core::ClassOrModuleRef> &updatedSymbols) {
+                   core::FoundDefHashesResult *foundHashesOut, vector<core::ClassOrModuleRef> &updatedSymbols, MangledClasses &mangledClasses) {
     Timer timeit(gs.tracer(), "naming.defineSymbols");
     const auto &epochManager = *gs.epochManager;
     uint32_t count = 0;
@@ -2468,7 +2543,7 @@ void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinition
         }
         core::MutableContext ctx(gs, core::Symbols::root(), fref);
 
-        SymbolDefiner symbolDefiner(*fileFoundDefinitions, updatedSymbols);
+        SymbolDefiner symbolDefiner(ctx, *fileFoundDefinitions, updatedSymbols, mangledClasses);
         auto state = symbolDefiner.enterClassDefinitions(ctx, willDeleteOldDefs, classBehaviorLocs);
         if (willDeleteOldDefs) {
             auto frefIt = oldFoundHashesForFiles.find(fref);
@@ -2494,15 +2569,15 @@ void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinition
 
         core::MutableContext ctx(gs, core::Symbols::root(), fref);
 
-        SymbolDefiner symbolDefiner(*fileFoundDefinitions, updatedSymbols);
+        SymbolDefiner symbolDefiner(ctx, *fileFoundDefinitions, updatedSymbols, mangledClasses);
         symbolDefiner.enterNewDefinitions(ctx, move(incrementalDefinitions[fref]));
     }
     return;
 }
 
-void symbolizeTrees(const core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers) {
+void symbolizeTrees(const core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers, const MangledClasses &mangledClasses) {
     Timer timeit(gs.tracer(), "naming.symbolizeTrees");
-    Parallel::iterate(workers, "symbolizeTrees", trees, [&gs, inserter = TreeSymbolizer()](auto &parsedFile) mutable {
+    Parallel::iterate(workers, "symbolizeTrees", trees, [&gs, inserter = TreeSymbolizer(mangledClasses)](auto &parsedFile) mutable {
         Timer timeit(gs.tracer(), "naming.symbolizeTreesOne", {{"file", string(parsedFile.file.data(gs).path())}});
         core::Context ctx(gs, core::Symbols::root(), parsedFile.file);
         ast::TreeWalk::apply(ctx, inserter, parsedFile.tree);
@@ -2524,12 +2599,13 @@ Namer::runInternal(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, Wor
         ENFORCE(foundDefs.size() == 1,
                 "Producing foundMethodHashes is meant to only happen when hashing a single file");
     }
-    defineSymbols(gs, move(foundDefs), std::move(oldFoundHashesForFiles), foundHashesOut, updatedSymbols);
+    MangledClasses mangledClasses;
+    defineSymbols(gs, move(foundDefs), std::move(oldFoundHashesForFiles), foundHashesOut, updatedSymbols, mangledClasses);
     if (gs.epochManager->wasTypecheckingCanceled()) {
         return true;
     }
 
-    symbolizeTrees(gs, trees, workers);
+    symbolizeTrees(gs, trees, workers, mangledClasses);
     return false;
 }
 
