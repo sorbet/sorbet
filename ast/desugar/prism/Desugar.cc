@@ -257,7 +257,7 @@ private:
 
     std::string_view sliceLocation(pm_location_t loc) const;
 
-    ast::Send::BlockType blockTypeOf(pm_location_t openingLoc) const;
+    ast::Send::BlockType blockTypeOf(pm_location_t loc) const;
 
     std::pair<core::NameRef, core::LocOffsets> translateSymbol(pm_symbol_node *symbol);
 
@@ -2648,7 +2648,7 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
 
                 ast::Send::Flags flags;
                 flags.isPrivateOk = true;
-                flags.blockType = blockTypeOf(blockNode->opening_loc);
+                flags.blockType = blockTypeOf(blockNode->closing_loc);
 
                 return MK::Send(location, move(receiver), methodName, location, posArgs, move(args), flags);
             }
@@ -2935,7 +2935,7 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
             pm_arguments_node *args = nullptr;
             auto block = DesugaredBlockArgument::literalBlock(
                 desugarLiteralBlock(lambdaNode->body, lambdaNode->parameters, blockLoc, lambdaNode->operator_loc),
-                blockTypeOf(lambdaNode->opening_loc));
+                blockTypeOf(lambdaNode->closing_loc));
             auto isPrivateOk = false; // `Kernel.lambda` is not a private call
             return desugarMethodCall(move(receiver), core::Names::lambda(), operatorLoc, args, lambdaNode->closing_loc,
                                      move(block), location, isPrivateOk);
@@ -4127,7 +4127,7 @@ Desugarer::DesugaredBlockArgument Desugarer::desugarBlock(pm_node_t *block, pm_a
     if (auto *blockNode = down_cast<pm_block_node>(block)) { // a literal block with `{ ... }` or `do ... end`
         auto literalBlock = desugarLiteralBlock(blockNode->body, blockNode->parameters, blockNode->base.location,
                                                 blockNode->opening_loc);
-        auto blockType = blockTypeOf(blockNode->opening_loc);
+        auto blockType = blockTypeOf(blockNode->closing_loc);
 
         // Handle combination of block pass argument AND a literal block.
         // e.g., `foo(&block) { "literal" }` - both need to be kept.
@@ -5347,16 +5347,16 @@ string_view Desugarer::sliceLocation(pm_location_t loc) const {
     return cast_prism_string(loc.start, loc.end - loc.start);
 }
 
-// Determine the syntax that was used to write a block, based on the token that opens it.
+// Determine the syntax that was used to write a block, based on the token that closes it.
 //
-// Synthesized blocks (like the ones the RBS rewriters create) have a zero-width opening loc, and so they're only known
+// Synthesized blocks (like the ones the RBS rewriters create) have a zero-width closing loc, and so they're only known
 // to be `Present`.
-ast::Send::BlockType Desugarer::blockTypeOf(pm_location_t openingLoc) const {
-    auto opening = sliceLocation(openingLoc);
+ast::Send::BlockType Desugarer::blockTypeOf(pm_location_t loc) const {
+    auto token = sliceLocation(loc);
 
-    if (opening == "{"sv) {
+    if (token == "}"sv) {
         return ast::Send::BlockType::Braces;
-    } else if (opening == "do"sv) {
+    } else if (token == "end"sv) {
         return ast::Send::BlockType::DoEnd;
     } else {
         return ast::Send::BlockType::Present;
