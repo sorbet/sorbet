@@ -435,6 +435,93 @@ void autogen(core::GlobalState &gs, vector<core::FileRef> files, ExpectationHand
     handler.checkExpectations();
 }
 
+vector<ast::ParsedFile> indexForStressIncremental(core::GlobalState *gs, absl::Span<core::FileRef> files,
+                                                  ExpectationHandler &handler) {
+    vector<ast::ParsedFile> newTrees;
+    newTrees.reserve(files.size());
+    for (auto &f : files) {
+        if (f.data(*gs).strictLevel == core::StrictLevel::Ignore) {
+            newTrees.emplace_back(ast::make_expression<ast::EmptyTree>(), f);
+            continue;
+        }
+
+        const int prohibitedLines = f.data(*gs).source().size();
+        auto newSource = absl::StrCat(string(prohibitedLines + 1, '\n'), f.data(*gs).source());
+        auto newFile = make_shared<core::File>(string(f.data(*gs).path()), move(newSource), f.data(*gs).sourceType);
+        gs->replaceFile(f, move(newFile));
+
+        core::MutableContext ctx(*gs, core::Symbols::root(), f);
+
+        handler.drainErrors(*gs);
+
+        // this replicates the logic of pipeline::indexOne
+        ast::ExpressionPtr ast;
+        switch (parser) {
+            case realmain::options::Parser::ORIGINAL: {
+                ENFORCE(!gs->cacheSensitiveOptions.rbsEnabled, "RBS mode is only supported with the Prism parser");
+
+                // Parser
+                parser::ParseResult parseResult;
+                {
+                    auto settings = parser::Parser::Settings{false, false, false};
+                    parseResult = parser::Parser::run(*gs, f, settings);
+                }
+
+                handler.addObserved(*gs, "parse-tree", [&]() { return parseResult.tree->toString(*gs); });
+                handler.addObserved(*gs, "parse-tree-whitequark",
+                                    [&]() { return parseResult.tree->toWhitequark(*gs); });
+                handler.addObserved(*gs, "parse-tree-json", [&]() { return parseResult.tree->toJSON(*gs); });
+
+                // Desugarer
+                ast = ast::desugar::node2Tree(ctx, move(parseResult.tree));
+
+                handler.addObserved(*gs, "desguar-tree", [&]() { return ast.toString(*gs); });
+                handler.addObserved(*gs, "desugar-tree-raw", [&]() { return ast.showRaw(*gs); });
+
+                break;
+            }
+
+            case realmain::options::Parser::PRISM: {
+                auto prismResult = parser::Prism::Parser::run(ctx);
+
+                // Run the RBS rewriter
+                if (gs->cacheSensitiveOptions.rbsEnabled) {
+                    auto &prismParser = prismResult.getParser();
+                    rbs::runRBSRewrite(*gs, f, prismResult.getRawNodePointer(), prismResult.getCommentLocations(), ctx,
+                                       prismParser);
+
+                    handler.addObserved(*gs, "rbs-rewrite-tree", [&]() { return prismResult.prettyPrint(); });
+                }
+
+                // Prism Desugarer
+                { ast = ast::Desugar::Prism::node2Tree(ctx, move(prismResult)); }
+
+                // Do *not* check the `desugar-tree` and `desugar-tree-raw` expectations for the Prism parser,
+                // which can be subtly different (e.g. the numbering of unique identifiers).
+                // Instead, we compare the two ASTs in the `index()` function.
+
+                break;
+            }
+        }
+
+        // Rewriter pass
+        ast = rewriter::Rewriter::run(ctx, move(ast));
+        handler.addObserved(*gs, "rewrite-tree", [&]() { return ast.toString(*gs); });
+        handler.addObserved(*gs, "rewrite-tree-raw", [&]() { return ast.showRaw(*gs); });
+
+        // local vars
+        auto file = ast::ParsedFile{move(ast), f};
+        file = local_vars::LocalVars::run(ctx, move(file));
+        testSerialize(*gs, file);
+        handler.addObserved(*gs, "index-tree", [&]() { return file.tree.toString(*gs); });
+        handler.addObserved(*gs, "index-tree-raw", [&]() { return file.tree.showRaw(*gs); });
+
+        newTrees.emplace_back(move(file));
+    }
+    fast_sort(newTrees, [](const auto &lhs, const auto &rhs) { return lhs.file < rhs.file; });
+    return newTrees;
+}
+
 TEST_CASE("PerPhaseTest") {
     Expectations test = Expectations::getExpectations(singleTest);
 
@@ -756,88 +843,7 @@ TEST_CASE("PerPhaseTest") {
     handler.clear(*gs);
     auto symbolsBefore = gs->symbolsUsedTotal();
 
-    vector<ast::ParsedFile> newTrees;
-    for (auto &f : files) {
-        if (f.data(*gs).strictLevel == core::StrictLevel::Ignore) {
-            newTrees.emplace_back(ast::make_expression<ast::EmptyTree>(), f);
-            continue;
-        }
-
-        const int prohibitedLines = f.data(*gs).source().size();
-        auto newSource = absl::StrCat(string(prohibitedLines + 1, '\n'), f.data(*gs).source());
-        auto newFile = make_shared<core::File>(string(f.data(*gs).path()), move(newSource), f.data(*gs).sourceType);
-        gs->replaceFile(f, move(newFile));
-
-        core::MutableContext ctx(*gs, core::Symbols::root(), f);
-
-        handler.drainErrors(*gs);
-
-        // this replicates the logic of pipeline::indexOne
-        ast::ExpressionPtr ast;
-        switch (parser) {
-            case realmain::options::Parser::ORIGINAL: {
-                ENFORCE(!gs->cacheSensitiveOptions.rbsEnabled, "RBS mode is only supported with the Prism parser");
-
-                // Parser
-                parser::ParseResult parseResult;
-                {
-                    auto settings = parser::Parser::Settings{false, false, false};
-                    parseResult = parser::Parser::run(*gs, f, settings);
-                }
-
-                handler.addObserved(*gs, "parse-tree", [&]() { return parseResult.tree->toString(*gs); });
-                handler.addObserved(*gs, "parse-tree-whitequark",
-                                    [&]() { return parseResult.tree->toWhitequark(*gs); });
-                handler.addObserved(*gs, "parse-tree-json", [&]() { return parseResult.tree->toJSON(*gs); });
-
-                // Desugarer
-                ast = ast::desugar::node2Tree(ctx, move(parseResult.tree));
-
-                handler.addObserved(*gs, "desguar-tree", [&]() { return ast.toString(*gs); });
-                handler.addObserved(*gs, "desugar-tree-raw", [&]() { return ast.showRaw(*gs); });
-
-                break;
-            }
-
-            case realmain::options::Parser::PRISM: {
-                auto prismResult = parser::Prism::Parser::run(ctx);
-
-                // Run the RBS rewriter
-                if (gs->cacheSensitiveOptions.rbsEnabled) {
-                    auto &prismParser = prismResult.getParser();
-                    rbs::runRBSRewrite(*gs, f, prismResult.getRawNodePointer(), prismResult.getCommentLocations(), ctx,
-                                       prismParser);
-
-                    handler.addObserved(*gs, "rbs-rewrite-tree", [&]() { return prismResult.prettyPrint(); });
-                }
-
-                // Prism Desugarer
-                { ast = ast::Desugar::Prism::node2Tree(ctx, move(prismResult)); }
-
-                // Do *not* check the `desugar-tree` and `desugar-tree-raw` expectations for the Prism parser,
-                // which can be subtly different (e.g. the numbering of unique identifiers).
-                // Instead, we compare the two ASTs in the `index()` function.
-
-                break;
-            }
-        }
-
-        // Rewriter pass
-        ast = rewriter::Rewriter::run(ctx, move(ast));
-        handler.addObserved(*gs, "rewrite-tree", [&]() { return ast.toString(*gs); });
-        handler.addObserved(*gs, "rewrite-tree-raw", [&]() { return ast.showRaw(*gs); });
-
-        // local vars
-        auto file = ast::ParsedFile{move(ast), f};
-        file = local_vars::LocalVars::run(ctx, move(file));
-        testSerialize(*gs, file);
-        handler.addObserved(*gs, "index-tree", [&]() { return file.tree.toString(*gs); });
-        handler.addObserved(*gs, "index-tree-raw", [&]() { return file.tree.showRaw(*gs); });
-
-        newTrees.emplace_back(move(file));
-    }
-    trees = move(newTrees);
-    fast_sort(trees, [](auto &lhs, auto &rhs) { return lhs.file < rhs.file; });
+    trees = indexForStressIncremental(gs.get(), absl::MakeSpan(files), handler);
 
     bool ranIncrementalNamer = false;
     {
