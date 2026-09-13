@@ -5040,6 +5040,10 @@ end
 class Net::IMAP::Literal < ::Data
   def initialize(data); end
 
+  def data; end
+
+  def non_sync; end
+
   def send_data(imap); end
 
   def validate(); end
