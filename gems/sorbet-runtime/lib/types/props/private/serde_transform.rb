@@ -53,7 +53,7 @@ module T::Props
           keys = generate(type.keys, mode, 'k')
           values = generate(type.values, mode, 'v')
           if keys && values
-            "#{varname}.each_with_object({}) {|(k,v),h| h[#{keys}] = #{values}}"
+            "#{varname}.to_h {|k,v| [#{keys}, #{values}]}"
           elsif keys
             "#{varname}.transform_keys {|k| #{keys}}"
           elsif values
