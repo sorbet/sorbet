@@ -1677,14 +1677,7 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
 FileRef GlobalState::enterFile(shared_ptr<File> file) {
     ENFORCE_NO_TIMER(!fileTableFrozen);
 
-    SLOW_DEBUG_ONLY(for (auto &f
-                         : this->getFiles()) {
-        if (f) {
-            if (f->path() == file->path()) {
-                Exception::raise("Request to `enterFile` for already-entered file path?");
-            }
-        }
-    })
+    ENFORCE(!findFileByPath(file->path()).exists(), "Request to `enterFile` for already-entered file path?");
 
     symbolsReferencedByFile.emplace_back();
     return files->emplace(std::move(file));
