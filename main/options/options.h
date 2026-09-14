@@ -226,6 +226,7 @@ struct Options {
 
     bool packageAttributedErrors = false;
     bool packageDirected = false;
+    std::vector<std::string> typecheckPackages;
     uint32_t reserveClassTableCapacity = 0;
     uint32_t reserveMethodTableCapacity = 0;
     uint32_t reserveFieldTableCapacity = 0;

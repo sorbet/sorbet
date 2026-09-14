@@ -1,0 +1,48 @@
+--- Nested package keeps global RBIs, generated RBIs, and preludes ---
+No errors! Great job.
+exit: 0
+--- The same selection in package-directed mode ---
+No errors! Great job.
+exit: 0
+--- Explicit test package is a consumer ---
+Errors: 1
+app/test/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+exit: 100
+--- Selecting the test package includes application dependencies ---
+Errors: 1
+app/test/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+exit: 100
+--- Explicit test package mode ---
+Errors: 1
+app/test/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+exit: 100
+--- Selecting a prelude selects all of its implicit consumers ---
+Errors: 3
+app/test/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+generated/Unrelated/value.rbi:3: Unable to resolve constant `Missing` https://srb.help/5002
+unrelated/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+exit: 100
+--- Selecting a prelude in package-directed mode ---
+Errors: 3
+app/test/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+generated/Unrelated/value.rbi:3: Unable to resolve constant `Missing` https://srb.help/5002
+unrelated/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+exit: 100
+--- File table omits unread sources ---
+   "path": "./app/__package.rb",
+   "path": "./app/isolated/__package.rb",
+   "path": "./app/isolated/value.rb",
+   "path": "./app/test/__package.rb",
+   "path": "./generated/App_Isolated/value.rbi",
+   "path": "./global.rbi",
+   "path": "./prelude/__package.rb",
+   "path": "./prelude/global.rb",
+   "path": "./unrelated/__package.rb",
+exit: 0
+--- Typed-sigil suggestions stay within the selection ---
+Errors: 4
+app/isolated/value.rb:1: You could add `# typed: strict` https://srb.help/7022
+generated/App_Isolated/value.rbi:1: You could add `# typed: strict` https://srb.help/7022
+global.rbi:1: You could add `# typed: false` https://srb.help/7022
+prelude/global.rb:1: You could add `# typed: strict` https://srb.help/7022
+exit: 100

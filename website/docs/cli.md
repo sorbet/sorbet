@@ -77,6 +77,24 @@ Sometimes, including an entire folder includes too many files. We can refine the
 
 This will ignore input files that contain the given pattern in their paths (relative to the input path passed to Sorbet). Patterns beginning with / match against the prefix of these relative paths; others are substring matches. Matches must be against whole component parts, so `foo` matches `/foo/bar.rb` and `/bar/foo/baz.rb` but not `/foo.rb` or `/foo2/bar.rb`.
 
+### Selecting packages
+
+With `--stripe-packages` (or its alias `--sorbet-packages`), use `--typecheck-packages` to check part of a packaged project:
+
+```bash
+srb tc --stripe-packages --typecheck-packages=Project::Foo,Project::Bar .
+# Equivalent; the option can be repeated:
+srb tc --stripe-packages --typecheck-packages=Project::Foo --typecheck-packages=Project::Bar .
+```
+
+Sorbet selects the named packages and all their transitive downstream consumers, then includes every transitive dependency of that set. Both regular and test imports count. Dependencies needed by a consumer are included even if the named packages do not import them. Other consumers of those dependencies are not selected just because they share a dependency. Cycles and duplicate names are supported.
+
+Prelude packages are implicit dependencies of every package, so they are always included; selecting a prelude selects the whole project. Unpackaged files, such as global RBIs, are also retained. Generated files associated with a package by the extra package directory options follow that package's selection.
+
+Continue to supply the project's usual input paths: this option selects packages within those inputs and does not discover additional directories. Sorbet reads all `__package.rb` files to build and validate the graph, so errors in package declarations can still be reported outside the selection. Ordinary source files in unselected packages are not indexed, resolved, or typechecked.
+
+Unknown or empty package names are errors. The option works with `--experimental-package-directed` and the on-disk cache, but cannot be combined with `--lsp`, `--store-state`, or `--gen-packages`.
+
 ### Considerations for memory usage
 
 Using `# typed: ignore` means only "ignore the contents of this file for the purpose of type checking." Sorbet still must read every `# typed: ignore` file in the codebase (to find the sigil in the first place)

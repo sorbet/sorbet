@@ -1,0 +1,11 @@
+--- Invalid imports (mode: ) ---
+app/__package.rb:4: Unable to resolve constant `Missing` https://srb.help/5002
+app/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+other/__package.rb:4: Argument to `import` must be a constant https://srb.help/3706
+exit: 100
+--- Invalid imports (mode: --experimental-package-directed) ---
+app/__package.rb:4: Unable to resolve constant `Missing` https://srb.help/5002
+app/__package.rb:4: Unable to resolve constant `Missing` https://srb.help/5002
+app/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+other/__package.rb:4: Argument to `import` must be a constant https://srb.help/3706
+exit: 100

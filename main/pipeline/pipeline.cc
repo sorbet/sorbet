@@ -1651,7 +1651,12 @@ string printFileTableJSON(const core::GlobalState &gs, const UnorderedMap<long, 
 
     for (int i = 1; i < gs.filesUsed(); ++i) {
         core::FileRef file(i);
-        if (file.data(gs).isPayload()) {
+        const auto &fileData = file.dataAllowingUnsafe(gs);
+        // Package selection can leave files outside the selection unread.
+        if (fileData.sourceType == core::File::Type::NotYetRead) {
+            continue;
+        }
+        if (fileData.isPayload()) {
             if (!showFull) {
                 continue;
             } else if (gs.censorForSnapshotTests && i > 10) {
