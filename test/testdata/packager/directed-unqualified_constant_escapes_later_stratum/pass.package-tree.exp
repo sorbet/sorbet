@@ -1,0 +1,89 @@
+# -- test/testdata/packager/directed-unqualified_constant_escapes_later_stratum/base/__package.rb --
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::Base<<C Base>> < (::Sorbet::Private::Static::PackageSpec)
+    <self>.import(::<PackageSpecRegistry>::<C P>)
+
+    <self>.export(<emptyTree>::<C Base>::<C Thing>)
+  end
+end
+# -- test/testdata/packager/directed-unqualified_constant_escapes_later_stratum/p/__package.rb --
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::P<<C P>> < (::Sorbet::Private::Static::PackageSpec)
+    <self>.export(<emptyTree>::<C P>::<C Secret2>)
+  end
+end
+# -- test/testdata/packager/directed-unqualified_constant_escapes_later_stratum/p/shared/__package.rb --
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::P::Shared<<C Shared>> < (::Sorbet::Private::Static::PackageSpec)
+    <self>.import(::<PackageSpecRegistry>::<C Base>)
+  end
+end
+# -- test/testdata/packager/directed-unqualified_constant_escapes_later_stratum/p/shared/consumer/__package.rb --
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::P::Shared::Consumer<<C Consumer>> < (::Sorbet::Private::Static::PackageSpec)
+    <self>.import(::<PackageSpecRegistry>::<C P>)
+  end
+end
+# -- test/testdata/packager/directed-unqualified_constant_escapes_later_stratum/p/secret2.rb --
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module ::P<<C P>> < ()
+    class ::P::Secret2<<C Secret2>> < (::<todo sym>)
+    end
+  end
+end
+# -- test/testdata/packager/directed-unqualified_constant_escapes_later_stratum/base/thing.rb --
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module ::Base<<C Base>> < ()
+    class ::Base::Thing<<C Thing>> < (::<todo sym>)
+      def secret(<blk>)
+        <emptyTree>::<C P>::<C Secret2>.new()
+      end
+
+      <runtime method definition of secret>
+    end
+  end
+end
+# -- test/testdata/packager/directed-unqualified_constant_escapes_later_stratum/p/shared/consumer/client.rb --
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module ::P<<C P>> < ()
+    module ::P::Shared<<C Shared>> < ()
+      module ::P::Shared::Consumer<<C Consumer>> < ()
+        class ::P::Shared::Consumer::Client<<C Client>> < (::<todo sym>)
+          def call(<blk>)
+            begin
+              <emptyTree>::<C Secret>
+              <emptyTree>::<C T>.reveal_type(<emptyTree>::<C Secret2>)
+            end
+          end
+
+          <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+          <runtime method definition of call>
+        end
+      end
+    end
+  end
+end
+# -- test/testdata/packager/directed-unqualified_constant_escapes_later_stratum/p/shared/secret.rb --
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module ::P<<C P>> < ()
+    module ::P::Shared<<C Shared>> < ()
+      class ::P::Shared::Secret<<C Secret>> < (::<todo sym>)
+        def base(<blk>)
+          <emptyTree>::<C Base>::<C Thing>.new()
+        end
+
+        <runtime method definition of base>
+      end
+    end
+  end
+end
+# -- test/testdata/packager/directed-unqualified_constant_escapes_later_stratum/p/shared/secret2.rb --
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module ::P<<C P>> < ()
+    module ::P::Shared<<C Shared>> < ()
+      class ::P::Shared::Secret2<<C Secret2>> < (::<todo sym>)
+      end
+    end
+  end
+end
