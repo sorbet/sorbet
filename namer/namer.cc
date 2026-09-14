@@ -1839,7 +1839,8 @@ public:
         }
     }
 
-    SymbolDefiner(core::Context ctx, const core::FoundDefinitions &foundDefs, vector<core::ClassOrModuleRef> &symbolsToRecompute, MangledClasses &mangledClasses)
+    SymbolDefiner(core::Context ctx, const core::FoundDefinitions &foundDefs,
+                  vector<core::ClassOrModuleRef> &symbolsToRecompute, MangledClasses &mangledClasses)
         : foundDefs(foundDefs), symbolsToRecompute{symbolsToRecompute}, mangledClasses(mangledClasses) {
         // TODO(jez) Should this be a helper somewhere?
         auto &file = ctx.file.data(ctx);
@@ -2526,7 +2527,8 @@ void findConflictingClassDefs(const core::GlobalState &gs, ClassBehaviorLocsMap 
 
 void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinitions,
                    UnorderedMap<core::FileRef, shared_ptr<const core::FileHash>> &&oldFoundHashesForFiles,
-                   core::FoundDefHashesResult *foundHashesOut, vector<core::ClassOrModuleRef> &updatedSymbols, MangledClasses &mangledClasses) {
+                   core::FoundDefHashesResult *foundHashesOut, vector<core::ClassOrModuleRef> &updatedSymbols,
+                   MangledClasses &mangledClasses) {
     Timer timeit(gs.tracer(), "naming.defineSymbols");
     const auto &epochManager = *gs.epochManager;
     uint32_t count = 0;
@@ -2575,13 +2577,15 @@ void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinition
     return;
 }
 
-void symbolizeTrees(const core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers, const MangledClasses &mangledClasses) {
+void symbolizeTrees(const core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers,
+                    const MangledClasses &mangledClasses) {
     Timer timeit(gs.tracer(), "naming.symbolizeTrees");
-    Parallel::iterate(workers, "symbolizeTrees", trees, [&gs, inserter = TreeSymbolizer(mangledClasses)](auto &parsedFile) mutable {
-        Timer timeit(gs.tracer(), "naming.symbolizeTreesOne", {{"file", string(parsedFile.file.data(gs).path())}});
-        core::Context ctx(gs, core::Symbols::root(), parsedFile.file);
-        ast::TreeWalk::apply(ctx, inserter, parsedFile.tree);
-    });
+    Parallel::iterate(
+        workers, "symbolizeTrees", trees, [&gs, inserter = TreeSymbolizer(mangledClasses)](auto &parsedFile) mutable {
+            Timer timeit(gs.tracer(), "naming.symbolizeTreesOne", {{"file", string(parsedFile.file.data(gs).path())}});
+            core::Context ctx(gs, core::Symbols::root(), parsedFile.file);
+            ast::TreeWalk::apply(ctx, inserter, parsedFile.tree);
+        });
 }
 
 } // namespace
@@ -2600,7 +2604,8 @@ Namer::runInternal(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, Wor
                 "Producing foundMethodHashes is meant to only happen when hashing a single file");
     }
     MangledClasses mangledClasses;
-    defineSymbols(gs, move(foundDefs), std::move(oldFoundHashesForFiles), foundHashesOut, updatedSymbols, mangledClasses);
+    defineSymbols(gs, move(foundDefs), std::move(oldFoundHashesForFiles), foundHashesOut, updatedSymbols,
+                  mangledClasses);
     if (gs.epochManager->wasTypecheckingCanceled()) {
         return true;
     }
