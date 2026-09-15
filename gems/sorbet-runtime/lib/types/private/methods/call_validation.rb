@@ -7,7 +7,8 @@ module T::Private::Methods::CallValidation
 
   KERNEL_TO_S = Kernel.instance_method(:to_s)
   MODULE_TO_S = Module.instance_method(:to_s)
-  private_constant(:KERNEL_TO_S, :MODULE_TO_S)
+  METHOD_NAME_FOR_EVAL = /\A[A-Za-z_][A-Za-z0-9_]*[!?]?\z/
+  private_constant(:KERNEL_TO_S, :MODULE_TO_S, :METHOD_NAME_FOR_EVAL)
 
   # Wraps a method with a layer of validation for the given type signature.
   # This wrapper is meant to be fast, and is applied by a previous wrapper,
@@ -52,21 +53,35 @@ module T::Private::Methods::CallValidation
   def self.create_abstract_wrapper(mod, method_name, original_visibility)
     T::Configuration.without_ruby_warnings do
       T::Private::DeclState.current.without_on_method_added do
-        mod.module_eval(<<~METHOD, __FILE__, __LINE__ + 1)
-          #{original_visibility}
+        if METHOD_NAME_FOR_EVAL.match?(method_name)
+          mod.module_eval(<<~METHOD, __FILE__, __LINE__ + 1)
+            #{original_visibility}
 
-          def #{method_name}(...)
+            def #{method_name}(...)
+              # We allow abstract methods to be implemented by things further down the ancestor chain.
+              # So, if a super method exists, call it.
+              if defined?(super)
+                super
+              else
+                raise NotImplementedError.new(
+                  "The method `#{method_name}` on #{mod} is declared as `abstract`. It does not have an implementation."
+                )
+              end
+            end
+          METHOD
+        else
+          T::Private::ClassUtils.def_with_visibility(mod, method_name, original_visibility) do |*args, &blk|
             # We allow abstract methods to be implemented by things further down the ancestor chain.
             # So, if a super method exists, call it.
             if defined?(super)
-              super
+              super(*args, &blk)
             else
               raise NotImplementedError.new(
                 "The method `#{method_name}` on #{mod} is declared as `abstract`. It does not have an implementation."
               )
             end
           end
-        METHOD
+        end
       end
     end
   end
