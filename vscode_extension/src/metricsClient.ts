@@ -109,16 +109,23 @@ export class MetricsClient {
       }
     } catch (reason) {
       sorbetMetricsApi = NoOpApi.INSTANCE;
-      const adjustedReason =
+      if (
         (<any>reason)?.message ===
         "command 'sorbet.metrics.getExportedApi' not found"
-          ? "Define the 'sorbet.metrics.getExportedApi' command to enable metrics gathering"
-          : (<any>reason).message;
-
-      this.context.log.error(
-        "Metrics-gathering disabled (error)",
-        adjustedReason,
-      );
+      ) {
+        // Expected outside of Stripe's internal `sorbet-internal.metrics`
+        // extension: not an error, just the same as the "no API" case above.
+        this.context.log.info(
+          "Metrics-gathering disabled (no API). Define the " +
+            "'sorbet.metrics.getExportedApi' command to enable metrics " +
+            "gathering.",
+        );
+      } else {
+        this.context.log.error(
+          "Metrics-gathering disabled (error)",
+          (<any>reason)?.message,
+        );
+      }
     }
     return sorbetMetricsApi;
   }
