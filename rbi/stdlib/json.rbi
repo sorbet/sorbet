@@ -442,6 +442,93 @@ class JSON::CircularDatastructure < JSON::NestingError
 end
 
 class JSON::Coder
+  # Argument `options`, if given, contains a
+  # [`Hash`](https://docs.ruby-lang.org/en/master/Hash.html) of options for both
+  # parsing and generating. It is passed positionally by json 2.x and as keyword
+  # arguments by json 3.x, so both are accepted here.
+  #
+  # For generation, the `strict: true` option is always set. When a Ruby object
+  # with no native [`JSON`](https://docs.ruby-lang.org/en/master/JSON.html)
+  # counterpart is encountered, the block given here is invoked, and must return
+  # a Ruby object that has a native
+  # [`JSON`](https://docs.ruby-lang.org/en/master/JSON.html) counterpart.
+  sig do
+    params(
+      options: ::T.nilable(::T::Hash[Symbol, ::T.anything]),
+      kwoptions: ::T.anything,
+      as_json: ::T.nilable(::T.proc.params(object: ::T.anything).returns(::T.anything)),
+    )
+    .void
+  end
+  def initialize(options=nil, **kwoptions, &as_json); end
+
+  # Serialize the given object into a
+  # [`JSON`](https://docs.ruby-lang.org/en/master/JSON.html) document, returning
+  # a [`String`](https://docs.ruby-lang.org/en/master/String.html), or `io` when
+  # one is given.
+  sig do
+    params(
+      object: ::T.anything,
+    )
+    .returns(String)
+  end
+  sig do
+    type_parameters(:IO)
+    .params(
+      object: ::T.anything,
+      io: ::T.type_parameter(:IO),
+    )
+    .returns(::T.type_parameter(:IO))
+  end
+  def dump(object, io=T.unsafe(nil)); end
+
+  # Alias for [`dump`](https://docs.ruby-lang.org/en/master/JSON/Coder.html#method-i-dump).
+  sig do
+    params(
+      object: ::T.anything,
+    )
+    .returns(String)
+  end
+  sig do
+    type_parameters(:IO)
+    .params(
+      object: ::T.anything,
+      io: ::T.type_parameter(:IO),
+    )
+    .returns(::T.type_parameter(:IO))
+  end
+  def generate(object, io=T.unsafe(nil)); end
+
+  # Parse the given [`JSON`](https://docs.ruby-lang.org/en/master/JSON.html)
+  # document and return an equivalent Ruby object. The result depends on the
+  # document, so it is `T.untyped` as it is for
+  # [`JSON.parse`](https://docs.ruby-lang.org/en/master/JSON.html#method-i-parse).
+  sig do
+    params(
+      source: String,
+    )
+    .returns(::T.untyped)
+  end
+  def load(source); end
+
+  # Alias for [`load`](https://docs.ruby-lang.org/en/master/JSON/Coder.html#method-i-load).
+  sig do
+    params(
+      source: String,
+    )
+    .returns(::T.untyped)
+  end
+  def parse(source); end
+
+  # Parse the [`JSON`](https://docs.ruby-lang.org/en/master/JSON.html) document
+  # at `path` and return an equivalent Ruby object.
+  sig do
+    params(
+      path: ::T.any(String, ::Pathname),
+    )
+    .returns(::T.untyped)
+  end
+  def load_file(path); end
 end
 
 # This exception is raised if a generator or unparser error occurs.
