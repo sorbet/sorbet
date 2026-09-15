@@ -3251,6 +3251,12 @@ public:
     void postTransformCast(core::Context ctx, ast::ExpressionPtr &tree) {
         auto cast = ast::cast_tree<ast::Cast>(tree);
         if (cast->cast == core::Names::assumeType()) {
+            if (cast->typeExpr.isSelfReference()) {
+                // For `X = new` (or `self.new`), the inferred type is the enclosing class.
+                auto klass = ctx.owner.enclosingClass(ctx);
+                cast->typeExpr = ast::MK::Constant(cast->typeExpr.loc(), klass);
+            }
+
             // This cast was not written by the user. Before we attempt to parse it as a type, let's
             // make sure that it's even possible to be valid.
             auto cnst = ast::cast_tree<ast::ConstantLit>(cast->typeExpr);
