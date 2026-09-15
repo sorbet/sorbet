@@ -1,0 +1,24 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::First<<C First>> < (::Sorbet::Private::Static::PackageSpec)
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::Second<<C Second>> < (::Sorbet::Private::Static::PackageSpec)
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module ::Second<Second$1> < ()
+    class ::Second::FromFirst<<C FromFirst>> < (::<todo sym>)
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module ::Second<Second$2> < ()
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module ::Second<<C Second>> < ()
+    class ::Second::FromSecond<<C FromSecond>> < (::<todo sym>)
+    end
+  end
+end
