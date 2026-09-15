@@ -341,8 +341,8 @@ public:
         ownerStack.pop_back();
     }
 
-    void addMethodModifiers(core::Context ctx, core::NameRef modifierName,
-                            absl::Span<const ast::ExpressionPtr> sendArgs) {
+    void addMethodModifiers(core::Context ctx, const ast::Send &send) {
+        auto sendArgs = send.posArgs();
         if (sendArgs.empty()) {
             return;
         }
@@ -350,14 +350,14 @@ public:
         if (sendArgs.size() == 1) {
             if (auto array = ast::cast_tree<ast::Array>(sendArgs[0])) {
                 for (auto &e : array->elems) {
-                    addMethodModifier(ctx, modifierName, e);
+                    addMethodModifier(ctx, send, e);
                 }
                 return;
             }
         }
 
         for (auto &arg : sendArgs) {
-            addMethodModifier(ctx, modifierName, arg);
+            addMethodModifier(ctx, send, arg);
         }
     }
 
@@ -371,13 +371,16 @@ public:
                 if (ownerIsMethod) {
                     break;
                 }
-                addMethodModifiers(ctx, original.fun, original.posArgs());
+                addMethodModifiers(ctx, original);
                 break;
             }
             case core::Names::packagePrivate().rawId():
             case core::Names::packagePrivateClassMethod().rawId(): {
                 if (!ctx.state.packageDB().enabled()) {
                     // These are only special if running in the packager.
+                    if (original.numPosArgs() == 1) {
+                        addMethodModifierDiagnostics(ctx, original, original.getPosArg(0));
+                    }
                     break;
                 }
                 [[fallthrough]];
@@ -403,7 +406,7 @@ public:
                         core::NameRef::noName(),
                     }};
                 } else {
-                    addMethodModifiers(ctx, original.fun, original.posArgs());
+                    addMethodModifiers(ctx, original);
                 }
                 break;
             case core::Names::privateConstant().rawId(): {
@@ -447,15 +450,54 @@ public:
         foundDefs->addModifier(methodVisiStack.back()->withTarget(original.name));
     }
 
-    void addMethodModifier(core::Context ctx, core::NameRef modifierName, const ast::ExpressionPtr &arg) {
+    struct UnwrappedMethodName {
+        core::NameRef name;
+        optional<bool> isSelfMethod;
+    };
+
+    void addMethodModifierDiagnostics(core::Context ctx, const ast::Send &send, const ast::ExpressionPtr &arg) {
         auto target = unwrapLiteralToMethodName(ctx, arg);
-        if (target.exists()) {
+        if (target.has_value() && target->isSelfMethod.has_value()) {
+            auto isSelfMethod = target->isSelfMethod.value();
+            if (send.fun == core::Names::private_() && isSelfMethod) {
+                if (auto e = ctx.beginError(send.funLoc, core::errors::Namer::PrivateMethodMismatch)) {
+                    e.setHeader("Use `{}` to define private class methods", "private_class_method");
+                    auto replacementLoc = ctx.locAt(send.funLoc);
+                    e.replaceWith("Replace with `private_class_method`", replacementLoc, "private_class_method");
+                }
+            } else if (send.fun == core::Names::privateClassMethod() && !isSelfMethod) {
+                if (auto e = ctx.beginError(send.funLoc, core::errors::Namer::PrivateMethodMismatch)) {
+                    e.setHeader("Use `{}` to define private instance methods", "private");
+                    auto replacementLoc = ctx.locAt(send.funLoc);
+                    e.replaceWith("Replace with `private`", replacementLoc, "private");
+                }
+            } else if (send.fun == core::Names::packagePrivate() && isSelfMethod) {
+                if (auto e = ctx.beginError(send.funLoc, core::errors::Namer::PrivateMethodMismatch)) {
+                    e.setHeader("Use `{}` to define package-private class methods", "package_private_class_method");
+                    auto replacementLoc = ctx.locAt(send.funLoc);
+                    e.replaceWith("Replace with `package_private_class_method`", replacementLoc,
+                                  "package_private_class_method");
+                }
+            } else if (send.fun == core::Names::packagePrivateClassMethod() && !isSelfMethod) {
+                if (auto e = ctx.beginError(send.funLoc, core::errors::Namer::PrivateMethodMismatch)) {
+                    e.setHeader("Use `{}` to define package-private instance methods", "package_private");
+                    auto replacementLoc = ctx.locAt(send.funLoc);
+                    e.replaceWith("Replace with `package_private`", replacementLoc, "package_private");
+                }
+            }
+        }
+    }
+
+    void addMethodModifier(core::Context ctx, const ast::Send &send, const ast::ExpressionPtr &arg) {
+        addMethodModifierDiagnostics(ctx, send, arg);
+        auto target = unwrapLiteralToMethodName(ctx, arg);
+        if (target.has_value()) {
             foundDefs->addModifier(core::FoundModifier{
                 core::FoundModifier::Kind::Method,
                 getOwner(),
                 arg.loc(),
-                /*name*/ modifierName,
-                target,
+                /*name*/ send.fun,
+                target->name,
             });
         }
     }
@@ -511,18 +553,28 @@ public:
         });
     }
 
-    core::NameRef unwrapLiteralToMethodName(core::Context ctx, const ast::ExpressionPtr &expr) {
+    optional<UnwrappedMethodName> unwrapLiteralToMethodName(core::Context ctx, const ast::ExpressionPtr &expr) {
         if (auto sym = ast::cast_tree<ast::Literal>(expr)) {
             // this handles the `private :foo` case
             if (!sym->isSymbol()) {
-                return core::NameRef::noName();
+                return nullopt;
             }
-            return sym->asSymbol();
+            return UnwrappedMethodName{sym->asSymbol(), nullopt};
         } else if (auto def = ast::cast_tree<ast::RuntimeMethodDefinition>(expr)) {
-            return def->name;
+            // this handles the `private def foo` case
+            return UnwrappedMethodName{def->name, def->isSelfMethod};
+        } else if (auto send = ast::cast_tree<ast::Send>(expr)) {
+            // Handles combinations of modifiers like
+            // - `private abstract def foo` (`private(abstract(def foo; end))`)
+            // - `abstract private def foo` (`abstract(private(def foo; end))`)
+            if (send->numPosArgs() == 1 && send->fun.isMethodDefModifierName()) {
+                return unwrapLiteralToMethodName(ctx, send->getPosArg(0));
+            }
+
+            return nullopt;
         } else {
             ENFORCE(!ast::isa_tree<ast::MethodDef>(expr), "methods inside sends should be gone");
-            return core::NameRef::noName();
+            return nullopt;
         }
     }
 
