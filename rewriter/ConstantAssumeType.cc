@@ -8,7 +8,7 @@ using namespace std;
 
 namespace sorbet::rewriter {
 
-void ConstantAssumeType::run(core::MutableContext ctx, ast::Assign *asgn) {
+void ConstantAssumeType::run(core::MutableContext ctx, ast::Assign *asgn, bool isRoot) {
     if (ctx.state.cacheSensitiveOptions.runningUnderAutogen) {
         return;
     }
@@ -40,7 +40,12 @@ void ConstantAssumeType::run(core::MutableContext ctx, ast::Assign *asgn) {
         return;
     }
 
-    if (!(ast::isa_tree<ast::UnresolvedConstantLit>(send->recv) || ast::isa_tree<ast::ConstantLit>(send->recv))) {
+    if (isRoot && send->recv.isSelfReference()) {
+        return; // Don't try to cast top level `X = new` to `<root>`
+    }
+
+    if (!(ast::isa_tree<ast::UnresolvedConstantLit>(send->recv) || ast::isa_tree<ast::ConstantLit>(send->recv) ||
+          send->recv.isSelfReference())) {
         return;
     }
 
