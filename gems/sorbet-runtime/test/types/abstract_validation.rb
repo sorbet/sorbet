@@ -106,6 +106,32 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
     )
   end
 
+  it "supports abstract method names that are not valid Ruby identifiers" do
+    method_name = :"method name with spaces"
+    implementation_ran = false
+    abstract_class = Class.new do
+      extend T::Sig
+      extend T::Helpers
+      abstract!
+
+      sig { abstract.void }
+      define_method(method_name) {}
+    end
+    concrete_class = Class.new(abstract_class) do
+      extend T::Sig
+
+      sig { override.void }
+      define_method(method_name) { implementation_ran = true }
+    end
+
+    concrete_class.new.public_send(method_name)
+    assert(implementation_ran)
+
+    assert_raises(NotImplementedError) do
+      abstract_class.allocate.public_send(method_name)
+    end
+  end
+
   it "succeeds if a concrete module implements all abstract methods" do
     mod = Module.new do
       extend T::Sig
