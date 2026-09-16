@@ -618,8 +618,9 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  "Optional hint message to add to all packaging related errors",
                                  cxxopts::value<string>()->default_value(""));
     options.add_options(section)("typecheck-packages",
-                                 "Typecheck these packages, their transitive consumers, and all dependencies of that "
-                                 "set. Accepts comma-separated package names and can be repeated.",
+                                 "Typecheck these packages and their transitive dependencies, including preludes. "
+                                 "Test packages must be selected explicitly. Requires --experimental-package-directed. "
+                                 "Accepts comma-separated package names and can be repeated.",
                                  cxxopts::value<vector<string>>(), "<name>");
     options.add_options(section)("extra-package-files-directory-prefix-underscore",
                                  "Extra parent directories which contain package files. Files are associated to a "
@@ -1332,8 +1333,8 @@ void readOptions(Options &opts,
             throw EarlyReturnWithCode(1);
         }
         if (raw.count("typecheck-packages")) {
-            if (!opts.cacheSensitiveOptions.sorbetPackages) {
-                logger->error("--typecheck-packages requires --stripe-packages or --sorbet-packages");
+            if (!opts.packageDirected) {
+                logger->error("--typecheck-packages requires --experimental-package-directed");
                 throw EarlyReturnWithCode(1);
             }
             if (opts.runLSP || !opts.storeState.empty() || genPackagesEnabled) {

@@ -1,3 +1,3 @@
 # typed: true
 
-class App::Isolated::Generated < GlobalPrelude; end
+class App::Isolated::Generated < ::Google::Protobuf::AbstractMessage; end

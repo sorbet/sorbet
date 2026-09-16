@@ -48,6 +48,10 @@ private:
     // completed.
     std::vector<Node> nodes_;
 
+    // Select the named SCCs, preludes, and their dependencies without selecting consumers or promoting application
+    // SCCs to legacy test SCCs. An empty selection includes all nodes.
+    std::vector<bool> selectSCCs(const PackageDB &db, const UnorderedSet<MangledName> &packages) const;
+
 public:
     Condensation() = default;
 
@@ -102,8 +106,8 @@ public:
 
     // Compute a traversal through the condensation graph, that yields groups of SCCs that have no dependencies on each
     // other. These groups are acceptable to typecheck in the same stratum, under the assumption that the package graph
-    // is well-formed.
-    const Traversal computeTraversal(const GlobalState &gs) const;
+    // is well-formed. When packages is non-empty, only traverse their expanded package selection.
+    const Traversal computeTraversal(const GlobalState &gs, const UnorderedSet<MangledName> &packages = {}) const;
 
     absl::Span<const Node> nodes() const {
         return this->nodes_;
@@ -111,12 +115,6 @@ public:
 
     // Fetch the set of packages that depend on the set of packages provided.
     UnorderedSet<MangledName> transitiveDependentsOf(const PackageDB &db,
-                                                     const UnorderedSet<MangledName> &packages) const;
-
-    // Select whole packages (both application and test code): first their transitive consumers, then all
-    // dependencies of that set. Includes implicit prelude dependencies without selecting unrelated consumers
-    // of dependencies. Requires the package DB corresponding to this condensation graph.
-    UnorderedSet<MangledName> expandPackageSelection(const PackageDB &db,
                                                      const UnorderedSet<MangledName> &packages) const;
 };
 

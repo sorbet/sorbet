@@ -647,28 +647,6 @@ int realmain(int argc, char *argv[]) {
             pipeline::buildPackageDB(*gs, absl::MakeSpan(packageIndexed), inputFilesSpan, opts, *workers);
         }
 
-        UnorderedSet<core::packages::MangledName> selectedPackages;
-        if (!opts.typecheckPackages.empty()) {
-            for (const auto &name : opts.typecheckPackages) {
-                vector<string> parts = absl::StrSplit(name, "::");
-                auto pkg = core::packages::MangledName::lookupMangledName(*gs, parts);
-                if (!gs->packageDB().getPackageInfo(pkg).exists()) {
-                    logger->error("Unknown package `{}` in --typecheck-packages", name);
-                    throw EarlyReturnWithCode(1);
-                }
-                selectedPackages.insert(pkg);
-            }
-            selectedPackages = gs->packageDB().condensation().expandPackageSelection(gs->packageDB(), selectedPackages);
-        }
-        auto inPackageSelection = [&](core::FileRef file) {
-            if (opts.typecheckPackages.empty()) {
-                return true;
-            }
-            auto pkg = gs->packageDB().getPackageNameForFile(file);
-            // Unpackaged files include global RBIs needed by any package.
-            return !pkg.exists() || selectedPackages.contains(pkg);
-        };
-
         // We disable tree leaking if we're targeting emscripten, or if we're typechecking in package dependency order.
         // The latter is so that we reuse memory as we traverse the package graph.
         const bool intentionallyLeakASTs = !sorbet::emscripten_build && !opts.packageDirected;
@@ -678,15 +656,6 @@ int realmain(int argc, char *argv[]) {
         vector<ast::ParsedFile> stratumFiles;
         int currentStratum = -1;
         auto strata = pipeline::computePackageStrata(*gs, packageIndexed, inputFilesSpan, opts);
-        if (!opts.typecheckPackages.empty()) {
-            for (auto &stratum : strata.strata) {
-                auto packagesEnd = absl::c_stable_partition(
-                    stratum.packageFiles, [&](const auto &file) { return inPackageSelection(file.file); });
-                stratum.packageFiles = stratum.packageFiles.first(distance(stratum.packageFiles.begin(), packagesEnd));
-                auto sourcesEnd = absl::c_stable_partition(stratum.sourceFiles, inPackageSelection);
-                stratum.sourceFiles = stratum.sourceFiles.first(distance(stratum.sourceFiles.begin(), sourcesEnd));
-            }
-        }
         gs->preallocateForStrata(strata.strata.size());
         for (auto &stratum : strata.strata) {
             ++currentStratum;
@@ -852,7 +821,7 @@ int realmain(int argc, char *argv[]) {
             auto id = 0;
             for (auto &file : gs->getFiles().subspan(1)) {
                 id++;
-                if (!inPackageSelection(core::FileRef(id))) {
+                if (strata.fileToStratum[id] == pipeline::PackageStrata::UNSELECTED) {
                     continue;
                 }
                 if (file->isPayload()) {

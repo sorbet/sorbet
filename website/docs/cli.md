@@ -79,21 +79,23 @@ This will ignore input files that contain the given pattern in their paths (rela
 
 ### Selecting packages
 
-With `--stripe-packages` (or its alias `--sorbet-packages`), use `--typecheck-packages` to check part of a packaged project:
+In package-directed typechecking mode (`--experimental-package-directed`), use `--typecheck-packages` with `--stripe-packages` (or its alias `--sorbet-packages`) to check part of a packaged project:
 
 ```bash
-srb tc --stripe-packages --typecheck-packages=Project::Foo,Project::Bar .
+srb tc --stripe-packages --experimental-package-directed --typecheck-packages=Project::Foo,Project::Bar .
 # Equivalent; the option can be repeated:
-srb tc --stripe-packages --typecheck-packages=Project::Foo --typecheck-packages=Project::Bar .
+srb tc --stripe-packages --experimental-package-directed --typecheck-packages=Project::Foo --typecheck-packages=Project::Bar .
 ```
 
-Sorbet selects the named packages and all their transitive downstream consumers, then includes every transitive dependency of that set. Both regular and test imports count. Dependencies needed by a consumer are included even if the named packages do not import them. Other consumers of those dependencies are not selected just because they share a dependency. Cycles and duplicate names are supported.
+Sorbet selects the named packages and their transitive dependencies. Downstream consumers are not selected: a generated registry that imports a selected service does not pull in every other service in the registry. Production selections do not include the legacy tests of their dependencies. Name a test package explicitly to select its code and dependencies. Cycles and duplicate names are supported.
 
-Prelude packages are implicit dependencies of every package, so they are always included; selecting a prelude selects the whole project. Unpackaged files, such as global RBIs, are also retained. Generated files associated with a package by the extra package directory options follow that package's selection.
+For example, selecting `Project::Foo` does not select `Project::Foo::Test`; name both to check both. An explicit test selection may require legacy test dependencies, which can cover much more of the project than the corresponding production selection.
+
+Prelude packages (marked with `prelude!` or `prelude_package`) are implicit dependencies of every package, so they are always included. Selecting a prelude does not select its consumers. Unpackaged files, such as global RBIs, are also retained. Generated files associated with a package by the extra package directory options follow that package's selection.
 
 Continue to supply the project's usual input paths: this option selects packages within those inputs and does not discover additional directories. Sorbet reads all `__package.rb` files to build and validate the graph, so errors in package declarations can still be reported outside the selection. Ordinary source files in unselected packages are not indexed, resolved, or typechecked.
 
-Unknown or empty package names are errors. The option works with `--experimental-package-directed` and the on-disk cache, but cannot be combined with `--lsp`, `--store-state`, or `--gen-packages`.
+Unknown or empty package names are errors. The option requires `--experimental-package-directed` and supports the on-disk cache, but cannot be combined with `--lsp`, `--store-state`, or `--gen-packages`.
 
 ### Considerations for memory usage
 

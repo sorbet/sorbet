@@ -506,6 +506,7 @@ NameDef names[] = {
     {"only"},
     {"testRb", "test_rb"},
     {"prelude_bang", "prelude!"},
+    {"preludePackage", "prelude_package"},
     {"test_bang", "test!"},
     {"usesInternals", "uses_internals"},
 

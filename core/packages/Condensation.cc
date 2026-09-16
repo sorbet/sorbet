@@ -11,6 +11,7 @@ namespace {
 
 struct TraversalBuilder {
     absl::Span<const Condensation::Node> nodes;
+    vector<bool> included;
     vector<uint32_t> remainingImports;
 
     vector<uint32_t> sccLengths;
@@ -18,9 +19,10 @@ struct TraversalBuilder {
 
     Condensation::Traversal result;
 
-    TraversalBuilder(const core::GlobalState &gs, absl::Span<const Condensation::Node> nodes)
-        : nodes{nodes}, remainingImports(this->nodes.size(), 0) {
+    TraversalBuilder(const core::GlobalState &gs, absl::Span<const Condensation::Node> nodes, vector<bool> included)
+        : nodes{nodes}, included{move(included)}, remainingImports(nodes.size(), 0) {
         result.packages.reserve(gs.packageDB().packages().size());
+        ENFORCE(this->included.size() == nodes.size());
     }
 
     struct Roots {
@@ -37,6 +39,11 @@ struct TraversalBuilder {
 
         // Seed the needed imports for the traversal from the roots.
         for (auto &node : this->nodes) {
+            if (!this->included[node.id]) {
+                continue;
+            }
+            ENFORCE(absl::c_all_of(node.imports, [&](auto dependency) { return this->included[dependency]; }),
+                    "The package selection must include all dependencies");
             // Prelude packages behave a little differently from normal packages: we put them all into the first stratum
             // regardless of their imports. This has interesting effects on the `remainingImports` we track in the
             // builder, and how we use the `backEdges` of the condensation graph:
@@ -85,6 +92,9 @@ struct TraversalBuilder {
 
             // Queue up the dependents in the next frontier, decrementing their imports by one
             for (auto dep : this->nodes[sccId].backEdges) {
+                if (!this->included[dep]) {
+                    continue;
+                }
                 auto &remaining = this->remainingImports[dep];
 
                 // Prelude packages are processed all in one go, so we ignore any dependencies within that subgraph.
@@ -135,8 +145,9 @@ struct TraversalBuilder {
 
 } // namespace
 
-const Condensation::Traversal Condensation::computeTraversal(const core::GlobalState &gs) const {
-    TraversalBuilder builder(gs, this->nodes_);
+const Condensation::Traversal Condensation::computeTraversal(const core::GlobalState &gs,
+                                                             const UnorderedSet<MangledName> &packages) const {
+    TraversalBuilder builder(gs, this->nodes_, this->selectSCCs(gs.packageDB(), packages));
 
     // All prelude package SCCs, and the set of non-prelude package SCCs that have no imports.
     auto [prelude, roots] = builder.roots();
@@ -264,67 +275,39 @@ UnorderedSet<MangledName> Condensation::transitiveDependentsOf(const PackageDB &
     return downstream;
 }
 
-UnorderedSet<MangledName> Condensation::expandPackageSelection(const PackageDB &db,
-                                                               const UnorderedSet<MangledName> &packages) const {
+vector<bool> Condensation::selectSCCs(const PackageDB &db, const UnorderedSet<MangledName> &packages) const {
+    vector<bool> selected(this->nodes_.size(), packages.empty());
     if (packages.empty()) {
-        return {};
+        return selected;
     }
 
-    UnorderedSet<MangledName> selected;
     vector<int> pending;
-    vector<bool> visited(this->nodes_.size(), false);
     auto enqueue = [&](int scc) {
-        if (!visited[scc]) {
-            visited[scc] = true;
+        if (!selected[scc]) {
+            selected[scc] = true;
             pending.emplace_back(scc);
         }
     };
-    auto includePackage = [&](MangledName pkg) {
-        if (!selected.insert(pkg).second) {
-            return;
-        }
-        const auto &info = db.getPackageInfo(pkg);
-        // A package can have separate application and test SCCs, or only a test SCC. Visiting either part
-        // selects the whole package, including consumers and dependencies of the other part.
-        for (auto scc : {info.sccID(), info.testSccID()}) {
-            if (scc.has_value()) {
-                enqueue(scc.value());
-            }
-        }
-    };
     for (auto pkg : packages) {
-        includePackage(pkg);
+        const auto &info = db.getPackageInfo(pkg);
+        ENFORCE(info.exists());
+        auto scc = info.sccID();
+        ENFORCE(scc.has_value());
+        enqueue(scc.value());
     }
 
-    for (size_t i = 0; i < pending.size(); ++i) {
-        const auto &node = this->nodes_[pending[i]];
-        if (node.isPrelude) {
-            // Every package is an implicit consumer of every prelude package.
-            return UnorderedSet<MangledName>(db.packages().begin(), db.packages().end());
-        }
-        for (auto pkg : node.members) {
-            includePackage(pkg);
-        }
-        for (auto consumer : node.backEdges) {
-            enqueue(consumer);
-        }
-    }
-
-    // Prelude dependencies are implicit, so add them explicitly before walking imports.
+    // All prelude code belongs to the initial stratum and provides global definitions, including test helpers.
     for (const auto &node : this->nodes_) {
         if (node.isPrelude) {
             enqueue(node.id);
         }
     }
 
-    // Revisit the entire consumer closure, following imports this time. Keeping the two walks separate
-    // avoids pulling in unrelated consumers of shared dependencies.
+    // Only imports are required to typecheck the selection. Following back edges would select consumers such as
+    // generated registries, which can import most of the project even when the selected package is small.
+    // Reaching an application SCC must not select its legacy test SCC either.
     for (size_t i = 0; i < pending.size(); ++i) {
-        const auto &node = this->nodes_[pending[i]];
-        for (auto pkg : node.members) {
-            includePackage(pkg);
-        }
-        for (auto dependency : node.imports) {
+        for (auto dependency : this->nodes_[pending[i]].imports) {
             enqueue(dependency);
         }
     }

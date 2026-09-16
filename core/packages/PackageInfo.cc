@@ -1033,7 +1033,10 @@ std::string PackageInfo::renderPackageRbContents(
     fmt::memory_buffer result;
 
     if (isPreludePackage()) {
-        fmt::format_to(std::back_inserter(result), "  prelude!\n\n");
+        // Keep the project's spelling of the prelude directive when regenerating its package file.
+        auto directiveSource = core::Loc(file, locs.preludePackage).source(gs);
+        ENFORCE(directiveSource.has_value());
+        fmt::format_to(std::back_inserter(result), "  {}\n\n", directiveSource.value());
     }
 
     for (auto &directive : extraDirectives_) {
