@@ -767,9 +767,7 @@ module Kernel
   sig { params(x: NilClass).returns(T::Array[T.untyped]) }
   sig do
     type_parameters(:Elem)
-      .params(
-        x: T.any(T::Enumerable[T.type_parameter(:Elem)], T.type_parameter(:Elem), T.nilable(T.type_parameter(:Elem)))
-      )
+      .params(x: T.any(T::Enumerable[T.type_parameter(:Elem)], NilClass, T.type_parameter(:Elem)))
       .returns(T::Array[T.type_parameter(:Elem)])
   end
   def Array(x); end
