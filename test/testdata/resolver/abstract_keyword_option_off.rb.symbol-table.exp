@@ -1,0 +1,36 @@
+class ::<root> < ::Object ()
+  class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> ()
+    method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/resolver/abstract_keyword_option_off.rb:4
+      argument <blk><block> @ Loc {file=test/testdata/resolver/abstract_keyword_option_off.rb start=??? end=???}
+  class ::AbstractKeywordInClass < ::Object () @ test/testdata/resolver/abstract_keyword_option_off.rb:9
+    method ::AbstractKeywordInClass#bar (x, y, <blk>) @ test/testdata/resolver/abstract_keyword_option_off.rb:16
+      argument x<> @ Loc {file=test/testdata/resolver/abstract_keyword_option_off.rb start=16:20 end=16:21}
+      argument y<> @ Loc {file=test/testdata/resolver/abstract_keyword_option_off.rb start=16:23 end=16:24}
+      argument <blk><block> @ Loc {file=test/testdata/resolver/abstract_keyword_option_off.rb start=??? end=???}
+    method ::AbstractKeywordInClass#foo (<blk>) @ test/testdata/resolver/abstract_keyword_option_off.rb:15
+      argument <blk><block> @ Loc {file=test/testdata/resolver/abstract_keyword_option_off.rb start=??? end=???}
+    method ::AbstractKeywordInClass#priv1 : private (<blk>) @ test/testdata/resolver/abstract_keyword_option_off.rb:20
+      argument <blk><block> @ Loc {file=test/testdata/resolver/abstract_keyword_option_off.rb start=??? end=???}
+    method ::AbstractKeywordInClass#priv2 : private (<blk>) @ test/testdata/resolver/abstract_keyword_option_off.rb:24
+      argument <blk><block> @ Loc {file=test/testdata/resolver/abstract_keyword_option_off.rb start=??? end=???}
+    method ::AbstractKeywordInClass#prot1 : protected (<blk>) @ test/testdata/resolver/abstract_keyword_option_off.rb:19
+      argument <blk><block> @ Loc {file=test/testdata/resolver/abstract_keyword_option_off.rb start=??? end=???}
+    method ::AbstractKeywordInClass#prot2 : protected (<blk>) @ test/testdata/resolver/abstract_keyword_option_off.rb:23
+      argument <blk><block> @ Loc {file=test/testdata/resolver/abstract_keyword_option_off.rb start=??? end=???}
+    method ::AbstractKeywordInClass#pub1 (<blk>) @ test/testdata/resolver/abstract_keyword_option_off.rb:18
+      argument <blk><block> @ Loc {file=test/testdata/resolver/abstract_keyword_option_off.rb start=??? end=???}
+    method ::AbstractKeywordInClass#pub2 (<blk>) @ test/testdata/resolver/abstract_keyword_option_off.rb:22
+      argument <blk><block> @ Loc {file=test/testdata/resolver/abstract_keyword_option_off.rb start=??? end=???}
+  class ::<Class:AbstractKeywordInClass>[<AttachedClass>] < ::<Class:Object> (ShimForAbstractModifierSupport, Helpers) @ test/testdata/resolver/abstract_keyword_option_off.rb:9
+    type-member(+) ::<Class:AbstractKeywordInClass>::<AttachedClass> -> T.attached_class (of AbstractKeywordInClass) @ test/testdata/resolver/abstract_keyword_option_off.rb:9
+    method ::<Class:AbstractKeywordInClass>#<static-init> (<blk>) @ test/testdata/resolver/abstract_keyword_option_off.rb:9
+      argument <blk><block> @ Loc {file=test/testdata/resolver/abstract_keyword_option_off.rb start=??? end=???}
+  module ::ShimForAbstractModifierSupport < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/testdata/resolver/abstract_keyword_option_off.rb:4
+    method ::ShimForAbstractModifierSupport#abstract (method_name, <blk>) @ test/testdata/resolver/abstract_keyword_option_off.rb:6
+      argument method_name<> @ Loc {file=test/testdata/resolver/abstract_keyword_option_off.rb start=6:16 end=6:27}
+      argument <blk><block> @ Loc {file=test/testdata/resolver/abstract_keyword_option_off.rb start=??? end=???}
+  class ::<Class:ShimForAbstractModifierSupport>[<AttachedClass>] < ::Module () @ test/testdata/resolver/abstract_keyword_option_off.rb:4
+    type-member(+) ::<Class:ShimForAbstractModifierSupport>::<AttachedClass> -> T.attached_class (of ShimForAbstractModifierSupport) @ test/testdata/resolver/abstract_keyword_option_off.rb:4
+    method ::<Class:ShimForAbstractModifierSupport>#<static-init> (<blk>) @ test/testdata/resolver/abstract_keyword_option_off.rb:4
+      argument <blk><block> @ Loc {file=test/testdata/resolver/abstract_keyword_option_off.rb start=??? end=???}
+
