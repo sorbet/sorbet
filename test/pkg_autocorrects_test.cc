@@ -161,6 +161,19 @@ const core::SymbolRef getConstantRef(core::GlobalState &gs, vector<string> rawNa
     return sym;
 }
 
+TEST_CASE("Package generation preserves the prelude directive") {
+    for (auto directive : {"prelude!", "prelude_package"}) {
+        INFO(directive);
+        core::GlobalState gs(errorQueue);
+        makeDefaultPackagerGlobalState(gs);
+        auto source = fmt::format("# typed: strict\nclass Prelude < PackageSpec\n  {}\nend\n", directive);
+        auto parsedFiles = enterPackages(gs, {{"prelude/__package.rb", source}});
+        auto &pkg = packageInfoFor(gs, parsedFiles.front().file);
+        REQUIRE(pkg.isPreludePackage());
+        CHECK_EQ(pkg.renderPackageRbContents(gs, {}, {}, {}), fmt::format("  {}\n\n", directive));
+    }
+}
+
 TEST_CASE("Simple add import") {
     core::GlobalState gs(errorQueue);
     makeDefaultPackagerGlobalState(gs);
