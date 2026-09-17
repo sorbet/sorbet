@@ -1626,6 +1626,11 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             blockType = Types::untyped(method);
         }
 
+        // Unlike the other parameters (which go through `matchArgType`), the block parameter never
+        // has an argument to check against, so this is the only place where `T.self_type` nested in
+        // the `&blk` parameter's type gets replaced with the receiver (e.g. for `Kernel#tap`).
+        blockType = Types::replaceSelfType(gs, blockType, args.selfType);
+
         // Only report "does not expect a block" error if the method is defined in a `typed: strict`
         // file or higher and has a sig, which would force the "uses `yield` but does not mention a
         // block parameter" error, so we can use the heuristic about isSyntheticBlockParameter.
