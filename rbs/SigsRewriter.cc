@@ -232,32 +232,36 @@ bool isSelfOrKernel(pm_node_t *node, const parser::Prism::Parser *prismParser) {
     return false;
 }
 
-core::AutocorrectSuggestion autocorrectAbstractBody(core::MutableContext ctx, pm_node_t *method,
-                                                    const parser::Prism::Parser *prismParser, pm_node_t *method_body) {
+optional<core::AutocorrectSuggestion> autocorrectAbstractBody(core::MutableContext ctx, pm_node_t *method,
+                                                              const parser::Prism::Parser *prismParser,
+                                                              pm_node_t *method_body) {
     core::LocOffsets editLoc;
     string corrected;
-
-    auto *def = down_cast_nonnull<pm_def_node_t>(method);
-    auto methodLoc = prismParser->translateLocation(method->location);
-    auto nameLoc = prismParser->translateLocation(def->name_loc);
-
-    auto lineStart = core::Loc::pos2Detail(ctx.file.data(ctx), nameLoc.endPos()).line;
-    auto lineEnd = core::Loc::pos2Detail(ctx.file.data(ctx), methodLoc.endPos()).line;
 
     if (method_body) {
         editLoc = prismParser->translateLocation(method_body->location);
         corrected = "raise \"Abstract method called\"";
-    } else if (lineStart == lineEnd) {
-        editLoc = nameLoc.copyEndWithZeroLength().join(methodLoc.copyEndWithZeroLength());
-        corrected = " = raise(\"Abstract method called\")";
     } else {
-        editLoc = nameLoc.copyEndWithZeroLength();
-        auto [_endLoc, indentLength] = ctx.locAt(methodLoc).findStartOfIndentation(ctx);
-        string indent(indentLength + 2, ' ');
-        corrected = "\n" + indent + "raise \"Abstract method called\"";
+        auto *def = down_cast_nonnull<pm_def_node_t>(method);
+        if (def->end_keyword_loc.start == nullptr || def->end_keyword_loc.start == def->end_keyword_loc.end) {
+            return nullopt;
+        }
+        auto methodLoc = prismParser->translateLocation(method->location);
+
+        // Insert before `end` without separating the header from its comments.
+        editLoc = prismParser->translateLocation(def->end_keyword_loc).copyWithZeroLength();
+        auto lineStart = core::Loc::pos2Detail(ctx.file.data(ctx), methodLoc.beginPos()).line;
+        auto lineEnd = core::Loc::pos2Detail(ctx.file.data(ctx), methodLoc.endPos()).line;
+
+        if (lineStart == lineEnd) {
+            corrected = "raise \"Abstract method called\"; ";
+        } else {
+            auto [_endLoc, indentLength] = ctx.locAt(methodLoc).findStartOfIndentation(ctx);
+            corrected = "  raise \"Abstract method called\"\n" + string(indentLength, ' ');
+        }
     }
 
-    return core::AutocorrectSuggestion{fmt::format("Add `{}` to the method body", "raise"),
+    return core::AutocorrectSuggestion{"Replace the abstract method body with `raise`",
                                        {core::AutocorrectSuggestion::Edit{ctx.locAt(editLoc), corrected}}};
 }
 
@@ -306,8 +310,9 @@ void ensureAbstractMethodRaises(core::MutableContext ctx, pm_node_t *node, parse
 
     if (auto e = ctx.beginIndexerError(nodeLoc, core::errors::Rewriter::RBSAbstractMethodNoRaises)) {
         e.setHeader("Methods declared @abstract with an RBS comment must always raise");
-        auto autocorrect = autocorrectAbstractBody(ctx, node, prismParser, def->body);
-        e.addAutocorrect(move(autocorrect));
+        if (auto autocorrect = autocorrectAbstractBody(ctx, node, prismParser, def->body)) {
+            e.addAutocorrect(move(*autocorrect));
+        }
     }
 }
 
