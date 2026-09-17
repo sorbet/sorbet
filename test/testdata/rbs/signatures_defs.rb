@@ -397,6 +397,29 @@ module Annotations
     # @abstract
     #: -> Integer
     private def method_abstract_private = super
+
+    # @abstract
+    #: -> Integer
+    #  ^^^^^^^^^^ error: Unused type annotation. No method def before next annotation
+    #: -> Integer
+    def multiple_signatures = super
+
+    # @abstract
+    # @abstract
+    #: -> Integer
+    def repeated_annotations
+      super
+    end
+
+    # @abstract
+    # @abstract
+    #: -> Integer
+    private def repeated_private = super
+
+    # @abstract
+    # @abstract
+    #: -> Integer
+    def repeated_empty; end # error: Methods declared `@abstract` with an RBS comment must contain only a forwarding super call
   end
 
   # @interface
