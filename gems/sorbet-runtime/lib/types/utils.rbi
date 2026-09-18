@@ -47,6 +47,9 @@ module T::Utils
   sig { void }
   def self.eagerly_define_all_lazy_props_methods!; end
 
+  sig { void }
+  def self.drop_unchecked_sigs!; end
+
   # TODO(jez) If we were to move this to the public rbi/ folder, we would
   # probably want the types to all be non-nil. Maybe we should just make this a
   # private helper.

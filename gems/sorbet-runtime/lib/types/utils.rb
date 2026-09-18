@@ -178,6 +178,18 @@ module T::Utils
     nil
   end
 
+  # Free the signatures whose runtime checks never run: the `.checked(:never)`
+  # sigs, plus the `.checked(:tests)` sigs outside of a test environment. After
+  # this call, `T::Utils.signature_for_method` returns `nil` for those methods,
+  # and nothing can rebuild them.
+  #
+  # Call this while eagerly preloading a codebase (e.g. at service startup) to
+  # trade that introspection for memory, and again if more code loads later.
+  def self.drop_unchecked_sigs!
+    T::Private::Methods.drop_unchecked_sigs!
+    nil
+  end
+
   def self.lift_enum(enum)
     unless enum.is_a?(T::Types::Enum)
       raise ArgumentError.new("#{enum.inspect} is not a T.deprecated_enum")
