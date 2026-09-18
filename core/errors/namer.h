@@ -32,6 +32,7 @@ inline constexpr ErrorClass PackageScopeMustBeClass{4026, StrictLevel::False};
 inline constexpr ErrorClass RedefinitionOfPackage{4027, StrictLevel::False};
 inline constexpr ErrorClass ModifyingUnpackagedConstant{4028, StrictLevel::False};
 inline constexpr ErrorClass InvalidPackageExpression{4029, StrictLevel::False};
+inline constexpr ErrorClass PrivateMethodMismatch{4030, StrictLevel::False};
 } // namespace sorbet::core::errors::Namer
 
 #endif
