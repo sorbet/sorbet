@@ -99,7 +99,7 @@ public:
                         return;
                     }
 
-                    nodes = Minitest::run(ctx, isClass, &send);
+                    nodes = Minitest::run(ctx, isClass, &send, prevStat);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = move(nodes);
                         return;
