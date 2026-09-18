@@ -42,24 +42,28 @@ class Foo
 
   def foo8(**)
     [1,2,3].each do |**|
+                   # ^^ error: Anonymous keyword rest parameter
       T.unsafe(self).p(**)
     end
   end
 
   def foo9(**kwargs)
-    [1,2,3].each do |**|
+    [1,2,3].each do |*args, **|
+                          # ^^ error: Anonymous keyword rest parameter
       T.unsafe(self).p(**)
     end
   end
 
   def foo10(&)
     [1,2,3].each do |&|
+                   # ^ error: Anonymous block parameter
       T.unsafe(self).p(&)
     end
   end
 
   def foo11(&block)
     [1,2,3].each do |&|
+                   # ^ error: Anonymous block parameter
       T.unsafe(self).p(&)
     end
   end
