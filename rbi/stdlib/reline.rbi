@@ -72,7 +72,7 @@ class Reline::Config
   def bind_key(key, func_name); end
   def bind_tty_special_chars; end
   def bind_tty_special_chars=(arg0); end
-  def bind_variable(name, value); end
+  def bind_variable(*args); end
   def blink_matching_paren; end
   def blink_matching_paren=(arg0); end
   def byte_oriented; end
@@ -95,7 +95,7 @@ class Reline::Config
   def enable_keypad=(arg0); end
   def expand_tilde; end
   def expand_tilde=(arg0); end
-  def handle_directive(directive, file, no); end
+  def handle_directive(*args); end
   def history_preserve_point; end
   def history_preserve_point=(arg0); end
   def history_size; end
