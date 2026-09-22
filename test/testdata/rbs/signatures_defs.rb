@@ -364,13 +364,13 @@ module Annotations
     # @abstract
     #: -> Integer
     def method_abstract5 # error: Methods declared @abstract with an RBS comment must always raise
-      puts "foo" # error: Abstract methods must not contain any code in their body
+      puts "foo"
     end
 
     # @abstract
     #: -> Integer
     def method_abstract6 # error: Methods declared @abstract with an RBS comment must always raise
-      puts "foo" # error: Abstract methods must not contain any code in their body
+      puts "foo"
       raise "foo"
     end
 
@@ -395,7 +395,7 @@ module Annotations
     # @abstract
     #: -> Integer
     def method_abstract9 # error: Methods declared @abstract with an RBS comment must always raise
-      Abstract.raise # error: Abstract methods must not contain any code in their body
+      Abstract.raise
     end
 
     # @abstract

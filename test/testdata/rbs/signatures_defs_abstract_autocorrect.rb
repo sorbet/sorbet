@@ -15,13 +15,13 @@ class Abstract
   # @abstract
   #: -> void
   def baz # error: Methods declared @abstract with an RBS comment must always raise
-    puts # error: Abstract methods must not contain any code in their body
+    puts
   end
 
   # @abstract
   #: -> void
   def qux # error: Methods declared @abstract with an RBS comment must always raise
-    puts # error: Abstract methods must not contain any code in their body
+    puts
     puts
   end
 
@@ -37,13 +37,13 @@ class Abstract
   # @abstract
   #: -> void
   def self.baz # error: Methods declared @abstract with an RBS comment must always raise
-    puts # error: Abstract methods must not contain any code in their body
+    puts
   end
 
   # @abstract
   #: -> void
   def self.qux # error: Methods declared @abstract with an RBS comment must always raise
-    puts # error: Abstract methods must not contain any code in their body
+    puts
     puts
   end
 
@@ -82,7 +82,7 @@ class Abstract
   # @abstract
   #: (Integer, i: Integer) { -> void } -> void
   def existing_body(value, i:, &block) # error: Methods declared @abstract with an RBS comment must always raise
-    puts value # error: Abstract methods must not contain any code in their body
+    puts value
   end
 
   # @abstract

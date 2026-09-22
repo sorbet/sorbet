@@ -17,7 +17,7 @@ class Abstract
   # @abstract
   #: -> void
   def baz # error: Methods declared @abstract with an RBS comment must always raise
-    raise "Abstract method called" # error: Abstract methods must not contain any code in their body
+    raise "Abstract method called"
   end
 
   # @abstract
@@ -39,7 +39,7 @@ class Abstract
   # @abstract
   #: -> void
   def self.baz # error: Methods declared @abstract with an RBS comment must always raise
-    raise "Abstract method called" # error: Abstract methods must not contain any code in their body
+    raise "Abstract method called"
   end
 
   # @abstract
@@ -87,7 +87,7 @@ class Abstract
   # @abstract
   #: (Integer, i: Integer) { -> void } -> void
   def existing_body(value, i:, &block) # error: Methods declared @abstract with an RBS comment must always raise
-    raise "Abstract method called" # error: Abstract methods must not contain any code in their body
+    raise "Abstract method called"
   end
 
   # @abstract
