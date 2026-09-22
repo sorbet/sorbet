@@ -277,22 +277,22 @@ bool isValidAbstractMethod(pm_node_t *node) {
 }
 
 void ensureAbstractMethodCallsSuper(core::MutableContext ctx, pm_node_t *node, parser::Prism::Parser *prismParser) {
-    if (isValidAbstractMethod(node)) {
-        // Remove the forwarding stub from the checker AST to avoid error 5019 later in the pipeline.
-        auto *def = down_cast_nonnull<pm_def_node_t>(node);
-        prismParser->destroyNode(def->body);
-        def->body = nullptr;
-        return;
+    auto *def = down_cast_nonnull<pm_def_node_t>(node);
+    if (!isValidAbstractMethod(node)) {
+        auto nodeLoc = prismParser->translateLocation(node->location);
+        if (auto e = ctx.beginIndexerError(nodeLoc, core::errors::Rewriter::RBSAbstractMethodNoSuper)) {
+            e.setHeader("Methods declared `{}` with an RBS comment must contain only a forwarding super call",
+                        "@abstract");
+            if (auto autocorrect = autocorrectAbstractBody(ctx, node, prismParser, def->body)) {
+                e.addAutocorrect(move(*autocorrect));
+            }
+        }
     }
 
-    auto *def = down_cast_nonnull<pm_def_node_t>(node);
-    auto nodeLoc = prismParser->translateLocation(node->location);
-
-    if (auto e = ctx.beginIndexerError(nodeLoc, core::errors::Rewriter::RBSAbstractMethodNoSuper)) {
-        e.setHeader("Methods declared `{}` with an RBS comment must contain only a forwarding super call", "@abstract");
-        if (auto autocorrect = autocorrectAbstractBody(ctx, node, prismParser, def->body)) {
-            e.addAutocorrect(move(*autocorrect));
-        }
+    // The RBS error above fully diagnoses invalid bodies, so hide every abstract body from later resolver checks.
+    if (def->body != nullptr) {
+        prismParser->destroyNode(def->body);
+        def->body = nullptr;
     }
 }
 

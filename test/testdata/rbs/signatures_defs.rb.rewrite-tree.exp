@@ -677,7 +677,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       def method_abstract4<<todo method>>(&<blk>)
-        <self>.<super>()
+        <emptyTree>
       end
 
       ::T::Sig::WithoutRuntime.sig() do ||
@@ -685,7 +685,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       def method_abstract5<<todo method>>(&<blk>)
-        <self>.puts("foo")
+        <emptyTree>
       end
 
       ::T::Sig::WithoutRuntime.sig() do ||
@@ -693,10 +693,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       def method_abstract6<<todo method>>(&<blk>)
-        begin
-          <self>.puts("foo")
-          <self>.<super>(ZSuperArgs)
-        end
+        <emptyTree>
       end
 
       ::T::Sig::WithoutRuntime.sig() do ||
@@ -704,7 +701,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       def method_abstract7<<todo method>>(&<blk>)
-        <self>.<super>(1)
+        <emptyTree>
       end
 
       ::T::Sig::WithoutRuntime.sig() do ||
@@ -712,7 +709,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       def method_abstract8<<todo method>>(&<blk>)
-        <self>.raise()
+        <emptyTree>
       end
 
       ::T::Sig::WithoutRuntime.sig() do ||
@@ -720,9 +717,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       def method_abstract9<<todo method>>(&<blk>)
-        <self>.<super>(ZSuperArgs) do ||
-          <emptyTree>
-        end
+        <emptyTree>
       end
 
       ::T::Sig::WithoutRuntime.sig() do ||
