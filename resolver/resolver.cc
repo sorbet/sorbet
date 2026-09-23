@@ -1685,13 +1685,24 @@ public:
                 if (auto e = ctx.beginError(declLoc, core::errors::Resolver::PackageScopeViolation)) {
                     auto scopePkgName = scopeKlass.data(ctx)->package;
                     const auto &scopePkg = ctx.state.packageDB().getPackageInfo(scopePkgName);
-                    e.setHeader("`{}` belongs to package `{}`", scopeKlass.show(ctx), scopePkgName.owner.show(ctx));
-                    e.addErrorLine(scopePkg.declLoc(), "defined here");
-                    e.addErrorNote("Either `import {}` in this package's `__package.rb`, or define this class\n"
-                                   "    using its fully-qualified name in a single declaration.",
-                                   scopePkgName.owner.show(ctx));
-                    if (auto suggestion = curPkg.addImport(ctx, scopePkg, core::packages::ImportType::Normal)) {
-                        e.addAutocorrect(std::move(*suggestion));
+
+                    auto scopeName = scopePkg.show(ctx);
+                    auto curName = curPkg.show(ctx);
+
+                    e.setHeader("`{}` may not be opened by package `{}`", scopeKlass.show(ctx), curName);
+                    e.addErrorLine(scopePkg.declLoc(), "Owning package");
+                    e.addErrorLine(curPkg.declLoc(), "Referencing package");
+
+                    if (absl::StartsWith(curName, scopeName)) {
+                        e.addErrorNote("Either `import {}` in `{}`'s `__package.rb`, or change this file's\n"
+                                       "    top-level constant to match `{}`.",
+                                       scopeName, curName, curName);
+
+                        if (auto suggestion = curPkg.addImport(ctx, scopePkg, core::packages::ImportType::Normal)) {
+                            e.addAutocorrect(std::move(*suggestion));
+                        }
+                    } else {
+                        e.addErrorNote("Please change this file's top-level constant to match `{}`.", curName);
                     }
                 }
                 return;
