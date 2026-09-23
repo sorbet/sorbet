@@ -115,9 +115,11 @@ def fail_class_message
   fail StandardError, "message"
 end
 
-y = loop do
+def kernel_loop
+  y = loop do
+  end
+  puts y # error: This code is unreachable
 end
-puts y # error: This code is unreachable
 
 class Test
   def test
