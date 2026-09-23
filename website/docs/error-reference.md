@@ -2997,6 +2997,62 @@ Even though `__package.rb` files use Ruby syntax, they do not allow arbitrary Ru
 
 But despite that, `__package.rb` files must be completely statically analyzable, which means most forms of Ruby expressions are not allowed in these files.
 
+## 5086
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+The top-level constant of a packaged file must be owned by the package that the file belongs to. This ensures that Sorbet's constant resolution will match Ruby's, even if Sorbet is processing packages incrementally.
+
+For example, imagine we have two packages: `Opus::Foo` and `Opus::Foo::Bar`. It's always acceptable for a file owned by `Opus::Foo::Bar` to be defined as follows:
+
+```ruby
+# typed: true
+
+module Opus::Foo::Bar
+  class Feature
+    ...
+  end
+end
+```
+
+Or even:
+
+```ruby
+# typed: true
+
+class Opus::Foo::Bar::Feature
+  ...
+end
+```
+
+However, separating out the parts of the top-level constant introduces resolution scopes in packages that Sorbet may not have processed yet:
+
+```ruby
+# typed: true
+
+module Opus::Foo # error: `Opus::Foo` may not be opened by package `Opus::Foo::Bar`
+  module Bar
+    class Feature
+      ...
+    end
+  end
+end
+```
+
+We can relax this restriction if `Opus::Foo::Bar` imports `Opus::Foo`, as that guarantees that Sorbet will have seen all constants defined at `Opus::Foo`, and constant resolution will match the runtime behavior of the Ruby VM.
+
+```ruby
+# typed: true
+
+module Opus::Foo # Fine, as long as `Opus::Foo::Bar` imports `Opus::Foo`
+  module Bar
+    class Feature
+      ...
+    end
+  end
+end
+```
+
 ## 6001
 
 Certain Ruby keywords like `break`, `next`, and `retry` can only be used inside a Ruby block.
