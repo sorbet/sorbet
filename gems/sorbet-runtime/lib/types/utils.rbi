@@ -47,6 +47,11 @@ module T::Utils
   sig { void }
   def self.eagerly_define_all_lazy_props_methods!; end
 
+  # Force every type object in the process to build its lazily-initialized
+  # members, so that forked workers don't write onto shared type objects.
+  sig { void }
+  def self.build_all_types; end
+
   # TODO(jez) If we were to move this to the public rbi/ folder, we would
   # probably want the types to all be non-nil. Maybe we should just make this a
   # private helper.

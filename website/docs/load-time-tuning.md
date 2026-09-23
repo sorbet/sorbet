@@ -17,6 +17,9 @@ T::Utils.run_all_type_alias_blocks
 
 # Force all T::Struct classes to generate their specialized serialization methods
 T::Utils.eagerly_define_all_lazy_props_methods!
+
+# Force every type object to build its lazily-initialized members
+T::Utils.build_all_types
 ```
 
 For certain applications, like HTTP services, these methods mitigate first-call or first-request latency spikes. It's the same idea behind projects like [nakayoshi_fork] and patterns like zeitwerk's `eager_load`.
@@ -52,3 +55,11 @@ T::Utils.eagerly_define_all_lazy_props_methods!
 Classes that include `T::Props::Serializable` (including `T::Struct`) generate specialized `serialize` and `from_hash` methods using codegen for runtime performance (mostly: to avoid contention for VM-level method call caches). These specialized methods are usually generated lazily on the first call to the ser/de methods. This method eagerly generates these specialized methods.
 
 > **Note**: The `serialize` and `from_hash` methods on `T::Struct` have a number of [gotchas and legacy behaviors](tstruct.md#serialize-and-from_hash-converting-tstruct-to-and-from-hash).
+
+## `T::Utils.build_all_types`
+
+```ruby
+T::Utils.build_all_types
+```
+
+Type objects initialize lazily: composite types like `T.any` and `T::Array` coerce their member types on first use, and simple types memoize their name and `T.nilable` form. In a forked worker, that first use writes onto a type object shared with the parent, copying the memory page that holds it. This method builds those members for every type object in the process up front, so the pages stay shared after forking.

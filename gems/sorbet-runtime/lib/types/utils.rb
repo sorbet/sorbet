@@ -178,6 +178,59 @@ module T::Utils
     nil
   end
 
+  # Force every type object in the process to build its lazily-initialized
+  # members: coerced member types, and the memoized name and `T.nilable` form
+  # of a `T::Types::Simple`.
+  #
+  # Call this before forking workers so that first use of a type in a worker
+  # doesn't write onto a type object shared with the parent via copy-on-write.
+  def self.build_all_types
+    require 'objspace'
+    ObjectSpace.each_object(T::Types::Base) do |type|
+      build_own_members(type) unless type.frozen?
+    end
+    nil
+  end
+
+  # Only members that coercion may have just created are followed; every other
+  # member already existed, so the heap walk reaches it on its own.
+  private_class_method def self.build_own_members(type)
+    case type
+    when T::Types::Simple
+      if !type.raw_type.equal?(NilClass)
+        type.name
+        type.to_nilable.types
+      end
+    when T::Types::Union, T::Types::FixedArray, T::Types::Intersection
+      type.types.each { |member| build_created_member(member) }
+    when T::Types::TypedHash
+      build_created_member(type.keys)
+      build_created_member(type.values)
+      build_created_member(type.type)
+    when T::Types::TypedEnumerable, T::Types::TypedClass, T::Types::TypedModule
+      build_created_member(type.type)
+    when T::Types::FixedHash
+      type.types.each_value { |member| build_created_member(member) }
+    when T::Types::Proc
+      type.arg_types.each_value { |member| build_created_member(member) }
+      build_created_member(type.returns)
+    when T::Types::Enum
+      type.name
+    end
+  end
+
+  private_class_method def self.build_created_member(member)
+    case member
+    when T::Types::Simple
+      if !member.frozen? && !member.raw_type.equal?(NilClass)
+        member.name
+        member.to_nilable.types
+      end
+    when T::Types::FixedArray, T::Types::FixedHash, T::Types::Proc
+      build_own_members(member)
+    end
+  end
+
   def self.lift_enum(enum)
     unless enum.is_a?(T::Types::Enum)
       raise ArgumentError.new("#{enum.inspect} is not a T.deprecated_enum")

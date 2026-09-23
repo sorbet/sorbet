@@ -17,5 +17,12 @@ module Opus::Types::Test
       assert(status.success?, "fixture failed (exit #{status.exitstatus}): #{result}")
       assert_equal("PASS\n", result)
     end
+
+    it 'build_all_types builds the lazy members of every type object' do
+      fixture = "#{__dir__}/fixtures/build_all_types.rb"
+      result, status = Open3.capture2e("ruby", fixture)
+      assert(status.success?, "fixture failed (exit #{status.exitstatus}): #{result}")
+      assert_equal("PASS\n", result)
+    end
   end
 end
