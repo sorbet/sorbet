@@ -8,7 +8,7 @@ title: Load-time Tuning
 These methods force that deferred work to happen eagerly:
 
 ```ruby
-# If you are going to use these, use them in this order to ensure nothing is missed from eager loading.
+# Due to lazy loading, if using all of these methods you need to use them in order to avoid missing anything.
 
 # Run all `sig {...}` blocks, redefining all associated methods with runtime checking
 # (or dropping the first-call wrapper, for `.checked(:never)` sigs)
