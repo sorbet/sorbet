@@ -113,7 +113,7 @@ nested/nested.rb:67: File belongs to package `Root::Nested` but defines a consta
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
 
-nested/nested.rb:34: `Root` may not be opened by package `Root::Nested` https://srb.help/5086
+nested/nested.rb:34: Package `Root::Nested` may not open `Root` https://srb.help/5086
     34 |module Root
         ^^^^^^^^^^^
     __package.rb:3: Owning package
@@ -123,8 +123,7 @@ nested/nested.rb:34: `Root` may not be opened by package `Root::Nested` https://
      3 |class Root::Nested < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Note:
-    Either `import Root` in `Root::Nested`'s `__package.rb`, or change this file's
-    top-level constant to match `Root::Nested`.
+    Either `import Root` in `Root::Nested`'s `__package.rb`, or change this file's top-level constant to match `Root::Nested`.
   Autocorrect: Use `-a` to autocorrect
     nested/__package.rb:3: Insert `import Root`
      3 |class Root::Nested < PackageSpec
@@ -286,7 +285,7 @@ nested/nested.test.rb:17: Tests in the `Root::Nested` package must define tests 
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
 
-nested/nested.test.rb:6: `Test::Root` may not be opened by package `Root::Nested` https://srb.help/5086
+nested/nested.test.rb:6: Package `Root::Nested` may not open `Test::Root` https://srb.help/5086
      6 |module Test::Root
         ^^^^^^^^^^^^^^^^^
     __package.rb:3: Owning package
@@ -296,8 +295,7 @@ nested/nested.test.rb:6: `Test::Root` may not be opened by package `Root::Nested
      3 |class Root::Nested < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Note:
-    Either `import Root` in `Root::Nested`'s `__package.rb`, or change this file's
-    top-level constant to match `Root::Nested`.
+    Either `import Root` in `Root::Nested`'s `__package.rb`, or change this file's top-level constant to match `Root::Nested`.
   Autocorrect: Use `-a` to autocorrect
     nested/__package.rb:3: Insert `import Root`
      3 |class Root::Nested < PackageSpec
@@ -343,7 +341,7 @@ commands/foo_command.rb:4: File belongs to package `Root::Commands::Foo` but def
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
 
-commands/foo_command.rb:4: `Root::Commands::Baz::Ban` may not be opened by package `Root::Commands::Foo` https://srb.help/5086
+commands/foo_command.rb:4: Package `Root::Commands::Foo` may not open `Root::Commands::Baz::Ban` https://srb.help/5086
      4 |  class Baz::Ban; end
           ^^^^^^^^^^^^^^
     __package.rb:3: Owning package
@@ -353,14 +351,13 @@ commands/foo_command.rb:4: `Root::Commands::Baz::Ban` may not be opened by packa
      3 |class Root::Commands::Foo < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Note:
-    Either `import Root` in `Root::Commands::Foo`'s `__package.rb`, or change this file's
-    top-level constant to match `Root::Commands::Foo`.
+    Either `import Root` in `Root::Commands::Foo`'s `__package.rb`, or change this file's top-level constant to match `Root::Commands::Foo`.
   Autocorrect: Use `-a` to autocorrect
     commands/__package.rb:3: Insert `import Root`
      3 |class Root::Commands::Foo < PackageSpec
                                                ^
 
-commands/foo_command.rb:3: `Root::Commands` may not be opened by package `Root::Commands::Foo` https://srb.help/5086
+commands/foo_command.rb:3: Package `Root::Commands::Foo` may not open `Root::Commands` https://srb.help/5086
      3 |module Root::Commands
         ^^^^^^^^^^^^^^^^^^^^^
     __package.rb:3: Owning package
@@ -370,8 +367,7 @@ commands/foo_command.rb:3: `Root::Commands` may not be opened by package `Root::
      3 |class Root::Commands::Foo < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Note:
-    Either `import Root` in `Root::Commands::Foo`'s `__package.rb`, or change this file's
-    top-level constant to match `Root::Commands::Foo`.
+    Either `import Root` in `Root::Commands::Foo`'s `__package.rb`, or change this file's top-level constant to match `Root::Commands::Foo`.
   Autocorrect: Use `-a` to autocorrect
     commands/__package.rb:3: Insert `import Root`
      3 |class Root::Commands::Foo < PackageSpec
