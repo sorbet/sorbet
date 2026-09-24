@@ -19,6 +19,12 @@ module T::Types
       nil
     end
 
+    # overrides Base
+    def build_lazy_fields
+      build_inner_lazy_fields(type)
+      nil
+    end
+
     def underlying_class
       Enumerable
     end

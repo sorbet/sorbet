@@ -39,6 +39,26 @@ module T::Types
       raise NotImplementedError
     end
 
+    # Force every lazily-initialized field of this type to be built: the coerced
+    # form of each inner type, plus anything else memoized on first use, like
+    # the name and `T.nilable` form of a `T::Types::Simple`. Unlike `build_type`,
+    # this also builds the inner types, via `build_inner_lazy_fields`, because
+    # coercing them may have only just created them.
+    #
+    # Every subclass must implement this, if only to return nil, so that a new
+    # kind of type can't be left out of `T::Utils.build_all_types` by accident.
+    # It's unusual to call this directly; you probably want `T::Utils.build_all_types`.
+    define_method(:build_lazy_fields) do
+      raise NotImplementedError
+    end
+
+    # For `build_lazy_fields` implementations: build the lazy fields of one
+    # inner type. A frozen type can't take a write, so its fields were either
+    # built before it was frozen or never will be; skip it rather than raise.
+    private def build_inner_lazy_fields(inner)
+      inner.build_lazy_fields unless inner.frozen?
+    end
+
     # Equality is based on name, so be sure the name reflects all relevant state when implementing.
     define_method(:name) do
       raise NotImplementedError

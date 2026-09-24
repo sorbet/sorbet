@@ -8,6 +8,8 @@ title: Load-time Tuning
 These methods force that deferred work to happen eagerly:
 
 ```ruby
+# If you are going to use these, use them in this order to ensure nothing is missed from eager loading.
+
 # Run all `sig {...}` blocks, redefining all associated methods with runtime checking
 # (or dropping the first-call wrapper, for `.checked(:never)` sigs)
 T::Utils.run_all_sig_blocks
@@ -25,6 +27,8 @@ T::Utils.build_all_types
 For certain applications, like HTTP services, these methods mitigate first-call or first-request latency spikes. It's the same idea behind projects like [nakayoshi_fork] and patterns like zeitwerk's `eager_load`.
 
 Call these methods **after** all application code has been loaded (e.g., in a Rails initializer or a `before_fork` hook) but **before** forking workers (so the initialized state is shared across processes via copy-on-write).
+
+The order matters. Running a `sig` block or a `T.type_alias` block creates the type objects it mentions, and `build_all_types` only reaches type objects that exist when it runs, so it goes last.
 
 [nakayoshi_fork]: https://github.com/ko1/nakayoshi_fork
 

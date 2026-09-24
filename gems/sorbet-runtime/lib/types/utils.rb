@@ -179,56 +179,16 @@ module T::Utils
   end
 
   # Force every type object in the process to build its lazily-initialized
-  # fields: the coerced form of each type it wraps, and the memoized name and
-  # `T.nilable` form of a `T::Types::Simple`.
+  # fields (see `T::Types::Base#build_lazy_fields`).
   #
   # Call this before forking workers so that first use of a type in a worker
   # doesn't write onto a type object shared with the parent via copy-on-write.
   def self.build_all_types
     require 'objspace'
     ObjectSpace.each_object(T::Types::Base) do |type|
-      build_lazy_fields(type) unless type.frozen?
+      type.build_lazy_fields unless type.frozen?
     end
     nil
-  end
-
-  # Only inner types that coercion may have just created are followed; every
-  # other inner type already existed, so the heap walk reaches it on its own.
-  private_class_method def self.build_lazy_fields(type)
-    case type
-    when T::Types::Simple
-      if !type.raw_type.equal?(NilClass)
-        type.name
-        type.to_nilable.types
-      end
-    when T::Types::Union, T::Types::FixedArray, T::Types::Intersection
-      type.types.each { |inner| build_inner_type(inner) }
-    when T::Types::TypedHash
-      build_inner_type(type.keys)
-      build_inner_type(type.values)
-      build_inner_type(type.type)
-    when T::Types::TypedEnumerable, T::Types::TypedClass, T::Types::TypedModule
-      build_inner_type(type.type)
-    when T::Types::FixedHash
-      type.types.each_value { |inner| build_inner_type(inner) }
-    when T::Types::Proc
-      type.arg_types.each_value { |inner| build_inner_type(inner) }
-      build_inner_type(type.returns)
-    when T::Types::Enum
-      type.name
-    end
-  end
-
-  private_class_method def self.build_inner_type(inner)
-    case inner
-    when T::Types::Simple
-      if !inner.frozen? && !inner.raw_type.equal?(NilClass)
-        inner.name
-        inner.to_nilable.types
-      end
-    when T::Types::FixedArray, T::Types::FixedHash, T::Types::Proc
-      build_lazy_fields(inner)
-    end
   end
 
   def self.lift_enum(enum)

@@ -18,6 +18,15 @@ module T::Types
     end
 
     # overrides Base
+    def build_lazy_fields
+      name
+      # `to_nilable` pairs this type with `NilClass`, which SimplePairUnion
+      # rejects as a duplicate when this type already is `NilClass`.
+      to_nilable.types unless @raw_type.equal?(NilClass)
+      nil
+    end
+
+    # overrides Base
     def name
       # Memoize to mitigate pathological performance with anonymous modules (https://bugs.ruby-lang.org/issues/11119)
       #

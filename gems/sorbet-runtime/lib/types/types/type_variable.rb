@@ -23,6 +23,11 @@ module T::Types
       nil
     end
 
+    # overrides Base
+    def build_lazy_fields
+      nil
+    end
+
     def valid?(obj)
       true
     end

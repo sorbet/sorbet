@@ -24,5 +24,16 @@ module Opus::Types::Test
       assert(status.success?, "fixture failed (exit #{status.exitstatus}): #{result}")
       assert_equal("PASS\n", result)
     end
+
+    it 'every T::Types::Base subclass implements build_lazy_fields' do
+      # Anonymous subclasses are throwaways from other tests. Inheriting a
+      # superclass's implementation is fine; inheriting Base's is not, since
+      # that one only raises.
+      missing = ObjectSpace.each_object(Class).select do |klass|
+        klass < T::Types::Base && !klass.name.nil? &&
+          klass.instance_method(:build_lazy_fields).owner.equal?(T::Types::Base)
+      end
+      assert_empty(missing.map(&:name).sort, "build_all_types would raise on these types")
+    end
   end
 end

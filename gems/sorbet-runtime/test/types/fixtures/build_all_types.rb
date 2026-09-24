@@ -16,13 +16,18 @@ class RowsStruct < T::Struct
   prop :rows, T::Array[T::Hash[String, T::Array[Integer]]]
 end
 
+RowAlias = T.type_alias { T::Array[NeverMadeNilable] }
+
 row_type = RowsStruct.decorator.props.fetch(:rows).fetch(:type_object).type
 simple = T::Utils.coerce(NeverMadeNilable)
 loose_type = T::Utils.coerce(T::Hash[String, T::Array[NeverMadeNilable]])
+proc_type = T::Utils.coerce(T.proc.params(x: [Integer, NeverMadeNilable]).returns(NeverMadeNilable))
 
 check("prop inner type unbuilt before") { !row_type.instance_variable_defined?(:@type) }
 check("simple nilable unbuilt before") { !simple.instance_variable_defined?(:@nilable) }
 check("loose type key type unbuilt before") { !loose_type.instance_variable_defined?(:@keys) }
+check("proc arg types unbuilt before") { !proc_type.instance_variable_defined?(:@arg_types) }
+check("type alias unbuilt before") { !RowAlias.instance_variable_defined?(:@aliased_type) }
 
 T::Utils.build_all_types
 
@@ -33,6 +38,9 @@ check("simple nilable built after") { simple.instance_variable_defined?(:@nilabl
 check("nilable union types built after") { T.nilable(NeverMadeNilable).instance_variable_defined?(:@types) }
 check("loose type key type built after") { loose_type.instance_variable_defined?(:@keys) }
 check("nested loose type inner type built after") { loose_type.values.instance_variable_defined?(:@type) }
+check("proc arg types built after") { proc_type.instance_variable_defined?(:@arg_types) }
+check("proc fixed array arg built after") { proc_type.arg_types.fetch(:x).instance_variable_defined?(:@types) }
+check("type alias built after") { RowAlias.instance_variable_defined?(:@aliased_type) }
 
 # Building must not change what a type accepts.
 check("struct still validates") { RowsStruct.new(rows: [{"a" => [1]}]).rows == [{"a" => [1]}] }
