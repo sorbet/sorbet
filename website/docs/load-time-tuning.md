@@ -18,7 +18,7 @@ T::Utils.run_all_type_alias_blocks
 # Force all T::Struct classes to generate their specialized serialization methods
 T::Utils.eagerly_define_all_lazy_props_methods!
 
-# Force every type object to build its lazily-initialized members
+# Force every type object to build its lazily-initialized fields
 T::Utils.build_all_types
 ```
 
@@ -62,4 +62,4 @@ Classes that include `T::Props::Serializable` (including `T::Struct`) generate s
 T::Utils.build_all_types
 ```
 
-Type objects initialize lazily: composite types like `T.any` and `T::Array` coerce their member types on first use, and simple types memoize their name and `T.nilable` form. In a forked worker, that first use writes onto a type object shared with the parent, copying the memory page that holds it. This method builds those members for every type object in the process up front, so the pages stay shared after forking.
+Type objects initialize lazily: composite types like `T.any` and `T::Array` coerce the types they wrap on first use, and simple types memoize their name and `T.nilable` form. In a forked worker, that first use writes onto a type object shared with the parent, copying the memory page that holds it. This method builds those fields for every type object in the process up front, so the pages stay shared after forking.

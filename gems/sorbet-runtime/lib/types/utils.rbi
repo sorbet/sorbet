@@ -48,7 +48,7 @@ module T::Utils
   def self.eagerly_define_all_lazy_props_methods!; end
 
   # Force every type object in the process to build its lazily-initialized
-  # members, so that forked workers don't write onto shared type objects.
+  # fields, so that forked workers don't write onto shared type objects.
   sig { void }
   def self.build_all_types; end
 
