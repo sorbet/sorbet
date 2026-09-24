@@ -39,6 +39,12 @@ end
 X7 = [HasTypeMember].freeze
 Y7 = [HasTypeTemplate].freeze
 
+X8 = [ # error: must have type annotations
+  ONE = 1,
+  TWO = 2,
+  THREE = 3,
+]
+
 def revealed_types # error: does not have a `sig`
   T.reveal_type(X0) # error: `T::Array[T.any(Integer, String)]`
   T.reveal_type(Y0) # error: `[Integer, String] (2-tuple)`
@@ -61,4 +67,6 @@ def revealed_types # error: does not have a `sig`
 
   T.reveal_type(X7) # error: `[T.class_of(HasTypeMember)] (1-tuple)`
   T.reveal_type(Y7) # error: `[T.class_of(HasTypeTemplate)[HasTypeTemplate, T.untyped]] (1-tuple)`
+
+  T.reveal_type(X8) # error: `T.untyped`
 end
