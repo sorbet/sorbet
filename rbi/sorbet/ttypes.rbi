@@ -17,6 +17,9 @@ class T::Types::Base
   sig { abstract.void }
   def build_type; end
 
+  sig { abstract.void }
+  def build_lazy_fields; end
+
   sig { overridable.params(obj: Kernel).returns(T::Boolean) }
   def recursively_valid?(obj); end
 
