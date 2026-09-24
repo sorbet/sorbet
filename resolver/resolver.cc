@@ -2659,6 +2659,9 @@ class ResolveTypeMembersAndFieldsWalk {
                 // Don't recurse--just take the type from the cast verbatim (no inference)
                 result = cast.type;
             },
+            [&](const ast::Assign &asgn) {
+                result = resolveConstantType(ctx, asgn.rhs, /* topCall */ false, /* isFrozen */ false);
+            },
             [&](const ast::Array &arr) {
                 if (arr.elems.empty()) {
                     // Require type annotation for empty array, instead of inferring something like
