@@ -484,9 +484,6 @@ module T::Utils
 
   # Force every type object in the process to build its lazily-initialized
   # fields, so that forked workers don't write onto shared type objects.
-  #
-  # Call this while eagerly preloading a codebase (e.g. before forking workers),
-  # after the other eager-loading methods above, since those create type objects.
   sig { void }
   def self.build_all_types; end
 end

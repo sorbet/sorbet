@@ -26,9 +26,7 @@ module Opus::Types::Test
     end
 
     it 'every T::Types::Base subclass implements build_lazy_fields' do
-      # Anonymous subclasses are throwaways from other tests. Inheriting a
-      # superclass's implementation is fine; inheriting Base's is not, since
-      # that one only raises.
+      # Anonymous subclasses are throwaways from other tests.
       missing = ObjectSpace.each_object(Class).select do |klass|
         klass < T::Types::Base && !klass.name.nil? &&
           klass.instance_method(:build_lazy_fields).owner.equal?(T::Types::Base)

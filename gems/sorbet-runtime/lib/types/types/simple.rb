@@ -20,8 +20,7 @@ module T::Types
     # overrides Base
     def build_lazy_fields
       name
-      # `to_nilable` pairs this type with `NilClass`, which SimplePairUnion
-      # rejects as a duplicate when this type already is `NilClass`.
+      # NilClass can't be paired with itself in a SimplePairUnion.
       to_nilable.types unless @raw_type.equal?(NilClass)
       nil
     end
