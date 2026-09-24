@@ -26,7 +26,7 @@ module Root::Nested
   end
 end
 
-module Root # error: `Root` may not be opened
+module Root # error: Package `Root::Nested` may not open `Root`
   module Nested
     class SomeClass
       class Deeper; end
@@ -52,7 +52,7 @@ end
 class Root::Nested::Stringy < String
 end
 
-module Root # error: `Root` may not be opened
+module Root # error: Package `Root::Nested` may not open `Root`
   NOT_IN_PACKAGE = T.let(1, Integer)
 # ^^^^^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
 

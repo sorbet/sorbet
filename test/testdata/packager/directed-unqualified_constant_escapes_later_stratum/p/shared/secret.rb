@@ -1,7 +1,7 @@
 # typed: true
 # stratum: 2
 
-module P # error: `P` may not be opened
+module P # error: Package `P::Shared` may not open `P`
   module Shared
     class Secret
       def base

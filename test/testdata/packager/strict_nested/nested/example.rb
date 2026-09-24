@@ -1,6 +1,6 @@
 # typed: strict
 
-module Root # error: `Root` may not be opened
+module Root # error: Package `Root::Nested` may not open `Root`
   module Nested
     class Example
       p(Root)

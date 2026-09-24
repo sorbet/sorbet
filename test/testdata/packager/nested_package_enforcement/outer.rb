@@ -12,6 +12,6 @@ module Outer
   end
 
   module Inner::Bar; end
-# ^^^^^^^^^^^^^^^^^ error: `Outer::Inner::Bar` may not be opened
+# ^^^^^^^^^^^^^^^^^ error: Package `Outer` may not open `Outer::Inner::Bar`
 #        ^^^^^^^^^^ error: File belongs to package `Outer` but defines a constant that does not match this namespace
 end

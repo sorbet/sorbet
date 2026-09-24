@@ -2,7 +2,7 @@
 # stratum: 1
 
 module P
-  module Shared # error: `P::Shared` may not be opened
+  module Shared # error: Package `P::Shared::Consumer` may not open `P::Shared`
     module Consumer
       class Client
         extend T::Sig
