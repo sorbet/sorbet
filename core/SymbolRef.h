@@ -1091,6 +1091,10 @@ public:
         return ClassOrModuleRef::fromRaw(92);
     }
 
+    static ClassOrModuleRef T_DefMods() {
+        return ClassOrModuleRef::fromRaw(93);
+    }
+
     static FieldRef ErrorNode() {
         return FieldRef::fromRaw(3);
     }

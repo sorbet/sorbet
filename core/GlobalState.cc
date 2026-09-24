@@ -856,6 +856,9 @@ void GlobalState::initEmpty() {
     klass = enterClassOrModuleSymbol(Loc::none(), Symbols::Magic(), core::Names::Constants::UntypedSource());
     ENFORCE_NO_TIMER(klass == Symbols::Magic_UntypedSource());
 
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), core::Names::Constants::DefMods());
+    ENFORCE_NO_TIMER(klass == Symbols::T_DefMods());
+
     field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::super());
     ENFORCE_NO_TIMER(field == Symbols::Magic_UntypedSource_super());
 
