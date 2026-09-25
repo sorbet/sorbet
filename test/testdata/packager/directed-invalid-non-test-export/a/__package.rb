@@ -7,5 +7,4 @@ class A < PackageSpec
 
   export B::Thing
 # ^^^^^^^^^^^^^^^ error: Cannot export `B::Thing` because it is owned by another package
-# ^^^^^^^^^^^^^^^ error: Cannot export `B::Thing` because it is owned by another package
 end
