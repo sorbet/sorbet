@@ -19,7 +19,6 @@ T::Utils.run_all_type_alias_blocks
 T::Utils.eagerly_define_all_lazy_props_methods!
 
 # Force every type object to build its lazily-initialized fields
-# Because blocks are lazily loaded, you need to make sure to call this after all other loaders above.
 T::Utils.build_all_types
 ```
 
