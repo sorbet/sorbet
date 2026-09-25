@@ -352,9 +352,6 @@ Usage:
       --experimental-package-directed
                                 Enable support for checking by package, instead of
                                 processing all files at once
-      --experimental-test-packages
-                                Disable support for implicit test namespaces in existing
-                                packages
 
 ```
 
