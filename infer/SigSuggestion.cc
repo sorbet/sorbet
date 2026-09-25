@@ -73,6 +73,9 @@ void extractSendArgumentKnowledge(core::Context ctx, cfg::CFG &cfg, core::LocOff
     auto numPosArgs = snd->numPosArgs;
     auto numKwArgs = snd->argRefs().size() - numPosArgs;
     bool hasKwSplat = numKwArgs % 2 == 1;
+    // A keyword splat trails the inlined keyword args, and is a single argument rather than a
+    // key/value pair, so it sits past the end of the region that can be read pairwise.
+    auto kwArgsEnd = snd->argRefs().size() - (hasKwSplat ? 1 : 0);
 
     // Since this is a "fake" dispatch and we are not going to display the errors anyway,
     // core::Loc::none() should be okay here.
@@ -99,7 +102,7 @@ void extractSendArgumentKnowledge(core::Context ctx, cfg::CFG &cfg, core::LocOff
     bool inKwArgs = false;
     auto argRefs = snd->argRefs();
     for (int i = 0, argIdx = 0; i < argRefs.size(); i++, argIdx++) {
-        inKwArgs = inKwArgs || (i >= numPosArgs && !hasKwSplat);
+        inKwArgs = i >= numPosArgs && i < kwArgsEnd;
 
         // extract the keyword argument name when the send contains inlined keyword arguments
         optional<core::NameRef> keyword;
