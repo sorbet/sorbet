@@ -24,6 +24,11 @@ module T::Types
       nil
     end
 
+    # overrides Base
+    def build_lazy_fields
+      nil
+    end
+
     def self.make(name)
       cached = Private.cached_entry(name)
       return cached if cached

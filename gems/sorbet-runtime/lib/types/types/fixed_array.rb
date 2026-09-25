@@ -20,6 +20,12 @@ module T::Types
     end
 
     # overrides Base
+    def build_lazy_fields
+      types.each { |type| build_inner_lazy_fields(type) }
+      nil
+    end
+
+    # overrides Base
     def name
       "[#{types.join(', ')}]"
     end

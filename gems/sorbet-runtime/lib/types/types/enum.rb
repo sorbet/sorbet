@@ -23,6 +23,12 @@ module T::Types
     end
 
     # overrides Base
+    def build_lazy_fields
+      name
+      nil
+    end
+
+    # overrides Base
     def valid?(obj)
       @values.member?(obj)
     end

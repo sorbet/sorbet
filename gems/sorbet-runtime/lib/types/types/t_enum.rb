@@ -15,6 +15,11 @@ module T::Types
     end
 
     # overrides Base
+    def build_lazy_fields
+      nil
+    end
+
+    # overrides Base
     def name
       # Strips the #<...> off, just leaving the ...
       # Reasoning: the user will have written something like

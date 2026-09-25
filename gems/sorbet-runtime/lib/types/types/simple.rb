@@ -18,6 +18,14 @@ module T::Types
     end
 
     # overrides Base
+    def build_lazy_fields
+      name
+      # NilClass can't be paired with itself in a SimplePairUnion.
+      to_nilable.types unless @raw_type.equal?(NilClass)
+      nil
+    end
+
+    # overrides Base
     def name
       # Memoize to mitigate pathological performance with anonymous modules (https://bugs.ruby-lang.org/issues/11119)
       #
