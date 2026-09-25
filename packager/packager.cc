@@ -1340,15 +1340,6 @@ public:
     }
 };
 
-bool isTestExport(const ast::ExpressionPtr &expr) {
-    auto send = ast::cast_tree<ast::Send>(expr);
-    if (!send || send->fun != core::Names::export_() || send->numPosArgs() != 1) {
-        return false;
-    }
-
-    return isTestConstant(send->getPosArg(0));
-}
-
 } // namespace
 
 vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, vector<ast::ParsedFile> files,
@@ -1472,7 +1463,11 @@ ast::ParsedFile Packager::copyPackageWithoutTestExports(const core::GlobalState 
         return result;
     }
 
-    auto it = std::remove_if(package->rhs.begin(), package->rhs.end(), isTestExport);
+    auto it = std::remove_if(package->rhs.begin(), package->rhs.end(), [](const auto &expr) {
+        auto send = ast::cast_tree<ast::Send>(expr);
+        return send && send->fun == core::Names::export_() && send->numPosArgs() == 1 &&
+               isTestConstant(send->getPosArg(0));
+    });
     package->rhs.erase(it, package->rhs.end());
 
     return result;
