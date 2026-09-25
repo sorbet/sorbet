@@ -8,8 +8,6 @@ title: Load-time Tuning
 These methods force that deferred work to happen eagerly:
 
 ```ruby
-# Due to lazy loading, if using all of these methods you need to use them in order to avoid missing anything.
-
 # Run all `sig {...}` blocks, redefining all associated methods with runtime checking
 # (or dropping the first-call wrapper, for `.checked(:never)` sigs)
 T::Utils.run_all_sig_blocks
@@ -21,6 +19,7 @@ T::Utils.run_all_type_alias_blocks
 T::Utils.eagerly_define_all_lazy_props_methods!
 
 # Force every type object to build its lazily-initialized fields
+# Because blocks are lazily loaded, you need to make sure to call this after all other loaders above.
 T::Utils.build_all_types
 ```
 
