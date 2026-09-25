@@ -5,12 +5,19 @@ module Shared # error: Package `Shared::Consumer` may not open `Shared`
   module Consumer
     class Client
       def call
-        # Identical to `unqualified_constant_escapes_package`, but in package-directed mode. Both
-        # files sit in stratum 0, so `Shared::Secret` resolves the same way (the lexical walk climbs
-        # into the parent package's `Shared` namespace). Package-directed mode changes how strata are
-        # named and resolved, not the cross-package visibility rule, so the same error still fires.
+        # Unqualified `Secret` is not defined in this package's namespace `Shared::Consumer`.
+        # Because this file nests `module Shared` around `module Consumer`, the parent namespace
+        # `Shared` is a lexical scope here, so constant resolution walks Client -> Consumer ->
+        # Shared and finds `Shared::Secret`, which belongs to the *parent* package `Shared`. The
+        # resolver never stops at package boundaries; the packager then flags the cross-package
+        # reference because `Shared` is neither imported here nor exports `Secret`.
         Secret
       # ^^^^^^ error: `Shared` is not imported
+
+        # `Secret2` is exported from `Shared`, but `Shared::Consumer` still doesn't import `Shared`,
+        # so the cross-package reference is flagged for the missing import rather than the export.
+        Secret2
+      # ^^^^^^^ error: `Shared` is not imported
       end
     end
   end

@@ -3,4 +3,5 @@
 # enable-package-directed: true
 
 class Shared < PackageSpec
+  export Shared::Secret2
 end
