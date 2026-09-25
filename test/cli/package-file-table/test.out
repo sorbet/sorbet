@@ -67,15 +67,6 @@ Errors: 2
    "source_size": 287
   },
   {
-   "path": "./foo/foo.test.rb",
-   "sigil": "Strict",
-   "strict": "Strict",
-   "min_error_level": "Max",
-   "pkg": "Project::Foo",
-   "pkg_scc_id": 1,
-   "source_size": 47
-  },
-  {
    "path": "./foo/foo_methods.rb",
    "sigil": "Strict",
    "strict": "Strict",
@@ -83,6 +74,24 @@ Errors: 2
    "pkg": "Project::Foo",
    "pkg_scc_id": 0,
    "source_size": 397
+  },
+  {
+   "path": "./foo/test/__package.rb",
+   "sigil": "Strict",
+   "strict": "Strict",
+   "min_error_level": "Max",
+   "pkg": "Test::Project::Foo",
+   "pkg_scc_id": 1,
+   "source_size": 143
+  },
+  {
+   "path": "./foo/test/foo.test.rb",
+   "sigil": "Strict",
+   "strict": "Strict",
+   "min_error_level": "Max",
+   "pkg": "Test::Project::Foo",
+   "pkg_scc_id": 1,
+   "source_size": 47
   }
  ]
 }

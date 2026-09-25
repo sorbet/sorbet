@@ -1,5 +1,7 @@
 # typed: strict
 
-class Other < PackageSpec
+class Test::Other < PackageSpec
+  test!
+
   import Foo::Bar
 end
