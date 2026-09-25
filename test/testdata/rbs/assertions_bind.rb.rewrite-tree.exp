@@ -94,10 +94,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  ::<Magic>.<build-range>(0, 10, false).each() do |_i|
-    begin
-      <cast:bind>(<self>, <todo sym>, <emptyTree>::<C Foo>)
-      <emptyTree>::<C T>.reveal_type(<self>)
+  begin
+    forTemp$4 = ::<Magic>.<build-range>(0, 10, false)
+    _i = ::<Magic>.<element-or-nil>(forTemp$4)
+    forTemp$4.each() do |_i|
+      begin
+        <cast:bind>(<self>, <todo sym>, <emptyTree>::<C Foo>)
+        <emptyTree>::<C T>.reveal_type(<self>)
+      end
     end
   end
 
@@ -168,7 +172,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <cast:bind>(<self>, <todo sym>, <emptyTree>::<C Foo>)
     <emptyTree>::<C T>.reveal_type(<self>)
   end
-rescue => <rescueTemp>$4
+rescue => <rescueTemp>$5
   begin
     <cast:bind>(<self>, <todo sym>, <emptyTree>::<C Bar>)
     <emptyTree>::<C T>.reveal_type(<self>)

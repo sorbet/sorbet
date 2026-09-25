@@ -7,132 +7,276 @@ ClassDef{
       orig = nullptr
     }]
   rhs = [
-    Send{
-      flags = {}
-      recv = Send{
-        flags = {privateOk}
-        recv = Self
-        fun = <U a>
-        block = nullptr
-        pos_args = 0
-        args = [
-        ]
-      }
-      fun = <U each>
-      block = Block {
-        params = [
-          UnresolvedIdent{
-            kind = Local
-            name = <U x>
-          }
-        ]
-        body = EmptyTree
-      }
-      pos_args = 0
-      args = [
-      ]
-    }
-
-    Send{
-      flags = {}
-      recv = Send{
-        flags = {privateOk}
-        recv = Self
-        fun = <U a>
-        block = nullptr
-        pos_args = 0
-        args = [
-        ]
-      }
-      fun = <U each>
-      block = Block {
-        params = [
-          UnresolvedIdent{
-            kind = Local
-            name = <U x>
-          }
-        ]
-        body = Literal{ value = "one-liner" }
-      }
-      pos_args = 0
-      args = [
-      ]
-    }
-
-    Send{
-      flags = {}
-      recv = Send{
-        flags = {privateOk}
-        recv = Self
-        fun = <U a>
-        block = nullptr
-        pos_args = 0
-        args = [
-        ]
-      }
-      fun = <U each>
-      block = Block {
-        params = [
-          UnresolvedIdent{
-            kind = Local
-            name = <U x>
-          }
-        ]
-        body = InsSeq{
-          stats = [
-            Literal{ value = "two" }
-          ],
-          expr = Literal{ value = "lines" }
-        }
-      }
-      pos_args = 0
-      args = [
-      ]
-    }
-
-    Send{
-      flags = {}
-      recv = Send{
-        flags = {privateOk}
-        recv = Self
-        fun = <U a>
-        block = nullptr
-        pos_args = 0
-        args = [
-        ]
-      }
-      fun = <U each>
-      block = Block {
-        params = [
-          UnresolvedIdent{
-            kind = Local
-            name = <U x>
-          }
-        ]
-        body = EmptyTree
-      }
-      pos_args = 0
-      args = [
-      ]
-    }
-
-    Send{
-      flags = {}
-      recv = Send{
-        flags = {privateOk}
-        recv = Self
-        fun = <U a>
-        block = nullptr
-        pos_args = 0
-        args = [
-        ]
-      }
-      fun = <U each>
-      block = Block {
-        params = [
-          UnresolvedIdent{
+    InsSeq{
+      stats = [
+        Assign{
+          lhs = UnresolvedIdent{
             kind = Local
             name = <D <U forTemp> $2>
+          }
+          rhs = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U a>
+            block = nullptr
+            pos_args = 0
+            args = [
+            ]
+          }
+        }
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Local
+            name = <U x>
+          }
+          rhs = Send{
+            flags = {}
+            recv = ConstantLit{
+              symbol = (class ::<Magic>)
+              orig = nullptr
+            }
+            fun = <U <element-or-nil>>
+            block = nullptr
+            pos_args = 1
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <D <U forTemp> $2>
+              }
+            ]
+          }
+        }
+      ],
+      expr = Send{
+        flags = {}
+        recv = UnresolvedIdent{
+          kind = Local
+          name = <D <U forTemp> $2>
+        }
+        fun = <U each>
+        block = Block {
+          params = [
+            UnresolvedIdent{
+              kind = Local
+              name = <U x>
+            }
+          ]
+          body = EmptyTree
+        }
+        pos_args = 0
+        args = [
+        ]
+      }
+    }
+
+    InsSeq{
+      stats = [
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Local
+            name = <D <U forTemp> $3>
+          }
+          rhs = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U a>
+            block = nullptr
+            pos_args = 0
+            args = [
+            ]
+          }
+        }
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Local
+            name = <U x>
+          }
+          rhs = Send{
+            flags = {}
+            recv = ConstantLit{
+              symbol = (class ::<Magic>)
+              orig = nullptr
+            }
+            fun = <U <element-or-nil>>
+            block = nullptr
+            pos_args = 1
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <D <U forTemp> $3>
+              }
+            ]
+          }
+        }
+      ],
+      expr = Send{
+        flags = {}
+        recv = UnresolvedIdent{
+          kind = Local
+          name = <D <U forTemp> $3>
+        }
+        fun = <U each>
+        block = Block {
+          params = [
+            UnresolvedIdent{
+              kind = Local
+              name = <U x>
+            }
+          ]
+          body = Literal{ value = "one-liner" }
+        }
+        pos_args = 0
+        args = [
+        ]
+      }
+    }
+
+    InsSeq{
+      stats = [
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Local
+            name = <D <U forTemp> $4>
+          }
+          rhs = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U a>
+            block = nullptr
+            pos_args = 0
+            args = [
+            ]
+          }
+        }
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Local
+            name = <U x>
+          }
+          rhs = Send{
+            flags = {}
+            recv = ConstantLit{
+              symbol = (class ::<Magic>)
+              orig = nullptr
+            }
+            fun = <U <element-or-nil>>
+            block = nullptr
+            pos_args = 1
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <D <U forTemp> $4>
+              }
+            ]
+          }
+        }
+      ],
+      expr = Send{
+        flags = {}
+        recv = UnresolvedIdent{
+          kind = Local
+          name = <D <U forTemp> $4>
+        }
+        fun = <U each>
+        block = Block {
+          params = [
+            UnresolvedIdent{
+              kind = Local
+              name = <U x>
+            }
+          ]
+          body = InsSeq{
+            stats = [
+              Literal{ value = "two" }
+            ],
+            expr = Literal{ value = "lines" }
+          }
+        }
+        pos_args = 0
+        args = [
+        ]
+      }
+    }
+
+    InsSeq{
+      stats = [
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Local
+            name = <D <U forTemp> $5>
+          }
+          rhs = Send{
+            flags = {privateOk}
+            recv = Self
+            fun = <U a>
+            block = nullptr
+            pos_args = 0
+            args = [
+            ]
+          }
+        }
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Local
+            name = <U x>
+          }
+          rhs = Send{
+            flags = {}
+            recv = ConstantLit{
+              symbol = (class ::<Magic>)
+              orig = nullptr
+            }
+            fun = <U <element-or-nil>>
+            block = nullptr
+            pos_args = 1
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = <D <U forTemp> $5>
+              }
+            ]
+          }
+        }
+      ],
+      expr = Send{
+        flags = {}
+        recv = UnresolvedIdent{
+          kind = Local
+          name = <D <U forTemp> $5>
+        }
+        fun = <U each>
+        block = Block {
+          params = [
+            UnresolvedIdent{
+              kind = Local
+              name = <U x>
+            }
+          ]
+          body = EmptyTree
+        }
+        pos_args = 0
+        args = [
+        ]
+      }
+    }
+
+    Send{
+      flags = {}
+      recv = Send{
+        flags = {privateOk}
+        recv = Self
+        fun = <U a>
+        block = nullptr
+        pos_args = 0
+        args = [
+        ]
+      }
+      fun = <U each>
+      block = Block {
+        params = [
+          UnresolvedIdent{
+            kind = Local
+            name = <D <U forTemp> $6>
           }
         ]
         body = InsSeq{
@@ -142,17 +286,17 @@ ClassDef{
                 Assign{
                   lhs = UnresolvedIdent{
                     kind = Local
-                    name = <D <U <assignTemp>> $3>
+                    name = <D <U <assignTemp>> $7>
                   }
                   rhs = UnresolvedIdent{
                     kind = Local
-                    name = <D <U forTemp> $2>
+                    name = <D <U forTemp> $6>
                   }
                 }
                 Assign{
                   lhs = UnresolvedIdent{
                     kind = Local
-                    name = <D <U <assignTemp>> $4>
+                    name = <D <U <assignTemp>> $8>
                   }
                   rhs = Send{
                     flags = {}
@@ -166,7 +310,7 @@ ClassDef{
                     args = [
                       UnresolvedIdent{
                         kind = Local
-                        name = <D <U <assignTemp>> $3>
+                        name = <D <U <assignTemp>> $7>
                       }
                       Literal{ value = 2 }
                       Literal{ value = 0 }
@@ -182,7 +326,7 @@ ClassDef{
                     flags = {}
                     recv = UnresolvedIdent{
                       kind = Local
-                      name = <D <U <assignTemp>> $4>
+                      name = <D <U <assignTemp>> $8>
                     }
                     fun = <U []>
                     block = nullptr
@@ -197,13 +341,13 @@ ClassDef{
                     Assign{
                       lhs = UnresolvedIdent{
                         kind = Local
-                        name = <D <U <assignTemp>> $5>
+                        name = <D <U <assignTemp>> $9>
                       }
                       rhs = Send{
                         flags = {}
                         recv = UnresolvedIdent{
                           kind = Local
-                          name = <D <U <assignTemp>> $4>
+                          name = <D <U <assignTemp>> $8>
                         }
                         fun = <U []>
                         block = nullptr
@@ -216,7 +360,7 @@ ClassDef{
                     Assign{
                       lhs = UnresolvedIdent{
                         kind = Local
-                        name = <D <U <assignTemp>> $6>
+                        name = <D <U <assignTemp>> $10>
                       }
                       rhs = Send{
                         flags = {}
@@ -230,7 +374,7 @@ ClassDef{
                         args = [
                           UnresolvedIdent{
                             kind = Local
-                            name = <D <U <assignTemp>> $5>
+                            name = <D <U <assignTemp>> $9>
                           }
                           Literal{ value = 2 }
                           Literal{ value = 0 }
@@ -246,7 +390,7 @@ ClassDef{
                         flags = {}
                         recv = UnresolvedIdent{
                           kind = Local
-                          name = <D <U <assignTemp>> $6>
+                          name = <D <U <assignTemp>> $10>
                         }
                         fun = <U []>
                         block = nullptr
@@ -265,7 +409,7 @@ ClassDef{
                         flags = {}
                         recv = UnresolvedIdent{
                           kind = Local
-                          name = <D <U <assignTemp>> $6>
+                          name = <D <U <assignTemp>> $10>
                         }
                         fun = <U []>
                         block = nullptr
@@ -278,13 +422,13 @@ ClassDef{
                   ],
                   expr = UnresolvedIdent{
                     kind = Local
-                    name = <D <U <assignTemp>> $5>
+                    name = <D <U <assignTemp>> $9>
                   }
                 }
               ],
               expr = UnresolvedIdent{
                 kind = Local
-                name = <D <U <assignTemp>> $3>
+                name = <D <U <assignTemp>> $7>
               }
             }
           ],
