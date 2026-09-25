@@ -1,0 +1,9 @@
+# frozen_string_literal: true
+# typed: strict
+# exclude-from-file-update: true
+
+module Imp
+  PN = Package::Namespace # error: `Package::Namespace` resolves but is not exported from `Package`
+
+  p(PN::A.a)
+end
