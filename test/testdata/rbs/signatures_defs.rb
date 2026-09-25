@@ -364,13 +364,13 @@ module Annotations
     # @abstract
     #: -> Integer
     def method_abstract5 # error: Methods declared @abstract with an RBS comment must always raise
-      puts "foo" # error: Abstract methods must not contain any code in their body
+      puts "foo"
     end
 
     # @abstract
     #: -> Integer
     def method_abstract6 # error: Methods declared @abstract with an RBS comment must always raise
-      puts "foo" # error: Abstract methods must not contain any code in their body
+      puts "foo"
       raise "foo"
     end
 
@@ -395,7 +395,7 @@ module Annotations
     # @abstract
     #: -> Integer
     def method_abstract9 # error: Methods declared @abstract with an RBS comment must always raise
-      Abstract.raise # error: Abstract methods must not contain any code in their body
+      Abstract.raise
     end
 
     # @abstract
@@ -410,6 +410,36 @@ module Annotations
     end
 
     class Error < StandardError; end
+
+    # @abstract
+    #: -> Integer
+    #  ^^^^^^^^^^ error: Unused type annotation. No method def before next annotation
+    #: -> Integer
+    def multiple_signatures = raise
+
+    # @abstract
+    # @abstract
+    #: -> Integer
+    def repeated_annotations
+      raise
+    end
+
+    # @abstract
+    # @abstract
+    #: -> Integer
+    private def repeated_private = raise
+
+    # @abstract
+    # @abstract
+    #: -> Integer
+    def repeated_empty; end # error: Methods declared @abstract with an RBS comment must always raise
+  end
+
+  # @interface
+  module Interface
+    # @abstract
+    #: (i: Integer) -> String
+    def foo(i:) = raise
   end
 
   class Final

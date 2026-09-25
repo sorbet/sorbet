@@ -6,18 +6,18 @@
 class Abstract
   # @abstract
   #: -> void
-  def foo = raise("Abstract method called") # error: Methods declared @abstract with an RBS comment must always raise
+  def foo; raise "Abstract method called"; end # error: Methods declared @abstract with an RBS comment must always raise
 
   # @abstract
   #: -> void
-  def bar
-    raise "Abstract method called" # error: Methods declared @abstract with an RBS comment must always raise
+  def bar # error: Methods declared @abstract with an RBS comment must always raise
+    raise "Abstract method called"
   end
 
   # @abstract
   #: -> void
   def baz # error: Methods declared @abstract with an RBS comment must always raise
-    raise "Abstract method called" # error: Abstract methods must not contain any code in their body
+    raise "Abstract method called"
   end
 
   # @abstract
@@ -28,23 +28,72 @@ class Abstract
 
   # @abstract
   #: -> void
-  def self.foo = raise("Abstract method called") # error: Methods declared @abstract with an RBS comment must always raise
+  def self.foo; raise "Abstract method called"; end # error: Methods declared @abstract with an RBS comment must always raise
 
   # @abstract
   #: -> void
-  def self.bar
-    raise "Abstract method called" # error: Methods declared @abstract with an RBS comment must always raise
+  def self.bar # error: Methods declared @abstract with an RBS comment must always raise
+    raise "Abstract method called"
   end
 
   # @abstract
   #: -> void
   def self.baz # error: Methods declared @abstract with an RBS comment must always raise
-    raise "Abstract method called" # error: Abstract methods must not contain any code in their body
+    raise "Abstract method called"
   end
 
   # @abstract
   #: -> void
   def self.qux # error: Methods declared @abstract with an RBS comment must always raise
+    raise "Abstract method called"
+  end
+
+  # @abstract
+  #: (Integer) -> void
+  def positional(value); raise "Abstract method called"; end # error: Methods declared @abstract with an RBS comment must always raise
+
+  # @abstract
+  #: (i: Integer) -> void
+  def keyword(i:) # error: Methods declared @abstract with an RBS comment must always raise
+    raise "Abstract method called"
+  end
+
+  # @abstract
+  #: { -> void } -> void
+  def self.with_block(&block); raise "Abstract method called"; end # error: Methods declared @abstract with an RBS comment must always raise
+
+  # @abstract
+  #: (Integer, i: Integer) { -> void } -> void
+  def unparenthesized value, i:, &block # error: Methods declared @abstract with an RBS comment must always raise
+    raise "Abstract method called"
+  end
+
+  # @abstract
+  #: (Integer, i: Integer) { -> void } -> void
+  def multiline_parameters( # error: Methods declared @abstract with an RBS comment must always raise
+    value,
+    i:,
+    &block
+  )
+    raise "Abstract method called"
+  end
+
+  # @abstract
+  #: -> void
+  def empty_parentheses() # error: Methods declared @abstract with an RBS comment must always raise
+    raise "Abstract method called"
+  end
+
+  # @abstract
+  #: (Integer, i: Integer) { -> void } -> void
+  def existing_body(value, i:, &block) # error: Methods declared @abstract with an RBS comment must always raise
+    raise "Abstract method called"
+  end
+
+  # @abstract
+  #: (i: Integer) -> void
+  def fooBar(i:) # rubocop:disable Naming/MethodName
+  #   ^^^^^^ error: Methods declared @abstract with an RBS comment must always raise
     raise "Abstract method called"
   end
 end

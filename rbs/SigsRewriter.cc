@@ -209,6 +209,112 @@ void insertHelpers(pm_node_t *body, absl::Span<pm_node_t *const> helpers) {
     }
 }
 
+bool isSelfOrKernel(pm_node_t *node, const parser::Prism::Parser *prismParser) {
+    if (isa_node<pm_self_node>(node)) {
+        return true;
+    }
+
+    if (auto *constant = down_cast<pm_constant_read_node_t>(node)) {
+        auto name = prismParser->resolveConstant(constant->name);
+        // Check if it's Kernel constant with no scope (::Kernel or bare Kernel)
+        return name == "Kernel";
+    }
+
+    if (auto *constantPath = down_cast<pm_constant_path_node_t>(node)) {
+        // Check if it's ::Kernel (parent is nullptr, representing root ::)
+        // We reject Foo::Kernel or any other scoped constant
+        if (constantPath->parent == nullptr) {
+            auto name = prismParser->resolveConstant(constantPath->name);
+            return name == "Kernel";
+        }
+    }
+
+    return false;
+}
+
+optional<core::AutocorrectSuggestion> autocorrectAbstractBody(core::MutableContext ctx, pm_node_t *method,
+                                                              const parser::Prism::Parser *prismParser,
+                                                              pm_node_t *method_body) {
+    core::LocOffsets editLoc;
+    string corrected;
+
+    if (method_body) {
+        editLoc = prismParser->translateLocation(method_body->location);
+        corrected = "raise \"Abstract method called\"";
+    } else {
+        auto *def = down_cast_nonnull<pm_def_node_t>(method);
+        if (def->end_keyword_loc.start == nullptr || def->end_keyword_loc.start == def->end_keyword_loc.end) {
+            return nullopt;
+        }
+        auto methodLoc = prismParser->translateLocation(method->location);
+
+        // Insert before `end` without separating the header from its comments.
+        editLoc = prismParser->translateLocation(def->end_keyword_loc).copyWithZeroLength();
+        auto lineStart = core::Loc::pos2Detail(ctx.file.data(ctx), methodLoc.beginPos()).line;
+        auto lineEnd = core::Loc::pos2Detail(ctx.file.data(ctx), methodLoc.endPos()).line;
+
+        if (lineStart == lineEnd) {
+            corrected = "raise \"Abstract method called\"; ";
+        } else {
+            auto [_endLoc, indentLength] = ctx.locAt(methodLoc).findStartOfIndentation(ctx);
+            corrected = "  raise \"Abstract method called\"\n" + string(indentLength, ' ');
+        }
+    }
+
+    return core::AutocorrectSuggestion{"Replace the abstract method body with `raise`",
+                                       {core::AutocorrectSuggestion::Edit{ctx.locAt(editLoc), corrected}}};
+}
+
+bool isValidAbstractMethod(pm_node_t *node, const parser::Prism::Parser *prismParser) {
+    auto *def = down_cast<pm_def_node_t>(node);
+    if (def == nullptr) {
+        return false;
+    }
+
+    if (def->body == nullptr) {
+        return false;
+    }
+
+    pm_node_t *bodyNode = def->body;
+
+    // Unwrap statements node if it contains exactly one statement
+    if (auto *stmts = down_cast<pm_statements_node_t>(bodyNode)) {
+        if (stmts->body.size != 1) {
+            return false;
+        }
+        bodyNode = stmts->body.nodes[0];
+    }
+
+    auto *call = down_cast<pm_call_node_t>(bodyNode);
+    if (call == nullptr) {
+        return false;
+    }
+
+    auto methodName = prismParser->resolveConstant(call->name);
+
+    // Check if it's a raise call with no receiver or self/Kernel receiver
+    return methodName == "raise" && (call->receiver == nullptr || isSelfOrKernel(call->receiver, prismParser));
+}
+
+void ensureAbstractMethodRaises(core::MutableContext ctx, pm_node_t *node, parser::Prism::Parser *prismParser) {
+    auto *def = down_cast_nonnull<pm_def_node_t>(node);
+    if (!isValidAbstractMethod(node, prismParser)) {
+        auto nodeLoc = prismParser->translateLocation(node->location);
+        if (auto e = ctx.beginIndexerError(nodeLoc, core::errors::Rewriter::RBSAbstractMethodNoRaises)) {
+            e.setHeader("Methods declared @abstract with an RBS comment must always raise");
+            if (auto autocorrect = autocorrectAbstractBody(ctx, node, prismParser, def->body)) {
+                e.addAutocorrect(move(*autocorrect));
+            }
+        }
+    }
+
+    // The RBS error above fully diagnoses invalid bodies, so hide every abstract body from later resolver checks.
+    if (def->body != nullptr) {
+        prismParser->destroyNode(def->body);
+        def->body = nullptr;
+    }
+}
+
 } // namespace
 
 void SigsRewriter::insertTypeParams(pm_node_t *node, pm_node_t *body) {
@@ -330,24 +436,23 @@ unique_ptr<vector<pm_node_t *>> SigsRewriter::signaturesForNode(pm_node_t *node)
         return nullptr;
     }
 
+    auto *method = down_cast<pm_def_node_t>(node);
+    auto *call = down_cast<pm_call_node_t>(node);
+    if (call != nullptr && isMethodDefSignatureTarget(node, parser, ctx.state)) {
+        method = down_cast_nonnull<pm_def_node_t>(call->arguments->arguments.nodes[0]);
+    }
+
     auto signatures = make_unique<vector<pm_node_t *>>();
     auto signatureTranslator = rbs::SignatureTranslator{ctx, parser};
 
     for (auto &declaration : comments.signatures) {
-        if (isa_node<pm_def_node_t>(node)) {
-            auto sig = signatureTranslator.translateMethodSignature(node, declaration, comments.annotations);
+        if (method != nullptr) {
+            auto sig = signatureTranslator.translateMethodSignature(up_cast(method), declaration, comments.annotations);
             if (sig) {
                 signatures->emplace_back(sig);
             }
-        } else if (auto *call = down_cast<pm_call_node_t>(node)) {
-            if (isMethodDefSignatureTarget(node, parser, ctx.state)) {
-                // Translate the signature for the wrapped method definition.
-                auto sig = signatureTranslator.translateMethodSignature(call->arguments->arguments.nodes[0],
-                                                                        declaration, comments.annotations);
-                if (sig) {
-                    signatures->emplace_back(sig);
-                }
-            } else if (parser.isAttrAccessorCall(node)) {
+        } else if (call != nullptr) {
+            if (parser.isAttrAccessorCall(node)) {
                 auto sig = signatureTranslator.translateAttrSignature(call, declaration, comments.annotations);
                 if (sig) {
                     signatures->emplace_back(sig);
@@ -358,6 +463,13 @@ unique_ptr<vector<pm_node_t *>> SigsRewriter::signaturesForNode(pm_node_t *node)
         } else {
             Exception::raise("Unimplemented node type for signatures: {}", (int)PM_NODE_TYPE(node));
         }
+    }
+
+    // All signatures share this method node. Validate and erase its body only once.
+    if (method != nullptr && !signatures->empty() &&
+        absl::c_any_of(comments.annotations,
+                       [](const Comment &annotation) { return annotation.string == "abstract"; })) {
+        ensureAbstractMethodRaises(ctx, up_cast(method), &parser);
     }
 
     return signatures;

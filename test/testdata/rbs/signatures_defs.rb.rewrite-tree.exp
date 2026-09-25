@@ -685,7 +685,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       def method_abstract5<<todo method>>(&<blk>)
-        <self>.puts("foo")
+        <emptyTree>
       end
 
       ::T::Sig::WithoutRuntime.sig() do ||
@@ -693,10 +693,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       def method_abstract6<<todo method>>(&<blk>)
-        begin
-          <self>.puts("foo")
-          <self>.raise("foo")
-        end
+        <emptyTree>
       end
 
       ::T::Sig::WithoutRuntime.sig() do ||
@@ -728,7 +725,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       def method_abstract9<<todo method>>(&<blk>)
-        <emptyTree>::<C Abstract>.raise()
+        <emptyTree>
       end
 
       ::T::Sig::WithoutRuntime.sig() do ||
@@ -745,6 +742,42 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       def self.raise<<todo method>>(&<blk>)
         <self>.raise()
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.abstract().returns(<emptyTree>::<C Integer>)
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.abstract().returns(<emptyTree>::<C Integer>)
+      end
+
+      def multiple_signatures<<todo method>>(&<blk>)
+        <emptyTree>
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.abstract().abstract().returns(<emptyTree>::<C Integer>)
+      end
+
+      def repeated_annotations<<todo method>>(&<blk>)
+        <emptyTree>
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.abstract().abstract().returns(<emptyTree>::<C Integer>)
+      end
+
+      def repeated_private<<todo method>>(&<blk>)
+        <emptyTree>
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.abstract().abstract().returns(<emptyTree>::<C Integer>)
+      end
+
+      def repeated_empty<<todo method>>(&<blk>)
+        <emptyTree>
       end
 
       <runtime method definition of method_abstract1>
@@ -774,9 +807,33 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       class <emptyTree>::<C Error><<C <todo sym>>> < (<emptyTree>::<C StandardError>)
       end
 
+      <runtime method definition of multiple_signatures>
+
+      <runtime method definition of repeated_annotations>
+
+      <self>.private(<runtime method definition of repeated_private>)
+
+      <runtime method definition of repeated_empty>
+
       <self>.extend(::<root>::<C T>::<C Helpers>)
 
       <self>.abstract!()
+    end
+
+    module <emptyTree>::<C Interface><<C <todo sym>>> < ()
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.abstract().params(:i, <emptyTree>::<C Integer>).returns(<emptyTree>::<C String>)
+      end
+
+      def foo<<todo method>>(i:, &<blk>)
+        <emptyTree>
+      end
+
+      <runtime method definition of foo>
+
+      <self>.extend(::<root>::<C T>::<C Helpers>)
+
+      <self>.interface!()
     end
 
     class <emptyTree>::<C Final><<C <todo sym>>> < (::<todo sym>)
