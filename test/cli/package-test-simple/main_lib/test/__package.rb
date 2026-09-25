@@ -7,4 +7,5 @@ class Test::Project::MainLib < PackageSpec
   import Project::MainLib, uses_internals: true
   import Project::Util
   import Project::TestOnly
+  import Test::Project::Util
 end

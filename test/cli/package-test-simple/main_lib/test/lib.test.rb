@@ -6,6 +6,8 @@ class Test::Project::MainLib::LibTest
   Project::MainLib::Lib.new
   # Tests can access `import`
   Project::Util::MyUtil.new
+  # Tests can import another package's test helpers
+  Test::Project::Util::UtilHelper
   # Tests can access imports on the test package
   Project::TestOnly::SomeHelper.new
 end
