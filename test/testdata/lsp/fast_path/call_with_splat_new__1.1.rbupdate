@@ -1,0 +1,10 @@
+# typed: strict
+# assert-fast-path: call_with_splat_new__1.rb,call_with_splat_new__2.rb
+
+class A
+  extend T::Sig
+
+  sig {params(x: String).void}
+  def initialize(x)
+  end
+end

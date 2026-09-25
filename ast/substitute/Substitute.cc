@@ -52,6 +52,17 @@ private:
         return literal->asName();
     }
 
+    core::NameRef substituteDispatchedName(core::NameRef name) {
+        const auto &dispatchMap = core::intrinsicMethodsDispatchMap();
+        if (auto it = dispatchMap.find(name); it != dispatchMap.end()) {
+            for (const auto target : it->second) {
+                [[maybe_unused]] auto _substituted = subst.substituteSymbolName(target);
+            }
+        }
+
+        return subst.substituteSymbolName(name);
+    }
+
 public:
     SubstWalk(T &subst) : subst(subst) {}
 
@@ -105,13 +116,13 @@ public:
             if (send.numPosArgs() > 0) {
                 auto name = unwrapLiteralToName(send.getPosArg(0));
                 if (name.exists()) {
-                    [[maybe_unused]] auto _substituted = subst.substituteSymbolName(name);
+                    [[maybe_unused]] auto _substituted = substituteDispatchedName(name);
                 }
             }
             if (send.numPosArgs() > 1) {
                 auto name = unwrapLiteralToName(send.getPosArg(1));
                 if (name.exists()) {
-                    [[maybe_unused]] auto _substituted = subst.substituteSymbolName(name);
+                    [[maybe_unused]] auto _substituted = substituteDispatchedName(name);
                 }
             }
         } else if (send.fun == core::Names::callWithSplat() || send.fun == core::Names::callWithBlockPass() ||
@@ -122,18 +133,10 @@ public:
             // positional arg at index 1.
             auto name = unwrapLiteralToName(send.getPosArg(1));
             ENFORCE(name.exists(), "Name should exist because this arg should be a Literal");
-            [[maybe_unused]] auto _substituted = subst.substituteSymbolName(name);
+            [[maybe_unused]] auto _substituted = substituteDispatchedName(name);
         }
 
-        send.fun = subst.substituteSymbolName(send.fun);
-
-        // Some intrinsic method dispatch to other methods. Defensively assume that any method that
-        // shares a name with an intrinsic might be an intrinsic method.
-        for (const auto &[source, targets] : core::intrinsicMethodsDispatchMap()) {
-            for (const auto target : targets) {
-                [[maybe_unused]] auto _substituted = subst.substituteSymbolName(target);
-            }
-        }
+        send.fun = substituteDispatchedName(send.fun);
     }
 
     void postTransformLiteral(core::Context ctx, ExpressionPtr &tree) {
