@@ -7,11 +7,12 @@
 # Ruby resolves the bare `Baz` below to `Opus::Foo::Baz` (via the `Opus::Foo` cref), and so does Sorbet in
 # monolithic mode, reporting "`Opus::Foo::Baz` is not imported" and giving `X` the type `T.untyped`.
 #
-# In package-directed mode the lexical lookup misses at `Opus::Foo`, climbs to the root scope, and silently
-# binds `Baz` to the prelude's `::Baz`. This snapshot records that (wrong) behavior.
+# Package-directed mode must report the same thing, rather than letting the lexical lookup miss at `Opus::Foo`,
+# climb to the root scope, and silently bind `Baz` to the prelude's `::Baz`.
 module Opus::Foo
   module Bar
     X = Baz
-    T.reveal_type(X) # error: Revealed type: `T.class_of(Baz)`
+      # ^^^ error: `Opus::Foo::Baz` is not imported
+    T.reveal_type(X) # error: Revealed type: `T.untyped`
   end
 end

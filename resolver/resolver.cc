@@ -296,14 +296,47 @@ private:
     vector<ClassMethodsResolutionItem> todoClassMethods_;
     vector<RequireAncestorResolutionItem> todoRequiredAncestors_;
 
+    // Returns true if `scope::name` is the namespace of a package that this file is not allowed to reference.
+    //
+    // Ruby's lexical constant lookup would find `scope::name` at this point (the package defines that namespace at
+    // runtime), so the walk up the lexical scopes must stop here. In package-directed mode, though, the package may
+    // live in a later stratum, in which case its namespace symbol has not been entered yet and a plain member lookup
+    // on `scope` misses. Without this check, the lookup would escape to an outer scope and could silently bind to an
+    // unrelated constant of the same name, diverging from both Ruby and monolithic mode. Stopping the walk lets the
+    // usual "not imported" error be reported instead, exactly as it would have been if the symbol had been present.
+    //
+    // We only do this for packages the file can't reference: an accessible package is in an earlier (or the same)
+    // stratum, so the member lookup on `scope` is authoritative for it.
+    static bool shadowedByInaccessiblePackage(core::Context ctx, core::ClassOrModuleRef scope, core::NameRef name) {
+        if (scope == core::Symbols::root() || !shouldCheckPackage(ctx)) {
+            return false;
+        }
+        auto registryOwner = scope.data(ctx)->packageRegistryOwner;
+        if (!registryOwner.exists()) {
+            return false;
+        }
+        auto member = registryOwner.data(ctx)->findMemberNoDealias(name);
+        if (!member.exists() || !member.isClassOrModule()) {
+            return false;
+        }
+        auto registryMember = member.asClassOrModuleRef();
+        if (!cursorIsPackage(ctx, registryMember)) {
+            // An intermediate package-registry namespace, not a package. We can't know which package defines the
+            // corresponding runtime module, so leave the lookup alone.
+            return false;
+        }
+        return !canReferencePackage(ctx, core::packages::MangledName(registryMember));
+    }
+
     static core::SymbolRef resolveLhs(core::Context ctx, const shared_ptr<Nesting> &nesting, core::NameRef name) {
         Nesting *scope = nesting.get();
         while (scope != nullptr) {
             if (scope->scope.isClassOrModule()) {
+                auto klass = scope->scope.asClassOrModuleRef();
                 // We don't want to rely on existing information in the symbol table for the
                 // fast path in LSP, but we do need to explicitly look through type template
                 // static fields to find the field on the singleton class.
-                auto lookup = scope->scope.asClassOrModuleRef().data(ctx)->findMemberNoDealias(name);
+                auto lookup = klass.data(ctx)->findMemberNoDealias(name);
                 if (lookup.isStaticField(ctx)) {
                     if (lookup.asFieldRef().data(ctx)->isClassAlias()) {
                         auto dealiased = lookup.dealias(ctx);
@@ -319,6 +352,9 @@ private:
                 }
                 if (lookup.exists()) {
                     return lookup;
+                }
+                if (shadowedByInaccessiblePackage(ctx, klass, name)) {
+                    return core::Symbols::noSymbol();
                 }
             }
             scope = scope->parent.get();
