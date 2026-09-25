@@ -4,7 +4,7 @@
 class Test
   extend T::Sig
 
-  sig {returns(String)}
+  sig {returns(T.nilable(String))}
   attr_accessor :non_nil_accessor
   #              ^^^^^^^^^^^^^^^^ error: Use of undeclared variable `@non_nil_accessor`
   #              ^^^^^^^^^^^^^^^^ error: The instance variable `@non_nil_accessor` must be declared using `T.let` when specifying `# typed: strict`
@@ -20,11 +20,25 @@ class Test
   sig {returns(T.untyped)}
   attr_reader :untyped_reader # error: Use of undeclared variable `@untyped_reader`
 
-  sig {params(non_nil_writer: String).returns(String)}
+  sig {params(non_nil_writer: String).returns(T.nilable(String))}
   attr_writer :non_nil_writer # error: The instance variable `@non_nil_writer` must be declared using `T.let` when specifying `# typed: strict`
   sig {params(nilable_writer: String).returns(T.nilable(String))}
   attr_writer :nilable_writer
   sig {params(untyped_writer: T.untyped).returns(T.untyped)}
   attr_writer :untyped_writer
+
+  # One sig shared by many names only needs widening once.
+  sig {returns(T.nilable(String))}
+  attr_accessor :multi_one, :multi_two
+  #              ^^^^^^^^^ error: Use of undeclared variable `@multi_one`
+  #              ^^^^^^^^^ error: The instance variable `@multi_one` must be declared using `T.let` when specifying `# typed: strict`
+  #                          ^^^^^^^^^ error: Use of undeclared variable `@multi_two`
+  #                          ^^^^^^^^^ error: The instance variable `@multi_two` must be declared using `T.let` when specifying `# typed: strict`
+
+  MyAlias = T.type_alias {Integer}
+  sig {returns(T.nilable(MyAlias))}
+  attr_accessor :aliased
+  #              ^^^^^^^ error: Use of undeclared variable `@aliased`
+  #              ^^^^^^^ error: The instance variable `@aliased` must be declared using `T.let` when specifying `# typed: strict`
 end
 # ------------------------------
