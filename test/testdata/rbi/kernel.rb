@@ -115,9 +115,11 @@ def fail_class_message
   fail StandardError, "message"
 end
 
-y = loop do
+def kernel_loop
+  y = loop do
+  end
+  puts y # error: This code is unreachable
 end
-puts y # error: This code is unreachable
 
 class Test
   def test
@@ -145,3 +147,18 @@ callcc {|cont|
   end
 }
 puts
+
+# Kernel#printf
+def test_printf
+  printf
+
+  printf "foo"
+  printf "%d", 1
+  printf "%d-%d", 1, 2
+  printf "%d-%d-%d", 1, 2, 3
+
+  printf $stderr, "foo"
+  printf $stderr, "%d", 1
+  printf $stderr, "%d-%d", 1, 2
+  printf $stderr, "%d-%d-%d", 1, 2, 3
+end
