@@ -957,7 +957,7 @@ PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::Pars
                         }
 
                         auto &tree =
-                            packageFiles.emplace_back(packager::Packager::copyPackageWithoutTestExports(gs, package));
+                            packageFiles.emplace_back(packager::Packager::copyPackageWithoutExports(gs, package, true));
                         ENFORCE(tree.tree);
                     }
                 }
