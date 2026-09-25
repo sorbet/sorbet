@@ -86,7 +86,7 @@ def enum_example(suit)
   when *RedSuits
     T.reveal_type(suit) # error: `T.any(Suit::Hearts, Suit::Diamonds)`
   else
-    T.reveal_type(suit) # error: `T.any(Suit::Clubs, Suit::Spades)`
+    T.reveal_type(suit) # error: `T.any(Suit::Spades, Suit::Clubs)`
   end
 
   case suit

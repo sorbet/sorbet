@@ -335,6 +335,13 @@ pair<OrInfo, optional<string>> showOrElem(const GlobalState &gs, ShowOptions opt
         }
     } else if (auto orType = cast_type<OrType>(ty)) {
         return showOrs(gs, options, orType->left, orType->right);
+    } else if (auto enumUnion = cast_type<EnumUnionType>(ty)) {
+        auto info = OrInfo::otherInfo();
+        info.markContainsMultiple();
+        return make_pair(
+            info, make_optional(fmt::format("{}", fmt::map_join(enumUnion->members, ", ", [&](auto member) -> string {
+                                                return member.show(gs, options);
+                                            }))));
     }
 
     return make_pair(OrInfo::otherInfo(), make_optional(ty.show(gs, options)));
@@ -546,6 +553,26 @@ string MetaType::toStringWithTabs(const GlobalState &gs, int tabs) const {
 
 string MetaType::show(const GlobalState &gs, ShowOptions options) const {
     return fmt::format("Runtime object representing type: {}", wrapped.show(gs, options));
+}
+
+string EnumUnionType::toStringWithTabs(const GlobalState &gs, int tabs) const {
+    fmt::memory_buffer buf;
+    fmt::format_to(std::back_inserter(buf), "EnumUnionType {{");
+    bool first = true;
+    for (auto &member : members) {
+        if (!first) {
+            fmt::format_to(std::back_inserter(buf), ", ");
+        }
+        first = false;
+        fmt::format_to(std::back_inserter(buf), "{}", member.toString(gs));
+    }
+    fmt::format_to(std::back_inserter(buf), "}}");
+    return to_string(buf);
+}
+
+string EnumUnionType::show(const GlobalState &gs, ShowOptions options) const {
+    return fmt::format("T.any({})",
+                       fmt::map_join(members, ", ", [&](auto member) -> string { return member.show(gs, options); }));
 }
 
 } // namespace sorbet::core
