@@ -351,6 +351,18 @@ TypePtr Types::dropLiteral(const GlobalState &gs, const TypePtr &tp) {
     return tp;
 }
 
+TypePtr Types::dropLiteralRecursive(const GlobalState &gs, const TypePtr &tp) {
+    if (auto orType = cast_type<OrType>(tp)) {
+        auto left = dropLiteralRecursive(gs, orType->left);
+        auto right = dropLiteralRecursive(gs, orType->right);
+        if (left == orType->left && right == orType->right) {
+            return tp;
+        }
+        return Types::lub(gs, left, right, LiteralTypesMode::broaden);
+    }
+    return Types::dropLiteral(gs, tp);
+}
+
 TypePtr Types::lubAll(const GlobalState &gs, const vector<TypePtr> &elements) {
     TypePtr acc = Types::bottom();
     for (auto &el : elements) {
@@ -360,7 +372,7 @@ TypePtr Types::lubAll(const GlobalState &gs, const vector<TypePtr> &elements) {
         //
         // Which means that to remove all literals, it's sufficient to do a single `dropLiteral`
         // at the call `lubAll` call site.
-        acc = Types::lub(gs, acc, el);
+        acc = Types::lub(gs, acc, el, LiteralTypesMode::broaden);
     }
     return acc;
 }
@@ -590,7 +602,7 @@ TypePtr TupleType::underlying(const GlobalState &gs) const {
     if (this->elems.empty()) {
         return Types::arrayOfUntyped(Symbols::Magic_UntypedSource_tupleUnderlying());
     } else {
-        return Types::arrayOf(gs, Types::dropLiteral(gs, Types::lubAll(gs, this->elems)));
+        return Types::arrayOf(gs, Types::dropLiteralRecursive(gs, Types::lubAll(gs, this->elems)));
     }
 }
 

@@ -14,5 +14,5 @@ class A
   if T.unsafe(nil)
     x = 1
   end
-  T.reveal_type(x) # error: `T.nilable(Integer)`
+  T.reveal_type(x) # error: Revealed type: `T.nilable(Integer)`
 end
