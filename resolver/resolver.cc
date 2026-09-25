@@ -1797,8 +1797,9 @@ public:
             }
         }
 
-        // Check the name we're introducing for a scope, as that counts for requiring a package namespace
-        // opening check in the parent scope.
+        // A scoped class name like `class Foo::Bar` looks up `Foo` at runtime. That lookup happens in the *enclosing*
+        // scope (the one this ClassDef is nested in), not in the scope of `Foo::Bar` itself, so it's the parent
+        // nesting that needs the package namespace opening check. Nothing about the body of `Foo::Bar` is implied.
         if (auto name = ast::cast_tree<ast::ConstantLit>(original.name)) {
             if (!ast::isa_tree<ast::EmptyTree>(name->original()->scope) && nesting_->parent != nullptr) {
                 nesting_->parent->runtimeResolutionPresent = true;
