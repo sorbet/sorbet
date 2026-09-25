@@ -182,7 +182,7 @@ class PropagateVisibility final {
     //
     // This is very unsatisfying, because it looks a lot like us re-introducing FullyQualifiedName,
     // which was half of the point of moving Symbols into the package database in the first place.
-    pair<core::ClassOrModuleRef, core::ClassOrModuleRef> getScopesForPackage(const core::GlobalState &gs) {
+    core::ClassOrModuleRef getExportScopeForPackage(const core::GlobalState &gs, bool testExport) {
         vector<core::NameRef> parts;
         auto owner = package.mangledName().owner;
         while (owner != core::Symbols::root() && owner != core::Symbols::PackageSpecRegistry()) {
@@ -191,19 +191,21 @@ class PropagateVisibility final {
             owner = ownerData->owner;
         }
 
-        auto nonTestScope = getScopeForPackage(gs, parts, core::Symbols::root());
-        auto testNamespace = core::Symbols::root().data(gs)->findMember(gs, core::packages::PackageDB::TEST_NAMESPACE);
-        core::ClassOrModuleRef testScope;
-        if (!this->package.usesTestPackages && testNamespace.exists() && testNamespace.isClassOrModule()) {
-            testScope = getScopeForPackage(gs, parts, testNamespace.asClassOrModuleRef());
+        if (!testExport) {
+            return getScopeForPackage(gs, parts, core::Symbols::root());
         }
 
-        // TODO(trevor): we can remove the returned test scope after switching to test packages.
-        return {nonTestScope, testScope};
+        auto testNamespace = core::Symbols::root().data(gs)->findMember(gs, core::packages::PackageDB::TEST_NAMESPACE);
+        if (!this->package.usesTestPackages && testNamespace.exists() && testNamespace.isClassOrModule()) {
+            return getScopeForPackage(gs, parts, testNamespace.asClassOrModuleRef());
+        }
+
+        return core::Symbols::noClassOrModule();
     }
 
     void unsetAllExportedInPackage(core::MutableContext ctx) {
-        auto [nonTestScope, testScope] = getScopesForPackage(ctx);
+        auto nonTestScope = getExportScopeForPackage(ctx, false);
+        auto testScope = getExportScopeForPackage(ctx, true);
 
         auto setExportedTo = false;
 
