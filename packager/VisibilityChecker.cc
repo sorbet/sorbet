@@ -203,23 +203,16 @@ class PropagateVisibility final {
         return core::Symbols::noClassOrModule();
     }
 
-    void unsetAllExportedInPackage(core::MutableContext ctx) {
-        auto nonTestScope = getExportScopeForPackage(ctx, false);
-        auto testScope = getExportScopeForPackage(ctx, true);
+    void unsetExportedInPackage(core::MutableContext ctx, bool testExport) {
+        auto scope = getExportScopeForPackage(ctx, testExport);
 
         auto setExportedTo = false;
 
         // loc is never used in `recursiveSetIsExported` if `setExportedTo` is false, so just say "none"
         auto currentExportLineLoc = core::LocOffsets::none();
-        if (nonTestScope.exists()) {
-            recursiveSetIsExported(ctx, setExportedTo, nonTestScope, currentExportLineLoc, nonTestScope);
+        if (scope.exists()) {
+            recursiveSetIsExported(ctx, setExportedTo, scope, currentExportLineLoc, scope);
         }
-        if (testScope.exists()) {
-            recursiveSetIsExported(ctx, setExportedTo, testScope, currentExportLineLoc, testScope);
-        }
-
-        // Shouldn't have been touched, because currentExportLineLoc was none, but let's just clear it to be safe.
-        explicitlyExported.clear();
     }
 
     bool ignoreRBIExportEnforcement(const core::GlobalState &gs, core::FileRef file) {
@@ -461,7 +454,8 @@ public:
 
         core::MutableContext ctx{gs, core::Symbols::root(), f.file};
         PropagateVisibility pass{*package};
-        pass.unsetAllExportedInPackage(ctx);
+        pass.unsetExportedInPackage(ctx, false);
+        pass.unsetExportedInPackage(ctx, true);
         ast::ConstTreeWalk::apply(ctx, pass, f.tree);
 
         auto exportAll = package->locs.exportAll;
