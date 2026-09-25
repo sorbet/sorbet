@@ -856,14 +856,16 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 // Note: super is not a method call, and so all the logic in the case below to
                 // compute autocorrects to potentially fix up the method call's receiver can't apply.
                 e.addErrorNote("For help fixing `{}` errors: {}", "super", "https://sorbet.org/docs/typed-super");
-            } else if (args.receiverLoc().exists() &&
-                       (gs.suggestUnsafe.has_value() ||
-                        (args.fullType.type != args.thisType && symbol == Symbols::NilClass() &&
-                         // Don't suggest T.must if the suggestion will produce bottom
-                         !Types::dropNil(gs, args.fullType.type).isBottom()))) {
-                auto wrapInFn = gs.suggestUnsafe.value_or("T.must");
-                autocorrectReceiver(gs, e, args, wrapInFn);
             } else {
+                if (args.receiverLoc().exists() &&
+                    (gs.suggestUnsafe.has_value() ||
+                     (args.fullType.type != args.thisType && symbol == Symbols::NilClass() &&
+                      // Don't suggest T.must if the suggestion will produce bottom
+                      !Types::dropNil(gs, args.fullType.type).isBottom()))) {
+                    auto wrapInFn = gs.suggestUnsafe.value_or("T.must");
+                    autocorrectReceiver(gs, e, args, wrapInFn);
+                }
+
                 auto canSkipFuzzyMatch = false;
                 if (symbol.data(gs)->isModule()) {
                     auto objMeth = core::Symbols::Object().data(gs)->findMethodTransitive(gs, args.name);
