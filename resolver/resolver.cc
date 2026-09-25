@@ -148,7 +148,18 @@ private:
         const shared_ptr<Nesting> parent;
         const core::SymbolRef scope;
 
+        // Marked `true` if we see a constant lit used under this scope. If it's true, this will trigger validation of
+        // the scope as it's being popped in `postTransformClassDef`. Additionally, `postTransformClassDef` will
+        // propagate the flag's state to parent scopes, ensuring that all are checked when constant resolution is
+        // triggered in a child scope.
+        bool runtimeResolutionPresent = false;
+
         Nesting(shared_ptr<Nesting> parent, core::SymbolRef scope) : parent(std::move(parent)), scope(scope) {}
+
+        bool atTopLevel() const {
+            return this->scope == core::Symbols::root() ||
+                   (this->parent != nullptr && this->parent->scope == core::Symbols::root());
+        }
     };
     CheckSize(Nesting, 24, 8);
 
@@ -1628,7 +1639,90 @@ public:
     }
 
     void postTransformUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
+        this->nesting_->runtimeResolutionPresent = true;
         walkUnresolvedConstantLit(ctx, tree);
+    }
+
+    // Enforces that a file owned by a package may only open the scope of symbols that it owns (or imports).
+    // This is called for all nesting scopes that contain constant references that would trigger constant
+    // resolution.
+    //
+    // This restriction on the scopes opened is to ensure that we only allow constant resolution to happen
+    // in nesting scopes that we know we've seen all constant definitions for already. For unpackaged code
+    // this is trivially true, but for packaged code we may be processing packages incrementally, and
+    // reopening the symbols defined by a parent package might lead to incorrect resolution in the case that
+    // the parent package is processed after the subpackage.
+    void checkScopePackage(core::Context ctx, core::ClassOrModuleRef scopeKlass, core::LocOffsets declLoc) {
+        // TODO(trevor) remove this check once the migration is finished, and we're not baking in an
+        // ignore of this error.
+        if (!ctx.state.shouldReportErrorOn(ctx.file, core::errors::Resolver::PackageScopeViolation)) {
+            return;
+        }
+
+        if (!ctx.state.packageDB().enabled()) {
+            return;
+        }
+
+        if (scopeKlass == core::Symbols::root()) {
+            return;
+        }
+
+        // Skip anything that's rooted in the `<PackageSpecRegistry>` shadow hierarchy
+        if (scopeKlass.data(ctx)->packageRegistryOwner == scopeKlass) {
+            return;
+        }
+
+        // If the file isn't associated with a package, we reject any modification to a packaged constant.
+        auto curPkgName = ctx.state.packageDB().getPackageNameForFile(ctx.file);
+        if (!curPkgName.exists()) {
+            if (scopeKlass.data(ctx)->package.exists()) {
+                auto scopePkgName = scopeKlass.data(ctx)->package;
+                const auto &scopePkg = ctx.state.packageDB().getPackageInfo(scopePkgName);
+                if (auto e = ctx.beginError(declLoc, core::errors::Resolver::PackageScopeViolation)) {
+                    e.setHeader("Unpackaged code may not open `{}`", scopeKlass.show(ctx));
+                    e.addErrorLine(scopePkg.declLoc(), "Owning package");
+                }
+            }
+
+            return;
+        }
+
+        const auto &curPkg = ctx.state.packageDB().getPackageInfo(curPkgName);
+        ENFORCE(curPkg.exists());
+
+        switch (curPkg.canOpenScope(ctx, scopeKlass)) {
+            case core::packages::PackageInfo::CanOpenScopeResult::CanOpen:
+                return;
+
+            case core::packages::PackageInfo::CanOpenScopeResult::NotImported: {
+                if (auto e = ctx.beginError(declLoc, core::errors::Resolver::PackageScopeViolation)) {
+                    auto scopePkgName = scopeKlass.data(ctx)->package;
+                    const auto &scopePkg = ctx.state.packageDB().getPackageInfo(scopePkgName);
+
+                    auto scopeName = scopePkg.show(ctx);
+                    auto curName = curPkg.show(ctx);
+
+                    e.setHeader("Package `{}` may not open `{}`", curName, scopeKlass.show(ctx));
+                    e.addErrorLine(scopePkg.declLoc(), "Owning package");
+                    e.addErrorLine(curPkg.declLoc(), "Referencing package");
+
+                    if (isStrictPackagePrefix(ctx, scopePkgName, curPkgName)) {
+                        e.addErrorNote("Either `import {}` in `{}`'s `__package.rb`, or change this file's top-level "
+                                       "constant to match `{}`.",
+                                       scopeName, curName, curName);
+
+                        if (auto suggestion = curPkg.addImport(ctx, scopePkg, core::packages::ImportType::Normal)) {
+                            // TODO(trevor) how does this interact with gen-packages mode, do we need to add a
+                            // `trackPackageReference` call here?
+                            e.addAutocorrect(std::move(*suggestion));
+                        }
+                    } else {
+                        e.addErrorNote("Please change this file's top-level constant to match `{}`.", curName);
+                    }
+                }
+                return;
+            }
+        }
     }
 
     void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
@@ -1696,6 +1790,23 @@ public:
                     e.addErrorLine(ambigDef.loc(ctx), "Or could mean `{}` if nested under here", option2);
                 }
             }
+        }
+
+        // Check the name we're introducing for a scope, as that counts for requiring a package namespace
+        // opening check.
+        if (auto name = ast::cast_tree<ast::ConstantLit>(original.name)) {
+            if (!ast::isa_tree<ast::EmptyTree>(name->original()->scope)) {
+                nesting_->runtimeResolutionPresent = nesting_->runtimeResolutionPresent || !nesting_->atTopLevel();
+            }
+        }
+
+        if (this->nesting_->runtimeResolutionPresent) {
+            // Propagate the flag to the parent scope, ensuring that we check it as well during the corresponding call
+            // to `postTransformClassDef`.
+            if (auto &parent = this->nesting_->parent) {
+                parent->runtimeResolutionPresent = true;
+            }
+            checkScopePackage(ctx, klass, original.declLoc);
         }
 
         nesting_ = nesting_->parent;

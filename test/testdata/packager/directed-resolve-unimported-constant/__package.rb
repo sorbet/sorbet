@@ -2,6 +2,8 @@
 # enable-packager: true
 # enable-package-directed: true
 
-class P::Shared < PackageSpec
-  import Base
+class Root < PackageSpec
+
+  prelude!
+
 end

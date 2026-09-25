@@ -113,6 +113,22 @@ nested/nested.rb:67: File belongs to package `Root::Nested` but defines a consta
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
 
+nested/nested.rb:34: Package `Root::Nested` may not open `Root` https://srb.help/5086
+    34 |module Root
+        ^^^^^^^^^^^
+    __package.rb:3: Owning package
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    nested/__package.rb:3: Referencing package
+     3 |class Root::Nested < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Either `import Root` in `Root::Nested`'s `__package.rb`, or change this file's top-level constant to match `Root::Nested`.
+  Autocorrect: Use `-a` to autocorrect
+    nested/__package.rb:3: Insert `import Root`
+     3 |class Root::Nested < PackageSpec
+                                        ^
+
 nested/nested.rb:35: `extend` may only be used on constants in the package that owns them https://srb.help/5084
     35 |  extend T::Sig
                  ^^^^^^
@@ -269,6 +285,22 @@ nested/nested.test.rb:17: Tests in the `Root::Nested` package must define tests 
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
 
+nested/nested.test.rb:6: Package `Root::Nested` may not open `Test::Root` https://srb.help/5086
+     6 |module Test::Root
+        ^^^^^^^^^^^^^^^^^
+    __package.rb:3: Owning package
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    nested/__package.rb:3: Referencing package
+     3 |class Root::Nested < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Either `import Root` in `Root::Nested`'s `__package.rb`, or change this file's top-level constant to match `Root::Nested`.
+  Autocorrect: Use `-a` to autocorrect
+    nested/__package.rb:3: Insert `import Root`
+     3 |class Root::Nested < PackageSpec
+                                        ^
+
 nested/root_scoped_missing_test_namespace.test.rb:5: Defining a root-scoped constant requires this package to be marked `prelude!` https://srb.help/3713
      5 |class ::Root::Nested::MissingTestNamespace
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -309,6 +341,38 @@ commands/foo_command.rb:4: File belongs to package `Root::Commands::Foo` but def
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
 
+commands/foo_command.rb:4: Package `Root::Commands::Foo` may not open `Root::Commands::Baz::Ban` https://srb.help/5086
+     4 |  class Baz::Ban; end
+          ^^^^^^^^^^^^^^
+    __package.rb:3: Owning package
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    commands/__package.rb:3: Referencing package
+     3 |class Root::Commands::Foo < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Either `import Root` in `Root::Commands::Foo`'s `__package.rb`, or change this file's top-level constant to match `Root::Commands::Foo`.
+  Autocorrect: Use `-a` to autocorrect
+    commands/__package.rb:3: Insert `import Root`
+     3 |class Root::Commands::Foo < PackageSpec
+                                               ^
+
+commands/foo_command.rb:3: Package `Root::Commands::Foo` may not open `Root::Commands` https://srb.help/5086
+     3 |module Root::Commands
+        ^^^^^^^^^^^^^^^^^^^^^
+    __package.rb:3: Owning package
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    commands/__package.rb:3: Referencing package
+     3 |class Root::Commands::Foo < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Either `import Root` in `Root::Commands::Foo`'s `__package.rb`, or change this file's top-level constant to match `Root::Commands::Foo`.
+  Autocorrect: Use `-a` to autocorrect
+    commands/__package.rb:3: Insert `import Root`
+     3 |class Root::Commands::Foo < PackageSpec
+                                               ^
+
 extend_sig.rb:4: This file must only define behavior in enclosing package `Root` https://srb.help/3713
      4 |  include T::Sig
           ^^^^^^^^^^^^^^
@@ -330,4 +394,4 @@ extend_sig.rb:4: `include` may only be used on constants in the package that own
         ^^^^^^^^^^^^^^^^^^^^^^^^
   Note:
     `Module` is unpackaged, and may be reopened from a package marked `prelude!`
-Errors: 33
+Errors: 37

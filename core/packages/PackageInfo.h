@@ -346,6 +346,20 @@ public:
     bool ownsNamespace(const core::GlobalState &gs, MangledName namespacePackage, ClassOrModuleRef packageRegistryOwner,
                        bool couldBePrefix) const;
 
+    enum class CanOpenScopeResult : uint8_t {
+        // The scope is part of this package (this package owns the symbol),
+        // or it is another package that this package imports.
+        CanOpen,
+
+        // The symbol belongs to another package that this package does NOT import.
+        // (e.g. opening a parent package `A::B` from `A::B::C` without importing it)
+        NotImported,
+    };
+
+    // True when it's legal for a file owned by this package to *open* (define a
+    // class/module scope named after) `sym`, per the package-scope-nesting rule.
+    CanOpenScopeResult canOpenScope(const core::GlobalState &gs, ClassOrModuleRef sym) const;
+
     // It's okay to access the internals of `other` if it's this package, or if test packages are enabled and we
     // imported `other` with `uses_internals: true`.
     bool canAccessInternalsOf(bool testPackages, MangledName other) const;

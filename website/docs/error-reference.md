@@ -3003,6 +3003,38 @@ Even though `__package.rb` files use Ruby syntax, they do not allow arbitrary Ru
 
 But despite that, `__package.rb` files must be completely statically analyzable, which means most forms of Ruby expressions are not allowed in these files.
 
+## 5086
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+The top-level constant of a packaged file must be owned by or have been imported by the package that the file belongs to. This ensures that Sorbet's constant resolution will match Ruby's, even if Sorbet is processing packages incrementally.
+
+For example, imagine we have two packages: `Opus::Foo` and `Opus::Foo::Bar`, and a file in `Opus::Foo::Bar` is structured as follows:
+
+```ruby
+# typed: true
+
+module Opus::Foo
+  module Bar
+    class Feature
+      ...
+    end
+  end
+end
+```
+
+If `Opus::Foo::Bar` does not import `Opus::Foo` this is an error. The error can be resolved by merging the outer-most modules together into a single module declaration:
+
+```ruby
+# typed: true
+
+module Opus::Foo::Bar
+  class Feature
+    ...
+  end
+end
+```
+
 ## 6001
 
 Certain Ruby keywords like `break`, `next`, and `retry` can only be used inside a Ruby block.
