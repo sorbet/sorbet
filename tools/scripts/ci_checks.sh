@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eux
+set -euxo pipefail
 
 ./tools/scripts/format_build_files.sh -t
 ./tools/scripts/format_cxx.sh -t
