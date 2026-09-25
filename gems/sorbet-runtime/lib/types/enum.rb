@@ -81,6 +81,8 @@ class T::Enum
     if @mapping.nil?
       raise(UNBOUND_SERIALIZATION_MAP_MESSAGE % self.class)
     end
+    # Allow enum instances to be passed directly
+    return serialized_val if serialized_val.is_a?(self)
     @mapping[serialized_val]
   end
 
