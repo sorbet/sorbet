@@ -8,6 +8,7 @@
 #endif
 #include "ProgressIndicator.h"
 #include "absl/strings/match.h"
+#include "absl/strings/str_split.h"
 #include "ast/Helpers.h"
 #include "ast/desugar/Desugar.h"
 #include "ast/desugar/prism/Desugar.h"
@@ -844,13 +845,24 @@ PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::Pars
     result.fileToStratum = vector<core::packages::Stratum>(gs.filesUsed(), core::packages::Stratum(0));
 
     if (!opts.packageDirected) {
+        ENFORCE(opts.typecheckPackages.empty());
         result.strata = {CondensationStratumInfo{absl::MakeSpan(packageFiles), sourceFiles}};
         return result;
     }
 
     auto &db = gs.packageDB();
 
-    auto traversal = db.condensation().computeTraversal(gs);
+    UnorderedSet<core::packages::MangledName> packages;
+    for (const auto &name : opts.typecheckPackages) {
+        vector<string> parts = absl::StrSplit(name, "::");
+        auto pkg = core::packages::MangledName::lookupMangledName(gs, parts);
+        if (!db.getPackageInfo(pkg).exists()) {
+            gs.errorQueue->logger.error("Unknown package `{}` in --typecheck-packages", name);
+            throw EarlyReturnWithCode(1);
+        }
+        packages.insert(pkg);
+    }
+    auto traversal = db.condensation().computeTraversal(gs, packages);
 
     // This can happen if we enabled packages and package-directed mode, but there were no packages defined.
     if (traversal.strata.empty()) {
@@ -893,19 +905,25 @@ PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::Pars
                 continue;
             }
 
-            ENFORCE(stratumMapping.find(pkgName) != stratumMapping.end(),
-                    "All packages must be present in the condensation graph");
-            auto &info = stratumMapping[pkgName];
+            auto it = stratumMapping.find(pkgName);
+            if (it == stratumMapping.end()) {
+                ENFORCE(!opts.typecheckPackages.empty(), "All packages must be present in the condensation graph");
+                result.fileToStratum[ix] = PackageStrata::UNSELECTED;
+                continue;
+            }
+            auto &info = it->second;
 
             // TODO(trevor): after we switch fully over to test packges, this conditional can go away as we won't have
             // the distinction between a test and application node in the condensation graph.
-            if (file->isPackagedTest() || file->isPackagedTestHelper()) {
-                ENFORCE(info.testStratum < USHRT_MAX);
-                result.fileToStratum[ix] = core::packages::Stratum(info.testStratum);
-            } else {
-                ENFORCE(info.applicationStratum < USHRT_MAX);
-                result.fileToStratum[ix] = core::packages::Stratum(info.applicationStratum);
+            auto stratum =
+                file->isPackagedTest() || file->isPackagedTestHelper() ? info.testStratum : info.applicationStratum;
+            if (stratum == INT32_MAX) {
+                ENFORCE(!opts.typecheckPackages.empty());
+                result.fileToStratum[ix] = PackageStrata::UNSELECTED;
+                continue;
             }
+            ENFORCE(stratum < USHRT_MAX);
+            result.fileToStratum[ix] = core::packages::Stratum(stratum);
         }
 
         fast_sort(sourceFiles,
@@ -916,6 +934,11 @@ PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::Pars
                       auto rStratum = fileToStratum[rid];
                       return std::tie(lStratum, lid) < std::tie(rStratum, rid);
                   });
+
+        // Excluded files sort after every real stratum and must never reach the indexer.
+        auto selectedEnd = absl::c_find_if(
+            sourceFiles, [&result](auto file) { return result.fileToStratum[file.id()] == PackageStrata::UNSELECTED; });
+        sourceFiles = sourceFiles.first(distance(sourceFiles.begin(), selectedEnd));
     }
 
     // Reserve enough space for all the strata of the condensation traversal, plus one more for unpackaged code.
@@ -1651,7 +1674,12 @@ string printFileTableJSON(const core::GlobalState &gs, const UnorderedMap<long, 
 
     for (int i = 1; i < gs.filesUsed(); ++i) {
         core::FileRef file(i);
-        if (file.data(gs).isPayload()) {
+        const auto &fileData = file.dataAllowingUnsafe(gs);
+        // Package selection can leave files outside the selection unread.
+        if (fileData.sourceType == core::File::Type::NotYetRead) {
+            continue;
+        }
+        if (fileData.isPayload()) {
             if (!showFull) {
                 continue;
             } else if (gs.censorForSnapshotTests && i > 10) {

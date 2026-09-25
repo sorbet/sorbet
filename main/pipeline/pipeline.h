@@ -58,17 +58,22 @@ struct CondensationStratumInfo {
 };
 
 struct PackageStrata {
+    // Files in packages outside the selection do not belong to any stratum.
+    static constexpr core::packages::Stratum UNSELECTED{UINT16_MAX};
+
     // The individual strata of the package graph traversal.
     std::vector<CondensationStratumInfo> strata;
 
     // The mapping of a core::FileRef to the stratum it occurs in. We identify individual strata with a uint16_t,
     // because overflowing that value would require a dependency chain of length greater than 65535.
+    // Entries for files in excluded packages are UNSELECTED.
     std::vector<core::packages::Stratum> fileToStratum;
 };
 
 // Using the condensation graph, sort the package and source files according to the stratum they would show up in a
 // parallel traversal of the condensation graph from its roots. The `packageFiles` vector will be mutated to include
-// non-test versions of the package files included originally.
+// non-test versions of the selected package files. With --typecheck-packages, only the expanded selection appears
+// in the strata, and excluded source files are sorted to the end of `files`.
 PackageStrata computePackageStrata(const core::GlobalState &gs, std::vector<ast::ParsedFile> &packageFiles,
                                    absl::Span<core::FileRef> files, const options::Options &opts);
 
