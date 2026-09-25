@@ -54,6 +54,18 @@ class PropagateVisibility final {
     core::packages::PackageInfo &package;
     vector<core::LocOffsets> exportsInCurrentAST;
 
+    // In package-directed mode, a legacy package spec is split into a production AST containing only non-test exports
+    // and a test AST containing only test exports. Clear each namespace lazily when its first export is encountered so
+    // that processing the test AST does not clear production exports restored from an earlier stratum or copied
+    // symbol-table prefix.
+    //
+    // Consequently, an AST with no exports does not clear either namespace. This is safe while every edit to a
+    // `__package.rb` file takes the slow path from stratum zero: deleting the final export also rebuilds the symbol
+    // table without its old exported bit. If package-file edits ever take the fast path, they will need to explicitly
+    // clear the relevant namespace even when the updated AST contains no exports.
+    bool clearedNonTestExports = false;
+    bool clearedTestExports = false;
+
     // Blames which location (export) caused a symbol to first be marked exported.
     struct ExportBlame {
         core::SymbolRef exportedBy;
@@ -182,7 +194,7 @@ class PropagateVisibility final {
     //
     // This is very unsatisfying, because it looks a lot like us re-introducing FullyQualifiedName,
     // which was half of the point of moving Symbols into the package database in the first place.
-    pair<core::ClassOrModuleRef, core::ClassOrModuleRef> getScopesForPackage(const core::GlobalState &gs) {
+    core::ClassOrModuleRef getExportScopeForPackage(const core::GlobalState &gs, bool testExport) {
         vector<core::NameRef> parts;
         auto owner = package.mangledName().owner;
         while (owner != core::Symbols::root() && owner != core::Symbols::PackageSpecRegistry()) {
@@ -191,33 +203,41 @@ class PropagateVisibility final {
             owner = ownerData->owner;
         }
 
-        auto nonTestScope = getScopeForPackage(gs, parts, core::Symbols::root());
-        auto testNamespace = core::Symbols::root().data(gs)->findMember(gs, core::packages::PackageDB::TEST_NAMESPACE);
-        core::ClassOrModuleRef testScope;
-        if (!this->package.usesTestPackages && testNamespace.exists() && testNamespace.isClassOrModule()) {
-            testScope = getScopeForPackage(gs, parts, testNamespace.asClassOrModuleRef());
+        if (!testExport) {
+            return getScopeForPackage(gs, parts, core::Symbols::root());
         }
 
-        // TODO(trevor): we can remove the returned test scope after switching to test packages.
-        return {nonTestScope, testScope};
+        auto testNamespace = core::Symbols::root().data(gs)->findMember(gs, core::packages::PackageDB::TEST_NAMESPACE);
+        if (!this->package.usesTestPackages && testNamespace.exists() && testNamespace.isClassOrModule()) {
+            return getScopeForPackage(gs, parts, testNamespace.asClassOrModuleRef());
+        }
+
+        return core::Symbols::noClassOrModule();
     }
 
-    void unsetAllExportedInPackage(core::MutableContext ctx) {
-        auto [nonTestScope, testScope] = getScopesForPackage(ctx);
+    void unsetExportedInPackage(core::MutableContext ctx, bool testExport) {
+        auto scope = getExportScopeForPackage(ctx, testExport);
 
         auto setExportedTo = false;
 
         // loc is never used in `recursiveSetIsExported` if `setExportedTo` is false, so just say "none"
         auto currentExportLineLoc = core::LocOffsets::none();
-        if (nonTestScope.exists()) {
-            recursiveSetIsExported(ctx, setExportedTo, nonTestScope, currentExportLineLoc, nonTestScope);
+        if (scope.exists()) {
+            recursiveSetIsExported(ctx, setExportedTo, scope, currentExportLineLoc, scope);
         }
-        if (testScope.exists()) {
-            recursiveSetIsExported(ctx, setExportedTo, testScope, currentExportLineLoc, testScope);
+    }
+
+    static bool isTestExport(const ast::ConstantLit &lit) {
+        auto original = lit.original();
+        while (original != nullptr) {
+            if (ast::isa_tree<ast::EmptyTree>(original->scope)) {
+                return original->cnst == core::Names::Constants::Test();
+            }
+
+            original = ast::cast_tree<ast::UnresolvedConstantLit>(original->scope);
         }
 
-        // Shouldn't have been touched, because currentExportLineLoc was none, but let's just clear it to be safe.
-        explicitlyExported.clear();
+        return false;
     }
 
     bool ignoreRBIExportEnforcement(const core::GlobalState &gs, core::FileRef file) {
@@ -364,6 +384,13 @@ public:
             return;
         }
 
+        auto testExport = isTestExport(*lit);
+        auto &clearedExports = testExport ? clearedTestExports : clearedNonTestExports;
+        if (!clearedExports) {
+            unsetExportedInPackage(ctx, testExport);
+            clearedExports = true;
+        }
+
         // This is a syntactically valid export. It might export something that doesn't exist, but
         // that doesn't matter: the rest of the pipeline depends on being able to see the `export`
         // lines locations for the purposes of autocorrects, so let's at least record that there is
@@ -459,7 +486,6 @@ public:
 
         core::MutableContext ctx{gs, core::Symbols::root(), f.file};
         PropagateVisibility pass{*package};
-        pass.unsetAllExportedInPackage(ctx);
         ast::ConstTreeWalk::apply(ctx, pass, f.tree);
 
         auto exportAll = package->locs.exportAll;

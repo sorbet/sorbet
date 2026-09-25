@@ -942,7 +942,11 @@ PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::Pars
                 // behavior by copying package files to be valid in an application-only context anymore.
                 if (scc.isTest) {
                     for (auto member : scc.members) {
-                        auto &tree = packageFiles.emplace_back(std::move(packagesToPackageRb[member]));
+                        auto &package = packagesToPackageRb[member];
+                        auto &tree = packageFiles.emplace_back(
+                            package.file.isTestPackage(gs)
+                                ? std::move(package)
+                                : packager::Packager::copyPackageWithoutExports(gs, package, false));
                         ENFORCE(tree.tree);
                     }
                 } else {
@@ -957,7 +961,7 @@ PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::Pars
                         }
 
                         auto &tree =
-                            packageFiles.emplace_back(packager::Packager::copyPackageWithoutTestExports(gs, package));
+                            packageFiles.emplace_back(packager::Packager::copyPackageWithoutExports(gs, package, true));
                         ENFORCE(tree.tree);
                     }
                 }
