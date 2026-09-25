@@ -100,8 +100,22 @@ module T::Props::Serializable
   end
 
   # with() will clone the old object to the new object and merge the specified props to the new object.
-  def with(changed_props)
-    with_existing_hash(changed_props, existing_hash: self.serialize)
+  def with(**changed_props)
+    difference = changed_props.keys - self.class.props.keys
+    if !difference.empty?
+      difference.map! { |key| "`#{key}`" }
+      if difference.size == 1
+        raise ArgumentError.new("Unexpected arguments: #{self.class} does not have prop #{difference.first}")
+      else
+        raise ArgumentError.new("Unexpected arguments: #{self.class} does not have props #{difference.join(', ')}")
+      end
+    end
+
+    args = self.class.props.to_h do |name, _|
+      [name, changed_props.fetch(name, self.send(name))]
+    end
+
+    self.class.new(**args)
   end
 
   private def recursive_stringify_keys(obj)
