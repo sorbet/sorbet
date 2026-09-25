@@ -3,7 +3,7 @@
 # enable-package-directed: true
 # disable-fast-path: true
 
-# stratum: 2
+# stratum: 1
 
 class Child < PackageSpec
   import Parent
