@@ -1,30 +1,30 @@
-autocorrect-private.rb:14: Use `private` to define private instance methods https://srb.help/3503
+autocorrect-private.rb:14: Use `private` to define private instance methods https://srb.help/4030
     14 |  private_class_method def foo
-    15 |  end
+          ^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
     autocorrect-private.rb:14: Replaced with `private`
     14 |  private_class_method def foo
           ^^^^^^^^^^^^^^^^^^^^
 
-autocorrect-private.rb:19: Use `private_class_method` to define private class methods https://srb.help/3503
+autocorrect-private.rb:19: Use `private_class_method` to define private class methods https://srb.help/4030
     19 |  private def self.foo
-    20 |  end
+          ^^^^^^^
   Autocorrect: Done
     autocorrect-private.rb:19: Replaced with `private_class_method`
     19 |  private def self.foo
           ^^^^^^^
 
-autocorrect-private.rb:24: Use `package_private_class_method` to define package-private class methods https://srb.help/3503
+autocorrect-private.rb:24: Use `package_private_class_method` to define package-private class methods https://srb.help/4030
     24 |  package_private def self.foo
-    25 |  end
+          ^^^^^^^^^^^^^^^
   Autocorrect: Done
     autocorrect-private.rb:24: Replaced with `package_private_class_method`
     24 |  package_private def self.foo
           ^^^^^^^^^^^^^^^
 
-autocorrect-private.rb:29: Use `package_private` to define package-private instance methods https://srb.help/3503
+autocorrect-private.rb:29: Use `package_private` to define package-private instance methods https://srb.help/4030
     29 |  package_private_class_method def foo
-    30 |  end
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
     autocorrect-private.rb:29: Replaced with `package_private`
     29 |  package_private_class_method def foo
