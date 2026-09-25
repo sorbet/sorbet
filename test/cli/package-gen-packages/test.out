@@ -79,13 +79,13 @@ E/__package.rb:3: `E` is missing `visible_to`s https://srb.help/3734
     10 |  visible_to AlsoDoesNotExist::*
                                         ^
 
-D/__package.rb:3: `D` is missing imports https://srb.help/3734
-     3 |class D < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^
+D/test/__package.rb:3: `Test::D` is missing imports https://srb.help/3734
+     3 |class Test::D < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    D/__package.rb:7: Inserted `test_import E`
-     7 |  import B
-                  ^
+    D/test/__package.rb:8: Inserted `import E`
+     8 |  import D, uses_internals: true
+                                        ^
 
 C/app.rb:8: `F` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
      8 |      puts F::CONSTANT_FROM_F
@@ -150,7 +150,6 @@ class D < PackageSpec
   layer 'util'
 
   import B
-  test_import E
   export D::AlreadyExportedClass
   export D::ANestedPackage::Foo
   export D::EnumFromD::Variant
@@ -175,6 +174,18 @@ class E < PackageSpec
 
   visible_to 'tests'
   visible_to C
+end
+
+###### cat D/test/__package.rb ######
+# typed: strict
+
+class Test::D < PackageSpec
+  test!
+  layer 'test'
+  strict_dependencies 'dag'
+
+  import D, uses_internals: true
+  import E
 end
 
 ###### cat PackageWithIgnore/__package.rb ######
@@ -254,13 +265,13 @@ E/__package.rb:3: `E` is missing `visible_to`s https://srb.help/3734
     10 |  visible_to AlsoDoesNotExist::*
                                         ^
 
-D/__package.rb:3: `D` is missing imports https://srb.help/3734
-     3 |class D < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^
+D/test/__package.rb:3: `Test::D` is missing imports https://srb.help/3734
+     3 |class Test::D < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    D/__package.rb:7: Inserted `test_import E`
-     7 |  import B
-                  ^
+    D/test/__package.rb:8: Inserted `import E`
+     8 |  import D, uses_internals: true
+                                        ^
 
 A/constants.rb:5: Unable to resolve constant `G` https://srb.help/5002
      5 |  puts G::ANOTHER_CONSTANT_FROM_G
@@ -338,7 +349,6 @@ class D < PackageSpec
   layer 'util'
 
   import B
-  test_import E
   export D::AlreadyExportedClass
   export D::ANestedPackage::Foo
   export D::EnumFromD::Variant
@@ -363,6 +373,18 @@ class E < PackageSpec
 
   visible_to 'tests'
   visible_to C
+end
+
+###### cat D/test/__package.rb ######
+# typed: strict
+
+class Test::D < PackageSpec
+  test!
+  layer 'test'
+  strict_dependencies 'dag'
+
+  import D, uses_internals: true
+  import E
 end
 
 ###### cat PackageWithIgnore/__package.rb ######
