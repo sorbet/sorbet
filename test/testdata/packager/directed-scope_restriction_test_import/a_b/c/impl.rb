@@ -6,11 +6,9 @@
 # exist yet when `Secret` below is resolved.
 #
 # Ruby resolves `Secret` to `A::B::Secret` (via the `A::B` cref). Sorbet's lexical lookup misses at `A::B`, climbs
-# to the root scope, and binds to the prelude's `::Secret` instead: a different constant, with no error to say so.
-#
-# Today `canOpenScope` treats the `test_import` like an `import`, so no 5086 is reported on `module A::B` either.
-# This snapshot records that behavior; the next commit changes it.
-module A::B
+# to the root scope, and binds to the prelude's `::Secret` instead: a different constant. The 5086 on `module A::B`
+# is the only thing telling the user this file is not safe as written.
+module A::B # error: Package `A::B::C` may not open `A::B`
   module C
     X = Secret
     T.reveal_type(X) # error: Revealed type: `T.class_of(Secret)`
