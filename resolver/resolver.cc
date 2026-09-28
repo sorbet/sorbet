@@ -1662,8 +1662,9 @@ public:
             return;
         }
 
-        // Skip anything that's rooted in the `<PackageSpecRegistry>` shadow hierarchy
-        if (scopeKlass.data(ctx)->packageRegistryOwner == scopeKlass) {
+        // __package.rb files already require that there is only one top-level declaration, which means that this check
+        // is trivially successful.
+        if (ctx.file.data(ctx).hasPackageRbPath()) {
             return;
         }
 
