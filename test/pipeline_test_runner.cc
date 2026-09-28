@@ -603,13 +603,15 @@ TEST_CASE("PerPhaseTest") {
     vector<ast::ParsedFile> stratumFiles;
     auto strata = realmain::pipeline::computePackageStrata(*gs, trees, filesSpan, opts);
 
-    for (auto &stratumAssertion : RangeAssertion::getAssertions<StratumAssertion>(assertions)) {
-        auto file = gs->findFileByPath(stratumAssertion->filename);
-        auto actualStratum = strata.fileToStratum[file.id()];
-        if (actualStratum != stratumAssertion->value) {
-            ADD_FAIL_CHECK_AT(stratumAssertion->filename.c_str(), stratumAssertion->assertionLine + 1,
-                              "Expected " << stratumAssertion->filename << " at stratum "
-                                          << stratumAssertion->value.rawId() << "; got " << actualStratum.rawId());
+    if (opts.packageDirected) {
+        for (auto &stratumAssertion : RangeAssertion::getAssertions<StratumAssertion>(assertions)) {
+            auto file = gs->findFileByPath(stratumAssertion->filename);
+            auto actualStratum = strata.fileToStratum[file.id()];
+            if (actualStratum != stratumAssertion->value) {
+                ADD_FAIL_CHECK_AT(stratumAssertion->filename.c_str(), stratumAssertion->assertionLine + 1,
+                                  "Expected " << stratumAssertion->filename << " at stratum "
+                                              << stratumAssertion->value.rawId() << "; got " << actualStratum.rawId());
+            }
         }
     }
 
