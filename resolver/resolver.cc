@@ -155,11 +155,6 @@ private:
         bool runtimeResolutionPresent = false;
 
         Nesting(shared_ptr<Nesting> parent, core::SymbolRef scope) : parent(std::move(parent)), scope(scope) {}
-
-        bool atTopLevel() const {
-            return this->scope == core::Symbols::root() ||
-                   (this->parent != nullptr && this->parent->scope == core::Symbols::root());
-        }
     };
     CheckSize(Nesting, 24, 8);
 
@@ -1794,10 +1789,10 @@ public:
         }
 
         // Check the name we're introducing for a scope, as that counts for requiring a package namespace
-        // opening check.
+        // opening check in the parent scope.
         if (auto name = ast::cast_tree<ast::ConstantLit>(original.name)) {
-            if (!ast::isa_tree<ast::EmptyTree>(name->original()->scope)) {
-                nesting_->runtimeResolutionPresent = nesting_->runtimeResolutionPresent || !nesting_->atTopLevel();
+            if (!ast::isa_tree<ast::EmptyTree>(name->original()->scope) && nesting_->parent != nullptr) {
+                nesting_->parent->runtimeResolutionPresent = true;
             }
         }
 
