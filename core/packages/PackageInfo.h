@@ -358,7 +358,7 @@ public:
 
     // True when it's legal for a file owned by this package to *open* (define a
     // class/module scope named after) `sym`, per the package-scope-nesting rule.
-    CanOpenScopeResult canOpenScope(const core::GlobalState &gs, ClassOrModuleRef sym) const;
+    CanOpenScopeResult canOpenScope(Context ctx, ClassOrModuleRef sym) const;
 
     // It's okay to access the internals of `other` if it's this package, or if test packages are enabled and we
     // imported `other` with `uses_internals: true`.

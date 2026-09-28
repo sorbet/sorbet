@@ -1350,13 +1350,13 @@ bool PackageInfo::ownsNamespace(const core::GlobalState &gs, MangledName namespa
     return false;
 }
 
-PackageInfo::CanOpenScopeResult PackageInfo::canOpenScope(const core::GlobalState &gs, ClassOrModuleRef sym) const {
+PackageInfo::CanOpenScopeResult PackageInfo::canOpenScope(Context ctx, ClassOrModuleRef sym) const {
     ENFORCE(this->exists());
     ENFORCE(sym.exists());
 
     // Normalize away singleton classes, matching canModifySymbol.
-    sym = sym.data(gs)->topAttachedClass(gs);
-    auto symData = sym.data(gs);
+    sym = sym.data(ctx)->topAttachedClass(ctx);
+    auto symData = sym.data(ctx);
 
     auto symPackage = symData->package;
 
@@ -1378,7 +1378,8 @@ PackageInfo::CanOpenScopeResult PackageInfo::canOpenScope(const core::GlobalStat
     //
     // Because we have already checked 1 during an earlier pass, it's sufficient to ensure that we have imported the
     // package.
-    if (this->importsPackage(symPackage) == nullptr) {
+    auto *imp = this->importsPackage(symPackage);
+    if (imp == nullptr || !imp->isAvailableTo(ctx, ctx.file)) {
         return CanOpenScopeResult::NotImported;
     }
 
