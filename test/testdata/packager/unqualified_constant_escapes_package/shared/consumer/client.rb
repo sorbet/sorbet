@@ -11,12 +11,12 @@ module Shared # error: Package `Shared::Consumer` may not open `Shared`
         # resolver never stops at package boundaries; the packager then flags the cross-package
         # reference because `Shared` is neither imported here nor exports `Secret`.
         Secret
-      # ^^^^^^ error: `Shared` is not imported
+      # ^^^^^^ error: Used `test_import` package `Shared` in non-test file
 
         # `Secret2` is exported from `Shared`, but `Shared::Consumer` still doesn't import `Shared`,
         # so the cross-package reference is flagged for the missing import rather than the export.
         Secret2
-      # ^^^^^^^ error: `Shared` is not imported
+      # ^^^^^^^ error: Used `test_import` package `Shared` in non-test file
       end
     end
   end
