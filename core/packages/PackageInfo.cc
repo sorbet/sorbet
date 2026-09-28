@@ -1373,11 +1373,12 @@ PackageInfo::CanOpenScopeResult PackageInfo::canOpenScope(Context ctx, ClassOrMo
 
     // We can only reopen the namespace of another package if:
     //
-    // 1. We are a subpackage of it
-    // 2. We have imported it
+    // 1. We are a subpackage of it,
+    // 2. We have imported it,
+    // 3. (While `::Test` exists) we are allowed to use that import from the current file.
     //
     // Because we have already checked 1 during an earlier pass, it's sufficient to ensure that we have imported the
-    // package.
+    // package, and are allowed to use it.
     auto *imp = this->importsPackage(symPackage);
     if (imp == nullptr || !imp->isAvailableTo(ctx, ctx.file)) {
         return CanOpenScopeResult::NotImported;

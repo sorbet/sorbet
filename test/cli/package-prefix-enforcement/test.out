@@ -297,7 +297,7 @@ nested/nested.test.rb:6: Package `Root::Nested` may not open `Test::Root` https:
   Note:
     Either `import Root` in `Root::Nested`'s `__package.rb`, or change this file's top-level constant to match `Root::Nested`.
   Autocorrect: Use `-a` to autocorrect
-    nested/__package.rb:3: Insert `import Root`
+    nested/__package.rb:3: Insert `test_import Root, only: "test_rb"`
      3 |class Root::Nested < PackageSpec
                                         ^
 

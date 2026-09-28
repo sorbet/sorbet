@@ -1711,7 +1711,8 @@ public:
                                        "constant to match `{}`.",
                                        scopeName, curName, curName);
 
-                        if (auto suggestion = curPkg.addImport(ctx, scopePkg, core::packages::ImportType::Normal)) {
+                        auto importType = curPkg.fileToImportType(ctx, ctx.file);
+                        if (auto suggestion = curPkg.addImport(ctx, scopePkg, importType)) {
                             // TODO(trevor) how does this interact with gen-packages mode, do we need to add a
                             // `trackPackageReference` call here?
                             e.addAutocorrect(std::move(*suggestion));
