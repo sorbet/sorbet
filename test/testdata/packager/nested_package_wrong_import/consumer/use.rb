@@ -1,4 +1,4 @@
 # typed: strict
 
 p(Parent::Child::Thing)
-# ^^^^^^ error: `Parent` is not imported
+# ^^^^^^^^^^^^^ error: `Parent::Child` is not imported
