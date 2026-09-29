@@ -705,8 +705,8 @@ private:
         auto legacyTestRoot = isLegacyTestRoot(job);
         auto scope = ast::cast_tree<ast::ConstantLit>(original.scope);
         auto scopeWasStubbed = scope != nullptr && scope->symbol() == core::Symbols::StubModule();
-        if (shouldCheckPackage(ctx) && !job.isOutermost && job.packageRegistryCursor.exists() &&
-            !legacyTestRoot && !scopeWasStubbed && shouldContinueWithPackageRegistryCursor(ctx, job)) {
+        if (shouldCheckPackage(ctx) && !job.isOutermost && job.packageRegistryCursor.exists() && !legacyTestRoot &&
+            !scopeWasStubbed && shouldContinueWithPackageRegistryCursor(ctx, job)) {
             // Lie, and say that this constant resolves to a `<PackageSpecRegistry>`-scoped symbol.
             //
             // We want to report the import that would make the outermost constant resolve, which
