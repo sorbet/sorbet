@@ -677,7 +677,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       def method_abstract4<<todo method>>(&<blk>)
-        <emptyTree>
+        <self>.<super>()
       end
 
       ::T::Sig::WithoutRuntime.sig() do ||
@@ -695,7 +695,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       def method_abstract6<<todo method>>(&<blk>)
         begin
           <self>.puts("foo")
-          <self>.raise("foo")
+          <self>.<super>(ZSuperArgs)
         end
       end
 
@@ -704,7 +704,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       def method_abstract7<<todo method>>(&<blk>)
-        <emptyTree>
+        <self>.<super>(1)
       end
 
       ::T::Sig::WithoutRuntime.sig() do ||
@@ -712,15 +712,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       def method_abstract8<<todo method>>(&<blk>)
-        <emptyTree>
-      end
-
-      ::T::Sig::WithoutRuntime.sig() do ||
-        <self>.abstract().returns(<emptyTree>::<C Integer>)
-      end
-
-      def method_abstract8<<todo method>>(&<blk>)
-        <emptyTree>
+        <self>.raise()
       end
 
       ::T::Sig::WithoutRuntime.sig() do ||
@@ -728,23 +720,25 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       def method_abstract9<<todo method>>(&<blk>)
-        <emptyTree>::<C Abstract>.raise()
+        <self>.<super>(ZSuperArgs) do ||
+          <emptyTree>
+        end
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.abstract().params(:i, <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
+      end
+
+      def method_abstract10<<todo method>>(i:, &<blk>)
+        <emptyTree>
       end
 
       ::T::Sig::WithoutRuntime.sig() do ||
         <self>.abstract().returns(<emptyTree>::<C Integer>)
       end
 
-      def method_abstract10<<todo method>>(&<blk>)
+      def method_abstract_private<<todo method>>(&<blk>)
         <emptyTree>
-      end
-
-      ::T::Sig::WithoutRuntime.sig() do ||
-        <self>.returns(::<root>::<C T>.noreturn())
-      end
-
-      def self.raise<<todo method>>(&<blk>)
-        <self>.raise()
       end
 
       <runtime method definition of method_abstract1>
@@ -763,21 +757,54 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <runtime method definition of method_abstract8>
 
-      <runtime method definition of method_abstract8>
-
       <runtime method definition of method_abstract9>
 
       <runtime method definition of method_abstract10>
 
-      <runtime method definition of self.raise>
-
-      class <emptyTree>::<C Error><<C <todo sym>>> < (<emptyTree>::<C StandardError>)
-      end
+      <self>.private(<runtime method definition of method_abstract_private>)
 
       <self>.extend(::<root>::<C T>::<C Helpers>)
 
       <self>.abstract!()
     end
+
+    module <emptyTree>::<C Interface><<C <todo sym>>> < ()
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.abstract().params(:i, <emptyTree>::<C Integer>).returns(<emptyTree>::<C String>)
+      end
+
+      def foo<<todo method>>(i:, &<blk>)
+        <emptyTree>
+      end
+
+      <runtime method definition of foo>
+
+      <self>.extend(::<root>::<C T>::<C Helpers>)
+
+      <self>.interface!()
+    end
+
+    class <emptyTree>::<C ImplementationParent><<C <todo sym>>> < (::<todo sym>)
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.params(:i, <emptyTree>::<C Integer>).returns(<emptyTree>::<C String>)
+      end
+
+      def foo<<todo method>>(i:, &<blk>)
+        i.to_s()
+      end
+
+      <runtime method definition of foo>
+    end
+
+    class <emptyTree>::<C InheritedImplementation><<C <todo sym>>> < (<emptyTree>::<C ImplementationParent>)
+      <self>.include(<emptyTree>::<C Interface>)
+    end
+
+    class <emptyTree>::<C MissingImplementation><<C <todo sym>>> < (::<todo sym>)
+      <self>.include(<emptyTree>::<C Interface>)
+    end
+
+    <emptyTree>::<C T>.reveal_type(<emptyTree>::<C InheritedImplementation>.new().foo(:i, 1))
 
     class <emptyTree>::<C Final><<C <todo sym>>> < (::<todo sym>)
       ::T::Sig::WithoutRuntime.sig(:final) do ||

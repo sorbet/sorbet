@@ -32,7 +32,7 @@ inline constexpr ErrorClass RBSUnusedComment{3554, StrictLevel::False};
 inline constexpr ErrorClass RBSMultilineMisformatted{3555, StrictLevel::False};
 inline constexpr ErrorClass RBSIncorrectParameterKind{3556, StrictLevel::False};
 inline constexpr ErrorClass RBSMultipleGenericSignatures{3557, StrictLevel::False};
-inline constexpr ErrorClass RBSAbstractMethodNoRaises{3558, StrictLevel::False};
+inline constexpr ErrorClass RBSAbstractMethodNoSuper{3558, StrictLevel::False};
 inline constexpr ErrorClass RBSOptionalRecordKey{3559, StrictLevel::False};
 
 } // namespace sorbet::core::errors::Rewriter
