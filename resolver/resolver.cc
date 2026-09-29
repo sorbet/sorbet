@@ -1664,7 +1664,7 @@ public:
 
         // __package.rb files already require that there is only one top-level declaration, which means that this check
         // is trivially successful.
-        if (ctx.file.data(ctx).hasPackageRbPath()) {
+        if (ctx.file.data(ctx).isPackage(ctx)) {
             return;
         }
 
