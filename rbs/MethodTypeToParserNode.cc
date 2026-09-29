@@ -17,29 +17,6 @@ namespace sorbet::rbs {
 
 namespace {
 
-bool isSelfOrKernel(pm_node_t *node, const parser::Prism::Parser *prismParser) {
-    if (isa_node<pm_self_node>(node)) {
-        return true;
-    }
-
-    if (auto *constant = down_cast<pm_constant_read_node_t>(node)) {
-        auto name = prismParser->resolveConstant(constant->name);
-        // Check if it's Kernel constant with no scope (::Kernel or bare Kernel)
-        return name == "Kernel";
-    }
-
-    if (auto *constantPath = down_cast<pm_constant_path_node_t>(node)) {
-        // Check if it's ::Kernel (parent is nullptr, representing root ::)
-        // We reject Foo::Kernel or any other scoped constant
-        if (constantPath->parent == nullptr) {
-            auto name = prismParser->resolveConstant(constantPath->name);
-            return name == "Kernel";
-        }
-    }
-
-    return false;
-}
-
 optional<core::AutocorrectSuggestion> autocorrectAbstractBody(core::MutableContext ctx, pm_node_t *method,
                                                               const parser::Prism::Parser *prismParser,
                                                               pm_node_t *method_body) {
@@ -48,7 +25,7 @@ optional<core::AutocorrectSuggestion> autocorrectAbstractBody(core::MutableConte
 
     if (method_body) {
         editLoc = prismParser->translateLocation(method_body->location);
-        corrected = "raise \"Abstract method called\"";
+        corrected = "super";
     } else {
         auto *def = down_cast_nonnull<pm_def_node_t>(method);
         if (def->end_keyword_loc.start == nullptr || def->end_keyword_loc.start == def->end_keyword_loc.end) {
@@ -62,20 +39,18 @@ optional<core::AutocorrectSuggestion> autocorrectAbstractBody(core::MutableConte
         auto lineEnd = core::Loc::pos2Detail(ctx.file.data(ctx), methodLoc.endPos()).line;
 
         if (lineStart == lineEnd) {
-            corrected = "raise \"Abstract method called\"; ";
+            corrected = "super; ";
         } else {
             auto [_endLoc, indentLength] = ctx.locAt(methodLoc).findStartOfIndentation(ctx);
-            corrected = "  raise \"Abstract method called\"\n" + string(indentLength, ' ');
+            corrected = "  super\n" + string(indentLength, ' ');
         }
     }
 
-    return core::AutocorrectSuggestion{"Replace the abstract method body with `raise`",
+    return core::AutocorrectSuggestion{"Replace the abstract method body with `super`",
                                        {core::AutocorrectSuggestion::Edit{ctx.locAt(editLoc), corrected}}};
 }
 
-// Returns true if the node is a valid abstract method (def node with a body that only raises)
-// e.g. def abstract_method = raise
-bool isValidAbstractMethod(pm_node_t *node, const parser::Prism::Parser *prismParser) {
+bool isValidAbstractMethod(pm_node_t *node) {
     auto *def = down_cast<pm_def_node_t>(node);
     if (def == nullptr) {
         return false;
@@ -90,25 +65,19 @@ bool isValidAbstractMethod(pm_node_t *node, const parser::Prism::Parser *prismPa
     // Unwrap statements node if it contains exactly one statement
     if (auto *stmts = down_cast<pm_statements_node_t>(bodyNode)) {
         if (stmts->body.size != 1) {
-            return false; // Multiple statements, not just a raise
+            return false;
         }
         bodyNode = stmts->body.nodes[0];
     }
 
-    auto *call = down_cast<pm_call_node_t>(bodyNode);
-    if (call == nullptr) {
-        return false;
-    }
-
-    auto methodName = prismParser->resolveConstant(call->name);
-
-    // Check if it's a raise call with no receiver or self/Kernel receiver
-    return methodName == "raise" && (call->receiver == nullptr || isSelfOrKernel(call->receiver, prismParser));
+    // Explicit arguments or a block would change the call instead of forwarding it.
+    auto *super = down_cast<pm_forwarding_super_node_t>(bodyNode);
+    return super != nullptr && super->block == nullptr;
 }
 
-void ensureAbstractMethodRaises(core::MutableContext ctx, pm_node_t *node, parser::Prism::Parser *prismParser) {
-    if (isValidAbstractMethod(node, prismParser)) {
-        // Method properly raises, remove body to avoid error 5019 later in the pipeline
+void ensureAbstractMethodCallsSuper(core::MutableContext ctx, pm_node_t *node, parser::Prism::Parser *prismParser) {
+    if (isValidAbstractMethod(node)) {
+        // Remove the forwarding stub from the checker AST to avoid error 5019 later in the pipeline.
         auto *def = down_cast_nonnull<pm_def_node_t>(node);
         prismParser->destroyNode(def->body);
         def->body = nullptr;
@@ -118,8 +87,8 @@ void ensureAbstractMethodRaises(core::MutableContext ctx, pm_node_t *node, parse
     auto *def = down_cast_nonnull<pm_def_node_t>(node);
     auto nodeLoc = prismParser->translateLocation(node->location);
 
-    if (auto e = ctx.beginIndexerError(nodeLoc, core::errors::Rewriter::RBSAbstractMethodNoRaises)) {
-        e.setHeader("Methods declared @abstract with an RBS comment must always raise");
+    if (auto e = ctx.beginIndexerError(nodeLoc, core::errors::Rewriter::RBSAbstractMethodNoSuper)) {
+        e.setHeader("Methods declared @abstract with an RBS comment must contain only a forwarding super call");
         if (auto autocorrect = autocorrectAbstractBody(ctx, node, prismParser, def->body)) {
             e.addAutocorrect(move(*autocorrect));
         }
@@ -136,7 +105,7 @@ pm_node_t *handleAnnotations(core::MutableContext ctx, pm_node_t *node, pm_node_
             // no-op, `final` is handled in the `sig()` call later
         } else if (annotation.string == "abstract") {
             sigBuilder = prism.Call0(annotation.typeLoc, sigBuilder, core::Names::abstract().show(ctx.state));
-            ensureAbstractMethodRaises(ctx, node, prismParser);
+            ensureAbstractMethodCallsSuper(ctx, node, prismParser);
         } else if (annotation.string == "overridable") {
             sigBuilder = prism.Call0(annotation.typeLoc, sigBuilder, core::Names::overridable().show(ctx.state));
         } else if (annotation.string == "override") {
