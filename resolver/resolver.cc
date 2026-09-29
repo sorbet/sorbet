@@ -578,14 +578,19 @@ private:
         auto inaccessibleCursorPackage = cursorIdentifiesPackage && !canReferencePackage(ctx, cursorPackage);
         auto productionLegacyTestPath = job.legacyTestPath && !ctx.file.data(ctx).isPackagedTest();
 
-        if (!alreadyReported && !productionLegacyTestPath && inaccessibleCursorPackage) {
+        if (!job.isOutermost && job.packageRegistryCursor.exists() && !isLegacyTestRoot(job) &&
+            (!cursorIdentifiesPackage || inaccessibleCursorPackage)) {
+            return PackageResolutionAction::DeferToOutermost;
+        }
+
+        if (job.isOutermost && !alreadyReported && !productionLegacyTestPath && inaccessibleCursorPackage) {
             bool shouldReport;
             switch (job.packageCursorPosition) {
                 case PackageCursorPosition::PackageBoundary:
-                    shouldReport = job.isOutermost || !isStrictPrefixOfAvailablePackage(ctx, cursorPackage);
+                    shouldReport = true;
                     break;
                 case PackageCursorPosition::PackageMember:
-                    shouldReport = job.isOutermost && !isStrictPrefixOfAvailablePackage(ctx, cursorPackage);
+                    shouldReport = !isStrictPrefixOfAvailablePackage(ctx, cursorPackage);
                     break;
                 case PackageCursorPosition::None:
                 case PackageCursorPosition::NamespacePrefix:
@@ -597,12 +602,17 @@ private:
             }
         }
 
-        if (!job.isOutermost && job.packageRegistryCursor.exists() && !isLegacyTestRoot(job) &&
-            (!cursorIdentifiesPackage || inaccessibleCursorPackage)) {
-            return PackageResolutionAction::DeferToOutermost;
-        }
-
         return PackageResolutionAction::None;
+    }
+
+    static bool shouldContinueWithPackageRegistryCursor(core::Context ctx, const ConstantResolutionItem &job) {
+        auto cursorIdentifiesPackage =
+            job.packageRegistryCursor.exists() && cursorIsPackage(ctx, job.packageRegistryCursor);
+        auto cursorIdentifiesAccessiblePackage =
+            cursorIdentifiesPackage && canReferencePackage(ctx, core::packages::MangledName(job.packageRegistryCursor));
+        // Cross package boundaries to find nested packages, but preserve unresolved accessible package members.
+        return !cursorIdentifiesAccessiblePackage ||
+               job.packageCursorPosition == PackageCursorPosition::PackageBoundary;
     }
 
     // Walks the tree back up the scope, but ONLY during error reporting
@@ -693,12 +703,10 @@ private:
 
         auto &original = *job.out->original();
         auto legacyTestRoot = isLegacyTestRoot(job);
-        auto cursorIdentifiesPackage =
-            job.packageRegistryCursor.exists() && cursorIsPackage(ctx, job.packageRegistryCursor);
         auto scope = ast::cast_tree<ast::ConstantLit>(original.scope);
         auto scopeWasStubbed = scope != nullptr && scope->symbol() == core::Symbols::StubModule();
-        if (shouldCheckPackage(ctx) && !job.isOutermost && job.packageRegistryCursor.exists() &&
-            !cursorIdentifiesPackage && !legacyTestRoot && !scopeWasStubbed) {
+        if (shouldCheckPackage(ctx) && !job.isOutermost && job.packageRegistryCursor.exists() && !legacyTestRoot &&
+            !scopeWasStubbed && shouldContinueWithPackageRegistryCursor(ctx, job)) {
             // Lie, and say that this constant resolves to a `<PackageSpecRegistry>`-scoped symbol.
             //
             // We want to report the import that would make the outermost constant resolve, which
