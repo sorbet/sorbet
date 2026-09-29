@@ -5,5 +5,5 @@
 class RelaxedPrelude < PackageSpec
   prelude!
 
-  import Application
+  import Application # error: `RelaxedPrelude` may not `import` non-prelude package `Application`
 end
