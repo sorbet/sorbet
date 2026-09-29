@@ -7,6 +7,7 @@
 #include "core/core.h"
 #include "core/errors/rewriter.h"
 #include "rewriter/rewriter.h"
+#include "rewriter/util/Util.h"
 
 using namespace std;
 
@@ -411,7 +412,7 @@ ast::ExpressionPtr prepareParameterizedBody(core::MutableContext ctx, core::Name
                                             ast::ExpressionPtr &iteratee, bool insideDescribe);
 
 ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::ExpressionPtr &maybeSharedExamplesName,
-                             ast::Send *send, bool insideDescribe);
+                             ast::Send *send, bool insideDescribe, bool hasPrecedingSig);
 
 ast::ExpressionPtr invalidUnderParameterizedBody(core::MutableContext ctx, core::NameRef eachName,
                                                  ast::ExpressionPtr stmt) {
@@ -543,8 +544,8 @@ ast::ExpressionPtr runUnderParameterized(core::MutableContext ctx, core::NameRef
             // `RSpec.`-prefixed registers globally, bare-receiver scopes to the consumer on
             // each include of the outer. `runSingle` distinguishes the two by checking the
             // receiver — see the comment on its `sharedExamples` arm.
-            auto result =
-                runSingle(ctx, /* isClass */ false, /* maybeSharedExamplesName */ nullptr, send, insideDescribe);
+            auto result = runSingle(ctx, /* isClass */ false, /* maybeSharedExamplesName */ nullptr, send,
+                                    insideDescribe, /* hasPrecedingSig */ false);
             if (result != nullptr) {
                 return result;
             }
@@ -643,10 +644,10 @@ ast::ExpressionPtr prepareParameterizedBody(core::MutableContext ctx, core::Name
 
 ast::ExpressionPtr tryRunSingleOnSend(core::MutableContext ctx, bool isClass,
                                       const ast::ExpressionPtr &maybeSharedExamplesName, ast::ExpressionPtr body,
-                                      bool insideDescribe) {
+                                      bool insideDescribe, bool hasPrecedingSig) {
     auto bodySend = ast::cast_tree<ast::Send>(body);
     if (bodySend) {
-        auto change = runSingle(ctx, isClass, move(maybeSharedExamplesName), bodySend, insideDescribe);
+        auto change = runSingle(ctx, isClass, move(maybeSharedExamplesName), bodySend, insideDescribe, hasPrecedingSig);
         if (change) {
             return change;
         }
@@ -657,21 +658,27 @@ ast::ExpressionPtr tryRunSingleOnSend(core::MutableContext ctx, bool isClass,
 ast::ExpressionPtr prepareBody(core::MutableContext ctx, bool isClass,
                                const ast::ExpressionPtr &maybeSharedExamplesName, ast::ExpressionPtr body,
                                bool insideDescribe) {
-    body = tryRunSingleOnSend(ctx, isClass, maybeSharedExamplesName, std::move(body), insideDescribe);
+    body = tryRunSingleOnSend(ctx, isClass, maybeSharedExamplesName, std::move(body), insideDescribe,
+                              /* hasPrecedingSig */ false);
 
     if (auto bodySeq = ast::cast_tree<ast::InsSeq>(body)) {
+        const ast::ExpressionPtr *prevStat = nullptr;
         for (auto &exp : bodySeq->stats) {
-            exp = tryRunSingleOnSend(ctx, isClass, maybeSharedExamplesName, std::move(exp), insideDescribe);
+            auto hasPrecedingSig = prevStat != nullptr && ASTUtil::castSig(*prevStat) != nullptr;
+            exp = tryRunSingleOnSend(ctx, isClass, maybeSharedExamplesName, std::move(exp), insideDescribe,
+                                     hasPrecedingSig);
+            prevStat = &exp;
         }
 
         bodySeq->expr =
-            tryRunSingleOnSend(ctx, isClass, maybeSharedExamplesName, std::move(bodySeq->expr), insideDescribe);
+            tryRunSingleOnSend(ctx, isClass, maybeSharedExamplesName, std::move(bodySeq->expr), insideDescribe,
+                               prevStat != nullptr && ASTUtil::castSig(*prevStat) != nullptr);
     }
     return body;
 }
 
 ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::ExpressionPtr &maybeSharedExamplesName,
-                             ast::Send *send, bool insideDescribe) {
+                             ast::Send *send, bool insideDescribe, bool hasPrecedingSig) {
     auto *block = send->block();
 
     switch (send->fun.rawId()) {
@@ -877,7 +884,9 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
             // defined methods, we don't actually need to care about the RuntimeMethodDefinition, and
             // omitting it saves memory.
             ast::cast_tree_nonnull<ast::MethodDef>(method).flags.discardDef = true;
-            method = addSigVoid(ctx, move(method));
+            if (!hasPrecedingSig) {
+                method = addSigVoid(ctx, move(method));
+            }
             if (send->numPosArgs() > 0 && !ast::isa_tree<ast::Literal>(send->getPosArg(0))) {
                 method = ast::MK::InsSeq1(send->loc, send->getPosArg(0).deepCopy(), move(method));
             }
@@ -925,7 +934,9 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
                                                       prepareBody(ctx, /* isClass */ true, maybeSharedExamplesName,
                                                                   std::move(itBody), /* insideDescribe */ true));
             ast::cast_tree_nonnull<ast::MethodDef>(itMethod).flags.discardDef = true;
-            itMethod = addSigVoid(ctx, move(itMethod));
+            if (!hasPrecedingSig) {
+                itMethod = addSigVoid(ctx, move(itMethod));
+            }
             itMethod = constantMover.addConstantsToExpression(send->loc, move(itMethod));
 
             ast::ClassDef::RHS_store describeBody;
@@ -1094,7 +1105,8 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
 
 } // namespace
 
-vector<ast::ExpressionPtr> Minitest::run(core::MutableContext ctx, bool isClass, ast::Send *send) {
+vector<ast::ExpressionPtr> Minitest::run(core::MutableContext ctx, bool isClass, ast::Send *send,
+                                         const ast::ExpressionPtr *prevStat) {
     vector<ast::ExpressionPtr> stats;
     if (ctx.state.cacheSensitiveOptions.runningUnderAutogen) {
         return stats;
@@ -1112,7 +1124,7 @@ vector<ast::ExpressionPtr> Minitest::run(core::MutableContext ctx, bool isClass,
         auto processStmt = [&](ast::ExpressionPtr &stmt) {
             if (auto bodySend = ast::cast_tree<ast::Send>(stmt)) {
                 auto result = runSingle(ctx, /* isClass */ false, /* maybeSharedExamplesName */ nullptr, bodySend,
-                                        /* insideDescribe */ false);
+                                        /* insideDescribe */ false, /* hasPrecedingSig */ false);
                 if (result != nullptr) {
                     stats.emplace_back(std::move(result));
                 }
@@ -1131,7 +1143,8 @@ vector<ast::ExpressionPtr> Minitest::run(core::MutableContext ctx, bool isClass,
     }
 
     auto insideDescribe = false;
-    auto exp = runSingle(ctx, isClass, /* maybeSharedExamplesName */ nullptr, send, insideDescribe);
+    auto exp = runSingle(ctx, isClass, /* maybeSharedExamplesName */ nullptr, send, insideDescribe,
+                         prevStat != nullptr && ASTUtil::castSig(*prevStat) != nullptr);
     if (exp != nullptr) {
         stats.emplace_back(std::move(exp));
     }
