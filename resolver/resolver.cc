@@ -583,14 +583,14 @@ private:
             return PackageResolutionAction::DeferToOutermost;
         }
 
-        if (!alreadyReported && !productionLegacyTestPath && inaccessibleCursorPackage) {
+        if (job.isOutermost && !alreadyReported && !productionLegacyTestPath && inaccessibleCursorPackage) {
             bool shouldReport;
             switch (job.packageCursorPosition) {
                 case PackageCursorPosition::PackageBoundary:
-                    shouldReport = job.isOutermost;
+                    shouldReport = true;
                     break;
                 case PackageCursorPosition::PackageMember:
-                    shouldReport = job.isOutermost && !isStrictPrefixOfAvailablePackage(ctx, cursorPackage);
+                    shouldReport = !isStrictPrefixOfAvailablePackage(ctx, cursorPackage);
                     break;
                 case PackageCursorPosition::None:
                 case PackageCursorPosition::NamespacePrefix:
