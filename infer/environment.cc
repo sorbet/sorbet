@@ -1640,13 +1640,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 const core::TypeAndOrigins &typeAndOrigin = getTypeAndOrigin(i.what.variable);
 
                 // Inference normally visits T.absurd only while control flow is live. Raise-before-absurd blocks
-                // are also checked when dead, where an exhaustive argument can be represented as either bottom
-                // directly or a type semantically equivalent to bottom (for example, T.noreturn).
-
-                const bool isBottom = typeAndOrigin.type.isBottom() ||
-                                      (!typeAndOrigin.type.isUntyped() &&
-                                       core::Types::isSubType(ctx, typeAndOrigin.type, core::Types::bottom()));
-                if (!isBottom) {
+                // are also checked when dead, so only report an error if the argument's type is not bottom.
+                if (!typeAndOrigin.type.isBottom()) {
                     if (auto e = ctx.beginError(bind.loc, core::errors::Infer::NotExhaustive)) {
                         if (typeAndOrigin.type.isUntyped()) {
                             e.setHeader("Control flow could reach `{}` because argument was `{}`", "T.absurd",
