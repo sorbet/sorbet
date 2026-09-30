@@ -144,7 +144,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
     args=()
 
     case "${srcs[0]}" in
-      test/prism_regression/*|test/testdata/rbs/*)
+      test/prism_regression/*|test/testdata/rbs/*|test/**/*.prism.rb)
         args+=("--parser=prism")
         ;;
     esac
