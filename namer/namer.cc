@@ -1495,40 +1495,41 @@ private:
         const auto fun = mod.name;
         auto symbolData = ctx.owner.asClassOrModuleRef().data(ctx);
         switch (fun.rawId()) {
-        case core::Names::declareFinal().rawId():
-            symbolData->flags.isFinal = true;
-            symbolData->singletonClass(ctx).data(ctx)->flags.isFinal = true;
-            break;
-        case core::Names::declareSealed().rawId(): {
-            symbolData->flags.isSealed = true;
+            case core::Names::declareFinal().rawId():
+                symbolData->flags.isFinal = true;
+                symbolData->singletonClass(ctx).data(ctx)->flags.isFinal = true;
+                break;
+            case core::Names::declareSealed().rawId(): {
+                symbolData->flags.isSealed = true;
 
-            auto classOfKlass = symbolData->singletonClass(ctx);
-            auto loc = ctx.locAt(mod.loc);
-            auto sealedSubclasses = ctx.state.enterMethodSymbol(loc, classOfKlass, core::Names::sealedSubclasses());
-            sealedSubclasses.data(ctx)->addLoc(ctx, loc);
-            auto &blkArg = ctx.state.enterMethodParameter(core::Loc::none(), sealedSubclasses, core::Names::blkArg());
-            blkArg.flags.isBlock = true;
+                auto classOfKlass = symbolData->singletonClass(ctx);
+                auto loc = ctx.locAt(mod.loc);
+                auto sealedSubclasses = ctx.state.enterMethodSymbol(loc, classOfKlass, core::Names::sealedSubclasses());
+                sealedSubclasses.data(ctx)->addLoc(ctx, loc);
+                auto &blkArg =
+                    ctx.state.enterMethodParameter(core::Loc::none(), sealedSubclasses, core::Names::blkArg());
+                blkArg.flags.isBlock = true;
 
-            // T.noreturn here represents the zero-length list of subclasses of this sealed class.
-            // We will use T.any to record subclasses when they're resolved.
-            sealedSubclasses.data(ctx)->resultType = core::Types::setOf(core::Types::bottom());
-            break;
-        }
-        case core::Names::declareInterface().rawId():
-            symbolData->flags.isInterface = true;
-            if (!symbolData->isModule()) {
-                if (auto e = ctx.beginError(mod.loc, core::errors::Namer::InterfaceClass)) {
-                    e.setHeader("Classes can't be interfaces. Use `{}` instead of `{}`", "abstract!", "interface!");
-                    e.replaceWith("Change `interface!` to `abstract!`", ctx.locAt(mod.loc), "abstract!");
-                }
+                // T.noreturn here represents the zero-length list of subclasses of this sealed class.
+                // We will use T.any to record subclasses when they're resolved.
+                sealedSubclasses.data(ctx)->resultType = core::Types::setOf(core::Types::bottom());
+                break;
             }
-            [[fallthrough]];
-        case core::Names::declareAbstract().rawId():
-            symbolData->flags.isAbstract = true;
-            symbolData->singletonClass(ctx).data(ctx)->flags.isAbstract = true;
-            break;
-        default:
-            break;
+            case core::Names::declareInterface().rawId():
+                symbolData->flags.isInterface = true;
+                if (!symbolData->isModule()) {
+                    if (auto e = ctx.beginError(mod.loc, core::errors::Namer::InterfaceClass)) {
+                        e.setHeader("Classes can't be interfaces. Use `{}` instead of `{}`", "abstract!", "interface!");
+                        e.replaceWith("Change `interface!` to `abstract!`", ctx.locAt(mod.loc), "abstract!");
+                    }
+                }
+                [[fallthrough]];
+            case core::Names::declareAbstract().rawId():
+                symbolData->flags.isAbstract = true;
+                symbolData->singletonClass(ctx).data(ctx)->flags.isAbstract = true;
+                break;
+            default:
+                break;
         }
     }
 
