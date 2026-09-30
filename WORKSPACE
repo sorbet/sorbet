@@ -58,8 +58,10 @@ llvm_toolchain(
     # The sysroots are needed for cross-compiling
     sysroot = {
         "": "",
-        "darwin-x86_64": "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
-        "darwin-aarch64": "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+        # We're stuck on MacOSX26 until we update clang far enough to support `-fdefine-target-os-macros`,
+        # as the MacOSX27.sdk (the default with Xcode 27) requires that now.
+        "darwin-x86_64": "/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk",
+        "darwin-aarch64": "/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk",
     },
 )
 
