@@ -121,3 +121,41 @@ def non_exhaustive_live_branch_multiple_predecessors(x)
     T.absurd(x) # error: Control flow could reach `T.absurd` because the type `Symbol` wasn't handled
   end
 end
+
+sig {params(x: String).returns(ArgumentError)}
+def make_error(x)
+  ArgumentError.new(x)
+end
+
+sig {params(x: String).void}
+def raise_argument_call_in_dead_branch(x)
+  unless true
+    raise make_error(x)
+    T.absurd(x) # error: Control flow could reach `T.absurd` because the type `String` wasn't handled
+  end
+end
+
+sig {params(x: Integer).void}
+def raise_integer_argument_call_in_dead_branch(x)
+  unless true
+    raise make_error(x) # error: Expected `String` but found `Integer` for argument `x`
+    T.absurd(x) # error: Control flow could reach `T.absurd` because the type `Integer` wasn't handled
+  end
+end
+
+sig {params(x: Integer).void}
+def nested_raise_argument_call_in_dead_branch(x)
+  unless true
+    raise make_error(x.to_s)
+    T.absurd(x) # error: Control flow could reach `T.absurd` because the type `Integer` wasn't handled
+  end
+end
+
+sig {params(x: String).void}
+def unrelated_argument_errors_in_dead_branch_are_skipped(x)
+  unless true
+    make_error(123) # error: This code is unreachable
+    raise make_error(x)
+    T.absurd(x) # error: Control flow could reach `T.absurd` because the type `String` wasn't handled
+  end
+end
