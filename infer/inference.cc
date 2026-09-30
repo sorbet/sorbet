@@ -44,7 +44,9 @@ void raiseLocsBeforeAbsurd(const cfg::BasicBlock &bb, InlinedVector<core::LocOff
     for (const auto &bind : bb.exprs) {
         auto send = cfg::cast_instruction<cfg::Send>(bind.value);
         if (send != nullptr && send->fun == core::Names::raise()) {
-            precedingRaiseLoc = bind.loc;
+            if (!precedingRaiseLoc.has_value()) {
+                precedingRaiseLoc = bind.loc;
+            }
         } else if (precedingRaiseLoc.has_value() && cfg::isa_instruction<cfg::TAbsurd>(bind.value)) {
             result.emplace_back(*precedingRaiseLoc);
             precedingRaiseLoc.reset();
