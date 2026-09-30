@@ -38,8 +38,8 @@ bool Inference::willRun(core::Context ctx, core::LocOffsets loc, core::MethodRef
     return true;
 }
 
-InlinedVector<core::LocOffsets, 1> raiseLocsBeforeAbsurd(const cfg::BasicBlock &bb) {
-    InlinedVector<core::LocOffsets, 1> result;
+void raiseLocsBeforeAbsurd(const cfg::BasicBlock &bb, InlinedVector<core::LocOffsets, 1> &result) {
+    result.erase(result.begin(), result.end());
     optional<core::LocOffsets> precedingRaiseLoc;
     for (const auto &bind : bb.exprs) {
         auto send = cfg::cast_instruction<cfg::Send>(bind.value);
@@ -50,7 +50,6 @@ InlinedVector<core::LocOffsets, 1> raiseLocsBeforeAbsurd(const cfg::BasicBlock &
             precedingRaiseLoc.reset();
         }
     }
-    return result;
 }
 
 bool silenceDeadCodeError(const cfg::Binding &bind, absl::Span<const core::LocOffsets> allowedRaiseLocs) {
@@ -131,6 +130,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
     vector<bool> visited;
     visited.resize(cfg->maxBasicBlockId);
     KnowledgeFilter knowledgeFilter(ctx, *cfg);
+    InlinedVector<core::LocOffsets, 1> allowedRaiseLocs;
     for (auto it = cfg->forwardsTopoSort.rbegin(); it != cfg->forwardsTopoSort.rend(); ++it) {
         cfg::BasicBlock *bb = *it;
         if (bb == cfg->deadBlock()) {
@@ -150,7 +150,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         }
         Environment &current = outEnvironments[bb->id];
         current.initializeBasicBlockArgs(*bb);
-        const auto allowedRaiseLocs = raiseLocsBeforeAbsurd(*bb);
+        raiseLocsBeforeAbsurd(*bb, allowedRaiseLocs);
         const bool deadButTypecheckAnyways = !allowedRaiseLocs.empty();
 
         // We very much want to limit access to "global" data structures downstream.
