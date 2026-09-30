@@ -196,6 +196,10 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                                               applyKnowledgeInDeadBranch);
                     if (!envAsSeenFromBranch.isDead) {
                         current.isDead = false;
+                    }
+                    // Dead-entry reconstruction needs narrowed types from impossible edges too,
+                    // but merging them must not make the block reachable.
+                    if (!envAsSeenFromBranch.isDead || applyKnowledgeInDeadBranch) {
                         current.mergeWith(ctx, envAsSeenFromBranch, *cfg.get(), bb, knowledgeFilter);
                     }
                 }
