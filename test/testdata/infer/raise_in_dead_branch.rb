@@ -59,10 +59,10 @@ def unpaired_raise_still_errors
 end
 
 sig {params(x: String).void}
-def only_closest_raise_is_allowed(x)
+def only_first_raise_is_allowed(x)
   unless true
-    raise ArgumentError, "First failure" # error: This code is unreachable
-    raise RuntimeError, "Unexpected value: #{x}"
+    raise ArgumentError, "First failure"
+    raise RuntimeError, "Unexpected value: #{x}" # error: This code is unreachable
     T.absurd(x) # error: Control flow could reach `T.absurd` because the type `String` wasn't handled
   end
 end

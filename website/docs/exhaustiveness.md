@@ -57,6 +57,8 @@ end
 
 Sorbet still checks the trailing `T.absurd`, while Ruby executes the custom `raise` first if the branch is reached.
 
+If multiple consecutive `raise` calls precede `T.absurd`, only the first is exempt from unreachable-code errors. Subsequent raises are still unreachable.
+
 Now let's walk through an example explaining not only **how** Sorbet provides exhaustiveness checking, but also **why** it's useful:
 
 ## Example
