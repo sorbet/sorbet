@@ -1639,8 +1639,10 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
             [&](cfg::TAbsurd &i) {
                 const core::TypeAndOrigins &typeAndOrigin = getTypeAndOrigin(i.what.variable);
 
-                // Inference normally visits T.absurd only while control flow is live. Raise-before-absurd blocks
-                // are also checked when dead, so only report an error if the argument's type is not bottom.
+                // Normally, inference only processes T.absurd in live code. As a special case,
+                // we also check it in dead code when preceded by a raise, so that the raise
+                // does not bypass exhaustiveness checking. In that case, a bottom argument
+                // means the cases were exhaustive and no error is needed.
                 if (!typeAndOrigin.type.isBottom()) {
                     if (auto e = ctx.beginError(bind.loc, core::errors::Infer::NotExhaustive)) {
                         if (typeAndOrigin.type.isUntyped()) {
