@@ -266,7 +266,7 @@ public:
      *
      * When applyKnowledgeInDeadBranch is true, apply the branch's knowledge
      * even if the condition proves that branch unreachable. This supplies the
-     * counterfactual types needed to check T.absurd in a dead branch.
+     * type context needed to check T.absurd in a dead branch.
      *
      * Either returns a reference to `env` unchanged, or populates `copy` and
      * returns a reference to that. This odd calling convention is used to avoid
