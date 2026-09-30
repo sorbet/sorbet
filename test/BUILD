@@ -539,7 +539,7 @@ pipeline_tests(
             "testdata/**/*.exp",
         ],
         exclude = [
-            # Package validation errors from earlier package-directed strata are not retained by LSP.
+            # TODO(jez): Re-enable once LSP handles the dual `__package.rb` processing in package-directed mode.
             "testdata/packager/directed-prelude-import/application/__package.rb",
             "testdata/packager/directed-prelude-import/prelude/__package.rb",
 
@@ -569,7 +569,7 @@ pipeline_tests(
             "testdata/**/*.exp",
         ],
         exclude = [
-            # Package validation errors from earlier package-directed strata are not retained by LSP.
+            # TODO(jez): Re-enable once LSP handles the dual `__package.rb` processing in package-directed mode.
             "testdata/packager/directed-prelude-import/application/__package.rb",
             "testdata/packager/directed-prelude-import/prelude/__package.rb",
 
