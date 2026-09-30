@@ -39,7 +39,6 @@ bool Inference::willRun(core::Context ctx, core::LocOffsets loc, core::MethodRef
 }
 
 void raiseLocsBeforeAbsurd(const cfg::BasicBlock &bb, InlinedVector<core::LocOffsets, 1> &result) {
-    result.erase(result.begin(), result.end());
     optional<core::LocOffsets> precedingRaiseLoc;
     for (const auto &bind : bb.exprs) {
         auto send = cfg::cast_instruction<cfg::Send>(bind.value);
@@ -135,6 +134,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
     InlinedVector<core::LocOffsets, 1> allowedRaiseLocs;
     for (auto it = cfg->forwardsTopoSort.rbegin(); it != cfg->forwardsTopoSort.rend(); ++it) {
         cfg::BasicBlock *bb = *it;
+        allowedRaiseLocs.erase(allowedRaiseLocs.begin(), allowedRaiseLocs.end());
         if (bb == cfg->deadBlock()) {
             for (const auto &bind : bb->exprs) {
                 if (bind.value.isSynthetic() || bind.loc.empty()) {
@@ -152,8 +152,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         }
         Environment &current = outEnvironments[bb->id];
         current.initializeBasicBlockArgs(*bb);
-        raiseLocsBeforeAbsurd(*bb, allowedRaiseLocs);
-        const bool deadButTypecheckAnyways = !allowedRaiseLocs.empty();
+        bool hasRaiseAbsurdPair = false;
 
         // We very much want to limit access to "global" data structures downstream.
         // In particular, processBinding should only need to know about the current binding (nothing
@@ -169,33 +168,48 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         // to make it easy to reason about correctness.
         optional<cfg::BasicBlock::BlockExitCondInfo> parentUpdateKnowledgeReceiver;
 
-        if (bb->backEdges.size() == 1) {
-            auto *parent = bb->backEdges[0];
-            bool isTrueBranch = parent->bexit.thenb == bb;
-            if (!outEnvironments[parent->id].isDead) {
-                Environment tempEnv(methodLoc);
-                auto &envAsSeenFromBranch = Environment::withCond(
-                    ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current.vars(), deadButTypecheckAnyways);
-                current.populateFrom(ctx, envAsSeenFromBranch);
-
-                parentUpdateKnowledgeReceiver = parent->maybeGetUpdateKnowledgeReceiver(*cfg);
-            } else {
-                current.isDead = true;
-            }
-        } else {
-            current.isDead = (bb != cfg->entry());
-            for (cfg::BasicBlock *parent : bb->backEdges) {
-                if (!visited[parent->id] || outEnvironments[parent->id].isDead) {
-                    continue;
-                }
+        auto populateFromPredecessors = [&](bool applyKnowledgeInDeadBranch) {
+            if (bb->backEdges.size() == 1) {
+                auto *parent = bb->backEdges[0];
                 bool isTrueBranch = parent->bexit.thenb == bb;
-                Environment tempEnv(methodLoc);
-                auto &envAsSeenFromBranch = Environment::withCond(
-                    ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current.vars(), deadButTypecheckAnyways);
-                if (!envAsSeenFromBranch.isDead) {
-                    current.isDead = false;
-                    current.mergeWith(ctx, envAsSeenFromBranch, *cfg.get(), bb, knowledgeFilter);
+                if (!outEnvironments[parent->id].isDead) {
+                    Environment tempEnv(methodLoc);
+                    auto &envAsSeenFromBranch =
+                        Environment::withCond(ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current.vars(),
+                                              applyKnowledgeInDeadBranch);
+                    current.populateFrom(ctx, envAsSeenFromBranch);
+
+                    parentUpdateKnowledgeReceiver = parent->maybeGetUpdateKnowledgeReceiver(*cfg);
+                } else {
+                    current.isDead = true;
                 }
+            } else {
+                current.isDead = (bb != cfg->entry());
+                for (cfg::BasicBlock *parent : bb->backEdges) {
+                    if (!visited[parent->id] || outEnvironments[parent->id].isDead) {
+                        continue;
+                    }
+                    bool isTrueBranch = parent->bexit.thenb == bb;
+                    Environment tempEnv(methodLoc);
+                    auto &envAsSeenFromBranch =
+                        Environment::withCond(ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current.vars(),
+                                              applyKnowledgeInDeadBranch);
+                    if (!envAsSeenFromBranch.isDead) {
+                        current.isDead = false;
+                        current.mergeWith(ctx, envAsSeenFromBranch, *cfg.get(), bb, knowledgeFilter);
+                    }
+                }
+            }
+        };
+
+        populateFromPredecessors(false);
+        if (current.isDead) {
+            raiseLocsBeforeAbsurd(*bb, allowedRaiseLocs);
+            hasRaiseAbsurdPair = !allowedRaiseLocs.empty();
+            if (hasRaiseAbsurdPair) {
+                // Normal refinement can stop as soon as the branch is dead. Rebuild from the predecessors
+                // with full branch knowledge so T.absurd sees the narrowed type, not the partial refinement.
+                populateFromPredecessors(true);
             }
         }
 
@@ -211,7 +225,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         cfg::InstructionPtr *unreachableInstruction = nullptr;
         core::Loc locForUnreachable;
         bool dueToSafeNavigation = false;
-        const bool deadAtEntry = current.isDead;
+        const bool deadButTypecheckAnyways = current.isDead && hasRaiseAbsurdPair;
 
         if (current.isDead) {
             bb->firstDeadInstructionIdx = 0;
@@ -278,7 +292,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             for (cfg::Binding &bind : bb->exprs) {
                 i++;
                 const bool typecheckDeadAbsurd =
-                    current.isDead && deadButTypecheckAnyways && cfg::isa_instruction<cfg::TAbsurd>(bind.value);
+                    current.isDead && hasRaiseAbsurdPair && cfg::isa_instruction<cfg::TAbsurd>(bind.value);
                 if (!current.isDead || !ctx.state.lspQuery.isEmpty() || typecheckDeadAbsurd) {
                     bind.bind.type = current.processBinding(ctx, *cfg, bind, bb->outerLoops,
                                                             bind.bind.variable.minLoops(*cfg), knowledgeFilter, *constr,
@@ -292,14 +306,19 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     ENFORCE(bind.bind.type);
                     bind.bind.type.sanityCheck(ctx);
                     if (bind.bind.type.isBottom()) {
-                        current.isDead = true;
+                        if (!current.isDead) {
+                            current.isDead = true;
+                            // A live block can become dead while processing; check for a trailing raise/absurd pair.
+                            raiseLocsBeforeAbsurd(*bb, allowedRaiseLocs);
+                            hasRaiseAbsurdPair = !allowedRaiseLocs.empty();
+                        }
                         madeBlockDead = ctx.locAt(bind.loc);
                     }
                     if (current.isDead && bb->firstDeadInstructionIdx == -1) {
                         // this can also be result of evaluating an instruction, e.g. an always false hard_assert
                         bb->firstDeadInstructionIdx = i;
                     }
-                } else if (deadAtEntry && deadButTypecheckAnyways) {
+                } else if (deadButTypecheckAnyways) {
                     // Only T.absurd needs typechecking in a block that was dead on entry. Dead-code reporting for
                     // the remaining bindings is deferred until after the exhaustiveness check.
                     continue;

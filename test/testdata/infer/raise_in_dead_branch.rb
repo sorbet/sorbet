@@ -87,3 +87,10 @@ def raise_after_absurd_still_errors(x)
     raise ArgumentError, "Unexpected value: #{x}" # error: This code is unreachable
   end
 end
+
+sig {params(x: String).void}
+def unrelated_code_after_live_raise_still_errors(x)
+  raise ArgumentError, "Unexpected value: #{x}"
+  puts(x) # error: This code is unreachable
+  T.absurd(x)
+end
