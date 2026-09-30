@@ -81,6 +81,14 @@ core::ClassOrModuleRef contextClass(const core::GlobalState &gs, core::SymbolRef
     }
 }
 
+PackageInfo &packageInfoForContext(core::MutableContext ctx) {
+    auto packageName = ctx.state.packageDB().getPackageNameForFile(ctx.file);
+    ENFORCE(packageName.exists() && packageName.owner == ctx.owner.asClassOrModuleRef());
+    auto *packageInfo = ctx.state.packageDB().getPackageInfoNonConst(packageName);
+    ENFORCE(packageInfo != nullptr);
+    return *packageInfo;
+}
+
 /**
  * Used with TreeWalk to locate all of the class, method, static field, and type member symbols defined in the tree.
  * Does not mutate GlobalState, which allows us to parallelize this process.
@@ -101,7 +109,17 @@ class SymbolFinder {
             return;
         }
 
+        auto isPackageClass = foundDefs->package.has_value() && foundDefs->package->owner.kind() == klass.kind() &&
+                              foundDefs->package->owner.idx() == klass.idx();
+
         switch (send->fun.rawId()) {
+            case core::Names::exportAll().rawId():
+            case core::Names::prelude_bang().rawId():
+            case core::Names::test_bang().rawId():
+                if (!isPackageClass || send->hasBlock() || send->hasNonBlockArgs()) {
+                    break;
+                }
+                [[fallthrough]];
             case core::Names::declareFinal().rawId():
             case core::Names::declareSealed().rawId():
             case core::Names::declareInterface().rawId():
@@ -1495,6 +1513,15 @@ private:
         const auto fun = mod.name;
         auto symbolData = ctx.owner.asClassOrModuleRef().data(ctx);
         switch (fun.rawId()) {
+            case core::Names::exportAll().rawId():
+                packageInfoForContext(ctx).locs.exportAll = mod.loc;
+                break;
+            case core::Names::prelude_bang().rawId():
+                packageInfoForContext(ctx).locs.preludePackage = mod.loc;
+                break;
+            case core::Names::test_bang().rawId():
+                packageInfoForContext(ctx).locs.testPackage = mod.loc;
+                break;
             case core::Names::declareFinal().rawId():
                 symbolData->flags.isFinal = true;
                 symbolData->singletonClass(ctx).data(ctx)->flags.isFinal = true;
