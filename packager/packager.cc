@@ -547,9 +547,11 @@ struct PackageSpecBodyWalk {
                         }
                     }
 
+                    auto skipRecordingImport = false;
                     // TODO(trevor): this check can be removed after we've fully switched to test-packages, as
                     // `test_import` will no longer exist
                     if (info.usesTestPackages && send.fun == core::Names::testImport()) {
+                        skipRecordingImport = true;
                         // TODO(trevor) we completely ignore `test_import` if we're in test-packages mode. As part of
                         // the migration is swapping in test files without modifying the originals, this gives us a good
                         // path forward for not making a lot of potentially conflicting changes all at once.
@@ -560,7 +562,43 @@ struct PackageSpecBodyWalk {
                                 e.replaceWith("Use import", ctx.locAt(send.funLoc), "import");
                             }
                         }
-                    } else {
+                    } else if (info.isPreludePackage()) {
+                        auto &otherPkg = ctx.state.packageDB().getPackageInfo(importName);
+                        if (otherPkg.exists()) {
+                            // Prelude packages may only import other prelude packages
+                            if (!otherPkg.isPreludePackage()) {
+                                skipRecordingImport = true;
+                                if (auto e = ctx.beginError(send.loc, core::errors::Packager::PreludePackageImport)) {
+                                    string_view import;
+                                    switch (method2ImportType(send)) {
+                                        case core::packages::ImportType::Normal:
+                                            import = "import";
+                                            break;
+                                        case core::packages::ImportType::TestHelper:
+                                        case core::packages::ImportType::TestUnit:
+                                            import = "test_import";
+                                            break;
+                                    }
+                                    e.setHeader("Prelude package `{}` may not `{}` non-prelude package `{}`",
+                                                info.show(ctx), import, otherPkg.show(ctx));
+
+                                    auto importLoc = ctx.locAt(send.loc);
+                                    auto line = importLoc.toDetails(ctx.state).first.line;
+                                    auto &file = importLoc.file().data(ctx.state);
+                                    auto fileEnd = static_cast<uint32_t>(file.source().size());
+                                    if (auto lineStart = core::Loc::detail2Pos(file, {line, 1})) {
+                                        auto nextLineStart =
+                                            core::Loc::detail2Pos(file, {line + 1, 1}).value_or(fileEnd);
+                                        nextLineStart = min(nextLineStart, fileEnd);
+                                        e.replaceWith("Delete invalid import",
+                                                      core::Loc(importLoc.file(), *lineStart, nextLineStart), "");
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (!skipRecordingImport) {
                         imp = &info.importedPackageNames.emplace_back(importName, method2ImportType(send), send.loc);
                     }
                 }
@@ -1155,15 +1193,13 @@ void validatePackage(core::Context ctx) {
     auto &pkgInfo = PackageInfo::from(ctx, absPkg);
     bool skipImportVisibilityCheck = packageDB.allowRelaxedPackagerChecksFor(pkgInfo.mangledName());
     auto enforceLayering = ctx.state.packageDB().enforceLayering();
-    bool pkgIsPrelude = pkgInfo.isPreludePackage();
-    bool onlyValidatePreludeImports = skipImportVisibilityCheck && !enforceLayering;
 
-    if (onlyValidatePreludeImports && !pkgIsPrelude) {
+    if (skipImportVisibilityCheck && !enforceLayering) {
         return;
     }
 
     for (auto &i : pkgInfo.importedPackageNames) {
-        if (!onlyValidatePreludeImports && pkgInfo.usesTestPackages) {
+        if (pkgInfo.usesTestPackages) {
             ENFORCE(i.type == ImportType::Normal, "test_import found in --test-packages mode");
         }
 
@@ -1171,30 +1207,6 @@ void validatePackage(core::Context ctx) {
 
         // this might mean the other package doesn't exist, but that should have been caught already
         if (!otherPkg.exists()) {
-            continue;
-        }
-
-        if (pkgIsPrelude) {
-            // Prelude packages may only import other prelude packages
-            if (!otherPkg.isPreludePackage()) {
-                if (auto e = ctx.beginError(i.loc, core::errors::Packager::PreludePackageImport)) {
-                    string_view import;
-                    switch (i.type) {
-                        case core::packages::ImportType::Normal:
-                            import = "import";
-                            break;
-                        case core::packages::ImportType::TestHelper:
-                        case core::packages::ImportType::TestUnit:
-                            import = "test_import";
-                            break;
-                    }
-                    e.setHeader("Prelude package `{}` may not `{}` non-prelude package `{}`", pkgInfo.show(ctx), import,
-                                otherPkg.show(ctx));
-                }
-            }
-        }
-
-        if (onlyValidatePreludeImports) {
             continue;
         }
 
