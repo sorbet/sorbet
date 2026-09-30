@@ -58,8 +58,8 @@ llvm_toolchain(
     # The sysroots are needed for cross-compiling
     sysroot = {
         "": "",
-        "darwin-x86_64": "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
-        "darwin-aarch64": "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+        "darwin-x86_64": "/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk",
+        "darwin-aarch64": "/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk",
     },
 )
 
