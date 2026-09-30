@@ -94,3 +94,30 @@ def unrelated_code_after_live_raise_still_errors(x)
   puts(x) # error: This code is unreachable
   T.absurd(x)
 end
+
+sig {params(x: T.any(Integer, String)).void}
+def exhaustive_dead_branch_multiple_predecessors(x)
+  if x.is_a?(Integer) || x.is_a?(String)
+  else
+    raise ArgumentError, "Unexpected value: #{x}"
+    T.absurd(x)
+  end
+end
+
+sig {params(x: T.any(Integer, String), y: Symbol).void}
+def non_exhaustive_dead_branch_multiple_predecessors(x, y)
+  if x.is_a?(Integer) || x.is_a?(String)
+  else
+    raise ArgumentError, "Unexpected value: #{y}"
+    T.absurd(y) # error: Control flow could reach `T.absurd` because the type `Symbol` wasn't handled
+  end
+end
+
+sig {params(x: T.any(Integer, String, Symbol)).void}
+def non_exhaustive_live_branch_multiple_predecessors(x)
+  if x.is_a?(Integer) || x.is_a?(String)
+  else
+    raise ArgumentError, "Unexpected value: #{x}"
+    T.absurd(x) # error: Control flow could reach `T.absurd` because the type `Symbol` wasn't handled
+  end
+end
