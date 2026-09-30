@@ -81,6 +81,14 @@ core::ClassOrModuleRef contextClass(const core::GlobalState &gs, core::SymbolRef
     }
 }
 
+PackageInfo &packageInfoForContext(core::MutableContext ctx) {
+    auto packageName = ctx.state.packageDB().getPackageNameForFile(ctx.file);
+    ENFORCE(packageName.exists() && packageName.owner == ctx.owner.asClassOrModuleRef());
+    auto *packageInfo = ctx.state.packageDB().getPackageInfoNonConst(packageName);
+    ENFORCE(packageInfo != nullptr);
+    return *packageInfo;
+}
+
 /**
  * Used with TreeWalk to locate all of the class, method, static field, and type member symbols defined in the tree.
  * Does not mutate GlobalState, which allows us to parallelize this process.
@@ -101,7 +109,17 @@ class SymbolFinder {
             return;
         }
 
+        auto isPackageClass = foundDefs->package.has_value() && foundDefs->package->owner.kind() == klass.kind() &&
+                              foundDefs->package->owner.idx() == klass.idx();
+
         switch (send->fun.rawId()) {
+            case core::Names::exportAll().rawId():
+            case core::Names::prelude_bang().rawId():
+            case core::Names::test_bang().rawId():
+                if (!isPackageClass || send->hasBlock() || send->hasNonBlockArgs()) {
+                    break;
+                }
+                [[fallthrough]];
             case core::Names::declareFinal().rawId():
             case core::Names::declareSealed().rawId():
             case core::Names::declareInterface().rawId():
@@ -1494,36 +1512,51 @@ private:
         ENFORCE(mod.kind == core::FoundModifier::Kind::Class);
         const auto fun = mod.name;
         auto symbolData = ctx.owner.asClassOrModuleRef().data(ctx);
-        if (fun == core::Names::declareFinal()) {
-            symbolData->flags.isFinal = true;
-            symbolData->singletonClass(ctx).data(ctx)->flags.isFinal = true;
-        }
-        if (fun == core::Names::declareSealed()) {
-            symbolData->flags.isSealed = true;
+        switch (fun.rawId()) {
+            case core::Names::exportAll().rawId():
+                packageInfoForContext(ctx).locs.exportAll = mod.loc;
+                break;
+            case core::Names::prelude_bang().rawId():
+                packageInfoForContext(ctx).locs.preludePackage = mod.loc;
+                break;
+            case core::Names::test_bang().rawId():
+                packageInfoForContext(ctx).locs.testPackage = mod.loc;
+                break;
+            case core::Names::declareFinal().rawId():
+                symbolData->flags.isFinal = true;
+                symbolData->singletonClass(ctx).data(ctx)->flags.isFinal = true;
+                break;
+            case core::Names::declareSealed().rawId(): {
+                symbolData->flags.isSealed = true;
 
-            auto classOfKlass = symbolData->singletonClass(ctx);
-            auto loc = ctx.locAt(mod.loc);
-            auto sealedSubclasses = ctx.state.enterMethodSymbol(loc, classOfKlass, core::Names::sealedSubclasses());
-            sealedSubclasses.data(ctx)->addLoc(ctx, loc);
-            auto &blkArg = ctx.state.enterMethodParameter(core::Loc::none(), sealedSubclasses, core::Names::blkArg());
-            blkArg.flags.isBlock = true;
+                auto classOfKlass = symbolData->singletonClass(ctx);
+                auto loc = ctx.locAt(mod.loc);
+                auto sealedSubclasses = ctx.state.enterMethodSymbol(loc, classOfKlass, core::Names::sealedSubclasses());
+                sealedSubclasses.data(ctx)->addLoc(ctx, loc);
+                auto &blkArg =
+                    ctx.state.enterMethodParameter(core::Loc::none(), sealedSubclasses, core::Names::blkArg());
+                blkArg.flags.isBlock = true;
 
-            // T.noreturn here represents the zero-length list of subclasses of this sealed class.
-            // We will use T.any to record subclasses when they're resolved.
-            sealedSubclasses.data(ctx)->resultType = core::Types::setOf(core::Types::bottom());
-        }
-        if (fun == core::Names::declareInterface() || fun == core::Names::declareAbstract()) {
-            symbolData->flags.isAbstract = true;
-            symbolData->singletonClass(ctx).data(ctx)->flags.isAbstract = true;
-        }
-        if (fun == core::Names::declareInterface()) {
-            symbolData->flags.isInterface = true;
-            if (!symbolData->isModule()) {
-                if (auto e = ctx.beginError(mod.loc, core::errors::Namer::InterfaceClass)) {
-                    e.setHeader("Classes can't be interfaces. Use `{}` instead of `{}`", "abstract!", "interface!");
-                    e.replaceWith("Change `interface!` to `abstract!`", ctx.locAt(mod.loc), "abstract!");
-                }
+                // T.noreturn here represents the zero-length list of subclasses of this sealed class.
+                // We will use T.any to record subclasses when they're resolved.
+                sealedSubclasses.data(ctx)->resultType = core::Types::setOf(core::Types::bottom());
+                break;
             }
+            case core::Names::declareInterface().rawId():
+                symbolData->flags.isInterface = true;
+                if (!symbolData->isModule()) {
+                    if (auto e = ctx.beginError(mod.loc, core::errors::Namer::InterfaceClass)) {
+                        e.setHeader("Classes can't be interfaces. Use `{}` instead of `{}`", "abstract!", "interface!");
+                        e.replaceWith("Change `interface!` to `abstract!`", ctx.locAt(mod.loc), "abstract!");
+                    }
+                }
+                [[fallthrough]];
+            case core::Names::declareAbstract().rawId():
+                symbolData->flags.isAbstract = true;
+                symbolData->singletonClass(ctx).data(ctx)->flags.isAbstract = true;
+                break;
+            default:
+                break;
         }
     }
 

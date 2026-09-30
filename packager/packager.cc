@@ -605,11 +605,9 @@ struct PackageSpecBodyWalk {
                 }
             }
         } else if (send.fun == core::Names::exportAll()) {
-            if (send.numPosArgs() == 0) {
-                info.locs.exportAll = send.loc;
-            }
+            // Handled as a class-level modifier in namer.
         } else if (send.fun == core::Names::prelude_bang() && !send.hasBlock() && !send.hasNonBlockArgs()) {
-            info.locs.preludePackage = send.loc;
+            // Handled as a class-level modifier in namer.
         } else if (send.fun == core::Names::visibleTo()) {
             if (send.numPosArgs() == 1) {
                 if (auto target = ast::cast_tree<ast::Literal>(send.getPosArg(0))) {
@@ -862,7 +860,7 @@ struct PackageSpecBodyWalk {
                     }
                 }
 
-                info.locs.testPackage = send.loc;
+                // Handled as a class-level modifier in namer.
             }
         } else {
             // Extra directives
@@ -1373,6 +1371,9 @@ vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, ve
                 // rewritePackageSpec. We make the most shallow copy possible, to ensure that we don't raise duplicate
                 // errors on the fast path.
                 PackageInfo copy{info.mangledName_, info.file, info.locs.loc, info.locs.declLoc};
+                copy.locs.exportAll = info.locs.exportAll;
+                copy.locs.preludePackage = info.locs.preludePackage;
+                copy.locs.testPackage = info.locs.testPackage;
                 rewritePackageSpec(gs, file, copy);
             }
             validatePackage(ctx);
