@@ -1494,11 +1494,12 @@ private:
         ENFORCE(mod.kind == core::FoundModifier::Kind::Class);
         const auto fun = mod.name;
         auto symbolData = ctx.owner.asClassOrModuleRef().data(ctx);
-        if (fun == core::Names::declareFinal()) {
+        switch (fun.rawId()) {
+        case core::Names::declareFinal().rawId():
             symbolData->flags.isFinal = true;
             symbolData->singletonClass(ctx).data(ctx)->flags.isFinal = true;
-        }
-        if (fun == core::Names::declareSealed()) {
+            break;
+        case core::Names::declareSealed().rawId(): {
             symbolData->flags.isSealed = true;
 
             auto classOfKlass = symbolData->singletonClass(ctx);
@@ -1511,12 +1512,9 @@ private:
             // T.noreturn here represents the zero-length list of subclasses of this sealed class.
             // We will use T.any to record subclasses when they're resolved.
             sealedSubclasses.data(ctx)->resultType = core::Types::setOf(core::Types::bottom());
+            break;
         }
-        if (fun == core::Names::declareInterface() || fun == core::Names::declareAbstract()) {
-            symbolData->flags.isAbstract = true;
-            symbolData->singletonClass(ctx).data(ctx)->flags.isAbstract = true;
-        }
-        if (fun == core::Names::declareInterface()) {
+        case core::Names::declareInterface().rawId():
             symbolData->flags.isInterface = true;
             if (!symbolData->isModule()) {
                 if (auto e = ctx.beginError(mod.loc, core::errors::Namer::InterfaceClass)) {
@@ -1524,6 +1522,13 @@ private:
                     e.replaceWith("Change `interface!` to `abstract!`", ctx.locAt(mod.loc), "abstract!");
                 }
             }
+            [[fallthrough]];
+        case core::Names::declareAbstract().rawId():
+            symbolData->flags.isAbstract = true;
+            symbolData->singletonClass(ctx).data(ctx)->flags.isAbstract = true;
+            break;
+        default:
+            break;
         }
     }
 
