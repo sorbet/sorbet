@@ -565,25 +565,25 @@ struct PackageSpecBodyWalk {
                     } else if (info.isPreludePackage()) {
                         auto &otherPkg = ctx.state.packageDB().getPackageInfo(importName);
                         if (otherPkg.exists()) {
-            // Prelude packages may only import other prelude packages
-            if (!otherPkg.isPreludePackage()) {
-                skipRecordingImport = true;
-                if (auto e = ctx.beginError(send.loc, core::errors::Packager::PreludePackageImport)) {
-                    string_view import;
-                    switch (method2ImportType(send)) {
-                        case core::packages::ImportType::Normal:
-                            import = "import";
-                            break;
-                        case core::packages::ImportType::TestHelper:
-                        case core::packages::ImportType::TestUnit:
-                            import = "test_import";
-                            break;
-                    }
-                    e.setHeader("Prelude package `{}` may not `{}` non-prelude package `{}`", info.show(ctx), import,
-                                otherPkg.show(ctx));
-                }
-            }
+                            // Prelude packages may only import other prelude packages
+                            if (!otherPkg.isPreludePackage()) {
+                                skipRecordingImport = true;
+                                if (auto e = ctx.beginError(send.loc, core::errors::Packager::PreludePackageImport)) {
+                                    string_view import;
+                                    switch (method2ImportType(send)) {
+                                        case core::packages::ImportType::Normal:
+                                            import = "import";
+                                            break;
+                                        case core::packages::ImportType::TestHelper:
+                                        case core::packages::ImportType::TestUnit:
+                                            import = "test_import";
+                                            break;
+                                    }
+                                    e.setHeader("Prelude package `{}` may not `{}` non-prelude package `{}`",
+                                                info.show(ctx), import, otherPkg.show(ctx));
+                                }
                             }
+                        }
                     }
 
                     if (!skipRecordingImport) {
