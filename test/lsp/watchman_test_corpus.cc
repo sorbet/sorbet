@@ -153,8 +153,8 @@ TEST_CASE_FIXTURE(ProtocolTest, "ZeroingOutPackageFiles") {
 
         {"b/impl.rb", "# typed: strict\n"
                       "# frozen_string_literal: true\n"
-                      "module Project\n"
-                      "  class B::Foo\n"
+                      "module Project::B\n"
+                      "  class Foo\n"
                       "    extend T::Sig\n"
                       "    sig { returns(Project::C::Bar) }\n"
                       "    def test\n"
@@ -171,8 +171,8 @@ TEST_CASE_FIXTURE(ProtocolTest, "ZeroingOutPackageFiles") {
 
         {"c/impl.rb", "# typed: strict\n"
                       "# frozen_string_literal: true\n"
-                      "module Project\n"
-                      "  class C::Bar\n"
+                      "module Project::C\n"
+                      "  class Bar\n"
                       "  end\n"
                       "end\n"},
     });
