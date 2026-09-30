@@ -53,13 +53,17 @@ void raiseLocsBeforeAbsurd(const cfg::BasicBlock &bb, InlinedVector<core::LocOff
     }
 }
 
+bool isPartOfPairedRaise(const cfg::Binding &bind, absl::Span<const core::LocOffsets> allowedRaiseLocs) {
+    return bind.loc.exists() &&
+           absl::c_any_of(allowedRaiseLocs, [&](const auto &raiseLoc) { return raiseLoc.contains(bind.loc); });
+}
+
 bool silenceDeadCodeError(const cfg::Binding &bind, absl::Span<const core::LocOffsets> allowedRaiseLocs) {
     if (bind.value.isSynthetic() || cfg::isa_instruction<cfg::TAbsurd>(bind.value)) {
         return true;
     }
 
-    return bind.loc.exists() &&
-           absl::c_any_of(allowedRaiseLocs, [&](const auto &raiseLoc) { return raiseLoc.contains(bind.loc); });
+    return isPartOfPairedRaise(bind, allowedRaiseLocs);
 }
 
 unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg) {
@@ -295,9 +299,11 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             int i = 0;
             for (cfg::Binding &bind : bb->exprs) {
                 i++;
-                const bool typecheckDeadAbsurd =
-                    current.isDead && hasRaiseAbsurdPair && cfg::isa_instruction<cfg::TAbsurd>(bind.value);
-                if (!current.isDead || !ctx.state.lspQuery.isEmpty() || typecheckDeadAbsurd) {
+                const bool typecheckDeadBinding =
+                    current.isDead && hasRaiseAbsurdPair &&
+                    (cfg::isa_instruction<cfg::TAbsurd>(bind.value) ||
+                     (deadButTypecheckAnyways && isPartOfPairedRaise(bind, allowedRaiseLocs)));
+                if (!current.isDead || !ctx.state.lspQuery.isEmpty() || typecheckDeadBinding) {
                     bind.bind.type = current.processBinding(ctx, *cfg, bind, bb->outerLoops,
                                                             bind.bind.variable.minLoops(*cfg), knowledgeFilter, *constr,
                                                             methodReturnType, parentUpdateKnowledgeReceiver);
@@ -323,8 +329,8 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                         bb->firstDeadInstructionIdx = i;
                     }
                 } else if (deadButTypecheckAnyways) {
-                    // Only T.absurd needs typechecking in a block that was dead on entry. Dead-code reporting for
-                    // the remaining bindings is deferred until after the exhaustiveness check.
+                    // Only paired raises, their arguments, and T.absurd are typechecked in a dead-entry block.
+                    // Dead-code reporting for other bindings is deferred until after the exhaustiveness check.
                     continue;
                 } else if (ctx.state.lspQuery.isEmpty() && !silenceDeadCodeError(bind, allowedRaiseLocs)) {
                     if (auto e = ctx.beginError(bind.loc, core::errors::Infer::DeadBranchInferencer)) {
