@@ -581,6 +581,18 @@ struct PackageSpecBodyWalk {
                                     }
                                     e.setHeader("Prelude package `{}` may not `{}` non-prelude package `{}`",
                                                 info.show(ctx), import, otherPkg.show(ctx));
+
+                                    auto importLoc = ctx.locAt(send.loc);
+                                    auto line = importLoc.toDetails(ctx.state).first.line;
+                                    auto &file = importLoc.file().data(ctx.state);
+                                    auto fileEnd = static_cast<uint32_t>(file.source().size());
+                                    if (auto lineStart = core::Loc::detail2Pos(file, {line, 1})) {
+                                        auto nextLineStart =
+                                            core::Loc::detail2Pos(file, {line + 1, 1}).value_or(fileEnd);
+                                        nextLineStart = min(nextLineStart, fileEnd);
+                                        e.replaceWith("Delete invalid import",
+                                                      core::Loc(importLoc.file(), *lineStart, nextLineStart), "");
+                                    }
                                 }
                             }
                         }

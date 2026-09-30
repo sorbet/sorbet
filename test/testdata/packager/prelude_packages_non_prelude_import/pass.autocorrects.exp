@@ -28,8 +28,6 @@ end
 class Prelude < PackageSpec
   prelude!
 
-  import Application # error: `Prelude` may not `import` non-prelude package `Application`
-  test_import Application # error: `Prelude` may not `test_import` non-prelude package `Application`
 
   export Prelude::A
 end
@@ -50,6 +48,5 @@ end
 class RelaxedPrelude < PackageSpec
   prelude!
 
-  import Application # error: `RelaxedPrelude` may not `import` non-prelude package `Application`
 end
 # ------------------------------
