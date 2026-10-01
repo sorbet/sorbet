@@ -193,11 +193,11 @@ private:
         PackageCursorPosition packageCursorPosition = PackageCursorPosition::None;
 
         ConstantResolutionItem() = default;
-        ConstantResolutionItem(const shared_ptr<Nesting> &scope, ast::ConstantLit *lit) : scope(scope), out(lit) {}
-        ConstantResolutionItem(const shared_ptr<Nesting> &scope, ast::ConstantLit *lit,
+        ConstantResolutionItem(shared_ptr<Nesting> scope, ast::ConstantLit *lit) : scope(move(scope)), out(lit) {}
+        ConstantResolutionItem(shared_ptr<Nesting> scope, ast::ConstantLit *lit,
                                core::ClassOrModuleRef packageRegistryCursor, bool isOutermost, bool legacyTestPath,
                                PackageCursorPosition packageCursorPosition)
-            : scope(scope), out(lit), packageRegistryCursor(packageRegistryCursor), isOutermost(isOutermost),
+            : scope(move(scope)), out(lit), packageRegistryCursor(packageRegistryCursor), isOutermost(isOutermost),
               legacyTestPath(legacyTestPath), packageCursorPosition(packageCursorPosition) {}
         ConstantResolutionItem(ConstantResolutionItem &&rhs) noexcept = default;
         ConstantResolutionItem &operator=(ConstantResolutionItem &&rhs) noexcept = default;

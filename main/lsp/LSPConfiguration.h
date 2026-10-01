@@ -109,12 +109,12 @@ public:
 
     // The following properties are configured during initialization.
 
-    LSPConfiguration(const options::Options &opts, const std::shared_ptr<LSPOutput> &output,
-                     const std::shared_ptr<spdlog::logger> &logger, bool disableFastPath = false);
+    LSPConfiguration(const options::Options &opts, std::shared_ptr<LSPOutput> output,
+                     std::shared_ptr<spdlog::logger> logger, bool disableFastPath = false);
 
     // Note: These two methods should only be called from the LSPPreprocessor thread, which is the only place that
     // should have mutable access to LSPConfiguration.
-    void setClientConfig(const std::shared_ptr<const LSPClientConfiguration> &clientConfig);
+    void setClientConfig(std::shared_ptr<const LSPClientConfiguration> clientConfig);
     void markInitialized();
 
     /**

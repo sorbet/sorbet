@@ -113,13 +113,13 @@ public:
 
 }; // namespace
 
-LSPTypecheckerCoordinator::LSPTypecheckerCoordinator(const shared_ptr<const LSPConfiguration> &config,
+LSPTypecheckerCoordinator::LSPTypecheckerCoordinator(shared_ptr<const LSPConfiguration> config,
                                                      shared_ptr<core::lsp::PreemptionTaskManager> preemptionTaskManager,
                                                      WorkerPool &workers, shared_ptr<TaskQueue> taskQueue)
     : preemptionTaskManager(preemptionTaskManager), shouldTerminate(false),
-      typechecker(config, move(preemptionTaskManager)), config(config), hasDedicatedThread(false),
+      typechecker(config, move(preemptionTaskManager)), config(move(config)), hasDedicatedThread(false),
       workers(workers), taskQueue{std::move(taskQueue)},
-      preemptionWorkers(WorkerPool::create(config->opts.threads, *config->logger)) {}
+      preemptionWorkers(WorkerPool::create(this->config->opts.threads, *this->config->logger)) {}
 
 void LSPTypecheckerCoordinator::asyncRunInternal(shared_ptr<LSPTypecheckerCoordinator::Task> task) {
     if (hasDedicatedThread) {
