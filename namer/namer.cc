@@ -178,7 +178,8 @@ class SymbolFinder {
         return getOwnerSkippingMethods().first;
     }
 
-    core::FoundDefinitionRef defineScope(core::FoundDefinitionRef owner, const ast::ExpressionPtr &node, bool withinExplicitRootScope) {
+    core::FoundDefinitionRef defineScope(core::FoundDefinitionRef owner, const ast::ExpressionPtr &node,
+                                         bool withinExplicitRootScope) {
         withinExplicitRootScope = withinExplicitRootScope || isExplicitlyRootScoped(node);
         if (auto id = ast::cast_tree<ast::ConstantLit>(node)) {
             // Already defined. Insert a foundname so we can reference it.
@@ -2104,8 +2105,8 @@ class TreeSymbolizer {
     const MangledClasses &mangledClasses;
     size_t explicitRootScopeDepth = 0;
 
-    core::SymbolRef squashNamesInner(core::Context ctx, core::SymbolRef owner, ast::ExpressionPtr &node,
-                                     bool firstName, bool withinExplicitRootScope) {
+    core::SymbolRef squashNamesInner(core::Context ctx, core::SymbolRef owner, ast::ExpressionPtr &node, bool firstName,
+                                     bool withinExplicitRootScope) {
         auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node);
         if (constLit == nullptr) {
             if (auto id = ast::cast_tree<ast::ConstantLit>(node)) {
@@ -2135,7 +2136,8 @@ class TreeSymbolizer {
         auto newOwner = squashNamesInner(ctx, owner, constLit->scope, firstNameRecursive, withinExplicitRootScope);
         ENFORCE(newOwner.exists());
 
-        auto mangled = mangledClasses.find({ctx.file, newOwner.asClassOrModuleRef(), constLit->cnst, withinExplicitRootScope});
+        auto mangled =
+            mangledClasses.find({ctx.file, newOwner.asClassOrModuleRef(), constLit->cnst, withinExplicitRootScope});
         core::SymbolRef existing = mangled != mangledClasses.end()
                                        ? mangled->second
                                        : ctx.state.lookupClassSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
