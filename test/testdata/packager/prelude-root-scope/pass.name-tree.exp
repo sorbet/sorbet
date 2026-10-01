@@ -1,0 +1,33 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::Consumer<<C Consumer>> < (::Sorbet::Private::Static::PackageSpec)
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::Prelude<<C Prelude>> < (::Sorbet::Private::Static::PackageSpec)
+    <self>.prelude!()
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  <emptyTree>::<C Foo>::<C FromUnqualified>
+
+  <emptyTree>::<C Foo>::<C FromExplicitRoot>
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::Foo<<C Foo>> < (::<todo sym>)
+    class ::Foo::FromUnqualified<<C FromUnqualified>> < (::<todo sym>)
+    end
+  end
+
+  class ::Foo<<C Foo>> < (::<todo sym>)
+    class ::Foo::FromExplicitRoot<<C FromExplicitRoot>> < (::<todo sym>)
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::Foo<<C Foo>> < (::<todo sym>)
+    class ::Foo::FromExplicitRootTest<<C FromExplicitRootTest>> < (::<todo sym>)
+    end
+  end
+
+  <emptyTree>::<C Foo>::<C FromExplicitRootTest>
+end
