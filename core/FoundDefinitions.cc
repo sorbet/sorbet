@@ -124,8 +124,8 @@ string FoundClass::toString(const core::GlobalState &gs, const FoundDefinitions 
             classKindStr = "class"sv;
             break;
     }
-    return fmt::format("{{ id = {}, owner = {}, name = {}, classKind = {}, withinExplicitRootScope = {} }}", id, owner.idx(), name.show(gs),
-                       classKindStr, withinExplicitRootScope);
+    return fmt::format("{{ id = {}, owner = {}, name = {}, classKind = {}, withinExplicitRootScope = {} }}", id,
+                       owner.idx(), name.show(gs), classKindStr, withinExplicitRootScope);
 }
 
 string FoundPackage::toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const {
