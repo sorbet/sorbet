@@ -296,8 +296,8 @@ private:
     vector<ClassMethodsResolutionItem> todoClassMethods_;
     vector<RequireAncestorResolutionItem> todoRequiredAncestors_;
 
-    static core::SymbolRef resolveLhs(core::Context ctx, const shared_ptr<Nesting> &nesting, core::NameRef name) {
-        Nesting *scope = nesting.get();
+    static core::SymbolRef resolveLhs(core::Context ctx, const Nesting *nesting, core::NameRef name) {
+        auto *scope = nesting;
         while (scope != nullptr) {
             if (scope->scope.isClassOrModule()) {
                 // We don't want to rely on existing information in the symbol table for the
@@ -489,7 +489,7 @@ private:
     static core::SymbolRef resolveConstant(core::Context ctx, ConstantResolutionItem &job) {
         auto &c = *job.out->original();
         if (ast::isa_tree<ast::EmptyTree>(c.scope)) {
-            auto result = resolveLhs(ctx, job.scope, c.cnst);
+            auto result = resolveLhs(ctx, job.scope.get(), c.cnst);
             auto isPotentialLegacyTestRoot =
                 shouldCheckPackage(ctx) && c.cnst == core::packages::PackageDB::TEST_NAMESPACE;
             if (!result.exists()) {
@@ -1525,12 +1525,12 @@ private:
         return {cursor, false, position};
     }
 
-    static PackageCursorState cursorForBareConstant(core::Context ctx, const shared_ptr<Nesting> &nesting,
+    static PackageCursorState cursorForBareConstant(core::Context ctx, const Nesting *nesting,
                                                     core::NameRef name) {
         if (!shouldCheckPackage(ctx)) {
             return {};
         }
-        for (auto scope = nesting.get(); scope != nullptr; scope = scope->parent.get()) {
+        for (auto scope = nesting; scope != nullptr; scope = scope->parent.get()) {
             if (!scope->scope.isClassOrModule()) {
                 continue;
             }
@@ -1565,7 +1565,7 @@ private:
                 cursor.cursor = core::Symbols::PackageSpecRegistry();
                 cursor.position = PackageCursorPosition::NamespacePrefix;
             } else if (scopeWasEmpty) {
-                cursor = cursorForBareConstant(ctx, nesting_, constant->original()->cnst);
+                cursor = cursorForBareConstant(ctx, nesting_.get(), constant->original()->cnst);
             } else {
                 cursor = advancePackageCursor(ctx, scopeCursor, constant->original()->cnst);
             }
@@ -1781,7 +1781,7 @@ public:
             transformAncestor(ctx.withOwner(klass), singleton, ancst, isInclude);
         }
 
-        checkAmbiguousDefinition(ctx, nesting_->scope, nesting_->parent, original.declLoc);
+        checkAmbiguousDefinition(ctx, nesting_->scope, nesting_->parent.get(), original.declLoc);
 
         // Check the name we're introducing for a scope, as that counts for requiring a package namespace
         // opening check in the parent scope.
@@ -1803,7 +1803,7 @@ public:
         nesting_ = nesting_->parent;
     }
 
-    void checkAmbiguousDefinition(core::Context ctx, core::SymbolRef curSym, const shared_ptr<Nesting> &curNesting,
+    void checkAmbiguousDefinition(core::Context ctx, core::SymbolRef curSym, const Nesting *curNesting,
                                   core::LocOffsets loc) {
         if (!ctx.state.shouldReportErrorOn(ctx.file, core::errors::Resolver::AmbiguousDefinitionError)) {
             // no need to check if suppressed
@@ -1851,7 +1851,7 @@ public:
     }
 
     const core::SymbolRef findAnyDefinitionAmbiguousWithCurrent(core::Context ctx, core::SymbolRef curSym,
-                                                                const shared_ptr<Nesting> &curNesting) {
+                                                                const Nesting *curNesting) {
         const core::SymbolRef defaultSymbol;
         if (curNesting == nullptr || curNesting->scope == core::Symbols::root()) {
             // can't be ambiguous if nested directly under root scope
@@ -1886,7 +1886,7 @@ public:
         core::NameRef filler = precedingSymForCurDef.name(ctx);
 
         // Look for filler name in all nestings above current nesting.
-        auto searchNesting = curNesting->parent;
+        auto *searchNesting = curNesting->parent.get();
         while (searchNesting != nullptr) {
             if (searchNesting->scope.isClassOrModule()) {
                 auto scopeSym = searchNesting->scope.asClassOrModuleRef().data(ctx);
@@ -1916,7 +1916,7 @@ public:
                 }
             }
 
-            searchNesting = searchNesting->parent;
+            searchNesting = searchNesting->parent.get();
         }
 
         return defaultSymbol;
@@ -1991,7 +1991,7 @@ public:
             }
         }
 
-        checkAmbiguousDefinition(ctx, id->symbol(), nesting_, asgn.loc);
+        checkAmbiguousDefinition(ctx, id->symbol(), nesting_.get(), asgn.loc);
 
         auto rhs = ast::cast_tree<ast::ConstantLit>(asgn.rhs);
         if (rhs == nullptr) {
