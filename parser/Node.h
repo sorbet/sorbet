@@ -53,14 +53,11 @@ public:
 
 protected:
     void printTabs(fmt::memory_buffer &to, int count) const;
-    void printNode(fmt::memory_buffer &to, Node *node, const core::GlobalState &gs,
-                   int tabs) const;
-    void printNodeJSON(fmt::memory_buffer &to, Node *node, const core::GlobalState &gs,
-                       int tabs) const;
-    void printNodeJSONWithLocs(fmt::memory_buffer &to, Node *node, const core::GlobalState &gs,
-                               core::FileRef file, int tabs) const;
-    void printNodeWhitequark(fmt::memory_buffer &to, Node *node, const core::GlobalState &gs,
-                             int tabs) const;
+    void printNode(fmt::memory_buffer &to, Node *node, const core::GlobalState &gs, int tabs) const;
+    void printNodeJSON(fmt::memory_buffer &to, Node *node, const core::GlobalState &gs, int tabs) const;
+    void printNodeJSONWithLocs(fmt::memory_buffer &to, Node *node, const core::GlobalState &gs, core::FileRef file,
+                               int tabs) const;
+    void printNodeWhitequark(fmt::memory_buffer &to, Node *node, const core::GlobalState &gs, int tabs) const;
 };
 
 template <class To> To *cast_node(Node *what) {

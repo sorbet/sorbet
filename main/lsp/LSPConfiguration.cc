@@ -19,8 +19,7 @@ constexpr string_view httpsScheme = "https"sv;
 
 namespace {
 
-string getRootPath(LSPOutput &output, const options::Options &opts,
-                   spdlog::logger &logger) {
+string getRootPath(LSPOutput &output, const options::Options &opts, spdlog::logger &logger) {
     if (opts.rawInputDirNames.empty() ||
         (opts.rawInputDirNames.size() > 1 && !opts.forciblySilenceLspMultipleDirError)) {
         string msg = opts.forciblySilenceLspMultipleDirError
@@ -48,8 +47,8 @@ MarkupKind getPreferredMarkupKind(vector<MarkupKind> formats) {
 
 LSPConfiguration::LSPConfiguration(const options::Options &opts, shared_ptr<LSPOutput> output,
                                    shared_ptr<spdlog::logger> logger, bool disableFastPath)
-    : initialized(atomic<bool>(false)), opts(opts), output(move(output)), logger(move(logger)), disableFastPath(disableFastPath),
-      rootPath(getRootPath(*this->output, opts, *this->logger)) {}
+    : initialized(atomic<bool>(false)), opts(opts), output(move(output)), logger(move(logger)),
+      disableFastPath(disableFastPath), rootPath(getRootPath(*this->output, opts, *this->logger)) {}
 
 void LSPConfiguration::assertHasClientConfig() const {
     if (!clientConfig) {

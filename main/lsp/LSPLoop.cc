@@ -22,14 +22,13 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-LSPLoop::LSPLoop(unique_ptr<core::GlobalState> initialGS, WorkerPool &workers,
-                 shared_ptr<LSPConfiguration> config, unique_ptr<KeyValueStore> kvstore)
+LSPLoop::LSPLoop(unique_ptr<core::GlobalState> initialGS, WorkerPool &workers, shared_ptr<LSPConfiguration> config,
+                 unique_ptr<KeyValueStore> kvstore)
     : config(config), taskQueue(make_shared<TaskQueue>()), epochManager(initialGS->epochManager),
       preprocessor(move(config), taskQueue),
       typecheckerCoord(this->config, make_shared<core::lsp::PreemptionTaskManager>(initialGS->epochManager), workers,
                        taskQueue),
-      indexer(this->config, move(initialGS), move(kvstore)),
-      emptyWorkers(WorkerPool::create(0, *this->config->logger)),
+      indexer(this->config, move(initialGS), move(kvstore)), emptyWorkers(WorkerPool::create(0, *this->config->logger)),
       lastMetricUpdateTime(chrono::steady_clock::now()) {}
 
 constexpr chrono::minutes STATSD_INTERVAL = chrono::minutes(5);

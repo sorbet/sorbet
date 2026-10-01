@@ -451,8 +451,7 @@ public:
     vector<pair<core::LocOffsets, const ast::ExpressionPtr *>> LCAScopeStack;
     vector<core::LocOffsets> matches;
     ExpressionPtrSearchWalk(ast::ExpressionPtr *matchingNode, vector<core::LocOffsets> skippedLocsRange,
-                            vector<core::LocOffsets> skippedLocsExact,
-                            const core::Loc selectionLoc)
+                            vector<core::LocOffsets> skippedLocsExact, const core::Loc selectionLoc)
         : targetNode(matchingNode), skippedLocsRange(skippedLocsRange), skippedLocsExact(skippedLocsExact),
           selectionLoc(selectionLoc) {}
 

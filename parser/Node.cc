@@ -28,8 +28,7 @@ void Node::printTabs(fmt::memory_buffer &to, int count) const {
     }
 }
 
-void Node::printNode(fmt::memory_buffer &to, Node *node, const core::GlobalState &gs,
-                     int tabs) const {
+void Node::printNode(fmt::memory_buffer &to, Node *node, const core::GlobalState &gs, int tabs) const {
     if (node) {
         fmt::format_to(std::back_inserter(to), "{}\n", node->toStringWithTabs(gs, tabs));
     } else {
@@ -37,8 +36,7 @@ void Node::printNode(fmt::memory_buffer &to, Node *node, const core::GlobalState
     }
 }
 
-void Node::printNodeJSON(fmt::memory_buffer &to, Node *node, const core::GlobalState &gs,
-                         int tabs) const {
+void Node::printNodeJSON(fmt::memory_buffer &to, Node *node, const core::GlobalState &gs, int tabs) const {
     if (node) {
         fmt::format_to(std::back_inserter(to), "{}", node->toJSON(gs, tabs));
     } else {
@@ -46,8 +44,8 @@ void Node::printNodeJSON(fmt::memory_buffer &to, Node *node, const core::GlobalS
     }
 }
 
-void Node::printNodeJSONWithLocs(fmt::memory_buffer &to, Node *node, const core::GlobalState &gs,
-                                 core::FileRef file, int tabs) const {
+void Node::printNodeJSONWithLocs(fmt::memory_buffer &to, Node *node, const core::GlobalState &gs, core::FileRef file,
+                                 int tabs) const {
     if (node) {
         fmt::format_to(std::back_inserter(to), "{}", node->toJSONWithLocs(gs, file, tabs));
     } else {
@@ -55,8 +53,7 @@ void Node::printNodeJSONWithLocs(fmt::memory_buffer &to, Node *node, const core:
     }
 }
 
-void Node::printNodeWhitequark(fmt::memory_buffer &to, Node *node, const core::GlobalState &gs,
-                               int tabs) const {
+void Node::printNodeWhitequark(fmt::memory_buffer &to, Node *node, const core::GlobalState &gs, int tabs) const {
     if (node) {
         fmt::format_to(std::back_inserter(to), "{}", node->toWhitequark(gs, tabs));
     } else {

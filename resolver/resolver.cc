@@ -1525,8 +1525,7 @@ private:
         return {cursor, false, position};
     }
 
-    static PackageCursorState cursorForBareConstant(core::Context ctx, const Nesting *nesting,
-                                                    core::NameRef name) {
+    static PackageCursorState cursorForBareConstant(core::Context ctx, const Nesting *nesting, core::NameRef name) {
         if (!shouldCheckPackage(ctx)) {
             return {};
         }
