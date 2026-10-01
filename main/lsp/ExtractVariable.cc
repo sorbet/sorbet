@@ -375,7 +375,6 @@ class ExpressionPtrSearchWalk {
     vector<const ast::ExpressionPtr *> enclosingScopeStack;
     vector<core::LocOffsets> skippedLocsRange;
     vector<core::LocOffsets> skippedLocsExact;
-    const shared_ptr<spdlog::logger> logger;
     const core::Loc selectionLoc;
 
     // NOTE: Might want to profile and switch to UnorderedSet.
@@ -452,10 +451,10 @@ public:
     vector<pair<core::LocOffsets, const ast::ExpressionPtr *>> LCAScopeStack;
     vector<core::LocOffsets> matches;
     ExpressionPtrSearchWalk(ast::ExpressionPtr *matchingNode, vector<core::LocOffsets> skippedLocsRange,
-                            vector<core::LocOffsets> skippedLocsExact, const shared_ptr<spdlog::logger> logger,
+                            vector<core::LocOffsets> skippedLocsExact,
                             const core::Loc selectionLoc)
         : targetNode(matchingNode), skippedLocsRange(skippedLocsRange), skippedLocsExact(skippedLocsExact),
-          logger(logger), selectionLoc(selectionLoc) {}
+          selectionLoc(selectionLoc) {}
 
     void preTransformExpressionPtr(core::Context ctx, const ast::ExpressionPtr &tree) {
         if (!tree.loc().exists()) {
@@ -545,7 +544,7 @@ MultipleOccurrenceResult VariableExtractor::getExtractMultipleOccurrenceEdits(co
     const auto file = selectionLoc.file();
     const auto &gs = typechecker.state();
 
-    ExpressionPtrSearchWalk walk(&matchingNode, skippedLocsRange, skippedLocsExact, config.logger, selectionLoc);
+    ExpressionPtrSearchWalk walk(&matchingNode, skippedLocsRange, skippedLocsExact, selectionLoc);
     core::Context ctx(gs, core::Symbols::root(), file);
     ast::TreeWalk::apply(ctx, walk, enclosingClassOrMethod);
 
