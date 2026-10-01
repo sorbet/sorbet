@@ -63,18 +63,6 @@ Timer::Timer(spdlog::logger &log, ConstExprStr name, initializer_list<pair<Const
 Timer::Timer(spdlog::logger &log, ConstExprStr name, initializer_list<int> histogramBuckets)
     : Timer(log, name, FlowId{0}, {}, histogramBuckets) {}
 
-Timer::Timer(const shared_ptr<spdlog::logger> &log, ConstExprStr name, FlowId prev,
-             initializer_list<pair<ConstExprStr, string>> args)
-    : Timer(*log, name, prev, args, {}){};
-
-Timer::Timer(const shared_ptr<spdlog::logger> &log, ConstExprStr name,
-             initializer_list<pair<ConstExprStr, string>> args)
-    : Timer(*log, name, args){};
-
-Timer::Timer(const shared_ptr<spdlog::logger> &log, ConstExprStr name)
-    : Timer(*log, name, initializer_list<pair<ConstExprStr, string>>{}){};
-Timer::Timer(const shared_ptr<spdlog::logger> &log, ConstExprStr name, FlowId prev) : Timer(*log, name, prev, {}, {}){};
-
 Timer::Timer(spdlog::logger &log, ConstExprStr name)
     : Timer(log, name, initializer_list<pair<ConstExprStr, string>>{}){};
 Timer::Timer(spdlog::logger &log, ConstExprStr name, FlowId prev) : Timer(log, name, prev, {}, {}){};

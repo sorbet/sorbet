@@ -261,7 +261,7 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
     // This path only works for fast path updates.
     ENFORCE(updates.typecheckingPath == TypecheckingPath::Fast);
 
-    Timer timeit(config->logger, "fast_path");
+    Timer timeit(*config->logger, "fast_path");
 
     auto shouldRunIncrementalNamer = updates.fastPathUseIncrementalNamer;
     if (shouldRunIncrementalNamer) {
@@ -620,7 +620,7 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
 
     auto &logger = config->logger;
     auto slowPathOp = make_optional<ShowOperation>(*config, ShowOperation::Kind::SlowPathBlocking);
-    Timer timeit(logger, "slow_path");
+    Timer timeit(*logger, "slow_path");
     ENFORCE(updates.typecheckingPath != TypecheckingPath::Fast || config->disableFastPath);
     logger->debug("Taking slow path");
 
@@ -665,7 +665,7 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
         switch (mode) {
             // Initialization fetches the list of files to index from the options
             case SlowPathMode::Init: {
-                Timer timeit(this->config->logger, "initial_init");
+                Timer timeit(*this->config->logger, "initial_init");
 
                 ENFORCE(!this->initialized);
                 this->workspaceFiles = pipeline::reserveFiles(*this->gs, config->opts.inputFileNames);
@@ -674,7 +674,7 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
 
             // Reindexing on the slow path derives the list of inputs files from the file table
             case SlowPathMode::Cancelable: {
-                Timer timeit(this->config->logger, "slow_path_init");
+                Timer timeit(*this->config->logger, "slow_path_init");
 
                 if (!updates.updatedFiles.empty()) {
                     applyFileTableUpdates(*this->gs, this->workspaceFiles, *this->config, openFiles, updates);
@@ -717,7 +717,7 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
         // ----- build the package DB -----
 
         if (this->config->opts.cacheSensitiveOptions.sorbetPackages) {
-            Timer timeit(this->config->logger, "buildPackageDB");
+            Timer timeit(*this->config->logger, "buildPackageDB");
 
             auto ownedKvstore = kvstore.openKVStore();
 
@@ -801,11 +801,11 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
                 optional<Timer> timeit;
                 switch (mode) {
                     case SlowPathMode::Init:
-                        timeit.emplace(this->config->logger, "initial_index");
+                        timeit.emplace(*this->config->logger, "initial_index");
                         break;
 
                     case SlowPathMode::Cancelable:
-                        timeit.emplace(this->config->logger, "slow_path_reindex");
+                        timeit.emplace(*this->config->logger, "slow_path_reindex");
                         break;
                 }
 
@@ -1039,7 +1039,7 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const vector<cor
     auto queryCollector = make_shared<QueryCollector>();
     gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, queryCollector);
 
-    Timer timeit(config->logger, "query");
+    Timer timeit(*config->logger, "query");
     prodCategoryCounterInc("lsp.updates", "query");
     ENFORCE(gs->errorQueue->isEmpty());
     ENFORCE(gs->lspQuery.isEmpty());

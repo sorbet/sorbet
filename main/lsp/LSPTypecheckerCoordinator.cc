@@ -51,7 +51,7 @@ public:
         // Destruct timer, if specified. Causes metric to be reported.
         timeUntilRun = nullptr;
         {
-            Timer timeit(config.logger, "LSPTask::run");
+            Timer timeit(*config.logger, "LSPTask::run");
             timeit.setTag("method", task->methodString());
             task->run(*delegate);
         }
@@ -81,7 +81,7 @@ public:
         : config(config), task(move(task)), typechecker(typechecker), workers(workers){};
 
     void run() override {
-        Timer timeit(config.logger, "LSPDangerousTypecheckerTask::runSpecial");
+        Timer timeit(*config.logger, "LSPDangerousTypecheckerTask::runSpecial");
         timeit.setTag("method", task->methodString());
         task->runSpecial(typechecker, workers);
     }
@@ -171,7 +171,7 @@ public:
         // Destruct timer, if specified. Causes metric to be reported.
         this->timeUntilRun = nullptr;
 
-        Timer timeit(config.logger, "preemption_loop");
+        Timer timeit(*config.logger, "preemption_loop");
         for (;;) {
             unique_ptr<LSPTask> task;
             {
@@ -192,7 +192,7 @@ public:
                 taskQueue.tasks().pop_front();
 
                 {
-                    Timer timeit(config.logger, "LSPTask::index");
+                    Timer timeit(*config.logger, "LSPTask::index");
                     timeit.setTag("method", task->methodString());
                     // Index while holding lock to prevent races with processing thread.
                     task->index(indexer);
@@ -205,7 +205,7 @@ public:
             if (task->finalPhase() == LSPTask::Phase::INDEX) {
                 continue;
             }
-            Timer timeit(config.logger, "LSPTask::run");
+            Timer timeit(*config.logger, "LSPTask::run");
             timeit.setTag("method", task->methodString());
             task->run(this->delegate);
         }

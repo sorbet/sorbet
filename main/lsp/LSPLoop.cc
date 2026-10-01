@@ -44,7 +44,7 @@ bool LSPLoop::shouldSendCountersToStatsd(chrono::time_point<chrono::steady_clock
 }
 
 void LSPLoop::sendCountersToStatsd(chrono::time_point<chrono::steady_clock> currentTime) {
-    Timer timeit(config->logger, "LSPLoop::sendCountersToStatsd");
+    Timer timeit(*config->logger, "LSPLoop::sendCountersToStatsd");
     ENFORCE(this_thread::get_id() == mainThreadId, "sendCounterToStatsd can only be called from the main LSP thread.");
     const auto &opts = config->opts;
     // Record process and version stats. Do this BEFORE clearing the thread counters!
@@ -123,7 +123,7 @@ void LSPLoop::processRequests(vector<unique_ptr<LSPMessage>> messages) {
 void LSPLoop::runTask(unique_ptr<LSPTask> task) {
     prodCategoryCounterInc("lsp.messages.processed", task->methodString());
     {
-        Timer timeit(config->logger, "LSPTask::index");
+        Timer timeit(*config->logger, "LSPTask::index");
         timeit.setTag("method", task->methodString());
         task->index(this->indexer);
     }
@@ -206,7 +206,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
             // Thread that executes this lambda is called reader thread.
             // This thread _intentionally_ does not capture `this`.
             MessageQueueState::NotifyOnDestruction notify(messageQueue, messageQueueMutex);
-            auto timeit = make_unique<Timer>(logger, "getNewRequest");
+            auto timeit = make_unique<Timer>(*logger, "getNewRequest");
             while (true) {
                 auto readResult = input->read();
                 if (readResult.result == FileOps::ReadResult::ErrorOrEof) {
@@ -221,7 +221,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                         messageQueue.counters = mergeCounters(move(messageQueue.counters));
                         messageQueue.pendingRequests.push_back(move(msg));
                         // Reset span now that we've found a request.
-                        timeit = make_unique<Timer>(logger, "getNewRequest");
+                        timeit = make_unique<Timer>(*logger, "getNewRequest");
                     }
                     // Check if it's time to exit.
                     if (messageQueue.terminate) {
@@ -245,7 +245,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
         while (true) {
             unique_ptr<LSPTask> task;
             {
-                Timer timeit(logger, "idle");
+                Timer timeit(*logger, "idle");
                 absl::MutexLock lck(taskQueue->getMutex(), absl::Condition(taskQueue.get(), &TaskQueue::ready));
                 ENFORCE(!taskQueue->isPaused());
                 if (taskQueue->isTerminated()) {
