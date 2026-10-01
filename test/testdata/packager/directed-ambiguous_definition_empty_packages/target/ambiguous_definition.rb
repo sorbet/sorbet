@@ -14,8 +14,8 @@ module Target
   module DeclaredEmpty::B
   end
 
-  # The unimported package is in a later stratum, so its namespace has not been
-  # entered and package-directed mode does not report the ambiguity.
-  module UnimportedEmpty::B
+  # Sorbet cannot inspect the contents of this package because it is not
+  # imported and is in a later stratum.
+  module UnimportedEmpty::B # error: Definition of `B` is possibly ambiguous
   end
 end

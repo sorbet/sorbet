@@ -9,8 +9,9 @@
 #
 # In package-directed mode `A` is in a later stratum than this file, so `::A`
 # has not been entered yet when `findAnyDefinitionAmbiguousWithCurrent` runs,
-# and nothing is reported.
+# but the resolver consults the package registry to discover that it might
+# exist at runtime.
 module Nested
-  module A::B
+  module A::B # error: Definition of `B` is possibly ambiguous
   end
 end

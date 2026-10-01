@@ -1833,12 +1833,20 @@ public:
 
         if (auto e = ctx.beginError(loc, core::errors::Resolver::AmbiguousDefinitionError)) {
             auto name = curSym.name(ctx).show(ctx);
-            e.setHeader("Definition of `{}` is ambiguous", name);
+            auto isPossiblyAmbiguous =
+                ambigDef.isClassOrModule() && ambigDef.asClassOrModuleRef().isPackageSpecSymbol(ctx.state);
+            e.setHeader("Definition of `{}` is {}ambiguous", name, isPossiblyAmbiguous ? "possibly " : "");
             auto owner = curSym.owner(ctx);
             auto option1 = fmt::format("{}::{}", owner.show(ctx), name);
-            e.addErrorLine(owner.loc(ctx), "Could mean `{}` if nested under here", option1);
             auto option2 = fmt::format("{}::{}", ambigDef.show(ctx), name);
-            e.addErrorLine(ambigDef.loc(ctx), "Or could mean `{}` if nested under here", option2);
+            if (isPossiblyAmbiguous) {
+                e.addErrorLine(owner.loc(ctx), "Could define `{}`", option1);
+                e.addErrorLine(ambigDef.loc(ctx), "Or could define `{}`, which belongs to another package", option2);
+                e.addErrorNote("The relevant package is not imported, so its contents are unknown");
+            } else {
+                e.addErrorLine(owner.loc(ctx), "Could mean `{}` if nested under here", option1);
+                e.addErrorLine(ambigDef.loc(ctx), "Or could mean `{}` if nested under here", option2);
+            }
         }
     }
 
@@ -1886,6 +1894,25 @@ public:
                 if (ambigDef.exists()) {
                     // Filler name found! Definition is ambiguous.
                     return ambigDef;
+                }
+
+                // Namespaces defined by packages in later strata have not been entered into the
+                // symbol table yet, so we have to consult the package registry to check for
+                // possible ambiguous definitions with those packages.
+                auto registryScope = scopeSym->packageRegistryOwner;
+                if (shouldCheckPackage(ctx) && registryScope.exists()) {
+                    auto registryMember = registryScope.data(ctx)->findMemberNoDealias(filler);
+                    if (registryMember.exists() && registryMember.isClassOrModule()) {
+                        auto registryNamespace = registryMember.asClassOrModuleRef();
+                        auto packageName = core::packages::MangledName(registryNamespace);
+                        auto isPackage = cursorIsPackage(ctx, registryNamespace);
+                        auto isAvailablePackage = isPackage && canReferencePackage(ctx, packageName);
+                        auto isAvailablePackagePrefix = isStrictPrefixOfAvailablePackage(ctx, packageName);
+                        if (!isAvailablePackage && !isAvailablePackagePrefix) {
+                            // This namespace might exist at runtime, making the scoped definition ambiguous.
+                            return registryMember;
+                        }
+                    }
                 }
             }
 
