@@ -916,13 +916,13 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 break;
             case FieldType::Node:
                 out << "    fmt::format_to(std::back_inserter(buf), \"" << arg.name << " = \");\n";
-                out << "    printNode(buf, " << arg.name << ", gs, tabs + 1);\n";
+                out << "    printNode(buf, " << arg.name << ".get(), gs, tabs + 1);\n";
                 break;
             case FieldType::NodeVec:
                 out << "    fmt::format_to(std::back_inserter(buf), \"" << arg.name << " = [\\n\");\n";
                 out << "    for (auto &&a: " << arg.name << ") {\n";
                 out << "      printTabs(buf, tabs + 2);\n";
-                out << "      printNode(buf, a, gs, tabs + 2);\n";
+                out << "      printNode(buf, a.get(), gs, tabs + 2);\n";
                 out << "    }" << '\n';
                 out << "    printTabs(buf, tabs + 1);\n";
                 out << "    fmt::format_to(std::back_inserter(buf), \"]\\n\");\n";
@@ -994,7 +994,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 break;
             case FieldType::Node:
                 out << "    fmt::format_to(std::back_inserter(buf),  \"\\\"" << arg.name << "\\\" : \");\n";
-                out << "    printNodeJSON(buf, " << arg.name << ", gs, tabs + 1);\n";
+                out << "    printNodeJSON(buf, " << arg.name << ".get(), gs, tabs + 1);\n";
                 out << "    fmt::format_to(std::back_inserter(buf),  \"" << maybeComma << "\\n\");\n";
                 break;
             case FieldType::NodeVec:
@@ -1003,7 +1003,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 out << "    for (auto &&a: " << arg.name << ") { \n";
                 out << "      i++;\n";
                 out << "      printTabs(buf, tabs + 2);\n";
-                out << "      printNodeJSON(buf, a, gs, tabs + 2);\n";
+                out << "      printNodeJSON(buf, a.get(), gs, tabs + 2);\n";
                 out << "      if (i + 1 < " << arg.name << ".size()) {\n";
                 out << "        fmt::format_to(std::back_inserter(buf),  \",\");" << '\n';
                 out << "      }" << '\n';
@@ -1078,7 +1078,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 break;
             case FieldType::Node:
                 out << "    fmt::format_to(std::back_inserter(buf),  \"\\\"" << arg.name << "\\\" : \");\n";
-                out << "    printNodeJSONWithLocs(buf, " << arg.name << ", gs, file, tabs + 1);\n";
+                out << "    printNodeJSONWithLocs(buf, " << arg.name << ".get(), gs, file, tabs + 1);\n";
                 out << "    fmt::format_to(std::back_inserter(buf),  \"" << maybeComma << "\\n\");\n";
                 break;
             case FieldType::NodeVec:
@@ -1087,7 +1087,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 out << "    for (auto &&a: " << arg.name << ") { \n";
                 out << "      i++;\n";
                 out << "      printTabs(buf, tabs + 2);\n";
-                out << "      printNodeJSONWithLocs(buf, a, gs, file, tabs + 2);\n";
+                out << "      printNodeJSONWithLocs(buf, a.get(), gs, file, tabs + 2);\n";
                 out << "      if (i + 1 < " << arg.name << ".size()) {\n";
                 out << "        fmt::format_to(std::back_inserter(buf),  \",\");" << '\n';
                 out << "      }" << '\n';
@@ -1151,7 +1151,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 out << "    if (" << arg.name << ") {\n";
                 out << "     fmt::format_to(std::back_inserter(buf), \"\\n\");\n";
                 out << "     printTabs(buf, tabs + 1);" << '\n';
-                out << "     printNodeWhitequark(buf, " << arg.name << ", gs, tabs + 1);\n";
+                out << "     printNodeWhitequark(buf, " << arg.name << ".get(), gs, tabs + 1);\n";
                 out << "    } else {\n";
                 out << "      fmt::format_to(std::back_inserter(buf), \" nil\");\n";
                 out << "    }\n";
@@ -1162,7 +1162,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 out << "      if (a) {\n";
                 out << "        fmt::format_to(std::back_inserter(buf), \"\\n\");\n";
                 out << "        printTabs(buf, tabs + 1);" << '\n';
-                out << "        printNodeWhitequark(buf, a, gs, tabs + 1);\n";
+                out << "        printNodeWhitequark(buf, a.get(), gs, tabs + 1);\n";
                 out << "      } else {\n";
                 out << "        fmt::format_to(std::back_inserter(buf), \" nil\");\n";
                 out << "      }\n";

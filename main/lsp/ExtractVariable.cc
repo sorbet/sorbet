@@ -7,10 +7,10 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-void logDebugInfo(const shared_ptr<spdlog::logger> logger, const core::GlobalState &gs, const core::Loc selectionLoc,
+void logDebugInfo(spdlog::logger &logger, const core::GlobalState &gs, const core::Loc selectionLoc,
                   const string message) {
-    logger->error("msg=\"ExtractToVariable: {}\" selectionLoc=\"{}\"", message, selectionLoc.showRaw(gs));
-    logger->error("source=\"{}\"", absl::CEscape(selectionLoc.file().data(gs).source()));
+    logger.error("msg=\"ExtractToVariable: {}\" selectionLoc=\"{}\"", message, selectionLoc.showRaw(gs));
+    logger.error("source=\"{}\"", absl::CEscape(selectionLoc.file().data(gs).source()));
 }
 
 optional<core::LocOffsets> detectCase(const ast::ExpressionPtr *whereToInsert, const core::LocOffsets target) {
@@ -323,7 +323,7 @@ VariableExtractor::getExtractSingleOccurrenceEdits(const LSPTypecheckerDelegate 
     auto enclosingScope = walk.enclosingScope;
     auto whereToInsert = findWhereToInsert(*enclosingScope, locOffsets);
     if (!whereToInsert.exists()) {
-        logDebugInfo(config.logger, gs, selectionLoc,
+        logDebugInfo(*config.logger, gs, selectionLoc,
                      "failed to determine whereToInsert in getExtractSingleOccurrenceEdits");
         return {};
     }
@@ -563,7 +563,7 @@ MultipleOccurrenceResult VariableExtractor::getExtractMultipleOccurrenceEdits(co
 
     auto whereToInsert = findWhereToInsert(*scopeToInsertIn, firstMatch);
     if (!whereToInsert.exists()) {
-        logDebugInfo(config.logger, gs, selectionLoc,
+        logDebugInfo(*config.logger, gs, selectionLoc,
                      "failed to determine whereToInsert in getExtractMultipleOccurrenceEdits");
         return {};
     }

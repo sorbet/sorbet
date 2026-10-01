@@ -85,7 +85,7 @@ public:
 class InvalidTypeError final : public SerializationError {
 public:
     InvalidTypeError(std::string_view fieldName, std::string_view expectedType,
-                     const std::unique_ptr<rapidjson::Value> &found);
+                     const rapidjson::Value &found);
 };
 
 class JSONBaseType {

@@ -74,9 +74,9 @@ InvalidConstantValueError::InvalidConstantValueError(string_view fieldName, stri
                                      expectedValue, actualValue)) {}
 
 InvalidTypeError::InvalidTypeError(string_view fieldName, string_view expectedType,
-                                   const unique_ptr<rapidjson::Value> &found)
+                                   const rapidjson::Value &found)
     : SerializationError(fmt::format("Expected field `{}` to have value of type `{}`, but had value `{}`.", fieldName,
-                                     expectedType, stringify(*found))) {}
+                                     expectedType, stringify(found))) {}
 
 const string JSONBaseType::defaultFieldName = "root";
 

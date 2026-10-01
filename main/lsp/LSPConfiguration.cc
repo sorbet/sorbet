@@ -19,8 +19,8 @@ constexpr string_view httpsScheme = "https"sv;
 
 namespace {
 
-string getRootPath(const shared_ptr<LSPOutput> &output, const options::Options &opts,
-                   const shared_ptr<spdlog::logger> &logger) {
+string getRootPath(LSPOutput &output, const options::Options &opts,
+                   spdlog::logger &logger) {
     if (opts.rawInputDirNames.empty() ||
         (opts.rawInputDirNames.size() > 1 && !opts.forciblySilenceLspMultipleDirError)) {
         string msg = opts.forciblySilenceLspMultipleDirError
@@ -28,9 +28,9 @@ string getRootPath(const shared_ptr<LSPOutput> &output, const options::Options &
                          : "Sorbet's language server requires a single input directory.";
         msg += fmt::format(" However, {} are configured: [{}]", opts.rawInputDirNames.size(),
                            absl::StrJoin(opts.rawInputDirNames, ", "));
-        logger->error(msg);
+        logger.error(msg);
         auto params = make_unique<ShowMessageParams>(MessageType::Error, msg);
-        output->write(make_unique<LSPMessage>(
+        output.write(make_unique<LSPMessage>(
             make_unique<NotificationMessage>("2.0", LSPMethod::WindowShowMessage, move(params))));
         throw EarlyReturnWithCode(1);
     }
@@ -49,7 +49,7 @@ MarkupKind getPreferredMarkupKind(vector<MarkupKind> formats) {
 LSPConfiguration::LSPConfiguration(const options::Options &opts, const shared_ptr<LSPOutput> &output,
                                    const shared_ptr<spdlog::logger> &logger, bool disableFastPath)
     : initialized(atomic<bool>(false)), opts(opts), output(output), logger(logger), disableFastPath(disableFastPath),
-      rootPath(getRootPath(output, opts, logger)) {}
+      rootPath(getRootPath(*output, opts, *logger)) {}
 
 void LSPConfiguration::assertHasClientConfig() const {
     if (!clientConfig) {

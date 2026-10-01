@@ -53,13 +53,13 @@ public:
 
 protected:
     void printTabs(fmt::memory_buffer &to, int count) const;
-    void printNode(fmt::memory_buffer &to, const std::unique_ptr<Node> &node, const core::GlobalState &gs,
+    void printNode(fmt::memory_buffer &to, Node *node, const core::GlobalState &gs,
                    int tabs) const;
-    void printNodeJSON(fmt::memory_buffer &to, const std::unique_ptr<Node> &node, const core::GlobalState &gs,
+    void printNodeJSON(fmt::memory_buffer &to, Node *node, const core::GlobalState &gs,
                        int tabs) const;
-    void printNodeJSONWithLocs(fmt::memory_buffer &to, const std::unique_ptr<Node> &node, const core::GlobalState &gs,
+    void printNodeJSONWithLocs(fmt::memory_buffer &to, Node *node, const core::GlobalState &gs,
                                core::FileRef file, int tabs) const;
-    void printNodeWhitequark(fmt::memory_buffer &to, const std::unique_ptr<Node> &node, const core::GlobalState &gs,
+    void printNodeWhitequark(fmt::memory_buffer &to, Node *node, const core::GlobalState &gs,
                              int tabs) const;
 };
 
