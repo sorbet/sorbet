@@ -1,0 +1,47 @@
+class <C <U <root>>> < <C <U Object>> ()
+  module <C <U <PackageSpecRegistry>>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> ()
+    class <C <U <PackageSpecRegistry>>>::<C <U Child>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U PackageSpec>> () @ Loc {file=test/testdata/packager/test-stratum-include/child/__package.rb start=6:1 end=6:26}
+    class <C <U <PackageSpecRegistry>>>::<S <C <U Child>> $1>[<C <U <AttachedClass>>>] < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<S <C <U PackageSpec>> $1> () @ Loc {file=test/testdata/packager/test-stratum-include/child/__package.rb start=6:1 end=6:26}
+      type-member(+) <C <U <PackageSpecRegistry>>>::<S <C <U Child>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U <PackageSpecRegistry>>>::<S <C <U Child>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Child) @ Loc {file=test/testdata/packager/test-stratum-include/child/__package.rb start=6:1 end=6:26}
+      method <C <U <PackageSpecRegistry>>>::<S <C <U Child>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/test-stratum-include/child/__package.rb start=6:1 end=8:4}
+        argument <blk><block> @ Loc {file=test/testdata/packager/test-stratum-include/child/__package.rb start=??? end=???}
+    class <C <U <PackageSpecRegistry>>>::<C <U Parent>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U PackageSpec>> () @ Loc {file=test/testdata/packager/test-stratum-include/parent/__package.rb start=5:1 end=5:27}
+    class <C <U <PackageSpecRegistry>>>::<S <C <U Parent>> $1>[<C <U <AttachedClass>>>] < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<S <C <U PackageSpec>> $1> () @ Loc {file=test/testdata/packager/test-stratum-include/parent/__package.rb start=5:1 end=5:27}
+      type-member(+) <C <U <PackageSpecRegistry>>>::<S <C <U Parent>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U <PackageSpecRegistry>>>::<S <C <U Parent>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Parent) @ Loc {file=test/testdata/packager/test-stratum-include/parent/__package.rb start=5:1 end=5:27}
+      method <C <U <PackageSpecRegistry>>>::<S <C <U Parent>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/test-stratum-include/parent/__package.rb start=5:1 end=9:4}
+        argument <blk><block> @ Loc {file=test/testdata/packager/test-stratum-include/parent/__package.rb start=??? end=???}
+  class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/test-stratum-include/child/__package.rb start=6:1 end=8:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/test-stratum-include/child/__package.rb start=??? end=???}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/test-stratum-include/child/uses.rb start=6:1 end=6:23}
+      argument <blk><block> @ Loc {file=test/testdata/packager/test-stratum-include/child/uses.rb start=??? end=???}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/test-stratum-include/parent/__package.rb start=5:1 end=9:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/test-stratum-include/parent/__package.rb start=??? end=???}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/test-stratum-include/parent/my_class.rb start=6:1 end=7:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/test-stratum-include/parent/my_class.rb start=??? end=???}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/test-stratum-include/parent/test/my_module.rb start=6:1 end=7:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/test-stratum-include/parent/test/my_module.rb start=??? end=???}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/test-stratum-include/parent/test/reopen.rb start=6:1 end=10:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/test-stratum-include/parent/test/reopen.rb start=??? end=???}
+  module <C <U Child>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/packager/test-stratum-include/child/uses.rb start=6:7 end=6:12}
+    class <C <U Child>>::<C <U Uses>> < <C <U Object>> () @ Loc {file=test/testdata/packager/test-stratum-include/child/uses.rb start=6:1 end=6:18}
+    class <C <U Child>>::<S <C <U Uses>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/packager/test-stratum-include/child/uses.rb start=6:1 end=6:18}
+      type-member(+) <C <U Child>>::<S <C <U Uses>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Child>>::<S <C <U Uses>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Child::Uses) @ Loc {file=test/testdata/packager/test-stratum-include/child/uses.rb start=6:1 end=6:18}
+      method <C <U Child>>::<S <C <U Uses>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/test-stratum-include/child/uses.rb start=6:1 end=6:23}
+        argument <blk><block> @ Loc {file=test/testdata/packager/test-stratum-include/child/uses.rb start=??? end=???}
+  class <S <C <U Child>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/packager/test-stratum-include/child/uses.rb start=6:7 end=6:12}
+    type-member(+) <S <C <U Child>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Child>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Child) @ Loc {file=test/testdata/packager/test-stratum-include/child/uses.rb start=6:7 end=6:12}
+  module <C <U Parent>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/packager/test-stratum-include/parent/my_class.rb start=6:7 end=6:13}
+    class <C <U Parent>>::<C <U MyClass>> < <C <U Object>> () @ (Loc {file=test/testdata/packager/test-stratum-include/parent/my_class.rb start=6:1 end=6:22}, Loc {file=test/testdata/packager/test-stratum-include/parent/test/reopen.rb start=6:1 end=6:22})
+    class <C <U Parent>>::<S <C <U MyClass>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ (Loc {file=test/testdata/packager/test-stratum-include/parent/my_class.rb start=6:1 end=6:22}, Loc {file=test/testdata/packager/test-stratum-include/parent/test/reopen.rb start=6:1 end=6:22})
+      type-member(+) <C <U Parent>>::<S <C <U MyClass>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Parent>>::<S <C <U MyClass>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Parent::MyClass) @ (Loc {file=test/testdata/packager/test-stratum-include/parent/my_class.rb start=6:1 end=6:22}, Loc {file=test/testdata/packager/test-stratum-include/parent/test/reopen.rb start=6:1 end=6:22})
+      method <C <U Parent>>::<S <C <U MyClass>> $1>#<U <static-init>> (<blk>) @ (Loc {file=test/testdata/packager/test-stratum-include/parent/my_class.rb start=6:1 end=7:4}, Loc {file=test/testdata/packager/test-stratum-include/parent/test/reopen.rb start=6:1 end=10:4})
+        argument <blk><block> @ Loc {file=test/testdata/packager/test-stratum-include/parent/my_class.rb start=??? end=???}
+    module <C <U Parent>>::<C <U TestMixin>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/packager/test-stratum-include/parent/test/my_module.rb start=6:1 end=6:25}
+    class <C <U Parent>>::<S <C <U TestMixin>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/packager/test-stratum-include/parent/test/my_module.rb start=6:1 end=6:25}
+      type-member(+) <C <U Parent>>::<S <C <U TestMixin>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Parent>>::<S <C <U TestMixin>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Parent::TestMixin) @ Loc {file=test/testdata/packager/test-stratum-include/parent/test/my_module.rb start=6:1 end=6:25}
+      method <C <U Parent>>::<S <C <U TestMixin>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/test-stratum-include/parent/test/my_module.rb start=6:1 end=7:4}
+        argument <blk><block> @ Loc {file=test/testdata/packager/test-stratum-include/parent/test/my_module.rb start=??? end=???}
+  class <S <C <U Parent>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/packager/test-stratum-include/parent/my_class.rb start=6:7 end=6:13}
+    type-member(+) <S <C <U Parent>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Parent>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Parent) @ Loc {file=test/testdata/packager/test-stratum-include/parent/my_class.rb start=6:7 end=6:13}
+

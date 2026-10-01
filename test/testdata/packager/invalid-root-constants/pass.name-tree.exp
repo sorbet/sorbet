@@ -1,0 +1,48 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::Base<<C Base>> < (::Sorbet::Private::Static::PackageSpec)
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::Consumer<<C Consumer>> < (::Sorbet::Private::Static::PackageSpec)
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::Other::Nested<<C Nested>> < (::Sorbet::Private::Static::PackageSpec)
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::Producer<<C Producer>> < (::Sorbet::Private::Static::PackageSpec)
+    <self>.import(<emptyTree>::<C Base>)
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module ::Consumer<<C Consumer>> < ()
+    <emptyTree>::<C FromRuby>.new()
+
+    <emptyTree>::<C FromRBI>.new()
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::FromRuby<<C FromRuby>> < (::<todo sym>)
+  end
+
+  class ::ExistingRoot<<C ExistingRoot>> < (::<todo sym>)
+  end
+
+  class ::Other<<C Other>> < (::<todo sym>)
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module ::Producer<<C Producer>> < ()
+    class ::Producer::FromTest<<C FromTest>> < (::<todo sym>)
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::FromRBI<<C FromRBI>> < (::<todo sym>)
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::ExistingRoot<<C ExistingRoot>> < (::<todo sym>)
+  end
+end
