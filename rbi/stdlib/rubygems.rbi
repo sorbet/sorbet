@@ -3004,9 +3004,10 @@ end
 class Gem::Package::TarWriter
   def initialize(io); end
 
-  # Adds file `name` with permissions `mode`, and yields an
+  # Adds file `name` with permissions `mode` and mtime `mtime` (sets
+  # `Gem.source_date_epoch` if not specified), and yields an
   # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) for writing the file to
-  def add_file(name, mode); end
+  def add_file(name, mode, mtime = nil); end
 
   # Adds `name` with permissions `mode` to the tar, yielding `io` for writing
   # the file. The `digest_algorithm` is written to a read-only `name`.sum file
