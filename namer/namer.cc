@@ -44,9 +44,9 @@ using AllFoundDefinitions = vector<pair<core::FileRef, unique_ptr<core::FoundDef
 
 using namespace core::packages;
 
-// [file, owner, originalName] → owner::mangledName
+// [file, owner, originalName, withinExplicitRootScope] → owner::mangledName
 using MangledClasses =
-    UnorderedMap<tuple<core::FileRef, core::ClassOrModuleRef, core::NameRef>, core::ClassOrModuleRef>;
+    UnorderedMap<tuple<core::FileRef, core::ClassOrModuleRef, core::NameRef, bool>, core::ClassOrModuleRef>;
 
 core::ClassOrModuleRef methodOwner(core::Context ctx, core::SymbolRef owner, bool isSelfMethod) {
     ENFORCE(owner.exists() && owner != core::Symbols::todo());
@@ -79,6 +79,15 @@ core::ClassOrModuleRef contextClass(const core::GlobalState &gs, core::SymbolRef
             owner = owner.owner(gs);
         }
     }
+}
+
+bool isExplicitlyRootScoped(const ast::ExpressionPtr &node) {
+    auto *cursor = &node;
+    while (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(*cursor)) {
+        cursor = &constLit->scope;
+    }
+    auto root = ast::cast_tree<ast::ConstantLit>(*cursor);
+    return root != nullptr && root->symbol() == core::Symbols::root();
 }
 
 PackageInfo &packageInfoForContext(core::MutableContext ctx) {
@@ -160,11 +169,17 @@ class SymbolFinder {
         return {*it, isSelfMethod};
     }
 
+    bool currentOwnerWithinExplicitRootScope() {
+        auto owner = getOwner();
+        return owner.kind() == core::FoundDefinitionRef::Kind::Class && owner.klass(*foundDefs).withinExplicitRootScope;
+    }
+
     core::FoundDefinitionRef getOwner() {
         return getOwnerSkippingMethods().first;
     }
 
-    core::FoundDefinitionRef defineScope(core::FoundDefinitionRef owner, const ast::ExpressionPtr &node) {
+    core::FoundDefinitionRef defineScope(core::FoundDefinitionRef owner, const ast::ExpressionPtr &node, bool withinExplicitRootScope) {
+        withinExplicitRootScope = withinExplicitRootScope || isExplicitlyRootScoped(node);
         if (auto id = ast::cast_tree<ast::ConstantLit>(node)) {
             // Already defined. Insert a foundname so we can reference it.
             auto sym = id->symbol();
@@ -172,11 +187,12 @@ class SymbolFinder {
             return foundDefs->addSymbol(sym.asClassOrModuleRef());
         } else if (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node)) {
             core::FoundClass found;
-            found.owner = defineScope(owner, constLit->scope);
+            found.owner = defineScope(owner, constLit->scope, withinExplicitRootScope);
             found.name = constLit->cnst;
             found.loc = constLit->loc;
             found.declLoc = constLit->loc;
             found.classKind = core::FoundClass::Kind::Unknown;
+            found.withinExplicitRootScope = withinExplicitRootScope;
             return foundDefs->addClass(move(found));
         } else {
             // Either EmptyTree (no more scope) or something is ill-formed (arbitrary expr for const scope?)
@@ -200,6 +216,7 @@ public:
         found.classKind = ast::ClassDef::kindToFoundClassKind(klass.kind);
         found.loc = klass.loc;
         found.declLoc = klass.declLoc;
+        found.withinExplicitRootScope = currentOwnerWithinExplicitRootScope() || isExplicitlyRootScoped(klass.name);
 
         auto ident = ast::cast_tree<ast::UnresolvedIdent>(klass.name);
         if ((ident != nullptr) && ident->name == core::Names::singleton()) {
@@ -208,7 +225,7 @@ public:
         } else {
             if (klass.symbol == core::Symbols::todo()) {
                 const auto &constLit = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(klass.name);
-                found.owner = defineScope(getOwner(), constLit.scope);
+                found.owner = defineScope(getOwner(), constLit.scope, found.withinExplicitRootScope);
                 found.name = constLit.cnst;
             } else {
                 // Desugar populates a top-level root() ClassDef.
@@ -607,7 +624,7 @@ public:
         auto &lhs = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(asgn.lhs);
 
         core::FoundStaticField found;
-        found.owner = defineScope(getOwner(), lhs.scope);
+        found.owner = defineScope(getOwner(), lhs.scope, currentOwnerWithinExplicitRootScope());
         found.name = lhs.cnst;
         found.asgnLoc = asgn.loc;
         found.lhsLoc = lhs.loc;
@@ -1345,7 +1362,7 @@ private:
             }
 
             if (shouldMangle) {
-                mangledClasses[{ctx.file, owner, klass.name}] = symbol;
+                mangledClasses[{ctx.file, owner, klass.name, klass.withinExplicitRootScope}] = symbol;
             }
         }
         ENFORCE(symbol.exists());
@@ -2085,9 +2102,10 @@ public:
 class TreeSymbolizer {
     friend class Namer;
     const MangledClasses &mangledClasses;
+    size_t explicitRootScopeDepth = 0;
 
     core::SymbolRef squashNamesInner(core::Context ctx, core::SymbolRef owner, ast::ExpressionPtr &node,
-                                     bool firstName) {
+                                     bool firstName, bool withinExplicitRootScope) {
         auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node);
         if (constLit == nullptr) {
             if (auto id = ast::cast_tree<ast::ConstantLit>(node)) {
@@ -2114,10 +2132,10 @@ class TreeSymbolizer {
         }
 
         const bool firstNameRecursive = false;
-        auto newOwner = squashNamesInner(ctx, owner, constLit->scope, firstNameRecursive);
+        auto newOwner = squashNamesInner(ctx, owner, constLit->scope, firstNameRecursive, withinExplicitRootScope);
         ENFORCE(newOwner.exists());
 
-        auto mangled = mangledClasses.find({ctx.file, newOwner.asClassOrModuleRef(), constLit->cnst});
+        auto mangled = mangledClasses.find({ctx.file, newOwner.asClassOrModuleRef(), constLit->cnst, withinExplicitRootScope});
         core::SymbolRef existing = mangled != mangledClasses.end()
                                        ? mangled->second
                                        : ctx.state.lookupClassSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
@@ -2137,7 +2155,8 @@ class TreeSymbolizer {
 
     core::SymbolRef squashNames(core::Context ctx, core::SymbolRef owner, ast::ExpressionPtr &node) {
         const bool firstName = true;
-        return squashNamesInner(ctx, owner, node, firstName);
+        auto withinExplicitRootScope = explicitRootScopeDepth > 0 || isExplicitlyRootScoped(node);
+        return squashNamesInner(ctx, owner, node, firstName, withinExplicitRootScope);
     }
 
     ast::ExpressionPtr arg2Symbol(int pos, const core::ParsedParam &parsedArg, ast::ExpressionPtr arg) {
@@ -2154,6 +2173,11 @@ public:
 
     void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
+
+        auto withinExplicitRootScope = explicitRootScopeDepth > 0 || isExplicitlyRootScoped(klass.name);
+        if (withinExplicitRootScope) {
+            explicitRootScopeDepth++;
+        }
 
         auto ident = ast::cast_tree<ast::UnresolvedIdent>(klass.name);
 
@@ -2175,13 +2199,12 @@ public:
         }
     }
 
-#ifdef DEBUG_MODE
-    // After some refactors, the only thing left in this callback is a bunch of ENFORCEs, so I've
-    // compiled the entire callback out unless DEBUG_MODE is set.
-    //
-    // If you're changing this to put load bearing logic back into this method, feel free to remove
-    // the #ifdef above.
     void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
+        if (explicitRootScopeDepth > 0) {
+            explicitRootScopeDepth--;
+        }
+
+#ifdef DEBUG_MODE
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         ENFORCE(klass.symbol != core::Symbols::todo());
@@ -2193,8 +2216,8 @@ public:
         // ENFORCE'ing it here makes certain errors apparent earlier.
         auto allowMissing = true;
         ENFORCE(ctx.state.lookupStaticInitForClass(klass.symbol, allowMissing).exists());
-    }
 #endif
+    }
 
     ast::MethodDef::PARAMS_store fillInParams(const vector<core::ParsedParam> &parsedParams,
                                               ast::MethodDef::PARAMS_store oldParams) {
