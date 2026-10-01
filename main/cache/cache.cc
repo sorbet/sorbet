@@ -228,21 +228,40 @@ void removeCacheDir(const string &path) {
     }
 
     auto dataMdb = fmt::format("{}/data.mdb", path);
-    if (FileOps::exists(dataMdb)) {
-        FileOps::removeFile(dataMdb);
+    if (0 != remove(dataMdb.c_str())) {
+        switch (errno) {
+            // It's fine if the file was already gone: this can happen if two sorbets were started at
+            // the same time, and one removes the db while this one is trying to do the same.
+            case ENOENT:
+                break;
+
+            default: {
+                auto msg = fmt::format("Error in removeCacheDir('{}'): {}", dataMdb, errno);
+                throw sorbet::RemoveFileException(msg);
+            }
+        }
     }
 
     auto lockMdb = fmt::format("{}/lock.mdb", path);
-    if (FileOps::exists(lockMdb)) {
-        FileOps::removeFile(lockMdb);
+    if (0 != remove(lockMdb.c_str())) {
+        switch (errno) {
+            // It's fine if the file was already gone: this can happen if two sorbets were started at
+            // the same time, and one removes the lock while this one is trying to do the same.
+            case ENOENT:
+                break;
+
+            default: {
+                auto msg = fmt::format("Error in removeCacheDir('{}'): {}", lockMdb, errno);
+                throw sorbet::RemoveFileException(msg);
+            }
+        }
     }
 
     // Fail silently if the directory has files other than those created by LMDB. This should be fine though, as we
     // will have removed the largest files.
-    auto err = rmdir(path.c_str());
-    if (err) {
+    if (0 != rmdir(path.c_str())) {
         switch (errno) {
-            // Return `false` if the directory is missing, isn't actually a directory, or wasn't empty.
+            // It's fine if the directory is missing, isn't actually a directory, or wasn't empty.
             case ENOENT:
             case ENOTDIR:
             case ENOTEMPTY:
