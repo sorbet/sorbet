@@ -110,6 +110,7 @@ struct FoundClass final {
     core::LocOffsets loc;
     core::LocOffsets declLoc;
     bool definesBehavior = false;
+    bool withinExplicitRootScope = false;
 
     enum class Kind : uint8_t {
         Unknown,

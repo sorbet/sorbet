@@ -44,9 +44,9 @@ using AllFoundDefinitions = vector<pair<core::FileRef, unique_ptr<core::FoundDef
 
 using namespace core::packages;
 
-// [file, owner, originalName] → owner::mangledName
+// [file, owner, originalName, withinExplicitRootScope] → owner::mangledName
 using MangledClasses =
-    UnorderedMap<tuple<core::FileRef, core::ClassOrModuleRef, core::NameRef>, core::ClassOrModuleRef>;
+    UnorderedMap<tuple<core::FileRef, core::ClassOrModuleRef, core::NameRef, bool>, core::ClassOrModuleRef>;
 
 core::ClassOrModuleRef methodOwner(core::Context ctx, core::SymbolRef owner, bool isSelfMethod) {
     ENFORCE(owner.exists() && owner != core::Symbols::todo());
@@ -79,6 +79,15 @@ core::ClassOrModuleRef contextClass(const core::GlobalState &gs, core::SymbolRef
             owner = owner.owner(gs);
         }
     }
+}
+
+bool isExplicitlyRootScoped(const ast::ExpressionPtr &node) {
+    auto *cursor = &node;
+    while (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(*cursor)) {
+        cursor = &constLit->scope;
+    }
+    auto root = ast::cast_tree<ast::ConstantLit>(*cursor);
+    return root != nullptr && root->symbol() == core::Symbols::root();
 }
 
 PackageInfo &packageInfoForContext(core::MutableContext ctx) {
@@ -160,11 +169,18 @@ class SymbolFinder {
         return {*it, isSelfMethod};
     }
 
+    bool currentOwnerWithinExplicitRootScope() {
+        auto owner = getOwner();
+        return owner.kind() == core::FoundDefinitionRef::Kind::Class && owner.klass(*foundDefs).withinExplicitRootScope;
+    }
+
     core::FoundDefinitionRef getOwner() {
         return getOwnerSkippingMethods().first;
     }
 
-    core::FoundDefinitionRef defineScope(core::FoundDefinitionRef owner, const ast::ExpressionPtr &node) {
+    core::FoundDefinitionRef defineScope(core::FoundDefinitionRef owner, const ast::ExpressionPtr &node,
+                                         bool withinExplicitRootScope) {
+        withinExplicitRootScope = withinExplicitRootScope || isExplicitlyRootScoped(node);
         if (auto id = ast::cast_tree<ast::ConstantLit>(node)) {
             // Already defined. Insert a foundname so we can reference it.
             auto sym = id->symbol();
@@ -172,11 +188,12 @@ class SymbolFinder {
             return foundDefs->addSymbol(sym.asClassOrModuleRef());
         } else if (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node)) {
             core::FoundClass found;
-            found.owner = defineScope(owner, constLit->scope);
+            found.owner = defineScope(owner, constLit->scope, withinExplicitRootScope);
             found.name = constLit->cnst;
             found.loc = constLit->loc;
             found.declLoc = constLit->loc;
             found.classKind = core::FoundClass::Kind::Unknown;
+            found.withinExplicitRootScope = withinExplicitRootScope;
             return foundDefs->addClass(move(found));
         } else {
             // Either EmptyTree (no more scope) or something is ill-formed (arbitrary expr for const scope?)
@@ -200,6 +217,7 @@ public:
         found.classKind = ast::ClassDef::kindToFoundClassKind(klass.kind);
         found.loc = klass.loc;
         found.declLoc = klass.declLoc;
+        found.withinExplicitRootScope = currentOwnerWithinExplicitRootScope() || isExplicitlyRootScoped(klass.name);
 
         auto ident = ast::cast_tree<ast::UnresolvedIdent>(klass.name);
         if ((ident != nullptr) && ident->name == core::Names::singleton()) {
@@ -208,7 +226,7 @@ public:
         } else {
             if (klass.symbol == core::Symbols::todo()) {
                 const auto &constLit = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(klass.name);
-                found.owner = defineScope(getOwner(), constLit.scope);
+                found.owner = defineScope(getOwner(), constLit.scope, found.withinExplicitRootScope);
                 found.name = constLit.cnst;
             } else {
                 // Desugar populates a top-level root() ClassDef.
@@ -607,7 +625,7 @@ public:
         auto &lhs = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(asgn.lhs);
 
         core::FoundStaticField found;
-        found.owner = defineScope(getOwner(), lhs.scope);
+        found.owner = defineScope(getOwner(), lhs.scope, currentOwnerWithinExplicitRootScope());
         found.name = lhs.cnst;
         found.asgnLoc = asgn.loc;
         found.lhsLoc = lhs.loc;
@@ -1283,10 +1301,14 @@ private:
         }
     }
 
-    bool shouldMangleClassDefinition(core::MutableContext ctx, core::ClassOrModuleRef owner, core::NameRef name) {
+    bool shouldMangleClassDefinition(core::MutableContext ctx, core::ClassOrModuleRef owner,
+                                     const core::FoundClass &klass) {
         if (this->package == nullptr) {
             return false;
         }
+
+        // TODO(jez) This namespace logic is substantially duplicated with EnforcePackagePrefix. We will likely want
+        // to share it longer term, but that is tricky because mangling must happen in namer, before that pass runs.
 
         // An enclosing mangled name has already isolated this entire subtree from the source-level namespace, so
         // mangling classes nested more deeply provides no additional protection.
@@ -1296,9 +1318,60 @@ private:
             }
         }
 
-        auto packageInfo = ctx.state.packageInfoForClassOrModule(owner, name);
-        return packageInfo.packageRegistryOwner.exists() && packageInfo.package.exists() &&
-               !this->package->ownsNamespace(ctx, packageInfo.package, packageInfo.packageRegistryOwner, true);
+        auto packageInfo = ctx.state.packageInfoForClassOrModule(owner, klass.name);
+        // Class and module definitions can be prefixes of this package's namespace. Those prefixes are package
+        // registry entries rather than packages, so `packageInfo.package` can be empty; allow `ownsNamespace` to
+        // check the registry owner.
+        const bool couldBePrefix = true;
+        auto ownsNamespace =
+            this->package->ownsNamespace(ctx, packageInfo.package, packageInfo.packageRegistryOwner, couldBePrefix);
+
+        // A synthetic class-path prefix that resolves to an existing unpackaged namespace is a reference, not the
+        // definition that EnforcePackagePrefix will reject. Keep that prefix stable in preludes and isolate the
+        // concrete invalid definition beneath it. If this file already mangled the prefix itself, later definitions
+        // must continue through that same mangled subtree instead.
+        if (this->package->isPreludePackage() && klass.classKind == core::FoundClass::Kind::Unknown) {
+            auto existing = owner.data(ctx)->findMember(ctx, klass.name);
+            auto mangled = mangledClasses.find({ctx.file, owner, klass.name, klass.withinExplicitRootScope});
+            if (mangled == mangledClasses.end() && existing.exists() && existing.isClassOrModule() &&
+                !packageInfo.package.exists() && !packageInfo.packageRegistryOwner.exists()) {
+                return false;
+            }
+        }
+
+        // Prelude packages use explicit root scopes to modify unpackaged namespaces, so definitions within those
+        // scopes remain unmangled.
+        if (this->package->isPreludePackage() && klass.withinExplicitRootScope) {
+            // Definitions in namespaces owned by another package must still be isolated.
+            return packageInfo.packageRegistryOwner.exists() && packageInfo.package.exists() && !ownsNamespace;
+        }
+
+        // Keep the synthetic intermediate `Test` namespace stable while migrating to test packages. The concrete
+        // legacy definition nested beneath it will still be mangled, but preserving this shared prefix keeps constant
+        // resolution independent of package traversal order.
+        auto isIntermediateTestNamespace = klass.classKind == core::FoundClass::Kind::Unknown &&
+                                           owner == core::Symbols::root() &&
+                                           klass.name == core::Names::Constants::Test();
+        if (ctx.state.packageDB().testPackages() && isIntermediateTestNamespace) {
+            return false;
+        }
+
+        // Isolate definitions that violate either the test namespace or package namespace restrictions from the
+        // source-level namespace so that they cannot affect constant resolution in other packages.
+        auto mustUseTestNamespace = !this->package->usesTestPackages && ctx.file.data(ctx).isPackagedTest() &&
+                                    !this->package->file.data(ctx).isPackagedTest();
+        auto inTestNamespace = owner == core::Symbols::root() && klass.name == core::Names::Constants::Test();
+        for (auto enclosing = owner; !inTestNamespace && enclosing != core::Symbols::root();
+             enclosing = enclosing.data(ctx)->owner) {
+            auto data = enclosing.data(ctx);
+            inTestNamespace = data->owner == core::Symbols::root() && data->name == core::Names::Constants::Test();
+        }
+        if ((mustUseTestNamespace && !inTestNamespace) ||
+            (this->package->usesTestPackages && !ctx.state.packageDB().testPackages() && inTestNamespace)) {
+            return true;
+        }
+
+        return !ownsNamespace;
     }
 
     core::NameRef mangledClassName(core::MutableContext ctx, core::ClassOrModuleRef owner,
@@ -1330,7 +1403,7 @@ private:
             auto owner = getOwnerSymbol(state, klass.owner);
             auto name = klass.name;
 
-            auto shouldMangle = shouldMangleClassDefinition(ctx, owner, klass.name);
+            auto shouldMangle = shouldMangleClassDefinition(ctx, owner, klass);
             if (shouldMangle) {
                 name = mangledClassName(ctx, owner, klass);
             }
@@ -1345,7 +1418,7 @@ private:
             }
 
             if (shouldMangle) {
-                mangledClasses[{ctx.file, owner, klass.name}] = symbol;
+                mangledClasses[{ctx.file, owner, klass.name, klass.withinExplicitRootScope}] = symbol;
             }
         }
         ENFORCE(symbol.exists());
@@ -2085,9 +2158,10 @@ public:
 class TreeSymbolizer {
     friend class Namer;
     const MangledClasses &mangledClasses;
+    size_t explicitRootScopeDepth = 0;
 
-    core::SymbolRef squashNamesInner(core::Context ctx, core::SymbolRef owner, ast::ExpressionPtr &node,
-                                     bool firstName) {
+    core::SymbolRef squashNamesInner(core::Context ctx, core::SymbolRef owner, ast::ExpressionPtr &node, bool firstName,
+                                     bool withinExplicitRootScope) {
         auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node);
         if (constLit == nullptr) {
             if (auto id = ast::cast_tree<ast::ConstantLit>(node)) {
@@ -2114,10 +2188,11 @@ class TreeSymbolizer {
         }
 
         const bool firstNameRecursive = false;
-        auto newOwner = squashNamesInner(ctx, owner, constLit->scope, firstNameRecursive);
+        auto newOwner = squashNamesInner(ctx, owner, constLit->scope, firstNameRecursive, withinExplicitRootScope);
         ENFORCE(newOwner.exists());
 
-        auto mangled = mangledClasses.find({ctx.file, newOwner.asClassOrModuleRef(), constLit->cnst});
+        auto mangled =
+            mangledClasses.find({ctx.file, newOwner.asClassOrModuleRef(), constLit->cnst, withinExplicitRootScope});
         core::SymbolRef existing = mangled != mangledClasses.end()
                                        ? mangled->second
                                        : ctx.state.lookupClassSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
@@ -2137,7 +2212,8 @@ class TreeSymbolizer {
 
     core::SymbolRef squashNames(core::Context ctx, core::SymbolRef owner, ast::ExpressionPtr &node) {
         const bool firstName = true;
-        return squashNamesInner(ctx, owner, node, firstName);
+        auto withinExplicitRootScope = explicitRootScopeDepth > 0 || isExplicitlyRootScoped(node);
+        return squashNamesInner(ctx, owner, node, firstName, withinExplicitRootScope);
     }
 
     ast::ExpressionPtr arg2Symbol(int pos, const core::ParsedParam &parsedArg, ast::ExpressionPtr arg) {
@@ -2154,6 +2230,11 @@ public:
 
     void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
+
+        auto withinExplicitRootScope = explicitRootScopeDepth > 0 || isExplicitlyRootScoped(klass.name);
+        if (withinExplicitRootScope) {
+            explicitRootScopeDepth++;
+        }
 
         auto ident = ast::cast_tree<ast::UnresolvedIdent>(klass.name);
 
@@ -2175,13 +2256,12 @@ public:
         }
     }
 
-#ifdef DEBUG_MODE
-    // After some refactors, the only thing left in this callback is a bunch of ENFORCEs, so I've
-    // compiled the entire callback out unless DEBUG_MODE is set.
-    //
-    // If you're changing this to put load bearing logic back into this method, feel free to remove
-    // the #ifdef above.
     void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
+        if (explicitRootScopeDepth > 0) {
+            explicitRootScopeDepth--;
+        }
+
+#ifdef DEBUG_MODE
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         ENFORCE(klass.symbol != core::Symbols::todo());
@@ -2193,8 +2273,8 @@ public:
         // ENFORCE'ing it here makes certain errors apparent earlier.
         auto allowMissing = true;
         ENFORCE(ctx.state.lookupStaticInitForClass(klass.symbol, allowMissing).exists());
-    }
 #endif
+    }
 
     ast::MethodDef::PARAMS_store fillInParams(const vector<core::ParsedParam> &parsedParams,
                                               ast::MethodDef::PARAMS_store oldParams) {

@@ -26,7 +26,7 @@ bad_test/a.rb:3: File belongs to package `Test::BadTest` but defines a constant 
 bad_test/a.rb:15: `include` may only be used on constants in the package that owns them https://srb.help/5084
     15 |  include ClassMethods
                   ^^^^^^^^^^^^
-    bad_test/subpackage/foo.rb:3: Symbol originally defined here
+    bad_test/a.rb:3: Symbol originally defined here
      3 |module Test::BadTest
         ^^^^^^^^^^^^^^^^^^^^
     bad_test/__package.rb:3: Package defined here is not marked `prelude!`
@@ -38,7 +38,7 @@ bad_test/a.rb:15: `include` may only be used on constants in the package that ow
 bad_test/a.rb:12: `extend` may only be used on constants in the package that owns them https://srb.help/5084
     12 |  extend ClassMethods
                  ^^^^^^^^^^^^
-    bad_test/subpackage/foo.rb:3: Symbol originally defined here
+    bad_test/a.rb:3: Symbol originally defined here
      3 |module Test::BadTest
         ^^^^^^^^^^^^^^^^^^^^
     bad_test/__package.rb:3: Package defined here is not marked `prelude!`
@@ -140,20 +140,9 @@ root/root.rb:12: Package `Root` has subpackages, so its corresponding class must
      3 |class Root::Subpackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-bad_test/subpackage/__package.rb:5: Constant `Test::BadTest::Subpackage::Foo` lacks a declaration in this package and cannot be exported https://srb.help/3721
+bad_test/subpackage/__package.rb:5: Unable to resolve constant `BadTest` https://srb.help/5002
      5 |  export Test::BadTest::Subpackage::Foo
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    bad_test/subpackage/__package.rb:5: Delete
-     5 |  export Test::BadTest::Subpackage::Foo
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-bad_test/subpackage/__package.rb:5: Cannot export `Test::BadTest::Subpackage::Foo` because it is owned by another package https://srb.help/3721
-     5 |  export Test::BadTest::Subpackage::Foo
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    bad_test/subpackage/foo.rb:5: Defined here
-     5 |    class Foo
-            ^^^^^^^^^
+                 ^^^^^^^^^^^^^
 
 bad_test/__package.rb:4: Unable to resolve constant `Root` https://srb.help/5002
      4 |  import Test::Root::Subpackage
@@ -225,4 +214,4 @@ root/test/root.rb:12: Package `Root` has subpackages, so its corresponding class
     root/subpackage/__package.rb:3: First subpackage defined here
      3 |class Root::Subpackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 24
+Errors: 23
