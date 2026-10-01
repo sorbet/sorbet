@@ -249,15 +249,6 @@ nested/nested.test.rb:20: Cannot initialize the module `Nested` by constant assi
     Sorbet does not allow treating constant assignments as class or module definitions,
     even if the initializer computes a `Module` object at runtime. See the docs for more.
 
-nested/nested.test.rb:3: Defining a root-scoped constant requires this package to be marked `prelude!` https://srb.help/3713
-     3 |class ::UnitTest; end
-              ^^^^^^^^^^
-    nested/__package.rb:3: This package is missing a `prelude!` declaration
-     3 |class Root::Nested < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Note:
-    Root-scoped constants are exempt from package namespace checks only in `prelude!` packages
-
 nested/nested.test.rb:7: Tests in the `Root::Nested` package must define tests in the `Test::Root::Nested` namespace https://srb.help/3713
      7 |  NOT_IN_MODULE = nil
           ^^^^^^^^^^^^^
@@ -378,4 +369,4 @@ extend_sig.rb:4: `include` may only be used on constants in the package that own
         ^^^^^^^^^^^^^^^^^^^^^^^^
   Note:
     `Module` is unpackaged, and may be reopened from a package marked `prelude!`
-Errors: 36
+Errors: 35

@@ -1,6 +1,6 @@
 # typed: strict
 
-class ::UnitTest; end
+class Test::Root::Nested::UnitTest; end
 
 # Correct location
 module Test::Root
