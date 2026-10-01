@@ -406,6 +406,13 @@ private:
             couldBePrefix = false;
         }
 
+        // A package prefix must advance at least one component below the registry root. If `ownerForScope` is still
+        // the root, lookup matched zero package components, so this ordinary scope is not on a package path.
+        // `Test` deliberately stays at the root so that package lookup skips the `Test` component.
+        if (ownerForScope == core::Symbols::PackageSpecRegistry() && scopeSym != maybeTestNamespace) {
+            return false;
+        }
+
         // TODO(trevor) this can be removed once we've fully migrated to test-packages, as the special
         // treatment of `Test::` will be gone.
         // TODO(trevor) we consider `testPackages` here so that we only raise an error for the `Test::`
