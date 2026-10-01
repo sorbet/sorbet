@@ -1,0 +1,49 @@
+class <C <U <root>>> < <C <U Object>> ()
+  module <C <U <PackageSpecRegistry>>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> ()
+    class <C <U <PackageSpecRegistry>>>::<C <U First>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U PackageSpec>> () @ Loc {file=test/testdata/packager/package-namespace-mangling/first/__package.rb start=5:1 end=5:26}
+    class <C <U <PackageSpecRegistry>>>::<S <C <U First>> $1>[<C <U <AttachedClass>>>] < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<S <C <U PackageSpec>> $1> () @ Loc {file=test/testdata/packager/package-namespace-mangling/first/__package.rb start=5:1 end=5:26}
+      type-member(+) <C <U <PackageSpecRegistry>>>::<S <C <U First>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U <PackageSpecRegistry>>>::<S <C <U First>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=First) @ Loc {file=test/testdata/packager/package-namespace-mangling/first/__package.rb start=5:1 end=5:26}
+      method <C <U <PackageSpecRegistry>>>::<S <C <U First>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/package-namespace-mangling/first/__package.rb start=5:1 end=6:4}
+        argument <blk><block> @ Loc {file=test/testdata/packager/package-namespace-mangling/first/__package.rb start=??? end=???}
+    class <C <U <PackageSpecRegistry>>>::<C <U Second>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U PackageSpec>> () @ Loc {file=test/testdata/packager/package-namespace-mangling/second/__package.rb start=3:1 end=3:27}
+    class <C <U <PackageSpecRegistry>>>::<S <C <U Second>> $1>[<C <U <AttachedClass>>>] < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<S <C <U PackageSpec>> $1> () @ Loc {file=test/testdata/packager/package-namespace-mangling/second/__package.rb start=3:1 end=3:27}
+      type-member(+) <C <U <PackageSpecRegistry>>>::<S <C <U Second>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U <PackageSpecRegistry>>>::<S <C <U Second>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Second) @ Loc {file=test/testdata/packager/package-namespace-mangling/second/__package.rb start=3:1 end=3:27}
+      method <C <U <PackageSpecRegistry>>>::<S <C <U Second>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/package-namespace-mangling/second/__package.rb start=3:1 end=4:4}
+        argument <blk><block> @ Loc {file=test/testdata/packager/package-namespace-mangling/second/__package.rb start=??? end=???}
+  class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/package-namespace-mangling/first/__package.rb start=5:1 end=6:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/package-namespace-mangling/first/__package.rb start=??? end=???}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/package-namespace-mangling/first/bad_open.rb start=3:1 end=7:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/package-namespace-mangling/first/bad_open.rb start=??? end=???}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/package-namespace-mangling/first/unreferenced_bad_open.rb start=4:1 end=6:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/package-namespace-mangling/first/unreferenced_bad_open.rb start=??? end=???}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/package-namespace-mangling/second/__package.rb start=3:1 end=4:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/package-namespace-mangling/second/__package.rb start=??? end=???}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/package-namespace-mangling/second/definition.rb start=3:1 end=6:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/package-namespace-mangling/second/definition.rb start=??? end=???}
+  module <C <U Second>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/packager/package-namespace-mangling/second/definition.rb start=3:1 end=3:14}
+    class <C <U Second>>::<C <U FromSecond>> < <C <U Object>> () @ Loc {file=test/testdata/packager/package-namespace-mangling/second/definition.rb start=4:3 end=4:19}
+    class <C <U Second>>::<S <C <U FromSecond>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/packager/package-namespace-mangling/second/definition.rb start=4:3 end=4:19}
+      type-member(+) <C <U Second>>::<S <C <U FromSecond>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Second>>::<S <C <U FromSecond>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Second::FromSecond) @ Loc {file=test/testdata/packager/package-namespace-mangling/second/definition.rb start=4:3 end=4:19}
+      method <C <U Second>>::<S <C <U FromSecond>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/package-namespace-mangling/second/definition.rb start=4:3 end=5:6}
+        argument <blk><block> @ Loc {file=test/testdata/packager/package-namespace-mangling/second/definition.rb start=??? end=???}
+  module <M <C <U Second>> $1> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/packager/package-namespace-mangling/first/bad_open.rb start=3:1 end=3:14}
+    class <M <C <U Second>> $1>::<C <U FromFirst>> < <C <U Object>> () @ Loc {file=test/testdata/packager/package-namespace-mangling/first/bad_open.rb start=5:3 end=5:18}
+    class <M <C <U Second>> $1>::<S <C <U FromFirst>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/packager/package-namespace-mangling/first/bad_open.rb start=5:3 end=5:18}
+      type-member(+) <M <C <U Second>> $1>::<S <C <U FromFirst>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<M <C <U Second>> $1>::<S <C <U FromFirst>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Second::FromFirst) @ Loc {file=test/testdata/packager/package-namespace-mangling/first/bad_open.rb start=5:3 end=5:18}
+      method <M <C <U Second>> $1>::<S <C <U FromFirst>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/package-namespace-mangling/first/bad_open.rb start=5:3 end=6:6}
+        argument <blk><block> @ Loc {file=test/testdata/packager/package-namespace-mangling/first/bad_open.rb start=??? end=???}
+  module <M <C <U Second>> $2> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/packager/package-namespace-mangling/first/unreferenced_bad_open.rb start=4:1 end=4:14}
+  class <S <C <U Second>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/packager/package-namespace-mangling/second/definition.rb start=3:1 end=3:14}
+    type-member(+) <S <C <U Second>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Second>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Second) @ Loc {file=test/testdata/packager/package-namespace-mangling/second/definition.rb start=3:1 end=3:14}
+    method <S <C <U Second>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/package-namespace-mangling/second/definition.rb start=3:1 end=6:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/package-namespace-mangling/second/definition.rb start=??? end=???}
+  class <S <M <C <U Second>> $1> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/packager/package-namespace-mangling/first/bad_open.rb start=3:1 end=3:14}
+    type-member(+) <S <M <C <U Second>> $1> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <M <C <U Second>> $1> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Second) @ Loc {file=test/testdata/packager/package-namespace-mangling/first/bad_open.rb start=3:1 end=3:14}
+    method <S <M <C <U Second>> $1> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/package-namespace-mangling/first/bad_open.rb start=3:1 end=7:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/package-namespace-mangling/first/bad_open.rb start=??? end=???}
+  class <S <M <C <U Second>> $2> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/packager/package-namespace-mangling/first/unreferenced_bad_open.rb start=4:1 end=4:14}
+    type-member(+) <S <M <C <U Second>> $2> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <M <C <U Second>> $2> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Second) @ Loc {file=test/testdata/packager/package-namespace-mangling/first/unreferenced_bad_open.rb start=4:1 end=4:14}
+    method <S <M <C <U Second>> $2> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/package-namespace-mangling/first/unreferenced_bad_open.rb start=4:1 end=6:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/package-namespace-mangling/first/unreferenced_bad_open.rb start=??? end=???}
+
