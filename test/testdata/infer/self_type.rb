@@ -56,7 +56,8 @@ module B
   sig { params(x: T.self_type).void }
   #            ^ error: `T.self_type` may only be used in an `:out` context, like `returns`
   def takes_self_public(x)
-    #                   ^ error: Expression does not have a fully-defined type
+    # Despite the error above, the parameter still gets a usable type in the body.
+    T.reveal_type(x) # error: `B`
     x
   end
 
@@ -66,10 +67,19 @@ module B
     x
   end
 
+  # `T.self_type` is allowed nested inside a `T.proc`, as long as the variance works out.
   sig { params(blk: T.proc.params(arg0: T.self_type).void).void }
-  #                                     ^^^^^^^^^^^ error: Only top-level `T.self_type` is supported
   def yield_self_void(&blk)
     yield self
+  end
+
+  sig { params(blk: T.proc.returns(T.self_type)).void }
+  #            ^^^ error: `T.self_type` may only be used in an `:out` context, like `returns`
+  def takes_proc_returning_self(&blk); end
+
+  sig { returns(T.proc.params(arg0: T.self_type).void) }
+  def returns_proc_taking_self # error: `T.self_type` may only be used in an `:out` context, like `returns`
+    ->(x) {}
   end
 
   sig { params(x: T.any(T.self_type, Integer)).void }
@@ -81,9 +91,9 @@ module B
   sig { params(other: T.self_type).void }
   #            ^^^^^ error: `T.self_type` may only be used in an `:out` context, like `returns`
   def ==(other)
-    #    ^^^^^ error: Expression does not have a fully-defined type
     return self.class == other.class
     #           ^^^^^ error: Method `class` does not exist on `B`
+    #                          ^^^^^ error: Method `class` does not exist on `B`
   end
 end
 

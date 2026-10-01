@@ -1329,7 +1329,13 @@ optional<TypeSyntax::ResultType> getResultTypeAndBindWithSelfTypeParamsImpl(core
     } else if (ast::isa_tree<ast::Send>(expr)) {
         const auto &s = ast::cast_tree_nonnull<ast::Send>(expr);
         if (isTProc(ctx, &s)) {
-            auto maybeSig = parseSigWithSelfTypeParams(ctx, s, &sigBeingParsed, args.withoutSelfType());
+            // Unlike the type arguments of a generic class, `T.self_type` is allowed inside a
+            // `T.proc` type (it inherits `allowSelfType` from the enclosing context). Whether a
+            // given use is valid is decided by the variance checker, which treats the `Proc<N>`
+            // classes like any other generic class: `Return` is `:out` and each `Arg<N>` is `:in`.
+            // That makes `T.proc.params(x: T.self_type)` fine in a method parameter (two negations)
+            // but rejects e.g. `T.proc.returns(T.self_type)` there.
+            auto maybeSig = parseSigWithSelfTypeParams(ctx, s, &sigBeingParsed, args);
             if (!maybeSig.has_value()) {
                 return nullopt;
             }

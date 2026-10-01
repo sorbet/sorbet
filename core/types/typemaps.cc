@@ -133,6 +133,36 @@ optional<vector<TypePtr>> instantiateTypeVarsInElems(const vector<TypePtr> &elem
     return newElems;
 }
 
+optional<vector<TypePtr>> replaceSelfTypeInElems(const vector<TypePtr> &elems, const GlobalState &gs,
+                                                 const TypePtr &receiver) {
+    optional<vector<TypePtr>> newElems;
+    int i = -1;
+    for (auto &e : elems) {
+        ++i;
+        auto t = e._replaceSelfType(gs, receiver);
+        if (!newElems.has_value() && !t) {
+            continue;
+        }
+
+        if (!newElems.has_value()) {
+            // Oops, need to fixup all the elements that should be there.
+            newElems.emplace();
+            newElems->reserve(elems.size());
+            for (int j = 0; j < i; ++j) {
+                newElems->emplace_back(elems[j]);
+            }
+        }
+
+        if (!t) {
+            t = e;
+        }
+
+        ENFORCE(newElems->size() == i);
+        newElems->emplace_back(move(t));
+    }
+    return newElems;
+}
+
 // Matches the 4 used in the vector backing ClassOrModuleRef::typeMembers()
 using PolaritiesStore = InlinedVector<core::Polarity, 4>;
 
@@ -375,6 +405,16 @@ TypePtr Types::replaceSelfType(const GlobalState &gs, const TypePtr &what, const
 
 TypePtr SelfType::_replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const {
     return receiver;
+}
+
+TypePtr AppliedType::_replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const {
+    // This is what makes `T.self_type` work when nested inside a `T.proc` type, because `T.proc`
+    // types are `AppliedType`s over the synthetic `Proc<N>` classes.
+    optional<vector<TypePtr>> newTargs = replaceSelfTypeInElems(this->targs, gs, receiver);
+    if (!newTargs) {
+        return nullptr;
+    }
+    return make_type<AppliedType>(this->klass, move(*newTargs));
 }
 
 TypePtr OrType::_replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const {

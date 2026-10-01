@@ -415,14 +415,10 @@ TypePtr ParamInfo::parameterTypeAsSeenByImplementation(Context ctx, core::TypeCo
         // this method. It's not solved and you shouldn't try to instantiate types against itt
     }
 
-    if (owner.data(ctx)->flags.isPrivate) {
-        // optimization: only replace self type in parameter for private methods, because
-        // `T.self_type` is not allowed in parameters otherwise. When we allow non-top-level
-        // T.self_type, we will need to always replace, because there might be a valid use in a
-        // non-private method in e.g. a `T.proc.returns` (but maybe in the process of allowing
-        // non-top-level T.self_type we eliminate the need to replace at all?)
-        instantiated = core::Types::replaceSelfType(ctx, instantiated, klass.data(ctx)->selfType(ctx));
-    }
+    // Top-level `T.self_type` in a parameter is only allowed for private methods, but it can also
+    // show up nested inside a `T.proc` parameter of any method (e.g. the `&blk` of `Kernel#tap`),
+    // so we always have to replace it.
+    instantiated = core::Types::replaceSelfType(ctx, instantiated, klass.data(ctx)->selfType(ctx));
 
     if (!flags.isRepeated) {
         return instantiated;

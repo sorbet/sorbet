@@ -965,6 +965,7 @@ public:
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
     TypePtr _approximateTypeVars(const GlobalState &gs, const TypeConstraint &tc, core::Polarity polarity) const;
     TypePtr _instantiateTypeVars(const GlobalState &gs, const TypeConstraint &tc) const;
+    TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const;
 };
 CheckSize(AppliedType, 32, 8);
 

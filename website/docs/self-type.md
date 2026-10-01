@@ -142,11 +142,24 @@ class Generic < Parent
 end
 ```
 
-Since [`T.proc` types](procs.md) are basically generic class types in disguise, `T.self_type` cannot be used inside `T.proc` parameter or return types (though using `T.self_type` in `T.proc.bind` is allowed). This means that methods like `yield_self` and `tap` [cannot be precisely typed yet](https://github.com/sorbet/sorbet/issues/5632).
-
 Note that "top-level" in this context only applies to inside the type arguments applied to generic class types—`T.self_type` can already be nested inside types like `T.any` and `T.all`.
 
 This limitation is likely to be lifted eventually, so please let us know whether that's important.
+
+[`T.proc` types](procs.md) are exempt from this restriction, even though they're generic class types in disguise: `T.self_type` can appear in a `T.proc`'s parameter and return types (as well as in `T.proc.bind`). This is what lets Sorbet give methods like `then`, `yield_self`, and `tap` their natural types:
+
+```ruby
+sig do
+  type_parameters(:U)
+    .params(blk: T.proc.params(arg0: T.self_type).returns(T.type_parameter(:U)))
+    .returns(T.type_parameter(:U))
+end
+def my_then(&blk)
+  yield self
+end
+```
+
+The usual [variance rules](#no-uses-in-parameters-types) still apply, so `T.self_type` is only allowed where it ends up being used covariantly—like the parameters of a `T.proc` that is itself a method parameter, as above.
 
 ## No uses in parameters' types
 
@@ -173,3 +186,23 @@ end
 ```
 
 If it helps, think of `T.self_type` as a [type_member](generics.md#type_member--type_template) that is [covariant](generics.md#covariance-out) and [upper bounded](generics.md#bounds-on-type_members-and-type_templates-fixed-upper-lower) by itself (i.e., a recursively-defined type). Just as covariant type members are not allowed in input positions, neither is `T.self_type`, unless [the method is private](generics.md#variance-positions-and-private).
+
+This is a rule about positions, not about the word `params`. Two contravariant positions cancel out, so `T.self_type` **is** allowed in the parameters of a `T.proc` that is itself a method parameter (which is how methods like `tap` are typed):
+
+```ruby
+class A
+  extend T::Sig
+
+  # ✅ `T.self_type` is used covariantly overall
+  sig { params(blk: T.proc.params(x: T.self_type).void).void }
+  def each_self(&blk)
+    yield self
+  end
+
+  # ❌ `T.self_type` is used contravariantly overall
+  sig { returns(T.proc.params(x: T.self_type).void) }
+  def bad
+    ->(x) {}
+  end
+end
+```
