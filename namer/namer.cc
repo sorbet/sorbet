@@ -1301,10 +1301,14 @@ private:
         }
     }
 
-    bool shouldMangleClassDefinition(core::MutableContext ctx, core::ClassOrModuleRef owner, core::NameRef name) {
+    bool shouldMangleClassDefinition(core::MutableContext ctx, core::ClassOrModuleRef owner,
+                                     const core::FoundClass &klass) {
         if (this->package == nullptr) {
             return false;
         }
+
+        // TODO(jez) This namespace logic is substantially duplicated with EnforcePackagePrefix. We will likely want
+        // to share it longer term, but that is tricky because mangling must happen in namer, before that pass runs.
 
         // An enclosing mangled name has already isolated this entire subtree from the source-level namespace, so
         // mangling classes nested more deeply provides no additional protection.
@@ -1314,9 +1318,60 @@ private:
             }
         }
 
-        auto packageInfo = ctx.state.packageInfoForClassOrModule(owner, name);
-        return packageInfo.packageRegistryOwner.exists() && packageInfo.package.exists() &&
-               !this->package->ownsNamespace(ctx, packageInfo.package, packageInfo.packageRegistryOwner, true);
+        auto packageInfo = ctx.state.packageInfoForClassOrModule(owner, klass.name);
+        // Class and module definitions can be prefixes of this package's namespace. Those prefixes are package
+        // registry entries rather than packages, so `packageInfo.package` can be empty; allow `ownsNamespace` to
+        // check the registry owner.
+        const bool couldBePrefix = true;
+        auto ownsNamespace =
+            this->package->ownsNamespace(ctx, packageInfo.package, packageInfo.packageRegistryOwner, couldBePrefix);
+
+        // A synthetic class-path prefix that resolves to an existing unpackaged namespace is a reference, not the
+        // definition that EnforcePackagePrefix will reject. Keep that prefix stable in preludes and isolate the
+        // concrete invalid definition beneath it. If this file already mangled the prefix itself, later definitions
+        // must continue through that same mangled subtree instead.
+        if (this->package->isPreludePackage() && klass.classKind == core::FoundClass::Kind::Unknown) {
+            auto existing = owner.data(ctx)->findMember(ctx, klass.name);
+            auto mangled = mangledClasses.find({ctx.file, owner, klass.name, klass.withinExplicitRootScope});
+            if (mangled == mangledClasses.end() && existing.exists() && existing.isClassOrModule() &&
+                !packageInfo.package.exists() && !packageInfo.packageRegistryOwner.exists()) {
+                return false;
+            }
+        }
+
+        // Prelude packages use explicit root scopes to modify unpackaged namespaces, so definitions within those
+        // scopes remain unmangled.
+        if (this->package->isPreludePackage() && klass.withinExplicitRootScope) {
+            // Definitions in namespaces owned by another package must still be isolated.
+            return packageInfo.packageRegistryOwner.exists() && packageInfo.package.exists() && !ownsNamespace;
+        }
+
+        // Keep the synthetic intermediate `Test` namespace stable while migrating to test packages. The concrete
+        // legacy definition nested beneath it will still be mangled, but preserving this shared prefix keeps constant
+        // resolution independent of package traversal order.
+        auto isIntermediateTestNamespace = klass.classKind == core::FoundClass::Kind::Unknown &&
+                                           owner == core::Symbols::root() &&
+                                           klass.name == core::Names::Constants::Test();
+        if (ctx.state.packageDB().testPackages() && isIntermediateTestNamespace) {
+            return false;
+        }
+
+        // Isolate definitions that violate either the test namespace or package namespace restrictions from the
+        // source-level namespace so that they cannot affect constant resolution in other packages.
+        auto mustUseTestNamespace = !this->package->usesTestPackages && ctx.file.data(ctx).isPackagedTest() &&
+                                    !this->package->file.data(ctx).isPackagedTest();
+        auto inTestNamespace = owner == core::Symbols::root() && klass.name == core::Names::Constants::Test();
+        for (auto enclosing = owner; !inTestNamespace && enclosing != core::Symbols::root();
+             enclosing = enclosing.data(ctx)->owner) {
+            auto data = enclosing.data(ctx);
+            inTestNamespace = data->owner == core::Symbols::root() && data->name == core::Names::Constants::Test();
+        }
+        if ((mustUseTestNamespace && !inTestNamespace) ||
+            (this->package->usesTestPackages && !ctx.state.packageDB().testPackages() && inTestNamespace)) {
+            return true;
+        }
+
+        return !ownsNamespace;
     }
 
     core::NameRef mangledClassName(core::MutableContext ctx, core::ClassOrModuleRef owner,
@@ -1348,7 +1403,7 @@ private:
             auto owner = getOwnerSymbol(state, klass.owner);
             auto name = klass.name;
 
-            auto shouldMangle = shouldMangleClassDefinition(ctx, owner, klass.name);
+            auto shouldMangle = shouldMangleClassDefinition(ctx, owner, klass);
             if (shouldMangle) {
                 name = mangledClassName(ctx, owner, klass);
             }

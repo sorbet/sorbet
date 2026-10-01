@@ -23,26 +23,26 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::FromRuby<<C FromRuby>> < (::<todo sym>)
+  class ::FromRuby<FromRuby$1> < (::<todo sym>)
   end
 
-  class ::ExistingRoot<<C ExistingRoot>> < (::<todo sym>)
+  class ::ExistingRoot<ExistingRoot$1> < (::<todo sym>)
   end
 
-  class ::Other<<C Other>> < (::<todo sym>)
+  class ::Other<Other$1> < (::<todo sym>)
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module ::Producer<<C Producer>> < ()
+  module ::Producer<Producer$1> < ()
     class ::Producer::FromTest<<C FromTest>> < (::<todo sym>)
     end
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::FromRBI<<C FromRBI>> < (::<todo sym>)
+  class ::FromRBI<FromRBI$1> < (::<todo sym>)
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::ExistingRoot<<C ExistingRoot>> < (::<todo sym>)
+  class ::ExistingRoot<ExistingRoot$2> < (::<todo sym>)
   end
 end

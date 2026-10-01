@@ -1,5 +1,5 @@
 # typed: strict
 
-Foo::FromUnqualified
+Foo::FromUnqualified # error: Unable to resolve constant `FromUnqualified`
 
 Foo::FromExplicitRoot
