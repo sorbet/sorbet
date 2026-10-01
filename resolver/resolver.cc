@@ -1781,21 +1781,7 @@ public:
             transformAncestor(ctx.withOwner(klass), singleton, ancst, isInclude);
         }
 
-        // Check for ambiguous definitions.
-        if (checkAmbiguousDefinition(ctx, nesting_->scope, nesting_->parent)) {
-            const auto ambigDef = findAnyDefinitionAmbiguousWithCurrent(ctx, nesting_->scope, nesting_->parent);
-            if (ambigDef.exists()) {
-                if (auto e = ctx.beginError(original.declLoc, core::errors::Resolver::AmbiguousDefinitionError)) {
-                    auto name = klass.data(ctx)->name.show(ctx);
-                    e.setHeader("Definition of `{}` is ambiguous", name);
-                    auto klassOwner = klass.data(ctx)->owner;
-                    auto option1 = fmt::format("{}::{}", klassOwner.show(ctx), name);
-                    e.addErrorLine(klassOwner.data(ctx)->loc(), "Could mean `{}` if nested under here", option1);
-                    auto option2 = fmt::format("{}::{}", ambigDef.show(ctx), name);
-                    e.addErrorLine(ambigDef.loc(ctx), "Or could mean `{}` if nested under here", option2);
-                }
-            }
-        }
+        checkAmbiguousDefinition(ctx, nesting_->scope, nesting_->parent, original.declLoc);
 
         // Check the name we're introducing for a scope, as that counts for requiring a package namespace
         // opening check in the parent scope.
@@ -1817,30 +1803,43 @@ public:
         nesting_ = nesting_->parent;
     }
 
-    const bool checkAmbiguousDefinition(core::Context ctx, core::SymbolRef curSym,
-                                        const shared_ptr<Nesting> &curNesting) {
+    void checkAmbiguousDefinition(core::Context ctx, core::SymbolRef curSym, const shared_ptr<Nesting> &curNesting,
+                                  core::LocOffsets loc) {
         if (!ctx.state.shouldReportErrorOn(ctx.file, core::errors::Resolver::AmbiguousDefinitionError)) {
             // no need to check if suppressed
-            return false;
+            return;
         }
 
         if (ctx.file.data(ctx).isPackage(ctx)) {
             // no need to check package files
-            return false;
+            return;
         }
 
         if (curSym == core::Symbols::root()) {
             // no need to check <root> def itself
-            return false;
+            return;
         }
 
         // Can't be ambiguous if current definition is single-part, don't check in this case.
         const core::SymbolRef curOwner = curSym.owner(ctx);
         if (curOwner == curNesting->scope) {
-            return false;
+            return;
         }
 
-        return true;
+        const auto ambigDef = findAnyDefinitionAmbiguousWithCurrent(ctx, curSym, curNesting);
+        if (!ambigDef.exists()) {
+            return;
+        }
+
+        if (auto e = ctx.beginError(loc, core::errors::Resolver::AmbiguousDefinitionError)) {
+            auto name = curSym.name(ctx).show(ctx);
+            e.setHeader("Definition of `{}` is ambiguous", name);
+            auto owner = curSym.owner(ctx);
+            auto option1 = fmt::format("{}::{}", owner.show(ctx), name);
+            e.addErrorLine(owner.loc(ctx), "Could mean `{}` if nested under here", option1);
+            auto option2 = fmt::format("{}::{}", ambigDef.show(ctx), name);
+            e.addErrorLine(ambigDef.loc(ctx), "Or could mean `{}` if nested under here", option2);
+        }
     }
 
     const core::SymbolRef findAnyDefinitionAmbiguousWithCurrent(core::Context ctx, core::SymbolRef curSym,
@@ -1965,21 +1964,7 @@ public:
             }
         }
 
-        // Check for ambiguous definitions.
-        if (checkAmbiguousDefinition(ctx, id->symbol(), nesting_)) {
-            const auto ambigDef = findAnyDefinitionAmbiguousWithCurrent(ctx, id->symbol(), nesting_);
-            if (ambigDef.exists()) {
-                if (auto e = ctx.beginError(asgn.loc, core::errors::Resolver::AmbiguousDefinitionError)) {
-                    auto name = id->symbol().name(ctx).show(ctx);
-                    e.setHeader("Definition of `{}` is ambiguous", name);
-                    auto casgnOwner = id->symbol().owner(ctx);
-                    auto option1 = fmt::format("{}::{}", casgnOwner.show(ctx), name);
-                    e.addErrorLine(casgnOwner.loc(ctx), "Could mean `{}` if nested under here", option1);
-                    auto option2 = fmt::format("{}::{}", ambigDef.show(ctx), name);
-                    e.addErrorLine(ambigDef.loc(ctx), "Or could mean `{}` if nested under here", option2);
-                }
-            }
-        }
+        checkAmbiguousDefinition(ctx, id->symbol(), nesting_, asgn.loc);
 
         auto rhs = ast::cast_tree<ast::ConstantLit>(asgn.rhs);
         if (rhs == nullptr) {
