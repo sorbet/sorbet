@@ -1870,6 +1870,14 @@ module Kernel
   # ```
   sig do
     params(
+        arg0: String,
+        arg1: BasicObject,
+        arg2: BasicObject,
+    )
+    .returns(NilClass)
+  end
+  sig do
+    params(
         arg0: IO,
         arg1: String,
         arg2: BasicObject,
