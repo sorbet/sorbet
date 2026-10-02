@@ -1013,11 +1013,17 @@ private:
     static bool resolveAncestorJob(core::MutableContext ctx, AncestorResolutionItem &job,
                                    const UnorderedSet<core::ClassOrModuleRef> &suppressPayloadSuperclassRedefinitionFor,
                                    bool lastRun) {
+        auto filePackage = ctx.state.packageDB().getPackageNameForFile(ctx.file);
+        auto &filePackageInfo = ctx.state.packageDB().getPackageInfo(filePackage);
+        auto canModify = filePackageInfo.canModifySymbol(ctx, job.klass);
         auto ancestorSym = job.ancestor->symbol();
         bool isTypeAlias = ancestorSym.exists() && ancestorSym.isTypeAlias(ctx);
         auto resolved = ancestorSym.exists() && !isTypeAlias ? ancestorSym.dealias(ctx) : core::SymbolRef();
         if (!ancestorSym.exists() || (!lastRun && !resolved.isClassOrModule())) {
-            if (!lastRun && !isTypeAlias && !job.isSuperclass && !job.mixinIndex.has_value()) {
+            // Reserving a mixin slot also mutates the class. Do not modify an earlier stratum's class
+            // even temporarily when package ownership will reject the mixin once its constant resolves.
+            if (!lastRun && !isTypeAlias && !job.isSuperclass && !job.mixinIndex.has_value() &&
+                canModify == core::packages::PackageInfo::CanModifyResult::CanModify) {
                 // This is an include or extend. Add a placeholder to fill in later to preserve
                 // ordering of mixins, unless an index is already set.
                 job.mixinIndex = job.klass.data(ctx)->addMixinPlaceholder(ctx);
@@ -1057,9 +1063,6 @@ private:
         }
 
         bool ancestorPresent = true;
-        auto filePackage = ctx.state.packageDB().getPackageNameForFile(ctx.file);
-        auto &filePackageInfo = ctx.state.packageDB().getPackageInfo(filePackage);
-        auto canModify = filePackageInfo.canModifySymbol(ctx, job.klass);
         if (job.isSuperclass) {
             switch (canModify) {
                 // NOTE: we ignore the PackageSpec error here, as it's fine to set the superclass of something in the
