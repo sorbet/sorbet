@@ -25,10 +25,10 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "dtl",
-        url = "https://github.com/cubicdaiya/dtl/archive/v1.19.tar.gz",
-        sha256 = "f47b99dd11e5d771ad32a8dc960db4ab2fbe349fb0346fa0795f53c846a99c5d",
+        url = "https://github.com/cubicdaiya/dtl/archive/v1.21.tar.gz",
+        sha256 = "90ed2dbf4e6d687737fe25f118bbcb6aed778cecc3f2115d191a032bf8643dbd",
         build_file = "@com_stripe_ruby_typer//third_party:dtl.BUILD",
-        strip_prefix = "dtl-1.19",
+        strip_prefix = "dtl-1.21",
     )
 
     http_archive(
