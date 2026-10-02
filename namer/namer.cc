@@ -81,12 +81,16 @@ core::ClassOrModuleRef contextClass(const core::GlobalState &gs, core::SymbolRef
     }
 }
 
-PackageInfo &packageInfoForContext(core::MutableContext ctx) {
+// Returns nullptr if this file's package spec did not define a package. For example, `insertPackage` does not enter a
+// package for a `__package.rb` file that redefines a package already defined by some other `__package.rb` file.
+PackageInfo *packageInfoForContext(core::MutableContext ctx) {
     auto packageName = ctx.state.packageDB().getPackageNameForFile(ctx.file);
-    ENFORCE(packageName.exists() && packageName.owner == ctx.owner.asClassOrModuleRef());
+    if (!packageName.exists() || packageName.owner != ctx.owner.asClassOrModuleRef()) {
+        return nullptr;
+    }
     auto *packageInfo = ctx.state.packageDB().getPackageInfoNonConst(packageName);
     ENFORCE(packageInfo != nullptr);
-    return *packageInfo;
+    return packageInfo;
 }
 
 /**
@@ -1514,13 +1518,19 @@ private:
         auto symbolData = ctx.owner.asClassOrModuleRef().data(ctx);
         switch (fun.rawId()) {
             case core::Names::exportAll().rawId():
-                packageInfoForContext(ctx).locs.exportAll = mod.loc;
+                if (auto *packageInfo = packageInfoForContext(ctx)) {
+                    packageInfo->locs.exportAll = mod.loc;
+                }
                 break;
             case core::Names::prelude_bang().rawId():
-                packageInfoForContext(ctx).locs.preludePackage = mod.loc;
+                if (auto *packageInfo = packageInfoForContext(ctx)) {
+                    packageInfo->locs.preludePackage = mod.loc;
+                }
                 break;
             case core::Names::test_bang().rawId():
-                packageInfoForContext(ctx).locs.testPackage = mod.loc;
+                if (auto *packageInfo = packageInfoForContext(ctx)) {
+                    packageInfo->locs.testPackage = mod.loc;
+                }
                 break;
             case core::Names::declareFinal().rawId():
                 symbolData->flags.isFinal = true;
