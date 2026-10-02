@@ -39,6 +39,13 @@ template <class T, class Pred> size_t erase_if(JobList<T> &items, Pred pred) {
     return oldSize - items.size();
 }
 
+// Moving directly avoids instantiating move-iterator range insertion machinery for every job type.
+template <class Destination, class Source> void appendMoved(Destination &destination, Source &source) {
+    for (auto &item : source) {
+        destination.emplace_back(std::move(item));
+    }
+}
+
 /*
  * Note: There are multiple separate tree walks defined in this file, the main
  * ones being:
@@ -936,8 +943,7 @@ private:
              result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
             if (result.gotItem()) {
                 retries += threadResult.first;
-                jobs.insert(jobs.end(), make_move_iterator(threadResult.second.begin()),
-                            make_move_iterator(threadResult.second.end()));
+                appendMoved(jobs, threadResult.second);
             }
         }
         categoryCounterAdd("resolve.constants.nonancestor", "retry", retries);
@@ -2208,24 +2214,13 @@ public:
                  !result.done();
                  result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
                 if (result.gotItem()) {
-                    todo.insert(todo.end(), make_move_iterator(threadResult.todo_.begin()),
-                                make_move_iterator(threadResult.todo_.end()));
-                    todoAncestors.insert(todoAncestors.end(), make_move_iterator(threadResult.todoAncestors_.begin()),
-                                         make_move_iterator(threadResult.todoAncestors_.end()));
-                    todoClassAliases.insert(todoClassAliases.end(),
-                                            make_move_iterator(threadResult.todoClassAliases_.begin()),
-                                            make_move_iterator(threadResult.todoClassAliases_.end()));
-                    todoTypeAliases.insert(todoTypeAliases.end(),
-                                           make_move_iterator(threadResult.todoTypeAliases_.begin()),
-                                           make_move_iterator(threadResult.todoTypeAliases_.end()));
-                    todoClassMethods.insert(todoClassMethods.end(),
-                                            make_move_iterator(threadResult.todoClassMethods_.begin()),
-                                            make_move_iterator(threadResult.todoClassMethods_.end()));
-                    todoRequiredAncestors.insert(todoRequiredAncestors.end(),
-                                                 make_move_iterator(threadResult.todoRequiredAncestors_.begin()),
-                                                 make_move_iterator(threadResult.todoRequiredAncestors_.end()));
-                    trees.insert(trees.end(), make_move_iterator(threadResult.trees.begin()),
-                                 make_move_iterator(threadResult.trees.end()));
+                    appendMoved(todo, threadResult.todo_);
+                    appendMoved(todoAncestors, threadResult.todoAncestors_);
+                    appendMoved(todoClassAliases, threadResult.todoClassAliases_);
+                    appendMoved(todoTypeAliases, threadResult.todoTypeAliases_);
+                    appendMoved(todoClassMethods, threadResult.todoClassMethods_);
+                    appendMoved(todoRequiredAncestors, threadResult.todoRequiredAncestors_);
+                    appendMoved(trees, threadResult.trees);
                 }
             }
         }
@@ -3656,8 +3651,7 @@ public:
                  !result.done();
                  result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
                 if (result.gotItem()) {
-                    combinedFiles.insert(combinedFiles.end(), make_move_iterator(threadResult.files.begin()),
-                                         make_move_iterator(threadResult.files.end()));
+                    appendMoved(combinedFiles, threadResult.files);
                     combinedTodoAssigns.emplace_back(move(threadResult.todoAssigns));
                     combinedTodoAttachedClassItems.emplace_back(move(threadResult.todoAttachedClassItems));
                     combinedTodoUntypedResultTypes.emplace_back(move(threadResult.todoUntypedResultTypes));
@@ -4606,10 +4600,8 @@ vector<ast::ParsedFile> resolveSigs(core::GlobalState &gs, vector<ast::ParsedFil
              !result.done();
              result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
             if (result.gotItem()) {
-                trees.insert(trees.end(), make_move_iterator(threadResult.trees.begin()),
-                             make_move_iterator(threadResult.trees.end()));
-                combinedFileJobs.insert(combinedFileJobs.end(), make_move_iterator(threadResult.fileSigs.begin()),
-                                        make_move_iterator(threadResult.fileSigs.end()));
+                appendMoved(trees, threadResult.trees);
+                appendMoved(combinedFileJobs, threadResult.fileSigs);
             }
         }
     }
