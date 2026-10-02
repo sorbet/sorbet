@@ -1,0 +1,9 @@
+# typed: true
+# assert-slow-path: true
+
+module Other
+     # ^^^^^ error: File belongs to package `Lifecycle` but defines a constant that does not match this namespace
+  class Item
+    def invalid; end
+  end
+end
