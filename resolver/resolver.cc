@@ -3640,15 +3640,15 @@ public:
         vector<ast::ParsedFile> combinedFiles;
         // The following items are not flattened; it'd be expensive to do so on large projects (they contain every
         // field/method alias/etc for the entire workspace!)
-        vector<JobList<ResolveAssignItem>> combinedTodoAssigns;
-        vector<JobList<ResolveAttachedClassItem>> combinedTodoAttachedClassItems;
+        JobList<JobList<ResolveAssignItem>> combinedTodoAssigns;
+        JobList<JobList<ResolveAttachedClassItem>> combinedTodoAttachedClassItems;
         vector<vector<core::SymbolRef>> combinedTodoUntypedResultTypes;
-        vector<JobList<ResolveCastItem>> combinedTodoResolveCastItems;
-        vector<JobList<ResolveFieldItem>> combinedTodoResolveFieldItems;
-        vector<JobList<ResolveStaticFieldItem>> combinedTodoResolveStaticFieldItems;
-        vector<JobList<ResolveSimpleStaticFieldItem>> combinedTodoResolveSimpleStaticFieldItems;
-        vector<JobList<ResolveMethodAliasItem>> combinedTodoMethodAliasItems;
-        vector<JobList<RecordSealedSubclassItem>> combinedTodoSealedSubclassItems;
+        JobList<JobList<ResolveCastItem>> combinedTodoResolveCastItems;
+        JobList<JobList<ResolveFieldItem>> combinedTodoResolveFieldItems;
+        JobList<JobList<ResolveStaticFieldItem>> combinedTodoResolveStaticFieldItems;
+        JobList<JobList<ResolveSimpleStaticFieldItem>> combinedTodoResolveSimpleStaticFieldItems;
+        JobList<JobList<ResolveMethodAliasItem>> combinedTodoMethodAliasItems;
+        JobList<JobList<RecordSealedSubclassItem>> combinedTodoSealedSubclassItems;
 
         {
             ResolveTypeMembersAndFieldsWorkerResult threadResult;
