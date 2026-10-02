@@ -1232,7 +1232,7 @@ vector<uint8_t> Serializer::storeTree(const core::File &file, const ast::ParsedF
     Pickler p;
 
     // See comment in `serialize.h` above `loadTree`.
-    p.putU4(file.source().size());
+    p.putU4(file.sourceSize());
     p.putBytes(file.sourceHash());
 
     SerializerImpl::pickle(p, file.getFileHash());
@@ -1245,7 +1245,7 @@ ast::ExpressionPtr Serializer::loadTree(const core::GlobalState &gs, core::File 
 
     // See comment in `serialize.h` above `loadTree`.
     uint32_t fileSrcLen = p.getU4();
-    if (file.source().size() != fileSrcLen) {
+    if (file.sourceSize() != fileSrcLen) {
         // File does not have expected size; bail.
         return nullptr;
     }

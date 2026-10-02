@@ -38,6 +38,9 @@ public:
 
     std::string_view path() const;
     std::string_view source() const;
+    // Should be used in preference to `source().size()`, as future changes to `source()`
+    // may require re-materialization of the source from some other location.
+    size_t sourceSize() const;
     Type sourceType;
 
     bool isPayload() const;

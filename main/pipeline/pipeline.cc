@@ -1193,7 +1193,7 @@ ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, vector<ast::ParsedFil
                 for (auto &f : what) {
                     // Shift contents of file past current file's EOF, re-run incrementalResolve, assert that no
                     // locations appear before file's old EOF.
-                    const int prohibitedLines = f.file.data(gs).source().size();
+                    const int prohibitedLines = f.file.data(gs).sourceSize();
                     auto newSource = fmt::format("{}\n{}", string(prohibitedLines, '\n'), f.file.data(gs).source());
                     auto newFile = make_shared<core::File>(string(f.file.data(gs).path()), move(newSource),
                                                            f.file.data(gs).sourceType);
@@ -1796,7 +1796,7 @@ void sortBySize(const core::GlobalState &gs, vector<ast::ParsedFile> &trees) {
     // If files are not already sorted, we want to start typeckecking big files first because it helps with
     // better work distribution
     fast_sort(trees, [&](const auto &lhs, const auto &rhs) -> bool {
-        return lhs.file.data(gs).source().size() > rhs.file.data(gs).source().size();
+        return lhs.file.data(gs).sourceSize() > rhs.file.data(gs).sourceSize();
     });
 }
 

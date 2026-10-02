@@ -117,7 +117,7 @@ public:
     // For example:
     //
     //     `loc.adjust(gs, -1, 0).exists() == false` if `loc.beginPos() == 0`
-    //     `loc.adjust(gs, 0, 1).exists() == false` if `loc.endPos() == loc.file().data(gs).source().size()`
+    //     `loc.adjust(gs, 0, 1).exists() == false` if `loc.endPos() == loc.file().data(gs).sourceSize()`
     //
     // etc.
     Loc adjust(const GlobalState &gs, int32_t beginAdjust, int32_t endAdjust) const;

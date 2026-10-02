@@ -63,7 +63,7 @@ Loc Loc::join(Loc other) const {
 Loc::Detail Loc::pos2Detail(const File &file, uint32_t off) {
     Loc::Detail detail;
 
-    if (off > file.source().size()) {
+    if (off > file.sourceSize()) {
         fatalLogger->error(R"(msg="Bad offset2Pos off" path="{}" off="{}"")", absl::CEscape(file.path()), off);
         fatalLogger->error("source=\"{}\"", absl::CEscape(file.source()));
         ENFORCE_NO_TIMER(false);
@@ -92,7 +92,7 @@ optional<uint32_t> Loc::detail2Pos(const File &file, Loc::Detail detail) {
     auto line0idx = line1idx - 1;
 
     auto lineStart = line0idx == 0 ? 0 : lineBreaks[line0idx - 1] + 1;
-    auto lineEnd = line0idx < lineBreaks.size() ? lineBreaks[line0idx] : file.source().size();
+    auto lineEnd = line0idx < lineBreaks.size() ? lineBreaks[line0idx] : file.sourceSize();
     auto lineLength = lineEnd - lineStart;
     auto column1idx = detail.column;
     if (column1idx > lineLength + 1) {
@@ -165,13 +165,13 @@ void addLocLine(stringstream &buf, int line, const File &file, int tabs, int lin
         return;
     }
     auto numToWrite = endPos - offset;
-    if (offset >= file.source().size()) {
+    if (offset >= file.sourceSize()) {
         fatalLogger->error(R"(msg="Bad addLocLine offset" path="{}" line="{}" offset="{}")", absl::CEscape(file.path()),
                            line, offset);
         fatalLogger->error("source=\"{}\"", absl::CEscape(file.source()));
         ENFORCE_NO_TIMER(false);
     }
-    if (offset + numToWrite > file.source().size()) {
+    if (offset + numToWrite > file.sourceSize()) {
         fatalLogger->error(R"(msg="Bad addLocLine write size" path="{}" line="{}" offset="{}" numToWrite="{}")",
                            absl::CEscape(file.path()), line, offset, numToWrite);
         fatalLogger->error("source=\"{}\"", absl::CEscape(file.source()));
@@ -359,7 +359,7 @@ Loc Loc::adjust(const GlobalState &gs, int32_t beginAdjust, int32_t endAdjust) c
     int64_t begin = this->beginPos();
     int64_t end = this->endPos();
 
-    uint64_t fileLength = this->file().data(gs).source().size();
+    uint64_t fileLength = this->file().data(gs).sourceSize();
 
     if (begin + beginAdjust < 0) {
         return Loc::none(this->file());
@@ -387,7 +387,7 @@ Loc Loc::adjustLen(const GlobalState &gs, int32_t beginAdjust, int32_t len) cons
     // Upcast these to signed, 64-bit ints, so we don't have to worry about underflow / overflow.
     int64_t begin = this->beginPos();
 
-    uint64_t fileLength = this->file().data(gs).source().size();
+    uint64_t fileLength = this->file().data(gs).sourceSize();
 
     if (begin + beginAdjust < 0) {
         return Loc::none(this->file());

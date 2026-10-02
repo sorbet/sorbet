@@ -27,7 +27,7 @@ uint32_t translatePos(size_t pos, uint32_t maxOff) {
 }
 
 core::Loc rangeToLoc(const core::GlobalState &gs, core::FileRef file, const ruby_parser::diagnostic::range &range) {
-    uint32_t maxOff = file.data(gs).source().size();
+    uint32_t maxOff = file.data(gs).sourceSize();
     return core::Loc(file, translatePos(range.beginPos, maxOff - 1), translatePos(range.endPos, maxOff));
 }
 

@@ -446,7 +446,7 @@ vector<ast::ParsedFile> indexForStressIncremental(core::GlobalState *gs, absl::S
             continue;
         }
 
-        const int prohibitedLines = f.data(*gs).source().size();
+        const int prohibitedLines = f.data(*gs).sourceSize();
         auto newSource = absl::StrCat(string(prohibitedLines + 1, '\n'), f.data(*gs).source());
         auto newFile = make_shared<core::File>(string(f.data(*gs).path()), move(newSource), f.data(*gs).sourceType);
         gs->replaceFile(f, move(newFile));
@@ -645,7 +645,7 @@ TEST_CASE("PerPhaseTest") {
         // Simulate what pipeline.cc does: We want to start typechecking big files first because it helps with better
         // work distribution
         fast_sort(stratumFiles, [&](const auto &lhs, const auto &rhs) -> bool {
-            return lhs.file.data(*gs).source().size() > rhs.file.data(*gs).source().size();
+            return lhs.file.data(*gs).sourceSize() > rhs.file.data(*gs).sourceSize();
         });
 
         for (auto &resolvedTree : stratumFiles) {

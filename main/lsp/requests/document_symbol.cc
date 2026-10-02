@@ -166,7 +166,7 @@ public:
     }
 
     static vector<unique_ptr<DocumentSymbol>> documentSymbol(core::Context ctx, const ast::ExpressionPtr &tree) {
-        core::Loc fullFile{ctx.file, core::LocOffsets{0, static_cast<uint32_t>(ctx.file.data(ctx).source().size())}};
+        core::Loc fullFile{ctx.file, core::LocOffsets{0, static_cast<uint32_t>(ctx.file.data(ctx).sourceSize())}};
 
         Outliner outliner{fullFile};
 
