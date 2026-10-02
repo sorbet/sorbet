@@ -211,7 +211,7 @@ private:
         core::FileRef file;
         vector<T> items;
 
-        ResolveItems(core::FileRef file, vector<T> &&items) : file(file), items(move(items)){};
+        ResolveItems(core::FileRef file, vector<T> &&items) : file(file), items(move(items)) {};
     };
 
     struct AncestorResolutionItem {

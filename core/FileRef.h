@@ -9,7 +9,7 @@ class File;
 
 class FileRef final {
 public:
-    FileRef() noexcept : _id(0){};
+    FileRef() noexcept : _id(0) {};
     FileRef(unsigned int id) noexcept;
 
     FileRef(FileRef &f) = default;

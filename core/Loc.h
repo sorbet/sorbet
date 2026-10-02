@@ -77,7 +77,7 @@ public:
 
     inline Loc(FileRef file, LocOffsets offsets) noexcept : storage{offsets, file} {}
 
-    Loc() noexcept : Loc(0, LocOffsets::none()){};
+    Loc() noexcept : Loc(0, LocOffsets::none()) {};
 
     Loc &operator=(const Loc &rhs) = default;
     Loc &operator=(Loc &&rhs) = default;
