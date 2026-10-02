@@ -1563,6 +1563,16 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 } else if (!expectedReturnType.isUntyped() && !expectedReturnType.isTop() &&
                            typeAndOrigin.type.isUntyped()) {
                     auto what = core::errors::Infer::errorClassForUntyped(ctx, ctx.file, typeAndOrigin.type);
+
+                    // Computing the precise loc for reporting requires line breaks, which
+                    // in turn requires the source of the file.  In a world where we don't
+                    // always keep the source around, materializing that source can be
+                    // expensive, and the untyped error being reported here only matters
+                    // at `typed: strong`.  To avoid materializing that source, we check
+                    // whether the error would even matter in the first place.
+                    if (!ctx.state.shouldReportErrorOn(ctx.file, what)) {
+                        return;
+                    }
                     auto errLoc = ctx.locAt(bind.loc).truncateToFirstLine(ctx);
                     if (auto e = ctx.state.beginError(errLoc, what)) {
                         e.setHeader("Value returned from method `{}` is `{}`", ctx.owner.name(ctx).show(ctx),
