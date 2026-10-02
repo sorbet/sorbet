@@ -29,6 +29,16 @@ using namespace std;
 namespace sorbet::resolver {
 namespace {
 
+// These private work lists use InlinedVector's simpler container and iterator templates to reduce
+// clangd's AST rebuild time. Keep the inline capacity small to limit the size of per-file job groups.
+template <class T> using JobList = InlinedVector<T, 1>;
+
+template <class T, class Pred> size_t erase_if(JobList<T> &items, Pred pred) {
+    auto oldSize = items.size();
+    items.erase(std::remove_if(items.begin(), items.end(), std::move(pred)), items.end());
+    return oldSize - items.size();
+}
+
 /*
  * Note: There are multiple separate tree walks defined in this file, the main
  * ones being:
@@ -209,9 +219,9 @@ private:
 
     template <class T> struct ResolveItems {
         core::FileRef file;
-        vector<T> items;
+        JobList<T> items;
 
-        ResolveItems(core::FileRef file, vector<T> &&items) : file(file), items(move(items)){};
+        ResolveItems(core::FileRef file, JobList<T> &&items) : file(file), items(move(items)){};
     };
 
     struct AncestorResolutionItem {
@@ -289,12 +299,12 @@ private:
         const RequireAncestorResolutionItem &operator=(const RequireAncestorResolutionItem &) = delete;
     };
 
-    vector<ConstantResolutionItem> todo_;
-    vector<AncestorResolutionItem> todoAncestors_;
-    vector<ClassAliasResolutionItem> todoClassAliases_;
-    vector<TypeAliasResolutionItem> todoTypeAliases_;
-    vector<ClassMethodsResolutionItem> todoClassMethods_;
-    vector<RequireAncestorResolutionItem> todoRequiredAncestors_;
+    JobList<ConstantResolutionItem> todo_;
+    JobList<AncestorResolutionItem> todoAncestors_;
+    JobList<ClassAliasResolutionItem> todoClassAliases_;
+    JobList<TypeAliasResolutionItem> todoTypeAliases_;
+    JobList<ClassMethodsResolutionItem> todoClassMethods_;
+    JobList<RequireAncestorResolutionItem> todoRequiredAncestors_;
 
     static core::SymbolRef resolveLhs(core::Context ctx, const shared_ptr<Nesting> &nesting, core::NameRef name) {
         Nesting *scope = nesting.get();
@@ -882,12 +892,12 @@ private:
     }
 
     static bool resolveConstantResolutionItems(const core::GlobalState &gs,
-                                               vector<ResolveItems<ConstantResolutionItem>> &jobs,
+                                               JobList<ResolveItems<ConstantResolutionItem>> &jobs,
                                                WorkerPool &workers) {
         if (jobs.empty()) {
             return false;
         }
-        auto outputq = make_shared<BlockingBoundedQueue<pair<uint32_t, vector<ResolveItems<ConstantResolutionItem>>>>>(
+        auto outputq = make_shared<BlockingBoundedQueue<pair<uint32_t, JobList<ResolveItems<ConstantResolutionItem>>>>>(
             jobs.size());
         auto inputq = make_shared<ConcurrentBoundedQueue<ResolveItems<ConstantResolutionItem>>>(jobs.size());
         for (auto &job : jobs) {
@@ -896,7 +906,7 @@ private:
         jobs.clear();
 
         workers.multiplexJob("resolveConstantsWorker", [inputq, outputq, &gs]() {
-            vector<ResolveItems<ConstantResolutionItem>> leftover;
+            JobList<ResolveItems<ConstantResolutionItem>> leftover;
             ResolveItems<ConstantResolutionItem> job(core::FileRef(), {});
             uint32_t processed = 0;
             uint32_t retries = 0;
@@ -920,7 +930,7 @@ private:
         });
 
         uint32_t retries = 0;
-        pair<uint32_t, vector<ResolveItems<ConstantResolutionItem>>> threadResult;
+        pair<uint32_t, JobList<ResolveItems<ConstantResolutionItem>>> threadResult;
         for (auto result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
              !result.done();
              result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
@@ -2075,12 +2085,12 @@ public:
     }
 
     struct ResolveWalkResult {
-        vector<ResolveItems<ConstantResolutionItem>> todo_;
-        vector<ResolveItems<AncestorResolutionItem>> todoAncestors_;
-        vector<ResolveItems<ClassAliasResolutionItem>> todoClassAliases_;
-        vector<ResolveItems<TypeAliasResolutionItem>> todoTypeAliases_;
-        vector<ResolveItems<ClassMethodsResolutionItem>> todoClassMethods_;
-        vector<ResolveItems<RequireAncestorResolutionItem>> todoRequiredAncestors_;
+        JobList<ResolveItems<ConstantResolutionItem>> todo_;
+        JobList<ResolveItems<AncestorResolutionItem>> todoAncestors_;
+        JobList<ResolveItems<ClassAliasResolutionItem>> todoClassAliases_;
+        JobList<ResolveItems<TypeAliasResolutionItem>> todoTypeAliases_;
+        JobList<ResolveItems<ClassMethodsResolutionItem>> todoClassMethods_;
+        JobList<ResolveItems<RequireAncestorResolutionItem>> todoRequiredAncestors_;
         vector<ast::ParsedFile> trees;
 
         // Consume the todos, and reset the internal state of the `ResolveConstantsWalk`.
@@ -2091,23 +2101,31 @@ public:
 
             // We leave `constants.firstDefinitionLocs` alone here as it acts as a cache across trees.
 
+            // An inline move can leave moved-from items in the source list. Clear each list before
+            // reusing the walker for the next file.
             if (!constants.todo_.empty()) {
                 this->todo_.emplace_back(file, move(constants.todo_));
+                constants.todo_.clear();
             }
             if (!constants.todoAncestors_.empty()) {
                 this->todoAncestors_.emplace_back(file, move(constants.todoAncestors_));
+                constants.todoAncestors_.clear();
             }
             if (!constants.todoClassAliases_.empty()) {
                 this->todoClassAliases_.emplace_back(file, move(constants.todoClassAliases_));
+                constants.todoClassAliases_.clear();
             }
             if (!constants.todoTypeAliases_.empty()) {
                 this->todoTypeAliases_.emplace_back(file, move(constants.todoTypeAliases_));
+                constants.todoTypeAliases_.clear();
             }
             if (!constants.todoClassMethods_.empty()) {
                 this->todoClassMethods_.emplace_back(file, move(constants.todoClassMethods_));
+                constants.todoClassMethods_.clear();
             }
             if (!constants.todoRequiredAncestors_.empty()) {
                 this->todoRequiredAncestors_.emplace_back(file, move(constants.todoRequiredAncestors_));
+                constants.todoRequiredAncestors_.clear();
             }
         }
     };
@@ -2177,12 +2195,12 @@ public:
             }
         });
         trees.clear();
-        vector<ResolveItems<ConstantResolutionItem>> todo;
-        vector<ResolveItems<AncestorResolutionItem>> todoAncestors;
-        vector<ResolveItems<ClassAliasResolutionItem>> todoClassAliases;
-        vector<ResolveItems<TypeAliasResolutionItem>> todoTypeAliases;
-        vector<ResolveItems<ClassMethodsResolutionItem>> todoClassMethods;
-        vector<ResolveItems<RequireAncestorResolutionItem>> todoRequiredAncestors;
+        JobList<ResolveItems<ConstantResolutionItem>> todo;
+        JobList<ResolveItems<AncestorResolutionItem>> todoAncestors;
+        JobList<ResolveItems<ClassAliasResolutionItem>> todoClassAliases;
+        JobList<ResolveItems<TypeAliasResolutionItem>> todoTypeAliases;
+        JobList<ResolveItems<ClassMethodsResolutionItem>> todoClassMethods;
+        JobList<ResolveItems<RequireAncestorResolutionItem>> todoRequiredAncestors;
 
         {
             ResolveWalkResult threadResult;
@@ -2467,31 +2485,31 @@ class ResolveTypeMembersAndFieldsWalk {
 
     struct ResolveTypeMembersAndFieldsWorkerResult {
         vector<ast::ParsedFile> files;
-        vector<ResolveAssignItem> todoAssigns;
-        vector<ResolveAttachedClassItem> todoAttachedClassItems;
+        JobList<ResolveAssignItem> todoAssigns;
+        JobList<ResolveAttachedClassItem> todoAttachedClassItems;
         vector<core::SymbolRef> todoUntypedResultTypes;
-        vector<ResolveCastItem> todoResolveCastItems;
-        vector<ResolveFieldItem> todoResolveFieldItems;
-        vector<ResolveStaticFieldItem> todoResolveStaticFieldItems;
-        vector<ResolveSimpleStaticFieldItem> todoResolveSimpleStaticFieldItems;
-        vector<ResolveMethodAliasItem> todoMethodAliasItems;
-        vector<RecordSealedSubclassItem> todoSealedSubclassItems;
+        JobList<ResolveCastItem> todoResolveCastItems;
+        JobList<ResolveFieldItem> todoResolveFieldItems;
+        JobList<ResolveStaticFieldItem> todoResolveStaticFieldItems;
+        JobList<ResolveSimpleStaticFieldItem> todoResolveSimpleStaticFieldItems;
+        JobList<ResolveMethodAliasItem> todoMethodAliasItems;
+        JobList<RecordSealedSubclassItem> todoSealedSubclassItems;
     };
 
     struct ResolveTypeMembersAndFieldsResult {
         vector<ast::ParsedFile> trees;
-        vector<ResolveCastItem> todoResolveCastItems;
+        JobList<ResolveCastItem> todoResolveCastItems;
     };
 
-    vector<ResolveAssignItem> todoAssigns_;
-    vector<ResolveAttachedClassItem> todoAttachedClassItems_;
+    JobList<ResolveAssignItem> todoAssigns_;
+    JobList<ResolveAttachedClassItem> todoAttachedClassItems_;
     vector<core::SymbolRef> todoUntypedResultTypes_;
-    vector<ResolveCastItem> todoResolveCastItems_;
-    vector<ResolveFieldItem> todoResolveFieldItems_;
-    vector<ResolveStaticFieldItem> todoResolveStaticFieldItems_;
-    vector<ResolveSimpleStaticFieldItem> todoResolveSimpleStaticFieldItems_;
-    vector<ResolveMethodAliasItem> todoMethodAliasItems_;
-    vector<RecordSealedSubclassItem> todoSealedSubclassItems_;
+    JobList<ResolveCastItem> todoResolveCastItems_;
+    JobList<ResolveFieldItem> todoResolveFieldItems_;
+    JobList<ResolveStaticFieldItem> todoResolveStaticFieldItems_;
+    JobList<ResolveSimpleStaticFieldItem> todoResolveSimpleStaticFieldItems_;
+    JobList<ResolveMethodAliasItem> todoMethodAliasItems_;
+    JobList<RecordSealedSubclassItem> todoSealedSubclassItems_;
 
     // State for tracking type usage inside of a type alias or type member
     // definition
@@ -3622,15 +3640,15 @@ public:
         vector<ast::ParsedFile> combinedFiles;
         // The following items are not flattened; it'd be expensive to do so on large projects (they contain every
         // field/method alias/etc for the entire workspace!)
-        vector<vector<ResolveAssignItem>> combinedTodoAssigns;
-        vector<vector<ResolveAttachedClassItem>> combinedTodoAttachedClassItems;
+        vector<JobList<ResolveAssignItem>> combinedTodoAssigns;
+        vector<JobList<ResolveAttachedClassItem>> combinedTodoAttachedClassItems;
         vector<vector<core::SymbolRef>> combinedTodoUntypedResultTypes;
-        vector<vector<ResolveCastItem>> combinedTodoResolveCastItems;
-        vector<vector<ResolveFieldItem>> combinedTodoResolveFieldItems;
-        vector<vector<ResolveStaticFieldItem>> combinedTodoResolveStaticFieldItems;
-        vector<vector<ResolveSimpleStaticFieldItem>> combinedTodoResolveSimpleStaticFieldItems;
-        vector<vector<ResolveMethodAliasItem>> combinedTodoMethodAliasItems;
-        vector<vector<RecordSealedSubclassItem>> combinedTodoSealedSubclassItems;
+        vector<JobList<ResolveCastItem>> combinedTodoResolveCastItems;
+        vector<JobList<ResolveFieldItem>> combinedTodoResolveFieldItems;
+        vector<JobList<ResolveStaticFieldItem>> combinedTodoResolveStaticFieldItems;
+        vector<JobList<ResolveSimpleStaticFieldItem>> combinedTodoResolveSimpleStaticFieldItems;
+        vector<JobList<ResolveMethodAliasItem>> combinedTodoMethodAliasItems;
+        vector<JobList<RecordSealedSubclassItem>> combinedTodoSealedSubclassItems;
 
         {
             ResolveTypeMembersAndFieldsWorkerResult threadResult;
@@ -3684,7 +3702,7 @@ public:
         bool progress = true;
         while (progress && !combinedTodoAssigns.empty()) {
             progress = false;
-            erase_if(combinedTodoAssigns, [&](vector<ResolveAssignItem> &threadTodos) {
+            erase_if(combinedTodoAssigns, [&](JobList<ResolveAssignItem> &threadTodos) {
                 auto origSize = threadTodos.size();
                 erase_if(threadTodos, [&](ResolveAssignItem &job) -> bool {
                     core::MutableContext ctx(gs, core::Symbols::root(), job.file);
@@ -3730,7 +3748,7 @@ public:
         }
 
         // Resolve the remaining casts and fields.
-        vector<ResolveCastItem> stillPendingTodoResolveCastItems;
+        JobList<ResolveCastItem> stillPendingTodoResolveCastItems;
         for (auto &threadTodos : combinedTodoResolveCastItems) {
             for (auto &job : threadTodos) {
                 auto lastTry = false;
@@ -3775,7 +3793,7 @@ public:
         return {move(combinedFiles), move(stillPendingTodoResolveCastItems)};
     }
 
-    static void resolvePendingCastItems(const core::GlobalState &gs, vector<ResolveCastItem> &todoResolveCastItems) {
+    static void resolvePendingCastItems(const core::GlobalState &gs, JobList<ResolveCastItem> &todoResolveCastItems) {
         for (auto &job : todoResolveCastItems) {
             auto lastTry = true;
             if (!resolveCastItem(gs, job, lastTry)) {
