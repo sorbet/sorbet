@@ -85,7 +85,7 @@ LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &ch
                                         const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) const {
     TypecheckingPathResult result;
 
-    Timer timeit(config->logger, "fast_path_decision");
+    Timer timeit(*config->logger, "fast_path_decision");
     auto &logger = *config->logger;
     logger.debug("Trying to see if fast path is available after {} file changes", changedFiles.size());
     if (config->disableFastPath) {
@@ -325,7 +325,7 @@ void LSPIndexer::initialize(IndexerInitializationTask &task, vector<shared_ptr<c
 }
 
 unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit, WorkerPool &workers) {
-    Timer timeit(config->logger, "LSPIndexer::commitEdit");
+    Timer timeit(*config->logger, "LSPIndexer::commitEdit");
     auto result = make_unique<LSPFileUpdates>();
     auto &update = *result;
     update.epoch = edit.epoch;

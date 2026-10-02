@@ -56,8 +56,8 @@ class LSPLoop {
     std::vector<std::unique_ptr<LSPTask>> commitAndGetTasksForMessage(LSPMessage &msg);
 
 public:
-    LSPLoop(std::unique_ptr<core::GlobalState> initialGS, WorkerPool &workers,
-            const std::shared_ptr<LSPConfiguration> &config, std::unique_ptr<KeyValueStore> kvstore);
+    LSPLoop(std::unique_ptr<core::GlobalState> initialGS, WorkerPool &workers, std::shared_ptr<LSPConfiguration> config,
+            std::unique_ptr<KeyValueStore> kvstore);
     /**
      * Runs the language server on a dedicated thread. Returns the final global state if it exits cleanly, or nullopt
      * on error.

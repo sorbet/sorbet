@@ -71,7 +71,7 @@ private:
     void asyncRunInternal(std::shared_ptr<Task> task);
 
 public:
-    LSPTypecheckerCoordinator(const std::shared_ptr<const LSPConfiguration> &config,
+    LSPTypecheckerCoordinator(std::shared_ptr<const LSPConfiguration> config,
                               std::shared_ptr<core::lsp::PreemptionTaskManager> preemptionTaskManager,
                               WorkerPool &workers, std::shared_ptr<TaskQueue> taskQueue);
 

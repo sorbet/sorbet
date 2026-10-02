@@ -54,7 +54,7 @@ LSPQuery::filterAndDedup(const core::GlobalState &gs,
 
 LSPQueryResult LSPQuery::byLoc(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker, string_view uri,
                                const Position &pos, LSPMethod forMethod, bool emptyResultIfFileIsUntyped) {
-    Timer timeit(config.logger, "setupLSPQueryByLoc");
+    Timer timeit(*config.logger, "setupLSPQueryByLoc");
     const core::GlobalState &gs = typechecker.state();
     auto fref = config.uri2FileRef(gs, uri);
 
@@ -92,14 +92,14 @@ LSPQueryResult LSPQuery::byLoc(const LSPConfiguration &config, LSPTypecheckerDel
 LSPQueryResult LSPQuery::LSPQuery::bySymbolsInFiles(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker,
                                                     core::lsp::Query::Symbol::STORAGE &&symbols,
                                                     vector<core::FileRef> frefs) {
-    Timer timeit(config.logger, "setupLSPQueryBySymbolInFiles");
+    Timer timeit(*config.logger, "setupLSPQueryBySymbolInFiles");
     ENFORCE(absl::c_all_of(symbols, [](auto symbol) { return symbol.exists(); }));
     return typechecker.query(core::lsp::Query::createSymbolQuery(move(symbols)), frefs);
 }
 
 LSPQueryResult LSPQuery::bySymbol(const LSPConfiguration &config, LSPTypecheckerDelegate &typechecker,
                                   core::lsp::Query::Symbol::STORAGE &&symbols, core::packages::MangledName pkgName) {
-    Timer timeit(config.logger, "setupLSPQueryBySymbol");
+    Timer timeit(*config.logger, "setupLSPQueryBySymbol");
     ENFORCE(absl::c_all_of(symbols, [](auto symbol) { return symbol.exists(); }));
     vector<core::FileRef> frefs;
     const core::GlobalState &gs = typechecker.state();

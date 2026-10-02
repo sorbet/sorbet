@@ -261,7 +261,7 @@ void runAutogen(core::GlobalState &gs, options::Options &opts, WorkerPool &worke
         .msgpackSkipReferenceMetadata = std::move(opts.autogenMsgpackSkipReferenceMetadata),
     };
 
-    Timer timeit(logger, "autogen");
+    Timer timeit(*logger, "autogen");
 
     auto resultq = make_shared<BlockingBoundedQueue<AutogenResult>>(indexed.size());
     auto fileq = make_shared<ConcurrentBoundedQueue<int>>(indexed.size());
@@ -277,7 +277,7 @@ void runAutogen(core::GlobalState &gs, options::Options &opts, WorkerPool &worke
             AutogenResult out;
             int n = 0;
             {
-                Timer timeit(logger, "autogenWorker");
+                Timer timeit(*logger, "autogenWorker");
                 int idx = 0;
 
                 for (auto result = fileq->try_pop(idx); !result.done(); result = fileq->try_pop(idx)) {
@@ -299,11 +299,11 @@ void runAutogen(core::GlobalState &gs, options::Options &opts, WorkerPool &worke
                     AutogenResult::Serialized serialized;
 
                     if (opts.print.Autogen.enabled) {
-                        Timer timeit(logger, "autogenToString");
+                        Timer timeit(*logger, "autogenToString");
                         serialized.strval = pf.toString(ctx, autogenVersion);
                     }
                     if (opts.print.AutogenMsgPack.enabled) {
-                        Timer timeit(logger, "autogenToMsgpack");
+                        Timer timeit(*logger, "autogenToMsgpack");
                         serialized.msgpack = pf.toMsgpack(ctx, autogenVersion, autogenCfg);
                     }
 
@@ -311,7 +311,7 @@ void runAutogen(core::GlobalState &gs, options::Options &opts, WorkerPool &worke
                         // Exclude RBI files because they are not loadable and should not appear in
                         // auto-loader related output.
                         if (opts.print.AutogenSubclasses.enabled) {
-                            Timer timeit(logger, "autogenSubclasses");
+                            Timer timeit(*logger, "autogenSubclasses");
                             serialized.subclasses = autogen::Subclasses::listAllSubclasses(
                                 ctx, pf, opts.autogenSubclassesAbsoluteIgnorePatterns,
                                 opts.autogenSubclassesRelativeIgnorePatterns);
@@ -340,7 +340,7 @@ void runAutogen(core::GlobalState &gs, options::Options &opts, WorkerPool &worke
 
     if (opts.print.Autogen.enabled || opts.print.AutogenMsgPack.enabled) {
         {
-            Timer timeit(logger, "autogenDependencyDBPrint");
+            Timer timeit(*logger, "autogenDependencyDBPrint");
             if (opts.print.AutogenMsgPack.enabled) {
                 opts.print.AutogenMsgPack.print(
                     autogen::ParsedFile::msgpackGlobalHeader(autogenVersion, merged.size(), autogenCfg));
@@ -357,7 +357,7 @@ void runAutogen(core::GlobalState &gs, options::Options &opts, WorkerPool &worke
     }
 
     if (opts.print.AutogenSubclasses.enabled) {
-        Timer timeit(logger, "autogenSubclassesPrint");
+        Timer timeit(*logger, "autogenSubclassesPrint");
 
         // Merge the {Parent: Set{Child1, Child2}} maps from each thread
         autogen::Subclasses::Map childMap;
@@ -569,7 +569,7 @@ int realmain(int argc, char *argv[]) {
                           OwnedKeyValueStore::abort(move(kvstore)));
         gs = loop.runLSP(make_shared<lsp::LSPFDInput>(logger, STDIN_FILENO)).value_or(nullptr);
     } else if (gs->cacheSensitiveOptions.runningUnderAutogen) {
-        Timer timeall(logger, "wall_time");
+        Timer timeall(*logger, "wall_time");
         runAutogen(*gs, opts, *workers, move(kvstore));
 
         gs->errorQueue->flushAllErrors(*gs);
@@ -578,7 +578,7 @@ int realmain(int argc, char *argv[]) {
         }
 #endif
     } else {
-        Timer timeall(logger, "wall_time");
+        Timer timeall(*logger, "wall_time");
         if constexpr (sorbet::is_release_build) {
             if (opts.statsdTagRevision) {
                 timeall.setTag("version", sorbet::build_scm_revision);

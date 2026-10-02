@@ -116,7 +116,7 @@ void LSPPreprocessor::mergeFileChanges() {
     taskQueue->getMutex()->AssertHeld();
     auto &logger = config->logger;
     // mergeFileChanges is the most expensive operation this thread performs while holding the mutex lock.
-    Timer timeit(logger, "lsp.mergeFileChanges");
+    Timer timeit(*logger, "lsp.mergeFileChanges");
     auto &pendingRequests = taskQueue->tasks();
     const int originalSize = pendingRequests.size();
     int requestsMergedCounter = 0;
@@ -367,7 +367,7 @@ void LSPPreprocessor::preprocessAndEnqueue(unique_ptr<LSPMessage> msg) {
     task->latencyTimer = move(msg->latencyTimer);
 
     {
-        Timer timeit(config->logger, "LSPTask::preprocess");
+        Timer timeit(*config->logger, "LSPTask::preprocess");
         timeit.setTag("method", task->methodString());
         task->preprocess(*this);
     }

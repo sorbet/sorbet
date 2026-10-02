@@ -20,12 +20,6 @@ public:
     Timer(spdlog::logger &log, ConstExprStr name, FlowId prev,
           std::initializer_list<std::pair<ConstExprStr, std::string>> args,
           std::initializer_list<int> histogramBuckets);
-    Timer(const std::shared_ptr<spdlog::logger> &log, ConstExprStr name, FlowId prev);
-    Timer(const std::shared_ptr<spdlog::logger> &log, ConstExprStr name);
-    Timer(const std::shared_ptr<spdlog::logger> &log, ConstExprStr name, FlowId prev,
-          std::initializer_list<std::pair<ConstExprStr, std::string>> args);
-    Timer(const std::shared_ptr<spdlog::logger> &log, ConstExprStr name,
-          std::initializer_list<std::pair<ConstExprStr, std::string>> args);
     // Delete copy constructor to avoid accidentally copying and reporting a timer twice.
     Timer(const Timer &) = delete;
     // Define custom move constructor to avoid reporting moved timers.
