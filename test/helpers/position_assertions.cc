@@ -1187,7 +1187,7 @@ optional<bool> BooleanPropertyAssertion::getValue(string_view type,
 
 BooleanPropertyAssertion::BooleanPropertyAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
                                                    bool value, string_view assertionType)
-    : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), value(value){};
+    : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), value(value) {};
 
 string BooleanPropertyAssertion::toString() const {
     return fmt::format("{}: {}", assertionType, value);
@@ -1218,7 +1218,7 @@ optional<string> StringPropertyAssertion::getValue(string_view type,
 
 StringPropertyAssertion::StringPropertyAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
                                                  string value, string_view assertionType)
-    : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), value(value){};
+    : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), value(value) {};
 
 string StringPropertyAssertion::toString() const {
     return fmt::format("{}: {}", assertionType, value);
@@ -2456,7 +2456,7 @@ shared_ptr<StringPropertyAssertions> StringPropertyAssertions::make(string_view 
 
 StringPropertyAssertions::StringPropertyAssertions(string_view filename, unique_ptr<Range> &range, int assertionLine,
                                                    vector<string> values, string_view assertionType)
-    : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), values(values){};
+    : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), values(values) {};
 
 optional<vector<string>> StringPropertyAssertions::getValues(string_view type,
                                                              const vector<shared_ptr<RangeAssertion>> &assertions) {
@@ -2577,7 +2577,7 @@ shared_ptr<StratumAssertion> StratumAssertion::make(string_view filename, unique
 
 StratumAssertion::StratumAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
                                    core::packages::Stratum value)
-    : RangeAssertion(filename, range, assertionLine), value(value){};
+    : RangeAssertion(filename, range, assertionLine), value(value) {};
 
 string StratumAssertion::toString() const {
     return fmt::format("stratum: {}", value.rawId());

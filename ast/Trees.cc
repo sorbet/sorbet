@@ -1555,7 +1555,7 @@ string_view Self::nodeName() const {
     return "Self";
 }
 
-ParsedFilesOrCancelled::ParsedFilesOrCancelled() : trees(nullopt){};
+ParsedFilesOrCancelled::ParsedFilesOrCancelled() : trees(nullopt) {};
 ParsedFilesOrCancelled::ParsedFilesOrCancelled(vector<ParsedFile> &&trees) : trees(move(trees)) {}
 
 ParsedFilesOrCancelled ParsedFilesOrCancelled::cancel(std::vector<ParsedFile> &&trees, WorkerPool &workers) {

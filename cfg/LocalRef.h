@@ -10,8 +10,8 @@ class LocalRef final {
     uint32_t _id;
 
 public:
-    LocalRef() : _id(0){};
-    LocalRef(uint32_t id) : _id(id){};
+    LocalRef() : _id(0) {};
+    LocalRef(uint32_t id) : _id(id) {};
     LocalRef(const LocalRef &) = default;
     LocalRef(LocalRef &&) = default;
     LocalRef &operator=(LocalRef &&) = default;

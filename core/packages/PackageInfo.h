@@ -80,7 +80,7 @@ struct VisibleTo {
     core::LocOffsets loc;
 
     VisibleTo(MangledName mangledName, VisibleToType type, core::LocOffsets loc)
-        : mangledName(mangledName), type(type), loc(loc){};
+        : mangledName(mangledName), type(type), loc(loc) {};
 };
 
 struct PackageReferenceInfo {

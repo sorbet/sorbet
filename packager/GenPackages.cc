@@ -320,7 +320,7 @@ void GenPackages::runStrict(core::GlobalState &gs) {
         ENFORCE(pkgInfo.exists());
 
         auto existingContentsLoc = core::Loc(pkgInfo.file, pkgInfo.locs.loc)
-                                       .adjust(gs, pkgInfo.locs.declLoc.length() + 1, -1 * (int32_t) "end"sv.size());
+                                       .adjust(gs, pkgInfo.locs.declLoc.length() + 1, -1 * (int32_t)"end"sv.size());
         auto existingContents = existingContentsLoc.source(gs);
         ENFORCE(existingContents.has_value());
 
