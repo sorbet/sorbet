@@ -749,7 +749,7 @@ vector<unique_ptr<Location>> &extractLocations(ResponseMessage &respMsg) {
     static vector<unique_ptr<Location>> empty;
     auto &result = *(respMsg.result);
     auto &locationsOrNull = get<variant<JSONNullObject, vector<unique_ptr<Location>>>>(result);
-    if (auto isNull = get_if<JSONNullObject>(&locationsOrNull)) {
+    if (get_if<JSONNullObject>(&locationsOrNull)) {
         return empty;
     }
     return get<vector<unique_ptr<Location>>>(locationsOrNull);
@@ -759,7 +759,7 @@ vector<unique_ptr<DocumentHighlight>> &extractDocumentHighlights(ResponseMessage
     static vector<unique_ptr<DocumentHighlight>> empty;
     auto &result = *(respMsg.result);
     auto &highlightsOrNull = get<variant<JSONNullObject, vector<unique_ptr<DocumentHighlight>>>>(result);
-    if (auto isNull = get_if<JSONNullObject>(&highlightsOrNull)) {
+    if (get_if<JSONNullObject>(&highlightsOrNull)) {
         return empty;
     }
     return get<vector<unique_ptr<DocumentHighlight>>>(highlightsOrNull);
@@ -1310,7 +1310,7 @@ void HoverAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &assertio
 
 // Retrieve contents of a Hover response as a string.
 string_view hoverToString(variant<JSONNullObject, unique_ptr<Hover>> &hoverResult) {
-    if (auto nullResp = get_if<JSONNullObject>(&hoverResult)) {
+    if (get_if<JSONNullObject>(&hoverResult)) {
         return NULL_LABEL;
     } else {
         auto &hover = get<unique_ptr<Hover>>(hoverResult);
@@ -2384,7 +2384,7 @@ void ShowSymbolAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &ass
 }
 
 string_view symbolInformationToString(variant<JSONNullObject, unique_ptr<SymbolInformation>> &showSymbolResult) {
-    if (auto nullResp = get_if<JSONNullObject>(&showSymbolResult)) {
+    if (get_if<JSONNullObject>(&showSymbolResult)) {
         return NULL_LABEL;
     } else {
         auto &symbolInformation = get<unique_ptr<SymbolInformation>>(showSymbolResult);

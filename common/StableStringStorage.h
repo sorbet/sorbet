@@ -37,7 +37,7 @@ private:
 
 template <size_t PageSize>
 StableStringStorage<PageSize>::StableStringStorage(const StableStringStorage<PageSize> &rhs)
-    : strings(rhs.string), currentPagePosition(PageSize + 1) {}
+    : strings(rhs.strings), currentPagePosition(PageSize + 1) {}
 
 template <size_t PageSize>
 StableStringStorage<PageSize> &StableStringStorage<PageSize>::operator=(const StableStringStorage<PageSize> &rhs) {

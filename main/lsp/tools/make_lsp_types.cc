@@ -2,7 +2,7 @@
 
 using namespace std;
 
-shared_ptr<JSONType> makeStrEnum(const string name, vector<const string> values,
+shared_ptr<JSONType> makeStrEnum(const string name, vector<string> values,
                                  vector<shared_ptr<JSONClassType>> &enumTypes) {
     shared_ptr<JSONStringEnumType> ct = make_shared<JSONStringEnumType>(name, values);
     enumTypes.push_back(ct);
