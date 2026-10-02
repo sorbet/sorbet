@@ -1579,11 +1579,10 @@ private:
             }
             if (resolved) {
                 categoryCounterInc("resolve.constants.nonancestor", "firstpass");
-                auto resolvedCursor = cursorForSymbol(ctx, constant->symbol());
-                if (resolvedCursor.cursor.exists()) {
-                    resolvedCursor.legacyTestPath = job.legacyTestPath;
-                    cursor = resolvedCursor;
-                }
+                // Once a symbol is resolved, we can just use the cursor of that symbol
+                // (even if empty, i.e. "unpackaged"), rather than having to guess.
+                cursor = cursorForSymbol(ctx, constant->symbol());
+                cursor.legacyTestPath = job.legacyTestPath;
                 if (this->loadTimeScope() && (!constant->symbol().isClassOrModule() ||
                                               constant->symbol().asClassOrModuleRef().data(ctx)->isDeclared())) {
                     // While Sorbet treats class A::B; end like an implicit definition of A, it's actually a
