@@ -69,7 +69,7 @@ class NotifyNotificationOnDestruction {
     absl::Notification &notification;
 
 public:
-    NotifyNotificationOnDestruction(absl::Notification &notif) : notification(notif){};
+    NotifyNotificationOnDestruction(absl::Notification &notif) : notification(notif) {};
     ~NotifyNotificationOnDestruction() {
         if (!notification.HasBeenNotified()) {
             notification.Notify();

@@ -153,7 +153,7 @@ public:
 
     ExpectationHandler(Expectations &test, shared_ptr<core::ErrorQueue> &errorQueue,
                        shared_ptr<core::ErrorCollector> &errorCollector)
-        : test(test), errorQueue(errorQueue), errorCollector(errorCollector){};
+        : test(test), errorQueue(errorQueue), errorCollector(errorCollector) {};
 
     bool hasExpectation(string_view expectationType) {
         return test.expectations.contains(expectationType);
@@ -495,7 +495,9 @@ vector<ast::ParsedFile> indexForStressIncremental(core::GlobalState *gs, absl::S
                 }
 
                 // Prism Desugarer
-                { ast = ast::Desugar::Prism::node2Tree(ctx, move(prismResult)); }
+                {
+                    ast = ast::Desugar::Prism::node2Tree(ctx, move(prismResult));
+                }
 
                 // Do *not* check the `desugar-tree` and `desugar-tree-raw` expectations for the Prism parser,
                 // which can be subtly different (e.g. the numbering of unique identifiers).
@@ -808,8 +810,7 @@ TEST_CASE("PerPhaseTest") {
         realmain::Minimize::writeDiff(*gs, *gsForMinimize, printerConfig);
 
         auto addNewline = false;
-        handler.addObserved(
-            *gs, "minimized-rbi", [&]() { return printerConfig.flushToString(); }, addNewline);
+        handler.addObserved(*gs, "minimized-rbi", [&]() { return printerConfig.flushToString(); }, addNewline);
     }
 
     handler.checkExpectations();
@@ -833,7 +834,9 @@ TEST_CASE("PerPhaseTest") {
 
     // Allow later phases to have errors that we didn't test for
     errorQueue->flushAllErrors(*gs);
-    { auto _ = errorCollector->drainErrors(); }
+    {
+        auto _ = errorCollector->drainErrors();
+    }
 
     // now we test the incremental resolver
 
@@ -908,7 +911,9 @@ TEST_CASE("PerPhaseTest") {
 
     // and drain all the remaining errors
     errorQueue->flushAllErrors(*gs);
-    { auto _ = errorCollector->drainErrors(); }
+    {
+        auto _ = errorCollector->drainErrors();
+    }
 
     {
         INFO("the incremental resolver should not add new symbols");

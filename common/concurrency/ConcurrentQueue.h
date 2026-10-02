@@ -99,7 +99,7 @@ using ConcurrentBoundedQueue = AbstractConcurrentBoundedQueue<Elem, moodycamel::
 template <class Elem>
 class ConcurrentUnBoundedQueue : public AbstractConcurrentBoundedQueue<Elem, moodycamel::ConcurrentQueue<Elem>> {
 public:
-    ConcurrentUnBoundedQueue() : AbstractConcurrentBoundedQueue<Elem, moodycamel::ConcurrentQueue<Elem>>(INT_MAX){};
+    ConcurrentUnBoundedQueue() : AbstractConcurrentBoundedQueue<Elem, moodycamel::ConcurrentQueue<Elem>>(INT_MAX) {};
 };
 
 template <class Elem>
@@ -109,7 +109,7 @@ template <class Elem>
 class BlockingUnBoundedQueue : public AbstractConcurrentBoundedQueue<Elem, moodycamel::BlockingConcurrentQueue<Elem>> {
 public:
     BlockingUnBoundedQueue()
-        : AbstractConcurrentBoundedQueue<Elem, moodycamel::BlockingConcurrentQueue<Elem>>(INT_MAX){};
+        : AbstractConcurrentBoundedQueue<Elem, moodycamel::BlockingConcurrentQueue<Elem>>(INT_MAX) {};
 };
 
 #ifdef _MACH_BOOLEAN_H_

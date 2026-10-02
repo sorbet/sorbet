@@ -158,7 +158,7 @@ const vector<ParserOptions> parser_options({
 
 } // namespace
 
-PrinterConfig::PrinterConfig() : state(make_shared<GuardedState>()){};
+PrinterConfig::PrinterConfig() : state(make_shared<GuardedState>()) {};
 
 void PrinterConfig::print(const string_view &contents) const {
     if (outputPath.empty()) {

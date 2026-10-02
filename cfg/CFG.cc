@@ -357,8 +357,7 @@ optional<BasicBlock::BlockExitCondInfo> BasicBlock::maybeGetUpdateKnowledgeRecei
 string BasicBlock::toString(const core::GlobalState &gs, const CFG &cfg) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "block[id={}]({})\n", this->id,
-                   fmt::map_join(
-                       this->args, ", ", [&](const auto &arg) -> auto{ return arg.toString(gs, cfg); }));
+                   fmt::map_join(this->args, ", ", [&](const auto &arg) -> auto { return arg.toString(gs, cfg); }));
 
     if (this->outerLoops > 0) {
         fmt::format_to(std::back_inserter(buf), "outerLoops: {}\n", this->outerLoops);
@@ -373,8 +372,7 @@ string BasicBlock::toString(const core::GlobalState &gs, const CFG &cfg) const {
 string BasicBlock::toTextualString(const core::GlobalState &gs, const CFG &cfg) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "bb{}[firstDead={}]({}):\n", this->id, this->firstDeadInstructionIdx,
-                   fmt::map_join(
-                       this->args, ", ", [&](const auto &arg) -> auto{ return arg.toString(gs, cfg); }));
+                   fmt::map_join(this->args, ", ", [&](const auto &arg) -> auto { return arg.toString(gs, cfg); }));
 
     if (this->outerLoops > 0) {
         fmt::format_to(std::back_inserter(buf), "    # outerLoops: {}\n", this->outerLoops);
@@ -405,8 +403,7 @@ string BasicBlock::toTextualString(const core::GlobalState &gs, const CFG &cfg) 
 string BasicBlock::showRaw(const core::GlobalState &gs, const CFG &cfg) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "block[id={}]({})\n", this->id,
-                   fmt::map_join(
-                       this->args, ", ", [&](const auto &arg) -> auto{ return arg.showRaw(gs, cfg); }));
+                   fmt::map_join(this->args, ", ", [&](const auto &arg) -> auto { return arg.showRaw(gs, cfg); }));
 
     if (this->outerLoops > 0) {
         fmt::format_to(std::back_inserter(buf), "outerLoops: {}\n", this->outerLoops);

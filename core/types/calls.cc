@@ -606,7 +606,7 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
                 return i < s.arity;
             }
 
-            Comp(const GlobalState &gs) : gs(gs){};
+            Comp(const GlobalState &gs) : gs(gs) {};
         } cmp(gs);
 
         auto er = absl::c_equal_range(leftCandidates, args.size(), cmp);

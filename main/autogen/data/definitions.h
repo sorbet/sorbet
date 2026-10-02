@@ -52,7 +52,7 @@ enum class ClassKind { Class, Module };
 struct DefinitionRef {
     uint32_t _id;
 
-    DefinitionRef() : _id(NONE_ID){};
+    DefinitionRef() : _id(NONE_ID) {};
     DefinitionRef(uint32_t id) : _id(id) {}
 
     uint32_t id() const {
@@ -69,7 +69,7 @@ struct DefinitionRef {
 // A reference to a specific `Reference` inside of a `ParsedFile`.
 struct ReferenceRef {
     uint32_t _id;
-    ReferenceRef() : _id(NONE_ID){};
+    ReferenceRef() : _id(NONE_ID) {};
     ReferenceRef(uint32_t id) : _id(id) {}
 
     uint32_t id() const {
