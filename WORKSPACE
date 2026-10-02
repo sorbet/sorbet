@@ -49,12 +49,12 @@ compatibility_proxy_repo()
 load("@toolchains_llvm//toolchain:rules.bzl", "llvm_toolchain")
 
 llvm_toolchain(
-    name = "llvm_toolchain_15_0_7",
+    name = "llvm_toolchain_18_1_8",
     absolute_paths = True,
     alternative_llvm_sources = [
         "https://github.com/sorbet/llvm-project/releases/download/llvmorg-{llvm_version}/{basename}",
     ],
-    llvm_version = "15.0.7",
+    llvm_version = "18.1.8",
     # The sysroots are needed for cross-compiling
     sysroot = {
         "": "",
@@ -63,7 +63,7 @@ llvm_toolchain(
     },
 )
 
-load("@llvm_toolchain_15_0_7//:toolchains.bzl", "llvm_register_toolchains")
+load("@llvm_toolchain_18_1_8//:toolchains.bzl", "llvm_register_toolchains")
 
 llvm_register_toolchains()
 
