@@ -1,0 +1,7 @@
+# typed: strict
+# assert-slow-path: true
+
+# Simulates copying `a/__package.rb` to start a new package, before renaming it.
+class A < PackageSpec # error: Redefinition of package `A`
+  export_all!
+end
