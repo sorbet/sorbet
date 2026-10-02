@@ -1013,9 +1013,17 @@ private:
     static bool resolveAncestorJob(core::MutableContext ctx, AncestorResolutionItem &job,
                                    const UnorderedSet<core::ClassOrModuleRef> &suppressPayloadSuperclassRedefinitionFor,
                                    bool lastRun) {
+        auto filePackage = ctx.state.packageDB().getPackageNameForFile(ctx.file);
+        auto &filePackageInfo = ctx.state.packageDB().getPackageInfo(filePackage);
+        auto canModify = filePackageInfo.canModifySymbol(ctx, job.klass);
         auto ancestorSym = job.ancestor->symbol();
-        if (!ancestorSym.exists()) {
-            if (!lastRun && !job.isSuperclass && !job.mixinIndex.has_value()) {
+        bool isTypeAlias = ancestorSym.exists() && ancestorSym.isTypeAlias(ctx);
+        auto resolved = ancestorSym.exists() && !isTypeAlias ? ancestorSym.dealias(ctx) : core::SymbolRef();
+        if (!ancestorSym.exists() || (!lastRun && !resolved.isClassOrModule())) {
+            // Reserving a mixin slot also mutates the class. Do not modify an earlier stratum's class
+            // even temporarily when package ownership will reject the mixin once its constant resolves.
+            if (!lastRun && !isTypeAlias && !job.isSuperclass && !job.mixinIndex.has_value() &&
+                canModify == core::packages::PackageInfo::CanModifyResult::CanModify) {
                 // This is an include or extend. Add a placeholder to fill in later to preserve
                 // ordering of mixins, unless an index is already set.
                 job.mixinIndex = job.klass.data(ctx)->addMixinPlaceholder(ctx);
@@ -1023,37 +1031,20 @@ private:
             return false;
         }
 
-        core::ClassOrModuleRef resolvedClass;
-        {
-            core::SymbolRef resolved;
-            if (ancestorSym.isTypeAlias(ctx)) {
-                if (!lastRun) {
-                    return false;
-                }
-                if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::DynamicSuperclass)) {
-                    e.setHeader("Superclasses and mixins may not be type aliases");
-                }
-                resolved = stubSymbolForAncestor(job);
-            } else {
-                resolved = ancestorSym.dealias(ctx);
+        if (isTypeAlias) {
+            if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::DynamicSuperclass)) {
+                e.setHeader("Superclasses and mixins may not be type aliases");
             }
-
-            if (!resolved.isClassOrModule()) {
-                if (!lastRun) {
-                    if (!job.isSuperclass && !job.mixinIndex.has_value()) {
-                        // This is an include or extend. Add a placeholder to fill in later to preserve
-                        // ordering of mixins.
-                        job.mixinIndex = job.klass.data(ctx)->addMixinPlaceholder(ctx);
-                    }
-                    return false;
-                }
-                if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::DynamicSuperclass)) {
-                    e.setHeader("Superclasses and mixins may only use class aliases like `{}`", "A = Integer");
-                }
-                resolved = stubSymbolForAncestor(job);
-            }
-            resolvedClass = resolved.asClassOrModuleRef();
+            resolved = stubSymbolForAncestor(job);
         }
+
+        if (!resolved.isClassOrModule()) {
+            if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::DynamicSuperclass)) {
+                e.setHeader("Superclasses and mixins may only use class aliases like `{}`", "A = Integer");
+            }
+            resolved = stubSymbolForAncestor(job);
+        }
+        auto resolvedClass = resolved.asClassOrModuleRef();
 
         if (resolvedClass == job.klass) {
             if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::CircularDependency)) {
@@ -1072,9 +1063,6 @@ private:
         }
 
         bool ancestorPresent = true;
-        auto filePackage = ctx.state.packageDB().getPackageNameForFile(ctx.file);
-        auto &filePackageInfo = ctx.state.packageDB().getPackageInfo(filePackage);
-        auto canModify = filePackageInfo.canModifySymbol(ctx, job.klass);
         if (job.isSuperclass) {
             switch (canModify) {
                 // NOTE: we ignore the PackageSpec error here, as it's fine to set the superclass of something in the
