@@ -48,13 +48,44 @@ compatibility_proxy_repo()
 
 load("@toolchains_llvm//toolchain:rules.bzl", "llvm_toolchain")
 
+# The toolchain links Apple's system libc++ on macOS. Use Apple's headers
+# with it, rather than LLVM 22 headers that require newer runtime symbols.
+# Use Command Line Tools consistently with the sysroots below.
+apple_libcxx_headers = "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1"
+
+# cxx_flags replaces the toolchain defaults, so preserve the standard,
+# library selection, and module workaround while changing the header search.
+apple_libcxx_cxx_flags = [
+    "-std=c++20",
+    "-stdlib=libc++",
+    "-Xclang",
+    "-fno-cxx-modules",
+    "-nostdinc++",
+    "-isystem",
+    apple_libcxx_headers,
+]
+
 llvm_toolchain(
-    name = "llvm_toolchain_15_0_7",
+    name = "llvm_toolchain_22_1_3",
     absolute_paths = True,
     alternative_llvm_sources = [
         "https://github.com/sorbet/llvm-project/releases/download/llvmorg-{llvm_version}/{basename}",
     ],
-    llvm_version = "15.0.7",
+    cxx_builtin_include_directories = {
+        "darwin-aarch64": [apple_libcxx_headers],
+        "darwin-x86_64": [apple_libcxx_headers],
+    },
+    cxx_flags = {
+        "darwin-aarch64": apple_libcxx_cxx_flags,
+        "darwin-x86_64": apple_libcxx_cxx_flags,
+    },
+    # These releases postdate our pinned toolchains_llvm distribution table.
+    extra_llvm_distributions = {
+        "LLVM-22.1.3-Linux-ARM64.tar.xz": "4dc01fbb46084b3c3304a51e8412903da3735d5a276bcdd35333bc38bad8a8b6",
+        "LLVM-22.1.3-Linux-X64.tar.xz": "6e776c396895837a168a36d13e0b0e4552680eda58d8dab6aa5fb75e2c3d13ea",
+        "LLVM-22.1.3-macOS-ARM64.tar.xz": "881e524d374cd2befd95888db1846e3150b0728fa842b90bb15bafc0b19c075c",
+    },
+    llvm_version = "22.1.3",
     # The sysroots are needed for cross-compiling
     sysroot = {
         "": "",
@@ -63,7 +94,7 @@ llvm_toolchain(
     },
 )
 
-load("@llvm_toolchain_15_0_7//:toolchains.bzl", "llvm_register_toolchains")
+load("@llvm_toolchain_22_1_3//:toolchains.bzl", "llvm_register_toolchains")
 
 llvm_register_toolchains()
 
