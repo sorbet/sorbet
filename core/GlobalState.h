@@ -95,6 +95,12 @@ private:
     void moveNames(Bucket *from, Bucket *to, unsigned int szFrom, unsigned int szTo);
 
 public:
+    // Return how big the hash table should be to hold `numNames` names.
+    static inline uint32_t sizeFor(size_t numNames) {
+        ENFORCE(numNames < std::numeric_limits<uint32_t>::max());
+        return 2 * nextPowerOfTwo(numNames);
+    }
+
     static inline Hash hashMixUTF8(std::string_view name) {
         return _hash(name);
     }
