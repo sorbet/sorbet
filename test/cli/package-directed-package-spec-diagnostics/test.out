@@ -1,0 +1,269 @@
+------ monolithic ----------------------
+__package.rb:12: Argument to `strict_dependencies` must be one of: `'false'`, `'layered'`, `'layered_dag'`, or `'dag'` https://srb.help/3724
+    12 |  strict_dependencies false
+                              ^^^^^
+
+__package.rb:13: Argument to `layer` must be one of: app https://srb.help/3725
+    13 |  layer 1
+                ^
+
+__package.rb:14: Argument to `tests_min_typed_level` must be one of: `ignore`, `false`, `true`, `strict`, or `strong` https://srb.help/3729
+    14 |  sorbet tests_min_typed_level: false
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+__package.rb:9: Unable to resolve constant `MissingImport` https://srb.help/5002
+     9 |  import MissingImport
+                 ^^^^^^^^^^^^^
+
+__package.rb:10: Unable to resolve constant `MissingVisibility` https://srb.help/5002
+    10 |  visible_to MissingVisibility
+                     ^^^^^^^^^^^^^^^^^
+
+__package.rb:6: Too many arguments provided for method `Sorbet::Private::Static::PackageSpec.custom_method`. Expected: `1`, got: `2` https://srb.help/7004
+     6 |  custom_method 'one', 'extra'
+                               ^^^^^^^
+    packages.rbi:5: `custom_method` defined here
+     5 |  def self.custom_method(value); end
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    __package.rb:6: Delete
+     6 |  custom_method 'one', 'extra'
+                             ^^^^^^^^^
+
+__package.rb:7: Method `missing_method` does not exist on `T.class_of(Root)` https://srb.help/7003
+     7 |  missing_method
+          ^^^^^^^^^^^^^^
+  Got `T.class_of(Root)` originating from:
+    __package.rb:3:
+     3 |class Root < PackageSpec
+        ^
+  Did you mean `define_method`? Use `-a` to autocorrect
+    __package.rb:7: Replace with `define_method`
+     7 |  missing_method
+          ^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
+      NN |  def define_method(arg0, arg1=T.unsafe(nil), &blk); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+__package.rb:12: Expected `String` but found `FalseClass` for argument `arg0` https://srb.help/7002
+    12 |  strict_dependencies false
+                              ^^^^^
+  Expected `String` for argument `arg0` of method `Sorbet::Private::Static::PackageSpec.strict_dependencies`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/packages.rbi#LCENSORED:
+    NN |  sig { params(arg0: String).void }
+                       ^^^^
+  Got `FalseClass` originating from:
+    __package.rb:12:
+    12 |  strict_dependencies false
+                              ^^^^^
+
+__package.rb:13: Expected `String` but found `Integer(1)` for argument `arg0` https://srb.help/7002
+    13 |  layer 1
+                ^
+  Expected `String` for argument `arg0` of method `Sorbet::Private::Static::PackageSpec.layer`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/packages.rbi#LCENSORED:
+    NN |  sig { params(arg0: String).void }
+                       ^^^^
+  Got `Integer(1)` originating from:
+    __package.rb:13:
+    13 |  layer 1
+                ^
+
+__package.rb:14: Expected `T.nilable(String)` but found `FalseClass` for argument `tests_min_typed_level` https://srb.help/7002
+    14 |  sorbet tests_min_typed_level: false
+                                        ^^^^^
+  Expected `T.nilable(String)` for argument `tests_min_typed_level` of method `Sorbet::Private::Static::PackageSpec.sorbet`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/packages.rbi#LCENSORED:
+    NN |  sig { params(min_typed_level: String, tests_min_typed_level: T.nilable(String)).void }
+                                                ^^^^^^^^^^^^^^^^^^^^^
+  Got `FalseClass` originating from:
+    __package.rb:14:
+    14 |  sorbet tests_min_typed_level: false
+                                        ^^^^^
+
+__package.rb:14: Missing required keyword argument `min_typed_level` for method `Sorbet::Private::Static::PackageSpec.sorbet` https://srb.help/7004
+    14 |  sorbet tests_min_typed_level: false
+                                             ^
+    https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/packages.rbi#LCENSORED: Keyword parameter `min_typed_level` declared to expect type `String` here:
+    NN |  sig { params(min_typed_level: String, tests_min_typed_level: T.nilable(String)).void }
+                       ^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    __package.rb:14: Insert `, min_typed_level:`
+    14 |  sorbet tests_min_typed_level: false
+                                             ^
+Errors: 11
+------ package-directed ----------------
+__package.rb:12: Argument to `strict_dependencies` must be one of: `'false'`, `'layered'`, `'layered_dag'`, or `'dag'` https://srb.help/3724
+    12 |  strict_dependencies false
+                              ^^^^^
+
+__package.rb:13: Argument to `layer` must be one of: app https://srb.help/3725
+    13 |  layer 1
+                ^
+
+__package.rb:14: Argument to `tests_min_typed_level` must be one of: `ignore`, `false`, `true`, `strict`, or `strong` https://srb.help/3729
+    14 |  sorbet tests_min_typed_level: false
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+__package.rb:9: Unable to resolve constant `MissingImport` https://srb.help/5002
+     9 |  import MissingImport
+                 ^^^^^^^^^^^^^
+
+__package.rb:10: Unable to resolve constant `MissingVisibility` https://srb.help/5002
+    10 |  visible_to MissingVisibility
+                     ^^^^^^^^^^^^^^^^^
+
+__package.rb:9: Unable to resolve constant `MissingImport` https://srb.help/5002
+     9 |  import MissingImport
+                 ^^^^^^^^^^^^^
+
+__package.rb:10: Unable to resolve constant `MissingVisibility` https://srb.help/5002
+    10 |  visible_to MissingVisibility
+                     ^^^^^^^^^^^^^^^^^
+
+__package.rb:6: Too many arguments provided for method `Sorbet::Private::Static::PackageSpec.custom_method`. Expected: `1`, got: `2` https://srb.help/7004
+     6 |  custom_method 'one', 'extra'
+                               ^^^^^^^
+    packages.rbi:5: `custom_method` defined here
+     5 |  def self.custom_method(value); end
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    __package.rb:6: Delete
+     6 |  custom_method 'one', 'extra'
+                             ^^^^^^^^^
+
+__package.rb:7: Method `missing_method` does not exist on `T.class_of(Root)` https://srb.help/7003
+     7 |  missing_method
+          ^^^^^^^^^^^^^^
+  Got `T.class_of(Root)` originating from:
+    __package.rb:3:
+     3 |class Root < PackageSpec
+        ^
+  Did you mean `define_method`? Use `-a` to autocorrect
+    __package.rb:7: Replace with `define_method`
+     7 |  missing_method
+          ^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
+      NN |  def define_method(arg0, arg1=T.unsafe(nil), &blk); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+__package.rb:12: Expected `String` but found `FalseClass` for argument `arg0` https://srb.help/7002
+    12 |  strict_dependencies false
+                              ^^^^^
+  Expected `String` for argument `arg0` of method `Sorbet::Private::Static::PackageSpec.strict_dependencies`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/packages.rbi#LCENSORED:
+    NN |  sig { params(arg0: String).void }
+                       ^^^^
+  Got `FalseClass` originating from:
+    __package.rb:12:
+    12 |  strict_dependencies false
+                              ^^^^^
+
+__package.rb:13: Expected `String` but found `Integer(1)` for argument `arg0` https://srb.help/7002
+    13 |  layer 1
+                ^
+  Expected `String` for argument `arg0` of method `Sorbet::Private::Static::PackageSpec.layer`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/packages.rbi#LCENSORED:
+    NN |  sig { params(arg0: String).void }
+                       ^^^^
+  Got `Integer(1)` originating from:
+    __package.rb:13:
+    13 |  layer 1
+                ^
+
+__package.rb:14: Expected `T.nilable(String)` but found `FalseClass` for argument `tests_min_typed_level` https://srb.help/7002
+    14 |  sorbet tests_min_typed_level: false
+                                        ^^^^^
+  Expected `T.nilable(String)` for argument `tests_min_typed_level` of method `Sorbet::Private::Static::PackageSpec.sorbet`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/packages.rbi#LCENSORED:
+    NN |  sig { params(min_typed_level: String, tests_min_typed_level: T.nilable(String)).void }
+                                                ^^^^^^^^^^^^^^^^^^^^^
+  Got `FalseClass` originating from:
+    __package.rb:14:
+    14 |  sorbet tests_min_typed_level: false
+                                        ^^^^^
+
+__package.rb:14: Missing required keyword argument `min_typed_level` for method `Sorbet::Private::Static::PackageSpec.sorbet` https://srb.help/7004
+    14 |  sorbet tests_min_typed_level: false
+                                             ^
+    https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/packages.rbi#LCENSORED: Keyword parameter `min_typed_level` declared to expect type `String` here:
+    NN |  sig { params(min_typed_level: String, tests_min_typed_level: T.nilable(String)).void }
+                       ^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    __package.rb:14: Insert `, min_typed_level:`
+    14 |  sorbet tests_min_typed_level: false
+                                             ^
+
+__package.rb:6: Too many arguments provided for method `Sorbet::Private::Static::PackageSpec.custom_method`. Expected: `1`, got: `2` https://srb.help/7004
+     6 |  custom_method 'one', 'extra'
+                               ^^^^^^^
+    packages.rbi:5: `custom_method` defined here
+     5 |  def self.custom_method(value); end
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    __package.rb:6: Delete
+     6 |  custom_method 'one', 'extra'
+                             ^^^^^^^^^
+
+__package.rb:7: Method `missing_method` does not exist on `T.class_of(Root)` https://srb.help/7003
+     7 |  missing_method
+          ^^^^^^^^^^^^^^
+  Got `T.class_of(Root)` originating from:
+    __package.rb:3:
+     3 |class Root < PackageSpec
+        ^
+  Did you mean `define_method`? Use `-a` to autocorrect
+    __package.rb:7: Replace with `define_method`
+     7 |  missing_method
+          ^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Defined here
+      NN |  def define_method(arg0, arg1=T.unsafe(nil), &blk); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+__package.rb:12: Expected `String` but found `FalseClass` for argument `arg0` https://srb.help/7002
+    12 |  strict_dependencies false
+                              ^^^^^
+  Expected `String` for argument `arg0` of method `Sorbet::Private::Static::PackageSpec.strict_dependencies`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/packages.rbi#LCENSORED:
+    NN |  sig { params(arg0: String).void }
+                       ^^^^
+  Got `FalseClass` originating from:
+    __package.rb:12:
+    12 |  strict_dependencies false
+                              ^^^^^
+
+__package.rb:13: Expected `String` but found `Integer(1)` for argument `arg0` https://srb.help/7002
+    13 |  layer 1
+                ^
+  Expected `String` for argument `arg0` of method `Sorbet::Private::Static::PackageSpec.layer`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/packages.rbi#LCENSORED:
+    NN |  sig { params(arg0: String).void }
+                       ^^^^
+  Got `Integer(1)` originating from:
+    __package.rb:13:
+    13 |  layer 1
+                ^
+
+__package.rb:14: Expected `T.nilable(String)` but found `FalseClass` for argument `tests_min_typed_level` https://srb.help/7002
+    14 |  sorbet tests_min_typed_level: false
+                                        ^^^^^
+  Expected `T.nilable(String)` for argument `tests_min_typed_level` of method `Sorbet::Private::Static::PackageSpec.sorbet`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/packages.rbi#LCENSORED:
+    NN |  sig { params(min_typed_level: String, tests_min_typed_level: T.nilable(String)).void }
+                                                ^^^^^^^^^^^^^^^^^^^^^
+  Got `FalseClass` originating from:
+    __package.rb:14:
+    14 |  sorbet tests_min_typed_level: false
+                                        ^^^^^
+
+__package.rb:14: Missing required keyword argument `min_typed_level` for method `Sorbet::Private::Static::PackageSpec.sorbet` https://srb.help/7004
+    14 |  sorbet tests_min_typed_level: false
+                                             ^
+    https://github.com/sorbet/sorbet/tree/master/rbi/sorbet/packages.rbi#LCENSORED: Keyword parameter `min_typed_level` declared to expect type `String` here:
+    NN |  sig { params(min_typed_level: String, tests_min_typed_level: T.nilable(String)).void }
+                       ^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    __package.rb:14: Insert `, min_typed_level:`
+    14 |  sorbet tests_min_typed_level: false
+                                             ^
+Errors: 19
