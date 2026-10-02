@@ -193,9 +193,11 @@ class SymbolFinder {
         } else if (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node)) {
             core::FoundClass found;
             found.owner = defineScope(owner, constLit->scope, withinExplicitRootScope);
+            found.lexicalOwner = getOwner();
             found.name = constLit->cnst;
             found.loc = constLit->loc;
             found.declLoc = constLit->loc;
+            found.nameLoc = constLit->loc;
             found.classKind = core::FoundClass::Kind::Unknown;
             found.withinExplicitRootScope = withinExplicitRootScope;
             return foundDefs->addClass(move(found));
@@ -221,7 +223,11 @@ public:
         found.classKind = ast::ClassDef::kindToFoundClassKind(klass.kind);
         found.loc = klass.loc;
         found.declLoc = klass.declLoc;
+        found.nameLoc = klass.name.loc();
+        found.lexicalOwner = getOwner();
         found.withinExplicitRootScope = currentOwnerWithinExplicitRootScope() || isExplicitlyRootScoped(klass.name);
+        found.hasExplicitSuperclass = klass.kind == ast::ClassDef::Kind::Class && !klass.ancestors.empty() &&
+                                      ast::isa_tree<ast::UnresolvedConstantLit>(klass.ancestors[0]);
 
         auto ident = ast::cast_tree<ast::UnresolvedIdent>(klass.name);
         if ((ident != nullptr) && ident->name == core::Names::singleton()) {
