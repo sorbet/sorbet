@@ -1016,8 +1016,8 @@ private:
         auto ancestorSym = job.ancestor->symbol();
         bool isTypeAlias = ancestorSym.exists() && ancestorSym.isTypeAlias(ctx);
         auto resolved = ancestorSym.exists() && !isTypeAlias ? ancestorSym.dealias(ctx) : core::SymbolRef();
-        if (!ancestorSym.exists() || (!lastRun && !isTypeAlias && !resolved.isClassOrModule())) {
-            if (!lastRun && !job.isSuperclass && !job.mixinIndex.has_value()) {
+        if (!ancestorSym.exists() || (!lastRun && !resolved.isClassOrModule())) {
+            if (!lastRun && !isTypeAlias && !job.isSuperclass && !job.mixinIndex.has_value()) {
                 // This is an include or extend. Add a placeholder to fill in later to preserve
                 // ordering of mixins, unless an index is already set.
                 job.mixinIndex = job.klass.data(ctx)->addMixinPlaceholder(ctx);
@@ -1028,9 +1028,6 @@ private:
         core::ClassOrModuleRef resolvedClass;
         {
             if (isTypeAlias) {
-                if (!lastRun) {
-                    return false;
-                }
                 if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::DynamicSuperclass)) {
                     e.setHeader("Superclasses and mixins may not be type aliases");
                 }
