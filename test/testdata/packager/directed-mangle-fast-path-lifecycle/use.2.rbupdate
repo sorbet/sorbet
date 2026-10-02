@@ -1,0 +1,2 @@
+# typed: strict
+Lifecycle::Item.new.restored
