@@ -628,7 +628,11 @@ public:
     // Might correspond to an intermediate `<PackageSpecRegistry>` namespace (not a package), but at least
     // will always correspond to the tightest possible namespace in the `<PackageSpecRegistry>` subtree.
     //
-    // Only set if `gs.packageDB().enabled()`
+    // Normally, only set if `gs.packageDB().enabled()`, though `<root>` and `<PackageSpecRegistry>`
+    // (and `::Test` in legacy test packages mode) are initialized to contain `<PackageSpecRegistry>`.
+    //
+    // Unpackaged namespaces outside the package-name hierarchy, like `::Regexp`, have no registry
+    // cursor (the default).
     //
     // - Given ::<root>, contains ::<PackageSpecRegistry>
     // - Given ::Opus::MyPkg, contains ::<PackageSpecRegistry>::Opus::MyPkg
@@ -636,9 +640,10 @@ public:
     // - Given ::Opus::MyPkg::Foo::InnerPkg, contains ::<PackageSpecRegistry>::Opus::MyPkg::Foo::InnerPkg
     // - Given ::Test, contains ::<PackageSpecRegistry>
     // - Given ::Test::Opus::MyPkg, contains ::<PackageSpecRegistry>::Opus::MyPkg
+    // - Given an unpackaged namespace like ::Regexp, contains ::<none>
     //
     // When set to `::<none>`, inherit whatever our owner has for `package`.
-    ClassOrModuleRef packageRegistryOwner = core::Symbols::PackageSpecRegistry();
+    ClassOrModuleRef packageRegistryOwner = core::Symbols::noClassOrModule();
 
     // The package that this symbol belongs to.
     //
