@@ -1025,23 +1025,20 @@ private:
             return false;
         }
 
-        core::ClassOrModuleRef resolvedClass;
-        {
-            if (isTypeAlias) {
-                if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::DynamicSuperclass)) {
-                    e.setHeader("Superclasses and mixins may not be type aliases");
-                }
-                resolved = stubSymbolForAncestor(job);
+        if (isTypeAlias) {
+            if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::DynamicSuperclass)) {
+                e.setHeader("Superclasses and mixins may not be type aliases");
             }
-
-            if (!resolved.isClassOrModule()) {
-                if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::DynamicSuperclass)) {
-                    e.setHeader("Superclasses and mixins may only use class aliases like `{}`", "A = Integer");
-                }
-                resolved = stubSymbolForAncestor(job);
-            }
-            resolvedClass = resolved.asClassOrModuleRef();
+            resolved = stubSymbolForAncestor(job);
         }
+
+        if (!resolved.isClassOrModule()) {
+            if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::DynamicSuperclass)) {
+                e.setHeader("Superclasses and mixins may only use class aliases like `{}`", "A = Integer");
+            }
+            resolved = stubSymbolForAncestor(job);
+        }
+        auto resolvedClass = resolved.asClassOrModuleRef();
 
         if (resolvedClass == job.klass) {
             if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::CircularDependency)) {
