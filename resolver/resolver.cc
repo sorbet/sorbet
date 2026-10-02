@@ -1014,7 +1014,9 @@ private:
                                    const UnorderedSet<core::ClassOrModuleRef> &suppressPayloadSuperclassRedefinitionFor,
                                    bool lastRun) {
         auto ancestorSym = job.ancestor->symbol();
-        if (!ancestorSym.exists()) {
+        bool isTypeAlias = ancestorSym.exists() && ancestorSym.isTypeAlias(ctx);
+        auto resolved = ancestorSym.exists() && !isTypeAlias ? ancestorSym.dealias(ctx) : core::SymbolRef();
+        if (!ancestorSym.exists() || (!lastRun && !isTypeAlias && !resolved.isClassOrModule())) {
             if (!lastRun && !job.isSuperclass && !job.mixinIndex.has_value()) {
                 // This is an include or extend. Add a placeholder to fill in later to preserve
                 // ordering of mixins, unless an index is already set.
@@ -1025,8 +1027,7 @@ private:
 
         core::ClassOrModuleRef resolvedClass;
         {
-            core::SymbolRef resolved;
-            if (ancestorSym.isTypeAlias(ctx)) {
+            if (isTypeAlias) {
                 if (!lastRun) {
                     return false;
                 }
@@ -1034,19 +1035,9 @@ private:
                     e.setHeader("Superclasses and mixins may not be type aliases");
                 }
                 resolved = stubSymbolForAncestor(job);
-            } else {
-                resolved = ancestorSym.dealias(ctx);
             }
 
             if (!resolved.isClassOrModule()) {
-                if (!lastRun) {
-                    if (!job.isSuperclass && !job.mixinIndex.has_value()) {
-                        // This is an include or extend. Add a placeholder to fill in later to preserve
-                        // ordering of mixins.
-                        job.mixinIndex = job.klass.data(ctx)->addMixinPlaceholder(ctx);
-                    }
-                    return false;
-                }
                 if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::DynamicSuperclass)) {
                     e.setHeader("Superclasses and mixins may only use class aliases like `{}`", "A = Integer");
                 }
