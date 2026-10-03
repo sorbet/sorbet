@@ -374,6 +374,16 @@ TEST_CASE("filesWithErrorsSince") {
     INFO("Only returns files with errors");
     CHECK_EQ(1, filesWithErrorsSince.size());
     CHECK_EQ(fref, filesWithErrorsSince[0]);
+
+    auto clearingEpoch = 4;
+    er.beginEpoch(clearingEpoch, true, move(diagnosticLatencyTimers));
+    er.pushDiagnostics(clearingEpoch, fref, emptyErrorList, *gs);
+    er.pushDiagnostics(clearingEpoch, frefWithoutErrors, emptyErrorList, *gs);
+
+    filesWithErrorsSince = er.filesWithErrorsSince(clearingEpoch);
+    INFO("Also returns files that just had their errors cleared");
+    CHECK_EQ(1, filesWithErrorsSince.size());
+    CHECK_EQ(fref, filesWithErrorsSince[0]);
     er.sanityCheck();
 }
 

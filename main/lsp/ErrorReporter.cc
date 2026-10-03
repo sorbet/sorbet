@@ -15,7 +15,7 @@ vector<core::FileRef> ErrorReporter::filesWithErrorsSince(uint32_t epoch) {
     vector<core::FileRef> filesUpdatedSince;
     for (size_t i = 1; i < fileErrorStatuses.size(); ++i) {
         ErrorStatus fileErrorStatus = fileErrorStatuses[i];
-        if (fileErrorStatus.lastReportedEpoch >= epoch && fileErrorStatus.errorCount > 0) {
+        if (fileErrorStatus.lastReportedEpoch >= epoch && fileErrorStatus.sentDiagnostics) {
             filesUpdatedSince.push_back(core::FileRef(i));
         }
     }
@@ -128,7 +128,8 @@ void ErrorReporter::pushDiagnostics(uint32_t epoch, core::FileRef file, const ve
 
     // If the error reporter is not going to report errors and the file had no errors previously, break
     // Avoids an issue where ErrorReporter sends an empty error list for files that have hidden errors.
-    if (errorsToReport == 0 && fileErrorStatus.errorCount == 0) {
+    fileErrorStatus.sentDiagnostics = errorsToReport > 0 || fileErrorStatus.errorCount > 0;
+    if (!fileErrorStatus.sentDiagnostics) {
         return;
     }
 

@@ -17,6 +17,8 @@ struct ErrorStatus {
     uint32_t lastReportedEpoch = 0;
     // The number of errors reported for this file during the last reported epoch.
     uint32_t errorCount = 0;
+    // Whether the last reported epoch sent diagnostics for this file to the client.
+    bool sentDiagnostics = false;
 };
 
 class ErrorReporter {
