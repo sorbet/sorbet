@@ -697,6 +697,50 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithEditToFileWi
     CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath_canceled"), 0);
 }
 
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithEditToFileWithRBSSignature") {
+    // Set lspMaxFilesOnFastPath to 1 so that the edit below is only fast for as long as Sorbet does not lose track of
+    // the signature of bar, which would implicate the file that calls it.
+    auto opts = make_shared<realmain::options::Options>();
+    opts->cacheSensitiveOptions.usePrismParser = true;
+    opts->cacheSensitiveOptions.rbsEnabled = true;
+    opts->lspMaxFilesOnFastPath = 1;
+    resetState(opts);
+
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->enableTypecheckInfo = true;
+    assertErrorDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
+
+    assertErrorDiagnostics(send(*openFile("foo.rb", "")), {});
+    assertErrorDiagnostics(send(*openFile("bar.rb", "# typed: true\nclass Bar\n#: -> Integer\ndef bar = 1\nend\n")),
+                           {});
+    assertErrorDiagnostics(send(*openFile("calls_bar.rb", "# typed: true\nBar.new.bar\n")), {});
+
+    // clear counters
+    getCounters();
+
+    // Slow path: Edit foo to have a class. Expect the edit below to preempt.
+    sendAsync(*changeFile("foo.rb", "# typed: true\nclass Foo\nend\n", 2, false, 1));
+
+    // Wait for typechecking to begin to avoid races.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // Fast path: Only the body of bar changes. Its signature comes from the RBS comment.
+    sendAsync(*changeFile("bar.rb", "# typed: true\nclass Bar\n#: -> Integer\ndef bar = 2\nend\n", 2));
+
+    // Send a no-op to clear out the pipeline.
+    assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
+
+    auto counters = getCounters();
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "fastpath"), 1);
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 1);
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath_canceled"), 0);
+}
+
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathThatFixesAllErrors") {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;

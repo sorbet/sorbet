@@ -17,6 +17,17 @@ const realmain::options::Options &opts() {
     return emptyOpts;
 };
 
+// The empty options, except for the choice of parser: a file should hash the same no matter which of the two ways
+// below produced its tree, and `indexAndComputeFileHashes` gets its trees from the parser that `hashingOpts` names.
+const realmain::options::Options &indexOpts(const realmain::options::Options &hashingOpts) {
+    const static realmain::options::Options prismOpts = [] {
+        realmain::options::Options opts{};
+        opts.cacheSensitiveOptions.usePrismParser = true;
+        return opts;
+    }();
+    return hashingOpts.cacheSensitiveOptions.usePrismParser ? prismOpts : opts();
+}
+
 pair<ast::ParsedFile, core::UsageHash> rewriteAST(const core::GlobalState &originalGS, core::GlobalState &newGS,
                                                   core::FileRef newFref, const ast::ParsedFile &ast) {
     // TODO(jvilk): Switch to passing around compressed ASTs which are cheaper to copy + inflate.
@@ -108,7 +119,7 @@ unique_ptr<core::FileHash> computeFileHashForFile(shared_ptr<core::File> forWhat
     // The caller's GlobalState shares this File, so decide its level with the caller's options (think
     // `--typed-override`), not with the empty ones that the rest of hashing uses.
     fref.data(*lgs).strictLevel = realmain::pipeline::decideStrictLevel(*lgs, fref, hashingOpts);
-    auto ast = realmain::pipeline::indexOne(opts(), *lgs, fref);
+    auto ast = realmain::pipeline::indexOne(indexOpts(hashingOpts), *lgs, fref);
 
     // Calculate UsageHash. We use LazyNameSubstitution for this purpose, but it will not do any actual substitution
     // when fromGS == toGS (hence we intentionally do not unfreeze name table).
