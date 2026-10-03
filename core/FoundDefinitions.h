@@ -138,14 +138,16 @@ CheckSize(FoundPackage, 20, 4);
 
 struct FoundStaticField final {
     FoundDefinitionRef owner;
+    FoundDefinitionRef lexicalOwner;
     core::NameRef name;
     core::LocOffsets asgnLoc;
     core::LocOffsets lhsLoc;
     bool isTypeAlias = false;
+    bool withinExplicitRootScope = false;
 
     std::string toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const;
 };
-CheckSize(FoundStaticField, 28, 4);
+CheckSize(FoundStaticField, 32, 4);
 
 struct FoundTypeMember final {
     FoundDefinitionRef owner;

@@ -636,6 +636,8 @@ public:
 
         core::FoundStaticField found;
         found.owner = defineScope(getOwner(), lhs.scope, currentOwnerWithinExplicitRootScope());
+        found.lexicalOwner = getOwner();
+        found.withinExplicitRootScope = currentOwnerWithinExplicitRootScope() || isExplicitlyRootScoped(asgn.lhs);
         found.name = lhs.cnst;
         found.asgnLoc = asgn.loc;
         found.lhsLoc = lhs.loc;
@@ -662,6 +664,8 @@ public:
             // Too many arguments. Define a static field that we'll use for this type member later.
             core::FoundStaticField staticField;
             staticField.owner = found.owner;
+            staticField.lexicalOwner = getOwner();
+            staticField.withinExplicitRootScope = currentOwnerWithinExplicitRootScope();
             staticField.name = found.name;
             staticField.asgnLoc = found.asgnLoc;
             staticField.lhsLoc = asgn.lhs.loc();
@@ -1687,6 +1691,9 @@ private:
                                                   const core::FoundTypeMember &typeMember) {
         core::FoundStaticField staticField;
         staticField.owner = typeMember.owner;
+        staticField.lexicalOwner = typeMember.owner;
+        staticField.withinExplicitRootScope = typeMember.owner.kind() == core::FoundDefinitionRef::Kind::Class &&
+                                             typeMember.owner.klass(foundDefs).withinExplicitRootScope;
         staticField.name = typeMember.name;
         staticField.asgnLoc = typeMember.asgnLoc;
         staticField.lhsLoc = typeMember.nameLoc;
