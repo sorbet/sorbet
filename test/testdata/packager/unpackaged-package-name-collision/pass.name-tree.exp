@@ -1,0 +1,37 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::Base<<C Base>> < (::Sorbet::Private::Static::PackageSpec)
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::Consumer<<C Consumer>> < (::Sorbet::Private::Static::PackageSpec)
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::String<<C String>> < (::Sorbet::Private::Static::PackageSpec)
+    <self>.import(<emptyTree>::<C Base>)
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  <emptyTree>::<C String>.from_invalid_reopening()
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::String<<C String>> < (::<todo sym>)
+    def self.from_invalid_reopening(<blk>)
+      0
+    end
+
+    <runtime method definition of self.from_invalid_reopening>
+
+    class ::String::Nested<<C Nested>> < (::<todo sym>)
+    end
+
+    class ::Consumer::Escaped<<C Escaped>> < (::<todo sym>)
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::String<<C String>> < (::<todo sym>)
+    class ::Consumer::FromRBI<<C FromRBI>> < (::<root>::<C Object>)
+    end
+  end
+end

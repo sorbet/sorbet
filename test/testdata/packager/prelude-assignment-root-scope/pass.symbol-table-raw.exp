@@ -1,0 +1,29 @@
+class <C <U <root>>> < <C <U Object>> ()
+  module <C <U <PackageSpecRegistry>>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> ()
+    class <C <U <PackageSpecRegistry>>>::<C <U Consumer>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U PackageSpec>> () @ Loc {file=test/testdata/packager/prelude-assignment-root-scope/consumer/__package.rb start=4:1 end=4:29}
+    class <C <U <PackageSpecRegistry>>>::<S <C <U Consumer>> $1>[<C <U <AttachedClass>>>] < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<S <C <U PackageSpec>> $1> () @ Loc {file=test/testdata/packager/prelude-assignment-root-scope/consumer/__package.rb start=4:1 end=4:29}
+      type-member(+) <C <U <PackageSpecRegistry>>>::<S <C <U Consumer>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U <PackageSpecRegistry>>>::<S <C <U Consumer>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Consumer) @ Loc {file=test/testdata/packager/prelude-assignment-root-scope/consumer/__package.rb start=4:1 end=4:29}
+      method <C <U <PackageSpecRegistry>>>::<S <C <U Consumer>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/prelude-assignment-root-scope/consumer/__package.rb start=4:1 end=5:4}
+        argument <blk><block> @ Loc {file=test/testdata/packager/prelude-assignment-root-scope/consumer/__package.rb start=??? end=???}
+    class <C <U <PackageSpecRegistry>>>::<C <U Prelude>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U PackageSpec>> () @ Loc {file=test/testdata/packager/prelude-assignment-root-scope/prelude/__package.rb start=3:1 end=3:28}
+    class <C <U <PackageSpecRegistry>>>::<S <C <U Prelude>> $1>[<C <U <AttachedClass>>>] < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<S <C <U PackageSpec>> $1> () @ Loc {file=test/testdata/packager/prelude-assignment-root-scope/prelude/__package.rb start=3:1 end=3:28}
+      type-member(+) <C <U <PackageSpecRegistry>>>::<S <C <U Prelude>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U <PackageSpecRegistry>>>::<S <C <U Prelude>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Prelude) @ Loc {file=test/testdata/packager/prelude-assignment-root-scope/prelude/__package.rb start=3:1 end=3:28}
+      method <C <U <PackageSpecRegistry>>>::<S <C <U Prelude>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/prelude-assignment-root-scope/prelude/__package.rb start=3:1 end=5:4}
+        argument <blk><block> @ Loc {file=test/testdata/packager/prelude-assignment-root-scope/prelude/__package.rb start=??? end=???}
+  class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/prelude-assignment-root-scope/consumer/__package.rb start=4:1 end=5:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/prelude-assignment-root-scope/consumer/__package.rb start=??? end=???}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/prelude-assignment-root-scope/consumer/use.rb start=3:1 end=4:26}
+      argument <blk><block> @ Loc {file=test/testdata/packager/prelude-assignment-root-scope/consumer/use.rb start=??? end=???}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/prelude-assignment-root-scope/prelude/__package.rb start=3:1 end=5:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/prelude-assignment-root-scope/prelude/__package.rb start=??? end=???}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/prelude-assignment-root-scope/prelude/definitions.rb start=3:1 end=8:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/prelude-assignment-root-scope/prelude/definitions.rb start=??? end=???}
+  class <C <U RootBox>> < <C <U Object>> () @ Loc {file=test/testdata/packager/prelude-assignment-root-scope/prelude/definitions.rb start=6:1 end=6:16}
+    static-field <C <U RootBox>>::<C <U NestedAssignment>> -> Integer @ Loc {file=test/testdata/packager/prelude-assignment-root-scope/prelude/definitions.rb start=7:3 end=7:19}
+  class <S <C <U RootBox>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/packager/prelude-assignment-root-scope/prelude/definitions.rb start=6:1 end=6:16}
+    type-member(+) <S <C <U RootBox>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U RootBox>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=RootBox) @ Loc {file=test/testdata/packager/prelude-assignment-root-scope/prelude/definitions.rb start=6:1 end=6:16}
+    method <S <C <U RootBox>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/prelude-assignment-root-scope/prelude/definitions.rb start=6:1 end=8:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/prelude-assignment-root-scope/prelude/definitions.rb start=??? end=???}
+  static-field <C <U SharedAssignment>> -> Integer @ Loc {file=test/testdata/packager/prelude-assignment-root-scope/prelude/definitions.rb start=4:1 end=4:19}
+
