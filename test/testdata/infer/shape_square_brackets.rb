@@ -21,6 +21,11 @@ def test2(x)
   # This type is wrong, because the key `foo:` is now `String("world")`, but that's no worse than normal pinned variables
   T.reveal_type(opts) # error: Revealed type: `{foo: String("hello")} (shape of T::Hash[T.untyped, T.untyped])`
 
+  status = T.unsafe(nil) ? 'ok' : 'remove'
+  record = {status: status}
+  record[:status] = 'failure'
+  record[:status] = 1 # error: Expected `String` but found `Integer(1)` for key `Symbol(:status)`
+
   # Non-literal type for key
   opts[String.new] = 0
 end

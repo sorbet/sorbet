@@ -68,4 +68,11 @@ class Main
           a = 2
       end
   end
+
+  def unify_literals(cond)
+      a = cond ? :heads : :tails
+      while cond
+          a = :something_else
+      end
+  end
 end

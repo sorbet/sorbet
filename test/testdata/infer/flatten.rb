@@ -173,7 +173,7 @@ or_type_collection = [
   end
 ]
 
-T.reveal_type(or_type_collection) # error: Revealed type: `[T.any(T::Array[String], Integer)] (1-tuple)`
-T.reveal_type(or_type_collection.flatten(1)) # error: Revealed type: `T::Array[T.any(String, Integer)]`
-T.reveal_type(or_type_collection.flatten(2)) # error: Revealed type: `T::Array[T.any(String, Integer)]`
-T.reveal_type(or_type_collection.flatten) # error: Revealed type: `T::Array[T.any(String, Integer)]`
+T.reveal_type(or_type_collection) # error: Revealed type: `[T.any(Integer(1), [String("2")])] (1-tuple)`
+T.reveal_type(or_type_collection.flatten(1)) # error: Revealed type: `T::Array[T.any(Integer, String)]
+T.reveal_type(or_type_collection.flatten(2)) # error: Revealed type: `T::Array[T.any(Integer, String)]`
+T.reveal_type(or_type_collection.flatten) # error: Revealed type: `T::Array[T.any(Integer, String)]`
