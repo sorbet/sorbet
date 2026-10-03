@@ -127,7 +127,10 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
         changedFiles.emplace(fref, idx);
     }
 
-    result.totalChanged = changedFiles.size();
+    // A `# typed: ignore` file is never parsed, so there is nothing in it to check.
+    result.totalChanged = absl::c_count_if(changedFiles, [&updatedFiles](const auto &entry) {
+        return updatedFiles[entry.second]->strictLevel != core::StrictLevel::Ignore;
+    });
 
     if (changedSymbolNameHashes.empty()) {
         // Optimization--skip the loop over every file in the project (`gs.getFiles()`) if

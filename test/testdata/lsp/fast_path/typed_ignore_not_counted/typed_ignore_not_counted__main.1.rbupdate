@@ -1,0 +1,11 @@
+# typed: true
+# assert-fast-path: typed_ignore_not_counted__main.rb,typed_ignore_not_counted__ignored.rb,typed_ignore_not_counted__1.rb,typed_ignore_not_counted__2.rb,typed_ignore_not_counted__3.rb,typed_ignore_not_counted__4.rb,typed_ignore_not_counted__5.rb,typed_ignore_not_counted__6.rb,typed_ignore_not_counted__7.rb,typed_ignore_not_counted__8.rb,typed_ignore_not_counted__9.rb
+
+class MyClass
+  extend T::Sig
+
+  sig { returns(T.untyped) }
+  def self.my_method
+    0
+  end
+end
