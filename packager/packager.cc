@@ -345,8 +345,6 @@ private:
         return def.kind == ast::ClassDef::Kind::Class && !def.ancestors.empty() &&
                ast::isa_tree<ast::UnresolvedConstantLit>(def.ancestors[0]);
     }
-
-
 };
 
 struct PackageSpecBodyWalk {

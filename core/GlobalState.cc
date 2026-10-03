@@ -1189,8 +1189,9 @@ ClassOrModuleRef GlobalState::enterClassOrModuleSymbol(Loc loc, ClassOrModuleRef
     return ret;
 }
 
-GlobalState::ClassOrModulePackageInfo GlobalState::packageInfoForClassOrModule(
-    ClassOrModuleRef owner, NameRef name, optional<ClassOrModulePackageInfo> ownerPackageInfo) const {
+GlobalState::ClassOrModulePackageInfo
+GlobalState::packageInfoForClassOrModule(ClassOrModuleRef owner, NameRef name,
+                                         optional<ClassOrModulePackageInfo> ownerPackageInfo) const {
     if (!this->packageDB().enabled()) {
         // Note that this case also initializes `<PackageSpecRegistry>` itself as being not owned by
         // a package. We manually set it back to Symbols::PackageSpecRegistry() in `initEmpty` to

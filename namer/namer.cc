@@ -49,7 +49,8 @@ using namespace core::packages;
 using MangledClasses =
     UnorderedMap<tuple<core::FileRef, core::ClassOrModuleRef, core::NameRef, bool>, core::ClassOrModuleRef>;
 
-using MangledStaticFields = UnorderedMap<tuple<core::FileRef, core::ClassOrModuleRef, core::NameRef, bool>, core::FieldRef>;
+using MangledStaticFields =
+    UnorderedMap<tuple<core::FileRef, core::ClassOrModuleRef, core::NameRef, bool>, core::FieldRef>;
 
 core::ClassOrModuleRef methodOwner(core::Context ctx, core::SymbolRef owner, bool isSelfMethod) {
     ENFORCE(owner.exists() && owner != core::Symbols::todo());
@@ -1424,7 +1425,7 @@ private:
     }
 
     void reportNamespaceError(core::MutableContext ctx, core::LocOffsets nameLoc, bool withinExplicitRootScope,
-                                   const ClassNamespaceDecision &decision) {
+                              const ClassNamespaceDecision &decision) {
         if (auto e = ctx.beginError(nameLoc, core::errors::Packager::DefinitionPackageMismatch)) {
             if (withinExplicitRootScope) {
                 e.setHeader("Defining a root-scoped constant requires this package to be marked `{}`", "prelude!");
@@ -1837,7 +1838,8 @@ private:
                 sourceNamespace.packageInfo = {data->packageRegistryOwner, data->package};
                 sourceNamespace.inTestNamespace = false;
                 auto rootTest = core::Symbols::root().data(ctx)->findMember(ctx, PackageDB::TEST_NAMESPACE);
-                for (auto enclosing = scope; enclosing != core::Symbols::root(); enclosing = enclosing.data(ctx)->owner) {
+                for (auto enclosing = scope; enclosing != core::Symbols::root();
+                     enclosing = enclosing.data(ctx)->owner) {
                     sourceNamespace.inTestNamespace |= core::SymbolRef(enclosing) == rootTest;
                 }
             }
@@ -1852,21 +1854,25 @@ private:
             auto suppressErrors = staticField.lexicalOwner.kind() == core::FoundDefinitionRef::Kind::Class &&
                                   state.suppressedNamespaceErrors[staticField.lexicalOwner.idx()];
             if (hasError && !suppressErrors) {
-                namespaceErrors.push_back({staticField.asgnLoc, namespaceNameLoc.value_or(staticField.lhsLoc), staticField.withinExplicitRootScope,
-                                          {sourceNamespace, onPackagePath, exempt, hasError, hasError, scope, name}});
+                namespaceErrors.push_back({staticField.asgnLoc,
+                                           namespaceNameLoc.value_or(staticField.lhsLoc),
+                                           staticField.withinExplicitRootScope,
+                                           {sourceNamespace, onPackagePath, exempt, hasError, hasError, scope, name}});
             }
             // Invalid class owners already isolate their constants. Qualified assignments can reset
             // to a packaged owner, so isolate those independently even when the diagnostic is suppressed.
             if (hasError && (scope == core::Symbols::root() || scope.data(ctx)->packageRegistryOwner.exists() ||
                              scope.data(ctx)->package.exists())) {
                 isolatedNamespace = true;
-                auto previous = mangledStaticFields.find({ctx.file, scope, staticField.name, staticField.withinExplicitRootScope});
+                auto previous =
+                    mangledStaticFields.find({ctx.file, scope, staticField.name, staticField.withinExplicitRootScope});
                 if (previous != mangledStaticFields.end()) {
                     name = previous->second.data(ctx)->name;
                 } else {
                     for (const auto &[candidateName, candidateSymbol] : scope.data(ctx)->members()) {
                         if (candidateName.hasUniqueNameKind(ctx, core::UniqueNameKind::MangleRename) &&
-                            candidateName.dataUnique(ctx)->original == staticField.name && candidateSymbol.isStaticField(ctx) &&
+                            candidateName.dataUnique(ctx)->original == staticField.name &&
+                            candidateSymbol.isStaticField(ctx) &&
                             absl::c_any_of(candidateSymbol.asFieldRef().data(ctx)->locs(),
                                            [&ctx](core::Loc loc) { return loc.file() == ctx.file; })) {
                             name = candidateName;
@@ -1900,7 +1906,7 @@ private:
         staticField.owner = typeMember.owner;
         staticField.lexicalOwner = typeMember.owner;
         staticField.withinExplicitRootScope = typeMember.owner.kind() == core::FoundDefinitionRef::Kind::Class &&
-                                             typeMember.owner.klass(foundDefs).withinExplicitRootScope;
+                                              typeMember.owner.klass(foundDefs).withinExplicitRootScope;
         staticField.name = typeMember.name;
         staticField.asgnLoc = typeMember.asgnLoc;
         staticField.lhsLoc = typeMember.nameLoc;
@@ -2551,8 +2557,8 @@ public:
 
         auto maybeCnst = mangledStaticFields.find({ctx.file, scope, lhs.cnst, withinExplicitRootScope});
         core::SymbolRef cnst = maybeCnst != mangledStaticFields.end()
-                                  ? maybeCnst->second
-                                  : ctx.state.lookupStaticFieldSymbol(scope, lhs.cnst);
+                                   ? maybeCnst->second
+                                   : ctx.state.lookupStaticFieldSymbol(scope, lhs.cnst);
         ENFORCE(cnst.exists());
         asgn.lhs = ast::make_expression<ast::ConstantLit>(cnst, asgn.lhs.toUnique<ast::UnresolvedConstantLit>());
 
@@ -2967,13 +2973,13 @@ void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinition
 void symbolizeTrees(const core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers,
                     const MangledClasses &mangledClasses, const MangledStaticFields &mangledStaticFields) {
     Timer timeit(gs.tracer(), "naming.symbolizeTrees");
-    Parallel::iterate(
-        workers, "symbolizeTrees", trees,
-        [&gs, inserter = TreeSymbolizer(mangledClasses, mangledStaticFields)](auto &parsedFile) mutable {
-            Timer timeit(gs.tracer(), "naming.symbolizeTreesOne", {{"file", string(parsedFile.file.data(gs).path())}});
-            core::Context ctx(gs, core::Symbols::root(), parsedFile.file);
-            ast::TreeWalk::apply(ctx, inserter, parsedFile.tree);
-        });
+    Parallel::iterate(workers, "symbolizeTrees", trees,
+                      [&gs, inserter = TreeSymbolizer(mangledClasses, mangledStaticFields)](auto &parsedFile) mutable {
+                          Timer timeit(gs.tracer(), "naming.symbolizeTreesOne",
+                                       {{"file", string(parsedFile.file.data(gs).path())}});
+                          core::Context ctx(gs, core::Symbols::root(), parsedFile.file);
+                          ast::TreeWalk::apply(ctx, inserter, parsedFile.tree);
+                      });
 }
 
 } // namespace
