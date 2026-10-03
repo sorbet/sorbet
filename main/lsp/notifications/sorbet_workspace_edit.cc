@@ -159,7 +159,10 @@ TypecheckingPath SorbetWorkspaceEditTask::getTypecheckingPath(const LSPIndexer &
         return updates->typecheckingPath;
     }
     if (!cachedFastPathDecisionValid || cachedFastPathDecisionFileTableVersion != index.getFileTableVersion()) {
-        cachedFastPathDecision = index.getTypecheckingPath(params->updates);
+        cachedFastPathDecisionFiles.clear();
+        absl::c_copy_if(params->updates, back_inserter(cachedFastPathDecisionFiles),
+                        [&index](const auto &file) { return index.wouldUpdateFileTable(*file); });
+        cachedFastPathDecision = index.getTypecheckingPath(cachedFastPathDecisionFiles);
         cachedFastPathDecisionFileTableVersion = index.getFileTableVersion();
         cachedFastPathDecisionValid = true;
     }
@@ -175,9 +178,13 @@ const SorbetWorkspaceEditParams &SorbetWorkspaceEditTask::getParams() const {
 }
 
 core::packages::Stratum SorbetWorkspaceEditTask::preemptionStratum(FileStratumMapping info) const {
+    // `PreemptionLoop::run` asks `canPreempt` first, under the same lock, so the cached decision is current. It
+    // leaves out the files that `index` will drop.
+    ENFORCE(cachedFastPathDecisionValid);
+    const auto &files = cachedFastPathDecisionValid ? cachedFastPathDecisionFiles : this->params->updates;
     vector<string_view> paths;
-    paths.reserve(this->params->updates.size());
-    absl::c_transform(this->params->updates, back_inserter(paths), [](auto &file) { return file->path(); });
+    paths.reserve(files.size());
+    absl::c_transform(files, back_inserter(paths), [](auto &file) { return file->path(); });
     return info.getStratumForPaths(paths);
 }
 

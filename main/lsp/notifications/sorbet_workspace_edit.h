@@ -18,6 +18,8 @@ class SorbetWorkspaceEditTask final : public LSPDangerousTypecheckerTask {
     mutable TypecheckingPath cachedFastPathDecision = TypecheckingPath::Slow;
     // The decision also becomes invalidated when the indexer's file table changes.
     mutable uint32_t cachedFastPathDecisionFileTableVersion = 0;
+    // The files that the decision is about: the updates that `index` will not drop as no-ops.
+    mutable std::vector<std::shared_ptr<core::File>> cachedFastPathDecisionFiles;
     // HACK: In the event that this edit is too large to index serially, stash the indexer here for use in `runSpecial`.
     LSPIndexer *indexer = nullptr;
 

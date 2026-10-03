@@ -616,6 +616,48 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPath") {
                          /* assertUniqueStartTimes */ false);
 }
 
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithMostlyUnchangedFiles") {
+    // Set lspMaxFilesOnFastPath to 1 so that an update naming two files names too many for the fast path.
+    auto opts = make_shared<realmain::options::Options>();
+    opts->lspMaxFilesOnFastPath = 1;
+    resetState(opts);
+
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->enableTypecheckInfo = true;
+    assertErrorDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
+
+    writeFilesToFS({{"bar.rb", "# typed: true\nclass Bar\ndef bar = 1\nend\n"},
+                    {"baz.rb", "# typed: true\nclass Baz\ndef baz = 1\nend\n"}});
+    assertErrorDiagnostics(send(*watchmanFileUpdate({"bar.rb", "baz.rb"})), {});
+    assertErrorDiagnostics(send(*openFile("foo.rb", "")), {});
+
+    // clear counters
+    getCounters();
+
+    // Slow path: Edit foo to have a class. Expect the update below to preempt.
+    sendAsync(*changeFile("foo.rb", "# typed: true\nclass Foo\nend\n", 2, false, 1));
+
+    // Wait for typechecking to begin to avoid races.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // Fast path: The update names both files, but only bar changed.
+    writeFilesToFS({{"bar.rb", "# typed: true\nclass Bar\ndef bar = 2\nend\n"}});
+    sendAsync(*watchmanFileUpdate({"bar.rb", "baz.rb"}));
+
+    // Send a no-op to clear out the pipeline.
+    assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
+
+    auto counters = getCounters();
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "fastpath"), 1);
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 1);
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath_canceled"), 0);
+}
+
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithEditToFileWithStrictnessOverride") {
     // bar.rb defines a class, but the override hides it from Sorbet.
     auto opts = make_shared<realmain::options::Options>();
@@ -2084,6 +2126,40 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedPreemptionAfterSlow
             REQUIRE_EQ(runInfo->filesTypechecked.size(), 1);
             CHECK_EQ(runInfo->filesTypechecked.front(), fmt::format("{}/foo/a.rb", this->rootPath));
         }
+    }
+
+    SUBCASE("unknown_deleted_file") {
+        // Sorbet does not know about foo/c.rb, and it is not on disk either, so there is no file whose stratum this
+        // update would have to wait for.
+        sendAsync(*watchmanFileUpdate({"foo/c.rb"}));
+
+        setSlowPathBlocked(false);
+
+        // We should see a fast path start notification
+        {
+            auto diag = readAsync();
+            REQUIRE(diag->isNotification());
+            REQUIRE_EQ(diag->asNotification().method, LSPMethod::SorbetTypecheckRunInfo);
+            auto &runInfo = get<unique_ptr<SorbetTypecheckRunInfo>>(diag->asNotification().params);
+            CHECK_EQ(runInfo->typecheckingPath, TypecheckingPath::Fast);
+            CHECK_EQ(runInfo->status, SorbetTypecheckRunStatus::Started);
+        }
+
+        // And then a fast path end notification
+        {
+            auto diag = readAsync();
+            REQUIRE(diag->isNotification());
+            REQUIRE_EQ(diag->asNotification().method, LSPMethod::SorbetTypecheckRunInfo);
+            auto &runInfo = get<unique_ptr<SorbetTypecheckRunInfo>>(diag->asNotification().params);
+            CHECK_EQ(runInfo->typecheckingPath, TypecheckingPath::Fast);
+            CHECK_EQ(runInfo->status, SorbetTypecheckRunStatus::Ended);
+            CHECK(runInfo->filesTypechecked.empty());
+        }
+
+        // Only now does the slow path publish the notification about the call to Roo::A.n in b.rb.
+        auto diag = readAsync();
+        REQUIRE(diag->isNotification());
+        CHECK_EQ(diag->asNotification().method, LSPMethod::TextDocumentPublishDiagnostics);
     }
 
     // Finally, we'll see the slow path end
