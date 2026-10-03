@@ -96,9 +96,7 @@ core::FileRef makeEmptyGlobalStateForFile(spdlog::logger &logger, shared_ptr<cor
     lgs->silenceErrors = true;
     {
         core::UnfreezeFileTable fileTableAccess(*lgs);
-        auto fref = lgs->enterFile(std::move(forWhat));
-        fref.data(*lgs).strictLevel = realmain::pipeline::decideStrictLevel(*lgs, fref, opts());
-        return fref;
+        return lgs->enterFile(std::move(forWhat));
     }
 }
 
@@ -107,6 +105,9 @@ unique_ptr<core::FileHash> computeFileHashForFile(shared_ptr<core::File> forWhat
     Timer timeit(logger, "computeFileHash");
     unique_ptr<core::GlobalState> lgs;
     core::FileRef fref = makeEmptyGlobalStateForFile(logger, move(forWhat), /* out param */ lgs, hashingOpts);
+    // The caller's GlobalState shares this File, so decide its level with the caller's options (think
+    // `--typed-override`), not with the empty ones that the rest of hashing uses.
+    fref.data(*lgs).strictLevel = realmain::pipeline::decideStrictLevel(*lgs, fref, hashingOpts);
     auto ast = realmain::pipeline::indexOne(opts(), *lgs, fref);
 
     // Calculate UsageHash. We use LazyNameSubstitution for this purpose, but it will not do any actual substitution
