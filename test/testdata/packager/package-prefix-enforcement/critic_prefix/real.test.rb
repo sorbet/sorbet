@@ -1,7 +1,7 @@
 # typed: strict
 
 module Critic::SomePkg::Real
-  #    ^^^^^^^^^^^^^^^^^^^^^ error: Tests in the `Critic::SomePkg` package must define tests in the `Test::Critic::SomePkg` namespace
+# error: Tests in the `Critic::SomePkg` package must define tests in the `Test::Critic::SomePkg` namespace
   FOO = 1
 end
 

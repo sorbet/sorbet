@@ -201,7 +201,6 @@ class SymbolFinder {
             found.name = constLit->cnst;
             found.loc = constLit->loc;
             found.declLoc = constLit->loc;
-            found.nameLoc = constLit->loc;
             found.classKind = core::FoundClass::Kind::Unknown;
             found.withinExplicitRootScope = withinExplicitRootScope;
             return foundDefs->addClass(move(found));
@@ -227,7 +226,6 @@ public:
         found.classKind = ast::ClassDef::kindToFoundClassKind(klass.kind);
         found.loc = klass.loc;
         found.declLoc = klass.declLoc;
-        found.nameLoc = klass.name.loc();
         found.lexicalOwner = getOwner();
         found.withinExplicitRootScope = currentOwnerWithinExplicitRootScope() || isExplicitlyRootScoped(klass.name);
         found.hasExplicitSuperclass = klass.kind == ast::ClassDef::Kind::Class && !klass.ancestors.empty() &&
@@ -1495,7 +1493,7 @@ private:
             if (package != nullptr) {
                 decision = classifyClassNamespace(ctx, owner, klass);
                 if (!suppressErrors && decision->hasError) {
-                    namespaceErrors.push_back({klass.loc, klass.nameLoc, klass.withinExplicitRootScope, *decision});
+                    namespaceErrors.push_back({klass.loc, klass.declLoc, klass.withinExplicitRootScope, *decision});
                 }
                 state.suppressedNamespaceErrors.back() =
                     suppressErrors || decision->hasError ||

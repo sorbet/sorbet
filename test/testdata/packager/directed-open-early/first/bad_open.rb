@@ -1,7 +1,7 @@
 # typed: true
 
 module Second
-     # ^^^^^^ error: File belongs to package `First` but defines a constant that does not match this namespace
+# error: File belongs to package `First` but defines a constant that does not match this namespace
   class Foo
     def foo; end
   end

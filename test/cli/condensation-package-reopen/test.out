@@ -1,6 +1,6 @@
 bad_test/a.rb:3: File belongs to package `Test::BadTest` but defines a constant that does not match this namespace https://srb.help/3713
      3 |module Test::BadTest
-               ^^^^^^^^^^^^^
+        ^^^^^^^^^^^^^^^^^^^^
     bad_test/__package.rb:3: Enclosing package declared here
      3 |class Test::BadTest < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -49,7 +49,7 @@ bad_test/a.rb:12: `extend` may only be used on constants in the package that own
 
 bad_test/subpackage/foo.rb:3: File belongs to package `Test::BadTest::Subpackage` but defines a constant that does not match this namespace https://srb.help/3713
      3 |module Test::BadTest
-               ^^^^^^^^^^^^^
+        ^^^^^^^^^^^^^^^^^^^^
     bad_test/subpackage/__package.rb:3: Enclosing package declared here
      3 |class Test::BadTest::Subpackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -67,7 +67,7 @@ bad_test/__package.rb:4: Unable to resolve constant `Root` https://srb.help/5002
 
 bad_test/a.rbi:3: File belongs to package `Test::BadTest` but defines a constant that does not match this namespace https://srb.help/3713
      3 |module Test::BadTest
-               ^^^^^^^^^^^^^
+        ^^^^^^^^^^^^^^^^^^^^
     bad_test/__package.rb:3: Enclosing package declared here
      3 |class Test::BadTest < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

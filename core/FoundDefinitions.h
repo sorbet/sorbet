@@ -111,7 +111,6 @@ struct FoundClass final {
     core::NameRef name;
     core::LocOffsets loc;
     core::LocOffsets declLoc;
-    core::LocOffsets nameLoc;
     bool definesBehavior = false;
     bool withinExplicitRootScope = false;
     bool hasExplicitSuperclass = false;
@@ -125,7 +124,7 @@ struct FoundClass final {
 
     std::string toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const;
 };
-CheckSize(FoundClass, 40, 4);
+CheckSize(FoundClass, 32, 4);
 
 struct FoundPackage final {
     FoundDefinitionRef owner;
