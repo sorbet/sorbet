@@ -5037,8 +5037,12 @@ end
 class Net::IMAP::FlagCountError < Net::IMAP::Error
 end
 
-class Net::IMAP::Literal < Net::IMAP::CommandData
+class Net::IMAP::Literal < ::Data
   def initialize(data); end
+
+  def data; end
+
+  def non_sync; end
 
   def send_data(imap); end
 
@@ -5254,7 +5258,7 @@ class Net::IMAP::PlainAuthenticator
   def process(data); end
 end
 
-class Net::IMAP::QuotedString < Net::IMAP::CommandData
+class Net::IMAP::QuotedString < Net::IMAP::ValidNonLiteralData
   def initialize(data); end
 
   def send_data(imap); end
@@ -5570,6 +5574,16 @@ class Net::IMAP::UntaggedResponse < Struct
   def self.members(); end
 
   def initialize(*_); end
+end
+
+class Net::IMAP::ValidNonLiteralData < Net::IMAP::CommandData
+  def initialize(data); end
+
+  def ascii_only?(); end
+
+  def send_data(imap); end
+
+  def validate(); end
 end
 
 class Net::InternetMessageIO < Net::BufferedIO
