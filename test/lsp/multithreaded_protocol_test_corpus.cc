@@ -544,6 +544,45 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPath") {
                          /* assertUniqueStartTimes */ false);
 }
 
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithEditToFileWithStrictnessOverride") {
+    // bar.rb defines a class, but the override hides it from Sorbet.
+    auto opts = make_shared<realmain::options::Options>();
+    opts->strictnessOverrides[fmt::format("{}/bar.rb", this->rootPath)] = core::StrictLevel::Ignore;
+    resetState(opts);
+
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->enableTypecheckInfo = true;
+    assertErrorDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
+
+    assertErrorDiagnostics(send(*openFile("foo.rb", "")), {});
+    assertErrorDiagnostics(send(*openFile("bar.rb", "# typed: true\nclass Bar\nend\n")), {});
+
+    // clear counters
+    getCounters();
+
+    // Slow path: Edit foo to have a class. Expect the edit below to preempt.
+    sendAsync(*changeFile("foo.rb", "# typed: true\nclass Foo\nend\n", 2, false, 1));
+
+    // Wait for typechecking to begin to avoid races.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // Fast path: Sorbet still ignores the contents of bar, so no definition changes.
+    sendAsync(*changeFile("bar.rb", "# typed: true\nclass Bar\nend\n# A comment.\n", 2));
+
+    // Send a no-op to clear out the pipeline.
+    assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
+
+    auto counters = getCounters();
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "fastpath"), 1);
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 1);
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath_canceled"), 0);
+}
+
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathThatFixesAllErrors") {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;
