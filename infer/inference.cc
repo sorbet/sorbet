@@ -50,7 +50,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
     int typedSendCount = 0;
     int totalSendCount = 0;
     const int startErrorCount = ctx.state.totalErrors();
-    auto guessTypes = true;
+    auto canSuggestSig = true;
     unique_ptr<core::TypeConstraint> _constr;
     core::TypeConstraint *constr = &core::TypeConstraint::EmptyFrozenConstraint;
     if (cfg->symbol.data(ctx)->flags.isGenericMethod) {
@@ -64,7 +64,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             Exception::raise("Constraint should always solve after creating empty TypeConstraint with all upper bounds "
                              "set to to SelfTypeParam of itself");
         }
-        guessTypes = false;
+        canSuggestSig = false;
     }
 
     core::TypePtr methodReturnType = cfg->symbol.data(ctx)->resultType;
@@ -72,11 +72,17 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
 
     if (cfg->symbol.data(ctx)->name.kind() != core::NameKind::UTF8 ||
         cfg->symbol.data(ctx)->name == core::Names::staticInit() || !cfg->symbol.data(ctx)->loc().exists()) {
-        guessTypes = false;
+        canSuggestSig = false;
     }
 
+    auto shouldSuggestSig = missingReturnType && canSuggestSig &&
+                            (ctx.state.shouldReportErrorOn(ctx.file, core::errors::Infer::UntypedMethod) ||
+                             ctx.state.lspQuery.matchesSuggestSig(cfg->symbol));
+
     if (missingReturnType) {
-        if (guessTypes) {
+        // This inference is only used to suggest a signature. Avoid building its constraint when the inferred type
+        // would end up discarded. RBI signature suggestions always use T.untyped for their return type.
+        if (shouldSuggestSig && !ctx.file.data(ctx).isRBI()) {
             ENFORCE(constr->isSolved() && constr->isEmpty());
             _constr = make_unique<core::TypeConstraint>();
             constr = _constr.get();
@@ -394,7 +400,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         counterInc("infer.methods_typechecked.no_errors");
     }
 
-    if (missingReturnType && guessTypes) {
+    if (missingReturnType && shouldSuggestSig) {
         if (auto e = ctx.beginError(cfg->declLoc, core::errors::Infer::UntypedMethod)) {
             e.setHeader("The method `{}` does not have a `{}`", cfg->symbol.data(ctx)->name.show(ctx), "sig");
             auto maybeAutocorrect = SigSuggestion::maybeSuggestSig(ctx, *cfg, methodReturnType, *constr);
