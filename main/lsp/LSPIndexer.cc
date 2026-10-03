@@ -485,7 +485,10 @@ bool LSPIndexer::preemptionPossible(const TaskQueue::QueueType &tasks) const {
 bool LSPIndexer::wouldUpdateFileTable(const core::File &newer) const {
     auto fref = this->gs->findFileByPath(newer.path());
     if (!fref.exists()) {
-        return true;
+        // A deleted file is read as an empty one, so an empty file at an unknown path may not exist at all. Either
+        // way it has nothing to typecheck. The exceptions are a file that the client has open and expects answers
+        // about, and a `__package.rb` file, as the packager checks whether some of those exist.
+        return newer.isOpenInClient() || !newer.source().empty() || core::File::isPackagePath(newer.path());
     }
 
     auto &existing = this->getFile(fref);

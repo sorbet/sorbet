@@ -105,6 +105,7 @@ public:
 
     /**
      * Given a File, return true if it is new, or differs from the version currently in the indexer's file table.
+     * The exception is a new file that is empty: it only counts if it is open in the client or is a `__package.rb`.
      */
     bool wouldUpdateFileTable(const core::File &file) const;
 

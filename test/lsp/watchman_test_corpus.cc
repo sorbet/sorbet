@@ -17,14 +17,20 @@ TEST_CASE_FIXTURE(ProtocolTest, "UpdateFileOnFileSystem") {
     assertErrorDiagnostics(send(*watchmanFileUpdate({"foo.rb"})), {d});
 }
 
-// Creates an empty file and deletes it.
+// Creates an empty file and deletes it. Neither is worth a slow path.
 TEST_CASE_FIXTURE(ProtocolTest, "CreateAndDeleteEmptyFile") {
     assertErrorDiagnostics(initializeLSP(), {});
+
+    // Clear counters
+    getCounters();
+
     writeFilesToFS({{"foo.rb", ""}});
     assertErrorDiagnostics(send(*watchmanFileUpdate({"foo.rb"})), {});
 
     deleteFileFromFS("foo.rb");
     assertErrorDiagnostics(send(*watchmanFileUpdate({"foo.rb"})), {});
+
+    CHECK_EQ(getCounters().getCategoryCounter("lsp.updates", "slowpath"), 0);
 }
 
 // Adds a file with an error, and then deletes that file. Asserts that Sorbet no longer complains about the file.
@@ -41,7 +47,51 @@ TEST_CASE_FIXTURE(ProtocolTest, "DeleteFileWithErrors") {
 // Informs Sorbet about a file update for a file it does not know about and is deleted on disk. Should be a no-op.
 TEST_CASE_FIXTURE(ProtocolTest, "DeleteFileUnknownToSorbet") {
     assertErrorDiagnostics(initializeLSP(), {});
+
+    // Clear counters
+    getCounters();
+
     assertErrorDiagnostics(send(*watchmanFileUpdate({"foo.rb"})), {});
+
+    auto counters = getCounters();
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 0);
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "fastpath"), 1);
+}
+
+// Creates an empty file, and then adds an error to it. Sorbet only takes notice of the file once it has contents.
+TEST_CASE_FIXTURE(ProtocolTest, "UpdateFileThatWasEmptyWhenCreated") {
+    assertErrorDiagnostics(initializeLSP(), {});
+
+    // Clear counters
+    getCounters();
+
+    writeFilesToFS({{"foo.rb", ""}});
+    assertErrorDiagnostics(send(*watchmanFileUpdate({"foo.rb"})), {});
+
+    writeFilesToFS({{"foo.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n"}});
+    ExpectedDiagnostic d = {"foo.rb", 3, "Expected `Integer`"};
+    assertErrorDiagnostics(send(*watchmanFileUpdate({"foo.rb"})), {d});
+
+    CHECK_EQ(getCounters().getCategoryCounter("lsp.updates", "slowpath"), 1);
+}
+
+// The packager checks whether a package has a `test/__package.rb` file, so Sorbet has to know about an empty one.
+TEST_CASE_FIXTURE(ProtocolTest, "CreateEmptyPackageFile") {
+    auto opts = make_shared<realmain::options::Options>();
+    opts->cacheSensitiveOptions.sorbetPackages = true;
+    this->resetState(std::move(opts));
+
+    writeFilesToFS({{"__package.rb", "# typed: strict\nclass Project < PackageSpec\nend\n"}});
+    this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/__package.rb", this->rootPath));
+    assertErrorDiagnostics(initializeLSP(), {});
+
+    // Clear counters
+    getCounters();
+
+    writeFilesToFS({{"test/__package.rb", ""}});
+    assertErrorDiagnostics(send(*watchmanFileUpdate({"test/__package.rb"})), {});
+
+    CHECK_EQ(getCounters().getCategoryCounter("lsp.updates", "slowpath"), 1);
 }
 
 // Updates a file, opens it in editor (but it's empty), closes file without saving to disk.
