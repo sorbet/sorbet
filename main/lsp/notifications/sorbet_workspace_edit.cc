@@ -158,8 +158,9 @@ TypecheckingPath SorbetWorkspaceEditTask::getTypecheckingPath(const LSPIndexer &
     if (updates != nullptr) {
         return updates->typecheckingPath;
     }
-    if (!cachedFastPathDecisionValid) {
+    if (!cachedFastPathDecisionValid || cachedFastPathDecisionFileTableVersion != index.getFileTableVersion()) {
         cachedFastPathDecision = index.getTypecheckingPath(params->updates);
+        cachedFastPathDecisionFileTableVersion = index.getFileTableVersion();
         cachedFastPathDecisionValid = true;
     }
     return cachedFastPathDecision;

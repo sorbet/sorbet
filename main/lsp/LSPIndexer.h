@@ -44,6 +44,8 @@ class LSPIndexer final {
     /** Whether the slow path for `pendingTypecheckUpdates` got canceled. If so, the next `commitEdit` has to merge
      * them into its update. */
     bool pendingTypecheckUpdatesCanceled = false;
+    /** Changes every time that the file table does. */
+    uint32_t fileTableVersion = 0;
     /** A WorkerPool with 0 workers. */
     std::unique_ptr<WorkerPool> emptyWorkers;
 
@@ -78,6 +80,12 @@ public:
      * Determines if the given files can take the fast path relative to the latest committed edit.
      */
     TypecheckingPath getTypecheckingPath(const std::vector<std::shared_ptr<core::File>> &changedFiles) const;
+
+    /**
+     * Identifies the current contents of the file table. The answer from `getTypecheckingPath` can only change when
+     * this does.
+     */
+    uint32_t getFileTableVersion() const;
 
     /**
      * Computes state hashes for the given set of files. Is a no-op if the provided files all have hashes.

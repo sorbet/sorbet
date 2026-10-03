@@ -299,6 +299,7 @@ void LSPIndexer::initialize(IndexerInitializationTask &task, vector<shared_ptr<c
     }
 
     {
+        fileTableVersion++;
         core::UnfreezeFileTable unfreezeFiles{*this->gs};
 
         auto ix = 0;
@@ -338,6 +339,9 @@ unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edi
     UnorderedMap<core::FileRef, shared_ptr<core::File>> newlyEvictedFiles;
     // Update globalStateHashes. Keep track of file IDs for these files, along with old hashes for these files.
     {
+        if (!update.updatedFiles.empty()) {
+            fileTableVersion++;
+        }
         core::UnfreezeFileTable fileTableAccess(*gs);
         update.updatedFileRefs.reserve(update.updatedFiles.size());
         for (auto &file : update.updatedFiles) {
@@ -438,6 +442,10 @@ unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edi
 unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit) {
     ENFORCE(edit.updates.size() <= config->opts.lspMaxFilesOnFastPath, "Too many files to index serially");
     return commitEdit(edit, *emptyWorkers);
+}
+
+uint32_t LSPIndexer::getFileTableVersion() const {
+    return fileTableVersion;
 }
 
 void LSPIndexer::cancelSlowPathBeforeCommit(uint32_t epoch) {

@@ -1,6 +1,7 @@
 #include "doctest/doctest.h"
 // ^ Violates linting rules, so include first.
 #include "absl/strings/match.h"
+#include "absl/strings/str_replace.h"
 #include "common/common.h"
 #include "common/sort/sort.h"
 #include "test/helpers/lsp.h"
@@ -1704,6 +1705,84 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptDoesNotCrashOnEvictedFil
 
     // Drain the pipeline with a fence.
     assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
+}
+
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PreemptingEditsInvalidateFastPathDecisionOfQueuedEdit") {
+    // Set lspMaxFilesOnFastPath to 3 so that changing one method with a single caller fits on the fast path, but
+    // changing two of them does not.
+    auto opts = make_shared<realmain::options::Options>();
+    opts->lspMaxFilesOnFastPath = 3;
+    resetState(opts);
+
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->enableTypecheckInfo = true;
+    assertErrorDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
+
+    string fooContents = "# typed: true\n"
+                         "class Foo\n"
+                         "  extend T::Sig\n"
+                         "  sig { returns(Integer) }\n"
+                         "  def self.foo = 0\n"
+                         "end\n";
+    string barContents = "# typed: true\n"
+                         "class Bar\n"
+                         "  extend T::Sig\n"
+                         "  sig { returns(Integer) }\n"
+                         "  def self.bar = 0\n"
+                         "end\n";
+    assertErrorDiagnostics(send(*openFile("foo.rb", fooContents)), {});
+    assertErrorDiagnostics(send(*openFile("calls_foo.rb", "# typed: true\nFoo.foo\n")), {});
+    assertErrorDiagnostics(send(*openFile("bar.rb", barContents)), {});
+    assertErrorDiagnostics(send(*openFile("calls_bar.rb", "# typed: true\nBar.bar\n")), {});
+    assertErrorDiagnostics(send(*openFile("baz.rb", "# typed: true\nclass Baz\nend\n")), {});
+
+    // clear counters
+    getCounters();
+
+    // Slow path: Rename the class in baz. Expect the edits below to preempt.
+    sendAsync(*changeFile("baz.rb", "# typed: true\nclass Baz2\nend\n", 2, false, 1));
+
+    // Wait for the slow path to start.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
+    // Two fast path edits, each of which changes a method that one other file calls. The hovers keep the edits in the
+    // queue from being merged.
+    sendAsync(*changeFile("foo.rb", absl::StrReplaceAll(fooContents, {{"Integer", "T.untyped"}}), 2));
+    sendAsync(*hover("foo.rb", 1, 6));
+    sendAsync(*changeFile("bar.rb", absl::StrReplaceAll(barContents, {{"Integer", "T.untyped"}}), 2));
+    sendAsync(*hover("bar.rb", 1, 6));
+    // Undo both edits. Relative to the files that Sorbet has when this edit enters the queue it changes nothing, but
+    // once the edits above are committed it changes two methods called from two more files, which is too many files for
+    // the fast path.
+    sendAsync(*changeFile("foo.rb", fooContents, 3));
+    sendAsync(*changeFile("bar.rb", barContents, 3));
+    sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt)));
+
+    // Wait for both hovers.
+    for (int hovers = 0; hovers < 2;) {
+        auto msg = readAsync();
+        REQUIRE(msg != nullptr);
+        if (msg->isResponse()) {
+            hovers++;
+        }
+    }
+
+    // Drain the pipeline with a fence.
+    assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
+
+    // The first two edits preempt the slow path. The last one takes the slow path, either by canceling the running
+    // slow path or after it, depending on timing.
+    auto counters = getCounters();
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "fastpath"), 2);
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath") +
+                 counters.getCategoryCounter("lsp.updates", "slowpath_canceled"),
+             2);
 }
 
 // This case shows how preemption works when the preemption tasks occur in a stratum that's at or before the one that
