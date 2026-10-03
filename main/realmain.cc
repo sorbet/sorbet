@@ -821,6 +821,9 @@ int realmain(int argc, char *argv[]) {
             auto id = 0;
             for (auto &file : gs->getFiles().subspan(1)) {
                 id++;
+                if (strata.fileToStratum[id] == pipeline::PackageStrata::UNSELECTED) {
+                    continue;
+                }
                 if (file->isPayload()) {
                     continue;
                 }

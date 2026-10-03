@@ -1,0 +1,40 @@
+--- Nested package keeps global RBIs, generated RBIs, and preludes ---
+No errors! Great job.
+exit: 0
+--- Explicit test package is not selected implicitly ---
+No errors! Great job.
+exit: 0
+--- Selecting the test package includes application dependencies ---
+Errors: 1
+app/test/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+exit: 100
+--- Explicit application and test selections in test package mode ---
+Errors: 1
+app/test/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+exit: 100
+--- Selecting a prelude excludes its consumers ---
+No errors! Great job.
+exit: 0
+--- Selecting a prelude_package excludes its consumers ---
+No errors! Great job.
+exit: 0
+--- File table omits unread sources ---
+   "path": "./app/__package.rb",
+   "path": "./app/isolated/__package.rb",
+   "path": "./app/isolated/value.rb",
+   "path": "./app/test/__package.rb",
+   "path": "./generated/App_Isolated/value.rbi",
+   "path": "./global.rbi",
+   "path": "./prelude/__package.rb",
+   "path": "./prelude/global.rb",
+   "path": "./shims/__package.rb",
+   "path": "./shims/google-protobuf.rbi",
+   "path": "./unrelated/__package.rb",
+exit: 0
+--- Typed-sigil suggestions stay within the selection ---
+Errors: 4
+app/isolated/value.rb:1: You could add `# typed: strict` https://srb.help/7022
+generated/App_Isolated/value.rbi:1: You could add `# typed: strict` https://srb.help/7022
+global.rbi:1: You could add `# typed: false` https://srb.help/7022
+prelude/global.rb:1: You could add `# typed: strict` https://srb.help/7022
+exit: 100
