@@ -72,6 +72,8 @@ void SorbetWorkspaceEditTask::index(LSPIndexer &indexer) {
         // HACK: Too many files to `commitEdit` serially. Index in `runSpecial`.
         this->indexer = &indexer;
         ENFORCE(getTypecheckingPath(indexer) != TypecheckingPath::Fast);
+        // `runSpecial` has to wait for the running slow path, which this edit makes obsolete.
+        indexer.cancelSlowPathBeforeCommit(params->epoch);
     }
 }
 

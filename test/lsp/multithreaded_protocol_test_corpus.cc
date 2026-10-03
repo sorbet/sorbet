@@ -324,6 +324,77 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelsSlowPathWhenNewEditWouldTak
     checkDiagnosticTimes(counters.getTimings("last_diagnostic_latency"), 2, /* assertUniqueStartTimes */ false);
 }
 
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelsSlowPathWhenNewEditHasTooManyFiles") {
+    // Set lspMaxFilesOnFastPath to 1 so that a two-file edit is too large to commit on the processing thread.
+    auto opts = make_shared<realmain::options::Options>();
+    opts->lspMaxFilesOnFastPath = 1;
+    resetState(opts);
+
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->enableTypecheckInfo = true;
+    assertErrorDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
+
+    // Initial state: Three empty files.
+    assertErrorDiagnostics(send(*openFile("foo.rb", "")), {});
+    assertErrorDiagnostics(send(*openFile("bar.rb", "")), {});
+    assertErrorDiagnostics(send(*openFile("baz.rb", "")), {});
+
+    // clear counters
+    getCounters();
+
+    // Slow path 1: Edit foo to have an error since Bar doesn't exist. Expect a cancelation.
+    sendAsync(*changeFile(
+        "foo.rb", "# typed: true\n\nclass Foo\nextend T::Sig\nsig{returns(Integer)}\ndef foo\nBar.new.bar\nend\nend\n",
+        2, true));
+
+    // Wait for typechecking to begin to avoid races.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // Slow path 2: Bar defines the expected method, but declared with a non-integer return value (so foo now has a
+    // new error). The pause makes the two edits arrive as a single edit.
+    sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
+    sendAsync(*changeFile("bar.rb",
+                          "# typed: true\n\nclass Bar\nextend T::Sig\nsig{returns(String)}\ndef bar\n10\nend\nend\n", 2,
+                          false));
+    sendAsync(*changeFile("baz.rb", "# typed: true\n\nclass Baz\nend\n", 2, false));
+    // Pause so that all latency timers for the above operations get reported.
+    this_thread::sleep_for(timestampGranularity);
+    sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt)));
+
+    // Wait for first typecheck run to get canceled.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Cancelled);
+    }
+
+    // Send a no-op to clear out the pipeline. Should have one error per file with a method.
+    assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
+                           {
+                               {"foo.rb", 6, "Expected `Integer` but found `String` for method result type"},
+                               {"bar.rb", 6, "Expected `String` but found `Integer(10)` for method result type"},
+                           });
+
+    auto counters = getCounters();
+    // N.B.: lsp.messages.processed contains canceled slow paths.
+    CHECK_EQ(counters.getCategoryCounter("lsp.messages.processed", "sorbet.workspaceEdit"), 2);
+    CHECK_EQ(counters.getCategoryCounter("lsp.messages.processed", "sorbet.mergedEdits"), 2);
+
+    // We don't report task latencies for merged edits or canceled slow paths.
+    CHECK_EQ(counters.getTimings("task_latency", {{"method", "sorbet.workspaceEdit"}}).size(), 1);
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "fastpath"), 0);
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 1);
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath_canceled"), 1);
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "query"), 0);
+    // 1 per edit
+    checkDiagnosticTimes(counters.getTimings("last_diagnostic_latency"), 3, /* assertUniqueStartTimes */ false);
+}
+
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithHover") {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;

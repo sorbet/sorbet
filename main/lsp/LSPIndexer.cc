@@ -377,16 +377,21 @@ unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edi
         // pendingTypecheckUpdates.epoch]
         ENFORCE(runningSlowPath.epoch <= pendingTypecheckUpdates.epoch);
         ENFORCE(runningSlowPath.epoch > (pendingTypecheckUpdates.epoch - pendingTypecheckUpdates.editCount));
+        ENFORCE(!pendingTypecheckUpdatesCanceled, "The canceled slow path should be over by the next commitEdit");
 
         // Cancel if the new update will take the slow path anyway.
         if (update.typecheckingPath != TypecheckingPath::Fast && gs->epochManager->tryCancelSlowPath(update.epoch)) {
-            // Cancelation succeeded! Merge the updates from the cancelled run into the current update.
-            update.mergeOlder(pendingTypecheckUpdates);
-            mergeEvictedFiles(evictedFiles, newlyEvictedFiles);
-            // The two updates together could end up taking the fast path.
-            update.typecheckingPath = getTypecheckingPath(update, newlyEvictedFiles);
-            update.canceledSlowPath = true;
+            pendingTypecheckUpdatesCanceled = true;
         }
+    }
+
+    if (std::exchange(pendingTypecheckUpdatesCanceled, false)) {
+        // Cancelation succeeded! Merge the updates from the cancelled run into the current update.
+        update.mergeOlder(pendingTypecheckUpdates);
+        mergeEvictedFiles(evictedFiles, newlyEvictedFiles);
+        // The two updates together could end up taking the fast path.
+        update.typecheckingPath = getTypecheckingPath(update, newlyEvictedFiles);
+        update.canceledSlowPath = true;
     }
 
     if (update.canceledSlowPath) {
@@ -433,6 +438,11 @@ unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edi
 unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit) {
     ENFORCE(edit.updates.size() <= config->opts.lspMaxFilesOnFastPath, "Too many files to index serially");
     return commitEdit(edit, *emptyWorkers);
+}
+
+void LSPIndexer::cancelSlowPathBeforeCommit(uint32_t epoch) {
+    ENFORCE(!pendingTypecheckUpdatesCanceled);
+    pendingTypecheckUpdatesCanceled = gs->epochManager->tryCancelSlowPath(epoch);
 }
 
 core::FileRef LSPIndexer::uri2FileRef(string_view uri) const {

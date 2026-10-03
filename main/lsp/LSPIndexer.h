@@ -41,6 +41,9 @@ class LSPIndexer final {
     std::vector<std::unique_ptr<Timer>> pendingTypecheckDiagnosticLatencyTimers;
     /** Contains files evicted by `pendingTypecheckUpdates`. Used to make fast path decisions in the immediate past. */
     UnorderedMap<core::FileRef, std::shared_ptr<core::File>> evictedFiles;
+    /** Whether the slow path for `pendingTypecheckUpdates` got canceled. If so, the next `commitEdit` has to merge
+     * them into its update. */
+    bool pendingTypecheckUpdatesCanceled = false;
     /** A WorkerPool with 0 workers. */
     std::unique_ptr<WorkerPool> emptyWorkers;
 
@@ -92,6 +95,13 @@ public:
      */
     std::unique_ptr<LSPFileUpdates> commitEdit(SorbetWorkspaceEditParams &edit, WorkerPool &workers);
     std::unique_ptr<LSPFileUpdates> commitEdit(SorbetWorkspaceEditParams &edit);
+
+    /**
+     * Cancels the running slow path, if any, for an edit that takes the slow path but only reaches `commitEdit` on the
+     * typechecker thread, once that slow path is over. `commitEdit` then merges the canceled edits into that edit.
+     * Must be called from the message processing thread.
+     */
+    void cancelSlowPathBeforeCommit(uint32_t epoch);
 
     /**
      * Retrieves the file ref for the given file, if exists.
