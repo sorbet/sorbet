@@ -20,6 +20,8 @@ class SorbetWorkspaceEditTask final : public LSPDangerousTypecheckerTask {
     mutable uint32_t cachedFastPathDecisionFileTableVersion = 0;
     // The files that the decision is about: the updates that `index` will not drop as no-ops.
     mutable std::vector<std::shared_ptr<core::File>> cachedFastPathDecisionFiles;
+    // Whether the last decision made was to take the fast path. Unlike the cached decision, this outlives a merge.
+    mutable bool lastFastPathDecisionWasFast = false;
     // HACK: In the event that this edit is too large to index serially, stash the indexer here for use in `runSpecial`.
     LSPIndexer *indexer = nullptr;
 
@@ -33,6 +35,10 @@ public:
     const SorbetWorkspaceEditParams &getParams() const;
 
     void mergeNewer(SorbetWorkspaceEditTask &task);
+    // Whether this edit was last known to take the fast path, but would name more than `lspMaxFilesOnFastPath`
+    // files once `task` is merged into it. Every update counts, including the no-ops that `index` drops: only the
+    // indexer can tell those apart.
+    bool wouldLoseFastPathByMerging(const SorbetWorkspaceEditTask &task) const;
     void preprocess(LSPPreprocessor &preprocess) override;
     void index(LSPIndexer &indexer) override;
     void run(LSPTypecheckerDelegate &typechecker) override;

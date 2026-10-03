@@ -142,6 +142,11 @@ void LSPPreprocessor::mergeFileChanges() {
                     break;
                 }
             }
+            if (olderEdit->wouldLoseFastPathByMerging(*newerEdit)) {
+                // olderEdit is waiting to preempt a slow path, which it could no longer do. Merge the remaining
+                // edits into newerEdit instead, which the outer loop looks at next.
+                break;
+            }
             olderEdit->mergeNewer(*newerEdit);
             // Delete the update we just merged and move on to next item.
             it = pendingRequests.erase(it);

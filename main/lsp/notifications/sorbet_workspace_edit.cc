@@ -48,6 +48,21 @@ void SorbetWorkspaceEditTask::mergeNewer(SorbetWorkspaceEditTask &task) {
     cachedFastPathDecision = TypecheckingPath::Slow;
 }
 
+bool SorbetWorkspaceEditTask::wouldLoseFastPathByMerging(const SorbetWorkspaceEditTask &task) const {
+    if (!lastFastPathDecisionWasFast) {
+        return false;
+    }
+
+    UnorderedSet<string_view> paths;
+    for (auto &file : params->updates) {
+        paths.insert(file->path());
+    }
+    for (auto &file : task.params->updates) {
+        paths.insert(file->path());
+    }
+    return paths.size() > config.opts.lspMaxFilesOnFastPath;
+}
+
 void SorbetWorkspaceEditTask::preprocess(LSPPreprocessor &preprocessor) {
     // latencyTimer is assigned prior to preprocess.
     if (this->latencyTimer != nullptr && !params->updates.empty()) {
@@ -165,6 +180,7 @@ TypecheckingPath SorbetWorkspaceEditTask::getTypecheckingPath(const LSPIndexer &
         cachedFastPathDecision = index.getTypecheckingPath(cachedFastPathDecisionFiles);
         cachedFastPathDecisionFileTableVersion = index.getFileTableVersion();
         cachedFastPathDecisionValid = true;
+        lastFastPathDecisionWasFast = cachedFastPathDecision == TypecheckingPath::Fast;
     }
     return cachedFastPathDecision;
 }

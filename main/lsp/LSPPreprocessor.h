@@ -83,7 +83,7 @@ class LSPPreprocessor final {
     /**
      * Merges all consecutive file updates into a single update. File updates are also merged if they are only separated
      * by *delayable* requests (see LSPMessage::isDelayable()). Updates are merged into the earliest file update in the
-     * sequence.
+     * sequence, unless that would cost it a fast path that it is known to take: then they start a new sequence.
      *
      * Example: (E = edit, D = delayable non-edit, M = arbitrary non-edit)
      * {[M1][E1][E2][D1][E3]} => {[M1][E1-3][D1]}

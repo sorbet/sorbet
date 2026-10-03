@@ -338,6 +338,61 @@ TEST_CASE("MergesFileUpdatesProperlyAfterCancelation") {
     }
 }
 
+TEST_CASE("StopsMergingIntoFastPathEditAtFileLimit") {
+    // Set lspMaxFilesOnFastPath to 2 so that three files are too many for the fast path.
+    auto opts = makeOptions("");
+    opts.lspMaxFilesOnFastPath = 2;
+    auto config = makeConfig(opts);
+    auto state = make_shared<TaskQueue>();
+    auto preprocessor = makePreprocessor(state, config);
+    LSPIndexer indexer(config, makeGS(), nullptr);
+
+    // Tell the indexer about three files.
+    for (auto path : {"foo.rb", "bar.rb", "baz.rb"}) {
+        preprocessor.preprocessAndEnqueue(makeOpen(path, "# typed: true\ndef foo; end", 1));
+        unique_ptr<LSPTask> task;
+        {
+            absl::MutexLock lck{state->getMutex()};
+            task = move(state->tasks().front());
+            state->tasks().pop_front();
+        }
+        task->index(indexer);
+    }
+
+    // An edit to foo.rb that takes the fast path, which Sorbet finds out when it checks whether the edit can preempt.
+    preprocessor.preprocessAndEnqueue(makeChange("foo.rb", "# typed: true\ndef foo; 1 + 1; end", 2));
+    {
+        absl::MutexLock lck{state->getMutex()};
+        REQUIRE_EQ(1, state->tasks().size());
+        REQUIRE(state->tasks().front()->canPreempt(indexer));
+    }
+
+    // An edit to bar.rb is merged into it: two files still fit on the fast path.
+    preprocessor.preprocessAndEnqueue(makeChange("bar.rb", "# typed: true\ndef foo; 1 + 1; end", 2));
+    {
+        absl::MutexLock lck{state->getMutex()};
+        REQUIRE_EQ(1, state->tasks().size());
+    }
+    CHECK_EQ(getUpdates(*state, 0).value()->mergeCount, 1);
+
+    // An edit to baz.rb stays separate: three files are too many.
+    preprocessor.preprocessAndEnqueue(makeChange("baz.rb", "# typed: true\ndef foo; 1 + 1; end", 2));
+    {
+        absl::MutexLock lck{state->getMutex()};
+        REQUIRE_EQ(2, state->tasks().size());
+    }
+    CHECK_EQ(getUpdates(*state, 0).value()->mergeCount, 1);
+
+    // Later edits merge into the edit to baz.rb instead.
+    preprocessor.preprocessAndEnqueue(makeChange("baz.rb", "# typed: true\ndef foo; 1 + 2; end", 3));
+    {
+        absl::MutexLock lck{state->getMutex()};
+        REQUIRE_EQ(2, state->tasks().size());
+    }
+    CHECK_EQ(getUpdates(*state, 0).value()->mergeCount, 1);
+    CHECK_EQ(getUpdates(*state, 1).value()->mergeCount, 1);
+}
+
 TEST_CASE("PreemptionTasksWorkAsExpected") {
     auto errorCollector = make_shared<core::ErrorCollector>();
     auto gs = makeGS(errorCollector);
