@@ -119,6 +119,10 @@ A short list of useful LSP-related command line flags:
 
   Certain language clients deal poorly with large quantities of diagnostics (errors, warnings, information hints, etc.). Sorbet caps the number of diagnostics it sends to clients at 1,000 diagnostics, but this can be changed (set it to `0` to remove the cap).
 
+- `--lsp-max-files-on-fast-path`
+
+  Sorbet [retypechecks the whole workspace](server-status#why-do-some-of-my-edits-make-sorbet-go-back-to-typechecking) after an edit that changes over 50 files at once, or that changes a definition used in over 50 files. This flag changes that limit. Sorbet handles a smaller edit by retypechecking only those files, and does not respond to other requests until it finishes, so the limit that works best depends on how long the codebase takes to retypecheck from scratch.
+
 For all Sorbet flags, be sure to check `srb tc --help`.
 
 ## Instructions for specific language clients

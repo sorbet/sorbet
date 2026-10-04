@@ -130,6 +130,8 @@ Today, this happens for these kinds of edits:
 - Edits which change the class or inheritance hierarchy.
 - Edits which change a definition used in over 50 files.
 
+The limit of 50 files in the list above is a default, which the [`--lsp-max-files-on-fast-path`](lsp.md#other-useful-lsp-related-flags) flag changes.
+
 Notably, this list does not include these common edits:
 
 - Edits which change code inside a method body.

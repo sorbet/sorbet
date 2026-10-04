@@ -201,6 +201,12 @@ Usage:
                                 informations) to the language client, like VS Code. Can
                                 prevent slowdown triggered by large diagnostic lists. A
                                 <cap> of 0 means no limit. (default: 1000)
+      --lsp-max-files-on-fast-path <n>
+                                Retypechecks the whole codebase after an edit that
+                                changes over <n> files at once, or that changes a
+                                definition used in over <n> files. Smaller edits only
+                                retypecheck those files, which blocks other requests
+                                until it finishes. (default: 50)
       --disable-watchman        When in LSP mode, disable file watching via Watchman
       --watchman-path <path>    Path to watchman executable. Will search on `PATH` if
                                 <path> contains no slashes. (default: watchman)
