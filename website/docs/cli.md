@@ -60,6 +60,10 @@ srb tc . --ignore=/vendor
 
 `srb tc` can be given a list of paths (either folder or files) to Ruby files that it should read. By default, `sorbet/config` is created to contain `.`, so `srb tc` will type check every file in the current directory[^gems].
 
+Recursive directory discovery follows nested directory symlinks, including links to targets outside the input directory. Discovered paths retain the lexical route through each link, not the target's physical path.
+
+A directory link whose target is already on the current traversal route is skipped. A nested link-resolution loop is also skipped; supplying that looping path as the input root produces an input error. Separate aliases are traversed independently, so a real directory and its symlink can contribute the same file under different paths. File symlinks continue to be selected by filename extension, including dangling links.
+
 > **Note**: Sorbet only checks files that end in `*.rb` or `*.rbi`. To check other files, they must be explicitly named on the command line (or in the config file), or given an appropriate file extension.
 
 <!-- prettier-ignore-start -->
@@ -75,7 +79,7 @@ Sometimes, including an entire folder includes too many files. We can refine the
 --ignore <pattern>
 ```
 
-This will ignore input files that contain the given pattern in their paths (relative to the input path passed to Sorbet). Patterns beginning with / match against the prefix of these relative paths; others are substring matches. Matches must be against whole component parts, so `foo` matches `/foo/bar.rb` and `/bar/foo/baz.rb` but not `/foo.rb` or `/foo2/bar.rb`.
+This will ignore input files that contain the given pattern in their paths (relative to the input path passed to Sorbet). Patterns beginning with / match against the prefix of these relative paths; others are substring matches. Matches must be against whole component parts, so `foo` matches `/foo/bar.rb` and `/bar/foo/baz.rb` but not `/foo.rb` or `/foo2/bar.rb`. For a linked directory, matching uses the lexical route under the input path, not the target's physical path; ignoring a linked directory prunes that route and its descendants.
 
 ### Considerations for memory usage
 

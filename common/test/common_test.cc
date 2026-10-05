@@ -9,9 +9,55 @@
 #include "spdlog/spdlog.h"
 
 #include <array>
+#include <atomic>
 #include <filesystem>
+#include <fstream>
 
 namespace sorbet::common {
+
+namespace {
+
+class TemporaryDirectory final {
+public:
+    TemporaryDirectory() {
+        static std::atomic<unsigned int> nextId = 0;
+        const auto tempPath = std::filesystem::temp_directory_path();
+        for (;;) {
+            root = tempPath / ("sorbet-common-test-" + std::to_string(nextId.fetch_add(1)));
+            std::error_code error;
+            if (std::filesystem::create_directory(root, error)) {
+                return;
+            }
+            REQUIRE_FALSE(error);
+        }
+    }
+
+    ~TemporaryDirectory() {
+        std::error_code error;
+        std::filesystem::remove_all(root, error);
+    }
+
+    std::filesystem::path root;
+};
+
+void writeFile(const std::filesystem::path &path, std::string_view contents = "") {
+    std::filesystem::create_directories(path.parent_path());
+    std::ofstream output(path);
+    REQUIRE(output.good());
+    output << contents;
+    REQUIRE(output.good());
+}
+
+std::vector<std::string> discoverFiles(const std::filesystem::path &root, int workerCount, bool recursive = true,
+                                       std::vector<std::string> absoluteIgnores = {},
+                                       std::vector<std::string> relativeIgnores = {}) {
+    auto logger = spdlog::default_logger();
+    auto workers = WorkerPool::create(workerCount, *logger);
+    return FileOps::listFilesInDir(root.string(), {".rb", ".rbi"}, *workers, recursive, absoluteIgnores,
+                                   relativeIgnores);
+}
+
+} // namespace
 
 TEST_CASE("Levenstein") {
     Levenstein levenstein;
@@ -59,7 +105,7 @@ TEST_CASE("FileOps::listFilesInDir") {
             FileOps::listFilesInDir(root, {".rb"}, *workers, true, {}, {});
             FAIL("expected listFilesInDir to throw");
         } catch (FileNotFoundException &e) {
-            CHECK_EQ(std::string(e.what()), "Couldn't open directory `common_test_missing_dir`");
+            CHECK(std::string(e.what()).find(root) != std::string::npos);
         }
     }
 
@@ -71,6 +117,141 @@ TEST_CASE("FileOps::listFilesInDir") {
         CHECK_THROWS_AS(FileOps::listFilesInDir(root, {".rb"}, *workers, true, {}, {}), FileNotDirException);
 
         std::filesystem::remove_all(root);
+    }
+}
+
+TEST_CASE("FileOps follows nested directory symlinks and preserves symlink roots") {
+    TemporaryDirectory temp;
+    const auto root = temp.root / "project";
+    const auto external = temp.root / "external-rbi";
+    writeFile(root / "lib" / "local.rb");
+    writeFile(external / "nested" / "shared.rb");
+    writeFile(external / "nested" / "types.rbi");
+    writeFile(external / "nested" / "ignored.txt");
+    std::filesystem::create_directory_symlink(external, root / "lib" / "linked");
+
+    const std::vector<std::string> linkedFiles = {(root / "lib" / "linked" / "nested" / "shared.rb").string(),
+                                                  (root / "lib" / "linked" / "nested" / "types.rbi").string(),
+                                                  (root / "lib" / "local.rb").string()};
+    for (const int workerCount : {0, 4}) {
+        INFO("worker count: " << workerCount);
+        CHECK_EQ(discoverFiles(root, workerCount), linkedFiles);
+    }
+
+    const auto physicalRoot = temp.root / "physical-root";
+    const auto lexicalRoot = temp.root / "root-link";
+    writeFile(physicalRoot / "source.rbi");
+    std::filesystem::create_directory_symlink(physicalRoot, lexicalRoot);
+    const std::vector<std::string> lexicalRootFiles = {(lexicalRoot / "source.rbi").string()};
+    for (const int workerCount : {0, 4}) {
+        INFO("worker count: " << workerCount);
+        CHECK_EQ(discoverFiles(lexicalRoot, workerCount), lexicalRootFiles);
+    }
+}
+
+TEST_CASE("FileOps prunes ancestor cycles but preserves lexical aliases") {
+    TemporaryDirectory temp;
+    const auto root = temp.root / "project";
+    writeFile(root / "base.rb");
+    writeFile(root / "nested" / "inside.rb");
+    writeFile(root / "nested" / "deeper" / "deep.rb");
+    writeFile(root / "shared" / "shared.rb");
+    writeFile(root / "mutual" / "first" / "first.rb");
+    writeFile(root / "mutual" / "second" / "second.rb");
+
+    std::filesystem::create_directory_symlink(".", root / "self");
+    std::filesystem::create_directory_symlink("..", root / "nested" / "parent");
+    std::filesystem::create_directory_symlink("..", root / "nested" / "deeper" / "parent");
+    std::filesystem::create_directory_symlink(root, root / "nested" / "deeper" / "absolute-root");
+    std::filesystem::create_directory_symlink("../..", root / "nested" / "deeper" / "dotdot-root");
+    std::filesystem::create_directory_symlink("nested/../nested", root / "nested-alias");
+    std::filesystem::create_directory_symlink("shared", root / "alias-one");
+    std::filesystem::create_directory_symlink("shared", root / "alias-two");
+    std::filesystem::create_directory_symlink("../second", root / "mutual" / "first" / "to-second");
+    std::filesystem::create_directory_symlink("../first", root / "mutual" / "second" / "to-first");
+
+    const std::vector<std::string> expected = {
+        (root / "alias-one" / "shared.rb").string(),
+        (root / "alias-two" / "shared.rb").string(),
+        (root / "base.rb").string(),
+        (root / "mutual" / "first" / "first.rb").string(),
+        (root / "mutual" / "first" / "to-second" / "second.rb").string(),
+        (root / "mutual" / "second" / "second.rb").string(),
+        (root / "mutual" / "second" / "to-first" / "first.rb").string(),
+        (root / "nested-alias" / "deeper" / "deep.rb").string(),
+        (root / "nested-alias" / "inside.rb").string(),
+        (root / "nested" / "deeper" / "deep.rb").string(),
+        (root / "nested" / "inside.rb").string(),
+        (root / "shared" / "shared.rb").string(),
+    };
+    for (const int workerCount : {0, 4}) {
+        INFO("worker count: " << workerCount);
+        CHECK_EQ(discoverFiles(root, workerCount), expected);
+    }
+}
+
+TEST_CASE("FileOps applies ignores to lexical routes and keeps leaf symlinks non-recursively") {
+    TemporaryDirectory temp;
+    const auto root = temp.root / "project";
+    const auto external = temp.root / "external";
+    writeFile(root / "local.rb");
+    writeFile(root / "ignored" / "hidden.rb");
+    writeFile(root / "nested" / "nested.rb");
+    writeFile(external / "target.rb");
+    std::filesystem::create_directory_symlink(external, root / "links");
+    std::filesystem::create_symlink(external / "target.rb", root / "file-link.rb");
+    std::filesystem::create_symlink(root / "missing.rb", root / "dangling.rb");
+
+    const std::vector<std::string> withoutLinks = {
+        (root / "dangling.rb").string(), (root / "file-link.rb").string(), (root / "ignored" / "hidden.rb").string(),
+        (root / "local.rb").string(), (root / "nested" / "nested.rb").string()};
+    const std::vector<std::string> withLinkedTarget = {(root / "dangling.rb").string(),
+                                                       (root / "file-link.rb").string(),
+                                                       (root / "ignored" / "hidden.rb").string(),
+                                                       (root / "links" / "target.rb").string(),
+                                                       (root / "local.rb").string(),
+                                                       (root / "nested" / "nested.rb").string()};
+
+    for (const int workerCount : {0, 4}) {
+        INFO("worker count: " << workerCount);
+        CHECK_EQ(discoverFiles(root, workerCount, true, {"/links"}), withoutLinks);
+        CHECK_EQ(discoverFiles(root, workerCount, true, {}, {"/links"}), withoutLinks);
+        CHECK_EQ(discoverFiles(root, workerCount, true, {external.string()}), withLinkedTarget);
+        CHECK_EQ(discoverFiles(root, workerCount, false),
+                 std::vector<std::string>{(root / "dangling.rb").string(), (root / "file-link.rb").string(),
+                                          (root / "local.rb").string()});
+    }
+}
+
+TEST_CASE("FileOps skips nested ELOOP entries and preserves root errors") {
+    TemporaryDirectory temp;
+    const auto root = temp.root / "project";
+    writeFile(root / "before.rb");
+    std::filesystem::create_directory_symlink("b", root / "a");
+    std::filesystem::create_directory_symlink("a", root / "b");
+
+    const std::vector<std::string> expected = {(root / "before.rb").string()};
+    const auto missingRoot = temp.root / "missing";
+    const auto notDirectory = temp.root / "not-directory.rb";
+    writeFile(notDirectory);
+    for (const int workerCount : {0, 4}) {
+        INFO("worker count: " << workerCount);
+        CHECK_EQ(discoverFiles(root, workerCount), expected);
+
+        try {
+            discoverFiles(root / "a", workerCount);
+            FAIL("expected a symlink loop supplied as a root to fail");
+        } catch (FileNotFoundException &e) {
+            CHECK(std::string(e.what()).find((root / "a").string()) != std::string::npos);
+        }
+
+        try {
+            discoverFiles(missingRoot, workerCount);
+            FAIL("expected a missing root to fail");
+        } catch (FileNotFoundException &e) {
+            CHECK(std::string(e.what()).find(missingRoot.string()) != std::string::npos);
+        }
+        CHECK_THROWS_AS(discoverFiles(notDirectory, workerCount), FileNotDirException);
     }
 }
 

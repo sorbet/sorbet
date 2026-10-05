@@ -42,7 +42,10 @@ public:
     static void removeFile(const std::string &path);
 
     /**
-     * Returns a list of all files in the given directory. Returns paths that include the path to directory.
+     * Returns a list of lexical file paths in the given directory, including the path to directory.
+     * Recursive scans follow directory symlinks and prune a directory when its target identity repeats on the
+     * current ancestor branch; separate lexical aliases remain separate results. File symlinks, including dangling
+     * links, are selected by their allowed extension. Non-recursive scans do not descend into directories.
      * Throws FileNotFoundException if path does not exist, and FileNotDirException if path is not a directory.
      */
     static std::vector<std::string> listFilesInDir(std::string_view path, const UnorderedSet<std::string> &extensions,

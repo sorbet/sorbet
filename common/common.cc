@@ -8,6 +8,7 @@
 #include "os/os.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include <array>
+#include <cerrno>
 #include <csignal>
 #include <cstdarg>
 #include <cstdio>
@@ -310,7 +311,41 @@ bool sorbet::FileOps::isFileIgnored(string_view basePath, string_view filePath,
 }
 
 struct QuitToken {};
-using Job = variant<QuitToken, filesystem::path>;
+struct DirectoryIdentity {
+    dev_t device;
+    ino_t inode;
+};
+
+struct DirectoryAncestors {
+    DirectoryIdentity identity;
+    shared_ptr<const DirectoryAncestors> parent;
+};
+
+struct DirectoryJob {
+    filesystem::path path;
+    shared_ptr<const DirectoryAncestors> ancestors;
+};
+
+using Job = variant<QuitToken, DirectoryJob>;
+
+bool hasAncestor(const shared_ptr<const DirectoryAncestors> &ancestors, const DirectoryIdentity &identity) {
+    for (auto *ancestor = ancestors.get(); ancestor != nullptr; ancestor = ancestor->parent.get()) {
+        if (ancestor->identity.device == identity.device && ancestor->identity.inode == identity.inode) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void tolerateDirectoryError(int error, bool isRoot, const filesystem::path &path) {
+    if (!isRoot && (error == ENOENT || error == ENOTDIR || error == ELOOP)) {
+        return;
+    }
+    if (isRoot && error == ENOTDIR) {
+        throw sorbet::FileNotDirException();
+    }
+    throw sorbet::FileNotFoundException(fmt::format("Couldn't open directory `{}`", path.string()));
+}
 // We record all classes of exceptions we can throw separately, rather than one single `SorbetException`.
 //
 // We do this for two reasons: one is that when looking for a `catch` handler, C++ will only look for
@@ -332,14 +367,14 @@ void appendFilesInDir(const string &basePath, const sorbet::UnorderedSet<string>
     atomic<size_t> pendingJobs{0};
 
     // The invariant that the code below must maintain is pendingJobs must be
-    // at least as large as the number of items in jobq.  Therefore, once
+    // at least as large as the number of items in jobq. Therefore, once
     // pendingJobs is 0, whatever thread observes that can be assured that there
     // is no more work to be done and can initiate shutdown.
     //
     // In practice, all it takes to maintain this invariant is that pendingJobs
     // must be incremented prior to pushing work onto jobq.
     ++pendingJobs;
-    jobq->push(basePath, 1);
+    jobq->push(DirectoryJob{filesystem::path(basePath), nullptr}, 1);
 
     workers.multiplexJob("options.findFiles", [numWorkers, jobq, resultq, &pendingJobs, &basePath, &extensions,
                                                &recursive, &absoluteIgnorePatterns, &relativeIgnorePatterns]() {
@@ -356,52 +391,97 @@ void appendFilesInDir(const string &basePath, const sorbet::UnorderedSet<string>
                     break;
                 }
 
-                auto *strvariant = std::get_if<filesystem::path>(&job);
-                ENFORCE(strvariant != nullptr);
-                auto &path = *strvariant;
+                auto *directoryJob = std::get_if<DirectoryJob>(&job);
+                ENFORCE(directoryJob != nullptr);
+                const auto &path = directoryJob->path;
+                const bool isRoot = !directoryJob->ancestors;
 
-                std::error_code ec;
-                for (auto &entry : filesystem::directory_iterator(path, ec)) {
-                    string pathStr = entry.path();
-                    if (entry.is_directory()) {
-                        if (!recursive || entry.is_symlink()) {
-                            continue;
-                        }
-                    } else {
-                        if (!sorbet::FileOps::hasAllowedExtension(pathStr, extensions)) {
-                            continue;
-                        }
-                    }
-
-                    if (sorbet::FileOps::isFileIgnored(basePath, pathStr, absoluteIgnorePatterns,
-                                                       relativeIgnorePatterns)) {
-                        continue;
-                    }
-
-                    if (entry.is_directory()) {
-                        ++pendingJobs;
-                        jobq->push(entry.path(), 1);
-                    } else {
-                        output.push_back(move(pathStr));
-                    }
-                }
-
-                if (ec) {
-                    // A checkout can replace a subdirectory between its parent's listing and this one. The file
-                    // watcher reports whatever took its place, so only the root has to exist.
-                    const bool vanished = path != basePath && (ec.value() == ENOENT || ec.value() == ENOTDIR);
-                    if (!vanished) {
-                        if (ec.value() == ENOTDIR) {
+                DirectoryIdentity identity{};
+                bool shouldEnumerate = true;
+                if (recursive) {
+                    struct stat metadata {};
+                    if (::stat(path.c_str(), &metadata) != 0) {
+                        const int error = errno;
+                        tolerateDirectoryError(error, isRoot, path);
+                        shouldEnumerate = false;
+                    } else if (!S_ISDIR(metadata.st_mode)) {
+                        if (isRoot) {
                             throw sorbet::FileNotDirException();
                         }
-                        throw sorbet::FileNotFoundException(fmt::format("Couldn't open directory `{}`", path.string()));
+                        shouldEnumerate = false;
+                    } else {
+                        identity = DirectoryIdentity{metadata.st_dev, metadata.st_ino};
+                        shouldEnumerate = !hasAncestor(directoryJob->ancestors, identity);
                     }
                 }
 
-                // Now that we've finished with this directory, we can decrement.
+                if (shouldEnumerate) {
+                    shared_ptr<const DirectoryAncestors> childAncestors;
+                    std::error_code iteratorError;
+                    filesystem::directory_iterator iterator(path, iteratorError);
+                    const filesystem::directory_iterator end;
+
+                    if (iteratorError) {
+                        tolerateDirectoryError(iteratorError.value(), isRoot, path);
+                    } else {
+                        while (iterator != end) {
+                            const auto &entry = *iterator;
+                            string pathStr = entry.path().string();
+
+                            // Ignore matching is lexical and must happen before filesystem metadata lookup.
+                            if (!sorbet::FileOps::isFileIgnored(basePath, pathStr, absoluteIgnorePatterns,
+                                                                relativeIgnorePatterns)) {
+                                std::error_code statusError;
+                                const auto entryStatus = entry.status(statusError);
+                                if (statusError) {
+                                    const int error = statusError.value();
+                                    if (error == ENOENT || error == ENOTDIR) {
+                                        // status() follows symlinks. Keep an allowed dangling file symlink,
+                                        // as the old extension-based leaf selection did.
+                                        std::error_code linkStatusError;
+                                        const auto linkStatus = entry.symlink_status(linkStatusError);
+                                        if (!linkStatusError) {
+                                            if (filesystem::is_symlink(linkStatus) &&
+                                                sorbet::FileOps::hasAllowedExtension(pathStr, extensions)) {
+                                                output.push_back(move(pathStr));
+                                            }
+                                        } else {
+                                            const int linkError = linkStatusError.value();
+                                            if (linkError != ENOENT && linkError != ENOTDIR && linkError != ELOOP) {
+                                                throw sorbet::FileNotFoundException(
+                                                    fmt::format("Couldn't access `{}`", pathStr));
+                                            }
+                                        }
+                                    } else if (error != ELOOP) {
+                                        throw sorbet::FileNotFoundException(
+                                            fmt::format("Couldn't access `{}`", pathStr));
+                                    }
+                                } else if (filesystem::is_directory(entryStatus)) {
+                                    if (recursive) {
+                                        if (!childAncestors) {
+                                            childAncestors = make_shared<const DirectoryAncestors>(
+                                                DirectoryAncestors{identity, directoryJob->ancestors});
+                                        }
+                                        DirectoryJob child{entry.path(), childAncestors};
+                                        ++pendingJobs;
+                                        jobq->push(move(child), 1);
+                                    }
+                                } else if (sorbet::FileOps::hasAllowedExtension(pathStr, extensions)) {
+                                    output.push_back(move(pathStr));
+                                }
+                            }
+
+                            iterator.increment(iteratorError);
+                            if (iteratorError) {
+                                tolerateDirectoryError(iteratorError.value(), isRoot, path);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                // Every successfully processed job, including a pruned or vanished directory, reaches this epilogue.
                 auto remaining = --pendingJobs;
-                // If this thread is finished with the last job in the queue, then
-                // we can start signaling other threads that they need to quit.
                 if (remaining == 0) {
                     // Maintain the invariant, even though we're all done.
                     pendingJobs += numWorkers;
@@ -459,10 +539,7 @@ void appendFilesInDir(const string &basePath, const sorbet::UnorderedSet<string>
             }
         }
 
-        // If there was an error, don't raise it until after all the worker threads have finished,
-        // because they might be working on something, attempting to write to the pendingJobs
-        // variable stored on our stack, and then suddenly see that stack address gone because we've
-        // raised and jumped elsewhere.
+        // Wait before rethrowing so no worker can keep using stack-owned state.
         if (fileNotFound.has_value()) {
             throw fileNotFound.value();
         } else if (fileNotDir.has_value()) {
