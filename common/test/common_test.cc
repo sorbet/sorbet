@@ -223,6 +223,29 @@ TEST_CASE("FileOps applies ignores to lexical routes and keeps leaf symlinks non
     }
 }
 
+TEST_CASE("FileOps classifies entries by target type and link name") {
+    TemporaryDirectory temp;
+    const auto root = temp.root / "project";
+    const auto external = temp.root / "external";
+    writeFile(root / "real.rb");
+    writeFile(root / "notes.txt");
+    writeFile(root / "package.rb" / "inside.rb");
+    writeFile(external / "linked.rb");
+    std::filesystem::create_directory_symlink(external, root / "directory-link.rb");
+    std::filesystem::create_directory_symlink("..", root / "package.rb" / "cycle.rb");
+    std::filesystem::create_symlink("real.rb", root / "text-link.txt");
+    std::filesystem::create_symlink("loop.rb", root / "loop.rb");
+
+    const std::vector<std::string> recursive = {(root / "directory-link.rb" / "linked.rb").string(),
+                                                (root / "package.rb" / "inside.rb").string(),
+                                                (root / "real.rb").string()};
+    for (const int workerCount : {0, 4}) {
+        INFO("worker count: " << workerCount);
+        CHECK_EQ(discoverFiles(root, workerCount), recursive);
+        CHECK_EQ(discoverFiles(root, workerCount, false), std::vector<std::string>{(root / "real.rb").string()});
+    }
+}
+
 TEST_CASE("FileOps skips nested ELOOP entries and preserves root errors") {
     TemporaryDirectory temp;
     const auto root = temp.root / "project";

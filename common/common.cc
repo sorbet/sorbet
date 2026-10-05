@@ -310,6 +310,7 @@ bool sorbet::FileOps::isFileIgnored(string_view basePath, string_view filePath,
     return false;
 }
 
+namespace {
 struct QuitToken {};
 struct DirectoryIdentity {
     dev_t device;
@@ -323,6 +324,8 @@ struct DirectoryAncestors {
 
 struct DirectoryJob {
     filesystem::path path;
+    // Recursive mode only: filled in by the parent when it enqueues the job. The root job stats itself.
+    DirectoryIdentity identity;
     shared_ptr<const DirectoryAncestors> ancestors;
 };
 
@@ -337,8 +340,13 @@ bool hasAncestor(const shared_ptr<const DirectoryAncestors> &ancestors, const Di
     return false;
 }
 
+// A descendant vanished during the walk, or is reached through a broken or looping symlink.
+bool isMissingPathError(int error) {
+    return error == ENOENT || error == ENOTDIR || error == ELOOP;
+}
+
 void tolerateDirectoryError(int error, bool isRoot, const filesystem::path &path) {
-    if (!isRoot && (error == ENOENT || error == ENOTDIR || error == ELOOP)) {
+    if (!isRoot && isMissingPathError(error)) {
         return;
     }
     if (isRoot && error == ENOTDIR) {
@@ -346,6 +354,41 @@ void tolerateDirectoryError(int error, bool isRoot, const filesystem::path &path
     }
     throw sorbet::FileNotFoundException(fmt::format("Couldn't open directory `{}`", path.string()));
 }
+
+enum class EntryKind {
+    File,
+    Directory,
+    // A symlink, or an entry whose type could not be determined. Resolved with stat by the caller.
+    Unresolved,
+};
+
+// Uses the type cached by the directory iterator, so non-symlink entries cost no syscall. When the filesystem
+// does not report a type (DT_UNKNOWN), libc++ falls back to lstat/stat here; failures are left to the caller so
+// that they surface only after the ignore check.
+EntryKind cachedEntryKind(const filesystem::directory_entry &entry) {
+    std::error_code error;
+    if (entry.is_symlink(error) || error) {
+        return EntryKind::Unresolved;
+    }
+    if (entry.is_directory(error)) {
+        return EntryKind::Directory;
+    }
+    return error ? EntryKind::Unresolved : EntryKind::File;
+}
+
+DirectoryIdentity rootDirectoryIdentity(const filesystem::path &path) {
+    struct stat metadata {};
+    if (::stat(path.c_str(), &metadata) != 0) {
+        // Always throws for the root.
+        tolerateDirectoryError(errno, /* isRoot */ true, path);
+    }
+    if (!S_ISDIR(metadata.st_mode)) {
+        throw sorbet::FileNotDirException();
+    }
+    return DirectoryIdentity{metadata.st_dev, metadata.st_ino};
+}
+} // namespace
+
 // We record all classes of exceptions we can throw separately, rather than one single `SorbetException`.
 //
 // We do this for two reasons: one is that when looking for a `catch` handler, C++ will only look for
@@ -374,7 +417,7 @@ void appendFilesInDir(const string &basePath, const sorbet::UnorderedSet<string>
     // In practice, all it takes to maintain this invariant is that pendingJobs
     // must be incremented prior to pushing work onto jobq.
     ++pendingJobs;
-    jobq->push(DirectoryJob{filesystem::path(basePath), nullptr}, 1);
+    jobq->push(DirectoryJob{filesystem::path(basePath), {}, nullptr}, 1);
 
     workers.multiplexJob("options.findFiles", [numWorkers, jobq, resultq, &pendingJobs, &basePath, &extensions,
                                                &recursive, &absoluteIgnorePatterns, &relativeIgnorePatterns]() {
@@ -396,91 +439,73 @@ void appendFilesInDir(const string &basePath, const sorbet::UnorderedSet<string>
                 const auto &path = directoryJob->path;
                 const bool isRoot = !directoryJob->ancestors;
 
-                DirectoryIdentity identity{};
-                bool shouldEnumerate = true;
-                if (recursive) {
+                // Children were resolved and cycle-checked by their parent; only the root needs a lookup here.
+                const auto identity = isRoot && recursive ? rootDirectoryIdentity(path) : directoryJob->identity;
+                shared_ptr<const DirectoryAncestors> childAncestors;
+                std::error_code iteratorError;
+                for (filesystem::directory_iterator iterator(path, iteratorError), end;
+                     !iteratorError && iterator != end; iterator.increment(iteratorError)) {
+                    const auto &entry = *iterator;
+                    string pathStr = entry.path().string();
+                    const auto kind = cachedEntryKind(entry);
+                    const bool allowedExtension = sorbet::FileOps::hasAllowedExtension(pathStr, extensions);
+
+                    if (kind == EntryKind::File) {
+                        if (allowedExtension &&
+                            !sorbet::FileOps::isFileIgnored(basePath, pathStr, absoluteIgnorePatterns,
+                                                            relativeIgnorePatterns)) {
+                            output.push_back(move(pathStr));
+                        }
+                        continue;
+                    }
+                    // Non-recursive scans only resolve links that could be listed as files.
+                    if (!recursive && (kind == EntryKind::Directory || !allowedExtension)) {
+                        continue;
+                    }
+                    // Ignore matching is lexical and precedes the stat, so ignored broken links can't throw.
+                    if (sorbet::FileOps::isFileIgnored(basePath, pathStr, absoluteIgnorePatterns,
+                                                       relativeIgnorePatterns)) {
+                        continue;
+                    }
+
                     struct stat metadata {};
-                    if (::stat(path.c_str(), &metadata) != 0) {
+                    if (::stat(pathStr.c_str(), &metadata) != 0) {
                         const int error = errno;
-                        tolerateDirectoryError(error, isRoot, path);
-                        shouldEnumerate = false;
-                    } else if (!S_ISDIR(metadata.st_mode)) {
-                        if (isRoot) {
-                            throw sorbet::FileNotDirException();
+                        if (!isMissingPathError(error)) {
+                            throw sorbet::FileNotFoundException(fmt::format("Couldn't access `{}`", pathStr));
                         }
-                        shouldEnumerate = false;
-                    } else {
-                        identity = DirectoryIdentity{metadata.st_dev, metadata.st_ino};
-                        shouldEnumerate = !hasAncestor(directoryJob->ancestors, identity);
+                        // Keep an allowed dangling file symlink, as the old extension-based leaf selection did.
+                        if (error != ELOOP && kind == EntryKind::Unresolved && allowedExtension) {
+                            output.push_back(move(pathStr));
+                        }
+                        continue;
                     }
+                    if (!S_ISDIR(metadata.st_mode)) {
+                        if (allowedExtension) {
+                            output.push_back(move(pathStr));
+                        }
+                        continue;
+                    }
+                    if (!recursive) {
+                        continue;
+                    }
+
+                    if (!childAncestors) {
+                        childAncestors = make_shared<const DirectoryAncestors>(
+                            DirectoryAncestors{identity, directoryJob->ancestors});
+                    }
+                    const DirectoryIdentity childIdentity{metadata.st_dev, metadata.st_ino};
+                    if (hasAncestor(childAncestors, childIdentity)) {
+                        continue;
+                    }
+                    ++pendingJobs;
+                    jobq->push(DirectoryJob{entry.path(), childIdentity, childAncestors}, 1);
+                }
+                if (iteratorError) {
+                    tolerateDirectoryError(iteratorError.value(), isRoot, path);
                 }
 
-                if (shouldEnumerate) {
-                    shared_ptr<const DirectoryAncestors> childAncestors;
-                    std::error_code iteratorError;
-                    filesystem::directory_iterator iterator(path, iteratorError);
-                    const filesystem::directory_iterator end;
-
-                    if (iteratorError) {
-                        tolerateDirectoryError(iteratorError.value(), isRoot, path);
-                    } else {
-                        while (iterator != end) {
-                            const auto &entry = *iterator;
-                            string pathStr = entry.path().string();
-
-                            // Ignore matching is lexical and must happen before filesystem metadata lookup.
-                            if (!sorbet::FileOps::isFileIgnored(basePath, pathStr, absoluteIgnorePatterns,
-                                                                relativeIgnorePatterns)) {
-                                std::error_code statusError;
-                                const auto entryStatus = entry.status(statusError);
-                                if (statusError) {
-                                    const int error = statusError.value();
-                                    if (error == ENOENT || error == ENOTDIR) {
-                                        // status() follows symlinks. Keep an allowed dangling file symlink,
-                                        // as the old extension-based leaf selection did.
-                                        std::error_code linkStatusError;
-                                        const auto linkStatus = entry.symlink_status(linkStatusError);
-                                        if (!linkStatusError) {
-                                            if (filesystem::is_symlink(linkStatus) &&
-                                                sorbet::FileOps::hasAllowedExtension(pathStr, extensions)) {
-                                                output.push_back(move(pathStr));
-                                            }
-                                        } else {
-                                            const int linkError = linkStatusError.value();
-                                            if (linkError != ENOENT && linkError != ENOTDIR && linkError != ELOOP) {
-                                                throw sorbet::FileNotFoundException(
-                                                    fmt::format("Couldn't access `{}`", pathStr));
-                                            }
-                                        }
-                                    } else if (error != ELOOP) {
-                                        throw sorbet::FileNotFoundException(
-                                            fmt::format("Couldn't access `{}`", pathStr));
-                                    }
-                                } else if (filesystem::is_directory(entryStatus)) {
-                                    if (recursive) {
-                                        if (!childAncestors) {
-                                            childAncestors = make_shared<const DirectoryAncestors>(
-                                                DirectoryAncestors{identity, directoryJob->ancestors});
-                                        }
-                                        DirectoryJob child{entry.path(), childAncestors};
-                                        ++pendingJobs;
-                                        jobq->push(move(child), 1);
-                                    }
-                                } else if (sorbet::FileOps::hasAllowedExtension(pathStr, extensions)) {
-                                    output.push_back(move(pathStr));
-                                }
-                            }
-
-                            iterator.increment(iteratorError);
-                            if (iteratorError) {
-                                tolerateDirectoryError(iteratorError.value(), isRoot, path);
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                // Every successfully processed job, including a pruned or vanished directory, reaches this epilogue.
+                // Every successfully processed job, including a vanished directory, reaches this epilogue.
                 auto remaining = --pendingJobs;
                 if (remaining == 0) {
                     // Maintain the invariant, even though we're all done.
