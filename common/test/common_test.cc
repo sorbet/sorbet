@@ -11,7 +11,6 @@
 #include <array>
 #include <atomic>
 #include <filesystem>
-#include <fstream>
 #include <unistd.h>
 
 namespace sorbet::common {
@@ -43,10 +42,7 @@ public:
 
 void writeFile(const std::filesystem::path &path, std::string_view contents = "") {
     std::filesystem::create_directories(path.parent_path());
-    std::ofstream output(path);
-    REQUIRE(output.good());
-    output << contents;
-    REQUIRE(output.good());
+    FileOps::write(path.string(), contents);
 }
 
 std::vector<std::string> discoverFiles(const std::filesystem::path &root, int workerCount, bool recursive = true,
