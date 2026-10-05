@@ -490,7 +490,7 @@ bool LSPIndexer::wouldUpdateFileTable(const core::File &newer) const {
 
     auto &existing = this->getFile(fref);
     return existing.sourceType != core::File::Type::Normal || existing.sourceType != newer.sourceType ||
-           existing.isOpenInClient() != newer.isOpenInClient() || existing.source().size() != newer.source().size() ||
+           existing.isOpenInClient() != newer.isOpenInClient() || existing.sourceSize() != newer.sourceSize() ||
            existing.sourceHash() != newer.sourceHash();
 }
 

@@ -102,7 +102,7 @@ std::optional<string> Dedenter::dedent(string_view str) {
 class Builder::Impl {
 public:
     Impl(GlobalState &gs, core::FileRef file) : gs_(gs), file_(file) {
-        this->maxOff_ = file.data(gs).source().size();
+        this->maxOff_ = file.data(gs).sourceSize();
         foreignNodes_.emplace_back();
     }
 
