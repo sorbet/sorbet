@@ -1,0 +1,60 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C Foo><<C <todo sym>>> < (::<todo sym>)
+    <emptyTree>::<C BAR> = <cast:<assume type>>(<self>.new(), <todo sym>, <self>)
+
+    <emptyTree>::<C EXPLICIT> = <cast:<assume type>>(<self>.new(), <todo sym>, <self>)
+
+    <emptyTree>::<C FROZEN> = <cast:<assume type>>(<self>.new().freeze(), <todo sym>, <self>)
+
+    <emptyTree>::<C EXPLICIT_FROZEN> = <cast:<assume type>>(<self>.new().freeze(), <todo sym>, <self>)
+  end
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C Foo>::<C BAR>)
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C Foo>::<C EXPLICIT>)
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C Foo>::<C FROZEN>)
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C Foo>::<C EXPLICIT_FROZEN>)
+
+  class <emptyTree>::<C WithArguments><<C <todo sym>>> < (::<todo sym>)
+    <self>.sig() do ||
+      <self>.params(:value, <emptyTree>::<C Integer>, :name, <emptyTree>::<C String>).void()
+    end
+
+    def initialize<<todo method>>(value, name:, &<blk>)
+      <emptyTree>
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <runtime method definition of initialize>
+
+    <emptyTree>::<C INSTANCE> = <cast:<assume type>>(<self>.new(1, :name, "one"), <todo sym>, <self>)
+  end
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C WithArguments>::<C INSTANCE>)
+
+  module <emptyTree>::<C Nested><<C <todo sym>>> < ()
+    class <emptyTree>::<C Foo><<C <todo sym>>> < (::<todo sym>)
+      class <emptyTree>::<C Foo><<C <todo sym>>> < (::<todo sym>)
+      end
+
+      <emptyTree>::<C INSTANCE> = <cast:<assume type>>(<self>.new(), <todo sym>, <self>)
+    end
+  end
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C Nested>::<C Foo>::<C INSTANCE>)
+
+  class <emptyTree>::<C Nested>::<C Qualified><<C <todo sym>>> < (::<todo sym>)
+    <emptyTree>::<C INSTANCE> = <cast:<assume type>>(<self>.new(), <todo sym>, <self>)
+  end
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C Nested>::<C Qualified>::<C INSTANCE>)
+
+  class <emptyTree>::<C Child><<C <todo sym>>> < (<emptyTree>::<C Foo>)
+    <emptyTree>::<C INSTANCE> = <cast:<assume type>>(<self>.new(), <todo sym>, <self>)
+  end
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C Child>::<C INSTANCE>)
+end
