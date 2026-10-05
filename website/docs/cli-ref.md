@@ -41,11 +41,7 @@ Usage:
       --file <path>             Run over the contents of <path>
                                 (Equivalent to passing <path> as a positional argument)
       --dir <path>              Run over all Ruby and RBI files in <path>, recursively,
-                                following nested directory symlinks
-                                (Equivalent to passing <path> as a positional argument)
-                                Discovered paths retain the lexical route through each link.
-                                Ancestor directory cycles are skipped; separate aliases are
-                                traversed independently and may contribute duplicate files.
+                                following nested directory symlinks.
       --allowed-extension <ext>[,<ext>...]
                                 Use these extensions to determine which file types Sorbet
                                 should discover inside directories. (default: .rb,.rbi)
