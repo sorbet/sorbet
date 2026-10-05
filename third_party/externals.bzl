@@ -285,6 +285,18 @@ def register_sorbet_dependencies():
     )
 
     http_archive(
+        name = "bison_src",
+        build_file = "@com_stripe_ruby_typer//third_party:bison.BUILD",
+        urls = [
+            "https://mirror.bazel.build/ftp.gnu.org/gnu/bison/bison-3.8.2.tar.xz",
+            "https://mirrors.kernel.org/gnu/bison/bison-3.8.2.tar.xz",
+            "https://ftp.gnu.org/gnu/bison/bison-3.8.2.tar.xz",
+        ],
+        sha256 = "9bba0214ccf7f1079c5d59210045227bcf619519840ebfa80cd3849cff5a5bf2",
+        strip_prefix = "bison-3.8.2",
+    )
+
+    http_archive(
         name = "rules_m4",
         url = "https://github.com/jmillikin/rules_m4/releases/download/v0.2.1/rules_m4-v0.2.1.tar.xz",
         sha256 = "f59f75ac8a315d7647a2d058d324a87ff9ebbc4bf5c7a61b08d58da119a7fb43",
