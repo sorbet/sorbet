@@ -1,0 +1,3 @@
+# typed: strict
+Lifecycle::Item.new # error: Unable to resolve constant `Item`
+Other::Item.new # error: Unable to resolve constant `Other`
