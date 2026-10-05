@@ -471,12 +471,13 @@ void appendFilesInDir(const string &basePath, const sorbet::UnorderedSet<string>
                     struct stat metadata {};
                     if (::stat(pathStr.c_str(), &metadata) != 0) {
                         const int error = errno;
-                        if (!isMissingPathError(error)) {
-                            throw sorbet::FileNotFoundException(fmt::format("Couldn't access `{}`", pathStr));
-                        }
-                        // Keep an allowed dangling file symlink, as the old extension-based leaf selection did.
                         if (error != ELOOP && kind == EntryKind::Unresolved && allowedExtension) {
+                            // Like a real file, an unresolvable link with an allowed name is listed (this keeps
+                            // dangling file links); reading it later reports any error.
                             output.push_back(move(pathStr));
+                        } else {
+                            // Otherwise it may be a directory, so fail exactly like an unopenable real directory.
+                            tolerateDirectoryError(error, /* isRoot */ false, entry.path());
                         }
                         continue;
                     }

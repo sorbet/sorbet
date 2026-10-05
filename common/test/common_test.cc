@@ -12,6 +12,7 @@
 #include <atomic>
 #include <filesystem>
 #include <fstream>
+#include <unistd.h>
 
 namespace sorbet::common {
 
@@ -55,6 +56,32 @@ std::vector<std::string> discoverFiles(const std::filesystem::path &root, int wo
     auto workers = WorkerPool::create(workerCount, *logger);
     return FileOps::listFilesInDir(root.string(), {".rb", ".rbi"}, *workers, recursive, absoluteIgnores,
                                    relativeIgnores);
+}
+
+// Removes all permissions from a directory, restoring them on scope exit so TemporaryDirectory can clean up.
+class LockedDirectory final {
+public:
+    explicit LockedDirectory(std::filesystem::path path) : path(std::move(path)) {
+        std::filesystem::permissions(this->path, std::filesystem::perms::none);
+    }
+
+    ~LockedDirectory() {
+        std::error_code error;
+        std::filesystem::permissions(path, std::filesystem::perms::owner_all, error);
+    }
+
+private:
+    std::filesystem::path path;
+};
+
+void checkUnopenableDirectory(const std::filesystem::path &root, const std::filesystem::path &directory,
+                              int workerCount) {
+    try {
+        discoverFiles(root, workerCount);
+        FAIL("expected an unopenable directory to fail");
+    } catch (FileNotFoundException &e) {
+        CHECK_EQ(std::string(e.what()), fmt::format("Couldn't open directory `{}`", directory.string()));
+    }
 }
 
 } // namespace
@@ -275,6 +302,55 @@ TEST_CASE("FileOps skips nested ELOOP entries and preserves root errors") {
             CHECK(std::string(e.what()).find(missingRoot.string()) != std::string::npos);
         }
         CHECK_THROWS_AS(discoverFiles(notDirectory, workerCount), FileNotDirException);
+    }
+}
+
+TEST_CASE("FileOps reports unopenable linked directories like real directories") {
+    if (geteuid() == 0) {
+        MESSAGE("skipping: permission checks do not apply to root");
+        return;
+    }
+
+    TemporaryDirectory temp;
+    // Each failing scenario gets its own root, since the first failure aborts the walk.
+    const auto realRoot = temp.root / "real";
+    const auto linkRoot = temp.root / "link";
+    const auto beneathRoot = temp.root / "beneath";
+    const auto fileRoot = temp.root / "file";
+    const auto locked = temp.root / "locked";
+    for (const auto &root : {realRoot, linkRoot, beneathRoot, fileRoot}) {
+        writeFile(root / "local.rb");
+    }
+    writeFile(realRoot / "unreadable" / "hidden.rb");
+    writeFile(locked / "inner" / "hidden.rb");
+    writeFile(locked / "file.rb");
+    std::filesystem::create_directory_symlink(realRoot / "unreadable", linkRoot / "unreadable-link");
+    std::filesystem::create_directory_symlink(locked / "inner", beneathRoot / "beneath-link");
+    std::filesystem::create_symlink(locked / "file.rb", fileRoot / "file-link.rb");
+
+    // Declared after `temp` so permissions are restored before it is removed.
+    LockedDirectory lockedUnreadable(realRoot / "unreadable");
+    LockedDirectory lockedParent(locked);
+
+    for (const int workerCount : {0, 4}) {
+        INFO("worker count: " << workerCount);
+        checkUnopenableDirectory(realRoot, realRoot / "unreadable", workerCount);
+        // The target can be stat'ed but not opened.
+        checkUnopenableDirectory(linkRoot, linkRoot / "unreadable-link", workerCount);
+        // The target can't even be stat'ed, because its parent is not searchable.
+        checkUnopenableDirectory(beneathRoot, beneathRoot / "beneath-link", workerCount);
+
+        // Like a real file, a link with an allowed name is listed without being read.
+        const std::vector<std::string> withFileLink = {(fileRoot / "file-link.rb").string(),
+                                                       (fileRoot / "local.rb").string()};
+        CHECK_EQ(discoverFiles(fileRoot, workerCount), withFileLink);
+        CHECK_EQ(discoverFiles(fileRoot, workerCount, false), withFileLink);
+
+        // Ignoring the link's lexical route avoids touching it.
+        const std::vector<std::string> linkLocal = {(linkRoot / "local.rb").string()};
+        CHECK_EQ(discoverFiles(linkRoot, workerCount, true, {"/unreadable-link"}), linkLocal);
+        const std::vector<std::string> beneathLocal = {(beneathRoot / "local.rb").string()};
+        CHECK_EQ(discoverFiles(beneathRoot, workerCount, true, {}, {"/beneath-link"}), beneathLocal);
     }
 }
 
