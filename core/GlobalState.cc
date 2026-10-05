@@ -284,8 +284,8 @@ GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue, shared_ptr<lsp::Type
     typeParameters.reserve(PAYLOAD_MAX_TYPE_ARGUMENT_COUNT);
     typeMembers.reserve(PAYLOAD_MAX_TYPE_MEMBER_COUNT);
 
-    int namesByHashSize = nextPowerOfTwo(
-        2 * (PAYLOAD_MAX_UTF8_NAME_COUNT + PAYLOAD_MAX_CONSTANT_NAME_COUNT + PAYLOAD_MAX_UNIQUE_NAME_COUNT));
+    uint32_t namesByHashSize = NameHash::sizeFor(PAYLOAD_MAX_UTF8_NAME_COUNT + PAYLOAD_MAX_CONSTANT_NAME_COUNT +
+                                                 PAYLOAD_MAX_UNIQUE_NAME_COUNT);
     namesByHash.resize(namesByHashSize);
 
     this->symbolOffsets.emplace_back();
@@ -1610,7 +1610,7 @@ void NameHash::moveNames(Bucket *from, Bucket *to, unsigned int szFrom, unsigned
 }
 
 void NameHash::expandNames(uint32_t utf8NameSize, uint32_t constantNameSize, uint32_t uniqueNameSize) {
-    uint32_t hashTableSize = 2 * nextPowerOfTwo(utf8NameSize + constantNameSize + uniqueNameSize);
+    uint32_t hashTableSize = NameHash::sizeFor(utf8NameSize + constantNameSize + uniqueNameSize);
 
     if (hashTableSize > buckets_.size()) {
         vector<Bucket> new_namesByHash(hashTableSize);
@@ -1855,7 +1855,7 @@ void GlobalState::sanityCheckTableSizes() const {
     ENFORCE_NO_TIMER(!namesByHash.empty(), "empty name hash table size");
     ENFORCE_NO_TIMER((namesByHash.size() & (namesByHash.size() - 1)) == 0,
                      "name hash table size is not a power of two");
-    ENFORCE_NO_TIMER(nextPowerOfTwo(utf8Names.capacity() + constantNames.capacity() + uniqueNames.capacity()) * 2 ==
+    ENFORCE_NO_TIMER(NameHash::sizeFor(utf8Names.capacity() + constantNames.capacity() + uniqueNames.capacity()) ==
                          namesByHash.capacity(),
                      "name table and hash name table sizes out of sync names.capacity={} namesByHash.capacity={}",
                      namesUsedTotal(), namesByHash.capacity());
