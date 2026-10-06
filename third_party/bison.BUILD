@@ -11,10 +11,9 @@ configure_make(
     configure_options = [
         # We don't care about translated error messages
         "--disable-nls",
-        # If we really want colorized bison diagnostics we could try to add
-        # this as a build dep
-        "--without-libtextstyle",
     ],
+    # Bison 3.3.2's bundled gnulib triggers this warning; remove for 3.8.2.
+    copts = ["-Wno-implicit-const-int-float-conversion"],
     env = {
         "M4": "$(execpath @rules_m4//m4:current_m4_toolchain)",
     },
