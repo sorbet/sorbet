@@ -320,6 +320,10 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                         }
                         madeBlockDead = ctx.locAt(bind.loc);
                     }
+                    if (cfg::isa_instruction<cfg::TAbsurd>(bind.value)) {
+                        // Later T.absurd calls must not inherit this pair's special dead-code typechecking.
+                        allowedRaiseLoc.reset();
+                    }
                     if (current.isDead && bb->firstDeadInstructionIdx == -1) {
                         // this can also be result of evaluating an instruction, e.g. an always false hard_assert
                         bb->firstDeadInstructionIdx = i;
