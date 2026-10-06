@@ -48,6 +48,10 @@ compatibility_proxy_repo()
 
 load("@toolchains_llvm//toolchain:rules.bzl", "llvm_toolchain")
 
+# The LLVM 22 ARM64 macOS archive has no x86_64 compiler-rt slice. Bundled
+# LLD warns on Intel cross-links; tested int128 helpers resolve via libSystem.
+# Keep driver defaults (not -nodefaultlibs, which also removes sanitizer
+# runtimes). Recheck the archive and older-macOS coverage on future upgrades.
 llvm_toolchain(
     name = "llvm_toolchain_22_1_3",
     absolute_paths = True,
@@ -55,12 +59,6 @@ llvm_toolchain(
         "https://github.com/sorbet/llvm-project/releases/download/llvmorg-{llvm_version}/{basename}",
     ],
     llvm_version = "22.1.3",
-    # The sysroots are needed for cross-compiling
-    sysroot = {
-        "": "",
-        "darwin-x86_64": "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
-        "darwin-aarch64": "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
-    },
 )
 
 load("@llvm_toolchain_22_1_3//:toolchains.bzl", "llvm_register_toolchains")
