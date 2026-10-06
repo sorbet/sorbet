@@ -288,6 +288,10 @@ def register_sorbet_dependencies():
         name = "rules_m4",
         url = "https://github.com/jmillikin/rules_m4/releases/download/v0.2.1/rules_m4-v0.2.1.tar.xz",
         sha256 = "f59f75ac8a315d7647a2d058d324a87ff9ebbc4bf5c7a61b08d58da119a7fb43",
+        # The pinned overlay assumes Intel's long-double layout on Darwin.
+        # Remove when rules_m4 supplies ARM64-aware gnulib configuration.
+        patches = ["@com_stripe_ruby_typer//third_party:rules_m4/darwin_long_double.patch"],
+        patch_args = ["-p1"],
     )
 
     http_archive(
