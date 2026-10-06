@@ -91,6 +91,9 @@ load("@rules_m4//m4:m4.bzl", "m4_register_toolchains")
 
 m4_register_toolchains(
     extra_copts = [
+        # M4 1.4.18 and its bundled gnulib trigger the SDK's sprintf
+        # deprecation warning. Revisit when upgrading M4/gnulib.
+        "-Wno-deprecated-declarations",
         # M4 1.4.18 marks a void fault_handler as pure. Clang ignores the
         # invalid attribute; revisit this suppression on an M4 upgrade.
         "-Wno-ignored-attributes",
@@ -101,6 +104,9 @@ load("@rules_bison//bison:bison.bzl", "bison_register_toolchains")
 
 bison_register_toolchains(
     extra_copts = [
+        # Bundled gnulib formatting code triggers the macOS SDK's sprintf
+        # deprecation warning. Revisit when upgrading Bison's gnulib.
+        "-Wno-deprecated-declarations",
         # Bison 3.3.2's bundled gnulib triggers this warning; remove for 3.8.2.
         "-Wno-implicit-const-int-float-conversion",
         # Bison 3.3.2's generated parse-gram.c sets gram_nerrs without using
