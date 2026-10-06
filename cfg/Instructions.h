@@ -366,6 +366,10 @@ public:
 
     ~Send();
 
+    // Send::make allocates trailing arguments beyond sizeof(Send). Do not
+    // pass sizeof(Send) to sized delete for that variable-sized allocation.
+    static void operator delete(void *ptr) noexcept;
+
     core::LocOffsets locWithoutBlock(core::LocOffsets bindLoc);
 
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;

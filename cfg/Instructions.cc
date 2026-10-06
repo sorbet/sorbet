@@ -6,6 +6,7 @@
 #include "core/Names.h"
 #include "core/TypeConstraint.h"
 #include <memory>
+#include <new>
 #include <utility>
 
 using namespace std;
@@ -154,6 +155,10 @@ Send::~Send() {
     destroySpan(argRefs());
     destroySpan(argTypes());
     destroySpan(argLocs());
+}
+
+void Send::operator delete(void *ptr) noexcept {
+    ::operator delete(ptr);
 }
 
 core::LocOffsets Send::locWithoutBlock(core::LocOffsets bindLoc) {
