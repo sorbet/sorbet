@@ -81,7 +81,7 @@ emsdk_deps()
 
 load("@emsdk//:emscripten_deps.bzl", emsdk_emscripten_deps = "emscripten_deps")
 
-emsdk_emscripten_deps(emscripten_version = "3.1.59")
+emsdk_emscripten_deps(emscripten_version = "4.0.23")
 
 load("@emsdk//:toolchains.bzl", "register_emscripten_toolchains")
 
