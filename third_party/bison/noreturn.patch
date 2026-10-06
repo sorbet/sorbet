@@ -1,0 +1,11 @@
+--- a/lib/obstack.c
++++ b/lib/obstack.c
+@@ -326,7 +326,7 @@
+ #   include <libio/iolibio.h>
+ #  endif
+ 
+-static _Noreturn void
++static _Noreturn __attribute_noreturn__ void
+ print_and_abort (void)
+ {
+   /* Don't change any of these strings.  Yes, it would be possible to add

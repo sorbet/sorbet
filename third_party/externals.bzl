@@ -288,6 +288,9 @@ def register_sorbet_dependencies():
     http_archive(
         name = "bison_src",
         build_file = "@com_stripe_ruby_typer//third_party:bison.BUILD",
+        # Preserve the noreturn compatibility fix from rules_bison's overlay.
+        patches = ["@com_stripe_ruby_typer//third_party:bison/noreturn.patch"],
+        patch_args = ["-p1"],
         urls = [
             # Available for 3.8.2; the mirror returns 404 for 3.3.2.
             # "https://mirror.bazel.build/ftp.gnu.org/gnu/bison/bison-{0}.tar.xz".format(bison_version),
