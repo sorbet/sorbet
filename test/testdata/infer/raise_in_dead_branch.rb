@@ -68,11 +68,11 @@ def only_first_raise_is_allowed(x)
 end
 
 sig {params(x: String, y: Integer).void}
-def multiple_raise_absurd_pairs_are_allowed(x, y)
+def only_raise_before_first_absurd_is_exempt(x, y)
   unless true
     raise ArgumentError, "Unexpected value: #{x}"
     T.absurd(x) # error: Control flow could reach `T.absurd` because the type `String` wasn't handled
-    raise RuntimeError, "Unexpected value: #{y}"
+    raise RuntimeError, "Unexpected value: #{y}" # error: This code is unreachable
     T.absurd(y) # error: Control flow could reach `T.absurd` because the type `Integer` wasn't handled
   end
 end
@@ -85,6 +85,7 @@ def raise_after_absurd_still_errors(x)
   else
     T.absurd(x)
     raise ArgumentError, "Unexpected value: #{x}" # error: This code is unreachable
+    T.absurd(x)
   end
 end
 
@@ -157,5 +158,16 @@ def unrelated_argument_errors_in_dead_branch_are_skipped(x)
     make_error(123) # error: This code is unreachable
     raise make_error(x)
     T.absurd(x) # error: Control flow could reach `T.absurd` because the type `String` wasn't handled
+  end
+end
+
+sig {params(x: String).void}
+def paired_raise_is_reset_between_blocks(x)
+  unless true
+    raise make_error(x)
+    T.absurd(x) # error: Control flow could reach `T.absurd` because the type `String` wasn't handled
+  end
+  unless true
+    T.absurd(x)
   end
 end
