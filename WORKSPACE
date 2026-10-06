@@ -79,6 +79,16 @@ load("@emsdk//:deps.bzl", emsdk_deps = "deps")
 
 emsdk_deps()
 
+load("@rules_python//python:repositories.bzl", "py_repositories", "python_register_toolchains")
+
+py_repositories()
+
+# Register Python's execution toolchain for emsdk's upstream interpreter lookup.
+python_register_toolchains(
+    name = "emscripten_python",
+    python_version = "3.11.10",
+)
+
 load("@emsdk//:emscripten_deps.bzl", emsdk_emscripten_deps = "emscripten_deps")
 
 emsdk_emscripten_deps(emscripten_version = "4.0.23")
