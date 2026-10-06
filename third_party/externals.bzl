@@ -185,14 +185,14 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "rules_cc",
-        sha256 = "a2fdfde2ab9b2176bd6a33afca14458039023edb1dd2e73e6823810809df4027",
-        strip_prefix = "rules_cc-0.2.14",
-        urls = ["https://github.com/bazelbuild/rules_cc/archive/refs/tags/0.2.14.tar.gz"],
+        sha256 = "bd7124a844d0403b4b353bcea34d6c8b2ba88dc26881c26c9ee668da89b71846",
+        strip_prefix = "rules_cc-0.2.25",
+        urls = ["https://github.com/bazelbuild/rules_cc/releases/download/0.2.25/rules_cc-0.2.25.tar.gz"],
     )
 
-    # TODO(jez) We keep our changes on the `sorbet` branch of `sorbet/bazel-toolchain`
-    # The `master` branch is the commit of `bazel-contrib/toolchains_llvm` that we're based on
-    # In 2ddd7d791 (#7912) we upgraded the toolchain. Our old toolchain patches are on the `sorbet-old-toolchain` branch
+    # Based on bazel-contrib/toolchains_llvm at e79f0a3, with Sorbet changes
+    # on the sorbet branch of sorbet/bazel-toolchain.
+    # https://github.com/bazel-contrib/toolchains_llvm/compare/master...sorbet:bazel-toolchain:sorbet
     #
     # You can use this version of `toolchains_llvm` when tinkering locally. You'll want to run `bazel clean --expunge`
     # to ensure that your changes get picked up between builds.
@@ -202,9 +202,9 @@ def register_sorbet_dependencies():
     # )
     http_archive(
         name = "toolchains_llvm",
-        url = "https://github.com/sorbet/bazel-toolchain/archive/3f912e338d79ea29ad35f20321f24d551d7d89ad.tar.gz",
-        sha256 = "4c998dc3f3b0c7b31a66aa4e262191b94da93cf31698eb6ac5a751267afbe26a",
-        strip_prefix = "bazel-toolchain-3f912e338d79ea29ad35f20321f24d551d7d89ad",
+        sha256 = "90a16fc6803d6e31f9102e54130cf33ca1afd2a3f353dabf5fd13545604ed4f6",
+        strip_prefix = "bazel-toolchain-6cf46852a16a075c8e57b601e5580f2d2a7f817a",
+        urls = ["https://github.com/sorbet/bazel-toolchain/archive/6cf46852a16a075c8e57b601e5580f2d2a7f817a.tar.gz"],
     )
 
     http_archive(
@@ -304,8 +304,8 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "bazel_skylib",
-        sha256 = "cd55a062e763b9349921f0f5db8c3933288dc8ba4f76dd9416aac68acee3cb94",
-        url = "https://github.com/bazelbuild/bazel-skylib/releases/download/1.5.0/bazel-skylib-1.5.0.tar.gz",
+        sha256 = "37cdfbc6faefea94f7b37760a305c98c08981116c2bc9e821e3b423221fad8c8",
+        url = "https://github.com/bazelbuild/bazel-skylib/releases/download/1.9.2/bazel-skylib-1.9.2.tar.gz",
     )
 
     http_archive(
