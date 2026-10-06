@@ -276,8 +276,22 @@ def register_sorbet_dependencies():
         sha256 = "2d3292d508b4f5477f490b080b38a34aaefed43e85258a1de72cb8dde3f8f3af",
         strip_prefix = "emsdk-4.0.6/bazel",
         url = "https://github.com/emscripten-core/emsdk/archive/4.0.6.tar.gz",
-        patches = ["@com_stripe_ruby_typer//third_party:emsdk/emscripten_4_0_23.patch"],
+        patches = [
+            "@com_stripe_ruby_typer//third_party:emsdk/emscripten_4_0_23.patch",
+            # Backport https://github.com/emscripten-core/emsdk/pull/1676 to
+            # the WORKSPACE-compatible layout: use the Python exec toolchain
+            # instead of Apple's Python 3.9.6 (4.0.23 requires 3.10+).
+            # Remove when adopting the newer upstream Bazel integration.
+            "@com_stripe_ruby_typer//third_party:emsdk/hermetic_python.patch",
+        ],
         patch_args = ["-p1"],
+    )
+
+    http_archive(
+        name = "rules_python",
+        sha256 = "690e0141724abb568267e003c7b6d9a54925df40c275a870a4d934161dc9dd53",
+        strip_prefix = "rules_python-0.40.0",
+        urls = ["https://github.com/bazelbuild/rules_python/releases/download/0.40.0/rules_python-0.40.0.tar.gz"],
     )
 
     http_archive(
