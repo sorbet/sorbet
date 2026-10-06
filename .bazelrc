@@ -49,6 +49,14 @@ build --copt=-fstack-protector
 
 build --copt=-Werror --copt=-Wimplicit-fallthrough --copt=-Wmissing-field-initializers
 
+# Clang's Linux GCC discovery warns about missing system libstdc++ headers
+# even for C or explicit libc++ builds. We use toolchain-provided libc++.
+# Suppress only this diagnostic for target/host compilation and linking.
+build --copt=-Wno-gcc-install-dir-libstdcxx
+build --host_copt=-Wno-gcc-install-dir-libstdcxx
+build --linkopt=-Wno-gcc-install-dir-libstdcxx
+build --host_linkopt=-Wno-gcc-install-dir-libstdcxx
+
 build --copt=-D_LIBCPP_ENABLE_NODISCARD
 
 build --host_copt=-O1
