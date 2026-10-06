@@ -301,6 +301,18 @@ def register_sorbet_dependencies():
         strip_prefix = "bison-{0}".format(bison_version),
     )
 
+    m4_version = "1.4.21"
+    http_archive(
+        name = "m4_src",
+        build_file = "@com_stripe_ruby_typer//third_party:m4.BUILD",
+        urls = [
+            "https://mirrors.kernel.org/gnu/m4/m4-{0}.tar.xz".format(m4_version),
+            "https://ftp.gnu.org/gnu/m4/m4-{0}.tar.xz".format(m4_version),
+        ],
+        sha256 = "f25c6ab51548a73a75558742fb031e0625d6485fe5f9155949d6486a2408ab66",
+        strip_prefix = "m4-{0}".format(m4_version),
+    )
+
     http_archive(
         name = "rules_m4",
         url = "https://github.com/jmillikin/rules_m4/releases/download/v0.2.1/rules_m4-v0.2.1.tar.xz",

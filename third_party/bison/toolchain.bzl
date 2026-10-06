@@ -17,6 +17,8 @@ def _bison_launcher_impl(ctx):
             "#!/bin/sh",
             "set -eu",
             'runfiles="${RUNFILES_DIR:-$0.runfiles}"',
+            # M4 is also a launcher and must share Bison's runfiles tree.
+            'export RUNFILES_DIR="$runfiles"',
             'export BISON_PKGDATADIR="$runfiles/%s/%s/share/bison"' % (ctx.workspace_name, install.short_path),
             'export M4="$runfiles/%s/%s"' % (ctx.workspace_name, m4.m4_tool.executable.short_path),
             'exec "$runfiles/%s/%s/bin/bison" "$@"' % (ctx.workspace_name, install.short_path),

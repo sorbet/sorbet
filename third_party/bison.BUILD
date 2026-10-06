@@ -7,7 +7,7 @@ filegroup(
 
 configure_make(
     name = "bison",
-    build_data = ["@rules_m4//m4:current_m4_toolchain"],
+    build_data = ["@com_stripe_ruby_typer//third_party/m4:m4"],
     configure_options = [
         # We don't care about translated error messages
         "--disable-nls",
@@ -15,7 +15,7 @@ configure_make(
     # Bison 3.3.2's bundled gnulib triggers this warning; remove for 3.8.2.
     copts = ["-Wno-implicit-const-int-float-conversion"],
     env = {
-        "M4": "$(execpath @rules_m4//m4:current_m4_toolchain)",
+        "M4": "$(execpath @com_stripe_ruby_typer//third_party/m4:m4)",
     },
     lib_source = ":srcs",
     out_binaries = ["bison"],

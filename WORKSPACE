@@ -89,9 +89,7 @@ load("@rules_ragel//ragel:ragel.bzl", "ragel_register_toolchains")
 
 ragel_register_toolchains()
 
-load("@rules_m4//m4:m4.bzl", "m4_register_toolchains")
-
-m4_register_toolchains()
+register_toolchains("//third_party/m4:toolchain")
 
 register_toolchains("//third_party/bison:toolchain")
 
