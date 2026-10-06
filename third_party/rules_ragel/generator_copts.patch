@@ -1,0 +1,14 @@
+diff --git a/ragel/internal/overlay/ragel_v6.BUILD b/ragel/internal/overlay/ragel_v6.BUILD
+--- a/ragel/internal/overlay/ragel_v6.BUILD
++++ b/ragel/internal/overlay/ragel_v6.BUILD
+@@ -17,6 +17,10 @@
+         "ragel/*.cpp",
+         "ragel/*.h",
+     ]),
++    copts = [
++        # AAPL containers relocate non-trivially copyable objects with memmove.
++        "-Wno-nontrivial-memcall",
++    ],
+     visibility = ["//bin:__pkg__"],
+     deps = [
+         ":aapl",
