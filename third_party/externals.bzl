@@ -265,9 +265,19 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "emsdk",
-        sha256 = "47515d522229a103b7d9f34eacc1d88ac355b22fd754d13417a2191fd9d77d5f",
-        strip_prefix = "emsdk-3.1.59/bazel",
-        url = "https://github.com/emscripten-core/emsdk/archive/3.1.59.tar.gz",
+        # 4.0.6 is the last release with WORKSPACE support. Backport only
+        # upstream's 4.0.23 binary catalogue entry to keep that integration.
+        # Unpatched 4.0.6 uses Clang 21 and fails the Wasm build because it
+        # rejects -Wno-gcc-install-dir-libstdcxx under -Werror. Since newer
+        # binaries require a catalogue patch anyway, use 4.0.23's LLVM 22.
+        # 4.0.23 is not established as the minimum working version. Remove
+        # this patch when moving to Bzlmod and a matching upstream emsdk,
+        # or update its catalogue entry when changing the binary version.
+        sha256 = "2d3292d508b4f5477f490b080b38a34aaefed43e85258a1de72cb8dde3f8f3af",
+        strip_prefix = "emsdk-4.0.6/bazel",
+        url = "https://github.com/emscripten-core/emsdk/archive/4.0.6.tar.gz",
+        patches = ["@com_stripe_ruby_typer//third_party:emsdk/emscripten_4_0_23.patch"],
+        patch_args = ["-p1"],
     )
 
     http_archive(
