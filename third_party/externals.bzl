@@ -284,17 +284,18 @@ def register_sorbet_dependencies():
         strip_prefix = "rules_bison-478079b28605a38000eaf83719568d756b3383a0",
     )
 
+    bison_version = "3.3.2"
     http_archive(
         name = "bison_src",
         build_file = "@com_stripe_ruby_typer//third_party:bison.BUILD",
         urls = [
             # Available for 3.8.2; the mirror returns 404 for 3.3.2.
-            # "https://mirror.bazel.build/ftp.gnu.org/gnu/bison/bison-3.3.2.tar.xz",
-            "https://mirrors.kernel.org/gnu/bison/bison-3.3.2.tar.xz",
-            "https://ftp.gnu.org/gnu/bison/bison-3.3.2.tar.xz",
+            # "https://mirror.bazel.build/ftp.gnu.org/gnu/bison/bison-{0}.tar.xz".format(bison_version),
+            "https://mirrors.kernel.org/gnu/bison/bison-{0}.tar.xz".format(bison_version),
+            "https://ftp.gnu.org/gnu/bison/bison-{0}.tar.xz".format(bison_version),
         ],
         sha256 = "039ee45b61d95e5003e7e8376f9080001b4066ff357bde271b7faace53b9d804",
-        strip_prefix = "bison-3.3.2",
+        strip_prefix = "bison-{0}".format(bison_version),
     )
 
     http_archive(
