@@ -89,6 +89,10 @@ public:
     RBSDeclaration(CommentsVector comments) : comments(std::move(comments)) {
         std::string result;
         for (const auto &comment : this->comments) {
+            // Preserve line boundaries so RBS comments end before the next continuation.
+            if (&comment != &this->comments.front()) {
+                result += '\n';
+            }
             result += comment.string;
         }
         this->string = std::move(result);
