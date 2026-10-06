@@ -39,7 +39,7 @@ steps:
 
   - label: ":mac: test-static-sanitized.sh"
     command: '.buildkite/test-static-sanitized.sh < /dev/null'
-    if: 'build.branch == "master" || build.branch =~ /MACOS_CI/'
+    if: 'build.branch == "master" || build.branch =~ /\b(MACOS_CI|MACOS-CI)\b/'
     artifact_paths:
       - _out_/profile.json
       - _out_/clang_tidy_profile.json
@@ -76,7 +76,7 @@ steps:
 
   - label: ":mac: build-static-release.sh"
     command: '.buildkite/build-static-release.sh < /dev/null'
-    if: 'build.branch == "master" || build.branch =~ /ci-macos/'
+    if: 'build.branch == "master" || build.branch =~ /\b(MACOS_CI|MACOS-CI)\b/'
     artifact_paths: _out_/**/*
     agents:
       os: mac
