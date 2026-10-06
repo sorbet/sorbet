@@ -275,6 +275,11 @@ def register_sorbet_dependencies():
         url = "https://github.com/jmillikin/rules_ragel/archive/f99f17fcad2e155646745f4827ac636a3b5d4d15.zip",
         sha256 = "f957682c6350b2e4484c433c7f45d427a86de5c8751a0d2a9836f36995fe0320",
         strip_prefix = "rules_ragel-f99f17fcad2e155646745f4827ac636a3b5d4d15",
+        # Ragel 6.11 still triggers the memmove diagnostic. Ragel 7.1.0's
+        # void* casts avoid it without changing relocation semantics; revisit
+        # the suppression if upgrading, with separate codegen validation.
+        patches = ["@com_stripe_ruby_typer//third_party:rules_ragel/generator_copts.patch"],
+        patch_args = ["-p1"],
     )
 
     http_archive(
