@@ -62,7 +62,7 @@ srb tc . --ignore=/vendor
 
 Recursive directory discovery follows nested directory symlinks, including links to targets outside the input directory. Discovered paths retain the lexical route through each link, not the target's physical path.
 
-A directory link whose target is already on the current traversal route is skipped. A nested link-resolution loop is also skipped; supplying that looping path as the input root produces an input error. Separate aliases are traversed independently, so a real directory and its symlink can contribute the same file under different paths. File symlinks continue to be selected by filename extension, including dangling links.
+A directory link whose target is already on the current traversal route is skipped. Separate aliases are traversed independently, so a real directory and its symlink can contribute the same file under different paths. File symlinks continue to be selected by filename extension, including dangling links.
 
 > **Note**: Sorbet only checks files that end in `*.rb` or `*.rbi`. To check other files, they must be explicitly named on the command line (or in the config file), or given an appropriate file extension.
 
