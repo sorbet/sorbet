@@ -26,6 +26,12 @@ export JOB_NAME=test-static-sanitized
 # shellcheck source-path=SCRIPTDIR/..
 source .buildkite/tools/setup-bazel.sh
 
+./bazel aquery --config=buildfarm-sanitized-mac \
+  'inputs("common/common[.]cc", mnemonic("CppCompile", deps(//main:sorbet)))' \
+  --output=text
+
+exit 1
+
 echo -- will run with "${build_args[@]}"
 
 err=0
