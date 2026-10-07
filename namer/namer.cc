@@ -18,6 +18,7 @@
 #include "core/Names.h"
 #include "core/Symbols.h"
 #include "core/errors/namer.h"
+#include "core/errors/packager.h"
 #include "core/hashing/hashing.h"
 #include "core/lsp/TypecheckEpochManager.h"
 #include "core/packages/PackageInfo.h"
@@ -885,10 +886,34 @@ void populatePackagePathPrefixes(core::MutableContext ctx, core::packages::Packa
  * Defines symbols for all of the definitions found via SymbolFinder. Single threaded.
  */
 class SymbolDefiner {
+    struct SourceNamespace final {
+        core::GlobalState::ClassOrModulePackageInfo packageInfo;
+        bool inTestNamespace;
+    };
+
+    struct ClassNamespaceDecision final {
+        SourceNamespace source;
+        bool onPackagePath;
+        bool exempt;
+        bool hasError;
+        core::ClassOrModuleRef nameOwner;
+        core::NameRef name;
+    };
+
+    struct NamespaceError final {
+        core::LocOffsets expressionLoc;
+        core::LocOffsets nameLoc;
+        bool withinExplicitRootScope;
+        ClassNamespaceDecision decision;
+    };
+
 public:
     struct State {
         // See getOwnerSymbol for how both of these work.
         vector<core::ClassOrModuleRef> definedClasses;
+        vector<bool> suppressedNamespaceErrors;
+        UnorderedMap<core::ClassOrModuleRef, SourceNamespace> sourceNamespaces;
+        vector<NamespaceError> namespaceErrors;
 
         State() = default;
         State(const State &) = delete;
@@ -903,6 +928,10 @@ private:
     vector<core::ClassOrModuleRef> &symbolsToRecompute;
     MangledClasses &mangledClasses;
     const PackageInfo *package = nullptr;
+
+    // Diagnostic context is separate from the metadata on isolated recovery symbols.
+    UnorderedMap<core::ClassOrModuleRef, SourceNamespace> sourceNamespaces;
+    vector<NamespaceError> namespaceErrors;
 
     // Get the symbol for an already-defined owner. Limited to refs that can own things (classes and methods).
     core::ClassOrModuleRef getOwnerSymbol(const SymbolDefiner::State &state, core::FoundDefinitionRef ref) {
@@ -1330,6 +1359,96 @@ private:
                !this->package->ownsNamespace(ctx, packageInfo.package, packageInfo.packageRegistryOwner, true);
     }
 
+    ClassNamespaceDecision classifyClassNamespace(core::MutableContext ctx, core::ClassOrModuleRef owner,
+                                                  const core::FoundClass &klass) {
+        auto ownerSource = sourceNamespaces.find(owner);
+        optional<core::GlobalState::ClassOrModulePackageInfo> ownerPackageInfo;
+        if (ownerSource != sourceNamespaces.end()) {
+            ownerPackageInfo = ownerSource->second.packageInfo;
+        }
+        auto packageInfo = ctx.state.packageInfoForClassOrModule(owner, klass.name, ownerPackageInfo);
+        auto nameOwner = owner;
+        auto name = klass.name;
+        auto rootTest = core::Symbols::root().data(ctx)->findMember(ctx, PackageDB::TEST_NAMESPACE);
+        bool inTestNamespace = owner == core::Symbols::root() && klass.name == PackageDB::TEST_NAMESPACE;
+        inTestNamespace |= ownerSource != sourceNamespaces.end() ? ownerSource->second.inTestNamespace : false;
+        for (auto enclosing = owner; !inTestNamespace && enclosing != core::Symbols::root();
+             enclosing = enclosing.data(ctx)->owner) {
+            inTestNamespace = core::SymbolRef(enclosing) == rootTest;
+        }
+
+        auto existing = owner.data(ctx)->findMember(ctx, klass.name);
+        if (existing.exists() && existing.isClassOrModule()) {
+            auto existingClass = existing.asClassOrModuleRef();
+            if (auto source = sourceNamespaces.find(existingClass); source != sourceNamespaces.end()) {
+                packageInfo = source->second.packageInfo;
+                inTestNamespace = source->second.inTestNamespace;
+            } else {
+                auto data = existingClass.data(ctx);
+                packageInfo = {data->packageRegistryOwner, data->package};
+            }
+            nameOwner = existingClass.data(ctx)->owner;
+            name = existingClass.data(ctx)->name;
+        }
+
+        auto mustUseTestNamespace = !package->usesTestPackages && ctx.file.data(ctx).isPackagedTest() &&
+                                    !package->file.data(ctx).isPackagedTest();
+        // Registry prefixes need not be packages themselves. Test deliberately skips a component.
+        const bool couldBePrefix = packageInfo.packageRegistryOwner.exists();
+        auto onPackagePath =
+            package->ownsNamespace(ctx, packageInfo.package, packageInfo.packageRegistryOwner, couldBePrefix);
+        if (packageInfo.packageRegistryOwner == core::Symbols::PackageSpecRegistry() &&
+            !(owner == core::Symbols::root() && klass.name == PackageDB::TEST_NAMESPACE)) {
+            onPackagePath = false;
+        }
+        if (package->usesTestPackages && !ctx.state.packageDB().testPackages() && inTestNamespace) {
+            onPackagePath = false;
+        }
+
+        auto exempt = package->isPreludePackage() && klass.withinExplicitRootScope;
+        auto hasError = !exempt && (!onPackagePath || (mustUseTestNamespace && !inTestNamespace));
+        if (klass.classKind == core::FoundClass::Kind::Unknown) {
+            // Synthetic name components are references, not definitions diagnosed by this check.
+            hasError = false;
+        }
+        return {{packageInfo, inTestNamespace}, onPackagePath, exempt, hasError, nameOwner, name};
+    }
+
+    void reportNamespaceError(core::MutableContext ctx, core::LocOffsets nameLoc, bool withinExplicitRootScope,
+                                   const ClassNamespaceDecision &decision) {
+        if (auto e = ctx.beginError(nameLoc, core::errors::Packager::DefinitionPackageMismatch)) {
+            if (withinExplicitRootScope) {
+                e.setHeader("Defining a root-scoped constant requires this package to be marked `{}`", "prelude!");
+                e.addErrorLine(package->declLoc(), "This package is missing a `{}` declaration", "prelude!");
+                e.addErrorNote("Root-scoped constants are exempt from package namespace checks only in `{}` packages",
+                               "prelude!");
+                return;
+            }
+            auto mustUseTestNamespace = !package->usesTestPackages && ctx.file.data(ctx).isPackagedTest() &&
+                                        !package->file.data(ctx).isPackagedTest();
+            auto requiredName = package->mangledName().owner.show(ctx);
+            if (mustUseTestNamespace) {
+                requiredName = fmt::format("{}::{}", PackageDB::TEST_NAMESPACE.show(ctx), requiredName);
+                e.setHeader("Tests in the `{}` package must define tests in the `{}` namespace", package->show(ctx),
+                            requiredName);
+            } else {
+                e.setHeader("File belongs to package `{}` but defines a constant that does not match this namespace",
+                            requiredName);
+            }
+            e.addErrorLine(package->declLoc(), "Enclosing package declared here");
+            if (!decision.onPackagePath && decision.source.packageInfo.package.exists()) {
+                auto &requiredPackage = ctx.state.packageDB().getPackageInfo(decision.source.packageInfo.package);
+                if (requiredPackage.exists()) {
+                    auto name = decision.nameOwner == core::Symbols::root()
+                                    ? decision.name.show(ctx)
+                                    : fmt::format("{}::{}", decision.nameOwner.show(ctx), decision.name.show(ctx));
+                    e.addErrorLine(requiredPackage.declLoc(), "Must belong to this package, given constant name `{}`",
+                                   name);
+                }
+            }
+        }
+    }
+
     core::NameRef mangledClassName(core::MutableContext ctx, core::ClassOrModuleRef owner,
                                    const core::FoundClass &klass) {
         // We can't always call `nextMangledName` because on the fast path we need to reuse the previous name.
@@ -1349,7 +1468,10 @@ private:
         return ctx.state.nextMangledName(owner, klass.name);
     }
 
-    core::ClassOrModuleRef getClassSymbol(core::MutableContext ctx, const State &state, const core::FoundClass &klass) {
+    core::ClassOrModuleRef getClassSymbol(core::MutableContext ctx, State &state, const core::FoundClass &klass) {
+        bool suppressErrors = klass.lexicalOwner.kind() == core::FoundDefinitionRef::Kind::Class &&
+                              state.suppressedNamespaceErrors[klass.lexicalOwner.idx()];
+        state.suppressedNamespaceErrors.emplace_back(suppressErrors);
         core::ClassOrModuleRef symbol;
         if (klass.name == core::Names::Constants::Root()) {
             symbol = core::Symbols::root();
@@ -1359,6 +1481,17 @@ private:
             auto owner = getOwnerSymbol(state, klass.owner);
             auto name = klass.name;
 
+            optional<ClassNamespaceDecision> decision;
+            if (package != nullptr) {
+                decision = classifyClassNamespace(ctx, owner, klass);
+                if (!suppressErrors && decision->hasError) {
+                    namespaceErrors.push_back({klass.loc, klass.nameLoc, klass.withinExplicitRootScope, *decision});
+                }
+                state.suppressedNamespaceErrors.back() =
+                    suppressErrors || decision->hasError ||
+                    (!decision->exempt && klass.hasExplicitSuperclass &&
+                     decision->source.packageInfo.package != package->mangledName());
+            }
             auto shouldMangle = shouldMangleClassDefinition(ctx, owner, klass.name);
             if (!shouldMangle) {
                 // Aliases are entered by resolver--namer should be agnostic of them.
@@ -1393,6 +1526,9 @@ private:
 
             if (shouldMangle) {
                 mangledClasses[{ctx.file, owner, klass.name, klass.withinExplicitRootScope}] = symbol;
+            }
+            if (decision.has_value()) {
+                sourceNamespaces[symbol] = move(decision->source);
             }
         }
         ENFORCE(symbol.exists());
@@ -1433,7 +1569,7 @@ private:
         return symbol;
     }
 
-    core::ClassOrModuleRef insertClass(core::MutableContext ctx, const State &state, const core::FoundClass &klass,
+    core::ClassOrModuleRef insertClass(core::MutableContext ctx, State &state, const core::FoundClass &klass,
                                        bool willDeleteOldDefs, ClassBehaviorLocsMap &classBehaviorLocs) {
         auto symbol = getClassSymbol(ctx, state, klass);
 
@@ -1654,7 +1790,8 @@ private:
     }
 
     core::FieldRef insertStaticField(core::MutableContext ctx, const State &state,
-                                     const core::FoundStaticField &staticField) {
+                                     const core::FoundStaticField &staticField,
+                                     optional<core::LocOffsets> namespaceNameLoc = nullopt) {
         ENFORCE(ctx.owner.isClassOrModule());
 
         auto scope = getOwnerSymbol(state, staticField.owner);
@@ -1675,6 +1812,32 @@ private:
             }
         }
         ensureNoPackageConflict(ctx, scope, name, staticField.lhsLoc);
+        if (package != nullptr && name == staticField.name) {
+            auto source = sourceNamespaces.find(scope);
+            SourceNamespace sourceNamespace;
+            if (source != sourceNamespaces.end()) {
+                sourceNamespace = source->second;
+            } else {
+                auto data = scope.data(ctx);
+                sourceNamespace.packageInfo = {data->packageRegistryOwner, data->package};
+                sourceNamespace.inTestNamespace = false;
+                auto rootTest = core::Symbols::root().data(ctx)->findMember(ctx, PackageDB::TEST_NAMESPACE);
+                for (auto enclosing = scope; enclosing != core::Symbols::root(); enclosing = enclosing.data(ctx)->owner) {
+                    sourceNamespace.inTestNamespace |= core::SymbolRef(enclosing) == rootTest;
+                }
+            }
+            auto onPackagePath = sourceNamespace.packageInfo.package == package->mangledName();
+            auto mustUseTestNamespace = !package->usesTestPackages && ctx.file.data(ctx).isPackagedTest() &&
+                                        !package->file.data(ctx).isPackagedTest();
+            auto exempt = package->isPreludePackage() && staticField.withinExplicitRootScope;
+            auto hasError = !exempt && (!onPackagePath || (mustUseTestNamespace && !sourceNamespace.inTestNamespace));
+            auto suppressErrors = staticField.lexicalOwner.kind() == core::FoundDefinitionRef::Kind::Class &&
+                                  state.suppressedNamespaceErrors[staticField.lexicalOwner.idx()];
+            if (hasError && !suppressErrors) {
+                namespaceErrors.push_back({staticField.asgnLoc, namespaceNameLoc.value_or(staticField.lhsLoc), staticField.withinExplicitRootScope,
+                                          {sourceNamespace, onPackagePath, exempt, hasError, scope, name}});
+            }
+        }
         sym = ctx.state.enterStaticFieldSymbol(ctx.locAt(staticField.lhsLoc), scope, name);
         // Reset resultType to nullptr for idempotency on the fast path--it will always be
         // re-entered in resolver.
@@ -1698,7 +1861,7 @@ private:
         staticField.asgnLoc = typeMember.asgnLoc;
         staticField.lhsLoc = typeMember.nameLoc;
         staticField.isTypeAlias = true;
-        return insertStaticField(ctx, state, staticField);
+        return insertStaticField(ctx, state, staticField, typeMember.nameLoc);
     }
 
     core::SymbolRef insertTypeMember(core::MutableContext ctx, const State &state,
@@ -2013,10 +2176,14 @@ public:
             insertPackage(ctx, state, foundDefs.package.value());
         }
 
+        state.sourceNamespaces = move(sourceNamespaces);
+        state.namespaceErrors = move(namespaceErrors);
         return state;
     }
 
     void enterNewDefinitions(core::MutableContext ctx, SymbolDefiner::State &&state) {
+        sourceNamespaces = move(state.sourceNamespaces);
+        namespaceErrors = move(state.namespaceErrors);
         // We have to defer defining non-class constant symbols until this (second) phase of incremental
         // namer so that we don't delete and immediately re-enter a symbol (possibly keeping it
         // alive, if it had multiple locs at the time of deletion) before SymbolDefiner has had a
@@ -2042,6 +2209,25 @@ public:
                     ENFORCE(false, "Unexpected definition ref {}", core::FoundDefinitionRef::kindToString(ref.kind()));
                     break;
             }
+        }
+
+        // Definitions are entered by kind, not lexical order. An invalid assignment suppresses
+        // diagnostics in its RHS just as an invalid class suppresses its body, so emit only after
+        // collecting both kinds of namespace violation.
+        fast_sort(namespaceErrors, [](const auto &lhs, const auto &rhs) {
+            if (lhs.expressionLoc.beginPos() != rhs.expressionLoc.beginPos()) {
+                return lhs.expressionLoc.beginPos() < rhs.expressionLoc.beginPos();
+            }
+            return lhs.expressionLoc.endPos() > rhs.expressionLoc.endPos();
+        });
+        core::LocOffsets suppressedLoc;
+        for (const auto &error : namespaceErrors) {
+            if (suppressedLoc.exists() && error.expressionLoc.beginPos() >= suppressedLoc.beginPos() &&
+                error.expressionLoc.endPos() <= suppressedLoc.endPos()) {
+                continue;
+            }
+            reportNamespaceError(ctx, error.nameLoc, error.withinExplicitRootScope, error.decision);
+            suppressedLoc = error.expressionLoc;
         }
 
         for (auto &method : foundDefs.methods()) {

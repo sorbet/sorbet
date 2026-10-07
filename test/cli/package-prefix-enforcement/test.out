@@ -25,45 +25,6 @@ nested/nested.rb:3: File belongs to package `Root::Nested` but defines a constan
      3 |class Root::Nested < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-nested/nested.rb:39: This file must only define behavior in enclosing package `Root::Nested` https://srb.help/3713
-    39 |  sig {returns(NilClass)}
-          ^^^^^^^^^^^^^^^^^^^^^^^
-    nested/nested.rb:34: Defining behavior in `Root` instead:
-    34 |module Root
-               ^^^^
-    nested/__package.rb:3: Enclosing package `Root::Nested` declared here
-     3 |class Root::Nested < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    __package.rb:3: Package `Root` declared here
-     3 |class Root < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^
-
-nested/nested.rb:40: This file must only define behavior in enclosing package `Root::Nested` https://srb.help/3713
-    40 |  def self.method
-          ^^^^^^^^^^^^^^^
-    nested/nested.rb:34: Defining behavior in `Root` instead:
-    34 |module Root
-               ^^^^
-    nested/__package.rb:3: Enclosing package `Root::Nested` declared here
-     3 |class Root::Nested < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    __package.rb:3: Package `Root` declared here
-     3 |class Root < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^
-
-nested/nested.rb:35: This file must only define behavior in enclosing package `Root::Nested` https://srb.help/3713
-    35 |  extend T::Sig
-          ^^^^^^^^^^^^^
-    nested/nested.rb:34: Defining behavior in `Root` instead:
-    34 |module Root
-               ^^^^
-    nested/__package.rb:3: Enclosing package `Root::Nested` declared here
-     3 |class Root::Nested < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    __package.rb:3: Package `Root` declared here
-     3 |class Root < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^
-
 nested/nested.rb:37: File belongs to package `Root::Nested` but defines a constant that does not match this namespace https://srb.help/3713
     37 |  NOT_IN_PACKAGE = T.let(1, Integer)
           ^^^^^^^^^^^^^^
@@ -110,6 +71,45 @@ nested/nested.rb:67: File belongs to package `Root::Nested` but defines a consta
      3 |class Root::Nested < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     __package.rb:3: Must belong to this package, given constant name `Root::X`
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+
+nested/nested.rb:39: This file must only define behavior in enclosing package `Root::Nested` https://srb.help/3713
+    39 |  sig {returns(NilClass)}
+          ^^^^^^^^^^^^^^^^^^^^^^^
+    nested/nested.rb:34: Defining behavior in `Root` instead:
+    34 |module Root
+               ^^^^
+    nested/__package.rb:3: Enclosing package `Root::Nested` declared here
+     3 |class Root::Nested < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    __package.rb:3: Package `Root` declared here
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+
+nested/nested.rb:40: This file must only define behavior in enclosing package `Root::Nested` https://srb.help/3713
+    40 |  def self.method
+          ^^^^^^^^^^^^^^^
+    nested/nested.rb:34: Defining behavior in `Root` instead:
+    34 |module Root
+               ^^^^
+    nested/__package.rb:3: Enclosing package `Root::Nested` declared here
+     3 |class Root::Nested < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    __package.rb:3: Package `Root` declared here
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+
+nested/nested.rb:35: This file must only define behavior in enclosing package `Root::Nested` https://srb.help/3713
+    35 |  extend T::Sig
+          ^^^^^^^^^^^^^
+    nested/nested.rb:34: Defining behavior in `Root` instead:
+    34 |module Root
+               ^^^^
+    nested/__package.rb:3: Enclosing package `Root::Nested` declared here
+     3 |class Root::Nested < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    __package.rb:3: Package `Root` declared here
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
 
