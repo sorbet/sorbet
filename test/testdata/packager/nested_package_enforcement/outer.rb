@@ -8,7 +8,7 @@ module Outer
 
   module Inner
 # ^^^^^^^^^^^^ error: File belongs to package `Outer` but defines a constant that does not match this namespace
-    module Foo; end # error: File belongs to package `Outer` but defines a constant that does not match this namespace
+    module Foo; end
   end
 
   module Inner::Bar; end

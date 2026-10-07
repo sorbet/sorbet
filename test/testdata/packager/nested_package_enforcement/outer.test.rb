@@ -8,7 +8,7 @@ module Test::Outer
 
   module Inner
 # ^^^^^^^^^^^^ error: Tests in the `Outer` package must define tests in the `Test::Outer` namespace
-    module Foo; end # error: Tests in the `Outer` package must define tests in the `Test::Outer` namespace
+    module Foo; end
   end
 
   module Inner::Bar; end

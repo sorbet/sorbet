@@ -5,7 +5,7 @@ class String # error: File belongs to package `String` but defines a constant th
     0
   end
 
-  class Nested # error: File belongs to package `String` but defines a constant that does not match this namespace
+  class Nested
   end
 
   # Namespace resets report their own violation even inside an invalid definition.

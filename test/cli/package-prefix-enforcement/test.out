@@ -5,13 +5,6 @@ nested/nested.rb:3: File belongs to package `Root::Nested` but defines a constan
      3 |class Root::Nested < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-nested/nested.rb:4: File belongs to package `Root::Nested` but defines a constant that does not match this namespace https://srb.help/3713
-     4 |  class Inside; end
-          ^^^^^^^^^^^^
-    nested/__package.rb:3: Enclosing package declared here
-     3 |class Root::Nested < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 nested/nested.rb:53: File belongs to package `Root::Nested` but defines a constant that does not match this namespace https://srb.help/3713
     53 |module Root::ModNotInPackage
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -35,15 +28,6 @@ nested/nested.rb:56: File belongs to package `Root::Nested` but defines a consta
 nested/nested.rb:59: Defining a root-scoped constant requires this package to be marked `prelude!` https://srb.help/3713
     59 |module ::TopLevel
         ^^^^^^^^^^^^^^^^^
-    nested/__package.rb:3: This package is missing a `prelude!` declaration
-     3 |class Root::Nested < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Note:
-    Root-scoped constants are exempt from package namespace checks only in `prelude!` packages
-
-nested/nested.rb:60: Defining a root-scoped constant requires this package to be marked `prelude!` https://srb.help/3713
-    60 |  class Foo
-          ^^^^^^^^^
     nested/__package.rb:3: This package is missing a `prelude!` declaration
      3 |class Root::Nested < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -324,13 +308,6 @@ critic_prefix/real.test.rb:3: Tests in the `Critic::SomePkg` package must define
      3 |class Critic::SomePkg < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-critic_prefix/real.test.rb:4: Tests in the `Critic::SomePkg` package must define tests in the `Test::Critic::SomePkg` namespace https://srb.help/3713
-     4 |  FOO = 1
-          ^^^
-    critic_prefix/__package.rb:3: Enclosing package declared here
-     3 |class Critic::SomePkg < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 critic_prefix/real.test.rb:7: Tests in the `Critic::SomePkg` package must define tests in the `Test::Critic::SomePkg` namespace https://srb.help/3713
      7 |Critic::SomePkg::RealConst = 2
         ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -351,9 +328,6 @@ commands/foo_command.rb:4: File belongs to package `Root::Commands::Foo` but def
     commands/__package.rb:3: Enclosing package declared here
      3 |class Root::Commands::Foo < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    __package.rb:3: Must belong to this package, given constant name `Root::Commands::Baz::Ban`
-     3 |class Root < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^
 
 commands/foo_command.rb:3: Package `Root::Commands::Foo` may not open `Root::Commands` https://srb.help/5086
      3 |module Root::Commands
@@ -391,4 +365,4 @@ extend_sig.rb:4: `include` may only be used on constants in the package that own
         ^^^^^^^^^^^^^^^^^^^^^^^^
   Note:
     `Module` is unpackaged, and may be reopened from a package marked `prelude!`
-Errors: 38
+Errors: 35

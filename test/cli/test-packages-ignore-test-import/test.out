@@ -49,14 +49,7 @@ old_style/test/foo.test.rb:3: File belongs to package `OldStyle` but defines a c
     old_style/__package.rb:3: Enclosing package declared here
      3 |class OldStyle < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-old_style/test/foo.test.rb:4: File belongs to package `OldStyle` but defines a constant that does not match this namespace https://srb.help/3713
-     4 |  class FooTest
-          ^^^^^^^^^^^^^
-    old_style/__package.rb:3: Enclosing package declared here
-     3 |class OldStyle < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 6
+Errors: 5
 ------ package-directed -------------------------
 consumer/test/use.rb:4: `Test::InBetween` is not imported https://srb.help/3718
      4 |  Test::InBetween::FooTest
@@ -108,11 +101,4 @@ old_style/test/foo.test.rb:3: File belongs to package `OldStyle` but defines a c
     old_style/__package.rb:3: Enclosing package declared here
      3 |class OldStyle < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-old_style/test/foo.test.rb:4: File belongs to package `OldStyle` but defines a constant that does not match this namespace https://srb.help/3713
-     4 |  class FooTest
-          ^^^^^^^^^^^^^
-    old_style/__package.rb:3: Enclosing package declared here
-     3 |class OldStyle < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 6
+Errors: 5

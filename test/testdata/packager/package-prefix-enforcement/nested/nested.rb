@@ -2,7 +2,7 @@
 
 module Wrong
 # error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
-  class Inside; end # error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
+  class Inside; end
 end
 
 Root::Nested::Foo::Bar = nil
@@ -81,7 +81,7 @@ class Root::ClassNotInPackage
 end
 
 module ::TopLevel # error: requires this package to be marked `prelude!`
-  class Foo # error: Defining a root-scoped constant requires this package to be marked `prelude!`
+  class Foo
     sig {void}
     def foo
     end

@@ -5,27 +5,6 @@ bad_test/a.rb:3: File belongs to package `Test::BadTest` but defines a constant 
      3 |class Test::BadTest < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-bad_test/a.rb:4: File belongs to package `Test::BadTest` but defines a constant that does not match this namespace https://srb.help/3713
-     4 |  module ClassMethods
-          ^^^^^^^^^^^^^^^^^^^
-    bad_test/__package.rb:3: Enclosing package declared here
-     3 |class Test::BadTest < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-bad_test/a.rb:17: File belongs to package `Test::BadTest` but defines a constant that does not match this namespace https://srb.help/3713
-    17 |  X = type_member
-          ^
-    bad_test/__package.rb:3: Enclosing package declared here
-     3 |class Test::BadTest < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-bad_test/a.rb:19: File belongs to package `Test::BadTest` but defines a constant that does not match this namespace https://srb.help/3713
-    19 |  Y = type_template
-          ^
-    bad_test/__package.rb:3: Enclosing package declared here
-     3 |class Test::BadTest < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 bad_test/a.rb:17: `type_member` may only be used on constants in the package that owns them https://srb.help/4028
     17 |  X = type_member
               ^^^^^^^^^^^
@@ -75,20 +54,6 @@ bad_test/subpackage/foo.rb:3: File belongs to package `Test::BadTest::Subpackage
      3 |class Test::BadTest::Subpackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-bad_test/subpackage/foo.rb:4: File belongs to package `Test::BadTest::Subpackage` but defines a constant that does not match this namespace https://srb.help/3713
-     4 |  module Subpackage
-          ^^^^^^^^^^^^^^^^^
-    bad_test/subpackage/__package.rb:3: Enclosing package declared here
-     3 |class Test::BadTest::Subpackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-bad_test/subpackage/foo.rb:5: File belongs to package `Test::BadTest::Subpackage` but defines a constant that does not match this namespace https://srb.help/3713
-     5 |    class Foo
-            ^^^^^^^^^
-    bad_test/subpackage/__package.rb:3: Enclosing package declared here
-     3 |class Test::BadTest::Subpackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 bad_test/__package.rb:4: Unable to resolve constant `Root` https://srb.help/5002
      4 |  import Test::Root::Subpackage
                  ^^^^^^^^^^
@@ -103,20 +68,6 @@ bad_test/__package.rb:4: Unable to resolve constant `Root` https://srb.help/5002
 bad_test/a.rbi:3: File belongs to package `Test::BadTest` but defines a constant that does not match this namespace https://srb.help/3713
      3 |module Test::BadTest
         ^^^^^^^^^^^^^^^^^^^^
-    bad_test/__package.rb:3: Enclosing package declared here
-     3 |class Test::BadTest < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-bad_test/a.rbi:4: File belongs to package `Test::BadTest` but defines a constant that does not match this namespace https://srb.help/3713
-     4 |  X = type_member
-          ^
-    bad_test/__package.rb:3: Enclosing package declared here
-     3 |class Test::BadTest < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-bad_test/a.rbi:5: File belongs to package `Test::BadTest` but defines a constant that does not match this namespace https://srb.help/3713
-     5 |  Y = type_template
-          ^
     bad_test/__package.rb:3: Enclosing package declared here
      3 |class Test::BadTest < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -263,4 +214,4 @@ root/test/root.rb:12: Package `Root` has subpackages, so its corresponding class
     root/subpackage/__package.rb:3: First subpackage defined here
      3 |class Root::Subpackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 30
+Errors: 23
