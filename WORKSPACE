@@ -76,6 +76,7 @@ py_repositories()
 # Register Python's execution toolchain for emsdk's upstream interpreter lookup.
 python_register_toolchains(
     name = "emscripten_python",
+    ignore_root_user_error = True,
     python_version = "3.11.10",
 )
 
