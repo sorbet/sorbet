@@ -93,7 +93,13 @@ load("@rules_m4//m4:m4.bzl", "m4_register_toolchains")
 
 m4_register_toolchains()
 
-register_toolchains("//third_party/bison:toolchain")
+load("@rules_bison//bison:bison.bzl", "bison_register_toolchains")
+
+bison_register_toolchains(
+    # Clang 12+ introduced this flag. All versions of Bison at time of writing
+    # (up to 3.7.6) include code flagged by this warning.
+    extra_copts = ["-Wno-implicit-const-int-float-conversion"],
+)
 
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 
