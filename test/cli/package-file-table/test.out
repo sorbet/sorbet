@@ -27,6 +27,7 @@ Errors: 2
    "strict": "Strict",
    "min_error_level": "Max",
    "pkg": "Project::Bar",
+   "pkg_scc_id": 0,
    "source_size": 197
   },
   {
@@ -35,6 +36,7 @@ Errors: 2
    "strict": "Strict",
    "min_error_level": "Max",
    "pkg": "Project::Bar",
+   "pkg_scc_id": 0,
    "source_size": 254
   },
   {
@@ -43,6 +45,7 @@ Errors: 2
    "strict": "Strict",
    "min_error_level": "Max",
    "pkg": "Project::Bar",
+   "pkg_scc_id": 0,
    "source_size": 397
   },
   {
@@ -51,6 +54,7 @@ Errors: 2
    "strict": "Strict",
    "min_error_level": "Max",
    "pkg": "Project::Foo",
+   "pkg_scc_id": 0,
    "source_size": 173
   },
   {
@@ -59,7 +63,17 @@ Errors: 2
    "strict": "Strict",
    "min_error_level": "False",
    "pkg": "Project::Foo",
+   "pkg_scc_id": 0,
    "source_size": 287
+  },
+  {
+   "path": "./foo/foo.test.rb",
+   "sigil": "Strict",
+   "strict": "Strict",
+   "min_error_level": "Max",
+   "pkg": "Project::Foo",
+   "pkg_scc_id": 1,
+   "source_size": 47
   },
   {
    "path": "./foo/foo_methods.rb",
@@ -67,6 +81,7 @@ Errors: 2
    "strict": "Strict",
    "min_error_level": "Max",
    "pkg": "Project::Foo",
+   "pkg_scc_id": 0,
    "source_size": 397
   }
  ]

@@ -89,10 +89,16 @@ void JSON::fileToJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer> &writer, 
     if (packageDB.enabled()) {
         const auto &pkgName = packageDB.getPackageNameForFile(file);
         if (pkgName.exists()) {
-            auto pkg = packageDB.getPackageInfo(pkgName).show(gs);
+            const auto &pkgInfo = packageDB.getPackageInfo(pkgName);
+            auto pkg = pkgInfo.show(gs);
             if (!pkg.empty()) {
                 writer.Key("pkg");
                 writer.String(pkg.data(), pkg.size());
+            }
+            auto sccID = data.isPackagedTest() ? pkgInfo.testSccID() : pkgInfo.sccID();
+            if (sccID.has_value()) {
+                writer.Key("pkg_scc_id");
+                writer.Int(*sccID);
             }
         }
     }
