@@ -1842,6 +1842,9 @@ private:
                 }
             }
             auto onPackagePath = sourceNamespace.packageInfo.package == package->mangledName();
+            if (package->usesTestPackages && !ctx.state.packageDB().testPackages() && sourceNamespace.inTestNamespace) {
+                onPackagePath = false;
+            }
             auto mustUseTestNamespace = !package->usesTestPackages && ctx.file.data(ctx).isPackagedTest() &&
                                         !package->file.data(ctx).isPackagedTest();
             auto exempt = package->isPreludePackage() && staticField.withinExplicitRootScope;
