@@ -881,13 +881,8 @@ void populatePackagePathPrefixes(core::MutableContext ctx, core::packages::Packa
  * Defines symbols for all of the definitions found via SymbolFinder. Single threaded.
  */
 class SymbolDefiner {
-    struct SourceNamespace final {
-        core::GlobalState::ClassOrModulePackageInfo packageInfo;
-        bool inTestNamespace;
-    };
-
     struct ClassNamespaceDecision final {
-        SourceNamespace source;
+        core::GlobalState::ClassOrModulePackageInfo packageInfo;
         bool onPackagePath;
         bool exempt;
         bool hasError;
@@ -1409,7 +1404,7 @@ private:
             }
         }
         shouldMangle &= !isMangledNamespace(ctx, owner);
-        return {{packageInfo, inTestNamespace}, onPackagePath, exempt, hasError, shouldMangle, nameOwner, name};
+        return {packageInfo, onPackagePath, exempt, hasError, shouldMangle, nameOwner, name};
     }
 
     void reportNamespaceError(core::MutableContext ctx, core::LocOffsets nameLoc, bool withinExplicitRootScope,
@@ -1434,8 +1429,8 @@ private:
                             requiredName);
             }
             e.addErrorLine(package->declLoc(), "Enclosing package declared here");
-            if (!decision.onPackagePath && decision.source.packageInfo.package.exists()) {
-                auto &requiredPackage = ctx.state.packageDB().getPackageInfo(decision.source.packageInfo.package);
+            if (!decision.onPackagePath && decision.packageInfo.package.exists()) {
+                auto &requiredPackage = ctx.state.packageDB().getPackageInfo(decision.packageInfo.package);
                 if (requiredPackage.exists()) {
                     auto name = decision.nameOwner == core::Symbols::root()
                                     ? decision.name.show(ctx)
@@ -1808,26 +1803,25 @@ private:
         ensureNoPackageConflict(ctx, scope, name, staticField.lhsLoc);
         if (package != nullptr && name == staticField.name &&
             !hasRejectedNamespaceOwner(ctx, state, staticField.owner)) {
-            SourceNamespace sourceNamespace;
             auto data = scope.data(ctx);
-            sourceNamespace.packageInfo = {data->packageRegistryOwner, data->package};
-            sourceNamespace.inTestNamespace = false;
+            core::GlobalState::ClassOrModulePackageInfo packageInfo{data->packageRegistryOwner, data->package};
+            bool inTestNamespace = false;
             auto rootTest = core::Symbols::root().data(ctx)->findMember(ctx, PackageDB::TEST_NAMESPACE);
             for (auto enclosing = scope; enclosing != core::Symbols::root(); enclosing = enclosing.data(ctx)->owner) {
-                sourceNamespace.inTestNamespace |= core::SymbolRef(enclosing) == rootTest;
+                inTestNamespace |= core::SymbolRef(enclosing) == rootTest;
             }
-            auto onPackagePath = sourceNamespace.packageInfo.package == package->mangledName();
-            if (package->usesTestPackages && !ctx.state.packageDB().testPackages() && sourceNamespace.inTestNamespace) {
+            auto onPackagePath = packageInfo.package == package->mangledName();
+            if (package->usesTestPackages && !ctx.state.packageDB().testPackages() && inTestNamespace) {
                 onPackagePath = false;
             }
             auto mustUseTestNamespace = !package->usesTestPackages && ctx.file.data(ctx).isPackagedTest() &&
                                         !package->file.data(ctx).isPackagedTest();
             auto exempt = package->isPreludePackage() && staticField.withinExplicitRootScope;
-            auto hasError = !exempt && (!onPackagePath || (mustUseTestNamespace && !sourceNamespace.inTestNamespace));
+            auto hasError = !exempt && (!onPackagePath || (mustUseTestNamespace && !inTestNamespace));
             if (hasError) {
                 reportNamespaceError(ctx, namespaceNameLoc.value_or(staticField.lhsLoc),
                                      staticField.withinExplicitRootScope,
-                                     {sourceNamespace, onPackagePath, exempt, hasError, hasError, scope, name});
+                                     {packageInfo, onPackagePath, exempt, hasError, hasError, scope, name});
             }
             // Invalid class owners already isolate their constants. Qualified assignments can reset
             // to a packaged owner, so isolate those independently.
