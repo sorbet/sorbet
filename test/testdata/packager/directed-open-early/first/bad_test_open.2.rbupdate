@@ -2,7 +2,7 @@
 
 module Test::Second
 # error: File belongs to package `First` but defines a constant that does not match this namespace
-  class FromFirst
+  class FromFirst # error: File belongs to package `First` but defines a constant that does not match this namespace
   end
 end
 # exclude-from-file-update: true

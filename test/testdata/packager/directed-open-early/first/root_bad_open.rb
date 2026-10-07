@@ -2,6 +2,6 @@
 
 module ::Second
 # error: Defining a root-scoped constant requires this package to be marked `prelude!`
-  class Foo
+  class Foo # error: Defining a root-scoped constant requires this package to be marked `prelude!`
   end
 end

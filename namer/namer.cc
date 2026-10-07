@@ -197,7 +197,6 @@ class SymbolFinder {
         } else if (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node)) {
             core::FoundClass found;
             found.owner = defineScope(owner, constLit->scope, withinExplicitRootScope);
-            found.lexicalOwner = getOwner();
             found.name = constLit->cnst;
             found.loc = constLit->loc;
             found.declLoc = constLit->loc;
@@ -226,10 +225,7 @@ public:
         found.classKind = ast::ClassDef::kindToFoundClassKind(klass.kind);
         found.loc = klass.loc;
         found.declLoc = klass.declLoc;
-        found.lexicalOwner = getOwner();
         found.withinExplicitRootScope = currentOwnerWithinExplicitRootScope() || isExplicitlyRootScoped(klass.name);
-        found.hasExplicitSuperclass = klass.kind == ast::ClassDef::Kind::Class && !klass.ancestors.empty() &&
-                                      ast::isa_tree<ast::UnresolvedConstantLit>(klass.ancestors[0]);
 
         auto ident = ast::cast_tree<ast::UnresolvedIdent>(klass.name);
         if ((ident != nullptr) && ident->name == core::Names::singleton()) {
@@ -638,7 +634,6 @@ public:
 
         core::FoundStaticField found;
         found.owner = defineScope(getOwner(), lhs.scope, currentOwnerWithinExplicitRootScope());
-        found.lexicalOwner = getOwner();
         found.withinExplicitRootScope = currentOwnerWithinExplicitRootScope() || isExplicitlyRootScoped(asgn.lhs);
         found.name = lhs.cnst;
         found.asgnLoc = asgn.loc;
@@ -666,7 +661,6 @@ public:
             // Too many arguments. Define a static field that we'll use for this type member later.
             core::FoundStaticField staticField;
             staticField.owner = found.owner;
-            staticField.lexicalOwner = getOwner();
             staticField.withinExplicitRootScope = currentOwnerWithinExplicitRootScope();
             staticField.name = found.name;
             staticField.asgnLoc = found.asgnLoc;
@@ -911,9 +905,8 @@ class SymbolDefiner {
 
 public:
     struct State {
-        // See getOwnerSymbol for how both of these work.
+        // See getOwnerSymbol for how definition references map to these symbols.
         vector<core::ClassOrModuleRef> definedClasses;
-        vector<bool> suppressedNamespaceErrors;
         UnorderedMap<core::ClassOrModuleRef, SourceNamespace> sourceNamespaces;
         vector<NamespaceError> namespaceErrors;
 
@@ -1476,10 +1469,7 @@ private:
         return ctx.state.nextMangledName(owner, klass.name);
     }
 
-    core::ClassOrModuleRef getClassSymbol(core::MutableContext ctx, State &state, const core::FoundClass &klass) {
-        bool suppressErrors = klass.lexicalOwner.kind() == core::FoundDefinitionRef::Kind::Class &&
-                              state.suppressedNamespaceErrors[klass.lexicalOwner.idx()];
-        state.suppressedNamespaceErrors.emplace_back(suppressErrors);
+    core::ClassOrModuleRef getClassSymbol(core::MutableContext ctx, const State &state, const core::FoundClass &klass) {
         core::ClassOrModuleRef symbol;
         if (klass.name == core::Names::Constants::Root()) {
             symbol = core::Symbols::root();
@@ -1492,13 +1482,9 @@ private:
             optional<ClassNamespaceDecision> decision;
             if (package != nullptr) {
                 decision = classifyClassNamespace(ctx, owner, klass);
-                if (!suppressErrors && decision->hasError) {
+                if (decision->hasError) {
                     namespaceErrors.push_back({klass.loc, klass.declLoc, klass.withinExplicitRootScope, *decision});
                 }
-                state.suppressedNamespaceErrors.back() =
-                    suppressErrors || decision->hasError ||
-                    (!decision->exempt && klass.hasExplicitSuperclass &&
-                     decision->source.packageInfo.package != package->mangledName());
             }
             auto shouldMangle = decision.has_value() && decision->shouldMangle;
             if (!shouldMangle) {
@@ -1582,7 +1568,7 @@ private:
         return symbol;
     }
 
-    core::ClassOrModuleRef insertClass(core::MutableContext ctx, State &state, const core::FoundClass &klass,
+    core::ClassOrModuleRef insertClass(core::MutableContext ctx, const State &state, const core::FoundClass &klass,
                                        bool willDeleteOldDefs, ClassBehaviorLocsMap &classBehaviorLocs) {
         auto symbol = getClassSymbol(ctx, state, klass);
 
@@ -1849,16 +1835,14 @@ private:
                                         !package->file.data(ctx).isPackagedTest();
             auto exempt = package->isPreludePackage() && staticField.withinExplicitRootScope;
             auto hasError = !exempt && (!onPackagePath || (mustUseTestNamespace && !sourceNamespace.inTestNamespace));
-            auto suppressErrors = staticField.lexicalOwner.kind() == core::FoundDefinitionRef::Kind::Class &&
-                                  state.suppressedNamespaceErrors[staticField.lexicalOwner.idx()];
-            if (hasError && !suppressErrors) {
+            if (hasError) {
                 namespaceErrors.push_back({staticField.asgnLoc,
                                            namespaceNameLoc.value_or(staticField.lhsLoc),
                                            staticField.withinExplicitRootScope,
                                            {sourceNamespace, onPackagePath, exempt, hasError, hasError, scope, name}});
             }
             // Invalid class owners already isolate their constants. Qualified assignments can reset
-            // to a packaged owner, so isolate those independently even when the diagnostic is suppressed.
+            // to a packaged owner, so isolate those independently.
             if (hasError && (scope == core::Symbols::root() || scope.data(ctx)->packageRegistryOwner.exists() ||
                              scope.data(ctx)->package.exists())) {
                 isolatedNamespace = true;
@@ -1902,7 +1886,6 @@ private:
                                                   const core::FoundTypeMember &typeMember) {
         core::FoundStaticField staticField;
         staticField.owner = typeMember.owner;
-        staticField.lexicalOwner = typeMember.owner;
         staticField.withinExplicitRootScope = typeMember.owner.kind() == core::FoundDefinitionRef::Kind::Class &&
                                               typeMember.owner.klass(foundDefs).withinExplicitRootScope;
         staticField.name = typeMember.name;
@@ -2261,23 +2244,16 @@ public:
             }
         }
 
-        // Definitions are entered by kind, not lexical order. An invalid assignment suppresses
-        // diagnostics in its RHS just as an invalid class suppresses its body, so emit only after
-        // collecting both kinds of namespace violation.
+        // Definitions are entered by kind, not lexical order. Collect both kinds of namespace
+        // violation before emitting diagnostics in source order.
         fast_sort(namespaceErrors, [](const auto &lhs, const auto &rhs) {
             if (lhs.expressionLoc.beginPos() != rhs.expressionLoc.beginPos()) {
                 return lhs.expressionLoc.beginPos() < rhs.expressionLoc.beginPos();
             }
             return lhs.expressionLoc.endPos() > rhs.expressionLoc.endPos();
         });
-        core::LocOffsets suppressedLoc;
         for (const auto &error : namespaceErrors) {
-            if (suppressedLoc.exists() && error.expressionLoc.beginPos() >= suppressedLoc.beginPos() &&
-                error.expressionLoc.endPos() <= suppressedLoc.endPos()) {
-                continue;
-            }
             reportNamespaceError(ctx, error.nameLoc, error.withinExplicitRootScope, error.decision);
-            suppressedLoc = error.expressionLoc;
         }
 
         for (auto &method : foundDefs.methods()) {

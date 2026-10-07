@@ -5,10 +5,10 @@ class String # error: File belongs to package `String` but defines a constant th
     0
   end
 
-  class Nested
+  class Nested # error: File belongs to package `String` but defines a constant that does not match this namespace
   end
 
-  # The lexical parent's error suppresses errors even when the namespace resets.
-  class ::Consumer::Escaped
+  # Namespace resets report their own violation even inside an invalid definition.
+  class ::Consumer::Escaped # error: Defining a root-scoped constant requires this package to be marked `prelude!`
   end
 end

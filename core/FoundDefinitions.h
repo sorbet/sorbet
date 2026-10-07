@@ -106,14 +106,11 @@ CheckSize(FoundDefinitionRef, 4, 4);
 
 struct FoundClass final {
     FoundDefinitionRef owner;
-    // Unlike owner, this preserves lexical nesting across qualified and explicit-root names.
-    FoundDefinitionRef lexicalOwner;
     core::NameRef name;
     core::LocOffsets loc;
     core::LocOffsets declLoc;
     bool definesBehavior = false;
     bool withinExplicitRootScope = false;
-    bool hasExplicitSuperclass = false;
 
     enum class Kind : uint8_t {
         Unknown,
@@ -124,7 +121,7 @@ struct FoundClass final {
 
     std::string toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const;
 };
-CheckSize(FoundClass, 32, 4);
+CheckSize(FoundClass, 28, 4);
 
 struct FoundPackage final {
     FoundDefinitionRef owner;
@@ -137,7 +134,6 @@ CheckSize(FoundPackage, 20, 4);
 
 struct FoundStaticField final {
     FoundDefinitionRef owner;
-    FoundDefinitionRef lexicalOwner;
     core::NameRef name;
     core::LocOffsets asgnLoc;
     core::LocOffsets lhsLoc;
@@ -146,7 +142,7 @@ struct FoundStaticField final {
 
     std::string toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const;
 };
-CheckSize(FoundStaticField, 32, 4);
+CheckSize(FoundStaticField, 28, 4);
 
 struct FoundTypeMember final {
     FoundDefinitionRef owner;

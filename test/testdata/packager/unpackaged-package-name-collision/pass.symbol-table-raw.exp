@@ -26,7 +26,7 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> @ Loc {file=test/testdata/packager/unpackaged-package-name-collision/string/__package.rb start=??? end=???}
     method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/unpackaged-package-name-collision/string/bad.rb start=3:1 end=14:4}
       argument <blk><block> @ Loc {file=test/testdata/packager/unpackaged-package-name-collision/string/bad.rb start=??? end=???}
-    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/unpackaged-package-name-collision/string/bad.rbi start=3:1 end=6:4}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/unpackaged-package-name-collision/string/bad.rbi start=3:1 end=7:4}
       argument <blk><block> @ Loc {file=test/testdata/packager/unpackaged-package-name-collision/string/bad.rbi start=??? end=???}
   module <M <C <U Consumer>> $1> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/packager/unpackaged-package-name-collision/string/bad.rb start=12:9 end=12:19}
     class <M <C <U Consumer>> $1>::<C <U Escaped>> < <C <U Object>> () @ Loc {file=test/testdata/packager/unpackaged-package-name-collision/string/bad.rb start=12:3 end=12:28}
@@ -38,7 +38,7 @@ class <C <U <root>>> < <C <U Object>> ()
     class <M <C <U Consumer>> $2>::<C <U FromRBI>> < <C <U Object>> () @ Loc {file=test/testdata/packager/unpackaged-package-name-collision/string/bad.rbi start=4:3 end=4:39}
     class <M <C <U Consumer>> $2>::<S <C <U FromRBI>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/packager/unpackaged-package-name-collision/string/bad.rbi start=4:3 end=4:39}
       type-member(+) <M <C <U Consumer>> $2>::<S <C <U FromRBI>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<M <C <U Consumer>> $2>::<S <C <U FromRBI>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Consumer::FromRBI) @ Loc {file=test/testdata/packager/unpackaged-package-name-collision/string/bad.rbi start=4:3 end=4:39}
-      method <M <C <U Consumer>> $2>::<S <C <U FromRBI>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/unpackaged-package-name-collision/string/bad.rbi start=4:3 end=5:6}
+      method <M <C <U Consumer>> $2>::<S <C <U FromRBI>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/unpackaged-package-name-collision/string/bad.rbi start=4:3 end=6:6}
         argument <blk><block> @ Loc {file=test/testdata/packager/unpackaged-package-name-collision/string/bad.rbi start=??? end=???}
   class <S <M <C <U Consumer>> $1> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/packager/unpackaged-package-name-collision/string/bad.rb start=12:9 end=12:19}
     type-member(+) <S <M <C <U Consumer>> $1> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <M <C <U Consumer>> $1> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Consumer) @ Loc {file=test/testdata/packager/unpackaged-package-name-collision/string/bad.rb start=12:9 end=12:19}
@@ -59,6 +59,6 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> @ Loc {file=test/testdata/packager/unpackaged-package-name-collision/string/bad.rb start=??? end=???}
   class <S <M <C <U String>> $2> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/packager/unpackaged-package-name-collision/string/bad.rbi start=3:1 end=3:13}
     type-member(+) <S <M <C <U String>> $2> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <M <C <U String>> $2> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=String) @ Loc {file=test/testdata/packager/unpackaged-package-name-collision/string/bad.rbi start=3:1 end=3:13}
-    method <S <M <C <U String>> $2> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/unpackaged-package-name-collision/string/bad.rbi start=3:1 end=6:4}
+    method <S <M <C <U String>> $2> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/unpackaged-package-name-collision/string/bad.rbi start=3:1 end=7:4}
       argument <blk><block> @ Loc {file=test/testdata/packager/unpackaged-package-name-collision/string/bad.rbi start=??? end=???}
 
