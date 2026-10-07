@@ -11,7 +11,7 @@
 # silently binds `Baz` to the prelude's `::Baz`. Assert the monolithic behavior that directed mode should match.
 module Opus::Foo
   module Bar
-    X = Baz # error: `Opus::Foo::Baz` resolves but is not imported
+    X = Baz # error: `Opus::Foo::Baz` is not imported
     T.reveal_type(X) # error: Revealed type: `T.untyped`
   end
 end
