@@ -1,0 +1,13 @@
+diff --git a/m4/internal/gnulib/config-darwin.h b/m4/internal/gnulib/config-darwin.h
+--- a/m4/internal/gnulib/config-darwin.h
++++ b/m4/internal/gnulib/config-darwin.h
+@@ -178,2 +178,9 @@
++/* ARM64 Darwin uses binary64 long double, not Intel's extended format.
++   Remove this override when the overlay supplies target-correct config. */
++#if defined(__aarch64__)
++#define LDBL_EXPBIT0_BIT DBL_EXPBIT0_BIT
++#define LDBL_EXPBIT0_WORD DBL_EXPBIT0_WORD
++#else
+ #define LDBL_EXPBIT0_BIT 0
+ #define LDBL_EXPBIT0_WORD 2
++#endif

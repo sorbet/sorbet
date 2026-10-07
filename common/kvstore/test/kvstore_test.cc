@@ -104,7 +104,8 @@ TEST_CASE("kvstore") {
 
     SUBCASE("CannotCreateTwoKvstores") {
         auto kvstore1 = make_unique<KeyValueStore>(logger, "1", directory, "vanilla", maxSize);
-        CHECK_THROWS_AS(make_unique<KeyValueStore>(logger, "1", directory, "vanilla", maxSize), std::invalid_argument);
+        CHECK_THROWS_AS((void)make_unique<KeyValueStore>(logger, "1", directory, "vanilla", maxSize),
+                        std::invalid_argument);
     }
 
     SUBCASE("LeavesNoStaleTransactions") {

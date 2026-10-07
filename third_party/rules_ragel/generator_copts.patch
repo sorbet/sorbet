@@ -1,0 +1,16 @@
+diff --git a/ragel/internal/overlay/ragel_v6.BUILD b/ragel/internal/overlay/ragel_v6.BUILD
+--- a/ragel/internal/overlay/ragel_v6.BUILD
++++ b/ragel/internal/overlay/ragel_v6.BUILD
+@@ -17,6 +17,12 @@
+         "ragel/*.cpp",
+         "ragel/*.h",
+     ]),
++    copts = [
++        # AAPL containers relocate non-trivially copyable objects with memmove.
++        "-Wno-nontrivial-memcall",
++        # Apple's SDK deprecates sprintf used throughout this generator.
++        "-Wno-deprecated-declarations",
++    ],
+     visibility = ["//bin:__pkg__"],
+     deps = [
+         ":aapl",

@@ -48,22 +48,27 @@ compatibility_proxy_repo()
 
 load("@toolchains_llvm//toolchain:rules.bzl", "llvm_toolchain")
 
+# The LLVM 22 ARM64 macOS archive has no x86_64 compiler-rt slice. Bundled
+# LLD ignored it in Intel cross-link probes; int128 helpers resolved via libSystem.
+# Keep driver defaults (not -nodefaultlibs, which also removes sanitizer
+# runtimes). Recheck the archive and older-macOS coverage on future upgrades.
 llvm_toolchain(
-    name = "llvm_toolchain_15_0_7",
+    name = "llvm_toolchain_22_1_3",
     absolute_paths = True,
     alternative_llvm_sources = [
         "https://github.com/sorbet/llvm-project/releases/download/llvmorg-{llvm_version}/{basename}",
     ],
-    llvm_version = "15.0.7",
-    # The sysroots are needed for cross-compiling
-    sysroot = {
-        "": "",
-        "darwin-x86_64": "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
-        "darwin-aarch64": "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+    # TODO(jez) Switch back to LLVM 22's lld once this is fixed:
+    # https://github.com/llvm/llvm-project/issues/224309
+    # "auto" uses xcrun to find ld on macOS; Linux keeps using the bundled lld.
+    linker = {
+        "darwin-aarch64": "auto",
+        "darwin-x86_64": "auto",
     },
+    llvm_version = "22.1.3",
 )
 
-load("@llvm_toolchain_15_0_7//:toolchains.bzl", "llvm_register_toolchains")
+load("@llvm_toolchain_22_1_3//:toolchains.bzl", "llvm_register_toolchains")
 
 llvm_register_toolchains()
 
@@ -71,9 +76,20 @@ load("@emsdk//:deps.bzl", emsdk_deps = "deps")
 
 emsdk_deps()
 
+load("@rules_python//python:repositories.bzl", "py_repositories", "python_register_toolchains")
+
+py_repositories()
+
+# Register Python's execution toolchain for emsdk's upstream interpreter lookup.
+python_register_toolchains(
+    name = "emscripten_python",
+    ignore_root_user_error = True,
+    python_version = "3.11.10",
+)
+
 load("@emsdk//:emscripten_deps.bzl", emsdk_emscripten_deps = "emscripten_deps")
 
-emsdk_emscripten_deps(emscripten_version = "3.1.59")
+emsdk_emscripten_deps(emscripten_version = "4.0.23")
 
 load("@emsdk//:toolchains.bzl", "register_emscripten_toolchains")
 
@@ -91,14 +107,30 @@ ragel_register_toolchains()
 
 load("@rules_m4//m4:m4.bzl", "m4_register_toolchains")
 
-m4_register_toolchains()
+m4_register_toolchains(
+    extra_copts = [
+        # M4 1.4.18 and its bundled gnulib trigger the SDK's sprintf
+        # deprecation warning. Revisit when upgrading M4/gnulib.
+        "-Wno-deprecated-declarations",
+        # M4 1.4.18 marks a void fault_handler as pure. Clang ignores the
+        # invalid attribute; revisit this suppression on an M4 upgrade.
+        "-Wno-ignored-attributes",
+    ],
+)
 
 load("@rules_bison//bison:bison.bzl", "bison_register_toolchains")
 
 bison_register_toolchains(
-    # Clang 12+ introduced this flag. All versions of Bison at time of writing
-    # (up to 3.7.6) include code flagged by this warning.
-    extra_copts = ["-Wno-implicit-const-int-float-conversion"],
+    extra_copts = [
+        # Bundled gnulib formatting code triggers the macOS SDK's sprintf
+        # deprecation warning. Revisit when upgrading Bison's gnulib.
+        "-Wno-deprecated-declarations",
+        # Bison 3.3.2's bundled gnulib triggers this warning; remove for 3.8.2.
+        "-Wno-implicit-const-int-float-conversion",
+        # Bison 3.3.2's generated parse-gram.c sets gram_nerrs without using
+        # it. Revisit this suppression when upgrading the generator.
+        "-Wno-unused-but-set-variable",
+    ],
 )
 
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")

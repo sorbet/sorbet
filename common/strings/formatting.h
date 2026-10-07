@@ -1,6 +1,12 @@
 #ifndef SORBET_COMMON_FORMATTING_HPP
 #define SORBET_COMMON_FORMATTING_HPP
 
+#include <algorithm>
+#include <functional>
+#include <iterator>
+#include <string_view>
+#include <type_traits>
+
 #include "spdlog/fmt/fmt.h"
 
 namespace fmt {

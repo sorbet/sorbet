@@ -125,7 +125,7 @@ private:
                                     bool showRaw = false) const;
 
 public:
-    ClassOrModuleRef() : _id(0){};
+    ClassOrModuleRef() : _id(0) {};
     ClassOrModuleRef(const GlobalState &from, uint32_t id);
 
     uint32_t id() const {
@@ -207,7 +207,7 @@ private:
                                     bool showRaw = false) const;
 
 public:
-    MethodRef() : _id(0){};
+    MethodRef() : _id(0) {};
     MethodRef(const GlobalState &from, uint32_t id);
 
     uint32_t id() const {
@@ -257,7 +257,7 @@ private:
                                     bool showRaw = false) const;
 
 public:
-    FieldRef() : _id(0){};
+    FieldRef() : _id(0) {};
     FieldRef(const GlobalState &from, uint32_t id);
 
     uint32_t id() const {
@@ -301,7 +301,7 @@ private:
                                     bool showRaw = false) const;
 
 public:
-    TypeMemberRef() : _id(0){};
+    TypeMemberRef() : _id(0) {};
     TypeMemberRef(const GlobalState &from, uint32_t id);
 
     uint32_t id() const {
@@ -345,7 +345,7 @@ private:
                                     bool showRaw = false) const;
 
 public:
-    TypeParameterRef() : _id(0){};
+    TypeParameterRef() : _id(0) {};
     TypeParameterRef(const GlobalState &from, uint32_t id);
 
     uint32_t id() const {
@@ -478,7 +478,7 @@ public:
     SymbolRef(FieldRef kls);
     SymbolRef(TypeMemberRef kls);
     SymbolRef(TypeParameterRef kls);
-    SymbolRef() : _id(0){};
+    SymbolRef() : _id(0) {};
 
     // From experimentation, in the common case, methods typically have 2 or fewer arguments.
     // Placed here so it can be used across packages for common case optimizations.

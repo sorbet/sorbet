@@ -41,10 +41,10 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "spdlog",
-        url = "https://github.com/gabime/spdlog/archive/f355b3d58f7067eee1706ff3c801c2361011f3d5.zip",  # v1.15.1
-        sha256 = "320359060d04ed85c95450961c198fbe56642050cabed33d59e1449232508038",
+        url = "https://github.com/gabime/spdlog/archive/refs/tags/v1.16.0.tar.gz",
+        sha256 = "8741753e488a78dd0d0024c980e1fb5b5c85888447e309d9cb9d949bdb52aa3e",
         build_file = "@com_stripe_ruby_typer//third_party:spdlog.BUILD",
-        strip_prefix = "spdlog-f355b3d58f7067eee1706ff3c801c2361011f3d5",
+        strip_prefix = "spdlog-1.16.0",
     )
 
     # We don't use this directly, but protobuf will skip defining its own
@@ -185,14 +185,14 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "rules_cc",
-        sha256 = "a2fdfde2ab9b2176bd6a33afca14458039023edb1dd2e73e6823810809df4027",
-        strip_prefix = "rules_cc-0.2.14",
-        urls = ["https://github.com/bazelbuild/rules_cc/archive/refs/tags/0.2.14.tar.gz"],
+        sha256 = "bd7124a844d0403b4b353bcea34d6c8b2ba88dc26881c26c9ee668da89b71846",
+        strip_prefix = "rules_cc-0.2.25",
+        urls = ["https://github.com/bazelbuild/rules_cc/releases/download/0.2.25/rules_cc-0.2.25.tar.gz"],
     )
 
-    # TODO(jez) We keep our changes on the `sorbet` branch of `sorbet/bazel-toolchain`
-    # The `master` branch is the commit of `bazel-contrib/toolchains_llvm` that we're based on
-    # In 2ddd7d791 (#7912) we upgraded the toolchain. Our old toolchain patches are on the `sorbet-old-toolchain` branch
+    # Based on bazel-contrib/toolchains_llvm at e79f0a3, with Sorbet changes
+    # on the sorbet branch of sorbet/bazel-toolchain.
+    # https://github.com/bazel-contrib/toolchains_llvm/compare/master...sorbet:bazel-toolchain:sorbet
     #
     # You can use this version of `toolchains_llvm` when tinkering locally. You'll want to run `bazel clean --expunge`
     # to ensure that your changes get picked up between builds.
@@ -202,9 +202,9 @@ def register_sorbet_dependencies():
     # )
     http_archive(
         name = "toolchains_llvm",
-        url = "https://github.com/sorbet/bazel-toolchain/archive/3f912e338d79ea29ad35f20321f24d551d7d89ad.tar.gz",
-        sha256 = "4c998dc3f3b0c7b31a66aa4e262191b94da93cf31698eb6ac5a751267afbe26a",
-        strip_prefix = "bazel-toolchain-3f912e338d79ea29ad35f20321f24d551d7d89ad",
+        sha256 = "90a16fc6803d6e31f9102e54130cf33ca1afd2a3f353dabf5fd13545604ed4f6",
+        strip_prefix = "bazel-toolchain-6cf46852a16a075c8e57b601e5580f2d2a7f817a",
+        urls = ["https://github.com/sorbet/bazel-toolchain/archive/6cf46852a16a075c8e57b601e5580f2d2a7f817a.tar.gz"],
     )
 
     http_archive(
@@ -265,9 +265,33 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "emsdk",
-        sha256 = "47515d522229a103b7d9f34eacc1d88ac355b22fd754d13417a2191fd9d77d5f",
-        strip_prefix = "emsdk-3.1.59/bazel",
-        url = "https://github.com/emscripten-core/emsdk/archive/3.1.59.tar.gz",
+        # 4.0.6 is the last release with WORKSPACE support. Backport only
+        # upstream's 4.0.23 binary catalogue entry to keep that integration.
+        # Unpatched 4.0.6 uses Clang 21 and fails the Wasm build because it
+        # rejects -Wno-gcc-install-dir-libstdcxx under -Werror. Since newer
+        # binaries require a catalogue patch anyway, use 4.0.23's LLVM 22.
+        # 4.0.23 is not established as the minimum working version. Remove
+        # this patch when moving to Bzlmod and a matching upstream emsdk,
+        # or update its catalogue entry when changing the binary version.
+        sha256 = "2d3292d508b4f5477f490b080b38a34aaefed43e85258a1de72cb8dde3f8f3af",
+        strip_prefix = "emsdk-4.0.6/bazel",
+        url = "https://github.com/emscripten-core/emsdk/archive/4.0.6.tar.gz",
+        patches = [
+            "@com_stripe_ruby_typer//third_party:emsdk/emscripten_4_0_23.patch",
+            # Backport https://github.com/emscripten-core/emsdk/pull/1676 to
+            # the WORKSPACE-compatible layout: use the Python exec toolchain
+            # instead of Apple's Python 3.9.6 (4.0.23 requires 3.10+).
+            # Remove when adopting the newer upstream Bazel integration.
+            "@com_stripe_ruby_typer//third_party:emsdk/hermetic_python.patch",
+        ],
+        patch_args = ["-p1"],
+    )
+
+    http_archive(
+        name = "rules_python",
+        sha256 = "690e0141724abb568267e003c7b6d9a54925df40c275a870a4d934161dc9dd53",
+        strip_prefix = "rules_python-0.40.0",
+        urls = ["https://github.com/bazelbuild/rules_python/releases/download/0.40.0/rules_python-0.40.0.tar.gz"],
     )
 
     http_archive(
@@ -275,6 +299,11 @@ def register_sorbet_dependencies():
         url = "https://github.com/jmillikin/rules_ragel/archive/f99f17fcad2e155646745f4827ac636a3b5d4d15.zip",
         sha256 = "f957682c6350b2e4484c433c7f45d427a86de5c8751a0d2a9836f36995fe0320",
         strip_prefix = "rules_ragel-f99f17fcad2e155646745f4827ac636a3b5d4d15",
+        # Ragel 6.11 still triggers the memmove diagnostic. Ragel 7.1.0's
+        # void* casts avoid it without changing relocation semantics; revisit
+        # the suppression if upgrading, with separate codegen validation.
+        patches = ["@com_stripe_ruby_typer//third_party:rules_ragel/generator_copts.patch"],
+        patch_args = ["-p1"],
     )
 
     http_archive(
@@ -288,6 +317,10 @@ def register_sorbet_dependencies():
         name = "rules_m4",
         url = "https://github.com/jmillikin/rules_m4/releases/download/v0.2.1/rules_m4-v0.2.1.tar.xz",
         sha256 = "f59f75ac8a315d7647a2d058d324a87ff9ebbc4bf5c7a61b08d58da119a7fb43",
+        # The pinned overlay assumes Intel's long-double layout on Darwin.
+        # Remove when rules_m4 supplies ARM64-aware gnulib configuration.
+        patches = ["@com_stripe_ruby_typer//third_party:rules_m4/darwin_long_double.patch"],
+        patch_args = ["-p1"],
     )
 
     http_archive(
@@ -300,8 +333,8 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "bazel_skylib",
-        sha256 = "cd55a062e763b9349921f0f5db8c3933288dc8ba4f76dd9416aac68acee3cb94",
-        url = "https://github.com/bazelbuild/bazel-skylib/releases/download/1.5.0/bazel-skylib-1.5.0.tar.gz",
+        sha256 = "37cdfbc6faefea94f7b37760a305c98c08981116c2bc9e821e3b423221fad8c8",
+        url = "https://github.com/bazelbuild/bazel-skylib/releases/download/1.9.2/bazel-skylib-1.9.2.tar.gz",
     )
 
     http_archive(

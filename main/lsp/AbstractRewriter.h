@@ -22,7 +22,7 @@ public:
     };
 
     AbstractRewriter(const core::GlobalState &gs, const sorbet::realmain::lsp::LSPConfiguration &config)
-        : gs(gs), config(config), invalid(false){};
+        : gs(gs), config(config), invalid(false) {};
 
     virtual ~AbstractRewriter() = default;
     virtual void rename(std::unique_ptr<core::lsp::QueryResponse> &response) = 0;

@@ -9,7 +9,7 @@ namespace sorbet::core {
 using namespace std;
 
 ErrorQueue::ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer, shared_ptr<ErrorFlusher> errorFlusher)
-    : errorFlusher(errorFlusher), owner(this_thread::get_id()), logger(logger), tracer(tracer){};
+    : errorFlusher(errorFlusher), owner(this_thread::get_id()), logger(logger), tracer(tracer) {};
 
 void ErrorQueue::collectAllInternal() {
     core::ErrorQueueMessage msg;

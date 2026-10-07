@@ -78,7 +78,7 @@ class DangerousTypecheckerTask : public LSPTypecheckerCoordinator::Task {
 public:
     DangerousTypecheckerTask(const LSPConfiguration &config, unique_ptr<LSPDangerousTypecheckerTask> task,
                              LSPTypechecker &typechecker, WorkerPool &workers)
-        : config(config), task(move(task)), typechecker(typechecker), workers(workers){};
+        : config(config), task(move(task)), typechecker(typechecker), workers(workers) {};
 
     void run() override {
         Timer timeit(*config.logger, "LSPDangerousTypecheckerTask::runSpecial");
