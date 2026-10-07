@@ -49,7 +49,7 @@ compatibility_proxy_repo()
 load("@toolchains_llvm//toolchain:rules.bzl", "llvm_toolchain")
 
 # The LLVM 22 ARM64 macOS archive has no x86_64 compiler-rt slice. Bundled
-# LLD warns on Intel cross-links; tested int128 helpers resolve via libSystem.
+# LLD ignored it in Intel cross-link probes; int128 helpers resolved via libSystem.
 # Keep driver defaults (not -nodefaultlibs, which also removes sanitizer
 # runtimes). Recheck the archive and older-macOS coverage on future upgrades.
 llvm_toolchain(
@@ -58,6 +58,13 @@ llvm_toolchain(
     alternative_llvm_sources = [
         "https://github.com/sorbet/llvm-project/releases/download/llvmorg-{llvm_version}/{basename}",
     ],
+    # TODO(jez) Switch back to LLVM 22's lld once this is fixed:
+    # https://github.com/llvm/llvm-project/issues/224309
+    # "auto" uses xcrun to find ld on macOS; Linux keeps using the bundled lld.
+    linker = {
+        "darwin-aarch64": "auto",
+        "darwin-x86_64": "auto",
+    },
     llvm_version = "22.1.3",
 )
 
