@@ -97,6 +97,10 @@ void JSON::fileToJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer> &writer, 
         }
     }
 
+    // Source size in bytes, including for payload files and inline input.
+    writer.Key("source_size");
+    writer.Uint64(data.sourceSize());
+
     writer.EndObject();
 }
 
