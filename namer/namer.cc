@@ -896,19 +896,11 @@ class SymbolDefiner {
         core::NameRef name;
     };
 
-    struct NamespaceError final {
-        core::LocOffsets expressionLoc;
-        core::LocOffsets nameLoc;
-        bool withinExplicitRootScope;
-        ClassNamespaceDecision decision;
-    };
-
 public:
     struct State {
         // See getOwnerSymbol for how definition references map to these symbols.
         vector<core::ClassOrModuleRef> definedClasses;
         UnorderedMap<core::ClassOrModuleRef, SourceNamespace> sourceNamespaces;
-        vector<NamespaceError> namespaceErrors;
 
         State() = default;
         State(const State &) = delete;
@@ -927,7 +919,6 @@ private:
 
     // Diagnostic context is separate from the metadata on isolated recovery symbols.
     UnorderedMap<core::ClassOrModuleRef, SourceNamespace> sourceNamespaces;
-    vector<NamespaceError> namespaceErrors;
 
     // Get the symbol for an already-defined owner. Limited to refs that can own things (classes and methods).
     core::ClassOrModuleRef getOwnerSymbol(const SymbolDefiner::State &state, core::FoundDefinitionRef ref) {
@@ -1483,7 +1474,7 @@ private:
             if (package != nullptr) {
                 decision = classifyClassNamespace(ctx, owner, klass);
                 if (decision->hasError) {
-                    namespaceErrors.push_back({klass.loc, klass.declLoc, klass.withinExplicitRootScope, *decision});
+                    reportNamespaceError(ctx, klass.declLoc, klass.withinExplicitRootScope, *decision);
                 }
             }
             auto shouldMangle = decision.has_value() && decision->shouldMangle;
@@ -1836,10 +1827,9 @@ private:
             auto exempt = package->isPreludePackage() && staticField.withinExplicitRootScope;
             auto hasError = !exempt && (!onPackagePath || (mustUseTestNamespace && !sourceNamespace.inTestNamespace));
             if (hasError) {
-                namespaceErrors.push_back({staticField.asgnLoc,
-                                           namespaceNameLoc.value_or(staticField.lhsLoc),
-                                           staticField.withinExplicitRootScope,
-                                           {sourceNamespace, onPackagePath, exempt, hasError, hasError, scope, name}});
+                reportNamespaceError(ctx, namespaceNameLoc.value_or(staticField.lhsLoc),
+                                     staticField.withinExplicitRootScope,
+                                     {sourceNamespace, onPackagePath, exempt, hasError, hasError, scope, name});
             }
             // Invalid class owners already isolate their constants. Qualified assignments can reset
             // to a packaged owner, so isolate those independently.
@@ -2210,13 +2200,11 @@ public:
         }
 
         state.sourceNamespaces = move(sourceNamespaces);
-        state.namespaceErrors = move(namespaceErrors);
         return state;
     }
 
     void enterNewDefinitions(core::MutableContext ctx, SymbolDefiner::State &&state) {
         sourceNamespaces = move(state.sourceNamespaces);
-        namespaceErrors = move(state.namespaceErrors);
         // We have to defer defining non-class constant symbols until this (second) phase of incremental
         // namer so that we don't delete and immediately re-enter a symbol (possibly keeping it
         // alive, if it had multiple locs at the time of deletion) before SymbolDefiner has had a
@@ -2242,18 +2230,6 @@ public:
                     ENFORCE(false, "Unexpected definition ref {}", core::FoundDefinitionRef::kindToString(ref.kind()));
                     break;
             }
-        }
-
-        // Definitions are entered by kind, not lexical order. Collect both kinds of namespace
-        // violation before emitting diagnostics in source order.
-        fast_sort(namespaceErrors, [](const auto &lhs, const auto &rhs) {
-            if (lhs.expressionLoc.beginPos() != rhs.expressionLoc.beginPos()) {
-                return lhs.expressionLoc.beginPos() < rhs.expressionLoc.beginPos();
-            }
-            return lhs.expressionLoc.endPos() > rhs.expressionLoc.endPos();
-        });
-        for (const auto &error : namespaceErrors) {
-            reportNamespaceError(ctx, error.nameLoc, error.withinExplicitRootScope, error.decision);
         }
 
         for (auto &method : foundDefs.methods()) {
