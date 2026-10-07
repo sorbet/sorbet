@@ -18,4 +18,22 @@ other/regexp_parser.rbi:9: File belongs to package `Other` but defines a constan
     other/__package.rb:3: Enclosing package declared here
      3 |class Other < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 3
+
+other/regexp_parser.rbi:9: Unable to resolve constant `Error` https://srb.help/5002
+     9 |class Regexp::ScannerError < Regexp::Parser::Error
+                                     ^^^^^^^^^^^^^^^^^^^^^
+  Did you mean `Errno`? Use `-a` to autocorrect
+    other/regexp_parser.rbi:9: Replace with `Errno`
+     9 |class Regexp::ScannerError < Regexp::Parser::Error
+                                     ^^^^^^^^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/errno.rbi#L46: `Errno` defined here
+    46 |module Errno
+        ^^^^^^^^^^^^
+  Did you mean `IOError`? Use `-a` to autocorrect
+    other/regexp_parser.rbi:9: Replace with `IOError`
+     9 |class Regexp::ScannerError < Regexp::Parser::Error
+                                     ^^^^^^^^^^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/errors.rbi#L161: `IOError` defined here
+     161 |class IOError < StandardError
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 4

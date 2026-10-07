@@ -24,6 +24,7 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> @ Loc {file=test/testdata/packager/prelude-qualified-assignment/consumer/use.rb start=??? end=???}
   module <C <U A>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/packager/prelude-qualified-assignment/a/definitions.rb start=5:1 end=5:4}
     static-field <C <U A>>::<C <U X>> -> String @ Loc {file=test/testdata/packager/prelude-qualified-assignment/a/definitions.rb start=5:1 end=5:7}
+    static-field <C <U A>>::<M <C <U X>> $1> -> Integer @ Loc {file=test/testdata/packager/prelude-qualified-assignment/a/definitions.rb start=3:1 end=3:5}
   class <S <C <U A>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/packager/prelude-qualified-assignment/a/definitions.rb start=5:1 end=5:4}
     type-member(+) <S <C <U A>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U A>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A) @ Loc {file=test/testdata/packager/prelude-qualified-assignment/a/definitions.rb start=5:1 end=5:4}
 

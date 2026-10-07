@@ -10,7 +10,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     ::Consumer::BAD = <cast:let>(1, <todo sym>, <emptyTree>::<C Integer>)
 
-    ::Consumer::BAD_NESTED = class ::Unrelated<<C Unrelated>> < (::<todo sym>)
+    ::Consumer::BAD_NESTED = class ::Unrelated<Unrelated$1> < (::<todo sym>)
       def self.inside_rhs(<blk>)
         <emptyTree>
       end

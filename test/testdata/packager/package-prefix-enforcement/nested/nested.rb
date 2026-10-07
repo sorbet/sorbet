@@ -39,7 +39,7 @@ module Root # error: Package `Root::Nested` may not open `Root`
     sig { void }
     def example
       NOT_IN_PACKAGE
-    # ^^^^^^^^^^^^^^ error: `Root` is not imported
+    # ^^^^^^^^^^^^^^ error: Unable to resolve constant `NOT_IN_PACKAGE`
     end
   end
 end

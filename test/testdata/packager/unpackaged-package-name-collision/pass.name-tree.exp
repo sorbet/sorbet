@@ -15,7 +15,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C String>.from_invalid_reopening()
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::String<<C String>> < (::<todo sym>)
+  class ::String<String$1> < (::<todo sym>)
     def self.from_invalid_reopening(<blk>)
       0
     end
@@ -30,7 +30,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::String<<C String>> < (::<todo sym>)
+  class ::String<String$2> < (::<todo sym>)
     class ::Consumer::FromRBI<<C FromRBI>> < (::<root>::<C Object>)
     end
   end

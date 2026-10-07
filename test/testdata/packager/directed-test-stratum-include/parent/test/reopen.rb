@@ -5,6 +5,7 @@
 
 class Parent::MyClass # error: Tests in the `Parent` package must define tests in the `Test::Parent` namespace
   include Parent::TestMixin
-  #       ^^^^^^^^^^^^^^^^^ error: `include` in a test file cannot modify a non-test class in the same package
-
+  #       ^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `TestMixin`
+  #       ^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `TestMixin`
+  #       ^^^^^^^^^^^^^^^^^ error: `include` may only be used on constants in the package that owns them
 end

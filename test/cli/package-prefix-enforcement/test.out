@@ -360,9 +360,9 @@ extend_sig.rb:3: Defining a root-scoped constant requires this package to be mar
 extend_sig.rb:4: `include` may only be used on constants in the package that owns them https://srb.help/5084
      4 |  include T::Sig
                   ^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#LCENSORED: Symbol originally defined here
-    NN |class Module < Object
-        ^^^^^^^^^^^^^^^^^^^^^
+    extend_sig.rb:3: Symbol originally defined here
+     3 |class ::Module
+        ^^^^^^^^^^^^^^
     __package.rb:3: Package defined here is not marked `prelude!`
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
