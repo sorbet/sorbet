@@ -154,7 +154,21 @@ private:
         // triggered in a child scope.
         bool runtimeResolutionPresent = false;
 
-        Nesting(shared_ptr<Nesting> parent, core::SymbolRef scope) : parent(std::move(parent)), scope(scope) {}
+        // Marked `true` when we open a scope that explicitly belongs to a different package.
+        // This is used during constant resolution to indicate that we need to consult the package hierarchy at the same
+        // point when resolving names, as there could be a package with the right name that hasn't been imported.
+        bool checkPackageRegistry = false;
+
+        Nesting(core::Context ctx, shared_ptr<Nesting> parent, core::SymbolRef scope)
+            : parent(std::move(parent)), scope(scope) {
+            if (ctx.state.packageDB().enabled()) {
+                auto curPkg = ctx.state.packageDB().getPackageNameForFile(ctx.file);
+                if (curPkg.exists() && scope.isClassOrModule()) {
+                    auto scopePkg = scope.asClassOrModuleRef().data(ctx)->package;
+                    this->checkPackageRegistry = scopePkg.exists() && curPkg != scopePkg;
+                }
+            }
+        }
     };
     CheckSize(Nesting, 24, 8);
 
@@ -317,6 +331,17 @@ private:
                         }
                     }
                 }
+
+                if (!lookup.exists() && scope->checkPackageRegistry) {
+                    auto packageRegistryScope = scope->scope.asClassOrModuleRef().data(ctx)->packageRegistryOwner;
+                    if (packageRegistryScope.exists()) {
+                        lookup = packageRegistryScope.data(ctx)->findMemberNoDealias(name);
+                        if (lookup.exists()) {
+                            return lookup;
+                        }
+                    }
+                }
+
                 if (lookup.exists()) {
                     return lookup;
                 }
@@ -1745,7 +1770,7 @@ public:
             }
         }
 
-        nesting_ = make_unique<Nesting>(std::move(nesting_), sym);
+        nesting_ = make_unique<Nesting>(ctx, move(nesting_), sym);
     }
 
     void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
