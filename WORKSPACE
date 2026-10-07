@@ -91,7 +91,13 @@ ragel_register_toolchains()
 
 load("@rules_m4//m4:m4.bzl", "m4_register_toolchains")
 
-m4_register_toolchains()
+m4_register_toolchains(
+    extra_copts = [
+        # M4 1.4.18 marks a void fault_handler as pure. Clang ignores the
+        # invalid attribute; revisit this suppression on an M4 upgrade.
+        "-Wno-ignored-attributes",
+    ],
+)
 
 load("@rules_bison//bison:bison.bzl", "bison_register_toolchains")
 
