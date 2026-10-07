@@ -167,7 +167,7 @@ build:release-sanitized-linux --define jemalloc=false
 build:release-sanitized-linux --config=release-debug-common
 
 build:release-sanitized-linux-aarch64 --copt=-O2
-build:release-sanitized-linux-aarch64 --config=sanitize-linux-aarch64
+build:release-sanitized-linux-aarch64 --config=sanitize-linux
 build:release-sanitized-linux-aarch64 --define jemalloc=false
 build:release-sanitized-linux-aarch64 --config=release-debug-common
 
@@ -260,19 +260,10 @@ build:ubsan --linkopt=-fsanitize=undefined --copt=-fno-sanitize-recover=undefine
 build:ubsan --define unsanitized=false
 build:ubsan --copt=-DHAS_SANITIZER
 
-# TODO(jez) It's not clear whether we still need these tricks to get sanitizers to work,
-# because we're using the toolchain's lld linker now.
-# We could consider replacing this with something more typical.
-# Original motivation: Bazel links C++ files with $CC, not $CXX, this breaks UBSan
-build:sanitize-linux --linkopt=../../external/llvm_toolchain_15_0_7_llvm/lib/clang/15.0.7/lib/x86_64-unknown-linux-gnu/libclang_rt.asan_cxx.a
-build:sanitize-linux --linkopt=../../external/llvm_toolchain_15_0_7_llvm/lib/clang/15.0.7/lib/x86_64-unknown-linux-gnu/libclang_rt.ubsan_standalone_cxx.a
-build:sanitize-linux --linkopt=../../external/llvm_toolchain_15_0_7_llvm/lib/clang/15.0.7/lib/x86_64-unknown-linux-gnu/libclang_rt.ubsan_standalone.a
+# Bazel links C++ targets with the C driver, so request C++ sanitizer runtimes.
+# Let Clang choose the archives: ASan already includes UBSan support.
+build:sanitize-linux --linkopt=-fsanitize-link-c++-runtime
 build:sanitize-linux --config=sanitize
-
-build:sanitize-linux-aarch64 --linkopt=../../external/llvm_toolchain_15_0_7_llvm/lib/clang/15.0.7/lib/aarch64-unknown-linux-gnu/libclang_rt.asan_cxx.a
-build:sanitize-linux-aarch64 --linkopt=../../external/llvm_toolchain_15_0_7_llvm/lib/clang/15.0.7/lib/aarch64-unknown-linux-gnu/libclang_rt.ubsan_standalone_cxx.a
-build:sanitize-linux-aarch64 --linkopt=../../external/llvm_toolchain_15_0_7_llvm/lib/clang/15.0.7/lib/aarch64-unknown-linux-gnu/libclang_rt.ubsan_standalone.a
-build:sanitize-linux-aarch64 --config=sanitize
 
 build:sanitize-mac --config=sanitize
 
