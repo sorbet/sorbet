@@ -337,7 +337,7 @@ private:
                     if (packageRegistryScope.exists()) {
                         lookup = packageRegistryScope.data(ctx)->findMemberNoDealias(name);
                         if (lookup.exists()) {
-                            return lookup;
+                            return core::SymbolRef();
                         }
                     }
                 }
