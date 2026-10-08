@@ -9,9 +9,78 @@
 #include "spdlog/spdlog.h"
 
 #include <array>
+#include <atomic>
 #include <filesystem>
+#include <unistd.h>
 
 namespace sorbet::common {
+
+namespace {
+
+class TemporaryDirectory final {
+public:
+    TemporaryDirectory() {
+        static std::atomic<unsigned int> nextId = 0;
+        const auto tempPath = std::filesystem::temp_directory_path();
+        for (;;) {
+            root = tempPath / ("sorbet-common-test-" + std::to_string(nextId.fetch_add(1)));
+            std::error_code error;
+            if (std::filesystem::create_directory(root, error)) {
+                return;
+            }
+            REQUIRE_FALSE(error);
+        }
+    }
+
+    ~TemporaryDirectory() {
+        std::error_code error;
+        std::filesystem::remove_all(root, error);
+    }
+
+    std::filesystem::path root;
+};
+
+void writeFile(const std::filesystem::path &path, std::string_view contents = "") {
+    std::filesystem::create_directories(path.parent_path());
+    FileOps::write(path.string(), contents);
+}
+
+std::vector<std::string> discoverFiles(const std::filesystem::path &root, int workerCount, bool recursive = true,
+                                       std::vector<std::string> absoluteIgnores = {},
+                                       std::vector<std::string> relativeIgnores = {}) {
+    auto logger = spdlog::default_logger();
+    auto workers = WorkerPool::create(workerCount, *logger);
+    return FileOps::listFilesInDir(root.string(), {".rb", ".rbi"}, *workers, recursive, absoluteIgnores,
+                                   relativeIgnores);
+}
+
+// Removes all permissions from a directory, restoring them on scope exit so TemporaryDirectory can clean up.
+class LockedDirectory final {
+public:
+    explicit LockedDirectory(std::filesystem::path path) : path(std::move(path)) {
+        std::filesystem::permissions(this->path, std::filesystem::perms::none);
+    }
+
+    ~LockedDirectory() {
+        std::error_code error;
+        std::filesystem::permissions(path, std::filesystem::perms::owner_all, error);
+    }
+
+private:
+    std::filesystem::path path;
+};
+
+void checkUnopenableDirectory(const std::filesystem::path &root, const std::filesystem::path &directory,
+                              int workerCount) {
+    try {
+        discoverFiles(root, workerCount);
+        FAIL("expected an unopenable directory to fail");
+    } catch (FileNotFoundException &e) {
+        CHECK_EQ(std::string(e.what()), fmt::format("Couldn't open directory `{}`", directory.string()));
+    }
+}
+
+} // namespace
 
 TEST_CASE("Levenstein") {
     Levenstein levenstein;
@@ -59,7 +128,7 @@ TEST_CASE("FileOps::listFilesInDir") {
             FileOps::listFilesInDir(root, {".rb"}, *workers, true, {}, {});
             FAIL("expected listFilesInDir to throw");
         } catch (FileNotFoundException &e) {
-            CHECK_EQ(std::string(e.what()), "Couldn't open directory `common_test_missing_dir`");
+            CHECK(std::string(e.what()).find(root) != std::string::npos);
         }
     }
 
@@ -71,6 +140,213 @@ TEST_CASE("FileOps::listFilesInDir") {
         CHECK_THROWS_AS(FileOps::listFilesInDir(root, {".rb"}, *workers, true, {}, {}), FileNotDirException);
 
         std::filesystem::remove_all(root);
+    }
+}
+
+TEST_CASE("FileOps follows nested directory symlinks and preserves symlink roots") {
+    TemporaryDirectory temp;
+    const auto root = temp.root / "project";
+    const auto external = temp.root / "external-rbi";
+    writeFile(root / "lib" / "local.rb");
+    writeFile(external / "nested" / "shared.rb");
+    writeFile(external / "nested" / "types.rbi");
+    writeFile(external / "nested" / "ignored.txt");
+    std::filesystem::create_directory_symlink(external, root / "lib" / "linked");
+
+    const std::vector<std::string> linkedFiles = {(root / "lib" / "linked" / "nested" / "shared.rb").string(),
+                                                  (root / "lib" / "linked" / "nested" / "types.rbi").string(),
+                                                  (root / "lib" / "local.rb").string()};
+    for (const int workerCount : {0, 4}) {
+        INFO("worker count: " << workerCount);
+        CHECK_EQ(discoverFiles(root, workerCount), linkedFiles);
+    }
+
+    const auto physicalRoot = temp.root / "physical-root";
+    const auto lexicalRoot = temp.root / "root-link";
+    writeFile(physicalRoot / "source.rbi");
+    std::filesystem::create_directory_symlink(physicalRoot, lexicalRoot);
+    const std::vector<std::string> lexicalRootFiles = {(lexicalRoot / "source.rbi").string()};
+    for (const int workerCount : {0, 4}) {
+        INFO("worker count: " << workerCount);
+        CHECK_EQ(discoverFiles(lexicalRoot, workerCount), lexicalRootFiles);
+    }
+}
+
+TEST_CASE("FileOps prunes ancestor cycles but preserves lexical aliases") {
+    TemporaryDirectory temp;
+    const auto root = temp.root / "project";
+    writeFile(root / "base.rb");
+    writeFile(root / "nested" / "inside.rb");
+    writeFile(root / "nested" / "deeper" / "deep.rb");
+    writeFile(root / "shared" / "shared.rb");
+    writeFile(root / "mutual" / "first" / "first.rb");
+    writeFile(root / "mutual" / "second" / "second.rb");
+
+    std::filesystem::create_directory_symlink(".", root / "self");
+    std::filesystem::create_directory_symlink("..", root / "nested" / "parent");
+    std::filesystem::create_directory_symlink("..", root / "nested" / "deeper" / "parent");
+    std::filesystem::create_directory_symlink(root, root / "nested" / "deeper" / "absolute-root");
+    std::filesystem::create_directory_symlink("../..", root / "nested" / "deeper" / "dotdot-root");
+    std::filesystem::create_directory_symlink("nested/../nested", root / "nested-alias");
+    std::filesystem::create_directory_symlink("shared", root / "alias-one");
+    std::filesystem::create_directory_symlink("shared", root / "alias-two");
+    std::filesystem::create_directory_symlink("../second", root / "mutual" / "first" / "to-second");
+    std::filesystem::create_directory_symlink("../first", root / "mutual" / "second" / "to-first");
+
+    const std::vector<std::string> expected = {
+        (root / "alias-one" / "shared.rb").string(),
+        (root / "alias-two" / "shared.rb").string(),
+        (root / "base.rb").string(),
+        (root / "mutual" / "first" / "first.rb").string(),
+        (root / "mutual" / "first" / "to-second" / "second.rb").string(),
+        (root / "mutual" / "second" / "second.rb").string(),
+        (root / "mutual" / "second" / "to-first" / "first.rb").string(),
+        (root / "nested-alias" / "deeper" / "deep.rb").string(),
+        (root / "nested-alias" / "inside.rb").string(),
+        (root / "nested" / "deeper" / "deep.rb").string(),
+        (root / "nested" / "inside.rb").string(),
+        (root / "shared" / "shared.rb").string(),
+    };
+    for (const int workerCount : {0, 4}) {
+        INFO("worker count: " << workerCount);
+        CHECK_EQ(discoverFiles(root, workerCount), expected);
+    }
+}
+
+TEST_CASE("FileOps applies ignores to lexical routes and keeps leaf symlinks non-recursively") {
+    TemporaryDirectory temp;
+    const auto root = temp.root / "project";
+    const auto external = temp.root / "external";
+    writeFile(root / "local.rb");
+    writeFile(root / "ignored" / "hidden.rb");
+    writeFile(root / "nested" / "nested.rb");
+    writeFile(external / "target.rb");
+    std::filesystem::create_directory_symlink(external, root / "links");
+    std::filesystem::create_symlink(external / "target.rb", root / "file-link.rb");
+    std::filesystem::create_symlink(root / "missing.rb", root / "dangling.rb");
+
+    const std::vector<std::string> withoutLinks = {
+        (root / "dangling.rb").string(), (root / "file-link.rb").string(), (root / "ignored" / "hidden.rb").string(),
+        (root / "local.rb").string(), (root / "nested" / "nested.rb").string()};
+    const std::vector<std::string> withLinkedTarget = {(root / "dangling.rb").string(),
+                                                       (root / "file-link.rb").string(),
+                                                       (root / "ignored" / "hidden.rb").string(),
+                                                       (root / "links" / "target.rb").string(),
+                                                       (root / "local.rb").string(),
+                                                       (root / "nested" / "nested.rb").string()};
+
+    for (const int workerCount : {0, 4}) {
+        INFO("worker count: " << workerCount);
+        CHECK_EQ(discoverFiles(root, workerCount, true, {"/links"}), withoutLinks);
+        CHECK_EQ(discoverFiles(root, workerCount, true, {}, {"/links"}), withoutLinks);
+        CHECK_EQ(discoverFiles(root, workerCount, true, {external.string()}), withLinkedTarget);
+        CHECK_EQ(discoverFiles(root, workerCount, false),
+                 std::vector<std::string>{(root / "dangling.rb").string(), (root / "file-link.rb").string(),
+                                          (root / "local.rb").string()});
+    }
+}
+
+TEST_CASE("FileOps classifies entries by target type and link name") {
+    TemporaryDirectory temp;
+    const auto root = temp.root / "project";
+    const auto external = temp.root / "external";
+    writeFile(root / "real.rb");
+    writeFile(root / "notes.txt");
+    writeFile(root / "package.rb" / "inside.rb");
+    writeFile(external / "linked.rb");
+    std::filesystem::create_directory_symlink(external, root / "directory-link.rb");
+    std::filesystem::create_directory_symlink("..", root / "package.rb" / "cycle.rb");
+    std::filesystem::create_symlink("real.rb", root / "text-link.txt");
+    std::filesystem::create_symlink("loop.rb", root / "loop.rb");
+
+    const std::vector<std::string> recursive = {(root / "directory-link.rb" / "linked.rb").string(),
+                                                (root / "package.rb" / "inside.rb").string(),
+                                                (root / "real.rb").string()};
+    for (const int workerCount : {0, 4}) {
+        INFO("worker count: " << workerCount);
+        CHECK_EQ(discoverFiles(root, workerCount), recursive);
+        CHECK_EQ(discoverFiles(root, workerCount, false), std::vector<std::string>{(root / "real.rb").string()});
+    }
+}
+
+TEST_CASE("FileOps skips nested ELOOP entries and preserves root errors") {
+    TemporaryDirectory temp;
+    const auto root = temp.root / "project";
+    writeFile(root / "before.rb");
+    std::filesystem::create_directory_symlink("b", root / "a");
+    std::filesystem::create_directory_symlink("a", root / "b");
+
+    const std::vector<std::string> expected = {(root / "before.rb").string()};
+    const auto missingRoot = temp.root / "missing";
+    const auto notDirectory = temp.root / "not-directory.rb";
+    writeFile(notDirectory);
+    for (const int workerCount : {0, 4}) {
+        INFO("worker count: " << workerCount);
+        CHECK_EQ(discoverFiles(root, workerCount), expected);
+
+        try {
+            discoverFiles(root / "a", workerCount);
+            FAIL("expected a symlink loop supplied as a root to fail");
+        } catch (FileNotFoundException &e) {
+            CHECK(std::string(e.what()).find((root / "a").string()) != std::string::npos);
+        }
+
+        try {
+            discoverFiles(missingRoot, workerCount);
+            FAIL("expected a missing root to fail");
+        } catch (FileNotFoundException &e) {
+            CHECK(std::string(e.what()).find(missingRoot.string()) != std::string::npos);
+        }
+        CHECK_THROWS_AS(discoverFiles(notDirectory, workerCount), FileNotDirException);
+    }
+}
+
+TEST_CASE("FileOps reports unopenable linked directories like real directories") {
+    if (geteuid() == 0) {
+        MESSAGE("skipping: permission checks do not apply to root");
+        return;
+    }
+
+    TemporaryDirectory temp;
+    // Each failing scenario gets its own root, since the first failure aborts the walk.
+    const auto realRoot = temp.root / "real";
+    const auto linkRoot = temp.root / "link";
+    const auto beneathRoot = temp.root / "beneath";
+    const auto fileRoot = temp.root / "file";
+    const auto locked = temp.root / "locked";
+    for (const auto &root : {realRoot, linkRoot, beneathRoot, fileRoot}) {
+        writeFile(root / "local.rb");
+    }
+    writeFile(realRoot / "unreadable" / "hidden.rb");
+    writeFile(locked / "inner" / "hidden.rb");
+    writeFile(locked / "file.rb");
+    std::filesystem::create_directory_symlink(realRoot / "unreadable", linkRoot / "unreadable-link");
+    std::filesystem::create_directory_symlink(locked / "inner", beneathRoot / "beneath-link");
+    std::filesystem::create_symlink(locked / "file.rb", fileRoot / "file-link.rb");
+
+    // Declared after `temp` so permissions are restored before it is removed.
+    LockedDirectory lockedUnreadable(realRoot / "unreadable");
+    LockedDirectory lockedParent(locked);
+
+    for (const int workerCount : {0, 4}) {
+        INFO("worker count: " << workerCount);
+        checkUnopenableDirectory(realRoot, realRoot / "unreadable", workerCount);
+        // The target can be stat'ed but not opened.
+        checkUnopenableDirectory(linkRoot, linkRoot / "unreadable-link", workerCount);
+        // The target can't even be stat'ed, because its parent is not searchable.
+        checkUnopenableDirectory(beneathRoot, beneathRoot / "beneath-link", workerCount);
+
+        // Like a real file, a link with an allowed name is listed without being read.
+        const std::vector<std::string> withFileLink = {(fileRoot / "file-link.rb").string(),
+                                                       (fileRoot / "local.rb").string()};
+        CHECK_EQ(discoverFiles(fileRoot, workerCount), withFileLink);
+        CHECK_EQ(discoverFiles(fileRoot, workerCount, false), withFileLink);
+
+        // Ignoring the link's lexical route avoids touching it.
+        const std::vector<std::string> linkLocal = {(linkRoot / "local.rb").string()};
+        CHECK_EQ(discoverFiles(linkRoot, workerCount, true, {"/unreadable-link"}), linkLocal);
+        const std::vector<std::string> beneathLocal = {(beneathRoot / "local.rb").string()};
+        CHECK_EQ(discoverFiles(beneathRoot, workerCount, true, {}, {"/beneath-link"}), beneathLocal);
     }
 }
 

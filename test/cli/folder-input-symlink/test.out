@@ -2,68 +2,53 @@
 {
  "files": [
   {
-   "path": "./bar.rb",
+   "path": "./consumer.rb",
+   "sigil": "True",
+   "strict": "True",
+   "min_error_level": "Max",
+   "source_size": 51
+  },
+  {
+   "path": "./file-link.rb",
    "strict": "False",
    "min_error_level": "Max",
    "source_size": 0
   },
   {
-   "path": "./foo.rb",
+   "path": "./local.rb",
    "strict": "False",
    "min_error_level": "Max",
    "source_size": 0
+  },
+  {
+   "path": "./references/lib/file-link.rb",
+   "strict": "False",
+   "min_error_level": "Max",
+   "source_size": 0
+  },
+  {
+   "path": "./references/lib/nested.rb",
+   "strict": "False",
+   "min_error_level": "Max",
+   "source_size": 0
+  },
+  {
+   "path": "./references/shared.rbi",
+   "sigil": "True",
+   "strict": "True",
+   "min_error_level": "Max",
+   "source_size": 102
   }
  ]
 }
 ------------------------------------------------------------------------
-{
- "files": [
-  {
-   "path": "./bar.rb",
-   "strict": "False",
-   "min_error_level": "Max",
-   "source_size": 0
-  },
-  {
-   "path": "./foo.rb",
-   "strict": "False",
-   "min_error_level": "Max",
-   "source_size": 0
-  },
-  {
-   "path": "./references/bar.rb",
-   "strict": "False",
-   "min_error_level": "Max",
-   "source_size": 0
-  },
-  {
-   "path": "./references/lib/baz.rb",
-   "strict": "False",
-   "min_error_level": "Max",
-   "source_size": 0
-  }
- ]
-}
+No errors! Great job.
 ------------------------------------------------------------------------
-{
- "files": [
-  {
-   "path": "./bar.rb",
-   "strict": "False",
-   "min_error_level": "Max",
-   "source_size": 0
-  },
-  {
-   "path": "./foo.rb",
-   "strict": "False",
-   "min_error_level": "Max",
-   "source_size": 0
-  },
-  {
-   "path": "./references/lib/baz.rb",
-   "strict": "False",
-   "min_error_level": "Max",
-   "source_size": 0
-  }
- ]
-}
+consumer.rb:2: Argument does not have asserted type `String` https://srb.help/7007
+     2 |T.let(SharedFromRBI.answer, String)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `Integer` originating from:
+    consumer.rb:2:
+     2 |T.let(SharedFromRBI.answer, String)
+              ^^^^^^^^^^^^^^^^^^^^
+Errors: 1

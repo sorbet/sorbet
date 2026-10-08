@@ -62,6 +62,12 @@ instead of this, which will **not** work in LSP mode:
 
 Using `--ignore` flags like this is imperfect and will not always work, but it's the best current workaround. For more, see [Including and excluding files](cli.md#including-and-excluding-files).
 
+## Directory symlinks
+
+Startup discovery follows nested directory symlinks, including links to targets outside the workspace. Sorbet keeps each file's lexical path through the link. For example, a file reached as `rbi/shared/types.rbi` uses the URI for that path under the workspace; a URI for the external target is not an alias for it. Directory cycles are pruned, while separate logical aliases remain distinct paths.
+
+[Watchman does not follow symlinks](https://facebook.github.io/watchman/), so startup discovery does not create watches for external targets. Editor changes sent for the logical URI are handled through LSP, but external on-disk edits, file creation or deletion, and symlink retargeting are not guaranteed to update the linked path automatically. Restart Sorbet to reliably rediscover those changes; an event reported for the physical target path must not be assumed to refresh the logical URI.
+
 ## Using Sorbet as a language server
 
 With the [Prerequisites](#prerequisites) out of the way, simply add the `--lsp` flag to however you invoke Sorbet right now. Some examples:

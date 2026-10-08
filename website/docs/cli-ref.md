@@ -40,13 +40,14 @@ Usage:
                                 "")
       --file <path>             Run over the contents of <path>
                                 (Equivalent to passing <path> as a positional argument)
-      --dir <path>              Run over all Ruby and RBI files in <path>, recursively
-                                (Equivalent to passing <path> as a positional argument)
+      --dir <path>              Run over all Ruby and RBI files in <path>, recursively,
+                                following nested directory symlinks.
       --allowed-extension <ext>[,<ext>...]
                                 Use these extensions to determine which file types Sorbet
                                 should discover inside directories. (default: .rb,.rbi)
       --ignore <pattern>        Ignores input files that contain <pattern> in their paths
-                                (relative to the input path passed to Sorbet).
+                                (relative to the input path passed to Sorbet). For symlinked
+                                directories, patterns match the lexical route, not the target.
                                 When <pattern> starts with `/` it matches against the
                                 prefix of these relative paths; others match anywhere.
                                 Matches must be against whole path segments, so `foo`
