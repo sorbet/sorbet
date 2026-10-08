@@ -1,11 +1,11 @@
-nested/nested.rb:3: File belongs to package `Root::Nested` but defines a constant that does not match this namespace https://srb.help/3713
+nested/nested.rb:3: File belongs to package `Root::Nested` but defines a constant that does not match this namespace https://srb.help/4031
      3 |module Wrong
         ^^^^^^^^^^^^
     nested/__package.rb:3: Enclosing package declared here
      3 |class Root::Nested < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-nested/nested.rb:53: File belongs to package `Root::Nested` but defines a constant that does not match this namespace https://srb.help/3713
+nested/nested.rb:53: File belongs to package `Root::Nested` but defines a constant that does not match this namespace https://srb.help/4031
     53 |module Root::ModNotInPackage
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     nested/__package.rb:3: Enclosing package declared here
@@ -15,7 +15,7 @@ nested/nested.rb:53: File belongs to package `Root::Nested` but defines a consta
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
 
-nested/nested.rb:56: File belongs to package `Root::Nested` but defines a constant that does not match this namespace https://srb.help/3713
+nested/nested.rb:56: File belongs to package `Root::Nested` but defines a constant that does not match this namespace https://srb.help/4031
     56 |class Root::ClassNotInPackage
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     nested/__package.rb:3: Enclosing package declared here
@@ -25,7 +25,7 @@ nested/nested.rb:56: File belongs to package `Root::Nested` but defines a consta
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
 
-nested/nested.rb:59: Defining a root-scoped constant requires this package to be marked `prelude!` https://srb.help/3713
+nested/nested.rb:59: Defining a root-scoped constant requires this package to be marked `prelude!` https://srb.help/4031
     59 |module ::TopLevel
         ^^^^^^^^^^^^^^^^^
     nested/__package.rb:3: This package is missing a `prelude!` declaration
@@ -34,7 +34,7 @@ nested/nested.rb:59: Defining a root-scoped constant requires this package to be
   Note:
     Root-scoped constants are exempt from package namespace checks only in `prelude!` packages
 
-nested/nested.rb:37: File belongs to package `Root::Nested` but defines a constant that does not match this namespace https://srb.help/3713
+nested/nested.rb:37: File belongs to package `Root::Nested` but defines a constant that does not match this namespace https://srb.help/4031
     37 |  NOT_IN_PACKAGE = T.let(1, Integer)
           ^^^^^^^^^^^^^^
     nested/__package.rb:3: Enclosing package declared here
@@ -44,7 +44,7 @@ nested/nested.rb:37: File belongs to package `Root::Nested` but defines a consta
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
 
-nested/nested.rb:67: File belongs to package `Root::Nested` but defines a constant that does not match this namespace https://srb.help/3713
+nested/nested.rb:67: File belongs to package `Root::Nested` but defines a constant that does not match this namespace https://srb.help/4031
     67 |Root::X = 1
         ^^^^^^^
     nested/__package.rb:3: Enclosing package declared here
@@ -229,14 +229,14 @@ nested/nested.rb:61: Method `void` does not exist on `T.class_of(TopLevel::Foo)`
       NN |  def load(filename, arg0=T.unsafe(nil)); end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-nested/nested.test.rb:14: Tests in the `Root::Nested` package must define tests in the `Test::Root::Nested` namespace https://srb.help/3713
+nested/nested.test.rb:14: Tests in the `Root::Nested` package must define tests in the `Test::Root::Nested` namespace https://srb.help/4031
     14 |module Root::Nested::ShouldBeInTestPrefix
                ^^^^
     nested/__package.rb:3: Enclosing package declared here
      3 |class Root::Nested < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-nested/nested.test.rb:7: Tests in the `Root::Nested` package must define tests in the `Test::Root::Nested` namespace https://srb.help/3713
+nested/nested.test.rb:7: Tests in the `Root::Nested` package must define tests in the `Test::Root::Nested` namespace https://srb.help/4031
      7 |  NOT_IN_MODULE = nil
           ^^^^^^^^^^^^^
     nested/__package.rb:3: Enclosing package declared here
@@ -246,7 +246,7 @@ nested/nested.test.rb:7: Tests in the `Root::Nested` package must define tests i
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
 
-nested/nested.test.rb:17: Tests in the `Root::Nested` package must define tests in the `Test::Root::Nested` namespace https://srb.help/3713
+nested/nested.test.rb:17: Tests in the `Root::Nested` package must define tests in the `Test::Root::Nested` namespace https://srb.help/4031
     17 |Test::Root::X = 1
         ^^^^^^^^^^^^^
     nested/__package.rb:3: Enclosing package declared here
@@ -292,7 +292,7 @@ nested/nested.test.rb:6: Package `Root::Nested` may not open `Test::Root` https:
      3 |class Root::Nested < PackageSpec
                                         ^
 
-nested/root_scoped_missing_test_namespace.test.rb:5: Defining a root-scoped constant requires this package to be marked `prelude!` https://srb.help/3713
+nested/root_scoped_missing_test_namespace.test.rb:5: Defining a root-scoped constant requires this package to be marked `prelude!` https://srb.help/4031
      5 |class ::Root::Nested::MissingTestNamespace
               ^^^^^^
     nested/__package.rb:3: This package is missing a `prelude!` declaration
@@ -301,28 +301,28 @@ nested/root_scoped_missing_test_namespace.test.rb:5: Defining a root-scoped cons
   Note:
     Root-scoped constants are exempt from package namespace checks only in `prelude!` packages
 
-critic_prefix/real.test.rb:3: Tests in the `Critic::SomePkg` package must define tests in the `Test::Critic::SomePkg` namespace https://srb.help/3713
+critic_prefix/real.test.rb:3: Tests in the `Critic::SomePkg` package must define tests in the `Test::Critic::SomePkg` namespace https://srb.help/4031
      3 |module Critic::SomePkg::Real
                ^^^^^^
     critic_prefix/__package.rb:3: Enclosing package declared here
      3 |class Critic::SomePkg < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-critic_prefix/real.test.rb:7: Tests in the `Critic::SomePkg` package must define tests in the `Test::Critic::SomePkg` namespace https://srb.help/3713
+critic_prefix/real.test.rb:7: Tests in the `Critic::SomePkg` package must define tests in the `Test::Critic::SomePkg` namespace https://srb.help/4031
      7 |Critic::SomePkg::RealConst = 2
         ^^^^^^
     critic_prefix/__package.rb:3: Enclosing package declared here
      3 |class Critic::SomePkg < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-critic_prefix/real.test.rb:13: Tests in the `Critic::SomePkg` package must define tests in the `Test::Critic::SomePkg` namespace https://srb.help/3713
+critic_prefix/real.test.rb:13: Tests in the `Critic::SomePkg` package must define tests in the `Test::Critic::SomePkg` namespace https://srb.help/4031
     13 |SomeOtherNamespace::SomePkg::SomeConst = 4
         ^^^^^^^^^^^^^^^^^^
     critic_prefix/__package.rb:3: Enclosing package declared here
      3 |class Critic::SomePkg < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-commands/foo_command.rb:4: File belongs to package `Root::Commands::Foo` but defines a constant that does not match this namespace https://srb.help/3713
+commands/foo_command.rb:4: File belongs to package `Root::Commands::Foo` but defines a constant that does not match this namespace https://srb.help/4031
      4 |  class Baz::Ban; end
                 ^^^
     commands/__package.rb:3: Enclosing package declared here
@@ -348,7 +348,7 @@ commands/foo_command.rb:3: Package `Root::Commands::Foo` may not open `Root::Com
      3 |class Root::Commands::Foo < PackageSpec
                                                ^
 
-extend_sig.rb:3: Defining a root-scoped constant requires this package to be marked `prelude!` https://srb.help/3713
+extend_sig.rb:3: Defining a root-scoped constant requires this package to be marked `prelude!` https://srb.help/4031
      3 |class ::Module
         ^^^^^^^^^^^^^^
     __package.rb:3: This package is missing a `prelude!` declaration

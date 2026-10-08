@@ -43,7 +43,7 @@ consumer/test/use.rb:7: Unable to resolve constant `Migrated` https://srb.help/5
     NN |module BigMath
         ^^^^^^^^^^^^^^
 
-old_style/test/foo.test.rb:3: File belongs to package `OldStyle` but defines a constant that does not match this namespace https://srb.help/3713
+old_style/test/foo.test.rb:3: File belongs to package `OldStyle` but defines a constant that does not match this namespace https://srb.help/4031
      3 |module Test::OldStyle
         ^^^^^^^^^^^^^^^^^^^^^
     old_style/__package.rb:3: Enclosing package declared here
@@ -95,7 +95,7 @@ consumer/test/use.rb:7: Unable to resolve constant `Migrated` https://srb.help/5
     NN |module BigMath
         ^^^^^^^^^^^^^^
 
-old_style/test/foo.test.rb:3: File belongs to package `OldStyle` but defines a constant that does not match this namespace https://srb.help/3713
+old_style/test/foo.test.rb:3: File belongs to package `OldStyle` but defines a constant that does not match this namespace https://srb.help/4031
      3 |module Test::OldStyle
         ^^^^^^^^^^^^^^^^^^^^^
     old_style/__package.rb:3: Enclosing package declared here
