@@ -2,10 +2,23 @@
 #define SORBET_KEYVALUESTORE_H
 #include "absl/synchronization/mutex.h"
 #include "common/common.h"
+#include <stdexcept>
 #include <thread>
 namespace sorbet {
 
 class OwnedKeyValueStore;
+
+/**
+ * Thrown when writing a value into the database fails, for example because the database has
+ * reached its maximum size (MDB_MAP_FULL) or the disk is full.
+ *
+ * After this is thrown, the current write transaction is in an error state: further writes will
+ * fail, and the transaction cannot be committed. The only thing to do is abort it.
+ */
+class KeyValueStoreWriteFailed : public std::runtime_error {
+public:
+    KeyValueStoreWriteFailed(const std::string &message) : std::runtime_error(message) {}
+};
 
 struct KeyValueStoreValue {
     uint8_t *data;
@@ -88,8 +101,9 @@ public:
     /** Reads a string from the key value store. Lifetime of string is tied to the lifetime of the database. Returns an
      * empty string_view if the key does not exist. */
     std::optional<std::string_view> readString(std::string_view key) const;
+    /** can only be called from owning thread. Throws KeyValueStoreWriteFailed if the write fails. */
     void writeString(std::string_view key, std::string_view value);
-    /** can only be called from owning thread */
+    /** can only be called from owning thread. Throws KeyValueStoreWriteFailed if the write fails. */
     void write(std::string_view key, const std::vector<uint8_t> &value);
 
     /** Aborts all changes without writing them to disk. Returns an unowned kvstore that can be re-owned if more writes

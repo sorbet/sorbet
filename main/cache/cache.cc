@@ -109,10 +109,14 @@ bool retainGlobalState(core::GlobalState &gs, const unique_ptr<OwnedKeyValueStor
     return true;
 }
 
-bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, absl::Span<const ast::ParsedFile> parsedFiles,
+/**
+ * Throws KeyValueStoreWriteFailed if any write fails, but only after all the worker threads have
+ * finished (so that no worker is still using `parsedFiles` when this function returns).
+ */
+void cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, absl::Span<const ast::ParsedFile> parsedFiles,
                         const unique_ptr<OwnedKeyValueStore> &kvstore) {
     if (kvstore == nullptr) {
-        return false;
+        return;
     }
 
     Timer timeit(gs.tracer(), "pipeline::cacheTreesAndFiles");
@@ -161,21 +165,33 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, absl::
     });
 
     size_t written = 0;
+    optional<KeyValueStoreWriteFailed> writeFailed;
     {
         vector<pair<string, vector<uint8_t>>> threadResult;
         for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
              !result.done();
              result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
-            if (result.gotItem()) {
+            // After a failed write, the transaction can only be aborted, so there's no point in
+            // attempting more writes. Keep draining the queue until the workers are done.
+            if (result.gotItem() && !writeFailed.has_value()) {
                 for (auto &a : threadResult) {
-                    kvstore->write(move(a.first), move(a.second));
+                    try {
+                        kvstore->write(move(a.first), move(a.second));
+                    } catch (KeyValueStoreWriteFailed &e) {
+                        writeFailed = e;
+                        break;
+                    }
                     written++;
                 }
             }
         }
     }
+
+    if (writeFailed.has_value()) {
+        throw *writeFailed;
+    }
+
     prodCounterAdd("types.input.files.kvstore.write", written);
-    return written != 0;
 }
 
 } // namespace
@@ -201,9 +217,29 @@ unique_ptr<KeyValueStore> maybeCacheGlobalStateAndFiles(unique_ptr<KeyValueStore
         return kvstore;
     }
     auto ownedKvstore = make_unique<OwnedKeyValueStore>(move(kvstore));
-    auto cacheHasGlobalState = retainGlobalState(gs, ownedKvstore);
+    bool cacheHasGlobalState = false;
+    try {
+        cacheHasGlobalState = retainGlobalState(gs, ownedKvstore);
+        if (cacheHasGlobalState) {
+            cacheTreesAndFiles(gs, workers, indexed, ownedKvstore);
+        }
+    } catch (KeyValueStoreWriteFailed &e) {
+        // The cache is only an optimization, so failing to write to it should not stop Sorbet from
+        // reporting errors. The most likely cause is that the cache has grown larger than
+        // --max-cache-size-bytes, so the warning suggests how to recover.
+        //
+        // The write transaction is now in an error state and can only be aborted. Some of the
+        // writes might have already updated `gs` (e.g., its kvstoreUuid), so we stop using the
+        // cache entirely for the rest of this process, rather than risking any inconsistency.
+        prodCounterInc("cache.write_failed");
+        OwnedKeyValueStore::abort(move(ownedKvstore));
+        gs.tracer().warn("Failed to write to the cache, proceeding without it ({}). "
+                         "If the cache is full, delete the cache directory or pass a larger --max-cache-size-bytes.",
+                         e.what());
+        return nullptr;
+    }
+
     if (cacheHasGlobalState) {
-        cacheTreesAndFiles(gs, workers, indexed, ownedKvstore);
         auto sizeBytes = ownedKvstore->cacheSize();
         kvstore = OwnedKeyValueStore::bestEffortCommit(gs.tracer(), move(ownedKvstore));
         prodCounterInc("cache.committed");

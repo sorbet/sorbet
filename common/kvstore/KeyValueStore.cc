@@ -231,7 +231,10 @@ void OwnedKeyValueStore::writeInternal(string_view key, void *value, size_t len)
 
     int rc = mdb_put(txnState->txn, txnState->dbi, &kv, &dv, 0);
     if (rc != 0) {
-        throw_mdb_error("failed write into database"sv, rc, kvstorePath());
+        // Not using throw_mdb_error, because callers might want to handle this (e.g., by
+        // proceeding without writing to the cache).
+        throw KeyValueStoreWriteFailed(fmt::format("failed write into database: mdb_error=\"{}\" cache_path=\"{}\"",
+                                                   mdb_strerror(rc), kvstorePath()));
     }
 }
 
