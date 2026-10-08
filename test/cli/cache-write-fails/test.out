@@ -1,0 +1,40 @@
+==== global state too large for the cache ====
+Failed to write to the cache, proceeding without it (failed write into database: mdb_error="MDB_MAP_FULL: Environment mapsize limit reached" cache_path="cache"). If the cache is full, delete the cache directory or pass a larger --max-cache-size-bytes.
+error.rb:2: Argument does not have asserted type `String` https://srb.help/7007
+     2 |T.let(1, String)
+        ^^^^^^^^^^^^^^^^
+  Got `Integer(1)` originating from:
+    error.rb:2:
+     2 |T.let(1, String)
+              ^
+Errors: 1
+exit code: 100
+==== cache becomes full while writing trees ====
+error.rb:2: Argument does not have asserted type `String` https://srb.help/7007
+     2 |T.let(1, String)
+        ^^^^^^^^^^^^^^^^
+  Got `Integer(1)` originating from:
+    error.rb:2:
+     2 |T.let(1, String)
+              ^
+Errors: 1
+exit code: 100
+Failed to write to the cache, proceeding without it (failed write into database: mdb_error="MDB_MAP_FULL: Environment mapsize limit reached" cache_path="cache"). If the cache is full, delete the cache directory or pass a larger --max-cache-size-bytes.
+error.rb:2: Argument does not have asserted type `String` https://srb.help/7007
+     2 |T.let(1, String)
+        ^^^^^^^^^^^^^^^^
+  Got `Integer(1)` originating from:
+    error.rb:2:
+     2 |T.let(1, String)
+              ^
+Errors: 1
+exit code: 100
+error.rb:2: Argument does not have asserted type `String` https://srb.help/7007
+     2 |T.let(1, String)
+        ^^^^^^^^^^^^^^^^
+  Got `Integer(1)` originating from:
+    error.rb:2:
+     2 |T.let(1, String)
+              ^
+Errors: 1
+exit code: 100
