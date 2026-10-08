@@ -45,12 +45,11 @@ using AllFoundDefinitions = vector<pair<core::FileRef, unique_ptr<core::FoundDef
 
 using namespace core::packages;
 
-// [file, owner, originalName, withinExplicitRootScope] → owner::mangledName
-using MangledClasses =
-    UnorderedMap<tuple<core::FileRef, core::ClassOrModuleRef, core::NameRef, bool>, core::ClassOrModuleRef>;
-
-using MangledStaticFields =
-    UnorderedMap<tuple<core::FileRef, core::ClassOrModuleRef, core::NameRef, bool>, core::FieldRef>;
+// [file, owner, originalName, withinExplicitRootScope]
+using MangledSymbolKey = tuple<core::FileRef, core::ClassOrModuleRef, core::NameRef, bool>;
+// MangledSymbolKey → owner::mangledName
+using MangledClasses = UnorderedMap<MangledSymbolKey, core::ClassOrModuleRef>;
+using MangledStaticFields = UnorderedMap<MangledSymbolKey, core::FieldRef>;
 
 core::ClassOrModuleRef methodOwner(core::Context ctx, core::SymbolRef owner, bool isSelfMethod) {
     ENFORCE(owner.exists() && owner != core::Symbols::todo());
