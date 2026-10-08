@@ -759,4 +759,64 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "CachePopulationWithPackages") {
     }
 }
 
+TEST_CASE_FIXTURE(CacheProtocolTest, "SessionCacheWrittenByAnotherProcess") {
+    // We're re-initializing everything for sorbet-packages, so we have to release the initial cache.
+    this->lspWrapper = nullptr;
+
+    {
+        auto opts = make_shared<realmain::options::Options>();
+        opts->cacheSensitiveOptions.sorbetPackages = true;
+        resetState(opts);
+    }
+
+    auto relativeFilepath = "foo/__package.rb";
+    auto filePath = fmt::format("{}/{}", this->rootPath, relativeFilepath);
+    writeFilesToFS({{relativeFilepath, "# typed: strict\nclass Foo < PackageSpec\nend\n"}});
+    this->lspWrapper->opts->inputFileNames.emplace_back(filePath);
+
+    // Initialization creates a session copy of the cache.
+    assertErrorDiagnostics(initializeLSP(), {});
+
+    auto sessionPath = fmt::format("{}/{}{}", cacheDir, realmain::cache::SessionCache::SESSION_DIR_PREFIX, getpid());
+    REQUIRE(FileOps::dirExists(sessionPath));
+
+    // Simulate another Sorbet process (sharing the same `--cache-dir`) whose write ended up in our session copy. This
+    // can happen when that process was waiting on the cache's write lock, because `SessionCache::make` has to release
+    // the lock before copying. That process saw different file contents, which introduce names that this LSP process's
+    // GlobalState has never seen. We write directly into the session copy to make this deterministic.
+    auto updatedFileContents = "# typed: strict\nclass Zzyzxquux < PackageSpec\nend\n";
+    {
+        auto sink = make_shared<spdlog::sinks::null_sink_mt>();
+        auto logger = make_shared<spdlog::logger>("null", sink);
+        realmain::options::Options otherOpts;
+        otherOpts.cacheSensitiveOptions = this->lspWrapper->opts->cacheSensitiveOptions;
+        otherOpts.cacheDir = sessionPath;
+
+        unique_ptr<const OwnedKeyValueStore> kvstore = realmain::cache::maybeCreateKeyValueStore(logger, otherOpts);
+        REQUIRE_NE(kvstore, nullptr);
+        auto gs = make_unique<core::GlobalState>(make_shared<core::ErrorQueue>(*logger, *logger));
+        payload::createInitialGlobalState(*gs, otherOpts, kvstore);
+        realmain::pipeline::setGlobalStateOptions(*gs, otherOpts);
+
+        vector<core::FileRef> frefs;
+        {
+            core::UnfreezeFileTable fileTableAccess(*gs);
+            frefs.emplace_back(gs->enterFile(filePath, updatedFileContents));
+        }
+
+        auto workers = WorkerPool::create(0, *logger);
+        auto indexed = realmain::pipeline::index(*gs, absl::MakeSpan(frefs), otherOpts, *workers, kvstore);
+        REQUIRE(indexed.hasResult());
+        REQUIRE(gs->wasNameTableModified());
+
+        auto written = realmain::cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(std::move(kvstore)),
+                                                                      otherOpts, *gs, *workers, indexed.result());
+        REQUIRE_NE(written, nullptr);
+    }
+
+    // When the LSP process sees the same file contents, it must not use the other process's tree, because the names
+    // in that tree refer to the other process's name table.
+    assertErrorDiagnostics(send(*openFile(relativeFilepath, updatedFileContents)), {});
+}
+
 } // namespace sorbet::test::lsp
