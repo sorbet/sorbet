@@ -1650,7 +1650,7 @@ private:
         staticField.owner = typeMember.owner;
         staticField.name = typeMember.name;
         staticField.asgnLoc = typeMember.asgnLoc;
-        staticField.lhsLoc = typeMember.asgnLoc;
+        staticField.lhsLoc = typeMember.nameLoc;
         staticField.isTypeAlias = true;
         return insertStaticField(ctx, state, staticField);
     }
