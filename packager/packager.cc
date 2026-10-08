@@ -150,6 +150,8 @@ bool isRootScopedDefinition(const ast::ConstantLit *lit) {
 // Namespace definitions are checked by namer. This visitor checks behavior in package namespaces.
 class EnforcePackageBehavior final {
     const PackageInfo &pkg;
+    // Legacy test files must define behavior in Test::<package>; test-only packages use their
+    // package namespace directly, without an additional Test:: prefix.
     const bool mustUseTestNamespace;
 
     // By contrast with `Context::owner`, this `scope` field:
