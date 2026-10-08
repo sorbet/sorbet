@@ -1307,7 +1307,7 @@ PackageInfo::CanModifyResult PackageInfo::canModifySymbol(core::Context ctx, Cla
     // namespace, and if so that there aren't any subpackages, as that could introduce ordering dependencies that don't
     // work with package-directed type checking.
     if (symPackage == this->mangledName_) {
-        if (this->hasSubPackages && symData->isPackageNamespace()) {
+        if (this->hasSubPackages && symData->packageRegistryOwner.exists()) {
             return CanModifyResult::Subpackages;
         }
 
