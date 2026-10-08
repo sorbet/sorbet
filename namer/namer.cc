@@ -1378,10 +1378,7 @@ private:
 
         auto mustUseTestNamespace = !package->usesTestPackages && ctx.file.data(ctx).isPackagedTest() &&
                                     !package->file.data(ctx).isPackagedTest();
-        // Registry prefixes need not be packages themselves. Test deliberately skips a component.
-        const bool couldBePrefix = packageInfo.packageRegistryOwner.exists();
-        auto onPackagePath =
-            package->ownsNamespace(ctx, packageInfo.package, packageInfo.packageRegistryOwner, couldBePrefix);
+        auto onPackagePath = package->ownsNamespace(ctx, packageInfo.package, packageInfo.packageRegistryOwner);
         if (packageInfo.packageRegistryOwner == core::Symbols::PackageSpecRegistry() &&
             !(owner == core::Symbols::root() && klass.name == PackageDB::TEST_NAMESPACE)) {
             onPackagePath = false;
@@ -1414,14 +1411,14 @@ private:
         }
         shouldMangle &= !ownerInfo.isMangled;
         if (hasError) {
-            reportNamespaceError(ctx, klass.declLoc, klass.withinExplicitRootScope, packageInfo, onPackagePath,
+            reportNamespaceError(ctx, klass.declLoc, klass.withinExplicitRootScope, packageInfo.package, onPackagePath,
                                  nameOwner, name);
         }
         return shouldMangle;
     }
 
     void reportNamespaceError(core::MutableContext ctx, core::LocOffsets nameLoc, bool withinExplicitRootScope,
-                              core::GlobalState::ClassOrModulePackageInfo packageInfo, bool onPackagePath,
+                              core::packages::MangledName namespacePackage, bool onPackagePath,
                               core::ClassOrModuleRef nameOwner, core::NameRef name) {
         if (auto e = ctx.beginError(nameLoc, core::errors::Packager::DefinitionPackageMismatch)) {
             if (withinExplicitRootScope && !package->isPreludePackage()) {
@@ -1443,8 +1440,8 @@ private:
                             requiredName);
             }
             e.addErrorLine(package->declLoc(), "Enclosing package declared here");
-            if (!onPackagePath && packageInfo.package.exists()) {
-                auto &requiredPackage = ctx.state.packageDB().getPackageInfo(packageInfo.package);
+            if (!onPackagePath && namespacePackage.exists()) {
+                auto &requiredPackage = ctx.state.packageDB().getPackageInfo(namespacePackage);
                 if (requiredPackage.exists()) {
                     auto constantName = nameOwner == core::Symbols::root()
                                             ? name.show(ctx)
@@ -1827,7 +1824,8 @@ private:
             auto hasError = !exempt && (!onPackagePath || (mustUseTestNamespace && !inTestNamespace));
             if (hasError) {
                 reportNamespaceError(ctx, namespaceNameLoc.value_or(staticField.lhsLoc),
-                                     staticField.withinExplicitRootScope, packageInfo, onPackagePath, scope, name);
+                                     staticField.withinExplicitRootScope, packageInfo.package, onPackagePath, scope,
+                                     name);
             }
             // Invalid class owners already isolate their constants. Qualified assignments can reset
             // to a packaged owner, so isolate those independently.

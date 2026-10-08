@@ -1189,9 +1189,8 @@ ClassOrModuleRef GlobalState::enterClassOrModuleSymbol(Loc loc, ClassOrModuleRef
     return ret;
 }
 
-GlobalState::ClassOrModulePackageInfo
-GlobalState::packageInfoForClassOrModule(ClassOrModuleRef owner, NameRef name,
-                                         optional<ClassOrModulePackageInfo> ownerPackageInfo) const {
+GlobalState::ClassOrModulePackageInfo GlobalState::packageInfoForClassOrModule(ClassOrModuleRef owner,
+                                                                               NameRef name) const {
     if (!this->packageDB().enabled()) {
         // Note that this case also initializes `<PackageSpecRegistry>` itself as being not owned by
         // a package. We manually set it back to Symbols::PackageSpecRegistry() in `initEmpty` to
@@ -1207,15 +1206,12 @@ GlobalState::packageInfoForClassOrModule(ClassOrModuleRef owner, NameRef name,
         return {Symbols::PackageSpecRegistry(), packages::MangledName()};
     }
 
-    if (!ownerPackageInfo.has_value()) {
-        auto ownerData = owner.data(*this);
-        ownerPackageInfo = ClassOrModulePackageInfo{ownerData->packageRegistryOwner, ownerData->package};
-    }
-    auto ownerPackageRegistryOwner = ownerPackageInfo->packageRegistryOwner;
+    auto ownerData = owner.data(*this);
+    auto ownerPackageRegistryOwner = ownerData->packageRegistryOwner;
     if (!ownerPackageRegistryOwner.exists()) {
         // Our owner was already past the end of the PackageSpecRegistry namespace.
         // Propogate that we are too, and mark us as being owned by whatever package our owner was.
-        return {Symbols::noClassOrModule(), ownerPackageInfo->package};
+        return {Symbols::noClassOrModule(), ownerData->package};
     }
 
     auto registryName = name;
@@ -1234,7 +1230,7 @@ GlobalState::packageInfoForClassOrModule(ClassOrModuleRef owner, NameRef name,
                                     : Symbols::noClassOrModule();
 
     if (!packageRegistryOwner.exists()) {
-        return {packageRegistryOwner, ownerPackageInfo->package};
+        return {packageRegistryOwner, ownerData->package};
     }
 
     auto pkg = packages::MangledName(packageRegistryOwner);
@@ -1243,7 +1239,7 @@ GlobalState::packageInfoForClassOrModule(ClassOrModuleRef owner, NameRef name,
     } else {
         // We narrowed the packageRegistryOwner to an intermediate namespace (not an actual package),
         // so our package is still the same as the package of our owner.
-        return {packageRegistryOwner, ownerPackageInfo->package};
+        return {packageRegistryOwner, ownerData->package};
     }
 }
 

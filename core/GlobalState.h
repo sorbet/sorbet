@@ -456,9 +456,7 @@ public:
     };
 
     // Computes the package metadata that enterClassOrModuleSymbol will assign to a new symbol.
-    ClassOrModulePackageInfo
-    packageInfoForClassOrModule(ClassOrModuleRef owner, NameRef name,
-                                std::optional<ClassOrModulePackageInfo> ownerPackageInfo = std::nullopt) const;
+    ClassOrModulePackageInfo packageInfoForClassOrModule(ClassOrModuleRef owner, NameRef name) const;
 
     NameRef nextMangledName(ClassOrModuleRef owner, NameRef origName);
     void mangleRenameMethod(MethodRef what, NameRef origName);

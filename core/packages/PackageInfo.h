@@ -343,8 +343,8 @@ public:
 
     // Whether a constant with this package metadata is on this package's namespace path. Class and module symbols can
     // be prefixes of a package namespace; other constants must belong to the package exactly.
-    bool ownsNamespace(const core::GlobalState &gs, MangledName namespacePackage, ClassOrModuleRef packageRegistryOwner,
-                       bool couldBePrefix) const;
+    bool ownsNamespace(const core::GlobalState &gs, MangledName namespacePackage,
+                       ClassOrModuleRef packageRegistryOwner) const;
 
     enum class CanOpenScopeResult : uint8_t {
         // The scope is part of this package (this package owns the symbol),
