@@ -363,7 +363,12 @@ void appendFilesInDir(const string &basePath, const sorbet::UnorderedSet<string>
                 std::error_code ec;
                 for (auto &entry : filesystem::directory_iterator(path, ec)) {
                     string pathStr = entry.path();
-                    if (entry.is_directory()) {
+                    // The non-throwing overload, because `is_directory` follows symlinks, and stat fails for a
+                    // symlink loop (ELOOP) or a target we can't access (EACCES). Such an entry can't be listed, so
+                    // treat it like a dangling symlink: not a directory.
+                    std::error_code statEc;
+                    const bool isDirectory = entry.is_directory(statEc);
+                    if (isDirectory) {
                         if (!recursive || entry.is_symlink()) {
                             continue;
                         }
@@ -378,7 +383,7 @@ void appendFilesInDir(const string &basePath, const sorbet::UnorderedSet<string>
                         continue;
                     }
 
-                    if (entry.is_directory()) {
+                    if (isDirectory) {
                         ++pendingJobs;
                         jobq->push(entry.path(), 1);
                     } else {
