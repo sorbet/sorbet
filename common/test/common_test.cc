@@ -72,6 +72,22 @@ TEST_CASE("FileOps::listFilesInDir") {
 
         std::filesystem::remove_all(root);
     }
+
+    SUBCASE("a symlink loop is treated like a dangling symlink") {
+        const std::string root = "common_test_symlink_loop_dir";
+        std::filesystem::remove_all(root);
+        FileOps::ensureDir(root);
+        FileOps::write(root + "/a.rb", "");
+        std::filesystem::create_symlink("loop2", root + "/loop1");
+        std::filesystem::create_symlink("loop1", root + "/loop2");
+        std::filesystem::create_symlink("loop.rb", root + "/loop.rb");
+        std::filesystem::create_symlink("nonexistent.rb", root + "/dangling.rb");
+
+        auto files = FileOps::listFilesInDir(root, {".rb"}, *workers, true, {}, {});
+        CHECK_EQ(files, std::vector<std::string>{root + "/a.rb", root + "/dangling.rb", root + "/loop.rb"});
+
+        std::filesystem::remove_all(root);
+    }
 }
 
 TEST_SUITE("UIntSet") {
