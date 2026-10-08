@@ -1397,17 +1397,17 @@ private:
             onPackagePath = false;
         }
 
-        auto exempt = package->isPreludePackage() && klass.withinExplicitRootScope;
+        auto foreignNamespace =
+            packageInfo.packageRegistryOwner.exists() && packageInfo.package.exists() && !onPackagePath;
+        auto explicitRootPrelude = package->isPreludePackage() && klass.withinExplicitRootScope;
+        auto exempt = explicitRootPrelude && !foreignNamespace;
         auto hasError = !exempt && (!onPackagePath || (mustUseTestNamespace && !inTestNamespace));
         bool shouldMangle = hasError;
-        if (exempt) {
-            // Keep the conservative guard for explicit-root prelude reopenings of other packages.
-            // Tightening the corresponding enforcement policy is separate follow-up work.
-            shouldMangle = packageInfo.packageRegistryOwner.exists() && packageInfo.package.exists() && !onPackagePath;
-        }
         if (klass.classKind == core::FoundClass::Kind::Unknown) {
-            // Synthetic name components are references, not definitions diagnosed by this check.
-            hasError = false;
+            // Usually synthetic components are references, not definitions. Explicit-root preludes
+            // cannot enter a foreign package namespace, however: report that boundary before its
+            // isolation loses the ownership information needed to diagnose the final definition.
+            hasError &= explicitRootPrelude && foreignNamespace;
             auto mangled = mangledClasses.find({ctx.file, owner, klass.name, klass.withinExplicitRootScope});
             if (package->isPreludePackage() && mangled == mangledClasses.end() && existing.exists() &&
                 existing.isClassOrModule() && !packageInfo.package.exists() &&
@@ -1426,7 +1426,7 @@ private:
     void reportNamespaceError(core::MutableContext ctx, core::LocOffsets nameLoc, bool withinExplicitRootScope,
                               const ClassNamespaceDecision &decision) {
         if (auto e = ctx.beginError(nameLoc, core::errors::Packager::DefinitionPackageMismatch)) {
-            if (withinExplicitRootScope) {
+            if (withinExplicitRootScope && !package->isPreludePackage()) {
                 e.setHeader("Defining a root-scoped constant requires this package to be marked `{}`", "prelude!");
                 e.addErrorLine(package->declLoc(), "This package is missing a `{}` declaration", "prelude!");
                 e.addErrorNote("Root-scoped constants are exempt from package namespace checks only in `{}` packages",
@@ -1830,7 +1830,9 @@ private:
             }
             auto mustUseTestNamespace = !package->usesTestPackages && ctx.file.data(ctx).isPackagedTest() &&
                                         !package->file.data(ctx).isPackagedTest();
-            auto exempt = package->isPreludePackage() && staticField.withinExplicitRootScope;
+            auto foreignNamespace =
+                packageInfo.packageRegistryOwner.exists() && packageInfo.package.exists() && !onPackagePath;
+            auto exempt = package->isPreludePackage() && staticField.withinExplicitRootScope && !foreignNamespace;
             auto hasError = !exempt && (!onPackagePath || (mustUseTestNamespace && !inTestNamespace));
             if (hasError) {
                 reportNamespaceError(ctx, namespaceNameLoc.value_or(staticField.lhsLoc),

@@ -1,7 +1,7 @@
 # typed: strict
 
-# Reopening a foreign namespace is currently isolated without a diagnostic.
-module ::Owner
+# Explicit-root preludes cannot reopen another package's namespace.
+module ::Owner # error: File belongs to package `Prelude` but defines a constant that does not match this namespace
   class Nested; end
   VALUE = 1
 end
