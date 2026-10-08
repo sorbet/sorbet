@@ -532,7 +532,7 @@ PackageInfo::checkReferenceAgainstImports(core::Context ctx, core::LocOffsets er
 
     bool isTestImport = ctx.file.data(ctx).isPackagedTest();
     if (this->usesTestPackages) {
-        isTestImport = false;
+        isTestImport = this->testPackage();
     }
     core::packages::ImportType autocorrectedImportType = core::packages::ImportType::Normal;
     if (isTestImport) {
