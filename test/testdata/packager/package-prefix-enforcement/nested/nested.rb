@@ -9,7 +9,7 @@ Root::Nested::Foo::Bar = nil
 ::Allowed::TopLevel = nil # error: requires this package to be marked `prelude!`
 
   NotAllowed::Foo::Bar = nil
-# ^^^^^^^^^^^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
+# ^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
 
 module Root::Nested
 

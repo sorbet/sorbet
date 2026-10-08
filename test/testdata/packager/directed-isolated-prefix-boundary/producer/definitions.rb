@@ -1,7 +1,7 @@
 # typed: true
 
   class Other::Thing
-# ^^^^^^^^^^^^^^^^^^ error: File belongs to package `Producer` but defines a constant that does not match this namespace
+#       ^^^^^ error: File belongs to package `Producer` but defines a constant that does not match this namespace
     class Nested; end
     class << self
       class SingletonNested; end
@@ -11,12 +11,12 @@
   end
 
   class Missing::Thing
-# ^^^^^^^^^^^^^^^^^^^^ error: File belongs to package `Producer` but defines a constant that does not match this namespace
+#       ^^^^^^^ error: File belongs to package `Producer` but defines a constant that does not match this namespace
     class Nested; end
   end
 
   Other::VALUE = 1
-# ^^^^^^^^^^^^ error: File belongs to package `Producer` but defines a constant that does not match this namespace
+# ^^^^^ error: File belongs to package `Producer` but defines a constant that does not match this namespace
 
   module Producer::Valid
     class << self

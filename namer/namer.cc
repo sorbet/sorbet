@@ -1309,56 +1309,31 @@ private:
 
     struct NamespaceOwnerInfo final {
         bool isMangled;
-        bool hasRejectedDefinition;
         bool inTestNamespace;
     };
 
-    NamespaceOwnerInfo namespaceOwnerInfo(core::Context ctx, const State &state, core::FoundDefinitionRef owner) {
-        auto realOwner = core::Symbols::noClassOrModule();
-        for (auto ref = owner; ref.kind() == core::FoundDefinitionRef::Kind::Class; ref = ref.klass(foundDefs).owner) {
-            const auto &klass = ref.klass(foundDefs);
-            // Synthetic prefixes can be isolated before the actual definition is diagnosed.
-            if (klass.classKind != core::FoundClass::Kind::Unknown && klass.name != core::Names::singleton()) {
-                realOwner = getOwnerSymbol(state, ref);
-                break;
-            }
-        }
-        bool isMangled = false;
-        bool withinRealOwner = false;
+    NamespaceOwnerInfo namespaceOwnerInfo(core::Context ctx, core::ClassOrModuleRef owner) {
         bool inTestNamespace = false;
         auto rootTest = core::Symbols::root().data(ctx)->findMember(ctx, PackageDB::TEST_NAMESPACE);
-        for (auto symbol = getOwnerSymbol(state, owner); symbol != core::Symbols::root();
-             symbol = symbol.data(ctx)->owner) {
-            withinRealOwner |= symbol == realOwner;
+        for (auto symbol = owner.data(ctx)->topAttachedClass(ctx); symbol != core::Symbols::root();
+             symbol = symbol.data(ctx)->owner.data(ctx)->topAttachedClass(ctx)) {
             inTestNamespace |= core::SymbolRef(symbol) == rootTest;
             if (symbol.data(ctx)->name.hasUniqueNameKind(ctx, core::UniqueNameKind::MangleRename)) {
-                isMangled = true;
-                if (withinRealOwner) {
-                    return {true, true, inTestNamespace};
-                }
+                return {true, inTestNamespace};
             }
         }
-        // Singleton symbols belong to the enclosing namespace rather than their attached class,
-        // so the real definition owner may not have been on the symbol-owner chain above.
-        if (!withinRealOwner && realOwner.exists()) {
-            for (auto symbol = realOwner; symbol != core::Symbols::root(); symbol = symbol.data(ctx)->owner) {
-                if (symbol.data(ctx)->name.hasUniqueNameKind(ctx, core::UniqueNameKind::MangleRename)) {
-                    return {isMangled, true, inTestNamespace};
-                }
-            }
-        }
-        return {isMangled, false, inTestNamespace};
+        return {false, inTestNamespace};
     }
 
-    bool shouldMangleClassDefinition(core::MutableContext ctx, const State &state, core::ClassOrModuleRef owner,
+    bool shouldMangleClassDefinition(core::MutableContext ctx, core::ClassOrModuleRef owner,
                                      const core::FoundClass &klass) {
         if (this->package == nullptr) {
             return false;
         }
         // The owner already isolates these definitions. Scope resets have a different owner
         // and must still be checked independently.
-        auto ownerInfo = namespaceOwnerInfo(ctx, state, klass.owner);
-        if (ownerInfo.hasRejectedDefinition) {
+        auto ownerInfo = namespaceOwnerInfo(ctx, owner);
+        if (ownerInfo.isMangled) {
             return false;
         }
         auto packageInfo = ctx.state.packageInfoForClassOrModule(owner, klass.name);
@@ -1394,10 +1369,6 @@ private:
         auto hasError = !exempt && (!onPackagePath || (mustUseTestNamespace && !inTestNamespace));
         bool shouldMangle = hasError;
         if (klass.classKind == core::FoundClass::Kind::Unknown) {
-            // Usually synthetic components are references, not definitions. Explicit-root preludes
-            // cannot enter a foreign package namespace, however: report that boundary before its
-            // isolation loses the ownership information needed to diagnose the final definition.
-            hasError &= explicitRootPrelude && foreignNamespace;
             auto mangled = mangledClasses.find({ctx.file, owner, klass.name, klass.withinExplicitRootScope});
             if (package->isPreludePackage() && mangled == mangledClasses.end() && existing.exists() &&
                 existing.isClassOrModule() && !packageInfo.package.exists() &&
@@ -1408,8 +1379,10 @@ private:
                 klass.name == PackageDB::TEST_NAMESPACE) {
                 shouldMangle = false;
             }
+            // Diagnose the first isolated prefix before its ownership information is cleared.
+            // Valid synthetic references above remain exempt; descendants need no further checks.
+            hasError = shouldMangle;
         }
-        shouldMangle &= !ownerInfo.isMangled;
         if (hasError) {
             reportNamespaceError(ctx, klass.declLoc, klass.withinExplicitRootScope, packageInfo.package, onPackagePath,
                                  nameOwner, name);
@@ -1482,7 +1455,7 @@ private:
             auto owner = getOwnerSymbol(state, klass.owner);
             auto name = klass.name;
 
-            auto shouldMangle = shouldMangleClassDefinition(ctx, state, owner, klass);
+            auto shouldMangle = shouldMangleClassDefinition(ctx, owner, klass);
             if (!shouldMangle) {
                 // Aliases are entered by resolver--namer should be agnostic of them.
                 auto original = owner.data(ctx)->findMemberNoDealias(klass.name);
@@ -1805,10 +1778,9 @@ private:
             }
         }
         ensureNoPackageConflict(ctx, scope, name, staticField.lhsLoc);
-        auto ownerInfo = package != nullptr && name == staticField.name
-                             ? namespaceOwnerInfo(ctx, state, staticField.owner)
-                             : NamespaceOwnerInfo{};
-        if (package != nullptr && name == staticField.name && !ownerInfo.hasRejectedDefinition) {
+        auto ownerInfo =
+            package != nullptr && name == staticField.name ? namespaceOwnerInfo(ctx, scope) : NamespaceOwnerInfo{};
+        if (package != nullptr && name == staticField.name && !ownerInfo.isMangled) {
             auto data = scope.data(ctx);
             core::GlobalState::ClassOrModulePackageInfo packageInfo{data->packageRegistryOwner, data->package};
             bool inTestNamespace = ownerInfo.inTestNamespace;

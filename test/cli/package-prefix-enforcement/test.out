@@ -231,7 +231,7 @@ nested/nested.rb:61: Method `void` does not exist on `T.class_of(TopLevel::Foo)`
 
 nested/nested.test.rb:14: Tests in the `Root::Nested` package must define tests in the `Test::Root::Nested` namespace https://srb.help/3713
     14 |module Root::Nested::ShouldBeInTestPrefix
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+               ^^^^
     nested/__package.rb:3: Enclosing package declared here
      3 |class Root::Nested < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -294,7 +294,7 @@ nested/nested.test.rb:6: Package `Root::Nested` may not open `Test::Root` https:
 
 nested/root_scoped_missing_test_namespace.test.rb:5: Defining a root-scoped constant requires this package to be marked `prelude!` https://srb.help/3713
      5 |class ::Root::Nested::MissingTestNamespace
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+              ^^^^^^
     nested/__package.rb:3: This package is missing a `prelude!` declaration
      3 |class Root::Nested < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -303,31 +303,34 @@ nested/root_scoped_missing_test_namespace.test.rb:5: Defining a root-scoped cons
 
 critic_prefix/real.test.rb:3: Tests in the `Critic::SomePkg` package must define tests in the `Test::Critic::SomePkg` namespace https://srb.help/3713
      3 |module Critic::SomePkg::Real
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+               ^^^^^^
     critic_prefix/__package.rb:3: Enclosing package declared here
      3 |class Critic::SomePkg < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 critic_prefix/real.test.rb:7: Tests in the `Critic::SomePkg` package must define tests in the `Test::Critic::SomePkg` namespace https://srb.help/3713
      7 |Critic::SomePkg::RealConst = 2
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+        ^^^^^^
     critic_prefix/__package.rb:3: Enclosing package declared here
      3 |class Critic::SomePkg < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 critic_prefix/real.test.rb:13: Tests in the `Critic::SomePkg` package must define tests in the `Test::Critic::SomePkg` namespace https://srb.help/3713
     13 |SomeOtherNamespace::SomePkg::SomeConst = 4
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        ^^^^^^^^^^^^^^^^^^
     critic_prefix/__package.rb:3: Enclosing package declared here
      3 |class Critic::SomePkg < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 commands/foo_command.rb:4: File belongs to package `Root::Commands::Foo` but defines a constant that does not match this namespace https://srb.help/3713
      4 |  class Baz::Ban; end
-          ^^^^^^^^^^^^^^
+                ^^^
     commands/__package.rb:3: Enclosing package declared here
      3 |class Root::Commands::Foo < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    __package.rb:3: Must belong to this package, given constant name `Root::Commands::Baz`
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
 
 commands/foo_command.rb:3: Package `Root::Commands::Foo` may not open `Root::Commands` https://srb.help/5086
      3 |module Root::Commands
