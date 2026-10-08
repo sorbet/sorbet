@@ -942,6 +942,34 @@ TEST_CASE_FIXTURE(ProtocolTest, "DidChangeConfigurationNotificationUpdatesHighli
                              });
 }
 
+TEST_CASE_FIXTURE(ProtocolTest, "DidChangeConfigurationFollowedByCloseBeforeTypechecking") {
+    assertErrorDiagnostics(initializeLSP(), {});
+
+    assertErrorDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
+                                                    "class A\n"
+                                                    "  def foo; end\n"
+                                                    "end\n")),
+                           {});
+
+    auto settings = make_unique<SorbetInitializationOptions>();
+    settings->highlightUntyped = true;
+    auto config = make_unique<DidChangeConfigurationParams>(move(settings));
+
+    // Send both messages in the same batch, so that the preprocessor handles the `didClose`
+    // (removing `foo.rb` from its set of open files) before the typechecker runs the
+    // `didChangeConfiguration` task, which captured the set of open files when it was preprocessed.
+    vector<unique_ptr<LSPMessage>> messages;
+    messages.push_back(makeConfigurationChange(move(config)));
+    messages.push_back(closeFile("foo.rb"));
+    send(move(messages));
+
+    assertErrorDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
+                                                    "class A\n"
+                                                    "  def foo; end\n"
+                                                    "end\n")),
+                           {});
+}
+
 TEST_CASE_FIXTURE(ProtocolTest, "OverloadedStdlibSymbolWithMonkeyPatches") {
     const bool supportsMarkdown = false;
     const bool supportsCodeActionResolve = true;
