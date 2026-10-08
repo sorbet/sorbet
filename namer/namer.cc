@@ -1755,8 +1755,7 @@ private:
     }
 
     core::FieldRef insertStaticField(core::MutableContext ctx, const State &state,
-                                     const core::FoundStaticField &staticField,
-                                     optional<core::LocOffsets> namespaceNameLoc = nullopt) {
+                                     const core::FoundStaticField &staticField) {
         ENFORCE(ctx.owner.isClassOrModule());
 
         auto scope = getOwnerSymbol(state, staticField.owner);
@@ -1795,9 +1794,8 @@ private:
             auto exempt = package->isPreludePackage() && staticField.withinExplicitRootScope && !foreignNamespace;
             auto hasError = !exempt && (!onPackagePath || (mustUseTestNamespace && !inTestNamespace));
             if (hasError) {
-                reportNamespaceError(ctx, namespaceNameLoc.value_or(staticField.lhsLoc),
-                                     staticField.withinExplicitRootScope, packageInfo.package, onPackagePath, scope,
-                                     name);
+                reportNamespaceError(ctx, staticField.lhsLoc, staticField.withinExplicitRootScope, packageInfo.package,
+                                     onPackagePath, scope, name);
             }
             // Invalid class owners already isolate their constants. Qualified assignments can reset
             // to a packaged owner, so isolate those independently.
@@ -1850,7 +1848,7 @@ private:
         staticField.asgnLoc = typeMember.asgnLoc;
         staticField.lhsLoc = typeMember.nameLoc;
         staticField.isTypeAlias = true;
-        return insertStaticField(ctx, state, staticField, typeMember.nameLoc);
+        return insertStaticField(ctx, state, staticField);
     }
 
     core::SymbolRef insertTypeMember(core::MutableContext ctx, const State &state,
