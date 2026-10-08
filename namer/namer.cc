@@ -1797,6 +1797,18 @@ private:
         auto scope = getOwnerSymbol(state, staticField.owner);
         auto name = staticField.name;
 
+        // Package-aware mangling, to avoid entering symbols which belong to other packages
+        auto shouldMangle = shouldMangleStaticFieldDefinition(ctx, scope, staticField);
+        if (shouldMangle) {
+            auto previous = packageMangledStaticFields.find(
+                {ctx.file, scope, staticField.name, staticField.withinExplicitRootScope});
+            if (previous != packageMangledStaticFields.end()) {
+                name = previous->second.data(ctx)->name;
+            } else {
+                name = packageMangledName(ctx, scope, staticField.name, PackageMangledKind::StaticField);
+            }
+        }
+
         auto sym = ctx.state.lookupStaticFieldSymbol(scope, name);
         auto currSym = ctx.state.lookupSymbol(scope, name);
         if (!sym.exists() && currSym.exists()) {
@@ -1807,22 +1819,12 @@ private:
         if (sym.exists()) {
             ENFORCE(currSym.exists());
             name = sym.data(ctx)->name;
-            if (name.hasUniqueNameKind(ctx, core::UniqueNameKind::MangleRename)) {
+            if (!shouldMangle && name.hasUniqueNameKind(ctx, core::UniqueNameKind::MangleRename)) {
                 ENFORCE(currSym != sym);
                 emitRedefinedConstantError(ctx, staticField.asgnLoc, sym, currSym);
             }
         }
         ensureNoPackageConflict(ctx, scope, name, staticField.lhsLoc);
-        auto shouldMangle = name == staticField.name && shouldMangleStaticFieldDefinition(ctx, scope, staticField);
-        if (shouldMangle) {
-            auto previous = packageMangledStaticFields.find(
-                {ctx.file, scope, staticField.name, staticField.withinExplicitRootScope});
-            if (previous != packageMangledStaticFields.end()) {
-                name = previous->second.data(ctx)->name;
-            } else {
-                name = packageMangledName(ctx, scope, staticField.name, PackageMangledKind::StaticField);
-            }
-        }
         sym = ctx.state.enterStaticFieldSymbol(ctx.locAt(staticField.lhsLoc), scope, name);
         if (shouldMangle) {
             packageMangledStaticFields[{ctx.file, scope, staticField.name, staticField.withinExplicitRootScope}] = sym;
