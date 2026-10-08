@@ -5,7 +5,8 @@
    "path": "test/cli/file-table-json/file-table-json.rb",
    "sigil": "True",
    "strict": "True",
-   "min_error_level": "Max"
+   "min_error_level": "Max",
+   "source_size": 17
   }
  ]
 }
@@ -16,7 +17,8 @@
    "path": "test/cli/file-table-json/file-table-json.rb",
    "sigil": "True",
    "strict": "True",
-   "min_error_level": "Max"
+   "min_error_level": "Max",
+   "source_size": 17
   }
  ]
 }
@@ -27,67 +29,78 @@
    "path": "https://github.com/sorbet/sorbet/tree/master/rbi/core/argf.rbi",
    "sigil": "Stdlib",
    "strict": "Stdlib",
-   "min_error_level": "Max"
+   "min_error_level": "Max",
+   "source_size": 28590
   },
   {
    "path": "https://github.com/sorbet/sorbet/tree/master/rbi/core/array.rbi",
    "sigil": "Stdlib",
    "strict": "Stdlib",
-   "min_error_level": "Max"
+   "min_error_level": "Max",
+   "source_size": 95314
   },
   {
    "path": "https://github.com/sorbet/sorbet/tree/master/rbi/core/basic_object.rbi",
    "sigil": "Stdlib",
    "strict": "Stdlib",
-   "min_error_level": "Max"
+   "min_error_level": "Max",
+   "source_size": 11679
   },
   {
    "path": "https://github.com/sorbet/sorbet/tree/master/rbi/core/binding.rbi",
    "sigil": "Stdlib",
    "strict": "Stdlib",
-   "min_error_level": "Max"
+   "min_error_level": "Max",
+   "source_size": 6163
   },
   {
    "path": "https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi",
    "sigil": "Stdlib",
    "strict": "Stdlib",
-   "min_error_level": "Max"
+   "min_error_level": "Max",
+   "source_size": 7180
   },
   {
    "path": "https://github.com/sorbet/sorbet/tree/master/rbi/core/comparable.rbi",
    "sigil": "Stdlib",
    "strict": "Stdlib",
-   "min_error_level": "Max"
+   "min_error_level": "Max",
+   "source_size": 4145
   },
   {
    "path": "https://github.com/sorbet/sorbet/tree/master/rbi/core/complex.rbi",
    "sigil": "Stdlib",
    "strict": "Stdlib",
-   "min_error_level": "Max"
+   "min_error_level": "Max",
+   "source_size": 14721
   },
   {
    "path": "https://github.com/sorbet/sorbet/tree/master/rbi/core/constants.rbi",
    "sigil": "Stdlib",
    "strict": "Stdlib",
-   "min_error_level": "Max"
+   "min_error_level": "Max",
+   "source_size": 1969
   },
   {
    "path": "https://github.com/sorbet/sorbet/tree/master/rbi/core/data.rbi",
    "sigil": "Stdlib",
    "strict": "Stdlib",
-   "min_error_level": "Max"
+   "min_error_level": "Max",
+   "source_size": 14693
   },
   {
    "path": "https://github.com/sorbet/sorbet/tree/master/rbi/core/dir.rbi",
    "sigil": "Stdlib",
    "strict": "Stdlib",
-   "min_error_level": "Max"
+   "min_error_level": "Max",
+   "source_size": 17543
   },
   {
    "path": "test/cli/file-table-json/file-table-json.rb",
    "sigil": "True",
    "strict": "True",
-   "min_error_level": "Max"
+   "min_error_level": "Max",
+   "source_size": 17
   }
  ]
 }
@@ -98,7 +111,8 @@
    "path": "test/cli/file-table-json/file-table-json.rb",
    "sigil": "True",
    "strict": "True",
-   "min_error_level": "Max"
+   "min_error_level": "Max",
+   "source_size": 17
   }
  ]
 }

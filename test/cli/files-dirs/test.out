@@ -8,7 +8,8 @@
   {
    "path": "foo.rb",
    "strict": "False",
-   "min_error_level": "Max"
+   "min_error_level": "Max",
+   "source_size": 0
   }
  ]
 }
@@ -59,7 +60,8 @@ Usage:
   {
    "path": "./foo.rb",
    "strict": "False",
-   "min_error_level": "Max"
+   "min_error_level": "Max",
+   "source_size": 0
   }
  ]
 }
@@ -70,7 +72,8 @@ Note: --dir and -e are meant to be additive
   {
    "path": "./foo.rb",
    "strict": "False",
-   "min_error_level": "Max"
+   "min_error_level": "Max",
+   "source_size": 0
   }
  ]
 }
