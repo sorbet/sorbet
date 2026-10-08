@@ -187,7 +187,6 @@ class SymbolFinder {
 
     core::FoundDefinitionRef defineScope(core::FoundDefinitionRef owner, const ast::ExpressionPtr &node,
                                          bool withinExplicitRootScope) {
-        withinExplicitRootScope = withinExplicitRootScope || isExplicitlyRootScoped(node);
         if (auto id = ast::cast_tree<ast::ConstantLit>(node)) {
             // Already defined. Insert a foundname so we can reference it.
             auto sym = id->symbol();
@@ -632,8 +631,8 @@ public:
         auto &lhs = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(asgn.lhs);
 
         core::FoundStaticField found;
-        found.owner = defineScope(getOwner(), lhs.scope, currentOwnerWithinExplicitRootScope());
         found.withinExplicitRootScope = currentOwnerWithinExplicitRootScope() || isExplicitlyRootScoped(asgn.lhs);
+        found.owner = defineScope(getOwner(), lhs.scope, found.withinExplicitRootScope);
         found.name = lhs.cnst;
         found.asgnLoc = asgn.loc;
         found.lhsLoc = lhs.loc;
@@ -1318,44 +1317,62 @@ private:
         }
     }
 
-    bool isMangledNamespace(core::Context ctx, core::ClassOrModuleRef owner) {
-        for (; owner != core::Symbols::root(); owner = owner.data(ctx)->owner) {
-            if (owner.data(ctx)->name.hasUniqueNameKind(ctx, core::UniqueNameKind::MangleRename)) {
-                return true;
-            }
-        }
-        return false;
-    }
+    struct NamespaceOwnerInfo final {
+        bool isMangled;
+        bool hasRejectedDefinition;
+        bool inTestNamespace;
+    };
 
-    bool hasRejectedNamespaceOwner(core::Context ctx, const State &state, core::FoundDefinitionRef owner) {
-        while (owner.kind() == core::FoundDefinitionRef::Kind::Class) {
-            const auto &klass = owner.klass(foundDefs);
+    NamespaceOwnerInfo namespaceOwnerInfo(core::Context ctx, const State &state, core::FoundDefinitionRef owner) {
+        auto realOwner = core::Symbols::noClassOrModule();
+        for (auto ref = owner; ref.kind() == core::FoundDefinitionRef::Kind::Class; ref = ref.klass(foundDefs).owner) {
+            const auto &klass = ref.klass(foundDefs);
             // Synthetic prefixes can be isolated before the actual definition is diagnosed.
-            if (klass.classKind != core::FoundClass::Kind::Unknown &&
-                isMangledNamespace(ctx, getOwnerSymbol(state, owner))) {
-                return true;
+            if (klass.classKind != core::FoundClass::Kind::Unknown && klass.name != core::Names::singleton()) {
+                realOwner = getOwnerSymbol(state, ref);
+                break;
             }
-            owner = klass.owner;
         }
-        return false;
+        bool isMangled = false;
+        bool withinRealOwner = false;
+        bool inTestNamespace = false;
+        auto rootTest = core::Symbols::root().data(ctx)->findMember(ctx, PackageDB::TEST_NAMESPACE);
+        for (auto symbol = getOwnerSymbol(state, owner); symbol != core::Symbols::root();
+             symbol = symbol.data(ctx)->owner) {
+            withinRealOwner |= symbol == realOwner;
+            inTestNamespace |= core::SymbolRef(symbol) == rootTest;
+            if (symbol.data(ctx)->name.hasUniqueNameKind(ctx, core::UniqueNameKind::MangleRename)) {
+                isMangled = true;
+                if (withinRealOwner) {
+                    return {true, true, inTestNamespace};
+                }
+            }
+        }
+        // Singleton symbols belong to the enclosing namespace rather than their attached class,
+        // so the real definition owner may not have been on the symbol-owner chain above.
+        if (!withinRealOwner && realOwner.exists()) {
+            for (auto symbol = realOwner; symbol != core::Symbols::root(); symbol = symbol.data(ctx)->owner) {
+                if (symbol.data(ctx)->name.hasUniqueNameKind(ctx, core::UniqueNameKind::MangleRename)) {
+                    return {isMangled, true, inTestNamespace};
+                }
+            }
+        }
+        return {isMangled, false, inTestNamespace};
     }
 
     ClassNamespaceDecision classifyClassNamespace(core::MutableContext ctx, const State &state,
                                                   core::ClassOrModuleRef owner, const core::FoundClass &klass) {
         // The owner already isolates these definitions. Scope resets have a different owner
         // and must still be checked independently.
-        if (hasRejectedNamespaceOwner(ctx, state, klass.owner)) {
+        auto ownerInfo = namespaceOwnerInfo(ctx, state, klass.owner);
+        if (ownerInfo.hasRejectedDefinition) {
             return {};
         }
         auto packageInfo = ctx.state.packageInfoForClassOrModule(owner, klass.name);
         auto nameOwner = owner;
         auto name = klass.name;
-        auto rootTest = core::Symbols::root().data(ctx)->findMember(ctx, PackageDB::TEST_NAMESPACE);
-        bool inTestNamespace = owner == core::Symbols::root() && klass.name == PackageDB::TEST_NAMESPACE;
-        for (auto enclosing = owner; !inTestNamespace && enclosing != core::Symbols::root();
-             enclosing = enclosing.data(ctx)->owner) {
-            inTestNamespace = core::SymbolRef(enclosing) == rootTest;
-        }
+        bool inTestNamespace =
+            ownerInfo.inTestNamespace || (owner == core::Symbols::root() && klass.name == PackageDB::TEST_NAMESPACE);
 
         auto existing = owner.data(ctx)->findMember(ctx, klass.name);
         if (existing.exists() && existing.isClassOrModule()) {
@@ -1402,7 +1419,7 @@ private:
                 shouldMangle = false;
             }
         }
-        shouldMangle &= !isMangledNamespace(ctx, owner);
+        shouldMangle &= !ownerInfo.isMangled;
         return {packageInfo, onPackagePath, exempt, hasError, shouldMangle, nameOwner, name};
     }
 
@@ -1800,15 +1817,13 @@ private:
             }
         }
         ensureNoPackageConflict(ctx, scope, name, staticField.lhsLoc);
-        if (package != nullptr && name == staticField.name &&
-            !hasRejectedNamespaceOwner(ctx, state, staticField.owner)) {
+        auto ownerInfo = package != nullptr && name == staticField.name
+                             ? namespaceOwnerInfo(ctx, state, staticField.owner)
+                             : NamespaceOwnerInfo{};
+        if (package != nullptr && name == staticField.name && !ownerInfo.hasRejectedDefinition) {
             auto data = scope.data(ctx);
             core::GlobalState::ClassOrModulePackageInfo packageInfo{data->packageRegistryOwner, data->package};
-            bool inTestNamespace = false;
-            auto rootTest = core::Symbols::root().data(ctx)->findMember(ctx, PackageDB::TEST_NAMESPACE);
-            for (auto enclosing = scope; enclosing != core::Symbols::root(); enclosing = enclosing.data(ctx)->owner) {
-                inTestNamespace |= core::SymbolRef(enclosing) == rootTest;
-            }
+            bool inTestNamespace = ownerInfo.inTestNamespace;
             auto onPackagePath = packageInfo.package == package->mangledName();
             if (package->usesTestPackages && !ctx.state.packageDB().testPackages() && inTestNamespace) {
                 onPackagePath = false;
@@ -2371,9 +2386,9 @@ class TreeSymbolizer {
         return existing;
     }
 
-    core::SymbolRef squashNames(core::Context ctx, core::SymbolRef owner, ast::ExpressionPtr &node) {
+    core::SymbolRef squashNames(core::Context ctx, core::SymbolRef owner, ast::ExpressionPtr &node,
+                                bool withinExplicitRootScope) {
         const bool firstName = true;
-        auto withinExplicitRootScope = explicitRootScopeDepth > 0 || isExplicitlyRootScoped(node);
         return squashNamesInner(ctx, owner, node, firstName, withinExplicitRootScope);
     }
 
@@ -2407,7 +2422,8 @@ public:
         } else {
             auto symbol = klass.symbol;
             if (symbol == core::Symbols::todo()) {
-                auto squashedSymbol = squashNames(ctx, ctx.owner.enclosingClass(ctx), klass.name);
+                auto squashedSymbol =
+                    squashNames(ctx, ctx.owner.enclosingClass(ctx), klass.name, withinExplicitRootScope);
                 ENFORCE(squashedSymbol.exists());
                 klass.symbol = squashedSymbol.asClassOrModuleRef();
             } else {
@@ -2485,7 +2501,7 @@ public:
 
         // squashNames removes the leading `::`; preserve it for the same lookup key used by SymbolDefiner.
         auto withinExplicitRootScope = explicitRootScopeDepth > 0 || isExplicitlyRootScoped(asgn.lhs);
-        auto maybeScope = squashNames(ctx, contextClass(ctx, ctx.owner), lhs.scope);
+        auto maybeScope = squashNames(ctx, contextClass(ctx, ctx.owner), lhs.scope, withinExplicitRootScope);
         ENFORCE(maybeScope.exists());
 
         if (!maybeScope.isClassOrModule()) {
