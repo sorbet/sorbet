@@ -879,16 +879,6 @@ void populatePackagePathPrefixes(core::MutableContext ctx, core::packages::Packa
  * Defines symbols for all of the definitions found via SymbolFinder. Single threaded.
  */
 class SymbolDefiner {
-    struct ClassNamespaceDecision final {
-        core::GlobalState::ClassOrModulePackageInfo packageInfo;
-        bool onPackagePath;
-        bool exempt;
-        bool hasError;
-        bool shouldMangle;
-        core::ClassOrModuleRef nameOwner;
-        core::NameRef name;
-    };
-
 public:
     struct State {
         // See getOwnerSymbol for how definition references map to these symbols.
@@ -1360,13 +1350,16 @@ private:
         return {isMangled, false, inTestNamespace};
     }
 
-    ClassNamespaceDecision classifyClassNamespace(core::MutableContext ctx, const State &state,
-                                                  core::ClassOrModuleRef owner, const core::FoundClass &klass) {
+    bool shouldMangleClassDefinition(core::MutableContext ctx, const State &state, core::ClassOrModuleRef owner,
+                                     const core::FoundClass &klass) {
+        if (this->package == nullptr) {
+            return false;
+        }
         // The owner already isolates these definitions. Scope resets have a different owner
         // and must still be checked independently.
         auto ownerInfo = namespaceOwnerInfo(ctx, state, klass.owner);
         if (ownerInfo.hasRejectedDefinition) {
-            return {};
+            return false;
         }
         auto packageInfo = ctx.state.packageInfoForClassOrModule(owner, klass.name);
         auto nameOwner = owner;
@@ -1420,11 +1413,16 @@ private:
             }
         }
         shouldMangle &= !ownerInfo.isMangled;
-        return {packageInfo, onPackagePath, exempt, hasError, shouldMangle, nameOwner, name};
+        if (hasError) {
+            reportNamespaceError(ctx, klass.declLoc, klass.withinExplicitRootScope, packageInfo, onPackagePath,
+                                 nameOwner, name);
+        }
+        return shouldMangle;
     }
 
     void reportNamespaceError(core::MutableContext ctx, core::LocOffsets nameLoc, bool withinExplicitRootScope,
-                              const ClassNamespaceDecision &decision) {
+                              core::GlobalState::ClassOrModulePackageInfo packageInfo, bool onPackagePath,
+                              core::ClassOrModuleRef nameOwner, core::NameRef name) {
         if (auto e = ctx.beginError(nameLoc, core::errors::Packager::DefinitionPackageMismatch)) {
             if (withinExplicitRootScope && !package->isPreludePackage()) {
                 e.setHeader("Defining a root-scoped constant requires this package to be marked `{}`", "prelude!");
@@ -1445,14 +1443,14 @@ private:
                             requiredName);
             }
             e.addErrorLine(package->declLoc(), "Enclosing package declared here");
-            if (!decision.onPackagePath && decision.packageInfo.package.exists()) {
-                auto &requiredPackage = ctx.state.packageDB().getPackageInfo(decision.packageInfo.package);
+            if (!onPackagePath && packageInfo.package.exists()) {
+                auto &requiredPackage = ctx.state.packageDB().getPackageInfo(packageInfo.package);
                 if (requiredPackage.exists()) {
-                    auto name = decision.nameOwner == core::Symbols::root()
-                                    ? decision.name.show(ctx)
-                                    : fmt::format("{}::{}", decision.nameOwner.show(ctx), decision.name.show(ctx));
+                    auto constantName = nameOwner == core::Symbols::root()
+                                            ? name.show(ctx)
+                                            : fmt::format("{}::{}", nameOwner.show(ctx), name.show(ctx));
                     e.addErrorLine(requiredPackage.declLoc(), "Must belong to this package, given constant name `{}`",
-                                   name);
+                                   constantName);
                 }
             }
         }
@@ -1487,14 +1485,7 @@ private:
             auto owner = getOwnerSymbol(state, klass.owner);
             auto name = klass.name;
 
-            optional<ClassNamespaceDecision> decision;
-            if (package != nullptr) {
-                decision = classifyClassNamespace(ctx, state, owner, klass);
-                if (decision->hasError) {
-                    reportNamespaceError(ctx, klass.declLoc, klass.withinExplicitRootScope, *decision);
-                }
-            }
-            auto shouldMangle = decision.has_value() && decision->shouldMangle;
+            auto shouldMangle = shouldMangleClassDefinition(ctx, state, owner, klass);
             if (!shouldMangle) {
                 // Aliases are entered by resolver--namer should be agnostic of them.
                 auto original = owner.data(ctx)->findMemberNoDealias(klass.name);
@@ -1836,8 +1827,7 @@ private:
             auto hasError = !exempt && (!onPackagePath || (mustUseTestNamespace && !inTestNamespace));
             if (hasError) {
                 reportNamespaceError(ctx, namespaceNameLoc.value_or(staticField.lhsLoc),
-                                     staticField.withinExplicitRootScope,
-                                     {packageInfo, onPackagePath, exempt, hasError, hasError, scope, name});
+                                     staticField.withinExplicitRootScope, packageInfo, onPackagePath, scope, name);
             }
             // Invalid class owners already isolate their constants. Qualified assignments can reset
             // to a packaged owner, so isolate those independently.
