@@ -7,6 +7,7 @@
 #include "core/serialize/serialize.h"
 #include "main/options/options.h"
 #include "sorbet_version/sorbet_version.h"
+#include <algorithm>
 #include <charconv>
 #include <cstdio>
 #include <unistd.h>
@@ -278,7 +279,8 @@ void removeCacheDir(const string &path) {
 
 const string_view SessionCache::SESSION_DIR_PREFIX = "sorbet-session-";
 
-SessionCache::SessionCache(string path) : path{std::move(path)} {}
+SessionCache::SessionCache(string path, vector<uint8_t> nameTableUUID)
+    : path{std::move(path)}, nameTableUUID{std::move(nameTableUUID)} {}
 
 SessionCache::~SessionCache() noexcept(false) {
     removeCacheDir(this->path);
@@ -324,12 +326,24 @@ unique_ptr<SessionCache> SessionCache::make(unique_ptr<const OwnedKeyValueStore>
         removeCacheDir(path);
     }
 
+    // The caller has checked that `kvstore` still contains the name table that its GlobalState was created from, so
+    // remember that name table's UUID. `copyTo` has to drop our write transaction before copying, which gives other
+    // processes waiting on the write lock a chance to write a different name table (and trees that refer to it) into
+    // the cache before the copy is taken.
+    vector<uint8_t> nameTableUUID;
+    {
+        auto uuid = kvstore->read(core::serialize::Serializer::NAME_TABLE_UUID_KEY);
+        if (uuid.data != nullptr) {
+            nameTableUUID.assign(uuid.data, uuid.data + uuid.len);
+        }
+    }
+
     kvstore->copyTo(path);
 
     OwnedKeyValueStore::abort(std::move(kvstore));
 
     // Explicit construction because the constructor is private.
-    return unique_ptr<SessionCache>(new SessionCache{std::move(path)});
+    return unique_ptr<SessionCache>(new SessionCache{std::move(path), std::move(nameTableUUID)});
 }
 
 string_view SessionCache::kvstorePath() const {
@@ -343,7 +357,7 @@ unique_ptr<KeyValueStore> SessionCache::open(shared_ptr<::spdlog::logger> logger
         return nullptr;
     }
 
-    auto kvstore = make_unique<const OwnedKeyValueStore>(openCache(std::move(logger), this->path, opts));
+    auto kvstore = make_unique<const OwnedKeyValueStore>(openCache(logger, this->path, opts));
 
     // If the name table entry is missing, this indicates that the cache is completely fresh and doesn't originate in a
     // copy from the result of indexing. This can happen if only the `data.mdb` file was removed from `this->path`, and
@@ -351,6 +365,17 @@ unique_ptr<KeyValueStore> SessionCache::open(shared_ptr<::spdlog::logger> logger
     const auto nameTableDiffCountEntry =
         kvstore->read(core::serialize::Serializer::NAME_TABLE_DIFF_COUNT_AND_HASH_SIZE_KEY);
     if (nameTableDiffCountEntry.len == 0) {
+        return nullptr;
+    }
+
+    // If the name table in the copy is not the one we expected, some other process wrote to the cache before (or
+    // after) we copied it. The trees in the copy might then refer to names that don't exist in our GlobalState, and
+    // using them would corrupt the symbol table, so treat this like a missing cache.
+    const auto uuidEntry = kvstore->read(core::serialize::Serializer::NAME_TABLE_UUID_KEY);
+    const auto uuidMatches = std::equal(uuidEntry.data, uuidEntry.data + uuidEntry.len, this->nameTableUUID.begin(),
+                                        this->nameTableUUID.end());
+    if (!uuidMatches) {
+        logger->debug("Session cache at {} has an unexpected name table; ignoring it", this->path);
         return nullptr;
     }
 

@@ -48,8 +48,12 @@ class SessionCache {
     // The path to the session-unique copy of the cache that was created during initialization.
     std::string path;
 
+    // The serialized name table UUID of the kvstore that the copy was made from. The trees in the copy are only
+    // valid for a GlobalState with this name table, so we refuse to use the copy if its UUID ever differs.
+    std::vector<uint8_t> nameTableUUID;
+
     SessionCache() = delete;
-    explicit SessionCache(std::string path);
+    SessionCache(std::string path, std::vector<uint8_t> nameTableUUID);
 
 public:
     static const std::string_view SESSION_DIR_PREFIX;
