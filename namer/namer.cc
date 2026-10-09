@@ -1354,22 +1354,20 @@ private:
         if (ownerInfo.isMangled) {
             return false;
         }
-        // Classes establish namespaces, so classify the defined name rather than just its owner.
+
         auto [packageRegistryOwner, namespacePackage] = ctx.state.packageInfoForClassOrModule(owner, klass.name);
-        auto diagnosticOwner = owner;
-        auto name = klass.name;
         const bool isTestNamespaceRoot = owner == core::Symbols::root() && klass.name == PackageDB::TEST_NAMESPACE;
         bool inTestNamespace = ownerInfo.inTestNamespace || isTestNamespaceRoot;
 
-        auto existing = owner.data(ctx)->findMember(ctx, klass.name);
+        // Classify the source binding before following aliases: package-directed naming
+        // can see resolved aliases from earlier strata, while monolithic naming runs
+        // before source constant assignments are resolved.
+        auto existing = owner.data(ctx)->findMemberNoDealias(klass.name);
         if (existing.exists() && existing.isClassOrModule()) {
             auto existingClass = existing.asClassOrModuleRef();
             auto data = existingClass.data(ctx);
             packageRegistryOwner = data->packageRegistryOwner;
             namespacePackage = data->package;
-            // findMember de-aliases constants; describe the target's name, not the alias used here.
-            diagnosticOwner = existingClass.data(ctx)->owner;
-            name = existingClass.data(ctx)->name;
         }
 
         // Class definitions may open intermediate package prefixes; assignments may not.
@@ -1389,11 +1387,25 @@ private:
                 return false;
             }
         }
+        if (!shouldMangle && existing.exists() && !existing.isClassOrModule()) {
+            auto target = existing.dealias(ctx);
+            if (target.isClassOrModule()) {
+                // Permission to define the source name does not grant permission to modify
+                // its alias target (for example, Mutex aliases unpackaged Thread::Mutex).
+                auto targetClass = target.asClassOrModuleRef();
+                auto data = targetClass.data(ctx);
+                packageRegistryOwner = data->packageRegistryOwner;
+                namespacePackage = data->package;
+                onPackagePath = package->ownsNamespace(ctx, namespacePackage, packageRegistryOwner);
+                shouldMangle = hasNamespaceError(ctx, namespacePackage, packageRegistryOwner,
+                                                 klass.withinExplicitRootScope, inTestNamespace, onPackagePath);
+            }
+        }
         // Diagnose the first isolated prefix before its ownership information is cleared.
         // Valid synthetic references above remain exempt; descendants need no further checks.
         if (shouldMangle) {
             reportNamespaceError(ctx, klass.declLoc, klass.withinExplicitRootScope, namespacePackage, onPackagePath,
-                                 diagnosticOwner, name);
+                                 owner, klass.name);
         }
         return shouldMangle;
     }
@@ -1425,7 +1437,7 @@ private:
 
     void reportNamespaceError(core::MutableContext ctx, core::LocOffsets nameLoc, bool withinExplicitRootScope,
                               core::packages::MangledName namespacePackage, bool onPackagePath,
-                              core::ClassOrModuleRef diagnosticOwner, core::NameRef name) {
+                              core::ClassOrModuleRef owner, core::NameRef name) {
         if (auto e = ctx.beginError(nameLoc, core::errors::Namer::DefinitionPackageMismatch)) {
             if (withinExplicitRootScope && !package->isPreludePackage()) {
                 e.setHeader("Defining a root-scoped constant requires this package to be marked `{}`", "prelude!");
@@ -1447,9 +1459,9 @@ private:
             if (!onPackagePath && namespacePackage.exists()) {
                 auto &requiredPackage = ctx.state.packageDB().getPackageInfo(namespacePackage);
                 if (requiredPackage.exists()) {
-                    auto constantName = diagnosticOwner == core::Symbols::root()
+                    auto constantName = owner == core::Symbols::root()
                                             ? name.show(ctx)
-                                            : fmt::format("{}::{}", diagnosticOwner.show(ctx), name.show(ctx));
+                                            : fmt::format("{}::{}", owner.show(ctx), name.show(ctx));
                     e.addErrorLine(requiredPackage.declLoc(), "Must belong to this package, given constant name `{}`",
                                    constantName);
                 }
