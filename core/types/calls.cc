@@ -4238,6 +4238,23 @@ public:
     }
 } Array_compact;
 
+class Enumerator_Lazy_compact : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        TypePtr element;
+
+        auto ap = cast_type<AppliedType>(args.thisType);
+        ENFORCE(ap->klass == Symbols::Enumerator_Lazy() ||
+                ap->klass.data(gs)->derivesFrom(gs, Symbols::Enumerator_Lazy()));
+        ENFORCE(!ap->targs.empty());
+        element = ap->targs.front();
+
+        auto ret = Types::dropNil(gs, element);
+        vector<TypePtr> targs{ret};
+        res.returnType = make_type<AppliedType>(Symbols::Enumerator_Lazy(), move(targs));
+    }
+} Enumerator_Lazy_compact;
+
 class Array_zip : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
@@ -4737,6 +4754,8 @@ const vector<Intrinsic> intrinsics{
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::fail(), &Kernel_raise},
 
     {Symbols::Enumerable(), Intrinsic::Kind::Instance, Names::toH(), &Enumerable_toH},
+
+    {Symbols::Enumerator_Lazy(), Intrinsic::Kind::Instance, Names::compact(), &Enumerator_Lazy_compact},
 
     {Symbols::Module(), Intrinsic::Kind::Instance, Names::tripleEq(), &Module_tripleEq},
     {Symbols::T_Enum(), Intrinsic::Kind::Instance, Names::tripleEq(), &T_Enum_tripleEq},
