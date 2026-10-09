@@ -1,0 +1,60 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::Other<<C Other>> < (::Sorbet::Private::Static::PackageSpec)
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::Prelude<<C Prelude>> < (::Sorbet::Private::Static::PackageSpec)
+    <self>.prelude!()
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::Producer<<C Producer>> < (::Sorbet::Private::Static::PackageSpec)
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module ::Other<<C Other>> < ()
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::String::ValidPatch<<C ValidPatch>> < (::<todo sym>)
+  end
+
+  class ::ExplicitRootPrelude::Valid<<C Valid>> < (::<todo sym>)
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::Other::Thing<<C Thing>> < (::<todo sym>)
+    class ::Other::Thing::Nested<<C Nested>> < (::<todo sym>)
+    end
+
+    class <singleton class><<Class:Thing>> < ()
+      class ::Other::<Class:Thing>::SingletonNested<<C SingletonNested>> < (::<todo sym>)
+      end
+
+      ::Other::<Class:Thing>::VALUE = 1
+    end
+
+    ::Other::Thing::Param = ::T.type_alias() do ||
+      ::T.untyped()
+    end
+  end
+
+  class ::Missing::Thing<<C Thing>> < (::<todo sym>)
+    class ::Missing::Thing::Nested<<C Nested>> < (::<todo sym>)
+    end
+  end
+
+  ::Other::VALUE = 1
+
+  module ::Producer::Valid<<C Valid>> < ()
+    class <singleton class><<Class:Valid>> < ()
+      class ::Producer::<Class:Valid>::Nested<<C Nested>> < (::<todo sym>)
+      end
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  ::Param = ::T.type_alias() do ||
+    ::T.untyped()
+  end
+end

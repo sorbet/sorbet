@@ -1,0 +1,95 @@
+class <C <U <root>>> < <C <U Object>> ()
+  module <C <U <PackageSpecRegistry>>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> ()
+    class <C <U <PackageSpecRegistry>>>::<C <U Owner>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U PackageSpec>> () @ Loc {file=test/testdata/packager/prelude-foreign-namespace/owner/__package.rb start=3:1 end=3:26}
+    class <C <U <PackageSpecRegistry>>>::<S <C <U Owner>> $1>[<C <U <AttachedClass>>>] < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<S <C <U PackageSpec>> $1> () @ Loc {file=test/testdata/packager/prelude-foreign-namespace/owner/__package.rb start=3:1 end=3:26}
+      type-member(+) <C <U <PackageSpecRegistry>>>::<S <C <U Owner>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U <PackageSpecRegistry>>>::<S <C <U Owner>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Owner) @ Loc {file=test/testdata/packager/prelude-foreign-namespace/owner/__package.rb start=3:1 end=3:26}
+      method <C <U <PackageSpecRegistry>>>::<S <C <U Owner>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/prelude-foreign-namespace/owner/__package.rb start=3:1 end=4:4}
+        argument <blk><block> @ Loc {file=test/testdata/packager/prelude-foreign-namespace/owner/__package.rb start=??? end=???}
+    class <C <U <PackageSpecRegistry>>>::<C <U Prelude>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U PackageSpec>> () @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/__package.rb start=5:1 end=5:28}
+    class <C <U <PackageSpecRegistry>>>::<S <C <U Prelude>> $1>[<C <U <AttachedClass>>>] < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<S <C <U PackageSpec>> $1> () @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/__package.rb start=5:1 end=5:28}
+      type-member(+) <C <U <PackageSpecRegistry>>>::<S <C <U Prelude>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U <PackageSpecRegistry>>>::<S <C <U Prelude>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Prelude) @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/__package.rb start=5:1 end=5:28}
+      method <C <U <PackageSpecRegistry>>>::<S <C <U Prelude>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/__package.rb start=5:1 end=7:4}
+        argument <blk><block> @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/__package.rb start=??? end=???}
+  class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/prelude-foreign-namespace/owner/__package.rb start=3:1 end=4:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/prelude-foreign-namespace/owner/__package.rb start=??? end=???}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/prelude-foreign-namespace/owner/definitions.rb start=3:1 end=5:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/prelude-foreign-namespace/owner/definitions.rb start=??? end=???}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/__package.rb start=5:1 end=7:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/__package.rb start=??? end=???}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/assignment.rb start=3:1 end=3:22}
+      argument <blk><block> @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/assignment.rb start=??? end=???}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=4:1 end=27:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=??? end=???}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/qualified.rb start=3:1 end=5:33}
+      argument <blk><block> @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/qualified.rb start=??? end=???}
+  module <C <U Owner>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/packager/prelude-foreign-namespace/owner/definitions.rb start=3:1 end=3:13}
+    class <C <U Owner>>::<C <U Existing>> < <C <U Object>> () @ Loc {file=test/testdata/packager/prelude-foreign-namespace/owner/definitions.rb start=4:3 end=4:17}
+    class <C <U Owner>>::<S <C <U Existing>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/packager/prelude-foreign-namespace/owner/definitions.rb start=4:3 end=4:17}
+      type-member(+) <C <U Owner>>::<S <C <U Existing>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Owner>>::<S <C <U Existing>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Owner::Existing) @ Loc {file=test/testdata/packager/prelude-foreign-namespace/owner/definitions.rb start=4:3 end=4:17}
+      method <C <U Owner>>::<S <C <U Existing>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/prelude-foreign-namespace/owner/definitions.rb start=4:3 end=4:22}
+        argument <blk><block> @ Loc {file=test/testdata/packager/prelude-foreign-namespace/owner/definitions.rb start=??? end=???}
+  module <M <C <U Owner>> $1> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/assignment.rb start=3:1 end=3:8}
+    static-field <M <C <U Owner>> $1>::<C <U ASSIGNED>> -> Integer @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/assignment.rb start=3:1 end=3:18}
+  module <M <C <U Owner>> $2> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=4:1 end=4:15}
+    class <M <C <U Owner>> $2>::<C <U Nested>> < <C <U Object>> () @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=5:3 end=5:15}
+    class <M <C <U Owner>> $2>::<S <C <U Nested>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=5:3 end=5:15}
+      type-member(+) <M <C <U Owner>> $2>::<S <C <U Nested>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<M <C <U Owner>> $2>::<S <C <U Nested>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Owner::Nested) @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=5:3 end=5:15}
+      method <M <C <U Owner>> $2>::<S <C <U Nested>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=5:3 end=5:20}
+        argument <blk><block> @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=??? end=???}
+    static-field <M <C <U Owner>> $2>::<C <U VALUE>> -> Integer @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=6:3 end=6:8}
+  module <M <C <U Owner>> $3> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/qualified.rb start=5:8 end=5:15}
+    module <M <C <U Owner>> $3>::<C <U Deep>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/qualified.rb start=5:8 end=5:21}
+      module <M <C <U Owner>> $3>::<C <U Deep>>::<C <U Patch>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/qualified.rb start=5:1 end=5:28}
+      class <M <C <U Owner>> $3>::<C <U Deep>>::<S <C <U Patch>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/qualified.rb start=5:1 end=5:28}
+        type-member(+) <M <C <U Owner>> $3>::<C <U Deep>>::<S <C <U Patch>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<M <C <U Owner>> $3>::<C <U Deep>>::<S <C <U Patch>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Owner::Deep::Patch) @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/qualified.rb start=5:1 end=5:28}
+        method <M <C <U Owner>> $3>::<C <U Deep>>::<S <C <U Patch>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/qualified.rb start=5:1 end=5:33}
+          argument <blk><block> @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/qualified.rb start=??? end=???}
+    class <M <C <U Owner>> $3>::<S <C <U Deep>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/qualified.rb start=5:8 end=5:21}
+      type-member(+) <M <C <U Owner>> $3>::<S <C <U Deep>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<M <C <U Owner>> $3>::<S <C <U Deep>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Owner::Deep) @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/qualified.rb start=5:8 end=5:21}
+    class <M <C <U Owner>> $3>::<C <U Qualified>> < <C <U Object>> () @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/qualified.rb start=3:1 end=3:25}
+    class <M <C <U Owner>> $3>::<S <C <U Qualified>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/qualified.rb start=3:1 end=3:25}
+      type-member(+) <M <C <U Owner>> $3>::<S <C <U Qualified>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<M <C <U Owner>> $3>::<S <C <U Qualified>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Owner::Qualified) @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/qualified.rb start=3:1 end=3:25}
+      method <M <C <U Owner>> $3>::<S <C <U Qualified>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/qualified.rb start=3:1 end=3:30}
+        argument <blk><block> @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/qualified.rb start=??? end=???}
+  class <S <C <U Owner>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/packager/prelude-foreign-namespace/owner/definitions.rb start=3:1 end=3:13}
+    type-member(+) <S <C <U Owner>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Owner>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Owner) @ Loc {file=test/testdata/packager/prelude-foreign-namespace/owner/definitions.rb start=3:1 end=3:13}
+    method <S <C <U Owner>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/prelude-foreign-namespace/owner/definitions.rb start=3:1 end=5:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/prelude-foreign-namespace/owner/definitions.rb start=??? end=???}
+  class <S <M <C <U Owner>> $1> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/assignment.rb start=3:1 end=3:8}
+    type-member(+) <S <M <C <U Owner>> $1> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <M <C <U Owner>> $1> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Owner) @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/assignment.rb start=3:1 end=3:8}
+  class <S <M <C <U Owner>> $2> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=4:1 end=4:15}
+    type-member(+) <S <M <C <U Owner>> $2> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <M <C <U Owner>> $2> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Owner) @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=4:1 end=4:15}
+    method <S <M <C <U Owner>> $2> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=4:1 end=7:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=??? end=???}
+  class <S <M <C <U Owner>> $3> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/qualified.rb start=5:8 end=5:15}
+    type-member(+) <S <M <C <U Owner>> $3> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <M <C <U Owner>> $3> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Owner) @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/qualified.rb start=5:8 end=5:15}
+  module <C <U Prelude>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=24:1 end=24:17}
+    class <C <U Prelude>>::<C <U Own>> < <C <U Object>> () @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=25:3 end=25:12}
+    class <C <U Prelude>>::<S <C <U Own>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=25:3 end=25:12}
+      type-member(+) <C <U Prelude>>::<S <C <U Own>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Prelude>>::<S <C <U Own>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Prelude::Own) @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=25:3 end=25:12}
+      method <C <U Prelude>>::<S <C <U Own>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=25:3 end=25:17}
+        argument <blk><block> @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=??? end=???}
+    static-field <C <U Prelude>>::<C <U VALUE>> -> Integer @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=26:3 end=26:8}
+  class <S <C <U Prelude>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=24:1 end=24:17}
+    type-member(+) <S <C <U Prelude>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Prelude>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Prelude) @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=24:1 end=24:17}
+    method <S <C <U Prelude>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=24:1 end=27:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=??? end=???}
+  class <C <U String>> < <C <U Object>> (<C <U String>>, <C <U Comparable>>) @ (Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=19:1 end=19:15}, Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/bigdecimal.rbi start=removed end=removed}, Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/json.rbi start=removed end=removed}, Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/shellwords.rbi start=removed end=removed}, Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/core/string.rbi start=removed end=removed})
+    class <C <U String>>::<C <U PreludePatch>> < <C <U Object>> () @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=20:3 end=20:21}
+    class <C <U String>>::<S <C <U PreludePatch>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=20:3 end=20:21}
+      type-member(+) <C <U String>>::<S <C <U PreludePatch>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U String>>::<S <C <U PreludePatch>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=String::PreludePatch) @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=20:3 end=20:21}
+      method <C <U String>>::<S <C <U PreludePatch>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=20:3 end=20:26}
+        argument <blk><block> @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=??? end=???}
+  module <C <U UnpackagedPrelude>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=14:1 end=14:27}
+    class <C <U UnpackagedPrelude>>::<C <U Nested>> < <C <U Object>> () @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=15:3 end=15:15}
+    class <C <U UnpackagedPrelude>>::<S <C <U Nested>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=15:3 end=15:15}
+      type-member(+) <C <U UnpackagedPrelude>>::<S <C <U Nested>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U UnpackagedPrelude>>::<S <C <U Nested>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=UnpackagedPrelude::Nested) @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=15:3 end=15:15}
+      method <C <U UnpackagedPrelude>>::<S <C <U Nested>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=15:3 end=15:20}
+        argument <blk><block> @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=??? end=???}
+    static-field <C <U UnpackagedPrelude>>::<C <U VALUE>> -> Integer @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=16:3 end=16:8}
+  class <S <C <U UnpackagedPrelude>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=14:1 end=14:27}
+    type-member(+) <S <C <U UnpackagedPrelude>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U UnpackagedPrelude>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=UnpackagedPrelude) @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=14:1 end=14:27}
+    method <S <C <U UnpackagedPrelude>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=14:1 end=17:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/prelude-foreign-namespace/prelude/definitions.rb start=??? end=???}
+

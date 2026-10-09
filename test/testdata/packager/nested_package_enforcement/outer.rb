@@ -7,10 +7,10 @@ module Outer
   MY_CONST = 1
 
   module Inner
-#        ^^^^^ error: File belongs to package `Outer` but defines a constant that does not match this namespace
+# ^^^^^^^^^^^^ error: File belongs to package `Outer` but defines a constant that does not match this namespace
     module Foo; end
   end
 
   module Inner::Bar; end
-#        ^^^^^^^^^^ error: File belongs to package `Outer` but defines a constant that does not match this namespace
+#        ^^^^^ error: File belongs to package `Outer` but defines a constant that does not match this namespace
 end

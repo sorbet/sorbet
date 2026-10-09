@@ -1,3 +1,3 @@
 # typed: strict
 
-Target::TestOnlyThing
+Target::TestOnlyThing # error: Unable to resolve constant `TestOnlyThing`

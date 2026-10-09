@@ -1,0 +1,23 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::Consumer::Nested<<C Nested>> < (::Sorbet::Private::Static::PackageSpec)
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module ::Consumer<<C Consumer>> < ()
+    def self.after_assignment(<blk>)
+      <emptyTree>
+    end
+
+    ::Consumer::BAD = <cast:let>(1, <todo sym>, <emptyTree>::<C Integer>)
+
+    ::Consumer::BAD_NESTED = class ::Unrelated<Unrelated$1> < (::<todo sym>)
+      def self.inside_rhs(<blk>)
+        <emptyTree>
+      end
+
+      <runtime method definition of self.inside_rhs>
+    end
+
+    <runtime method definition of self.after_assignment>
+  end
+end

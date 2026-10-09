@@ -1332,11 +1332,11 @@ PackageInfo::CanModifyResult PackageInfo::canModifySymbol(core::Context ctx, Cla
 }
 
 bool PackageInfo::ownsNamespace(const core::GlobalState &gs, MangledName namespacePackage,
-                                ClassOrModuleRef packageRegistryOwner, bool couldBePrefix) const {
+                                ClassOrModuleRef packageRegistryOwner) const {
     if (namespacePackage == this->mangledName()) {
         return true;
     }
-    if (!couldBePrefix || !packageRegistryOwner.exists()) {
+    if (!packageRegistryOwner.exists()) {
         return false;
     }
 

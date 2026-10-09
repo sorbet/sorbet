@@ -1,0 +1,85 @@
+class <C <U <root>>> < <C <U Object>> ()
+  module <C <U <PackageSpecRegistry>>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> ()
+    class <C <U <PackageSpecRegistry>>>::<C <U Base>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U PackageSpec>> () @ Loc {file=test/testdata/packager/invalid-root-constants/base/__package.rb start=3:1 end=3:25}
+    class <C <U <PackageSpecRegistry>>>::<S <C <U Base>> $1>[<C <U <AttachedClass>>>] < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<S <C <U PackageSpec>> $1> () @ Loc {file=test/testdata/packager/invalid-root-constants/base/__package.rb start=3:1 end=3:25}
+      type-member(+) <C <U <PackageSpecRegistry>>>::<S <C <U Base>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U <PackageSpecRegistry>>>::<S <C <U Base>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Base) @ Loc {file=test/testdata/packager/invalid-root-constants/base/__package.rb start=3:1 end=3:25}
+      method <C <U <PackageSpecRegistry>>>::<S <C <U Base>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/invalid-root-constants/base/__package.rb start=3:1 end=4:4}
+        argument <blk><block> @ Loc {file=test/testdata/packager/invalid-root-constants/base/__package.rb start=??? end=???}
+    class <C <U <PackageSpecRegistry>>>::<C <U Consumer>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U PackageSpec>> () @ Loc {file=test/testdata/packager/invalid-root-constants/consumer/__package.rb start=4:1 end=4:29}
+    class <C <U <PackageSpecRegistry>>>::<S <C <U Consumer>> $1>[<C <U <AttachedClass>>>] < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<S <C <U PackageSpec>> $1> () @ Loc {file=test/testdata/packager/invalid-root-constants/consumer/__package.rb start=4:1 end=4:29}
+      type-member(+) <C <U <PackageSpecRegistry>>>::<S <C <U Consumer>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U <PackageSpecRegistry>>>::<S <C <U Consumer>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Consumer) @ Loc {file=test/testdata/packager/invalid-root-constants/consumer/__package.rb start=4:1 end=4:29}
+      method <C <U <PackageSpecRegistry>>>::<S <C <U Consumer>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/invalid-root-constants/consumer/__package.rb start=4:1 end=5:4}
+        argument <blk><block> @ Loc {file=test/testdata/packager/invalid-root-constants/consumer/__package.rb start=??? end=???}
+    module <C <U <PackageSpecRegistry>>>::<C <U Other>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/packager/invalid-root-constants/other/nested/__package.rb start=3:7 end=3:12}
+      class <C <U <PackageSpecRegistry>>>::<C <U Other>>::<C <U Nested>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U PackageSpec>> () @ Loc {file=test/testdata/packager/invalid-root-constants/other/nested/__package.rb start=3:1 end=3:34}
+      class <C <U <PackageSpecRegistry>>>::<C <U Other>>::<S <C <U Nested>> $1>[<C <U <AttachedClass>>>] < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<S <C <U PackageSpec>> $1> () @ Loc {file=test/testdata/packager/invalid-root-constants/other/nested/__package.rb start=3:1 end=3:34}
+        type-member(+) <C <U <PackageSpecRegistry>>>::<C <U Other>>::<S <C <U Nested>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U <PackageSpecRegistry>>>::<C <U Other>>::<S <C <U Nested>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Other::Nested) @ Loc {file=test/testdata/packager/invalid-root-constants/other/nested/__package.rb start=3:1 end=3:34}
+        method <C <U <PackageSpecRegistry>>>::<C <U Other>>::<S <C <U Nested>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/invalid-root-constants/other/nested/__package.rb start=3:1 end=4:4}
+          argument <blk><block> @ Loc {file=test/testdata/packager/invalid-root-constants/other/nested/__package.rb start=??? end=???}
+    class <C <U <PackageSpecRegistry>>>::<S <C <U Other>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/packager/invalid-root-constants/other/nested/__package.rb start=3:7 end=3:12}
+      type-member(+) <C <U <PackageSpecRegistry>>>::<S <C <U Other>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U <PackageSpecRegistry>>>::<S <C <U Other>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Other) @ Loc {file=test/testdata/packager/invalid-root-constants/other/nested/__package.rb start=3:7 end=3:12}
+    class <C <U <PackageSpecRegistry>>>::<C <U Producer>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U PackageSpec>> () @ Loc {file=test/testdata/packager/invalid-root-constants/producer/__package.rb start=3:1 end=3:29}
+    class <C <U <PackageSpecRegistry>>>::<S <C <U Producer>> $1>[<C <U <AttachedClass>>>] < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<S <C <U PackageSpec>> $1> () @ Loc {file=test/testdata/packager/invalid-root-constants/producer/__package.rb start=3:1 end=3:29}
+      type-member(+) <C <U <PackageSpecRegistry>>>::<S <C <U Producer>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U <PackageSpecRegistry>>>::<S <C <U Producer>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Producer) @ Loc {file=test/testdata/packager/invalid-root-constants/producer/__package.rb start=3:1 end=3:29}
+      method <C <U <PackageSpecRegistry>>>::<S <C <U Producer>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/invalid-root-constants/producer/__package.rb start=3:1 end=5:4}
+        argument <blk><block> @ Loc {file=test/testdata/packager/invalid-root-constants/producer/__package.rb start=??? end=???}
+  class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/invalid-root-constants/base/__package.rb start=3:1 end=4:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/invalid-root-constants/base/__package.rb start=??? end=???}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/invalid-root-constants/consumer/__package.rb start=4:1 end=5:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/invalid-root-constants/consumer/__package.rb start=??? end=???}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/invalid-root-constants/consumer/use.rb start=3:1 end=6:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/invalid-root-constants/consumer/use.rb start=??? end=???}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/invalid-root-constants/other/nested/__package.rb start=3:1 end=4:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/invalid-root-constants/other/nested/__package.rb start=??? end=???}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/invalid-root-constants/producer/__package.rb start=3:1 end=5:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/invalid-root-constants/producer/__package.rb start=??? end=???}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad.rb start=3:1 end=13:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad.rb start=??? end=???}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad.rbi start=3:1 end=4:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad.rbi start=??? end=???}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad.test.rb start=3:1 end=6:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad.test.rb start=??? end=???}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad_other.rb start=3:1 end=4:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad_other.rb start=??? end=???}
+  module <C <U Consumer>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/packager/invalid-root-constants/consumer/use.rb start=3:1 end=3:16}
+  class <S <C <U Consumer>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/packager/invalid-root-constants/consumer/use.rb start=3:1 end=3:16}
+    type-member(+) <S <C <U Consumer>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Consumer>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Consumer) @ Loc {file=test/testdata/packager/invalid-root-constants/consumer/use.rb start=3:1 end=3:16}
+    method <S <C <U Consumer>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/invalid-root-constants/consumer/use.rb start=3:1 end=6:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/invalid-root-constants/consumer/use.rb start=??? end=???}
+  class <M <C <U ExistingRoot>> $1> < <C <U Object>> () @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad.rb start=6:1 end=6:21}
+  class <M <C <U ExistingRoot>> $2> < <C <U Object>> () @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad_other.rb start=3:1 end=3:21}
+  class <S <M <C <U ExistingRoot>> $1> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad.rb start=6:1 end=6:21}
+    type-member(+) <S <M <C <U ExistingRoot>> $1> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <M <C <U ExistingRoot>> $1> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=ExistingRoot) @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad.rb start=6:1 end=6:21}
+    method <S <M <C <U ExistingRoot>> $1> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad.rb start=6:1 end=7:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad.rb start=??? end=???}
+  class <S <M <C <U ExistingRoot>> $2> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad_other.rb start=3:1 end=3:21}
+    type-member(+) <S <M <C <U ExistingRoot>> $2> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <M <C <U ExistingRoot>> $2> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=ExistingRoot) @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad_other.rb start=3:1 end=3:21}
+    method <S <M <C <U ExistingRoot>> $2> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad_other.rb start=3:1 end=4:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad_other.rb start=??? end=???}
+  class <M <C <U FromRBI>> $1> < <C <U Object>> () @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad.rbi start=3:1 end=3:16}
+  class <S <M <C <U FromRBI>> $1> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad.rbi start=3:1 end=3:16}
+    type-member(+) <S <M <C <U FromRBI>> $1> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <M <C <U FromRBI>> $1> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=FromRBI) @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad.rbi start=3:1 end=3:16}
+    method <S <M <C <U FromRBI>> $1> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad.rbi start=3:1 end=4:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad.rbi start=??? end=???}
+  class <M <C <U FromRuby>> $1> < <C <U Object>> () @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad.rb start=12:1 end=12:17}
+  class <S <M <C <U FromRuby>> $1> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad.rb start=12:1 end=12:17}
+    type-member(+) <S <M <C <U FromRuby>> $1> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <M <C <U FromRuby>> $1> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=FromRuby) @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad.rb start=12:1 end=12:17}
+    method <S <M <C <U FromRuby>> $1> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad.rb start=12:1 end=13:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad.rb start=??? end=???}
+  class <M <C <U Other>> $1> < <C <U Object>> () @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad.rb start=9:1 end=9:14}
+  class <S <M <C <U Other>> $1> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad.rb start=9:1 end=9:14}
+    type-member(+) <S <M <C <U Other>> $1> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <M <C <U Other>> $1> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Other) @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad.rb start=9:1 end=9:14}
+    method <S <M <C <U Other>> $1> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad.rb start=9:1 end=10:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad.rb start=??? end=???}
+  module <M <C <U Producer>> $1> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad.test.rb start=3:1 end=3:18}
+    class <M <C <U Producer>> $1>::<C <U FromTest>> < <C <U Object>> () @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad.test.rb start=4:3 end=4:17}
+    class <M <C <U Producer>> $1>::<S <C <U FromTest>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad.test.rb start=4:3 end=4:17}
+      type-member(+) <M <C <U Producer>> $1>::<S <C <U FromTest>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<M <C <U Producer>> $1>::<S <C <U FromTest>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Producer::FromTest) @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad.test.rb start=4:3 end=4:17}
+      method <M <C <U Producer>> $1>::<S <C <U FromTest>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad.test.rb start=4:3 end=5:6}
+        argument <blk><block> @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad.test.rb start=??? end=???}
+  class <S <M <C <U Producer>> $1> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad.test.rb start=3:1 end=3:18}
+    type-member(+) <S <M <C <U Producer>> $1> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <M <C <U Producer>> $1> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Producer) @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad.test.rb start=3:1 end=3:18}
+    method <S <M <C <U Producer>> $1> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad.test.rb start=3:1 end=6:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/invalid-root-constants/producer/bad.test.rb start=??? end=???}
+

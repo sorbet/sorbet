@@ -2,7 +2,7 @@
 
 module Parent
   module Second
-       # ^^^^^^ error: File belongs to package `Parent::First` but defines a constant that does not match this namespace
+# ^^^^^^^^^^^^^ error: File belongs to package `Parent::First` but defines a constant that does not match this namespace
     class Foo
     end
   end

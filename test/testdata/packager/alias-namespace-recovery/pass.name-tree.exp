@@ -1,0 +1,138 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::A<<C A>> < (::Sorbet::Private::Static::PackageSpec)
+    <self>.import(<emptyTree>::<C B>)
+
+    <self>.export(<emptyTree>::<C A>::<C Thing>)
+
+    <self>.export(<emptyTree>::<C A>::<C Same>)
+
+    <self>.export(<emptyTree>::<C A>::<C Foreign>)
+
+    <self>.export(<emptyTree>::<C A>::<C Chained>)
+
+    <self>.export(<emptyTree>::<C A>::<C ModuleAlias>)
+
+    <self>.export(<emptyTree>::<C A>::<C Unpackaged>)
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::A::Patch<<C Patch>> < (::Sorbet::Private::Static::PackageSpec)
+    <self>.import(<emptyTree>::<C A>)
+
+    <self>.import(<emptyTree>::<C B>)
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::B<<C B>> < (::Sorbet::Private::Static::PackageSpec)
+    <self>.export(<emptyTree>::<C B>::<C Thing>)
+
+    <self>.export(<emptyTree>::<C B>::<C Mixin>)
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::Consumer<<C Consumer>> < (::Sorbet::Private::Static::PackageSpec)
+    <self>.import(<emptyTree>::<C A>)
+
+    <self>.import(<emptyTree>::<C B>)
+
+    <self>.import(<emptyTree>::<C A>::<C Patch>)
+
+    <self>.import(<emptyTree>::<C Mutex>)
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::Mutex<<C Mutex>> < (::Sorbet::Private::Static::PackageSpec)
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module ::A<<C A>> < ()
+    class ::A::Thing<<C Thing>> < (::<todo sym>)
+    end
+
+    ::A::Same = <emptyTree>::<C Thing>
+
+    ::A::Foreign = <emptyTree>::<C B>::<C Thing>
+
+    ::A::Chained = <emptyTree>::<C Foreign>
+
+    ::A::ModuleAlias = <emptyTree>::<C B>::<C Mixin>
+
+    ::A::Unpackaged = <emptyTree>::<C String>
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::A::Same::Nested<<C Nested>> < (::<todo sym>)
+  end
+
+  ::A::Same::FIELD = 1
+
+  class ::A::Foreign::Nested<<C Nested>> < (::<todo sym>)
+  end
+
+  ::A::Foreign::FIELD = 1
+
+  class ::A::Chained::Nested<<C Nested>> < (::<todo sym>)
+  end
+
+  ::A::Chained::FIELD = 1
+
+  module ::A::ModuleAlias<ModuleAlias$1> < ()
+    def alias_recovery_marker(<blk>)
+      <emptyTree>
+    end
+
+    <runtime method definition of alias_recovery_marker>
+  end
+
+  class ::A::Unpackaged::Nested<<C Nested>> < (::<todo sym>)
+  end
+
+  ::A::Unpackaged::FIELD = 1
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module ::B<<C B>> < ()
+    class ::B::Thing<<C Thing>> < (::<todo sym>)
+    end
+
+    module ::B::Mixin<<C Mixin>> < ()
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  <cast:let>(<emptyTree>::<C A>::<C Same>.new(), <todo sym>, <emptyTree>::<C A>::<C Thing>)
+
+  <cast:let>(<emptyTree>::<C A>::<C Foreign>.new(), <todo sym>, <emptyTree>::<C B>::<C Thing>)
+
+  <cast:let>(<emptyTree>::<C A>::<C Chained>.new(), <todo sym>, <emptyTree>::<C B>::<C Thing>)
+
+  <cast:let>(<emptyTree>::<C A>::<C Unpackaged>.new(), <todo sym>, <emptyTree>::<C String>)
+
+  <emptyTree>::<C A>::<C Thing>::<C Nested>
+
+  <emptyTree>::<C A>::<C Thing>::<C FIELD>
+
+  <emptyTree>::<C B>::<C Thing>::<C Nested>
+
+  <emptyTree>::<C B>::<C Thing>::<C FIELD>
+
+  <emptyTree>::<C String>::<C Nested>
+
+  <emptyTree>::<C String>::<C FIELD>
+
+  <emptyTree>::<C Thread>::<C Mutex>.new().alias_recovery_marker()
+
+  class ::Consumer<<C Consumer>> < (::<todo sym>, <emptyTree>::<C B>::<C Mixin>)
+    <self>.include(<emptyTree>::<C B>::<C Mixin>)
+  end
+
+  <emptyTree>::<C Consumer>.new().alias_recovery_marker()
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::Mutex<Mutex$1> < (::<todo sym>)
+    def alias_recovery_marker(<blk>)
+      <emptyTree>
+    end
+
+    <runtime method definition of alias_recovery_marker>
+  end
+end

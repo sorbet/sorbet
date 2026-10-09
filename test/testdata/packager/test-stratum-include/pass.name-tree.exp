@@ -1,0 +1,29 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::Child<<C Child>> < (::Sorbet::Private::Static::PackageSpec)
+    <self>.import(<emptyTree>::<C Parent>)
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::Parent<<C Parent>> < (::Sorbet::Private::Static::PackageSpec)
+    <self>.export(<emptyTree>::<C Parent>::<C MyClass>)
+
+    <self>.test_import(<emptyTree>::<C Child>)
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::Child::Uses<<C Uses>> < (::<todo sym>)
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::Parent::MyClass<<C MyClass>> < (::<todo sym>)
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module ::Parent::TestMixin<<C TestMixin>> < ()
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::Parent::MyClass<<C MyClass>> < (::<todo sym>, <emptyTree>::<C Parent>::<C TestMixin>)
+    <self>.include(<emptyTree>::<C Parent>::<C TestMixin>)
+  end
+end

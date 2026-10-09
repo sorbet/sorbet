@@ -7,7 +7,7 @@ end
 # This will be an error because it defines a constant which does
 # not match the enclosing namespace
 class SomethingElse
-    # ^^^^^^^^^^^^^ error: defines a constant that does not match this namespace
+# error: defines a constant that does not match this namespace
 end
 
 # Root-scoped constants may only opt out of package prefix checks in prelude packages.

@@ -12,5 +12,5 @@ module Test::Root
 end
 
 module Root::Nested::Foo
-#      ^^^^^^^^^^^^^^^^^ error: Tests in the `Root::Nested` package must define tests in the `Test::Root::Nested` namespace
+# error: Tests in the `Root::Nested` package must define tests in the `Test::Root::Nested` namespace
 end

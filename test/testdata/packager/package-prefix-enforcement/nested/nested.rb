@@ -1,7 +1,7 @@
 # typed: strict
 
 module Wrong
-     # ^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
+# error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
   class Inside; end
 end
 
@@ -9,7 +9,7 @@ Root::Nested::Foo::Bar = nil
 ::Allowed::TopLevel = nil # error: requires this package to be marked `prelude!`
 
   NotAllowed::Foo::Bar = nil
-# ^^^^^^^^^^^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
+# ^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
 
 module Root::Nested
 
@@ -39,13 +39,13 @@ module Root # error: Package `Root::Nested` may not open `Root`
     sig { void }
     def example
       NOT_IN_PACKAGE
-    # ^^^^^^^^^^^^^^ error: `Root` is not imported
+    # ^^^^^^^^^^^^^^ error: Unable to resolve constant `NOT_IN_PACKAGE`
     end
   end
 end
 
   class Root::Stringy < String
-#       ^^^^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
 #                       ^^^^^^ error: Superclasses may only be set on constants in the package that owns them
 end
 
@@ -73,11 +73,11 @@ def top_level_method
 end
 
 module Root::ModNotInPackage
-  #    ^^^^^^^^^^^^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
+# error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
 end
 
 class Root::ClassNotInPackage
-    # ^^^^^^^^^^^^^^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
+# error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
 end
 
 module ::TopLevel # error: requires this package to be marked `prelude!`
