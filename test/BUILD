@@ -515,6 +515,9 @@ pipeline_tests(
             # were not actually running because they have RBS support enabled
             "testdata/lsp/hover_rbs.rb",
             "testdata/lsp/hover_rbs_assertions_let.rb",
+
+            # Mismatched parse tree for file with syntax error
+            "testdata/namer/malformed_payload_data_namespace.rb",
         ],
     ),
     "PrismPosTests",
