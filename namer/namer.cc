@@ -1358,52 +1358,36 @@ private:
         auto [packageRegistryOwner, namespacePackage] = ctx.state.packageInfoForClassOrModule(owner, klass.name);
         const bool isTestNamespaceRoot = owner == core::Symbols::root() && klass.name == PackageDB::TEST_NAMESPACE;
         bool inTestNamespace = ownerInfo.inTestNamespace || isTestNamespaceRoot;
-
-        // Classify the source binding before following aliases: package-directed naming
-        // can see resolved aliases from earlier strata, while monolithic naming runs
-        // before source constant assignments are resolved.
-        auto existing = owner.data(ctx)->findMemberNoDealias(klass.name);
-        if (existing.exists() && existing.isClassOrModule()) {
-            auto existingClass = existing.asClassOrModuleRef();
-            auto data = existingClass.data(ctx);
-            packageRegistryOwner = data->packageRegistryOwner;
-            namespacePackage = data->package;
+        const bool isScope = klass.classKind == core::FoundClass::Kind::Unknown;
+        if (isScope && ctx.state.packageDB().testPackages() && isTestNamespaceRoot) {
+            return false;
         }
 
-        // Class definitions may open intermediate package prefixes; assignments may not.
+        // Check the symbol before following aliases, because aliases are a resolver concept.
+        auto existing = owner.data(ctx)->findMemberNoDealias(klass.name);
+        if (existing.exists() && existing.isClassOrModule()) {
+            auto data = existing.asClassOrModuleRef().data(ctx);
+            // If we've found a pre-existing symbol, treat its packaging information as canonical.
+            // (It might have been marked explicitly unpackaged, e.g. String in the payload)
+            packageRegistryOwner = data->packageRegistryOwner;
+            namespacePackage = data->package;
+
+            // Traversing an existing unpackaged namespace is not itself a definition.
+            // Keep checking the definition inside it, unless this scope was already rejected.
+            if (isScope && package->isPreludePackage() && !namespacePackage.exists() &&
+                !packageRegistryOwner.exists() &&
+                packageMangledClasses.find({ctx.file, owner, klass.name, klass.withinExplicitRootScope}) ==
+                    packageMangledClasses.end()) {
+                return false;
+            }
+        }
+
         auto onPackagePath = package->ownsNamespace(ctx, namespacePackage, packageRegistryOwner);
         if (packageRegistryOwner == core::Symbols::PackageSpecRegistry() && !isTestNamespaceRoot) {
             onPackagePath = false;
         }
         auto shouldMangle = hasNamespaceError(ctx, namespacePackage, packageRegistryOwner,
                                               klass.withinExplicitRootScope, inTestNamespace, onPackagePath);
-        if (klass.classKind == core::FoundClass::Kind::Unknown) {
-            auto mangled = packageMangledClasses.find({ctx.file, owner, klass.name, klass.withinExplicitRootScope});
-            auto reference = existing.exists() ? existing.dealias(ctx) : core::Symbols::noSymbol();
-            if (package->isPreludePackage() && mangled == packageMangledClasses.end() && existing.exists() &&
-                reference.isClassOrModule() && !namespacePackage.exists() &&
-                !reference.asClassOrModuleRef().data(ctx)->package.exists() &&
-                !reference.asClassOrModuleRef().data(ctx)->packageRegistryOwner.exists()) {
-                return false;
-            }
-            if (ctx.state.packageDB().testPackages() && isTestNamespaceRoot) {
-                return false;
-            }
-        }
-        if (!shouldMangle && existing.exists() && !existing.isClassOrModule()) {
-            auto target = existing.dealias(ctx);
-            if (target.isClassOrModule()) {
-                // Permission to define the source name does not grant permission to modify
-                // its alias target (for example, Mutex aliases unpackaged Thread::Mutex).
-                auto targetClass = target.asClassOrModuleRef();
-                auto data = targetClass.data(ctx);
-                packageRegistryOwner = data->packageRegistryOwner;
-                namespacePackage = data->package;
-                onPackagePath = package->ownsNamespace(ctx, namespacePackage, packageRegistryOwner);
-                shouldMangle = hasNamespaceError(ctx, namespacePackage, packageRegistryOwner,
-                                                 klass.withinExplicitRootScope, inTestNamespace, onPackagePath);
-            }
-        }
         // Diagnose the first isolated prefix before its ownership information is cleared.
         // Valid synthetic references above remain exempt; descendants need no further checks.
         if (shouldMangle) {
@@ -2351,15 +2335,9 @@ class TreeSymbolizer {
 
         auto mangled = packageMangledClasses.find(
             {ctx.file, newOwner.asClassOrModuleRef(), constLit->cnst, withinExplicitRootScope});
-        // Match SymbolDefiner's lookup of the original binding, including resolved aliases.
-        // Another file's collision-recovery class must not hide the alias target, but this
-        // file's package recovery mapping must still take precedence.
         core::SymbolRef existing = mangled != packageMangledClasses.end()
                                        ? mangled->second
-                                       : newOwner.asClassOrModuleRef().data(ctx)->findMember(ctx, constLit->cnst);
-        if (!existing.isClassOrModule()) {
-            existing = ctx.state.lookupClassSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
-        }
+                                       : ctx.state.lookupClassSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
         if (firstName && !existing.exists() && newOwner.isClassOrModule()) {
             existing = ctx.state.lookupStaticFieldSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
             if (existing.exists()) {

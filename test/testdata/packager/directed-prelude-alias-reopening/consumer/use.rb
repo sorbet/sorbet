@@ -1,9 +1,10 @@
 # typed: true
 
-# Valid explicit-root definitions reach the canonical target.
-T.let(Queue::AliasControl.new, Thread::Queue::AliasControl)
-T.let(Queue::ALIAS_CONTROL, Integer)
-T.let(Thread::Queue::ALIAS_CONTROL, Integer)
+# Explicit-root definitions through aliases are also isolated.
+T.let(Queue::AliasControl.new, Thread::Queue::AliasControl) # error: Unable to resolve constant `AliasControl`
+#                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `AliasControl`
+T.let(Queue::ALIAS_CONTROL, Integer) # error: Unable to resolve constant `ALIAS_CONTROL`
+T.let(Thread::Queue::ALIAS_CONTROL, Integer) # error: Unable to resolve constant `ALIAS_CONTROL`
 
 # The non-root definitions remain isolated.
 Thread::Queue::Rejected # error: Unable to resolve constant `Rejected`
