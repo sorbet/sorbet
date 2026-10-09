@@ -1379,8 +1379,11 @@ private:
                                               klass.withinExplicitRootScope, inTestNamespace, onPackagePath);
         if (klass.classKind == core::FoundClass::Kind::Unknown) {
             auto mangled = packageMangledClasses.find({ctx.file, owner, klass.name, klass.withinExplicitRootScope});
+            auto reference = existing.exists() ? existing.dealias(ctx) : core::Symbols::noSymbol();
             if (package->isPreludePackage() && mangled == packageMangledClasses.end() && existing.exists() &&
-                existing.isClassOrModule() && !namespacePackage.exists() && !packageRegistryOwner.exists()) {
+                reference.isClassOrModule() && !namespacePackage.exists() &&
+                !reference.asClassOrModuleRef().data(ctx)->package.exists() &&
+                !reference.asClassOrModuleRef().data(ctx)->packageRegistryOwner.exists()) {
                 return false;
             }
             if (ctx.state.packageDB().testPackages() && isTestNamespaceRoot) {
@@ -2348,9 +2351,15 @@ class TreeSymbolizer {
 
         auto mangled = packageMangledClasses.find(
             {ctx.file, newOwner.asClassOrModuleRef(), constLit->cnst, withinExplicitRootScope});
+        // Match SymbolDefiner's lookup of the original binding, including resolved aliases.
+        // Another file's collision-recovery class must not hide the alias target, but this
+        // file's package recovery mapping must still take precedence.
         core::SymbolRef existing = mangled != packageMangledClasses.end()
                                        ? mangled->second
-                                       : ctx.state.lookupClassSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
+                                       : newOwner.asClassOrModuleRef().data(ctx)->findMember(ctx, constLit->cnst);
+        if (!existing.isClassOrModule()) {
+            existing = ctx.state.lookupClassSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
+        }
         if (firstName && !existing.exists() && newOwner.isClassOrModule()) {
             existing = ctx.state.lookupStaticFieldSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
             if (existing.exists()) {
