@@ -700,7 +700,19 @@ private:
             // we only set this when a job has failed for other reasons and we've already reported an error, and
             // continuing on will only redundantly report that we can't resolve the constant, so bail early here
             job.out->markUnresolved();
-            job.out->resolutionScopes()->emplace_back(core::Symbols::noSymbol());
+            if (auto scope = ast::cast_tree<ast::ConstantLit>(job.out->original()->scope)) {
+                // The scope resolved, but we refused to look up a constant through it (e.g., `A::B`
+                // where `A` is a type alias). Record the scope like any other explicit scope.
+                //
+                // Recording `noSymbol` here would instead mean "the scope was stubbed," which tells
+                // `fullUnresolvedPath` to keep walking outward into `A`. That's only valid when `A` is
+                // itself unresolved and has resolutionScopes.
+                ENFORCE(scope->symbol().exists() && scope->symbol() != core::Symbols::StubModule());
+                job.out->resolutionScopes()->emplace_back(scope->symbol());
+            } else {
+                // Dynamic constant reference (e.g., `foo::B`). There is no constant scope to report.
+                job.out->resolutionScopes()->emplace_back(core::Symbols::noSymbol());
+            }
             return;
         }
 
