@@ -1116,12 +1116,13 @@ private:
 
                 case core::packages::PackageInfo::CanModifyResult::Subpackages:
                     if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::PackageNamespaceMixin)) {
-                        e.setHeader("Package `{}` has subpackages, so its corresponding class must not have ancestors",
-                                    filePackage.owner.show(ctx));
+                        e.setHeader("`{}` is part of a subpackage namespace, and must not have ancestors",
+                                    job.klass.show(ctx));
 
                         e.addErrorLine(filePackageInfo.declLoc(), "Package defined here");
 
-                        auto subpackages = filePackageInfo.directSubPackages(ctx);
+                        auto subpackages =
+                            filePackageInfo.directSubPackages(ctx, job.klass.data(ctx)->packageRegistryOwner);
                         if (!subpackages.empty()) {
                             e.addErrorLine(subpackages.front().owner.data(ctx)->loc(), "First subpackage defined here");
                         }
@@ -1186,12 +1187,13 @@ private:
 
                 case core::packages::PackageInfo::CanModifyResult::Subpackages:
                     if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::PackageNamespaceMixin)) {
-                        e.setHeader("Package `{}` has subpackages, so its corresponding class must not have ancestors",
-                                    filePackage.owner.show(ctx));
+                        e.setHeader("`{}` is part of a subpackage namespace, and must not have ancestors",
+                                    job.klass.show(ctx));
 
                         e.addErrorLine(filePackageInfo.declLoc(), "Package defined here");
 
-                        auto subpackages = filePackageInfo.directSubPackages(ctx);
+                        auto subpackages =
+                            filePackageInfo.directSubPackages(ctx, job.klass.data(ctx)->packageRegistryOwner);
                         if (!subpackages.empty()) {
                             e.addErrorLine(subpackages.front().owner.data(ctx)->loc(), "First subpackage defined here");
                         }

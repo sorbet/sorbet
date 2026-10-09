@@ -2400,11 +2400,10 @@ public:
 
             case core::packages::PackageInfo::CanModifyResult::Subpackages:
                 if (auto e = ctx.beginError(send->loc, core::errors::Namer::RootTypeMember)) {
-                    e.setHeader("Package `{}` has subpackages, so its corresponding class must not be generic",
-                                filePackage.owner.show(ctx));
+                    e.setHeader("`{}` is part of a subpackage namespace, and must not be generic", onSymbol.show(ctx));
 
                     e.addErrorLine(filePackageInfo.declLoc(), "Package defined here");
-                    auto subpackages = filePackageInfo.directSubPackages(ctx);
+                    auto subpackages = filePackageInfo.directSubPackages(ctx, onSymbol.data(ctx)->packageRegistryOwner);
                     if (!subpackages.empty()) {
                         auto &subpackageInfo = ctx.state.packageDB().getPackageInfo(subpackages[0]);
                         e.addErrorLine(subpackageInfo.declLoc(), "First subpackage defined here");
