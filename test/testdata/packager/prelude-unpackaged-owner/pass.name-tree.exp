@@ -1,0 +1,32 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::Consumer<<C Consumer>> < (::Sorbet::Private::Static::PackageSpec)
+    <self>.import(<emptyTree>::<C Prelude>)
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::Prelude<<C Prelude>> < (::Sorbet::Private::Static::PackageSpec)
+    <self>.prelude!()
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  <emptyTree>::<C String>::<C RejectedClass>
+
+  <emptyTree>::<C String>::<C REJECTED_FIELD>
+
+  <emptyTree>::<C String>::<C ValidClass>
+
+  <cast:let>(<emptyTree>::<C String>::<C VALID_FIELD>, <todo sym>, <emptyTree>::<C Integer>)
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::String::RejectedClass<RejectedClass$1> < (::<todo sym>)
+  end
+
+  ::String::REJECTED_FIELD = <cast:let>(1, <todo sym>, <emptyTree>::<C Integer>)
+
+  ::String::REJECTED_FIELD = <cast:let>(2, <todo sym>, <emptyTree>::<C Integer>)
+
+  class ::String::ValidClass<<C ValidClass>> < (::<todo sym>)
+  end
+
+  ::String::VALID_FIELD = <cast:let>(3, <todo sym>, <emptyTree>::<C Integer>)
+end
