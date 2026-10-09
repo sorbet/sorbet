@@ -946,9 +946,6 @@ private:
     void emitRedefinedConstantError(core::MutableContext ctx, core::LocOffsets errorLoc, core::NameRef name,
                                     core::SymbolRef::Kind kind, core::SymbolRef prevSymbol) {
         using Kind = core::SymbolRef::Kind;
-        ENFORCE(
-            kind != Kind::ClassOrModule,
-            "ClassOrModule symbols should always be entered first, so they should never need to mangle something else");
         if (auto e = ctx.beginError(errorLoc, core::errors::Namer::ConstantKindRedefinition)) {
             auto prevSymbolKind = prettySymbolKind(ctx, prevSymbol.kind());
             if (prevSymbol.kind() == Kind::ClassOrModule && prevSymbol.asClassOrModuleRef().data(ctx)->isDeclared()) {
@@ -1335,13 +1332,31 @@ private:
             auto name = klass.name;
 
             auto shouldMangle = shouldMangleClassDefinition(ctx, owner, klass.name);
+            if (!shouldMangle) {
+                // Aliases are entered by resolver--namer should be agnostic of them.
+                auto original = owner.data(ctx)->findMemberNoDealias(klass.name);
+                if (original.exists() && !original.isClassOrModule()) {
+                    // We used to try to ensure that classes were defined first, so if the symbol
+                    // existed it would necessarily be a class, and not need to be mangled.
+                    //
+                    // Turns out, that was never true (because of payload symbols), and is
+                    // increasingly not true in a package-directed world. Luckily we can piggy back
+                    // on the same mangling logic we built for package-directed class mangling to
+                    // also mangle class symbols everywhere.
+                    emitRedefinedConstantError(ctx, klass.declLoc, klass.name, core::SymbolRef::Kind::ClassOrModule,
+                                               original);
+                    shouldMangle = true;
+                }
+            }
             if (shouldMangle) {
                 name = mangledClassName(ctx, owner, klass);
             }
 
-            auto member = owner.data(ctx)->findMember(ctx, name);
+            // Aliases are entered by resolver--namer should be agnostic of them.
+            auto member = owner.data(ctx)->findMemberNoDealias(name);
             if (member.exists()) {
-                // Class/module definitions are entered before other constants, so this member has the right kind.
+                // We either kept the name of an existing class/module or chose a mangled name that
+                // only reuses class/module symbols, so any existing member here has the right kind.
                 symbol = member.asClassOrModuleRef();
             } else {
                 auto newClass = ctx.state.enterClassOrModuleSymbol(ctx.locAt(klass.declLoc), owner, name);
