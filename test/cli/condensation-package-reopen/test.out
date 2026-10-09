@@ -96,9 +96,9 @@ root/root.rb:17: `Root` is part of a subpackage namespace, and must not be gener
     root/__package.rb:3: Package defined here
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
-    root/subpackage/__package.rb:3: First subpackage defined here
-     3 |class Root::Subpackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    root/a/b/__package.rb:3: First subpackage defined here
+     3 |class Root::A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 root/root.rb:19: `T.class_of(Root)` is part of a subpackage namespace, and must not be generic https://srb.help/4016
     19 |  Y = type_template
@@ -106,9 +106,9 @@ root/root.rb:19: `T.class_of(Root)` is part of a subpackage namespace, and must 
     root/__package.rb:3: Package defined here
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
-    root/subpackage/__package.rb:3: First subpackage defined here
-     3 |class Root::Subpackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    root/a/b/__package.rb:3: First subpackage defined here
+     3 |class Root::A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 root/root.rb:3: `Root` is part of a subpackage namespace, and must not have ancestors https://srb.help/5083
      3 |class Root < Prelude::A
@@ -116,9 +116,9 @@ root/root.rb:3: `Root` is part of a subpackage namespace, and must not have ance
     root/__package.rb:3: Package defined here
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
-    root/subpackage/__package.rb:3: First subpackage defined here
-     3 |class Root::Subpackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    root/a/b/__package.rb:3: First subpackage defined here
+     3 |class Root::A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 root/root.rb:15: `Root` is part of a subpackage namespace, and must not have ancestors https://srb.help/5083
     15 |  include ClassMethods
@@ -126,9 +126,9 @@ root/root.rb:15: `Root` is part of a subpackage namespace, and must not have anc
     root/__package.rb:3: Package defined here
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
-    root/subpackage/__package.rb:3: First subpackage defined here
-     3 |class Root::Subpackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    root/a/b/__package.rb:3: First subpackage defined here
+     3 |class Root::A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 root/root.rb:12: `T.class_of(Root)` is part of a subpackage namespace, and must not have ancestors https://srb.help/5083
     12 |  extend ClassMethods
@@ -136,9 +136,9 @@ root/root.rb:12: `T.class_of(Root)` is part of a subpackage namespace, and must 
     root/__package.rb:3: Package defined here
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
-    root/subpackage/__package.rb:3: First subpackage defined here
-     3 |class Root::Subpackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    root/a/b/__package.rb:3: First subpackage defined here
+     3 |class Root::A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 bad_test/subpackage/__package.rb:5: Constant `Test::BadTest::Subpackage::Foo` lacks a declaration in this package and cannot be exported https://srb.help/3721
      5 |  export Test::BadTest::Subpackage::Foo
@@ -166,15 +166,33 @@ bad_test/__package.rb:4: Unable to resolve constant `Root` https://srb.help/5002
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
 
+root/a.rb:4: `T.class_of(Root::A)` is part of a subpackage namespace, and must not have ancestors https://srb.help/5083
+     4 |  extend T::Generic
+                 ^^^^^^^^^^
+    root/__package.rb:3: Package defined here
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    root/a/b/__package.rb:3: First subpackage defined here
+     3 |class Root::A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+root/a.rb:6: Method `type_member` does not exist on `T.class_of(T)` https://srb.help/7003
+     6 |  X = T.type_member
+                ^^^^^^^^^^^
+  Got `T.class_of(T)` originating from:
+    root/a.rb:6:
+     6 |  X = T.type_member
+              ^
+
 root/root.rbi:4: `Root` is part of a subpackage namespace, and must not be generic https://srb.help/4016
      4 |  X = type_member
               ^^^^^^^^^^^
     root/__package.rb:3: Package defined here
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
-    root/subpackage/__package.rb:3: First subpackage defined here
-     3 |class Root::Subpackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    root/a/b/__package.rb:3: First subpackage defined here
+     3 |class Root::A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 root/root.rbi:5: `T.class_of(Root)` is part of a subpackage namespace, and must not be generic https://srb.help/4016
      5 |  Y = type_template
@@ -182,9 +200,9 @@ root/root.rbi:5: `T.class_of(Root)` is part of a subpackage namespace, and must 
     root/__package.rb:3: Package defined here
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
-    root/subpackage/__package.rb:3: First subpackage defined here
-     3 |class Root::Subpackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    root/a/b/__package.rb:3: First subpackage defined here
+     3 |class Root::A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 root/test/root.rb:17: `Test::Root` is part of a subpackage namespace, and must not be generic https://srb.help/4016
     17 |  X = type_member
@@ -192,9 +210,9 @@ root/test/root.rb:17: `Test::Root` is part of a subpackage namespace, and must n
     root/__package.rb:3: Package defined here
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
-    root/subpackage/__package.rb:3: First subpackage defined here
-     3 |class Root::Subpackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    root/a/b/__package.rb:3: First subpackage defined here
+     3 |class Root::A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 root/test/root.rb:19: `T.class_of(Test::Root)` is part of a subpackage namespace, and must not be generic https://srb.help/4016
     19 |  Y = type_template
@@ -202,9 +220,9 @@ root/test/root.rb:19: `T.class_of(Test::Root)` is part of a subpackage namespace
     root/__package.rb:3: Package defined here
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
-    root/subpackage/__package.rb:3: First subpackage defined here
-     3 |class Root::Subpackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    root/a/b/__package.rb:3: First subpackage defined here
+     3 |class Root::A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 root/test/root.rb:15: `Test::Root` is part of a subpackage namespace, and must not have ancestors https://srb.help/5083
     15 |  include ClassMethods
@@ -212,9 +230,9 @@ root/test/root.rb:15: `Test::Root` is part of a subpackage namespace, and must n
     root/__package.rb:3: Package defined here
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
-    root/subpackage/__package.rb:3: First subpackage defined here
-     3 |class Root::Subpackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    root/a/b/__package.rb:3: First subpackage defined here
+     3 |class Root::A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 root/test/root.rb:12: `T.class_of(Test::Root)` is part of a subpackage namespace, and must not have ancestors https://srb.help/5083
     12 |  extend ClassMethods
@@ -222,7 +240,7 @@ root/test/root.rb:12: `T.class_of(Test::Root)` is part of a subpackage namespace
     root/__package.rb:3: Package defined here
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
-    root/subpackage/__package.rb:3: First subpackage defined here
-     3 |class Root::Subpackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 24
+    root/a/b/__package.rb:3: First subpackage defined here
+     3 |class Root::A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 26
