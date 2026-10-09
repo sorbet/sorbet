@@ -44,8 +44,10 @@ void SorbetWorkspaceEditTask::mergeNewer(SorbetWorkspaceEditTask &task) {
     // This cached information is now invalid.
     task.cachedFastPathDecisionValid = false;
     task.cachedFastPathDecision = TypecheckingPath::Slow;
+    task.cachedFastPathExtraFiles.clear();
     cachedFastPathDecisionValid = false;
     cachedFastPathDecision = TypecheckingPath::Slow;
+    cachedFastPathExtraFiles.clear();
 }
 
 void SorbetWorkspaceEditTask::preprocess(LSPPreprocessor &preprocessor) {
@@ -157,7 +159,13 @@ TypecheckingPath SorbetWorkspaceEditTask::getTypecheckingPath(const LSPIndexer &
         return updates->typecheckingPath;
     }
     if (!cachedFastPathDecisionValid) {
-        cachedFastPathDecision = index.getTypecheckingPath(params->updates);
+        auto result = index.getTypecheckingPath(params->updates);
+        cachedFastPathDecision = result.path;
+        if (cachedFastPathDecision == TypecheckingPath::Fast) {
+            cachedFastPathExtraFiles = std::move(result.files.extraFiles);
+        } else {
+            cachedFastPathExtraFiles.clear();
+        }
         cachedFastPathDecisionValid = true;
     }
     return cachedFastPathDecision;
@@ -172,10 +180,21 @@ const SorbetWorkspaceEditParams &SorbetWorkspaceEditTask::getParams() const {
 }
 
 core::packages::Stratum SorbetWorkspaceEditTask::preemptionStratum(FileStratumMapping info) const {
+    // Only fast path edits preempt, and `canPreempt` populates the cache before we're asked for a stratum. Be
+    // conservative if that ever stops being the case.
+    if (!cachedFastPathDecisionValid) {
+        return info.getLastStratum();
+    }
+
     vector<string_view> paths;
     paths.reserve(this->params->updates.size());
     absl::c_transform(this->params->updates, back_inserter(paths), [](auto &file) { return file->path(); });
-    return info.getStratumForPaths(paths);
+
+    // The fast path runs the incremental namer over its extra files, so the slow path must have already named and
+    // resolved the strata that they belong to. Otherwise, the incremental namer would enter their symbols into the
+    // in-progress symbol table without linearizing them, and typecheck them against a symbol table that's missing
+    // their dependencies.
+    return std::max(info.getStratumForPaths(paths), info.getStratumForFiles(cachedFastPathExtraFiles));
 }
 
 } // namespace sorbet::realmain::lsp

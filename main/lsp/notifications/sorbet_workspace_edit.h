@@ -16,6 +16,9 @@ class SorbetWorkspaceEditTask final : public LSPDangerousTypecheckerTask {
     // Caches the fast path decision for the provided update. Becomes invalidated when the update changes.
     mutable bool cachedFastPathDecisionValid = false;
     mutable TypecheckingPath cachedFastPathDecision = TypecheckingPath::Slow;
+    // When `cachedFastPathDecision` is the fast path, the files outside of the update that the fast path will also
+    // typecheck (e.g., because they mention a method whose definition changed).
+    mutable std::vector<core::FileRef> cachedFastPathExtraFiles;
     // HACK: In the event that this edit is too large to index serially, stash the indexer here for use in `runSpecial`.
     LSPIndexer *indexer = nullptr;
 
