@@ -1233,14 +1233,19 @@ vector<MangledName> PackageInfo::directSubPackages(const core::GlobalState &gs, 
 
     vector<ClassOrModuleRef> work;
     if (startFrom.exists()) {
-        DEBUG_ONLY(auto cursor = startFrom; bool foundParent = false; while (cursor != core::Symbols::root()) {
-            if (cursor == this->mangledName_.owner) {
-                foundParent = true;
-                break;
-            }
+        if constexpr (debug_mode) {
+            auto cursor = startFrom;
+            bool foundParent = false;
+            while (cursor != core::Symbols::root()) {
+                if (cursor == this->mangledName_.owner) {
+                    foundParent = true;
+                    break;
+                }
 
-            cursor = cursor.data(gs)->owner;
-        } ENFORCE(foundParent);)
+                cursor = cursor.data(gs)->owner;
+            }
+            ENFORCE(foundParent);
+        }
     } else {
         startFrom = this->mangledName_.owner;
     }
