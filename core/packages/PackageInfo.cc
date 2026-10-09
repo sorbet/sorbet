@@ -1227,12 +1227,24 @@ void addChildren(vector<ClassOrModuleRef> &work, core::ConstClassOrModuleData kl
 
 } // namespace
 
-vector<MangledName> PackageInfo::directSubPackages(const core::GlobalState &gs) const {
+vector<MangledName> PackageInfo::directSubPackages(const core::GlobalState &gs, ClassOrModuleRef startFrom) const {
     ENFORCE(this->exists());
     vector<MangledName> subpackages;
 
     vector<ClassOrModuleRef> work;
-    addChildren(work, this->mangledName_.owner.data(gs));
+    if (startFrom.exists()) {
+        DEBUG_ONLY(auto cursor = startFrom; bool foundParent = false; while (cursor != core::Symbols::root()) {
+            if (cursor == this->mangledName_.owner) {
+                foundParent = true;
+                break;
+            }
+
+            cursor = cursor.data(gs)->owner;
+        } ENFORCE(foundParent);)
+    } else {
+        startFrom = this->mangledName_.owner;
+    }
+    addChildren(work, startFrom.data(gs));
 
     // Termination argument: we only have one loop in the hierarchy for root, ignoring the singleton/attached class
     // cycle for each symbol, and as we know we're already calling this for a valid package and only processing its
