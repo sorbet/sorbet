@@ -184,7 +184,8 @@ KnowledgeRef KnowledgeRef::under(core::Context ctx, const Environment &env, cfg:
         } else {
             auto &second = fnd->second;
             auto &typeAndOrigin = state.typeAndOrigins;
-            // Skip probing identical types; Types::all already handles them in constant time.
+            // A shared enum value proves the intersection is nonempty without constructing it.
+            // For identical types, use the existing constant-time intersection instead of probing.
             if ((typeAndOrigin.type == second || !hasSharedEnumValue(ctx, typeAndOrigin.type, second)) &&
                 core::Types::all(ctx, typeAndOrigin.type, second).isBottom()) {
                 copy.markDead();
