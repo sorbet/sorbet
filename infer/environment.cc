@@ -28,19 +28,19 @@ bool typeTestReferencesVar(const InlinedVector<pair<cfg::LocalRef, core::TypePtr
     return absl::c_any_of(typeTest, [var](auto &test) { return test.first == var; });
 }
 
-bool hasSharedEnumValue(core::Context ctx, const core::TypePtr &first, const core::TypePtr &second) {
+// Performance shortcut for pathological intersections of large, mostly overlapping enum unions:
+// a shared concrete enum value proves the intersection is nonempty without constructing it.
+// Returning false is inconclusive; the caller must compute the full intersection.
+bool findsSharedEnumValue(core::Context ctx, const core::TypePtr &first, const core::TypePtr &second) {
     if (!core::isa_type<core::OrType>(first) || !core::isa_type<core::OrType>(second)) {
         return false;
     }
-    // Types::all already handles identical types with a pointer comparison.
+    // Skip probing identical types; the caller's intersection already handles them in constant time.
     if (first == second) {
         return false;
     }
 
-    // Performance shortcut for pathological intersections of large, mostly overlapping enum unions:
-    // a shared concrete enum value proves the intersection is nonempty without constructing it.
     // Probe both ends: narrowing may have removed one of these values from the other union.
-    // If neither proves overlap, the caller still computes the full intersection.
     for (bool left : {true, false}) {
         const auto *candidate = &first;
         while (auto unionType = core::cast_type<core::OrType>(*candidate)) {
@@ -188,7 +188,7 @@ KnowledgeRef KnowledgeRef::under(core::Context ctx, const Environment &env, cfg:
         } else {
             auto &second = fnd->second;
             auto &typeAndOrigin = state.typeAndOrigins;
-            if (!hasSharedEnumValue(ctx, typeAndOrigin.type, second) &&
+            if (!findsSharedEnumValue(ctx, typeAndOrigin.type, second) &&
                 core::Types::all(ctx, typeAndOrigin.type, second).isBottom()) {
                 copy.markDead();
                 break;
