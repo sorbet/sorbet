@@ -693,12 +693,36 @@ Methods can be marked as abstract using the `@abstract` annotation comment:
 ```ruby
 # @abstract
 #: -> void
-def baz
-  raise "not implemented"
-end
+def baz = super
 ```
 
-Unlike Sorbet's `abstract` methods, methods annotated with `@abstract` must have a body that consists of a single recognized `raise` call.
+Methods annotated with `@abstract` must have a body consisting of a single forwarding `super` call.
+
+The forwarding `super` preserves Ruby's method lookup. When a class includes an abstract module and inherits a concrete implementation from its superclass, the abstract method delegates to that implementation:
+
+```ruby
+# typed: true
+
+class Parent
+  #: -> String
+  def name = "parent"
+end
+
+# @abstract
+module Name
+  # @abstract
+  #: -> String
+  def name = super
+end
+
+class Child < Parent
+  include Name
+end
+
+Child.new.name # => "parent"
+```
+
+If no implementation exists later in the ancestor chain, Ruby raises `NoMethodError`.
 
 ## Method annotations
 
