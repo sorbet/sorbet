@@ -550,7 +550,8 @@ PackageInfo::checkReferenceAgainstImports(core::Context ctx, core::LocOffsets er
     bool causesVisibilityError = !pkg.isVisibleTo(ctx, *this, autocorrectedImportType);
     bool badTestReference = this->usesTestPackages && pkg.testPackage() && !this->testPackage();
     optional<string> path;
-    if (!isTestImport && db.enforceLayering()) {
+    // TODO(trevor) re-enable cycle checking for test-packages once we have migrated fully.
+    if (!isTestImport && !this->testPackage() && db.enforceLayering()) {
         layeringViolation =
             strictDepsLevel > core::packages::StrictDependenciesLevel::False && this->causesLayeringViolation(db, pkg);
         strictDependenciesTooLow = importStrictDepsLevel != core::packages::StrictDependenciesLevel::None &&
