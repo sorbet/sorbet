@@ -1,0 +1,176 @@
+Monolithic:
+a/patch/definitions.rb:4: File belongs to package `A::Patch` but defines a constant that does not match this namespace https://srb.help/4031
+     4 |class A::Same::Nested
+              ^^^^^^^
+    a/patch/__package.rb:3: Enclosing package declared here
+     3 |class A::Patch < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    a/__package.rb:3: Must belong to this package, given constant name `A::Same`
+     3 |class A < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+
+a/patch/definitions.rb:6: File belongs to package `A::Patch` but defines a constant that does not match this namespace https://srb.help/4031
+     6 |A::Same::FIELD = 1
+        ^^^^^^^
+    a/patch/__package.rb:3: Enclosing package declared here
+     3 |class A::Patch < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    a/__package.rb:3: Must belong to this package, given constant name `A::Same`
+     3 |class A < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+
+a/patch/definitions.rb:8: File belongs to package `A::Patch` but defines a constant that does not match this namespace https://srb.help/4031
+     8 |class A::Foreign::Nested
+              ^^^^^^^^^^
+    a/patch/__package.rb:3: Enclosing package declared here
+     3 |class A::Patch < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    a/__package.rb:3: Must belong to this package, given constant name `A::Foreign`
+     3 |class A < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+
+a/patch/definitions.rb:10: File belongs to package `A::Patch` but defines a constant that does not match this namespace https://srb.help/4031
+    10 |A::Foreign::FIELD = 1
+        ^^^^^^^^^^
+    a/patch/__package.rb:3: Enclosing package declared here
+     3 |class A::Patch < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    a/__package.rb:3: Must belong to this package, given constant name `A::Foreign`
+     3 |class A < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+
+a/patch/definitions.rb:12: File belongs to package `A::Patch` but defines a constant that does not match this namespace https://srb.help/4031
+    12 |class A::Chained::Nested
+              ^^^^^^^^^^
+    a/patch/__package.rb:3: Enclosing package declared here
+     3 |class A::Patch < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    a/__package.rb:3: Must belong to this package, given constant name `A::Chained`
+     3 |class A < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+
+a/patch/definitions.rb:14: File belongs to package `A::Patch` but defines a constant that does not match this namespace https://srb.help/4031
+    14 |A::Chained::FIELD = 1
+        ^^^^^^^^^^
+    a/patch/__package.rb:3: Enclosing package declared here
+     3 |class A::Patch < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    a/__package.rb:3: Must belong to this package, given constant name `A::Chained`
+     3 |class A < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+
+a/patch/definitions.rb:16: File belongs to package `A::Patch` but defines a constant that does not match this namespace https://srb.help/4031
+    16 |module A::ModuleAlias
+        ^^^^^^^^^^^^^^^^^^^^^
+    a/patch/__package.rb:3: Enclosing package declared here
+     3 |class A::Patch < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    a/__package.rb:3: Must belong to this package, given constant name `A::ModuleAlias`
+     3 |class A < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+
+a/patch/definitions.rb:21: File belongs to package `A::Patch` but defines a constant that does not match this namespace https://srb.help/4031
+    21 |class A::Unpackaged::Nested
+              ^^^^^^^^^^^^^
+    a/patch/__package.rb:3: Enclosing package declared here
+     3 |class A::Patch < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    a/__package.rb:3: Must belong to this package, given constant name `A::Unpackaged`
+     3 |class A < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+
+a/patch/definitions.rb:23: File belongs to package `A::Patch` but defines a constant that does not match this namespace https://srb.help/4031
+    23 |A::Unpackaged::FIELD = 1
+        ^^^^^^^^^^^^^
+    a/patch/__package.rb:3: Enclosing package declared here
+     3 |class A::Patch < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    a/__package.rb:3: Must belong to this package, given constant name `A::Unpackaged`
+     3 |class A < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+Errors: 9
+Package-directed:
+a/patch/definitions.rb:4: File belongs to package `A::Patch` but defines a constant that does not match this namespace https://srb.help/4031
+     4 |class A::Same::Nested
+              ^^^^^^^
+    a/patch/__package.rb:3: Enclosing package declared here
+     3 |class A::Patch < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    a/__package.rb:3: Must belong to this package, given constant name `A::Thing`
+     3 |class A < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+
+a/patch/definitions.rb:6: File belongs to package `A::Patch` but defines a constant that does not match this namespace https://srb.help/4031
+     6 |A::Same::FIELD = 1
+        ^^^^^^^
+    a/patch/__package.rb:3: Enclosing package declared here
+     3 |class A::Patch < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    a/__package.rb:3: Must belong to this package, given constant name `A::Thing`
+     3 |class A < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+
+a/patch/definitions.rb:8: File belongs to package `A::Patch` but defines a constant that does not match this namespace https://srb.help/4031
+     8 |class A::Foreign::Nested
+              ^^^^^^^^^^
+    a/patch/__package.rb:3: Enclosing package declared here
+     3 |class A::Patch < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    b/__package.rb:3: Must belong to this package, given constant name `B::Thing`
+     3 |class B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+
+a/patch/definitions.rb:10: File belongs to package `A::Patch` but defines a constant that does not match this namespace https://srb.help/4031
+    10 |A::Foreign::FIELD = 1
+        ^^^^^^^^^^
+    a/patch/__package.rb:3: Enclosing package declared here
+     3 |class A::Patch < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    b/__package.rb:3: Must belong to this package, given constant name `B::Thing`
+     3 |class B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+
+a/patch/definitions.rb:12: File belongs to package `A::Patch` but defines a constant that does not match this namespace https://srb.help/4031
+    12 |class A::Chained::Nested
+              ^^^^^^^^^^
+    a/patch/__package.rb:3: Enclosing package declared here
+     3 |class A::Patch < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    b/__package.rb:3: Must belong to this package, given constant name `B::Thing`
+     3 |class B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+
+a/patch/definitions.rb:14: File belongs to package `A::Patch` but defines a constant that does not match this namespace https://srb.help/4031
+    14 |A::Chained::FIELD = 1
+        ^^^^^^^^^^
+    a/patch/__package.rb:3: Enclosing package declared here
+     3 |class A::Patch < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    b/__package.rb:3: Must belong to this package, given constant name `B::Thing`
+     3 |class B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+
+a/patch/definitions.rb:16: File belongs to package `A::Patch` but defines a constant that does not match this namespace https://srb.help/4031
+    16 |module A::ModuleAlias
+        ^^^^^^^^^^^^^^^^^^^^^
+    a/patch/__package.rb:3: Enclosing package declared here
+     3 |class A::Patch < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    b/__package.rb:3: Must belong to this package, given constant name `B::Mixin`
+     3 |class B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+
+a/patch/definitions.rb:21: File belongs to package `A::Patch` but defines a constant that does not match this namespace https://srb.help/4031
+    21 |class A::Unpackaged::Nested
+              ^^^^^^^^^^^^^
+    a/patch/__package.rb:3: Enclosing package declared here
+     3 |class A::Patch < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+a/patch/definitions.rb:23: File belongs to package `A::Patch` but defines a constant that does not match this namespace https://srb.help/4031
+    23 |A::Unpackaged::FIELD = 1
+        ^^^^^^^^^^^^^
+    a/patch/__package.rb:3: Enclosing package declared here
+     3 |class A::Patch < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 9

@@ -1,0 +1,134 @@
+class <C <U <root>>> < <C <U Object>> ()
+  module <C <U <PackageSpecRegistry>>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> ()
+    class <C <U <PackageSpecRegistry>>>::<C <U A>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U PackageSpec>> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/__package.rb start=4:1 end=4:22}
+      class <C <U <PackageSpecRegistry>>>::<C <U A>>::<C <U Patch>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U PackageSpec>> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/__package.rb start=4:1 end=4:29}
+      class <C <U <PackageSpecRegistry>>>::<C <U A>>::<S <C <U Patch>> $1>[<C <U <AttachedClass>>>] < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<S <C <U PackageSpec>> $1> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/__package.rb start=4:1 end=4:29}
+        type-member(+) <C <U <PackageSpecRegistry>>>::<C <U A>>::<S <C <U Patch>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U <PackageSpecRegistry>>>::<C <U A>>::<S <C <U Patch>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A::Patch) @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/__package.rb start=4:1 end=4:29}
+        method <C <U <PackageSpecRegistry>>>::<C <U A>>::<S <C <U Patch>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/__package.rb start=4:1 end=7:4}
+          argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/__package.rb start=??? end=???}
+    class <C <U <PackageSpecRegistry>>>::<S <C <U A>> $1>[<C <U <AttachedClass>>>] < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<S <C <U PackageSpec>> $1> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/__package.rb start=4:1 end=4:22}
+      type-member(+) <C <U <PackageSpecRegistry>>>::<S <C <U A>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U <PackageSpecRegistry>>>::<S <C <U A>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A) @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/__package.rb start=4:1 end=4:22}
+      method <C <U <PackageSpecRegistry>>>::<S <C <U A>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/__package.rb start=4:1 end=12:4}
+        argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/__package.rb start=??? end=???}
+    class <C <U <PackageSpecRegistry>>>::<C <U B>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U PackageSpec>> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/b/__package.rb start=5:1 end=5:22}
+    class <C <U <PackageSpecRegistry>>>::<S <C <U B>> $1>[<C <U <AttachedClass>>>] < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<S <C <U PackageSpec>> $1> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/b/__package.rb start=5:1 end=5:22}
+      type-member(+) <C <U <PackageSpecRegistry>>>::<S <C <U B>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U <PackageSpecRegistry>>>::<S <C <U B>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=B) @ Loc {file=test/testdata/packager/alias-namespace-recovery/b/__package.rb start=5:1 end=5:22}
+      method <C <U <PackageSpecRegistry>>>::<S <C <U B>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/b/__package.rb start=5:1 end=8:4}
+        argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/b/__package.rb start=??? end=???}
+    class <C <U <PackageSpecRegistry>>>::<C <U Consumer>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U PackageSpec>> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/consumer/__package.rb start=4:1 end=4:29}
+    class <C <U <PackageSpecRegistry>>>::<S <C <U Consumer>> $1>[<C <U <AttachedClass>>>] < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<S <C <U PackageSpec>> $1> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/consumer/__package.rb start=4:1 end=4:29}
+      type-member(+) <C <U <PackageSpecRegistry>>>::<S <C <U Consumer>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U <PackageSpecRegistry>>>::<S <C <U Consumer>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Consumer) @ Loc {file=test/testdata/packager/alias-namespace-recovery/consumer/__package.rb start=4:1 end=4:29}
+      method <C <U <PackageSpecRegistry>>>::<S <C <U Consumer>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/consumer/__package.rb start=4:1 end=9:4}
+        argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/consumer/__package.rb start=??? end=???}
+    class <C <U <PackageSpecRegistry>>>::<C <U Mutex>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U PackageSpec>> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/mutex/__package.rb start=4:1 end=4:26}
+    class <C <U <PackageSpecRegistry>>>::<S <C <U Mutex>> $1>[<C <U <AttachedClass>>>] < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<S <C <U PackageSpec>> $1> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/mutex/__package.rb start=4:1 end=4:26}
+      type-member(+) <C <U <PackageSpecRegistry>>>::<S <C <U Mutex>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U <PackageSpecRegistry>>>::<S <C <U Mutex>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Mutex) @ Loc {file=test/testdata/packager/alias-namespace-recovery/mutex/__package.rb start=4:1 end=4:26}
+      method <C <U <PackageSpecRegistry>>>::<S <C <U Mutex>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/mutex/__package.rb start=4:1 end=5:4}
+        argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/mutex/__package.rb start=??? end=???}
+  class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/__package.rb start=4:1 end=12:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/__package.rb start=??? end=???}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/aliases.rb start=3:1 end=10:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/aliases.rb start=??? end=???}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/__package.rb start=4:1 end=7:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/__package.rb start=??? end=???}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=4:1 end=23:25}
+      argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=??? end=???}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/b/__package.rb start=5:1 end=8:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/b/__package.rb start=??? end=???}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/b/definitions.rb start=3:1 end=6:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/b/definitions.rb start=??? end=???}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/consumer/__package.rb start=4:1 end=9:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/consumer/__package.rb start=??? end=???}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/consumer/use.rb start=4:1 end=20:35}
+      argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/consumer/use.rb start=??? end=???}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/mutex/__package.rb start=4:1 end=5:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/mutex/__package.rb start=??? end=???}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/mutex/definitions.rb start=5:1 end=7:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/mutex/definitions.rb start=??? end=???}
+  module <C <U A>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/aliases.rb start=3:1 end=3:9}
+    static-field <C <U A>>::<C <U Chained>> -> AliasType { symbol = <C <U A>>::<C <U Foreign>> } @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/aliases.rb start=7:3 end=7:10}
+    module <C <U A>>::<M <C <U Chained>> $1> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=14:1 end=14:11}
+      static-field <C <U A>>::<M <C <U Chained>> $1>::<C <U FIELD>> -> Integer @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=14:1 end=14:18}
+      class <C <U A>>::<M <C <U Chained>> $1>::<C <U Nested>> < <C <U Object>> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=12:1 end=12:25}
+      class <C <U A>>::<M <C <U Chained>> $1>::<S <C <U Nested>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=12:1 end=12:25}
+        type-member(+) <C <U A>>::<M <C <U Chained>> $1>::<S <C <U Nested>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U A>>::<M <C <U Chained>> $1>::<S <C <U Nested>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A::Chained::Nested) @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=12:1 end=12:25}
+        method <C <U A>>::<M <C <U Chained>> $1>::<S <C <U Nested>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=12:1 end=13:4}
+          argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=??? end=???}
+    class <C <U A>>::<S <M <C <U Chained>> $1> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=14:1 end=14:11}
+      type-member(+) <C <U A>>::<S <M <C <U Chained>> $1> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U A>>::<S <M <C <U Chained>> $1> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A::Chained) @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=14:1 end=14:11}
+    static-field <C <U A>>::<C <U Foreign>> -> AliasType { symbol = <C <U B>>::<C <U Thing>> } @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/aliases.rb start=6:3 end=6:10}
+    module <C <U A>>::<M <C <U Foreign>> $1> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=10:1 end=10:11}
+      static-field <C <U A>>::<M <C <U Foreign>> $1>::<C <U FIELD>> -> Integer @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=10:1 end=10:18}
+      class <C <U A>>::<M <C <U Foreign>> $1>::<C <U Nested>> < <C <U Object>> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=8:1 end=8:25}
+      class <C <U A>>::<M <C <U Foreign>> $1>::<S <C <U Nested>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=8:1 end=8:25}
+        type-member(+) <C <U A>>::<M <C <U Foreign>> $1>::<S <C <U Nested>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U A>>::<M <C <U Foreign>> $1>::<S <C <U Nested>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A::Foreign::Nested) @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=8:1 end=8:25}
+        method <C <U A>>::<M <C <U Foreign>> $1>::<S <C <U Nested>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=8:1 end=9:4}
+          argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=??? end=???}
+    class <C <U A>>::<S <M <C <U Foreign>> $1> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=10:1 end=10:11}
+      type-member(+) <C <U A>>::<S <M <C <U Foreign>> $1> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U A>>::<S <M <C <U Foreign>> $1> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A::Foreign) @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=10:1 end=10:11}
+    static-field <C <U A>>::<C <U ModuleAlias>> -> AliasType { symbol = <C <U B>>::<C <U Mixin>> } @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/aliases.rb start=8:3 end=8:14}
+    module <C <U A>>::<M <C <U ModuleAlias>> $1> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=16:1 end=16:22}
+      method <C <U A>>::<M <C <U ModuleAlias>> $1>#<U alias_recovery_marker> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=17:3 end=17:28}
+        argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=??? end=???}
+    class <C <U A>>::<S <M <C <U ModuleAlias>> $1> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=16:1 end=16:22}
+      type-member(+) <C <U A>>::<S <M <C <U ModuleAlias>> $1> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U A>>::<S <M <C <U ModuleAlias>> $1> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A::ModuleAlias) @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=16:1 end=16:22}
+      method <C <U A>>::<S <M <C <U ModuleAlias>> $1> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=16:1 end=18:4}
+        argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=??? end=???}
+    static-field <C <U A>>::<C <U Same>> -> AliasType { symbol = <C <U A>>::<C <U Thing>> } @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/aliases.rb start=5:3 end=5:7}
+    module <C <U A>>::<M <C <U Same>> $1> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=6:1 end=6:8}
+      static-field <C <U A>>::<M <C <U Same>> $1>::<C <U FIELD>> -> Integer @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=6:1 end=6:15}
+      class <C <U A>>::<M <C <U Same>> $1>::<C <U Nested>> < <C <U Object>> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=4:1 end=4:22}
+      class <C <U A>>::<M <C <U Same>> $1>::<S <C <U Nested>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=4:1 end=4:22}
+        type-member(+) <C <U A>>::<M <C <U Same>> $1>::<S <C <U Nested>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U A>>::<M <C <U Same>> $1>::<S <C <U Nested>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A::Same::Nested) @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=4:1 end=4:22}
+        method <C <U A>>::<M <C <U Same>> $1>::<S <C <U Nested>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=4:1 end=5:4}
+          argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=??? end=???}
+    class <C <U A>>::<S <M <C <U Same>> $1> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=6:1 end=6:8}
+      type-member(+) <C <U A>>::<S <M <C <U Same>> $1> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U A>>::<S <M <C <U Same>> $1> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A::Same) @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=6:1 end=6:8}
+    class <C <U A>>::<C <U Thing>> < <C <U Object>> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/aliases.rb start=4:3 end=4:14}
+    class <C <U A>>::<S <C <U Thing>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/aliases.rb start=4:3 end=4:14}
+      type-member(+) <C <U A>>::<S <C <U Thing>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U A>>::<S <C <U Thing>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A::Thing) @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/aliases.rb start=4:3 end=4:14}
+      method <C <U A>>::<S <C <U Thing>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/aliases.rb start=4:3 end=4:19}
+        argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/aliases.rb start=??? end=???}
+    static-field <C <U A>>::<C <U Unpackaged>> -> AliasType { symbol = <C <U String>> } @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/aliases.rb start=9:3 end=9:13}
+    module <C <U A>>::<M <C <U Unpackaged>> $1> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=23:1 end=23:14}
+      static-field <C <U A>>::<M <C <U Unpackaged>> $1>::<C <U FIELD>> -> Integer @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=23:1 end=23:21}
+      class <C <U A>>::<M <C <U Unpackaged>> $1>::<C <U Nested>> < <C <U Object>> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=21:1 end=21:28}
+      class <C <U A>>::<M <C <U Unpackaged>> $1>::<S <C <U Nested>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=21:1 end=21:28}
+        type-member(+) <C <U A>>::<M <C <U Unpackaged>> $1>::<S <C <U Nested>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U A>>::<M <C <U Unpackaged>> $1>::<S <C <U Nested>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A::Unpackaged::Nested) @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=21:1 end=21:28}
+        method <C <U A>>::<M <C <U Unpackaged>> $1>::<S <C <U Nested>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=21:1 end=22:4}
+          argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=??? end=???}
+    class <C <U A>>::<S <M <C <U Unpackaged>> $1> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=23:1 end=23:14}
+      type-member(+) <C <U A>>::<S <M <C <U Unpackaged>> $1> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U A>>::<S <M <C <U Unpackaged>> $1> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A::Unpackaged) @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=23:1 end=23:14}
+  class <S <C <U A>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/aliases.rb start=3:1 end=3:9}
+    type-member(+) <S <C <U A>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U A>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A) @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/aliases.rb start=3:1 end=3:9}
+    method <S <C <U A>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/aliases.rb start=3:1 end=10:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/aliases.rb start=??? end=???}
+  module <C <U B>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/b/definitions.rb start=3:1 end=3:9}
+    module <C <U B>>::<C <U Mixin>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/b/definitions.rb start=5:3 end=5:15}
+    class <C <U B>>::<S <C <U Mixin>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/b/definitions.rb start=5:3 end=5:15}
+      type-member(+) <C <U B>>::<S <C <U Mixin>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U B>>::<S <C <U Mixin>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=B::Mixin) @ Loc {file=test/testdata/packager/alias-namespace-recovery/b/definitions.rb start=5:3 end=5:15}
+      method <C <U B>>::<S <C <U Mixin>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/b/definitions.rb start=5:3 end=5:20}
+        argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/b/definitions.rb start=??? end=???}
+    class <C <U B>>::<C <U Thing>> < <C <U Object>> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/b/definitions.rb start=4:3 end=4:14}
+    class <C <U B>>::<S <C <U Thing>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/b/definitions.rb start=4:3 end=4:14}
+      type-member(+) <C <U B>>::<S <C <U Thing>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U B>>::<S <C <U Thing>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=B::Thing) @ Loc {file=test/testdata/packager/alias-namespace-recovery/b/definitions.rb start=4:3 end=4:14}
+      method <C <U B>>::<S <C <U Thing>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/b/definitions.rb start=4:3 end=4:19}
+        argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/b/definitions.rb start=??? end=???}
+  class <S <C <U B>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/b/definitions.rb start=3:1 end=3:9}
+    type-member(+) <S <C <U B>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U B>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=B) @ Loc {file=test/testdata/packager/alias-namespace-recovery/b/definitions.rb start=3:1 end=3:9}
+    method <S <C <U B>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/b/definitions.rb start=3:1 end=6:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/b/definitions.rb start=??? end=???}
+  class <C <U Consumer>> < <C <U Object>> (<C <U Mixin>>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/consumer/use.rb start=17:1 end=17:15}
+  class <S <C <U Consumer>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/consumer/use.rb start=17:1 end=17:15}
+    type-member(+) <S <C <U Consumer>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Consumer>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Consumer) @ Loc {file=test/testdata/packager/alias-namespace-recovery/consumer/use.rb start=17:1 end=17:15}
+    method <S <C <U Consumer>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/consumer/use.rb start=17:1 end=19:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/consumer/use.rb start=??? end=???}
+  class <M <C <U Mutex>> $1> < <C <U Object>> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/mutex/definitions.rb start=5:1 end=5:12}
+    method <M <C <U Mutex>> $1>#<U alias_recovery_marker> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/mutex/definitions.rb start=6:3 end=6:28}
+      argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/mutex/definitions.rb start=??? end=???}
+  class <S <M <C <U Mutex>> $1> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/mutex/definitions.rb start=5:1 end=5:12}
+    type-member(+) <S <M <C <U Mutex>> $1> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <M <C <U Mutex>> $1> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Mutex) @ Loc {file=test/testdata/packager/alias-namespace-recovery/mutex/definitions.rb start=5:1 end=5:12}
+    method <S <M <C <U Mutex>> $1> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/mutex/definitions.rb start=5:1 end=7:4}
+      argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/mutex/definitions.rb start=??? end=???}
+
