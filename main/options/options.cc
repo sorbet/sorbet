@@ -1066,7 +1066,7 @@ void readOptions(Options &opts,
             logger->error("You may not use autocorrect when silencing errors.");
             throw EarlyReturnWithCode(1);
         }
-        if (opts.autocorrect && !opts.inlineInput.empty()) {
+        if (opts.autocorrect && (!opts.inlineInput.empty() || !opts.inlineRBIInput.empty())) {
             logger->error("You may not use autocorrect with inline input.");
             throw EarlyReturnWithCode(1);
         }
