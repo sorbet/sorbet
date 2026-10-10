@@ -54,7 +54,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foo9<<todo method>>(**kwargs, &<blk>)
-      [1, 2, 3].each() do |**|
+      [1, 2, 3].each() do |*args, **|
         <emptyTree>::<C T>.unsafe(<self>).p(begin
             <hashTemp>$2 = ::<Magic>.<to-hash-dup>(::T.unsafe(<fwd-kwargs>))
             <hashTemp>$2
