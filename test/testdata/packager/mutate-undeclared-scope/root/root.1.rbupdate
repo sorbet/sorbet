@@ -1,0 +1,5 @@
+# typed: true
+module Root::User
+  extend T::Helpers
+  mixes_in_class_methods Root # error: `Root` is declared implicitly, but must be defined as a `module` explicitly
+end
