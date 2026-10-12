@@ -124,6 +124,9 @@ public:
     bool seenTruthyOption; // Only used during environment merge. Used to indicate "all-knowing" truthy option.
     bool seenFalsyOption;  // Same for falsy
 
+    // Share the empty KnowledgeRef between the two fields; `mutate` will update appropriately.
+    TestedKnowledge() : _truthy(), _falsy(_truthy) {}
+
     const KnowledgeRef &truthy() const {
         return _truthy;
     }
