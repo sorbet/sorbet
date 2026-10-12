@@ -2149,7 +2149,7 @@ move(direction)
 <blockquote>
 <p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
 </blockquote>
-<p>If a package contains a sub-package, its namespace module (or class) is required to not have mixins. Alternatively, if a package namespace must have mixins, it may not have sub-packages. For example, if there are two packages <code>A</code> and <code>A::B</code>, package <code>A</code> is not allowed to define mixins on the <code>A</code> module or class.</p>
+<p>If a package contains a sub-package, the modules (or classes) that make up the path to that subpackage may not have mixins. For example, if there are two packages <code>A</code> and <code>A::B</code>, package <code>A</code> is not allowed to define mixins on the <code>A</code> module or class.</p>
 <p>Resolving this error involves moving the functionality off of the package namespace symbol <code>A</code> and onto a member of the <code>A</code> package instead, or moving the sub-package to a different place in the package hierarchy. For example,</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">A</span></span>
   extend Foo <span class="hljs-comment"># error</span>
