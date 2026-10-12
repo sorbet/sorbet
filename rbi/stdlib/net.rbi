@@ -2657,6 +2657,12 @@ class Net::HTTPClientError < Net::HTTPResponse
   HAS_BODY = ::T.unsafe(nil)
 end
 
+class Net::HTTPClientException < Net::ProtoServerError
+  include ::Net::HTTPExceptions
+end
+# Deprecated alias kept by net-http for compatibility (renamed in Ruby 2.6)
+Net::HTTPServerException = Net::HTTPClientException
+
 class Net::HTTPConflict < Net::HTTPClientError
   HAS_BODY = ::T.unsafe(nil)
 end
@@ -3392,12 +3398,6 @@ end
 class Net::HTTPServerError < Net::HTTPResponse
   HAS_BODY = ::T.unsafe(nil)
 end
-
-class Net::HTTPServerException < Net::ProtoServerError
-  include ::Net::HTTPExceptions
-end
-# for compatibility
-Net::HTTPClientException = Net::HTTPServerException
 
 class Net::HTTPServiceUnavailable < Net::HTTPServerError
   HAS_BODY = ::T.unsafe(nil)
