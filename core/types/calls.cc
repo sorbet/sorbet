@@ -2524,11 +2524,18 @@ class Magic_callWithSplat : public IntrinsicMethod {
 private:
     static InlinedVector<const TypeAndOrigins *, 2> generateSendArgs(const TupleType *posTuple,
                                                                      const TupleType *kwTuple,
+                                                                     InlinedVector<const TypeAndOrigins*, 2> &callWithSplatArgs,
+                                                                     int posArgsOffset,
                                                                      InlinedVector<TypeAndOrigins, 2> &sendArgStore,
                                                                      Loc argsLoc) {
         auto numKwArgs = kwTuple != nullptr ? kwTuple->elems.size() : 0;
 
-        sendArgStore.reserve(posTuple->elems.size() + numKwArgs);
+        auto totalArgs = posTuple->elems.size() + callWithSplatArgs.size() - posArgsOffset;
+        sendArgStore.reserve(totalArgs + numKwArgs);
+
+        for (auto it = callWithSplatArgs.begin() + posArgsOffset; it != callWithSplatArgs.end(); ++it) {
+            sendArgStore.emplace_back(**it);
+        }
 
         for (auto &arg : posTuple->elems) {
             sendArgStore.emplace_back(arg, argsLoc);
@@ -2556,10 +2563,11 @@ public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         // args[0] is the receiver
         // args[1] is the method
-        // args[2] are the splat arguments
-        // args[3] are the keyword args
+        // args[2] are the trailing splat arguments
+        // args[3] are the trailing keyword splats
+        // args[4..] are the positional/keyword arguments which came before the splats
 
-        if (args.args.size() != 4) {
+        if (args.args.size() < 4) {
             return;
         }
 
@@ -2617,11 +2625,12 @@ public:
             return;
         }
 
-        uint16_t numPosArgs = posTuple->elems.size();
+        // the trailing args are going to also be counted here
+        uint16_t numPosArgs = posTuple->elems.size() + args.args.size() - 4;
 
         InlinedVector<TypeAndOrigins, 2> sendArgStore;
         InlinedVector<const TypeAndOrigins *, 2> sendArgs =
-            Magic_callWithSplat::generateSendArgs(posTuple, kwTuple, sendArgStore, args.argLoc(2));
+            Magic_callWithSplat::generateSendArgs(posTuple, kwTuple, args.args, 4, sendArgStore, args.argLoc(2));
         InlinedVector<LocOffsets, 2> sendArgLocs(sendArgs.size(), args.locs.args[2]);
         CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], args.locs.fun,
                           absl::MakeSpan(sendArgLocs)};
@@ -2918,8 +2927,9 @@ public:
         // args[2] are the splat arguments
         // args[3] are the keyword arguments
         // args[4] is the block
+        // args[5...] are the remaining positional ones
 
-        if (args.args.size() != 5) {
+        if (args.args.size() < 5) {
             return;
         }
 
@@ -2967,7 +2977,7 @@ public:
             return;
         }
 
-        uint16_t numPosArgs = posTuple->elems.size();
+        uint16_t numPosArgs = posTuple->elems.size() + args.args.size() - 5;
 
         auto kwType = args.args[3]->type;
         auto kwTuple = cast_type<TupleType>(kwType);
@@ -2988,7 +2998,7 @@ public:
 
         InlinedVector<TypeAndOrigins, 2> sendArgStore;
         InlinedVector<const TypeAndOrigins *, 2> sendArgs =
-            Magic_callWithSplat::generateSendArgs(posTuple, kwTuple, sendArgStore, args.argLoc(2));
+            Magic_callWithSplat::generateSendArgs(posTuple, kwTuple, args.args, 5, sendArgStore, args.argLoc(2));
         InlinedVector<LocOffsets, 2> sendArgLocs(sendArgs.size(), args.locs.args[2]);
         CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], args.locs.fun,
                           absl::MakeSpan(sendArgLocs)};
