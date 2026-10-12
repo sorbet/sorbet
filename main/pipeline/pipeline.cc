@@ -906,6 +906,15 @@ PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::Pars
                 ENFORCE(info.applicationStratum < USHRT_MAX);
                 result.fileToStratum[ix] = core::packages::Stratum(info.applicationStratum);
             }
+
+            if constexpr (debug_mode) {
+                if (file->isPackage(gs)) {
+                    auto &pkgInfo = db.getPackageInfo(pkgName);
+                    if (pkgInfo.usesTestPackages) {
+                        ENFORCE(info.testStratum == info.applicationStratum);
+                    }
+                }
+            }
         }
 
         fast_sort(sourceFiles,
