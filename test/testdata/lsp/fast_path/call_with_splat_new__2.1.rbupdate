@@ -1,0 +1,9 @@
+# typed: strict
+# exclude-from-file-update: true
+
+int_arg = [1]
+str_arg = ['']
+  A.new(*int_arg)
+# ^ error: Expected `String` but found `Integer(1)` for argument `x`
+  A.new(*str_arg)
+# spacer
