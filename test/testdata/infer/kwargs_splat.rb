@@ -49,8 +49,8 @@ def h(x, y:, **kw_splat)
 end
 
 untyped_values_hash = T.let({}, T::Hash[Symbol, T.untyped])
+  # `y:` is passed explicitly, so the splat isn't the only possible source for it.
   h(1, y: 2, **untyped_values_hash)
-  #    ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Cannot call `Object#h` with a `Hash` keyword splat because the method has required keyword parameters
 
 sig {params(kw_splat: T::Hash[Symbol, String]).void}
 def i(**kw_splat)

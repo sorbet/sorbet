@@ -69,70 +69,28 @@ ClassDef{
         }
         Array{
           elems = [
-            InsSeq{
-              stats = [
-                Assign{
-                  lhs = UnresolvedIdent{
-                    kind = Local
-                    name = <D <U <hashTemp>> $2>
-                  }
-                  rhs = Hash{
-                    pairs = [
-                      [
-                        key = Literal{ value = :e }
-                        value = Literal{ value = 6 }
-                      ]
-                    ]
-                  }
-                }
-                Assign{
-                  lhs = UnresolvedIdent{
-                    kind = Local
-                    name = <D <U <hashTemp>> $2>
-                  }
-                  rhs = Send{
-                    flags = {}
-                    recv = ConstantLit{
-                      symbol = (class ::<Magic>)
-                      orig = nullptr
-                    }
-                    fun = <U <merge-hash>>
-                    block = nullptr
-                    pos_args = 2
-                    args = [
-                      UnresolvedIdent{
-                        kind = Local
-                        name = <D <U <hashTemp>> $2>
-                      }
-                      Send{
-                        flags = {}
-                        recv = ConstantLit{
-                          symbol = (class ::<Magic>)
-                          orig = nullptr
-                        }
-                        fun = <U <to-hash-nodup>>
-                        block = nullptr
-                        pos_args = 1
-                        args = [
-                          Send{
-                            flags = {privateOk}
-                            recv = Self
-                            fun = <U f>
-                            block = nullptr
-                            pos_args = 0
-                            args = [
-                            ]
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                }
-              ],
-              expr = UnresolvedIdent{
-                kind = Local
-                name = <D <U <hashTemp>> $2>
+            Literal{ value = :e }
+            Literal{ value = 6 }
+            Send{
+              flags = {}
+              recv = ConstantLit{
+                symbol = (class ::<Magic>)
+                orig = nullptr
               }
+              fun = <U <to-hash-dup>>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Send{
+                  flags = {privateOk}
+                  recv = Self
+                  fun = <U f>
+                  block = nullptr
+                  pos_args = 0
+                  args = [
+                  ]
+                }
+              ]
             }
           ]
         }
@@ -237,70 +195,28 @@ ClassDef{
         }
         Array{
           elems = [
-            InsSeq{
-              stats = [
-                Assign{
-                  lhs = UnresolvedIdent{
-                    kind = Local
-                    name = <D <U <hashTemp>> $3>
-                  }
-                  rhs = Hash{
-                    pairs = [
-                      [
-                        key = Literal{ value = :e }
-                        value = Literal{ value = 6 }
-                      ]
-                    ]
-                  }
-                }
-                Assign{
-                  lhs = UnresolvedIdent{
-                    kind = Local
-                    name = <D <U <hashTemp>> $3>
-                  }
-                  rhs = Send{
-                    flags = {}
-                    recv = ConstantLit{
-                      symbol = (class ::<Magic>)
-                      orig = nullptr
-                    }
-                    fun = <U <merge-hash>>
-                    block = nullptr
-                    pos_args = 2
-                    args = [
-                      UnresolvedIdent{
-                        kind = Local
-                        name = <D <U <hashTemp>> $3>
-                      }
-                      Send{
-                        flags = {}
-                        recv = ConstantLit{
-                          symbol = (class ::<Magic>)
-                          orig = nullptr
-                        }
-                        fun = <U <to-hash-nodup>>
-                        block = nullptr
-                        pos_args = 1
-                        args = [
-                          Send{
-                            flags = {privateOk}
-                            recv = Self
-                            fun = <U f>
-                            block = nullptr
-                            pos_args = 0
-                            args = [
-                            ]
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                }
-              ],
-              expr = UnresolvedIdent{
-                kind = Local
-                name = <D <U <hashTemp>> $3>
+            Literal{ value = :e }
+            Literal{ value = 6 }
+            Send{
+              flags = {}
+              recv = ConstantLit{
+                symbol = (class ::<Magic>)
+                orig = nullptr
               }
+              fun = <U <to-hash-dup>>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Send{
+                  flags = {privateOk}
+                  recv = Self
+                  fun = <U f>
+                  block = nullptr
+                  pos_args = 0
+                  args = [
+                  ]
+                }
+              ]
             }
           ]
         }
@@ -401,70 +317,28 @@ ClassDef{
         }
         Array{
           elems = [
-            InsSeq{
-              stats = [
-                Assign{
-                  lhs = UnresolvedIdent{
-                    kind = Local
-                    name = <D <U <hashTemp>> $4>
-                  }
-                  rhs = Hash{
-                    pairs = [
-                      [
-                        key = Literal{ value = :e }
-                        value = Literal{ value = 6 }
-                      ]
-                    ]
-                  }
-                }
-                Assign{
-                  lhs = UnresolvedIdent{
-                    kind = Local
-                    name = <D <U <hashTemp>> $4>
-                  }
-                  rhs = Send{
-                    flags = {}
-                    recv = ConstantLit{
-                      symbol = (class ::<Magic>)
-                      orig = nullptr
-                    }
-                    fun = <U <merge-hash>>
-                    block = nullptr
-                    pos_args = 2
-                    args = [
-                      UnresolvedIdent{
-                        kind = Local
-                        name = <D <U <hashTemp>> $4>
-                      }
-                      Send{
-                        flags = {}
-                        recv = ConstantLit{
-                          symbol = (class ::<Magic>)
-                          orig = nullptr
-                        }
-                        fun = <U <to-hash-nodup>>
-                        block = nullptr
-                        pos_args = 1
-                        args = [
-                          Send{
-                            flags = {privateOk}
-                            recv = Self
-                            fun = <U f>
-                            block = nullptr
-                            pos_args = 0
-                            args = [
-                            ]
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                }
-              ],
-              expr = UnresolvedIdent{
-                kind = Local
-                name = <D <U <hashTemp>> $4>
+            Literal{ value = :e }
+            Literal{ value = 6 }
+            Send{
+              flags = {}
+              recv = ConstantLit{
+                symbol = (class ::<Magic>)
+                orig = nullptr
               }
+              fun = <U <to-hash-dup>>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Send{
+                  flags = {privateOk}
+                  recv = Self
+                  fun = <U f>
+                  block = nullptr
+                  pos_args = 0
+                  args = [
+                  ]
+                }
+              ]
             }
           ]
         }

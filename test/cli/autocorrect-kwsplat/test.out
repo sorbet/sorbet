@@ -55,24 +55,6 @@ test.rb:21: Cannot call `Object#requires_x` with a `Hash` keyword splat because 
     21 |requires_x(0, 1, 2, **opts, x: 0)
                               ^^^^^^^^^^
 
-test.rb:23: Cannot call `Object#requires_x` with a `Hash` keyword splat because the method has required keyword parameters https://srb.help/7019
-    23 |requires_x(0, 1, 2, x: 0, **opts)
-                            ^^^^^^^^^^^^
-    test.rb:4: Keyword parameters of `Object#requires_x` begin here:
-     4 |sig {params(pos: Integer, x: Integer).void}
-                                  ^
-  Got `T::Hash[T.untyped, T.untyped]` originating from:
-    test.rb:23:
-    23 |requires_x(0, 1, 2, x: 0, **opts)
-                            ^^^^^^^^^^^^
-  Note:
-    Note that Sorbet does not yet handle mixing explicitly-passed keyword args with splats.
-    To ignore this and pass the splat anyways, use `T.unsafe`
-  Autocorrect: Done
-    test.rb:23: Replaced with `**T.unsafe({x: 0, **opts})`
-    23 |requires_x(0, 1, 2, x: 0, **opts)
-                            ^^^^^^^^^^^^
-
 test.rb:25: Cannot call `Object#requires_x` with a `Hash` keyword splat because the method has required keyword parameters https://srb.help/7019
     25 |requires_x(0, 1, 2, **{x => 0})
                             ^^^^^^^^^^
@@ -126,7 +108,7 @@ test.rb:29: Expected `String` for keyword parameter `x` but found `T.nilable(Int
     test.rb:29: Replaced with `T.unsafe(nilble_opts)`
     29 |optional_x(0, 1, 2, **nilble_opts)
                               ^^^^^^^^^^^
-Errors: 7
+Errors: 6
 
 --------------------------------------------------------------------------
 
@@ -152,7 +134,7 @@ requires_x(0, 1, 2, **T.unsafe(opts))
 
 requires_x(0, 1, 2, **T.unsafe({**opts, x: 0}))
 
-requires_x(0, 1, 2, **T.unsafe({x: 0, **opts}))
+requires_x(0, 1, 2, x: 0, **opts)
 
 requires_x(0, 1, 2, **T.unsafe({x => 0}))
 
