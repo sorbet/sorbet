@@ -951,14 +951,15 @@ PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::Pars
                     for (auto member : scc.members) {
                         const auto &package = packagesToPackageRb[member];
 
-                        // Test-only packages don't have any application code, so we can safely skip them at this point.
+                        // Test-only packages don't have any application code, so if we end up with one in an
+                        // application stratum, it's the only occurrence. This will have been raised as an error prior
+                        // to this point, when we constructed the package DB.
                         if (package.file.isTestPackage(gs)) {
-                            continue;
-                        }
-
-                        auto &tree =
+                            packageFiles.emplace_back(std::move(packagesToPackageRb[member]));
+                        } else {
                             packageFiles.emplace_back(packager::Packager::copyPackageWithoutTestExports(gs, package));
-                        ENFORCE(tree.tree);
+                        }
+                        ENFORCE(packageFiles.back().tree);
                     }
                 }
             }
