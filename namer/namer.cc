@@ -18,7 +18,6 @@
 #include "core/Names.h"
 #include "core/Symbols.h"
 #include "core/errors/namer.h"
-#include "core/errors/packager.h"
 #include "core/hashing/hashing.h"
 #include "core/lsp/TypecheckEpochManager.h"
 #include "core/packages/PackageInfo.h"
@@ -1415,7 +1414,7 @@ private:
     void reportNamespaceError(core::MutableContext ctx, core::LocOffsets nameLoc, bool withinExplicitRootScope,
                               core::packages::MangledName namespacePackage, bool onPackagePath,
                               core::ClassOrModuleRef owner, core::NameRef name) {
-        if (auto e = ctx.beginError(nameLoc, core::errors::Packager::DefinitionPackageMismatch)) {
+        if (auto e = ctx.beginError(nameLoc, core::errors::Namer::DefinitionPackageMismatch)) {
             if (withinExplicitRootScope && !package->isPreludePackage()) {
                 e.setHeader("Defining a root-scoped constant requires this package to be marked `{}`", "prelude!");
                 e.addErrorLine(package->declLoc(), "This package is missing a `{}` declaration", "prelude!");
