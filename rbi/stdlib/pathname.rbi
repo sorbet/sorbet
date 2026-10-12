@@ -214,7 +214,7 @@
 # documentation (e.g. through `ri`) will contain more information. In some
 # cases, a brief description will follow.
 class Pathname < Object
-  SAME_PATHS = T.let(T.unsafe(nil), Proc)
+  SAME_PATHS = T.let(T.unsafe(nil), T::Proc[T.untyped])
   SEPARATOR_LIST = T.let(T.unsafe(nil), String)
   SEPARATOR_PAT = T.let(T.unsafe(nil), Regexp)
   TO_PATH = T.let(T.unsafe(nil), Symbol)

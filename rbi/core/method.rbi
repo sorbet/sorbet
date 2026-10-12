@@ -34,7 +34,7 @@ class Method < Object
 
   # Returns a [`Proc`](https://docs.ruby-lang.org/en/2.7.0/Proc.html) object
   # corresponding to this method.
-  sig {returns(Proc)}
+  sig {returns(T::Proc[T.untyped])}
   def to_proc; end
 
   # Invokes the *meth* with the specified arguments, returning the method's
