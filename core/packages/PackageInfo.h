@@ -279,7 +279,8 @@ public:
     }
 
     // The list of known direct sub-packages of this package.
-    std::vector<MangledName> directSubPackages(const core::GlobalState &gs) const;
+    std::vector<MangledName> directSubPackages(const core::GlobalState &gs,
+                                               ClassOrModuleRef startFrom = ClassOrModuleRef()) const;
 
     const Import *importsPackage(MangledName mangledName) const;
 
