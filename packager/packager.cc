@@ -148,7 +148,7 @@ bool isRootScopedDefinition(const ast::ConstantLit *lit) {
 }
 
 // Namespace definitions are checked by namer. This visitor checks behavior in package namespaces.
-class EnforcePackagePrefix final {
+class EnforcePackageBehavior final {
     const PackageInfo &pkg;
     // Legacy test files must define behavior in Test::<package>; test-only packages use their
     // package namespace directly, without an additional Test:: prefix.
@@ -178,7 +178,7 @@ class EnforcePackagePrefix final {
     int errorDepth = 0;
 
 public:
-    EnforcePackagePrefix(core::Context ctx, const PackageInfo &pkg)
+    EnforcePackageBehavior(core::Context ctx, const PackageInfo &pkg)
         : pkg(pkg), mustUseTestNamespace(!pkg.usesTestPackages && ctx.file.data(ctx).isPackagedTest() &&
                                          !pkg.file.data(ctx).isPackagedTest()) {
         ENFORCE(pkg.exists());
@@ -1177,8 +1177,8 @@ void validatePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
     }
     // TODO(neil): Autocorrect to update the sigil?
 
-    EnforcePackagePrefix enforcePrefix(ctx, pkgImpl);
-    ast::ConstShallowWalk::apply(ctx, enforcePrefix, tree);
+    EnforcePackageBehavior enforceBehavior(ctx, pkgImpl);
+    ast::ConstShallowWalk::apply(ctx, enforceBehavior, tree);
 }
 
 } // namespace
