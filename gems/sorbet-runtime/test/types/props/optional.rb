@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 # typed: ignore
 require_relative '../../test_helper'
+require 'singleton'
 
 class Opus::Types::Test::Props::OptionalTest < Critic::Unit::UnitTest
   class DefaultsStruct
@@ -67,5 +68,42 @@ class Opus::Types::Test::Props::OptionalTest < Critic::Unit::UnitTest
     m = DefaultsStruct.new(prop1: nil, prop2: nil)
     assert_nil(m.prop1)
     assert_nil(m.prop2)
+  end
+
+  class SingletonDefaultStruct
+    include T::Props::Serializable
+    include T::Props::WeakConstructor
+
+    class Unset
+      include Singleton
+    end
+
+    prop :foo, T.any(T.nilable(Integer), Unset), default: Unset.instance.freeze
+  end
+
+  it 'allows a frozen singleton instance as a prop default' do
+    m1 = SingletonDefaultStruct.new
+    m2 = SingletonDefaultStruct.new
+
+    assert_instance_of(SingletonDefaultStruct::Unset, m1.foo)
+    assert_same(SingletonDefaultStruct::Unset.instance, m1.foo)
+    assert_same(m1.foo, m2.foo)
+  end
+
+  it 'raises a clear error for a non-frozen non-cloneable default' do
+    struct = Class.new do
+      include T::Props::Serializable
+      include T::Props::WeakConstructor
+
+      class Uncloneable
+        include Singleton
+      end
+
+      prop :bar, T.nilable(Object), default: Uncloneable.instance
+    end
+
+    err = assert_raises(TypeError) { struct.new }
+    assert_includes(err.message, 'frozen')
+    assert_includes(err.message, 'clone-able')
   end
 end
