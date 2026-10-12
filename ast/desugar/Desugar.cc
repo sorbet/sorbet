@@ -881,7 +881,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 // Remove "special" arguments from the list, and keep track of what we found along the way.
                 auto hasFwdArgs = false;
                 auto hasFwdRestArg = false;
-                auto hasSplat = false;
+                bool hasSplatArg = false;
+                parser::NodeVec splatArgs;
                 auto newEndIt = remove_if(send->args.begin(), send->args.end(), [&](auto &arg) {
                     bool eraseFromArgs = false;
 
@@ -901,8 +902,11 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                         eraseFromArgs = true;
                     } else if (parser::isa_node<parser::Splat>(arg.get())) {
                         // Detect if there's a splat in the argument list
-                        hasSplat = true;
-                        eraseFromArgs = false;
+                        hasSplatArg = true;
+                        eraseFromArgs = true;
+                        splatArgs.emplace_back(move(arg));
+                    } else if (hasSplatArg) {
+                        eraseFromArgs = true;
                     } else {
                         eraseFromArgs = false;
                     }
@@ -911,24 +915,45 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 });
                 send->args.erase(newEndIt, send->args.end());
 
-                if (hasFwdArgs || hasFwdRestArg || hasSplat) {
-                    // If we have a splat anywhere in the argument list, desugar
-                    // the argument list as a single Array node, and then
-                    // synthesize a call to
-                    //   Magic.callWithSplat(receiver, method, argArray[, &blk])
-                    // The callWithSplat implementation (in C++) will unpack a
-                    // tuple type and call into the normal call mechanism.
+                if (hasFwdArgs || hasFwdRestArg || hasSplatArg) {
+                    // If we have a splat anywhere in the argument list, then we'll be converting this to an
+                    // intrinsic. The common case is going to look like
+                    //
+                    //   recv.method(a, *args, k: v, **kwargs[, &blk])
+                    //
+                    // which will be converted to
+                    //
+                    //   Magic.callWithSplat(recv, method, args, kwargs, a, k: v, [, &blk])
+                    //
+                    // Of course, Ruby splats are complicated, which means it's possible for us to get
+                    // something like
+                    //
+                    //   recv.method(a, *args1, b, *args2)
+                    //
+                    // in which case we'll be desugaring to something vaguely like
+                    //
+                    //   Magic.callWithSplat(recv, method, args1 + [b] + args2, nil, a)
+                    //
+                    // If callWithSplat's third argument ends up being a tuple, the callWithSplat intrinsic
+                    // can typecheck against the explicit arguments as given.
 
-                    auto argsEmpty = send->args.empty();
-                    unique_ptr<parser::Node> array = make_unique<parser::Array>(locZeroLen, move(send->args));
-                    auto args = node2TreeImpl(dctx, array);
+                    auto args = MK::Nil(loc);
+                    if (hasSplatArg) {
+                        // If there's only the one splat (which is fairly common) then just pass it directly
+                        if (splatArgs.size() == 1) {
+                            args = node2TreeImpl(dctx, splatArgs.back());
+                        } else {
+                            // if there's more than just the one, then turn it into a splatted array
+                            unique_ptr<parser::Node> array = make_unique<parser::Array>(locZeroLen, move(splatArgs));
+                            args = node2TreeImpl(dctx, array);
+                        }
+                    }
 
                     if (hasFwdArgs) {
                         auto fwdArgs = MK::Local(loc, core::Names::fwdArgs());
                         auto argsSplat = MK::Splat(loc, move(fwdArgs));
                         auto argsConcat =
-                            argsEmpty ? move(argsSplat)
-                                      : MK::Send1(loc, move(args), core::Names::concat(), locZeroLen, move(argsSplat));
+                            hasSplatArg ? move(argsSplat) : MK::Send1(loc, move(args), core::Names::concat(), locZeroLen, move(argsSplat));
 
                         auto fwdKwargs = MK::Local(loc, core::Names::fwdKwargs());
                         auto kwargsSplat =
@@ -939,7 +964,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                         auto kwargsArray = MK::Array(loc, move(kwargsEntries));
 
                         argsConcat =
-                            MK::Send1(loc, move(argsConcat), core::Names::concat(), locZeroLen, move(kwargsArray));
+                            MK::Send1(loc, move(argsSplat), core::Names::concat(), locZeroLen, move(kwargsArray));
 
                         args = move(argsConcat);
                     } else if (hasFwdRestArg) {
@@ -981,6 +1006,9 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                         // Desugar any call with a splat and without a block pass argument.
                         // If there's a literal block argument, that's handled here, too.
                         // E.g. `foo(*splat)` or `foo(*splat) { |x| puts(x) }`
+                        for (auto &arg : send->args) {
+                            sendargs.emplace_back(node2TreeImpl(dctx, arg));
+                        }
                         res = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplat(), send->methodLoc, 4,
                                        move(sendargs), flags);
                     } else {
@@ -999,6 +1027,9 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                             // E.g. `foo(*splat, &block)`
 
                             sendargs.emplace_back(move(blockPassArg));
+                            for (auto &arg : send->args) {
+                                sendargs.emplace_back(node2TreeImpl(dctx, arg));
+                            }
                             res = MK::Send(loc, MK::Magic(blockPassLoc), core::Names::callWithSplatAndBlockPass(),
                                            send->methodLoc, 5, move(sendargs), flags);
                         }
