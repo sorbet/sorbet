@@ -1,0 +1,52 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::Owner<<C Owner>> < (::Sorbet::Private::Static::PackageSpec)
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::Prelude<<C Prelude>> < (::Sorbet::Private::Static::PackageSpec)
+    <self>.prelude!()
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module ::Owner<<C Owner>> < ()
+    class ::Owner::Existing<<C Existing>> < (::<todo sym>)
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  ::Owner::ASSIGNED = 1
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module ::Owner<Owner$2> < ()
+    class ::Owner::Nested<<C Nested>> < (::<todo sym>)
+    end
+
+    ::Owner::VALUE = 1
+  end
+
+  module ::UnpackagedPrelude<<C UnpackagedPrelude>> < ()
+    class ::UnpackagedPrelude::Nested<<C Nested>> < (::<todo sym>)
+    end
+
+    ::UnpackagedPrelude::VALUE = 1
+  end
+
+  class ::String<<C String>> < (::<todo sym>)
+    class ::String::PreludePatch<<C PreludePatch>> < (::<todo sym>)
+    end
+  end
+
+  module ::Prelude<<C Prelude>> < ()
+    class ::Prelude::Own<<C Own>> < (::<todo sym>)
+    end
+
+    ::Prelude::VALUE = 1
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::Owner::Qualified<<C Qualified>> < (::<todo sym>)
+  end
+
+  module ::Owner::Deep::Patch<<C Patch>> < ()
+  end
+end
