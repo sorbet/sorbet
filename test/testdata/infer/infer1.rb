@@ -48,4 +48,3 @@ def baz8
    b = 1
  end
 end
-

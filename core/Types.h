@@ -67,6 +67,12 @@ enum class UntypedMode {
     AlwaysIncompatible = 2,
 };
 
+// How literal types should be handled in least-upper-bound calculations.
+enum class LiteralTypesMode {
+    broaden,  // lub(123, 456) = Integer
+    preserve, // lub(123, 456) = 123 | 456
+};
+
 class Types final {
 public:
     /** Greater lower bound: the widest type that is subtype of both t1 and t2 */
@@ -170,11 +176,14 @@ public:
      */
     static TypePtr approximateTypeVars(const GlobalState &gs, const TypePtr &what, const TypeConstraint &tc);
     static TypePtr dropLiteral(const GlobalState &gs, const TypePtr &tp);
+    /** Drops literal types, recursively processing union components. */
+    static TypePtr dropLiteralRecursive(const GlobalState &gs, const TypePtr &tp);
 
     /** Internal implementation. You should probably use all(). */
     static TypePtr glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     /** Internal implementation. You should probably use any(). */
-    static TypePtr lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
+    static TypePtr lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2,
+                       LiteralTypesMode literalTypesMode = LiteralTypesMode::preserve);
 
     static TypePtr lubAll(const GlobalState &gs, const std::vector<TypePtr> &elements);
     static TypePtr arrayOf(const GlobalState &gs, const TypePtr &elem);
@@ -299,6 +308,34 @@ inline bool is_proxy_type(const TypePtr &what) {
         case TypePtr::Tag::ShapeType:
         case TypePtr::Tag::TupleType:
             return true;
+        case TypePtr::Tag::ClassType:
+        case TypePtr::Tag::BlamedUntyped:
+        case TypePtr::Tag::UnresolvedClassType:
+        case TypePtr::Tag::UnresolvedAppliedType:
+        case TypePtr::Tag::OrType:
+        case TypePtr::Tag::AndType:
+        case TypePtr::Tag::LambdaParam:
+        case TypePtr::Tag::SelfTypeParam:
+        case TypePtr::Tag::SelfType:
+        case TypePtr::Tag::AliasType:
+        case TypePtr::Tag::AppliedType:
+        case TypePtr::Tag::TypeVar:
+        case TypePtr::Tag::MetaType:
+            return false;
+    }
+}
+
+inline bool is_literal_type(const TypePtr &what) {
+    if (what == nullptr) {
+        return false;
+    }
+    switch (what.tag()) {
+        case TypePtr::Tag::NamedLiteralType:
+        case TypePtr::Tag::IntegerLiteralType:
+        case TypePtr::Tag::FloatLiteralType:
+            return true;
+        case TypePtr::Tag::ShapeType:
+        case TypePtr::Tag::TupleType:
         case TypePtr::Tag::ClassType:
         case TypePtr::Tag::BlamedUntyped:
         case TypePtr::Tag::UnresolvedClassType:
@@ -810,9 +847,11 @@ private:
     template <class T>
     friend bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
                                                 const TypePtr &t2, UntypedMode mode, T &errorDetailsCollector);
-    friend TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
+    friend TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2,
+                                   LiteralTypesMode literalTypesMode);
     friend TypePtr lubGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
-    friend TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
+    friend TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2,
+                              LiteralTypesMode literalTypesMode);
     friend TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr filterOrComponents(const TypePtr &originalType, absl::Span<const TypePtr> typeFilter);
     friend TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from,
@@ -864,7 +903,8 @@ private:
     friend TypePtr lubGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr glbDistributeAnd(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr glbGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
-    friend TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
+    friend TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2,
+                              LiteralTypesMode literalTypesMode);
     friend TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &t1);
     friend TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from,

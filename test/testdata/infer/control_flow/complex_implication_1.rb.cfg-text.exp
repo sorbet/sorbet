@@ -155,8 +155,8 @@ bb22[firstDead=-1]():
 # - bb20
 # - bb21
 # - bb22
-bb24[firstDead=1](<returnMethodTemp>$2: T.nilable(Integer)):
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(Integer)
+bb24[firstDead=1](<returnMethodTemp>$2: T.nilable(Integer(1))):
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(Integer(1))
     <unconditional> -> bb1
 
 }

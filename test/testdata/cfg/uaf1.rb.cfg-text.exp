@@ -69,7 +69,7 @@ bb5[firstDead=-1](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::V
 # backedges
 # - bb5
 # - bb8
-bb7[firstDead=-1](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$7: T.nilable(Integer), <exceptionValue>$8: Exception, <gotoDeadTemp>$13: NilClass):
+bb7[firstDead=-1](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$7: T.nilable(Integer(1)), <exceptionValue>$8: Exception, <gotoDeadTemp>$13: NilClass):
     # outerLoops: 1
     <cfgAlias>$11: T.class_of(StandardError) = alias <C StandardError>
     <isaCheckTemp>$12: T::Boolean = <cfgAlias>$11: T.class_of(StandardError).===(<exceptionValue>$8: Exception)
@@ -100,7 +100,7 @@ bb11[firstDead=-1](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::
 
 # backedges
 # - bb7
-bb12[firstDead=-1](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$7: T.nilable(Integer)):
+bb12[firstDead=-1](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$7: T.nilable(Integer(1))):
     # outerLoops: 1
     <gotoDeadTemp>$13: TrueClass = true
     <gotoDeadTemp>$13 -> (TrueClass ? bb1 : bb13)
@@ -109,9 +109,9 @@ bb12[firstDead=-1](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::
 # - bb10
 # - bb11
 # - bb12
-bb13[firstDead=1](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$7: Integer, <gotoDeadTemp>$13: NilClass):
+bb13[firstDead=1](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$7: T.any(Integer(1), Integer(2)), <gotoDeadTemp>$13: NilClass):
     # outerLoops: 1
-    <blockReturnTemp>$15: T.noreturn = blockreturn<map> <blockReturnTemp>$7: Integer
+    <blockReturnTemp>$15: T.noreturn = blockreturn<map> <blockReturnTemp>$7: T.any(Integer(1), Integer(2))
     <unconditional> -> bb2
 
 }

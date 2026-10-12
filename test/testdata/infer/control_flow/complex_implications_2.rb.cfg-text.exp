@@ -62,8 +62,8 @@ bb9[firstDead=-1]():
 # backedges
 # - bb8
 # - bb9
-bb10[firstDead=1](<returnMethodTemp>$2: T.nilable(Integer)):
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(Integer)
+bb10[firstDead=1](<returnMethodTemp>$2: T.nilable(Integer(1))):
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(Integer(1))
     <unconditional> -> bb1
 
 }

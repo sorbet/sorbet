@@ -32,7 +32,7 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb4
-bb3[firstDead=-1](<returnMethodTemp>$2: T.nilable(Integer), <exceptionValue>$3: Exception):
+bb3[firstDead=-1](<returnMethodTemp>$2: T.nilable(Integer(1)), <exceptionValue>$3: Exception):
     <cfgAlias>$7: T.class_of(StandardError) = alias <C StandardError>
     <isaCheckTemp>$8: T::Boolean = <cfgAlias>$7: T.class_of(StandardError).===(<exceptionValue>$3: Exception)
     <isaCheckTemp>$8 -> (T::Boolean ? bb10 : bb11)
@@ -64,14 +64,14 @@ bb7[firstDead=0]():
 
 # backedges
 # - bb3
-bb10[firstDead=-1](<returnMethodTemp>$2: T.nilable(Integer), <exceptionValue>$3: StandardError):
+bb10[firstDead=-1](<returnMethodTemp>$2: T.nilable(Integer(1)), <exceptionValue>$3: StandardError):
     <exceptionValue>$3: NilClass = nil
     <keepForCfgTemp>$5: T.untyped = <keep-alive> <exceptionValue>$3
     <gotoDeadTemp>$9 -> (NilClass ? bb1 : bb12)
 
 # backedges
 # - bb3
-bb11[firstDead=-1](<returnMethodTemp>$2: T.nilable(Integer)):
+bb11[firstDead=-1](<returnMethodTemp>$2: T.nilable(Integer(1))):
     <gotoDeadTemp>$9: TrueClass = true
     <gotoDeadTemp>$9 -> (TrueClass ? bb1 : bb12)
 
@@ -80,8 +80,8 @@ bb11[firstDead=-1](<returnMethodTemp>$2: T.nilable(Integer)):
 # - bb7
 # - bb10
 # - bb11
-bb12[firstDead=1](<returnMethodTemp>$2: T.nilable(Integer)):
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(Integer)
+bb12[firstDead=1](<returnMethodTemp>$2: T.nilable(T.any(Integer(1), Integer(3)))):
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(T.any(Integer(1), Integer(3)))
     <unconditional> -> bb1
 
 }
