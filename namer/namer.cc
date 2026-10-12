@@ -1339,7 +1339,8 @@ private:
         if (package->usesTestPackages && !ctx.state.packageDB().testPackages() && inTestNamespace) {
             onPackagePath = false;
         }
-        auto exempt = package->isPreludePackage() && withinExplicitRootScope;
+        auto foreignNamespace = packageRegistryOwner.exists() && namespacePackage.exists() && !onPackagePath;
+        auto exempt = package->isPreludePackage() && withinExplicitRootScope && !foreignNamespace;
         return !exempt && (!onPackagePath || (mustUseTestNamespace(ctx) && !inTestNamespace));
     }
 
@@ -1383,7 +1384,7 @@ private:
             reportNamespaceError(ctx, klass.declLoc, klass.withinExplicitRootScope, namespacePackage, onPackagePath,
                                  owner, klass.name);
         }
-        return shouldMangle || (packageRegistryOwner.exists() && namespacePackage.exists() && !onPackagePath);
+        return shouldMangle;
     }
 
     bool shouldMangleStaticFieldDefinition(core::MutableContext ctx, core::ClassOrModuleRef owner,
