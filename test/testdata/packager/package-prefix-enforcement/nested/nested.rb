@@ -7,10 +7,10 @@ end
 
 Root::Nested::Foo::Bar = nil
 ::Allowed::TopLevel = nil # error: requires this package to be marked `prelude!`
-
+# error: requires this package to be marked `prelude!`
   NotAllowed::Foo::Bar = nil
+# ^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
 # ^^^^^^^^^^^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
-
 module Root::Nested
 
   ALLOWED_CONST = T.let(1, Integer)
@@ -46,7 +46,7 @@ end
 
   class Root::Stringy < String
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
-#                       ^^^^^^ error: Superclasses may only be set on constants in the package that owns them
+
 end
 
 class Root::Nested::Stringy < String

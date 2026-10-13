@@ -10,5 +10,6 @@ class String # error: File belongs to package `String` but defines a constant th
 
   # The lexical parent's error suppresses errors even when the namespace resets.
   class ::Consumer::Escaped
+#       ^^^^^^^^^^ error: Defining a root-scoped constant requires this package to be marked `prelude!`
   end
 end

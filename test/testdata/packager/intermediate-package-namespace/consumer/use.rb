@@ -1,3 +1,3 @@
 # typed: strict
 
-Shared::Other::FromIntermediate
+Shared::Other::FromIntermediate # error: Unable to resolve constant `FromIntermediate`

@@ -24,7 +24,7 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> @ Loc {file=test/testdata/packager/invalid-constant-assignments/consumer/use.rb start=??? end=???}
     method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/invalid-constant-assignments/producer/__package.rb start=4:1 end=6:4}
       argument <blk><block> @ Loc {file=test/testdata/packager/invalid-constant-assignments/producer/__package.rb start=??? end=???}
-    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/invalid-constant-assignments/producer/bad.rb start=3:1 end=8:4}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/invalid-constant-assignments/producer/bad.rb start=3:1 end=10:4}
       argument <blk><block> @ Loc {file=test/testdata/packager/invalid-constant-assignments/producer/bad.rb start=??? end=???}
     method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/invalid-constant-assignments/producer/bad.rbi start=3:1 end=3:30}
       argument <blk><block> @ Loc {file=test/testdata/packager/invalid-constant-assignments/producer/bad.rbi start=??? end=???}
@@ -42,6 +42,6 @@ class <C <U <root>>> < <C <U Object>> ()
   module <C <U Producer>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/packager/invalid-constant-assignments/producer/bad.rb start=6:1 end=6:16}
   class <S <C <U Producer>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/packager/invalid-constant-assignments/producer/bad.rb start=6:1 end=6:16}
     type-member(+) <S <C <U Producer>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Producer>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Producer) @ Loc {file=test/testdata/packager/invalid-constant-assignments/producer/bad.rb start=6:1 end=6:16}
-    method <S <C <U Producer>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/invalid-constant-assignments/producer/bad.rb start=6:1 end=8:4}
+    method <S <C <U Producer>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/invalid-constant-assignments/producer/bad.rb start=6:1 end=10:4}
       argument <blk><block> @ Loc {file=test/testdata/packager/invalid-constant-assignments/producer/bad.rb start=??? end=???}
 

@@ -7,6 +7,7 @@ class String # error: File belongs to package `Prelude` but defines a constant t
 end
 
 Array::EARLY = 1 # error: File belongs to package `Prelude` but defines a constant that does not match this namespace
+# error: File belongs to package `Prelude` but defines a constant that does not match this namespace
 class Array # error: File belongs to package `Prelude` but defines a constant that does not match this namespace
 end
 
@@ -22,7 +23,7 @@ class LocalRoot::Generic # error: File belongs to package `Prelude` but defines 
   Elem = type_member
 end
 
-::String::Early
-::Array::EARLY
-::LocalRoot::Early
-::LocalRoot::Generic
+::String::Early # error: Unable to resolve constant `Early`
+::Array::EARLY # error: Unable to resolve constant `EARLY`
+::LocalRoot::Early # error: Unable to resolve constant `Early`
+::LocalRoot::Generic # error: Unable to resolve constant `Generic`

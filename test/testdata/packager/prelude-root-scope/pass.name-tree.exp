@@ -13,7 +13,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C Foo>::<C FromExplicitRoot>
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::Foo<<C Foo>> < (::<todo sym>)
+  class ::Foo<Foo$1> < (::<todo sym>)
     class ::Foo::FromUnqualified<<C FromUnqualified>> < (::<todo sym>)
     end
   end

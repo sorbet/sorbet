@@ -32,13 +32,18 @@ class <C <U <root>>> < <C <U Object>> ()
       type-member(+) <C <U Foo>>::<S <C <U FromExplicitRootTest>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Foo>>::<S <C <U FromExplicitRootTest>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Foo::FromExplicitRootTest) @ Loc {file=test/testdata/packager/prelude-root-scope/prelude/definitions.test.rb start=4:3 end=4:29}
       method <C <U Foo>>::<S <C <U FromExplicitRootTest>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/prelude-root-scope/prelude/definitions.test.rb start=4:3 end=5:6}
         argument <blk><block> @ Loc {file=test/testdata/packager/prelude-root-scope/prelude/definitions.test.rb start=??? end=???}
-    class <C <U Foo>>::<C <U FromUnqualified>> < <C <U Object>> () @ Loc {file=test/testdata/packager/prelude-root-scope/prelude/definitions.rb start=4:3 end=4:24}
-    class <C <U Foo>>::<S <C <U FromUnqualified>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/packager/prelude-root-scope/prelude/definitions.rb start=4:3 end=4:24}
-      type-member(+) <C <U Foo>>::<S <C <U FromUnqualified>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U Foo>>::<S <C <U FromUnqualified>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Foo::FromUnqualified) @ Loc {file=test/testdata/packager/prelude-root-scope/prelude/definitions.rb start=4:3 end=4:24}
-      method <C <U Foo>>::<S <C <U FromUnqualified>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/prelude-root-scope/prelude/definitions.rb start=4:3 end=5:6}
+  class <M <C <U Foo>> $1> < <C <U Object>> () @ Loc {file=test/testdata/packager/prelude-root-scope/prelude/definitions.rb start=3:1 end=3:10}
+    class <M <C <U Foo>> $1>::<C <U FromUnqualified>> < <C <U Object>> () @ Loc {file=test/testdata/packager/prelude-root-scope/prelude/definitions.rb start=4:3 end=4:24}
+    class <M <C <U Foo>> $1>::<S <C <U FromUnqualified>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/packager/prelude-root-scope/prelude/definitions.rb start=4:3 end=4:24}
+      type-member(+) <M <C <U Foo>> $1>::<S <C <U FromUnqualified>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<M <C <U Foo>> $1>::<S <C <U FromUnqualified>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Foo::FromUnqualified) @ Loc {file=test/testdata/packager/prelude-root-scope/prelude/definitions.rb start=4:3 end=4:24}
+      method <M <C <U Foo>> $1>::<S <C <U FromUnqualified>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/prelude-root-scope/prelude/definitions.rb start=4:3 end=5:6}
         argument <blk><block> @ Loc {file=test/testdata/packager/prelude-root-scope/prelude/definitions.rb start=??? end=???}
   class <S <C <U Foo>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ (Loc {file=test/testdata/packager/prelude-root-scope/prelude/definitions.rb start=8:1 end=8:12}, Loc {file=test/testdata/packager/prelude-root-scope/prelude/definitions.test.rb start=3:1 end=3:12})
     type-member(+) <S <C <U Foo>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Foo>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Foo) @ (Loc {file=test/testdata/packager/prelude-root-scope/prelude/definitions.rb start=8:1 end=8:12}, Loc {file=test/testdata/packager/prelude-root-scope/prelude/definitions.test.rb start=3:1 end=3:12})
     method <S <C <U Foo>> $1>#<U <static-init>> (<blk>) @ (Loc {file=test/testdata/packager/prelude-root-scope/prelude/definitions.rb start=8:1 end=11:4}, Loc {file=test/testdata/packager/prelude-root-scope/prelude/definitions.test.rb start=3:1 end=6:4})
+      argument <blk><block> @ Loc {file=test/testdata/packager/prelude-root-scope/prelude/definitions.rb start=??? end=???}
+  class <S <M <C <U Foo>> $1> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/packager/prelude-root-scope/prelude/definitions.rb start=3:1 end=3:10}
+    type-member(+) <S <M <C <U Foo>> $1> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <M <C <U Foo>> $1> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Foo) @ Loc {file=test/testdata/packager/prelude-root-scope/prelude/definitions.rb start=3:1 end=3:10}
+    method <S <M <C <U Foo>> $1> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/prelude-root-scope/prelude/definitions.rb start=3:1 end=6:4}
       argument <blk><block> @ Loc {file=test/testdata/packager/prelude-root-scope/prelude/definitions.rb start=??? end=???}
 

@@ -76,7 +76,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   ::A::Chained::FIELD = 1
 
-  module ::A::ModuleAlias<<C ModuleAlias>> < ()
+  module ::A::ModuleAlias<ModuleAlias$1> < ()
     def alias_recovery_marker(<blk>)
       <emptyTree>
     end

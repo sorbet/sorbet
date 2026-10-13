@@ -34,9 +34,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Other::<Class:Thing>::VALUE = 1
     end
 
-    ::Other::Thing::Param = ::T.type_alias() do ||
-      ::T.untyped()
-    end
+    ::Other::Thing::Param = <self>.type_member()
   end
 
   class ::Missing::Thing<<C Thing>> < (::<todo sym>)
