@@ -235,6 +235,7 @@ private:
         bool isSuperclass; // true if superclass, false for mixin
         bool isInclude;    // true if include, false if extend
         optional<uint16_t> mixinIndex;
+        optional<core::packages::PackageInfo::CanModifyResult> canModify;
 
         AncestorResolutionItem() = default;
         AncestorResolutionItem(AncestorResolutionItem &&rhs) noexcept = default;
@@ -1076,7 +1077,11 @@ private:
                                    bool lastRun) {
         auto filePackage = ctx.state.packageDB().getPackageNameForFile(ctx.file);
         auto &filePackageInfo = ctx.state.packageDB().getPackageInfo(filePackage);
-        auto canModify = filePackageInfo.canModifySymbol(ctx, job.klass);
+        if (!job.canModify.has_value()) {
+            // Ownership is unchanged across fixed-point retries, so only check it once per job.
+            job.canModify = filePackageInfo.canModifySymbol(ctx, job.klass);
+        }
+        auto canModify = *job.canModify;
         auto ancestorSym = job.ancestor->symbol();
         bool isTypeAlias = ancestorSym.exists() && ancestorSym.isTypeAlias(ctx);
         auto resolved = ancestorSym.exists() && !isTypeAlias ? ancestorSym.dealias(ctx) : core::SymbolRef();
