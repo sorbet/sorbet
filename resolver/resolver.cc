@@ -154,7 +154,21 @@ private:
         // triggered in a child scope.
         bool runtimeResolutionPresent = false;
 
-        Nesting(shared_ptr<Nesting> parent, core::SymbolRef scope) : parent(std::move(parent)), scope(scope) {}
+        // Marked `true` when we open a scope that explicitly belongs to a different package.
+        // This is used during constant resolution to indicate that we need to consult the package hierarchy at the same
+        // point when resolving names, as there could be a package with the right name that hasn't been imported.
+        bool checkPackageRegistry = false;
+
+        Nesting(core::Context ctx, shared_ptr<Nesting> parent, core::SymbolRef scope)
+            : parent(std::move(parent)), scope(scope) {
+            if (ctx.state.packageDB().enabled()) {
+                auto curPkg = ctx.state.packageDB().getPackageNameForFile(ctx.file);
+                if (curPkg.exists() && scope.isClassOrModule()) {
+                    auto scopePkg = scope.asClassOrModuleRef().data(ctx)->package;
+                    this->checkPackageRegistry = scopePkg.exists() && curPkg != scopePkg;
+                }
+            }
+        }
     };
     CheckSize(Nesting, 24, 8);
 
@@ -296,6 +310,36 @@ private:
     vector<ClassMethodsResolutionItem> todoClassMethods_;
     vector<RequireAncestorResolutionItem> todoRequiredAncestors_;
 
+    static bool shadowedByPackage(core::Context ctx, core::ClassOrModuleRef scope, core::NameRef name) {
+        auto packageRegistryScope = scope.data(ctx)->packageRegistryOwner;
+        if (!packageRegistryScope.exists()) {
+            return false;
+        }
+
+        // If the symbol exists in the package registry, but not outside of it, that could mean that we're seeing a
+        // reference to a package that hasn't been processed yet.
+        auto lookup = packageRegistryScope.data(ctx)->findMemberNoDealias(name);
+        if (!lookup.exists() || !lookup.isClassOrModule()) {
+            return false;
+        }
+
+        // If the symbol doesn't correspond directly to a package name, we can't make assumptions about how it's
+        // introduced, and must assume that it would be resolvable at runtime.
+        if (!cursorIsPackage(ctx, lookup.asClassOrModuleRef())) {
+            return true;
+        }
+
+        // If we have imported the package that owns this symbol, we can allow symbol resolution to continue, as we know
+        // that while the package does own that namespace, it does not define it.
+        if (canReferencePackage(ctx, core::packages::MangledName(lookup.asClassOrModuleRef()))) {
+            return false;
+        }
+
+        // At this point, we know that this refers to a package that wasn't imported, and that hasn't been seen yet, so
+        // shadowing is possible.
+        return true;
+    }
+
     static core::SymbolRef resolveLhs(core::Context ctx, const Nesting *nesting, core::NameRef name) {
         auto *scope = nesting;
         while (scope != nullptr) {
@@ -317,8 +361,13 @@ private:
                         }
                     }
                 }
+
                 if (lookup.exists()) {
                     return lookup;
+                }
+
+                if (scope->checkPackageRegistry && shadowedByPackage(ctx, scope->scope.asClassOrModuleRef(), name)) {
+                    return core::SymbolRef();
                 }
             }
             scope = scope->parent.get();
@@ -1759,7 +1808,7 @@ public:
             }
         }
 
-        nesting_ = make_unique<Nesting>(std::move(nesting_), sym);
+        nesting_ = make_unique<Nesting>(ctx, move(nesting_), sym);
     }
 
     void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
