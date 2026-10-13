@@ -1096,6 +1096,23 @@ TEST_CASE_FIXTURE(ProtocolTest, "OpeningExistingFilesTakesTheFastPath") {
     }
 }
 
+TEST_CASE_FIXTURE(ProtocolTest, "RespectsStrictnessOverridesOnStartup") {
+    auto opts = make_shared<realmain::options::Options>();
+    opts->strictnessOverrides[fmt::format("{}/foo.rb", this->rootPath)] = core::StrictLevel::False;
+    resetState(opts);
+
+    // The error in foo.rb is only reported at `# typed: true`.
+    writeFilesToFS({{"foo.rb", "# typed: true\n"
+                               "class Foo1\n"
+                               "  def branch\n"
+                               "    1 + \"stuff\"\n"
+                               "  end\n"
+                               "end\n"}});
+    this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/foo.rb", this->rootPath));
+
+    assertErrorDiagnostics(initializeLSP(), {});
+}
+
 TEST_CASE_FIXTURE(ProtocolTest, "ImplementationOnBrokenLambda") {
     assertErrorDiagnostics(initializeLSP(), {});
     assertErrorDiagnostics(send(*openFile("foo.rb", "->... {}")), {{"foo.rb", 0, "unexpected token \"...\""}});
