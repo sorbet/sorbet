@@ -44,9 +44,10 @@ using AllFoundDefinitions = vector<pair<core::FileRef, unique_ptr<core::FoundDef
 
 using namespace core::packages;
 
-// [file, owner, originalName] → owner::mangledName
-using MangledClasses =
-    UnorderedMap<tuple<core::FileRef, core::ClassOrModuleRef, core::NameRef>, core::ClassOrModuleRef>;
+// [file, owner, originalName]
+using PackageMangledSymbolKey = tuple<core::FileRef, core::ClassOrModuleRef, core::NameRef>;
+// PackageMangledSymbolKey → owner::mangledName
+using PackageMangledClasses = UnorderedMap<PackageMangledSymbolKey, core::ClassOrModuleRef>;
 
 core::ClassOrModuleRef methodOwner(core::Context ctx, core::SymbolRef owner, bool isSelfMethod) {
     ENFORCE(owner.exists() && owner != core::Symbols::todo());
@@ -873,7 +874,7 @@ private:
     const core::FoundDefinitions &foundDefs;
 
     vector<core::ClassOrModuleRef> &symbolsToRecompute;
-    MangledClasses &mangledClasses;
+    PackageMangledClasses &packageMangledClasses;
     const PackageInfo *package = nullptr;
 
     // Get the symbol for an already-defined owner. Limited to refs that can own things (classes and methods).
@@ -1364,7 +1365,7 @@ private:
             }
 
             if (shouldMangle) {
-                mangledClasses[{ctx.file, owner, klass.name}] = symbol;
+                packageMangledClasses[{ctx.file, owner, klass.name}] = symbol;
             }
         }
         ENFORCE(symbol.exists());
@@ -1950,8 +1951,8 @@ public:
     }
 
     SymbolDefiner(core::Context ctx, const core::FoundDefinitions &foundDefs,
-                  vector<core::ClassOrModuleRef> &symbolsToRecompute, MangledClasses &mangledClasses)
-        : foundDefs(foundDefs), symbolsToRecompute{symbolsToRecompute}, mangledClasses(mangledClasses) {
+                  vector<core::ClassOrModuleRef> &symbolsToRecompute, PackageMangledClasses &packageMangledClasses)
+        : foundDefs(foundDefs), symbolsToRecompute{symbolsToRecompute}, packageMangledClasses(packageMangledClasses) {
         // TODO(jez) Should this be a helper somewhere?
         auto &file = ctx.file.data(ctx);
         if (!ctx.state.packageDB().enabled() || file.isPackage(ctx)) {
@@ -2109,7 +2110,7 @@ public:
  */
 class TreeSymbolizer {
     friend class Namer;
-    const MangledClasses &mangledClasses;
+    const PackageMangledClasses &packageMangledClasses;
 
     core::SymbolRef squashNamesInner(core::Context ctx, core::SymbolRef owner, ast::ExpressionPtr &node,
                                      bool firstName) {
@@ -2142,8 +2143,8 @@ class TreeSymbolizer {
         auto newOwner = squashNamesInner(ctx, owner, constLit->scope, firstNameRecursive);
         ENFORCE(newOwner.exists());
 
-        auto mangled = mangledClasses.find({ctx.file, newOwner.asClassOrModuleRef(), constLit->cnst});
-        core::SymbolRef existing = mangled != mangledClasses.end()
+        auto mangled = packageMangledClasses.find({ctx.file, newOwner.asClassOrModuleRef(), constLit->cnst});
+        core::SymbolRef existing = mangled != packageMangledClasses.end()
                                        ? mangled->second
                                        : ctx.state.lookupClassSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
         if (firstName && !existing.exists() && newOwner.isClassOrModule()) {
@@ -2175,7 +2176,7 @@ class TreeSymbolizer {
     }
 
 public:
-    TreeSymbolizer(const MangledClasses &mangledClasses) : mangledClasses(mangledClasses) {}
+    TreeSymbolizer(const PackageMangledClasses &packageMangledClasses) : packageMangledClasses(packageMangledClasses) {}
 
     void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
@@ -2637,7 +2638,7 @@ void findConflictingClassDefs(const core::GlobalState &gs, ClassBehaviorLocsMap 
 void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinitions,
                    UnorderedMap<core::FileRef, shared_ptr<const core::FileHash>> &&oldFoundHashesForFiles,
                    core::FoundDefHashesResult *foundHashesOut, vector<core::ClassOrModuleRef> &updatedSymbols,
-                   MangledClasses &mangledClasses) {
+                   PackageMangledClasses &packageMangledClasses) {
     Timer timeit(gs.tracer(), "naming.defineSymbols");
     const auto &epochManager = *gs.epochManager;
     uint32_t count = 0;
@@ -2654,7 +2655,7 @@ void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinition
         }
         core::MutableContext ctx(gs, core::Symbols::root(), fref);
 
-        SymbolDefiner symbolDefiner(ctx, *fileFoundDefinitions, updatedSymbols, mangledClasses);
+        SymbolDefiner symbolDefiner(ctx, *fileFoundDefinitions, updatedSymbols, packageMangledClasses);
         auto state = symbolDefiner.enterClassDefinitions(ctx, willDeleteOldDefs, classBehaviorLocs);
         if (willDeleteOldDefs) {
             auto frefIt = oldFoundHashesForFiles.find(fref);
@@ -2680,17 +2681,17 @@ void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinition
 
         core::MutableContext ctx(gs, core::Symbols::root(), fref);
 
-        SymbolDefiner symbolDefiner(ctx, *fileFoundDefinitions, updatedSymbols, mangledClasses);
+        SymbolDefiner symbolDefiner(ctx, *fileFoundDefinitions, updatedSymbols, packageMangledClasses);
         symbolDefiner.enterNewDefinitions(ctx, move(incrementalDefinitions[fref]));
     }
     return;
 }
 
 void symbolizeTrees(const core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers,
-                    const MangledClasses &mangledClasses) {
+                    const PackageMangledClasses &packageMangledClasses) {
     Timer timeit(gs.tracer(), "naming.symbolizeTrees");
     Parallel::iterate(
-        workers, "symbolizeTrees", trees, [&gs, inserter = TreeSymbolizer(mangledClasses)](auto &parsedFile) mutable {
+        workers, "symbolizeTrees", trees, [&gs, inserter = TreeSymbolizer(packageMangledClasses)](auto &parsedFile) mutable {
             Timer timeit(gs.tracer(), "naming.symbolizeTreesOne", {{"file", string(parsedFile.file.data(gs).path())}});
             core::Context ctx(gs, core::Symbols::root(), parsedFile.file);
             ast::TreeWalk::apply(ctx, inserter, parsedFile.tree);
@@ -2712,14 +2713,14 @@ Namer::runInternal(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, Wor
         ENFORCE(foundDefs.size() == 1,
                 "Producing foundMethodHashes is meant to only happen when hashing a single file");
     }
-    MangledClasses mangledClasses;
+    PackageMangledClasses packageMangledClasses;
     defineSymbols(gs, move(foundDefs), std::move(oldFoundHashesForFiles), foundHashesOut, updatedSymbols,
-                  mangledClasses);
+                  packageMangledClasses);
     if (gs.epochManager->wasTypecheckingCanceled()) {
         return true;
     }
 
-    symbolizeTrees(gs, trees, workers, mangledClasses);
+    symbolizeTrees(gs, trees, workers, packageMangledClasses);
     return false;
 }
 
