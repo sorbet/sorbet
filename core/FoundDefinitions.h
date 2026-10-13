@@ -110,6 +110,7 @@ struct FoundClass final {
     core::LocOffsets loc;
     core::LocOffsets declLoc;
     bool definesBehavior = false;
+    bool withinExplicitRootScope = false;
 
     enum class Kind : uint8_t {
         Unknown,
@@ -137,6 +138,7 @@ struct FoundStaticField final {
     core::LocOffsets asgnLoc;
     core::LocOffsets lhsLoc;
     bool isTypeAlias = false;
+    bool withinExplicitRootScope = false;
 
     std::string toString(const core::GlobalState &gs, const FoundDefinitions &foundDefs, uint32_t id) const;
 };
