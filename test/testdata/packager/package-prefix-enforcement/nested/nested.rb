@@ -1,7 +1,7 @@
 # typed: strict
 
-module Wrong
-     # ^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
+module Wrong # error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
+
   class Inside; end
 end
 
@@ -45,7 +45,7 @@ module Root # error: Package `Root::Nested` may not open `Root`
 end
 
   class Root::Stringy < String
-#       ^^^^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
 #                       ^^^^^^ error: Superclasses may only be set on constants in the package that owns them
 end
 
@@ -72,12 +72,12 @@ def top_level_method
   'top'
 end
 
-module Root::ModNotInPackage
-  #    ^^^^^^^^^^^^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
+module Root::ModNotInPackage # error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
+
 end
 
-class Root::ClassNotInPackage
-    # ^^^^^^^^^^^^^^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
+class Root::ClassNotInPackage # error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
+
 end
 
 module ::TopLevel # error: requires this package to be marked `prelude!`

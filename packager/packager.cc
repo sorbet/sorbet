@@ -232,7 +232,7 @@ public:
         if (hasNamespaceMismatch) {
             ENFORCE(errorDepth == 0);
             errorDepth++;
-            if (auto e = ctx.beginError(constantLit->loc(), core::errors::Packager::DefinitionPackageMismatch)) {
+            if (auto e = ctx.beginError(classDef.declLoc, core::errors::Packager::DefinitionPackageMismatch)) {
                 if (rootConsts > 0) {
                     ENFORCE(!pkg.isPreludePackage(), "Prelude root scopes should have been exempted above");
                     rootScopedConstantInNonPreludePackage(ctx, e);
