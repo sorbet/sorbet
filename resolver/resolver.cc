@@ -319,7 +319,7 @@ private:
         // If the symbol exists in the package registry, but not outside of it, that could mean that we're seeing a
         // reference to a package that hasn't been processed yet.
         auto lookup = packageRegistryScope.data(ctx)->findMemberNoDealias(name);
-        if (!lookup.exists()) {
+        if (!lookup.exists() || !lookup.isClassOrModule()) {
             return false;
         }
 
