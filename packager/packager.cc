@@ -392,9 +392,7 @@ private:
         const auto &[scopeSym, _scopeLoc] = scope.back();
 
         core::ClassOrModuleRef klassSym;
-        bool couldBePrefix = true;
         if (!scopeSym.isClassOrModule()) {
-            couldBePrefix = false;
             klassSym = scopeSym.enclosingClass(gs);
         } else {
             klassSym = scopeSym.asClassOrModuleRef();
@@ -402,10 +400,6 @@ private:
         auto klassData = klassSym.data(gs);
         auto pkgForScope = klassData->package;
         auto ownerForScope = klassData->packageRegistryOwner;
-        if (!ownerForScope.exists()) {
-            couldBePrefix = false;
-        }
-
         // A package prefix must advance at least one component below the registry root. If `ownerForScope` is still
         // the root, lookup matched zero package components, so this ordinary scope is not on a package path.
         // `Test` deliberately stays at the root so that package lookup skips the `Test` component.
@@ -421,7 +415,7 @@ private:
             return false;
         }
 
-        return this->pkg.ownsNamespace(gs, pkgForScope, ownerForScope, couldBePrefix);
+        return this->pkg.ownsNamespace(gs, pkgForScope, ownerForScope);
     }
 
     bool inTestNamespace(const core::GlobalState &gs) const {

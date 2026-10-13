@@ -1299,7 +1299,7 @@ private:
 
         auto packageInfo = ctx.state.packageInfoForClassOrModule(owner, name);
         return packageInfo.packageRegistryOwner.exists() && packageInfo.package.exists() &&
-               !this->package->ownsNamespace(ctx, packageInfo.package, packageInfo.packageRegistryOwner, true);
+               !this->package->ownsNamespace(ctx, packageInfo.package, packageInfo.packageRegistryOwner);
     }
 
     core::NameRef mangledClassName(core::MutableContext ctx, core::ClassOrModuleRef owner,
