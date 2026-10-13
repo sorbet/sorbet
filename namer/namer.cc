@@ -18,6 +18,7 @@
 #include "core/Names.h"
 #include "core/Symbols.h"
 #include "core/errors/namer.h"
+#include "core/errors/packager.h"
 #include "core/hashing/hashing.h"
 #include "core/lsp/TypecheckEpochManager.h"
 #include "core/packages/PackageInfo.h"
@@ -896,7 +897,7 @@ private:
 
     vector<core::ClassOrModuleRef> &symbolsToRecompute;
     PackageMangledClasses &packageMangledClasses;
-    [[maybe_unused]] PackageMangledStaticFields &packageMangledStaticFields;
+    PackageMangledStaticFields &packageMangledStaticFields;
     const PackageInfo *package = nullptr;
 
     // Get the symbol for an already-defined owner. Limited to refs that can own things (classes and methods).
@@ -1307,22 +1308,141 @@ private:
         }
     }
 
-    bool shouldMangleClassDefinition(core::MutableContext ctx, core::ClassOrModuleRef owner, core::NameRef name) {
-        if (this->package == nullptr) {
-            return false;
-        }
+    struct NamespaceOwnerInfo final {
+        bool isMangled;
+        bool inTestNamespace;
+    };
 
-        // An enclosing mangled name has already isolated this entire subtree from the source-level namespace, so
-        // mangling classes nested more deeply provides no additional protection.
-        for (auto enclosing = owner; enclosing != core::Symbols::root(); enclosing = enclosing.data(ctx)->owner) {
-            if (enclosing.data(ctx)->name.hasUniqueNameKind(ctx, core::UniqueNameKind::MangleRename)) {
-                return false;
+    NamespaceOwnerInfo namespaceOwnerInfo(core::Context ctx, core::ClassOrModuleRef owner) {
+        bool inTestNamespace = false;
+        auto rootTest = core::Symbols::root().data(ctx)->findMember(ctx, PackageDB::TEST_NAMESPACE);
+
+        for (auto symbol = owner.data(ctx)->topAttachedClass(ctx); symbol != core::Symbols::root();
+             symbol = symbol.data(ctx)->owner.data(ctx)->topAttachedClass(ctx)) {
+            inTestNamespace |= rootTest == symbol;
+            if (symbol.data(ctx)->name.hasUniqueNameKind(ctx, core::UniqueNameKind::MangleRename)) {
+                return {/* isMangled */ true, inTestNamespace};
             }
         }
 
-        auto packageInfo = ctx.state.packageInfoForClassOrModule(owner, name);
-        return packageInfo.packageRegistryOwner.exists() && packageInfo.package.exists() &&
-               !this->package->ownsNamespace(ctx, packageInfo.package, packageInfo.packageRegistryOwner);
+        return {/* isMangled */ false, inTestNamespace};
+    }
+
+    bool mustUseTestNamespace(core::Context ctx) const {
+        return !package->usesTestPackages && ctx.file.data(ctx).isPackagedTest() &&
+               !package->file.data(ctx).isPackagedTest();
+    }
+
+    bool hasNamespaceError(core::Context ctx, core::packages::MangledName namespacePackage,
+                           core::ClassOrModuleRef packageRegistryOwner, bool withinExplicitRootScope,
+                           bool inTestNamespace, bool &onPackagePath) const {
+        if (package->usesTestPackages && !ctx.state.packageDB().testPackages() && inTestNamespace) {
+            onPackagePath = false;
+        }
+        auto exempt = package->isPreludePackage() && withinExplicitRootScope;
+        return !exempt && (!onPackagePath || (mustUseTestNamespace(ctx) && !inTestNamespace));
+    }
+
+    bool shouldMangleClassDefinition(core::MutableContext ctx, core::ClassOrModuleRef owner,
+                                     const core::FoundClass &klass) {
+        if (this->package == nullptr) {
+            return false;
+        }
+        auto ownerInfo = namespaceOwnerInfo(ctx, owner);
+        // Definitions nested within a mangled owner are already isolated. Skip further mangling.
+        if (ownerInfo.isMangled) {
+            return false;
+        }
+
+        auto [packageRegistryOwner, namespacePackage] = ctx.state.packageInfoForClassOrModule(owner, klass.name);
+        const bool isTestNamespaceRoot = owner == core::Symbols::root() && klass.name == PackageDB::TEST_NAMESPACE;
+        bool inTestNamespace = ownerInfo.inTestNamespace || isTestNamespaceRoot;
+        if (klass.classKind == core::FoundClass::Kind::Unknown && ctx.state.packageDB().testPackages() &&
+            isTestNamespaceRoot) {
+            return false;
+        }
+
+        // Check the symbol before following aliases, because aliases are a resolver concept.
+        auto existing = owner.data(ctx)->findMemberNoDealias(klass.name);
+        if (existing.exists() && existing.isClassOrModule()) {
+            auto data = existing.asClassOrModuleRef().data(ctx);
+            // If we've found a pre-existing symbol, treat its packaging information as canonical.
+            // (It might have been marked explicitly unpackaged, e.g. String in the payload)
+            packageRegistryOwner = data->packageRegistryOwner;
+            namespacePackage = data->package;
+        }
+
+        auto onPackagePath = package->ownsNamespace(ctx, namespacePackage, packageRegistryOwner);
+        if (packageRegistryOwner == core::Symbols::PackageSpecRegistry() && !isTestNamespaceRoot) {
+            onPackagePath = false;
+        }
+        auto shouldMangle = hasNamespaceError(ctx, namespacePackage, packageRegistryOwner,
+                                              klass.withinExplicitRootScope, inTestNamespace, onPackagePath);
+        if (shouldMangle) {
+            // Report using the source namespace's ownership before mangling clears it.
+            reportNamespaceError(ctx, klass.declLoc, klass.withinExplicitRootScope, namespacePackage, onPackagePath,
+                                 owner, klass.name);
+        }
+        return shouldMangle || (packageRegistryOwner.exists() && namespacePackage.exists() && !onPackagePath);
+    }
+
+    bool shouldMangleStaticFieldDefinition(core::MutableContext ctx, core::ClassOrModuleRef owner,
+                                           const core::FoundStaticField &staticField) {
+        if (this->package == nullptr) {
+            return false;
+        }
+        auto ownerInfo = namespaceOwnerInfo(ctx, owner);
+        if (ownerInfo.isMangled) {
+            return false;
+        }
+        // Assignments define values inside namespaces, so classify the containing owner.
+        auto packageRegistryOwner = owner.data(ctx)->packageRegistryOwner;
+        auto namespacePackage = owner.data(ctx)->package;
+        bool inTestNamespace = ownerInfo.inTestNamespace;
+
+        // Unlike class definitions, assignments require exact package ownership.
+        auto onPackagePath = namespacePackage == package->mangledName();
+        auto shouldMangle = hasNamespaceError(ctx, namespacePackage, packageRegistryOwner,
+                                              staticField.withinExplicitRootScope, inTestNamespace, onPackagePath);
+        if (shouldMangle) {
+            reportNamespaceError(ctx, staticField.lhsLoc, staticField.withinExplicitRootScope, namespacePackage,
+                                 onPackagePath, owner, staticField.name);
+        }
+        return shouldMangle;
+    }
+
+    void reportNamespaceError(core::MutableContext ctx, core::LocOffsets nameLoc, bool withinExplicitRootScope,
+                              core::packages::MangledName namespacePackage, bool onPackagePath,
+                              core::ClassOrModuleRef owner, core::NameRef name) {
+        if (auto e = ctx.beginError(nameLoc, core::errors::Packager::DefinitionPackageMismatch)) {
+            if (withinExplicitRootScope && !package->isPreludePackage()) {
+                e.setHeader("Defining a root-scoped constant requires this package to be marked `{}`", "prelude!");
+                e.addErrorLine(package->declLoc(), "This package is missing a `{}` declaration", "prelude!");
+                e.addErrorNote("Root-scoped constants are exempt from package namespace checks only in `{}` packages",
+                               "prelude!");
+                return;
+            }
+            auto requiredName = package->mangledName().owner.show(ctx);
+            if (mustUseTestNamespace(ctx)) {
+                requiredName = fmt::format("{}::{}", PackageDB::TEST_NAMESPACE.show(ctx), requiredName);
+                e.setHeader("Tests in the `{}` package must define tests in the `{}` namespace", package->show(ctx),
+                            requiredName);
+            } else {
+                e.setHeader("File belongs to package `{}` but defines a constant that does not match this namespace",
+                            requiredName);
+            }
+            e.addErrorLine(package->declLoc(), "Enclosing package declared here");
+            if (!onPackagePath && namespacePackage.exists()) {
+                auto &requiredPackage = ctx.state.packageDB().getPackageInfo(namespacePackage);
+                if (requiredPackage.exists()) {
+                    auto constantName = owner == core::Symbols::root()
+                                            ? name.show(ctx)
+                                            : fmt::format("{}::{}", owner.show(ctx), name.show(ctx));
+                    e.addErrorLine(requiredPackage.declLoc(), "Must belong to this package, given constant name `{}`",
+                                   constantName);
+                }
+            }
+        }
     }
 
     enum class PackageMangledKind { ClassOrModule, StaticField };
@@ -1364,7 +1484,7 @@ private:
             auto owner = getOwnerSymbol(state, klass.owner);
             auto name = klass.name;
 
-            auto shouldMangle = shouldMangleClassDefinition(ctx, owner, klass.name);
+            auto shouldMangle = shouldMangleClassDefinition(ctx, owner, klass);
             if (!shouldMangle) {
                 // Aliases are entered by resolver--namer should be agnostic of them.
                 auto original = owner.data(ctx)->findMemberNoDealias(klass.name);
@@ -1398,6 +1518,11 @@ private:
 
             if (shouldMangle) {
                 packageMangledClasses[{ctx.file, owner, klass.name, klass.withinExplicitRootScope}] = symbol;
+                // Zero out the package information, to make it not seem like mangled definitions are packaged.
+                // (Makes errors less confusing.)
+                auto data = symbol.data(ctx);
+                data->packageRegistryOwner = core::Symbols::noClassOrModule();
+                data->package = MangledName();
             }
         }
         ENFORCE(symbol.exists());
@@ -1664,6 +1789,19 @@ private:
 
         auto scope = getOwnerSymbol(state, staticField.owner);
         auto name = staticField.name;
+
+        // Package-aware mangling, to avoid entering symbols which belong to other packages
+        auto shouldMangle = shouldMangleStaticFieldDefinition(ctx, scope, staticField);
+        if (shouldMangle) {
+            auto previous = packageMangledStaticFields.find(
+                {ctx.file, scope, staticField.name, staticField.withinExplicitRootScope});
+            if (previous != packageMangledStaticFields.end()) {
+                name = previous->second.data(ctx)->name;
+            } else {
+                name = packageMangledName(ctx, scope, staticField.name, PackageMangledKind::StaticField);
+            }
+        }
+
         auto sym = ctx.state.lookupStaticFieldSymbol(scope, name);
         auto currSym = ctx.state.lookupSymbol(scope, name);
         if (!sym.exists() && currSym.exists()) {
@@ -1674,13 +1812,16 @@ private:
         if (sym.exists()) {
             ENFORCE(currSym.exists());
             name = sym.data(ctx)->name;
-            if (name.hasUniqueNameKind(ctx, core::UniqueNameKind::MangleRename)) {
+            if (!shouldMangle && name.hasUniqueNameKind(ctx, core::UniqueNameKind::MangleRename)) {
                 ENFORCE(currSym != sym);
                 emitRedefinedConstantError(ctx, staticField.asgnLoc, sym, currSym);
             }
         }
         ensureNoPackageConflict(ctx, scope, name, staticField.lhsLoc);
         sym = ctx.state.enterStaticFieldSymbol(ctx.locAt(staticField.lhsLoc), scope, name);
+        if (shouldMangle) {
+            packageMangledStaticFields[{ctx.file, scope, staticField.name, staticField.withinExplicitRootScope}] = sym;
+        }
         // Reset resultType to nullptr for idempotency on the fast path--it will always be
         // re-entered in resolver.
         sym.data(ctx)->resultType = nullptr;
@@ -2325,7 +2466,10 @@ public:
         }
         auto scope = maybeScope.asClassOrModuleRef();
 
-        core::SymbolRef cnst = ctx.state.lookupStaticFieldSymbol(scope, lhs.cnst);
+        auto maybeCnst = packageMangledStaticFields.find({ctx.file, scope, lhs.cnst, withinExplicitRootScope});
+        core::SymbolRef cnst = maybeCnst != packageMangledStaticFields.end()
+                                   ? maybeCnst->second
+                                   : ctx.state.lookupStaticFieldSymbol(scope, lhs.cnst);
         ENFORCE(cnst.exists());
         asgn.lhs = ast::make_expression<ast::ConstantLit>(cnst, asgn.lhs.toUnique<ast::UnresolvedConstantLit>());
 

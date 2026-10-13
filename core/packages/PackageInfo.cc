@@ -1298,6 +1298,14 @@ PackageInfo::CanModifyResult PackageInfo::canModifySymbol(core::Context ctx, Cla
     // Ensure we're not working with a singleton class before performing any further checks.
     sym = sym.data(gs)->topAttachedClass(gs);
 
+    // A rejected definition has its own recovery namespace. Changes inside it cannot modify
+    // the original namespace, and suggesting a different package or `prelude!` would be misleading.
+    for (auto scope = sym; scope != Symbols::root(); scope = scope.data(gs)->owner.data(gs)->topAttachedClass(gs)) {
+        if (scope.data(gs)->name.hasUniqueNameKind(gs, UniqueNameKind::MangleRename)) {
+            return CanModifyResult::CanModify;
+        }
+    }
+
     auto symData = sym.data(gs);
 
     // It's not okay to modify anything in the package hierarchy, as we don't support packages with generics, or mixins
