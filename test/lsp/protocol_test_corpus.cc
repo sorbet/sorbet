@@ -1102,7 +1102,12 @@ TEST_CASE_FIXTURE(ProtocolTest, "RespectsStrictnessOverridesOnStartup") {
     resetState(opts);
 
     // The error in foo.rb is only reported at `# typed: true`.
-    writeFilesToFS({{"foo.rb", "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n"}});
+    writeFilesToFS({{"foo.rb", "# typed: true\n"
+                               "class Foo1\n"
+                               "  def branch\n"
+                               "    1 + \"stuff\"\n"
+                               "  end\n"
+                               "end\n"}});
     this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/foo.rb", this->rootPath));
 
     assertErrorDiagnostics(initializeLSP(), {});

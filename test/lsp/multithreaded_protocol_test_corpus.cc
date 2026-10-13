@@ -556,13 +556,20 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithEditToFileWi
         initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
 
     assertErrorDiagnostics(send(*openFile("foo.rb", "")), {});
-    assertErrorDiagnostics(send(*openFile("bar.rb", "# typed: true\nclass Bar\nend\n")), {});
+    assertErrorDiagnostics(send(*openFile("bar.rb", "# typed: true\n"
+                                                    "class Bar\n"
+                                                    "end\n")),
+                           {});
 
     // clear counters
     getCounters();
 
     // Slow path: Edit foo to have a class. Expect the edit below to preempt.
-    sendAsync(*changeFile("foo.rb", "# typed: true\nclass Foo\nend\n", 2, false, 1));
+    sendAsync(*changeFile("foo.rb",
+                          "# typed: true\n"
+                          "class Foo\n"
+                          "end\n",
+                          2, false, 1));
 
     // Wait for typechecking to begin to avoid races.
     {
@@ -572,7 +579,12 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithEditToFileWi
     }
 
     // Fast path: Sorbet still ignores the contents of bar, so no definition changes.
-    sendAsync(*changeFile("bar.rb", "# typed: true\nclass Bar\nend\n# A comment.\n", 2));
+    sendAsync(*changeFile("bar.rb",
+                          "# typed: true\n"
+                          "class Bar\n"
+                          "end\n"
+                          "# A comment.\n",
+                          2));
 
     // Send a no-op to clear out the pipeline.
     assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
