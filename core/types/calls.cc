@@ -2522,12 +2522,10 @@ class Magic_callWithSplat : public IntrinsicMethod {
     friend class Magic_callWithSplatAndBlockPass;
 
 private:
-    static InlinedVector<const TypeAndOrigins *, 2> generateSendArgs(const TupleType *posTuple,
-                                                                     const TupleType *kwTuple,
-                                                                     InlinedVector<const TypeAndOrigins*, 2> &callWithSplatArgs,
-                                                                     int posArgsOffset,
-                                                                     InlinedVector<TypeAndOrigins, 2> &sendArgStore,
-                                                                     Loc argsLoc) {
+    static InlinedVector<const TypeAndOrigins *, 2>
+    generateSendArgs(const TupleType *posTuple, const TupleType *kwTuple,
+                     InlinedVector<const TypeAndOrigins *, 2> &callWithSplatArgs, int posArgsOffset,
+                     InlinedVector<TypeAndOrigins, 2> &sendArgStore, Loc argsLoc) {
         auto numKwArgs = kwTuple != nullptr ? kwTuple->elems.size() : 0;
 
         auto totalArgs = posTuple->elems.size() + callWithSplatArgs.size() - posArgsOffset;
