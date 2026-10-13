@@ -952,8 +952,9 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     if (hasFwdArgs) {
                         auto fwdArgs = MK::Local(loc, core::Names::fwdArgs());
                         auto argsSplat = MK::Splat(loc, move(fwdArgs));
-                        auto argsConcat =
-                            hasSplatArg ? move(argsSplat) : MK::Send1(loc, move(args), core::Names::concat(), locZeroLen, move(argsSplat));
+                        auto argsConcat = hasSplatArg ? move(argsSplat)
+                                                      : MK::Send1(loc, move(args), core::Names::concat(), locZeroLen,
+                                                                  move(argsSplat));
 
                         auto fwdKwargs = MK::Local(loc, core::Names::fwdKwargs());
                         auto kwargsSplat =
