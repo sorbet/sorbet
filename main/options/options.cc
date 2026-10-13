@@ -515,9 +515,9 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
         cxxopts::value<int>()->default_value(to_string(empty.lspErrorCap)), "<cap>");
     options.add_options(section)(
         "lsp-max-files-on-fast-path",
-        "Retypechecks the whole codebase after an edit that changes over <n> files at once, or that changes a "
-        "definition used in over <n> files. Smaller edits only retypecheck those files, which blocks other requests "
-        "until it finishes.",
+        "Retypechecks the whole codebase after an edit that changes over <n> files at once, "
+        "or that changes a definition used in over <n> files. "
+        "Smaller edits only retypecheck those files, which blocks other requests until it finishes.",
         cxxopts::value<uint32_t>()->default_value(to_string(empty.lspMaxFilesOnFastPath)), "<n>");
     options.add_options(section)("disable-watchman", "When in LSP mode, disable file watching via Watchman");
     options.add_options(section)("watchman-path",
