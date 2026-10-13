@@ -7,7 +7,7 @@ class String # error: File belongs to package `Prelude` but defines a constant t
 end
 
 Array::EARLY = 1 # error: File belongs to package `Prelude` but defines a constant that does not match this namespace
-# error: File belongs to package `Prelude` but defines a constant that does not match this namespace
+
 class Array # error: File belongs to package `Prelude` but defines a constant that does not match this namespace
 end
 

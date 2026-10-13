@@ -81,7 +81,7 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> @ Loc {file=test/testdata/packager/isolated-prefix-boundary/other/definitions.rb start=??? end=???}
   class <S <M <C <U Other>> $1> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/packager/isolated-prefix-boundary/producer/definitions.rb start=19:3 end=19:8}
     type-member(+) <S <M <C <U Other>> $1> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <M <C <U Other>> $1> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Other) @ Loc {file=test/testdata/packager/isolated-prefix-boundary/producer/definitions.rb start=19:3 end=19:8}
-  static-field-type-alias <C <U Param>> -> T.untyped @ Loc {file=test/testdata/packager/isolated-prefix-boundary/producer/type_member.rb start=3:3 end=3:8}
+  static-field-type-alias <M <C <U Param>> $1> -> T.untyped @ Loc {file=test/testdata/packager/isolated-prefix-boundary/producer/type_member.rb start=3:3 end=3:8}
   module <C <U Producer>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/packager/isolated-prefix-boundary/producer/definitions.rb start=22:10 end=22:18}
     module <C <U Producer>>::<C <U Valid>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/packager/isolated-prefix-boundary/producer/definitions.rb start=22:3 end=22:25}
     class <C <U Producer>>::<S <C <U Valid>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/packager/isolated-prefix-boundary/producer/definitions.rb start=23:5 end=23:10}

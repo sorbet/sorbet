@@ -34,25 +34,42 @@ nested/nested.rb:59: Defining a root-scoped constant requires this package to be
   Note:
     Root-scoped constants are exempt from package namespace checks only in `prelude!` packages
 
-nested/nested.rb:69: Cannot initialize the module `Root` by constant assignment https://srb.help/4022
-    69 |Root = 1
-        ^^^^^^^^
-    nested/nested.rb:34: Previously defined as a module here
-    34 |module Root
-        ^^^^^^^^^^^
-  Note:
-    Sorbet does not allow treating constant assignments as class or module definitions,
-    even if the initializer computes a `Module` object at runtime. See the docs for more.
+nested/nested.rb:37: File belongs to package `Root::Nested` but defines a constant that does not match this namespace https://srb.help/3713
+    37 |  NOT_IN_PACKAGE = T.let(1, Integer)
+          ^^^^^^^^^^^^^^
+    nested/__package.rb:3: Enclosing package declared here
+     3 |class Root::Nested < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    __package.rb:3: Must belong to this package, given constant name `Root::NOT_IN_PACKAGE`
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
 
-nested/nested.rb:70: Cannot initialize the module `Nested` by constant assignment https://srb.help/4022
+nested/nested.rb:67: File belongs to package `Root::Nested` but defines a constant that does not match this namespace https://srb.help/3713
+    67 |Root::X = 1
+        ^^^^^^^
+    nested/__package.rb:3: Enclosing package declared here
+     3 |class Root::Nested < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    __package.rb:3: Must belong to this package, given constant name `Root::X`
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+
+nested/nested.rb:69: File belongs to package `Root::Nested` but defines a constant that does not match this namespace https://srb.help/3713
+    69 |Root = 1
+        ^^^^
+    nested/__package.rb:3: Enclosing package declared here
+     3 |class Root::Nested < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+nested/nested.rb:70: File belongs to package `Root::Nested` but defines a constant that does not match this namespace https://srb.help/3713
     70 |Root::Nested = 1
-        ^^^^^^^^^^^^^^^^
-    nested/nested.rb:23: Previously defined as a module here
-    23 |  module Nested
-          ^^^^^^^^^^^^^
-  Note:
-    Sorbet does not allow treating constant assignments as class or module definitions,
-    even if the initializer computes a `Module` object at runtime. See the docs for more.
+        ^^^^^^^^^^^^
+    nested/__package.rb:3: Enclosing package declared here
+     3 |class Root::Nested < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    __package.rb:3: Must belong to this package, given constant name `Root::Nested`
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
 
 nested/nested.rb:39: This file must only define behavior in enclosing package `Root::Nested` https://srb.help/3713
     39 |  sig {returns(NilClass)}
@@ -90,26 +107,6 @@ nested/nested.rb:35: This file must only define behavior in enclosing package `R
      3 |class Root::Nested < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     __package.rb:3: Package `Root` declared here
-     3 |class Root < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^
-
-nested/nested.rb:37: File belongs to package `Root::Nested` but defines a constant that does not match this namespace https://srb.help/3713
-    37 |  NOT_IN_PACKAGE = T.let(1, Integer)
-          ^^^^^^^^^^^^^^
-    nested/__package.rb:3: Enclosing package declared here
-     3 |class Root::Nested < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    __package.rb:3: Must belong to this package, given constant name `Root::NOT_IN_PACKAGE`
-     3 |class Root < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^
-
-nested/nested.rb:67: File belongs to package `Root::Nested` but defines a constant that does not match this namespace https://srb.help/3713
-    67 |Root::X = 1
-        ^^^^^^^
-    nested/__package.rb:3: Enclosing package declared here
-     3 |class Root::Nested < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    __package.rb:3: Must belong to this package, given constant name `Root::X`
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -236,26 +233,6 @@ nested/nested.test.rb:14: Tests in the `Root::Nested` package must define tests 
      3 |class Root::Nested < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-nested/nested.test.rb:19: Cannot initialize the module `Root` by constant assignment https://srb.help/4022
-    19 |Test::Root = 1
-        ^^^^^^^^^^^^^^
-    nested/nested.test.rb:6: Previously defined as a module here
-     6 |module Test::Root
-        ^^^^^^^^^^^^^^^^^
-  Note:
-    Sorbet does not allow treating constant assignments as class or module definitions,
-    even if the initializer computes a `Module` object at runtime. See the docs for more.
-
-nested/nested.test.rb:20: Cannot initialize the module `Nested` by constant assignment https://srb.help/4022
-    20 |Test::Root::Nested = 1
-        ^^^^^^^^^^^^^^^^^^^^^^
-    nested/nested.test.rb:8: Previously defined as a module here
-     8 |  module Nested
-          ^^^^^^^^^^^^^
-  Note:
-    Sorbet does not allow treating constant assignments as class or module definitions,
-    even if the initializer computes a `Module` object at runtime. See the docs for more.
-
 nested/nested.test.rb:7: Tests in the `Root::Nested` package must define tests in the `Test::Root::Nested` namespace https://srb.help/3713
      7 |  NOT_IN_MODULE = nil
           ^^^^^^^^^^^^^
@@ -273,6 +250,23 @@ nested/nested.test.rb:17: Tests in the `Root::Nested` package must define tests 
      3 |class Root::Nested < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     __package.rb:3: Must belong to this package, given constant name `Test::Root::X`
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+
+nested/nested.test.rb:19: Tests in the `Root::Nested` package must define tests in the `Test::Root::Nested` namespace https://srb.help/3713
+    19 |Test::Root = 1
+        ^^^^^^^^^^
+    nested/__package.rb:3: Enclosing package declared here
+     3 |class Root::Nested < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+nested/nested.test.rb:20: Tests in the `Root::Nested` package must define tests in the `Test::Root::Nested` namespace https://srb.help/3713
+    20 |Test::Root::Nested = 1
+        ^^^^^^^^^^^^^^^^^^
+    nested/__package.rb:3: Enclosing package declared here
+     3 |class Root::Nested < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    __package.rb:3: Must belong to this package, given constant name `Test::Root::Nested`
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -322,20 +316,6 @@ critic_prefix/real.test.rb:13: Tests in the `Critic::SomePkg` package must defin
      3 |class Critic::SomePkg < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-critic_prefix/real.test.rb:7: Tests in the `Critic::SomePkg` package must define tests in the `Test::Critic::SomePkg` namespace https://srb.help/3713
-     7 |Critic::SomePkg::RealConst = 2
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    critic_prefix/__package.rb:3: Enclosing package declared here
-     3 |class Critic::SomePkg < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-critic_prefix/real.test.rb:13: Tests in the `Critic::SomePkg` package must define tests in the `Test::Critic::SomePkg` namespace https://srb.help/3713
-    13 |SomeOtherNamespace::SomePkg::SomeConst = 4
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    critic_prefix/__package.rb:3: Enclosing package declared here
-     3 |class Critic::SomePkg < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 commands/foo_command.rb:4: File belongs to package `Root::Commands::Foo` but defines a constant that does not match this namespace https://srb.help/3713
      4 |  class Baz::Ban; end
                 ^^^
@@ -370,4 +350,4 @@ extend_sig.rb:3: Defining a root-scoped constant requires this package to be mar
         ^^^^^^^^^^^^^^^^^^^^^^^^
   Note:
     Root-scoped constants are exempt from package namespace checks only in `prelude!` packages
-Errors: 36
+Errors: 34

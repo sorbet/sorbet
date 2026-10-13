@@ -18,7 +18,7 @@
 
   Other::VALUE = 1
 # ^^^^^ error: File belongs to package `Producer` but defines a constant that does not match this namespace
-# ^^^^^^^^^^^^ error: File belongs to package `Producer` but defines a constant that does not match this namespace
+
   module Producer::Valid
     class << self
       class Nested; end

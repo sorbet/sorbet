@@ -37,8 +37,8 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> @ Loc {file=test/testdata/packager/invalid-constant-assignments/consumer/use.rb start=??? end=???}
   class <S <M <C <U Consumer>> $1> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/packager/invalid-constant-assignments/producer/bad.rb start=7:3 end=7:13}
     type-member(+) <S <M <C <U Consumer>> $1> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <M <C <U Consumer>> $1> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Consumer) @ Loc {file=test/testdata/packager/invalid-constant-assignments/producer/bad.rb start=7:3 end=7:13}
-  static-field <C <U FromRBI>> -> Integer @ Loc {file=test/testdata/packager/invalid-constant-assignments/producer/bad.rbi start=3:1 end=3:10}
-  static-field <C <U FromRuby>> -> Integer @ Loc {file=test/testdata/packager/invalid-constant-assignments/producer/bad.rb start=4:1 end=4:11}
+  static-field <M <C <U FromRBI>> $1> -> Integer @ Loc {file=test/testdata/packager/invalid-constant-assignments/producer/bad.rbi start=3:1 end=3:10}
+  static-field <M <C <U FromRuby>> $1> -> Integer @ Loc {file=test/testdata/packager/invalid-constant-assignments/producer/bad.rb start=4:1 end=4:11}
   module <C <U Producer>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U ImplicitModuleSuperclass>> () @ Loc {file=test/testdata/packager/invalid-constant-assignments/producer/bad.rb start=6:1 end=6:16}
   class <S <C <U Producer>> $1>[<C <U <AttachedClass>>>] < <C <U Module>> () @ Loc {file=test/testdata/packager/invalid-constant-assignments/producer/bad.rb start=6:1 end=6:16}
     type-member(+) <S <C <U Producer>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Producer>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Producer) @ Loc {file=test/testdata/packager/invalid-constant-assignments/producer/bad.rb start=6:1 end=6:16}

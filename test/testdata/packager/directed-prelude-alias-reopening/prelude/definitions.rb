@@ -12,4 +12,3 @@ class Queue::Rejected
 end
   Queue::REJECTED = T.let(2, Integer)
 # ^^^^^ error: File belongs to package `Prelude` but defines a constant that does not match this namespace
-# ^^^^^^^^^^^^^^^ error: File belongs to package `Prelude` but defines a constant that does not match this namespace
