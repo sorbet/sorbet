@@ -188,7 +188,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         core::Loc locForUnreachable;
         bool dueToSafeNavigation = false;
         bool deadButTypecheckAnyways = false;
-        bool hasAbsurd = false;
+        core::Loc absurdLoc;
 
         if (deadOnEntry) {
             bb->firstDeadInstructionIdx = 0;
@@ -213,7 +213,9 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             //      error.
 
             for (auto &expr : bb->exprs) {
-                hasAbsurd = hasAbsurd || cfg::isa_instruction<cfg::TAbsurd>(expr.value);
+                if (!absurdLoc.exists() && cfg::isa_instruction<cfg::TAbsurd>(expr.value)) {
+                    absurdLoc = ctx.locAt(expr.loc);
+                }
                 if (silenceDeadCodeError(expr.value)) {
                     continue;
                 }
@@ -248,8 +250,8 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         // BasicBlock args don't have types because every backEdge was dead.)
         if (singlePredecessorSource != nullptr) {
             auto *parent = bb->backEdges[0];
-            if (unreachableInstruction != nullptr && hasAbsurd && !dueToSafeNavigation && visited[parent->id] &&
-                !outEnvironments[parent->id].isDead) {
+            if (unreachableInstruction != nullptr && absurdLoc.exists() && !dueToSafeNavigation &&
+                visited[parent->id] && !outEnvironments[parent->id].isDead) {
                 // Use pre-condition types for a defensive guard, rather than
                 // populating from the impossible refinement and then replacing it.
                 singlePredecessorSource = &outEnvironments[parent->id];
@@ -257,13 +259,13 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             }
             current.populateFrom(ctx, *singlePredecessorSource);
             singlePredecessorEnv.reset();
-        } else if (unreachableInstruction != nullptr && hasAbsurd && !dueToSafeNavigation) {
+        } else if (unreachableInstruction != nullptr && absurdLoc.exists() && !dueToSafeNavigation) {
             // Repeat the environment merging above, but populate/merge *ignoring* the condition (no
             // withCond), because the cond itself might have caused the backEdge to be dead.
             // (Every backEdge was dead in the first pass, so current was not yet populated.)
             //
             // This means we do double the environment merging for these blocks (potentially expensive),
-            // but we only do it for dead blocks with hasAbsurd, not for ordinary dead blocks.
+            // but we only do it for dead blocks containing T.absurd, not for ordinary dead blocks.
             ENFORCE(deadOnEntry);
             for (auto *parent : bb->backEdges) {
                 if (!visited[parent->id] || outEnvironments[parent->id].isDead) {
@@ -324,7 +326,11 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                 } else if (ctx.state.lspQuery.isEmpty() && current.isDead && !silenceDeadCodeError(bind.value)) {
                     if (auto e = ctx.beginError(bind.loc, core::errors::Infer::DeadBranchInferencer)) {
                         e.setHeader("This code is unreachable");
-                        e.addErrorLine(madeBlockDead, "This expression always raises or can never be computed");
+                        if (absurdLoc.exists() && madeBlockDead == absurdLoc) {
+                            e.addErrorLine(absurdLoc, "Defensive error handling must come before `{}`", "T.absurd");
+                        } else {
+                            e.addErrorLine(madeBlockDead, "This expression always raises or can never be computed");
+                        }
                     }
                     break;
                 }
