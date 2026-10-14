@@ -145,14 +145,22 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         // to make it easy to reason about correctness.
         optional<cfg::BasicBlock::BlockExitCondInfo> parentUpdateKnowledgeReceiver;
 
+        // These variables are set when the block has a single live predecessor. withCond may
+        // return either a temporary owned by singlePredecessorEnv or an outEnvironments entry;
+        // singlePredecessorSource keeps track of which environment to copy into current below.
+        // Defer that copy until after dead-block classification so that phase can instead select
+        // the parent's unrefined outEnvironments entry without paying for a second populateFrom.
+        optional<Environment> singlePredecessorEnv;
+        const Environment *singlePredecessorSource = nullptr;
         if (bb->backEdges.size() == 1) {
             auto *parent = bb->backEdges[0];
             bool isTrueBranch = parent->bexit.thenb == bb;
             if (!outEnvironments[parent->id].isDead) {
-                Environment tempEnv(methodLoc);
+                auto &tempEnv = singlePredecessorEnv.emplace(methodLoc);
                 auto &envAsSeenFromBranch =
                     Environment::withCond(ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current.vars());
-                current.populateFrom(ctx, envAsSeenFromBranch);
+                singlePredecessorSource = &envAsSeenFromBranch;
+                current.isDead = envAsSeenFromBranch.isDead;
 
                 parentUpdateKnowledgeReceiver = parent->maybeGetUpdateKnowledgeReceiver(*cfg);
             } else {
@@ -179,6 +187,8 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         cfg::InstructionPtr *unreachableInstruction = nullptr;
         core::Loc locForUnreachable;
         bool dueToSafeNavigation = false;
+        bool deadButTypecheckAnyways = false;
+        bool hasAbsurd = false;
 
         if (deadOnEntry) {
             bb->firstDeadInstructionIdx = 0;
@@ -192,7 +202,8 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             //   1. If this block is only dead because all jumps into this block are dead,
             //      we already reported an error and don't want a duplicate.
             //   2. If the block consists only of synthetic bindings or T.absurd, we don't
-            //      want to issue an error.
+            //      want to issue an error. A block with other instructions and T.absurd
+            //      is checked below, using types from before the impossible condition.
             //   3. If the block contains a send of the form <Magic>.<nil-for-safe-navigation>(x),
             //      we want to issue an UnnecessarySafeNavigationError, extracting
             //      type-and-origin info from x. (This magic form is inserted by the desugarer
@@ -202,6 +213,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             //      error.
 
             for (auto &expr : bb->exprs) {
+                hasAbsurd = hasAbsurd || cfg::isa_instruction<cfg::TAbsurd>(expr.value);
                 if (silenceDeadCodeError(expr.value)) {
                     continue;
                 }
@@ -231,6 +243,44 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             }
         }
 
+        // Mirrors the logic to initialize the Environment above, but this time ignoring the BlockExit condition
+        // for the "deadButTypecheckAnyways" case. (If we didn't do this, we might end up with environments whose
+        // BasicBlock args don't have types because every backEdge was dead.)
+        if (singlePredecessorSource != nullptr) {
+            auto *parent = bb->backEdges[0];
+            if (unreachableInstruction != nullptr && hasAbsurd && !dueToSafeNavigation && visited[parent->id] &&
+                !outEnvironments[parent->id].isDead) {
+                // Use pre-condition types for a defensive guard, rather than
+                // populating from the impossible refinement and then replacing it.
+                singlePredecessorSource = &outEnvironments[parent->id];
+                deadButTypecheckAnyways = true;
+            }
+            current.populateFrom(ctx, *singlePredecessorSource);
+            singlePredecessorEnv.reset();
+        } else if (unreachableInstruction != nullptr && hasAbsurd && !dueToSafeNavigation) {
+            // Repeat the environment merging above, but populate/merge *ignoring* the condition (no
+            // withCond), because the cond itself might have caused the backEdge to be dead.
+            // (Every backEdge was dead in the first pass, so current was not yet populated.)
+            //
+            // This means we do double the environment merging for these blocks (potentially expensive),
+            // but we only do it for dead blocks with hasAbsurd, not for ordinary dead blocks.
+            ENFORCE(deadOnEntry);
+            for (auto *parent : bb->backEdges) {
+                if (!visited[parent->id] || outEnvironments[parent->id].isDead) {
+                    continue;
+                }
+                if (!deadButTypecheckAnyways) {
+                    current.populateFrom(ctx, outEnvironments[parent->id]);
+                } else {
+                    current.mergeWith(ctx, outEnvironments[parent->id], *cfg, bb, knowledgeFilter);
+                }
+                deadButTypecheckAnyways = true;
+            }
+        }
+        // All this work to try to come up with a suitable environment for typechecking dead blocks ignoring
+        // BlockExit conditions should not overwrite the original `isDead` determination for this env.
+        current.isDead = deadOnEntry;
+
         current.computePins(ctx, outEnvironments, *cfg.get(), bb);
         current.setUninitializedVarsToNil(ctx, methodLoc);
 
@@ -244,12 +294,13 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             continue;
         }
 
-        if (unreachableInstruction == nullptr) {
+        if (unreachableInstruction == nullptr || deadButTypecheckAnyways) {
+            bool typecheck = !current.isDead || deadButTypecheckAnyways;
             core::Loc madeBlockDead;
             int i = 0;
             for (cfg::Binding &bind : bb->exprs) {
                 i++;
-                if (!current.isDead || !ctx.state.lspQuery.isEmpty()) {
+                if (typecheck || !ctx.state.lspQuery.isEmpty()) {
                     bind.bind.type = current.processBinding(ctx, *cfg, bind, bb->outerLoops,
                                                             bind.bind.variable.minLoops(*cfg), knowledgeFilter, *constr,
                                                             methodReturnType, parentUpdateKnowledgeReceiver);
@@ -264,6 +315,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     if (bind.bind.type.isBottom()) {
                         current.isDead = true;
                         madeBlockDead = ctx.locAt(bind.loc);
+                        typecheck = false;
                     }
                     if (current.isDead && bb->firstDeadInstructionIdx == -1) {
                         // this can also be result of evaluating an instruction, e.g. an always false hard_assert
@@ -279,7 +331,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             }
         }
 
-        if (unreachableInstruction != nullptr) {
+        if (unreachableInstruction != nullptr && !deadButTypecheckAnyways) {
             auto send = cfg::cast_instruction<cfg::Send>(*unreachableInstruction);
             if (dueToSafeNavigation && send != nullptr) {
                 if (auto e = ctx.state.beginError(locForUnreachable, core::errors::Infer::UnnecessarySafeNavigation)) {

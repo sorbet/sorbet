@@ -7,7 +7,6 @@ def raise_absurd(x)
   when Integer, String
   else
     raise
-  # ^^^^^ error: This code is unreachable
     T.absurd(x)
   end
 end
@@ -28,7 +27,6 @@ def fail_absurd(x)
   when Integer, String
   else
     fail
-  # ^^^^ error: This code is unreachable
     T.absurd(x)
   end
 end
@@ -60,7 +58,7 @@ def separate_raise(x)
   else
     T.absurd(x)
     raise 'unexpected value'
-  # ^^^^^^^^^^^^^^^^^^^^^^^^ error: This code is unreachable
+        # ^^^^^^^^^^^^^^^^^^ error: This code is unreachable
   end
 end
 
@@ -87,7 +85,6 @@ def unrelated_absurd(x)
   when Integer, String
   else
     raise 'unexpected value'
-  # ^^^^^^^^^^^^^^^^^^^^^^^^ error: This code is unreachable
     T.absurd(x)
   end
 end
@@ -222,8 +219,8 @@ sig {params(x: String).void}
 def repeated_guard(x)
   unless true
     panic(x)
-    # error: This code is unreachable
     panic(x)
+  # ^^^^^^^^ error: This code is unreachable
     T.absurd(x)
   end
 end
@@ -232,7 +229,6 @@ sig {params(x: String).void}
 def dead_absurd_after_guard(x)
   unless true
     panic(x)
-  # ^^^^^^^^ error: This code is unreachable
     T.absurd(x)
   end
 end
@@ -533,7 +529,7 @@ sig {params(bar: String).void}
 def prepared_raise_with_absurd(bar)
   if bar.is_a?(String)
   else
-    msg = "foo #{bar}" # error: This code is unreachable
+    msg = "foo #{bar}"
     raise msg + " " + msg.size.to_s
     T.absurd(bar)
   end
@@ -553,7 +549,6 @@ def returning_send_with_absurd(bar)
   if bar.is_a?(String)
   else
     puts "unexpected #{bar}"
-  # ^^^^^^^^^^^^^^^^^^^^^^^^ error: This code is unreachable
     T.absurd(bar)
   end
 end
@@ -564,7 +559,7 @@ def invalid_preparation_with_absurd(bar)
   if bar.is_a?(String)
   else
     panic(123)
-  # ^^^^^^^^^^ error: This code is unreachable
+        # ^^^ error: Expected `String` but found `Integer(123)` for argument `message`
     T.absurd(bar)
   end
 end
@@ -573,8 +568,9 @@ sig {params(bar: String).void}
 def code_between_raise_and_absurd(bar)
   if bar.is_a?(String)
   else
-    raise 'unexpected' # error: This code is unreachable
+    raise 'unexpected'
     puts bar
+  # ^^^^^^^^ error: This code is unreachable
     T.absurd(bar)
   end
 end
@@ -583,9 +579,10 @@ sig {params(bar: String).void}
 def code_after_absurd(bar)
   if bar.is_a?(String)
   else
-    puts bar # error: This code is unreachable
+    puts bar
     T.absurd(bar)
     puts 'later'
+       # ^^^^^^^ error: This code is unreachable
   end
 end
 
@@ -595,7 +592,6 @@ def returning_raise_with_absurd(bar)
   if bar.is_a?(String)
   else
     ReturningRaise.new.raise(bar)
-  # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: This code is unreachable
     T.absurd(bar)
   end
 end
@@ -605,7 +601,6 @@ def untyped_send_with_absurd(bar)
   if bar.is_a?(String)
   else
     T.unsafe(self).panic(bar)
-  # ^^^^^^^^^^^^^^^^^^^^^^^^^ error: This code is unreachable
     T.absurd(bar)
   end
 end
@@ -626,7 +621,8 @@ end
 sig {params(bar: String).void}
 def bottom_read_with_absurd(bar)
   unless true
-    impossible = BottomValues::VALUE # error: This code is unreachable
+    impossible = BottomValues::VALUE
+               # ^^^^^^^^^^^^ error: This code is unreachable
     panic(impossible)
     T.absurd(bar)
   end
