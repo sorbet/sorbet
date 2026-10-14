@@ -1705,12 +1705,6 @@ public:
     // reopening the symbols defined by a parent package might lead to incorrect resolution in the case that
     // the parent package is processed after the subpackage.
     void checkScopePackage(core::Context ctx, core::ClassOrModuleRef scopeKlass, core::LocOffsets declLoc) {
-        // TODO(trevor) remove this check once the migration is finished, and we're not baking in an
-        // ignore of this error.
-        if (!ctx.state.shouldReportErrorOn(ctx.file, core::errors::Resolver::PackageScopeViolation)) {
-            return;
-        }
-
         if (!ctx.state.packageDB().enabled()) {
             return;
         }
