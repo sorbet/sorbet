@@ -183,6 +183,11 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         }
 
         visited[bb->id] = true;
+
+        cfg::InstructionPtr *unreachableInstruction = nullptr;
+        core::Loc locForUnreachable;
+        bool dueToSafeNavigation = false;
+
         if (current.isDead) {
             bb->firstDeadInstructionIdx = 0;
             // this block is unreachable.
@@ -207,10 +212,6 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             if (!absl::c_any_of(bb->backEdges, [&](const auto &bb) { return !outEnvironments[bb->id].isDead; })) {
                 continue;
             }
-
-            cfg::InstructionPtr *unreachableInstruction = nullptr;
-            core::Loc locForUnreachable;
-            bool dueToSafeNavigation = false;
 
             for (auto &expr : bb->exprs) {
                 if (silenceDeadCodeError(expr.value)) {
@@ -245,6 +246,44 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                 continue;
             }
 
+        }
+
+        if (unreachableInstruction == nullptr) {
+        core::Loc madeBlockDead;
+        int i = 0;
+        for (cfg::Binding &bind : bb->exprs) {
+            i++;
+            if (!current.isDead || !ctx.state.lspQuery.isEmpty()) {
+                bind.bind.type =
+                    current.processBinding(ctx, *cfg, bind, bb->outerLoops, bind.bind.variable.minLoops(*cfg),
+                                           knowledgeFilter, *constr, methodReturnType, parentUpdateKnowledgeReceiver);
+                if (cfg::isa_instruction<cfg::Send>(bind.value)) {
+                    totalSendCount++;
+                    if (bind.bind.type && !bind.bind.type.isUntyped()) {
+                        typedSendCount++;
+                    }
+                }
+                ENFORCE(bind.bind.type);
+                bind.bind.type.sanityCheck(ctx);
+                if (bind.bind.type.isBottom()) {
+                    current.isDead = true;
+                    madeBlockDead = ctx.locAt(bind.loc);
+                }
+                if (current.isDead && bb->firstDeadInstructionIdx == -1) {
+                    // this can also be result of evaluating an instruction, e.g. an always false hard_assert
+                    bb->firstDeadInstructionIdx = i;
+                }
+            } else if (ctx.state.lspQuery.isEmpty() && current.isDead && !silenceDeadCodeError(bind.value)) {
+                if (auto e = ctx.beginError(bind.loc, core::errors::Infer::DeadBranchInferencer)) {
+                    e.setHeader("This code is unreachable");
+                    e.addErrorLine(madeBlockDead, "This expression always raises or can never be computed");
+                }
+                break;
+            }
+        }
+        }
+
+        if (unreachableInstruction != nullptr) {
             auto send = cfg::cast_instruction<cfg::Send>(*unreachableInstruction);
             if (dueToSafeNavigation && send != nullptr) {
                 if (auto e = ctx.state.beginError(locForUnreachable, core::errors::Infer::UnnecessarySafeNavigation)) {
@@ -331,38 +370,6 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             continue;
         }
 
-        core::Loc madeBlockDead;
-        int i = 0;
-        for (cfg::Binding &bind : bb->exprs) {
-            i++;
-            if (!current.isDead || !ctx.state.lspQuery.isEmpty()) {
-                bind.bind.type =
-                    current.processBinding(ctx, *cfg, bind, bb->outerLoops, bind.bind.variable.minLoops(*cfg),
-                                           knowledgeFilter, *constr, methodReturnType, parentUpdateKnowledgeReceiver);
-                if (cfg::isa_instruction<cfg::Send>(bind.value)) {
-                    totalSendCount++;
-                    if (bind.bind.type && !bind.bind.type.isUntyped()) {
-                        typedSendCount++;
-                    }
-                }
-                ENFORCE(bind.bind.type);
-                bind.bind.type.sanityCheck(ctx);
-                if (bind.bind.type.isBottom()) {
-                    current.isDead = true;
-                    madeBlockDead = ctx.locAt(bind.loc);
-                }
-                if (current.isDead && bb->firstDeadInstructionIdx == -1) {
-                    // this can also be result of evaluating an instruction, e.g. an always false hard_assert
-                    bb->firstDeadInstructionIdx = i;
-                }
-            } else if (ctx.state.lspQuery.isEmpty() && current.isDead && !silenceDeadCodeError(bind.value)) {
-                if (auto e = ctx.beginError(bind.loc, core::errors::Infer::DeadBranchInferencer)) {
-                    e.setHeader("This code is unreachable");
-                    e.addErrorLine(madeBlockDead, "This expression always raises or can never be computed");
-                }
-                break;
-            }
-        }
         if (!current.isDead) {
             ENFORCE(bb->firstDeadInstructionIdx == -1);
             const auto &bexitTpo = current.getAndFillTypeAndOrigin(bb->bexit.cond);
