@@ -301,7 +301,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                 const bool typecheckDeadBinding =
                     current.isDead && allowedRaiseLoc &&
                     (deadButTypecheckAnyways ? isPartOfPairedRaise(bind, allowedRaiseLoc)
-                                            : cfg::isa_instruction<cfg::TAbsurd>(bind.value));
+                                             : cfg::isa_instruction<cfg::TAbsurd>(bind.value));
                 if (!current.isDead || !ctx.state.lspQuery.isEmpty() || typecheckDeadBinding) {
                     bind.bind.type = current.processBinding(ctx, *cfg, bind, bb->outerLoops,
                                                             bind.bind.variable.minLoops(*cfg), knowledgeFilter, *constr,
