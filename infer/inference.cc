@@ -136,10 +136,9 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
     vector<bool> visited;
     visited.resize(cfg->maxBasicBlockId);
     KnowledgeFilter knowledgeFilter(ctx, *cfg);
-    core::LocOffsets allowedRaiseLoc;
     for (auto it = cfg->forwardsTopoSort.rbegin(); it != cfg->forwardsTopoSort.rend(); ++it) {
+        core::LocOffsets allowedRaiseLoc;
         cfg::BasicBlock *bb = *it;
-        allowedRaiseLoc = core::LocOffsets::none();
         if (bb == cfg->deadBlock()) {
             for (const auto &bind : bb->exprs) {
                 if (bind.value.isSynthetic() || bind.loc.empty()) {
@@ -197,10 +196,6 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     Environment::withCond(ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current.vars());
                 if (!envAsSeenFromBranch.isDead) {
                     current.isDead = false;
-                }
-                // Dead-entry reconstruction needs narrowed types from impossible edges too,
-                // but merging them must not make the block reachable.
-                if (!envAsSeenFromBranch.isDead) {
                     current.mergeWith(ctx, envAsSeenFromBranch, *cfg.get(), bb, knowledgeFilter);
                 }
             }
