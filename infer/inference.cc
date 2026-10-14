@@ -172,52 +172,42 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         // to make it easy to reason about correctness.
         optional<cfg::BasicBlock::BlockExitCondInfo> parentUpdateKnowledgeReceiver;
 
-        auto populateFromPredecessors = [&](bool applyKnowledgeInDeadBranch) {
-            if (bb->backEdges.size() == 1) {
-                auto *parent = bb->backEdges[0];
-                bool isTrueBranch = parent->bexit.thenb == bb;
-                if (!outEnvironments[parent->id].isDead) {
-                    Environment tempEnv(methodLoc);
-                    auto &envAsSeenFromBranch =
-                        Environment::withCond(ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current.vars(),
-                                              applyKnowledgeInDeadBranch);
-                    current.populateFrom(ctx, envAsSeenFromBranch);
+        if (bb->backEdges.size() == 1) {
+            auto *parent = bb->backEdges[0];
+            bool isTrueBranch = parent->bexit.thenb == bb;
+            if (!outEnvironments[parent->id].isDead) {
+                Environment tempEnv(methodLoc);
+                auto &envAsSeenFromBranch =
+                    Environment::withCond(ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current.vars());
+                current.populateFrom(ctx, envAsSeenFromBranch);
 
-                    parentUpdateKnowledgeReceiver = parent->maybeGetUpdateKnowledgeReceiver(*cfg);
-                } else {
-                    current.isDead = true;
-                }
+                parentUpdateKnowledgeReceiver = parent->maybeGetUpdateKnowledgeReceiver(*cfg);
             } else {
-                current.isDead = (bb != cfg->entry());
-                for (cfg::BasicBlock *parent : bb->backEdges) {
-                    if (!visited[parent->id] || outEnvironments[parent->id].isDead) {
-                        continue;
-                    }
-                    bool isTrueBranch = parent->bexit.thenb == bb;
-                    Environment tempEnv(methodLoc);
-                    auto &envAsSeenFromBranch =
-                        Environment::withCond(ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current.vars(),
-                                              applyKnowledgeInDeadBranch);
-                    if (!envAsSeenFromBranch.isDead) {
-                        current.isDead = false;
-                    }
-                    // Dead-entry reconstruction needs narrowed types from impossible edges too,
-                    // but merging them must not make the block reachable.
-                    if (!envAsSeenFromBranch.isDead || applyKnowledgeInDeadBranch) {
-                        current.mergeWith(ctx, envAsSeenFromBranch, *cfg.get(), bb, knowledgeFilter);
-                    }
+                current.isDead = true;
+            }
+        } else {
+            current.isDead = (bb != cfg->entry());
+            for (cfg::BasicBlock *parent : bb->backEdges) {
+                if (!visited[parent->id] || outEnvironments[parent->id].isDead) {
+                    continue;
+                }
+                bool isTrueBranch = parent->bexit.thenb == bb;
+                Environment tempEnv(methodLoc);
+                auto &envAsSeenFromBranch =
+                    Environment::withCond(ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current.vars());
+                if (!envAsSeenFromBranch.isDead) {
+                    current.isDead = false;
+                }
+                // Dead-entry reconstruction needs narrowed types from impossible edges too,
+                // but merging them must not make the block reachable.
+                if (!envAsSeenFromBranch.isDead) {
+                    current.mergeWith(ctx, envAsSeenFromBranch, *cfg.get(), bb, knowledgeFilter);
                 }
             }
-        };
+        }
 
-        populateFromPredecessors(false);
         if (current.isDead) {
             allowedRaiseLoc = raiseLocBeforeAbsurd(*bb);
-            if (allowedRaiseLoc.exists()) {
-                // Normal refinement can stop as soon as the branch is dead. Rebuild from the predecessors
-                // with full branch knowledge so the paired raise's arguments see the narrowed types.
-                populateFromPredecessors(true);
-            }
         }
 
         current.computePins(ctx, outEnvironments, *cfg.get(), bb);
@@ -298,12 +288,8 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             int i = 0;
             for (cfg::Binding &bind : bb->exprs) {
                 i++;
-                // A dead-entry block still checks the paired raise's arguments, but not T.absurd.
-                // Only check T.absurd when a live block became dead while processing its bindings.
-                const bool typecheckDeadBinding =
-                    current.isDead && allowedRaiseLoc.exists() &&
-                    (cfg::isa_instruction<cfg::TAbsurd>(bind.value) ||
-                     (deadButTypecheckAnyways && isPartOfPairedRaise(bind, allowedRaiseLoc)));
+                const bool typecheckDeadBinding = current.isDead && allowedRaiseLoc.exists() &&
+                                                  deadButTypecheckAnyways && isPartOfPairedRaise(bind, allowedRaiseLoc);
                 if (!current.isDead || !ctx.state.lspQuery.isEmpty() || typecheckDeadBinding) {
                     bind.bind.type = current.processBinding(ctx, *cfg, bind, bb->outerLoops,
                                                             bind.bind.variable.minLoops(*cfg), knowledgeFilter, *constr,
