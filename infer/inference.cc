@@ -175,25 +175,17 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             }
         }
 
-        current.computePins(ctx, outEnvironments, *cfg.get(), bb);
-        current.setUninitializedVarsToNil(ctx, ctx.locAt(cfg->declLoc));
-
-        for (auto &blockArg : bb->args) {
-            current.getAndFillTypeAndOrigin(blockArg);
-        }
-
-        visited[bb->id] = true;
-
+        const bool deadOnEntry = current.isDead;
         cfg::InstructionPtr *unreachableInstruction = nullptr;
         core::Loc locForUnreachable;
         bool dueToSafeNavigation = false;
 
-        if (current.isDead) {
+        if (deadOnEntry) {
             bb->firstDeadInstructionIdx = 0;
+        }
+        if (deadOnEntry && !bb->exprs.empty() &&
+            absl::c_any_of(bb->backEdges, [&](const auto &bb) { return !outEnvironments[bb->id].isDead; })) {
             // this block is unreachable.
-            if (bb->exprs.empty()) {
-                continue;
-            }
 
             // This is a bit complicated:
             //
@@ -208,10 +200,6 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             //   4. Otherwise, we want to issue a DeadBranchInferencer error, taking the first
             //      (non-synthetic, non-"T.absurd") instruction in the block as the loc of the
             //      error.
-
-            if (!absl::c_any_of(bb->backEdges, [&](const auto &bb) { return !outEnvironments[bb->id].isDead; })) {
-                continue;
-            }
 
             for (auto &expr : bb->exprs) {
                 if (silenceDeadCodeError(expr.value)) {
@@ -241,10 +229,19 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     locForUnreachable = locForUnreachable.join(ctx.locAt(expr.loc));
                 }
             }
+        }
 
-            if (unreachableInstruction == nullptr) {
-                continue;
-            }
+        current.computePins(ctx, outEnvironments, *cfg.get(), bb);
+        current.setUninitializedVarsToNil(ctx, methodLoc);
+
+        for (auto &blockArg : bb->args) {
+            current.getAndFillTypeAndOrigin(blockArg);
+        }
+
+        visited[bb->id] = true;
+
+        if (deadOnEntry && unreachableInstruction == nullptr) {
+            continue;
         }
 
         if (unreachableInstruction == nullptr) {
