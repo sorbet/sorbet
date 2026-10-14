@@ -38,26 +38,28 @@ bool Inference::willRun(core::Context ctx, core::LocOffsets loc, core::MethodRef
     return true;
 }
 
-void raiseLocBeforeAbsurd(const cfg::BasicBlock &bb, optional<core::LocOffsets> &pendingRaiseLoc) {
+core::LocOffsets raiseLocBeforeAbsurd(const cfg::BasicBlock &bb) {
+    core::LocOffsets firstRaise;
     for (const auto &bind : bb.exprs) {
         auto send = cfg::cast_instruction<cfg::Send>(bind.value);
         if (send != nullptr && send->fun == core::Names::raise()) {
-            if (!pendingRaiseLoc) {
-                pendingRaiseLoc = bind.loc;
+            if (!firstRaise.exists()) {
+                firstRaise = bind.loc;
             }
         } else if (cfg::isa_instruction<cfg::TAbsurd>(bind.value)) {
             // Only a raise before the first T.absurd is eligible for the dead-code exception.
-            return;
+            break;
         }
     }
-    pendingRaiseLoc.reset();
+
+    return firstRaise;
 }
 
-bool isPartOfPairedRaise(const cfg::Binding &bind, const optional<core::LocOffsets> &allowedRaiseLoc) {
-    return bind.loc.exists() && allowedRaiseLoc && allowedRaiseLoc->contains(bind.loc);
+bool isPartOfPairedRaise(const cfg::Binding &bind, core::LocOffsets allowedRaiseLoc) {
+    return bind.loc.exists() && allowedRaiseLoc.exists() && allowedRaiseLoc.contains(bind.loc);
 }
 
-bool silenceDeadCodeError(const cfg::Binding &bind, const optional<core::LocOffsets> &allowedRaiseLoc) {
+bool silenceDeadCodeError(const cfg::Binding &bind, core::LocOffsets allowedRaiseLoc) {
     if (bind.value.isSynthetic() || cfg::isa_instruction<cfg::TAbsurd>(bind.value)) {
         return true;
     }
@@ -134,10 +136,10 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
     vector<bool> visited;
     visited.resize(cfg->maxBasicBlockId);
     KnowledgeFilter knowledgeFilter(ctx, *cfg);
-    optional<core::LocOffsets> allowedRaiseLoc;
+    core::LocOffsets allowedRaiseLoc;
     for (auto it = cfg->forwardsTopoSort.rbegin(); it != cfg->forwardsTopoSort.rend(); ++it) {
         cfg::BasicBlock *bb = *it;
-        allowedRaiseLoc.reset();
+        allowedRaiseLoc = core::LocOffsets::none();
         if (bb == cfg->deadBlock()) {
             for (const auto &bind : bb->exprs) {
                 if (bind.value.isSynthetic() || bind.loc.empty()) {
@@ -210,8 +212,8 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
 
         populateFromPredecessors(false);
         if (current.isDead) {
-            raiseLocBeforeAbsurd(*bb, allowedRaiseLoc);
-            if (allowedRaiseLoc) {
+            allowedRaiseLoc = raiseLocBeforeAbsurd(*bb);
+            if (allowedRaiseLoc.exists()) {
                 // Normal refinement can stop as soon as the branch is dead. Rebuild from the predecessors
                 // with full branch knowledge so the paired raise's arguments see the narrowed types.
                 populateFromPredecessors(true);
@@ -230,7 +232,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         cfg::InstructionPtr *unreachableInstruction = nullptr;
         core::Loc locForUnreachable;
         bool dueToSafeNavigation = false;
-        const bool deadButTypecheckAnyways = current.isDead && allowedRaiseLoc;
+        const bool deadButTypecheckAnyways = current.isDead && allowedRaiseLoc.exists();
 
         if (current.isDead) {
             bb->firstDeadInstructionIdx = 0;
@@ -299,9 +301,9 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                 // A dead-entry block still checks the paired raise's arguments, but not T.absurd.
                 // Only check T.absurd when a live block became dead while processing its bindings.
                 const bool typecheckDeadBinding =
-                    current.isDead && allowedRaiseLoc &&
-                    (deadButTypecheckAnyways ? isPartOfPairedRaise(bind, allowedRaiseLoc)
-                                             : cfg::isa_instruction<cfg::TAbsurd>(bind.value));
+                    current.isDead && allowedRaiseLoc.exists() &&
+                    (cfg::isa_instruction<cfg::TAbsurd>(bind.value) ||
+                     (deadButTypecheckAnyways && isPartOfPairedRaise(bind, allowedRaiseLoc)));
                 if (!current.isDead || !ctx.state.lspQuery.isEmpty() || typecheckDeadBinding) {
                     bind.bind.type = current.processBinding(ctx, *cfg, bind, bb->outerLoops,
                                                             bind.bind.variable.minLoops(*cfg), knowledgeFilter, *constr,
@@ -318,13 +320,13 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                         if (!current.isDead) {
                             current.isDead = true;
                             // A live block can become dead while processing; check for a trailing raise/absurd pair.
-                            raiseLocBeforeAbsurd(*bb, allowedRaiseLoc);
+                            allowedRaiseLoc = raiseLocBeforeAbsurd(*bb);
                         }
                         madeBlockDead = ctx.locAt(bind.loc);
                     }
                     if (cfg::isa_instruction<cfg::TAbsurd>(bind.value)) {
                         // Later T.absurd calls must not inherit this pair's special dead-code typechecking.
-                        allowedRaiseLoc.reset();
+                        allowedRaiseLoc = core::LocOffsets::none();
                     }
                     if (current.isDead && bb->firstDeadInstructionIdx == -1) {
                         // this can also be result of evaluating an instruction, e.g. an always false hard_assert
