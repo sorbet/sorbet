@@ -54,7 +54,7 @@ end
 sig {void}
 def unpaired_raise_still_errors
   unless true
-    raise ArgumentError, "Unexpected value"
+    raise ArgumentError, "Unexpected value" # error: This code is unreachable
   end
 end
 

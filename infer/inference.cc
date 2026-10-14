@@ -48,11 +48,11 @@ core::LocOffsets raiseLocBeforeAbsurd(const cfg::BasicBlock &bb) {
             }
         } else if (cfg::isa_instruction<cfg::TAbsurd>(bind.value)) {
             // Only a raise before the first T.absurd is eligible for the dead-code exception.
-            break;
+            return firstRaise;
         }
     }
 
-    return firstRaise;
+    return core::LocOffsets::none();
 }
 
 bool isPartOfPairedRaise(const cfg::Binding &bind, core::LocOffsets allowedRaiseLoc) {
