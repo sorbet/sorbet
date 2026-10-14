@@ -213,7 +213,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             raiseLocBeforeAbsurd(*bb, allowedRaiseLoc);
             if (allowedRaiseLoc) {
                 // Normal refinement can stop as soon as the branch is dead. Rebuild from the predecessors
-                // with full branch knowledge so T.absurd sees the narrowed type, not the partial refinement.
+                // with full branch knowledge so the paired raise's arguments see the narrowed types.
                 populateFromPredecessors(true);
             }
         }
@@ -286,7 +286,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             }
 
             if (unreachableInstruction == nullptr && !deadButTypecheckAnyways) {
-                // There is no diagnostic to report and no exhaustiveness check to run.
+                // There is no diagnostic to report and no paired raise to typecheck.
                 continue;
             }
         }
@@ -296,10 +296,12 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             int i = 0;
             for (cfg::Binding &bind : bb->exprs) {
                 i++;
+                // A dead-entry block still checks the paired raise's arguments, but not T.absurd.
+                // Only check T.absurd when a live block became dead while processing its bindings.
                 const bool typecheckDeadBinding =
                     current.isDead && allowedRaiseLoc &&
-                    (cfg::isa_instruction<cfg::TAbsurd>(bind.value) ||
-                     (deadButTypecheckAnyways && isPartOfPairedRaise(bind, allowedRaiseLoc)));
+                    (deadButTypecheckAnyways ? isPartOfPairedRaise(bind, allowedRaiseLoc)
+                                            : cfg::isa_instruction<cfg::TAbsurd>(bind.value));
                 if (!current.isDead || !ctx.state.lspQuery.isEmpty() || typecheckDeadBinding) {
                     bind.bind.type = current.processBinding(ctx, *cfg, bind, bb->outerLoops,
                                                             bind.bind.variable.minLoops(*cfg), knowledgeFilter, *constr,
@@ -329,8 +331,8 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                         bb->firstDeadInstructionIdx = i;
                     }
                 } else if (deadButTypecheckAnyways) {
-                    // Only paired raises, their arguments, and T.absurd are typechecked in a dead-entry block.
-                    // Dead-code reporting for other bindings is deferred until after the exhaustiveness check.
+                    // Only paired raises and their arguments are typechecked in a dead-entry block.
+                    // Dead-code reporting for other bindings is deferred until after checking the raise.
                     continue;
                 } else if (ctx.state.lspQuery.isEmpty() && !silenceDeadCodeError(bind, allowedRaiseLoc)) {
                     if (auto e = ctx.beginError(bind.loc, core::errors::Infer::DeadBranchInferencer)) {

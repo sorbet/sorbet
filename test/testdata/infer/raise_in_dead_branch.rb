@@ -6,7 +6,7 @@ sig {params(x: String).void}
 def non_exhaustive_dead_branch(x)
   unless true
     raise ArgumentError, "Unexpected value: #{x}"
-    T.absurd(x) # error: Control flow could reach `T.absurd` because the type `String` wasn't handled
+    T.absurd(x)
   end
 end
 
@@ -37,7 +37,7 @@ def unrelated_dead_code_still_errors(x)
   unless true
     puts(x) # error: This code is unreachable
     raise ArgumentError, "Unexpected value: #{x}"
-    T.absurd(x) # error: Control flow could reach `T.absurd` because the type `String` wasn't handled
+    T.absurd(x)
   end
 end
 
@@ -63,7 +63,7 @@ def only_first_raise_is_allowed(x)
   unless true
     raise ArgumentError, "First failure"
     raise RuntimeError, "Unexpected value: #{x}" # error: This code is unreachable
-    T.absurd(x) # error: Control flow could reach `T.absurd` because the type `String` wasn't handled
+    T.absurd(x)
   end
 end
 
@@ -71,7 +71,7 @@ sig {params(x: String, y: Integer).void}
 def only_first_raise_absurd_pair_is_checked(x, y)
   unless true
     raise ArgumentError, "Unexpected value: #{x}"
-    T.absurd(x) # error: Control flow could reach `T.absurd` because the type `String` wasn't handled
+    T.absurd(x)
     raise RuntimeError, "Unexpected value: #{y}" # error: This code is unreachable
     T.absurd(y)
   end
@@ -117,8 +117,8 @@ sig {params(x: T.any(Integer, String), y: Symbol).void}
 def non_exhaustive_dead_branch_multiple_predecessors(x, y)
   if x.is_a?(Integer) || x.is_a?(String)
   else
-    raise ArgumentError, "Unexpected value: #{y}"
-    T.absurd(y) # error: Control flow could reach `T.absurd` because the type `Symbol` wasn't handled
+    raise ArgumentError, "Unexpected value: #{x}"
+    T.absurd(y)
   end
 end
 
@@ -140,7 +140,7 @@ sig {params(x: String).void}
 def raise_argument_call_in_dead_branch(x)
   unless true
     raise make_error(x)
-    T.absurd(x) # error: Control flow could reach `T.absurd` because the type `String` wasn't handled
+    T.absurd(x)
   end
 end
 
@@ -148,7 +148,7 @@ sig {params(x: Integer).void}
 def raise_integer_argument_call_in_dead_branch(x)
   unless true
     raise make_error(x) # error: Expected `String` but found `Integer` for argument `x`
-    T.absurd(x) # error: Control flow could reach `T.absurd` because the type `Integer` wasn't handled
+    T.absurd(x)
   end
 end
 
@@ -156,7 +156,7 @@ sig {params(x: Integer).void}
 def nested_raise_argument_call_in_dead_branch(x)
   unless true
     raise make_error(x.to_s)
-    T.absurd(x) # error: Control flow could reach `T.absurd` because the type `Integer` wasn't handled
+    T.absurd(x)
   end
 end
 
@@ -165,7 +165,7 @@ def unrelated_argument_errors_in_dead_branch_are_skipped(x)
   unless true
     make_error(123) # error: This code is unreachable
     raise make_error(x)
-    T.absurd(x) # error: Control flow could reach `T.absurd` because the type `String` wasn't handled
+    T.absurd(x)
   end
 end
 
@@ -173,7 +173,7 @@ sig {params(x: String).void}
 def paired_raise_is_reset_between_blocks(x)
   unless true
     raise make_error(x)
-    T.absurd(x) # error: Control flow could reach `T.absurd` because the type `String` wasn't handled
+    T.absurd(x)
   end
   unless true
     T.absurd(x)

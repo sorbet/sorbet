@@ -55,7 +55,7 @@ else
 end
 ```
 
-Sorbet still checks the trailing `T.absurd`, while Ruby executes the custom `raise` first if the branch is reached.
+Sorbet still checks the trailing `T.absurd` if the branch is reachable before the `raise`, while Ruby executes the custom `raise` first if the branch is reached. If Sorbet already knows the branch is unreachable, it skips the exhaustiveness check, but still typechecks the paired `raise` and its arguments.
 
 If multiple consecutive `raise` calls precede `T.absurd`, only the first is exempt from unreachable-code errors. Subsequent raises are still unreachable.
 
