@@ -7,6 +7,48 @@
 #include "main/lsp/LSPConfiguration.h"
 
 namespace sorbet::realmain::lsp {
+
+class TypecheckingPathInfo {
+    TypecheckingPath path_ = TypecheckingPath::Slow;
+    bool isIncremental = false;
+
+    constexpr TypecheckingPathInfo(TypecheckingPath path, bool isIncremental)
+        : path_{path}, isIncremental{isIncremental} {}
+
+public:
+    TypecheckingPathInfo() = default;
+
+    TypecheckingPathInfo(const TypecheckingPathInfo &other) = default;
+    TypecheckingPathInfo &operator=(const TypecheckingPathInfo &other) = default;
+
+    TypecheckingPathInfo(TypecheckingPathInfo &&other) = default;
+    TypecheckingPathInfo &operator=(TypecheckingPathInfo &&other) = default;
+
+    static constexpr TypecheckingPathInfo slow() {
+        return TypecheckingPathInfo{};
+    }
+
+    static constexpr TypecheckingPathInfo fast(bool isIncremental) {
+        return TypecheckingPathInfo{TypecheckingPath::Fast, isIncremental};
+    }
+
+    bool isSlow() const {
+        return this->path_ == TypecheckingPath::Slow;
+    }
+
+    bool isFast() const {
+        return this->path_ == TypecheckingPath::Fast;
+    }
+
+    bool isFastIncremental() const {
+        return this->path_ == TypecheckingPath::Fast && this->isIncremental;
+    }
+
+    TypecheckingPath path() const {
+        return this->path_;
+    }
+};
+
 /**
  * Encapsulates an update to LSP's file state in a compact form.
  */
