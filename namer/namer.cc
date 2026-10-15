@@ -1518,11 +1518,6 @@ private:
 
             if (shouldMangle) {
                 packageMangledClasses[{ctx.file, owner, klass.name, klass.withinExplicitRootScope}] = symbol;
-                // Zero out the package information, to make it not seem like mangled definitions are packaged.
-                // (Makes errors less confusing.)
-                auto data = symbol.data(ctx);
-                data->packageRegistryOwner = core::Symbols::noClassOrModule();
-                data->package = MangledName();
             }
         }
         ENFORCE(symbol.exists());
