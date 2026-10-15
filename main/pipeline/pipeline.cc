@@ -900,11 +900,11 @@ PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::Pars
             // TODO(trevor): after we switch fully over to test packges, this conditional can go away as we won't have
             // the distinction between a test and application node in the condensation graph.
             if (file->isPackagedTest() || file->isPackagedTestHelper()) {
-                ENFORCE(info.testStratum < USHRT_MAX);
-                result.fileToStratum[ix] = core::packages::Stratum(info.testStratum);
+                ENFORCE(info.testStratum != core::packages::Stratum::NONE);
+                result.fileToStratum[ix] = info.testStratum;
             } else {
-                ENFORCE(info.applicationStratum < USHRT_MAX);
-                result.fileToStratum[ix] = core::packages::Stratum(info.applicationStratum);
+                ENFORCE(info.applicationStratum != core::packages::Stratum::NONE);
+                result.fileToStratum[ix] = info.applicationStratum;
             }
 
             if constexpr (debug_mode) {
