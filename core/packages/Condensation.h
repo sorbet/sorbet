@@ -5,6 +5,7 @@
 #include "absl/types/span.h"
 #include "common/common.h"
 #include "core/packages/MangledName.h"
+#include "core/packages/Stratum.h"
 #include <cstdint>
 #include <string>
 #include <utility>
@@ -91,8 +92,8 @@ public:
         // Using "stratum" instead of "layer" to avoid confusion with the modularity concept/package
         // DSL method of "layer" (utility, business, service, etc.)
         struct StratumInfo {
-            uint32_t applicationStratum = INT32_MAX;
-            uint32_t testStratum = INT32_MAX;
+            Stratum applicationStratum = Stratum::NONE;
+            Stratum testStratum = Stratum::NONE;
         };
 
         // Build a mapping from package mangled name to the entry in `this->strata` that the application and test code

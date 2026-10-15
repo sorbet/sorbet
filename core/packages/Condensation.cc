@@ -179,16 +179,16 @@ Condensation::Traversal::buildStratumMapping(const core::GlobalState &gs) const 
                 // test-packages.
                 auto &info = result[name];
                 if (db.getPackageInfo(name).usesTestPackages) {
-                    ENFORCE(info.applicationStratum == INT32_MAX);
-                    ENFORCE(info.testStratum == INT32_MAX);
-                    info.applicationStratum = ix;
-                    info.testStratum = ix;
+                    ENFORCE(info.applicationStratum == Stratum::NONE);
+                    ENFORCE(info.testStratum == Stratum::NONE);
+                    info.applicationStratum = Stratum(ix);
+                    info.testStratum = Stratum(ix);
                 } else if (scc.isTest) {
-                    ENFORCE(info.testStratum == INT32_MAX);
-                    info.testStratum = ix;
+                    ENFORCE(info.testStratum == Stratum::NONE);
+                    info.testStratum = Stratum(ix);
                 } else {
-                    ENFORCE(info.applicationStratum == INT32_MAX);
-                    info.applicationStratum = ix;
+                    ENFORCE(info.applicationStratum == Stratum::NONE);
+                    info.applicationStratum = Stratum(ix);
                 }
             }
         }
