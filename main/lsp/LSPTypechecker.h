@@ -237,17 +237,20 @@ public:
     /**
      * Get the id of the stratum that an edit involving these file refs could be checked at.
      */
-    core::packages::Stratum getStratumForFiles(absl::Span<const core::FileRef> frefs) const;
+    core::packages::Stratum getStratumForFiles(absl::Span<const core::FileRef> frefs,
+                                               bool includePackages = false) const;
 
     /**
      * Get the id of the stratum that an edit involving these paths could be checked at.
      */
-    core::packages::Stratum getStratumForPaths(absl::Span<const std::string_view> paths) const;
+    core::packages::Stratum getStratumForPaths(absl::Span<const std::string_view> paths,
+                                               bool includePackages = false) const;
 
     /**
      * Get the id of the stratum that an edit involving these uris could be checked at.
      */
-    core::packages::Stratum getStratumForUris(absl::Span<const std::string_view> uris) const;
+    core::packages::Stratum getStratumForUris(absl::Span<const std::string_view> uris,
+                                              bool includePackages = false) const;
 
     /**
      * Get the id of the stratum that an edit involving this file ref could be checked at.

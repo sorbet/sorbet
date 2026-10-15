@@ -1178,8 +1178,10 @@ void LSPTypechecker::updateConfigAndGsFromOptions(const DidChangeConfigurationPa
     }
 }
 
-core::packages::Stratum FileStratumMapping::getStratumForFiles(absl::Span<const core::FileRef> refs) const {
+core::packages::Stratum FileStratumMapping::getStratumForFiles(absl::Span<const core::FileRef> refs,
+                                                               bool includePackages) const {
     core::packages::Stratum stratum(0);
+    auto &db = this->tc.state().packageDB();
     for (auto ref : refs) {
         // Fall back on the last stratum for new files.
         if (!ref.exists() || ref.id() >= this->tc.fileToStratum.size()) {
@@ -1189,24 +1191,58 @@ core::packages::Stratum FileStratumMapping::getStratumForFiles(absl::Span<const 
         stratum = std::max(stratum, this->tc.fileToStratum[ref.id()]);
     }
 
+    // TODO(trevor): remove this once we have fully removed test-namespaces. This accounts for incremental edits, as
+    // they pull in the `__package.rb` file during the fast-path, but don't differentiate between the application/test
+    // partition of a package that hasn't been migrated to test packages. As a result, if we don't default to the
+    // test stratum for the package at this point, we may process the `__package.rb` file in the application stratum,
+    // but with all its test imports and exports present, resulting in incorrect errors about test symbols not being
+    // present.
+    if (db.enabled() && includePackages) {
+        // This loop mirrors the structure of a similar loop in runFastPath, that pulls __package.rb files into the set
+        // of files being typechecked.
+        for (auto fref : refs) {
+            if (fref.data(this->tc.state()).isPackage(this->tc.state())) {
+                continue;
+            }
+
+            auto pkg = db.getPackageNameForFile(fref);
+            if (!pkg.exists()) {
+                continue;
+            }
+
+            auto &info = db.getPackageInfo(pkg);
+            auto packageFref = info.fullLoc().file();
+            if (!packageFref.exists()) {
+                continue;
+            }
+
+            // We don't special case packages that have been migrated to test packages here as their application and
+            // test stratum are the same. So while we could skip them at this point, it doesn't change the result to
+            // process them.
+            stratum = std::max(stratum, info.stratum.testStratum);
+        }
+    }
+
     return stratum;
 }
 
-core::packages::Stratum FileStratumMapping::getStratumForPaths(absl::Span<const string_view> paths) const {
+core::packages::Stratum FileStratumMapping::getStratumForPaths(absl::Span<const string_view> paths,
+                                                               bool includePackages) const {
     vector<core::FileRef> refs;
     refs.reserve(paths.size());
     absl::c_transform(paths, back_inserter(refs),
                       [&gs = this->tc.state()](auto path) { return gs.findFileByPath(path); });
-    return this->getStratumForFiles(refs);
+    return this->getStratumForFiles(refs, includePackages);
 }
 
-core::packages::Stratum FileStratumMapping::getStratumForUris(absl::Span<const string_view> uris) const {
+core::packages::Stratum FileStratumMapping::getStratumForUris(absl::Span<const string_view> uris,
+                                                              bool includePackages) const {
     vector<core::FileRef> refs;
     refs.reserve(uris.size());
     absl::c_transform(uris, back_inserter(refs), [&gs = this->tc.state(), &config = *this->tc.config](auto uri) {
         return config.uri2FileRef(gs, uri);
     });
-    return this->getStratumForFiles(refs);
+    return this->getStratumForFiles(refs, includePackages);
 }
 
 core::packages::Stratum FileStratumMapping::getStratumForFile(core::FileRef ref) const {
