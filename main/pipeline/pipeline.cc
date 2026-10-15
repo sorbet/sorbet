@@ -835,7 +835,7 @@ void unpartitionPackageFiles(vector<ast::ParsedFile> &packageFiles, vector<ast::
     }
 }
 
-PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::ParsedFile> &packageFiles,
+PackageStrata computePackageStrata(core::GlobalState &gs, vector<ast::ParsedFile> &packageFiles,
                                    absl::Span<core::FileRef> sourceFiles, const options::Options &opts) {
     Timer timeit(gs.tracer(), "computePackageStrata");
 
@@ -844,6 +844,9 @@ PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::Pars
     result.fileToStratum = vector<core::packages::Stratum>(gs.filesUsed(), core::packages::Stratum(0));
 
     if (!opts.packageDirected) {
+        for (auto name : gs.packageDB().packages()) {
+            gs.packageDB().getPackageInfoNonConst(name)->stratum = {core::packages::Stratum(0), core::packages::Stratum(0)};
+        }
         result.strata = {CondensationStratumInfo{absl::MakeSpan(packageFiles), sourceFiles}};
         return result;
     }
@@ -879,7 +882,7 @@ PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::Pars
     {
         Timer timeit(gs.tracer(), "computePackageStrata.stratumMapping");
 
-        auto stratumMapping = traversal.buildStratumMapping(gs);
+        traversal.recordStrata(gs);
 
         int ix = 0;
         for (auto &file : gs.getFiles().subspan(1)) {
@@ -893,9 +896,7 @@ PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::Pars
                 continue;
             }
 
-            ENFORCE(stratumMapping.find(pkgName) != stratumMapping.end(),
-                    "All packages must be present in the condensation graph");
-            auto &info = stratumMapping[pkgName];
+            const auto &info = db.getPackageInfo(pkgName).stratum;
 
             // TODO(trevor): after we switch fully over to test packges, this conditional can go away as we won't have
             // the distinction between a test and application node in the condensation graph.
