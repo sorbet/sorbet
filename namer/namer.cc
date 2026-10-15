@@ -1307,24 +1307,21 @@ private:
         }
     }
 
-    struct NamespaceOwnerInfo final {
-        bool isMangled;
-        bool inTestNamespace;
-    };
+    bool isMangledNamespace(core::Context ctx, core::ClassOrModuleRef owner) {
+        return owner.data(ctx)->topAttachedClass(ctx).data(ctx)->name.hasUniqueNameKind(
+            ctx, core::UniqueNameKind::MangleRename);
+    }
 
-    NamespaceOwnerInfo namespaceOwnerInfo(core::Context ctx, core::ClassOrModuleRef owner) {
+    bool isInTestNamespace(core::Context ctx, core::ClassOrModuleRef owner) {
         bool inTestNamespace = false;
         auto rootTest = core::Symbols::root().data(ctx)->findMember(ctx, PackageDB::TEST_NAMESPACE);
 
         for (auto symbol = owner.data(ctx)->topAttachedClass(ctx); symbol != core::Symbols::root();
              symbol = symbol.data(ctx)->owner.data(ctx)->topAttachedClass(ctx)) {
             inTestNamespace |= rootTest == symbol;
-            if (symbol.data(ctx)->name.hasUniqueNameKind(ctx, core::UniqueNameKind::MangleRename)) {
-                return {/* isMangled */ true, inTestNamespace};
-            }
         }
 
-        return {/* isMangled */ false, inTestNamespace};
+        return inTestNamespace;
     }
 
     bool mustUseTestNamespace(core::Context ctx) const {
@@ -1345,18 +1342,19 @@ private:
 
     bool shouldMangleClassDefinition(core::MutableContext ctx, core::ClassOrModuleRef owner,
                                      const core::FoundClass &klass) {
-        if (this->package == nullptr) {
-            return false;
+        // Once we're in a mangled namespace, we keep mangling (all nested definisions are isolated,
+        // which allows keeping the implementation of canModifySymbol cheap since it only has to
+        // look directly at the symbol, not any of its owners)
+        if (isMangledNamespace(ctx, owner)) {
+            return true;
         }
-        auto ownerInfo = namespaceOwnerInfo(ctx, owner);
-        // Definitions nested within a mangled owner are already isolated. Skip further mangling.
-        if (ownerInfo.isMangled) {
+        if (this->package == nullptr) {
             return false;
         }
 
         auto [packageRegistryOwner, namespacePackage] = ctx.state.packageInfoForClassOrModule(owner, klass.name);
         const bool isTestNamespaceRoot = owner == core::Symbols::root() && klass.name == PackageDB::TEST_NAMESPACE;
-        bool inTestNamespace = ownerInfo.inTestNamespace || isTestNamespaceRoot;
+        bool inTestNamespace = isInTestNamespace(ctx, owner) || isTestNamespaceRoot;
         if (klass.classKind == core::FoundClass::Kind::Unknown && ctx.state.packageDB().testPackages() &&
             isTestNamespaceRoot) {
             return false;
@@ -1388,17 +1386,16 @@ private:
 
     bool shouldMangleStaticFieldDefinition(core::MutableContext ctx, core::ClassOrModuleRef owner,
                                            const core::FoundStaticField &staticField) {
-        if (this->package == nullptr) {
-            return false;
+        if (isMangledNamespace(ctx, owner)) {
+            return true;
         }
-        auto ownerInfo = namespaceOwnerInfo(ctx, owner);
-        if (ownerInfo.isMangled) {
+        if (this->package == nullptr) {
             return false;
         }
         // Assignments define values inside namespaces, so classify the containing owner.
         auto packageRegistryOwner = owner.data(ctx)->packageRegistryOwner;
         auto namespacePackage = owner.data(ctx)->package;
-        bool inTestNamespace = ownerInfo.inTestNamespace;
+        bool inTestNamespace = isInTestNamespace(ctx, owner);
 
         // Unlike class definitions, assignments require exact package ownership.
         auto onPackagePath = namespacePackage == package->mangledName();
@@ -1453,6 +1450,11 @@ private:
         // To do that, we search the owner's members for a matching mangled symbol defined in this file.
         // This intentionally gives subsequent reopenings within the same file the same mangled name. It also
         // makes us resilient to fast path edits, like whitespace changes, that preserve the definition.
+        //
+        // Reuse must stay file-local: canModifySymbol permits modifying mangled recovery classes, whether
+        // mangled for a package violation or a constant-kind conflict. A later stratum must get a fresh
+        // recovery class, not add mixins or type members to an earlier stratum's class. The same-file
+        // restriction is safe because each file belongs to a single stratum.
         for (const auto &[candidateName, candidateSymbol] : owner.data(ctx)->members()) {
             if (!candidateName.hasUniqueNameKind(ctx, core::UniqueNameKind::MangleRename) ||
                 candidateName.dataUnique(ctx)->original != name) {

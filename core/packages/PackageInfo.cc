@@ -1298,12 +1298,14 @@ PackageInfo::CanModifyResult PackageInfo::canModifySymbol(core::Context ctx, Cla
     // Ensure we're not working with a singleton class before performing any further checks.
     sym = sym.data(gs)->topAttachedClass(gs);
 
-    // A rejected definition has its own recovery namespace. Changes inside it cannot modify
-    // the original namespace, and suggesting a different package or `prelude!` would be misleading.
-    for (auto scope = sym; scope != Symbols::root(); scope = scope.data(gs)->owner.data(gs)->topAttachedClass(gs)) {
-        if (scope.data(gs)->name.hasUniqueNameKind(gs, UniqueNameKind::MangleRename)) {
-            return CanModifyResult::CanModify;
-        }
+    // When we mangle a namespace which doesn't match the package's prefix, the isolated symbol is
+    // only possible to reopen from that file, which means we can modify mangled namespaces at will.
+    //
+    // This case also handles mangles for constant-kind redefinitions (static field redefined as a
+    // class), which is also safe because namer creates a separate recovery class with the same
+    // file-local reopening restriction, leaving the original constant unchanged.
+    if (sym.data(gs)->name.hasUniqueNameKind(gs, UniqueNameKind::MangleRename)) {
+        return CanModifyResult::CanModify;
     }
 
     auto symData = sym.data(gs);
