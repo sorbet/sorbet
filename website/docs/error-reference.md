@@ -3346,7 +3346,24 @@ In Sorbet, it is an error to have provably unreachable code. Because Sorbet is [
 
 Erroring for dead or unreachable code is generally a way to prevent bugs. People don't usually expect that some branch of code is never taken; usually dead code errors come from simple typos or misunderstandings about how Ruby works. In particular: the only two "falsy" values in Ruby are `nil` and `false`.
 
-Note if you intend for code to be dead because you've exhausted all the cases and are trying to raise in the default case, use `T.absurd` to assert that a case analysis is exhaustive. See [Exhaustiveness Checking](exhaustiveness.md) for more information.
+Note: Sorbet allows silencing "This code is unreachable" errors as long as the region of code which is dead ends with a [`T.absurd`](exhaustiveness.md) call. This allows doing things like raising a custom assertion, incrementing a metric, printing an error log, etc. if something which was supposed to be impossible statically actually happens at runtime:
+
+```ruby
+sig { params(x: String).void }
+def handle(x)
+  if x.is_a?(String)
+    puts x
+  else
+    message = "Unexpected value: #{x}"
+    raise message
+    T.absurd(x)
+  end
+end
+```
+
+Put `T.absurd` after the defensive handling, without an intervening conditional or loop. Statements after an unconditional `raise` still produce unreachable-code errors, except for the `T.absurd` assertion itself.
+
+`T.absurd` also checks exhaustiveness: if control flow could reach the `T.absurd` because a case was not handled, Sorbet reports an error. See [Exhaustiveness Checking](exhaustiveness.md) for more information.
 
 Sometimes, dead code errors can be hard to track down. The best way to pinpoint the cause of a dead code error is to wrap variables or expressions in `T.reveal_type(...)` to validate the assumptions that a piece of code is making. For more troubleshooting tips, see [Troubleshooting](troubleshooting.md).
 

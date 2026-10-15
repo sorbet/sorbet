@@ -1636,14 +1636,19 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
             [&](cfg::TAbsurd &i) {
                 const core::TypeAndOrigins &typeAndOrigin = getTypeAndOrigin(i.what.variable);
 
-                if (auto e = ctx.beginError(bind.loc, core::errors::Infer::NotExhaustive)) {
-                    if (typeAndOrigin.type.isUntyped()) {
-                        e.setHeader("Control flow could reach `{}` because argument was `{}`", "T.absurd", "T.untyped");
-                    } else {
-                        e.setHeader("Control flow could reach `{}` because the type `{}` wasn't handled", "T.absurd",
-                                    typeAndOrigin.type.show(ctx));
+                // We sometimes typecheck unreachable code.
+                auto absurdIsUnreachable = this->isDead || typeAndOrigin.type.isBottom();
+                if (!absurdIsUnreachable) {
+                    if (auto e = ctx.beginError(bind.loc, core::errors::Infer::NotExhaustive)) {
+                        if (typeAndOrigin.type.isUntyped()) {
+                            e.setHeader("Control flow could reach `{}` because argument was `{}`", "T.absurd",
+                                        "T.untyped");
+                        } else {
+                            e.setHeader("Control flow could reach `{}` because the type `{}` wasn't handled",
+                                        "T.absurd", typeAndOrigin.type.show(ctx));
+                        }
+                        e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
                     }
-                    e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
                 }
 
                 tp.type = core::Types::bottom();

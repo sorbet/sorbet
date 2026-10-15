@@ -33,9 +33,9 @@ def unresolved_raise_constant_still_errors(x)
 end
 
 sig {params(x: String).void}
-def unrelated_dead_code_still_errors(x)
+def preparation_before_raise_is_allowed(x)
   unless true
-    puts(x) # error: This code is unreachable
+    puts(x)
     raise ArgumentError, "Unexpected value: #{x}"
     T.absurd(x)
   end
@@ -161,9 +161,10 @@ def nested_raise_argument_call_in_dead_branch(x)
 end
 
 sig {params(x: String).void}
-def unrelated_argument_errors_in_dead_branch_are_skipped(x)
+def unrelated_argument_errors_in_dead_branch_are_checked(x)
   unless true
-    make_error(123) # error: This code is unreachable
+    make_error(123)
+             # ^^^ error: Expected `String` but found `Integer(123)` for argument `x`
     raise make_error(x)
     T.absurd(x)
   end
