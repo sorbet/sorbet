@@ -845,7 +845,8 @@ PackageStrata computePackageStrata(core::GlobalState &gs, vector<ast::ParsedFile
 
     if (!opts.packageDirected) {
         for (auto name : gs.packageDB().packages()) {
-            gs.packageDB().getPackageInfoNonConst(name)->stratum = {core::packages::Stratum(0), core::packages::Stratum(0)};
+            gs.packageDB().getPackageInfoNonConst(name)->stratum = {core::packages::Stratum(0),
+                                                                    core::packages::Stratum(0)};
         }
         result.strata = {CondensationStratumInfo{absl::MakeSpan(packageFiles), sourceFiles}};
         return result;
