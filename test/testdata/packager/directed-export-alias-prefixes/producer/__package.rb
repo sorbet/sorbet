@@ -4,6 +4,6 @@
 
 class Producer < PackageSpec
   export Producer::Final
-  export Producer::Via::Nested
-  export Producer::Via::Value
+  export Producer::Via::Nested # error: Cannot export through class alias
+  export Producer::Via::Value # error: Cannot export through class alias
 end

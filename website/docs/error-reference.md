@@ -769,6 +769,7 @@ end
 
 Additional signatures of error 3721 include:
 
+- An export path using a class alias as a namespace. For example, if `MyPackage::Alias = MyPackage::Target`, use `export MyPackage::Target::Nested` instead of `export MyPackage::Alias::Nested`. Exporting the alias itself with `export MyPackage::Alias` is allowed; this exports the alias constant without exporting its target.
 - A package exporting a constant only defined in .rbi files. RBI files are shims to enable typechecking in places where Ruby metaprogramming prevents Sorbet from statically interpreting the behavior of a class or module. Generally, these files declare additional methods on classes defined in Ruby source files, and should not define any new constants. However, there are some rare exceptions where these files can define net-new constants. For these cases, we enforce that these constants cannot be exported.
 - A package exporting an enum value:
 
