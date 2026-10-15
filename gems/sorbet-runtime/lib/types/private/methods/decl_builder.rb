@@ -222,7 +222,10 @@ module T::Private::Methods
       check_live!
 
       names.each do |name|
-        raise BuilderError.new("not a symbol: #{name}") unless Symbol === name
+        unless Symbol === name
+          raise BuilderError.new("not a symbol: #{name}")
+          T.absurd(name)
+        end
       end
 
       if !decl.type_parameters.equal?(ARG_NOT_PROVIDED)

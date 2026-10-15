@@ -20,7 +20,10 @@
 # `*_class_method` variants, like `private_class_method`.
 module T::DefMods
   def abstract(method_name)
-    Kernel.raise TypeError.new("abstract accepts a Symbol, got #{method_name.class}") unless method_name.is_a?(Symbol)
+    unless method_name.is_a?(Symbol)
+      Kernel.raise TypeError.new("abstract accepts a Symbol, got #{method_name.class}")
+      T.absurd(method_name)
+    end
 
     begin
       T::Private::Methods.declare_abstract(T.unsafe(self), method_name)
@@ -32,7 +35,10 @@ module T::DefMods
   end
 
   def override(method_name, allow_incompatible: false)
-    Kernel.raise TypeError.new("override accepts a Symbol, got #{method_name.class}") unless method_name.is_a?(Symbol)
+    unless method_name.is_a?(Symbol)
+      Kernel.raise TypeError.new("override accepts a Symbol, got #{method_name.class}")
+      T.absurd(method_name)
+    end
 
     begin
       T::Private::Methods.declare_override(T.unsafe(self), method_name, allow_incompatible: allow_incompatible)
@@ -44,7 +50,10 @@ module T::DefMods
   end
 
   def final(method_name)
-    Kernel.raise TypeError.new("final accepts a Symbol, got #{method_name.class}") unless method_name.is_a?(Symbol)
+    unless method_name.is_a?(Symbol)
+      Kernel.raise TypeError.new("final accepts a Symbol, got #{method_name.class}")
+      T.absurd(method_name)
+    end
 
     begin
       T::Private::Methods.declare_final(T.unsafe(self), method_name)
@@ -56,7 +65,10 @@ module T::DefMods
   end
 
   def overridable(method_name)
-    Kernel.raise TypeError.new("overridable accepts a Symbol, got #{method_name.class}") unless method_name.is_a?(Symbol)
+    unless method_name.is_a?(Symbol)
+      Kernel.raise TypeError.new("overridable accepts a Symbol, got #{method_name.class}")
+      T.absurd(method_name)
+    end
 
     begin
       T::Private::Methods.declare_overridable(T.unsafe(self), method_name)
