@@ -10,7 +10,11 @@ class VisibilityChecker final {
     ~VisibilityChecker() = default;
 
 public:
-    static void run(core::GlobalState &gs, WorkerPool &workers, absl::Span<const ast::ParsedFile> files);
+    // Set the export bits of the symbols in the packages of `files`.
+    static void propagateExports(core::GlobalState &gs, absl::Span<const ast::ParsedFile> files);
+
+    // Report references in `files` to constants that aren't visible to them.
+    static void checkReferences(core::GlobalState &gs, WorkerPool &workers, absl::Span<const ast::ParsedFile> files);
 };
 
 } // namespace sorbet::packager

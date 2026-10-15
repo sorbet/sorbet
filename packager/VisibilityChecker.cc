@@ -738,15 +738,15 @@ public:
 };
 } // namespace
 
-void VisibilityChecker::run(core::GlobalState &gs, WorkerPool &workers, absl::Span<const ast::ParsedFile> files) {
-    Timer timeit(gs.tracer(), "visibility_checker.run");
-
-    {
-        Timer timeit(gs.tracer(), "visibility_checker.propagate_visibility");
-        for (auto &f : files) {
-            PropagateVisibility::run(gs, f);
-        }
+void VisibilityChecker::propagateExports(core::GlobalState &gs, absl::Span<const ast::ParsedFile> files) {
+    Timer timeit(gs.tracer(), "visibility_checker.propagate_visibility");
+    for (auto &f : files) {
+        PropagateVisibility::run(gs, f);
     }
+}
+
+void VisibilityChecker::checkReferences(core::GlobalState &gs, WorkerPool &workers,
+                                        absl::Span<const ast::ParsedFile> files) {
     VisibilityCheckerPass::run(gs, workers, files);
 }
 

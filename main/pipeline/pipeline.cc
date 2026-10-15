@@ -1196,7 +1196,8 @@ ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, vector<ast::ParsedFil
 #ifndef SORBET_REALMAIN_MIN
             if (opts.cacheSensitiveOptions.sorbetPackages) {
                 Timer timeit(gs.tracer(), "visibility_checker");
-                packager::VisibilityChecker::run(gs, workers, what);
+                packager::VisibilityChecker::propagateExports(gs, what);
+                packager::VisibilityChecker::checkReferences(gs, workers, what);
             }
 #endif
 
@@ -1324,7 +1325,11 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
 
 #ifndef SORBET_REALMAIN_MIN
         if (opts.cacheSensitiveOptions.sorbetPackages) {
-            packager::VisibilityChecker::run(gs, workers, what);
+            // Without incremental namer, no symbols were deleted or re-entered, so their export bits are unchanged.
+            if (runIncrementalNamer) {
+                packager::VisibilityChecker::propagateExports(gs, what);
+            }
+            packager::VisibilityChecker::checkReferences(gs, workers, what);
         }
 #endif
 
