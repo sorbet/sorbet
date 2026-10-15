@@ -1502,19 +1502,16 @@ private:
                 }
             }
             if (shouldMangle) {
-                name = packageMangledName(ctx, owner, klass.name, PackageMangledKind::ClassOrModule);
+                auto previous =
+                    packageMangledClasses.find({ctx.file, owner, klass.name, klass.withinExplicitRootScope});
+                if (previous != packageMangledClasses.end()) {
+                    name = previous->second.data(ctx)->name;
+                } else {
+                    name = packageMangledName(ctx, owner, klass.name, PackageMangledKind::ClassOrModule);
+                }
             }
 
-            // Aliases are entered by resolver--namer should be agnostic of them.
-            auto member = owner.data(ctx)->findMemberNoDealias(name);
-            if (member.exists()) {
-                // We either kept the name of an existing class/module or chose a mangled name that
-                // only reuses class/module symbols, so any existing member here has the right kind.
-                symbol = member.asClassOrModuleRef();
-            } else {
-                auto newClass = ctx.state.enterClassOrModuleSymbol(ctx.locAt(klass.declLoc), owner, name);
-                symbol = newClass;
-            }
+            symbol = ctx.state.enterClassOrModuleSymbol(ctx.locAt(klass.declLoc), owner, name);
 
             if (shouldMangle) {
                 packageMangledClasses[{ctx.file, owner, klass.name, klass.withinExplicitRootScope}] = symbol;
