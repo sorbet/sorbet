@@ -1341,7 +1341,7 @@ private:
 
     bool shouldMangleClassDefinition(core::MutableContext ctx, core::ClassOrModuleRef owner,
                                      const core::FoundClass &klass) {
-        // Once we're in a mangled namespace, we keep mangling (all nested definisions are isolated,
+        // Once we're in a mangled namespace, we keep mangling (all nested definitions are isolated,
         // which allows keeping the implementation of canModifySymbol cheap since it only has to
         // look directly at the symbol, not any of its owners)
         if (isMangledNamespace(ctx, owner)) {
