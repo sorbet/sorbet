@@ -344,6 +344,15 @@ class PropagateVisibility final {
         return lines;
     }
 
+    void applyExport(core::MutableContext ctx, core::SymbolRef sym, core::LocOffsets loc) {
+        auto setExportedTo = true;
+        recursiveSetIsExported(ctx, setExportedTo, sym, loc, sym);
+
+        // When exporting a symbol, we also export its parent namespace. This is a bit of a hack, and it would
+        // be great to remove this, but this was the behavior of the previous packager implementation.
+        exportParentNamespace(ctx, sym.owner(ctx).asClassOrModuleRef());
+    }
+
     PropagateVisibility(core::packages::PackageInfo &package) : package{package} {}
 
 public:
@@ -427,23 +436,13 @@ public:
                 }
 
                 checkExportPackage(ctx, send.loc, sym);
-                auto setExportedTo = true;
-                recursiveSetIsExported(ctx, setExportedTo, sym, send.loc, sym);
-
-                // When exporting a symbol, we also export its parent namespace. This is a bit of a hack, and it would
-                // be great to remove this, but this was the behavior of the previous packager implementation.
-                exportParentNamespace(ctx, klassData->owner);
+                applyExport(ctx, sym, send.loc);
                 return;
             }
 
             case core::SymbolRef::Kind::FieldOrStaticField: {
                 checkExportPackage(ctx, send.loc, sym);
-                auto setExportedTo = true;
-                recursiveSetIsExported(ctx, setExportedTo, sym, send.loc, sym);
-
-                // When exporting a field, we also export its parent namespace. This is a bit of a hack, and it would be
-                // great to remove this, but this was the behavior of the previous packager implementation.
-                exportParentNamespace(ctx, sym.asFieldRef().data(ctx)->owner);
+                applyExport(ctx, sym, send.loc);
                 return;
             }
 
