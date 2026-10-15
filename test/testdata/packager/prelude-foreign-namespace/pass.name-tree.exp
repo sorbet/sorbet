@@ -18,7 +18,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module ::Owner<Owner$2> < ()
-    class ::Owner::Nested<<C Nested>> < (::<todo sym>)
+    class ::Owner::Nested<Nested$1> < (::<todo sym>)
     end
 
     ::Owner::VALUE = 1
@@ -44,9 +44,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::Owner::Qualified<<C Qualified>> < (::<todo sym>)
+  class ::Owner::Qualified<Qualified$1> < (::<todo sym>)
   end
 
-  module ::Owner::Deep::Patch<<C Patch>> < ()
+  module ::Owner::Deep::Patch<Patch$1> < ()
   end
 end

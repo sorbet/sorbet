@@ -61,17 +61,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::A::Same::Nested<<C Nested>> < (::<todo sym>)
+  class ::A::Same::Nested<Nested$1> < (::<todo sym>)
   end
 
   ::A::Same::FIELD = 1
 
-  class ::A::Foreign::Nested<<C Nested>> < (::<todo sym>)
+  class ::A::Foreign::Nested<Nested$1> < (::<todo sym>)
   end
 
   ::A::Foreign::FIELD = 1
 
-  class ::A::Chained::Nested<<C Nested>> < (::<todo sym>)
+  class ::A::Chained::Nested<Nested$1> < (::<todo sym>)
   end
 
   ::A::Chained::FIELD = 1
@@ -84,7 +84,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <runtime method definition of alias_recovery_marker>
   end
 
-  class ::A::Unpackaged::Nested<<C Nested>> < (::<todo sym>)
+  class ::A::Unpackaged::Nested<Nested$1> < (::<todo sym>)
   end
 
   ::A::Unpackaged::FIELD = 1

@@ -37,7 +37,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module ::Producer<Producer$1> < ()
-    class ::Producer::FromTest<<C FromTest>> < (::<todo sym>)
+    class ::Producer::FromTest<FromTest$1> < (::<todo sym>)
     end
   end
 end

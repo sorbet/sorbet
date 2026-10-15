@@ -23,12 +23,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::Other::Thing<<C Thing>> < (::<todo sym>)
-    class ::Other::Thing::Nested<<C Nested>> < (::<todo sym>)
+  class ::Other::Thing<Thing$1> < (::<todo sym>)
+    class ::Other::Thing::Nested<Nested$1> < (::<todo sym>)
     end
 
     class <singleton class><<Class:Thing>> < ()
-      class ::Other::<Class:Thing>::SingletonNested<<C SingletonNested>> < (::<todo sym>)
+      class ::Other::<Class:Thing>::SingletonNested<SingletonNested$1> < (::<todo sym>)
       end
 
       ::Other::<Class:Thing>::VALUE = 1
@@ -37,8 +37,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     ::Other::Thing::Param = <self>.type_member()
   end
 
-  class ::Missing::Thing<<C Thing>> < (::<todo sym>)
-    class ::Missing::Thing::Nested<<C Nested>> < (::<todo sym>)
+  class ::Missing::Thing<Thing$1> < (::<todo sym>)
+    class ::Missing::Thing::Nested<Nested$1> < (::<todo sym>)
     end
   end
 

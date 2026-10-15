@@ -18,7 +18,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <cast:let>(<emptyTree>::<C String>::<C VALID_FIELD>, <todo sym>, <emptyTree>::<C Integer>)
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::String::RejectedClass<<C RejectedClass>> < (::<todo sym>)
+  class ::String::RejectedClass<RejectedClass$1> < (::<todo sym>)
   end
 
   ::String::REJECTED_FIELD = <cast:let>(1, <todo sym>, <emptyTree>::<C Integer>)

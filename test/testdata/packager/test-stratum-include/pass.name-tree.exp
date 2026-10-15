@@ -19,11 +19,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module ::Parent::TestMixin<<C TestMixin>> < ()
+  module ::Parent::TestMixin<TestMixin$1> < ()
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  class ::Parent::MyClass<<C MyClass>> < (::<todo sym>, <emptyTree>::<C Parent>::<C TestMixin>)
+  class ::Parent::MyClass<MyClass$1> < (::<todo sym>, <emptyTree>::<C Parent>::<C TestMixin>)
     <self>.include(<emptyTree>::<C Parent>::<C TestMixin>)
   end
 end

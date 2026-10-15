@@ -22,16 +22,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of self.from_invalid_reopening>
 
-    class ::String::Nested<<C Nested>> < (::<todo sym>)
+    class ::String::Nested<Nested$1> < (::<todo sym>)
     end
 
-    class ::Consumer::Escaped<<C Escaped>> < (::<todo sym>)
+    class ::Consumer::Escaped<Escaped$1> < (::<todo sym>)
     end
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::String<String$2> < (::<todo sym>)
-    class ::Consumer::FromRBI<<C FromRBI>> < (::<root>::<C Object>)
+    class ::Consumer::FromRBI<FromRBI$1> < (::<root>::<C Object>)
     end
   end
 end
