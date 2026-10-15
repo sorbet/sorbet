@@ -9,6 +9,7 @@
 #include "core/StrictLevel.h"
 #include "core/SymbolRef.h"
 #include "core/packages/MangledName.h"
+#include "core/packages/Stratum.h"
 #include <optional>
 #include <vector>
 
@@ -177,6 +178,18 @@ public:
     core::FileRef file;
 
     core::NameRef layer;
+
+    // Source strata assigned by computePackageStrata. Monolithic processing assigns both
+    // zero. Recomputed for each traversal and copied with the package database, including
+    // when restoring a canceled slow path. These are independent of the package AST's stratum.
+    // TODO(trevor): We can replace `StratumInfo` with a single uint32_t once we've fully migrated
+    // to test-packages.
+    // Using "stratum" instead of "layer" to avoid confusion with the modularity concept/package
+    // DSL method of "layer" (utility, business, service, etc.)
+    struct StratumInfo {
+        Stratum applicationStratum = Stratum::NONE;
+        Stratum testStratum = Stratum::NONE;
+    } stratum;
 
     // ID of the strongly-connected component that this package is in, according to its graph of import dependencies
     int sccID_ = -1;

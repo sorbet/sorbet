@@ -69,7 +69,7 @@ struct PackageStrata {
 // Using the condensation graph, sort the package and source files according to the stratum they would show up in a
 // parallel traversal of the condensation graph from its roots. The `packageFiles` vector will be mutated to include
 // non-test versions of the package files included originally.
-PackageStrata computePackageStrata(const core::GlobalState &gs, std::vector<ast::ParsedFile> &packageFiles,
+PackageStrata computePackageStrata(core::GlobalState &gs, std::vector<ast::ParsedFile> &packageFiles,
                                    absl::Span<core::FileRef> files, const options::Options &opts);
 
 void buildPackageDB(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, absl::Span<core::FileRef> nonPackageFiles,

@@ -164,11 +164,11 @@ const Condensation::Traversal Condensation::computeTraversal(const core::GlobalS
     return builder.build();
 }
 
-UnorderedMap<MangledName, Condensation::Traversal::StratumInfo>
-Condensation::Traversal::buildStratumMapping(const core::GlobalState &gs) const {
-    UnorderedMap<MangledName, StratumInfo> result;
-
+void Condensation::Traversal::recordStrata(core::GlobalState &gs) const {
     auto &db = gs.packageDB();
+    for (auto name : db.packages()) {
+        db.getPackageInfoNonConst(name)->stratum = {};
+    }
 
     int ix = -1;
     for (auto stratum : this->strata) {
@@ -177,7 +177,7 @@ Condensation::Traversal::buildStratumMapping(const core::GlobalState &gs) const 
             for (auto name : scc.members) {
                 // TODO(trevor): we can switch to maintaining a single stratum once we've fully migrated to
                 // test-packages.
-                auto &info = result[name];
+                auto &info = db.getPackageInfoNonConst(name)->stratum;
                 if (db.getPackageInfo(name).usesTestPackages) {
                     ENFORCE(info.applicationStratum == Stratum::NONE);
                     ENFORCE(info.testStratum == Stratum::NONE);
@@ -193,8 +193,6 @@ Condensation::Traversal::buildStratumMapping(const core::GlobalState &gs) const 
             }
         }
     }
-
-    return result;
 }
 
 Condensation::Node &CondensationBuilder::pushNode(ImportType type, bool isPrelude) {
