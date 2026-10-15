@@ -2417,7 +2417,20 @@ bar(<span class="hljs-symbol">x:</span> <span class="hljs-number">1</span>) <spa
 <h2><a class="anchor" aria-hidden="true" id="7006"></a><a href="#7006" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>7006</h2>
 <p>In Sorbet, it is an error to have provably unreachable code. Because Sorbet is <a href="/docs/flow-sensitive">sensitive to control flow</a> in a program, Sorbet can not only track what types each variable has within all the branches of a conditional, but also whether any given branch could be executed at all.</p>
 <p>Erroring for dead or unreachable code is generally a way to prevent bugs. People don’t usually expect that some branch of code is never taken; usually dead code errors come from simple typos or misunderstandings about how Ruby works. In particular: the only two “falsy” values in Ruby are <code>nil</code> and <code>false</code>.</p>
-<p>Note if you intend for code to be dead because you’ve exhausted all the cases and are trying to raise in the default case, use <code>T.absurd</code> to assert that a case analysis is exhaustive. See <a href="/docs/exhaustiveness">Exhaustiveness Checking</a> for more information.</p>
+<p>Note: Sorbet allows silencing “This code is unreachable” errors as long as the region of code which is dead ends with a <a href="/docs/exhaustiveness"><code>T.absurd</code></a> call. This allows doing things like raising a custom assertion, incrementing a metric, printing an error log, etc. if something which was supposed to be impossible statically actually happens at runtime:</p>
+<pre><code class="hljs css language-ruby">sig { params(<span class="hljs-symbol">x:</span> String).void }
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">handle</span><span class="hljs-params">(x)</span></span>
+  <span class="hljs-keyword">if</span> x.is_a?(String)
+    puts x
+  <span class="hljs-keyword">else</span>
+    message = <span class="hljs-string">"Unexpected value: <span class="hljs-subst">#{x}</span>"</span>
+    raise message
+    T.absurd(x)
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>Put <code>T.absurd</code> after the defensive handling, without an intervening conditional or loop. Statements after an unconditional <code>raise</code> still produce unreachable-code errors, except for the <code>T.absurd</code> assertion itself.</p>
+<p><code>T.absurd</code> also checks exhaustiveness: if control flow could reach the <code>T.absurd</code> because a case was not handled, Sorbet reports an error. See <a href="/docs/exhaustiveness">Exhaustiveness Checking</a> for more information.</p>
 <p>Sometimes, dead code errors can be hard to track down. The best way to pinpoint the cause of a dead code error is to wrap variables or expressions in <code>T.reveal_type(...)</code> to validate the assumptions that a piece of code is making. For more troubleshooting tips, see <a href="/docs/troubleshooting">Troubleshooting</a>.</p>
 <p>If for whatever reason it’s too hard to track down the cause of a dead code error, it’s possible to silence it by making a variable or expression “unanalyzable,” aka untyped. (When something is untyped, Sorbet will do very limited flow-sensitivity analysis compared to if Sorbet knows the type. To make something unanalyzable, we can wrap it in <code>T.unsafe(...)</code>:</p>
 <pre><code class="hljs css language-ruby">x = <span class="hljs-literal">false</span>
