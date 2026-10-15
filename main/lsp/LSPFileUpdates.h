@@ -83,7 +83,7 @@ public:
     // (Used in tests) Ensures that a slow path typecheck waits until this number of preemption occurs before finishing.
     int preemptionsExpected = 0;
 
-    TypecheckingPath typecheckingPath = TypecheckingPath::Slow;
+    TypecheckingPathInfo typecheckingPath = TypecheckingPathInfo::slow();
 
     // Indicates whether or not the incremental namer should be used on the fast path.
     bool fastPathUseIncrementalNamer = false;

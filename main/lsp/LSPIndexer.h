@@ -50,12 +50,12 @@ class LSPIndexer final {
      * Determines if the given edit can take the fast path relative to the most recently committed edit.
      * It compares the file hashes in the files in `edit` to those in `evictedFiles` and `gs` (in that order).
      */
-    TypecheckingPath
+    TypecheckingPathInfo
     getTypecheckingPath(LSPFileUpdates &edit,
                         const UnorderedMap<core::FileRef, std::shared_ptr<core::File>> &evictedFiles) const;
 
     struct TypecheckingPathResult {
-        TypecheckingPath path = TypecheckingPath::Slow;
+        TypecheckingPathInfo pathInfo = TypecheckingPathInfo::slow();
         LSPFileUpdates::FastPathFilesToTypecheckResult files;
     };
 
@@ -74,7 +74,7 @@ public:
     /**
      * Determines if the given files can take the fast path relative to the latest committed edit.
      */
-    TypecheckingPath getTypecheckingPath(const std::vector<std::shared_ptr<core::File>> &changedFiles) const;
+    TypecheckingPathInfo getTypecheckingPath(const std::vector<std::shared_ptr<core::File>> &changedFiles) const;
 
     /**
      * Computes state hashes for the given set of files. Is a no-op if the provided files all have hashes.

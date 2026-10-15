@@ -212,7 +212,7 @@ LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &ch
         return result;
     }
 
-    result.path = TypecheckingPath::Fast;
+    result.pathInfo = TypecheckingPathInfo::fast(result.files.useIncrementalNamer);
     logger.debug("Taking fast path");
 
     // Using the incremental name indicates that we changed a symbol that affects an unrelated file, and thus traversed
@@ -226,7 +226,7 @@ LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &ch
     return result;
 }
 
-TypecheckingPath
+TypecheckingPathInfo
 LSPIndexer::getTypecheckingPath(LSPFileUpdates &edit,
                                 const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) const {
     auto &logger = *config->logger;
@@ -234,25 +234,19 @@ LSPIndexer::getTypecheckingPath(LSPFileUpdates &edit,
     if (edit.hasNewFiles) {
         logger.debug("Taking slow path because update has a new file");
         prodCategoryCounterInc("lsp.slow_path_reason", "new_file");
-        return TypecheckingPath::Slow;
+        return TypecheckingPathInfo::slow();
     }
 
     auto [path, result] = getTypecheckingPathInternal(edit.updatedFiles, evictedFiles);
-    switch (path) {
-        case TypecheckingPath::Fast: {
-            edit.fastPathUseIncrementalNamer = result.useIncrementalNamer;
-            edit.fastPathExtraFiles = std::move(result.extraFiles);
-            break;
-        }
-
-        case TypecheckingPath::Slow:
-            break;
+    if (path.isFast()) {
+        edit.fastPathUseIncrementalNamer = result.useIncrementalNamer;
+        edit.fastPathExtraFiles = std::move(result.extraFiles);
     }
 
     return path;
 }
 
-TypecheckingPath LSPIndexer::getTypecheckingPath(const vector<shared_ptr<core::File>> &changedFiles) const {
+TypecheckingPathInfo LSPIndexer::getTypecheckingPath(const vector<shared_ptr<core::File>> &changedFiles) const {
     static UnorderedMap<core::FileRef, shared_ptr<core::File>> emptyMap;
 
     // Avoid expensively computing file hashes if there are too many files and it's likely that we'd
@@ -261,7 +255,7 @@ TypecheckingPath LSPIndexer::getTypecheckingPath(const vector<shared_ptr<core::F
         config->logger->debug("Taking slow path because too many files changed ({} files > {} files)",
                               changedFiles.size(), config->opts.lspMaxFilesOnFastPath);
         prodCategoryCounterInc("lsp.slow_path_reason", "too_many_files");
-        return TypecheckingPath::Slow;
+        return TypecheckingPathInfo::slow();
     }
 
     // Ensure all files have computed hashes.
@@ -379,7 +373,7 @@ unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edi
         ENFORCE(runningSlowPath.epoch > (pendingTypecheckUpdates.epoch - pendingTypecheckUpdates.editCount));
 
         // Cancel if the new update will take the slow path anyway.
-        if (update.typecheckingPath != TypecheckingPath::Fast && gs->epochManager->tryCancelSlowPath(update.epoch)) {
+        if (update.typecheckingPath.isSlow() && gs->epochManager->tryCancelSlowPath(update.epoch)) {
             // Cancelation succeeded! Merge the updates from the cancelled run into the current update.
             update.mergeOlder(pendingTypecheckUpdates);
             mergeEvictedFiles(evictedFiles, newlyEvictedFiles);
@@ -395,29 +389,24 @@ unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edi
                                             make_move_iterator(pendingTypecheckDiagnosticLatencyTimers.begin()),
                                             make_move_iterator(pendingTypecheckDiagnosticLatencyTimers.end()));
         clearAndReplaceTimers(pendingTypecheckDiagnosticLatencyTimers, edit.diagnosticLatencyTimers);
-    } else if (update.typecheckingPath != TypecheckingPath::Fast) {
+    } else if (update.typecheckingPath.isSlow()) {
         // Replace diagnostic latency timers; this is a new slow path that did not cancel the previous slow path.
         clearAndReplaceTimers(pendingTypecheckDiagnosticLatencyTimers, edit.diagnosticLatencyTimers);
     }
 
-    switch (update.typecheckingPath) {
-        case TypecheckingPath::Fast: {
-            // Edit takes the fast path. Merge with this edit so we can reverse it if the slow path gets canceled.
-            auto merged = update.copy();
-            merged.mergeOlder(pendingTypecheckUpdates);
-            pendingTypecheckUpdates = move(merged);
-            if (!update.canceledSlowPath) {
-                // If a slow path is running, this update preempted.
-                pendingTypecheckUpdates.committedEditCount += update.editCount;
-            }
-            mergeEvictedFiles(evictedFiles, newlyEvictedFiles);
-            break;
+    if (update.typecheckingPath.isFast()) {
+        // Edit takes the fast path. Merge with this edit so we can reverse it if the slow path gets canceled.
+        auto merged = update.copy();
+        merged.mergeOlder(pendingTypecheckUpdates);
+        pendingTypecheckUpdates = move(merged);
+        if (!update.canceledSlowPath) {
+            // If a slow path is running, this update preempted.
+            pendingTypecheckUpdates.committedEditCount += update.editCount;
         }
-        case TypecheckingPath::Slow: {
-            // Completely replace `pendingTypecheckUpdates` if this was a slow path update.
-            pendingTypecheckUpdates = update.copy();
-            break;
-        }
+        mergeEvictedFiles(evictedFiles, newlyEvictedFiles);
+    } else {
+        // Completely replace `pendingTypecheckUpdates` if this was a slow path update.
+        pendingTypecheckUpdates = update.copy();
     }
 
     // newlyEvictedFiles contains the changes from this edit + changes from the pending typecheck, if applicable.

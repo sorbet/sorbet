@@ -132,7 +132,7 @@ void LSPTypechecker::initialize(TaskQueue &queue, unique_ptr<core::GlobalState> 
 
     // We should always initialize with epoch 0.
     updates.epoch = 0;
-    updates.typecheckingPath = TypecheckingPath::Slow;
+    updates.typecheckingPath = TypecheckingPathInfo::slow();
     this->gs = std::move(initialGS);
 
     // Initialize settings that come through from the client.
@@ -207,8 +207,9 @@ bool LSPTypechecker::typecheck(unique_ptr<LSPFileUpdates> updates, WorkerPool &w
     vector<core::FileRef> filesTypechecked;
     bool committed = true;
     core::packages::Stratum startingStratum;
-    const bool isFastPath = updates->typecheckingPath == TypecheckingPath::Fast;
-    sendTypecheckInfo(*config, *gs, SorbetTypecheckRunStatus::Started, updates->typecheckingPath, {}, startingStratum);
+    const bool isFastPath = updates->typecheckingPath.isFast();
+    sendTypecheckInfo(*config, *gs, SorbetTypecheckRunStatus::Started, updates->typecheckingPath.path(), {},
+                      startingStratum);
     {
         ErrorEpoch epoch(*errorReporter, updates->epoch, isFastPath, move(diagnosticLatencyTimers));
 
@@ -246,7 +247,7 @@ bool LSPTypechecker::typecheck(unique_ptr<LSPFileUpdates> updates, WorkerPool &w
     }
 
     sendTypecheckInfo(*config, *gs, committed ? SorbetTypecheckRunStatus::Ended : SorbetTypecheckRunStatus::Cancelled,
-                      updates->typecheckingPath, move(filesTypechecked), startingStratum);
+                      updates->typecheckingPath.path(), move(filesTypechecked), startingStratum);
     return committed;
 }
 
@@ -259,7 +260,7 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
     ENFORCE(!updates.cancellationExpected);
     ENFORCE(updates.preemptionsExpected == 0);
     // This path only works for fast path updates.
-    ENFORCE(updates.typecheckingPath == TypecheckingPath::Fast);
+    ENFORCE(updates.typecheckingPath.isFast());
 
     Timer timeit(*config->logger, "fast_path");
 
@@ -621,7 +622,7 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
     auto &logger = config->logger;
     auto slowPathOp = make_optional<ShowOperation>(*config, ShowOperation::Kind::SlowPathBlocking);
     Timer timeit(*logger, "slow_path");
-    ENFORCE(updates.typecheckingPath != TypecheckingPath::Fast || config->disableFastPath);
+    ENFORCE(updates.typecheckingPath.isSlow() || config->disableFastPath);
     logger->debug("Taking slow path");
 
     core::packages::Stratum startingStratum(0);
@@ -1059,7 +1060,7 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const vector<cor
 unique_ptr<LSPFileUpdates> LSPTypechecker::getNoopUpdate(absl::Span<const core::FileRef> frefs) const {
     auto result = make_unique<LSPFileUpdates>();
     auto &noop = *result;
-    noop.typecheckingPath = TypecheckingPath::Fast;
+    noop.typecheckingPath = TypecheckingPathInfo::fast(/* isIncremental */ false);
     // Epoch isn't important for this update.
     noop.epoch = 0;
     noop.updatedFileRefs = vector(frefs.begin(), frefs.end());
@@ -1231,7 +1232,7 @@ void LSPTypecheckerDelegate::resumeTaskQueue(InitializedTask &task) {
 
 void LSPTypecheckerDelegate::typecheckOnFastPath(unique_ptr<LSPFileUpdates> updates,
                                                  vector<unique_ptr<Timer>> diagnosticLatencyTimers) {
-    if (updates->typecheckingPath != TypecheckingPath::Fast) {
+    if (updates->typecheckingPath.isSlow()) {
         Exception::raise("Tried to typecheck a slow path edit on the fast path.");
     }
     auto committed = typechecker.typecheck(std::move(updates), workers, move(diagnosticLatencyTimers));

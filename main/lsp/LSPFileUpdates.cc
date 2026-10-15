@@ -28,7 +28,7 @@ void LSPFileUpdates::mergeOlder(const LSPFileUpdates &older) {
         this->updatedFileRefs.push_back(fref);
         this->updatedFiles.push_back(older.updatedFiles[ix]);
     }
-    typecheckingPath = TypecheckingPath::Slow;
+    typecheckingPath = TypecheckingPathInfo::slow();
 }
 
 LSPFileUpdates LSPFileUpdates::copy() const {
