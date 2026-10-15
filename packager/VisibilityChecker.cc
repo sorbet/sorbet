@@ -390,10 +390,15 @@ public:
             }
             auto prefix = scope->symbol();
             if (prefix.isClassAlias(ctx)) {
-                if (auto e = ctx.beginError(scope->loc(), core::errors::Packager::InvalidExport)) {
-                    e.setHeader("Cannot export through class alias `{}`", prefix.show(ctx));
-                    e.addErrorLine(prefix.loc(ctx), "Alias defined here");
-                    e.addErrorNote("Export `{}` directly instead", lit->symbol().show(ctx));
+                if (ctx.state.packageDB().genPackagesMode() == core::packages::GenPackagesMode::Disabled) {
+                    if (auto e = ctx.beginError(scope->loc(), core::errors::Packager::InvalidExport)) {
+                        e.setHeader("Cannot export through class alias `{}`", prefix.show(ctx));
+                        e.addErrorLine(prefix.loc(ctx), "Alias defined here");
+                        e.addErrorNote("Export `{}` directly instead", lit->symbol().show(ctx));
+                    }
+                } else {
+                    // The generator will add a direct export for the target if another package uses it.
+                    this->package.exportsToDelete_.emplace_back(send.loc);
                 }
                 return;
             }

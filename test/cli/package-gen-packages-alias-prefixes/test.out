@@ -1,34 +1,20 @@
-producer/__package.rb:4: Cannot export through class alias `Producer::Alias` https://srb.help/3721
-     4 |  export Producer::Alias::Nested
-                 ^^^^^^^^^^^^^^^
-    producer/definitions.rb:10: Alias defined here
-    10 |  Alias = Target
-          ^^^^^
-  Note:
-    Export `Producer::Target::Nested` directly instead
-
-producer/__package.rb:5: Cannot export through class alias `Producer::Alias` https://srb.help/3721
-     5 |  export Producer::Alias::Unused
-                 ^^^^^^^^^^^^^^^
-    producer/definitions.rb:10: Alias defined here
-    10 |  Alias = Target
-          ^^^^^
-  Note:
-    Export `Producer::Target::Unused` directly instead
-
 producer/__package.rb:3: `Producer` is missing exports https://srb.help/3734
      3 |class Producer < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
+    producer/__package.rb:4: Deleted
+     4 |  export Producer::Alias::Nested
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    producer/__package.rb:5: Deleted
+     5 |  export Producer::Alias::Unused
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     producer/__package.rb:6: Inserted `export Producer::Target::Nested`
      6 |  export Producer::Alias
                                 ^
-Errors: 3
+Errors: 1
 # typed: strict
 
 class Producer < PackageSpec
-  export Producer::Alias::Nested
-  export Producer::Alias::Unused
   export Producer::Alias
   export Producer::Target::Nested
 end
