@@ -18,4 +18,18 @@ test/cli/absurd-dead-code/test.rb:24: This code is unreachable https://srb.help/
     test/cli/absurd-dead-code/test.rb:23: This expression always raises or can never be computed
     23 |  raise "stop"
           ^^^^^^^^^^^^
-Errors: 3
+
+test/cli/absurd-dead-code/test.rb:30: This code is unreachable https://srb.help/7006
+    30 |    message = "Unexpected value: #{x}"
+    31 |    raise message
+    test/cli/absurd-dead-code/test.rb:29: This condition was always `truthy` (`T::Boolean`)
+    29 |  unless x.is_a?(String)
+                 ^^^^^^^^^^^^^^^
+  Got `T::Boolean` originating from:
+    test/cli/absurd-dead-code/test.rb:29:
+    29 |  unless x.is_a?(String)
+                 ^^^^^^^^^^^^^^^
+  Note:
+    If this code is intentionally unreachable, end this sequence with `T.absurd(...)`
+    after any defensive error handling.
+Errors: 4

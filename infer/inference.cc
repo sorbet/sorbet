@@ -418,6 +418,10 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     e.addErrorNote("If this is intentional, either delete the redundant code or restructure\n"
                                    "    it to use `{}` so that Sorbet can check for exhaustiveness.",
                                    "T.absurd");
+                } else if (!absurdLoc.exists()) {
+                    e.addErrorNote("If this code is intentionally unreachable, end this sequence with `{}`\n"
+                                   "    after any defensive error handling.",
+                                   "T.absurd(...)");
                 }
             }
 

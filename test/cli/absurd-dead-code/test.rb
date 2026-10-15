@@ -23,3 +23,11 @@ def ordinary_code_after_raise
   raise "stop"
   puts "later"
 end
+
+sig {params(x: String).void}
+def missing_absurd(x)
+  unless x.is_a?(String)
+    message = "Unexpected value: #{x}"
+    raise message
+  end
+end
