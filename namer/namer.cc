@@ -1330,12 +1330,11 @@ private:
     }
 
     bool hasNamespaceError(core::Context ctx, core::packages::MangledName namespacePackage,
-                           core::ClassOrModuleRef packageRegistryOwner, bool withinExplicitRootScope,
-                           bool inTestNamespace, bool &onPackagePath) const {
+                           bool withinExplicitRootScope, bool inTestNamespace, bool &onPackagePath) const {
         if (package->usesTestPackages && !ctx.state.packageDB().testPackages() && inTestNamespace) {
             onPackagePath = false;
         }
-        auto foreignNamespace = packageRegistryOwner.exists() && namespacePackage.exists() && !onPackagePath;
+        auto foreignNamespace = namespacePackage.exists() && !onPackagePath;
         auto exempt = package->isPreludePackage() && withinExplicitRootScope && !foreignNamespace;
         return !exempt && (!onPackagePath || (mustUseTestNamespace(ctx) && !inTestNamespace));
     }
@@ -1374,8 +1373,8 @@ private:
         if (packageRegistryOwner == core::Symbols::PackageSpecRegistry() && !isTestNamespaceRoot) {
             onPackagePath = false;
         }
-        auto shouldMangle = hasNamespaceError(ctx, namespacePackage, packageRegistryOwner,
-                                              klass.withinExplicitRootScope, inTestNamespace, onPackagePath);
+        auto shouldMangle =
+            hasNamespaceError(ctx, namespacePackage, klass.withinExplicitRootScope, inTestNamespace, onPackagePath);
         if (shouldMangle) {
             // Report using the source namespace's ownership before mangling clears it.
             reportNamespaceError(ctx, klass.declLoc, klass.withinExplicitRootScope, namespacePackage, onPackagePath,
@@ -1393,14 +1392,13 @@ private:
             return false;
         }
         // Assignments define values inside namespaces, so classify the containing owner.
-        auto packageRegistryOwner = owner.data(ctx)->packageRegistryOwner;
         auto namespacePackage = owner.data(ctx)->package;
         bool inTestNamespace = isInTestNamespace(ctx, owner);
 
         // Unlike class definitions, assignments require exact package ownership.
         auto onPackagePath = namespacePackage == package->mangledName();
-        auto shouldMangle = hasNamespaceError(ctx, namespacePackage, packageRegistryOwner,
-                                              staticField.withinExplicitRootScope, inTestNamespace, onPackagePath);
+        auto shouldMangle = hasNamespaceError(ctx, namespacePackage, staticField.withinExplicitRootScope,
+                                              inTestNamespace, onPackagePath);
         if (shouldMangle) {
             reportNamespaceError(ctx, staticField.lhsLoc, staticField.withinExplicitRootScope, namespacePackage,
                                  onPackagePath, owner, staticField.name);
