@@ -49,6 +49,16 @@ core::ClassOrModuleRef getScopeForPackage(const core::GlobalState &gs, absl::Spa
     return result;
 }
 
+// Which of a package's namespaces to recompute export bits for. A package that doesn't use `test!` packages defines
+// its application and its `Test::` namespace in different strata in package-directed mode, and processing one must
+// not change the other's symbols, which might belong to an earlier stratum.
+//
+// TODO(jez) Delete this once all packages use `test!` packages.
+enum class Namespace {
+    Application,
+    Test,
+};
+
 class PropagateVisibility final {
     enum class Mode {
         SetExportBits,
@@ -205,17 +215,17 @@ class PropagateVisibility final {
         return {nonTestScope, testScope};
     }
 
-    void unsetAllExportedInPackage(core::MutableContext ctx) {
+    void unsetAllExportedInPackage(core::MutableContext ctx, Namespace ns) {
         auto [nonTestScope, testScope] = getScopesForPackage(ctx);
 
         auto setExportedTo = false;
 
         // loc is never used in `recursiveSetIsExported` if `setExportedTo` is false, so just say "none"
         auto currentExportLineLoc = core::LocOffsets::none();
-        if (nonTestScope.exists()) {
+        if (ns == Namespace::Application && nonTestScope.exists()) {
             recursiveSetIsExported(ctx, setExportedTo, nonTestScope, currentExportLineLoc, nonTestScope);
         }
-        if (testScope.exists()) {
+        if (ns == Namespace::Test && testScope.exists()) {
             recursiveSetIsExported(ctx, setExportedTo, testScope, currentExportLineLoc, testScope);
         }
 
@@ -529,21 +539,31 @@ public:
     //
     // This reports no errors: `reportErrors` reports them, from the package's resolved `__package.rb`
     // (which might not happen until the test SCC for this package runs).
-    static void setExportBits(core::GlobalState &gs, core::packages::MangledName name) {
+    static void setExportBits(core::GlobalState &gs, core::packages::MangledName name, Namespace ns) {
         auto package = gs.packageDB().getPackageInfoNonConst(name);
         ENFORCE(package != nullptr);
+        if (package->usesTestPackages) {
+            // A `test!` package is a separate package, so each package has only one namespace.
+            ns = Namespace::Application;
+        }
 
         core::MutableContext ctx{gs, core::Symbols::root(), package->fullLoc().file()};
         // TODO(jez) This doesn't actually walk the tree anymore, but it still constructs
         // PropagateVisibility because that's where all the helpers that set export bits are.
         PropagateVisibility pass{*package, Mode::SetExportBits};
 
-        // TODO(jez) This preserves master behavior as of this commit: the test side of the
-        // `__package.rb` would unset all export bits, even the application side.
-        pass.unsetAllExportedInPackage(ctx);
+        pass.unsetAllExportedInPackage(ctx, ns);
 
         for (const auto &exp : package->exports_) {
-            // Exports can't go through class aliases, so we don't need to dealias any prefix.
+            // Exports can't go through class aliases, so an export of a `Test::` constant only exports symbols in
+            // the `Test::` namespace, and vice versa.
+            auto isTestExport =
+                !package->usesTestPackages && exp.reversedPath.back() == core::packages::PackageDB::TEST_NAMESPACE;
+            if (isTestExport != (ns == Namespace::Test)) {
+                continue;
+            }
+
+            // For the same reason, we don't need to dealias any prefix.
             core::SymbolRef sym = core::Symbols::root();
             for (auto it = exp.reversedPath.rbegin(); it != exp.reversedPath.rend() && sym.exists(); ++it) {
                 sym = sym.isClassOrModule() ? sym.asClassOrModuleRef().data(gs)->findMemberNoDealias(*it)
@@ -774,9 +794,12 @@ public:
 
 void VisibilityChecker::propagateExports(core::GlobalState &gs, absl::Span<const ast::ParsedFile> files) {
     Timer timeit(gs.tracer(), "visibility_checker.propagate_visibility");
-    UnorderedSet<core::packages::MangledName> packages;
+    // Recompute the bits of the namespaces whose files are being processed: these are the only symbols that this
+    // stratum (or fast path) can have entered or changed.
+    UnorderedSet<pair<core::packages::MangledName, Namespace>> recomputed;
     for (auto &f : files) {
-        if (f.file.data(gs).isPackage(gs)) {
+        auto &file = f.file.data(gs);
+        if (file.isPackage(gs)) {
             // Doesn't depend on export bits, only on the exports in the package's `__package.rb`.
             PropagateVisibility::reportErrors(gs, f);
         } else {
@@ -790,9 +813,10 @@ void VisibilityChecker::propagateExports(core::GlobalState &gs, absl::Span<const
             // looking for `__package.rb` files, because the application stratum of a legacy
             // application+test package won't place the `__package.rb` file in that stratum, but
             // still needs to export the application constants.)
-            auto [_it, seenForFirstTime] = packages.emplace(pkgName);
+            auto ns = file.isPackagedTest() ? Namespace::Test : Namespace::Application;
+            auto [_it, seenForFirstTime] = recomputed.emplace(pkgName, ns);
             if (seenForFirstTime) {
-                PropagateVisibility::setExportBits(gs, pkgName);
+                PropagateVisibility::setExportBits(gs, pkgName, ns);
             }
         }
     }
