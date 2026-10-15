@@ -71,6 +71,9 @@ struct Import {
 
 struct Export {
     core::LocOffsets loc;
+    // The exported constant's names, from leaf to root. Stored as names rather than symbols so that
+    // the path can be resolved against a GlobalState that has only some of the package's symbols.
+    std::vector<core::NameRef> reversedPath;
 
     explicit Export(core::LocOffsets loc) : loc(loc) {}
 };

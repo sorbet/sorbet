@@ -388,11 +388,15 @@ struct PackageSpecBodyWalk {
                 // export. This should be removed once we're fully migrated.
                 if (ctx.state.packageDB().testPackages() && !this->info.testPackage() && isTestConstant(expr)) {
                     tree = ast::make_expression<ast::EmptyTree>();
-                } else if (verifyConstant(ctx, core::Names::export_(), expr) != nullptr) {
+                } else if (auto target = verifyConstant(ctx, core::Names::export_(), expr)) {
                     // Record every syntactically valid export. verifyConstant only checks that the argument is a
                     // constant path, so this also records constants that will fail to resolve later. The rest of the
                     // pipeline uses these locations for autocorrects.
-                    info.exports_.emplace_back(send.loc);
+                    auto &exp = info.exports_.emplace_back(send.loc);
+                    while (target != nullptr) {
+                        exp.reversedPath.emplace_back(target->cnst);
+                        target = ast::cast_tree<ast::UnresolvedConstantLit>(target->scope);
+                    }
                 } else if (ast::isa_tree<ast::UnresolvedConstantLit>(expr)) {
                     // A constant path that verifyConstant rejected (e.g., a `::`-rooted one), which it reported
                     // an error for. Drop it so that `exports_` has every export resolver could resolve.
