@@ -1502,7 +1502,13 @@ private:
                 }
             }
             if (shouldMangle) {
-                name = packageMangledName(ctx, owner, klass.name, PackageMangledKind::ClassOrModule);
+                auto previous =
+                    packageMangledClasses.find({ctx.file, owner, klass.name, klass.withinExplicitRootScope});
+                if (previous != packageMangledClasses.end()) {
+                    name = previous->second.data(ctx)->name;
+                } else {
+                    name = packageMangledName(ctx, owner, klass.name, PackageMangledKind::ClassOrModule);
+                }
             }
 
             // Aliases are entered by resolver--namer should be agnostic of them.
