@@ -9,7 +9,7 @@ Root::Nested::Foo::Bar = nil
 ::Allowed::TopLevel = nil # error: requires this package to be marked `prelude!`
 
   NotAllowed::Foo::Bar = nil
-# ^^^^^^^^^^^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
+# ^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
 
 module Root::Nested
 
@@ -39,14 +39,14 @@ module Root # error: Package `Root::Nested` may not open `Root`
     sig { void }
     def example
       NOT_IN_PACKAGE
-    # ^^^^^^^^^^^^^^ error: `Root` is not imported
+#     ^^^^^^^^^^^^^^ error: Unable to resolve constant `NOT_IN_PACKAGE`
     end
   end
 end
 
   class Root::Stringy < String
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
-#                       ^^^^^^ error: Superclasses may only be set on constants in the package that owns them
+
 end
 
 class Root::Nested::Stringy < String

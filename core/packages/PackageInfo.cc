@@ -1298,6 +1298,16 @@ PackageInfo::CanModifyResult PackageInfo::canModifySymbol(core::Context ctx, Cla
     // Ensure we're not working with a singleton class before performing any further checks.
     sym = sym.data(gs)->topAttachedClass(gs);
 
+    // When we mangle a namespace which doesn't match the package's prefix, the isolated symbol is
+    // only possible to reopen from that file, which means we can modify mangled namespaces at will.
+    //
+    // This case also handles mangles for constant-kind redefinitions (static field redefined as a
+    // class), which is also safe because namer creates a separate recovery class with the same
+    // file-local reopening restriction, leaving the original constant unchanged.
+    if (sym.data(gs)->name.hasUniqueNameKind(gs, UniqueNameKind::MangleRename)) {
+        return CanModifyResult::CanModify;
+    }
+
     auto symData = sym.data(gs);
 
     // It's not okay to modify anything in the package hierarchy, as we don't support packages with generics, or mixins
@@ -1349,11 +1359,11 @@ PackageInfo::CanModifyResult PackageInfo::canModifySymbol(core::Context ctx, Cla
 }
 
 bool PackageInfo::ownsNamespace(const core::GlobalState &gs, MangledName namespacePackage,
-                                ClassOrModuleRef packageRegistryOwner, bool couldBePrefix) const {
+                                ClassOrModuleRef packageRegistryOwner) const {
     if (namespacePackage == this->mangledName()) {
         return true;
     }
-    if (!couldBePrefix || !packageRegistryOwner.exists()) {
+    if (!packageRegistryOwner.exists()) {
         return false;
     }
 

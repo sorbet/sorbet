@@ -8,7 +8,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module ::Second<Second$1> < ()
-    class ::Second::FromFirst<<C FromFirst>> < (::<todo sym>)
+    class ::Second::FromFirst<FromFirst$1> < (::<todo sym>)
     end
   end
 end

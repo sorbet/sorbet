@@ -675,9 +675,11 @@ Package names must not contain underscores. Internally, the packager assumes it 
 
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
 
-All code inside a package must live within the namespace declared by it's enclosing `__package.rb` file. Note that since packages are allowed to nest inside each other, sometimes you might have attempted to add code in a folder that you didn't realize was actually managed by a nested package.
+Behavior defined inside a package must live within the namespace declared by its enclosing `__package.rb` file. Note that since packages are allowed to nest inside each other, sometimes you might have attempted to add code in a folder that you didn't realize was actually managed by a nested package.
 
 If you're seeing this error and surprised, double check which folders have `__package.rb` files in them, and the names of the packages declared by them.
+
+Namespace-definition violations previously reported with this code now use [4031](#4031). This code still reports behavior defined outside the permitted namespace.
 
 ## 3714
 
@@ -1374,6 +1376,18 @@ private_class_method def self.some_singleton_class_method; end
 ```
 
 Note that the `self.` keyword in the method declaration changes the method from being an instance method to being a class method. In Ruby this `self.` prefix is similar to the `static` keyword on method definitions in languages like C++ or Java.
+
+## 4031
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+Class and module definitions must be in their enclosing package's namespace, or an intermediate prefix of that namespace. Constant assignments must be in a namespace owned by the enclosing package, not merely a prefix. Check the names and locations of enclosing and nested `__package.rb` files if a definition unexpectedly belongs to another package.
+
+Legacy test files must define constants in `Test::<package>`. Test-only packages use their package namespace directly, without the additional `Test::` prefix.
+
+Explicit-root definitions outside the package namespace require a `prelude!` package. Being a prelude does not permit defining constants in another package's namespace.
+
+These namespace-definition errors previously used [3713](#3713), which remains the code for behavior defined outside the permitted namespace. Invalid definitions are isolated from their source-level namespace, so other references may also report unresolved constants.
 
 ## 5001
 

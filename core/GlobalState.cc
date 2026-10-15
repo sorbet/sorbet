@@ -1159,6 +1159,17 @@ SymbolRef GlobalState::findRenamedSymbol(ClassOrModuleRef owner, SymbolRef sym) 
     }
 }
 
+namespace {
+
+bool isMangledNamespaceName(const GlobalState &gs, NameRef name) {
+    while (name.hasUniqueNameKind(gs, UniqueNameKind::Singleton)) {
+        name = name.dataUnique(gs)->original;
+    }
+    return name.hasUniqueNameKind(gs, UniqueNameKind::MangleRename);
+}
+
+} // namespace
+
 ClassOrModuleRef GlobalState::enterClassOrModuleSymbol(Loc loc, ClassOrModuleRef owner, NameRef name) {
     // ENFORCE_NO_TIMER(!owner.exists()); // Owner may not exist on purely synthetic symbols.
     ENFORCE_NO_TIMER(name.isClassName(*this));
@@ -1198,6 +1209,13 @@ GlobalState::ClassOrModulePackageInfo GlobalState::packageInfoForClassOrModule(C
         return {Symbols::noClassOrModule(), packages::MangledName()};
     }
 
+    // A mangled class is a separate recovery symbol, whether created for a package violation or a
+    // constant-kind conflict. It must not inherit the original constant's package ownership or registry
+    // cursor: doing so could let rejected definitions claim a namespace belonging to another package.
+    if (isMangledNamespaceName(*this, name)) {
+        return {Symbols::noClassOrModule(), packages::MangledName()};
+    }
+
     // TODO(trevor) remove this once we've fully migrated to test-packages
     if (owner == Symbols::root() &&
         (!this->packageDB().testPackages() && name == packages::PackageDB::TEST_NAMESPACE)) {
@@ -1215,8 +1233,7 @@ GlobalState::ClassOrModulePackageInfo GlobalState::packageInfoForClassOrModule(C
     }
 
     auto registryName = name;
-    while (registryName.hasUniqueNameKind(*this, UniqueNameKind::Singleton) ||
-           registryName.hasUniqueNameKind(*this, UniqueNameKind::MangleRename)) {
+    while (registryName.hasUniqueNameKind(*this, UniqueNameKind::Singleton)) {
         registryName = registryName.dataUnique(*this)->original;
     }
     auto packageRegistryMember = ownerPackageRegistryOwner.data(*this)->findMember(*this, registryName);
