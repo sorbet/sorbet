@@ -16,7 +16,10 @@ module T::Types
     end
 
     def initialize(name)
-      raise ArgumentError.new("not a symbol: #{name}") unless name.is_a?(Symbol)
+      unless name.is_a?(Symbol)
+        raise ArgumentError.new("not a symbol: #{name}")
+        T.absurd(name)
+      end
       @name = name
     end
 
