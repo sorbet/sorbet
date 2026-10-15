@@ -1176,8 +1176,10 @@ void LSPTypechecker::updateConfigAndGsFromOptions(const DidChangeConfigurationPa
     }
 }
 
-core::packages::Stratum FileStratumMapping::getStratumForFiles(absl::Span<const core::FileRef> refs) const {
+core::packages::Stratum FileStratumMapping::getStratumForFiles(absl::Span<const core::FileRef> refs,
+                                                               bool includePackages) const {
     core::packages::Stratum stratum(0);
+    auto &db = this->tc.state().packageDB();
     for (auto ref : refs) {
         // Fall back on the last stratum for new files.
         if (!ref.exists() || ref.id() >= this->tc.fileToStratum.size()) {
@@ -1185,26 +1187,42 @@ core::packages::Stratum FileStratumMapping::getStratumForFiles(absl::Span<const 
         }
 
         stratum = std::max(stratum, this->tc.fileToStratum[ref.id()]);
+
+        // TODO(trevor): remove this once we have fully removed test-namespaces. This accounts for incremental
+        // edits, as they pull in the `__package.rb` file during the fast-path, which aren't split into their
+        // application and test versions during the fast path. As a result, if we don't default to the test
+        // stratum for the package at this point, we may process the `__package.rb` file in the application
+        // stratum, but with all its test imports and exports present.
+        if (includePackages) {
+            auto pkg = db.getPackageNameForFile(ref);
+            if (!pkg.exists()) {
+                return this->tc.lastStratum;
+            }
+
+            stratum = std::max(stratum, db.getPackageInfo(pkg).stratum.testStratum);
+        }
     }
 
     return stratum;
 }
 
-core::packages::Stratum FileStratumMapping::getStratumForPaths(absl::Span<const string_view> paths) const {
+core::packages::Stratum FileStratumMapping::getStratumForPaths(absl::Span<const string_view> paths,
+                                                               bool includePackages) const {
     vector<core::FileRef> refs;
     refs.reserve(paths.size());
     absl::c_transform(paths, back_inserter(refs),
                       [&gs = this->tc.state()](auto path) { return gs.findFileByPath(path); });
-    return this->getStratumForFiles(refs);
+    return this->getStratumForFiles(refs, includePackages);
 }
 
-core::packages::Stratum FileStratumMapping::getStratumForUris(absl::Span<const string_view> uris) const {
+core::packages::Stratum FileStratumMapping::getStratumForUris(absl::Span<const string_view> uris,
+                                                              bool includePackages) const {
     vector<core::FileRef> refs;
     refs.reserve(uris.size());
     absl::c_transform(uris, back_inserter(refs), [&gs = this->tc.state(), &config = *this->tc.config](auto uri) {
         return config.uri2FileRef(gs, uri);
     });
-    return this->getStratumForFiles(refs);
+    return this->getStratumForFiles(refs, includePackages);
 }
 
 core::packages::Stratum FileStratumMapping::getStratumForFile(core::FileRef ref) const {

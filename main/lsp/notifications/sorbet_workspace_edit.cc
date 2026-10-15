@@ -172,10 +172,11 @@ const SorbetWorkspaceEditParams &SorbetWorkspaceEditTask::getParams() const {
 }
 
 core::packages::Stratum SorbetWorkspaceEditTask::preemptionStratum(FileStratumMapping info) const {
+    ENFORCE(this->cachedFastPathDecision.isFast());
     vector<string_view> paths;
     paths.reserve(this->params->updates.size());
     absl::c_transform(this->params->updates, back_inserter(paths), [](auto &file) { return file->path(); });
-    return info.getStratumForPaths(paths);
+    return info.getStratumForPaths(paths, this->cachedFastPathDecision.isFastIncremental());
 }
 
 } // namespace sorbet::realmain::lsp
