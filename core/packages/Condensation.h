@@ -80,6 +80,12 @@ public:
         // Spans of `this->sccs` that have no import conflicts, and could go through the pipeline in the same stratum.
         std::vector<absl::Span<SCCInfo>> strata;
 
+        // All dependencies of the focused packages.
+        UnorderedSet<MangledName> upstream;
+
+        // All dependants of the focused packages.
+        UnorderedSet<MangledName> downstream;
+
         Traversal() = default;
 
         Traversal(const Traversal &other) = delete;
@@ -95,7 +101,7 @@ public:
     // Compute a traversal through the condensation graph, that yields groups of SCCs that have no dependencies on each
     // other. These groups are acceptable to typecheck in the same stratum, under the assumption that the package graph
     // is well-formed.
-    const Traversal computeTraversal(const GlobalState &gs) const;
+    const Traversal computeTraversal(const GlobalState &gs, const UnorderedSet<MangledName> *focusedPackages) const;
 
     absl::Span<const Node> nodes() const {
         return this->nodes_;
