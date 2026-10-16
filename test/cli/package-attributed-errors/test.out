@@ -28,7 +28,7 @@
      3 |class Lib::Nested < PackageSpec
         ^
 
-[<none>] unpackaged.rb:1: File `./unpackaged.rb` does not belong to a package; add a `__package.rb` file to one of its parent directories https://srb.help/3705
+[<none>] unpackaged.rb:1: File `./unpackaged.rb` does not belong to a package; add a `__package.rb` file to one of its parent directories https://srb.help/4032
      1 |# typed: strict
         ^
 
