@@ -676,6 +676,14 @@ class Enumerator::Lazy < Enumerator
   end
   def collect_concat(&blk); end
 
+  ### This is implemented in C++ to fix the return type
+
+  # Like
+  # [`Enumerable#compact`](https://docs.ruby-lang.org/en/3.1/Enumerable.html#method-i-compact),
+  # but chains operation to be lazy-evaluated.
+  sig {returns(T::Enumerator::Lazy[T.untyped])}
+  def compact(); end
+
   # Like
   # [`Enumerable#drop`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-drop),
   # but chains operation to be lazy-evaluated.
