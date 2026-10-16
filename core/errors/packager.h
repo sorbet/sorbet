@@ -9,7 +9,7 @@ namespace sorbet::core::errors::Packager {
 inline constexpr ErrorClass InvalidPackageDefinition{3702, StrictLevel::False};
 // inline constexpr ErrorClass RedefinitionOfPackage{3703, StrictLevel::False};
 inline constexpr ErrorClass PackageNotFound{3704, StrictLevel::False};
-inline constexpr ErrorClass UnpackagedFile{3705, StrictLevel::False};
+// 3705 UnpackagedFile moved to Namer (4032)
 inline constexpr ErrorClass InvalidConfiguration{3706, StrictLevel::False};
 inline constexpr ErrorClass MultiplePackagesInOneFile{3707, StrictLevel::False};
 // 3708 MultipleExportMethodsCalls

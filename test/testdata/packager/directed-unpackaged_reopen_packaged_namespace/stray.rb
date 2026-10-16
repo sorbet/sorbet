@@ -2,13 +2,13 @@
 # Omit the directory so the assertion also matches LSP paths.
 # typed: true
 
-# This file belongs to no package, which is already an error (3705, on line 1). `checkScopePackage` then also
+# This file belongs to no package, which is already an error (4032, on line 1). `checkScopePackage` then also
 # reports 5086 for every scope in the file whose symbol belongs to a package -- including `Opus::Foo::Extra`,
 # which this file *defines* (it inherits `package = Opus::Foo` from its owner), so that message is misleading as
-# well as redundant. Record the current behavior before making `checkScopePackage` return early when the file
-# has no package, as `shouldCheckPackage` already does.
-module Opus::Foo # error: Unpackaged code may not open `Opus::Foo`
-  class Extra # error: Unpackaged code may not open `Opus::Foo::Extra`
+# well as redundant. Namer now isolates these definitions, and `checkScopePackage` skips unpackaged files,
+# leaving only the 4032 above.
+module Opus::Foo
+  class Extra
     X = Integer
   end
 end
