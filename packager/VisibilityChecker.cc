@@ -93,7 +93,7 @@ class PropagateVisibility final {
         decltype(duplicateExports)(COMPARE_EXPORT_LOCS);
 
     void checkDuplicateExport(core::MutableContext ctx, core::SymbolRef currentExportLineSym,
-                              core::LocOffsets currentExportLineLoc, core::SymbolRef sym, bool alreadyExported) {
+                              core::LocOffsets currentExportLineLoc, core::SymbolRef sym) {
         // Only report duplicate errors if there's an entry in the explicitlyExported map. We don't add to the
         // explicitlyExported map when marking a parent namespace as exported (in exportParentNamespace).
         auto isExplicitlyExported = this->explicitlyExported.find(sym) != this->explicitlyExported.end();
@@ -129,8 +129,7 @@ class PropagateVisibility final {
                 auto klassData = sym.asClassOrModuleRef().data(ctx);
 
                 if (mode == Mode::ReportErrors) {
-                    checkDuplicateExport(ctx, currentExportLineSym, currentExportLineLoc, sym,
-                                         klassData->flags.isExported);
+                    checkDuplicateExport(ctx, currentExportLineSym, currentExportLineLoc, sym);
                 } else {
                 klassData->flags.isExported = setExportedTo;
                 }
@@ -155,8 +154,7 @@ class PropagateVisibility final {
                 }
 
                 if (mode == Mode::ReportErrors) {
-                    checkDuplicateExport(ctx, currentExportLineSym, currentExportLineLoc, sym,
-                                         fieldData->flags.isExported);
+                    checkDuplicateExport(ctx, currentExportLineSym, currentExportLineLoc, sym);
                 } else {
                 fieldData->flags.isExported = setExportedTo;
                 }
