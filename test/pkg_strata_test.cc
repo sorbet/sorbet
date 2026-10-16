@@ -41,11 +41,11 @@ TEST_CASE("Package strata describe only the selected traversal") {
     bool selected = false;
     SUBCASE("Full traversal") {}
     SUBCASE("Selected consumer excludes other consumers of its dependency") {
-        opts.typecheckPackages = {"App"};
+        opts.focusPackages = {"App"};
         selected = true;
     }
     SUBCASE("Package declarations without ordinary sources") {
-        opts.typecheckPackages = {"App"};
+        opts.focusPackages = {"App"};
         auto result = realmain::pipeline::computePackageStrata(gs, packageFiles, {}, opts);
         REQUIRE_EQ(2, result.strata.size());
         for (auto &stratum : result.strata) {
