@@ -314,7 +314,7 @@ Usage:
       --sorbet-packages-hint-message arg
                                 Optional hint message to add to all packaging related
                                 errors (default: "")
-      --typecheck-packages <name>
+      --focus-packages <name>
                                 Typecheck these packages and their transitive
                                 dependencies, including preludes. Test packages must be
                                 selected explicitly. Requires

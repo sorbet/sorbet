@@ -1317,6 +1317,19 @@ void readOptions(Options &opts,
             }
         }
 
+        if (raw.count("focus-packages")) {
+            if (!opts.cacheSensitiveOptions.sorbetPackages) {
+                logger->error("--focus-packages can only be specified in --sorbet-packages mode");
+                throw EarlyReturnWithCode(1);
+            }
+
+            for (const auto &packages : raw["focus-packages"].as<vector<string>>()) {
+                for (auto &pkg : absl::StrSplit(packages, ',')) {
+                    opts.focusPackages.emplace_back(pkg);
+                }
+            }
+        }
+
         if constexpr (debug_mode) {
             // TODO(jez) We're no-op'ing the `--gen-packages` flag outside of `dbg` builds of Sorbet
             // because it's not stable enough yet, and we think that it's causing adverse memory usage
@@ -1515,6 +1528,28 @@ void readOptions(Options &opts,
             }
             if (raw["typed"].as<string>() != "strict") {
                 logger->error("--suggest-typed must also include `{}`", "--typed=strict");
+                throw EarlyReturnWithCode(1);
+            }
+        }
+
+        if (!opts.focusPackages.empty()) {
+            if (opts.runLSP) {
+                logger->error("--focus-packages can not be used with --lsp is enabled");
+                throw EarlyReturnWithCode(1);
+            }
+
+            if (opts.genPackagesMode != core::packages::GenPackagesMode::Disabled) {
+                logger->error("--focus-packages can not be used when --gen-packages is enabled");
+                throw EarlyReturnWithCode(1);
+            }
+
+            if (!opts.storeState.empty()) {
+                logger->error("--focus-packages can not be used when --store-state is enabled");
+                throw EarlyReturnWithCode(1);
+            }
+
+            if (!opts.packageDirected) {
+                logger->error("--focus-packages requires --experimental-package-directed");
                 throw EarlyReturnWithCode(1);
             }
         }

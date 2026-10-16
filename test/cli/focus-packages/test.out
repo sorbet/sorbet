@@ -100,31 +100,31 @@ test_top/value.rb:4: Argument does not have asserted type `Integer` https://srb.
 top/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 exit: 100
 --- Unknown package ---
-Unknown package `Missing` in --typecheck-packages
+Unknown package `Missing` in --focus-packages
 exit: 1
 --- Namespace is not itself a package ---
-Unknown package `Lib` in --typecheck-packages
+Unknown package `Lib` in --focus-packages
 exit: 1
 --- Empty selection ---
---typecheck-packages requires non-empty package names
+--focus-packages requires non-empty package names
 exit: 1
 --- Empty name in selection ---
---typecheck-packages requires non-empty package names
+--focus-packages requires non-empty package names
 exit: 1
 --- Package mode required ---
 --experimental-package-directed can only be specified in --sorbet-packages mode
 exit: 1
 --- Package-directed mode required with either package flag ---
---typecheck-packages requires --experimental-package-directed
+--focus-packages requires --experimental-package-directed
 exit: 1
---typecheck-packages requires --experimental-package-directed
+--focus-packages requires --experimental-package-directed
 exit: 1
 --- LSP requires the whole project ---
---typecheck-packages cannot be combined with --lsp, --store-state, or --gen-packages
+--focus-packages cannot be combined with --lsp, --store-state, or --gen-packages
 exit: 1
 --- Stored state requires the whole project ---
---typecheck-packages cannot be combined with --lsp, --store-state, or --gen-packages
+--focus-packages cannot be combined with --lsp, --store-state, or --gen-packages
 exit: 1
 --- Package generation requires the whole project ---
---typecheck-packages cannot be combined with --lsp, --store-state, or --gen-packages
+--focus-packages cannot be combined with --lsp, --store-state, or --gen-packages
 exit: 1

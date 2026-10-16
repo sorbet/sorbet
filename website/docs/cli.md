@@ -79,12 +79,12 @@ This will ignore input files that contain the given pattern in their paths (rela
 
 ### Selecting packages
 
-In package-directed typechecking mode (`--experimental-package-directed`), use `--typecheck-packages` with `--stripe-packages` (or its alias `--sorbet-packages`) to check part of a packaged project:
+In package-directed typechecking mode (`--experimental-package-directed`), use `--focus-packages` with `--stripe-packages` (or its alias `--sorbet-packages`) to check part of a packaged project:
 
 ```bash
-srb tc --stripe-packages --experimental-package-directed --typecheck-packages=Project::Foo,Project::Bar .
+srb tc --stripe-packages --experimental-package-directed --focus-packages=Project::Foo,Project::Bar .
 # Equivalent; the option can be repeated:
-srb tc --stripe-packages --experimental-package-directed --typecheck-packages=Project::Foo --typecheck-packages=Project::Bar .
+srb tc --stripe-packages --experimental-package-directed --focus-packages=Project::Foo --typecheck-packages=Project::Bar .
 ```
 
 Sorbet selects the named packages and their transitive dependencies. Downstream consumers are not selected: a generated registry that imports a selected service does not pull in every other service in the registry. Production selections do not include the legacy tests of their dependencies. Name a test package explicitly to select its code and dependencies. Cycles and duplicate names are supported.
