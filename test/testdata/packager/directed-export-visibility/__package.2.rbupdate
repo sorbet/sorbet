@@ -1,5 +1,5 @@
 # typed: strict
-# stratum: 0
+# stratum: 2
 # Producer package description
 class Producer < PackageSpec
   #   ^^^^^^^^ def: producer-pkg

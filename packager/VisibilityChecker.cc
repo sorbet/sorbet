@@ -67,7 +67,6 @@ class PropagateVisibility final {
 
     core::packages::PackageInfo &package;
     const Mode mode;
-    vector<core::LocOffsets> exportsInCurrentAST;
 
     // Blames which location (export) caused a symbol to first be marked exported.
     struct ExportBlame {
@@ -388,17 +387,6 @@ public:
             return;
         }
 
-        // This is a syntactically valid export. It might export something that doesn't exist, but
-        // that doesn't matter: the rest of the pipeline depends on being able to see the `export`
-        // lines locations for the purposes of autocorrects, so let's at least record that there is
-        // an export here.
-        //
-        // TODO(jez) Delete this once `test!` packages is the default (SEO: `--test-packages`)
-        // We populate `exports_` in `packager.cc` now, but we still need to track a file-local
-        // version of it here, to handle the test and non-test `__package.rb` split.
-        // After `--test-packages`, PackageInfo::exports_ should be our only source of truth.
-        this->exportsInCurrentAST.emplace_back(send.loc);
-
         if (lit->symbol() == core::Symbols::StubModule()) {
             // Don't attempt to export a symbol that doesn't exist. Resolver reported an error already.
             return;
@@ -500,14 +488,14 @@ public:
         ast::ConstTreeWalk::apply(ctx, pass, f.tree);
 
         auto exportAll = package->locs.exportAll;
-        if (exportAll.exists() && !pass.exportsInCurrentAST.empty()) {
+        if (exportAll.exists() && !package->exports_.empty()) {
             if (auto e = ctx.beginError(exportAll, core::errors::Packager::ExportConflict)) {
                 e.setHeader("Package `{}` declares `{}` and therefore should not use explicit exports",
                             package->mangledName().owner.show(ctx), "export_all!");
 
                 auto edits = vector<core::AutocorrectSuggestion::Edit>{};
-                for (const auto exportLoc : pass.exportsInCurrentAST) {
-                    auto replaceLoc = ctx.locAt(exportLoc);
+                for (const auto &exp : package->exports_) {
+                    auto replaceLoc = ctx.locAt(exp.loc);
                     auto [indentedStart, numSpaces] = replaceLoc.findStartOfIndentation(ctx);
                     // Remove leading whitespace
                     replaceLoc = replaceLoc.adjust(ctx, -1 * numSpaces, 0);

@@ -814,7 +814,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelPackageDirectedSlowPathDisca
     assertErrorDiagnostics(send(*openFile("__package.rb", packageText)), {});
     getCounters();
 
-    // Queue a package error, then cancel the edit before diagnostics can be published.
+    // Packager queues the invalid-argument diagnostic immediately. The cancellation wait is
+    // in the application stratum, before the package AST can drain that queue in its test stratum.
     sendAsync(*changeFile("__package.rb",
                           "# typed: strict\nclass Root < PackageSpec\n"
                           "  export Root::Value\n  bogus Root::Value\nend\n",
@@ -1939,8 +1940,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedPreemptionAfterSlow
         auto &hoverResult =
             get<unique_ptr<Hover>>(get<variant<JSONNullObject, unique_ptr<Hover>>>(*resp->asResponse().result));
         REQUIRE(hoverResult);
-        // Currently, the query runs before Foo's test stratum, so it can't resolve the export.
-        CHECK(absl::StrContains(hoverResult->contents->value, "(unable to resolve constant)"));
+        CHECK(absl::StrContains(hoverResult->contents->value, "Test::Root::Foo::Helper"));
     }
 
     SUBCASE("fast_path_edit") {

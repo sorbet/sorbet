@@ -1348,7 +1348,8 @@ TEST_CASE_FIXTURE(ProtocolTest, "SlowPathRestarts") {
     }
 
     SUBCASE("NewTestFile") {
-        // New files currently inherit their package file's application stratum.
+        // New test sources invalidate the test stratum, while new application sources above
+        // invalidate the application stratum. Neither can infer ownership from __package.rb.
         auto resps = send(*openFile("foo/test/b.rb", "# typed: true\n"
                                                      "module Test::Root::Foo\n"
                                                      "  class B; end\n"
@@ -1359,7 +1360,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "SlowPathRestarts") {
         REQUIRE_EQ(resps.back()->asNotification().method, LSPMethod::SorbetTypecheckRunInfo);
         const auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(resps.back()->asNotification().params);
         CHECK_EQ(params->status, SorbetTypecheckRunStatus::Ended);
-        CHECK_EQ(params->startingStratum, 1);
+        CHECK_EQ(params->startingStratum, 2);
     }
 
     SUBCASE("ExistingFile") {
@@ -1486,7 +1487,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "NewPackagedSourceFileStrata") {
         string path = isTest ? "foo/test/new.rb" : "foo/new.rb";
         string source = fmt::format("# typed: true\nmodule {}Root::Foo::New; end\n1 + false\n", isTest ? "Test::" : "");
         auto resps = send(*openFile(path, source));
-        auto expectedStratum = packageDirected ? 1 : 0;
+        auto expectedStratum = packageDirected ? (isTest ? 2 : 1) : 0;
         bool sawEnd = false;
         for (const auto &resp : resps) {
             if (resp->isNotification() && resp->asNotification().method == LSPMethod::SorbetTypecheckRunInfo) {
@@ -2038,8 +2039,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "PackageDirectedPackageDiagnostics") {
             }
         }
     }
-    // Currently, package-directed mode publishes the package file's diagnostics once for each copy of its AST.
-    CHECK_EQ(packagePublications, 2);
+    CHECK_EQ(packagePublications, 1);
     vector<ExpectedDiagnostic> expected = {{"__package.rb", 3, "Method `unknown_dsl` does not exist"}};
     assertErrorDiagnostics(move(diagnostics), expected);
     assertErrorDiagnostics(send(*openFile("a.rb", files[1].second)), expected);

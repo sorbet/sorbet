@@ -1,6 +1,6 @@
 # typed: strict
 
-# stratum: 0
+# stratum: 2
 
 class Parent < PackageSpec
   export Parent::MyGeneric

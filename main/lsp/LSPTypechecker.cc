@@ -498,12 +498,11 @@ EditInfo determineMaximumPrefix(const core::GlobalState &gs, const vector<core::
                 fileStratum = core::packages::Stratum(0);
                 pkg = core::packages::MangledName();
             } else {
-                auto &info = gs.packageDB().getPackageInfo(pkg);
-                ENFORCE(info.exists());
-
-                // We have already checked for new package files above, so this should always be true.
-                ENFORCE(info.file.id() < fileToStratum.size());
-                fileStratum = fileToStratum[info.file.id()];
+                // Don't use the stratum of the package's `__package.rb`: for legacy packages that's
+                // their test stratum, which is later than the stratum of their application sources.
+                const auto &stratum = gs.packageDB().getPackageInfo(pkg).stratum;
+                fileStratum = file->isPackagedTest() ? stratum.testStratum : stratum.applicationStratum;
+                ENFORCE(fileStratum != core::packages::Stratum::NONE);
             }
         } else {
             pkg = gs.packageDB().getPackageNameForFile(fref);

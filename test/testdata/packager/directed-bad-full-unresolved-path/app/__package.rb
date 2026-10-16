@@ -1,5 +1,5 @@
 # typed: strict
-# stratum: 1
+# stratum: 2
 
 class App < PackageSpec
   import Lib

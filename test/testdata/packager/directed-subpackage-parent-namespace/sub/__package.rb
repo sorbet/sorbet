@@ -1,5 +1,5 @@
 # typed: strict
-# stratum: 0
+# stratum: 1
 
 class MyPackage::Sub < PackageSpec
 end

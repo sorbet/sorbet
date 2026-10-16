@@ -1,5 +1,5 @@
 # typed: strict
-# stratum: 0
+# stratum: 2
 # Producer package description
 class Producer < PackageSpec
   #   ^^^^^^^^ def: producer-pkg
@@ -16,7 +16,6 @@ class Producer < PackageSpec
   #                      ^ show-symbol: Test::Producer::Helper
   #                      ^^^^^^ hover: Producer test helper
   export Producer::Missing
-  #      ^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `Missing`
   #      ^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `Missing`
   export Test::Producer::Missing
   #      ^^^^^^^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `Missing`

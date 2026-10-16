@@ -293,12 +293,6 @@ D/__package.rb:3: `D` is missing imports and exports https://srb.help/3734
     D/__package.rb:9: Deleted
      9 |  export D::ANestedPackage::Foo
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    D/__package.rb:9: Deleted
-     9 |  export D::ANestedPackage::Foo
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    D/__package.rb:10: Deleted
-    10 |  export D::EnumFromD::Variant
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     D/__package.rb:10: Deleted
     10 |  export D::EnumFromD::Variant
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
