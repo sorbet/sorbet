@@ -132,7 +132,7 @@ void LSPTypechecker::initialize(TaskQueue &queue, unique_ptr<core::GlobalState> 
 
     // We should always initialize with epoch 0.
     updates.epoch = 0;
-    updates.typecheckingPath = TypecheckingPath::Slow;
+    updates.typecheckingPath = TypecheckingPathInfo::slow();
     this->gs = std::move(initialGS);
 
     // Initialize settings that come through from the client.
@@ -207,8 +207,9 @@ bool LSPTypechecker::typecheck(unique_ptr<LSPFileUpdates> updates, WorkerPool &w
     vector<core::FileRef> filesTypechecked;
     bool committed = true;
     core::packages::Stratum startingStratum;
-    const bool isFastPath = updates->typecheckingPath == TypecheckingPath::Fast;
-    sendTypecheckInfo(*config, *gs, SorbetTypecheckRunStatus::Started, updates->typecheckingPath, {}, startingStratum);
+    const bool isFastPath = updates->typecheckingPath.isFast();
+    sendTypecheckInfo(*config, *gs, SorbetTypecheckRunStatus::Started, updates->typecheckingPath.path(), {},
+                      startingStratum);
     {
         ErrorEpoch epoch(*errorReporter, updates->epoch, isFastPath, move(diagnosticLatencyTimers));
 
@@ -246,7 +247,7 @@ bool LSPTypechecker::typecheck(unique_ptr<LSPFileUpdates> updates, WorkerPool &w
     }
 
     sendTypecheckInfo(*config, *gs, committed ? SorbetTypecheckRunStatus::Ended : SorbetTypecheckRunStatus::Cancelled,
-                      updates->typecheckingPath, move(filesTypechecked), startingStratum);
+                      updates->typecheckingPath.path(), move(filesTypechecked), startingStratum);
     return committed;
 }
 
@@ -259,7 +260,7 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
     ENFORCE(!updates.cancellationExpected);
     ENFORCE(updates.preemptionsExpected == 0);
     // This path only works for fast path updates.
-    ENFORCE(updates.typecheckingPath == TypecheckingPath::Fast);
+    ENFORCE(updates.typecheckingPath.isFast());
 
     Timer timeit(*config->logger, "fast_path");
 
@@ -621,7 +622,7 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
     auto &logger = config->logger;
     auto slowPathOp = make_optional<ShowOperation>(*config, ShowOperation::Kind::SlowPathBlocking);
     Timer timeit(*logger, "slow_path");
-    ENFORCE(updates.typecheckingPath != TypecheckingPath::Fast || config->disableFastPath);
+    ENFORCE(updates.typecheckingPath.isSlow() || config->disableFastPath);
     logger->debug("Taking slow path");
 
     core::packages::Stratum startingStratum(0);
@@ -1059,7 +1060,7 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const vector<cor
 unique_ptr<LSPFileUpdates> LSPTypechecker::getNoopUpdate(absl::Span<const core::FileRef> frefs) const {
     auto result = make_unique<LSPFileUpdates>();
     auto &noop = *result;
-    noop.typecheckingPath = TypecheckingPath::Fast;
+    noop.typecheckingPath = TypecheckingPathInfo::fast(/* isIncremental */ false);
     // Epoch isn't important for this update.
     noop.epoch = 0;
     noop.updatedFileRefs = vector(frefs.begin(), frefs.end());
@@ -1175,8 +1176,10 @@ void LSPTypechecker::updateConfigAndGsFromOptions(const DidChangeConfigurationPa
     }
 }
 
-core::packages::Stratum FileStratumMapping::getStratumForFiles(absl::Span<const core::FileRef> refs) const {
+core::packages::Stratum FileStratumMapping::getStratumForFiles(absl::Span<const core::FileRef> refs,
+                                                               bool includePackages) const {
     core::packages::Stratum stratum(0);
+    auto &db = this->tc.state().packageDB();
     for (auto ref : refs) {
         // Fall back on the last stratum for new files.
         if (!ref.exists() || ref.id() >= this->tc.fileToStratum.size()) {
@@ -1184,26 +1187,42 @@ core::packages::Stratum FileStratumMapping::getStratumForFiles(absl::Span<const 
         }
 
         stratum = std::max(stratum, this->tc.fileToStratum[ref.id()]);
+
+        // TODO(trevor): remove this once we have fully removed test-namespaces. This accounts for incremental
+        // edits, as they pull in the `__package.rb` file during the fast-path, which aren't split into their
+        // application and test versions during the fast path. As a result, if we don't default to the test
+        // stratum for the package at this point, we may process the `__package.rb` file in the application
+        // stratum, but with all its test imports and exports present.
+        if (includePackages) {
+            auto pkg = db.getPackageNameForFile(ref);
+            if (!pkg.exists()) {
+                return this->tc.lastStratum;
+            }
+
+            stratum = std::max(stratum, db.getPackageInfo(pkg).stratum.testStratum);
+        }
     }
 
     return stratum;
 }
 
-core::packages::Stratum FileStratumMapping::getStratumForPaths(absl::Span<const string_view> paths) const {
+core::packages::Stratum FileStratumMapping::getStratumForPaths(absl::Span<const string_view> paths,
+                                                               bool includePackages) const {
     vector<core::FileRef> refs;
     refs.reserve(paths.size());
     absl::c_transform(paths, back_inserter(refs),
                       [&gs = this->tc.state()](auto path) { return gs.findFileByPath(path); });
-    return this->getStratumForFiles(refs);
+    return this->getStratumForFiles(refs, includePackages);
 }
 
-core::packages::Stratum FileStratumMapping::getStratumForUris(absl::Span<const string_view> uris) const {
+core::packages::Stratum FileStratumMapping::getStratumForUris(absl::Span<const string_view> uris,
+                                                              bool includePackages) const {
     vector<core::FileRef> refs;
     refs.reserve(uris.size());
     absl::c_transform(uris, back_inserter(refs), [&gs = this->tc.state(), &config = *this->tc.config](auto uri) {
         return config.uri2FileRef(gs, uri);
     });
-    return this->getStratumForFiles(refs);
+    return this->getStratumForFiles(refs, includePackages);
 }
 
 core::packages::Stratum FileStratumMapping::getStratumForFile(core::FileRef ref) const {
@@ -1231,7 +1250,7 @@ void LSPTypecheckerDelegate::resumeTaskQueue(InitializedTask &task) {
 
 void LSPTypecheckerDelegate::typecheckOnFastPath(unique_ptr<LSPFileUpdates> updates,
                                                  vector<unique_ptr<Timer>> diagnosticLatencyTimers) {
-    if (updates->typecheckingPath != TypecheckingPath::Fast) {
+    if (updates->typecheckingPath.isSlow()) {
         Exception::raise("Tried to typecheck a slow path edit on the fast path.");
     }
     auto committed = typechecker.typecheck(std::move(updates), workers, move(diagnosticLatencyTimers));

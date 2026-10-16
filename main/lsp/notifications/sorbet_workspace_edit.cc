@@ -43,9 +43,9 @@ void SorbetWorkspaceEditTask::mergeNewer(SorbetWorkspaceEditTask &task) {
 
     // This cached information is now invalid.
     task.cachedFastPathDecisionValid = false;
-    task.cachedFastPathDecision = TypecheckingPath::Slow;
+    task.cachedFastPathDecision = TypecheckingPathInfo::slow();
     cachedFastPathDecisionValid = false;
-    cachedFastPathDecision = TypecheckingPath::Slow;
+    cachedFastPathDecision = TypecheckingPathInfo::slow();
 }
 
 void SorbetWorkspaceEditTask::preprocess(LSPPreprocessor &preprocessor) {
@@ -71,7 +71,7 @@ void SorbetWorkspaceEditTask::index(LSPIndexer &indexer) {
     } else {
         // HACK: Too many files to `commitEdit` serially. Index in `runSpecial`.
         this->indexer = &indexer;
-        ENFORCE(getTypecheckingPath(indexer) != TypecheckingPath::Fast);
+        ENFORCE(getTypecheckingPath(indexer).isSlow());
     }
 }
 
@@ -88,7 +88,7 @@ void SorbetWorkspaceEditTask::run(LSPTypecheckerDelegate &typechecker) {
     latencyCancelSlowPath = nullptr;
     // For consistency; I don't expect this notification to be used for fast path edits.
     startedNotification.Notify();
-    if (updates->typecheckingPath != TypecheckingPath::Fast) {
+    if (updates->typecheckingPath.isSlow()) {
         Exception::raise("Attempted to run a slow path update on the fast path!");
     }
     const auto newEditCount = updates->editCount - updates->committedEditCount;
@@ -152,7 +152,7 @@ void SorbetWorkspaceEditTask::schedulerWaitUntilReady() {
     startedNotification.WaitForNotification();
 }
 
-TypecheckingPath SorbetWorkspaceEditTask::getTypecheckingPath(const LSPIndexer &index) const {
+TypecheckingPathInfo SorbetWorkspaceEditTask::getTypecheckingPath(const LSPIndexer &index) const {
     if (updates != nullptr) {
         return updates->typecheckingPath;
     }
@@ -164,7 +164,7 @@ TypecheckingPath SorbetWorkspaceEditTask::getTypecheckingPath(const LSPIndexer &
 }
 
 bool SorbetWorkspaceEditTask::canPreempt(const LSPIndexer &index) const {
-    return getTypecheckingPath(index) == TypecheckingPath::Fast;
+    return getTypecheckingPath(index).isFast();
 }
 
 const SorbetWorkspaceEditParams &SorbetWorkspaceEditTask::getParams() const {
@@ -172,10 +172,11 @@ const SorbetWorkspaceEditParams &SorbetWorkspaceEditTask::getParams() const {
 }
 
 core::packages::Stratum SorbetWorkspaceEditTask::preemptionStratum(FileStratumMapping info) const {
+    ENFORCE(this->cachedFastPathDecision.isFast());
     vector<string_view> paths;
     paths.reserve(this->params->updates.size());
     absl::c_transform(this->params->updates, back_inserter(paths), [](auto &file) { return file->path(); });
-    return info.getStratumForPaths(paths);
+    return info.getStratumForPaths(paths, this->cachedFastPathDecision.isFastIncremental());
 }
 
 } // namespace sorbet::realmain::lsp

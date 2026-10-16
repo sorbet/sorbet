@@ -15,7 +15,7 @@ class SorbetWorkspaceEditTask final : public LSPDangerousTypecheckerTask {
     std::unique_ptr<SorbetWorkspaceEditParams> params;
     // Caches the fast path decision for the provided update. Becomes invalidated when the update changes.
     mutable bool cachedFastPathDecisionValid = false;
-    mutable TypecheckingPath cachedFastPathDecision = TypecheckingPath::Slow;
+    mutable TypecheckingPathInfo cachedFastPathDecision = TypecheckingPathInfo::slow();
     // HACK: In the event that this edit is too large to index serially, stash the indexer here for use in `runSpecial`.
     LSPIndexer *indexer = nullptr;
 
@@ -37,7 +37,7 @@ public:
     core::packages::Stratum preemptionStratum(FileStratumMapping info) const override;
 
     bool canPreempt(const LSPIndexer &index) const override;
-    TypecheckingPath getTypecheckingPath(const LSPIndexer &index) const;
+    TypecheckingPathInfo getTypecheckingPath(const LSPIndexer &index) const;
 };
 
 } // namespace sorbet::realmain::lsp

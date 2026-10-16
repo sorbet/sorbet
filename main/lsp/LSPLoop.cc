@@ -137,18 +137,13 @@ void LSPLoop::runTask(unique_ptr<LSPTask> task) {
         if (auto *editTask = dynamic_cast<SorbetWorkspaceEditTask *>(dangerousTask)) {
             unique_ptr<SorbetWorkspaceEditTask> edit(editTask);
             (void)task.release();
-            switch (edit->getTypecheckingPath(indexer)) {
-                case TypecheckingPath::Fast: {
-                    // Can run on fast path synchronously; it should complete quickly.
-                    typecheckerCoord.syncRun(move(edit));
-                    break;
-                }
-                case TypecheckingPath::Slow: {
-                    // Must run on slow path; this method is async in multithreaded environments, and blocks in
-                    // single threaded environments.
-                    typecheckerCoord.typecheckOnSlowPath(move(edit));
-                    break;
-                }
+            if (edit->getTypecheckingPath(indexer).isFast()) {
+                // Can run on fast path synchronously; it should complete quickly.
+                typecheckerCoord.syncRun(move(edit));
+            } else {
+                // Must run on slow path; this method is async in multithreaded environments, and blocks in
+                // single threaded environments.
+                typecheckerCoord.typecheckOnSlowPath(move(edit));
             }
 
         } else {
