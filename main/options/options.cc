@@ -669,6 +669,11 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options(section)("experimental-package-directed",
                                  "Enable support for checking by package, instead of processing all files at once",
                                  cxxopts::value<bool>());
+     options.add_options(section)("experimental-test-packages",
+                                  "Disable support for implicit test namespaces in existing packages",
+                                  cxxopts::value<bool>());
+    options.add_options(section)("focus-packages", "Focus typechecking to these packages",
+                                 cxxopts::value<vector<string>>(), "P1,P2,P3,...");
     // }}}
 
     // ----- STRIPE AUTOGEN ----------------------------------------------- {{{
@@ -1316,6 +1321,9 @@ void readOptions(Options &opts,
 
             for (const auto &packages : raw["focus-packages"].as<vector<string>>()) {
                 for (auto &pkg : absl::StrSplit(packages, ',')) {
+                    if (pkg.empty()) {
+                        continue;
+                    }
                     opts.focusPackages.emplace_back(pkg);
                 }
             }
