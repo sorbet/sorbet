@@ -140,7 +140,7 @@ class PropagateVisibility final {
                 if (mode == Mode::ReportErrors) {
                     checkDuplicateExport(ctx, currentExportLineSym, currentExportLineLoc, sym);
                 } else {
-                klassData->flags.isExported = setExportedTo;
+                    klassData->flags.isExported = setExportedTo;
                 }
 
                 // This `members` call does not have a stable order--we recover a determinstic order
@@ -165,7 +165,7 @@ class PropagateVisibility final {
                 if (mode == Mode::ReportErrors) {
                     checkDuplicateExport(ctx, currentExportLineSym, currentExportLineLoc, sym);
                 } else {
-                fieldData->flags.isExported = setExportedTo;
+                    fieldData->flags.isExported = setExportedTo;
                 }
                 break;
             }
@@ -361,9 +361,9 @@ class PropagateVisibility final {
         recursiveSetIsExported(ctx, setExportedTo, sym, loc, sym);
 
         if (mode == Mode::SetExportBits) {
-        // When exporting a symbol, we also export its parent namespace. This is a bit of a hack, and it would
-        // be great to remove this, but this was the behavior of the previous packager implementation.
-        exportParentNamespace(ctx, sym.owner(ctx).asClassOrModuleRef());
+            // When exporting a symbol, we also export its parent namespace. This is a bit of a hack, and it would
+            // be great to remove this, but this was the behavior of the previous packager implementation.
+            exportParentNamespace(ctx, sym.owner(ctx).asClassOrModuleRef());
         }
     }
 

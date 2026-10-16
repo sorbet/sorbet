@@ -1842,8 +1842,11 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedPreemptionAfterSlow
                  "    end\n"
                  "  end\n"
                  "end\n"},
-        {"foo/__package.rb",
-         PackageTextBuilder().withName("Root::Foo").withExports({"Root::Foo::A", "Test::Root::Foo::Helper"}).withImports({"Root"}).build()},
+        {"foo/__package.rb", PackageTextBuilder()
+                                 .withName("Root::Foo")
+                                 .withExports({"Root::Foo::A", "Test::Root::Foo::Helper"})
+                                 .withImports({"Root"})
+                                 .build()},
         {"foo/a.rb", "# typed: true\n"
                      "module Root::Foo\n"
                      "  class A\n"

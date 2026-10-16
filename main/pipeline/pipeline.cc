@@ -952,8 +952,8 @@ PackageStrata computePackageStrata(core::GlobalState &gs, vector<ast::ParsedFile
 
         {
             for (auto &scc : stratum) {
-                    for (auto member : scc.members) {
-                        if (scc.isTest || db.getPackageInfo(member).usesTestPackages) {
+                for (auto member : scc.members) {
+                    if (scc.isTest || db.getPackageInfo(member).usesTestPackages) {
                         // A legacy package has both an application and a test node in the condensation graph, but
                         // its `__package.rb` must only be processed once so that its errors are only reported once.
                         // Process it with the test node, which sees both its application and test code. The
