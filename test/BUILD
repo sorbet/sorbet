@@ -545,6 +545,8 @@ pipeline_tests(
             # TODO(jez): Re-enable once LSP handles the dual `__package.rb` processing in package-directed mode.
             "testdata/packager/directed-prelude-import/application/__package.rb",
             "testdata/packager/directed-prelude-import/prelude/__package.rb",
+            "testdata/packager/directed-alias-namespace-recovery/**",
+            "testdata/packager/directed-unpackaged-package-name-collision/**",
 
             # RBS is only supported with Prism. Run these with `//test:test_corpus_lsp_prism`.
             "testdata/rbs/**/*.rb",
@@ -575,6 +577,8 @@ pipeline_tests(
             # TODO(jez): Re-enable once LSP handles the dual `__package.rb` processing in package-directed mode.
             "testdata/packager/directed-prelude-import/application/__package.rb",
             "testdata/packager/directed-prelude-import/prelude/__package.rb",
+            "testdata/packager/directed-alias-namespace-recovery/**",
+            "testdata/packager/directed-unpackaged-package-name-collision/**",
 
             # Prism LSP known failures: completion differences
             "testdata/lsp/completion/bad_arguments.rb",
