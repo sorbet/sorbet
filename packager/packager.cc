@@ -1045,6 +1045,43 @@ void validateVisibility(core::Context ctx, const PackageInfo &absPkg, const Impo
     }
 }
 
+// We don't have a way (yet?) to allow using packages to control access to things defined in the payload.
+//
+// It doesn't work today, because all the payload symbols have nothing for their `package` and
+// `packageRegistryOwner` fields (because those symbols were entered before any package files were available)
+//
+// It would be nice to change this, but for now, let's be explicit about telling the user this is unsupported.
+void validatePackageNamespace(core::Context ctx, const PackageInfo &pkgInfo) {
+    auto registryRoot = pkgInfo.mangledName().owner;
+    while (registryRoot.data(ctx)->owner != core::Symbols::PackageSpecRegistry()) {
+        registryRoot = registryRoot.data(ctx)->owner;
+    }
+
+    // It's sufficient to just check the top-most thing (vs having to accumulate a vector of names,
+    // and then walk back down from `root` in the non `<PackageSpecRegistry>` hierarchy): everything
+    // nested inside a payload constant is also from the payload, and nothing defined outside the
+    // payload can make a payload constant appear beneath it.
+    auto existing = core::Symbols::root().data(ctx)->findMemberNoDealias(registryRoot.data(ctx)->name);
+    if (!existing.exists()) {
+        return;
+    }
+
+    auto locs = existing.locs(ctx);
+    auto payloadLoc = absl::c_find_if(locs, [&](auto loc) { return loc.exists() && loc.file().data(ctx).isPayload(); });
+    if (payloadLoc == locs.end()) {
+        return;
+    }
+
+    if (auto e = ctx.beginError(pkgInfo.locs.declLoc, core::errors::Packager::InvalidPackageDefinition)) {
+        e.setHeader("Package `{}` cannot be defined because `{}` is defined in Sorbet's payload", pkgInfo.show(ctx),
+                    existing.show(ctx));
+        e.addErrorLine(*payloadLoc, "Defined here");
+        e.addErrorNote("Constants from Sorbet's payload do not belong to any package, so this package's imports, "
+                       "exports, and `{}` declarations would have no effect on them",
+                       "visible_to");
+    }
+}
+
 void validatePackage(core::Context ctx) {
     const auto &packageDB = ctx.state.packageDB();
     auto absPkg = packageDB.getPackageNameForFile(ctx.file);
@@ -1063,6 +1100,8 @@ void validatePackage(core::Context ctx) {
     }
 
     auto &pkgInfo = PackageInfo::from(ctx, absPkg);
+    validatePackageNamespace(ctx, pkgInfo);
+
     bool skipImportVisibilityCheck = packageDB.allowRelaxedPackagerChecksFor(pkgInfo.mangledName());
     auto enforceLayering = ctx.state.packageDB().enforceLayering();
 
