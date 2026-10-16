@@ -1,0 +1,5 @@
+# typed: strict
+# assert-fast-path: consumer/use.rb,producer/private.rb,producer/test/alias.rb
+# Recheck both scopes while rebuilding the application constants.
+
+Test::Producer::Alias = Producer::Private

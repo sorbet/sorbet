@@ -1347,6 +1347,21 @@ TEST_CASE_FIXTURE(ProtocolTest, "SlowPathRestarts") {
         }
     }
 
+    SUBCASE("NewTestFile") {
+        // New files currently inherit their package file's application stratum.
+        auto resps = send(*openFile("foo/test/b.rb", "# typed: true\n"
+                                                     "module Test::Root::Foo\n"
+                                                     "  class B; end\n"
+                                                     "end\n"));
+        assertErrorDiagnostics({}, {});
+        REQUIRE_EQ(resps.size(), 2);
+        REQUIRE(resps.back()->isNotification());
+        REQUIRE_EQ(resps.back()->asNotification().method, LSPMethod::SorbetTypecheckRunInfo);
+        const auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(resps.back()->asNotification().params);
+        CHECK_EQ(params->status, SorbetTypecheckRunStatus::Ended);
+        CHECK_EQ(params->startingStratum, 1);
+    }
+
     SUBCASE("ExistingFile") {
         assertErrorDiagnostics(send(*openFile(files[3].first, files[3].second)), {});
 
@@ -1444,6 +1459,59 @@ TEST_CASE_FIXTURE(ProtocolTest, "SlowPathRestarts") {
             // We're modifying the package graph, which means we rebuild everything.
             CHECK_EQ(params->startingStratum, 0);
         }
+    }
+}
+
+// Source-stratum lookup must also work with the monolithic traversal, including newly added test helpers.
+TEST_CASE_FIXTURE(ProtocolTest, "NewPackagedSourceFileStrata") {
+    auto checkNewFile = [&](bool packageDirected, bool isTest) {
+        auto initOpts = make_shared<realmain::options::Options>();
+        initOpts->cacheSensitiveOptions.sorbetPackages = true;
+        initOpts->packageDirected = packageDirected;
+        resetState(initOpts);
+
+        vector<pair<string, string>> files = {
+            {"__package.rb", PackageTextBuilder().withName("Root").build()},
+            {"foo/__package.rb", PackageTextBuilder().withName("Root::Foo").withImports({"Root"}).build()},
+        };
+        writeFilesToFS(files);
+        for (const auto &[path, _] : files) {
+            lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/{}", rootPath, path));
+        }
+        auto opts = make_unique<SorbetInitializationOptions>();
+        opts->enableTypecheckInfo = true;
+        assertErrorDiagnostics(initializeLSP(true, true, move(opts)), {});
+
+        // Include an inference error to prove that prefix reuse actually indexed and typechecked the new file.
+        string path = isTest ? "foo/test/new.rb" : "foo/new.rb";
+        string source = fmt::format("# typed: true\nmodule {}Root::Foo::New; end\n1 + false\n", isTest ? "Test::" : "");
+        auto resps = send(*openFile(path, source));
+        auto expectedStratum = packageDirected ? 1 : 0;
+        bool sawEnd = false;
+        for (const auto &resp : resps) {
+            if (resp->isNotification() && resp->asNotification().method == LSPMethod::SorbetTypecheckRunInfo) {
+                const auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(resp->asNotification().params);
+                if (params->status == SorbetTypecheckRunStatus::Ended) {
+                    CHECK_EQ(params->startingStratum, expectedStratum);
+                    sawEnd = true;
+                }
+            }
+        }
+        CHECK(sawEnd);
+        assertErrorDiagnostics(move(resps), {{path, 2, "Expected `Integer`"}});
+    };
+
+    SUBCASE("MonolithicApplication") {
+        checkNewFile(false, false);
+    }
+    SUBCASE("MonolithicTestHelper") {
+        checkNewFile(false, true);
+    }
+    SUBCASE("DirectedApplication") {
+        checkNewFile(true, false);
+    }
+    SUBCASE("DirectedTestHelper") {
+        checkNewFile(true, true);
     }
 }
 
@@ -1936,6 +2004,54 @@ TEST_CASE_FIXTURE(ProtocolTest, "EarlyErrorsForceInfer") {
 
     // We still see the same messages, but we know the ones in `a.rb` are stale.
     assertStale({files[1].first});
+}
+
+// A legacy package has a synthetic test SCC even when there are no test sources. Its
+// package diagnostics must be published once and reproduced by a support-file fast path.
+TEST_CASE_FIXTURE(ProtocolTest, "PackageDirectedPackageDiagnostics") {
+    auto opts = make_shared<realmain::options::Options>();
+    opts->cacheSensitiveOptions.sorbetPackages = true;
+    opts->packageDirected = true;
+    resetState(opts);
+
+    vector<pair<string, string>> files = {
+        {"__package.rb", "# typed: strict\n"
+                         "class Root < PackageSpec\n"
+                         "  export Root::Value\n"
+                         "  unknown_dsl 'value'\n"
+                         "end\n"},
+        {"a.rb", "# typed: strict\nmodule Root\n  Value = 1\nend\n"},
+    };
+    writeFilesToFS(files);
+    for (auto &[path, _] : files) {
+        lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/{}", rootPath, path));
+    }
+    auto diagnostics = initializeLSP();
+    size_t packagePublications = 0;
+    for (const auto &message : diagnostics) {
+        if (message->isNotification() &&
+            message->asNotification().method == LSPMethod::TextDocumentPublishDiagnostics) {
+            const auto &params = get<unique_ptr<PublishDiagnosticsParams>>(message->asNotification().params);
+            if (absl::EndsWith(params->uri, "/__package.rb")) {
+                ++packagePublications;
+                CHECK_EQ(params->diagnostics.size(), 1);
+            }
+        }
+    }
+    // Currently, package-directed mode publishes the package file's diagnostics once for each copy of its AST.
+    CHECK_EQ(packagePublications, 2);
+    vector<ExpectedDiagnostic> expected = {{"__package.rb", 3, "Method `unknown_dsl` does not exist"}};
+    assertErrorDiagnostics(move(diagnostics), expected);
+    assertErrorDiagnostics(send(*openFile("a.rb", files[1].second)), expected);
+    assertErrorDiagnostics(send(*changeFile("a.rb", "# typed: strict\nmodule Root\n  Value = 'changed'\nend\n", 2)),
+                           expected);
+    // A package edit removes the diagnostic and must publish an empty replacement.
+    assertErrorDiagnostics(send(*openFile("__package.rb", files[0].second)), expected);
+    assertErrorDiagnostics(send(*changeFile("__package.rb",
+                                            "# typed: strict\nclass Root < PackageSpec\n"
+                                            "  export Root::Value\nend\n",
+                                            2)),
+                           {});
 }
 
 } // namespace sorbet::test::lsp

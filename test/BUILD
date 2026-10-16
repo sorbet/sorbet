@@ -547,6 +547,10 @@ pipeline_tests(
             "testdata/packager/directed-prelude-import/prelude/__package.rb",
             "testdata/packager/directed-alias-namespace-recovery/**",
             "testdata/packager/directed-unpackaged-package-name-collision/**",
+            "testdata/packager/directed-export-validation/**",
+            "testdata/packager/directed-export-visibility/**",
+            "testdata/packager/directed-package-spec-diagnostics/**",
+            "testdata/packager/directed-single-package-processing/**",
 
             # RBS is only supported with Prism. Run these with `//test:test_corpus_lsp_prism`.
             "testdata/rbs/**/*.rb",
@@ -579,6 +583,10 @@ pipeline_tests(
             "testdata/packager/directed-prelude-import/prelude/__package.rb",
             "testdata/packager/directed-alias-namespace-recovery/**",
             "testdata/packager/directed-unpackaged-package-name-collision/**",
+            "testdata/packager/directed-export-validation/**",
+            "testdata/packager/directed-export-visibility/**",
+            "testdata/packager/directed-package-spec-diagnostics/**",
+            "testdata/packager/directed-single-package-processing/**",
 
             # Prism LSP known failures: completion differences
             "testdata/lsp/completion/bad_arguments.rb",
