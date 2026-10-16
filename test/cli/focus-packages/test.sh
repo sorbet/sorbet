@@ -2,7 +2,7 @@
 set -u
 
 sorbet="$PWD/main/sorbet"
-cd test/cli/typecheck-packages || exit 1
+cd test/cli/focus-packages || exit 1
 
 # Imports point from consumer to dependency:
 #   Top -> Consumer -> Target -> Lib::Base -> RootDep
@@ -27,68 +27,68 @@ echo '--- All packages (including unrelated syntax and resolution errors) ---'
 run --stripe-packages
 
 echo '--- Target: production dependencies exclude consumers and their dependencies ---'
-run --stripe-packages --typecheck-packages=Target
+run --stripe-packages --focus-packages=Target
 
 echo '--- Same selection with worker threads ---'
-run --stripe-packages --max-threads=2 --typecheck-packages=Target
+run --stripe-packages --max-threads=2 --focus-packages=Target
 
 echo '--- Multiple names, repeated flag, and duplicate roots ---'
-run --sorbet-packages --typecheck-packages=Target,Sibling --typecheck-packages=Target
+run --sorbet-packages --focus-packages=Target,Sibling --focus-packages=Target
 
 echo '--- Namespaced package ---'
-run --stripe-packages --typecheck-packages=Lib::Base
+run --stripe-packages --focus-packages=Lib::Base
 
 echo '--- Cycle: dependencies do not pull in their other consumers ---'
-run --stripe-packages --typecheck-packages=CycleB
+run --stripe-packages --focus-packages=CycleB
 
 echo '--- Production selection does not follow test-only consumers ---'
-run --stripe-packages --typecheck-packages=TestSupport
+run --stripe-packages --focus-packages=TestSupport
 
 echo '--- Migrated root does not select implicit tests of dependencies ---'
-run --stripe-packages --typecheck-packages=Top
+run --stripe-packages --focus-packages=Top
 
 echo '--- Explicitly selected tests retain their dependencies ---'
-run --stripe-packages --typecheck-packages=Top::Test
+run --stripe-packages --focus-packages=Top::Test
 
 cache_dir=$(mktemp -d)
 trap 'rm -rf "$cache_dir"' EXIT
 
 echo '--- Cold cache ---'
-run --stripe-packages --cache-dir="$cache_dir" --typecheck-packages=Target
+run --stripe-packages --cache-dir="$cache_dir" --focus-packages=Target
 
 echo '--- Warm cache, different selection ---'
-run --stripe-packages --cache-dir="$cache_dir" --typecheck-packages=Sibling
+run --stripe-packages --cache-dir="$cache_dir" --focus-packages=Sibling
 
 echo '--- Warm cache, original selection ---'
-run --stripe-packages --cache-dir="$cache_dir" --typecheck-packages=Target
+run --stripe-packages --cache-dir="$cache_dir" --focus-packages=Target
 
 echo '--- Full check after caching partial checks ---'
 run --stripe-packages --cache-dir="$cache_dir"
 
 echo '--- Unknown package ---'
-run --stripe-packages --typecheck-packages=Target,Missing
+run --stripe-packages --focus-packages=Target,Missing
 
 echo '--- Namespace is not itself a package ---'
-run --stripe-packages --typecheck-packages=Lib
+run --stripe-packages --focus-packages=Lib
 
 echo '--- Empty selection ---'
-run --stripe-packages --typecheck-packages=
+run --stripe-packages --focus-packages=
 
 echo '--- Empty name in selection ---'
-run --stripe-packages --typecheck-packages=Target,,Sibling
+run --stripe-packages --focus-packages=Target,,Sibling
 
 echo '--- Package mode required ---'
-run --typecheck-packages=Target
+run --focus-packages=Target
 
 echo '--- Package-directed mode required with either package flag ---'
-run --stripe-packages --experimental-package-directed=false --typecheck-packages=Target
-run --sorbet-packages --experimental-package-directed=false --typecheck-packages=Target
+run --stripe-packages --experimental-package-directed=false --focus-packages=Target
+run --sorbet-packages --experimental-package-directed=false --focus-packages=Target
 
 echo '--- LSP requires the whole project ---'
-run --stripe-packages --typecheck-packages=Target --lsp
+run --stripe-packages --focus-packages=Target --lsp
 
 echo '--- Stored state requires the whole project ---'
-run --stripe-packages --typecheck-packages=Target --store-state=gs,files,names
+run --stripe-packages --focus-packages=Target --store-state=gs,files,names
 
 echo '--- Package generation requires the whole project ---'
-run --stripe-packages --typecheck-packages=Target --gen-packages
+run --stripe-packages --focus-packages=Target --gen-packages
