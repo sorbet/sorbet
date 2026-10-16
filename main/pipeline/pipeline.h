@@ -64,6 +64,9 @@ struct PackageStrata {
     // The mapping of a core::FileRef to the stratum it occurs in. We identify individual strata with a uint16_t,
     // because overflowing that value would require a dependency chain of length greater than 65535.
     std::vector<core::packages::Stratum> fileToStratum;
+
+    // If present, the packages that we are restricting typechecking to.
+    std::unique_ptr<UnorderedSet<core::packages::MangledName>> focusedPackages;
 };
 
 // Using the condensation graph, sort the package and source files according to the stratum they would show up in a

@@ -676,6 +676,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
         "In package-directed mode, split strata above this file count (including `__package.rb` files) into their "
         "component SCCs",
         cxxopts::value<uint32_t>());
+    options.add_options(section)("focus-packages", "Focus typechecking to these packages",
+                                 cxxopts::value<vector<string>>(), "P1,P2,P3,...");
     // }}}
 
     // ----- STRIPE AUTOGEN ----------------------------------------------- {{{
@@ -1323,6 +1325,23 @@ void readOptions(Options &opts,
             }
         }
 
+        if (raw.count("focus-packages")) {
+            if (!opts.cacheSensitiveOptions.sorbetPackages) {
+                logger->error("--focus-packages can only be specified in --sorbet-packages mode");
+                throw EarlyReturnWithCode(1);
+            }
+
+            for (const auto &packages : raw["focus-packages"].as<vector<string>>()) {
+                for (auto &pkg : absl::StrSplit(packages, ',')) {
+                    if (pkg.empty()) {
+                        logger->error("Empty package name given to --focus-packages");
+                        throw EarlyReturnWithCode(1);
+                    }
+                    opts.focusPackages.emplace_back(pkg);
+                }
+            }
+        }
+
         if constexpr (debug_mode) {
             // TODO(jez) We're no-op'ing the `--gen-packages` flag outside of `dbg` builds of Sorbet
             // because it's not stable enough yet, and we think that it's causing adverse memory usage
@@ -1511,6 +1530,33 @@ void readOptions(Options &opts,
             }
             if (raw["typed"].as<string>() != "strict") {
                 logger->error("--suggest-typed must also include `{}`", "--typed=strict");
+                throw EarlyReturnWithCode(1);
+            }
+        }
+
+        if (!opts.focusPackages.empty()) {
+            if (opts.runLSP) {
+                logger->error("--focus-packages can not be used with --lsp is enabled");
+                throw EarlyReturnWithCode(1);
+            }
+
+            if (opts.suggestTyped) {
+                logger->error("--focus-packages can not be used with --suggest-typed is enabled");
+                throw EarlyReturnWithCode(1);
+            }
+
+            if (opts.genPackagesMode != core::packages::GenPackagesMode::Disabled) {
+                logger->error("--focus-packages can not be used when --gen-packages is enabled");
+                throw EarlyReturnWithCode(1);
+            }
+
+            if (!opts.storeState.empty()) {
+                logger->error("--focus-packages can not be used when --store-state is enabled");
+                throw EarlyReturnWithCode(1);
+            }
+
+            if (!opts.packageDirected) {
+                logger->error("--focus-packages requires --experimental-package-directed");
                 throw EarlyReturnWithCode(1);
             }
         }
