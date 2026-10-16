@@ -28,6 +28,30 @@ bool typeTestReferencesVar(const InlinedVector<pair<cfg::LocalRef, core::TypePtr
     return absl::c_any_of(typeTest, [var](auto &test) { return test.first == var; });
 }
 
+// Performance shortcut for pathological intersections of large, mostly overlapping enum unions:
+// a shared concrete enum value proves the intersection is nonempty without constructing it.
+// Returning false is inconclusive; the caller must compute the full intersection.
+bool hasSharedEnumValue(core::Context ctx, const core::TypePtr &first, const core::TypePtr &second) {
+    if (!core::isa_type<core::OrType>(first) || !core::isa_type<core::OrType>(second)) {
+        return false;
+    }
+
+    // Probe both ends: narrowing may have removed one of these values from the other union.
+    for (bool left : {true, false}) {
+        const auto *candidate = &first;
+        while (auto unionType = core::cast_type<core::OrType>(*candidate)) {
+            candidate = left ? &unionType->left : &unionType->right;
+        }
+        if (core::isa_type<core::ClassType>(*candidate)) {
+            auto symbol = core::cast_type_nonnull<core::ClassType>(*candidate).symbol;
+            if (symbol.data(ctx)->name.isTEnumName(ctx) && core::Types::isSubType(ctx, *candidate, second)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 } // namespace
 
 void TypeTestReverseIndex::addToIndex(cfg::LocalRef from, cfg::LocalRef to) {
@@ -160,8 +184,10 @@ KnowledgeRef KnowledgeRef::under(core::Context ctx, const Environment &env, cfg:
         } else {
             auto &second = fnd->second;
             auto &typeAndOrigin = state.typeAndOrigins;
-            auto combinedType = core::Types::all(ctx, typeAndOrigin.type, second);
-            if (combinedType.isBottom()) {
+            // A shared enum value proves the intersection is nonempty without constructing it.
+            // For identical types, use the existing constant-time intersection instead of probing.
+            if ((typeAndOrigin.type == second || !hasSharedEnumValue(ctx, typeAndOrigin.type, second)) &&
+                core::Types::all(ctx, typeAndOrigin.type, second).isBottom()) {
                 copy.markDead();
                 break;
             }
