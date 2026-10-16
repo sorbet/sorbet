@@ -2229,4 +2229,95 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedPreemptionWaitsForS
     }
 }
 
+// Like PackageDirectedPreemptionWithTestExports, but the `__package.rb` that the incremental namer re-checks belongs to
+// a fast path *extra* file (foo/a.rb mentions `bar`), not to the edited file. Root::Foo is a legacy package whose test
+// stratum comes after Root::Baz, which itself comes after Root::Foo's application stratum.
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedPreemptionWaitsForPackageFileOfFastPathExtraFiles") {
+    vector<pair<string, string>> files = {
+        {"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A"}).build()},
+        {"a.rb", "# typed: true\n"
+                 "module Root\n"
+                 "  class A\n"
+                 "  end\n"
+                 "end\n"},
+        {"b.rb", "# typed: true\n"
+                 "module Root\n"
+                 "  class B\n"
+                 "  end\n"
+                 "end\n"},
+        {"foo/__package.rb", PackageTextBuilder()
+                                 .withName("Root::Foo")
+                                 .withExports({"Root::Foo::A", "Test::Root::Foo::Helper"})
+                                 .withImports({"Root"})
+                                 .withTestImports({"Root::Baz"})
+                                 .build()},
+        {"foo/a.rb", "# typed: true\n"
+                     "module Root::Foo\n"
+                     "  class A\n"
+                     "    def foo\n"
+                     "      T.unsafe(Root::A.new).bar\n"
+                     "    end\n"
+                     "  end\n"
+                     "end\n"},
+        {"foo/test/helper.rb", "# typed: true\n"
+                               "class Test::Root::Foo::Helper\n"
+                               "end\n"},
+        {"baz/__package.rb", PackageTextBuilder().withName("Root::Baz").withImports({"Root::Foo"}).build()},
+        {"baz/b.rb", "# typed: true\n"
+                     "module Root::Baz\n"
+                     "end\n"},
+    };
+    initializePackagedWorkspace(true, files);
+
+    assertErrorDiagnostics(send(*openFile("a.rb", files[1].second)), {});
+    assertErrorDiagnostics(send(*openFile("b.rb", files[2].second)), {});
+
+    setSlowPathBlocked(true);
+    sendAsync(*changeFile("b.rb",
+                          "# typed: true\n"
+                          "module Root\n"
+                          "  class B\n"
+                          "    class NewClassTakesSlowPath; end\n"
+                          "  end\n"
+                          "end\n",
+                          2, /* cancellationExpected */ false, /* preemptionsExpected */ 1));
+
+    auto status = getTypecheckRunStatus(*readAsync());
+    REQUIRE(status.has_value());
+    REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+
+    sendAsync(*changeFile("a.rb",
+                          "# typed: true\n"
+                          "module Root\n"
+                          "  class A\n"
+                          "    def bar; end\n"
+                          "  end\n"
+                          "end\n",
+                          2));
+    setSlowPathBlocked(false);
+
+    for (auto expectedStatus : {SorbetTypecheckRunStatus::Started, SorbetTypecheckRunStatus::Ended}) {
+        auto message = readAsync();
+        REQUIRE(message->isNotification());
+        if (message->asNotification().method == LSPMethod::TextDocumentPublishDiagnostics) {
+            FAIL_CHECK(fmt::format("Expected fast path status, but received diagnostics:\n{}", message->toJSON(true)));
+            return;
+        }
+        REQUIRE_EQ(message->asNotification().method, LSPMethod::SorbetTypecheckRunInfo);
+        auto &runInfo = get<unique_ptr<SorbetTypecheckRunInfo>>(message->asNotification().params);
+        CHECK_EQ(runInfo->typecheckingPath, TypecheckingPath::Fast);
+        CHECK_EQ(runInfo->status, expectedStatus);
+        if (expectedStatus == SorbetTypecheckRunStatus::Ended) {
+            CHECK(absl::c_contains(runInfo->filesTypechecked, fmt::format("{}/foo/__package.rb", this->rootPath)));
+        }
+    }
+
+    auto slowPathEnd = readAsync();
+    REQUIRE(slowPathEnd->isNotification());
+    REQUIRE_EQ(slowPathEnd->asNotification().method, LSPMethod::SorbetTypecheckRunInfo);
+    auto &runInfo = get<unique_ptr<SorbetTypecheckRunInfo>>(slowPathEnd->asNotification().params);
+    CHECK_EQ(runInfo->typecheckingPath, TypecheckingPath::Slow);
+    CHECK_EQ(runInfo->status, SorbetTypecheckRunStatus::Ended);
+}
+
 } // namespace sorbet::test::lsp
