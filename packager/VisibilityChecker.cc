@@ -206,7 +206,11 @@ public:
 //
 // This does not change any export bits: `ExportBits` sets them, from the exports recorded on the `PackageInfo`.
 class ExportErrors final {
-    core::packages::PackageInfo &package;
+    const core::packages::PackageInfo &package;
+
+    // `export` lines that `--gen-packages` should delete. These are applied to the package after the walk, so that
+    // the walk itself doesn't need to mutate anything.
+    vector<core::LocOffsets> exportsToDelete;
 
     // Blames which location (export) caused a symbol to first be marked exported.
     struct ExportBlame {
@@ -241,7 +245,7 @@ class ExportErrors final {
     map<core::LocOffsets, DuplicateExportError, decltype(COMPARE_EXPORT_LOCS)> duplicateExports =
         decltype(duplicateExports)(COMPARE_EXPORT_LOCS);
 
-    void checkDuplicateExport(core::MutableContext ctx, core::SymbolRef currentExportLineSym,
+    void checkDuplicateExport(core::Context ctx, core::SymbolRef currentExportLineSym,
                               core::LocOffsets currentExportLineLoc, core::SymbolRef sym) {
         // Only report duplicate errors if there's an entry in the explicitlyExported map. We don't add to the
         // explicitlyExported map when marking a parent namespace as exported (in exportParentNamespace).
@@ -266,7 +270,7 @@ class ExportErrors final {
         }
     }
 
-    void recursiveCheckDuplicateExports(core::MutableContext ctx, core::SymbolRef currentExportLineSym,
+    void recursiveCheckDuplicateExports(core::Context ctx, core::SymbolRef currentExportLineSym,
                                         core::LocOffsets currentExportLineLoc, core::SymbolRef sym) {
         // Stop recursing at package boundary
         if (this->package.mangledName() != sym.enclosingClass(ctx).data(ctx)->package) {
@@ -324,7 +328,7 @@ class ExportErrors final {
     }
 
     // Checks that the package that a symbol is defined in can be exported from the package we're currently checking.
-    void checkExportPackage(core::MutableContext ctx, core::LocOffsets loc, core::SymbolRef sym) {
+    void checkExportPackage(core::Context ctx, core::LocOffsets loc, core::SymbolRef sym) {
         ENFORCE(!sym.locs(ctx).empty()); // Can't be empty
 
         bool shouldDeleteExport = false;
@@ -379,7 +383,7 @@ class ExportErrors final {
         }
         if (shouldDeleteExport) {
             ENFORCE(ctx.state.packageDB().genPackagesMode() != core::packages::GenPackagesMode::Disabled);
-            this->package.exportsToDelete_.emplace_back(loc);
+            this->exportsToDelete.emplace_back(loc);
         }
     }
 
@@ -433,11 +437,11 @@ class ExportErrors final {
         return lines;
     }
 
-    ExportErrors(core::packages::PackageInfo &package) : package{package} {}
+    ExportErrors(const core::packages::PackageInfo &package) : package{package} {}
 
 public:
     // Find uses of export and mark the symbols they mention as exported.
-    void postTransformSend(core::MutableContext ctx, const ast::Send &send) {
+    void postTransformSend(core::Context ctx, const ast::Send &send) {
         if (send.fun != core::Names::export_()) {
             return;
         }
@@ -476,7 +480,7 @@ public:
                     }
                 } else {
                     // The generator will add a direct export for the target if another package uses it.
-                    this->package.exportsToDelete_.emplace_back(send.loc);
+                    this->exportsToDelete.emplace_back(send.loc);
                 }
                 return;
             }
@@ -544,22 +548,28 @@ public:
             return;
         }
 
-        auto package = gs.packageDB().getPackageInfoNonConst(pkgName);
-        ENFORCE(package->exists(), "Package is associated with a file, but doesn't exist");
+        auto &package = gs.packageDB().getPackageInfo(pkgName);
+        ENFORCE(package.exists(), "Package is associated with a file, but doesn't exist");
 
-        // TODO(jez) Get this to be a `core::Context` now.
-        core::MutableContext ctx{gs, core::Symbols::root(), f.file};
-        ExportErrors pass{*package};
+        core::Context ctx{gs, core::Symbols::root(), f.file};
+        ExportErrors pass{package};
         ast::ConstTreeWalk::apply(ctx, pass, f.tree);
 
-        auto exportAll = package->locs.exportAll;
-        if (exportAll.exists() && !package->exports_.empty()) {
+        if (!pass.exportsToDelete.empty()) {
+            auto &exportsToDelete = gs.packageDB().getPackageInfoNonConst(pkgName)->exportsToDelete_;
+            for (auto loc : pass.exportsToDelete) {
+                exportsToDelete.emplace_back(loc);
+            }
+        }
+
+        auto exportAll = package.locs.exportAll;
+        if (exportAll.exists() && !package.exports_.empty()) {
             if (auto e = ctx.beginError(exportAll, core::errors::Packager::ExportConflict)) {
                 e.setHeader("Package `{}` declares `{}` and therefore should not use explicit exports",
-                            package->mangledName().owner.show(ctx), "export_all!");
+                            package.mangledName().owner.show(ctx), "export_all!");
 
                 auto edits = vector<core::AutocorrectSuggestion::Edit>{};
-                for (const auto &exp : package->exports_) {
+                for (const auto &exp : package.exports_) {
                     auto replaceLoc = ctx.locAt(exp.loc);
                     auto [indentedStart, numSpaces] = replaceLoc.findStartOfIndentation(ctx);
                     // Remove leading whitespace
