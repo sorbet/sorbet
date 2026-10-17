@@ -634,6 +634,7 @@ TEST_CASE("PerPhaseTest") {
 
             if (opts.cacheSensitiveOptions.sorbetPackages) {
                 packager::VisibilityChecker::propagateExports(*gs, stratumFiles);
+                packager::VisibilityChecker::reportExportErrors(*gs, stratumFiles);
                 packager::VisibilityChecker::checkReferences(*gs, *workers, stratumFiles);
             }
 
@@ -902,6 +903,7 @@ TEST_CASE("PerPhaseTest") {
     if (opts.cacheSensitiveOptions.sorbetPackages) {
         if (ranIncrementalNamer) {
             packager::VisibilityChecker::propagateExports(*gs, trees);
+            packager::VisibilityChecker::reportExportErrors(*gs, trees);
         }
         packager::VisibilityChecker::checkReferences(*gs, *workers, trees);
     }

@@ -1183,6 +1183,7 @@ ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, vector<ast::ParsedFil
             if (opts.cacheSensitiveOptions.sorbetPackages) {
                 Timer timeit(gs.tracer(), "visibility_checker");
                 packager::VisibilityChecker::propagateExports(gs, what);
+                packager::VisibilityChecker::reportExportErrors(gs, what);
                 packager::VisibilityChecker::checkReferences(gs, workers, what);
             }
 #endif
@@ -1314,6 +1315,7 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             // Without incremental namer, no symbols were deleted or re-entered, so their export bits are unchanged.
             if (runIncrementalNamer) {
                 packager::VisibilityChecker::propagateExports(gs, what);
+                packager::VisibilityChecker::reportExportErrors(gs, what);
             }
             packager::VisibilityChecker::checkReferences(gs, workers, what);
         }

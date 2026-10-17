@@ -824,24 +824,34 @@ void VisibilityChecker::propagateExports(core::GlobalState &gs, absl::Span<const
     for (auto &f : files) {
         auto &file = f.file.data(gs);
         if (file.isPackage(gs)) {
+            continue;
+        }
+
+        auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
+        if (!pkgName.exists()) {
+            continue;
+        }
+
+        // Track which packages we've already setExportBits for, because we only have to do this
+        // once per unique package in the set of edited files. (And we can't just scan files
+        // looking for `__package.rb` files, because the application stratum of a legacy
+        // application+test package won't place the `__package.rb` file in that stratum, but
+        // still needs to export the application constants.)
+        auto ns = file.isPackagedTest() ? Namespace::Test : Namespace::Application;
+        auto [_it, seenForFirstTime] = recomputed.emplace(pkgName, ns);
+        if (seenForFirstTime) {
+            ExportBits::run(gs, pkgName, ns);
+        }
+    }
+}
+
+void VisibilityChecker::reportExportErrors(core::GlobalState &gs, absl::Span<const ast::ParsedFile> files) {
+    Timer timeit(gs.tracer(), "visibility_checker.report_export_errors");
+    // TODO(jez) Each `__package.rb` file's walk is independent, so this could run in parallel
+    for (auto &f : files) {
+        if (f.file.data(gs).isPackage(gs)) {
             // Doesn't depend on export bits, only on the exports in the package's `__package.rb`.
             ExportErrors::run(gs, f);
-        } else {
-            auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
-            if (!pkgName.exists()) {
-                continue;
-            }
-
-            // Track which packages we've already setExportBits for, because we only have to do this
-            // once per unique package in the set of edited files. (And we can't just scan files
-            // looking for `__package.rb` files, because the application stratum of a legacy
-            // application+test package won't place the `__package.rb` file in that stratum, but
-            // still needs to export the application constants.)
-            auto ns = file.isPackagedTest() ? Namespace::Test : Namespace::Application;
-            auto [_it, seenForFirstTime] = recomputed.emplace(pkgName, ns);
-            if (seenForFirstTime) {
-                ExportBits::run(gs, pkgName, ns);
-            }
         }
     }
 }

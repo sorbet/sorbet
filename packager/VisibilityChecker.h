@@ -13,6 +13,9 @@ public:
     // Set the export bits of the symbols in the packages of `files`.
     static void propagateExports(core::GlobalState &gs, absl::Span<const ast::ParsedFile> files);
 
+    // Report errors in the `export` lines of the resolved `__package.rb` files in `files`.
+    static void reportExportErrors(core::GlobalState &gs, absl::Span<const ast::ParsedFile> files);
+
     // Report references in `files` to constants that aren't visible to them.
     static void checkReferences(core::GlobalState &gs, WorkerPool &workers, absl::Span<const ast::ParsedFile> files);
 };
