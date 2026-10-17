@@ -75,10 +75,29 @@ DispatchResult FloatLiteralType::dispatchCall(const GlobalState &gs, const Dispa
 }
 
 DispatchResult OrType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
-    categoryCounterInc("dispatch_call", "ortype");
-    auto leftRet = left.dispatchCall(gs, args.withSelfAndThisRef(left));
-    auto rightRet = right.dispatchCall(gs, args.withSelfAndThisRef(right));
-    return DispatchResult::merge(gs, DispatchResult::Combinator::OR, std::move(leftRet), std::move(rightRet));
+    // Unions are usually nested on the left, and `DispatchResult::merge` walks the left result's chain to append
+    // the right one, so recursing on `left` here would be quadratic in the number of components. Instead, walk the
+    // left spine and do what `merge` does in place, keeping track of the end of the chain.
+    InlinedVector<const OrType *, 4> spine;
+    for (auto o = this; o != nullptr; o = cast_type<OrType>(o->left)) {
+        categoryCounterInc("dispatch_call", "ortype");
+        spine.emplace_back(o);
+    }
+
+    const auto &innermost = spine.back()->left;
+    auto result = innermost.dispatchCall(gs, args.withSelfAndThisRef(innermost));
+    auto *last = &result;
+    for (auto it = spine.rbegin(); it != spine.rend(); ++it) {
+        const auto &right = (*it)->right;
+        auto rightRet = right.dispatchCall(gs, args.withSelfAndThisRef(right));
+        result.returnType = Types::any(gs, result.returnType, rightRet.returnType);
+        result.secondaryKind = DispatchResult::Combinator::OR;
+        while (last->secondary != nullptr) {
+            last = last->secondary.get();
+        }
+        last->secondary = make_unique<DispatchResult>(std::move(rightRet));
+    }
+    return result;
 }
 
 TypePtr OrType::getCallArguments(const GlobalState &gs, NameRef name) const {
