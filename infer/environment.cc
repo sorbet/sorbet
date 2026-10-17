@@ -108,6 +108,47 @@ bool KnowledgeFilter::isNeeded(cfg::LocalRef var) {
     return used_vars[var.id()];
 }
 
+namespace {
+// The number of `OrType` nodes in `type`, counting no more than `limit`.
+int countOrNodes(const core::TypePtr &type, int limit) {
+    auto o = core::cast_type<core::OrType>(type);
+    if (o == nullptr || limit == 0) {
+        return 0;
+    }
+    auto count = 1 + countOrNodes(o->left, limit - 1);
+    return count == limit ? count : count + countOrNodes(o->right, limit - count);
+}
+
+void collectClasses(const core::TypePtr &type, UnorderedSet<core::ClassOrModuleRef> &classes) {
+    if (auto o = core::cast_type<core::OrType>(type)) {
+        collectClasses(o->left, classes);
+        collectClasses(o->right, classes);
+    } else if (core::isa_type<core::ClassType>(type)) {
+        classes.insert(core::cast_type_nonnull<core::ClassType>(type).symbol);
+    }
+}
+
+bool hasClassIn(const core::TypePtr &type, const UnorderedSet<core::ClassOrModuleRef> &classes) {
+    if (auto o = core::cast_type<core::OrType>(type)) {
+        return hasClassIn(o->right, classes) || hasClassIn(o->left, classes);
+    }
+    return core::isa_type<core::ClassType>(type) &&
+           classes.contains(core::cast_type_nonnull<core::ClassType>(type).symbol);
+}
+
+// Whether two unions of at least 16 components have a class in common, in which case `Types::all` of them is not
+// bottom: `glb` splits both unions until it compares that class against a union containing it. Computing that
+// `glb` is cubic in the size of the unions.
+bool largeUnionsShareClass(const core::TypePtr &a, const core::TypePtr &b) {
+    if (countOrNodes(a, 15) < 15 || countOrNodes(b, 15) < 15) {
+        return false;
+    }
+    UnorderedSet<core::ClassOrModuleRef> inA;
+    collectClasses(a, inA);
+    return hasClassIn(b, inA);
+}
+} // namespace
+
 KnowledgeRef KnowledgeRef::under(core::Context ctx, const Environment &env, cfg::CFG &inWhat, cfg::BasicBlock *bb,
                                  bool isNeeded) const {
     if (knowledge->yesTypeTests.empty() && !isNeeded) {
@@ -160,6 +201,9 @@ KnowledgeRef KnowledgeRef::under(core::Context ctx, const Environment &env, cfg:
         } else {
             auto &second = fnd->second;
             auto &typeAndOrigin = state.typeAndOrigins;
+            if (typeAndOrigin.type != second && largeUnionsShareClass(typeAndOrigin.type, second)) {
+                continue;
+            }
             auto combinedType = core::Types::all(ctx, typeAndOrigin.type, second);
             if (combinedType.isBottom()) {
                 copy.markDead();
