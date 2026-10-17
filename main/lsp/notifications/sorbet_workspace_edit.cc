@@ -180,7 +180,17 @@ core::packages::Stratum SorbetWorkspaceEditTask::preemptionStratum(FileStratumMa
     // resolved the strata that they belong to. Otherwise, the incremental namer would enter their symbols into the
     // in-progress symbol table without linearizing them, and typecheck them against a symbol table that's missing
     // their dependencies.
-    return std::max(info.getStratumForPaths(paths), info.getStratumForFiles(cachedTypecheckingPath->files.extraFiles));
+    const auto &files = cachedTypecheckingPath->files;
+    auto stratum = std::max(info.getStratumForPaths(paths), info.getStratumForFiles(files.extraFiles));
+
+    // A fast path that uses the incremental namer also retypechecks the `__package.rb` file of every package that it
+    // checks a file from, so wait for those files' strata too. For a package that doesn't use `test!` packages, that's
+    // its test stratum, which can be later than the strata of the files themselves.
+    if (files.useIncrementalNamer) {
+        stratum = std::max(stratum, info.getStratumForPackageFilesOf(paths, files.extraFiles));
+    }
+
+    return stratum;
 }
 
 } // namespace sorbet::realmain::lsp

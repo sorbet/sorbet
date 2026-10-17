@@ -245,6 +245,13 @@ public:
     core::packages::Stratum getStratumForPaths(absl::Span<const std::string_view> paths) const;
 
     /**
+     * Get the id of the stratum that the `__package.rb` files of the packages that own these paths and files could be
+     * checked at.
+     */
+    core::packages::Stratum getStratumForPackageFilesOf(absl::Span<const std::string_view> paths,
+                                                        absl::Span<const core::FileRef> refs) const;
+
+    /**
      * Get the id of the stratum that an edit involving these uris could be checked at.
      */
     core::packages::Stratum getStratumForUris(absl::Span<const std::string_view> uris) const;

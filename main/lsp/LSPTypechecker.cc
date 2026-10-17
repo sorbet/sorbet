@@ -1200,6 +1200,30 @@ core::packages::Stratum FileStratumMapping::getStratumForPaths(absl::Span<const 
     return this->getStratumForFiles(refs);
 }
 
+core::packages::Stratum FileStratumMapping::getStratumForPackageFilesOf(absl::Span<const string_view> paths,
+                                                                        absl::Span<const core::FileRef> refs) const {
+    const auto &gs = this->tc.state();
+    vector<core::FileRef> packageFiles;
+    auto addPackageFile = [&gs, &packageFiles](core::FileRef ref) {
+        if (!ref.exists()) {
+            return;
+        }
+
+        auto pkg = gs.packageDB().getPackageNameForFile(ref);
+        if (pkg.exists()) {
+            packageFiles.emplace_back(gs.packageDB().getPackageInfo(pkg).fullLoc().file());
+        }
+    };
+    for (auto path : paths) {
+        addPackageFile(gs.findFileByPath(path));
+    }
+    for (auto ref : refs) {
+        addPackageFile(ref);
+    }
+
+    return this->getStratumForFiles(packageFiles);
+}
+
 core::packages::Stratum FileStratumMapping::getStratumForUris(absl::Span<const string_view> uris) const {
     vector<core::FileRef> refs;
     refs.reserve(uris.size());
