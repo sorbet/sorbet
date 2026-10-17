@@ -9,6 +9,17 @@ my_package/__package.rb:4: Cannot export enum value `MyPackage::A::Val1`. Instea
      4 |  export MyPackage::A::Val1 # error
           ^^^^^^^^^^^^^^^^^^^^^^^^^
 
+my_package/__package.rb:5: Cannot export enum value `MyPackage::A::NOT_A_VALUE`. Instead, export the entire enum `MyPackage::A` https://srb.help/3721
+     5 |  export MyPackage::A::NOT_A_VALUE
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    my_package/a.rb:11: Defined here
+    11 |    NOT_A_VALUE = 1
+            ^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    my_package/__package.rb:5: Replace with `export MyPackage::A`
+     5 |  export MyPackage::A::NOT_A_VALUE
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 other_package/b.rb:5: `MyPackage::A::Val2` resolves but is not exported from `MyPackage` https://srb.help/3717
      5 |    X = MyPackage::A::Val2
                 ^^^^^^^^^^^^^^^^^^
@@ -19,4 +30,15 @@ other_package/b.rb:5: `MyPackage::A::Val2` resolves but is not exported from `My
     my_package/__package.rb:3: Insert `export MyPackage::A`
      3 |class MyPackage < PackageSpec
                                      ^
-Errors: 2
+
+other_package/b.rb:6: `MyPackage::A::OTHER_CONST` resolves but is not exported from `MyPackage` https://srb.help/3717
+     6 |    Y = MyPackage::A::OTHER_CONST
+                ^^^^^^^^^^^^^^^^^^^^^^^^^
+    my_package/a.rb:12: Defined here
+    12 |    OTHER_CONST = 2
+            ^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    my_package/__package.rb:3: Insert `export MyPackage::A`
+     3 |class MyPackage < PackageSpec
+                                     ^
+Errors: 4
