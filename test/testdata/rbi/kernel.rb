@@ -66,7 +66,9 @@ system(env, ['echo', 'echo'], 'hello', out: :err)
 # then
 obj = T.let("foo", String)
 # Object#then, with a block
-T.reveal_type(obj.then(&:to_i)) # error: Revealed type: `T.untyped`
+T.reveal_type(obj.then(&:to_i)) # error: Revealed type: `Integer`
+# Object#then yields the receiver, so the block parameter has the receiver's type
+obj.then {|s| T.reveal_type(s)} # error: Revealed type: `String`
 
 # object_id
 obj = T.let("foo", String)
