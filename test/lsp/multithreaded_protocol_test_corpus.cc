@@ -169,7 +169,8 @@ public:
             auto message = readAsync();
             REQUIRE(message->isNotification());
             if (message->asNotification().method == LSPMethod::TextDocumentPublishDiagnostics) {
-                FAIL_CHECK(fmt::format("Expected fast path status, but received diagnostics:\n{}", message->toJSON(true)));
+                FAIL_CHECK(
+                    fmt::format("Expected fast path status, but received diagnostics:\n{}", message->toJSON(true)));
                 return;
             }
             REQUIRE_EQ(message->asNotification().method, LSPMethod::SorbetTypecheckRunInfo);
