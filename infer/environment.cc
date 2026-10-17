@@ -28,6 +28,50 @@ bool typeTestReferencesVar(const InlinedVector<pair<cfg::LocalRef, core::TypePtr
     return absl::c_any_of(typeTest, [var](auto &test) { return test.first == var; });
 }
 
+using TypeTest = pair<cfg::LocalRef, core::TypePtr>;
+using TypeTests = InlinedVector<TypeTest, 1>;
+
+// Finds the first type test on a local. `KnowledgeRef::under` gives the knowledge of a local that a branch reads a
+// test on every local in scope, so in a method with many such locals these lists are long, and scanning one for
+// each local in scope is quadratic. Long lists are indexed instead.
+class TypeTestLookup {
+    const TypeTests &tests;
+    UnorderedMap<cfg::LocalRef, const TypeTest *> index;
+
+public:
+    explicit TypeTestLookup(const TypeTests &tests) : tests(tests) {
+        if (tests.size() >= 64) {
+            index.reserve(tests.size());
+            for (const auto &test : tests) {
+                // Keeps the first test on each local, which is the one a scan finds.
+                index.emplace(test.first, &test);
+            }
+        }
+    }
+
+    const TypeTest *find(cfg::LocalRef local) const {
+        if (!index.empty()) {
+            auto it = index.find(local);
+            return it == index.end() ? nullptr : it->second;
+        }
+        auto it = absl::c_find_if(tests, [&](const auto &test) { return test.first == local; });
+        return it == tests.end() ? nullptr : &*it;
+    }
+};
+
+// Keeps the tests on locals that `other` also has a test on, combining the two types with `combine`.
+template <typename F> void keepTestsAlsoIn(TypeTests &tests, const TypeTests &other, F combine) {
+    TypeTestLookup inOther(other);
+    auto kept = tests.begin();
+    for (auto &[local, type] : tests) {
+        // Note: No need to update Environment::typeTestsWithVar since it is an overapproximation
+        if (auto fnd = inOther.find(local)) {
+            *kept++ = {local, combine(fnd->second, type)};
+        }
+    }
+    tests.erase(kept, tests.end());
+}
+
 } // namespace
 
 void TypeTestReverseIndex::addToIndex(cfg::LocalRef from, cfg::LocalRef to) {
@@ -119,14 +163,16 @@ KnowledgeRef KnowledgeRef::under(core::Context ctx, const Environment &env, cfg:
         return copy;
     }
     bool enteringLoop = bb->flags.isLoopHeader;
+    // `copy` only gains tests on locals this loop has already visited, so the ones to find are in `knowledge`.
+    TypeTestLookup existingTests(knowledge->yesTypeTests);
     for (auto &pair : env.vars()) {
         auto local = pair.first;
         auto &state = pair.second;
         if (enteringLoop && bb->outerLoops <= local.maxLoopWrite(inWhat)) {
             continue;
         }
-        auto fnd = absl::c_find_if(copy->yesTypeTests, [&](auto const &e) -> bool { return e.first == local; });
-        if (fnd == copy->yesTypeTests.end()) {
+        auto fnd = existingTests.find(local);
+        if (fnd == nullptr) {
             // add info from env to knowledge
             ENFORCE(state.typeAndOrigins.type != nullptr);
             // This handles code snippets such as
@@ -171,30 +217,10 @@ KnowledgeRef KnowledgeRef::under(core::Context ctx, const Environment &env, cfg:
 }
 
 void KnowledgeFact::min(core::Context ctx, const KnowledgeFact &other) {
-    for (auto it = yesTypeTests.begin(); it != yesTypeTests.end(); /* nothing */) {
-        auto &entry = *it;
-        cfg::LocalRef local = entry.first;
-        auto fnd = absl::c_find_if(other.yesTypeTests, [&](auto const &elem) -> bool { return elem.first == local; });
-        if (fnd == other.yesTypeTests.end()) {
-            // Note: No need to update Environment::typeTestsWithVar since it is an overapproximation
-            it = yesTypeTests.erase(it);
-        } else {
-            entry.second = core::Types::any(ctx, fnd->second, entry.second);
-            it++;
-        }
-    }
-    for (auto it = noTypeTests.begin(); it != noTypeTests.end(); /* nothing */) {
-        auto &entry = *it;
-        cfg::LocalRef local = entry.first;
-        auto fnd = absl::c_find_if(other.noTypeTests, [&](auto const &elem) -> bool { return elem.first == local; });
-        if (fnd == other.noTypeTests.end()) {
-            // Note: No need to update Environment::typeTestsWithVar since it is an overapproximation
-            it = noTypeTests.erase(it);
-        } else {
-            entry.second = core::Types::all(ctx, fnd->second, entry.second);
-            it++;
-        }
-    }
+    keepTestsAlsoIn(yesTypeTests, other.yesTypeTests,
+                    [&](const auto &theirs, const auto &ours) { return core::Types::any(ctx, theirs, ours); });
+    keepTestsAlsoIn(noTypeTests, other.noTypeTests,
+                    [&](const auto &theirs, const auto &ours) { return core::Types::all(ctx, theirs, ours); });
 }
 
 void KnowledgeFact::sanityCheck() const {
