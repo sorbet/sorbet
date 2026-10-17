@@ -877,8 +877,8 @@ PackageStrata computePackageStrata(core::GlobalState &gs, vector<ast::ParsedFile
         return true;
     });
 
-    // We'll generate non-test variants of each package, so we need to double the storage of this vector.
-    packageFiles.reserve(numPackageFiles * 2);
+    // Spans into this vector must remain valid as we append the sole AST for each package.
+    packageFiles.reserve(numPackageFiles);
 
     {
         Timer timeit(gs.tracer(), "computePackageStrata.stratumMapping");
@@ -901,7 +901,10 @@ PackageStrata computePackageStrata(core::GlobalState &gs, vector<ast::ParsedFile
 
             // TODO(trevor): after we switch fully over to test packges, this conditional can go away as we won't have
             // the distinction between a test and application node in the condensation graph.
-            if (file->isPackagedTest() || file->isPackagedTestHelper()) {
+            // A legacy package file runs only in its test stratum. Queries must wait for that
+            // stratum too, so that all its application and test dependencies are available.
+            auto isPackageRbInLegacyPkg = file->isPackage(gs) && !db.getPackageInfo(pkgName).usesTestPackages;
+            if (file->isPackagedTest() || file->isPackagedTestHelper() || isPackageRbInLegacyPkg) {
                 ENFORCE(info.testStratum != core::packages::Stratum::NONE);
                 result.fileToStratum[ix] = info.testStratum;
             } else {
@@ -949,28 +952,14 @@ PackageStrata computePackageStrata(core::GlobalState &gs, vector<ast::ParsedFile
 
         {
             for (auto &scc : stratum) {
-                // TODO(trevor): this can be simplified when we switch to test-packages, as we won't need to emulate the
-                // behavior by copying package files to be valid in an application-only context anymore.
-                if (scc.isTest) {
-                    for (auto member : scc.members) {
+                for (auto member : scc.members) {
+                    if (scc.isTest || db.getPackageInfo(member).usesTestPackages) {
+                        // A legacy package has both an application and a test node in the condensation graph, but
+                        // its `__package.rb` must only be processed once so that its errors are only reported once.
+                        // Process it with the test node, which sees both its application and test code. The
+                        // application node applies the package's exports without it (see VisibilityChecker).
                         auto &tree = packageFiles.emplace_back(std::move(packagesToPackageRb[member]));
                         ENFORCE(tree.tree);
-                    }
-                } else {
-                    // When processing the application source of a package, we need to make a copy of the package file,
-                    // and edit out any reference to test symbols.
-                    for (auto member : scc.members) {
-                        const auto &package = packagesToPackageRb[member];
-
-                        // Test-only packages don't have any application code, so if we end up with one in an
-                        // application stratum, it's the only occurrence. This will have been raised as an error prior
-                        // to this point, when we constructed the package DB.
-                        if (package.file.isTestPackage(gs)) {
-                            packageFiles.emplace_back(std::move(packagesToPackageRb[member]));
-                        } else {
-                            packageFiles.emplace_back(packager::Packager::copyPackageWithoutTestExports(gs, package));
-                        }
-                        ENFORCE(packageFiles.back().tree);
                     }
                 }
             }
@@ -989,9 +978,6 @@ PackageStrata computePackageStrata(core::GlobalState &gs, vector<ast::ParsedFile
             resultStratum.sourceFiles = sourceSpan.subspan(0, len);
             sourceSpan = sourceSpan.subspan(len);
         }
-
-        // If we had non-empty source files, we better have package files that manage them.
-        ENFORCE(resultStratum.sourceFiles.empty() || !resultStratum.packageFiles.empty())
     }
 
     ENFORCE(sourceSpan.empty());

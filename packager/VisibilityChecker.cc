@@ -49,10 +49,24 @@ core::ClassOrModuleRef getScopeForPackage(const core::GlobalState &gs, absl::Spa
     return result;
 }
 
-// For each __package.rb file, traverse the resolved tree and apply the visibility annotations to the symbols.
+// Which of a package's namespaces to recompute export bits for. A package that doesn't use `test!` packages defines
+// its application and its `Test::` namespace in different strata in package-directed mode, and processing one must
+// not change the other's symbols, which might belong to an earlier stratum.
+//
+// TODO(jez) Delete this once all packages use `test!` packages.
+enum class Namespace {
+    Application,
+    Test,
+};
+
 class PropagateVisibility final {
+    enum class Mode {
+        SetExportBits,
+        ReportErrors,
+    };
+
     core::packages::PackageInfo &package;
-    vector<core::LocOffsets> exportsInCurrentAST;
+    const Mode mode;
 
     // Blames which location (export) caused a symbol to first be marked exported.
     struct ExportBlame {
@@ -88,7 +102,7 @@ class PropagateVisibility final {
         decltype(duplicateExports)(COMPARE_EXPORT_LOCS);
 
     void checkDuplicateExport(core::MutableContext ctx, core::SymbolRef currentExportLineSym,
-                              core::LocOffsets currentExportLineLoc, core::SymbolRef sym, bool alreadyExported) {
+                              core::LocOffsets currentExportLineLoc, core::SymbolRef sym) {
         // Only report duplicate errors if there's an entry in the explicitlyExported map. We don't add to the
         // explicitlyExported map when marking a parent namespace as exported (in exportParentNamespace).
         auto isExplicitlyExported = this->explicitlyExported.find(sym) != this->explicitlyExported.end();
@@ -98,7 +112,7 @@ class PropagateVisibility final {
             auto atTop = sym == currentExportLineSym;
             auto errLoc = atTop ? currentExportLineLoc : this->explicitlyExported[sym].firstExportedAt;
 
-            if (alreadyExported && duplicateExports.find(errLoc) == duplicateExports.end()) {
+            if (duplicateExports.find(errLoc) == duplicateExports.end()) {
                 auto firstExportedAt = atTop ? this->explicitlyExported[sym].firstExportedAt : currentExportLineLoc;
                 duplicateExports[errLoc] = DuplicateExportError{sym, currentExportLineSym, firstExportedAt};
             }
@@ -123,12 +137,11 @@ class PropagateVisibility final {
             case core::SymbolRef::Kind::ClassOrModule: {
                 auto klassData = sym.asClassOrModuleRef().data(ctx);
 
-                if (setExportedTo) {
-                    checkDuplicateExport(ctx, currentExportLineSym, currentExportLineLoc, sym,
-                                         klassData->flags.isExported);
+                if (mode == Mode::ReportErrors) {
+                    checkDuplicateExport(ctx, currentExportLineSym, currentExportLineLoc, sym);
+                } else {
+                    klassData->flags.isExported = setExportedTo;
                 }
-
-                klassData->flags.isExported = setExportedTo;
 
                 // This `members` call does not have a stable order--we recover a determinstic order
                 // by sorting duplicate errors at the end of PropagateVisibility
@@ -149,12 +162,11 @@ class PropagateVisibility final {
                     break;
                 }
 
-                if (setExportedTo) {
-                    checkDuplicateExport(ctx, currentExportLineSym, currentExportLineLoc, sym,
-                                         fieldData->flags.isExported);
+                if (mode == Mode::ReportErrors) {
+                    checkDuplicateExport(ctx, currentExportLineSym, currentExportLineLoc, sym);
+                } else {
+                    fieldData->flags.isExported = setExportedTo;
                 }
-
-                fieldData->flags.isExported = setExportedTo;
                 break;
             }
 
@@ -202,17 +214,17 @@ class PropagateVisibility final {
         return {nonTestScope, testScope};
     }
 
-    void unsetAllExportedInPackage(core::MutableContext ctx) {
+    void unsetAllExportedInPackage(core::MutableContext ctx, Namespace ns) {
         auto [nonTestScope, testScope] = getScopesForPackage(ctx);
 
         auto setExportedTo = false;
 
         // loc is never used in `recursiveSetIsExported` if `setExportedTo` is false, so just say "none"
         auto currentExportLineLoc = core::LocOffsets::none();
-        if (nonTestScope.exists()) {
+        if (ns == Namespace::Application && nonTestScope.exists()) {
             recursiveSetIsExported(ctx, setExportedTo, nonTestScope, currentExportLineLoc, nonTestScope);
         }
-        if (testScope.exists()) {
+        if (ns == Namespace::Test && testScope.exists()) {
             recursiveSetIsExported(ctx, setExportedTo, testScope, currentExportLineLoc, testScope);
         }
 
@@ -344,7 +356,18 @@ class PropagateVisibility final {
         return lines;
     }
 
-    PropagateVisibility(core::packages::PackageInfo &package) : package{package} {}
+    void applyExport(core::MutableContext ctx, core::SymbolRef sym, core::LocOffsets loc) {
+        auto setExportedTo = true;
+        recursiveSetIsExported(ctx, setExportedTo, sym, loc, sym);
+
+        if (mode == Mode::SetExportBits) {
+            // When exporting a symbol, we also export its parent namespace. This is a bit of a hack, and it would
+            // be great to remove this, but this was the behavior of the previous packager implementation.
+            exportParentNamespace(ctx, sym.owner(ctx).asClassOrModuleRef());
+        }
+    }
+
+    PropagateVisibility(core::packages::PackageInfo &package, Mode mode) : package{package}, mode{mode} {}
 
 public:
     // Find uses of export and mark the symbols they mention as exported.
@@ -363,17 +386,6 @@ public:
             // Already reported an error in packager.cc
             return;
         }
-
-        // This is a syntactically valid export. It might export something that doesn't exist, but
-        // that doesn't matter: the rest of the pipeline depends on being able to see the `export`
-        // lines locations for the purposes of autocorrects, so let's at least record that there is
-        // an export here.
-        //
-        // TODO(jez) Delete this once `test!` packages is the default (SEO: `--test-packages`)
-        // We populate `exports_` in `packager.cc` now, but we still need to track a file-local
-        // version of it here, to handle the test and non-test `__package.rb` split.
-        // After `--test-packages`, PackageInfo::exports_ should be our only source of truth.
-        this->exportsInCurrentAST.emplace_back(send.loc);
 
         if (lit->symbol() == core::Symbols::StubModule()) {
             // Don't attempt to export a symbol that doesn't exist. Resolver reported an error already.
@@ -427,23 +439,13 @@ public:
                 }
 
                 checkExportPackage(ctx, send.loc, sym);
-                auto setExportedTo = true;
-                recursiveSetIsExported(ctx, setExportedTo, sym, send.loc, sym);
-
-                // When exporting a symbol, we also export its parent namespace. This is a bit of a hack, and it would
-                // be great to remove this, but this was the behavior of the previous packager implementation.
-                exportParentNamespace(ctx, klassData->owner);
+                applyExport(ctx, sym, send.loc);
                 return;
             }
 
             case core::SymbolRef::Kind::FieldOrStaticField: {
                 checkExportPackage(ctx, send.loc, sym);
-                auto setExportedTo = true;
-                recursiveSetIsExported(ctx, setExportedTo, sym, send.loc, sym);
-
-                // When exporting a field, we also export its parent namespace. This is a bit of a hack, and it would be
-                // great to remove this, but this was the behavior of the previous packager implementation.
-                exportParentNamespace(ctx, sym.asFieldRef().data(ctx)->owner);
+                applyExport(ctx, sym, send.loc);
                 return;
             }
 
@@ -468,10 +470,9 @@ public:
         }
     }
 
-    static void run(core::GlobalState &gs, const ast::ParsedFile &f) {
-        if (!f.file.data(gs).isPackage(gs)) {
-            return;
-        }
+    // A resolved `__package.rb` is only used to report errors in its exports.
+    static void reportErrors(core::GlobalState &gs, const ast::ParsedFile &f) {
+        ENFORCE(f.file.data(gs).isPackage(gs));
 
         auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
         if (!pkgName.exists()) {
@@ -481,20 +482,20 @@ public:
         auto package = gs.packageDB().getPackageInfoNonConst(pkgName);
         ENFORCE(package->exists(), "Package is associated with a file, but doesn't exist");
 
+        // TODO(jez) Get this to be a `core::Context` now.
         core::MutableContext ctx{gs, core::Symbols::root(), f.file};
-        PropagateVisibility pass{*package};
-        pass.unsetAllExportedInPackage(ctx);
+        PropagateVisibility pass{*package, Mode::ReportErrors};
         ast::ConstTreeWalk::apply(ctx, pass, f.tree);
 
         auto exportAll = package->locs.exportAll;
-        if (exportAll.exists() && !pass.exportsInCurrentAST.empty()) {
+        if (exportAll.exists() && !package->exports_.empty()) {
             if (auto e = ctx.beginError(exportAll, core::errors::Packager::ExportConflict)) {
                 e.setHeader("Package `{}` declares `{}` and therefore should not use explicit exports",
                             package->mangledName().owner.show(ctx), "export_all!");
 
                 auto edits = vector<core::AutocorrectSuggestion::Edit>{};
-                for (const auto exportLoc : pass.exportsInCurrentAST) {
-                    auto replaceLoc = ctx.locAt(exportLoc);
+                for (const auto &exp : package->exports_) {
+                    auto replaceLoc = ctx.locAt(exp.loc);
                     auto [indentedStart, numSpaces] = replaceLoc.findStartOfIndentation(ctx);
                     // Remove leading whitespace
                     replaceLoc = replaceLoc.adjust(ctx, -1 * numSpaces, 0);
@@ -518,6 +519,47 @@ public:
                                 err.duplicate.show(ctx), err.prefix.show(ctx));
                     e.addErrorLine(ctx.locAt(err.firstExportedAt), "Prefix exported here");
                 }
+            }
+        }
+    }
+
+    // Recompute the export bits of the package's symbols from its `exports_`.
+    //
+    // This reports no errors: `reportErrors` reports them, from the package's resolved `__package.rb`
+    // (which might not happen until the test SCC for this package runs).
+    static void setExportBits(core::GlobalState &gs, core::packages::MangledName name, Namespace ns) {
+        auto package = gs.packageDB().getPackageInfoNonConst(name);
+        ENFORCE(package != nullptr);
+        if (package->usesTestPackages) {
+            // A `test!` package is a separate package, so each package has only one namespace.
+            ns = Namespace::Application;
+        }
+
+        core::MutableContext ctx{gs, core::Symbols::root(), package->fullLoc().file()};
+        // TODO(jez) This doesn't actually walk the tree anymore, but it still constructs
+        // PropagateVisibility because that's where all the helpers that set export bits are.
+        PropagateVisibility pass{*package, Mode::SetExportBits};
+
+        pass.unsetAllExportedInPackage(ctx, ns);
+
+        for (const auto &exp : package->exports_) {
+            // Exports can't go through class aliases, so an export of a `Test::` constant only exports symbols in
+            // the `Test::` namespace, and vice versa.
+            auto isTestExport =
+                !package->usesTestPackages && exp.reversedPath.back() == core::packages::PackageDB::TEST_NAMESPACE;
+            if (isTestExport != (ns == Namespace::Test)) {
+                continue;
+            }
+
+            // For the same reason, we don't need to dealias any prefix.
+            core::SymbolRef sym = core::Symbols::root();
+            for (auto it = exp.reversedPath.rbegin(); it != exp.reversedPath.rend() && sym.exists(); ++it) {
+                sym = sym.isClassOrModule() ? sym.asClassOrModuleRef().data(gs)->findMemberNoDealias(*it)
+                                            : core::Symbols::noSymbol();
+            }
+
+            if (sym.exists() && (sym.isClassOrModule() || sym.isStaticField(gs))) {
+                pass.applyExport(ctx, sym, exp.loc);
             }
         }
     }
@@ -740,8 +782,31 @@ public:
 
 void VisibilityChecker::propagateExports(core::GlobalState &gs, absl::Span<const ast::ParsedFile> files) {
     Timer timeit(gs.tracer(), "visibility_checker.propagate_visibility");
+    // Recompute the bits of the namespaces whose files are being processed: these are the only symbols that this
+    // stratum (or fast path) can have entered or changed.
+    UnorderedSet<pair<core::packages::MangledName, Namespace>> recomputed;
     for (auto &f : files) {
-        PropagateVisibility::run(gs, f);
+        auto &file = f.file.data(gs);
+        if (file.isPackage(gs)) {
+            // Doesn't depend on export bits, only on the exports in the package's `__package.rb`.
+            PropagateVisibility::reportErrors(gs, f);
+        } else {
+            auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
+            if (!pkgName.exists()) {
+                continue;
+            }
+
+            // Track which packages we've already setExportBits for, because we only have to do this
+            // once per unique package in the set of edited files. (And we can't just scan files
+            // looking for `__package.rb` files, because the application stratum of a legacy
+            // application+test package won't place the `__package.rb` file in that stratum, but
+            // still needs to export the application constants.)
+            auto ns = file.isPackagedTest() ? Namespace::Test : Namespace::Application;
+            auto [_it, seenForFirstTime] = recomputed.emplace(pkgName, ns);
+            if (seenForFirstTime) {
+                PropagateVisibility::setExportBits(gs, pkgName, ns);
+            }
+        }
     }
 }
 

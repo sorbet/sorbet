@@ -1,0 +1,22 @@
+# typed: strict
+# stratum: 2
+# Producer package description
+class Producer < PackageSpec
+  #   ^^^^^^^^ def: producer-pkg
+  test_import Consumer
+  export Producer::Public
+  #                ^^^^^^ usage: public
+  #                ^ show-symbol: Producer::Public
+  #                ^^^^^^ hover: Producer application API
+  export Producer::Original::Nested
+  export Producer::Value
+  export Producer::Type
+  export Test::Producer::Helper
+  #                      ^^^^^^ usage: helper
+  #                      ^ show-symbol: Test::Producer::Helper
+  #                      ^^^^^^ hover: Producer test helper
+  export Producer::Missing
+  #      ^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `Missing`
+  export Test::Producer::Missing
+  #      ^^^^^^^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `Missing`
+end

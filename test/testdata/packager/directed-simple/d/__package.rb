@@ -2,7 +2,7 @@
 
 # at 1 because we depend on A but have a cycle with E
 
-# stratum: 1
+# stratum: 2
 
 class D < PackageSpec
   import A

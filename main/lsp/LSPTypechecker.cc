@@ -347,11 +347,9 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
                 auto pkg = gs->packageDB().getPackageNameForFile(fref);
                 if (pkg.exists()) {
                     // Since even no-op (e.g. whitespace-only) edits will cause constants to be deleted
-                    // and re-added, we have to add the __package.rb files to set of files to retypecheck
-                    // so that we can re-run PropagateVisibility to set export bits for any constants.
-                    // TODO(jez) Make PropagateVisibility a function of the packageDB so that we
-                    // don't have to completely retypecheck the `__package.rb` file again just to
-                    // make sure one file's constants have the right visibility flags.
+                    // and re-added, the errors in the `__package.rb` file's exports might change (e.g.,
+                    // an exported constant might no longer exist), so we have to retypecheck it.
+                    // TODO(jez) I think we could stop doing this if we replaced `export` with `package_private!`
                     auto packageFref = gs->packageDB().getPackageInfo(pkg).fullLoc().file();
                     if (!packageFref.exists()) {
                         continue;
@@ -500,12 +498,11 @@ EditInfo determineMaximumPrefix(const core::GlobalState &gs, const vector<core::
                 fileStratum = core::packages::Stratum(0);
                 pkg = core::packages::MangledName();
             } else {
-                auto &info = gs.packageDB().getPackageInfo(pkg);
-                ENFORCE(info.exists());
-
-                // We have already checked for new package files above, so this should always be true.
-                ENFORCE(info.file.id() < fileToStratum.size());
-                fileStratum = fileToStratum[info.file.id()];
+                // Don't use the stratum of the package's `__package.rb`: for legacy packages that's
+                // their test stratum, which is later than the stratum of their application sources.
+                const auto &stratum = gs.packageDB().getPackageInfo(pkg).stratum;
+                fileStratum = file->isPackagedTest() ? stratum.testStratum : stratum.applicationStratum;
+                ENFORCE(fileStratum != core::packages::Stratum::NONE);
             }
         } else {
             pkg = gs.packageDB().getPackageNameForFile(fref);

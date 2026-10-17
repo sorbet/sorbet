@@ -1,5 +1,5 @@
 # typed: strict
-# stratum: 2
+# stratum: 3
 
 class Parent::Second < PackageSpec
   import Parent::First
