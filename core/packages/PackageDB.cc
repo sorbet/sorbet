@@ -267,15 +267,29 @@ const Condensation &PackageDB::condensation() const {
 }
 
 core::SymbolRef PackageDB::getEnumClassForEnumValue(const core::GlobalState &gs, core::SymbolRef sym) {
-    if (sym.isStaticField(gs) && sym.owner(gs).isClassOrModule()) {
-        auto owner = sym.owner(gs);
-        // There's a hidden class like `MyEnum::X$1` between `MyEnum::X` and `T::Enum` in the ancestor chain.
-        if (owner.asClassOrModuleRef().data(gs)->superClass() == core::Symbols::T_Enum()) {
-            return owner;
-        }
+    if (!sym.isStaticField(gs) || !sym.owner(gs).isClassOrModule()) {
+        return core::Symbols::noSymbol();
     }
 
-    return core::Symbols::noSymbol();
+    // The `T::Enum` rewriter turns `X = new` into `class X$1 < MyEnum; end; X = X$1.new`. Look for that hidden class
+    // rather than checking whether `MyEnum`'s superclass is `T::Enum`, so that this works before resolver has resolved
+    // superclasses.
+    auto uniqueName = gs.lookupNameUnique(core::UniqueNameKind::TEnum, sym.name(gs), 1);
+    if (!uniqueName.exists()) {
+        return core::Symbols::noSymbol();
+    }
+    auto hiddenClassName = gs.lookupNameConstant(uniqueName);
+    if (!hiddenClassName.exists()) {
+        return core::Symbols::noSymbol();
+    }
+
+    auto owner = sym.owner(gs).asClassOrModuleRef();
+    auto hiddenClass = owner.data(gs)->findMemberNoDealias(hiddenClassName);
+    if (!hiddenClass.exists() || !hiddenClass.isClassOrModule()) {
+        return core::Symbols::noSymbol();
+    }
+
+    return owner;
 }
 
 namespace {
