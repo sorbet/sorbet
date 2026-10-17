@@ -628,12 +628,15 @@ TEST_CASE("PerPhaseTest") {
         realmain::pipeline::unpartitionPackageFiles(stratumFiles, move(nonPackageTrees));
 
         {
+            if (opts.cacheSensitiveOptions.sorbetPackages) {
+                packager::VisibilityChecker::propagateExports(*gs, stratumFiles);
+            }
+
             core::UnfreezeNameTable nameTableAccess(*gs);     // Resolver::defineAttr
             core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
             stratumFiles = move(resolver::Resolver::run(*gs, move(stratumFiles), *workers).result());
 
             if (opts.cacheSensitiveOptions.sorbetPackages) {
-                packager::VisibilityChecker::propagateExports(*gs, stratumFiles);
                 packager::VisibilityChecker::reportExportErrors(*gs, stratumFiles);
                 packager::VisibilityChecker::checkReferences(*gs, *workers, stratumFiles);
             }
@@ -890,6 +893,10 @@ TEST_CASE("PerPhaseTest") {
         }
     }
 
+    if (opts.cacheSensitiveOptions.sorbetPackages && ranIncrementalNamer) {
+        packager::VisibilityChecker::propagateExports(*gs, trees);
+    }
+
     // resolver
     {
         vector<core::ClassOrModuleRef> recomputeNoSymbols;
@@ -902,7 +909,6 @@ TEST_CASE("PerPhaseTest") {
 
     if (opts.cacheSensitiveOptions.sorbetPackages) {
         if (ranIncrementalNamer) {
-            packager::VisibilityChecker::propagateExports(*gs, trees);
             packager::VisibilityChecker::reportExportErrors(*gs, trees);
         }
         packager::VisibilityChecker::checkReferences(*gs, *workers, trees);
