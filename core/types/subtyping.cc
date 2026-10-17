@@ -85,6 +85,32 @@ void fillInOrComponents(InlinedVector<TypePtr, 4> &orComponents, const TypePtr &
     }
 }
 
+// The number of `OrType` nodes in `type`, counting no more than `limit`.
+int countOrNodes(const TypePtr &type, int limit) {
+    auto o = cast_type<OrType>(type);
+    if (o == nullptr || limit == 0) {
+        return 0;
+    }
+    auto count = 1 + countOrNodes(o->left, limit - 1);
+    return count == limit ? count : count + countOrNodes(o->right, limit - count);
+}
+
+// Whether `type` is a union of at least 16 components, all of them class types other than the special ones. If so,
+// `components` holds them.
+bool isLargeClassUnion(const TypePtr &type, InlinedVector<TypePtr, 4> &components) {
+    if (countOrNodes(type, 15) < 15) {
+        return false;
+    }
+    fillInOrComponents(components, type);
+    return absl::c_all_of(components, [](const auto &component) {
+        if (!isa_type<ClassType>(component)) {
+            return false;
+        }
+        auto sym = cast_type_nonnull<ClassType>(component).symbol;
+        return sym != Symbols::top() && sym != Symbols::untyped() && sym != Symbols::bottom();
+    });
+}
+
 TypePtr filterOrComponents(const TypePtr &originalType, absl::Span<const TypePtr> typeFilter) {
     auto o = cast_type<OrType>(originalType);
     if (o == nullptr) {
@@ -893,6 +919,15 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         }
 
         if (isa_type<ClassType>(t1) || isa_type<AppliedType>(t1) || isa_type<SelfTypeParam>(t1)) {
+            // If the class `t1` overlaps no component of a large union of classes, the recursion below splits `t2`
+            // all the way down, checking `isAsSpecificAs` at every level, only to return bottom.
+            InlinedVector<TypePtr, 4> components;
+            if (isa_type<ClassType>(t1) && isLargeClassUnion(t2, components) &&
+                absl::c_all_of(components, [&](const auto &c) { return glbGround(gs, t1, c).isBottom(); })) {
+                categoryCounterInc("glb", "ZZZorClassDisjoint");
+                return Types::bottom();
+            }
+
             auto lft = Types::all(gs, t1, o2->left);
             if (Types::isAsSpecificAs(gs, lft, o2->right) && !lft.isBottom()) {
                 categoryCounterInc("glb", "ZZZorClass");
@@ -1576,6 +1611,25 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
 
     if (t1 == t2) {
         return true;
+    }
+
+    if constexpr (!shouldAddErrorDetails) {
+        // Below, each component of a union `t1` is checked against `t2` by walking `t2`. When `t2` is a large union
+        // of classes, a component that is one of those classes is a subtype (the walk would end at
+        // `isSubType(c, c)`), so only walk for the rest.
+        InlinedVector<TypePtr, 4> rhs;
+        if (isa_type<OrType>(t1) && isLargeClassUnion(t2, rhs)) {
+            UnorderedSet<ClassOrModuleRef> rhsClasses;
+            for (const auto &c : rhs) {
+                rhsClasses.insert(cast_type_nonnull<ClassType>(c).symbol);
+            }
+            InlinedVector<TypePtr, 4> lhs;
+            fillInOrComponents(lhs, t1);
+            return absl::c_all_of(lhs, [&](const auto &c) {
+                return (isa_type<ClassType>(c) && rhsClasses.contains(cast_type_nonnull<ClassType>(c).symbol)) ||
+                       Types::isSubTypeUnderConstraint(gs, constr, c, t2, mode, errorDetailsCollector);
+            });
+        }
     }
 
     // pairs to cover: 1  (_, _)
