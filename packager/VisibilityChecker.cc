@@ -210,13 +210,7 @@ public:
 };
 
 class PropagateVisibility final {
-    enum class Mode {
-        SetExportBits,
-        ReportErrors,
-    };
-
     core::packages::PackageInfo &package;
-    const Mode mode;
 
     // Blames which location (export) caused a symbol to first be marked exported.
     struct ExportBlame {
@@ -445,7 +439,7 @@ class PropagateVisibility final {
         return lines;
     }
 
-    PropagateVisibility(core::packages::PackageInfo &package, Mode mode) : package{package}, mode{mode} {}
+    PropagateVisibility(core::packages::PackageInfo &package) : package{package} {}
 
 public:
     // Find uses of export and mark the symbols they mention as exported.
@@ -562,7 +556,7 @@ public:
 
         // TODO(jez) Get this to be a `core::Context` now.
         core::MutableContext ctx{gs, core::Symbols::root(), f.file};
-        PropagateVisibility pass{*package, Mode::ReportErrors};
+        PropagateVisibility pass{*package};
         ast::ConstTreeWalk::apply(ctx, pass, f.tree);
 
         auto exportAll = package->locs.exportAll;
