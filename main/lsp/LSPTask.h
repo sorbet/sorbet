@@ -83,17 +83,19 @@ public:
     // a no-op. Is only ever invoked from the preprocessor thread.
     virtual void preprocess(LSPPreprocessor &preprocessor);
 
-    // Some tasks, like edits, need to interface with the indexer. Is only ever invoked from the processing
-    // thread, and is guaranteed to be invoked exactly once. The default implementation is a no-op.
-    // May be run from the processing thread (normally) or the typechecking thread (if preempting).
+    // Normally called on the processing thread; during preemption, called on the typechecker thread. If the task
+    // defers preemption because the slow path has not made it to the edit stratum (see `preemptionStratum`), the
+    // index() method may be called again on the same task; tasks that can be deferred must make repeated calls safe.
+    // The default implementation is a no-op.
     virtual void index(LSPIndexer &indexer);
 
     // Runs the task. Is only ever invoked from the typechecker thread. Since it is exceedingly rare for a request to
     // not need to interface with the typechecker, this method must be implemented by all subclasses.
     virtual void run(LSPTypecheckerDelegate &typechecker) = 0;
 
-    // The stratum that this task is runnable at, if running from the preemption scheduler. By default this returns the
-    // last stratum, which is a conservatively correct choice for any task that supports preemption.
+    // The stratum that this task is runnable at, if running from the preemption scheduler. By default this returns
+    // the last stratum, which is a conservatively correct choice for any task that supports preemption. This method is
+    // always run after the indexer.
     virtual core::packages::Stratum preemptionStratum(FileStratumMapping info) const;
 };
 
