@@ -66,8 +66,7 @@ enum class Namespace {
 class ExportBits final {
     const core::packages::PackageInfo &package;
 
-    void recursiveSetIsExported(core::GlobalState &gs, bool setExportedTo,
-                                core::SymbolRef sym) {
+    void recursiveSetIsExported(core::GlobalState &gs, bool setExportedTo, core::SymbolRef sym) {
         // Stop recursing at package boundary
         if (this->package.mangledName() != sym.enclosingClass(gs).data(gs)->package) {
             return;
@@ -76,7 +75,7 @@ class ExportBits final {
         switch (sym.kind()) {
             case core::SymbolRef::Kind::ClassOrModule: {
                 auto klassData = sym.asClassOrModuleRef().data(gs);
-                    klassData->flags.isExported = setExportedTo;
+                klassData->flags.isExported = setExportedTo;
 
                 for (const auto &[name, child] : klassData->members()) {
                     if (name == core::Names::attached()) {
@@ -95,7 +94,7 @@ class ExportBits final {
                     break;
                 }
 
-                    fieldData->flags.isExported = setExportedTo;
+                fieldData->flags.isExported = setExportedTo;
                 break;
             }
 
@@ -157,11 +156,11 @@ class ExportBits final {
 
     void applyExport(core::GlobalState &gs, core::SymbolRef sym) {
         auto setExportedTo = true;
-            recursiveSetIsExported(gs, setExportedTo, sym);
+        recursiveSetIsExported(gs, setExportedTo, sym);
 
-            // When exporting a symbol, we also export its parent namespace. This is a bit of a hack, and it would
-            // be great to remove this, but this was the behavior of the previous packager implementation.
-            exportParentNamespace(gs, sym.owner(gs).asClassOrModuleRef());
+        // When exporting a symbol, we also export its parent namespace. This is a bit of a hack, and it would
+        // be great to remove this, but this was the behavior of the previous packager implementation.
+        exportParentNamespace(gs, sym.owner(gs).asClassOrModuleRef());
     }
 
     ExportBits(const core::packages::PackageInfo &package) : package{package} {}
@@ -267,9 +266,8 @@ class ExportErrors final {
         }
     }
 
-    void recursiveCheckDuplicateExports(core::MutableContext ctx,
-                                        core::SymbolRef currentExportLineSym, core::LocOffsets currentExportLineLoc,
-                                        core::SymbolRef sym) {
+    void recursiveCheckDuplicateExports(core::MutableContext ctx, core::SymbolRef currentExportLineSym,
+                                        core::LocOffsets currentExportLineLoc, core::SymbolRef sym) {
         // Stop recursing at package boundary
         if (this->package.mangledName() != sym.enclosingClass(ctx).data(ctx)->package) {
             return;
@@ -279,7 +277,7 @@ class ExportErrors final {
             case core::SymbolRef::Kind::ClassOrModule: {
                 auto klassData = sym.asClassOrModuleRef().data(ctx);
 
-                    checkDuplicateExport(ctx, currentExportLineSym, currentExportLineLoc, sym);
+                checkDuplicateExport(ctx, currentExportLineSym, currentExportLineLoc, sym);
 
                 // This `members` call does not have a stable order--we recover a determinstic order
                 // by sorting duplicate errors at the end of ExportErrors
@@ -289,8 +287,7 @@ class ExportErrors final {
                         continue;
                     }
 
-                    recursiveCheckDuplicateExports(ctx, currentExportLineSym, currentExportLineLoc,
-                                                   child);
+                    recursiveCheckDuplicateExports(ctx, currentExportLineSym, currentExportLineLoc, child);
                 }
                 break;
             }
@@ -301,7 +298,7 @@ class ExportErrors final {
                     break;
                 }
 
-                    checkDuplicateExport(ctx, currentExportLineSym, currentExportLineLoc, sym);
+                checkDuplicateExport(ctx, currentExportLineSym, currentExportLineLoc, sym);
                 break;
             }
 
