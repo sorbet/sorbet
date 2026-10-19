@@ -60,6 +60,8 @@ enum class Namespace {
 };
 
 class ExportBits final {
+    core::packages::PackageInfo &package;
+
     void recursiveSetIsExported(core::MutableContext ctx, bool setExportedTo, core::SymbolRef currentExportLineSym,
                                 core::LocOffsets currentExportLineLoc, core::SymbolRef sym) {
         // Stop recursing at package boundary
@@ -164,6 +166,8 @@ class ExportBits final {
             exportParentNamespace(ctx, sym.owner(ctx).asClassOrModuleRef());
     }
 
+    ExportBits(core::packages::PackageInfo &package) : package{package} {}
+
 public:
     // Recompute the export bits of the package's symbols from its `exports_`.
     //
@@ -178,9 +182,7 @@ public:
         }
 
         core::MutableContext ctx{gs, core::Symbols::root(), package->fullLoc().file()};
-        // TODO(jez) This doesn't actually walk the tree anymore, but it still constructs
-        // PropagateVisibility because that's where all the helpers that set export bits are.
-        PropagateVisibility pass{*package, Mode::SetExportBits};
+        ExportBits pass{*package};
 
         pass.unsetAllExportedInPackage(ctx, ns);
 
@@ -839,7 +841,7 @@ void VisibilityChecker::propagateExports(core::GlobalState &gs, absl::Span<const
             auto ns = file.isPackagedTest() ? Namespace::Test : Namespace::Application;
             auto [_it, seenForFirstTime] = recomputed.emplace(pkgName, ns);
             if (seenForFirstTime) {
-                PropagateVisibility::setExportBits(gs, pkgName, ns);
+                ExportBits::setExportBits(gs, pkgName, ns);
             }
         }
     }
