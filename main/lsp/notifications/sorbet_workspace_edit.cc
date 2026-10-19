@@ -57,6 +57,10 @@ void SorbetWorkspaceEditTask::preprocess(LSPPreprocessor &preprocessor) {
 }
 
 void SorbetWorkspaceEditTask::index(LSPIndexer &indexer) {
+    if (this->updates != nullptr) {
+        return;
+    }
+
     // This is the first time that we're able to compare the files in the update set to
     // the indexer's file table. We should determine if any of the updates we've received
     // are no-ops from background notifications, and filter them out to not artificially
@@ -172,10 +176,16 @@ const SorbetWorkspaceEditParams &SorbetWorkspaceEditTask::getParams() const {
 }
 
 core::packages::Stratum SorbetWorkspaceEditTask::preemptionStratum(FileStratumMapping info) const {
-    vector<string_view> paths;
-    paths.reserve(this->params->updates.size());
-    absl::c_transform(this->params->updates, back_inserter(paths), [](auto &file) { return file->path(); });
-    return info.getStratumForPaths(paths);
+    // This case should be impossible, as we only run preemption for workspace edits that indicate that they would take
+    // the fast path, and we index before calling this method, which is where we populate the updates field. This is
+    // defensive check for release builds, as the interplay between `canPreempt` and `index` is a little tricky.
+    if (this->updates == nullptr) [[unlikely]] {
+        ENFORCE(false, "The preemption stratum can only be computed after indexing");
+        return info.getLastStratum();
+    }
+
+    return std::max(info.getStratumForFiles(this->updates->updatedFileRefs),
+                    info.getStratumForFiles(this->updates->fastPathExtraFiles));
 }
 
 } // namespace sorbet::realmain::lsp
