@@ -579,14 +579,12 @@ end
 
 > This error is specific to RBS support when using the `--enable-experimental-rbs-comments` flag.
 
-Methods annotated with `@abstract` must always raise an error:
+Methods annotated with `@abstract` must contain only a forwarding `super` call. This allows an implementation inherited from a superclass to satisfy the abstract method while still raising `NoMethodError` when no implementation exists. See [RBS support: Abstract methods](rbs-support.md#abstract-methods) for details.
 
 ```ruby
 # @abstract
 #: -> void
-def baz
-  raise "not implemented"
-end
+def baz = super
 ```
 
 ## 3559
