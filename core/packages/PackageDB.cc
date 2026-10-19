@@ -64,7 +64,8 @@ const PackageInfo *PackageDB::getPackageForSourceFile(const core::GlobalState &g
     }
 
     auto &package = getPackageInfo(packageName);
-    return package.exists() ? &package : nullptr;
+    ENFORCE(package.exists());
+    return &package;
 }
 
 MangledName PackageDB::getParentPackage(const GlobalState &gs, MangledName pkg) const {
