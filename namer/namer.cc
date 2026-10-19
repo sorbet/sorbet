@@ -897,8 +897,10 @@ private:
     vector<core::ClassOrModuleRef> &symbolsToRecompute;
     PackageMangledClasses &packageMangledClasses;
     PackageMangledStaticFields &packageMangledStaticFields;
-    const PackageInfo *package = nullptr;
-    bool isolateUnpackagedDefinitions = false;
+    const PackageInfo *const package;
+    // Isolate unpackaged definitions so they cannot populate package namespaces or modify
+    // payload symbols. Payload files are allowed to have no package, including on the LSP fast path.
+    const bool isolateUnpackagedDefinitions;
 
     // Get the symbol for an already-defined owner. Limited to refs that can own things (classes and methods).
     core::ClassOrModuleRef getOwnerSymbol(const SymbolDefiner::State &state, core::FoundDefinitionRef ref) {
@@ -2122,24 +2124,10 @@ public:
                   vector<core::ClassOrModuleRef> &symbolsToRecompute, PackageMangledClasses &packageMangledClasses,
                   PackageMangledStaticFields &packageMangledStaticFields)
         : foundDefs(foundDefs), symbolsToRecompute{symbolsToRecompute}, packageMangledClasses(packageMangledClasses),
-          packageMangledStaticFields(packageMangledStaticFields) {
-        // TODO(jez) Should this be a helper somewhere?
-        auto &file = ctx.file.data(ctx);
-        if (!ctx.state.packageDB().enabled() || file.isPackage(ctx)) {
-            return;
-        }
-
-        auto packageName = ctx.state.packageDB().getPackageNameForFile(ctx.file);
-        if (!packageName.exists()) {
-            // Isolate unpackaged definitions so they cannot populate package namespaces or modify
-            // payload symbols. Payload files are allowed to have no package, including on the LSP fast path.
-            isolateUnpackagedDefinitions = !file.isPayload();
-            return;
-        }
-
-        auto &package = ctx.state.packageDB().getPackageInfo(packageName);
-        this->package = package.exists() ? &package : nullptr;
-    }
+          packageMangledStaticFields(packageMangledStaticFields),
+          package(ctx.state.packageDB().getPackageForSourceFile(ctx.state, ctx.file)),
+          isolateUnpackagedDefinitions(ctx.state.packageDB().enabled() && !ctx.file.data(ctx).isPackage(ctx) &&
+                                       this->package == nullptr && !ctx.file.data(ctx).isPayload()) {}
 
     SymbolDefiner::State enterClassDefinitions(core::MutableContext ctx, bool willDeleteOldDefs,
                                                ClassBehaviorLocsMap &classBehaviorLocs) {

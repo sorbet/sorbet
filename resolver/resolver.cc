@@ -1711,28 +1711,17 @@ public:
             return;
         }
 
-        if (!ctx.state.packageDB().enabled()) {
-            return;
-        }
-
         if (scopeKlass == core::Symbols::root()) {
             return;
         }
 
-        // __package.rb files already require that there is only one top-level declaration, which means that this check
-        // is trivially successful.
-        if (ctx.file.data(ctx).isPackage(ctx)) {
+        // Package specs already require a single top-level declaration. Namer reports unpackaged
+        // source files and isolates their definitions, so neither needs a scope check here.
+        auto package = ctx.state.packageDB().getPackageForSourceFile(ctx.state, ctx.file);
+        if (package == nullptr) {
             return;
         }
-
-        // Namer already reports unpackaged files and isolates their definitions.
-        auto curPkgName = ctx.state.packageDB().getPackageNameForFile(ctx.file);
-        if (!curPkgName.exists()) {
-            return;
-        }
-
-        const auto &curPkg = ctx.state.packageDB().getPackageInfo(curPkgName);
-        ENFORCE(curPkg.exists());
+        const auto &curPkg = *package;
 
         switch (curPkg.canOpenScope(ctx, scopeKlass)) {
             case core::packages::PackageInfo::CanOpenScopeResult::CanOpen:
@@ -1750,7 +1739,7 @@ public:
                     e.addErrorLine(scopePkg.declLoc(), "Owning package");
                     e.addErrorLine(curPkg.declLoc(), "Referencing package");
 
-                    if (isStrictPackagePrefix(ctx, scopePkgName, curPkgName)) {
+                    if (isStrictPackagePrefix(ctx, scopePkgName, curPkg.mangledName())) {
                         e.addErrorNote("Either `import {}` in `{}`'s `__package.rb`, or change this file's top-level "
                                        "constant to match `{}`.",
                                        scopeName, curName, curName);

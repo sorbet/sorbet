@@ -725,17 +725,13 @@ public:
                     continue;
                 }
                 auto &f = filesSpan[idx];
-                if (f.file.data(gs).isPackage(gs)) {
-                    resultq->push(std::nullopt, 1);
-                    continue;
-                }
-                auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
-                if (!pkgName.exists()) {
+                auto package = gs.packageDB().getPackageForSourceFile(gs, f.file);
+                if (package == nullptr) {
                     resultq->push(std::nullopt, 1);
                     continue;
                 }
                 core::Context ctx{gs, core::Symbols::root(), f.file};
-                VisibilityCheckerPass pass{ctx, gs.packageDB().getPackageInfo(pkgName)};
+                VisibilityCheckerPass pass{ctx, *package};
                 ast::ConstTreeWalk::apply(ctx, pass, f.tree);
                 resultq->push(
                     ThreadResult{f.file, std::move(pass.referencedPackages), std::move(pass.referencedSymbols)}, 1);

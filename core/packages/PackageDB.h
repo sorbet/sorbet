@@ -40,6 +40,10 @@ public:
     // associated package for the file.
     const MangledName getPackageNameForFile(FileRef file) const;
 
+    // Returns the package for an ordinary source file, or nullptr when packages are disabled,
+    // the file is a package spec (__package.rb), or no existing package is associated with it.
+    const PackageInfo *getPackageForSourceFile(const core::GlobalState &gs, FileRef file) const;
+
     // Set the associated package for the file.
     void setPackageNameForFile(FileRef file, MangledName mangledName);
 
