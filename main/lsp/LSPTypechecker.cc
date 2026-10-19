@@ -363,6 +363,10 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
                 continue;
             }
 
+            if (!info.usesTestPackages && !file.isPackagedTest() && !file.isPackagedTestHelper()) {
+                continue;
+            }
+
             packageFiles.emplace_back(packageFref);
             if (!oldFoundHashesForFiles.contains(fref)) {
                 oldFoundHashesForFiles.emplace(fref, fref.data(*gs).getFileHash());
