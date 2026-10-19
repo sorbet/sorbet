@@ -1,3 +1,13 @@
+foo/foo.rb:14: `Project::Bar::UnexportedClass` resolves but is not exported from `Project::Bar` https://srb.help/3717
+    14 |    Project::Bar::UnexportedClass
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  `Project::Bar::UnexportedClass` does not define behavior and thus will not be automatically exported
+    bar/bar.rb:14:
+    14 |  class UnexportedClass; end
+          ^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Either export it manually, or better, restructure the code so that package namespaces do not define behavior.
+
 foo/foo.rb:13: Unable to resolve constant `BardClass` https://srb.help/5002
     13 |    Project::Bar::BardClass
             ^^^^^^^^^^^^^^^^^^^^^^^
@@ -8,14 +18,4 @@ foo/foo.rb:13: Unable to resolve constant `BardClass` https://srb.help/5002
     bar/bar.rb:6: `Project::Bar::BarClass` defined here
      6 |  class BarClass
           ^^^^^^^^^^^^^^
-
-foo/foo.rb:14: `Project::Bar::UnexportedClass` resolves but is not exported from `Project::Bar` https://srb.help/3717
-    14 |    Project::Bar::UnexportedClass
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  `Project::Bar::UnexportedClass` does not define behavior and thus will not be automatically exported
-    bar/bar.rb:14:
-    14 |  class UnexportedClass; end
-          ^^^^^^^^^^^^^^^^^^^^^
-  Note:
-    Either export it manually, or better, restructure the code so that package namespaces do not define behavior.
 Errors: 2
