@@ -180,6 +180,14 @@ public:
                     break;
                 }
 
+                {
+                    auto &task = taskQueue.tasks().front();
+                    Timer timeit(*config.logger, "LSPTask::index");
+                    timeit.setTag("method", task->methodString());
+                    // Index while holding lock to prevent races with processing thread.
+                    task->index(indexer);
+                }
+
                 // If we haven't reached a stratum that's sufficient for running this task, indicate that preemption
                 // should be rescheduled for later.
                 auto neededStratum = taskQueue.tasks().front()->preemptionStratum(delegate.getFileStratumMapping());
@@ -190,13 +198,6 @@ public:
 
                 task = move(taskQueue.tasks().front());
                 taskQueue.tasks().pop_front();
-
-                {
-                    Timer timeit(*config.logger, "LSPTask::index");
-                    timeit.setTag("method", task->methodString());
-                    // Index while holding lock to prevent races with processing thread.
-                    task->index(indexer);
-                }
             }
 
             prodCategoryCounterInc("lsp.messages.processed", task->methodString());
