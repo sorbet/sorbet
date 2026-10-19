@@ -168,6 +168,8 @@ private:
     CheckSize(Nesting, 24, 8);
 
     shared_ptr<Nesting> nesting_;
+    // True while resolving a ClassDef's mixin ancestors (everything other than a class's superclass).
+    bool inMixinAncestor_ = false;
 
     // Map of SymbolRef to first location of a symbol definition in a file. This is used for out-of-order reference
     // checking. When present in this map, the loc stored is different than a symbol's canonical loc. Specifically,
@@ -199,6 +201,10 @@ private:
         bool resolutionFailed = false;
         bool isOutermost = true;
         bool legacyTestPath = false;
+        // Whether this constant is (part of) one of a ClassDef's mixin ancestors. Namer copies the arguments of
+        // `include` and `extend` into the ClassDef's ancestors, but leaves the sends in the class body too, so resolver
+        // resolves these constants twice. Errors are only reported for the copy in the class body.
+        bool isMixinAncestor = false;
         PackageCursorPosition packageCursorPosition = PackageCursorPosition::None;
 
         ConstantResolutionItem() = default;
@@ -567,8 +573,10 @@ private:
             }
 
             if (sym.isTypeAlias(ctx) && !job.resolutionFailed) {
+                if (!job.isMixinAncestor) {
                 if (auto e = ctx.beginError(c.loc, core::errors::Resolver::ConstantInTypeAlias)) {
                     e.setHeader("Resolving constants through type aliases is not supported");
+                }
                 }
                 job.resolutionFailed = true;
                 return core::Symbols::noSymbol();
@@ -585,7 +593,7 @@ private:
             if (result.exists() &&
                 ((result.isClassOrModule() && result.asClassOrModuleRef().data(ctx)->flags.isPrivate) ||
                  (result.isStaticField(ctx) && result.asFieldRef().data(ctx)->flags.isStaticFieldPrivate)) &&
-                !ctx.file.data(ctx).isRBI()) {
+                !ctx.file.data(ctx).isRBI() && !job.isMixinAncestor) {
                 if (auto e = ctx.beginError(c.loc, core::errors::Resolver::PrivateConstantReferenced)) {
                     e.setHeader("Non-private reference to private constant `{}` referenced", result.show(ctx));
                 }
@@ -594,7 +602,7 @@ private:
             return enforcePackageBoundary(ctx, job, result);
         }
 
-        if (!job.resolutionFailed) {
+        if (!job.resolutionFailed && !job.isMixinAncestor) {
             if (auto e = ctx.beginError(c.loc, core::errors::Resolver::DynamicConstant)) {
                 e.setHeader("Dynamic constant references are unsupported");
             }
@@ -832,6 +840,10 @@ private:
         auto packageAction = packageResolutionAction(ctx, job, alreadyReported);
         switch (packageAction) {
             case PackageResolutionAction::ReportPackageError: {
+                if (job.isMixinAncestor) {
+                    // The copy of this constant in the class body reports the error, and tracks the reference.
+                    return;
+                }
                 auto cursorPackage = core::packages::MangledName(job.packageRegistryCursor);
                 auto currentPackage = gs.packageDB().getPackageNameForFile(file);
                 auto currentPackageInfo = gs.packageDB().getPackageInfoNonConst(currentPackage);
@@ -848,7 +860,7 @@ private:
                 break;
         }
 
-        if (constantNameMissing || alreadyReported) {
+        if (constantNameMissing || alreadyReported || job.isMixinAncestor) {
             return;
         }
         if (isImport && gs.packageDB().genPackagesMode() != core::packages::GenPackagesMode::Disabled) {
@@ -1494,7 +1506,10 @@ private:
             if (isSuperclass) {
                 nesting_ = nesting_->parent;
             }
+            auto inMixinAncestorTmp = this->inMixinAncestor_;
+            this->inMixinAncestor_ = !isSuperclass;
             postTransformUnresolvedConstantLit(ctx, ancestor);
+            this->inMixinAncestor_ = inMixinAncestorTmp;
             nesting_ = scopeTmp;
         }
         AncestorResolutionItem job;
@@ -1623,6 +1638,7 @@ private:
             ConstantResolutionItem job{
                 nesting_, constant, cursor.cursor, isOutermost, cursor.legacyTestPath, cursor.position,
             };
+            job.isMixinAncestor = this->inMixinAncestor_;
             auto resolved = resolveConstantJob(ctx, job);
             if (scopeWasEmpty && constant->original()->cnst == core::packages::PackageDB::TEST_NAMESPACE &&
                 shouldCheckPackage(ctx)) {
@@ -1646,7 +1662,9 @@ private:
                     // intermediate namespaces, so they would always be defined at the right time. As Stripe's
                     // codebase moves away from this legacy autoloader, it will be easier to introduce such
                     // changes into Sorbet.)
+                    if (!job.isMixinAncestor) {
                     checkReferenceOrder(ctx, constant->symbol(), *c, firstDefinitionLocs);
+                    }
                 }
             } else {
                 todo_.emplace_back(std::move(job));

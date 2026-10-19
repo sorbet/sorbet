@@ -8,7 +8,6 @@ end
 class ::Outside # error: Defining a root-scoped constant requires this package to be marked `prelude!`
   extend Consumer::Missing
 #        ^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `Missing`
-#        ^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `Missing`
 
   extend Consumer::Known
 end

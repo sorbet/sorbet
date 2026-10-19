@@ -30,9 +30,7 @@ end
 RSpec.describe 'two-level consumer that skips the outer' do
   include_context 'middle bare context'
   #               ^^^^^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `<shared_examples 'middle bare context'>`
-  #               ^^^^^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `<shared_examples 'middle bare context'>`
   include_examples 'inner bare examples'
-  #                ^^^^^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `<shared_examples 'inner bare examples'>`
   #                ^^^^^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `<shared_examples 'inner bare examples'>`
 end
 
@@ -53,7 +51,6 @@ end
 
 RSpec.describe 'consumer using it_behaves_like without including the outer' do
   it_behaves_like 'bare nested for it_behaves_like'
-  #               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `<shared_examples 'bare nested for it_behaves_like'>`
   #               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `<shared_examples 'bare nested for it_behaves_like'>`
 end
 
@@ -135,7 +132,6 @@ end
 RSpec.describe 'consumer skipping the transitive chain' do
   include_examples 'bare nested in transitive A'
   #                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `<shared_examples 'bare nested in transitive A'>`
-  #                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `<shared_examples 'bare nested in transitive A'>`
 end
 
 # Bare shared_examples with block params nested in a parameterized outer.
@@ -159,6 +155,5 @@ end
 
 RSpec.describe 'consumer that skips the outer for parameterized inner' do
   include_examples 'inner with params'
-  #                ^^^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `<shared_examples 'inner with params'>`
   #                ^^^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `<shared_examples 'inner with params'>`
 end

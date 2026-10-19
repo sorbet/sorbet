@@ -6,5 +6,5 @@
 class Parent::MyClass # error: Tests in the `Parent` package must define tests in the `Test::Parent` namespace
   include Parent::TestMixin
 #         ^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `TestMixin`
-#         ^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `TestMixin`
+
 end
