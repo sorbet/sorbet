@@ -137,11 +137,7 @@ class PropagateVisibility final {
             case core::SymbolRef::Kind::ClassOrModule: {
                 auto klassData = sym.asClassOrModuleRef().data(ctx);
 
-                if (mode == Mode::ReportErrors) {
-                    checkDuplicateExport(ctx, currentExportLineSym, currentExportLineLoc, sym);
-                } else {
                     klassData->flags.isExported = setExportedTo;
-                }
 
                 // This `members` call does not have a stable order--we recover a determinstic order
                 // by sorting duplicate errors at the end of PropagateVisibility
@@ -162,11 +158,7 @@ class PropagateVisibility final {
                     break;
                 }
 
-                if (mode == Mode::ReportErrors) {
-                    checkDuplicateExport(ctx, currentExportLineSym, currentExportLineLoc, sym);
-                } else {
                     fieldData->flags.isExported = setExportedTo;
-                }
                 break;
             }
 
@@ -189,11 +181,7 @@ class PropagateVisibility final {
             case core::SymbolRef::Kind::ClassOrModule: {
                 auto klassData = sym.asClassOrModuleRef().data(ctx);
 
-                if (mode == Mode::ReportErrors) {
                     checkDuplicateExport(ctx, currentExportLineSym, currentExportLineLoc, sym);
-                } else {
-                    klassData->flags.isExported = setExportedTo;
-                }
 
                 // This `members` call does not have a stable order--we recover a determinstic order
                 // by sorting duplicate errors at the end of PropagateVisibility
@@ -215,11 +203,7 @@ class PropagateVisibility final {
                     break;
                 }
 
-                if (mode == Mode::ReportErrors) {
                     checkDuplicateExport(ctx, currentExportLineSym, currentExportLineLoc, sym);
-                } else {
-                    fieldData->flags.isExported = setExportedTo;
-                }
                 break;
             }
 
@@ -280,9 +264,6 @@ class PropagateVisibility final {
         if (ns == Namespace::Test && testScope.exists()) {
             recursiveSetIsExported(ctx, setExportedTo, testScope, currentExportLineLoc, testScope);
         }
-
-        // Shouldn't have been touched, because currentExportLineLoc was none, but let's just clear it to be safe.
-        explicitlyExported.clear();
     }
 
     bool ignoreRBIExportEnforcement(const core::GlobalState &gs, core::FileRef file) {
@@ -411,17 +392,11 @@ class PropagateVisibility final {
 
     void applyExport(core::MutableContext ctx, core::SymbolRef sym, core::LocOffsets loc) {
         auto setExportedTo = true;
-        if (mode == Mode::ReportErrors) {
-            recursiveCheckDuplicateExports(ctx, setExportedTo, sym, loc, sym);
-        } else {
             recursiveSetIsExported(ctx, setExportedTo, sym, loc, sym);
-        }
 
-        if (mode == Mode::SetExportBits) {
             // When exporting a symbol, we also export its parent namespace. This is a bit of a hack, and it would
             // be great to remove this, but this was the behavior of the previous packager implementation.
             exportParentNamespace(ctx, sym.owner(ctx).asClassOrModuleRef());
-        }
     }
 
     PropagateVisibility(core::packages::PackageInfo &package, Mode mode) : package{package}, mode{mode} {}
