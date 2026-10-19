@@ -173,9 +173,17 @@ const SorbetWorkspaceEditParams &SorbetWorkspaceEditTask::getParams() const {
 
 core::packages::Stratum SorbetWorkspaceEditTask::preemptionStratum(FileStratumMapping info) const {
     vector<string_view> paths;
-    paths.reserve(this->params->updates.size());
+    paths.reserve(this->params->updates.size() + this->updates->fastPathExtraFiles.size());
     absl::c_transform(this->params->updates, back_inserter(paths), [](auto &file) { return file->path(); });
-    return info.getStratumForPaths(paths);
+
+    auto stratum = info.getStratumForPaths(paths);
+    if (this->updates && !this->updates->fastPathExtraFiles.empty()) {
+        // NOTE: file refs are kept in sync between the indexer and typechecker global states, so if
+        // `fastPathExtraFiles` is populated, they match.
+        stratum = std::max(stratum, info.getStratumForFiles(this->updates->fastPathExtraFiles));
+    }
+
+    return stratum;
 }
 
 } // namespace sorbet::realmain::lsp
