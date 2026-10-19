@@ -177,6 +177,59 @@ class PropagateVisibility final {
         }
     }
 
+    void recursiveCheckDuplicateExports(core::MutableContext ctx, bool setExportedTo,
+                                        core::SymbolRef currentExportLineSym, core::LocOffsets currentExportLineLoc,
+                                        core::SymbolRef sym) {
+        // Stop recursing at package boundary
+        if (this->package.mangledName() != sym.enclosingClass(ctx).data(ctx)->package) {
+            return;
+        }
+
+        switch (sym.kind()) {
+            case core::SymbolRef::Kind::ClassOrModule: {
+                auto klassData = sym.asClassOrModuleRef().data(ctx);
+
+                if (mode == Mode::ReportErrors) {
+                    checkDuplicateExport(ctx, currentExportLineSym, currentExportLineLoc, sym);
+                } else {
+                    klassData->flags.isExported = setExportedTo;
+                }
+
+                // This `members` call does not have a stable order--we recover a determinstic order
+                // by sorting duplicate errors at the end of PropagateVisibility
+                for (const auto &[name, child] : klassData->members()) {
+                    if (name == core::Names::attached()) {
+                        // There is a cycle between a class and its singleton, and this avoids infinite recursion.
+                        continue;
+                    }
+
+                    recursiveCheckDuplicateExports(ctx, setExportedTo, currentExportLineSym, currentExportLineLoc,
+                                                   child);
+                }
+                break;
+            }
+
+            case core::SymbolRef::Kind::FieldOrStaticField: {
+                auto fieldData = sym.asFieldRef().data(ctx);
+                if (!fieldData->flags.isStaticField) {
+                    break;
+                }
+
+                if (mode == Mode::ReportErrors) {
+                    checkDuplicateExport(ctx, currentExportLineSym, currentExportLineLoc, sym);
+                } else {
+                    fieldData->flags.isExported = setExportedTo;
+                }
+                break;
+            }
+
+            case core::SymbolRef::Kind::TypeMember:
+            case core::SymbolRef::Kind::Method:
+            case core::SymbolRef::Kind::TypeParameter:
+                break;
+        }
+    }
+
     void exportParentNamespace(core::GlobalState &gs, core::ClassOrModuleRef owner) {
         // Implicitly export parent namespace (symbol owner) until we hit the root of the package.
         // NOTE that we make an exception for namespaces that define behavior: these CANNOT get exported implicitly,
@@ -358,7 +411,11 @@ class PropagateVisibility final {
 
     void applyExport(core::MutableContext ctx, core::SymbolRef sym, core::LocOffsets loc) {
         auto setExportedTo = true;
-        recursiveSetIsExported(ctx, setExportedTo, sym, loc, sym);
+        if (mode == Mode::ReportErrors) {
+            recursiveCheckDuplicateExports(ctx, setExportedTo, sym, loc, sym);
+        } else {
+            recursiveSetIsExported(ctx, setExportedTo, sym, loc, sym);
+        }
 
         if (mode == Mode::SetExportBits) {
             // When exporting a symbol, we also export its parent namespace. This is a bit of a hack, and it would
