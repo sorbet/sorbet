@@ -898,6 +898,8 @@ private:
     PackageMangledClasses &packageMangledClasses;
     PackageMangledStaticFields &packageMangledStaticFields;
     const PackageInfo *const package;
+    // Isolate unpackaged definitions so they cannot populate package namespaces or modify
+    // payload symbols. Payload files are allowed to have no package, including on the LSP fast path.
     const bool isolateUnpackagedDefinitions;
 
     // Get the symbol for an already-defined owner. Limited to refs that can own things (classes and methods).
@@ -2124,8 +2126,6 @@ public:
         : foundDefs(foundDefs), symbolsToRecompute{symbolsToRecompute}, packageMangledClasses(packageMangledClasses),
           packageMangledStaticFields(packageMangledStaticFields),
           package(ctx.state.packageDB().getPackageForSourceFile(ctx.state, ctx.file)),
-          // Isolate unpackaged definitions so they cannot populate package namespaces or modify
-          // payload symbols. Payload files are allowed to have no package, including on the LSP fast path.
           isolateUnpackagedDefinitions(ctx.state.packageDB().enabled() && !ctx.file.data(ctx).isPackage(ctx) &&
                                        this->package == nullptr && !ctx.file.data(ctx).isPayload()) {}
 
