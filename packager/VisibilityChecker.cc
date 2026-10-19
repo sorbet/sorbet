@@ -496,13 +496,13 @@ public:
                 }
 
                 checkExportPackage(ctx, send.loc, sym);
-                applyExport(ctx, sym, send.loc);
+                recursiveCheckDuplicateExports(ctx, true, sym, send.loc, sym);
                 return;
             }
 
             case core::SymbolRef::Kind::FieldOrStaticField: {
                 checkExportPackage(ctx, send.loc, sym);
-                applyExport(ctx, sym, send.loc);
+                recursiveCheckDuplicateExports(ctx, true, sym, send.loc, sym);
                 return;
             }
 
