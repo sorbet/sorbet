@@ -1,5 +1,6 @@
 #include "doctest/doctest.h"
 // ^ Violates linting rules, so include first.
+#include "absl/algorithm/container.h"
 #include "absl/strings/match.h"
 #include "common/common.h"
 #include "common/sort/sort.h"
@@ -1998,6 +1999,110 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedPreemptionAfterSlow
         REQUIRE(diag->isNotification());
         REQUIRE_EQ(diag->asNotification().method, LSPMethod::SorbetTypecheckRunInfo);
         auto &runInfo = get<unique_ptr<SorbetTypecheckRunInfo>>(diag->asNotification().params);
+        CHECK_EQ(runInfo->typecheckingPath, TypecheckingPath::Slow);
+        CHECK_EQ(runInfo->status, SorbetTypecheckRunStatus::Ended);
+    }
+}
+
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedPreemptionWaitsForExtraFastPathFiles") {
+    vector<pair<string, string>> files = {
+        {"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A"}).build()},
+        {"a.rb", "# typed: true\n"
+                 "module Root\n"
+                 "  class A\n"
+                 "    extend T::Sig\n"
+                 "    sig {returns(String)}\n"
+                 "    def value\n"
+                 "      \"old\"\n"
+                 "    end\n"
+                 "  end\n"
+                 "end\n"},
+        {"b.rb", "# typed: true\n"
+                 "module Root\n"
+                 "  class B\n"
+                 "  end\n"
+                 "end\n"},
+        {"foo/__package.rb", PackageTextBuilder().withName("Root::Foo").withImports({"Root"}).build()},
+        {"foo/a.rb", "# typed: true\n"
+                     "module Root::Foo\n"
+                     "  class Consumer\n"
+                     "    def value\n"
+                     "      Root::A.new.value\n"
+                     "    end\n"
+                     "  end\n"
+                     "end\n"},
+    };
+    initializePackagedWorkspace(true, files);
+    assertErrorDiagnostics(send(*openFile("a.rb", files[1].second)), {});
+    assertErrorDiagnostics(send(*openFile("b.rb", files[2].second)), {});
+
+    setSlowPathBlocked(true);
+    sendAsync(*changeFile("b.rb",
+                          "# typed: true\n"
+                          "module Root\n"
+                          "  class B\n"
+                          "    class Inner\n"
+                          "      def bar\n"
+                          "        Root::A.n\n"
+                          "      end\n"
+                          "    end\n"
+                          "  end\n"
+                          "end\n",
+                          2, /* cancellationExpected */ false, /* preemptionsExpected */ 1));
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // Changing the return type changes A#value's hash. The incremental fast path must also retypecheck the file
+    // that calls it in Root::Foo, so preemption must wait for that later stratum.
+    sendAsync(*changeFile("a.rb",
+                          "# typed: true\n"
+                          "module Root\n"
+                          "  class A\n"
+                          "    extend T::Sig\n"
+                          "    sig {returns(Integer)}\n"
+                          "    def value\n"
+                          "      1\n"
+                          "    end\n"
+                          "  end\n"
+                          "end\n",
+                          2));
+    setSlowPathBlocked(false);
+
+    // The Root stratum reports its error before the fast path starts in the Root::Foo stratum.
+    {
+        auto diag = readAsync();
+        REQUIRE(diag->isNotification());
+        REQUIRE_EQ(diag->asNotification().method, LSPMethod::TextDocumentPublishDiagnostics);
+        auto params = getPublishDiagnosticParams(diag->asNotification());
+        REQUIRE(params.has_value());
+        CHECK_EQ((*params)->uri, getUri("b.rb"));
+    }
+    {
+        auto msg = readAsync();
+        REQUIRE(msg->isNotification());
+        REQUIRE_EQ(msg->asNotification().method, LSPMethod::SorbetTypecheckRunInfo);
+        auto &runInfo = get<unique_ptr<SorbetTypecheckRunInfo>>(msg->asNotification().params);
+        CHECK_EQ(runInfo->typecheckingPath, TypecheckingPath::Fast);
+        CHECK_EQ(runInfo->status, SorbetTypecheckRunStatus::Started);
+    }
+    {
+        auto msg = readAsync();
+        REQUIRE(msg->isNotification());
+        REQUIRE_EQ(msg->asNotification().method, LSPMethod::SorbetTypecheckRunInfo);
+        auto &runInfo = get<unique_ptr<SorbetTypecheckRunInfo>>(msg->asNotification().params);
+        CHECK_EQ(runInfo->typecheckingPath, TypecheckingPath::Fast);
+        CHECK_EQ(runInfo->status, SorbetTypecheckRunStatus::Ended);
+        CHECK(absl::c_linear_search(runInfo->filesTypechecked, fmt::format("{}/a.rb", rootPath)));
+        CHECK(absl::c_linear_search(runInfo->filesTypechecked, fmt::format("{}/foo/a.rb", rootPath)));
+    }
+    {
+        auto msg = readAsync();
+        REQUIRE(msg->isNotification());
+        REQUIRE_EQ(msg->asNotification().method, LSPMethod::SorbetTypecheckRunInfo);
+        auto &runInfo = get<unique_ptr<SorbetTypecheckRunInfo>>(msg->asNotification().params);
         CHECK_EQ(runInfo->typecheckingPath, TypecheckingPath::Slow);
         CHECK_EQ(runInfo->status, SorbetTypecheckRunStatus::Ended);
     }
