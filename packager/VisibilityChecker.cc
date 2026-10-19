@@ -590,20 +590,6 @@ public:
 };
 
 class VisibilityCheckerPass final {
-    void addExportInfo(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef litSymbol, bool definesBehavior) {
-        auto definedHereLoc = litSymbol.loc(ctx);
-        if (definesBehavior) {
-            e.addErrorLine(definedHereLoc, "Defined here");
-        } else {
-            e.addErrorSection(core::ErrorSection(
-                core::ErrorColors::format("`{}` does not define behavior and thus will not be automatically exported",
-                                          litSymbol.show(ctx)),
-                {core::ErrorLine(definedHereLoc, "")}));
-            e.addErrorNote("Either export it manually, or better, "
-                           "restructure the code so that package namespaces do not define behavior.");
-        }
-    }
-
 public:
     const core::packages::PackageInfo &package;
     UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo> referencedPackages;
@@ -666,55 +652,7 @@ public:
             return;
         }
 
-        auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-        bool isExported = pkg.locs.exportAll.exists();
-        if (litSymbol.isClassOrModule()) {
-            isExported = isExported || litSymbol.asClassOrModuleRef().data(ctx)->flags.isExported;
-        } else if (litSymbol.isFieldOrStaticField()) {
-            isExported = isExported || litSymbol.asFieldRef().data(ctx)->flags.isExported;
-        }
-        isExported = isExported || db.allowRelaxedPackagerChecksFor(this->package.mangledName());
-        if (this->package.usesTestPackages && !isExported) {
-            auto *import = this->package.importsPackage(otherPackage);
-            ENFORCE(import != nullptr, "If it wasn't imported, we should not be dealing with exports");
-            isExported = isExported || import->usesInternals;
-        }
-
-        if (!isExported) {
-            if (db.genPackagesMode() != core::packages::GenPackagesMode::Disabled) {
-                return;
-            }
-
-            bool definesBehavior =
-                !litSymbol.isClassOrModule() || litSymbol.asClassOrModuleRef().data(ctx)->flags.isBehaviorDefining;
-            std::optional<core::AutocorrectSuggestion> exportAutocorrect;
-            if (definesBehavior) {
-                auto symToExport = litSymbol;
-                auto enumClass = core::packages::PackageDB::getEnumClassForEnumValue(ctx.state, symToExport);
-                if (enumClass.exists()) {
-                    symToExport = enumClass;
-                }
-                // For compatibility with gen-packages, we do _not_ add an export if it doesn't define
-                // behavior. This is mostly because it's easier to get Sorbet to behave like gen-packages
-                // than the other way around.
-                //
-                // If we move to a world where all __package.rb edits are done via Sorbet autocorrects,
-                // we could make this addExport call unconditional.
-                if (auto exp = pkg.addExport(ctx, symToExport)) {
-                    exportAutocorrect.emplace(exp.value());
-                }
-            }
-            if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedPackagePrivateName)) {
-                e.setHeader("`{}` resolves but is not exported from `{}`", litSymbol.show(ctx), pkg.show(ctx));
-                addExportInfo(ctx, e, litSymbol, definesBehavior);
-
-                auto hasAutocorrect = exportAutocorrect.has_value();
-                e.maybeAddAutocorrect(move(exportAutocorrect));
-                if (hasAutocorrect && !db.errorHint().empty()) {
-                    e.addErrorNote("{}", db.errorHint());
-                }
-            }
-        }
+        this->package.checkReferenceAgainstExports(ctx, lit.loc(), litSymbol, otherPackage);
     }
 
     void preTransformClassDef(core::Context ctx, const ast::ClassDef &original) {
