@@ -897,8 +897,8 @@ private:
     vector<core::ClassOrModuleRef> &symbolsToRecompute;
     PackageMangledClasses &packageMangledClasses;
     PackageMangledStaticFields &packageMangledStaticFields;
-    const PackageInfo *package = nullptr;
-    bool isolateUnpackagedDefinitions = false;
+    const PackageInfo *const package;
+    const bool isolateUnpackagedDefinitions;
 
     // Get the symbol for an already-defined owner. Limited to refs that can own things (classes and methods).
     core::ClassOrModuleRef getOwnerSymbol(const SymbolDefiner::State &state, core::FoundDefinitionRef ref) {
@@ -2118,28 +2118,30 @@ public:
         }
     }
 
-    SymbolDefiner(core::Context ctx, const core::FoundDefinitions &foundDefs,
-                  vector<core::ClassOrModuleRef> &symbolsToRecompute, PackageMangledClasses &packageMangledClasses,
-                  PackageMangledStaticFields &packageMangledStaticFields)
-        : foundDefs(foundDefs), symbolsToRecompute{symbolsToRecompute}, packageMangledClasses(packageMangledClasses),
-          packageMangledStaticFields(packageMangledStaticFields) {
-        // TODO(jez) Should this be a helper somewhere?
+    static const PackageInfo *getPackageForFile(core::Context ctx) {
         auto &file = ctx.file.data(ctx);
         if (!ctx.state.packageDB().enabled() || file.isPackage(ctx)) {
-            return;
+            return nullptr;
         }
 
         auto packageName = ctx.state.packageDB().getPackageNameForFile(ctx.file);
         if (!packageName.exists()) {
-            // Isolate unpackaged definitions so they cannot populate package namespaces or modify
-            // payload symbols. Payload files are allowed to have no package, including on the LSP fast path.
-            isolateUnpackagedDefinitions = !file.isPayload();
-            return;
+            return nullptr;
         }
 
         auto &package = ctx.state.packageDB().getPackageInfo(packageName);
-        this->package = package.exists() ? &package : nullptr;
+        return package.exists() ? &package : nullptr;
     }
+
+    SymbolDefiner(core::Context ctx, const core::FoundDefinitions &foundDefs,
+                  vector<core::ClassOrModuleRef> &symbolsToRecompute, PackageMangledClasses &packageMangledClasses,
+                  PackageMangledStaticFields &packageMangledStaticFields)
+        : foundDefs(foundDefs), symbolsToRecompute{symbolsToRecompute}, packageMangledClasses(packageMangledClasses),
+          packageMangledStaticFields(packageMangledStaticFields), package(getPackageForFile(ctx)),
+          // Isolate unpackaged definitions so they cannot populate package namespaces or modify
+          // payload symbols. Payload files are allowed to have no package, including on the LSP fast path.
+          isolateUnpackagedDefinitions(ctx.state.packageDB().enabled() && !ctx.file.data(ctx).isPackage(ctx) &&
+                                       this->package == nullptr && !ctx.file.data(ctx).isPayload()) {}
 
     SymbolDefiner::State enterClassDefinitions(core::MutableContext ctx, bool willDeleteOldDefs,
                                                ClassBehaviorLocsMap &classBehaviorLocs) {
