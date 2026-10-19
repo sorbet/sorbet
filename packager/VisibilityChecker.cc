@@ -60,18 +60,18 @@ enum class Namespace {
 };
 
 class ExportBits final {
-    core::packages::PackageInfo &package;
+    const core::packages::PackageInfo &package;
 
-    void recursiveSetIsExported(core::MutableContext ctx, bool setExportedTo, core::SymbolRef currentExportLineSym,
-                                core::LocOffsets currentExportLineLoc, core::SymbolRef sym) {
+    void recursiveSetIsExported(core::GlobalState &gs, bool setExportedTo,
+                                core::SymbolRef sym) {
         // Stop recursing at package boundary
-        if (this->package.mangledName() != sym.enclosingClass(ctx).data(ctx)->package) {
+        if (this->package.mangledName() != sym.enclosingClass(gs).data(gs)->package) {
             return;
         }
 
         switch (sym.kind()) {
             case core::SymbolRef::Kind::ClassOrModule: {
-                auto klassData = sym.asClassOrModuleRef().data(ctx);
+                auto klassData = sym.asClassOrModuleRef().data(gs);
 
                     klassData->flags.isExported = setExportedTo;
 
@@ -83,13 +83,13 @@ class ExportBits final {
                         continue;
                     }
 
-                    recursiveSetIsExported(ctx, setExportedTo, currentExportLineSym, currentExportLineLoc, child);
+                    recursiveSetIsExported(gs, setExportedTo, child);
                 }
                 break;
             }
 
             case core::SymbolRef::Kind::FieldOrStaticField: {
-                auto fieldData = sym.asFieldRef().data(ctx);
+                auto fieldData = sym.asFieldRef().data(gs);
                 if (!fieldData->flags.isStaticField) {
                     break;
                 }
@@ -142,31 +142,28 @@ class ExportBits final {
         return {nonTestScope, testScope};
     }
 
-    void unsetAllExportedInPackage(core::MutableContext ctx, Namespace ns) {
-        auto [nonTestScope, testScope] = getScopesForPackage(ctx);
+    void unsetAllExportedInPackage(core::GlobalState &gs, Namespace ns) {
+        auto [nonTestScope, testScope] = getScopesForPackage(gs);
 
         auto setExportedTo = false;
-
-        // loc is never used in `recursiveSetIsExported` if `setExportedTo` is false, so just say "none"
-        auto currentExportLineLoc = core::LocOffsets::none();
         if (ns == Namespace::Application && nonTestScope.exists()) {
-            recursiveSetIsExported(ctx, setExportedTo, nonTestScope, currentExportLineLoc, nonTestScope);
+            recursiveSetIsExported(gs, setExportedTo, nonTestScope);
         }
         if (ns == Namespace::Test && testScope.exists()) {
-            recursiveSetIsExported(ctx, setExportedTo, testScope, currentExportLineLoc, testScope);
+            recursiveSetIsExported(gs, setExportedTo, testScope);
         }
     }
 
-    void applyExport(core::MutableContext ctx, core::SymbolRef sym, core::LocOffsets loc) {
+    void applyExport(core::GlobalState &gs, core::SymbolRef sym) {
         auto setExportedTo = true;
-            recursiveSetIsExported(ctx, setExportedTo, sym, loc, sym);
+            recursiveSetIsExported(gs, setExportedTo, sym);
 
             // When exporting a symbol, we also export its parent namespace. This is a bit of a hack, and it would
             // be great to remove this, but this was the behavior of the previous packager implementation.
-            exportParentNamespace(ctx, sym.owner(ctx).asClassOrModuleRef());
+            exportParentNamespace(gs, sym.owner(gs).asClassOrModuleRef());
     }
 
-    ExportBits(core::packages::PackageInfo &package) : package{package} {}
+    ExportBits(const core::packages::PackageInfo &package) : package{package} {}
 
 public:
     // Recompute the export bits of the package's symbols from its `exports_`.
@@ -174,23 +171,22 @@ public:
     // This reports no errors: `reportErrors` reports them, from the package's resolved `__package.rb`
     // (which might not happen until the test SCC for this package runs).
     static void setExportBits(core::GlobalState &gs, core::packages::MangledName name, Namespace ns) {
-        auto package = gs.packageDB().getPackageInfoNonConst(name);
-        ENFORCE(package != nullptr);
-        if (package->usesTestPackages) {
+        auto &package = gs.packageDB().getPackageInfo(name);
+        ENFORCE(package.exists());
+        if (package.usesTestPackages) {
             // A `test!` package is a separate package, so each package has only one namespace.
             ns = Namespace::Application;
         }
 
-        core::MutableContext ctx{gs, core::Symbols::root(), package->fullLoc().file()};
-        ExportBits pass{*package};
+        ExportBits pass{package};
 
-        pass.unsetAllExportedInPackage(ctx, ns);
+        pass.unsetAllExportedInPackage(gs, ns);
 
-        for (const auto &exp : package->exports_) {
+        for (const auto &exp : package.exports_) {
             // Exports can't go through class aliases, so an export of a `Test::` constant only exports symbols in
             // the `Test::` namespace, and vice versa.
             auto isTestExport =
-                !package->usesTestPackages && exp.reversedPath.back() == core::packages::PackageDB::TEST_NAMESPACE;
+                !package.usesTestPackages && exp.reversedPath.back() == core::packages::PackageDB::TEST_NAMESPACE;
             if (isTestExport != (ns == Namespace::Test)) {
                 continue;
             }
@@ -203,7 +199,7 @@ public:
             }
 
             if (sym.exists() && (sym.isClassOrModule() || sym.isStaticField(gs))) {
-                pass.applyExport(ctx, sym, exp.loc);
+                pass.applyExport(gs, sym);
             }
         }
     }
@@ -270,7 +266,7 @@ class PropagateVisibility final {
         }
     }
 
-    void recursiveCheckDuplicateExports(core::MutableContext ctx, bool setExportedTo,
+    void recursiveCheckDuplicateExports(core::MutableContext ctx,
                                         core::SymbolRef currentExportLineSym, core::LocOffsets currentExportLineLoc,
                                         core::SymbolRef sym) {
         // Stop recursing at package boundary
@@ -292,7 +288,7 @@ class PropagateVisibility final {
                         continue;
                     }
 
-                    recursiveCheckDuplicateExports(ctx, setExportedTo, currentExportLineSym, currentExportLineLoc,
+                    recursiveCheckDuplicateExports(ctx, currentExportLineSym, currentExportLineLoc,
                                                    child);
                 }
                 break;
@@ -511,13 +507,13 @@ public:
                 }
 
                 checkExportPackage(ctx, send.loc, sym);
-                recursiveCheckDuplicateExports(ctx, true, sym, send.loc, sym);
+                recursiveCheckDuplicateExports(ctx, sym, send.loc, sym);
                 return;
             }
 
             case core::SymbolRef::Kind::FieldOrStaticField: {
                 checkExportPackage(ctx, send.loc, sym);
-                recursiveCheckDuplicateExports(ctx, true, sym, send.loc, sym);
+                recursiveCheckDuplicateExports(ctx, sym, send.loc, sym);
                 return;
             }
 
