@@ -266,9 +266,7 @@ const Condensation &PackageDB::condensation() const {
     return this->condensation_;
 }
 
-namespace {
-// TODO(neil): deduplicate, this helper is also declared in VisibilityChecker.cc
-core::SymbolRef getEnumClassForEnumValue(const core::GlobalState &gs, core::SymbolRef sym) {
+core::SymbolRef PackageDB::getEnumClassForEnumValue(const core::GlobalState &gs, core::SymbolRef sym) {
     if (sym.isStaticField(gs) && sym.owner(gs).isClassOrModule()) {
         auto owner = sym.owner(gs);
         // There's a hidden class like `MyEnum::X$1` between `MyEnum::X` and `T::Enum` in the ancestor chain.
@@ -280,6 +278,7 @@ core::SymbolRef getEnumClassForEnumValue(const core::GlobalState &gs, core::Symb
     return core::Symbols::noSymbol();
 }
 
+namespace {
 bool ownerWillBeExported(const core::GlobalState &gs, const vector<core::SymbolRef> &alreadyExported,
                          core::ClassOrModuleRef owner) {
     while (owner != core::Symbols::root()) {
@@ -352,7 +351,7 @@ void exportField(const core::GlobalState &gs,
             break;
         }
 
-        auto maybeEnumClass = getEnumClassForEnumValue(gs, core::SymbolRef(symbol));
+        auto maybeEnumClass = PackageDB::getEnumClassForEnumValue(gs, core::SymbolRef(symbol));
         if (maybeEnumClass.exists()) {
             // No need to check if maybeEnumClass is already going to be exported since we have a ownerWillBeExported
             // call above
