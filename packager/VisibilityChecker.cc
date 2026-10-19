@@ -59,6 +59,154 @@ enum class Namespace {
     Test,
 };
 
+class ExportBits final {
+    void recursiveSetIsExported(core::MutableContext ctx, bool setExportedTo, core::SymbolRef currentExportLineSym,
+                                core::LocOffsets currentExportLineLoc, core::SymbolRef sym) {
+        // Stop recursing at package boundary
+        if (this->package.mangledName() != sym.enclosingClass(ctx).data(ctx)->package) {
+            return;
+        }
+
+        switch (sym.kind()) {
+            case core::SymbolRef::Kind::ClassOrModule: {
+                auto klassData = sym.asClassOrModuleRef().data(ctx);
+
+                    klassData->flags.isExported = setExportedTo;
+
+                // This `members` call does not have a stable order--we recover a determinstic order
+                // by sorting duplicate errors at the end of PropagateVisibility
+                for (const auto &[name, child] : klassData->members()) {
+                    if (name == core::Names::attached()) {
+                        // There is a cycle between a class and its singleton, and this avoids infinite recursion.
+                        continue;
+                    }
+
+                    recursiveSetIsExported(ctx, setExportedTo, currentExportLineSym, currentExportLineLoc, child);
+                }
+                break;
+            }
+
+            case core::SymbolRef::Kind::FieldOrStaticField: {
+                auto fieldData = sym.asFieldRef().data(ctx);
+                if (!fieldData->flags.isStaticField) {
+                    break;
+                }
+
+                    fieldData->flags.isExported = setExportedTo;
+                break;
+            }
+
+            case core::SymbolRef::Kind::TypeMember:
+            case core::SymbolRef::Kind::Method:
+            case core::SymbolRef::Kind::TypeParameter:
+                break;
+        }
+    }
+
+    void exportParentNamespace(core::GlobalState &gs, core::ClassOrModuleRef owner) {
+        // Implicitly export parent namespace (symbol owner) until we hit the root of the package.
+        // NOTE that we make an exception for namespaces that define behavior: these CANNOT get exported implicitly,
+        // as that violates the private-by-default paradigm.
+        while (owner.exists() && !owner.data(gs)->flags.isExported && !owner.data(gs)->flags.isBehaviorDefining &&
+               this->package.mangledName() == owner.data(gs)->package) {
+            owner.data(gs)->flags.isExported = true;
+            owner = owner.data(gs)->owner;
+        }
+    }
+
+    // TODO(jez) This function is annoying that it has to recurse up the owner chain. It would be
+    // better if we didn't have to do this, but that would involve persisting the test and non-test
+    // root symbols for a package onto the PackageInfo itself, which is tricky.
+    //
+    // This is very unsatisfying, because it looks a lot like us re-introducing FullyQualifiedName,
+    // which was half of the point of moving Symbols into the package database in the first place.
+    pair<core::ClassOrModuleRef, core::ClassOrModuleRef> getScopesForPackage(const core::GlobalState &gs) {
+        vector<core::NameRef> parts;
+        auto owner = package.mangledName().owner;
+        while (owner != core::Symbols::root() && owner != core::Symbols::PackageSpecRegistry()) {
+            auto ownerData = owner.data(gs);
+            parts.emplace_back(ownerData->name);
+            owner = ownerData->owner;
+        }
+
+        auto nonTestScope = getScopeForPackage(gs, parts, core::Symbols::root());
+        auto testNamespace = core::Symbols::root().data(gs)->findMember(gs, core::packages::PackageDB::TEST_NAMESPACE);
+        core::ClassOrModuleRef testScope;
+        if (!this->package.usesTestPackages && testNamespace.exists() && testNamespace.isClassOrModule()) {
+            testScope = getScopeForPackage(gs, parts, testNamespace.asClassOrModuleRef());
+        }
+
+        // TODO(trevor): we can remove the returned test scope after switching to test packages.
+        return {nonTestScope, testScope};
+    }
+
+    void unsetAllExportedInPackage(core::MutableContext ctx, Namespace ns) {
+        auto [nonTestScope, testScope] = getScopesForPackage(ctx);
+
+        auto setExportedTo = false;
+
+        // loc is never used in `recursiveSetIsExported` if `setExportedTo` is false, so just say "none"
+        auto currentExportLineLoc = core::LocOffsets::none();
+        if (ns == Namespace::Application && nonTestScope.exists()) {
+            recursiveSetIsExported(ctx, setExportedTo, nonTestScope, currentExportLineLoc, nonTestScope);
+        }
+        if (ns == Namespace::Test && testScope.exists()) {
+            recursiveSetIsExported(ctx, setExportedTo, testScope, currentExportLineLoc, testScope);
+        }
+    }
+
+    void applyExport(core::MutableContext ctx, core::SymbolRef sym, core::LocOffsets loc) {
+        auto setExportedTo = true;
+            recursiveSetIsExported(ctx, setExportedTo, sym, loc, sym);
+
+            // When exporting a symbol, we also export its parent namespace. This is a bit of a hack, and it would
+            // be great to remove this, but this was the behavior of the previous packager implementation.
+            exportParentNamespace(ctx, sym.owner(ctx).asClassOrModuleRef());
+    }
+
+public:
+    // Recompute the export bits of the package's symbols from its `exports_`.
+    //
+    // This reports no errors: `reportErrors` reports them, from the package's resolved `__package.rb`
+    // (which might not happen until the test SCC for this package runs).
+    static void setExportBits(core::GlobalState &gs, core::packages::MangledName name, Namespace ns) {
+        auto package = gs.packageDB().getPackageInfoNonConst(name);
+        ENFORCE(package != nullptr);
+        if (package->usesTestPackages) {
+            // A `test!` package is a separate package, so each package has only one namespace.
+            ns = Namespace::Application;
+        }
+
+        core::MutableContext ctx{gs, core::Symbols::root(), package->fullLoc().file()};
+        // TODO(jez) This doesn't actually walk the tree anymore, but it still constructs
+        // PropagateVisibility because that's where all the helpers that set export bits are.
+        PropagateVisibility pass{*package, Mode::SetExportBits};
+
+        pass.unsetAllExportedInPackage(ctx, ns);
+
+        for (const auto &exp : package->exports_) {
+            // Exports can't go through class aliases, so an export of a `Test::` constant only exports symbols in
+            // the `Test::` namespace, and vice versa.
+            auto isTestExport =
+                !package->usesTestPackages && exp.reversedPath.back() == core::packages::PackageDB::TEST_NAMESPACE;
+            if (isTestExport != (ns == Namespace::Test)) {
+                continue;
+            }
+
+            // For the same reason, we don't need to dealias any prefix.
+            core::SymbolRef sym = core::Symbols::root();
+            for (auto it = exp.reversedPath.rbegin(); it != exp.reversedPath.rend() && sym.exists(); ++it) {
+                sym = sym.isClassOrModule() ? sym.asClassOrModuleRef().data(gs)->findMemberNoDealias(*it)
+                                            : core::Symbols::noSymbol();
+            }
+
+            if (sym.exists() && (sym.isClassOrModule() || sym.isStaticField(gs))) {
+                pass.applyExport(ctx, sym, exp.loc);
+            }
+        }
+    }
+};
+
 class PropagateVisibility final {
     enum class Mode {
         SetExportBits,
@@ -126,49 +274,6 @@ class PropagateVisibility final {
         }
     }
 
-    void recursiveSetIsExported(core::MutableContext ctx, bool setExportedTo, core::SymbolRef currentExportLineSym,
-                                core::LocOffsets currentExportLineLoc, core::SymbolRef sym) {
-        // Stop recursing at package boundary
-        if (this->package.mangledName() != sym.enclosingClass(ctx).data(ctx)->package) {
-            return;
-        }
-
-        switch (sym.kind()) {
-            case core::SymbolRef::Kind::ClassOrModule: {
-                auto klassData = sym.asClassOrModuleRef().data(ctx);
-
-                    klassData->flags.isExported = setExportedTo;
-
-                // This `members` call does not have a stable order--we recover a determinstic order
-                // by sorting duplicate errors at the end of PropagateVisibility
-                for (const auto &[name, child] : klassData->members()) {
-                    if (name == core::Names::attached()) {
-                        // There is a cycle between a class and its singleton, and this avoids infinite recursion.
-                        continue;
-                    }
-
-                    recursiveSetIsExported(ctx, setExportedTo, currentExportLineSym, currentExportLineLoc, child);
-                }
-                break;
-            }
-
-            case core::SymbolRef::Kind::FieldOrStaticField: {
-                auto fieldData = sym.asFieldRef().data(ctx);
-                if (!fieldData->flags.isStaticField) {
-                    break;
-                }
-
-                    fieldData->flags.isExported = setExportedTo;
-                break;
-            }
-
-            case core::SymbolRef::Kind::TypeMember:
-            case core::SymbolRef::Kind::Method:
-            case core::SymbolRef::Kind::TypeParameter:
-                break;
-        }
-    }
-
     void recursiveCheckDuplicateExports(core::MutableContext ctx, bool setExportedTo,
                                         core::SymbolRef currentExportLineSym, core::LocOffsets currentExportLineLoc,
                                         core::SymbolRef sym) {
@@ -211,58 +316,6 @@ class PropagateVisibility final {
             case core::SymbolRef::Kind::Method:
             case core::SymbolRef::Kind::TypeParameter:
                 break;
-        }
-    }
-
-    void exportParentNamespace(core::GlobalState &gs, core::ClassOrModuleRef owner) {
-        // Implicitly export parent namespace (symbol owner) until we hit the root of the package.
-        // NOTE that we make an exception for namespaces that define behavior: these CANNOT get exported implicitly,
-        // as that violates the private-by-default paradigm.
-        while (owner.exists() && !owner.data(gs)->flags.isExported && !owner.data(gs)->flags.isBehaviorDefining &&
-               this->package.mangledName() == owner.data(gs)->package) {
-            owner.data(gs)->flags.isExported = true;
-            owner = owner.data(gs)->owner;
-        }
-    }
-
-    // TODO(jez) This function is annoying that it has to recurse up the owner chain. It would be
-    // better if we didn't have to do this, but that would involve persisting the test and non-test
-    // root symbols for a package onto the PackageInfo itself, which is tricky.
-    //
-    // This is very unsatisfying, because it looks a lot like us re-introducing FullyQualifiedName,
-    // which was half of the point of moving Symbols into the package database in the first place.
-    pair<core::ClassOrModuleRef, core::ClassOrModuleRef> getScopesForPackage(const core::GlobalState &gs) {
-        vector<core::NameRef> parts;
-        auto owner = package.mangledName().owner;
-        while (owner != core::Symbols::root() && owner != core::Symbols::PackageSpecRegistry()) {
-            auto ownerData = owner.data(gs);
-            parts.emplace_back(ownerData->name);
-            owner = ownerData->owner;
-        }
-
-        auto nonTestScope = getScopeForPackage(gs, parts, core::Symbols::root());
-        auto testNamespace = core::Symbols::root().data(gs)->findMember(gs, core::packages::PackageDB::TEST_NAMESPACE);
-        core::ClassOrModuleRef testScope;
-        if (!this->package.usesTestPackages && testNamespace.exists() && testNamespace.isClassOrModule()) {
-            testScope = getScopeForPackage(gs, parts, testNamespace.asClassOrModuleRef());
-        }
-
-        // TODO(trevor): we can remove the returned test scope after switching to test packages.
-        return {nonTestScope, testScope};
-    }
-
-    void unsetAllExportedInPackage(core::MutableContext ctx, Namespace ns) {
-        auto [nonTestScope, testScope] = getScopesForPackage(ctx);
-
-        auto setExportedTo = false;
-
-        // loc is never used in `recursiveSetIsExported` if `setExportedTo` is false, so just say "none"
-        auto currentExportLineLoc = core::LocOffsets::none();
-        if (ns == Namespace::Application && nonTestScope.exists()) {
-            recursiveSetIsExported(ctx, setExportedTo, nonTestScope, currentExportLineLoc, nonTestScope);
-        }
-        if (ns == Namespace::Test && testScope.exists()) {
-            recursiveSetIsExported(ctx, setExportedTo, testScope, currentExportLineLoc, testScope);
         }
     }
 
@@ -388,15 +441,6 @@ class PropagateVisibility final {
         fast_sort(lines);
 
         return lines;
-    }
-
-    void applyExport(core::MutableContext ctx, core::SymbolRef sym, core::LocOffsets loc) {
-        auto setExportedTo = true;
-            recursiveSetIsExported(ctx, setExportedTo, sym, loc, sym);
-
-            // When exporting a symbol, we also export its parent namespace. This is a bit of a hack, and it would
-            // be great to remove this, but this was the behavior of the previous packager implementation.
-            exportParentNamespace(ctx, sym.owner(ctx).asClassOrModuleRef());
     }
 
     PropagateVisibility(core::packages::PackageInfo &package, Mode mode) : package{package}, mode{mode} {}
@@ -551,47 +595,6 @@ public:
                                 err.duplicate.show(ctx), err.prefix.show(ctx));
                     e.addErrorLine(ctx.locAt(err.firstExportedAt), "Prefix exported here");
                 }
-            }
-        }
-    }
-
-    // Recompute the export bits of the package's symbols from its `exports_`.
-    //
-    // This reports no errors: `reportErrors` reports them, from the package's resolved `__package.rb`
-    // (which might not happen until the test SCC for this package runs).
-    static void setExportBits(core::GlobalState &gs, core::packages::MangledName name, Namespace ns) {
-        auto package = gs.packageDB().getPackageInfoNonConst(name);
-        ENFORCE(package != nullptr);
-        if (package->usesTestPackages) {
-            // A `test!` package is a separate package, so each package has only one namespace.
-            ns = Namespace::Application;
-        }
-
-        core::MutableContext ctx{gs, core::Symbols::root(), package->fullLoc().file()};
-        // TODO(jez) This doesn't actually walk the tree anymore, but it still constructs
-        // PropagateVisibility because that's where all the helpers that set export bits are.
-        PropagateVisibility pass{*package, Mode::SetExportBits};
-
-        pass.unsetAllExportedInPackage(ctx, ns);
-
-        for (const auto &exp : package->exports_) {
-            // Exports can't go through class aliases, so an export of a `Test::` constant only exports symbols in
-            // the `Test::` namespace, and vice versa.
-            auto isTestExport =
-                !package->usesTestPackages && exp.reversedPath.back() == core::packages::PackageDB::TEST_NAMESPACE;
-            if (isTestExport != (ns == Namespace::Test)) {
-                continue;
-            }
-
-            // For the same reason, we don't need to dealias any prefix.
-            core::SymbolRef sym = core::Symbols::root();
-            for (auto it = exp.reversedPath.rbegin(); it != exp.reversedPath.rend() && sym.exists(); ++it) {
-                sym = sym.isClassOrModule() ? sym.asClassOrModuleRef().data(gs)->findMemberNoDealias(*it)
-                                            : core::Symbols::noSymbol();
-            }
-
-            if (sym.exists() && (sym.isClassOrModule() || sym.isStaticField(gs))) {
-                pass.applyExport(ctx, sym, exp.loc);
             }
         }
     }
