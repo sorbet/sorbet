@@ -714,16 +714,18 @@ namespace {
 
 void PackageInfo::checkReferenceAgainstExports(core::Context ctx, core::LocOffsets errLoc, core::SymbolRef litSymbol,
                                                MangledName otherPackage) const {
-        auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
+    auto &db = ctx.state.packageDB();
+    ENFORCE(otherPackage.exists() && this->mangledName() != otherPackage);
+        auto &pkg = db.getPackageInfo(otherPackage);
         bool isExported = pkg.locs.exportAll.exists();
         if (litSymbol.isClassOrModule()) {
             isExported = isExported || litSymbol.asClassOrModuleRef().data(ctx)->flags.isExported;
         } else if (litSymbol.isFieldOrStaticField()) {
             isExported = isExported || litSymbol.asFieldRef().data(ctx)->flags.isExported;
         }
-        isExported = isExported || db.allowRelaxedPackagerChecksFor(this->package.mangledName());
-        if (this->package.usesTestPackages && !isExported) {
-            auto *import = this->package.importsPackage(otherPackage);
+        isExported = isExported || db.allowRelaxedPackagerChecksFor(this->mangledName());
+        if (this->usesTestPackages && !isExported) {
+            auto *import = this->importsPackage(otherPackage);
             ENFORCE(import != nullptr, "If it wasn't imported, we should not be dealing with exports");
             isExported = isExported || import->usesInternals;
         }
@@ -738,7 +740,7 @@ void PackageInfo::checkReferenceAgainstExports(core::Context ctx, core::LocOffse
             std::optional<core::AutocorrectSuggestion> exportAutocorrect;
             if (definesBehavior) {
                 auto symToExport = litSymbol;
-                auto enumClass = core::packages::PackageDB::getEnumClassForEnumValue(ctx.state, symToExport);
+                auto enumClass = PackageDB::getEnumClassForEnumValue(ctx.state, symToExport);
                 if (enumClass.exists()) {
                     symToExport = enumClass;
                 }
@@ -752,7 +754,7 @@ void PackageInfo::checkReferenceAgainstExports(core::Context ctx, core::LocOffse
                     exportAutocorrect.emplace(exp.value());
                 }
             }
-            if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedPackagePrivateName)) {
+            if (auto e = ctx.beginError(errLoc, core::errors::Packager::UsedPackagePrivateName)) {
                 e.setHeader("`{}` resolves but is not exported from `{}`", litSymbol.show(ctx), pkg.show(ctx));
                 addExportInfo(ctx, e, litSymbol, definesBehavior);
 

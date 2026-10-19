@@ -637,8 +637,6 @@ public:
         // TODO(neil): we should also track A, A::B, A::B::C, so that we can use this for find all references too.
         referencedSymbols.insert(litSymbol);
 
-        auto &db = ctx.state.packageDB();
-
         // no need to check visibility for these cases
         auto otherPackage = litSymbol.enclosingClass(ctx).data(ctx)->package;
         if (!otherPackage.exists() || this->package.mangledName() == otherPackage) {
