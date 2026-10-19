@@ -338,28 +338,34 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
         vector<core::FileRef> packageFiles;
 
         for (auto fref : toTypecheck) {
+            auto &file = fref.data(*gs);
             // Only need to re-run packager if we're going to delete constants and have to re-define
             // their visibility, which only happens if we're running incrementalNamer.
             // NOTE: Using `gs` to access package information here assumes that edits to __package.rb
             // files don't take the fast path. We'll want (or maybe need) to revisit this when we start
             // making edits to `__package.rb` take fast paths.
-            if (!(fref.data(*gs).isPackage(*gs))) {
-                auto pkg = gs->packageDB().getPackageNameForFile(fref);
-                if (pkg.exists()) {
-                    // Since even no-op (e.g. whitespace-only) edits will cause constants to be deleted
-                    // and re-added, the errors in the `__package.rb` file's exports might change (e.g.,
-                    // an exported constant might no longer exist), so we have to retypecheck it.
-                    // TODO(jez) I think we could stop doing this if we replaced `export` with `package_private!`
-                    auto packageFref = gs->packageDB().getPackageInfo(pkg).fullLoc().file();
-                    if (!packageFref.exists()) {
-                        continue;
-                    }
+            if (file.isPackage(*gs)) {
+                continue;
+            }
 
-                    packageFiles.emplace_back(packageFref);
-                    if (!oldFoundHashesForFiles.contains(fref)) {
-                        oldFoundHashesForFiles.emplace(fref, fref.data(*gs).getFileHash());
-                    }
-                }
+            auto pkg = gs->packageDB().getPackageNameForFile(fref);
+            if (!pkg.exists()) {
+                continue;
+            }
+
+            // Since even no-op (e.g. whitespace-only) edits will cause constants to be deleted
+            // and re-added, the errors in the `__package.rb` file's exports might change (e.g.,
+            // an exported constant might no longer exist), so we have to retypecheck it.
+            // TODO(jez) I think we could stop doing this if we replaced `export` with `package_private!`
+            auto &info = gs->packageDB().getPackageInfo(pkg);
+            auto packageFref = info.fullLoc().file();
+            if (!packageFref.exists()) {
+                continue;
+            }
+
+            packageFiles.emplace_back(packageFref);
+            if (!oldFoundHashesForFiles.contains(fref)) {
+                oldFoundHashesForFiles.emplace(fref, fref.data(*gs).getFileHash());
             }
         }
 
