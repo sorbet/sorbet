@@ -623,7 +623,7 @@ Sorbet found an `import` in a `__package.rb` file, but the imported constant did
 
 ## 3705
 
-> **TODO** This error code is not yet documented.
+This error has been replaced by [4032](#4032).
 
 ## 3706
 
@@ -1387,6 +1387,16 @@ Legacy test files must define constants in `Test::<package>`. Test-only packages
 Explicit-root definitions outside the package namespace require a `prelude!` package. Being a prelude does not permit defining constants in another package's namespace.
 
 These namespace-definition errors previously used [3713](#3713), which remains the code for behavior defined outside the permitted namespace. Invalid definitions are isolated from their source-level namespace, so other references may also report unresolved constants.
+
+## 4032
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+In `--sorbet-packages` mode, all files must belong to a package. We may relax this in the future.
+
+Move the file into an existing package's directory, or add a `__package.rb` file declaring the package in an enclosing folder.
+
+This error previously used code [3705](#3705).
 
 ## 5001
 

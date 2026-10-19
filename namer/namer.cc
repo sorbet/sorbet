@@ -898,6 +898,7 @@ private:
     PackageMangledClasses &packageMangledClasses;
     PackageMangledStaticFields &packageMangledStaticFields;
     const PackageInfo *package = nullptr;
+    bool isolateUnpackagedDefinitions = false;
 
     // Get the symbol for an already-defined owner. Limited to refs that can own things (classes and methods).
     core::ClassOrModuleRef getOwnerSymbol(const SymbolDefiner::State &state, core::FoundDefinitionRef ref) {
@@ -1348,7 +1349,7 @@ private:
             return true;
         }
         if (this->package == nullptr) {
-            return false;
+            return isolateUnpackagedDefinitions;
         }
 
         auto [packageRegistryOwner, namespacePackage] = ctx.state.packageInfoForClassOrModule(owner, klass.name);
@@ -1389,7 +1390,7 @@ private:
             return true;
         }
         if (this->package == nullptr) {
-            return false;
+            return isolateUnpackagedDefinitions;
         }
         // Assignments define values inside namespaces, so classify the containing owner.
         auto namespacePackage = owner.data(ctx)->package;
@@ -2130,6 +2131,9 @@ public:
 
         auto packageName = ctx.state.packageDB().getPackageNameForFile(ctx.file);
         if (!packageName.exists()) {
+            // Isolate unpackaged definitions so they cannot populate package namespaces or modify
+            // payload symbols. Payload files are allowed to have no package, including on the LSP fast path.
+            isolateUnpackagedDefinitions = !file.isPayload();
             return;
         }
 
@@ -2139,6 +2143,16 @@ public:
 
     SymbolDefiner::State enterClassDefinitions(core::MutableContext ctx, bool willDeleteOldDefs,
                                                ClassBehaviorLocsMap &classBehaviorLocs) {
+        // Report once per file, before entering isolated recovery symbols. SymbolDefiner is constructed
+        // again for non-class definitions, so its constructor must not report this error.
+        if (isolateUnpackagedDefinitions && ctx.file.data(ctx).sourceSize() != 0) {
+            if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Namer::UnpackagedFile)) {
+                e.setHeader("File `{}` does not belong to a package; add a `{}` file to one "
+                            "of its parent directories",
+                            ctx.file.data(ctx).path(), "__package.rb");
+            }
+        }
+
         SymbolDefiner::State state;
         state.definedClasses.reserve(foundDefs.klasses().size());
 

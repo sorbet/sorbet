@@ -1725,18 +1725,9 @@ public:
             return;
         }
 
-        // If the file isn't associated with a package, we reject any modification to a packaged constant.
+        // Namer already reports unpackaged files and isolates their definitions.
         auto curPkgName = ctx.state.packageDB().getPackageNameForFile(ctx.file);
         if (!curPkgName.exists()) {
-            if (scopeKlass.data(ctx)->package.exists()) {
-                auto scopePkgName = scopeKlass.data(ctx)->package;
-                const auto &scopePkg = ctx.state.packageDB().getPackageInfo(scopePkgName);
-                if (auto e = ctx.beginError(declLoc, core::errors::Resolver::PackageScopeViolation)) {
-                    e.setHeader("Unpackaged code may not open `{}`", scopeKlass.show(ctx));
-                    e.addErrorLine(scopePkg.declLoc(), "Owning package");
-                }
-            }
-
             return;
         }
 
