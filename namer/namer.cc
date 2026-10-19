@@ -2118,26 +2118,12 @@ public:
         }
     }
 
-    static const PackageInfo *getPackageForFile(core::Context ctx) {
-        auto &file = ctx.file.data(ctx);
-        if (!ctx.state.packageDB().enabled() || file.isPackage(ctx)) {
-            return nullptr;
-        }
-
-        auto packageName = ctx.state.packageDB().getPackageNameForFile(ctx.file);
-        if (!packageName.exists()) {
-            return nullptr;
-        }
-
-        auto &package = ctx.state.packageDB().getPackageInfo(packageName);
-        return package.exists() ? &package : nullptr;
-    }
-
     SymbolDefiner(core::Context ctx, const core::FoundDefinitions &foundDefs,
                   vector<core::ClassOrModuleRef> &symbolsToRecompute, PackageMangledClasses &packageMangledClasses,
                   PackageMangledStaticFields &packageMangledStaticFields)
         : foundDefs(foundDefs), symbolsToRecompute{symbolsToRecompute}, packageMangledClasses(packageMangledClasses),
-          packageMangledStaticFields(packageMangledStaticFields), package(getPackageForFile(ctx)),
+          packageMangledStaticFields(packageMangledStaticFields),
+          package(ctx.state.packageDB().getPackageForSourceFile(ctx.state, ctx.file)),
           // Isolate unpackaged definitions so they cannot populate package namespaces or modify
           // payload symbols. Payload files are allowed to have no package, including on the LSP fast path.
           isolateUnpackagedDefinitions(ctx.state.packageDB().enabled() && !ctx.file.data(ctx).isPackage(ctx) &&

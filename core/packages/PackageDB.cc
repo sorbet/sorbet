@@ -53,6 +53,20 @@ const MangledName PackageDB::getPackageNameForFile(FileRef file) const {
     return this->packageForFile_[file.id()];
 }
 
+const PackageInfo *PackageDB::getPackageForSourceFile(const core::GlobalState &gs, FileRef file) const {
+    if (!enabled() || file.data(gs).isPackage(gs)) {
+        return nullptr;
+    }
+
+    auto packageName = getPackageNameForFile(file);
+    if (!packageName.exists()) {
+        return nullptr;
+    }
+
+    auto &package = getPackageInfo(packageName);
+    return package.exists() ? &package : nullptr;
+}
+
 MangledName PackageDB::getParentPackage(const GlobalState &gs, MangledName pkg) const {
     ENFORCE(pkg.exists());
 
