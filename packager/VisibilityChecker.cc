@@ -17,18 +17,6 @@ namespace sorbet::packager {
 
 namespace {
 
-static core::SymbolRef getEnumClassForEnumValue(const core::GlobalState &gs, core::SymbolRef sym) {
-    if (sym.isStaticField(gs) && sym.owner(gs).isClassOrModule()) {
-        auto owner = sym.owner(gs);
-        // There's a hidden class like `MyEnum::X$1` between `MyEnum::X` and `T::Enum` in the ancestor chain.
-        if (owner.asClassOrModuleRef().data(gs)->superClass() == core::Symbols::T_Enum()) {
-            return owner;
-        }
-    }
-
-    return core::Symbols::noSymbol();
-}
-
 core::ClassOrModuleRef getScopeForPackage(const core::GlobalState &gs, absl::Span<const core::NameRef> parts,
                                           core::ClassOrModuleRef startingFrom) {
     auto result = startingFrom;
@@ -363,7 +351,7 @@ class ExportErrors final {
         //
         // See also how when we get a visibility violation for an enum value not being exported we export the entire
         // enum, not the specific enum value, to avoid conflict-inducing churn on `__package.rb` files.
-        auto enumClass = getEnumClassForEnumValue(ctx.state, sym);
+        auto enumClass = core::packages::PackageDB::getEnumClassForEnumValue(ctx.state, sym);
         if (enumClass.exists()) {
             if (ctx.state.packageDB().genPackagesMode() == core::packages::GenPackagesMode::Disabled) {
                 if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidExport)) {
@@ -702,7 +690,7 @@ public:
             std::optional<core::AutocorrectSuggestion> exportAutocorrect;
             if (definesBehavior) {
                 auto symToExport = litSymbol;
-                auto enumClass = getEnumClassForEnumValue(ctx.state, symToExport);
+                auto enumClass = core::packages::PackageDB::getEnumClassForEnumValue(ctx.state, symToExport);
                 if (enumClass.exists()) {
                     symToExport = enumClass;
                 }
