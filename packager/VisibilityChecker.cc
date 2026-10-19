@@ -540,23 +540,25 @@ public:
         }
     }
 
-    static void run(core::GlobalState &gs, const ast::ParsedFile &f) {
-        ENFORCE(f.file.data(gs).isPackage(gs));
+    static void run(core::GlobalState &mutableGS, const ast::ParsedFile &f) {
+        core::Context ctx{mutableGS, core::Symbols::root(), f.file};
+        ENFORCE(f.file.data(ctx).isPackage(ctx));
 
-        auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
+        auto pkgName = ctx.state.packageDB().getPackageNameForFile(f.file);
         if (!pkgName.exists()) {
             return;
         }
 
-        auto &package = gs.packageDB().getPackageInfo(pkgName);
+        auto &package = ctx.state.packageDB().getPackageInfo(pkgName);
         ENFORCE(package.exists(), "Package is associated with a file, but doesn't exist");
 
-        core::Context ctx{gs, core::Symbols::root(), f.file};
         ExportErrors pass{package};
         ast::ConstTreeWalk::apply(ctx, pass, f.tree);
 
+        // TODO(jez) This is the only thing left that uses a mutable GlobalState here.
+        // If we delete this, we could make this take a `const GlobalState &`
         if (!pass.exportsToDelete.empty()) {
-            auto &exportsToDelete = gs.packageDB().getPackageInfoNonConst(pkgName)->exportsToDelete_;
+            auto &exportsToDelete = mutableGS.packageDB().getPackageInfoNonConst(pkgName)->exportsToDelete_;
             for (auto loc : pass.exportsToDelete) {
                 exportsToDelete.emplace_back(loc);
             }
