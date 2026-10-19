@@ -356,38 +356,38 @@ module Annotations
     # @abstract
     #: -> Integer
     def method_abstract4 # error: Methods declared `@abstract` with an RBS comment must contain only a forwarding super call
-      super() # error: Abstract methods must not contain any code in their body
+      super()
     end
 
     # @abstract
     #: -> Integer
     def method_abstract5 # error: Methods declared `@abstract` with an RBS comment must contain only a forwarding super call
-      puts "foo" # error: Abstract methods must not contain any code in their body
+      puts "foo"
     end
 
     # @abstract
     #: -> Integer
     def method_abstract6 # error: Methods declared `@abstract` with an RBS comment must contain only a forwarding super call
-      puts "foo" # error: Abstract methods must not contain any code in their body
+      puts "foo"
       super
     end
 
     # @abstract
     #: -> Integer
     def method_abstract7 # error: Methods declared `@abstract` with an RBS comment must contain only a forwarding super call
-      super(1) # error: Abstract methods must not contain any code in their body
+      super(1)
     end
 
     # @abstract
     #: -> Integer
     def method_abstract8 # error: Methods declared `@abstract` with an RBS comment must contain only a forwarding super call
-      raise # error: Abstract methods must not contain any code in their body
+      raise
     end
 
     # @abstract
     #: -> Integer
     def method_abstract9 # error: Methods declared `@abstract` with an RBS comment must contain only a forwarding super call
-      super {} # error: Abstract methods must not contain any code in their body
+      super {}
     end
 
     # @abstract
@@ -397,6 +397,29 @@ module Annotations
     # @abstract
     #: -> Integer
     private def method_abstract_private = super
+
+    # @abstract
+    #: -> Integer
+    #  ^^^^^^^^^^ error: Unused type annotation. No method def before next annotation
+    #: -> Integer
+    def multiple_signatures = super
+
+    # @abstract
+    # @abstract
+    #: -> Integer
+    def repeated_annotations
+      super
+    end
+
+    # @abstract
+    # @abstract
+    #: -> Integer
+    private def repeated_private = super
+
+    # @abstract
+    # @abstract
+    #: -> Integer
+    def repeated_empty; end # error: Methods declared `@abstract` with an RBS comment must contain only a forwarding super call
   end
 
   # @interface

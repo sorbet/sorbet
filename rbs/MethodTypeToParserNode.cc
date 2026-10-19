@@ -17,95 +17,7 @@ namespace sorbet::rbs {
 
 namespace {
 
-optional<core::AutocorrectSuggestion> autocorrectAbstractBody(core::MutableContext ctx, pm_node_t *method,
-                                                              const parser::Prism::Parser *prismParser,
-                                                              pm_node_t *method_body) {
-    core::LocOffsets editLoc;
-    string corrected;
-
-    if (method_body) {
-        editLoc = prismParser->translateLocation(method_body->location);
-        corrected = "super";
-    } else {
-        auto *def = down_cast_nonnull<pm_def_node_t>(method);
-        if (def->end_keyword_loc.start == nullptr || def->end_keyword_loc.start == def->end_keyword_loc.end) {
-            return nullopt;
-        }
-        auto methodLoc = prismParser->translateLocation(method->location);
-
-        // Default to insertion before `end` to keep header comments in place.
-        editLoc = prismParser->translateLocation(def->end_keyword_loc).copyWithZeroLength();
-        auto lineStart = core::Loc::pos2Detail(ctx.file.data(ctx), methodLoc.beginPos()).line;
-        auto lineEnd = core::Loc::pos2Detail(ctx.file.data(ctx), methodLoc.endPos()).line;
-
-        if (lineStart == lineEnd) {
-            auto methodName = prismParser->resolveConstant(def->name);
-            if ((def->parameters == nullptr || def->rparen_loc.start != nullptr) &&
-                !ctx.state.enterNameUTF8(methodName).isSetter(ctx.state)) {
-                auto headerLoc =
-                    prismParser->translateLocation(def->rparen_loc.start != nullptr ? def->rparen_loc : def->name_loc);
-                editLoc = core::LocOffsets{headerLoc.endPos(), methodLoc.endPos()};
-                corrected = " = super";
-            } else {
-                corrected = "super; ";
-            }
-        } else {
-            auto [_endLoc, indentLength] = ctx.locAt(methodLoc).findStartOfIndentation(ctx);
-            corrected = "  super\n" + string(indentLength, ' ');
-        }
-    }
-
-    return core::AutocorrectSuggestion{"Replace the abstract method body with `super`",
-                                       {core::AutocorrectSuggestion::Edit{ctx.locAt(editLoc), corrected}}};
-}
-
-bool isValidAbstractMethod(pm_node_t *node) {
-    auto *def = down_cast<pm_def_node_t>(node);
-    if (def == nullptr) {
-        return false;
-    }
-
-    if (def->body == nullptr) {
-        return false;
-    }
-
-    pm_node_t *bodyNode = def->body;
-
-    // Unwrap statements node if it contains exactly one statement
-    if (auto *stmts = down_cast<pm_statements_node_t>(bodyNode)) {
-        if (stmts->body.size != 1) {
-            return false;
-        }
-        bodyNode = stmts->body.nodes[0];
-    }
-
-    // Explicit arguments or a block would change the call instead of forwarding it.
-    auto *super = down_cast<pm_forwarding_super_node_t>(bodyNode);
-    return super != nullptr && super->block == nullptr;
-}
-
-void ensureAbstractMethodCallsSuper(core::MutableContext ctx, pm_node_t *node, parser::Prism::Parser *prismParser) {
-    if (isValidAbstractMethod(node)) {
-        // Remove the forwarding stub from the checker AST to avoid error 5019 later in the pipeline.
-        auto *def = down_cast_nonnull<pm_def_node_t>(node);
-        prismParser->destroyNode(def->body);
-        def->body = nullptr;
-        return;
-    }
-
-    auto *def = down_cast_nonnull<pm_def_node_t>(node);
-    auto nodeLoc = prismParser->translateLocation(node->location);
-
-    if (auto e = ctx.beginIndexerError(nodeLoc, core::errors::Rewriter::RBSAbstractMethodNoSuper)) {
-        e.setHeader("Methods declared `{}` with an RBS comment must contain only a forwarding super call", "@abstract");
-        if (auto autocorrect = autocorrectAbstractBody(ctx, node, prismParser, def->body)) {
-            e.addAutocorrect(move(*autocorrect));
-        }
-    }
-}
-
-pm_node_t *handleAnnotations(core::MutableContext ctx, pm_node_t *node, pm_node_t *sigBuilder,
-                             absl::Span<const Comment> annotations, parser::Prism::Parser *prismParser,
+pm_node_t *handleAnnotations(core::MutableContext ctx, pm_node_t *sigBuilder, absl::Span<const Comment> annotations,
                              const parser::Prism::Factory &prism) {
     static constexpr string_view OVERRIDE_ALLOW_INCOMPATIBLE_PREFIX = "override(allow_incompatible: ";
 
@@ -114,7 +26,7 @@ pm_node_t *handleAnnotations(core::MutableContext ctx, pm_node_t *node, pm_node_
             // no-op, `final` is handled in the `sig()` call later
         } else if (annotation.string == "abstract") {
             sigBuilder = prism.Call0(annotation.typeLoc, sigBuilder, core::Names::abstract().show(ctx.state));
-            ensureAbstractMethodCallsSuper(ctx, node, prismParser);
+
         } else if (annotation.string == "overridable") {
             sigBuilder = prism.Call0(annotation.typeLoc, sigBuilder, core::Names::overridable().show(ctx.state));
         } else if (annotation.string == "override") {
@@ -448,7 +360,7 @@ pm_node_t *MethodTypeToParserNode::attrSignature(pm_call_node_t *call, const rbs
     auto callLoc = prismParser.translateLocation(call->base.location);
 
     pm_node_t *sigBuilder = prism.Self(fullTypeLoc.copyWithZeroLength());
-    sigBuilder = handleAnnotations(ctx, &call->base, sigBuilder, annotations, &prismParser, prism);
+    sigBuilder = handleAnnotations(ctx, sigBuilder, annotations, prism);
 
     if (call->arguments == nullptr || call->arguments->arguments.size == 0) {
         if (auto e = ctx.beginIndexerError(callLoc, core::errors::Rewriter::RBSUnsupported)) {
@@ -642,7 +554,7 @@ pm_node_t *MethodTypeToParserNode::methodSignature(pm_node_t *methodDef, const r
     }
 
     pm_node_t *sigReceiver = prism.Self(fullTypeLoc);
-    sigReceiver = handleAnnotations(ctx, methodDef, sigReceiver, annotations, &prismParser, prism);
+    sigReceiver = handleAnnotations(ctx, sigReceiver, annotations, prism);
 
     if (!typeParams.empty()) {
         vector<pm_node_t *> typeParamSymbols;
