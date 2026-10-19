@@ -574,9 +574,9 @@ private:
 
             if (sym.isTypeAlias(ctx) && !job.resolutionFailed) {
                 if (!job.isMixinAncestor) {
-                if (auto e = ctx.beginError(c.loc, core::errors::Resolver::ConstantInTypeAlias)) {
-                    e.setHeader("Resolving constants through type aliases is not supported");
-                }
+                    if (auto e = ctx.beginError(c.loc, core::errors::Resolver::ConstantInTypeAlias)) {
+                        e.setHeader("Resolving constants through type aliases is not supported");
+                    }
                 }
                 job.resolutionFailed = true;
                 return core::Symbols::noSymbol();
@@ -1663,7 +1663,7 @@ private:
                     // codebase moves away from this legacy autoloader, it will be easier to introduce such
                     // changes into Sorbet.)
                     if (!job.isMixinAncestor) {
-                    checkReferenceOrder(ctx, constant->symbol(), *c, firstDefinitionLocs);
+                        checkReferenceOrder(ctx, constant->symbol(), *c, firstDefinitionLocs);
                     }
                 }
             } else {
