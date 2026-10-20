@@ -470,15 +470,13 @@ void generateCreateValidatorOptionalArgs(const Options &options, size_t req, siz
                "|*args, &blk|\n");
     fmt::print("      # This method is a manually sped-up version of more general code in `validate_call`\n");
 
-    // Required args are always present; optional args are checked only when the
-    // caller actually passed them. Defaults are never validated (matches the slow
-    // path); `bind_call` enforces the arity bounds.
-    for (size_t i = 0; i < req; i++) {
-        generateArgCheck(i, fmt::format("args[{}]", i));
-    }
-    for (size_t i = req; i < total; i++) {
-        // Skip the check when the optional arg was not passed. `i == 0` uses
-        // `args.empty?` (rubocop prefers it over `args.length <= 0`).
+    // Each arg is checked only when the caller actually passed it, like the slow
+    // path. Defaults are never validated, and a call missing a required arg must
+    // reach `bind_call`, which enforces the arity bounds by raising
+    // `ArgumentError` (checking the missing arg would raise a `TypeError` for
+    // `nil` instead).
+    for (size_t i = 0; i < total; i++) {
+        // `i == 0` uses `args.empty?` (rubocop prefers it over `args.length <= 0`).
         auto guard = i == 0 ? "args.empty?"s : fmt::format("args.length <= {}", i);
         generateArgCheck(i, fmt::format("args[{}]", i), guard);
     }

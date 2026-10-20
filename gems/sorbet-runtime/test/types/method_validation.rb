@@ -607,10 +607,10 @@ module Opus::Types::Test
         end
         assert_match(/wrong number of arguments \(given 1, expected 2..3\)/, err.message)
 
-        err = assert_raises(TypeError) do
+        err = assert_raises(ArgumentError) do
           @mod.foo(:x)
         end
-        assert_match(/\AParameter 'b': Expected type String, got type NilClass/, err.message)
+        assert_match(/wrong number of arguments \(given 1, expected 2..3\)/, err.message)
 
         err = assert_raises(TypeError) do
           @mod.foo(:x, 1)
