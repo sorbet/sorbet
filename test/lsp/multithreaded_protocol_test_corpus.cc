@@ -58,10 +58,12 @@ public:
 
     // Initializes Sorbet in package mode over `files` (written to the workspace, in this order) and clears the
     // counters.
-    void initializePackagedWorkspace(bool packageDirected, const vector<pair<string, string>> &files) {
+    void initializePackagedWorkspace(bool packageDirected, const vector<pair<string, string>> &files,
+                                     optional<int> sleepInSlowPathSeconds = nullopt) {
         auto opts = make_shared<realmain::options::Options>();
         opts->cacheSensitiveOptions.sorbetPackages = true;
         opts->packageDirected = packageDirected;
+        opts->sleepInSlowPathSeconds = sleepInSlowPathSeconds;
         resetState(opts);
 
         writeFilesToFS(files);
@@ -2319,6 +2321,77 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedPreemptionWaitsForP
     auto &runInfo = get<unique_ptr<SorbetTypecheckRunInfo>>(slowPathEnd->asNotification().params);
     CHECK_EQ(runInfo->typecheckingPath, TypecheckingPath::Slow);
     CHECK_EQ(runInfo->status, SorbetTypecheckRunStatus::Ended);
+}
+
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedDeferredEditMergedWithFastPath") {
+    const string updatedA = "# typed: true\n"
+                            "module Root\n"
+                            "  class A\n"
+                            "    extend T::Sig\n"
+                            "    sig {returns(Integer)}\n"
+                            "    def value = 1\n"
+                            "  end\n"
+                            "end\n";
+    const string updatedB = "# typed: true\nmodule Root\n  class B\n    class Inner\n"
+                            "      def bar = Root::A.n\n"
+                            "    end\n"
+                            "  end\nend\n# latest edit\n";
+    vector<pair<string, string>> files = {
+        {"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A"}).build()},
+        {"a.rb", "# typed: true\n"
+                 "module Root\n"
+                 "  class A\n"
+                 "    extend T::Sig\n"
+                 "    sig {returns(String)}\n"
+                 "    def value = \"old\"\n"
+                 "  end\n"
+                 "end\n"},
+        {"b.rb", "# typed: true\nmodule Root\n  class B; end\nend\n"},
+        {"foo/__package.rb", PackageTextBuilder().withName("Root::Foo").withImports({"Root"}).build()},
+        {"foo/a.rb", "# typed: true\nmodule Root::Foo\n  class Consumer\n"
+                     "    def value = Root::A.new.value\n"
+                     "  end\nend\n"},
+    };
+    // Leave time after Root's diagnostics for the newer edit to merge before the slow path reaches Root::Foo.
+    initializePackagedWorkspace(true, files, 1);
+    assertErrorDiagnostics(send(*openFile("a.rb", files[1].second)), {});
+    assertErrorDiagnostics(send(*openFile("b.rb", files[2].second)), {});
+
+    setSlowPathBlocked(true);
+    sendAsync(*changeFile("b.rb",
+                          "# typed: true\nmodule Root\n  class B\n    class Inner\n"
+                          "      def bar = Root::A.n\n"
+                          "    end\n"
+                          "  end\nend\n",
+                          2, /* cancellationExpected */ false, /* preemptionsExpected */ 1));
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // Editing A#value pulls foo/a.rb into the fast path. Preemption indexes this edit in the Root stratum, then
+    // defers it until Root::Foo.
+    sendAsync(*changeFile("a.rb", updatedA, 2));
+    setSlowPathBlocked(false);
+    {
+        auto diag = readAsync();
+        REQUIRE(diag->isNotification());
+        REQUIRE_EQ(diag->asNotification().method, LSPMethod::TextDocumentPublishDiagnostics);
+        auto params = getPublishDiagnosticParams(diag->asNotification());
+        REQUIRE(params.has_value());
+        CHECK_EQ((*params)->uri, getUri("b.rb"));
+    }
+
+    // A newer fast-path edit merges with the delayed edit without canceling the slow path. The merged task must
+    // still contain a.rb, even though indexing moved that file out of the delayed task's params.
+    sendAsync(*changeFile("b.rb", updatedB, 3));
+    send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20)));
+    auto counters = getCounters();
+    CHECK_EQ(counters.getCategoryCounter("lsp.messages.processed", "sorbet.mergedEdits"), 1);
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath_canceled"), 0);
+    CHECK_EQ(readFile(getUri("b.rb")), updatedB);
+    CHECK_EQ(readFile(getUri("a.rb")), updatedA);
 }
 
 } // namespace sorbet::test::lsp
