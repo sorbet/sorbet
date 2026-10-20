@@ -11,7 +11,13 @@ class VisibilityChecker final {
 
 public:
     // Set the export bits of the symbols in the packages of `files`.
+    //
+    // Only depends on the symbols that namer entered and the exports recorded on each `PackageInfo`, so this runs
+    // before resolver.
     static void propagateExports(core::GlobalState &gs, absl::Span<const ast::ParsedFile> files);
+
+    // Report errors in the `export` lines of the resolved `__package.rb` files in `files`.
+    static void reportExportErrors(core::GlobalState &gs, absl::Span<const ast::ParsedFile> files);
 
     // Report references in `files` to constants that aren't visible to them.
     static void checkReferences(core::GlobalState &gs, WorkerPool &workers, absl::Span<const ast::ParsedFile> files);
