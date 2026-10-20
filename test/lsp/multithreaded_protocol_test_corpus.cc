@@ -2364,4 +2364,132 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedNewerEditMergedInto
     CHECK(sawNewerEditError);
 }
 
+// When a fast path edit's preemption is deferred to a later stratum and a slow path edit arrives behind it (with a
+// non-edit request in between, so LSPPreprocessor doesn't merge them), the processing thread cancels the scheduled
+// preemption, moves the edits to the front of the queue, and merges them into one slow path edit.
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedSlowPathEditPromotedPastDeferredPreemption") {
+    vector<pair<string, string>> files = {
+        {"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A"}).build()},
+        {"a.rb", "# typed: true\n"
+                 "module Root\n"
+                 "  class A\n"
+                 "    extend T::Sig\n"
+                 "    sig {returns(String)}\n"
+                 "    def value\n"
+                 "      \"old\"\n"
+                 "    end\n"
+                 "  end\n"
+                 "end\n"},
+        {"b.rb", "# typed: true\n"
+                 "module Root\n"
+                 "  class B\n"
+                 "  end\n"
+                 "end\n"},
+        {"foo/__package.rb", PackageTextBuilder().withName("Root::Foo").withImports({"Root"}).build()},
+        {"foo/a.rb", "# typed: true\n"
+                     "module Root::Foo\n"
+                     "  class Consumer\n"
+                     "    def value\n"
+                     "      Root::A.new.value\n"
+                     "    end\n"
+                     "  end\n"
+                     "end\n"},
+    };
+    auto opts = make_shared<realmain::options::Options>();
+    opts->cacheSensitiveOptions.sorbetPackages = true;
+    opts->packageDirected = true;
+    // Pause after resolving each stratum, to give the later requests time to arrive while the preemption is deferred.
+    opts->sleepInSlowPathSeconds = 1;
+    resetState(opts);
+    writeFilesToFS(files);
+    for (auto &[path, _] : files) {
+        lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/{}", rootPath, path));
+    }
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->enableTypecheckInfo = true;
+    assertErrorDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
+
+    assertErrorDiagnostics(send(*openFile("a.rb", files[1].second)), {});
+    assertErrorDiagnostics(send(*openFile("b.rb", files[2].second)), {});
+
+    setSlowPathBlocked(true);
+    sendAsync(*changeFile("b.rb",
+                          "# typed: true\n"
+                          "module Root\n"
+                          "  class B\n"
+                          "    class Inner\n"
+                          "      def bar\n"
+                          "        Root::A.n\n"
+                          "      end\n"
+                          "    end\n"
+                          "  end\n"
+                          "end\n",
+                          2));
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // This fast path also typechecks foo/a.rb, so its preemption is deferred from Root's stratum to Root::Foo's.
+    sendAsync(*changeFile("a.rb",
+                          "# typed: true\n"
+                          "module Root\n"
+                          "  class A\n"
+                          "    extend T::Sig\n"
+                          "    sig {returns(Integer)}\n"
+                          "    def value\n"
+                          "      1\n"
+                          "    end\n"
+                          "  end\n"
+                          "end\n",
+                          2));
+    setSlowPathBlocked(false);
+
+    // Root's stratum (and with it, the deferral) is done once its diagnostics are published.
+    {
+        auto diag = readAsync();
+        REQUIRE(diag->isNotification());
+        REQUIRE_EQ(diag->asNotification().method, LSPMethod::TextDocumentPublishDiagnostics);
+    }
+
+    // While Root::Foo's stratum sleeps: a request (which stops LSPPreprocessor from merging the edits), then a slow
+    // path edit with a type error.
+    sendAsync(*hover("a.rb", 2, 9));
+    sendAsync(*changeFile("b.rb",
+                          "# typed: true\n"
+                          "module Root\n"
+                          "  class B\n"
+                          "    class Inner\n"
+                          "      def bar\n"
+                          "        Root::A.n\n"
+                          "      end\n"
+                          "    end\n"
+                          "    class AnotherNewClass; end\n"
+                          "    T.let(1, String)\n"
+                          "  end\n"
+                          "end\n",
+                          3));
+
+    bool sawHover = false;
+    bool sawNewerEditError = false;
+    for (int i = 0; i < 20 && !(sawHover && sawNewerEditError); i++) {
+        auto msg = readAsync();
+        if (msg->isResponse()) {
+            sawHover = sawHover || msg->asResponse().requestMethod == LSPMethod::TextDocumentHover;
+        } else if (msg->asNotification().method == LSPMethod::TextDocumentPublishDiagnostics) {
+            auto params = getPublishDiagnosticParams(msg->asNotification());
+            REQUIRE(params.has_value());
+            if ((*params)->uri == getUri("b.rb")) {
+                sawNewerEditError = absl::c_any_of((*params)->diagnostics, [](auto &diag) {
+                    return absl::StrContains(diag->message, "does not have asserted type");
+                });
+            }
+        }
+    }
+    CHECK(sawHover);
+    CHECK(sawNewerEditError);
+}
+
 } // namespace sorbet::test::lsp
