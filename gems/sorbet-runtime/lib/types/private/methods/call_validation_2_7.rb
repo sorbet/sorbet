@@ -2250,7 +2250,7 @@ module T::Private::Methods::CallValidation
   def self.create_validator_method_optional_args1_2(mod, original_method, method_sig, original_visibility, return_type, arg0_type, arg1_type)
     T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |*args, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
-      unless arg0_type.valid?(args[0])
+      unless args.empty? || arg0_type.valid?(args[0])
         CallValidation.report_error(
           method_sig,
           method_sig.arg_types[0][1].error_message_for_obj(args[0]),
@@ -2357,7 +2357,7 @@ module T::Private::Methods::CallValidation
   def self.create_validator_method_optional_args1_3(mod, original_method, method_sig, original_visibility, return_type, arg0_type, arg1_type, arg2_type)
     T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |*args, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
-      unless arg0_type.valid?(args[0])
+      unless args.empty? || arg0_type.valid?(args[0])
         CallValidation.report_error(
           method_sig,
           method_sig.arg_types[0][1].error_message_for_obj(args[0]),
@@ -2416,7 +2416,7 @@ module T::Private::Methods::CallValidation
   def self.create_validator_method_optional_args2_3(mod, original_method, method_sig, original_visibility, return_type, arg0_type, arg1_type, arg2_type)
     T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |*args, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
-      unless arg0_type.valid?(args[0])
+      unless args.empty? || arg0_type.valid?(args[0])
         CallValidation.report_error(
           method_sig,
           method_sig.arg_types[0][1].error_message_for_obj(args[0]),
@@ -2427,7 +2427,7 @@ module T::Private::Methods::CallValidation
           caller_offset: -1
         )
       end
-      unless arg1_type.valid?(args[1])
+      unless args.length <= 1 || arg1_type.valid?(args[1])
         CallValidation.report_error(
           method_sig,
           method_sig.arg_types[1][1].error_message_for_obj(args[1]),
@@ -2545,7 +2545,7 @@ module T::Private::Methods::CallValidation
   def self.create_validator_method_optional_args1_4(mod, original_method, method_sig, original_visibility, return_type, arg0_type, arg1_type, arg2_type, arg3_type)
     T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |*args, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
-      unless arg0_type.valid?(args[0])
+      unless args.empty? || arg0_type.valid?(args[0])
         CallValidation.report_error(
           method_sig,
           method_sig.arg_types[0][1].error_message_for_obj(args[0]),
@@ -2615,7 +2615,7 @@ module T::Private::Methods::CallValidation
   def self.create_validator_method_optional_args2_4(mod, original_method, method_sig, original_visibility, return_type, arg0_type, arg1_type, arg2_type, arg3_type)
     T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |*args, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
-      unless arg0_type.valid?(args[0])
+      unless args.empty? || arg0_type.valid?(args[0])
         CallValidation.report_error(
           method_sig,
           method_sig.arg_types[0][1].error_message_for_obj(args[0]),
@@ -2626,7 +2626,7 @@ module T::Private::Methods::CallValidation
           caller_offset: -1
         )
       end
-      unless arg1_type.valid?(args[1])
+      unless args.length <= 1 || arg1_type.valid?(args[1])
         CallValidation.report_error(
           method_sig,
           method_sig.arg_types[1][1].error_message_for_obj(args[1]),
@@ -2685,7 +2685,7 @@ module T::Private::Methods::CallValidation
   def self.create_validator_method_optional_args3_4(mod, original_method, method_sig, original_visibility, return_type, arg0_type, arg1_type, arg2_type, arg3_type)
     T::Private::ClassUtils.def_with_visibility(mod, method_sig.method_name, original_visibility) do |*args, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
-      unless arg0_type.valid?(args[0])
+      unless args.empty? || arg0_type.valid?(args[0])
         CallValidation.report_error(
           method_sig,
           method_sig.arg_types[0][1].error_message_for_obj(args[0]),
@@ -2696,7 +2696,7 @@ module T::Private::Methods::CallValidation
           caller_offset: -1
         )
       end
-      unless arg1_type.valid?(args[1])
+      unless args.length <= 1 || arg1_type.valid?(args[1])
         CallValidation.report_error(
           method_sig,
           method_sig.arg_types[1][1].error_message_for_obj(args[1]),
@@ -2707,7 +2707,7 @@ module T::Private::Methods::CallValidation
           caller_offset: -1
         )
       end
-      unless arg2_type.valid?(args[2])
+      unless args.length <= 2 || arg2_type.valid?(args[2])
         CallValidation.report_error(
           method_sig,
           method_sig.arg_types[2][1].error_message_for_obj(args[2]),
