@@ -1,0 +1,4 @@
+# typed: true
+# assert-slow-path: true
+module Opus::Foo
+end
