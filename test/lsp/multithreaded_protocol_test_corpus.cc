@@ -2108,4 +2108,136 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedPreemptionWaitsForE
     }
 }
 
+// A fast path edit can typecheck files beyond the ones that it edits: when an edit adds a method, every file that
+// mentions the method's name is typechecked with it (using the incremental namer). Those extra files can belong to a
+// later stratum than the edited file, so a preempting fast path must wait for the slow path to reach the stratum of
+// the extra files too, not just the stratum of the edited ones. Otherwise the incremental namer enters the extra
+// files' symbols into a symbol table that the slow path hasn't reached yet, and nothing ever linearizes them.
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedPreemptionWaitsForStratumOfFastPathExtraFiles") {
+    auto opts = make_shared<realmain::options::Options>();
+    opts->cacheSensitiveOptions.sorbetPackages = true;
+    opts->packageDirected = true;
+    resetState(opts);
+
+    vector<pair<string, string>> files = {
+        {"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A"}).build()},
+        {"a.rb", "# typed: true\n"
+                 "module Root\n"
+                 "  class A\n"
+                 "  end\n"
+                 "end\n"},
+        {"b.rb", "# typed: true\n"
+                 "module Root\n"
+                 "  class B\n"
+                 "  end\n"
+                 "end\n"},
+        {"foo/__package.rb",
+         PackageTextBuilder().withName("Root::Foo").withExports({"Root::Foo::A"}).withImports({"Root"}).build()},
+        {"foo/a.rb", "# typed: true\n"
+                     "module Root::Foo\n"
+                     "  class A\n"
+                     "    def foo\n"
+                     "      T.unsafe(Root::A.new).bar\n"
+                     "    end\n"
+                     "  end\n"
+                     "end\n"},
+    };
+
+    writeFilesToFS(files);
+
+    for (auto &[path, _] : files) {
+        this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/{}", this->rootPath, path));
+    }
+
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->enableTypecheckInfo = true;
+    assertErrorDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
+
+    assertErrorDiagnostics(send(*openFile("a.rb", files[1].second)), {});
+    assertErrorDiagnostics(send(*openFile("b.rb", files[2].second)), {});
+
+    setSlowPathBlocked(true);
+
+    {
+        auto cancellationExpected = false;
+        auto preemptionsExpected = 1;
+
+        // Adding a class to b.rb takes the slow path, which starts over from the first stratum.
+        sendAsync(*changeFile("b.rb",
+                              "# typed: true\n"
+                              "module Root\n"
+                              "  class B\n"
+                              "    class Inner\n"
+                              "      def baz\n"
+                              "        Root::A.n\n"
+                              "      end\n"
+                              "    end\n"
+                              "  end\n"
+                              "end\n",
+                              2, cancellationExpected, preemptionsExpected));
+    }
+
+    // Wait for typechecking to start.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // Adding a method to a.rb (first stratum) takes the fast path, which also typechecks foo/a.rb (second stratum)
+    // because it mentions `bar`.
+    sendAsync(*changeFile("a.rb",
+                          "# typed: true\n"
+                          "module Root\n"
+                          "  class A\n"
+                          "    def bar; end\n"
+                          "  end\n"
+                          "end\n",
+                          2));
+
+    setSlowPathBlocked(false);
+
+    // This is the slow path publishing a notification about the call to Root::A.n in b.rb, which happens in the first
+    // stratum, before the slow path reaches the stratum that contains foo/a.rb.
+    {
+        auto diag = readAsync();
+        REQUIRE(diag->isNotification());
+        REQUIRE_EQ(diag->asNotification().method, LSPMethod::TextDocumentPublishDiagnostics);
+        auto &params = get<unique_ptr<PublishDiagnosticsParams>>(diag->asNotification().params);
+        CHECK_EQ(params->uri, fmt::format("file://{}/b.rb", this->rootPath));
+    }
+
+    // We should see a fast path start notification
+    {
+        auto diag = readAsync();
+        REQUIRE(diag->isNotification());
+        REQUIRE_EQ(diag->asNotification().method, LSPMethod::SorbetTypecheckRunInfo);
+        auto &runInfo = get<unique_ptr<SorbetTypecheckRunInfo>>(diag->asNotification().params);
+        CHECK_EQ(runInfo->typecheckingPath, TypecheckingPath::Fast);
+        CHECK_EQ(runInfo->status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // And then a fast path end notification
+    {
+        auto diag = readAsync();
+        REQUIRE(diag->isNotification());
+        REQUIRE_EQ(diag->asNotification().method, LSPMethod::SorbetTypecheckRunInfo);
+        auto &runInfo = get<unique_ptr<SorbetTypecheckRunInfo>>(diag->asNotification().params);
+        CHECK_EQ(runInfo->typecheckingPath, TypecheckingPath::Fast);
+        CHECK_EQ(runInfo->status, SorbetTypecheckRunStatus::Ended);
+        CHECK(absl::c_contains(runInfo->filesTypechecked, fmt::format("{}/foo/a.rb", this->rootPath)));
+    }
+
+    // Finally, we'll see the slow path end
+    {
+        auto diag = readAsync();
+        REQUIRE(diag->isNotification());
+        REQUIRE_EQ(diag->asNotification().method, LSPMethod::SorbetTypecheckRunInfo);
+        auto &runInfo = get<unique_ptr<SorbetTypecheckRunInfo>>(diag->asNotification().params);
+        CHECK_EQ(runInfo->typecheckingPath, TypecheckingPath::Slow);
+        CHECK_EQ(runInfo->status, SorbetTypecheckRunStatus::Ended);
+    }
+}
+
 } // namespace sorbet::test::lsp
