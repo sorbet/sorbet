@@ -1316,8 +1316,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PreemptionCanceledForSlowPathWorks
         vector<unique_ptr<LSPMessage>> msgs;
         msgs.emplace_back(readAsync());
         // TODO(trevor): why does this report the same error twice?
-        assertErrorDiagnostics(move(msgs), {{"foo.rb", 4, "Unable to resolve constant `Modu`"},
-                                            {"foo.rb", 4, "Unable to resolve constant `Modu`"}});
+        assertErrorDiagnostics(move(msgs), {{"foo.rb", 4, "Unable to resolve constant `Modu`"}});
     }
 
     // And finally the slow path finishes
@@ -1460,8 +1459,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PreemptionCanceledForSlowPathWorks
         vector<unique_ptr<LSPMessage>> msgs;
         msgs.emplace_back(readAsync());
         // TODO(trevor): why does this report the same error twice?
-        assertErrorDiagnostics(move(msgs), {{"foo.rb", 4, "Unable to resolve constant `Modu`"},
-                                            {"foo.rb", 4, "Unable to resolve constant `Modu`"}});
+        assertErrorDiagnostics(move(msgs), {{"foo.rb", 4, "Unable to resolve constant `Modu`"}});
     }
 
     // And finally the slow path finishes
