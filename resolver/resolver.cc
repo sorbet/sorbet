@@ -198,13 +198,13 @@ private:
         shared_ptr<Nesting> scope;
         ast::ConstantLit *out;
         core::ClassOrModuleRef packageRegistryCursor;
-        bool resolutionFailed = false;
-        bool isOutermost = true;
-        bool legacyTestPath = false;
+        bool resolutionFailed : 1 = false;
+        bool isOutermost : 1 = true;
+        bool legacyTestPath : 1 = false;
         // Whether this constant is (part of) one of a ClassDef's mixin ancestors. Namer copies the arguments of
         // `include` and `extend` into the ClassDef's ancestors, but leaves the sends in the class body too, so resolver
         // resolves these constants twice. Errors are only reported for the copy in the class body.
-        bool isMixinAncestor = false;
+        bool isMixinAncestor : 1 = false;
         PackageCursorPosition packageCursorPosition = PackageCursorPosition::None;
 
         ConstantResolutionItem() = default;
