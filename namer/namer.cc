@@ -275,7 +275,7 @@ public:
         if (!klass.ancestors.empty()) {
             /* Superclass is typeAlias in parent scope, mixins are typeAlias in inner scope */
             for (auto &anc : klass.ancestors) {
-                if (!isValidAncestor(anc)) {
+                if (!isValidAncestor(anc, /* isOutermost */ true)) {
                     if (auto e = ctx.beginError(anc.loc(), core::errors::Namer::AncestorNotConstant)) {
                         e.setHeader("Superclasses must only contain constant literals");
                     }
@@ -337,7 +337,7 @@ public:
                 dest->emplace_back(arg.deepCopy());
                 continue;
             }
-            if (isValidAncestor(arg)) {
+            if (isValidAncestor(arg, /* isOutermost */ true)) {
                 dest->emplace_back(arg.deepCopy());
             } else {
                 if (auto e = ctx.beginError(arg.loc(), core::errors::Namer::AncestorNotConstant)) {
@@ -347,12 +347,14 @@ public:
         }
     }
 
-    bool isValidAncestor(const ast::ExpressionPtr &exp) {
-        if (ast::isa_tree<ast::EmptyTree>(exp) || exp.isSelfReference() || ast::isa_tree<ast::ConstantLit>(exp)) {
+    // `self` is a valid ancestor on its own, but `self::B` is a dynamic constant reference.
+    bool isValidAncestor(const ast::ExpressionPtr &exp, bool isOutermost) {
+        if (ast::isa_tree<ast::EmptyTree>(exp) || (isOutermost && exp.isSelfReference()) ||
+            ast::isa_tree<ast::ConstantLit>(exp)) {
             return true;
         }
         if (auto lit = ast::cast_tree<ast::UnresolvedConstantLit>(exp)) {
-            return isValidAncestor(lit->scope);
+            return isValidAncestor(lit->scope, /* isOutermost */ false);
         }
         return false;
     }
