@@ -42,8 +42,8 @@ void SorbetWorkspaceEditTask::mergeNewer(SorbetWorkspaceEditTask &task) {
     }
 
     // This cached information is now invalid.
-    task.cachedTypecheckingPath.reset();
-    cachedTypecheckingPath.reset();
+    task.cachedPrediction.reset();
+    cachedPrediction.reset();
 }
 
 void SorbetWorkspaceEditTask::preprocess(LSPPreprocessor &preprocessor) {
@@ -154,11 +154,11 @@ TypecheckingPath SorbetWorkspaceEditTask::getTypecheckingPath(const LSPIndexer &
     if (updates != nullptr) {
         return updates->typecheckingPath;
     }
-    if (!cachedTypecheckingPath.has_value() || cachedTypecheckingPathVersion != index.getVersion()) {
-        cachedTypecheckingPath = index.getTypecheckingPath(params->updates);
-        cachedTypecheckingPathVersion = index.getVersion();
+    if (!cachedPrediction.has_value() || cachedPredictionVersion != index.getVersion()) {
+        cachedPrediction = index.predictTypecheckingPath(params->updates);
+        cachedPredictionVersion = index.getVersion();
     }
-    return cachedTypecheckingPath->path;
+    return cachedPrediction->path;
 }
 
 bool SorbetWorkspaceEditTask::canPreempt(const LSPIndexer &index) const {
@@ -171,7 +171,7 @@ const SorbetWorkspaceEditParams &SorbetWorkspaceEditTask::getParams() const {
 
 core::packages::Stratum SorbetWorkspaceEditTask::preemptionStratum(FileStratumMapping info) const {
     // Only fast path edits preempt, and `canPreempt` populates the cache before we're asked for a stratum.
-    ENFORCE(cachedTypecheckingPath.has_value());
+    ENFORCE(cachedPrediction.has_value());
 
     vector<string_view> paths;
     paths.reserve(this->params->updates.size());
@@ -181,7 +181,7 @@ core::packages::Stratum SorbetWorkspaceEditTask::preemptionStratum(FileStratumMa
     // resolved the strata that they belong to. Otherwise, the incremental namer would enter their symbols into the
     // in-progress symbol table without linearizing them, and typecheck them against a symbol table that's missing
     // their dependencies.
-    const auto &files = cachedTypecheckingPath->files;
+    const auto &files = cachedPrediction->files;
     auto stratum = std::max(info.getStratumForPaths(paths), info.getStratumForFiles(files.extraFiles));
 
     // A fast path that uses the incremental namer also retypechecks the `__package.rb` file of every package that it

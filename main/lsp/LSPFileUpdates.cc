@@ -107,7 +107,7 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
         // that the `updatedFile` and `fref.data(gs)` actually are the same File object. For this case, we have to find
         // the old File's hashes in `evictedFiles`.
         //
-        // When called from `LSPIndexer::getTypecheckingPath` (to predict a queued edit's path) or from the
+        // When called from `LSPIndexer::predictTypecheckingPath` (to predict a queued edit's path) or from the
         // typechecker, the old file will not yet have been evicted, so `updatedFile` represents the new File, and the
         // thing in GlobalState is the old File.
         const auto &oldLocalSymbolTableHashes = evictedFiles.empty()
@@ -177,7 +177,7 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
             //
             // We were called from one of two places, both of which are deciding a typechecking path:
             // - commitEdit, to decide the path of the edit that it's committing.
-            // - canPreempt (via LSPIndexer::getTypecheckingPath), to predict that path for a queued edit.
+            // - canPreempt (via LSPIndexer::predictTypecheckingPath), to predict that path for a queued edit.
             //
             // Either way, this many files means the slow path, which doesn't use the list of extra files, so let's
             // early exit.

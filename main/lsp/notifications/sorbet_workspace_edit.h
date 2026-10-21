@@ -13,11 +13,12 @@ class SorbetWorkspaceEditTask final : public LSPDangerousTypecheckerTask {
     absl::Notification startedNotification;
     std::unique_ptr<Timer> latencyCancelSlowPath;
     std::unique_ptr<SorbetWorkspaceEditParams> params;
-    // Caches the fast path decision for the provided update, along with the files outside of the update that the fast
-    // path will also typecheck (e.g., because they mention a method whose definition changed). Becomes invalidated
-    // when the update changes, or when the indexer commits another edit (e.g., one ahead of this one in the queue).
-    mutable std::optional<LSPIndexer::TypecheckingPathResult> cachedTypecheckingPath;
-    mutable uint32_t cachedTypecheckingPathVersion = 0;
+    // Caches the indexer's prediction of the typechecking path for the provided update, along with the files outside of
+    // the update that the fast path will also typecheck (e.g., because they mention a method whose definition
+    // changed). Becomes invalidated when the update changes, or when the indexer commits another edit (e.g., one ahead
+    // of this one in the queue).
+    mutable std::optional<LSPIndexer::TypecheckingPathResult> cachedPrediction;
+    mutable uint32_t cachedPredictionVersion = 0;
     // HACK: In the event that this edit is too large to index serially, stash the indexer here for use in `runSpecial`.
     LSPIndexer *indexer = nullptr;
 
@@ -39,6 +40,8 @@ public:
     core::packages::Stratum preemptionStratum(FileStratumMapping info) const override;
 
     bool canPreempt(const LSPIndexer &index) const override;
+    // The typechecking path that `commitEdit` decided, once this edit has been committed. Before that, the path that
+    // the indexer predicts `commitEdit` would decide.
     TypecheckingPath getTypecheckingPath(const LSPIndexer &index) const;
 };
 
