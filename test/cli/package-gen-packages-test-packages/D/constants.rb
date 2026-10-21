@@ -7,7 +7,7 @@ module D
     CONSTANT_FROM_D_CLASS = "Hello from ClassFromD"
   end
 
-  puts B::CONSTANT_FROM_B
+  FROM_B = T.let(B::CONSTANT_FROM_B, String)
 
   class EnumFromD < T::Enum
     enums do

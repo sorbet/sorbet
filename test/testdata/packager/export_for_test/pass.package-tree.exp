@@ -82,7 +82,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <runtime method definition of self.stub_stuff!>
     end
+  end
 
+  module ::Opus::Foo::Checks<<C Checks>> < ()
     <emptyTree>::<C Opus>::<C Foo>::<C Bar>::<C BarClass>
 
     <emptyTree>::<C Test>::<C Opus>::<C Foo>::<C Bar>::<C BarClassTest>

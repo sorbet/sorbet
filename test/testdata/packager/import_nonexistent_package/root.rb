@@ -1,6 +1,6 @@
 # typed: strict
 
-module Root
+module Root::Probe
   Root::A::Foo
 # ^^^^^^^ error: `Root::A` is not imported
 end

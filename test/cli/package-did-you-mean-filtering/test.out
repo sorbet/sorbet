@@ -1,10 +1,10 @@
 root.rb:4: Unable to resolve constant `SomePkg` https://srb.help/5002
-     4 |  SomePkg
-          ^^^^^^^
+     4 |  SOME_PKG = SomePkg
+                     ^^^^^^^
   Did you mean `Project::SomePkg1`? Use `-a` to autocorrect
     root.rb:4: Replace with `Project::SomePkg1`
-     4 |  SomePkg
-          ^^^^^^^
+     4 |  SOME_PKG = SomePkg
+                     ^^^^^^^
     some_pkg1/helper.rb:3: `Project::SomePkg1` defined here
      3 |class Project::SomePkg1::Helper; end
               ^^^^^^^^^^^^^^^^^

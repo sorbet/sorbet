@@ -7,6 +7,6 @@ module MyPackage
 
   class Foo < Base
   end
-
-  Foo.new.from_base
 end
+
+MyPackage::Foo.new.from_base

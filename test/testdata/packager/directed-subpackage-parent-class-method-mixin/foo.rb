@@ -14,6 +14,6 @@ module MyPackage
   class Foo
     include M
   end
-
-  Foo.class_method_from_mixin
 end
+
+MyPackage::Foo.class_method_from_mixin
