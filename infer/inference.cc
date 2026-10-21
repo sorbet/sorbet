@@ -308,10 +308,9 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                 // dead-code errors (synthetic bindings and T.absurd) after a terminating expression.
                 const bool silentAfterTerminator = absurdAfterTerminator && silenceDeadCodeError(bind.value);
                 if (typecheck || silentAfterTerminator || !ctx.state.lspQuery.isEmpty()) {
-                    bind.bind.type = current.processBinding(ctx, *cfg, bind, bb->outerLoops,
-                                                            bind.bind.variable.minLoops(*cfg), knowledgeFilter, *constr,
-                                                            methodReturnType, parentUpdateKnowledgeReceiver,
-                                                            deadOnEntry);
+                    bind.bind.type = current.processBinding(
+                        ctx, *cfg, bind, bb->outerLoops, bind.bind.variable.minLoops(*cfg), knowledgeFilter, *constr,
+                        methodReturnType, parentUpdateKnowledgeReceiver, deadOnEntry);
                     if (cfg::isa_instruction<cfg::Send>(bind.value)) {
                         totalSendCount++;
                         if (bind.bind.type && !bind.bind.type.isUntyped()) {

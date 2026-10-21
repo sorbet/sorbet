@@ -1012,12 +1012,10 @@ core::TypePtr flatmapHack(core::Context ctx, const core::TypePtr &receiver, cons
     return mapType;
 }
 
-core::TypePtr
-Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Binding &bind, int loopCount,
-                            int bindMinLoops, KnowledgeFilter &knowledgeFilter, core::TypeConstraint &constr,
-                            const core::TypePtr &methodReturnType,
-                            const optional<cfg::BasicBlock::BlockExitCondInfo> &parentUpdateKnowledgeReceiver,
-                            bool deadOnEntry) {
+core::TypePtr Environment::processBinding(
+    core::Context ctx, const cfg::CFG &inWhat, cfg::Binding &bind, int loopCount, int bindMinLoops,
+    KnowledgeFilter &knowledgeFilter, core::TypeConstraint &constr, const core::TypePtr &methodReturnType,
+    const optional<cfg::BasicBlock::BlockExitCondInfo> &parentUpdateKnowledgeReceiver, bool deadOnEntry) {
     try {
         core::TypeAndOrigins tp;
         bool noLoopChecking = cfg::isa_instruction<cfg::Alias>(bind.value) ||
