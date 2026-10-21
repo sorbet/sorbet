@@ -122,3 +122,37 @@ other state that would need to be reverted in the event of a cancelation. It
 begins running the slow path (which is very similar to initialization) and then
 if it hasn't been cancelled, it will commit the new `GlobalState` and free the
 state held by `UndoState`.
+
+## Fast Path, Preemption, and Cancellation
+
+A `SorbetWorkspaceEditTask` is queued, then committed, then run (see the
+comment on the class). Committing (`LSPIndexer::commitEdit`) applies the edit to
+the indexer's file table, and decides whether it takes the fast path or the slow
+path. An edit is only committed right before it runs, so the `TaskQueue` never
+holds a committed edit, and the preprocessor and processing threads only merge
+edits that haven't been committed.
+
+When there's no slow path running, the processing thread commits the edit at the
+front of the queue and runs it: synchronously on the typechecker thread if it
+takes the fast path, or as a new slow path (`runSpecial`) if it doesn't.
+
+While a slow path is running, the processing thread checks whether the task at
+the front of the queue can **preempt** it. For an edit, that means taking the
+fast path, which the indexer predicts without committing the edit
+(`LSPIndexer::predictTypecheckingPath`). If it can, the processing thread
+schedules a preemption (`LSPLoop::tryPreemptSlowPath`), and waits on the task
+queue's mutex. The slow path checks for a scheduled preemption while it
+typechecks each stratum. A task can only run once the slow path has reached the
+stratum the task needs (`LSPTask::preemptionStratum`): for an edit, that's the
+latest stratum of any file its predicted fast path typechecks. Until then, the
+preemption is rescheduled for that stratum. When it does run, the typechecker
+thread commits the edit while holding the task queue's mutex, and then runs it.
+
+A slow path edit **cancels** the running slow path instead. Canceling restores
+the typechecker's state from before the slow path (`UndoState`), so the
+canceling edit's update has to include everything since then: the slow path's
+own edits, and the fast path edits that preempted it. The indexer tracks those
+in `LSPIndexer::pendingTypecheckUpdates`. If a slow path edit arrives behind
+edits that are waiting to preempt, the processing thread moves the edits to the
+front of the queue and merges them into one slow path edit
+(`LSPLoop::promoteSlowPathEdits`), which cancels the slow path.
