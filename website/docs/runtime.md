@@ -227,12 +227,6 @@ For example, this should probably be placed as the first line of any `rake test`
 
 ### `.checked(:tests)` and `.void`
 
-<!--
-This is the only part that threw me. Maybe change the sentence to "...changes how .void returns values."? And then the next paragraph describes what's going on?
-
-"changes the meaning to .returns(T.anything)" is technically correct, but the way this is worded makes me think it has static behavior changes...but it can't have static behavior changes, because it's only a runtime thing.
--->
-
 As of sorbet-runtime 0.6.13065, using `.checked(:tests)` on a sig that returns `.void` makes the sig behave like `.returns(T.anything)` at runtime, that is: the return value is not substituted with a dummy value. (Statically, `.void` and `.returns(T.anything)` remain equivalent).
 
 Normally, putting `.void` in a signature means that the return value will be discarded at runtime and [replaced with a dummy value](sigs.md#returns--void-annotating-return-types). For `.checked(:tests)` (as of `0.6.13065`), that dummy value replacement does not happen, and the original return value is returned untouched. This applies even if the `:tests` checked level of the sig was set implicitly by `default_checked_level = :tests`.
