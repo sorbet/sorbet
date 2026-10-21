@@ -16,28 +16,6 @@ bad_test/a.rb:12: Unable to resolve constant `ClassMethods` https://srb.help/500
     NN |class Method < Object
         ^^^^^^^^^^^^^^^^^^^^^
 
-bad_test/a.rb:12: Unable to resolve constant `ClassMethods` https://srb.help/5002
-    12 |  extend ClassMethods
-                 ^^^^^^^^^^^^
-  Did you mean `Method`? Use `-a` to autocorrect
-    bad_test/a.rb:12: Replace with `Method`
-    12 |  extend ClassMethods
-                 ^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/method.rbi#LCENSORED: `Method` defined here
-    NN |class Method < Object
-        ^^^^^^^^^^^^^^^^^^^^^
-
-bad_test/a.rb:15: Unable to resolve constant `ClassMethods` https://srb.help/5002
-    15 |  include ClassMethods
-                  ^^^^^^^^^^^^
-  Did you mean `Method`? Use `-a` to autocorrect
-    bad_test/a.rb:15: Replace with `Method`
-    15 |  include ClassMethods
-                  ^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/method.rbi#LCENSORED: `Method` defined here
-    NN |class Method < Object
-        ^^^^^^^^^^^^^^^^^^^^^
-
 bad_test/a.rb:15: Unable to resolve constant `ClassMethods` https://srb.help/5002
     15 |  include ClassMethods
                   ^^^^^^^^^^^^
@@ -229,4 +207,4 @@ root/test/root.rb:12: `T.class_of(Test::Root)` is part of a subpackage namespace
     root/a/b/__package.rb:3: First subpackage defined here
      3 |class Root::A::B < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 24
+Errors: 22

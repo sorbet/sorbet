@@ -7,5 +7,4 @@ class Foo
 
   include A::B
   #       ^^^^ error: Resolving constants through type aliases is not supported
-  #       ^^^^ error: Resolving constants through type aliases is not supported
 end

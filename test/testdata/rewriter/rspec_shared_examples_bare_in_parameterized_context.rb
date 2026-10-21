@@ -48,11 +48,8 @@ end
 RSpec.describe 'consumer that does not include the outer' do
   include_context 'bare nested context inside parameterized'
   #               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `<shared_examples 'bare nested context inside parameterized'>`
-  #               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `<shared_examples 'bare nested context inside parameterized'>`
   include_examples 'bare nested examples inside parameterized'
   #                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `<shared_examples 'bare nested examples inside parameterized'>`
-  #                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `<shared_examples 'bare nested examples inside parameterized'>`
   include_examples 'bare nested examples_for inside parameterized'
-  #                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `<shared_examples 'bare nested examples_for inside parameterized'>`
   #                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `<shared_examples 'bare nested examples_for inside parameterized'>`
 end

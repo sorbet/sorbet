@@ -4,7 +4,6 @@ class BadNamespace::Foo < BadParent
   #                       ^^^^^^^^^ error: Unable to resolve constant `BadParent`
   include BadMixin
   #       ^^^^^^^^ error: Unable to resolve constant `BadMixin`
-  #       ^^^^^^^^ error: Unable to resolve constant `BadMixin`
 
   def foo
     @foo
