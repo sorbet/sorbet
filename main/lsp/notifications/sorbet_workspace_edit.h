@@ -8,6 +8,27 @@
 namespace sorbet::realmain::lsp {
 class LSPFileUpdates;
 class SorbetWorkspaceEditParams;
+/**
+ * An edit to one or more files. Its lifecycle:
+ *
+ * 1. Queued. The preprocessor creates the task, and may merge newer edits into it (`mergeNewer`). So may the
+ *    processing thread, when it promotes a slow path edit past a preemption (`LSPLoop::promoteSlowPathEdits`). While a
+ *    slow path is running, `canPreempt` and `preemptionStratum` use the indexer's prediction of the typechecking path
+ *    that committing the edit would decide (`cachedPrediction`).
+ *
+ * 2. Committed. `index` commits the edit to the indexer (`LSPIndexer::commitEdit`), which decides its typechecking path
+ *    and returns the `LSPFileUpdates` for the typechecker (`updates`). An edit with too many files to commit serially
+ *    is instead committed at the start of `runSpecial`, which can use the typechecker's workers.
+ *
+ *    An edit is only committed right before it runs: either by the processing thread, which then hands it to the
+ *    typechecker, or by a preemption, which then runs it. So the task queue never holds a committed edit, and merging
+ *    only ever happens before committing.
+ *
+ * 3. Run. On the fast path, `run` typechecks it, either normally or while preempting a slow path. On the slow path,
+ *    `runSpecial` starts a cancelable slow path, and lets the processing thread continue once it has started
+ *    (`schedulerWaitUntilReady`). A later slow path edit can cancel that slow path, in which case the later edit's
+ *    update includes this edit's files too (see `LSPIndexer::commitEdit`).
+ */
 class SorbetWorkspaceEditTask final : public LSPDangerousTypecheckerTask {
     std::unique_ptr<LSPFileUpdates> updates;
     absl::Notification startedNotification;
