@@ -47,6 +47,23 @@ class LSPLoop {
 
     void runTask(std::unique_ptr<LSPTask> task);
 
+    /**
+     * Called while a slow path is running and the task at the front of the queue can preempt it. Schedules a
+     * preemption, and waits (releasing the mutex) until the front of the queue can no longer preempt, either because
+     * the preemption ran or because it's no longer possible.
+     *
+     * Returns `false` if the preemption couldn't be scheduled (e.g., because the slow path just finished), in which
+     * case the caller should run the front task normally.
+     */
+    bool tryPreemptSlowPath() ABSL_EXCLUSIVE_LOCKS_REQUIRED(taskQueue->getMutex());
+
+    /**
+     * Called after a scheduled preemption either ran or was canceled. If the preemption stopped because a slow path
+     * edit is behind edits that could preempt, moves those edits to the front of the queue and merges them into one
+     * slow path edit, which will cancel the running slow path.
+     */
+    void promoteSlowPathEdits() ABSL_EXCLUSIVE_LOCKS_REQUIRED(taskQueue->getMutex());
+
     /** Returns `true` if 5 minutes have elapsed since LSP last sent counters to statsd. */
     bool shouldSendCountersToStatsd(std::chrono::time_point<std::chrono::steady_clock> currentTime) const;
     /** Sends counters to statsd. */
