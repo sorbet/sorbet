@@ -1,0 +1,11 @@
+# typed: true
+# assert-fast-path: outer.rb
+
+module Outer
+  def self.helper; 1; end
+
+  class Thing; end
+end
+
+Outer.helper
+Outer::Thing
