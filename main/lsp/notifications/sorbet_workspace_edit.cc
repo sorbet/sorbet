@@ -104,7 +104,7 @@ void SorbetWorkspaceEditTask::runSpecial(LSPTypechecker &typechecker, WorkerPool
     }
     if (indexer) {
         ENFORCE(updates == nullptr);
-        // Using the `indexer` here is safe; the indexing thread is blocked until `startedNotification.Notify` is called
+        // Using the `indexer` here is safe; the processing thread waits until `startedNotification.Notify` is called
         // later in this function.
         // This is really gnarly; there's got to be a cleaner way to do threading here. We can't move this out because
         // we need `workers`, which is a resource that is explicitly managed by typechecking.

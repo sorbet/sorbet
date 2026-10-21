@@ -365,7 +365,7 @@ unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edi
                                                        make_shared<core::NullFlusher>());
         auto trees = hashing::Hashing::indexAndComputeFileHashes(
             *gs, config->opts, *config->logger, absl::MakeSpan(update.updatedFileRefs), workers, kvstore);
-        ENFORCE(trees.hasResult(), "The indexer thread doesn't support cancellation");
+        ENFORCE(trees.hasResult(), "commitEdit doesn't support cancellation");
     }
 
     // _Now_ that we've computed file hashes, we can make a fast path determination.
@@ -476,7 +476,7 @@ bool LSPIndexer::preemptionPossible(const TaskQueue::QueueType &tasks) const {
     }
 
     // If the first task that can't preempt is a workspace edit, return that preemption is no longer possible so that
-    // the main thread will move the slow path edit to the front of the queue and force a slow path cancellation.
+    // the processing thread will move the slow path edit to the front of the queue and force a slow path cancellation.
     if (dynamic_cast<SorbetWorkspaceEditTask *>(cannotPreempt->get())) {
         return false;
     }

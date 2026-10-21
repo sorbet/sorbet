@@ -1,5 +1,23 @@
 # LSP
 
+## Threads
+
+In multithreaded mode, Sorbet's language server runs these threads. Comments in
+`main/lsp` refer to them by these names.
+
+- **Reader** (`lspReader`): reads messages from the client into a message
+  queue. Watchman has its own reader (`watchmanReader`) for file change events.
+- **Preprocessor** (`lspPreprocess`): turns messages into `LSPTask`s, merges
+  consecutive edits (`LSPPreprocessor::mergeFileChanges`), and pushes the tasks
+  onto the `TaskQueue`.
+- **Processing** (the thread that runs `LSPLoop::runLSP`): takes tasks off the
+  `TaskQueue`, runs their `index` hook against the `LSPIndexer`, and hands them
+  to the typechecker. It owns the `LSPIndexer`, except while it's waiting for a
+  task that has its own way of handing the indexer to the typechecker thread
+  (a preemption, or `SorbetWorkspaceEditTask::runSpecial`).
+- **Typechecker** (`Typechecker`): runs tasks against the `LSPTypechecker`,
+  including slow paths, and preemptions of slow paths.
+
 ## Initialization
 
 ```mermaid
@@ -7,7 +25,7 @@ sequenceDiagram
   box rgba(255,255,255,0.2) Preprocessor Thread
   participant LSPPreprocessor
   end
-  box rgba(255,255,255,0.2) Main Thread
+  box rgba(255,255,255,0.2) Processing Thread
   participant LSPLoop
   participant LSPIndexer
   end
@@ -33,20 +51,21 @@ and received by the preprocessor thread. The preprocessor thread then
 immediately queues a `InitializedTask` in the `TaskQueue` that the `LSPLoop`
 consumes.
 
-That task is dequeued in the `LSPLoop` instance running on the main thread, and
-run. When its `index` hook is called, it copies the indexer's `GlobalState` and
-takes ownership of the `KeyValueStore` that is held by the `LSPIndexer` in an
-instance variable, so that those values will be available later when the `run`
-hook for that task is executed in the typechecker thread. As initialization is
-not cancelable or preemptable, the task also pauses the `TaskQueue` that the
-`LSPLoop` is reading from, to ensure that we don't attempt to handle any queries
-without a valid `GlobalState` present.
+That task is dequeued in the `LSPLoop` instance running on the processing
+thread, and run. When its `index` hook is called, it copies the indexer's
+`GlobalState` and takes ownership of the `KeyValueStore` that is held by the
+`LSPIndexer` in an instance variable, so that those values will be available
+later when the `run` hook for that task is executed in the typechecker thread.
+As initialization is not cancelable or preemptable, the task also pauses the
+`TaskQueue` that the `LSPLoop` is reading from, to ensure that we don't attempt
+to handle any queries without a valid `GlobalState` present.
 
 Next the task's `run` hook is executed on the typechecker thread. This allows
 the task to call the `LSPTypechecker::initialize` method, which kicks off a slow
 path to populate the `GlobalState` copy from the indexer, using the
 `KeyValueStore` if it's available. Once the slow path has finished, the
-typechecker makes a copy of its file table to send back to the indexer thread. 
+typechecker makes a copy of its file table to send back to the processing
+thread.
 
 > [!NOTE]
 > Keeping the file tables of the indexer and typechecker threads in sync is
@@ -56,11 +75,11 @@ typechecker makes a copy of its file table to send back to the indexer thread.
 > default to the slow path.
 
 The copy of the file table that's made in the `LSPTypechecker::initialize`
-method is moved to an `IndexerInitializationTask`. The typechecker places the task
-at the front of the queue, and unblocks the main thread again. When the main
-thread wakes up and processes that event, the `IndexerInitializationTask::index`
-hook will move the file table entries into the `GlobalState` in the
-`LSPIndexer` instance.
+method is moved to an `IndexerInitializationTask`. The typechecker places the
+task at the front of the queue, and unblocks the processing thread again. When
+the processing thread wakes up and processes that event, the
+`IndexerInitializationTask::index` hook will move the file table entries into
+the `GlobalState` in the `LSPIndexer` instance.
 
 ## Slow Path
 
@@ -69,7 +88,7 @@ sequenceDiagram
   box rgba(255,255,255,0.2) Preprocessor Thread
   participant LSPPreprocessor
   end
-  box rgba(255,255,255,0.2) Main Thread
+  box rgba(255,255,255,0.2) Processing Thread
   participant LSPLoop
   participant LSPIndexer
   end
@@ -86,8 +105,8 @@ sequenceDiagram
 ```
 
 The slow path begins with the preprocessor thread translating edit events into a
-`SorbetWorkspaceEdit` task. This task is then run on the main thread, and makes
-a fast or slow path decision when its `index` hook is run.
+`SorbetWorkspaceEdit` task. This task is then run on the processing thread, and
+makes a fast or slow path decision when its `index` hook is run.
 
 When it's determined that the slow path will run, the `LSPIndexer::commitEdit`
 method will be called from either the `index` hook, or the `runSpecial` hook,

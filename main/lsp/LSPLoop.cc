@@ -45,7 +45,8 @@ bool LSPLoop::shouldSendCountersToStatsd(chrono::time_point<chrono::steady_clock
 
 void LSPLoop::sendCountersToStatsd(chrono::time_point<chrono::steady_clock> currentTime) {
     Timer timeit(*config->logger, "LSPLoop::sendCountersToStatsd");
-    ENFORCE(this_thread::get_id() == mainThreadId, "sendCounterToStatsd can only be called from the main LSP thread.");
+    ENFORCE(this_thread::get_id() == processingThreadId,
+            "sendCounterToStatsd can only be called from the processing thread.");
     const auto &opts = config->opts;
     // Record process and version stats. Do this BEFORE clearing the thread counters!
     StatsD::addStandardMetrics();
@@ -236,7 +237,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
     // Bridges the gap between the {reader, watchman} threads and the typechecking thread.
     auto preprocessingThread = preprocessor.runPreprocessor(messageQueue, messageQueueMutex);
 
-    mainThreadId = this_thread::get_id();
+    processingThreadId = this_thread::get_id();
     {
         // Ensure Watchman thread gets unstuck when thread exits prior to initialization.
         NotifyNotificationOnDestruction notify(initializedNotification);

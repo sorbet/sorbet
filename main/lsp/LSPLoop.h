@@ -43,7 +43,7 @@ class LSPLoop {
      */
     std::chrono::time_point<std::chrono::steady_clock> lastMetricUpdateTime;
     /** ID of the processing thread, which runs `runLSP`: it indexes tasks and hands them to the typechecker. */
-    std::thread::id mainThreadId;
+    std::thread::id processingThreadId;
 
     void runTask(std::unique_ptr<LSPTask> task);
 
