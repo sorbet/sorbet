@@ -252,7 +252,8 @@ LSPIndexer::getTypecheckingPath(LSPFileUpdates &edit,
     return path;
 }
 
-TypecheckingPath LSPIndexer::getTypecheckingPath(const vector<shared_ptr<core::File>> &changedFiles) const {
+LSPIndexer::TypecheckingPathResult
+LSPIndexer::getTypecheckingPath(const vector<shared_ptr<core::File>> &changedFiles) const {
     static UnorderedMap<core::FileRef, shared_ptr<core::File>> emptyMap;
 
     // Avoid expensively computing file hashes if there are too many files and it's likely that we'd
@@ -261,14 +262,13 @@ TypecheckingPath LSPIndexer::getTypecheckingPath(const vector<shared_ptr<core::F
         config->logger->debug("Taking slow path because too many files changed ({} files > {} files)",
                               changedFiles.size(), config->opts.lspMaxFilesOnFastPath);
         prodCategoryCounterInc("lsp.slow_path_reason", "too_many_files");
-        return TypecheckingPath::Slow;
+        return {TypecheckingPath::Slow, {}};
     }
 
     // Ensure all files have computed hashes.
     computeFileHashes(changedFiles);
 
-    auto [path, result] = getTypecheckingPathInternal(changedFiles, emptyMap);
-    return path;
+    return getTypecheckingPathInternal(changedFiles, emptyMap);
 }
 
 void LSPIndexer::transferInitializeState(InitializedTask &task) {

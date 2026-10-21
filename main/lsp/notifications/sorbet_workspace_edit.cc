@@ -42,10 +42,8 @@ void SorbetWorkspaceEditTask::mergeNewer(SorbetWorkspaceEditTask &task) {
     }
 
     // This cached information is now invalid.
-    task.cachedFastPathDecisionValid = false;
-    task.cachedFastPathDecision = TypecheckingPath::Slow;
-    cachedFastPathDecisionValid = false;
-    cachedFastPathDecision = TypecheckingPath::Slow;
+    task.cachedFastPathDecision.reset();
+    cachedFastPathDecision.reset();
 }
 
 void SorbetWorkspaceEditTask::preprocess(LSPPreprocessor &preprocessor) {
@@ -156,11 +154,10 @@ TypecheckingPath SorbetWorkspaceEditTask::getTypecheckingPath(const LSPIndexer &
     if (updates != nullptr) {
         return updates->typecheckingPath;
     }
-    if (!cachedFastPathDecisionValid) {
+    if (!cachedFastPathDecision.has_value()) {
         cachedFastPathDecision = index.getTypecheckingPath(params->updates);
-        cachedFastPathDecisionValid = true;
     }
-    return cachedFastPathDecision;
+    return cachedFastPathDecision->path;
 }
 
 bool SorbetWorkspaceEditTask::canPreempt(const LSPIndexer &index) const {

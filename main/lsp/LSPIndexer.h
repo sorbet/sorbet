@@ -26,6 +26,13 @@ class LSPConfiguration;
  * The actual work of typechecking is undertaken by LSPTypechecker.
  */
 class LSPIndexer final {
+public:
+    struct TypecheckingPathResult {
+        TypecheckingPath path = TypecheckingPath::Slow;
+        LSPFileUpdates::FastPathFilesToTypecheckResult files;
+    };
+
+private:
     bool initialized = false;
     /** Encapsulates the active configuration for the language server. */
     const std::shared_ptr<const LSPConfiguration> config;
@@ -54,11 +61,6 @@ class LSPIndexer final {
     getTypecheckingPath(LSPFileUpdates &edit,
                         const UnorderedMap<core::FileRef, std::shared_ptr<core::File>> &evictedFiles) const;
 
-    struct TypecheckingPathResult {
-        TypecheckingPath path = TypecheckingPath::Slow;
-        LSPFileUpdates::FastPathFilesToTypecheckResult files;
-    };
-
     /**
      * INVARIANT: `changedFiles` must have hashes computed.
      */
@@ -74,7 +76,7 @@ public:
     /**
      * Determines if the given files can take the fast path relative to the latest committed edit.
      */
-    TypecheckingPath getTypecheckingPath(const std::vector<std::shared_ptr<core::File>> &changedFiles) const;
+    TypecheckingPathResult getTypecheckingPath(const std::vector<std::shared_ptr<core::File>> &changedFiles) const;
 
     /**
      * Computes state hashes for the given set of files. Is a no-op if the provided files all have hashes.
