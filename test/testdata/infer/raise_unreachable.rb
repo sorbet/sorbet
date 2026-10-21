@@ -266,12 +266,12 @@ def untyped_guard(x)
 end
 
 sig {params(x: T.any(Integer, String)).void}
-def guard_does_not_assert_exhaustiveness(x)
+def guard_does_not_hide_non_exhaustiveness(x)
   case x
   when Integer
   else
     panic('unhandled string')
-    T.absurd(x)
+    T.absurd(x) # error: Control flow could reach `T.absurd` because the type `String` wasn't handled
   end
 end
 

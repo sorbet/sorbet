@@ -1016,7 +1016,8 @@ core::TypePtr
 Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Binding &bind, int loopCount,
                             int bindMinLoops, KnowledgeFilter &knowledgeFilter, core::TypeConstraint &constr,
                             const core::TypePtr &methodReturnType,
-                            const optional<cfg::BasicBlock::BlockExitCondInfo> &parentUpdateKnowledgeReceiver) {
+                            const optional<cfg::BasicBlock::BlockExitCondInfo> &parentUpdateKnowledgeReceiver,
+                            bool deadOnEntry) {
     try {
         core::TypeAndOrigins tp;
         bool noLoopChecking = cfg::isa_instruction<cfg::Alias>(bind.value) ||
@@ -1636,8 +1637,10 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
             [&](cfg::TAbsurd &i) {
                 const core::TypeAndOrigins &typeAndOrigin = getTypeAndOrigin(i.what.variable);
 
-                // We sometimes typecheck unreachable code.
-                auto absurdIsUnreachable = this->isDead || typeAndOrigin.type.isBottom();
+                // Dead-entry blocks may be checked using types from before an impossible condition.
+                // In a live-entry block, however, a preceding noreturn call must not hide a
+                // non-exhaustive argument.
+                auto absurdIsUnreachable = deadOnEntry || typeAndOrigin.type.isBottom();
                 if (!absurdIsUnreachable) {
                     if (auto e = ctx.beginError(bind.loc, core::errors::Infer::NotExhaustive)) {
                         if (typeAndOrigin.type.isUntyped()) {
