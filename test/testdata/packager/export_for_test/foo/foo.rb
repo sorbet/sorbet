@@ -12,8 +12,9 @@ module Opus::Foo
     sig {void}
     def self.stub_stuff!; end
   end
+end
 
-
+module Opus::Foo::Checks
   # Check Visibility
   # via import Opus::Foo::Bar
   Opus::Foo::Bar::BarClass

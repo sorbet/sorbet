@@ -1,5 +1,5 @@
 # typed: strict
 
 module Project
-  SomePkg
+  SOME_PKG = SomePkg
 end
