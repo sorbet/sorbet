@@ -154,8 +154,9 @@ TypecheckingPath SorbetWorkspaceEditTask::getTypecheckingPath(const LSPIndexer &
     if (updates != nullptr) {
         return updates->typecheckingPath;
     }
-    if (!cachedTypecheckingPath.has_value()) {
+    if (!cachedTypecheckingPath.has_value() || cachedTypecheckingPathVersion != index.getVersion()) {
         cachedTypecheckingPath = index.getTypecheckingPath(params->updates);
+        cachedTypecheckingPathVersion = index.getVersion();
     }
     return cachedTypecheckingPath->path;
 }

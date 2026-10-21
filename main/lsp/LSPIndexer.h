@@ -50,6 +50,8 @@ private:
     UnorderedMap<core::FileRef, std::shared_ptr<core::File>> evictedFiles;
     /** A WorkerPool with 0 workers. */
     std::unique_ptr<WorkerPool> emptyWorkers;
+    /** Incremented whenever the files in `gs` change. */
+    uint32_t version = 0;
 
     void computeFileHashes(const std::vector<std::shared_ptr<core::File>> &files, WorkerPool &workers) const;
 
@@ -78,6 +80,14 @@ public:
      * result also describes which files outside of `changedFiles` the fast path would typecheck.
      */
     TypecheckingPathResult getTypecheckingPath(const std::vector<std::shared_ptr<core::File>> &changedFiles) const;
+
+    /**
+     * Changes whenever the files in `gs` change, so that a result computed against them (like `getTypecheckingPath`)
+     * can tell whether it's stale.
+     */
+    uint32_t getVersion() const {
+        return version;
+    }
 
     /**
      * Computes state hashes for the given set of files. Is a no-op if the provided files all have hashes.

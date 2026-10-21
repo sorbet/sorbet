@@ -322,6 +322,7 @@ void LSPIndexer::initialize(IndexerInitializationTask &task, vector<shared_ptr<c
     }
 
     initialized = true;
+    version++;
 }
 
 unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit, WorkerPool &workers) {
@@ -333,6 +334,7 @@ unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edi
     update.updatedFiles = move(edit.updates);
     update.cancellationExpected = edit.sorbetCancellationExpected;
     update.preemptionsExpected = edit.sorbetPreemptionsExpected;
+    version++;
     // _Wait_ to compute `getTypecheckingPath` until after we compute hashes.
 
     UnorderedMap<core::FileRef, shared_ptr<core::File>> newlyEvictedFiles;
