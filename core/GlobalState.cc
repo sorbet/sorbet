@@ -2131,6 +2131,11 @@ unique_ptr<GlobalState> GlobalState::copyForIndexThread(
     // Additional options that might be used during indexing are manually copied over here
     result->kvstoreUuid = this->kvstoreUuid;
 
+    // The rewriter runs semantic extensions on every class body, so index threads need them too.
+    for (auto &semanticExtension : this->semanticExtensions) {
+        result->semanticExtensions.emplace_back(semanticExtension->deepCopy(*this, *result));
+    }
+
     if (packagerEnabled) {
         core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*result);
         core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = result->unfreezePackages();
