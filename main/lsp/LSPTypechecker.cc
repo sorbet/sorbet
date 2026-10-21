@@ -334,44 +334,6 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
     }
     gs->reopenStratum(editStratum);
 
-    if (shouldRunIncrementalNamer && gs->packageDB().enabled()) {
-        vector<core::FileRef> packageFiles;
-
-        for (auto fref : toTypecheck) {
-            auto &file = fref.data(*gs);
-            // Only need to re-run packager if we're going to delete constants and have to re-define
-            // their visibility, which only happens if we're running incrementalNamer.
-            // NOTE: Using `gs` to access package information here assumes that edits to __package.rb
-            // files don't take the fast path. We'll want (or maybe need) to revisit this when we start
-            // making edits to `__package.rb` take fast paths.
-            if (file.isPackage(*gs)) {
-                continue;
-            }
-
-            auto pkg = gs->packageDB().getPackageNameForFile(fref);
-            if (!pkg.exists()) {
-                continue;
-            }
-
-            // Since even no-op (e.g. whitespace-only) edits will cause constants to be deleted
-            // and re-added, the errors in the `__package.rb` file's exports might change (e.g.,
-            // an exported constant might no longer exist), so we have to retypecheck it.
-            // TODO(jez) I think we could stop doing this if we replaced `export` with `package_private!`
-            auto &info = gs->packageDB().getPackageInfo(pkg);
-            auto packageFref = info.fullLoc().file();
-            if (!packageFref.exists()) {
-                continue;
-            }
-
-            packageFiles.emplace_back(packageFref);
-            if (!oldFoundHashesForFiles.contains(fref)) {
-                oldFoundHashesForFiles.emplace(fref, fref.data(*gs).getFileHash());
-            }
-        }
-
-        toTypecheck.insert(toTypecheck.end(), packageFiles.begin(), packageFiles.end());
-    }
-
     fast_sort(toTypecheck);
     toTypecheck.erase(std::unique(toTypecheck.begin(), toTypecheck.end()), toTypecheck.end());
 
