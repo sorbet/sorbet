@@ -3210,4 +3210,122 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedMergedFastEditsExtr
     CHECK_FALSE(sawOversizedFastPath);
 }
 
+// A queued edit's cached typechecking path is computed against the indexer's files at the time. If an edit ahead of
+// it in the queue is indexed first (here, by the same preemption), the cached result can be stale. In particular, the
+// cache can say that the fast path won't run the incremental namer when it will, in which case preemption doesn't wait
+// for the strata of the package files that the fast path rechecks.
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedPreemptionAfterEarlierEditIndexed") {
+    const string originalX = "# typed: true\n"
+                             "module Root::Bar\n"
+                             "  class X; end\n"
+                             "end\n";
+    vector<pair<string, string>> files = {
+        {"__package.rb", PackageTextBuilder()
+                             .withName("Root")
+                             .withExports({"Test::Root::Helper"})
+                             .withTestImports({"Root::Foo"})
+                             .build()},
+        {"z.rb", "# typed: true\n"
+                 "module Root\n"
+                 "  class Z\n"
+                 "    def m = 1\n"
+                 "  end\n"
+                 "end\n"},
+        {"test/helper.rb", "# typed: true\n"
+                           "class Test::Root::Helper\n"
+                           "end\n"},
+        {"bar/__package.rb", PackageTextBuilder().withName("Root::Bar").build()},
+        {"bar/x.rb", originalX},
+        {"foo/__package.rb", PackageTextBuilder().withName("Root::Foo").withImports({"Root::Baz"}).build()},
+        {"foo/a.rb", "# typed: true\n"
+                     "module Root::Foo\n"
+                     "end\n"},
+        {"baz/__package.rb", PackageTextBuilder().withName("Root::Baz").build()},
+        {"baz/b.rb", "# typed: true\n"
+                     "module Root::Baz\n"
+                     "end\n"},
+    };
+    // Strata: Root's, Root::Bar's, and Root::Baz's application code are first. Root::Bar's `__package.rb` (its test
+    // stratum) and Root::Foo's application code are second. Root's `__package.rb` (its test stratum, which imports
+    // Root::Foo) is third.
+    //
+    // Pause after resolving each stratum, so that every edit is queued before the first preemption runs.
+    initializePackagedWorkspace(true, files, 1);
+    assertErrorDiagnostics(send(*openFile("z.rb", files[1].second)), {});
+    assertErrorDiagnostics(send(*openFile("bar/x.rb", originalX)), {});
+    assertErrorDiagnostics(send(*openFile("baz/b.rb", files[8].second)), {});
+
+    setSlowPathBlocked(true);
+    sendAsync(*changeFile("baz/b.rb",
+                          "# typed: true\n"
+                          "module Root::Baz\n"
+                          "  class NewClassTakesSlowPath; end\n"
+                          "end\n",
+                          2, /* cancellationExpected */ false, /* preemptionsExpected */ 1));
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // E1 adds a method, so it uses the incremental namer and waits for Root::Bar's `__package.rb` (second stratum).
+    sendAsync(*changeFile("bar/x.rb",
+                          "# typed: true\n"
+                          "module Root::Bar\n"
+                          "  class X\n"
+                          "    def new_method; end\n"
+                          "  end\n"
+                          "end\n",
+                          2));
+    // Keeps LSPPreprocessor from merging E1 and E2.
+    sendAsync(*hover("bar/x.rb", 2, 8));
+    // E2 merges two edits: one reverts E1, and one changes a method body in Root. Relative to the files before E1, it
+    // changes no symbols, so it wouldn't use the incremental namer. Relative to E1, it deletes a method, so it does,
+    // and it rechecks Root's `__package.rb` (third stratum).
+    sendAsync(*changeFile("bar/x.rb", originalX, 3));
+    sendAsync(*changeFile("z.rb",
+                          "# typed: true\n"
+                          "module Root\n"
+                          "  class Z\n"
+                          "    def m = 2\n"
+                          "  end\n"
+                          "end\n",
+                          2));
+    setSlowPathBlocked(false);
+
+    auto fastPathsEnded = 0;
+    auto sawHover = false;
+    auto slowPathEnded = false;
+    for (int i = 0; i < 20 && !slowPathEnded; i++) {
+        auto msg = readAsync();
+        if (msg->isResponse()) {
+            sawHover = true;
+            continue;
+        }
+        REQUIRE(msg->isNotification());
+        auto &notif = msg->asNotification();
+        if (notif.method == LSPMethod::TextDocumentPublishDiagnostics) {
+            auto params = getPublishDiagnosticParams(notif);
+            REQUIRE(params.has_value());
+            if (!(*params)->diagnostics.empty()) {
+                FAIL_CHECK(fmt::format("Expected no errors, but received diagnostics:\n{}", msg->toJSON(true)));
+            }
+            continue;
+        }
+        REQUIRE_EQ(notif.method, LSPMethod::SorbetTypecheckRunInfo);
+        auto &runInfo = get<unique_ptr<SorbetTypecheckRunInfo>>(notif.params);
+        if (runInfo->status != SorbetTypecheckRunStatus::Ended) {
+            continue;
+        }
+        if (runInfo->typecheckingPath == TypecheckingPath::Fast) {
+            fastPathsEnded++;
+        } else {
+            slowPathEnded = true;
+        }
+    }
+    REQUIRE(slowPathEnded);
+    CHECK(sawHover);
+    CHECK_EQ(fastPathsEnded, 2);
+}
+
 } // namespace sorbet::test::lsp
