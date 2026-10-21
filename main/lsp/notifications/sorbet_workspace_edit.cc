@@ -89,7 +89,7 @@ void SorbetWorkspaceEditTask::run(LSPTypecheckerDelegate &typechecker) {
     if (updates->typecheckingPath != TypecheckingPath::Fast) {
         Exception::raise("Attempted to run a slow path update on the fast path!");
     }
-    const auto newEditCount = updates->editCount - updates->committedEditCount;
+    const auto newEditCount = updates->newEditCount();
 
     // Checks in debug builds that we have exactly 1 diagnostic latency timer per edit
     ENFORCE(latencyTimer == nullptr || newEditCount == params->diagnosticLatencyTimers.size());
@@ -132,7 +132,7 @@ void SorbetWorkspaceEditTask::runSpecial(LSPTypechecker &typechecker, WorkerPool
     ENFORCE(indexer == nullptr);
     startedNotification.Notify();
 
-    const auto newEditCount = updates->editCount - updates->committedEditCount;
+    const auto newEditCount = updates->newEditCount();
 
     // Checks in debug builds that we have exactly 1 diagnostic latency timer per edit
     ENFORCE(latencyTimer == nullptr || newEditCount == params->diagnosticLatencyTimers.size());

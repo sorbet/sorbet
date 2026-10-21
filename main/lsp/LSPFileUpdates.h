@@ -69,6 +69,15 @@ public:
      */
     LSPFileUpdates copy() const;
 
+    /**
+     * The number of edits in this update whose diagnostics haven't been reported yet: every edit, except for the fast
+     * path edits that preempted a slow path that this update cancels (`committedEditCount`). The task that typechecks
+     * this update must have one diagnostic latency timer for each of them.
+     */
+    uint32_t newEditCount() const {
+        return editCount - committedEditCount;
+    }
+
     LSPFileUpdates() = default;
     LSPFileUpdates(LSPFileUpdates &&other) = default;
     LSPFileUpdates &operator=(LSPFileUpdates &&other) = default;
