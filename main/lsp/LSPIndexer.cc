@@ -59,7 +59,7 @@ LSPIndexer::LSPIndexer(shared_ptr<const LSPConfiguration> config, unique_ptr<cor
     : config(config), gs(move(gs)), kvstore(move(kvstore)), emptyWorkers(WorkerPool::create(0, *config->logger)) {}
 
 LSPIndexer::~LSPIndexer() {
-    for (auto &timer : pendingTypecheckDiagnosticLatencyTimers) {
+    for (auto &timer : pendingSlowPath.diagnosticLatencyTimers) {
         timer->cancel();
     }
 }
@@ -370,65 +370,81 @@ unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edi
     // _Now_ that we've computed file hashes, we can make a fast path determination.
     update.typecheckingPath = decideTypecheckingPath(update, newlyEvictedFiles);
 
-    auto runningSlowPath = gs->epochManager->getStatus();
-    if (runningSlowPath.slowPathRunning) {
-        // A cancelable slow path is currently running. Check if we can cancel.
-        // Invariant: `pendingTypecheckUpdates` should contain the edits currently being typechecked on the slow path.
-        // runningSlowPath.epoch should be in the interval (pendingTypecheckUpdates.epoch - editCount,
-        // pendingTypecheckUpdates.epoch]
-        ENFORCE(runningSlowPath.epoch <= pendingTypecheckUpdates.epoch);
-        ENFORCE(runningSlowPath.epoch > (pendingTypecheckUpdates.epoch - pendingTypecheckUpdates.editCount));
+    tryCancelSlowPath(update, newlyEvictedFiles, edit.diagnosticLatencyTimers);
+    recordInPendingSlowPath(update, std::move(newlyEvictedFiles), edit.diagnosticLatencyTimers);
 
-        // Cancel if the new update will take the slow path anyway.
-        if (update.typecheckingPath != TypecheckingPath::Fast && gs->epochManager->tryCancelSlowPath(update.epoch)) {
-            // Cancelation succeeded! Merge the updates from the cancelled run into the current update.
-            update.mergeOlder(pendingTypecheckUpdates);
-            mergeEvictedFiles(evictedFiles, newlyEvictedFiles);
-            // The two updates together could end up taking the fast path.
-            update.typecheckingPath = decideTypecheckingPath(update, newlyEvictedFiles);
-            update.canceledSlowPath = true;
-        }
+    return result;
+}
+
+void LSPIndexer::tryCancelSlowPath(LSPFileUpdates &update,
+                                   UnorderedMap<core::FileRef, shared_ptr<core::File>> &newlyEvictedFiles,
+                                   vector<unique_ptr<Timer>> &diagnosticLatencyTimers) {
+    auto runningSlowPath = gs->epochManager->getStatus();
+    if (!runningSlowPath.slowPathRunning) {
+        return;
     }
 
-    if (update.canceledSlowPath) {
-        // Merge diagnostic latency timers; this edit contains the previous slow path.
-        edit.diagnosticLatencyTimers.insert(edit.diagnosticLatencyTimers.end(),
-                                            make_move_iterator(pendingTypecheckDiagnosticLatencyTimers.begin()),
-                                            make_move_iterator(pendingTypecheckDiagnosticLatencyTimers.end()));
-        clearAndReplaceTimers(pendingTypecheckDiagnosticLatencyTimers, edit.diagnosticLatencyTimers);
-    } else if (update.typecheckingPath != TypecheckingPath::Fast) {
-        // Replace diagnostic latency timers; this is a new slow path that did not cancel the previous slow path.
-        clearAndReplaceTimers(pendingTypecheckDiagnosticLatencyTimers, edit.diagnosticLatencyTimers);
+    // A cancelable slow path is currently running. Check if we can cancel.
+    // Invariant: `pendingSlowPath.updates` should contain the edits currently being typechecked on the slow path.
+    // runningSlowPath.epoch should be in the interval (pendingSlowPath.updates.epoch - editCount,
+    // pendingSlowPath.updates.epoch]
+    auto &pending = pendingSlowPath.updates;
+    ENFORCE(runningSlowPath.epoch <= pending.epoch);
+    ENFORCE(runningSlowPath.epoch > (pending.epoch - pending.editCount));
+
+    // Cancel if the new update will take the slow path anyway.
+    if (update.typecheckingPath == TypecheckingPath::Fast || !gs->epochManager->tryCancelSlowPath(update.epoch)) {
+        return;
+    }
+
+    // Cancelation succeeded! Merge the updates from the cancelled run into the current update.
+    update.mergeOlder(pending);
+    mergeEvictedFiles(pendingSlowPath.evictedFiles, newlyEvictedFiles);
+    // The two updates together could end up taking the fast path.
+    update.typecheckingPath = decideTypecheckingPath(update, newlyEvictedFiles);
+    update.canceledSlowPath = true;
+
+    // Merge diagnostic latency timers; this edit contains the previous slow path.
+    diagnosticLatencyTimers.insert(diagnosticLatencyTimers.end(),
+                                   make_move_iterator(pendingSlowPath.diagnosticLatencyTimers.begin()),
+                                   make_move_iterator(pendingSlowPath.diagnosticLatencyTimers.end()));
+}
+
+void LSPIndexer::recordInPendingSlowPath(const LSPFileUpdates &update,
+                                         UnorderedMap<core::FileRef, shared_ptr<core::File>> newlyEvictedFiles,
+                                         const vector<unique_ptr<Timer>> &diagnosticLatencyTimers) {
+    if (update.canceledSlowPath || update.typecheckingPath != TypecheckingPath::Fast) {
+        // Either this update contains the previous slow path (and its timers), or it's a new slow path that did not
+        // cancel the previous slow path. Either way, its timers replace the previous slow path's.
+        clearAndReplaceTimers(pendingSlowPath.diagnosticLatencyTimers, diagnosticLatencyTimers);
     }
 
     switch (update.typecheckingPath) {
         case TypecheckingPath::Fast: {
             // Edit takes the fast path. Merge with this edit so we can reverse it if the slow path gets canceled.
             auto merged = update.copy();
-            merged.mergeOlder(pendingTypecheckUpdates);
-            pendingTypecheckUpdates = move(merged);
+            merged.mergeOlder(pendingSlowPath.updates);
+            pendingSlowPath.updates = move(merged);
             if (!update.canceledSlowPath) {
                 // If a slow path is running, this update preempted.
-                pendingTypecheckUpdates.committedEditCount += update.editCount;
+                pendingSlowPath.updates.committedEditCount += update.editCount;
             }
-            mergeEvictedFiles(evictedFiles, newlyEvictedFiles);
+            mergeEvictedFiles(pendingSlowPath.evictedFiles, newlyEvictedFiles);
             break;
         }
         case TypecheckingPath::Slow: {
-            // Completely replace `pendingTypecheckUpdates` if this was a slow path update.
-            pendingTypecheckUpdates = update.copy();
+            // Completely replace `pendingSlowPath.updates` if this was a slow path update.
+            pendingSlowPath.updates = update.copy();
             break;
         }
     }
 
     // newlyEvictedFiles contains the changes from this edit + changes from the pending typecheck, if applicable.
-    evictedFiles = std::move(newlyEvictedFiles);
+    pendingSlowPath.evictedFiles = std::move(newlyEvictedFiles);
 
     // Don't copy over these (test-only) properties, as they only apply to the original request.
-    pendingTypecheckUpdates.cancellationExpected = false;
-    pendingTypecheckUpdates.preemptionsExpected = 0;
-
-    return result;
+    pendingSlowPath.updates.cancellationExpected = false;
+    pendingSlowPath.updates.preemptionsExpected = 0;
 }
 
 unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit) {

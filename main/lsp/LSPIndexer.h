@@ -41,13 +41,24 @@ private:
     std::unique_ptr<core::GlobalState> gs;
     /** Key-value store used during initialization. */
     std::unique_ptr<KeyValueStore> kvstore;
-    /** Contains a copy of the last edit committed on the slow path. Used in slow path cancelation logic. */
-    LSPFileUpdates pendingTypecheckUpdates;
-    /** Contains a clone of the latency timers for each new edit in the pending typecheck operation. Is used to ensure
-     * that we correctly track the latency of canceled & rescheduled typechecking operations. */
-    std::vector<std::unique_ptr<Timer>> pendingTypecheckDiagnosticLatencyTimers;
-    /** Contains files evicted by `pendingTypecheckUpdates`. Used to make fast path decisions in the immediate past. */
-    UnorderedMap<core::FileRef, std::shared_ptr<core::File>> evictedFiles;
+    /**
+     * What the indexer knows about the slow path that the typechecker is running: the edits that the slow path is
+     * typechecking, plus the fast path edits that have preempted it. A newer slow path edit that cancels this slow path
+     * must include all of them, because canceling restores the typechecker to its state from before the slow path.
+     *
+     * Only read while a slow path is running. After the slow path finishes, this is stale until the next slow path
+     * edit replaces it.
+     */
+    struct PendingSlowPath {
+        /** Contains a copy of the last edit committed on the slow path. Used in slow path cancelation logic. */
+        LSPFileUpdates updates;
+        /** Contains a clone of the latency timers for each new edit in the pending typecheck operation. Is used to
+         * ensure that we correctly track the latency of canceled & rescheduled typechecking operations. */
+        std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers;
+        /** Contains files evicted by `updates`. Used to make fast path decisions in the immediate past. */
+        UnorderedMap<core::FileRef, std::shared_ptr<core::File>> evictedFiles;
+    };
+    PendingSlowPath pendingSlowPath;
     /** A WorkerPool with 0 workers. */
     std::unique_ptr<WorkerPool> emptyWorkers;
     /** Incremented whenever the files in `gs` change. */
@@ -64,6 +75,28 @@ private:
     TypecheckingPath
     decideTypecheckingPath(LSPFileUpdates &edit,
                            const UnorderedMap<core::FileRef, std::shared_ptr<core::File>> &evictedFiles) const;
+
+    /**
+     * Called by `commitEdit` once it has decided `update`'s typechecking path. If a slow path is running and `update`
+     * takes the slow path too, cancels the running slow path, and merges `pendingSlowPath` into `update` (and its
+     * timers into `diagnosticLatencyTimers`), deciding the merged update's path again.
+     *
+     * Canceling must happen on the processing thread (`TypecheckEpochManager::tryCancelSlowPath` asserts that).
+     * `commitEdit` also runs on the typechecker thread, but never cancels there: in a preemption, the update takes the
+     * fast path (the prediction that let it preempt matches the decision), and in `runSpecial`, no slow path is
+     * running.
+     */
+    void tryCancelSlowPath(LSPFileUpdates &update,
+                           UnorderedMap<core::FileRef, std::shared_ptr<core::File>> &newlyEvictedFiles,
+                           std::vector<std::unique_ptr<Timer>> &diagnosticLatencyTimers);
+
+    /**
+     * Called by `commitEdit` last. A slow path update replaces `pendingSlowPath`, and a fast path update is merged
+     * into it (as having preempted the running slow path, if there is one).
+     */
+    void recordInPendingSlowPath(const LSPFileUpdates &update,
+                                 UnorderedMap<core::FileRef, std::shared_ptr<core::File>> newlyEvictedFiles,
+                                 const std::vector<std::unique_ptr<Timer>> &diagnosticLatencyTimers);
 
     /**
      * The computation shared by `decideTypecheckingPath` and `predictTypecheckingPath`.

@@ -152,7 +152,7 @@ A slow path edit **cancels** the running slow path instead. Canceling restores
 the typechecker's state from before the slow path (`UndoState`), so the
 canceling edit's update has to include everything since then: the slow path's
 own edits, and the fast path edits that preempted it. The indexer tracks those
-in `LSPIndexer::pendingTypecheckUpdates`. If a slow path edit arrives behind
+in `LSPIndexer::pendingSlowPath`. If a slow path edit arrives behind
 edits that are waiting to preempt, the processing thread moves the edits to the
 front of the queue and merges them into one slow path edit
 (`LSPLoop::promoteSlowPathEdits`), which cancels the slow path.
