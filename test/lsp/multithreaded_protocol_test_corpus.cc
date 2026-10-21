@@ -1669,6 +1669,88 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptDoesNotCrashOnEvictedFil
     assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
 }
 
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "QueuedEditRechecksFastPathAfterEarlierEditIsIndexed") {
+    auto opts = make_shared<realmain::options::Options>();
+    opts->lspMaxFilesOnFastPath = 2;
+    resetState(opts);
+
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->enableTypecheckInfo = true;
+    assertErrorDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
+
+    assertErrorDiagnostics(send(*openFile("x.rb", "# typed: true\n"
+                                                  "class X\n"
+                                                  "  extend T::Sig\n"
+                                                  "  sig {returns(String)}\n"
+                                                  "  def m = 'old'\n"
+                                                  "end\n")),
+                           {});
+    assertErrorDiagnostics(send(*openFile("y.rb", "# typed: true\n"
+                                                  "class Y\n"
+                                                  "  def use = 1\n"
+                                                  "end\n")),
+                           {});
+    assertErrorDiagnostics(send(*openFile("z.rb", "# typed: true\n"
+                                                  "class Z\n"
+                                                  "  def use = X.new.m\n"
+                                                  "end\n")),
+                           {});
+    assertErrorDiagnostics(send(*openFile("trigger.rb", "# typed: true\nclass Trigger\nend\n")), {});
+
+    // Keep a slow path running while both edits enter the queue. Its expected preemption makes the queue scan
+    // preview the later edit before the earlier edit changes the indexer's file table.
+    sendAsync(*changeFile("trigger.rb", "# typed: true\nclass RenamedTrigger\nend\n", 2,
+                          /* cancellationExpected */ true, /* preemptionsExpected */ 1));
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
+    // This body edit adds Y to the files that a subsequent change to X#m must typecheck.
+    sendAsync(*changeFile("y.rb",
+                          "# typed: true\n"
+                          "class Y\n"
+                          "  def use = X.new.m\n"
+                          "end\n",
+                          2));
+    // A request keeps the two edits separate, so merging cannot invalidate the second edit's preview.
+    sendAsync(*hover("y.rb", 2, 19));
+    // Before Y is indexed, this affects only X and Z and appears to fit the two-file limit. Afterwards it
+    // also affects Y and must take the slow path.
+    sendAsync(*changeFile("x.rb",
+                          "# typed: true\n"
+                          "class X\n"
+                          "  extend T::Sig\n"
+                          "  sig {returns(Integer)}\n"
+                          "  def m = 1\n"
+                          "end\n",
+                          2));
+    sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt)));
+
+    auto messages = send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20)));
+    bool sawFastPath = false;
+    bool sawSlowPath = false;
+    bool sawHover = false;
+    for (auto &message : messages) {
+        if (message->isResponse() && message->asResponse().requestMethod == LSPMethod::TextDocumentHover) {
+            sawHover = true;
+        }
+        if (message->isNotification() && message->method() == LSPMethod::SorbetTypecheckRunInfo) {
+            auto &runInfo = get<unique_ptr<SorbetTypecheckRunInfo>>(message->asNotification().params);
+            if (runInfo->status == SorbetTypecheckRunStatus::Started) {
+                sawFastPath |= runInfo->typecheckingPath == TypecheckingPath::Fast;
+                sawSlowPath |= runInfo->typecheckingPath == TypecheckingPath::Slow;
+            }
+        }
+    }
+    CHECK(sawFastPath);
+    CHECK(sawHover);
+    CHECK(sawSlowPath);
+}
+
 // This case shows how preemption works when the preemption tasks occur in a stratum that's at or before the one that
 // contains the file that kicked off the slow path.
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedPreemptionBeforeSlowPathStratum") {
