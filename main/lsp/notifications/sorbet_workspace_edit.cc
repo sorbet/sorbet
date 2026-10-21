@@ -31,7 +31,9 @@ LSPTask::Phase SorbetWorkspaceEditTask::finalPhase() const {
 
 void SorbetWorkspaceEditTask::mergeNewer(SorbetWorkspaceEditTask &task) {
     // Merging is only supported *before* we index this update.
-    ENFORCE(updates == nullptr && task.updates == nullptr);
+    auto *queued = std::get_if<Queued>(&state);
+    auto *newerQueued = std::get_if<Queued>(&task.state);
+    ENFORCE(queued != nullptr && newerQueued != nullptr);
     params->merge(*task.params);
     // Don't report a latency metric for merged edits.
     if (task.latencyTimer) {
@@ -42,8 +44,12 @@ void SorbetWorkspaceEditTask::mergeNewer(SorbetWorkspaceEditTask &task) {
     }
 
     // This cached information is now invalid.
-    task.cachedPrediction.reset();
-    cachedPrediction.reset();
+    if (newerQueued != nullptr) {
+        newerQueued->cachedPrediction.reset();
+    }
+    if (queued != nullptr) {
+        queued->cachedPrediction.reset();
+    }
 }
 
 void SorbetWorkspaceEditTask::preprocess(LSPPreprocessor &preprocessor) {
@@ -55,6 +61,8 @@ void SorbetWorkspaceEditTask::preprocess(LSPPreprocessor &preprocessor) {
 }
 
 void SorbetWorkspaceEditTask::index(LSPIndexer &indexer) {
+    ENFORCE(std::holds_alternative<Queued>(state));
+
     // This is the first time that we're able to compare the files in the update set to
     // the indexer's file table. We should determine if any of the updates we've received
     // are no-ops from background notifications, and filter them out to not artificially
@@ -65,11 +73,10 @@ void SorbetWorkspaceEditTask::index(LSPIndexer &indexer) {
     });
 
     if (params->updates.size() <= config.opts.lspMaxFilesOnFastPath) {
-        updates = indexer.commitEdit(*params);
+        state = Committed{indexer.commitEdit(*params)};
     } else {
         // HACK: Too many files to `commitEdit` serially. Index in `runSpecial`.
-        this->indexer = &indexer;
-        ENFORCE(getTypecheckingPath(indexer) != TypecheckingPath::Fast);
+        state = CommitInRunSpecial{&indexer};
     }
 }
 
@@ -77,8 +84,10 @@ void SorbetWorkspaceEditTask::run(LSPTypecheckerDelegate &typechecker) {
     if (latencyTimer != nullptr) {
         latencyTimer->setTag("path", "fast");
     }
+    auto *committed = std::get_if<Committed>(&state);
+    ENFORCE(committed != nullptr);
+    auto &updates = committed->updates;
     ENFORCE(updates != nullptr);
-    ENFORCE(this->indexer == nullptr);
     if (!updates->canceledSlowPath) {
         latencyCancelSlowPath->cancel();
     }
@@ -102,23 +111,26 @@ void SorbetWorkspaceEditTask::runSpecial(LSPTypechecker &typechecker, WorkerPool
     if (latencyTimer != nullptr) {
         latencyTimer->setTag("path", "slow");
     }
-    if (indexer) {
-        ENFORCE(updates == nullptr);
+    if (auto *deferred = std::get_if<CommitInRunSpecial>(&state)) {
         // Using the `indexer` here is safe; the processing thread waits until `startedNotification.Notify` is called
         // later in this function.
         // This is really gnarly; there's got to be a cleaner way to do threading here. We can't move this out because
         // we need `workers`, which is a resource that is explicitly managed by typechecking.
-        updates = indexer->commitEdit(*params, workers);
+        auto *indexer = deferred->indexer;
+        state = Committed{indexer->commitEdit(*params, workers)};
 
         // IMPORTANT: We only have unqiue access to the indexer until we notify the LSPTypecheckerCoordinator that we
         // have started, which is done through `startedNotification` below. As there's no mutex that guarantees unique
         // access to the indexer (other than the task queue's mutex) and the LSPTypecheckerCoordinator will allow new
         // tasks to start once we notify through `startedNotification`, we need to make sure that we don't accidentally
-        // use `indexer` again after this point.
-        indexer = nullptr;
-    } else {
-        ENFORCE(updates != nullptr);
+        // use `indexer` again after this point. Replacing `state` drops the stashed pointer, so only the local
+        // `indexer` above remains, and nothing below uses it.
     }
+
+    auto *committed = std::get_if<Committed>(&state);
+    ENFORCE(committed != nullptr);
+    auto &updates = committed->updates;
+    ENFORCE(updates != nullptr);
 
     if (!updates->canceledSlowPath) {
         latencyCancelSlowPath->cancel();
@@ -129,7 +141,6 @@ void SorbetWorkspaceEditTask::runSpecial(LSPTypechecker &typechecker, WorkerPool
     // processing thread that it's safe to move on.
     typechecker.state().epochManager->startCommitEpoch(updates->epoch);
 
-    ENFORCE(indexer == nullptr);
     startedNotification.Notify();
 
     const auto newEditCount = updates->newEditCount();
@@ -151,14 +162,21 @@ void SorbetWorkspaceEditTask::schedulerWaitUntilReady() {
 }
 
 TypecheckingPath SorbetWorkspaceEditTask::getTypecheckingPath(const LSPIndexer &index) const {
-    if (updates != nullptr) {
-        return updates->typecheckingPath;
+    if (auto *committed = std::get_if<Committed>(&state)) {
+        ENFORCE(committed->updates != nullptr);
+        return committed->updates->typecheckingPath;
     }
-    if (!cachedPrediction.has_value() || cachedPredictionVersion != index.getVersion()) {
-        cachedPrediction = index.predictTypecheckingPath(params->updates);
-        cachedPredictionVersion = index.getVersion();
+    if (std::holds_alternative<CommitInRunSpecial>(state)) {
+        // Too many files for the fast path.
+        return TypecheckingPath::Slow;
     }
-    return cachedPrediction->path;
+
+    auto &queued = std::get<Queued>(state);
+    if (!queued.cachedPrediction.has_value() || queued.cachedPredictionVersion != index.getVersion()) {
+        queued.cachedPrediction = index.predictTypecheckingPath(params->updates);
+        queued.cachedPredictionVersion = index.getVersion();
+    }
+    return queued.cachedPrediction->path;
 }
 
 bool SorbetWorkspaceEditTask::canPreempt(const LSPIndexer &index) const {
@@ -170,8 +188,9 @@ const SorbetWorkspaceEditParams &SorbetWorkspaceEditTask::getParams() const {
 }
 
 core::packages::Stratum SorbetWorkspaceEditTask::preemptionStratum(FileStratumMapping info) const {
-    // Only fast path edits preempt, and `canPreempt` populates the cache before we're asked for a stratum.
-    ENFORCE(cachedPrediction.has_value());
+    // Only queued fast path edits preempt, and `canPreempt` populates the cache before we're asked for a stratum.
+    auto *queued = std::get_if<Queued>(&state);
+    ENFORCE(queued != nullptr && queued->cachedPrediction.has_value());
 
     vector<string_view> paths;
     paths.reserve(this->params->updates.size());
@@ -181,7 +200,7 @@ core::packages::Stratum SorbetWorkspaceEditTask::preemptionStratum(FileStratumMa
     // resolved the strata that they belong to. Otherwise, the incremental namer would enter their symbols into the
     // in-progress symbol table without linearizing them, and typecheck them against a symbol table that's missing
     // their dependencies.
-    const auto &files = cachedPrediction->files;
+    const auto &files = queued->cachedPrediction->files;
     auto stratum = std::max(info.getStratumForPaths(paths), info.getStratumForFiles(files.extraFiles));
 
     // A fast path that uses the incremental namer also retypechecks the `__package.rb` file of every package that it
