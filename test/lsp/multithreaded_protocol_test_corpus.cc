@@ -3089,4 +3089,125 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedCancelSlowPathOfDef
     CHECK(absl::StrContains(hoverResult->contents->value, "Integer"));
 }
 
+// Two fast path edits that each fit within the fast path file limit, but whose extra files together don't, must not
+// take the fast path once they're merged.
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedMergedFastEditsExtraFilesExceedFileLimit") {
+    vector<pair<string, string>> files = {
+        {"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A"}).build()},
+        {"a.rb", "# typed: true\n"
+                 "module Root\n"
+                 "  class A\n"
+                 "    extend T::Sig\n"
+                 "    sig {returns(String)}\n"
+                 "    def x = \"x\"\n"
+                 "    sig {returns(String)}\n"
+                 "    def y = \"y\"\n"
+                 "  end\n"
+                 "end\n"},
+        {"b.rb", "# typed: true\nmodule Root\n  class B; end\nend\n"},
+        {"f2.rb", "# typed: true\nmodule Root\n  class F2\n    def call = Root::A.new.y\n  end\nend\n"},
+        {"f3.rb", "# typed: true\nmodule Root\n  class F3\n    def call = Root::A.new.y\n  end\nend\n"},
+        {"foo/__package.rb", PackageTextBuilder().withName("Root::Foo").withImports({"Root"}).build()},
+        {"foo/f1.rb", "# typed: true\nmodule Root::Foo\n  class F1\n    def call = Root::A.new.x\n  end\nend\n"},
+    };
+    auto opts = make_shared<realmain::options::Options>();
+    opts->cacheSensitiveOptions.sorbetPackages = true;
+    opts->packageDirected = true;
+    // Each edit below checks at most 3 files, but merged, they check 4.
+    opts->lspMaxFilesOnFastPath = 3;
+    // Pause after resolving each stratum, to give the newer edit time to arrive while the preemption is deferred.
+    opts->sleepInSlowPathSeconds = 1;
+    resetState(opts);
+    writeFilesToFS(files);
+    for (auto &[path, _] : files) {
+        lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/{}", rootPath, path));
+    }
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->enableTypecheckInfo = true;
+    assertErrorDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
+
+    assertErrorDiagnostics(send(*openFile("a.rb", files[1].second)), {});
+    assertErrorDiagnostics(send(*openFile("b.rb", files[2].second)), {});
+
+    setSlowPathBlocked(true);
+    sendAsync(*changeFile("b.rb",
+                          "# typed: true\n"
+                          "module Root\n"
+                          "  class B\n"
+                          "    class Inner\n"
+                          "      def bar\n"
+                          "        Root::A.n\n"
+                          "      end\n"
+                          "    end\n"
+                          "  end\n"
+                          "end\n",
+                          2));
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // Changing A#x's signature pulls in foo/f1.rb, so this fast path is deferred to Root::Foo's stratum.
+    sendAsync(*changeFile("a.rb",
+                          "# typed: true\n"
+                          "module Root\n"
+                          "  class A\n"
+                          "    extend T::Sig\n"
+                          "    sig {returns(Integer)}\n"
+                          "    def x = 1\n"
+                          "    sig {returns(String)}\n"
+                          "    def y = \"y\"\n"
+                          "  end\n"
+                          "end\n",
+                          2));
+    setSlowPathBlocked(false);
+
+    // Root's stratum (and with it, the deferral) is done once its diagnostics are published.
+    {
+        auto diag = readAsync();
+        REQUIRE(diag->isNotification());
+        REQUIRE_EQ(diag->asNotification().method, LSPMethod::TextDocumentPublishDiagnostics);
+    }
+
+    // Changing A#y's signature too pulls in f2.rb and f3.rb. This merges into the deferred edit.
+    sendAsync(*changeFile("a.rb",
+                          "# typed: true\n"
+                          "module Root\n"
+                          "  class A\n"
+                          "    extend T::Sig\n"
+                          "    sig {returns(Integer)}\n"
+                          "    def x = 1\n"
+                          "    sig {returns(Integer)}\n"
+                          "    def y = 2\n"
+                          "  end\n"
+                          "end\n",
+                          3));
+
+    bool sawOversizedFastPath = false;
+    bool slowPathEnded = false;
+    for (int i = 0; i < 30 && !slowPathEnded; i++) {
+        auto msg = readAsync();
+        if (!msg->isNotification() || msg->asNotification().method != LSPMethod::SorbetTypecheckRunInfo) {
+            continue;
+        }
+        auto &runInfo = get<unique_ptr<SorbetTypecheckRunInfo>>(msg->asNotification().params);
+        if (runInfo->status != SorbetTypecheckRunStatus::Ended) {
+            continue;
+        }
+        if (runInfo->typecheckingPath == TypecheckingPath::Fast) {
+            auto checked = [&](string_view path) {
+                return absl::c_linear_search(runInfo->filesTypechecked, fmt::format("{}/{}", rootPath, path));
+            };
+            sawOversizedFastPath =
+                sawOversizedFastPath || (checked("foo/f1.rb") && checked("f2.rb") && checked("f3.rb"));
+        } else {
+            slowPathEnded = true;
+        }
+    }
+    REQUIRE(slowPathEnded);
+    CHECK_FALSE(sawOversizedFastPath);
+}
+
 } // namespace sorbet::test::lsp
