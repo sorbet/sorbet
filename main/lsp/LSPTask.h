@@ -83,9 +83,10 @@ public:
     // a no-op. Is only ever invoked from the preprocessor thread.
     virtual void preprocess(LSPPreprocessor &preprocessor);
 
-    // Some tasks, like edits, need to interface with the indexer. Is only ever invoked from the processing
-    // thread, and is guaranteed to be invoked exactly once. The default implementation is a no-op.
-    // May be run from the processing thread (normally) or the typechecking thread (if preempting).
+    // Some tasks, like edits, need to interface with the indexer. Is guaranteed to be invoked exactly once, right
+    // before `run`. The default implementation is a no-op. Runs on the processing thread, unless the task is preempting
+    // a slow path, in which case it runs on the typechecker thread while holding the task queue's mutex (which the
+    // processing thread waits on).
     virtual void index(LSPIndexer &indexer);
 
     // Runs the task. Is only ever invoked from the typechecker thread. Since it is exceedingly rare for a request to

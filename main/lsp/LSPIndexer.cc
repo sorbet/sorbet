@@ -273,9 +273,9 @@ LSPIndexer::getTypecheckingPath(const vector<shared_ptr<core::File>> &changedFil
 
 void LSPIndexer::transferInitializeState(InitializedTask &task) {
     ENFORCE(this->config->opts.genPackagesMode == core::packages::GenPackagesMode::Disabled);
-    // Copying the global state here means that we snapshot before any files have been loaded. That means that the
-    // indexer and typechecker's file tables will almost immediately diverge, but that's not an issue as we don't share
-    // `core::FileRef` values between the two.
+    // Copying the global state here means that we snapshot before any files have been loaded. The indexer's file table
+    // stays empty until `IndexerInitializationTask` installs a copy of the typechecker's, after which the two file
+    // tables assign the same `core::FileRef` to each file (see `LSPFileUpdates::updatedFileRefs`).
     auto enableGenPackagesAllowRelaxingTestVisibility = false;
     auto typecheckerGS =
         std::exchange(this->gs, this->gs->copyForLSPTypechecker(

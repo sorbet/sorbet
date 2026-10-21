@@ -42,7 +42,7 @@ class LSPLoop {
      * The time that LSP last sent metrics to statsd -- if `opts.statsdHost` was specified.
      */
     std::chrono::time_point<std::chrono::steady_clock> lastMetricUpdateTime;
-    /** ID of the main thread, which actually processes LSP requests and performs typechecking. */
+    /** ID of the processing thread, which runs `runLSP`: it indexes tasks and hands them to the typechecker. */
     std::thread::id mainThreadId;
 
     void runTask(std::unique_ptr<LSPTask> task);

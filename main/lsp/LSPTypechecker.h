@@ -60,10 +60,9 @@ class LSPTypechecker final {
     /** Contains the ID of the thread responsible for typechecking. */
     std::thread::id typecheckerThreadId;
     /**
-     * GlobalState used for typechecking. It is replaced during indexing on the slow path, and is always replaced with
-     * a GlobalState that derives from the one created during LSP initialization. This derivation is guaranteed by
-     * passing a copy of that GlobalState to the indexer thread at the end of initialization, and then copying that
-     * GlobalState back over to the typechecker to use as the starting point for the next slow path.
+     * GlobalState used for typechecking. A cancelable slow path replaces it with a copy of itself
+     * (`pipeline::copyForSlowPath`), and saves the original in `cancellationUndoState` so that it can be restored if
+     * the slow path is canceled.
      */
     std::unique_ptr<core::GlobalState> gs;
 

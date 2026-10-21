@@ -102,15 +102,14 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
             continue;
         }
 
-        // When run from the indexer, the old file will actually have been evicted from the GlobalState so that the new
-        // file can be given to the pipeline to be indexed (and thus have the new hashes computed), so that the
-        // `updatedFile` and `fref.data(gs)` actually are the same File object. For this case, we have to find the old
-        // File's hashes in `evictedFiles`.
+        // When called from `LSPIndexer::commitEdit`, the old file will actually have been evicted from the GlobalState
+        // so that the new file can be given to the pipeline to be indexed (and thus have the new hashes computed), so
+        // that the `updatedFile` and `fref.data(gs)` actually are the same File object. For this case, we have to find
+        // the old File's hashes in `evictedFiles`.
         //
-        // When run from the typechecker, the old file will not yet have been evicted before
-        // fastPathFilesToTypecheck is called (it will be evicted later on that thread, right
-        // before calling into the pipeline). On that thread, `updatedFile` represents the new
-        // File, and the thing in GlobalState is the old File.
+        // When called from `LSPIndexer::getTypecheckingPath` (to predict a queued edit's path) or from the
+        // typechecker, the old file will not yet have been evicted, so `updatedFile` represents the new File, and the
+        // thing in GlobalState is the old File.
         const auto &oldLocalSymbolTableHashes = evictedFiles.empty()
                                                     ? fref.data(gs).getFileHash()->localSymbolTableHashes
                                                     : evictedFiles.at(fref)->getFileHash()->localSymbolTableHashes;
@@ -176,18 +175,12 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
             // The "2 * ..." is so that we can get a rough idea of whether there's an easy
             // bang-for-buck bump we could make to the threshold by reading the logs.
             //
-            // One of three things could be true:
-            // - We're running on the indexer thread via commitEdit to decide typecheckingPath,
-            //   which only cares about how many extra files there are, not what they are.
-            // - We're running on the indexer thread via canPreempt to decide whether preemption
-            //   is possible, which also only cares about the count.
-            // - We're running on the typechecker thread (knowing that typecheckingPath was already
-            //   TypecheckingPath::Fast) and simply need to compute the list of files to typecheck.
-            //   But that would be a contradiction--because otherwise the indexer would have marked
-            //   the update as not being able to take the fast path.
+            // We were called from one of two places, both of which are deciding a typechecking path:
+            // - commitEdit, to decide the path of the edit that it's committing.
+            // - canPreempt (via LSPIndexer::getTypecheckingPath), to predict that path for a queued edit.
             //
-            // So it's actually only one of the first two things that's true, and neither of which
-            // care about the full file list, so let's early exit.
+            // Either way, this many files means the slow path, which doesn't use the list of extra files, so let's
+            // early exit.
             return result;
         }
     }

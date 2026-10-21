@@ -21,10 +21,10 @@ sequenceDiagram
   LSPIndexer ->> LSPLoop: TaskQueue::pause
   LSPLoop ->> LSPTypechecker: InitializedTask::run
   LSPTypechecker ->> LSPTypechecker: LSPTypechecker::runSlowPath
-  LSPTypechecker --) LSPLoop: IndexerInitializedTask (at front of TaskQueue)
+  LSPTypechecker --) LSPLoop: IndexerInitializationTask (at front of TaskQueue)
   Note left of LSPTypechecker: Copy the typechecker's<br/>file table
   LSPTypechecker ->> LSPLoop: TaskQueue::resume
-  LSPLoop ->> LSPIndexer: IndexerInitializedTask::index
+  LSPLoop ->> LSPIndexer: IndexerInitializationTask::index
   Note left of LSPIndexer: Install the file table copy<br/>in LSPIndexer's GlobalState
 ```
 
@@ -56,10 +56,10 @@ typechecker makes a copy of its file table to send back to the indexer thread.
 > default to the slow path.
 
 The copy of the file table that's made in the `LSPTypechecker::initialize`
-method is moved to an `IndexerInitializedTask`. The typechecker places the task
+method is moved to an `IndexerInitializationTask`. The typechecker places the task
 at the front of the queue, and unblocks the main thread again. When the main
-thread wakes up and processes that event, the `IndexerInitializedTask::index`
-hook will install the move the file table entries into the `GlobalState` in the
+thread wakes up and processes that event, the `IndexerInitializationTask::index`
+hook will move the file table entries into the `GlobalState` in the
 `LSPIndexer` instance.
 
 ## Slow Path

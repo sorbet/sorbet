@@ -59,12 +59,13 @@ public:
     /**
      * Merges the given (and older) LSPFileUpdates object into this LSPFileUpdates object.
      *
-     * Resets `getTypecheckingPath`.
+     * Resets `typecheckingPath` to `Slow`; callers must decide the combined update's path again.
      */
     void mergeOlder(const LSPFileUpdates &older);
 
     /**
-     * Returns a copy of this LSPFileUpdates object. Does not handle deepCopying `updatedGS`.
+     * Returns a copy of this LSPFileUpdates object, without the fast path files (`fastPathExtraFiles` and
+     * `fastPathUseIncrementalNamer`) or `canceledSlowPath`.
      */
     LSPFileUpdates copy() const;
 
@@ -93,9 +94,9 @@ public:
     fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPConfiguration &config,
                              const std::vector<std::shared_ptr<core::File>> &updatedFiles);
 
-    // Overload because sometimes we have to look up the old file's hash in GlobalState (when
-    // running on the typechecker thread), and sometimes we have to look it up in evictedFiles (when
-    // running on the indexer thread).
+    // Overload because sometimes we have to look up the old file's hash in GlobalState (when called before the old
+    // file has been replaced, as in `runFastPath`), and sometimes we have to look it up in evictedFiles (when called
+    // after, as in `LSPIndexer::commitEdit`).
     static FastPathFilesToTypecheckResult
     fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPConfiguration &config,
                              const std::vector<std::shared_ptr<core::File>> &updatedFiles,
