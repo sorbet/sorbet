@@ -154,9 +154,17 @@ TypecheckingPath SorbetWorkspaceEditTask::getTypecheckingPath(const LSPIndexer &
     if (updates != nullptr) {
         return updates->typecheckingPath;
     }
-    if (!cachedFastPathDecision.has_value()) {
-        cachedFastPathDecision = index.getTypecheckingPath(params->updates);
+
+    // If we have committed edits since this fast path decision was committed, we need to recompute it. Clear it out so
+    // it's recomputed below.
+    if (cachedFastPathDecision.has_value() && !index.isTypecheckingPathValid(*cachedFastPathDecision)) {
+        cachedFastPathDecision.reset();
     }
+
+    if (!cachedFastPathDecision.has_value()) {
+        cachedFastPathDecision.emplace(index.getTypecheckingPath(params->updates));
+    }
+
     return cachedFastPathDecision->path;
 }
 
