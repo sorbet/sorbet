@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 # typed: strict
 
-class Project::ConsumerAuth
+module Project::ConsumerAuth
   class IdentifierType
   end
 end
