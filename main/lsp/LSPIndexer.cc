@@ -240,8 +240,7 @@ LSPIndexer::decideTypecheckingPath(LSPFileUpdates &edit,
     auto [path, result] = computeTypecheckingPath(edit.updatedFiles, evictedFiles);
     switch (path) {
         case TypecheckingPath::Fast: {
-            edit.fastPathUseIncrementalNamer = result.useIncrementalNamer;
-            edit.fastPathExtraFiles = std::move(result.extraFiles);
+            edit.fastPathFiles = std::move(result);
             break;
         }
 
