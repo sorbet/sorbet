@@ -2710,4 +2710,78 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedDeferredEditMergedW
     CHECK_EQ(readFile(getUri("a.rb")), updatedA);
 }
 
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedDeferredEditMergedIntoRunSpecial") {
+    const string updatedB = "# typed: true\nmodule Root\n  class B\n    class Inner\n"
+                            "      def bar = Root::A.n\n"
+                            "    end\n"
+                            "    class AnotherNewClass; end\n"
+                            "  end\nend\n";
+    const string updatedFoo = "# typed: true\nmodule Root::Foo\n  class Consumer\n"
+                              "    def value = Root::A.new.value\n"
+                              "  end\nend\n# latest edit\n";
+    vector<pair<string, string>> files = {
+        {"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A"}).build()},
+        {"a.rb", "# typed: true\nmodule Root\n  class A\n"
+                 "    def value = 1\n"
+                 "  end\nend\n"},
+        {"b.rb", "# typed: true\nmodule Root\n  class B; end\nend\n"},
+        {"foo/__package.rb", PackageTextBuilder().withName("Root::Foo").withImports({"Root"}).build()},
+        {"foo/a.rb", "# typed: true\nmodule Root::Foo\n  class Consumer\n"
+                     "    def value = Root::A.new.value\n"
+                     "  end\nend\n"},
+    };
+    auto opts = make_shared<realmain::options::Options>();
+    opts->cacheSensitiveOptions.sorbetPackages = true;
+    opts->packageDirected = true;
+    opts->sleepInSlowPathSeconds = 1;
+    opts->lspMaxFilesOnFastPath = 1;
+    resetState(opts);
+    writeFilesToFS(files);
+    for (auto &[path, _] : files) {
+        lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/{}", rootPath, path));
+    }
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->enableTypecheckInfo = true;
+    assertErrorDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
+    getCounters();
+
+    assertErrorDiagnostics(send(*openFile("b.rb", files[2].second)), {});
+    assertErrorDiagnostics(send(*openFile("foo/a.rb", files[4].second)), {});
+
+    setSlowPathBlocked(true);
+    sendAsync(*changeFile("b.rb",
+                          "# typed: true\nmodule Root\n  class B\n    class Inner\n"
+                          "      def bar = Root::A.n\n"
+                          "    end\n"
+                          "  end\nend\n",
+                          2));
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // This comment edit is indexed while Root is running, then deferred until Root::Foo's stratum.
+    sendAsync(*changeFile("foo/a.rb", updatedFoo, 2));
+    setSlowPathBlocked(false);
+    {
+        auto diag = readAsync();
+        REQUIRE(diag->isNotification());
+        REQUIRE_EQ(diag->asNotification().method, LSPMethod::TextDocumentPublishDiagnostics);
+        auto params = getPublishDiagnosticParams(diag->asNotification());
+        REQUIRE(params.has_value());
+        CHECK_EQ((*params)->uri, getUri("b.rb"));
+    }
+
+    // The newer slow edit merges into the deferred task. Together they exceed the one-file indexing limit,
+    // so the merged task must commit both edits through runSpecial.
+    sendAsync(*changeFile("b.rb", updatedB, 3));
+    send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20)));
+    auto counters = getCounters();
+    CHECK_EQ(counters.getCategoryCounter("lsp.messages.processed", "sorbet.mergedEdits"), 1);
+    CHECK_EQ(readFile(getUri("b.rb")), updatedB);
+    CHECK_EQ(readFile(getUri("foo/a.rb")), updatedFoo);
+}
+
 } // namespace sorbet::test::lsp
