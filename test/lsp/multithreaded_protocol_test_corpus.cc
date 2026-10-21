@@ -2646,4 +2646,68 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedSlowPathEditPromote
     CHECK(sawNewerEditError);
 }
 
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedDeferredEditMergedWithNoOp") {
+    const string updatedA = "# typed: true\n"
+                            "module Root\n"
+                            "  class A\n"
+                            "    extend T::Sig\n"
+                            "    sig {returns(Integer)}\n"
+                            "    def value = 1\n"
+                            "  end\n"
+                            "end\n";
+    vector<pair<string, string>> files = {
+        {"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A"}).build()},
+        {"a.rb", "# typed: true\n"
+                 "module Root\n"
+                 "  class A\n"
+                 "    extend T::Sig\n"
+                 "    sig {returns(String)}\n"
+                 "    def value = \"old\"\n"
+                 "  end\n"
+                 "end\n"},
+        {"b.rb", "# typed: true\nmodule Root\n  class B; end\nend\n"},
+        {"foo/__package.rb", PackageTextBuilder().withName("Root::Foo").withImports({"Root"}).build()},
+        {"foo/a.rb", "# typed: true\nmodule Root::Foo\n  class Consumer\n"
+                     "    def value = Root::A.new.value\n"
+                     "  end\nend\n"},
+    };
+    initializePackagedWorkspace(true, files, 1);
+    assertErrorDiagnostics(send(*openFile("a.rb", files[1].second)), {});
+    assertErrorDiagnostics(send(*openFile("b.rb", files[2].second)), {});
+
+    setSlowPathBlocked(true);
+    sendAsync(*changeFile("b.rb",
+                          "# typed: true\nmodule Root\n  class B\n    class Inner\n"
+                          "      def bar = Root::A.n\n"
+                          "    end\n"
+                          "  end\nend\n",
+                          2, /* cancellationExpected */ false, /* preemptionsExpected */ 1));
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // This edit is indexed in Root, but its fast path is deferred until Root::Foo.
+    sendAsync(*changeFile("a.rb", updatedA, 2));
+    setSlowPathBlocked(false);
+    {
+        auto diag = readAsync();
+        REQUIRE(diag->isNotification());
+        REQUIRE_EQ(diag->asNotification().method, LSPMethod::TextDocumentPublishDiagnostics);
+        auto params = getPublishDiagnosticParams(diag->asNotification());
+        REQUIRE(params.has_value());
+        CHECK_EQ((*params)->uri, getUri("b.rb"));
+    }
+
+    // The newer edit is identical to the indexed file, so indexing filters it out after it merges into the
+    // deferred task. It still counts as a message with a diagnostic latency timer.
+    sendAsync(*changeFile("a.rb", updatedA, 3));
+    send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20)));
+    auto counters = getCounters();
+    CHECK_EQ(counters.getCategoryCounter("lsp.messages.processed", "sorbet.mergedEdits"), 1);
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath_canceled"), 0);
+    CHECK_EQ(readFile(getUri("a.rb")), updatedA);
+}
+
 } // namespace sorbet::test::lsp
