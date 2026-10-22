@@ -1356,6 +1356,13 @@ vector<MangledName> PackageInfo::directSubPackages(const core::GlobalState &gs, 
     return subpackages;
 }
 
+bool PackageInfo::hasSubPackages(const core::GlobalState &gs) const {
+    ENFORCE(this->exists());
+    // Registry symbols also contain a synthetic singleton member, which does not indicate a subpackage.
+    const auto &members = this->mangledName_.owner.data(gs)->members();
+    return members.size() > 1 || (members.size() == 1 && members.begin()->first != Names::singleton());
+}
+
 PackageInfo::CanModifyResult PackageInfo::canModifySymbol(core::Context ctx, ClassOrModuleRef sym) const {
     ENFORCE(sym.exists());
 
@@ -1393,7 +1400,7 @@ PackageInfo::CanModifyResult PackageInfo::canModifySymbol(core::Context ctx, Cla
     // namespace, and if so that there aren't any subpackages, as that could introduce ordering dependencies that don't
     // work with package-directed type checking.
     if (symPackage == this->mangledName_) {
-        if (this->hasSubPackages && symData->packageRegistryOwner.exists()) {
+        if (this->hasSubPackages(gs) && symData->packageRegistryOwner.exists()) {
             return CanModifyResult::Subpackages;
         }
 
