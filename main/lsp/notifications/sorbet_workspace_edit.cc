@@ -42,10 +42,8 @@ void SorbetWorkspaceEditTask::mergeNewer(SorbetWorkspaceEditTask &task) {
     }
 
     // This cached information is now invalid.
-    task.cachedFastPathDecisionValid = false;
-    task.cachedFastPathDecision = TypecheckingPath::Slow;
-    cachedFastPathDecisionValid = false;
-    cachedFastPathDecision = TypecheckingPath::Slow;
+    task.cachedFastPathDecision.reset();
+    cachedFastPathDecision.reset();
 }
 
 void SorbetWorkspaceEditTask::preprocess(LSPPreprocessor &preprocessor) {
@@ -156,11 +154,14 @@ TypecheckingPath SorbetWorkspaceEditTask::getTypecheckingPath(const LSPIndexer &
     if (updates != nullptr) {
         return updates->typecheckingPath;
     }
-    if (!cachedFastPathDecisionValid) {
-        cachedFastPathDecision = index.getTypecheckingPath(params->updates);
-        cachedFastPathDecisionValid = true;
+
+    // Compute the fast path decision if it's not present, or if the indexer has committed other edits since it was
+    // computed.
+    if (!cachedFastPathDecision.has_value() || !index.isTypecheckingPathValid(*cachedFastPathDecision)) {
+        cachedFastPathDecision.emplace(index.getTypecheckingPath(params->updates));
     }
-    return cachedFastPathDecision;
+
+    return cachedFastPathDecision->path;
 }
 
 bool SorbetWorkspaceEditTask::canPreempt(const LSPIndexer &index) const {
@@ -172,10 +173,31 @@ const SorbetWorkspaceEditParams &SorbetWorkspaceEditTask::getParams() const {
 }
 
 core::packages::Stratum SorbetWorkspaceEditTask::preemptionStratum(FileStratumMapping info) const {
+    ENFORCE(this->updates == nullptr);
+
+    // There should be no path to `preemptionStratum` where we haven't cached the fast path info, but just to make sure
+    // that we don't crash in a production build if that happens to not be the case, we defensively return the last
+    // stratum here.
+    if (!this->cachedFastPathDecision.has_value()) {
+        ENFORCE(false, "Missing cached fast path decision when computing an edit preemption stratum");
+        return info.getLastStratum();
+    }
+
     vector<string_view> paths;
     paths.reserve(this->params->updates.size());
     absl::c_transform(this->params->updates, back_inserter(paths), [](auto &file) { return file->path(); });
-    return info.getStratumForPaths(paths);
+
+    auto stratum = info.getStratumForPaths(paths);
+
+    // The incremental namer will pull in additional files that aren't directly part of the edit. Those may be
+    // associated with a later stratum than the edited files, so we need to factor those in if they're present.
+    if (!this->cachedFastPathDecision->files.extraFiles.empty()) {
+        ENFORCE(this->cachedFastPathDecision->files.useIncrementalNamer,
+                "The incremental namer must be enabled if there are extra files on the fast path");
+        stratum = std::max(stratum, info.getStratumForFiles(this->cachedFastPathDecision->files.extraFiles));
+    }
+
+    return stratum;
 }
 
 } // namespace sorbet::realmain::lsp

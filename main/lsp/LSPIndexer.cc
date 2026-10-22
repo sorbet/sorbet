@@ -83,7 +83,7 @@ void LSPIndexer::computeFileHashes(const vector<shared_ptr<core::File>> &files) 
 LSPIndexer::TypecheckingPathResult
 LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &changedFiles,
                                         const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) const {
-    TypecheckingPathResult result;
+    TypecheckingPathResult result(this->commitCount);
 
     Timer timeit(*config->logger, "fast_path_decision");
     auto &logger = *config->logger;
@@ -237,11 +237,11 @@ LSPIndexer::getTypecheckingPath(LSPFileUpdates &edit,
         return TypecheckingPath::Slow;
     }
 
-    auto [path, result] = getTypecheckingPathInternal(edit.updatedFiles, evictedFiles);
-    switch (path) {
+    auto result = getTypecheckingPathInternal(edit.updatedFiles, evictedFiles);
+    switch (result.path) {
         case TypecheckingPath::Fast: {
-            edit.fastPathUseIncrementalNamer = result.useIncrementalNamer;
-            edit.fastPathExtraFiles = std::move(result.extraFiles);
+            edit.fastPathUseIncrementalNamer = result.files.useIncrementalNamer;
+            edit.fastPathExtraFiles = std::move(result.files.extraFiles);
             break;
         }
 
@@ -249,10 +249,11 @@ LSPIndexer::getTypecheckingPath(LSPFileUpdates &edit,
             break;
     }
 
-    return path;
+    return result.path;
 }
 
-TypecheckingPath LSPIndexer::getTypecheckingPath(const vector<shared_ptr<core::File>> &changedFiles) const {
+LSPIndexer::TypecheckingPathResult
+LSPIndexer::getTypecheckingPath(const vector<shared_ptr<core::File>> &changedFiles) const {
     static UnorderedMap<core::FileRef, shared_ptr<core::File>> emptyMap;
 
     // Avoid expensively computing file hashes if there are too many files and it's likely that we'd
@@ -261,14 +262,14 @@ TypecheckingPath LSPIndexer::getTypecheckingPath(const vector<shared_ptr<core::F
         config->logger->debug("Taking slow path because too many files changed ({} files > {} files)",
                               changedFiles.size(), config->opts.lspMaxFilesOnFastPath);
         prodCategoryCounterInc("lsp.slow_path_reason", "too_many_files");
-        return TypecheckingPath::Slow;
+
+        return LSPIndexer::TypecheckingPathResult(this->commitCount);
     }
 
     // Ensure all files have computed hashes.
     computeFileHashes(changedFiles);
 
-    auto [path, result] = getTypecheckingPathInternal(changedFiles, emptyMap);
-    return path;
+    return getTypecheckingPathInternal(changedFiles, emptyMap);
 }
 
 void LSPIndexer::transferInitializeState(InitializedTask &task) {
@@ -326,6 +327,10 @@ void LSPIndexer::initialize(IndexerInitializationTask &task, vector<shared_ptr<c
 
 unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit, WorkerPool &workers) {
     Timer timeit(*config->logger, "LSPIndexer::commitEdit");
+
+    // Update the commit counter, as we're about to mutate the file table.
+    this->commitCount++;
+
     auto result = make_unique<LSPFileUpdates>();
     auto &update = *result;
     update.epoch = edit.epoch;
