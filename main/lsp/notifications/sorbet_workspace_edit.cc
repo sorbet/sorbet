@@ -183,21 +183,25 @@ core::packages::Stratum SorbetWorkspaceEditTask::preemptionStratum(FileStratumMa
         return info.getLastStratum();
     }
 
+    core::packages::Stratum stratum(0);
+    bool includePackageFiles = false;
+
+    if (this->cachedFastPathDecision->files.useIncrementalNamer) {
+        includePackageFiles = true;
+
+        // The incremental namer will pull in additional files that aren't directly part of the edit. Those may be
+        // associated with a later stratum than the edited files, so we need to factor those in if they're present.
+        if (!this->cachedFastPathDecision->files.extraFiles.empty()) {
+            stratum = std::max(
+                stratum, info.getStratumForFiles(this->cachedFastPathDecision->files.extraFiles, includePackageFiles));
+        }
+    }
+
     vector<string_view> paths;
     paths.reserve(this->params->updates.size());
     absl::c_transform(this->params->updates, back_inserter(paths), [](auto &file) { return file->path(); });
 
-    auto stratum = info.getStratumForPaths(paths);
-
-    // The incremental namer will pull in additional files that aren't directly part of the edit. Those may be
-    // associated with a later stratum than the edited files, so we need to factor those in if they're present.
-    if (!this->cachedFastPathDecision->files.extraFiles.empty()) {
-        ENFORCE(this->cachedFastPathDecision->files.useIncrementalNamer,
-                "The incremental namer must be enabled if there are extra files on the fast path");
-        stratum = std::max(stratum, info.getStratumForFiles(this->cachedFastPathDecision->files.extraFiles));
-    }
-
-    return stratum;
+    return std::max(stratum, info.getStratumForPaths(paths, includePackageFiles));
 }
 
 } // namespace sorbet::realmain::lsp
