@@ -1385,8 +1385,10 @@ private:
             // Report using the source namespace's ownership before mangling clears it.
             reportNamespaceError(ctx, klass.declLoc, klass.withinExplicitRootScope, namespacePackage, onPackagePath,
                                  owner, klass.name);
+            return true;
         }
-        return shouldMangle;
+
+        return false;
     }
 
     bool shouldMangleStaticFieldDefinition(core::MutableContext ctx, core::ClassOrModuleRef owner,
