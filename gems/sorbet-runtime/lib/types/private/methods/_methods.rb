@@ -643,7 +643,10 @@ module T::Private::Methods
 
   # use this directly if you don't want/need to box up the method into an object to pass to method_to_key.
   private_class_method def self.method_owner_and_name_to_key(owner, name)
-    "#{owner.object_id}##{name}"
+    # Frozen so that Hash#[]= stores this String as-is instead of storing a
+    # frozen copy. Keys are kept for every method with a sig, so this halves
+    # the number of key Strings retained.
+    "#{owner.object_id}##{name}".freeze
   end
 
   private_class_method def self.method_to_key(method)
