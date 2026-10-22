@@ -733,6 +733,7 @@ private:
                 resolvedField.data(gs)->resultType = core::Types::untyped(resolved);
             }
             job.out->setSymbol(resolved);
+            checkReferenceAgainstExports(ctx, job, resolved);
             return;
         }
         if (resolved.exists()) {
@@ -929,6 +930,34 @@ private:
         }
     }
 
+    // Reports an error if the outermost constant of a constant literal (i.e., `C` in `A::B::C`) resolved to a constant
+    // that its package doesn't export. Only the outermost constant is checked: in `A::B::C`, `A::B` is allowed to be
+    // unexported, as long as `C` is exported.
+    static void checkReferenceAgainstExports(core::Context ctx, const ConstantResolutionItem &job,
+                                             core::SymbolRef resolved) {
+        if (!job.isOutermost || job.isMixinAncestor || !shouldCheckPackage(ctx)) {
+            return;
+        }
+        if (!resolved.isClassOrModule() && !resolved.isFieldOrStaticField()) {
+            return;
+        }
+
+        auto otherPackage = resolved.enclosingClass(ctx).data(ctx)->package;
+        auto &packageDB = ctx.state.packageDB();
+        auto currentPackage = packageDB.getPackageNameForFile(ctx.file);
+        if (!otherPackage.exists() || currentPackage == otherPackage) {
+            return;
+        }
+        if (!canReferencePackage(ctx, otherPackage)) {
+            // This reference has an import error instead (which `VisibilityChecker::checkReferences` reports). Only
+            // report that, not also an export error.
+            return;
+        }
+
+        packageDB.getPackageInfo(currentPackage)
+            .checkReferenceAgainstExports(ctx, job.out->loc(), resolved, otherPackage);
+    }
+
     static bool resolveConstantJob(core::Context ctx, ConstantResolutionItem &job) {
         if (isAlreadyResolved(ctx, *job.out)) {
             return true;
@@ -941,12 +970,14 @@ private:
             auto resolvedField = resolved.asFieldRef();
             if (resolvedField.data(ctx)->resultType != nullptr) {
                 job.out->setSymbol(resolved);
+                checkReferenceAgainstExports(ctx, job, resolved);
                 return true;
             }
             return false;
         }
 
         job.out->setSymbol(resolved);
+        checkReferenceAgainstExports(ctx, job, resolved);
         return true;
     }
 

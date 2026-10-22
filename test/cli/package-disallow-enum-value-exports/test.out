@@ -19,4 +19,15 @@ other_package/b.rb:5: `MyPackage::A::Val2` resolves but is not exported from `My
     my_package/__package.rb:3: Insert `export MyPackage::A`
      3 |class MyPackage < PackageSpec
                                      ^
-Errors: 2
+
+other_package/b.rb:6: `MyPackage::A::OTHER_CONST` resolves but is not exported from `MyPackage` https://srb.help/3717
+     6 |    Y = MyPackage::A::OTHER_CONST
+                ^^^^^^^^^^^^^^^^^^^^^^^^^
+    my_package/a.rb:12: Defined here
+    12 |    OTHER_CONST = 2
+            ^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    my_package/__package.rb:5: Insert `export MyPackage::A::OTHER_CONST`
+     5 |  export MyPackage::A::NOT_A_VALUE
+                                          ^
+Errors: 3

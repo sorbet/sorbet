@@ -52,8 +52,6 @@ public:
     static void validatePackagedFiles(const core::GlobalState &gs, WorkerPool &workers,
                                       absl::Span<ast::ParsedFile> files);
 
-    static core::SymbolRef getEnumClassForEnumValue(const core::GlobalState &gs, core::SymbolRef sym);
-
     Packager() = delete;
 };
 } // namespace sorbet::packager

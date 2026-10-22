@@ -34,6 +34,9 @@ class PackageDB final {
 public:
     static constexpr NameRef TEST_NAMESPACE = core::Names::Constants::Test();
 
+    // If `sym` is a `T::Enum` value, the enum class it belongs to. Otherwise, `noSymbol`.
+    static core::SymbolRef getEnumClassForEnumValue(const core::GlobalState &gs, core::SymbolRef sym);
+
     MangledName enterPackage(std::unique_ptr<PackageInfo> pkg);
 
     // Fetch the mangled package name for a file, returning a MangledName that doesn't exist if there is no

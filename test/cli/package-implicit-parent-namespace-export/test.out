@@ -1,14 +1,3 @@
-other_package/reference.rb:8: `MyPackage::ParentNamespace::PrivateConst3` resolves but is not exported from `MyPackage` https://srb.help/3717
-     8 |  MPP::PrivateConst3 # Should be an ERROR! Private constant.
-          ^^^^^^^^^^^^^^^^^^
-    my_package/constants.rb:7: Defined here
-     7 |    PrivateConst3 = 3
-            ^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    my_package/__package.rb:6: Insert `export MyPackage::ParentNamespace::PrivateConst3`
-     6 |  export MyPackage::BehaviorDefiningParentNamespace::Const1
-                                                                   ^
-
 other_package/reference.rb:10: `MyPackage::BehaviorDefiningParentNamespace` resolves but is not exported from `MyPackage` https://srb.help/3717
     10 |  BPP = MyPackage::BehaviorDefiningParentNamespace # should be an ERROR! Not allowed since namespace defines behavior.
                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -19,4 +8,15 @@ other_package/reference.rb:10: `MyPackage::BehaviorDefiningParentNamespace` reso
     my_package/__package.rb:3: Insert `export MyPackage::BehaviorDefiningParentNamespace`
      3 |class MyPackage < PackageSpec
                                      ^
+
+other_package/reference.rb:8: `MyPackage::ParentNamespace::PrivateConst3` resolves but is not exported from `MyPackage` https://srb.help/3717
+     8 |  MPP::PrivateConst3 # Should be an ERROR! Private constant.
+          ^^^^^^^^^^^^^^^^^^
+    my_package/constants.rb:7: Defined here
+     7 |    PrivateConst3 = 3
+            ^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    my_package/__package.rb:6: Insert `export MyPackage::ParentNamespace::PrivateConst3`
+     6 |  export MyPackage::BehaviorDefiningParentNamespace::Const1
+                                                                   ^
 Errors: 2
