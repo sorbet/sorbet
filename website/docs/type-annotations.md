@@ -48,6 +48,8 @@ Sorbet does _very_ minimal inference for types of constants. These are the cases
 
   In these cases, Sorbet reports an error stating that it requires an explicit type annotation to correct the faulty assumption. This only applies at the top-level (e.g., not inside arrays).
 
+  Within a class body, `X = new` and `X = self.new` also infer the enclosing class as the type of `X`. Both forms support `.freeze` as well.
+
 In all other cases, Sorbet does not infer the types of constants, and will assume a type of `T.untyped`. In [`# typed: strict`](static.md) files, Sorbet reports an error requiring that a type be specified, so that Sorbet does not assume `T.untyped`.
 
 To specify the type of a constant, use `T.let`:

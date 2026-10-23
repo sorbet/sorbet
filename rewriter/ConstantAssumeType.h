@@ -16,10 +16,13 @@ namespace sorbet::rewriter {
  * but only in `# typed: true` files, so that we can be sure that the type annotation will be
  * checked for correctness.
  *
+ * Also handles `X = new` and `X = self.new` in a class body, using the enclosing class
+ * as the type (resolved after naming).
+ *
  */
 class ConstantAssumeType final {
 public:
-    static void run(core::MutableContext ctx, ast::Assign *asgn);
+    static void run(core::MutableContext ctx, ast::Assign *asgn, bool isRoot);
 
     ConstantAssumeType() = delete;
 };
