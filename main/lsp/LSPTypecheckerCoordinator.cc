@@ -220,6 +220,11 @@ public:
             testHooks->preemptionReadyToFinish.Notify();
             testHooks->resumePreemption.WaitForNotification();
         }
+        // NOTE: the lock doesn't guard `finished`, but the main thread waits on `finished` in addition to testing the
+        // task queue state in it's mutex Await call. As `finished` is not associated directly with the `taskQueue`
+        // mutex, we need to signal any threads that might be waiting on this mutex that they should check if they can
+        // make progress.
+        absl::MutexLock lck(this->taskQueue.getMutex());
         finished.Notify();
     }
 };

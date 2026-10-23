@@ -295,11 +295,11 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                         // In this if statement **only**, `taskQueue::stateMutex` protects all accesses to LSPIndexer.
                         // This is needed to linearize the indexing of edits, which may happen in the typechecking
                         // thread if a fast path edit preempts, with the `canPreempt` checks of edits in this thread.
-                        auto noPreemptionTasksRemain = [&indexer = this->indexer,
+                        auto noPreemptionTasksRemain = [&indexer = this->indexer, &finished,
                                                         &tasks = this->taskQueue->tasks()]() -> bool {
                             // The capture of `tasks` here is safe because the only caller of this closure is the
                             // `Await` below, which will lock the mutex that guards `tasks` for its duration.
-                            return !indexer.preemptionPossible(tasks);
+                            return finished.HasBeenNotified() || !indexer.preemptionPossible(tasks);
                         };
                         // Wait until the head of the queue turns into a non-preemptible task to resume processing the
                         // queue.
