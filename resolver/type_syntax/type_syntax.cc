@@ -628,6 +628,11 @@ optional<ParsedSig> parseSigWithSelfTypeParams(core::Context ctx, const ast::Sen
 bool recurseOrType(core::Context ctx, core::TypePtr type, vector<string> &v) {
     if (auto o = core::cast_type<core::OrType>(type)) {
         return recurseOrType(ctx, o->left, v) && recurseOrType(ctx, o->right, v);
+    } else if (auto eu = core::cast_type<core::EnumUnionType>(type)) {
+        for (auto member : eu->members) {
+            v.push_back(fmt::format("T.class_of({})", member.data(ctx)->externalType().show(ctx)));
+        }
+        return true;
     } else if (core::isa_type<core::ClassType>(type)) {
         v.push_back(fmt::format("T.class_of({})", type.show(ctx)));
         return true;
@@ -733,7 +738,7 @@ optional<core::ClassOrModuleRef> parseTClassOf(core::Context ctx, const ast::Sen
             auto type = move(maybeType.value());
             vector<string> classes;
             auto shouldAutoCorrect = recurseOrType(ctx, type, classes);
-            if (core::isa_type<core::OrType>(type) && shouldAutoCorrect) {
+            if (core::is_union_type(type) && shouldAutoCorrect) {
                 auto autocorrect = fmt::format("T.any({})", fmt::join(classes, ", "));
                 e.setHeader("`{}` must wrap each individual class type, not the outer `{}`", "T.class_of", "T.any");
                 e.replaceWith("Distribute `T.class_of`", ctx.locAt(send.loc), "{}", autocorrect);

@@ -252,6 +252,15 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         }
     }
 
+    // EnumUnionType is a compact representation of the equivalent OrType. Expand it and use the OrType logic, which
+    // gives the same answer (but gives up the compact representation).
+    if (auto eu1 = cast_type<EnumUnionType>(t1)) {
+        return lub(gs, eu1->toOrType(gs), t2);
+    }
+    if (auto eu2 = cast_type<EnumUnionType>(t2)) {
+        return lub(gs, t1, eu2->toOrType(gs));
+    }
+
     if (isa_type<OrType>(t2)) { // 3, 5, 6
         categoryCounterInc("lub", "or>");
         return lubDistributeOr(gs, t2, t1);
@@ -604,6 +613,10 @@ TypePtr lubGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
         return t2;
     } else {
         categoryCounterInc("lub.<class>.collapsed", "no");
+        auto parent1 = EnumUnionType::parentEnumClass(gs, sym1);
+        if (parent1.exists() && parent1 == EnumUnionType::parentEnumClass(gs, sym2)) {
+            return Types::enumUnion(sym1, sym2);
+        }
         return OrType::make_shared(t1, t2);
     }
 }
@@ -728,6 +741,14 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             categoryCounterInc("glb", "bottom>");
             return t2;
         }
+    }
+
+    // Expand an EnumUnionType into the equivalent OrType, and use the OrType logic.
+    if (auto eu1 = cast_type<EnumUnionType>(t1)) {
+        return glb(gs, eu1->toOrType(gs), t2);
+    }
+    if (auto eu2 = cast_type<EnumUnionType>(t2)) {
+        return glb(gs, t1, eu2->toOrType(gs));
     }
 
     if (t1.kind() > t2.kind()) { // force the relation to be symmentric and half the implementation
@@ -1591,6 +1612,15 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
 
     // Note: order of cases here matters! We can't lose "and" information in t1 early and we can't
     // lose "or" information in t2 early.
+
+    // Expand an EnumUnionType into the equivalent OrType, and use the OrType logic.
+    if (auto eu1 = cast_type<EnumUnionType>(t1)) { // 7, 8, 9
+        return isSubTypeUnderConstraint(gs, constr, eu1->toOrType(gs), t2, mode, errorDetailsCollector);
+    }
+    if (auto eu2 = cast_type<EnumUnionType>(t2)) { // 3, 6
+        return isSubTypeUnderConstraint(gs, constr, t1, eu2->toOrType(gs), mode, errorDetailsCollector);
+    }
+
     if (auto o1 = cast_type<OrType>(t1)) { // 7, 8, 9
         auto subCollectorLeft = errorDetailsCollector.newCollector();
         auto isSubTypeOfLeft = Types::isSubTypeUnderConstraint(gs, constr, o1->left, t2, mode, subCollectorLeft);
@@ -1737,7 +1767,7 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
         } else if (isa_type<SelfTypeParam>(t1)) {
             auto selfTypeParam1 = cast_type_nonnull<SelfTypeParam>(t1);
             if (const auto lambdaParam = cast_type<LambdaParam>(selfTypeParam1.definition.resultType(gs))) {
-                if (isa_type<OrType>(lambdaParam->upperBound) || isa_type<AndType>(lambdaParam->upperBound)) {
+                if (is_union_type(lambdaParam->upperBound) || isa_type<AndType>(lambdaParam->upperBound)) {
                     return Types::isSubTypeUnderConstraint(gs, constr, lambdaParam->upperBound, t2, mode,
                                                            errorDetailsCollector);
                 }
@@ -1768,7 +1798,7 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
         } else if (isa_type<SelfTypeParam>(t2)) {
             auto selfTypeParam2 = cast_type_nonnull<SelfTypeParam>(t2);
             if (const auto lambdaParam = cast_type<LambdaParam>(selfTypeParam2.definition.resultType(gs))) {
-                if (isa_type<OrType>(lambdaParam->lowerBound) || isa_type<AndType>(lambdaParam->lowerBound)) {
+                if (is_union_type(lambdaParam->lowerBound) || isa_type<AndType>(lambdaParam->lowerBound)) {
                     return Types::isSubTypeUnderConstraint(gs, constr, t1, lambdaParam->lowerBound, mode,
                                                            errorDetailsCollector);
                 }

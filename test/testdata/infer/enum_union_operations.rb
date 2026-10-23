@@ -118,7 +118,7 @@ class Test
   def self.narrow_with_case(e)
     case e
     when E::A, E::B
-      T.reveal_type(e) # error: Revealed type: `T.any(E::B, E::A)`
+      T.reveal_type(e) # error: Revealed type: `T.any(E::A, E::B)`
     when E::C
       T.reveal_type(e) # error: Revealed type: `E::C`
     else
