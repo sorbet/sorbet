@@ -2159,7 +2159,7 @@ public:
         return state;
     }
 
-    void enterNewDefinitions(core::MutableContext ctx, SymbolDefiner::State &&state) {
+    void enterNewDefinitions(core::MutableContext ctx, const SymbolDefiner::State &state) {
         // We have to defer defining non-class constant symbols until this (second) phase of incremental
         // namer so that we don't delete and immediately re-enter a symbol (possibly keeping it
         // alive, if it had multiple locs at the time of deletion) before SymbolDefiner has had a
@@ -2200,7 +2200,11 @@ public:
         for (auto &field : foundDefs.fields()) {
             insertField(ctx.withOwner(getOwnerSymbol(state, field.owner)), field);
         }
+    }
 
+    // Runs only after enterNewDefinitions has run for every file, so that a modifier like `private :foo` finds
+    // `foo` even when it is defined in a file that is processed later.
+    void applyModifiers(core::MutableContext ctx, const SymbolDefiner::State &state) {
         for (const auto &modifier : foundDefs.modifiers()) {
             const auto owner = getOwnerSymbol(state, modifier.owner);
             switch (modifier.kind) {
@@ -2874,7 +2878,21 @@ void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinition
 
         SymbolDefiner symbolDefiner(ctx, *fileFoundDefinitions, updatedSymbols, packageMangledClasses,
                                     packageMangledStaticFields);
-        symbolDefiner.enterNewDefinitions(ctx, move(incrementalDefinitions[fref]));
+        symbolDefiner.enterNewDefinitions(ctx, incrementalDefinitions[fref]);
+    }
+
+    count = 0;
+    for (auto &[fref, fileFoundDefinitions] : allFoundDefinitions) {
+        count++;
+        if (count % 250 == 0 && epochManager.wasTypecheckingCanceled()) {
+            return;
+        }
+
+        core::MutableContext ctx(gs, core::Symbols::root(), fref);
+
+        SymbolDefiner symbolDefiner(ctx, *fileFoundDefinitions, updatedSymbols, packageMangledClasses,
+                                    packageMangledStaticFields);
+        symbolDefiner.applyModifiers(ctx, incrementalDefinitions[fref]);
     }
     return;
 }
