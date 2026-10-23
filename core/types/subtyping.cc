@@ -832,6 +832,96 @@ TypePtr Types::all(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
     return ret;
 }
 
+namespace {
+
+// Computes glb(eu, other) directly when the answer only depends on enum variant membership. Every member of an
+// EnumUnionType is a class that directly subclasses the same enum, so its intersection with another variant or with an
+// unrelated class is empty. Returns nullptr when `other` needs the general OrType distribution (modules, type
+// parameters, AndTypes, ...).
+TypePtr glbEnumUnion(const GlobalState &gs, const EnumUnionType &eu, const TypePtr &euType, const TypePtr &other) {
+    auto parent = eu.parentEnumClass(gs);
+
+    if (auto otherEU = cast_type<EnumUnionType>(other)) {
+        if (otherEU->parentEnumClass(gs) != parent) {
+            return Types::bottom();
+        }
+        vector<ClassOrModuleRef> common;
+        set_intersection(eu.members.begin(), eu.members.end(), otherEU->members.begin(), otherEU->members.end(),
+                         back_inserter(common), enumMemberLess);
+        if (common.empty()) {
+            return Types::bottom();
+        } else if (common.size() == 1) {
+            return common[0].data(gs)->externalType();
+        } else if (common.size() == eu.members.size()) {
+            return euType;
+        } else if (common.size() == otherEU->members.size()) {
+            return other;
+        }
+        return Types::enumUnion(move(common));
+    }
+
+    if (isa_type<OrType>(other)) {
+        // Same collapsing checks as the OrType case in glb, then distribute over the components of `other` (most of
+        // which are variants of this enum, nil, or other unions of variants).
+        if (Types::isSubType(gs, euType, other)) {
+            return euType;
+        }
+        if (Types::isSubType(gs, other, euType)) {
+            return other;
+        }
+        if (!other.isFullyDefined()) {
+            return nullptr;
+        }
+        InlinedVector<TypePtr, 4> components;
+        fillInOrComponents(components, other);
+        auto result = Types::bottom();
+        for (auto &component : components) {
+            result = Types::any(gs, result, Types::glb(gs, euType, component));
+        }
+        return result;
+    }
+
+    if (auto app = cast_type<AppliedType>(other)) {
+        if (Types::isSubType(gs, euType, other)) {
+            return euType;
+        }
+        auto klass = app->klass;
+        if (klass.data(gs)->isClass() && !absl::c_binary_search(eu.members, klass, enumMemberLess) &&
+            !klass.data(gs)->derivesFrom(gs, parent)) {
+            return Types::bottom();
+        }
+        return nullptr;
+    }
+
+    if (is_proxy_type(other) || isa_type<MetaType>(other)) {
+        // Literal, tuple, and shape types are never subtypes of an enum variant, and a MetaType never intersects a
+        // class (see the corresponding cases in glb).
+        return Types::bottom();
+    }
+
+    if (!isa_type<ClassType>(other)) {
+        return nullptr;
+    }
+
+    auto sym = cast_type_nonnull<ClassType>(other).symbol;
+    if (absl::c_binary_search(eu.members, sym, enumMemberLess)) {
+        return other;
+    }
+    if (eu.derivesFrom(gs, sym)) {
+        return euType;
+    }
+    if (sym.data(gs)->isClass() && !sym.data(gs)->derivesFrom(gs, parent)) {
+        return Types::bottom();
+    }
+    if (sym.data(gs)->isModule() && sym.data(gs)->flags.isFinal) {
+        // Same as glbGround: no member can later include a final module.
+        return Types::bottom();
+    }
+    return nullptr;
+}
+
+} // namespace
+
 TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     if (t1 == t2) {
         categoryCounterInc("glb", "ref-eq");
@@ -879,12 +969,31 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         }
     }
 
-    // Expand an EnumUnionType into the equivalent OrType, and use the OrType logic.
-    if (auto eu1 = cast_type<EnumUnionType>(t1)) {
-        return glb(gs, eu1->toOrType(gs), t2);
-    }
-    if (auto eu2 = cast_type<EnumUnionType>(t2)) {
-        return glb(gs, t1, eu2->toOrType(gs));
+    // Most intersections with an EnumUnionType only depend on variant membership, which glbEnumUnion computes
+    // directly. For type parameters and the like, preserve all of the existing OrType distribution behavior. In
+    // particular, filtering members merely by whether their intersection is inhabited would lose constraints from types
+    // like T.all(type_parameter, EnumUnionType).
+    if (isa_type<EnumUnionType>(t1) || isa_type<EnumUnionType>(t2)) {
+        const auto &euType = isa_type<EnumUnionType>(t1) ? t1 : t2;
+        const auto &other = isa_type<EnumUnionType>(t1) ? t2 : t1;
+        const auto &eu = cast_type_nonnull<EnumUnionType>(euType);
+        if (auto result = glbEnumUnion(gs, eu, euType, other)) {
+            categoryCounterInc("glb", "enumunion");
+            return result;
+        }
+        if (isa_type<AndType>(other)) {
+            // Handled by glbDistributeAnd below, which comes back here for each component.
+        } else if (isa_type<ClassType>(other) && cast_type_nonnull<ClassType>(other).symbol.data(gs)->isModule()) {
+            // An unrelated (non-final) module. Same result as the OrType case below, which would find that `other`
+            // does not collapse with any member.
+            categoryCounterInc("glb", "enumunion.module");
+            return AndType::make_shared(other, euType);
+        } else {
+            // Type parameters, self types, and the like, where we need the exact constraint and bound handling of
+            // the OrType case. These rarely meet an EnumUnionType.
+            categoryCounterInc("glb", "enumunion.expand");
+            return isa_type<EnumUnionType>(t1) ? glb(gs, eu.toOrType(gs), t2) : glb(gs, t1, eu.toOrType(gs));
+        }
     }
 
     if (t1.kind() > t2.kind()) { // force the relation to be symmentric and half the implementation
