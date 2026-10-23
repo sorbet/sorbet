@@ -158,6 +158,14 @@ unique_ptr<LSPMessage> MultiThreadedLSPWrapper::read(int timeoutMs) {
     return output->read(timeoutMs);
 }
 
+void MultiThreadedLSPWrapper::setPreemptionTestHooks(shared_ptr<PreemptionTestHooks> hooks) {
+    lspLoop->setPreemptionTestHooks(move(hooks));
+}
+
+void MultiThreadedLSPWrapper::synchronizeTaskQueueForTest() {
+    lspLoop->synchronizeTaskQueueForTest();
+}
+
 void LSPWrapper::enableAllExperimentalFeatures() {
     opts->lspDocumentHighlightEnabled = true;
     opts->lspSignatureHelpEnabled = true;

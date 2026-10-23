@@ -2,6 +2,7 @@
 #define RUBY_TYPER_LSP_LSPPREPROCESSOR_H
 
 #include "absl/synchronization/mutex.h"
+#include "absl/synchronization/notification.h"
 #include "main/lsp/LSPConfiguration.h"
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/MessageQueueState.h"
@@ -16,6 +17,18 @@ class DidCloseTextDocumentParams;
 class DidOpenTextDocumentParams;
 class WatchmanQueryResponse;
 class CancelParams;
+
+// Test-only gates for the next scheduled preemption and preprocessing of a selected request.
+struct PreemptionTestHooks {
+    const MessageId requestId;
+    absl::Notification resumeProcessing;
+    absl::Notification processingReadyToAwait;
+    absl::Notification preemptionReadyToFinish;
+    absl::Notification resumePreemption;
+    absl::Notification preprocessingFinished;
+
+    explicit PreemptionTestHooks(MessageId requestId) : requestId(std::move(requestId)) {}
+};
 
 class TaskQueue final {
 public:
@@ -33,6 +46,8 @@ private:
     CounterState counters ABSL_GUARDED_BY(stateMutex);
 
 public:
+    std::shared_ptr<PreemptionTestHooks> preemptionTestHooks ABSL_GUARDED_BY(stateMutex);
+
     TaskQueue() = default;
 
     TaskQueue(const TaskQueue &other) = delete;
