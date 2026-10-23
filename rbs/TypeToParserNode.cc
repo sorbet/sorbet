@@ -187,22 +187,24 @@ pm_node_t *TypeToParserNode::functionType(const rbs_types_function_t *node, core
     int argIndex = 0;
     for (rbs_node_list_node *list_node = node->required_positionals->head; list_node != nullptr;
          list_node = list_node->next) {
-        auto argName = "arg" + to_string(argIndex);
-        auto key = prism.Symbol(loc, argName);
-
         rbs_node_t *paramNode = list_node->node;
         pm_node_t *innerType;
 
+        string argName;
         if (paramNode->type != RBS_TYPES_FUNCTION_PARAM) {
             if (auto e = ctx.beginIndexerError(loc, core::errors::Internal::InternalError)) {
                 e.setHeader("Unexpected node type `{}` in function parameter type, expected `{}`",
                             rbs_node_type_name(paramNode), "FunctionParam");
             }
             innerType = prism.TUntyped(loc);
+            argName = "arg" + to_string(argIndex);
         } else {
-            innerType = toPrismNode(((rbs_types_function_param_t *)paramNode)->type, declaration);
+            auto *param = rbs_down_cast<rbs_types_function_param_t>(paramNode);
+            innerType = toPrismNode(param->type, declaration);
+            argName = param->name ? string(parser.resolveConstant(param->name)) : "arg" + to_string(argIndex);
         }
 
+        auto key = prism.Symbol(loc, argName);
         pairs.push_back(prism.AssocNode(loc, key, innerType));
         argIndex++;
     }
