@@ -145,6 +145,7 @@ class PreemptionLoop : public core::lsp::PreemptionTask {
     TaskQueue &taskQueue;
     LSPTypecheckerDelegate delegate;
     LSPIndexer &indexer;
+    const shared_ptr<PreemptionTestHooks> testHooks;
 
     unique_ptr<Timer> timeUntilRun;
 
@@ -152,7 +153,8 @@ public:
     PreemptionLoop(const LSPConfiguration &config, absl::Notification &finished, TaskQueue &taskQueue,
                    WorkerPool &preemptionWorkers, LSPTypechecker &typechecker, LSPIndexer &indexer)
         : config{config}, finished{finished}, taskQueue{taskQueue},
-          delegate(this->taskQueue, preemptionWorkers, typechecker), indexer{indexer} {}
+          delegate(this->taskQueue, preemptionWorkers, typechecker), indexer{indexer},
+          testHooks{taskQueue.preemptionTestHooks} {}
 
     void timeLatencyUntilRun(unique_ptr<Timer> timer) {
         timeUntilRun = move(timer);
@@ -214,6 +216,15 @@ public:
     }
 
     void finish() override {
+        if (testHooks != nullptr) [[unlikely]] {
+            testHooks->preemptionReadyToFinish.Notify();
+            testHooks->resumePreemption.WaitForNotification();
+        }
+        // NOTE: the lock doesn't guard `finished`, but the main thread waits on `finished` in addition to testing the
+        // task queue state in it's mutex Await call. As `finished` is not associated directly with the `taskQueue`
+        // mutex, we need to signal any threads that might be waiting on this mutex that they should check if they can
+        // make progress.
+        absl::MutexLock lck(this->taskQueue.getMutex());
         finished.Notify();
     }
 };

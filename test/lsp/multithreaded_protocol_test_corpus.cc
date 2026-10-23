@@ -1,9 +1,11 @@
 #include "doctest/doctest.h"
 // ^ Violates linting rules, so include first.
 #include "absl/algorithm/container.h"
+#include "absl/cleanup/cleanup.h"
 #include "absl/strings/match.h"
 #include "common/common.h"
 #include "common/sort/sort.h"
+#include "main/lsp/LSPPreprocessor.h"
 #include "test/helpers/lsp.h"
 #include "test/helpers/packages.h"
 #include "test/lsp/ProtocolTest.h"
@@ -471,6 +473,104 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithHover") {
     CHECK_EQ(counters.getCategoryCounter("lsp.updates", "query"), 1);
     // 1 per edit
     checkDiagnosticTimes(counters.getTimings("last_diagnostic_latency"), 1, /* assertUniqueStartTimes */ false);
+}
+
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PreemptionCompletionUnblocksRefilledQueue") {
+    bool packageDirected = false;
+    SUBCASE("monolithic") {}
+    SUBCASE("package_directed") {
+        packageDirected = true;
+    }
+
+    // Finish preemption only after LSPLoop is waiting on a refilled queue. Waking it requires both checking
+    // finished in the Await predicate and notifying finished under the task queue mutex.
+    const string source = "# typed: true\nclass Root::A\nend\n";
+    initializePackagedWorkspace(
+        packageDirected,
+        {{"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A"}).build()}, {"a.rb", source}});
+    assertErrorDiagnostics(send(*openFile("a.rb", source)), {});
+
+    auto &wrapper = dynamic_cast<MultiThreadedLSPWrapper &>(*lspWrapper);
+    auto firstHoverId = nextId;
+    auto firstHover = hover("a.rb", 1, 12);
+    auto secondHoverId = nextId;
+    auto secondHover = hover("a.rb", 1, 12);
+    auto hooks = make_shared<PreemptionTestHooks>(secondHoverId);
+    absl::Cleanup cleanup = [&] {
+        // Cancel the queued hover if the regression is present, otherwise wrapper teardown would wait forever.
+        // Release both gates even if an earlier assertion failed.
+        sendAsync(*cancelRequest(secondHoverId));
+        if (!hooks->resumeProcessing.HasBeenNotified()) {
+            hooks->resumeProcessing.Notify();
+        }
+        if (!hooks->resumePreemption.HasBeenNotified()) {
+            hooks->resumePreemption.Notify();
+        }
+    };
+    wrapper.setPreemptionTestHooks(hooks);
+
+    sendAsync(*changeFile("a.rb", source + "class Root::B; end\n", 2,
+                          /* cancellationExpected */ false, /* preemptionsExpected */ 1));
+    {
+        auto response = readAsync();
+        REQUIRE(response != nullptr);
+        CHECK_EQ(getTypecheckRunStatus(*response), SorbetTypecheckRunStatus::Started);
+    }
+    sendAsync(*firstHover);
+    {
+        auto response = readAsync();
+        REQUIRE(response != nullptr);
+        assertResponseMessage(firstHoverId, *response);
+        CHECK_FALSE(response->asResponse().error.has_value());
+    }
+    REQUIRE(hooks->preemptionReadyToFinish.WaitForNotificationWithTimeout(absl::Seconds(1)));
+
+    // Preemption has drained the queue. Refill it before letting the processing thread enter Await.
+    sendAsync(*secondHover);
+
+    // Wait for preprocessing to finish touching the queue mutex: a later counter-merge unlock could otherwise
+    // hide a missing wakeup in finish().
+    REQUIRE(hooks->preprocessingFinished.WaitForNotificationWithTimeout(absl::Seconds(1)));
+    wrapper.synchronizeTaskQueueForTest();
+
+    hooks->resumeProcessing.Notify();
+    REQUIRE(hooks->processingReadyToAwait.WaitForNotificationWithTimeout(absl::Seconds(1)));
+    // The notification was sent with the queue mutex held, immediately before Await. Acquiring it proves
+    // Await has released it with a false predicate: finished is false and the second hover is queued.
+    wrapper.synchronizeTaskQueueForTest();
+    hooks->resumePreemption.Notify();
+
+    // The second hover may itself preempt the remaining slow path, so accept its response on either side of
+    // the slow-path Ended notification.
+    bool receivedHover = false;
+    bool slowPathEnded = false;
+    for (int i = 0; i < 2; i++) {
+        auto response = wrapper.read(1000);
+        if (response == nullptr) {
+            break;
+        }
+        if (getTypecheckRunStatus(*response) == SorbetTypecheckRunStatus::Ended) {
+            CHECK_FALSE(slowPathEnded);
+            slowPathEnded = true;
+        } else {
+            assertResponseMessage(secondHoverId, *response);
+            CHECK_FALSE(response->asResponse().error.has_value());
+            CHECK_FALSE(receivedHover);
+            receivedHover = true;
+        }
+    }
+    CHECK(slowPathEnded);
+    CHECK_MESSAGE(receivedHover, "Processing must resume when preemption has finished, even if the queue was "
+                                 "refilled with another preemptible request");
+
+    move(cleanup).Invoke();
+    if (!receivedHover) {
+        auto canceled = readAsync();
+        REQUIRE(canceled != nullptr);
+        assertResponseMessage(secondHoverId, *canceled);
+        assertResponseError((int)LSPErrorCodes::RequestCancelled, "Request was canceled", *canceled);
+    }
+    assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
 }
 
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithCodeAction") {

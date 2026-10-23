@@ -79,6 +79,14 @@ public:
     void setSlowPathBlocked(bool blocked) {
         typecheckerCoord.setSlowPathBlocked(blocked);
     }
+
+    /**
+     * (For tests only) Control processing and completion of the next scheduled preemption.
+     */
+    void setPreemptionTestHooks(std::shared_ptr<PreemptionTestHooks> hooks);
+
+    /** (For tests only) Acquire and release the task queue mutex to synchronize with a thread releasing it. */
+    void synchronizeTaskQueueForTest();
 };
 
 // TODO(jvilk): Move to LSPTask.

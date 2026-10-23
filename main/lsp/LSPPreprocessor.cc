@@ -413,6 +413,7 @@ unique_ptr<Joinable> LSPPreprocessor::runPreprocessor(MessageQueueState &message
                 }
             }
 
+            auto requestId = msg->id();
             preprocessAndEnqueue(move(msg));
 
             {
@@ -420,6 +421,12 @@ unique_ptr<Joinable> LSPPreprocessor::runPreprocessor(MessageQueueState &message
                 // Merge the counters from all of the worker threads with those stored in
                 // taskQueue.
                 taskQueue->getCounters() = mergeCounters(move(taskQueue->getCounters()));
+                if (taskQueue->preemptionTestHooks != nullptr && requestId.has_value() &&
+                    requestId->equals(taskQueue->preemptionTestHooks->requestId)) [[unlikely]] {
+                    // A test can acquire the queue mutex after this notification to ensure preprocessing has
+                    // finished touching it, so a later unlock here cannot hide a missing wakeup in finish().
+                    taskQueue->preemptionTestHooks->preprocessingFinished.Notify();
+                }
                 if (taskQueue->isTerminated()) {
                     // We must have processed an exit notification, or one of the downstream threads exited.
                     return;
