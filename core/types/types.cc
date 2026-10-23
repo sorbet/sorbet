@@ -821,7 +821,14 @@ void EnumUnionType::_sanityCheck(const GlobalState &gs) const {
 }
 
 bool EnumUnionType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
-    return absl::c_all_of(members, [&](auto member) { return member.data(gs)->derivesFrom(gs, klass); });
+    // Every member is a synthesized `class X$1 < MyEnum; end` with an empty body (see rewriter/TEnum.cc), which user
+    // code cannot reopen. So the members' ancestors are exactly the enum's ancestors, plus each member itself (and a
+    // union of at least two members never derives from one member).
+    auto parent = parentEnumClass(gs);
+    auto result = parent == klass || parent.data(gs)->derivesFrom(gs, klass);
+    SLOW_ENFORCE(result ==
+                 absl::c_all_of(members, [&](auto member) { return member.data(gs)->derivesFrom(gs, klass); }));
+    return result;
 }
 
 ClassOrModuleRef EnumUnionType::parentEnumClass(const GlobalState &gs, ClassOrModuleRef sym) {
