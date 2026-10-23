@@ -83,8 +83,24 @@ DispatchResult OrType::dispatchCall(const GlobalState &gs, const DispatchArgs &a
 
 DispatchResult EnumUnionType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     categoryCounterInc("dispatch_call", "enumunion");
-    auto expanded = toOrType(gs);
-    return expanded.dispatchCall(gs, args.withThisRef(expanded));
+    ENFORCE(members.size() >= 2);
+    auto memberType = members[0].data(gs)->externalType();
+    auto result = memberType.dispatchCall(gs, args.withSelfAndThisRef(memberType));
+
+    // Builds the same result as folding DispatchResult::merge over the members, but keeps track of the end of the
+    // `secondary` chain instead of walking the whole chain to append each member, which would be quadratic.
+    auto *tail = &result;
+    for (size_t i = 1; i < members.size(); i++) {
+        memberType = members[i].data(gs)->externalType();
+        auto memberRet = memberType.dispatchCall(gs, args.withSelfAndThisRef(memberType));
+        while (tail->secondary != nullptr) {
+            tail = tail->secondary.get();
+        }
+        result.returnType = Types::any(gs, result.returnType, memberRet.returnType);
+        result.secondaryKind = DispatchResult::Combinator::OR;
+        tail->secondary = make_unique<DispatchResult>(std::move(memberRet));
+    }
+    return result;
 }
 
 TypePtr OrType::getCallArguments(const GlobalState &gs, NameRef name) const {
