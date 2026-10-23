@@ -87,6 +87,12 @@ struct Node {
         for (auto &child : this->children) {
             if (auto res = child->genNode(gs)) {
                 result.emplace_back(move(res));
+            } else if (child->symbol.isClassOrModule() &&
+                       child->symbol.asClassOrModuleRef().data(gs)->isSingletonClass(gs)) {
+                // If `child` is `class << self`, return its children instead
+                // of dropping them
+                auto nested = child->genChildren(gs);
+                result.insert(result.end(), make_move_iterator(nested.begin()), make_move_iterator(nested.end()));
             }
         }
 
