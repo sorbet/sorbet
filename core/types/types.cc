@@ -257,7 +257,29 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, absl::
                 result = from;
             }
         },
-        [&](const EnumUnionType &eu) { result = dropSubtypesOf(gs, eu.toOrType(gs), klasses); },
+        [&](const EnumUnionType &eu) {
+            // Every member has the same ancestors as the enum (see EnumUnionType::derivesFrom), so a class that is not
+            // itself a member drops either every member or none of them.
+            if (absl::c_any_of(klasses, [&](auto klass) { return eu.derivesFrom(gs, klass); })) {
+                result = Types::bottom();
+                return;
+            }
+            vector<ClassOrModuleRef> kept;
+            for (auto member : eu.members) {
+                if (!absl::c_linear_search(klasses, member)) {
+                    kept.emplace_back(member);
+                }
+            }
+            if (kept.size() == eu.members.size()) {
+                result = from;
+            } else if (kept.empty()) {
+                result = Types::bottom();
+            } else if (kept.size() == 1) {
+                result = kept[0].data(gs)->externalType();
+            } else {
+                result = Types::enumUnion(move(kept));
+            }
+        },
         [&](const SelfTypeParam &p) {
             if (!p.definition.isTypeMember()) {
                 // Only type members have upper bounds--type parameters do not
@@ -332,7 +354,7 @@ TypePtr Types::approximateSubtract(const GlobalState &gs, const TypePtr &from, c
         [&](const OrType &o) {
             result = Types::approximateSubtract(gs, Types::approximateSubtract(gs, from, o.left), o.right);
         },
-        [&](const EnumUnionType &e) { result = Types::approximateSubtract(gs, from, e.toOrType(gs)); },
+        [&](const EnumUnionType &e) { result = Types::dropSubtypesOf(gs, from, e.members); },
 
         [&](const TypePtr &) { result = from; });
     return result;
