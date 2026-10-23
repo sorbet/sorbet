@@ -1726,6 +1726,137 @@ bool Types::isSubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t
                                     errorDetailsCollector);
 }
 
+namespace {
+
+// isSubTypeUnderConstraint(eu, t2), when it can be computed without expanding `eu` into an OrType. Returns nullopt
+// when the general (expanded) logic is needed.
+optional<bool> isSubTypeEnumUnionLeft(const GlobalState &gs, TypeConstraint &constr, const EnumUnionType &eu,
+                                      const TypePtr &euType, const TypePtr &t2, UntypedMode mode) {
+    auto parent = eu.parentEnumClass(gs);
+    if (t2.isUntyped()) {
+        return mode == UntypedMode::AlwaysCompatible;
+    }
+    if (auto eu2 = cast_type<EnumUnionType>(t2)) {
+        return parent == eu2->parentEnumClass(gs) &&
+               includes(eu2->members.begin(), eu2->members.end(), eu.members.begin(), eu.members.end(), enumMemberLess);
+    }
+    if (isa_type<ClassType>(t2)) {
+        auto sym = cast_type_nonnull<ClassType>(t2).symbol;
+        if (sym == Symbols::top() || sym == Symbols::void_()) {
+            return true;
+        }
+        if (sym == Symbols::bottom()) {
+            return false;
+        }
+        return eu.derivesFrom(gs, sym);
+    }
+    if (auto a2 = cast_type<AppliedType>(t2)) {
+        if (!eu.derivesFrom(gs, a2->klass)) {
+            return false;
+        }
+        return nullopt;
+    }
+    if (is_proxy_type(t2)) {
+        // Members are plain classes, which are never subtypes of a literal, tuple, or shape type.
+        return false;
+    }
+    if (auto a2 = cast_type<AndType>(t2)) {
+        auto left = Types::isSubTypeUnderConstraint(gs, constr, euType, a2->left, mode, ErrorSection::Collector::NO_OP);
+        return left &&
+               Types::isSubTypeUnderConstraint(gs, constr, euType, a2->right, mode, ErrorSection::Collector::NO_OP);
+    }
+    if (isa_type<TypeVar>(t2)) {
+        if (constr.isSolved()) {
+            return nullopt;
+        }
+        // Equivalent to recording each member separately, which is what distributing the OrType would do.
+        return constr.rememberIsSubtype(gs, euType, t2);
+    }
+    if (isa_type<OrType>(t2) && t2.isFullyDefined()) {
+        // Components of t2 that are variants of this enum cover those members directly. Any other component is either
+        // a supertype of every member (so it covers the whole union) or of none of them, except for things like
+        // AndTypes, for which the remaining members fall back to a member-by-member check.
+        InlinedVector<TypePtr, 4> components;
+        fillInOrComponents(components, t2);
+        vector<ClassOrModuleRef> covered;
+        bool hasOtherComponents = false;
+        for (auto &component : components) {
+            if (auto componentEU = cast_type<EnumUnionType>(component)) {
+                if (componentEU->parentEnumClass(gs) != parent) {
+                    continue;
+                }
+                vector<ClassOrModuleRef> merged;
+                set_union(covered.begin(), covered.end(), componentEU->members.begin(), componentEU->members.end(),
+                          back_inserter(merged), enumMemberLess);
+                covered = move(merged);
+            } else if (isa_type<ClassType>(component) &&
+                       EnumUnionType::parentEnumClass(gs, cast_type_nonnull<ClassType>(component).symbol) == parent) {
+                auto sym = cast_type_nonnull<ClassType>(component).symbol;
+                auto it = lower_bound(covered.begin(), covered.end(), sym, enumMemberLess);
+                if (it == covered.end() || *it != sym) {
+                    covered.insert(it, sym);
+                }
+            } else if (Types::isSubTypeUnderConstraint(gs, constr, euType, component, mode,
+                                                       ErrorSection::Collector::NO_OP)) {
+                return true;
+            } else if (!isa_type<ClassType>(component) && !is_proxy_type(component)) {
+                hasOtherComponents = true;
+            }
+        }
+        vector<ClassOrModuleRef> remaining;
+        set_difference(eu.members.begin(), eu.members.end(), covered.begin(), covered.end(), back_inserter(remaining),
+                       enumMemberLess);
+        if (remaining.empty()) {
+            return true;
+        }
+        if (!hasOtherComponents) {
+            return false;
+        }
+        return absl::c_all_of(remaining, [&](auto member) {
+            return Types::isSubTypeUnderConstraint(gs, constr, member.data(gs)->externalType(), t2, mode,
+                                                   ErrorSection::Collector::NO_OP);
+        });
+    }
+    return nullopt;
+}
+
+// isSubTypeUnderConstraint(t1, eu), when it can be computed without expanding `eu` into an OrType. Returns nullopt
+// when the general (expanded) logic is needed. `t1` is never an OrType or AndType.
+optional<bool> isSubTypeEnumUnionRight(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
+                                       const EnumUnionType &eu, const TypePtr &euType, UntypedMode mode) {
+    if (isa_type<ClassType>(t1)) {
+        auto sym = cast_type_nonnull<ClassType>(t1).symbol;
+        if (sym == Symbols::untyped()) {
+            return mode == UntypedMode::AlwaysCompatible;
+        }
+        if (sym == Symbols::bottom()) {
+            return true;
+        }
+        return absl::c_binary_search(eu.members, sym, enumMemberLess);
+    }
+    if (t1.isUntyped()) {
+        return mode == UntypedMode::AlwaysCompatible;
+    }
+    if (auto a1 = cast_type<AppliedType>(t1)) {
+        if (!absl::c_binary_search(eu.members, a1->klass, enumMemberLess)) {
+            return false;
+        }
+        return Types::isSubTypeUnderConstraint(gs, constr, t1, a1->klass.data(gs)->externalType(), mode,
+                                               ErrorSection::Collector::NO_OP);
+    }
+    if (is_proxy_type(t1)) {
+        // Literal, tuple, and shape types are never subtypes of an enum variant.
+        return false;
+    }
+    if (isa_type<TypeVar>(t1) && !constr.isSolved()) {
+        // Same as the TypeVar case for OrType on the right.
+        return constr.rememberIsSubtype(gs, t1, euType);
+    }
+    return nullopt;
+}
+
+} // namespace
+
 template <class T>
 bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
                                      const TypePtr &t2, UntypedMode mode, T &errorDetailsCollector) {
@@ -1748,13 +1879,36 @@ bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &cons
 
     // Note: order of cases here matters! We can't lose "and" information in t1 early and we can't
     // lose "or" information in t2 early.
-
-    // Expand an EnumUnionType into the equivalent OrType, and use the OrType logic.
+    // EnumUnionType is a compact OrType. Where the answer only depends on enum variant membership, compute it directly.
+    // Otherwise, expand it and use the OrType logic below.
+    //
+    // When collecting error details, only trust a direct answer of `true`. For `false`, expand, so that the error
+    // messages are the same as for the equivalent OrType. (Callers like matchArgType collect details on every check,
+    // not just failing ones, so this is a hot path.) The direct answer may record type constraints, which would then
+    // be recorded twice, so only try it when the constraint is already solved.
     if (auto eu1 = cast_type<EnumUnionType>(t1)) { // 7, 8, 9
+        if (!shouldAddErrorDetails || constr.isSolved()) {
+            if (auto result = isSubTypeEnumUnionLeft(gs, constr, *eu1, t1, t2, mode)) {
+                if (!shouldAddErrorDetails || *result) {
+                    return *result;
+                }
+            }
+        }
         return isSubTypeUnderConstraint(gs, constr, eu1->toOrType(gs), t2, mode, errorDetailsCollector);
     }
     if (auto eu2 = cast_type<EnumUnionType>(t2)) { // 3, 6
-        return isSubTypeUnderConstraint(gs, constr, t1, eu2->toOrType(gs), mode, errorDetailsCollector);
+        // An OrType or AndType on the left is handled by the general logic below, which distributes over it and
+        // comes back here for each component.
+        if (!isa_type<OrType>(t1) && !isa_type<AndType>(t1)) {
+            if (!shouldAddErrorDetails || constr.isSolved()) {
+                if (auto result = isSubTypeEnumUnionRight(gs, constr, t1, *eu2, t2, mode)) {
+                    if (!shouldAddErrorDetails || *result) {
+                        return *result;
+                    }
+                }
+            }
+            return isSubTypeUnderConstraint(gs, constr, t1, eu2->toOrType(gs), mode, errorDetailsCollector);
+        }
     }
 
     if (auto o1 = cast_type<OrType>(t1)) { // 7, 8, 9
