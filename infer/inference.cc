@@ -299,13 +299,18 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         if (unreachableInstruction == nullptr || deadButTypecheckAnyways) {
             bool typecheck = !current.isDead || deadButTypecheckAnyways;
             core::Loc madeBlockDead;
+            // Set when flow terminates in a live-entry block that has a T.absurd after the terminator.
+            bool absurdAfterTerminator = false;
             int i = 0;
             for (cfg::Binding &bind : bb->exprs) {
                 i++;
-                if (typecheck || !ctx.state.lspQuery.isEmpty()) {
-                    bind.bind.type = current.processBinding(ctx, *cfg, bind, bb->outerLoops,
-                                                            bind.bind.variable.minLoops(*cfg), knowledgeFilter, *constr,
-                                                            methodReturnType, parentUpdateKnowledgeReceiver);
+                // In a live-entry block with T.absurd, keep checking bindings that are exempt from
+                // dead-code errors (synthetic bindings and T.absurd) after a terminating expression.
+                const bool silentAfterTerminator = absurdAfterTerminator && silenceDeadCodeError(bind.value);
+                if (typecheck || silentAfterTerminator || !ctx.state.lspQuery.isEmpty()) {
+                    bind.bind.type = current.processBinding(
+                        ctx, *cfg, bind, bb->outerLoops, bind.bind.variable.minLoops(*cfg), knowledgeFilter, *constr,
+                        methodReturnType, parentUpdateKnowledgeReceiver, deadOnEntry);
                     if (cfg::isa_instruction<cfg::Send>(bind.value)) {
                         totalSendCount++;
                         if (bind.bind.type && !bind.bind.type.isUntyped()) {
@@ -316,7 +321,14 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     bind.bind.type.sanityCheck(ctx);
                     if (bind.bind.type.isBottom()) {
                         current.isDead = true;
-                        madeBlockDead = ctx.locAt(bind.loc);
+                        if (!madeBlockDead.exists()) {
+                            madeBlockDead = ctx.locAt(bind.loc);
+                            absurdAfterTerminator =
+                                !deadOnEntry &&
+                                absl::c_any_of(absl::MakeConstSpan(bb->exprs).subspan(i), [](const auto &expr) {
+                                    return cfg::isa_instruction<cfg::TAbsurd>(expr.value);
+                                });
+                        }
                         typecheck = false;
                     }
                     if (current.isDead && bb->firstDeadInstructionIdx == -1) {

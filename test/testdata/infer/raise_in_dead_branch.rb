@@ -47,7 +47,7 @@ def non_exhaustive_live_branch(x)
   when Integer
   else
     raise ArgumentError, "Unexpected value: #{x}"
-    T.absurd(x)
+    T.absurd(x) # error: Control flow could reach `T.absurd` because the type `String` wasn't handled
   end
 end
 
@@ -97,10 +97,10 @@ def unrelated_code_after_live_raise_still_errors(x)
 end
 
 sig {params(x: String, y: Integer).void}
-def only_first_absurd_after_live_raise_is_checked(x, y)
+def each_absurd_after_live_raise_is_checked(x, y)
   raise ArgumentError, x
-  T.absurd(x)
-  T.absurd(y)
+  T.absurd(x) # error: Control flow could reach `T.absurd` because the type `String` wasn't handled
+  T.absurd(y) # error: Control flow could reach `T.absurd` because the type `Integer` wasn't handled
   puts(y) # error: This code is unreachable
 end
 
@@ -127,7 +127,7 @@ def non_exhaustive_live_branch_multiple_predecessors(x)
   if x.is_a?(Integer) || x.is_a?(String)
   else
     raise ArgumentError, "Unexpected value: #{x}"
-    T.absurd(x)
+    T.absurd(x) # error: Control flow could reach `T.absurd` because the type `Symbol` wasn't handled
   end
 end
 
