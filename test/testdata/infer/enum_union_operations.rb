@@ -43,7 +43,7 @@ class Test
   sig { params(ab: T.any(E::A, E::B), nbc: T.nilable(T.any(E::B, E::C)), c: T::Boolean).void }
   def self.lub_with_nilable_overlap(ab, nbc, c)
     x = c ? ab : nbc
-    T.reveal_type(x) # error: Revealed type: `T.nilable(T.any(E::C, E::A, E::B))`
+    T.reveal_type(x) # error: Revealed type: `T.nilable(T.any(E::A, E::B, E::C))`
   end
 
   sig { params(ab: T.any(E::A, E::B), a_and_m: T.all(E::A, M), c: T::Boolean).void }

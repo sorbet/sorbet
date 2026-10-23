@@ -27,6 +27,10 @@ bool compositeTypeDeepRefEqualHelper(const TypePtr &t1, const TypePtr &t2) {
     if (isa_type<AndType>(t1)) {
         return compositeTypeDeepRefEqual(cast_type_nonnull<AndType>(t1), cast_type_nonnull<AndType>(t2));
     }
+    if (isa_type<EnumUnionType>(t1)) {
+        // The leaves of the equivalent OrType are ClassTypes, which are equal by reference when their symbols are.
+        return cast_type_nonnull<EnumUnionType>(t1).members == cast_type_nonnull<EnumUnionType>(t2).members;
+    }
     return false;
 }
 
@@ -108,7 +112,17 @@ TypePtr filterOrComponents(const TypePtr &originalType, absl::Span<const TypePtr
     }
 }
 
-TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
+namespace {
+// Whether `type` is exactly `T.any(a, b)` (or `T.any(b, a)`), as opposed to some simplification of it.
+bool isJuxtaposition(const TypePtr &type, const TypePtr &a, const TypePtr &b) {
+    auto o = cast_type<OrType>(type);
+    return o != nullptr && ((o->left == a && o->right == b) || (o->left == b && o->right == a));
+}
+} // namespace
+
+TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr &originalT2) {
+    // Not const: merging an EnumUnionType component of t1 into t2 (below) grows t2.
+    auto t2 = originalT2;
     InlinedVector<TypePtr, 4> originalOrComponents;
     InlinedVector<TypePtr, 4> typesConsumed;
     auto o1 = cast_type<OrType>(t1);
@@ -126,6 +140,14 @@ TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr 
             // lubbed == t2, so component <: t2
             // Thus, we don't need to include component in the final OrType; it's subsumed by t2.
             typesConsumed.emplace_back(component);
+        } else if (isa_type<EnumUnionType>(lubbed) ||
+                   (isa_type<EnumUnionType>(component) && !isJuxtaposition(lubbed, component, t2))) {
+            // lub merged component into t2 instead of just juxtaposing them: either both are variants of the same
+            // enum, or t2 is an OrType some of whose components were variants of component's enum. Absorb component
+            // into t2, so that the result does not hold two overlapping unions of the same enum.
+            categoryCounterInc("lubDistributeOr.outcome", "mergedEnumUnion");
+            typesConsumed.emplace_back(component);
+            t2 = move(lubbed);
         }
     }
     if (typesConsumed.empty()) {
@@ -143,6 +165,99 @@ TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr 
     categoryCounterInc("lubDistributeOr.outcome", "consumedComponent");
     return OrType::make_shared(move(remainingTypes), underlying(gs, t2));
 }
+
+// The EnumUnionType analogue of lubDistributeOr, for an `other` that is not an OrType.
+//
+// Every member of an EnumUnionType is a class with a unique, synthesized name (see rewriter/TEnum.cc): nothing else
+// can subclass it, and its only ancestors are the enum's ancestors. So for a ground `other`, either all of the members
+// are subtypes of `other` or none are, and `other` is a subtype of the union exactly when lubDistributeOr would have
+// found it to be a subtype of one member.
+TypePtr lubDistributeEnumUnion(const GlobalState &gs, const TypePtr &euType, const TypePtr &other) {
+    ENFORCE(isa_type<EnumUnionType>(euType));
+    ENFORCE(!isa_type<OrType>(other));
+    if (isa_type<TypeVar>(other)) {
+        // Matches lub's treatment of TypeVar: never collapse.
+        return OrType::make_shared(euType, other);
+    }
+    if (isa_type<SelfTypeParam>(other) || isa_type<SelfType>(other) || isa_type<AliasType>(other)) {
+        // These can absorb individual members via their bounds, so defer to the per-member logic. They rarely meet an
+        // EnumUnionType, so the expansion is not a performance concern.
+        return lubDistributeOr(gs, cast_type_nonnull<EnumUnionType>(euType).toOrType(gs), other);
+    }
+    if (Types::isSubType(gs, other, euType)) {
+        categoryCounterInc("lubDistributeEnumUnion.outcome", "t1");
+        return euType;
+    }
+    if (Types::isSubType(gs, euType, other)) {
+        categoryCounterInc("lubDistributeEnumUnion.outcome", "t2");
+        return other;
+    }
+    categoryCounterInc("lubDistributeEnumUnion.outcome", "worst");
+    return OrType::make_shared(euType, underlying(gs, other));
+}
+
+// lub(t1, t2) where t1 is a union (either OrType or EnumUnionType) and t2 is not a subtype of t1 by reference.
+TypePtr lubDistributeUnion(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
+    if (isa_type<OrType>(t1)) {
+        return lubDistributeOr(gs, t1, t2);
+    }
+    if (isa_type<OrType>(t2)) {
+        // Distributing over the OrType lets lubDistributeOr merge t1 into any same-enum components of t2.
+        return lubDistributeOr(gs, t2, t1);
+    }
+    return lubDistributeEnumUnion(gs, t1, t2);
+}
+
+namespace {
+
+bool enumMemberLess(ClassOrModuleRef lhs, ClassOrModuleRef rhs) {
+    return lhs.id() < rhs.id();
+}
+
+// Computes lub(eu, other) directly when the result only depends on enum variant membership. Returns nullptr when
+// `other` needs the general distribution logic.
+TypePtr lubEnumUnion(const GlobalState &gs, const EnumUnionType &eu, const TypePtr &euType, const TypePtr &other) {
+    auto parent = eu.parentEnumClass(gs);
+    if (auto otherEU = cast_type<EnumUnionType>(other)) {
+        if (otherEU->parentEnumClass(gs) != parent) {
+            return nullptr;
+        }
+        vector<ClassOrModuleRef> combined;
+        combined.reserve(eu.members.size() + otherEU->members.size());
+        set_union(eu.members.begin(), eu.members.end(), otherEU->members.begin(), otherEU->members.end(),
+                  back_inserter(combined), enumMemberLess);
+        if (combined.size() == eu.members.size()) {
+            return euType;
+        }
+        if (combined.size() == otherEU->members.size()) {
+            return other;
+        }
+        return Types::enumUnion(move(combined));
+    }
+
+    if (!isa_type<ClassType>(other)) {
+        return nullptr;
+    }
+    auto sym = cast_type_nonnull<ClassType>(other).symbol;
+    if (EnumUnionType::parentEnumClass(gs, sym) == parent) {
+        auto insertionPoint = lower_bound(eu.members.begin(), eu.members.end(), sym, enumMemberLess);
+        if (insertionPoint != eu.members.end() && *insertionPoint == sym) {
+            return euType;
+        }
+        vector<ClassOrModuleRef> combined;
+        combined.reserve(eu.members.size() + 1);
+        combined.insert(combined.end(), eu.members.begin(), insertionPoint);
+        combined.emplace_back(sym);
+        combined.insert(combined.end(), insertionPoint, eu.members.end());
+        return Types::enumUnion(move(combined));
+    }
+    if (eu.derivesFrom(gs, sym)) {
+        return other;
+    }
+    return nullptr;
+}
+
+} // namespace
 
 TypePtr glbDistributeAnd(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     auto a1 = cast_type<AndType>(t1);
@@ -206,6 +321,21 @@ TypePtr dropLubComponents(const GlobalState &gs, const TypePtr &t1, const TypePt
         } else if (subr) {
             return o1->left;
         }
+    } else if (auto eu1 = cast_type<EnumUnionType>(t1)) {
+        vector<ClassOrModuleRef> kept;
+        for (auto member : eu1->members) {
+            if (!Types::isSubType(gs, member.data(gs)->externalType(), t2)) {
+                kept.emplace_back(member);
+            }
+        }
+        if (kept.size() == eu1->members.size()) {
+            return t1;
+        } else if (kept.empty()) {
+            return Types::bottom();
+        } else if (kept.size() == 1) {
+            return kept[0].data(gs)->externalType();
+        }
+        return Types::enumUnion(move(kept));
     }
     return t1;
 }
@@ -252,18 +382,24 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         }
     }
 
-    // EnumUnionType is a compact representation of the equivalent OrType. Expand it and use the OrType logic, which
-    // gives the same answer (but gives up the compact representation).
+    // EnumUnionType is a compact representation of the equivalent OrType. Combine it directly with other variants of
+    // the same enum (or a common ancestor). Otherwise, the logic below treats it like an OrType: see
+    // lubDistributeUnion.
     if (auto eu1 = cast_type<EnumUnionType>(t1)) {
-        return lub(gs, eu1->toOrType(gs), t2);
-    }
-    if (auto eu2 = cast_type<EnumUnionType>(t2)) {
-        return lub(gs, t1, eu2->toOrType(gs));
+        if (auto result = lubEnumUnion(gs, *eu1, t1, t2)) {
+            categoryCounterInc("lub", "<enumunion");
+            return result;
+        }
+    } else if (auto eu2 = cast_type<EnumUnionType>(t2)) {
+        if (auto result = lubEnumUnion(gs, *eu2, t2, t1)) {
+            categoryCounterInc("lub", "enumunion>");
+            return result;
+        }
     }
 
-    if (isa_type<OrType>(t2)) { // 3, 5, 6
+    if (is_union_type(t2)) { // 3, 5, 6
         categoryCounterInc("lub", "or>");
-        return lubDistributeOr(gs, t2, t1);
+        return lubDistributeUnion(gs, t2, t1);
     } else if (auto a2 = cast_type<AndType>(t2)) { // 2, 4
         if (auto a1 = cast_type<AndType>(t1)) {
             // Check if the members of a1 and a2 are referentially equivalent. This helps simplify T.all types created
@@ -280,13 +416,13 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         if (t2filtered != t2) {
             return lub(gs, t1d, t2filtered);
         }
-        if (isa_type<OrType>(t1)) {
-            return lubDistributeOr(gs, t1, t2);
+        if (is_union_type(t1)) {
+            return lubDistributeUnion(gs, t1, t2);
         }
         return OrType::make_shared(t1, t2filtered);
-    } else if (isa_type<OrType>(t1)) {
+    } else if (is_union_type(t1)) {
         categoryCounterInc("lub", "<or");
-        return lubDistributeOr(gs, t1, t2);
+        return lubDistributeUnion(gs, t1, t2);
     }
 
     if (auto a1 = cast_type<AppliedType>(t1)) {

@@ -829,6 +829,7 @@ private:
     friend bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
                                                 const TypePtr &t2, UntypedMode mode, T &errorDetailsCollector);
     friend TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
+    friend TypePtr lubDistributeEnumUnion(const GlobalState &gs, const TypePtr &euType, const TypePtr &other);
     friend TypePtr lubGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
