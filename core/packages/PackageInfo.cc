@@ -197,6 +197,20 @@ int PackageInfo::orderByAlphabetical(const core::GlobalState &gs, const PackageI
 
 // autocorrects
 
+optional<core::Loc> PackageInfo::endOfLastNonBlankLine(const core::GlobalState &gs, uint32_t offset) const {
+    // let's do something gross: walk backward until we find non-whitespace
+    const auto source = this->file.data(gs).source();
+    while (isspace(source[offset])) {
+        offset--;
+        // this shouldn't happen in a well-formatted
+        // `__package.rb` file, but just to be safe
+        if (offset == 0) {
+            return nullopt;
+        }
+    }
+    return core::Loc(this->file, offset + 1, offset + 1);
+}
+
 optional<core::AutocorrectSuggestion> PackageInfo::addImport(const core::GlobalState &gs, const PackageInfo &info,
                                                              ImportType importType) const {
     if (this->usesTestPackages) {
@@ -272,25 +286,17 @@ optional<core::AutocorrectSuggestion> PackageInfo::addImport(const core::GlobalS
             exportOffset = locs.loc.endPos() - "end\n"sv.size();
         }
 
-        string_view file_source = this->file.data(gs).source();
-
         // Defensively guard against the first export loc or the package's loc being invalid.
-        if (exportOffset <= 0 || exportOffset >= file_source.size()) {
+        if (exportOffset <= 0 || exportOffset >= this->file.data(gs).source().size()) {
             ENFORCE(false, "Failed to find a valid starting loc");
             return nullopt;
         }
 
-        // we want to find the end of the last non-empty line, so
-        // let's do something gross: walk backward until we find non-whitespace
-        while (isspace(file_source[exportOffset])) {
-            exportOffset--;
-            // this shouldn't happen in a well-formatted
-            // `__package.rb` file, but just to be safe
-            if (exportOffset == 0) {
-                return nullopt;
-            }
+        auto endOfLine = this->endOfLastNonBlankLine(gs, static_cast<uint32_t>(exportOffset));
+        if (!endOfLine.has_value()) {
+            return nullopt;
         }
-        insertionLoc = core::Loc(this->file, exportOffset + 1, exportOffset + 1);
+        insertionLoc = *endOfLine;
     }
     ENFORCE(insertionLoc.exists());
 
@@ -352,19 +358,11 @@ optional<core::AutocorrectSuggestion> PackageInfo::addExport(const core::GlobalS
         }
     } else {
         // if we don't have any exports, then we can try adding it right before the final `end`
-        uint32_t exportOffset = this->locs.loc.endPos() - "end\n"sv.size();
-        // we want to find the end of the last non-empty line, so
-        // let's do something gross: walk backward until we find non-whitespace
-        const auto file_source = this->file.data(gs).source();
-        while (isspace(file_source[exportOffset])) {
-            exportOffset--;
-            // this shouldn't happen in a well-formatted
-            // `__package.rb` file, but just to be safe
-            if (exportOffset == 0) {
-                return nullopt;
-            }
+        auto endOfLine = this->endOfLastNonBlankLine(gs, this->locs.loc.endPos() - "end\n"sv.size());
+        if (!endOfLine.has_value()) {
+            return nullopt;
         }
-        insertionLoc = {this->file, exportOffset + 1, exportOffset + 1};
+        insertionLoc = *endOfLine;
     }
     ENFORCE(insertionLoc.exists());
 
@@ -383,19 +381,11 @@ optional<core::AutocorrectSuggestion> PackageInfo::addVisibleToTests(const core:
         insertionLoc = core::Loc(pkgFile, visibleTo_.back().loc.copyEndWithZeroLength());
     } else {
         // if we don't have any visible_to entries, then we can try adding it right before the final `end`
-        uint32_t visibleToOffset = this->locs.loc.endPos() - "end\n"sv.size();
-        // we want to find the end of the last non-empty line, so
-        // let's do something gross: walk backward until we find non-whitespace
-        const auto file_source = this->file.data(gs).source();
-        while (isspace(file_source[visibleToOffset])) {
-            visibleToOffset--;
-            // this shouldn't happen in a well-formatted
-            // `__package.rb` file, but just to be safe
-            if (visibleToOffset == 0) {
-                return nullopt;
-            }
+        auto endOfLine = this->endOfLastNonBlankLine(gs, this->locs.loc.endPos() - "end\n"sv.size());
+        if (!endOfLine.has_value()) {
+            return nullopt;
         }
-        insertionLoc = {this->file, visibleToOffset + 1, visibleToOffset + 1};
+        insertionLoc = *endOfLine;
     }
     ENFORCE(insertionLoc.exists());
 
@@ -430,19 +420,11 @@ optional<core::AutocorrectSuggestion> PackageInfo::addVisibleTo(const core::Glob
         }
     } else {
         // if we don't have any visible_to entries, then we can try adding it right before the final `end`
-        uint32_t visibleToOffset = this->locs.loc.endPos() - "end\n"sv.size();
-        // we want to find the end of the last non-empty line, so
-        // let's do something gross: walk backward until we find non-whitespace
-        const auto file_source = this->file.data(gs).source();
-        while (isspace(file_source[visibleToOffset])) {
-            visibleToOffset--;
-            // this shouldn't happen in a well-formatted
-            // `__package.rb` file, but just to be safe
-            if (visibleToOffset == 0) {
-                return nullopt;
-            }
+        auto endOfLine = this->endOfLastNonBlankLine(gs, this->locs.loc.endPos() - "end\n"sv.size());
+        if (!endOfLine.has_value()) {
+            return nullopt;
         }
-        insertionLoc = {this->file, visibleToOffset + 1, visibleToOffset + 1};
+        insertionLoc = *endOfLine;
     }
     ENFORCE(insertionLoc.exists());
 

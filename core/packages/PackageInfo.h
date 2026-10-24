@@ -289,6 +289,10 @@ public:
 
     // autocorrects
 
+    // The (zero-length) loc at the end of the last non-blank line at or before `offset` in this package's file, if
+    // any. Where to add a line to the package spec when there's no line of the same kind to put it next to.
+    std::optional<core::Loc> endOfLastNonBlankLine(const core::GlobalState &gs, uint32_t offset) const;
+
     std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &info,
                                                          ImportType importType) const;
 
