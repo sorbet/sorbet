@@ -1,4 +1,4 @@
 # typed: true
 
-class NotExemptClass < StandardError # error: `NotExemptClass` is part of a subpackage namespace, and must not have ancestors
+class NotExemptClass < StandardError # error: `NotExemptClass` can only have a superclass if package `NotExemptClass` is marked `outer_package_with_namespace_behavior!`
 end

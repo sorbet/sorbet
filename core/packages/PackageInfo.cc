@@ -1,6 +1,7 @@
 #include "core/packages/PackageInfo.h"
 #include "absl/strings/str_join.h"
 #include "common/sort/sort.h"
+#include "core/Error.h"
 #include "core/GlobalState.h"
 #include "core/Loc.h"
 #include "core/NameRef.h"
@@ -1397,6 +1398,65 @@ vector<MangledName> PackageInfo::directSubPackages(const core::GlobalState &gs, 
     }
 
     return subpackages;
+}
+
+void PackageInfo::explainSubpackageNamespaceError(const core::GlobalState &gs, ErrorBuilder &e, string_view subject,
+                                                  string_view restriction, ClassOrModuleRef packageRegistryOwner,
+                                                  string_view namespaceName, bool inLegacyTestNamespace,
+                                                  string_view alternative) const {
+    auto ownerName = this->show(gs);
+    auto marker = "outer_package_with_namespace_behavior!"sv;
+    auto importOwner = fmt::format("import {}", ownerName);
+    if (inLegacyTestNamespace) {
+        e.setHeader("`{}` cannot {}, because `{}` encloses the tests of packages nested under `{}`", subject,
+                    restriction, namespaceName, ownerName);
+    } else if (this->outerPackageWithNamespaceBehavior()) {
+        e.setHeader("`{}` can only {} if every package nested under `{}` imports it", subject, restriction, ownerName);
+    } else {
+        e.setHeader("`{}` can only {} if package `{}` is marked `{}`", subject, restriction, ownerName, marker);
+    }
+
+    // When the annotation doesn't take effect because of a nested package, that's the one to point at.
+    auto &missingInfo = gs.packageDB().getPackageInfo(this->nestedPackageMissingImport);
+    auto pointAtMissing = !inLegacyTestNamespace && this->outerPackageWithNamespaceBehavior() && missingInfo.exists();
+
+    e.addErrorLine(this->declLoc(), "Package `{}` defined here", ownerName);
+    if (packageRegistryOwner.exists()) {
+        auto subpackages = this->directSubPackages(gs, packageRegistryOwner);
+        if (!subpackages.empty() && !(pointAtMissing && subpackages.front() == missingInfo.mangledName())) {
+            auto &subpackageInfo = gs.packageDB().getPackageInfo(subpackages.front());
+            if (inLegacyTestNamespace) {
+                e.addErrorLine(subpackageInfo.declLoc(), "The tests of `{}` are nested under `{}`",
+                               subpackageInfo.show(gs), namespaceName);
+            } else {
+                e.addErrorLine(subpackageInfo.declLoc(), "`{}` is nested under `{}`", subpackageInfo.show(gs),
+                               namespaceName);
+            }
+        }
+    }
+
+    if (inLegacyTestNamespace) {
+        e.addErrorNote("Instead, {}. Marking package `{}` with `{}` does not apply to `{}`, because the tests of a "
+                       "package nested under `{}` can be typechecked before the tests of `{}`",
+                       alternative, ownerName, marker, namespaceName, ownerName, ownerName);
+    } else if (this->outerPackageWithNamespaceBehavior()) {
+        // The annotation doesn't take effect, because a nested package is missing the import (see
+        // namespaceBehaviorPermitted).
+        e.addErrorLine(core::Loc(this->file, this->locs.outerPackageWithNamespaceBehavior),
+                       "`{}` is marked `{}` here, but that has no effect until every package nested under it "
+                       "imports it",
+                       ownerName, marker);
+        if (pointAtMissing) {
+            e.addErrorLine(missingInfo.declLoc(), "`{}` is nested under `{}`, but does not `{}`", missingInfo.show(gs),
+                           ownerName, importOwner);
+        }
+        e.addErrorNote("Either {}, or add the missing imports reported by error 3737 on the packages nested under `{}`",
+                       alternative, ownerName);
+    } else {
+        e.addErrorNote("Either {}, or confirm that this is intentional by marking package `{}` with `{}`.\n"
+                       "    That requires every package nested under `{}` to `{}`",
+                       alternative, ownerName, marker, ownerName, importOwner);
+    }
 }
 
 PackageInfo::CanModifyResult PackageInfo::canModifySymbol(core::Context ctx, ClassOrModuleRef sym) const {

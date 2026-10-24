@@ -15,6 +15,7 @@
 #include <vector>
 
 namespace sorbet::core {
+class ErrorBuilder;
 struct AutocorrectSuggestion;
 class NameRef;
 class Loc;
@@ -306,6 +307,16 @@ public:
     // The list of known direct sub-packages of this package.
     std::vector<MangledName> directSubPackages(const core::GlobalState &gs,
                                                ClassOrModuleRef startFrom = ClassOrModuleRef()) const;
+
+    // Describe a `CanModifyResult::Subpackages`-style error: `subject` (the namespace `namespaceName` that this
+    // package owns, with `<PackageSpecRegistry>` node `packageRegistryOwner`, or its singleton class) can't
+    // `restriction` (e.g. "be generic"). Sets the header, points at a package nested under the namespace, and says
+    // how to fix it: `alternative`, or making this package's `outer_package_with_namespace_behavior!` take effect.
+    // That's not an option for a legacy `Test::` namespace (`inLegacyTestNamespace`).
+    void explainSubpackageNamespaceError(const core::GlobalState &gs, ErrorBuilder &e, std::string_view subject,
+                                         std::string_view restriction, ClassOrModuleRef packageRegistryOwner,
+                                         std::string_view namespaceName, bool inLegacyTestNamespace,
+                                         std::string_view alternative) const;
 
     const Import *importsPackage(MangledName mangledName) const;
 

@@ -2596,14 +2596,11 @@ public:
 
             case core::packages::PackageInfo::CanModifyResult::Subpackages:
                 if (auto e = ctx.beginError(send->loc, core::errors::Namer::RootTypeMember)) {
-                    e.setHeader("`{}` is part of a subpackage namespace, and must not be generic", onSymbol.show(ctx));
-
-                    e.addErrorLine(filePackageInfo.declLoc(), "Package defined here");
-                    auto subpackages = filePackageInfo.directSubPackages(ctx, onSymbol.data(ctx)->packageRegistryOwner);
-                    if (!subpackages.empty()) {
-                        auto &subpackageInfo = ctx.state.packageDB().getPackageInfo(subpackages[0]);
-                        e.addErrorLine(subpackageInfo.declLoc(), "First subpackage defined here");
-                    }
+                    auto attached = onSymbol.data(ctx)->topAttachedClass(ctx);
+                    filePackageInfo.explainSubpackageNamespaceError(
+                        ctx, e, onSymbol.show(ctx), "be generic", attached.data(ctx)->packageRegistryOwner,
+                        attached.show(ctx), core::packages::PackageInfo::isInLegacyTestNamespace(ctx, attached),
+                        isTypeTemplate ? "remove the `type_template`" : "remove the `type_member`");
                 }
                 return ignoreBadTypeMember(ctx, move(tree));
 
