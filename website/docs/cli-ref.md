@@ -189,7 +189,7 @@ Usage:
                                 (default: true)
       --metrics-extra-tags <key1>=<value1>,<key2>=<value2>
                                 Extra tags to include in every statsd metric, comma
-                                separated. (default: "")
+                                separated (repeatable). (default: "")
 
 ```
 
