@@ -1,0 +1,92 @@
+# -- test/testdata/packager/subpackage_namespace_autocorrect/__package.rb --
+# typed: strict
+# enable-packager: true
+
+class Generic < PackageSpec
+  outer_package_with_namespace_behavior!
+end
+# ------------------------------
+# -- test/testdata/packager/subpackage_namespace_autocorrect/generic.rb --
+# typed: true
+
+module Generic
+  extend T::Generic # error: `T.class_of(Generic)` can only have ancestors if package `Generic` is marked `outer_package_with_namespace_behavior!`
+  Elem = type_member # error: `Generic` can only be generic if package `Generic` is marked `outer_package_with_namespace_behavior!`
+end
+# ------------------------------
+# -- test/testdata/packager/subpackage_namespace_autocorrect/other/__package.rb --
+# typed: strict
+
+class Other < PackageSpec
+  outer_package_with_namespace_behavior!
+
+  import Generic
+
+  export Other::Thing
+end
+# ------------------------------
+# -- test/testdata/packager/subpackage_namespace_autocorrect/other/nested/__package.rb --
+# typed: strict
+
+class Other::Nested < PackageSpec
+end
+# ------------------------------
+# -- test/testdata/packager/subpackage_namespace_autocorrect/other/other.rb --
+# typed: true
+
+module Other
+  include Comparable # error: `Other` can only have ancestors if package `Other` is marked `outer_package_with_namespace_behavior!`
+end
+# ------------------------------
+# -- test/testdata/packager/subpackage_namespace_autocorrect/other/thing.rb --
+# typed: true
+
+module Other
+  class Thing; end
+end
+# ------------------------------
+# -- test/testdata/packager/subpackage_namespace_autocorrect/prelude_pkg/__package.rb --
+# typed: strict
+
+class PreludePkg < PackageSpec
+  prelude!
+
+  outer_package_with_namespace_behavior!
+
+  export PreludePkg::Thing
+end
+# ------------------------------
+# -- test/testdata/packager/subpackage_namespace_autocorrect/prelude_pkg/nested/__package.rb --
+# typed: strict
+
+class PreludePkg::Nested < PackageSpec
+end
+# ------------------------------
+# -- test/testdata/packager/subpackage_namespace_autocorrect/prelude_pkg/prelude_pkg.rb --
+# typed: true
+
+module PreludePkg
+  include Comparable # error: `PreludePkg` can only have ancestors if package `PreludePkg` is marked `outer_package_with_namespace_behavior!`
+end
+# ------------------------------
+# -- test/testdata/packager/subpackage_namespace_autocorrect/prelude_pkg/thing.rb --
+# typed: true
+
+module PreludePkg
+  class Thing; end
+end
+# ------------------------------
+# -- test/testdata/packager/subpackage_namespace_autocorrect/sub/__package.rb --
+# typed: strict
+
+class Generic::Sub < PackageSpec
+  import Generic
+end
+# ------------------------------
+# -- test/testdata/packager/subpackage_namespace_autocorrect/sub/sub.rb --
+# typed: true
+
+module Generic::Sub
+  class Thing; end
+end
+# ------------------------------

@@ -1178,7 +1178,7 @@ When using `--sorbet-packages`, this error also applies to the modules or classe
 
 - move the generic functionality to a class that's exported by the package, or
 - move its sub-packages to a different place in the package hierarchy, or
-- if `Foo` is meant to be generic, mark the `Foo` package `outer_package_with_namespace_behavior!`. That requires every package nested under `Foo` to `import Foo` (see [3737](#3737)), and it doesn't apply to the legacy `Test::Foo` namespace.
+- if `Foo` is meant to be generic, mark the `Foo` package `outer_package_with_namespace_behavior!` (Sorbet's autocorrect does this). That requires every package nested under `Foo` to `import Foo` (see [3737](#3737)), and it doesn't apply to the legacy `Test::Foo` namespace.
 
 For example, if you have the following definition for the package namespace `A`, and there are subpackages defined underneath `A`:
 
@@ -3024,7 +3024,7 @@ If a package contains a sub-package, the modules (or classes) that make up the p
 
 In package-directed mode, `A::B` can be typechecked before `A`, so it must not be able to observe `A` changing. Marking `A` with `outer_package_with_namespace_behavior!` requires every package nested under `A` to `import A` (see [3737](#3737)), which guarantees that `A` is typechecked first. (That doesn't hold for the legacy `Test::A` namespace, so the annotation doesn't apply to it.)
 
-Resolving this error involves moving the functionality off of the package namespace symbol `A` and onto a member of the `A` package instead, moving the sub-package to a different place in the package hierarchy, or (if the mixin is intentional) marking `A` with `outer_package_with_namespace_behavior!`. For example,
+Resolving this error involves moving the functionality off of the package namespace symbol `A` and onto a member of the `A` package instead, moving the sub-package to a different place in the package hierarchy, or (if the mixin is intentional) marking `A` with `outer_package_with_namespace_behavior!` (Sorbet's autocorrect does this). For example,
 
 ```ruby
 module A

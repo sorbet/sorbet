@@ -77,6 +77,10 @@ root/root.rb:17: `Root` can only be generic if package `Root` is marked `outer_p
   Note:
     Either remove the `type_member`, or confirm that this is intentional by marking package `Root` with `outer_package_with_namespace_behavior!`.
     That requires every package nested under `Root` to `import Root`
+  Autocorrect: Use `-a` to autocorrect
+    root/__package.rb:3: Insert `outer_package_with_namespace_behavior!`
+     3 |class Root < PackageSpec
+                                ^
 
 root/root.rb:19: `T.class_of(Root)` can only be generic if package `Root` is marked `outer_package_with_namespace_behavior!` https://srb.help/4016
     19 |  Y = type_template
@@ -90,6 +94,10 @@ root/root.rb:19: `T.class_of(Root)` can only be generic if package `Root` is mar
   Note:
     Either remove the `type_template`, or confirm that this is intentional by marking package `Root` with `outer_package_with_namespace_behavior!`.
     That requires every package nested under `Root` to `import Root`
+  Autocorrect: Use `-a` to autocorrect
+    root/__package.rb:3: Insert `outer_package_with_namespace_behavior!`
+     3 |class Root < PackageSpec
+                                ^
 
 root/root.rb:3: `Root` can only have a superclass if package `Root` is marked `outer_package_with_namespace_behavior!` https://srb.help/5083
      3 |class Root < Prelude::A
@@ -103,6 +111,10 @@ root/root.rb:3: `Root` can only have a superclass if package `Root` is marked `o
   Note:
     Either remove the superclass, or confirm that this is intentional by marking package `Root` with `outer_package_with_namespace_behavior!`.
     That requires every package nested under `Root` to `import Root`
+  Autocorrect: Use `-a` to autocorrect
+    root/__package.rb:3: Insert `outer_package_with_namespace_behavior!`
+     3 |class Root < PackageSpec
+                                ^
 
 root/root.rb:15: `Root` can only have ancestors if package `Root` is marked `outer_package_with_namespace_behavior!` https://srb.help/5083
     15 |  include ClassMethods
@@ -116,6 +128,10 @@ root/root.rb:15: `Root` can only have ancestors if package `Root` is marked `out
   Note:
     Either remove the `include`, or confirm that this is intentional by marking package `Root` with `outer_package_with_namespace_behavior!`.
     That requires every package nested under `Root` to `import Root`
+  Autocorrect: Use `-a` to autocorrect
+    root/__package.rb:3: Insert `outer_package_with_namespace_behavior!`
+     3 |class Root < PackageSpec
+                                ^
 
 root/root.rb:12: `T.class_of(Root)` can only have ancestors if package `Root` is marked `outer_package_with_namespace_behavior!` https://srb.help/5083
     12 |  extend ClassMethods
@@ -129,6 +145,10 @@ root/root.rb:12: `T.class_of(Root)` can only have ancestors if package `Root` is
   Note:
     Either remove the `extend`, or confirm that this is intentional by marking package `Root` with `outer_package_with_namespace_behavior!`.
     That requires every package nested under `Root` to `import Root`
+  Autocorrect: Use `-a` to autocorrect
+    root/__package.rb:3: Insert `outer_package_with_namespace_behavior!`
+     3 |class Root < PackageSpec
+                                ^
 
 bad_test/subpackage/__package.rb:5: Unable to resolve constant `BadTest` https://srb.help/5002
      5 |  export Test::BadTest::Subpackage::Foo
@@ -157,6 +177,10 @@ root/a.rb:4: `T.class_of(Root::A)` can only have ancestors if package `Root` is 
   Note:
     Either remove the `extend`, or confirm that this is intentional by marking package `Root` with `outer_package_with_namespace_behavior!`.
     That requires every package nested under `Root` to `import Root`
+  Autocorrect: Use `-a` to autocorrect
+    root/__package.rb:3: Insert `outer_package_with_namespace_behavior!`
+     3 |class Root < PackageSpec
+                                ^
 
 root/a.rb:6: Method `type_member` does not exist on `T.class_of(T)` https://srb.help/7003
      6 |  X = T.type_member
@@ -178,6 +202,10 @@ root/root.rbi:4: `Root` can only be generic if package `Root` is marked `outer_p
   Note:
     Either remove the `type_member`, or confirm that this is intentional by marking package `Root` with `outer_package_with_namespace_behavior!`.
     That requires every package nested under `Root` to `import Root`
+  Autocorrect: Use `-a` to autocorrect
+    root/__package.rb:3: Insert `outer_package_with_namespace_behavior!`
+     3 |class Root < PackageSpec
+                                ^
 
 root/root.rbi:5: `T.class_of(Root)` can only be generic if package `Root` is marked `outer_package_with_namespace_behavior!` https://srb.help/4016
      5 |  Y = type_template
@@ -191,6 +219,10 @@ root/root.rbi:5: `T.class_of(Root)` can only be generic if package `Root` is mar
   Note:
     Either remove the `type_template`, or confirm that this is intentional by marking package `Root` with `outer_package_with_namespace_behavior!`.
     That requires every package nested under `Root` to `import Root`
+  Autocorrect: Use `-a` to autocorrect
+    root/__package.rb:3: Insert `outer_package_with_namespace_behavior!`
+     3 |class Root < PackageSpec
+                                ^
 
 root/test/root.rb:17: `Test::Root` cannot be generic, because `Test::Root` encloses the tests of packages nested under `Root` https://srb.help/4016
     17 |  X = type_member

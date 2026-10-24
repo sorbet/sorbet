@@ -312,11 +312,15 @@ public:
     std::vector<MangledName> directSubPackages(const core::GlobalState &gs,
                                                ClassOrModuleRef startFrom = ClassOrModuleRef()) const;
 
+    // Autocorrect that marks this package `outer_package_with_namespace_behavior!`.
+    std::optional<core::AutocorrectSuggestion> addOuterPackageWithNamespaceBehavior(const core::GlobalState &gs) const;
+
     // Describe a `CanModifyResult::Subpackages`-style error: `subject` (the namespace `namespaceName` that this
     // package owns, with `<PackageSpecRegistry>` node `packageRegistryOwner`, or its singleton class) can't
     // `restriction` (e.g. "be generic"). Sets the header, points at a package nested under the namespace, and says
-    // how to fix it: `alternative`, or making this package's `outer_package_with_namespace_behavior!` take effect.
-    // That's not an option for a legacy `Test::` namespace (`inLegacyTestNamespace`).
+    // how to fix it: `alternative`, or making this package's `outer_package_with_namespace_behavior!` take effect
+    // (marking it is offered as an autocorrect). That's not an option for a legacy `Test::` namespace
+    // (`inLegacyTestNamespace`).
     void explainSubpackageNamespaceError(const core::GlobalState &gs, ErrorBuilder &e, std::string_view subject,
                                          std::string_view restriction, ClassOrModuleRef packageRegistryOwner,
                                          std::string_view namespaceName, bool inLegacyTestNamespace,

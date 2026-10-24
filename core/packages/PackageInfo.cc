@@ -1382,6 +1382,38 @@ vector<MangledName> PackageInfo::directSubPackages(const core::GlobalState &gs, 
     return subpackages;
 }
 
+optional<core::AutocorrectSuggestion>
+PackageInfo::addOuterPackageWithNamespaceBehavior(const core::GlobalState &gs) const {
+    if (this->outerPackageWithNamespaceBehavior()) {
+        return nullopt;
+    }
+
+    // Put it on its own line where renderPackageRbContents (--gen-packages) puts it: first in the package body, except
+    // after `prelude!`.
+    auto afterPrelude = this->locs.preludePackage.exists();
+    auto anchor = afterPrelude ? this->locs.preludePackage : this->locs.declLoc;
+    auto source = this->file.data(gs).source();
+    auto endOfAnchorLine = source.find('\n', anchor.endPos());
+    auto endOfPackage = this->locs.loc.endPos();
+    if (endOfAnchorLine == string_view::npos || endOfAnchorLine >= endOfPackage) {
+        return nullopt;
+    }
+
+    // Like renderPackageRbContents, separate it from `prelude!` and from the rest of the body (if there's anything
+    // after it besides the final `end`) with blank lines, unless there already is one.
+    auto endOfBody = this->endOfLastNonBlankLine(gs, endOfPackage - "end\n"sv.size());
+    auto hasMoreBody = endOfBody.has_value() && endOfBody->beginPos() > endOfAnchorLine;
+    auto endOfNextLine = source.find('\n', endOfAnchorLine + 1);
+    auto nextLine = source.substr(endOfAnchorLine + 1, endOfNextLine - (endOfAnchorLine + 1));
+    auto nextLineIsBlank = absl::c_all_of(nextLine, [](char c) { return isspace(c); });
+
+    auto insertionLoc = core::Loc(this->file, endOfAnchorLine, endOfAnchorLine);
+    return core::AutocorrectSuggestion(
+        fmt::format("Mark `{}` with `{}`", this->show(gs), "outer_package_with_namespace_behavior!"),
+        {{insertionLoc, fmt::format("\n{}  outer_package_with_namespace_behavior!{}", afterPrelude ? "\n" : "",
+                                    hasMoreBody && !nextLineIsBlank ? "\n" : "")}});
+}
+
 void PackageInfo::explainSubpackageNamespaceError(const core::GlobalState &gs, ErrorBuilder &e, string_view subject,
                                                   string_view restriction, ClassOrModuleRef packageRegistryOwner,
                                                   string_view namespaceName, bool inLegacyTestNamespace,
@@ -1438,6 +1470,9 @@ void PackageInfo::explainSubpackageNamespaceError(const core::GlobalState &gs, E
         e.addErrorNote("Either {}, or confirm that this is intentional by marking package `{}` with `{}`.\n"
                        "    That requires every package nested under `{}` to `{}`",
                        alternative, ownerName, marker, ownerName, importOwner);
+        if (auto autocorrect = this->addOuterPackageWithNamespaceBehavior(gs)) {
+            e.addAutocorrect(std::move(*autocorrect));
+        }
     }
 }
 
