@@ -1434,9 +1434,15 @@ PackageInfo::CanModifyResult PackageInfo::canModifySymbol(core::Context ctx, Cla
 
     // The symbol is already owned by this package, so we only need to check if the symbol corresponds to the package
     // namespace, and if so that there aren't any subpackages, as that could introduce ordering dependencies that don't
-    // work with package-directed type checking.
+    // work with package-directed type checking. A package marked `outer_package_with_namespace_behavior!` opts out of
+    // this, as long as every package nested under it imports it (or a package in between), which rules out those
+    // dependencies.
+    //
+    // That doesn't extend to the legacy `Test::` namespaces: a nested package's tests can be typechecked before this
+    // package's tests, even when the nested package imports this one.
     if (symPackage == this->mangledName_) {
-        if (this->hasSubPackages && symData->packageRegistryOwner.exists()) {
+        if (this->hasSubPackages && symData->packageRegistryOwner.exists() &&
+            (!this->namespaceBehaviorPermitted() || isInLegacyTestNamespace(gs, sym))) {
             return CanModifyResult::Subpackages;
         }
 
@@ -1470,6 +1476,23 @@ PackageInfo::CanModifyResult PackageInfo::canModifySymbol(core::Context ctx, Cla
     // At this point, we know we're in a packaged context, trying to modify the symbol of another package, which is not
     // allowed.
     return CanModifyResult::NotOwner;
+}
+
+bool PackageInfo::isInLegacyTestNamespace(const core::GlobalState &gs, ClassOrModuleRef sym) {
+    if (gs.packageDB().testPackages()) {
+        // `Test` is not special when using `test!` packages.
+        return false;
+    }
+
+    sym = sym.data(gs)->topAttachedClass(gs);
+    while (sym.exists() && sym != core::Symbols::root()) {
+        auto owner = sym.data(gs)->owner;
+        if (owner == core::Symbols::root()) {
+            return sym.data(gs)->name == PackageDB::TEST_NAMESPACE;
+        }
+        sym = owner.data(gs)->topAttachedClass(gs);
+    }
+    return false;
 }
 
 bool PackageInfo::ownsNamespace(const core::GlobalState &gs, MangledName namespacePackage,

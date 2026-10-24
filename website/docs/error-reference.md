@@ -975,7 +975,9 @@ class A < PackageSpec
 end
 ```
 
-This declares that the namespaces on the path to `A`'s nested packages (`A` itself, and any intermediate namespaces like `A::Inner` between `A` and a nested package `A::Inner::B`) are intentionally more than plain `module`s that only serve as namespaces.
+This declares that the namespaces on the path to `A`'s nested packages (`A` itself, and any intermediate namespaces like `A::Inner` between `A` and a nested package `A::Inner::B`) are intentionally more than plain `module`s that only serve as namespaces. For example, they may have a superclass, mixins, or type members (see [4016](#4016) and [5083](#5083)).
+
+The annotation does not apply to the legacy `Test::A` namespace (which holds the tests of packages that don't use `test!` packages), nor to the `Test::` namespaces nested in it: tests of a package nested under `A` can be typechecked before `A`'s tests, even when that package imports `A`.
 
 That's only allowed if `A` is always typechecked before the packages nested under it, so that they never observe those namespaces changing. To guarantee that, every package nested under `A`, at any depth, must `import` either `A` itself, or a package between `A` and it. For example, if there are packages `A`, `A::B`, and `A::B::C`, then `A::B::C` can `import A::B` instead of `import A`: `A::B` is nested under `A` too, so it has to meet the same requirement. (A `test_import` does not count, and neither does importing some other package that imports `A`.) This error reports a nested package that doesn't.
 
@@ -1172,7 +1174,11 @@ where `...` is some expression which computes a class or module. Sorbet can't kn
 
 `type_member` and `type_template` cannot be used at the top-level of a file. Instead, they must be used inside a class or module definition.
 
-When using `--sorbet-packages`, this error also applies to the root module or class of a package whose namespace contains sub-packages. For example, if there are two packages `Foo` and `Foo::Bar`, the module or class `Foo` may not have `type_member` or `type_template` definitions while `Foo::Bar` would be allowed to. To fix this error, you must either move the generic functionality to a class that's exported by the package, or move its sub-packages to a different place in the package hierarchy.
+When using `--sorbet-packages`, this error also applies to the modules or classes that make up the path to a sub-package, unless the package that owns them is marked `outer_package_with_namespace_behavior!`. For example, if there are two packages `Foo` and `Foo::Bar`, the module or class `Foo` may not have `type_member` or `type_template` definitions while `Foo::Bar` would be allowed to. To fix this error, either:
+
+- move the generic functionality to a class that's exported by the package, or
+- move its sub-packages to a different place in the package hierarchy, or
+- if `Foo` is meant to be generic, mark the `Foo` package `outer_package_with_namespace_behavior!`. That requires every package nested under `Foo` to `import Foo` (see [3737](#3737)), and it doesn't apply to the legacy `Test::Foo` namespace.
 
 For example, if you have the following definition for the package namespace `A`, and there are subpackages defined underneath `A`:
 
@@ -3014,9 +3020,11 @@ end
 
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
 
-If a package contains a sub-package, the modules (or classes) that make up the path to that subpackage may not have mixins. For example, if there are two packages `A` and `A::B`, package `A` is not allowed to define mixins on the `A` module or class.
+If a package contains a sub-package, the modules (or classes) that make up the path to that subpackage may not have a superclass or mixins, unless the package is marked `outer_package_with_namespace_behavior!`. For example, if there are two packages `A` and `A::B`, package `A` is not allowed to define mixins on the `A` module or class.
 
-Resolving this error involves moving the functionality off of the package namespace symbol `A` and onto a member of the `A` package instead, or moving the sub-package to a different place in the package hierarchy. For example,
+In package-directed mode, `A::B` can be typechecked before `A`, so it must not be able to observe `A` changing. Marking `A` with `outer_package_with_namespace_behavior!` requires every package nested under `A` to `import A` (see [3737](#3737)), which guarantees that `A` is typechecked first. (That doesn't hold for the legacy `Test::A` namespace, so the annotation doesn't apply to it.)
+
+Resolving this error involves moving the functionality off of the package namespace symbol `A` and onto a member of the `A` package instead, moving the sub-package to a different place in the package hierarchy, or (if the mixin is intentional) marking `A` with `outer_package_with_namespace_behavior!`. For example,
 
 ```ruby
 module A

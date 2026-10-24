@@ -376,6 +376,10 @@ public:
         return this->outerPackageWithNamespaceBehavior() && !this->nestedPackageMissingImport.exists();
     }
 
+    // Whether `sym` is `Test`, or nested in it, where `Test` holds the tests of packages that don't use `test!`
+    // packages (e.g., `Test::Foo::Bar` for package `Foo::Bar`).
+    static bool isInLegacyTestNamespace(const core::GlobalState &gs, ClassOrModuleRef sym);
+
     // Do this package's visible_to rules allow `importingPkg` to import this package, using an import of type
     // `importType`?
     bool isVisibleTo(const core::GlobalState &gs, const PackageInfo &importingPkgInfo,
@@ -388,7 +392,9 @@ public:
         // The symbol is in the PackageSpecRegistry hierarchy, and cannot be modified.
         PackageSpec,
 
-        // The symbol is the namespace of a package, and subpackges exist.
+        // The symbol is a namespace on the path to a subpackage, and either this package's
+        // `outer_package_with_namespace_behavior!` doesn't take effect (see `namespaceBehaviorPermitted`), or the
+        // namespace is a legacy `Test::` namespace, which the annotation doesn't apply to.
         Subpackages,
 
         // The symbol belongs to another package.
