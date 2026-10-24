@@ -1005,6 +1005,20 @@ std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingImports(
             }
         }
     }
+    // Required by `outer_package_with_namespace_behavior!`, whether or not this package references it. Importing the
+    // nearest unsatisfied package satisfies all of them (see unsatisfiedOuterPackages).
+    auto unsatisfied = unsatisfiedOuterPackages(gs, [&](MangledName pkg) {
+        auto *imp = this->importsPackage(pkg);
+        if (imp != nullptr && !imp->isTestImport()) {
+            return true;
+        }
+        auto it = toImport.find(pkg);
+        return it != toImport.end() && it->second == ImportType::Normal;
+    });
+    if (!unsatisfied.empty()) {
+        toImport[unsatisfied.front()] = ImportType::Normal;
+    }
+
     auto importEdits = computeImportEdits(gs, *this, toImport);
     allEdits.insert(allEdits.end(), make_move_iterator(importEdits.begin()), make_move_iterator(importEdits.end()));
     if (allEdits.empty()) {
@@ -1130,6 +1144,10 @@ std::string PackageInfo::renderPackageRbContents(
 
     if (isPreludePackage()) {
         fmt::format_to(std::back_inserter(result), "  prelude!\n\n");
+    }
+
+    if (outerPackageWithNamespaceBehavior()) {
+        fmt::format_to(std::back_inserter(result), "  outer_package_with_namespace_behavior!\n\n");
     }
 
     for (auto &directive : extraDirectives_) {

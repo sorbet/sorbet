@@ -987,7 +987,7 @@ end
 
 Until every package nested under `A` meets this requirement, the annotation has no effect: the namespaces on the path to `A`'s nested packages are restricted as if `A` weren't marked.
 
-To fix this error, either add `import A` to the nested package (Sorbet's autocorrect does this), or remove `outer_package_with_namespace_behavior!` from `A`.
+To fix this error, either add `import A` to the nested package (Sorbet's autocorrect does this, and so does `--gen-packages`), or remove `outer_package_with_namespace_behavior!` from `A`.
 
 ## 4001
 

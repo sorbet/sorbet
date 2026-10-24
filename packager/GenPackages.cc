@@ -42,6 +42,29 @@ vector<core::packages::Import> computeNewImports(const core::GlobalState &gs,
         }
     }
 
+    // Every package nested under a package marked `outer_package_with_namespace_behavior!` has to import it (or a
+    // package in between), even if it's not referenced anywhere. Importing the nearest unsatisfied one satisfies all
+    // of them (see unsatisfiedOuterPackages).
+    auto unsatisfied = pkgInfo.unsatisfiedOuterPackages(gs, [&](core::packages::MangledName pkg) {
+        auto it = importMap.find(pkg);
+        return it != importMap.end() && it->second == core::packages::ImportType::Normal;
+    });
+    if (!unsatisfied.empty()) {
+        // An existing import of a package between it and this one satisfies it too, so keep that instead of adding
+        // another import, if there is one (--gen-packages=strict drops unreferenced imports otherwise).
+        auto toImport = unsatisfied.front();
+        auto &packageDB = gs.packageDB();
+        for (auto outer = packageDB.getParentPackage(gs, pkgInfo.mangledName()); outer != unsatisfied.front();
+             outer = packageDB.getParentPackage(gs, outer)) {
+            auto *imp = pkgInfo.importsPackage(outer);
+            if (imp != nullptr && !imp->isTestImport()) {
+                toImport = outer;
+                break;
+            }
+        }
+        importMap[toImport] = core::packages::ImportType::Normal;
+    }
+
     vector<core::packages::Import> newImports;
     newImports.reserve(importMap.size());
     for (auto &[mangledName, importType] : importMap) {

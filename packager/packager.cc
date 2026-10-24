@@ -1097,6 +1097,11 @@ void validatePackageNamespace(core::Context ctx, const PackageInfo &pkgInfo) {
 // PackageInfo::namespaceBehaviorPermitted, computed in Packager::buildPackageDB).
 void validateOuterPackageImports(core::Context ctx, const PackageInfo &pkgInfo) {
     const auto &packageDB = ctx.state.packageDB();
+    if (packageDB.genPackagesMode() != core::packages::GenPackagesMode::Disabled) {
+        // --gen-packages adds these imports itself.
+        return;
+    }
+
     auto unsatisfied = pkgInfo.unsatisfiedOuterPackages(ctx);
     if (unsatisfied.empty()) {
         return;
@@ -1381,11 +1386,14 @@ void Packager::buildPackageDB(core::GlobalState &gs, WorkerPool &workers, absl::
 
                 // Record whether each `outer_package_with_namespace_behavior!` takes effect (see
                 // PackageInfo::namespaceBehaviorPermitted). Only this package's own imports matter, which
-                // rewritePackageSpec just populated.
-                for (auto outer : info.unsatisfiedOuterPackages(gs)) {
-                    auto &outerInfo = PackageInfo::from(gs, outer);
-                    if (!outerInfo.nestedPackageMissingImport.exists()) {
-                        outerInfo.nestedPackageMissingImport = pkgName;
+                // rewritePackageSpec just populated. In --gen-packages mode, which adds the missing imports itself
+                // (and doesn't report them), treat every annotation as taking effect.
+                if (gs.packageDB().genPackagesMode() == core::packages::GenPackagesMode::Disabled) {
+                    for (auto outer : info.unsatisfiedOuterPackages(gs)) {
+                        auto &outerInfo = PackageInfo::from(gs, outer);
+                        if (!outerInfo.nestedPackageMissingImport.exists()) {
+                            outerInfo.nestedPackageMissingImport = pkgName;
+                        }
                     }
                 }
             }

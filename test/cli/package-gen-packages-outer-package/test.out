@@ -1,0 +1,191 @@
+###### Running gen-packages=normal ######
+outer/missing/__package.rb:3: `Outer::Missing` is missing imports https://srb.help/3734
+     3 |class Outer::Missing < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    outer/missing/__package.rb:5: Inserted `import Outer`
+     5 |  strict_dependencies 'false'
+                                     ^
+
+outer/used/inner/__package.rb:4: `Outer::Used::Inner` is missing imports https://srb.help/3734
+     4 |class Outer::Used::Inner < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    outer/used/inner/__package.rb:6: Inserted `import Outer::Used`
+     6 |  strict_dependencies 'false'
+                                     ^
+
+outer/used/__package.rb:3: `Outer::Used` is missing exports https://srb.help/3734
+     3 |class Outer::Used < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    outer/used/__package.rb:7: Inserted `export Outer::Used::X`
+     7 |  import Outer
+                      ^
+Errors: 3
+
+###### cat outer/__package.rb ######
+# typed: strict
+
+class Outer < PackageSpec
+  outer_package_with_namespace_behavior!
+
+  layer 'util'
+  strict_dependencies 'false'
+
+  export Outer::Thing
+end
+
+###### cat outer/used/__package.rb ######
+# typed: strict
+
+class Outer::Used < PackageSpec
+  layer 'app'
+  strict_dependencies 'false'
+
+  import Outer
+  export Outer::Used::X
+end
+
+###### cat outer/used/inner/__package.rb ######
+# typed: strict
+
+# Importing `Outer::Used` (which it references) is enough, so it doesn't need `import Outer`.
+class Outer::Used::Inner < PackageSpec
+  layer 'app'
+  strict_dependencies 'false'
+  import Outer::Used
+end
+
+###### cat outer/unused/__package.rb ######
+# typed: strict
+
+class Outer::Unused < PackageSpec
+  layer 'app'
+  strict_dependencies 'false'
+
+  import Outer
+end
+
+###### cat outer/unused/inner/__package.rb ######
+# typed: strict
+
+# Its unreferenced `import Outer::Unused` is what satisfies `Outer`'s requirement, so it's kept.
+class Outer::Unused::Inner < PackageSpec
+  layer 'app'
+  strict_dependencies 'false'
+
+  import Outer::Unused
+end
+
+###### cat outer/missing/__package.rb ######
+# typed: strict
+
+class Outer::Missing < PackageSpec
+  layer 'app'
+  strict_dependencies 'false'
+  import Outer
+end
+
+###### Running gen-packages=strict ######
+outer/__package.rb:3: `Outer` has changes https://srb.help/3734
+     3 |class Outer < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+
+outer/missing/__package.rb:3: `Outer::Missing` has changes https://srb.help/3734
+     3 |class Outer::Missing < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+
+outer/used/inner/__package.rb:4: `Outer::Used::Inner` has changes https://srb.help/3734
+     4 |class Outer::Used::Inner < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+
+outer/used/__package.rb:3: `Outer::Used` has changes https://srb.help/3734
+     3 |class Outer::Used < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+
+outer/unused/__package.rb:3: `Outer::Unused` has changes https://srb.help/3734
+     3 |class Outer::Unused < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+
+outer/unused/inner/__package.rb:4: `Outer::Unused::Inner` has changes https://srb.help/3734
+     4 |class Outer::Unused::Inner < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+Errors: 6
+
+###### cat outer/__package.rb ######
+# typed: strict
+
+class Outer < PackageSpec
+  outer_package_with_namespace_behavior!
+
+  layer 'util'
+  strict_dependencies 'dag'
+
+  export Outer::Thing
+end
+
+###### cat outer/used/__package.rb ######
+# typed: strict
+
+class Outer::Used < PackageSpec
+  layer 'app'
+  strict_dependencies 'dag'
+
+  # strict_dependencies 'dag':
+  import Outer
+  export Outer::Used::X
+end
+
+###### cat outer/used/inner/__package.rb ######
+# typed: strict
+
+# Importing `Outer::Used` (which it references) is enough, so it doesn't need `import Outer`.
+class Outer::Used::Inner < PackageSpec
+  layer 'app'
+  strict_dependencies 'dag'
+
+  # strict_dependencies 'dag':
+  import Outer::Used
+end
+
+###### cat outer/unused/__package.rb ######
+# typed: strict
+
+class Outer::Unused < PackageSpec
+  layer 'app'
+  strict_dependencies 'dag'
+
+  # strict_dependencies 'dag':
+  import Outer
+end
+
+###### cat outer/unused/inner/__package.rb ######
+# typed: strict
+
+# Its unreferenced `import Outer::Unused` is what satisfies `Outer`'s requirement, so it's kept.
+class Outer::Unused::Inner < PackageSpec
+  layer 'app'
+  strict_dependencies 'dag'
+
+  # strict_dependencies 'dag':
+  import Outer::Unused
+end
+
+###### cat outer/missing/__package.rb ######
+# typed: strict
+
+class Outer::Missing < PackageSpec
+  layer 'app'
+  strict_dependencies 'dag'
+
+  # strict_dependencies 'dag':
+  import Outer
+end
+
