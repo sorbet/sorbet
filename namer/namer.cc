@@ -1388,7 +1388,50 @@ private:
             return true;
         }
 
+        // Only the owning package's own files are checked here. Another package's file reopening the
+        // namespace (e.g. `class Outer; module Nested` in a nested package) is reported elsewhere if it
+        // defines behavior, and marking the owning package wouldn't make it safe anyway.
+        if (klass.classKind == core::FoundClass::Kind::Class && namespacePackage == package->mangledName()) {
+            auto inLegacyTestNamespace = core::packages::PackageInfo::isInLegacyTestNamespace(ctx, owner);
+            if (isRestrictedPackageNamespace(ctx, namespacePackage, packageRegistryOwner, inLegacyTestNamespace)) {
+                reportPackageNamespaceDefinitionError(ctx, klass, owner, namespacePackage, packageRegistryOwner,
+                                                      inLegacyTestNamespace);
+            }
+        }
+
         return false;
+    }
+
+    // Whether this is a namespace on the path to a subpackage (the owning package's root, or an
+    // intermediate namespace between it and a subpackage) where the owning package's
+    // `outer_package_with_namespace_behavior!` doesn't take effect (it's not marked, a nested package is
+    // missing the import, or this is a legacy `Test::` namespace, which the annotation never applies to).
+    // Such a namespace has to be a plain `module`, because a nested package can be typechecked before its
+    // owner.
+    bool isRestrictedPackageNamespace(core::Context ctx, core::packages::MangledName namespacePackage,
+                                      core::ClassOrModuleRef packageRegistryOwner, bool inLegacyTestNamespace) {
+        if (!namespacePackage.exists() || !packageRegistryOwner.exists() ||
+            packageRegistryOwner == core::Symbols::PackageSpecRegistry()) {
+            return false;
+        }
+        auto &ownerInfo = ctx.state.packageDB().getPackageInfo(namespacePackage);
+        return ownerInfo.exists() && ownerInfo.hasSubPackages &&
+               (!ownerInfo.namespaceBehaviorPermitted() || inLegacyTestNamespace);
+    }
+
+    void reportPackageNamespaceDefinitionError(core::MutableContext ctx, const core::FoundClass &klass,
+                                               core::ClassOrModuleRef owner,
+                                               core::packages::MangledName namespacePackage,
+                                               core::ClassOrModuleRef packageRegistryOwner,
+                                               bool inLegacyTestNamespace) {
+        if (auto e = ctx.beginError(klass.declLoc, core::errors::Namer::PackageNamespaceDefinition)) {
+            auto namespaceName = owner == core::Symbols::root()
+                                     ? klass.name.show(ctx)
+                                     : fmt::format("{}::{}", owner.show(ctx), klass.name.show(ctx));
+            auto &ownerInfo = ctx.state.packageDB().getPackageInfo(namespacePackage);
+            ownerInfo.explainSubpackageNamespaceError(ctx, e, namespaceName, "be a `class`", packageRegistryOwner,
+                                                      namespaceName, inLegacyTestNamespace, "make it a `module`");
+        }
     }
 
     bool shouldMangleStaticFieldDefinition(core::MutableContext ctx, core::ClassOrModuleRef owner,

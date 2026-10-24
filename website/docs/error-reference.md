@@ -975,7 +975,7 @@ class A < PackageSpec
 end
 ```
 
-This declares that the namespaces on the path to `A`'s nested packages (`A` itself, and any intermediate namespaces like `A::Inner` between `A` and a nested package `A::Inner::B`) are intentionally more than plain `module`s that only serve as namespaces. For example, they may have a superclass, mixins, or type members (see [4016](#4016) and [5083](#5083)).
+This declares that the namespaces on the path to `A`'s nested packages (`A` itself, and any intermediate namespaces like `A::Inner` between `A` and a nested package `A::Inner::B`) are intentionally more than plain `module`s that only serve as namespaces. For example, they may be `class`es, and may have a superclass, mixins, or type members (see [4016](#4016), [4033](#4033), and [5083](#5083)).
 
 The annotation does not apply to the legacy `Test::A` namespace (which holds the tests of packages that don't use `test!` packages), nor to the `Test::` namespaces nested in it: tests of a package nested under `A` can be typechecked before `A`'s tests, even when that package imports `A`.
 
@@ -1429,6 +1429,21 @@ In `--sorbet-packages` mode, all files must belong to a package. We may relax th
 Move the file into an existing package's directory, or add a `__package.rb` file declaring the package in an enclosing folder.
 
 This error previously used code [3705](#3705).
+
+## 4033
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+If a package contains a sub-package, the modules that make up the path to that sub-package must be `module`s, not `class`es, unless the package that owns them is marked `outer_package_with_namespace_behavior!`. For example, if there are two packages `A` and `A::B`, then `A` may only be a `class` if package `A` is marked `outer_package_with_namespace_behavior!`.
+
+This applies to the files of the package that owns the namespace. (A file in `A::B` that reopens `A` is subject to separate rules: for example it may not define behavior on `A`.) It also applies to the legacy `Test::A` namespace, where marking `A` has no effect (see [3737](#3737)).
+
+In package-directed mode, a nested package can be typechecked before the package that owns its enclosing namespace. Requiring a `module` means that the namespace never changes from a `module` to a `class` after a nested package has seen it. Marking `A` with `outer_package_with_namespace_behavior!` instead requires every package nested under `A` to `import A` (see [3737](#3737)), which guarantees that `A` is typechecked first.
+
+To fix this error, either:
+
+- change `class A` to `module A` (moving anything that needs a class, like instance methods or a superclass, onto a constant nested inside `A`), or
+- if `A` is meant to be a `class`, mark package `A` with `outer_package_with_namespace_behavior!` (Sorbet's autocorrect does this).
 
 ## 5001
 

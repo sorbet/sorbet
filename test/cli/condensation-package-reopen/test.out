@@ -65,6 +65,23 @@ bad_test/a.rbi:3: File belongs to package `Test::BadTest` but defines a constant
      3 |class Test::BadTest < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+root/root.rb:3: `Root` can only be a `class` if package `Root` is marked `outer_package_with_namespace_behavior!` https://srb.help/4033
+     3 |class Root < Prelude::A
+        ^^^^^^^^^^^^^^^^^^^^^^^
+    root/__package.rb:3: Package `Root` defined here
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    root/a/b/__package.rb:3: `Root::A::B` is nested under `Root`
+     3 |class Root::A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Either make it a `module`, or confirm that this is intentional by marking package `Root` with `outer_package_with_namespace_behavior!`.
+    That requires every package nested under `Root` to `import Root`
+  Autocorrect: Use `-a` to autocorrect
+    root/__package.rb:3: Insert `outer_package_with_namespace_behavior!`
+     3 |class Root < PackageSpec
+                                ^
+
 root/root.rb:17: `Root` can only be generic if package `Root` is marked `outer_package_with_namespace_behavior!` https://srb.help/4016
     17 |  X = type_member
               ^^^^^^^^^^^
@@ -165,6 +182,23 @@ bad_test/__package.rb:4: Unable to resolve constant `Root` https://srb.help/5002
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
 
+root/a.rb:3: `Root::A` can only be a `class` if package `Root` is marked `outer_package_with_namespace_behavior!` https://srb.help/4033
+     3 |class Root::A
+        ^^^^^^^^^^^^^
+    root/__package.rb:3: Package `Root` defined here
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    root/a/b/__package.rb:3: `Root::A::B` is nested under `Root::A`
+     3 |class Root::A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Either make it a `module`, or confirm that this is intentional by marking package `Root` with `outer_package_with_namespace_behavior!`.
+    That requires every package nested under `Root` to `import Root`
+  Autocorrect: Use `-a` to autocorrect
+    root/__package.rb:3: Insert `outer_package_with_namespace_behavior!`
+     3 |class Root < PackageSpec
+                                ^
+
 root/a.rb:4: `T.class_of(Root::A)` can only have ancestors if package `Root` is marked `outer_package_with_namespace_behavior!` https://srb.help/5083
      4 |  extend T::Generic
                  ^^^^^^^^^^
@@ -189,6 +223,23 @@ root/a.rb:6: Method `type_member` does not exist on `T.class_of(T)` https://srb.
     root/a.rb:6:
      6 |  X = T.type_member
               ^
+
+root/root.rbi:3: `Root` can only be a `class` if package `Root` is marked `outer_package_with_namespace_behavior!` https://srb.help/4033
+     3 |class Root
+        ^^^^^^^^^^
+    root/__package.rb:3: Package `Root` defined here
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    root/a/b/__package.rb:3: `Root::A::B` is nested under `Root`
+     3 |class Root::A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Either make it a `module`, or confirm that this is intentional by marking package `Root` with `outer_package_with_namespace_behavior!`.
+    That requires every package nested under `Root` to `import Root`
+  Autocorrect: Use `-a` to autocorrect
+    root/__package.rb:3: Insert `outer_package_with_namespace_behavior!`
+     3 |class Root < PackageSpec
+                                ^
 
 root/root.rbi:4: `Root` can only be generic if package `Root` is marked `outer_package_with_namespace_behavior!` https://srb.help/4016
      4 |  X = type_member
@@ -271,4 +322,4 @@ root/test/root.rb:12: `T.class_of(Test::Root)` cannot have ancestors, because `T
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Note:
     Instead, remove the `extend`. Marking package `Root` with `outer_package_with_namespace_behavior!` does not apply to `Test::Root`, because the tests of a package nested under `Root` can be typechecked before the tests of `Root`
-Errors: 22
+Errors: 25
