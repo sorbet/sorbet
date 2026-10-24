@@ -10,6 +10,7 @@
 #include "core/SymbolRef.h"
 #include "core/packages/MangledName.h"
 #include "core/packages/Stratum.h"
+#include <functional>
 #include <optional>
 #include <vector>
 
@@ -176,6 +177,9 @@ public:
 
         // Set to non-none loc when this package is marked `prelude!`
         core::LocOffsets preludePackage;
+
+        // Set to non-none loc when this package is marked `outer_package_with_namespace_behavior!`
+        core::LocOffsets outerPackageWithNamespaceBehavior;
     } locs;
 
     core::FileRef file;
@@ -218,6 +222,11 @@ public:
     // maintaining this field as it becomes a property of symbol nesting, but would involve following more memory
     // indirections.
     bool hasSubPackages = false;
+
+    // A package nested under this one that doesn't meet the import requirement of this package's
+    // `outer_package_with_namespace_behavior!` (see `unsatisfiedOuterPackages`), if there is one. Computed when
+    // building the package DB. While one exists, the annotation has no effect (see `namespaceBehaviorPermitted`).
+    MangledName nestedPackageMissingImport;
 
     core::StrictLevel minTypedLevel = core::StrictLevel::None;
     core::StrictLevel testsMinTypedLevel = core::StrictLevel::None;
@@ -300,6 +309,19 @@ public:
 
     const Import *importsPackage(MangledName mangledName) const;
 
+    // The packages enclosing this one (at any depth) that are marked `outer_package_with_namespace_behavior!`, but
+    // whose import requirement this package doesn't meet, nearest first.
+    //
+    // A marked package `P` requires each package `N` nested under it to `import` (not `test_import`) either `P`
+    // itself, or some package between `P` and `N`. That's enough, because the package in between is also nested
+    // under `P`, so it has to meet the same requirement: by induction, `N` always reaches `P` through imports.
+    // It follows that importing the first of the returned packages would satisfy all of them.
+    //
+    // `importsNormally` says which packages count as imported; the overload without it uses this package's imports.
+    std::vector<MangledName> unsatisfiedOuterPackages(const core::GlobalState &gs,
+                                                      const std::function<bool(MangledName)> &importsNormally) const;
+    std::vector<MangledName> unsatisfiedOuterPackages(const core::GlobalState &gs) const;
+
     // Is it a layering violation to import otherPkg from this package?
     bool causesLayeringViolation(const PackageDB &packageDB, const PackageInfo &otherPkg) const;
 
@@ -333,6 +355,25 @@ public:
     // True if this package was marked as a `test!` package.
     bool testPackage() const {
         return this->locs.testPackage.exists();
+    }
+
+    // True when the package is marked `outer_package_with_namespace_behavior!`.
+    //
+    // Used to permit namespaces on the path to its nested packages (e.g., both the `OuterPkg` and
+    // `OuterPkg::NS`) to be more than just plain modules with no behavior.
+    //
+    // Enforces that every package nested under it `import`s either this package, or a package in between (see
+    // `unsatisfiedOuterPackages`), to allow such behavior to be safe in package-directed mode.
+    bool outerPackageWithNamespaceBehavior() const {
+        return this->locs.outerPackageWithNamespaceBehavior.exists();
+    }
+
+    // True when this package is marked `outer_package_with_namespace_behavior!`, and every package nested under it
+    // meets the import requirement that comes with that. Only then does the annotation take effect: otherwise, the
+    // offending packages are reported (3737), and this package's namespaces are as restricted as if it weren't
+    // marked, because a nested package might be typechecked before it.
+    bool namespaceBehaviorPermitted() const {
+        return this->outerPackageWithNamespaceBehavior() && !this->nestedPackageMissingImport.exists();
     }
 
     // Do this package's visible_to rules allow `importingPkg` to import this package, using an import of type
@@ -409,7 +450,7 @@ public:
         const core::GlobalState &gs, std::vector<Import> newImports, std::vector<core::SymbolRef> newExports,
         UnorderedMap<core::packages::MangledName, core::packages::StrictDependenciesLevel> newStrictnessByPkg) const;
 };
-CheckSize(PackageInfo, 280, 8);
+CheckSize(PackageInfo, 296, 8);
 
 } // namespace sorbet::core::packages
 #endif

@@ -1,0 +1,119 @@
+# -- test/testdata/packager/outer_package_with_namespace_behavior/__package.rb --
+# typed: strict
+# enable-packager: true
+
+class Outer < PackageSpec
+  outer_package_with_namespace_behavior!
+end
+# ------------------------------
+# -- test/testdata/packager/outer_package_with_namespace_behavior/bad_args/__package.rb --
+# typed: strict
+
+class BadArgs < PackageSpec
+  outer_package_with_namespace_behavior!()
+                                       # ^^^^ error: Too many arguments
+end
+# ------------------------------
+# -- test/testdata/packager/outer_package_with_namespace_behavior/lonely/__package.rb --
+# typed: strict
+
+# A package with no nested packages can be marked, too: the annotation has no effect.
+class Lonely < PackageSpec
+  outer_package_with_namespace_behavior!
+end
+# ------------------------------
+# -- test/testdata/packager/outer_package_with_namespace_behavior/mid/leaf/__package.rb --
+# typed: strict
+
+class Outer::Mid::Leaf < PackageSpec # error: `Outer::Mid::Leaf` is nested under `Outer`, so it must `import Outer`
+  import Outer
+end
+# ------------------------------
+# -- test/testdata/packager/outer_package_with_namespace_behavior/missing/__package.rb --
+# typed: strict
+
+class Outer::Missing < PackageSpec # error: `Outer::Missing` is nested under `Outer`, so it must `import Outer`
+  import Outer
+end
+# ------------------------------
+# -- test/testdata/packager/outer_package_with_namespace_behavior/missing/bare/__package.rb --
+# typed: strict
+
+class Outer::Missing::Bare < PackageSpec # error: `Outer::Missing::Bare` is nested under `Outer`, so it must `import Outer`
+  import Outer
+end
+# ------------------------------
+# -- test/testdata/packager/outer_package_with_namespace_behavior/missing/deeper/__package.rb --
+# typed: strict
+
+# The error is reported on `Outer::Missing` instead, which is what has to change.
+class Outer::Missing::Deeper < PackageSpec
+  import Outer::Missing
+end
+# ------------------------------
+# -- test/testdata/packager/outer_package_with_namespace_behavior/nested/__package.rb --
+# typed: strict
+
+class Outer::Nested < PackageSpec
+  outer_package_with_namespace_behavior!
+
+  import Outer
+end
+# ------------------------------
+# -- test/testdata/packager/outer_package_with_namespace_behavior/nested/leaf/__package.rb --
+# typed: strict
+
+class Outer::Nested::Leaf < PackageSpec # error: `Outer::Nested::Leaf` is nested under `Outer::Nested`, so it must `import Outer::Nested`
+  import Outer
+  import Outer::Nested
+end
+# ------------------------------
+# -- test/testdata/packager/outer_package_with_namespace_behavior/nested/other/__package.rb --
+# typed: strict
+
+class Outer::Nested::Other < PackageSpec # error: `Outer::Nested::Other` is nested under `Outer::Nested`, so it must `import Outer::Nested`
+  import Outer::Nested
+end
+# ------------------------------
+# -- test/testdata/packager/outer_package_with_namespace_behavior/ok/__package.rb --
+# typed: strict
+
+class Outer::Ok < PackageSpec
+  import Outer
+end
+# ------------------------------
+# -- test/testdata/packager/outer_package_with_namespace_behavior/ok/deeper/__package.rb --
+# typed: strict
+
+# Importing `Outer::Ok` is enough, because `Outer::Ok` has to import `Outer` itself.
+class Outer::Ok::Deeper < PackageSpec
+  import Outer::Ok
+end
+# ------------------------------
+# -- test/testdata/packager/outer_package_with_namespace_behavior/ok/test/__package.rb --
+# typed: strict
+
+# `test!` packages are not special: like any other package, importing the package that encloses them is enough.
+class Outer::Ok::Test < PackageSpec
+  test!
+
+  import Outer::Ok, uses_internals: true
+end
+# ------------------------------
+# -- test/testdata/packager/outer_package_with_namespace_behavior/test/__package.rb --
+# typed: strict
+
+class Outer::Test < PackageSpec
+  test!
+
+  import Outer, uses_internals: true
+end
+# ------------------------------
+# -- test/testdata/packager/outer_package_with_namespace_behavior/test_only/__package.rb --
+# typed: strict
+
+class Outer::TestOnly < PackageSpec # error: `Outer::TestOnly` is nested under `Outer`, so it must `import Outer`
+  import Outer
+  import Outer::Ok
+end
+# ------------------------------

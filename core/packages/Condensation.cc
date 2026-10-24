@@ -193,6 +193,20 @@ void Condensation::Traversal::recordStrata(core::GlobalState &gs) const {
             }
         }
     }
+
+    if constexpr (debug_mode) {
+        // This is what makes `outer_package_with_namespace_behavior!` sound: a package where it takes effect is never
+        // typechecked after a package nested under it.
+        for (auto name : db.packages()) {
+            auto &info = db.getPackageInfo(name);
+            for (auto outer = db.getParentPackage(gs, name); outer.exists(); outer = db.getParentPackage(gs, outer)) {
+                auto &outerInfo = db.getPackageInfo(outer);
+                ENFORCE(!outerInfo.namespaceBehaviorPermitted() ||
+                            outerInfo.stratum.applicationStratum <= info.stratum.applicationStratum,
+                        "`{}` is typechecked after `{}`, which is nested under it", outerInfo.show(gs), info.show(gs));
+            }
+        }
+    }
 }
 
 Condensation::Node &CondensationBuilder::pushNode(ImportType type, bool isPrelude) {

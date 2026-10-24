@@ -29,4 +29,10 @@ class Sorbet::Private::Static::PackageSpec
 
   sig { void }
   def self.test!(); end
+
+  # Allows the namespaces on the path to this package's nested packages to
+  # define behavior, ancestors, and generics, and to be classes. Requires
+  # every package nested under this one to `import` it.
+  sig { void }
+  def self.outer_package_with_namespace_behavior!; end
 end

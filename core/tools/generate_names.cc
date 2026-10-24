@@ -507,6 +507,7 @@ NameDef names[] = {
     {"testRb", "test_rb"},
     {"prelude_bang", "prelude!"},
     {"test_bang", "test!"},
+    {"outerPackageWithNamespaceBehavior", "outer_package_with_namespace_behavior!"},
     {"usesInternals", "uses_internals"},
 
     // GlobalState initEmpty()

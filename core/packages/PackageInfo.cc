@@ -464,6 +464,31 @@ const Import *PackageInfo::importsPackage(MangledName mangledName) const {
     return &*imp;
 }
 
+vector<MangledName>
+PackageInfo::unsatisfiedOuterPackages(const core::GlobalState &gs,
+                                      const std::function<bool(MangledName)> &importsNormally) const {
+    vector<MangledName> result;
+    const auto &packageDB = gs.packageDB();
+    for (auto outer = packageDB.getParentPackage(gs, this->mangledName_); outer.exists();
+         outer = packageDB.getParentPackage(gs, outer)) {
+        if (importsNormally(outer)) {
+            // This satisfies `outer`, and every marked package enclosing it.
+            break;
+        }
+        if (packageDB.getPackageInfo(outer).outerPackageWithNamespaceBehavior()) {
+            result.emplace_back(outer);
+        }
+    }
+    return result;
+}
+
+vector<MangledName> PackageInfo::unsatisfiedOuterPackages(const core::GlobalState &gs) const {
+    return this->unsatisfiedOuterPackages(gs, [this](MangledName pkg) {
+        auto *imp = this->importsPackage(pkg);
+        return imp != nullptr && !imp->isTestImport();
+    });
+}
+
 // Is it a layering violation to import otherPkg from this package?
 bool PackageInfo::causesLayeringViolation(const PackageDB &packageDB, const PackageInfo &otherPkg) const {
     ENFORCE(exists());

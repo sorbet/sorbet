@@ -131,6 +131,7 @@ class SymbolFinder {
             case core::Names::exportAll().rawId():
             case core::Names::prelude_bang().rawId():
             case core::Names::test_bang().rawId():
+            case core::Names::outerPackageWithNamespaceBehavior().rawId():
                 if (!isPackageClass || send->hasBlock() || send->hasNonBlockArgs()) {
                     break;
                 }
@@ -1700,6 +1701,11 @@ private:
             case core::Names::test_bang().rawId():
                 if (auto *packageInfo = packageInfoForContext(ctx)) {
                     packageInfo->locs.testPackage = mod.loc;
+                }
+                break;
+            case core::Names::outerPackageWithNamespaceBehavior().rawId():
+                if (auto *packageInfo = packageInfoForContext(ctx)) {
+                    packageInfo->locs.outerPackageWithNamespaceBehavior = mod.loc;
                 }
                 break;
             case core::Names::declareFinal().rawId():

@@ -520,6 +520,9 @@ struct PackageSpecBodyWalk {
             // Handled as a class-level modifier in namer.
         } else if (send.fun == core::Names::prelude_bang() && !send.hasBlock() && !send.hasNonBlockArgs()) {
             // Handled as a class-level modifier in namer.
+        } else if (send.fun == core::Names::outerPackageWithNamespaceBehavior() && !send.hasBlock() &&
+                   !send.hasNonBlockArgs()) {
+            // Handled as a class-level modifier in namer.
         } else if (send.fun == core::Names::visibleTo()) {
             if (send.numPosArgs() == 1) {
                 if (auto target = ast::cast_tree<ast::Literal>(send.getPosArg(0))) {
@@ -807,6 +810,7 @@ struct PackageSpecBodyWalk {
             case core::Names::prelude_bang().rawId():
             case core::Names::testImport().rawId():
             case core::Names::test_bang().rawId():
+            case core::Names::outerPackageWithNamespaceBehavior().rawId():
                 return true;
 
             default:
@@ -1084,6 +1088,48 @@ void validatePackageNamespace(core::Context ctx, const PackageInfo &pkgInfo) {
     }
 }
 
+// A package marked `outer_package_with_namespace_behavior!` allows the namespaces on the path to its nested packages
+// to be more than plain modules. That's only sound in package-directed mode if the outer package is always typechecked
+// before (or in the same stratum as) every package nested under it, so each of those packages has to import it, or a
+// package in between (see PackageInfo::unsatisfiedOuterPackages).
+//
+// Until that holds for every package nested under it, the annotation has no effect (see
+// PackageInfo::namespaceBehaviorPermitted, computed in Packager::buildPackageDB).
+void validateOuterPackageImports(core::Context ctx, const PackageInfo &pkgInfo) {
+    const auto &packageDB = ctx.state.packageDB();
+    auto unsatisfied = pkgInfo.unsatisfiedOuterPackages(ctx);
+    if (unsatisfied.empty()) {
+        return;
+    }
+
+    if (auto e = ctx.beginError(pkgInfo.locs.declLoc, core::errors::Packager::MissingOuterPackageImport)) {
+        // Importing the nearest one satisfies all of them.
+        auto &nearestInfo = packageDB.getPackageInfo(unsatisfied.front());
+        auto nearestName = nearestInfo.show(ctx);
+        auto importNearest = fmt::format("import {}", nearestName);
+        e.setHeader("`{}` is nested under `{}`, so it must `{}`", pkgInfo.show(ctx), nearestName, importNearest);
+        for (auto outer : unsatisfied) {
+            auto &outerInfo = packageDB.getPackageInfo(outer);
+            e.addErrorLine(core::Loc(outerInfo.file, outerInfo.locs.outerPackageWithNamespaceBehavior),
+                           "`{}` is marked `{}` here", outerInfo.show(ctx), "outer_package_with_namespace_behavior!");
+            if (auto *imp = pkgInfo.importsPackage(outer)) {
+                e.addErrorLine(core::Loc(pkgInfo.file, imp->loc), "A `{}` is not strong enough", "test_import");
+            }
+        }
+
+        auto parent = packageDB.getParentPackage(ctx, pkgInfo.mangledName());
+        if (parent != unsatisfied.front()) {
+            e.addErrorNote("Importing a package between `{}` and `{}` instead (like `{}`) would also work, because "
+                           "that package is subject to the same requirement",
+                           nearestName, pkgInfo.show(ctx), packageDB.getPackageInfo(parent).show(ctx));
+        }
+
+        if (auto autocorrect = pkgInfo.addImport(ctx, nearestInfo, ImportType::Normal)) {
+            e.addAutocorrect(std::move(*autocorrect));
+        }
+    }
+}
+
 void validatePackage(core::Context ctx) {
     const auto &packageDB = ctx.state.packageDB();
     auto absPkg = packageDB.getPackageNameForFile(ctx.file);
@@ -1103,6 +1149,7 @@ void validatePackage(core::Context ctx) {
 
     auto &pkgInfo = PackageInfo::from(ctx, absPkg);
     validatePackageNamespace(ctx, pkgInfo);
+    validateOuterPackageImports(ctx, pkgInfo);
 
     bool skipImportVisibilityCheck = packageDB.allowRelaxedPackagerChecksFor(pkgInfo.mangledName());
     auto enforceLayering = ctx.state.packageDB().enforceLayering();
@@ -1284,6 +1331,7 @@ vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, ve
                 copy.locs.exportAll = info.locs.exportAll;
                 copy.locs.preludePackage = info.locs.preludePackage;
                 copy.locs.testPackage = info.locs.testPackage;
+                copy.locs.outerPackageWithNamespaceBehavior = info.locs.outerPackageWithNamespaceBehavior;
                 rewritePackageSpec(gs, file, copy);
             }
             validatePackage(ctx);
@@ -1329,6 +1377,16 @@ void Packager::buildPackageDB(core::GlobalState &gs, WorkerPool &workers, absl::
                     // As we're iterating over all packages in this pass, it's sufficient to mark only the parent as
                     // having subpackages.
                     info.hasSubPackages = true;
+                }
+
+                // Record whether each `outer_package_with_namespace_behavior!` takes effect (see
+                // PackageInfo::namespaceBehaviorPermitted). Only this package's own imports matter, which
+                // rewritePackageSpec just populated.
+                for (auto outer : info.unsatisfiedOuterPackages(gs)) {
+                    auto &outerInfo = PackageInfo::from(gs, outer);
+                    if (!outerInfo.nestedPackageMissingImport.exists()) {
+                        outerInfo.nestedPackageMissingImport = pkgName;
+                    }
                 }
             }
         }
