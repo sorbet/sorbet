@@ -975,7 +975,7 @@ class A < PackageSpec
 end
 ```
 
-This declares that the namespaces on the path to `A`'s nested packages (`A` itself, and any intermediate namespaces like `A::Inner` between `A` and a nested package `A::Inner::B`) are intentionally more than plain `module`s that only serve as namespaces. For example, they may be `class`es, and may have a superclass, mixins, or type members (see [4016](#4016), [4033](#4033), and [5083](#5083)).
+This declares that the namespaces on the path to `A`'s nested packages (`A` itself, and any intermediate namespaces like `A::Inner` between `A` and a nested package `A::Inner::B`) are intentionally more than plain `module`s that only serve as namespaces. For example, they may be `class`es, define methods, and have a superclass, mixins, or type members (see [4016](#4016), [4033](#4033), and [5083](#5083)).
 
 The annotation does not apply to the legacy `Test::A` namespace (which holds the tests of packages that don't use `test!` packages), nor to the `Test::` namespaces nested in it: tests of a package nested under `A` can be typechecked before `A`'s tests, even when that package imports `A`.
 
@@ -1434,16 +1434,18 @@ This error previously used code [3705](#3705).
 
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
 
-If a package contains a sub-package, the modules that make up the path to that sub-package must be `module`s, not `class`es, unless the package that owns them is marked `outer_package_with_namespace_behavior!`. For example, if there are two packages `A` and `A::B`, then `A` may only be a `class` if package `A` is marked `outer_package_with_namespace_behavior!`.
+If a package contains a sub-package, the modules that make up the path to that sub-package must be plain `module`s that only serve as namespaces, unless the package that owns them is marked `outer_package_with_namespace_behavior!`. That is, they may not be `class`es, and they may not define behavior: methods, `private_constant`, `sig`s, and other code at the top level of the `module` body (even a local variable or an `if __FILE__ == $PROGRAM_NAME` check). Nested classes, modules, and constant assignments are fine. (Mixins, superclasses, and type members on these namespaces are reported separately, as [5083](#5083) and [4016](#4016).)
+
+For example, if there are two packages `A` and `A::B`, then `A` may only be a `class` or define methods if package `A` is marked `outer_package_with_namespace_behavior!`.
 
 This applies to the files of the package that owns the namespace. (A file in `A::B` that reopens `A` is subject to separate rules: for example it may not define behavior on `A`.) It also applies to the legacy `Test::A` namespace, where marking `A` has no effect (see [3737](#3737)).
 
-In package-directed mode, a nested package can be typechecked before the package that owns its enclosing namespace. Requiring a `module` means that the namespace never changes from a `module` to a `class` after a nested package has seen it. Marking `A` with `outer_package_with_namespace_behavior!` instead requires every package nested under `A` to `import A` (see [3737](#3737)), which guarantees that `A` is typechecked first.
+In package-directed mode, a nested package can be typechecked before the package that owns its enclosing namespace. Requiring a plain `module` means that the namespace never changes after a nested package has seen it. Marking `A` with `outer_package_with_namespace_behavior!` instead requires every package nested under `A` to `import A` (see [3737](#3737)), which guarantees that `A` is typechecked first.
 
 To fix this error, either:
 
-- change `class A` to `module A` (moving anything that needs a class, like instance methods or a superclass, onto a constant nested inside `A`), or
-- if `A` is meant to be a `class`, mark package `A` with `outer_package_with_namespace_behavior!` (Sorbet's autocorrect does this).
+- change `class A` to `module A`, and move any behavior (methods, mixins, a superclass, top-level statements) onto a constant nested inside `A`, or
+- if `A` is meant to be a `class` or to define behavior, mark package `A` with `outer_package_with_namespace_behavior!` (Sorbet's autocorrect does this).
 
 Until the error is fixed, Sorbet isolates every `class A ... end` or `module A ... end` definition of `A` in that file from the real `A` namespace, so constants defined inside them may fail to resolve elsewhere.
 

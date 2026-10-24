@@ -1,6 +1,6 @@
 # typed: true
 
-module UnsatisfiedBehavior
+module UnsatisfiedBehavior # error: `UnsatisfiedBehavior` can only define behavior if every package nested under `UnsatisfiedBehavior` imports it
   def self.helper; end
 end
 

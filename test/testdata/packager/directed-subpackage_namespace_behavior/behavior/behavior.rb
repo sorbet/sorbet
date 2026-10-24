@@ -1,6 +1,6 @@
 # typed: true
 
-module Behavior
+module Behavior # error: `Behavior` can only define behavior if package `Behavior` is marked `outer_package_with_namespace_behavior!`
   def self.helper; end
 
   class Thing; end

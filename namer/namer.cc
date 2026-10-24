@@ -1396,7 +1396,9 @@ private:
         // Only the owning package's own files are checked here. Another package's file reopening the
         // namespace (e.g. `class Outer; module Nested` in a nested package) is reported elsewhere if it
         // defines behavior, and marking the owning package wouldn't make it safe anyway.
-        if (klass.classKind == core::FoundClass::Kind::Class && namespacePackage == package->mangledName()) {
+        auto isClass = klass.classKind == core::FoundClass::Kind::Class;
+        auto definesBehavior = klass.classKind != core::FoundClass::Kind::Unknown && klass.definesBehavior;
+        if ((isClass || definesBehavior) && namespacePackage == package->mangledName()) {
             auto inLegacyTestNamespace = core::packages::PackageInfo::isInLegacyTestNamespace(ctx, owner);
             if (isRestrictedPackageNamespace(ctx, namespacePackage, packageRegistryOwner, inLegacyTestNamespace)) {
                 reportPackageNamespaceDefinitionError(ctx, klass, owner, namespacePackage, packageRegistryOwner,
@@ -1442,9 +1444,17 @@ private:
             auto namespaceName = owner == core::Symbols::root()
                                      ? klass.name.show(ctx)
                                      : fmt::format("{}::{}", owner.show(ctx), klass.name.show(ctx));
+            auto isClass = klass.classKind == core::FoundClass::Kind::Class;
+            auto restriction = isClass ? (klass.definesBehavior ? "be a `class` that defines behavior" : "be a `class`")
+                                       : "define behavior";
+            auto alternative =
+                klass.definesBehavior
+                    ? (isClass ? "make it a `module` and move its behavior onto a constant nested inside it"
+                               : "move its behavior onto a constant nested inside it")
+                    : "make it a `module`";
             auto &ownerInfo = ctx.state.packageDB().getPackageInfo(namespacePackage);
-            ownerInfo.explainSubpackageNamespaceError(ctx, e, namespaceName, "be a `class`", packageRegistryOwner,
-                                                      namespaceName, inLegacyTestNamespace, "make it a `module`");
+            ownerInfo.explainSubpackageNamespaceError(ctx, e, namespaceName, restriction, packageRegistryOwner,
+                                                      namespaceName, inLegacyTestNamespace, alternative);
         }
     }
 
