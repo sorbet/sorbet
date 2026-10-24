@@ -1,3 +1,3 @@
 # typed: true
 
-Behavior::Extra
+Behavior::Extra # error: Unable to resolve constant `Extra`

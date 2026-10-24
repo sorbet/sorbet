@@ -1447,7 +1447,7 @@ To fix this error, either:
 - change `class A` to `module A`, and move any behavior (methods, mixins, a superclass, top-level statements) onto a constant nested inside `A`, or
 - if `A` is meant to be a `class` or to define behavior, mark package `A` with `outer_package_with_namespace_behavior!` (Sorbet's autocorrect does this).
 
-Until the error is fixed, Sorbet isolates every `class A ... end` or `module A ... end` definition of `A` in that file from the real `A` namespace, so constants defined inside them may fail to resolve elsewhere.
+Until the error is fixed, Sorbet isolates every `class A ... end` or `module A ... end` definition of `A` in that file from the real `A` namespace, so methods and constants defined inside them may fail to resolve elsewhere.
 
 ## 5001
 

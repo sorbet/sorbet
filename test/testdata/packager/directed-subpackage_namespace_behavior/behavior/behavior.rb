@@ -6,8 +6,8 @@ module Behavior # error: `Behavior` can only define behavior if package `Behavio
   class Thing; end
 end
 
-Behavior.helper
-Behavior::Thing.new
+Behavior.helper # error: Method `helper` does not exist on `T.class_of(Behavior)`
+Behavior::Thing.new # error: Unable to resolve constant `Thing`
 
 module Behavior::Extra
 end

@@ -4,4 +4,4 @@ module Test::ExemptBehavior # error: `Test::ExemptBehavior` cannot define behavi
   def self.test_helper; end
 end
 
-Test::ExemptBehavior.test_helper
+Test::ExemptBehavior.test_helper # error: Unable to resolve constant `ExemptBehavior`

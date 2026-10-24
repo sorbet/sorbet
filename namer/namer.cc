@@ -1407,8 +1407,8 @@ private:
         }
 
         // Isolate every mention of such a namespace in this file (not just the offending definition), so
-        // that the file can't change the kind of a namespace symbol that (in package-directed mode) a
-        // nested package might have already created as a module.
+        // that the file can't change the kind of (or add behavior to) a namespace symbol that (in
+        // package-directed mode) a nested package might have already created as a plain module.
         if (packageRegistryOwner.exists() && !isolatedNamespaces.empty() &&
             isolatedNamespaces.contains(
                 {packageRegistryOwner, core::packages::PackageInfo::isInLegacyTestNamespace(ctx, owner)})) {
@@ -2206,9 +2206,9 @@ public:
           isolateUnpackagedDefinitions(ctx.state.packageDB().enabled() && !ctx.file.data(ctx).isPackage(ctx) &&
                                        this->package == nullptr && !ctx.file.data(ctx).isPayload()) {}
 
-    // A file in the owning package that declares a restricted package namespace as a `class` gets
-    // every mention of that namespace in the file isolated, not just that definition, so that all of
-    // the file's definitions agree on which symbol the namespace is.
+    // A file in the owning package that declares a restricted package namespace as a `class` (or
+    // defines behavior on it) gets every mention of that namespace in the file isolated, not just that
+    // definition, so that all of the file's definitions agree on which symbol the namespace is.
     //
     // This has to be decided before entering any of the file's classes, which is before the
     // namespace's symbol necessarily exists, so it works from the package metadata that each class
@@ -2259,7 +2259,9 @@ public:
             }
             infos.emplace_back(info);
 
-            if (klass.classKind == core::FoundClass::Kind::Class && info.package == package->mangledName() &&
+            auto isClass = klass.classKind == core::FoundClass::Kind::Class;
+            auto definesBehavior = klass.classKind != core::FoundClass::Kind::Unknown && klass.definesBehavior;
+            if ((isClass || definesBehavior) && info.package == package->mangledName() &&
                 isRestrictedPackageNamespace(ctx, info.package, info.packageRegistryOwner, inLegacy)) {
                 isolatedNamespaces.insert({info.packageRegistryOwner, inLegacy});
             }
