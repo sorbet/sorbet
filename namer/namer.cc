@@ -901,6 +901,11 @@ private:
     PackageMangledClasses &packageMangledClasses;
     PackageMangledStaticFields &packageMangledStaticFields;
     const PackageInfo *const package;
+    // The restricted package namespaces (see `isRestrictedPackageNamespace`) that this file wrongly
+    // defines, as their `<PackageSpecRegistry>` node and whether they're in the legacy `Test::` namespace
+    // (`Foo` and `Test::Foo` share a node). Every mention of such a namespace in the file is isolated.
+    // See `findIsolatedNamespaces`.
+    UnorderedSet<pair<core::ClassOrModuleRef, bool>> isolatedNamespaces;
     // Isolate unpackaged definitions so they cannot populate package namespaces or modify
     // payload symbols. Payload files are allowed to have no package, including on the LSP fast path.
     const bool isolateUnpackagedDefinitions;
@@ -1397,6 +1402,15 @@ private:
                 reportPackageNamespaceDefinitionError(ctx, klass, owner, namespacePackage, packageRegistryOwner,
                                                       inLegacyTestNamespace);
             }
+        }
+
+        // Isolate every mention of such a namespace in this file (not just the offending definition), so
+        // that the file can't change the kind of a namespace symbol that (in package-directed mode) a
+        // nested package might have already created as a module.
+        if (packageRegistryOwner.exists() && !isolatedNamespaces.empty() &&
+            isolatedNamespaces.contains(
+                {packageRegistryOwner, core::packages::PackageInfo::isInLegacyTestNamespace(ctx, owner)})) {
+            return true;
         }
 
         return false;
@@ -2182,6 +2196,66 @@ public:
           isolateUnpackagedDefinitions(ctx.state.packageDB().enabled() && !ctx.file.data(ctx).isPackage(ctx) &&
                                        this->package == nullptr && !ctx.file.data(ctx).isPayload()) {}
 
+    // A file in the owning package that declares a restricted package namespace as a `class` gets
+    // every mention of that namespace in the file isolated, not just that definition, so that all of
+    // the file's definitions agree on which symbol the namespace is.
+    //
+    // This has to be decided before entering any of the file's classes, which is before the
+    // namespace's symbol necessarily exists, so it works from the package metadata that each class
+    // definition would get, computed along the chain of definitions that own it.
+    void findIsolatedNamespaces(core::Context ctx) {
+        if (this->package == nullptr) {
+            return;
+        }
+
+        vector<core::GlobalState::ClassOrModulePackageInfo> infos;
+        infos.reserve(foundDefs.klasses().size());
+        // Whether each definition is `Test` or nested in it (see PackageInfo::isInLegacyTestNamespace).
+        vector<bool> inLegacyTestNamespace;
+        inLegacyTestNamespace.reserve(foundDefs.klasses().size());
+        auto legacyTestNamespaces = !ctx.state.packageDB().testPackages();
+        for (const auto &klass : foundDefs.klasses()) {
+            core::GlobalState::ClassOrModulePackageInfo ownerInfo;
+            bool ownerIsRoot = false;
+            bool ownerInLegacyTestNamespace = false;
+            switch (klass.owner.kind()) {
+                case core::FoundDefinitionRef::Kind::Symbol: {
+                    auto owner = klass.owner.symbol();
+                    ownerInfo = {owner.data(ctx)->packageRegistryOwner, owner.data(ctx)->package};
+                    ownerIsRoot = owner == core::Symbols::root();
+                    ownerInLegacyTestNamespace = core::packages::PackageInfo::isInLegacyTestNamespace(ctx, owner);
+                    break;
+                }
+                case core::FoundDefinitionRef::Kind::Class:
+                    ownerInfo = infos[klass.owner.idx()];
+                    ownerIsRoot = foundDefs.klasses()[klass.owner.idx()].name == core::Names::Constants::Root();
+                    ownerInLegacyTestNamespace = inLegacyTestNamespace[klass.owner.idx()];
+                    break;
+                default:
+                    break;
+            }
+            auto inLegacy = klass.name != core::Names::Constants::Root() &&
+                            (ownerInLegacyTestNamespace ||
+                             (legacyTestNamespaces && ownerIsRoot && klass.name == PackageDB::TEST_NAMESPACE));
+            inLegacyTestNamespace.emplace_back(inLegacy);
+
+            core::GlobalState::ClassOrModulePackageInfo info;
+            if (klass.name == core::Names::Constants::Root()) {
+                // Desugar's top-level `<root>` definition is the root symbol itself (see getClassSymbol).
+                auto root = core::Symbols::root();
+                info = {root.data(ctx)->packageRegistryOwner, root.data(ctx)->package};
+            } else {
+                info = ctx.state.packageInfoForNestedName(ownerInfo, ownerIsRoot, klass.name);
+            }
+            infos.emplace_back(info);
+
+            if (klass.classKind == core::FoundClass::Kind::Class && info.package == package->mangledName() &&
+                isRestrictedPackageNamespace(ctx, info.package, info.packageRegistryOwner, inLegacy)) {
+                isolatedNamespaces.insert({info.packageRegistryOwner, inLegacy});
+            }
+        }
+    }
+
     SymbolDefiner::State enterClassDefinitions(core::MutableContext ctx, bool willDeleteOldDefs,
                                                ClassBehaviorLocsMap &classBehaviorLocs) {
         // Report once per file, before entering isolated recovery symbols. SymbolDefiner is constructed
@@ -2193,6 +2267,8 @@ public:
                             ctx.file.data(ctx).path(), "__package.rb");
             }
         }
+
+        findIsolatedNamespaces(ctx);
 
         SymbolDefiner::State state;
         state.definedClasses.reserve(foundDefs.klasses().size());

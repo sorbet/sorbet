@@ -1,3 +1,3 @@
 # typed: true
 
-ClassRoot::Extra
+ClassRoot::Extra # error: Unable to resolve constant `Extra`

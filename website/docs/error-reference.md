@@ -1445,6 +1445,8 @@ To fix this error, either:
 - change `class A` to `module A` (moving anything that needs a class, like instance methods or a superclass, onto a constant nested inside `A`), or
 - if `A` is meant to be a `class`, mark package `A` with `outer_package_with_namespace_behavior!` (Sorbet's autocorrect does this).
 
+Until the error is fixed, Sorbet isolates every `class A ... end` or `module A ... end` definition of `A` in that file from the real `A` namespace, so constants defined inside them may fail to resolve elsewhere.
+
 ## 5001
 
 Sorbet cannot resolve references to dynamic constants. The common case occurs when a constant is dynamically referenced through the singleton class of `self`:
