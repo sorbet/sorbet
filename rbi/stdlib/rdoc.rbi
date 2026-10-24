@@ -4694,7 +4694,7 @@ end
 # describe multiple terms. See
 # [`RDoc::Markup::ListItem`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/ListItem.html)
 # for how labels and definition are stored as list items.
-class RDoc::Markup::List
+class RDoc::Markup::List < ::RDoc::Markup::Element
   # Creates a new list of `type` with `items`. Valid list types are: `:BULLET`,
   # `:LABEL`, `:LALPHA`, `:NOTE`, `:NUMBER`, `:UALPHA`
   def initialize(type = _, *items); end
@@ -4740,7 +4740,7 @@ end
 # *   an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of Strings
 #     for a list item with multiple terms
 # *   nil for an extra description attached to a previously labeled list item
-class RDoc::Markup::ListItem
+class RDoc::Markup::ListItem < ::RDoc::Markup::Element
   # Creates a new
   # [`ListItem`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/ListItem.html)
   # with an optional `label` containing `parts`
@@ -5014,7 +5014,7 @@ class RDoc::Markup::PreProcess
 end
 
 # A section of text that is added to the output document as-is
-class RDoc::Markup::Raw
+class RDoc::Markup::Raw < ::RDoc::Markup::Element
   # Creates a new
   # [`Raw`](https://docs.ruby-lang.org/en/2.6.0/RDoc/Markup/Raw.html) containing
   # `parts`
