@@ -501,8 +501,9 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  cxxopts::value<int>()->default_value(fmt::format("{}", empty.statsdPort)), "<port>");
     options.add_options(section)("statsd-tag-revision", "Tags some metrics with the revision Sorbet was built from",
                                  cxxopts::value<bool>()->default_value(fmt::format("{}", empty.statsdTagRevision)));
-    options.add_options(section)("metrics-extra-tags", "Extra tags to include in every statsd metric, comma separated.",
-                                 cxxopts::value<string>()->default_value(""), "<key1>=<value1>,<key2>=<value2>");
+    options.add_options(section)(
+        "metrics-extra-tags", "Extra tags to include in every statsd metric, comma separated (repeatable).",
+        cxxopts::value<vector<string>>()->default_value(""), "<key1>=<value1>,<key2>=<value2>");
     // }}}
 
     // ----- LSP ---------------------------------------------------------- {{{
@@ -1239,9 +1240,8 @@ void readOptions(Options &opts,
         opts.webTraceFileStrict = raw["web-trace-file-strict"].as<bool>();
         {
             // parse extra sfx/datadog tags
-            auto stringToParse = raw["metrics-extra-tags"].as<string>();
-            if (stringToParse != "") {
-                for (absl::string_view sp : absl::StrSplit(stringToParse, ',')) {
+            for (const auto &sp : raw["metrics-extra-tags"].as<vector<string>>()) {
+                if (sp != "") {
                     opts.metricsExtraTags.insert(absl::StrSplit(sp, absl::MaxSplits('=', 1)));
                 }
             }
