@@ -2,5 +2,5 @@
 
 class Rooted < PackageSpec
   export_all!
-  export ::Rooted::Public # error: Argument to `export` must be a constant
+  export ::Rooted::Public # error: Argument to `export` must not use a `::` prefix
 end
