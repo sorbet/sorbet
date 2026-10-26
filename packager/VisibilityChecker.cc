@@ -738,7 +738,7 @@ void VisibilityChecker::propagateExports(core::GlobalState &gs, absl::Span<const
     }
 }
 
-void VisibilityChecker::reportExportErrors(core::GlobalState &gs, absl::Span<const ast::ParsedFile> files) {
+void VisibilityChecker::reportExportErrors(const core::GlobalState &gs, absl::Span<const ast::ParsedFile> files) {
     Timer timeit(gs.tracer(), "visibility_checker.report_export_errors");
     // TODO(jez) Each `__package.rb` file's walk is independent, so this could run in parallel
     for (auto &f : files) {
