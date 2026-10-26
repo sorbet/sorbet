@@ -1014,51 +1014,6 @@ std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingImportsF
     return core::AutocorrectSuggestion{"Add missing imports for this file", std::move(allEdits)};
 }
 
-std::optional<core::AutocorrectSuggestion>
-PackageInfo::aggregateMissingExports(const core::GlobalState &gs, vector<core::SymbolRef> &toExport) const {
-    std::vector<core::AutocorrectSuggestion::Edit> allEdits;
-    for (auto export_ : exportsToDelete_) {
-        // This is an invalid export (ex. exporting a constant from a different package). If the constant the user was
-        // trying to export is used somewhere, then we're going to add the correct export just below, so we can delete
-        // this line.
-        auto exportLoc = core::Loc(fullLoc().file(), export_.loc);
-        auto startDetail = exportLoc.toDetails(gs).first;
-        auto replaceLoc = exportLoc.adjust(gs, -startDetail.column, 0);
-        core::AutocorrectSuggestion::Edit deleteEdit = {replaceLoc, ""};
-        allEdits.push_back(deleteEdit);
-    }
-    for (auto &symbol : toExport) {
-        switch (symbol.kind()) {
-            case core::SymbolRef::Kind::ClassOrModule:
-                if (symbol.asClassOrModuleRef().data(gs)->flags.isExported) {
-                    continue;
-                }
-                break;
-            case core::SymbolRef::Kind::FieldOrStaticField:
-                if (symbol.asFieldRef().data(gs)->flags.isExported) {
-                    continue;
-                }
-                break;
-            case core::SymbolRef::Kind::TypeMember:
-            case core::SymbolRef::Kind::Method:
-            case core::SymbolRef::Kind::TypeParameter:
-                ENFORCE(false, "trying to export something other than ClassOrModule or FieldOrStaticField");
-        }
-        auto autocorrect = addExport(gs, symbol);
-        if (autocorrect.has_value()) {
-            allEdits.insert(allEdits.end(), make_move_iterator(autocorrect.value().edits.begin()),
-                            make_move_iterator(autocorrect.value().edits.end()));
-        }
-    }
-
-    if (allEdits.empty()) {
-        return nullopt;
-    }
-
-    AutocorrectSuggestion::mergeAdjacentEdits(allEdits);
-    return core::AutocorrectSuggestion{"Add missing exports", std::move(allEdits)};
-}
-
 std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingVisibleTo(
     const core::GlobalState &gs, UnorderedSet<core::packages::MangledName> &visibleTos, bool visibleToTests) const {
     std::vector<core::AutocorrectSuggestion::Edit> allEdits;
@@ -1099,7 +1054,7 @@ std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingVisibleT
 }
 
 std::string PackageInfo::renderPackageRbContents(
-    const core::GlobalState &gs, std::vector<Import> newImports, std::vector<core::SymbolRef> newExports,
+    const core::GlobalState &gs, std::vector<Import> newImports,
     UnorderedMap<core::packages::MangledName, core::packages::StrictDependenciesLevel> newStrictnessByPkg) const {
     fmt::memory_buffer result;
 
@@ -1242,14 +1197,11 @@ std::string PackageInfo::renderPackageRbContents(
     }
     if (locs.exportAll.exists()) {
         fmt::format_to(std::back_inserter(result), "  export_all!\n");
-    } else {
-        auto newExportsNames = vector<string>{};
-        absl::c_transform(newExports, back_inserter(newExportsNames),
-                          [&gs](SymbolRef export_) { return export_.show(gs); });
-        fast_sort(newExportsNames, [](string &l, string &r) { return l < r; });
-        for (auto &export_ : newExportsNames) {
-            fmt::format_to(back_inserter(result), "  export {}\n", export_);
-        }
+    }
+    for (const auto &export_ : exports_) {
+        auto source = core::Loc(file, export_.loc).source(gs);
+        ENFORCE(source.has_value());
+        fmt::format_to(back_inserter(result), "  {}\n", source.value());
     }
 
     if (!visibleTo().empty() || visibleToTests()) {

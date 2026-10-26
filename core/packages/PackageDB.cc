@@ -377,38 +377,7 @@ void exportField(const core::GlobalState &gs,
     }
 }
 
-UnorderedMap<core::SymbolRef, vector<core::FileRef>> computeReferencingFiles(const core::GlobalState &gs) {
-    auto referencingFiles = UnorderedMap<core::SymbolRef, vector<core::FileRef>>{};
-    // symbolsReferencedByFile is a map from file -> [symbol] referenced in that file
-    // This loop computes the inverse: referencingFiles is a map from symbol -> [file] that reference that symbol
-    Timer timeit(gs.tracer(), "gen_packages.compute_referencing_files");
-    auto numFiles = gs.getFiles().size();
-    for (auto i = 1; i < numFiles; i++) {
-        core::FileRef fref(i);
-        auto referencedSymbols = gs.getSymbolsReferencedByFile(fref);
-        for (auto &symbol : referencedSymbols) {
-            referencingFiles[symbol].push_back(fref);
-        }
-    }
-    return referencingFiles;
-}
 }; // namespace
-
-UnorderedMap<core::packages::MangledName, vector<core::SymbolRef>>
-PackageDB::exportsByPackage(const core::GlobalState &gs) {
-    auto referencingFiles = computeReferencingFiles(gs);
-
-    auto toExport = UnorderedMap<core::packages::MangledName, vector<core::SymbolRef>>{};
-    for (uint32_t i = 1; i < gs.classAndModulesUsed(); ++i) {
-        auto classOrModuleRef = core::ClassOrModuleRef(gs, i);
-        exportClassOrModule(gs, toExport, classOrModuleRef, referencingFiles[classOrModuleRef]);
-    }
-    for (uint32_t i = 1; i < gs.fieldsUsed(); ++i) {
-        auto fieldRef = core::FieldRef(gs, i);
-        exportField(gs, toExport, fieldRef, referencingFiles[fieldRef]);
-    }
-    return toExport;
-}
 
 optional<core::AutocorrectSuggestion> PackageDB::aggregateMissingExportsForFile(const core::GlobalState &gs,
                                                                                 const core::FileRef fref) {

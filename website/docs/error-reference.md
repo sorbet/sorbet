@@ -939,7 +939,6 @@ This error occurs in `--gen-packages` mode, which aims to report all packaging r
 This error will be reported on a `__package.rb` file, along with an autocorrect that fixes those issues, if any of the following are true:
 
 - the `__package.rb` is missing `import`s, and it is not a modularity error to `import` those packages
-- the `__package.rb` is missing `export`s
 - the `__package.rb` is missing `visible_to`, and `--gen-packages-update-visibility-for` flag is passed.
 
 ## 3735
