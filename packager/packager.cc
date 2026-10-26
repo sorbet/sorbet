@@ -107,6 +107,14 @@ bool recursiveVerifyConstant(core::Context ctx, core::NameRef fun, const ast::Ex
         return true;
     }
 
+    if (auto scope = ast::cast_tree<ast::ConstantLit>(expr);
+        scope != nullptr && scope->symbol() == core::Symbols::root()) {
+        if (auto e = ctx.beginError(root.loc(), core::errors::Packager::InvalidConfiguration)) {
+            e.setHeader("Argument to `{}` must not use a `{}` prefix", fun.show(ctx), "::");
+        }
+        return false;
+    }
+
     auto target = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     if (target == nullptr) {
         if (auto e = ctx.beginError(root.loc(), core::errors::Packager::InvalidConfiguration)) {
