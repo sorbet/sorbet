@@ -1219,7 +1219,7 @@ def foo(x)
   when Integer
   when String
   else
-    x #: absurd
+    raise #: absurd(x)
   end
 end
 ```

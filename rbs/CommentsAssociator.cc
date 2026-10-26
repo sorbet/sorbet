@@ -36,6 +36,7 @@ namespace {
 // Static regex patterns to avoid recompilation
 const regex TYPE_ALIAS_PATTERN("^#: type\\s*([a-z][A-Za-z0-9_]*)\\s*=\\s*([^\\n]*)$");
 const regex HEREDOC_PATTERN("\\s*=?\\s*<<(-|~)[^,\\s\\n#]+(,\\s*<<(-|~)[^,\\s\\n#]+)*");
+const regex absurdCommentPattern("^#:\\s*absurd\\s*(?:\\(|#|$)");
 
 constexpr std::string_view TYPE_ALIAS_PREFIX = "type ";
 
@@ -124,6 +125,13 @@ uint32_t CommentsAssociator::posToLine(uint32_t pos) {
     return core::Loc::pos2Detail(ctx.file.data(ctx), pos).line;
 }
 
+bool CommentsAssociator::isOnOwnLine(const CommentNode &comment) {
+    auto commentBegin = comment.loc.beginPos();
+    auto detail = core::Loc::pos2Detail(ctx.file.data(ctx), commentBegin);
+    auto lineStart = ctx.file.data(ctx).source().substr(commentBegin - (detail.column - 1), detail.column - 1);
+    return lineStart.find_first_not_of(" \t") == std::string_view::npos;
+}
+
 void CommentsAssociator::consumeCommentsInsideNode(pm_node_t *node, string_view kind) {
     auto loc = translateLocation(node->location);
     auto beginLine = posToLine(loc.beginPos());
@@ -173,7 +181,6 @@ void CommentsAssociator::consumeCommentsBetweenLines(int startLine, int endLine,
 }
 
 void CommentsAssociator::consumeOrphanedSignatureComments(int startLine, int endLine) {
-    auto source = ctx.file.data(ctx).source();
     for (auto it = commentByLine.begin(); it != commentByLine.end();) {
         if (it->first <= startLine) {
             ++it;
@@ -182,10 +189,7 @@ void CommentsAssociator::consumeOrphanedSignatureComments(int startLine, int end
         if (it->first >= endLine) {
             break;
         }
-        auto commentBegin = it->second.loc.beginPos();
-        auto detail = core::Loc::pos2Detail(ctx.file.data(ctx), commentBegin);
-        auto lineStart = source.substr(commentBegin - (detail.column - 1), detail.column - 1);
-        if (lineStart.find_first_not_of(" \t") != std::string_view::npos) {
+        if (!isOnOwnLine(it->second)) {
             ++it;
             continue;
         }
@@ -299,6 +303,21 @@ int CommentsAssociator::maybeInsertStandalonePlaceholders(pm_node_list_t &nodes,
             continue;
         }
 
+        auto commentString = it->second.string;
+
+        // Unlike bind comments, standalone absurd assertions have no valid runtime expression.
+        // Trailing comments may be in range too (e.g., after an empty branch) and belong to their line's node.
+        if (regex_search(commentString.begin(), commentString.end(), absurdCommentPattern) && isOnOwnLine(it->second)) {
+            continuationFor = nullptr;
+
+            if (auto e = ctx.beginIndexerError(it->second.loc, core::errors::Rewriter::RBSAssertionError)) {
+                e.setHeader("RBS absurd must always be used with a raise");
+            }
+
+            it = commentByLine.erase(it);
+            continue;
+        }
+
         // Handle bind comments: `#: self as Type`
         // Creates a synthetic placeholder node that will be replaced with T.bind(self, Type)
         if (absl::StartsWith(it->second.string, BIND_PREFIX)) {
@@ -321,7 +340,6 @@ int CommentsAssociator::maybeInsertStandalonePlaceholders(pm_node_list_t &nodes,
         // Handle type alias comments: `#: type foo = String`
         // Creates a constant assignment: `type foo = T.type_alias { String }`
         // This allows using `foo` as a type alias later (e.g., `#: self as foo`)
-        auto commentString = it->second.string;
         std::match_results<std::string_view::const_iterator> matches;
         if (std::regex_match(commentString.begin(), commentString.end(), matches, TYPE_ALIAS_PATTERN)) {
             // Type aliases are only allowed at top level or in class/module bodies
