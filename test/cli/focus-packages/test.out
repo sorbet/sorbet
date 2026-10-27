@@ -39,6 +39,20 @@ target/test/value.rb:4: Argument does not have asserted type `Integer` https://s
 target/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 test_support/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 exit: 100
+--- Target: production dependencies exclude consumers and their dependencies, skipping infer for dependencies ---
+consumer/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+cycle_a/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+cycle_b/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+target/test/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+target/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+test_consumer/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+test_top/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+top/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+exit: 100
+--- Target: production dependencies exclude consumers and their dependencies, skipping dependents, and infer for dependencies ---
+target/test/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+target/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+exit: 100
 --- Multiple names, repeated flag, and duplicate roots ---
 base/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 consumer/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007

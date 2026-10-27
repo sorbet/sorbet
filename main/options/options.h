@@ -165,6 +165,7 @@ struct Options {
     // Focus on these packages when typechecking
     std::vector<std::string> focusPackages;
     bool focusSkipDownstream = false;
+    bool focusSkipUpstream = false;
     bool testPackages = false;
     std::string typedSource = "";
     std::string cacheDir = "";

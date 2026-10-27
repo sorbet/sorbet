@@ -914,7 +914,9 @@ PackageStrata computePackageStrata(core::GlobalState &gs, vector<ast::ParsedFile
     // The result focused package set represents the set that we will typecheck in focused mode. As we want to
     // explicilty skip the upstream dependencies during infer, we don't include them here.
     if (result.focusedPackages) {
-        result.focusedPackages->merge(traversal.upstream);
+        if (!opts.focusSkipUpstream) {
+            result.focusedPackages->merge(traversal.upstream);
+        }
         result.focusedPackages->merge(traversal.downstream);
     }
 
