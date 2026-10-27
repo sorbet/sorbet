@@ -73,6 +73,7 @@ top/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/
 exit: 100
 --- Cycle: dependencies do not pull in their other consumers ---
 base/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+cycle_a/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 cycle_b/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 root/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 target/test/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
@@ -169,44 +170,14 @@ exit: 100
 Unknown package `Missing` in --focus-packages
 exit: 1
 --- Namespace is not itself a package ---
-other/syntax.rb:4: unexpected token "end" https://srb.help/2001
-other/unresolved.rb:3: Unable to resolve constant `Missing` https://srb.help/5002
-exit: 100
+Unknown package `Lib` in --focus-packages
+exit: 1
 --- Empty selection ---
-base/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-consumer/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-cycle_a/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-cycle_b/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-extra/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-extra_dep/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-other/syntax.rb:4: unexpected token "end" https://srb.help/2001
-other/unresolved.rb:3: Unable to resolve constant `Missing` https://srb.help/5002
-other/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-root/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-sibling/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-target/test/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-target/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-test_consumer/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-test_support/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-test_top/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-top/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-exit: 100
+Empty package name given to --focus-packages
+exit: 1
 --- Empty name in selection ---
-base/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-consumer/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-cycle_a/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-cycle_b/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-extra/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-extra_dep/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-root/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-sibling/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-target/test/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-target/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-test_consumer/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-test_support/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-test_top/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-top/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-exit: 100
+Empty package name given to --focus-packages
+exit: 1
 --- Package mode required ---
 --experimental-package-directed can only be specified in --sorbet-packages mode
 exit: 1

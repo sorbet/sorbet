@@ -850,6 +850,8 @@ unique_ptr<UnorderedSet<core::packages::MangledName>> focusedPackages(core::Glob
     vector<string> parts;
     for (auto &pkgStr : opts.focusPackages) {
         parts.clear();
+        ENFORCE(!pkgStr.empty());
+
         auto splitter = absl::StrSplit(pkgStr, "::");
         parts.insert(parts.begin(), splitter.begin(), splitter.end());
 
@@ -864,6 +866,8 @@ unique_ptr<UnorderedSet<core::packages::MangledName>> focusedPackages(core::Glob
         // valid package.
         auto &info = db.getPackageInfo(pkgName);
         if (!info.exists()) {
+            gs.errorQueue->logger.error("Unknown package `{}` in --focus-packages", pkgStr);
+            invalidPackage = true;
             continue;
         }
 

@@ -1330,7 +1330,8 @@ void readOptions(Options &opts,
             for (const auto &packages : raw["focus-packages"].as<vector<string>>()) {
                 for (auto &pkg : absl::StrSplit(packages, ',')) {
                     if (pkg.empty()) {
-                        continue;
+                        logger->error("Empty package name given to --focus-packages");
+                        throw EarlyReturnWithCode(1);
                     }
                     opts.focusPackages.emplace_back(pkg);
                 }
