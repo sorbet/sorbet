@@ -38,16 +38,6 @@ string_view strictDependenciesLevelToString(StrictDependenciesLevel level) {
     }
 }
 
-PackageInfo &PackageInfo::from(core::GlobalState &gs, MangledName pkg) {
-    ENFORCE(pkg.exists());
-    return *gs.packageDB().getPackageInfoNonConst(pkg);
-}
-
-const PackageInfo &PackageInfo::from(const core::GlobalState &gs, MangledName pkg) {
-    ENFORCE(pkg.exists());
-    return gs.packageDB().getPackageInfo(pkg);
-}
-
 unique_ptr<PackageInfo> PackageInfo::deepCopy() const {
     ENFORCE(exists());
     return make_unique<PackageInfo>(*this);

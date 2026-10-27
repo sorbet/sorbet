@@ -966,7 +966,7 @@ void validateLayering(core::Context ctx, const Import &i) {
     const auto &packageDB = ctx.state.packageDB();
     ENFORCE(packageDB.getPackageInfo(i.mangledName).exists())
     ENFORCE(packageDB.getPackageNameForFile(ctx.file).exists())
-    auto &thisPkg = PackageInfo::from(ctx, packageDB.getPackageNameForFile(ctx.file));
+    auto &thisPkg = packageDB.getPackageInfo(packageDB.getPackageNameForFile(ctx.file));
     auto &otherPkg = packageDB.getPackageInfo(i.mangledName);
     ENFORCE(thisPkg.sccID().has_value(), "computeSCCs should already have been called and set sccID");
     ENFORCE(otherPkg.sccID().has_value(), "computeSCCs should already have been called and set sccID");
@@ -1101,7 +1101,7 @@ void validatePackage(core::Context ctx) {
         }
     }
 
-    auto &pkgInfo = PackageInfo::from(ctx, absPkg);
+    auto &pkgInfo = packageDB.getPackageInfo(absPkg);
     validatePackageNamespace(ctx, pkgInfo);
 
     bool skipImportVisibilityCheck = packageDB.allowRelaxedPackagerChecksFor(pkgInfo.mangledName());
@@ -1179,7 +1179,7 @@ void validatePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
         return;
     }
 
-    auto &pkgImpl = PackageInfo::from(ctx, pkg);
+    auto &pkgImpl = ctx.state.packageDB().getPackageInfo(pkg);
 
     // NOTE: the loc where we report the error may be wrong, the first line could be another sigil like
     // frozen_string_literal Unfortunately, we don't store the loc of the typed sigil, so this is the best we can do
@@ -1319,12 +1319,12 @@ void Packager::buildPackageDB(core::GlobalState &gs, WorkerPool &workers, absl::
                 if (!pkgName.exists()) {
                     continue;
                 }
-                auto &info = PackageInfo::from(gs, pkgName);
+                auto &info = *gs.packageDB().getPackageInfoNonConst(pkgName);
                 rewritePackageSpec(gs, file, info);
 
                 auto parentPkgName = gs.packageDB().getParentPackage(gs, pkgName);
                 if (parentPkgName.exists()) {
-                    auto &info = PackageInfo::from(gs, parentPkgName);
+                    auto &info = *gs.packageDB().getPackageInfoNonConst(parentPkgName);
 
                     // As we're iterating over all packages in this pass, it's sufficient to mark only the parent as
                     // having subpackages.
