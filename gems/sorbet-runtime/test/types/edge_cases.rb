@@ -943,12 +943,18 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
       klass = Class.new do
         extend T::Sig
-        sig { void }
-        def self.hello; end
+        sig { params(value: String).returns(String) }
+        def self.hello(value)
+          value
+        end
       end
 
-      thread = Thread.new { klass.hello }
-      klass.hello
+      thread = Thread.new { klass.hello('first') }
+      assert_equal('second', klass.hello('second'))
+      assert_equal('first', thread.value)
+
+      error = assert_raises(TypeError) { klass.hello(123) }
+      assert_includes(error.message, "Parameter 'value'")
     ensure
       thread&.join
 
