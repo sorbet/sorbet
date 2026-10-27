@@ -934,12 +934,20 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     it "does not crash when two threads call the same wrapper at #{pause_at}" do
       barrier = Concurrent::CyclicBarrier.new(2)
       mutex = Mutex.new
+      main_thread = Thread.current
       mod = T::Private::Methods.singleton_class
       original_method = mod.instance_method(pause_at)
       original_visibility = T::Private::ClassUtils.visibility_method_name(mod, pause_at)
+      paused = false
+      thread = nil
       T::Private::ClassUtils.replace_method(original_method, mod, pause_at) do |*args|
-        barrier.wait
-        mutex.synchronize { original_method.bind_call(T::Private::Methods, *args) }
+        if Thread.current != main_thread && !paused
+          paused = true
+          barrier.wait
+          mutex.synchronize { original_method.bind_call(T::Private::Methods, *args) }
+        else
+          original_method.bind_call(T::Private::Methods, *args)
+        end
       end
 
       klass = Class.new do
@@ -950,14 +958,24 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         end
       end
 
-      thread = Thread.new { klass.hello('first') }
-      assert_equal('second', klass.hello('second'))
+      mutex.synchronize do
+        thread = Thread.new do
+          Thread.current.report_on_exception = false
+          klass.hello('first')
+        end
+        barrier.wait
+        # Finish initialization before letting the other caller proceed.
+        assert_equal('second', klass.hello('second'))
+      end
       assert_equal('first', thread.value)
 
       error = assert_raises(TypeError) { klass.hello(123) }
       assert_includes(error.message, "Parameter 'value'")
     ensure
-      thread&.join
+      if thread&.alive?
+        thread.kill
+        thread.join
+      end
 
       # We can directly restore this by redefining the method because we know
       # that the intercepted method was defined on
