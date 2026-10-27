@@ -930,13 +930,14 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     assert_match(/A previous invocation of #<Class:/, e.message)
   end
 
-  it 'does not crash when two threads call the same wrapper' do
-    begin
+  %i[run_sig_block_for_key].each do |pause_at|
+    it "does not crash when two threads call the same wrapper at #{pause_at}" do
       barrier = Concurrent::CyclicBarrier.new(2)
       mutex = Mutex.new
       mod = T::Private::Methods.singleton_class
-      original_method = mod.instance_method(:run_sig_block_for_key)
-      T::Private::ClassUtils.replace_method(original_method, mod, :run_sig_block_for_key) do |*args|
+      original_method = mod.instance_method(pause_at)
+      original_visibility = T::Private::ClassUtils.visibility_method_name(mod, pause_at)
+      T::Private::ClassUtils.replace_method(original_method, mod, pause_at) do |*args|
         barrier.wait
         mutex.synchronize { original_method.bind_call(T::Private::Methods, *args) }
       end
@@ -959,13 +960,13 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
       thread&.join
 
       # We can directly restore this by redefining the method because we know
-      # that `run_sig_block_for_key` was defined on
+      # that the intercepted method was defined on
       # `T::Private::Methods.singleton_class`, not an ancestor.
       #
       # (If that weren't the case, we'd have to restore via `remove_method`)
       T::Configuration.without_ruby_warnings do
         mod.send(:define_method, original_method.name, original_method)
-        mod.send(:private, original_method.name)
+        mod.send(original_visibility, original_method.name)
       end
     end
   end
