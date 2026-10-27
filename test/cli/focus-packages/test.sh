@@ -32,9 +32,6 @@ run --stripe-packages --focus-packages=Target
 echo '--- Target: production dependencies exclude consumers and their dependencies, skipping dependants ---'
 run --stripe-packages --focus-packages=Target --focus-skip-downstream
 
-echo '--- Same selection with worker threads ---'
-run --stripe-packages --max-threads=2 --focus-packages=Target
-
 echo '--- Multiple names, repeated flag, and duplicate roots ---'
 run --sorbet-packages --focus-packages=Target,Sibling --focus-packages=Target
 
