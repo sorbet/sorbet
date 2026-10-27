@@ -17,7 +17,7 @@ test_support/value.rb:4: Argument does not have asserted type `Integer` https://
 test_top/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 top/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 exit: 100
---- Target: production dependencies exclude consumers and their dependencies ---
+--- Target: includes dependencies and dependents ---
 base/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 consumer/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 cycle_a/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
@@ -32,14 +32,12 @@ test_support/value.rb:4: Argument does not have asserted type `Integer` https://
 test_top/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 top/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 exit: 100
---- Target: production dependencies exclude consumers and their dependencies, skipping dependants ---
+--- Target: skipping dependents, including explicit test consumers ---
 base/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 root/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-target/test/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 target/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-test_support/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 exit: 100
---- Target: production dependencies exclude consumers and their dependencies, skipping infer for dependencies ---
+--- Target: skipping inference for dependencies ---
 consumer/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 cycle_a/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 cycle_b/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
@@ -49,8 +47,7 @@ test_consumer/value.rb:4: Argument does not have asserted type `Integer` https:/
 test_top/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 top/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 exit: 100
---- Target: production dependencies exclude consumers and their dependencies, skipping dependents, and infer for dependencies ---
-target/test/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+--- Target: skipping dependents and inference for dependencies ---
 target/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 exit: 100
 --- Multiple names, repeated flag, and duplicate roots ---
@@ -90,25 +87,16 @@ base/value.rb:4: Argument does not have asserted type `Integer` https://srb.help
 cycle_a/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 cycle_b/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 root/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-target/test/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 target/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-test_support/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 exit: 100
---- Production selection does not follow test-only consumers ---
+--- Test support selection includes explicit test consumers ---
 base/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-consumer/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-cycle_a/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-cycle_b/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-extra/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-extra_dep/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 root/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 target/test/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 target/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-test_consumer/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 test_support/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
-test_top/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 exit: 100
---- Migrated root does not select implicit tests of dependencies ---
+--- Focused root includes explicit test consumers ---
 base/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 consumer/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 extra/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007

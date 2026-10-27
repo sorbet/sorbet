@@ -959,7 +959,8 @@ PackageStrata computePackageStrata(core::GlobalState &gs, vector<ast::ParsedFile
             }
 
             auto stratum = db.getPackageInfo(pkgName).stratum;
-            ENFORCE(stratum != core::packages::Stratum::NONE, "All packages must be present in the condensation graph");
+            ENFORCE(result.focusedPackages != nullptr || stratum != core::packages::Stratum::NONE,
+                    "All packages must be present in the condensation graph unless checking a focused set");
             result.fileToStratum[ix] = stratum;
         }
 

@@ -1,6 +1,7 @@
 # typed: strict
 
 class TestTop < PackageSpec
-  test_import TestConsumer, only: "test_rb"
+  test!
+  import TestConsumer
   export TestTop::Value
 end
