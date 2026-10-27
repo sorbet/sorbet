@@ -616,10 +616,6 @@ module T::Private::Methods
     @signatures_by_method[method_to_key(maybe_wrapped_method)] = signature
   end
 
-  def self.has_sig_block_for_method(method)
-    has_sig_block_for_key(method_to_key(method))
-  end
-
   # Only public because it needs to get called inside the first-call wrapper closure.
   def self._sig_block_is_current?(key, sig_block)
     @sig_wrappers[key].equal?(sig_block)
@@ -636,10 +632,6 @@ module T::Private::Methods
   # Only public so that it can be accessed in the closure for _on_method_added
   def self.maybe_run_sig_block_for_key(key)
     run_sig_block_for_key(key) if has_sig_block_for_key(key)
-  end
-
-  def self.run_sig_block_for_method(method)
-    run_sig_block_for_key(method_to_key(method))
   end
 
   # use this directly if you don't want/need to box up the method into an object to pass to method_to_key.
