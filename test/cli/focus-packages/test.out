@@ -32,6 +32,13 @@ test_support/value.rb:4: Argument does not have asserted type `Integer` https://
 test_top/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 top/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 exit: 100
+--- Target: production dependencies exclude consumers and their dependencies, skipping dependants ---
+base/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+root/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+target/test/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+target/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+test_support/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+exit: 100
 --- Same selection with worker threads ---
 base/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 consumer/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
