@@ -252,10 +252,6 @@ public:
         return testSccID_ == -1 ? std::nullopt : std::make_optional(testSccID_);
     }
 
-    static PackageInfo &from(core::GlobalState &gs, MangledName pkg);
-
-    static const PackageInfo &from(const core::GlobalState &gs, MangledName pkg);
-
     std::unique_ptr<PackageInfo> deepCopy() const;
 
     PackageInfo(MangledName mangledName, core::FileRef file, core::LocOffsets loc, core::LocOffsets declLoc)
