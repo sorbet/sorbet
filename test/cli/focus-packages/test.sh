@@ -7,11 +7,11 @@ cd test/cli/focus-packages || exit 1
 # Imports point from consumer to dependency:
 #   Top -> Consumer -> Target -> Lib::Base -> RootDep
 #   Consumer -> Extra -> ExtraDep
-#   Target --test_import--> TestSupport
-#   TestTop --test_import (test_rb)--> TestConsumer --test_import--> Target
+#   Target::Test -> Target, TestSupport
+#   TestTop -> TestConsumer -> Target
 #   CycleA <-> CycleB, CycleA -> Target
 #   Sibling -> Lib::Base; Other is disconnected.
-# Top has an explicit test package; its dependencies still use implicit tests.
+# Top::Test, Target::Test, TestConsumer, and TestTop are explicit test packages.
 
 run() {
   local output status
@@ -26,16 +26,16 @@ run() {
 echo '--- All packages (including unrelated syntax and resolution errors) ---'
 run --stripe-packages
 
-echo '--- Target: production dependencies exclude consumers and their dependencies ---'
+echo '--- Target: includes dependencies and dependents ---'
 run --stripe-packages --focus-packages=Target
 
-echo '--- Target: production dependencies exclude consumers and their dependencies, skipping dependants ---'
+echo '--- Target: skipping dependents, including explicit test consumers ---'
 run --stripe-packages --focus-packages=Target --focus-skip-downstream
 
-echo '--- Target: production dependencies exclude consumers and their dependencies, skipping infer for dependencies ---'
+echo '--- Target: skipping inference for dependencies ---'
 run --stripe-packages --focus-packages=Target --focus-skip-upstream
 
-echo '--- Target: production dependencies exclude consumers and their dependencies, skipping dependents, and infer for dependencies ---'
+echo '--- Target: skipping dependents and inference for dependencies ---'
 run --stripe-packages --focus-packages=Target --focus-skip-upstream --focus-skip-downstream
 
 echo '--- Multiple names, repeated flag, and duplicate roots ---'
@@ -47,10 +47,10 @@ run --stripe-packages --focus-packages=Lib::Base
 echo '--- Cycle: dependencies do not pull in their other consumers ---'
 run --stripe-packages --focus-packages=CycleB
 
-echo '--- Production selection does not follow test-only consumers ---'
+echo '--- Test support selection includes explicit test consumers ---'
 run --stripe-packages --focus-packages=TestSupport
 
-echo '--- Migrated root does not select implicit tests of dependencies ---'
+echo '--- Focused root includes explicit test consumers ---'
 run --stripe-packages --focus-packages=Top
 
 echo '--- Explicitly selected tests retain their dependencies ---'

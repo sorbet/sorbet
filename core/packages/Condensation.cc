@@ -76,14 +76,6 @@ struct TraversalBuilder {
                     for (auto pkgName : this->nodes[info.sccID().value()].members) {
                         augmented.insert(pkgName);
                     }
-
-                    if (!info.usesTestPackages) {
-                        this->skipNode[info.testSccID().value()] = false;
-
-                        for (auto pkgName : this->nodes[info.testSccID().value()].members) {
-                            augmented.insert(pkgName);
-                        }
-                    }
                 }
 
                 // `augmented` represents the original set augmented with scc members
@@ -102,10 +94,6 @@ struct TraversalBuilder {
                     ENFORCE(info.exists());
 
                     absl::c_copy(this->nodes[info.sccID().value()].backEdges, back_inserter(work));
-
-                    if (!info.usesTestPackages) {
-                        absl::c_copy(this->nodes[info.testSccID().value()].backEdges, back_inserter(work));
-                    }
                 }
 
                 // Traverse towards the leaves, building the downstream set.

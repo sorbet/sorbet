@@ -1,5 +1,5 @@
 # typed: true
 
-class Test::Target::Value < TestSupport::Value
+class Target::Test::Value < TestSupport::Value
   BAD = T.let("wrong", Integer)
 end

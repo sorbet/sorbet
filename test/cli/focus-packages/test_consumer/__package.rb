@@ -1,6 +1,7 @@
 # typed: strict
 
 class TestConsumer < PackageSpec
-  test_import Target
+  test!
+  import Target
   export TestConsumer::Value
 end
