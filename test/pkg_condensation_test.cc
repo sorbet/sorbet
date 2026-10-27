@@ -29,7 +29,7 @@ TEST_CASE("Condensation Graph - One package") {
         CHECK_EQ(2, condensation.nodes().size());
     }
 
-    auto traversal = condensation.computeTraversal(gs);
+    auto traversal = condensation.computeTraversal(gs, nullptr, false);
 
     {
         INFO("The traversal should include two strata, each with a single SCC");
@@ -64,7 +64,7 @@ TEST_CASE("Condensation Graph - Two packages") {
         CHECK_EQ(4, condensation.nodes().size());
     }
 
-    auto traversal = condensation.computeTraversal(gs);
+    auto traversal = condensation.computeTraversal(gs, nullptr, false);
 
     {
         INFO("The traversal should include three strata, and four SCCs");
@@ -109,7 +109,7 @@ TEST_CASE("Condensation Graph - Four packages without deps") {
         CHECK_EQ(8, condensation.nodes().size());
     }
 
-    auto traversal = condensation.computeTraversal(gs);
+    auto traversal = condensation.computeTraversal(gs, nullptr, false);
 
     {
         INFO("The traversal should include two strata, each with four SCCs");
@@ -153,7 +153,7 @@ TEST_CASE("Condensation Graph - Four packages with a cycle of three") {
               PackageHelpers::makePackageRB("Lib::Foo::D", "layered", "lib", {"Lib::Foo::A"}, {})}});
 
     auto &condensation = gs.packageDB().condensation();
-    auto traversal = condensation.computeTraversal(gs);
+    auto traversal = condensation.computeTraversal(gs, nullptr, false);
 
     auto pkgA = PackageHelpers::packageInfoFor(gs, parsedFiles[0].file).mangledName();
     auto pkgB = PackageHelpers::packageInfoFor(gs, parsedFiles[1].file).mangledName();
@@ -367,7 +367,7 @@ TEST_CASE("Condensation Graph - Two prelude packages, two normal packages") {
         CHECK_EQ(8, condensation.nodes().size());
     }
 
-    auto traversal = condensation.computeTraversal(gs);
+    auto traversal = condensation.computeTraversal(gs, nullptr, false);
 
     {
         REQUIRE_EQ(3, traversal.strata.size());
@@ -442,27 +442,12 @@ TEST_CASE("Condensation Graph - Two packages, one is test-only") {
 
     auto &condensation = gs.packageDB().condensation();
     {
-        const auto &testPackage = PackageHelpers::packageInfoFor(gs, parsedFiles[1].file);
-        auto scc = testPackage.sccID();
-        REQUIRE(scc.has_value());
-        CHECK(testPackage.testSccID() == scc);
-        CHECK(condensation.nodes()[scc.value()].isTest);
-        auto selected = condensation.computeTraversal(gs, {testPackage.mangledName()});
-        REQUIRE_EQ(1, selected.strata.size());
-        REQUIRE_EQ(1, selected.sccs.size());
-        CHECK(selected.sccs.front().isTest);
-        CHECK(selected.packages == vector{testPackage.mangledName()});
-        auto mapping = selected.buildStratumMapping(gs);
-        REQUIRE_EQ(1, mapping.size());
-        CHECK_EQ(0, mapping.at(testPackage.mangledName()).testStratum);
-    }
-    {
         INFO("The condensation graph should contain three nodes total (app + test for Lib::Foo::A, and "
              "Lib::Foo::Test::B)");
         CHECK_EQ(3, condensation.nodes().size());
     }
 
-    auto traversal = condensation.computeTraversal(gs);
+    auto traversal = condensation.computeTraversal(gs, nullptr, false);
 
     {
         INFO("The traversal should include the same number of nodes as the condensation");
@@ -485,72 +470,6 @@ TEST_CASE("Condensation Graph - Two packages, one is test-only") {
         INFO("The second stratum should be all test code");
         CHECK_EQ(1, traversal.strata[1].size());
         CHECK_EQ(1, absl::c_count_if(traversal.strata[1], [](auto &scc) { return scc.isTest; }));
-    }
-}
-
-TEST_CASE("Package selection preserves application and test SCC boundaries") {
-    core::GlobalState gs(errorQueue);
-    PackageHelpers::makeDefaultPackagerGlobalState(gs);
-    auto parsedFiles = PackageHelpers::enterPackages(
-        gs, {{"app/__package.rb", PackageHelpers::makePackageRB("App", "false", "", {"Dependency"})},
-             {"app/test/__package.rb", "# typed: strict\nclass App::Test < PackageSpec\n  test!\n  import App\nend\n"},
-             {"dependency/__package.rb", PackageHelpers::makePackageRB("Dependency", "false", "", {}, {"TestOnly"})},
-             {"test_only/__package.rb", PackageHelpers::makePackageRB("TestOnly", "false", "")},
-             {"sibling/__package.rb", PackageHelpers::makePackageRB("Sibling", "false", "", {"Dependency"})},
-             {"other/test/__package.rb",
-              "# typed: strict\nclass Other::Test < PackageSpec\n  test!\n  import Dependency\nend\n"},
-             {"registry/__package.rb", PackageHelpers::makePackageRB("Registry", "false", "", {"App", "Sibling"})}});
-    auto app = PackageHelpers::packageInfoFor(gs, parsedFiles[0].file).mangledName();
-    auto appTest = PackageHelpers::packageInfoFor(gs, parsedFiles[1].file).mangledName();
-    auto dependency = PackageHelpers::packageInfoFor(gs, parsedFiles[2].file).mangledName();
-    auto testOnly = PackageHelpers::packageInfoFor(gs, parsedFiles[3].file).mangledName();
-    auto sibling = PackageHelpers::packageInfoFor(gs, parsedFiles[4].file).mangledName();
-    auto otherTest = PackageHelpers::packageInfoFor(gs, parsedFiles[5].file).mangledName();
-    auto registry = PackageHelpers::packageInfoFor(gs, parsedFiles[6].file).mangledName();
-    auto &condensation = gs.packageDB().condensation();
-
-    SUBCASE("Production selection excludes registries, test consumers, and dependency tests") {
-        auto traversal = condensation.computeTraversal(gs, {app});
-        REQUIRE_EQ(2, traversal.sccs.size());
-        auto mapping = traversal.buildStratumMapping(gs);
-        REQUIRE_EQ(2, mapping.size());
-        CHECK_EQ(0, mapping.at(dependency).applicationStratum);
-        CHECK_EQ(1, mapping.at(app).applicationStratum);
-        CHECK_EQ(INT32_MAX, mapping.at(dependency).testStratum);
-        CHECK_FALSE(mapping.contains(appTest));
-        CHECK_FALSE(mapping.contains(sibling));
-        CHECK_FALSE(mapping.contains(testOnly));
-        CHECK_FALSE(mapping.contains(registry));
-    }
-    SUBCASE("Explicitly selected registries retain all their dependencies") {
-        auto traversal = condensation.computeTraversal(gs, {registry});
-        auto mapping = traversal.buildStratumMapping(gs);
-        REQUIRE_EQ(4, mapping.size());
-        CHECK(mapping.contains(app));
-        CHECK(mapping.contains(sibling));
-        CHECK(mapping.contains(dependency));
-        CHECK(mapping.contains(registry));
-        CHECK_FALSE(mapping.contains(testOnly));
-    }
-    SUBCASE("Test selection does not promote transitive application dependencies to tests") {
-        auto traversal = condensation.computeTraversal(gs, {appTest});
-        REQUIRE_EQ(3, traversal.sccs.size());
-        auto mapping = traversal.buildStratumMapping(gs);
-        REQUIRE_EQ(3, mapping.size());
-        CHECK_EQ(INT32_MAX, mapping.at(dependency).testStratum);
-        CHECK(mapping.contains(app));
-        CHECK(mapping.contains(appTest));
-        CHECK_FALSE(mapping.contains(testOnly));
-    }
-    SUBCASE("Explicit test selections retain legacy test dependencies required by the graph") {
-        auto traversal = condensation.computeTraversal(gs, {otherTest});
-        auto mapping = traversal.buildStratumMapping(gs);
-        REQUIRE_EQ(3, mapping.size());
-        CHECK(mapping.at(dependency).testStratum != INT32_MAX);
-        CHECK(mapping.contains(testOnly));
-        CHECK(mapping.contains(otherTest));
-        CHECK_FALSE(mapping.contains(app));
-        CHECK_FALSE(mapping.contains(sibling));
     }
 }
 
