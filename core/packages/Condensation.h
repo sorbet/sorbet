@@ -106,7 +106,10 @@ public:
     // packages that either are dependencies of or are depended on by the focused set.  NOTE: the `focusedPackages` set
     // may be modified if it is passed, as it will be augmented to include all the members of the SCCs that the original
     // packages belong to.
-    const Traversal computeTraversal(const GlobalState &gs, UnorderedSet<MangledName> *focusedPackages = nullptr) const;
+    //
+    // Passing `true` for `skipDownstream` will exclude the dependant packages of the focused set.
+    const Traversal computeTraversal(const GlobalState &gs, UnorderedSet<MangledName> *focusedPackages = nullptr,
+                                     bool skipDownstream = false) const;
 
     absl::Span<const Node> nodes() const {
         return this->nodes_;
