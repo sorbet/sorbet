@@ -930,7 +930,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     assert_match(/A previous invocation of #<Class:/, e.message)
   end
 
-  %i[run_sig_block_for_key].each do |pause_at|
+  %i[run_sig_block_for_key run_builder build_sig].each do |pause_at|
     it "does not crash when two threads call the same wrapper at #{pause_at}" do
       barrier = Concurrent::CyclicBarrier.new(2)
       mutex = Mutex.new
@@ -967,7 +967,13 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         # Finish initialization before letting the other caller proceed.
         assert_equal('second', klass.hello('second'))
       end
-      assert_equal('first', thread.value)
+      if pause_at == :run_builder
+        # TODO(#10821): This caller should reuse the completed signature.
+        error = assert_raises(RuntimeError) { thread.value }
+        assert_match(/should have already been unwrapped/, error.message)
+      else
+        assert_equal('first', thread.value)
+      end
 
       error = assert_raises(TypeError) { klass.hello(123) }
       assert_includes(error.message, "Parameter 'value'")
