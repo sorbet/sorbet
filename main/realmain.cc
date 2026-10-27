@@ -737,12 +737,7 @@ int realmain(int argc, char *argv[]) {
         }
 
         if (opts.genPackagesMode != core::packages::GenPackagesMode::Disabled) {
-            // One of the things this pass does is insert missing exports. Because of this, it needs to run after
-            // VisibilityChecker has been run for all strata; a symbol might be used in a strata after the strata for
-            // the package that owns that symbol, and we need to be able to see that use to know that a export should be
-            // generated for that symbol. Because of that, we need to put this pass outside of the loop above.
-            //
-            // A similar principle applies for inserting `visible_to`s with --gen-packages-update-visiblity-for
+            // Generate `visible_to`s after VisibilityChecker has recorded references from all strata.
             switch (opts.genPackagesMode) {
                 case core::packages::GenPackagesMode::Strict:
                     packager::GenPackages::runStrict(*gs);

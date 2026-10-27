@@ -1,20 +1,22 @@
-producer/__package.rb:3: `Producer` is missing exports https://srb.help/3734
+No errors! Great job.
+# typed: strict
+
+class Producer < PackageSpec
+  export Producer::Alias::Nested
+  export Producer::Alias::Unused
+  export Producer::Alias
+end
+###### gen-packages=strict ######
+producer/__package.rb:3: `Producer` has changes https://srb.help/3734
      3 |class Producer < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    producer/__package.rb:4: Deleted
-     4 |  export Producer::Alias::Nested
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    producer/__package.rb:5: Deleted
-     5 |  export Producer::Alias::Unused
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    producer/__package.rb:6: Inserted `export Producer::Target::Nested`
-     6 |  export Producer::Alias
-                                ^
 Errors: 1
 # typed: strict
 
 class Producer < PackageSpec
+
+  export Producer::Alias::Nested
+  export Producer::Alias::Unused
   export Producer::Alias
-  export Producer::Target::Nested
 end

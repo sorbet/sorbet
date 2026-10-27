@@ -196,10 +196,6 @@ public:
 class ExportErrors final {
     const core::packages::PackageInfo &package;
 
-    // `export` lines that `--gen-packages` should delete. These are applied to the package after the walk, so that
-    // the walk itself doesn't need to mutate anything.
-    vector<core::LocOffsets> exportsToDelete;
-
     // Blames which location (export) caused a symbol to first be marked exported.
     struct ExportBlame {
         core::SymbolRef exportedBy;
@@ -319,7 +315,6 @@ class ExportErrors final {
     void checkExportPackage(core::Context ctx, core::LocOffsets loc, core::SymbolRef sym) {
         ENFORCE(!sym.locs(ctx).empty()); // Can't be empty
 
-        bool shouldDeleteExport = false;
         if (onlyInRBI(ctx, sym)) {
             if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidExport)) {
                 e.setHeader("Cannot export `{}` because it is only defined in an RBI file", sym.show(ctx));
@@ -335,8 +330,6 @@ class ExportErrors final {
                     e.addErrorLine(sym.loc(ctx), "Defined here");
                     // TODO(neil): should there be an autocorrect to delete this export here?
                 }
-            } else {
-                shouldDeleteExport = true;
             }
         }
 
@@ -365,13 +358,7 @@ class ExportErrors final {
                         {core::AutocorrectSuggestion::Edit{core::Loc{package.fullLoc().file(), loc},
                                                            fmt::format("export {}", enumClassName)}}});
                 }
-            } else {
-                shouldDeleteExport = true;
             }
-        }
-        if (shouldDeleteExport) {
-            ENFORCE(ctx.state.packageDB().genPackagesMode() != core::packages::GenPackagesMode::Disabled);
-            this->exportsToDelete.emplace_back(loc);
         }
     }
 
@@ -466,9 +453,6 @@ public:
                         e.addErrorLine(prefix.loc(ctx), "Alias defined here");
                         e.addErrorNote("Export `{}` directly instead", lit->symbol().show(ctx));
                     }
-                } else {
-                    // The generator will add a direct export for the target if another package uses it.
-                    this->exportsToDelete.emplace_back(send.loc);
                 }
                 return;
             }
@@ -528,8 +512,8 @@ public:
         }
     }
 
-    static void run(core::GlobalState &mutableGS, const ast::ParsedFile &f) {
-        core::Context ctx{mutableGS, core::Symbols::root(), f.file};
+    static void run(const core::GlobalState &gs, const ast::ParsedFile &f) {
+        core::Context ctx{gs, core::Symbols::root(), f.file};
         ENFORCE(f.file.data(ctx).isPackage(ctx));
 
         auto pkgName = ctx.state.packageDB().getPackageNameForFile(f.file);
@@ -542,15 +526,6 @@ public:
 
         ExportErrors pass{package};
         ast::ConstTreeWalk::apply(ctx, pass, f.tree);
-
-        // TODO(jez) This is the only thing left that uses a mutable GlobalState here.
-        // If we delete this, we could make this take a `const GlobalState &`
-        if (!pass.exportsToDelete.empty()) {
-            auto &exportsToDelete = mutableGS.packageDB().getPackageInfoNonConst(pkgName)->exportsToDelete_;
-            for (auto loc : pass.exportsToDelete) {
-                exportsToDelete.emplace_back(loc);
-            }
-        }
 
         auto exportAll = package.locs.exportAll;
         if (exportAll.exists() && !package.exports_.empty()) {
@@ -631,11 +606,13 @@ public:
             return;
         }
 
-        // NOTE: this only tracks the information required for computing what symbols needed to be exported, and not for
-        // find all references. For example, if the current symbol is A::B::C::D, then only A::B::C::D will be added to
-        // symbolsReferenced, and not A, A::B, A::B::C.
-        // TODO(neil): we should also track A, A::B, A::B::C, so that we can use this for find all references too.
-        referencedSymbols.insert(litSymbol);
+        // Only needed by the LSP's "Apply all Sorbet fixes for file", via PackageDB::aggregateMissingExportsForFile:
+        // individual export autocorrects are skipped during generic aggregation. gen-packages only needs package
+        // references.
+        // TODO(jez): Delete referencedSymbols and GlobalState::symbolsReferencedByFile when we remove the export DSL.
+        if (ctx.state.packageDB().genPackagesMode() == core::packages::GenPackagesMode::Disabled) {
+            referencedSymbols.insert(litSymbol);
+        }
 
         // no need to check visibility for these cases
         auto otherPackage = litSymbol.enclosingClass(ctx).data(ctx)->package;
@@ -722,8 +699,9 @@ public:
                     nonConstPackageInfo->trackPackageReferences(file, references);
                 }
 
-                auto &referencedSymbols = threadResult->referencedSymbols;
-                nonConstGs.setSymbolsReferencedByFile(file, referencedSymbols);
+                if (gs.packageDB().genPackagesMode() == core::packages::GenPackagesMode::Disabled) {
+                    nonConstGs.setSymbolsReferencedByFile(file, threadResult->referencedSymbols);
+                }
             }
         }
         barrier.Wait();
@@ -760,7 +738,7 @@ void VisibilityChecker::propagateExports(core::GlobalState &gs, absl::Span<const
     }
 }
 
-void VisibilityChecker::reportExportErrors(core::GlobalState &gs, absl::Span<const ast::ParsedFile> files) {
+void VisibilityChecker::reportExportErrors(const core::GlobalState &gs, absl::Span<const ast::ParsedFile> files) {
     Timer timeit(gs.tracer(), "visibility_checker.report_export_errors");
     // TODO(jez) Each `__package.rb` file's walk is independent, so this could run in parallel
     for (auto &f : files) {

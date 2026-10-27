@@ -17,7 +17,7 @@ public:
     static void propagateExports(core::GlobalState &gs, absl::Span<const ast::ParsedFile> files);
 
     // Report errors in the `export` lines of the resolved `__package.rb` files in `files`.
-    static void reportExportErrors(core::GlobalState &gs, absl::Span<const ast::ParsedFile> files);
+    static void reportExportErrors(const core::GlobalState &gs, absl::Span<const ast::ParsedFile> files);
 
     // Report references in `files` to packages that they may not reference (e.g., missing imports or layering
     // violations), and record which packages and symbols each file references.

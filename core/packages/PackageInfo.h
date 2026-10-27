@@ -140,10 +140,6 @@ public:
     // These are copied into every package that imports this package.
     std::vector<Export> exports_ = {};
 
-    // In gen-packages mode, we should delete exports that are invalid. This vector is used to track them when
-    // encountered in VisibilityChecker, so we can remove them in GenPackages
-    std::vector<Export> exportsToDelete_ = {};
-
     // The other packages to which this package is visible. If this vector is empty, then it means
     // the package is fully public and can be imported by anything.
     //
@@ -395,17 +391,15 @@ public:
     std::optional<core::AutocorrectSuggestion> aggregateMissingImports(const core::GlobalState &gs) const;
     std::optional<core::AutocorrectSuggestion> aggregateMissingImportsForFile(const core::GlobalState &gs,
                                                                               const core::FileRef fref) const;
-    std::optional<core::AutocorrectSuggestion> aggregateMissingExports(const core::GlobalState &gs,
-                                                                       std::vector<core::SymbolRef> &toExport) const;
     std::optional<core::AutocorrectSuggestion>
     aggregateMissingVisibleTo(const core::GlobalState &gs, UnorderedSet<core::packages::MangledName> &visibleTos,
                               bool visibleToTests) const;
 
     std::string renderPackageRbContents(
-        const core::GlobalState &gs, std::vector<Import> newImports, std::vector<core::SymbolRef> newExports,
+        const core::GlobalState &gs, std::vector<Import> newImports,
         UnorderedMap<core::packages::MangledName, core::packages::StrictDependenciesLevel> newStrictnessByPkg) const;
 };
-CheckSize(PackageInfo, 280, 8);
+CheckSize(PackageInfo, 256, 8);
 
 } // namespace sorbet::core::packages
 #endif
