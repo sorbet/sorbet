@@ -516,6 +516,10 @@ module T::Private::Methods
         nil
       end
 
+    # Another thread can finish initialization after this call enters the
+    # first-call wrapper but before run_builder reads sig_state.
+    return current_declaration if current_declaration.is_a?(Signature)
+
     # Release location information sooner
     declaration_block.loc = nil
 
@@ -547,10 +551,7 @@ module T::Private::Methods
 
   def self.run_builder(declaration_block)
     sig_state = declaration_block.sig_state
-    return sig_state if sig_state.is_a?(Declaration)
-    if !sig_state.is_a?(Proc)
-      raise "DeclarationBlock for #{declaration_block.mod} at #{declaration_block.loc} should have already been unwrapped"
-    end
+    return sig_state unless sig_state.is_a?(Proc)
 
     builder = DeclBuilder.new(
       declaration_block.mod,

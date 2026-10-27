@@ -102,7 +102,7 @@ module T::Private::Methods
   sig {params(key: String, sig_block: T.proc.returns(Signature)).returns(T::Boolean)}
   def self._sig_block_is_current?(key, sig_block); end
 
-  sig {params(declaration_block: DeclarationBlock).returns(T::Private::Methods::Declaration)}
+  sig {params(declaration_block: DeclarationBlock).returns(T.any(Declaration, Signature))}
   def self.run_builder(declaration_block); end
 
   sig {params(method_name: Symbol, original_method: UnboundMethod, current_declaration: T::Private::Methods::Declaration).returns(T::Private::Methods::Signature)}

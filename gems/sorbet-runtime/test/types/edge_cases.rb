@@ -967,13 +967,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         # Finish initialization before letting the other caller proceed.
         assert_equal('second', klass.hello('second'))
       end
-      if pause_at == :run_builder
-        # TODO(#10821): This caller should reuse the completed signature.
-        error = assert_raises(RuntimeError) { thread.value }
-        assert_match(/should have already been unwrapped/, error.message)
-      else
-        assert_equal('first', thread.value)
-      end
+      assert_equal('first', thread.value)
 
       error = assert_raises(TypeError) { klass.hello(123) }
       assert_includes(error.message, "Parameter 'value'")
