@@ -24,7 +24,7 @@ struct TraversalBuilder {
     Condensation::Traversal result;
 
     TraversalBuilder(const core::GlobalState &gs, absl::Span<const Condensation::Node> nodes,
-                     const UnorderedSet<MangledName> *focusedPackages)
+                     const UnorderedSet<MangledName> *focusedPackages, bool skipDownstream)
         : nodes{nodes}, remainingImports(this->nodes.size(), 0) {
         result.packages.reserve(gs.packageDB().packages().size());
 
@@ -60,8 +60,7 @@ struct TraversalBuilder {
             auto &db = gs.packageDB();
             vector<int> work;
 
-            // Seed the traversal with the dependants of the focused set, also marking the focused set as not
-            // skippable.
+            // Mark the focused set as not skippable
             for (auto pkgName : *focusedPackages) {
                 if (!pkgName.exists()) {
                     continue;
@@ -70,32 +69,44 @@ struct TraversalBuilder {
                 auto &info = db.getPackageInfo(pkgName);
                 ENFORCE(info.exists());
 
-                {
-                    auto &node = this->nodes[info.sccID().value()];
-                    this->skipNode[node.id] = false;
-                    absl::c_copy(node.backEdges, back_inserter(work));
-                }
-
+                this->skipNode[info.sccID().value()] = false;
                 if (!info.usesTestPackages) {
-                    auto &node = this->nodes[info.testSccID().value()];
-                    this->skipNode[node.id] = false;
-                    absl::c_copy(node.backEdges, back_inserter(work));
+                    this->skipNode[info.testSccID().value()] = false;
                 }
             }
 
-            // Traverse towards the leaves, building the downstream set.
-            while (!work.empty()) {
-                auto id = work.back();
-                work.pop_back();
-                if (!this->skipNode[id]) {
-                    continue;
+            if (!skipDownstream) {
+                // Seed the traversal with the dependants of the focused set, also marking the focused set as not
+                // skippable.
+                for (auto pkgName : *focusedPackages) {
+                    if (!pkgName.exists()) {
+                        continue;
+                    }
+
+                    auto &info = db.getPackageInfo(pkgName);
+                    ENFORCE(info.exists());
+
+                    absl::c_copy(this->nodes[info.sccID().value()].backEdges, back_inserter(work));
+
+                    if (!info.usesTestPackages) {
+                        absl::c_copy(this->nodes[info.testSccID().value()].backEdges, back_inserter(work));
+                    }
                 }
 
-                this->skipNode[id] = false;
+                // Traverse towards the leaves, building the downstream set.
+                while (!work.empty()) {
+                    auto id = work.back();
+                    work.pop_back();
+                    if (!this->skipNode[id]) {
+                        continue;
+                    }
 
-                auto &node = this->nodes[id];
-                this->result.downstream.insert(node.members.begin(), node.members.end());
-                absl::c_copy(node.backEdges, back_inserter(work));
+                    this->skipNode[id] = false;
+
+                    auto &node = this->nodes[id];
+                    this->result.downstream.insert(node.members.begin(), node.members.end());
+                    absl::c_copy(node.backEdges, back_inserter(work));
+                }
             }
 
             // Seed the traversal with the dependencies of everything marked as not skippable.
@@ -262,8 +273,9 @@ struct TraversalBuilder {
 } // namespace
 
 const Condensation::Traversal Condensation::computeTraversal(const core::GlobalState &gs,
-                                                             const UnorderedSet<MangledName> *focusedPackages) const {
-    TraversalBuilder builder(gs, this->nodes_, focusedPackages);
+                                                             const UnorderedSet<MangledName> *focusedPackages,
+                                                             bool skipDownstream) const {
+    TraversalBuilder builder(gs, this->nodes_, focusedPackages, skipDownstream);
 
     // All prelude package SCCs, and the set of non-prelude package SCCs that have no imports.
     auto [prelude, roots] = builder.roots();
