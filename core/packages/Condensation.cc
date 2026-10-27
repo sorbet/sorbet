@@ -25,7 +25,7 @@ struct TraversalBuilder {
     Condensation::Traversal result;
 
     TraversalBuilder(const core::GlobalState &gs, absl::Span<const Condensation::Node> nodes,
-                     const UnorderedSet<MangledName> *focusedPackages, bool skipDownstream)
+                     UnorderedSet<MangledName> *focusedPackages, bool skipDownstream)
         : nodes{nodes}, remainingImports(this->nodes.size(), 0) {
         result.packages.reserve(gs.packageDB().packages().size());
 
@@ -61,19 +61,34 @@ struct TraversalBuilder {
             auto &db = gs.packageDB();
             vector<int> work;
 
-            // Mark the focused set as not skippable
-            for (auto pkgName : *focusedPackages) {
-                if (!pkgName.exists()) {
-                    continue;
+            // Mark the focused set as not skippable, and augment it with all the members of the involved sccs
+            {
+                UnorderedSet<MangledName> augmented;
+                for (auto pkgName : *focusedPackages) {
+                    if (!pkgName.exists()) {
+                        continue;
+                    }
+
+                    auto &info = db.getPackageInfo(pkgName);
+                    ENFORCE(info.exists());
+
+                    this->skipNode[info.sccID().value()] = false;
+
+                    for (auto pkgName : this->nodes[info.sccID().value()].members) {
+                        augmented.insert(pkgName);
+                    }
+
+                    if (!info.usesTestPackages) {
+                        this->skipNode[info.testSccID().value()] = false;
+
+                        for (auto pkgName : this->nodes[info.testSccID().value()].members) {
+                            augmented.insert(pkgName);
+                        }
+                    }
                 }
 
-                auto &info = db.getPackageInfo(pkgName);
-                ENFORCE(info.exists());
-
-                this->skipNode[info.sccID().value()] = false;
-                if (!info.usesTestPackages) {
-                    this->skipNode[info.testSccID().value()] = false;
-                }
+                // `augmented` represents the original set augmented with scc members
+                std::swap(*focusedPackages, augmented);
             }
 
             if (!skipDownstream) {
@@ -280,7 +295,7 @@ struct TraversalBuilder {
 } // namespace
 
 const Condensation::Traversal Condensation::computeTraversal(const core::GlobalState &gs,
-                                                             const UnorderedSet<MangledName> *focusedPackages,
+                                                             UnorderedSet<MangledName> *focusedPackages,
                                                              bool skipDownstream) const {
     TraversalBuilder builder(gs, this->nodes_, focusedPackages, skipDownstream);
 
