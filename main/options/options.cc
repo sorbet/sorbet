@@ -674,6 +674,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  cxxopts::value<bool>());
     options.add_options(section)("focus-packages", "Focus typechecking to these packages",
                                  cxxopts::value<vector<string>>(), "P1,P2,P3,...");
+    options.add_options(section)("focus-skip-downstream", "Skip downstream packages when checking a focused set",
+                                 cxxopts::value<bool>());
     // }}}
 
     // ----- STRIPE AUTOGEN ----------------------------------------------- {{{
@@ -1333,6 +1335,12 @@ void readOptions(Options &opts,
                     opts.focusPackages.emplace_back(pkg);
                 }
             }
+        }
+
+        opts.focusSkipDownstream = raw["focus-skip-downstream"].as<bool>();
+        if (opts.focusSkipDownstream && opts.focusPackages.empty()) {
+            logger->error("--focus-skip-downstream requires a set of packaged to be passsed with --focus-packages");
+            throw EarlyReturnWithCode(1);
         }
 
         if constexpr (debug_mode) {

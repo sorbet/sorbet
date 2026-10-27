@@ -101,7 +101,8 @@ public:
     // Compute a traversal through the condensation graph, that yields groups of SCCs that have no dependencies on each
     // other. These groups are acceptable to typecheck in the same stratum, under the assumption that the package graph
     // is well-formed.
-    const Traversal computeTraversal(const GlobalState &gs, const UnorderedSet<MangledName> *focusedPackages) const;
+    const Traversal computeTraversal(const GlobalState &gs, const UnorderedSet<MangledName> *focusedPackages,
+                                     bool skipDownstream) const;
 
     absl::Span<const Node> nodes() const {
         return this->nodes_;

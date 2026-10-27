@@ -905,7 +905,7 @@ PackageStrata computePackageStrata(core::GlobalState &gs, vector<ast::ParsedFile
 
     auto &db = gs.packageDB();
 
-    auto traversal = db.condensation().computeTraversal(gs, result.focusedPackages.get());
+    auto traversal = db.condensation().computeTraversal(gs, result.focusedPackages.get(), opts.focusSkipDownstream);
 
     // The result focused package set represents the set that we will typecheck in focused mode. As we want to
     // explicilty skip the upstream dependencies during infer, we don't include them here.
