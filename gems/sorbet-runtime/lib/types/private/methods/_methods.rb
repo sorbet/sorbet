@@ -508,7 +508,7 @@ module T::Private::Methods
   # Executes the `sig` block, and converts the resulting Declaration
   # to a Signature.
   def self.run_sig(method_name, original_method, declaration_block, unwrap:)
-    current_declaration =
+    current_decl_or_sig =
       begin
         run_builder(declaration_block)
       rescue DeclBuilder::BuilderError => e
@@ -518,14 +518,14 @@ module T::Private::Methods
 
     # Another thread can finish initialization after this call enters the
     # first-call wrapper but before run_builder reads sig_state.
-    return current_declaration if current_declaration.is_a?(Signature)
+    return current_decl_or_sig if current_decl_or_sig.is_a?(Signature)
 
     # Release location information sooner
     declaration_block.loc = nil
 
     signature =
-      if current_declaration
-        build_sig(method_name, original_method, current_declaration)
+      if current_decl_or_sig
+        build_sig(method_name, original_method, current_decl_or_sig)
       else
         Signature.new_untyped(method: original_method)
       end
