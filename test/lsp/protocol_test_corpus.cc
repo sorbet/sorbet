@@ -635,7 +635,71 @@ TEST_CASE_FIXTURE(ProtocolTest, "RejectsRequestsThatDontTypecheck") {
     REQUIRE_FALSE(r.result);
     REQUIRE(r.error);
     auto &error = *r.error;
-    REQUIRE_NE(error->message.find("Unable to deserialize LSP request"), string::npos);
+    REQUIRE_EQ(error->message,
+               "Unable to deserialize LSP request: Missing field `TextDocumentPositionParams.textDocument`.");
+    REQUIRE_EQ(error->code, (int)LSPErrorCodes::InvalidParams);
+}
+
+// The same as above, but with a string `id` (which LSP allows).
+TEST_CASE_FIXTURE(ProtocolTest, "RejectsRequestsThatDontTypecheckWithStringIds") {
+    assertErrorDiagnostics(initializeLSP(), {});
+    auto responses = sendRaw("{\"jsonrpc\":\"2.0\",\"method\":\"textDocument/"
+                             "hover\",\"id\":\"9001\",\"params\":{\"settings\":{\"ruby-typer\":{}}}}");
+    REQUIRE_EQ(responses.size(), 1);
+    auto &response = responses.at(0);
+    REQUIRE(response->isResponse());
+    auto &r = response->asResponse();
+    REQUIRE_EQ(get<string>(r.id), "9001");
+    REQUIRE_FALSE(r.result);
+    REQUIRE(r.error);
+    auto &error = *r.error;
+    REQUIRE_EQ(error->message,
+               "Unable to deserialize LSP request: Missing field `TextDocumentPositionParams.textDocument`.");
+    REQUIRE_EQ(error->code, (int)LSPErrorCodes::InvalidParams);
+}
+
+// A notification-only method sent as a request (i.e., with an `id`).
+TEST_CASE_FIXTURE(ProtocolTest, "RejectsNotificationMethodsSentAsRequests") {
+    assertErrorDiagnostics(initializeLSP(), {});
+    auto responses = sendRaw(R"({"jsonrpc":"2.0","method":"textDocument/didOpen","id":9001,"params":)"
+                             R"({"textDocument":{"uri":"file:///foo.rb","languageId":"ruby","version":1,"text":""}}})");
+    REQUIRE_EQ(responses.size(), 1);
+    auto &response = responses.at(0);
+    REQUIRE(response->isResponse());
+    auto &r = response->asResponse();
+    REQUIRE_EQ(get<int>(r.id), 9001);
+    REQUIRE_FALSE(r.result);
+    REQUIRE(r.error);
+    auto &error = *r.error;
+    REQUIRE_EQ(error->message, "LSP method `textDocument/didOpen` was sent as a request, which it does not support");
+    REQUIRE_EQ(error->code, (int)LSPErrorCodes::InvalidRequest);
+}
+
+// A request-only method sent as a notification (i.e., without an `id`).
+TEST_CASE_FIXTURE(ProtocolTest, "IgnoresRequestMethodsSentAsNotifications") {
+    assertErrorDiagnostics(initializeLSP(), {});
+    // Notifications can't be responded to, so the error is only logged.
+    assertErrorDiagnostics(sendRaw(R"({"jsonrpc":"2.0","method":"textDocument/hover","params":)"
+                                   R"({"textDocument":{"uri":"file:///foo.rb"},"position":{"line":0,"character":0}}})"),
+                           {});
+}
+
+// A request whose params contain an out-of-range value for an integer enum.
+TEST_CASE_FIXTURE(ProtocolTest, "RejectsRequestsWithInvalidIntEnumValues") {
+    assertErrorDiagnostics(initializeLSP(), {});
+    auto responses = sendRaw(R"({"jsonrpc":"2.0","method":"textDocument/completion","id":9001,"params":)"
+                             R"({"textDocument":{"uri":"file:///foo.rb"},"position":{"line":0,"character":0},)"
+                             R"("context":{"triggerKind":99}}})");
+    REQUIRE_EQ(responses.size(), 1);
+    auto &response = responses.at(0);
+    REQUIRE(response->isResponse());
+    auto &r = response->asResponse();
+    REQUIRE_EQ(get<int>(r.id), 9001);
+    REQUIRE_FALSE(r.result);
+    REQUIRE(r.error);
+    auto &error = *r.error;
+    REQUIRE_EQ(error->message,
+               "Unable to deserialize LSP request: Found invalid value `99` for enum of type CompletionTriggerKind");
     REQUIRE_EQ(error->code, (int)LSPErrorCodes::InvalidParams);
 }
 
