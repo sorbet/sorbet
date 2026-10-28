@@ -60,12 +60,27 @@ _TEST_RUNNERS = {
 def pipeline_tests(suite_name, all_paths, test_name_prefix, extra_files = [], tags = [], parser = None):
     tests = {}  # test_name-> {"path": String, "prefix": String, "sentinel": String, "isPackage": bool}
 
+    has_prism_variant = {}
+
+    for path in all_paths:
+        if path.endswith(".prism.rb"):
+            has_prism_variant[path[:-len(".prism.rb")] + ".rb"] = True
+
     # The packager step needs folder-based steps since folder structure dictates package membership.
     # All immediate subdirs of `/packager/` are individual tests.
     folder_test_dir = "/packager/"
 
     for path in all_paths:
         if not path.endswith(".rb") and not path.endswith(".rbi"):
+            continue
+
+        # If we found a `.prism` test variant and we're running on the original parser, skip
+        if parser != "prism" and path.endswith(".prism.rb"):
+            continue
+
+        # If we're running on the Prism parser and we find a test for which we have a `.prism` variant, then skip the
+        # non prism version
+        if parser == "prism" and path in has_prism_variant:
             continue
 
         packager_pos = path.find(folder_test_dir)

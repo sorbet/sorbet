@@ -1,5 +1,4 @@
 # typed: true
-# disable-parser-comparison: true
 
 lambda do |;| end
 #         ^ error: unmatched "|" in block argument list
