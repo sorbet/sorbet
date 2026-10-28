@@ -98,3 +98,6 @@ run --stripe-packages --focus-packages=Target --store-state=gs,files,names
 
 echo '--- Package generation requires the whole project ---'
 run --stripe-packages --focus-packages=Target --gen-packages
+
+echo '--- Suggest-typed requires the whole project ---'
+run --stripe-packages --focus-packages=Target --suggest-typed --isolate-error-code=7022 --typed=strict
