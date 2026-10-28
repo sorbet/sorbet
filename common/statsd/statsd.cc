@@ -18,25 +18,11 @@ using namespace std;
 
 namespace sorbet {
 
-namespace {
-map<string, string> extraGlobalTags;
-}
-void StatsD::addExtraTags(const map<string, string> &tags) {
-    if (!extraGlobalTags.empty()) {
-        bool isSame =
-            tags.size() == extraGlobalTags.size() && std::equal(tags.begin(), tags.end(), extraGlobalTags.begin(),
-                                                                [](auto a, auto b) { return a.first == b.first; });
-        if (!isSame) {
-            Exception::raise("re setting statsD global tags not supported");
-        }
-    }
-    extraGlobalTags = tags;
-}
-
 class StatsdClientWrapper {
     constexpr static int PKT_LEN = 512; // conservative bound for MTU
     statsd_link *link;
     string packet;
+    const map<string, string> &extraGlobalTags;
 
     string cleanMetricName(string_view name) {
         return absl::StrReplaceAll(name, {{":", "_"}, {"|", "_"}, {"@", "_"}});
@@ -75,8 +61,9 @@ class StatsdClientWrapper {
     }
 
 public:
-    StatsdClientWrapper(string host, int port, string prefix)
-        : link(statsd_init_with_namespace(host.c_str(), port, cleanMetricName(prefix).c_str())) {
+    StatsdClientWrapper(string host, int port, string prefix, const map<string, string> &extraGlobalTags)
+        : link(statsd_init_with_namespace(host.c_str(), port, cleanMetricName(prefix).c_str())),
+          extraGlobalTags(extraGlobalTags) {
         if (link == nullptr) {
             Exception::raise("statsd initialization failed: host={} port={} prefix={}", host, port, prefix);
         }
@@ -100,8 +87,9 @@ public:
     }
 };
 
-bool StatsD::submitCounters(const CounterState &counters, string_view host, int port, string_view prefix) {
-    StatsdClientWrapper statsd(string(host), port, string(prefix));
+bool StatsD::submitCounters(const CounterState &counters, string_view host, int port, string_view prefix,
+                            const map<string, string> &extraTags) {
+    StatsdClientWrapper statsd(string(host), port, string(prefix), extraTags);
 
     counters.counters->canonicalize();
     for (auto &cat : counters.counters->countersByCategory) {

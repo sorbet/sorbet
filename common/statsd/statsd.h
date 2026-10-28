@@ -15,9 +15,8 @@ public:
 
     /** Adds standard process and sorbet-related metrics (RSS, faults, Sorbet version, etc). */
     static void addStandardMetrics();
-    static bool submitCounters(const CounterState &counters, std::string_view host, int port, std::string_view prefix);
-
-    static void addExtraTags(const std::map<std::string, std::string> &tags);
+    static bool submitCounters(const CounterState &counters, std::string_view host, int port, std::string_view prefix,
+                               const std::map<std::string, std::string> &extraTags);
 };
 } // namespace sorbet
 
