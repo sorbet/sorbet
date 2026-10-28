@@ -1305,7 +1305,7 @@ module Kernel
     params(
         arg0: Exception,
         arg1: String,
-        arg2: T::Array[String],
+        arg2: T.any(T::Array[String], T::Array[Thread::Backtrace::Location]),
     )
     .returns(T.noreturn)
   end
@@ -2963,7 +2963,7 @@ module Kernel
     params(
         arg0: T.any(T::Class[T.anything], Exception),
         arg1: T.untyped,
-        arg2: T.nilable(T::Array[String]),
+        arg2: T.nilable(T.any(T::Array[String], T::Array[Thread::Backtrace::Location])),
     )
     .returns(T.noreturn)
   end

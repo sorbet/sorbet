@@ -594,7 +594,7 @@ class Thread < Object
     params(
       arg0: T.any(T::Class[Exception], Exception),
       arg1: T.untyped,
-      arg2: T.nilable(T::Array[String]),
+      arg2: T.nilable(T.any(T::Array[String], T::Array[Thread::Backtrace::Location])),
     )
     .void
   end
