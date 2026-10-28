@@ -635,8 +635,47 @@ TEST_CASE_FIXTURE(ProtocolTest, "RejectsRequestsThatDontTypecheck") {
     REQUIRE_FALSE(r.result);
     REQUIRE(r.error);
     auto &error = *r.error;
-    REQUIRE_NE(error->message.find("Unable to deserialize LSP request"), string::npos);
+    REQUIRE_EQ(error->message, "Unable to deserialize LSP request: Error deserializing JSON message: Missing field "
+                               "`TextDocumentPositionParams.textDocument`.");
     REQUIRE_EQ(error->code, (int)LSPErrorCodes::InvalidParams);
+}
+
+// The same as above, but with a string `id` (which LSP allows).
+TEST_CASE_FIXTURE(ProtocolTest, "RejectsRequestsThatDontTypecheckWithStringIds") {
+    assertErrorDiagnostics(initializeLSP(), {});
+    // TODO: The error is only logged, so the client never gets a response.
+    auto responses = sendRaw("{\"jsonrpc\":\"2.0\",\"method\":\"textDocument/"
+                             "hover\",\"id\":\"9001\",\"params\":{\"settings\":{\"ruby-typer\":{}}}}");
+    REQUIRE_EQ(responses.size(), 0);
+}
+
+// A notification-only method sent as a request (i.e., with an `id`).
+TEST_CASE_FIXTURE(ProtocolTest, "RejectsNotificationMethodsSentAsRequests") {
+    assertErrorDiagnostics(initializeLSP(), {});
+    // TODO: This currently escapes `LSPMessage::fromClient` and crashes the server.
+    REQUIRE_THROWS_AS(
+        sendRaw(R"({"jsonrpc":"2.0","method":"textDocument/didOpen","id":9001,"params":)"
+                R"({"textDocument":{"uri":"file:///foo.rb","languageId":"ruby","version":1,"text":""}}})"),
+        InvalidDiscriminantValueError);
+}
+
+// A request-only method sent as a notification (i.e., without an `id`).
+TEST_CASE_FIXTURE(ProtocolTest, "IgnoresRequestMethodsSentAsNotifications") {
+    assertErrorDiagnostics(initializeLSP(), {});
+    // TODO: This currently escapes `LSPMessage::fromClient` and crashes the server.
+    REQUIRE_THROWS_AS(sendRaw(R"({"jsonrpc":"2.0","method":"textDocument/hover","params":)"
+                              R"({"textDocument":{"uri":"file:///foo.rb"},"position":{"line":0,"character":0}}})"),
+                      InvalidDiscriminantValueError);
+}
+
+// A request whose params contain an out-of-range value for an integer enum.
+TEST_CASE_FIXTURE(ProtocolTest, "RejectsRequestsWithInvalidIntEnumValues") {
+    assertErrorDiagnostics(initializeLSP(), {});
+    // TODO: This currently escapes `LSPMessage::fromClient` and crashes the server.
+    REQUIRE_THROWS_AS(sendRaw(R"({"jsonrpc":"2.0","method":"textDocument/completion","id":9001,"params":)"
+                              R"({"textDocument":{"uri":"file:///foo.rb"},"position":{"line":0,"character":0},)"
+                              R"("context":{"triggerKind":99}}})"),
+                      InvalidEnumValueError);
 }
 
 // Ensures that the server ignores invalid JSON.
