@@ -907,6 +907,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                         splatArgs.emplace_back(move(arg));
                     } else if (hasSplatArg) {
                         eraseFromArgs = true;
+                        splatArgs.emplace_back(move(arg));
                     } else {
                         eraseFromArgs = false;
                     }
