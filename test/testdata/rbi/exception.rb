@@ -22,3 +22,10 @@ Errno::ENOENT.new("message")
 Errno::ENOENT.new("message", "func")
 T.reveal_type(SystemCallError.new(nil).errno) # error: Revealed type: `T.nilable(Integer)`
 T.reveal_type(Errno::ENOENT.new.errno) # error: Revealed type: `Integer`
+
+T.reveal_type(ex.set_backtrace(caller)) # error: Revealed type: `T::Array[String]`
+T.reveal_type(ex.set_backtrace("foo.rb:1")) # error: Revealed type: `T::Array[String]`
+ex.set_backtrace(nil)
+T.reveal_type(ex.set_backtrace(caller_locations)) # error: Revealed type: `T::Array[Thread::Backtrace::Location]`
+T.reveal_type(ex.set_backtrace(ex.backtrace_locations || ex.backtrace)) # error: Revealed type: `T.nilable(T::Array[T.any(String, Thread::Backtrace::Location)])`
+ex.set_backtrace([1]) # error: Expected `T.nilable(T.any(T::Array[String], String))` but found `[Integer(1)]` for argument `arg0`

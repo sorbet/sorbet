@@ -44,6 +44,21 @@ def raise_obj_or_string(obj_or_str)
   raise obj_or_str
 end
 
+sig { params(locations: T::Array[Thread::Backtrace::Location]).returns(T.noreturn) }
+def raise_with_locations(locations)
+  raise ArgumentError, 'bad argument', locations
+end
+
+sig { params(error: StandardError).returns(T.noreturn) }
+def raise_with_backtrace_of(error)
+  raise ArgumentError, error.message, error.backtrace_locations || error.backtrace
+end
+
+sig { params(locations: T::Array[Thread::Backtrace::Location]).returns(T.noreturn) }
+def fail_with_locations(locations)
+  fail ArgumentError.new('bad argument'), 'bad argument', locations
+end
+
 # make sure we don't regress and mark these as errors
 env = {'VAR' => 'VAL'}
 system('echo')
