@@ -1561,6 +1561,11 @@ void readOptions(Options &opts,
                 throw EarlyReturnWithCode(1);
             }
 
+            if (opts.suggestTyped) {
+                logger->error("--focus-packages can not be used with --suggest-typed is enabled");
+                throw EarlyReturnWithCode(1);
+            }
+
             if (opts.genPackagesMode != core::packages::GenPackagesMode::Disabled) {
                 logger->error("--focus-packages can not be used when --gen-packages is enabled");
                 throw EarlyReturnWithCode(1);

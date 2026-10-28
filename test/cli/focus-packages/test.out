@@ -209,3 +209,6 @@ exit: 1
 --- Package generation requires the whole project ---
 --focus-packages can not be used when --gen-packages is enabled
 exit: 1
+--- Suggest-typed requires the whole project ---
+--focus-packages can not be used with --suggest-typed is enabled
+exit: 1
