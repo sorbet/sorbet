@@ -92,12 +92,12 @@ unique_ptr<LSPMessage> LSPMessage::fromClient(string_view json) {
                                    id);
         } else {
             return makeSorbetError(LSPErrorCodes::InvalidParams,
-                                   fmt::format("Unable to deserialize LSP request: {}", e.what()), id);
+                                   fmt::format("Unable to deserialize LSP request: {}", e.message), id);
         }
     } catch (DeserializationError e) {
         // The client request was valid JSON, but was invalid in some way.
         return makeSorbetError(LSPErrorCodes::InvalidParams,
-                               fmt::format("Unable to deserialize LSP request: {}", e.what()), id);
+                               fmt::format("Unable to deserialize LSP request: {}", e.message), id);
     }
 }
 

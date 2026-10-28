@@ -635,8 +635,8 @@ TEST_CASE_FIXTURE(ProtocolTest, "RejectsRequestsThatDontTypecheck") {
     REQUIRE_FALSE(r.result);
     REQUIRE(r.error);
     auto &error = *r.error;
-    REQUIRE_EQ(error->message, "Unable to deserialize LSP request: Error deserializing JSON message: Missing field "
-                               "`TextDocumentPositionParams.textDocument`.");
+    REQUIRE_EQ(error->message,
+               "Unable to deserialize LSP request: Missing field `TextDocumentPositionParams.textDocument`.");
     REQUIRE_EQ(error->code, (int)LSPErrorCodes::InvalidParams);
 }
 

@@ -18,7 +18,7 @@ string stringify(const rapidjson::Value &value) {
 }
 
 DeserializationError::DeserializationError(string_view message)
-    : runtime_error(fmt::format("Error deserializing JSON message: {}", message)) {}
+    : runtime_error(fmt::format("Error deserializing JSON message: {}", message)), message(string(message)) {}
 
 InvalidStringEnumError::InvalidStringEnumError(string_view enumName, string_view value)
     : DeserializationError(fmt::format("Invalid value for enum type `{}`: {}", enumName, value)),

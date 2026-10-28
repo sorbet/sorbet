@@ -15,6 +15,8 @@ namespace sorbet::realmain::lsp {
 
 class DeserializationError : public std::runtime_error {
 public:
+    // The error message, without the generic prefix that `what()` includes.
+    const std::string message;
     DeserializationError(std::string_view message);
 };
 
