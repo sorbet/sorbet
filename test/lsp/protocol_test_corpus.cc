@@ -661,20 +661,27 @@ TEST_CASE_FIXTURE(ProtocolTest, "RejectsRequestsThatDontTypecheckWithStringIds")
 // A notification-only method sent as a request (i.e., with an `id`).
 TEST_CASE_FIXTURE(ProtocolTest, "RejectsNotificationMethodsSentAsRequests") {
     assertErrorDiagnostics(initializeLSP(), {});
-    // TODO: This currently escapes `LSPMessage::fromClient` and crashes the server.
-    REQUIRE_THROWS_AS(
-        sendRaw(R"({"jsonrpc":"2.0","method":"textDocument/didOpen","id":9001,"params":)"
-                R"({"textDocument":{"uri":"file:///foo.rb","languageId":"ruby","version":1,"text":""}}})"),
-        InvalidDiscriminantValueError);
+    auto responses = sendRaw(R"({"jsonrpc":"2.0","method":"textDocument/didOpen","id":9001,"params":)"
+                             R"({"textDocument":{"uri":"file:///foo.rb","languageId":"ruby","version":1,"text":""}}})");
+    REQUIRE_EQ(responses.size(), 1);
+    auto &response = responses.at(0);
+    REQUIRE(response->isResponse());
+    auto &r = response->asResponse();
+    REQUIRE_EQ(get<int>(r.id), 9001);
+    REQUIRE_FALSE(r.result);
+    REQUIRE(r.error);
+    auto &error = *r.error;
+    REQUIRE_EQ(error->message, "LSP method `textDocument/didOpen` was sent as a request, which it does not support");
+    REQUIRE_EQ(error->code, (int)LSPErrorCodes::InvalidRequest);
 }
 
 // A request-only method sent as a notification (i.e., without an `id`).
 TEST_CASE_FIXTURE(ProtocolTest, "IgnoresRequestMethodsSentAsNotifications") {
     assertErrorDiagnostics(initializeLSP(), {});
-    // TODO: This currently escapes `LSPMessage::fromClient` and crashes the server.
-    REQUIRE_THROWS_AS(sendRaw(R"({"jsonrpc":"2.0","method":"textDocument/hover","params":)"
-                              R"({"textDocument":{"uri":"file:///foo.rb"},"position":{"line":0,"character":0}}})"),
-                      InvalidDiscriminantValueError);
+    // Notifications can't be responded to, so the error is only logged.
+    assertErrorDiagnostics(sendRaw(R"({"jsonrpc":"2.0","method":"textDocument/hover","params":)"
+                                   R"({"textDocument":{"uri":"file:///foo.rb"},"position":{"line":0,"character":0}}})"),
+                           {});
 }
 
 // A request whose params contain an out-of-range value for an integer enum.

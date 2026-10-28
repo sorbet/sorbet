@@ -100,6 +100,13 @@ unique_ptr<LSPMessage> LSPMessage::fromClient(string_view json) {
             return makeSorbetError(LSPErrorCodes::InvalidParams,
                                    fmt::format("Unable to deserialize LSP request: {}", e.message), id);
         }
+    } catch (InvalidDiscriminantValueError e) {
+        // The method is one we support, but the message has the wrong shape for it: either a notification method was
+        // sent with an `id`, or a request method was sent without one.
+        return makeSorbetError(LSPErrorCodes::InvalidRequest,
+                               fmt::format("LSP method `{}` was sent as a {}, which it does not support",
+                                           e.discriminantValue, id.has_value() ? "request" : "notification"),
+                               id);
     } catch (DeserializationError e) {
         // The client request was valid JSON, but was invalid in some way.
         return makeSorbetError(LSPErrorCodes::InvalidParams,
