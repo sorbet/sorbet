@@ -2,7 +2,6 @@
 #define SORBET_CORE_STATSD_H
 
 #include "core/core.h"
-#include <map>
 
 namespace sorbet {
 class StatsD {
@@ -21,7 +20,8 @@ public:
      * Re-reading on every call means a long-running LSP process notices when the file changes.
      */
     static bool submitCounters(const CounterState &counters, std::string_view host, int port, std::string_view prefix,
-                               const std::map<std::string, std::string> &extraTags, std::string_view latestVersionFile);
+                               const UnorderedMap<std::string, std::string> &extraTags,
+                               std::string_view latestVersionFile);
 };
 } // namespace sorbet
 

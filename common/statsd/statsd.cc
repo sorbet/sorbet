@@ -47,7 +47,7 @@ class StatsdClientWrapper {
     constexpr static int PKT_LEN = 512; // conservative bound for MTU
     statsd_link *link;
     string packet;
-    const map<string, string> &extraGlobalTags;
+    const UnorderedMap<string, string> &extraGlobalTags;
 
     string cleanMetricName(string_view name) {
         return absl::StrReplaceAll(name, {{":", "_"}, {"|", "_"}, {"@", "_"}});
@@ -86,7 +86,7 @@ class StatsdClientWrapper {
     }
 
 public:
-    StatsdClientWrapper(string host, int port, string prefix, const map<string, string> &extraGlobalTags)
+    StatsdClientWrapper(string host, int port, string prefix, const UnorderedMap<string, string> &extraGlobalTags)
         : link(statsd_init_with_namespace(host.c_str(), port, cleanMetricName(prefix).c_str())),
           extraGlobalTags(extraGlobalTags) {
         if (link == nullptr) {
@@ -113,7 +113,7 @@ public:
 };
 
 bool StatsD::submitCounters(const CounterState &counters, string_view host, int port, string_view prefix,
-                            const map<string, string> &extraTags, string_view latestVersionFile) {
+                            const UnorderedMap<string, string> &extraTags, string_view latestVersionFile) {
     auto extraGlobalTags = extraTags;
     if (!latestVersionFile.empty()) {
         auto latestVersion = readLatestVersionFile(latestVersionFile);

@@ -4,7 +4,7 @@ using namespace std;
 namespace sorbet {
 
 bool StatsD::submitCounters(const CounterState &counters, string_view host, int port, string_view prefix,
-                            const map<string, string> &extraTags, string_view latestVersionFile) {
+                            const UnorderedMap<string, string> &extraTags, string_view latestVersionFile) {
     return false;
 }
 
