@@ -58,7 +58,8 @@ bool MessageId::equals(const MessageId &id) const {
     }
 }
 
-unique_ptr<LSPMessage> makeSorbetError(LSPErrorCodes code, string_view message, optional<int> id = nullopt) {
+unique_ptr<LSPMessage> makeSorbetError(LSPErrorCodes code, string_view message,
+                                       optional<variant<int, string>> id = nullopt) {
     auto errorParams = make_unique<SorbetErrorParams>((int)code, string(message));
     if (id) {
         auto req = make_unique<RequestMessage>("2.0", *id, LSPMethod::SorbetError, move(errorParams));
@@ -78,9 +79,14 @@ unique_ptr<LSPMessage> LSPMessage::fromClient(string_view json) {
     }
 
     // Grab ID before parsing, as the value may get moved out.
-    optional<int> id;
-    if (d.HasMember("id") && d["id"].IsInt()) {
-        id = d["id"].GetInt();
+    optional<variant<int, string>> id;
+    if (d.HasMember("id")) {
+        auto &idValue = d["id"];
+        if (idValue.IsInt()) {
+            id = idValue.GetInt();
+        } else if (idValue.IsString()) {
+            id = string(idValue.GetString(), idValue.GetStringLength());
+        }
     }
 
     try {

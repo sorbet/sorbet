@@ -643,10 +643,19 @@ TEST_CASE_FIXTURE(ProtocolTest, "RejectsRequestsThatDontTypecheck") {
 // The same as above, but with a string `id` (which LSP allows).
 TEST_CASE_FIXTURE(ProtocolTest, "RejectsRequestsThatDontTypecheckWithStringIds") {
     assertErrorDiagnostics(initializeLSP(), {});
-    // TODO: The error is only logged, so the client never gets a response.
     auto responses = sendRaw("{\"jsonrpc\":\"2.0\",\"method\":\"textDocument/"
                              "hover\",\"id\":\"9001\",\"params\":{\"settings\":{\"ruby-typer\":{}}}}");
-    REQUIRE_EQ(responses.size(), 0);
+    REQUIRE_EQ(responses.size(), 1);
+    auto &response = responses.at(0);
+    REQUIRE(response->isResponse());
+    auto &r = response->asResponse();
+    REQUIRE_EQ(get<string>(r.id), "9001");
+    REQUIRE_FALSE(r.result);
+    REQUIRE(r.error);
+    auto &error = *r.error;
+    REQUIRE_EQ(error->message,
+               "Unable to deserialize LSP request: Missing field `TextDocumentPositionParams.textDocument`.");
+    REQUIRE_EQ(error->code, (int)LSPErrorCodes::InvalidParams);
 }
 
 // A notification-only method sent as a request (i.e., with an `id`).
