@@ -1,4 +1,5 @@
 #include "common/statsd/statsd.h"
+#include "common/FileOps.h"
 #include "common/counters/Counters_impl.h"
 #include "common/os/os.h"
 #include "common/strings/formatting.h"
@@ -10,6 +11,7 @@ extern "C" {
 
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_replace.h"
+#include "absl/strings/strip.h"
 
 #include <string>
 #include <sys/resource.h> // getrusage
@@ -17,6 +19,29 @@ extern "C" {
 using namespace std;
 
 namespace sorbet {
+
+namespace {
+optional<string> readLatestVersionFile(string_view path) {
+    try {
+        return FileOps::read(string(path));
+    } catch (FileNotFoundException &e) {
+        return nullopt;
+    }
+}
+
+// "true" or "false" if `latestVersion` does or doesn't match `revision`, or "unknown" if the file
+// couldn't be read or was empty.
+string_view isLatestVersionTagValue(const optional<string> &latestVersion, string_view revision) {
+    if (!latestVersion.has_value()) {
+        return "unknown";
+    }
+    auto trimmed = absl::StripAsciiWhitespace(*latestVersion);
+    if (trimmed.empty()) {
+        return "unknown";
+    }
+    return trimmed == revision ? "true" : "false";
+}
+} // namespace
 
 class StatsdClientWrapper {
     constexpr static int PKT_LEN = 512; // conservative bound for MTU
@@ -88,8 +113,14 @@ public:
 };
 
 bool StatsD::submitCounters(const CounterState &counters, string_view host, int port, string_view prefix,
-                            const map<string, string> &extraTags) {
-    StatsdClientWrapper statsd(string(host), port, string(prefix), extraTags);
+                            const map<string, string> &extraTags, string_view latestVersionFile) {
+    auto extraGlobalTags = extraTags;
+    if (!latestVersionFile.empty()) {
+        auto latestVersion = readLatestVersionFile(latestVersionFile);
+        extraGlobalTags.insert_or_assign("is_latest_version",
+                                         string(isLatestVersionTagValue(latestVersion, build_scm_revision)));
+    }
+    StatsdClientWrapper statsd(string(host), port, string(prefix), extraGlobalTags);
 
     counters.counters->canonicalize();
     for (auto &cat : counters.counters->countersByCategory) {

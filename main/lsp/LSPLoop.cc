@@ -62,7 +62,8 @@ void LSPLoop::sendCountersToStatsd(chrono::time_point<chrono::steady_clock> curr
     if (!opts.statsdHost.empty()) {
         lastMetricUpdateTime = currentTime;
         auto prefix = fmt::format("{}.lsp.counters", opts.statsdPrefix);
-        StatsD::submitCounters(counters, opts.statsdHost, opts.statsdPort, prefix, opts.metricsExtraTags);
+        StatsD::submitCounters(counters, opts.statsdHost, opts.statsdPort, prefix, opts.metricsExtraTags,
+                               opts.metricsLatestVersionFile);
     }
 
     if (!opts.webTraceFile.empty()) {

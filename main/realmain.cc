@@ -918,7 +918,8 @@ int realmain(int argc, char *argv[]) {
         if (opts.runLSP) {
             prefix += ".lsp";
         }
-        StatsD::submitCounters(counters, opts.statsdHost, opts.statsdPort, prefix + ".counters", opts.metricsExtraTags);
+        StatsD::submitCounters(counters, opts.statsdHost, opts.statsdPort, prefix + ".counters", opts.metricsExtraTags,
+                               opts.metricsLatestVersionFile);
     }
     if (!opts.webTraceFile.empty()) {
         web_tracer_framework::Tracing::storeTraces(counters, opts.webTraceFile, opts.webTraceFileStrict);
