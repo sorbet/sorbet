@@ -411,9 +411,6 @@ int realmain(int argc, char *argv[]) {
     if (opts.stdoutHUPHack) {
         startHUPMonitor();
     }
-#ifndef SORBET_REALMAIN_MIN
-    StatsD::addExtraTags(opts.metricsExtraTags);
-#endif
     if (!opts.debugLogFile.empty()) {
         // LSP could run for a long time. Rotate log files, and trim at 1 GiB. Keep around 3 log files.
         // Cast first number to size_t to prevent integer multiplication.
@@ -916,7 +913,8 @@ int realmain(int argc, char *argv[]) {
         if (opts.runLSP) {
             prefix += ".lsp";
         }
-        StatsD::submitCounters(counters, opts.statsdHost, opts.statsdPort, prefix + ".counters");
+        StatsD::submitCounters(counters, opts.statsdHost, opts.statsdPort, prefix + ".counters", opts.metricsExtraTags,
+                               opts.metricsLatestVersionFile);
     }
     if (!opts.webTraceFile.empty()) {
         web_tracer_framework::Tracing::storeTraces(counters, opts.webTraceFile, opts.webTraceFileStrict);

@@ -190,6 +190,13 @@ Usage:
       --metrics-extra-tags <key1>=<value1>,<key2>=<value2>
                                 Extra tags to include in every statsd metric, comma
                                 separated (repeatable). (default: "")
+      --metrics-latest-version-file <file>
+                                Tag every statsd metric with
+                                `is_latest_version:{true,false,unknown}`, by comparing
+                                the revision Sorbet was built from to the contents of
+                                <file>. Re-reads <file> every time metrics are sent, so
+                                that long-running LSP processes notice when <file>
+                                changes. (default: "")
 
 ```
 

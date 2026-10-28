@@ -251,7 +251,8 @@ struct Options {
     std::string metricsPrefix = "ruby_typer.unknown";
     std::string metricsBranch = "none";
     std::string metricsSha = "none";
-    std::map<std::string, std::string> metricsExtraTags; // be super careful with cardinality here
+    UnorderedMap<std::string, std::string> metricsExtraTags; // be super careful with cardinality here
+    std::string metricsLatestVersionFile;
 
     std::string dumpPackageInfo = "";
     std::vector<std::string> packageSkipRBIExportEnforcementDirs;

@@ -504,6 +504,12 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options(section)(
         "metrics-extra-tags", "Extra tags to include in every statsd metric, comma separated (repeatable).",
         cxxopts::value<vector<string>>()->default_value(""), "<key1>=<value1>,<key2>=<value2>");
+    options.add_options(section)(
+        "metrics-latest-version-file",
+        "Tag every statsd metric with `is_latest_version:{true,false,unknown}`, by comparing the revision Sorbet "
+        "was built from to the contents of <file>. Re-reads <file> every time metrics are sent, so that "
+        "long-running LSP processes notice when <file> changes.",
+        cxxopts::value<string>()->default_value(empty.metricsLatestVersionFile), "<file>");
     // }}}
 
     // ----- LSP ---------------------------------------------------------- {{{
@@ -1235,6 +1241,7 @@ void readOptions(Options &opts,
         opts.metricsRepo = raw["metrics-repo"].as<string>();
         opts.metricsBranch = raw["metrics-branch"].as<string>();
         opts.metricsPrefix = raw["metrics-prefix"].as<string>();
+        opts.metricsLatestVersionFile = raw["metrics-latest-version-file"].as<string>();
         opts.debugLogFile = raw["debug-log-file"].as<string>();
         opts.webTraceFile = raw["web-trace-file"].as<string>();
         opts.webTraceFileStrict = raw["web-trace-file-strict"].as<bool>();
