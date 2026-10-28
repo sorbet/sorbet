@@ -40,7 +40,7 @@ JSONConstantError::JSONConstantError(string_view fieldName, string_view expected
                                        expectedValue, stringify(actualValue))) {}
 
 SerializationError::SerializationError(string_view message)
-    : runtime_error(fmt::format("Error serializing object to JSON message: {}", message)) {}
+    : runtime_error(fmt::format("Error serializing object to JSON message: {}", message)), message(string(message)) {}
 
 MissingVariantValueError::MissingVariantValueError(string_view fieldName)
     : SerializationError(fmt::format("Variant field `{}` does not have a value", fieldName)) {}

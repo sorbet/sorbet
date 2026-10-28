@@ -45,6 +45,8 @@ public:
 
 class SerializationError : public std::runtime_error {
 public:
+    // The error message, without the generic prefix that `what()` includes.
+    const std::string message;
     SerializationError(std::string_view message);
 };
 

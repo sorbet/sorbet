@@ -111,6 +111,12 @@ unique_ptr<LSPMessage> LSPMessage::fromClient(string_view json) {
         // The client request was valid JSON, but was invalid in some way.
         return makeSorbetError(LSPErrorCodes::InvalidParams,
                                fmt::format("Unable to deserialize LSP request: {}", e.message), id);
+    } catch (SerializationError e) {
+        // Some generated validation is shared between serializing and deserializing and throws a `SerializationError`
+        // either way (e.g. an out-of-range value for an integer enum). When deserializing a client message, that is
+        // still a problem with the message, not a bug in Sorbet.
+        return makeSorbetError(LSPErrorCodes::InvalidParams,
+                               fmt::format("Unable to deserialize LSP request: {}", e.message), id);
     }
 }
 

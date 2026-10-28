@@ -687,11 +687,20 @@ TEST_CASE_FIXTURE(ProtocolTest, "IgnoresRequestMethodsSentAsNotifications") {
 // A request whose params contain an out-of-range value for an integer enum.
 TEST_CASE_FIXTURE(ProtocolTest, "RejectsRequestsWithInvalidIntEnumValues") {
     assertErrorDiagnostics(initializeLSP(), {});
-    // TODO: This currently escapes `LSPMessage::fromClient` and crashes the server.
-    REQUIRE_THROWS_AS(sendRaw(R"({"jsonrpc":"2.0","method":"textDocument/completion","id":9001,"params":)"
-                              R"({"textDocument":{"uri":"file:///foo.rb"},"position":{"line":0,"character":0},)"
-                              R"("context":{"triggerKind":99}}})"),
-                      InvalidEnumValueError);
+    auto responses = sendRaw(R"({"jsonrpc":"2.0","method":"textDocument/completion","id":9001,"params":)"
+                             R"({"textDocument":{"uri":"file:///foo.rb"},"position":{"line":0,"character":0},)"
+                             R"("context":{"triggerKind":99}}})");
+    REQUIRE_EQ(responses.size(), 1);
+    auto &response = responses.at(0);
+    REQUIRE(response->isResponse());
+    auto &r = response->asResponse();
+    REQUIRE_EQ(get<int>(r.id), 9001);
+    REQUIRE_FALSE(r.result);
+    REQUIRE(r.error);
+    auto &error = *r.error;
+    REQUIRE_EQ(error->message,
+               "Unable to deserialize LSP request: Found invalid value `99` for enum of type CompletionTriggerKind");
+    REQUIRE_EQ(error->code, (int)LSPErrorCodes::InvalidParams);
 }
 
 // Ensures that the server ignores invalid JSON.
