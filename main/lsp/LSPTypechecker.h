@@ -164,7 +164,7 @@ public:
 
     /** Runs the provided query against the given files, and returns matches. */
     LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery,
-                         WorkerPool &workers) const;
+                         WorkerPool &workers);
 
     /**
      * Returns the parsed file for the given file, up to the desugar pass, and local vars.
@@ -180,12 +180,12 @@ public:
      * Returns copies of the indexed trees that have been run through the incremental resolver. There is no guarantee
      * that the resolved trees are returned in the same order that the FileRefs appear in the input span.
      */
-    std::vector<ast::ParsedFile> getResolved(absl::Span<const core::FileRef> frefs, WorkerPool &workers) const;
+    std::vector<ast::ParsedFile> getResolved(absl::Span<const core::FileRef> frefs, WorkerPool &workers);
 
     /**
      * Returns a copy of the indexed tree that has been run through the incremental resolver.
      */
-    ast::ParsedFile getResolved(core::FileRef fref, WorkerPool &workers) const;
+    ast::ParsedFile getResolved(core::FileRef fref, WorkerPool &workers);
 
     /**
      * Returns the currently active GlobalState.
