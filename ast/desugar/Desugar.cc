@@ -938,7 +938,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     // If callWithSplat's third argument ends up being a tuple, the callWithSplat intrinsic
                     // can typecheck against the explicit arguments as given.
 
-                    auto args = MK::Nil(loc);
+                    auto args = ast::MK::Array(loc, {});
                     if (hasSplatArg) {
                         // If there's only the one splat (which is fairly common) then just pass it directly
                         if (splatArgs.size() == 1) {
