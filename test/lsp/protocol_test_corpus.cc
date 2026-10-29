@@ -1527,6 +1527,82 @@ TEST_CASE_FIXTURE(ProtocolTest, "SlowPathRestarts") {
     }
 }
 
+// Root::Foo has one import that violates layering. Adding source files restarts the slow path at stratum 1,
+// copying a nonempty symbol-table prefix; each restart should still report that import violation only once.
+TEST_CASE_FIXTURE(ProtocolTest, "PackageDirectedSlowPathDoesNotDuplicateImports") {
+    auto initOpts = make_shared<realmain::options::Options>();
+    initOpts->cacheSensitiveOptions.sorbetPackages = true;
+    initOpts->packageDirected = true;
+    initOpts->packagerLayers = {"lib", "app"};
+    resetState(initOpts);
+
+    vector<pair<string, string>> files = {
+        {"__package.rb", PackageTextBuilder().withName("Root").withStrictDeps("layered").withLayer("app").build()},
+        {"a.rb", "# typed: true\nmodule Root; class A; end; end\n"},
+        {"foo/__package.rb", PackageTextBuilder()
+                                 .withName("Root::Foo")
+                                 .withStrictDeps("layered")
+                                 .withLayer("lib")
+                                 .withImports({"Root"})
+                                 .build()},
+        {"foo/a.rb", "# typed: true\nmodule Root::Foo; class A; end; end\n"},
+    };
+    writeFilesToFS(files);
+    for (auto &[path, _] : files) {
+        lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/{}", rootPath, path));
+    }
+
+    auto checkImportDiagnostics = [&](const vector<unique_ptr<LSPMessage>> &messages) {
+        size_t packagePublications = 0;
+        for (const auto &message : messages) {
+            if (!message->isNotification() ||
+                message->asNotification().method != LSPMethod::TextDocumentPublishDiagnostics) {
+                continue;
+            }
+            const auto &params = get<unique_ptr<PublishDiagnosticsParams>>(message->asNotification().params);
+            if (params->uri != getUri("foo/__package.rb")) {
+                CHECK(params->diagnostics.empty());
+                continue;
+            }
+            ++packagePublications;
+            CHECK_EQ(params->diagnostics.size(), 1);
+            for (const auto &diagnostic : params->diagnostics) {
+                CHECK_EQ(diagnostic->message,
+                         "Layering violation: cannot import `Root` (in layer `app`) from `Root::Foo` (in layer `lib`)");
+            }
+        }
+        CHECK_EQ(packagePublications, 1);
+    };
+
+    auto opts = make_unique<SorbetInitializationOptions>();
+    opts->enableTypecheckInfo = true;
+    checkImportDiagnostics(initializeLSP(true, true, move(opts)));
+
+    for (int restart = 1; restart <= 2; ++restart) {
+        INFO("Slow path restart: " << restart);
+        auto responses = send(*openFile(fmt::format("foo/restart{}.rb", restart),
+                                        fmt::format("# typed: true\nclass Root::Foo::Restart{}; end\n", restart)));
+        size_t slowPathStarts = 0;
+        size_t slowPathEnds = 0;
+        for (const auto &response : responses) {
+            if (!response->isNotification() || response->asNotification().method != LSPMethod::SorbetTypecheckRunInfo) {
+                continue;
+            }
+            const auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(response->asNotification().params);
+            REQUIRE_EQ(params->typecheckingPath, TypecheckingPath::Slow);
+            if (params->status == SorbetTypecheckRunStatus::Started) {
+                ++slowPathStarts;
+            } else if (params->status == SorbetTypecheckRunStatus::Ended) {
+                ++slowPathEnds;
+                REQUIRE_EQ(params->startingStratum, 1);
+            }
+        }
+        REQUIRE_EQ(slowPathStarts, 1);
+        REQUIRE_EQ(slowPathEnds, 1);
+        checkImportDiagnostics(responses);
+    }
+}
+
 // Source-stratum lookup must also work with the monolithic traversal, including newly added test helpers.
 TEST_CASE_FIXTURE(ProtocolTest, "NewPackagedSourceFileStrata") {
     auto checkNewFile = [&](bool packageDirected, bool isTest) {

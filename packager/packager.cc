@@ -922,6 +922,16 @@ private:
 };
 
 void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, PackageInfo &info) {
+    // Reset the package state, as this might not be the first time we've seen the package.
+    info.sccID().reset();
+    info.testSccID().reset();
+    info.importedPackageNames.clear();
+    info.exports_.clear();
+    info.visibleTo_.clear();
+    info.extraDirectives_.clear();
+    info.usesTestPackages = false;
+    info.hasSubPackages = false;
+
     // We attempt to determine if this package is test-packages compatible before processing its body, as that changes
     // the local interpretation of some of the package DSL. This doesn't work for `test!` packages though, as both
     // packaging systems allow for `__package.rb` files to live inside of a `test` directory.
