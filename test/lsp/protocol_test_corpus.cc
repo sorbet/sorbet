@@ -1096,6 +1096,46 @@ TEST_CASE_FIXTURE(ProtocolTest, "OpeningExistingFilesTakesTheFastPath") {
     }
 }
 
+TEST_CASE_FIXTURE(ProtocolTest, "QueriesAfterClosingFileUseContentsOnDisk") {
+    vector<pair<string, string>> files{
+        {"foo.rb", "# typed: true\n"
+                   "class A\n"
+                   "  def foo\n"
+                   "    1234\n"
+                   "  end\n"
+                   "end\n"},
+    };
+    this->writeFilesToFS(files);
+    this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/foo.rb", this->rootPath));
+
+    assertErrorDiagnostics(initializeLSP(false /* supportsMarkdown */), {});
+
+    // Only change a method body, keeping the same length as the contents on disk.
+    assertErrorDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
+                                                    "class A\n"
+                                                    "  def foo\n"
+                                                    "    'ab'\n"
+                                                    "  end\n"
+                                                    "end\n")),
+                           {});
+
+    // Closing the file reverts it to the contents on disk.
+    getCounters();
+    assertErrorDiagnostics(send(*closeFile("foo.rb")), {});
+    auto counters = getCounters();
+    REQUIRE_EQ(counters.getCategoryCounter("lsp.updates", "fastpath"), 1);
+    REQUIRE_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 0);
+
+    auto hoverResponses = send(*hover("foo.rb", 3, 4));
+    REQUIRE_EQ(hoverResponses.size(), 1);
+    auto &hoverResponse = hoverResponses.at(0);
+    REQUIRE(hoverResponse->isResponse());
+    auto &hoverResult = get<variant<JSONNullObject, unique_ptr<Hover>>>(*hoverResponse->asResponse().result);
+    auto &hover = get<unique_ptr<Hover>>(hoverResult);
+    // BUG: This shows the contents of the file from before it was closed.
+    CHECK_EQ(hover->contents->value, "String(\"ab\")");
+}
+
 TEST_CASE_FIXTURE(ProtocolTest, "RespectsStrictnessOverridesOnStartup") {
     auto opts = make_shared<realmain::options::Options>();
     opts->strictnessOverrides[fmt::format("{}/foo.rb", this->rootPath)] = core::StrictLevel::False;
