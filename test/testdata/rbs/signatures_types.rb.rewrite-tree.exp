@@ -512,7 +512,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::T::Sig::WithoutRuntime.sig() do ||
-    <self>.returns(::<root>::<C T>.proc().params(:arg0, <emptyTree>::<C Integer>, :arg1, <emptyTree>::<C String>).returns(<emptyTree>::<C String>))
+    <self>.returns(::<root>::<C T>.proc().params(:a, <emptyTree>::<C Integer>, :arg1, <emptyTree>::<C String>, :c, <emptyTree>::<C Symbol>, :arg3, <emptyTree>::<C Float>).returns(<emptyTree>::<C String>))
   end
 
   def proc_type1<<todo method>>(&<blk>)

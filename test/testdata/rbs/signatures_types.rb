@@ -334,9 +334,9 @@ def shape_type5; T.unsafe(nil); end
 
 # Proc types
 
-#: -> ^(Integer, String) -> String
+#: -> ^(Integer a, String, Symbol c, Float) -> String
 def proc_type1; T.unsafe(nil); end
-T.reveal_type(proc_type1) # error: Revealed type: `T.proc.params(arg0: Integer, arg1: String).returns(String)`
+T.reveal_type(proc_type1) # error: Revealed type: `T.proc.params(arg0: Integer, arg1: String, arg2: Symbol, arg3: Float).returns(String)`
 
 #: -> ^() [self: Foo] -> void # error: Using `bind` is not permitted here
 def proc_type2; T.unsafe(nil); end
