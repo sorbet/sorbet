@@ -135,7 +135,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
     srcs=()
     for src in "${all_srcs[@]}"; do
       case "$src" in
-        *.rb|*.rbi)
+        *.rb|*.rbi|*.rbupdate)
           srcs+=("$src")
           ;;
       esac
