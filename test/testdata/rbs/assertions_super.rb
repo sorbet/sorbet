@@ -68,3 +68,19 @@ class SuperBlockChild < SuperBlockParent
     end
   end
 end
+
+class KeywordSuperParent
+  #: (Integer, **untyped) -> Integer
+  def mutate(id, **kwargs)
+    id
+  end
+end
+
+class KeywordSuperChild < KeywordSuperParent
+  # @override
+  #: (Integer, **untyped) -> Integer
+  def mutate(id, **)
+    super(id, **)
+    1 #: Integer
+  end
+end

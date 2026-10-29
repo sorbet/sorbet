@@ -1112,7 +1112,7 @@ pm_node_t *AssertionsRewriter::rewriteNode(pm_node_t *node) {
         }
         case PM_ASSOC_SPLAT_NODE: {
             auto *splat = down_cast_nonnull<pm_assoc_splat_node_t>(node);
-            splat->value = rewriteNode(maybeInsertCast(splat->value));
+            splat->value = rewriteNullableNode(maybeInsertCast(splat->value));
             return node;
         }
 
