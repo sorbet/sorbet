@@ -68,12 +68,9 @@ struct TraversalBuilder {
         False,
     };
 
-    // Record a single stratum by processing each SCC id, marking the imports of those ids as satisfied. If any
-    // dependent package no longer has any outstanding imports, its id will be added to `next`.
-    template <IsPrelude PreludeStratum> void recordStratum(absl::Span<uint32_t> stratum, vector<uint32_t> &next) {
-        stratumLengths.emplace_back(stratum.size());
-        ENFORCE(!stratum.empty());
-
+    // Sort the given stratum by test/application status, and then by smallest member id. As members are sorted for a
+    // finalized condensation graph, the first id in the members list is always the smallest.
+    void sortStratum(absl::Span<uint32_t> stratum) const {
         fast_sort(stratum, [this](uint32_t leftId, uint32_t rightId) {
             const auto &left = this->nodes[leftId];
             const auto &right = this->nodes[rightId];
@@ -83,6 +80,13 @@ struct TraversalBuilder {
             auto rightFirstMemberId = right.members.front().owner.id();
             return std::tie(left.isTest, leftFirstMemberId) < std::tie(right.isTest, rightFirstMemberId);
         });
+    }
+
+    // Record a single stratum by processing each SCC id, marking the imports of those ids as satisfied. If any
+    // dependent package no longer has any outstanding imports, its id will be added to `next`.
+    template <IsPrelude PreludeStratum> void recordStratum(absl::Span<const uint32_t> stratum, vector<uint32_t> &next) {
+        stratumLengths.emplace_back(stratum.size());
+        ENFORCE(!stratum.empty());
 
         for (auto sccId : stratum) {
             auto &node = this->nodes[sccId];
@@ -154,9 +158,10 @@ const Condensation::Traversal Condensation::computeTraversal(const core::GlobalS
     auto [prelude, roots] = builder.roots();
 
     if (!prelude.empty()) {
+        builder.sortStratum(absl::MakeSpan(prelude));
         // Record a single stratum for all prelude SCCs, emitting any packages whose imports were satisfied by the
         // prelude set to the roots.
-        builder.recordStratum<TraversalBuilder::IsPrelude::True>(absl::MakeSpan(prelude), roots);
+        builder.recordStratum<TraversalBuilder::IsPrelude::True>(prelude, roots);
     }
 
     // Insert the non-prelude SCCs that are ready but were skipped into the frontier, so that we process all of the
@@ -165,7 +170,8 @@ const Condensation::Traversal Condensation::computeTraversal(const core::GlobalS
     while (!roots.empty()) {
         next.clear();
 
-        builder.recordStratum<TraversalBuilder::IsPrelude::False>(absl::MakeSpan(roots), next);
+        builder.sortStratum(absl::MakeSpan(roots));
+        builder.recordStratum<TraversalBuilder::IsPrelude::False>(roots, next);
 
         // The content of `next` isn't important at this point, and it will be cleared on the next iteration of the
         // loop. Morally this is `roots = next`, but we swap and clear instead to avoid any ambiguity about
