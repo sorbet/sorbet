@@ -160,10 +160,22 @@ module T::Types
         # @param type_a [T::Types::Base]
         # @param type_b [T::Types::Base]
         # @param types [Array] optional array of additional T::Types::Base instances
+        @nilable_cache = ObjectSpace::WeakMap.new
+
+        # Memoizes `T.nilable(type)` for compound types, the way `Simple#to_nilable` does for simple ones.
+        def self.nilable_of(type)
+          cached = @nilable_cache[type]
+          return cached if cached
+
+          @nilable_cache[type] = Union.new([type, T::Utils::Nilable::NIL_TYPE])
+        end
+
         def self.union_of_types(type_a, type_b, types=EMPTY_ARRAY)
           if !types.empty?
             # Slow path
             return Union.new([type_a, type_b] + types)
+          elsif type_b.equal?(T::Utils::Nilable::NIL_TYPE) && !type_a.is_a?(T::Types::Simple)
+            return nilable_of(type_a)
           elsif !type_a.is_a?(T::Types::Simple) || !type_b.is_a?(T::Types::Simple)
             # Slow path
             return Union.new([type_a, type_b])
