@@ -220,7 +220,7 @@ Condensation::Node &CondensationBuilder::pushNode(ImportType type, bool isPrelud
     return node;
 }
 
-Condensation CondensationBuilder::build() {
+Condensation CondensationBuilder::build() && {
     // Now that we're finalizing the condensation graph, sort each node's members and build its back edges.
     for (auto &node : this->condensation.nodes_) {
         ENFORCE(!node.members.empty());

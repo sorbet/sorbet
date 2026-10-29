@@ -112,7 +112,7 @@ class CondensationBuilder {
 public:
     Condensation::Node &pushNode(ImportType type, bool isPrelude);
 
-    Condensation build();
+    Condensation build() &&;
 };
 
 } // namespace sorbet::core::packages
