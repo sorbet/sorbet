@@ -131,10 +131,10 @@ class LSPTypechecker final {
                                std::shared_ptr<core::ErrorFlusher> errorFlusher, bool isNoopUpdateForRetypecheck) const;
 
     /**
-     * Populate `this->indexedFinalGS` with copies of indexed trees from the `indexed` span, whose files are mentioned
-     * in the `openFiles` vector.
+     * Populate `this->indexedFinalGS` with copies of indexed trees from the `indexed` span, whose files are open in the
+     * client.
      */
-    void cacheUpdatedFiles(absl::Span<const ast::ParsedFile> indexed, const UnorderedSet<core::FileRef> &openFiles);
+    void cacheUpdatedFiles(absl::Span<const ast::ParsedFile> indexed);
 
 public:
     LSPTypechecker(std::shared_ptr<const LSPConfiguration> config,
