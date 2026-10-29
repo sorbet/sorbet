@@ -2,8 +2,8 @@
 # typed: true
 
 class T::Private::Methods::Signature
-  attr_reader :method, :method_name, :arg_types, :kwarg_types, :block_type, :block_name,
-              :rest_type, :rest_name, :keyrest_type, :keyrest_name, :bind, :effective_return_type,
+  attr_reader :method, :method_name, :arg_types, :kwarg_types, :block_type,
+              :rest_type, :keyrest_type, :bind, :effective_return_type,
               :return_type, :mode, :req_arg_count, :req_kwarg_names,
               :check_level, :parameters, :on_failure, :override_allow_incompatible,
               :defined_raw
@@ -47,11 +47,8 @@ class T::Private::Methods::Signature
     @method = method
     @method_name = method_name
     @block_type = nil
-    @block_name = nil
     @rest_type = nil
-    @rest_name = nil
     @keyrest_type = nil
-    @keyrest_name = nil
     @return_type = T::Utils.coerce(raw_return_type)
     @effective_return_type = if check_level == :tests && @return_type.is_a?(T::Private::Types::Void)
       T::Types::Anything::Private::INSTANCE
@@ -147,13 +144,10 @@ class T::Private::Methods::Signature
           (req_kwarg_names ||= []) << param_name
         end
       when :block
-        @block_name = param_name
         @block_type = type
       when :rest
-        @rest_name = param_name
         @rest_type = type
       when :keyrest
-        @keyrest_name = param_name
         @keyrest_type = type
       else
         raise "Unexpected param_kind: `#{param_kind}`. Method: #{method_desc}"
@@ -175,6 +169,19 @@ class T::Private::Methods::Signature
     new_sig = clone
     new_sig.method_name = alias_name
     new_sig
+  end
+
+  # Names are derived rather than stored so that Signature fits in a smaller GC slot.
+  def block_name
+    parameter_name(:block)
+  end
+
+  def rest_name
+    parameter_name(:rest)
+  end
+
+  def keyrest_name
+    parameter_name(:keyrest)
   end
 
   def arg_count
@@ -228,9 +235,10 @@ class T::Private::Methods::Signature
       if !@rest_type.nil?
         rest_count = args_length - @arg_types.length
         rest_count = 0 if rest_count.negative?
+        rest_name = parameter_name(:rest)
 
         rest_count.times do
-          yield @rest_name, args[it], @rest_type
+          yield rest_name, args[it], @rest_type
           it += 1
         end
       end
@@ -266,6 +274,11 @@ class T::Private::Methods::Signature
     @rest_type&.build_type
     @keyrest_type&.build_type
     @return_type.build_type
+  end
+
+  private def parameter_name(kind)
+    @parameters.each { |param_kind, name| return name if param_kind == kind }
+    nil
   end
 
   EMPTY_LIST = [].freeze

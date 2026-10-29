@@ -41,6 +41,40 @@ module Opus::Types::Test
         assert_equal(:sigfun, sfm.method_name)
         assert_equal('Integer', sfm.return_type.name)
       end
+
+      it 'reports the names and types of rest, keyrest, and block params' do
+        c = Class.new do
+          extend T::Sig
+          sig { params(a: Integer, rest: String, kw: Integer, opts: Symbol, blk: T.proc.void).void }
+          def all_kinds(a, *rest, kw:, **opts, &blk); end
+
+          sig { params(a: Integer).void }
+          def plain(a); end
+        end
+
+        sig = T::Utils.signature_for_method(c.instance_method(:all_kinds))
+        assert_equal(:rest, sig.rest_name)
+        assert_equal('String', sig.rest_type.name)
+        assert_equal(:opts, sig.keyrest_name)
+        assert_equal('Symbol', sig.keyrest_type.name)
+        assert_equal(:blk, sig.block_name)
+        refute_nil(sig.block_type)
+
+        plain = T::Utils.signature_for_method(c.instance_method(:plain))
+        assert_nil(plain.rest_name)
+        assert_nil(plain.rest_type)
+        assert_nil(plain.keyrest_name)
+        assert_nil(plain.keyrest_type)
+        assert_nil(plain.block_name)
+        assert_nil(plain.block_type)
+      end
+
+      it 'names an unnamed rest param positionally on untyped signatures' do
+        sig = T::Private::Methods::Signature.new_untyped(method: Array.instance_method(:push))
+        assert_equal(:arg0, sig.rest_name)
+        assert_nil(sig.keyrest_name)
+        assert_nil(sig.block_name)
+      end
     end
 
     describe 'force_type_init' do
