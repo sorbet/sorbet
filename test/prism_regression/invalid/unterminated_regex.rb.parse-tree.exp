@@ -1,11 +1,17 @@
-Regexp {
-  regex = [
-    String {
-      val = <U foo
->
-    }
-  ]
-  opts = Regopt {
-    opts = ""
-  }
-}
+@ ProgramNode (location: (3,0)-(4,0))
++-- locals: []
++-- statements:
+    @ StatementsNode (location: (3,0)-(4,0))
+    +-- body: (length: 1)
+        +-- @ InterpolatedRegularExpressionNode (location: (3,0)-(4,0))
+            +-- RegularExpressionFlags: nil
+            +-- opening_loc: (3,0)-(3,1) = "/"
+            +-- parts: (length: 1)
+            |   +-- @ StringNode (location: (3,1)-(4,0))
+            |       +-- StringFlags: frozen
+            |       +-- opening_loc: nil
+            |       +-- content_loc: (3,1)-(4,0) = "foo\n"
+            |       +-- closing_loc: nil
+            |       +-- unescaped: "foo\n"
+            +-- closing_loc: (4,0)-(4,0) = ""
+

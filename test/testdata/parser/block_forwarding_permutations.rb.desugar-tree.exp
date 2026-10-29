@@ -12,7 +12,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   def case4_forwarding<<todo method>>(*<fwd-args>, **<fwd-kwargs>, &<fwd-block>)
-    ::<Magic>.<call-with-splat-and-block-pass>(<self>, :bar, ::<Magic>.<splat>(<fwd-args>).concat([::<Magic>.<to-hash-dup>(<fwd-kwargs>)]), nil, <fwd-block>)
+    ::<Magic>.<call-with-splat-and-block-pass>(<self>, :bar, <emptyTree>.concat([::<Magic>.<to-hash-dup>(<fwd-kwargs>)]), nil, <fwd-block>)
   end
 
   def case5_block_literal<<todo method>>(&<blk>)
@@ -22,7 +22,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   def case6_forwarding_and_literal<<todo method>>(*<fwd-args>, **<fwd-kwargs>, &<fwd-block>)
-    ::<Magic>.<call-with-splat-and-block-pass>(<self>, :foo, ::<Magic>.<splat>(<fwd-args>).concat([::<Magic>.<to-hash-dup>(<fwd-kwargs>)]), nil, <fwd-block>) do ||
+    ::<Magic>.<call-with-splat-and-block-pass>(<self>, :foo, <emptyTree>.concat([::<Magic>.<to-hash-dup>(<fwd-kwargs>)]), nil, <fwd-block>) do ||
       "literal block"
     end
   end

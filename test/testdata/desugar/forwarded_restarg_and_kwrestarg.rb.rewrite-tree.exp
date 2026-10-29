@@ -24,8 +24,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       res = ::<Magic>.<call-with-splat>(<self>, :pos_args, [].concat(::T.unsafe(<fwd-args>.to_a())), nil)
       <emptyTree>::<C T>.reveal_type(res)
       ::<Magic>.<call-with-splat>(<emptyTree>::<C T>.unsafe(<self>), :pos_args, [].concat(::T.unsafe(<fwd-args>.to_a())), nil)
-      ::<Magic>.<call-with-splat>(<emptyTree>::<C T>.unsafe(<self>), :pos_args, [1].concat(::T.unsafe(<fwd-args>.to_a())), nil)
-      ::<Magic>.<call-with-splat>(<emptyTree>::<C T>.unsafe(<self>), :pos_args, [1, 2].concat(::T.unsafe(<fwd-args>.to_a())), nil)
+      ::<Magic>.<call-with-splat>(<emptyTree>::<C T>.unsafe(<self>), :pos_args, [].concat(::T.unsafe(<fwd-args>.to_a())), nil, 1)
+      ::<Magic>.<call-with-splat>(<emptyTree>::<C T>.unsafe(<self>), :pos_args, [].concat(::T.unsafe(<fwd-args>.to_a())), nil, 1, 2)
     end
   end
 

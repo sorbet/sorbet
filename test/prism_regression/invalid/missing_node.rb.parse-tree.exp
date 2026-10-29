@@ -1,12 +1,23 @@
-Send {
-  receiver = Integer {
-    val = "1"
-  }
-  method = <U +>
-  args = [
-    Const {
-      scope = NULL
-      name = <C <U <ErrorNode>>>
-    }
-  ]
-}
+@ ProgramNode (location: (3,0)-(3,3))
++-- locals: []
++-- statements:
+    @ StatementsNode (location: (3,0)-(3,3))
+    +-- body: (length: 1)
+        +-- @ CallNode (location: (3,0)-(3,3))
+            +-- CallNodeFlags: nil
+            +-- receiver:
+            |   @ IntegerNode (location: (3,0)-(3,1))
+            |   +-- IntegerBaseFlags: decimal
+            |   +-- value: 1
+            +-- call_operator_loc: nil
+            +-- name: :+
+            +-- message_loc: (3,2)-(3,3) = "+"
+            +-- opening_loc: nil
+            +-- arguments:
+            |   @ ArgumentsNode (location: (3,2)-(3,3))
+            |   +-- ArgumentsNodeFlags: nil
+            |   +-- arguments: (length: 1)
+            |       +-- @ MissingNode (location: (3,2)-(3,3))
+            +-- closing_loc: nil
+            +-- block: nil
+
