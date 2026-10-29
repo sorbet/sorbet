@@ -23,6 +23,7 @@ class Condensation {
 
 public:
     struct Node {
+        // Sorted by mangled name when the condensation is built.
         std::vector<core::packages::MangledName> members;
 
         // The SCC IDs of the packages this SCC depends on.
@@ -68,11 +69,12 @@ public:
             // True when this group of packages represents a cycle of test dependencies.
             bool isTest = false;
 
-            // A span of `this->packages` that's involved in this SCC.
+            // A span of `this->packages` that's involved in this SCC, sorted by mangled name.
             absl::Span<MangledName> members;
         };
 
-        // Spans of `this->packages` that correspond to an SCC.
+        // Spans of `this->packages` that correspond to an SCC. Within each stratum, application SCCs precede test
+        // SCCs, and each group is ordered lexicographically by member mangled names.
         std::vector<SCCInfo> sccs;
 
         // Spans of `this->sccs` that have no import conflicts, and could go through the pipeline in the same stratum.

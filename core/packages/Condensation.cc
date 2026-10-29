@@ -1,7 +1,9 @@
 #include "core/packages/Condensation.h"
+#include "common/sort/sort.h"
 #include "common/strings/formatting.h"
 #include "core/GlobalState.h"
 #include <algorithm>
+#include <tuple>
 
 using namespace std;
 
@@ -65,6 +67,20 @@ struct TraversalBuilder {
         True,
         False,
     };
+
+    // Sort the given stratum by test/application status, and then by smallest member id. As members are sorted for a
+    // finalized condensation graph, the first id in the members list is always the smallest.
+    void sortStratum(absl::Span<uint32_t> stratum) const {
+        fast_sort(stratum, [this](uint32_t leftId, uint32_t rightId) {
+            const auto &left = this->nodes[leftId];
+            const auto &right = this->nodes[rightId];
+            // Prelude strata can contain both application and test SCCs. Keep application code first.
+            // Members are sorted, and SCCs of the same kind are disjoint, so their first members determine the order.
+            auto leftFirstMemberId = left.members.front().owner.id();
+            auto rightFirstMemberId = right.members.front().owner.id();
+            return std::tie(left.isTest, leftFirstMemberId) < std::tie(right.isTest, rightFirstMemberId);
+        });
+    }
 
     // Record a single stratum by processing each SCC id, marking the imports of those ids as satisfied. If any
     // dependent package no longer has any outstanding imports, its id will be added to `next`.
@@ -142,6 +158,7 @@ const Condensation::Traversal Condensation::computeTraversal(const core::GlobalS
     auto [prelude, roots] = builder.roots();
 
     if (!prelude.empty()) {
+        builder.sortStratum(absl::MakeSpan(prelude));
         // Record a single stratum for all prelude SCCs, emitting any packages whose imports were satisfied by the
         // prelude set to the roots.
         builder.recordStratum<TraversalBuilder::IsPrelude::True>(prelude, roots);
@@ -153,6 +170,7 @@ const Condensation::Traversal Condensation::computeTraversal(const core::GlobalS
     while (!roots.empty()) {
         next.clear();
 
+        builder.sortStratum(absl::MakeSpan(roots));
         builder.recordStratum<TraversalBuilder::IsPrelude::False>(roots, next);
 
         // The content of `next` isn't important at this point, and it will be cleared on the next iteration of the
@@ -203,8 +221,11 @@ Condensation::Node &CondensationBuilder::pushNode(ImportType type, bool isPrelud
 }
 
 Condensation CondensationBuilder::build() {
-    // Now that we're finalizing the condensation graph, build the back edges for each node.
+    // Now that we're finalizing the condensation graph, sort each node's members and build its back edges.
     for (auto &node : this->condensation.nodes_) {
+        ENFORCE(!node.members.empty());
+        // With stable package identities, member ordering should not depend on SCC discovery order.
+        fast_sort(node.members, [](MangledName left, MangledName right) { return left.owner.id() < right.owner.id(); });
         for (auto imp : node.imports) {
             this->condensation.nodes_[imp].backEdges.push_back(node.id);
         }
