@@ -25,8 +25,6 @@ class T::Private::Methods::Signature
   attr_reader :req_arg_count
   sig {returns(T::Array[Symbol])}
   attr_reader :req_kwarg_names
-  sig {returns(T::Array[[Symbol, Symbol]])}
-  attr_reader :parameters
   sig {returns(T.nilable(T::Array[T.untyped]))}
   attr_reader :on_failure
 
@@ -52,12 +50,12 @@ class T::Private::Methods::Signature
       mode: String,
       check_level: T.nilable(Symbol),
       on_failure: T.nilable(T::Array[T.untyped]),
-      parameters: T::Array[[Symbol, Symbol]],
+      parameters: T.nilable(T::Array[[Symbol, Symbol]]),
       override_allow_incompatible: T.any(TrueClass, FalseClass, Symbol),
       defined_raw: T::Boolean,
     ).void
   end
-  def initialize(method:, method_name:, raw_arg_types:, raw_return_type:, bind:, mode:, check_level:, on_failure:, parameters: method.parameters, override_allow_incompatible: false, defined_raw: false)
+  def initialize(method:, method_name:, raw_arg_types:, raw_return_type:, bind:, mode:, check_level:, on_failure:, parameters: nil, override_allow_incompatible: false, defined_raw: false)
     @method = T.let(method, UnboundMethod)
     @method_name = T.let(method_name, Symbol)
     @block_type = T.let(nil, T.nilable(T::Types::Base))
@@ -66,7 +64,7 @@ class T::Private::Methods::Signature
     @return_type = T.let(raw_return_type, T::Types::Base)
     @effective_return_type = T.let(raw_return_type, T::Types::Base)
     @bind = T.let(nil, T.nilable(T::Types::Base))
-    @parameters = T.let(parameters, T::Array[[Symbol, Symbol]])
+    @parameters = T.let(parameters, T.nilable(T::Array[[Symbol, Symbol]]))
     @on_failure = T.let(on_failure, T.nilable(T::Array[T.untyped]))
     @flags = T.let(0, Integer)
     @arg_types = T.let([], T::Array[[Symbol, T::Types::Base]])
@@ -80,6 +78,9 @@ class T::Private::Methods::Signature
 
   sig {params(alias_name: Symbol).returns(T::Private::Methods::Signature)}
   def as_alias(alias_name); end
+
+  sig {returns(T::Array[[Symbol, Symbol]])}
+  def parameters; end
 
   sig {returns(T.nilable(Symbol))}
   def block_name; end
