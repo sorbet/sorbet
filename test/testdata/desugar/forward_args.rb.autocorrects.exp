@@ -21,14 +21,14 @@ class Foo
   end
 
   def foo5(*)
-    [1,2,3].each do |*_|
+    [1,2,3].each do |*|
                    # ^ error: Anonymous rest parameter
       T.unsafe(self).p(*)
     end
   end
 
   def foo6(*args)
-    [1,2,3].each do |*_|
+    [1,2,3].each do |*|
                    # ^ error: Anonymous rest parameter
       T.unsafe(self).p(*)
     end
