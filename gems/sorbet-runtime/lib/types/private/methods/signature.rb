@@ -5,7 +5,7 @@ class T::Private::Methods::Signature
   attr_reader :method, :method_name, :arg_types, :kwarg_types, :block_type,
               :rest_type, :keyrest_type, :bind, :effective_return_type,
               :return_type, :mode, :req_arg_count, :req_kwarg_names,
-              :check_level, :parameters, :on_failure, :override_allow_incompatible,
+              :check_level, :on_failure, :override_allow_incompatible,
               :defined_raw
 
   # T.unsafe: `UnboundMethod#parameters` lies and says `T::Array[[Symbol, Symbol]]`.
@@ -42,7 +42,7 @@ class T::Private::Methods::Signature
     )
   end
 
-  def initialize(method:, method_name:, raw_arg_types:, raw_return_type:, bind:, mode:, check_level:, on_failure:, parameters: method.parameters, override_allow_incompatible: false, defined_raw: false)
+  def initialize(method:, method_name:, raw_arg_types:, raw_return_type:, bind:, mode:, check_level:, on_failure:, parameters: nil, override_allow_incompatible: false, defined_raw: false)
     check_level = check_level.nil? ? T::Private::RuntimeLevels.default_checked_level : check_level
     @method = method
     @method_name = method_name
@@ -58,7 +58,9 @@ class T::Private::Methods::Signature
     @bind = NilClass.===(bind) ? bind : T::Utils.coerce(bind)
     @mode = mode
     @check_level = check_level
+    # Only retained when `@method.parameters` can't reproduce it, or when the rest name is needed per call.
     @parameters = parameters
+    parameters ||= method.parameters
     @on_failure = on_failure
     @override_allow_incompatible = override_allow_incompatible
     @defined_raw = defined_raw
@@ -156,6 +158,7 @@ class T::Private::Methods::Signature
       i += 1
     end
 
+    @parameters ||= parameters unless @rest_type.nil?
     @arg_types = arg_types || EMPTY_LIST
     @kwarg_types = kwarg_types || EMPTY_HASH
     @req_arg_count = req_arg_count
@@ -172,6 +175,10 @@ class T::Private::Methods::Signature
   end
 
   # Names are derived rather than stored so that Signature fits in a smaller GC slot.
+  def parameters
+    @parameters || @method.parameters
+  end
+
   def block_name
     parameter_name(:block)
   end
@@ -277,7 +284,7 @@ class T::Private::Methods::Signature
   end
 
   private def parameter_name(kind)
-    @parameters.each { |param_kind, name| return name if param_kind == kind }
+    parameters.each { |param_kind, name| return name if param_kind == kind }
     nil
   end
 

@@ -69,6 +69,36 @@ module Opus::Types::Test
         assert_nil(plain.block_type)
       end
 
+      it 'reports the method parameters' do
+        c = Class.new do
+          extend T::Sig
+          sig { params(a: Integer, b: String, blk: T.proc.void).void }
+          def fixed(a, b='', &blk); end
+
+          sig { params(a: Integer, rest: String).void }
+          def with_rest(a, *rest); end
+        end
+
+        assert_equal([%i[req a], %i[opt b], %i[block blk]], T::Utils.signature_for_method(c.instance_method(:fixed)).parameters)
+        assert_equal([%i[req a], %i[rest rest]], T::Utils.signature_for_method(c.instance_method(:with_rest)).parameters)
+      end
+
+      it 'keeps explicitly passed parameters' do
+        sig = T::Private::Methods::Signature.new_untyped(method: Array.instance_method(:push))
+        assert_equal([%i[rest arg0]], sig.parameters)
+      end
+
+      it 'names the rest param in call errors' do
+        c = Class.new do
+          extend T::Sig
+          sig { params(a: Integer, rest: String).void }
+          def with_rest(a, *rest); end
+        end
+
+        err = assert_raises(TypeError) { c.new.with_rest(1, 'ok', :bad) }
+        assert_match(/Parameter 'rest': Expected type String, got type Symbol/, err.message)
+      end
+
       it 'names an unnamed rest param positionally on untyped signatures' do
         sig = T::Private::Methods::Signature.new_untyped(method: Array.instance_method(:push))
         assert_equal(:arg0, sig.rest_name)
