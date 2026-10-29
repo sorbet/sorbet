@@ -222,6 +222,11 @@ bool LSPTypechecker::typecheck(unique_ptr<LSPFileUpdates> updates, WorkerPool &w
             ENFORCE(updates->updatedFiles.empty());
             ENFORCE(updates->updatedFileRefs.empty());
 
+            // Drop stale entries for typechecked files that are no longer open.
+            for (auto fref : filesTypechecked) {
+                this->indexedFinalGS.erase(fref.id());
+            }
+
             for (auto &ast : result.indexedTrees) {
                 this->indexedFinalGS[ast.file.id()] = move(ast);
             }

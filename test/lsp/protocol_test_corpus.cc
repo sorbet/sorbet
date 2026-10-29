@@ -1132,8 +1132,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "QueriesAfterClosingFileUseContentsOnDisk") {
     REQUIRE(hoverResponse->isResponse());
     auto &hoverResult = get<variant<JSONNullObject, unique_ptr<Hover>>>(*hoverResponse->asResponse().result);
     auto &hover = get<unique_ptr<Hover>>(hoverResult);
-    // BUG: This shows the contents of the file from before it was closed.
-    CHECK_EQ(hover->contents->value, "String(\"ab\")");
+    CHECK_EQ(hover->contents->value, "Integer(1234)");
 }
 
 TEST_CASE_FIXTURE(ProtocolTest, "RespectsStrictnessOverridesOnStartup") {
