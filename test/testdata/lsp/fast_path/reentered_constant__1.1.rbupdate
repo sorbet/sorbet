@@ -1,0 +1,13 @@
+# typed: true
+# assert-fast-path: reentered_constant__1.rb
+
+class A
+  extend T::Sig
+
+  X = T.let(1, Integer)
+
+  sig {params(x: Integer).returns(Integer)}
+  def foo(x)
+    x
+  end
+end
