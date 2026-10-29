@@ -1,0 +1,8 @@
+# typed: true
+# exclude-from-file-update: true
+
+# This file doesn't mention `foo`, so the fast path in the update doesn't
+# typecheck it, even though the fast path re-enters `A::X` with a new symbol.
+
+puts A::X
+#       ^ hover: Integer
