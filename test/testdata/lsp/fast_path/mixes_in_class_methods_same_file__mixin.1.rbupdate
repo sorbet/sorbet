@@ -1,0 +1,17 @@
+# typed: true
+# assert-fast-path: mixes_in_class_methods_same_file__mixin.rb
+
+# This should take the slow path: it changes the singleton class ancestors of
+# every class that includes `Mixin`. The new `<mixed-in-class-methods>` symbol
+# changes this file's hash, but only as a method, not as part of the class
+# hierarchy. Nothing else mentions that method, so the fast path only
+# retypechecks this file.
+
+module ClassMethods
+  def hello; end
+end
+
+module Mixin
+  extend T::Helpers
+  mixes_in_class_methods(ClassMethods)
+end

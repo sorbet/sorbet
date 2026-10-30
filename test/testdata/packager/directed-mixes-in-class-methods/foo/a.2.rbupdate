@@ -1,0 +1,13 @@
+# typed: true
+# assert-slow-path: true
+
+class Root::Foo::A
+  include Root::Mixin
+  module Inner; end
+end
+
+# This slow path starts at the stratum for `Root::Foo`, copying the symbols
+# for `Root` from before. The fast path above entered
+# `<mixed-in-class-methods>` without reopening that stratum, so the copy
+# drops it, and this error stays even though `foo/a.rb` is retypechecked.
+Root::Foo::A.hello # error: Method `hello` does not exist

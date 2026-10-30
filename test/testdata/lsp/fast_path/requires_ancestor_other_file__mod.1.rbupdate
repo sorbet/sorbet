@@ -1,0 +1,14 @@
+# typed: true
+# enable-experimental-requires-ancestor: true
+# assert-fast-path: requires_ancestor_other_file__mod.rb
+
+# This should take the slow path: it changes which ancestors every class that
+# includes `M` must have. But `Needed` is in another file, so it doesn't
+# resolve when computing this file's hash, and the hash is unchanged. As a
+# result, `U` is not retypechecked, and is missing an error that it must
+# include `Needed`.
+
+module M
+  extend T::Helpers
+  requires_ancestor { Needed }
+end
