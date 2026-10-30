@@ -124,6 +124,40 @@ module Opus::Types::Test
         assert_operator(ObjectSpace.memsize_of(sig), :<=, 160,
                         "T::Private::Methods::Signature grew past 160 bytes; see the comment on its class definition")
       end
+
+      it 'round-trips every combination of packed flags' do
+        method = Class.new { def no_params; end }.instance_method(:no_params)
+        build = lambda do |mode:, check_level:, override_allow_incompatible: false, defined_raw: false|
+          T::Private::Methods::Signature.new(
+            method: method, method_name: :no_params, raw_arg_types: {}, raw_return_type: NilClass, bind: nil,
+            mode: mode, check_level: check_level, on_failure: nil,
+            override_allow_incompatible: override_allow_incompatible, defined_raw: defined_raw,
+          )
+        end
+
+        T::Private::Methods::Modes::MODES.each do |mode|
+          T::Private::RuntimeLevels::LEVELS.each do |check_level|
+            [false, true, :visibility].each do |allow_incompatible|
+              [false, true].each do |defined_raw|
+                sig = build.call(mode: mode, check_level: check_level,
+                                 override_allow_incompatible: allow_incompatible, defined_raw: defined_raw)
+                assert_equal(
+                  [mode, check_level, allow_incompatible, defined_raw],
+                  [sig.mode, sig.check_level, sig.override_allow_incompatible, sig.defined_raw],
+                )
+              end
+            end
+          end
+        end
+
+        assert_equal(T::Private::RuntimeLevels.default_checked_level,
+                     build.call(mode: 'standard', check_level: nil).check_level)
+        assert_raises(ArgumentError) { build.call(mode: 'bogus', check_level: :always) }
+        assert_raises(ArgumentError) { build.call(mode: 'standard', check_level: :bogus) }
+        assert_raises(ArgumentError) do
+          build.call(mode: 'standard', check_level: :always, override_allow_incompatible: :bogus)
+        end
+      end
     end
 
     describe 'force_type_init' do

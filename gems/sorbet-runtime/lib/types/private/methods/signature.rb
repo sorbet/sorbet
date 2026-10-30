@@ -7,9 +7,22 @@
 class T::Private::Methods::Signature
   attr_reader :method, :method_name, :arg_types, :kwarg_types, :block_type,
               :rest_type, :keyrest_type, :bind, :effective_return_type,
-              :return_type, :mode, :req_arg_count, :req_kwarg_names,
-              :check_level, :parameters, :on_failure, :override_allow_incompatible,
-              :defined_raw
+              :return_type, :req_arg_count, :req_kwarg_names, :parameters, :on_failure
+
+  # @flags packs, from the low bits up: mode (3 bits), check_level (2 bits),
+  # override_allow_incompatible (2 bits), and defined_raw (1 bit).
+  FLAG_MODES = T::Private::Methods::Modes::MODES
+  FLAG_CHECK_LEVELS = T::Private::RuntimeLevels::LEVELS
+  FLAG_ALLOW_INCOMPATIBLE = [false, true, :visibility].freeze
+  MODE_MASK = 0b111
+  CHECK_LEVEL_SHIFT = 3
+  CHECK_LEVEL_MASK = 0b11
+  ALLOW_INCOMPATIBLE_SHIFT = 5
+  ALLOW_INCOMPATIBLE_MASK = 0b11
+  DEFINED_RAW_BIT = 1 << 7
+  private_constant :FLAG_MODES, :FLAG_CHECK_LEVELS, :FLAG_ALLOW_INCOMPATIBLE, :MODE_MASK,
+                   :CHECK_LEVEL_SHIFT, :CHECK_LEVEL_MASK, :ALLOW_INCOMPATIBLE_SHIFT,
+                   :ALLOW_INCOMPATIBLE_MASK, :DEFINED_RAW_BIT
 
   # T.unsafe: `UnboundMethod#parameters` lies and says `T::Array[[Symbol, Symbol]]`.
   # Sorbet can't lub tuple types, meaning that `T.any([Symbol], [Symbol,
@@ -59,12 +72,12 @@ class T::Private::Methods::Signature
       @return_type
     end
     @bind = NilClass.===(bind) ? bind : T::Utils.coerce(bind)
-    @mode = mode
-    @check_level = check_level
     @parameters = parameters
     @on_failure = on_failure
-    @override_allow_incompatible = override_allow_incompatible
-    @defined_raw = defined_raw
+    @flags = flag_index(FLAG_MODES, mode, 'mode') |
+             (flag_index(FLAG_CHECK_LEVELS, check_level, 'check_level') << CHECK_LEVEL_SHIFT) |
+             (flag_index(FLAG_ALLOW_INCOMPATIBLE, override_allow_incompatible, 'override_allow_incompatible') << ALLOW_INCOMPATIBLE_SHIFT) |
+             (defined_raw ? DEFINED_RAW_BIT : 0)
 
     # Use T.untyped in lieu of T.nilable to try to avoid unnecessary allocations.
     arg_types = nil
@@ -187,6 +200,22 @@ class T::Private::Methods::Signature
     parameter_name(:keyrest)
   end
 
+  def mode
+    FLAG_MODES.fetch(@flags & MODE_MASK)
+  end
+
+  def check_level
+    FLAG_CHECK_LEVELS.fetch((@flags >> CHECK_LEVEL_SHIFT) & CHECK_LEVEL_MASK)
+  end
+
+  def override_allow_incompatible
+    FLAG_ALLOW_INCOMPATIBLE.fetch((@flags >> ALLOW_INCOMPATIBLE_SHIFT) & ALLOW_INCOMPATIBLE_MASK)
+  end
+
+  def defined_raw
+    @flags.anybits?(DEFINED_RAW_BIT)
+  end
+
   def arg_count
     @arg_types.length
   end
@@ -290,6 +319,10 @@ class T::Private::Methods::Signature
   private def parameter_name(kind)
     @parameters.each { |param_kind, name| return name if param_kind == kind }
     nil
+  end
+
+  private def flag_index(values, value, field)
+    values.index(value) || raise(ArgumentError.new("Invalid #{field} for `#{@method_name}`: #{value.inspect}"))
   end
 
   EMPTY_LIST = [].freeze
