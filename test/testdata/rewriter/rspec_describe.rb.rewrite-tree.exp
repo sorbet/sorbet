@@ -16,7 +16,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     "User"
     class <emptyTree>::<C <describe 'User'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
       def name<<todo method>>(&<blk>)
-        "Alice"
+        if <self>.is_a?(<emptyTree>::<C <context 'when verified'>>)
+          begin
+            <cast:<synthetic bind>>(<self>, <todo sym>, <emptyTree>::<C <context 'when verified'>>)
+            "Alice"
+          end
+        else
+          "Alice"
+        end
       end
 
       def <it 'has a name'><<todo method>>(&<blk>)
