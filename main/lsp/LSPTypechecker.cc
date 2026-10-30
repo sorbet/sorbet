@@ -325,14 +325,18 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
     updates.updatedFiles.clear();
     updates.updatedFileRefs.clear();
 
-    // Remember where in the package graph we're making this change, as that will determine how much we can copy on the
-    // next slow path. We consider all parts of the edit, not just changed files, as running the fast path will mutate
-    // the symbols of the stratum the files belong to.
-    auto editStratum = this->lastStratum;
-    for (auto fref : toTypecheck) {
-        editStratum = std::min(editStratum, this->fileToStratum[fref.id()]);
+    // When running the incremental namer, we'll enter new symbols for everything in the edit. This means that we can
+    // no longer consider the suffix of the symbol table that contains the old symbols to be valid, and any future slow
+    // paths must not copy a prefix that overlaps with them. We record that restriction here, using reopenStratum for
+    // the earliest stratum affected by any of the files in the edit. Note that it's important that we consider all
+    // files here, not just those that were modified, as the incremental namer doesn't differentiate.
+    if (shouldRunIncrementalNamer) {
+        auto editStratum = this->lastStratum;
+        for (auto fref : toTypecheck) {
+            editStratum = std::min(editStratum, this->fileToStratum[fref.id()]);
+        }
+        gs->reopenStratum(editStratum);
     }
-    gs->reopenStratum(editStratum);
 
     if (shouldRunIncrementalNamer && gs->packageDB().enabled()) {
         vector<core::FileRef> packageFiles;
