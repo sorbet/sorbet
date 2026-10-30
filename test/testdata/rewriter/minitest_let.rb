@@ -136,3 +136,21 @@ class MyTestHelper < Minitest::Spec
     end
   end
 end
+
+class InheritedHelpersOptInTest < Minitest::Spec
+  extend T::Sig
+
+  describe "inherited helpers remain opt-in" do
+    sig { returns(String) }
+    subject { child_only_input } # error: Method `child_only_input` does not exist
+
+    describe "child" do
+      sig { returns(String) }
+      let(:child_only_input) { "hello" }
+
+      it "uses the subject" do
+        subject
+      end
+    end
+  end
+end
