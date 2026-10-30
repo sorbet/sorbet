@@ -165,7 +165,7 @@ string_view NameRef::shortName(const GlobalState &gs) const {
     switch (kind()) {
         case NameKind::UTF8: {
             auto raw = dataUtf8(gs);
-            return string_view(raw->utf8.begin(), raw->utf8.end() - raw->utf8.begin());
+            return string_view(raw->utf8.data(), raw->utf8.size());
         }
         case NameKind::UNIQUE:
             return dataUnique(gs)->original.shortName(gs);

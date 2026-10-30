@@ -21,6 +21,8 @@ private:
     UnorderedMap<core::FileRef, std::vector<std::unique_ptr<ErrorQueueMessage>>> collected;
     ConcurrentUnBoundedQueue<core::ErrorQueueMessage> queue;
 
+    void collectAllInternal();
+
 public:
     spdlog::logger &logger;
     spdlog::logger &tracer;
@@ -35,6 +37,9 @@ public:
     void pushError(const GlobalState &gs, std::unique_ptr<Error> error);
     void pushQueryResponse(core::FileRef fromFile, std::unique_ptr<lsp::QueryResponse> response);
     bool isEmpty();
+
+    /** Collect all errors in the queue, returning a set of files that recorded errors at this point in time. */
+    UnorderedSet<FileRef> collectAll();
 
     void flushAllErrors(const GlobalState &gs);
     void flushErrorsForFile(const GlobalState &gs, FileRef file);

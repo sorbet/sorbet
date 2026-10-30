@@ -89,7 +89,7 @@ ClassDef{
               localVariable = <U <blk>>
             }]
           rhs = Send{
-            flags = {privateOk}
+            flags = {privateOk, doEndBlock}
             recv = Self
             fun = <U loop>
             block = Block {
@@ -110,7 +110,7 @@ ClassDef{
               localVariable = <U <blk>>
             }]
           rhs = Send{
-            flags = {privateOk}
+            flags = {privateOk, doEndBlock}
             recv = Self
             fun = <U loop>
             block = Block {

@@ -16,12 +16,16 @@ jobs:
         uses: actions/github-script@v8
         with:
           script: |
+            if (context.repo.owner != 'sorbet' || context.repo.repo != 'sorbet') {
+              return;
+            }
+
             const suffix = `-${context.payload.pull_request.number}`;
             const branches = await github.paginate(
               github.rest.repos.listBranches,
               {
-                owner: context.repo.owner,
-                repo: context.repo.repo,
+                owner: 'sorbet',
+                repo: 'sorbet',
                 per_page: 100,
               },
             );
@@ -35,8 +39,8 @@ jobs:
             for (const {name} of matches) {
               try {
                 await github.rest.git.deleteRef({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
+                  owner: 'sorbet',
+                  repo: 'sorbet',
                   ref: `heads/${name}`,
                 });
                 core.info(`Deleted branch ${name}`);

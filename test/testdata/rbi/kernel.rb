@@ -44,6 +44,21 @@ def raise_obj_or_string(obj_or_str)
   raise obj_or_str
 end
 
+sig { params(locations: T::Array[Thread::Backtrace::Location]).returns(T.noreturn) }
+def raise_with_locations(locations)
+  raise ArgumentError, 'bad argument', locations
+end
+
+sig { params(error: StandardError).returns(T.noreturn) }
+def raise_with_backtrace_of(error)
+  raise ArgumentError, error.message, error.backtrace_locations || error.backtrace
+end
+
+sig { params(locations: T::Array[Thread::Backtrace::Location]).returns(T.noreturn) }
+def fail_with_locations(locations)
+  fail ArgumentError.new('bad argument'), 'bad argument', locations
+end
+
 # make sure we don't regress and mark these as errors
 env = {'VAR' => 'VAL'}
 system('echo')
@@ -115,9 +130,11 @@ def fail_class_message
   fail StandardError, "message"
 end
 
-y = loop do
+def kernel_loop
+  y = loop do
+  end
+  puts y # error: This code is unreachable
 end
-puts y # error: This code is unreachable
 
 class Test
   def test
@@ -145,3 +162,18 @@ callcc {|cont|
   end
 }
 puts
+
+# Kernel#printf
+def test_printf
+  printf
+
+  printf "foo"
+  printf "%d", 1
+  printf "%d-%d", 1, 2
+  printf "%d-%d-%d", 1, 2, 3
+
+  printf $stderr, "foo"
+  printf $stderr, "%d", 1
+  printf $stderr, "%d-%d", 1, 2
+  printf $stderr, "%d-%d-%d", 1, 2, 3
+end

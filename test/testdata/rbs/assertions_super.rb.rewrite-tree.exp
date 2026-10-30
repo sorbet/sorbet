@@ -84,4 +84,34 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of explicit_super>
   end
+
+  class <emptyTree>::<C KeywordSuperParent><<C <todo sym>>> < (::<todo sym>)
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params(:id, <emptyTree>::<C Integer>, :kwargs, ::<root>::<C T>.untyped()).returns(<emptyTree>::<C Integer>)
+    end
+
+    def mutate<<todo method>>(id, **kwargs, &<blk>)
+      id
+    end
+
+    <runtime method definition of mutate>
+  end
+
+  class <emptyTree>::<C KeywordSuperChild><<C <todo sym>>> < (<emptyTree>::<C KeywordSuperParent>)
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.override().params(:id, <emptyTree>::<C Integer>, :**, ::<root>::<C T>.untyped()).returns(<emptyTree>::<C Integer>)
+    end
+
+    def mutate<<todo method>>(id, **, &<blk>)
+      begin
+        <self>.<super>(id, begin
+            <hashTemp>$2 = ::<Magic>.<to-hash-dup>(::T.unsafe(<fwd-kwargs>))
+            <hashTemp>$2
+          end)
+        <cast:let>(1, <todo sym>, <emptyTree>::<C Integer>)
+      end
+    end
+
+    <runtime method definition of mutate>
+  end
 end

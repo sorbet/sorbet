@@ -1,8 +1,13 @@
 #ifdef EMSCRIPTEN
 
+#include "common/os/os.h"
 #include <string>
 
 using namespace std;
+
+optional<size_t> getCurrentProcessSwapUsageKb() {
+    return nullopt;
+}
 
 bool stopInDebugger() {
     return false;

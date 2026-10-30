@@ -23,6 +23,7 @@ class Condensation {
 
 public:
     struct Node {
+        // Sorted by mangled name when the condensation is built.
         std::vector<core::packages::MangledName> members;
 
         // The SCC IDs of the packages this SCC depends on.
@@ -68,11 +69,12 @@ public:
             // True when this group of packages represents a cycle of test dependencies.
             bool isTest = false;
 
-            // A span of `this->packages` that's involved in this SCC.
+            // A span of `this->packages` that's involved in this SCC, sorted by mangled name.
             absl::Span<MangledName> members;
         };
 
-        // Spans of `this->packages` that correspond to an SCC.
+        // Spans of `this->packages` that correspond to an SCC. Within each stratum, application SCCs precede test
+        // SCCs, and each group is ordered lexicographically by member mangled names.
         std::vector<SCCInfo> sccs;
 
         // Spans of `this->sccs` that have no import conflicts, and could go through the pipeline in the same stratum.
@@ -86,18 +88,8 @@ public:
         Traversal &operator=(const Traversal &other) = default;
         Traversal &operator=(Traversal &&other) = default;
 
-        // TODO(trevor): We can replace `StratumInfo` with a single uint32_t once we've fully migrated
-        // to test-packages.
-        // Using "stratum" instead of "layer" to avoid confusion with the modularity concept/package
-        // DSL method of "layer" (utility, business, service, etc.)
-        struct StratumInfo {
-            uint32_t applicationStratum = INT32_MAX;
-            uint32_t testStratum = INT32_MAX;
-        };
-
-        // Build a mapping from package mangled name to the entry in `this->strata` that the application and test code
-        // belong to, respectively.
-        UnorderedMap<MangledName, StratumInfo> buildStratumMapping(const core::GlobalState &gs) const;
+        // Record the application and test source stratum of each package in PackageInfo.
+        void recordStrata(core::GlobalState &gs) const;
     };
 
     // Compute a traversal through the condensation graph, that yields groups of SCCs that have no dependencies on each
@@ -108,6 +100,10 @@ public:
     absl::Span<const Node> nodes() const {
         return this->nodes_;
     }
+
+    // Fetch the set of packages that depend on the set of packages provided.
+    UnorderedSet<MangledName> transitiveDependentsOf(const PackageDB &db,
+                                                     const UnorderedSet<MangledName> &packages) const;
 };
 
 class CondensationBuilder {
@@ -116,7 +112,7 @@ class CondensationBuilder {
 public:
     Condensation::Node &pushNode(ImportType type, bool isPrelude);
 
-    Condensation build();
+    Condensation build() &&;
 };
 
 } // namespace sorbet::core::packages

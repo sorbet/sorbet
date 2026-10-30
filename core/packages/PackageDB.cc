@@ -53,6 +53,21 @@ const MangledName PackageDB::getPackageNameForFile(FileRef file) const {
     return this->packageForFile_[file.id()];
 }
 
+const PackageInfo *PackageDB::getPackageForSourceFile(const core::GlobalState &gs, FileRef file) const {
+    if (!enabled() || file.data(gs).isPackage(gs)) {
+        return nullptr;
+    }
+
+    auto packageName = getPackageNameForFile(file);
+    if (!packageName.exists()) {
+        return nullptr;
+    }
+
+    auto &package = getPackageInfo(packageName);
+    ENFORCE(package.exists());
+    return &package;
+}
+
 MangledName PackageDB::getParentPackage(const GlobalState &gs, MangledName pkg) const {
     ENFORCE(pkg.exists());
 
@@ -251,20 +266,33 @@ const Condensation &PackageDB::condensation() const {
     return this->condensation_;
 }
 
-namespace {
-// TODO(neil): deduplicate, this helper is also declared in VisibilityChecker.cc
-core::SymbolRef getEnumClassForEnumValue(const core::GlobalState &gs, core::SymbolRef sym) {
-    if (sym.isStaticField(gs) && sym.owner(gs).isClassOrModule()) {
-        auto owner = sym.owner(gs);
-        // There's a hidden class like `MyEnum::X$1` between `MyEnum::X` and `T::Enum` in the ancestor chain.
-        if (owner.asClassOrModuleRef().data(gs)->superClass() == core::Symbols::T_Enum()) {
-            return owner;
-        }
+core::SymbolRef PackageDB::getEnumClassForEnumValue(const core::GlobalState &gs, core::SymbolRef sym) {
+    if (!sym.isStaticField(gs) || !sym.owner(gs).isClassOrModule()) {
+        return core::Symbols::noSymbol();
     }
 
-    return core::Symbols::noSymbol();
+    // The `T::Enum` rewriter turns `X = new` into `class X$1 < MyEnum; end; X = X$1.new`. Look for that hidden class
+    // rather than checking whether `MyEnum`'s superclass is `T::Enum`, so that this works before resolver has resolved
+    // superclasses.
+    auto uniqueName = gs.lookupNameUnique(core::UniqueNameKind::TEnum, sym.name(gs), 1);
+    if (!uniqueName.exists()) {
+        return core::Symbols::noSymbol();
+    }
+    auto hiddenClassName = gs.lookupNameConstant(uniqueName);
+    if (!hiddenClassName.exists()) {
+        return core::Symbols::noSymbol();
+    }
+
+    auto owner = sym.owner(gs).asClassOrModuleRef();
+    auto hiddenClass = owner.data(gs)->findMemberNoDealias(hiddenClassName);
+    if (!hiddenClass.exists() || !hiddenClass.isClassOrModule()) {
+        return core::Symbols::noSymbol();
+    }
+
+    return owner;
 }
 
+namespace {
 bool ownerWillBeExported(const core::GlobalState &gs, const vector<core::SymbolRef> &alreadyExported,
                          core::ClassOrModuleRef owner) {
     while (owner != core::Symbols::root()) {
@@ -337,7 +365,7 @@ void exportField(const core::GlobalState &gs,
             break;
         }
 
-        auto maybeEnumClass = getEnumClassForEnumValue(gs, core::SymbolRef(symbol));
+        auto maybeEnumClass = PackageDB::getEnumClassForEnumValue(gs, core::SymbolRef(symbol));
         if (maybeEnumClass.exists()) {
             // No need to check if maybeEnumClass is already going to be exported since we have a ownerWillBeExported
             // call above
@@ -349,38 +377,7 @@ void exportField(const core::GlobalState &gs,
     }
 }
 
-UnorderedMap<core::SymbolRef, vector<core::FileRef>> computeReferencingFiles(const core::GlobalState &gs) {
-    auto referencingFiles = UnorderedMap<core::SymbolRef, vector<core::FileRef>>{};
-    // symbolsReferencedByFile is a map from file -> [symbol] referenced in that file
-    // This loop computes the inverse: referencingFiles is a map from symbol -> [file] that reference that symbol
-    Timer timeit(gs.tracer(), "gen_packages.compute_referencing_files");
-    auto numFiles = gs.getFiles().size();
-    for (auto i = 1; i < numFiles; i++) {
-        core::FileRef fref(i);
-        auto referencedSymbols = gs.getSymbolsReferencedByFile(fref);
-        for (auto &symbol : referencedSymbols) {
-            referencingFiles[symbol].push_back(fref);
-        }
-    }
-    return referencingFiles;
-}
 }; // namespace
-
-UnorderedMap<core::packages::MangledName, vector<core::SymbolRef>>
-PackageDB::exportsByPackage(const core::GlobalState &gs) {
-    auto referencingFiles = computeReferencingFiles(gs);
-
-    auto toExport = UnorderedMap<core::packages::MangledName, vector<core::SymbolRef>>{};
-    for (uint32_t i = 1; i < gs.classAndModulesUsed(); ++i) {
-        auto classOrModuleRef = core::ClassOrModuleRef(gs, i);
-        exportClassOrModule(gs, toExport, classOrModuleRef, referencingFiles[classOrModuleRef]);
-    }
-    for (uint32_t i = 1; i < gs.fieldsUsed(); ++i) {
-        auto fieldRef = core::FieldRef(gs, i);
-        exportField(gs, toExport, fieldRef, referencingFiles[fieldRef]);
-    }
-    return toExport;
-}
 
 optional<core::AutocorrectSuggestion> PackageDB::aggregateMissingExportsForFile(const core::GlobalState &gs,
                                                                                 const core::FileRef fref) {

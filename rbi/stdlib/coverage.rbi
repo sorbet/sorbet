@@ -81,9 +81,10 @@ module Coverage
         lines: T::Boolean,
         branches: T::Boolean,
         methods: T::Boolean,
+        eval: T::Boolean,
         oneshot_lines: T::Boolean
     )
     .returns(NilClass)
   end
-  def self.start(all = T.unsafe(nil), lines: T.unsafe(nil), branches: T.unsafe(nil), methods: T.unsafe(nil), oneshot_lines: T.unsafe(nil)); end
+  def self.start(all = T.unsafe(nil), lines: T.unsafe(nil), branches: T.unsafe(nil), methods: T.unsafe(nil), eval: T.unsafe(nil), oneshot_lines: T.unsafe(nil)); end
 end

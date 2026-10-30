@@ -17,6 +17,11 @@ common:test --test_env=GTEST_INSTALL_FAILURE_SIGNAL_HANDLER=1
 #  <other cppmap files>
 build --host_features=-module_maps --features=-module_maps
 
+# Use macOS 11.0 (Big Sur) as the minimum for both architectures and tools.
+# Configure Bazel directly so rules_cc's macos_minimum_os feature agrees;
+# this also satisfies SDK libc++'s std::filesystem availability checks.
+build --macos_minimum_os=11.0 --host_macos_minimum_os=11.0
+
 # Port over all dependencies to use Bzlmod. Until then, disable it,
 # as enabling it pulls in the module version of dependencies such
 # as @@zlib~. By default, @@zlib~ doesn't build; we need to pass in
@@ -43,6 +48,14 @@ build --copt=-fno-omit-frame-pointer
 build --copt=-fstack-protector
 
 build --copt=-Werror --copt=-Wimplicit-fallthrough --copt=-Wmissing-field-initializers
+
+# Clang's Linux GCC discovery warns about missing system libstdc++ headers
+# even for C or explicit libc++ builds. We use toolchain-provided libc++.
+# Suppress only this diagnostic for target/host compilation and linking.
+build --copt=-Wno-gcc-install-dir-libstdcxx
+build --host_copt=-Wno-gcc-install-dir-libstdcxx
+build --linkopt=-Wno-gcc-install-dir-libstdcxx
+build --host_linkopt=-Wno-gcc-install-dir-libstdcxx
 
 build --copt=-D_LIBCPP_ENABLE_NODISCARD
 
@@ -145,12 +158,10 @@ build:release-sanitized-linux-aarch64 --copt=-march=armv8.1a
 build:release-mac --config=release-common --config=shared-libs
 
 build:cross-to-darwin-x86_64 --platforms=@//tools/platforms:darwin_x86_64
-build:cross-to-darwin-x86_64 --extra_toolchains=@llvm_toolchain_15_0_7//:cc-toolchain-x86_64-darwin
-build:cross-to-darwin-x86_64 --copt=-stdlib=libc++ --linkopt=-lc++
+build:cross-to-darwin-x86_64 --extra_toolchains=@llvm_toolchain_22_1_3//:cc-toolchain-x86_64-darwin
 
 build:cross-to-darwin-arm64 --platforms=@//tools/platforms:darwin_arm64
-build:cross-to-darwin-arm64 --extra_toolchains=@llvm_toolchain_15_0_7//:cc-toolchain-aarch64-darwin
-build:cross-to-darwin-arm64 --copt=-stdlib=libc++ --linkopt=-lc++
+build:cross-to-darwin-arm64 --extra_toolchains=@llvm_toolchain_22_1_3//:cc-toolchain-aarch64-darwin
 
 build:release-debug-linux --config=release-linux
 build:release-debug-linux --config=release-debug-common
@@ -167,7 +178,7 @@ build:release-sanitized-linux --define jemalloc=false
 build:release-sanitized-linux --config=release-debug-common
 
 build:release-sanitized-linux-aarch64 --copt=-O2
-build:release-sanitized-linux-aarch64 --config=sanitize-linux-aarch64
+build:release-sanitized-linux-aarch64 --config=sanitize-linux
 build:release-sanitized-linux-aarch64 --define jemalloc=false
 build:release-sanitized-linux-aarch64 --config=release-debug-common
 
@@ -181,13 +192,16 @@ build:release-sanitized-mac --define jemalloc=false
 build:test-sanitized-linux --config=release-sanitized-linux --config=dbg --nostamp --define release=false
 common:test-sanitized-linux --test_env="UBSAN_OPTIONS=print_stacktrace=1"
 common:test-sanitized-linux --test_env="ASAN_OPTIONS=detect_leaks=0"
+test:test-sanitized-linux --run_under=//tools:sanitizer_test_wrapper
 
 build:test-sanitized-linux-aarch64 --config=release-sanitized-linux-aarch64 --config=dbg --nostamp --define release=false
 common:test-sanitized-linux-aarch64 --test_env="UBSAN_OPTIONS=print_stacktrace=1"
 common:test-sanitized-linux-aarch64 --test_env="ASAN_OPTIONS=detect_leaks=0"
+test:test-sanitized-linux-aarch64 --run_under=//tools:sanitizer_test_wrapper
 
 build:test-sanitized-mac --config=release-sanitized-mac --config=dbg --nostamp --define release=false
 common:test-sanitized-mac --test_env="UBSAN_OPTIONS=print_stacktrace=1"
+test:test-sanitized-mac --run_under=//tools:sanitizer_test_wrapper
 
 build:reduce-intermediate-file-size-base --copt=-g0 --linkopt=-g0 # used by buildfarm to have less debug information on disk
 build:reduce-intermediate-file-size-base --strip=always
@@ -257,19 +271,10 @@ build:ubsan --linkopt=-fsanitize=undefined --copt=-fno-sanitize-recover=undefine
 build:ubsan --define unsanitized=false
 build:ubsan --copt=-DHAS_SANITIZER
 
-# TODO(jez) It's not clear whether we still need these tricks to get sanitizers to work,
-# because we're using the toolchain's lld linker now.
-# We could consider replacing this with something more typical.
-# Original motivation: Bazel links C++ files with $CC, not $CXX, this breaks UBSan
-build:sanitize-linux --linkopt=../../external/llvm_toolchain_15_0_7_llvm/lib/clang/15.0.7/lib/x86_64-unknown-linux-gnu/libclang_rt.asan_cxx.a
-build:sanitize-linux --linkopt=../../external/llvm_toolchain_15_0_7_llvm/lib/clang/15.0.7/lib/x86_64-unknown-linux-gnu/libclang_rt.ubsan_standalone_cxx.a
-build:sanitize-linux --linkopt=../../external/llvm_toolchain_15_0_7_llvm/lib/clang/15.0.7/lib/x86_64-unknown-linux-gnu/libclang_rt.ubsan_standalone.a
+# Bazel links C++ targets with the C driver, so request C++ sanitizer runtimes.
+# Let Clang choose the archives: ASan already includes UBSan support.
+build:sanitize-linux --linkopt=-fsanitize-link-c++-runtime
 build:sanitize-linux --config=sanitize
-
-build:sanitize-linux-aarch64 --linkopt=../../external/llvm_toolchain_15_0_7_llvm/lib/clang/15.0.7/lib/aarch64-unknown-linux-gnu/libclang_rt.asan_cxx.a
-build:sanitize-linux-aarch64 --linkopt=../../external/llvm_toolchain_15_0_7_llvm/lib/clang/15.0.7/lib/aarch64-unknown-linux-gnu/libclang_rt.ubsan_standalone_cxx.a
-build:sanitize-linux-aarch64 --linkopt=../../external/llvm_toolchain_15_0_7_llvm/lib/clang/15.0.7/lib/aarch64-unknown-linux-gnu/libclang_rt.ubsan_standalone.a
-build:sanitize-linux-aarch64 --config=sanitize
 
 build:sanitize-mac --config=sanitize
 

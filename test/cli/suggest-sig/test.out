@@ -25,10 +25,6 @@ suggest-sig.rb:124: Method `generated` does not exist on `T::Private::Methods::D
     suggest-sig.rb:124:
      124 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated} # error: `generated` is deprecated
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Done
-    suggest-sig.rb:124: Replaced with `inherited`
-     124 |sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated} # error: `generated` is deprecated
-                                                                         ^^^^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#LCENSORED: Defined here
       NN |  def inherited(arg0); end
             ^^^^^^^^^^^^^^^^^^^
@@ -40,10 +36,6 @@ suggest-sig.rb:137: Method `generated` does not exist on `T::Private::Methods::D
     suggest-sig.rb:135:
      135 |  params(a: T.untyped, cond: T::Boolean). # error: `generated` is deprecated
      136 |  returns(T.untyped).
-  Autocorrect: Done
-    suggest-sig.rb:137: Replaced with `inherited`
-     137 |  generated
-            ^^^^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#LCENSORED: Defined here
       NN |  def inherited(arg0); end
             ^^^^^^^^^^^^^^^^^^^
@@ -195,6 +187,9 @@ suggest-sig.rb:85: This code is unreachable https://srb.help/7006
     suggest-sig.rb:85:
     85 |  if true || qux || blah
              ^^^^
+  Note:
+    If this code is intentionally unreachable, end this sequence with `T.absurd(...)`
+    after any defensive error handling.
 
 suggest-sig.rb:85: This code is unreachable https://srb.help/7006
     85 |  if true || qux || blah
@@ -209,6 +204,9 @@ suggest-sig.rb:85: This code is unreachable https://srb.help/7006
     suggest-sig.rb:85:
     85 |  if true || qux || blah
                  ^^^^
+  Note:
+    If this code is intentionally unreachable, end this sequence with `T.absurd(...)`
+    after any defensive error handling.
 
 suggest-sig.rb:88: This code is unreachable https://srb.help/7006
     88 |    takesString(x)
@@ -226,6 +224,9 @@ suggest-sig.rb:88: This code is unreachable https://srb.help/7006
     suggest-sig.rb:85:
     85 |  if true || qux || blah
                         ^^^^
+  Note:
+    If this code is intentionally unreachable, end this sequence with `T.absurd(...)`
+    after any defensive error handling.
 
 suggest-sig.rb:84: The method `dead` does not have a `sig` https://srb.help/7017
     84 |def dead(x)
@@ -528,7 +529,7 @@ def cantRun(a)
   1
 end
 
-sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).inherited} # error: `generated` is deprecated
+sig {params(a: T.untyped, cond: T::Boolean).returns(T.untyped).generated} # error: `generated` is deprecated
 def fooCondGeneratedCurly(a, cond)
   if cond
     takesInt(a)
@@ -541,7 +542,7 @@ end
 sig do
   params(a: T.untyped, cond: T::Boolean). # error: `generated` is deprecated
   returns(T.untyped).
-  inherited
+  generated
 end
 def fooCondGeneratedDo(a, cond)
   if cond

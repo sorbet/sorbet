@@ -9,7 +9,7 @@ def normal_usage(x)
   when String
     puts x
   else
-    x #: absurd
+    raise #: absurd(x)
   end
 end
 
@@ -19,7 +19,7 @@ def forgotten_case(x)
   when Integer
     puts x
   else
-    x #: absurd # error: Control flow could reach `T.absurd` because the type `String` wasn't handled
+    raise #: absurd(x) # error: Control flow could reach `T.absurd` because the type `String` wasn't handled
   end
 end
 
@@ -32,7 +32,7 @@ def got_all_cases_but_untyped(x)
   when String
     puts y
   else
-    y #: absurd # error: Control flow could reach `T.absurd` because argument was `T.untyped`
+    raise #: absurd(y) # error: Control flow could reach `T.absurd` because argument was `T.untyped`
   end
 end
 
@@ -42,7 +42,7 @@ def forgotten_two_cases(x)
   when Integer
     puts x
   else
-    x #: absurd # error: Control flow could reach `T.absurd` because the type `T.any(String, T::Array[Integer])` wasn't handled
+    raise #: absurd(x) # error: Control flow could reach `T.absurd` because the type `T.any(String, T::Array[Integer])` wasn't handled
   end
 end
 
@@ -52,7 +52,7 @@ def missing_case_with_generic(x)
   when Array
     puts x
   else
-    x #: absurd # error: Control flow could reach `T.absurd` because the type `String` wasn't handled
+    raise #: absurd(x) # error: Control flow could reach `T.absurd` because the type `String` wasn't handled
   end
 end
 
@@ -62,20 +62,20 @@ def ok_when_generic_cases_overlap(x)
   when Array
     puts x
   else
-    x #: absurd
+    raise #: absurd(x)
   end
 end
 
 #: (Integer | String) -> void
-def dead_code_before(x)
+def code_before_raise_is_allowed(x)
   case x
   when Integer
     puts x
   when String
     puts x
   else
-    puts 1 # error: This code is unreachable
-    x #: absurd
+    puts 1
+    raise #: absurd(x)
   end
 end
 
@@ -87,25 +87,21 @@ def dead_code_after(x)
   when String
     puts x
   else
-    x #: absurd
+    raise #: absurd(x)
     puts 1 # error: This code is unreachable
   end
 end
 
 #: (Integer | String) -> void
-def cant_alias_local_variables(x)
+def can_alias_local_variables(x)
   case x
   when Integer
     puts x
   when String
     puts x
   else
-    # Hello future Sorbet contributor.
-    # It's not that we MUST have an error here, but rather that we were fine
-    # with it, and couldn't see a simple solution that avoided emitting one.
     y = x
-    #   ^ error: This code is unreachable
-    y #: absurd
+    raise #: absurd(y)
   end
 end
 
@@ -116,7 +112,7 @@ def normal_usage_with_isa(x)
   elsif x.is_a?(String)
     puts x
   else
-    x #: absurd
+    raise #: absurd(x)
   end
 end
 
@@ -125,7 +121,7 @@ def missing_case_with_isa(x)
   if x.is_a?(Integer)
     puts x
   else
-    x #: absurd # error: Control flow could reach `T.absurd` because the type `String` wasn't handled
+    raise #: absurd(x) # error: Control flow could reach `T.absurd` because the type `String` wasn't handled
   end
 end
 
@@ -134,7 +130,7 @@ def enforce_something_is_always_non_nil(x)
   if !x.nil?
     puts x
   else
-    x #: absurd
+    raise #: absurd(x)
   end
 end
 
@@ -143,37 +139,36 @@ def error_when_predicate_always_true(x)
   if !x.nil?
     puts 1 # not a dead code error, because it's always true!
     # This is a strange error message given the test case.
-    x #: absurd # error: Control flow could reach `T.absurd` because the type `Integer` wasn't handled
+    raise #: absurd(x) # error: Control flow could reach `T.absurd` because the type `Integer` wasn't handled
   end
 end
 
 # --- trying to subvert normal usage ------------------------------------------
 
+# The code is already dead before the `raise`, so the `raise` itself is unreachable.
+
 def only_absurd
   temp1 = T.let(T.unsafe(nil), T.noreturn)
-  temp1 #: absurd
+  raise #: absurd(temp1) # error: This code is unreachable
 end
 
 #: (bot) -> void
-def allows_arg_noreturn(x)
-  x #: absurd
+def arg_noreturn(x)
+  raise #: absurd(x) # error: This code is unreachable
   puts(x)
-# ^^^^^^^ error: This code is unreachable
 end
 
 #: (bot, bot) -> void
-def allows_args_noreturn(x, y)
-  x #: absurd
-  y #: absurd
+def args_noreturn(x, y)
+  raise #: absurd(x) # error: This code is unreachable
+  raise #: absurd(y)
   puts(x)
-# ^^^^^^^ error: This code is unreachable
 end
 
 #: (Integer & String) -> void
 def intersects_to_bottom(x)
-  x #: absurd
+  raise #: absurd(x) # error: This code is unreachable
   puts(x)
-# ^^^^^^^ error: This code is unreachable
 end
 
 # --- reasonable usage on global, class, instance, and local variables --------
@@ -184,14 +179,14 @@ def absurd_not_reached_on_global_var
   case $some_global
   when TrueClass
   when FalseClass
-  else $some_global #: absurd # error: Control flow could reach `T.absurd` because argument was `T.untyped`
+  else raise #: absurd($some_global) # error: Control flow could reach `T.absurd` because argument was `T.untyped`
   end
 end
 
 #: -> void
 def absurd_reached_on_global_var
   if !$some_global
-    $some_global #: absurd # error: Control flow could reach `T.absurd` because the type `T.nilable(FalseClass)` wasn't handled
+    raise #: absurd($some_global) # error: Control flow could reach `T.absurd` because the type `T.nilable(FalseClass)` wasn't handled
   end
 end
 
@@ -209,14 +204,14 @@ class SomeClass
     when TrueClass
     when FalseClass
     else
-      @@some_class_var #: absurd
+      raise #: absurd(@@some_class_var)
     end
   end
 
   #: -> void
   def absurd_reached_on_class_var
     if !@@some_class_var
-      @@some_class_var #: absurd # error: Control flow could reach `T.absurd` because the type `FalseClass` wasn't handled
+      raise #: absurd(@@some_class_var) # error: Control flow could reach `T.absurd` because the type `FalseClass` wasn't handled
     end
   end
 
@@ -226,14 +221,14 @@ class SomeClass
     when TrueClass
     when FalseClass
     else
-      @some_instance_var #: absurd
+      raise #: absurd(@some_instance_var)
     end
   end
 
   #: -> void
   def absurd_reached_on_instance_var
     if !@some_instance_var
-      @some_instance_var #: absurd # error: Control flow could reach `T.absurd` because the type `FalseClass` wasn't handled
+      raise #: absurd(@some_instance_var) # error: Control flow could reach `T.absurd` because the type `FalseClass` wasn't handled
     end
   end
 end
@@ -241,20 +236,126 @@ end
 #: (bool) -> void
 def absurd_reached_on_local_var(some_local_var)
   if !some_local_var
-    some_local_var #: absurd # error: Control flow could reach `T.absurd` because the type `FalseClass` wasn't handled
+    raise #: absurd(some_local_var) # error: Control flow could reach `T.absurd` because the type `FalseClass` wasn't handled
   end
+end
+
+class Suit < T::Enum
+  enums do
+    Hearts = new
+    Spades = new
+  end
+
+  #: -> String
+  def color
+    case self
+    when Hearts then "red"
+    else
+      raise #: absurd(self) # error: Control flow could reach `T.absurd` because the type `Suit::Spades` wasn't handled
+    end
+  end
+end
+
+# --- placement ---------------------------------------------------------------
+
+#: (Integer | String) -> void
+def after_empty_branch(x)
+  if x.is_a?(Integer)
+  elsif x.is_a?(String)
+  else
+    raise #: absurd(x)
+  end
+end
+
+#: (Integer | String) -> void
+def in_non_final_rescue(x)
+  begin
+    puts x
+  rescue ArgumentError
+    case x
+    when Integer
+    else
+      raise #: absurd(x) # error: Control flow could reach `T.absurd` because the type `String` wasn't handled
+    end
+  rescue TypeError
+  end
+end
+
+#: type absurd = Integer
+
+#: (Integer) -> void
+def type_alias_named_absurd(x)
+  y = x #: absurd | String
 end
 
 # --- incorrect usage ---------------------------------------------------------
 
 #: (Integer) -> void
-def not_enough_args(x)
-  #: absurd # error: Unexpected RBS assertion comment found in `method`
+def standalone_absurd(x)
+  case x
+  when Integer
+  else
+    #: absurd(x) # error: RBS absurd must always be used with a raise
+  end
 end
 
 #: (Integer) -> void
-def too_many_args(x)
-  if x.nil?
-    nil #: absurd # error: `T.absurd` expects to be called on a variable
+def not_a_raise(x)
+  x #: absurd(x) # error: RBS absurd must always be used with a raise
+end
+
+#: (Integer) -> void
+def malformed_absurd(x)
+  raise #: absurd(x.to_s) # error: RBS absurd requires a variable name
+end
+
+#: (Integer) -> void
+def missing_variable(x)
+  raise #: absurd # error: RBS absurd requires a variable name
+end
+
+#: (Integer) -> void
+def old_syntax(x)
+  x #: absurd # error: RBS absurd requires a variable name
+end
+
+#: (Integer) -> void
+def constant_name(x)
+  raise #: absurd(X) # error: RBS absurd requires a variable name
+end
+
+#: -> void
+def undefined_local
+  # An undefined local is treated as possibly uninitialized, with type NilClass.
+  raise #: absurd(does_not_exist) # error: Control flow could reach `T.absurd` because the type `NilClass` wasn't handled
+end
+
+#: (Integer | String) -> void
+def raise_with_arguments(x)
+  case x
+  when Integer
+  when String
+  else
+    raise ArgumentError, "Unexpected: #{x}" #: absurd(x)
+  end
+end
+
+#: (Integer | String) -> void
+def raise_unresolved_constant(x)
+  case x
+  when Integer
+  when String
+  else
+    raise DoesNotExist #: absurd(x) # error: Unable to resolve constant `DoesNotExist`
+  end
+end
+
+#: (Integer | String) -> void
+def raise_signature_is_checked(x)
+  case x
+  when Integer
+  when String
+  else
+    raise 42 #: absurd(x) # error: Expected `T.any(T::Class[T.anything], Exception, String)` but found `Integer(42)` for argument `arg0`
   end
 end

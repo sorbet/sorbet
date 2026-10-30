@@ -284,8 +284,8 @@ GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue, shared_ptr<lsp::Type
     typeParameters.reserve(PAYLOAD_MAX_TYPE_ARGUMENT_COUNT);
     typeMembers.reserve(PAYLOAD_MAX_TYPE_MEMBER_COUNT);
 
-    int namesByHashSize = nextPowerOfTwo(
-        2 * (PAYLOAD_MAX_UTF8_NAME_COUNT + PAYLOAD_MAX_CONSTANT_NAME_COUNT + PAYLOAD_MAX_UNIQUE_NAME_COUNT));
+    uint32_t namesByHashSize = NameHash::sizeFor(PAYLOAD_MAX_UTF8_NAME_COUNT + PAYLOAD_MAX_CONSTANT_NAME_COUNT +
+                                                 PAYLOAD_MAX_UNIQUE_NAME_COUNT);
     namesByHash.resize(namesByHashSize);
 
     this->symbolOffsets.emplace_back();
@@ -326,6 +326,7 @@ void GlobalState::initEmpty() {
     ENFORCE_NO_TIMER(klass == Symbols::bottom());
     klass = synthesizeClass(core::Names::Constants::Root(), 0);
     ENFORCE_NO_TIMER(klass == Symbols::root());
+    klass.data(*this)->packageRegistryOwner = Symbols::PackageSpecRegistry();
 
     klass = core::Symbols::root().data(*this)->singletonClass(*this);
     ENFORCE_NO_TIMER(klass == Symbols::rootSingleton());
@@ -1158,12 +1159,22 @@ SymbolRef GlobalState::findRenamedSymbol(ClassOrModuleRef owner, SymbolRef sym) 
     }
 }
 
+namespace {
+
+bool isMangledNamespaceName(const GlobalState &gs, NameRef name) {
+    while (name.hasUniqueNameKind(gs, UniqueNameKind::Singleton)) {
+        name = name.dataUnique(gs)->original;
+    }
+    return name.hasUniqueNameKind(gs, UniqueNameKind::MangleRename);
+}
+
+} // namespace
+
 ClassOrModuleRef GlobalState::enterClassOrModuleSymbol(Loc loc, ClassOrModuleRef owner, NameRef name) {
     // ENFORCE_NO_TIMER(!owner.exists()); // Owner may not exist on purely synthetic symbols.
     ENFORCE_NO_TIMER(name.isClassName(*this));
-    // We should never enter mangled classes (incremental fast path relies on all constants being
-    // defined first).
-    ENFORCE_NO_TIMER(!name.hasUniqueNameKind(*this, core::UniqueNameKind::MangleRename));
+    // Package namespace violations are entered with mangled names so that they cannot claim a constant belonging to
+    // another package.
     ClassOrModuleData ownerScope = owner.dataAllowingNone(*this);
 
     auto &store = ownerScope->members()[name];
@@ -1182,70 +1193,71 @@ ClassOrModuleRef GlobalState::enterClassOrModuleSymbol(Loc loc, ClassOrModuleRef
     data->addLoc(*this, loc);
     DEBUG_ONLY(categoryCounterInc("symbols", "class"));
 
+    auto packageInfo = packageInfoForClassOrModule(owner, name);
+    data->packageRegistryOwner = packageInfo.packageRegistryOwner;
+    data->package = packageInfo.package;
+
+    return ret;
+}
+
+GlobalState::ClassOrModulePackageInfo GlobalState::packageInfoForClassOrModule(ClassOrModuleRef owner,
+                                                                               NameRef name) const {
     if (!this->packageDB().enabled()) {
         // Note that this case also initializes `<PackageSpecRegistry>` itself as being not owned by
         // a package. We manually set it back to Symbols::PackageSpecRegistry() in `initEmpty` to
         // ensure that the ownership propagates through to package symbols that are entered later.
-        data->packageRegistryOwner = Symbols::noClassOrModule();
-        return ret;
+        return {Symbols::noClassOrModule(), packages::MangledName()};
+    }
+
+    // A mangled class is a separate recovery symbol, whether created for a package violation or a
+    // constant-kind conflict. It must not inherit the original constant's package ownership or registry
+    // cursor: doing so could let rejected definitions claim a namespace belonging to another package.
+    if (isMangledNamespaceName(*this, name)) {
+        return {Symbols::noClassOrModule(), packages::MangledName()};
     }
 
     // TODO(trevor) remove this once we've fully migrated to test-packages
-    if (owner == Symbols::root() && name == packages::PackageDB::TEST_NAMESPACE) {
+    if (owner == Symbols::root() &&
+        (!this->packageDB().testPackages() && name == packages::PackageDB::TEST_NAMESPACE)) {
         // Leave packageRegistryOwner as `<PackageSpecRegistry>` (essentially, skip over `Test` when
         // searching for package names). Leave `package` as the non-existent package name.
-        return ret;
+        return {Symbols::PackageSpecRegistry(), packages::MangledName()};
     }
 
     auto ownerData = owner.data(*this);
     auto ownerPackageRegistryOwner = ownerData->packageRegistryOwner;
-    auto ownerCanStartPackageLookup =
-        owner == Symbols::root() || owner.isPackageSpecSymbol(*this) ||
-        (ownerData->owner == Symbols::root() && ownerData->name == packages::PackageDB::TEST_NAMESPACE);
-    if (!ownerCanStartPackageLookup && !ownerData->package.exists() &&
-        ownerPackageRegistryOwner == Symbols::PackageSpecRegistry()) {
-        // This owner is implicitly unpackaged. Definitions nested under it must remain unpackaged rather than
-        // resuming a package-name search below the unpackaged namespace.
-        ownerPackageRegistryOwner = Symbols::noClassOrModule();
-    }
-
     if (!ownerPackageRegistryOwner.exists()) {
         // Our owner was already past the end of the PackageSpecRegistry namespace.
         // Propogate that we are too, and mark us as being owned by whatever package our owner was.
-        data->packageRegistryOwner = Symbols::noClassOrModule();
-        data->package = ownerData->package;
-        return ret;
+        return {Symbols::noClassOrModule(), ownerData->package};
     }
 
     auto registryName = name;
     while (registryName.hasUniqueNameKind(*this, UniqueNameKind::Singleton)) {
         registryName = registryName.dataUnique(*this)->original;
     }
-    auto packageRegistryOwner = ownerPackageRegistryOwner.data(*this)->findMember(*this, registryName);
-    data->packageRegistryOwner = packageRegistryOwner.exists() && packageRegistryOwner.isClassOrModule()
-                                     // Found narrower entry in <PackageSpecRegistry> hierarchy
-                                     ? packageRegistryOwner.asClassOrModuleRef()
-                                     // Set to `noClassOrModule()` to ensure that we don't keep
-                                     // looking for something (e.g., don't want Opus::A::B::C::D
-                                     // to find <PackageSpecRegistry>::Opus::A::D even if it
-                                     // exists--the intermediate namespaces were missing).
-                                     : Symbols::noClassOrModule();
+    auto packageRegistryMember = ownerPackageRegistryOwner.data(*this)->findMember(*this, registryName);
+    auto packageRegistryOwner = packageRegistryMember.exists() && packageRegistryMember.isClassOrModule()
+                                    // Found narrower entry in <PackageSpecRegistry> hierarchy
+                                    ? packageRegistryMember.asClassOrModuleRef()
+                                    // Set to `noClassOrModule()` to ensure that we don't keep
+                                    // looking for something (e.g., don't want Opus::A::B::C::D
+                                    // to find <PackageSpecRegistry>::Opus::A::D even if it
+                                    // exists--the intermediate namespaces were missing).
+                                    : Symbols::noClassOrModule();
 
-    if (!data->packageRegistryOwner.exists()) {
-        data->package = ownerData->package;
-        return ret;
+    if (!packageRegistryOwner.exists()) {
+        return {packageRegistryOwner, ownerData->package};
     }
 
-    auto pkg = packages::MangledName(data->packageRegistryOwner);
+    auto pkg = packages::MangledName(packageRegistryOwner);
     if (this->packageDB().getPackageInfo(pkg).exists()) {
-        data->package = pkg;
+        return {packageRegistryOwner, pkg};
     } else {
         // We narrowed the packageRegistryOwner to an intermediate namespace (not an actual package),
         // so our package is still the same as the package of our owner.
-        data->package = ownerData->package;
+        return {packageRegistryOwner, ownerData->package};
     }
-
-    return ret;
 }
 
 TypeMemberRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef name, Variance variance) {
@@ -1276,11 +1288,12 @@ TypeMemberRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, Name
 
     auto contiguousStrataUntil = this->contiguousStrataUntil();
     const auto &boundary = this->symbolOffsets[contiguousStrataUntil.rawId()];
-    ENFORCE(!owner.exists() || owner.id() >= boundary.classAndModulesOffset,
-            "Entering type member `{}` at {} into `{}`, which belongs to an earlier stratum: owner_id={} "
-            "contiguous_strata_until={} class_boundary={}",
-            name.show(*this), loc.showRaw(*this), owner.show(*this), owner.id(), contiguousStrataUntil.rawId(),
-            boundary.classAndModulesOffset);
+    if (owner.exists() && owner.id() < boundary.classAndModulesOffset) {
+        Exception::raise("Entering type member `{}` at {} into `{}`, which belongs to an earlier stratum: owner_id={} "
+                         "contiguous_strata_until={} class_boundary={}",
+                         name.show(*this), loc.showRaw(*this), owner.show(*this), owner.id(),
+                         contiguousStrataUntil.rawId(), boundary.classAndModulesOffset);
+    }
 
     auto result = TypeMemberRef(*this, typeMembers.size());
     store = result; // DO NOT MOVE this assignment down. emplace_back on typeMembers invalidates `store`
@@ -1614,7 +1627,7 @@ void NameHash::moveNames(Bucket *from, Bucket *to, unsigned int szFrom, unsigned
 }
 
 void NameHash::expandNames(uint32_t utf8NameSize, uint32_t constantNameSize, uint32_t uniqueNameSize) {
-    uint32_t hashTableSize = 2 * nextPowerOfTwo(utf8NameSize + constantNameSize + uniqueNameSize);
+    uint32_t hashTableSize = NameHash::sizeFor(utf8NameSize + constantNameSize + uniqueNameSize);
 
     if (hashTableSize > buckets_.size()) {
         vector<Bucket> new_namesByHash(hashTableSize);
@@ -1672,14 +1685,7 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
 FileRef GlobalState::enterFile(shared_ptr<File> file) {
     ENFORCE_NO_TIMER(!fileTableFrozen);
 
-    SLOW_DEBUG_ONLY(for (auto &f
-                         : this->getFiles()) {
-        if (f) {
-            if (f->path() == file->path()) {
-                Exception::raise("Request to `enterFile` for already-entered file path?");
-            }
-        }
-    })
+    ENFORCE(!findFileByPath(file->path()).exists(), "Request to `enterFile` for already-entered file path?");
 
     symbolsReferencedByFile.emplace_back();
     return files->emplace(std::move(file));
@@ -1866,7 +1872,7 @@ void GlobalState::sanityCheckTableSizes() const {
     ENFORCE_NO_TIMER(!namesByHash.empty(), "empty name hash table size");
     ENFORCE_NO_TIMER((namesByHash.size() & (namesByHash.size() - 1)) == 0,
                      "name hash table size is not a power of two");
-    ENFORCE_NO_TIMER(nextPowerOfTwo(utf8Names.capacity() + constantNames.capacity() + uniqueNames.capacity()) * 2 ==
+    ENFORCE_NO_TIMER(NameHash::sizeFor(utf8Names.capacity() + constantNames.capacity() + uniqueNames.capacity()) ==
                          namesByHash.capacity(),
                      "name table and hash name table sizes out of sync names.capacity={} namesByHash.capacity={}",
                      namesUsedTotal(), namesByHash.capacity());
@@ -2109,7 +2115,8 @@ unique_ptr<GlobalState> GlobalState::copyForIndexThread(
     const vector<string> &extraPackageFilesDirectorySlashPrefixes,
     const vector<string> &packageSkipRBIExportEnforcementDirs, const vector<string> &allowRelaxedPackagerChecksFor,
     const vector<string> &updateVisibilityFor, const vector<string> &packagerLayers, string errorHint,
-    packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility, bool packageAttributedErrors) const {
+    packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility, bool packageAttributedErrors,
+    bool testPackages) const {
     ENFORCE(fileTableFrozen);
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
 
@@ -2124,6 +2131,11 @@ unique_ptr<GlobalState> GlobalState::copyForIndexThread(
     // Additional options that might be used during indexing are manually copied over here
     result->kvstoreUuid = this->kvstoreUuid;
 
+    // The rewriter runs semantic extensions on every class body, so index threads need them too.
+    for (auto &semanticExtension : this->semanticExtensions) {
+        result->semanticExtensions.emplace_back(semanticExtension->deepCopy(*this, *result));
+    }
+
     if (packagerEnabled) {
         core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*result);
         core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = result->unfreezePackages();
@@ -2131,7 +2143,7 @@ unique_ptr<GlobalState> GlobalState::copyForIndexThread(
                                    extraPackageFilesDirectorySlashDeprecatedPrefixes,
                                    extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs,
                                    allowRelaxedPackagerChecksFor, updateVisibilityFor, packagerLayers, errorHint,
-                                   genPackagesMode, allowRelaxingTestVisibility, packageAttributedErrors);
+                                   genPackagesMode, allowRelaxingTestVisibility, packageAttributedErrors, testPackages);
     }
 
     return result;
@@ -2143,7 +2155,7 @@ unique_ptr<GlobalState> GlobalState::copyForLSPTypechecker(
     const vector<string> &extraPackageFilesDirectorySlashPrefixes,
     const vector<string> &packageSkipRBIExportEnforcementDirs, const vector<string> &allowRelaxedPackagerChecksFor,
     const vector<string> &updateVisibilityFor, const vector<string> &packagerLayers, string errorHint,
-    packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility) const {
+    packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility, bool testPackages) const {
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
 
     result->initEmpty();
@@ -2164,7 +2176,7 @@ unique_ptr<GlobalState> GlobalState::copyForLSPTypechecker(
                                    extraPackageFilesDirectorySlashDeprecatedPrefixes,
                                    extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs,
                                    allowRelaxedPackagerChecksFor, updateVisibilityFor, packagerLayers, errorHint,
-                                   genPackagesMode, allowRelaxingTestVisibility, packageAttributedErrors);
+                                   genPackagesMode, allowRelaxingTestVisibility, packageAttributedErrors, testPackages);
     }
 
     return result;
@@ -2177,7 +2189,7 @@ unique_ptr<GlobalState> GlobalState::copyForSlowPath(
     const vector<string> &packageSkipRBIExportEnforcementDirs, const vector<string> &allowRelaxedPackagerChecksFor,
     const vector<string> &updateVisibilityFor, const vector<string> &packagerLayers, string errorHint,
     packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility, bool packageAttributedErrors,
-    core::packages::Stratum toStratum) const {
+    bool testPackages, core::packages::Stratum toStratum) const {
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
 
     // We omit a call to `initEmpty` here, as the only intended use of this function is to have its symbol table
@@ -2208,11 +2220,11 @@ unique_ptr<GlobalState> GlobalState::copyForSlowPath(
         {
             core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*result);
             core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = result->unfreezePackages();
-            result->setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes,
-                                       extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                                       extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs,
-                                       allowRelaxedPackagerChecksFor, updateVisibilityFor, packagerLayers, errorHint,
-                                       genPackagesMode, allowRelaxingTestVisibility, packageAttributedErrors);
+            result->setPackagerOptions(
+                extraPackageFilesDirectoryUnderscorePrefixes, extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs,
+                allowRelaxedPackagerChecksFor, updateVisibilityFor, packagerLayers, errorHint, genPackagesMode,
+                allowRelaxingTestVisibility, packageAttributedErrors, testPackages);
         }
 
         result->copySymbolTableFrom(*this, toStratum);
@@ -2460,7 +2472,8 @@ void GlobalState::setPackagerOptions(const vector<string> &extraPackageFilesDire
                                      const vector<string> &allowRelaxedPackagerChecksFor,
                                      const vector<string> &updateVisibilityFor, const vector<string> &packagerLayers,
                                      string errorHint, packages::GenPackagesMode genPackagesMode,
-                                     bool allowRelaxingTestVisibility, bool packageAttributedErrors) {
+                                     bool allowRelaxingTestVisibility, bool packageAttributedErrors,
+                                     bool testPackages) {
     ENFORCE_NO_TIMER(!packageDB_.frozen);
 
     packageDB_.enabled_ = true;
@@ -2476,6 +2489,7 @@ void GlobalState::setPackagerOptions(const vector<string> &extraPackageFilesDire
     absl::c_transform(packagerLayers, std::back_inserter(packageDB_.layers_),
                       [this](const auto &layer) { return enterNameUTF8(layer); });
     packageDB_.errorHint_ = errorHint;
+    packageDB_.testPackages_ = testPackages;
 }
 
 packages::UnfreezePackages GlobalState::unfreezePackages() {

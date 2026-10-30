@@ -102,7 +102,7 @@ module T::Private::Methods
   sig {params(key: String, sig_block: T.proc.returns(Signature)).returns(T::Boolean)}
   def self._sig_block_is_current?(key, sig_block); end
 
-  sig {params(declaration_block: DeclarationBlock).returns(T::Private::Methods::Declaration)}
+  sig {params(declaration_block: DeclarationBlock).returns(T.any(Declaration, Signature))}
   def self.run_builder(declaration_block); end
 
   sig {params(method_name: Symbol, original_method: UnboundMethod, current_declaration: T::Private::Methods::Declaration).returns(T::Private::Methods::Signature)}
@@ -114,17 +114,11 @@ module T::Private::Methods
   sig {params(mod: Module, signature: T::Private::Methods::Signature, original_method: UnboundMethod).void}
   def self.unwrap_method(mod, signature, original_method); end
 
-  sig {params(method: UnboundMethod).returns(T::Boolean)}
-  def self.has_sig_block_for_method(method); end
-
   sig {params(method: UnboundMethod).returns(T.nilable(T::Private::Methods::Signature))}
   def self.maybe_run_sig_block_for_method(method); end
 
   sig {params(key: String).returns(T.nilable(T::Private::Methods::Signature))}
   def self.maybe_run_sig_block_for_key(key); end
-
-  sig {params(method: UnboundMethod).returns(T::Private::Methods::Signature)}
-  def self.run_sig_block_for_method(method); end
 
   sig {params(force_type_init: T::Boolean).void}
   def self.run_all_sig_blocks(force_type_init: true); end

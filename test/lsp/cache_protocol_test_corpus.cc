@@ -680,6 +680,12 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "ReapOldCacheDirectories") {
     REQUIRE(!FileOps::exists(fmt::format("{}/lock.mdb", path)));
     REQUIRE(FileOps::exists(fmt::format("{}/keep-around", path)));
 
+    // Reaping caches again should be fine, and should leave the cache dir in the same state.
+    realmain::cache::SessionCache::reapOldCaches(*opts);
+    REQUIRE(!FileOps::exists(fmt::format("{}/data.mdb", path)));
+    REQUIRE(!FileOps::exists(fmt::format("{}/lock.mdb", path)));
+    REQUIRE(FileOps::exists(fmt::format("{}/keep-around", path)));
+
     // Clean up
     FileOps::removeFile(fmt::format("{}/keep-around", path));
     FileOps::removeDir(path);

@@ -36,7 +36,7 @@ public:
     bool isUnconditional() const {
         return thenb == elseb;
     }
-    BlockExit() : cond(), thenb(nullptr), elseb(nullptr){};
+    BlockExit() : cond(), thenb(nullptr), elseb(nullptr) {};
 };
 
 class Binding final {

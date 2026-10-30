@@ -9,7 +9,27 @@ namespace sorbet::core {
 using namespace std;
 
 ErrorQueue::ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer, shared_ptr<ErrorFlusher> errorFlusher)
-    : errorFlusher(errorFlusher), owner(this_thread::get_id()), logger(logger), tracer(tracer){};
+    : errorFlusher(errorFlusher), owner(this_thread::get_id()), logger(logger), tracer(tracer) {};
+
+void ErrorQueue::collectAllInternal() {
+    core::ErrorQueueMessage msg;
+    for (auto result = queue.try_pop(msg); result.gotItem(); result = queue.try_pop(msg)) {
+        collected[msg.whatFile].emplace_back(make_unique<ErrorQueueMessage>(move(msg)));
+    }
+}
+
+UnorderedSet<FileRef> ErrorQueue::collectAll() {
+    checkOwned();
+
+    this->collectAllInternal();
+
+    UnorderedSet<FileRef> hasErrors;
+    for (auto &entry : this->collected) {
+        hasErrors.insert(entry.first);
+    }
+
+    return hasErrors;
+}
 
 void ErrorQueue::flushAllErrors(const GlobalState &gs) {
     checkOwned();
@@ -35,10 +55,7 @@ void ErrorQueue::flushErrorsForFile(const GlobalState &gs, FileRef file) {
     filesFlushedCount.fetch_add(1);
     Timer timeit(tracer, "ErrorQueue::flushErrorsForFile");
 
-    core::ErrorQueueMessage msg;
-    for (auto result = queue.try_pop(msg); result.gotItem(); result = queue.try_pop(msg)) {
-        collected[msg.whatFile].emplace_back(make_unique<ErrorQueueMessage>(move(msg)));
-    }
+    this->collectAllInternal();
 
     errorFlusher->flushErrors(logger, gs, file, move(collected[file]));
 }
@@ -76,10 +93,7 @@ bool ErrorQueue::isEmpty() {
 UnorderedMap<core::FileRef, vector<unique_ptr<core::ErrorQueueMessage>>> ErrorQueue::drainAll() {
     checkOwned();
 
-    core::ErrorQueueMessage msg;
-    for (auto result = queue.try_pop(msg); result.gotItem(); result = queue.try_pop(msg)) {
-        collected[msg.whatFile].emplace_back(make_unique<ErrorQueueMessage>(move(msg)));
-    }
+    this->collectAllInternal();
 
     auto out = std::move(collected);
 

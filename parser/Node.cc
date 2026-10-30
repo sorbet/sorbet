@@ -9,6 +9,17 @@ using namespace std;
 
 namespace sorbet::parser {
 
+string_view showBlockStyle(BlockStyle style) {
+    switch (style) {
+        case BlockStyle::Present:
+            return "present";
+        case BlockStyle::DoEnd:
+            return "do-end";
+        case BlockStyle::Braces:
+            return "braces";
+    }
+}
+
 void Node::printTabs(fmt::memory_buffer &to, int count) const {
     int i = 0;
     while (i < count) {
@@ -17,8 +28,7 @@ void Node::printTabs(fmt::memory_buffer &to, int count) const {
     }
 }
 
-void Node::printNode(fmt::memory_buffer &to, const unique_ptr<Node> &node, const core::GlobalState &gs,
-                     int tabs) const {
+void Node::printNode(fmt::memory_buffer &to, Node *node, const core::GlobalState &gs, int tabs) const {
     if (node) {
         fmt::format_to(std::back_inserter(to), "{}\n", node->toStringWithTabs(gs, tabs));
     } else {
@@ -26,8 +36,7 @@ void Node::printNode(fmt::memory_buffer &to, const unique_ptr<Node> &node, const
     }
 }
 
-void Node::printNodeJSON(fmt::memory_buffer &to, const unique_ptr<Node> &node, const core::GlobalState &gs,
-                         int tabs) const {
+void Node::printNodeJSON(fmt::memory_buffer &to, Node *node, const core::GlobalState &gs, int tabs) const {
     if (node) {
         fmt::format_to(std::back_inserter(to), "{}", node->toJSON(gs, tabs));
     } else {
@@ -35,8 +44,8 @@ void Node::printNodeJSON(fmt::memory_buffer &to, const unique_ptr<Node> &node, c
     }
 }
 
-void Node::printNodeJSONWithLocs(fmt::memory_buffer &to, const unique_ptr<Node> &node, const core::GlobalState &gs,
-                                 core::FileRef file, int tabs) const {
+void Node::printNodeJSONWithLocs(fmt::memory_buffer &to, Node *node, const core::GlobalState &gs, core::FileRef file,
+                                 int tabs) const {
     if (node) {
         fmt::format_to(std::back_inserter(to), "{}", node->toJSONWithLocs(gs, file, tabs));
     } else {
@@ -44,8 +53,7 @@ void Node::printNodeJSONWithLocs(fmt::memory_buffer &to, const unique_ptr<Node> 
     }
 }
 
-void Node::printNodeWhitequark(fmt::memory_buffer &to, const unique_ptr<Node> &node, const core::GlobalState &gs,
-                               int tabs) const {
+void Node::printNodeWhitequark(fmt::memory_buffer &to, Node *node, const core::GlobalState &gs, int tabs) const {
     if (node) {
         fmt::format_to(std::back_inserter(to), "{}", node->toWhitequark(gs, tabs));
     } else {

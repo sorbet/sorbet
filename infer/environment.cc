@@ -392,13 +392,33 @@ bool Environment::hasType(core::Context ctx, cfg::LocalRef symbol) const {
     return fnd->second.typeAndOrigins.type != nullptr;
 }
 
-const core::TypeAndOrigins &Environment::getTypeAndOrigin(cfg::LocalRef symbol) const {
+Environment::VariableInfo Environment::getRefInfo(cfg::LocalRef symbol) const {
     auto fnd = _vars.find(symbol);
     if (fnd == _vars.end()) {
-        return uninitialized;
+        return VariableInfo{
+            uninitialized,
+            TestedKnowledge::empty,
+            false,
+            false,
+        };
     }
-    ENFORCE(fnd->second.typeAndOrigins.type != nullptr);
-    return fnd->second.typeAndOrigins;
+
+    return VariableInfo{
+        fnd->second.typeAndOrigins,
+        fnd->second.knowledge,
+        fnd->second.knownTruthy,
+        true,
+    };
+}
+
+const core::TypeAndOrigins &Environment::getTypeAndOrigin(cfg::LocalRef symbol) const {
+    auto info = getRefInfo(symbol);
+
+    if (info.wasFound) {
+        ENFORCE(info.typeAndOrigins.type != nullptr);
+    }
+
+    return info.typeAndOrigins;
 }
 
 const core::TypeAndOrigins &Environment::getAndFillTypeAndOrigin(cfg::LocalRef symbol, core::TypePtr &ty) const {
@@ -412,11 +432,7 @@ const core::TypeAndOrigins &Environment::getAndFillTypeAndOrigin(cfg::VariableUs
 }
 
 bool Environment::getKnownTruthy(cfg::LocalRef var) const {
-    auto fnd = _vars.find(var);
-    if (fnd == _vars.end()) {
-        return false;
-    }
-    return fnd->second.knownTruthy;
+    return getRefInfo(var).knownTruthy;
 }
 
 void Environment::propagateKnowledge(core::Context ctx, cfg::LocalRef to, cfg::LocalRef from,
@@ -851,7 +867,8 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, cfg::CF
     this->isDead |= other.isDead;
     for (auto &pair : _vars) {
         auto var = pair.first;
-        const auto &otherTO = other.getTypeAndOrigin(var);
+        const auto &otherInfo = other.getRefInfo(var);
+        const auto &otherTO = otherInfo.typeAndOrigins;
         auto &thisTO = pair.second.typeAndOrigins;
         if (thisTO.type != nullptr) {
             thisTO.type = core::Types::any(ctx, thisTO.type, otherTO.type);
@@ -861,22 +878,22 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, cfg::CF
                     thisTO.origins.emplace_back(origin);
                 }
             }
-            pair.second.knownTruthy = pair.second.knownTruthy && other.getKnownTruthy(var);
+            pair.second.knownTruthy = pair.second.knownTruthy && otherInfo.knownTruthy;
         } else {
             thisTO = otherTO;
-            pair.second.knownTruthy = other.getKnownTruthy(var);
+            pair.second.knownTruthy = otherInfo.knownTruthy;
         }
 
         if (bb->flags.isLoopHeader && bb->outerLoops <= var.maxLoopWrite(inWhat)) {
             continue;
         }
-        bool canBeFalsy = core::Types::canBeFalsy(ctx, otherTO.type) && !other.getKnownTruthy(var);
+        bool canBeFalsy = core::Types::canBeFalsy(ctx, otherTO.type) && !otherInfo.knownTruthy;
         bool canBeTruthy = core::Types::canBeTruthy(ctx, otherTO.type);
 
         if (canBeTruthy) {
             auto &thisKnowledge = pair.second.knowledge;
             auto otherTruthy =
-                other.getKnowledge(var, false).truthy().under(ctx, other, inWhat, bb, knowledgeFilter.isNeeded(var));
+                otherInfo.knowledge.truthy().under(ctx, other, inWhat, bb, knowledgeFilter.isNeeded(var));
             if (!otherTruthy->isDead) {
                 if (!thisKnowledge.seenTruthyOption) {
                     thisKnowledge.seenTruthyOption = true;
@@ -889,8 +906,7 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, cfg::CF
 
         if (canBeFalsy) {
             auto &thisKnowledge = pair.second.knowledge;
-            auto otherFalsy =
-                other.getKnowledge(var, false).falsy().under(ctx, other, inWhat, bb, knowledgeFilter.isNeeded(var));
+            auto otherFalsy = otherInfo.knowledge.falsy().under(ctx, other, inWhat, bb, knowledgeFilter.isNeeded(var));
             if (!otherFalsy->isDead) {
                 if (!thisKnowledge.seenFalsyOption) {
                     thisKnowledge.seenFalsyOption = true;
@@ -948,9 +964,10 @@ void Environment::populateFrom(core::Context ctx, const Environment &other) {
     this->isDead = other.isDead;
     for (auto &pair : _vars) {
         auto var = pair.first;
-        pair.second.typeAndOrigins = other.getTypeAndOrigin(var);
-        pair.second.knowledge.replace(var, typeTestsWithVar, other.getKnowledge(var, false));
-        pair.second.knownTruthy = other.getKnownTruthy(var);
+        auto info = other.getRefInfo(var);
+        pair.second.typeAndOrigins = info.typeAndOrigins;
+        pair.second.knowledge.replace(var, typeTestsWithVar, info.knowledge);
+        pair.second.knownTruthy = info.knownTruthy;
     }
 
     this->pinnedTypes = other.pinnedTypes;
@@ -995,11 +1012,10 @@ core::TypePtr flatmapHack(core::Context ctx, const core::TypePtr &receiver, cons
     return mapType;
 }
 
-core::TypePtr
-Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Binding &bind, int loopCount,
-                            int bindMinLoops, KnowledgeFilter &knowledgeFilter, core::TypeConstraint &constr,
-                            const core::TypePtr &methodReturnType,
-                            const optional<cfg::BasicBlock::BlockExitCondInfo> &parentUpdateKnowledgeReceiver) {
+core::TypePtr Environment::processBinding(
+    core::Context ctx, const cfg::CFG &inWhat, cfg::Binding &bind, int loopCount, int bindMinLoops,
+    KnowledgeFilter &knowledgeFilter, core::TypeConstraint &constr, const core::TypePtr &methodReturnType,
+    const optional<cfg::BasicBlock::BlockExitCondInfo> &parentUpdateKnowledgeReceiver, bool deadOnEntry) {
     try {
         core::TypeAndOrigins tp;
         bool noLoopChecking = cfg::isa_instruction<cfg::Alias>(bind.value) ||
@@ -1546,6 +1562,16 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 } else if (!expectedReturnType.isUntyped() && !expectedReturnType.isTop() &&
                            typeAndOrigin.type.isUntyped()) {
                     auto what = core::errors::Infer::errorClassForUntyped(ctx, ctx.file, typeAndOrigin.type);
+
+                    // Computing the precise loc for reporting requires line breaks, which
+                    // in turn requires the source of the file.  In a world where we don't
+                    // always keep the source around, materializing that source can be
+                    // expensive, and the untyped error being reported here only matters
+                    // at `typed: strong`.  To avoid materializing that source, we check
+                    // whether the error would even matter in the first place.
+                    if (!ctx.state.shouldReportErrorOn(ctx.file, what)) {
+                        return;
+                    }
                     auto errLoc = ctx.locAt(bind.loc).truncateToFirstLine(ctx);
                     if (auto e = ctx.state.beginError(errLoc, what)) {
                         e.setHeader("Value returned from method `{}` is `{}`", ctx.owner.name(ctx).show(ctx),
@@ -1609,14 +1635,21 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
             [&](cfg::TAbsurd &i) {
                 const core::TypeAndOrigins &typeAndOrigin = getTypeAndOrigin(i.what.variable);
 
-                if (auto e = ctx.beginError(bind.loc, core::errors::Infer::NotExhaustive)) {
-                    if (typeAndOrigin.type.isUntyped()) {
-                        e.setHeader("Control flow could reach `{}` because argument was `{}`", "T.absurd", "T.untyped");
-                    } else {
-                        e.setHeader("Control flow could reach `{}` because the type `{}` wasn't handled", "T.absurd",
-                                    typeAndOrigin.type.show(ctx));
+                // Dead-entry blocks may be checked using types from before an impossible condition.
+                // In a live-entry block, however, a preceding noreturn call must not hide a
+                // non-exhaustive argument.
+                auto absurdIsUnreachable = deadOnEntry || typeAndOrigin.type.isBottom();
+                if (!absurdIsUnreachable) {
+                    if (auto e = ctx.beginError(bind.loc, core::errors::Infer::NotExhaustive)) {
+                        if (typeAndOrigin.type.isUntyped()) {
+                            e.setHeader("Control flow could reach `{}` because argument was `{}`", "T.absurd",
+                                        "T.untyped");
+                        } else {
+                            e.setHeader("Control flow could reach `{}` because the type `{}` wasn't handled",
+                                        "T.absurd", typeAndOrigin.type.show(ctx));
+                        }
+                        e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
                     }
-                    e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
                 }
 
                 tp.type = core::Types::bottom();
@@ -1957,13 +1990,13 @@ core::TypeAndOrigins Environment::getTypeFromRebind(core::Context ctx, const cor
 }
 
 const TestedKnowledge &Environment::getKnowledge(cfg::LocalRef symbol, bool shouldFail) const {
-    auto fnd = _vars.find(symbol);
-    if (fnd == _vars.end()) {
+    auto info = getRefInfo(symbol);
+    if (!info.wasFound) {
         ENFORCE(!shouldFail, "Missing knowledge?");
-        return TestedKnowledge::empty;
+    } else {
+        info.knowledge.sanityCheck();
     }
-    fnd->second.knowledge.sanityCheck();
-    return fnd->second.knowledge;
+    return info.knowledge;
 }
 
 void Environment::initializeBasicBlockArgs(const cfg::BasicBlock &bb) {

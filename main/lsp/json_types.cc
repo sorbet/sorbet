@@ -18,7 +18,7 @@ string stringify(const rapidjson::Value &value) {
 }
 
 DeserializationError::DeserializationError(string_view message)
-    : runtime_error(fmt::format("Error deserializing JSON message: {}", message)) {}
+    : runtime_error(fmt::format("Error deserializing JSON message: {}", message)), message(string(message)) {}
 
 InvalidStringEnumError::InvalidStringEnumError(string_view enumName, string_view value)
     : DeserializationError(fmt::format("Invalid value for enum type `{}`: {}", enumName, value)),
@@ -40,7 +40,7 @@ JSONConstantError::JSONConstantError(string_view fieldName, string_view expected
                                        expectedValue, stringify(actualValue))) {}
 
 SerializationError::SerializationError(string_view message)
-    : runtime_error(fmt::format("Error serializing object to JSON message: {}", message)) {}
+    : runtime_error(fmt::format("Error serializing object to JSON message: {}", message)), message(string(message)) {}
 
 MissingVariantValueError::MissingVariantValueError(string_view fieldName)
     : SerializationError(fmt::format("Variant field `{}` does not have a value", fieldName)) {}
@@ -73,10 +73,9 @@ InvalidConstantValueError::InvalidConstantValueError(string_view fieldName, stri
     : SerializationError(fmt::format("Expected `{}` to have value \"{}\", but found value \"{}\".", fieldName,
                                      expectedValue, actualValue)) {}
 
-InvalidTypeError::InvalidTypeError(string_view fieldName, string_view expectedType,
-                                   const unique_ptr<rapidjson::Value> &found)
+InvalidTypeError::InvalidTypeError(string_view fieldName, string_view expectedType, const rapidjson::Value &found)
     : SerializationError(fmt::format("Expected field `{}` to have value of type `{}`, but had value `{}`.", fieldName,
-                                     expectedType, stringify(*found))) {}
+                                     expectedType, stringify(found))) {}
 
 const string JSONBaseType::defaultFieldName = "root";
 

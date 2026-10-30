@@ -341,76 +341,108 @@ module Annotations
   class Abstract
     # @abstract
     #: -> Integer
-    def method_abstract1; end # error: Methods declared @abstract with an RBS comment must always raise
+    def method_abstract1; end # error: Methods declared `@abstract` with an RBS comment must contain only a forwarding super call
 
     # @abstract
     #: -> Integer
     def method_abstract2
+      super
+    end
+
+    # @abstract
+    #: -> Integer
+    def method_abstract3 = super
+
+    # @abstract
+    #: -> Integer
+    def method_abstract4 # error: Methods declared `@abstract` with an RBS comment must contain only a forwarding super call
+      super()
+    end
+
+    # @abstract
+    #: -> Integer
+    def method_abstract5 # error: Methods declared `@abstract` with an RBS comment must contain only a forwarding super call
+      puts "foo"
+    end
+
+    # @abstract
+    #: -> Integer
+    def method_abstract6 # error: Methods declared `@abstract` with an RBS comment must contain only a forwarding super call
+      puts "foo"
+      super
+    end
+
+    # @abstract
+    #: -> Integer
+    def method_abstract7 # error: Methods declared `@abstract` with an RBS comment must contain only a forwarding super call
+      super(1)
+    end
+
+    # @abstract
+    #: -> Integer
+    def method_abstract8 # error: Methods declared `@abstract` with an RBS comment must contain only a forwarding super call
       raise
     end
 
     # @abstract
     #: -> Integer
-    def method_abstract3
-      raise "foo"
+    def method_abstract9 # error: Methods declared `@abstract` with an RBS comment must contain only a forwarding super call
+      super {}
     end
 
     # @abstract
-    #: -> Integer
-    def method_abstract4
-      Kernel.raise "foo"
-    end
+    #: (i: Integer) -> Integer
+    def method_abstract10(i:) = super
 
     # @abstract
     #: -> Integer
-    def method_abstract5 # error: Methods declared @abstract with an RBS comment must always raise
-      puts "foo" # error: Abstract methods must not contain any code in their body
-    end
+    private def method_abstract_private = super
 
     # @abstract
     #: -> Integer
-    def method_abstract6 # error: Methods declared @abstract with an RBS comment must always raise
-      puts "foo" # error: Abstract methods must not contain any code in their body
-      raise "foo"
+    #  ^^^^^^^^^^ error: Unused type annotation. No method def before next annotation
+    #: -> Integer
+    def multiple_signatures = super
+
+    # @abstract
+    # @abstract
+    #: -> Integer
+    def repeated_annotations
+      super
     end
 
     # @abstract
-    #: -> Integer
-    def method_abstract7
-      raise StandardError
-    end
-
     # @abstract
     #: -> Integer
-    def method_abstract8
-      raise StandardError, "error"
-    end
+    private def repeated_private = super
 
     # @abstract
-    #: -> Integer
-    def method_abstract8
-      raise ::Abstract::Error, "error"
-    end
-
     # @abstract
     #: -> Integer
-    def method_abstract9 # error: Methods declared @abstract with an RBS comment must always raise
-      Abstract.raise # error: Abstract methods must not contain any code in their body
-    end
-
-    # @abstract
-    #: -> Integer
-    def method_abstract10
-      self.raise
-    end
-
-    #: -> bot
-    def self.raise
-      raise
-    end
-
-    class Error < StandardError; end
+    def repeated_empty; end # error: Methods declared `@abstract` with an RBS comment must contain only a forwarding super call
   end
+
+  # @interface
+  module Interface
+    # @abstract
+    #: (i: Integer) -> String
+    def foo(i:) = super
+  end
+
+  class ImplementationParent
+    #: (i: Integer) -> String
+    def foo(i:) = i.to_s
+  end
+
+  class InheritedImplementation < ImplementationParent
+    include Interface
+  end
+
+  class MissingImplementation # error: Missing definition for abstract method
+    include Interface
+  end
+
+  T.reveal_type(InheritedImplementation.new.foo(i: 1)) # error: Revealed type: `String`
 
   class Final
     extend T::Helpers

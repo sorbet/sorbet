@@ -217,12 +217,20 @@ void ProtocolTest::updateDiagnostics(const LSPMessage &msg) {
             for (const auto &d : (*diagnosticParams)->diagnostics) {
                 diagnostics.push_back(d->copy());
             }
-            this->diagnostics[uriToFilePath(lspWrapper->config(), (*diagnosticParams)->uri)] = move(diagnostics);
+            auto file = uriToFilePath(lspWrapper->config(), (*diagnosticParams)->uri);
+            this->diagnostics[file] = move(diagnostics);
+
+            auto relativeName = absl::StripPrefix(file, this->rootPath);
+            this->staleFiles.erase(string(relativeName));
         }
     }
 }
 
 void ProtocolTest::updateDiagnostics(const vector<unique_ptr<LSPMessage>> &messages) {
+    for (auto &entry : this->diagnostics) {
+        this->staleFiles.insert(string(absl::StripPrefix(entry.first, this->rootPath)));
+    }
+
     for (auto &msg : messages) {
         updateDiagnostics(*msg);
     }
@@ -289,6 +297,14 @@ void assertDiagnostics(vector<unique_ptr<LSPMessage>> messages, vector<ExpectedD
     T::checkAll(sourceFileContents, errorAssertions, diagnostics);
 }
 } // namespace
+
+void ProtocolTest::assertStale(absl::Span<const string> filenames) const {
+    CHECK_MESSAGE(filenames.size() == this->staleFiles.size(), "Mismatch in number of expected stale files");
+
+    for (auto &file : filenames) {
+        CHECK_MESSAGE(this->staleFiles.contains(file), "Missing stale file", file);
+    }
+}
 
 void ProtocolTest::assertErrorDiagnostics(vector<unique_ptr<LSPMessage>> messages,
                                           vector<ExpectedDiagnostic> expected) {

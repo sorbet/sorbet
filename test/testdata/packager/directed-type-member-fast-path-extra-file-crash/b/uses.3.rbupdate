@@ -1,0 +1,26 @@
+# typed: strict
+# frozen_string_literal: true
+# assert-fast-path: a/__package.rb,a/gen.rb,b/__package.rb,b/uses.rb
+
+class B::Uses
+  extend T::Sig
+
+  sig { returns(A::Gen[Integer, Integer, Integer, Integer]) }
+  def self.gen = raise
+
+  sig { returns(Integer) }
+  def self.other = 0
+
+  # Same trick as version 1: adding a method named `other2` pulls the upstream
+  # (stratum 0) a/gen.rb into the fast path, which deletes and re-enters its
+  # `type_member`s at the end of the symbol table.
+  #
+  # This repeats version 1 *after* the slow path in version 2, because that slow
+  # path built a fresh GlobalState (resetting the reopened stratum). Without
+  # that reset, an earlier fast path in the session may have already reopened
+  # stratum 0, which masks the bug.
+  sig { returns(Integer) }
+  def self.other2 = 0
+end
+
+class B::NewClass; end

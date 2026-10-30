@@ -1,0 +1,22 @@
+No errors! Great job.
+# typed: strict
+
+class Producer < PackageSpec
+  export Producer::Alias::Nested
+  export Producer::Alias::Unused
+  export Producer::Alias
+end
+###### gen-packages=strict ######
+producer/__package.rb:3: `Producer` has changes https://srb.help/3734
+     3 |class Producer < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+Errors: 1
+# typed: strict
+
+class Producer < PackageSpec
+
+  export Producer::Alias::Nested
+  export Producer::Alias::Unused
+  export Producer::Alias
+end

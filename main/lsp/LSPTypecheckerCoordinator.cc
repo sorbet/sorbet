@@ -51,7 +51,7 @@ public:
         // Destruct timer, if specified. Causes metric to be reported.
         timeUntilRun = nullptr;
         {
-            Timer timeit(config.logger, "LSPTask::run");
+            Timer timeit(*config.logger, "LSPTask::run");
             timeit.setTag("method", task->methodString());
             task->run(*delegate);
         }
@@ -78,10 +78,10 @@ class DangerousTypecheckerTask : public LSPTypecheckerCoordinator::Task {
 public:
     DangerousTypecheckerTask(const LSPConfiguration &config, unique_ptr<LSPDangerousTypecheckerTask> task,
                              LSPTypechecker &typechecker, WorkerPool &workers)
-        : config(config), task(move(task)), typechecker(typechecker), workers(workers){};
+        : config(config), task(move(task)), typechecker(typechecker), workers(workers) {};
 
     void run() override {
-        Timer timeit(config.logger, "LSPDangerousTypecheckerTask::runSpecial");
+        Timer timeit(*config.logger, "LSPDangerousTypecheckerTask::runSpecial");
         timeit.setTag("method", task->methodString());
         task->runSpecial(typechecker, workers);
     }
@@ -113,13 +113,13 @@ public:
 
 }; // namespace
 
-LSPTypecheckerCoordinator::LSPTypecheckerCoordinator(const shared_ptr<const LSPConfiguration> &config,
+LSPTypecheckerCoordinator::LSPTypecheckerCoordinator(shared_ptr<const LSPConfiguration> config,
                                                      shared_ptr<core::lsp::PreemptionTaskManager> preemptionTaskManager,
                                                      WorkerPool &workers, shared_ptr<TaskQueue> taskQueue)
     : preemptionTaskManager(preemptionTaskManager), shouldTerminate(false),
-      typechecker(config, move(preemptionTaskManager)), config(config), hasDedicatedThread(false),
+      typechecker(config, move(preemptionTaskManager)), config(move(config)), hasDedicatedThread(false),
       workers(workers), taskQueue{std::move(taskQueue)},
-      preemptionWorkers(WorkerPool::create(config->opts.threads, *config->logger)) {}
+      preemptionWorkers(WorkerPool::create(this->config->opts.threads, *this->config->logger)) {}
 
 void LSPTypecheckerCoordinator::asyncRunInternal(shared_ptr<LSPTypecheckerCoordinator::Task> task) {
     if (hasDedicatedThread) {
@@ -145,6 +145,7 @@ class PreemptionLoop : public core::lsp::PreemptionTask {
     TaskQueue &taskQueue;
     LSPTypecheckerDelegate delegate;
     LSPIndexer &indexer;
+    const shared_ptr<PreemptionTestHooks> testHooks;
 
     unique_ptr<Timer> timeUntilRun;
 
@@ -152,7 +153,8 @@ public:
     PreemptionLoop(const LSPConfiguration &config, absl::Notification &finished, TaskQueue &taskQueue,
                    WorkerPool &preemptionWorkers, LSPTypechecker &typechecker, LSPIndexer &indexer)
         : config{config}, finished{finished}, taskQueue{taskQueue},
-          delegate(this->taskQueue, preemptionWorkers, typechecker), indexer{indexer} {}
+          delegate(this->taskQueue, preemptionWorkers, typechecker), indexer{indexer},
+          testHooks{taskQueue.preemptionTestHooks} {}
 
     void timeLatencyUntilRun(unique_ptr<Timer> timer) {
         timeUntilRun = move(timer);
@@ -171,7 +173,7 @@ public:
         // Destruct timer, if specified. Causes metric to be reported.
         this->timeUntilRun = nullptr;
 
-        Timer timeit(config.logger, "preemption_loop");
+        Timer timeit(*config.logger, "preemption_loop");
         for (;;) {
             unique_ptr<LSPTask> task;
             {
@@ -192,7 +194,7 @@ public:
                 taskQueue.tasks().pop_front();
 
                 {
-                    Timer timeit(config.logger, "LSPTask::index");
+                    Timer timeit(*config.logger, "LSPTask::index");
                     timeit.setTag("method", task->methodString());
                     // Index while holding lock to prevent races with processing thread.
                     task->index(indexer);
@@ -205,7 +207,7 @@ public:
             if (task->finalPhase() == LSPTask::Phase::INDEX) {
                 continue;
             }
-            Timer timeit(config.logger, "LSPTask::run");
+            Timer timeit(*config.logger, "LSPTask::run");
             timeit.setTag("method", task->methodString());
             task->run(this->delegate);
         }
@@ -214,6 +216,15 @@ public:
     }
 
     void finish() override {
+        if (testHooks != nullptr) [[unlikely]] {
+            testHooks->preemptionReadyToFinish.Notify();
+            testHooks->resumePreemption.WaitForNotification();
+        }
+        // NOTE: the lock doesn't guard `finished`, but the main thread waits on `finished` in addition to testing the
+        // task queue state in it's mutex Await call. As `finished` is not associated directly with the `taskQueue`
+        // mutex, we need to signal any threads that might be waiting on this mutex that they should check if they can
+        // make progress.
+        absl::MutexLock lck(this->taskQueue.getMutex());
         finished.Notify();
     }
 };

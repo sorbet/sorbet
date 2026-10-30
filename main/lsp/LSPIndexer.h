@@ -26,6 +26,27 @@ class LSPConfiguration;
  * The actual work of typechecking is undertaken by LSPTypechecker.
  */
 class LSPIndexer final {
+public:
+    struct TypecheckingPathResult {
+        TypecheckingPath path = TypecheckingPath::Slow;
+
+        LSPFileUpdates::FastPathFilesToTypecheckResult files;
+
+        // The indexer's commit count when this result was computed. This result must be discarded if this value is less
+        // than the indexer's current count.
+        const uint32_t commitCount = 0;
+
+        TypecheckingPathResult() = delete;
+        explicit TypecheckingPathResult(uint32_t commitCount) : commitCount{commitCount} {}
+
+        TypecheckingPathResult(const TypecheckingPathResult &other) = default;
+        TypecheckingPathResult(TypecheckingPathResult &&other) = default;
+
+        TypecheckingPathResult &operator=(const TypecheckingPathResult &other) = delete;
+        TypecheckingPathResult &operator=(TypecheckingPathResult &&other) = delete;
+    };
+
+private:
     bool initialized = false;
     /** Encapsulates the active configuration for the language server. */
     const std::shared_ptr<const LSPConfiguration> config;
@@ -44,6 +65,12 @@ class LSPIndexer final {
     /** A WorkerPool with 0 workers. */
     std::unique_ptr<WorkerPool> emptyWorkers;
 
+    /**
+     * A count of the number of times we've run `commitEdit`. The results of `getTypecheckingPath` are tagged
+     * with this value, so that we can know when their results have become potentially invalid.
+     */
+    uint32_t commitCount = 0;
+
     void computeFileHashes(const std::vector<std::shared_ptr<core::File>> &files, WorkerPool &workers) const;
 
     /**
@@ -53,11 +80,6 @@ class LSPIndexer final {
     TypecheckingPath
     getTypecheckingPath(LSPFileUpdates &edit,
                         const UnorderedMap<core::FileRef, std::shared_ptr<core::File>> &evictedFiles) const;
-
-    struct TypecheckingPathResult {
-        TypecheckingPath path = TypecheckingPath::Slow;
-        LSPFileUpdates::FastPathFilesToTypecheckResult files;
-    };
 
     /**
      * INVARIANT: `changedFiles` must have hashes computed.
@@ -74,7 +96,7 @@ public:
     /**
      * Determines if the given files can take the fast path relative to the latest committed edit.
      */
-    TypecheckingPath getTypecheckingPath(const std::vector<std::shared_ptr<core::File>> &changedFiles) const;
+    TypecheckingPathResult getTypecheckingPath(const std::vector<std::shared_ptr<core::File>> &changedFiles) const;
 
     /**
      * Computes state hashes for the given set of files. Is a no-op if the provided files all have hashes.
@@ -119,6 +141,11 @@ public:
 
     // Determines if it's possible for the head of the task queue to run during preemption.
     bool preemptionPossible(const TaskQueue::QueueType &tasks) const;
+
+    // Indicates if a typechecking path decision is still valid given the current state of the indexer's name table.
+    bool isTypecheckingPathValid(const TypecheckingPathResult &result) const {
+        return this->commitCount == result.commitCount;
+    }
 };
 
 } // namespace sorbet::realmain::lsp

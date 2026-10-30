@@ -182,6 +182,13 @@ class Environment {
         TestedKnowledge knowledge;
         bool knownTruthy;
     };
+    struct VariableInfo {
+        const core::TypeAndOrigins &typeAndOrigins;
+        const TestedKnowledge &knowledge;
+        bool knownTruthy;
+        bool wasFound;
+    };
+
     // TODO(jvilk): Use vectors.
     UnorderedMap<cfg::LocalRef, VariableState> _vars;
 
@@ -191,6 +198,10 @@ class Environment {
     TypeTestReverseIndex typeTestsWithVar;
 
     bool hasType(core::Context ctx, cfg::LocalRef symbol) const;
+
+    // This is almost `_vars[symbol]` except with special handling
+    // in the case that `symbol` does not exist.
+    VariableInfo getRefInfo(cfg::LocalRef symbol) const;
 
     TestedKnowledge &getKnowledge(cfg::LocalRef symbol, bool shouldFail = true) {
         return const_cast<TestedKnowledge &>(const_cast<const Environment *>(this)->getKnowledge(symbol, shouldFail));
@@ -269,11 +280,11 @@ public:
 
     void populateFrom(core::Context ctx, const Environment &other);
 
-    core::TypePtr
-    processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Binding &bind, int loopCount, int bindMinLoops,
-                   KnowledgeFilter &knowledgeFilter, core::TypeConstraint &constr,
-                   const core::TypePtr &methodReturnType,
-                   const std::optional<cfg::BasicBlock::BlockExitCondInfo> &parentUpdateKnowledgeReceiver);
+    core::TypePtr processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Binding &bind, int loopCount,
+                                 int bindMinLoops, KnowledgeFilter &knowledgeFilter, core::TypeConstraint &constr,
+                                 const core::TypePtr &methodReturnType,
+                                 const std::optional<cfg::BasicBlock::BlockExitCondInfo> &parentUpdateKnowledgeReceiver,
+                                 bool deadOnEntry);
 
     core::Loc locForUninitialized() const {
         return ownerLoc;

@@ -141,10 +141,7 @@ module T::Props::Serializable
       # If the prop was already missing during deserialization, that means the application
       # code already had to deal with a nil value, which means we wouldn't be accomplishing
       # much by raising here (other than causing an unnecessary breakage).
-      T::Configuration.log_info_handler(
-        "chalk-odm: missing required property in serialize",
-        prop: prop, class: self.class.name, id: self.class.decorator.get_id(self)
-      )
+      Kernel.warn("chalk-odm: missing required property in serialize prop=#{prop.inspect} class=#{self.class.name} id=#{self.class.decorator.get_id(self).inspect}")
     else
       raise TypeError.new("#{self.class.name}.#{prop} not set for non-optional prop")
     end
@@ -287,6 +284,18 @@ module T::Props::Serializable::DecoratorMethods
 
     if !rules[:raise_on_nil_write].nil? && rules[:raise_on_nil_write] != true
       raise ArgumentError.new("The value of `raise_on_nil_write` if specified must be `true` (given: #{rules[:raise_on_nil_write]}).")
+    end
+
+    if rules[:raise_on_nil_write] && !rules[:_tnilable]
+      is_nilclass_parent = type.is_a?(T::Types::Simple) &&
+                           (type.raw_type.equal?(Object) || type.raw_type.equal?(BasicObject))
+      # Use `instance_of?` because modules can be mixed into NilClass, but classes cannot.
+      is_module = type.is_a?(T::Types::Simple) && type.raw_type.instance_of?(Module)
+      underspecified_type = type.equal?(T.untyped) || is_nilclass_parent || is_module
+
+      unless underspecified_type
+        raise ArgumentError.new("`raise_on_nil_write` requires that the type of `#{name}` be `T.nilable(...)` (given: #{type})")
+      end
     end
 
     result

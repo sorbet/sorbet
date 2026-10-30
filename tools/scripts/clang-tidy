@@ -14,4 +14,4 @@ set -euo pipefail
 # We can work around this with our own script for editors to use.
 
 cd "$(dirname "$0")/../../bazel-sorbet"
-exec external/llvm_toolchain_15_0_7/bin/clang-tidy "$@"
+exec external/llvm_toolchain_22_1_3/bin/clang-tidy "$@"

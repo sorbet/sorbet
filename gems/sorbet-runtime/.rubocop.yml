@@ -54,6 +54,10 @@ Lint/UnusedMethodArgument:
 Lint/UselessMethodDefinition:
   Enabled: false
 
+# Sorbet's "This code is unreachable" is canonical
+Lint/UnreachableCode:
+  Enabled: false
+
 # Ratcheting these down is kind of outside the purview of a linter
 Metrics/AbcSize:
   Enabled: false

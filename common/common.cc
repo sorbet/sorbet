@@ -19,7 +19,9 @@
 #include <variant>
 #include <vector>
 
+#include <fcntl.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 using namespace std;
 
@@ -40,26 +42,52 @@ bool sorbet::FileOps::exists(const string &filename) {
 }
 
 string sorbet::FileOps::read(const string &filename) {
-    FILE *fp = std::fopen(filename.c_str(), "rb");
-    if (fp) {
-        fseek(fp, 0, SEEK_END);
-        auto sz = ftell(fp);
-        string contents(sz, '\0');
-        rewind(fp);
-        auto readBytes = fread(&contents[0], 1, sz, fp);
-        fclose(fp);
-        if (readBytes != contents.size()) {
-            // Error reading file?
-            auto msg = fmt::format("Error reading file: `{}`: {}", filename, errno);
-            throw sorbet::FileNotFoundException(msg);
-        }
-        return contents;
+    // Using fopen and friends is a little bit slower than using the stdlib, and
+    // that overhead adds up on big codebases.
+    int fd = ::open(filename.c_str(), O_RDONLY | O_CLOEXEC);
+    if (fd == -1) {
+        auto msg = fmt::format("Cannot open file `{}`", filename);
+        throw sorbet::FileNotFoundException(msg);
     }
-    auto msg = fmt::format("Cannot open file `{}`", filename);
-    throw sorbet::FileNotFoundException(msg);
+
+    struct stat st;
+    if (fstat(fd, &st) != 0) {
+        auto err = errno;
+        ::close(fd);
+        auto msg = fmt::format("Error reading file: `{}`: {}", filename, err);
+        throw sorbet::FileNotFoundException(msg);
+    }
+
+    const auto fileSize = st.st_size;
+    string contents(fileSize, '\0');
+    size_t readBytes = 0;
+    while (readBytes < fileSize) {
+        auto n = ::read(fd, &contents[readBytes], fileSize - readBytes);
+        if (n < 0) {
+            if (errno == EINTR) {
+                continue;
+            }
+            break;
+        }
+        if (n == 0) {
+            break;
+        }
+        readBytes += n;
+    }
+    auto err = errno;
+    ::close(fd);
+
+    if (readBytes != fileSize) {
+        // Error reading file?
+        auto msg = fmt::format("Error reading file: `{}`: {}", filename, err);
+        throw sorbet::FileNotFoundException(msg);
+    }
+    return contents;
 }
 
 void sorbet::FileOps::write(const string &filename, const vector<uint8_t> &data) {
+    // Writing files is less performance-critical in Sorbet, so fopen and company
+    // are OK to use here.
     FILE *fp = std::fopen(filename.c_str(), "wb");
     if (fp) {
         fwrite(data.data(), sizeof(uint8_t), data.size(), fp);
@@ -335,7 +363,12 @@ void appendFilesInDir(const string &basePath, const sorbet::UnorderedSet<string>
                 std::error_code ec;
                 for (auto &entry : filesystem::directory_iterator(path, ec)) {
                     string pathStr = entry.path();
-                    if (entry.is_directory()) {
+                    // The non-throwing overload, because `is_directory` follows symlinks, and stat fails for a
+                    // symlink loop (ELOOP) or a target we can't access (EACCES). Such an entry can't be listed, so
+                    // treat it like a dangling symlink: not a directory.
+                    std::error_code statEc;
+                    const bool isDirectory = entry.is_directory(statEc);
+                    if (isDirectory) {
                         if (!recursive || entry.is_symlink()) {
                             continue;
                         }
@@ -350,7 +383,7 @@ void appendFilesInDir(const string &basePath, const sorbet::UnorderedSet<string>
                         continue;
                     }
 
-                    if (entry.is_directory()) {
+                    if (isDirectory) {
                         ++pendingJobs;
                         jobq->push(entry.path(), 1);
                     } else {
@@ -359,12 +392,14 @@ void appendFilesInDir(const string &basePath, const sorbet::UnorderedSet<string>
                 }
 
                 if (ec) {
-                    switch (ec.value()) {
-                        case ENOTDIR:
+                    // A checkout can replace a subdirectory between its parent's listing and this one. The file
+                    // watcher reports whatever took its place, so only the root has to exist.
+                    const bool vanished = path != basePath && (ec.value() == ENOENT || ec.value() == ENOTDIR);
+                    if (!vanished) {
+                        if (ec.value() == ENOTDIR) {
                             throw sorbet::FileNotDirException();
-
-                        default:
-                            throw sorbet::FileNotFoundException(fmt::format("Couldn't open directory `{}`", basePath));
+                        }
+                        throw sorbet::FileNotFoundException(fmt::format("Couldn't open directory `{}`", path.string()));
                     }
                 }
 

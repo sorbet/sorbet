@@ -163,8 +163,6 @@ computeBestStrictness(const core::GlobalState &gs, const core::packages::Condens
 void GenPackages::run(core::GlobalState &gs) {
     Timer timeit(gs.tracer(), "gen_packages.run");
 
-    auto toExport = gs.packageDB().exportsByPackage(gs);
-
     auto neededVisibleTo = UnorderedMap<core::packages::MangledName, UnorderedSet<core::packages::MangledName>>{};
     auto neededVisibleToTests = UnorderedMap<core::packages::MangledName, bool>{};
     if (gs.packageDB().anyUpdateVisibilityFor()) {
@@ -206,13 +204,6 @@ void GenPackages::run(core::GlobalState &gs) {
         auto &pkgInfo = gs.packageDB().getPackageInfo(pkgName);
         ENFORCE(pkgInfo.exists());
         auto importsAutocorrect = pkgInfo.aggregateMissingImports(gs);
-        // It's a bit odd here that for imports, all the logic is in aggregateMissingImports, while for
-        // aggregateMissingExports, we need to do some extra computations outside the method and pass that in.
-        // The difference is that computing what imports are needed is a function only of the files in that package.
-        // However, for exports, we need to look the symbols referenced by other packages, which necessitates a loop
-        // over all files, and it doesn't make sense to rerun the loop for each package, so we do this work upfront
-        auto exportsAutocorrect = pkgInfo.aggregateMissingExports(gs, toExport[pkgName]);
-        // Similar idea for visible_to.
         // We always call aggregateMissingVisibleTo so that visible_to entries referencing non-existent packages
         // get deleted, even if we're not adding new visible_to entries for this package.
         auto emptyVisibleTos = UnorderedSet<core::packages::MangledName>{};
@@ -226,11 +217,6 @@ void GenPackages::run(core::GlobalState &gs) {
         if (importsAutocorrect) {
             autocorrects.push_back(move(importsAutocorrect.value()));
             missingTypes.push_back("imports");
-        }
-
-        if (exportsAutocorrect) {
-            autocorrects.push_back(move(exportsAutocorrect.value()));
-            missingTypes.push_back("exports");
         }
 
         if (visibleToAutocorrect) {
@@ -255,30 +241,9 @@ void GenPackages::run(core::GlobalState &gs) {
                 auto autocorrectTitle = fmt::format("Add missing {} and {}", missingTypes[0], missingTypes[1]);
                 e.addAutocorrect(core::AutocorrectSuggestion{autocorrectTitle, move(combinedEdits)});
             }
-        } else if (autocorrects.size() == 3) {
-            if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectPackageRB)) {
-                e.setHeader("`{}` is missing {}, {} and {}", pkgInfo.show(gs), missingTypes[0], missingTypes[1],
-                            missingTypes[2]);
-                auto combinedEdits = vector<core::AutocorrectSuggestion::Edit>{};
-                combinedEdits.insert(combinedEdits.end(), make_move_iterator(autocorrects[0].edits.begin()),
-                                     make_move_iterator(autocorrects[0].edits.end()));
-                combinedEdits.insert(combinedEdits.end(), make_move_iterator(autocorrects[1].edits.begin()),
-                                     make_move_iterator(autocorrects[1].edits.end()));
-                combinedEdits.insert(combinedEdits.end(), make_move_iterator(autocorrects[2].edits.begin()),
-                                     make_move_iterator(autocorrects[2].edits.end()));
-                core::AutocorrectSuggestion::mergeAdjacentEdits(combinedEdits);
-                auto autocorrectTitle =
-                    fmt::format("Add missing {}, {} and {}", missingTypes[0], missingTypes[1], missingTypes[2]);
-                e.addAutocorrect(core::AutocorrectSuggestion{autocorrectTitle, move(combinedEdits)});
-            }
-        } else if (autocorrects.size() > 3) {
-            ENFORCE(false);
+        } else {
+            ENFORCE(autocorrects.size() <= 2);
         }
-        // TODO(neil): for a file with no imports or exports, if both imports and exports are missing, we'll produce
-        // something like:
-        //   export MyPkg::Foo
-        //   import OtherPkg
-        // because e < i
         // TODO(neil): we should also delete imports that are unused but have a modularity error here
     }
 }
@@ -313,21 +278,18 @@ void GenPackages::runStrict(core::GlobalState &gs) {
         newStrictnessByPkg[pkgName] = newStrictDependenciesLevel;
     }
 
-    auto toExport = gs.packageDB().exportsByPackage(gs);
-
     for (auto pkgName : gs.packageDB().packages()) {
         auto &pkgInfo = gs.packageDB().getPackageInfo(pkgName);
         ENFORCE(pkgInfo.exists());
 
         auto existingContentsLoc = core::Loc(pkgInfo.file, pkgInfo.locs.loc)
-                                       .adjust(gs, pkgInfo.locs.declLoc.length() + 1, -1 * (int32_t) "end"sv.size());
+                                       .adjust(gs, pkgInfo.locs.declLoc.length() + 1, -1 * (int32_t)"end"sv.size());
         auto existingContents = existingContentsLoc.source(gs);
         ENFORCE(existingContents.has_value());
 
         // TODO(neil): If the __package.rb has an unused import that is a modularity error to import, we'll report an
         // error on the import in packager.cc, even though we're deleting it here
-        auto newContents = pkgInfo.renderPackageRbContents(gs, computeNewImports(gs, pkgInfo), move(toExport[pkgName]),
-                                                           newStrictnessByPkg);
+        auto newContents = pkgInfo.renderPackageRbContents(gs, computeNewImports(gs, pkgInfo), newStrictnessByPkg);
 
         if (existingContents.value() != newContents) {
             if (auto e = gs.beginError(pkgInfo.declLoc(), core::errors::Packager::IncorrectPackageRB)) {

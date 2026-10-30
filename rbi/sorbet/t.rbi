@@ -412,8 +412,6 @@ module T::Configuration
   def self.disable_vm_prop_serde; end
   def self.inline_type_error_handler(error, opts={}); end
   def self.inline_type_error_handler=(value); end
-  def self.log_info_handler(str, extra); end
-  def self.log_info_handler=(value); end
   def self.module_name_mangler; end
   def self.module_name_mangler=(value); end
   def self.scalar_types; end
@@ -483,6 +481,11 @@ module T::Utils
   # optimize for first-call/first-request latency.
   sig { void }
   def self.eagerly_define_all_lazy_props_methods!; end
+
+  # Force every type object in the process to build its lazily-initialized
+  # fields, so that forked workers don't write onto shared type objects.
+  sig { void }
+  def self.build_all_types; end
 
   sig { void }
   def self.drop_unchecked_sigs!; end

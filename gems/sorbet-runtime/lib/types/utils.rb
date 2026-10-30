@@ -178,6 +178,19 @@ module T::Utils
     nil
   end
 
+  # Force every type object in the process to build its lazily-initialized
+  # fields (see `T::Types::Base#build_lazy_fields`).
+  #
+  # Call this before forking workers so that first use of a type in a worker
+  # doesn't write onto a type object shared with the parent via copy-on-write.
+  def self.build_all_types
+    require 'objspace'
+    ObjectSpace.each_object(T::Types::Base) do |type|
+      type.build_lazy_fields unless type.frozen?
+    end
+    nil
+  end
+
   # Free the signatures whose runtime checks never run: the `.checked(:never)`
   # sigs, plus the `.checked(:tests)` sigs outside of a test environment. After
   # this call, `T::Utils.signature_for_method` returns `nil` for those methods,

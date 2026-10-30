@@ -158,7 +158,7 @@ const vector<ParserOptions> parser_options({
 
 } // namespace
 
-PrinterConfig::PrinterConfig() : state(make_shared<GuardedState>()){};
+PrinterConfig::PrinterConfig() : state(make_shared<GuardedState>()) {};
 
 void PrinterConfig::print(const string_view &contents) const {
     if (outputPath.empty()) {
@@ -501,8 +501,15 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  cxxopts::value<int>()->default_value(fmt::format("{}", empty.statsdPort)), "<port>");
     options.add_options(section)("statsd-tag-revision", "Tags some metrics with the revision Sorbet was built from",
                                  cxxopts::value<bool>()->default_value(fmt::format("{}", empty.statsdTagRevision)));
-    options.add_options(section)("metrics-extra-tags", "Extra tags to include in every statsd metric, comma separated.",
-                                 cxxopts::value<string>()->default_value(""), "<key1>=<value1>,<key2>=<value2>");
+    options.add_options(section)(
+        "metrics-extra-tags", "Extra tags to include in every statsd metric, comma separated (repeatable).",
+        cxxopts::value<vector<string>>()->default_value(""), "<key1>=<value1>,<key2>=<value2>");
+    options.add_options(section)(
+        "metrics-latest-version-file",
+        "Tag every statsd metric with `is_latest_version:{true,false,unknown}`, by comparing the revision Sorbet "
+        "was built from to the contents of <file>. Re-reads <file> every time metrics are sent, so that "
+        "long-running LSP processes notice when <file> changes.",
+        cxxopts::value<string>()->default_value(empty.metricsLatestVersionFile), "<file>");
     // }}}
 
     // ----- LSP ---------------------------------------------------------- {{{
@@ -513,13 +520,21 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
         "Reports no more than <cap> diagnostics (e.g. errors and informations) to the language client, like VS Code. "
         "Can prevent slowdown triggered by large diagnostic lists. A <cap> of 0 means no limit.",
         cxxopts::value<int>()->default_value(to_string(empty.lspErrorCap)), "<cap>");
+    options.add_options(section)(
+        "lsp-max-files-on-fast-path",
+        "Retypechecks the whole codebase after an edit that changes over <n> files at once, "
+        "or that changes a definition used in over <n> files. "
+        "Smaller edits only retypecheck those files, which blocks other requests until it finishes.",
+        cxxopts::value<uint32_t>()->default_value(to_string(empty.lspMaxFilesOnFastPath)), "<n>");
     options.add_options(section)("disable-watchman", "When in LSP mode, disable file watching via Watchman");
     options.add_options(section)("watchman-path",
                                  "Path to watchman executable. Will search on `PATH` if <path> contains no slashes.",
                                  cxxopts::value<string>()->default_value(empty.watchmanPath), "<path>");
     options.add_options(section)("watchman-pause-state-name",
-                                 "Name of watchman state that halts processing for its duration",
-                                 cxxopts::value<string>()->default_value(empty.watchmanPauseStateName), "<state>");
+                                 "Defer file change notifications while a client holds this watchman state (see "
+                                 "`watchman state-enter`) on the watched root; they arrive as one batch when the "
+                                 "state is left. May be repeated.",
+                                 cxxopts::value<vector<string>>(), "<state>");
     options.add_options(section)("watchman-namespace", "Namespace for watchman",
                                  cxxopts::value<string>()->default_value(empty.watchmanNamespace), "<namespace>");
     options.add_options(section)(
@@ -653,6 +668,9 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  cxxopts::value<bool>());
     options.add_options(section)("experimental-package-directed",
                                  "Enable support for checking by package, instead of processing all files at once",
+                                 cxxopts::value<bool>());
+    options.add_options(section)("experimental-test-packages",
+                                 "Disable support for implicit test namespaces in existing packages",
                                  cxxopts::value<bool>());
     // }}}
 
@@ -1037,6 +1055,7 @@ void readOptions(Options &opts,
         }
 
         opts.lspErrorCap = raw["lsp-error-cap"].as<int>();
+        opts.lspMaxFilesOnFastPath = raw["lsp-max-files-on-fast-path"].as<uint32_t>();
 
         opts.maxCacheSizeBytes = raw["max-cache-size-bytes"].as<size_t>();
         if (!extractPrinters(raw, opts, logger)) {
@@ -1061,7 +1080,7 @@ void readOptions(Options &opts,
             logger->error("You may not use autocorrect when silencing errors.");
             throw EarlyReturnWithCode(1);
         }
-        if (opts.autocorrect && !opts.inlineInput.empty()) {
+        if (opts.autocorrect && (!opts.inlineInput.empty() || !opts.inlineRBIInput.empty())) {
             logger->error("You may not use autocorrect with inline input.");
             throw EarlyReturnWithCode(1);
         }
@@ -1069,10 +1088,12 @@ void readOptions(Options &opts,
         opts.runLSP = raw["lsp"].as<bool>();
         opts.disableWatchman = raw["disable-watchman"].as<bool>();
         opts.watchmanPath = raw["watchman-path"].as<string>();
-        opts.watchmanPauseStateName = raw["watchman-pause-state-name"].as<string>();
-        if (!opts.watchmanPauseStateName.empty() && !opts.disableWatchman) {
-            logger->error("watchman-pause-state-name must be used with watchman enabled");
-            throw EarlyReturnWithCode(1);
+        if (raw.count("watchman-pause-state-name") > 0) {
+            opts.watchmanPauseStateNames = raw["watchman-pause-state-name"].as<vector<string>>();
+            if (opts.disableWatchman) {
+                logger->error("--watchman-pause-state-name cannot be used with --disable-watchman");
+                throw EarlyReturnWithCode(1);
+            }
         }
         opts.watchmanNamespace = raw["watchman-namespace"].as<string>();
 
@@ -1220,14 +1241,14 @@ void readOptions(Options &opts,
         opts.metricsRepo = raw["metrics-repo"].as<string>();
         opts.metricsBranch = raw["metrics-branch"].as<string>();
         opts.metricsPrefix = raw["metrics-prefix"].as<string>();
+        opts.metricsLatestVersionFile = raw["metrics-latest-version-file"].as<string>();
         opts.debugLogFile = raw["debug-log-file"].as<string>();
         opts.webTraceFile = raw["web-trace-file"].as<string>();
         opts.webTraceFileStrict = raw["web-trace-file-strict"].as<bool>();
         {
             // parse extra sfx/datadog tags
-            auto stringToParse = raw["metrics-extra-tags"].as<string>();
-            if (stringToParse != "") {
-                for (absl::string_view sp : absl::StrSplit(stringToParse, ',')) {
+            for (const auto &sp : raw["metrics-extra-tags"].as<vector<string>>()) {
+                if (sp != "") {
                     opts.metricsExtraTags.insert(absl::StrSplit(sp, absl::MaxSplits('=', 1)));
                 }
             }
@@ -1243,6 +1264,12 @@ void readOptions(Options &opts,
         opts.uniquelyDefinedBehavior = raw["uniquely-defined-behavior"].as<bool>();
         opts.cacheSensitiveOptions.sorbetPackages =
             raw["sorbet-packages"].as<bool>() || raw["stripe-packages"].as<bool>();
+
+        opts.testPackages = raw["experimental-test-packages"].as<bool>();
+        if (opts.testPackages && !opts.cacheSensitiveOptions.sorbetPackages) {
+            logger->error("--experimental-test-packages can only be speciried in --sorbet-packages mode");
+            throw EarlyReturnWithCode(1);
+        }
 
         opts.packageAttributedErrors = raw["package-attributed-errors"].as<bool>();
         if (opts.packageAttributedErrors && !opts.cacheSensitiveOptions.sorbetPackages) {
@@ -1290,15 +1317,19 @@ void readOptions(Options &opts,
             }
         }
 
-        if (raw.count("gen-packages")) {
-            auto genPackagesMode = raw["gen-packages"].as<string>();
-            if (genPackagesMode == "normal") {
-                opts.genPackagesMode = core::packages::GenPackagesMode::Normal;
-            } else if (genPackagesMode == "strict") {
-                opts.genPackagesMode = core::packages::GenPackagesMode::Strict;
-            } else {
-                logger->error("--gen-packages must be 'normal' or 'strict', got '{}'", genPackagesMode);
-                throw EarlyReturnWithCode(1);
+        if constexpr (debug_mode) {
+            // TODO(jez) We're no-op'ing the `--gen-packages` flag outside of `dbg` builds of Sorbet
+            // because it's not stable enough yet, and we think that it's causing adverse memory usage
+            if (raw.count("gen-packages")) {
+                auto genPackagesMode = raw["gen-packages"].as<string>();
+                if (genPackagesMode == "normal") {
+                    opts.genPackagesMode = core::packages::GenPackagesMode::Normal;
+                } else if (genPackagesMode == "strict") {
+                    opts.genPackagesMode = core::packages::GenPackagesMode::Strict;
+                } else {
+                    logger->error("--gen-packages must be 'normal' or 'strict', got '{}'", genPackagesMode);
+                    throw EarlyReturnWithCode(1);
+                }
             }
         }
         auto genPackagesEnabled = opts.genPackagesMode != core::packages::GenPackagesMode::Disabled;

@@ -140,7 +140,7 @@ struct Options {
     bool disableWatchman = false;
     std::string watchmanNamespace;
     std::string watchmanPath = "watchman";
-    std::string watchmanPauseStateName;
+    std::vector<std::string> watchmanPauseStateNames;
     bool stressIncrementalResolver = false;
     std::optional<int> sleepInSlowPathSeconds = std::nullopt;
     bool traceLexer = false;
@@ -162,6 +162,7 @@ struct Options {
     std::vector<std::string> allowRelaxedPackagerChecksFor;
     std::vector<std::string> updateVisibilityFor;
     std::vector<std::string> packagerLayers;
+    bool testPackages = false;
     std::string typedSource = "";
     std::string cacheDir = "";
     // This configured both maximum filesystem db size and max virtual memory usage
@@ -234,8 +235,7 @@ struct Options {
     uint32_t reserveConstantNameTableCapacity = 0;
     uint32_t reserveUniqueNameTableCapacity = 0;
 
-    /* The maximum number of files that are permitted to typecheck on the fast path concurrently. Not exposed on CLI.
-     * Placed on Options for convenience so tests can override. */
+    /* The maximum number of files that are permitted to typecheck on the fast path concurrently. */
     uint32_t lspMaxFilesOnFastPath = 50;
     /* The maximum number of errors to report to the client when in LSP mode. Prevents editor UI slowdown
      * related to large error lists. 0 means no limit. */
@@ -251,7 +251,8 @@ struct Options {
     std::string metricsPrefix = "ruby_typer.unknown";
     std::string metricsBranch = "none";
     std::string metricsSha = "none";
-    std::map<std::string, std::string> metricsExtraTags; // be super careful with cardinality here
+    UnorderedMap<std::string, std::string> metricsExtraTags; // be super careful with cardinality here
+    std::string metricsLatestVersionFile;
 
     std::string dumpPackageInfo = "";
     std::vector<std::string> packageSkipRBIExportEnforcementDirs;

@@ -33,13 +33,9 @@ class AutogenWalk {
     vector<NestingStackEntry> nestingStack;
     const AutogenConfig *autogenCfg;
 
-    enum class ScopeType { Class, Block };
-    vector<const ast::Send *> ignoring;
-    vector<ScopeType> scopeTypes;
-
     UnorderedMap<const ast::ConstantLit *, ReferenceRef> refMap;
 
-    UnorderedSet<pair<core::LocOffsets, core::SymbolRef>> seenRefsByLoc;
+    UnorderedMap<pair<core::LocOffsets, core::SymbolRef>, ReferenceRef> refsByLoc;
 
     // Convert a symbol name into a fully qualified name
     vector<core::NameRef> symbolName(core::Context ctx, core::SymbolRef sym) {
@@ -99,8 +95,6 @@ public:
         if (name == nullptr) {
             return;
         }
-        scopeTypes.emplace_back(ScopeType::Class);
-
         // create a new `Definition`
         auto &def = defs.emplace_back();
         def.id = defs.size() - 1;
@@ -143,49 +137,23 @@ public:
         refs[it->second.id()].is_defining_ref = true;
         refs[it->second.id()].definitionLoc = original.loc;
 
-        auto ait = original.ancestors.begin();
         // if this is a class, then the first ancestor is the parent class
         if (original.kind == ast::ClassDef::Kind::Class && !original.ancestors.empty()) {
             // we need to do name resolution for that class "outside" of the class body, so handle this before we've
             // modified the current scoping
-            ast::ConstTreeWalk::apply(ctx, *this, *ait);
-            ++ait;
+            ast::ConstTreeWalk::apply(ctx, *this, original.ancestors.front());
+            auto parent = ast::cast_tree<ast::ConstantLit>(original.ancestors.front());
+            if (parent != nullptr) {
+                auto it = refMap.find(parent);
+                if (it != refMap.end()) {
+                    refs[it->second.id()].parentKind = ClassKind::Class;
+                }
+            }
         }
 
-        // The rest of the ancestors are all references inside the class body (i.e. uses of `include` or `extend`) so
-        // add the current class to the scoping
+        // Mixins also appear naturally in the class body as arguments to `include` or `extend`. Let the normal tree
+        // walk find those references with the right scope.
         nestingStack.emplace_back(def.id);
-
-        // ...and then run the treemap over all the includes and extends
-        for (; ait != original.ancestors.end(); ++ait) {
-            ast::ConstTreeWalk::apply(ctx, *this, *ait);
-        }
-        for (auto &ancst : original.singletonAncestors) {
-            ast::ConstTreeWalk::apply(ctx, *this, ancst);
-        }
-
-        // and now that we've processed all the ancestors, we should have created references for them all, so traverse
-        // them once again...
-        for (auto &ancst : original.ancestors) {
-            auto cnst = ast::cast_tree<ast::ConstantLit>(ancst);
-            if (cnst == nullptr || cnst->original() == nullptr) {
-                // ignore them if they're not statically-known ancestors (i.e. not constants)
-                continue;
-            }
-
-            // ...find the references
-            auto it = refMap.find(cnst);
-            if (it == refMap.end()) {
-                continue;
-            }
-            // if it's the parent class, then we can set the parent_ref of the `Definition`
-            if (original.kind == ast::ClassDef::Kind::Class && &ancst == &original.ancestors.front()) {
-                // superclass
-                def.parent_ref = it->second;
-            }
-            // otherwise, make sure we know the ref is the parent of this `Definition`
-            refs[it->second.id()].parent_of = def.id;
-        }
     }
 
     void postTransformClassDef(core::Context ctx, const ast::ClassDef &original) {
@@ -195,17 +163,24 @@ public:
             return;
         }
 
-        // remove the stuff added to handle the class scope here
+        auto &def = defs[nestingStack.back().ref.id()];
+        for (auto &ancst : original.ancestors) {
+            auto cnst = ast::cast_tree<ast::ConstantLit>(ancst);
+            if (cnst == nullptr || cnst->original() == nullptr) {
+                continue;
+            }
+
+            auto it = refsByLoc.find(make_pair(cnst->loc(), cnst->symbol()));
+            if (it == refsByLoc.end()) {
+                continue;
+            }
+            if (original.kind == ast::ClassDef::Kind::Class && &ancst == &original.ancestors.front()) {
+                def.parent_ref = it->second;
+            }
+            refs[it->second.id()].parent_of = def.id;
+        }
+
         nestingStack.pop_back();
-        scopeTypes.pop_back();
-    }
-
-    void preTransformBlock(core::Context ctx, const ast::Block &block) {
-        scopeTypes.emplace_back(ScopeType::Block);
-    }
-
-    void postTransformBlock(core::Context ctx, const ast::Block &block) {
-        scopeTypes.pop_back();
     }
 
     // `true` if the constant is fully qualified and can be traced back to the root scope, `false` otherwise
@@ -260,11 +235,6 @@ public:
     }
 
     void postTransformConstantLit(core::Context ctx, const ast::ConstantLit &original) {
-        if (!ignoring.empty()) {
-            // this is an `include` or an `extend` which already got handled in `preTransformClassDef`
-            // (in which case don't handle it again)
-            return;
-        }
         if (original.original() == nullptr) {
             return;
         }
@@ -275,10 +245,11 @@ public:
         }
 
         auto entry = make_pair(original.loc(), original.symbol());
-        if (seenRefsByLoc.contains(entry)) {
+        auto existing = refsByLoc.find(entry);
+        if (existing != refsByLoc.end()) {
+            refMap[&original] = existing->second;
             return;
         }
-        seenRefsByLoc.emplace(move(entry));
 
         // Create a new `Reference`
         auto &ref = refs.emplace_back();
@@ -297,14 +268,9 @@ public:
             ref.resolved = QualifiedName::fromFullName(symbolName(ctx, sym));
         }
         ref.is_defining_ref = false;
-        // if we're already in the scope of the class (which will be the newest-created one) then we're looking at the
-        // `ancestors` or `singletonAncestors` values. Otherwise, (at least for the parent relationships we care about)
-        // we're looking at the first `class Child < Parent` relationship, so we change `is_subclassing` to true.
-        if (!defs.empty() && !nestingStack.empty() && defs.back().id._id != nestingStack.back().ref._id) {
-            ref.parentKind = ClassKind::Class;
-        }
         // now, add it to the refmap
         refMap[&original] = ref.id;
+        refsByLoc.emplace(move(entry), ref.id);
     }
 
     void postTransformAssign(core::Context ctx, const ast::Assign &original) {
@@ -377,14 +343,6 @@ public:
     }
 
     void preTransformSend(core::Context ctx, const ast::Send &original) {
-        bool inBlock = !scopeTypes.empty() && scopeTypes.back() == ScopeType::Block;
-        // Ignore include/extend sends iff they are directly at the class/module level.
-        // These cases are handled in `preTransformClassDef`.
-        // Do not ignore in block scope so that we a ref to the included module is still rendered.
-        if (!inBlock && original.recv.isSelfReference() &&
-            (original.fun == core::Names::include() || original.fun == core::Names::extend())) {
-            ignoring.emplace_back(&original);
-        }
         // This means it's a `require`; mark it as such
         if (original.flags.isPrivateOk && original.fun == core::Names::require() && original.numPosArgs() == 1) {
             auto lit = ast::cast_tree<ast::Literal>(original.getPosArg(0));
@@ -394,16 +352,7 @@ public:
         }
     }
 
-    void postTransformSend(core::Context ctx, const ast::Send &original) {
-        // if this send was something we were ignoring (i.e. an `include` or `require`) then pop this
-        if (!ignoring.empty() && ignoring.back() == &original) {
-            ignoring.pop_back();
-        }
-    }
-
     ParsedFile parsedFile() {
-        ENFORCE(scopeTypes.empty());
-
         ParsedFile out;
         out.nestings = move(nestings);
         out.refs = move(refs);

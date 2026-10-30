@@ -20,7 +20,7 @@ ClassDef{
         }]
       rhs = [
         Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = Self
           fun = <U sig>
           block = Block {
@@ -77,7 +77,7 @@ ClassDef{
         }
 
         Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = Self
           fun = <U sig>
           block = Block {
@@ -134,7 +134,7 @@ ClassDef{
         }
 
         Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = Self
           fun = <U sig>
           block = Block {
@@ -214,7 +214,7 @@ ClassDef{
         }
 
         Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = Self
           fun = <U sig>
           block = Block {
@@ -294,7 +294,7 @@ ClassDef{
         }
 
         Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = Self
           fun = <U sig>
           block = Block {
@@ -359,7 +359,7 @@ ClassDef{
         }
 
         Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = Self
           fun = <U sig>
           block = Block {
@@ -424,7 +424,7 @@ ClassDef{
         }
 
         Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = Self
           fun = <U sig>
           block = Block {
@@ -495,7 +495,7 @@ ClassDef{
         }
 
         Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = Self
           fun = <U sig>
           block = Block {
@@ -573,7 +573,7 @@ ClassDef{
         }]
       rhs = [
         Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = Self
           fun = <U sig>
           block = Block {
@@ -630,7 +630,7 @@ ClassDef{
         }
 
         Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = Self
           fun = <U sig>
           block = Block {
@@ -688,7 +688,7 @@ ClassDef{
         }
 
         Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = Self
           fun = <U sig>
           block = Block {
@@ -757,7 +757,7 @@ ClassDef{
         }
 
         Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = Self
           fun = <U sig>
           block = Block {
@@ -825,7 +825,7 @@ ClassDef{
         }
 
         Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = Self
           fun = <U sig>
           block = Block {
@@ -920,7 +920,7 @@ ClassDef{
         }
 
         Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = Self
           fun = <U sig>
           block = Block {
@@ -997,7 +997,7 @@ ClassDef{
         }
 
         Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = Self
           fun = <U sig>
           block = Block {
@@ -1073,7 +1073,7 @@ ClassDef{
         }
 
         Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = Self
           fun = <U sig>
           block = Block {
@@ -1101,7 +1101,7 @@ ClassDef{
               localVariable = <U <blk>>
             } }]
           rhs = Send{
-            flags = {}
+            flags = {doEndBlock}
             recv = Literal{ value = 1 }
             fun = <U times>
             block = Block {
@@ -1154,7 +1154,7 @@ ClassDef{
       ancestors = []
       rhs = [
         Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = Self
           fun = <U sig>
           block = Block {

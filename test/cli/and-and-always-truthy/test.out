@@ -22,6 +22,9 @@ test/cli/and-and-always-truthy/test.rb:15: This code is unreachable https://srb.
     test/cli/and-and-always-truthy/test.rb:15:
     15 |  if always_true || T.unsafe(true)
              ^^^^^^^^^^^
+  Note:
+    If this code is intentionally unreachable, end this sequence with `T.absurd(...)`
+    after any defensive error handling.
 
 test/cli/and-and-always-truthy/test.rb:21: This code is unreachable https://srb.help/7006
     21 |  if always_false && T.unsafe(true)
@@ -33,6 +36,9 @@ test/cli/and-and-always-truthy/test.rb:21: This code is unreachable https://srb.
     test/cli/and-and-always-truthy/test.rb:21:
     21 |  if always_false && T.unsafe(true)
              ^^^^^^^^^^^^
+  Note:
+    If this code is intentionally unreachable, end this sequence with `T.absurd(...)`
+    after any defensive error handling.
 
 test/cli/and-and-always-truthy/test.rb:24: Left side of `||` condition was always `falsy` https://srb.help/7006
     24 |  if always_false || T.unsafe(true)
@@ -58,4 +64,7 @@ test/cli/and-and-always-truthy/test.rb:31: This code is unreachable https://srb.
     test/cli/and-and-always-truthy/test.rb:29:
     29 |def example3(always_true)
                      ^^^^^^^^^^^
+  Note:
+    If this code is intentionally unreachable, end this sequence with `T.absurd(...)`
+    after any defensive error handling.
 Errors: 5

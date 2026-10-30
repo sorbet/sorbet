@@ -1,0 +1,7 @@
+# typed: strict
+
+class Producer < PackageSpec
+  export Producer::Alias::Nested
+  export Producer::Alias::Unused
+  export Producer::Alias
+end

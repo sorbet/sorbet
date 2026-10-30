@@ -596,6 +596,28 @@ module Opus::Types::Test
         assert_match(/\AParameter 'bar': Expected type String, got type Integer with value 1/, err.message)
       end
 
+      it 'handles a missing required arg alongside optional params' do
+        @mod.sig { params(a: Symbol, b: String, c: Integer).void }
+        def @mod.foo(a, b, c=0); end
+
+        # The first call goes through the slow path, which replaces the method
+        # with a specialized wrapper.
+        err = assert_raises(ArgumentError) do
+          @mod.foo(:x)
+        end
+        assert_match(/wrong number of arguments \(given 1, expected 2..3\)/, err.message)
+
+        err = assert_raises(ArgumentError) do
+          @mod.foo(:x)
+        end
+        assert_match(/wrong number of arguments \(given 1, expected 2..3\)/, err.message)
+
+        err = assert_raises(TypeError) do
+          @mod.foo(:x, 1)
+        end
+        assert_match(/\AParameter 'b': Expected type String, got type Integer with value 1/, err.message)
+      end
+
       it 'handles keyrest' do
         @mod.sig { params(opts: Integer).void }
         def @mod.foo(**opts); end

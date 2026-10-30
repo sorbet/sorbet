@@ -23,14 +23,6 @@ PackageWithIgnore/__package.rb:3: `PackageWithIgnore` is missing imports https:/
      5 |  layer 'util'
                       ^
 
-G/__package.rb:3: `G` is missing exports https://srb.help/3734
-     3 |class G < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Done
-    G/__package.rb:8: Inserted `export G::ANOTHER_CONSTANT_FROM_G`
-     8 |
-        ^
-
 B/__package.rb:3: `B` is missing `visible_to`s https://srb.help/3734
      3 |class B < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^
@@ -95,31 +87,7 @@ D/test/__package.rb:3: `D::Test` is missing imports https://srb.help/3734
      9 |  import D, uses_internals: true
                                         ^
 
-D/ANestedPackage/__package.rb:3: `D::ANestedPackage` is missing exports https://srb.help/3734
-     3 |class D::ANestedPackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Done
-    D/ANestedPackage/__package.rb:5: Inserted `export D::ANestedPackage::Foo`
-     5 |  layer 'util'
-                      ^
-
-D/__package.rb:3: `D` is missing exports https://srb.help/3734
-     3 |class D < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Done
-    D/__package.rb:9: Deleted
-     9 |  export D::ANestedPackage::Foo
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    D/__package.rb:10: Deleted
-    10 |  export D::EnumFromD::Variant
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    D/__package.rb:9: Inserted `export D::CONSTANT_FROM_D
-      export D::ClassFromD
-      export D::EnumFromD`
-     9 |  export D::ANestedPackage::Foo
-                                       ^
-
-C/app.rb:8: `F::CONSTANT_FROM_F` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
+C/app.rb:8: `F` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
      8 |      puts F::CONSTANT_FROM_F
                    ^^^^^^^^^^^^^^^^^^
     C/__package.rb:3: Enclosing package declared here
@@ -129,14 +97,19 @@ C/app.rb:8: `F::CONSTANT_FROM_F` cannot be referenced here because its `strict_d
      4 |  strict_dependencies 'layered'
                               ^^^^^^^^^
   Note:
-    `F::CONSTANT_FROM_F`'s package is not imported
+    `F` is not imported
 
-C/app.rb:9: Package `G` includes explicit visibility modifiers and cannot be imported from `C` https://srb.help/3723
+C/app.rb:9: `G` cannot be referenced here because package `G` includes explicit visibility modifiers and cannot be imported from `C` https://srb.help/3727
      9 |      puts G::CONSTANT_FROM_G
                    ^^^^^^^^^^^^^^^^^^
+    C/__package.rb:3: Enclosing package declared here
+     3 |class C < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
   Note:
     Please consult with the owning team before adding a `visible_to` line to the package `G`
-Errors: 12
+  Note:
+    `G` is not imported
+Errors: 9
 
 ###### cat B/__package.rb ######
 # typed: strict
@@ -178,9 +151,8 @@ class D < PackageSpec
 
   import B
   export D::AlreadyExportedClass
-  export D::CONSTANT_FROM_D
-  export D::ClassFromD
-  export D::EnumFromD
+  export D::ANestedPackage::Foo
+  export D::EnumFromD::Variant
 end
 
 ###### cat D/ANestedPackage/__package.rb ######
@@ -189,7 +161,6 @@ end
 class D::ANestedPackage < PackageSpec
   strict_dependencies 'dag'
   layer 'util'
-  export D::ANestedPackage::Foo
 end
 
 ###### cat E/__package.rb ######
@@ -303,30 +274,6 @@ D/test/__package.rb:3: `D::Test` is missing imports https://srb.help/3734
      9 |  import D, uses_internals: true
                                         ^
 
-D/ANestedPackage/__package.rb:3: `D::ANestedPackage` is missing exports https://srb.help/3734
-     3 |class D::ANestedPackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Done
-    D/ANestedPackage/__package.rb:5: Inserted `export D::ANestedPackage::Foo`
-     5 |  layer 'util'
-                      ^
-
-D/__package.rb:3: `D` is missing exports https://srb.help/3734
-     3 |class D < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Done
-    D/__package.rb:9: Deleted
-     9 |  export D::ANestedPackage::Foo
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    D/__package.rb:10: Deleted
-    10 |  export D::EnumFromD::Variant
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    D/__package.rb:9: Inserted `export D::CONSTANT_FROM_D
-      export D::ClassFromD
-      export D::EnumFromD`
-     9 |  export D::ANestedPackage::Foo
-                                       ^
-
 A/constants.rb:5: Unable to resolve constant `G` https://srb.help/5002
      5 |  puts G::ANOTHER_CONSTANT_FROM_G
                ^
@@ -340,7 +287,7 @@ A/constants.rb:5: Unable to resolve constant `G` https://srb.help/5002
      3 |module A
         ^^^^^^^^
 
-C/app.rb:8: `F::CONSTANT_FROM_F` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
+C/app.rb:8: `F` cannot be referenced here because its `strict_dependencies` is not strict enough https://srb.help/3727
      8 |      puts F::CONSTANT_FROM_F
                    ^^^^^^^^^^^^^^^^^^
     C/__package.rb:3: Enclosing package declared here
@@ -350,14 +297,19 @@ C/app.rb:8: `F::CONSTANT_FROM_F` cannot be referenced here because its `strict_d
      4 |  strict_dependencies 'layered'
                               ^^^^^^^^^
   Note:
-    `F::CONSTANT_FROM_F`'s package is not imported
+    `F` is not imported
 
-C/app.rb:9: Package `G` includes explicit visibility modifiers and cannot be imported from `C` https://srb.help/3723
+C/app.rb:9: `G` cannot be referenced here because package `G` includes explicit visibility modifiers and cannot be imported from `C` https://srb.help/3727
      9 |      puts G::CONSTANT_FROM_G
                    ^^^^^^^^^^^^^^^^^^
+    C/__package.rb:3: Enclosing package declared here
+     3 |class C < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
   Note:
     Please consult with the owning team before adding a `visible_to` line to the package `G`
-Errors: 11
+  Note:
+    `G` is not imported
+Errors: 9
 
 ###### cat B/__package.rb ######
 # typed: strict
@@ -399,9 +351,8 @@ class D < PackageSpec
 
   import B
   export D::AlreadyExportedClass
-  export D::CONSTANT_FROM_D
-  export D::ClassFromD
-  export D::EnumFromD
+  export D::ANestedPackage::Foo
+  export D::EnumFromD::Variant
 end
 
 ###### cat D/ANestedPackage/__package.rb ######
@@ -410,7 +361,6 @@ end
 class D::ANestedPackage < PackageSpec
   strict_dependencies 'dag'
   layer 'util'
-  export D::ANestedPackage::Foo
 end
 
 ###### cat E/__package.rb ######

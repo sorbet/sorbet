@@ -5,7 +5,8 @@
 namespace sorbet::core::errors::Rewriter {
 inline constexpr ErrorClass BadAttrArg{3501, StrictLevel::False};
 // inline constexpr ErrorClass BadWrapInstance{3502, StrictLevel::True};
-inline constexpr ErrorClass PrivateMethodMismatch{3503, StrictLevel::False};
+// moved to namer:
+// inline constexpr ErrorClass PrivateMethodMismatch{3503, StrictLevel::False};
 inline constexpr ErrorClass BadAttrType{3504, StrictLevel::True};
 inline constexpr ErrorClass BadModuleFunction{3505, StrictLevel::True};
 inline constexpr ErrorClass BadTEnumSyntax{3506, StrictLevel::False};
@@ -32,7 +33,8 @@ inline constexpr ErrorClass RBSUnusedComment{3554, StrictLevel::False};
 inline constexpr ErrorClass RBSMultilineMisformatted{3555, StrictLevel::False};
 inline constexpr ErrorClass RBSIncorrectParameterKind{3556, StrictLevel::False};
 inline constexpr ErrorClass RBSMultipleGenericSignatures{3557, StrictLevel::False};
-inline constexpr ErrorClass RBSAbstractMethodNoRaises{3558, StrictLevel::False};
+inline constexpr ErrorClass RBSAbstractMethodNoSuper{3558, StrictLevel::False};
+inline constexpr ErrorClass RBSOptionalRecordKey{3559, StrictLevel::False};
 
 } // namespace sorbet::core::errors::Rewriter
 #endif

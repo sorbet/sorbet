@@ -1,5 +1,7 @@
 #include "common/statsd/statsd.h"
+#include "common/FileOps.h"
 #include "common/counters/Counters_impl.h"
+#include "common/os/os.h"
 #include "common/strings/formatting.h"
 #include "sorbet_version/sorbet_version.h"
 
@@ -9,6 +11,7 @@ extern "C" {
 
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_replace.h"
+#include "absl/strings/strip.h"
 
 #include <string>
 #include <sys/resource.h> // getrusage
@@ -18,24 +21,33 @@ using namespace std;
 namespace sorbet {
 
 namespace {
-map<string, string> extraGlobalTags;
-}
-void StatsD::addExtraTags(const map<string, string> &tags) {
-    if (!extraGlobalTags.empty()) {
-        bool isSame =
-            tags.size() == extraGlobalTags.size() && std::equal(tags.begin(), tags.end(), extraGlobalTags.begin(),
-                                                                [](auto a, auto b) { return a.first == b.first; });
-        if (!isSame) {
-            Exception::raise("re setting statsD global tags not supported");
-        }
+optional<string> readLatestVersionFile(string_view path) {
+    try {
+        return FileOps::read(string(path));
+    } catch (FileNotFoundException &e) {
+        return nullopt;
     }
-    extraGlobalTags = tags;
 }
+
+// "true" or "false" if `latestVersion` does or doesn't match `revision`, or "unknown" if the file
+// couldn't be read or was empty.
+string_view isLatestVersionTagValue(const optional<string> &latestVersion, string_view revision) {
+    if (!latestVersion.has_value()) {
+        return "unknown";
+    }
+    auto trimmed = absl::StripAsciiWhitespace(*latestVersion);
+    if (trimmed.empty()) {
+        return "unknown";
+    }
+    return trimmed == revision ? "true" : "false";
+}
+} // namespace
 
 class StatsdClientWrapper {
     constexpr static int PKT_LEN = 512; // conservative bound for MTU
     statsd_link *link;
     string packet;
+    const UnorderedMap<string, string> &extraGlobalTags;
 
     string cleanMetricName(string_view name) {
         return absl::StrReplaceAll(name, {{":", "_"}, {"|", "_"}, {"@", "_"}});
@@ -74,8 +86,9 @@ class StatsdClientWrapper {
     }
 
 public:
-    StatsdClientWrapper(string host, int port, string prefix)
-        : link(statsd_init_with_namespace(host.c_str(), port, cleanMetricName(prefix).c_str())) {
+    StatsdClientWrapper(string host, int port, string prefix, const UnorderedMap<string, string> &extraGlobalTags)
+        : link(statsd_init_with_namespace(host.c_str(), port, cleanMetricName(prefix).c_str())),
+          extraGlobalTags(extraGlobalTags) {
         if (link == nullptr) {
             Exception::raise("statsd initialization failed: host={} port={} prefix={}", host, port, prefix);
         }
@@ -99,8 +112,15 @@ public:
     }
 };
 
-bool StatsD::submitCounters(const CounterState &counters, string_view host, int port, string_view prefix) {
-    StatsdClientWrapper statsd(string(host), port, string(prefix));
+bool StatsD::submitCounters(const CounterState &counters, string_view host, int port, string_view prefix,
+                            const UnorderedMap<string, string> &extraTags, string_view latestVersionFile) {
+    auto extraGlobalTags = extraTags;
+    if (!latestVersionFile.empty()) {
+        auto latestVersion = readLatestVersionFile(latestVersionFile);
+        extraGlobalTags.insert_or_assign("is_latest_version",
+                                         string(isLatestVersionTagValue(latestVersion, build_scm_revision)));
+    }
+    StatsdClientWrapper statsd(string(host), port, string(prefix), extraGlobalTags);
 
     counters.counters->canonicalize();
     for (auto &cat : counters.counters->countersByCategory) {
@@ -149,6 +169,9 @@ void StatsD::addStandardMetrics() {
         prodCounterAdd("run.utilization.oublock", usage.ru_oublock);
         prodCounterAdd("run.utilization.context_switch.voluntary", usage.ru_nvcsw);
         prodCounterAdd("run.utilization.context_switch.involuntary", usage.ru_nivcsw);
+    }
+    if (auto swapKb = getCurrentProcessSwapUsageKb()) {
+        prodCounterAdd("run.current_swap", *swapKb);
     }
     prodCounterAdd("release.build_scm_commit_count", sorbet::build_scm_commit_count);
     prodCounterAdd("release.build_timestamp", sorbet::build_timestamp);

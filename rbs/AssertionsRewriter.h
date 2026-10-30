@@ -30,7 +30,7 @@ class AssertionsRewriter {
 public:
     AssertionsRewriter(core::MutableContext ctx, parser::Prism::Parser &parser,
                        UnorderedMap<pm_node_t *, std::vector<CommentNode>> &commentsByNode)
-        : ctx(ctx), parser(parser), prism(parser), commentsByNode(commentsByNode){};
+        : ctx(ctx), parser(parser), prism(parser), commentsByNode(commentsByNode) {};
     // Rewrite the RBS assertions in the Prism AST, in-place.
     void run(pm_node_t *node);
 

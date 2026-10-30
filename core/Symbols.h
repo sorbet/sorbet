@@ -561,7 +561,7 @@ public:
     MethodRef findParentMethodTransitive(const GlobalState &gs, NameRef name) const;
     MethodRef findConcreteMethodTransitive(const GlobalState &gs, NameRef name) const;
 
-    /* transitively finds a member with the most similar name */
+    /* transitively finds methods or constants with the most similar name */
 
     struct FuzzySearchResult {
         SymbolRef symbol;
@@ -569,7 +569,9 @@ public:
         int distance;
     };
 
-    std::vector<FuzzySearchResult> findMemberFuzzyMatch(const GlobalState &gs, NameRef name, int betterThan = -1) const;
+    std::vector<FuzzySearchResult> findMethodFuzzyMatch(const GlobalState &gs, NameRef name, int betterThan = -1) const;
+    std::vector<FuzzySearchResult>
+    findConstantFuzzyMatch(Context ctx, NameRef name, packages::MangledName filterToPackage, int betterThan = -1) const;
 
     // Returns true if the symbol or any of its children are not in the symbol table. False otherwise.
     bool isPrintable(const GlobalState &gs) const;
@@ -626,7 +628,11 @@ public:
     // Might correspond to an intermediate `<PackageSpecRegistry>` namespace (not a package), but at least
     // will always correspond to the tightest possible namespace in the `<PackageSpecRegistry>` subtree.
     //
-    // Only set if `gs.packageDB().enabled()`
+    // Normally, only set if `gs.packageDB().enabled()`, though `<root>` and `<PackageSpecRegistry>`
+    // (and `::Test` in legacy test packages mode) are initialized to contain `<PackageSpecRegistry>`.
+    //
+    // Unpackaged namespaces outside the package-name hierarchy, like `::Regexp`, have no registry
+    // cursor (the default).
     //
     // - Given ::<root>, contains ::<PackageSpecRegistry>
     // - Given ::Opus::MyPkg, contains ::<PackageSpecRegistry>::Opus::MyPkg
@@ -634,9 +640,10 @@ public:
     // - Given ::Opus::MyPkg::Foo::InnerPkg, contains ::<PackageSpecRegistry>::Opus::MyPkg::Foo::InnerPkg
     // - Given ::Test, contains ::<PackageSpecRegistry>
     // - Given ::Test::Opus::MyPkg, contains ::<PackageSpecRegistry>::Opus::MyPkg
+    // - Given an unpackaged namespace like ::Regexp, contains ::<none>
     //
     // When set to `::<none>`, inherit whatever our owner has for `package`.
-    ClassOrModuleRef packageRegistryOwner = core::Symbols::PackageSpecRegistry();
+    ClassOrModuleRef packageRegistryOwner = core::Symbols::noClassOrModule();
 
     // The package that this symbol belongs to.
     //
@@ -723,10 +730,8 @@ private:
     friend class serialize::SerializerImpl;
     friend class GlobalState;
 
-    FuzzySearchResult findMemberFuzzyMatchUTF8(const GlobalState &gs, NameRef name, Levenstein &levenstein,
+    FuzzySearchResult findMethodFuzzyMatchUTF8(const GlobalState &gs, NameRef name, Levenstein &levenstein,
                                                int betterThan = -1) const;
-    std::vector<FuzzySearchResult> findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
-                                                                int betterThan = -1) const;
 
     /*
      * mixins and superclasses: `superClass` is *not* included in the

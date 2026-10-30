@@ -29,15 +29,23 @@ public:
 
 class PackageDB final {
     friend class core::GlobalState;
+    friend class UnfreezePackages;
 
 public:
     static constexpr NameRef TEST_NAMESPACE = core::Names::Constants::Test();
+
+    // If `sym` is a `T::Enum` value, the enum class it belongs to. Otherwise, `noSymbol`.
+    static core::SymbolRef getEnumClassForEnumValue(const core::GlobalState &gs, core::SymbolRef sym);
 
     MangledName enterPackage(std::unique_ptr<PackageInfo> pkg);
 
     // Fetch the mangled package name for a file, returning a MangledName that doesn't exist if there is no
     // associated package for the file.
     const MangledName getPackageNameForFile(FileRef file) const;
+
+    // Returns the package for an ordinary source file, or nullptr when packages are disabled,
+    // the file is a package spec (__package.rb), or no existing package is associated with it.
+    const PackageInfo *getPackageForSourceFile(const core::GlobalState &gs, FileRef file) const;
 
     // Set the associated package for the file.
     void setPackageNameForFile(FileRef file, MangledName mangledName);
@@ -69,6 +77,12 @@ public:
     // Whether the --sorbet-packages mode is active.
     bool enabled() const {
         return this->enabled_;
+    }
+
+    // Whether the --experimental-test-packages mode is active. This controls whether all packages are treated as having
+    // been migrated to `test!` packages; if this returns `false` there still may be test packages present.
+    bool testPackages() const {
+        return this->testPackages_;
     }
 
     GenPackagesMode genPackagesMode() const {
@@ -118,11 +132,6 @@ public:
     // Fetch the condensation graph for queries.
     const Condensation &condensation() const;
 
-    // Uses symbolsReferencedByFile to compute which symbols are no exported, and returns them in a map indexed by their
-    // owning package.
-    static UnorderedMap<core::packages::MangledName, std::vector<core::SymbolRef>>
-    exportsByPackage(const core::GlobalState &gs);
-
     // Returns an autocorrect that will insert an export for every symbol referenced in fref that is not already
     // exported.
     static std::optional<core::AutocorrectSuggestion> aggregateMissingExportsForFile(const core::GlobalState &gs,
@@ -155,9 +164,9 @@ private:
     bool frozen = true;
     std::thread::id writerThread;
 
-    Condensation condensation_;
+    bool testPackages_ = false;
 
-    friend class UnfreezePackages;
+    Condensation condensation_;
 };
 
 } // namespace sorbet::core::packages

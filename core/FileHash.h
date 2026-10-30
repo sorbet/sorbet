@@ -25,7 +25,7 @@ public:
         return _hashValue != 0;
     }
     WithoutUniqueNameHash(const WithoutUniqueNameHash &nm) noexcept = default;
-    WithoutUniqueNameHash() noexcept : _hashValue(0){};
+    WithoutUniqueNameHash() noexcept : _hashValue(0) {};
 
     auto operator<=>(const WithoutUniqueNameHash &rhs) const noexcept {
         ENFORCE_NO_TIMER(isDefined());
@@ -62,7 +62,7 @@ public:
         return _hashValue != 0;
     }
     FullNameHash(const FullNameHash &nm) noexcept = default;
-    FullNameHash() noexcept : _hashValue(0){};
+    FullNameHash() noexcept : _hashValue(0) {};
 
     inline auto operator<=>(const FullNameHash &rhs) const noexcept {
         ENFORCE_NO_TIMER(isDefined());

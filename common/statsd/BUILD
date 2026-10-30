@@ -15,6 +15,7 @@ cc_library(
     deps = [
         "//common",
         "//core",
+        "//common/os",
         "//sorbet_version",
     ] + select({
         "@platforms//cpu:wasm32": [],

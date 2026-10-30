@@ -37,9 +37,9 @@ steps:
             volumes:
               - "/usr/local/var/bazelcache:/usr/local/var/bazelcache"
 
-  - label: ":mac: test-static-sanitized.sh (master only)"
+  - label: ":mac: test-static-sanitized.sh"
     command: '.buildkite/test-static-sanitized.sh < /dev/null'
-    branches: "master"
+    if: 'build.branch == "master" || build.branch =~ /\b(MACOS_CI|MACOS-CI)\b/'
     artifact_paths:
       - _out_/profile.json
       - _out_/clang_tidy_profile.json
@@ -74,9 +74,9 @@ steps:
     artifact_paths: _out_/**/*
     <<: *elastic
 
-  - label: ":mac: build-static-release.sh (master only)"
+  - label: ":mac: build-static-release.sh"
     command: '.buildkite/build-static-release.sh < /dev/null'
-    branches: master
+    if: 'build.branch == "master" || build.branch =~ /\b(MACOS_CI|MACOS-CI)\b/'
     artifact_paths: _out_/**/*
     agents:
       os: mac
@@ -118,7 +118,7 @@ steps:
   - label: ":linux: build-static-release-java.sh (master only)"
     command: '.buildkite/build-static-release-java.sh < /dev/null'
     # this needs to be run when both linux & mac build-static-release
-    # are done. at the moment, mac is only done on master branch
+    # are done. Keep Java packaging limited to master.
     branches: master
     artifact_paths: _out_/**/*
     <<: *elastic

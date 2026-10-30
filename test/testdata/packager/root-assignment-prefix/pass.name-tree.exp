@@ -1,0 +1,12 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::A::B<<C B>> < (::Sorbet::Private::Static::PackageSpec)
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  ::A::X = 1
+
+  ::A::Y = 2
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  ::A::FromRBI = <cast:let>(<emptyTree>::<C T>.unsafe(nil), <todo sym>, <emptyTree>::<C String>)
+end

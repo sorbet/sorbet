@@ -26,8 +26,12 @@ public:
 
 protected:
     class slab {
-        typename std::aligned_storage<sizeof(T), alignof(T)>::type data[N];
+        alignas(T) unsigned char data[sizeof(T) * N];
         std::size_t _size = 0;
+
+        inline T *ptr_at(size_t i) {
+            return reinterpret_cast<T *>(data + sizeof(T) * i);
+        }
 
     public:
         inline bool is_full() const {
@@ -36,7 +40,7 @@ protected:
 
         template <typename... Args> T *alloc(Args &&...args) {
             assert(!is_full());
-            T *p = reinterpret_cast<T *>(data + _size);
+            auto *p = ptr_at(_size);
             new (p) T(std::forward<Args>(args)...);
             ++_size;
             return p;
@@ -44,7 +48,7 @@ protected:
 
         ~slab() {
             for (std::size_t pos = 0; pos < _size; ++pos) {
-                reinterpret_cast<T *>(data + pos)->~T();
+                ptr_at(pos)->~T();
             }
         }
     };

@@ -34,7 +34,8 @@ core::LocOffsets RBSDeclaration::typeLocFromRange(const rbs_location_range &rang
 
             return core::LocOffsets{beginLoc, endLoc};
         }
-        rangeOffset -= commentTypeLength;
+        // Include the newline inserted between comment strings by RBSDeclaration.
+        rangeOffset -= commentTypeLength + 1;
     }
     return comments.front().typeLoc;
 }

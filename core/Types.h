@@ -1159,13 +1159,13 @@ struct DispatchResult {
     DispatchResult(TypePtr returnType, TypePtr receiverType, core::MethodRef method)
         : returnType(returnType),
           main(DispatchComponent{
-              std::move(receiverType), method, {}, std::move(returnType), nullptr, nullptr, {}, {}, nullptr}){};
+              std::move(receiverType), method, {}, std::move(returnType), nullptr, nullptr, {}, {}, nullptr}) {};
     DispatchResult(TypePtr returnType, DispatchComponent comp)
-        : returnType(std::move(returnType)), main(std::move(comp)){};
+        : returnType(std::move(returnType)), main(std::move(comp)) {};
     DispatchResult(TypePtr returnType, DispatchComponent comp, std::unique_ptr<DispatchResult> secondary,
                    Combinator secondaryKind)
         : returnType(std::move(returnType)), main(std::move(comp)), secondary(std::move(secondary)),
-          secondaryKind(secondaryKind){};
+          secondaryKind(secondaryKind) {};
 
     // Combine two dispatch results, preferring the left as the `main`.
     static DispatchResult merge(const GlobalState &gs, Combinator kind, DispatchResult &&left, DispatchResult &&right);

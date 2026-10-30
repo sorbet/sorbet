@@ -18,7 +18,7 @@ namespace {
 
 struct PartialMatch {
     uint score = 0;
-    string_view::const_iterator matchEnd = nullptr; // progress in query match
+    optional<string_view::const_iterator> matchEnd; // progress in query match
 };
 
 class SymbolMatcher final {
@@ -207,15 +207,15 @@ void SymbolMatcher::updatePartialMatch(core::SymbolRef symbolRef, string_view::c
          previousAncestorRef = ancestorRef, ancestorRef = ancestorRef.owner(gs)) {
         auto &ancestorMatch = getPartialMatch(ancestorRef);
         auto ancestorEnd = ancestorMatch.matchEnd;
-        if (ancestorEnd == queryBegin || ancestorEnd == nullptr) {
+        if (!ancestorEnd || ancestorEnd == queryBegin) {
             break; // no further ancestor will be of any help
         }
         if (ancestorEnd == queryEnd) {
             continue; // ancestor matched everything, so skip to its parent
         }
         auto ancestorScore = ancestorMatch.score;
-        auto plusMatch = partialMatchSymbol(shortName, ancestorEnd, queryEnd, true, ceilingScore - ancestorScore);
-        if (plusMatch.matchEnd - partialMatch.matchEnd > 0) {
+        auto plusMatch = partialMatchSymbol(shortName, *ancestorEnd, queryEnd, true, ceilingScore - ancestorScore);
+        if (*plusMatch.matchEnd - *partialMatch.matchEnd > 0) {
             partialMatch.score = ancestorScore + plusMatch.score;
             partialMatch.matchEnd = plusMatch.matchEnd;
         } else if (plusMatch.matchEnd == partialMatch.matchEnd) {
@@ -288,7 +288,7 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
                      previousAncestorRef != ancestorRef && ancestorRef.exists();
                      previousAncestorRef = ancestorRef, ancestorRef = ancestorRef.owner(gs)) {
                     auto [ancestorScore, ancestorEnd] = getPartialMatch(ancestorRef);
-                    if (ancestorEnd == queryBegin || ancestorEnd == nullptr) {
+                    if (!ancestorEnd || ancestorEnd == queryBegin) {
                         break; // no further ancestor will be of any help
                     }
                     if (ancestorEnd == queryEnd) {
@@ -298,7 +298,7 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
                         continue; // matching this ancestor would be worse
                     }
                     auto [plusScore, plusEnd] =
-                        partialMatchSymbol(shortName, ancestorEnd, queryEnd, false, bestScore - ancestorScore);
+                        partialMatchSymbol(shortName, *ancestorEnd, queryEnd, false, bestScore - ancestorScore);
                     if (plusEnd == queryEnd) {
                         bestScore = min(bestScore, ancestorScore + plusScore);
                     }

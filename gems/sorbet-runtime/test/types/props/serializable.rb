@@ -390,6 +390,26 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       end
     end
 
+    it 'requires the prop type to be nilable' do
+      assert_prop_error(/requires that the type of `foo` be `T.nilable\(\.\.\.\)` \(given: String\)/) do
+        prop :foo, String, raise_on_nil_write: true
+      end
+
+      assert_prop_error(/requires that the type of `foo` be `T.nilable\(\.\.\.\)` \(given: NilClass\)/) do
+        prop :foo, NilClass, raise_on_nil_write: true
+      end
+    end
+
+    it 'allows underspecified prop types' do
+      Class.new do
+        include T::Props::Serializable
+        prop :untyped, T.untyped, raise_on_nil_write: true
+        prop :object, Object, raise_on_nil_write: true
+        prop :basic_object, BasicObject, raise_on_nil_write: true
+        prop :interface, Kernel, raise_on_nil_write: true
+      end
+    end
+
     it 'forbids nil in setter' do
       struct = NilFieldStruct.new(foo: 1, bar: 'something')
       ex = assert_raises(TypeError) do
@@ -438,23 +458,16 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       struct = NilSingleFieldStruct.from_hash({})
       assert_nil(struct.foo)
 
-      msg_string = nil
-      extra_hash = nil
-
-      T::Configuration.log_info_handler = proc do |msg, extra|
-        msg_string = msg
-        extra_hash = extra
+      h = nil
+      _stdout, msg_string = capture_io do
+        h = struct.serialize
       end
-
-      h = struct.serialize
 
       assert_instance_of(Hash, h)
       assert(h.empty?)
-      refute_nil(msg_string)
-      refute_nil(extra_hash)
       assert_includes(msg_string, "missing required property in serialize")
-      assert_equal(:foo, extra_hash[:prop])
-      assert_includes(extra_hash[:class], "NilSingleFieldStruct")
+      assert_includes(msg_string, "prop=:foo")
+      assert_includes(msg_string, "class=Opus::Types::Test::Props::SerializableTest::NilSingleFieldStruct")
     end
 
     describe 'with weak constructor' do

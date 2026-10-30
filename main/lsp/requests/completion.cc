@@ -33,7 +33,7 @@ struct RubyKeyword {
 
     RubyKeyword(string keyword, string documentation, optional<string> snippet = nullopt,
                 optional<string> detail = nullopt)
-        : keyword(move(keyword)), documentation(move(documentation)), snippet(move(snippet)), detail(move(detail)){};
+        : keyword(move(keyword)), documentation(move(documentation)), snippet(move(snippet)), detail(move(detail)) {};
 };
 
 using KeywordLikeSnippet = RubyKeyword;

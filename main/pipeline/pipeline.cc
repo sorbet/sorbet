@@ -112,7 +112,7 @@ void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) 
             opts.extraPackageFilesDirectoryUnderscorePrefixes, opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
             opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
             opts.allowRelaxedPackagerChecksFor, opts.updateVisibilityFor, opts.packagerLayers, opts.sorbetPackagesHint,
-            opts.genPackagesMode, opts.allowRelaxingTestVisibility, opts.packageAttributedErrors);
+            opts.genPackagesMode, opts.allowRelaxingTestVisibility, opts.packageAttributedErrors, opts.testPackages);
     }
 #endif
 }
@@ -129,7 +129,8 @@ unique_ptr<core::GlobalState> copyForSlowPath(const core::GlobalState &from, con
         opts.extraPackageFilesDirectoryUnderscorePrefixes, opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
         opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
         opts.allowRelaxedPackagerChecksFor, opts.updateVisibilityFor, opts.packagerLayers, opts.sorbetPackagesHint,
-        opts.genPackagesMode, opts.allowRelaxingTestVisibility, opts.packageAttributedErrors, forStratum);
+        opts.genPackagesMode, opts.allowRelaxingTestVisibility, opts.packageAttributedErrors, opts.testPackages,
+        forStratum);
 
     // Fall back on initializing from the payload if we're not copying part of from's symbol table.
     if (forStratum == core::packages::Stratum(0)) {
@@ -720,7 +721,7 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
         opts.extraPackageFilesDirectorySlashDeprecatedPrefixes, opts.extraPackageFilesDirectorySlashPrefixes,
         opts.packageSkipRBIExportEnforcementDirs, opts.allowRelaxedPackagerChecksFor, opts.updateVisibilityFor,
         opts.packagerLayers, opts.sorbetPackagesHint, opts.genPackagesMode, opts.allowRelaxingTestVisibility,
-        opts.packageAttributedErrors);
+        opts.packageAttributedErrors, opts.testPackages);
 
     workers.multiplexJob("indexSuppliedFiles", [emptyGs, &opts, fileq, resultq, &kvstore, cancelable]() {
         Timer timeit(emptyGs->tracer(), "indexSuppliedFilesWorker");
@@ -732,7 +733,7 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
             opts.extraPackageFilesDirectorySlashDeprecatedPrefixes, opts.extraPackageFilesDirectorySlashPrefixes,
             opts.packageSkipRBIExportEnforcementDirs, opts.allowRelaxedPackagerChecksFor, opts.updateVisibilityFor,
             opts.packagerLayers, opts.sorbetPackagesHint, opts.genPackagesMode, opts.allowRelaxingTestVisibility,
-            opts.packageAttributedErrors);
+            opts.packageAttributedErrors, opts.testPackages);
         auto &epochManager = *localGs->epochManager;
 
         IndexThreadResultPack threadResult;
@@ -834,7 +835,7 @@ void unpartitionPackageFiles(vector<ast::ParsedFile> &packageFiles, vector<ast::
     }
 }
 
-PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::ParsedFile> &packageFiles,
+PackageStrata computePackageStrata(core::GlobalState &gs, vector<ast::ParsedFile> &packageFiles,
                                    absl::Span<core::FileRef> sourceFiles, const options::Options &opts) {
     Timer timeit(gs.tracer(), "computePackageStrata");
 
@@ -843,6 +844,10 @@ PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::Pars
     result.fileToStratum = vector<core::packages::Stratum>(gs.filesUsed(), core::packages::Stratum(0));
 
     if (!opts.packageDirected) {
+        for (auto name : gs.packageDB().packages()) {
+            gs.packageDB().getPackageInfoNonConst(name)->stratum = {core::packages::Stratum(0),
+                                                                    core::packages::Stratum(0)};
+        }
         result.strata = {CondensationStratumInfo{absl::MakeSpan(packageFiles), sourceFiles}};
         return result;
     }
@@ -872,13 +877,13 @@ PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::Pars
         return true;
     });
 
-    // We'll generate non-test variants of each package, so we need to double the storage of this vector.
-    packageFiles.reserve(numPackageFiles * 2);
+    // Spans into this vector must remain valid as we append the sole AST for each package.
+    packageFiles.reserve(numPackageFiles);
 
     {
         Timer timeit(gs.tracer(), "computePackageStrata.stratumMapping");
 
-        auto stratumMapping = traversal.buildStratumMapping(gs);
+        traversal.recordStrata(gs);
 
         int ix = 0;
         for (auto &file : gs.getFiles().subspan(1)) {
@@ -892,18 +897,28 @@ PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::Pars
                 continue;
             }
 
-            ENFORCE(stratumMapping.find(pkgName) != stratumMapping.end(),
-                    "All packages must be present in the condensation graph");
-            auto &info = stratumMapping[pkgName];
+            const auto &info = db.getPackageInfo(pkgName).stratum;
 
             // TODO(trevor): after we switch fully over to test packges, this conditional can go away as we won't have
             // the distinction between a test and application node in the condensation graph.
-            if (file->isPackagedTest() || file->isPackagedTestHelper()) {
-                ENFORCE(info.testStratum < USHRT_MAX);
-                result.fileToStratum[ix] = core::packages::Stratum(info.testStratum);
+            // A legacy package file runs only in its test stratum. Queries must wait for that
+            // stratum too, so that all its application and test dependencies are available.
+            auto isPackageRbInLegacyPkg = file->isPackage(gs) && !db.getPackageInfo(pkgName).usesTestPackages;
+            if (file->isPackagedTest() || file->isPackagedTestHelper() || isPackageRbInLegacyPkg) {
+                ENFORCE(info.testStratum != core::packages::Stratum::NONE);
+                result.fileToStratum[ix] = info.testStratum;
             } else {
-                ENFORCE(info.applicationStratum < USHRT_MAX);
-                result.fileToStratum[ix] = core::packages::Stratum(info.applicationStratum);
+                ENFORCE(info.applicationStratum != core::packages::Stratum::NONE);
+                result.fileToStratum[ix] = info.applicationStratum;
+            }
+
+            if constexpr (debug_mode) {
+                if (file->isPackage(gs)) {
+                    auto &pkgInfo = db.getPackageInfo(pkgName);
+                    if (pkgInfo.usesTestPackages) {
+                        ENFORCE(info.testStratum == info.applicationStratum);
+                    }
+                }
             }
         }
 
@@ -937,26 +952,13 @@ PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::Pars
 
         {
             for (auto &scc : stratum) {
-                // TODO(trevor): this can be simplified when we switch to test-packages, as we won't need to emulate the
-                // behavior by copying package files to be valid in an application-only context anymore.
-                if (scc.isTest) {
-                    for (auto member : scc.members) {
+                for (auto member : scc.members) {
+                    if (scc.isTest || db.getPackageInfo(member).usesTestPackages) {
+                        // A legacy package has both an application and a test node in the condensation graph, but
+                        // its `__package.rb` must only be processed once so that its errors are only reported once.
+                        // Process it with the test node, which sees both its application and test code. The
+                        // application node applies the package's exports without it (see VisibilityChecker).
                         auto &tree = packageFiles.emplace_back(std::move(packagesToPackageRb[member]));
-                        ENFORCE(tree.tree);
-                    }
-                } else {
-                    // When processing the application source of a package, we need to make a copy of the package file,
-                    // and edit out any reference to test symbols.
-                    for (auto member : scc.members) {
-                        const auto &package = packagesToPackageRb[member];
-
-                        // Test-only packages don't have any application code, so we can safely skip them at this point.
-                        if (package.file.isTestPackage(gs)) {
-                            continue;
-                        }
-
-                        auto &tree =
-                            packageFiles.emplace_back(packager::Packager::copyPackageWithoutTestExports(gs, package));
                         ENFORCE(tree.tree);
                     }
                 }
@@ -976,9 +978,6 @@ PackageStrata computePackageStrata(const core::GlobalState &gs, vector<ast::Pars
             resultStratum.sourceFiles = sourceSpan.subspan(0, len);
             sourceSpan = sourceSpan.subspan(len);
         }
-
-        // If we had non-empty source files, we better have package files that manage them.
-        ENFORCE(resultStratum.sourceFiles.empty() || !resultStratum.packageFiles.empty())
     }
 
     ENFORCE(sourceSpan.empty());
@@ -1168,6 +1167,14 @@ ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, vector<ast::ParsedFil
                                     WorkerPool &workers) {
     try {
         if (opts.stopAfterPhase != options::Phase::NAMER) {
+#ifndef SORBET_REALMAIN_MIN
+            if (opts.cacheSensitiveOptions.sorbetPackages) {
+                // Only needs the symbols entered by namer and the exports recorded on each `PackageInfo`, not
+                // resolved constants.
+                packager::VisibilityChecker::propagateExports(gs, what);
+            }
+#endif
+
             ProgressIndicator namingProgress(opts.showProgress, "Resolving", 1);
             {
                 Timer timeit(gs.tracer(), "resolving");
@@ -1183,7 +1190,8 @@ ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, vector<ast::ParsedFil
 #ifndef SORBET_REALMAIN_MIN
             if (opts.cacheSensitiveOptions.sorbetPackages) {
                 Timer timeit(gs.tracer(), "visibility_checker");
-                packager::VisibilityChecker::run(gs, workers, what);
+                packager::VisibilityChecker::reportExportErrors(gs, what);
+                packager::VisibilityChecker::checkReferences(gs, workers, what);
             }
 #endif
 
@@ -1192,7 +1200,7 @@ ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, vector<ast::ParsedFil
                 for (auto &f : what) {
                     // Shift contents of file past current file's EOF, re-run incrementalResolve, assert that no
                     // locations appear before file's old EOF.
-                    const int prohibitedLines = f.file.data(gs).source().size();
+                    const int prohibitedLines = f.file.data(gs).sourceSize();
                     auto newSource = fmt::format("{}\n{}", string(prohibitedLines, '\n'), f.file.data(gs).source());
                     auto newFile = make_shared<core::File>(string(f.file.data(gs).path()), move(newSource),
                                                            f.file.data(gs).sourceType);
@@ -1288,6 +1296,11 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             // the package prefixes" with the later living in `pipeline::nameAndResolve` once again
             // (thus restoring the symmetry).
             what = packager::Packager::runIncremental(gs, move(what), workers);
+
+            // Without incremental namer, no symbols were deleted or re-entered, so their export bits are unchanged.
+            if (runIncrementalNamer) {
+                packager::VisibilityChecker::propagateExports(gs, what);
+            }
         }
 #endif
 
@@ -1311,7 +1324,11 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
 
 #ifndef SORBET_REALMAIN_MIN
         if (opts.cacheSensitiveOptions.sorbetPackages) {
-            packager::VisibilityChecker::run(gs, workers, what);
+            // Without incremental namer, the `__package.rb` files' errors are unchanged.
+            if (runIncrementalNamer) {
+                packager::VisibilityChecker::reportExportErrors(gs, what);
+            }
+            packager::VisibilityChecker::checkReferences(gs, workers, what);
         }
 #endif
 
@@ -1332,7 +1349,7 @@ class CFGCollectorAndTyper {
     const options::Options &opts;
 
 public:
-    CFGCollectorAndTyper(const options::Options &opts) : opts(opts){};
+    CFGCollectorAndTyper(const options::Options &opts) : opts(opts) {};
 
     void preTransformMethodDef(core::Context ctx, const ast::MethodDef &m) {
         if (!infer::Inference::willRun(ctx, m.declLoc, m.symbol)) {
@@ -1482,9 +1499,14 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
 }
 
 bool shouldTypecheck(const core::GlobalState &gs, const UnorderedSet<core::packages::MangledName> &relevantPackages,
-                     core::FileRef file) {
+                     const UnorderedSet<core::FileRef> hadErrors, core::FileRef file) {
     auto pkg = gs.packageDB().getPackageNameForFile(file);
     if (!pkg.exists()) {
+        return true;
+    }
+
+    // We override any potential skipping decision if the file has already had other errors raised.
+    if (hadErrors.contains(file)) {
         return true;
     }
 
@@ -1500,6 +1522,10 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> &&what, cons
     // Unless the error queue had a critical error, only typecheck should flush errors to the client, otherwise we will
     // drop errors in LSP mode.
     ENFORCE(gs.hadCriticalError() || gs.errorQueue->filesFlushedCount == 0);
+
+    // Collect all outstanding errors eagerly, so that we have an up-to-date picture of what files have had errors
+    // aready.
+    auto recordedErrors = gs.errorQueue->collectAll();
 
     const auto &epochManager = *gs.epochManager;
     // Record epoch at start of typechecking before any preemption occurs.
@@ -1523,8 +1549,8 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> &&what, cons
 
         {
             ProgressIndicator cfgInferProgress(opts.showProgress, "CFG+Inference", what.size());
-            workers.multiplexJob("typecheck", [&gs, &opts, epoch, &epochManager, &preemptionManager, fileq, outputq,
-                                               cancelable, relevantPackages, checkRelevantPackages,
+            workers.multiplexJob("typecheck", [&gs, &opts, epoch, &epochManager, &preemptionManager, &recordedErrors,
+                                               fileq, outputq, cancelable, relevantPackages, checkRelevantPackages,
                                                intentionallyLeakASTs]() {
                 ast::ParsedFile job;
                 int processedByThread = 0;
@@ -1549,7 +1575,8 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> &&what, cons
                             const bool fileWasChanged = preemptionManager && job.file.data(gs).epoch > epoch;
                             if (!isCanceled && !fileWasChanged && gs.errorQueue->wouldFlushErrorsForFile(job.file)) {
                                 core::FileRef file = job.file;
-                                if (!checkRelevantPackages || shouldTypecheck(gs, *relevantPackages, file)) {
+                                if (!checkRelevantPackages ||
+                                    shouldTypecheck(gs, *relevantPackages, recordedErrors, file)) {
                                     try {
                                         core::Context ctx(gs, core::Symbols::root(), file);
                                         typecheckOne(ctx, move(job), opts, intentionallyLeakASTs);
@@ -1558,12 +1585,13 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> &&what, cons
                                         gs.tracer().error("Exception typing file: {} (backtrace is above)",
                                                           file.data(gs).path());
                                     }
+
+                                    // Stream out errors for this file, as it has made it through the whole pipeline.
+                                    outputq->push(file, processedByThread);
+                                    processedByThread = 0;
                                 } else if (intentionallyLeakASTs) {
                                     intentionallyLeakMemory(job.tree.release());
                                 }
-                                // Stream out errors
-                                outputq->push(file, processedByThread);
-                                processedByThread = 0;
                             }
                         }
                     }
@@ -1784,7 +1812,7 @@ void sortBySize(const core::GlobalState &gs, vector<ast::ParsedFile> &trees) {
     // If files are not already sorted, we want to start typeckecking big files first because it helps with
     // better work distribution
     fast_sort(trees, [&](const auto &lhs, const auto &rhs) -> bool {
-        return lhs.file.data(gs).source().size() > rhs.file.data(gs).source().size();
+        return lhs.file.data(gs).sourceSize() > rhs.file.data(gs).sourceSize();
     });
 }
 

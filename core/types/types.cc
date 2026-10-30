@@ -516,8 +516,7 @@ void TupleType::_sanityCheck(const GlobalState &gs) const {
 }
 
 ShapeType::ShapeType(vector<TypePtr> keys, vector<TypePtr> values) : keys(move(keys)), values(move(values)) {
-    DEBUG_ONLY(for (auto &k
-                    : this->keys) {
+    DEBUG_ONLY(for (auto &k : this->keys) {
         ENFORCE(isa_type<NamedLiteralType>(k) || isa_type<IntegerLiteralType>(k) || isa_type<FloatLiteralType>(k));
     };);
     recordAllocatedType("shapetype");

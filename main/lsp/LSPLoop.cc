@@ -22,16 +22,25 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-LSPLoop::LSPLoop(unique_ptr<core::GlobalState> initialGS, WorkerPool &workers,
-                 const shared_ptr<LSPConfiguration> &config, unique_ptr<KeyValueStore> kvstore)
+LSPLoop::LSPLoop(unique_ptr<core::GlobalState> initialGS, WorkerPool &workers, shared_ptr<LSPConfiguration> config,
+                 unique_ptr<KeyValueStore> kvstore)
     : config(config), taskQueue(make_shared<TaskQueue>()), epochManager(initialGS->epochManager),
-      preprocessor(config, taskQueue),
-      typecheckerCoord(config, make_shared<core::lsp::PreemptionTaskManager>(initialGS->epochManager), workers,
+      preprocessor(move(config), taskQueue),
+      typecheckerCoord(this->config, make_shared<core::lsp::PreemptionTaskManager>(initialGS->epochManager), workers,
                        taskQueue),
-      indexer(config, move(initialGS), move(kvstore)), emptyWorkers(WorkerPool::create(0, *config->logger)),
+      indexer(this->config, move(initialGS), move(kvstore)), emptyWorkers(WorkerPool::create(0, *this->config->logger)),
       lastMetricUpdateTime(chrono::steady_clock::now()) {}
 
 constexpr chrono::minutes STATSD_INTERVAL = chrono::minutes(5);
+
+void LSPLoop::setPreemptionTestHooks(shared_ptr<PreemptionTestHooks> hooks) {
+    absl::MutexLock lck(taskQueue->getMutex());
+    taskQueue->preemptionTestHooks = move(hooks);
+}
+
+void LSPLoop::synchronizeTaskQueueForTest() {
+    absl::MutexLock lck(taskQueue->getMutex());
+}
 
 bool LSPLoop::shouldSendCountersToStatsd(chrono::time_point<chrono::steady_clock> currentTime) const {
     // If --web-trace-file, always flush after every task (probably: someone is debugging).
@@ -44,7 +53,7 @@ bool LSPLoop::shouldSendCountersToStatsd(chrono::time_point<chrono::steady_clock
 }
 
 void LSPLoop::sendCountersToStatsd(chrono::time_point<chrono::steady_clock> currentTime) {
-    Timer timeit(config->logger, "LSPLoop::sendCountersToStatsd");
+    Timer timeit(*config->logger, "LSPLoop::sendCountersToStatsd");
     ENFORCE(this_thread::get_id() == mainThreadId, "sendCounterToStatsd can only be called from the main LSP thread.");
     const auto &opts = config->opts;
     // Record process and version stats. Do this BEFORE clearing the thread counters!
@@ -53,7 +62,8 @@ void LSPLoop::sendCountersToStatsd(chrono::time_point<chrono::steady_clock> curr
     if (!opts.statsdHost.empty()) {
         lastMetricUpdateTime = currentTime;
         auto prefix = fmt::format("{}.lsp.counters", opts.statsdPrefix);
-        StatsD::submitCounters(counters, opts.statsdHost, opts.statsdPort, prefix);
+        StatsD::submitCounters(counters, opts.statsdHost, opts.statsdPort, prefix, opts.metricsExtraTags,
+                               opts.metricsLatestVersionFile);
     }
 
     if (!opts.webTraceFile.empty()) {
@@ -69,7 +79,7 @@ class NotifyNotificationOnDestruction {
     absl::Notification &notification;
 
 public:
-    NotifyNotificationOnDestruction(absl::Notification &notif) : notification(notif){};
+    NotifyNotificationOnDestruction(absl::Notification &notif) : notification(notif) {};
     ~NotifyNotificationOnDestruction() {
         if (!notification.HasBeenNotified()) {
             notification.Notify();
@@ -123,7 +133,7 @@ void LSPLoop::processRequests(vector<unique_ptr<LSPMessage>> messages) {
 void LSPLoop::runTask(unique_ptr<LSPTask> task) {
     prodCategoryCounterInc("lsp.messages.processed", task->methodString());
     {
-        Timer timeit(config->logger, "LSPTask::index");
+        Timer timeit(*config->logger, "LSPTask::index");
         timeit.setTag("method", task->methodString());
         task->index(this->indexer);
     }
@@ -206,7 +216,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
             // Thread that executes this lambda is called reader thread.
             // This thread _intentionally_ does not capture `this`.
             MessageQueueState::NotifyOnDestruction notify(messageQueue, messageQueueMutex);
-            auto timeit = make_unique<Timer>(logger, "getNewRequest");
+            auto timeit = make_unique<Timer>(*logger, "getNewRequest");
             while (true) {
                 auto readResult = input->read();
                 if (readResult.result == FileOps::ReadResult::ErrorOrEof) {
@@ -221,7 +231,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                         messageQueue.counters = mergeCounters(move(messageQueue.counters));
                         messageQueue.pendingRequests.push_back(move(msg));
                         // Reset span now that we've found a request.
-                        timeit = make_unique<Timer>(logger, "getNewRequest");
+                        timeit = make_unique<Timer>(*logger, "getNewRequest");
                     }
                     // Check if it's time to exit.
                     if (messageQueue.terminate) {
@@ -245,7 +255,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
         while (true) {
             unique_ptr<LSPTask> task;
             {
-                Timer timeit(logger, "idle");
+                Timer timeit(*logger, "idle");
                 absl::MutexLock lck(taskQueue->getMutex(), absl::Condition(taskQueue.get(), &TaskQueue::ready));
                 ENFORCE(!taskQueue->isPaused());
                 if (taskQueue->isTerminated()) {
@@ -276,18 +286,30 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
 
                     if (scheduleToken != nullptr) {
                         logger->debug("[Processing] Preempting slow path for task {}", methodStr);
+                        auto testHooks = taskQueue->preemptionTestHooks;
+                        if (testHooks != nullptr) [[unlikely]] {
+                            taskQueue->getMutex()->Unlock();
+                            testHooks->resumeProcessing.WaitForNotification();
+                            taskQueue->getMutex()->Lock();
+                        }
                         // Preemption scheduling success!
                         // In this if statement **only**, `taskQueue::stateMutex` protects all accesses to LSPIndexer.
                         // This is needed to linearize the indexing of edits, which may happen in the typechecking
                         // thread if a fast path edit preempts, with the `canPreempt` checks of edits in this thread.
-                        auto noPreemptionTasksRemain = [&indexer = this->indexer,
+                        auto noPreemptionTasksRemain = [&indexer = this->indexer, &finished,
                                                         &tasks = this->taskQueue->tasks()]() -> bool {
                             // The capture of `tasks` here is safe because the only caller of this closure is the
                             // `Await` below, which will lock the mutex that guards `tasks` for its duration.
-                            return !indexer.preemptionPossible(tasks);
+                            return finished.HasBeenNotified() || !indexer.preemptionPossible(tasks);
                         };
                         // Wait until the head of the queue turns into a non-preemptible task to resume processing the
                         // queue.
+                        if (testHooks != nullptr) [[unlikely]] {
+                            // Only gate the first scheduled preemption.
+                            taskQueue->preemptionTestHooks = nullptr;
+                            // Notify under the queue mutex. A test that then acquires it knows Await has released it.
+                            testHooks->processingReadyToAwait.Notify();
+                        }
                         taskQueue->getMutex()->Await(absl::Condition(&noPreemptionTasksRemain));
 
                         // The queue is now empty or has a task that cannot preempt. There are two possibilities here:

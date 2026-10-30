@@ -17,6 +17,9 @@ class T::Types::Base
   sig { abstract.void }
   def build_type; end
 
+  sig { abstract.void }
+  def build_lazy_fields; end
+
   sig { overridable.params(obj: Kernel).returns(T::Boolean) }
   def recursively_valid?(obj); end
 
@@ -241,6 +244,7 @@ end
 # --- user-defined generics ---
 
 class T::Types::TypeVariable < T::Types::Base
+  sig { params(variance: Symbol).void }
   def initialize(variance); end
 
   sig { override.returns(String) }
@@ -262,6 +266,7 @@ class T::Types::TypeTemplate < T::Types::TypeVariable
 end
 
 class T::Types::TypeParameter < T::Types::Base
+  sig { params(name: Symbol).void }
   def initialize(name); end
 
   sig { override.params(obj: Kernel).returns(T::Boolean) }
@@ -272,6 +277,7 @@ class T::Types::TypeParameter < T::Types::Base
   sig { override.returns(String) }
   def name; end
 
+  sig { params(name: Symbol).returns(T::Types::TypeParameter) }
   def self.make(name); end
 end
 

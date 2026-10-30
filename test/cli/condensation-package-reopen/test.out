@@ -1,159 +1,123 @@
-bad_test/a.rb:17: `type_member` may only be used on constants in the package that owns them https://srb.help/4028
-    17 |  X = type_member
-              ^^^^^^^^^^^
-    bad_test/__package.rb:3: Package containing the `type_member` is not a `prelude!`
-     3 |class Test::BadTest < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Note:
-    `Test::BadTest` is unpackaged, and may be reopened from a package marked `prelude!`
-
-bad_test/a.rb:19: `type_template` may only be used on constants in the package that owns them https://srb.help/4028
-    19 |  Y = type_template
-              ^^^^^^^^^^^^^
-    bad_test/__package.rb:3: Package containing the `type_template` is not a `prelude!`
-     3 |class Test::BadTest < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Note:
-    `Test::BadTest` is unpackaged, and may be reopened from a package marked `prelude!`
-
-bad_test/a.rb:3: File belongs to package `Test::BadTest` but defines a constant that does not match this namespace https://srb.help/3713
+bad_test/a.rb:3: File belongs to package `Test::BadTest` but defines a constant that does not match this namespace https://srb.help/4031
      3 |module Test::BadTest
-               ^^^^^^^^^^^^^
+        ^^^^^^^^^^^^^^^^^^^^
     bad_test/__package.rb:3: Enclosing package declared here
      3 |class Test::BadTest < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-bad_test/a.rb:15: `include` may only be used on constants in the package that owns them https://srb.help/5084
-    15 |  include ClassMethods
-                  ^^^^^^^^^^^^
-    bad_test/subpackage/foo.rb:3: Symbol originally defined here
-     3 |module Test::BadTest
-        ^^^^^^^^^^^^^^^^^^^^
-    bad_test/__package.rb:3: Package defined here is not marked `prelude!`
-     3 |class Test::BadTest < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Note:
-    `Test::BadTest` is unpackaged, and may be reopened from a package marked `prelude!`
-
-bad_test/a.rb:12: `extend` may only be used on constants in the package that owns them https://srb.help/5084
+bad_test/a.rb:12: Unable to resolve constant `ClassMethods` https://srb.help/5002
     12 |  extend ClassMethods
                  ^^^^^^^^^^^^
-    bad_test/subpackage/foo.rb:3: Symbol originally defined here
+  Did you mean `Method`? Use `-a` to autocorrect
+    bad_test/a.rb:12: Replace with `Method`
+    12 |  extend ClassMethods
+                 ^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/method.rbi#LCENSORED: `Method` defined here
+    NN |class Method < Object
+        ^^^^^^^^^^^^^^^^^^^^^
+
+bad_test/a.rb:15: Unable to resolve constant `ClassMethods` https://srb.help/5002
+    15 |  include ClassMethods
+                  ^^^^^^^^^^^^
+  Did you mean `Method`? Use `-a` to autocorrect
+    bad_test/a.rb:15: Replace with `Method`
+    15 |  include ClassMethods
+                  ^^^^^^^^^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/method.rbi#LCENSORED: `Method` defined here
+    NN |class Method < Object
+        ^^^^^^^^^^^^^^^^^^^^^
+
+bad_test/a.rb:17: Method `type_member` does not exist on `T.class_of(Test::BadTest)[T.attached_class (of Test::BadTest), T.class_of(Test::BadTest)::Y]` https://srb.help/7003
+    17 |  X = type_member
+              ^^^^^^^^^^^
+  Got `T.class_of(Test::BadTest)[T.attached_class (of Test::BadTest), T.class_of(Test::BadTest)::Y]` originating from:
+    bad_test/a.rb:3:
+     3 |module Test::BadTest
+        ^
+  Autocorrect: Use `-a` to autocorrect
+    bad_test/a.rb:4: Insert `extend T::Generic`
+     4 |  module ClassMethods
+        ^
+
+bad_test/a.rb:19: Method `type_template` does not exist on `T.class_of(Test::BadTest)[T.attached_class (of Test::BadTest), T.class_of(Test::BadTest)::Y]` https://srb.help/7003
+    19 |  Y = type_template
+              ^^^^^^^^^^^^^
+  Got `T.class_of(Test::BadTest)[T.attached_class (of Test::BadTest), T.class_of(Test::BadTest)::Y]` originating from:
+    bad_test/a.rb:3:
+     3 |module Test::BadTest
+        ^
+  Autocorrect: Use `-a` to autocorrect
+    bad_test/a.rb:4: Insert `extend T::Generic`
+     4 |  module ClassMethods
+        ^
+
+bad_test/subpackage/foo.rb:3: File belongs to package `Test::BadTest::Subpackage` but defines a constant that does not match this namespace https://srb.help/4031
      3 |module Test::BadTest
         ^^^^^^^^^^^^^^^^^^^^
-    bad_test/__package.rb:3: Package defined here is not marked `prelude!`
-     3 |class Test::BadTest < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Note:
-    `T.class_of(Test::BadTest)` is unpackaged, and may be reopened from a package marked `prelude!`
-
-bad_test/subpackage/foo.rb:3: File belongs to package `Test::BadTest::Subpackage` but defines a constant that does not match this namespace https://srb.help/3713
-     3 |module Test::BadTest
-               ^^^^^^^^^^^^^
     bad_test/subpackage/__package.rb:3: Enclosing package declared here
      3 |class Test::BadTest::Subpackage < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-bad_test/__package.rb:4: Unable to resolve constant `Root` https://srb.help/5002
-     4 |  import Test::Root::Subpackage
-                 ^^^^^^^^^^
-  Did you mean `Root`? Use `-a` to autocorrect
-    bad_test/__package.rb:4: Replace with `Root`
-     4 |  import Test::Root::Subpackage
-                 ^^^^^^^^^^
-    root/__package.rb:3: `Root` defined here
-     3 |class Root < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^
-
-bad_test/a.rbi:4: `type_member` may only be used on constants in the package that owns them https://srb.help/4028
-     4 |  X = type_member
-              ^^^^^^^^^^^
-    bad_test/__package.rb:3: Package containing the `type_member` is not a `prelude!`
-     3 |class Test::BadTest < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Note:
-    `Test::BadTest` is unpackaged, and may be reopened from a package marked `prelude!`
-
-bad_test/a.rbi:5: `type_template` may only be used on constants in the package that owns them https://srb.help/4028
-     5 |  Y = type_template
-              ^^^^^^^^^^^^^
-    bad_test/__package.rb:3: Package containing the `type_template` is not a `prelude!`
-     3 |class Test::BadTest < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Note:
-    `Test::BadTest` is unpackaged, and may be reopened from a package marked `prelude!`
-
-bad_test/a.rbi:3: File belongs to package `Test::BadTest` but defines a constant that does not match this namespace https://srb.help/3713
+bad_test/a.rbi:3: File belongs to package `Test::BadTest` but defines a constant that does not match this namespace https://srb.help/4031
      3 |module Test::BadTest
-               ^^^^^^^^^^^^^
+        ^^^^^^^^^^^^^^^^^^^^
     bad_test/__package.rb:3: Enclosing package declared here
      3 |class Test::BadTest < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-root/root.rb:17: Package `Root` has subpackages, so its corresponding class must not be generic https://srb.help/4016
+root/root.rb:17: `Root` is part of a subpackage namespace, and must not be generic https://srb.help/4016
     17 |  X = type_member
               ^^^^^^^^^^^
     root/__package.rb:3: Package defined here
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
-    root/subpackage/__package.rb:3: First subpackage defined here
-     3 |class Root::Subpackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    root/a/b/__package.rb:3: First subpackage defined here
+     3 |class Root::A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-root/root.rb:19: Package `Root` has subpackages, so its corresponding class must not be generic https://srb.help/4016
+root/root.rb:19: `T.class_of(Root)` is part of a subpackage namespace, and must not be generic https://srb.help/4016
     19 |  Y = type_template
               ^^^^^^^^^^^^^
     root/__package.rb:3: Package defined here
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
-    root/subpackage/__package.rb:3: First subpackage defined here
-     3 |class Root::Subpackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    root/a/b/__package.rb:3: First subpackage defined here
+     3 |class Root::A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-root/root.rb:3: Package `Root` has subpackages, so its corresponding class must not have ancestors https://srb.help/5083
+root/root.rb:3: `Root` is part of a subpackage namespace, and must not have ancestors https://srb.help/5083
      3 |class Root < Prelude::A
                      ^^^^^^^^^^
     root/__package.rb:3: Package defined here
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
-    root/subpackage/__package.rb:3: First subpackage defined here
-     3 |class Root::Subpackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    root/a/b/__package.rb:3: First subpackage defined here
+     3 |class Root::A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-root/root.rb:15: Package `Root` has subpackages, so its corresponding class must not have ancestors https://srb.help/5083
+root/root.rb:15: `Root` is part of a subpackage namespace, and must not have ancestors https://srb.help/5083
     15 |  include ClassMethods
                   ^^^^^^^^^^^^
     root/__package.rb:3: Package defined here
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
-    root/subpackage/__package.rb:3: First subpackage defined here
-     3 |class Root::Subpackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    root/a/b/__package.rb:3: First subpackage defined here
+     3 |class Root::A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-root/root.rb:12: Package `Root` has subpackages, so its corresponding class must not have ancestors https://srb.help/5083
+root/root.rb:12: `T.class_of(Root)` is part of a subpackage namespace, and must not have ancestors https://srb.help/5083
     12 |  extend ClassMethods
                  ^^^^^^^^^^^^
     root/__package.rb:3: Package defined here
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
-    root/subpackage/__package.rb:3: First subpackage defined here
-     3 |class Root::Subpackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    root/a/b/__package.rb:3: First subpackage defined here
+     3 |class Root::A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-bad_test/subpackage/__package.rb:5: Constant `Test::BadTest::Subpackage::Foo` lacks a declaration in this package and cannot be exported https://srb.help/3721
+bad_test/subpackage/__package.rb:5: Unable to resolve constant `BadTest` https://srb.help/5002
      5 |  export Test::BadTest::Subpackage::Foo
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    bad_test/subpackage/__package.rb:5: Delete
-     5 |  export Test::BadTest::Subpackage::Foo
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-bad_test/subpackage/__package.rb:5: Cannot export `Test::BadTest::Subpackage::Foo` because it is owned by another package https://srb.help/3721
-     5 |  export Test::BadTest::Subpackage::Foo
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    bad_test/subpackage/foo.rb:5: Defined here
-     5 |    class Foo
-            ^^^^^^^^^
+                 ^^^^^^^^^^^^^
 
 bad_test/__package.rb:4: Unable to resolve constant `Root` https://srb.help/5002
      4 |  import Test::Root::Subpackage
@@ -166,63 +130,81 @@ bad_test/__package.rb:4: Unable to resolve constant `Root` https://srb.help/5002
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
 
-root/root.rbi:4: Package `Root` has subpackages, so its corresponding class must not be generic https://srb.help/4016
+root/a.rb:4: `T.class_of(Root::A)` is part of a subpackage namespace, and must not have ancestors https://srb.help/5083
+     4 |  extend T::Generic
+                 ^^^^^^^^^^
+    root/__package.rb:3: Package defined here
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    root/a/b/__package.rb:3: First subpackage defined here
+     3 |class Root::A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+root/a.rb:6: Method `type_member` does not exist on `T.class_of(T)` https://srb.help/7003
+     6 |  X = T.type_member
+                ^^^^^^^^^^^
+  Got `T.class_of(T)` originating from:
+    root/a.rb:6:
+     6 |  X = T.type_member
+              ^
+
+root/root.rbi:4: `Root` is part of a subpackage namespace, and must not be generic https://srb.help/4016
      4 |  X = type_member
               ^^^^^^^^^^^
     root/__package.rb:3: Package defined here
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
-    root/subpackage/__package.rb:3: First subpackage defined here
-     3 |class Root::Subpackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    root/a/b/__package.rb:3: First subpackage defined here
+     3 |class Root::A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-root/root.rbi:5: Package `Root` has subpackages, so its corresponding class must not be generic https://srb.help/4016
+root/root.rbi:5: `T.class_of(Root)` is part of a subpackage namespace, and must not be generic https://srb.help/4016
      5 |  Y = type_template
               ^^^^^^^^^^^^^
     root/__package.rb:3: Package defined here
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
-    root/subpackage/__package.rb:3: First subpackage defined here
-     3 |class Root::Subpackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    root/a/b/__package.rb:3: First subpackage defined here
+     3 |class Root::A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-root/test/root.rb:17: Package `Root` has subpackages, so its corresponding class must not be generic https://srb.help/4016
+root/test/root.rb:17: `Test::Root` is part of a subpackage namespace, and must not be generic https://srb.help/4016
     17 |  X = type_member
               ^^^^^^^^^^^
     root/__package.rb:3: Package defined here
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
-    root/subpackage/__package.rb:3: First subpackage defined here
-     3 |class Root::Subpackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    root/a/b/__package.rb:3: First subpackage defined here
+     3 |class Root::A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-root/test/root.rb:19: Package `Root` has subpackages, so its corresponding class must not be generic https://srb.help/4016
+root/test/root.rb:19: `T.class_of(Test::Root)` is part of a subpackage namespace, and must not be generic https://srb.help/4016
     19 |  Y = type_template
               ^^^^^^^^^^^^^
     root/__package.rb:3: Package defined here
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
-    root/subpackage/__package.rb:3: First subpackage defined here
-     3 |class Root::Subpackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    root/a/b/__package.rb:3: First subpackage defined here
+     3 |class Root::A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-root/test/root.rb:15: Package `Root` has subpackages, so its corresponding class must not have ancestors https://srb.help/5083
+root/test/root.rb:15: `Test::Root` is part of a subpackage namespace, and must not have ancestors https://srb.help/5083
     15 |  include ClassMethods
                   ^^^^^^^^^^^^
     root/__package.rb:3: Package defined here
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
-    root/subpackage/__package.rb:3: First subpackage defined here
-     3 |class Root::Subpackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    root/a/b/__package.rb:3: First subpackage defined here
+     3 |class Root::A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-root/test/root.rb:12: Package `Root` has subpackages, so its corresponding class must not have ancestors https://srb.help/5083
+root/test/root.rb:12: `T.class_of(Test::Root)` is part of a subpackage namespace, and must not have ancestors https://srb.help/5083
     12 |  extend ClassMethods
                  ^^^^^^^^^^^^
     root/__package.rb:3: Package defined here
      3 |class Root < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
-    root/subpackage/__package.rb:3: First subpackage defined here
-     3 |class Root::Subpackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 24
+    root/a/b/__package.rb:3: First subpackage defined here
+     3 |class Root::A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 22

@@ -8,7 +8,7 @@ ClassDef{
     }]
   rhs = [
     Send{
-      flags = {privateOk}
+      flags = {privateOk, bracesBlock}
       recv = Self
       fun = <U foo1>
       block = Block {
@@ -24,7 +24,7 @@ ClassDef{
     }
 
     Send{
-      flags = {privateOk}
+      flags = {privateOk, doEndBlock}
       recv = Self
       fun = <U foo2>
       block = Block {
@@ -40,7 +40,7 @@ ClassDef{
     }
 
     Send{
-      flags = {privateOk}
+      flags = {privateOk, doEndBlock}
       recv = Self
       fun = <U foo5>
       block = Block {

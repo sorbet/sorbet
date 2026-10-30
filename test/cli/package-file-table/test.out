@@ -1,3 +1,13 @@
+foo/foo.rb:14: `Project::Bar::UnexportedClass` resolves but is not exported from `Project::Bar` https://srb.help/3717
+    14 |    Project::Bar::UnexportedClass
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  `Project::Bar::UnexportedClass` does not define behavior and thus will not be automatically exported
+    bar/bar.rb:14:
+    14 |  class UnexportedClass; end
+          ^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Either export it manually, or better, restructure the code so that package namespaces do not define behavior.
+
 foo/foo.rb:13: Unable to resolve constant `BardClass` https://srb.help/5002
     13 |    Project::Bar::BardClass
             ^^^^^^^^^^^^^^^^^^^^^^^
@@ -8,16 +18,6 @@ foo/foo.rb:13: Unable to resolve constant `BardClass` https://srb.help/5002
     bar/bar.rb:6: `Project::Bar::BarClass` defined here
      6 |  class BarClass
           ^^^^^^^^^^^^^^
-
-foo/foo.rb:14: `Project::Bar::UnexportedClass` resolves but is not exported from `Project::Bar` https://srb.help/3717
-    14 |    Project::Bar::UnexportedClass
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  `Project::Bar::UnexportedClass` does not define behavior and thus will not be automatically exported
-    bar/bar.rb:14:
-    14 |  class UnexportedClass; end
-          ^^^^^^^^^^^^^^^^^^^^^
-  Note:
-    Either export it manually, or better, restructure the code so that package namespaces do not define behavior.
 Errors: 2
 {
  "files": [
@@ -26,42 +26,63 @@ Errors: 2
    "sigil": "Strict",
    "strict": "Strict",
    "min_error_level": "Max",
-   "pkg": "Project::Bar"
+   "pkg": "Project::Bar",
+   "pkg_scc_id": 0,
+   "source_size": 197
   },
   {
    "path": "./bar/bar.rb",
    "sigil": "Strict",
    "strict": "Strict",
    "min_error_level": "Max",
-   "pkg": "Project::Bar"
+   "pkg": "Project::Bar",
+   "pkg_scc_id": 0,
+   "source_size": 254
   },
   {
    "path": "./bar/bar_methods.rb",
    "sigil": "Strict",
    "strict": "Strict",
    "min_error_level": "Max",
-   "pkg": "Project::Bar"
+   "pkg": "Project::Bar",
+   "pkg_scc_id": 0,
+   "source_size": 397
   },
   {
    "path": "./foo/__package.rb",
    "sigil": "Strict",
    "strict": "Strict",
    "min_error_level": "Max",
-   "pkg": "Project::Foo"
+   "pkg": "Project::Foo",
+   "pkg_scc_id": 0,
+   "source_size": 173
   },
   {
    "path": "./foo/foo.rb",
    "sigil": "Strict",
    "strict": "Strict",
    "min_error_level": "False",
-   "pkg": "Project::Foo"
+   "pkg": "Project::Foo",
+   "pkg_scc_id": 0,
+   "source_size": 287
+  },
+  {
+   "path": "./foo/foo.test.rb",
+   "sigil": "Strict",
+   "strict": "Strict",
+   "min_error_level": "Max",
+   "pkg": "Project::Foo",
+   "pkg_scc_id": 1,
+   "source_size": 47
   },
   {
    "path": "./foo/foo_methods.rb",
    "sigil": "Strict",
    "strict": "Strict",
    "min_error_level": "Max",
-   "pkg": "Project::Foo"
+   "pkg": "Project::Foo",
+   "pkg_scc_id": 0,
+   "source_size": 397
   }
  ]
 }

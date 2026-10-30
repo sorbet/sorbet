@@ -1,11 +1,14 @@
 #ifdef __linux__
 #include "absl/debugging/symbolize.h"
+#include "common/os/os.h"
 #include "spdlog/spdlog.h"
 #include <climits>
 #include <csignal>
 #include <cstdio>
 #include <cstring>
 #include <fcntl.h>
+#include <fstream>
+#include <limits>
 #include <sstream>
 #include <string>
 #include <sys/stat.h>
@@ -85,6 +88,23 @@ bool amIBeingDebugged() {
     }
 
     return false;
+}
+
+optional<size_t> getCurrentProcessSwapUsageKb() {
+    ifstream status("/proc/self/status");
+    string key;
+    while (status >> key) {
+        if (key == "VmSwap:") {
+            size_t swapKb;
+            string unit;
+            if (status >> swapKb >> unit && unit == "kB") {
+                return swapKb;
+            }
+            return nullopt;
+        }
+        status.ignore(numeric_limits<streamsize>::max(), '\n');
+    }
+    return nullopt;
 }
 
 bool stopInDebugger() {

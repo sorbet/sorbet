@@ -264,19 +264,17 @@ string TypeConstraint::toString(const core::GlobalState &gs) const {
 
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "bounds: [{}]\n",
-                   fmt::map_join(
-                       collated.begin(), collated.end(), ", ", [&gs](auto entry) -> auto{
-                           const auto &[sym, bounds] = entry;
-                           const auto &[lowerBound, upperBound] = bounds;
-                           auto lower = lowerBound != nullptr ? lowerBound.show(gs) : "_";
-                           auto upper = upperBound != nullptr ? upperBound.show(gs) : "_";
-                           return fmt::format("{} <: {} <: {}", lower, sym.show(gs), upper);
-                       }));
+                   fmt::map_join(collated.begin(), collated.end(), ", ", [&gs](auto entry) -> auto {
+                       const auto &[sym, bounds] = entry;
+                       const auto &[lowerBound, upperBound] = bounds;
+                       auto lower = lowerBound != nullptr ? lowerBound.show(gs) : "_";
+                       auto upper = upperBound != nullptr ? upperBound.show(gs) : "_";
+                       return fmt::format("{} <: {} <: {}", lower, sym.show(gs), upper);
+                   }));
     fmt::format_to(std::back_inserter(buf), "solution: [{}]\n",
-                   fmt::map_join(
-                       this->solution.begin(), this->solution.end(), ", ", [&gs](auto pair) -> auto{
-                           return fmt::format("{}: {}", pair.first.show(gs), pair.second.show(gs));
-                       }));
+                   fmt::map_join(this->solution.begin(), this->solution.end(), ", ", [&gs](auto pair) -> auto {
+                       return fmt::format("{}: {}", pair.first.show(gs), pair.second.show(gs));
+                   }));
     return to_string(buf);
 }
 

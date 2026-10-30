@@ -7,7 +7,7 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 DidChangeConfigurationTask::DidChangeConfigurationTask(const LSPConfiguration &config,
                                                        unique_ptr<DidChangeConfigurationParams> params,
-                                                       vector<string_view> &&openFiles, const uint32_t epoch)
+                                                       vector<string> &&openFiles, const uint32_t epoch)
     : LSPTask(config, LSPMethod::WorkspaceDidChangeConfiguration), params(move(params)), openFilePaths(move(openFiles)),
       epoch(epoch) {}
 
@@ -23,11 +23,11 @@ void DidChangeConfigurationTask::index(LSPIndexer &indexer) {
 
 namespace {
 
-vector<core::FileRef> getOpenFileRefs(const LSPTypecheckerDelegate &tc, absl::Span<const string_view> openFilePaths) {
+vector<core::FileRef> getOpenFileRefs(const LSPTypecheckerDelegate &tc, absl::Span<const string> openFilePaths) {
     vector<core::FileRef> openFileRefs;
     openFileRefs.reserve(openFilePaths.size());
 
-    for (auto path : openFilePaths) {
+    for (const auto &path : openFilePaths) {
         openFileRefs.push_back(tc.state().findFileByPath(path));
     }
 
@@ -45,7 +45,8 @@ void DidChangeConfigurationTask::run(LSPTypecheckerDelegate &tc) {
 }
 
 core::packages::Stratum DidChangeConfigurationTask::preemptionStratum(FileStratumMapping info) const {
-    return info.getStratumForPaths(this->openFilePaths);
+    vector<string_view> paths(this->openFilePaths.begin(), this->openFilePaths.end());
+    return info.getStratumForPaths(paths);
 }
 
 } // namespace sorbet::realmain::lsp

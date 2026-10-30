@@ -165,7 +165,7 @@ ClassDef{
           name = <U <blk>>
         } }]
       rhs = Send{
-        flags = {privateOk}
+        flags = {privateOk, bracesBlock}
         recv = Self
         fun = <U bar>
         block = Block {
@@ -193,7 +193,7 @@ ClassDef{
           name = <U <fwd-block>>
         } }]
       rhs = Send{
-        flags = {privateOk}
+        flags = {privateOk, bracesBlock}
         recv = ConstantLit{
           symbol = (class ::<Magic>)
           orig = nullptr
@@ -269,7 +269,7 @@ ClassDef{
           name = <U block>
         } }]
       rhs = Send{
-        flags = {privateOk}
+        flags = {privateOk, bracesBlock}
         recv = ConstantLit{
           symbol = (class ::<Magic>)
           orig = nullptr
@@ -300,7 +300,7 @@ ClassDef{
           name = <U &>
         } }]
       rhs = Send{
-        flags = {privateOk}
+        flags = {privateOk, bracesBlock}
         recv = ConstantLit{
           symbol = (class ::<Magic>)
           orig = nullptr

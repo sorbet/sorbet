@@ -9,6 +9,18 @@
 
 namespace sorbet::parser {
 
+// The syntax used to write the block argument of a send, when it's known.
+//
+// A value of `Present` means that a block is present, but the syntax used to write it isn't known (usually because the
+// block was synthesized, rather than parsed from source).
+enum class BlockStyle : uint8_t {
+    Present = 0,
+    DoEnd = 1,
+    Braces = 2,
+};
+
+std::string_view showBlockStyle(BlockStyle style);
+
 class Node {
 public:
     Node(core::LocOffsets loc) : loc(loc) {
@@ -41,14 +53,11 @@ public:
 
 protected:
     void printTabs(fmt::memory_buffer &to, int count) const;
-    void printNode(fmt::memory_buffer &to, const std::unique_ptr<Node> &node, const core::GlobalState &gs,
-                   int tabs) const;
-    void printNodeJSON(fmt::memory_buffer &to, const std::unique_ptr<Node> &node, const core::GlobalState &gs,
-                       int tabs) const;
-    void printNodeJSONWithLocs(fmt::memory_buffer &to, const std::unique_ptr<Node> &node, const core::GlobalState &gs,
-                               core::FileRef file, int tabs) const;
-    void printNodeWhitequark(fmt::memory_buffer &to, const std::unique_ptr<Node> &node, const core::GlobalState &gs,
-                             int tabs) const;
+    void printNode(fmt::memory_buffer &to, Node *node, const core::GlobalState &gs, int tabs) const;
+    void printNodeJSON(fmt::memory_buffer &to, Node *node, const core::GlobalState &gs, int tabs) const;
+    void printNodeJSONWithLocs(fmt::memory_buffer &to, Node *node, const core::GlobalState &gs, core::FileRef file,
+                               int tabs) const;
+    void printNodeWhitequark(fmt::memory_buffer &to, Node *node, const core::GlobalState &gs, int tabs) const;
 };
 
 template <class To> To *cast_node(Node *what) {

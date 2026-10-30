@@ -81,7 +81,7 @@ uint32_t hashFullNameRef(const GlobalState &gs, NameRef nm) {
 } // namespace
 
 WithoutUniqueNameHash::WithoutUniqueNameHash(const GlobalState &gs, NameRef nm)
-    : _hashValue(incZero(hashNameRefWithoutUniques(gs, nm))){};
+    : _hashValue(incZero(hashNameRefWithoutUniques(gs, nm))) {};
 
 void WithoutUniqueNameHash::sortAndDedupe(vector<core::WithoutUniqueNameHash> &hashes) {
     fast_sort(hashes);

@@ -145,14 +145,22 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         // to make it easy to reason about correctness.
         optional<cfg::BasicBlock::BlockExitCondInfo> parentUpdateKnowledgeReceiver;
 
+        // These variables are set when the block has a single live predecessor. withCond may
+        // return either a temporary owned by singlePredecessorEnv or an outEnvironments entry;
+        // singlePredecessorSource keeps track of which environment to copy into current below.
+        // Defer that copy until after dead-block classification so that phase can instead select
+        // the parent's unrefined outEnvironments entry without paying for a second populateFrom.
+        optional<Environment> singlePredecessorEnv;
+        const Environment *singlePredecessorSource = nullptr;
         if (bb->backEdges.size() == 1) {
             auto *parent = bb->backEdges[0];
             bool isTrueBranch = parent->bexit.thenb == bb;
             if (!outEnvironments[parent->id].isDead) {
-                Environment tempEnv(methodLoc);
+                auto &tempEnv = singlePredecessorEnv.emplace(methodLoc);
                 auto &envAsSeenFromBranch =
                     Environment::withCond(ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current.vars());
-                current.populateFrom(ctx, envAsSeenFromBranch);
+                singlePredecessorSource = &envAsSeenFromBranch;
+                current.isDead = envAsSeenFromBranch.isDead;
 
                 parentUpdateKnowledgeReceiver = parent->maybeGetUpdateKnowledgeReceiver(*cfg);
             } else {
@@ -175,27 +183,27 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             }
         }
 
-        current.computePins(ctx, outEnvironments, *cfg.get(), bb);
-        current.setUninitializedVarsToNil(ctx, ctx.locAt(cfg->declLoc));
+        const bool deadOnEntry = current.isDead;
+        cfg::InstructionPtr *unreachableInstruction = nullptr;
+        core::Loc locForUnreachable;
+        bool dueToSafeNavigation = false;
+        bool deadButTypecheckAnyways = false;
+        core::Loc absurdLoc;
 
-        for (auto &blockArg : bb->args) {
-            current.getAndFillTypeAndOrigin(blockArg);
-        }
-
-        visited[bb->id] = true;
-        if (current.isDead) {
+        if (deadOnEntry) {
             bb->firstDeadInstructionIdx = 0;
+        }
+        if (deadOnEntry && !bb->exprs.empty() &&
+            absl::c_any_of(bb->backEdges, [&](const auto &bb) { return !outEnvironments[bb->id].isDead; })) {
             // this block is unreachable.
-            if (bb->exprs.empty()) {
-                continue;
-            }
 
             // This is a bit complicated:
             //
             //   1. If this block is only dead because all jumps into this block are dead,
             //      we already reported an error and don't want a duplicate.
             //   2. If the block consists only of synthetic bindings or T.absurd, we don't
-            //      want to issue an error.
+            //      want to issue an error. A block with other instructions and T.absurd
+            //      is checked below, using types from before the impossible condition.
             //   3. If the block contains a send of the form <Magic>.<nil-for-safe-navigation>(x),
             //      we want to issue an UnnecessarySafeNavigationError, extracting
             //      type-and-origin info from x. (This magic form is inserted by the desugarer
@@ -204,15 +212,10 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             //      (non-synthetic, non-"T.absurd") instruction in the block as the loc of the
             //      error.
 
-            if (!absl::c_any_of(bb->backEdges, [&](const auto &bb) { return !outEnvironments[bb->id].isDead; })) {
-                continue;
-            }
-
-            cfg::InstructionPtr *unreachableInstruction = nullptr;
-            core::Loc locForUnreachable;
-            bool dueToSafeNavigation = false;
-
             for (auto &expr : bb->exprs) {
+                if (!absurdLoc.exists() && cfg::isa_instruction<cfg::TAbsurd>(expr.value)) {
+                    absurdLoc = ctx.locAt(expr.loc);
+                }
                 if (silenceDeadCodeError(expr.value)) {
                     continue;
                 }
@@ -240,11 +243,113 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     locForUnreachable = locForUnreachable.join(ctx.locAt(expr.loc));
                 }
             }
+        }
 
-            if (unreachableInstruction == nullptr) {
-                continue;
+        // Mirrors the logic to initialize the Environment above, but this time ignoring the BlockExit condition
+        // for the "deadButTypecheckAnyways" case. (If we didn't do this, we might end up with environments whose
+        // BasicBlock args don't have types because every backEdge was dead.)
+        if (singlePredecessorSource != nullptr) {
+            auto *parent = bb->backEdges[0];
+            if (unreachableInstruction != nullptr && absurdLoc.exists() && !dueToSafeNavigation &&
+                visited[parent->id] && !outEnvironments[parent->id].isDead) {
+                // Use pre-condition types for a defensive guard, rather than
+                // populating from the impossible refinement and then replacing it.
+                singlePredecessorSource = &outEnvironments[parent->id];
+                deadButTypecheckAnyways = true;
             }
+            current.populateFrom(ctx, *singlePredecessorSource);
+            singlePredecessorEnv.reset();
+        } else if (unreachableInstruction != nullptr && absurdLoc.exists() && !dueToSafeNavigation) {
+            // Repeat the environment merging above, but populate/merge *ignoring* the condition (no
+            // withCond), because the cond itself might have caused the backEdge to be dead.
+            // (Every backEdge was dead in the first pass, so current was not yet populated.)
+            //
+            // This means we do double the environment merging for these blocks (potentially expensive),
+            // but we only do it for dead blocks containing T.absurd, not for ordinary dead blocks.
+            ENFORCE(deadOnEntry);
+            for (auto *parent : bb->backEdges) {
+                if (!visited[parent->id] || outEnvironments[parent->id].isDead) {
+                    continue;
+                }
+                if (!deadButTypecheckAnyways) {
+                    current.populateFrom(ctx, outEnvironments[parent->id]);
+                } else {
+                    current.mergeWith(ctx, outEnvironments[parent->id], *cfg, bb, knowledgeFilter);
+                }
+                deadButTypecheckAnyways = true;
+            }
+        }
+        // All this work to try to come up with a suitable environment for typechecking dead blocks ignoring
+        // BlockExit conditions should not overwrite the original `isDead` determination for this env.
+        current.isDead = deadOnEntry;
 
+        current.computePins(ctx, outEnvironments, *cfg.get(), bb);
+        current.setUninitializedVarsToNil(ctx, methodLoc);
+
+        for (auto &blockArg : bb->args) {
+            current.getAndFillTypeAndOrigin(blockArg);
+        }
+
+        visited[bb->id] = true;
+
+        if (deadOnEntry && unreachableInstruction == nullptr) {
+            continue;
+        }
+
+        if (unreachableInstruction == nullptr || deadButTypecheckAnyways) {
+            bool typecheck = !current.isDead || deadButTypecheckAnyways;
+            core::Loc madeBlockDead;
+            // Set when flow terminates in a live-entry block that has a T.absurd after the terminator.
+            bool absurdAfterTerminator = false;
+            int i = 0;
+            for (cfg::Binding &bind : bb->exprs) {
+                i++;
+                // In a live-entry block with T.absurd, keep checking bindings that are exempt from
+                // dead-code errors (synthetic bindings and T.absurd) after a terminating expression.
+                const bool silentAfterTerminator = absurdAfterTerminator && silenceDeadCodeError(bind.value);
+                if (typecheck || silentAfterTerminator || !ctx.state.lspQuery.isEmpty()) {
+                    bind.bind.type = current.processBinding(
+                        ctx, *cfg, bind, bb->outerLoops, bind.bind.variable.minLoops(*cfg), knowledgeFilter, *constr,
+                        methodReturnType, parentUpdateKnowledgeReceiver, deadOnEntry);
+                    if (cfg::isa_instruction<cfg::Send>(bind.value)) {
+                        totalSendCount++;
+                        if (bind.bind.type && !bind.bind.type.isUntyped()) {
+                            typedSendCount++;
+                        }
+                    }
+                    ENFORCE(bind.bind.type);
+                    bind.bind.type.sanityCheck(ctx);
+                    if (bind.bind.type.isBottom()) {
+                        current.isDead = true;
+                        if (!madeBlockDead.exists()) {
+                            madeBlockDead = ctx.locAt(bind.loc);
+                            absurdAfterTerminator =
+                                !deadOnEntry &&
+                                absl::c_any_of(absl::MakeConstSpan(bb->exprs).subspan(i), [](const auto &expr) {
+                                    return cfg::isa_instruction<cfg::TAbsurd>(expr.value);
+                                });
+                        }
+                        typecheck = false;
+                    }
+                    if (current.isDead && bb->firstDeadInstructionIdx == -1) {
+                        // this can also be result of evaluating an instruction, e.g. an always false hard_assert
+                        bb->firstDeadInstructionIdx = i;
+                    }
+                } else if (ctx.state.lspQuery.isEmpty() && current.isDead && !silenceDeadCodeError(bind.value)) {
+                    if (auto e = ctx.beginError(bind.loc, core::errors::Infer::DeadBranchInferencer)) {
+                        e.setHeader("This code is unreachable");
+                        if (absurdLoc.exists() && madeBlockDead == absurdLoc) {
+                            e.addErrorLine(absurdLoc, "Defensive error handling must come before `{}`", "T.absurd");
+                        } else {
+                            e.addErrorLine(madeBlockDead, "This expression always raises or can never be computed");
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+
+        if (unreachableInstruction != nullptr && !deadButTypecheckAnyways) {
             auto send = cfg::cast_instruction<cfg::Send>(*unreachableInstruction);
             if (dueToSafeNavigation && send != nullptr) {
                 if (auto e = ctx.state.beginError(locForUnreachable, core::errors::Infer::UnnecessarySafeNavigation)) {
@@ -325,44 +430,16 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     e.addErrorNote("If this is intentional, either delete the redundant code or restructure\n"
                                    "    it to use `{}` so that Sorbet can check for exhaustiveness.",
                                    "T.absurd");
+                } else if (!absurdLoc.exists()) {
+                    e.addErrorNote("If this code is intentionally unreachable, end this sequence with `{}`\n"
+                                   "    after any defensive error handling.",
+                                   "T.absurd(...)");
                 }
             }
 
             continue;
         }
 
-        core::Loc madeBlockDead;
-        int i = 0;
-        for (cfg::Binding &bind : bb->exprs) {
-            i++;
-            if (!current.isDead || !ctx.state.lspQuery.isEmpty()) {
-                bind.bind.type =
-                    current.processBinding(ctx, *cfg, bind, bb->outerLoops, bind.bind.variable.minLoops(*cfg),
-                                           knowledgeFilter, *constr, methodReturnType, parentUpdateKnowledgeReceiver);
-                if (cfg::isa_instruction<cfg::Send>(bind.value)) {
-                    totalSendCount++;
-                    if (bind.bind.type && !bind.bind.type.isUntyped()) {
-                        typedSendCount++;
-                    }
-                }
-                ENFORCE(bind.bind.type);
-                bind.bind.type.sanityCheck(ctx);
-                if (bind.bind.type.isBottom()) {
-                    current.isDead = true;
-                    madeBlockDead = ctx.locAt(bind.loc);
-                }
-                if (current.isDead && bb->firstDeadInstructionIdx == -1) {
-                    // this can also be result of evaluating an instruction, e.g. an always false hard_assert
-                    bb->firstDeadInstructionIdx = i;
-                }
-            } else if (ctx.state.lspQuery.isEmpty() && current.isDead && !silenceDeadCodeError(bind.value)) {
-                if (auto e = ctx.beginError(bind.loc, core::errors::Infer::DeadBranchInferencer)) {
-                    e.setHeader("This code is unreachable");
-                    e.addErrorLine(madeBlockDead, "This expression always raises or can never be computed");
-                }
-                break;
-            }
-        }
         if (!current.isDead) {
             ENFORCE(bb->firstDeadInstructionIdx == -1);
             const auto &bexitTpo = current.getAndFillTypeAndOrigin(bb->bexit.cond);

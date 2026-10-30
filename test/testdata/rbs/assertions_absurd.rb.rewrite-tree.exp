@@ -1,0 +1,717 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:x, ::<root>::<C T>.any(<emptyTree>::<C Integer>, <emptyTree>::<C String>)).void()
+  end
+
+  def normal_usage<<todo method>>(x, &<blk>)
+    if <emptyTree>::<C Integer>.===(x)
+      <self>.puts(x)
+    else
+      if <emptyTree>::<C String>.===(x)
+        <self>.puts(x)
+      else
+        begin
+          <self>.raise()
+          ::<root>::<C T>.absurd(x)
+        end
+      end
+    end
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:x, ::<root>::<C T>.any(<emptyTree>::<C Integer>, <emptyTree>::<C String>)).void()
+  end
+
+  def forgotten_case<<todo method>>(x, &<blk>)
+    if <emptyTree>::<C Integer>.===(x)
+      <self>.puts(x)
+    else
+      begin
+        <self>.raise()
+        ::<root>::<C T>.absurd(x)
+      end
+    end
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:x, ::<root>::<C T>.any(<emptyTree>::<C Integer>, <emptyTree>::<C String>)).void()
+  end
+
+  def got_all_cases_but_untyped<<todo method>>(x, &<blk>)
+    begin
+      y = <emptyTree>::<C T>.unsafe(x)
+      if <emptyTree>::<C Integer>.===(y)
+        <self>.puts(y)
+      else
+        if <emptyTree>::<C String>.===(y)
+          <self>.puts(y)
+        else
+          begin
+            <self>.raise()
+            ::<root>::<C T>.absurd(y)
+          end
+        end
+      end
+    end
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:x, ::<root>::<C T>.any(<emptyTree>::<C Integer>, <emptyTree>::<C String>, ::<root>::<C T>::<C Array>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))).void()
+  end
+
+  def forgotten_two_cases<<todo method>>(x, &<blk>)
+    if <emptyTree>::<C Integer>.===(x)
+      <self>.puts(x)
+    else
+      begin
+        <self>.raise()
+        ::<root>::<C T>.absurd(x)
+      end
+    end
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:x, ::<root>::<C T>.any(<emptyTree>::<C String>, ::<root>::<C T>::<C Array>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))).void()
+  end
+
+  def missing_case_with_generic<<todo method>>(x, &<blk>)
+    if <emptyTree>::<C Array>.===(x)
+      <self>.puts(x)
+    else
+      begin
+        <self>.raise()
+        ::<root>::<C T>.absurd(x)
+      end
+    end
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:x, ::<root>::<C T>.any(::<root>::<C T>::<C Array>.<syntheticSquareBrackets>(<emptyTree>::<C String>), ::<root>::<C T>::<C Array>.<syntheticSquareBrackets>(<emptyTree>::<C Integer>))).void()
+  end
+
+  def ok_when_generic_cases_overlap<<todo method>>(x, &<blk>)
+    if <emptyTree>::<C Array>.===(x)
+      <self>.puts(x)
+    else
+      begin
+        <self>.raise()
+        ::<root>::<C T>.absurd(x)
+      end
+    end
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:x, ::<root>::<C T>.any(<emptyTree>::<C Integer>, <emptyTree>::<C String>)).void()
+  end
+
+  def code_before_raise_is_allowed<<todo method>>(x, &<blk>)
+    if <emptyTree>::<C Integer>.===(x)
+      <self>.puts(x)
+    else
+      if <emptyTree>::<C String>.===(x)
+        <self>.puts(x)
+      else
+        begin
+          <self>.puts(1)
+          begin
+            <self>.raise()
+            ::<root>::<C T>.absurd(x)
+          end
+        end
+      end
+    end
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:x, ::<root>::<C T>.any(<emptyTree>::<C Integer>, <emptyTree>::<C String>)).void()
+  end
+
+  def dead_code_after<<todo method>>(x, &<blk>)
+    if <emptyTree>::<C Integer>.===(x)
+      <self>.puts(x)
+    else
+      if <emptyTree>::<C String>.===(x)
+        <self>.puts(x)
+      else
+        begin
+          begin
+            <self>.raise()
+            ::<root>::<C T>.absurd(x)
+          end
+          <self>.puts(1)
+        end
+      end
+    end
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:x, ::<root>::<C T>.any(<emptyTree>::<C Integer>, <emptyTree>::<C String>)).void()
+  end
+
+  def can_alias_local_variables<<todo method>>(x, &<blk>)
+    if <emptyTree>::<C Integer>.===(x)
+      <self>.puts(x)
+    else
+      if <emptyTree>::<C String>.===(x)
+        <self>.puts(x)
+      else
+        begin
+          y = x
+          begin
+            <self>.raise()
+            ::<root>::<C T>.absurd(y)
+          end
+        end
+      end
+    end
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:x, ::<root>::<C T>.any(<emptyTree>::<C Integer>, <emptyTree>::<C String>)).void()
+  end
+
+  def normal_usage_with_isa<<todo method>>(x, &<blk>)
+    if x.is_a?(<emptyTree>::<C Integer>)
+      <self>.puts(x)
+    else
+      if x.is_a?(<emptyTree>::<C String>)
+        <self>.puts(x)
+      else
+        begin
+          <self>.raise()
+          ::<root>::<C T>.absurd(x)
+        end
+      end
+    end
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:x, ::<root>::<C T>.any(<emptyTree>::<C Integer>, <emptyTree>::<C String>)).void()
+  end
+
+  def missing_case_with_isa<<todo method>>(x, &<blk>)
+    if x.is_a?(<emptyTree>::<C Integer>)
+      <self>.puts(x)
+    else
+      begin
+        <self>.raise()
+        ::<root>::<C T>.absurd(x)
+      end
+    end
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:x, <emptyTree>::<C Integer>).void()
+  end
+
+  def enforce_something_is_always_non_nil<<todo method>>(x, &<blk>)
+    if x.nil?().!()
+      <self>.puts(x)
+    else
+      begin
+        <self>.raise()
+        ::<root>::<C T>.absurd(x)
+      end
+    end
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:x, <emptyTree>::<C Integer>).void()
+  end
+
+  def error_when_predicate_always_true<<todo method>>(x, &<blk>)
+    if x.nil?().!()
+      begin
+        <self>.puts(1)
+        begin
+          <self>.raise()
+          ::<root>::<C T>.absurd(x)
+        end
+      end
+    else
+      <emptyTree>
+    end
+  end
+
+  def only_absurd<<todo method>>(&<blk>)
+    begin
+      temp1 = <cast:let>(<emptyTree>::<C T>.unsafe(nil), <todo sym>, <emptyTree>::<C T>.noreturn())
+      begin
+        <self>.raise()
+        ::<root>::<C T>.absurd(temp1)
+      end
+    end
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:x, ::<root>::<C T>.noreturn()).void()
+  end
+
+  def arg_noreturn<<todo method>>(x, &<blk>)
+    begin
+      begin
+        <self>.raise()
+        ::<root>::<C T>.absurd(x)
+      end
+      <self>.puts(x)
+    end
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:x, ::<root>::<C T>.noreturn(), :y, ::<root>::<C T>.noreturn()).void()
+  end
+
+  def args_noreturn<<todo method>>(x, y, &<blk>)
+    begin
+      begin
+        <self>.raise()
+        ::<root>::<C T>.absurd(x)
+      end
+      begin
+        <self>.raise()
+        ::<root>::<C T>.absurd(y)
+      end
+      <self>.puts(x)
+    end
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:x, ::<root>::<C T>.all(<emptyTree>::<C Integer>, <emptyTree>::<C String>)).void()
+  end
+
+  def intersects_to_bottom<<todo method>>(x, &<blk>)
+    begin
+      begin
+        <self>.raise()
+        ::<root>::<C T>.absurd(x)
+      end
+      <self>.puts(x)
+    end
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.void()
+  end
+
+  def absurd_not_reached_on_global_var<<todo method>>(&<blk>)
+    if <emptyTree>::<C TrueClass>.===($some_global)
+      <emptyTree>
+    else
+      if <emptyTree>::<C FalseClass>.===($some_global)
+        <emptyTree>
+      else
+        begin
+          <self>.raise()
+          ::<root>::<C T>.absurd($some_global)
+        end
+      end
+    end
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.void()
+  end
+
+  def absurd_reached_on_global_var<<todo method>>(&<blk>)
+    if $some_global.!()
+      begin
+        <self>.raise()
+        ::<root>::<C T>.absurd($some_global)
+      end
+    else
+      <emptyTree>
+    end
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:some_local_var, ::<root>::<C T>::<C Boolean>).void()
+  end
+
+  def absurd_reached_on_local_var<<todo method>>(some_local_var, &<blk>)
+    if some_local_var.!()
+      begin
+        <self>.raise()
+        ::<root>::<C T>.absurd(some_local_var)
+      end
+    else
+      <emptyTree>
+    end
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:x, ::<root>::<C T>.any(<emptyTree>::<C Integer>, <emptyTree>::<C String>)).void()
+  end
+
+  def after_empty_branch<<todo method>>(x, &<blk>)
+    if x.is_a?(<emptyTree>::<C Integer>)
+      <emptyTree>
+    else
+      if x.is_a?(<emptyTree>::<C String>)
+        <emptyTree>
+      else
+        begin
+          <self>.raise()
+          ::<root>::<C T>.absurd(x)
+        end
+      end
+    end
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:x, ::<root>::<C T>.any(<emptyTree>::<C Integer>, <emptyTree>::<C String>)).void()
+  end
+
+  def in_non_final_rescue<<todo method>>(x, &<blk>)
+    <self>.puts(x)
+  rescue <emptyTree>::<C ArgumentError> => <rescueTemp>$2
+    if <emptyTree>::<C Integer>.===(x)
+      <emptyTree>
+    else
+      begin
+        <self>.raise()
+        ::<root>::<C T>.absurd(x)
+      end
+    end
+  rescue <emptyTree>::<C TypeError> => <rescueTemp>$3
+    <emptyTree>
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:x, <emptyTree>::<C Integer>).void()
+  end
+
+  def type_alias_named_absurd<<todo method>>(x, &<blk>)
+    y = <cast:let>(x, <todo sym>, ::<root>::<C T>.any(<emptyTree>::<C type absurd>, <emptyTree>::<C String>))
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:x, <emptyTree>::<C Integer>).void()
+  end
+
+  def standalone_absurd<<todo method>>(x, &<blk>)
+    if <emptyTree>::<C Integer>.===(x)
+      <emptyTree>
+    else
+      <emptyTree>
+    end
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:x, <emptyTree>::<C Integer>).void()
+  end
+
+  def not_a_raise<<todo method>>(x, &<blk>)
+    x
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:x, <emptyTree>::<C Integer>).void()
+  end
+
+  def malformed_absurd<<todo method>>(x, &<blk>)
+    <self>.raise()
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:x, <emptyTree>::<C Integer>).void()
+  end
+
+  def missing_variable<<todo method>>(x, &<blk>)
+    <self>.raise()
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:x, <emptyTree>::<C Integer>).void()
+  end
+
+  def old_syntax<<todo method>>(x, &<blk>)
+    x
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:x, <emptyTree>::<C Integer>).void()
+  end
+
+  def constant_name<<todo method>>(x, &<blk>)
+    <self>.raise()
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.void()
+  end
+
+  def undefined_local<<todo method>>(&<blk>)
+    begin
+      <self>.raise()
+      ::<root>::<C T>.absurd(does_not_exist)
+    end
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:x, ::<root>::<C T>.any(<emptyTree>::<C Integer>, <emptyTree>::<C String>)).void()
+  end
+
+  def raise_with_arguments<<todo method>>(x, &<blk>)
+    if <emptyTree>::<C Integer>.===(x)
+      <emptyTree>
+    else
+      if <emptyTree>::<C String>.===(x)
+        <emptyTree>
+      else
+        begin
+          <self>.raise(<emptyTree>::<C ArgumentError>, ::<Magic>.<string-interpolate>("Unexpected: ", x))
+          ::<root>::<C T>.absurd(x)
+        end
+      end
+    end
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:x, ::<root>::<C T>.any(<emptyTree>::<C Integer>, <emptyTree>::<C String>)).void()
+  end
+
+  def raise_unresolved_constant<<todo method>>(x, &<blk>)
+    if <emptyTree>::<C Integer>.===(x)
+      <emptyTree>
+    else
+      if <emptyTree>::<C String>.===(x)
+        <emptyTree>
+      else
+        begin
+          <self>.raise(<emptyTree>::<C DoesNotExist>)
+          ::<root>::<C T>.absurd(x)
+        end
+      end
+    end
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:x, ::<root>::<C T>.any(<emptyTree>::<C Integer>, <emptyTree>::<C String>)).void()
+  end
+
+  def raise_signature_is_checked<<todo method>>(x, &<blk>)
+    if <emptyTree>::<C Integer>.===(x)
+      <emptyTree>
+    else
+      if <emptyTree>::<C String>.===(x)
+        <emptyTree>
+      else
+        begin
+          <self>.raise(42)
+          ::<root>::<C T>.absurd(x)
+        end
+      end
+    end
+  end
+
+  <runtime method definition of normal_usage>
+
+  <runtime method definition of forgotten_case>
+
+  <runtime method definition of got_all_cases_but_untyped>
+
+  <runtime method definition of forgotten_two_cases>
+
+  <runtime method definition of missing_case_with_generic>
+
+  <runtime method definition of ok_when_generic_cases_overlap>
+
+  <runtime method definition of code_before_raise_is_allowed>
+
+  <runtime method definition of dead_code_after>
+
+  <runtime method definition of can_alias_local_variables>
+
+  <runtime method definition of normal_usage_with_isa>
+
+  <runtime method definition of missing_case_with_isa>
+
+  <runtime method definition of enforce_something_is_always_non_nil>
+
+  <runtime method definition of error_when_predicate_always_true>
+
+  <runtime method definition of only_absurd>
+
+  <runtime method definition of arg_noreturn>
+
+  <runtime method definition of args_noreturn>
+
+  <runtime method definition of intersects_to_bottom>
+
+  $some_global = <cast:let>(true, <todo sym>, ::<root>::<C T>::<C Boolean>)
+
+  <runtime method definition of absurd_not_reached_on_global_var>
+
+  <runtime method definition of absurd_reached_on_global_var>
+
+  class <emptyTree>::<C SomeClass><<C <todo sym>>> < (::<todo sym>)
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.void()
+    end
+
+    def initialize<<todo method>>(&<blk>)
+      @some_instance_var = <cast:let>(true, <todo sym>, ::<root>::<C T>::<C Boolean>)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.void()
+    end
+
+    def absurd_not_reached_on_class_var<<todo method>>(&<blk>)
+      if <emptyTree>::<C TrueClass>.===(@@some_class_var)
+        <emptyTree>
+      else
+        if <emptyTree>::<C FalseClass>.===(@@some_class_var)
+          <emptyTree>
+        else
+          begin
+            <self>.raise()
+            ::<root>::<C T>.absurd(@@some_class_var)
+          end
+        end
+      end
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.void()
+    end
+
+    def absurd_reached_on_class_var<<todo method>>(&<blk>)
+      if @@some_class_var.!()
+        begin
+          <self>.raise()
+          ::<root>::<C T>.absurd(@@some_class_var)
+        end
+      else
+        <emptyTree>
+      end
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.void()
+    end
+
+    def absurd_not_reached_on_instance_var<<todo method>>(&<blk>)
+      if <emptyTree>::<C TrueClass>.===(@some_instance_var)
+        <emptyTree>
+      else
+        if <emptyTree>::<C FalseClass>.===(@some_instance_var)
+          <emptyTree>
+        else
+          begin
+            <self>.raise()
+            ::<root>::<C T>.absurd(@some_instance_var)
+          end
+        end
+      end
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.void()
+    end
+
+    def absurd_reached_on_instance_var<<todo method>>(&<blk>)
+      if @some_instance_var.!()
+        begin
+          <self>.raise()
+          ::<root>::<C T>.absurd(@some_instance_var)
+        end
+      else
+        <emptyTree>
+      end
+    end
+
+    @@some_class_var = <cast:let>(true, <todo sym>, ::<root>::<C T>::<C Boolean>)
+
+    <runtime method definition of initialize>
+
+    <runtime method definition of absurd_not_reached_on_class_var>
+
+    <runtime method definition of absurd_reached_on_class_var>
+
+    <runtime method definition of absurd_not_reached_on_instance_var>
+
+    <runtime method definition of absurd_reached_on_instance_var>
+  end
+
+  <runtime method definition of absurd_reached_on_local_var>
+
+  class <emptyTree>::<C Suit><<C <todo sym>>> < (<emptyTree>::<C T>::<C Enum>)
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(<emptyTree>::<C String>)
+    end
+
+    def color<<todo method>>(&<blk>)
+      if <emptyTree>::<C Hearts>.===(<self>)
+        "red"
+      else
+        begin
+          <self>.raise()
+          ::<root>::<C T>.absurd(<self>)
+        end
+      end
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.returns(::String)
+    end
+
+    def serialize<<todo method>>(&<blk>)
+      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    <self>.extend(::T::Helpers)
+
+    <self>.abstract!()
+
+    <self>.sealed!()
+
+    <self>.enums() do ||
+      begin
+        class <emptyTree>::<C Hearts$1><<C <todo sym>>> < (<emptyTree>::<C Suit>)
+        end
+        <emptyTree>::<C Hearts> = <cast:<unchecked_let>>(<emptyTree>::<C Hearts$1>.new(), <todo sym>, <emptyTree>::<C Hearts$1>)
+        class <emptyTree>::<C Spades$1><<C <todo sym>>> < (<emptyTree>::<C Suit>)
+        end
+        <emptyTree>::<C Spades> = <cast:<unchecked_let>>(<emptyTree>::<C Spades$1>.new(), <todo sym>, <emptyTree>::<C Spades$1>)
+        nil
+      end
+    end
+
+    <runtime method definition of color>
+
+    <self>.public()
+
+    <runtime method definition of serialize>
+  end
+
+  <runtime method definition of after_empty_branch>
+
+  <runtime method definition of in_non_final_rescue>
+
+  <emptyTree>::<C type absurd> = ::<root>::<C T>.type_alias() do ||
+    <emptyTree>::<C Integer>
+  end
+
+  <runtime method definition of type_alias_named_absurd>
+
+  <runtime method definition of standalone_absurd>
+
+  <runtime method definition of not_a_raise>
+
+  <runtime method definition of malformed_absurd>
+
+  <runtime method definition of missing_variable>
+
+  <runtime method definition of old_syntax>
+
+  <runtime method definition of constant_name>
+
+  <runtime method definition of undefined_local>
+
+  <runtime method definition of raise_with_arguments>
+
+  <runtime method definition of raise_unresolved_constant>
+
+  <runtime method definition of raise_signature_is_checked>
+end

@@ -82,7 +82,7 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
     vector<core::WithoutUniqueNameHash> changedSymbolNameHashes;
 
     FastPathFilesToTypecheckResult result;
-    Timer timeit(config.logger, "compute_fast_path_file_set");
+    Timer timeit(*config.logger, "compute_fast_path_file_set");
     auto idx = -1;
     for (const auto &updatedFile : updatedFiles) {
         idx++;

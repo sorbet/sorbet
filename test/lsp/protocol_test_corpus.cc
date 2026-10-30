@@ -635,7 +635,71 @@ TEST_CASE_FIXTURE(ProtocolTest, "RejectsRequestsThatDontTypecheck") {
     REQUIRE_FALSE(r.result);
     REQUIRE(r.error);
     auto &error = *r.error;
-    REQUIRE_NE(error->message.find("Unable to deserialize LSP request"), string::npos);
+    REQUIRE_EQ(error->message,
+               "Unable to deserialize LSP request: Missing field `TextDocumentPositionParams.textDocument`.");
+    REQUIRE_EQ(error->code, (int)LSPErrorCodes::InvalidParams);
+}
+
+// The same as above, but with a string `id` (which LSP allows).
+TEST_CASE_FIXTURE(ProtocolTest, "RejectsRequestsThatDontTypecheckWithStringIds") {
+    assertErrorDiagnostics(initializeLSP(), {});
+    auto responses = sendRaw("{\"jsonrpc\":\"2.0\",\"method\":\"textDocument/"
+                             "hover\",\"id\":\"9001\",\"params\":{\"settings\":{\"ruby-typer\":{}}}}");
+    REQUIRE_EQ(responses.size(), 1);
+    auto &response = responses.at(0);
+    REQUIRE(response->isResponse());
+    auto &r = response->asResponse();
+    REQUIRE_EQ(get<string>(r.id), "9001");
+    REQUIRE_FALSE(r.result);
+    REQUIRE(r.error);
+    auto &error = *r.error;
+    REQUIRE_EQ(error->message,
+               "Unable to deserialize LSP request: Missing field `TextDocumentPositionParams.textDocument`.");
+    REQUIRE_EQ(error->code, (int)LSPErrorCodes::InvalidParams);
+}
+
+// A notification-only method sent as a request (i.e., with an `id`).
+TEST_CASE_FIXTURE(ProtocolTest, "RejectsNotificationMethodsSentAsRequests") {
+    assertErrorDiagnostics(initializeLSP(), {});
+    auto responses = sendRaw(R"({"jsonrpc":"2.0","method":"textDocument/didOpen","id":9001,"params":)"
+                             R"({"textDocument":{"uri":"file:///foo.rb","languageId":"ruby","version":1,"text":""}}})");
+    REQUIRE_EQ(responses.size(), 1);
+    auto &response = responses.at(0);
+    REQUIRE(response->isResponse());
+    auto &r = response->asResponse();
+    REQUIRE_EQ(get<int>(r.id), 9001);
+    REQUIRE_FALSE(r.result);
+    REQUIRE(r.error);
+    auto &error = *r.error;
+    REQUIRE_EQ(error->message, "LSP method `textDocument/didOpen` was sent as a request, which it does not support");
+    REQUIRE_EQ(error->code, (int)LSPErrorCodes::InvalidRequest);
+}
+
+// A request-only method sent as a notification (i.e., without an `id`).
+TEST_CASE_FIXTURE(ProtocolTest, "IgnoresRequestMethodsSentAsNotifications") {
+    assertErrorDiagnostics(initializeLSP(), {});
+    // Notifications can't be responded to, so the error is only logged.
+    assertErrorDiagnostics(sendRaw(R"({"jsonrpc":"2.0","method":"textDocument/hover","params":)"
+                                   R"({"textDocument":{"uri":"file:///foo.rb"},"position":{"line":0,"character":0}}})"),
+                           {});
+}
+
+// A request whose params contain an out-of-range value for an integer enum.
+TEST_CASE_FIXTURE(ProtocolTest, "RejectsRequestsWithInvalidIntEnumValues") {
+    assertErrorDiagnostics(initializeLSP(), {});
+    auto responses = sendRaw(R"({"jsonrpc":"2.0","method":"textDocument/completion","id":9001,"params":)"
+                             R"({"textDocument":{"uri":"file:///foo.rb"},"position":{"line":0,"character":0},)"
+                             R"("context":{"triggerKind":99}}})");
+    REQUIRE_EQ(responses.size(), 1);
+    auto &response = responses.at(0);
+    REQUIRE(response->isResponse());
+    auto &r = response->asResponse();
+    REQUIRE_EQ(get<int>(r.id), 9001);
+    REQUIRE_FALSE(r.result);
+    REQUIRE(r.error);
+    auto &error = *r.error;
+    REQUIRE_EQ(error->message,
+               "Unable to deserialize LSP request: Found invalid value `99` for enum of type CompletionTriggerKind");
     REQUIRE_EQ(error->code, (int)LSPErrorCodes::InvalidParams);
 }
 
@@ -942,6 +1006,34 @@ TEST_CASE_FIXTURE(ProtocolTest, "DidChangeConfigurationNotificationUpdatesHighli
                              });
 }
 
+TEST_CASE_FIXTURE(ProtocolTest, "DidChangeConfigurationFollowedByCloseBeforeTypechecking") {
+    assertErrorDiagnostics(initializeLSP(), {});
+
+    assertErrorDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
+                                                    "class A\n"
+                                                    "  def foo; end\n"
+                                                    "end\n")),
+                           {});
+
+    auto settings = make_unique<SorbetInitializationOptions>();
+    settings->highlightUntyped = true;
+    auto config = make_unique<DidChangeConfigurationParams>(move(settings));
+
+    // Send both messages in the same batch, so that the preprocessor handles the `didClose`
+    // (removing `foo.rb` from its set of open files) before the typechecker runs the
+    // `didChangeConfiguration` task, which captured the set of open files when it was preprocessed.
+    vector<unique_ptr<LSPMessage>> messages;
+    messages.push_back(makeConfigurationChange(move(config)));
+    messages.push_back(closeFile("foo.rb"));
+    send(move(messages));
+
+    assertErrorDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
+                                                    "class A\n"
+                                                    "  def foo; end\n"
+                                                    "end\n")),
+                           {});
+}
+
 TEST_CASE_FIXTURE(ProtocolTest, "OverloadedStdlibSymbolWithMonkeyPatches") {
     const bool supportsMarkdown = false;
     const bool supportsCodeActionResolve = true;
@@ -1066,6 +1158,62 @@ TEST_CASE_FIXTURE(ProtocolTest, "OpeningExistingFilesTakesTheFastPath") {
         REQUIRE_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 0);
         REQUIRE_EQ(counters.getCategoryCounter("lsp.updates", "slowpath_canceled"), 0);
     }
+}
+
+TEST_CASE_FIXTURE(ProtocolTest, "QueriesAfterClosingFileUseContentsOnDisk") {
+    vector<pair<string, string>> files{
+        {"foo.rb", "# typed: true\n"
+                   "class A\n"
+                   "  def foo\n"
+                   "    1234\n"
+                   "  end\n"
+                   "end\n"},
+    };
+    this->writeFilesToFS(files);
+    this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/foo.rb", this->rootPath));
+
+    assertErrorDiagnostics(initializeLSP(false /* supportsMarkdown */), {});
+
+    // Only change a method body, keeping the same length as the contents on disk.
+    assertErrorDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
+                                                    "class A\n"
+                                                    "  def foo\n"
+                                                    "    'ab'\n"
+                                                    "  end\n"
+                                                    "end\n")),
+                           {});
+
+    // Closing the file reverts it to the contents on disk.
+    getCounters();
+    assertErrorDiagnostics(send(*closeFile("foo.rb")), {});
+    auto counters = getCounters();
+    REQUIRE_EQ(counters.getCategoryCounter("lsp.updates", "fastpath"), 1);
+    REQUIRE_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 0);
+
+    auto hoverResponses = send(*hover("foo.rb", 3, 4));
+    REQUIRE_EQ(hoverResponses.size(), 1);
+    auto &hoverResponse = hoverResponses.at(0);
+    REQUIRE(hoverResponse->isResponse());
+    auto &hoverResult = get<variant<JSONNullObject, unique_ptr<Hover>>>(*hoverResponse->asResponse().result);
+    auto &hover = get<unique_ptr<Hover>>(hoverResult);
+    CHECK_EQ(hover->contents->value, "Integer(1234)");
+}
+
+TEST_CASE_FIXTURE(ProtocolTest, "RespectsStrictnessOverridesOnStartup") {
+    auto opts = make_shared<realmain::options::Options>();
+    opts->strictnessOverrides[fmt::format("{}/foo.rb", this->rootPath)] = core::StrictLevel::False;
+    resetState(opts);
+
+    // The error in foo.rb is only reported at `# typed: true`.
+    writeFilesToFS({{"foo.rb", "# typed: true\n"
+                               "class Foo1\n"
+                               "  def branch\n"
+                               "    1 + \"stuff\"\n"
+                               "  end\n"
+                               "end\n"}});
+    this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/foo.rb", this->rootPath));
+
+    assertErrorDiagnostics(initializeLSP(), {});
 }
 
 TEST_CASE_FIXTURE(ProtocolTest, "ImplementationOnBrokenLambda") {
@@ -1302,6 +1450,22 @@ TEST_CASE_FIXTURE(ProtocolTest, "SlowPathRestarts") {
         }
     }
 
+    SUBCASE("NewTestFile") {
+        // New test sources invalidate the test stratum, while new application sources above
+        // invalidate the application stratum. Neither can infer ownership from __package.rb.
+        auto resps = send(*openFile("foo/test/b.rb", "# typed: true\n"
+                                                     "module Test::Root::Foo\n"
+                                                     "  class B; end\n"
+                                                     "end\n"));
+        assertErrorDiagnostics({}, {});
+        REQUIRE_EQ(resps.size(), 2);
+        REQUIRE(resps.back()->isNotification());
+        REQUIRE_EQ(resps.back()->asNotification().method, LSPMethod::SorbetTypecheckRunInfo);
+        const auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(resps.back()->asNotification().params);
+        CHECK_EQ(params->status, SorbetTypecheckRunStatus::Ended);
+        CHECK_EQ(params->startingStratum, 2);
+    }
+
     SUBCASE("ExistingFile") {
         assertErrorDiagnostics(send(*openFile(files[3].first, files[3].second)), {});
 
@@ -1399,6 +1563,135 @@ TEST_CASE_FIXTURE(ProtocolTest, "SlowPathRestarts") {
             // We're modifying the package graph, which means we rebuild everything.
             CHECK_EQ(params->startingStratum, 0);
         }
+    }
+}
+
+// Root::Foo has one import that violates layering. Adding source files restarts the slow path at stratum 1,
+// copying a nonempty symbol-table prefix; each restart should still report that import violation only once.
+TEST_CASE_FIXTURE(ProtocolTest, "PackageDirectedSlowPathDoesNotDuplicateImports") {
+    auto initOpts = make_shared<realmain::options::Options>();
+    initOpts->cacheSensitiveOptions.sorbetPackages = true;
+    initOpts->packageDirected = true;
+    initOpts->packagerLayers = {"lib", "app"};
+    resetState(initOpts);
+
+    vector<pair<string, string>> files = {
+        {"__package.rb", PackageTextBuilder().withName("Root").withStrictDeps("layered").withLayer("app").build()},
+        {"a.rb", "# typed: true\nmodule Root; class A; end; end\n"},
+        {"foo/__package.rb", PackageTextBuilder()
+                                 .withName("Root::Foo")
+                                 .withStrictDeps("layered")
+                                 .withLayer("lib")
+                                 .withImports({"Root"})
+                                 .build()},
+        {"foo/a.rb", "# typed: true\nmodule Root::Foo; class A; end; end\n"},
+    };
+    writeFilesToFS(files);
+    for (auto &[path, _] : files) {
+        lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/{}", rootPath, path));
+    }
+
+    auto checkImportDiagnostics = [&](const vector<unique_ptr<LSPMessage>> &messages) {
+        size_t packagePublications = 0;
+        for (const auto &message : messages) {
+            if (!message->isNotification() ||
+                message->asNotification().method != LSPMethod::TextDocumentPublishDiagnostics) {
+                continue;
+            }
+            const auto &params = get<unique_ptr<PublishDiagnosticsParams>>(message->asNotification().params);
+            if (params->uri != getUri("foo/__package.rb")) {
+                CHECK(params->diagnostics.empty());
+                continue;
+            }
+            ++packagePublications;
+            CHECK_EQ(params->diagnostics.size(), 1);
+            for (const auto &diagnostic : params->diagnostics) {
+                CHECK_EQ(diagnostic->message,
+                         "Layering violation: cannot import `Root` (in layer `app`) from `Root::Foo` (in layer `lib`)");
+            }
+        }
+        CHECK_EQ(packagePublications, 1);
+    };
+
+    auto opts = make_unique<SorbetInitializationOptions>();
+    opts->enableTypecheckInfo = true;
+    checkImportDiagnostics(initializeLSP(true, true, move(opts)));
+
+    for (int restart = 1; restart <= 2; ++restart) {
+        INFO("Slow path restart: " << restart);
+        auto responses = send(*openFile(fmt::format("foo/restart{}.rb", restart),
+                                        fmt::format("# typed: true\nclass Root::Foo::Restart{}; end\n", restart)));
+        size_t slowPathStarts = 0;
+        size_t slowPathEnds = 0;
+        for (const auto &response : responses) {
+            if (!response->isNotification() || response->asNotification().method != LSPMethod::SorbetTypecheckRunInfo) {
+                continue;
+            }
+            const auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(response->asNotification().params);
+            REQUIRE_EQ(params->typecheckingPath, TypecheckingPath::Slow);
+            if (params->status == SorbetTypecheckRunStatus::Started) {
+                ++slowPathStarts;
+            } else if (params->status == SorbetTypecheckRunStatus::Ended) {
+                ++slowPathEnds;
+                REQUIRE_EQ(params->startingStratum, 1);
+            }
+        }
+        REQUIRE_EQ(slowPathStarts, 1);
+        REQUIRE_EQ(slowPathEnds, 1);
+        checkImportDiagnostics(responses);
+    }
+}
+
+// Source-stratum lookup must also work with the monolithic traversal, including newly added test helpers.
+TEST_CASE_FIXTURE(ProtocolTest, "NewPackagedSourceFileStrata") {
+    auto checkNewFile = [&](bool packageDirected, bool isTest) {
+        auto initOpts = make_shared<realmain::options::Options>();
+        initOpts->cacheSensitiveOptions.sorbetPackages = true;
+        initOpts->packageDirected = packageDirected;
+        resetState(initOpts);
+
+        vector<pair<string, string>> files = {
+            {"__package.rb", PackageTextBuilder().withName("Root").build()},
+            {"foo/__package.rb", PackageTextBuilder().withName("Root::Foo").withImports({"Root"}).build()},
+        };
+        writeFilesToFS(files);
+        for (const auto &[path, _] : files) {
+            lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/{}", rootPath, path));
+        }
+        auto opts = make_unique<SorbetInitializationOptions>();
+        opts->enableTypecheckInfo = true;
+        assertErrorDiagnostics(initializeLSP(true, true, move(opts)), {});
+
+        // Include an inference error to prove that prefix reuse actually indexed and typechecked the new file.
+        string path = isTest ? "foo/test/new.rb" : "foo/new.rb";
+        string source = fmt::format("# typed: true\nmodule {}Root::Foo::New; end\n1 + false\n", isTest ? "Test::" : "");
+        auto resps = send(*openFile(path, source));
+        auto expectedStratum = packageDirected ? (isTest ? 2 : 1) : 0;
+        bool sawEnd = false;
+        for (const auto &resp : resps) {
+            if (resp->isNotification() && resp->asNotification().method == LSPMethod::SorbetTypecheckRunInfo) {
+                const auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(resp->asNotification().params);
+                if (params->status == SorbetTypecheckRunStatus::Ended) {
+                    CHECK_EQ(params->startingStratum, expectedStratum);
+                    sawEnd = true;
+                }
+            }
+        }
+        CHECK(sawEnd);
+        assertErrorDiagnostics(move(resps), {{path, 2, "Expected `Integer`"}});
+    };
+
+    SUBCASE("MonolithicApplication") {
+        checkNewFile(false, false);
+    }
+    SUBCASE("MonolithicTestHelper") {
+        checkNewFile(false, true);
+    }
+    SUBCASE("DirectedApplication") {
+        checkNewFile(true, false);
+    }
+    SUBCASE("DirectedTestHelper") {
+        checkNewFile(true, true);
     }
 }
 
@@ -1608,7 +1901,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "ErrorsRemainAfterSlowPathRestart") {
 
         // We should see a starting and ending slow path message, with errors between. The error messages between are
         // the error on `Root::Foo::A` and the fast-path error from `Root::A`.
-        CHECK_EQ(resps.size(), 4);
+        CHECK_EQ(resps.size(), 3);
         {
             auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(resps.front()->asNotification().params);
             CHECK_EQ(params->typecheckingPath, TypecheckingPath::Slow);
@@ -1620,21 +1913,25 @@ TEST_CASE_FIXTURE(ProtocolTest, "ErrorsRemainAfterSlowPathRestart") {
             CHECK_EQ(params->typecheckingPath, TypecheckingPath::Slow);
             CHECK_EQ(params->status, SorbetTypecheckRunStatus::Ended);
 
-            // We're modifying package `Root::Foo`, but we had made a fast-path edit that changed a file in `Root`. As a
-            // result, we start back in stratum `0`.
-            CHECK_EQ(params->startingStratum, 0);
+            // We're modifying package `Root::Foo`, and not running the incremental namer. Thus, we start at stratum 1
+            // instead of 0.
+            CHECK_EQ(params->startingStratum, 1);
         }
 
+        // As we will skip typechecking `Root` when only `Root::A` changed, we will only see the error that was
+        // introduced in the slow path edit to foo/a.rb.
         assertErrorDiagnostics(move(resps), {
                                                 {files[1].first, 4, "Expected `Integer`"},
                                                 {files[3].first, 7, "Method `+` does not exist"},
                                             });
+        // We would still expect the client to show the errors from `a.rb`, but we assert that they were not generated
+        // by this slow path.
+        assertStale({files[1].first});
     }
 }
 
-// Tests that no-op fast path edits don't push the fastPathEditStratum down, affecting where we can start the next slow
-// path from.
-TEST_CASE_FIXTURE(ProtocolTest, "ViewingFilesDoesntAffectFastPathEditStratum") {
+// Show that no-op fast path edits still shrink the copyable prefix of the symbol table.
+TEST_CASE_FIXTURE(ProtocolTest, "ViewingFilesAffectsFastPathEditStratum") {
     auto initOpts = make_shared<realmain::options::Options>();
     initOpts->cacheSensitiveOptions.sorbetPackages = true;
     initOpts->packageDirected = true;
@@ -1675,7 +1972,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "ViewingFilesDoesntAffectFastPathEditStratum") {
     // The initial slow path.
     assertErrorDiagnostics(initializeLSP(supportsMarkdown, supportsCodeActionResolve, move(opts)), {});
 
-    // Only open a.rb, to test that we skip this stratum on the next slow path
+    // Only open a.rb, which will reset the editable prefix to stratum `0`.
     assertErrorDiagnostics(send(*openFile(files[1].first, files[1].second)), {});
 
     // Make a slow path edit to Root::Foo::A
@@ -1714,12 +2011,226 @@ TEST_CASE_FIXTURE(ProtocolTest, "ViewingFilesDoesntAffectFastPathEditStratum") {
             CHECK_EQ(params->typecheckingPath, TypecheckingPath::Slow);
             CHECK_EQ(params->status, SorbetTypecheckRunStatus::Ended);
 
-            // We're modifying package `Root::Foo`, after a no-op edit to `Root`. As a result, we should restart at
-            // stratum 1.
+            // We're modifying package `Root::Foo`, after a no-op edit to `Root`. Since that no-op does not require the
+            // incremental namer, we start back up from stratum 1, not 0.
+            CHECK_EQ(params->startingStratum, 1);
+        }
+
+        assertErrorDiagnostics(move(resps), {{files[3].first, 7, "Method `+` does not exist"}});
+    }
+
+    // Make another slow path edit to Root::Foo::A
+    {
+        assertErrorDiagnostics(send(*openFile(files[3].first, files[3].second)), {});
+
+        // Make a slow path modification to an existing file.
+        auto resps = send(*changeFile(files[3].first,
+                                      "# typed: true\n"
+                                      "module Root::Foo\n"
+                                      "  class A\n"
+                                      "    module Foo2\n"
+                                      "    end\n"
+                                      "\n"
+                                      "    def foo\n"
+                                      "      Root::A.new() + :type_error\n"
+                                      "    end\n"
+                                      "  end\n"
+                                      "end\n",
+                                      2));
+
+        // We should see at a minimum the start/end typechecking messages.
+        REQUIRE(resps.size() >= 2);
+
+        // We should see a starting and ending slow path message, with errors between. The error message between is the
+        // error on `Root::Foo::A`.
+        CHECK_EQ(resps.size(), 3);
+        {
+            auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(resps.front()->asNotification().params);
+            CHECK_EQ(params->typecheckingPath, TypecheckingPath::Slow);
+            CHECK_EQ(params->status, SorbetTypecheckRunStatus::Started);
+        }
+
+        {
+            auto &params = get<unique_ptr<SorbetTypecheckRunInfo>>(resps.back()->asNotification().params);
+            CHECK_EQ(params->typecheckingPath, TypecheckingPath::Slow);
+            CHECK_EQ(params->status, SorbetTypecheckRunStatus::Ended);
+
+            // We're modifying package `Root::Foo` from a fresh state, so the next slow path should start at the stratum
+            // that defines `Root::Foo`.
             CHECK_EQ(params->startingStratum, 1);
         }
 
         assertErrorDiagnostics(move(resps), {{files[3].first, 7, "Method `+` does not exist"}});
     }
 }
+
+// Shows how skipping infer for packages unrelated to the current edit interacts with errors in earlier passes.
+TEST_CASE_FIXTURE(ProtocolTest, "EarlyErrorsForceInfer") {
+    auto initOpts = make_shared<realmain::options::Options>();
+    initOpts->cacheSensitiveOptions.sorbetPackages = true;
+    initOpts->packageDirected = true;
+    resetState(initOpts);
+
+    vector<pair<string, string>> files = {
+        {"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A"}).build()},
+        {"a.rb", "# typed: true\n"
+                 "module Root\n"
+                 "  class A\n"
+                 "    def fun\n"
+                 "    end\n"
+                 "  end\n"
+                 "end\n"},
+        {"foo/__package.rb",
+         PackageTextBuilder().withName("Root::Foo").withExports({"Root::Foo::A"}).withImports({"Root"}).build()},
+        {"foo/a.rb", "# typed: true\n"
+                     "module Root::Foo\n"
+                     "  class A\n"
+                     "    def foo\n"
+                     "      Root::A.new()\n"
+                     "    end\n"
+                     "  end\n"
+                     "end\n"},
+    };
+
+    writeFilesToFS(files);
+
+    for (auto &[path, _] : files) {
+        this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/{}", this->rootPath, path));
+    }
+
+    auto supportsMarkdown = true;
+    auto supportsCodeActionResolve = true;
+    auto opts = make_unique<SorbetInitializationOptions>();
+
+    // The initial slow path.
+    assertErrorDiagnostics(initializeLSP(supportsMarkdown, supportsCodeActionResolve, move(opts)), {});
+
+    assertErrorDiagnostics(send(*openFile(files[1].first, files[1].second)), {});
+    assertErrorDiagnostics(send(*openFile(files[3].first, files[3].second)), {});
+
+    // Make a resolver error and an inference error to Root::A
+    assertErrorDiagnostics(send(*changeFile(files[1].first,
+                                            "# typed: true\n"
+                                            "module Root\n"
+                                            "  class A\n"
+                                            "    def foo\n"
+                                            "      DoesNotExist.new\n"
+                                            "      1 + :sym\n"
+                                            "    end\n"
+                                            "  end\n"
+                                            "end\n",
+                                            2)),
+                           {
+                               {files[1].first, 4, "Unable to resolve constant `DoesNotExist`"},
+                               {files[1].first, 5, "Expected `Integer`"},
+                           });
+
+    // Make a slow path edit to Root::Foo::A, and note that we retain all errors.
+    assertErrorDiagnostics(send(*changeFile(files[3].first,
+                                            "# typed: true\n"
+                                            "module Root::Foo\n"
+                                            "  class A\n"
+                                            "    module Foo\n"
+                                            "    end\n"
+                                            "\n"
+                                            "    def foo\n"
+                                            "      Root::A.new() + :type_error\n"
+                                            "    end\n"
+                                            "  end\n"
+                                            "end\n",
+                                            3)),
+                           {
+                               {files[1].first, 4, "Unable to resolve constant `DoesNotExist`"},
+                               {files[1].first, 5, "Expected `Integer`"},
+                               {files[3].first, 7, "Method `+` does not exist"},
+                           });
+
+    // Correct the resolver error in a.rb, so that only infer errors remain
+    assertErrorDiagnostics(send(*changeFile(files[1].first,
+                                            "# typed: true\n"
+                                            "module Root\n"
+                                            "  class A\n"
+                                            "    def foo\n"
+                                            "      1 + :sym\n"
+                                            "    end\n"
+                                            "  end\n"
+                                            "end\n",
+                                            4)),
+                           {
+                               {files[1].first, 4, "Expected `Integer`"},
+                               {files[3].first, 7, "Method `+` does not exist"},
+                           });
+    // Fast path edit that doesn't affect foo/a.rb
+    assertStale({files[3].first});
+
+    // Make a slow path edit to Root::Foo::A, and note that we only report infer errors on foo/a.rb now.
+    assertErrorDiagnostics(send(*changeFile(files[3].first,
+                                            "# typed: true\n"
+                                            "module Root::Foo\n"
+                                            "  class A\n"
+                                            "    module Foo2\n"
+                                            "    end\n"
+                                            "\n"
+                                            "    def foo\n"
+                                            "      Root::A.new() + :type_error\n"
+                                            "    end\n"
+                                            "  end\n"
+                                            "end\n",
+                                            5)),
+                           {
+                               {files[1].first, 4, "Expected `Integer`"},
+                               {files[3].first, 7, "Method `+` does not exist"},
+                           });
+
+    // We still see the same messages, but we know the ones in `a.rb` are stale.
+    assertStale({files[1].first});
+}
+
+// A legacy package has a synthetic test SCC even when there are no test sources. Its
+// package diagnostics must be published once and reproduced by a support-file fast path.
+TEST_CASE_FIXTURE(ProtocolTest, "PackageDirectedPackageDiagnostics") {
+    auto opts = make_shared<realmain::options::Options>();
+    opts->cacheSensitiveOptions.sorbetPackages = true;
+    opts->packageDirected = true;
+    resetState(opts);
+
+    vector<pair<string, string>> files = {
+        {"__package.rb", "# typed: strict\n"
+                         "class Root < PackageSpec\n"
+                         "  export Root::Value\n"
+                         "  unknown_dsl 'value'\n"
+                         "end\n"},
+        {"a.rb", "# typed: strict\nmodule Root\n  Value = 1\nend\n"},
+    };
+    writeFilesToFS(files);
+    for (auto &[path, _] : files) {
+        lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/{}", rootPath, path));
+    }
+    auto diagnostics = initializeLSP();
+    size_t packagePublications = 0;
+    for (const auto &message : diagnostics) {
+        if (message->isNotification() &&
+            message->asNotification().method == LSPMethod::TextDocumentPublishDiagnostics) {
+            const auto &params = get<unique_ptr<PublishDiagnosticsParams>>(message->asNotification().params);
+            if (absl::EndsWith(params->uri, "/__package.rb")) {
+                ++packagePublications;
+                CHECK_EQ(params->diagnostics.size(), 1);
+            }
+        }
+    }
+    CHECK_EQ(packagePublications, 1);
+    vector<ExpectedDiagnostic> expected = {{"__package.rb", 3, "Method `unknown_dsl` does not exist"}};
+    assertErrorDiagnostics(move(diagnostics), expected);
+    assertErrorDiagnostics(send(*openFile("a.rb", files[1].second)), expected);
+    assertErrorDiagnostics(send(*changeFile("a.rb", "# typed: strict\nmodule Root\n  Value = 'changed'\nend\n", 2)),
+                           expected);
+    // A package edit removes the diagnostic and must publish an empty replacement.
+    assertErrorDiagnostics(send(*openFile("__package.rb", files[0].second)), expected);
+    assertErrorDiagnostics(send(*changeFile("__package.rb",
+                                            "# typed: strict\nclass Root < PackageSpec\n"
+                                            "  export Root::Value\nend\n",
+                                            2)),
+                           {});
+}
+
 } // namespace sorbet::test::lsp

@@ -189,6 +189,10 @@ string_view File::source() const {
     return this->source_;
 }
 
+size_t File::sourceSize() const {
+    return this->source_.size();
+}
+
 StrictLevel File::minErrorLevel() const {
     return minErrorLevel_;
 }

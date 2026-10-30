@@ -14,7 +14,7 @@ public:
     const uint16_t code;
     const StrictLevel minLevel;
 
-    constexpr ErrorClass(uint16_t code, StrictLevel minLevel) : code(code), minLevel(minLevel){};
+    constexpr ErrorClass(uint16_t code, StrictLevel minLevel) : code(code), minLevel(minLevel) {};
     ErrorClass(const ErrorClass &rhs) = default;
 
     bool operator==(const ErrorClass &rhs) const noexcept = default;
@@ -48,7 +48,7 @@ struct ErrorLine {
     LocDisplay displayLoc;
 
     ErrorLine(Loc loc, std::string formattedMessage, LocDisplay displayLoc = LocDisplay::Shown)
-        : loc(loc), formattedMessage(std::move(formattedMessage)), displayLoc(displayLoc){};
+        : loc(loc), formattedMessage(std::move(formattedMessage)), displayLoc(displayLoc) {};
 
     // Use this (instead of the constructor) if you want `{}` to mean "turn this cyan if should use
     // colors, or just backticks otherwise".

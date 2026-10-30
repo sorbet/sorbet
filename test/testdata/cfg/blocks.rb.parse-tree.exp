@@ -36,6 +36,7 @@ Class {
       body = LVar {
         name = <U x>
       }
+      style = do-end
     }
   }
 }

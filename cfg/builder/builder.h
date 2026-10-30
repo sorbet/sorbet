@@ -82,7 +82,7 @@ private:
                UnorderedMap<core::NameRef, LocalRef> &discoveredUndeclaredFields, uint32_t &temporaryCounter)
         : ctx(ctx), inWhat(inWhat), target(target), loops(loops), isInsideRubyBlock(false), isInsideLambda(false),
           breakIsJump(false), nextScope(nextScope), breakScope(breakScope), rescueScope(rescueScope), aliases(aliases),
-          discoveredUndeclaredFields(discoveredUndeclaredFields), temporaryCounter(temporaryCounter){};
+          discoveredUndeclaredFields(discoveredUndeclaredFields), temporaryCounter(temporaryCounter) {};
 };
 } // namespace sorbet::cfg
 #endif // SORBET_BUILDER_H

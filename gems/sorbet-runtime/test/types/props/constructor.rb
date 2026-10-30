@@ -478,7 +478,7 @@ class Opus::Types::Test::Props::ConstructorTest < Critic::Unit::UnitTest
   class NilFieldStruct < T::Struct
     prop :foo, T.nilable(Integer), raise_on_nil_write: true
     prop :bar, T.nilable(String), raise_on_nil_write: true
-    prop :required, String, raise_on_nil_write: true
+    prop :required, String
   end
 
   class UntypedStruct < T::Struct

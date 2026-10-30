@@ -1,6 +1,8 @@
 #include "core/AutocorrectSuggestion.h"
 #include "absl/strings/str_cat.h"
 #include "common/sort/sort.h"
+#include "core/ErrorQueue.h"
+#include "core/GlobalState.h"
 
 using namespace std;
 
@@ -51,18 +53,37 @@ void AutocorrectSuggestion::mergeAdjacentEdits(std::vector<core::AutocorrectSugg
 UnorderedMap<FileRef, string> AutocorrectSuggestion::apply(const GlobalState &gs, FileSystem &fs,
                                                            const vector<AutocorrectSuggestion> &autocorrects) {
     UnorderedMap<FileRef, string> sources;
+    UnorderedSet<FileRef> unreadable;
     for (auto &autocorrect : autocorrects) {
         for (auto &edit : autocorrect.edits) {
             auto file = edit.loc.file();
-            if (!sources.count(file)) {
-                sources[file] = fs.readFile(string(file.data(gs).path()));
+            if (sources.contains(file) || unreadable.contains(file)) {
+                continue;
+            }
+
+            auto path = string(file.data(gs).path());
+            try {
+                sources[file] = fs.readFile(path);
+            } catch (FileNotFoundException &e) {
+                // Despite the name, FileOps::read throws FileNotFoundException for any failure to
+                // open or read the file (e.g. ENOENT, EACCES, EISDIR), not just a missing file. This
+                // happens if the file never existed on disk (`--e-rbi`), or if it was deleted or
+                // changed permissions since Sorbet read it at the start of the run. Skip the file
+                // instead of crashing.
+                gs.errorQueue->logger.warn("Cannot read file `{}` to apply autocorrects, skipping", path);
+                unreadable.insert(file);
             }
         }
     }
 
     vector<AutocorrectSuggestion::Edit> edits;
     for (auto &autocorrect : autocorrects) {
-        move(autocorrect.edits.begin(), autocorrect.edits.end(), back_inserter(edits));
+        for (auto &edit : autocorrect.edits) {
+            if (unreadable.contains(edit.loc.file())) {
+                continue;
+            }
+            edits.emplace_back(edit);
+        }
     }
 
     // Sort the locs backwards

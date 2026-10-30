@@ -1,6 +1,7 @@
 #ifndef SORBET_STABLE_STRING_STORAGE_H
 #define SORBET_STABLE_STRING_STORAGE_H
 
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
@@ -37,7 +38,7 @@ private:
 
 template <size_t PageSize>
 StableStringStorage<PageSize>::StableStringStorage(const StableStringStorage<PageSize> &rhs)
-    : strings(rhs.string), currentPagePosition(PageSize + 1) {}
+    : strings(rhs.strings), currentPagePosition(PageSize + 1) {}
 
 template <size_t PageSize>
 StableStringStorage<PageSize> &StableStringStorage<PageSize>::operator=(const StableStringStorage<PageSize> &rhs) {

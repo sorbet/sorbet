@@ -239,7 +239,7 @@ public:
             }
         }
 
-        return scc.condensation.build();
+        return std::move(scc.condensation).build();
     }
 };
 

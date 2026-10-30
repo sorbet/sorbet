@@ -1,0 +1,27 @@
+autocorrect-unwritable-file.rb:7: Method `fo` does not exist on `A` https://srb.help/7003
+     7 |A.new.fo
+              ^^
+  Got `A` originating from:
+    autocorrect-unwritable-file.rb:7:
+     7 |A.new.fo
+        ^^^^^
+  Autocorrect: Done
+    autocorrect-unwritable-file.rb:7: Replaced with `foo`
+     7 |A.new.fo
+              ^^
+    autocorrect-unwritable-file.rb:4: Defined here
+     4 |  def foo; end
+          ^^^^^^^
+Errors: 1
+Cannot write file `autocorrect-unwritable-file.rb` to apply autocorrects
+exit code: 100
+
+--------------------------------------------------------------------------
+
+# typed: true
+
+class A
+  def foo; end
+end
+
+A.new.fo

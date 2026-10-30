@@ -8,4 +8,5 @@ end
 t.raise StandardError
 t.raise StandardError.new
 t.raise StandardError, "test"
+t.raise StandardError, "test", caller_locations
 t.raise "test"

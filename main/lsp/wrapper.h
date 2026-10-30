@@ -20,6 +20,7 @@ class LSPLoop;
 class LSPOutputToVector;
 class LSPProgrammaticInput;
 class LSPConfiguration;
+struct PreemptionTestHooks;
 
 class LSPWrapper {
     // Bugfix: WorkerPool destructor assumes that logger is alive when it runs, so keep around logger until it finishes.
@@ -143,6 +144,12 @@ public:
      * A return value of `nullptr` indicates that a timeout has occurred.
      */
     std::unique_ptr<LSPMessage> read(int timeoutMs = 100);
+
+    /** (For tests only) Control processing and completion of the next scheduled preemption. */
+    void setPreemptionTestHooks(std::shared_ptr<PreemptionTestHooks> hooks);
+
+    /** (For tests only) Acquire and release the task queue mutex to synchronize with a thread releasing it. */
+    void synchronizeTaskQueueForTest();
 };
 
 } // namespace sorbet::realmain::lsp

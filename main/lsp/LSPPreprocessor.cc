@@ -116,7 +116,7 @@ void LSPPreprocessor::mergeFileChanges() {
     taskQueue->getMutex()->AssertHeld();
     auto &logger = config->logger;
     // mergeFileChanges is the most expensive operation this thread performs while holding the mutex lock.
-    Timer timeit(logger, "lsp.mergeFileChanges");
+    Timer timeit(*logger, "lsp.mergeFileChanges");
     auto &pendingRequests = taskQueue->tasks();
     const int originalSize = pendingRequests.size();
     int requestsMergedCounter = 0;
@@ -367,7 +367,7 @@ void LSPPreprocessor::preprocessAndEnqueue(unique_ptr<LSPMessage> msg) {
     task->latencyTimer = move(msg->latencyTimer);
 
     {
-        Timer timeit(config->logger, "LSPTask::preprocess");
+        Timer timeit(*config->logger, "LSPTask::preprocess");
         timeit.setTag("method", task->methodString());
         task->preprocess(*this);
     }
@@ -413,6 +413,7 @@ unique_ptr<Joinable> LSPPreprocessor::runPreprocessor(MessageQueueState &message
                 }
             }
 
+            auto requestId = msg->id();
             preprocessAndEnqueue(move(msg));
 
             {
@@ -420,6 +421,12 @@ unique_ptr<Joinable> LSPPreprocessor::runPreprocessor(MessageQueueState &message
                 // Merge the counters from all of the worker threads with those stored in
                 // taskQueue.
                 taskQueue->getCounters() = mergeCounters(move(taskQueue->getCounters()));
+                if (taskQueue->preemptionTestHooks != nullptr && requestId.has_value() &&
+                    requestId->equals(taskQueue->preemptionTestHooks->requestId)) [[unlikely]] {
+                    // A test can acquire the queue mutex after this notification to ensure preprocessing has
+                    // finished touching it, so a later unlock here cannot hide a missing wakeup in finish().
+                    taskQueue->preemptionTestHooks->preprocessingFinished.Notify();
+                }
                 if (taskQueue->isTerminated()) {
                     // We must have processed an exit notification, or one of the downstream threads exited.
                     return;
@@ -505,8 +512,8 @@ LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<WatchmanQueryResponse>
     }
     return edit;
 }
-vector<string_view> LSPPreprocessor::openFilePaths() const {
-    vector<string_view> paths;
+vector<string> LSPPreprocessor::openFilePaths() const {
+    vector<string> paths;
     paths.reserve(openFiles.size());
     for (auto const &[path, file] : openFiles) {
         paths.emplace_back(path);

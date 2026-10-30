@@ -390,10 +390,10 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
 unique_ptr<Error> reportMissingKwargs(const GlobalState &gs, const DispatchArgs &args, MethodRef method,
                                       const vector<const ParamInfo *> &missingKwargs, ClassOrModuleRef inClass,
                                       const vector<TypePtr> &targs) {
-    auto errLoc = args.argsLoc(gs).copyEndWithZeroLength();
     if (missingKwargs.empty()) {
         return nullptr;
     }
+    auto errLoc = args.argsLoc(gs).copyEndWithZeroLength();
     if (auto e = gs.beginError(errLoc, errors::Infer::MethodArgumentCountMismatch)) {
         if (missingKwargs.size() == 1) {
             e.setHeader("Missing required keyword argument `{}` for method `{}`", missingKwargs[0]->name.show(gs),
@@ -606,7 +606,7 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
                 return i < s.arity;
             }
 
-            Comp(const GlobalState &gs) : gs(gs){};
+            Comp(const GlobalState &gs) : gs(gs) {};
         } cmp(gs);
 
         auto er = absl::c_equal_range(leftCandidates, args.size(), cmp);
@@ -928,23 +928,50 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 }
 
                 canSkipFuzzyMatch = canSkipFuzzyMatch || !args.funLoc().exists() || args.funLoc().empty();
+
                 if (!canSkipFuzzyMatch) {
-                    auto alternatives = symbol.data(gs)->findMemberFuzzyMatch(gs, targetName);
+                    // This kind of does a crude constant resolution. Some problems with it:
+                    // - It has to be aware of the `<root>` / `Object` distinction at the top-level
+                    // - It ignores the syntactic scope and always does a transitive lookup (even
+                    //   when Sorbet would otherwise ban that)
+                    // but it lets us avoid the findMethodFuzzyMatch call below.
+                    auto constantScope = symbol == Symbols::root() ? symbol : symbol.data(gs)->attachedClass(gs);
+                    NameRef constantName;
+                    if (constantScope.exists() && (constantName = gs.lookupNameConstant(targetName)).exists()) {
+                        auto possibleSymbol = constantScope.data(gs)->findMemberTransitive(gs, constantName);
+                        if (possibleSymbol.exists() && possibleSymbol.isClassOrModule() &&
+                            possibleSymbol.asClassOrModuleRef().data(gs)->typeArity(gs) == 0) {
+                            e.addErrorNote("Ruby uses `.new` to invoke a class's constructor");
+                            if (possibleSymbol.asClassOrModuleRef().data(gs)->owner == constantScope) {
+                                e.replaceWith("Insert `.new`", args.funLoc().copyEndWithZeroLength(), ".new");
+                            } else {
+                                // Sorbet doesn't resolve constants through inheritance with explicit scopes.
+                                // If we relied on transitivity to find the constant, there's a good chance that
+                                // there was an explicit scope, and we need to expand the absolute constant.
+                                auto constantLoc = args.receiverLoc().exists() ? args.receiverLoc().join(args.funLoc())
+                                                                               : args.funLoc();
+                                e.replaceWith("Construct with `.new`", constantLoc, "{}.new", possibleSymbol.show(gs));
+                            }
+                            canSkipFuzzyMatch = true;
+                        }
+                    }
+                }
+
+                if (!canSkipFuzzyMatch) {
+                    auto alternatives = symbol.data(gs)->findMethodFuzzyMatch(gs, targetName);
                     for (auto alternative : alternatives) {
                         auto possibleSymbol = alternative.symbol;
-                        if (!possibleSymbol.isClassOrModule() && !possibleSymbol.isMethod()) {
+                        if (!possibleSymbol.isMethod()) {
                             continue;
                         }
 
-                        if (possibleSymbol.isMethod()) {
-                            auto possibleMethod = possibleSymbol.asMethodRef().data(gs);
-                            if ((possibleMethod->flags.isPrivate || possibleMethod->owner == Symbols::Kernel()) &&
-                                !args.isPrivateOk) {
-                                // Special-case Kernel methods, which should be treated as private, but aren't due to
-                                // this bug: https://github.com/sorbet/sorbet/issues/4434
-                                // (If we fix that bug, we can delete the `Kernel` reference above.)
-                                continue;
-                            }
+                        auto possibleMethod = possibleSymbol.asMethodRef().data(gs);
+                        if ((possibleMethod->flags.isPrivate || possibleMethod->owner == Symbols::Kernel()) &&
+                            !args.isPrivateOk) {
+                            // Special-case Kernel methods, which should be treated as private, but aren't due to
+                            // this bug: https://github.com/sorbet/sorbet/issues/4434
+                            // (If we fix that bug, we can delete the `Kernel` reference above.)
+                            continue;
                         }
 
                         if (isSetter && possibleSymbol.name(gs).lookupWithEq(gs) == args.name) {
@@ -959,20 +986,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                             toReplace.remove_suffix(1);
                         }
                         if (args.funLoc().source(gs) != toReplace) {
-                            auto suggestedName = possibleSymbol.isClassOrModule() ? possibleSymbol.show(gs) + ".new"
-                                                                                  : possibleSymbol.show(gs);
-                            e.addErrorLine(possibleSymbol.loc(gs), "Did you mean: `{}`", suggestedName);
-                            continue;
-                        }
-
-                        if (possibleSymbol.isClassOrModule()) {
-                            if (possibleSymbol.asClassOrModuleRef().data(gs)->typeArity(gs) > 0) {
-                                // If this call was in type syntax, we might have already have built an
-                                // autocorrect to turn this from `MyClass(...)` to `MyClass[...]`.
-                                continue;
-                            }
-                            e.addErrorNote("Ruby uses `.new` to invoke a class's constructor");
-                            e.replaceWith("Insert `.new`", args.funLoc().copyEndWithZeroLength(), ".new");
+                            e.addErrorLine(possibleSymbol.loc(gs), "Did you mean: `{}`", possibleSymbol.show(gs));
                             continue;
                         }
 
@@ -3536,7 +3550,7 @@ optional<Loc> locOfValueForKey(const GlobalState &gs, const Loc origin, const Na
     // TODO(jez) Use Loc::adjust here
     uint32_t valueBegin = origin.beginPos() + keyStart + keySymbol.size() + char_traits<char>::length(" ");
     uint32_t valueEnd = valueBegin + char_traits<char>::length(valueStr);
-    if (valueEnd <= origin.file().data(gs).source().size()) {
+    if (valueEnd <= origin.file().data(gs).sourceSize()) {
         auto loc = Loc{origin.file(), valueBegin, valueEnd};
         if (loc.exists() && loc.source(gs).value() == valueStr) {
             return loc;

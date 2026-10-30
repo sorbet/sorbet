@@ -19,7 +19,7 @@ public:
           argTypes(argTypes.begin(), argTypes.end()), callerSideName(callerSideName), originalName(originalName),
           enclosingMethod(enclosingMethod), isPrivateOk(isPrivateOk), numPosArgs(numPosArgs), file(file),
           termLocOffsets(termLocOffsets), receiverLocOffsets(receiverLocOffsets), funLocOffsets(funLocOffsets),
-          locOffsetsWithoutBlock(locOffsetsWithoutBlock){};
+          locOffsetsWithoutBlock(locOffsetsWithoutBlock) {};
     const std::shared_ptr<core::DispatchResult> dispatchResult;
     const InlinedVector<core::LocOffsets, 2> argLocOffsets;
     const InlinedVector<core::TypePtr, 2> argTypes;
@@ -73,7 +73,7 @@ CheckSize(IdentResponse, 72, 8);
 
 class LiteralResponse final {
 public:
-    LiteralResponse(core::Loc termLoc, core::TypeAndOrigins retType) : termLoc(termLoc), retType(std::move(retType)){};
+    LiteralResponse(core::Loc termLoc, core::TypeAndOrigins retType) : termLoc(termLoc), retType(std::move(retType)) {};
     const core::Loc termLoc;
     const core::TypeAndOrigins retType;
 };
@@ -110,7 +110,7 @@ CheckSize(ConstantResponse, 80, 8);
 class FieldResponse final {
 public:
     FieldResponse(core::FieldRef symbol, core::Loc termLoc, core::NameRef name, core::TypeAndOrigins retType)
-        : symbol(symbol), termLoc(termLoc), name(name), retType(std::move(retType)){};
+        : symbol(symbol), termLoc(termLoc), name(name), retType(std::move(retType)) {};
     const core::FieldRef symbol;
     const core::Loc termLoc;
     const core::NameRef name;
@@ -124,7 +124,7 @@ public:
                       core::LocOffsets declLocOffsets, core::NameRef name, bool isAttrBestEffortUIOnly,
                       core::TypeAndOrigins retType)
         : symbol(symbol), file(file), termLocOffsets(termLocOffsets), declLocOffsets(declLocOffsets), name(name),
-          isAttrBestEffortUIOnly(isAttrBestEffortUIOnly), retType(std::move(retType)){};
+          isAttrBestEffortUIOnly(isAttrBestEffortUIOnly), retType(std::move(retType)) {};
     const core::MethodRef symbol;
     const core::FileRef file;
     const core::LocOffsets termLocOffsets;
@@ -145,7 +145,7 @@ CheckSize(MethodDefResponse, 64, 8);
 class ClassDefResponse final {
 public:
     ClassDefResponse(core::ClassOrModuleRef symbol, core::Loc termLoc, core::Loc declLoc)
-        : symbol(symbol), termLoc(termLoc), declLoc(declLoc){};
+        : symbol(symbol), termLoc(termLoc), declLoc(declLoc) {};
     const core::ClassOrModuleRef symbol;
     const core::Loc termLoc;
     const core::Loc declLoc;
@@ -154,7 +154,7 @@ CheckSize(ClassDefResponse, 28, 4);
 
 class EditResponse final {
 public:
-    EditResponse(core::Loc loc, std::string replacement) : loc(loc), replacement(std::move(replacement)){};
+    EditResponse(core::Loc loc, std::string replacement) : loc(loc), replacement(std::move(replacement)) {};
     const core::Loc loc;
     const std::string replacement;
 };

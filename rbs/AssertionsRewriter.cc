@@ -15,7 +15,9 @@ namespace {
 
 const regex notNilPattern("^\\s*!nil\\s*(#.*)?$");
 const regex untypedPattern("^\\s*untyped\\s*(#.*)?$");
-const regex absurdPattern("^\\s*absurd\\s*(#.*)?$");
+const regex absurdPattern("^absurd\\s*(?:\\(|#|$)");
+const regex absurdVariablePattern(
+    "^absurd\\s*\\(\\s*((?:@@?|\\$)[a-zA-Z_][a-zA-Z0-9_]*|[a-z_][a-zA-Z0-9_]*)\\s*\\)\\s*(#.*)?$");
 
 /*
  * Parse the comment and return the type as a `pm_node_t*` and the kind of assertion we need to apply (let, cast,
@@ -30,8 +32,54 @@ parseComment(core::MutableContext ctx, parser::Prism::Parser &parser, InlineComm
              absl::Span<pair<core::LocOffsets, core::NameRef>> typeParams) {
     Factory prism{parser};
 
-    if (comment.kind == InlineComment::Kind::MUST || comment.kind == InlineComment::Kind::UNSAFE ||
-        comment.kind == InlineComment::Kind::ABSURD) {
+    if (comment.kind == InlineComment::Kind::ABSURD) {
+        match_results<string_view::const_iterator> matches;
+        auto content = comment.comment.string;
+
+        if (!regex_match(content.begin(), content.end(), matches, absurdVariablePattern)) {
+            if (auto e = ctx.beginIndexerError(comment.comment.typeLoc, core::errors::Rewriter::RBSAssertionError)) {
+                e.setHeader("RBS absurd requires a variable name");
+                e.addErrorNote("Annotate the `{}` that handles the impossible case, like `{}`", "raise",
+                               "raise #: absurd(x)");
+            }
+            return nullopt;
+        }
+
+        auto name = content.substr(matches.position(1), matches.length(1));
+        auto loc = core::LocOffsets{comment.comment.typeLoc.beginPos() + static_cast<uint32_t>(matches.position(1)),
+                                    comment.comment.typeLoc.beginPos() +
+                                        static_cast<uint32_t>(matches.position(1) + matches.length(1))};
+        if (name == "self") {
+            return pair{prism.Self(loc), comment.kind};
+        }
+
+        auto id = prism.addConstantToPool(name);
+        auto pmLoc = parser.convertLocOffsets(loc);
+
+        if (absl::StartsWith(name, "@@")) {
+            auto *value = prism.allocateNode<pm_class_variable_read_node_t>();
+            *value = {.base = prism.initializeBaseNode(PM_CLASS_VARIABLE_READ_NODE, pmLoc), .name = id};
+            return pair{up_cast(value), comment.kind};
+        }
+
+        if (absl::StartsWith(name, "@")) {
+            auto *value = prism.allocateNode<pm_instance_variable_read_node_t>();
+            *value = {.base = prism.initializeBaseNode(PM_INSTANCE_VARIABLE_READ_NODE, pmLoc), .name = id};
+            return pair{up_cast(value), comment.kind};
+        }
+
+        if (absl::StartsWith(name, "$")) {
+            auto *value = prism.allocateNode<pm_global_variable_read_node_t>();
+            *value = {.base = prism.initializeBaseNode(PM_GLOBAL_VARIABLE_READ_NODE, pmLoc), .name = id};
+            return pair{up_cast(value), comment.kind};
+        }
+
+        auto *value = prism.allocateNode<pm_local_variable_read_node_t>();
+        *value = {.base = prism.initializeBaseNode(PM_LOCAL_VARIABLE_READ_NODE, pmLoc), .name = id, .depth = 0};
+        return pair{up_cast(value), comment.kind};
+    }
+
+    if (comment.kind == InlineComment::Kind::MUST || comment.kind == InlineComment::Kind::UNSAFE) {
         // The type should never be used but we need to hold the location...
         return pair{prism.Nil(comment.comment.typeLoc), comment.kind};
     }
@@ -382,7 +430,7 @@ optional<rbs::InlineComment> AssertionsRewriter::commentForNode(pm_node_t *node)
             } else if (regex_match(content.begin(), content.end(), untypedPattern)) {
                 kind = InlineComment::Kind::UNSAFE;
             }
-        } else if (regex_match(content.begin(), content.end(), absurdPattern)) {
+        } else if (regex_search(content.begin(), content.end(), absurdPattern)) {
             kind = InlineComment::Kind::ABSURD;
         } else if (absl::StartsWith(content, "self as ")) {
             kind = InlineComment::Kind::BIND;
@@ -417,6 +465,7 @@ optional<rbs::InlineComment> AssertionsRewriter::commentForNode(pm_node_t *node)
  * - `x #: as X`: `T.cast(x, X)`
  * - `x #: as !nil`: `T.must(x)`
  * - `x #: as untyped`: `T.unsafe(x)`
+ * - `raise #: absurd(x)`: `raise; T.absurd(x)`
  */
 pm_node_t *AssertionsRewriter::insertCast(pm_node_t *node, optional<pair<pm_node_t *, InlineComment::Kind>> pair) {
     if (!pair) {
@@ -442,8 +491,30 @@ pm_node_t *AssertionsRewriter::insertCast(pm_node_t *node, optional<pair<pm_node
             return prism.TMust(typeLoc, node);
         case InlineComment::Kind::UNSAFE:
             return prism.TUnsafe(typeLoc, node);
-        case InlineComment::Kind::ABSURD:
-            return prism.TAbsurd(typeLoc, node);
+        case InlineComment::Kind::ABSURD: {
+            auto *call = down_cast<pm_call_node_t>(node);
+            bool isRaise = call && parser.resolveConstant(call->name) == "raise";
+
+            // If raise has a receiver, confirm it's `Kernel`, `::Kernel` or `self`
+            if (isRaise && call->receiver) {
+                auto *constant = down_cast<pm_constant_read_node_t>(call->receiver);
+                auto *path = down_cast<pm_constant_path_node_t>(call->receiver);
+
+                isRaise = isa_node<pm_self_node_t>(call->receiver) ||
+                          (constant && parser.resolveConstant(constant->name) == "Kernel") ||
+                          (path && !path->parent && parser.resolveConstant(path->name) == "Kernel");
+            }
+
+            if (!isRaise) {
+                if (auto e = ctx.beginIndexerError(typeLoc, core::errors::Rewriter::RBSAssertionError)) {
+                    e.setHeader("RBS absurd must always be used with a raise");
+                }
+                return node;
+            }
+
+            pm_node_t *body[] = {node, prism.TAbsurd(typeLoc, type)};
+            return prism.StatementsNode(translateLocation(node->location).join(typeLoc), absl::MakeSpan(body));
+        }
         case InlineComment::Kind::BIND:
             if (auto e = ctx.beginIndexerError(typeLoc, core::errors::Rewriter::RBSUnsupported)) {
                 e.setHeader("`{}` binding can't be used as a trailing comment", "self");
@@ -1041,7 +1112,7 @@ pm_node_t *AssertionsRewriter::rewriteNode(pm_node_t *node) {
         }
         case PM_ASSOC_SPLAT_NODE: {
             auto *splat = down_cast_nonnull<pm_assoc_splat_node_t>(node);
-            splat->value = rewriteNode(maybeInsertCast(splat->value));
+            splat->value = rewriteNullableNode(maybeInsertCast(splat->value));
             return node;
         }
 

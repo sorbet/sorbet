@@ -91,5 +91,5 @@ public:
     void multiplexJobWait(std::string_view taskName, Task t) override;
     int size() override;
 };
-};     // namespace sorbet
+}; // namespace sorbet
 #endif // SORBET_WORKERPOOL_IMPL_H

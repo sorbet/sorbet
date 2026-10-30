@@ -423,8 +423,7 @@ string getCounterStatistics() {
         fast_sort(sortedTimings, [](const auto &e1, const auto &e2) -> bool { return e1.first < e2.first; });
 
         fmt::format_to(std::back_inserter(buf), "{}",
-                       fmt::map_join(
-                           sortedTimings, "", [](const auto &el) -> auto{ return el.second; }));
+                       fmt::map_join(sortedTimings, "", [](const auto &el) -> auto { return el.second; }));
     }
 
     {
@@ -439,8 +438,7 @@ string getCounterStatistics() {
         fast_sort(sortedOther, [](const auto &e1, const auto &e2) -> bool { return e1.first < e2.first; });
 
         fmt::format_to(std::back_inserter(buf), "{}",
-                       fmt::map_join(
-                           sortedOther, "", [](const auto &el) -> auto{ return el.second; }));
+                       fmt::map_join(sortedOther, "", [](const auto &el) -> auto { return el.second; }));
     }
     return to_string(buf);
 }

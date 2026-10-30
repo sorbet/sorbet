@@ -12,6 +12,9 @@ suggest_unsafe_dead.rb:15: This code is unreachable https://srb.help/7006
     suggest_unsafe_dead.rb:11:
     11 |x = T.let(0, Integer)
             ^^^^^^^^^^^^^^^^^
+  Note:
+    If this code is intentionally unreachable, end this sequence with `T.absurd(...)`
+    after any defensive error handling.
 
 suggest_unsafe_dead.rb:19: This code is unreachable https://srb.help/7006
     19 |  puts y
@@ -27,6 +30,9 @@ suggest_unsafe_dead.rb:19: This code is unreachable https://srb.help/7006
     suggest_unsafe_dead.rb:12:
     12 |y = T.let(nil, NilClass)
             ^^^^^^^^^^^^^^^^^^^^
+  Note:
+    If this code is intentionally unreachable, end this sequence with `T.absurd(...)`
+    after any defensive error handling.
 
 suggest_unsafe_dead.rb:24: This code is unreachable https://srb.help/7006
     24 |  x || do_something
@@ -42,6 +48,9 @@ suggest_unsafe_dead.rb:24: This code is unreachable https://srb.help/7006
     suggest_unsafe_dead.rb:23:
     23 |def test1_variable_or(x)
                               ^
+  Note:
+    If this code is intentionally unreachable, end this sequence with `T.absurd(...)`
+    after any defensive error handling.
 
 suggest_unsafe_dead.rb:29: This code is unreachable https://srb.help/7006
     29 |  x && do_something
@@ -57,6 +66,9 @@ suggest_unsafe_dead.rb:29: This code is unreachable https://srb.help/7006
     suggest_unsafe_dead.rb:28:
     28 |def test2_variable_and(x)
                                ^
+  Note:
+    If this code is intentionally unreachable, end this sequence with `T.absurd(...)`
+    after any defensive error handling.
 
 suggest_unsafe_dead.rb:35: This code is unreachable https://srb.help/7006
     35 |  returns_integer || do_something
@@ -72,6 +84,9 @@ suggest_unsafe_dead.rb:35: This code is unreachable https://srb.help/7006
     suggest_unsafe_dead.rb:35:
     35 |  returns_integer || do_something
           ^^^^^^^^^^^^^^^
+  Note:
+    If this code is intentionally unreachable, end this sequence with `T.absurd(...)`
+    after any defensive error handling.
 
 suggest_unsafe_dead.rb:47: This code is unreachable https://srb.help/7006
     47 |    do_something
@@ -87,6 +102,9 @@ suggest_unsafe_dead.rb:47: This code is unreachable https://srb.help/7006
     suggest_unsafe_dead.rb:45:
     45 |  when String then puts 'str'
                ^^^^^^
+  Note:
+    If this code is intentionally unreachable, end this sequence with `T.absurd(...)`
+    after any defensive error handling.
 
 suggest_unsafe_dead.rb:56: This code is unreachable https://srb.help/7006
     56 |    do_something
@@ -102,6 +120,9 @@ suggest_unsafe_dead.rb:56: This code is unreachable https://srb.help/7006
     suggest_unsafe_dead.rb:53:
     53 |  if returns_integer
              ^^^^^^^^^^^^^^^
+  Note:
+    If this code is intentionally unreachable, end this sequence with `T.absurd(...)`
+    after any defensive error handling.
 
 suggest_unsafe_dead.rb:70: This code is unreachable https://srb.help/7006
     70 |    do_something
@@ -120,6 +141,9 @@ suggest_unsafe_dead.rb:70: This code is unreachable https://srb.help/7006
     suggest_unsafe_dead.rb:62: Possibly uninitialized (`NilClass`) in:
     62 |def test6_possibly_uninitialized
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    If this code is intentionally unreachable, end this sequence with `T.absurd(...)`
+    after any defensive error handling.
 
 suggest_unsafe_dead.rb:98: This code is unreachable https://srb.help/7006
       98 |    begin
@@ -136,6 +160,9 @@ suggest_unsafe_dead.rb:98: This code is unreachable https://srb.help/7006
     suggest_unsafe_dead.rb:96:
     96 |  if false
              ^^^^^
+  Note:
+    If this code is intentionally unreachable, end this sequence with `T.absurd(...)`
+    after any defensive error handling.
 
 suggest_unsafe_dead.rb:81: This code is unreachable https://srb.help/7006
     81 |      do_something
@@ -151,6 +178,9 @@ suggest_unsafe_dead.rb:81: This code is unreachable https://srb.help/7006
     suggest_unsafe_dead.rb:79:
     79 |  def test7_self
           ^
+  Note:
+    If this code is intentionally unreachable, end this sequence with `T.absurd(...)`
+    after any defensive error handling.
 
 suggest_unsafe_dead.rb:89: This code is unreachable https://srb.help/7006
     89 |      do_something
@@ -166,6 +196,9 @@ suggest_unsafe_dead.rb:89: This code is unreachable https://srb.help/7006
     suggest_unsafe_dead.rb:87:
     87 |    this = self
                    ^^^^
+  Note:
+    If this code is intentionally unreachable, end this sequence with `T.absurd(...)`
+    after any defensive error handling.
 Errors: 11
 
 --------------------------------------------------------------------------

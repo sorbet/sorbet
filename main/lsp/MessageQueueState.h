@@ -21,7 +21,7 @@ struct MessageQueueState {
         bool &flag;
 
     public:
-        NotifyOnDestruction(MessageQueueState &state, absl::Mutex &mutex) : mutex(mutex), flag(state.terminate){};
+        NotifyOnDestruction(MessageQueueState &state, absl::Mutex &mutex) : mutex(mutex), flag(state.terminate) {};
         ~NotifyOnDestruction() {
             absl::MutexLock lck(&mutex);
             flag = true;

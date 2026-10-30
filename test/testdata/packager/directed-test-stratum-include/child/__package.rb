@@ -2,7 +2,7 @@
 # enable-packager: true
 # enable-package-directed: true
 
-# stratum: 1
+# stratum: 2
 
 class Child < PackageSpec
   import Parent

@@ -19,8 +19,7 @@ constexpr string_view httpsScheme = "https"sv;
 
 namespace {
 
-string getRootPath(const shared_ptr<LSPOutput> &output, const options::Options &opts,
-                   const shared_ptr<spdlog::logger> &logger) {
+string getRootPath(LSPOutput &output, const options::Options &opts, spdlog::logger &logger) {
     if (opts.rawInputDirNames.empty() ||
         (opts.rawInputDirNames.size() > 1 && !opts.forciblySilenceLspMultipleDirError)) {
         string msg = opts.forciblySilenceLspMultipleDirError
@@ -28,9 +27,9 @@ string getRootPath(const shared_ptr<LSPOutput> &output, const options::Options &
                          : "Sorbet's language server requires a single input directory.";
         msg += fmt::format(" However, {} are configured: [{}]", opts.rawInputDirNames.size(),
                            absl::StrJoin(opts.rawInputDirNames, ", "));
-        logger->error(msg);
+        logger.error(msg);
         auto params = make_unique<ShowMessageParams>(MessageType::Error, msg);
-        output->write(make_unique<LSPMessage>(
+        output.write(make_unique<LSPMessage>(
             make_unique<NotificationMessage>("2.0", LSPMethod::WindowShowMessage, move(params))));
         throw EarlyReturnWithCode(1);
     }
@@ -46,10 +45,10 @@ MarkupKind getPreferredMarkupKind(vector<MarkupKind> formats) {
 }
 } // namespace
 
-LSPConfiguration::LSPConfiguration(const options::Options &opts, const shared_ptr<LSPOutput> &output,
-                                   const shared_ptr<spdlog::logger> &logger, bool disableFastPath)
-    : initialized(atomic<bool>(false)), opts(opts), output(output), logger(logger), disableFastPath(disableFastPath),
-      rootPath(getRootPath(output, opts, logger)) {}
+LSPConfiguration::LSPConfiguration(const options::Options &opts, shared_ptr<LSPOutput> output,
+                                   shared_ptr<spdlog::logger> logger, bool disableFastPath)
+    : initialized(atomic<bool>(false)), opts(opts), output(move(output)), logger(move(logger)),
+      disableFastPath(disableFastPath), rootPath(getRootPath(*this->output, opts, *this->logger)) {}
 
 void LSPConfiguration::assertHasClientConfig() const {
     if (!clientConfig) {
@@ -131,11 +130,11 @@ LSPClientConfiguration::LSPClientConfiguration(const InitializeParams &params) {
     }
 }
 
-void LSPConfiguration::setClientConfig(const shared_ptr<const LSPClientConfiguration> &clientConfig) {
+void LSPConfiguration::setClientConfig(shared_ptr<const LSPClientConfiguration> clientConfig) {
     if (this->clientConfig) {
         Exception::raise("Cannot call setClientConfig twice in one session!");
     }
-    this->clientConfig = clientConfig;
+    this->clientConfig = move(clientConfig);
 }
 
 string LSPConfiguration::localName2Remote(string_view filePath) const {

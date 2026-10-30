@@ -341,7 +341,7 @@ public:
     static std::unique_ptr<parser::Node> TTypeAlias(core::LocOffsets loc, std::unique_ptr<parser::Node> type) {
         auto send = Send0(loc, T(loc), core::Names::typeAlias(), loc);
         auto body = std::make_unique<parser::Begin>(loc, parser::NodeVec1(move(type)));
-        return std::make_unique<parser::Block>(loc, move(send), nullptr, move(body));
+        return std::make_unique<parser::Block>(loc, move(send), nullptr, move(body), parser::BlockStyle::Present);
     }
 
     /*
@@ -370,12 +370,12 @@ public:
     /*
      * Is `expr` a `T` or `::T` constant node?
      */
-    static bool isT(const std::unique_ptr<parser::Node> &expr) {
+    static bool isT(parser::Node *expr) {
         if (expr == nullptr) {
             return false;
         }
 
-        auto t = parser::cast_node<parser::Const>(expr.get());
+        auto t = parser::cast_node<parser::Const>(expr);
         return t != nullptr && t->name == core::Names::Constants::T() &&
                (t->scope == nullptr || isa_node<parser::Cbase>(t->scope.get()));
     }
@@ -383,9 +383,9 @@ public:
     /*
      * Is `expr` a `T.untyped()` or `::T.untyped()` send node?
      */
-    static bool isTUntyped(const std::unique_ptr<parser::Node> &expr) {
-        auto send = parser::cast_node<parser::Send>(expr.get());
-        return send != nullptr && send->method == core::Names::untyped() && isT(send->receiver);
+    static bool isTUntyped(parser::Node *expr) {
+        auto send = parser::cast_node<parser::Send>(expr);
+        return send != nullptr && send->method == core::Names::untyped() && isT(send->receiver.get());
     }
 
     /**

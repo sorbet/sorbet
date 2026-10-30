@@ -9,6 +9,7 @@
 #include "core/StrictLevel.h"
 #include "core/SymbolRef.h"
 #include "core/packages/MangledName.h"
+#include "core/packages/Stratum.h"
 #include <optional>
 #include <vector>
 
@@ -64,10 +65,15 @@ struct Import {
     bool isTestImport() const {
         return type != ImportType::Normal;
     }
+
+    bool isAvailableTo(const core::GlobalState &gs, core::FileRef file) const;
 };
 
 struct Export {
     core::LocOffsets loc;
+    // The exported constant's names, from leaf to root. Stored as names rather than symbols so that
+    // the path can be resolved against a GlobalState that has only some of the package's symbols.
+    std::vector<core::NameRef> reversedPath;
 
     explicit Export(core::LocOffsets loc) : loc(loc) {}
 };
@@ -78,7 +84,7 @@ struct VisibleTo {
     core::LocOffsets loc;
 
     VisibleTo(MangledName mangledName, VisibleToType type, core::LocOffsets loc)
-        : mangledName(mangledName), type(type), loc(loc){};
+        : mangledName(mangledName), type(type), loc(loc) {};
 };
 
 struct PackageReferenceInfo {
@@ -134,10 +140,6 @@ public:
     // These are copied into every package that imports this package.
     std::vector<Export> exports_ = {};
 
-    // In gen-packages mode, we should delete exports that are invalid. This vector is used to track them when
-    // encountered in VisibilityChecker, so we can remove them in GenPackages
-    std::vector<Export> exportsToDelete_ = {};
-
     // The other packages to which this package is visible. If this vector is empty, then it means
     // the package is fully public and can be imported by anything.
     //
@@ -175,6 +177,18 @@ public:
     core::FileRef file;
 
     core::NameRef layer;
+
+    // Source strata assigned by computePackageStrata. Monolithic processing assigns both
+    // zero. Recomputed for each traversal and copied with the package database, including
+    // when restoring a canceled slow path. These are independent of the package AST's stratum.
+    // TODO(trevor): We can replace `StratumInfo` with a single uint32_t once we've fully migrated
+    // to test-packages.
+    // Using "stratum" instead of "layer" to avoid confusion with the modularity concept/package
+    // DSL method of "layer" (utility, business, service, etc.)
+    struct StratumInfo {
+        Stratum applicationStratum = Stratum::NONE;
+        Stratum testStratum = Stratum::NONE;
+    } stratum;
 
     // ID of the strongly-connected component that this package is in, according to its graph of import dependencies
     int sccID_ = -1;
@@ -234,10 +248,6 @@ public:
         return testSccID_ == -1 ? std::nullopt : std::make_optional(testSccID_);
     }
 
-    static PackageInfo &from(core::GlobalState &gs, MangledName pkg);
-
-    static const PackageInfo &from(const core::GlobalState &gs, MangledName pkg);
-
     std::unique_ptr<PackageInfo> deepCopy() const;
 
     PackageInfo(MangledName mangledName, core::FileRef file, core::LocOffsets loc, core::LocOffsets declLoc)
@@ -277,7 +287,8 @@ public:
     }
 
     // The list of known direct sub-packages of this package.
-    std::vector<MangledName> directSubPackages(const core::GlobalState &gs) const;
+    std::vector<MangledName> directSubPackages(const core::GlobalState &gs,
+                                               ClassOrModuleRef startFrom = ClassOrModuleRef()) const;
 
     const Import *importsPackage(MangledName mangledName) const;
 
@@ -285,6 +296,18 @@ public:
     bool causesLayeringViolation(const PackageDB &packageDB, const PackageInfo &otherPkg) const;
 
     bool causesLayeringViolation(const PackageDB &packageDB, core::NameRef otherPkgLayer) const;
+
+    // Returns `std::nullopt` if it's okay to reference the package from this file.
+    // Returns a `PackageReferenceInfo` if the usage was not okay (e.g. missing import, modularity error, etc.)
+    std::optional<core::packages::PackageReferenceInfo>
+    checkReferenceAgainstImports(core::Context ctx, core::LocOffsets errLoc, MangledName otherPackage) const;
+
+    // Reports an error if `litSymbol`, which is defined in `otherPackage`, is not exported to this package.
+    //
+    // Assumes that this file is allowed to reference `otherPackage` (i.e., that `checkReferenceAgainstImports` found
+    // nothing to report).
+    void checkReferenceAgainstExports(core::Context ctx, core::LocOffsets errLoc, core::SymbolRef litSymbol,
+                                      MangledName otherPackage) const;
 
     // What is the minimum strict dependencies level that this package's imports must have?
     StrictDependenciesLevel minimumStrictDependenciesLevel() const;
@@ -334,6 +357,25 @@ public:
     // example).
     CanModifyResult canModifySymbol(core::Context ctx, ClassOrModuleRef sym) const;
 
+    // Whether a constant with this package metadata is on this package's namespace path. Class and module symbols can
+    // be prefixes of a package namespace; other constants must belong to the package exactly.
+    bool ownsNamespace(const core::GlobalState &gs, MangledName namespacePackage,
+                       ClassOrModuleRef packageRegistryOwner) const;
+
+    enum class CanOpenScopeResult : uint8_t {
+        // The scope is part of this package (this package owns the symbol),
+        // or it is another package that this package imports.
+        CanOpen,
+
+        // The symbol belongs to another package that this package does NOT import.
+        // (e.g. opening a parent package `A::B` from `A::B::C` without importing it)
+        NotImported,
+    };
+
+    // True when it's legal for a file owned by this package to *open* (define a
+    // class/module scope named after) `sym`, per the package-scope-nesting rule.
+    CanOpenScopeResult canOpenScope(Context ctx, ClassOrModuleRef sym) const;
+
     // It's okay to access the internals of `other` if it's this package, or if test packages are enabled and we
     // imported `other` with `uses_internals: true`.
     bool canAccessInternalsOf(bool testPackages, MangledName other) const;
@@ -343,21 +385,21 @@ public:
     // Track that `file` references the packages in `references`, along with some metadata about each reference
     void trackPackageReferences(const core::FileRef file,
                                 std::vector<std::pair<core::packages::MangledName, PackageReferenceInfo>> &references);
+    void trackPackageReference(const core::FileRef file, MangledName package, PackageReferenceInfo referenceInfo);
+    void resetPackageReferences(const core::FileRef file);
 
     std::optional<core::AutocorrectSuggestion> aggregateMissingImports(const core::GlobalState &gs) const;
     std::optional<core::AutocorrectSuggestion> aggregateMissingImportsForFile(const core::GlobalState &gs,
                                                                               const core::FileRef fref) const;
-    std::optional<core::AutocorrectSuggestion> aggregateMissingExports(const core::GlobalState &gs,
-                                                                       std::vector<core::SymbolRef> &toExport) const;
     std::optional<core::AutocorrectSuggestion>
     aggregateMissingVisibleTo(const core::GlobalState &gs, UnorderedSet<core::packages::MangledName> &visibleTos,
                               bool visibleToTests) const;
 
     std::string renderPackageRbContents(
-        const core::GlobalState &gs, std::vector<Import> newImports, std::vector<core::SymbolRef> newExports,
+        const core::GlobalState &gs, std::vector<Import> newImports,
         UnorderedMap<core::packages::MangledName, core::packages::StrictDependenciesLevel> newStrictnessByPkg) const;
 };
-CheckSize(PackageInfo, 280, 8);
+CheckSize(PackageInfo, 256, 8);
 
 } // namespace sorbet::core::packages
 #endif

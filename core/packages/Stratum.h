@@ -14,6 +14,8 @@ class Stratum {
     uint16_t stratum = 0;
 
 public:
+    static const Stratum NONE;
+
     Stratum() = default;
     constexpr explicit Stratum(uint16_t stratum) : stratum{stratum} {}
 
@@ -24,6 +26,9 @@ public:
 
     constexpr auto operator<=>(const Stratum &other) const noexcept = default;
 };
+
+// Define NONE after the class because Stratum must be complete to initialize a value of its own type.
+inline constexpr Stratum Stratum::NONE{UINT16_MAX};
 
 } // namespace sorbet::core::packages
 

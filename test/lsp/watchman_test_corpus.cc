@@ -153,8 +153,8 @@ TEST_CASE_FIXTURE(ProtocolTest, "ZeroingOutPackageFiles") {
 
         {"b/impl.rb", "# typed: strict\n"
                       "# frozen_string_literal: true\n"
-                      "module Project\n"
-                      "  class B::Foo\n"
+                      "module Project::B\n"
+                      "  class Foo\n"
                       "    extend T::Sig\n"
                       "    sig { returns(Project::C::Bar) }\n"
                       "    def test\n"
@@ -171,8 +171,8 @@ TEST_CASE_FIXTURE(ProtocolTest, "ZeroingOutPackageFiles") {
 
         {"c/impl.rb", "# typed: strict\n"
                       "# frozen_string_literal: true\n"
-                      "module Project\n"
-                      "  class C::Bar\n"
+                      "module Project::C\n"
+                      "  class Bar\n"
                       "  end\n"
                       "end\n"},
     });
@@ -197,8 +197,8 @@ TEST_CASE_FIXTURE(ProtocolTest, "ZeroingOutPackageFiles") {
     requests.push_back(watchmanFileUpdate({"c/__package.rb", "c/impl.rb"}));
     assertErrorDiagnostics(send(move(requests)), {
                                                      {"b/__package.rb", 4, "Unable to resolve constant"},
-                                                     {"b/impl.rb", 5, "resolves but is not exported"},
-                                                     {"b/impl.rb", 7, "resolves but is not exported"},
+                                                     {"b/impl.rb", 5, "is not imported"},
+                                                     {"b/impl.rb", 7, "is not imported"},
                                                      {"c/__package.rb", 0, "must contain a package definition"},
                                                  });
 }

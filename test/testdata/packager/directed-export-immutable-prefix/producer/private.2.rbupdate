@@ -1,0 +1,7 @@
+# typed: strict
+# assert-fast-path: consumer/use.rb,producer/private.rb,producer/test/alias.rb
+
+class Producer::Private
+  class Nested; end
+  Value = 2
+end

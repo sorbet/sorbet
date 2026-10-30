@@ -19,6 +19,12 @@ module T::Types
     end
 
     # overrides Base
+    def build_lazy_fields
+      types.each_value { |type| build_inner_lazy_fields(type) }
+      nil
+    end
+
+    # overrides Base
     def name
       serialize_hash(types)
     end

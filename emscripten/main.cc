@@ -77,6 +77,6 @@ void EMSCRIPTEN_KEEPALIVE lsp(void (*respond)(const char *), const char *message
         respond(response->toJSON().c_str());
     }
 }
+}
 
 int main(int argc, char **argv) {}
-}

@@ -153,7 +153,7 @@ public:
 
     ExpectationHandler(Expectations &test, shared_ptr<core::ErrorQueue> &errorQueue,
                        shared_ptr<core::ErrorCollector> &errorCollector)
-        : test(test), errorQueue(errorQueue), errorCollector(errorCollector){};
+        : test(test), errorQueue(errorQueue), errorCollector(errorCollector) {};
 
     bool hasExpectation(string_view expectationType) {
         return test.expectations.contains(expectationType);
@@ -348,6 +348,7 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
         trees.emplace_back(move(localNamed));
     }
 
+    fast_sort(trees, [](const auto &lhs, const auto &rhs) { return lhs.file < rhs.file; });
     return trees;
 }
 
@@ -435,6 +436,95 @@ void autogen(core::GlobalState &gs, vector<core::FileRef> files, ExpectationHand
     handler.checkExpectations();
 }
 
+vector<ast::ParsedFile> indexForStressIncremental(core::GlobalState *gs, absl::Span<core::FileRef> files,
+                                                  ExpectationHandler &handler) {
+    vector<ast::ParsedFile> newTrees;
+    newTrees.reserve(files.size());
+    for (auto &f : files) {
+        if (f.data(*gs).strictLevel == core::StrictLevel::Ignore) {
+            newTrees.emplace_back(ast::make_expression<ast::EmptyTree>(), f);
+            continue;
+        }
+
+        const int prohibitedLines = f.data(*gs).sourceSize();
+        auto newSource = absl::StrCat(string(prohibitedLines + 1, '\n'), f.data(*gs).source());
+        auto newFile = make_shared<core::File>(string(f.data(*gs).path()), move(newSource), f.data(*gs).sourceType);
+        gs->replaceFile(f, move(newFile));
+
+        core::MutableContext ctx(*gs, core::Symbols::root(), f);
+
+        handler.drainErrors(*gs);
+
+        // this replicates the logic of pipeline::indexOne
+        ast::ExpressionPtr ast;
+        switch (parser) {
+            case realmain::options::Parser::ORIGINAL: {
+                ENFORCE(!gs->cacheSensitiveOptions.rbsEnabled, "RBS mode is only supported with the Prism parser");
+
+                // Parser
+                parser::ParseResult parseResult;
+                {
+                    auto settings = parser::Parser::Settings{false, false, false};
+                    parseResult = parser::Parser::run(*gs, f, settings);
+                }
+
+                handler.addObserved(*gs, "parse-tree", [&]() { return parseResult.tree->toString(*gs); });
+                handler.addObserved(*gs, "parse-tree-whitequark",
+                                    [&]() { return parseResult.tree->toWhitequark(*gs); });
+                handler.addObserved(*gs, "parse-tree-json", [&]() { return parseResult.tree->toJSON(*gs); });
+
+                // Desugarer
+                ast = ast::desugar::node2Tree(ctx, move(parseResult.tree));
+
+                handler.addObserved(*gs, "desguar-tree", [&]() { return ast.toString(*gs); });
+                handler.addObserved(*gs, "desugar-tree-raw", [&]() { return ast.showRaw(*gs); });
+
+                break;
+            }
+
+            case realmain::options::Parser::PRISM: {
+                auto prismResult = parser::Prism::Parser::run(ctx);
+
+                // Run the RBS rewriter
+                if (gs->cacheSensitiveOptions.rbsEnabled) {
+                    auto &prismParser = prismResult.getParser();
+                    rbs::runRBSRewrite(*gs, f, prismResult.getRawNodePointer(), prismResult.getCommentLocations(), ctx,
+                                       prismParser);
+
+                    handler.addObserved(*gs, "rbs-rewrite-tree", [&]() { return prismResult.prettyPrint(); });
+                }
+
+                // Prism Desugarer
+                {
+                    ast = ast::Desugar::Prism::node2Tree(ctx, move(prismResult));
+                }
+
+                // Do *not* check the `desugar-tree` and `desugar-tree-raw` expectations for the Prism parser,
+                // which can be subtly different (e.g. the numbering of unique identifiers).
+                // Instead, we compare the two ASTs in the `index()` function.
+
+                break;
+            }
+        }
+
+        // Rewriter pass
+        ast = rewriter::Rewriter::run(ctx, move(ast));
+        handler.addObserved(*gs, "rewrite-tree", [&]() { return ast.toString(*gs); });
+        handler.addObserved(*gs, "rewrite-tree-raw", [&]() { return ast.showRaw(*gs); });
+
+        // local vars
+        auto file = ast::ParsedFile{move(ast), f};
+        file = local_vars::LocalVars::run(ctx, move(file));
+        testSerialize(*gs, file);
+        handler.addObserved(*gs, "index-tree", [&]() { return file.tree.toString(*gs); });
+        handler.addObserved(*gs, "index-tree-raw", [&]() { return file.tree.showRaw(*gs); });
+
+        newTrees.emplace_back(move(file));
+    }
+    fast_sort(newTrees, [](const auto &lhs, const auto &rhs) { return lhs.file < rhs.file; });
+    return newTrees;
+}
+
 TEST_CASE("PerPhaseTest") {
     Expectations test = Expectations::getExpectations(singleTest);
 
@@ -500,10 +590,11 @@ TEST_CASE("PerPhaseTest") {
     }
 
     vector<ast::ParsedFile> trees;
+    absl::Span<core::FileRef> inputPackageFiles;
     auto filesSpan = absl::Span<core::FileRef>(files);
     if (opts.cacheSensitiveOptions.sorbetPackages) {
         auto numPackageFiles = realmain::pipeline::partitionPackageFiles(*gs, filesSpan);
-        auto inputPackageFiles = filesSpan.first(numPackageFiles);
+        inputPackageFiles = filesSpan.first(numPackageFiles);
         filesSpan = filesSpan.subspan(numPackageFiles);
 
         trees = index(*gs, inputPackageFiles, handler, test, assertions);
@@ -514,13 +605,15 @@ TEST_CASE("PerPhaseTest") {
     vector<ast::ParsedFile> stratumFiles;
     auto strata = realmain::pipeline::computePackageStrata(*gs, trees, filesSpan, opts);
 
-    for (auto &stratumAssertion : RangeAssertion::getAssertions<StratumAssertion>(assertions)) {
-        auto file = gs->findFileByPath(stratumAssertion->filename);
-        auto actualStratum = strata.fileToStratum[file.id()];
-        if (actualStratum != stratumAssertion->value) {
-            ADD_FAIL_CHECK_AT(stratumAssertion->filename.c_str(), stratumAssertion->assertionLine + 1,
-                              "Expected " << stratumAssertion->filename << " at stratum "
-                                          << stratumAssertion->value.rawId() << "; got " << actualStratum.rawId());
+    if (opts.packageDirected) {
+        for (auto &stratumAssertion : RangeAssertion::getAssertions<StratumAssertion>(assertions)) {
+            auto file = gs->findFileByPath(stratumAssertion->filename);
+            auto actualStratum = strata.fileToStratum[file.id()];
+            if (actualStratum != stratumAssertion->value) {
+                ADD_FAIL_CHECK_AT(stratumAssertion->filename.c_str(), stratumAssertion->assertionLine + 1,
+                                  "Expected " << stratumAssertion->filename << " at stratum "
+                                              << stratumAssertion->value.rawId() << "; got " << actualStratum.rawId());
+            }
         }
     }
 
@@ -535,12 +628,17 @@ TEST_CASE("PerPhaseTest") {
         realmain::pipeline::unpartitionPackageFiles(stratumFiles, move(nonPackageTrees));
 
         {
+            if (opts.cacheSensitiveOptions.sorbetPackages) {
+                packager::VisibilityChecker::propagateExports(*gs, stratumFiles);
+            }
+
             core::UnfreezeNameTable nameTableAccess(*gs);     // Resolver::defineAttr
             core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
             stratumFiles = move(resolver::Resolver::run(*gs, move(stratumFiles), *workers).result());
 
             if (opts.cacheSensitiveOptions.sorbetPackages) {
-                packager::VisibilityChecker::run(*gs, *workers, stratumFiles);
+                packager::VisibilityChecker::reportExportErrors(*gs, stratumFiles);
+                packager::VisibilityChecker::checkReferences(*gs, *workers, stratumFiles);
             }
 
             handler.drainErrors(*gs);
@@ -554,7 +652,7 @@ TEST_CASE("PerPhaseTest") {
         // Simulate what pipeline.cc does: We want to start typechecking big files first because it helps with better
         // work distribution
         fast_sort(stratumFiles, [&](const auto &lhs, const auto &rhs) -> bool {
-            return lhs.file.data(*gs).source().size() > rhs.file.data(*gs).source().size();
+            return lhs.file.data(*gs).sourceSize() > rhs.file.data(*gs).sourceSize();
         });
 
         for (auto &resolvedTree : stratumFiles) {
@@ -717,8 +815,7 @@ TEST_CASE("PerPhaseTest") {
         realmain::Minimize::writeDiff(*gs, *gsForMinimize, printerConfig);
 
         auto addNewline = false;
-        handler.addObserved(
-            *gs, "minimized-rbi", [&]() { return printerConfig.flushToString(); }, addNewline);
+        handler.addObserved(*gs, "minimized-rbi", [&]() { return printerConfig.flushToString(); }, addNewline);
     }
 
     handler.checkExpectations();
@@ -742,7 +839,9 @@ TEST_CASE("PerPhaseTest") {
 
     // Allow later phases to have errors that we didn't test for
     errorQueue->flushAllErrors(*gs);
-    { auto _ = errorCollector->drainErrors(); }
+    {
+        auto _ = errorCollector->drainErrors();
+    }
 
     // now we test the incremental resolver
 
@@ -756,90 +855,14 @@ TEST_CASE("PerPhaseTest") {
     handler.clear(*gs);
     auto symbolsBefore = gs->symbolsUsedTotal();
 
-    vector<ast::ParsedFile> newTrees;
-    for (auto &f : files) {
-        if (f.data(*gs).strictLevel == core::StrictLevel::Ignore) {
-            newTrees.emplace_back(ast::make_expression<ast::EmptyTree>(), f);
-            continue;
-        }
-
-        const int prohibitedLines = f.data(*gs).source().size();
-        auto newSource = absl::StrCat(string(prohibitedLines + 1, '\n'), f.data(*gs).source());
-        auto newFile = make_shared<core::File>(string(f.data(*gs).path()), move(newSource), f.data(*gs).sourceType);
-        gs->replaceFile(f, move(newFile));
-
-        core::MutableContext ctx(*gs, core::Symbols::root(), f);
-
-        handler.drainErrors(*gs);
-
-        // this replicates the logic of pipeline::indexOne
-        ast::ExpressionPtr ast;
-        switch (parser) {
-            case realmain::options::Parser::ORIGINAL: {
-                ENFORCE(!gs->cacheSensitiveOptions.rbsEnabled, "RBS mode is only supported with the Prism parser");
-
-                // Parser
-                parser::ParseResult parseResult;
-                {
-                    auto settings = parser::Parser::Settings{false, false, false};
-                    parseResult = parser::Parser::run(*gs, f, settings);
-                }
-
-                handler.addObserved(*gs, "parse-tree", [&]() { return parseResult.tree->toString(*gs); });
-                handler.addObserved(*gs, "parse-tree-whitequark",
-                                    [&]() { return parseResult.tree->toWhitequark(*gs); });
-                handler.addObserved(*gs, "parse-tree-json", [&]() { return parseResult.tree->toJSON(*gs); });
-
-                // Desugarer
-                ast = ast::desugar::node2Tree(ctx, move(parseResult.tree));
-
-                handler.addObserved(*gs, "desguar-tree", [&]() { return ast.toString(*gs); });
-                handler.addObserved(*gs, "desugar-tree-raw", [&]() { return ast.showRaw(*gs); });
-
-                break;
-            }
-
-            case realmain::options::Parser::PRISM: {
-                auto prismResult = parser::Prism::Parser::run(ctx);
-
-                // Run the RBS rewriter
-                if (gs->cacheSensitiveOptions.rbsEnabled) {
-                    auto &prismParser = prismResult.getParser();
-                    rbs::runRBSRewrite(*gs, f, prismResult.getRawNodePointer(), prismResult.getCommentLocations(), ctx,
-                                       prismParser);
-
-                    handler.addObserved(*gs, "rbs-rewrite-tree", [&]() { return prismResult.prettyPrint(); });
-                }
-
-                // Prism Desugarer
-                { ast = ast::Desugar::Prism::node2Tree(ctx, move(prismResult)); }
-
-                // Do *not* check the `desugar-tree` and `desugar-tree-raw` expectations for the Prism parser,
-                // which can be subtly different (e.g. the numbering of unique identifiers).
-                // Instead, we compare the two ASTs in the `index()` function.
-
-                break;
-            }
-        }
-
-        // Rewriter pass
-        ast = rewriter::Rewriter::run(ctx, move(ast));
-        handler.addObserved(*gs, "rewrite-tree", [&]() { return ast.toString(*gs); });
-        handler.addObserved(*gs, "rewrite-tree-raw", [&]() { return ast.showRaw(*gs); });
-
-        // local vars
-        auto file = ast::ParsedFile{move(ast), f};
-        file = local_vars::LocalVars::run(ctx, move(file));
-        testSerialize(*gs, file);
-        handler.addObserved(*gs, "index-tree", [&]() { return file.tree.toString(*gs); });
-        handler.addObserved(*gs, "index-tree-raw", [&]() { return file.tree.showRaw(*gs); });
-
-        newTrees.emplace_back(move(file));
+    trees = indexForStressIncremental(gs.get(), inputPackageFiles, handler);
+    trees.reserve(files.size());
+    for (auto &stratum : strata.strata) {
+        auto batch = indexForStressIncremental(gs.get(), stratum.sourceFiles, handler);
+        absl::c_move(batch, back_inserter(trees));
     }
-    trees = move(newTrees);
-    fast_sort(trees, [](auto &lhs, auto &rhs) { return lhs.file < rhs.file; });
 
-    bool ranIncrementalNamer = false;
+    const bool ranIncrementalNamer = false;
     {
         // namer
         for (auto &tree : trees) {
@@ -851,7 +874,6 @@ TEST_CASE("PerPhaseTest") {
             // Here, to complement those tests, we just run Namer::run (not Namer::runIncremental)
             // to stress the codepath where Namer is not tasked with deleting anything when run for
             // the fast path.
-            ENFORCE(!ranIncrementalNamer);
             auto canceled = namer::Namer::run(*gs, absl::MakeSpan(&tree, 1), *workers, &foundHashes);
             ENFORCE(!canceled);
 
@@ -870,6 +892,10 @@ TEST_CASE("PerPhaseTest") {
         }
     }
 
+    if (opts.cacheSensitiveOptions.sorbetPackages && ranIncrementalNamer) {
+        packager::VisibilityChecker::propagateExports(*gs, trees);
+    }
+
     // resolver
     {
         vector<core::ClassOrModuleRef> recomputeNoSymbols;
@@ -881,7 +907,7 @@ TEST_CASE("PerPhaseTest") {
     }
 
     if (opts.cacheSensitiveOptions.sorbetPackages) {
-        packager::VisibilityChecker::run(*gs, *workers, trees);
+        packager::VisibilityChecker::checkReferences(*gs, *workers, trees);
     }
 
     for (auto &resolvedTree : trees) {
@@ -893,7 +919,9 @@ TEST_CASE("PerPhaseTest") {
 
     // and drain all the remaining errors
     errorQueue->flushAllErrors(*gs);
-    { auto _ = errorCollector->drainErrors(); }
+    {
+        auto _ = errorCollector->drainErrors();
+    }
 
     {
         INFO("the incremental resolver should not add new symbols");

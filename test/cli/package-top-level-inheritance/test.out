@@ -1,11 +1,27 @@
-a/foo.rb:5: `Main::B` resolves but its package is not imported https://srb.help/3718
+a/foo.rb:5: `Main` is not imported https://srb.help/3718
      5 |    class Foo < Main::B
-                        ^^^^^^^
-    __package.rb:3: Exported from package here
+                        ^^^^
+    __package.rb:3: Package defined here
      3 |class Main < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
     a/__package.rb:3: Insert `import Main`
      3 |class Main::A < PackageSpec
                                    ^
-Errors: 1
+
+a/foo.rb:3: Package `Main::A` may not open `Main` https://srb.help/5086
+     3 |module Main
+        ^^^^^^^^^^^
+    __package.rb:3: Owning package
+     3 |class Main < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    a/__package.rb:3: Referencing package
+     3 |class Main::A < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Either `import Main` in `Main::A`'s `__package.rb`, or change this file's top-level constant to match `Main::A`.
+  Autocorrect: Use `-a` to autocorrect
+    a/__package.rb:3: Insert `import Main`
+     3 |class Main::A < PackageSpec
+                                   ^
+Errors: 2

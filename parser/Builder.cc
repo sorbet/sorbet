@@ -102,7 +102,7 @@ std::optional<string> Dedenter::dedent(string_view str) {
 class Builder::Impl {
 public:
     Impl(GlobalState &gs, core::FileRef file) : gs_(gs), file_(file) {
-        this->maxOff_ = file.data(gs).source().size();
+        this->maxOff_ = file.data(gs).sourceSize();
         foreignNodes_.emplace_back();
     }
 
@@ -590,10 +590,17 @@ public:
         }
 
         auto blockLoc = tokLoc(begin).join(tokLoc(end));
+
+        auto style = BlockStyle::Present;
+        ENFORCE(end != nullptr);
+        if (end != nullptr) {
+            style = end->type() == ruby_parser::token_type::tRCURLY ? BlockStyle::Braces : BlockStyle::DoEnd;
+        }
+
         Node &n = *methodCall;
         const type_info &ty = typeid(n);
         if (ty == typeid(Send) || ty == typeid(CSend) || ty == typeid(Super) || ty == typeid(ZSuper)) {
-            return make_unique<Block>(blockLoc, std::move(methodCall), std::move(args), std::move(body));
+            return make_unique<Block>(blockLoc, std::move(methodCall), std::move(args), std::move(body), style);
         }
 
         sorbet::parser::NodeVec *exprs;
@@ -607,7 +614,7 @@ public:
             [&](Node *n) { Exception::raise("Unexpected send node: {}", n->nodeName()); });
 
         auto &send = exprs->front();
-        unique_ptr<Node> block = make_unique<Block>(blockLoc, std::move(send), std::move(args), std::move(body));
+        unique_ptr<Node> block = make_unique<Block>(blockLoc, std::move(send), std::move(args), std::move(body), style);
         exprs->front().swap(block);
         return methodCall;
     }

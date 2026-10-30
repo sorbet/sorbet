@@ -7,10 +7,10 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-void logDebugInfo(const shared_ptr<spdlog::logger> logger, const core::GlobalState &gs, const core::Loc selectionLoc,
+void logDebugInfo(spdlog::logger &logger, const core::GlobalState &gs, const core::Loc selectionLoc,
                   const string message) {
-    logger->error("msg=\"ExtractToVariable: {}\" selectionLoc=\"{}\"", message, selectionLoc.showRaw(gs));
-    logger->error("source=\"{}\"", absl::CEscape(selectionLoc.file().data(gs).source()));
+    logger.error("msg=\"ExtractToVariable: {}\" selectionLoc=\"{}\"", message, selectionLoc.showRaw(gs));
+    logger.error("source=\"{}\"", absl::CEscape(selectionLoc.file().data(gs).source()));
 }
 
 optional<core::LocOffsets> detectCase(const ast::ExpressionPtr *whereToInsert, const core::LocOffsets target) {
@@ -323,7 +323,7 @@ VariableExtractor::getExtractSingleOccurrenceEdits(const LSPTypecheckerDelegate 
     auto enclosingScope = walk.enclosingScope;
     auto whereToInsert = findWhereToInsert(*enclosingScope, locOffsets);
     if (!whereToInsert.exists()) {
-        logDebugInfo(config.logger, gs, selectionLoc,
+        logDebugInfo(*config.logger, gs, selectionLoc,
                      "failed to determine whereToInsert in getExtractSingleOccurrenceEdits");
         return {};
     }
@@ -375,7 +375,6 @@ class ExpressionPtrSearchWalk {
     vector<const ast::ExpressionPtr *> enclosingScopeStack;
     vector<core::LocOffsets> skippedLocsRange;
     vector<core::LocOffsets> skippedLocsExact;
-    const shared_ptr<spdlog::logger> logger;
     const core::Loc selectionLoc;
 
     // NOTE: Might want to profile and switch to UnorderedSet.
@@ -452,10 +451,9 @@ public:
     vector<pair<core::LocOffsets, const ast::ExpressionPtr *>> LCAScopeStack;
     vector<core::LocOffsets> matches;
     ExpressionPtrSearchWalk(ast::ExpressionPtr *matchingNode, vector<core::LocOffsets> skippedLocsRange,
-                            vector<core::LocOffsets> skippedLocsExact, const shared_ptr<spdlog::logger> logger,
-                            const core::Loc selectionLoc)
+                            vector<core::LocOffsets> skippedLocsExact, const core::Loc selectionLoc)
         : targetNode(matchingNode), skippedLocsRange(skippedLocsRange), skippedLocsExact(skippedLocsExact),
-          logger(logger), selectionLoc(selectionLoc) {}
+          selectionLoc(selectionLoc) {}
 
     void preTransformExpressionPtr(core::Context ctx, const ast::ExpressionPtr &tree) {
         if (!tree.loc().exists()) {
@@ -545,7 +543,7 @@ MultipleOccurrenceResult VariableExtractor::getExtractMultipleOccurrenceEdits(co
     const auto file = selectionLoc.file();
     const auto &gs = typechecker.state();
 
-    ExpressionPtrSearchWalk walk(&matchingNode, skippedLocsRange, skippedLocsExact, config.logger, selectionLoc);
+    ExpressionPtrSearchWalk walk(&matchingNode, skippedLocsRange, skippedLocsExact, selectionLoc);
     core::Context ctx(gs, core::Symbols::root(), file);
     ast::TreeWalk::apply(ctx, walk, enclosingClassOrMethod);
 
@@ -564,7 +562,7 @@ MultipleOccurrenceResult VariableExtractor::getExtractMultipleOccurrenceEdits(co
 
     auto whereToInsert = findWhereToInsert(*scopeToInsertIn, firstMatch);
     if (!whereToInsert.exists()) {
-        logDebugInfo(config.logger, gs, selectionLoc,
+        logDebugInfo(*config.logger, gs, selectionLoc,
                      "failed to determine whereToInsert in getExtractMultipleOccurrenceEdits");
         return {};
     }

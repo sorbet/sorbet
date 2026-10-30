@@ -20,8 +20,8 @@ public:
     LocalRef variable;
     core::TypePtr type;
     VariableUseSite() = default;
-    explicit VariableUseSite(LocalRef local) : variable(local){};
-    VariableUseSite(LocalRef local, core::TypePtr type) : variable(local), type(std::move(type)){};
+    explicit VariableUseSite(LocalRef local) : variable(local) {};
+    VariableUseSite(LocalRef local, core::TypePtr type) : variable(local), type(std::move(type)) {};
     VariableUseSite(const VariableUseSite &) = delete;
     const VariableUseSite &operator=(const VariableUseSite &rhs) = delete;
     VariableUseSite(VariableUseSite &&) = default;
@@ -365,6 +365,10 @@ public:
     }
 
     ~Send();
+
+    // Send::make allocates trailing arguments beyond sizeof(Send). Do not
+    // pass sizeof(Send) to sized delete for that variable-sized allocation.
+    static void operator delete(void *ptr) noexcept;
 
     core::LocOffsets locWithoutBlock(core::LocOffsets bindLoc);
 

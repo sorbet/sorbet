@@ -18,12 +18,17 @@ module Errors
   # ^^^ error: Failed to parse RBS type parameters (expected ',' or ']' after type parameter, got pEOF)
   class ParseError4; end
 
-  #: [unchecked T]
+  #: [unchecked A]
   #   ^^^^^^^^^^^ error: `unchecked` type parameters are not supported by Sorbet
   class UnsupportedError1; end
 
   class UselessSignature1 #: [U]
   #                       ^^^^^^ error: Unexpected RBS assertion comment found after `class` declaration
+  end
+
+  #: [T]
+  #   ^ error: `T` is not a valid type parameter name. It conflicts with Sorbet's own namespace
+  class UnsupportedTypeParamName
   end
 end
 
@@ -216,7 +221,7 @@ g16 = G14.new #: G14[MyModule::MyClass]
 T.reveal_type(g16) # error: Revealed type: `G14[MyModule::MyClass]`
 
 # Test deep copy with type parameter references
-#: [T, U]
+#: [A, U]
 class G17; end
 
 #: [X] (X) -> G17[X, X]

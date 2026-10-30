@@ -95,6 +95,12 @@ private:
     void moveNames(Bucket *from, Bucket *to, unsigned int szFrom, unsigned int szTo);
 
 public:
+    // Return how big the hash table should be to hold `numNames` names.
+    static inline uint32_t sizeFor(size_t numNames) {
+        ENFORCE(numNames < std::numeric_limits<uint32_t>::max());
+        return 2 * nextPowerOfTwo(numNames);
+    }
+
     static inline Hash hashMixUTF8(std::string_view name) {
         return _hash(name);
     }
@@ -441,8 +447,16 @@ public:
                             const std::vector<std::string> &updateVisibilityFor,
                             const std::vector<std::string> &packagerLayers, std::string errorHint,
                             packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility,
-                            bool packageAttributedErrors);
+                            bool packageAttributedErrors, bool testPackages);
     packages::UnfreezePackages unfreezePackages();
+
+    struct ClassOrModulePackageInfo final {
+        ClassOrModuleRef packageRegistryOwner;
+        packages::MangledName package;
+    };
+
+    // Computes the package metadata that enterClassOrModuleSymbol will assign to a new symbol.
+    ClassOrModulePackageInfo packageInfoForClassOrModule(ClassOrModuleRef owner, NameRef name) const;
 
     NameRef nextMangledName(ClassOrModuleRef owner, NameRef origName);
     void mangleRenameMethod(MethodRef what, NameRef origName);
@@ -566,7 +580,7 @@ public:
         const std::vector<std::string> &allowRelaxedPackagerChecksFor,
         const std::vector<std::string> &updateVisibilityFor, const std::vector<std::string> &packagerLayers,
         std::string errorHint, packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility,
-        bool packageAttributedErrors) const;
+        bool packageAttributedErrors, bool testPackages) const;
 
     // Minimally copy the global state, including the file table, to initialize the LSPTypechecker.
     // NOTE: this very intentionally will not copy the symbol or name tables. The symbol tables aren't used or populated
@@ -578,7 +592,8 @@ public:
         const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
         const std::vector<std::string> &allowRelaxedPackagerChecksFor,
         const std::vector<std::string> &updateVisibilityFor, const std::vector<std::string> &packagerLayers,
-        std::string errorHint, packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility) const;
+        std::string errorHint, packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility,
+        bool testPackages) const;
 
     // Copy the name table, file table and other parts of GlobalState that are required to start the slow path. If the
     // `toStratum` value is passed as something other than the `0` stratum, the prefix of the symbol table leading up to
@@ -591,7 +606,7 @@ public:
                     const std::vector<std::string> &allowRelaxedPackagerChecksFor,
                     const std::vector<std::string> &updateVisibilityFor, const std::vector<std::string> &packagerLayers,
                     std::string errorHint, packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility,
-                    bool packageAttributedErrors, core::packages::Stratum toStratum) const;
+                    bool packageAttributedErrors, bool testPackages, core::packages::Stratum toStratum) const;
 
     // Contains a path prefix that should be stripped from all printed paths.
     std::string pathPrefix;

@@ -2,15 +2,15 @@
 
 # Because this constant has a leading `::`, the packager allows us to
 # define things on it despite it not belonging to the enclosing namespace
-class ::UnpackagedTheSequel
+class ::UnpackagedTheSequel # error: requires this package to be marked `prelude!`
   # despite being in a constant not governed by this package, we still
   # subject the internals to import restrictions:
   def test
-    # this is defined in unpackaged code, so okay
-    puts UnpackagedCode
+    # unpackaged Ruby definitions are isolated
+    puts UnpackagedCode # error: Unable to resolve constant `UnpackagedCode`
 
-    # this is defined in an unpackaged RBI, so okay
-    puts Minitest
+    # unpackaged RBIs are isolated too (only Sorbet payload files are exempt)
+    puts Minitest # error: Unable to resolve constant `Minitest`
 
     # this is defined within the same package, so okay
     puts MyPackage::MyClass.new
@@ -20,6 +20,6 @@ class ::UnpackagedTheSequel
 
     # this is defined in a non-imported package
     puts OtherPackageNotImported::ExportedClass.new
-    #    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `OtherPackageNotImported::ExportedClass` resolves but its package is not imported
+    #    ^^^^^^^^^^^^^^^^^^^^^^^ error: `OtherPackageNotImported` is not imported
   end
 end

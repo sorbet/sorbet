@@ -1407,7 +1407,7 @@ ClassDef{
         }
 
         Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = Self
           fun = <U sig>
           block = Block {
@@ -1488,7 +1488,7 @@ ClassDef{
         }
 
         Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = Self
           fun = <U sig>
           block = Block {
@@ -3822,7 +3822,7 @@ ClassDef{
             }
             Literal{ value = :foreign }
             Send{
-              flags = {}
+              flags = {bracesBlock}
               recv = ConstantLit{
                 symbol = (module ::Kernel)
                 orig = nullptr
@@ -3861,7 +3861,7 @@ ClassDef{
             }
             Literal{ value = :foreign }
             Send{
-              flags = {privateOk}
+              flags = {privateOk, bracesBlock}
               recv = Self
               fun = <U proc>
               block = Block {
@@ -3897,7 +3897,7 @@ ClassDef{
             }
             Literal{ value = :foreign }
             Send{
-              flags = {privateOk}
+              flags = {privateOk, bracesBlock}
               recv = Self
               fun = <U proc>
               block = Block {

@@ -25,6 +25,13 @@ module T::Private::Types
       nil
     end
 
+    # overrides Base
+    def build_lazy_fields
+      # Not the aliased type too: an alias can refer to itself.
+      effective_aliased_type
+      nil
+    end
+
     def aliased_type
       @aliased_type ||= T::Utils.coerce(@callable.call)
     end

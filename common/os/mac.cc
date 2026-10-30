@@ -1,5 +1,6 @@
 #ifdef __APPLE__
 #include "absl/debugging/symbolize.h"
+#include "common/os/os.h"
 #include "spdlog/spdlog.h"
 #include <cassert>
 #include <cstdio>
@@ -65,6 +66,10 @@ bool amIBeingDebugged()
     // We're being debugged if the P_TRACED flag is set.
 
     return ((info.kp_proc.p_flag & P_TRACED) != 0);
+}
+
+optional<size_t> getCurrentProcessSwapUsageKb() {
+    return nullopt;
 }
 
 bool stopInDebugger() {

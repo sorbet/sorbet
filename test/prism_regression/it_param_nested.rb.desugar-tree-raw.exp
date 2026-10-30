@@ -8,7 +8,7 @@ ClassDef{
     }]
   rhs = [
     Send{
-      flags = {}
+      flags = {bracesBlock}
       recv = Array{
         elems = [
           Array{
@@ -34,7 +34,7 @@ ClassDef{
           }
         ]
         body = Send{
-          flags = {}
+          flags = {bracesBlock}
           recv = UnresolvedIdent{
             kind = Local
             name = <U it>

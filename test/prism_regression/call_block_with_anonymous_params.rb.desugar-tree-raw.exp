@@ -8,7 +8,7 @@ ClassDef{
     }]
   rhs = [
     Send{
-      flags = {privateOk}
+      flags = {privateOk, doEndBlock}
       recv = Self
       fun = <U foo>
       block = Block {

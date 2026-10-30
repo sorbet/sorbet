@@ -6,10 +6,10 @@ end
 
 # This will be an error because it defines a constant which does
 # not match the enclosing namespace
-class SomethingElse
-    # ^^^^^^^^^^^^^ error: defines a constant that does not match this namespace
+class SomethingElse # error: defines a constant that does not match this namespace
+
 end
 
-# This will be okay because of the leading `::`
-class ::SomethingCompletelyDifferent
+# Root-scoped constants may only opt out of package prefix checks in prelude packages.
+class ::SomethingCompletelyDifferent # error: requires this package to be marked `prelude!`
 end

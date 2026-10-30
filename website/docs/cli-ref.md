@@ -189,7 +189,14 @@ Usage:
                                 (default: true)
       --metrics-extra-tags <key1>=<value1>,<key2>=<value2>
                                 Extra tags to include in every statsd metric, comma
-                                separated. (default: "")
+                                separated (repeatable). (default: "")
+      --metrics-latest-version-file <file>
+                                Tag every statsd metric with
+                                `is_latest_version:{true,false,unknown}`, by comparing
+                                the revision Sorbet was built from to the contents of
+                                <file>. Re-reads <file> every time metrics are sent, so
+                                that long-running LSP processes notice when <file>
+                                changes. (default: "")
 
 ```
 
@@ -201,12 +208,20 @@ Usage:
                                 informations) to the language client, like VS Code. Can
                                 prevent slowdown triggered by large diagnostic lists. A
                                 <cap> of 0 means no limit. (default: 1000)
+      --lsp-max-files-on-fast-path <n>
+                                Retypechecks the whole codebase after an edit that
+                                changes over <n> files at once, or that changes a
+                                definition used in over <n> files. Smaller edits only
+                                retypecheck those files, which blocks other requests
+                                until it finishes. (default: 50)
       --disable-watchman        When in LSP mode, disable file watching via Watchman
       --watchman-path <path>    Path to watchman executable. Will search on `PATH` if
                                 <path> contains no slashes. (default: watchman)
       --watchman-pause-state-name <state>
-                                Name of watchman state that halts processing for its
-                                duration (default: "")
+                                Defer file change notifications while a client holds this
+                                watchman state (see `watchman state-enter`) on the
+                                watched root; they arrive as one batch when the state is
+                                left. May be repeated.
       --watchman-namespace <namespace>
                                 Namespace for watchman (default: "")
       --lsp-directories-missing-from-client <path>
@@ -337,6 +352,9 @@ Usage:
       --experimental-package-directed
                                 Enable support for checking by package, instead of
                                 processing all files at once
+      --experimental-test-packages
+                                Disable support for implicit test namespaces in existing
+                                packages
 
 ```
 

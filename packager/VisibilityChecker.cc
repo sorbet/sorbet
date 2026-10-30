@@ -17,18 +17,6 @@ namespace sorbet::packager {
 
 namespace {
 
-static core::SymbolRef getEnumClassForEnumValue(const core::GlobalState &gs, core::SymbolRef sym) {
-    if (sym.isStaticField(gs) && sym.owner(gs).isClassOrModule()) {
-        auto owner = sym.owner(gs);
-        // There's a hidden class like `MyEnum::X$1` between `MyEnum::X` and `T::Enum` in the ancestor chain.
-        if (owner.asClassOrModuleRef().data(gs)->superClass() == core::Symbols::T_Enum()) {
-            return owner;
-        }
-    }
-
-    return core::Symbols::noSymbol();
-}
-
 core::ClassOrModuleRef getScopeForPackage(const core::GlobalState &gs, absl::Span<const core::NameRef> parts,
                                           core::ClassOrModuleRef startingFrom) {
     auto result = startingFrom;
@@ -49,108 +37,49 @@ core::ClassOrModuleRef getScopeForPackage(const core::GlobalState &gs, absl::Spa
     return result;
 }
 
-// For each __package.rb file, traverse the resolved tree and apply the visibility annotations to the symbols.
-class PropagateVisibility final {
-    core::packages::PackageInfo &package;
+// Which of a package's namespaces to recompute export bits for. A package that doesn't use `test!` packages defines
+// its application and its `Test::` namespace in different strata in package-directed mode, and processing one must
+// not change the other's symbols, which might belong to an earlier stratum.
+//
+// TODO(jez) Delete this once all packages use `test!` packages.
+enum class Namespace {
+    Application,
+    Test,
+};
 
-    // Blames which location (export) caused a symbol to first be marked exported.
-    struct ExportBlame {
-        core::SymbolRef exportedBy;
-        core::LocOffsets firstExportedAt;
-    };
-    UnorderedMap<core::SymbolRef, ExportBlame> explicitlyExported;
+// Sets the `isExported` bits on a package's symbols, using the exports recorded on its `PackageInfo`.
+//
+// This reports no errors: `ExportErrors` reports them, from the package's resolved `__package.rb`
+// (which might not happen until the test SCC for this package runs).
+class ExportBits final {
+    const core::packages::PackageInfo &package;
 
-    // In general, it's not good to compare arbitrary LocOffsets, because they might not be in the
-    // same file and thus not comparable, thus they have no `operator<` on them.
-    //
-    // Since we know that we're only going to compare locs from within a file, we can define our own
-    // function here.
-    static constexpr auto COMPARE_EXPORT_LOCS = [](const core::LocOffsets &left, const core::LocOffsets &right) {
-        if (left.beginPos() < right.beginPos()) {
-            return true;
-        } else if (left.beginPos() == right.beginPos()) {
-            return left.endPos() < right.endPos();
-        } else {
-            return false;
-        }
-    };
-
-    struct DuplicateExportError {
-        core::SymbolRef duplicate;
-        core::SymbolRef prefix;
-        core::LocOffsets firstExportedAt;
-    };
-    // Collect duplicate export errors into a map and report at the end of this file.
-    // - uses an ordered map, because we want to report them in a determinstic order
-    // - unique by `export` loc, because we want to only report a given `export` line as bad once
-    map<core::LocOffsets, DuplicateExportError, decltype(COMPARE_EXPORT_LOCS)> duplicateExports =
-        decltype(duplicateExports)(COMPARE_EXPORT_LOCS);
-
-    void checkDuplicateExport(core::MutableContext ctx, core::SymbolRef currentExportLineSym,
-                              core::LocOffsets currentExportLineLoc, core::SymbolRef sym, bool alreadyExported) {
-        // Only report duplicate errors if there's an entry in the explicitlyExported map. We don't add to the
-        // explicitlyExported map when marking a parent namespace as exported (in exportParentNamespace).
-        auto isExplicitlyExported = this->explicitlyExported.find(sym) != this->explicitlyExported.end();
-        if (isExplicitlyExported) {
-            // If we're not at the top, then the current export is more general.
-            // Report the error on the line that previously exported this symbol.
-            auto atTop = sym == currentExportLineSym;
-            auto errLoc = atTop ? currentExportLineLoc : this->explicitlyExported[sym].firstExportedAt;
-
-            if (alreadyExported && duplicateExports.find(errLoc) == duplicateExports.end()) {
-                auto firstExportedAt = atTop ? this->explicitlyExported[sym].firstExportedAt : currentExportLineLoc;
-                duplicateExports[errLoc] = DuplicateExportError{sym, currentExportLineSym, firstExportedAt};
-            }
-
-        } else if (currentExportLineLoc.exists() &&
-                   // Don't treat singleton classes as explicitly exported, so they never show up in
-                   // duplicate export errors.
-                   (!sym.isClassOrModule() || !sym.asClassOrModuleRef().data(ctx)->isSingletonClass(ctx))) {
-            this->explicitlyExported[sym] =
-                ExportBlame{.exportedBy = currentExportLineSym, .firstExportedAt = currentExportLineLoc};
-        }
-    }
-
-    void recursiveSetIsExported(core::MutableContext ctx, bool setExportedTo, core::SymbolRef currentExportLineSym,
-                                core::LocOffsets currentExportLineLoc, core::SymbolRef sym) {
+    void recursiveSetIsExported(core::GlobalState &gs, bool setExportedTo, core::SymbolRef sym) {
         // Stop recursing at package boundary
-        if (this->package.mangledName() != sym.enclosingClass(ctx).data(ctx)->package) {
+        if (this->package.mangledName() != sym.enclosingClass(gs).data(gs)->package) {
             return;
         }
 
         switch (sym.kind()) {
             case core::SymbolRef::Kind::ClassOrModule: {
-                auto klassData = sym.asClassOrModuleRef().data(ctx);
-
-                if (setExportedTo) {
-                    checkDuplicateExport(ctx, currentExportLineSym, currentExportLineLoc, sym,
-                                         klassData->flags.isExported);
-                }
-
+                auto klassData = sym.asClassOrModuleRef().data(gs);
                 klassData->flags.isExported = setExportedTo;
 
-                // This `members` call does not have a stable order--we recover a determinstic order
-                // by sorting duplicate errors at the end of PropagateVisibility
                 for (const auto &[name, child] : klassData->members()) {
                     if (name == core::Names::attached()) {
                         // There is a cycle between a class and its singleton, and this avoids infinite recursion.
                         continue;
                     }
 
-                    recursiveSetIsExported(ctx, setExportedTo, currentExportLineSym, currentExportLineLoc, child);
+                    recursiveSetIsExported(gs, setExportedTo, child);
                 }
                 break;
             }
 
             case core::SymbolRef::Kind::FieldOrStaticField: {
-                auto fieldData = sym.asFieldRef().data(ctx);
+                auto fieldData = sym.asFieldRef().data(gs);
                 if (!fieldData->flags.isStaticField) {
                     break;
-                }
-
-                if (setExportedTo) {
-                    checkDuplicateExport(ctx, currentExportLineSym, currentExportLineLoc, sym,
-                                         fieldData->flags.isExported);
                 }
 
                 fieldData->flags.isExported = setExportedTo;
@@ -201,22 +130,171 @@ class PropagateVisibility final {
         return {nonTestScope, testScope};
     }
 
-    void unsetAllExportedInPackage(core::MutableContext ctx) {
-        auto [nonTestScope, testScope] = getScopesForPackage(ctx);
+    void unsetAllExportedInPackage(core::GlobalState &gs, Namespace ns) {
+        auto [nonTestScope, testScope] = getScopesForPackage(gs);
 
         auto setExportedTo = false;
-
-        // loc is never used in `recursiveSetIsExported` if `setExportedTo` is false, so just say "none"
-        auto currentExportLineLoc = core::LocOffsets::none();
-        if (nonTestScope.exists()) {
-            recursiveSetIsExported(ctx, setExportedTo, nonTestScope, currentExportLineLoc, nonTestScope);
+        if (ns == Namespace::Application && nonTestScope.exists()) {
+            recursiveSetIsExported(gs, setExportedTo, nonTestScope);
         }
-        if (testScope.exists()) {
-            recursiveSetIsExported(ctx, setExportedTo, testScope, currentExportLineLoc, testScope);
+        if (ns == Namespace::Test && testScope.exists()) {
+            recursiveSetIsExported(gs, setExportedTo, testScope);
+        }
+    }
+
+    void applyExport(core::GlobalState &gs, core::SymbolRef sym) {
+        auto setExportedTo = true;
+        recursiveSetIsExported(gs, setExportedTo, sym);
+
+        // When exporting a symbol, we also export its parent namespace. This is a bit of a hack, and it would
+        // be great to remove this, but this was the behavior of the previous packager implementation.
+        exportParentNamespace(gs, sym.owner(gs).asClassOrModuleRef());
+    }
+
+    ExportBits(const core::packages::PackageInfo &package) : package{package} {}
+
+public:
+    // Recompute the export bits of the package's symbols from its `exports_`.
+    static void run(core::GlobalState &gs, core::packages::MangledName name, Namespace ns) {
+        auto &package = gs.packageDB().getPackageInfo(name);
+        ENFORCE(package.exists());
+        if (package.usesTestPackages) {
+            // A `test!` package is a separate package, so each package has only one namespace.
+            ns = Namespace::Application;
         }
 
-        // Shouldn't have been touched, because currentExportLineLoc was none, but let's just clear it to be safe.
-        explicitlyExported.clear();
+        ExportBits pass{package};
+
+        pass.unsetAllExportedInPackage(gs, ns);
+
+        for (const auto &exp : package.exports_) {
+            // Exports can't go through class aliases, so an export of a `Test::` constant only exports symbols in
+            // the `Test::` namespace, and vice versa.
+            auto isTestExport =
+                !package.usesTestPackages && exp.reversedPath.back() == core::packages::PackageDB::TEST_NAMESPACE;
+            if (isTestExport != (ns == Namespace::Test)) {
+                continue;
+            }
+
+            // For the same reason, we don't need to dealias any prefix.
+            core::SymbolRef sym = core::Symbols::root();
+            for (auto it = exp.reversedPath.rbegin(); it != exp.reversedPath.rend() && sym.exists(); ++it) {
+                sym = sym.isClassOrModule() ? sym.asClassOrModuleRef().data(gs)->findMemberNoDealias(*it)
+                                            : core::Symbols::noSymbol();
+            }
+
+            if (sym.exists() && (sym.isClassOrModule() || sym.isStaticField(gs))) {
+                pass.applyExport(gs, sym);
+            }
+        }
+    }
+};
+
+// Reports errors in the `export` lines of a package's resolved `__package.rb` file.
+//
+// This does not change any export bits: `ExportBits` sets them, from the exports recorded on the `PackageInfo`.
+class ExportErrors final {
+    const core::packages::PackageInfo &package;
+
+    // Blames which location (export) caused a symbol to first be marked exported.
+    struct ExportBlame {
+        core::SymbolRef exportedBy;
+        core::LocOffsets firstExportedAt;
+    };
+    UnorderedMap<core::SymbolRef, ExportBlame> explicitlyExported;
+
+    // In general, it's not good to compare arbitrary LocOffsets, because they might not be in the
+    // same file and thus not comparable, thus they have no `operator<` on them.
+    //
+    // Since we know that we're only going to compare locs from within a file, we can define our own
+    // function here.
+    static constexpr auto COMPARE_EXPORT_LOCS = [](const core::LocOffsets &left, const core::LocOffsets &right) {
+        if (left.beginPos() < right.beginPos()) {
+            return true;
+        } else if (left.beginPos() == right.beginPos()) {
+            return left.endPos() < right.endPos();
+        } else {
+            return false;
+        }
+    };
+
+    struct DuplicateExportError {
+        core::SymbolRef duplicate;
+        core::SymbolRef prefix;
+        core::LocOffsets firstExportedAt;
+    };
+    // Collect duplicate export errors into a map and report at the end of this file.
+    // - uses an ordered map, because we want to report them in a determinstic order
+    // - unique by `export` loc, because we want to only report a given `export` line as bad once
+    map<core::LocOffsets, DuplicateExportError, decltype(COMPARE_EXPORT_LOCS)> duplicateExports =
+        decltype(duplicateExports)(COMPARE_EXPORT_LOCS);
+
+    void checkDuplicateExport(core::Context ctx, core::SymbolRef currentExportLineSym,
+                              core::LocOffsets currentExportLineLoc, core::SymbolRef sym) {
+        // Only report duplicate errors if there's an entry in the explicitlyExported map. We don't add to the
+        // explicitlyExported map when marking a parent namespace as exported (in exportParentNamespace).
+        auto isExplicitlyExported = this->explicitlyExported.find(sym) != this->explicitlyExported.end();
+        if (isExplicitlyExported) {
+            // If we're not at the top, then the current export is more general.
+            // Report the error on the line that previously exported this symbol.
+            auto atTop = sym == currentExportLineSym;
+            auto errLoc = atTop ? currentExportLineLoc : this->explicitlyExported[sym].firstExportedAt;
+
+            if (duplicateExports.find(errLoc) == duplicateExports.end()) {
+                auto firstExportedAt = atTop ? this->explicitlyExported[sym].firstExportedAt : currentExportLineLoc;
+                duplicateExports[errLoc] = DuplicateExportError{sym, currentExportLineSym, firstExportedAt};
+            }
+
+        } else if (currentExportLineLoc.exists() &&
+                   // Don't treat singleton classes as explicitly exported, so they never show up in
+                   // duplicate export errors.
+                   (!sym.isClassOrModule() || !sym.asClassOrModuleRef().data(ctx)->isSingletonClass(ctx))) {
+            this->explicitlyExported[sym] =
+                ExportBlame{.exportedBy = currentExportLineSym, .firstExportedAt = currentExportLineLoc};
+        }
+    }
+
+    void recursiveCheckDuplicateExports(core::Context ctx, core::SymbolRef currentExportLineSym,
+                                        core::LocOffsets currentExportLineLoc, core::SymbolRef sym) {
+        // Stop recursing at package boundary
+        if (this->package.mangledName() != sym.enclosingClass(ctx).data(ctx)->package) {
+            return;
+        }
+
+        switch (sym.kind()) {
+            case core::SymbolRef::Kind::ClassOrModule: {
+                auto klassData = sym.asClassOrModuleRef().data(ctx);
+
+                checkDuplicateExport(ctx, currentExportLineSym, currentExportLineLoc, sym);
+
+                // This `members` call does not have a stable order--we recover a determinstic order
+                // by sorting duplicate errors at the end of ExportErrors
+                for (const auto &[name, child] : klassData->members()) {
+                    if (name == core::Names::attached()) {
+                        // There is a cycle between a class and its singleton, and this avoids infinite recursion.
+                        continue;
+                    }
+
+                    recursiveCheckDuplicateExports(ctx, currentExportLineSym, currentExportLineLoc, child);
+                }
+                break;
+            }
+
+            case core::SymbolRef::Kind::FieldOrStaticField: {
+                auto fieldData = sym.asFieldRef().data(ctx);
+                if (!fieldData->flags.isStaticField) {
+                    break;
+                }
+
+                checkDuplicateExport(ctx, currentExportLineSym, currentExportLineLoc, sym);
+                break;
+            }
+
+            case core::SymbolRef::Kind::TypeMember:
+            case core::SymbolRef::Kind::Method:
+            case core::SymbolRef::Kind::TypeParameter:
+                break;
+        }
     }
 
     bool ignoreRBIExportEnforcement(const core::GlobalState &gs, core::FileRef file) {
@@ -234,10 +312,9 @@ class PropagateVisibility final {
     }
 
     // Checks that the package that a symbol is defined in can be exported from the package we're currently checking.
-    void checkExportPackage(core::MutableContext ctx, core::LocOffsets loc, core::SymbolRef sym) {
+    void checkExportPackage(core::Context ctx, core::LocOffsets loc, core::SymbolRef sym) {
         ENFORCE(!sym.locs(ctx).empty()); // Can't be empty
 
-        bool shouldDeleteExport = false;
         if (onlyInRBI(ctx, sym)) {
             if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidExport)) {
                 e.setHeader("Cannot export `{}` because it is only defined in an RBI file", sym.show(ctx));
@@ -253,8 +330,6 @@ class PropagateVisibility final {
                     e.addErrorLine(sym.loc(ctx), "Defined here");
                     // TODO(neil): should there be an autocorrect to delete this export here?
                 }
-            } else {
-                shouldDeleteExport = true;
             }
         }
 
@@ -269,7 +344,7 @@ class PropagateVisibility final {
         //
         // See also how when we get a visibility violation for an enum value not being exported we export the entire
         // enum, not the specific enum value, to avoid conflict-inducing churn on `__package.rb` files.
-        auto enumClass = getEnumClassForEnumValue(ctx.state, sym);
+        auto enumClass = core::packages::PackageDB::getEnumClassForEnumValue(ctx.state, sym);
         if (enumClass.exists()) {
             if (ctx.state.packageDB().genPackagesMode() == core::packages::GenPackagesMode::Disabled) {
                 if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidExport)) {
@@ -283,13 +358,7 @@ class PropagateVisibility final {
                         {core::AutocorrectSuggestion::Edit{core::Loc{package.fullLoc().file(), loc},
                                                            fmt::format("export {}", enumClassName)}}});
                 }
-            } else {
-                shouldDeleteExport = true;
             }
-        }
-        if (shouldDeleteExport) {
-            ENFORCE(ctx.state.packageDB().genPackagesMode() != core::packages::GenPackagesMode::Disabled);
-            this->package.exportsToDelete_.emplace_back(loc);
         }
     }
 
@@ -343,11 +412,11 @@ class PropagateVisibility final {
         return lines;
     }
 
-    PropagateVisibility(core::packages::PackageInfo &package) : package{package} {}
+    ExportErrors(const core::packages::PackageInfo &package) : package{package} {}
 
 public:
     // Find uses of export and mark the symbols they mention as exported.
-    void postTransformSend(core::MutableContext ctx, const ast::Send &send) {
+    void postTransformSend(core::Context ctx, const ast::Send &send) {
         if (send.fun != core::Names::export_()) {
             return;
         }
@@ -363,15 +432,30 @@ public:
             return;
         }
 
-        // This is a syntactically valid export. It might export something that doesn't exist, but
-        // that doesn't matter: the rest of the pipeline depends on being able to see the `export`
-        // lines locations for the purposes of autocorrects, so let's at least record that there is
-        // an export here.
-        this->package.exports_.emplace_back(send.loc);
-
         if (lit->symbol() == core::Symbols::StubModule()) {
             // Don't attempt to export a symbol that doesn't exist. Resolver reported an error already.
             return;
+        }
+
+        // Skip any `export` constants which only resolved through a class alias.
+        // When exporting something, we shouldn't allow people to indirect or obscure their exports.
+        auto scope = lit;
+        while (scope->original() != nullptr) {
+            scope = ast::cast_tree<ast::ConstantLit>(scope->original()->scope);
+            if (scope == nullptr) {
+                break;
+            }
+            auto prefix = scope->symbol();
+            if (prefix.isClassAlias(ctx)) {
+                if (ctx.state.packageDB().genPackagesMode() == core::packages::GenPackagesMode::Disabled) {
+                    if (auto e = ctx.beginError(scope->loc(), core::errors::Packager::InvalidExport)) {
+                        e.setHeader("Cannot export through class alias `{}`", prefix.show(ctx));
+                        e.addErrorLine(prefix.loc(ctx), "Alias defined here");
+                        e.addErrorNote("Export `{}` directly instead", lit->symbol().show(ctx));
+                    }
+                }
+                return;
+            }
         }
 
         auto sym = lit->symbol();
@@ -397,23 +481,13 @@ public:
                 }
 
                 checkExportPackage(ctx, send.loc, sym);
-                auto setExportedTo = true;
-                recursiveSetIsExported(ctx, setExportedTo, sym, send.loc, sym);
-
-                // When exporting a symbol, we also export its parent namespace. This is a bit of a hack, and it would
-                // be great to remove this, but this was the behavior of the previous packager implementation.
-                exportParentNamespace(ctx, klassData->owner);
+                recursiveCheckDuplicateExports(ctx, sym, send.loc, sym);
                 return;
             }
 
             case core::SymbolRef::Kind::FieldOrStaticField: {
                 checkExportPackage(ctx, send.loc, sym);
-                auto setExportedTo = true;
-                recursiveSetIsExported(ctx, setExportedTo, sym, send.loc, sym);
-
-                // When exporting a field, we also export its parent namespace. This is a bit of a hack, and it would be
-                // great to remove this, but this was the behavior of the previous packager implementation.
-                exportParentNamespace(ctx, sym.asFieldRef().data(ctx)->owner);
+                recursiveCheckDuplicateExports(ctx, sym, send.loc, sym);
                 return;
             }
 
@@ -438,33 +512,30 @@ public:
         }
     }
 
-    static void run(core::GlobalState &gs, const ast::ParsedFile &f) {
-        if (!f.file.data(gs).isPackage(gs)) {
-            return;
-        }
+    static void run(const core::GlobalState &gs, const ast::ParsedFile &f) {
+        core::Context ctx{gs, core::Symbols::root(), f.file};
+        ENFORCE(f.file.data(ctx).isPackage(ctx));
 
-        auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
+        auto pkgName = ctx.state.packageDB().getPackageNameForFile(f.file);
         if (!pkgName.exists()) {
             return;
         }
 
-        auto package = gs.packageDB().getPackageInfoNonConst(pkgName);
-        ENFORCE(package->exists(), "Package is associated with a file, but doesn't exist");
+        auto &package = ctx.state.packageDB().getPackageInfo(pkgName);
+        ENFORCE(package.exists(), "Package is associated with a file, but doesn't exist");
 
-        core::MutableContext ctx{gs, core::Symbols::root(), f.file};
-        PropagateVisibility pass{*package};
-        pass.unsetAllExportedInPackage(ctx);
+        ExportErrors pass{package};
         ast::ConstTreeWalk::apply(ctx, pass, f.tree);
 
-        auto exportAll = package->locs.exportAll;
-        if (exportAll.exists() && !package->exports_.empty()) {
+        auto exportAll = package.locs.exportAll;
+        if (exportAll.exists() && !package.exports_.empty()) {
             if (auto e = ctx.beginError(exportAll, core::errors::Packager::ExportConflict)) {
                 e.setHeader("Package `{}` declares `{}` and therefore should not use explicit exports",
-                            package->mangledName().owner.show(ctx), "export_all!");
+                            package.mangledName().owner.show(ctx), "export_all!");
 
                 auto edits = vector<core::AutocorrectSuggestion::Edit>{};
-                for (const auto &export_ : package->exports_) {
-                    auto replaceLoc = ctx.locAt(export_.loc);
+                for (const auto &exp : package.exports_) {
+                    auto replaceLoc = ctx.locAt(exp.loc);
                     auto [indentedStart, numSpaces] = replaceLoc.findStartOfIndentation(ctx);
                     // Remove leading whitespace
                     replaceLoc = replaceLoc.adjust(ctx, -1 * numSpaces, 0);
@@ -493,65 +564,9 @@ public:
     }
 };
 
-enum class FileType {
-    ProdFile,
-    TestHelperFile,
-    TestUnitFile,
-};
-
-const FileType fileTypeFromCtx(const core::Context ctx) {
-    if (ctx.file.data(ctx).isPackagedTestHelper()) {
-        return FileType::TestHelperFile;
-    } else if (ctx.file.data(ctx).isPackagedTest()) {
-        return FileType::TestUnitFile;
-    } else {
-        return FileType::ProdFile;
-    }
-}
-
 class VisibilityCheckerPass final {
-    void addExportInfo(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef litSymbol, bool definesBehavior) {
-        auto definedHereLoc = litSymbol.loc(ctx);
-        if (definesBehavior) {
-            e.addErrorLine(definedHereLoc, "Defined here");
-        } else {
-            e.addErrorSection(core::ErrorSection(
-                core::ErrorColors::format("`{}` does not define behavior and thus will not be automatically exported",
-                                          litSymbol.show(ctx)),
-                {core::ErrorLine(definedHereLoc, "")}));
-            e.addErrorNote("Either export it manually, or better, "
-                           "restructure the code so that package namespaces do not define behavior.");
-        }
-    }
-
-    void addImportExportAutocorrect(core::Context ctx, core::ErrorBuilder &e,
-                                    optional<core::AutocorrectSuggestion> &&importAutocorrect,
-                                    optional<core::AutocorrectSuggestion> &&exportAutocorrect) {
-        auto &db = ctx.state.packageDB();
-        auto hasAutocorrect = importAutocorrect.has_value() || exportAutocorrect.has_value();
-
-        if (importAutocorrect.has_value() && exportAutocorrect.has_value()) {
-            auto combinedTitle = fmt::format("{} and {}", importAutocorrect->title, exportAutocorrect->title);
-            importAutocorrect->edits.insert(importAutocorrect->edits.end(),
-                                            make_move_iterator(exportAutocorrect->edits.begin()),
-                                            make_move_iterator(exportAutocorrect->edits.end()));
-            e.addAutocorrect(core::AutocorrectSuggestion{combinedTitle, move(importAutocorrect->edits),
-                                                         false /* isDidYouMean */, false /* hideEdit */,
-                                                         /* shouldSkipWhenAggregated */ true});
-        } else if (importAutocorrect.has_value()) {
-            e.addAutocorrect(std::move(importAutocorrect.value()));
-        } else if (exportAutocorrect.has_value()) {
-            e.addAutocorrect(std::move(exportAutocorrect.value()));
-        }
-
-        if (hasAutocorrect && !db.errorHint().empty()) {
-            e.addErrorNote("{}", db.errorHint());
-        }
-    }
-
 public:
     const core::packages::PackageInfo &package;
-    const FileType fileType;
     UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo> referencedPackages;
     UnorderedSet<core::SymbolRef> referencedSymbols;
 
@@ -560,12 +575,7 @@ public:
     // ConstantLit was a definition.
     UnorderedSet<const void *> constantAssignmentDefinitions;
 
-    VisibilityCheckerPass(core::Context ctx, const core::packages::PackageInfo &package)
-        : package{package}, fileType{fileTypeFromCtx(ctx)} {}
-
-    bool isAnyTestFile() const {
-        return fileType != FileType::ProdFile;
-    }
+    VisibilityCheckerPass(core::Context ctx, const core::packages::PackageInfo &package) : package{package} {}
 
     void preTransformAssign(core::Context ctx, const ast::Assign &asgn) {
         auto lhs = ast::cast_tree<ast::ConstantLit>(asgn.lhs);
@@ -590,21 +600,19 @@ public:
         if (!litSymbol.isClassOrModule() && !litSymbol.isFieldOrStaticField()) {
             return;
         }
-
-        // NOTE: this only tracks the information required for computing what symbols needed to be exported, and not for
-        // find all references. For example, if the current symbol is A::B::C::D, then only A::B::C::D will be added to
-        // symbolsReferenced, and not A, A::B, A::B::C.
-        // TODO(neil): we should also track A, A::B, A::B::C, so that we can use this for find all references too.
-        referencedSymbols.insert(litSymbol);
-
-        auto loc = litSymbol.loc(ctx);
-
-        auto otherFile = loc.file();
-        if (!otherFile.exists()) {
+        if (litSymbol == core::Symbols::todo()) {
+            // The symbol will be `<todo sym>` when traversing to a ClassDef which omits a superclass.
+            // TODO(jez) Should we change put the real superclass in the tree once GlobalPass resolves it?
             return;
         }
 
-        auto &db = ctx.state.packageDB();
+        // Only needed by the LSP's "Apply all Sorbet fixes for file", via PackageDB::aggregateMissingExportsForFile:
+        // individual export autocorrects are skipped during generic aggregation. gen-packages only needs package
+        // references.
+        // TODO(jez): Delete referencedSymbols and GlobalState::symbolsReferencedByFile when we remove the export DSL.
+        if (ctx.state.packageDB().genPackagesMode() == core::packages::GenPackagesMode::Disabled) {
+            referencedSymbols.insert(litSymbol);
+        }
 
         // no need to check visibility for these cases
         auto otherPackage = litSymbol.enclosingClass(ctx).data(ctx)->package;
@@ -612,273 +620,9 @@ public:
             return;
         }
 
-        auto &pkg = ctx.state.packageDB().getPackageInfo(otherPackage);
-
-        // If the imported symbol comes from the test namespace, we must also be in the test namespace.
-        // TODO(trevor): this check is redundant with import checking after the test-packages migration is complete.
-        if (!pkg.usesTestPackages &&
-            (otherFile.data(ctx).isPackagedTestHelper() || otherFile.data(ctx).isPackagedTest()) &&
-            !this->isAnyTestFile()) {
-            if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
-                e.setHeader("`{}` is defined in a test namespace and cannot be referenced in a non-test file",
-                            litSymbol.show(ctx));
-            }
-            return;
-        }
-
-        if (this->package.usesTestPackages) {
-            if (pkg.testPackage() && !this->package.testPackage()) {
-                if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::TestImportMismatch)) {
-                    e.setHeader("Package `{}` may not reference `{}` packages", this->package.show(ctx), "test!");
-                    e.addErrorLine(this->package.declLoc(), "Defined here");
-                    e.addErrorLine(pkg.declLoc(), "Referenced `{}` package defined here", "test!");
-                }
-            }
-        }
-
-        bool isExported = pkg.locs.exportAll.exists();
-        if (litSymbol.isClassOrModule()) {
-            isExported = isExported || litSymbol.asClassOrModuleRef().data(ctx)->flags.isExported;
-        } else if (litSymbol.isFieldOrStaticField()) {
-            isExported = isExported || litSymbol.asFieldRef().data(ctx)->flags.isExported;
-        }
-        isExported = isExported || db.allowRelaxedPackagerChecksFor(this->package.mangledName());
-        bool definesBehavior =
-            !litSymbol.isClassOrModule() || litSymbol.asClassOrModuleRef().data(ctx)->flags.isBehaviorDefining;
-        auto *import = this->package.importsPackage(otherPackage);
-        auto wasImported = import != nullptr;
-        if (this->package.usesTestPackages) {
-            isExported = isExported || (wasImported && import->usesInternals);
-            if (wasImported) {
-                ENFORCE(import->type == core::packages::ImportType::Normal,
-                        "test_import found in --test-packages mode");
-            }
-        }
-
-        // Is this a test import (whether test helper or not) used in a production context?
-        auto testImportInProd =
-            wasImported && import->type != core::packages::ImportType::Normal && this->fileType == FileType::ProdFile;
-        // Is this a test import not intended for use in helpers?
-        auto testUnitImportInHelper = wasImported && import->type == core::packages::ImportType::TestUnit &&
-                                      this->fileType != FileType::TestUnitFile;
-        bool importNeeded = !wasImported || testImportInProd || testUnitImportInHelper;
-        referencedPackages[otherPackage] = {.importNeeded = importNeeded, .causesModularityError = false};
-
-        if (importNeeded || !isExported) {
-            bool isTestImport = otherFile.data(ctx).isPackagedTestHelper() || this->fileType != FileType::ProdFile;
-            if (this->package.usesTestPackages) {
-                isTestImport = false;
-            }
-            core::packages::ImportType autocorrectedImportType = core::packages::ImportType::Normal;
-            if (isTestImport) {
-                if (this->fileType == FileType::TestHelperFile) {
-                    autocorrectedImportType = core::packages::ImportType::TestHelper;
-                } else {
-                    autocorrectedImportType = core::packages::ImportType::TestUnit;
-                }
-            }
-            auto strictDepsLevel = this->package.strictDependenciesLevel;
-            auto importStrictDepsLevel = pkg.strictDependenciesLevel;
-            bool layeringViolation = false;
-            bool strictDependenciesTooLow = false;
-            bool causesCycle = false;
-            bool causesVisibilityError = !pkg.isVisibleTo(ctx, this->package, autocorrectedImportType);
-            optional<string> path;
-            if (!isTestImport && db.enforceLayering()) {
-                layeringViolation = strictDepsLevel > core::packages::StrictDependenciesLevel::False &&
-                                    this->package.causesLayeringViolation(db, pkg);
-                strictDependenciesTooLow = importStrictDepsLevel != core::packages::StrictDependenciesLevel::None &&
-                                           importStrictDepsLevel < this->package.minimumStrictDependenciesLevel();
-                // If there's a path from the imported packaged to this package, then adding the import will close
-                // the loop and cause a cycle.
-                path = pkg.pathTo(ctx, this->package.mangledName());
-                causesCycle =
-                    strictDepsLevel >= core::packages::StrictDependenciesLevel::LayeredDag && path.has_value();
-            }
-            bool hasModularityError = layeringViolation || strictDependenciesTooLow || causesCycle;
-            referencedPackages[otherPackage].causesModularityError = hasModularityError;
-            if (!hasModularityError && !causesVisibilityError) {
-                if (db.genPackagesMode() != core::packages::GenPackagesMode::Disabled) {
-                    return;
-                }
-
-                std::optional<core::AutocorrectSuggestion> importAutocorrect;
-                if (importNeeded) {
-                    if (auto exp = this->package.addImport(ctx, pkg, autocorrectedImportType)) {
-                        importAutocorrect.emplace(exp.value());
-                    }
-                }
-                std::optional<core::AutocorrectSuggestion> exportAutocorrect;
-                if (!isExported) {
-                    auto symToExport = litSymbol;
-                    auto enumClass = getEnumClassForEnumValue(ctx.state, symToExport);
-                    if (enumClass.exists()) {
-                        symToExport = enumClass;
-                    }
-                    if (definesBehavior) {
-                        // For compatibility with gen-packages, we do _not_ add an export if it doesn't define
-                        // behavior. This is mostly because it's easier to get Sorbet to behave like gen-packages
-                        // than the other way around.
-                        //
-                        // If we move to a world where all __package.rb edits are done via Sorbet autocorrects,
-                        // we could make this addExport call unconditional.
-                        if (auto exp = pkg.addExport(ctx, symToExport)) {
-                            exportAutocorrect.emplace(exp.value());
-                        }
-                    }
-                }
-
-                if (!isExported && !wasImported) {
-                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
-                        e.setHeader("`{}` resolves but is not exported from `{}` and `{}` is not imported",
-                                    litSymbol.show(ctx), pkg.show(ctx), pkg.show(ctx));
-                        addExportInfo(ctx, e, litSymbol, definesBehavior);
-                        addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
-                    }
-                } else if (!isExported && testImportInProd) {
-                    ENFORCE(!this->package.usesTestPackages, "test_import found in --test-packages mode");
-                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
-                        e.setHeader("`{}` resolves but is not exported from `{}` and `{}` is `{}`ed",
-                                    litSymbol.show(ctx), pkg.show(ctx), pkg.show(ctx), "test_import");
-                        addExportInfo(ctx, e, litSymbol, definesBehavior);
-                        addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
-                    }
-                } else if (!isExported && testUnitImportInHelper) {
-                    ENFORCE(!this->package.usesTestPackages, "test_import found in --test-packages mode");
-                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
-                        e.setHeader("`{}` resolves but is not exported from `{}` and `{}` is `{}`ed for only {} files",
-                                    litSymbol.show(ctx), pkg.show(ctx), pkg.show(ctx), "test_import", ".test.rb");
-                        e.addErrorNote("This is because this `{}` is declared with `{}`, which means the constant can "
-                                       "only be used in `{}` files.",
-                                       "test_import", "only: 'test_rb'", ".test.rb");
-                        addExportInfo(ctx, e, litSymbol, definesBehavior);
-                        addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
-                    }
-                } else if (!isExported) {
-                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedPackagePrivateName)) {
-                        e.setHeader("`{}` resolves but is not exported from `{}`", litSymbol.show(ctx), pkg.show(ctx));
-                        addExportInfo(ctx, e, litSymbol, definesBehavior);
-
-                        addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
-                    }
-                } else if (!wasImported) {
-                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::MissingImport)) {
-                        e.setHeader("`{}` resolves but its package is not imported", lit.symbol().show(ctx));
-                        e.addErrorLine(pkg.declLoc(), "Exported from package here");
-                        addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
-                    }
-                } else if (testImportInProd) {
-                    ENFORCE(!isTestImport);
-                    ENFORCE(!this->package.usesTestPackages, "test_import found in --test-packages mode");
-                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
-                        e.setHeader("Used `{}` constant `{}` in non-test file", "test_import", litSymbol.show(ctx));
-                        e.addErrorLine(pkg.declLoc(), "Defined here");
-                        addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
-                    }
-                } else if (testUnitImportInHelper) {
-                    ENFORCE(!this->package.usesTestPackages, "test_import found in --test-packages mode");
-                    if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::UsedTestOnlyName)) {
-                        e.setHeader("The `{}` constant `{}` can only be used in `{}` files", "test_import",
-                                    litSymbol.show(ctx), ".test.rb");
-                        e.addErrorLine(pkg.declLoc(), "Defined here");
-                        e.addErrorNote("This is because this `{}` is declared with `{}`, which means the constant can "
-                                       "only be used in `{}` files.",
-                                       "test_import", "only: 'test_rb'", ".test.rb");
-                        addImportExportAutocorrect(ctx, e, move(importAutocorrect), move(exportAutocorrect));
-                    }
-                } else {
-                    ENFORCE(false);
-                }
-            }
-
-            // We should only report a visibility error if we're not going to add a visible_to to the package
-            // Otherwise the error is pointless since it'll go away after the new visible_to is added
-            if (causesVisibilityError && !ctx.state.packageDB().updateVisibilityFor(otherPackage)) {
-                if (auto e = ctx.beginError(lit.loc(), core::errors::Packager::ImportNotVisible)) {
-                    e.setHeader("Package `{}` includes explicit visibility modifiers and cannot be imported from `{}`",
-                                pkg.show(ctx), this->package.show(ctx));
-                    e.addErrorNote("Please consult with the owning team before adding a `{}` line to the package `{}`",
-                                   "visible_to", pkg.show(ctx));
-                }
-            }
-
-            if (hasModularityError) {
-                // TODO(neil): Provide actionable advice and/or link to a doc that would help the user resolve these
-                // layering/strict_dependencies issues.
-                core::ErrorClass error =
-                    causesCycle ? core::errors::Packager::StrictDependenciesViolation
-                                : (layeringViolation ? core::errors::Packager::LayeringViolation
-                                                     : core::errors::Packager::StrictDependenciesViolation);
-                if (auto e = ctx.beginError(lit.loc(), error)) {
-                    vector<string> reasons;
-                    e.addErrorLine(this->package.declLoc(), "Enclosing package declared here");
-                    if (causesCycle) {
-                        reasons.emplace_back(core::ErrorColors::format(
-                            "importing its package would put `{}` into a cycle", this->package.show(ctx)));
-                        auto currentStrictDepsLevel =
-                            fmt::format("strict_dependencies '{}'",
-                                        core::packages::strictDependenciesLevelToString(strictDepsLevel));
-                        e.addErrorLine(core::Loc(this->package.file, this->package.locs.strictDependenciesLevel),
-                                       "`{}` is `{}`, which disallows cycles", this->package.show(ctx),
-                                       currentStrictDepsLevel);
-                        ENFORCE(path.has_value(),
-                                "Path from pkg to this->package should always exist if causesCycle is true");
-                        e.addErrorNote("Path from `{}` to `{}`:\n{}", pkg.show(ctx), this->package.show(ctx),
-                                       path.value());
-                    }
-
-                    if (layeringViolation) {
-                        reasons.emplace_back("importing its package would cause a layering violation");
-                        ENFORCE(pkg.layer.exists(), "causesLayeringViolation should return false if layer is not set");
-                        ENFORCE(this->package.layer.exists(),
-                                "causesLayeringViolation should return false if layer is not set");
-                        e.addErrorLine(core::Loc(pkg.file, pkg.locs.layer),
-                                       "Package `{}` must be at most layer `{}` (to match package `{}`) but is "
-                                       "currently layer `{}`",
-                                       pkg.show(ctx), this->package.layer.show(ctx), this->package.show(ctx),
-                                       pkg.layer.show(ctx));
-                    }
-
-                    if (strictDependenciesTooLow) {
-                        reasons.emplace_back(
-                            core::ErrorColors::format("its `{}` is not strict enough", "strict_dependencies"));
-                        ENFORCE(importStrictDepsLevel != core::packages::StrictDependenciesLevel::None,
-                                "strictDependenciesTooLow should be false if strict_dependencies level is not set");
-                        auto requiredStrictDepsLevel = fmt::format("strict_dependencies '{}'",
-                                                                   core::packages::strictDependenciesLevelToString(
-                                                                       this->package.minimumStrictDependenciesLevel()));
-                        auto currentStrictDepsLevel =
-                            fmt::format("strict_dependencies '{}'",
-                                        core::packages::strictDependenciesLevelToString(importStrictDepsLevel));
-                        e.addErrorLine(core::Loc(pkg.file, pkg.locs.strictDependenciesLevel),
-                                       "`{}` must be at least `{}` but is currently `{}`", pkg.show(ctx),
-                                       requiredStrictDepsLevel, currentStrictDepsLevel);
-                    }
-
-                    ENFORCE(!reasons.empty(), "At least one reason should be present");
-                    string reason;
-                    if (reasons.size() == 1) {
-                        reason = reasons[0];
-                    } else if (reasons.size() == 2) {
-                        reason = fmt::format("{}, and {}", reasons[0], reasons[1]);
-                    } else if (reasons.size() == 3) {
-                        reason = fmt::format("{}, {}, and {}", reasons[0], reasons[1], reasons[2]);
-                    } else {
-                        ENFORCE(false, "At most three reasons should be present");
-                    }
-                    e.setHeader("`{}` cannot be referenced here because {}", lit.symbol().show(ctx), reason);
-                    if (!isExported) {
-                        e.addErrorNote("`{}` is not exported", lit.symbol().show(ctx));
-                    } else if (!wasImported) {
-                        e.addErrorNote("`{}`'s package is not imported", lit.symbol().show(ctx));
-                    } else if (testImportInProd || testUnitImportInHelper) {
-                        e.addErrorNote("`{}`'s package is imported as `{}`", lit.symbol().show(ctx), "test_import");
-                    } else {
-                        ENFORCE(false);
-                    }
-                }
-            }
-        }
+        auto importError = this->package.checkReferenceAgainstImports(ctx, lit.loc(), otherPackage);
+        referencedPackages[otherPackage] = importError.value_or(core::packages::PackageReferenceInfo{});
+        // Resolver reports references to constants that aren't exported.
     }
 
     void preTransformClassDef(core::Context ctx, const ast::ClassDef &original) {
@@ -913,17 +657,13 @@ public:
                     continue;
                 }
                 auto &f = filesSpan[idx];
-                if (f.file.data(gs).isPackage(gs)) {
-                    resultq->push(std::nullopt, 1);
-                    continue;
-                }
-                auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
-                if (!pkgName.exists()) {
+                auto package = gs.packageDB().getPackageForSourceFile(gs, f.file);
+                if (package == nullptr) {
                     resultq->push(std::nullopt, 1);
                     continue;
                 }
                 core::Context ctx{gs, core::Symbols::root(), f.file};
-                VisibilityCheckerPass pass{ctx, gs.packageDB().getPackageInfo(pkgName)};
+                VisibilityCheckerPass pass{ctx, *package};
                 ast::ConstTreeWalk::apply(ctx, pass, f.tree);
                 resultq->push(
                     ThreadResult{f.file, std::move(pass.referencedPackages), std::move(pass.referencedSymbols)}, 1);
@@ -948,10 +688,20 @@ public:
                 for (auto &[packageName, packageReferenceInfo] : referencedPackages) {
                     references.emplace_back(make_pair(packageName, packageReferenceInfo));
                 }
-                nonConstPackageInfo->trackPackageReferences(file, references);
+                if (gs.packageDB().genPackagesMode() == core::packages::GenPackagesMode::Disabled) {
+                    // Resolver has already recorded references that it rejected at package boundaries. Merge the
+                    // successfully resolved references found here into the same per-file entry.
+                    for (auto &[packageName, packageReferenceInfo] : references) {
+                        nonConstPackageInfo->trackPackageReference(file, packageName, packageReferenceInfo);
+                    }
+                } else {
+                    // Resolver package checking is disabled in gen-packages mode, so this pass owns the complete set.
+                    nonConstPackageInfo->trackPackageReferences(file, references);
+                }
 
-                auto &referencedSymbols = threadResult->referencedSymbols;
-                nonConstGs.setSymbolsReferencedByFile(file, referencedSymbols);
+                if (gs.packageDB().genPackagesMode() == core::packages::GenPackagesMode::Disabled) {
+                    nonConstGs.setSymbolsReferencedByFile(file, threadResult->referencedSymbols);
+                }
             }
         }
         barrier.Wait();
@@ -959,15 +709,48 @@ public:
 };
 } // namespace
 
-void VisibilityChecker::run(core::GlobalState &gs, WorkerPool &workers, absl::Span<const ast::ParsedFile> files) {
-    Timer timeit(gs.tracer(), "visibility_checker.run");
+void VisibilityChecker::propagateExports(core::GlobalState &gs, absl::Span<const ast::ParsedFile> files) {
+    Timer timeit(gs.tracer(), "visibility_checker.propagate_visibility");
+    // Recompute the bits of the namespaces whose files are being processed: these are the only symbols that this
+    // stratum (or fast path) can have entered or changed.
+    UnorderedSet<pair<core::packages::MangledName, Namespace>> recomputed;
+    for (auto &f : files) {
+        auto &file = f.file.data(gs);
+        if (file.isPackage(gs)) {
+            continue;
+        }
 
-    {
-        Timer timeit(gs.tracer(), "visibility_checker.propagate_visibility");
-        for (auto &f : files) {
-            PropagateVisibility::run(gs, f);
+        auto pkgName = gs.packageDB().getPackageNameForFile(f.file);
+        if (!pkgName.exists()) {
+            continue;
+        }
+
+        // Track which packages we've already setExportBits for, because we only have to do this
+        // once per unique package in the set of edited files. (And we can't just scan files
+        // looking for `__package.rb` files, because the application stratum of a legacy
+        // application+test package won't place the `__package.rb` file in that stratum, but
+        // still needs to export the application constants.)
+        auto ns = file.isPackagedTest() ? Namespace::Test : Namespace::Application;
+        auto [_it, seenForFirstTime] = recomputed.emplace(pkgName, ns);
+        if (seenForFirstTime) {
+            ExportBits::run(gs, pkgName, ns);
         }
     }
+}
+
+void VisibilityChecker::reportExportErrors(const core::GlobalState &gs, absl::Span<const ast::ParsedFile> files) {
+    Timer timeit(gs.tracer(), "visibility_checker.report_export_errors");
+    // TODO(jez) Each `__package.rb` file's walk is independent, so this could run in parallel
+    for (auto &f : files) {
+        if (f.file.data(gs).isPackage(gs)) {
+            // Doesn't depend on export bits, only on the exports in the package's `__package.rb`.
+            ExportErrors::run(gs, f);
+        }
+    }
+}
+
+void VisibilityChecker::checkReferences(core::GlobalState &gs, WorkerPool &workers,
+                                        absl::Span<const ast::ParsedFile> files) {
     VisibilityCheckerPass::run(gs, workers, files);
 }
 

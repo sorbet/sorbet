@@ -1,15 +1,15 @@
 # typed: strict
 
-module Wrong
-     # ^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
+module Wrong # error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
+
   class Inside; end
 end
 
 Root::Nested::Foo::Bar = nil
-::Allowed::TopLevel = nil
+::Allowed::TopLevel = nil # error: requires this package to be marked `prelude!`
 
   NotAllowed::Foo::Bar = nil
-# ^^^^^^^^^^^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
+# ^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
 
 module Root::Nested
 
@@ -26,7 +26,7 @@ module Root::Nested
   end
 end
 
-module Root
+module Root # error: Package `Root::Nested` may not open `Root`
   module Nested
     class SomeClass
       class Deeper; end
@@ -39,20 +39,20 @@ module Root
     sig { void }
     def example
       NOT_IN_PACKAGE
-    # ^^^^^^^^^^^^^^ error: `Root::NOT_IN_PACKAGE` resolves but is not exported from `Root` and `Root` is not imported
+#     ^^^^^^^^^^^^^^ error: Unable to resolve constant `NOT_IN_PACKAGE`
     end
   end
 end
 
   class Root::Stringy < String
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: This file must only define behavior in enclosing package `Root::Nested`
-#                       ^^^^^^ error: Superclasses may only be set on constants in the package that owns them
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
+
 end
 
 class Root::Nested::Stringy < String
 end
 
-module Root
+module Root # error: Package `Root::Nested` may not open `Root`
   NOT_IN_PACKAGE = T.let(1, Integer)
 # ^^^^^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
 
@@ -72,15 +72,15 @@ def top_level_method
   'top'
 end
 
-module Root::ModNotInPackage
-     # ^^^^^^^^^^^^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
+module Root::ModNotInPackage # error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
+
 end
 
-class Root::ClassNotInPackage
-    # ^^^^^^^^^^^^^^^^^^^^^^^ error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
+class Root::ClassNotInPackage # error: File belongs to package `Root::Nested` but defines a constant that does not match this namespace
+
 end
 
-module ::TopLevel
+module ::TopLevel # error: requires this package to be marked `prelude!`
   class Foo
     sig {void}
     def foo

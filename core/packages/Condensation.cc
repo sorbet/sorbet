@@ -1,6 +1,9 @@
 #include "core/packages/Condensation.h"
+#include "common/sort/sort.h"
 #include "common/strings/formatting.h"
 #include "core/GlobalState.h"
+#include <algorithm>
+#include <tuple>
 
 using namespace std;
 
@@ -64,6 +67,20 @@ struct TraversalBuilder {
         True,
         False,
     };
+
+    // Sort the given stratum by test/application status, and then by smallest member id. As members are sorted for a
+    // finalized condensation graph, the first id in the members list is always the smallest.
+    void sortStratum(absl::Span<uint32_t> stratum) const {
+        fast_sort(stratum, [this](uint32_t leftId, uint32_t rightId) {
+            const auto &left = this->nodes[leftId];
+            const auto &right = this->nodes[rightId];
+            // Prelude strata can contain both application and test SCCs. Keep application code first.
+            // Members are sorted, and SCCs of the same kind are disjoint, so their first members determine the order.
+            auto leftFirstMemberId = left.members.front().owner.id();
+            auto rightFirstMemberId = right.members.front().owner.id();
+            return std::tie(left.isTest, leftFirstMemberId) < std::tie(right.isTest, rightFirstMemberId);
+        });
+    }
 
     // Record a single stratum by processing each SCC id, marking the imports of those ids as satisfied. If any
     // dependent package no longer has any outstanding imports, its id will be added to `next`.
@@ -141,6 +158,7 @@ const Condensation::Traversal Condensation::computeTraversal(const core::GlobalS
     auto [prelude, roots] = builder.roots();
 
     if (!prelude.empty()) {
+        builder.sortStratum(absl::MakeSpan(prelude));
         // Record a single stratum for all prelude SCCs, emitting any packages whose imports were satisfied by the
         // prelude set to the roots.
         builder.recordStratum<TraversalBuilder::IsPrelude::True>(prelude, roots);
@@ -152,6 +170,7 @@ const Condensation::Traversal Condensation::computeTraversal(const core::GlobalS
     while (!roots.empty()) {
         next.clear();
 
+        builder.sortStratum(absl::MakeSpan(roots));
         builder.recordStratum<TraversalBuilder::IsPrelude::False>(roots, next);
 
         // The content of `next` isn't important at this point, and it will be cleared on the next iteration of the
@@ -163,11 +182,11 @@ const Condensation::Traversal Condensation::computeTraversal(const core::GlobalS
     return builder.build();
 }
 
-UnorderedMap<MangledName, Condensation::Traversal::StratumInfo>
-Condensation::Traversal::buildStratumMapping(const core::GlobalState &gs) const {
-    UnorderedMap<MangledName, StratumInfo> result;
-
+void Condensation::Traversal::recordStrata(core::GlobalState &gs) const {
     auto &db = gs.packageDB();
+    for (auto name : db.packages()) {
+        db.getPackageInfoNonConst(name)->stratum = {};
+    }
 
     int ix = -1;
     for (auto stratum : this->strata) {
@@ -176,24 +195,22 @@ Condensation::Traversal::buildStratumMapping(const core::GlobalState &gs) const 
             for (auto name : scc.members) {
                 // TODO(trevor): we can switch to maintaining a single stratum once we've fully migrated to
                 // test-packages.
-                auto &info = result[name];
+                auto &info = db.getPackageInfoNonConst(name)->stratum;
                 if (db.getPackageInfo(name).usesTestPackages) {
-                    ENFORCE(info.applicationStratum == INT32_MAX);
-                    ENFORCE(info.testStratum == INT32_MAX);
-                    info.applicationStratum = ix;
-                    info.testStratum = ix;
+                    ENFORCE(info.applicationStratum == Stratum::NONE);
+                    ENFORCE(info.testStratum == Stratum::NONE);
+                    info.applicationStratum = Stratum(ix);
+                    info.testStratum = Stratum(ix);
                 } else if (scc.isTest) {
-                    ENFORCE(info.testStratum == INT32_MAX);
-                    info.testStratum = ix;
+                    ENFORCE(info.testStratum == Stratum::NONE);
+                    info.testStratum = Stratum(ix);
                 } else {
-                    ENFORCE(info.applicationStratum == INT32_MAX);
-                    info.applicationStratum = ix;
+                    ENFORCE(info.applicationStratum == Stratum::NONE);
+                    info.applicationStratum = Stratum(ix);
                 }
             }
         }
     }
-
-    return result;
 }
 
 Condensation::Node &CondensationBuilder::pushNode(ImportType type, bool isPrelude) {
@@ -203,15 +220,67 @@ Condensation::Node &CondensationBuilder::pushNode(ImportType type, bool isPrelud
     return node;
 }
 
-Condensation CondensationBuilder::build() {
-    // Now that we're finalizing the condensation graph, build the back edges for each node.
+Condensation CondensationBuilder::build() && {
+    // Now that we're finalizing the condensation graph, sort each node's members and build its back edges.
     for (auto &node : this->condensation.nodes_) {
+        ENFORCE(!node.members.empty());
+        // With stable package identities, member ordering should not depend on SCC discovery order.
+        fast_sort(node.members, [](MangledName left, MangledName right) { return left.owner.id() < right.owner.id(); });
         for (auto imp : node.imports) {
             this->condensation.nodes_[imp].backEdges.push_back(node.id);
         }
     }
 
     return move(this->condensation);
+}
+
+UnorderedSet<MangledName> Condensation::transitiveDependentsOf(const PackageDB &db,
+                                                               const UnorderedSet<MangledName> &packages) const {
+    vector<int> frontier, next;
+    absl::c_transform(packages, back_inserter(frontier), [&db](auto pkg) {
+        auto &info = db.getPackageInfo(pkg);
+        ENFORCE(info.exists());
+
+        // TODO(trevor) remove this comment once we've fully migrated to test-packages
+        // Right now this is an over approximation, as we can't tell if the package specified in `packages` is
+        // referring to the tests, or the application code.
+        auto scc = info.sccID();
+        ENFORCE(scc.has_value());
+        return scc.value();
+    });
+
+    vector<bool> visited(this->nodes_.size(), false);
+    while (!frontier.empty()) {
+        next.clear();
+
+        for (auto scc : frontier) {
+            if (visited[scc]) {
+                continue;
+            }
+
+            visited[scc] = true;
+
+            auto &node = this->nodes_[scc];
+
+            next.insert(next.end(), node.backEdges.begin(), node.backEdges.end());
+        }
+
+        std::swap(frontier, next);
+    }
+
+    UnorderedSet<MangledName> downstream;
+
+    for (auto &node : this->nodes_) {
+        if (!visited[node.id]) {
+            continue;
+        }
+
+        for (auto pkg : node.members) {
+            downstream.insert(pkg);
+        }
+    }
+
+    return downstream;
 }
 
 } // namespace sorbet::core::packages

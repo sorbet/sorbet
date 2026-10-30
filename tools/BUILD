@@ -6,6 +6,12 @@ clang_tool("clang-format")
 
 clang_tool("clang-tidy")
 
+sh_binary(
+    name = "sanitizer_test_wrapper",
+    srcs = ["sanitizer_test_wrapper.sh"],
+    data = ["@llvm_toolchain_22_1_3//:bin/llvm-symbolizer"],
+)
+
 compilation_database(
     name = "compdb",
     testonly = True,
@@ -78,6 +84,7 @@ compilation_database(
         "//main/lsp:lsp_test",
         "//main/lsp:undo_state_test",
         "//main/lsp:watchman_shutdown_test",
+        "//main/lsp:watchman_subscription_test",
         "//main/minimize:minimize",
         "//main/options:options",
         "//main/options:options_test",

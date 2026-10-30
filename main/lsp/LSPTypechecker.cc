@@ -222,6 +222,11 @@ bool LSPTypechecker::typecheck(unique_ptr<LSPFileUpdates> updates, WorkerPool &w
             ENFORCE(updates->updatedFiles.empty());
             ENFORCE(updates->updatedFileRefs.empty());
 
+            // Drop stale entries for typechecked files that are no longer open.
+            for (auto fref : filesTypechecked) {
+                this->indexedFinalGS.erase(fref.id());
+            }
+
             for (auto &ast : result.indexedTrees) {
                 this->indexedFinalGS[ast.file.id()] = move(ast);
             }
@@ -261,7 +266,7 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
     // This path only works for fast path updates.
     ENFORCE(updates.typecheckingPath == TypecheckingPath::Fast);
 
-    Timer timeit(config->logger, "fast_path");
+    Timer timeit(*config->logger, "fast_path");
 
     auto shouldRunIncrementalNamer = updates.fastPathUseIncrementalNamer;
     if (shouldRunIncrementalNamer) {
@@ -272,6 +277,9 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
     }
 
     // Replace error queue with one that is owned by this thread.
+    // NOTE: If the fast path is running in a preemption context, the `errorQueue` of the running slow path will be
+    // saved in the preemption manager; it's always fine at this point to replace the queue, as we will either be
+    // replacing an inactive queue from the idle state, or a dummy queue from the preemption manager.
     gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, errorFlusher);
 
     vector<core::FileRef> toTypecheck;
@@ -285,7 +293,6 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
     }
 
     config->logger->debug("Added {} files that were not part of the edit to the update set", toTypecheck.size());
-    auto editStratum = this->lastStratum;
     UnorderedMap<core::FileRef, shared_ptr<const core::FileHash>> oldFoundHashesForFiles;
     auto ix = -1;
     for (auto &file : updates.updatedFiles) {
@@ -294,7 +301,6 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
         ENFORCE(fref.exists(), "New files are not supported in the fast path");
         ENFORCE(fref == gs->findFileByPath(file->path()));
 
-        auto newHash = file->sourceHash();
         auto oldFile = gs->replaceFile(fref, std::move(file));
 
         if (shouldRunIncrementalNamer) {
@@ -315,13 +321,6 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
             oldFoundHashesForFiles.emplace(fref, oldFile->getFileHash());
         }
 
-        // We track the edit stratum for all files that were updated by the edit, if their source hashes differ. This
-        // will avoid bumping the reopened stratum down when the file was opened by a query like go-to-definition,
-        // but is still fairly coarse grained, as any change will mark the package as needing to be re-typechecked.
-        if (oldFile->sourceHash() != newHash) {
-            editStratum = std::min(this->fileToStratum[fref.id()], editStratum);
-        }
-
         // If file doesn't have a typed: sigil, then we need to ensure it's typechecked using typed: false.
         fref.data(*gs).strictLevel = pipeline::decideStrictLevel(*gs, fref, config->opts);
 
@@ -331,38 +330,51 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
     updates.updatedFiles.clear();
     updates.updatedFileRefs.clear();
 
-    // Remember where in the package graph we're making this change, as that will determine how much we can
-    // copy on the next slow path.
-    gs->reopenStratum(editStratum);
+    // When running the incremental namer, we'll enter new symbols for everything in the edit. This means that we can
+    // no longer consider the suffix of the symbol table that contains the old symbols to be valid, and any future slow
+    // paths must not copy a prefix that overlaps with them. We record that restriction here, using reopenStratum for
+    // the earliest stratum affected by any of the files in the edit. Note that it's important that we consider all
+    // files here, not just those that were modified, as the incremental namer doesn't differentiate.
+    if (shouldRunIncrementalNamer) {
+        auto editStratum = this->lastStratum;
+        for (auto fref : toTypecheck) {
+            editStratum = std::min(editStratum, this->fileToStratum[fref.id()]);
+        }
+        gs->reopenStratum(editStratum);
+    }
 
     if (shouldRunIncrementalNamer && gs->packageDB().enabled()) {
         vector<core::FileRef> packageFiles;
 
         for (auto fref : toTypecheck) {
+            auto &file = fref.data(*gs);
             // Only need to re-run packager if we're going to delete constants and have to re-define
             // their visibility, which only happens if we're running incrementalNamer.
             // NOTE: Using `gs` to access package information here assumes that edits to __package.rb
             // files don't take the fast path. We'll want (or maybe need) to revisit this when we start
             // making edits to `__package.rb` take fast paths.
-            if (!(fref.data(*gs).isPackage(*gs))) {
-                auto pkg = gs->packageDB().getPackageNameForFile(fref);
-                if (pkg.exists()) {
-                    // Since even no-op (e.g. whitespace-only) edits will cause constants to be deleted
-                    // and re-added, we have to add the __package.rb files to set of files to retypecheck
-                    // so that we can re-run PropagateVisibility to set export bits for any constants.
-                    // TODO(jez) Make PropagateVisibility a function of the packageDB so that we
-                    // don't have to completely retypecheck the `__package.rb` file again just to
-                    // make sure one file's constants have the right visibility flags.
-                    auto packageFref = gs->packageDB().getPackageInfo(pkg).fullLoc().file();
-                    if (!packageFref.exists()) {
-                        continue;
-                    }
+            if (file.isPackage(*gs)) {
+                continue;
+            }
 
-                    packageFiles.emplace_back(packageFref);
-                    if (!oldFoundHashesForFiles.contains(fref)) {
-                        oldFoundHashesForFiles.emplace(fref, fref.data(*gs).getFileHash());
-                    }
-                }
+            auto pkg = gs->packageDB().getPackageNameForFile(fref);
+            if (!pkg.exists()) {
+                continue;
+            }
+
+            // Since even no-op (e.g. whitespace-only) edits will cause constants to be deleted
+            // and re-added, the errors in the `__package.rb` file's exports might change (e.g.,
+            // an exported constant might no longer exist), so we have to retypecheck it.
+            // TODO(jez) I think we could stop doing this if we replaced `export` with `package_private!`
+            auto &info = gs->packageDB().getPackageInfo(pkg);
+            auto packageFref = info.fullLoc().file();
+            if (!packageFref.exists()) {
+                continue;
+            }
+
+            packageFiles.emplace_back(packageFref);
+            if (!oldFoundHashesForFiles.contains(fref)) {
+                oldFoundHashesForFiles.emplace(fref, fref.data(*gs).getFileHash());
             }
         }
 
@@ -436,17 +448,51 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
 
 namespace {
 
+struct EditInfo {
+    // The minimum stratum in the package graph traversal file modifications begin.
+    core::packages::Stratum editStratum;
+
+    // The set of packages directly affected by the edit. An empty value indicates that we couldn't restrict the
+    // set of packages down beyond the whole set. This can happen if the package graph was modified, or we encountered
+    // a file that we couldn't attribute to an existing package.
+    optional<UnorderedSet<core::packages::MangledName>> affectedPackages;
+
+    // Compute the set of transitive dependent packages from the set involved in the slow path edit. If a new package
+    // was added, no packages were identified, or a `prelude!` package was part of the edit set, return `nullptr` to
+    // indicate that everything must be checked.
+    unique_ptr<UnorderedSet<core::packages::MangledName>>
+    transitiveAffectedPackages(const core::packages::PackageDB &db) const {
+        if (!this->affectedPackages.has_value() || this->affectedPackages->empty()) {
+            return nullptr;
+        }
+
+        auto updateIncludesPreludePackage = absl::c_any_of(this->affectedPackages.value(), [&db](auto pkg) {
+            auto &info = db.getPackageInfo(pkg);
+            return info.exists() && info.isPreludePackage();
+        });
+        if (updateIncludesPreludePackage) {
+            return nullptr;
+        }
+
+        return make_unique<UnorderedSet<core::packages::MangledName>>(
+            db.condensation().transitiveDependentsOf(db, this->affectedPackages.value()));
+    }
+};
+
 // Determine how much of the symbol table we can copy when starting a slow path edit: any __package.rb modification
 // means that we can't reuse the symbol table.
-core::packages::Stratum determineMaximumPrefix(const core::GlobalState &gs,
-                                               const vector<core::packages::Stratum> &fileToStratum,
-                                               const LSPFileUpdates &update) {
+EditInfo determineMaximumPrefix(const core::GlobalState &gs, const vector<core::packages::Stratum> &fileToStratum,
+                                const LSPFileUpdates &update) {
+    EditInfo result;
+
     // SorbetWorkspaceEditTask filters out empty workspace edits before they reach the indexer or typechecker.
     ENFORCE(!update.updatedFiles.empty());
 
     // We start by assuming we can copy as much of the symbol table as GlobalState says is still a self-contained
     // prefix, which any fast path edit since the last slow path will have lowered.
-    auto editStratum = gs.contiguousStrataUntil();
+    result.editStratum = gs.contiguousStrataUntil();
+
+    result.affectedPackages.emplace();
 
     int ix = -1;
     for (auto &file : update.updatedFiles) {
@@ -454,25 +500,28 @@ core::packages::Stratum determineMaximumPrefix(const core::GlobalState &gs,
 
         auto fref = update.updatedFileRefs[ix];
 
+        core::packages::MangledName pkg;
         core::packages::Stratum fileStratum;
 
         // If this is a new file, we can still copy a prefix if we can determine what package it would belong to.
         if (fref.id() >= fileToStratum.size()) {
-            auto pkg = gs.packageDB().findPackageByPath(gs, *file);
+            pkg = gs.packageDB().findPackageByPath(gs, *file);
 
             // We can't keep any part of the symbol table if we see a new package file, or can't determine what
             // package the file might belong to.
             if (file->hasPackageRbPath() || !pkg.exists()) {
                 fileStratum = core::packages::Stratum(0);
+                pkg = core::packages::MangledName();
             } else {
-                auto &info = gs.packageDB().getPackageInfo(pkg);
-                ENFORCE(info.exists());
-
-                // We have already checked for new package files above, so this should always be true.
-                ENFORCE(info.file.id() < fileToStratum.size());
-                fileStratum = fileToStratum[info.file.id()];
+                // Don't use the stratum of the package's `__package.rb`: for legacy packages that's
+                // their test stratum, which is later than the stratum of their application sources.
+                const auto &stratum = gs.packageDB().getPackageInfo(pkg).stratum;
+                fileStratum = file->isPackagedTest() ? stratum.testStratum : stratum.applicationStratum;
+                ENFORCE(fileStratum != core::packages::Stratum::NONE);
             }
         } else {
+            pkg = gs.packageDB().getPackageNameForFile(fref);
+
             // We can't keep any part of the symbol table if a package file has changed.
             if (file->hasPackageRbPath() && fref.data(gs).sourceHash() != file->sourceHash()) {
                 fileStratum = core::packages::Stratum(0);
@@ -481,13 +530,21 @@ core::packages::Stratum determineMaximumPrefix(const core::GlobalState &gs,
             }
         }
 
+        if (result.affectedPackages.has_value() && pkg.exists()) {
+            result.affectedPackages->insert(pkg);
+        } else {
+            // The affected package set becomes invalid as soon as we detect a modification to the package graph, or
+            // can't attribute a file to a known package.
+            result.affectedPackages = std::nullopt;
+        }
+
         // We need to find the earliest stratum involved in this edit to know what prefix of the symbol table will not
         // be affected by it. This is the opposite of what we do for preemption, as in that case we need to know the
         // point at which an edit's dependencies will all have been satisfied.
-        editStratum = std::min(editStratum, fileStratum);
+        result.editStratum = std::min(result.editStratum, fileStratum);
     }
 
-    return editStratum;
+    return result;
 }
 
 // Determine which files we need to copy into the open files cache (indexedFinalGS), and update the file table to point
@@ -575,17 +632,21 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
 
     auto &logger = config->logger;
     auto slowPathOp = make_optional<ShowOperation>(*config, ShowOperation::Kind::SlowPathBlocking);
-    Timer timeit(logger, "slow_path");
+    Timer timeit(*logger, "slow_path");
     ENFORCE(updates.typecheckingPath != TypecheckingPath::Fast || config->disableFastPath);
     logger->debug("Taking slow path");
 
     core::packages::Stratum startingStratum(0);
+    unique_ptr<UnorderedSet<core::packages::MangledName>> transitiveAffectedPackages;
+
     UnorderedSet<core::FileRef> openFiles;
     ENFORCE(this->cancellationUndoState == nullptr);
     if (cancelable) {
         timeit.setTag("cancelable", "true");
 
-        startingStratum = determineMaximumPrefix(*this->gs, this->fileToStratum, updates);
+        auto editInfo = determineMaximumPrefix(*this->gs, this->fileToStratum, updates);
+        startingStratum = editInfo.editStratum;
+        transitiveAffectedPackages = editInfo.transitiveAffectedPackages(this->gs->packageDB());
 
         auto savedGS =
             std::exchange(this->gs, pipeline::copyForSlowPath(*this->gs, this->config->opts, startingStratum));
@@ -616,7 +677,7 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
         switch (mode) {
             // Initialization fetches the list of files to index from the options
             case SlowPathMode::Init: {
-                Timer timeit(this->config->logger, "initial_init");
+                Timer timeit(*this->config->logger, "initial_init");
 
                 ENFORCE(!this->initialized);
                 this->workspaceFiles = pipeline::reserveFiles(*this->gs, config->opts.inputFileNames);
@@ -625,7 +686,7 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
 
             // Reindexing on the slow path derives the list of inputs files from the file table
             case SlowPathMode::Cancelable: {
-                Timer timeit(this->config->logger, "slow_path_init");
+                Timer timeit(*this->config->logger, "slow_path_init");
 
                 if (!updates.updatedFiles.empty()) {
                     applyFileTableUpdates(*this->gs, this->workspaceFiles, *this->config, openFiles, updates);
@@ -668,7 +729,7 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
         // ----- build the package DB -----
 
         if (this->config->opts.cacheSensitiveOptions.sorbetPackages) {
-            Timer timeit(this->config->logger, "buildPackageDB");
+            Timer timeit(*this->config->logger, "buildPackageDB");
 
             auto ownedKvstore = kvstore.openKVStore();
 
@@ -752,11 +813,11 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
                 optional<Timer> timeit;
                 switch (mode) {
                     case SlowPathMode::Init:
-                        timeit.emplace(this->config->logger, "initial_index");
+                        timeit.emplace(*this->config->logger, "initial_index");
                         break;
 
                     case SlowPathMode::Cancelable:
-                        timeit.emplace(this->config->logger, "slow_path_reindex");
+                        timeit.emplace(*this->config->logger, "slow_path_reindex");
                         break;
                 }
 
@@ -889,9 +950,8 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
             }
 
             auto sorted = sortParsedFiles(*gs, *errorReporter, move(maybeResolved.result()));
-            auto relevantPackages = nullptr;
-            pipeline::typecheck(*gs, move(sorted), config->opts, workers, relevantPackages, cancelable, currentStratum,
-                                preemptManager);
+            pipeline::typecheck(*gs, move(sorted), config->opts, workers, transitiveAffectedPackages.get(), cancelable,
+                                currentStratum, preemptManager);
         }
 
         // [Test only] Ensure that we handled all expected preemptions
@@ -991,7 +1051,7 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const vector<cor
     auto queryCollector = make_shared<QueryCollector>();
     gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, queryCollector);
 
-    Timer timeit(config->logger, "query");
+    Timer timeit(*config->logger, "query");
     prodCategoryCounterInc("lsp.updates", "query");
     ENFORCE(gs->errorQueue->isEmpty());
     ENFORCE(gs->lspQuery.isEmpty());
@@ -1127,8 +1187,10 @@ void LSPTypechecker::updateConfigAndGsFromOptions(const DidChangeConfigurationPa
     }
 }
 
-core::packages::Stratum FileStratumMapping::getStratumForFiles(absl::Span<const core::FileRef> refs) const {
+core::packages::Stratum FileStratumMapping::getStratumForFiles(absl::Span<const core::FileRef> refs,
+                                                               bool includePackages) const {
     core::packages::Stratum stratum(0);
+    auto &db = this->tc.state().packageDB();
     for (auto ref : refs) {
         // Fall back on the last stratum for new files.
         if (!ref.exists() || ref.id() >= this->tc.fileToStratum.size()) {
@@ -1138,24 +1200,58 @@ core::packages::Stratum FileStratumMapping::getStratumForFiles(absl::Span<const 
         stratum = std::max(stratum, this->tc.fileToStratum[ref.id()]);
     }
 
+    // TODO(trevor): remove this once we have fully removed test-namespaces. This accounts for incremental edits, as
+    // they pull in the `__package.rb` file during the fast-path, but don't differentiate between the application/test
+    // partition of a package that hasn't been migrated to test packages. As a result, if we don't default to the
+    // test stratum for the package at this point, we may process the `__package.rb` file in the application stratum,
+    // but with all its test imports and exports present, resulting in incorrect errors about test symbols not being
+    // present.
+    if (db.enabled() && includePackages) {
+        // This loop mirrors the structure of a similar loop in runFastPath, that pulls __package.rb files into the set
+        // of files being typechecked.
+        for (auto fref : refs) {
+            if (fref.data(this->tc.state()).isPackage(this->tc.state())) {
+                continue;
+            }
+
+            auto pkg = db.getPackageNameForFile(fref);
+            if (!pkg.exists()) {
+                continue;
+            }
+
+            auto &info = db.getPackageInfo(pkg);
+            auto packageFref = info.fullLoc().file();
+            if (!packageFref.exists()) {
+                continue;
+            }
+
+            // We don't special case packages that have been migrated to test packages here as their application and
+            // test stratum are the same. So while we could skip them at this point, it doesn't change the result to
+            // process them.
+            stratum = std::max(stratum, info.stratum.testStratum);
+        }
+    }
+
     return stratum;
 }
 
-core::packages::Stratum FileStratumMapping::getStratumForPaths(absl::Span<const string_view> paths) const {
+core::packages::Stratum FileStratumMapping::getStratumForPaths(absl::Span<const string_view> paths,
+                                                               bool includePackages) const {
     vector<core::FileRef> refs;
     refs.reserve(paths.size());
     absl::c_transform(paths, back_inserter(refs),
                       [&gs = this->tc.state()](auto path) { return gs.findFileByPath(path); });
-    return this->getStratumForFiles(refs);
+    return this->getStratumForFiles(refs, includePackages);
 }
 
-core::packages::Stratum FileStratumMapping::getStratumForUris(absl::Span<const string_view> uris) const {
+core::packages::Stratum FileStratumMapping::getStratumForUris(absl::Span<const string_view> uris,
+                                                              bool includePackages) const {
     vector<core::FileRef> refs;
     refs.reserve(uris.size());
     absl::c_transform(uris, back_inserter(refs), [&gs = this->tc.state(), &config = *this->tc.config](auto uri) {
         return config.uri2FileRef(gs, uri);
     });
-    return this->getStratumForFiles(refs);
+    return this->getStratumForFiles(refs, includePackages);
 }
 
 core::packages::Stratum FileStratumMapping::getStratumForFile(core::FileRef ref) const {

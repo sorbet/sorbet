@@ -56,8 +56,8 @@ class LSPLoop {
     std::vector<std::unique_ptr<LSPTask>> commitAndGetTasksForMessage(LSPMessage &msg);
 
 public:
-    LSPLoop(std::unique_ptr<core::GlobalState> initialGS, WorkerPool &workers,
-            const std::shared_ptr<LSPConfiguration> &config, std::unique_ptr<KeyValueStore> kvstore);
+    LSPLoop(std::unique_ptr<core::GlobalState> initialGS, WorkerPool &workers, std::shared_ptr<LSPConfiguration> config,
+            std::unique_ptr<KeyValueStore> kvstore);
     /**
      * Runs the language server on a dedicated thread. Returns the final global state if it exits cleanly, or nullopt
      * on error.
@@ -79,6 +79,14 @@ public:
     void setSlowPathBlocked(bool blocked) {
         typecheckerCoord.setSlowPathBlocked(blocked);
     }
+
+    /**
+     * (For tests only) Control processing and completion of the next scheduled preemption.
+     */
+    void setPreemptionTestHooks(std::shared_ptr<PreemptionTestHooks> hooks);
+
+    /** (For tests only) Acquire and release the task queue mutex to synchronize with a thread releasing it. */
+    void synchronizeTaskQueueForTest();
 };
 
 // TODO(jvilk): Move to LSPTask.

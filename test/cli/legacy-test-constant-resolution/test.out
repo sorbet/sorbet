@@ -1,0 +1,203 @@
+------ monolithic -------------------------------
+prod_none/use.rb:3: Unable to resolve constant `Test` https://srb.help/5002
+     3 |Test::Target::Helper
+        ^^^^
+
+unit_early/test/use.test.rb:3: `EarlyTarget` is not imported https://srb.help/3718
+     3 |Test::EarlyTarget::Value
+        ^^^^^^^^^^^^^^^^^
+    early_target/__package.rb:3: Package defined here
+     3 |class EarlyTarget < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    unit_early/__package.rb:5: Insert `test_import EarlyTarget, only: "test_rb"`
+     5 |  test_import EarlyBridge
+                                 ^
+
+unit_late/test/use.test.rb:3: `LateTarget` is not imported https://srb.help/3718
+     3 |Test::LateTarget::Value
+        ^^^^^^^^^^^^^^^^
+    late_target/__package.rb:3: Package defined here
+     3 |class LateTarget < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    unit_late/__package.rb:3: Insert `test_import LateTarget, only: "test_rb"`
+     3 |class UnitLate < PackageSpec
+                                    ^
+
+unit_none/test/use.test.rb:3: `Target` is not imported https://srb.help/3718
+     3 |Test::Target::TestCase
+        ^^^^^^^^^^^^
+    target/__package.rb:3: Package defined here
+     3 |class Target < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    unit_none/__package.rb:3: Insert `test_import Target, only: "test_rb"`
+     3 |class UnitNone < PackageSpec
+                                    ^
+
+helper_unit_import/test/helper.rb:3: The `test_import` package `Target` can only be used in `.test.rb` files https://srb.help/3720
+     3 |Test::Target::TestCase
+        ^^^^^^^^^^^^
+    target/__package.rb:3: Defined here
+     3 |class Target < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    This is because this `test_import` is declared with `only: 'test_rb'`, which means the constant can only be used in `.test.rb` files.
+  Autocorrect: Use `-a` to autocorrect
+    helper_unit_import/__package.rb:3: Insert `test_import Target`
+     3 |class HelperUnitImport < PackageSpec
+                                            ^
+    helper_unit_import/__package.rb:4: Delete
+     4 |  test_import Target, only: "test_rb"
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+prod_test/use.rb:3: Unable to resolve constant `Test` https://srb.help/5002
+     3 |Test::Target::Helper
+        ^^^^
+
+prod_normal/use.rb:3: Unable to resolve constant `Test` https://srb.help/5002
+     3 |Test::Target::Helper
+        ^^^^
+Errors: 7
+------ package-directed: isolated production, no import ------
+prod_none/use.rb:3: Unable to resolve constant `Test` https://srb.help/5002
+     3 |Test::Target::Helper
+        ^^^^
+Errors: 1
+------ package-directed: isolated production, normal import ------
+prod_normal/use.rb:3: Unable to resolve constant `Test` https://srb.help/5002
+     3 |Test::Target::Helper
+        ^^^^
+Errors: 1
+------ package-directed: isolated production, test import ------
+prod_test/use.rb:3: Unable to resolve constant `Test` https://srb.help/5002
+     3 |Test::Target::Helper
+        ^^^^
+Errors: 1
+------ package-directed: isolated test unit, no import ------
+unit_none/test/use.test.rb:3: `Target` is not imported https://srb.help/3718
+     3 |Test::Target::TestCase
+        ^^^^^^^^^^^^
+    target/__package.rb:3: Package defined here
+     3 |class Target < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    unit_none/__package.rb:3: Insert `test_import Target, only: "test_rb"`
+     3 |class UnitNone < PackageSpec
+                                    ^
+Errors: 1
+------ package-directed: unimported target test SCC is later ------
+unit_late/test/use.test.rb:3: Unable to resolve constant `Test` https://srb.help/5002
+     3 |Test::LateTarget::Value
+        ^^^^
+  Did you mean `Set`? Use `-a` to autocorrect
+    unit_late/test/use.test.rb:3: Replace with `Set`
+     3 |Test::LateTarget::Value
+        ^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/set.rbi#LCENSORED: `Set` defined here
+      NN |class Set < Object
+          ^^^^^^^^^^^^^^^^^^
+  Did you mean `Net`? Use `-a` to autocorrect
+    unit_late/test/use.test.rb:3: Replace with `Net`
+     3 |Test::LateTarget::Value
+        ^^^^
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/net.rbi#LCENSORED: `Net` defined here
+    NN |module Net
+        ^^^^^^^^^^
+Errors: 1
+------ package-directed: unimported target test SCC is earlier ------
+unit_early/test/use.test.rb:3: `EarlyTarget` is not imported https://srb.help/3718
+     3 |Test::EarlyTarget::Value
+        ^^^^^^^^^^^^^^^^^
+    early_target/__package.rb:3: Package defined here
+     3 |class EarlyTarget < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    unit_early/__package.rb:5: Insert `test_import EarlyTarget, only: "test_rb"`
+     5 |  test_import EarlyBridge
+                                 ^
+Errors: 1
+------ package-directed: isolated test unit, test import ------
+No errors! Great job.
+------ package-directed: isolated helper, helper import ------
+No errors! Great job.
+------ package-directed: isolated helper, test-unit import ------
+helper_unit_import/test/helper.rb:3: The `test_import` package `Target` can only be used in `.test.rb` files https://srb.help/3720
+     3 |Test::Target::TestCase
+        ^^^^^^^^^^^^
+    target/__package.rb:3: Defined here
+     3 |class Target < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    This is because this `test_import` is declared with `only: 'test_rb'`, which means the constant can only be used in `.test.rb` files.
+  Autocorrect: Use `-a` to autocorrect
+    helper_unit_import/__package.rb:3: Insert `test_import Target`
+     3 |class HelperUnitImport < PackageSpec
+                                            ^
+    helper_unit_import/__package.rb:4: Delete
+     4 |  test_import Target, only: "test_rb"
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 1
+------ package-directed: complete graph ----------------------
+prod_none/use.rb:3: Unable to resolve constant `Test` https://srb.help/5002
+     3 |Test::Target::Helper
+        ^^^^
+
+prod_test/use.rb:3: Unable to resolve constant `Test` https://srb.help/5002
+     3 |Test::Target::Helper
+        ^^^^
+
+unit_late/test/use.test.rb:3: `LateTarget` is not imported https://srb.help/3718
+     3 |Test::LateTarget::Value
+        ^^^^^^^^^^^^^^^^
+    late_target/__package.rb:3: Package defined here
+     3 |class LateTarget < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    unit_late/__package.rb:3: Insert `test_import LateTarget, only: "test_rb"`
+     3 |class UnitLate < PackageSpec
+                                    ^
+
+unit_none/test/use.test.rb:3: `Target` is not imported https://srb.help/3718
+     3 |Test::Target::TestCase
+        ^^^^^^^^^^^^
+    target/__package.rb:3: Package defined here
+     3 |class Target < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    unit_none/__package.rb:3: Insert `test_import Target, only: "test_rb"`
+     3 |class UnitNone < PackageSpec
+                                    ^
+
+prod_normal/use.rb:3: Unable to resolve constant `Test` https://srb.help/5002
+     3 |Test::Target::Helper
+        ^^^^
+
+helper_unit_import/test/helper.rb:3: The `test_import` package `Target` can only be used in `.test.rb` files https://srb.help/3720
+     3 |Test::Target::TestCase
+        ^^^^^^^^^^^^
+    target/__package.rb:3: Defined here
+     3 |class Target < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    This is because this `test_import` is declared with `only: 'test_rb'`, which means the constant can only be used in `.test.rb` files.
+  Autocorrect: Use `-a` to autocorrect
+    helper_unit_import/__package.rb:3: Insert `test_import Target`
+     3 |class HelperUnitImport < PackageSpec
+                                            ^
+    helper_unit_import/__package.rb:4: Delete
+     4 |  test_import Target, only: "test_rb"
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+unit_early/test/use.test.rb:3: `EarlyTarget` is not imported https://srb.help/3718
+     3 |Test::EarlyTarget::Value
+        ^^^^^^^^^^^^^^^^^
+    early_target/__package.rb:3: Package defined here
+     3 |class EarlyTarget < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    unit_early/__package.rb:5: Insert `test_import EarlyTarget, only: "test_rb"`
+     5 |  test_import EarlyBridge
+                                 ^
+Errors: 7

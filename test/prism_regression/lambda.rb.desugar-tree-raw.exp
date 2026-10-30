@@ -8,7 +8,7 @@ ClassDef{
     }]
   rhs = [
     Send{
-      flags = {}
+      flags = {bracesBlock}
       recv = ConstantLit{
         symbol = (module ::Kernel)
         orig = nullptr
@@ -25,7 +25,7 @@ ClassDef{
     }
 
     Send{
-      flags = {}
+      flags = {bracesBlock}
       recv = ConstantLit{
         symbol = (module ::Kernel)
         orig = nullptr
@@ -49,7 +49,7 @@ ClassDef{
     }
 
     Send{
-      flags = {}
+      flags = {bracesBlock}
       recv = ConstantLit{
         symbol = (module ::Kernel)
         orig = nullptr
@@ -76,7 +76,7 @@ ClassDef{
     }
 
     Send{
-      flags = {privateOk}
+      flags = {privateOk, bracesBlock}
       recv = Self
       fun = <U lambda>
       block = Block {
@@ -90,7 +90,7 @@ ClassDef{
     }
 
     Send{
-      flags = {privateOk}
+      flags = {privateOk, bracesBlock}
       recv = Self
       fun = <U lambda>
       block = Block {
@@ -119,7 +119,7 @@ ClassDef{
       args = [
         Literal{ value = :arg1 }
         Send{
-          flags = {}
+          flags = {bracesBlock}
           recv = ConstantLit{
             symbol = (module ::Kernel)
             orig = nullptr
@@ -138,7 +138,7 @@ ClassDef{
     }
 
     Send{
-      flags = {}
+      flags = {bracesBlock}
       recv = ConstantLit{
         symbol = (module ::Kernel)
         orig = nullptr
@@ -197,7 +197,7 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            flags = {}
+            flags = {bracesBlock}
             recv = ConstantLit{
               symbol = (module ::Kernel)
               orig = nullptr
@@ -217,7 +217,7 @@ ClassDef{
     }
 
     Send{
-      flags = {}
+      flags = {bracesBlock}
       recv = ConstantLit{
         symbol = (module ::Kernel)
         orig = nullptr

@@ -69,6 +69,11 @@ module T::Private::Methods
   #
   # The ones that are here are the "private" ones used only for the implementation
   class DeclBuilder
+    # The public RBI leaves this untyped because the resolver validates sig DSL
+    # arguments. Use the validated type when checking the runtime implementation.
+    sig {params(names: Symbol).returns(DeclBuilder)}
+    def type_parameters(*names); end
+
     sig {returns(Declaration)}
     def decl; end
 
