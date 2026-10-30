@@ -79,12 +79,15 @@ class LSPTypechecker final {
     std::vector<core::FileRef> workspaceFiles;
 
     /**
-     * Trees that have been indexed with this->gs between slow path runs, which means that they may have names that are
-     * not present in the name table of the indexer. This is a sparse diff of trees indexed by file id, and should be
-     * consulted before re-indexing trees. This lookup strategy is implemented by this->getResolved. All of the trees in
-     * this map are valid to use with this->gs.
+     * Resolved trees for files that are open in the client, indexed by file id. These are consulted by
+     * this->getResolved before re-indexing and re-resolving a file.
+     *
+     * Every tree in this map is valid to use with this->gs: its names are present in this->gs's name table (which may
+     * not be true of the indexer's name table), and every symbol it references is still present in this->gs's symbol
+     * table. Maintaining the latter property requires discarding trees whenever an operation might delete symbols that
+     * a tree references (see the fast path in this->typecheck).
      */
-    UnorderedMap<int, ast::ParsedFile> indexedFinalGS;
+    UnorderedMap<int, ast::ParsedFile> resolvedFinalGS;
 
     /** Set only when typechecking is happening on the slow path. Contains all of the state needed to restore
      * LSPTypechecker to its pre-slow-path state. Can be null, which indicates that no slow path is currently running */
@@ -122,8 +125,9 @@ class LSPTypechecker final {
         // All of the files that we typechecked during the fast path.
         std::vector<core::FileRef> filesTypechecked;
 
-        // Copies of the indexed trees that were updated during the fast path, for updating the cache of open files.
-        std::vector<ast::ParsedFile> indexedTrees;
+        // Copies of the resolved trees for files typechecked during the fast path that are open in the client, for
+        // updating the cache of open files.
+        std::vector<ast::ParsedFile> resolvedTrees;
 
         // Whether the fast path ran the incremental namer, which deletes and re-enters the symbols defined in the
         // files it typechecks. Resolved trees for other files might reference those deleted symbols.
@@ -135,10 +139,10 @@ class LSPTypechecker final {
                                std::shared_ptr<core::ErrorFlusher> errorFlusher, bool isNoopUpdateForRetypecheck) const;
 
     /**
-     * Populate `this->indexedFinalGS` with copies of indexed trees from the `indexed` span, whose files are open in the
-     * client.
+     * Populate `this->resolvedFinalGS` with copies of resolved trees from the `resolved` span, whose files are open in
+     * the client.
      */
-    void cacheUpdatedFiles(absl::Span<const ast::ParsedFile> indexed);
+    void cacheUpdatedFiles(absl::Span<const ast::ParsedFile> resolved);
 
 public:
     LSPTypechecker(std::shared_ptr<const LSPConfiguration> config,
@@ -181,13 +185,16 @@ public:
     ast::ExpressionPtr getLocalVarTrees(core::FileRef fref) const;
 
     /**
-     * Returns copies of the indexed trees that have been run through the incremental resolver. There is no guarantee
-     * that the resolved trees are returned in the same order that the FileRefs appear in the input span.
+     * Returns copies of the resolved trees for the given files. There is no guarantee that the resolved trees are
+     * returned in the same order that the FileRefs appear in the input span.
+     *
+     * Trees for files that are open in the client are served from (and, on a miss, saved to) `this->resolvedFinalGS`.
+     * Other files are indexed and run through the incremental resolver.
      */
     std::vector<ast::ParsedFile> getResolved(absl::Span<const core::FileRef> frefs, WorkerPool &workers);
 
     /**
-     * Returns a copy of the indexed tree that has been run through the incremental resolver.
+     * Returns a copy of the resolved tree for the given file.
      */
     ast::ParsedFile getResolved(core::FileRef fref, WorkerPool &workers);
 
