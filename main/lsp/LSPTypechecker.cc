@@ -222,6 +222,11 @@ bool LSPTypechecker::typecheck(unique_ptr<LSPFileUpdates> updates, WorkerPool &w
             ENFORCE(updates->updatedFiles.empty());
             ENFORCE(updates->updatedFileRefs.empty());
 
+            if (result.reenteredSymbols) {
+                // Trees for files outside of `filesTypechecked` might reference symbols that were deleted.
+                this->indexedFinalGS.clear();
+            }
+
             // Drop stale entries for typechecked files that are no longer open.
             for (auto fref : filesTypechecked) {
                 this->indexedFinalGS.erase(fref.id());
@@ -391,13 +396,6 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
     vector<ast::ParsedFile> updatedIndexed;
     for (core::FileRef fref : toTypecheck) {
         auto t = pipeline::indexOne(config->opts, *gs, fref);
-
-        // As the fast-path might pull in unrelated files in the incremental case, we make sure to only cache files that
-        // are explicitly open in the editor.
-        if (fref.data(*gs).isOpenInClient()) {
-            toCache.emplace_back(ast::ParsedFile{t.tree.deepCopy(), t.file});
-        }
-
         updatedIndexed.emplace_back(std::move(t));
 
         // See earlier in the method for an explanation of the isNoopUpdateForRetypecheck check here.
@@ -415,6 +413,15 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
                         ? pipeline::incrementalResolve(*gs, move(updatedIndexed), std::move(oldFoundHashesForFiles),
                                                        config->opts, workers)
                         : pipeline::incrementalResolve(*gs, move(updatedIndexed), nullopt, config->opts, workers);
+
+    for (auto &t : resolved) {
+        // As the fast-path might pull in unrelated files in the incremental case, we make sure to only cache files that
+        // are explicitly open in the editor.
+        if (t.file.data(*gs).isOpenInClient()) {
+            toCache.emplace_back(ast::ParsedFile{t.tree.deepCopy(), t.file});
+        }
+    }
+
     auto sorted = sortParsedFiles(*gs, *errorReporter, move(resolved));
     const auto cancelable = false;
     auto relevantPackages = nullptr;
@@ -439,7 +446,7 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
         "Running fast path over num_files={} incrementalNamer={} preemption={} duration={} files=[{}]",
         toTypecheck.size(), shouldRunIncrementalNamer, isPreemption, duration.usec, files);
 
-    return FastPathResult{move(toTypecheck), move(toCache)};
+    return FastPathResult{move(toTypecheck), move(toCache), shouldRunIncrementalNamer};
 }
 
 namespace {
@@ -742,8 +749,6 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
 
             kvstore.closeKVStore(move(ownedKvstore));
 
-            this->cacheUpdatedFiles(packageIndexed);
-
             // Only need to compute FoundDefHashes when running to compute a FileHash
             auto foundHashes = nullptr;
 
@@ -809,7 +814,6 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
                         return currentStratum;
                     }
                     nonPackagedIndexed = std::move(result.result());
-                    this->cacheUpdatedFiles(nonPackagedIndexed);
                 }
 
                 // Only write the cache during initialization to avoid unbounded growth.
@@ -860,6 +864,8 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
             if (!maybeResolved.hasResult()) {
                 return currentStratum;
             }
+
+            this->cacheUpdatedFiles(maybeResolved.result());
 
             if (gs->sleepInSlowPathSeconds.has_value()) {
                 auto sleepDuration = gs->sleepInSlowPathSeconds.value();
@@ -1076,6 +1082,7 @@ ast::ExpressionPtr LSPTypechecker::getLocalVarTrees(core::FileRef fref) const {
 vector<ast::ParsedFile> LSPTypechecker::getResolved(absl::Span<const core::FileRef> frefs, WorkerPool &workers) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     vector<ast::ParsedFile> updatedIndexed;
+    vector<ast::ParsedFile> cachedResolved;
 
     vector<core::FileRef> toIndex;
     toIndex.reserve(frefs.size());
@@ -1085,7 +1092,7 @@ vector<ast::ParsedFile> LSPTypechecker::getResolved(absl::Span<const core::FileR
         if (treeFinalGS != this->indexedFinalGS.end()) {
             auto &indexed = treeFinalGS->second;
             if (indexed.tree) {
-                updatedIndexed.emplace_back(ast::ParsedFile{indexed.tree.deepCopy(), indexed.file});
+                cachedResolved.emplace_back(ast::ParsedFile{indexed.tree.deepCopy(), indexed.file});
             }
         } else {
             ENFORCE(id < this->gs->filesUsed());
@@ -1103,12 +1110,25 @@ vector<ast::ParsedFile> LSPTypechecker::getResolved(absl::Span<const core::FileR
         absl::c_move(std::move(indexed), std::back_inserter(updatedIndexed));
     }
 
+    if (updatedIndexed.empty()) {
+        return cachedResolved;
+    }
+
     // There are two incrementalResolve modes: one when running for the purpose of processing a file update,
     // and one for running an LSP query on an already-resolved file.
     // In getResolved, we want the LSP query behavior, not the file update behavior, which we get by passing nullopt.
+    // This mode does not delete any symbols, so it does not invalidate any trees in `indexedFinalGS`.
     auto foundHashesForFiles = nullopt;
 
-    return pipeline::incrementalResolve(*gs, move(updatedIndexed), move(foundHashesForFiles), config->opts, workers);
+    auto resolved = pipeline::incrementalResolve(*gs, move(updatedIndexed), move(foundHashesForFiles), config->opts, workers);
+    for (auto &t : resolved) {
+        if (t.file.data(*gs).isOpenInClient()) {
+            this->indexedFinalGS[t.file.id()] = ast::ParsedFile{t.tree.deepCopy(), t.file};
+        }
+    }
+
+    absl::c_move(std::move(cachedResolved), std::back_inserter(resolved));
+    return resolved;
 }
 
 ast::ParsedFile LSPTypechecker::getResolved(core::FileRef fref, WorkerPool &workers) {
