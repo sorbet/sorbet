@@ -183,8 +183,8 @@ module T::Utils
   # this call, `T::Utils.signature_for_method` returns `nil` for those methods,
   # and nothing can rebuild them.
   #
-  # Call this while eagerly preloading a codebase (e.g. at service startup) to
-  # trade that introspection for memory, and again if more code loads later.
+  # Call this once after eagerly preloading a codebase (e.g. at service startup)
+  # and after `run_all_sig_blocks`, to trade that introspection for memory.
   def self.drop_unchecked_sigs!
     T::Private::Methods.drop_unchecked_sigs!
     nil

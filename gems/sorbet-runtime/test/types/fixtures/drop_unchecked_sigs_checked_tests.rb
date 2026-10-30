@@ -25,20 +25,20 @@ rescue StandardError => e
   false
 end
 
-klass = Class.new do
+class CheckedTests
   extend T::Sig
 
   sig { params(x: Symbol).returns(Symbol).checked(:tests) }
   def foo(x)
     x
   end
-  alias_method :bar, :foo
+  alias bar foo
 end
 
-check("the method runs") { klass.new.foo(:foo) == :foo }
-check("the sig is kept") { !T::Utils.signature_for_method(klass.instance_method(:foo)).nil? }
+check("the method runs") { CheckedTests.new.foo(:foo) == :foo }
+check("the sig is kept") { !T::Utils.signature_for_method(CheckedTests.instance_method(:foo)).nil? }
 check("the alias still validates") do
-  klass.new.bar(1)
+  CheckedTests.new.bar(1)
   false
 rescue TypeError
   true
