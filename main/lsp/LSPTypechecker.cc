@@ -224,16 +224,16 @@ bool LSPTypechecker::typecheck(unique_ptr<LSPFileUpdates> updates, WorkerPool &w
 
             if (result.reenteredSymbols) {
                 // Trees for files outside of `filesTypechecked` might reference symbols that were deleted.
-                this->indexedFinalGS.clear();
+                this->resolvedFinalGS.clear();
             }
 
             // Drop stale entries for typechecked files that are no longer open.
             for (auto fref : filesTypechecked) {
-                this->indexedFinalGS.erase(fref.id());
+                this->resolvedFinalGS.erase(fref.id());
             }
 
-            for (auto &ast : result.indexedTrees) {
-                this->indexedFinalGS[ast.file.id()] = move(ast);
+            for (auto &ast : result.resolvedTrees) {
+                this->resolvedFinalGS[ast.file.id()] = move(ast);
             }
 
             prodCategoryCounterInc("lsp.updates", "fastpath");
@@ -641,7 +641,7 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
             std::exchange(this->gs, pipeline::copyForSlowPath(*this->gs, this->config->opts, startingStratum));
 
         this->cancellationUndoState =
-            make_unique<UndoState>(std::move(savedGS), std::move(this->indexedFinalGS), move(this->fileToStratum),
+            make_unique<UndoState>(std::move(savedGS), std::move(this->resolvedFinalGS), move(this->fileToStratum),
                                    this->lastStratum, this->workspaceFiles, updates.epoch);
     } else {
         timeit.setTag("cancelable", "false");
@@ -965,7 +965,7 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
         // Eagerly restore the state to how it was before this slow path, so that we're not holding the old state for an
         // arbitrarily long time. The next update will be responsible for freeing the underlying UndoState after it
         // makes use of the epoch field to determine additional files to include in the edit.
-        cancellationUndoState->restore(this->gs, this->indexedFinalGS, this->fileToStratum, this->lastStratum,
+        cancellationUndoState->restore(this->gs, this->resolvedFinalGS, this->fileToStratum, this->lastStratum,
                                        this->workspaceFiles);
         logger->debug("[Typechecker] Typecheck run for epoch {} was canceled.", updates.epoch);
     }
@@ -973,13 +973,13 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
     return {committed, startingStratum};
 }
 
-void LSPTypechecker::cacheUpdatedFiles(absl::Span<const ast::ParsedFile> indexed) {
+void LSPTypechecker::cacheUpdatedFiles(absl::Span<const ast::ParsedFile> resolved) {
     auto &logger = *config->logger;
     Timer timeit(logger, "slow_path.cache_open_files");
 
-    for (auto &ast : indexed) {
+    for (auto &ast : resolved) {
         if (ast.file.data(*this->gs).isOpenInClient()) {
-            this->indexedFinalGS[ast.file.id()] = ast::ParsedFile{ast.tree.deepCopy(), ast.file};
+            this->resolvedFinalGS[ast.file.id()] = ast::ParsedFile{ast.tree.deepCopy(), ast.file};
         }
     }
 }
@@ -1088,11 +1088,11 @@ vector<ast::ParsedFile> LSPTypechecker::getResolved(absl::Span<const core::FileR
     toIndex.reserve(frefs.size());
     for (auto fref : frefs) {
         const auto id = fref.id();
-        auto treeFinalGS = this->indexedFinalGS.find(id);
-        if (treeFinalGS != this->indexedFinalGS.end()) {
-            auto &indexed = treeFinalGS->second;
-            if (indexed.tree) {
-                cachedResolved.emplace_back(ast::ParsedFile{indexed.tree.deepCopy(), indexed.file});
+        auto treeFinalGS = this->resolvedFinalGS.find(id);
+        if (treeFinalGS != this->resolvedFinalGS.end()) {
+            auto &cached = treeFinalGS->second;
+            if (cached.tree) {
+                cachedResolved.emplace_back(ast::ParsedFile{cached.tree.deepCopy(), cached.file});
             }
         } else {
             ENFORCE(id < this->gs->filesUsed());
@@ -1117,14 +1117,14 @@ vector<ast::ParsedFile> LSPTypechecker::getResolved(absl::Span<const core::FileR
     // There are two incrementalResolve modes: one when running for the purpose of processing a file update,
     // and one for running an LSP query on an already-resolved file.
     // In getResolved, we want the LSP query behavior, not the file update behavior, which we get by passing nullopt.
-    // This mode does not delete any symbols, so it does not invalidate any trees in `indexedFinalGS`.
+    // This mode does not delete any symbols, so it does not invalidate any trees in `resolvedFinalGS`.
     auto foundHashesForFiles = nullopt;
 
     auto resolved =
         pipeline::incrementalResolve(*gs, move(updatedIndexed), move(foundHashesForFiles), config->opts, workers);
     for (auto &t : resolved) {
         if (t.file.data(*gs).isOpenInClient()) {
-            this->indexedFinalGS[t.file.id()] = ast::ParsedFile{t.tree.deepCopy(), t.file};
+            this->resolvedFinalGS[t.file.id()] = ast::ParsedFile{t.tree.deepCopy(), t.file};
         }
     }
 
