@@ -28,6 +28,13 @@ Call these methods **after** all application code has been loaded (e.g., in a Ra
 
 The order matters. Running a `sig` block or a `T.type_alias` block creates the type objects it mentions, and `build_all_types` only reaches type objects that exist when it runs, so it goes last.
 
+There is also a method that frees memory at that same point, instead of forcing work to happen early:
+
+```ruby
+# Free the signatures whose runtime checks never run
+T::Utils.drop_unchecked_sigs!
+```
+
 [nakayoshi_fork]: https://github.com/ko1/nakayoshi_fork
 
 ## `T::Utils.run_all_sig_blocks`
@@ -65,3 +72,32 @@ T::Utils.build_all_types
 ```
 
 Type objects initialize lazily: composite types like `T.any` and `T::Array` coerce the types they wrap on first use, and simple types memoize their name and `T.nilable` form. In a forked worker, that first use writes onto a type object shared with the parent, copying the memory page that holds it. This method builds those fields for every type object in the process up front, so the pages stay shared after forking.
+
+## `T::Utils.drop_unchecked_sigs!`
+
+```ruby
+T::Utils.drop_unchecked_sigs!
+```
+
+A `sig` that never checks anything at runtime still costs memory: `sorbet-runtime` keeps its `Signature` object so that tools can introspect the method. These are the sigs marked `.checked(:never)`, plus the sigs marked `.checked(:tests)` outside of a test environment. In a large application they can hold many megabytes.
+
+This method frees the signatures that `sorbet-runtime` holds at the time of the call. There is no way back: nothing can rebuild a freed signature, because its `sig` block has already run.
+
+Call it once, **after** all application code has been loaded and **after** `T::Utils.run_all_sig_blocks`, so that every `sig` block has run and recorded its signature:
+
+```ruby
+T::Utils.run_all_sig_blocks
+T::Utils.drop_unchecked_sigs!
+```
+
+Signatures recorded after the call (for example by code that loads later) are kept as usual.
+
+> **Warning**: This method changes the result of `T::Utils.signature_for_method`. Before the call, it returns a signature for every method with a `sig`. After the call, it returns a signature only for methods whose sigs are checked at runtime (and for `abstract` methods), and `nil` for the rest. If you only call this method in production (as with the other methods on this page), `signature_for_method` will give different answers in production than in development and tests. Only call this method if no code in the application (including gems) relies on `signature_for_method` returning a signature for every method with a `sig`.
+
+Runtime dispatch never uses these signatures, so calls behave the same. Methods with such sigs keep no wrapper at all, so `Method#arity`, `Method#source_location` and `Method#parameters` report the same values as before. Apart from `signature_for_method`, the only other visible change is that final method violations lose the `Made final here:` source location.
+
+Signatures on `abstract` methods are never dropped, because `T::AbstractUtils` reads them at any time.
+
+> **Note**: An application that prepends `T::CompatibilityPatches::MethodExtensions` must take the `Method` object after the `sig` block has run. A handle taken from the first-call wrapper before that reports the parameters of the wrapper, because the patch can no longer find the dropped signature.
+
+> **Note**: A `sig` block that runs after this call cannot see a dropped signature on the method it overrides, so `sorbet-runtime` skips the override checks against that parent signature. This is another reason to call it only once all code has been loaded.
