@@ -128,10 +128,6 @@ class LSPTypechecker final {
         // Copies of the resolved trees for files typechecked during the fast path that are open in the client, for
         // updating the cache of open files.
         std::vector<ast::ParsedFile> resolvedTrees;
-
-        // Whether the fast path ran the incremental namer, which deletes and re-enters the symbols defined in the
-        // files it typechecks. Resolved trees for other files might reference those deleted symbols.
-        bool reenteredSymbols;
     };
 
     /** Runs incremental typechecking on the provided updates. Returns the final list of files typechecked. */

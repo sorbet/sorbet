@@ -222,8 +222,9 @@ bool LSPTypechecker::typecheck(unique_ptr<LSPFileUpdates> updates, WorkerPool &w
             ENFORCE(updates->updatedFiles.empty());
             ENFORCE(updates->updatedFileRefs.empty());
 
-            if (result.reenteredSymbols) {
-                // Trees for files outside of `filesTypechecked` might reference symbols that were deleted.
+            if (updates->fastPathUseIncrementalNamer) {
+                // The incremental namer deletes and re-enters the symbols defined in the files it typechecks, so trees
+                // for files outside of `filesTypechecked` might reference symbols that were deleted.
                 this->resolvedFinalGS.clear();
             } else {
                 // Drop stale entries for typechecked files that are no longer open.
@@ -446,7 +447,7 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
         "Running fast path over num_files={} incrementalNamer={} preemption={} duration={} files=[{}]",
         toTypecheck.size(), shouldRunIncrementalNamer, isPreemption, duration.usec, files);
 
-    return FastPathResult{move(toTypecheck), move(toCache), shouldRunIncrementalNamer};
+    return FastPathResult{move(toTypecheck), move(toCache)};
 }
 
 namespace {
