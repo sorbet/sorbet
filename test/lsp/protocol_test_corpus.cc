@@ -1913,9 +1913,9 @@ TEST_CASE_FIXTURE(ProtocolTest, "ErrorsRemainAfterSlowPathRestart") {
             CHECK_EQ(params->typecheckingPath, TypecheckingPath::Slow);
             CHECK_EQ(params->status, SorbetTypecheckRunStatus::Ended);
 
-            // We're modifying package `Root::Foo`, but we had made a fast-path edit that changed a file in `Root`. As a
-            // result, we start back in stratum `0`.
-            CHECK_EQ(params->startingStratum, 0);
+            // We're modifying package `Root::Foo`, and not running the incremental namer. Thus, we start at stratum 1
+            // instead of 0.
+            CHECK_EQ(params->startingStratum, 1);
         }
 
         // As we will skip typechecking `Root` when only `Root::A` changed, we will only see the error that was
@@ -2011,9 +2011,9 @@ TEST_CASE_FIXTURE(ProtocolTest, "ViewingFilesAffectsFastPathEditStratum") {
             CHECK_EQ(params->typecheckingPath, TypecheckingPath::Slow);
             CHECK_EQ(params->status, SorbetTypecheckRunStatus::Ended);
 
-            // We're modifying package `Root::Foo`, after a no-op edit to `Root`. However, as fast-path edits will
-            // always shrink the copyable prefix of the symbol table, we restart at stratum `0`.
-            CHECK_EQ(params->startingStratum, 0);
+            // We're modifying package `Root::Foo`, after a no-op edit to `Root`. Since that no-op does not require the
+            // incremental namer, we start back up from stratum 1, not 0.
+            CHECK_EQ(params->startingStratum, 1);
         }
 
         assertErrorDiagnostics(move(resps), {{files[3].first, 7, "Method `+` does not exist"}});
