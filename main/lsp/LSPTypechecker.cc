@@ -1120,7 +1120,8 @@ vector<ast::ParsedFile> LSPTypechecker::getResolved(absl::Span<const core::FileR
     // This mode does not delete any symbols, so it does not invalidate any trees in `indexedFinalGS`.
     auto foundHashesForFiles = nullopt;
 
-    auto resolved = pipeline::incrementalResolve(*gs, move(updatedIndexed), move(foundHashesForFiles), config->opts, workers);
+    auto resolved =
+        pipeline::incrementalResolve(*gs, move(updatedIndexed), move(foundHashesForFiles), config->opts, workers);
     for (auto &t : resolved) {
         if (t.file.data(*gs).isOpenInClient()) {
             this->indexedFinalGS[t.file.id()] = ast::ParsedFile{t.tree.deepCopy(), t.file};
