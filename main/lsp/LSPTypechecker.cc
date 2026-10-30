@@ -225,11 +225,11 @@ bool LSPTypechecker::typecheck(unique_ptr<LSPFileUpdates> updates, WorkerPool &w
             if (result.reenteredSymbols) {
                 // Trees for files outside of `filesTypechecked` might reference symbols that were deleted.
                 this->resolvedFinalGS.clear();
-            }
-
-            // Drop stale entries for typechecked files that are no longer open.
-            for (auto fref : filesTypechecked) {
-                this->resolvedFinalGS.erase(fref.id());
+            } else {
+                // Drop stale entries for typechecked files that are no longer open.
+                for (auto fref : filesTypechecked) {
+                    this->resolvedFinalGS.erase(fref.id());
+                }
             }
 
             for (auto &ast : result.resolvedTrees) {
