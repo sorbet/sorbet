@@ -922,16 +922,6 @@ private:
 };
 
 void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, PackageInfo &info) {
-    // Reset the package state, as this might not be the first time we've seen the package.
-    info.sccID().reset();
-    info.testSccID().reset();
-    info.importedPackageNames.clear();
-    info.exports_.clear();
-    info.visibleTo_.clear();
-    info.extraDirectives_.clear();
-    info.usesTestPackages = false;
-    info.hasSubPackages = false;
-
     // We attempt to determine if this package is test-packages compatible before processing its body, as that changes
     // the local interpretation of some of the package DSL. This doesn't work for `test!` packages though, as both
     // packaging systems allow for `__package.rb` files to live inside of a `test` directory.
@@ -948,6 +938,13 @@ void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, P
             info.usesTestPackages = gs.findFileByPath(testPackagePath).exists();
         }
     }
+
+    // The body walk appends to these lists. This might not be the first time we've seen the package (e.g., when a
+    // slow path copies a prefix of the symbol table, it also copies the populated package DB), so clear them first.
+    info.importedPackageNames.clear();
+    info.exports_.clear();
+    info.visibleTo_.clear();
+    info.extraDirectives_.clear();
 
     PackageSpecBodyWalk bodyWalk(info);
     core::Context ctx(gs, core::Symbols::root(), package.file);
