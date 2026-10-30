@@ -1,4 +1,5 @@
 #include "core/packages/Condensation.h"
+#include "MangledName.h"
 #include "common/sort/sort.h"
 #include "common/strings/formatting.h"
 #include "core/GlobalState.h"
@@ -18,11 +19,141 @@ struct TraversalBuilder {
     vector<uint32_t> sccLengths;
     vector<uint32_t> stratumLengths;
 
+    // Indicates if this node will be part of the traversal at all
+    vector<bool> skipNode;
+
     Condensation::Traversal result;
 
-    TraversalBuilder(const core::GlobalState &gs, absl::Span<const Condensation::Node> nodes)
+    TraversalBuilder(const core::GlobalState &gs, absl::Span<const Condensation::Node> nodes,
+                     UnorderedSet<MangledName> *focusedPackages, bool skipDownstream)
         : nodes{nodes}, remainingImports(this->nodes.size(), 0) {
         result.packages.reserve(gs.packageDB().packages().size());
+
+        // Nothing is skipped to start with.
+        this->skipNode = vector(this->nodes.size(), false);
+
+        // The high-level summary of the focused algorithm is:
+        // 1. we mark all prelude packages as required, and part of the upstream set.
+        // 2. we traverse down to the leaves of the condensation graph from the focused set to mark the downstream set
+        // 3. we traverse from the union of the focused and downstream sets towards the roots, to mark the upstream set.
+        //
+        // These sets make up the focused edit.
+        if (focusedPackages) {
+            this->skipNode.assign(this->nodes.size(), true);
+
+            // Mark all `prelude!` packages as not skippable
+            for (auto node : this->nodes) {
+                if (!node.isPrelude) {
+                    continue;
+                }
+
+                this->skipNode[node.id] = false;
+
+                for (auto pkg : node.members) {
+                    if (focusedPackages->contains(pkg)) {
+                        continue;
+                    }
+
+                    this->result.upstream.insert(pkg);
+                }
+            }
+
+            auto &db = gs.packageDB();
+            vector<int> work;
+
+            // Mark the focused set as not skippable, and augment it with all the members of the involved sccs
+            {
+                UnorderedSet<MangledName> augmented;
+                for (auto pkgName : *focusedPackages) {
+                    if (!pkgName.exists()) {
+                        continue;
+                    }
+
+                    auto &info = db.getPackageInfo(pkgName);
+                    ENFORCE(info.exists());
+
+                    this->skipNode[info.sccID().value()] = false;
+
+                    for (auto pkgName : this->nodes[info.sccID().value()].members) {
+                        augmented.insert(pkgName);
+                    }
+
+                    if (!info.usesTestPackages) {
+                        this->skipNode[info.testSccID().value()] = false;
+
+                        for (auto pkgName : this->nodes[info.testSccID().value()].members) {
+                            augmented.insert(pkgName);
+                        }
+                    }
+                }
+
+                // `augmented` represents the original set augmented with scc members
+                std::swap(*focusedPackages, augmented);
+            }
+
+            if (!skipDownstream) {
+                // Seed the traversal with the dependants of the focused set, also marking the focused set as not
+                // skippable.
+                for (auto pkgName : *focusedPackages) {
+                    if (!pkgName.exists()) {
+                        continue;
+                    }
+
+                    auto &info = db.getPackageInfo(pkgName);
+                    ENFORCE(info.exists());
+
+                    absl::c_copy(this->nodes[info.sccID().value()].backEdges, back_inserter(work));
+
+                    if (!info.usesTestPackages) {
+                        absl::c_copy(this->nodes[info.testSccID().value()].backEdges, back_inserter(work));
+                    }
+                }
+
+                // Traverse towards the leaves, building the downstream set.
+                while (!work.empty()) {
+                    auto id = work.back();
+                    work.pop_back();
+                    if (!this->skipNode[id]) {
+                        continue;
+                    }
+
+                    this->skipNode[id] = false;
+
+                    auto &node = this->nodes[id];
+                    this->result.downstream.insert(node.members.begin(), node.members.end());
+                    absl::c_copy(node.backEdges, back_inserter(work));
+                }
+            }
+
+            // Seed the traversal with the dependencies of everything marked as not skippable.
+            for (auto &node : this->nodes) {
+                if (this->skipNode[node.id]) {
+                    continue;
+                }
+
+                absl::c_copy(node.imports, back_inserter(work));
+            }
+
+            fast_sort(work);
+            work.erase(std::unique(work.begin(), work.end()), work.end());
+
+            // Traverse towards the roots from the focused set, building the upstreams set at the same time.
+            while (!work.empty()) {
+                auto id = work.back();
+                work.pop_back();
+                if (!this->skipNode[id]) {
+                    continue;
+                }
+
+                this->skipNode[id] = false;
+
+                auto &node = this->nodes[id];
+                this->result.upstream.insert(node.members.begin(), node.members.end());
+                absl::c_copy(node.imports, back_inserter(work));
+            }
+
+            work.clear();
+        }
     }
 
     struct Roots {
@@ -85,10 +216,18 @@ struct TraversalBuilder {
     // Record a single stratum by processing each SCC id, marking the imports of those ids as satisfied. If any
     // dependent package no longer has any outstanding imports, its id will be added to `next`.
     template <IsPrelude PreludeStratum> void recordStratum(absl::Span<const uint32_t> stratum, vector<uint32_t> &next) {
-        stratumLengths.emplace_back(stratum.size());
         ENFORCE(!stratum.empty());
 
+        auto numSccs = 0;
+
         for (auto sccId : stratum) {
+            if (this->skipNode[sccId]) {
+                ENFORCE(!this->nodes[sccId].isPrelude);
+                continue;
+            }
+
+            numSccs++;
+
             auto &node = this->nodes[sccId];
             ENFORCE(this->remainingImports[node.id] == 0);
 
@@ -124,6 +263,10 @@ struct TraversalBuilder {
                 }
             }
         }
+
+        if (numSccs > 0) {
+            this->stratumLengths.emplace_back(numSccs);
+        }
     }
 
     Condensation::Traversal build() {
@@ -151,8 +294,10 @@ struct TraversalBuilder {
 
 } // namespace
 
-const Condensation::Traversal Condensation::computeTraversal(const core::GlobalState &gs) const {
-    TraversalBuilder builder(gs, this->nodes_);
+const Condensation::Traversal Condensation::computeTraversal(const core::GlobalState &gs,
+                                                             UnorderedSet<MangledName> *focusedPackages,
+                                                             bool skipDownstream) const {
+    TraversalBuilder builder(gs, this->nodes_, focusedPackages, skipDownstream);
 
     // All prelude package SCCs, and the set of non-prelude package SCCs that have no imports.
     auto [prelude, roots] = builder.roots();

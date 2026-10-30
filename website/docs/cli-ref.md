@@ -355,6 +355,11 @@ Usage:
       --experimental-test-packages
                                 Disable support for implicit test namespaces in existing
                                 packages
+      --focus-packages P1,P2,P3,...
+                                Focus typechecking to these packages
+      --focus-skip-upstream     Skip upstream packages during inference, when checking a
+                                focused set
+      --focus-skip-downstream   Skip downstream packages when checking a focused set
 
 ```
 

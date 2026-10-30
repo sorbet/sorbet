@@ -29,7 +29,7 @@ TEST_CASE("Condensation Graph - One package") {
         CHECK_EQ(2, condensation.nodes().size());
     }
 
-    auto traversal = condensation.computeTraversal(gs);
+    auto traversal = condensation.computeTraversal(gs, nullptr, false);
 
     {
         INFO("The traversal should include two strata, each with a single SCC");
@@ -64,7 +64,7 @@ TEST_CASE("Condensation Graph - Two packages") {
         CHECK_EQ(4, condensation.nodes().size());
     }
 
-    auto traversal = condensation.computeTraversal(gs);
+    auto traversal = condensation.computeTraversal(gs, nullptr, false);
 
     {
         INFO("The traversal should include three strata, and four SCCs");
@@ -109,7 +109,7 @@ TEST_CASE("Condensation Graph - Four packages without deps") {
         CHECK_EQ(8, condensation.nodes().size());
     }
 
-    auto traversal = condensation.computeTraversal(gs);
+    auto traversal = condensation.computeTraversal(gs, nullptr, false);
 
     {
         INFO("The traversal should include two strata, each with four SCCs");
@@ -153,7 +153,7 @@ TEST_CASE("Condensation Graph - Four packages with a cycle of three") {
               PackageHelpers::makePackageRB("Lib::Foo::D", "layered", "lib", {"Lib::Foo::A"}, {})}});
 
     auto &condensation = gs.packageDB().condensation();
-    auto traversal = condensation.computeTraversal(gs);
+    auto traversal = condensation.computeTraversal(gs, nullptr, false);
 
     auto pkgA = PackageHelpers::packageInfoFor(gs, parsedFiles[0].file).mangledName();
     auto pkgB = PackageHelpers::packageInfoFor(gs, parsedFiles[1].file).mangledName();
@@ -367,7 +367,7 @@ TEST_CASE("Condensation Graph - Two prelude packages, two normal packages") {
         CHECK_EQ(8, condensation.nodes().size());
     }
 
-    auto traversal = condensation.computeTraversal(gs);
+    auto traversal = condensation.computeTraversal(gs, nullptr, false);
 
     {
         REQUIRE_EQ(3, traversal.strata.size());
@@ -447,7 +447,7 @@ TEST_CASE("Condensation Graph - Two packages, one is test-only") {
         CHECK_EQ(3, condensation.nodes().size());
     }
 
-    auto traversal = condensation.computeTraversal(gs);
+    auto traversal = condensation.computeTraversal(gs, nullptr, false);
 
     {
         INFO("The traversal should include the same number of nodes as the condensation");

@@ -8,6 +8,7 @@
 #endif
 #include "ProgressIndicator.h"
 #include "absl/strings/match.h"
+#include "absl/strings/str_split.h"
 #include "ast/Helpers.h"
 #include "ast/desugar/Desugar.h"
 #include "ast/desugar/prism/Desugar.h"
@@ -835,6 +836,59 @@ void unpartitionPackageFiles(vector<ast::ParsedFile> &packageFiles, vector<ast::
     }
 }
 
+namespace {
+unique_ptr<UnorderedSet<core::packages::MangledName>> focusedPackages(core::GlobalState &gs,
+                                                                      const options::Options &opts) {
+    auto &db = gs.packageDB();
+    if (!db.enabled() || opts.focusPackages.empty()) {
+        return nullptr;
+    }
+
+    bool invalidPackage = false;
+    UnorderedSet<core::packages::MangledName> result;
+
+    vector<string> parts;
+    for (auto &pkgStr : opts.focusPackages) {
+        parts.clear();
+        ENFORCE(!pkgStr.empty());
+
+        auto splitter = absl::StrSplit(pkgStr, "::");
+        parts.insert(parts.begin(), splitter.begin(), splitter.end());
+
+        auto pkgName = core::packages::MangledName::lookupMangledName(gs, parts);
+        if (!pkgName.exists()) {
+            gs.errorQueue->logger.error("Unknown package `{}` in --focus-packages", pkgStr);
+            invalidPackage = true;
+            continue;
+        }
+
+        // The mangled name might point to a valid point in the package-registry namespace, but might not point to a
+        // valid package.
+        auto &info = db.getPackageInfo(pkgName);
+        if (!info.exists()) {
+            gs.errorQueue->logger.error("Unknown package `{}` in --focus-packages", pkgStr);
+            invalidPackage = true;
+            continue;
+        }
+
+        // Prelude packages are implicit dependencies of everything, so restricting to dependencies of one would be the
+        // same as typechecking the whole codebase.
+        if (db.getPackageInfo(pkgName).isPreludePackage()) {
+            return nullptr;
+        }
+
+        result.insert(pkgName);
+    }
+
+    if (invalidPackage) {
+        // TODO(trevor): we should figure out a better error recovery here.
+        throw EarlyReturnWithCode(1);
+    }
+
+    return make_unique<UnorderedSet<core::packages::MangledName>>(move(result));
+}
+} // namespace
+
 PackageStrata computePackageStrata(core::GlobalState &gs, vector<ast::ParsedFile> &packageFiles,
                                    absl::Span<core::FileRef> sourceFiles, const options::Options &opts) {
     Timer timeit(gs.tracer(), "computePackageStrata");
@@ -842,6 +896,7 @@ PackageStrata computePackageStrata(core::GlobalState &gs, vector<ast::ParsedFile
     PackageStrata result;
 
     result.fileToStratum = vector<core::packages::Stratum>(gs.filesUsed(), core::packages::Stratum(0));
+    result.focusedPackages = focusedPackages(gs, opts);
 
     if (!opts.packageDirected) {
         for (auto name : gs.packageDB().packages()) {
@@ -854,7 +909,16 @@ PackageStrata computePackageStrata(core::GlobalState &gs, vector<ast::ParsedFile
 
     auto &db = gs.packageDB();
 
-    auto traversal = db.condensation().computeTraversal(gs);
+    auto traversal = db.condensation().computeTraversal(gs, result.focusedPackages.get(), opts.focusSkipDownstream);
+
+    // The result focused package set represents the set that we will typecheck in focused mode. As we want to
+    // explicilty skip the upstream dependencies during infer, we don't include them here.
+    if (result.focusedPackages) {
+        if (!opts.focusSkipUpstream) {
+            result.focusedPackages->merge(traversal.upstream);
+        }
+        result.focusedPackages->merge(traversal.downstream);
+    }
 
     // This can happen if we enabled packages and package-directed mode, but there were no packages defined.
     if (traversal.strata.empty()) {
@@ -905,10 +969,8 @@ PackageStrata computePackageStrata(core::GlobalState &gs, vector<ast::ParsedFile
             // stratum too, so that all its application and test dependencies are available.
             auto isPackageRbInLegacyPkg = file->isPackage(gs) && !db.getPackageInfo(pkgName).usesTestPackages;
             if (file->isPackagedTest() || file->isPackagedTestHelper() || isPackageRbInLegacyPkg) {
-                ENFORCE(info.testStratum != core::packages::Stratum::NONE);
                 result.fileToStratum[ix] = info.testStratum;
             } else {
-                ENFORCE(info.applicationStratum != core::packages::Stratum::NONE);
                 result.fileToStratum[ix] = info.applicationStratum;
             }
 
@@ -980,7 +1042,7 @@ PackageStrata computePackageStrata(core::GlobalState &gs, vector<ast::ParsedFile
         }
     }
 
-    ENFORCE(sourceSpan.empty());
+    ENFORCE(result.focusedPackages != nullptr || sourceSpan.empty());
     ENFORCE(!result.strata.empty());
     ENFORCE(result.strata.size() <= maxStrata);
 
