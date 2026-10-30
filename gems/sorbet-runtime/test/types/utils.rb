@@ -75,6 +75,55 @@ module Opus::Types::Test
         assert_nil(sig.keyrest_name)
         assert_nil(sig.block_name)
       end
+
+      it 'reports the names of anonymous rest, keyrest, and block params' do
+        c = Class.new do
+          extend T::Sig
+          sig { params(a: Integer, "*": String, "**": Integer, "&": T.proc.void).void }
+          # A string, because RuboCop parses this file as Ruby 3.0, which has no anonymous `&`.
+          class_eval('def anonymous(a, *, **, &); end', __FILE__, __LINE__)
+        end
+
+        sig = T::Utils.signature_for_method(c.instance_method(:anonymous))
+        assert_equal(:*, sig.rest_name)
+        assert_equal(:**, sig.keyrest_name)
+        assert_equal(:&, sig.block_name)
+
+        names = []
+        sig.each_args_value_type([0, 'x', 'y', {k: 1}]) { |name, _, _| names << name }
+        assert_equal(%i[a * * k], names)
+
+        err = assert_raises(TypeError) { c.new.anonymous(0, 1) {} }
+        assert_match(/Parameter '\*': Expected type String, got type Integer/, err.message)
+      end
+
+      it 'names rest args when required params follow the rest param' do
+        c = Class.new do
+          extend T::Sig
+          sig { params(rest: String, a: Integer).void }
+          def post_required(*rest, a); end
+        end
+
+        sig = T::Utils.signature_for_method(c.instance_method(:post_required))
+        assert_equal(:rest, sig.rest_name)
+
+        names = []
+        sig.each_args_value_type([0, 'x', 'y']) { |name, _, _| names << name }
+        assert_equal(%i[a rest rest], names)
+      end
+
+      it 'fits in a 160-byte GC slot' do
+        require 'objspace'
+        c = Class.new do
+          extend T::Sig
+          sig { params(a: Integer, rest: String, kw: Integer, opts: Symbol, blk: T.proc.void).void.checked(:always) }
+          def all_kinds(a, *rest, kw:, **opts, &blk); end
+        end
+
+        sig = T::Utils.signature_for_method(c.instance_method(:all_kinds))
+        assert_operator(ObjectSpace.memsize_of(sig), :<=, 160,
+                        "T::Private::Methods::Signature grew past 160 bytes; see the comment on its class definition")
+      end
     end
 
     describe 'force_type_init' do

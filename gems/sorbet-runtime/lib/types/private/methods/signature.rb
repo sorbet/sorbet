@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 # typed: true
 
+# Every sig keeps one of these for the life of the process. At 18 or fewer instance variables an
+# instance fits in a 160-byte GC slot; a 19th moves every instance to the 320-byte slot, so prefer
+# deriving new state over storing it.
 class T::Private::Methods::Signature
   attr_reader :method, :method_name, :arg_types, :kwarg_types, :block_type,
               :rest_type, :keyrest_type, :bind, :effective_return_type,
@@ -234,12 +237,14 @@ class T::Private::Methods::Signature
 
       if !@rest_type.nil?
         rest_count = args_length - @arg_types.length
-        rest_count = 0 if rest_count.negative?
-        rest_name = parameter_name(:rest)
 
-        rest_count.times do
-          yield rest_name, args[it], @rest_type
-          it += 1
+        if rest_count > 0
+          rest_name = fast_rest_name
+
+          rest_count.times do
+            yield rest_name, args[it], @rest_type
+            it += 1
+          end
         end
       end
     end
@@ -274,6 +279,12 @@ class T::Private::Methods::Signature
     @rest_type&.build_type
     @keyrest_type&.build_type
     @return_type.build_type
+  end
+
+  # The rest param directly follows the positional params unless required params come after it.
+  private def fast_rest_name
+    param_kind, param_name = @parameters[@arg_types.length]
+    param_kind == :rest ? param_name : parameter_name(:rest)
   end
 
   private def parameter_name(kind)
