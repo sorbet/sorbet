@@ -862,7 +862,7 @@ TEST_CASE("PerPhaseTest") {
         absl::c_move(batch, back_inserter(trees));
     }
 
-    bool ranIncrementalNamer = false;
+    const bool ranIncrementalNamer = false;
     {
         // namer
         for (auto &tree : trees) {
@@ -874,7 +874,6 @@ TEST_CASE("PerPhaseTest") {
             // Here, to complement those tests, we just run Namer::run (not Namer::runIncremental)
             // to stress the codepath where Namer is not tasked with deleting anything when run for
             // the fast path.
-            ENFORCE(!ranIncrementalNamer);
             auto canceled = namer::Namer::run(*gs, absl::MakeSpan(&tree, 1), *workers, &foundHashes);
             ENFORCE(!canceled);
 
@@ -908,9 +907,6 @@ TEST_CASE("PerPhaseTest") {
     }
 
     if (opts.cacheSensitiveOptions.sorbetPackages) {
-        if (ranIncrementalNamer) {
-            packager::VisibilityChecker::reportExportErrors(*gs, trees);
-        }
         packager::VisibilityChecker::checkReferences(*gs, *workers, trees);
     }
 
