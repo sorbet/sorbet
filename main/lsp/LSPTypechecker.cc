@@ -547,10 +547,9 @@ EditInfo determineMaximumPrefix(const core::GlobalState &gs, const vector<core::
     return result;
 }
 
-// Determine which files we need to copy into the open files cache (indexedFinalGS), and update the file table to point
-// to the updated files.
+// Update the file table to point to the updated files.
 void applyFileTableUpdates(core::GlobalState &gs, vector<core::FileRef> &workspaceFiles, const LSPConfiguration &config,
-                           UnorderedSet<core::FileRef> &openFiles, LSPFileUpdates &updates) {
+                           LSPFileUpdates &updates) {
     core::UnfreezeFileTable updateFileTable{gs};
 
     vector<pair<core::FileRef, shared_ptr<core::File>>> newFiles;
@@ -606,18 +605,6 @@ void applyFileTableUpdates(core::GlobalState &gs, vector<core::FileRef> &workspa
             workspaceFiles.emplace_back(newFref);
         }
     }
-
-    for (auto fref : updates.updatedFileRefs) {
-        // Not all files present in the update set will be from open files--some could be watchman
-        // update events, and others will be the result of a `textDocument/didClose` notification.
-        // As a result, we may need to remove entries from the set that was eagerly cloned from
-        // `indexedFinalGS`
-        if (fref.data(gs).isOpenInClient()) {
-            openFiles.insert(fref);
-        } else {
-            openFiles.erase(fref);
-        }
-    }
 }
 } // namespace
 
@@ -639,7 +626,6 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
     core::packages::Stratum startingStratum(0);
     unique_ptr<UnorderedSet<core::packages::MangledName>> transitiveAffectedPackages;
 
-    UnorderedSet<core::FileRef> openFiles;
     ENFORCE(this->cancellationUndoState == nullptr);
     if (cancelable) {
         timeit.setTag("cancelable", "true");
@@ -650,11 +636,6 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
 
         auto savedGS =
             std::exchange(this->gs, pipeline::copyForSlowPath(*this->gs, this->config->opts, startingStratum));
-
-        // Seed open files with the previous set from `indexedFinalGS`
-        for (auto &entry : this->indexedFinalGS) {
-            openFiles.insert(entry.first);
-        }
 
         this->cancellationUndoState =
             make_unique<UndoState>(std::move(savedGS), std::move(this->indexedFinalGS), move(this->fileToStratum),
@@ -689,7 +670,7 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
                 Timer timeit(*this->config->logger, "slow_path_init");
 
                 if (!updates.updatedFiles.empty()) {
-                    applyFileTableUpdates(*this->gs, this->workspaceFiles, *this->config, openFiles, updates);
+                    applyFileTableUpdates(*this->gs, this->workspaceFiles, *this->config, updates);
 
                     ENFORCE(updatedFileRefs.empty());
                     std::swap(updates.updatedFileRefs, updatedFileRefs);
@@ -765,7 +746,7 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
 
             kvstore.closeKVStore(move(ownedKvstore));
 
-            this->cacheUpdatedFiles(packageIndexed, openFiles);
+            this->cacheUpdatedFiles(packageIndexed);
 
             // Only need to compute FoundDefHashes when running to compute a FileHash
             auto foundHashes = nullptr;
@@ -832,7 +813,7 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
                         return currentStratum;
                     }
                     nonPackagedIndexed = std::move(result.result());
-                    this->cacheUpdatedFiles(nonPackagedIndexed, openFiles);
+                    this->cacheUpdatedFiles(nonPackagedIndexed);
                 }
 
                 // Only write the cache during initialization to avoid unbounded growth.
@@ -990,13 +971,12 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
     return {committed, startingStratum};
 }
 
-void LSPTypechecker::cacheUpdatedFiles(absl::Span<const ast::ParsedFile> indexed,
-                                       const UnorderedSet<core::FileRef> &openFiles) {
+void LSPTypechecker::cacheUpdatedFiles(absl::Span<const ast::ParsedFile> indexed) {
     auto &logger = *config->logger;
     Timer timeit(logger, "slow_path.cache_open_files");
 
     for (auto &ast : indexed) {
-        if (openFiles.contains(ast.file)) {
+        if (ast.file.data(*this->gs).isOpenInClient()) {
             this->indexedFinalGS[ast.file.id()] = ast::ParsedFile{ast.tree.deepCopy(), ast.file};
         }
     }
