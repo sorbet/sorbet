@@ -125,6 +125,9 @@ class T::Private::Methods::Signature
   sig {void}
   def force_type_init; end
 
+  sig {returns(T.nilable(Symbol))}
+  private def fast_rest_name; end
+
   sig {params(kind: Symbol).returns(T.nilable(Symbol))}
   private def parameter_name(kind); end
 
