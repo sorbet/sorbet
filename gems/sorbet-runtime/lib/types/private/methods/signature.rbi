@@ -11,38 +11,24 @@ class T::Private::Methods::Signature
   attr_reader :kwarg_types
   sig {returns(T.nilable(T::Types::Base))}
   attr_reader :block_type
-  sig {returns(T.nilable(Symbol))}
-  attr_reader :block_name
   sig {returns(T.nilable(T::Types::Base))}
   attr_reader :rest_type
-  sig {returns(T.nilable(Symbol))}
-  attr_reader :rest_name
   sig {returns(T.nilable(T::Types::Base))}
   attr_reader :keyrest_type
-  sig {returns(T.nilable(Symbol))}
-  attr_reader :keyrest_name
   sig {returns(T.nilable(T::Types::Base))}
   attr_reader :bind
   sig {returns(T::Types::Base)}
   attr_reader :effective_return_type
   sig {returns(T::Types::Base)}
   attr_reader :return_type
-  sig {returns(String)}
-  attr_reader :mode
   sig {returns(Integer)}
   attr_reader :req_arg_count
   sig {returns(T::Array[Symbol])}
   attr_reader :req_kwarg_names
-  sig {returns(Symbol)}
-  attr_reader :check_level
   sig {returns(T::Array[[Symbol, Symbol]])}
   attr_reader :parameters
   sig {returns(T.nilable(T::Array[T.untyped]))}
   attr_reader :on_failure
-  sig {returns(T.nilable(T.any(TrueClass, FalseClass, Symbol)))}
-  attr_reader :override_allow_incompatible
-  sig {returns(T::Boolean)}
-  attr_reader :defined_raw
 
   sig do
     params(
@@ -75,20 +61,14 @@ class T::Private::Methods::Signature
     @method = T.let(method, UnboundMethod)
     @method_name = T.let(method_name, Symbol)
     @block_type = T.let(nil, T.nilable(T::Types::Base))
-    @block_name = T.let(nil, T.nilable(Symbol))
     @rest_type = T.let(nil, T.nilable(T::Types::Base))
-    @rest_name = T.let(nil, T.nilable(Symbol))
     @keyrest_type = T.let(nil, T.nilable(T::Types::Base))
-    @keyrest_name = T.let(nil, T.nilable(Symbol))
     @return_type = T.let(raw_return_type, T::Types::Base)
     @effective_return_type = T.let(raw_return_type, T::Types::Base)
     @bind = T.let(nil, T.nilable(T::Types::Base))
-    @mode = T.let(mode, String)
-    @check_level = T.let(check_level, Symbol)
     @parameters = T.let(parameters, T::Array[[Symbol, Symbol]])
     @on_failure = T.let(on_failure, T.nilable(T::Array[T.untyped]))
-    @override_allow_incompatible = T.let(override_allow_incompatible, T.any(T::Boolean, Symbol))
-    @defined_raw = T.let(defined_raw, T::Boolean)
+    @flags = T.let(0, Integer)
     @arg_types = T.let([], T::Array[[Symbol, T::Types::Base]])
     @kwarg_types = T.let([], T::Hash[Symbol, T::Types::Base])
     @req_arg_count = T.let(0, Integer)
@@ -100,6 +80,27 @@ class T::Private::Methods::Signature
 
   sig {params(alias_name: Symbol).returns(T::Private::Methods::Signature)}
   def as_alias(alias_name); end
+
+  sig {returns(T.nilable(Symbol))}
+  def block_name; end
+
+  sig {returns(T.nilable(Symbol))}
+  def rest_name; end
+
+  sig {returns(T.nilable(Symbol))}
+  def keyrest_name; end
+
+  sig {returns(String)}
+  def mode; end
+
+  sig {returns(Symbol)}
+  def check_level; end
+
+  sig {returns(T.any(T::Boolean, Symbol))}
+  def override_allow_incompatible; end
+
+  sig {returns(T::Boolean)}
+  def defined_raw; end
 
   sig {returns(Integer)}
   def arg_count; end
@@ -124,6 +125,15 @@ class T::Private::Methods::Signature
 
   sig {void}
   def force_type_init; end
+
+  sig {returns(T.nilable(Symbol))}
+  private def fast_rest_name; end
+
+  sig {params(kind: Symbol).returns(T.nilable(Symbol))}
+  private def parameter_name(kind); end
+
+  sig {params(values: T::Array[T.untyped], value: T.untyped, field: String).returns(Integer)}
+  private def flag_index(values, value, field); end
 
   EMPTY_LIST = T.let(T.unsafe(nil), T::Array[T.untyped])
   EMPTY_HASH = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
