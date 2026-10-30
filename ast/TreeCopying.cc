@@ -167,6 +167,7 @@ ExpressionPtr deepCopy(const void *avoid, const Tag tag, const void *tree, bool 
                 if (auto *resolutionScopes = exp->resolutionScopes()) {
                     // This constant failed to resolve. Its `symbol()` is `StubModule`, which can't be passed to the
                     // constructor. The resolver creates these by marking a constant unresolved, so we do the same.
+                    ENFORCE(exp->symbol() == core::Symbols::StubModule());
                     auto result = make_expression<ConstantLit>(core::Symbols::noSymbol(), move(originalC));
                     auto &lit = cast_tree_nonnull<ConstantLit>(result);
                     lit.markUnresolved();
