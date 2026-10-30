@@ -1453,6 +1453,29 @@ private:
         }
     }
 
+    // Like saveClassMethodsForHashing, but for the argument of `requires_ancestor { X }` or
+    // `requires_ancestor { T.class_of(X) }`.
+    static void saveRequiredAncestorForHashing(core::GlobalState &gs, const RequireAncestorResolutionItem &todo) {
+        auto *block = todo.send->block();
+        if (block == nullptr || todo.send->numPosArgs() > 0) {
+            return;
+        }
+
+        auto id = ast::cast_tree<ast::ConstantLit>(block->body);
+        if (id == nullptr && isTClassOf(block->body)) {
+            auto &send = ast::cast_tree_nonnull<ast::Send>(block->body);
+            if (send.numPosArgs() == 1) {
+                id = ast::cast_tree<ast::ConstantLit>(send.getPosArg(0));
+            }
+        }
+        if (id == nullptr) {
+            return;
+        }
+
+        core::MutableContext ctx(gs, todo.owner, todo.file);
+        saveUnresolvedAncestorForHashing(ctx, todo.owner, *id);
+    }
+
     static void resolveRequiredAncestorsJob(core::GlobalState &gs, const RequireAncestorResolutionItem &todo) {
         auto owner = todo.owner;
         auto send = todo.send;
@@ -2422,7 +2445,6 @@ public:
                     resolveRequiredAncestorsJob(gs, todo);
                 }
             }
-            todoRequiredAncestors.clear();
         }
 
         // We can no longer resolve new constants. All the code below reports errors
@@ -2504,6 +2526,13 @@ public:
             }
         }
         todoClassMethods.clear();
+
+        for (auto &job : todoRequiredAncestors) {
+            for (auto &todo : job.items) {
+                saveRequiredAncestorForHashing(gs, todo);
+            }
+        }
+        todoRequiredAncestors.clear();
 
         if (gs.epochManager->wasTypecheckingCanceled()) {
             return ast::ParsedFilesOrCancelled::cancel(std::move(trees), workers);
