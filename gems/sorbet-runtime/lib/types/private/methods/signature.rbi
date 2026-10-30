@@ -11,16 +11,10 @@ class T::Private::Methods::Signature
   attr_reader :kwarg_types
   sig {returns(T.nilable(T::Types::Base))}
   attr_reader :block_type
-  sig {returns(T.nilable(Symbol))}
-  attr_reader :block_name
   sig {returns(T.nilable(T::Types::Base))}
   attr_reader :rest_type
-  sig {returns(T.nilable(Symbol))}
-  attr_reader :rest_name
   sig {returns(T.nilable(T::Types::Base))}
   attr_reader :keyrest_type
-  sig {returns(T.nilable(Symbol))}
-  attr_reader :keyrest_name
   sig {returns(T.nilable(T::Types::Base))}
   attr_reader :bind
   sig {returns(T::Types::Base)}
@@ -75,11 +69,8 @@ class T::Private::Methods::Signature
     @method = T.let(method, UnboundMethod)
     @method_name = T.let(method_name, Symbol)
     @block_type = T.let(nil, T.nilable(T::Types::Base))
-    @block_name = T.let(nil, T.nilable(Symbol))
     @rest_type = T.let(nil, T.nilable(T::Types::Base))
-    @rest_name = T.let(nil, T.nilable(Symbol))
     @keyrest_type = T.let(nil, T.nilable(T::Types::Base))
-    @keyrest_name = T.let(nil, T.nilable(Symbol))
     @return_type = T.let(raw_return_type, T::Types::Base)
     @effective_return_type = T.let(raw_return_type, T::Types::Base)
     @bind = T.let(nil, T.nilable(T::Types::Base))
@@ -100,6 +91,15 @@ class T::Private::Methods::Signature
 
   sig {params(alias_name: Symbol).returns(T::Private::Methods::Signature)}
   def as_alias(alias_name); end
+
+  sig {returns(T.nilable(Symbol))}
+  def block_name; end
+
+  sig {returns(T.nilable(Symbol))}
+  def rest_name; end
+
+  sig {returns(T.nilable(Symbol))}
+  def keyrest_name; end
 
   sig {returns(Integer)}
   def arg_count; end
@@ -124,6 +124,12 @@ class T::Private::Methods::Signature
 
   sig {void}
   def force_type_init; end
+
+  sig {returns(T.nilable(Symbol))}
+  private def fast_rest_name; end
+
+  sig {params(kind: Symbol).returns(T.nilable(Symbol))}
+  private def parameter_name(kind); end
 
   EMPTY_LIST = T.let(T.unsafe(nil), T::Array[T.untyped])
   EMPTY_HASH = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
