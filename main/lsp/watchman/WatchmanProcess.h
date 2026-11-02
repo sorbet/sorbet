@@ -25,7 +25,6 @@ private:
     const std::string watchmanPath;
     const std::string workSpace;
     const std::vector<std::string> extensions;
-    const std::unique_ptr<Joinable> thread;
     // Mutex that must be held before reading or writing stopped.
     absl::Mutex mutex;
     // If true, the process has been stopped.
@@ -36,6 +35,9 @@ private:
     absl::Notification &initializedNotification;
     const std::shared_ptr<const LSPConfiguration> config;
     std::string watchmanNamespace;
+    // The thread uses all of the members above, so this member must be the last one. C++ initializes members in
+    // declaration order and destroys them in reverse order.
+    const std::unique_ptr<Joinable> thread;
 
     /**
      * Starts up a Watchman subprocess and begins processing file changes. Runs in a dedicated thread.
