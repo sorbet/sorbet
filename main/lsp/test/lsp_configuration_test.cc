@@ -53,4 +53,29 @@ TEST_CASE("LocalName2RemoteEmptyRoot") {
     CHECK_EQ(config->localName2Remote(""), "");
 }
 
+TEST_CASE("RootPathBelowClientRoot") {
+    // Sorbet runs in a subdirectory of the folder open in the editor.
+    auto opts = makeOptions("/foo/bar");
+    auto config = makeConfig(opts, "file:///foo");
+    CHECK_EQ(config->localName2Remote("/foo/bar/baz.rb"), "file:///foo/bar/baz.rb");
+    CHECK_EQ(config->remoteName2Local("file:///foo/bar/baz.rb"), "/foo/bar/baz.rb");
+    CHECK(config->isUriInWorkspace("file:///foo/bar/baz.rb"));
+    CHECK_FALSE(config->isUriInWorkspace("file:///foo/baz.rb"));
+}
+
+TEST_CASE("RootPathOutsideClientRoot") {
+    // The client runs on another machine, with a different path for the same folder.
+    auto opts = makeOptions("/remote/bar");
+    auto config = makeConfig(opts, "file:///local/bar");
+    CHECK_EQ(config->localName2Remote("/remote/bar/baz.rb"), "file:///local/bar/baz.rb");
+    CHECK_EQ(config->remoteName2Local("file:///local/bar/baz.rb"), "/remote/bar/baz.rb");
+}
+
+TEST_CASE("RootPathSharingPrefixWithClientRoot") {
+    // `/foo/barbaz` is not below `/foo/bar`.
+    auto opts = makeOptions("/foo/barbaz");
+    auto config = makeConfig(opts, "file:///foo/bar");
+    CHECK_EQ(config->localName2Remote("/foo/barbaz/qux.rb"), "file:///foo/bar/qux.rb");
+}
+
 } // namespace sorbet::realmain::lsp::test

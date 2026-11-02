@@ -15,6 +15,7 @@ namespace sorbet::realmain::lsp {
 namespace {
 constexpr string_view sorbetScheme = "sorbet:"sv;
 constexpr string_view httpsScheme = "https"sv;
+constexpr string_view fileScheme = "file://"sv;
 } // namespace
 
 namespace {
@@ -130,10 +131,31 @@ LSPClientConfiguration::LSPClientConfiguration(const InitializeParams &params) {
     }
 }
 
+string urlDecode(string_view uri);
+
+namespace {
+// The client's root URI corresponds to rootPath, even when the client runs on another machine with different paths.
+// But when the client's workspace folder contains rootPath, e.g. because Sorbet runs in a subdirectory of the folder
+// open in the editor, the URI for rootPath has to include that subdirectory.
+string getRootPathUri(string_view clientRootUri, string_view rootPath) {
+    if (!absl::StartsWith(clientRootUri, fileScheme)) {
+        return string(clientRootUri);
+    }
+    auto clientRoot = urlDecode(clientRootUri.substr(fileScheme.length()));
+    clientRoot = FileOps::realpath(clientRoot).value_or(clientRoot);
+    auto absoluteRootPath = FileOps::realpath(string(rootPath)).value_or(string(rootPath));
+    if (!absl::StartsWith(absoluteRootPath, absl::StrCat(clientRoot, "/"))) {
+        return string(clientRootUri);
+    }
+    return absl::StrCat(clientRootUri, absoluteRootPath.substr(clientRoot.length()));
+}
+} // namespace
+
 void LSPConfiguration::setClientConfig(shared_ptr<const LSPClientConfiguration> clientConfig) {
     if (this->clientConfig) {
         Exception::raise("Cannot call setClientConfig twice in one session!");
     }
+    this->rootPathUri = getRootPathUri(clientConfig->rootUri, rootPath);
     this->clientConfig = move(clientConfig);
 }
 
@@ -157,7 +179,7 @@ string LSPConfiguration::localName2Remote(string_view filePath) const {
         FileOps::isFileIgnored(rootPath, filePath, opts.lspDirsMissingFromClient, {})) {
         return absl::StrCat(sorbetScheme, relativeUri);
     }
-    return absl::StrCat(clientConfig->rootUri, "/", relativeUri);
+    return absl::StrCat(rootPathUri, "/", relativeUri);
 }
 
 string urlDecode(string_view uri) {
@@ -190,7 +212,7 @@ string LSPConfiguration::remoteName2Local(string_view encodedUri) const {
     }
 
     const bool isSorbetURI = this->isSorbetUri(uri);
-    const string_view root = isSorbetURI ? sorbetScheme : clientConfig->rootUri;
+    const string_view root = isSorbetURI ? sorbetScheme : rootPathUri;
     string::iterator start = uri.begin() + root.length();
     if (*start == '/') {
         ++start;
@@ -288,7 +310,7 @@ bool LSPConfiguration::isSorbetUri(string_view uri) const {
 
 bool LSPConfiguration::isUriInWorkspace(string_view uri) const {
     assertHasClientConfig();
-    return absl::StartsWith(uri, clientConfig->rootUri);
+    return absl::StartsWith(uri, rootPathUri);
 }
 
 void LSPConfiguration::markInitialized() {

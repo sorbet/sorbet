@@ -88,6 +88,10 @@ class LSPConfiguration {
     // access to this object. Object is `const` to avoid mutations post-initialization.
     // clientConfig is set by the LSPPreprocessor.
     std::shared_ptr<const LSPClientConfiguration> clientConfig;
+    // The client's URI for rootPath. Usually the client's root URI, but longer when the client's workspace folder
+    // contains rootPath, e.g. when Sorbet runs in a subdirectory of the folder open in the editor. Set with
+    // clientConfig.
+    std::string rootPathUri;
     // If 'true', then the client<->server initialization handshake has *completed*. Set by the LSPPreprocessor.
     std::atomic<bool> initialized;
     // Throws if clientConfig is not set. Must be called before accessing `clientConfig` in LSPConfiguration methods.
