@@ -184,24 +184,19 @@ core::packages::Stratum SorbetWorkspaceEditTask::preemptionStratum(FileStratumMa
     }
 
     core::packages::Stratum stratum(0);
-    bool includePackageFiles = false;
 
-    if (this->cachedFastPathDecision->files.useIncrementalNamer) {
-        includePackageFiles = true;
-
-        // The incremental namer will pull in additional files that aren't directly part of the edit. Those may be
-        // associated with a later stratum than the edited files, so we need to factor those in if they're present.
-        if (!this->cachedFastPathDecision->files.extraFiles.empty()) {
-            stratum = std::max(
-                stratum, info.getStratumForFiles(this->cachedFastPathDecision->files.extraFiles, includePackageFiles));
-        }
+    // The incremental namer will pull in additional files that aren't directly part of the edit. Those may be
+    // associated with a later stratum than the edited files, so we need to factor those in if they're present.
+    if (this->cachedFastPathDecision->files.useIncrementalNamer &&
+        !this->cachedFastPathDecision->files.extraFiles.empty()) {
+        stratum = std::max(stratum, info.getStratumForFiles(this->cachedFastPathDecision->files.extraFiles));
     }
 
     vector<string_view> paths;
     paths.reserve(this->params->updates.size());
     absl::c_transform(this->params->updates, back_inserter(paths), [](auto &file) { return file->path(); });
 
-    return std::max(stratum, info.getStratumForPaths(paths, includePackageFiles));
+    return std::max(stratum, info.getStratumForPaths(paths));
 }
 
 } // namespace sorbet::realmain::lsp
