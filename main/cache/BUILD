@@ -1,7 +1,7 @@
 cc_library(
     name = "cache",
     srcs = select({
-        "@platforms//cpu:wasm32": ["cache-orig.cc"],
+        "@platforms//cpu:wasm32": ["cache-noop.cc"],
         "//conditions:default": ["cache.cc"],
     }),
     hdrs = ["cache.h"],
@@ -27,7 +27,7 @@ cc_library(
 cc_library(
     name = "cache-orig",
     srcs = [
-        "cache-orig.cc",
+        "cache-noop.cc",
     ],
     hdrs = ["cache.h"],
     linkstatic = select({
