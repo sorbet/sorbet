@@ -915,8 +915,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelPackageDirectedSlowPathDisca
     assertErrorDiagnostics(send(*openFile("__package.rb", packageText)), {});
     getCounters();
 
-    // Packager queues the invalid-argument diagnostic immediately. The cancellation wait is
-    // in the application stratum, before the package AST can drain that queue in its test stratum.
+    // Packager queues the invalid-argument diagnostic immediately. The cancellation wait comes after
+    // resolving the package's stratum, before typechecking the package AST would drain that queue.
     sendAsync(*changeFile("__package.rb",
                           "# typed: strict\nclass Root < PackageSpec\n"
                           "  export Root::Value\n  bogus Root::Value\nend\n",

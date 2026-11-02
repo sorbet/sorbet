@@ -1403,6 +1403,9 @@ TEST_CASE_FIXTURE(ProtocolTest, "SlowPathRestarts") {
                      "    end\n"
                      "  end\n"
                      "end\n"},
+        {"foo/test/__package.rb",
+         "# typed: strict\n\nclass Test::Root::Foo < PackageSpec\n  test!\n  import Root::Foo, "
+         "uses_internals: true\nend\n"},
     };
 
     writeFilesToFS(files);
@@ -1451,8 +1454,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "SlowPathRestarts") {
     }
 
     SUBCASE("NewTestFile") {
-        // New test sources invalidate the test stratum, while new application sources above
-        // invalidate the application stratum. Neither can infer ownership from __package.rb.
+        // New sources in the test package only invalidate the test package's stratum.
         auto resps = send(*openFile("foo/test/b.rb", "# typed: true\n"
                                                      "module Test::Root::Foo\n"
                                                      "  class B; end\n"
@@ -1642,7 +1644,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "PackageDirectedSlowPathDoesNotDuplicateImports"
     }
 }
 
-// Source-stratum lookup must also work with the monolithic traversal, including newly added test helpers.
+// Source-stratum lookup must also work with the monolithic traversal, including newly added test package sources.
 TEST_CASE_FIXTURE(ProtocolTest, "NewPackagedSourceFileStrata") {
     auto checkNewFile = [&](bool packageDirected, bool isTest) {
         auto initOpts = make_shared<realmain::options::Options>();
@@ -1653,6 +1655,9 @@ TEST_CASE_FIXTURE(ProtocolTest, "NewPackagedSourceFileStrata") {
         vector<pair<string, string>> files = {
             {"__package.rb", PackageTextBuilder().withName("Root").build()},
             {"foo/__package.rb", PackageTextBuilder().withName("Root::Foo").withImports({"Root"}).build()},
+            {"foo/test/__package.rb",
+             "# typed: strict\n\nclass Test::Root::Foo < PackageSpec\n  test!\n  import Root::Foo, "
+             "uses_internals: true\nend\n"},
         };
         writeFilesToFS(files);
         for (const auto &[path, _] : files) {
@@ -2186,8 +2191,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "EarlyErrorsForceInfer") {
     assertStale({files[1].first});
 }
 
-// A legacy package has a synthetic test SCC even when there are no test sources. Its
-// package diagnostics must be published once and reproduced by a support-file fast path.
+// A package's diagnostics must be published once and reproduced by a support-file fast path.
 TEST_CASE_FIXTURE(ProtocolTest, "PackageDirectedPackageDiagnostics") {
     auto opts = make_shared<realmain::options::Options>();
     opts->cacheSensitiveOptions.sorbetPackages = true;
