@@ -24,7 +24,7 @@ inline constexpr ErrorClass ExportConflict{3716, StrictLevel::False};
 inline constexpr ErrorClass UsedPackagePrivateName{3717, StrictLevel::False};
 inline constexpr ErrorClass MissingImport{3718, StrictLevel::False};
 // inline constexpr ErrorClass PackagedSymbolInUnpackagedContext{3719, StrictLevel::False};
-inline constexpr ErrorClass UsedTestOnlyName{3720, StrictLevel::False};
+// inline constexpr ErrorClass UsedTestOnlyName{3720, StrictLevel::False};
 inline constexpr ErrorClass InvalidExport{3721, StrictLevel::False};
 // inline constexpr ErrorClass ExportingTypeAlias{3722, StrictLevel::False};
 inline constexpr ErrorClass ImportNotVisible{3723, StrictLevel::False};

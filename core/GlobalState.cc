@@ -1216,14 +1216,6 @@ GlobalState::ClassOrModulePackageInfo GlobalState::packageInfoForClassOrModule(C
         return {Symbols::noClassOrModule(), packages::MangledName()};
     }
 
-    // TODO(trevor) remove this once we've fully migrated to test-packages
-    if (owner == Symbols::root() &&
-        (!this->packageDB().testPackages() && name == packages::PackageDB::TEST_NAMESPACE)) {
-        // Leave packageRegistryOwner as `<PackageSpecRegistry>` (essentially, skip over `Test` when
-        // searching for package names). Leave `package` as the non-existent package name.
-        return {Symbols::PackageSpecRegistry(), packages::MangledName()};
-    }
-
     auto ownerData = owner.data(*this);
     auto ownerPackageRegistryOwner = ownerData->packageRegistryOwner;
     if (!ownerPackageRegistryOwner.exists()) {
@@ -2115,8 +2107,7 @@ unique_ptr<GlobalState> GlobalState::copyForIndexThread(
     const vector<string> &extraPackageFilesDirectorySlashPrefixes,
     const vector<string> &packageSkipRBIExportEnforcementDirs, const vector<string> &allowRelaxedPackagerChecksFor,
     const vector<string> &updateVisibilityFor, const vector<string> &packagerLayers, string errorHint,
-    packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility, bool packageAttributedErrors,
-    bool testPackages) const {
+    packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility, bool packageAttributedErrors) const {
     ENFORCE(fileTableFrozen);
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
 
@@ -2143,7 +2134,7 @@ unique_ptr<GlobalState> GlobalState::copyForIndexThread(
                                    extraPackageFilesDirectorySlashDeprecatedPrefixes,
                                    extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs,
                                    allowRelaxedPackagerChecksFor, updateVisibilityFor, packagerLayers, errorHint,
-                                   genPackagesMode, allowRelaxingTestVisibility, packageAttributedErrors, testPackages);
+                                   genPackagesMode, allowRelaxingTestVisibility, packageAttributedErrors);
     }
 
     return result;
@@ -2155,7 +2146,7 @@ unique_ptr<GlobalState> GlobalState::copyForLSPTypechecker(
     const vector<string> &extraPackageFilesDirectorySlashPrefixes,
     const vector<string> &packageSkipRBIExportEnforcementDirs, const vector<string> &allowRelaxedPackagerChecksFor,
     const vector<string> &updateVisibilityFor, const vector<string> &packagerLayers, string errorHint,
-    packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility, bool testPackages) const {
+    packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility) const {
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
 
     result->initEmpty();
@@ -2176,7 +2167,7 @@ unique_ptr<GlobalState> GlobalState::copyForLSPTypechecker(
                                    extraPackageFilesDirectorySlashDeprecatedPrefixes,
                                    extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs,
                                    allowRelaxedPackagerChecksFor, updateVisibilityFor, packagerLayers, errorHint,
-                                   genPackagesMode, allowRelaxingTestVisibility, packageAttributedErrors, testPackages);
+                                   genPackagesMode, allowRelaxingTestVisibility, packageAttributedErrors);
     }
 
     return result;
@@ -2189,7 +2180,7 @@ unique_ptr<GlobalState> GlobalState::copyForSlowPath(
     const vector<string> &packageSkipRBIExportEnforcementDirs, const vector<string> &allowRelaxedPackagerChecksFor,
     const vector<string> &updateVisibilityFor, const vector<string> &packagerLayers, string errorHint,
     packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility, bool packageAttributedErrors,
-    bool testPackages, core::packages::Stratum toStratum) const {
+    core::packages::Stratum toStratum) const {
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
 
     // We omit a call to `initEmpty` here, as the only intended use of this function is to have its symbol table
@@ -2220,11 +2211,11 @@ unique_ptr<GlobalState> GlobalState::copyForSlowPath(
         {
             core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*result);
             core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = result->unfreezePackages();
-            result->setPackagerOptions(
-                extraPackageFilesDirectoryUnderscorePrefixes, extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs,
-                allowRelaxedPackagerChecksFor, updateVisibilityFor, packagerLayers, errorHint, genPackagesMode,
-                allowRelaxingTestVisibility, packageAttributedErrors, testPackages);
+            result->setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes,
+                                       extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                                       extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs,
+                                       allowRelaxedPackagerChecksFor, updateVisibilityFor, packagerLayers, errorHint,
+                                       genPackagesMode, allowRelaxingTestVisibility, packageAttributedErrors);
         }
 
         result->copySymbolTableFrom(*this, toStratum);
@@ -2472,8 +2463,7 @@ void GlobalState::setPackagerOptions(const vector<string> &extraPackageFilesDire
                                      const vector<string> &allowRelaxedPackagerChecksFor,
                                      const vector<string> &updateVisibilityFor, const vector<string> &packagerLayers,
                                      string errorHint, packages::GenPackagesMode genPackagesMode,
-                                     bool allowRelaxingTestVisibility, bool packageAttributedErrors,
-                                     bool testPackages) {
+                                     bool allowRelaxingTestVisibility, bool packageAttributedErrors) {
     ENFORCE_NO_TIMER(!packageDB_.frozen);
 
     packageDB_.enabled_ = true;
@@ -2489,7 +2479,6 @@ void GlobalState::setPackagerOptions(const vector<string> &extraPackageFilesDire
     absl::c_transform(packagerLayers, std::back_inserter(packageDB_.layers_),
                       [this](const auto &layer) { return enterNameUTF8(layer); });
     packageDB_.errorHint_ = errorHint;
-    packageDB_.testPackages_ = testPackages;
 }
 
 packages::UnfreezePackages GlobalState::unfreezePackages() {

@@ -45,24 +45,12 @@ core::lsp::Query::Symbol::STORAGE getSymsToCheckWithinPackage(const core::Global
     }
 
     core::lsp::Query::Symbol::STORAGE result;
-    vector<core::SymbolRef> namespacesToCheck(2);
-    namespacesToCheck.emplace_back(core::Symbols::root());
 
-    // TODO(trevor): we can remove this case once we have switched to test-packages
-    namespacesToCheck.emplace_back(
-        core::Symbols::root().data(gs)->findMember(gs, core::packages::PackageDB::TEST_NAMESPACE));
-
-    for (auto &namespaceToCheck : namespacesToCheck) {
-        if (!namespaceToCheck.exists()) {
-            continue;
-        }
-
-        auto symFound = findSym(gs, fullName, namespaceToCheck);
-        // Do nothing if the symbol is not found or is from the same package -- i.e. for class ... < PackageSpec
-        // declarations
-        if (symFound.exists() && symFound.enclosingClass(gs).data(gs)->package != packageName) {
-            result.emplace_back(std::move(symFound));
-        }
+    auto symFound = findSym(gs, fullName, core::Symbols::root());
+    // Do nothing if the symbol is not found or is from the same package -- i.e. for class ... < PackageSpec
+    // declarations
+    if (symFound.exists() && symFound.enclosingClass(gs).data(gs)->package != packageName) {
+        result.emplace_back(std::move(symFound));
     }
 
     return result;
@@ -180,7 +168,7 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
                 //
                 //    import Bar
                 //           ^^^
-                //  Returns all usages of `Bar` or `Test::Bar` *within* the Foo package only.
+                // Returns all usages of `Bar` within the Foo package only.
                 //
                 // Case 3. get-refs on an export statement
                 //

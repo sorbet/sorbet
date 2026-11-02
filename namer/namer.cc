@@ -1317,31 +1317,11 @@ private:
             ctx, core::UniqueNameKind::MangleRename);
     }
 
-    bool isInTestNamespace(core::Context ctx, core::ClassOrModuleRef owner) {
-        bool inTestNamespace = false;
-        auto rootTest = core::Symbols::root().data(ctx)->findMember(ctx, PackageDB::TEST_NAMESPACE);
-
-        for (auto symbol = owner.data(ctx)->topAttachedClass(ctx); symbol != core::Symbols::root();
-             symbol = symbol.data(ctx)->owner.data(ctx)->topAttachedClass(ctx)) {
-            inTestNamespace |= rootTest == symbol;
-        }
-
-        return inTestNamespace;
-    }
-
-    bool mustUseTestNamespace(core::Context ctx) const {
-        return !package->usesTestPackages && ctx.file.data(ctx).isPackagedTest() &&
-               !package->file.data(ctx).isPackagedTest();
-    }
-
-    bool hasNamespaceError(core::Context ctx, core::packages::MangledName namespacePackage,
-                           bool withinExplicitRootScope, bool inTestNamespace, bool &onPackagePath) const {
-        if (package->usesTestPackages && !ctx.state.packageDB().testPackages() && inTestNamespace) {
-            onPackagePath = false;
-        }
+    bool hasNamespaceError(core::packages::MangledName namespacePackage, bool withinExplicitRootScope,
+                           bool onPackagePath) const {
         auto foreignNamespace = namespacePackage.exists() && !onPackagePath;
         auto exempt = package->isPreludePackage() && withinExplicitRootScope && !foreignNamespace;
-        return !exempt && (!onPackagePath || (mustUseTestNamespace(ctx) && !inTestNamespace));
+        return !exempt && !onPackagePath;
     }
 
     bool shouldMangleClassDefinition(core::MutableContext ctx, core::ClassOrModuleRef owner,
@@ -1357,12 +1337,6 @@ private:
         }
 
         auto [packageRegistryOwner, namespacePackage] = ctx.state.packageInfoForClassOrModule(owner, klass.name);
-        const bool isTestNamespaceRoot = owner == core::Symbols::root() && klass.name == PackageDB::TEST_NAMESPACE;
-        bool inTestNamespace = isInTestNamespace(ctx, owner) || isTestNamespaceRoot;
-        if (klass.classKind == core::FoundClass::Kind::Unknown && ctx.state.packageDB().testPackages() &&
-            isTestNamespaceRoot) {
-            return false;
-        }
 
         // Check the symbol before following aliases, because aliases are a resolver concept.
         auto existing = owner.data(ctx)->findMemberNoDealias(klass.name);
@@ -1375,11 +1349,10 @@ private:
         }
 
         auto onPackagePath = package->ownsNamespace(ctx, namespacePackage, packageRegistryOwner);
-        if (packageRegistryOwner == core::Symbols::PackageSpecRegistry() && !isTestNamespaceRoot) {
+        if (packageRegistryOwner == core::Symbols::PackageSpecRegistry()) {
             onPackagePath = false;
         }
-        auto shouldMangle =
-            hasNamespaceError(ctx, namespacePackage, klass.withinExplicitRootScope, inTestNamespace, onPackagePath);
+        auto shouldMangle = hasNamespaceError(namespacePackage, klass.withinExplicitRootScope, onPackagePath);
         if (shouldMangle) {
             // Report using the source namespace's ownership before mangling clears it.
             reportNamespaceError(ctx, klass.declLoc, klass.withinExplicitRootScope, namespacePackage, onPackagePath,
@@ -1398,12 +1371,10 @@ private:
         }
         // Assignments define values inside namespaces, so classify the containing owner.
         auto namespacePackage = owner.data(ctx)->package;
-        bool inTestNamespace = isInTestNamespace(ctx, owner);
 
         // Unlike class definitions, assignments require exact package ownership.
         auto onPackagePath = namespacePackage == package->mangledName();
-        auto shouldMangle = hasNamespaceError(ctx, namespacePackage, staticField.withinExplicitRootScope,
-                                              inTestNamespace, onPackagePath);
+        auto shouldMangle = hasNamespaceError(namespacePackage, staticField.withinExplicitRootScope, onPackagePath);
         if (shouldMangle) {
             reportNamespaceError(ctx, staticField.lhsLoc, staticField.withinExplicitRootScope, namespacePackage,
                                  onPackagePath, owner, staticField.name);
@@ -1422,15 +1393,8 @@ private:
                                "prelude!");
                 return;
             }
-            auto requiredName = package->mangledName().owner.show(ctx);
-            if (mustUseTestNamespace(ctx)) {
-                requiredName = fmt::format("{}::{}", PackageDB::TEST_NAMESPACE.show(ctx), requiredName);
-                e.setHeader("Tests in the `{}` package must define tests in the `{}` namespace", package->show(ctx),
-                            requiredName);
-            } else {
-                e.setHeader("File belongs to package `{}` but defines a constant that does not match this namespace",
-                            requiredName);
-            }
+            e.setHeader("File belongs to package `{}` but defines a constant that does not match this namespace",
+                        package->mangledName().owner.show(ctx));
             e.addErrorLine(package->declLoc(), "Enclosing package declared here");
             if (!onPackagePath && namespacePackage.exists()) {
                 auto &requiredPackage = ctx.state.packageDB().getPackageInfo(namespacePackage);
@@ -1645,10 +1609,7 @@ private:
         ENFORCE(ctx.file.data(ctx).isPackage(ctx));
         auto owner = getOwnerSymbol(state, package.owner);
 
-        // Eagerly resolve the superclass, so that we can rely on it being set before we hit the resolver. This is
-        // necessary for package-directed typechecking, as we'll copy the package spec to emulate an application/test
-        // package split, and want to avoid the situation where one has a superclass of PackageSpec while the other has
-        // been defaulted to Object.
+        // Eagerly resolve the superclass, so that we can rely on it being set before we hit the resolver.
         owner.data(ctx)->setSuperClass(core::Symbols::PackageSpec());
 
         auto mangledName = core::packages::MangledName(owner);
@@ -2600,20 +2561,6 @@ public:
                     }
                 }
                 return ignoreBadTypeMember(ctx, move(tree));
-
-            case core::packages::PackageInfo::CanModifyResult::TestModifyingNonTest: {
-                if (auto e = ctx.beginError(send->loc, core::errors::Namer::ModifyingUnpackagedConstant)) {
-                    e.setHeader("`{}` in a test file cannot modify a non-test class in the same package",
-                                isTypeTemplate ? "type_template" : "type_member");
-                    for (auto &loc : onSymbol.data(ctx)->locs()) {
-                        if (loc.exists() && !loc.file().data(ctx).isPackagedTest()) {
-                            e.addErrorLine(loc, "`{}` defined here (non-test)", ctx.owner.show(ctx));
-                            break;
-                        }
-                    }
-                }
-                return ignoreBadTypeMember(ctx, move(tree));
-            }
 
             case core::packages::PackageInfo::CanModifyResult::NotOwner:
             case core::packages::PackageInfo::CanModifyResult::UnpackagedSymbol:

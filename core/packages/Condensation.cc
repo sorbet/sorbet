@@ -3,7 +3,6 @@
 #include "common/strings/formatting.h"
 #include "core/GlobalState.h"
 #include <algorithm>
-#include <tuple>
 
 using namespace std;
 
@@ -68,17 +67,12 @@ struct TraversalBuilder {
         False,
     };
 
-    // Sort the given stratum by test/application status, and then by smallest member id. As members are sorted for a
-    // finalized condensation graph, the first id in the members list is always the smallest.
+    // Sort the given stratum by smallest member id. As members are sorted for a finalized condensation graph, the
+    // first id in the members list is always the smallest.
     void sortStratum(absl::Span<uint32_t> stratum) const {
         fast_sort(stratum, [this](uint32_t leftId, uint32_t rightId) {
-            const auto &left = this->nodes[leftId];
-            const auto &right = this->nodes[rightId];
-            // Prelude strata can contain both application and test SCCs. Keep application code first.
-            // Members are sorted, and SCCs of the same kind are disjoint, so their first members determine the order.
-            auto leftFirstMemberId = left.members.front().owner.id();
-            auto rightFirstMemberId = right.members.front().owner.id();
-            return std::tie(left.isTest, leftFirstMemberId) < std::tie(right.isTest, rightFirstMemberId);
+            // Members are sorted, and SCCs are disjoint, so their first members determine the order.
+            return this->nodes[leftId].members.front().owner.id() < this->nodes[rightId].members.front().owner.id();
         });
     }
 
@@ -95,8 +89,7 @@ struct TraversalBuilder {
             // Insert the members of the SCC into the packages vector.
             absl::c_copy(node.members, back_inserter(this->result.packages));
 
-            auto &scc = this->result.sccs.emplace_back();
-            scc.isTest = node.isTest;
+            this->result.sccs.emplace_back();
             this->sccLengths.emplace_back(node.members.size());
 
             // Queue up the dependents in the next frontier, decrementing their imports by one
@@ -185,7 +178,7 @@ const Condensation::Traversal Condensation::computeTraversal(const core::GlobalS
 void Condensation::Traversal::recordStrata(core::GlobalState &gs) const {
     auto &db = gs.packageDB();
     for (auto name : db.packages()) {
-        db.getPackageInfoNonConst(name)->stratum = {};
+        db.getPackageInfoNonConst(name)->stratum = Stratum::NONE;
     }
 
     int ix = -1;
@@ -193,30 +186,15 @@ void Condensation::Traversal::recordStrata(core::GlobalState &gs) const {
         ++ix;
         for (auto &scc : stratum) {
             for (auto name : scc.members) {
-                // TODO(trevor): we can switch to maintaining a single stratum once we've fully migrated to
-                // test-packages.
-                auto &info = db.getPackageInfoNonConst(name)->stratum;
-                if (db.getPackageInfo(name).usesTestPackages) {
-                    ENFORCE(info.applicationStratum == Stratum::NONE);
-                    ENFORCE(info.testStratum == Stratum::NONE);
-                    info.applicationStratum = Stratum(ix);
-                    info.testStratum = Stratum(ix);
-                } else if (scc.isTest) {
-                    ENFORCE(info.testStratum == Stratum::NONE);
-                    info.testStratum = Stratum(ix);
-                } else {
-                    ENFORCE(info.applicationStratum == Stratum::NONE);
-                    info.applicationStratum = Stratum(ix);
-                }
+                db.getPackageInfoNonConst(name)->stratum = Stratum(ix);
             }
         }
     }
 }
 
-Condensation::Node &CondensationBuilder::pushNode(ImportType type, bool isPrelude) {
+Condensation::Node &CondensationBuilder::pushNode(bool isPrelude) {
     auto id = this->condensation.nodes_.size();
-    auto isTest = type != ImportType::Normal;
-    auto &node = this->condensation.nodes_.emplace_back(id, isTest, isPrelude);
+    auto &node = this->condensation.nodes_.emplace_back(id, isPrelude);
     return node;
 }
 
@@ -241,9 +219,6 @@ UnorderedSet<MangledName> Condensation::transitiveDependentsOf(const PackageDB &
         auto &info = db.getPackageInfo(pkg);
         ENFORCE(info.exists());
 
-        // TODO(trevor) remove this comment once we've fully migrated to test-packages
-        // Right now this is an over approximation, as we can't tell if the package specified in `packages` is
-        // referring to the tests, or the application code.
         auto scc = info.sccID();
         ENFORCE(scc.has_value());
         return scc.value();

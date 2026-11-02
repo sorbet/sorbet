@@ -35,13 +35,10 @@ public:
         // The SCC ID of this node.
         const int id = 0;
 
-        // Whether or not this is a node of application or test code.
-        const bool isTest = false;
-
         // True when this node contains prelude packages.
         const bool isPrelude = false;
 
-        Node(int id, bool isTest, bool isPrelude) : id{id}, isTest{isTest}, isPrelude{isPrelude} {}
+        Node(int id, bool isPrelude) : id{id}, isPrelude{isPrelude} {}
     };
 
 private:
@@ -59,22 +56,17 @@ public:
     Condensation &operator=(Condensation &&other) = default;
 
     struct Traversal {
-        // Packages ordered according to their dependencies in the package graph. It's safe to traverse this vector, and
-        // assume that when processing a package all of its imports will have been seen already. Packages will occur
-        // at least once and at most twice in this vector, with the second occurrence always being for the test code of
-        // a package.
+        // Packages ordered according to their dependencies in the package graph. It's safe to traverse this vector and
+        // assume that, when processing a package, all of its imports have been seen already. Each package occurs once.
         std::vector<MangledName> packages;
 
         struct SCCInfo {
-            // True when this group of packages represents a cycle of test dependencies.
-            bool isTest = false;
-
             // A span of `this->packages` that's involved in this SCC, sorted by mangled name.
             absl::Span<MangledName> members;
         };
 
-        // Spans of `this->packages` that correspond to an SCC. Within each stratum, application SCCs precede test
-        // SCCs, and each group is ordered lexicographically by member mangled names.
+        // Spans of `this->packages` that correspond to an SCC. Within each stratum, SCCs are ordered lexicographically
+        // by member mangled names.
         std::vector<SCCInfo> sccs;
 
         // Spans of `this->sccs` that have no import conflicts, and could go through the pipeline in the same stratum.
@@ -88,7 +80,7 @@ public:
         Traversal &operator=(const Traversal &other) = default;
         Traversal &operator=(Traversal &&other) = default;
 
-        // Record the application and test source stratum of each package in PackageInfo.
+        // Record the stratum of each package in PackageInfo.
         void recordStrata(core::GlobalState &gs) const;
     };
 
@@ -110,7 +102,7 @@ class CondensationBuilder {
     Condensation condensation;
 
 public:
-    Condensation::Node &pushNode(ImportType type, bool isPrelude);
+    Condensation::Node &pushNode(bool isPrelude);
 
     Condensation build() &&;
 };

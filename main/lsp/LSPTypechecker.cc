@@ -513,10 +513,7 @@ EditInfo determineMaximumPrefix(const core::GlobalState &gs, const vector<core::
                 fileStratum = core::packages::Stratum(0);
                 pkg = core::packages::MangledName();
             } else {
-                // Don't use the stratum of the package's `__package.rb`: for legacy packages that's
-                // their test stratum, which is later than the stratum of their application sources.
-                const auto &stratum = gs.packageDB().getPackageInfo(pkg).stratum;
-                fileStratum = file->isPackagedTest() ? stratum.testStratum : stratum.applicationStratum;
+                fileStratum = gs.packageDB().getPackageInfo(pkg).stratum;
                 ENFORCE(fileStratum != core::packages::Stratum::NONE);
             }
         } else {
@@ -1225,10 +1222,7 @@ core::packages::Stratum FileStratumMapping::getStratumForFiles(absl::Span<const 
                 continue;
             }
 
-            // We don't special case packages that have been migrated to test packages here as their application and
-            // test stratum are the same. So while we could skip them at this point, it doesn't change the result to
-            // process them.
-            stratum = std::max(stratum, info.stratum.testStratum);
+            stratum = std::max(stratum, info.stratum);
         }
     }
 

@@ -629,7 +629,7 @@ public:
     // will always correspond to the tightest possible namespace in the `<PackageSpecRegistry>` subtree.
     //
     // Normally, only set if `gs.packageDB().enabled()`, though `<root>` and `<PackageSpecRegistry>`
-    // (and `::Test` in legacy test packages mode) are initialized to contain `<PackageSpecRegistry>`.
+    // are initialized to contain `<PackageSpecRegistry>`.
     //
     // Unpackaged namespaces outside the package-name hierarchy, like `::Regexp`, have no registry
     // cursor (the default).
@@ -638,8 +638,6 @@ public:
     // - Given ::Opus::MyPkg, contains ::<PackageSpecRegistry>::Opus::MyPkg
     // - Given ::Opus::MyPkg::Foo, contains ::<PackageSpecRegistry>::Opus::MyPkg::Foo
     // - Given ::Opus::MyPkg::Foo::InnerPkg, contains ::<PackageSpecRegistry>::Opus::MyPkg::Foo::InnerPkg
-    // - Given ::Test, contains ::<PackageSpecRegistry>
-    // - Given ::Test::Opus::MyPkg, contains ::<PackageSpecRegistry>::Opus::MyPkg
     // - Given an unpackaged namespace like ::Regexp, contains ::<none>
     //
     // When set to `::<none>`, inherit whatever our owner has for `package`.

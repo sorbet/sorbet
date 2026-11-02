@@ -3,7 +3,8 @@ class Sorbet::Private::Static::PackageSpec
   sig { params(arg0: T.class_of(Sorbet::Private::Static::PackageSpec), uses_internals: T::Boolean).void }
   def self.import(arg0, uses_internals: false); end
 
-  sig { params(arg0: T.class_of(Sorbet::Private::Static::PackageSpec), only: T.nilable(String)).void }
+  # No longer has any effect. Accepted so that `__package.rb` files can delete it independently of upgrading Sorbet.
+  sig { params(arg0: T.untyped, only: T.nilable(String)).void }
   def self.test_import(arg0, only: nil); end
 
   sig { params(arg0: T.untyped).void }
@@ -21,6 +22,8 @@ class Sorbet::Private::Static::PackageSpec
   sig { params(arg0: String).void }
   def self.layer(arg0); end
 
+  # `tests_min_typed_level` no longer has any effect. It is accepted so that `__package.rb` files can delete it
+  # independently of upgrading Sorbet.
   sig { params(min_typed_level: String, tests_min_typed_level: T.nilable(String)).void }
   def self.sorbet(min_typed_level:, tests_min_typed_level: nil); end
 

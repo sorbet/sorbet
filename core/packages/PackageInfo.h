@@ -25,12 +25,6 @@ namespace sorbet::core::packages {
 
 class PackageDB;
 
-enum class ImportType : uint8_t {
-    Normal,
-    TestHelper,
-    TestUnit,
-};
-
 enum class VisibleToType {
     Normal,
     Wildcard,
@@ -48,25 +42,16 @@ std::string_view strictDependenciesLevelToString(StrictDependenciesLevel level);
 
 struct Import {
     MangledName mangledName;
-    ImportType type;
     core::LocOffsets loc;
 
-    // This is only valid when `type == ImportType::Normal`.
     bool usesInternals = false;
 
-    Import(MangledName mangledName, ImportType type, core::LocOffsets loc)
-        : mangledName(mangledName), type(type), loc(loc) {}
+    Import(MangledName mangledName, core::LocOffsets loc) : mangledName(mangledName), loc(loc) {}
 
     Import(Import &&other) = default;
     Import(const Import &other) = default;
     Import &operator=(Import &&other) = default;
     Import &operator=(const Import &other) = default;
-
-    bool isTestImport() const {
-        return type != ImportType::Normal;
-    }
-
-    bool isAvailableTo(const core::GlobalState &gs, core::FileRef file) const;
 };
 
 struct Export {
@@ -162,7 +147,6 @@ public:
         core::LocOffsets layer;
         core::LocOffsets strictDependenciesLevel;
         core::LocOffsets minTypedLevel;
-        core::LocOffsets testsMinTypedLevel;
 
         // Set to non-none loc when this package should just export everything
         core::LocOffsets exportAll;
@@ -178,32 +162,17 @@ public:
 
     core::NameRef layer;
 
-    // Source strata assigned by computePackageStrata. Monolithic processing assigns both
-    // zero. Recomputed for each traversal and copied with the package database, including
-    // when restoring a canceled slow path. These are independent of the package AST's stratum.
-    // TODO(trevor): We can replace `StratumInfo` with a single uint32_t once we've fully migrated
-    // to test-packages.
-    // Using "stratum" instead of "layer" to avoid confusion with the modularity concept/package
-    // DSL method of "layer" (utility, business, service, etc.)
-    struct StratumInfo {
-        Stratum applicationStratum = Stratum::NONE;
-        Stratum testStratum = Stratum::NONE;
-    } stratum;
+    // Source stratum assigned by computePackageStrata. Monolithic processing assigns zero.
+    // Recomputed for each traversal and copied with the package database, including when
+    // restoring a canceled slow path. This is independent of the package AST's stratum.
+    Stratum stratum = Stratum::NONE;
 
     // ID of the strongly-connected component that this package is in, according to its graph of import dependencies
     int sccID_ = -1;
 
-    // ID of the strongly-connected component that this package's tests are in, according to its graph of import
-    // dependencies
-    int testSccID_ = -1;
-
     MangledName mangledName_;
 
-    // Whether this package has been migrated either to a `test!` package, or to have a `test!` package instead of a
-    // test namespace.
-    bool usesTestPackages = false;
-
-    // Whether `visible_to` directives should be ignored for test code
+    // Whether `visible_to` directives should be ignored for `test!` packages
     bool visibleToTests_ = false;
 
     // Whether or not this package has other packages underneath its namespace.
@@ -216,7 +185,6 @@ public:
     bool hasSubPackages = false;
 
     core::StrictLevel minTypedLevel = core::StrictLevel::None;
-    core::StrictLevel testsMinTypedLevel = core::StrictLevel::None;
 
     StrictDependenciesLevel strictDependenciesLevel = StrictDependenciesLevel::None;
 
@@ -238,16 +206,6 @@ public:
         return sccID_ == -1 ? std::nullopt : std::make_optional(sccID_);
     }
 
-    // The ID of the SCC that this package's tests belong to. This ID is only useful in the context of the package graph
-    // condensation graph.
-    //
-    // WARNING: Modifying the contents of the package DB after ComputePackageSCCs will cause this id to go out of
-    // date.
-    std::optional<int> testSccID() const {
-        ENFORCE(exists());
-        return testSccID_ == -1 ? std::nullopt : std::make_optional(testSccID_);
-    }
-
     std::unique_ptr<PackageInfo> deepCopy() const;
 
     PackageInfo(MangledName mangledName, core::FileRef file, core::LocOffsets loc, core::LocOffsets declLoc)
@@ -259,8 +217,7 @@ public:
     explicit PackageInfo(const PackageInfo &) = default;
     PackageInfo &operator=(const PackageInfo &) = delete;
 
-    int orderImports(const core::GlobalState &gs, const PackageInfo &a, bool aIsTestImport, const PackageInfo &b,
-                     bool bIsTestImport,
+    int orderImports(const core::GlobalState &gs, const PackageInfo &a, const PackageInfo &b,
                      const std::optional<StrictDependenciesLevel> aStrictnessOverride = std::nullopt,
                      const std::optional<StrictDependenciesLevel> bStrictnessOverride = std::nullopt) const;
 
@@ -271,8 +228,7 @@ public:
 
     // autocorrects
 
-    std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &info,
-                                                         ImportType importType) const;
+    std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &info) const;
 
     std::optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs,
                                                          const core::SymbolRef newExport) const;
@@ -327,10 +283,8 @@ public:
         return this->locs.testPackage.exists();
     }
 
-    // Do this package's visible_to rules allow `importingPkg` to import this package, using an import of type
-    // `importType`?
-    bool isVisibleTo(const core::GlobalState &gs, const PackageInfo &importingPkgInfo,
-                     const ImportType importType) const;
+    // Do this package's visible_to rules allow `importingPkg` to import this package?
+    bool isVisibleTo(const core::GlobalState &gs, const PackageInfo &importingPkgInfo) const;
 
     enum class CanModifyResult : uint8_t {
         // This symbol can be modified.
@@ -348,8 +302,6 @@ public:
         // The symbol is unpackaged, and the context is not a prelude package.
         UnpackagedSymbol,
 
-        // The file is on the test side of the package but the symbol was defined on the non-test side.
-        TestModifyingNonTest,
     };
 
     // True when it's safe to modify this symbol from the context of a file owned by this package. Modification in this
@@ -376,11 +328,9 @@ public:
     // class/module scope named after) `sym`, per the package-scope-nesting rule.
     CanOpenScopeResult canOpenScope(Context ctx, ClassOrModuleRef sym) const;
 
-    // It's okay to access the internals of `other` if it's this package, or if test packages are enabled and we
-    // imported `other` with `uses_internals: true`.
-    bool canAccessInternalsOf(bool testPackages, MangledName other) const;
-
-    core::packages::ImportType fileToImportType(const core::GlobalState &gs, core::FileRef file) const;
+    // It's okay to access the internals of `other` if it's this package, or if this test package imported `other` with
+    // `uses_internals: true`.
+    bool canAccessInternalsOf(MangledName other) const;
 
     // Track that `file` references the packages in `references`, along with some metadata about each reference
     void trackPackageReferences(const core::FileRef file,
@@ -399,7 +349,7 @@ public:
         const core::GlobalState &gs, std::vector<Import> newImports,
         UnorderedMap<core::packages::MangledName, core::packages::StrictDependenciesLevel> newStrictnessByPkg) const;
 };
-CheckSize(PackageInfo, 256, 8);
+CheckSize(PackageInfo, 240, 8);
 
 } // namespace sorbet::core::packages
 #endif

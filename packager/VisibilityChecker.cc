@@ -37,20 +37,9 @@ core::ClassOrModuleRef getScopeForPackage(const core::GlobalState &gs, absl::Spa
     return result;
 }
 
-// Which of a package's namespaces to recompute export bits for. A package that doesn't use `test!` packages defines
-// its application and its `Test::` namespace in different strata in package-directed mode, and processing one must
-// not change the other's symbols, which might belong to an earlier stratum.
-//
-// TODO(jez) Delete this once all packages use `test!` packages.
-enum class Namespace {
-    Application,
-    Test,
-};
-
 // Sets the `isExported` bits on a package's symbols, using the exports recorded on its `PackageInfo`.
 //
-// This reports no errors: `ExportErrors` reports them, from the package's resolved `__package.rb`
-// (which might not happen until the test SCC for this package runs).
+// This reports no errors: `ExportErrors` reports them, from the package's resolved `__package.rb`.
 class ExportBits final {
     const core::packages::PackageInfo &package;
 
@@ -105,12 +94,12 @@ class ExportBits final {
     }
 
     // TODO(jez) This function is annoying that it has to recurse up the owner chain. It would be
-    // better if we didn't have to do this, but that would involve persisting the test and non-test
-    // root symbols for a package onto the PackageInfo itself, which is tricky.
+    // better if we didn't have to do this, but that would involve persisting the root symbol for a
+    // package onto the PackageInfo itself, which is tricky.
     //
     // This is very unsatisfying, because it looks a lot like us re-introducing FullyQualifiedName,
     // which was half of the point of moving Symbols into the package database in the first place.
-    pair<core::ClassOrModuleRef, core::ClassOrModuleRef> getScopesForPackage(const core::GlobalState &gs) {
+    core::ClassOrModuleRef getPackageScope(const core::GlobalState &gs) {
         vector<core::NameRef> parts;
         auto owner = package.mangledName().owner;
         while (owner != core::Symbols::root() && owner != core::Symbols::PackageSpecRegistry()) {
@@ -119,26 +108,15 @@ class ExportBits final {
             owner = ownerData->owner;
         }
 
-        auto nonTestScope = getScopeForPackage(gs, parts, core::Symbols::root());
-        auto testNamespace = core::Symbols::root().data(gs)->findMember(gs, core::packages::PackageDB::TEST_NAMESPACE);
-        core::ClassOrModuleRef testScope;
-        if (!this->package.usesTestPackages && testNamespace.exists() && testNamespace.isClassOrModule()) {
-            testScope = getScopeForPackage(gs, parts, testNamespace.asClassOrModuleRef());
-        }
-
-        // TODO(trevor): we can remove the returned test scope after switching to test packages.
-        return {nonTestScope, testScope};
+        return getScopeForPackage(gs, parts, core::Symbols::root());
     }
 
-    void unsetAllExportedInPackage(core::GlobalState &gs, Namespace ns) {
-        auto [nonTestScope, testScope] = getScopesForPackage(gs);
+    void unsetAllExportedInPackage(core::GlobalState &gs) {
+        auto scope = getPackageScope(gs);
 
         auto setExportedTo = false;
-        if (ns == Namespace::Application && nonTestScope.exists()) {
-            recursiveSetIsExported(gs, setExportedTo, nonTestScope);
-        }
-        if (ns == Namespace::Test && testScope.exists()) {
-            recursiveSetIsExported(gs, setExportedTo, testScope);
+        if (scope.exists()) {
+            recursiveSetIsExported(gs, setExportedTo, scope);
         }
     }
 
@@ -155,28 +133,16 @@ class ExportBits final {
 
 public:
     // Recompute the export bits of the package's symbols from its `exports_`.
-    static void run(core::GlobalState &gs, core::packages::MangledName name, Namespace ns) {
+    static void run(core::GlobalState &gs, core::packages::MangledName name) {
         auto &package = gs.packageDB().getPackageInfo(name);
         ENFORCE(package.exists());
-        if (package.usesTestPackages) {
-            // A `test!` package is a separate package, so each package has only one namespace.
-            ns = Namespace::Application;
-        }
 
         ExportBits pass{package};
 
-        pass.unsetAllExportedInPackage(gs, ns);
+        pass.unsetAllExportedInPackage(gs);
 
         for (const auto &exp : package.exports_) {
-            // Exports can't go through class aliases, so an export of a `Test::` constant only exports symbols in
-            // the `Test::` namespace, and vice versa.
-            auto isTestExport =
-                !package.usesTestPackages && exp.reversedPath.back() == core::packages::PackageDB::TEST_NAMESPACE;
-            if (isTestExport != (ns == Namespace::Test)) {
-                continue;
-            }
-
-            // For the same reason, we don't need to dealias any prefix.
+            // Exports can't go through class aliases, so we don't need to dealias any prefix.
             core::SymbolRef sym = core::Symbols::root();
             for (auto it = exp.reversedPath.rbegin(); it != exp.reversedPath.rend() && sym.exists(); ++it) {
                 sym = sym.isClassOrModule() ? sym.asClassOrModuleRef().data(gs)->findMemberNoDealias(*it)
@@ -713,7 +679,7 @@ void VisibilityChecker::propagateExports(core::GlobalState &gs, absl::Span<const
     Timer timeit(gs.tracer(), "visibility_checker.propagate_visibility");
     // Recompute the bits of the namespaces whose files are being processed: these are the only symbols that this
     // stratum (or fast path) can have entered or changed.
-    UnorderedSet<pair<core::packages::MangledName, Namespace>> recomputed;
+    UnorderedSet<core::packages::MangledName> recomputed;
     for (auto &f : files) {
         auto &file = f.file.data(gs);
         if (file.isPackage(gs)) {
@@ -726,14 +692,10 @@ void VisibilityChecker::propagateExports(core::GlobalState &gs, absl::Span<const
         }
 
         // Track which packages we've already setExportBits for, because we only have to do this
-        // once per unique package in the set of edited files. (And we can't just scan files
-        // looking for `__package.rb` files, because the application stratum of a legacy
-        // application+test package won't place the `__package.rb` file in that stratum, but
-        // still needs to export the application constants.)
-        auto ns = file.isPackagedTest() ? Namespace::Test : Namespace::Application;
-        auto [_it, seenForFirstTime] = recomputed.emplace(pkgName, ns);
+        // once per unique package in the set of edited files.
+        auto [_it, seenForFirstTime] = recomputed.emplace(pkgName);
         if (seenForFirstTime) {
-            ExportBits::run(gs, pkgName, ns);
+            ExportBits::run(gs, pkgName);
         }
     }
 }
