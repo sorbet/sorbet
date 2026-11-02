@@ -1,5 +1,5 @@
 # typed: strict
-# stratum: 3
+# stratum: 2
 
 class Second < PackageSpec
   import First

@@ -1,5 +1,5 @@
 # typed: strict
-# stratum: 2
+# stratum: 1
 
 class Consumer < PackageSpec
   import Prelude

@@ -1,6 +1,6 @@
 # typed: strict
 
-# stratum: 2
+# stratum: 1
 
 class B < PackageSpec
   import A

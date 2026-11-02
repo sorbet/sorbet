@@ -1,5 +1,5 @@
 # typed: strict
-# stratum: 4
+# stratum: 3
 
 class Consumer < PackageSpec
   import A
