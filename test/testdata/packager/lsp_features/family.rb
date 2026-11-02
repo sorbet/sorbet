@@ -41,7 +41,7 @@ module Simpsons
   end
 
   Test::Krabappel::Popquiz
-# ^^^^ error: Unable to resolve constant `Test`
+# ^^^^^^^^^^^^^^^ error: `Test::Krabappel` cannot be referenced here because `Simpsons` may not reference `test!` packages
 
   class Private
     #   ^^^^^^^ def: s-private

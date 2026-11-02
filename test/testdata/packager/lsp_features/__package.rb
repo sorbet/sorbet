@@ -11,11 +11,6 @@ class Simpsons < PackageSpec
     #      ^^^^ hover: Bart package description
     #      ^    show-symbol: Bart
 
-    test_import Krabappel
-    #           ^^^^^^^^^ import: krabappel-pkg
-    #           ^^^^^^^^^ hover: Bart's teacher
-    #           ^         show-symbol: Krabappel
-
     export Simpsons::Family
     #                ^^^^^^ usage: family
     #                ^      show-symbol: Simpsons::Family
