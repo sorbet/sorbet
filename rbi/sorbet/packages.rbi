@@ -29,4 +29,7 @@ class Sorbet::Private::Static::PackageSpec
 
   sig { void }
   def self.test!(); end
+
+  sig { params(arg0: T::Boolean).void }
+  def self.subclass_discovery(arg0); end
 end
