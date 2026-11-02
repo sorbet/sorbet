@@ -4,6 +4,7 @@
 #include "absl/strings/str_replace.h"
 #include "common/FileOps.h"
 #include "common/common.h"
+#include "common/exception/Exception.h"
 #include "common/kvstore/KeyValueStore.h"
 #include "core/ErrorQueue.h"
 #include "core/Unfreeze.h"
@@ -594,6 +595,17 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "ReopenExistingSessionCacheDir") {
     REQUIRE(FileOps::exists(sessionPath));
     sessionCache.reset();
     REQUIRE(FileOps::exists(sessionPath));
+
+    // Refuse to reuse the directory when an old database entry cannot be removed.
+    auto blockedDataPath = fmt::format("{}/data.mdb", sessionPath);
+    FileOps::createDir(blockedDataPath);
+    auto blockerPath = fmt::format("{}/keep-around", blockedDataPath);
+    FileOps::write(blockerPath, "");
+    kvstore = realmain::cache::maybeCreateKeyValueStore(logger, *opts);
+    CHECK_THROWS_AS(realmain::cache::SessionCache::make(std::move(kvstore), *logger, *opts), RemoveDirException);
+    REQUIRE(FileOps::exists(blockerPath));
+    FileOps::removeFile(blockerPath);
+    FileOps::removeDir(blockedDataPath);
 
     // Write empty lock and data files to simulate an existing cache, and remove the temp file that was used to persist
     // the directory.
