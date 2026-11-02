@@ -2,6 +2,7 @@
 // has to go first as it violates our requirements
 #include "absl/strings/match.h"
 #include "absl/strings/str_replace.h"
+#include "absl/synchronization/notification.h"
 #include "common/FileOps.h"
 #include "common/common.h"
 #include "common/exception/Exception.h"
@@ -441,6 +442,50 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "CopyCacheAfterInit") {
 
     OwnedKeyValueStore::abort(std::move(copy));
 
+    // Add an entry to the shared cache, to show that committing the session cache will overwrite it.
+    {
+        auto shared = realmain::cache::maybeCreateKeyValueStore(logger, *opts);
+        shared->writeString("shared only", "not in the session");
+        OwnedKeyValueStore::bestEffortCommit(*logger, std::move(shared));
+    }
+
+    // Committing will fail while the shared cache still has active shared locks.
+    {
+        auto sharedLock = CacheLock::acquireShared(opts->cacheDir);
+        REQUIRE(sharedLock.has_value());
+        auto sharedDataPath = fmt::format("{}/data.mdb", opts->cacheDir);
+        auto originalData = FileOps::read(sharedDataPath);
+        absl::Notification finished;
+        auto publisher = runInAThread("cache-publisher", [&]() {
+            CHECK_NOTHROW(sessionCache->commit(logger, *opts));
+            finished.Notify();
+        });
+        CHECK(finished.WaitForNotificationWithTimeout(absl::Seconds(5)));
+        CHECK_EQ(FileOps::read(sharedDataPath), originalData);
+        sharedLock.reset();
+        publisher.reset();
+        CHECK_FALSE(FileOps::dirExists(
+            fmt::format("{}/{}{}", opts->cacheDir, realmain::cache::SessionCache::STAGING_DIR_PREFIX, getpid())));
+    }
+    sessionCache->commit(logger, *opts);
+
+    // Verify that committing the session cache overwrites the shared one by checking that the `shared only` key is
+    // missing.
+    {
+        auto shared = realmain::cache::maybeCreateKeyValueStore(logger, *opts);
+        auto contents = shared->read("new key");
+        REQUIRE_NE(contents.data, nullptr);
+        CHECK_EQ(vector<uint8_t>(contents.data, contents.data + contents.len), value);
+        CHECK_FALSE(shared->readString("shared only").has_value());
+    }
+
+    // The session cache can still be used after it's been committed back to the shared cache.
+    copy = sessionCache->open(logger, *opts);
+    auto contents = copy->read("new key");
+    REQUIRE_NE(contents.data, nullptr);
+    CHECK_EQ(vector<uint8_t>(contents.data, contents.data + contents.len), value);
+    OwnedKeyValueStore::abort(std::move(copy));
+
     // Close the session cache, and make sure that it removes the directory.
     string sessionPath(sessionCache->kvstorePath());
     REQUIRE(FileOps::exists(sessionPath));
@@ -634,6 +679,14 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "ReopenExistingSessionCacheDir") {
 }
 
 TEST_CASE_FIXTURE(CacheProtocolTest, "ReapOldCacheDirectories") {
+    string_view prefix;
+    SUBCASE("Session caches") {
+        prefix = realmain::cache::SessionCache::SESSION_DIR_PREFIX;
+    }
+    SUBCASE("Publication staging directories") {
+        prefix = realmain::cache::SessionCache::STAGING_DIR_PREFIX;
+    }
+
     auto opts = lspWrapper->opts;
     REQUIRE(!opts->cacheDir.empty());
 
@@ -659,8 +712,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "ReapOldCacheDirectories") {
 
             --needed;
 
-            const auto &path = caches.emplace_back(
-                fmt::format("{}/{}{}", opts->cacheDir, realmain::cache::SessionCache::SESSION_DIR_PREFIX, pid));
+            const auto &path = caches.emplace_back(fmt::format("{}/{}{}", opts->cacheDir, prefix, pid));
             FileOps::createDir(path);
 
             // Create data and lock files to simulate a fully populated cache
@@ -704,6 +756,16 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "ReapOldCacheDirectories") {
     // Clean up
     FileOps::removeFile(fmt::format("{}/keep-around", path));
     FileOps::removeDir(path);
+
+    // Leave caches belonging to active processes alone.
+    auto activePath = fmt::format("{}/{}{}", opts->cacheDir, prefix, getpid());
+    FileOps::createDir(activePath);
+    auto dataPath = fmt::format("{}/data.mdb", activePath);
+    FileOps::write(dataPath, "");
+    realmain::cache::SessionCache::reapOldCaches(*opts);
+    CHECK(FileOps::exists(dataPath));
+    FileOps::removeFile(dataPath);
+    FileOps::removeDir(activePath);
 }
 
 TEST_CASE_FIXTURE(CacheProtocolTest, "CachePopulationWithPackages") {

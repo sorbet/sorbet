@@ -1,4 +1,5 @@
 #include "main/cache/cache.h"
+#include "absl/cleanup/cleanup.h"
 #include "common/FileOps.h"
 #include "common/Random.h"
 #include "common/concurrency/ConcurrentQueue.h"
@@ -11,6 +12,7 @@
 #include <cerrno>
 #include <charconv>
 #include <cstdio>
+#include <filesystem>
 #include <unistd.h>
 
 using namespace std;
@@ -274,6 +276,7 @@ bool removeCacheDir(const string &path) noexcept {
 } // namespace
 
 const string_view SessionCache::SESSION_DIR_PREFIX = "sorbet-session-";
+const string_view SessionCache::STAGING_DIR_PREFIX = "sorbet-publish-";
 
 SessionCache::SessionCache(string path) : path{std::move(path)} {}
 
@@ -287,12 +290,15 @@ void SessionCache::reapOldCaches(const options::Options &opts) {
     }
 
     for (const auto &dir : FileOps::listSubdirs(opts.cacheDir)) {
-        auto pos = dir.find(SESSION_DIR_PREFIX);
-        if (pos != 0) {
+        string_view pidStr;
+        if (dir.find(SESSION_DIR_PREFIX) == 0) {
+            pidStr = string_view(dir).substr(SESSION_DIR_PREFIX.size());
+        } else if (dir.find(STAGING_DIR_PREFIX) == 0) {
+            pidStr = string_view(dir).substr(STAGING_DIR_PREFIX.size());
+        } else {
             continue;
         }
 
-        string_view pidStr = string_view(dir).substr(SESSION_DIR_PREFIX.size());
         pid_t pid = -1;
         auto res = std::from_chars(pidStr.begin(), pidStr.end(), pid);
         if (res.ec != std::errc{} || res.ptr != pidStr.end() || pid <= 0) {
@@ -353,6 +359,34 @@ unique_ptr<OwnedKeyValueStore> SessionCache::open(shared_ptr<::spdlog::logger> l
     }
 
     return kvstore;
+}
+
+void SessionCache::commit(shared_ptr<::spdlog::logger> logger, const options::Options &opts) const {
+    if (opts.cacheDir.empty()) {
+        return;
+    }
+    auto kvstore = this->open(std::move(logger), opts);
+    if (kvstore == nullptr) {
+        return;
+    }
+
+    // Copy into the destination filesystem before atomically replacing data.mdb. This preserves both the
+    // shared database on a failed copy and the session database for subsequent use.
+    auto stagingPath = fmt::format("{}/{}{}", opts.cacheDir, STAGING_DIR_PREFIX, getpid());
+    removeCacheDir(stagingPath);
+    absl::Cleanup cleanupStagingDirectory = [&stagingPath] { removeCacheDir(stagingPath); };
+
+    kvstore->copyTo(stagingPath);
+    kvstore.reset();
+
+    // Skip publication if the shared cache is still in use.
+    auto accessLock = CacheLock::acquireExclusive(opts.cacheDir, /* blocking */ false);
+    if (!accessLock.has_value()) {
+        prodCounterInc("cache.publish_failed");
+        return;
+    }
+    filesystem::rename(fmt::format("{}/data.mdb", stagingPath), fmt::format("{}/data.mdb", opts.cacheDir));
+    prodCounterInc("cache.publish_success");
 }
 
 } // namespace sorbet::realmain::cache
