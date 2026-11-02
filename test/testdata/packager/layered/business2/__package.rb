@@ -6,5 +6,4 @@ class Business2 < PackageSpec
   layer 'business'
 
   import Utility1
-  test_import Service1
 end

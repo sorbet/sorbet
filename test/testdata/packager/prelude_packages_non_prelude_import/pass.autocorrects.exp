@@ -40,6 +40,18 @@ module Prelude
   end
 end
 # ------------------------------
+# -- test/testdata/packager/prelude_packages_non_prelude_import/prelude/test/__package.rb --
+# frozen_string_literal: true
+# typed: strict
+# enable-packager: true
+
+class Test::Prelude < PackageSpec
+  test!
+  prelude!
+
+  import Prelude
+end
+# ------------------------------
 # -- test/testdata/packager/prelude_packages_non_prelude_import/relaxed_prelude/__package.rb --
 # frozen_string_literal: true
 # typed: strict
