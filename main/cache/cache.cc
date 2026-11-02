@@ -7,6 +7,7 @@
 #include "core/serialize/serialize.h"
 #include "main/options/options.h"
 #include "sorbet_version/sorbet_version.h"
+#include <cerrno>
 #include <charconv>
 #include <cstdio>
 #include <unistd.h>
@@ -222,43 +223,33 @@ unique_ptr<KeyValueStore> maybeCacheGlobalStateAndFiles(unique_ptr<KeyValueStore
 }
 
 namespace {
-void removeCacheDir(const string &path) {
-    if (!FileOps::dirExists(path)) {
-        return;
-    }
-
+// Missing files and directories containing unrelated files are acceptable.
+bool removeCacheDir(const string &path) noexcept {
     auto dataMdb = fmt::format("{}/data.mdb", path);
     if (0 != remove(dataMdb.c_str())) {
         switch (errno) {
-            // It's fine if the file was already gone: this can happen if two sorbets were started at
-            // the same time, and one removes the db while this one is trying to do the same.
+            // Another process may have already removed the database.
             case ENOENT:
                 break;
 
-            default: {
-                auto msg = fmt::format("Error in removeCacheDir('{}'): {}", dataMdb, errno);
-                throw sorbet::RemoveFileException(msg);
-            }
+            default:
+                return false;
         }
     }
 
     auto lockMdb = fmt::format("{}/lock.mdb", path);
     if (0 != remove(lockMdb.c_str())) {
         switch (errno) {
-            // It's fine if the file was already gone: this can happen if two sorbets were started at
-            // the same time, and one removes the lock while this one is trying to do the same.
+            // Another process may have already removed the lock file.
             case ENOENT:
                 break;
 
-            default: {
-                auto msg = fmt::format("Error in removeCacheDir('{}'): {}", lockMdb, errno);
-                throw sorbet::RemoveFileException(msg);
-            }
+            default:
+                return false;
         }
     }
 
-    // Fail silently if the directory has files other than those created by LMDB. This should be fine though, as we
-    // will have removed the largest files.
+    // Leave directories containing files other than those created by LMDB intact.
     if (0 != rmdir(path.c_str())) {
         switch (errno) {
             // It's fine if the directory is missing, isn't actually a directory, or wasn't empty.
@@ -267,12 +258,12 @@ void removeCacheDir(const string &path) {
             case ENOTEMPTY:
                 break;
 
-            default: {
-                auto msg = fmt::format("Error in removeCacheDir('{}'): {}", path, errno);
-                throw sorbet::RemoveDirException(msg);
-            }
+            default:
+                return false;
         }
     }
+
+    return true;
 }
 } // namespace
 
@@ -320,8 +311,8 @@ unique_ptr<SessionCache> SessionCache::make(unique_ptr<const OwnedKeyValueStore>
     auto path = fmt::format("{}/{}{}", opts.cacheDir, SESSION_DIR_PREFIX, pid);
 
     // If the directory already exists, we're reusing a PID from a previous run of Sorbet.
-    if (FileOps::dirExists(path)) {
-        removeCacheDir(path);
+    if (FileOps::dirExists(path) && !removeCacheDir(path)) {
+        throw RemoveDirException(fmt::format("Failed to remove existing session cache '{}': {}", path, errno));
     }
 
     kvstore->copyTo(path);
