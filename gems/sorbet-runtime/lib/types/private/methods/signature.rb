@@ -288,8 +288,7 @@ class T::Private::Methods::Signature
   end
 
   private def parameter_name(kind)
-    @parameters.each { |param_kind, name| return name if param_kind == kind }
-    nil
+    @parameters.assoc(kind)&.[](1)
   end
 
   EMPTY_LIST = [].freeze

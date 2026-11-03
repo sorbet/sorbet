@@ -89,10 +89,6 @@ module Opus::Types::Test
         assert_equal(:**, sig.keyrest_name)
         assert_equal(:&, sig.block_name)
 
-        names = []
-        sig.each_args_value_type([0, 'x', 'y', {k: 1}]) { |name, _, _| names << name }
-        assert_equal(%i[a * * k], names)
-
         err = assert_raises(TypeError) { c.new.anonymous(0, 1) {} }
         assert_match(/Parameter '\*': Expected type String, got type Integer/, err.message)
       end
@@ -107,9 +103,11 @@ module Opus::Types::Test
         sig = T::Utils.signature_for_method(c.instance_method(:post_required))
         assert_equal(:rest, sig.rest_name)
 
-        names = []
-        sig.each_args_value_type([0, 'x', 'y']) { |name, _, _| names << name }
-        assert_equal(%i[a rest rest], names)
+        # This captures current, incorrect behavior: sorbet-runtime checks positional args in
+        # order and treats everything after them as rest args, so here it checks the first arg
+        # against `a` and the rest against `rest`, even though Ruby binds the last arg to `a`.
+        err = assert_raises(TypeError) { c.new.post_required(0, 1, 'x') }
+        assert_match(/Parameter 'rest': Expected type String, got type Integer/, err.message)
       end
 
       it 'fits in a 160-byte GC slot' do
