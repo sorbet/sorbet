@@ -1184,6 +1184,7 @@ ClassOrModuleRef GlobalState::enterClassOrModuleSymbol(Loc loc, ClassOrModuleRef
     }
 
     ENFORCE_NO_TIMER(!symbolTableFrozen);
+    ENFORCE_NO_TIMER(!newSymbolsForbidden, "Entering a new symbol while new symbols are forbidden");
     auto ret = ClassOrModuleRef(*this, classAndModules.size());
     store = ret; // DO NOT MOVE this assignment down. emplace_back on classAndModules invalidates `store`
     classAndModules.emplace_back();
@@ -1285,6 +1286,7 @@ TypeMemberRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, Name
     }
 
     ENFORCE_NO_TIMER(!symbolTableFrozen);
+    ENFORCE_NO_TIMER(!newSymbolsForbidden, "Entering a new symbol while new symbols are forbidden");
 
     auto contiguousStrataUntil = this->contiguousStrataUntil();
     const auto &boundary = this->symbolOffsets[contiguousStrataUntil.rawId()];
@@ -1347,6 +1349,7 @@ TypeParameterRef GlobalState::enterTypeParameter(Loc loc, MethodRef owner, NameR
     }
 
     ENFORCE_NO_TIMER(!symbolTableFrozen);
+    ENFORCE_NO_TIMER(!newSymbolsForbidden, "Entering a new symbol while new symbols are forbidden");
     auto result = TypeParameterRef(*this, this->typeParameters.size());
     this->typeParameters.emplace_back();
 
@@ -1371,6 +1374,7 @@ MethodRef GlobalState::enterMethodSymbol(Loc loc, ClassOrModuleRef owner, NameRe
     }
 
     ENFORCE_NO_TIMER(!symbolTableFrozen);
+    ENFORCE_NO_TIMER(!newSymbolsForbidden, "Entering a new symbol while new symbols are forbidden");
 
     auto result = MethodRef(*this, methods.size());
     store = result; // DO NOT MOVE this assignment down. emplace_back on methods invalidates `store`
@@ -1435,6 +1439,7 @@ FieldRef GlobalState::enterFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef 
     }
 
     ENFORCE_NO_TIMER(!symbolTableFrozen);
+    ENFORCE_NO_TIMER(!newSymbolsForbidden, "Entering a new symbol while new symbols are forbidden");
 
     auto result = FieldRef(*this, fields.size());
     store = result; // DO NOT MOVE this assignment down. emplace_back on fields invalidates `store`
@@ -1473,6 +1478,7 @@ FieldRef GlobalState::enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, Na
     }
 
     ENFORCE_NO_TIMER(!symbolTableFrozen);
+    ENFORCE_NO_TIMER(!newSymbolsForbidden, "Entering a new symbol while new symbols are forbidden");
 
     auto ret = FieldRef(*this, fields.size());
     store = ret; // DO NOT MOVE this assignment down. emplace_back on fields invalidates `store`

@@ -854,6 +854,10 @@ TEST_CASE("PerPhaseTest") {
 
     handler.clear(*gs);
     auto symbolsBefore = gs->symbolsUsedTotal();
+    // Re-running the namer and resolver on unchanged files must only find existing symbols. This is the property
+    // that the LSP fast path relies on when it skips the incremental namer. Like the check on symbolsBefore below,
+    // this lasts until the end of the test.
+    core::ForbidNewSymbols forbidNewSymbols(*gs);
 
     trees = indexForStressIncremental(gs.get(), inputPackageFiles, handler);
     trees.reserve(files.size());
