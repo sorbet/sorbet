@@ -1,7 +1,7 @@
 # typed: true
 
-def foo # error: Hint: this "def" token is not closed before the end of the file
-  for i in 1..7
+def foo
+  for i in 1..7 # error: Hint: this "for" token might not be properly closed
 end
 
 def bar; end # error: unexpected token "end of file"

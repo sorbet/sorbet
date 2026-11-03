@@ -344,6 +344,8 @@ pipeline_tests(
             "testdata/parser/error_recovery/eof_7.rb",
             "testdata/parser/error_recovery/eof_9.rb",
             "testdata/parser/error_recovery/for_dedented_end.rb",
+            "testdata/parser/error_recovery/for_eof.rb",
+            "testdata/parser/error_recovery/for_eof_no_newline.rb",
             "testdata/parser/error_recovery/forward_args.rb",
             "testdata/parser/error_recovery/if_do_1.rb",
             "testdata/parser/error_recovery/if_do_2.rb",

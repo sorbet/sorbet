@@ -2287,6 +2287,7 @@ array_premature_end: eof
                     expr_value_do compstmt kend_or_eof
                     {
                       $$ = driver.build.for_(self, $1, $2, $3, $5->nod, $5->tok, $6->body, $7);
+                      driver.rewind_if_dedented($1, $7);
                     }
                 | k_class cpath superclass
                     {

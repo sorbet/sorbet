@@ -1,0 +1,9 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  ::<Magic>.<build-range>(1, 7, false).each() do |i|
+    if <emptyTree>::<C <ErrorNode>>
+      <emptyTree>
+    else
+      <emptyTree>
+    end
+  end
+end
