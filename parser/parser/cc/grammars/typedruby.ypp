@@ -2190,6 +2190,7 @@ array_premature_end: eof
                       $$ = driver.build.condition(self, $1, $2, $3, $4->body,
                         nullptr,
                         else_ ? else_->nod : nullptr, end_t);
+                      driver.rewind_if_dedented($1, end_t);
                     }
                 | kUNLESS expr_value then compstmt opt_else kend_or_eof
                     {

@@ -349,6 +349,7 @@ pipeline_tests(
             "testdata/parser/error_recovery/forward_args.rb",
             "testdata/parser/error_recovery/if_do_1.rb",
             "testdata/parser/error_recovery/if_do_2.rb",
+            "testdata/parser/error_recovery/if_do_eof.rb",
             "testdata/parser/error_recovery/if_indent_1.rb",
             "testdata/parser/error_recovery/if_indent_2.rb",
             "testdata/parser/error_recovery/if_indent_3.rb",
