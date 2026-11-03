@@ -42,10 +42,10 @@ TEST_CASE("UndoStateRestoreRemovesExactlyTheFilesTheCanceledEditAdded") {
     }
     auto expected = sortedIds(workspaceFiles);
 
-    UnorderedMap<int, ast::ParsedFile> indexedFinalGS;
+    UnorderedMap<int, ast::ParsedFile> resolvedFinalGS;
     vector<core::packages::Stratum> fileToStratum(gs->filesUsed(), core::packages::Stratum(0));
     core::packages::Stratum lastStratum(0);
-    UndoState undoState(gs->deepCopyGlobalState(), move(indexedFinalGS), fileToStratum, lastStratum, workspaceFiles,
+    UndoState undoState(gs->deepCopyGlobalState(), move(resolvedFinalGS), fileToStratum, lastStratum, workspaceFiles,
                         /* epoch */ 7);
 
     // The canceled edit adds a package file and a source file; partitionPackageFiles then moves the package file to
@@ -58,7 +58,7 @@ TEST_CASE("UndoStateRestoreRemovesExactlyTheFilesTheCanceledEditAdded") {
     swap(workspaceFiles[1], workspaceFiles[3]);
     REQUIRE_EQ(workspaceFiles[3].id(), expected[1]);
 
-    undoState.restore(gs, indexedFinalGS, fileToStratum, lastStratum, workspaceFiles);
+    undoState.restore(gs, resolvedFinalGS, fileToStratum, lastStratum, workspaceFiles);
 
     CHECK_EQ(sortedIds(workspaceFiles), expected);
 }

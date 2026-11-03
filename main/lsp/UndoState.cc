@@ -9,18 +9,18 @@
 using namespace std;
 
 namespace sorbet::realmain::lsp {
-UndoState::UndoState(unique_ptr<core::GlobalState> evictedGs, UnorderedMap<int, ast::ParsedFile> evictedIndexedFinalGS,
+UndoState::UndoState(unique_ptr<core::GlobalState> evictedGs, UnorderedMap<int, ast::ParsedFile> evictedResolvedFinalGS,
                      vector<core::packages::Stratum> fileToStratum, core::packages::Stratum lastStratum,
                      const vector<core::FileRef> &workspaceFiles, uint32_t epoch)
-    : evictedGs(move(evictedGs)), evictedIndexedFinalGS(std::move(evictedIndexedFinalGS)),
+    : evictedGs(move(evictedGs)), evictedResolvedFinalGS(std::move(evictedResolvedFinalGS)),
       fileToStratum{move(fileToStratum)}, lastStratum{lastStratum}, initialWorkspaceFilesSize{workspaceFiles.size()},
       epoch(epoch) {}
 
-void UndoState::restore(unique_ptr<core::GlobalState> &gs, UnorderedMap<int, ast::ParsedFile> &indexedFinalGS,
+void UndoState::restore(unique_ptr<core::GlobalState> &gs, UnorderedMap<int, ast::ParsedFile> &resolvedFinalGS,
                         vector<core::packages::Stratum> &fileToStratum, core::packages::Stratum &lastStratum,
                         vector<core::FileRef> &workspaceFiles) {
     Timer timeit(evictedGs->tracer(), "undo_state.restore");
-    indexedFinalGS = std::move(evictedIndexedFinalGS);
+    resolvedFinalGS = std::move(evictedResolvedFinalGS);
     gs = move(evictedGs);
 
     fileToStratum = move(this->fileToStratum);
