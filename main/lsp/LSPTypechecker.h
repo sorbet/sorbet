@@ -11,6 +11,7 @@
 
 namespace sorbet {
 class WorkerPool;
+class OwnedKeyValueStore;
 } // namespace sorbet
 
 namespace sorbet::core::lsp {
@@ -94,6 +95,8 @@ class LSPTypechecker final {
     std::vector<core::packages::Stratum> fileToStratum;
 
     core::packages::Stratum lastStratum;
+
+    std::unique_ptr<OwnedKeyValueStore> openSessionCache() const;
 
     enum class SlowPathMode {
         Init,

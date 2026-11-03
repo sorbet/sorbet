@@ -55,14 +55,6 @@ vector<ast::ParsedFile> sortParsedFiles(const core::GlobalState &gs, ErrorReport
     return parsedFiles;
 }
 
-unique_ptr<OwnedKeyValueStore> openSessionCache(cache::SessionCache *cache, const LSPConfiguration &config) {
-    if (!cache) {
-        return nullptr;
-    }
-
-    return cache->open(config.logger, config.opts);
-}
-
 } // namespace
 
 LSPTypechecker::LSPTypechecker(shared_ptr<const LSPConfiguration> config,
@@ -71,6 +63,14 @@ LSPTypechecker::LSPTypechecker(shared_ptr<const LSPConfiguration> config,
       errorReporter(make_shared<ErrorReporter>(this->config)) {}
 
 LSPTypechecker::~LSPTypechecker() {}
+
+unique_ptr<OwnedKeyValueStore> LSPTypechecker::openSessionCache() const {
+    if (!this->sessionCache) {
+        return nullptr;
+    }
+
+    return this->sessionCache->open(this->config->logger, this->config->opts);
+}
 
 void LSPTypechecker::initialize(TaskQueue &queue, unique_ptr<core::GlobalState> initialGS,
                                 unique_ptr<cache::SessionCache> sessionCache, WorkerPool &workers,
@@ -105,8 +105,7 @@ void LSPTypechecker::initialize(TaskQueue &queue, unique_ptr<core::GlobalState> 
         // TODO(trevor): switching to always using a session cache would mean that we could initialize the name table
         // from the copy, which would remove the window where we might end up with a cache that differs from our name
         // table.
-        auto kvstore = cache::ownIfUnchanged(
-            *this->gs, OwnedKeyValueStore::abort(openSessionCache(this->sessionCache.get(), *this->config)));
+        auto kvstore = cache::ownIfUnchanged(*this->gs, OwnedKeyValueStore::abort(this->openSessionCache()));
         if (!kvstore) {
             this->sessionCache.reset();
         }
@@ -683,8 +682,7 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
         if (this->config->opts.cacheSensitiveOptions.sorbetPackages) {
             Timer timeit(*this->config->logger, "buildPackageDB");
 
-            unique_ptr<const OwnedKeyValueStore> ownedKvstore =
-                openSessionCache(this->sessionCache.get(), *this->config);
+            unique_ptr<const OwnedKeyValueStore> ownedKvstore = this->openSessionCache();
 
             // This is a bit of a lie: we haven't gotten the first stratum to a state where we could run preemption
             // tasks yet, but any errors raised by running a preemption action on this incomplete global state will be
@@ -770,8 +768,7 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
                         break;
                 }
 
-                unique_ptr<const OwnedKeyValueStore> ownedKvstore =
-                    openSessionCache(this->sessionCache.get(), *this->config);
+                unique_ptr<const OwnedKeyValueStore> ownedKvstore = this->openSessionCache();
 
                 {
                     auto result = hashing::Hashing::indexAndComputeFileHashes(
@@ -1061,7 +1058,7 @@ vector<ast::ParsedFile> LSPTypechecker::getResolved(absl::Span<const core::FileR
 
     if (!toIndex.empty()) {
         auto cancelable = false;
-        auto kvstore = openSessionCache(this->sessionCache.get(), *this->config);
+        auto kvstore = this->openSessionCache();
         auto result = pipeline::index(*this->gs, toIndex, this->config->opts, workers, std::move(kvstore), cancelable);
         ENFORCE(result.hasResult());
         auto indexed = std::move(result.result());
