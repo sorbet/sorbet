@@ -2579,10 +2579,9 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash(uint32_t foundClassesHash) 
         if (!sym.ignoreInHashing(*this)) {
             auto &target = retypecheckableSymbolHashesMap[WithoutUniqueNameHash(*this, sym.name)];
             target = mix(target, sym.hash(*this));
-            auto needMethodShapeHash = sym.name == Names::unresolvedAncestors() ||
-                                       sym.name == Names::requiredAncestors() ||
-                                       sym.name == Names::requiredAncestorsLin() ||
-                                       sym.name == Names::mixedInClassMethods();
+            auto needMethodShapeHash =
+                sym.name == Names::unresolvedAncestors() || sym.name == Names::requiredAncestors() ||
+                sym.name == Names::requiredAncestorsLin() || sym.name == Names::mixedInClassMethods();
             if (needMethodShapeHash) {
                 uint32_t methodShapeHash = sym.methodShapeHash(*this);
                 hierarchyHash = mix(hierarchyHash, methodShapeHash);
