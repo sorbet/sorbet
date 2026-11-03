@@ -1784,6 +1784,13 @@ private:
                                      const core::FoundStaticField &staticField) {
         ENFORCE(ctx.owner.isClassOrModule());
 
+        if (staticField.name == core::Names::Constants::AttachedClass()) {
+            // This is an invalid `has_attached_class!` that we're ignoring (the name can't be
+            // written in Ruby source). The rest of the pipeline assumes that any `<AttachedClass>`
+            // member is a type member, so don't define a static field with that name.
+            return core::Symbols::noField();
+        }
+
         auto scope = getOwnerSymbol(state, staticField.owner);
         auto name = staticField.name;
 
@@ -2532,6 +2539,13 @@ public:
 
     ast::ExpressionPtr ignoreBadTypeMember(core::Context ctx, ast::ExpressionPtr tree) {
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
+
+        auto &lhs = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(asgn.lhs);
+        if (lhs.cnst == core::Names::Constants::AttachedClass()) {
+            // The rest of the pipeline assumes that any `<AttachedClass>` member is a type member,
+            // so don't define a static field with that name.
+            return ast::MK::EmptyTree();
+        }
 
         asgn.rhs =
             ast::MK::Send0Block(asgn.loc, ast::MK::T(asgn.loc), core::Names::typeAlias(), asgn.loc.copyWithZeroLength(),
