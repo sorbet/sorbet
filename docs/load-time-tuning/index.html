@@ -71,16 +71,18 @@ T::Utils.run_all_type_alias_blocks
 <span class="hljs-comment"># Force all T::Struct classes to generate their specialized serialization methods</span>
 T::Utils.eagerly_define_all_lazy_props_methods!
 
+<span class="hljs-comment"># (Optional, can break code) Free signatures whose runtime checks never run,</span>
+<span class="hljs-comment"># then garbage collect the type objects which were freed</span>
+T::Utils.drop_unchecked_sigs!
+GC.start
+
 <span class="hljs-comment"># Force every type object to build its lazily-initialized fields</span>
 T::Utils.build_all_types
 </code></pre>
 <p>For certain applications, like HTTP services, these methods mitigate first-call or first-request latency spikes. It’s the same idea behind projects like <a href="https://github.com/ko1/nakayoshi_fork">nakayoshi_fork</a> and patterns like zeitwerk’s <code>eager_load</code>.</p>
 <p>Call these methods <strong>after</strong> all application code has been loaded (e.g., in a Rails initializer or a <code>before_fork</code> hook) but <strong>before</strong> forking workers (so the initialized state is shared across processes via copy-on-write).</p>
 <p>The order matters. Running a <code>sig</code> block or a <code>T.type_alias</code> block creates the type objects it mentions, and <code>build_all_types</code> only reaches type objects that exist when it runs, so it goes last.</p>
-<p>There is also a method that frees memory at that same point, instead of forcing work to happen early:</p>
-<pre><code class="hljs css language-ruby"><span class="hljs-comment"># Free the signatures whose runtime checks never run</span>
-T::Utils.drop_unchecked_sigs!
-</code></pre>
+<p><code>drop_unchecked_sigs!</code> is not always behavior preserving, <a href="#tutilsdrop_unchecked_sigs">see below</a> for why. At a high level, this operation drops runtime <code>Signature</code> objects which are not strictly required for any runtime type checking, but means that all reflection APIs <code>sorbet-runtime</code> provides to reify a <code>Signature</code> object for a method will return <code>nil</code> (which can cause code depending on reflection to break). When using this method, be sure to call <code>GC.start</code> before <code>build_all_types</code> to avoid redundant work.</p>
 <h2><a class="anchor" aria-hidden="true" id="tutilsrun_all_sig_blocks"></a><a href="#tutilsrun_all_sig_blocks" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>T::Utils.run_all_sig_blocks</code></h2>
 <pre><code class="hljs css language-ruby">T::Utils.run_all_sig_blocks
 </code></pre>
@@ -109,7 +111,10 @@ T::Utils.drop_unchecked_sigs!
 <p>Call it once, <strong>after</strong> all application code has been loaded and <strong>after</strong> <code>T::Utils.run_all_sig_blocks</code>, so that every <code>sig</code> block has run and recorded its signature:</p>
 <pre><code class="hljs css language-ruby">T::Utils.run_all_sig_blocks
 T::Utils.drop_unchecked_sigs!
+GC.start
+T::Utils.build_all_types
 </code></pre>
+<p>If the application also calls <code>T::Utils.build_all_types</code>, call <code>drop_unchecked_sigs!</code> first, and run the garbage collector in between. The type objects that only the dropped signatures mention become garbage, but <code>build_all_types</code> finds type objects with <code>ObjectSpace.each_object</code>, which still sees them until the garbage collector runs. Without the <code>GC.start</code>, <code>build_all_types</code> spends time building lazy fields on type objects that are about to be freed.</p>
 <p>Signatures recorded after the call (for example by code that loads later) are kept as usual.</p>
 <blockquote>
 <p><strong>Warning</strong>: This method changes the result of <code>T::Utils.signature_for_method</code>. Before the call, it returns a signature for every method with a <code>sig</code>. After the call, it returns a signature only for methods whose sigs are checked at runtime (and for <code>abstract</code> methods), and <code>nil</code> for the rest. If you only call this method in production (as with the other methods on this page), <code>signature_for_method</code> will give different answers in production than in development and tests. Only call this method if no code in the application (including gems) relies on <code>signature_for_method</code> returning a signature for every method with a <code>sig</code>.</p>
