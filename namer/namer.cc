@@ -1299,6 +1299,10 @@ private:
 
         auto owner = ctx.owner.enclosingClass(ctx);
         auto constantNameRef = ctx.state.lookupNameConstant(mod.target);
+        if (!constantNameRef.exists()) {
+            // If no constant with this name has ever been entered, there can't be a symbol to modify.
+            return;
+        }
         auto constant = ctx.state.lookupSymbol(owner, constantNameRef);
         if (constant.exists() && mod.name == core::Names::privateConstant()) {
             if (constant.isClassOrModule()) {
