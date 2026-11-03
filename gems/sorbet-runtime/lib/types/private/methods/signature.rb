@@ -72,7 +72,6 @@ class T::Private::Methods::Signature
       @return_type
     end
     @bind = NilClass.===(bind) ? bind : T::Utils.coerce(bind)
-    # Only retained when `@method.parameters` can't reproduce it, or when the rest name is needed per call.
     @parameters = parameters
     parameters ||= method.parameters
     @on_failure = on_failure
