@@ -21,10 +21,9 @@ WatchmanProcess::WatchmanProcess(shared_ptr<spdlog::logger> logger, string_view 
                                  absl::Mutex &messageQueueMutex, absl::Notification &initializedNotification,
                                  shared_ptr<const LSPConfiguration> config, string_view watchmanNamespace)
     : logger(std::move(logger)), watchmanPath(string(watchmanPath)), workSpace(string(workSpace)),
-      extensions(std::move(extensions)),
-      thread(runInAThread("watchmanReader", std::bind(&WatchmanProcess::start, this))), messageQueue(messageQueue),
-      messageQueueMutex(messageQueueMutex), initializedNotification(initializedNotification), config(std::move(config)),
-      watchmanNamespace(watchmanNamespace) {}
+      extensions(std::move(extensions)), messageQueue(messageQueue), messageQueueMutex(messageQueueMutex),
+      initializedNotification(initializedNotification), config(std::move(config)), watchmanNamespace(watchmanNamespace),
+      thread(runInAThread("watchmanReader", std::bind(&WatchmanProcess::start, this))) {}
 
 WatchmanProcess::~WatchmanProcess() {
     exitWithCode(0, "");
