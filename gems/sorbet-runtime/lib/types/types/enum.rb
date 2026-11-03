@@ -13,7 +13,6 @@ module T::Types
       when Hash
         @values = values
       else
-        require "set" unless defined?(Set)
         @values = values.to_set
       end
     end
