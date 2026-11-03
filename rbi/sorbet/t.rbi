@@ -486,6 +486,9 @@ module T::Utils
   # fields, so that forked workers don't write onto shared type objects.
   sig { void }
   def self.build_all_types; end
+
+  sig { void }
+  def self.drop_unchecked_sigs!; end
 end
 
 

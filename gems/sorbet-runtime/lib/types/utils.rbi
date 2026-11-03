@@ -52,6 +52,9 @@ module T::Utils
   sig { void }
   def self.build_all_types; end
 
+  sig { void }
+  def self.drop_unchecked_sigs!; end
+
   # TODO(jez) If we were to move this to the public rbi/ folder, we would
   # probably want the types to all be non-nil. Maybe we should just make this a
   # private helper.
