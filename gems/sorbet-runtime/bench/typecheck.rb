@@ -221,6 +221,16 @@ module SorbetBenchmarks
         optional_positional(0, 1)
       end
 
+      time_block("sig {params(a: Integer, r: String).void} (rest)") do
+        short_rest(0, 'x', 'y')
+        short_rest(0)
+      end
+
+      time_block("sig {params(a: Integer, b: Integer, c: Integer, d: Integer, r: String, k: Integer, blk: T.proc.void).void} (rest)") do
+        long_rest(0, 1, 2, 3, 'x', 'y', k: 4) {}
+        long_rest(0, 1, 2, 3) {}
+      end
+
       time_block("direct call Object#class") do
         example.class
         example.class
@@ -269,5 +279,11 @@ module SorbetBenchmarks
 
     sig { params(x: Integer, y: Integer).void }
     def self.optional_positional(x, y=0); end
+
+    sig { params(a: Integer, r: String).void }
+    def self.short_rest(a, *r); end
+
+    sig { params(a: Integer, b: Integer, c: Integer, d: Integer, r: String, k: Integer, blk: T.proc.void).void }
+    def self.long_rest(a, b, c, d, *r, k: 0, &blk); end
   end
 end
