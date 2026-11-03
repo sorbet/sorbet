@@ -922,7 +922,7 @@ int realmain(int argc, char *argv[]) {
 
     if (!opts.metricsFile.empty()) {
         string status;
-        if (!gs || gs->hadCriticalError()) {
+        if (gs == nullptr || gs->hadCriticalError()) {
             status = "Error";
         } else if (returnCode != 0) {
             status = "Failure";
