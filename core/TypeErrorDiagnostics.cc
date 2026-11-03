@@ -153,6 +153,11 @@ optional<pair<Loc, int>> calculateIndentedNextLine(const GlobalState &gs, const 
 optional<core::AutocorrectSuggestion::Edit>
 TypeErrorDiagnostics::editForDSLMethod(const GlobalState &gs, FileRef fileToEdit, Loc defaultInsertLoc,
                                        ClassOrModuleRef inWhatRef, ClassOrModuleRef dslOwner, string_view dsl) {
+    if (!inWhatRef.exists()) {
+        // e.g., the DSL method was called on an instance, so there's no class to insert into
+        return nullopt;
+    }
+
     auto inWhat = inWhatRef.data(gs);
     auto inWhatSingleton = inWhat->lookupSingletonClass(gs);
 
