@@ -1,0 +1,7 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  if "thing"
+    1
+  else
+    <emptyTree>
+  end
+end

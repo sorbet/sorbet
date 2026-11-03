@@ -1,0 +1,11 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def foo<<todo method>>(&<blk>)
+    ::<Magic>.<build-range>(1, 7, false).each() do |i|
+      <emptyTree>
+    end
+  end
+
+  def bar<<todo method>>(&<blk>)
+    <emptyTree>
+  end
+end
