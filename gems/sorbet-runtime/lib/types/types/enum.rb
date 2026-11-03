@@ -9,12 +9,13 @@ module T::Types
     attr_reader :values
 
     def initialize(values)
-      case values
-      when Hash
-        @values = values
-      else
-        @values = values.to_set
-      end
+      @values =
+        case values
+        when Hash
+          values
+        else
+          values.to_set
+        end
     end
 
     def build_type
