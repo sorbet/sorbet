@@ -18,6 +18,11 @@ T::Utils.run_all_type_alias_blocks
 # Force all T::Struct classes to generate their specialized serialization methods
 T::Utils.eagerly_define_all_lazy_props_methods!
 
+# (Optional, can break code) Free signatures whose runtime checks never run,
+# then garbage collect the type objects which were freed
+T::Utils.drop_unchecked_sigs!
+GC.start
+
 # Force every type object to build its lazily-initialized fields
 T::Utils.build_all_types
 ```
@@ -28,12 +33,7 @@ Call these methods **after** all application code has been loaded (e.g., in a Ra
 
 The order matters. Running a `sig` block or a `T.type_alias` block creates the type objects it mentions, and `build_all_types` only reaches type objects that exist when it runs, so it goes last.
 
-There is also a method that frees memory at that same point, instead of forcing work to happen early:
-
-```ruby
-# Free the signatures whose runtime checks never run
-T::Utils.drop_unchecked_sigs!
-```
+`drop_unchecked_sigs!` is not always behavior preserving, [see below](#tutilsdrop_unchecked_sigs) for why. At a high level, this operation drops runtime `Signature` objects which are not strictly required for any runtime type checking, but means that all reflection APIs `sorbet-runtime` provides to reify a `Signature` object for a method will return `nil` (which can cause code depending on reflection to break). When using this method, be sure to call `GC.start` before `build_all_types` to avoid redundant work.
 
 [nakayoshi_fork]: https://github.com/ko1/nakayoshi_fork
 
@@ -88,7 +88,11 @@ Call it once, **after** all application code has been loaded and **after** `T::U
 ```ruby
 T::Utils.run_all_sig_blocks
 T::Utils.drop_unchecked_sigs!
+GC.start
+T::Utils.build_all_types
 ```
+
+If the application also calls `T::Utils.build_all_types`, call `drop_unchecked_sigs!` first, and run the garbage collector in between. The type objects that only the dropped signatures mention become garbage, but `build_all_types` finds type objects with `ObjectSpace.each_object`, which still sees them until the garbage collector runs. Without the `GC.start`, `build_all_types` spends time building lazy fields on type objects that are about to be freed.
 
 Signatures recorded after the call (for example by code that loads later) are kept as usual.
 
