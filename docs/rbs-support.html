@@ -177,9 +177,9 @@ T.reveal_type(str) <span class="hljs-comment"># Revealed type: `String`</span>
 <h3><a class="anchor" aria-hidden="true" id="performance-is-worse"></a><a href="#performance-is-worse" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Performance is worse</h3>
 <p>The chosen implementation for RBS annotations in comments is:</p>
 <ol>
-<li>Scan and parse the file, like normal.</li>
-<li>Using the parsed file contents, re-scan the file, looking for comments, because Sorbet does not feed parsed comments throughout its pipeline.</li>
-<li>Parse the RBS comments, using a third-party RBS parser, which manages memory allocations using it’s own internal data structures.</li>
+<li>Scan and parse the file, like normal. The parser hands back the file’s comments along with the parse tree.</li>
+<li>Walk the parse tree, associating each RBS comment with the definition or expression it annotates.</li>
+<li>Parse the RBS comments, using a third-party RBS parser, which manages memory allocations using its own internal data structures.</li>
 <li>Translate the parsed RBS types to equivalent Ruby ASTs, and splice those ASTs into the parse result.</li>
 <li>Allow Sorbet to continue, where signatures and type annotations will be analyzed later in the pipeline.</li>
 </ol>
@@ -188,9 +188,9 @@ T.reveal_type(str) <span class="hljs-comment"># Revealed type: `String`</span>
 └──────┬───────┘
        ├──────────────────────────┐
        │                          ▼
-       │                   ┌──────────────┐
-       │                   │  <span class="hljs-built_in">scan</span> again  │
-       │                   └──────┬───────┘
+       │               ┌──────────────────────┐
+       │               │  associate comments  │
+       │               └──────────┬───────────┘
        │                          ▼
        │                   ┌─────────────┐
        │                   │  <span class="hljs-built_in">parse</span> RBS  │
@@ -206,8 +206,8 @@ T.reveal_type(str) <span class="hljs-comment"># Revealed type: `String`</span>
 └────────────────┘
 </code></pre>
 <p>This implementation is simple, making it easy to verify correctness. The RBS parser can be developed as a library and tested independently. As long as the translation produces Sorbet ASTs equivalent to <code>sig</code> annotations that a user would have written, ingesting the types will work correctly.</p>
-<p>But steps 2 and 4 are pure overhead (step 3 is a wash). Not only does this implementation scan every file which <em>might</em> use RBS comments twice, but it does not parse straight into Sorbet’s internal type representation.</p>
-<p>In large codebases, this adds nontrivial overhead, and is a blocker in the way of being able to advocate for using this syntax more widely.</p>
+<p>Steps 2 and 4 are overhead that <code>sig</code> syntax does not pay (step 3 is a wash). Step 2 costs little for files that don’t use RBS, because the walk is skipped when a file has no RBS comments, and it stops as soon as the last one has been associated. Step 4 is where the remaining cost sits. RBS annotations get translated into synthetic Ruby ASTs equivalent to hand-written <code>sig</code>s and are analyzed by the resolver from there, instead of parsing straight into Sorbet’s internal type representation.</p>
+<p>In large codebases, this still adds overhead relative to <code>sig</code> syntax, though much less than it used to.</p>
 <h4><a class="anchor" aria-hidden="true" id="runtime-checking-is-a-feature"></a><a href="#runtime-checking-is-a-feature" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Runtime checking is a feature</h4>
 <blockquote>
 <p>Note that runtime checking of RBS signatures is not implemented, so type safety is reduced.</p>
