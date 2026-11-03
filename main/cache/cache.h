@@ -68,8 +68,9 @@ public:
     static std::unique_ptr<SessionCache> make(std::unique_ptr<const OwnedKeyValueStore> kvstore,
                                               ::spdlog::logger &logger, const options::Options &opts);
 
-    // Open the session cache for use.
-    std::unique_ptr<KeyValueStore> open(std::shared_ptr<::spdlog::logger> logger, const options::Options &opts) const;
+    // Open the session cache, acquiring ownership on the calling thread.
+    std::unique_ptr<OwnedKeyValueStore> open(std::shared_ptr<::spdlog::logger> logger,
+                                             const options::Options &opts) const;
 };
 
 } // namespace sorbet::realmain::cache

@@ -327,14 +327,15 @@ string_view SessionCache::kvstorePath() const {
     return string_view(this->path);
 }
 
-unique_ptr<KeyValueStore> SessionCache::open(shared_ptr<::spdlog::logger> logger, const options::Options &opts) const {
+unique_ptr<OwnedKeyValueStore> SessionCache::open(shared_ptr<::spdlog::logger> logger,
+                                                  const options::Options &opts) const {
     // If the session copy has disappeared, we return a nullptr to force downstream consumers to explicitly handle the
     // empty cache.
     if (!FileOps::dirExists(this->path)) {
         return nullptr;
     }
 
-    auto kvstore = make_unique<const OwnedKeyValueStore>(openCache(std::move(logger), this->path, opts));
+    auto kvstore = make_unique<OwnedKeyValueStore>(openCache(std::move(logger), this->path, opts));
 
     // If the name table entry is missing, this indicates that the cache is completely fresh and doesn't originate in a
     // copy from the result of indexing. This can happen if only the `data.mdb` file was removed from `this->path`, and
@@ -345,8 +346,7 @@ unique_ptr<KeyValueStore> SessionCache::open(shared_ptr<::spdlog::logger> logger
         return nullptr;
     }
 
-    // We abort here because there will be no outstanding transactions present.
-    return OwnedKeyValueStore::abort(std::move(kvstore));
+    return kvstore;
 }
 
 } // namespace sorbet::realmain::cache
