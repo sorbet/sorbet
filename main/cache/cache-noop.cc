@@ -32,7 +32,8 @@ unique_ptr<SessionCache> SessionCache::make(unique_ptr<const OwnedKeyValueStore>
     return nullptr;
 }
 
-unique_ptr<KeyValueStore> SessionCache::open(shared_ptr<::spdlog::logger> logger, const options::Options &opts) const {
+unique_ptr<OwnedKeyValueStore> SessionCache::open(shared_ptr<::spdlog::logger> logger,
+                                                  const options::Options &opts) const {
     return nullptr;
 }
 

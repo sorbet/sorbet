@@ -84,12 +84,7 @@ unique_ptr<OwnedKeyValueStore> openSessionCache(cache::SessionCache *cache, cons
         return nullptr;
     }
 
-    auto kvstore = cache->open(config.logger, config.opts);
-    if (!kvstore) {
-        return nullptr;
-    }
-
-    return make_unique<OwnedKeyValueStore>(std::move(kvstore));
+    return cache->open(config.logger, config.opts);
 }
 
 /**
