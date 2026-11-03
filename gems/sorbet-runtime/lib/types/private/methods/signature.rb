@@ -318,7 +318,7 @@ class T::Private::Methods::Signature
 
   # The rest param directly follows the positional params unless required params come after it.
   private def fast_rest_name
-    param_kind, param_name = @parameters[@arg_types.length]
+    param_kind, param_name = parameters[@arg_types.length]
     param_kind == :rest ? param_name : parameter_name(:rest)
   end
 
