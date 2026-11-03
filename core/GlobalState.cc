@@ -2581,11 +2581,12 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash(uint32_t foundClassesHash) 
             target = mix(target, sym.hash(*this));
             auto needMethodShapeHash = sym.name == Names::unresolvedAncestors() ||
                                        sym.name == Names::requiredAncestors() ||
-                                       sym.name == Names::requiredAncestorsLin();
+                                       sym.name == Names::requiredAncestorsLin() ||
+                                       sym.name == Names::mixedInClassMethods();
             if (needMethodShapeHash) {
                 uint32_t methodShapeHash = sym.methodShapeHash(*this);
                 hierarchyHash = mix(hierarchyHash, methodShapeHash);
-                // The only three methods that trigger a method change anymore all relate to inheritance.
+                // The only methods that trigger a method change anymore all relate to inheritance.
                 // Let's blame this to a change to class symbols, not to methods
                 classModuleHash = mix(classModuleHash, methodShapeHash);
             }

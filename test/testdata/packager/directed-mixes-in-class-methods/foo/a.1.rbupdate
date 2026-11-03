@@ -5,4 +5,4 @@ class Root::Foo::A
   include Root::Mixin
 end
 
-Root::Foo::A.hello # error: Method `hello` does not exist
+Root::Foo::A.hello

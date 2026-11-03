@@ -1,5 +1,5 @@
 # typed: true
-# assert-fast-path: mixin.rb
+# assert-slow-path: true
 
 module Root::Mixin
   extend T::Helpers

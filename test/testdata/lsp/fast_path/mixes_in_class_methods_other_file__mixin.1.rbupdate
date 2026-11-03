@@ -1,9 +1,5 @@
 # typed: true
-# assert-fast-path: mixes_in_class_methods_other_file__mixin.rb
-
-# This should take the slow path: it changes the singleton class ancestors of
-# every class that includes `Mixin`. But `ClassMethods` is in another file, so
-# it doesn't resolve when computing this file's hash, and the hash is unchanged.
+# assert-slow-path: true
 
 module Mixin
   extend T::Helpers
