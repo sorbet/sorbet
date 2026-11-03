@@ -1263,6 +1263,15 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
     try {
         vector<core::ClassOrModuleRef> symbolsToRecompute;
         auto runIncrementalNamer = foundHashesForFiles.has_value() && !foundHashesForFiles->empty();
+
+        // Without the incremental namer, every file's hash is unchanged, so re-running the namer and resolver must
+        // only find symbols that already exist. LSPTypechecker::runFastPath relies on this: it only reopens the
+        // stratum of the edit (limiting how much of the symbol table a later slow path can copy) when it runs the
+        // incremental namer. A violation means that some symbol depends on part of a file not reflected in its hash.
+        optional<core::ForbidNewSymbols> forbidNewSymbols;
+        if (!runIncrementalNamer) {
+            forbidNewSymbols.emplace(gs);
+        }
         {
             Timer timeit(gs.tracer(), "incremental_naming");
             core::UnfreezeSymbolTable symbolTable(gs);

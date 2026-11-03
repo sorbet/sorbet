@@ -1,0 +1,7 @@
+# typed: true
+# assert-slow-path: true
+
+module Root::Mixin
+  extend T::Helpers
+  mixes_in_class_methods(Root::CM)
+end

@@ -335,6 +335,7 @@ class GlobalState final {
     friend serialize::SerializerImpl;
     friend class UnfreezeNameTable;
     friend class UnfreezeSymbolTable;
+    friend class ForbidNewSymbols;
     friend class UnfreezeFileTable;
     friend struct NameRefDebugCheck;
 
@@ -824,6 +825,8 @@ private:
     bool unfreezeFileTable();
     bool nameTableFrozen = true;
     bool symbolTableFrozen = true;
+    // Unlike symbolTableFrozen, this still allows updating existing symbols (e.g., adding locs).
+    bool newSymbolsForbidden = false;
     bool fileTableFrozen = true;
 
     // Symbol table offsets at the boundaries of the package graph traversal. symbolOffsets[k]

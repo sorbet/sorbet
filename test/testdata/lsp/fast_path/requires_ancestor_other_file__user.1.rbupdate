@@ -1,0 +1,7 @@
+# typed: true
+# enable-experimental-requires-ancestor: true
+# exclude-from-file-update: true
+
+class U # error: `U` must include `Needed` (required by `M`)
+  include M
+end

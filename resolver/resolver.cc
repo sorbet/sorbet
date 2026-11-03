@@ -1076,10 +1076,15 @@ private:
     }
 
     static void saveAncestorTypeForHashing(core::MutableContext ctx, const AncestorResolutionItem &item) {
+        saveUnresolvedAncestorForHashing(ctx, item.klass, *item.ancestor);
+    }
+
+    static void saveUnresolvedAncestorForHashing(core::MutableContext ctx, core::ClassOrModuleRef klass,
+                                                 const ast::ConstantLit &ancestor) {
         // For LSP, create a synthetic method <unresolved-ancestors> that has a return type containing a type
         // for every ancestor. When this return type changes, LSP takes the slow path (see
         // Symbol::methodShapeHash()).
-        auto unresolvedPath = item.ancestor->fullUnresolvedPath(ctx);
+        auto unresolvedPath = ancestor.fullUnresolvedPath(ctx);
         if (!unresolvedPath.has_value()) {
             return;
         }
@@ -1087,7 +1092,7 @@ private:
         auto ancestorType =
             core::make_type<core::UnresolvedClassType>(unresolvedPath->first, move(unresolvedPath->second));
 
-        auto uaSym = ctx.state.enterMethodSymbol(core::Loc::none(), item.klass, core::Names::unresolvedAncestors());
+        auto uaSym = ctx.state.enterMethodSymbol(core::Loc::none(), klass, core::Names::unresolvedAncestors());
 
         // Add a fake block argument so that this method symbol passes sanity checks
         auto &arg = ctx.state.enterMethodParameter(core::Loc::none(), uaSym, core::Names::blkArg());
@@ -1426,6 +1431,49 @@ private:
                 elems.emplace_back(type);
             }
         }
+    }
+
+    // A file's hash is computed by resolving that file in isolation, where a module defined in another file will not
+    // resolve, so `resolveClassMethodsJob` will not enter <mixed-in-class-methods>. Record those arguments like
+    // unresolved ancestors, so that adding or changing them changes the file's hash. This has to run after
+    // constantResolutionFailed, which stubs the unresolved constants.
+    static void saveClassMethodsForHashing(core::GlobalState &gs, const ClassMethodsResolutionItem &todo) {
+        if (!todo.owner.isClassOrModule()) {
+            // e.g., a call inside a method body. resolveClassMethodsJob reports an error for this.
+            return;
+        }
+
+        auto ownerKlass = todo.owner.asClassOrModuleRef();
+        core::MutableContext ctx(gs, ownerKlass, todo.file);
+        const auto numPosArgs = todo.send->numPosArgs();
+        for (auto i = 0; i < numPosArgs; ++i) {
+            if (auto id = ast::cast_tree<ast::ConstantLit>(todo.send->getPosArg(i))) {
+                saveUnresolvedAncestorForHashing(ctx, ownerKlass, *id);
+            }
+        }
+    }
+
+    // Like saveClassMethodsForHashing, but for the argument of `requires_ancestor { X }` or
+    // `requires_ancestor { T.class_of(X) }`.
+    static void saveRequiredAncestorForHashing(core::GlobalState &gs, const RequireAncestorResolutionItem &todo) {
+        auto *block = todo.send->block();
+        if (block == nullptr || todo.send->numPosArgs() > 0) {
+            return;
+        }
+
+        auto id = ast::cast_tree<ast::ConstantLit>(block->body);
+        if (id == nullptr && isTClassOf(block->body)) {
+            auto &send = ast::cast_tree_nonnull<ast::Send>(block->body);
+            if (send.numPosArgs() == 1) {
+                id = ast::cast_tree<ast::ConstantLit>(send.getPosArg(0));
+            }
+        }
+        if (id == nullptr) {
+            return;
+        }
+
+        core::MutableContext ctx(gs, todo.owner, todo.file);
+        saveUnresolvedAncestorForHashing(ctx, todo.owner, *id);
     }
 
     static void resolveRequiredAncestorsJob(core::GlobalState &gs, const RequireAncestorResolutionItem &todo) {
@@ -2388,7 +2436,6 @@ public:
                     resolveClassMethodsJob(gs, todo);
                 }
             }
-            todoClassMethods.clear();
         }
 
         {
@@ -2398,7 +2445,6 @@ public:
                     resolveRequiredAncestorsJob(gs, todo);
                 }
             }
-            todoRequiredAncestors.clear();
         }
 
         // We can no longer resolve new constants. All the code below reports errors
@@ -2473,6 +2519,20 @@ public:
                 }
             }
         }
+
+        for (auto &job : todoClassMethods) {
+            for (auto &todo : job.items) {
+                saveClassMethodsForHashing(gs, todo);
+            }
+        }
+        todoClassMethods.clear();
+
+        for (auto &job : todoRequiredAncestors) {
+            for (auto &todo : job.items) {
+                saveRequiredAncestorForHashing(gs, todo);
+            }
+        }
+        todoRequiredAncestors.clear();
 
         if (gs.epochManager->wasTypecheckingCanceled()) {
             return ast::ParsedFilesOrCancelled::cancel(std::move(trees), workers);
