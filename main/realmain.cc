@@ -562,8 +562,9 @@ int realmain(int argc, char *argv[]) {
                       sorbet::full_version_string);
 
         auto output = make_shared<lsp::LSPStdout>(logger);
+        auto sessionCache = cache::SessionCache::make(move(kvstore), *logger, opts);
         lsp::LSPLoop loop(move(gs), *workers, make_shared<lsp::LSPConfiguration>(opts, output, logger),
-                          OwnedKeyValueStore::abort(move(kvstore)));
+                          move(sessionCache));
         gs = loop.runLSP(make_shared<lsp::LSPFDInput>(logger, STDIN_FILENO)).value_or(nullptr);
     } else if (gs->cacheSensitiveOptions.runningUnderAutogen) {
         Timer timeall(*logger, "wall_time");

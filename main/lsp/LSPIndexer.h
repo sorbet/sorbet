@@ -2,6 +2,7 @@
 #define RUBY_TYPER_LSP_LSPINDEXER_H
 
 #include "core/core.h"
+#include "main/cache/cache.h"
 #include "main/lsp/LSPFileUpdates.h"
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/LSPPreprocessor.h"
@@ -10,7 +11,6 @@
 
 namespace sorbet {
 class WorkerPool;
-class KeyValueStore;
 } // namespace sorbet
 
 namespace sorbet::realmain::lsp {
@@ -53,8 +53,8 @@ private:
     /** Global state that we keep up-to-date with file edits. We do _not_ typecheck using this global state, as it will
      * never have a populated symbol table. */
     std::unique_ptr<core::GlobalState> gs;
-    /** Key-value store used during initialization. */
-    std::unique_ptr<KeyValueStore> kvstore;
+    /** Session cache transferred to the typechecker during initialization. */
+    std::unique_ptr<cache::SessionCache> sessionCache;
     /** Contains a copy of the last edit committed on the slow path. Used in slow path cancelation logic. */
     LSPFileUpdates pendingTypecheckUpdates;
     /** Contains a clone of the latency timers for each new edit in the pending typecheck operation. Is used to ensure
@@ -90,7 +90,7 @@ private:
 
 public:
     LSPIndexer(std::shared_ptr<const LSPConfiguration> config, std::unique_ptr<core::GlobalState> gs,
-               std::unique_ptr<KeyValueStore> kvstore);
+               std::unique_ptr<cache::SessionCache> sessionCache);
     ~LSPIndexer();
 
     /**

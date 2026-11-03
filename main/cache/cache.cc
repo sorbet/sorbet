@@ -342,23 +342,12 @@ string_view SessionCache::kvstorePath() const {
 unique_ptr<OwnedKeyValueStore> SessionCache::open(shared_ptr<::spdlog::logger> logger,
                                                   const options::Options &opts) const {
     // If the session copy has disappeared, we return a nullptr to force downstream consumers to explicitly handle the
-    // empty cache.
+    // empty cache. If only the database has been removed, we'll create a new one in the openCache call below.
     if (!FileOps::dirExists(this->path)) {
         return nullptr;
     }
 
-    auto kvstore = make_unique<OwnedKeyValueStore>(openCache(std::move(logger), this->path, opts));
-
-    // If the name table entry is missing, this indicates that the cache is completely fresh and doesn't originate in a
-    // copy from the result of indexing. This can happen if only the `data.mdb` file was removed from `this->path`, and
-    // the KeyValueStore created a fresh database when created.
-    const auto nameTableDiffCountEntry =
-        kvstore->read(core::serialize::Serializer::NAME_TABLE_DIFF_COUNT_AND_HASH_SIZE_KEY);
-    if (nameTableDiffCountEntry.len == 0) {
-        return nullptr;
-    }
-
-    return kvstore;
+    return make_unique<OwnedKeyValueStore>(openCache(std::move(logger), this->path, opts));
 }
 
 void SessionCache::commit(shared_ptr<::spdlog::logger> logger, const options::Options &opts) const {

@@ -171,7 +171,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPUsesCache") {
     }
 }
 
-TEST_CASE_FIXTURE(CacheProtocolTest, "LSPDoesNotUseCacheIfModified") {
+TEST_CASE_FIXTURE(CacheProtocolTest, "LSPUsesSessionCacheIfSharedCacheModified") {
     // Write a file to disk.
     auto relativeFilepath = "test.rb";
     auto filePath = fmt::format("{}/{}", rootPath, relativeFilepath);
@@ -219,7 +219,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPDoesNotUseCacheIfModified") {
         CHECK_NE(file.getFileHash(), nullptr);
     }
 
-    // LSP should read from disk when the cache gets updated by a different process mid-process.
+    // LSP should retain its initial snapshot when another process updates the shared cache.
     {
         // Note: I had trouble getting signals to work in CI. Even in a loop where the parent process sent a signal
         // to the child, the child never received the signal. So, I'm using a file to communicate instead.
@@ -269,10 +269,11 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPDoesNotUseCacheIfModified") {
                 initializeLSP(),
                 {{relativeFilepath, 4, "Expected `Integer` but found `String(\"hello\")` for method result type"}});
 
-            // We should not use the cache since it has been dirtied.
+            // The session still contains the original file, despite the shared cache changing.
             auto counters = getCounters();
-            CHECK_EQ(counters.getCounter("types.input.files.kvstore.hit"), 0);
-            CHECK_EQ(counters.getCounter("cache.committed"), 0);
+            CHECK_GT(counters.getCounter("types.input.files.kvstore.hit"), 0);
+            CHECK_EQ(counters.getCounter("types.input.files.kvstore.miss"), 0);
+            CHECK_EQ(counters.getCounter("cache.committed"), 1);
         }
     }
 }
@@ -563,18 +564,18 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "RemoveSessionCacheDirectory") {
     auto start = toRemove.front().rfind('/');
     string sessionCacheDir = toRemove.front().substr(0, start);
 
-    // Verify that we can't open when the database files have been removed
+    // Removing the database files leaves an empty cache that can be reopened.
     for (auto &file : toRemove) {
         FileOps::removeFile(file);
     }
 
     {
         auto copy = sessionCache->open(logger, *opts);
-        REQUIRE_EQ(copy, nullptr);
+        REQUIRE_NE(copy, nullptr);
+        CHECK_EQ(copy->read(key).data, nullptr);
     }
 
-    // Verify that we can't open when the database directory has been removed (the previous open attempt will create an
-    // empty db, so we have to remove the files again again)
+    // Removing the entire session directory prevents reopening the cache.
     for (auto &file : toRemove) {
         FileOps::removeFile(file);
     }

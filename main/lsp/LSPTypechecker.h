@@ -68,7 +68,7 @@ class LSPTypechecker final {
     std::unique_ptr<core::GlobalState> gs;
 
     /**
-     * A copy of the kvstore produced during initialization, that's private to this LSP session.
+     * A private cache used during initialization and subsequent typechecking.
      */
     std::unique_ptr<cache::SessionCache> sessionCache;
 
@@ -151,8 +151,9 @@ public:
      *
      * Writes all diagnostic messages to LSPOutput.
      */
-    void initialize(TaskQueue &queue, std::unique_ptr<core::GlobalState> gs, std::unique_ptr<KeyValueStore> kvstore,
-                    WorkerPool &workers, const LSPConfiguration &currentConfig);
+    void initialize(TaskQueue &queue, std::unique_ptr<core::GlobalState> gs,
+                    std::unique_ptr<cache::SessionCache> sessionCache, WorkerPool &workers,
+                    const LSPConfiguration &currentConfig);
 
     /**
      * Typechecks the given input. Returns 'true' if the updates were committed, or 'false' if typechecking was
@@ -314,7 +315,7 @@ public:
     virtual ~LSPTypecheckerDelegate() = default;
 
     void initialize(InitializedTask &task, std::unique_ptr<core::GlobalState> gs,
-                    std::unique_ptr<KeyValueStore> kvstore, const LSPConfiguration &currentConfig);
+                    std::unique_ptr<cache::SessionCache> sessionCache, const LSPConfiguration &currentConfig);
 
     void resumeTaskQueue(InitializedTask &task);
 

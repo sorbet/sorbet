@@ -2,6 +2,7 @@
 #define RUBY_TYPER_LSPLOOP_H
 
 #include "core/core.h"
+#include "main/cache/cache.h"
 #include "main/lsp/LSPIndexer.h"
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/LSPPreprocessor.h"
@@ -57,7 +58,7 @@ class LSPLoop {
 
 public:
     LSPLoop(std::unique_ptr<core::GlobalState> initialGS, WorkerPool &workers, std::shared_ptr<LSPConfiguration> config,
-            std::unique_ptr<KeyValueStore> kvstore);
+            std::unique_ptr<cache::SessionCache> sessionCache);
     /**
      * Runs the language server on a dedicated thread. Returns the final global state if it exits cleanly, or nullopt
      * on error.
