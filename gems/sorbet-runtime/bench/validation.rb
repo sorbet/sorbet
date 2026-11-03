@@ -90,7 +90,6 @@ module SorbetBenchmarks
         union_type.recursively_valid?(:sym)
       end
 
-      require 'set'
       set_type = T::Utils.coerce(T::Set[Integer])
       int_set = Set[1, 2, 3].freeze
       time_block("T::Set[Integer].valid?(3-int set)") do
