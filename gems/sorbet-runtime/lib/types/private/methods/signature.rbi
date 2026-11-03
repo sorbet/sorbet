@@ -29,8 +29,6 @@ class T::Private::Methods::Signature
   attr_reader :req_kwarg_names
   sig {returns(Symbol)}
   attr_reader :check_level
-  sig {returns(T::Array[[Symbol, Symbol]])}
-  attr_reader :parameters
   sig {returns(T.nilable(T::Array[T.untyped]))}
   attr_reader :on_failure
   sig {returns(T.nilable(T.any(TrueClass, FalseClass, Symbol)))}
@@ -60,12 +58,12 @@ class T::Private::Methods::Signature
       mode: String,
       check_level: T.nilable(Symbol),
       on_failure: T.nilable(T::Array[T.untyped]),
-      parameters: T::Array[[Symbol, Symbol]],
+      parameters: T.nilable(T::Array[[Symbol, Symbol]]),
       override_allow_incompatible: T.any(TrueClass, FalseClass, Symbol),
       defined_raw: T::Boolean,
     ).void
   end
-  def initialize(method:, method_name:, raw_arg_types:, raw_return_type:, bind:, mode:, check_level:, on_failure:, parameters: method.parameters, override_allow_incompatible: false, defined_raw: false)
+  def initialize(method:, method_name:, raw_arg_types:, raw_return_type:, bind:, mode:, check_level:, on_failure:, parameters: nil, override_allow_incompatible: false, defined_raw: false)
     @method = T.let(method, UnboundMethod)
     @method_name = T.let(method_name, Symbol)
     @block_type = T.let(nil, T.nilable(T::Types::Base))
@@ -76,7 +74,7 @@ class T::Private::Methods::Signature
     @bind = T.let(nil, T.nilable(T::Types::Base))
     @mode = T.let(mode, String)
     @check_level = T.let(check_level, Symbol)
-    @parameters = T.let(parameters, T::Array[[Symbol, Symbol]])
+    @parameters = T.let(parameters, T.nilable(T::Array[[Symbol, Symbol]]))
     @on_failure = T.let(on_failure, T.nilable(T::Array[T.untyped]))
     @override_allow_incompatible = T.let(override_allow_incompatible, T.any(T::Boolean, Symbol))
     @defined_raw = T.let(defined_raw, T::Boolean)
@@ -91,6 +89,9 @@ class T::Private::Methods::Signature
 
   sig {params(alias_name: Symbol).returns(T::Private::Methods::Signature)}
   def as_alias(alias_name); end
+
+  sig {returns(T::Array[[Symbol, Symbol]])}
+  def parameters; end
 
   sig {returns(T.nilable(Symbol))}
   def block_name; end
