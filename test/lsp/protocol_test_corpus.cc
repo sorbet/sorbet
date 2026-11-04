@@ -4,6 +4,7 @@
 #include "absl/strings/match.h"
 #include "absl/strings/str_replace.h"
 #include "common/common.h"
+#include "main/lsp/ShowOperation.h"
 #include "test/helpers/lsp.h"
 #include "test/helpers/packages.h"
 
@@ -1374,6 +1375,185 @@ TEST_CASE_FIXTURE(ProtocolTest, "ShowOperationPackaged") {
         checkNameAndStatus(resps[4], "SlowPathNonBlocking", SorbetOperationStatus::Start);
         checkNameAndStatus(resps[5], "SlowPathNonBlocking", SorbetOperationStatus::End);
     }
+}
+
+namespace {
+unique_ptr<LSPMessage> makeInitializeWithWorkDoneProgress(string_view rootPath, string_view rootUri, int id,
+                                                          optional<unique_ptr<SorbetInitializationOptions>> opts) {
+    auto supportsMarkdown = true;
+    auto supportsCodeActionResolve = true;
+    auto initializeParams = makeInitializeParams(string(rootPath), string(rootUri), supportsMarkdown,
+                                                 supportsCodeActionResolve, move(opts));
+    auto window = make_unique<WindowClientCapabilities>();
+    window->workDoneProgress = true;
+    initializeParams->capabilities->window = move(window);
+    return make_unique<LSPMessage>(
+        make_unique<RequestMessage>("2.0", id, LSPMethod::Initialize, move(initializeParams)));
+}
+
+unique_ptr<LSPMessage> makeInitialized() {
+    return make_unique<LSPMessage>(
+        make_unique<NotificationMessage>("2.0", LSPMethod::Initialized, make_unique<InitializedParams>()));
+}
+
+// Checks that `resps` reports the given operations with `$/progress`, in order, and returns the IDs of the
+// `window/workDoneProgress/create` requests that Sorbet sent.
+vector<string> checkWorkDoneProgress(const vector<unique_ptr<LSPMessage>> &resps,
+                                     const vector<pair<string, WorkDoneProgressKind>> &expected) {
+    vector<string> createIds;
+    // Tokens that have been created but not yet ended.
+    vector<string> openTokens;
+    size_t i = 0;
+    for (auto &[title, kind] : expected) {
+        if (kind == WorkDoneProgressKind::Begin) {
+            REQUIRE_LT(i, resps.size());
+            auto &create = resps[i++];
+            REQUIRE(create->isRequest());
+            REQUIRE_EQ(create->asRequest().method, LSPMethod::WindowWorkDoneProgressCreate);
+            auto &createParams = get<unique_ptr<WorkDoneProgressCreateParams>>(create->asRequest().params);
+            auto &id = create->asRequest().id;
+            REQUIRE(holds_alternative<string>(id));
+            CHECK(absl::StartsWith(get<string>(id), ShowOperation::WORK_DONE_PROGRESS_CREATE_ID_PREFIX));
+            createIds.push_back(get<string>(id));
+
+            REQUIRE_LT(i, resps.size());
+            auto &begin = resps[i++];
+            REQUIRE(begin->isNotification());
+            REQUIRE_EQ(begin->asNotification().method, LSPMethod::$Progress);
+            auto &params = get<unique_ptr<ProgressParams>>(begin->asNotification().params);
+            CHECK_EQ(params->token, createParams->token);
+            CHECK_EQ(params->value->kind, WorkDoneProgressKind::Begin);
+            CHECK_EQ(params->value->title, title);
+            CHECK_EQ(params->value->cancellable, false);
+            CHECK_FALSE(params->value->percentage.has_value());
+            openTokens.push_back(params->token);
+        } else {
+            REQUIRE_EQ(kind, WorkDoneProgressKind::End);
+            REQUIRE_LT(i, resps.size());
+            auto &end = resps[i++];
+            REQUIRE(end->isNotification());
+            REQUIRE_EQ(end->asNotification().method, LSPMethod::$Progress);
+            auto &params = get<unique_ptr<ProgressParams>>(end->asNotification().params);
+            CHECK_EQ(params->value->kind, WorkDoneProgressKind::End);
+            CHECK_FALSE(params->value->title.has_value());
+            // Operations nest, so each `end` closes the most recently opened token.
+            REQUIRE_FALSE(openTokens.empty());
+            CHECK_EQ(params->token, openTokens.back());
+            openTokens.pop_back();
+        }
+    }
+    CHECK_EQ(i, resps.size());
+    CHECK(openTokens.empty());
+    return createIds;
+}
+} // namespace
+
+// Clients that advertise `window.workDoneProgress` but don't opt into `sorbet/showOperation` get standard
+// `$/progress` notifications for slow operations.
+TEST_CASE_FIXTURE(ProtocolTest, "WorkDoneProgress") {
+    vector<pair<string, string>> files = {
+        {"a.rb", "# typed: true\n"
+                 "class A\n"
+                 "  def foo; end\n"
+                 "end\n"},
+    };
+    writeFilesToFS(files);
+    for (auto &[path, _] : files) {
+        this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/{}", this->rootPath, path));
+    }
+
+    {
+        auto resps = send(*makeInitializeWithWorkDoneProgress(rootPath, rootUri, nextId++, nullopt));
+        REQUIRE_EQ(resps.size(), 1);
+        REQUIRE(resps[0]->isResponse());
+    }
+
+    vector<string> createIds;
+    // The initial slow path.
+    {
+        auto resps = send(*makeInitialized());
+        createIds = checkWorkDoneProgress(resps, {
+                                                     {"Typechecking...", WorkDoneProgressKind::Begin},
+                                                     {"Indexing files...", WorkDoneProgressKind::Begin},
+                                                     {"", WorkDoneProgressKind::End},
+                                                     {"", WorkDoneProgressKind::End},
+                                                 });
+        REQUIRE_EQ(createIds.size(), 2);
+        CHECK_NE(createIds[0], createIds[1]);
+    }
+
+    // Responses to Sorbet's `window/workDoneProgress/create` requests, including error responses, are accepted
+    // silently.
+    {
+        auto resps = sendRaw(fmt::format(R"({{"jsonrpc":"2.0","id":"{}","result":null}})", createIds[0]));
+        CHECK(resps.empty());
+        resps = sendRaw(fmt::format(
+            R"({{"jsonrpc":"2.0","id":"{}","error":{{"code":-32603,"message":"could not create progress"}}}})",
+            createIds[1]));
+        CHECK(resps.empty());
+    }
+
+    // A slow path that can be preempted reports a separate, non-blocking operation.
+    {
+        auto resps = send(*openFile("b.rb", "# typed: true\n"
+                                            "class B\n"
+                                            "end\n"));
+        checkWorkDoneProgress(resps, {
+                                         {"Typechecking...", WorkDoneProgressKind::Begin},
+                                         {"Indexing files...", WorkDoneProgressKind::Begin},
+                                         {"", WorkDoneProgressKind::End},
+                                         {"", WorkDoneProgressKind::End},
+                                         {"Typechecking in background", WorkDoneProgressKind::Begin},
+                                         {"", WorkDoneProgressKind::End},
+                                     });
+    }
+
+    // The JSON matches the shape in the LSP spec.
+    {
+        auto resps = send(*getReference("a.rb", 2, 7));
+        REQUIRE_EQ(resps.size(), 4);
+        auto &begin = resps[1];
+        auto &params = get<unique_ptr<ProgressParams>>(begin->asNotification().params);
+        CHECK_EQ(params->value->title, "Finding all references...");
+        CHECK_EQ(begin->toJSON(),
+                 fmt::format(R"({{"jsonrpc":"2.0","method":"$/progress","params":{{"token":"{}","value":)"
+                             R"({{"kind":"begin","title":"Finding all references...","cancellable":false}}}}}})",
+                             params->token));
+        auto &end = resps[2];
+        CHECK_EQ(end->toJSON(),
+                 fmt::format(R"({{"jsonrpc":"2.0","method":"$/progress","params":{{"token":"{}","value":)"
+                             R"({{"kind":"end"}}}}}})",
+                             params->token));
+        REQUIRE(resps[3]->isResponse());
+    }
+}
+
+// The VS Code extension opts into `sorbet/showOperation`, and VS Code also advertises `window.workDoneProgress`.
+// Those clients should keep getting only `sorbet/showOperation`, not both.
+TEST_CASE_FIXTURE(ProtocolTest, "ShowOperationTakesPrecedenceOverWorkDoneProgress") {
+    vector<pair<string, string>> files = {
+        {"a.rb", "# typed: true\n"
+                 "class A\n"
+                 "end\n"},
+    };
+    writeFilesToFS(files);
+    for (auto &[path, _] : files) {
+        this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/{}", this->rootPath, path));
+    }
+
+    auto opts = make_unique<SorbetInitializationOptions>();
+    opts->supportsOperationNotifications = true;
+    {
+        auto resps = send(*makeInitializeWithWorkDoneProgress(rootPath, rootUri, nextId++, move(opts)));
+        REQUIRE_EQ(resps.size(), 1);
+        REQUIRE(resps[0]->isResponse());
+    }
+
+    auto resps = send(*makeInitialized());
+    REQUIRE_EQ(resps.size(), 4);
+    CHECK(absl::c_all_of(resps, [](auto &resp) {
+        return resp->isNotification() && resp->asNotification().method == LSPMethod::SorbetShowOperation;
+    }));
 }
 
 // Exercise cases where the slow path can reuse parts of the previous global state, and also show that any changes to

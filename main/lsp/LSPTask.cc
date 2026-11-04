@@ -143,10 +143,12 @@ ConstExprStr LSPTask::methodString() const {
             return "sorbet.error";
         case LSPMethod::SorbetFence:
             return "sorbet.fence";
+        case LSPMethod::$Progress:
         case LSPMethod::SorbetShowOperation:
         case LSPMethod::SorbetTypecheckRunInfo:
         case LSPMethod::TextDocumentPublishDiagnostics:
         case LSPMethod::WindowShowMessage:
+        case LSPMethod::WindowWorkDoneProgressCreate:
             // Sorbet sends these to the client; the server shouldn't receive them.
             return "other";
         case LSPMethod::Initialize:
