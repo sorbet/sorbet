@@ -7,7 +7,7 @@
 class T::Private::Methods::Signature
   attr_reader :method, :method_name, :arg_types, :kwarg_types, :block_type,
               :rest_type, :keyrest_type, :bind, :effective_return_type,
-              :return_type, :req_arg_count, :req_kwarg_names, :parameters, :on_failure
+              :return_type, :req_arg_count, :req_kwarg_names, :on_failure
 
   # @flags packs, from the low bits up: mode (3 bits), check_level (2 bits),
   # override_allow_incompatible (2 bits), and defined_raw (1 bit).
@@ -58,7 +58,7 @@ class T::Private::Methods::Signature
     )
   end
 
-  def initialize(method:, method_name:, raw_arg_types:, raw_return_type:, bind:, mode:, check_level:, on_failure:, parameters: method.parameters, override_allow_incompatible: false, defined_raw: false)
+  def initialize(method:, method_name:, raw_arg_types:, raw_return_type:, bind:, mode:, check_level:, on_failure:, parameters: nil, override_allow_incompatible: false, defined_raw: false)
     check_level = check_level.nil? ? T::Private::RuntimeLevels.default_checked_level : check_level
     @method = method
     @method_name = method_name
@@ -73,6 +73,7 @@ class T::Private::Methods::Signature
     end
     @bind = NilClass.===(bind) ? bind : T::Utils.coerce(bind)
     @parameters = parameters
+    parameters ||= method.parameters
     @on_failure = on_failure
     @flags = flag_index(FLAG_MODES, mode, 'mode') |
              (flag_index(FLAG_CHECK_LEVELS, check_level, 'check_level') << CHECK_LEVEL_SHIFT) |
@@ -172,6 +173,7 @@ class T::Private::Methods::Signature
       i += 1
     end
 
+    @parameters ||= parameters unless @rest_type.nil?
     @arg_types = arg_types || EMPTY_LIST
     @kwarg_types = kwarg_types || EMPTY_HASH
     @req_arg_count = req_arg_count
@@ -188,6 +190,10 @@ class T::Private::Methods::Signature
   end
 
   # Names are derived rather than stored so that Signature fits in a smaller GC slot.
+  def parameters
+    @parameters || @method.parameters
+  end
+
   def block_name
     parameter_name(:block)
   end
@@ -312,12 +318,12 @@ class T::Private::Methods::Signature
 
   # The rest param directly follows the positional params unless required params come after it.
   private def fast_rest_name
-    param_kind, param_name = @parameters[@arg_types.length]
+    param_kind, param_name = parameters[@arg_types.length]
     param_kind == :rest ? param_name : parameter_name(:rest)
   end
 
   private def parameter_name(kind)
-    @parameters.assoc(kind)&.[](1)
+    parameters.assoc(kind)&.[](1)
   end
 
   private def flag_index(values, value, field)
