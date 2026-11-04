@@ -1,6 +1,7 @@
 #include "core/packages/PackageInfo.h"
 #include "absl/strings/str_join.h"
 #include "common/sort/sort.h"
+#include "core/Error.h"
 #include "core/GlobalState.h"
 #include "core/Loc.h"
 #include "core/NameRef.h"
@@ -1000,6 +1001,56 @@ vector<MangledName> PackageInfo::directSubPackages(const core::GlobalState &gs, 
     }
 
     return subpackages;
+}
+
+void PackageInfo::explainSubpackageNamespaceError(const core::GlobalState &gs, ErrorBuilder &e, string_view subject,
+                                                  string_view restriction, ClassOrModuleRef packageRegistryOwner,
+                                                  string_view namespaceName, string_view alternative) const {
+    auto ownerName = this->show(gs);
+    auto marker = "imported_by_nested_packages!"sv;
+    auto importOwner = fmt::format("import {}", ownerName);
+    auto discouraged = "Defining behavior on a namespace that other packages are nested under is discouraged, because "
+                       "it slows down code loading in large codebases."sv;
+    if (this->importedByNestedPackages()) {
+        e.setHeader("`{}` can only {} if every package nested under `{}` imports it", subject, restriction, ownerName);
+    } else {
+        e.setHeader("`{}` cannot {}, because packages are nested under `{}`", subject, restriction, namespaceName);
+    }
+
+    // When the annotation doesn't take effect because of a nested package, that's the one to point at.
+    auto &missingInfo = gs.packageDB().getPackageInfo(this->nestedPackageMissingImport);
+    auto pointAtMissing = this->importedByNestedPackages() && missingInfo.exists();
+
+    e.addErrorLine(this->declLoc(), "Package `{}` defined here", ownerName);
+    if (packageRegistryOwner.exists()) {
+        auto subpackages = this->directSubPackages(gs, packageRegistryOwner);
+        if (!subpackages.empty() && !(pointAtMissing && subpackages.front() == missingInfo.mangledName())) {
+            auto &subpackageInfo = gs.packageDB().getPackageInfo(subpackages.front());
+            e.addErrorLine(subpackageInfo.declLoc(), "`{}` is nested under `{}`", subpackageInfo.show(gs),
+                           namespaceName);
+        }
+    }
+
+    if (this->importedByNestedPackages()) {
+        // If we're here, it means that `importedByNestedPackagesSatisfied` was false even though
+        // the marker was on the package, which means a nested package is missing an import.
+        e.addErrorLine(core::Loc(this->file, this->locs.importedByNestedPackages),
+                       "This `{}` has no effect until every package nested under `{}` imports it", marker, ownerName);
+        if (pointAtMissing) {
+            e.addErrorLine(missingInfo.declLoc(), "`{}` is nested under `{}`, but does not `{}`", missingInfo.show(gs),
+                           ownerName, importOwner);
+        }
+        e.addErrorNote("Either {}, or add the missing imports on the packages nested under `{}`.\n"
+                       "    {}",
+                       alternative, ownerName, discouraged);
+    } else {
+        e.addErrorNote(
+            "Either {}, or move the packages nested under `{}` elsewhere.\n"
+            "    {}\n"
+            "    If it's unavoidable, package `{}` can opt out of this restriction with `{}`, which requires "
+            "every package nested under `{}` to `{}`",
+            alternative, namespaceName, discouraged, ownerName, marker, ownerName, importOwner);
+    }
 }
 
 PackageInfo::CanModifyResult PackageInfo::canModifySymbol(core::Context ctx, ClassOrModuleRef sym) const {

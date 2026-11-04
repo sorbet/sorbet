@@ -1,6 +1,6 @@
 # typed: true
 
 module Unsatisfied
-  extend T::Generic # error: `T.class_of(Unsatisfied)` is part of a subpackage namespace, and must not have ancestors
-  Elem = type_member # error: `Unsatisfied` is part of a subpackage namespace, and must not be generic
+  extend T::Generic # error: `T.class_of(Unsatisfied)` can only have ancestors if every package nested under `Unsatisfied` imports it
+  Elem = type_member # error: `Unsatisfied` can only be generic if every package nested under `Unsatisfied` imports it
 end

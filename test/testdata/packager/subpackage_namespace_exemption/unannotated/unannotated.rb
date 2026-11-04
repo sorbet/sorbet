@@ -1,6 +1,6 @@
 # typed: true
 
 module Unannotated
-  extend T::Generic # error: `T.class_of(Unannotated)` is part of a subpackage namespace, and must not have ancestors
-  Elem = type_member # error: `Unannotated` is part of a subpackage namespace, and must not be generic
+  extend T::Generic # error: `T.class_of(Unannotated)` cannot have ancestors, because packages are nested under `Unannotated`
+  Elem = type_member # error: `Unannotated` cannot be generic, because packages are nested under `Unannotated`
 end
