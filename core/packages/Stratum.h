@@ -7,6 +7,9 @@
 namespace sorbet::core::packages {
 
 // The index of a group of packages in the condensation graph traversal.
+//
+// Using "stratum" instead of "layer" to avoid confusion with the modularity concept/package DSL method of "layer"
+// (utility, business, service, etc.)
 class Stratum {
     // We use uint16_t here, even though that might seem small, as overflowing a uint16_t would require a non-cyclic
     // chain of 65535 dependencies in the package graph. At time of writing (2026-04-29), the largest stratum we've

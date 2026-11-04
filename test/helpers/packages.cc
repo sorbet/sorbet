@@ -39,10 +39,6 @@ string PackageTextBuilder::build() {
         fmt::format_to(back_inserter(out), "  import {}\n", i);
     }
 
-    for (auto &i : this->testImports) {
-        fmt::format_to(back_inserter(out), "  test_import {}\n", i);
-    }
-
     for (auto &e : this->exports) {
         fmt::format_to(back_inserter(out), "  export {}\n", e);
     }
@@ -52,14 +48,12 @@ string PackageTextBuilder::build() {
     return out;
 }
 
-string PackageHelpers::makePackageRB(string name, string strictDeps, string layer, vector<string> imports,
-                                     vector<string> testImports) {
+string PackageHelpers::makePackageRB(string name, string strictDeps, string layer, vector<string> imports) {
     return PackageTextBuilder()
         .withName(move(name))
         .withStrictDeps(move(strictDeps))
         .withLayer(move(layer))
         .withImports(move(imports))
-        .withTestImports(move(testImports))
         .build();
 }
 

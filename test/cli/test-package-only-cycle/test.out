@@ -1,0 +1,18 @@
+test/t1/__package.rb:9: Strict dependencies violation: importing `Test::T2` will put `Test::T1` into a cycle, which is not valid at `strict_dependencies 'dag'` https://srb.help/3727
+     9 |  import Test::T2
+          ^^^^^^^^^^^^^^^
+  Note:
+    Path from `Test::T2` to `Test::T1`:
+    `Test::T2` →
+    `Test::T1`
+
+
+test/t2/__package.rb:9: Strict dependencies violation: importing `Test::T1` will put `Test::T2` into a cycle, which is not valid at `strict_dependencies 'dag'` https://srb.help/3727
+     9 |  import Test::T1
+          ^^^^^^^^^^^^^^^
+  Note:
+    Path from `Test::T1` to `Test::T2`:
+    `Test::T1` →
+    `Test::T2`
+
+Errors: 2

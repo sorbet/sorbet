@@ -95,7 +95,7 @@ void JSON::fileToJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer> &writer, 
                 writer.Key("pkg");
                 writer.String(pkg.data(), pkg.size());
             }
-            auto sccID = data.isPackagedTest() ? pkgInfo.testSccID() : pkgInfo.sccID();
+            auto sccID = pkgInfo.sccID();
             if (sccID.has_value()) {
                 writer.Key("pkg_scc_id");
                 writer.Int(*sccID);

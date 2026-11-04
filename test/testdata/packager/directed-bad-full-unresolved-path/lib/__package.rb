@@ -1,5 +1,5 @@
 # typed: strict
-# stratum: 1
+# stratum: 0
 
 class Lib < PackageSpec
   export Lib::AliasToLongProto

@@ -727,20 +727,6 @@ Fix the error by explicitly `import`'ing the upstream package into the `__packag
 
 Note that sometimes it is not possible to import another package because doing so would make the dependency graph of packages have a dependency cycle. In these cases, a common solution is to factor the shared functionality to a new package, and import that new package wherever it's needed. In some situations, there may be simpler ways to restructure the code that don't involve making a new package.
 
-## 3720
-
-> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
-
-The `--sorbet-packages` mode draws a distinction between test and non-test code. For a package called `A::B`
-
-- Some of the constants defined outside of `A::B` but imported into `A::B` are **test-only** imports (created by writing `test_import` instead of `import` in a `__package.rb` file).
-
-  To fix this error, if the change is desired, replace `test_import` with `import` for the constant.
-
-- Some of the constants defined within `A::B` live in the test namespace of `Test::A::B`, meaning that those constants can only be referenced inside `T::A::B`, not inside the non-test `A::B` namespace.
-
-  To fix this error, avoid referencing test code from a non-test namespace. This means refactoring where code lives within `A::B` to satisfy the above rule.
-
 ## 3721
 
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
@@ -871,8 +857,6 @@ If the flag is passed with no argument, then the default valid layers are `libra
 
 If a package is at `strict_dependencies 'layered'` or stricter, all packages it imports or references must have the same or lower layer. For example, given `--packager-layers util,lib,app`, all imports for a package with layer `lib` must either also have layer `lib`, or have layer `util` (but not layer `app`).
 
-Note: `test_import`s are not checked for layering violations.
-
 ## 3727
 
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) and [go/strict-dependencies](http://go/strict-dependencies) for more.
@@ -895,8 +879,6 @@ end
 
 Additionally, if a package is at `strict_dependencies 'dag'`, all packages it imports or references must also be `strict_dependencies 'dag'`.
 
-Note: `test_import`s are not checked for strict dependency violations.
-
 ## 3728
 
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
@@ -905,13 +887,13 @@ The following directives can only appear once per `__package.rb` file:
 
 - `layer`
 - `strict_dependencies`
-- `sorbet min_typed_level: ..., tests_min_typed_level: ...`.
+- `sorbet min_typed_level: ...`.
 
 ## 3729
 
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
 
-The `sorbet` directive in `__package.rb` specifies what the minimum sigil must be for source files in that package. It takes two keyword arguments: `min_typed_level` and `tests_min_typed_level`. For each, the valid options are: `'ignore'`, `'false'`, `'true'`, `'strict'`, and `'strong'`.
+The `sorbet` directive in `__package.rb` specifies what the minimum sigil must be for source files in that package. The valid values for `min_typed_level` are: `'ignore'`, `'false'`, `'true'`, `'strict'`, and `'strong'`.
 
 ## 3731
 
@@ -1380,8 +1362,6 @@ Note that the `self.` keyword in the method declaration changes the method from 
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
 
 Class and module definitions must be in their enclosing package's namespace, or an intermediate prefix of that namespace. Constant assignments must be in a namespace owned by the enclosing package, not merely a prefix. Check the names and locations of enclosing and nested `__package.rb` files if a definition unexpectedly belongs to another package.
-
-Legacy test files must define constants in `Test::<package>`. Test-only packages use their package namespace directly, without the additional `Test::` prefix.
 
 Explicit-root definitions outside the package namespace require a `prelude!` package. Being a prelude does not permit defining constants in another package's namespace.
 

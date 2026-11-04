@@ -103,92 +103,6 @@ public:
 
         return send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20)));
     }
-
-    void runTestExportPreemption(bool packageDirected) {
-        vector<pair<string, string>> files = {
-            {
-                "__package.rb",
-                PackageTextBuilder()
-                    .withName("Root")
-                    .withExports({"Test::Root::Helper"})
-                    .withTestImports({"Root::Foo"})
-                    .build(),
-            },
-            {
-                "a.rb",
-                "# typed: true\n"
-                "module Root\n"
-                "  class A; end\n"
-                "end\n",
-            },
-            {
-                "test/helper.rb",
-                "# typed: true\n"
-                "class Test::Root::Helper\n"
-                "end\n",
-            },
-
-            {
-                "foo/__package.rb",
-                PackageTextBuilder().withName("Root::Foo").build(),
-            },
-            {
-                "foo/b.rb",
-                "# typed: true\n"
-                "module Root::Foo\n"
-                "end\n",
-            },
-        };
-        initializePackagedWorkspace(packageDirected, files);
-
-        assertErrorDiagnostics(send(*openFile("a.rb", files[1].second)), {});
-        assertErrorDiagnostics(send(*openFile("foo/b.rb", files[4].second)), {});
-
-        setSlowPathBlocked(true);
-        sendAsync(*changeFile("foo/b.rb",
-                              "# typed: true\n"
-                              "module Root::Foo\n"
-                              "  class NewClassTakesSlowPath; end\n"
-                              "end\n",
-                              2, /* cancellationExpected */ false, /* preemptionsExpected */ 1));
-
-        auto status = getTypecheckRunStatus(*readAsync());
-        REQUIRE(status.has_value());
-        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
-
-        // Adding a method uses the incremental namer, which re-indexes Root's package file to restore visibility while
-        // preempting the slow path.
-        sendAsync(*changeFile("a.rb",
-                              "# typed: true\n"
-                              "module Root\n"
-                              "  class A\n"
-                              "    def new_method_takes_fast_path; end\n"
-                              "  end\n"
-                              "end\n",
-                              2));
-        setSlowPathBlocked(false);
-
-        for (auto expectedStatus : {SorbetTypecheckRunStatus::Started, SorbetTypecheckRunStatus::Ended}) {
-            auto message = readAsync();
-            REQUIRE(message->isNotification());
-            if (message->asNotification().method == LSPMethod::TextDocumentPublishDiagnostics) {
-                FAIL_CHECK(
-                    fmt::format("Expected fast path status, but received diagnostics:\n{}", message->toJSON(true)));
-                return;
-            }
-            REQUIRE_EQ(message->asNotification().method, LSPMethod::SorbetTypecheckRunInfo);
-            auto &runInfo = get<unique_ptr<SorbetTypecheckRunInfo>>(message->asNotification().params);
-            CHECK_EQ(runInfo->typecheckingPath, TypecheckingPath::Fast);
-            CHECK_EQ(runInfo->status, expectedStatus);
-        }
-
-        auto slowPathEnd = readAsync();
-        REQUIRE(slowPathEnd->isNotification());
-        REQUIRE_EQ(slowPathEnd->asNotification().method, LSPMethod::SorbetTypecheckRunInfo);
-        auto &runInfo = get<unique_ptr<SorbetTypecheckRunInfo>>(slowPathEnd->asNotification().params);
-        CHECK_EQ(runInfo->typecheckingPath, TypecheckingPath::Slow);
-        CHECK_EQ(runInfo->status, SorbetTypecheckRunStatus::Ended);
-    }
 };
 
 } // namespace
@@ -1001,8 +915,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelPackageDirectedSlowPathDisca
     assertErrorDiagnostics(send(*openFile("__package.rb", packageText)), {});
     getCounters();
 
-    // Packager queues the invalid-argument diagnostic immediately. The cancellation wait is
-    // in the application stratum, before the package AST can drain that queue in its test stratum.
+    // Packager queues the invalid-argument diagnostic immediately. The cancellation wait comes after
+    // resolving the package's stratum, before typechecking the package AST would drain that queue.
     sendAsync(*changeFile("__package.rb",
                           "# typed: strict\nclass Root < PackageSpec\n"
                           "  export Root::Value\n  bogus Root::Value\nend\n",
@@ -1935,15 +1849,6 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "QueuedEditRechecksFastPathAfterEar
     CHECK(sawSlowPath);
 }
 
-// TODO(jez) We might want to do something like this for the whole multithreaded_protocol_test_corpus?
-TEST_CASE_FIXTURE(MultithreadedProtocolTest, "MonolithicPreemptionWithTestExports") {
-    runTestExportPreemption(false);
-}
-
-TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedPreemptionWithTestExports") {
-    runTestExportPreemption(true);
-}
-
 // This case shows how preemption works when the preemption tasks occur in a stratum that's at or before the one that
 // contains the file that kicked off the slow path.
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedPreemptionBeforeSlowPathStratum") {
@@ -2118,11 +2023,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedPreemptionAfterSlow
                  "    end\n"
                  "  end\n"
                  "end\n"},
-        {"foo/__package.rb", PackageTextBuilder()
-                                 .withName("Root::Foo")
-                                 .withExports({"Root::Foo::A", "Test::Root::Foo::Helper"})
-                                 .withImports({"Root"})
-                                 .build()},
+        {"foo/__package.rb",
+         PackageTextBuilder().withName("Root::Foo").withExports({"Root::Foo::A"}).withImports({"Root"}).build()},
         {"foo/a.rb", "# typed: true\n"
                      "module Root::Foo\n"
                      "  class A\n"
@@ -2131,7 +2033,6 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedPreemptionAfterSlow
                      "    end\n"
                      "  end\n"
                      "end\n"},
-        {"foo/test/helper.rb", "# typed: true\nmodule Test::Root::Foo\n  class Helper; end\nend\n"},
     };
 
     writeFilesToFS(files);
@@ -2201,25 +2102,6 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedPreemptionAfterSlow
         auto resp = readAsync();
         REQUIRE(resp->isResponse());
         CHECK_EQ(resp->asResponse().requestMethod, LSPMethod::TextDocumentHover);
-    }
-
-    SUBCASE("package_hover") {
-        // Preempt the slow path with a query on a test export in the package file. Its target is
-        // only defined in Foo's test stratum, so the query must wait until that has been processed.
-        sendAsync(*hover("foo/__package.rb", 5, 30));
-        setSlowPathBlocked(false);
-
-        auto diag = readAsync();
-        REQUIRE(diag->isNotification());
-        CHECK_EQ(diag->asNotification().method, LSPMethod::TextDocumentPublishDiagnostics);
-
-        auto resp = readAsync();
-        REQUIRE(resp->isResponse());
-        CHECK_EQ(resp->asResponse().requestMethod, LSPMethod::TextDocumentHover);
-        auto &hoverResult =
-            get<unique_ptr<Hover>>(get<variant<JSONNullObject, unique_ptr<Hover>>>(*resp->asResponse().result));
-        REQUIRE(hoverResult);
-        CHECK(absl::StrContains(hoverResult->contents->value, "Test::Root::Foo::Helper"));
     }
 
     SUBCASE("fast_path_edit") {

@@ -1137,7 +1137,7 @@ core::TypePtr Environment::processBinding(
                             auto curPkg = db.getPackageNameForFile(ctx.file);
                             if (curPkg.exists()) {
                                 auto &info = db.getPackageInfo(curPkg);
-                                if (!info.canAccessInternalsOf(info.usesTestPackages, klass.data(ctx)->package)) {
+                                if (!info.canAccessInternalsOf(klass.data(ctx)->package)) {
                                     if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PackagePrivateMethod)) {
                                         e.setHeader("Method `{}` on `{}` is package-private and cannot be called from "
                                                     "package `{}`",

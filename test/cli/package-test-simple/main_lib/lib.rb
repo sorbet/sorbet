@@ -4,6 +4,6 @@
 class Project::MainLib::Lib
   Project::Util::MyUtil.new
 
-  # ERROR: Normal code is not allowed to access names from `test_import`
+  # ERROR: Normal code cannot access test-only packages
   Project::TestOnly::SomeHelper.new
 end

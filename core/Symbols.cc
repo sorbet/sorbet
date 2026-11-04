@@ -885,17 +885,10 @@ vector<ClassOrModule::FuzzySearchResult> ClassOrModule::findConstantFuzzyMatch(C
                     }
 
                     if (withinPackage != nullptr) {
-                        auto availableImportType = withinPackage->fileToImportType(gs, ctx.file);
                         auto memberPkg = member.second.enclosingClass(gs).data(gs)->package;
                         if (memberPkg.exists() && memberPkg != filterToPackage) {
                             auto *import = withinPackage->importsPackage(memberPkg);
                             if (import == nullptr) {
-                                continue;
-                            }
-                            if (!(import->type == packages::ImportType::Normal ||
-                                  availableImportType == packages::ImportType::TestUnit ||
-                                  (availableImportType == packages::ImportType::TestHelper &&
-                                   import->type == packages::ImportType::TestHelper))) {
                                 continue;
                             }
                         }

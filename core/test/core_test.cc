@@ -441,17 +441,10 @@ TEST_CASE("isPackageSpecSymbol") {
 
     {
         auto unfrezePackages = gs.packageDB().unfreeze();
-        gs.setPackagerOptions({}, {}, {}, {}, {}, {}, {}, "", packages::GenPackagesMode::Disabled, false, false, false);
+        gs.setPackagerOptions({}, {}, {}, {}, {}, {}, {}, "", packages::GenPackagesMode::Disabled, false, false);
     }
 
     CHECK_FALSE(Symbols::root().isPackageSpecSymbol(gs));
-
-    {
-        UnfreezeSymbolTable unfreeze(gs);
-        auto testNamespace = gs.enterClassOrModuleSymbol(Loc::none(), Symbols::root(), Names::Constants::Test());
-        REQUIRE(testNamespace.exists());
-        CHECK_FALSE(testNamespace.isPackageSpecSymbol(gs));
-    }
 }
 
 } // namespace sorbet::core

@@ -3,8 +3,6 @@
 
 # stratum: 2
 
-class Parent::MyClass # error: Tests in the `Parent` package must define tests in the `Test::Parent` namespace
-  include Parent::TestMixin
-#         ^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `TestMixin`
-
+class Parent::MyClass # error: File belongs to package `Test::Parent` but defines a constant that does not match this namespace
+  include Test::Parent::TestMixin
 end

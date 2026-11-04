@@ -3,5 +3,5 @@
 
 # stratum: 2
 
-module Parent::TestMixin # error: Tests in the `Parent` package must define tests in the `Test::Parent` namespace
+module Test::Parent::TestMixin
 end

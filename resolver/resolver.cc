@@ -200,7 +200,6 @@ private:
         core::ClassOrModuleRef packageRegistryCursor;
         bool resolutionFailed : 1 = false;
         bool isOutermost : 1 = true;
-        bool legacyTestPath : 1 = false;
         // Whether this constant is (part of) one of a ClassDef's mixin ancestors. Namer copies the arguments of
         // `include` and `extend` into the ClassDef's ancestors, but leaves the sends in the class body too, so resolver
         // resolves these constants twice. Errors are only reported for the copy in the class body.
@@ -210,10 +209,10 @@ private:
         ConstantResolutionItem() = default;
         ConstantResolutionItem(shared_ptr<Nesting> scope, ast::ConstantLit *lit) : scope(move(scope)), out(lit) {}
         ConstantResolutionItem(shared_ptr<Nesting> scope, ast::ConstantLit *lit,
-                               core::ClassOrModuleRef packageRegistryCursor, bool isOutermost, bool legacyTestPath,
+                               core::ClassOrModuleRef packageRegistryCursor, bool isOutermost,
                                PackageCursorPosition packageCursorPosition)
             : scope(move(scope)), out(lit), packageRegistryCursor(packageRegistryCursor), isOutermost(isOutermost),
-              legacyTestPath(legacyTestPath), packageCursorPosition(packageCursorPosition) {}
+              packageCursorPosition(packageCursorPosition) {}
         ConstantResolutionItem(ConstantResolutionItem &&rhs) noexcept = default;
         ConstantResolutionItem &operator=(ConstantResolutionItem &&rhs) noexcept = default;
 
@@ -424,7 +423,7 @@ private:
         auto &currentPackageInfo = packageDB.getPackageInfo(currentPackage);
         ENFORCE(currentPackageInfo.exists());
         auto *import = currentPackageInfo.importsPackage(otherPackage);
-        return import != nullptr && import->isAvailableTo(ctx.state, ctx.file);
+        return import != nullptr;
     }
 
     static bool isStrictPackagePrefix(core::Context ctx, core::packages::MangledName prefix,
@@ -457,8 +456,7 @@ private:
             return true;
         }
         for (const auto &import : currentPackageInfo.importedPackageNames) {
-            if (import.isAvailableTo(ctx.state, ctx.file) &&
-                isStrictPackagePrefix(ctx, otherPackage, import.mangledName)) {
+            if (isStrictPackagePrefix(ctx, otherPackage, import.mangledName)) {
                 return true;
             }
         }
@@ -541,25 +539,8 @@ private:
         auto &c = *job.out->original();
         if (ast::isa_tree<ast::EmptyTree>(c.scope)) {
             auto result = resolveLhs(ctx, job.scope.get(), c.cnst);
-            auto isPotentialLegacyTestRoot =
-                shouldCheckPackage(ctx) && c.cnst == core::packages::PackageDB::TEST_NAMESPACE;
             if (!result.exists()) {
-                job.legacyTestPath = isPotentialLegacyTestRoot;
                 return result;
-            }
-            if (isPotentialLegacyTestRoot) {
-                auto rootTest = core::Symbols::root().data(ctx)->findMemberNoDealias(c.cnst);
-                job.legacyTestPath = result.dealias(ctx) == rootTest;
-
-                // The `::Test` constant is defined by the first strata containing test code, so it
-                // might not exist at first. Conservatively say that `Test` doesn't resolve in any
-                // `/test/` file, even if it happened to be defined already, so that resolution does
-                // not depend on where the first test gets scheduled.
-                //
-                // TODO(jez) We can do better, but let's punt for now to keep this small.
-                if (job.legacyTestPath && !ctx.file.data(ctx).isPackagedTest()) {
-                    return core::Symbols::noSymbol();
-                }
             }
 
             return enforcePackageBoundary(ctx, job, result);
@@ -611,10 +592,6 @@ private:
         return core::Symbols::noSymbol();
     }
 
-    static bool isLegacyTestRoot(const ConstantResolutionItem &job) {
-        return job.legacyTestPath && ast::isa_tree<ast::EmptyTree>(job.out->original()->scope);
-    }
-
     enum class PackageResolutionAction : uint8_t {
         None,
         DeferToOutermost,
@@ -635,14 +612,13 @@ private:
             job.packageRegistryCursor.exists() && cursorIsPackage(ctx, job.packageRegistryCursor);
         auto cursorPackage = core::packages::MangledName(job.packageRegistryCursor);
         auto inaccessibleCursorPackage = cursorIdentifiesPackage && !canReferencePackage(ctx, cursorPackage);
-        auto productionLegacyTestPath = job.legacyTestPath && !ctx.file.data(ctx).isPackagedTest();
 
-        if (!job.isOutermost && job.packageRegistryCursor.exists() && !isLegacyTestRoot(job) &&
+        if (!job.isOutermost && job.packageRegistryCursor.exists() &&
             (!cursorIdentifiesPackage || inaccessibleCursorPackage)) {
             return PackageResolutionAction::DeferToOutermost;
         }
 
-        if (job.isOutermost && !alreadyReported && !productionLegacyTestPath && inaccessibleCursorPackage) {
+        if (job.isOutermost && !alreadyReported && inaccessibleCursorPackage) {
             bool shouldReport;
             switch (job.packageCursorPosition) {
                 case PackageCursorPosition::PackageBoundary:
@@ -774,11 +750,10 @@ private:
         ENFORCE(!job.out->symbol().exists());
 
         auto &original = *job.out->original();
-        auto legacyTestRoot = isLegacyTestRoot(job);
         auto scope = ast::cast_tree<ast::ConstantLit>(original.scope);
         auto scopeWasStubbed = scope != nullptr && scope->symbol() == core::Symbols::StubModule();
-        if (shouldCheckPackage(ctx) && !job.isOutermost && job.packageRegistryCursor.exists() && !legacyTestRoot &&
-            !scopeWasStubbed && shouldContinueWithPackageRegistryCursor(ctx, job)) {
+        if (shouldCheckPackage(ctx) && !job.isOutermost && job.packageRegistryCursor.exists() && !scopeWasStubbed &&
+            shouldContinueWithPackageRegistryCursor(ctx, job)) {
             // Lie, and say that this constant resolves to a `<PackageSpecRegistry>`-scoped symbol.
             //
             // We want to report the import that would make the outermost constant resolve, which
@@ -884,10 +859,8 @@ private:
                 }
             }
 
-            auto suppressLegacyTestSuggestion =
-                legacyTestRoot && !ctx.file.data(ctx).isPackagedTest() && shouldCheckPackage(ctx);
-            if (!foundCommonTypo && !suppressLegacyTestSuggestion && suggestionCount < MAX_SUGGESTION_COUNT &&
-                suggestScope.exists() && suggestScope.isClassOrModule()) {
+            if (!foundCommonTypo && suggestionCount < MAX_SUGGESTION_COUNT && suggestScope.exists() &&
+                suggestScope.isClassOrModule()) {
                 suggestionCount++;
 
                 core::packages::MangledName filterToPackage;
@@ -1226,35 +1199,27 @@ private:
                     }
                     break;
 
-                case core::packages::PackageInfo::CanModifyResult::TestModifyingNonTest:
                 case core::packages::PackageInfo::CanModifyResult::NotOwner:
                 case core::packages::PackageInfo::CanModifyResult::UnpackagedSymbol:
                     if (auto e =
                             ctx.beginError(job.ancestor->loc(), core::errors::Resolver::ModifyingUnpackagedConstant)) {
-                        if (canModify == core::packages::PackageInfo::CanModifyResult::TestModifyingNonTest) {
-                            e.setHeader(
-                                "Superclasses in a test file cannot modify a non-test class in the same package");
-                            e.addErrorLine(job.klass.data(ctx)->loc(), "`{}` defined here (non-test)",
+                        e.setHeader("Superclasses may only be set on constants in the package that owns them");
+
+                        e.addErrorLine(job.klass.data(ctx)->loc(), "Symbol originally defined here");
+
+                        if (canModify == core::packages::PackageInfo::CanModifyResult::NotOwner) {
+                            e.addErrorLine(filePackageInfo.declLoc(), "Package where the `{}` occurs",
+                                           job.isInclude ? "include" : "extend");
+
+                            auto &ownerPackage = ctx.state.packageDB().getPackageInfo(job.klass.data(ctx)->package);
+                            ENFORCE(ownerPackage.exists());
+                            e.addErrorLine(ownerPackage.declLoc(), "Package where `{}` is defined",
                                            job.klass.show(ctx));
                         } else {
-                            e.setHeader("Superclasses may only be set on constants in the package that owns them");
-
-                            e.addErrorLine(job.klass.data(ctx)->loc(), "Symbol originally defined here");
-
-                            if (canModify == core::packages::PackageInfo::CanModifyResult::NotOwner) {
-                                e.addErrorLine(filePackageInfo.declLoc(), "Package where the `{}` occurs",
-                                               job.isInclude ? "include" : "extend");
-
-                                auto &ownerPackage = ctx.state.packageDB().getPackageInfo(job.klass.data(ctx)->package);
-                                ENFORCE(ownerPackage.exists());
-                                e.addErrorLine(ownerPackage.declLoc(), "Package where `{}` is defined",
-                                               job.klass.show(ctx));
-                            } else {
-                                e.addErrorLine(filePackageInfo.declLoc(), "Package defined here is not marked `{}`",
-                                               "prelude!");
-                                e.addErrorNote("`{}` is unpackaged, and may be reopened from a package marked `{}`",
-                                               job.klass.show(ctx), "prelude!");
-                            }
+                            e.addErrorLine(filePackageInfo.declLoc(), "Package defined here is not marked `{}`",
+                                           "prelude!");
+                            e.addErrorNote("`{}` is unpackaged, and may be reopened from a package marked `{}`",
+                                           job.klass.show(ctx), "prelude!");
                         }
                     }
                     break;
@@ -1297,36 +1262,28 @@ private:
                     }
                     break;
 
-                case core::packages::PackageInfo::CanModifyResult::TestModifyingNonTest:
                 case core::packages::PackageInfo::CanModifyResult::NotOwner:
                 case core::packages::PackageInfo::CanModifyResult::UnpackagedSymbol:
                     if (auto e =
                             ctx.beginError(job.ancestor->loc(), core::errors::Resolver::ModifyingUnpackagedConstant)) {
-                        if (canModify == core::packages::PackageInfo::CanModifyResult::TestModifyingNonTest) {
-                            e.setHeader("`{}` in a test file cannot modify a non-test class in the same package",
-                                        job.isInclude ? "include" : "extend");
-                            e.addErrorLine(job.klass.data(ctx)->loc(), "`{}` defined here (non-test)",
+                        e.setHeader("`{}` may only be used on constants in the package that owns them",
+                                    job.isInclude ? "include" : "extend");
+
+                        e.addErrorLine(job.klass.data(ctx)->loc(), "Symbol originally defined here");
+
+                        if (canModify == core::packages::PackageInfo::CanModifyResult::NotOwner) {
+                            e.addErrorLine(filePackageInfo.declLoc(), "Package where the `{}` occurs",
+                                           job.isInclude ? "include" : "extend");
+
+                            auto &ownerPackage = ctx.state.packageDB().getPackageInfo(job.klass.data(ctx)->package);
+                            ENFORCE(ownerPackage.exists());
+                            e.addErrorLine(ownerPackage.declLoc(), "Package where `{}` is defined",
                                            job.klass.show(ctx));
                         } else {
-                            e.setHeader("`{}` may only be used on constants in the package that owns them",
-                                        job.isInclude ? "include" : "extend");
-
-                            e.addErrorLine(job.klass.data(ctx)->loc(), "Symbol originally defined here");
-
-                            if (canModify == core::packages::PackageInfo::CanModifyResult::NotOwner) {
-                                e.addErrorLine(filePackageInfo.declLoc(), "Package where the `{}` occurs",
-                                               job.isInclude ? "include" : "extend");
-
-                                auto &ownerPackage = ctx.state.packageDB().getPackageInfo(job.klass.data(ctx)->package);
-                                ENFORCE(ownerPackage.exists());
-                                e.addErrorLine(ownerPackage.declLoc(), "Package where `{}` is defined",
-                                               job.klass.show(ctx));
-                            } else {
-                                e.addErrorLine(filePackageInfo.declLoc(), "Package defined here is not marked `{}`",
-                                               "prelude!");
-                                e.addErrorNote("`{}` is unpackaged, and may be reopened from a package marked `{}`",
-                                               job.klass.show(ctx), "prelude!");
-                            }
+                            e.addErrorLine(filePackageInfo.declLoc(), "Package defined here is not marked `{}`",
+                                           "prelude!");
+                            e.addErrorNote("`{}` is unpackaged, and may be reopened from a package marked `{}`",
+                                           job.klass.show(ctx), "prelude!");
                         }
                     }
                     break;
@@ -1630,7 +1587,6 @@ private:
 
     struct PackageCursorState {
         core::ClassOrModuleRef cursor;
-        bool legacyTestPath = false;
         PackageCursorPosition position = PackageCursorPosition::None;
     };
 
@@ -1667,7 +1623,7 @@ private:
             position = enclosing.data(ctx)->isPackageNamespace() ? PackageCursorPosition::PackageBoundary
                                                                  : PackageCursorPosition::PackageMember;
         }
-        return {cursor, false, position};
+        return {cursor, position};
     }
 
     static PackageCursorState cursorForBareConstant(core::Context ctx, const Nesting *nesting, core::NameRef name) {
@@ -1687,7 +1643,7 @@ private:
                 auto result = member.asClassOrModuleRef();
                 auto position = cursorIsPackage(ctx, result) ? PackageCursorPosition::PackageBoundary
                                                              : PackageCursorPosition::NamespacePrefix;
-                return {result, false, position};
+                return {result, position};
             }
         }
         return advancePackageCursor(ctx, {core::Symbols::PackageSpecRegistry()}, name);
@@ -1702,33 +1658,22 @@ private:
             auto constant = ast::cast_tree<ast::ConstantLit>(out);
 
             PackageCursorState cursor;
-            if (scopeWasEmpty && constant->original()->cnst == core::packages::PackageDB::TEST_NAMESPACE &&
-                shouldCheckPackage(ctx)) {
-                ENFORCE(!scopeCursor.cursor.exists() && !scopeCursor.legacyTestPath &&
-                        scopeCursor.position == PackageCursorPosition::None);
-                cursor.cursor = core::Symbols::PackageSpecRegistry();
-                cursor.position = PackageCursorPosition::NamespacePrefix;
-            } else if (scopeWasEmpty) {
+            if (scopeWasEmpty) {
                 cursor = cursorForBareConstant(ctx, nesting_.get(), constant->original()->cnst);
             } else {
                 cursor = advancePackageCursor(ctx, scopeCursor, constant->original()->cnst);
             }
 
             ConstantResolutionItem job{
-                nesting_, constant, cursor.cursor, isOutermost, cursor.legacyTestPath, cursor.position,
+                nesting_, constant, cursor.cursor, isOutermost, cursor.position,
             };
             job.isMixinAncestor = this->inMixinAncestor_;
             auto resolved = resolveConstantJob(ctx, job);
-            if (scopeWasEmpty && constant->original()->cnst == core::packages::PackageDB::TEST_NAMESPACE &&
-                shouldCheckPackage(ctx)) {
-                cursor.legacyTestPath = job.legacyTestPath;
-            }
             if (resolved) {
                 categoryCounterInc("resolve.constants.nonancestor", "firstpass");
                 // Once a symbol is resolved, we can just use the cursor of that symbol
                 // (even if empty, i.e. "unpackaged"), rather than having to guess.
                 cursor = cursorForSymbol(ctx, constant->symbol());
-                cursor.legacyTestPath = job.legacyTestPath;
                 if (this->loadTimeScope() && (!constant->symbol().isClassOrModule() ||
                                               constant->symbol().asClassOrModuleRef().data(ctx)->isDeclared())) {
                     // While Sorbet treats class A::B; end like an implicit definition of A, it's actually a
@@ -1835,8 +1780,7 @@ public:
                                        "constant to match `{}`.",
                                        scopeName, curName, curName);
 
-                        auto importType = curPkg.fileToImportType(ctx, ctx.file);
-                        if (auto suggestion = curPkg.addImport(ctx, scopePkg, importType)) {
+                        if (auto suggestion = curPkg.addImport(ctx, scopePkg)) {
                             // TODO(trevor) how does this interact with gen-packages mode, do we need to add a
                             // `trackPackageReference` call here?
                             e.addAutocorrect(std::move(*suggestion));

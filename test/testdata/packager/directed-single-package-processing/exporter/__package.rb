@@ -7,5 +7,4 @@ class Exporter < PackageSpec
   export Exporter::Alias
   export Exporter::StaticField
   export Exporter::TypeAlias
-  export Test::Exporter::TestPublic
 end

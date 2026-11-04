@@ -11,5 +11,4 @@ class Foo::Bar::CyclePackage < PackageSpec
 
   export Foo::Bar::CyclePackage::OtherClass
   export Foo::Bar::CyclePackage::ImportMeTestOnly
-  export Test::Foo::Bar::CyclePackage::TestUtil
 end

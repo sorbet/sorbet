@@ -9,6 +9,4 @@ class A < PackageSpec
   export A::CONSTANT_FROM_A
 
   import Prelude
-
-  test_import B
 end

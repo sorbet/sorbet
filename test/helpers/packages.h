@@ -24,7 +24,6 @@ class PackageTextBuilder {
     std::string layer;
     std::vector<std::string> imports;
     std::vector<std::string> exports;
-    std::vector<std::string> testImports;
     bool preludePackage;
 
 public:
@@ -53,11 +52,6 @@ public:
         return *this;
     }
 
-    PackageTextBuilder &withTestImports(std::vector<std::string> testImports) {
-        this->testImports = std::move(testImports);
-        return *this;
-    }
-
     PackageTextBuilder &withPreludePackage() {
         this->preludePackage = true;
         return *this;
@@ -73,10 +67,10 @@ public:
     static const std::vector<std::string> LAYERS_LIB_APP;
     static const std::vector<std::string> LAYERS_UTIL_LIB_APP;
 
-    // Make a __package.rb source with the supplied eatures. A package name, and the `strict_deps` and `layer`
-    // attributes are required, while imports and test_imports are optional.
+    // Make a __package.rb source with the supplied features. A package name, and the `strict_deps` and `layer`
+    // attributes are required, while imports are optional.
     static std::string makePackageRB(std::string name, std::string strictDeps, std::string layer,
-                                     std::vector<std::string> imports = {}, std::vector<std::string> testImports = {});
+                                     std::vector<std::string> imports = {});
 
     // Construct a GlobalState that has the packager enabled, and optionally sets up the supplied layers.
     static void makeDefaultPackagerGlobalState(core::GlobalState &gs,

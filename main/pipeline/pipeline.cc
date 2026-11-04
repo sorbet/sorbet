@@ -112,7 +112,7 @@ void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) 
             opts.extraPackageFilesDirectoryUnderscorePrefixes, opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
             opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
             opts.allowRelaxedPackagerChecksFor, opts.updateVisibilityFor, opts.packagerLayers, opts.sorbetPackagesHint,
-            opts.genPackagesMode, opts.allowRelaxingTestVisibility, opts.packageAttributedErrors, opts.testPackages);
+            opts.genPackagesMode, opts.allowRelaxingTestVisibility, opts.packageAttributedErrors);
     }
 #endif
 }
@@ -129,8 +129,7 @@ unique_ptr<core::GlobalState> copyForSlowPath(const core::GlobalState &from, con
         opts.extraPackageFilesDirectoryUnderscorePrefixes, opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
         opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
         opts.allowRelaxedPackagerChecksFor, opts.updateVisibilityFor, opts.packagerLayers, opts.sorbetPackagesHint,
-        opts.genPackagesMode, opts.allowRelaxingTestVisibility, opts.packageAttributedErrors, opts.testPackages,
-        forStratum);
+        opts.genPackagesMode, opts.allowRelaxingTestVisibility, opts.packageAttributedErrors, forStratum);
 
     // Fall back on initializing from the payload if we're not copying part of from's symbol table.
     if (forStratum == core::packages::Stratum(0)) {
@@ -721,7 +720,7 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
         opts.extraPackageFilesDirectorySlashDeprecatedPrefixes, opts.extraPackageFilesDirectorySlashPrefixes,
         opts.packageSkipRBIExportEnforcementDirs, opts.allowRelaxedPackagerChecksFor, opts.updateVisibilityFor,
         opts.packagerLayers, opts.sorbetPackagesHint, opts.genPackagesMode, opts.allowRelaxingTestVisibility,
-        opts.packageAttributedErrors, opts.testPackages);
+        opts.packageAttributedErrors);
 
     workers.multiplexJob("indexSuppliedFiles", [emptyGs, &opts, fileq, resultq, &kvstore, cancelable]() {
         Timer timeit(emptyGs->tracer(), "indexSuppliedFilesWorker");
@@ -733,7 +732,7 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
             opts.extraPackageFilesDirectorySlashDeprecatedPrefixes, opts.extraPackageFilesDirectorySlashPrefixes,
             opts.packageSkipRBIExportEnforcementDirs, opts.allowRelaxedPackagerChecksFor, opts.updateVisibilityFor,
             opts.packagerLayers, opts.sorbetPackagesHint, opts.genPackagesMode, opts.allowRelaxingTestVisibility,
-            opts.packageAttributedErrors, opts.testPackages);
+            opts.packageAttributedErrors);
         auto &epochManager = *localGs->epochManager;
 
         IndexThreadResultPack threadResult;
@@ -845,8 +844,7 @@ PackageStrata computePackageStrata(core::GlobalState &gs, vector<ast::ParsedFile
 
     if (!opts.packageDirected) {
         for (auto name : gs.packageDB().packages()) {
-            gs.packageDB().getPackageInfoNonConst(name)->stratum = {core::packages::Stratum(0),
-                                                                    core::packages::Stratum(0)};
+            gs.packageDB().getPackageInfoNonConst(name)->stratum = core::packages::Stratum(0);
         }
         result.strata = {CondensationStratumInfo{absl::MakeSpan(packageFiles), sourceFiles}};
         return result;
@@ -885,9 +883,8 @@ PackageStrata computePackageStrata(core::GlobalState &gs, vector<ast::ParsedFile
 
         traversal.recordStrata(gs);
 
-        int ix = 0;
-        for (auto &file : gs.getFiles().subspan(1)) {
-            ++ix;
+        auto numFiles = gs.getFiles().size();
+        for (int ix = 1; ix < numFiles; ix++) {
             core::FileRef fref(ix);
             auto pkgName = db.getPackageNameForFile(fref);
             if (!pkgName.exists()) {
@@ -897,29 +894,9 @@ PackageStrata computePackageStrata(core::GlobalState &gs, vector<ast::ParsedFile
                 continue;
             }
 
-            const auto &info = db.getPackageInfo(pkgName).stratum;
-
-            // TODO(trevor): after we switch fully over to test packges, this conditional can go away as we won't have
-            // the distinction between a test and application node in the condensation graph.
-            // A legacy package file runs only in its test stratum. Queries must wait for that
-            // stratum too, so that all its application and test dependencies are available.
-            auto isPackageRbInLegacyPkg = file->isPackage(gs) && !db.getPackageInfo(pkgName).usesTestPackages;
-            if (file->isPackagedTest() || file->isPackagedTestHelper() || isPackageRbInLegacyPkg) {
-                ENFORCE(info.testStratum != core::packages::Stratum::NONE);
-                result.fileToStratum[ix] = info.testStratum;
-            } else {
-                ENFORCE(info.applicationStratum != core::packages::Stratum::NONE);
-                result.fileToStratum[ix] = info.applicationStratum;
-            }
-
-            if constexpr (debug_mode) {
-                if (file->isPackage(gs)) {
-                    auto &pkgInfo = db.getPackageInfo(pkgName);
-                    if (pkgInfo.usesTestPackages) {
-                        ENFORCE(info.testStratum == info.applicationStratum);
-                    }
-                }
-            }
+            auto stratum = db.getPackageInfo(pkgName).stratum;
+            ENFORCE(stratum != core::packages::Stratum::NONE, "All packages must be present in the condensation graph");
+            result.fileToStratum[ix] = stratum;
         }
 
         fast_sort(sourceFiles,
@@ -953,14 +930,8 @@ PackageStrata computePackageStrata(core::GlobalState &gs, vector<ast::ParsedFile
         {
             for (auto &scc : stratum) {
                 for (auto member : scc.members) {
-                    if (scc.isTest || db.getPackageInfo(member).usesTestPackages) {
-                        // A legacy package has both an application and a test node in the condensation graph, but
-                        // its `__package.rb` must only be processed once so that its errors are only reported once.
-                        // Process it with the test node, which sees both its application and test code. The
-                        // application node applies the package's exports without it (see VisibilityChecker).
-                        auto &tree = packageFiles.emplace_back(std::move(packagesToPackageRb[member]));
-                        ENFORCE(tree.tree);
-                    }
+                    auto &tree = packageFiles.emplace_back(std::move(packagesToPackageRb[member]));
+                    ENFORCE(tree.tree);
                 }
             }
 
