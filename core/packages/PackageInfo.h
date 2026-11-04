@@ -314,7 +314,8 @@ public:
         // The symbol is in the PackageSpecRegistry hierarchy, and cannot be modified.
         PackageSpec,
 
-        // The symbol is the namespace of a package, and subpackges exist.
+        // The symbol is a namespace on the path to a subpackage, and this package's `imported_by_nested_packages!`
+        // doesn't take effect (see `importedByNestedPackagesSatisfied`).
         Subpackages,
 
         // The symbol belongs to another package.

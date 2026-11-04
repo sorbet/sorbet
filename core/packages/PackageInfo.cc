@@ -1037,9 +1037,11 @@ PackageInfo::CanModifyResult PackageInfo::canModifySymbol(core::Context ctx, Cla
 
     // The symbol is already owned by this package, so we only need to check if the symbol corresponds to the package
     // namespace, and if so that there aren't any subpackages, as that could introduce ordering dependencies that don't
-    // work with package-directed type checking.
+    // work with package-directed type checking. A package marked `imported_by_nested_packages!` opts out of this, as
+    // long as every package nested under it imports it (or a package in between), which rules out those dependencies.
     if (symPackage == this->mangledName_) {
-        if (this->hasSubPackages && symData->packageRegistryOwner.exists()) {
+        if (this->hasSubPackages && symData->packageRegistryOwner.exists() &&
+            !this->importedByNestedPackagesSatisfied()) {
             return CanModifyResult::Subpackages;
         }
 

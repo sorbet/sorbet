@@ -3072,9 +3072,11 @@ end
 
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
 
-If a package contains a sub-package, the modules (or classes) that make up the path to that subpackage may not have mixins. For example, if there are two packages `A` and `A::B`, package `A` is not allowed to define mixins on the `A` module or class.
+If a package contains a sub-package, the modules (or classes) that make up the path to that subpackage may not have a superclass or mixins, unless the package is marked `imported_by_nested_packages!`. For example, if there are two packages `A` and `A::B`, package `A` is not allowed to define mixins on the `A` module or class.
 
-Resolving this error involves moving the functionality off of the package namespace symbol `A` and onto a member of the `A` package instead, or moving the sub-package to a different place in the package hierarchy. For example,
+In package-directed mode, `A::B` can be typechecked before `A`, so it must not be able to observe `A` changing. Marking `A` with `imported_by_nested_packages!` requires every package nested under `A` to `import A` (see [3739](#3739)), which guarantees that `A` is typechecked first.
+
+Resolving this error involves moving the functionality off of the package namespace symbol `A` and onto a member of the `A` package instead, moving the sub-package to a different place in the package hierarchy, or (if the mixin is intentional) marking `A` with `imported_by_nested_packages!`. For example,
 
 ```ruby
 module A
