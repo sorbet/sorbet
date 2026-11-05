@@ -6,8 +6,11 @@
 #include "absl/synchronization/notification.h"
 #include "common/FileOps.h"
 #include "common/common.h"
+#include "common/kvstore/CacheLock.h"
 #include "common/kvstore/KeyValueStore.h"
 #include "spdlog/sinks/stdout_sinks.h"
+#include <cerrno>
+#include <filesystem>
 
 using namespace std;
 using namespace sorbet;
@@ -106,6 +109,92 @@ TEST_CASE("kvstore") {
         auto kvstore1 = make_unique<KeyValueStore>(logger, "1", directory, "vanilla", maxSize);
         CHECK_THROWS_AS((void)make_unique<KeyValueStore>(logger, "1", directory, "vanilla", maxSize),
                         std::invalid_argument);
+    }
+
+    // Shared access must prevent exclusive access until the environment closes, even after a transaction ends.
+    SUBCASE("HoldsSharedLockUntilEnvironmentCloses") {
+        auto kvstore = make_unique<KeyValueStore>(logger, "1", directory, "vanilla", maxSize);
+        {
+            auto sharedLock = CacheLock::acquireShared(directory, /* blocking */ false);
+            REQUIRE(sharedLock.has_value());
+        }
+        CHECK_FALSE(CacheLock::acquireExclusive(directory, /* blocking */ false).has_value());
+        CHECK_EQ(errno, EWOULDBLOCK);
+
+        auto owned = make_unique<OwnedKeyValueStore>(move(kvstore));
+        kvstore = OwnedKeyValueStore::abort(move(owned));
+        CHECK_FALSE(CacheLock::acquireExclusive(directory, /* blocking */ false).has_value());
+        CHECK_EQ(errno, EWOULDBLOCK);
+
+        kvstore.reset();
+        CHECK(FileOps::exists(fmt::format("{}/{}", directory, CacheLock::ACCESS_LOCK_FILE)));
+        auto exclusiveLock = CacheLock::acquireExclusive(directory, /* blocking */ false);
+        CHECK(exclusiveLock.has_value());
+    }
+
+    // Wait for exclusive access to end before opening LMDB, without reserving the process-wide kvstore slot.
+    SUBCASE("WaitsForExclusiveLockBeforeOpeningDatabase") {
+        auto exclusiveLock = CacheLock::acquireExclusive(directory, /* blocking */ false);
+        REQUIRE(exclusiveLock.has_value());
+
+        absl::Notification starting;
+        absl::Notification opened;
+        auto opener = runInAThread("cache-opener", [&]() {
+            starting.Notify();
+            CHECK_NOTHROW([&]() {
+                auto kvstore = make_unique<KeyValueStore>(logger, "1", directory, "vanilla", maxSize);
+                opened.Notify();
+            }());
+        });
+        starting.WaitForNotification();
+        CHECK_FALSE(opened.WaitForNotificationWithTimeout(absl::Milliseconds(100)));
+        CHECK_FALSE(FileOps::exists(directory + "/data.mdb"));
+
+        // Waiting for the file lock must not reserve the process-wide kvstore slot.
+        CHECK_NOTHROW((void)make_unique<KeyValueStore>(logger, "1", directory + "/other", "vanilla", maxSize));
+
+        exclusiveLock.reset();
+        opener.reset();
+        CHECK(opened.HasBeenNotified());
+    }
+
+    // A failed LMDB open must release both the access lock and the process-wide kvstore slot.
+    SUBCASE("ReleasesLockAfterFailedOpen") {
+        auto dataPath = directory + "/data.mdb";
+        filesystem::create_directory(dataPath);
+        CHECK_THROWS_AS((void)make_unique<KeyValueStore>(logger, "1", directory, "vanilla", maxSize),
+                        std::invalid_argument);
+        {
+            auto exclusiveLock = CacheLock::acquireExclusive(directory, /* blocking */ false);
+            CHECK(exclusiveLock.has_value());
+        }
+        filesystem::remove(dataPath);
+        CHECK_NOTHROW((void)make_unique<KeyValueStore>(logger, "1", directory, "vanilla", maxSize));
+    }
+
+    // Move assignment releases the old lock and keeps the transferred lock held until its new owner releases it.
+    SUBCASE("MoveAssignmentTransfersLockOwnership") {
+        auto otherDirectory = directory + "/other";
+        FileOps::createDir(otherDirectory);
+        auto destination = CacheLock::acquireExclusive(directory, /* blocking */ false);
+        auto source = CacheLock::acquireExclusive(otherDirectory, /* blocking */ false);
+        REQUIRE(destination.has_value());
+        REQUIRE(source.has_value());
+
+        destination = move(source);
+        source.reset();
+        CHECK(CacheLock::acquireExclusive(directory, /* blocking */ false).has_value());
+        CHECK_FALSE(CacheLock::acquireShared(otherDirectory, /* blocking */ false).has_value());
+        CHECK_EQ(errno, EWOULDBLOCK);
+
+        // Self-move assignment must preserve the transferred lock.
+        auto &sameLock = destination;
+        destination = move(sameLock);
+        CHECK_FALSE(CacheLock::acquireShared(otherDirectory, /* blocking */ false).has_value());
+        CHECK_EQ(errno, EWOULDBLOCK);
+
+        destination.reset();
+        CHECK(CacheLock::acquireExclusive(otherDirectory, /* blocking */ false).has_value());
     }
 
     SUBCASE("LeavesNoStaleTransactions") {

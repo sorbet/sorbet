@@ -3,6 +3,7 @@
 #include "common/Random.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/exception/Exception.h"
+#include "common/kvstore/CacheLock.h"
 #include "common/kvstore/KeyValueStore.h"
 #include "core/serialize/serialize.h"
 #include "main/options/options.h"
@@ -249,7 +250,12 @@ bool removeCacheDir(const string &path) noexcept {
         }
     }
 
-    // Leave directories containing files other than those created by LMDB intact.
+    auto accessLock = fmt::format("{}/{}", path, CacheLock::ACCESS_LOCK_FILE);
+    if (0 != remove(accessLock.c_str()) && errno != ENOENT) {
+        return false;
+    }
+
+    // Leave directories containing unrelated files intact.
     if (0 != rmdir(path.c_str())) {
         switch (errno) {
             // It's fine if the directory is missing, isn't actually a directory, or wasn't empty.
