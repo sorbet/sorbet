@@ -62,4 +62,17 @@ rescue TypeError
   false
 end
 
+# A caller can rescue the error from a bad `T.deprecated_enum` and drop it.
+begin
+  T.deprecated_enum(5)
+rescue NoMethodError
+  nil
+end
+check("build_all_types raises on abandoned enums") do
+  T::Utils.build_all_types
+  false
+rescue NoMethodError
+  true
+end
+
 puts "PASS"
