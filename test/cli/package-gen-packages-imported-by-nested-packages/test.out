@@ -1,4 +1,12 @@
 ###### Running gen-packages=normal ######
+outer/missing/__package.rb:3: `Outer::Missing` is missing imports https://srb.help/3734
+     3 |class Outer::Missing < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    outer/missing/__package.rb:5: Inserted `import Outer`
+     5 |  strict_dependencies 'false'
+                                     ^
+
 outer/used/inner/__package.rb:4: `Outer::Used::Inner` is missing imports https://srb.help/3734
      4 |class Outer::Used::Inner < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -6,7 +14,7 @@ outer/used/inner/__package.rb:4: `Outer::Used::Inner` is missing imports https:/
     outer/used/inner/__package.rb:6: Inserted `import Outer::Used`
      6 |  strict_dependencies 'false'
                                      ^
-Errors: 1
+Errors: 2
 
 ###### cat outer/__package.rb ######
 # typed: strict
@@ -65,6 +73,7 @@ end
 class Outer::Missing < PackageSpec
   layer 'app'
   strict_dependencies 'false'
+  import Outer
 end
 
 ###### Running gen-packages=strict ######
@@ -103,6 +112,8 @@ Errors: 6
 # typed: strict
 
 class Outer < PackageSpec
+  imported_by_nested_packages!
+
   layer 'util'
   strict_dependencies 'dag'
 end
@@ -136,6 +147,9 @@ end
 class Outer::Unused < PackageSpec
   layer 'app'
   strict_dependencies 'dag'
+
+  # strict_dependencies 'dag':
+  import Outer
 end
 
 ###### cat outer/unused/inner/__package.rb ######
@@ -145,6 +159,9 @@ end
 class Outer::Unused::Inner < PackageSpec
   layer 'app'
   strict_dependencies 'dag'
+
+  # strict_dependencies 'dag':
+  import Outer::Unused
 end
 
 ###### cat outer/missing/__package.rb ######
@@ -153,5 +170,8 @@ end
 class Outer::Missing < PackageSpec
   layer 'app'
   strict_dependencies 'dag'
+
+  # strict_dependencies 'dag':
+  import Outer
 end
 

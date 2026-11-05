@@ -697,6 +697,13 @@ std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingImports(
             toImport.emplace(packageName);
         }
     }
+    // Required by `imported_by_nested_packages!`, whether or not this package references it. Importing the nearest
+    // unsatisfied package satisfies all of them (see enclosingPackagesMissingImport).
+    auto unsatisfied = enclosingPackagesMissingImport(gs, this->mangledName_, importedPackageNames, toImport);
+    if (!unsatisfied.empty()) {
+        toImport.emplace(unsatisfied.front());
+    }
+
     auto importEdits = computeImportEdits(gs, *this, toImport);
     allEdits.insert(allEdits.end(), make_move_iterator(importEdits.begin()), make_move_iterator(importEdits.end()));
     if (allEdits.empty()) {
@@ -781,6 +788,10 @@ std::string PackageInfo::renderPackageRbContents(
 
     if (isPreludePackage()) {
         fmt::format_to(std::back_inserter(result), "  prelude!\n\n");
+    }
+
+    if (importedByNestedPackages()) {
+        fmt::format_to(std::back_inserter(result), "  imported_by_nested_packages!\n\n");
     }
 
     for (auto &directive : extraDirectives_) {

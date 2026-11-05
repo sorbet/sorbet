@@ -1112,10 +1112,14 @@ void Packager::buildPackageDB(core::GlobalState &gs, WorkerPool &workers, absl::
                 // For each marked package enclosing this one whose `imported_by_nested_packages!` requirement this
                 // package doesn't meet, record that it isn't met (see `importedByNestedPackagesSatisfied`).
                 // Only this package's own imports matter, which rewritePackageSpec just populated.
-                for (auto outer : info.enclosingPackagesMissingImport(gs)) {
-                    auto &outerInfo = *gs.packageDB().getPackageInfoNonConst(outer);
-                    if (!outerInfo.nestedPackageMissingImport.exists()) {
-                        outerInfo.nestedPackageMissingImport = pkgName;
+                // In --gen-packages mode, which adds the missing imports itself (and doesn't report them),
+                // treat every annotation as taking effect.
+                if (gs.packageDB().genPackagesMode() == core::packages::GenPackagesMode::Disabled) {
+                    for (auto outer : info.enclosingPackagesMissingImport(gs)) {
+                        auto &outerInfo = *gs.packageDB().getPackageInfoNonConst(outer);
+                        if (!outerInfo.nestedPackageMissingImport.exists()) {
+                            outerInfo.nestedPackageMissingImport = pkgName;
+                        }
                     }
                 }
             }
