@@ -3902,7 +3902,7 @@ Desugarer::desugarParametersNode(pm_parameters_node *paramsNode, core::LocOffset
         // `NoKeywordsParameterNode` in the `keyword_rest` field.
         // If invalid code tries to use more than one `**nil` (like `def foo(**nil, **nil)`),
         // Prism will report an error, but still place the excess `**nil` nodes in `posts` list (never the others like
-        // `requireds` or `optionals`), which we need to skip here.
+        // `requireds` or `optionals`), which we need to skip here and when converting RBS method signatures.
         if (!isa_node<pm_no_keywords_parameter_node>(prismNode)) {
             paramsStore.emplace_back(desugar(prismNode));
         }

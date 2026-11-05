@@ -330,14 +330,18 @@ vector<pm_node_t *> getMethodParams(pm_def_node_t *def) {
         result.push_back(params->rest);
     }
 
+    // `**nil` forbids keyword arguments; it does not declare a parameter. Invalid duplicate markers can also
+    // appear in `posts` during Prism's error recovery, so exclude them from both possible locations.
     for (size_t i = 0; i < params->posts.size; i++) {
-        result.push_back(params->posts.nodes[i]);
+        if (!isa_node<pm_no_keywords_parameter_node_t>(params->posts.nodes[i])) {
+            result.push_back(params->posts.nodes[i]);
+        }
     }
     for (size_t i = 0; i < params->keywords.size; i++) {
         result.push_back(params->keywords.nodes[i]);
     }
 
-    if (params->keyword_rest) {
+    if (params->keyword_rest && !isa_node<pm_no_keywords_parameter_node_t>(params->keyword_rest)) {
         result.push_back(params->keyword_rest);
     }
 
