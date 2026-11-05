@@ -1777,6 +1777,16 @@ public:
 
     /* methods for marshalling to and from the parser's foreign pointers */
 
+    Node *peek_node(ForeignPtr node) {
+        auto off = reinterpret_cast<size_t>(node);
+        if (off == 0) {
+            return nullptr;
+        }
+
+        ENFORCE(foreignNodes_[off] != nullptr);
+        return foreignNodes_[off].get();
+    }
+
     unique_ptr<Node> cast_node(ForeignPtr node) {
         auto off = reinterpret_cast<size_t>(node);
         if (off == 0) {
@@ -2753,6 +2763,11 @@ ForeignPtr true_(SelfPtr builder, const token *tok) {
     return build->toForeign(build->true_(tok));
 }
 
+bool canTruncateBodyStmt(SelfPtr builder, ForeignPtr body) {
+    auto build = cast_builder(builder);
+    return sorbet::parser::cast_node<sorbet::parser::Begin>(build->peek_node(body)) != nullptr;
+}
+
 ForeignPtr truncateBodyStmt(SelfPtr builder, ForeignPtr body, const token *truncateToken) {
     auto build = cast_builder(builder);
     return build->toForeign(build->truncateBodyStmt(build->cast_node(body), truncateToken));
@@ -2945,6 +2960,7 @@ struct ruby_parser::builder Builder::interface = {
     symbols_compose,
     ternary,
     true_,
+    canTruncateBodyStmt,
     truncateBodyStmt,
     unary_op,
     undefMethod,
