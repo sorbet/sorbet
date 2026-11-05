@@ -2413,6 +2413,12 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
 
                     while (true) {
                         if (auto *pathNode = down_cast<pm_constant_path_node>(current)) {
+                            // Error recovery can produce a constant path without a name, e.g. `Foo::`.
+                            if (pathNode->name == PM_CONSTANT_ID_UNSET) {
+                                args.clear();
+                                break;
+                            }
+
                             args.emplace_back(MK::String(translateLoc(pathNode->base.location),
                                                          translateConstantName(pathNode->name)));
 
