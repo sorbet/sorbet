@@ -16,6 +16,12 @@ module T::Types
         else
           values.to_set
         end
+    rescue StandardError
+      # The conversion can raise. A caller can rescue that and drop this
+      # object, but `ObjectSpace.each_object` still yields it until the next
+      # GC, and `T::Utils.build_all_types` must be able to build it.
+      @values = Set[]
+      raise
     end
 
     def build_type

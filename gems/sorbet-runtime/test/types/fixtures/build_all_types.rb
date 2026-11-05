@@ -51,4 +51,28 @@ rescue TypeError
   true
 end
 
+# These each drop a SimplePairUnion whose constructor raised. It's garbage, but
+# ObjectSpace still yields it until the next GC, so it must still build.
+T.nilable(NilClass)
+T.any(Integer, Integer)
+check("build_all_types builds abandoned pair unions") do
+  T::Utils.build_all_types
+  true
+rescue TypeError
+  false
+end
+
+# A caller can rescue the error from a bad `T.deprecated_enum` and drop it.
+begin
+  T.deprecated_enum(5)
+rescue NoMethodError
+  nil
+end
+check("build_all_types builds after an abandoned enum") do
+  T::Utils.build_all_types
+  true
+rescue NoMethodError
+  false
+end
+
 puts "PASS"
