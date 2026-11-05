@@ -68,11 +68,11 @@ begin
 rescue NoMethodError
   nil
 end
-check("build_all_types raises on abandoned enums") do
+check("build_all_types builds after an abandoned enum") do
   T::Utils.build_all_types
-  false
-rescue NoMethodError
   true
+rescue NoMethodError
+  false
 end
 
 puts "PASS"
