@@ -79,12 +79,29 @@ KeyValueStore::KeyValueStore(shared_ptr<spdlog::logger> logger, string version, 
     : version(move(version)), path(move(path)), flavor(move(flavor)), dbState(make_unique<DBState>()),
       logger(move(logger)) {
     ENFORCE(!this->version.empty());
-    bool expected = false;
-    if (!kvstoreInUse.compare_exchange_strong(expected, true)) {
-        throw_mdb_error("Cannot create two kvstore instances simultaneously.", 0, path);
+    int rc = 0;
+    try {
+        filesystem::create_directories(this->path);
+    } catch (filesystem::filesystem_error &e) {
+        rc = e.code().value();
+        if (rc == ENOTDIR || rc == EACCES) {
+            goto fail;
+        }
+        fmt::print(stderr,
+                   "'{}' does not exist and could not be created. "
+                   "When using --cache-dir, create the directory before hand.\n",
+                   this->path);
+        throw EarlyReturnWithCode(1);
     }
 
-    int rc = mdb_env_create(&dbState->env);
+    {
+        bool expected = false;
+        if (!kvstoreInUse.compare_exchange_strong(expected, true)) {
+            throw_mdb_error("Cannot create two kvstore instances simultaneously.", 0, path);
+        }
+    }
+
+    rc = mdb_env_create(&dbState->env);
     if (rc != 0) {
         goto fail;
     }
@@ -96,6 +113,7 @@ KeyValueStore::KeyValueStore(shared_ptr<spdlog::logger> logger, string version, 
     if (rc != 0) {
         goto fail;
     }
+
     // _disable_ thread local storage so that the writer thread can close/abort a reader transaction.
     // MDB_NOTLS instructs LMDB to store transactions into the `MDB_txn` objects rather than thread-local storage.
     // It allows read-only transactions to migrate across threads (letting the writer thread clean up reader
@@ -103,31 +121,18 @@ KeyValueStore::KeyValueStore(shared_ptr<spdlog::logger> logger, string version, 
     // manually maintaining a map from thread to transaction.
     // Avoids MDB_READERS_FULL issues with concurrent Sorbet processes.
     rc = mdb_env_open(dbState->env, this->path.c_str(), MDB_NOTLS, 0664);
-    if (rc == ENOENT) {
-        try {
-            filesystem::create_directories(this->path);
-        } catch (filesystem::filesystem_error &e) {
-            fmt::print(stderr,
-                       "'{}' does not exist and could not be created. "
-                       "When using --cache-dir, create the directory before hand.\n",
-                       this->path);
-            throw EarlyReturnWithCode(1);
-        }
-        rc = mdb_env_open(dbState->env, this->path.c_str(), MDB_NOTLS, 0664);
-        if (rc != 0) {
-            goto fail;
-        }
-    } else if (rc == ENOTDIR) {
+    if (rc != 0) {
+        goto fail;
+    }
+    return;
+fail:
+    if (rc == ENOTDIR) {
         fmt::print(stderr, "'{}' is not a directory, and so cannot store the Sorbet disk cache.\n", this->path);
         throw EarlyReturnWithCode(1);
     } else if (rc == EACCES) {
         fmt::print(stderr, "No read permissions for '{}'\n", this->path);
         throw EarlyReturnWithCode(1);
-    } else if (rc != 0) {
-        goto fail;
     }
-    return;
-fail:
     throw_mdb_error("failed to create database"sv, rc, path);
 }
 KeyValueStore::~KeyValueStore() noexcept(false) {
