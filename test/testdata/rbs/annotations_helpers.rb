@@ -15,6 +15,11 @@ class Abstract3
 end
 
 # @abstract
+class AbstractMalformedHelper
+  extend T::::Helpers # error: expected a constant after the `::` operator
+end
+
+# @abstract
 # @abstract
 class Abstract4
   extend ::T::Helpers

@@ -118,11 +118,10 @@ bool Parser::isT(pm_node_t *node) const {
     }
 
     if (auto *constNode = down_cast<pm_constant_read_node_t>(node)) { // T
-        auto name = resolveConstant(constNode->name);
-        return name == "T";
+        return constNode->name != PM_CONSTANT_ID_UNSET && resolveConstant(constNode->name) == "T";
     } else if (auto *pathNode = down_cast<pm_constant_path_node_t>(node)) { // ::T
-        auto name = resolveConstant(pathNode->name);
-        return name == "T" && pathNode->parent == nullptr;
+        return pathNode->parent == nullptr && pathNode->name != PM_CONSTANT_ID_UNSET &&
+               resolveConstant(pathNode->name) == "T";
     }
 
     return false;
