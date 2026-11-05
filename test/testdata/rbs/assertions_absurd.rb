@@ -359,3 +359,9 @@ def raise_signature_is_checked(x)
     raise 42 #: absurd(x) # error: Expected `T.any(T::Class[T.anything], Exception, String)` but found `Integer(42)` for argument `arg0`
   end
 end
+
+#: (Integer) -> void
+def malformed_raise_receiver(x)
+  ::.raise #: absurd(x) # error: expected a constant after the `::` operator
+  #       ^^^^^^^^^^^^^ error: RBS absurd must always be used with a raise
+end

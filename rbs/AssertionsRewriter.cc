@@ -493,7 +493,7 @@ pm_node_t *AssertionsRewriter::insertCast(pm_node_t *node, optional<pair<pm_node
             return prism.TUnsafe(typeLoc, node);
         case InlineComment::Kind::ABSURD: {
             auto *call = down_cast<pm_call_node_t>(node);
-            bool isRaise = call && parser.resolveConstant(call->name) == "raise";
+            bool isRaise = call && call->name != PM_CONSTANT_ID_UNSET && parser.resolveConstant(call->name) == "raise";
 
             // If raise has a receiver, confirm it's `Kernel`, `::Kernel` or `self`
             if (isRaise && call->receiver) {
@@ -501,8 +501,10 @@ pm_node_t *AssertionsRewriter::insertCast(pm_node_t *node, optional<pair<pm_node
                 auto *path = down_cast<pm_constant_path_node_t>(call->receiver);
 
                 isRaise = isa_node<pm_self_node_t>(call->receiver) ||
-                          (constant && parser.resolveConstant(constant->name) == "Kernel") ||
-                          (path && !path->parent && parser.resolveConstant(path->name) == "Kernel");
+                          (constant && constant->name != PM_CONSTANT_ID_UNSET &&
+                           parser.resolveConstant(constant->name) == "Kernel") ||
+                          (path && !path->parent && path->name != PM_CONSTANT_ID_UNSET &&
+                           parser.resolveConstant(path->name) == "Kernel");
             }
 
             if (!isRaise) {
