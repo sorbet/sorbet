@@ -52,14 +52,14 @@ rescue TypeError
 end
 
 # These each drop a SimplePairUnion whose constructor raised. It's garbage, but
-# ObjectSpace still yields it until the next GC.
+# ObjectSpace still yields it until the next GC, so it must still build.
 T.nilable(NilClass)
 T.any(Integer, Integer)
-check("build_all_types raises on abandoned pair unions") do
+check("build_all_types builds abandoned pair unions") do
   T::Utils.build_all_types
-  false
-rescue TypeError
   true
+rescue TypeError
+  false
 end
 
 puts "PASS"
