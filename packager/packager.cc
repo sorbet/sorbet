@@ -412,6 +412,8 @@ struct PackageSpecBodyWalk {
             }
         } else if (send.fun == core::Names::prelude_bang() && !send.hasBlock() && !send.hasNonBlockArgs()) {
             // Handled as a class-level modifier in namer.
+        } else if (send.fun == core::Names::importedByNestedPackages() && !send.hasBlock() && !send.hasNonBlockArgs()) {
+            // Handled as a class-level modifier in namer.
         } else if (send.fun == core::Names::visibleTo()) {
             if (send.numPosArgs() == 1) {
                 if (auto target = ast::cast_tree<ast::Literal>(send.getPosArg(0))) {
@@ -630,6 +632,7 @@ struct PackageSpecBodyWalk {
             case core::Names::visibleTo().rawId():
             case core::Names::prelude_bang().rawId():
             case core::Names::test_bang().rawId():
+            case core::Names::importedByNestedPackages().rawId():
                 return true;
 
             default:
@@ -1014,6 +1017,7 @@ vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, ve
                 PackageInfo copy{info.mangledName_, info.file, info.locs.loc, info.locs.declLoc};
                 copy.locs.preludePackage = info.locs.preludePackage;
                 copy.locs.testPackage = info.locs.testPackage;
+                copy.locs.importedByNestedPackages = info.locs.importedByNestedPackages;
                 rewritePackageSpec(gs, file, copy);
             }
             validatePackage(ctx);

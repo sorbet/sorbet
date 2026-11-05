@@ -3,14 +3,15 @@
 # enable-packager: true
 
 class Outer < PackageSpec
-  imported_by_nested_packages! # error: Method `imported_by_nested_packages!` does not exist on `T.class_of(Outer)`
+  imported_by_nested_packages!
 end
 # ------------------------------
 # -- test/testdata/packager/imported_by_nested_packages/bad_args/__package.rb --
 # typed: strict
 
 class BadArgs < PackageSpec
-  imported_by_nested_packages!(:arg) # error: Method `imported_by_nested_packages!` does not exist on `T.class_of(BadArgs)`
+  imported_by_nested_packages!()
+                             # ^^^^ error: Too many arguments
 end
 # ------------------------------
 # -- test/testdata/packager/imported_by_nested_packages/lonely/__package.rb --
@@ -18,7 +19,7 @@ end
 
 # A package with no nested packages can be marked, too: the annotation has no effect.
 class Lonely < PackageSpec
-  imported_by_nested_packages! # error: Method `imported_by_nested_packages!` does not exist on `T.class_of(Lonely)`
+  imported_by_nested_packages!
 end
 # ------------------------------
 # -- test/testdata/packager/imported_by_nested_packages/mid/leaf/__package.rb --
@@ -51,7 +52,7 @@ end
 # typed: strict
 
 class Outer::Nested < PackageSpec
-  imported_by_nested_packages! # error: Method `imported_by_nested_packages!` does not exist on `T.class_of(Outer::Nested)`
+  imported_by_nested_packages!
 
   import Outer
 end

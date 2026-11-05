@@ -140,6 +140,9 @@ public:
 
         // Set to non-none loc when this package is marked `prelude!`
         core::LocOffsets preludePackage;
+
+        // Set to non-none loc when this package is marked `imported_by_nested_packages!`
+        core::LocOffsets importedByNestedPackages;
     } locs;
 
     core::FileRef file;
@@ -257,6 +260,14 @@ public:
         return this->locs.testPackage.exists();
     }
 
+    // True when the package is marked `imported_by_nested_packages!`.
+    //
+    // Used to permit namespaces on the path to its nested packages (e.g., both the `OuterPkg` and
+    // `OuterPkg::NS`) to be more than just plain modules with no behavior.
+    bool importedByNestedPackages() const {
+        return this->locs.importedByNestedPackages.exists();
+    }
+
     // Do this package's visible_to rules allow `importingPkg` to import this package?
     bool isVisibleTo(const core::GlobalState &gs, const PackageInfo &importingPkgInfo) const;
 
@@ -322,7 +333,7 @@ public:
                             const UnorderedMap<core::packages::MangledName, core::packages::StrictDependenciesLevel>
                                 &newStrictnessByPkg) const;
 };
-CheckSize(PackageInfo, 216, 8);
+CheckSize(PackageInfo, 224, 8);
 
 } // namespace sorbet::core::packages
 #endif

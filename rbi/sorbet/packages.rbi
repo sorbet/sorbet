@@ -22,4 +22,11 @@ class Sorbet::Private::Static::PackageSpec
 
   sig { void }
   def self.test!(); end
+
+  # Requires every package nested under this one to `import` it (or a
+  # package in between). In exchange, the namespaces on the path to this
+  # package's nested packages may define behavior, ancestors, and generics,
+  # and may be classes.
+  sig { void }
+  def self.imported_by_nested_packages!; end
 end
