@@ -433,6 +433,17 @@ public:
                     }
                     break;
                 }
+                if (!ownerIsMethod && !original.hasPosArgs() && original.recv.isSelfReference()) {
+                    // A bare `private` toggles the visibility of the methods defined after it. Report a
+                    // bare `package_private` instead of applying it, because it's almost certainly a mistake.
+                    if (auto e = ctx.beginError(original.loc, core::errors::Namer::BarePackagePrivate)) {
+                        auto name = original.fun.show(ctx);
+                        e.setHeader("`{}` with no arguments is not allowed", name);
+                        e.addErrorNote("Unlike `{}`, `{}` does not toggle the visibility of the methods after it",
+                                       "private", name);
+                    }
+                    break;
+                }
                 [[fallthrough]];
             }
             case core::Names::private_().rawId():

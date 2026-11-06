@@ -10,6 +10,22 @@ module Root::B::Test
     end
   end
 
+  class BareTest
+    def test_bare
+      Root::Bare.new.after_bare_package_private
+      Root::Bare.new.shadowed
+      Root::Bare.shadowed
+      Root::Bare.after_bare_package_private_class_method
+    end
+
+    def test_bare_private
+      Root::BarePrivate.new.before_bare_package_private_class_method
+    #                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Non-private call to private method `before_bare_package_private_class_method` on `Root::BarePrivate`
+      Root::BarePrivate.new.after_bare_package_private_class_method
+    #                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Non-private call to private method `after_bare_package_private_class_method` on `Root::BarePrivate`
+    end
+  end
+
   class Child < Root::ModifierParent
     def test_inherited_package_private
       package_private_private
