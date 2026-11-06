@@ -1264,6 +1264,9 @@ string ClassOrModuleRef::toStringWithOptions(const GlobalState &gs, int tabs, bo
     if (sym->flags.isPrivate) {
         classFlags.emplace_back("private");
     }
+    if (sym->flags.isPackagePrivate) {
+        classFlags.emplace_back("package_private!");
+    }
     if (!classFlags.empty()) {
         fmt::format_to(std::back_inserter(buf), " : {}",
                        fmt::map_join(classFlags, "|", [](const auto &flag) { return flag; }));
@@ -1399,6 +1402,9 @@ string FieldRef::toStringWithOptions(const GlobalState &gs, int tabs, bool showF
     auto fieldFlags = InlinedVector<string_view, 2>{};
     if (sym->flags.isStaticField && sym->flags.isStaticFieldPrivate) {
         fieldFlags.emplace_back("private");
+    }
+    if (sym->flags.isStaticField && sym->flags.isPackagePrivate) {
+        fieldFlags.emplace_back("package_private!");
     }
 
     fmt::format_to(std::back_inserter(buf), "{} {}", type, showRaw ? toStringFullName(gs) : showFullName(gs));
@@ -2240,6 +2246,7 @@ void Field::sanityCheck(const GlobalState &gs) const {
         ENFORCE_NO_TIMER(!flags.isStaticFieldTypeAlias);
         ENFORCE_NO_TIMER(!flags.isStaticField);
         ENFORCE_NO_TIMER(!flags.isStaticFieldPrivate);
+        ENFORCE_NO_TIMER(!flags.isPackagePrivate);
     } else {
         current2 = const_cast<GlobalState &>(gs).enterStaticFieldSymbol(this->loc(), this->owner, this->name);
     }

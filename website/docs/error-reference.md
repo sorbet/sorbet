@@ -1401,6 +1401,25 @@ class A
 end
 ```
 
+## 4034
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+A `package_private!` marker is somewhere it can't be. The error message says why. Usually the fix is to move the marker into the body of what you want to make private:
+
+```ruby
+class Opus::MyPackage::ImplClass
+  # Makes `ImplClass`, and everything nested inside it, private to its package
+  package_private!
+
+  X = 1
+  # Makes only `X` private to its package
+  package_private!(:X)
+end
+```
+
+To control which packages may import your package at all, rather than which of its constants they may use, use `visible_to` in its `__package.rb` file instead.
+
 ## 5001
 
 Sorbet cannot resolve references to dynamic constants. The common case occurs when a constant is dynamically referenced through the singleton class of `self`:
