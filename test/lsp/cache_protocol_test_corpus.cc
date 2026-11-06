@@ -5,6 +5,7 @@
 #include "common/FileOps.h"
 #include "common/common.h"
 #include "common/exception/Exception.h"
+#include "common/kvstore/CacheLock.h"
 #include "common/kvstore/KeyValueStore.h"
 #include "core/ErrorQueue.h"
 #include "core/Unfreeze.h"
@@ -532,6 +533,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "RemoveSessionCacheDirectory") {
     for (auto &file : toRemove) {
         FileOps::removeFile(file);
     }
+    FileOps::removeFile(fmt::format("{}/{}", sessionCacheDir, CacheLock::ACCESS_LOCK_FILE));
     FileOps::removeDir(sessionCacheDir);
 
     {
@@ -664,6 +666,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "ReapOldCacheDirectories") {
             // Create data and lock files to simulate a fully populated cache
             FileOps::write(fmt::format("{}/data.mdb", path), "");
             FileOps::write(fmt::format("{}/lock.mdb", path), "");
+            FileOps::write(fmt::format("{}/{}", path, CacheLock::ACCESS_LOCK_FILE), "");
         }
     }
 

@@ -2,9 +2,13 @@ cc_library(
     name = "kvstore",
     srcs = select({
         "@platforms//cpu:wasm32": ["KeyValueStore-emscripten.cc"],
-        "//conditions:default": ["KeyValueStore.cc"],
+        "//conditions:default": [
+            "CacheLock.cc",
+            "KeyValueStore.cc",
+        ],
     }),
     hdrs = [
+        "CacheLock.h",
         "KeyValueStore.h",
     ],
     linkopts = select({
@@ -18,6 +22,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//common",
+        "@com_google_absl//absl/cleanup",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/synchronization",
     ] + select({
