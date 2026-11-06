@@ -19,11 +19,13 @@ module Root::A
   end
 
   PublicAlias = Outer
+# ^^^^^^^^^^^ error: `Root::A::PublicAlias` is a public alias of package-private `Root::A::Outer`
 
   PrivateAlias = Outer
   package_private!(:PrivateAlias)
 
   PrivateConstantAlias = Outer
+# ^^^^^^^^^^^^^^^^^^^^ error: `Root::A::PrivateConstantAlias` is a public alias of package-private `Root::A::Outer`
   private_constant :PrivateConstantAlias
 
   # Includes a module covered by the marker on `Outer`.

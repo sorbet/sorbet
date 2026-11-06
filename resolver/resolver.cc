@@ -341,7 +341,14 @@ private:
         return true;
     }
 
-    static core::SymbolRef resolveLhs(core::Context ctx, const Nesting *nesting, core::NameRef name) {
+    struct ResolveLhsResult {
+        core::SymbolRef symbol;
+        // Whether `name` isn't a member of any of the lexical scopes in `nesting`, and was instead found in an
+        // ancestor of the innermost one.
+        bool foundInAncestor;
+    };
+
+    static ResolveLhsResult resolveLhs(core::Context ctx, const Nesting *nesting, core::NameRef name) {
         auto *scope = nesting;
         while (scope != nullptr) {
             if (scope->scope.isClassOrModule()) {
@@ -364,16 +371,16 @@ private:
                 }
 
                 if (lookup.exists()) {
-                    return lookup;
+                    return {lookup, false};
                 }
 
                 if (scope->checkPackageRegistry && shadowedByPackage(ctx, scope->scope.asClassOrModuleRef(), name)) {
-                    return core::SymbolRef();
+                    return {core::SymbolRef(), false};
                 }
             }
             scope = scope->parent.get();
         }
-        return nesting->scope.asClassOrModuleRef().data(ctx)->findMemberTransitiveNoDealias(ctx, name);
+        return {nesting->scope.asClassOrModuleRef().data(ctx)->findMemberTransitiveNoDealias(ctx, name), true};
     }
 
     static bool isAlreadyResolved(core::Context ctx, const ast::ConstantLit &original) {
@@ -504,9 +511,91 @@ private:
         }
     }
 
+    static bool isMarkedPackagePrivate(core::Context ctx, core::SymbolRef sym) {
+        if (sym.isClassOrModule()) {
+            return sym.asClassOrModuleRef().data(ctx)->flags.isPackagePrivate;
+        }
+        return sym.isStaticField(ctx) && sym.asFieldRef().data(ctx)->flags.isPackagePrivate;
+    }
+
+    // Returns the constant marked `package_private!` that covers `sym` (`sym` itself, or its nearest enclosing
+    // namespace in `package` that's marked), or `noSymbol` if nothing covers it.
+    //
+    // Namer only flags the marked symbol itself, so this has to walk the owner chain. Most callers don't need it: see
+    // `canReferencePackagePrivate`.
+    static core::SymbolRef packagePrivateMarker(core::Context ctx, core::SymbolRef sym,
+                                                core::packages::MangledName package) {
+        while (sym.exists() && sym != core::Symbols::root()) {
+            if (sym.isClassOrModule() && sym.asClassOrModuleRef().data(ctx)->package != package) {
+                break;
+            }
+            if (isMarkedPackagePrivate(ctx, sym)) {
+                return sym;
+            }
+            sym = sym.owner(ctx);
+        }
+        return core::Symbols::noSymbol();
+    }
+
+    // Whether the current file may reference `result`, which belongs to `otherPackage`, if `result` is covered by a
+    // `package_private!` marker. Reports an error the first time it says no.
+    static bool canReferencePackagePrivate(core::Context ctx, ConstantResolutionItem &job, core::SymbolRef result,
+                                           bool foundInAncestor, core::packages::MangledName otherPackage) {
+        auto &packageDB = ctx.state.packageDB();
+        if (!packageDB.publicByDefault() || !otherPackage.exists()) {
+            return true;
+        }
+        auto currentPackage = packageDB.getPackageNameForFile(ctx.file);
+        if (!currentPackage.exists() || packageDB.getPackageInfo(currentPackage).canAccessInternalsOf(otherPackage) ||
+            packageDB.allowRelaxedPackagerChecksFor(currentPackage)) {
+            return true;
+        }
+
+        // Checking `result`'s own marker is almost always enough:
+        //
+        // - A constant literal with a scope resolves each component of the scope first, so if `Outer` is marked,
+        //   `Outer::Inner` is refused at `Outer`, and never gets as far as `Inner`. (A class alias of `Outer` could
+        //   skip over it, but defining a public class alias of a package-private constant is an error.)
+        // - An unscoped constant literal found in one of its lexical scopes is a member of a namespace enclosing the
+        //   current file, which can only be marked if it's in the current package.
+        //
+        // That leaves an unscoped constant literal found in an ancestor. The marker that covers it can be anywhere in
+        // the ancestor's owner chain, since the ancestor was never named.
+        core::SymbolRef marker;
+        if (foundInAncestor) {
+            marker = packagePrivateMarker(ctx, result, otherPackage);
+        } else if (isMarkedPackagePrivate(ctx, result)) {
+            marker = result;
+        }
+        if (!marker.exists()) {
+            return true;
+        }
+
+        // Like for any other constant that resolves but can't be referenced, refuse to resolve it. Unlike for an
+        // import error, nothing about the current file could change that, so report the error now, and use
+        // `resolutionFailed` to avoid reporting it again (or reporting the constant as unresolved, or reporting
+        // later components of the constant literal).
+        if (!job.resolutionFailed && !job.isMixinAncestor) {
+            auto &pkg = packageDB.getPackageInfo(otherPackage);
+            if (auto e = ctx.beginError(job.out->original()->loc, core::errors::Packager::PackagePrivateConstant)) {
+                if (marker == result) {
+                    e.setHeader("`{}` is `{}` in package `{}`", result.show(ctx), "package_private!", pkg.show(ctx));
+                } else {
+                    e.setHeader("`{}` is package-private, because `{}` is `{}` in package `{}`", result.show(ctx),
+                                marker.show(ctx), "package_private!", pkg.show(ctx));
+                }
+                e.addErrorLine(marker.loc(ctx), "`{}` defined here", marker.show(ctx));
+                e.addErrorNote("Only `{}` and packages that import it with `{}` may reference it", pkg.show(ctx),
+                               "uses_internals: true");
+            }
+        }
+        job.resolutionFailed = true;
+        return false;
+    }
+
     // Ensures that we only allow resolving `job` to `result` if the package imports allow it
     static core::SymbolRef enforcePackageBoundary(core::Context ctx, ConstantResolutionItem &job,
-                                                  core::SymbolRef result) {
+                                                  core::SymbolRef result, bool foundInAncestor) {
         if (!shouldCheckPackage(ctx) || !result.exists()) {
             return result;
         }
@@ -523,6 +612,9 @@ private:
             otherPackage = enclosing.data(ctx)->package;
         }
         if (canReferencePackage(ctx, otherPackage)) {
+            if (!canReferencePackagePrivate(ctx, job, result, foundInAncestor, otherPackage)) {
+                return core::Symbols::noSymbol();
+            }
             return result;
         }
         if (!job.isOutermost && isStrictPrefixOfAvailablePackage(ctx, otherPackage)) {
@@ -538,12 +630,12 @@ private:
     static core::SymbolRef resolveConstant(core::Context ctx, ConstantResolutionItem &job) {
         auto &c = *job.out->original();
         if (ast::isa_tree<ast::EmptyTree>(c.scope)) {
-            auto result = resolveLhs(ctx, job.scope.get(), c.cnst);
+            auto [result, foundInAncestor] = resolveLhs(ctx, job.scope.get(), c.cnst);
             if (!result.exists()) {
                 return result;
             }
 
-            return enforcePackageBoundary(ctx, job, result);
+            return enforcePackageBoundary(ctx, job, result, foundInAncestor);
         }
         if (auto id = ast::cast_tree<ast::ConstantLit>(c.scope)) {
             auto sym = id->symbol();
@@ -580,7 +672,7 @@ private:
                 }
             }
 
-            return enforcePackageBoundary(ctx, job, result);
+            return enforcePackageBoundary(ctx, job, result, /* foundInAncestor */ false);
         }
 
         if (!job.resolutionFailed && !job.isMixinAncestor) {
@@ -1018,6 +1110,36 @@ private:
         return false;
     }
 
+    // A class alias makes the constants nested in the aliased class reachable through the alias's name, without naming
+    // the aliased class. So a class alias of a package-private constant must be package-private too, or it would make
+    // everything nested inside it public. (That's also why reference checks don't need to look past a scoped constant
+    // literal's own result.)
+    //
+    // `private_constant` isn't enough, because an unscoped constant literal can still find a private constant, e.g.
+    // through an ancestor.
+    static void checkPackagePrivateClassAlias(core::MutableContext ctx, core::SymbolRef lhs, core::SymbolRef rhs) {
+        if (!ctx.state.packageDB().publicByDefault()) {
+            return;
+        }
+        auto rhsPkg = rhs.enclosingClass(ctx).data(ctx)->package;
+        if (!rhsPkg.exists()) {
+            return;
+        }
+        auto marker = packagePrivateMarker(ctx, rhs, rhsPkg);
+        if (!marker.exists()) {
+            return;
+        }
+        auto lhsPkg = lhs.enclosingClass(ctx).data(ctx)->package;
+        if (lhsPkg == rhsPkg && packagePrivateMarker(ctx, lhs, lhsPkg).exists()) {
+            return;
+        }
+        if (auto e = ctx.state.beginError(lhs.loc(ctx), core::errors::Packager::PublicAliasOfPackagePrivate)) {
+            e.setHeader("`{}` is a public alias of package-private `{}`", lhs.show(ctx), rhs.show(ctx));
+            e.addErrorLine(marker.loc(ctx), "`{}` is marked `{}` here", marker.show(ctx), "package_private!");
+            e.addErrorNote("Mark the alias `{}` too, or reference `{}` directly", "package_private!", rhs.show(ctx));
+        }
+    }
+
     static bool resolveClassAliasJob(core::MutableContext ctx, ClassAliasResolutionItem &it) {
         auto rhsSym = it.rhs->symbol();
         if (!rhsSym.exists()) {
@@ -1039,6 +1161,7 @@ private:
 
         if (rhsSym.dealias(ctx) != it.lhs) {
             it.lhs.setResultType(ctx, core::make_type<core::AliasType>(rhsSym));
+            checkPackagePrivateClassAlias(ctx, it.lhs, rhsSym);
         } else {
             if (auto e = ctx.state.beginError(it.lhs.loc(ctx), core::errors::Resolver::RecursiveClassAlias)) {
                 e.setHeader("Class alias aliases to itself");

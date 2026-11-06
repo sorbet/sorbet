@@ -946,6 +946,36 @@ The cases where this error can show up in this set of packages are:
 
 `__package.rb` files can optionally declare a minimum `typed` level that all files in that package must follow (using the `sorbet` directive, see [3729](#3729)). This error occurs when a given file has a `typed` level lower than that minimum.
 
+## 3737
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+The constant is private to the package that defines it, because it (or a namespace enclosing it) is marked `package_private!`. Code in other packages can't reference it.
+
+To fix the error, use something else from that package's public API instead. If you own the package and the constant should be usable from other packages, delete the `package_private!` marker on the constant that the error points to. Double check whether it's intentional that the constant was marked private.
+
+If there are some pseudo-private APIs that still must be accessible to other packages, consider using `visible_to` instead of `package_private!`. Note that marking a package `visible_to` another package does not allow access to package private constants, `visible_to` merely permits one package to import another package in the first place.
+
+## 3738
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+A class alias of a package-private constant must be package-private too. Otherwise, other packages could use the alias to reach the constants nested inside the package-private class:
+
+```ruby
+class Opus::MyPackage::Outer
+  package_private!
+
+  class Inner; end
+end
+
+module Opus::MyPackage
+  PublicAlias = Outer # error: `PublicAlias` would make `Outer::Inner` public
+end
+```
+
+To fix the error, mark the alias with `package_private!(:PublicAlias)`, or delete the alias and reference the aliased constant directly. If the aliased constant should be usable from other packages, remove its `package_private!` marker instead.
+
 ## 4001
 
 Sorbet parses the syntax of `include` and `extend` declarations, even in `# typed: false` files. Recall from the [strictness levels](static.md#file-level-granularity-strictness-levels) docs that all constants in a Sorbet codebase must resolve, even at `# typed: false`. Parsing `include` blocks is required for this, so incorrect usages of `include` are reported when encountered.
