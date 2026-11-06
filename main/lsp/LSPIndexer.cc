@@ -287,7 +287,7 @@ void LSPIndexer::transferInitializeState(InitializedTask &task) {
                       this->config->opts.packageSkipRBIExportEnforcementDirs,
                       this->config->opts.allowRelaxedPackagerChecksFor, this->config->opts.updateVisibilityFor,
                       this->config->opts.packagerLayers, this->config->opts.sorbetPackagesHint,
-                      core::packages::GenPackagesMode::Disabled, enableGenPackagesAllowRelaxingTestVisibility));
+                      core::packages::GenPackagesMode::Disabled, enableGenPackagesAllowRelaxingTestVisibility, this->config->opts.publicByDefault));
 
     task.setGlobalState(std::move(typecheckerGS));
     task.setKeyValueStore(std::move(this->kvstore));
