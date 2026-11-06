@@ -368,7 +368,9 @@ public:
             return true;
         }
         if (auto lit = ast::cast_tree<ast::UnresolvedConstantLit>(exp)) {
-            return isValidAncestor(lit->scope, /* isOutermost */ false);
+            return lit->fold(
+                [&](const ast::ExpressionPtr &root) { return isValidAncestor(root, /* isOutermost */ false); },
+                [](bool isValid, core::NameRef name, core::LocOffsets loc) { return isValid; });
         }
         return false;
     }
