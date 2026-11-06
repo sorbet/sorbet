@@ -19,11 +19,9 @@ namespace sorbet {
 constexpr string_view VERSION_KEY = "DB_FORMAT_VERSION"sv;
 struct KeyValueStore::DBState {
     MDB_env *env = nullptr;
-    const optional<CacheLock> accessLock;
+    const CacheLock accessLock;
 
-    explicit DBState(optional<CacheLock> accessLock) : accessLock(move(accessLock)) {
-        ENFORCE(this->accessLock.has_value(), "DBState requires a held shared access lock");
-    }
+    explicit DBState(CacheLock accessLock) : accessLock(move(accessLock)) {}
 
     ~DBState() {
         mdb_env_close(env);
@@ -112,7 +110,7 @@ KeyValueStore::KeyValueStore(shared_ptr<spdlog::logger> logger, string version, 
             rc = errno;
             goto fail;
         }
-        dbState = make_unique<DBState>(move(accessLock));
+        dbState = make_unique<DBState>(move(accessLock.value()));
 
         bool expected = false;
         if (!kvstoreInUse.compare_exchange_strong(expected, true)) {
