@@ -1302,6 +1302,17 @@ private:
         return symbol;
     }
 
+    // We don't track the funLoc of FoundModifier.
+    // We're only using this in autocorrects, so I didn't think we should start tracking it.
+    static optional<core::Loc> modifierFunLoc(core::Context ctx, core::LocOffsets argLoc, string_view fun) {
+        auto funLen = static_cast<int32_t>(fun.size());
+        auto funLoc = ctx.locAt(argLoc).adjustLen(ctx, -funLen - 1, funLen);
+        if (funLoc.source(ctx) != fun) {
+            return nullopt;
+        }
+        return funLoc;
+    }
+
     void modifyMethod(core::MutableContext ctx, const core::FoundModifier &mod) {
         ENFORCE(mod.kind == core::FoundModifier::Kind::Method);
 
@@ -1343,6 +1354,29 @@ private:
                     break;
                 default:
                     break;
+            }
+        }
+
+        if (!method.exists() && mod.name == core::Names::packagePrivate() && ctx.state.packageDB().publicByDefault()) {
+            // Check for a `package_private` <> `package_private!` mixup
+            auto cnst = ctx.state.lookupNameConstant(mod.target);
+            auto klass = ctx.owner.enclosingClass(ctx);
+            auto sym = cnst.exists() ? ctx.state.lookupSymbol(klass, cnst) : core::Symbols::noSymbol();
+            if (sym.exists() && !sym.isTypeMember()) {
+                if (auto e = ctx.beginError(mod.loc, core::errors::Namer::InvalidPackagePrivate)) {
+                    e.setHeader("`{}` can only make methods package-private, but `{}` is a constant",
+                                mod.name.show(ctx), mod.target.show(ctx));
+                    e.addErrorLine(sym.loc(ctx), "`{}` defined here", sym.show(ctx));
+                    if (sym.isClassOrModule()) {
+                        e.addErrorNote("To make `{}` package-private, use `{}` in its body", sym.show(ctx),
+                                       "package_private!");
+                    } else if (auto funLoc = modifierFunLoc(ctx, mod.loc, "package_private"sv)) {
+                        e.replaceWith("Use `package_private!`", *funLoc, "package_private!");
+                    } else {
+                        e.addErrorNote("To make `{}` package-private, use `{}`", sym.show(ctx),
+                                       fmt::format("package_private!(:{})", mod.target.show(ctx)));
+                    }
+                }
             }
         }
     }
@@ -1410,6 +1444,33 @@ private:
 
     void reportPackagePrivateNotDefinedInFile(core::MutableContext ctx, const core::FoundModifier &mod,
                                               core::ClassOrModuleRef owner) {
+        // Check whether it's a typo and they meant to mark a method `package_private`
+        auto method = owner.data(ctx)->findMethod(ctx, mod.target);
+        auto methodModifier = core::Names::packagePrivate();
+        auto singleton = owner.data(ctx)->lookupSingletonClass(ctx);
+        if (!method.exists() && singleton.exists()) {
+            // TODO(jez) We should revisit this, there are few enough uses in pay-server that we
+            // should probably just standardize on `package_private`, drop `package_private_class_method`,
+            // and tie it into the existing support for e.g. `abstract def foo`
+            method = singleton.data(ctx)->findMethod(ctx, mod.target);
+            methodModifier = core::Names::packagePrivateClassMethod();
+        }
+        if (method.exists()) {
+            if (auto e = ctx.beginError(mod.loc, core::errors::Namer::InvalidPackagePrivate)) {
+                e.setHeader("`{}` can only make constants package-private, but `{}` is a method", "package_private!",
+                            mod.target.show(ctx));
+                e.addErrorLine(method.data(ctx)->loc(), "`{}` defined here", method.show(ctx));
+                if (auto funLoc = modifierFunLoc(ctx, mod.loc, "package_private!"sv)) {
+                    e.replaceWith(fmt::format("Use `{}`", methodModifier.show(ctx)), *funLoc, "{}",
+                                  methodModifier.show(ctx));
+                } else {
+                    e.addErrorNote("To make `{}` package-private, use `{}`", method.show(ctx),
+                                   fmt::format("{} :{}", methodModifier.show(ctx), mod.target.show(ctx)));
+                }
+            }
+            return;
+        }
+
         if (auto e = ctx.beginError(mod.loc, core::errors::Namer::InvalidPackagePrivate)) {
             e.setHeader("`{}` can only mark a constant defined in the same file", "package_private!");
             e.addErrorNote("No constant named `{}` is defined in `{}` in this file", mod.target.show(ctx),

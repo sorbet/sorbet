@@ -1450,6 +1450,8 @@ end
 
 To control which packages may import your package at all, rather than which of its constants they may use, use `visible_to` in its `__package.rb` file instead.
 
+`package_private!` is for constants. To make a method package-private, use `package_private` (or `package_private_class_method`) instead.
+
 ## 5001
 
 Sorbet cannot resolve references to dynamic constants. The common case occurs when a constant is dynamically referenced through the singleton class of `self`:

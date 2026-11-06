@@ -1,0 +1,68 @@
+# -- test/testdata/packager/package_private_name_mixups/a/__package.rb --
+# typed: strict
+
+class Root::A < PackageSpec
+end
+# ------------------------------
+# -- test/testdata/packager/package_private_name_mixups/a/a.rb --
+# typed: strict
+
+module Root::A
+  class Example
+    extend T::Sig
+
+    SomeConstant = 1
+    class SomeClass; end
+
+    sig { void }
+    def some_method; end
+
+    sig { void }
+    def self.some_class_method; end
+
+    # Constants, passed to `package_private`.
+    package_private! :SomeConstant
+    #               ^^^^^^^^^^^^^ error: `package_private` can only make methods package-private, but `SomeConstant` is a constant
+    package_private!(:SomeConstant)
+    #               ^^^^^^^^^^^^^ error: `package_private` can only make methods package-private, but `SomeConstant` is a constant
+    package_private! :SomeConstant, :some_method
+    #               ^^^^^^^^^^^^^ error: `package_private` can only make methods package-private, but `SomeConstant` is a constant
+    package_private :SomeClass
+    #               ^^^^^^^^^^ error: `package_private` can only make methods package-private, but `SomeClass` is a constant
+
+    # Methods, passed to the constant modifier.
+    package_private(:some_method)
+    #                ^^^^^^^^^^^^ error: `package_private!` can only make constants package-private, but `some_method` is a method
+    package_private_class_method(:some_class_method)
+    #                ^^^^^^^^^^^^^^^^^^ error: `package_private!` can only make constants package-private, but `some_class_method` is a method
+
+    # Names that match nothing.
+    package_private :does_not_exist
+    package_private!(:DoesNotExist)
+    #                ^^^^^^^^^^^^^ error: `package_private!` can only mark a constant defined in the same file
+  end
+end
+# ------------------------------
+# -- test/testdata/packager/package_private_name_mixups/prelude/__package.rb --
+# typed: strict
+# enable-packager: true
+# experimental-public-by-default: true
+
+class Prelude < PackageSpec
+  prelude!
+end
+# ------------------------------
+# -- test/testdata/packager/package_private_name_mixups/prelude/module.rbi --
+# typed: strict
+
+class ::Module
+  sig { params(name: T.nilable(Symbol)).void }
+  private def package_private!(name = nil); end
+
+  sig { params(args: T.any(Symbol, String)).returns(T.untyped) }
+  private def package_private(*args); end
+
+  sig { params(args: T.any(Symbol, String)).returns(T.untyped) }
+  private def package_private_class_method(*args); end
+end
+# ------------------------------
