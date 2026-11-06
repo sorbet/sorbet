@@ -1319,7 +1319,8 @@ private:
             return;
         }
 
-        if (mod.name == core::Names::privateConstant()) {
+        switch (mod.name.rawId()) {
+            case core::Names::privateConstant().rawId():
             if (constant.isClassOrModule()) {
                 constant.asClassOrModuleRef().data(ctx)->flags.isPrivate = true;
             } else if (constant.isStaticField(ctx)) {
@@ -1328,6 +1329,9 @@ private:
                 // Visibility on type members is special (even more restrictive than private),
                 // so we ignore requests to mark type members private.
             }
+                break;
+            default:
+                break;
         }
     }
 
