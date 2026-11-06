@@ -390,19 +390,21 @@ pair<core::NameRef, core::LocOffsets> ASTUtil::getAttrName(core::MutableContext 
 
 bool ASTUtil::isRootScopedSyntacticConstant(const ast::ExpressionPtr &expr,
                                             absl::Span<const core::NameRef> constantName) {
-    auto *p = &expr;
-
-    for (auto it = constantName.rbegin(), end = constantName.rend(); it != end; ++it) {
-        auto ucl = ast::cast_tree<ast::UnresolvedConstantLit>(*p);
-
-        if (ucl == nullptr || ucl->cnst != *it) {
-            return false;
-        }
-
-        p = &ucl->scope;
+    auto ucl = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
+    if (ucl == nullptr) {
+        return constantName.empty() && ast::MK::isRootScope(expr);
     }
-
-    return ast::MK::isRootScope(*p);
+    auto [partsMatched, matches] =
+        ucl->fold([](const ast::ExpressionPtr &root) { return make_pair(size_t{0}, ast::MK::isRootScope(root)); },
+                  [&](pair<size_t, bool> state, core::NameRef name, core::LocOffsets loc) {
+                      if (state.second && state.first < constantName.size() && constantName[state.first] == name) {
+                          state.first++;
+                      } else {
+                          state.second = false;
+                      }
+                      return state;
+                  });
+    return matches && partsMatched == constantName.size();
 }
 
 optional<ASTUtil::DuplicateArg> ASTUtil::findDuplicateArg(core::MutableContext ctx, const ast::Send *send) {
