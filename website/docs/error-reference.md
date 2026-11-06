@@ -1377,6 +1377,28 @@ Move the file into an existing package's directory, or add a `__package.rb` file
 
 This error previously used code [3705](#3705).
 
+## 4033
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+`package_private` and `package_private_class_method` must be given the methods to make package-private:
+
+```ruby
+class A
+  package_private # error: `package_private` with no arguments is not allowed
+
+  def foo; end
+end
+```
+
+Unlike `private`, a bare `package_private` does not toggle the visibility of the methods defined after it. Pass each method definition (or its name) to `package_private` instead:
+
+```ruby
+class A
+  package_private def foo; end
+end
+```
+
 ## 5001
 
 Sorbet cannot resolve references to dynamic constants. The common case occurs when a constant is dynamically referenced through the singleton class of `self`:

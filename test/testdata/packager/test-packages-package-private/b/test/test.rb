@@ -13,10 +13,8 @@ module Root::B::Test
   class BareTest
     def test_bare
       Root::Bare.new.after_bare_package_private
-    # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Method `after_bare_package_private` on `Root::Bare` is package-private and cannot be called from package `Root::B::Test`
       Root::Bare.new.shadowed
       Root::Bare.shadowed
-    # ^^^^^^^^^^^^^^^^^^^ error: Method `shadowed` on `T.class_of(Root::Bare)` is package-private and cannot be called from package `Root::B::Test`
       Root::Bare.after_bare_package_private_class_method
     end
 
@@ -24,6 +22,7 @@ module Root::B::Test
       Root::BarePrivate.new.before_bare_package_private_class_method
     #                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Non-private call to private method `before_bare_package_private_class_method` on `Root::BarePrivate`
       Root::BarePrivate.new.after_bare_package_private_class_method
+    #                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Non-private call to private method `after_bare_package_private_class_method` on `Root::BarePrivate`
     end
   end
 
