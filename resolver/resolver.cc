@@ -908,7 +908,7 @@ private:
     // unexported, as long as `C` is exported.
     static void checkReferenceAgainstExports(core::Context ctx, const ConstantResolutionItem &job,
                                              core::SymbolRef resolved) {
-        if (!job.isOutermost || job.isMixinAncestor || !shouldCheckPackage(ctx)) {
+        if (!job.isOutermost || job.isMixinAncestor || !shouldCheckPackage(ctx) || ctx.state.packageDB().publicByDefault()) {
             return;
         }
         if (!resolved.isClassOrModule() && !resolved.isFieldOrStaticField()) {

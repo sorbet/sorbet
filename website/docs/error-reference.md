@@ -717,6 +717,8 @@ Referencing a constant defined in another package that has not been explicitly e
 
 To fix this error, either change the upstream package to start exporting the constant, or change the code in the current package to depend on only public exports of the upstream package. When changing an upstream package to expose things that were not previously exposed, double check whether it's intentional that the constant has not been exported.
 
+With `--experimental-public-by-default`, constants are public unless marked `package_private!`, and `export` and `export_all!` lines are accepted but ignored, so this error is never reported.
+
 ## 3718
 
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.

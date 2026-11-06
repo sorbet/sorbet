@@ -355,6 +355,13 @@ struct PackageSpecBodyWalk {
         }
 
         if (send.fun == core::Names::export_()) {
+            if (ctx.state.packageDB().publicByDefault()) {
+                // Exports have no meaning when constants are public by default. Drop them without resolving or
+                // recording them, so that exports of constants that no longer exist don't report errors.
+                tree = ast::make_expression<ast::EmptyTree>();
+                return;
+            }
+
             if (send.numPosArgs() == 1) {
                 auto &expr = send.getPosArg(0);
                 if (auto target = verifyConstant(ctx, core::Names::export_(), expr)) {
