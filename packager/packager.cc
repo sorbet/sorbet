@@ -43,27 +43,29 @@ string buildValidLayersStr(const core::GlobalState &gs) {
 MangledName resolvePackageName(core::Context ctx, const ast::UnresolvedConstantLit *constantLit, bool allowNamespace) {
     ENFORCE(constantLit != nullptr);
 
-    vector<core::NameRef> fullNameReversed;
-    while (constantLit != nullptr) {
-        fullNameReversed.emplace_back(constantLit->cnst);
-        if (auto resolvedLit = ast::cast_tree<ast::ConstantLit>(constantLit->scope)) {
-            constantLit = resolvedLit->original();
-        } else {
-            constantLit = ast::cast_tree<ast::UnresolvedConstantLit>(constantLit->scope);
-        }
-    }
-    ENFORCE(!fullNameReversed.empty());
-
-    // Since packager now runs after namer, we know that these symbols are entered.
-    auto owner = core::Symbols::PackageSpecRegistry();
-    for (auto part = fullNameReversed.rbegin(); part != fullNameReversed.rend(); part++) {
-        auto member = owner.data(ctx)->findMember(ctx, *part);
-        if (!member.exists() || !member.isClassOrModule()) {
-            owner = core::Symbols::noClassOrModule();
-            break;
-        }
-        owner = member.asClassOrModuleRef();
-    }
+    using ResolutionState = pair<core::ClassOrModuleRef, size_t>;
+    auto resolve = [&](const auto &self, const ast::UnresolvedConstantLit &constant) -> ResolutionState {
+        return constant.fold(
+            [&](const ast::ExpressionPtr &root) -> ResolutionState {
+                auto resolved = ast::cast_tree<ast::ConstantLit>(root);
+                if (resolved != nullptr && resolved->original() != nullptr) {
+                    return self(self, *resolved->original());
+                }
+                return {core::Symbols::PackageSpecRegistry(), 0};
+            },
+            [&](ResolutionState state, core::NameRef name, core::LocOffsets loc) {
+                state.second++;
+                if (!state.first.exists()) {
+                    return state;
+                }
+                auto member = state.first.data(ctx)->findMember(ctx, name);
+                state.first = member.exists() && member.isClassOrModule() ? member.asClassOrModuleRef()
+                                                                          : core::Symbols::noClassOrModule();
+                return state;
+            });
+    };
+    auto [owner, parts] = resolve(resolve, *constantLit);
+    ENFORCE(parts > 0);
 
     if (owner == core::Symbols::PackageSpecRegistry()) {
         // This is a weird case, because I don't think it's possible to get here, but we can handle it anyways.
@@ -71,7 +73,7 @@ MangledName resolvePackageName(core::Context ctx, const ast::UnresolvedConstantL
         // should probably be able to pre-resolve the constants in import/visible_to/etc. lines at
         // this point, and report an eager error if those package names fail to resolve, rather than
         // resorting handling this (impossible?) edge case.
-        ENFORCE(fullNameReversed.empty());
+        ENFORCE(parts == 0);
         owner = core::Symbols::noClassOrModule();
     }
 
