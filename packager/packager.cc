@@ -362,10 +362,13 @@ struct PackageSpecBodyWalk {
                     // constant path, so this also records constants that will fail to resolve later. The rest of the
                     // pipeline uses these locations for autocorrects.
                     auto &exp = info.exports_.emplace_back(send.loc);
-                    while (target != nullptr) {
-                        exp.reversedPath.emplace_back(target->cnst);
-                        target = ast::cast_tree<ast::UnresolvedConstantLit>(target->scope);
-                    }
+                    exp.reversedPath =
+                        target->fold([](const ast::ExpressionPtr &root) { return vector<core::NameRef>{}; },
+                                     [](vector<core::NameRef> path, core::NameRef name, core::LocOffsets loc) {
+                                         path.emplace_back(name);
+                                         return path;
+                                     });
+                    absl::c_reverse(exp.reversedPath);
                 } else if (ast::isa_tree<ast::UnresolvedConstantLit>(expr)) {
                     // A constant path that verifyConstant rejected (e.g., a `::`-rooted one), which it reported
                     // an error for. Drop it so that `exports_` has every export resolver could resolve.
