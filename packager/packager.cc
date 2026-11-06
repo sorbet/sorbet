@@ -84,31 +84,6 @@ MangledName resolvePackageName(core::Context ctx, const ast::UnresolvedConstantL
     return MangledName(owner);
 }
 
-bool recursiveVerifyConstant(core::Context ctx, core::NameRef fun, const ast::ExpressionPtr &root,
-                             const ast::ExpressionPtr &expr) {
-    if (ast::isa_tree<ast::EmptyTree>(expr)) {
-        return true;
-    }
-
-    if (auto scope = ast::cast_tree<ast::ConstantLit>(expr);
-        scope != nullptr && scope->symbol() == core::Symbols::root()) {
-        if (auto e = ctx.beginError(root.loc(), core::errors::Packager::InvalidConfiguration)) {
-            e.setHeader("Argument to `{}` must not use a `{}` prefix", fun.show(ctx), "::");
-        }
-        return false;
-    }
-
-    auto target = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
-    if (target == nullptr) {
-        if (auto e = ctx.beginError(root.loc(), core::errors::Packager::InvalidConfiguration)) {
-            e.setHeader("Argument to `{}` must be a constant", fun.show(ctx));
-        }
-        return false;
-    }
-
-    return recursiveVerifyConstant(ctx, fun, root, target->scope);
-}
-
 const ast::UnresolvedConstantLit *verifyConstant(core::Context ctx, core::NameRef fun, const ast::ExpressionPtr &expr) {
     auto target = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     if (target == nullptr) {
@@ -118,7 +93,23 @@ const ast::UnresolvedConstantLit *verifyConstant(core::Context ctx, core::NameRe
         return nullptr;
     }
 
-    if (recursiveVerifyConstant(ctx, fun, expr, target->scope)) {
+    auto valid = target->fold(
+        [&](const ast::ExpressionPtr &root) {
+            if (ast::isa_tree<ast::EmptyTree>(root)) {
+                return true;
+            }
+            if (auto scope = ast::cast_tree<ast::ConstantLit>(root);
+                scope != nullptr && scope->symbol() == core::Symbols::root()) {
+                if (auto e = ctx.beginError(expr.loc(), core::errors::Packager::InvalidConfiguration)) {
+                    e.setHeader("Argument to `{}` must not use a `{}` prefix", fun.show(ctx), "::");
+                }
+            } else if (auto e = ctx.beginError(expr.loc(), core::errors::Packager::InvalidConfiguration)) {
+                e.setHeader("Argument to `{}` must be a constant", fun.show(ctx));
+            }
+            return false;
+        },
+        [](bool valid, core::NameRef name, core::LocOffsets loc) { return valid; });
+    if (valid) {
         return target;
     }
 
