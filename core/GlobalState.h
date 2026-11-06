@@ -593,7 +593,8 @@ public:
         const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
         const std::vector<std::string> &allowRelaxedPackagerChecksFor,
         const std::vector<std::string> &updateVisibilityFor, const std::vector<std::string> &packagerLayers,
-        std::string errorHint, packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility, bool publicByDefault) const;
+        std::string errorHint, packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility,
+        bool publicByDefault) const;
 
     // Copy the name table, file table and other parts of GlobalState that are required to start the slow path. If the
     // `toStratum` value is passed as something other than the `0` stratum, the prefix of the symbol table leading up to

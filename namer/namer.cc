@@ -1403,14 +1403,14 @@ private:
 
         switch (mod.name.rawId()) {
             case core::Names::privateConstant().rawId():
-            if (constant.isClassOrModule()) {
-                constant.asClassOrModuleRef().data(ctx)->flags.isPrivate = true;
-            } else if (constant.isStaticField(ctx)) {
-                constant.asFieldRef().data(ctx)->flags.isStaticFieldPrivate = true;
-            } else if (constant.isTypeMember()) {
-                // Visibility on type members is special (even more restrictive than private),
-                // so we ignore requests to mark type members private.
-            }
+                if (constant.isClassOrModule()) {
+                    constant.asClassOrModuleRef().data(ctx)->flags.isPrivate = true;
+                } else if (constant.isStaticField(ctx)) {
+                    constant.asFieldRef().data(ctx)->flags.isStaticFieldPrivate = true;
+                } else if (constant.isTypeMember()) {
+                    // Visibility on type members is special (even more restrictive than private),
+                    // so we ignore requests to mark type members private.
+                }
                 break;
             case core::Names::packagePrivateBang().rawId():
                 if (constant.isClassOrModule()) {

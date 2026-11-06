@@ -129,7 +129,8 @@ unique_ptr<core::GlobalState> copyForSlowPath(const core::GlobalState &from, con
         opts.extraPackageFilesDirectoryUnderscorePrefixes, opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
         opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
         opts.allowRelaxedPackagerChecksFor, opts.updateVisibilityFor, opts.packagerLayers, opts.sorbetPackagesHint,
-        opts.genPackagesMode, opts.allowRelaxingTestVisibility, opts.packageAttributedErrors, opts.publicByDefault, forStratum);
+        opts.genPackagesMode, opts.allowRelaxingTestVisibility, opts.packageAttributedErrors, opts.publicByDefault,
+        forStratum);
 
     // Fall back on initializing from the payload if we're not copying part of from's symbol table.
     if (forStratum == core::packages::Stratum(0)) {

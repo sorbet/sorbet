@@ -576,7 +576,8 @@ public:
         // individual export autocorrects are skipped during generic aggregation. gen-packages only needs package
         // references.
         // TODO(jez): Delete referencedSymbols and GlobalState::symbolsReferencedByFile when we remove the export DSL.
-        if (ctx.state.packageDB().genPackagesMode() == core::packages::GenPackagesMode::Disabled && !ctx.state.packageDB().publicByDefault()) {
+        if (ctx.state.packageDB().genPackagesMode() == core::packages::GenPackagesMode::Disabled &&
+            !ctx.state.packageDB().publicByDefault()) {
             referencedSymbols.insert(litSymbol);
         }
 
