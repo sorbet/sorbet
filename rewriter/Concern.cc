@@ -26,16 +26,19 @@ bool doesExtendConcern(core::MutableContext ctx, ast::ClassDef *klass) {
                 if (firstArg == nullptr) {
                     return;
                 }
-                auto firstArgScope = ast::cast_tree<ast::UnresolvedConstantLit>(firstArg->scope);
-                if (firstArgScope == nullptr) {
-                    return;
-                }
-                auto outerScope = ast::cast_tree<ast::UnresolvedConstantLit>(firstArgScope->scope);
-                if (outerScope != nullptr) {
-                    return;
-                }
-                if (firstArg->cnst != core::Names::Constants::Concern() ||
-                    firstArgScope->cnst != core::Names::Constants::ActiveSupport()) {
+                const core::NameRef expected[] = {core::Names::Constants::ActiveSupport(),
+                                                  core::Names::Constants::Concern()};
+                auto [partsMatched, matches] = firstArg->fold(
+                    [](const ast::ExpressionPtr &root) { return make_pair(size_t{0}, true); },
+                    [&](pair<size_t, bool> state, core::NameRef name, core::LocOffsets loc) {
+                        if (state.second && state.first < std::size(expected) && expected[state.first] == name) {
+                            state.first++;
+                        } else {
+                            state.second = false;
+                        }
+                        return state;
+                    });
+                if (!matches || partsMatched != std::size(expected)) {
                     return;
                 }
 
