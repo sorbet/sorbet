@@ -2438,16 +2438,24 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 }
 
                 Send::ARGS_store args;
-                while (!isa_tree<EmptyTree>(value)) {
-                    auto lit = cast_tree<UnresolvedConstantLit>(value);
-                    if (lit == nullptr) {
-                        args.clear();
-                        break;
+                if (auto lit = cast_tree<UnresolvedConstantLit>(value)) {
+                    auto foldedArgs = lit->fold(
+                        [](const ExpressionPtr &root) -> optional<Send::ARGS_store> {
+                            if (isa_tree<EmptyTree>(root)) {
+                                return Send::ARGS_store{};
+                            }
+                            return nullopt;
+                        },
+                        [](optional<Send::ARGS_store> args, core::NameRef name, core::LocOffsets loc) {
+                            if (args.has_value()) {
+                                args->emplace_back(MK::String(loc, name));
+                            }
+                            return args;
+                        });
+                    if (foldedArgs.has_value()) {
+                        args = move(*foldedArgs);
                     }
-                    args.emplace_back(MK::String(lit->loc, lit->cnst));
-                    value = move(lit->scope);
                 }
-                absl::c_reverse(args);
 
                 auto numPosArgs = args.size();
                 auto res = MK::Send(loc, MK::Magic(loc), core::Names::defined_p(), locZeroLen, numPosArgs, move(args));
