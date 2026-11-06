@@ -1315,7 +1315,11 @@ private:
             return;
         }
         auto constant = ctx.state.lookupSymbol(owner, constantNameRef);
-        if (constant.exists() && mod.name == core::Names::privateConstant()) {
+        if (!constant.exists()) {
+            return;
+        }
+
+        if (mod.name == core::Names::privateConstant()) {
             if (constant.isClassOrModule()) {
                 constant.asClassOrModuleRef().data(ctx)->flags.isPrivate = true;
             } else if (constant.isStaticField(ctx)) {
