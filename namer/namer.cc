@@ -92,9 +92,9 @@ bool isExplicitlyRootScoped(const ast::ExpressionPtr &node) {
     if (constLit == nullptr) {
         return isRoot(node);
     }
-    return constLit->fold(
-        isRoot,
-        [](bool isExplicitlyRootScoped, core::NameRef name, core::LocOffsets loc) { return isExplicitlyRootScoped; });
+    return constLit->fold(isRoot, [](bool isExplicitlyRootScoped, core::NameRef name, core::LocOffsets loc) {
+        return isExplicitlyRootScoped;
+    });
 }
 
 // Returns nullptr if this file's package spec did not define a package. For example, `insertPackage` does not enter a
@@ -219,18 +219,17 @@ class SymbolFinder {
         };
 
         if (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node)) {
-            return constLit->fold(
-                defineRoot,
-                [&](core::FoundDefinitionRef current, core::NameRef name, core::LocOffsets loc) {
-                    core::FoundClass found;
-                    found.owner = current;
-                    found.name = name;
-                    found.loc = loc;
-                    found.declLoc = loc;
-                    found.classKind = core::FoundClass::Kind::Unknown;
-                    found.withinExplicitRootScope = withinExplicitRootScope;
-                    return foundDefs->addClass(move(found));
-                });
+            return constLit->fold(defineRoot,
+                                  [&](core::FoundDefinitionRef current, core::NameRef name, core::LocOffsets loc) {
+                                      core::FoundClass found;
+                                      found.owner = current;
+                                      found.name = name;
+                                      found.loc = loc;
+                                      found.declLoc = loc;
+                                      found.classKind = core::FoundClass::Kind::Unknown;
+                                      found.withinExplicitRootScope = withinExplicitRootScope;
+                                      return foundDefs->addClass(move(found));
+                                  });
         }
         return defineRoot(node);
     }
@@ -385,9 +384,8 @@ public:
             return ast::isa_tree<ast::EmptyTree>(root) || ast::isa_tree<ast::ConstantLit>(root);
         };
         if (auto lit = ast::cast_tree<ast::UnresolvedConstantLit>(exp)) {
-            return lit->fold(
-                isValidRoot,
-                [](bool isValid, core::NameRef name, core::LocOffsets loc) { return isValid; });
+            return lit->fold(isValidRoot,
+                             [](bool isValid, core::NameRef name, core::LocOffsets loc) { return isValid; });
         }
         return isValidRoot(exp);
     }
