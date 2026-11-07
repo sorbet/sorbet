@@ -441,6 +441,11 @@ ast::ExpressionPtr runUnderParameterized(core::MutableContext ctx, core::NameRef
                                          absl::Span<const ast::ExpressionPtr> destructuringStmts,
                                          ast::ExpressionPtr stmt, const ast::MethodDef::PARAMS_store &args,
                                          ast::ExpressionPtr &iteratee, bool insideDescribe) {
+    // An empty body has nothing to rewrite, nor anything invalid to report
+    if (ast::isa_tree<ast::EmptyTree>(stmt)) {
+        return stmt;
+    }
+
     // this statement must be a send
     auto send = ast::cast_tree<ast::Send>(stmt);
     if (send == nullptr) {
