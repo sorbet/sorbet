@@ -93,10 +93,10 @@ const ast::UnresolvedConstantLit *verifyConstant(core::Context ctx, core::NameRe
         return nullptr;
     }
 
-    auto valid = target->fold(
-        [&](const ast::ExpressionPtr &root) {
+    return target->fold(
+        [&](const ast::ExpressionPtr &root) -> const ast::UnresolvedConstantLit * {
             if (ast::isa_tree<ast::EmptyTree>(root)) {
-                return true;
+                return target;
             }
             if (auto scope = ast::cast_tree<ast::ConstantLit>(root);
                 scope != nullptr && scope->symbol() == core::Symbols::root()) {
@@ -106,14 +106,9 @@ const ast::UnresolvedConstantLit *verifyConstant(core::Context ctx, core::NameRe
             } else if (auto e = ctx.beginError(expr.loc(), core::errors::Packager::InvalidConfiguration)) {
                 e.setHeader("Argument to `{}` must be a constant", fun.show(ctx));
             }
-            return false;
+            return nullptr;
         },
-        [](bool valid, core::NameRef name, core::LocOffsets loc) { return valid; });
-    if (valid) {
-        return target;
-    }
-
-    return nullptr;
+        [](const ast::UnresolvedConstantLit *verified, core::NameRef name, core::LocOffsets loc) { return verified; });
 }
 
 bool isRootScopedDefinition(const ast::ConstantLit *lit) {
