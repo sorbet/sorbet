@@ -314,6 +314,16 @@ module Opus::Types::Test
         )
       end
 
+      it 'pools nilable compound types' do
+        assert_same(T.nilable(T::Boolean), T.nilable(T::Boolean))
+        assert_same(T.nilable(T::Array[String]), T.nilable(T::Array[String]))
+        assert_same(T.nilable(T::Hash[String, T.untyped]), T.nilable(T::Hash[String, T.untyped]))
+        refute_same(T.nilable(T::Array[String]), T.nilable(T::Array[Integer]))
+        assert(T.nilable(T::Array[String]).valid?(nil))
+        assert(T.nilable(T::Array[String]).recursively_valid?(['x']))
+        refute(T.nilable(T::Array[String]).recursively_valid?([1]))
+      end
+
       it 'uses fast path for T::Boolean' do
         assert_equal(
           T::Private::Types::SimplePairUnion,
@@ -653,6 +663,25 @@ module Opus::Types::Test
     end
 
     describe "TypedHash" do
+      it 'pools by key and value type' do
+        assert_same(T::Hash[Symbol, T.untyped], T::Hash[Symbol, T.untyped])
+        assert_same(T::Hash[String, T::Array[String]], T::Hash[String, T::Array[String]])
+        refute_same(T::Hash[Symbol, String], T::Hash[String, Symbol])
+        refute_same(T::Hash[Symbol, String], T::Hash[Symbol, Integer])
+      end
+
+      it 'pools by identity, not by name' do
+        a = Class.new { def self.name = 'SameName' }
+        b = Class.new { def self.name = 'SameName' }
+
+        type_a = T::Hash[a, Integer]
+        type_b = T::Hash[b, Integer]
+        refute_same(type_a, type_b)
+        assert(type_a.recursively_valid?({a.new => 1}))
+        refute(type_a.recursively_valid?({b.new => 1}))
+        assert(type_b.recursively_valid?({b.new => 1}))
+      end
+
       it 'describes hashes containing arrays' do
         t = T::Hash[Symbol, String]
         assert_equal(
