@@ -14,23 +14,28 @@ unique_ptr<ast::UnresolvedConstantLit> dupUnresolvedConstantLit(const ast::Unres
         return nullptr;
     }
 
-    auto scopeCnst = ast::cast_tree<ast::UnresolvedConstantLit>(cons->scope);
-    if (!scopeCnst) {
-        if (ast::isa_tree<ast::EmptyTree>(cons->scope)) {
-            return make_unique<ast::UnresolvedConstantLit>(cons->loc, ast::MK::EmptyTree(), cons->cnst);
-        }
-        auto id = ast::cast_tree<ast::ConstantLit>(cons->scope);
-        if (id == nullptr) {
-            return nullptr;
-        }
-        ENFORCE(id->symbol() == core::Symbols::root());
-        return make_unique<ast::UnresolvedConstantLit>(cons->loc, ASTUtil::dupType(cons->scope), cons->cnst);
-    }
-    auto scope = ASTUtil::dupType(cons->scope);
-    if (scope == nullptr) {
+    auto result = cons->fold(
+        [](const ast::ExpressionPtr &root) -> ast::ExpressionPtr {
+            if (ast::isa_tree<ast::EmptyTree>(root)) {
+                return ast::MK::EmptyTree();
+            }
+            auto id = ast::cast_tree<ast::ConstantLit>(root);
+            if (id == nullptr) {
+                return nullptr;
+            }
+            ENFORCE(id->symbol() == core::Symbols::root());
+            return ASTUtil::dupType(root);
+        },
+        [](ast::ExpressionPtr scope, core::NameRef name, core::LocOffsets loc) -> ast::ExpressionPtr {
+            if (scope == nullptr) {
+                return nullptr;
+            }
+            return ast::MK::UnresolvedConstant(loc, std::move(scope), name);
+        });
+    if (result == nullptr) {
         return nullptr;
     }
-    return make_unique<ast::UnresolvedConstantLit>(cons->loc, std::move(scope), cons->cnst);
+    return result.toUnique<ast::UnresolvedConstantLit>();
 }
 } // namespace
 
@@ -390,19 +395,21 @@ pair<core::NameRef, core::LocOffsets> ASTUtil::getAttrName(core::MutableContext 
 
 bool ASTUtil::isRootScopedSyntacticConstant(const ast::ExpressionPtr &expr,
                                             absl::Span<const core::NameRef> constantName) {
-    auto *p = &expr;
-
-    for (auto it = constantName.rbegin(), end = constantName.rend(); it != end; ++it) {
-        auto ucl = ast::cast_tree<ast::UnresolvedConstantLit>(*p);
-
-        if (ucl == nullptr || ucl->cnst != *it) {
-            return false;
-        }
-
-        p = &ucl->scope;
+    auto ucl = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
+    if (ucl == nullptr) {
+        return constantName.empty() && ast::MK::isRootScope(expr);
     }
-
-    return ast::MK::isRootScope(*p);
+    auto [partsMatched, matches] =
+        ucl->fold([](const ast::ExpressionPtr &root) { return make_pair(size_t{0}, ast::MK::isRootScope(root)); },
+                  [&](pair<size_t, bool> state, core::NameRef name, core::LocOffsets loc) {
+                      if (state.second && state.first < constantName.size() && constantName[state.first] == name) {
+                          state.first++;
+                      } else {
+                          state.second = false;
+                      }
+                      return state;
+                  });
+    return matches && partsMatched == constantName.size();
 }
 
 optional<ASTUtil::DuplicateArg> ASTUtil::findDuplicateArg(core::MutableContext ctx, const ast::Send *send) {

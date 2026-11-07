@@ -84,12 +84,17 @@ core::ClassOrModuleRef contextClass(const core::GlobalState &gs, core::SymbolRef
 }
 
 bool isExplicitlyRootScoped(const ast::ExpressionPtr &node) {
-    auto *cursor = &node;
-    while (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(*cursor)) {
-        cursor = &constLit->scope;
+    auto isRoot = [](const ast::ExpressionPtr &root) {
+        auto rootLit = ast::cast_tree<ast::ConstantLit>(root);
+        return rootLit != nullptr && rootLit->symbol() == core::Symbols::root();
+    };
+    auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node);
+    if (constLit == nullptr) {
+        return isRoot(node);
     }
-    auto root = ast::cast_tree<ast::ConstantLit>(*cursor);
-    return root != nullptr && root->symbol() == core::Symbols::root();
+    return constLit->fold(isRoot, [](bool isExplicitlyRootScoped, core::NameRef name, core::LocOffsets loc) {
+        return isExplicitlyRootScoped;
+    });
 }
 
 // Returns nullptr if this file's package spec did not define a package. For example, `insertPackage` does not enter a
@@ -186,25 +191,33 @@ class SymbolFinder {
 
     core::FoundDefinitionRef defineScope(core::FoundDefinitionRef owner, const ast::ExpressionPtr &node,
                                          bool withinExplicitRootScope) {
-        if (auto id = ast::cast_tree<ast::ConstantLit>(node)) {
-            // Already defined. Insert a foundname so we can reference it.
-            auto sym = id->symbol();
-            ENFORCE(sym.exists());
-            return foundDefs->addSymbol(sym.asClassOrModuleRef());
-        } else if (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node)) {
-            core::FoundClass found;
-            found.owner = defineScope(owner, constLit->scope, withinExplicitRootScope);
-            found.name = constLit->cnst;
-            found.loc = constLit->loc;
-            found.declLoc = constLit->loc;
-            found.classKind = core::FoundClass::Kind::Unknown;
-            found.withinExplicitRootScope = withinExplicitRootScope;
-            return foundDefs->addClass(move(found));
-        } else {
+        auto defineRoot = [&](const ast::ExpressionPtr &root) {
+            if (auto id = ast::cast_tree<ast::ConstantLit>(root)) {
+                // Already defined. Insert a foundname so we can reference it.
+                auto sym = id->symbol();
+                ENFORCE(sym.exists());
+                return foundDefs->addSymbol(sym.asClassOrModuleRef());
+            }
+
             // Either EmptyTree (no more scope) or something is ill-formed (arbitrary expr for const scope?)
             // Fall back to just using `owner`.
             return owner;
+        };
+
+        if (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node)) {
+            return constLit->fold(defineRoot,
+                                  [&](core::FoundDefinitionRef current, core::NameRef name, core::LocOffsets loc) {
+                                      core::FoundClass found;
+                                      found.owner = current;
+                                      found.name = name;
+                                      found.loc = loc;
+                                      found.declLoc = loc;
+                                      found.classKind = core::FoundClass::Kind::Unknown;
+                                      found.withinExplicitRootScope = withinExplicitRootScope;
+                                      return foundDefs->addClass(move(found));
+                                  });
         }
+        return defineRoot(node);
     }
 
 public:
@@ -275,7 +288,7 @@ public:
         if (!klass.ancestors.empty()) {
             /* Superclass is typeAlias in parent scope, mixins are typeAlias in inner scope */
             for (auto &anc : klass.ancestors) {
-                if (!isValidAncestor(anc, /* isOutermost */ true)) {
+                if (!isValidAncestor(anc)) {
                     if (auto e = ctx.beginError(anc.loc(), core::errors::Namer::AncestorNotConstant)) {
                         e.setHeader("Superclasses must only contain constant literals");
                     }
@@ -337,7 +350,7 @@ public:
                 dest->emplace_back(arg.deepCopy());
                 continue;
             }
-            if (isValidAncestor(arg, /* isOutermost */ true)) {
+            if (isValidAncestor(arg)) {
                 dest->emplace_back(arg.deepCopy());
             } else {
                 if (auto e = ctx.beginError(arg.loc(), core::errors::Namer::AncestorNotConstant)) {
@@ -348,15 +361,19 @@ public:
     }
 
     // `self` is a valid ancestor on its own, but `self::B` is a dynamic constant reference.
-    bool isValidAncestor(const ast::ExpressionPtr &exp, bool isOutermost) {
-        if (ast::isa_tree<ast::EmptyTree>(exp) || (isOutermost && exp.isSelfReference()) ||
-            ast::isa_tree<ast::ConstantLit>(exp)) {
+    bool isValidAncestor(const ast::ExpressionPtr &exp) {
+        if (exp.isSelfReference()) {
             return true;
         }
+
+        auto isValidRoot = [](const ast::ExpressionPtr &root) {
+            return ast::isa_tree<ast::EmptyTree>(root) || ast::isa_tree<ast::ConstantLit>(root);
+        };
         if (auto lit = ast::cast_tree<ast::UnresolvedConstantLit>(exp)) {
-            return isValidAncestor(lit->scope, /* isOutermost */ false);
+            return lit->fold(isValidRoot,
+                             [](bool isValid, core::NameRef name, core::LocOffsets loc) { return isValid; });
         }
-        return false;
+        return isValidRoot(exp);
     }
 
     void preTransformBlock(core::Context ctx, const ast::ExpressionPtr &block) {
