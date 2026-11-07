@@ -500,10 +500,20 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                    },
                    classTypes);
 
+    auto WindowClientCapabilities = makeObject("WindowClientCapabilities",
+                                               {
+                                                   makeField("workDoneProgress", makeOptional(JSONBool)),
+                                                   // Unused in Sorbet.
+                                                   // makeField("showMessage", makeOptional(JSONAny)),
+                                                   // makeField("showDocument", makeOptional(JSONAny)),
+                                               },
+                                               classTypes);
+
     auto ClientCapabilities = makeObject("ClientCapabilities",
                                          {
                                              makeField("workspace", makeOptional(WorkspaceClientCapabilities)),
                                              makeField("textDocument", makeOptional(TextDocumentClientCapabilities)),
+                                             makeField("window", makeOptional(WindowClientCapabilities)),
                                              // Unused in Sorbet.
                                              // makeField("experimental", makeOptional(JSONAny)),
                                          },
@@ -656,6 +666,38 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                             makeField("message", JSONString),
                                         },
                                         classTypes);
+
+    // Server-initiated work done progress (LSP 3.15+). Sorbet only ever creates tokens itself, so tokens are always
+    // strings.
+    auto WorkDoneProgressCreateParams = makeObject("WorkDoneProgressCreateParams",
+                                                   {
+                                                       makeField("token", JSONString),
+                                                   },
+                                                   classTypes);
+
+    auto WorkDoneProgressKind = makeStrEnum("WorkDoneProgressKind", {"begin", "report", "end"}, enumTypes);
+
+    // Covers the spec's WorkDoneProgressBegin, WorkDoneProgressReport, and WorkDoneProgressEnd. The generator cannot
+    // discriminate between variants of object types, so the fields that only apply to some kinds are optional.
+    auto WorkDoneProgress = makeObject("WorkDoneProgress",
+                                       {
+                                           makeField("kind", WorkDoneProgressKind),
+                                           // Required for `begin`.
+                                           makeField("title", makeOptional(JSONString)),
+                                           // Only valid for `begin` and `report`.
+                                           makeField("cancellable", makeOptional(JSONBool)),
+                                           makeField("message", makeOptional(JSONString)),
+                                           // Only valid for `begin` and `report`.
+                                           makeField("percentage", makeOptional(JSONInt)),
+                                       },
+                                       classTypes);
+
+    auto ProgressParams = makeObject("ProgressParams",
+                                     {
+                                         makeField("token", JSONString),
+                                         makeField("value", WorkDoneProgress),
+                                     },
+                                     classTypes);
 
     auto MessageActionItem = makeObject("MessageActionItem",
                                         {
@@ -1370,6 +1412,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                      "__PAUSE__",
                                      "__RESUME__",
                                      "$/cancelRequest",
+                                     "$/progress",
                                      "exit",
                                      "initialize",
                                      "initialized",
@@ -1403,6 +1446,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                      "textDocument/rename",
                                      "textDocument/signatureHelp",
                                      "window/showMessage",
+                                     "window/workDoneProgress/create",
                                      "workspace/symbol",
                                      "workspace/didChangeConfiguration",
                                      "textDocument/implementation",
@@ -1434,6 +1478,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                 {"sorbet/showSymbol", TextDocumentPositionParams},
                                                 // TODO(jez) Name?
                                                 {"sorbet/hierarchyReferences", ReferenceParams},
+                                                {"window/workDoneProgress/create", WorkDoneProgressCreateParams},
                                             });
     auto RequestMessage =
         makeObject("RequestMessage",
@@ -1478,6 +1523,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
             {"sorbet/readFile", TextDocumentItem},
             {"sorbet/showSymbol", makeVariant({JSONNull, SymbolInformation})},
             {"sorbet/hierarchyReferences", makeVariant({JSONNull, makeArray(Location)})},
+            {"window/workDoneProgress/create", JSONNull},
         });
     // N.B.: ResponseMessage.params must be optional, as it is not present when an error occurs.
     // N.B.: We add a 'requestMethod' field to response messages to make the discriminated union work.
@@ -1493,6 +1539,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
     auto NotificationMessageParamsType =
         makeDiscriminatedUnion(methodField, {
                                                 {"$/cancelRequest", CancelParams},
+                                                {"$/progress", ProgressParams},
                                                 {"initialized", InitializedParams},
                                                 {"exit", makeOptional(JSONNull)},
                                                 {"textDocument/publishDiagnostics", PublishDiagnosticsParams},

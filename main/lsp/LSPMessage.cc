@@ -1,5 +1,7 @@
 #include "LSPMessage.h"
+#include "absl/strings/match.h"
 #include "json_types.h"
+#include "main/lsp/ShowOperation.h"
 
 using namespace std;
 
@@ -126,6 +128,15 @@ LSPMessage::RawLSPMessage fromJSONValue(rapidjson::Document &d) {
         if (d.HasMember("method")) {
             return RequestMessage::fromJSONValue(d.GetObject(), "root");
         } else {
+            // `requestMethod` is a Sorbet-specific field, so clients don't include it when they respond to requests
+            // that Sorbet sends. The only request Sorbet sends is `window/workDoneProgress/create`, and those
+            // requests use IDs with a known prefix.
+            auto &id = d["id"];
+            if (!d.HasMember("requestMethod") && id.IsString() &&
+                absl::StartsWith(string_view(id.GetString(), id.GetStringLength()),
+                                 ShowOperation::WORK_DONE_PROGRESS_CREATE_ID_PREFIX)) {
+                d.AddMember("requestMethod", "window/workDoneProgress/create", d.GetAllocator());
+            }
             return ResponseMessage::fromJSONValue(d.GetObject(), "root");
         }
     } else {
