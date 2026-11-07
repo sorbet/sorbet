@@ -20,6 +20,8 @@ bool isTypecheckRun(const LSPMessage &msg) {
 } // namespace
 
 void ProtocolTest::resetState(shared_ptr<realmain::options::Options> opts) {
+    // Release the old session before creating another cache at the same process-specific path.
+    lspWrapper = nullptr;
     fs = make_shared<MockFileSystem>(rootPath);
     diagnostics.clear();
     sourceFileContents.clear();

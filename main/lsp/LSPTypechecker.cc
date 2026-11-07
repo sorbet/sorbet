@@ -55,59 +55,6 @@ vector<ast::ParsedFile> sortParsedFiles(const core::GlobalState &gs, ErrorReport
     return parsedFiles;
 }
 
-/**
- * This kvstore strategy holds the kvstore open for the duration of the slow path, during initialization. Ownership of
- * the kvstore is threaded back and forth between the slow path and the InitKVStoreStrategy through the open and close
- * methods.
- */
-class InitKVStoreStrategy : public KVStoreStrategy {
-    unique_ptr<const OwnedKeyValueStore> kvstore;
-
-    InitKVStoreStrategy(unique_ptr<const OwnedKeyValueStore> kvstore) : kvstore{move(kvstore)} {}
-
-public:
-    static InitKVStoreStrategy build(const core::GlobalState &gs, unique_ptr<KeyValueStore> kvstore) {
-        return InitKVStoreStrategy(cache::ownIfUnchanged(gs, std::move(kvstore)));
-    }
-
-    unique_ptr<const OwnedKeyValueStore> openKVStore() {
-        return move(this->kvstore);
-    }
-
-    void closeKVStore(unique_ptr<const OwnedKeyValueStore> kvstore) {
-        this->kvstore = move(kvstore);
-    }
-};
-
-unique_ptr<OwnedKeyValueStore> openSessionCache(cache::SessionCache *cache, const LSPConfiguration &config) {
-    if (!cache) {
-        return nullptr;
-    }
-
-    return cache->open(config.logger, config.opts);
-}
-
-/**
- * This kvstore strategy opens the kvstore at the beginning of each indexing pass, and closes the cache fully at the
- * end. This minimizes memory usage by avoiding keeping the whole db mapped at any given point.
- */
-class SessionKVStoreStrategy : public KVStoreStrategy {
-    cache::SessionCache *cache;
-    const LSPConfiguration &config;
-
-public:
-    SessionKVStoreStrategy(cache::SessionCache *cache, const LSPConfiguration &config) : cache{cache}, config{config} {}
-
-    unique_ptr<const OwnedKeyValueStore> openKVStore() {
-        return openSessionCache(this->cache, this->config);
-    }
-
-    void closeKVStore(unique_ptr<const OwnedKeyValueStore> kvstore) {
-        // We don't write in the cancelable slow path, and all our read operations have completed.
-        OwnedKeyValueStore::abort(std::move(kvstore));
-    }
-};
-
 } // namespace
 
 LSPTypechecker::LSPTypechecker(shared_ptr<const LSPConfiguration> config,
@@ -117,8 +64,16 @@ LSPTypechecker::LSPTypechecker(shared_ptr<const LSPConfiguration> config,
 
 LSPTypechecker::~LSPTypechecker() {}
 
+unique_ptr<OwnedKeyValueStore> LSPTypechecker::openSessionCache() const {
+    if (!this->sessionCache) {
+        return nullptr;
+    }
+
+    return this->sessionCache->open(this->config->logger, this->config->opts);
+}
+
 void LSPTypechecker::initialize(TaskQueue &queue, unique_ptr<core::GlobalState> initialGS,
-                                unique_ptr<KeyValueStore> kvstore, WorkerPool &workers,
+                                unique_ptr<cache::SessionCache> sessionCache, WorkerPool &workers,
                                 const LSPConfiguration &currentConfig) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId, "Typechecker can only be used from the typechecker thread.");
     ENFORCE(!this->initialized);
@@ -129,6 +84,7 @@ void LSPTypechecker::initialize(TaskQueue &queue, unique_ptr<core::GlobalState> 
     updates.epoch = 0;
     updates.typecheckingPath = TypecheckingPath::Slow;
     this->gs = std::move(initialGS);
+    this->sessionCache = std::move(sessionCache);
 
     // Initialize settings that come through from the client.
     this->gs->trackUntyped = currentConfig.getClientConfig().initialEnableHighlightUntyped;
@@ -142,10 +98,26 @@ void LSPTypechecker::initialize(TaskQueue &queue, unique_ptr<core::GlobalState> 
         const bool isIncremental = false;
         ErrorEpoch epoch(*errorReporter, updates.epoch, isIncremental, {});
         auto errorFlusher = make_shared<ErrorFlusherLSP>(updates.epoch, errorReporter);
-        auto handler = InitKVStoreStrategy::build(*this->gs, std::move(kvstore));
-        auto [committed, _startingStratum] = runSlowPath(updates, handler, workers, errorFlusher, SlowPathMode::Init);
+
+        // Since the global state has its name table loaded from the kvstore before the session cache copy is made,
+        // there is a small window where another process could write the cache while the session copy is being made.
+        // This is a fallback that ensures that we don't accidentally use a kvstore that doesn't match our name table.
+        // TODO(trevor): switching to always using a session cache would mean that we could initialize the name table
+        // from the copy, which would remove the window where we might end up with a cache that differs from our name
+        // table.
+        auto kvstore = cache::ownIfUnchanged(*this->gs, OwnedKeyValueStore::abort(this->openSessionCache()));
+        if (!kvstore) {
+            this->sessionCache.reset();
+        }
+        // Indexing opens its own handle to the session cache.
+        kvstore.reset();
+        auto [committed, _startingStratum] = runSlowPath(updates, workers, errorFlusher, SlowPathMode::Init);
         ENFORCE(committed);
         epoch.committed = true;
+    }
+
+    if (this->sessionCache) {
+        this->sessionCache->commit(config->logger, config->opts);
     }
 
     // Unblock the indexer now that its state is fully initialized.
@@ -234,9 +206,8 @@ bool LSPTypechecker::typecheck(unique_ptr<LSPFileUpdates> updates, WorkerPool &w
 
             prodCategoryCounterInc("lsp.updates", "fastpath");
         } else {
-            SessionKVStoreStrategy kvstore(this->sessionCache.get(), *this->config);
             std::tie(committed, startingStratum) =
-                runSlowPath(*updates, kvstore, workers, errorFlusher, SlowPathMode::Cancelable);
+                runSlowPath(*updates, workers, errorFlusher, SlowPathMode::Cancelable);
         }
 
         // We flush errors while `epoch` is still active, to ensure that we don't accidentally report errors about an
@@ -608,8 +579,7 @@ void applyFileTableUpdates(core::GlobalState &gs, vector<core::FileRef> &workspa
 }
 } // namespace
 
-pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &updates, KVStoreStrategy &kvstore,
-                                                                WorkerPool &workers,
+pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &updates, WorkerPool &workers,
                                                                 shared_ptr<core::ErrorFlusher> errorFlusher,
                                                                 LSPTypechecker::SlowPathMode mode) {
     ENFORCE(this_thread::get_id() == typecheckerThreadId,
@@ -712,7 +682,7 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
         if (this->config->opts.cacheSensitiveOptions.sorbetPackages) {
             Timer timeit(*this->config->logger, "buildPackageDB");
 
-            auto ownedKvstore = kvstore.openKVStore();
+            unique_ptr<const OwnedKeyValueStore> ownedKvstore = this->openSessionCache();
 
             // This is a bit of a lie: we haven't gotten the first stratum to a state where we could run preemption
             // tasks yet, but any errors raised by running a preemption action on this incomplete global state will be
@@ -737,14 +707,12 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
             if (mode == SlowPathMode::Init) {
                 // Cache these before any packager rewrites, so that the cache is still
                 // usable regardless of whether `--sorbet-packages` was passed.
-                // Want to keep the kvstore around so we can still write to it later.
-                ownedKvstore = cache::ownIfUnchanged(
-                    *this->gs,
-                    cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(std::move(ownedKvstore)),
-                                                         this->config->opts, *this->gs, workers, packageIndexed));
+                cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(std::move(ownedKvstore)),
+                                                     this->config->opts, *this->gs, workers, packageIndexed);
             }
 
-            kvstore.closeKVStore(move(ownedKvstore));
+            // Close the store after indexing; the next phase reopens the private session cache.
+            ownedKvstore.reset();
 
             // Only need to compute FoundDefHashes when running to compute a FileHash
             auto foundHashes = nullptr;
@@ -800,7 +768,7 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
                         break;
                 }
 
-                auto ownedKvstore = kvstore.openKVStore();
+                unique_ptr<const OwnedKeyValueStore> ownedKvstore = this->openSessionCache();
 
                 {
                     auto result = hashing::Hashing::indexAndComputeFileHashes(
@@ -817,21 +785,12 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
                 if (mode == SlowPathMode::Init) {
                     // Cache these before any packager rewrites, so that the cache is still usable
                     // regardless of whether `--sorbet-packages` was passed.
-                    ownedKvstore = cache::ownIfUnchanged(
-                        *this->gs, cache::maybeCacheGlobalStateAndFiles(
-                                       OwnedKeyValueStore::abort(std::move(ownedKvstore)), this->config->opts,
-                                       *this->gs, workers, nonPackagedIndexed));
+                    cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(std::move(ownedKvstore)),
+                                                         this->config->opts, *this->gs, workers, nonPackagedIndexed);
                 }
 
-                if (currentStratum == this->lastStratum) {
-                    if (mode == SlowPathMode::Init) {
-                        // Close and copy the global kvstore, so that we have unique access for the rest of the session.
-                        this->sessionCache = cache::SessionCache::make(std::move(ownedKvstore), *this->config->logger,
-                                                                       this->config->opts);
-                    }
-                }
-
-                kvstore.closeKVStore(move(ownedKvstore));
+                // Close the store after indexing; the next phase reopens the private session cache.
+                ownedKvstore.reset();
 
                 // Second namer run: all the other files (the packageDB shouldn't change)
                 auto foundHashes = nullptr;
@@ -1099,7 +1058,7 @@ vector<ast::ParsedFile> LSPTypechecker::getResolved(absl::Span<const core::FileR
 
     if (!toIndex.empty()) {
         auto cancelable = false;
-        auto kvstore = openSessionCache(this->sessionCache.get(), *this->config);
+        auto kvstore = this->openSessionCache();
         auto result = pipeline::index(*this->gs, toIndex, this->config->opts, workers, std::move(kvstore), cancelable);
         ENFORCE(result.hasResult());
         auto indexed = std::move(result.result());
@@ -1225,8 +1184,9 @@ LSPTypecheckerDelegate::LSPTypecheckerDelegate(TaskQueue &queue, WorkerPool &wor
     : typechecker(typechecker), queue{queue}, workers(workers) {}
 
 void LSPTypecheckerDelegate::initialize(InitializedTask &task, unique_ptr<core::GlobalState> gs,
-                                        unique_ptr<KeyValueStore> kvstore, const LSPConfiguration &currentConfig) {
-    return typechecker.initialize(this->queue, std::move(gs), std::move(kvstore), this->workers, currentConfig);
+                                        unique_ptr<cache::SessionCache> sessionCache,
+                                        const LSPConfiguration &currentConfig) {
+    return typechecker.initialize(this->queue, std::move(gs), std::move(sessionCache), this->workers, currentConfig);
 }
 
 void LSPTypecheckerDelegate::resumeTaskQueue(InitializedTask &task) {

@@ -19,7 +19,7 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 namespace {
 
-pair<unique_ptr<core::GlobalState>, unique_ptr<KeyValueStore>>
+pair<unique_ptr<core::GlobalState>, unique_ptr<cache::SessionCache>>
 createGlobalStateAndOtherObjects(string_view rootPath, options::Options &options, int numWorkerThreads,
                                  shared_ptr<spdlog::sinks::ansicolor_stderr_sink_mt> &stderrColorSinkOut,
                                  shared_ptr<spdlog::logger> &loggerOut,
@@ -39,7 +39,7 @@ createGlobalStateAndOtherObjects(string_view rootPath, options::Options &options
     unique_ptr<const OwnedKeyValueStore> kvstore = cache::maybeCreateKeyValueStore(loggerOut, options);
     payload::createInitialGlobalState(*gs, options, kvstore);
     pipeline::setGlobalStateOptions(*gs, options);
-    return make_pair(move(gs), OwnedKeyValueStore::abort(move(kvstore)));
+    return make_pair(move(gs), cache::SessionCache::make(move(kvstore), *loggerOut, options));
 }
 
 } // namespace
@@ -73,12 +73,12 @@ void MultiThreadedLSPWrapper::send(const string &json) {
 LSPWrapper::LSPWrapper(unique_ptr<core::GlobalState> gs, shared_ptr<options::Options> opts,
                        shared_ptr<spdlog::logger> logger,
                        shared_ptr<spdlog::sinks::ansicolor_stderr_sink_mt> stderrColorSink,
-                       shared_ptr<spdlog::logger> typeErrorsConsole, unique_ptr<KeyValueStore> kvstore,
+                       shared_ptr<spdlog::logger> typeErrorsConsole, unique_ptr<cache::SessionCache> sessionCache,
                        bool disableFastPath)
     : logger(logger), workers(WorkerPool::create(opts->threads, *logger)), stderrColorSink(move(stderrColorSink)),
       typeErrorsConsole(move(typeErrorsConsole)), output(make_shared<LSPOutputToVector>()),
       config_(make_shared<LSPConfiguration>(*opts, output, move(logger), disableFastPath)),
-      lspLoop(make_shared<LSPLoop>(std::move(gs), *workers, config_, move(kvstore))), opts(move(opts)) {}
+      lspLoop(make_shared<LSPLoop>(std::move(gs), *workers, config_, move(sessionCache))), opts(move(opts)) {}
 
 LSPWrapper::~LSPWrapper() {
     // Drain any in-flight worker pool tasks before member destruction begins.
@@ -94,16 +94,16 @@ SingleThreadedLSPWrapper::SingleThreadedLSPWrapper(unique_ptr<core::GlobalState>
                                                    shared_ptr<spdlog::logger> logger,
                                                    shared_ptr<spdlog::sinks::ansicolor_stderr_sink_mt> stderrColorSink,
                                                    shared_ptr<spdlog::logger> typeErrorsConsole,
-                                                   unique_ptr<KeyValueStore> kvstore, bool disableFastPath)
-    : LSPWrapper(move(gs), move(opts), move(logger), move(stderrColorSink), move(typeErrorsConsole), move(kvstore),
+                                                   unique_ptr<cache::SessionCache> sessionCache, bool disableFastPath)
+    : LSPWrapper(move(gs), move(opts), move(logger), move(stderrColorSink), move(typeErrorsConsole), move(sessionCache),
                  disableFastPath) {}
 
 MultiThreadedLSPWrapper::MultiThreadedLSPWrapper(unique_ptr<core::GlobalState> gs, shared_ptr<options::Options> opts,
                                                  shared_ptr<spdlog::logger> logger,
                                                  shared_ptr<spdlog::sinks::ansicolor_stderr_sink_mt> stderrColorSink,
                                                  shared_ptr<spdlog::logger> typeErrorsConsole,
-                                                 unique_ptr<KeyValueStore> kvstore, bool disableFastPath)
-    : LSPWrapper(move(gs), move(opts), move(logger), move(stderrColorSink), move(typeErrorsConsole), move(kvstore),
+                                                 unique_ptr<cache::SessionCache> sessionCache, bool disableFastPath)
+    : LSPWrapper(move(gs), move(opts), move(logger), move(stderrColorSink), move(typeErrorsConsole), move(sessionCache),
                  disableFastPath),
       input(make_shared<LSPProgrammaticInput>()),
       lspThread(runInAThread("LSPWrapper", [&]() -> void { lspLoop->runLSP(input); })) {}
@@ -117,14 +117,14 @@ MultiThreadedLSPWrapper::~MultiThreadedLSPWrapper() {
 
 unique_ptr<SingleThreadedLSPWrapper>
 SingleThreadedLSPWrapper::createWithGlobalState(unique_ptr<core::GlobalState> gs, shared_ptr<options::Options> options,
-                                                shared_ptr<spdlog::logger> logger, unique_ptr<KeyValueStore> kvstore,
-                                                bool disableFastPath) {
+                                                shared_ptr<spdlog::logger> logger,
+                                                unique_ptr<cache::SessionCache> sessionCache, bool disableFastPath) {
     options->runLSP = true;
     pipeline::setGlobalStateOptions(*gs, *options);
     // Note: To keep the constructor private, we need to construct with `new` and put it into a `unique_ptr` privately.
     // `make_unique` doesn't work because that method doesn't have access to the constructor.
-    auto wrapper = new SingleThreadedLSPWrapper(move(gs), move(options), move(logger), nullptr, nullptr, move(kvstore),
-                                                disableFastPath);
+    auto wrapper = new SingleThreadedLSPWrapper(move(gs), move(options), move(logger), nullptr, nullptr,
+                                                move(sessionCache), disableFastPath);
     return unique_ptr<SingleThreadedLSPWrapper>(wrapper);
 }
 

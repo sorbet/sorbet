@@ -19,6 +19,7 @@ cc_library(
             "//common/concurrency",
             "//main/options",
             "//sorbet_version",
+            "@com_google_absl//absl/cleanup",
         ],
     }),
 )

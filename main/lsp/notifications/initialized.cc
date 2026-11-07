@@ -1,5 +1,4 @@
 #include "main/lsp/notifications/initialized.h"
-#include "common/kvstore/KeyValueStore.h"
 #include "main/lsp/LSPIndexer.h"
 
 using namespace std;
@@ -7,7 +6,7 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 InitializedTask::InitializedTask(LSPConfiguration &config)
-    : LSPTask(config, LSPMethod::Initialized), mutableConfig(config), gs{}, kvstore{} {};
+    : LSPTask(config, LSPMethod::Initialized), mutableConfig(config), gs{}, sessionCache{} {};
 
 void InitializedTask::preprocess(LSPPreprocessor &preprocessor) {
     mutableConfig.markInitialized();
@@ -24,7 +23,7 @@ void InitializedTask::index(LSPIndexer &indexer) {
 
 void InitializedTask::run(LSPTypecheckerDelegate &typechecker) {
     ENFORCE(this->gs != nullptr);
-    typechecker.initialize(*this, std::move(this->gs), std::move(this->kvstore), config);
+    typechecker.initialize(*this, std::move(this->gs), std::move(this->sessionCache), config);
     typechecker.resumeTaskQueue(*this);
 }
 
@@ -36,8 +35,8 @@ void InitializedTask::setGlobalState(unique_ptr<core::GlobalState> gs) {
     this->gs = std::move(gs);
 }
 
-void InitializedTask::setKeyValueStore(unique_ptr<KeyValueStore> kvstore) {
-    this->kvstore = std::move(kvstore);
+void InitializedTask::setSessionCache(unique_ptr<cache::SessionCache> sessionCache) {
+    this->sessionCache = std::move(sessionCache);
 }
 
 } // namespace sorbet::realmain::lsp
