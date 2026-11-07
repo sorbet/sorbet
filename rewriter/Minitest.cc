@@ -2,6 +2,7 @@
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
+#include "common/sort/sort.h"
 #include "core/Context.h"
 #include "core/Names.h"
 #include "core/core.h"
@@ -1092,6 +1093,300 @@ ast::ExpressionPtr runSingle(core::MutableContext ctx, bool isClass, const ast::
     return nullptr;
 }
 
+// Match generated definitions to their DSL calls by source span before lowering erases helper kinds and hook scopes.
+class RSpecDeclarations {
+public:
+    enum class Kind { Other, Group, Its, Helper, EagerHelper, Example, ExampleHook, Hook };
+
+private:
+    UnorderedMap<uint64_t, Kind> declarations;
+
+    static uint64_t key(core::LocOffsets loc) {
+        return (uint64_t{loc.beginPos()} << 32) | loc.endPos();
+    }
+
+    static bool isUnfilteredExampleHook(const ast::Send &send) {
+        if (send.hasKwArgs()) {
+            return false;
+        }
+        if (send.numPosArgs() == 0) {
+            return true;
+        }
+        if (send.numPosArgs() != 1) {
+            return false;
+        }
+        auto scope = ast::cast_tree<ast::Literal>(send.getPosArg(0));
+        return scope && scope->isSymbol() &&
+               (scope->asName() == core::Names::each() || scope->asName() == core::Names::example());
+    }
+
+public:
+    Kind kindAt(core::LocOffsets loc) const {
+        auto it = declarations.find(key(loc));
+        return it == declarations.end() ? Kind::Other : it->second;
+    }
+
+    static bool isGroup(Kind kind) {
+        return kind == Kind::Group || kind == Kind::Its;
+    }
+
+    void record(core::MutableContext ctx, const ast::Send &send) {
+        if (!send.recv.isSelfReference() && !isRSpec(ctx, send.recv)) {
+            return;
+        }
+
+        auto kind = Kind::Other;
+        switch (send.fun.rawId()) {
+            case core::Names::describe().rawId():
+            case core::Names::xdescribe().rawId():
+            case core::Names::fdescribe().rawId():
+            case core::Names::context().rawId():
+            case core::Names::xcontext().rawId():
+            case core::Names::fcontext().rawId():
+            case core::Names::exampleGroup().rawId():
+            case core::Names::itBehavesLike().rawId():
+                kind = Kind::Group;
+                break;
+            case core::Names::its().rawId():
+                kind = Kind::Its;
+                break;
+            case core::Names::let().rawId():
+            case core::Names::subject().rawId():
+                kind = Kind::Helper;
+                break;
+            case core::Names::let_bang().rawId():
+                kind = Kind::EagerHelper;
+                break;
+            default:
+                if (send.hasBlock() && nameForTestHelperMethod(ctx, send, /* rspecMode */ true).exists()) {
+                    if (send.fun == core::Names::before() || send.fun == core::Names::after()) {
+                        kind = isUnfilteredExampleHook(send) ? Kind::ExampleHook : Kind::Hook;
+                    } else {
+                        kind = Kind::Example;
+                    }
+                }
+                break;
+        }
+        if (kind != Kind::Other) {
+            declarations[key(send.loc)] = kind;
+        }
+    }
+
+    void postTransformSend(core::MutableContext ctx, ast::ExpressionPtr &tree) {
+        record(ctx, ast::cast_tree_nonnull<ast::Send>(tree));
+    }
+};
+
+class RSpecSelfCalls {
+    uint32_t nestedScopes = 0;
+
+public:
+    vector<core::NameRef> calls;
+
+    void preTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
+        nestedScopes++;
+    }
+
+    void postTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
+        nestedScopes--;
+    }
+
+    void preTransformMethodDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
+        nestedScopes++;
+    }
+
+    void postTransformMethodDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
+        nestedScopes--;
+    }
+
+    void postTransformSend(core::MutableContext ctx, ast::ExpressionPtr &tree) {
+        auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
+        if (nestedScopes == 0 && send.recv.isSelfReference()) {
+            calls.emplace_back(send.fun);
+        }
+    }
+};
+
+class RSpecHelperReceivers {
+    using Kind = RSpecDeclarations::Kind;
+
+    struct Group {
+        ast::ClassDef *definition;
+        optional<size_t> parent;
+        UnorderedMap<core::NameRef, size_t> methods;
+        vector<size_t> examples;
+        vector<size_t> hooks;
+        vector<core::NameRef> eagerHelpers;
+    };
+
+    struct Method {
+        ast::MethodDef *definition;
+        size_t owner;
+        Kind kind;
+        vector<core::NameRef> calls;
+    };
+
+    const RSpecDeclarations &declarations;
+    vector<Group> groups;
+    vector<Method> methods;
+    optional<size_t> currentGroup;
+    vector<optional<size_t>> enclosingGroups;
+    uint32_t ignoredClassDepth = 0;
+    uint32_t methodDepth = 0;
+
+    optional<size_t> lookup(optional<size_t> group, core::NameRef name) const {
+        while (group.has_value()) {
+            const auto &entry = groups[*group];
+            auto it = entry.methods.find(name);
+            if (it != entry.methods.end()) {
+                return it->second;
+            }
+            group = entry.parent;
+        }
+        return nullopt;
+    }
+
+    ast::ExpressionPtr receiverType(size_t owner, size_t receiver, core::LocOffsets loc) const {
+        vector<core::NameRef> names;
+        while (receiver != owner) {
+            const auto &group = groups[receiver];
+            names.emplace_back(ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(group.definition->name).cnst);
+            ENFORCE(group.parent.has_value());
+            receiver = *group.parent;
+        }
+        reverse(names.begin(), names.end());
+        return ast::MK::UnresolvedConstantParts(loc, names);
+    }
+
+public:
+    explicit RSpecHelperReceivers(const RSpecDeclarations &declarations) : declarations(declarations) {}
+
+    void preTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
+        enclosingGroups.emplace_back(currentGroup);
+        auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
+        if (ignoredClassDepth > 0 || methodDepth > 0 || klass.kind != ast::ClassDef::Kind::Class ||
+            !RSpecDeclarations::isGroup(declarations.kindAt(klass.loc))) {
+            ignoredClassDepth++;
+            currentGroup = nullopt;
+            return;
+        }
+
+        auto parent = !klass.ancestors.empty() && klass.ancestors.front().isSelfReference() ? currentGroup : nullopt;
+        currentGroup = groups.size();
+        groups.push_back({&klass, parent, {}, {}, {}, {}});
+    }
+
+    void postTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
+        if (ignoredClassDepth > 0) {
+            ignoredClassDepth--;
+        }
+        currentGroup = enclosingGroups.back();
+        enclosingGroups.pop_back();
+    }
+
+    void preTransformMethodDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
+        methodDepth++;
+    }
+
+    void postTransformMethodDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
+        methodDepth--;
+        auto &definition = ast::cast_tree_nonnull<ast::MethodDef>(tree);
+        if (!currentGroup.has_value() || methodDepth > 0 || definition.flags.isSelfMethod) {
+            return;
+        }
+
+        RSpecSelfCalls calls;
+        ast::TreeWalk::apply(ctx, calls, definition.rhs);
+        auto kind = definition.flags.isRewriterSynthesized ? declarations.kindAt(definition.loc) : Kind::Other;
+        auto index = methods.size();
+        methods.push_back({&definition, *currentGroup, kind, move(calls.calls)});
+        auto &group = groups[*currentGroup];
+        group.methods[definition.name] = index;
+        if (kind == Kind::Example || kind == Kind::Its) {
+            group.examples.emplace_back(index);
+        } else if (kind == Kind::ExampleHook || kind == Kind::Hook) {
+            group.hooks.emplace_back(index);
+        } else if (kind == Kind::EagerHelper) {
+            group.eagerHelpers.emplace_back(definition.name);
+        }
+    }
+
+    void specialize() {
+        vector<pair<size_t, size_t>> pending;
+        for (size_t receiver = 0; receiver < groups.size(); receiver++) {
+            if (groups[receiver].examples.empty()) {
+                continue;
+            }
+            for (auto example : groups[receiver].examples) {
+                pending.emplace_back(example, receiver);
+            }
+            for (optional<size_t> ancestor = receiver; ancestor.has_value(); ancestor = groups[*ancestor].parent) {
+                for (auto hook : groups[*ancestor].hooks) {
+                    auto hookReceiver = methods[hook].kind == Kind::ExampleHook ? receiver : methods[hook].owner;
+                    pending.emplace_back(hook, hookReceiver);
+                }
+                for (auto name : groups[*ancestor].eagerHelpers) {
+                    if (auto method = lookup(receiver, name)) {
+                        pending.emplace_back(*method, receiver);
+                    }
+                }
+            }
+        }
+
+        vector<UnorderedSet<size_t>> consumers(methods.size());
+        for (size_t next = 0; next < pending.size(); next++) {
+            auto [index, receiver] = pending[next];
+            if (!consumers[index].insert(receiver).second) {
+                continue;
+            }
+            const auto &method = methods[index];
+            for (auto name : method.calls) {
+                auto isSuper = name == core::Names::super() || name == core::Names::untypedSuper();
+                auto target =
+                    isSuper ? lookup(groups[method.owner].parent, method.definition->name) : lookup(receiver, name);
+                if (target.has_value()) {
+                    pending.emplace_back(*target, receiver);
+                }
+            }
+        }
+
+        for (size_t index = 0; index < methods.size(); index++) {
+            auto &method = methods[index];
+            if ((method.kind != Kind::Helper && method.kind != Kind::EagerHelper && method.kind != Kind::ExampleHook) ||
+                consumers[index].empty()) {
+                continue;
+            }
+            if (consumers[index].size() == 1 && *consumers[index].begin() == method.owner) {
+                continue;
+            }
+
+            vector<size_t> receivers(consumers[index].begin(), consumers[index].end());
+            // Groups are collected in preorder, so descendants precede ancestors when reversed.
+            fast_sort(receivers, greater<size_t>());
+            auto loc = method.definition->declLoc.copyWithZeroLength();
+            auto original = move(method.definition->rhs);
+            ast::ExpressionPtr checked;
+            for (size_t remaining = receivers.size(); remaining > 0; remaining--) {
+                auto receiver = receivers[remaining - 1];
+                auto body = remaining == 1 ? move(original) : original.deepCopy();
+                if (receiver != method.owner) {
+                    auto bind =
+                        ast::MK::SyntheticBind(loc, ast::MK::Self(loc), receiverType(method.owner, receiver, loc));
+                    body = ast::MK::InsSeq1(loc, move(bind), move(body));
+                }
+                if (checked == nullptr) {
+                    checked = move(body);
+                } else {
+                    auto condition = ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::isA_p(), loc,
+                                                    receiverType(method.owner, receiver, loc));
+                    checked = ast::MK::If(loc, move(condition), move(body), move(checked));
+                }
+            }
+            method.definition->rhs = move(checked);
+        }
+    }
+};
+
 } // namespace
 
 vector<ast::ExpressionPtr> Minitest::run(core::MutableContext ctx, bool isClass, ast::Send *send) {
@@ -1130,9 +1425,22 @@ vector<ast::ExpressionPtr> Minitest::run(core::MutableContext ctx, bool isClass,
         return stats;
     }
 
+    RSpecDeclarations declarations;
+    if (ctx.state.cacheSensitiveOptions.rspecRewriterEnabled && send->hasBlock()) {
+        declarations.record(ctx, *send);
+        if (RSpecDeclarations::isGroup(declarations.kindAt(send->loc))) {
+            ast::TreeWalk::apply(ctx, declarations, send->block()->body);
+        }
+    }
+
     auto insideDescribe = false;
     auto exp = runSingle(ctx, isClass, /* maybeSharedExamplesName */ nullptr, send, insideDescribe);
     if (exp != nullptr) {
+        if (RSpecDeclarations::isGroup(declarations.kindAt(send->loc))) {
+            RSpecHelperReceivers receivers(declarations);
+            ast::TreeWalk::apply(ctx, receivers, exp);
+            receivers.specialize();
+        }
         stats.emplace_back(std::move(exp));
     }
     return stats;
