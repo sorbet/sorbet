@@ -10,7 +10,7 @@ namespace ruby_parser {
 base_driver::base_driver(std::string_view source, sorbet::StableStringStorage<> &scratch, const struct builder &builder,
                          bool traceLexer, bool indentationAware)
     : build(builder), lex(diagnostics, source, scratch, traceLexer), pending_error(false), def_level(0), ast(nullptr),
-      indentationAware(indentationAware) {}
+      indentationAware(indentationAware), remainingBodyRewindBytes(source.size()) {}
 
 const char *const base_driver::token_name(token_type type) {
     // We have several tokens that have the same human-readable string, but Bison won't
@@ -104,31 +104,25 @@ bool base_driver::rewind_if_different_line(token_t token1, token_t token2) {
     return true;
 }
 
-// This can quite easily get out of hand performance-wise. The major selling point of LR parsers is
-// that they admit linear-time implementations.
-//
-// For the time being (read: until we start seeing performance problems in practice), introducing
-// arbitrary-size backtracking like this method does is probably fine, because
-//
-// - It's only when there are syntax errors
-// - Parse results are cached
-// - It substantially improves the editor experience
-//
-// This backtracking makes the parser accidentally quadratic. Consider:
-//
-//     def f1
-//       def f2
-//         def f3
-//     end
-//
-// The lexer and parser will analyze the source substring of f1 once, f2 twice, and f3 three times.
-//
-// A future extension might be to limit the number of bytes allowed to be reprocessed (say: all
-// calls to rewind_and_reset when parsing a given file must move the lexer cursor by less than some
-// multiple of the file size, or even than some magic constant).
-//
-// Most other uses of rewind_and_reset don't currently suffer as acutely from this problem, because
-// they just back up over the last one or two tokens, not potentially back to the top of the file.
+bool base_driver::rewind_body_and_reset(size_t newPos) {
+    auto currentPos = this->lex.current_position();
+    if (newPos < currentPos) {
+        auto rewindBytes = currentPos - newPos;
+        if (rewindBytes > this->remainingBodyRewindBytes) {
+            return false;
+        }
+        this->remainingBodyRewindBytes -= rewindBytes;
+    }
+
+    this->rewind_and_reset(newPos);
+    return true;
+}
+
+// Indentation-aware body recovery uses backtracking to preserve as much of the parse tree as possible.
+// Without a bound, repeated malformed definitions can cause each rewind to reparse a suffix that
+// performs the same rewinds again, resulting in exponential runtime. Cumulative body backtracking is
+// limited to one source-file length. Once that budget is exhausted, this method keeps the body it
+// already parsed instead of attempting another recovery.
 ForeignPtr base_driver::rewind_and_munge_body_if_dedented(SelfPtr self, token_t beginToken, size_t headerEndPos,
                                                           ForeignPtr body, token_t bodyStartToken,
                                                           token_t lastTokBeforeDedent, token_t endToken) {
@@ -163,20 +157,28 @@ ForeignPtr base_driver::rewind_and_munge_body_if_dedented(SelfPtr self, token_t 
         this->rewind_to_tok_start(endToken);
         return body;
     } else if (this->lex.compare_indent_level(bodyStartToken, beginToken) <= 0) {
-        // Not even the very first thing in the body is indented. Treat this like empty method.
-        this->rewind_and_reset(headerEndPos);
+        // Not even the very first thing in the body is indented. Treat this like empty method if the
+        // lexer can reprocess the body at the surrounding scope.
+        if (!this->rewind_body_and_reset(headerEndPos)) {
+            return body;
+        }
         auto emptyBody = this->build.compstmt(self, this->alloc.node_list());
         return emptyBody;
     } else if (lastTokBeforeDedent != nullptr) {
         // Something in the body is dedented. Only put the properly indented stmts in the method.
-        auto truncatedBody = this->build.truncateBodyStmt(self, body, lastTokBeforeDedent);
-        if (truncatedBody != nullptr) {
-            this->rewind_and_reset(lastTokBeforeDedent->end());
+        if (this->build.canTruncateBodyStmt(self, body)) {
+            if (!this->rewind_body_and_reset(lastTokBeforeDedent->end())) {
+                return body;
+            }
+            auto truncatedBody = this->build.truncateBodyStmt(self, body, lastTokBeforeDedent);
+            ENFORCE(truncatedBody != nullptr);
             return truncatedBody;
         } else {
             // bodystmt had opt_else and/or opt_rescue; this is unhandled.
-            // give up, and say that the method body was empty
-            this->rewind_and_reset(headerEndPos);
+            // Give up and say that the method body was empty if the lexer can reprocess it.
+            if (!this->rewind_body_and_reset(headerEndPos)) {
+                return body;
+            }
             auto emptyBody = this->build.compstmt(self, this->alloc.node_list());
             return emptyBody;
         }

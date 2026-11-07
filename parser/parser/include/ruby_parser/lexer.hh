@@ -206,6 +206,10 @@ public:
     // Similar to rewind_and_reset_to_expr_end, but less common. Comes with the same caveats.
     void rewind_and_reset_to_expr_beg(size_t newPos);
 
+    size_t current_position() const {
+        return static_cast<size_t>(_p - source_buffer.data());
+    }
+
     int compare_indent_level(token_t left, token_t right);
 
     void set_state_expr_beg();
