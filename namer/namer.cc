@@ -186,14 +186,22 @@ class SymbolFinder {
 
     core::FoundDefinitionRef defineScope(core::FoundDefinitionRef owner, const ast::ExpressionPtr &node,
                                          bool withinExplicitRootScope) {
-        if (auto id = ast::cast_tree<ast::ConstantLit>(node)) {
-            // Already defined. Insert a foundname so we can reference it.
-            auto sym = id->symbol();
-            ENFORCE(sym.exists());
-            return foundDefs->addSymbol(sym.asClassOrModuleRef());
-        } else if (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node)) {
+        auto defineRoot = [&](const ast::ExpressionPtr &root) {
+            if (auto id = ast::cast_tree<ast::ConstantLit>(root)) {
+                // Already defined. Insert a foundname so we can reference it.
+                auto sym = id->symbol();
+                ENFORCE(sym.exists());
+                return foundDefs->addSymbol(sym.asClassOrModuleRef());
+            }
+
+            // Either EmptyTree (no more scope) or something is ill-formed (arbitrary expr for const scope?)
+            // Fall back to just using `owner`.
+            return owner;
+        };
+
+        if (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node)) {
             return constLit->fold(
-                [&](const ast::ExpressionPtr &root) { return defineScope(owner, root, withinExplicitRootScope); },
+                defineRoot,
                 [&](core::FoundDefinitionRef current, core::NameRef name, core::LocOffsets loc) {
                     core::FoundClass found;
                     found.owner = current;
@@ -204,11 +212,8 @@ class SymbolFinder {
                     found.withinExplicitRootScope = withinExplicitRootScope;
                     return foundDefs->addClass(move(found));
                 });
-        } else {
-            // Either EmptyTree (no more scope) or something is ill-formed (arbitrary expr for const scope?)
-            // Fall back to just using `owner`.
-            return owner;
         }
+        return defineRoot(node);
     }
 
 public:
