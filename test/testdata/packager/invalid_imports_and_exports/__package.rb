@@ -27,14 +27,7 @@ class A < PackageSpec
   export A::AClass
   export A::AModule
 
-  # `test_import` no longer has any effect, so it does not check its arguments.
   test_import B
-  test_import C
-  test_import C, only: :A_MYSTERIOUS_PURPOSE
-  test_import C, only: "something else"
-  test_import C, only: -> { "naught" }
-  #                       ^^^^^^^^^^^^ error: Invalid expression in package: `Block` not allowed
-  test_import C, only: "test_rb", only: "test_rb"
-  #                               ^^^^ error: Hash key `only` is duplicated
-  test_import C, with: "cheese"
+# ^^^^^^^^^^^ error: Method `test_import` does not exist
+  #           ^ error: Invalid expression in package
 end

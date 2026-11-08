@@ -372,10 +372,6 @@ struct PackageSpecBodyWalk {
                     tree = ast::make_expression<ast::EmptyTree>();
                 }
             }
-        } else if (send.fun == core::Names::testImport()) {
-            // `test_import` has no meaning now that tests live in `test!` packages. Drop it rather than reporting an
-            // error, so that `__package.rb` files can delete these lines independently of upgrading Sorbet.
-            tree = ast::make_expression<ast::EmptyTree>();
         } else if (send.fun == core::Names::import()) {
             if (send.numPosArgs() == 1) {
                 Import *imp = nullptr;
@@ -674,7 +670,6 @@ struct PackageSpecBodyWalk {
             case core::Names::visibleTo().rawId():
             case core::Names::exportAll().rawId():
             case core::Names::prelude_bang().rawId():
-            case core::Names::testImport().rawId():
             case core::Names::test_bang().rawId():
                 return true;
 

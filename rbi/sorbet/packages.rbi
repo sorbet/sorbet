@@ -3,10 +3,6 @@ class Sorbet::Private::Static::PackageSpec
   sig { params(arg0: T.class_of(Sorbet::Private::Static::PackageSpec), uses_internals: T::Boolean).void }
   def self.import(arg0, uses_internals: false); end
 
-  # No longer has any effect. Accepted so that `__package.rb` files can delete it independently of upgrading Sorbet.
-  sig { params(arg0: T.untyped, only: T.nilable(String)).void }
-  def self.test_import(arg0, only: nil); end
-
   sig { params(arg0: T.untyped).void }
   def self.export(arg0); end
 

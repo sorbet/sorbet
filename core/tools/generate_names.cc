@@ -485,7 +485,6 @@ NameDef names[] = {
 
     // Packager
     {"import"},
-    {"testImport", "test_import"},
     {"export_", "export"},
     {"legacy"},
     {"strict"},

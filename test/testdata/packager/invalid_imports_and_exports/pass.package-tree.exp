@@ -25,19 +25,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.export(<emptyTree>::<C A>::<C AModule>)
 
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
+    <self>.test_import(<emptyTree>::<C B>)
   end
 end
 # -- test/testdata/packager/invalid_imports_and_exports/b/__package.rb --
