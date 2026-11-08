@@ -1259,8 +1259,14 @@ string ClassOrModuleRef::toStringWithOptions(const GlobalState &gs, int tabs, bo
                        return showRaw ? name.showRaw(gs) : name.show(gs);
                    }));
 
+    // TODO(jez) Print the rest of the flags, like isAbstract, isInterface, isFinal, and isSealed
+    auto classFlags = InlinedVector<string_view, 2>{};
     if (sym->flags.isPrivate) {
-        fmt::format_to(std::back_inserter(buf), " : private");
+        classFlags.emplace_back("private");
+    }
+    if (!classFlags.empty()) {
+        fmt::format_to(std::back_inserter(buf), " : {}",
+                       fmt::map_join(classFlags, "|", [](const auto &flag) { return flag; }));
     }
     // root should have no locs. We used to have special handling here to hide locs on root
     // when censorForSnapshotTests was passed, but it's not needed anymore.
@@ -1390,12 +1396,16 @@ string FieldRef::toStringWithOptions(const GlobalState &gs, int tabs, bool showF
 
     string_view type = showKind(gs);
 
-    string_view access;
+    auto fieldFlags = InlinedVector<string_view, 2>{};
     if (sym->flags.isStaticField && sym->flags.isStaticFieldPrivate) {
-        access = " : private"sv;
+        fieldFlags.emplace_back("private");
     }
 
-    fmt::format_to(std::back_inserter(buf), "{} {}{}", type, showRaw ? toStringFullName(gs) : showFullName(gs), access);
+    fmt::format_to(std::back_inserter(buf), "{} {}", type, showRaw ? toStringFullName(gs) : showFullName(gs));
+    if (!fieldFlags.empty()) {
+        fmt::format_to(std::back_inserter(buf), " : {}",
+                       fmt::map_join(fieldFlags, "|", [](const auto &flag) { return flag; }));
+    }
 
     printResultType(gs, buf, sym->resultType, tabs, showRaw);
     printLocs(gs, buf, sym->locs(), showRaw);
