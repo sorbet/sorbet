@@ -28,6 +28,7 @@ Errors: 2
    "min_error_level": "Max",
    "pkg": "Project::Bar",
    "pkg_scc_id": 0,
+   "pkg_stratum": 0,
    "source_size": 197
   },
   {
@@ -37,6 +38,7 @@ Errors: 2
    "min_error_level": "Max",
    "pkg": "Project::Bar",
    "pkg_scc_id": 0,
+   "pkg_stratum": 0,
    "source_size": 254
   },
   {
@@ -46,6 +48,7 @@ Errors: 2
    "min_error_level": "Max",
    "pkg": "Project::Bar",
    "pkg_scc_id": 0,
+   "pkg_stratum": 0,
    "source_size": 397
   },
   {
@@ -55,6 +58,7 @@ Errors: 2
    "min_error_level": "Max",
    "pkg": "Project::Foo",
    "pkg_scc_id": 0,
+   "pkg_stratum": 0,
    "source_size": 173
   },
   {
@@ -64,6 +68,7 @@ Errors: 2
    "min_error_level": "False",
    "pkg": "Project::Foo",
    "pkg_scc_id": 0,
+   "pkg_stratum": 0,
    "source_size": 287
   },
   {
@@ -73,6 +78,7 @@ Errors: 2
    "min_error_level": "Max",
    "pkg": "Project::Foo",
    "pkg_scc_id": 0,
+   "pkg_stratum": 0,
    "source_size": 397
   },
   {
@@ -82,6 +88,7 @@ Errors: 2
    "min_error_level": "Max",
    "pkg": "Test::Project::Foo",
    "pkg_scc_id": 1,
+   "pkg_stratum": 0,
    "source_size": 143
   },
   {
@@ -91,6 +98,7 @@ Errors: 2
    "min_error_level": "Max",
    "pkg": "Test::Project::Foo",
    "pkg_scc_id": 1,
+   "pkg_stratum": 0,
    "source_size": 47
   }
  ]
