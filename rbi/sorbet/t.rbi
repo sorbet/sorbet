@@ -289,6 +289,10 @@ module T::Helpers
   sig {void}
   def sealed!; end
 
+  # Similar to sealed but allows for descendant class tracking across the whole codebase
+  sig {void}
+  def track_descendants!; end
+
   # We do not use signatures on `mixes_in_class_methods` as to not duplicate errors
   # between the `namer` phase and typechecking for calls.
   #
@@ -318,6 +322,11 @@ module T::Helpers
   # For more information, see https://sorbet.org/docs/requires-ancestor
   sig { params(block: T.proc.void).void }
   def requires_ancestor(&block); end
+end
+
+module T::Descendants
+  sig { params(superclass: T::Module[T.anything], subclass: T::Module[T.anything]).void }
+  def self.register(superclass, subclass); end
 end
 
 module T::Array
