@@ -1234,6 +1234,29 @@ public:
         return foldImpl(foldImpl, *this);
     }
 
+    // Consumes a constant path, transforms its terminal scope, and then rebuilds each constant part root-to-leaf.
+    // Each part retains ownership of its original UnresolvedConstantLit node and has its transformed scope installed.
+    template <class RootFn, class PartFn>
+    static ExpressionPtr foldOwned(ExpressionPtr tree, RootFn && onRoot, PartFn && onPart) {
+        static_assert(std::is_invocable_r_v<ExpressionPtr, RootFn &, ExpressionPtr &&>,
+                      "onRoot must accept an owned ExpressionPtr and return an ExpressionPtr");
+        static_assert(std::is_invocable_r_v<ExpressionPtr, PartFn &, std::unique_ptr<UnresolvedConstantLit> &&, bool>,
+                      "onPart must accept an owned UnresolvedConstantLit and whether it is outermost, and return an "
+                      "ExpressionPtr");
+
+        auto foldImpl = [&](const auto &self, std::unique_ptr<UnresolvedConstantLit> current,
+                            bool isOutermost) -> ExpressionPtr {
+            auto scope = std::move(current->scope);
+            if (isa_tree<UnresolvedConstantLit>(scope)) {
+                current->scope = self(self, scope.toUnique<UnresolvedConstantLit>(), false);
+            } else {
+                current->scope = std::invoke(onRoot, std::move(scope));
+            }
+            return std::invoke(onPart, std::move(current), isOutermost);
+        };
+        return foldImpl(foldImpl, tree.toUnique<UnresolvedConstantLit>(), true);
+    }
+
     // Follows the `UnresolvedConstantLit` scope chain until we arrive at a `scope`
     // that is not an `UnresolvedConstantLit`, and return a reference to that.
     const ExpressionPtr &outermostScope() const;
