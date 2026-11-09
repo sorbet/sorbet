@@ -100,6 +100,11 @@ void JSON::fileToJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer> &writer, 
                 writer.Key("pkg_scc_id");
                 writer.Int(*sccID);
             }
+            auto stratum = pkgInfo.stratum;
+            if (stratum != packages::Stratum::NONE) {
+                writer.Key("pkg_stratum");
+                writer.Int(stratum.rawId());
+            }
         }
     }
 
