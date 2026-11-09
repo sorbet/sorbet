@@ -1772,64 +1772,69 @@ private:
         return advancePackageCursor(ctx, {core::Symbols::PackageSpecRegistry()}, name);
     }
 
-    PackageCursorState walkUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr &tree, bool isOutermost = true) {
-        if (auto c = ast::cast_tree<ast::UnresolvedConstantLit>(tree)) {
-            auto scopeWasEmpty = ast::isa_tree<ast::EmptyTree>(c->scope);
-            auto scopeCursor = walkUnresolvedConstantLit(ctx, c->scope, false);
-            auto out = ast::make_expression<ast::ConstantLit>(core::Symbols::noSymbol(),
-                                                              tree.toUnique<ast::UnresolvedConstantLit>());
-            auto constant = ast::cast_tree<ast::ConstantLit>(out);
-
-            PackageCursorState cursor;
-            if (scopeWasEmpty) {
-                cursor = cursorForBareConstant(ctx, nesting_.get(), constant->original()->cnst);
-            } else {
-                cursor = advancePackageCursor(ctx, scopeCursor, constant->original()->cnst);
-            }
-
-            ConstantResolutionItem job{
-                nesting_, constant, cursor.cursor, isOutermost, cursor.position,
-            };
-            job.isMixinAncestor = this->inMixinAncestor_;
-            auto resolved = resolveConstantJob(ctx, job);
-            if (resolved) {
-                categoryCounterInc("resolve.constants.nonancestor", "firstpass");
-                // Once a symbol is resolved, we can just use the cursor of that symbol
-                // (even if empty, i.e. "unpackaged"), rather than having to guess.
-                cursor = cursorForSymbol(ctx, constant->symbol());
-                if (this->loadTimeScope() && (!constant->symbol().isClassOrModule() ||
-                                              constant->symbol().asClassOrModuleRef().data(ctx)->isDeclared())) {
-                    // While Sorbet treats class A::B; end like an implicit definition of A, it's actually a
-                    // reference of A--Ruby will require a proper definition of A elsewhere. Long term,
-                    // Sorbet should be taught to emit errors when these references are not actually defined,
-                    // matching Ruby's behavior. Then the reference order checks will be able to check all
-                    // references against their definitions, and not limit them to only isDeclared symbols here.
-
-                    // (Historically, Stripe's custom autoloader used static analysis to predeclare these
-                    // intermediate namespaces, so they would always be defined at the right time. As Stripe's
-                    // codebase moves away from this legacy autoloader, it will be easier to introduce such
-                    // changes into Sorbet.)
-                    if (!job.isMixinAncestor) {
-                        checkReferenceOrder(ctx, constant->symbol(), *c, firstDefinitionLocs);
-                    }
+    PackageCursorState walkUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
+        PackageCursorState cursor;
+        auto scopeWasEmpty = false;
+        tree = ast::UnresolvedConstantLit::foldOwned(
+            std::move(tree),
+            [&](ast::ExpressionPtr root) -> ast::ExpressionPtr {
+                scopeWasEmpty = ast::isa_tree<ast::EmptyTree>(root);
+                if (scopeWasEmpty) {
+                    cursor = {};
+                } else if (auto lit = ast::cast_tree<ast::ConstantLit>(root)) {
+                    cursor = cursorForSymbol(ctx, lit->symbol());
+                } else {
+                    // Uncommon case. Will result in "Dynamic constant references are not allowed" eventually.
+                    // Still want to do our best to recover (for e.g., LSP queries)
+                    ast::TreeWalk::apply(ctx, *this, root);
+                    cursor = {};
                 }
-            } else {
-                todo_.emplace_back(std::move(job));
-            }
-            tree = std::move(out);
-            return cursor;
-        }
-        if (ast::isa_tree<ast::EmptyTree>(tree)) {
-            return {};
-        }
-        if (auto lit = ast::cast_tree<ast::ConstantLit>(tree)) {
-            return cursorForSymbol(ctx, lit->symbol());
-        }
+                return root;
+            },
+            [&](std::unique_ptr<ast::UnresolvedConstantLit> original, bool isOutermost) -> ast::ExpressionPtr {
+                auto name = original->cnst;
+                auto out = ast::make_expression<ast::ConstantLit>(core::Symbols::noSymbol(), std::move(original));
+                auto constant = ast::cast_tree<ast::ConstantLit>(out);
 
-        // Uncommon case. Will result in "Dynamic constant references are not allowed" eventually.
-        // Still want to do our best to recover (for e.g., LSP queries)
-        ast::TreeWalk::apply(ctx, *this, tree);
-        return {};
+                if (scopeWasEmpty) {
+                    cursor = cursorForBareConstant(ctx, nesting_.get(), name);
+                } else {
+                    cursor = advancePackageCursor(ctx, cursor, name);
+                }
+                scopeWasEmpty = false;
+
+                ConstantResolutionItem job{
+                    nesting_, constant, cursor.cursor, isOutermost, cursor.position,
+                };
+                job.isMixinAncestor = this->inMixinAncestor_;
+                auto resolved = resolveConstantJob(ctx, job);
+                if (resolved) {
+                    categoryCounterInc("resolve.constants.nonancestor", "firstpass");
+                    // Once a symbol is resolved, we can just use the cursor of that symbol
+                    // (even if empty, i.e. "unpackaged"), rather than having to guess.
+                    cursor = cursorForSymbol(ctx, constant->symbol());
+                    if (this->loadTimeScope() && (!constant->symbol().isClassOrModule() ||
+                                                  constant->symbol().asClassOrModuleRef().data(ctx)->isDeclared())) {
+                        // While Sorbet treats class A::B; end like an implicit definition of A, it's actually a
+                        // reference of A--Ruby will require a proper definition of A elsewhere. Long term,
+                        // Sorbet should be taught to emit errors when these references are not actually defined,
+                        // matching Ruby's behavior. Then the reference order checks will be able to check all
+                        // references against their definitions, and not limit them to only isDeclared symbols here.
+
+                        // (Historically, Stripe's custom autoloader used static analysis to predeclare these
+                        // intermediate namespaces, so they would always be defined at the right time. As Stripe's
+                        // codebase moves away from this legacy autoloader, it will be easier to introduce such
+                        // changes into Sorbet.)
+                        if (!job.isMixinAncestor) {
+                            checkReferenceOrder(ctx, constant->symbol(), *constant->original(), firstDefinitionLocs);
+                        }
+                    }
+                } else {
+                    todo_.emplace_back(std::move(job));
+                }
+                return out;
+            });
+        return cursor;
     }
 
 public:
