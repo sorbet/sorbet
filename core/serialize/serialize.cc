@@ -543,6 +543,14 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
         case TypePtr::Tag::SelfTypeParam: {
             Exception::notImplemented();
         }
+        case TypePtr::Tag::EnumUnionType: {
+            auto &tp = cast_type_nonnull<EnumUnionType>(what);
+            p.putU4(tp.members.size());
+            for (auto &member : tp.members) {
+                p.putU4(member.id());
+            }
+            break;
+        }
     }
 }
 
@@ -629,6 +637,15 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
         case TypePtr::Tag::MetaType:
         case TypePtr::Tag::SelfTypeParam:
             Exception::raise("Unknown type tag {}", tag);
+        case TypePtr::Tag::EnumUnionType: {
+            int sz = p.getU4();
+            vector<ClassOrModuleRef> elems(sz);
+            for (auto &elem : elems) {
+                elem = ClassOrModuleRef::fromRaw(p.getU4());
+            }
+            auto result = Types::enumUnion(std::move(elems));
+            return result;
+        }
     }
 }
 
