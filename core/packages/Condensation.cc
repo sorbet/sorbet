@@ -119,7 +119,7 @@ struct TraversalBuilder {
         }
     }
 
-    Condensation::Traversal build() {
+    Condensation::Traversal build() && {
         // Fill in the scc member spans
         ENFORCE(this->result.sccs.size() == this->sccLengths.size());
         int i = -1;
@@ -172,7 +172,7 @@ const Condensation::Traversal Condensation::computeTraversal(const core::GlobalS
         swap(roots, next);
     }
 
-    return builder.build();
+    return move(builder).build();
 }
 
 void Condensation::Traversal::recordStrata(core::GlobalState &gs) const {
