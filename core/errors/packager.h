@@ -41,5 +41,7 @@ inline constexpr ErrorClass PreludePackageImport{3731, StrictLevel::False};
 inline constexpr ErrorClass IncorrectPackageRB{3734, StrictLevel::False};
 inline constexpr ErrorClass TestImportMismatch{3735, StrictLevel::False};
 inline constexpr ErrorClass TypedSigilTooLow{3736, StrictLevel::False};
+inline constexpr ErrorClass PackagePrivateConstant{3737, StrictLevel::False};
+inline constexpr ErrorClass PublicAliasOfPackagePrivate{3738, StrictLevel::False};
 } // namespace sorbet::core::errors::Packager
 #endif

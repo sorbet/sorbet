@@ -147,6 +147,20 @@ class SymbolFinder {
                 foundDefs->addModifier(move(mod));
                 break;
             }
+            case core::Names::packagePrivateBang().rawId():
+                // `postTransformSend` reports errors for every form, and handles `package_private!(:NAME)`.
+                if (!ctx.state.packageDB().publicByDefault() || !send->recv.isSelfReference() || send->hasBlock() ||
+                    send->hasNonBlockArgs()) {
+                    break;
+                }
+                foundDefs->addModifier(core::FoundModifier{
+                    core::FoundModifier::Kind::Class,
+                    klass,
+                    send->loc,
+                    /*name*/ send->fun,
+                    core::NameRef::noName(),
+                });
+                break;
             default:
                 break;
         }
@@ -477,6 +491,34 @@ public:
                 for (auto &arg : original.posArgs()) {
                     addConstantModifier(ctx, original.fun, arg);
                 }
+                break;
+            }
+            case core::Names::packagePrivateBang().rawId(): {
+                // Silently ignored without --experimental-public-by-default, so that the option can be turned off
+                // after markers have been added.
+                if (ownerIsMethod || !original.recv.isSelfReference() || !ctx.state.packageDB().publicByDefault()) {
+                    break;
+                }
+                if (original.hasBlock() || original.hasKwArgs() || original.numPosArgs() > 1) {
+                    if (auto e = ctx.beginError(original.loc, core::errors::Namer::InvalidPackagePrivate)) {
+                        e.setHeader("`{}` takes no arguments, or the name of one constant as a Symbol",
+                                    "package_private!");
+                    }
+                    break;
+                }
+                if (original.numPosArgs() == 1) {
+                    auto &arg = original.getPosArg(0);
+                    auto lit = ast::cast_tree<ast::Literal>(arg);
+                    if (lit == nullptr || !lit->isSymbol()) {
+                        if (auto e = ctx.beginError(arg.loc(), core::errors::Namer::InvalidPackagePrivate)) {
+                            e.setHeader("`{}` takes no arguments, or the name of one constant as a Symbol",
+                                        "package_private!");
+                        }
+                        break;
+                    }
+                    addConstantModifier(ctx, original.fun, arg);
+                }
+                // The `numPosArgs() == 0` case is handled by `findClassModifiers`
                 break;
             }
             case core::Names::aliasMethod().rawId(): {
@@ -1260,6 +1302,17 @@ private:
         return symbol;
     }
 
+    // We don't track the funLoc of FoundModifier.
+    // We're only using this in autocorrects, so I didn't think we should start tracking it.
+    static optional<core::Loc> modifierFunLoc(core::Context ctx, core::LocOffsets argLoc, string_view fun) {
+        auto funLen = static_cast<int32_t>(fun.size());
+        auto funLoc = ctx.locAt(argLoc).adjustLen(ctx, -funLen - 1, funLen);
+        if (funLoc.source(ctx) != fun) {
+            return nullopt;
+        }
+        return funLoc;
+    }
+
     void modifyMethod(core::MutableContext ctx, const core::FoundModifier &mod) {
         ENFORCE(mod.kind == core::FoundModifier::Kind::Method);
 
@@ -1303,6 +1356,31 @@ private:
                     break;
             }
         }
+
+        if (!method.exists() && mod.name == core::Names::packagePrivate() && ctx.state.packageDB().publicByDefault()) {
+            // Check for a `package_private` <> `package_private!` mixup
+            auto cnst = ctx.state.lookupNameConstant(mod.target);
+            auto klass = ctx.owner.enclosingClass(ctx);
+            auto sym = cnst.exists() ? ctx.state.lookupSymbol(klass, cnst) : core::Symbols::noSymbol();
+            if (sym.exists() && !sym.isTypeMember()) {
+                if (auto e = ctx.beginError(mod.loc, core::errors::Namer::InvalidPackagePrivate)) {
+                    e.setHeader("`{}` can only make methods package-private, but `{}` is a constant",
+                                mod.name.show(ctx), mod.target.show(ctx));
+                    e.addErrorLine(sym.loc(ctx), "`{}` defined here", sym.show(ctx));
+                    if (sym.isClassOrModule()) {
+                        // No autocorrect: a class or module is marked by `package_private!` in its own body, which
+                        // might be in another file, and `package_private!(:NAME)` only marks static fields.
+                        e.addErrorNote("To make `{}` package-private, use `{}` in its body", sym.show(ctx),
+                                       "package_private!");
+                    } else if (auto funLoc = modifierFunLoc(ctx, mod.loc, "package_private"sv)) {
+                        e.replaceWith("Use `package_private!`", *funLoc, "package_private!");
+                    } else {
+                        e.addErrorNote("To make `{}` package-private, use `{}`", sym.show(ctx),
+                                       fmt::format("package_private!(:{})", mod.target.show(ctx)));
+                    }
+                }
+            }
+        }
     }
 
     void modifyConstant(core::MutableContext ctx, const core::FoundModifier &mod) {
@@ -1312,18 +1390,93 @@ private:
         auto constantNameRef = ctx.state.lookupNameConstant(mod.target);
         if (!constantNameRef.exists()) {
             // If no constant with this name has ever been entered, there can't be a symbol to modify.
+            if (mod.name == core::Names::packagePrivateBang()) {
+                reportPackagePrivateNotDefinedInFile(ctx, mod, owner);
+            }
             return;
         }
         auto constant = ctx.state.lookupSymbol(owner, constantNameRef);
-        if (constant.exists() && mod.name == core::Names::privateConstant()) {
-            if (constant.isClassOrModule()) {
-                constant.asClassOrModuleRef().data(ctx)->flags.isPrivate = true;
-            } else if (constant.isStaticField(ctx)) {
-                constant.asFieldRef().data(ctx)->flags.isStaticFieldPrivate = true;
-            } else if (constant.isTypeMember()) {
-                // Visibility on type members is special (even more restrictive than private),
-                // so we ignore requests to mark type members private.
+        if (!constant.exists()) {
+            if (mod.name == core::Names::packagePrivateBang()) {
+                reportPackagePrivateNotDefinedInFile(ctx, mod, owner);
             }
+            return;
+        }
+
+        switch (mod.name.rawId()) {
+            case core::Names::privateConstant().rawId():
+                if (constant.isClassOrModule()) {
+                    constant.asClassOrModuleRef().data(ctx)->flags.isPrivate = true;
+                } else if (constant.isStaticField(ctx)) {
+                    constant.asFieldRef().data(ctx)->flags.isStaticFieldPrivate = true;
+                } else if (constant.isTypeMember()) {
+                    // Visibility on type members is special (even more restrictive than private),
+                    // so we ignore requests to mark type members private.
+                }
+                break;
+            case core::Names::packagePrivateBang().rawId():
+                if (constant.isClassOrModule()) {
+                    if (auto e = ctx.beginError(mod.loc, core::errors::Namer::InvalidPackagePrivate)) {
+                        e.setHeader("Use `{}` in the body of `{}` to mark it package-private", "package_private!",
+                                    constant.show(ctx));
+                    }
+                } else if (!constant.isStaticField(ctx)) {
+                    if (auto e = ctx.beginError(mod.loc, core::errors::Namer::InvalidPackagePrivate)) {
+                        e.setHeader("`{}` can only mark a constant, type alias, or class alias", "package_private!");
+                        e.addErrorLine(constant.loc(ctx), "`{}` defined here", constant.show(ctx));
+                    }
+                } else if (!absl::c_any_of(constant.locs(ctx), [&](auto loc) { return loc.file() == ctx.file; })) {
+                    // A marker in a file that doesn't define the constant would be lost on the fast path: when
+                    // the file that does define it is edited, namer deletes and re-enters the constant, but doesn't
+                    // re-run this file's modifiers.
+                    //
+                    // TODO(jez) `private_constant :NAME` on a static field has the same problem, so we should apply
+                    // this restriction to it too. (Classes aren't affected: namer doesn't delete them on the fast
+                    // path.)
+                    reportPackagePrivateNotDefinedInFile(ctx, mod, owner);
+                } else {
+                    constant.asFieldRef().data(ctx)->flags.isPackagePrivate = true;
+                    checkPackagePrivateOwner(ctx, mod.loc, constant);
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    void reportPackagePrivateNotDefinedInFile(core::MutableContext ctx, const core::FoundModifier &mod,
+                                              core::ClassOrModuleRef owner) {
+        // Check whether it's a typo and they meant to mark a method `package_private`
+        auto method = owner.data(ctx)->findMethod(ctx, mod.target);
+        auto methodModifier = core::Names::packagePrivate();
+        auto singleton = owner.data(ctx)->lookupSingletonClass(ctx);
+        if (!method.exists() && singleton.exists()) {
+            // TODO(jez) We should revisit this, there are few enough uses in pay-server that we
+            // should probably just standardize on `package_private`, drop `package_private_class_method`,
+            // and tie it into the existing support for e.g. `abstract def foo`
+            method = singleton.data(ctx)->findMethod(ctx, mod.target);
+            methodModifier = core::Names::packagePrivateClassMethod();
+        }
+        if (method.exists()) {
+            if (auto e = ctx.beginError(mod.loc, core::errors::Namer::InvalidPackagePrivate)) {
+                e.setHeader("`{}` can only make constants package-private, but `{}` is a method", "package_private!",
+                            mod.target.show(ctx));
+                e.addErrorLine(method.data(ctx)->loc(), "`{}` defined here", method.show(ctx));
+                if (auto funLoc = modifierFunLoc(ctx, mod.loc, "package_private!"sv)) {
+                    e.replaceWith(fmt::format("Use `{}`", methodModifier.show(ctx)), *funLoc, "{}",
+                                  methodModifier.show(ctx));
+                } else {
+                    e.addErrorNote("To make `{}` package-private, use `{}`", method.show(ctx),
+                                   fmt::format("{} :{}", methodModifier.show(ctx), mod.target.show(ctx)));
+                }
+            }
+            return;
+        }
+
+        if (auto e = ctx.beginError(mod.loc, core::errors::Namer::InvalidPackagePrivate)) {
+            e.setHeader("`{}` can only mark a constant defined in the same file", "package_private!");
+            e.addErrorNote("No constant named `{}` is defined in `{}` in this file", mod.target.show(ctx),
+                           owner.show(ctx));
         }
     }
 
@@ -1711,9 +1864,68 @@ private:
                 symbolData->flags.isAbstract = true;
                 symbolData->singletonClass(ctx).data(ctx)->flags.isAbstract = true;
                 break;
+            case core::Names::packagePrivateBang().rawId(): {
+                auto klass = ctx.owner.asClassOrModuleRef();
+
+                // Set the flag even if the marker is the wrong package. Hashing a file is done
+                // without knowledge of package files, and thus doesn't know if the file has the
+                // right owner, so we have to unconditionally set the flag in order in order to make
+                // sure we choose to take the slow path.
+                symbolData->flags.isPackagePrivate = true;
+
+                // We don't also have to set isPackagePrivate on the singletonClass(), because I
+                // don't think it's ever possible to resolve a constant reference to the singleton
+                // class (only a dynamic reference like `self`).
+
+                if (!checkPackagePrivateOwner(ctx, mod.loc, klass)) {
+                    break;
+                }
+
+                if (symbolData->packageRegistryOwner.exists()) {
+                    // Only namespaces that are or that enclose a package have an entry in the package registry.
+                    auto registryPackage = core::packages::MangledName(symbolData->packageRegistryOwner);
+                    if (auto e = ctx.beginError(mod.loc, core::errors::Namer::InvalidPackagePrivate)) {
+                        if (registryPackage == symbolData->package) {
+                            e.setHeader("`{}` cannot mark the root namespace of package `{}`", "package_private!",
+                                        klass.show(ctx));
+                            e.addErrorNote("To restrict which packages can import `{}`, use `{}` in its `{}` file",
+                                           klass.show(ctx), "visible_to", "__package.rb");
+                        } else {
+                            e.setHeader("`{}` cannot mark `{}`, because it encloses another package",
+                                        "package_private!", klass.show(ctx));
+                            e.addErrorNote("Mark the constants inside `{}` instead", klass.show(ctx));
+                        }
+                    }
+                }
+                break;
+            }
             default:
                 break;
         }
+    }
+
+    // Reports an error and returns false if a `package_private!` marker in this file may not mark `sym`.
+    //
+    // Callers set the flag regardless (see the comment in `modifyClass`).
+    bool checkPackagePrivateOwner(core::MutableContext ctx, core::LocOffsets loc, core::SymbolRef sym) {
+        auto symPackage = sym.enclosingClass(ctx).data(ctx)->package;
+        if (!symPackage.exists()) {
+            if (auto e = ctx.beginError(loc, core::errors::Namer::InvalidPackagePrivate)) {
+                e.setHeader("`{}` is not in a package and so cannot be made `{}`", sym.show(ctx), "package_private!");
+            }
+            return false;
+        }
+
+        auto filePackage = ctx.state.packageDB().getPackageNameForFile(ctx.file);
+        if (filePackage != symPackage) {
+            if (auto e = ctx.beginError(loc, core::errors::Namer::InvalidPackagePrivate)) {
+                e.setHeader("`{}` can only be marked `{}` by a file in its package, `{}`", sym.show(ctx),
+                            "package_private!", symPackage.owner.show(ctx));
+            }
+            return false;
+        }
+
+        return true;
     }
 
     core::FieldRef insertField(core::MutableContext ctx, const core::FoundField &field) {

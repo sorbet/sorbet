@@ -666,6 +666,10 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options(section)("package-attributed-errors",
                                  "Attribute errors to their enclosing package in the error output",
                                  cxxopts::value<bool>());
+    options.add_options(section)("experimental-public-by-default",
+                                 "Make constants public unless marked `package_private!`, ignoring `export` and "
+                                 "`export_all!`",
+                                 cxxopts::value<bool>());
     options.add_options(section)("experimental-package-directed",
                                  "Enable support for checking by package, instead of processing all files at once",
                                  cxxopts::value<bool>());
@@ -1265,6 +1269,11 @@ void readOptions(Options &opts,
         opts.packageAttributedErrors = raw["package-attributed-errors"].as<bool>();
         if (opts.packageAttributedErrors && !opts.cacheSensitiveOptions.sorbetPackages) {
             logger->error("--package-attributed-errors can only be specified in --sorbet-packages mode");
+            throw EarlyReturnWithCode(1);
+        }
+        opts.publicByDefault = raw["experimental-public-by-default"].as<bool>();
+        if (opts.publicByDefault && !opts.cacheSensitiveOptions.sorbetPackages) {
+            logger->error("--experimental-public-by-default can only be specified in --sorbet-packages mode");
             throw EarlyReturnWithCode(1);
         }
         opts.packageDirected = raw["experimental-package-directed"].as<bool>();

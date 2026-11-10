@@ -717,6 +717,8 @@ Referencing a constant defined in another package that has not been explicitly e
 
 To fix this error, either change the upstream package to start exporting the constant, or change the code in the current package to depend on only public exports of the upstream package. When changing an upstream package to expose things that were not previously exposed, double check whether it's intentional that the constant has not been exported.
 
+With `--experimental-public-by-default`, constants are public unless marked `package_private!`, and `export` and `export_all!` lines are accepted but ignored, so this error is never reported.
+
 ## 3718
 
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
@@ -943,6 +945,36 @@ The cases where this error can show up in this set of packages are:
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
 
 `__package.rb` files can optionally declare a minimum `typed` level that all files in that package must follow (using the `sorbet` directive, see [3729](#3729)). This error occurs when a given file has a `typed` level lower than that minimum.
+
+## 3737
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+The constant is private to the package that defines it, because it (or a namespace enclosing it) is marked `package_private!`. Code in other packages can't reference it.
+
+To fix the error, use something else from that package's public API instead. If you own the package and the constant should be usable from other packages, delete the `package_private!` marker on the constant that the error points to. Double check whether it's intentional that the constant was marked private.
+
+If there are some pseudo-private APIs that still must be accessible to other packages, consider using `visible_to` instead of `package_private!`. Note that marking a package `visible_to` another package does not allow access to package private constants, `visible_to` merely permits one package to import another package in the first place.
+
+## 3738
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+A class alias of a package-private constant must be package-private too. Otherwise, other packages could use the alias to reach the constants nested inside the package-private class:
+
+```ruby
+class Opus::MyPackage::Outer
+  package_private!
+
+  class Inner; end
+end
+
+module Opus::MyPackage
+  PublicAlias = Outer # error: `PublicAlias` would make `Outer::Inner` public
+end
+```
+
+To fix the error, mark the alias with `package_private!(:PublicAlias)`, or delete the alias and reference the aliased constant directly. If the aliased constant should be usable from other packages, remove its `package_private!` marker instead.
 
 ## 4001
 
@@ -1398,6 +1430,27 @@ class A
   package_private def foo; end
 end
 ```
+
+## 4034
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+A `package_private!` marker is somewhere it can't be. The error message says why. Usually the fix is to move the marker into the body of what you want to make private:
+
+```ruby
+class Opus::MyPackage::ImplClass
+  # Makes `ImplClass`, and everything nested inside it, private to its package
+  package_private!
+
+  X = 1
+  # Makes only `X` private to its package
+  package_private!(:X)
+end
+```
+
+To control which packages may import your package at all, rather than which of its constants they may use, use `visible_to` in its `__package.rb` file instead.
+
+`package_private!` is for constants. To make a method package-private, use `package_private` (or `package_private_class_method`) instead.
 
 ## 5001
 

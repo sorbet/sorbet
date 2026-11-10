@@ -235,6 +235,7 @@ PackageDB PackageDB::deepCopy() const {
     result.enabled_ = this->enabled_;
     result.genPackagesMode_ = this->genPackagesMode_;
     result.allowRelaxingTestVisibility_ = this->allowRelaxingTestVisibility_;
+    result.publicByDefault_ = this->publicByDefault_;
     result.extraPackageFilesDirectoryUnderscorePrefixes_ = this->extraPackageFilesDirectoryUnderscorePrefixes_;
     result.extraPackageFilesDirectorySlashDeprecatedPrefixes_ =
         this->extraPackageFilesDirectorySlashDeprecatedPrefixes_;

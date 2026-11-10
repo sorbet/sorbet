@@ -224,6 +224,7 @@ struct Options {
     bool experimentalMethodModifiers = false;
 
     bool packageAttributedErrors = false;
+    bool publicByDefault = false;
     bool packageDirected = false;
     uint32_t reserveClassTableCapacity = 0;
     uint32_t reserveMethodTableCapacity = 0;

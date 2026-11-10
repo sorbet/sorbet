@@ -154,6 +154,9 @@ for this_src in "${rb_src[@]}" DUMMY; do
       if grep -q '^# enable-package-directed: true' "${srcs[@]}"; then
         args+=("--experimental-package-directed")
       fi
+      if grep -q '^# experimental-public-by-default: true' "${srcs[@]}"; then
+        args+=("--experimental-public-by-default")
+      fi
 
       extra_underscore_prefixes=()
       while IFS='' read -r prefix; do

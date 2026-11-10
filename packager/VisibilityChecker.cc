@@ -576,7 +576,8 @@ public:
         // individual export autocorrects are skipped during generic aggregation. gen-packages only needs package
         // references.
         // TODO(jez): Delete referencedSymbols and GlobalState::symbolsReferencedByFile when we remove the export DSL.
-        if (ctx.state.packageDB().genPackagesMode() == core::packages::GenPackagesMode::Disabled) {
+        if (ctx.state.packageDB().genPackagesMode() == core::packages::GenPackagesMode::Disabled &&
+            !ctx.state.packageDB().publicByDefault()) {
             referencedSymbols.insert(litSymbol);
         }
 
@@ -676,6 +677,11 @@ public:
 } // namespace
 
 void VisibilityChecker::propagateExports(core::GlobalState &gs, absl::Span<const ast::ParsedFile> files) {
+    if (gs.packageDB().publicByDefault()) {
+        // Nothing is exported, because nothing needs to be.
+        return;
+    }
+
     Timer timeit(gs.tracer(), "visibility_checker.propagate_visibility");
     // Recompute the bits of the namespaces whose files are being processed: these are the only symbols that this
     // stratum (or fast path) can have entered or changed.
