@@ -396,6 +396,8 @@ pipeline_tests(
             "testdata/parser/error_recovery/unterminated_array.rb",
             "testdata/parser/error_recovery/unterminated_array_bad_1.rb",
             "testdata/parser/error_recovery/unterminated_array_bad_2.rb",
+            "testdata/parser/error_recovery/sclass_dedent.rb",
+            "testdata/parser/error_recovery/sclass_missing_end.rb",
             "testdata/parser/crash_block_pass_suggestion.rb",
             "testdata/parser/invalid_fatal.rb",
             "testdata/parser/invalid_syntax_error.rb",
