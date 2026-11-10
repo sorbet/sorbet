@@ -455,6 +455,14 @@ public:
                         e.setHeader("`{}` with no arguments is not allowed", name);
                         e.addErrorNote("Unlike `{}`, `{}` does not toggle the visibility of the methods after it",
                                        "private", name);
+                        if (original.fun == core::Names::packagePrivate() && ctx.state.packageDB().publicByDefault()) {
+                            e.addErrorNote("To make the enclosing class or module package-private, use `{}`",
+                                           "package_private!");
+                            auto funLoc = ctx.locAt(original.funLoc);
+                            if (funLoc.source(ctx) == "package_private") {
+                                e.replaceWith("Use `package_private!`", funLoc, "package_private!");
+                            }
+                        }
                     }
                     break;
                 }
