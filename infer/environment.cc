@@ -1130,9 +1130,9 @@ core::TypePtr Environment::processBinding(
 
                     if (it->main.method.exists() && it->main.method.data(ctx)->flags.isPackagePrivate) {
                         core::ClassOrModuleRef klass = it->main.method.data(ctx)->owner;
-                        if (klass.exists()) {
-                            ENFORCE(klass.data(ctx)->package.exists(),
-                                    "should not mark method package private unless it has a package");
+                        // Namer reports an error for a package-private method whose owner has no package,
+                        // but still sets the flag.
+                        if (klass.exists() && klass.data(ctx)->package.exists()) {
                             auto &db = ctx.state.packageDB();
                             auto curPkg = db.getPackageNameForFile(ctx.file);
                             if (curPkg.exists()) {
