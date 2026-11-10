@@ -43,7 +43,7 @@ MangledName resolvePackageName(core::Context ctx, const ast::UnresolvedConstantL
     ENFORCE(constantLit != nullptr);
 
     using ResolutionState = pair<core::ClassOrModuleRef, size_t>;
-    auto [owner, parts] = constantLit->fold(
+    auto [owner, parts] = constantLit->foldFromRoot(
         [&](const ast::ExpressionPtr &root) -> ResolutionState {
             auto resolved = ast::cast_tree<ast::ConstantLit>(root);
             ENFORCE(resolved == nullptr || resolved->original() == nullptr);
@@ -89,7 +89,7 @@ const ast::UnresolvedConstantLit *verifyConstant(core::Context ctx, core::NameRe
         return nullptr;
     }
 
-    return target->fold(
+    return target->foldFromRoot(
         [&](const ast::ExpressionPtr &root) -> const ast::UnresolvedConstantLit * {
             if (ast::isa_tree<ast::EmptyTree>(root)) {
                 return target;

@@ -14,7 +14,7 @@ unique_ptr<ast::UnresolvedConstantLit> dupUnresolvedConstantLit(const ast::Unres
         return nullptr;
     }
 
-    auto result = cons->fold(
+    auto result = cons->foldFromRoot(
         [](const ast::ExpressionPtr &root) -> ast::ExpressionPtr {
             if (ast::isa_tree<ast::EmptyTree>(root)) {
                 return ast::MK::EmptyTree();

@@ -1219,7 +1219,7 @@ public:
     std::string_view nodeName() const;
 
     // Folds the terminal scope and then each constant name from root to leaf.
-    template <class RootFn, class PartFn> auto fold(RootFn && onRoot, PartFn && onPart) const {
+    template <class RootFn, class PartFn> auto foldFromRoot(RootFn && onRoot, PartFn && onPart) const {
         using State = std::remove_cvref_t<std::invoke_result_t<RootFn &, const ExpressionPtr &>>;
 
         auto foldImpl = [&](const auto &self, const UnresolvedConstantLit &current) -> State {
