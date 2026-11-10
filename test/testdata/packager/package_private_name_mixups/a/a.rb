@@ -20,6 +20,7 @@ module Root::A
     #               ^^^^^^^^^^^^^ error: `package_private` can only make methods package-private, but `SomeConstant` is a constant
     package_private :SomeConstant, :some_method
     #               ^^^^^^^^^^^^^ error: `package_private` can only make methods package-private, but `SomeConstant` is a constant
+    # No autocorrect: a class is marked by `package_private!` in its own body, not by name.
     package_private :SomeClass
     #               ^^^^^^^^^^ error: `package_private` can only make methods package-private, but `SomeClass` is a constant
 

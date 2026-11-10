@@ -1368,6 +1368,8 @@ private:
                                 mod.name.show(ctx), mod.target.show(ctx));
                     e.addErrorLine(sym.loc(ctx), "`{}` defined here", sym.show(ctx));
                     if (sym.isClassOrModule()) {
+                        // No autocorrect: a class or module is marked by `package_private!` in its own body, which
+                        // might be in another file, and `package_private!(:NAME)` only marks static fields.
                         e.addErrorNote("To make `{}` package-private, use `{}` in its body", sym.show(ctx),
                                        "package_private!");
                     } else if (auto funLoc = modifierFunLoc(ctx, mod.loc, "package_private"sv)) {
