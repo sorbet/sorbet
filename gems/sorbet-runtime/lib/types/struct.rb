@@ -5,6 +5,37 @@ class T::InexactStruct
   include T::Props
   include T::Props::Serializable
   include T::Props::Constructor
+
+  # Keyword-style construction (`Point.new(x: 1, y: 2)`) makes the VM pack the
+  # keywords into a Hash once at this call boundary. Going through `Class#new`,
+  # that Hash is repacked a second time to match the positional `hash`
+  # parameter of the standard constructor, costing one extra transient Hash
+  # allocation per constructed struct. With the standard constructor, forward
+  # the packed Hash directly instead.
+  #
+  # Classes that define their own initialize (detected via the method_added
+  # hook below) get the original `Class#new` semantics restored exactly, so
+  # custom constructors see the same argument shapes as before.
+  EMPTY_HASH = T.let({}.freeze, T::Hash[Symbol, T.untyped])
+  private_constant :EMPTY_HASH
+
+  def self.new(hash = EMPTY_HASH, &blk)
+    instance = allocate
+    instance.send(:initialize, hash, &blk)
+    instance
+  end
+
+  # Resolved through subclasses' singleton ancestry: fires with self equal to
+  # the class where a method is defined.
+  def self.method_added(name)
+    if name == :initialize && !equal?(T::ImmutableStruct) &&
+       method(:new).owner.equal?(T::InexactStruct.singleton_class)
+      # A custom initialize may expect keywords or positional arguments the
+      # packed Hash above would not match; restore exact Class#new semantics.
+      define_singleton_method(:new, Class.instance_method(:new))
+    end
+    super(name)
+  end
 end
 
 class T::Struct < T::InexactStruct
@@ -31,9 +62,14 @@ class T::ImmutableStruct < T::InexactStruct
     end
   end
 
-  # Matches the one in WeakConstructor, but freezes the object
+  # Matches the one in WeakConstructor, but freezes the object. The frozen
+  # constant default keeps zero-arg and keyword construction from allocating a
+  # fresh `{}` on every call.
+  EMPTY_HASH = T.let({}.freeze, T::Hash[Symbol, T.untyped])
+  private_constant :EMPTY_HASH
+
   sig { params(hash: T::Hash[Symbol, T.untyped]).void.checked(:never) }
-  def initialize(hash={})
+  def initialize(hash=EMPTY_HASH)
     super
 
     freeze
