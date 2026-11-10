@@ -168,6 +168,7 @@ NameDef names[] = {
     {"declareAbstract", "abstract!"},
     {"declareFinal", "final!"},
     {"declareSealed", "sealed!"},
+    {"declareTrackDescendants", "track_descendants!"},
     {"revealType", "reveal_type"},
     {"absurd"},
     {"valid_p", "valid?"},
@@ -305,6 +306,7 @@ NameDef names[] = {
     {"skipGetter", "skip_getter"},
     {"skipSetter", "skip_setter"},
 
+    {"registerDescendant", "register"},
     {"registered"},
     {"instanceRegistered", "<instance_registered>"},
     {"helpers"},
@@ -599,6 +601,7 @@ NameDef names[] = {
     {"UndeclaredFieldStub", "<undeclared-field-stub>", true},
     {"badAliasMethodStub", "<bad-method-alias-stub>"},
     {"Helpers", "Helpers", true},
+    {"Descendants", "Descendants", true},
     {"Net", "Net", true},
     {"IMAP", "IMAP", true},
     {"Protocol", "Protocol", true},

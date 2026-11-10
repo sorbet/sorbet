@@ -400,14 +400,15 @@ public:
         bool isDeclaredInPackage : 1;
         bool isExported : 1;
         bool isBehaviorDefining : 1;
+        bool isTrackedSuperclass : 1;
 
-        constexpr static uint16_t NUMBER_OF_FLAGS = 12;
+        constexpr static uint16_t NUMBER_OF_FLAGS = 13;
         constexpr static uint16_t VALID_BITS_MASK = (1 << NUMBER_OF_FLAGS) - 1;
 
         Flags() noexcept
             : isClass(false), isModule(false), isAbstract(false), isInterface(false), isLinearizationComputed(false),
               isFinal(false), isSealed(false), isPrivate(false), isDeclared(false), isDeclaredInPackage(false),
-              isExported(false), isBehaviorDefining(false) {}
+              isExported(false), isBehaviorDefining(false), isTrackedSuperclass(false) {}
 
         uint16_t serialize() const {
             static_assert(sizeof(Flags) == sizeof(uint16_t));
@@ -455,6 +456,12 @@ public:
     // `false` (but still adds the mixin for processing during linearization) and the caller should report an error.
     [[nodiscard]] bool addMixin(const GlobalState &gs, ClassOrModuleRef sym,
                                 std::optional<uint16_t> index = std::nullopt);
+
+    inline const InlinedVector<ClassOrModuleRef, 4> &trackedSupers() const {
+        return trackedSupers_;
+    }
+
+    [[nodiscard]] bool addTrackedSuper(const GlobalState &gs, ClassOrModuleRef sym);
 
     // Add a placeholder for a mixin and return index in mixins()
     uint16_t addMixinPlaceholder(const GlobalState &gs);
@@ -742,6 +749,8 @@ private:
      */
     InlinedVector<ClassOrModuleRef, 4> mixins_;
 
+    InlinedVector<ClassOrModuleRef, 4> trackedSupers_;
+
     /** For Class or module - ordered type members of the class,
      */
     std::unique_ptr<InlinedVector<TypeMemberRef, 4>> typeParams;
@@ -761,7 +770,7 @@ private:
 
     void addMixinAt(ClassOrModuleRef sym, std::optional<uint16_t> index);
 };
-CheckSize(ClassOrModule, 128, 8);
+CheckSize(ClassOrModule, 152, 8);
 
 } // namespace sorbet::core
 #endif // SORBET_SYMBOLS_H

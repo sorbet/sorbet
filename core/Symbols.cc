@@ -24,7 +24,7 @@ const int Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS = 211;
 const int Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS = 53;
 const int Symbols::MAX_SYNTHETIC_FIELD_SYMBOLS = 20;
 const int Symbols::MAX_SYNTHETIC_TYPEPARAMETER_SYMBOLS = 6;
-const int Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 103;
+const int Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 104;
 
 namespace {
 constexpr string_view COLON_SEPARATOR = "::"sv;
@@ -475,6 +475,18 @@ bool ClassOrModule::addMixin(const GlobalState &gs, ClassOrModuleRef sym, option
         }
     }
     return isValidMixin;
+}
+
+bool ClassOrModule::addTrackedSuper(const GlobalState &gs, ClassOrModuleRef sym) {
+    ENFORCE(flags.isLinearizationComputed);
+
+    if (absl::c_contains(trackedSupers_, sym)) {
+        return false;
+    }
+
+    trackedSupers_.emplace_back(sym);
+
+    return true;
 }
 
 uint16_t ClassOrModule::addMixinPlaceholder(const GlobalState &gs) {

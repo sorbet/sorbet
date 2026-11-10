@@ -907,6 +907,10 @@ void GlobalState::initEmpty() {
     field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::Constants::LoadYieldParams());
     ENFORCE_NO_TIMER(field == Symbols::Magic_UntypedSource_LoadYieldParams());
 
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Descendants());
+    klass.data(*this)->setIsModule(true);
+    ENFORCE_NO_TIMER(klass == Symbols::T_Descendants());
+
     int reservedCount = 0;
 
     // Set the correct resultTypes for all synthesized classes
