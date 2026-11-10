@@ -1431,6 +1431,8 @@ class A
 end
 ```
 
+Alternatively, to make the class itself private to the package, use `package_private!` (note the exclamation mark).
+
 ## 4034
 
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.

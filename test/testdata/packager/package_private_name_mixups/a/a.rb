@@ -35,4 +35,21 @@ module Root::A
     package_private!(:DoesNotExist)
     #                ^^^^^^^^^^^^^ error: `package_private!` can only mark a constant defined in the same file
   end
+
+  # A bare `package_private`, meant as `package_private!`.
+  class Bare
+    package_private
+  # ^^^^^^^^^^^^^^^ error: `package_private` with no arguments is not allowed
+  end
+
+  class BareSelf
+    self.package_private
+  # ^^^^^^^^^^^^^^^^^^^^ error: `package_private` with no arguments is not allowed
+  end
+
+  # No autocorrect: `package_private!` has no class method counterpart.
+  class BareClassMethod
+    package_private_class_method
+  # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `package_private_class_method` with no arguments is not allowed
+  end
 end
