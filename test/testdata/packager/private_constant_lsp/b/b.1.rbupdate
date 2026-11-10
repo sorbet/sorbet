@@ -1,0 +1,6 @@
+# typed: true
+# exclude-from-file-update: true
+module Root::B
+  Root::A::Inner::X
+# ^^^^^^^^^^^^^^^^^ error: Non-private reference to private constant `Root::A::Inner::X` referenced
+end

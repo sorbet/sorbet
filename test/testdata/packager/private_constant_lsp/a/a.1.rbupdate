@@ -1,0 +1,6 @@
+# typed: strict
+# assert-fast-path: a/a.rb
+module Root::A::Inner
+  # Removing `private_constant` takes the fast path, which doesn't retypecheck b/b.rb
+  X = 1
+end

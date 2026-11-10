@@ -1,0 +1,7 @@
+# typed: true
+# exclude-from-file-update: true
+module Root::B
+  Root::A::Secret
+  Root::A::X
+# ^^^^^^^^^^ error: `Root::A::X` is `package_private!` in package `Root::A`
+end

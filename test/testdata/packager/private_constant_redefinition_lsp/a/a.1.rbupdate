@@ -1,0 +1,7 @@
+# typed: strict
+# assert-fast-path: a/a.rb
+module Root::A::Inner
+  class Y; end
+  # Removing `private_constant :Y` takes the fast path, which doesn't retypecheck b/b.rb
+  Y = 1 # error: Cannot initialize the class `Y` by constant assignment
+end
