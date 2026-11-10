@@ -47,7 +47,8 @@ MangledName resolvePackageName(core::Context ctx, const ast::UnresolvedConstantL
     while (constantLit != nullptr) {
         fullNameReversed.emplace_back(constantLit->cnst);
         if (auto resolvedLit = ast::cast_tree<ast::ConstantLit>(constantLit->scope)) {
-            constantLit = resolvedLit->original();
+            ENFORCE(resolvedLit->original() == nullptr);
+            constantLit = nullptr;
         } else {
             constantLit = ast::cast_tree<ast::UnresolvedConstantLit>(constantLit->scope);
         }
