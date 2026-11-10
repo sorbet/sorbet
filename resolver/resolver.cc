@@ -345,7 +345,7 @@ private:
         core::SymbolRef symbol;
         // Whether `name` isn't a member of any of the lexical scopes in `nesting`, and was instead found in an
         // ancestor of the innermost one.
-        bool foundInAncestor;
+        bool foundInAncestor = false;
     };
 
     static ResolveLhsResult resolveLhs(core::Context ctx, const Nesting *nesting, core::NameRef name) {
