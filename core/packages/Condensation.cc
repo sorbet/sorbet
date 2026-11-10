@@ -1,4 +1,5 @@
 #include "core/packages/Condensation.h"
+#include "PackageDB.h"
 #include "common/sort/sort.h"
 #include "common/strings/formatting.h"
 #include "core/GlobalState.h"
@@ -147,36 +148,80 @@ struct TraversalBuilder {
     }
 };
 
+bool cachedTraversalIsUsable(const PackageDB &db) {
+    return absl::c_all_of(db.packages(), [&db](auto pkgName) {
+        auto &info = db.getPackageInfo(pkgName);
+        return info.exists() && info.stratum != Stratum::NONE;
+    });
+}
+
 } // namespace
 
 const Condensation::Traversal Condensation::computeTraversal(const core::GlobalState &gs) const {
     TraversalBuilder builder(gs, this->nodes_);
 
-    // All prelude package SCCs, and the set of non-prelude package SCCs that have no imports.
-    auto [prelude, roots] = builder.roots();
+    if (cachedTraversalIsUsable(gs.packageDB())) {
+        builder.result.cached = true;
 
-    if (!prelude.empty()) {
-        builder.sortStratum(absl::MakeSpan(prelude));
-        // Record a single stratum for all prelude SCCs, emitting any packages whose imports were satisfied by the
-        // prelude set to the roots.
-        builder.recordStratum(prelude);
-        builder.computeNextStratum<TraversalBuilder::IsPrelude::True>(prelude, roots);
-    }
+        auto &db = gs.packageDB();
 
-    // Insert the non-prelude SCCs that are ready but were skipped into the frontier, so that we process all of the
-    // non-prelude nodes with no outstanding dependencies in one stratum.
-    vector<uint32_t> next;
-    while (!roots.empty()) {
-        next.clear();
+        struct NodeStratum {
+            Stratum stratum;
+            uint32_t nodeId;
+        };
 
-        builder.sortStratum(absl::MakeSpan(roots));
-        builder.recordStratum(roots);
-        builder.computeNextStratum<TraversalBuilder::IsPrelude::False>(roots, next);
+        vector<NodeStratum> stratumMapping;
+        stratumMapping.reserve(this->nodes().size());
+        for (auto &node : this->nodes()) {
+            ENFORCE(!node.members.empty());
+            auto stratum = db.getPackageInfo(node.members.front()).stratum;
+            stratumMapping.emplace_back(stratum, node.id);
+        }
 
-        // The content of `next` isn't important at this point, and it will be cleared on the next iteration of the
-        // loop. Morally this is `roots = next`, but we swap and clear instead to avoid any ambiguity about
-        // reallocations.
-        swap(roots, next);
+        fast_sort(stratumMapping, [](auto left, auto right) { return left.stratum < right.stratum; });
+
+        vector<uint32_t> sccs;
+        auto remaining = absl::MakeSpan(stratumMapping);
+        while (!remaining.empty()) {
+            auto stratum = remaining.front().stratum;
+            auto end = absl::c_find_if(remaining, [stratum](auto &p) { return p.stratum != stratum; });
+            auto stratumSize = std::distance(remaining.begin(), end);
+
+            auto members = remaining.subspan(0, stratumSize);
+            remaining = remaining.subspan(stratumSize);
+
+            sccs.clear();
+            absl::c_transform(members, back_inserter(sccs), [](auto &p) { return p.nodeId; });
+            builder.sortStratum(absl::MakeSpan(sccs));
+            builder.recordStratum(sccs);
+        }
+    } else {
+        // All prelude package SCCs, and the set of non-prelude package SCCs that have no imports.
+        auto [prelude, roots] = builder.roots();
+
+        if (!prelude.empty()) {
+            builder.sortStratum(absl::MakeSpan(prelude));
+            // Record a single stratum for all prelude SCCs, emitting any packages whose imports were satisfied by the
+            // prelude set to the roots.
+            builder.recordStratum(prelude);
+            builder.computeNextStratum<TraversalBuilder::IsPrelude::True>(prelude, roots);
+        }
+
+        // Insert the non-prelude SCCs that are ready but were skipped into the frontier, so that we process all of the
+        // non-prelude nodes with no outstanding dependencies in one stratum.
+        vector<uint32_t> next;
+        while (!roots.empty()) {
+            next.clear();
+
+            builder.sortStratum(absl::MakeSpan(roots));
+            builder.recordStratum(roots);
+            builder.computeNextStratum<TraversalBuilder::IsPrelude::False>(roots, next);
+
+            // The content of `next` isn't important at this point, and it will be cleared on the next iteration of the
+            // loop. Morally this is `roots = next`, but we swap and clear instead to avoid any ambiguity about
+            // reallocations.
+            swap(roots, next);
+        }
     }
 
     return move(builder).build();
