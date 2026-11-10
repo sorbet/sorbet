@@ -1,0 +1,186 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C RSpec><<C <todo sym>>> < ()
+    def self.configure<<todo method>>(&<implicit yield>)
+      <implicit yield>.call(<self>)
+    end
+
+    def self.include_context<<todo method>>(_name, _tag, &<blk>)
+      <emptyTree>
+    end
+
+    def self.define_derived_metadata<<todo method>>(**, &<implicit yield>)
+      <implicit yield>.call({})
+    end
+
+    module <emptyTree>::<C Core><<C <todo sym>>> < ()
+      class <emptyTree>::<C ExampleGroup><<C <todo sym>>> < (::<todo sym>)
+      end
+    end
+
+    <runtime method definition of self.configure>
+
+    <runtime method definition of self.include_context>
+
+    <runtime method definition of self.define_derived_metadata>
+  end
+
+  module ::<root>::<C <shared_examples 'outer auto included'>><<C <todo sym>>> < ()
+    module <emptyTree>::<C <shared_examples 'an action that requires permission'>><<C <todo sym>>> < ()
+      def <it 'works'><<todo method>>(&<blk>)
+        [::T.unsafe(nil)].each() do |action, permission|
+          <emptyTree>
+        end
+      end
+
+      <runtime method definition of <it 'works'>>
+    end
+
+    module <emptyTree>::<C <shared_examples 'an unauthorized action'>><<C <todo sym>>> < ()
+      def <it 'fails'><<todo method>>(&<blk>)
+        [::T.unsafe(nil)].each() do |action|
+          <emptyTree>
+        end
+      end
+
+      <runtime method definition of <it 'fails'>>
+    end
+
+    module <emptyTree>::<C <shared_examples 'a permitted operation'>><<C <todo sym>>> < ()
+      def <it 'is permitted'><<todo method>>(&<blk>)
+        [::T.unsafe(nil)].each() do |operation|
+          <emptyTree>
+        end
+      end
+
+      <runtime method definition of <it 'is permitted'>>
+    end
+
+    module <emptyTree>::<C <shared_examples 'a nested context'>><<C <todo sym>>> < ()
+      def foo<<todo method>>(&<blk>)
+        42
+      end
+
+      <runtime method definition of foo>
+    end
+  end
+
+  <emptyTree>::<C RSpec>.configure() do |config|
+    begin
+      config.include_context("outer auto included", :auto_tag)
+      config.define_derived_metadata(:file_path, ::Regexp.new("/some/path/", 0)) do |metadata|
+        metadata.[]=(:auto_tag, true)
+      end
+    end
+  end
+
+  begin
+    "metadata-driven consumer"
+    class <emptyTree>::<C <describe 'metadata-driven consumer'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      class <emptyTree>::<C <it_behaves_like 'an action that requires permission'>><<C <todo sym>>> < (<self>)
+        <self>.include(<emptyTree>::<C <shared_examples 'an action that requires permission'>>)
+      end
+
+      class <emptyTree>::<C <it_behaves_like 'an unauthorized action'>><<C <todo sym>>> < (<self>)
+        <self>.include(<emptyTree>::<C <shared_examples 'an unauthorized action'>>)
+      end
+
+      <self>.include(<emptyTree>::<C <shared_examples 'a permitted operation'>>)
+
+      <self>.include(<emptyTree>::<C <shared_examples 'a nested context'>>)
+    end
+  end
+
+  module ::<root>::<C <shared_examples 'with block context'>><<C <todo sym>>> < ()
+    module <emptyTree>::<C <shared_examples 'block-form sibling examples'>><<C <todo sym>>> < ()
+      def <it 'sibling works'><<todo method>>(&<blk>)
+        <emptyTree>
+      end
+    end
+  end
+
+  begin
+    "with-block include_context consumer"
+    class <emptyTree>::<C <describe 'with-block include_context consumer'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      <self>.include(<emptyTree>::<C <shared_examples 'with block context'>>)
+
+      class <emptyTree>::<C <it_behaves_like 'block-form sibling examples'>><<C <todo sym>>> < (<self>)
+        <self>.include(<emptyTree>::<C <shared_examples 'block-form sibling examples'>>)
+      end
+    end
+  end
+
+  module ::<root>::<C <shared_examples 'outer not auto included'>><<C <todo sym>>> < ()
+    module <emptyTree>::<C <shared_examples 'manually included only'>><<C <todo sym>>> < ()
+      def <it 'works only when explicitly included'><<todo method>>(&<blk>)
+        <emptyTree>
+      end
+    end
+  end
+
+  begin
+    "consumer that does not include outer"
+    class <emptyTree>::<C <describe 'consumer that does not include outer'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      class <emptyTree>::<C <it_behaves_like 'manually included only'>><<C <todo sym>>> < (<self>)
+        <self>.include(<emptyTree>::<C <shared_examples 'manually included only'>>)
+      end
+    end
+  end
+
+  module ::<root>::<C <shared_examples 'inner ctx'>><<C <todo sym>>> < ()
+    module <emptyTree>::<C <shared_examples 'inner shared examples'>><<C <todo sym>>> < ()
+      def <it 'inner works'><<todo method>>(&<blk>)
+        <emptyTree>
+      end
+    end
+  end
+
+  module ::<root>::<C <shared_examples 'outer ctx that includes inner'>><<C <todo sym>>> < ()
+    <self>.include(<emptyTree>::<C <shared_examples 'inner ctx'>>)
+
+    module <emptyTree>::<C <shared_examples 'outer shared examples that consumes inner'>><<C <todo sym>>> < ()
+      def <it 'outer works'><<todo method>>(&<blk>)
+        <emptyTree>
+      end
+
+      <self>.include(<emptyTree>::<C <shared_examples 'inner shared examples'>>)
+    end
+  end
+
+  module ::<root>::<C <shared_examples 'an action that requires permission'>><<C <todo sym>>> < ()
+    def <it 'works'><<todo method>>(&<blk>)
+      [::T.unsafe(nil)].each() do |action, permission|
+        <emptyTree>
+      end
+    end
+
+    <runtime method definition of <it 'works'>>
+  end
+
+  module ::<root>::<C <shared_examples 'an unauthorized action'>><<C <todo sym>>> < ()
+    def <it 'fails'><<todo method>>(&<blk>)
+      [::T.unsafe(nil)].each() do |action|
+        <emptyTree>
+      end
+    end
+
+    <runtime method definition of <it 'fails'>>
+  end
+
+  module ::<root>::<C <shared_examples 'a permitted operation'>><<C <todo sym>>> < ()
+    def <it 'is permitted'><<todo method>>(&<blk>)
+      [::T.unsafe(nil)].each() do |operation|
+        <emptyTree>
+      end
+    end
+
+    <runtime method definition of <it 'is permitted'>>
+  end
+
+  module ::<root>::<C <shared_examples 'a nested context'>><<C <todo sym>>> < ()
+    def foo<<todo method>>(&<blk>)
+      42
+    end
+
+    <runtime method definition of foo>
+  end
+end
