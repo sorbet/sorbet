@@ -986,6 +986,32 @@ end
 
 To fix the error, mark the alias with `package_private!(:PublicAlias)`, or delete the alias and reference the aliased constant directly. If the aliased constant should be usable from other packages, remove its `package_private!` marker instead.
 
+## 3739
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+A package can be marked `imported_by_nested_packages!`:
+
+```ruby
+class A < PackageSpec
+  imported_by_nested_packages!
+end
+```
+
+These are special packages where behavior is allowed to live on the package namespace itself, instead of isolating behavior to constants defined somewhere wholly inside the package. (This pattern is generally discouraged, because it adversely affects code loading performance in large codebases.)
+
+One requirement for such a package to be allowed to define behavior on the package namespace is that all nested packages must import the outer package. This guarantees that that behavior is parsed and analyzed entirely before any nested package would attempt to make use of it (and means that Sorbet doesn't have to retroactively invalidate something it already typechecked when such behavior is added).
+
+Put another way, every package nested under `A`, at any depth, must `import` either `A` itself, or a package between `A` and it. For example, if there are packages `A`, `A::B`, and `A::B::C`, then `A::B::C` can `import A::B` instead of `import A`: `A::B` is nested under `A` too, so it has to meet the same requirement. Importing some other package that imports `A` does not count, so this is also an error:
+
+```ruby
+class A::B < PackageSpec # error: `A::B` is nested under `A`, so it must `import A`
+  import A::Other
+end
+```
+
+To fix this error, either add `import A` to the nested package (Sorbet's autocorrect does this), or remove `imported_by_nested_packages!` from `A`.
+
 ## 4001
 
 Sorbet parses the syntax of `include` and `extend` declarations, even in `# typed: false` files. Recall from the [strictness levels](static.md#file-level-granularity-strictness-levels) docs that all constants in a Sorbet codebase must resolve, even at `# typed: false`. Parsing `include` blocks is required for this, so incorrect usages of `include` are reported when encountered.

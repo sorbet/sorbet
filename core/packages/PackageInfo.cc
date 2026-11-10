@@ -321,6 +321,27 @@ const Import *PackageInfo::importsPackage(MangledName mangledName) const {
     return &*imp;
 }
 
+vector<MangledName> PackageInfo::enclosingPackagesMissingImport(const core::GlobalState &gs, MangledName pkg,
+                                                                absl::Span<const Import> imports,
+                                                                const UnorderedSet<MangledName> &moreImports) {
+    vector<MangledName> result;
+    const auto &db = gs.packageDB();
+    for (auto outer = db.getParentPackage(gs, pkg); outer.exists(); outer = db.getParentPackage(gs, outer)) {
+        if (absl::c_any_of(imports, [outer](auto &i) { return i.mangledName == outer; }) || moreImports.contains(outer)) {
+            // This satisfies `outer`, and every marked package enclosing it.
+            break;
+        }
+        if (db.getPackageInfo(outer).importedByNestedPackages()) {
+            result.emplace_back(outer);
+        }
+    }
+    return result;
+}
+
+vector<MangledName> PackageInfo::enclosingPackagesMissingImport(const core::GlobalState &gs) const {
+    return enclosingPackagesMissingImport(gs, this->mangledName_, this->importedPackageNames, {});
+}
+
 // Is it a layering violation to import otherPkg from this package?
 bool PackageInfo::causesLayeringViolation(const PackageDB &packageDB, const PackageInfo &otherPkg) const {
     ENFORCE(exists());

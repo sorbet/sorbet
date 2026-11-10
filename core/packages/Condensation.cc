@@ -391,6 +391,19 @@ void Condensation::Traversal::recordStrata(core::GlobalState &gs) const {
             }
         }
     }
+
+    if constexpr (debug_mode) {
+        // `imported_by_nested_packages!` is only sound if a package where it takes effect is never typechecked after
+        // a package nested under it. Its import requirement is what guarantees that.
+        for (auto name : db.packages()) {
+            auto &info = db.getPackageInfo(name);
+            for (auto outer = db.getParentPackage(gs, name); outer.exists(); outer = db.getParentPackage(gs, outer)) {
+                auto &outerInfo = db.getPackageInfo(outer);
+                ENFORCE(!outerInfo.importedByNestedPackagesSatisfied() || outerInfo.stratum <= info.stratum,
+                        "`{}` is typechecked after `{}`, which is nested under it", outerInfo.show(gs), info.show(gs));
+            }
+        }
+    }
 }
 
 namespace {

@@ -25,19 +25,22 @@ end
 # -- test/testdata/packager/imported_by_nested_packages/mid/leaf/__package.rb --
 # typed: strict
 
-class Outer::Mid::Leaf < PackageSpec
+class Outer::Mid::Leaf < PackageSpec # error: `Outer::Mid::Leaf` is nested under `Outer`, so it must `import Outer`
+  import Outer
 end
 # ------------------------------
 # -- test/testdata/packager/imported_by_nested_packages/missing/__package.rb --
 # typed: strict
 
-class Outer::Missing < PackageSpec
+class Outer::Missing < PackageSpec # error: `Outer::Missing` is nested under `Outer`, so it must `import Outer`
+  import Outer
 end
 # ------------------------------
 # -- test/testdata/packager/imported_by_nested_packages/missing/bare/__package.rb --
 # typed: strict
 
-class Outer::Missing::Bare < PackageSpec
+class Outer::Missing::Bare < PackageSpec # error: `Outer::Missing::Bare` is nested under `Outer`, so it must `import Outer`
+  import Outer
 end
 # ------------------------------
 # -- test/testdata/packager/imported_by_nested_packages/missing/deeper/__package.rb --
@@ -60,14 +63,16 @@ end
 # -- test/testdata/packager/imported_by_nested_packages/nested/leaf/__package.rb --
 # typed: strict
 
-class Outer::Nested::Leaf < PackageSpec
+class Outer::Nested::Leaf < PackageSpec # error: `Outer::Nested::Leaf` is nested under `Outer::Nested`, so it must `import Outer::Nested`
   import Outer
+  import Outer::Nested
 end
 # ------------------------------
 # -- test/testdata/packager/imported_by_nested_packages/nested/other/__package.rb --
 # typed: strict
 
-class Outer::Nested::Other < PackageSpec
+class Outer::Nested::Other < PackageSpec # error: `Outer::Nested::Other` is nested under `Outer::Nested`, so it must `import Outer::Nested`
+  import Outer::Nested
 end
 # ------------------------------
 # -- test/testdata/packager/imported_by_nested_packages/ok/__package.rb --
@@ -99,7 +104,8 @@ end
 # typed: strict
 
 # Importing a package that imports `Outer` isn't enough, unless that package is between `Outer` and this one.
-class Outer::Sibling < PackageSpec
+class Outer::Sibling < PackageSpec # error: `Outer::Sibling` is nested under `Outer`, so it must `import Outer`
+  import Outer
   import Outer::Ok
 end
 # ------------------------------
