@@ -1,6 +1,6 @@
 # typed: strict
-# assert-fast-path: a/a.rb
+# assert-fast-path: a/__package.rb,a/a.rb,b/__package.rb,b/b.rb
 module Root::A::Inner
-  # Removing `private_constant` takes the fast path, which doesn't retypecheck b/b.rb
+  # Removing `private_constant` takes the fast path, which must still retypecheck b/b.rb
   X = 1
 end

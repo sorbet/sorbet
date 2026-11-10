@@ -1,9 +1,9 @@
 # typed: strict
-# assert-fast-path: a/a.rb
+# assert-fast-path: a/__package.rb,a/a.rb,b/__package.rb,b/b.rb
 module Root::A
   class Secret
   end
 
-  # Removing only a static field's marker takes the fast path, which doesn't retypecheck b/b.rb
+  # Removing only a static field's marker takes the fast path, which must still retypecheck b/b.rb
   X = 1
 end
