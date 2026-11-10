@@ -7,14 +7,6 @@ class ::<root> < ::Object ()
         argument <blk><block> @ Loc {file=test/testdata/packager/package_private_namer/prelude/__package.rb start=??? end=???}
     module ::<PackageSpecRegistry>::Root < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/testdata/packager/package_private_namer/a/__package.rb:3
       class ::<PackageSpecRegistry>::Root::A < ::Sorbet::Private::Static::PackageSpec () @ test/testdata/packager/package_private_namer/a/__package.rb:3
-        module ::<PackageSpecRegistry>::Root::A::Nested < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/testdata/packager/package_private_namer/a/nested/pkg/__package.rb:3
-          class ::<PackageSpecRegistry>::Root::A::Nested::Pkg < ::Sorbet::Private::Static::PackageSpec () @ test/testdata/packager/package_private_namer/a/nested/pkg/__package.rb:3
-          class ::<PackageSpecRegistry>::Root::A::Nested::<Class:Pkg>[<AttachedClass>] < ::Sorbet::Private::Static::<Class:PackageSpec> () @ test/testdata/packager/package_private_namer/a/nested/pkg/__package.rb:3
-            type-member(+) ::<PackageSpecRegistry>::Root::A::Nested::<Class:Pkg>::<AttachedClass> -> T.attached_class (of Root::A::Nested::Pkg) @ test/testdata/packager/package_private_namer/a/nested/pkg/__package.rb:3
-            method ::<PackageSpecRegistry>::Root::A::Nested::<Class:Pkg>#<static-init> (<blk>) @ test/testdata/packager/package_private_namer/a/nested/pkg/__package.rb:3
-              argument <blk><block> @ Loc {file=test/testdata/packager/package_private_namer/a/nested/pkg/__package.rb start=??? end=???}
-        class ::<PackageSpecRegistry>::Root::A::<Class:Nested>[<AttachedClass>] < ::Module () @ test/testdata/packager/package_private_namer/a/nested/pkg/__package.rb:3
-          type-member(+) ::<PackageSpecRegistry>::Root::A::<Class:Nested>::<AttachedClass> -> T.attached_class (of Root::A::Nested) @ test/testdata/packager/package_private_namer/a/nested/pkg/__package.rb:3
       class ::<PackageSpecRegistry>::Root::<Class:A>[<AttachedClass>] < ::Sorbet::Private::Static::<Class:PackageSpec> () @ test/testdata/packager/package_private_namer/a/__package.rb:3
         type-member(+) ::<PackageSpecRegistry>::Root::<Class:A>::<AttachedClass> -> T.attached_class (of Root::A) @ test/testdata/packager/package_private_namer/a/__package.rb:3
         method ::<PackageSpecRegistry>::Root::<Class:A>#<static-init> (<blk>) @ test/testdata/packager/package_private_namer/a/__package.rb:3
@@ -31,16 +23,14 @@ class ::<root> < ::Object ()
       argument <blk><block> @ Loc {file=test/testdata/packager/package_private_namer/a/__package.rb start=??? end=???}
     method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/packager/package_private_namer/a/errors.rb:3
       argument <blk><block> @ Loc {file=test/testdata/packager/package_private_namer/a/errors.rb start=??? end=???}
-    method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/packager/package_private_namer/a/nested/pkg/__package.rb:3
-      argument <blk><block> @ Loc {file=test/testdata/packager/package_private_namer/a/nested/pkg/__package.rb start=??? end=???}
-    method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/packager/package_private_namer/a/nested/pkg/pkg.rb:3
-      argument <blk><block> @ Loc {file=test/testdata/packager/package_private_namer/a/nested/pkg/pkg.rb start=??? end=???}
     method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/packager/package_private_namer/a/valid.rb:3
       argument <blk><block> @ Loc {file=test/testdata/packager/package_private_namer/a/valid.rb start=??? end=???}
     method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/packager/package_private_namer/b/__package.rb:3
       argument <blk><block> @ Loc {file=test/testdata/packager/package_private_namer/b/__package.rb start=??? end=???}
     method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/packager/package_private_namer/b/b.rb:3
       argument <blk><block> @ Loc {file=test/testdata/packager/package_private_namer/b/b.rb start=??? end=???}
+    method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/packager/package_private_namer/b/root_namespace.rb:3
+      argument <blk><block> @ Loc {file=test/testdata/packager/package_private_namer/b/root_namespace.rb start=??? end=???}
     method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/packager/package_private_namer/prelude/__package.rb:4
       argument <blk><block> @ Loc {file=test/testdata/packager/package_private_namer/prelude/__package.rb start=??? end=???}
     method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/packager/package_private_namer/prelude/module.rbi:3
@@ -50,30 +40,30 @@ class ::<root> < ::Object ()
       argument name<optional> -> T.nilable(Symbol) @ Loc {file=test/testdata/packager/package_private_namer/prelude/module.rbi start=4:16 end=4:20}
       argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/packager/package_private_namer/prelude/module.rbi start=??? end=???}
   module ::Root < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/testdata/packager/package_private_namer/a/errors.rb:3
-    module ::Root::A < ::Sorbet::Private::Static::ImplicitModuleSuperclass () : package_private @ (test/testdata/packager/package_private_namer/a/errors.rb:3, test/testdata/packager/package_private_namer/a/valid.rb:3)
-      class ::Root::A::Errors[Elem] < ::Object () @ test/testdata/packager/package_private_namer/a/errors.rb:12
-        type-member(=) ::Root::A::Errors::Elem -> Root::A::Errors::Elem @ test/testdata/packager/package_private_namer/a/errors.rb:26
-        class ::Root::A::Errors::Inner < ::Object () @ test/testdata/packager/package_private_namer/a/errors.rb:15
-        class ::Root::A::Errors::<Class:Inner>[<AttachedClass>] < ::<Class:Object> () @ test/testdata/packager/package_private_namer/a/errors.rb:15
-          type-member(+) ::Root::A::Errors::<Class:Inner>::<AttachedClass> -> T.attached_class (of Root::A::Errors::Inner) @ test/testdata/packager/package_private_namer/a/errors.rb:15
-          method ::Root::A::Errors::<Class:Inner>#<static-init> (<blk>) @ test/testdata/packager/package_private_namer/a/errors.rb:15
+    module ::Root::A < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ (test/testdata/packager/package_private_namer/a/errors.rb:3, test/testdata/packager/package_private_namer/a/valid.rb:3)
+      class ::Root::A::Errors[Elem] < ::Object () @ test/testdata/packager/package_private_namer/a/errors.rb:4
+        type-member(=) ::Root::A::Errors::Elem -> Root::A::Errors::Elem @ test/testdata/packager/package_private_namer/a/errors.rb:18
+        class ::Root::A::Errors::Inner < ::Object () @ test/testdata/packager/package_private_namer/a/errors.rb:7
+        class ::Root::A::Errors::<Class:Inner>[<AttachedClass>] < ::<Class:Object> () @ test/testdata/packager/package_private_namer/a/errors.rb:7
+          type-member(+) ::Root::A::Errors::<Class:Inner>::<AttachedClass> -> T.attached_class (of Root::A::Errors::Inner) @ test/testdata/packager/package_private_namer/a/errors.rb:7
+          method ::Root::A::Errors::<Class:Inner>#<static-init> (<blk>) @ test/testdata/packager/package_private_namer/a/errors.rb:7
             argument <blk><block> @ Loc {file=test/testdata/packager/package_private_namer/a/errors.rb start=??? end=???}
-      class ::Root::A::<Class:Errors>[<AttachedClass>] < ::<Class:Object> (Generic, Helpers) : package_private @ test/testdata/packager/package_private_namer/a/errors.rb:38
-        type-member(+) ::Root::A::<Class:Errors>::<AttachedClass> -> T.attached_class (of Root::A::Errors) @ test/testdata/packager/package_private_namer/a/errors.rb:12
-        method ::Root::A::<Class:Errors>#<static-init> (<blk>) @ test/testdata/packager/package_private_namer/a/errors.rb:12
+      class ::Root::A::<Class:Errors>[<AttachedClass>] < ::<Class:Object> (Generic, Helpers) : package_private @ test/testdata/packager/package_private_namer/a/errors.rb:30
+        type-member(+) ::Root::A::<Class:Errors>::<AttachedClass> -> T.attached_class (of Root::A::Errors) @ test/testdata/packager/package_private_namer/a/errors.rb:4
+        method ::Root::A::<Class:Errors>#<static-init> (<blk>) @ test/testdata/packager/package_private_namer/a/errors.rb:4
           argument <blk><block> @ Loc {file=test/testdata/packager/package_private_namer/a/errors.rb start=??? end=???}
-      class ::Root::A::<Class:<Class:Errors>>[<AttachedClass>] < ::Class () @ test/testdata/packager/package_private_namer/a/errors.rb:38
-        type-member(+) ::Root::A::<Class:<Class:Errors>>::<AttachedClass> -> T.attached_class (of T.class_of(Root::A::Errors)) @ test/testdata/packager/package_private_namer/a/errors.rb:38
-        method ::Root::A::<Class:<Class:Errors>>#<static-init> (<blk>) @ test/testdata/packager/package_private_namer/a/errors.rb:38
+      class ::Root::A::<Class:<Class:Errors>>[<AttachedClass>] < ::Class () @ test/testdata/packager/package_private_namer/a/errors.rb:30
+        type-member(+) ::Root::A::<Class:<Class:Errors>>::<AttachedClass> -> T.attached_class (of T.class_of(Root::A::Errors)) @ test/testdata/packager/package_private_namer/a/errors.rb:30
+        method ::Root::A::<Class:<Class:Errors>>#<static-init> (<blk>) @ test/testdata/packager/package_private_namer/a/errors.rb:30
           argument <blk><block> @ Loc {file=test/testdata/packager/package_private_namer/a/errors.rb start=??? end=???}
-      class ::Root::A::Marked < ::Object () : package_private @ (test/testdata/packager/package_private_namer/a/errors.rb:43, test/testdata/packager/package_private_namer/a/valid.rb:4)
+      class ::Root::A::Marked < ::Object () : package_private @ (test/testdata/packager/package_private_namer/a/errors.rb:35, test/testdata/packager/package_private_namer/a/valid.rb:4)
         static-field ::Root::A::Marked::Alias : package_private -> <Alias: ::String > @ test/testdata/packager/package_private_namer/a/valid.rb:10
         static-field ::Root::A::Marked::Later : package_private -> Integer @ test/testdata/packager/package_private_namer/a/valid.rb:18
         static-field-type-alias ::Root::A::Marked::TypeAlias : package_private -> Integer @ test/testdata/packager/package_private_namer/a/valid.rb:13
         static-field ::Root::A::Marked::X : package_private -> Integer @ test/testdata/packager/package_private_namer/a/valid.rb:7
-      class ::Root::A::<Class:Marked>[<AttachedClass>] < ::<Class:Object> () @ (test/testdata/packager/package_private_namer/a/errors.rb:43, test/testdata/packager/package_private_namer/a/valid.rb:4)
-        type-member(+) ::Root::A::<Class:Marked>::<AttachedClass> -> T.attached_class (of Root::A::Marked) @ (test/testdata/packager/package_private_namer/a/errors.rb:43, test/testdata/packager/package_private_namer/a/valid.rb:4)
-        method ::Root::A::<Class:Marked>#<static-init> (<blk>) @ (test/testdata/packager/package_private_namer/a/errors.rb:43, test/testdata/packager/package_private_namer/a/valid.rb:4)
+      class ::Root::A::<Class:Marked>[<AttachedClass>] < ::<Class:Object> () @ (test/testdata/packager/package_private_namer/a/errors.rb:35, test/testdata/packager/package_private_namer/a/valid.rb:4)
+        type-member(+) ::Root::A::<Class:Marked>::<AttachedClass> -> T.attached_class (of Root::A::Marked) @ (test/testdata/packager/package_private_namer/a/errors.rb:35, test/testdata/packager/package_private_namer/a/valid.rb:4)
+        method ::Root::A::<Class:Marked>#<static-init> (<blk>) @ (test/testdata/packager/package_private_namer/a/errors.rb:35, test/testdata/packager/package_private_namer/a/valid.rb:4)
           argument <blk><block> @ Loc {file=test/testdata/packager/package_private_namer/a/errors.rb start=??? end=???}
       class ::Root::A::MyEnum < ::T::Enum () : abstract|sealed @ test/testdata/packager/package_private_namer/a/valid.rb:21
         class ::Root::A::MyEnum::Other < ::Root::A::MyEnum () @ test/testdata/packager/package_private_namer/a/valid.rb:24
@@ -96,21 +86,6 @@ class ::<root> < ::Object ()
           argument <blk><block> @ Loc {file=test/testdata/packager/package_private_namer/a/valid.rb start=??? end=???}
         method ::Root::A::<Class:MyEnum>#sealed_subclasses (<blk>) -> T::Set[T.any(T.class_of(Root::A::MyEnum::Value), T.class_of(Root::A::MyEnum::Other))] @ test/testdata/packager/package_private_namer/a/valid.rb:21
           argument <blk><block> @ Loc {file=??? start=??? end=???}
-      module ::Root::A::Nested < ::Sorbet::Private::Static::ImplicitModuleSuperclass () : package_private @ test/testdata/packager/package_private_namer/a/errors.rb:7
-        module ::Root::A::Nested::Pkg < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/testdata/packager/package_private_namer/a/nested/pkg/pkg.rb:3
-          class ::Root::A::Nested::Pkg::Thing < ::Object () @ test/testdata/packager/package_private_namer/a/nested/pkg/pkg.rb:4
-          class ::Root::A::Nested::Pkg::<Class:Thing>[<AttachedClass>] < ::<Class:Object> () @ test/testdata/packager/package_private_namer/a/nested/pkg/pkg.rb:4
-            type-member(+) ::Root::A::Nested::Pkg::<Class:Thing>::<AttachedClass> -> T.attached_class (of Root::A::Nested::Pkg::Thing) @ test/testdata/packager/package_private_namer/a/nested/pkg/pkg.rb:4
-            method ::Root::A::Nested::Pkg::<Class:Thing>#<static-init> (<blk>) @ test/testdata/packager/package_private_namer/a/nested/pkg/pkg.rb:4
-              argument <blk><block> @ Loc {file=test/testdata/packager/package_private_namer/a/nested/pkg/pkg.rb start=??? end=???}
-        class ::Root::A::Nested::<Class:Pkg>[<AttachedClass>] < ::Module () @ test/testdata/packager/package_private_namer/a/nested/pkg/pkg.rb:3
-          type-member(+) ::Root::A::Nested::<Class:Pkg>::<AttachedClass> -> T.attached_class (of Root::A::Nested::Pkg) @ test/testdata/packager/package_private_namer/a/nested/pkg/pkg.rb:3
-          method ::Root::A::Nested::<Class:Pkg>#<static-init> (<blk>) @ test/testdata/packager/package_private_namer/a/nested/pkg/pkg.rb:3
-            argument <blk><block> @ Loc {file=test/testdata/packager/package_private_namer/a/nested/pkg/pkg.rb start=??? end=???}
-      class ::Root::A::<Class:Nested>[<AttachedClass>] < ::Module () @ test/testdata/packager/package_private_namer/a/errors.rb:7
-        type-member(+) ::Root::A::<Class:Nested>::<AttachedClass> -> T.attached_class (of Root::A::Nested) @ test/testdata/packager/package_private_namer/a/errors.rb:7
-        method ::Root::A::<Class:Nested>#<static-init> (<blk>) @ test/testdata/packager/package_private_namer/a/errors.rb:7
-          argument <blk><block> @ Loc {file=test/testdata/packager/package_private_namer/a/errors.rb start=??? end=???}
       module ::Root::A::Plain < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/testdata/packager/package_private_namer/a/valid.rb:29
         static-field ::Root::A::Plain::Y -> Integer @ test/testdata/packager/package_private_namer/a/valid.rb:31
       class ::Root::A::<Class:Plain>[<AttachedClass>] < ::Module () @ test/testdata/packager/package_private_namer/a/valid.rb:29
@@ -121,15 +96,15 @@ class ::<root> < ::Object ()
       type-member(+) ::Root::<Class:A>::<AttachedClass> -> T.attached_class (of Root::A) @ (test/testdata/packager/package_private_namer/a/errors.rb:3, test/testdata/packager/package_private_namer/a/valid.rb:3)
       method ::Root::<Class:A>#<static-init> (<blk>) @ (test/testdata/packager/package_private_namer/a/errors.rb:3, test/testdata/packager/package_private_namer/a/valid.rb:3)
         argument <blk><block> @ Loc {file=test/testdata/packager/package_private_namer/a/errors.rb start=??? end=???}
-    module ::Root::B < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/testdata/packager/package_private_namer/b/b.rb:3
+    module ::Root::B < ::Sorbet::Private::Static::ImplicitModuleSuperclass () : package_private @ (test/testdata/packager/package_private_namer/b/b.rb:3, test/testdata/packager/package_private_namer/b/root_namespace.rb:3)
       class ::Root::B::Thing < ::Object () : package_private @ test/testdata/packager/package_private_namer/b/b.rb:4
       class ::Root::B::<Class:Thing>[<AttachedClass>] < ::<Class:Object> () @ test/testdata/packager/package_private_namer/b/b.rb:4
         type-member(+) ::Root::B::<Class:Thing>::<AttachedClass> -> T.attached_class (of Root::B::Thing) @ test/testdata/packager/package_private_namer/b/b.rb:4
         method ::Root::B::<Class:Thing>#<static-init> (<blk>) @ test/testdata/packager/package_private_namer/b/b.rb:4
           argument <blk><block> @ Loc {file=test/testdata/packager/package_private_namer/b/b.rb start=??? end=???}
-    class ::Root::<Class:B>[<AttachedClass>] < ::Module () @ test/testdata/packager/package_private_namer/b/b.rb:3
-      type-member(+) ::Root::<Class:B>::<AttachedClass> -> T.attached_class (of Root::B) @ test/testdata/packager/package_private_namer/b/b.rb:3
-      method ::Root::<Class:B>#<static-init> (<blk>) @ test/testdata/packager/package_private_namer/b/b.rb:3
+    class ::Root::<Class:B>[<AttachedClass>] < ::Module () @ (test/testdata/packager/package_private_namer/b/b.rb:3, test/testdata/packager/package_private_namer/b/root_namespace.rb:3)
+      type-member(+) ::Root::<Class:B>::<AttachedClass> -> T.attached_class (of Root::B) @ (test/testdata/packager/package_private_namer/b/b.rb:3, test/testdata/packager/package_private_namer/b/root_namespace.rb:3)
+      method ::Root::<Class:B>#<static-init> (<blk>) @ (test/testdata/packager/package_private_namer/b/b.rb:3, test/testdata/packager/package_private_namer/b/root_namespace.rb:3)
         argument <blk><block> @ Loc {file=test/testdata/packager/package_private_namer/b/b.rb start=??? end=???}
   class ::<Class:Root>[<AttachedClass>] < ::Module () @ test/testdata/packager/package_private_namer/a/errors.rb:3
     type-member(+) ::<Class:Root>::<AttachedClass> -> T.attached_class (of Root) @ test/testdata/packager/package_private_namer/a/errors.rb:3

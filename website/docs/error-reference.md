@@ -1494,16 +1494,18 @@ To control which packages may import your package at all, rather than which of i
 
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
 
-If a package contains a sub-package, the modules that make up the path to that sub-package must be `module`s, not `class`es, unless the package that owns them is marked `imported_by_nested_packages!`. For example, if there are two packages `A` and `A::B`, then `A` may only be a `class` if package `A` is marked `imported_by_nested_packages!`.
+If a package contains a sub-package, the modules that make up the path to that sub-package must be plain `module`s that only serve as namespaces, unless the package that owns them is marked `imported_by_nested_packages!`. That is, they may not be `class`es, and they may not define behavior: methods, `private_constant`, `sig`s, and other code at the top level of the `module` body (even a local variable or an `if __FILE__ == $PROGRAM_NAME` check). Nested classes, modules, and constant assignments are fine. (Mixins, superclasses, and type members on these namespaces are reported separately, as [5083](#5083) and [4016](#4016).)
+
+For example, if there are two packages `A` and `A::B`, then `A` may only be a `class` or define methods if package `A` is marked `imported_by_nested_packages!`.
 
 This applies to the files of the package that owns the namespace. This error doesn't check a file in `A::B` that reopens `A`, which is subject to other rules: for example, it may not define behavior on `A`.
 
-In package-directed mode, a nested package can be typechecked before the package that owns its enclosing namespace. Requiring a `module` means that the namespace never changes from a `module` to a `class` after a nested package has seen it. Marking `A` with `imported_by_nested_packages!` instead requires every package nested under `A` to `import A` (see [3739](#3739)), which guarantees that `A` is typechecked before, or in the same stratum as, the packages nested under it.
+In package-directed mode, a nested package can be typechecked before the package that owns its enclosing namespace. Requiring a plain `module` means that the namespace never changes after a nested package has seen it. Marking `A` with `imported_by_nested_packages!` instead requires every package nested under `A` to `import A` (see [3739](#3739)), which guarantees that `A` is typechecked before, or in the same stratum as, the packages nested under it.
 
 To fix this error, either:
 
-- change `class A` to `module A` (moving anything that needs a class, like instance methods or a superclass, onto a constant nested inside `A`), or
-- if `A` must be a `class` and that can't be avoided, mark package `A` with `imported_by_nested_packages!`. This is discouraged, because behavior on a namespace that other packages are nested under slows down code loading in large codebases.
+- change `class A` to `module A`, and move any behavior (methods, mixins, a superclass, top-level statements) onto a constant nested inside `A`, or
+- if `A` must be a `class` or define behavior and that can't be avoided, mark package `A` with `imported_by_nested_packages!`. This is discouraged, because behavior on a namespace that other packages are nested under slows down code loading in large codebases.
 
 ## 5001
 

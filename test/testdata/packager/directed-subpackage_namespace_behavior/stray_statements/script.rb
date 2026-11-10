@@ -1,6 +1,6 @@
 # typed: true
 
-module StrayStatements
+module StrayStatements # error: `StrayStatements` cannot define behavior, because packages are nested under `StrayStatements`
   class Main; end
 
   Main.new if __FILE__ == $PROGRAM_NAME

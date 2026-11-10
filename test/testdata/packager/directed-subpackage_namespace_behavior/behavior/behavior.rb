@@ -1,6 +1,6 @@
 # typed: true
 
-module Behavior
+module Behavior # error: `Behavior` cannot define behavior, because packages are nested under `Behavior`
   def self.helper; end
 
   class Thing; end

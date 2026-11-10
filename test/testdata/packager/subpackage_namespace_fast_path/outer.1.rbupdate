@@ -1,7 +1,7 @@
 # typed: true
 # assert-fast-path: outer.rb
 
-module Outer
+module Outer # error: `Outer` cannot define behavior, because packages are nested under `Outer`
   def self.helper; 1; end
 
   class Thing; end

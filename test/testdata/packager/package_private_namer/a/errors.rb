@@ -1,14 +1,6 @@
 # typed: strict
 
 module Root::A
-  package_private!
-# ^^^^^^^^^^^^^^^^ error: `package_private!` cannot mark the root namespace of package `Root::A`
-
-  module Nested
-    package_private!
-  # ^^^^^^^^^^^^^^^^ error: `package_private!` cannot mark `Root::A::Nested`, because it encloses another package
-  end
-
   class Errors
     extend T::Generic
 

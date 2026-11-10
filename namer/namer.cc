@@ -1568,6 +1568,13 @@ private:
         return ownerInfo.exists() && ownerInfo.hasSubPackages && !ownerInfo.importedByNestedPackagesSatisfied();
     }
 
+    // Whether this definition is something that a restricted package namespace (see
+    // `isRestrictedPackageNamespace`) may not have: a `class`, or a definition with behavior.
+    static bool isRestrictedNamespaceDefinition(const core::FoundClass &klass) {
+        return klass.classKind == core::FoundClass::Kind::Class ||
+               (klass.classKind != core::FoundClass::Kind::Unknown && klass.definesBehavior);
+    }
+
     // Whether `symbol` is a restricted package namespace (see `isRestrictedPackageNamespace`) owned by the
     // package of the file being named.
     //
@@ -1587,10 +1594,18 @@ private:
                                                core::ClassOrModuleRef symbol) {
         if (auto e = ctx.beginError(klass.declLoc, core::errors::Namer::PackageNamespaceDefinition)) {
             auto namespaceName = symbol.show(ctx);
+            auto isClass = klass.classKind == core::FoundClass::Kind::Class;
+            auto restriction = isClass ? (klass.definesBehavior ? "be a `class` that defines behavior" : "be a `class`")
+                                       : "define behavior";
+            auto alternative =
+                klass.definesBehavior
+                    ? (isClass ? "make it a `module` and move its behavior onto a constant nested inside it"
+                               : "move its behavior onto a constant nested inside it")
+                    : "make it a `module`";
             auto data = symbol.data(ctx);
             auto &ownerInfo = ctx.state.packageDB().getPackageInfo(data->package);
-            ownerInfo.explainSubpackageNamespaceError(ctx, e, namespaceName, "be a `class`", data->packageRegistryOwner,
-                                                      namespaceName, "make it a `module`");
+            ownerInfo.explainSubpackageNamespaceError(ctx, e, namespaceName, restriction, data->packageRegistryOwner,
+                                                      namespaceName, alternative);
         }
     }
 
@@ -1723,7 +1738,7 @@ private:
         }
         ENFORCE(symbol.exists());
 
-        if (klass.classKind == core::FoundClass::Kind::Class && isOwnRestrictedPackageNamespace(ctx, symbol)) {
+        if (isRestrictedNamespaceDefinition(klass) && isOwnRestrictedPackageNamespace(ctx, symbol)) {
             reportPackageNamespaceDefinitionError(ctx, klass, symbol);
         }
 
