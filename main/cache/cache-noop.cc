@@ -37,4 +37,6 @@ unique_ptr<OwnedKeyValueStore> SessionCache::open(shared_ptr<::spdlog::logger> l
     return nullptr;
 }
 
+void SessionCache::commit(shared_ptr<::spdlog::logger> logger, const options::Options &opts) const {}
+
 } // namespace sorbet::realmain::cache

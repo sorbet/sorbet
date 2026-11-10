@@ -11,7 +11,6 @@
 
 namespace sorbet {
 class WorkerPool;
-class KeyValueStore;
 class OwnedKeyValueStore;
 } // namespace sorbet
 
@@ -40,18 +39,6 @@ class UndoState;
 class FileStratumMapping;
 
 /**
- * Strategies for managing the kvstore over the duration of the slow path. Each stratum checked will first open the
- * kvstore, and then close it at the end of its indexing phase.
- */
-class KVStoreStrategy {
-public:
-    virtual ~KVStoreStrategy() {}
-
-    virtual std::unique_ptr<const OwnedKeyValueStore> openKVStore() = 0;
-    virtual void closeKVStore(std::unique_ptr<const OwnedKeyValueStore> kvstore) = 0;
-};
-
-/**
  * Encapsulates typechecker operations and enforces that they happen on a single thread.
  */
 class LSPTypechecker final {
@@ -68,7 +55,7 @@ class LSPTypechecker final {
     std::unique_ptr<core::GlobalState> gs;
 
     /**
-     * A copy of the kvstore produced during initialization, that's private to this LSP session.
+     * A private cache used during initialization and subsequent typechecking.
      */
     std::unique_ptr<cache::SessionCache> sessionCache;
 
@@ -109,15 +96,16 @@ class LSPTypechecker final {
 
     core::packages::Stratum lastStratum;
 
+    std::unique_ptr<OwnedKeyValueStore> openSessionCache() const;
+
     enum class SlowPathMode {
         Init,
         Cancelable,
     };
 
-    /** Conservatively reruns entire pipeline without caching any trees. Returns 'true' if committed, 'false' if
-     * canceled. */
-    std::pair<bool, core::packages::Stratum> runSlowPath(LSPFileUpdates &updates, KVStoreStrategy &kvstore,
-                                                         WorkerPool &workers,
+    /** Reruns the pipeline using the session cache, closing the store after each indexing phase.
+     * Returns 'true' if committed, 'false' if canceled. */
+    std::pair<bool, core::packages::Stratum> runSlowPath(LSPFileUpdates &updates, WorkerPool &workers,
                                                          std::shared_ptr<core::ErrorFlusher> errorFlusher,
                                                          SlowPathMode mode);
 
@@ -151,8 +139,9 @@ public:
      *
      * Writes all diagnostic messages to LSPOutput.
      */
-    void initialize(TaskQueue &queue, std::unique_ptr<core::GlobalState> gs, std::unique_ptr<KeyValueStore> kvstore,
-                    WorkerPool &workers, const LSPConfiguration &currentConfig);
+    void initialize(TaskQueue &queue, std::unique_ptr<core::GlobalState> gs,
+                    std::unique_ptr<cache::SessionCache> sessionCache, WorkerPool &workers,
+                    const LSPConfiguration &currentConfig);
 
     /**
      * Typechecks the given input. Returns 'true' if the updates were committed, or 'false' if typechecking was
@@ -314,7 +303,7 @@ public:
     virtual ~LSPTypecheckerDelegate() = default;
 
     void initialize(InitializedTask &task, std::unique_ptr<core::GlobalState> gs,
-                    std::unique_ptr<KeyValueStore> kvstore, const LSPConfiguration &currentConfig);
+                    std::unique_ptr<cache::SessionCache> sessionCache, const LSPConfiguration &currentConfig);
 
     void resumeTaskQueue(InitializedTask &task);
 

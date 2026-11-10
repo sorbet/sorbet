@@ -55,8 +55,9 @@ void clearAndReplaceTimers(vector<unique_ptr<Timer>> &timers, const vector<uniqu
 } // namespace
 
 LSPIndexer::LSPIndexer(shared_ptr<const LSPConfiguration> config, unique_ptr<core::GlobalState> gs,
-                       unique_ptr<KeyValueStore> kvstore)
-    : config(config), gs(move(gs)), kvstore(move(kvstore)), emptyWorkers(WorkerPool::create(0, *config->logger)) {}
+                       unique_ptr<cache::SessionCache> sessionCache)
+    : config(config), gs(move(gs)), sessionCache(move(sessionCache)),
+      emptyWorkers(WorkerPool::create(0, *config->logger)) {}
 
 LSPIndexer::~LSPIndexer() {
     for (auto &timer : pendingTypecheckDiagnosticLatencyTimers) {
@@ -290,7 +291,7 @@ void LSPIndexer::transferInitializeState(InitializedTask &task) {
                       core::packages::GenPackagesMode::Disabled, enableGenPackagesAllowRelaxingTestVisibility));
 
     task.setGlobalState(std::move(typecheckerGS));
-    task.setKeyValueStore(std::move(this->kvstore));
+    task.setSessionCache(std::move(this->sessionCache));
 }
 
 void LSPIndexer::initialize(IndexerInitializationTask &task, vector<shared_ptr<core::File>> &&files) {

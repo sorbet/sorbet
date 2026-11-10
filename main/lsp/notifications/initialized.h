@@ -2,12 +2,9 @@
 #define RUBY_TYPER_LSP_NOTIFICATIONS_INITIALIZED_H
 
 #include "absl/synchronization/notification.h"
+#include "main/cache/cache.h"
 #include "main/lsp/LSPFileUpdates.h"
 #include "main/lsp/LSPTask.h"
-
-namespace sorbet {
-class KeyValueStore;
-}
 
 namespace sorbet::realmain::lsp {
 class InitializedTask final : public LSPTask {
@@ -15,7 +12,7 @@ class InitializedTask final : public LSPTask {
     LSPFileUpdates updates;
     LSPPreprocessor *preprocessor;
     std::unique_ptr<core::GlobalState> gs;
-    std::unique_ptr<KeyValueStore> kvstore;
+    std::unique_ptr<cache::SessionCache> sessionCache;
 
 public:
     InitializedTask(LSPConfiguration &config);
@@ -25,7 +22,7 @@ public:
     void run(LSPTypecheckerDelegate &typechecker) override;
 
     void setGlobalState(std::unique_ptr<core::GlobalState> gs);
-    void setKeyValueStore(std::unique_ptr<KeyValueStore> kvstore);
+    void setSessionCache(std::unique_ptr<cache::SessionCache> sessionCache);
     bool canPreempt(const LSPIndexer &indexer) const override;
 };
 } // namespace sorbet::realmain::lsp
