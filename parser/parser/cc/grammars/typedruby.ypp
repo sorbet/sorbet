@@ -2328,9 +2328,10 @@ array_premature_end: eof
                       driver.lex.context.inClass = false;
                       driver.local_push();
                     }
-                    bodystmt kEND
+                    bodystmt kend_or_eof
                     {
                       $$ = driver.build.def_sclass(self, $1->token, $2, $3, $6->body, $7);
+                      driver.rewind_if_dedented($1->token, $7);
 
                       driver.local_pop();
                       driver.lex.context.inDef = $1->context.inDef;

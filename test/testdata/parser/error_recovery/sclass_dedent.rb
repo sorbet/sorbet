@@ -1,7 +1,7 @@
 # typed: false
 
-class A # error: Hint: this "class" token is not closed before the end of the file
-  class << self
+class A
+  class << self # error: Hint: this "class" token might not be properly closed
     def foo
     end
 
