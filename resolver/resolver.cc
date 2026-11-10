@@ -1465,6 +1465,10 @@ private:
 
         if (ancestorPresent) {
             saveAncestorTypeForHashing(ctx, job);
+            if (ancestorSym.asClassOrModuleRef().data(ctx)->flags.isTrackedSuperclass &&
+                !job.klass.data(ctx)->flags.isTrackedSuperclass) {
+                job.klass.data(ctx)->flags.isTrackedSuperclass = true;
+            }
         }
         return true;
     }
@@ -2749,6 +2753,16 @@ class ResolveTypeMembersAndFieldsWalk {
         core::ClassOrModuleRef subclass;
     };
 
+    struct CheckTrackedDescendantItem {
+        core::ClassOrModuleRef superClass;
+        core::ClassOrModuleRef subclass;
+    };
+
+    struct ResolveTrackDescendantItem {
+        core::FileRef file;
+        ast::Send *send;
+    };
+
     struct ResolveTypeMembersAndFieldsWorkerResult {
         vector<ast::ParsedFile> files;
         vector<ResolveAssignItem> todoAssigns;
@@ -2760,6 +2774,8 @@ class ResolveTypeMembersAndFieldsWalk {
         vector<ResolveSimpleStaticFieldItem> todoResolveSimpleStaticFieldItems;
         vector<ResolveMethodAliasItem> todoMethodAliasItems;
         vector<RecordSealedSubclassItem> todoSealedSubclassItems;
+        vector<CheckTrackedDescendantItem> todoCheckTrackedDescendantItems;
+        vector<ResolveTrackDescendantItem> todoResolveTrackDescendants;
     };
 
     struct ResolveTypeMembersAndFieldsResult {
@@ -2776,6 +2792,8 @@ class ResolveTypeMembersAndFieldsWalk {
     vector<ResolveSimpleStaticFieldItem> todoResolveSimpleStaticFieldItems_;
     vector<ResolveMethodAliasItem> todoMethodAliasItems_;
     vector<RecordSealedSubclassItem> todoSealedSubclassItems_;
+    vector<CheckTrackedDescendantItem> todoCheckTrackedDescendantItems_;
+    vector<ResolveTrackDescendantItem> todoResolveTrackDescendants_;
 
     // State for tracking type usage inside of a type alias or type member
     // definition
@@ -3451,6 +3469,78 @@ class ResolveTypeMembersAndFieldsWalk {
         arg.flags.isKeyword = true;
     }
 
+    static void resolveTrackDescendant(core::GlobalState &gs, const ResolveTrackDescendantItem &todo) {
+        auto send = todo.send;
+        auto loc = core::Loc(todo.file, send->loc);
+        if (!todo.file.data(gs).isRBI()) {
+            if (auto e = gs.beginError(loc, core::errors::Resolver::InvalidDescendantRegistration)) {
+                e.setHeader("`{}` can only be called in an RBI file", send->fun.show(gs));
+            }
+            return;
+        }
+
+        auto &superclassArg = send->getPosArg(0);
+        auto &subclassArg = send->getPosArg(1);
+        auto superclassCnst = ast::cast_tree<ast::ConstantLit>(superclassArg);
+        auto subclassCnst = ast::cast_tree<ast::ConstantLit>(subclassArg);
+        if (superclassCnst == nullptr || subclassCnst == nullptr) {
+            if (auto e = gs.beginError(loc, core::errors::Resolver::InvalidDescendantRegistration)) {
+                e.setHeader("Arguments to `{}` must be statically resolvable to classes or modules",
+                            send->fun.show(gs));
+            }
+            return;
+        }
+
+        auto superclassLoc = core::Loc(todo.file, superclassCnst->loc());
+        auto superclass = superclassCnst->symbol();
+        if (superclass.exists()) {
+            superclass = superclass.dealias(gs);
+        }
+        if (!superclass.exists() || !superclass.isClassOrModule()) {
+            if (auto e = gs.beginError(superclassLoc, core::errors::Resolver::InvalidDescendantRegistration)) {
+                e.setHeader("First argument to `{}` must be statically resolvable to a class or module",
+                            send->fun.show(gs));
+            }
+            return;
+        }
+
+        auto subclassLoc = core::Loc(todo.file, subclassCnst->loc());
+        auto subclass = subclassCnst->symbol();
+        if (subclass.exists()) {
+            subclass = subclass.dealias(gs);
+        }
+        if (!subclass.exists() || !subclass.isClassOrModule() || subclass == core::Symbols::StubModule()) {
+            if (auto e = gs.beginError(subclassLoc, core::errors::Resolver::InvalidDescendantRegistration)) {
+                e.setHeader("Second argument to `{}` must be statically resolvable to a class or module",
+                            send->fun.show(gs));
+            }
+            return;
+        }
+
+        auto superclassSym = superclass.asClassOrModuleRef();
+        auto subclassSym = subclass.asClassOrModuleRef();
+        auto subclassDefLoc = subclassSym.data(gs)->loc();
+
+        auto subclassPkgName = gs.packageDB().getPackageNameForFile(subclassDefLoc.file());
+        auto curPkgName = gs.packageDB().getPackageNameForFile(todo.file);
+        if (subclassPkgName != curPkgName) {
+            if (auto e = gs.beginError(subclassLoc, core::errors::Resolver::InvalidDescendantRegistration)) {
+                e.setHeader("`{}` must be tracked in its own package", subclassSym.show(gs));
+            }
+            return;
+        }
+
+        if (!subclassSym.data(gs)->derivesFrom(gs, superclassSym)) {
+            if (auto e = gs.beginError(loc, core::errors::Resolver::InvalidDescendantRegistration)) {
+                e.setHeader("`{}` is not a descendant of `{}`", subclassSym.show(gs), superclassSym.show(gs));
+                e.addErrorLine(subclassSym.data(gs)->loc(), "`{}` defined here", subclassSym.show(gs));
+            }
+            return;
+        }
+
+        subclassSym.data(gs)->recordTrackedSuperclass(gs, superclassSym);
+    }
+
     ast::UnresolvedIdent *unwrapFieldAssign(ast::Assign &asgn) {
         auto uid = ast::cast_tree<ast::UnresolvedIdent>(asgn.lhs);
         if (uid == nullptr) {
@@ -3551,6 +3641,10 @@ public:
             }
 
             auto ancestorSym = dealiased.asClassOrModuleRef();
+            if (ancestorSym.data(ctx)->flags.isTrackedSuperclass) {
+                todoCheckTrackedDescendantItems_.emplace_back(CheckTrackedDescendantItem{ancestorSym, klass.symbol});
+            }
+
             if (!ancestorSym.data(ctx)->flags.isSealed) {
                 continue;
             }
@@ -3710,6 +3804,20 @@ public:
 
         if (auto id = ast::cast_tree<ast::ConstantLit>(send.recv)) {
             if (id->symbol() != core::Symbols::T()) {
+                if (id->symbol() == core::Symbols::T_Descendants()) {
+                    if (send.fun == core::Names::register_()) {
+                        if (send.numPosArgs() != 2 || send.hasKwArgs() || send.hasBlock()) {
+                            if (auto e =
+                                    ctx.beginError(send.loc, core::errors::Resolver::InvalidDescendantRegistration)) {
+                                e.setHeader("`{}` must be called with exactly 2 positional arguments",
+                                            send.fun.show(ctx));
+                            }
+                        } else if (ctx.state.packageDB().enabled()) {
+                            todoResolveTrackDescendants_.emplace_back(ctx.file, &send);
+                        }
+                    }
+                }
+
                 return;
             }
 
@@ -3907,6 +4015,8 @@ public:
                 output.todoResolveSimpleStaticFieldItems = move(walk.todoResolveSimpleStaticFieldItems_);
                 output.todoMethodAliasItems = move(walk.todoMethodAliasItems_);
                 output.todoSealedSubclassItems = move(walk.todoSealedSubclassItems_);
+                output.todoCheckTrackedDescendantItems = move(walk.todoCheckTrackedDescendantItems_);
+                output.todoResolveTrackDescendants = move(walk.todoResolveTrackDescendants_);
                 auto count = output.files.size();
                 outputq->push(move(output), count);
             }
@@ -3924,6 +4034,8 @@ public:
         vector<vector<ResolveSimpleStaticFieldItem>> combinedTodoResolveSimpleStaticFieldItems;
         vector<vector<ResolveMethodAliasItem>> combinedTodoMethodAliasItems;
         vector<vector<RecordSealedSubclassItem>> combinedTodoSealedSubclassItems;
+        vector<vector<CheckTrackedDescendantItem>> combinedTodoCheckTrackDescendantItems;
+        vector<vector<ResolveTrackDescendantItem>> combinedTodoResolveTrackDescendants;
 
         {
             ResolveTypeMembersAndFieldsWorkerResult threadResult;
@@ -3943,6 +4055,9 @@ public:
                         move(threadResult.todoResolveSimpleStaticFieldItems));
                     combinedTodoMethodAliasItems.emplace_back(move(threadResult.todoMethodAliasItems));
                     combinedTodoSealedSubclassItems.emplace_back(move(threadResult.todoSealedSubclassItems));
+                    combinedTodoCheckTrackDescendantItems.emplace_back(
+                        move(threadResult.todoCheckTrackedDescendantItems));
+                    combinedTodoResolveTrackDescendants.emplace_back(move(threadResult.todoResolveTrackDescendants));
                 }
             }
         }
@@ -4061,6 +4176,28 @@ public:
             for (auto &threadTodos : combinedTodoSealedSubclassItems) {
                 for (auto &[sealedClass, subclass] : threadTodos) {
                     sealedClass.data(gs)->recordSealedSubclass(gs, subclass);
+                }
+            }
+        }
+        {
+            Timer timeit(gs.tracer(), "resolver.resolveTrackDescendants");
+            for (auto &threadTodos : combinedTodoResolveTrackDescendants) {
+                for (auto &todo : threadTodos) {
+                    resolveTrackDescendant(gs, todo);
+                }
+            }
+        }
+        {
+            Timer timeit(gs.tracer(), "resolver.checkTrackedDescendants");
+            for (auto &threadTodos : combinedTodoCheckTrackDescendantItems) {
+                for (auto &[superclass, subclass] : threadTodos) {
+                    if (!absl::c_contains(subclass.data(gs)->trackedSuperClassesToList(gs), superclass)) {
+                        if (auto e =
+                                gs.beginError(subclass.data(gs)->loc(), core::errors::Resolver::UntrackedDescendant)) {
+                            e.setHeader("add T::Descendants.register({}, {}) in an RBI file in this package",
+                                        superclass.show(gs), subclass.show(gs));
+                        }
+                    }
                 }
             }
         }

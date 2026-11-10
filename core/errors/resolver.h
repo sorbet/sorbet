@@ -92,6 +92,8 @@ inline constexpr ErrorClass PackageNamespaceMixin{5083, StrictLevel::False};
 inline constexpr ErrorClass ModifyingUnpackagedConstant{5084, StrictLevel::False};
 inline constexpr ErrorClass InvalidPackageExpression{5085, StrictLevel::False};
 inline constexpr ErrorClass PackageScopeViolation{5086, StrictLevel::False};
+inline constexpr ErrorClass UntrackedDescendant{5087, StrictLevel::False};
+inline constexpr ErrorClass InvalidDescendantRegistration{5088, StrictLevel::False};
 } // namespace sorbet::core::errors::Resolver
 
 #endif

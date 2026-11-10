@@ -402,14 +402,15 @@ public:
         // Marked with `package_private!`. Constants nested inside it are package-private too, but this bit is only set
         // on the marked class itself.
         bool isPackagePrivate : 1;
+        bool isTrackedSuperclass : 1;
 
-        constexpr static uint16_t NUMBER_OF_FLAGS = 12;
+        constexpr static uint16_t NUMBER_OF_FLAGS = 13;
         constexpr static uint16_t VALID_BITS_MASK = (1 << NUMBER_OF_FLAGS) - 1;
 
         Flags() noexcept
             : isClass(false), isModule(false), isAbstract(false), isInterface(false), isLinearizationComputed(false),
               isFinal(false), isSealed(false), isPrivate(false), isDeclared(false), isDeclaredInPackage(false),
-              isBehaviorDefining(false), isPackagePrivate(false) {}
+              isBehaviorDefining(false), isPackagePrivate(false), isTrackedSuperclass(false) {}
 
         uint16_t serialize() const {
             static_assert(sizeof(Flags) == sizeof(uint16_t));
@@ -592,6 +593,11 @@ public:
 
     void recordSealedSubclass(GlobalState &gs, ClassOrModuleRef subclass);
 
+    // Records `superclass` on the `trackedSuperclasses` synthetic method of this class's singleton class, entering
+    // that method first if this is the first tracked superclass.
+    void recordTrackedSuperclass(GlobalState &gs, ClassOrModuleRef superclass);
+    InlinedVector<ClassOrModuleRef, 4> trackedSuperClassesToList(GlobalState &gs) const;
+
     // Returns the locations that are allowed to subclass the sealed class.
     absl::Span<const Loc> sealedLocs(const GlobalState &gs) const;
 
@@ -726,6 +732,10 @@ public:
 
 private:
     static void sortMembersStableOrder(const GlobalState &gs, std::vector<std::pair<NameRef, SymbolRef>> &out);
+
+    // Adds `classOfSubclass` to the `T::Set[T.any(...)]` stored as the result type of the synthetic `method`,
+    // unless it's already present.
+    static void recordClassOnSyntheticMethod(GlobalState &gs, MethodRef method, ClassOrModuleRef classOfSubclass);
 
     friend class serialize::SerializerImpl;
     friend class GlobalState;
