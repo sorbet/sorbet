@@ -3,7 +3,7 @@
 module IsolatedForms::Before
 end
 
-class IsolatedForms
+class IsolatedForms # error: `IsolatedForms` cannot be a `class`, because packages are nested under `IsolatedForms`
   class Helper; end
   class FromHelper < Helper; end
 end

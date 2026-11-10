@@ -1553,6 +1553,47 @@ private:
         return false;
     }
 
+    // Whether this is a namespace on the path to a subpackage (the owning package's root, or an
+    // intermediate namespace between it and a subpackage) where the owning package's
+    // `imported_by_nested_packages!` doesn't take effect (it's not marked, or a nested package is missing
+    // the import). Such a namespace has to be a plain `module`, because a nested package can be typechecked
+    // before its owner.
+    bool isRestrictedPackageNamespace(core::Context ctx, core::packages::MangledName namespacePackage,
+                                      core::ClassOrModuleRef packageRegistryOwner) {
+        if (!namespacePackage.exists() || !packageRegistryOwner.exists() ||
+            packageRegistryOwner == core::Symbols::PackageSpecRegistry()) {
+            return false;
+        }
+        auto &ownerInfo = ctx.state.packageDB().getPackageInfo(namespacePackage);
+        return ownerInfo.exists() && ownerInfo.hasSubPackages && !ownerInfo.importedByNestedPackagesSatisfied();
+    }
+
+    // Whether `symbol` is a restricted package namespace (see `isRestrictedPackageNamespace`) owned by the
+    // package of the file being named.
+    //
+    // Only the owning package's own files are checked. Another package's file reopening the namespace
+    // (e.g. `class Outer; module Nested` in a nested package) is reported elsewhere if it defines
+    // behavior, and marking the owning package wouldn't make it safe anyway.
+    bool isOwnRestrictedPackageNamespace(core::Context ctx, core::ClassOrModuleRef symbol) {
+        if (this->package == nullptr) {
+            return false;
+        }
+        auto data = symbol.data(ctx);
+        return data->package == package->mangledName() &&
+               isRestrictedPackageNamespace(ctx, data->package, data->packageRegistryOwner);
+    }
+
+    void reportPackageNamespaceDefinitionError(core::MutableContext ctx, const core::FoundClass &klass,
+                                               core::ClassOrModuleRef symbol) {
+        if (auto e = ctx.beginError(klass.declLoc, core::errors::Namer::PackageNamespaceDefinition)) {
+            auto namespaceName = symbol.show(ctx);
+            auto data = symbol.data(ctx);
+            auto &ownerInfo = ctx.state.packageDB().getPackageInfo(data->package);
+            ownerInfo.explainSubpackageNamespaceError(ctx, e, namespaceName, "be a `class`", data->packageRegistryOwner,
+                                                      namespaceName, "make it a `module`");
+        }
+    }
+
     bool shouldMangleStaticFieldDefinition(core::MutableContext ctx, core::ClassOrModuleRef owner,
                                            const core::FoundStaticField &staticField) {
         if (isMangledNamespace(ctx, owner)) {
@@ -1681,6 +1722,10 @@ private:
             }
         }
         ENFORCE(symbol.exists());
+
+        if (klass.classKind == core::FoundClass::Kind::Class && isOwnRestrictedPackageNamespace(ctx, symbol)) {
+            reportPackageNamespaceDefinitionError(ctx, klass, symbol);
+        }
 
         const bool isUnknown = klass.classKind == core::FoundClass::Kind::Unknown;
         const bool isModule = klass.classKind == core::FoundClass::Kind::Module;

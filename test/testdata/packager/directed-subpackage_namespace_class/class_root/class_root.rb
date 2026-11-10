@@ -1,6 +1,6 @@
 # typed: true
 
-class ClassRoot
+class ClassRoot # error: `ClassRoot` cannot be a `class`, because packages are nested under `ClassRoot`
   class Helper; end
 end
 

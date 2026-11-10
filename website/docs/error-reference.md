@@ -1490,6 +1490,21 @@ To control which packages may import your package at all, rather than which of i
 
 `package_private!` is for constants. To make a method package-private, use `package_private` (or `package_private_class_method`) instead.
 
+## 4035
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+If a package contains a sub-package, the modules that make up the path to that sub-package must be `module`s, not `class`es, unless the package that owns them is marked `imported_by_nested_packages!`. For example, if there are two packages `A` and `A::B`, then `A` may only be a `class` if package `A` is marked `imported_by_nested_packages!`.
+
+This applies to the files of the package that owns the namespace. This error doesn't check a file in `A::B` that reopens `A`, which is subject to other rules: for example, it may not define behavior on `A`.
+
+In package-directed mode, a nested package can be typechecked before the package that owns its enclosing namespace. Requiring a `module` means that the namespace never changes from a `module` to a `class` after a nested package has seen it. Marking `A` with `imported_by_nested_packages!` instead requires every package nested under `A` to `import A` (see [3739](#3739)), which guarantees that `A` is typechecked before, or in the same stratum as, the packages nested under it.
+
+To fix this error, either:
+
+- change `class A` to `module A` (moving anything that needs a class, like instance methods or a superclass, onto a constant nested inside `A`), or
+- if `A` must be a `class` and that can't be avoided, mark package `A` with `imported_by_nested_packages!`. This is discouraged, because behavior on a namespace that other packages are nested under slows down code loading in large codebases.
+
 ## 5001
 
 Sorbet cannot resolve references to dynamic constants. The common case occurs when a constant is dynamically referenced through the singleton class of `self`:
@@ -3074,7 +3089,7 @@ end
 
 If a package contains a sub-package, the modules (or classes) that make up the path to that subpackage may not have a superclass or mixins, unless the package is marked `imported_by_nested_packages!`. For example, if there are two packages `A` and `A::B`, package `A` is not allowed to define mixins on the `A` module or class.
 
-In package-directed mode, `A::B` can be typechecked before `A`, so it must not be able to observe `A` changing. Marking `A` with `imported_by_nested_packages!` requires every package nested under `A` to `import A` (see [3739](#3739)), which guarantees that `A` is typechecked first.
+In package-directed mode, `A::B` can be typechecked before `A`, so it must not be able to observe `A` changing. Marking `A` with `imported_by_nested_packages!` requires every package nested under `A` to `import A` (see [3739](#3739)), which guarantees that `A` is typechecked before, or in the same stratum as, the packages nested under it.
 
 Resolving this error involves moving the functionality off of the package namespace symbol `A` and onto a member of the `A` package instead, moving the sub-package to a different place in the package hierarchy, or (if the mixin is intentional) marking `A` with `imported_by_nested_packages!`. For example,
 
