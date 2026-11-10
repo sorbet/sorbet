@@ -1281,6 +1281,11 @@ void readOptions(Options &opts,
             logger->error("--experimental-package-directed can only be specified in --sorbet-packages mode");
             throw EarlyReturnWithCode(1);
         }
+        if (!opts.storeState.empty() && opts.cacheSensitiveOptions.sorbetPackages) {
+            // --store-state builds Sorbet's payload, whose files belong to no package.
+            logger->error("--store-state can't be combined with --sorbet-packages");
+            throw EarlyReturnWithCode(1);
+        }
 
         if (raw.count("extra-package-files-directory-prefix-underscore")) {
             for (const string &dirName : raw["extra-package-files-directory-prefix-underscore"].as<vector<string>>()) {

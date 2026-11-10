@@ -963,8 +963,7 @@ private:
     const PackageInfo *const package;
     // Isolate the definitions in an unpackaged file that would populate a package's namespace (see
     // `isPackageTerritory`). Its other definitions, like new root constants or reopened payload classes, are entered
-    // as usual, the way unpackaged RBIs need. Payload files are allowed to have no package, including on the LSP fast
-    // path.
+    // as usual, the way unpackaged RBIs need.
     const bool isolateUnpackagedDefinitions;
 
     // Get the symbol for an already-defined owner. Limited to refs that can own things (classes and methods).
@@ -2348,7 +2347,13 @@ public:
           packageMangledStaticFields(packageMangledStaticFields),
           package(ctx.state.packageDB().getPackageForSourceFile(ctx.state, ctx.file)),
           isolateUnpackagedDefinitions(ctx.state.packageDB().enabled() && !ctx.file.data(ctx).isPackage(ctx) &&
-                                       this->package == nullptr && !ctx.file.data(ctx).isPayload()) {}
+                                       this->package == nullptr) {
+        // Payload files belong to no package, so they'd be isolated too. But they're only ever entered before the
+        // packager is enabled: when building the payload (`--store-state`, which `--sorbet-packages` rejects), or when
+        // populating it from source. LSP doesn't re-run namer on them.
+        ENFORCE(!isolateUnpackagedDefinitions || !ctx.file.data(ctx).isPayload(), "Payload file `{}` in packager mode",
+                ctx.file.data(ctx).path());
+    }
 
     SymbolDefiner::State enterClassDefinitions(core::MutableContext ctx, bool willDeleteOldDefs,
                                                ClassBehaviorLocsMap &classBehaviorLocs) {
