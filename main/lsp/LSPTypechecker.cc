@@ -189,7 +189,7 @@ bool LSPTypechecker::typecheck(unique_ptr<LSPFileUpdates> updates, WorkerPool &w
             ENFORCE(updates->updatedFiles.empty());
             ENFORCE(updates->updatedFileRefs.empty());
 
-            if (updates->fastPathUseIncrementalNamer) {
+            if (updates->fastPathFiles.useIncrementalNamer) {
                 // The incremental namer deletes and re-enters the symbols defined in the files it typechecks, so trees
                 // for files outside of `filesTypechecked` might reference symbols that were deleted.
                 this->resolvedFinalGS.clear();
@@ -240,11 +240,11 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
 
     Timer timeit(*config->logger, "fast_path");
 
-    auto shouldRunIncrementalNamer = updates.fastPathUseIncrementalNamer;
+    auto shouldRunIncrementalNamer = updates.fastPathFiles.useIncrementalNamer;
     if (shouldRunIncrementalNamer) {
         timeit.setTag("path_chosen", "fast+incremental");
     } else {
-        ENFORCE(updates.fastPathExtraFiles.empty());
+        ENFORCE(updates.fastPathFiles.extraFiles.empty());
         timeit.setTag("path_chosen", "fast");
     }
 
@@ -255,11 +255,11 @@ LSPTypechecker::FastPathResult LSPTypechecker::runFastPath(LSPFileUpdates &updat
     gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer, errorFlusher);
 
     vector<core::FileRef> toTypecheck;
-    toTypecheck.reserve(updates.fastPathExtraFiles.size() + updates.updatedFiles.size());
+    toTypecheck.reserve(updates.fastPathFiles.extraFiles.size() + updates.updatedFiles.size());
 
-    absl::c_copy(updates.fastPathExtraFiles, back_inserter(toTypecheck));
+    absl::c_copy(updates.fastPathFiles.extraFiles, back_inserter(toTypecheck));
     if constexpr (debug_mode) {
-        for (auto fref : updates.fastPathExtraFiles) {
+        for (auto fref : updates.fastPathFiles.extraFiles) {
             ENFORCE(fref.exists());
         }
     }
