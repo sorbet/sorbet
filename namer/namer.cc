@@ -373,14 +373,9 @@ public:
             return true;
         }
 
-        auto isValidRoot = [](const ast::ExpressionPtr &root) {
-            return ast::isa_tree<ast::EmptyTree>(root) || ast::isa_tree<ast::ConstantLit>(root);
-        };
-        if (auto lit = ast::cast_tree<ast::UnresolvedConstantLit>(exp)) {
-            return lit->foldFromRoot(isValidRoot,
-                                     [](bool isValid, core::NameRef name, core::LocOffsets loc) { return isValid; });
-        }
-        return isValidRoot(exp);
+        auto lit = ast::cast_tree<ast::UnresolvedConstantLit>(exp);
+        const auto &outermostScope = lit == nullptr ? exp : lit->outermostScope();
+        return ast::isa_tree<ast::EmptyTree>(outermostScope) || ast::isa_tree<ast::ConstantLit>(outermostScope);
     }
 
     void preTransformBlock(core::Context ctx, const ast::ExpressionPtr &block) {
