@@ -244,6 +244,7 @@ ExpressionPtr desugarBlock(DesugarContext dctx, parser::Block *block) {
     auto inBlock = true;
     DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockParamLoc, dctx.enclosingBlockParamName,
                          dctx.enclosingMethodName, inBlock, dctx.inModule, dctx.preserveConcreteSyntax);
+    dctx1.depth = dctx.depth;
     auto desugaredBody = desugarBody(dctx1, block->loc, block->body, move(destructures));
 
     send->setBlock(MK::Block(block->loc, move(desugaredBody), move(Params)), blockStyleToType(block->style));
@@ -408,6 +409,7 @@ ExpressionPtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::LocOf
     auto inModule = dctx.inModule && !isSelf;
     DesugarContext dctx1(dctx.ctx, uniqueCounter, dctx.enclosingBlockParamLoc, dctx.enclosingBlockParamName, name,
                          dctx.inAnyBlock, inModule, dctx.preserveConcreteSyntax);
+    dctx1.depth = dctx.depth;
     auto [params, destructures] = desugarParams(dctx1, argnode);
 
     if (params.empty() || !isa_tree<BlockParam>(params.back())) {
@@ -423,6 +425,7 @@ ExpressionPtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::LocOf
 
     DesugarContext dctx2(dctx1.ctx, dctx1.uniqueCounter, enclosingBlockParamLoc, enclosingBlockParamName, name,
                          dctx.inAnyBlock, inModule, dctx.preserveConcreteSyntax);
+    dctx2.depth = dctx1.depth;
     ExpressionPtr desugaredBody = desugarBody(dctx2, loc, body, move(destructures));
     desugaredBody = validateRBIBody(dctx2, move(desugaredBody));
 
@@ -620,6 +623,7 @@ ClassDef::RHS_store scopeNodeToBody(DesugarContext dctx, unique_ptr<parser::Node
     auto inAnyBlock = false;
     DesugarContext dctx1(dctx.ctx, uniqueCounter, dctx.enclosingBlockParamLoc, dctx.enclosingBlockParamName,
                          dctx.enclosingMethodName, inAnyBlock, dctx.inModule, dctx.preserveConcreteSyntax);
+    dctx1.depth = dctx.depth;
     if (auto *begin = parser::cast_node<parser::Begin>(node.get())) {
         body.reserve(begin->stmts.size());
         for (auto &stat : begin->stmts) {
@@ -1618,6 +1622,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockParamLoc,
                                      dctx.enclosingBlockParamName, dctx.enclosingMethodName, dctx.inAnyBlock, true,
                                      dctx.preserveConcreteSyntax);
+                dctx1.depth = dctx.depth;
                 ClassDef::RHS_store body = scopeNodeToBody(dctx1, move(module->body));
                 ExpressionPtr res =
                     MK::Module(module->loc, module->declLoc, node2TreeImpl(dctx, module->name), move(body));
@@ -1627,6 +1632,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockParamLoc,
                                      dctx.enclosingBlockParamName, dctx.enclosingMethodName, dctx.inAnyBlock, false,
                                      dctx.preserveConcreteSyntax);
+                dctx1.depth = dctx.depth;
                 ClassDef::RHS_store body = scopeNodeToBody(dctx1, move(klass->body));
                 ClassDef::ANCESTORS_store ancestors;
                 if (klass->superclass == nullptr) {
@@ -1712,6 +1718,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockParamLoc,
                                      dctx.enclosingBlockParamName, dctx.enclosingMethodName, dctx.inAnyBlock, false,
                                      dctx.preserveConcreteSyntax);
+                dctx1.depth = dctx.depth;
                 ClassDef::RHS_store body = scopeNodeToBody(dctx1, move(sclass->body));
                 ClassDef::ANCESTORS_store emptyAncestors;
                 ExpressionPtr res =
@@ -2589,17 +2596,20 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
 // of unmatched brackets, or method chains) would otherwise recurse until the
 // process stack overflows and the checker dies with SIGSEGV and no diagnostic.
 // 1000 nesting levels is far beyond hand-written or machine-generated Ruby; on
-// an 8MB stack the unpatched recursion dies at roughly a third of that.
+// an 8MB stack the unpatched recursion dies at roughly three times that.
 constexpr uint32_t MAX_DESUGAR_DEPTH = 1000;
 
+// Thrown once the depth limit is hit, after reporting the error, and caught in `node2Tree`. Substituting
+// `EmptyTree` for the over-deep node in place is not safe: it can land where later passes require a specific
+// tree (e.g. a class name must be a constant).
+struct DesugarDepthExceeded {};
+
 ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> &what) {
-    if (++dctx.depth > MAX_DESUGAR_DEPTH) {
-        if (what != nullptr) {
-            if (auto e = dctx.ctx.beginIndexerError(what->loc, core::errors::Desugar::DeeplyNested)) {
-                e.setHeader("Expression is nested too deeply to desugar (limit: {} levels)", MAX_DESUGAR_DEPTH);
-            }
+    if (what != nullptr && ++dctx.depth > MAX_DESUGAR_DEPTH) {
+        if (auto e = dctx.ctx.beginIndexerError(what->loc, core::errors::Desugar::DeeplyNested)) {
+            e.setHeader("Expression is nested too deeply to desugar (limit: {} levels)", MAX_DESUGAR_DEPTH);
         }
-        return MK::EmptyTree();
+        throw DesugarDepthExceeded();
     }
     auto res = node2TreeImplBody(dctx, what.get());
     what.reset();
@@ -2634,7 +2644,12 @@ ExpressionPtr node2Tree(core::MutableContext ctx, unique_ptr<parser::Node> what,
         DesugarContext dctx(ctx, uniqueCounter, enclosingBlockParamLoc, enclosingBlockParamName,
                             core::NameRef::noName(), false, false, preserveConcreteSyntax);
         auto liftedClassDefLoc = what->loc;
-        auto result = node2TreeImpl(dctx, what);
+        ExpressionPtr result;
+        try {
+            result = node2TreeImpl(dctx, what);
+        } catch (DesugarDepthExceeded &) {
+            result = MK::EmptyTree();
+        }
         if (result.loc().exists()) {
             // If the desugared expression has a different loc, we want to use that. This can happen
             // because (:block (:send)) desugars to (:send (:block)), but the (:block) node just has

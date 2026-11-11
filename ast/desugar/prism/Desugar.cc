@@ -88,7 +88,8 @@ private:
           uniqueCounterStorage(resetUniqueCounter ? 1 : 999999),
           uniqueCounter(resetUniqueCounter ? this->uniqueCounterStorage : parent.uniqueCounter),
           enclosingMethodName(enclosingMethodName), enclosingBlockParamLoc(enclosingBlockParamLoc),
-          enclosingBlockParamName(enclosingBlockParamName), isInModule(isInModule), isInAnyBlock(isInAnyBlock) {}
+          enclosingBlockParamName(enclosingBlockParamName), isInModule(isInModule), isInAnyBlock(isInAnyBlock),
+          depth(parent.depth) {}
 
     ast::ExpressionPtr make_unsupported_node(core::LocOffsets loc, std::string_view nodeName) const;
 
@@ -1707,6 +1708,11 @@ ast::ExpressionPtr Desugarer::desugarNullable(pm_node_t *node) {
 constexpr uint32_t MAX_DESUGAR_DEPTH = 1000;
 
 namespace {
+// Thrown once the depth limit is hit, after reporting the error, and caught at `PM_PROGRAM_NODE`. Substituting
+// `EmptyTree` for the over-deep node in place is not safe: it can land where later passes require a specific
+// tree (e.g. a class name must be a constant).
+struct DesugarDepthExceeded {};
+
 class DepthGuard final {
     uint32_t &depth;
 
@@ -1729,7 +1735,7 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
         if (auto e = this->ctx.beginIndexerError(translateLoc(node->location), core::errors::Desugar::DeeplyNested)) {
             e.setHeader("Expression is nested too deeply to desugar (limit: {} levels)", MAX_DESUGAR_DEPTH);
         }
-        return MK::EmptyTree();
+        throw DesugarDepthExceeded();
     }
 
     auto location = translateLoc(node->location);
@@ -3164,27 +3170,33 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
             // The ClassDef location should be the location of the desugared content, not the program node.
             // This matches the legacy desugarer behavior from `node2Tree()` in `Desugar.cc`.
             auto classDefLoc = location;
-            if (programNode->statements->body.size == 1) {
-                auto statement = desugar(programNode->statements->body.nodes[0]);
+            try {
+                if (programNode->statements->body.size == 1) {
+                    auto statement = desugar(programNode->statements->body.nodes[0]);
 
-                // Use the desugared statement's location if it exists
-                if (statement.loc().exists()) {
-                    classDefLoc = statement.loc();
-                }
-
-                // If the one statement desugars into an instruction sequence of multiple statements,
-                // inline it so the statements are directly in the class body, rather than wrapped.
-                if (auto insSeq = ast::cast_tree<ast::InsSeq>(statement)) {
-                    classBody.reserve(insSeq->stats.size() + 1);
-                    for (auto &stat : insSeq->stats) {
-                        classBody.emplace_back(move(stat));
+                    // Use the desugared statement's location if it exists
+                    if (statement.loc().exists()) {
+                        classDefLoc = statement.loc();
                     }
-                    classBody.emplace_back(move(insSeq->expr));
+
+                    // If the one statement desugars into an instruction sequence of multiple statements,
+                    // inline it so the statements are directly in the class body, rather than wrapped.
+                    if (auto insSeq = ast::cast_tree<ast::InsSeq>(statement)) {
+                        classBody.reserve(insSeq->stats.size() + 1);
+                        for (auto &stat : insSeq->stats) {
+                            classBody.emplace_back(move(stat));
+                        }
+                        classBody.emplace_back(move(insSeq->expr));
+                    } else {
+                        classBody.emplace_back(move(statement));
+                    }
                 } else {
-                    classBody.emplace_back(move(statement));
+                    classBody = nodeListToStore<ast::ClassDef::RHS_store>(programNode->statements->body);
                 }
-            } else {
-                classBody = nodeListToStore<ast::ClassDef::RHS_store>(programNode->statements->body);
+            } catch (DesugarDepthExceeded &) {
+                classBody.clear();
+                classBody.emplace_back(MK::EmptyTree());
+                classDefLoc = location;
             }
 
             ast::ClassDef::ANCESTORS_store ancestors;

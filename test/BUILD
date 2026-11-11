@@ -291,6 +291,10 @@ pipeline_tests(
             "testdata/**/*.exp",
         ],
         exclude = [
+            # Deep enough to hit the desugar depth limit, which is deeper than the Prism parser and desugarer
+            # can recurse in unoptimized (dbg, sanitized) builds; covered by the legacy parser targets.
+            "testdata/desugar/deeply_nested_*.rb",
+
             # RBS tests have their own dedicated targets (rbs_prism)
             "testdata/rbs/**/*.rb",
             "testdata/rbs/**/*.exp",
@@ -574,6 +578,10 @@ pipeline_tests(
             "testdata/**/*.exp",
         ],
         exclude = [
+            # Deep enough to hit the desugar depth limit, which is deeper than the Prism parser and desugarer
+            # can recurse in unoptimized (dbg, sanitized) builds; covered by the legacy parser targets.
+            "testdata/desugar/deeply_nested_*.rb",
+
             # Prism LSP known failures: completion differences
             "testdata/lsp/completion/bad_arguments.rb",
             "testdata/lsp/completion/bad_list_elems.rb",
