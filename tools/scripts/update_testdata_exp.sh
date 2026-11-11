@@ -101,6 +101,14 @@ fi
 
 if [ "$BUILD" != "" ]; then
   ./bazel build //main:sorbet //test:print_document_symbols -c opt
+else
+  # Without these, every command that writes an exp file would leave it empty.
+  for binary in bazel-bin/main/sorbet bazel-bin/test/print_document_symbols; do
+    if [ ! -x "$binary" ]; then
+      1>&2 echo "$binary is missing. Build it, or omit --no-build"
+      exit 1
+    fi
+  done
 fi
 
 rb_src=()
