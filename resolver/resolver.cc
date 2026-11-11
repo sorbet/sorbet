@@ -1283,16 +1283,15 @@ private:
                                job.klass.data(ctx)->superClass() == resolvedClass) {
                         job.klass.data(ctx)->setSuperClass(resolvedClass);
                     } else {
-                        auto fileIsPayload = ctx.file.data(ctx).isPayload();
-                        auto klassDefinedInPayload = absl::c_any_of(
-                            job.klass.data(ctx)->locs(), [&](auto &loc) { return loc.file().data(ctx).isPayload(); });
-                        auto allowsPayloadParentOverride = suppressPayloadSuperclassRedefinitionFor.contains(job.klass);
-
-                        if (!allowsPayloadParentOverride) {
+                        if (!suppressPayloadSuperclassRedefinitionFor.contains(job.klass)) {
                             if (auto e = ctx.beginError(job.ancestor->loc(),
                                                         core::errors::Resolver::RedefinitionOfParents)) {
                                 e.setHeader("Parent of class `{}` redefined from `{}` to `{}`", job.klass.show(ctx),
                                             job.klass.data(ctx)->superClass().show(ctx), resolvedClass.show(ctx));
+                                auto fileIsPayload = ctx.file.data(ctx).isPayload();
+                                auto klassDefinedInPayload =
+                                    absl::c_any_of(job.klass.data(ctx)->locs(),
+                                                   [&](auto &loc) { return loc.file().data(ctx).isPayload(); });
                                 if (!fileIsPayload && klassDefinedInPayload) {
                                     e.addErrorLine(job.klass.data(ctx)->loc(), "Originally defined here");
                                     e.addErrorNote(
@@ -2330,6 +2329,19 @@ public:
                                 "--suppress-payload-superclass-redefinition-for");
                     e.addErrorNote("Double check that the provided class name exists, or delete this option\n"
                                    "    (which will be either from the command line args or from the `{}` file).",
+                                   "sorbet/config");
+                }
+                continue;
+            }
+
+            auto klassDefinedInPayload =
+                absl::c_any_of(klass.data(gs)->locs(), [&](auto &loc) { return loc.file().data(gs).isPayload(); });
+            if (!klassDefinedInPayload) {
+                if (auto e = gs.beginError(core::Loc::none(), core::errors::Resolver::RedefinitionOfParents)) {
+                    e.setHeader("`{}` provided via `{}` is not defined in Sorbet's payload", klass.show(gs),
+                                "--suppress-payload-superclass-redefinition-for");
+                    e.addErrorNote("This option only applies to classes defined in Sorbet's payload.\n"
+                                   "    Delete this option (from the command line args or from the `{}` file).",
                                    "sorbet/config");
                 }
                 continue;
