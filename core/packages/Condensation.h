@@ -72,6 +72,9 @@ public:
         // Spans of `this->sccs` that have no import conflicts, and could go through the pipeline in the same stratum.
         std::vector<absl::Span<SCCInfo>> strata;
 
+        // True when this traversal was restored from a copy of the package DB.
+        bool cached = false;
+
         Traversal() = default;
 
         Traversal(const Traversal &other) = delete;
