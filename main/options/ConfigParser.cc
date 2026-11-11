@@ -35,8 +35,8 @@ constexpr unsigned int MAX_INCLUDE_DEPTH = 16;
 
 } // namespace
 
-void ConfigParser::readArgsFromFile(shared_ptr<spdlog::logger> logger, string_view filename,
-                                    vector<string> &stringArgs, unsigned int depth) {
+void ConfigParser::readArgsFromFile(shared_ptr<spdlog::logger> logger, string_view filename, vector<string> &stringArgs,
+                                    unsigned int depth) {
     try {
         string argsP = FileOps::read(string(filename));
         string_view argsPView = argsP;
