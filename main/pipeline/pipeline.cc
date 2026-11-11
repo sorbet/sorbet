@@ -1139,14 +1139,6 @@ ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, vector<ast::ParsedFil
                                     WorkerPool &workers) {
     try {
         if (opts.stopAfterPhase != options::Phase::NAMER) {
-#ifndef SORBET_REALMAIN_MIN
-            if (opts.cacheSensitiveOptions.sorbetPackages) {
-                // Only needs the symbols entered by namer and the exports recorded on each `PackageInfo`, not
-                // resolved constants.
-                packager::VisibilityChecker::propagateExports(gs, what);
-            }
-#endif
-
             ProgressIndicator namingProgress(opts.showProgress, "Resolving", 1);
             {
                 Timer timeit(gs.tracer(), "resolving");
@@ -1277,11 +1269,6 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             // the package prefixes" with the later living in `pipeline::nameAndResolve` once again
             // (thus restoring the symmetry).
             what = packager::Packager::runIncremental(gs, move(what), workers);
-
-            // Without incremental namer, no symbols were deleted or re-entered, so their export bits are unchanged.
-            if (runIncrementalNamer) {
-                packager::VisibilityChecker::propagateExports(gs, what);
-            }
         }
 #endif
 
