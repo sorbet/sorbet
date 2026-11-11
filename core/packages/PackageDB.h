@@ -91,12 +91,6 @@ public:
         return this->packageAttributedErrors_;
     }
 
-    // Whether --experimental-public-by-default is active: constants are public unless marked `package_private!`, and
-    // `export` and `export_all!` are accepted but ignored.
-    bool publicByDefault() const {
-        return this->publicByDefault_;
-    }
-
     absl::Span<const std::string> extraPackageFilesDirectoryUnderscorePrefixes() const;
     absl::Span<const std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes() const;
     absl::Span<const std::string> extraPackageFilesDirectorySlashPrefixes() const;
@@ -135,7 +129,6 @@ private:
     GenPackagesMode genPackagesMode_ = GenPackagesMode::Disabled;
     bool allowRelaxingTestVisibility_ = false;
     bool packageAttributedErrors_ = false;
-    bool publicByDefault_ = false;
     std::vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes_;
     std::vector<std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes_;
     std::vector<std::string> extraPackageFilesDirectorySlashPrefixes_;

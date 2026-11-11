@@ -1,6 +1,5 @@
 # typed: strict
 # enable-packager: true
-# experimental-public-by-default: true
 
 class Root::A < PackageSpec
   # An export of a constant that doesn't exist, and a duplicate export.

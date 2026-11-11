@@ -256,7 +256,6 @@ const UnorderedMap<
         {"extra-package-files-directory-prefix-slash-deprecated", StringPropertyAssertion::make},
         {"extra-package-files-directory-prefix-slash", StringPropertyAssertion::make},
         {"allow-relaxed-packager-checks-for", StringPropertyAssertion::make},
-        {"experimental-public-by-default", BooleanPropertyAssertion::make},
         {"packager-layers", StringPropertyAssertions::make},
         {"implementation", ImplementationAssertion::make},
         {"find-implementation", FindImplementationAssertion::make},
@@ -677,9 +676,6 @@ realmain::options::Options RangeAssertion::parseOptions(vector<shared_ptr<RangeA
     if (allowRelaxedPackager.has_value()) {
         opts.allowRelaxedPackagerChecksFor.emplace_back(allowRelaxedPackager.value());
     }
-
-    opts.publicByDefault =
-        BooleanPropertyAssertion::getValue("experimental-public-by-default", assertions).value_or(false);
 
     vector<string> defaultLayers = {};
     opts.packagerLayers = StringPropertyAssertions::getValues("packager-layers", assertions).value_or(defaultLayers);

@@ -64,7 +64,6 @@ end
 # -- test/testdata/packager/package_private_name_mixups/prelude/__package.rb --
 # typed: strict
 # enable-packager: true
-# experimental-public-by-default: true
 
 class Prelude < PackageSpec
   prelude!

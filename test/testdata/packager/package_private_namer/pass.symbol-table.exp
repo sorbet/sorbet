@@ -1,9 +1,9 @@
 class ::<root> < ::Object ()
   module ::<PackageSpecRegistry> < ::Sorbet::Private::Static::ImplicitModuleSuperclass ()
-    class ::<PackageSpecRegistry>::Prelude < ::Sorbet::Private::Static::PackageSpec () @ test/testdata/packager/package_private_namer/prelude/__package.rb:5
-    class ::<PackageSpecRegistry>::<Class:Prelude>[<AttachedClass>] < ::Sorbet::Private::Static::<Class:PackageSpec> () @ test/testdata/packager/package_private_namer/prelude/__package.rb:5
-      type-member(+) ::<PackageSpecRegistry>::<Class:Prelude>::<AttachedClass> -> T.attached_class (of Prelude) @ test/testdata/packager/package_private_namer/prelude/__package.rb:5
-      method ::<PackageSpecRegistry>::<Class:Prelude>#<static-init> (<blk>) @ test/testdata/packager/package_private_namer/prelude/__package.rb:5
+    class ::<PackageSpecRegistry>::Prelude < ::Sorbet::Private::Static::PackageSpec () @ test/testdata/packager/package_private_namer/prelude/__package.rb:4
+    class ::<PackageSpecRegistry>::<Class:Prelude>[<AttachedClass>] < ::Sorbet::Private::Static::<Class:PackageSpec> () @ test/testdata/packager/package_private_namer/prelude/__package.rb:4
+      type-member(+) ::<PackageSpecRegistry>::<Class:Prelude>::<AttachedClass> -> T.attached_class (of Prelude) @ test/testdata/packager/package_private_namer/prelude/__package.rb:4
+      method ::<PackageSpecRegistry>::<Class:Prelude>#<static-init> (<blk>) @ test/testdata/packager/package_private_namer/prelude/__package.rb:4
         argument <blk><block> @ Loc {file=test/testdata/packager/package_private_namer/prelude/__package.rb start=??? end=???}
     module ::<PackageSpecRegistry>::Root < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/testdata/packager/package_private_namer/a/__package.rb:3
       class ::<PackageSpecRegistry>::Root::A < ::Sorbet::Private::Static::PackageSpec () @ test/testdata/packager/package_private_namer/a/__package.rb:3
@@ -41,7 +41,7 @@ class ::<root> < ::Object ()
       argument <blk><block> @ Loc {file=test/testdata/packager/package_private_namer/b/__package.rb start=??? end=???}
     method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/packager/package_private_namer/b/b.rb:3
       argument <blk><block> @ Loc {file=test/testdata/packager/package_private_namer/b/b.rb start=??? end=???}
-    method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/packager/package_private_namer/prelude/__package.rb:5
+    method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/packager/package_private_namer/prelude/__package.rb:4
       argument <blk><block> @ Loc {file=test/testdata/packager/package_private_namer/prelude/__package.rb start=??? end=???}
     method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/packager/package_private_namer/prelude/module.rbi:3
       argument <blk><block> @ Loc {file=test/testdata/packager/package_private_namer/prelude/module.rbi start=??? end=???}
