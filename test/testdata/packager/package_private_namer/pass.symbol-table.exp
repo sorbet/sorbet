@@ -75,7 +75,7 @@ class ::<root> < ::Object ()
         type-member(+) ::Root::A::<Class:Marked>::<AttachedClass> -> T.attached_class (of Root::A::Marked) @ (test/testdata/packager/package_private_namer/a/errors.rb:43, test/testdata/packager/package_private_namer/a/valid.rb:4)
         method ::Root::A::<Class:Marked>#<static-init> (<blk>) @ (test/testdata/packager/package_private_namer/a/errors.rb:43, test/testdata/packager/package_private_namer/a/valid.rb:4)
           argument <blk><block> @ Loc {file=test/testdata/packager/package_private_namer/a/errors.rb start=??? end=???}
-      class ::Root::A::MyEnum < ::T::Enum () @ test/testdata/packager/package_private_namer/a/valid.rb:21
+      class ::Root::A::MyEnum < ::T::Enum () : abstract|sealed @ test/testdata/packager/package_private_namer/a/valid.rb:21
         class ::Root::A::MyEnum::Other < ::Root::A::MyEnum () @ test/testdata/packager/package_private_namer/a/valid.rb:24
         static-field ::Root::A::MyEnum::Other -> Root::A::MyEnum::Other @ test/testdata/packager/package_private_namer/a/valid.rb:24
         class ::Root::A::MyEnum::<Class:Other>[<AttachedClass>] < ::Root::A::<Class:MyEnum> () @ test/testdata/packager/package_private_namer/a/valid.rb:24
@@ -90,7 +90,7 @@ class ::<root> < ::Object ()
             argument <blk><block> @ Loc {file=test/testdata/packager/package_private_namer/a/valid.rb start=??? end=???}
         method ::Root::A::MyEnum#serialize (<blk>) -> String @ test/testdata/packager/package_private_namer/a/valid.rb:21
           argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/packager/package_private_namer/a/valid.rb start=??? end=???}
-      class ::Root::A::<Class:MyEnum>[<AttachedClass>] < ::T::<Class:Enum> (Helpers) @ test/testdata/packager/package_private_namer/a/valid.rb:21
+      class ::Root::A::<Class:MyEnum>[<AttachedClass>] < ::T::<Class:Enum> (Helpers) : abstract @ test/testdata/packager/package_private_namer/a/valid.rb:21
         type-member(+) ::Root::A::<Class:MyEnum>::<AttachedClass> -> T.attached_class (of Root::A::MyEnum) @ test/testdata/packager/package_private_namer/a/valid.rb:21
         method ::Root::A::<Class:MyEnum>#<static-init> (<blk>) @ test/testdata/packager/package_private_namer/a/valid.rb:21
           argument <blk><block> @ Loc {file=test/testdata/packager/package_private_namer/a/valid.rb start=??? end=???}

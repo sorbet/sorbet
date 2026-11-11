@@ -1259,13 +1259,24 @@ string ClassOrModuleRef::toStringWithOptions(const GlobalState &gs, int tabs, bo
                        return showRaw ? name.showRaw(gs) : name.show(gs);
                    }));
 
-    // TODO(jez) Print the rest of the flags, like isAbstract, isInterface, isFinal, and isSealed
-    auto classFlags = InlinedVector<string_view, 2>{};
+    auto classFlags = InlinedVector<string_view, 4>{};
     if (sym->flags.isPrivate) {
         classFlags.emplace_back("private");
     }
     if (sym->flags.isPackagePrivate) {
         classFlags.emplace_back("package_private!");
+    }
+    if (sym->flags.isAbstract) {
+        classFlags.emplace_back("abstract");
+    }
+    if (sym->flags.isInterface) {
+        classFlags.emplace_back("interface");
+    }
+    if (sym->flags.isFinal) {
+        classFlags.emplace_back("final");
+    }
+    if (sym->flags.isSealed) {
+        classFlags.emplace_back("sealed");
     }
     if (!classFlags.empty()) {
         fmt::format_to(std::back_inserter(buf), " : {}",
