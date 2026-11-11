@@ -84,17 +84,10 @@ core::ClassOrModuleRef contextClass(const core::GlobalState &gs, core::SymbolRef
 }
 
 bool isExplicitlyRootScoped(const ast::ExpressionPtr &node) {
-    auto isRoot = [](const ast::ExpressionPtr &root) {
-        auto rootLit = ast::cast_tree<ast::ConstantLit>(root);
-        return rootLit != nullptr && rootLit->symbol() == core::Symbols::root();
-    };
     auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node);
-    if (constLit == nullptr) {
-        return isRoot(node);
-    }
-    return constLit->foldFromRoot(isRoot, [](bool isExplicitlyRootScoped, core::NameRef name, core::LocOffsets loc) {
-        return isExplicitlyRootScoped;
-    });
+    const auto &outermostScope = constLit == nullptr ? node : constLit->outermostScope();
+    auto rootLit = ast::cast_tree<ast::ConstantLit>(outermostScope);
+    return rootLit != nullptr && rootLit->symbol() == core::Symbols::root();
 }
 
 // Returns nullptr if this file's package spec did not define a package. For example, `insertPackage` does not enter a
