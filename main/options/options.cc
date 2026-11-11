@@ -679,6 +679,15 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options(section)("experimental-package-directed",
                                  "Enable support for checking by package, instead of processing all files at once",
                                  cxxopts::value<bool>());
+    options.add_options(section)(
+        "min-stratum-size",
+        "In package-directed mode, merge strata below this file count (including `__package.rb` files) with a neighbor",
+        cxxopts::value<uint32_t>());
+    options.add_options(section)(
+        "stratum-split-threshold",
+        "In package-directed mode, split strata above this file count (including `__package.rb` files) into their "
+        "component SCCs",
+        cxxopts::value<uint32_t>());
     // }}}
 
     // ----- STRIPE AUTOGEN ----------------------------------------------- {{{
@@ -1286,6 +1295,20 @@ void readOptions(Options &opts,
         if (opts.packageDirected && !opts.cacheSensitiveOptions.sorbetPackages) {
             logger->error("--experimental-package-directed can only be specified in --sorbet-packages mode");
             throw EarlyReturnWithCode(1);
+        }
+        if (raw["min-stratum-size"].count() > 0) {
+            opts.minStratumSize = raw["min-stratum-size"].as<uint32_t>();
+            if (opts.minStratumSize.has_value() && !opts.packageDirected) {
+                logger->error("--min-stratum-size requires --experimental-package-directed");
+                throw EarlyReturnWithCode(1);
+            }
+        }
+        if (raw["stratum-split-threshold"].count() > 0) {
+            opts.stratumSplitThreshold = raw["stratum-split-threshold"].as<uint32_t>();
+            if (opts.stratumSplitThreshold.has_value() && !opts.packageDirected) {
+                logger->error("--stratum-split-threshold requires --experimental-package-directed");
+                throw EarlyReturnWithCode(1);
+            }
         }
         if (!opts.storeState.empty() && opts.cacheSensitiveOptions.sorbetPackages) {
             // --store-state builds Sorbet's payload, whose files belong to no package.
