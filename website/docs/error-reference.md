@@ -709,6 +709,8 @@ This error means that you're exporting a constant redundantly. In Stripe Package
 
 To fix this error, simply remove the more specific export.
 
+Sorbet no longer reports this error: `export` lines are ignored, because constants are public unless marked `package_private!`.
+
 ## 3717
 
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
@@ -777,6 +779,8 @@ class MyPackage < PackageSpec
   export A::Val1 # not allowed, instead the full enum should be exported with `export A`
 end
 ```
+
+Sorbet no longer reports this error: `export` lines are ignored, because constants are public unless marked `package_private!`.
 
 ## 3722
 

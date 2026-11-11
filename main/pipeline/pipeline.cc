@@ -1165,7 +1165,6 @@ ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, vector<ast::ParsedFil
 #ifndef SORBET_REALMAIN_MIN
             if (opts.cacheSensitiveOptions.sorbetPackages) {
                 Timer timeit(gs.tracer(), "visibility_checker");
-                packager::VisibilityChecker::reportExportErrors(gs, what);
                 packager::VisibilityChecker::checkReferences(gs, workers, what);
             }
 #endif
@@ -1303,10 +1302,6 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
 
 #ifndef SORBET_REALMAIN_MIN
         if (opts.cacheSensitiveOptions.sorbetPackages) {
-            // Without incremental namer, the `__package.rb` files' errors are unchanged.
-            if (runIncrementalNamer) {
-                packager::VisibilityChecker::reportExportErrors(gs, what);
-            }
             packager::VisibilityChecker::checkReferences(gs, workers, what);
         }
 #endif
