@@ -752,6 +752,11 @@ void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, P
     info.visibleTo_.clear();
     info.extraDirectives_.clear();
 
+    // We reset the number of associated source files here, as we're either processing all package files before
+    // associating source files, or running for an incremental edit, which will be working with a throw-away copy of the
+    // package info.
+    info.numFilesInPackage = 0;
+
     PackageSpecBodyWalk bodyWalk(info);
     core::Context ctx(gs, core::Symbols::root(), package.file);
     ast::TreeWalk::apply(ctx, bodyWalk, package.tree);

@@ -243,7 +243,7 @@ void GenPackages::runStrict(core::GlobalState &gs) {
         for (auto &pkgName : scc.members) {
             auto &pkgInfo = gs.packageDB().getPackageInfo(pkgName);
             // TODO(neil): also check if this package is a build package
-            if (pkgInfo.numFilesInPackage() == 0) {
+            if (pkgInfo.numFilesInPackage == 0) {
                 skipRaisingStrictness[scc.id] = true;
                 break;
             }

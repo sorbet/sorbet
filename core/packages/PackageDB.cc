@@ -90,6 +90,8 @@ void PackageDB::setPackageNameForFile(FileRef file, MangledName mangledName) {
         this->packageForFile_.resize(file.id() + 1, MangledName());
     }
 
+    this->getPackageInfoNonConst(mangledName)->numFilesInPackage++;
+
     this->packageForFile_[file.id()] = mangledName;
 }
 
