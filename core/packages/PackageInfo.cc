@@ -871,11 +871,8 @@ std::string PackageInfo::renderPackageRbContents(
         }
     }
 
-    if (locs.exportAll.exists() || !exports_.empty()) {
+    if (!exports_.empty()) {
         fmt::format_to(std::back_inserter(result), "\n");
-    }
-    if (locs.exportAll.exists()) {
-        fmt::format_to(std::back_inserter(result), "  export_all!\n");
     }
     for (const auto &export_ : exports_) {
         auto source = core::Loc(file, export_.loc).source(gs);

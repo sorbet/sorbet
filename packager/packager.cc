@@ -414,7 +414,7 @@ struct PackageSpecBodyWalk {
                 }
             }
         } else if (send.fun == core::Names::exportAll()) {
-            // Handled as a class-level modifier in namer.
+            // Has no effect, because constants are public unless marked `package_private!`.
         } else if (send.fun == core::Names::prelude_bang() && !send.hasBlock() && !send.hasNonBlockArgs()) {
             // Handled as a class-level modifier in namer.
         } else if (send.fun == core::Names::visibleTo()) {
@@ -1020,7 +1020,6 @@ vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, ve
                 // rewritePackageSpec. We make the most shallow copy possible, to ensure that we don't raise duplicate
                 // errors on the fast path.
                 PackageInfo copy{info.mangledName_, info.file, info.locs.loc, info.locs.declLoc};
-                copy.locs.exportAll = info.locs.exportAll;
                 copy.locs.preludePackage = info.locs.preludePackage;
                 copy.locs.testPackage = info.locs.testPackage;
                 rewritePackageSpec(gs, file, copy);

@@ -148,9 +148,6 @@ public:
         core::LocOffsets strictDependenciesLevel;
         core::LocOffsets minTypedLevel;
 
-        // Set to non-none loc when this package should just export everything
-        core::LocOffsets exportAll;
-
         // Set to non-none loc when this package is marked `test!`
         core::LocOffsets testPackage;
 
