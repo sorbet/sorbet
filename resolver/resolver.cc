@@ -2335,6 +2335,19 @@ public:
                 continue;
             }
 
+            auto klassDefinedInPayload =
+                absl::c_any_of(klass.data(gs)->locs(), [&](auto &loc) { return loc.file().data(gs).isPayload(); });
+            if (!klassDefinedInPayload) {
+                if (auto e = gs.beginError(core::Loc::none(), core::errors::Resolver::RedefinitionOfParents)) {
+                    e.setHeader("`{}` provided via `{}` is not defined in Sorbet's payload", klass.show(gs),
+                                "--suppress-payload-superclass-redefinition-for");
+                    e.addErrorNote("This option only applies to classes defined in Sorbet's payload.\n"
+                                   "    Delete this option (from the command line args or from the `{}` file).",
+                                   "sorbet/config");
+                }
+                continue;
+            }
+
             suppressPayloadSuperclassRedefinitionFor.emplace(klass);
         }
 

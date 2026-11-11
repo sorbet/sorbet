@@ -29,6 +29,9 @@ echo "-- double.rb --"
   double.rb
 
 echo "-- user_only.rb --"
-2>&1 "$cwd/main/sorbet" --silence-dev-message \
+if 2>&1 "$cwd/main/sorbet" --silence-dev-message \
   --suppress-payload-superclass-redefinition-for=UserOnly \
-  user_only.rb
+  user_only.rb; then
+  echo "Expected to fail!"
+  exit 1
+fi
