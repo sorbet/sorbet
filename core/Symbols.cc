@@ -1264,7 +1264,7 @@ string ClassOrModuleRef::toStringWithOptions(const GlobalState &gs, int tabs, bo
         classFlags.emplace_back("private");
     }
     if (sym->flags.isPackagePrivate) {
-        classFlags.emplace_back("package_private!");
+        classFlags.emplace_back("package_private");
     }
     if (sym->flags.isAbstract) {
         classFlags.emplace_back("abstract");
@@ -1415,7 +1415,7 @@ string FieldRef::toStringWithOptions(const GlobalState &gs, int tabs, bool showF
         fieldFlags.emplace_back("private");
     }
     if (sym->flags.isStaticField && sym->flags.isPackagePrivate) {
-        fieldFlags.emplace_back("package_private!");
+        fieldFlags.emplace_back("package_private");
     }
 
     fmt::format_to(std::back_inserter(buf), "{} {}", type, showRaw ? toStringFullName(gs) : showFullName(gs));
