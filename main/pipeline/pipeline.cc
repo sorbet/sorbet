@@ -876,6 +876,18 @@ PackageStrata computePackageStrata(core::GlobalState &gs, vector<ast::ParsedFile
         return true;
     });
 
+    // We can't optimize a cached traversal, as we're most likely copying a prefix of the symbol table for the LSP slow
+    // path. Applying optimizations at this point might invalidate the symbol table offsets that we use to determine
+    // checkpoints in the global state.
+    if (!traversal.cached) {
+        traversal.optimize(db, opts.stratumSplitThreshold, opts.minStratumSize);
+
+        // This is very unlikely, but would cause a lot of confusing errors later on in the pipeline.
+        if (traversal.strata.size() > static_cast<size_t>(core::packages::Stratum::NONE.rawId())) [[unlikely]] {
+            Exception::raise("Too many strata in resulting traversal: {}", traversal.strata.size());
+        }
+    }
+
     // Spans into this vector must remain valid as we append the sole AST for each package.
     packageFiles.reserve(numPackageFiles);
 

@@ -258,6 +258,124 @@ void Condensation::Traversal::recordStrata(core::GlobalState &gs) const {
     }
 }
 
+namespace {
+
+uint32_t stratumSize(const PackageDB &db, absl::Span<const uint32_t> sccSizes,
+                     absl::Span<const Condensation::Traversal::SCCInfo> stratum) {
+    return absl::c_accumulate(stratum, 0L, [&db, sccSizes](auto acc, auto &sccInfo) {
+        auto sccId = db.getPackageInfo(sccInfo.members.front()).sccID();
+        ENFORCE(sccId.has_value());
+        return acc + sccSizes[*sccId];
+    });
+}
+
+struct StratumSplittingDecision {
+    bool preludePresent = false;
+    bool couldSplit = false;
+};
+
+StratumSplittingDecision couldSplitStratum(const PackageDB &db, absl::Span<const uint32_t> sccSizes,
+                                           const Condensation::Traversal &traversal,
+                                           optional<uint32_t> stratumSplitThreshold) {
+    StratumSplittingDecision result;
+    auto strata = absl::MakeSpan(traversal.strata);
+
+    result.preludePresent =
+        absl::c_any_of(db.packages(), [&db](auto pkgName) { return db.getPackageInfo(pkgName).isPreludePackage(); });
+
+    if (!stratumSplitThreshold.has_value()) {
+        return result;
+    }
+
+    // We explicitly skip the first stratum when prelude packages are present, as we require that all prelude
+    // packages go in that stratum and all prelude packages must remain in the same stratum.
+    if (result.preludePresent) {
+        strata = strata.subspan(1);
+    }
+
+    result.couldSplit = absl::c_any_of(strata, [&db, sccSizes, threshold = *stratumSplitThreshold](auto stratum) {
+        return stratumSize(db, sccSizes, stratum) > threshold;
+    });
+
+    return result;
+}
+
+bool couldCombineStrata(const PackageDB &db, absl::Span<const uint32_t> sccSizes,
+                        const Condensation::Traversal &traversal, uint32_t minStratumSize) {
+    return absl::c_any_of(traversal.strata, [&db, sccSizes, minStratumSize](auto stratum) {
+        return stratumSize(db, sccSizes, stratum) < minStratumSize;
+    });
+}
+} // namespace
+
+void Condensation::Traversal::optimize(const PackageDB &db, optional<uint32_t> stratumSplitThreshold,
+                                       optional<uint32_t> minStratumSize) {
+    if (!stratumSplitThreshold.has_value() && !minStratumSize.has_value()) {
+        return;
+    }
+
+    // Precompute SCC file sizes to help when determining if either optimization applies.
+    vector<uint32_t> sccSizes;
+    sccSizes.reserve(db.condensation().nodes().size());
+    for (auto &node : db.condensation().nodes()) {
+        sccSizes.emplace_back(absl::c_accumulate(node.members, 0L, [&db](auto acc, auto pkgName) {
+            return acc + db.getPackageInfo(pkgName).numFilesInPackage;
+        }));
+    }
+
+    // We split before considering combining, as it's not safe to split a combined stratum: splitting takes advantage
+    // of the fact that no scc in a stratum has a dependency on any other scc, but combining adjacent strata invalidates
+    // that assumption.
+    auto [preludePresent, splittingPossible] = couldSplitStratum(db, sccSizes, *this, stratumSplitThreshold);
+    if (splittingPossible) {
+        ENFORCE(stratumSplitThreshold.has_value());
+        auto originalStrata = std::exchange(this->strata, {});
+        auto strata = absl::MakeSpan(originalStrata);
+
+        auto start = 0;
+        if (preludePresent) {
+            this->strata.emplace_back(strata.front());
+            start = this->strata.back().size();
+            strata = strata.subspan(1);
+        }
+
+        for (auto stratum : strata) {
+            if (stratumSize(db, sccSizes, stratum) > *stratumSplitThreshold) {
+                // Disassemble the large stratum into one stratum for each SCC, relying on the next optimization to
+                // recombine them.
+                for (int i = 0; i < stratum.size(); ++i) {
+                    this->strata.emplace_back(absl::MakeSpan(this->sccs).subspan(start, 1));
+                    start += 1;
+                }
+            } else {
+                this->strata.emplace_back(stratum);
+                start += stratum.size();
+            }
+        }
+    }
+
+    if (minStratumSize.has_value() && couldCombineStrata(db, sccSizes, *this, *minStratumSize)) {
+        auto strata = std::exchange(this->strata, {});
+
+        auto start = 0;
+        this->strata.emplace_back(strata.front());
+        auto size = stratumSize(db, sccSizes, this->strata.back());
+
+        for (auto stratum : absl::MakeSpan(strata).subspan(1)) {
+            auto candidateSize = stratumSize(db, sccSizes, stratum);
+            if (size < *minStratumSize) {
+                auto length = this->strata.back().size() + stratum.size();
+                this->strata.back() = absl::MakeSpan(this->sccs).subspan(start, length);
+                size += candidateSize;
+            } else {
+                start += this->strata.back().size();
+                this->strata.emplace_back(stratum);
+                size = candidateSize;
+            }
+        }
+    }
+}
+
 Condensation::Node &CondensationBuilder::pushNode(bool isPrelude) {
     auto id = this->condensation.nodes_.size();
     auto &node = this->condensation.nodes_.emplace_back(id, isPrelude);
