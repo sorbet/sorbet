@@ -149,11 +149,30 @@ struct TraversalBuilder {
 };
 
 bool cachedTraversalIsUsable(const PackageDB &db) {
-    return absl::c_all_of(db.packages(), [&db](auto pkgName) {
-        auto &info = db.getPackageInfo(pkgName);
-        return info.exists() && info.stratum != Stratum::NONE;
-    });
+    auto packages = db.packages();
+    if (packages.empty()) {
+        return true;
+    }
+
+    // NOTE: We treat a single package with a populated stratum as implying that all packages have their stratum set.
+    // This relies heavily on us not copying the package DB if the package graph changes on the slow path.
+    auto cacheValid = db.getPackageInfo(packages.front()).stratum != Stratum::NONE;
+
+    ENFORCE(cacheValid == absl::c_all_of(packages,
+                                         [&db](auto pkgName) {
+                                             auto &info = db.getPackageInfo(pkgName);
+                                             return info.exists() && info.stratum != Stratum::NONE;
+                                         }),
+            "PackageInfo::stratum must be set or unset consistently for all packages");
+
+    return cacheValid;
 }
+
+// Used when rebuilding the cached traversal.
+struct NodeStratum {
+    Stratum stratum;
+    uint32_t nodeId = 0;
+};
 
 } // namespace
 
@@ -164,11 +183,6 @@ const Condensation::Traversal Condensation::computeTraversal(const core::GlobalS
         builder.result.cached = true;
 
         auto &db = gs.packageDB();
-
-        struct NodeStratum {
-            Stratum stratum;
-            uint32_t nodeId;
-        };
 
         vector<NodeStratum> stratumMapping;
         stratumMapping.reserve(this->nodes().size());
