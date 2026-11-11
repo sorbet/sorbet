@@ -28,3 +28,7 @@ echo "-- double.rb --"
   --suppress-payload-superclass-redefinition-for=IRB::RelineInputMethod \
   double.rb
 
+echo "-- user_only.rb --"
+2>&1 "$cwd/main/sorbet" --silence-dev-message \
+  --suppress-payload-superclass-redefinition-for=UserOnly \
+  user_only.rb
