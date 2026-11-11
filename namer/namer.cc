@@ -84,17 +84,10 @@ core::ClassOrModuleRef contextClass(const core::GlobalState &gs, core::SymbolRef
 }
 
 bool isExplicitlyRootScoped(const ast::ExpressionPtr &node) {
-    auto isRoot = [](const ast::ExpressionPtr &root) {
-        auto rootLit = ast::cast_tree<ast::ConstantLit>(root);
-        return rootLit != nullptr && rootLit->symbol() == core::Symbols::root();
-    };
     auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node);
-    if (constLit == nullptr) {
-        return isRoot(node);
-    }
-    return constLit->foldFromRoot(isRoot, [](bool isExplicitlyRootScoped, core::NameRef name, core::LocOffsets loc) {
-        return isExplicitlyRootScoped;
-    });
+    const auto &outermostScope = constLit == nullptr ? node : constLit->outermostScope();
+    auto rootLit = ast::cast_tree<ast::ConstantLit>(outermostScope);
+    return rootLit != nullptr && rootLit->symbol() == core::Symbols::root();
 }
 
 // Returns nullptr if this file's package spec did not define a package. For example, `insertPackage` does not enter a
@@ -380,14 +373,9 @@ public:
             return true;
         }
 
-        auto isValidRoot = [](const ast::ExpressionPtr &root) {
-            return ast::isa_tree<ast::EmptyTree>(root) || ast::isa_tree<ast::ConstantLit>(root);
-        };
-        if (auto lit = ast::cast_tree<ast::UnresolvedConstantLit>(exp)) {
-            return lit->foldFromRoot(isValidRoot,
-                                     [](bool isValid, core::NameRef name, core::LocOffsets loc) { return isValid; });
-        }
-        return isValidRoot(exp);
+        auto lit = ast::cast_tree<ast::UnresolvedConstantLit>(exp);
+        const auto &outermostScope = lit == nullptr ? exp : lit->outermostScope();
+        return ast::isa_tree<ast::EmptyTree>(outermostScope) || ast::isa_tree<ast::ConstantLit>(outermostScope);
     }
 
     void preTransformBlock(core::Context ctx, const ast::ExpressionPtr &block) {
@@ -874,14 +862,14 @@ public:
     }
 
     void postTransformUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &scope = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(tree).scope;
-        ast::TreeWalk::apply(ctx, *this, scope);
+        auto &outermostScope = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(tree).outermostScope();
+        ast::TreeWalk::apply(ctx, *this, outermostScope);
     }
 
     void postTransformConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
         auto original = ast::cast_tree_nonnull<ast::ConstantLit>(tree).original();
         if (original != nullptr) {
-            ast::TreeWalk::apply(ctx, *this, original->scope);
+            ast::TreeWalk::apply(ctx, *this, original->outermostScope());
         }
     }
 };
