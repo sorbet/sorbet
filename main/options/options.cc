@@ -666,9 +666,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
         "packager-layers",
         "Valid layer names for packages, ordered lowest to highest. Passing this flag also enables layering checks.",
         cxxopts::value<vector<string>>()->implicit_value("library,application"), "<layer-name>");
-    options.add_options(section)("package-skip-rbi-export-enforcement",
-                                 "Constants defined in RBIs in these directories (and no others) can be exported",
-                                 cxxopts::value<vector<string>>(), "<dir>");
     options.add_options(section)("package-attributed-errors",
                                  "Attribute errors to their enclosing package in the error output",
                                  cxxopts::value<bool>());
@@ -1450,16 +1447,6 @@ void readOptions(Options &opts,
             if (!opts.cacheSensitiveOptions.sorbetPackages) {
                 logger->error("--sorbet-packages-hint-message can only be specified in --sorbet-packages mode");
                 throw EarlyReturnWithCode(1);
-            }
-        }
-
-        if (raw.count("package-skip-rbi-export-enforcement")) {
-            if (!opts.cacheSensitiveOptions.sorbetPackages) {
-                logger->error("--package-skip-rbi-export-enforcement can only be specified in --sorbet-packages mode");
-                throw EarlyReturnWithCode(1);
-            }
-            for (const string &ns : raw["package-skip-rbi-export-enforcement"].as<vector<string>>()) {
-                opts.packageSkipRBIExportEnforcementDirs.emplace_back(ns);
             }
         }
 

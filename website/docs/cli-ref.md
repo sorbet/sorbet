@@ -343,9 +343,6 @@ Usage:
       --packager-layers [=<layer-name>(=library,application)]
                                 Valid layer names for packages, ordered lowest to
                                 highest. Passing this flag also enables layering checks.
-      --package-skip-rbi-export-enforcement <dir>
-                                Constants defined in RBIs in these directories (and no
-                                others) can be exported
       --package-attributed-errors
                                 Attribute errors to their enclosing package in the error
                                 output

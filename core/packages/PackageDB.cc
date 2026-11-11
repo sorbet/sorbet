@@ -146,10 +146,6 @@ absl::Span<const MangledName> PackageDB::packages() const {
     return absl::MakeSpan(mangledNames);
 }
 
-absl::Span<const string> PackageDB::skipRBIExportEnforcementDirs() const {
-    return absl::MakeSpan(skipRBIExportEnforcementDirs_);
-}
-
 absl::Span<const core::NameRef> PackageDB::layers() const {
     return absl::MakeSpan(layers_);
 }
@@ -241,7 +237,6 @@ PackageDB PackageDB::deepCopy() const {
     result.extraPackageFilesDirectorySlashDeprecatedPrefixes_ =
         this->extraPackageFilesDirectorySlashDeprecatedPrefixes_;
     result.extraPackageFilesDirectorySlashPrefixes_ = this->extraPackageFilesDirectorySlashPrefixes_;
-    result.skipRBIExportEnforcementDirs_ = this->skipRBIExportEnforcementDirs_;
     // This assumes that the GlobalState this PackageDB is getting copied into also has these
     // interned layer NameRefs at the same IDs as the current PackageDB.
     result.layers_ = this->layers_;

@@ -257,7 +257,6 @@ struct Options {
     std::string metricsLatestVersionFile;
 
     std::string dumpPackageInfo = "";
-    std::vector<std::string> packageSkipRBIExportEnforcementDirs;
     core::packages::GenPackagesMode genPackagesMode = core::packages::GenPackagesMode::Disabled;
     bool allowRelaxingTestVisibility = false;
 
