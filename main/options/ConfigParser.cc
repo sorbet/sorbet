@@ -27,10 +27,16 @@ bool isComment(string_view line) {
     return absl::c_all_of(prefix, [](auto c) { return isspace(c); });
 }
 
+// `@file` lines are resolved recursively; real-world configs nest at most one
+// or two levels. A generous cap turns include cycles (`@sorbet/config` inside
+// `sorbet/config`) and unbounded include chains into a clean error instead of
+// a stack overflow.
+constexpr unsigned int MAX_INCLUDE_DEPTH = 16;
+
 } // namespace
 
 void ConfigParser::readArgsFromFile(shared_ptr<spdlog::logger> logger, string_view filename,
-                                    vector<string> &stringArgs) {
+                                    vector<string> &stringArgs, unsigned int depth) {
     try {
         string argsP = FileOps::read(string(filename));
         string_view argsPView = argsP;
@@ -42,7 +48,13 @@ void ConfigParser::readArgsFromFile(shared_ptr<spdlog::logger> logger, string_vi
                 // skip empty lines and comments
                 continue;
             } else if (arg[0] == '@') {
-                readArgsFromFile(logger, arg.substr(min(arg.find_first_not_of("@"), arg.size())), stringArgs);
+                if (depth >= MAX_INCLUDE_DEPTH) {
+                    logger->error("Including `{}` exceeds the maximum config include depth ({})", filename,
+                                  MAX_INCLUDE_DEPTH);
+                    throw EarlyReturnWithCode(11);
+                }
+                readArgsFromFile(logger, arg.substr(min(arg.find_first_not_of("@"), arg.size())), stringArgs,
+                                 depth + 1);
             } else {
                 stringArgs.emplace_back(string(arg));
             }

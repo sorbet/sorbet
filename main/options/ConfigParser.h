@@ -21,9 +21,14 @@ namespace sorbet::realmain::options {
 class ConfigParser {
     /**
      * Read `@file` arguments and put them explicitly into `stringArgs`
+     *
+     * `depth` is the number of `@file` includes that led to this call, and is
+     * used to reject include cycles (`@`-ing a file that `@`-s itself,
+     * directly or transitively) and unbounded include chains, which would
+     * otherwise recurse until the stack overflows.
      */
     static void readArgsFromFile(std::shared_ptr<spdlog::logger> logger, std::string_view filename,
-                                 std::vector<std::string> &stringArgs);
+                                 std::vector<std::string> &stringArgs, unsigned int depth = 0);
 
 public:
     /**
