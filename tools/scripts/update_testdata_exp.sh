@@ -53,7 +53,7 @@ $0 [options] [<file>...]
 
 Arguments
   <file>      One or more *.rb files whose exp files to update.
-              Defaults to everything in test/testdata/
+              Defaults to everything in test/testdata/ and test/prism_regression/
 
 Options
   --no-build  Don't build anything, just reuse what was already built
@@ -62,44 +62,53 @@ EOF
 }
 
 BUILD=1
-if [ $# -eq 0 ]; then
-  paths=(test/testdata test/prism_regression)
-else
-  while true; do
-    case $1 in
-      --no-build)
-        BUILD=
-        shift
-        ;;
-      -h|--help)
-        usage
-        exit 0
-        ;;
-      -*)
-        1>&2 echo "Unrecognized option '$1'"
-        1>&2 usage
-        exit 1
-        ;;
-      *)
-        break;
-    esac
-  done
-  paths=()
-  for path in "${@}"; do
-    if [[ "$path" = *.exp ]]; then
-      # delete shortest match of pattern from back of path
-      path=${path%.*.exp}
-      if [[ "$path" = */pass ]]; then
-        path=${path%/pass}
-      fi
-    fi
+while [ $# -gt 0 ]; do
+  case $1 in
+    --no-build)
+      BUILD=
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    -*)
+      1>&2 echo "Unrecognized option '$1'"
+      1>&2 usage
+      exit 1
+      ;;
+    *)
+      break;
+  esac
+done
 
-    paths+=("$path")
-  done
+paths=()
+for path in "${@}"; do
+  if [[ "$path" = *.exp ]]; then
+    # delete shortest match of pattern from back of path
+    path=${path%.*.exp}
+    if [[ "$path" = */pass ]]; then
+      path=${path%/pass}
+    fi
+  fi
+
+  paths+=("$path")
+done
+
+if [ "${#paths[@]}" -eq 0 ]; then
+  paths=(test/testdata test/prism_regression)
 fi
 
 if [ "$BUILD" != "" ]; then
   ./bazel build //main:sorbet //test:print_document_symbols -c opt
+else
+  # Without these, every command that writes an exp file would leave it empty.
+  for binary in bazel-bin/main/sorbet bazel-bin/test/print_document_symbols; do
+    if [ ! -x "$binary" ]; then
+      1>&2 echo "$binary is missing. Build it, or omit --no-build"
+      exit 1
+    fi
+  done
 fi
 
 rb_src=()
