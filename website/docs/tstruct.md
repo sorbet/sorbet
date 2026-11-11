@@ -129,7 +129,25 @@ To fix this, `T::Struct` takes measures to clone objects, so that they are not s
 - `Array` and `Hash` default values are deeply cloned (i.e., Sorbet recursively calls `.clone` not only on the `Array` or `Hash` itself, but also on all their elements).
 - All other default values are simply cloned by calling `.clone` on the provided default.
 
-These rules prevent the most common misuses of accidentally mutating default values via references, but it is still possible to construct cases where the above rules are not strong enough. In such cases, use `factory:` to compute the default value in whatever way necessary. The value produced by `factory:` is used verbatim. (This means that `factory:` can be used when reference sharing across default values is actually the _desired_ outcome.)
+These rules prevent the most common misuses of accidentally mutating default values via references, but it is still possible to construct cases where the above rules are not strong enough. Because `.clone` is shallow, any mutable state *inside* such a default is still shared by every instance, including instances created later:
+
+```ruby
+class Bucket
+  attr_reader :items
+  def initialize = @items = []
+end
+
+class Example < T::Struct
+  prop :bucket, Bucket, default: Bucket.new # each instance gets a clone, but they all share one `items` array
+end
+
+Example.new.bucket.items << 'elem'
+p(Example.new.bucket.items) # => ["elem"]
+```
+
+The same applies to a `Set` whose elements are mutable, a `Struct` or `OpenStruct` holding a mutable value, and `ifunset:`.
+
+In such cases, use `factory:` to compute the default value in whatever way necessary (here, `factory: -> { Bucket.new }`). The value produced by `factory:` is used verbatim. (This means that `factory:` can be used when reference sharing across default values is actually the _desired_ outcome.)
 
 ## Fine-grained inheritance control with `override:`
 
