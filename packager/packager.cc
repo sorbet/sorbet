@@ -89,22 +89,19 @@ const ast::UnresolvedConstantLit *verifyConstant(core::Context ctx, core::NameRe
         return nullptr;
     }
 
-    return target->foldFromRoot(
-        [&](const ast::ExpressionPtr &root) -> const ast::UnresolvedConstantLit * {
-            if (ast::isa_tree<ast::EmptyTree>(root)) {
-                return target;
-            }
-            if (auto scope = ast::cast_tree<ast::ConstantLit>(root);
-                scope != nullptr && scope->symbol() == core::Symbols::root()) {
-                if (auto e = ctx.beginError(expr.loc(), core::errors::Packager::InvalidConfiguration)) {
-                    e.setHeader("Argument to `{}` must not use a `{}` prefix", fun.show(ctx), "::");
-                }
-            } else if (auto e = ctx.beginError(expr.loc(), core::errors::Packager::InvalidConfiguration)) {
-                e.setHeader("Argument to `{}` must be a constant", fun.show(ctx));
-            }
-            return nullptr;
-        },
-        [](const ast::UnresolvedConstantLit *verified, core::NameRef name, core::LocOffsets loc) { return verified; });
+    const auto &outermostScope = target->outermostScope();
+    if (ast::isa_tree<ast::EmptyTree>(outermostScope)) {
+        return target;
+    }
+    if (auto scope = ast::cast_tree<ast::ConstantLit>(outermostScope);
+        scope != nullptr && scope->symbol() == core::Symbols::root()) {
+        if (auto e = ctx.beginError(expr.loc(), core::errors::Packager::InvalidConfiguration)) {
+            e.setHeader("Argument to `{}` must not use a `{}` prefix", fun.show(ctx), "::");
+        }
+    } else if (auto e = ctx.beginError(expr.loc(), core::errors::Packager::InvalidConfiguration)) {
+        e.setHeader("Argument to `{}` must be a constant", fun.show(ctx));
+    }
+    return nullptr;
 }
 
 bool isRootScopedDefinition(const ast::ConstantLit *lit) {
