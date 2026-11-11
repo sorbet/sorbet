@@ -10,7 +10,9 @@
 #include "core/Types.h"
 #include "core/UntaggedPtr.h"
 #include "core/ZippedPair.h"
+#include <functional>
 #include <memory>
+#include <type_traits>
 #include <vector>
 
 //
@@ -1215,6 +1217,22 @@ public:
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRawWithLocs(const core::GlobalState &gs, core::FileRef file, int tabs = 0) const;
     std::string_view nodeName() const;
+
+    // Folds the terminal scope and then each constant name from root to leaf.
+    template <class RootFn, class PartFn> auto foldFromRoot(RootFn && onRoot, PartFn && onPart) const {
+        using State = std::remove_cvref_t<std::invoke_result_t<RootFn &, const ExpressionPtr &>>;
+
+        auto foldImpl = [&](const auto &self, const UnresolvedConstantLit &current) -> State {
+            State state = [&]() -> State {
+                if (auto scope = cast_tree<UnresolvedConstantLit>(current.scope)) {
+                    return self(self, *scope);
+                }
+                return std::invoke(onRoot, current.scope);
+            }();
+            return std::invoke(onPart, std::move(state), current.cnst, current.loc);
+        };
+        return foldImpl(foldImpl, *this);
+    }
 
     void _sanityCheck();
 };
