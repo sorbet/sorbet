@@ -1,5 +1,5 @@
 # typed: strict
-# assert-fast-path: __package.rb,main.rb
+# assert-fast-path: main.rb
 module MyPkg
   Value = "changed"
 end

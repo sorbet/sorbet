@@ -1,5 +1,5 @@
 # typed: strict
-# assert-fast-path: a.rb,__package.rb
+# assert-fast-path: a.rb
 
 class Package::A
   extend T::Sig

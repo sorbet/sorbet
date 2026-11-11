@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 # typed: strict
-# assert-fast-path: a.rb,__package.rb,dep/exported.rb,dep/__package.rb
+# assert-fast-path: a.rb,dep/exported.rb
 
 class Package::A
   extend T::Sig

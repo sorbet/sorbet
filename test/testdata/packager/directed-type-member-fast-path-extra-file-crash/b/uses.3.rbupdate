@@ -1,6 +1,6 @@
 # typed: strict
 # frozen_string_literal: true
-# assert-fast-path: a/__package.rb,a/gen.rb,b/__package.rb,b/uses.rb
+# assert-fast-path: a/gen.rb,b/uses.rb
 
 class B::Uses
   extend T::Sig
