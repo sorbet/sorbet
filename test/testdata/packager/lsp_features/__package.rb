@@ -12,8 +12,6 @@ class Simpsons < PackageSpec
     #      ^    show-symbol: Bart
 
     export Simpsons::Family
-    #                ^^^^^^ usage: family
-    #                ^      show-symbol: Simpsons::Family
 
     export_for_test Simpsons::Private
   # ^^^^^^^^^^^^^^^ error: Method `export_for_test` does not exist

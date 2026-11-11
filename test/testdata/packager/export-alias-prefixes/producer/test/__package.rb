@@ -5,5 +5,5 @@ class Test::Producer < PackageSpec
 
   import Producer, uses_internals: true
 
-  export Test::Producer::ToApp::Nested # error: Cannot export through class alias
+  export Test::Producer::ToApp::Nested
 end

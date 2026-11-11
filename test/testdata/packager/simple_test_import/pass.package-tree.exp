@@ -23,13 +23,13 @@ end
 # -- test/testdata/packager/simple_test_import/test_only/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::<PackageSpecRegistry>::Project::TestOnly<<C TestOnly>> < (::Sorbet::Private::Static::PackageSpec)
-    <self>.export(<emptyTree>::<C Project>::<C TestOnly>::<C SomeHelper>)
+    <emptyTree>
   end
 end
 # -- test/testdata/packager/simple_test_import/util/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::<PackageSpecRegistry>::Project::Util<<C Util>> < (::Sorbet::Private::Static::PackageSpec)
-    <self>.export(<emptyTree>::<C Project>::<C Util>::<C MyUtil>)
+    <emptyTree>
   end
 end
 # -- test/testdata/packager/simple_test_import/util/test/__package.rb --
@@ -39,7 +39,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.import(::<PackageSpecRegistry>::<C Project>::<C Util>)
 
-    <self>.export(<emptyTree>::<C Test>::<C Project>::<C Util>::<C UtilHelper>)
+    <emptyTree>
   end
 end
 # -- test/testdata/packager/simple_test_import/main_lib/lib.rb --

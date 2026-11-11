@@ -4,12 +4,8 @@
 class Producer < PackageSpec
   #   ^^^^^^^^ def: producer-pkg
   export Producer::Public
-  #                ^^^^^^ usage: public
-  #                ^ show-symbol: Producer::Public
-  #                ^^^^^^ hover: Producer application API
   export Producer::Original::Nested
   export Producer::Value
   export Producer::Type
   export Producer::Missing
-  #      ^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `Missing`
 end

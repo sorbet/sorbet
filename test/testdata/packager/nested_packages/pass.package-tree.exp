@@ -3,7 +3,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::<PackageSpecRegistry>::Package<<C Package>> < (::Sorbet::Private::Static::PackageSpec)
     <self>.import(::<PackageSpecRegistry>::<C Package>::<C Subpackage>)
 
-    <self>.export(<emptyTree>::<C Package>::<C PackageClass>)
+    <emptyTree>
   end
 end
 # -- test/testdata/packager/nested_packages/subpackage/__package.rb --
@@ -11,7 +11,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::<PackageSpecRegistry>::Package::Subpackage<<C Subpackage>> < (::Sorbet::Private::Static::PackageSpec)
     <self>.import(::<PackageSpecRegistry>::<C Package>)
 
-    <self>.export(<emptyTree>::<C Package>::<C Subpackage>::<C SubpackageClass>)
+    <emptyTree>
   end
 end
 # -- test/testdata/packager/nested_packages/mainpackage.rb --
