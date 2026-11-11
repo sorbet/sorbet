@@ -48,12 +48,29 @@ const char *const base_driver::token_name(token_type type) {
     }
 }
 
+// Every call to these two rewind entry points is error recovery: successful
+// parses never rewind (the grammar only calls them from `... error`
+// productions and the dedent-recovery helpers). But recovery re-lexes from the
+// rewind position, and for unterminated nested definitions each recovery
+// layer doubles the amount re-lexed (measured: 2^N diagnostics for N unclosed
+// `def`s — 216 bytes → >4GB). Past this many rewinds, stop rewinding and let
+// the parse recover forward instead, keeping pathological input linear.
+constexpr size_t MAX_RECOVERY_REWINDS = 1000;
+
 void base_driver::rewind_and_reset(size_t newPos) {
+    if (this->recovery_rewinds >= MAX_RECOVERY_REWINDS) {
+        return;
+    }
+    this->recovery_rewinds++;
     this->clear_lookahead();
     this->lex.rewind_and_reset_to_expr_end(newPos);
 }
 
 void base_driver::rewind_and_reset_to_beg(size_t newPos) {
+    if (this->recovery_rewinds >= MAX_RECOVERY_REWINDS) {
+        return;
+    }
+    this->recovery_rewinds++;
     this->clear_lookahead();
     this->lex.rewind_and_reset_to_expr_beg(newPos);
 }

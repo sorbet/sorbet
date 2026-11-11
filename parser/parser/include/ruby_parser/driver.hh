@@ -345,6 +345,15 @@ public:
     // true when in indentation-aware error recovery mode
     bool indentationAware;
     token_t last_token;
+    // Number of lexer rewinds performed for error recovery so far. Error
+    // recovery rewinds re-lex from an earlier position, so recovery work for
+    // a file with N unterminated nested definitions is O(2^N) — a few
+    // hundred bytes can allocate gigabytes. Past MAX_RECOVERY_REWINDS the
+    // parser stops rewinding and recovers by parsing forward instead.
+    // Well-formed files never rewind, and files with a realistic number of
+    // syntax errors rewind a handful of times, so this only engages for
+    // pathological input.
+    size_t recovery_rewinds = 0;
 
     // Stores a reference to the private yytname_ field from the generated bison parser,
     // which lets us look up pretty token names.
