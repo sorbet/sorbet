@@ -387,6 +387,8 @@ pipeline_tests(
             "testdata/parser/error_recovery/numparams_crash_2.rb",
             "testdata/parser/error_recovery/numparams_crash_3.rb",
             "testdata/parser/error_recovery/numparams_crash_5.rb",
+            "testdata/parser/error_recovery/numparams_crash_6.rb",
+            "testdata/parser/error_recovery/numparams_crash_7.rb",
             "testdata/parser/error_recovery/pos_after_kw_1.rb",
             "testdata/parser/error_recovery/send_after_end.rb",
             "testdata/parser/error_recovery/unmatched_block_args_1.rb",

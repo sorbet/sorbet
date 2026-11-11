@@ -237,7 +237,10 @@ public:
                 auto raw_numparam_stack = driver_->numparam_stack.stackCopy();
 
                 // ignore current block scope
-                raw_numparam_stack.pop_back();
+                // (the stack can be empty after error recovery leaves a block without its closing token)
+                if (!raw_numparam_stack.empty()) {
+                    raw_numparam_stack.pop_back();
+                }
 
                 std::reverse(raw_numparam_stack.begin(), raw_numparam_stack.end());
                 for (auto outer_scope : raw_numparam_stack) {
