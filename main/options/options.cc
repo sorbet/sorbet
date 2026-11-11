@@ -322,6 +322,12 @@ UnorderedMap<string, core::StrictLevel> extractStrictnessOverrides(string fileNa
     } catch (YAML::BadFile) {
         logger->error("Failed to read strictness override file \"{}\". Does it exist?", fileName);
         throw EarlyReturnWithCode(1);
+    } catch (const YAML::Exception &e) {
+        // A malformed or unexpected override file should be a clean config
+        // error, not an uncaught exception that aborts the process with a
+        // C++ backtrace.
+        logger->error("Failed to parse strictness override file \"{}\": {}", fileName, e.what());
+        throw EarlyReturnWithCode(1);
     }
     return result;
 }
