@@ -332,6 +332,14 @@ UnresolvedConstantLit::UnresolvedConstantLit(core::LocOffsets loc, ExpressionPtr
     _sanityCheck();
 }
 
+const ExpressionPtr &UnresolvedConstantLit::outermostScope() const {
+    auto current = this;
+    while (auto parent = cast_tree<UnresolvedConstantLit>(current->scope)) {
+        current = parent.get();
+    }
+    return current->scope;
+}
+
 ConstantLit::ConstantLit(core::LocOffsets loc, core::SymbolRef symbol) : storage(loc, symbol) {
     categoryCounterInc("trees", "resolvedconstantlit");
     _sanityCheck();
