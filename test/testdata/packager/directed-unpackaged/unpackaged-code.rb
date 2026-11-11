@@ -6,7 +6,7 @@
 
 # stratum: 0
 
-# This file has no package, so its definitions are isolated and cannot
-# be used by packaged code.
+# This file has no package, but this constant isn't in any package's
+# namespace, so packaged code can use it.
 module UnpackagedCode
 end

@@ -1,0 +1,9 @@
+# typed: strict
+# assert-slow-path: true
+module Root::A
+  class Secret
+  end
+
+  X = 1
+  package_private!(:X)
+end

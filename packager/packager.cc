@@ -980,17 +980,9 @@ void validatePackage(core::Context ctx) {
 void validatePackagedFile(core::Context ctx, const ast::ExpressionPtr &tree) {
     auto &file = ctx.file.data(ctx);
     ENFORCE(!file.isPackage(ctx));
-
-    if (file.isPayload()) {
-        // Files in Sorbet's payload are parsed and loaded in the --store-state phase, which runs
-        // outside of the packager mode. They're allowed to not belong to a package.
-        //
-        // Note that other RBIs that are not in Sorbet's payload follow the normal packaging rules.
-        //
-        // We normally skip running the packager when building in sorbet-orig mode, which computes
-        // the stored state, but payload files can be retypechecked by the fast path during LSP.
-        return;
-    }
+    // Files in Sorbet's payload belong to no package, but they're only ever indexed outside of the packager: when
+    // building the payload (`--store-state`, which `--sorbet-packages` rejects). LSP doesn't retypecheck them.
+    ENFORCE(!file.isPayload(), "Payload file `{}` in packager mode", file.path());
 
     if (file.sourceSize() == 0) {
         // Either this is an empty file, or it's a file that was deleted. In both cases, we don't need to validate it.

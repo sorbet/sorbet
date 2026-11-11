@@ -961,8 +961,9 @@ private:
     PackageMangledClasses &packageMangledClasses;
     PackageMangledStaticFields &packageMangledStaticFields;
     const PackageInfo *const package;
-    // Isolate unpackaged definitions so they cannot populate package namespaces or modify
-    // payload symbols. Payload files are allowed to have no package, including on the LSP fast path.
+    // Isolate the definitions in an unpackaged file that would populate a package's namespace (see
+    // `isPackageTerritory`). Its other definitions, like new root constants or reopened payload classes, are entered
+    // as usual, the way unpackaged RBIs need.
     const bool isolateUnpackagedDefinitions;
 
     // Get the symbol for an already-defined owner. Limited to refs that can own things (classes and methods).
@@ -1500,6 +1501,14 @@ private:
         return !exempt && !onPackagePath;
     }
 
+    // Whether a definition with this ownership would populate a package's namespace, or an intermediate namespace in
+    // the package hierarchy (like `Opus` for an `Opus::Foo` package). Unpackaged files may define anything else.
+    static bool isPackageTerritory(core::ClassOrModuleRef packageRegistryOwner,
+                                   core::packages::MangledName namespacePackage) {
+        return namespacePackage.exists() ||
+               (packageRegistryOwner.exists() && packageRegistryOwner != core::Symbols::PackageSpecRegistry());
+    }
+
     bool shouldMangleClassDefinition(core::MutableContext ctx, core::ClassOrModuleRef owner,
                                      const core::FoundClass &klass) {
         // Once we're in a mangled namespace, we keep mangling (all nested definitions are isolated,
@@ -1508,8 +1517,8 @@ private:
         if (isMangledNamespace(ctx, owner)) {
             return true;
         }
-        if (this->package == nullptr) {
-            return isolateUnpackagedDefinitions;
+        if (this->package == nullptr && !isolateUnpackagedDefinitions) {
+            return false;
         }
 
         auto [packageRegistryOwner, namespacePackage] = ctx.state.packageInfoForClassOrModule(owner, klass.name);
@@ -1522,6 +1531,10 @@ private:
             // (It might have been marked explicitly unpackaged, e.g. String in the payload)
             packageRegistryOwner = data->packageRegistryOwner;
             namespacePackage = data->package;
+        }
+
+        if (this->package == nullptr) {
+            return isPackageTerritory(packageRegistryOwner, namespacePackage);
         }
 
         auto onPackagePath = package->ownsNamespace(ctx, namespacePackage, packageRegistryOwner);
@@ -1543,7 +1556,9 @@ private:
             return true;
         }
         if (this->package == nullptr) {
-            return isolateUnpackagedDefinitions;
+            // The owner is `<root>` or a class that this file defines (namer defines the scope of `A::B = ...` as a
+            // class), which `shouldMangleClassDefinition` has already isolated if it needed to be.
+            return false;
         }
         // Assignments define values inside namespaces, so classify the containing owner.
         auto namespacePackage = owner.data(ctx)->package;
@@ -2332,7 +2347,13 @@ public:
           packageMangledStaticFields(packageMangledStaticFields),
           package(ctx.state.packageDB().getPackageForSourceFile(ctx.state, ctx.file)),
           isolateUnpackagedDefinitions(ctx.state.packageDB().enabled() && !ctx.file.data(ctx).isPackage(ctx) &&
-                                       this->package == nullptr && !ctx.file.data(ctx).isPayload()) {}
+                                       this->package == nullptr) {
+        // Payload files belong to no package, so they'd be isolated too. But they're only ever entered before the
+        // packager is enabled: when building the payload (`--store-state`, which `--sorbet-packages` rejects), or when
+        // populating it from source. LSP doesn't re-run namer on them.
+        ENFORCE(!isolateUnpackagedDefinitions || !ctx.file.data(ctx).isPayload(), "Payload file `{}` in packager mode",
+                ctx.file.data(ctx).path());
+    }
 
     SymbolDefiner::State enterClassDefinitions(core::MutableContext ctx, bool willDeleteOldDefs,
                                                ClassBehaviorLocsMap &classBehaviorLocs) {
