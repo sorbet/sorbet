@@ -59,6 +59,11 @@ class Desugarer final {
     const bool isInModule = false;   // True if we're in a Module definition. False for classes and singleton classes
     const bool isInAnyBlock = false; // True if we're in a `{ }`/`do end` block
 
+    // Recursion depth of `desugar` on the current node tree; capped by
+    // MAX_DESUGAR_DEPTH so that a pathologically nested expression cannot
+    // recurse until the process stack overflows.
+    uint32_t depth = 0;
+
     Desugarer(Desugarer &&) = delete;                 // Move constructor
     Desugarer(const Desugarer &) = delete;            // Copy constructor
     Desugarer &operator=(Desugarer &&) = delete;      // Move assignment
@@ -1693,9 +1698,39 @@ ast::ExpressionPtr Desugarer::desugarNullable(pm_node_t *node) {
     return desugar(node);
 }
 
+// Desugaring is recursive over the node tree, so a pathologically nested
+// expression (thousands of unmatched brackets, deep method chains) drives
+// recursion proportional to its nesting and can overflow the process stack
+// (SIGSEGV, no diagnostic). Bound the recursion and report a clean error
+// instead. 1000 nesting levels is far beyond real Ruby, hand-written or
+// generated.
+constexpr uint32_t MAX_DESUGAR_DEPTH = 1000;
+
+namespace {
+class DepthGuard final {
+    uint32_t &depth;
+
+public:
+    explicit DepthGuard(uint32_t &depth) : depth(depth) {
+        this->depth++;
+    }
+    ~DepthGuard() {
+        this->depth--;
+    }
+};
+} // namespace
+
 ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
     if (node == nullptr)
         return nullptr;
+
+    DepthGuard depthGuard(this->depth);
+    if (this->depth > MAX_DESUGAR_DEPTH) {
+        if (auto e = this->ctx.beginIndexerError(translateLoc(node->location), core::errors::Desugar::DeeplyNested)) {
+            e.setHeader("Expression is nested too deeply to desugar (limit: {} levels)", MAX_DESUGAR_DEPTH);
+        }
+        return MK::EmptyTree();
+    }
 
     auto location = translateLoc(node->location);
 

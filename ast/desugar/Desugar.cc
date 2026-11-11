@@ -30,6 +30,10 @@ struct DesugarContext final {
     bool inAnyBlock;
     bool inModule;
     bool preserveConcreteSyntax;
+    // Recursion depth of node2TreeImpl on the current parse tree; desugaring is
+    // recursive over the tree, so a pathologically nested expression drives
+    // recursion proportional to its nesting. Capped by MAX_DESUGAR_DEPTH.
+    uint32_t depth = 0;
 
     DesugarContext(core::MutableContext ctx, uint32_t &uniqueCounter, core::LocOffsets &enclosingBlockParamLoc,
                    core::NameRef &enclosingBlockParamName, core::NameRef enclosingMethodName, bool inAnyBlock,
@@ -2579,7 +2583,24 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
 }
 
 // Translate trees by calling `node2TreeBody`, and manually reset the unique_ptr argument when it's done.
+//
+// All recursion into children goes through this function, so the depth check
+// here bounds the whole tree walk: a deeply nested expression (e.g. thousands
+// of unmatched brackets, or method chains) would otherwise recurse until the
+// process stack overflows and the checker dies with SIGSEGV and no diagnostic.
+// 1000 nesting levels is far beyond hand-written or machine-generated Ruby; on
+// an 8MB stack the unpatched recursion dies at roughly a third of that.
+constexpr uint32_t MAX_DESUGAR_DEPTH = 1000;
+
 ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> &what) {
+    if (++dctx.depth > MAX_DESUGAR_DEPTH) {
+        if (what != nullptr) {
+            if (auto e = dctx.ctx.beginIndexerError(what->loc, core::errors::Desugar::DeeplyNested)) {
+                e.setHeader("Expression is nested too deeply to desugar (limit: {} levels)", MAX_DESUGAR_DEPTH);
+            }
+        }
+        return MK::EmptyTree();
+    }
     auto res = node2TreeImplBody(dctx, what.get());
     what.reset();
     return res;
