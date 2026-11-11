@@ -381,7 +381,8 @@ def register_sorbet_dependencies():
         sha256 = "47b61d25dd52bdaa1d571dab6705d076f05ba3d7a1bbbfed36145f8281c0403f",
         strip_prefix = "rules_foreign_cc-d74623f0ad47f4e375de81baa454eb106715a416",
         # Bootstrap Make needs -o for both names of Darwin's libtool.
-        # Remove when upstream recognizes llvm-libtool-darwin as well.
+        # Merged upstream: https://github.com/bazel-contrib/rules_foreign_cc/pull/1601.
+        # Once Bazel is >= 7.7.1, upgrade rules_foreign_cc and remove this patch.
         patches = ["@com_stripe_ruby_typer//third_party:rules_foreign_cc/llvm_libtool_darwin.patch"],
         patch_args = ["-p1"],
     )
