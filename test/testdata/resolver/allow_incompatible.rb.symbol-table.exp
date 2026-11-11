@@ -2,10 +2,10 @@ class ::<root> < ::Object ()
   class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> ()
     method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/resolver/allow_incompatible.rb:3
       argument <blk><block> @ Loc {file=test/testdata/resolver/allow_incompatible.rb start=??? end=???}
-  class ::AbstractClass < ::Object () @ test/testdata/resolver/allow_incompatible.rb:3
+  class ::AbstractClass < ::Object () : abstract @ test/testdata/resolver/allow_incompatible.rb:3
     method ::AbstractClass#bar : abstract (<blk>) -> Object @ test/testdata/resolver/allow_incompatible.rb:12
       argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/resolver/allow_incompatible.rb start=??? end=???}
-  class ::<Class:AbstractClass>[<AttachedClass>] < ::<Class:Object> (Helpers, Sig) @ test/testdata/resolver/allow_incompatible.rb:3
+  class ::<Class:AbstractClass>[<AttachedClass>] < ::<Class:Object> (Helpers, Sig) : abstract @ test/testdata/resolver/allow_incompatible.rb:3
     type-member(+) ::<Class:AbstractClass>::<AttachedClass> -> T.attached_class (of AbstractClass) @ test/testdata/resolver/allow_incompatible.rb:3
     method ::<Class:AbstractClass>#<static-init> (<blk>) @ test/testdata/resolver/allow_incompatible.rb:3
       argument <blk><block> @ Loc {file=test/testdata/resolver/allow_incompatible.rb start=??? end=???}
