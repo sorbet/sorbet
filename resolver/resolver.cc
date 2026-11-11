@@ -1283,16 +1283,15 @@ private:
                                job.klass.data(ctx)->superClass() == resolvedClass) {
                         job.klass.data(ctx)->setSuperClass(resolvedClass);
                     } else {
-                        auto fileIsPayload = ctx.file.data(ctx).isPayload();
-                        auto klassDefinedInPayload = absl::c_any_of(
-                            job.klass.data(ctx)->locs(), [&](auto &loc) { return loc.file().data(ctx).isPayload(); });
-                        auto allowsPayloadParentOverride = suppressPayloadSuperclassRedefinitionFor.contains(job.klass);
-
-                        if (!allowsPayloadParentOverride) {
+                        if (!suppressPayloadSuperclassRedefinitionFor.contains(job.klass)) {
                             if (auto e = ctx.beginError(job.ancestor->loc(),
                                                         core::errors::Resolver::RedefinitionOfParents)) {
                                 e.setHeader("Parent of class `{}` redefined from `{}` to `{}`", job.klass.show(ctx),
                                             job.klass.data(ctx)->superClass().show(ctx), resolvedClass.show(ctx));
+                                auto fileIsPayload = ctx.file.data(ctx).isPayload();
+                                auto klassDefinedInPayload =
+                                    absl::c_any_of(job.klass.data(ctx)->locs(),
+                                                   [&](auto &loc) { return loc.file().data(ctx).isPayload(); });
                                 if (!fileIsPayload && klassDefinedInPayload) {
                                     e.addErrorLine(job.klass.data(ctx)->loc(), "Originally defined here");
                                     e.addErrorNote(
