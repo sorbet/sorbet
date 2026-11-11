@@ -86,7 +86,7 @@ public:
                     }
 
                     // This has to come after the `Class.new` rewriter, because they would otherwise overlap.
-                    ConstantAssumeType::run(ctx, &assign);
+                    ConstantAssumeType::run(ctx, &assign, classDef->symbol == core::Symbols::root());
                 },
 
                 [&](ast::Send &send) {
