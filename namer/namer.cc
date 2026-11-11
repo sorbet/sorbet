@@ -147,7 +147,8 @@ class SymbolFinder {
             }
             case core::Names::packagePrivateBang().rawId():
                 // `postTransformSend` reports errors for every form, and handles `package_private!(:NAME)`.
-                if (!send->recv.isSelfReference() || send->hasBlock() || send->hasNonBlockArgs()) {
+                if (!ctx.state.packageDB().enabled() || !send->recv.isSelfReference() || send->hasBlock() ||
+                    send->hasNonBlockArgs()) {
                     break;
                 }
                 foundDefs->addModifier(core::FoundModifier{
@@ -506,7 +507,9 @@ public:
                 break;
             }
             case core::Names::packagePrivateBang().rawId(): {
-                if (ownerIsMethod || !original.recv.isSelfReference()) {
+                // Without --sorbet-packages there are no packages for a marker to restrict access to, so markers
+                // are silently ignored. That way, files with markers can still be typechecked with packages off.
+                if (!ctx.state.packageDB().enabled() || ownerIsMethod || !original.recv.isSelfReference()) {
                     break;
                 }
                 if (original.hasBlock() || original.hasKwArgs() || original.numPosArgs() > 1) {
