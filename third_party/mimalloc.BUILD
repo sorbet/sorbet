@@ -10,11 +10,11 @@ cmake(
     name = "mimalloc_lib",
     cache_entries = {
         "MI_INSTALL_TOPLEVEL": "ON",
-        # mimalloc v3 defaults allow_thp=1 on Linux and madvise()s MADV_HUGEPAGE
-        # over its whole 1GiB arena; on THP=[madvise] kernels every touched 4KiB
-        # slot then faults a 2MiB resident huge page, adding ~45MB of phantom
-        # RSS to small/medium typechecks (#10889). Runtime opt-in stays
-        # available via MIMALLOC_ALLOW_THP=1.
+        # Transparent hugepage support can be useful, but it drastically increases
+        # RSS usage for Sorbet runs on small codebases, and even on large
+        # codebases, it's not obvious that it's a win.  Folks who want to
+        # experiment with transparent hugepages can set `MIMALLOC_ALLOW_THP=1`
+        # when running Sorbet.
         "MI_NO_THP": "ON",
     },
     lib_source = ":srcs",
