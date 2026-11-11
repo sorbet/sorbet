@@ -862,8 +862,8 @@ public:
     }
 
     void postTransformUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
-        auto &scope = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(tree).scope;
-        ast::TreeWalk::apply(ctx, *this, scope);
+        auto &outermostScope = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(tree).outermostScope();
+        ast::TreeWalk::apply(ctx, *this, outermostScope);
     }
 
     void postTransformConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
