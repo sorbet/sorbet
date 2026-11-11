@@ -572,15 +572,6 @@ public:
             return;
         }
 
-        // Only needed by the LSP's "Apply all Sorbet fixes for file", via PackageDB::aggregateMissingExportsForFile:
-        // individual export autocorrects are skipped during generic aggregation. gen-packages only needs package
-        // references.
-        // TODO(jez): Delete referencedSymbols and GlobalState::symbolsReferencedByFile when we remove the export DSL.
-        if (ctx.state.packageDB().genPackagesMode() == core::packages::GenPackagesMode::Disabled &&
-            !ctx.state.packageDB().publicByDefault()) {
-            referencedSymbols.insert(litSymbol);
-        }
-
         // no need to check visibility for these cases
         auto otherPackage = litSymbol.enclosingClass(ctx).data(ctx)->package;
         if (!otherPackage.exists() || this->package.mangledName() == otherPackage) {
