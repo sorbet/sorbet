@@ -1,0 +1,14 @@
+# typed: strict
+# assert-fast-path: a/__package.rb,a/a.rb,b/__package.rb,b/b.rb
+module Root::A
+  class Foo
+    extend T::Sig
+
+    # Removing the markers takes the fast path, which must still retypecheck b/b.rb
+    sig { void }
+    def foo; end
+
+    sig { void }
+    def self.bar; end
+  end
+end

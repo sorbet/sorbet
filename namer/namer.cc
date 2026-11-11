@@ -1342,6 +1342,12 @@ private:
                     break;
                 case core::Names::packagePrivate().rawId():
                 case core::Names::packagePrivateClassMethod().rawId():
+                    // Set the flag even if the owner has no package. Hashing a file is done without
+                    // knowledge of package files, so no owner has a package there, and we have to
+                    // unconditionally set the flag in order to make sure that toggling it changes the
+                    // method's hash. Infer ignores the flag on a method whose owner has no package.
+                    method.data(ctx)->flags.isPackagePrivate = true;
+
                     if (!owner.data(ctx)->package.exists()) {
                         if (auto e = ctx.beginError(mod.loc, core::errors::Namer::PackagePrivateOutsidePackage)) {
                             e.setHeader("Method `{}` is not in a package and so cannot be made `{}`", method.show(ctx),
@@ -1349,10 +1355,7 @@ private:
                             e.addErrorLine(owner.data(ctx)->loc(), "This class has no package");
                             e.addErrorLine(method.data(ctx)->loc(), "Method defined here");
                         }
-                        break;
                     }
-
-                    method.data(ctx)->flags.isPackagePrivate = true;
                     break;
                 case core::Names::protected_().rawId():
                     method.data(ctx)->flags.isProtected = true;
