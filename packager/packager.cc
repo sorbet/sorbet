@@ -343,18 +343,10 @@ struct PackageSpecBodyWalk {
 
             if (send.numPosArgs() == 1) {
                 auto &expr = send.getPosArg(0);
-                if (auto target = verifyConstant(ctx, core::Names::export_(), expr)) {
-                    // Record every syntactically valid export. verifyConstant only checks that the argument is a
-                    // constant path, so this also records constants that will fail to resolve later. The rest of the
-                    // pipeline uses these locations for autocorrects.
-                    auto &exp = info.exports_.emplace_back(send.loc);
-                    while (target != nullptr) {
-                        exp.reversedPath.emplace_back(target->cnst);
-                        target = ast::cast_tree<ast::UnresolvedConstantLit>(target->scope);
-                    }
-                } else if (ast::isa_tree<ast::UnresolvedConstantLit>(expr)) {
+                if (verifyConstant(ctx, core::Names::export_(), expr) == nullptr &&
+                    ast::isa_tree<ast::UnresolvedConstantLit>(expr)) {
                     // A constant path that verifyConstant rejected (e.g., a `::`-rooted one), which it reported
-                    // an error for. Drop it so that `exports_` has every export resolver could resolve.
+                    // an error for. Drop it, so that later passes only see exports that verifyConstant accepted.
                     tree = ast::make_expression<ast::EmptyTree>();
                 }
             }

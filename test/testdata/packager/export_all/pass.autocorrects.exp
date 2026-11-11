@@ -5,11 +5,11 @@
 
 class Foo::Bar < PackageSpec
   export_all!
-# ^^^^^^^^^^^ error: Package `Foo::Bar` declares `export_all!` and therefore should not use explicit exports
 
   export_all!()
             # ^^^^^^^^^^^^^^ error: Too many arguments
 
+  export Foo::Bar::Thing
 
 end
 # ------------------------------
@@ -58,8 +58,9 @@ class Other < PackageSpec
   import Typical
 
   export_all!
-# ^^^^^^^^^^^ error: Package `Other` declares `export_all!` and therefore should not use explicit exports
 
+  export Other::OtherClass
+  export Other::OtherClass2
 end
 # ------------------------------
 # -- test/testdata/packager/export_all/other/other.rb --

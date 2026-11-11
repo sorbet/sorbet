@@ -87,8 +87,6 @@ class A < PackageSpec
 
   # strict_dependencies 'layered' or more strict:
   import Prelude
-
-  export A::CONSTANT_FROM_A
 end
 
 ###### cat A/test/__package.rb ######
@@ -115,9 +113,6 @@ class B < PackageSpec
   # strict_dependencies 'layered' or more strict:
   import C
   import D
-
-  export B::CONSTANT_FROM_B
-  export B::ANOTHER_CONSTANT_FROM_B
 
   visible_to A
 end

@@ -179,9 +179,10 @@ TEST_CASE("Add import with only existing exports") {
                         "  export SomethingElse\n"
                         "end\n";
 
+    // Exports aren't recorded, so the import goes at the end, as if there were no other lines.
     string expected = "class MyPackage < PackageSpec\n"
-                      "  import ExamplePackage\n"
                       "  export SomethingElse\n"
+                      "  import ExamplePackage\n"
                       "end\n";
 
     auto parsedFiles =
