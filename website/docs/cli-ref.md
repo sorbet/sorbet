@@ -349,9 +349,6 @@ Usage:
       --package-attributed-errors
                                 Attribute errors to their enclosing package in the error
                                 output
-      --experimental-public-by-default
-                                Make constants public unless marked `package_private!`,
-                                ignoring `export` and `export_all!`
       --experimental-package-directed
                                 Enable support for checking by package, instead of
                                 processing all files at once

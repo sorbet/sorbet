@@ -441,7 +441,7 @@ TEST_CASE("isPackageSpecSymbol") {
 
     {
         auto unfrezePackages = gs.packageDB().unfreeze();
-        gs.setPackagerOptions({}, {}, {}, {}, {}, {}, {}, "", packages::GenPackagesMode::Disabled, false, false, false);
+        gs.setPackagerOptions({}, {}, {}, {}, {}, {}, {}, "", packages::GenPackagesMode::Disabled, false, false);
     }
 
     CHECK_FALSE(Symbols::root().isPackageSpecSymbol(gs));

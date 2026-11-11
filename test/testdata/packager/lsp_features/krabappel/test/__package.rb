@@ -8,5 +8,4 @@ class Test::Krabappel < PackageSpec
   #      ^^^^^^^^^ usage: krabappel-pkg
 
   export Test::Krabappel::Popquiz
-  #                       ^^^^^^^ usage: popquiz
 end

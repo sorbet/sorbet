@@ -24,16 +24,4 @@ imported_as_test/foo_class.rb:5: `Other` is not imported https://srb.help/3718
   Note:
     Try running generate-packages.sh
 Errors: 1
-imported_as_test_unit/test/foo_class.rb:5: `Other::OtherClass` resolves but is not exported from `Other` https://srb.help/3717
-     5 |    Other::OtherClass
-            ^^^^^^^^^^^^^^^^^
-    other/other_class.rb:4: Defined here
-     4 |  class OtherClass
-          ^^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    other/__package.rb:3: Insert `export Other::OtherClass`
-     3 |class Other < PackageSpec
-                                 ^
-  Note:
-    Try running generate-packages.sh
-Errors: 1
+No errors! Great job.

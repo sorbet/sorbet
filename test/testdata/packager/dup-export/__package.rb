@@ -11,5 +11,4 @@ class Foo::Bar < PackageSpec
 
   export Foo::Bar::Also
   export Foo::Bar::Also
-# ^^^^^^^^^^^^^^^^^^^^^ error: Duplicate export of `Foo::Bar::Also`
 end

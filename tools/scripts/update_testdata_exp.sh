@@ -170,9 +170,6 @@ for this_src in "${rb_src[@]}" DUMMY; do
       if srcs_match '^# enable-package-directed: true'; then
         args+=("--experimental-package-directed")
       fi
-      if srcs_match '^# experimental-public-by-default: true'; then
-        args+=("--experimental-public-by-default")
-      fi
 
       extra_underscore_prefixes=()
       while IFS='' read -r prefix; do

@@ -334,30 +334,10 @@ struct PackageSpecBodyWalk {
         }
 
         if (send.fun == core::Names::export_()) {
-            if (ctx.state.packageDB().publicByDefault()) {
-                // Exports have no meaning when constants are public by default. Drop them without resolving or
-                // recording them, so that exports of constants that no longer exist don't report errors.
-                tree = ast::make_expression<ast::EmptyTree>();
-                return;
-            }
-
-            if (send.numPosArgs() == 1) {
-                auto &expr = send.getPosArg(0);
-                if (auto target = verifyConstant(ctx, core::Names::export_(), expr)) {
-                    // Record every syntactically valid export. verifyConstant only checks that the argument is a
-                    // constant path, so this also records constants that will fail to resolve later. The rest of the
-                    // pipeline uses these locations for autocorrects.
-                    auto &exp = info.exports_.emplace_back(send.loc);
-                    while (target != nullptr) {
-                        exp.reversedPath.emplace_back(target->cnst);
-                        target = ast::cast_tree<ast::UnresolvedConstantLit>(target->scope);
-                    }
-                } else if (ast::isa_tree<ast::UnresolvedConstantLit>(expr)) {
-                    // A constant path that verifyConstant rejected (e.g., a `::`-rooted one), which it reported
-                    // an error for. Drop it so that `exports_` has every export resolver could resolve.
-                    tree = ast::make_expression<ast::EmptyTree>();
-                }
-            }
+            // Exports have no meaning, because constants are public unless marked `package_private!`. Drop them without
+            // resolving them, so that exports of constants that no longer exist don't report errors.
+            tree = ast::make_expression<ast::EmptyTree>();
+            return;
         } else if (send.fun == core::Names::import()) {
             if (send.numPosArgs() == 1) {
                 Import *imp = nullptr;

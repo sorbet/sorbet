@@ -448,7 +448,7 @@ public:
                             const std::vector<std::string> &updateVisibilityFor,
                             const std::vector<std::string> &packagerLayers, std::string errorHint,
                             packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility,
-                            bool packageAttributedErrors, bool publicByDefault);
+                            bool packageAttributedErrors);
     packages::UnfreezePackages unfreezePackages();
 
     struct ClassOrModulePackageInfo final {
@@ -581,7 +581,7 @@ public:
         const std::vector<std::string> &allowRelaxedPackagerChecksFor,
         const std::vector<std::string> &updateVisibilityFor, const std::vector<std::string> &packagerLayers,
         std::string errorHint, packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility,
-        bool packageAttributedErrors, bool publicByDefault) const;
+        bool packageAttributedErrors) const;
 
     // Minimally copy the global state, including the file table, to initialize the LSPTypechecker.
     // NOTE: this very intentionally will not copy the symbol or name tables. The symbol tables aren't used or populated
@@ -593,8 +593,7 @@ public:
         const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
         const std::vector<std::string> &allowRelaxedPackagerChecksFor,
         const std::vector<std::string> &updateVisibilityFor, const std::vector<std::string> &packagerLayers,
-        std::string errorHint, packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility,
-        bool publicByDefault) const;
+        std::string errorHint, packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility) const;
 
     // Copy the name table, file table and other parts of GlobalState that are required to start the slow path. If the
     // `toStratum` value is passed as something other than the `0` stratum, the prefix of the symbol table leading up to
@@ -607,7 +606,7 @@ public:
                     const std::vector<std::string> &allowRelaxedPackagerChecksFor,
                     const std::vector<std::string> &updateVisibilityFor, const std::vector<std::string> &packagerLayers,
                     std::string errorHint, packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility,
-                    bool packageAttributedErrors, bool publicByDefault, core::packages::Stratum toStratum) const;
+                    bool packageAttributedErrors, core::packages::Stratum toStratum) const;
 
     // Contains a path prefix that should be stripped from all printed paths.
     std::string pathPrefix;
@@ -631,27 +630,6 @@ public:
     std::unique_ptr<LocalSymbolTableHashes> hash(uint32_t foundClassesHash) const;
     absl::Span<const std::shared_ptr<File>> getFiles() const {
         return this->files->span();
-    }
-
-    // NOTE: this only tracks the information required for computing what symbols needed to be exported, and not for
-    // find all references. For example, if a file references A::B::C::D, then only A::B::C::D will be in set returned,
-    // and not A, A::B, A::B::C.
-    const UnorderedSet<core::SymbolRef> &getSymbolsReferencedByFile(core::FileRef fref) const {
-        ENFORCE(symbolsReferencedByFile.size() == this->files->size(),
-                "mismatch in files.size ({}) and symbolsReferencedByFile.size(): ({})", files->size(),
-                symbolsReferencedByFile.size());
-        auto ix = fref.id();
-        ENFORCE(ix < symbolsReferencedByFile.size());
-        return this->symbolsReferencedByFile[ix];
-    }
-
-    void setSymbolsReferencedByFile(core::FileRef fref, UnorderedSet<core::SymbolRef> &referencedSymbols) {
-        ENFORCE(symbolsReferencedByFile.size() == this->files->size(),
-                "mismatch in files.size ({}) and symbolsReferencedByFile.size(): ({})", files->size(),
-                symbolsReferencedByFile.size());
-        auto ix = fref.id();
-        ENFORCE(ix < symbolsReferencedByFile.size());
-        this->symbolsReferencedByFile[ix].swap(referencedSymbols);
     }
 
     // Contains a string to be used as the base of the error URL.
@@ -810,7 +788,6 @@ private:
     UnorderedSet<int> suppressedErrorClasses;
     UnorderedSet<int> onlyErrorClasses;
     std::shared_ptr<FileTable> files;
-    std::vector<UnorderedSet<core::SymbolRef>> symbolsReferencedByFile;
     unsigned int utf8NamesWritten_ = 0;
     unsigned int constantNamesWritten_ = 0;
     unsigned int uniqueNamesWritten_ = 0;

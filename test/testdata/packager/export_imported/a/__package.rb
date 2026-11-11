@@ -9,5 +9,4 @@ class A < PackageSpec
   import B
 
   export B::BClass
-# ^^^^^^^^^^^^^^^^ error: Cannot export `B::BClass` because it is owned by another package
 end

@@ -29,7 +29,6 @@ module Opus::Foo
 
   # Not exported from util
   Opus::Util::Nesting.nesting_method
-# ^^^^^^^^^^^^^^^^^^^ error: `Opus::Util::Nesting` resolves but is not exported from `Opus::Util`
 
 
   # TestImported is not imported by this package

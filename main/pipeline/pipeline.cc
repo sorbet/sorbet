@@ -112,7 +112,7 @@ void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) 
             opts.extraPackageFilesDirectoryUnderscorePrefixes, opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
             opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
             opts.allowRelaxedPackagerChecksFor, opts.updateVisibilityFor, opts.packagerLayers, opts.sorbetPackagesHint,
-            opts.genPackagesMode, opts.allowRelaxingTestVisibility, opts.packageAttributedErrors, opts.publicByDefault);
+            opts.genPackagesMode, opts.allowRelaxingTestVisibility, opts.packageAttributedErrors);
     }
 #endif
 }
@@ -129,8 +129,7 @@ unique_ptr<core::GlobalState> copyForSlowPath(const core::GlobalState &from, con
         opts.extraPackageFilesDirectoryUnderscorePrefixes, opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
         opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
         opts.allowRelaxedPackagerChecksFor, opts.updateVisibilityFor, opts.packagerLayers, opts.sorbetPackagesHint,
-        opts.genPackagesMode, opts.allowRelaxingTestVisibility, opts.packageAttributedErrors, opts.publicByDefault,
-        forStratum);
+        opts.genPackagesMode, opts.allowRelaxingTestVisibility, opts.packageAttributedErrors, forStratum);
 
     // Fall back on initializing from the payload if we're not copying part of from's symbol table.
     if (forStratum == core::packages::Stratum(0)) {
@@ -721,7 +720,7 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
         opts.extraPackageFilesDirectorySlashDeprecatedPrefixes, opts.extraPackageFilesDirectorySlashPrefixes,
         opts.packageSkipRBIExportEnforcementDirs, opts.allowRelaxedPackagerChecksFor, opts.updateVisibilityFor,
         opts.packagerLayers, opts.sorbetPackagesHint, opts.genPackagesMode, opts.allowRelaxingTestVisibility,
-        opts.packageAttributedErrors, opts.publicByDefault);
+        opts.packageAttributedErrors);
 
     workers.multiplexJob("indexSuppliedFiles", [emptyGs, &opts, fileq, resultq, &kvstore, cancelable]() {
         Timer timeit(emptyGs->tracer(), "indexSuppliedFilesWorker");
@@ -733,7 +732,7 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
             opts.extraPackageFilesDirectorySlashDeprecatedPrefixes, opts.extraPackageFilesDirectorySlashPrefixes,
             opts.packageSkipRBIExportEnforcementDirs, opts.allowRelaxedPackagerChecksFor, opts.updateVisibilityFor,
             opts.packagerLayers, opts.sorbetPackagesHint, opts.genPackagesMode, opts.allowRelaxingTestVisibility,
-            opts.packageAttributedErrors, opts.publicByDefault);
+            opts.packageAttributedErrors);
         auto &epochManager = *localGs->epochManager;
 
         IndexThreadResultPack threadResult;
@@ -1139,14 +1138,6 @@ ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, vector<ast::ParsedFil
                                     WorkerPool &workers) {
     try {
         if (opts.stopAfterPhase != options::Phase::NAMER) {
-#ifndef SORBET_REALMAIN_MIN
-            if (opts.cacheSensitiveOptions.sorbetPackages) {
-                // Only needs the symbols entered by namer and the exports recorded on each `PackageInfo`, not
-                // resolved constants.
-                packager::VisibilityChecker::propagateExports(gs, what);
-            }
-#endif
-
             ProgressIndicator namingProgress(opts.showProgress, "Resolving", 1);
             {
                 Timer timeit(gs.tracer(), "resolving");
@@ -1277,11 +1268,6 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
             // the package prefixes" with the later living in `pipeline::nameAndResolve` once again
             // (thus restoring the symmetry).
             what = packager::Packager::runIncremental(gs, move(what), workers);
-
-            // Without incremental namer, no symbols were deleted or re-entered, so their export bits are unchanged.
-            if (runIncrementalNamer) {
-                packager::VisibilityChecker::propagateExports(gs, what);
-            }
         }
 #endif
 

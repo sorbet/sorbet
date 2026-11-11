@@ -147,8 +147,7 @@ class SymbolFinder {
             }
             case core::Names::packagePrivateBang().rawId():
                 // `postTransformSend` reports errors for every form, and handles `package_private!(:NAME)`.
-                if (!ctx.state.packageDB().publicByDefault() || !send->recv.isSelfReference() || send->hasBlock() ||
-                    send->hasNonBlockArgs()) {
+                if (!send->recv.isSelfReference() || send->hasBlock() || send->hasNonBlockArgs()) {
                     break;
                 }
                 foundDefs->addModifier(core::FoundModifier{
@@ -460,7 +459,7 @@ public:
                         e.setHeader("`{}` with no arguments is not allowed", name);
                         e.addErrorNote("Unlike `{}`, `{}` does not toggle the visibility of the methods after it",
                                        "private", name);
-                        if (original.fun == core::Names::packagePrivate() && ctx.state.packageDB().publicByDefault()) {
+                        if (original.fun == core::Names::packagePrivate()) {
                             e.addErrorNote("To make the enclosing class or module package-private, use `{}`",
                                            "package_private!");
                             auto funLoc = ctx.locAt(original.funLoc);
@@ -507,9 +506,7 @@ public:
                 break;
             }
             case core::Names::packagePrivateBang().rawId(): {
-                // Silently ignored without --experimental-public-by-default, so that the option can be turned off
-                // after markers have been added.
-                if (ownerIsMethod || !original.recv.isSelfReference() || !ctx.state.packageDB().publicByDefault()) {
+                if (ownerIsMethod || !original.recv.isSelfReference()) {
                     break;
                 }
                 if (original.hasBlock() || original.hasKwArgs() || original.numPosArgs() > 1) {
@@ -1374,7 +1371,7 @@ private:
             }
         }
 
-        if (!method.exists() && mod.name == core::Names::packagePrivate() && ctx.state.packageDB().publicByDefault()) {
+        if (!method.exists() && mod.name == core::Names::packagePrivate()) {
             // Check for a `package_private` <> `package_private!` mixup
             auto cnst = ctx.state.lookupNameConstant(mod.target);
             auto klass = ctx.owner.enclosingClass(ctx);

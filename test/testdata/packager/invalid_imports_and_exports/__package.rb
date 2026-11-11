@@ -19,10 +19,9 @@ class A < PackageSpec
   import B
   import B
 
-  export 123 # error: Argument to `export` must be a constant
-  export "hello" # error: Argument to `export` must be a constant
-  export method # error: Argument to `export` must be a constant
-       #       ^ error: Not enough arguments
+  export 123
+  export "hello"
+  export method
   export A::REFERENCE # Works; it's a constant.
   export A::AClass
   export A::AModule

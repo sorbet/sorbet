@@ -628,10 +628,6 @@ TEST_CASE("PerPhaseTest") {
         realmain::pipeline::unpartitionPackageFiles(stratumFiles, move(nonPackageTrees));
 
         {
-            if (opts.cacheSensitiveOptions.sorbetPackages) {
-                packager::VisibilityChecker::propagateExports(*gs, stratumFiles);
-            }
-
             core::UnfreezeNameTable nameTableAccess(*gs);     // Resolver::defineAttr
             core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
             stratumFiles = move(resolver::Resolver::run(*gs, move(stratumFiles), *workers).result());
@@ -894,10 +890,6 @@ TEST_CASE("PerPhaseTest") {
                 return fmt::format("# -- {} --\n{}", tree.file.data(*gs).path(), tree.tree.toString(*gs));
             });
         }
-    }
-
-    if (opts.cacheSensitiveOptions.sorbetPackages && ranIncrementalNamer) {
-        packager::VisibilityChecker::propagateExports(*gs, trees);
     }
 
     // resolver

@@ -5,11 +5,11 @@
 
 class Foo::Bar < PackageSpec
   export_all!
-# ^^^^^^^^^^^ error: Package `Foo::Bar` declares `export_all!` and therefore should not use explicit exports
 
   export_all!()
             # ^^^^^^^^^^^^^^ error: Too many arguments
 
+  export Foo::Bar::Thing
 
 end
 # ------------------------------
@@ -34,7 +34,6 @@ end
 # enable-packager: true
 
 class Foo::Bar::Baz < PackageSpec
-  export Foo::Bar::Baz::Quux
 end
 # ------------------------------
 # -- test/testdata/packager/export_all/foo_bar_baz/foo_bar_baz.rb --
@@ -59,8 +58,9 @@ class Other < PackageSpec
   import Typical
 
   export_all!
-# ^^^^^^^^^^^ error: Package `Other` declares `export_all!` and therefore should not use explicit exports
 
+  export Other::OtherClass
+  export Other::OtherClass2
 end
 # ------------------------------
 # -- test/testdata/packager/export_all/other/other.rb --
@@ -74,11 +74,9 @@ class Other::OtherClass
   # because `Foo::Bar::Baz` is a subpackage, the export walk should stop
   # and not export the stuff under that namespace
   Foo::Bar::Baz::Quux
-# ^^^^^^^^^^^^^^^^^^^ error: `Foo::Bar::Baz::Quux` resolves but is not exported
 
   Typical::Example # packages that don't use `export_all` are not affected
   Typical::NonExported # packages that don't use `export_all` are not affected
-# ^^^^^^^^^^^^^^^^^^^^ error: `Typical::NonExported` resolves but is not exported
 end
 # ------------------------------
 # -- test/testdata/packager/export_all/other/other2.rb --

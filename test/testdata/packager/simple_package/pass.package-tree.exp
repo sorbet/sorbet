@@ -3,9 +3,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::<PackageSpecRegistry>::Project::Bar<<C Bar>> < (::Sorbet::Private::Static::PackageSpec)
     <self>.import(::<PackageSpecRegistry>::<C Project>::<C Foo>)
 
-    <self>.export(<emptyTree>::<C Project>::<C Bar>::<C Bar>)
+    <emptyTree>
 
-    <self>.export(<emptyTree>::<C Project>::<C Bar>::<C CallsFoo>)
+    <emptyTree>
   end
 end
 # -- test/testdata/packager/simple_package/foo/__package.rb --
@@ -13,9 +13,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::<PackageSpecRegistry>::Project::Foo<<C Foo>> < (::Sorbet::Private::Static::PackageSpec)
     <self>.import(::<PackageSpecRegistry>::<C Project>::<C Bar>)
 
-    <self>.export(<emptyTree>::<C Project>::<C Foo>::<C Foo>)
+    <emptyTree>
 
-    <self>.export(<emptyTree>::<C Project>::<C Foo>::<C CallsBar>)
+    <emptyTree>
   end
 end
 # -- test/testdata/packager/simple_package/bar/bar.rb --

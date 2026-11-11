@@ -3,13 +3,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::<PackageSpecRegistry>::A<<C A>> < (::Sorbet::Private::Static::PackageSpec)
     <self>.import(::<PackageSpecRegistry>::<C B>)
 
-    <self>.export(<emptyTree>::<C B>::<C BClass>)
+    <emptyTree>
   end
 end
 # -- test/testdata/packager/export_imported/b/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::<PackageSpecRegistry>::B<<C B>> < (::Sorbet::Private::Static::PackageSpec)
-    <self>.export(<emptyTree>::<C B>::<C BClass>)
+    <emptyTree>
   end
 end
 # -- test/testdata/packager/export_imported/b/b.rb --

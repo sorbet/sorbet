@@ -13,7 +13,6 @@ class Test::Opus::Foo::FooTest
 
   # Not exported from util, and util is not imported with uses_internals
   Opus::Util::Nesting.nesting_method
-# ^^^^^^^^^^^^^^^^^^^ error: `Opus::Util::Nesting` resolves but is not exported from `Opus::Util`
 
   # via import Opus::TestImported
   Opus::TestImported::TIClass

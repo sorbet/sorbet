@@ -5,5 +5,5 @@ module NormalPackage
   # acceptable, because `Library::Constant` is exported
   Library::Constant
   # unacceptable!
-  Library::UnexportedConstant # error: `Library::UnexportedConstant` resolves but is not exported
+  Library::UnexportedConstant
 end

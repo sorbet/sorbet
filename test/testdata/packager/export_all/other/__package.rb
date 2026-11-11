@@ -7,7 +7,6 @@ class Other < PackageSpec
   import Typical
 
   export_all!
-# ^^^^^^^^^^^ error: Package `Other` declares `export_all!` and therefore should not use explicit exports
 
   export Other::OtherClass
   export Other::OtherClass2
