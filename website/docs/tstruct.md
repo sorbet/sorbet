@@ -145,8 +145,6 @@ Example.new.bucket.items << 'elem'
 p(Example.new.bucket.items) # => ["elem"]
 ```
 
-The same applies to a `Set` whose elements are mutable, a `Struct` or `OpenStruct` holding a mutable value, and `ifunset:`.
-
 In such cases, use `factory:` to compute the default value in whatever way necessary (here, `factory: -> { Bucket.new }`). The value produced by `factory:` is used verbatim. (This means that `factory:` can be used when reference sharing across default values is actually the _desired_ outcome.)
 
 ## Fine-grained inheritance control with `override:`
