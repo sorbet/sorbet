@@ -243,7 +243,9 @@ void GenPackages::runStrict(core::GlobalState &gs) {
         for (auto &pkgName : scc.members) {
             auto &pkgInfo = gs.packageDB().getPackageInfo(pkgName);
             // TODO(neil): also check if this package is a build package
-            if (pkgInfo.numFilesInPackage() == 0) {
+            // The `__package.rb` file counts against the total, so a package with no source files does still have a
+            // single file.
+            if (pkgInfo.numFilesInPackage <= 1) {
                 skipRaisingStrictness[scc.id] = true;
                 break;
             }

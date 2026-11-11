@@ -193,9 +193,9 @@ public:
     // TODO(neil): once we track a list of files in this package, we can `.reserve(files.size())` in the constructor
     UnorderedMap<core::FileRef, std::vector<std::pair<MangledName, PackageReferenceInfo>>> packagesReferencedByFile;
 
-    int numFilesInPackage() const {
-        return packagesReferencedByFile.size();
-    }
+    // The number of files associated with this package while building the package DB, including the package file
+    // itself.
+    uint32_t numFilesInPackage = 0;
 
     // The id of the SCC that this package's normal imports belong to.
     //
@@ -349,7 +349,7 @@ public:
         const core::GlobalState &gs, std::vector<Import> newImports,
         UnorderedMap<core::packages::MangledName, core::packages::StrictDependenciesLevel> newStrictnessByPkg) const;
 };
-CheckSize(PackageInfo, 240, 8);
+CheckSize(PackageInfo, 248, 8);
 
 } // namespace sorbet::core::packages
 #endif
