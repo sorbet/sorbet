@@ -488,18 +488,6 @@ class LocalNameInserter {
                                                std::move(newArgs), newFlags);
     }
 
-    void walkConstantLit(core::MutableContext ctx, ast::ExpressionPtr &tree) {
-        if (auto lit = ast::cast_tree<ast::UnresolvedConstantLit>(tree)) {
-            walkConstantLit(ctx, lit->scope);
-        } else if (ast::isa_tree<ast::EmptyTree>(tree) || ast::isa_tree<ast::ConstantLit>(tree)) {
-            // Do nothing.
-        } else {
-            // Uncommon case. Will result in "Dynamic constant references are not allowed" eventually.
-            // Still want to do our best to recover (for e.g., LSP queries)
-            ast::TreeWalk::apply(ctx, *this, tree);
-        }
-    }
-
 public:
     void preTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr &tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
@@ -567,7 +555,14 @@ public:
     }
 
     void postTransformUnresolvedConstantLit(core::MutableContext ctx, ast::ExpressionPtr &tree) {
-        walkConstantLit(ctx, tree);
+        auto &outermostScope = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(tree).outermostScope();
+        if (ast::isa_tree<ast::EmptyTree>(outermostScope) || ast::isa_tree<ast::ConstantLit>(outermostScope)) {
+            return;
+        }
+
+        // Uncommon case. Will result in "Dynamic constant references are not allowed" eventually.
+        // Still want to do our best to recover (for e.g., LSP queries)
+        ast::TreeWalk::apply(ctx, *this, outermostScope);
     }
 
 private:
