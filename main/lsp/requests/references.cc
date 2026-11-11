@@ -169,15 +169,6 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
                 //    import Bar
                 //           ^^^
                 // Returns all usages of `Bar` within the Foo package only.
-                //
-                // Case 3. get-refs on an export statement
-                //
-                //  class Foo < PackageSpec
-                //    ...
-                //
-                //    export Foo::A
-                //                ^
-                //  Returns all global usages of Foo::A
 
                 auto packageName = gs.packageDB().getPackageNameForFile(fref);
                 auto symsToCheck = getSymsToCheckWithinPackage(gs, constResp->symbolBeforeDealias, packageName);
