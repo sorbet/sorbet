@@ -869,7 +869,7 @@ public:
     void postTransformConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
         auto original = ast::cast_tree_nonnull<ast::ConstantLit>(tree).original();
         if (original != nullptr) {
-            ast::TreeWalk::apply(ctx, *this, original->scope);
+            ast::TreeWalk::apply(ctx, *this, original->outermostScope());
         }
     }
 };
