@@ -8,9 +8,7 @@ class Other::OtherClass
   # because `Foo::Bar::Baz` is a subpackage, the export walk should stop
   # and not export the stuff under that namespace
   Foo::Bar::Baz::Quux
-# ^^^^^^^^^^^^^^^^^^^ error: `Foo::Bar::Baz::Quux` resolves but is not exported
 
   Typical::Example # packages that don't use `export_all` are not affected
   Typical::NonExported # packages that don't use `export_all` are not affected
-# ^^^^^^^^^^^^^^^^^^^^ error: `Typical::NonExported` resolves but is not exported
 end

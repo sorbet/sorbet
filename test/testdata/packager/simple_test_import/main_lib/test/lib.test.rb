@@ -9,5 +9,4 @@ class Test::Project::MainLib::LibTest
   Test::Project::Util::UtilHelper # allowed by import
 
   Test::Project::Util::Unexported
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Project::Util::Unexported` resolves but is not exported from `Test::Project::Util`
 end

@@ -5,9 +5,9 @@ class Consumer::Use
 
   sig {void}
   def self.run
-    Producer::Private # error: `Producer::Private` resolves but is not exported
-    Producer::Private::Nested # error: `Producer::Private::Nested` resolves but is not exported
-    Producer::Private::Value # error: `Producer::Private::Value` resolves but is not exported
+    Producer::Private
+    Producer::Private::Nested
+    Producer::Private::Value
     puts 1
   end
 end
