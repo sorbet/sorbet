@@ -542,7 +542,7 @@ private:
     static bool canReferencePackagePrivate(core::Context ctx, ConstantResolutionItem &job, core::SymbolRef result,
                                            bool foundInAncestor, core::packages::MangledName otherPackage) {
         auto &packageDB = ctx.state.packageDB();
-        if (!packageDB.publicByDefault() || !otherPackage.exists()) {
+        if (!otherPackage.exists()) {
             return true;
         }
         auto currentPackage = packageDB.getPackageNameForFile(ctx.file);
@@ -1087,9 +1087,6 @@ private:
     // `private_constant` isn't enough, because an unscoped constant literal can still find a private constant, e.g.
     // through an ancestor.
     static void checkPackagePrivateClassAlias(core::MutableContext ctx, core::SymbolRef lhs, core::SymbolRef rhs) {
-        if (!ctx.state.packageDB().publicByDefault()) {
-            return;
-        }
         auto rhsPkg = rhs.enclosingClass(ctx).data(ctx)->package;
         if (!rhsPkg.exists()) {
             return;
