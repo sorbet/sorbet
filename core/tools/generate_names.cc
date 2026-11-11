@@ -169,6 +169,7 @@ NameDef names[] = {
     {"declareFinal", "final!"},
     {"declareSealed", "sealed!"},
     {"declareTrackDescendants", "track_descendants!"},
+    {"trackedSuperclasses", "tracked_superclasses"},
     {"revealType", "reveal_type"},
     {"absurd"},
     {"valid_p", "valid?"},

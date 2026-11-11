@@ -477,18 +477,6 @@ bool ClassOrModule::addMixin(const GlobalState &gs, ClassOrModuleRef sym, option
     return isValidMixin;
 }
 
-bool ClassOrModule::addTrackedSuper(const GlobalState &gs, ClassOrModuleRef sym) {
-    ENFORCE(flags.isLinearizationComputed);
-
-    if (absl::c_contains(trackedSupers_, sym)) {
-        return false;
-    }
-
-    trackedSupers_.emplace_back(sym);
-
-    return true;
-}
-
 uint16_t ClassOrModule::addMixinPlaceholder(const GlobalState &gs) {
     ENFORCE(ref(gs) != core::Symbols::PlaceholderMixin(), "Created a cycle through PlaceholderMixin");
     mixins_.emplace_back(core::Symbols::PlaceholderMixin());
@@ -1754,6 +1742,51 @@ ClassOrModuleRef ClassOrModule::topAttachedClass(const GlobalState &gs) const {
     return classSymbol;
 }
 
+void ClassOrModule::recordClassOnSyntheticMethod(GlobalState &gs, MethodRef method, ClassOrModuleRef classOfSubclass) {
+    auto data = method.data(gs);
+    ENFORCE(data->resultType != nullptr, "Should have been populated when {} was entered", method.show(gs));
+    auto appliedType = cast_type<AppliedType>(data->resultType);
+    ENFORCE(appliedType != nullptr, "{} should always be AppliedType", method.show(gs));
+    ENFORCE(appliedType->klass == core::Symbols::Set(), "{} should always be Set", method.show(gs));
+    auto currentClasses = appliedType->targs[0];
+
+    const TypePtr *iter = &currentClasses;
+    const OrType *orT = nullptr;
+    while ((orT = cast_type<OrType>(*iter))) {
+        core::ClassOrModuleRef subclass;
+        if (auto right = cast_type<AppliedType>(orT->right)) {
+            subclass = right->klass;
+        } else if (isa_type<ClassType>(orT->right)) {
+            auto right = cast_type_nonnull<ClassType>(orT->right);
+            subclass = right.symbol;
+        } else {
+            ENFORCE(false, "Unexpected type in {}!", method.show(gs))
+        }
+        if (subclass == classOfSubclass) {
+            return;
+        }
+        iter = &orT->left;
+    }
+
+    core::ClassOrModuleRef lastClass;
+    if (auto lastType = cast_type<AppliedType>(*iter)) {
+        lastClass = lastType->klass.data(gs)->attachedClass(gs);
+    } else if (isa_type<ClassType>(*iter)) {
+        auto lastType = cast_type_nonnull<ClassType>(*iter);
+        lastClass = lastType.symbol.data(gs)->attachedClass(gs);
+    } else {
+        ENFORCE(false, "Last element of {} must be AppliedType", method.show(gs))
+    }
+    if (lastClass == classOfSubclass) {
+        return;
+    }
+    if (currentClasses != core::Types::bottom()) {
+        appliedType->targs[0] = OrType::make_shared(currentClasses, classOfSubclass.data(gs)->externalType());
+    } else {
+        appliedType->targs[0] = classOfSubclass.data(gs)->externalType();
+    }
+}
+
 void ClassOrModule::recordSealedSubclass(GlobalState &gs, ClassOrModuleRef subclass) {
     ENFORCE(this->flags.isSealed, "Class is not marked sealed: {}", ref(gs).show(gs));
     ENFORCE(subclass.exists(), "Can't record sealed subclass for {} when subclass doesn't exist", ref(gs).show(gs));
@@ -1771,48 +1804,90 @@ void ClassOrModule::recordSealedSubclass(GlobalState &gs, ClassOrModuleRef subcl
     auto sealedSubclasses =
         selfRef.data(gs)->lookupSingletonClass(gs).data(gs)->findMethod(gs, core::Names::sealedSubclasses());
 
-    auto data = sealedSubclasses.data(gs);
-    ENFORCE(data->resultType != nullptr, "Should have been populated in namer");
-    auto appliedType = cast_type<AppliedType>(data->resultType);
-    ENFORCE(appliedType != nullptr, "sealedSubclasses should always be AppliedType");
-    ENFORCE(appliedType->klass == core::Symbols::Set(), "sealedSubclasses should always be Set");
-    auto currentClasses = appliedType->targs[0];
+    recordClassOnSyntheticMethod(gs, sealedSubclasses, classOfSubclass);
+}
 
-    const TypePtr *iter = &currentClasses;
-    const OrType *orT = nullptr;
-    while ((orT = cast_type<OrType>(*iter))) {
-        core::ClassOrModuleRef subclass;
-        if (auto right = cast_type<AppliedType>(orT->right)) {
-            subclass = right->klass;
-        } else if (isa_type<ClassType>(orT->right)) {
-            auto right = cast_type_nonnull<ClassType>(orT->right);
-            subclass = right.symbol;
+void ClassOrModule::recordTrackedSuperclass(GlobalState &gs, ClassOrModuleRef superclass) {
+    ENFORCE(superclass.exists(), "Can't record tracked superclass for {} when superclass doesn't exist",
+            ref(gs).show(gs));
+
+    // Avoid using a clobbered `this` pointer, as `singletonClass` and `enterMethodSymbol` can cause the symbol table
+    // to move.
+    ClassOrModuleRef selfRef = this->ref(gs);
+
+    // Like sealed subclasses, we record tracked superclasses on a synthetic method on the singleton class, called
+    // core::Names::trackedSuperclasses(). Unlike sealed subclasses, the method is only entered the first time a
+    // superclass is recorded, so that classes with no tracked superclasses don't pay for it.
+    auto classOfSuperclass = superclass.data(gs)->singletonClass(gs);
+    auto classOfSelf = selfRef.data(gs)->singletonClass(gs);
+    auto trackedSuperclasses = classOfSelf.data(gs)->findMethod(gs, core::Names::trackedSuperclasses());
+    if (!trackedSuperclasses.exists()) {
+        auto loc = selfRef.data(gs)->loc();
+        trackedSuperclasses = gs.enterMethodSymbol(loc, classOfSelf, core::Names::trackedSuperclasses());
+        auto &blkArg = gs.enterMethodParameter(core::Loc::none(), trackedSuperclasses, core::Names::blkArg());
+        blkArg.flags.isBlock = true;
+
+        // T.noreturn here represents the zero-length list of tracked superclasses.
+        // recordClassOnSyntheticMethod will use T.any to record superclasses.
+        trackedSuperclasses.data(gs)->resultType = core::Types::setOf(core::Types::bottom());
+    }
+
+    recordClassOnSyntheticMethod(gs, trackedSuperclasses, classOfSuperclass);
+}
+
+InlinedVector<ClassOrModuleRef, 4> ClassOrModule::trackedSuperClassesToList(GlobalState &gs) const {
+    // Avoid using a clobbered `this` pointer, as `singletonClass` and `enterMethodSymbol` can cause the symbol table
+    // to move.
+    ClassOrModuleRef selfRef = this->ref(gs);
+
+    auto classOfSelf = selfRef.data(gs)->singletonClass(gs);
+    auto trackedSuperclasses = classOfSelf.data(gs)->findMethod(gs, core::Names::trackedSuperclasses());
+    InlinedVector<ClassOrModuleRef, 4> result;
+    if (!trackedSuperclasses.exists()) {
+        return result;
+    }
+
+    auto data = trackedSuperclasses.data(gs);
+    ENFORCE(data->resultType != nullptr, "Should have been populated on creation");
+
+    auto setAppliedType = cast_type<AppliedType>(data->resultType);
+    ENFORCE(setAppliedType != nullptr, "trackedSuperclasses should always be AppliedType");
+    ENFORCE(setAppliedType->klass == core::Symbols::Set(), "trackedSuperclasses should always be Set");
+
+    auto currentClasses = setAppliedType->targs[0];
+    if (currentClasses.isBottom()) {
+        return result;
+    }
+
+    while (auto orType = cast_type<OrType>(currentClasses)) {
+        core::ClassOrModuleRef superclass;
+        if (auto right = cast_type<AppliedType>(orType->right)) {
+            superclass = right->klass.data(gs)->attachedClass(gs);
+        } else if (isa_type<ClassType>(orType->right)) {
+            auto right = cast_type_nonnull<ClassType>(orType->right);
+            superclass = right.symbol.data(gs)->attachedClass(gs);
         } else {
-            ENFORCE(false, "Unexpected type in sealedSubclasses!")
+            ENFORCE(false, "Unexpected type in trackedSuperclasses!")
         }
-        if (subclass == classOfSubclass) {
-            return;
-        }
-        iter = &orT->left;
+
+        ENFORCE(superclass.exists());
+        result.emplace_back(superclass);
+        currentClasses = orType->left;
     }
 
-    core::ClassOrModuleRef lastClass;
-    if (auto lastType = cast_type<AppliedType>(*iter)) {
-        lastClass = lastType->klass.data(gs)->attachedClass(gs);
-    } else if (isa_type<ClassType>(*iter)) {
-        auto lastType = cast_type_nonnull<ClassType>(*iter);
-        lastClass = lastType.symbol.data(gs)->attachedClass(gs);
+    core::ClassOrModuleRef superclass;
+    if (auto lastType = cast_type<AppliedType>(currentClasses)) {
+        superclass = lastType->klass.data(gs)->attachedClass(gs);
+    } else if (isa_type<ClassType>(currentClasses)) {
+        auto lastType = cast_type_nonnull<ClassType>(currentClasses);
+        superclass = lastType.symbol.data(gs)->attachedClass(gs);
     } else {
-        ENFORCE(false, "Last element of sealedSubclasses must be AppliedType")
+        ENFORCE(false, "Last element of trackedSuperclasses must be AppliedType")
     }
-    if (lastClass == classOfSubclass) {
-        return;
-    }
-    if (currentClasses != core::Types::bottom()) {
-        appliedType->targs[0] = OrType::make_shared(currentClasses, classOfSubclass.data(gs)->externalType());
-    } else {
-        appliedType->targs[0] = classOfSubclass.data(gs)->externalType();
-    }
+    ENFORCE(superclass.exists());
+    result.emplace_back(superclass);
+
+    return result;
 }
 
 absl::Span<const Loc> ClassOrModule::sealedLocs(const GlobalState &gs) const {

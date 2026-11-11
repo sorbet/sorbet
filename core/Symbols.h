@@ -457,12 +457,6 @@ public:
     [[nodiscard]] bool addMixin(const GlobalState &gs, ClassOrModuleRef sym,
                                 std::optional<uint16_t> index = std::nullopt);
 
-    inline const InlinedVector<ClassOrModuleRef, 4> &trackedSupers() const {
-        return trackedSupers_;
-    }
-
-    [[nodiscard]] bool addTrackedSuper(const GlobalState &gs, ClassOrModuleRef sym);
-
     // Add a placeholder for a mixin and return index in mixins()
     uint16_t addMixinPlaceholder(const GlobalState &gs);
 
@@ -596,6 +590,11 @@ public:
     ClassOrModuleRef topAttachedClass(const GlobalState &gs) const;
 
     void recordSealedSubclass(GlobalState &gs, ClassOrModuleRef subclass);
+
+    // Records `superclass` on the `trackedSuperclasses` synthetic method of this class's singleton class, entering
+    // that method first if this is the first tracked superclass.
+    void recordTrackedSuperclass(GlobalState &gs, ClassOrModuleRef superclass);
+    InlinedVector<ClassOrModuleRef, 4> trackedSuperClassesToList(GlobalState &gs) const;
 
     // Returns the locations that are allowed to subclass the sealed class.
     absl::Span<const Loc> sealedLocs(const GlobalState &gs) const;
@@ -732,6 +731,10 @@ public:
 private:
     static void sortMembersStableOrder(const GlobalState &gs, std::vector<std::pair<NameRef, SymbolRef>> &out);
 
+    // Adds `classOfSubclass` to the `T::Set[T.any(...)]` stored as the result type of the synthetic `method`,
+    // unless it's already present.
+    static void recordClassOnSyntheticMethod(GlobalState &gs, MethodRef method, ClassOrModuleRef classOfSubclass);
+
     friend class serialize::SerializerImpl;
     friend class GlobalState;
 
@@ -748,8 +751,6 @@ private:
      *   Resolver::finalize(), these will be rewritten to `Object()`.
      */
     InlinedVector<ClassOrModuleRef, 4> mixins_;
-
-    InlinedVector<ClassOrModuleRef, 4> trackedSupers_;
 
     /** For Class or module - ordered type members of the class,
      */
@@ -770,7 +771,7 @@ private:
 
     void addMixinAt(ClassOrModuleRef sym, std::optional<uint16_t> index);
 };
-CheckSize(ClassOrModule, 152, 8);
+CheckSize(ClassOrModule, 128, 8);
 
 } // namespace sorbet::core
 #endif // SORBET_SYMBOLS_H
