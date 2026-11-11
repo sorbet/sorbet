@@ -186,6 +186,7 @@ struct builder {
     ForeignPtr (*ternary)(SelfPtr builder, ForeignPtr cond, const token *question, ForeignPtr ifTrue,
                           const token *colon, ForeignPtr ifFalse);
     ForeignPtr (*true_)(SelfPtr builder, const token *tok);
+    bool (*canTruncateBodyStmt)(SelfPtr builder, ForeignPtr body);
     ForeignPtr (*truncateBodyStmt)(SelfPtr builder, ForeignPtr body, const token *truncateTok);
     ForeignPtr (*unary_op)(SelfPtr builder, const token *oper, ForeignPtr receiver);
     ForeignPtr (*undefMethod)(SelfPtr builder, const token *undef, const node_list *name_list);
