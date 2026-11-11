@@ -1237,6 +1237,7 @@ public:
     // Follows the `UnresolvedConstantLit` scope chain until we arrive at a `scope`
     // that is not an `UnresolvedConstantLit`, and return a reference to that.
     const ExpressionPtr &outermostScope() const;
+    ExpressionPtr &outermostScope();
 
     void _sanityCheck();
 };

@@ -340,6 +340,10 @@ const ExpressionPtr &UnresolvedConstantLit::outermostScope() const {
     return current->scope;
 }
 
+ExpressionPtr &UnresolvedConstantLit::outermostScope() {
+    return const_cast<ExpressionPtr &>(std::as_const(*this).outermostScope());
+}
+
 ConstantLit::ConstantLit(core::LocOffsets loc, core::SymbolRef symbol) : storage(loc, symbol) {
     categoryCounterInc("trees", "resolvedconstantlit");
     _sanityCheck();
