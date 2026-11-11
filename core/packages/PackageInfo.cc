@@ -237,54 +237,6 @@ optional<core::AutocorrectSuggestion> PackageInfo::addImport(const core::GlobalS
     return {suggestion};
 }
 
-optional<core::AutocorrectSuggestion> PackageInfo::addExport(const core::GlobalState &gs,
-                                                             const core::SymbolRef newExport) const {
-    auto newExportName = newExport.show(gs);
-    auto exportLine = fmt::format("export {}", newExportName);
-    auto pkgFile = this->file;
-    auto insertionLoc = core::Loc::none(pkgFile);
-    if (!exports_.empty()) {
-        // TODO(neil): can we use use `absl::c_lower_bound` here?
-        core::LocOffsets exportToInsertAfter;
-        for (auto &e : exports_) {
-            if (exportLine > core::Loc(pkgFile, e.loc).source(gs)) {
-                exportToInsertAfter = e.loc;
-            }
-        }
-        if (!exportToInsertAfter.exists()) {
-            // Insert before the first export
-            auto beforeConstantName = exports_.front().loc;
-            auto [beforeExport, numWhitespace] = core::Loc(pkgFile, beforeConstantName).findStartOfIndentation(gs);
-            auto endOfPrevLine = beforeExport.adjust(gs, -numWhitespace - "\n"sv.size(), 0);
-            insertionLoc = endOfPrevLine.copyWithZeroLength();
-        } else {
-            insertionLoc = core::Loc(pkgFile, exportToInsertAfter.copyEndWithZeroLength());
-        }
-    } else {
-        // if we don't have any exports, then we can try adding it right before the final `end`
-        uint32_t exportOffset = this->locs.loc.endPos() - "end\n"sv.size();
-        // we want to find the end of the last non-empty line, so
-        // let's do something gross: walk backward until we find non-whitespace
-        const auto file_source = this->file.data(gs).source();
-        while (isspace(file_source[exportOffset])) {
-            exportOffset--;
-            // this shouldn't happen in a well-formatted
-            // `__package.rb` file, but just to be safe
-            if (exportOffset == 0) {
-                return nullopt;
-            }
-        }
-        insertionLoc = {this->file, exportOffset + 1, exportOffset + 1};
-    }
-    ENFORCE(insertionLoc.exists());
-
-    core::AutocorrectSuggestion suggestion(
-        fmt::format("Export `{}` in package `{}`", newExportName, mangledName_.owner.show(gs)),
-        {{insertionLoc, fmt::format("\n  {}", exportLine)}}, false /* isDidYouMean */, false /* hideEdit */,
-        true /* shouldSkipWhenAggregated */);
-    return {suggestion};
-}
-
 optional<core::AutocorrectSuggestion> PackageInfo::addVisibleToTests(const core::GlobalState &gs) const {
     auto visibleToLine = "visible_to 'tests'";
     auto pkgFile = this->file;
@@ -552,77 +504,6 @@ PackageInfo::checkReferenceAgainstImports(core::Context ctx, core::LocOffsets er
         }
     }
     return {{.importNeeded = true, .causesModularityError = causesModularityError}};
-}
-
-namespace {
-void addExportInfo(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef litSymbol, bool definesBehavior) {
-    auto definedHereLoc = litSymbol.loc(ctx);
-    if (definesBehavior) {
-        e.addErrorLine(definedHereLoc, "Defined here");
-    } else {
-        e.addErrorSection(core::ErrorSection(
-            core::ErrorColors::format("`{}` does not define behavior and thus will not be automatically exported",
-                                      litSymbol.show(ctx)),
-            {core::ErrorLine(definedHereLoc, "")}));
-        e.addErrorNote("Either export it manually, or better, "
-                       "restructure the code so that package namespaces do not define behavior.");
-    }
-}
-} // namespace
-
-void PackageInfo::checkReferenceAgainstExports(core::Context ctx, core::LocOffsets errLoc, core::SymbolRef litSymbol,
-                                               MangledName otherPackage) const {
-    auto &db = ctx.state.packageDB();
-    ENFORCE(otherPackage.exists() && this->mangledName() != otherPackage);
-    auto &pkg = db.getPackageInfo(otherPackage);
-    bool isExported = pkg.locs.exportAll.exists();
-    if (litSymbol.isClassOrModule()) {
-        isExported = isExported || litSymbol.asClassOrModuleRef().data(ctx)->flags.isExported;
-    } else if (litSymbol.isFieldOrStaticField()) {
-        isExported = isExported || litSymbol.asFieldRef().data(ctx)->flags.isExported;
-    }
-    isExported = isExported || db.allowRelaxedPackagerChecksFor(this->mangledName());
-    if (!isExported) {
-        auto *import = this->importsPackage(otherPackage);
-        ENFORCE(import != nullptr, "If it wasn't imported, we should not be dealing with exports");
-        isExported = isExported || import->usesInternals;
-    }
-
-    if (!isExported) {
-        if (db.genPackagesMode() != core::packages::GenPackagesMode::Disabled) {
-            return;
-        }
-
-        bool definesBehavior =
-            !litSymbol.isClassOrModule() || litSymbol.asClassOrModuleRef().data(ctx)->flags.isBehaviorDefining;
-        std::optional<core::AutocorrectSuggestion> exportAutocorrect;
-        if (definesBehavior) {
-            auto symToExport = litSymbol;
-            auto enumClass = PackageDB::getEnumClassForEnumValue(ctx.state, symToExport);
-            if (enumClass.exists()) {
-                symToExport = enumClass;
-            }
-            // For compatibility with gen-packages, we do _not_ add an export if it doesn't define
-            // behavior. This is mostly because it's easier to get Sorbet to behave like gen-packages
-            // than the other way around.
-            //
-            // If we move to a world where all __package.rb edits are done via Sorbet autocorrects,
-            // we could make this addExport call unconditional.
-            if (auto exp = pkg.addExport(ctx, symToExport)) {
-                exportAutocorrect.emplace(exp.value());
-            }
-        }
-        if (auto e = ctx.beginError(errLoc, core::errors::Packager::UsedPackagePrivateName)) {
-            e.setHeader("`{}` resolves but is not exported from `{}`", litSymbol.show(ctx), pkg.show(ctx));
-            addExportInfo(ctx, e, litSymbol, definesBehavior);
-
-            auto hasAutocorrect = exportAutocorrect.has_value();
-            e.maybeAddAutocorrect(move(exportAutocorrect));
-            if (hasAutocorrect && !db.errorHint().empty()) {
-                e.addErrorNote("{}", db.errorHint());
-            }
-        }
-    }
 }
 
 // What is the minimum strict dependencies level that this package's imports must have?

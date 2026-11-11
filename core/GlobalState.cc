@@ -974,7 +974,6 @@ void GlobalState::initEmpty() {
 
     // First file is used to indicate absence of a file
     files->initEmpty();
-    symbolsReferencedByFile.emplace_back();
     freezeNameTable();
     freezeSymbolTable();
     freezeFileTable();
@@ -1685,7 +1684,6 @@ FileRef GlobalState::enterFile(shared_ptr<File> file) {
 
     ENFORCE(!findFileByPath(file->path()).exists(), "Request to `enterFile` for already-entered file path?");
 
-    symbolsReferencedByFile.emplace_back();
     return files->emplace(std::move(file));
 }
 
@@ -2044,7 +2042,6 @@ unique_ptr<GlobalState> GlobalState::deepCopyGlobalState(bool keepId) const {
 
     result->strings = this->strings;
     result->files = make_shared<FileTable>(*this->files);
-    result->symbolsReferencedByFile = this->symbolsReferencedByFile;
     result->lspQuery = this->lspQuery;
     result->kvstoreUuid = this->kvstoreUuid;
     result->utf8Names.reserve(this->utf8Names.capacity());
@@ -2124,7 +2121,6 @@ unique_ptr<GlobalState> GlobalState::copyForIndexThread(
     // We share the file table here insead of copying it, to avoid the allocation and overhead of merging back together
     // on an indexing thread.
     result->files = this->files;
-    // Skipping copying symbolsReferencedByFile, should not be used before VisibilityChecker.
 
     // Additional options that might be used during indexing are manually copied over here
     result->kvstoreUuid = this->kvstoreUuid;
@@ -2161,7 +2157,6 @@ unique_ptr<GlobalState> GlobalState::copyForLSPTypechecker(
 
     // Additional options that might be used during indexing are manually copied over here
     result->files = make_shared<FileTable>(*this->files);
-    result->symbolsReferencedByFile = vector<UnorderedSet<SymbolRef>>{this->files->size(), UnorderedSet<SymbolRef>{}};
     result->kvstoreUuid = this->kvstoreUuid;
 
     if (packagerEnabled) {
@@ -2198,7 +2193,6 @@ unique_ptr<GlobalState> GlobalState::copyForSlowPath(
     // We share the file table entries with the original GlobalState, and then copy the content of the name table,
     // string storage, and uuid to ensure that we remain compatible with the session cache.
     result->files = make_shared<FileTable>(*this->files);
-    result->symbolsReferencedByFile = vector<UnorderedSet<SymbolRef>>{this->files->size(), UnorderedSet<SymbolRef>{}};
     result->kvstoreUuid = this->kvstoreUuid;
     result->strings = this->strings;
     result->utf8Names = this->utf8Names;

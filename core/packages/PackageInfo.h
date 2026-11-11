@@ -230,9 +230,6 @@ public:
 
     std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &info) const;
 
-    std::optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs,
-                                                         const core::SymbolRef newExport) const;
-
     std::optional<core::AutocorrectSuggestion> addVisibleToTests(const core::GlobalState &gs) const;
 
     std::optional<core::AutocorrectSuggestion> addVisibleTo(const core::GlobalState &gs,
@@ -257,13 +254,6 @@ public:
     // Returns a `PackageReferenceInfo` if the usage was not okay (e.g. missing import, modularity error, etc.)
     std::optional<core::packages::PackageReferenceInfo>
     checkReferenceAgainstImports(core::Context ctx, core::LocOffsets errLoc, MangledName otherPackage) const;
-
-    // Reports an error if `litSymbol`, which is defined in `otherPackage`, is not exported to this package.
-    //
-    // Assumes that this file is allowed to reference `otherPackage` (i.e., that `checkReferenceAgainstImports` found
-    // nothing to report).
-    void checkReferenceAgainstExports(core::Context ctx, core::LocOffsets errLoc, core::SymbolRef litSymbol,
-                                      MangledName otherPackage) const;
 
     // What is the minimum strict dependencies level that this package's imports must have?
     StrictDependenciesLevel minimumStrictDependenciesLevel() const;

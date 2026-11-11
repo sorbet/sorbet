@@ -633,27 +633,6 @@ public:
         return this->files->span();
     }
 
-    // NOTE: this only tracks the information required for computing what symbols needed to be exported, and not for
-    // find all references. For example, if a file references A::B::C::D, then only A::B::C::D will be in set returned,
-    // and not A, A::B, A::B::C.
-    const UnorderedSet<core::SymbolRef> &getSymbolsReferencedByFile(core::FileRef fref) const {
-        ENFORCE(symbolsReferencedByFile.size() == this->files->size(),
-                "mismatch in files.size ({}) and symbolsReferencedByFile.size(): ({})", files->size(),
-                symbolsReferencedByFile.size());
-        auto ix = fref.id();
-        ENFORCE(ix < symbolsReferencedByFile.size());
-        return this->symbolsReferencedByFile[ix];
-    }
-
-    void setSymbolsReferencedByFile(core::FileRef fref, UnorderedSet<core::SymbolRef> &referencedSymbols) {
-        ENFORCE(symbolsReferencedByFile.size() == this->files->size(),
-                "mismatch in files.size ({}) and symbolsReferencedByFile.size(): ({})", files->size(),
-                symbolsReferencedByFile.size());
-        auto ix = fref.id();
-        ENFORCE(ix < symbolsReferencedByFile.size());
-        this->symbolsReferencedByFile[ix].swap(referencedSymbols);
-    }
-
     // Contains a string to be used as the base of the error URL.
     // The error code is appended to this string.
     std::string errorUrlBase;
@@ -810,7 +789,6 @@ private:
     UnorderedSet<int> suppressedErrorClasses;
     UnorderedSet<int> onlyErrorClasses;
     std::shared_ptr<FileTable> files;
-    std::vector<UnorderedSet<core::SymbolRef>> symbolsReferencedByFile;
     unsigned int utf8NamesWritten_ = 0;
     unsigned int constantNamesWritten_ = 0;
     unsigned int uniqueNamesWritten_ = 0;

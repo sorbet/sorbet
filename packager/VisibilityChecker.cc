@@ -534,7 +534,6 @@ class VisibilityCheckerPass final {
 public:
     const core::packages::PackageInfo &package;
     UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo> referencedPackages;
-    UnorderedSet<core::SymbolRef> referencedSymbols;
 
     // We only want to validate visibility for usages of constants, not definitions.
     // postTransformConstantLit does not discriminate, so we have to remember whether a given
@@ -596,7 +595,6 @@ public:
         struct ThreadResult {
             core::FileRef file;
             UnorderedMap<core::packages::MangledName, core::packages::PackageReferenceInfo> referencedPackages;
-            UnorderedSet<core::SymbolRef> referencedSymbols;
         };
         auto resultq = std::make_shared<BlockingBoundedQueue<std::optional<ThreadResult>>>(filesSpan.size());
         Timer timeit(gs.tracer(), "visibility_checker.check_visibility");
@@ -623,8 +621,7 @@ public:
                 core::Context ctx{gs, core::Symbols::root(), f.file};
                 VisibilityCheckerPass pass{ctx, *package};
                 ast::ConstTreeWalk::apply(ctx, pass, f.tree);
-                resultq->push(
-                    ThreadResult{f.file, std::move(pass.referencedPackages), std::move(pass.referencedSymbols)}, 1);
+                resultq->push(ThreadResult{f.file, std::move(pass.referencedPackages)}, 1);
             }
             barrier.DecrementCount();
         });
@@ -655,10 +652,6 @@ public:
                 } else {
                     // Resolver package checking is disabled in gen-packages mode, so this pass owns the complete set.
                     nonConstPackageInfo->trackPackageReferences(file, references);
-                }
-
-                if (gs.packageDB().genPackagesMode() == core::packages::GenPackagesMode::Disabled) {
-                    nonConstGs.setSymbolsReferencedByFile(file, threadResult->referencedSymbols);
                 }
             }
         }

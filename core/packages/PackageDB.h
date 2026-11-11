@@ -130,11 +130,6 @@ public:
     // Fetch the condensation graph for queries.
     const Condensation &condensation() const;
 
-    // Returns an autocorrect that will insert an export for every symbol referenced in fref that is not already
-    // exported.
-    static std::optional<core::AutocorrectSuggestion> aggregateMissingExportsForFile(const core::GlobalState &gs,
-                                                                                     const core::FileRef fref);
-
 private:
     bool enabled_ = false;
     GenPackagesMode genPackagesMode_ = GenPackagesMode::Disabled;
