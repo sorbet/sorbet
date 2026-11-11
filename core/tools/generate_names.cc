@@ -307,7 +307,7 @@ NameDef names[] = {
     {"skipGetter", "skip_getter"},
     {"skipSetter", "skip_setter"},
 
-    {"registerDescendant", "register"},
+    {"register_", "register"},
     {"registered"},
     {"instanceRegistered", "<instance_registered>"},
     {"helpers"},

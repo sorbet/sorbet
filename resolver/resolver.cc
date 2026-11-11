@@ -3601,7 +3601,7 @@ public:
         if (auto id = ast::cast_tree<ast::ConstantLit>(send.recv)) {
             if (id->symbol() != core::Symbols::T()) {
                 if (id->symbol() == core::Symbols::T_Descendants()) {
-                    if (send.fun == core::Names::registerDescendant()) {
+                    if (send.fun == core::Names::register_()) {
                         if (send.numPosArgs() != 2 || send.hasKwArgs() || send.hasBlock()) {
                             if (auto e =
                                     ctx.beginError(send.loc, core::errors::Resolver::InvalidDescendantRegistration)) {
