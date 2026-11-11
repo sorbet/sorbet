@@ -110,6 +110,13 @@ done < <(find "${paths[@]}" \( -name '*.rb' -o -name '*.rbi' -o -name '*.rbupdat
 basename=
 srcs=()
 
+# Whether any file in `srcs` has a line matching the pattern. `srcs` is empty
+# for a group made only of update files (`foo.1.rbupdate` has no `__` to group
+# it with `foo.rb`), and grep with no files would read stdin, so check first.
+srcs_match() {
+  [ "${#srcs[@]}" -gt 0 ] && grep -q "$1" "${srcs[@]}"
+}
+
 for this_src in "${rb_src[@]}" DUMMY; do
   if grep -q "${this_src#test/}" test/BUILD; then
     # If the test is directly mentioned in test/BULID, it's probably mentioned
@@ -135,7 +142,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
     srcs=()
     for src in "${all_srcs[@]}"; do
       case "$src" in
-        *.rb|*.rbi|*.rbupdate)
+        *.rb|*.rbi)
           srcs+=("$src")
           ;;
       esac
@@ -149,12 +156,12 @@ for this_src in "${rb_src[@]}" DUMMY; do
         ;;
     esac
 
-    if grep -q '^# enable-packager: true' "${srcs[@]}"; then
+    if srcs_match '^# enable-packager: true'; then
       args+=("--sorbet-packages")
-      if grep -q '^# enable-package-directed: true' "${srcs[@]}"; then
+      if srcs_match '^# enable-package-directed: true'; then
         args+=("--experimental-package-directed")
       fi
-      if grep -q '^# experimental-public-by-default: true' "${srcs[@]}"; then
+      if srcs_match '^# experimental-public-by-default: true'; then
         args+=("--experimental-public-by-default")
       fi
 
@@ -189,27 +196,27 @@ for this_src in "${rb_src[@]}" DUMMY; do
       fi
     fi
 
-    if grep -q '^# enable-experimental-requires-ancestor: true' "${srcs[@]}"; then
+    if srcs_match '^# enable-experimental-requires-ancestor: true'; then
       args+=("--enable-experimental-requires-ancestor")
     fi
 
-    if grep -q '^# enable-experimental-rspec: true' "${srcs[@]}"; then
+    if srcs_match '^# enable-experimental-rspec: true'; then
       args+=("--enable-experimental-rspec")
     fi
 
-    if grep -q '^# enable-experimental-rbs-comments: true' "${srcs[@]}"; then
+    if srcs_match '^# enable-experimental-rbs-comments: true'; then
       args+=("--enable-experimental-rbs-comments")
     fi
 
-    if grep -q '^# enable-experimental-method-modifiers: true' "${srcs[@]}"; then
+    if srcs_match '^# enable-experimental-method-modifiers: true'; then
       args+=("--enable-experimental-method-modifiers")
     fi
 
-    if grep -q '^# typed-super: false' "${srcs[@]}"; then
+    if srcs_match '^# typed-super: false'; then
       args+=("--typed-super=false")
     fi
 
-    if grep -q '^# enable-suggest-unsafe: true' "${srcs[@]}"; then
+    if srcs_match '^# enable-suggest-unsafe: true'; then
       args+=("--suggest-unsafe")
     fi
 
