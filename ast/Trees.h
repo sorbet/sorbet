@@ -1553,6 +1553,32 @@ public:
         return storage.original();
     }
 
+    // Walks original-backed constant parts from innermost to root. Returning false from either callback stops the
+    // walk. The root callback receives whether the terminal scope is itself a ConstantLit; its symbol is empty when
+    // it is not.
+    template <class RootFn, class PartFn> bool walkOriginalPath(RootFn && onRoot, PartFn && onPart) const {
+        static_assert(std::is_invocable_r_v<bool, RootFn &, core::LocOffsets, core::SymbolRef, bool>,
+                      "onRoot must accept (LocOffsets, SymbolRef, bool) and return bool");
+        static_assert(std::is_invocable_r_v<bool, PartFn &, core::LocOffsets, core::SymbolRef, core::NameRef, bool>,
+                      "onPart must accept (LocOffsets, SymbolRef, NameRef, bool) and return bool");
+
+        auto *current = this;
+        bool isOutermost = true;
+        while (auto *original = current->original()) {
+            if (!std::invoke(onPart, current->loc(), current->symbol(), original->cnst, isOutermost)) {
+                return false;
+            }
+
+            auto scope = cast_tree<ConstantLit>(original->scope);
+            if (scope == nullptr) {
+                return std::invoke(onRoot, original->scope.loc(), core::SymbolRef{}, false);
+            }
+            current = scope.get();
+            isOutermost = false;
+        }
+        return std::invoke(onRoot, current->loc(), current->symbol(), true);
+    }
+
     void _sanityCheck();
 };
 CheckSize(ConstantLit, 16, 8);

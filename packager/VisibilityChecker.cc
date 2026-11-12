@@ -264,23 +264,28 @@ public:
 
         // Skip any `export` constants which only resolved through a class alias.
         // When exporting something, we shouldn't allow people to indirect or obscure their exports.
-        auto scope = lit;
-        while (scope->original() != nullptr) {
-            scope = ast::cast_tree<ast::ConstantLit>(scope->original()->scope);
-            if (scope == nullptr) {
-                break;
+        auto checkPrefix = [&](core::LocOffsets loc, core::SymbolRef prefix) {
+            if (!prefix.isClassAlias(ctx)) {
+                return true;
             }
-            auto prefix = scope->symbol();
-            if (prefix.isClassAlias(ctx)) {
-                if (ctx.state.packageDB().genPackagesMode() == core::packages::GenPackagesMode::Disabled) {
-                    if (auto e = ctx.beginError(scope->loc(), core::errors::Packager::InvalidExport)) {
-                        e.setHeader("Cannot export through class alias `{}`", prefix.show(ctx));
-                        e.addErrorLine(prefix.loc(ctx), "Alias defined here");
-                        e.addErrorNote("Export `{}` directly instead", lit->symbol().show(ctx));
-                    }
+
+            if (ctx.state.packageDB().genPackagesMode() == core::packages::GenPackagesMode::Disabled) {
+                if (auto e = ctx.beginError(loc, core::errors::Packager::InvalidExport)) {
+                    e.setHeader("Cannot export through class alias `{}`", prefix.show(ctx));
+                    e.addErrorLine(prefix.loc(ctx), "Alias defined here");
+                    e.addErrorNote("Export `{}` directly instead", lit->symbol().show(ctx));
                 }
-                return;
             }
+            return false;
+        };
+        auto walkedEntirePath =
+            lit->walkOriginalPath([&](core::LocOffsets loc, core::SymbolRef symbol,
+                                      bool isConstant) { return !isConstant || checkPrefix(loc, symbol); },
+                                  [&](core::LocOffsets loc, core::SymbolRef symbol, core::NameRef, bool isOutermost) {
+                                      return isOutermost || checkPrefix(loc, symbol);
+                                  });
+        if (!walkedEntirePath) {
+            return;
         }
 
         auto sym = lit->symbol();

@@ -2204,14 +2204,21 @@ public:
 
     static int constantDepth(ast::ConstantLit *exp) {
         int depth = 0;
-        ast::ConstantLit *scope = exp;
-        while (auto original = scope->original()) {
-            scope = ast::cast_tree<ast::ConstantLit>(original->scope);
-            if (!scope) {
-                break;
-            }
-            depth += 1;
-        }
+        bool hasOriginalPath = false;
+        exp->walkOriginalPath(
+            [&](core::LocOffsets, core::SymbolRef, bool isConstant) {
+                if (hasOriginalPath && isConstant) {
+                    depth++;
+                }
+                return true;
+            },
+            [&](core::LocOffsets, core::SymbolRef, core::NameRef, bool isOutermost) {
+                hasOriginalPath = true;
+                if (!isOutermost) {
+                    depth++;
+                }
+                return true;
+            });
         return depth;
     }
 
