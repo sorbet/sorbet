@@ -240,6 +240,9 @@ struct Options {
      * related to large error lists. 0 means no limit. */
     uint32_t lspErrorCap = 1000;
 
+    std::optional<uint32_t> minStratumSize;
+    std::optional<uint32_t> stratumSplitThreshold;
+
     std::string statsdHost;
     std::string statsdPrefix = "ruby_typer.unknown";
     int statsdPort = 8200;

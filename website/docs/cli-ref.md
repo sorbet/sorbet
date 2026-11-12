@@ -352,6 +352,12 @@ Usage:
       --experimental-package-directed
                                 Enable support for checking by package, instead of
                                 processing all files at once
+      --min-stratum-size arg    In package-directed mode, merge strata below this file
+                                count (including `__package.rb` files) with a neighbor
+      --stratum-split-threshold arg
+                                In package-directed mode, split strata above this file
+                                count (including `__package.rb` files) into their
+                                component SCCs
 
 ```
 

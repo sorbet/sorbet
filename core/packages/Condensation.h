@@ -85,6 +85,11 @@ public:
 
         // Record the stratum of each package in PackageInfo.
         void recordStrata(core::GlobalState &gs) const;
+
+        // Apply splitting and combining optimizations to the traversal. This will potentially move packages between
+        // strata, and must not be called after `recordStrata`.
+        void optimize(const PackageDB &db, std::optional<uint32_t> stratumSplitThreshold,
+                      std::optional<uint32_t> minStratumFiles);
     };
 
     // Compute a traversal through the condensation graph, that yields groups of SCCs that have no dependencies on each
