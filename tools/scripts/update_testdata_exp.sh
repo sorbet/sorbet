@@ -56,16 +56,24 @@ Arguments
               Defaults to everything in test/testdata/ and test/prism_regression/
 
 Options
-  --no-build  Don't build anything, just reuse what was already built
-  -h, --help  Print this message
+  --config=<config>  Build with this Bazel config instead of -c opt.
+                     May be repeated.
+  --no-build         Don't build anything, just reuse what bazel-bin/
+                     points at (whichever config built it last)
+  -h, --help         Print this message
 EOF
 }
 
 BUILD=1
+configs=()
 while [ $# -gt 0 ]; do
   case $1 in
     --no-build)
       BUILD=
+      shift
+      ;;
+    --config=*)
+      configs+=("$1")
       shift
       ;;
     -h|--help)
@@ -99,8 +107,13 @@ if [ "${#paths[@]}" -eq 0 ]; then
   paths=(test/testdata test/prism_regression)
 fi
 
+if [ "${#configs[@]}" -eq 0 ]; then
+  # Optimized builds update the whole corpus fastest.
+  configs=(-c opt)
+fi
+
 if [ "$BUILD" != "" ]; then
-  ./bazel build //main:sorbet //test:print_document_symbols -c opt
+  ./bazel build //main:sorbet //test:print_document_symbols "${configs[@]}"
 else
   # Without these, every command that writes an exp file would leave it empty.
   for binary in bazel-bin/main/sorbet bazel-bin/test/print_document_symbols; do
