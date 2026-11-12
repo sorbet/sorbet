@@ -1,0 +1,23 @@
+###### Running gen-packages (first run) ######
+private_consumer/__package.rb:3: `PrivateConsumer` has changes https://srb.help/3734
+     3 |class PrivateConsumer < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+Errors: 1
+
+###### cat private_consumer/__package.rb ######
+# typed: strict
+
+class PrivateConsumer < PackageSpec
+  import PrivatePackage
+end
+
+###### Running gen-packages (second run) ######
+No errors! Great job.
+
+###### cat private_consumer/__package.rb ######
+# typed: strict
+
+class PrivateConsumer < PackageSpec
+  import PrivatePackage
+end

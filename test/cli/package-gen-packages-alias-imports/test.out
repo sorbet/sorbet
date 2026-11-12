@@ -1,0 +1,189 @@
+##################################
+###### Non package directed ######
+##################################
+
+###### Running gen-packages (first run) ######
+consumer/__package.rb:3: `Consumer` has changes https://srb.help/3734
+     3 |class Consumer < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+Errors: 1
+
+###### cat consumer/__package.rb ######
+# typed: strict
+
+class Consumer < PackageSpec
+  import Outer::Inner
+  import TargetPackage
+end
+
+###### cat target_only_consumer/__package.rb ######
+# typed: strict
+
+class TargetOnlyConsumer < PackageSpec
+  import TargetPackage
+end
+
+###### Typechecking ######
+consumer/use.rb:4: `AliasPackage` is not imported https://srb.help/3718
+     4 |AliasPackage::Alias::Thing.new
+        ^^^^^^^^^^^^
+    alias/__package.rb:3: Package defined here
+     3 |class AliasPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    consumer/__package.rb:3: Insert `import AliasPackage`
+     3 |class Consumer < PackageSpec
+                                    ^
+
+target_only_consumer/use.rb:4: `AliasPackage` is not imported https://srb.help/3718
+     4 |AliasPackage::Alias::Thing.new
+        ^^^^^^^^^^^^
+    alias/__package.rb:3: Package defined here
+     3 |class AliasPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    target_only_consumer/__package.rb:3: Insert `import AliasPackage`
+     3 |class TargetOnlyConsumer < PackageSpec
+                                              ^
+Errors: 2
+
+###### Running gen-packages (second run) ######
+No errors! Great job.
+
+###### cat consumer/__package.rb ######
+# typed: strict
+
+class Consumer < PackageSpec
+  import Outer::Inner
+  import TargetPackage
+end
+
+###### cat target_only_consumer/__package.rb ######
+# typed: strict
+
+class TargetOnlyConsumer < PackageSpec
+  import TargetPackage
+end
+
+###### Typechecking ######
+consumer/use.rb:4: `AliasPackage` is not imported https://srb.help/3718
+     4 |AliasPackage::Alias::Thing.new
+        ^^^^^^^^^^^^
+    alias/__package.rb:3: Package defined here
+     3 |class AliasPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    consumer/__package.rb:3: Insert `import AliasPackage`
+     3 |class Consumer < PackageSpec
+                                    ^
+
+target_only_consumer/use.rb:4: `AliasPackage` is not imported https://srb.help/3718
+     4 |AliasPackage::Alias::Thing.new
+        ^^^^^^^^^^^^
+    alias/__package.rb:3: Package defined here
+     3 |class AliasPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    target_only_consumer/__package.rb:3: Insert `import AliasPackage`
+     3 |class TargetOnlyConsumer < PackageSpec
+                                              ^
+Errors: 2
+##############################
+###### Package directed ######
+##############################
+
+###### Running gen-packages (first run) ######
+consumer/__package.rb:3: `Consumer` has changes https://srb.help/3734
+     3 |class Consumer < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+
+consumer/use.rb:4: Unable to resolve constant `AliasPackage` https://srb.help/5002
+     4 |AliasPackage::Alias::Thing.new
+        ^^^^^^^^^^^^
+Errors: 2
+
+###### cat consumer/__package.rb ######
+# typed: strict
+
+class Consumer < PackageSpec
+  import Outer::Inner
+end
+
+###### cat target_only_consumer/__package.rb ######
+# typed: strict
+
+class TargetOnlyConsumer < PackageSpec
+  import TargetPackage
+end
+
+###### Typechecking ######
+consumer/use.rb:4: `AliasPackage` is not imported https://srb.help/3718
+     4 |AliasPackage::Alias::Thing.new
+        ^^^^^^^^^^^^
+    alias/__package.rb:3: Package defined here
+     3 |class AliasPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    consumer/__package.rb:3: Insert `import AliasPackage`
+     3 |class Consumer < PackageSpec
+                                    ^
+
+target_only_consumer/use.rb:4: `AliasPackage` is not imported https://srb.help/3718
+     4 |AliasPackage::Alias::Thing.new
+        ^^^^^^^^^^^^
+    alias/__package.rb:3: Package defined here
+     3 |class AliasPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    target_only_consumer/__package.rb:3: Insert `import AliasPackage`
+     3 |class TargetOnlyConsumer < PackageSpec
+                                              ^
+Errors: 2
+
+###### Running gen-packages (second run) ######
+consumer/__package.rb:3: `Consumer` has changes https://srb.help/3734
+     3 |class Consumer < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+Errors: 1
+
+###### cat consumer/__package.rb ######
+# typed: strict
+
+class Consumer < PackageSpec
+  import Outer::Inner
+  import TargetPackage
+end
+
+###### cat target_only_consumer/__package.rb ######
+# typed: strict
+
+class TargetOnlyConsumer < PackageSpec
+  import TargetPackage
+end
+
+###### Typechecking ######
+consumer/use.rb:4: `AliasPackage` is not imported https://srb.help/3718
+     4 |AliasPackage::Alias::Thing.new
+        ^^^^^^^^^^^^
+    alias/__package.rb:3: Package defined here
+     3 |class AliasPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    consumer/__package.rb:3: Insert `import AliasPackage`
+     3 |class Consumer < PackageSpec
+                                    ^
+
+target_only_consumer/use.rb:4: `AliasPackage` is not imported https://srb.help/3718
+     4 |AliasPackage::Alias::Thing.new
+        ^^^^^^^^^^^^
+    alias/__package.rb:3: Package defined here
+     3 |class AliasPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    target_only_consumer/__package.rb:3: Insert `import AliasPackage`
+     3 |class TargetOnlyConsumer < PackageSpec
+                                              ^
+Errors: 2
