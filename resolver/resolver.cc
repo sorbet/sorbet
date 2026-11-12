@@ -995,14 +995,18 @@ private:
         return true;
     }
 
+    struct ResolveConstantsWorkerResult {
+        uint32_t retries = 0;
+        vector<ResolveItems<ConstantResolutionItem>> leftover;
+    };
+
     static bool resolveConstantResolutionItems(const core::GlobalState &gs,
                                                vector<ResolveItems<ConstantResolutionItem>> &jobs,
                                                WorkerPool &workers) {
         if (jobs.empty()) {
             return false;
         }
-        auto outputq = make_shared<BlockingBoundedQueue<pair<uint32_t, vector<ResolveItems<ConstantResolutionItem>>>>>(
-            jobs.size());
+        auto outputq = make_shared<BlockingBoundedQueue<ResolveConstantsWorkerResult>>(jobs.size());
         auto inputq = make_shared<ConcurrentBoundedQueue<ResolveItems<ConstantResolutionItem>>>(jobs.size());
         for (auto &job : jobs) {
             inputq->push(move(job), 1);
@@ -1010,10 +1014,9 @@ private:
         jobs.clear();
 
         workers.multiplexJob("resolveConstantsWorker", [inputq, outputq, &gs]() {
-            vector<ResolveItems<ConstantResolutionItem>> leftover;
+            ResolveConstantsWorkerResult workerResult;
             ResolveItems<ConstantResolutionItem> job(core::FileRef(), {});
             uint32_t processed = 0;
-            uint32_t retries = 0;
             for (auto result = inputq->try_pop(job); !result.done(); result = inputq->try_pop(job)) {
                 if (result.gotItem()) {
                     processed++;
@@ -1021,27 +1024,26 @@ private:
                     auto origSize = job.items.size();
                     erase_if(job.items,
                              [&](ConstantResolutionItem &item) -> bool { return resolveConstantJob(ictx, item); });
-                    retries += origSize - job.items.size();
+                    workerResult.retries += origSize - job.items.size();
                     if (!job.items.empty()) {
-                        leftover.emplace_back(move(job));
+                        workerResult.leftover.emplace_back(move(job));
                     }
                 }
             }
             if (processed > 0) {
-                auto pair = make_pair(retries, move(leftover));
-                outputq->push(move(pair), processed);
+                outputq->push(move(workerResult), processed);
             }
         });
 
         uint32_t retries = 0;
-        pair<uint32_t, vector<ResolveItems<ConstantResolutionItem>>> threadResult;
+        ResolveConstantsWorkerResult threadResult;
         for (auto result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
              !result.done();
              result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
             if (result.gotItem()) {
-                retries += threadResult.first;
-                jobs.insert(jobs.end(), make_move_iterator(threadResult.second.begin()),
-                            make_move_iterator(threadResult.second.end()));
+                retries += threadResult.retries;
+                jobs.insert(jobs.end(), make_move_iterator(threadResult.leftover.begin()),
+                            make_move_iterator(threadResult.leftover.end()));
             }
         }
         categoryCounterAdd("resolve.constants.nonancestor", "retry", retries);
