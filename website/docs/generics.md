@@ -392,7 +392,7 @@ end
 
 [→ View on sorbet.run][covariant-ibox]
 
-Note how in the above example, `Box` includes `IBox`, meaning that `Box` is a child of `IBox`. Children of generic classes or modules must always redeclare any type members declared by the parent, in the same order. The child must either copy the parent's specified variance or redeclare it as invariant. When the child is a `class` (not a `module`), redeclaring it as invariant is the **only** option.
+Note how in the above example, `Box` includes `IBox`, meaning that `Box` is a child of `IBox`. Children of generic classes or modules must always redeclare any type members declared by the parent, in the same order. The child must either copy the parent's specified variance or redeclare it as invariant. Here, `Box` redeclares `Elem` as invariant so that it can define `value=`, which uses `Elem` in an input position.
 
 ### Contravariance (`:in`)
 
