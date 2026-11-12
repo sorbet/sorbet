@@ -1161,7 +1161,9 @@ ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, vector<ast::ParsedFil
             }
 
 #ifndef SORBET_REALMAIN_MIN
-            if (opts.cacheSensitiveOptions.sorbetPackages) {
+            // Outside of `--gen-packages`, resolver records every package reference itself.
+            if (opts.cacheSensitiveOptions.sorbetPackages &&
+                opts.genPackagesMode != core::packages::GenPackagesMode::Disabled) {
                 Timer timeit(gs.tracer(), "visibility_checker");
                 packager::VisibilityChecker::checkReferences(gs, workers, what);
             }
@@ -1297,13 +1299,6 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
                 return what;
             }
         }
-
-#ifndef SORBET_REALMAIN_MIN
-        if (opts.cacheSensitiveOptions.sorbetPackages) {
-            packager::VisibilityChecker::checkReferences(gs, workers, what);
-        }
-#endif
-
     } catch (SorbetException &) {
         if (auto e = gs.beginError(sorbet::core::Loc::none(), sorbet::core::errors::Internal::InternalError)) {
             e.setHeader("Exception resolving (backtrace is above)");
