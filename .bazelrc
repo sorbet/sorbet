@@ -89,6 +89,18 @@ build:dbg --config=debugsymbols
 # TODO(jez) Do newer compile commands generators suffer from this problem? The one we use is archived
 build:dbg --remote_download_outputs=all
 
+##
+## development configuration
+##
+# Like `dbg` but with `-O1`, which makes Sorbet several times faster while
+# keeping usable stack traces at the cost of being able to inspect every var.
+# Use `--config=dbg` when stepping through code that `-O1` makes hard to follow.
+build:dev --config=dbg
+# Keeps these outputs in their own `bazel-out/` directory,
+# so that switching between `dev` and `dbg` doesn't rebuild everything.
+build:dev --platform_suffix=dev
+build:dev --copt=-O1
+
 build:rubydbg --copt=-DRUBY_DEBUG --copt=-DVM_CHECK_MODE=1 --copt=-DTRANSIENT_HEAP_CHECK_MODE --copt=-DRGENGC_CHECK_MODE --copt=-DENC_DEBUG
 
 build:coverage --config=forcedebug

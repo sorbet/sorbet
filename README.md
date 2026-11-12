@@ -152,6 +152,10 @@ below). There are many options you can pass when building `sorbet`:
 - `--config=dbg`
   - Most common build config for development.
   - Good stack traces, runs all ENFORCEs.
+- `--config=dev`
+  - Like `--config=dbg`, but with light optimizations (`-O1`).
+  - Several times faster, at the cost of some variables being optimized out
+    in a debugger.
 - `--config=sanitize`
   - Link in extra sanitizers, in particular: UBSan and ASan.
   - Catches most memory and undefined-behavior errors.
