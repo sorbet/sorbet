@@ -20,7 +20,7 @@ for arg in "$@"; do
     -h|--help)
       >&2 echo "usage: $0 [<build_arg> ...]"
       >&2 echo
-      >&2 echo 'Each <build_arg> is given to the `bazel build` command'
+      >&2 echo 'Each <build_arg> is given to the Bazel command'
       exit 0
       ;;
   esac
