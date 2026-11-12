@@ -228,6 +228,8 @@ private:
         ResolveItems(core::FileRef file, vector<T> &&items) : file(file), items(move(items)) {};
     };
 
+    using PackageReference = pair<core::packages::MangledName, core::packages::PackageReferenceInfo>;
+
     struct AncestorResolutionItem {
         ast::ConstantLit *ancestor;
         core::ClassOrModuleRef klass;
@@ -310,6 +312,7 @@ private:
     vector<TypeAliasResolutionItem> todoTypeAliases_;
     vector<ClassMethodsResolutionItem> todoClassMethods_;
     vector<RequireAncestorResolutionItem> todoRequiredAncestors_;
+    vector<PackageReference> packageReferences_;
 
     static bool shadowedByPackage(core::Context ctx, core::ClassOrModuleRef scope, core::NameRef name) {
         auto packageRegistryScope = scope.data(ctx)->packageRegistryOwner;
@@ -627,6 +630,75 @@ private:
         return core::Symbols::noSymbol();
     }
 
+    // The package that `job` depends on, now that it has resolved to `symbol`, if that's another package.
+    //
+    // Each component of a constant literal can depend on a different package. For `A::Alias::Thing`, where
+    // `A::Alias` is a class alias for a constant in another package, `Alias` depends on `A`, and `Thing` on the other
+    // package.
+    static optional<PackageReference> packageReference(core::Context ctx, const ConstantResolutionItem &job,
+                                                       core::SymbolRef symbol) {
+        // The copy of a mixin ancestor in the class body records the reference.
+        if (!shouldCheckPackage(ctx) || job.isMixinAncestor) {
+            return nullopt;
+        }
+        if (!symbol.isClassOrModule() && !symbol.isFieldOrStaticField()) {
+            return nullopt;
+        }
+        if (!job.isOutermost && symbol.isClassOrModule() &&
+            symbol.asClassOrModuleRef().data(ctx)->packageRegistryOwner.exists()) {
+            // We're still on the `packageRegistryOwner` path to a constant. Defer until we're off that path, or reach
+            // the outermost component.
+            return nullopt;
+        }
+        auto enclosing = symbol.enclosingClass(ctx);
+        if (enclosing.isPackageSpecSymbol(ctx)) {
+            // This is a placeholder symbol that we've resolved a missing constant to (for the purpose of reporting
+            // the outermost missing constant as the one to import). `constantResolutionFailed` will handle tracking
+            // the final missing package. (These symbols are only real constants in `__package.rb` files, which
+            // returned above.)
+            return nullopt;
+        }
+        auto otherPackage = enclosing.data(ctx)->package;
+        auto &packageDB = ctx.state.packageDB();
+        auto currentPackage = packageDB.getPackageNameForFile(ctx.file);
+        if (!otherPackage.exists() || otherPackage == currentPackage) {
+            return nullopt;
+        }
+
+        auto &currentPackageInfo = packageDB.getPackageInfo(currentPackage);
+        if (currentPackageInfo.importsPackage(otherPackage) != nullptr) {
+            // The constant resolved, and constant resolution is import-aware, so no import is needed.
+            return PackageReference{otherPackage, {.importNeeded = false, .causesModularityError = false}};
+        }
+        // This can only be a namespace prefix of an imported package, which `enforcePackageBoundary` allows.
+        return nullopt;
+    }
+
+    static void addPackageReference(vector<PackageReference> &references, PackageReference reference) {
+        // A file references few distinct packages, so a linear search is cheaper than a map. Merging here keeps
+        // each file's list to one entry per package, however many constant literals reference it.
+        auto existing = absl::c_find_if(references, [&](const auto &entry) { return entry.first == reference.first; });
+        if (existing == references.end()) {
+            references.emplace_back(reference);
+        } else {
+            existing->second.importNeeded |= reference.second.importNeeded;
+            existing->second.causesModularityError |= reference.second.causesModularityError;
+        }
+    }
+
+    // Package references are collected on worker threads, and recorded in the package DB on the main thread.
+    static void trackPackageReferences(core::GlobalState &gs, vector<ResolveItems<PackageReference>> &references) {
+        for (auto &fileReferences : references) {
+            auto package = gs.packageDB().getPackageNameForFile(fileReferences.file);
+            ENFORCE(package.exists());
+            auto packageInfo = gs.packageDB().getPackageInfoNonConst(package);
+            for (auto &[otherPackage, referenceInfo] : fileReferences.items) {
+                packageInfo->trackPackageReference(fileReferences.file, otherPackage, referenceInfo);
+            }
+        }
+        references.clear();
+    }
+
     static core::SymbolRef resolveConstant(core::Context ctx, ConstantResolutionItem &job) {
         auto &c = *job.out->original();
         if (ast::isa_tree<ast::EmptyTree>(c.scope)) {
@@ -799,6 +871,12 @@ private:
                 resolvedField.data(gs)->resultType = core::Types::untyped(resolved);
             }
             job.out->setSymbol(resolved);
+            if (auto reference = packageReference(ctx, job, resolved)) {
+                auto currentPackage = gs.packageDB().getPackageNameForFile(file);
+                gs.packageDB()
+                    .getPackageInfoNonConst(currentPackage)
+                    ->trackPackageReference(file, reference->first, reference->second);
+            }
             return;
         }
         if (resolved.exists()) {
@@ -974,7 +1052,8 @@ private:
         }
     }
 
-    static bool resolveConstantJob(core::Context ctx, ConstantResolutionItem &job) {
+    static bool resolveConstantJob(core::Context ctx, ConstantResolutionItem &job,
+                                   vector<PackageReference> &packageReferences) {
         if (isAlreadyResolved(ctx, *job.out)) {
             return true;
         }
@@ -982,26 +1061,26 @@ private:
         if (!resolved.exists()) {
             return false;
         }
-        if (resolved.isTypeAlias(ctx)) {
-            auto resolvedField = resolved.asFieldRef();
-            if (resolvedField.data(ctx)->resultType != nullptr) {
-                job.out->setSymbol(resolved);
-                return true;
-            }
+        if (resolved.isTypeAlias(ctx) && resolved.asFieldRef().data(ctx)->resultType == nullptr) {
             return false;
         }
 
         job.out->setSymbol(resolved);
+        if (auto reference = packageReference(ctx, job, resolved)) {
+            addPackageReference(packageReferences, *reference);
+        }
         return true;
     }
 
     struct ResolveConstantsWorkerResult {
         uint32_t retries = 0;
         vector<ResolveItems<ConstantResolutionItem>> leftover;
+        vector<ResolveItems<PackageReference>> packageReferences;
     };
 
     static bool resolveConstantResolutionItems(const core::GlobalState &gs,
                                                vector<ResolveItems<ConstantResolutionItem>> &jobs,
+                                               vector<ResolveItems<PackageReference>> &packageReferences,
                                                WorkerPool &workers) {
         if (jobs.empty()) {
             return false;
@@ -1021,10 +1100,15 @@ private:
                 if (result.gotItem()) {
                     processed++;
                     core::Context ictx(gs, core::Symbols::root(), job.file);
+                    vector<PackageReference> fileReferences;
                     auto origSize = job.items.size();
-                    erase_if(job.items,
-                             [&](ConstantResolutionItem &item) -> bool { return resolveConstantJob(ictx, item); });
+                    erase_if(job.items, [&](ConstantResolutionItem &item) -> bool {
+                        return resolveConstantJob(ictx, item, fileReferences);
+                    });
                     workerResult.retries += origSize - job.items.size();
+                    if (!fileReferences.empty()) {
+                        workerResult.packageReferences.emplace_back(job.file, move(fileReferences));
+                    }
                     if (!job.items.empty()) {
                         workerResult.leftover.emplace_back(move(job));
                     }
@@ -1044,6 +1128,9 @@ private:
                 retries += threadResult.retries;
                 jobs.insert(jobs.end(), make_move_iterator(threadResult.leftover.begin()),
                             make_move_iterator(threadResult.leftover.end()));
+                packageReferences.insert(packageReferences.end(),
+                                         make_move_iterator(threadResult.packageReferences.begin()),
+                                         make_move_iterator(threadResult.packageReferences.end()));
             }
         }
         categoryCounterAdd("resolve.constants.nonancestor", "retry", retries);
@@ -1738,7 +1825,7 @@ private:
                 nesting_, constant, cursor.cursor, isOutermost, cursor.position,
             };
             job.isMixinAncestor = this->inMixinAncestor_;
-            auto resolved = resolveConstantJob(ctx, job);
+            auto resolved = resolveConstantJob(ctx, job, packageReferences_);
             if (resolved) {
                 categoryCounterInc("resolve.constants.nonancestor", "firstpass");
                 // Once a symbol is resolved, we can just use the cursor of that symbol
@@ -2227,6 +2314,7 @@ public:
         vector<ResolveItems<TypeAliasResolutionItem>> todoTypeAliases_;
         vector<ResolveItems<ClassMethodsResolutionItem>> todoClassMethods_;
         vector<ResolveItems<RequireAncestorResolutionItem>> todoRequiredAncestors_;
+        vector<ResolveItems<PackageReference>> packageReferences_;
         vector<ast::ParsedFile> trees;
 
         // Consume the todos, and reset the internal state of the `ResolveConstantsWalk`.
@@ -2254,6 +2342,9 @@ public:
             }
             if (!constants.todoRequiredAncestors_.empty()) {
                 this->todoRequiredAncestors_.emplace_back(file, move(constants.todoRequiredAncestors_));
+            }
+            if (!constants.packageReferences_.empty()) {
+                this->packageReferences_.emplace_back(file, move(constants.packageReferences_));
             }
         }
     };
@@ -2342,6 +2433,7 @@ public:
         vector<ResolveItems<TypeAliasResolutionItem>> todoTypeAliases;
         vector<ResolveItems<ClassMethodsResolutionItem>> todoClassMethods;
         vector<ResolveItems<RequireAncestorResolutionItem>> todoRequiredAncestors;
+        vector<ResolveItems<PackageReference>> packageReferences;
 
         {
             ResolveWalkResult threadResult;
@@ -2365,11 +2457,15 @@ public:
                     todoRequiredAncestors.insert(todoRequiredAncestors.end(),
                                                  make_move_iterator(threadResult.todoRequiredAncestors_.begin()),
                                                  make_move_iterator(threadResult.todoRequiredAncestors_.end()));
+                    packageReferences.insert(packageReferences.end(),
+                                             make_move_iterator(threadResult.packageReferences_.begin()),
+                                             make_move_iterator(threadResult.packageReferences_.end()));
                     trees.insert(trees.end(), make_move_iterator(threadResult.trees.begin()),
                                  make_move_iterator(threadResult.trees.end()));
                 }
             }
         }
+        trackPackageReferences(gs, packageReferences);
 
         if (gs.epochManager->wasTypecheckingCanceled()) {
             return ast::ParsedFilesOrCancelled::cancel(std::move(trees), workers);
@@ -2418,7 +2514,8 @@ public:
             }
             {
                 Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.constants");
-                bool resolvedSomeConstants = resolveConstantResolutionItems(gs, todo, workers);
+                bool resolvedSomeConstants = resolveConstantResolutionItems(gs, todo, packageReferences, workers);
+                trackPackageReferences(gs, packageReferences);
                 progress = progress || resolvedSomeConstants;
             }
             {
