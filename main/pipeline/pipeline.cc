@@ -108,11 +108,11 @@ void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) 
     if (opts.cacheSensitiveOptions.sorbetPackages) {
         core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(gs);
         core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
-        gs.setPackagerOptions(
-            opts.extraPackageFilesDirectoryUnderscorePrefixes, opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
-            opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
-            opts.allowRelaxedPackagerChecksFor, opts.updateVisibilityFor, opts.packagerLayers, opts.sorbetPackagesHint,
-            opts.genPackagesMode, opts.allowRelaxingTestVisibility, opts.packageAttributedErrors);
+        gs.setPackagerOptions(opts.extraPackageFilesDirectoryUnderscorePrefixes,
+                              opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                              opts.extraPackageFilesDirectorySlashPrefixes, opts.allowRelaxedPackagerChecksFor,
+                              opts.updateVisibilityFor, opts.packagerLayers, opts.sorbetPackagesHint,
+                              opts.genPackagesMode, opts.allowRelaxingTestVisibility, opts.packageAttributedErrors);
     }
 #endif
 }
@@ -127,9 +127,9 @@ unique_ptr<core::GlobalState> copyForSlowPath(const core::GlobalState &from, con
 
     auto result = from.copyForSlowPath(
         opts.extraPackageFilesDirectoryUnderscorePrefixes, opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
-        opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
-        opts.allowRelaxedPackagerChecksFor, opts.updateVisibilityFor, opts.packagerLayers, opts.sorbetPackagesHint,
-        opts.genPackagesMode, opts.allowRelaxingTestVisibility, opts.packageAttributedErrors, forStratum);
+        opts.extraPackageFilesDirectorySlashPrefixes, opts.allowRelaxedPackagerChecksFor, opts.updateVisibilityFor,
+        opts.packagerLayers, opts.sorbetPackagesHint, opts.genPackagesMode, opts.allowRelaxingTestVisibility,
+        opts.packageAttributedErrors, forStratum);
 
     // Fall back on initializing from the payload if we're not copying part of from's symbol table.
     if (forStratum == core::packages::Stratum(0)) {
@@ -718,9 +718,8 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
     shared_ptr<const core::GlobalState> emptyGs = baseGs.copyForIndexThread(
         opts.cacheSensitiveOptions.sorbetPackages, opts.extraPackageFilesDirectoryUnderscorePrefixes,
         opts.extraPackageFilesDirectorySlashDeprecatedPrefixes, opts.extraPackageFilesDirectorySlashPrefixes,
-        opts.packageSkipRBIExportEnforcementDirs, opts.allowRelaxedPackagerChecksFor, opts.updateVisibilityFor,
-        opts.packagerLayers, opts.sorbetPackagesHint, opts.genPackagesMode, opts.allowRelaxingTestVisibility,
-        opts.packageAttributedErrors);
+        opts.allowRelaxedPackagerChecksFor, opts.updateVisibilityFor, opts.packagerLayers, opts.sorbetPackagesHint,
+        opts.genPackagesMode, opts.allowRelaxingTestVisibility, opts.packageAttributedErrors);
 
     workers.multiplexJob("indexSuppliedFiles", [emptyGs, &opts, fileq, resultq, &kvstore, cancelable]() {
         Timer timeit(emptyGs->tracer(), "indexSuppliedFilesWorker");
@@ -730,9 +729,8 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
         auto localGs = emptyGs->copyForIndexThread(
             opts.cacheSensitiveOptions.sorbetPackages, opts.extraPackageFilesDirectoryUnderscorePrefixes,
             opts.extraPackageFilesDirectorySlashDeprecatedPrefixes, opts.extraPackageFilesDirectorySlashPrefixes,
-            opts.packageSkipRBIExportEnforcementDirs, opts.allowRelaxedPackagerChecksFor, opts.updateVisibilityFor,
-            opts.packagerLayers, opts.sorbetPackagesHint, opts.genPackagesMode, opts.allowRelaxingTestVisibility,
-            opts.packageAttributedErrors);
+            opts.allowRelaxedPackagerChecksFor, opts.updateVisibilityFor, opts.packagerLayers, opts.sorbetPackagesHint,
+            opts.genPackagesMode, opts.allowRelaxingTestVisibility, opts.packageAttributedErrors);
         auto &epochManager = *localGs->epochManager;
 
         IndexThreadResultPack threadResult;
@@ -1165,7 +1163,6 @@ ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, vector<ast::ParsedFil
 #ifndef SORBET_REALMAIN_MIN
             if (opts.cacheSensitiveOptions.sorbetPackages) {
                 Timer timeit(gs.tracer(), "visibility_checker");
-                packager::VisibilityChecker::reportExportErrors(gs, what);
                 packager::VisibilityChecker::checkReferences(gs, workers, what);
             }
 #endif
@@ -1303,10 +1300,6 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
 
 #ifndef SORBET_REALMAIN_MIN
         if (opts.cacheSensitiveOptions.sorbetPackages) {
-            // Without incremental namer, the `__package.rb` files' errors are unchanged.
-            if (runIncrementalNamer) {
-                packager::VisibilityChecker::reportExportErrors(gs, what);
-            }
             packager::VisibilityChecker::checkReferences(gs, workers, what);
         }
 #endif

@@ -233,18 +233,15 @@ public:
         bool isStaticFieldTypeAlias : 1;
         bool isStaticFieldPrivate : 1;
 
-        // Can only export a static field
-        bool isExported : 1;
-
         // Can only mark a static field, with `package_private!(:NAME)`
         bool isPackagePrivate : 1;
 
-        constexpr static uint8_t NUMBER_OF_FLAGS = 6;
+        constexpr static uint8_t NUMBER_OF_FLAGS = 5;
         constexpr static uint8_t VALID_BITS_MASK = (1 << NUMBER_OF_FLAGS) - 1;
 
         Flags() noexcept
             : isField(false), isStaticField(false), isStaticFieldTypeAlias(false), isStaticFieldPrivate(false),
-              isExported(false), isPackagePrivate(false) {}
+              isPackagePrivate(false) {}
 
         uint8_t serialize() const {
             static_assert(sizeof(Flags) == sizeof(uint8_t));
@@ -401,19 +398,18 @@ public:
         bool isPrivate : 1;
         bool isDeclared : 1;
         bool isDeclaredInPackage : 1;
-        bool isExported : 1;
         bool isBehaviorDefining : 1;
         // Marked with `package_private!`. Constants nested inside it are package-private too, but this bit is only set
         // on the marked class itself.
         bool isPackagePrivate : 1;
 
-        constexpr static uint16_t NUMBER_OF_FLAGS = 13;
+        constexpr static uint16_t NUMBER_OF_FLAGS = 12;
         constexpr static uint16_t VALID_BITS_MASK = (1 << NUMBER_OF_FLAGS) - 1;
 
         Flags() noexcept
             : isClass(false), isModule(false), isAbstract(false), isInterface(false), isLinearizationComputed(false),
               isFinal(false), isSealed(false), isPrivate(false), isDeclared(false), isDeclaredInPackage(false),
-              isExported(false), isBehaviorDefining(false), isPackagePrivate(false) {}
+              isBehaviorDefining(false), isPackagePrivate(false) {}
 
         uint16_t serialize() const {
             static_assert(sizeof(Flags) == sizeof(uint16_t));

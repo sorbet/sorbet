@@ -94,7 +94,6 @@ public:
     absl::Span<const std::string> extraPackageFilesDirectoryUnderscorePrefixes() const;
     absl::Span<const std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes() const;
     absl::Span<const std::string> extraPackageFilesDirectorySlashPrefixes() const;
-    absl::Span<const std::string> skipRBIExportEnforcementDirs() const;
     // Possible layers for packages to be in. The layers are ordered lowest to highest.
     // Ie. {'util', 'app'} means that code in `app` can call code in `util`, but code in `util` cannot call code in
     // `app`.
@@ -133,7 +132,6 @@ private:
     std::vector<std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes_;
     std::vector<std::string> extraPackageFilesDirectorySlashPrefixes_;
     std::string errorHint_;
-    std::vector<std::string> skipRBIExportEnforcementDirs_;
     std::vector<std::string> allowRelaxedPackagerChecksFor_;
     UnorderedSet<MangledName> packagesWithRelaxedChecks_;
     std::vector<std::string> updateVisibilityFor_;

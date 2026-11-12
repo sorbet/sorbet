@@ -197,34 +197,28 @@ optional<core::AutocorrectSuggestion> PackageInfo::addImport(const core::GlobalS
         }
     } else {
         // if we don't have any imports, then we can try adding it
-        // either before the first export, or if we have no
-        // exports, then right before the final `end`
-        int64_t exportOffset;
-        if (!exports_.empty()) {
-            exportOffset = exports_.front().loc.beginPos() - " "sv.size();
-        } else {
-            exportOffset = locs.loc.endPos() - "end\n"sv.size();
-        }
+        // right before the final `end`
+        int64_t endOffset = locs.loc.endPos() - "end\n"sv.size();
 
         string_view file_source = this->file.data(gs).source();
 
-        // Defensively guard against the first export loc or the package's loc being invalid.
-        if (exportOffset <= 0 || exportOffset >= file_source.size()) {
+        // Defensively guard against the package's loc being invalid.
+        if (endOffset <= 0 || endOffset >= file_source.size()) {
             ENFORCE(false, "Failed to find a valid starting loc");
             return nullopt;
         }
 
         // we want to find the end of the last non-empty line, so
         // let's do something gross: walk backward until we find non-whitespace
-        while (isspace(file_source[exportOffset])) {
-            exportOffset--;
+        while (isspace(file_source[endOffset])) {
+            endOffset--;
             // this shouldn't happen in a well-formatted
             // `__package.rb` file, but just to be safe
-            if (exportOffset == 0) {
+            if (endOffset == 0) {
                 return nullopt;
             }
         }
-        insertionLoc = core::Loc(this->file, exportOffset + 1, exportOffset + 1);
+        insertionLoc = core::Loc(this->file, endOffset + 1, endOffset + 1);
     }
     ENFORCE(insertionLoc.exists());
 
@@ -869,18 +863,6 @@ std::string PackageInfo::renderPackageRbContents(
         } else {
             fmt::format_to(std::back_inserter(result), "  import {}\n", impPackageName);
         }
-    }
-
-    if (locs.exportAll.exists() || !exports_.empty()) {
-        fmt::format_to(std::back_inserter(result), "\n");
-    }
-    if (locs.exportAll.exists()) {
-        fmt::format_to(std::back_inserter(result), "  export_all!\n");
-    }
-    for (const auto &export_ : exports_) {
-        auto source = core::Loc(file, export_.loc).source(gs);
-        ENFORCE(source.has_value());
-        fmt::format_to(back_inserter(result), "  {}\n", source.value());
     }
 
     if (!visibleTo().empty() || visibleToTests()) {

@@ -126,7 +126,6 @@ class SymbolFinder {
                               foundDefs->package->owner.idx() == klass.idx();
 
         switch (send->fun.rawId()) {
-            case core::Names::exportAll().rawId():
             case core::Names::prelude_bang().rawId():
             case core::Names::test_bang().rawId():
                 if (!isPackageClass || send->hasBlock() || send->hasNonBlockArgs()) {
@@ -1847,11 +1846,6 @@ private:
         const auto fun = mod.name;
         auto symbolData = ctx.owner.asClassOrModuleRef().data(ctx);
         switch (fun.rawId()) {
-            case core::Names::exportAll().rawId():
-                if (auto *packageInfo = packageInfoForContext(ctx)) {
-                    packageInfo->locs.exportAll = mod.loc;
-                }
-                break;
             case core::Names::prelude_bang().rawId():
                 if (auto *packageInfo = packageInfoForContext(ctx)) {
                     packageInfo->locs.preludePackage = mod.loc;

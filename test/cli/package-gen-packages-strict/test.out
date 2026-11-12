@@ -72,7 +72,12 @@ C/__package.rb:8: Package `B` includes explicit visibility modifiers and cannot 
           ^^^^^^^^
   Note:
     Please consult with the owning team before adding a `visible_to` line to the package `B`
-Errors: 12
+
+C/__package.rb:3: `C` has changes https://srb.help/3734
+     3 |class C < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+Errors: 13
 
 ###### cat A/__package.rb ######
 # typed: strict
@@ -126,8 +131,6 @@ class C < PackageSpec
 
   # strict_dependencies 'false', 'layered', or 'layered_dag':
   import B
-
-  export_all!
 end
 
 ###### cat D/__package.rb ######
@@ -136,8 +139,6 @@ end
 class D < PackageSpec
   layer 'util'
   strict_dependencies 'dag'
-
-  export_all!
 end
 
 ###### cat E/__package.rb ######
@@ -146,6 +147,4 @@ end
 class E < PackageSpec
   layer 'util'
   strict_dependencies 'dag'
-
-  export_all!
 end

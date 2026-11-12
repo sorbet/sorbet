@@ -54,15 +54,6 @@ struct Import {
     Import &operator=(const Import &other) = default;
 };
 
-struct Export {
-    core::LocOffsets loc;
-    // The exported constant's names, from leaf to root. Stored as names rather than symbols so that
-    // the path can be resolved against a GlobalState that has only some of the package's symbols.
-    std::vector<core::NameRef> reversedPath;
-
-    explicit Export(core::LocOffsets loc) : loc(loc) {}
-};
-
 struct VisibleTo {
     MangledName mangledName;
     VisibleToType type;
@@ -121,10 +112,6 @@ public:
     // The names of each package imported by this package.
     std::vector<Import> importedPackageNames = {};
 
-    // List of exported items that form the body of this package's public API.
-    // These are copied into every package that imports this package.
-    std::vector<Export> exports_ = {};
-
     // The other packages to which this package is visible. If this vector is empty, then it means
     // the package is fully public and can be imported by anything.
     //
@@ -147,9 +134,6 @@ public:
         core::LocOffsets layer;
         core::LocOffsets strictDependenciesLevel;
         core::LocOffsets minTypedLevel;
-
-        // Set to non-none loc when this package should just export everything
-        core::LocOffsets exportAll;
 
         // Set to non-none loc when this package is marked `test!`
         core::LocOffsets testPackage;
@@ -339,7 +323,7 @@ public:
         const core::GlobalState &gs, std::vector<Import> newImports,
         UnorderedMap<core::packages::MangledName, core::packages::StrictDependenciesLevel> newStrictnessByPkg) const;
 };
-CheckSize(PackageInfo, 248, 8);
+CheckSize(PackageInfo, 216, 8);
 
 } // namespace sorbet::core::packages
 #endif

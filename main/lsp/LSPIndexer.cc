@@ -285,7 +285,6 @@ void LSPIndexer::transferInitializeState(InitializedTask &task) {
                       this->config->opts.extraPackageFilesDirectoryUnderscorePrefixes,
                       this->config->opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
                       this->config->opts.extraPackageFilesDirectorySlashPrefixes,
-                      this->config->opts.packageSkipRBIExportEnforcementDirs,
                       this->config->opts.allowRelaxedPackagerChecksFor, this->config->opts.updateVisibilityFor,
                       this->config->opts.packagerLayers, this->config->opts.sorbetPackagesHint,
                       core::packages::GenPackagesMode::Disabled, enableGenPackagesAllowRelaxingTestVisibility));

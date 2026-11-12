@@ -2107,8 +2107,7 @@ unique_ptr<GlobalState> GlobalState::deepCopyGlobalState(bool keepId) const {
 unique_ptr<GlobalState> GlobalState::copyForIndexThread(
     const bool packagerEnabled, const vector<string> &extraPackageFilesDirectoryUnderscorePrefixes,
     const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
-    const vector<string> &extraPackageFilesDirectorySlashPrefixes,
-    const vector<string> &packageSkipRBIExportEnforcementDirs, const vector<string> &allowRelaxedPackagerChecksFor,
+    const vector<string> &extraPackageFilesDirectorySlashPrefixes, const vector<string> &allowRelaxedPackagerChecksFor,
     const vector<string> &updateVisibilityFor, const vector<string> &packagerLayers, string errorHint,
     packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility, bool packageAttributedErrors) const {
     ENFORCE(fileTableFrozen);
@@ -2132,11 +2131,10 @@ unique_ptr<GlobalState> GlobalState::copyForIndexThread(
     if (packagerEnabled) {
         core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*result);
         core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = result->unfreezePackages();
-        result->setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes,
-                                   extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                                   extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs,
-                                   allowRelaxedPackagerChecksFor, updateVisibilityFor, packagerLayers, errorHint,
-                                   genPackagesMode, allowRelaxingTestVisibility, packageAttributedErrors);
+        result->setPackagerOptions(
+            extraPackageFilesDirectoryUnderscorePrefixes, extraPackageFilesDirectorySlashDeprecatedPrefixes,
+            extraPackageFilesDirectorySlashPrefixes, allowRelaxedPackagerChecksFor, updateVisibilityFor, packagerLayers,
+            errorHint, genPackagesMode, allowRelaxingTestVisibility, packageAttributedErrors);
     }
 
     return result;
@@ -2145,8 +2143,7 @@ unique_ptr<GlobalState> GlobalState::copyForIndexThread(
 unique_ptr<GlobalState> GlobalState::copyForLSPTypechecker(
     const bool packagerEnabled, const vector<string> &extraPackageFilesDirectoryUnderscorePrefixes,
     const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
-    const vector<string> &extraPackageFilesDirectorySlashPrefixes,
-    const vector<string> &packageSkipRBIExportEnforcementDirs, const vector<string> &allowRelaxedPackagerChecksFor,
+    const vector<string> &extraPackageFilesDirectorySlashPrefixes, const vector<string> &allowRelaxedPackagerChecksFor,
     const vector<string> &updateVisibilityFor, const vector<string> &packagerLayers, string errorHint,
     packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility) const {
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
@@ -2164,11 +2161,10 @@ unique_ptr<GlobalState> GlobalState::copyForLSPTypechecker(
 
         core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*result);
         core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = result->unfreezePackages();
-        result->setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes,
-                                   extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                                   extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs,
-                                   allowRelaxedPackagerChecksFor, updateVisibilityFor, packagerLayers, errorHint,
-                                   genPackagesMode, allowRelaxingTestVisibility, packageAttributedErrors);
+        result->setPackagerOptions(
+            extraPackageFilesDirectoryUnderscorePrefixes, extraPackageFilesDirectorySlashDeprecatedPrefixes,
+            extraPackageFilesDirectorySlashPrefixes, allowRelaxedPackagerChecksFor, updateVisibilityFor, packagerLayers,
+            errorHint, genPackagesMode, allowRelaxingTestVisibility, packageAttributedErrors);
     }
 
     return result;
@@ -2177,8 +2173,7 @@ unique_ptr<GlobalState> GlobalState::copyForLSPTypechecker(
 unique_ptr<GlobalState> GlobalState::copyForSlowPath(
     const vector<string> &extraPackageFilesDirectoryUnderscorePrefixes,
     const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
-    const vector<string> &extraPackageFilesDirectorySlashPrefixes,
-    const vector<string> &packageSkipRBIExportEnforcementDirs, const vector<string> &allowRelaxedPackagerChecksFor,
+    const vector<string> &extraPackageFilesDirectorySlashPrefixes, const vector<string> &allowRelaxedPackagerChecksFor,
     const vector<string> &updateVisibilityFor, const vector<string> &packagerLayers, string errorHint,
     packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility, bool packageAttributedErrors,
     core::packages::Stratum toStratum) const {
@@ -2211,11 +2206,10 @@ unique_ptr<GlobalState> GlobalState::copyForSlowPath(
         {
             core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*result);
             core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = result->unfreezePackages();
-            result->setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes,
-                                       extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                                       extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs,
-                                       allowRelaxedPackagerChecksFor, updateVisibilityFor, packagerLayers, errorHint,
-                                       genPackagesMode, allowRelaxingTestVisibility, packageAttributedErrors);
+            result->setPackagerOptions(
+                extraPackageFilesDirectoryUnderscorePrefixes, extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                extraPackageFilesDirectorySlashPrefixes, allowRelaxedPackagerChecksFor, updateVisibilityFor,
+                packagerLayers, errorHint, genPackagesMode, allowRelaxingTestVisibility, packageAttributedErrors);
         }
 
         result->copySymbolTableFrom(*this, toStratum);
@@ -2459,7 +2453,6 @@ packages::PackageDB &GlobalState::packageDB() {
 void GlobalState::setPackagerOptions(const vector<string> &extraPackageFilesDirectoryUnderscorePrefixes,
                                      const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
                                      const vector<string> &extraPackageFilesDirectorySlashPrefixes,
-                                     const vector<string> &packageSkipRBIExportEnforcementDirs,
                                      const vector<string> &allowRelaxedPackagerChecksFor,
                                      const vector<string> &updateVisibilityFor, const vector<string> &packagerLayers,
                                      string errorHint, packages::GenPackagesMode genPackagesMode,
@@ -2473,7 +2466,6 @@ void GlobalState::setPackagerOptions(const vector<string> &extraPackageFilesDire
     packageDB_.extraPackageFilesDirectoryUnderscorePrefixes_ = extraPackageFilesDirectoryUnderscorePrefixes;
     packageDB_.extraPackageFilesDirectorySlashDeprecatedPrefixes_ = extraPackageFilesDirectorySlashDeprecatedPrefixes;
     packageDB_.extraPackageFilesDirectorySlashPrefixes_ = extraPackageFilesDirectorySlashPrefixes;
-    packageDB_.skipRBIExportEnforcementDirs_ = packageSkipRBIExportEnforcementDirs;
     packageDB_.allowRelaxedPackagerChecksFor_ = allowRelaxedPackagerChecksFor;
     packageDB_.updateVisibilityFor_ = updateVisibilityFor;
     absl::c_transform(packagerLayers, std::back_inserter(packageDB_.layers_),

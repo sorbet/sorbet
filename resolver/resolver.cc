@@ -779,8 +779,6 @@ private:
 
     static const int MAX_SUGGESTION_COUNT = 10;
 
-    // Determine if a parent package exports a constant named `base`. If it does, return the symbol that already exists
-    // for that nesting scope.
     // We have failed to resolve the constant. We'll need to report the error and stub it so that we can proceed
     static void constantResolutionFailed(core::GlobalState &gs, core::FileRef file, ConstantResolutionItem &job,
                                          int &suggestionCount) {
@@ -891,17 +889,11 @@ private:
         auto constantNameMissing = original.cnst == core::Names::Constants::ConstantNameMissing();
         auto suggestScope = job.out->resolutionScopes()->front();
         auto isPackage = ctx.file.data(ctx).isPackage(gs);
-        auto isExport = false;
         auto isImport = false;
         if (isPackage) {
             // In the case the file is a __package.rb file, and the scope is a PackageSpec-scoped symbol,
-            // the resolution error must be in an import statement. Otherwise, it is in an export statement.
-
-            // TODO (aadi-stripe) Find a less brittle way of ascertaining whether the error comes from an
-            // export statement. Currently (1/9/23) this happens to work because export statements are the
-            // only part of the packager DSL that do not prepend PackageSpec to the relevant constant.
+            // the resolution error must be in an import statement.
             isImport = suggestScope.asClassOrModuleRef().isPackageSpecSymbol(ctx.state);
-            isExport = !suggestScope.asClassOrModuleRef().isPackageSpecSymbol(ctx.state);
         }
 
         auto packageAction = packageResolutionAction(ctx, job, alreadyReported);
@@ -960,18 +952,6 @@ private:
                 }
                 auto suggested = suggestScope.asClassOrModuleRef().data(ctx)->findConstantFuzzyMatch(ctx, original.cnst,
                                                                                                      filterToPackage);
-
-                if (isExport) {
-                    // If the resolution error is for an export, suggestions must be restricted to within the
-                    // current package only. They must not cross package boundaries as out-of-package suggestions
-                    // would be inherently invalid.
-                    auto enclosingPackage = ctx.state.packageDB().getPackageNameForFile(ctx.file);
-                    if (enclosingPackage.exists()) {
-                        erase_if(suggested, [&enclosingPackage, &gs](auto &suggestion) {
-                            return suggestion.symbol.enclosingClass(gs).data(gs)->package != enclosingPackage;
-                        });
-                    }
-                }
 
                 if (suggested.size() > 3) {
                     suggested.resize(3);

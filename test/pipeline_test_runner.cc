@@ -633,7 +633,6 @@ TEST_CASE("PerPhaseTest") {
             stratumFiles = move(resolver::Resolver::run(*gs, move(stratumFiles), *workers).result());
 
             if (opts.cacheSensitiveOptions.sorbetPackages) {
-                packager::VisibilityChecker::reportExportErrors(*gs, stratumFiles);
                 packager::VisibilityChecker::checkReferences(*gs, *workers, stratumFiles);
             }
 

@@ -414,7 +414,7 @@ struct PackageSpecBodyWalk {
                 }
             }
         } else if (send.fun == core::Names::exportAll()) {
-            // Handled as a class-level modifier in namer.
+            // Has no effect, because constants are public unless marked `package_private!`.
         } else if (send.fun == core::Names::prelude_bang() && !send.hasBlock() && !send.hasNonBlockArgs()) {
             // Handled as a class-level modifier in namer.
         } else if (send.fun == core::Names::visibleTo()) {
@@ -728,7 +728,6 @@ void rewritePackageSpec(const core::GlobalState &gs, ast::ParsedFile &package, P
     // The body walk appends to these lists. This might not be the first time we've seen the package (e.g., when a
     // slow path copies a prefix of the symbol table, it also copies the populated package DB), so clear them first.
     info.importedPackageNames.clear();
-    info.exports_.clear();
     info.visibleTo_.clear();
     info.extraDirectives_.clear();
 
@@ -1020,7 +1019,6 @@ vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, ve
                 // rewritePackageSpec. We make the most shallow copy possible, to ensure that we don't raise duplicate
                 // errors on the fast path.
                 PackageInfo copy{info.mangledName_, info.file, info.locs.loc, info.locs.declLoc};
-                copy.locs.exportAll = info.locs.exportAll;
                 copy.locs.preludePackage = info.locs.preludePackage;
                 copy.locs.testPackage = info.locs.testPackage;
                 rewritePackageSpec(gs, file, copy);
