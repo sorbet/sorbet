@@ -1084,6 +1084,88 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest,
     CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath_canceled"), 1);
 }
 
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageStratumOptimizationPreservesSlowPathRestarts") {
+    auto opts = make_shared<realmain::options::Options>();
+    opts->cacheSensitiveOptions.sorbetPackages = true;
+    opts->packageDirected = true;
+    opts->stratumSplitThreshold = 3;
+    opts->minStratumSize = 4;
+    resetState(opts);
+
+    // Counting __package.rb, A/B form a four-file SCC, C has three files, and D has two.
+    // Splitting [A, B, C] / [D] produces [A, B] / [C] / [D], then combining produces [A, B] / [C, D].
+    vector<pair<string, string>> files = {
+        {"a/__package.rb", PackageTextBuilder().withName("A").withImports({"B"}).withExports({"A::Base"}).build()},
+        {"a/a.rb", "# typed: true\nclass A::Base; end\n"},
+        {"b/__package.rb", PackageTextBuilder().withName("B").withImports({"A"}).withExports({"B::Base"}).build()},
+        {"b/b.rb", "# typed: true\nclass B::Base < A::Base; end\n"},
+        {"c/__package.rb", PackageTextBuilder().withName("C").withExports({"C::Base"}).build()},
+        {"c/c.rb", "# typed: true\nclass C::Base; end\n"},
+        {"c/extra.rb", "# typed: true\nclass C::Extra; end\n"},
+        {"d/__package.rb", PackageTextBuilder().withName("D").withImports({"B", "C"}).build()},
+        {"d/d.rb", "# typed: true\n"
+                   "class D::Main < B::Base\n"
+                   "  def run\n"
+                   "    C::Base.new\n"
+                   "  end\n"
+                   "end\n"},
+    };
+    writeFilesToFS(files);
+    for (auto &[path, _] : files) {
+        opts->inputFileNames.emplace_back(fmt::format("{}/{}", rootPath, path));
+    }
+
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->enableTypecheckInfo = true;
+    assertErrorDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
+    getCounters();
+
+    auto checkRestart = [this](vector<unique_ptr<LSPMessage>> messages, int expectedStartingStratum) {
+        vector<const SorbetTypecheckRunInfo *> runs;
+        for (auto &message : messages) {
+            if (getTypecheckRunStatus(*message).has_value()) {
+                runs.push_back(get<unique_ptr<SorbetTypecheckRunInfo>>(message->asNotification().params).get());
+            }
+        }
+        REQUIRE_EQ(runs.size(), 2);
+        CHECK_EQ(runs[0]->typecheckingPath, TypecheckingPath::Slow);
+        CHECK_EQ(runs[0]->status, SorbetTypecheckRunStatus::Started);
+        CHECK_EQ(runs[1]->typecheckingPath, TypecheckingPath::Slow);
+        CHECK_EQ(runs[1]->status, SorbetTypecheckRunStatus::Ended);
+        CHECK_EQ(runs[1]->startingStratum, expectedStartingStratum);
+        assertErrorDiagnostics(move(messages), {});
+    };
+
+    // C reaches four files, so a fresh optimization would stop combining it with D. Cancel this edit with a new
+    // file in D. Both the canceled run and its retry reuse the A/B symbol-table prefix, so they must keep the
+    // cached [A, B] / [C, D] traversal. Inheriting B::Base also checks that the copied prefix survives cancellation.
+    checkRestart(cancelSlowPathWithNewFile({"c/added.rb", "# typed: true\nclass C::Added < C::Base; end\n"},
+                                           {"d/added.rb", "# typed: true\n"
+                                                          "class D::Added < B::Base\n"
+                                                          "  def run\n"
+                                                          "    C::Base.new\n"
+                                                          "  end\n"
+                                                          "end\n"}),
+                 1);
+
+    // A subsequent edit in D still restarts in the combined stratum, even though C now meets the minimum size.
+    checkRestart(send(*openFile("d/later.rb", "# typed: true\nclass D::Later < D::Added; end\n")), 1);
+
+    // Changing a package file invalidates the entire prefix. The import graph is unchanged, but the new file
+    // counts now produce [A, B] / [C] / [D] when the optimizations run again.
+    checkRestart(send(*openFile("c/__package.rb",
+                                PackageTextBuilder().withName("C").withExports({"C::Base", "C::Extra"}).build())),
+                 0);
+
+    // D's next slow path uses the new boundary, copying both the A/B and C strata.
+    checkRestart(send(*openFile("d/last.rb", "# typed: true\nclass D::Last < D::Later; end\n")), 2);
+
+    auto counters = getCounters();
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 4);
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath_canceled"), 1);
+}
+
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "SlowFooThenFastBarThenUndoSlowFoo") {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;
