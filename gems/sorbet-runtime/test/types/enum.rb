@@ -535,6 +535,46 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
     end
   end
 
+  describe 'Marshal _load' do
+    class MarshalLoadHook
+      @loaded = false
+      class << self
+        attr_accessor :loaded
+      end
+
+      def self._load(_data)
+        self.loaded = true
+        new
+      end
+    end
+
+    # Builds a Marshal stream for a user-defined (`_dump`/`_load`) object of `klass` wrapping `data`.
+    def marshal_userdef(klass, data)
+      name = klass.name.b
+      raise ArgumentError if name.bytesize > 122 || data.bytesize > 122
+      "\x04\x08u:".b + (name.bytesize + 5).chr + name + (data.bytesize + 5).chr + data.b
+    end
+
+    it 'loads streams produced by _dump' do
+      assert_equal(marshal_userdef(CardSuit, Marshal.dump(CardSuit::SPADE.serialize)), Marshal.dump(CardSuit::SPADE))
+      assert_same(CardSuitCustom::NONE, Marshal.load(Marshal.dump(CardSuitCustom::NONE)))
+    end
+
+    it 'does not unmarshal nested data' do
+      hook_stream = marshal_userdef(MarshalLoadHook, '')
+      assert_same(true, Marshal.load(hook_stream).is_a?(MarshalLoadHook)) # rubocop:disable Security/MarshalLoad
+      MarshalLoadHook.loaded = false
+
+      smuggled = marshal_userdef(CardSuit, hook_stream)
+      assert_raises(KeyError) { Marshal.load(smuggled) } # rubocop:disable Security/MarshalLoad
+      assert_equal(false, MarshalLoadHook.loaded)
+    end
+
+    it 'raises KeyError for unknown values' do
+      assert_raises(KeyError) { Marshal.load(marshal_userdef(CardSuit, Marshal.dump('joker'))) } # rubocop:disable Security/MarshalLoad
+    end
+  end
+
   it 'can be used with an assert' do
     assert(CardSuit::SPADE, 'some message')
   end

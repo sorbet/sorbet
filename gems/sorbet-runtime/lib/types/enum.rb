@@ -376,6 +376,7 @@ class T::Enum
 
     @mapping = T.let(nil, T.nilable(T::Hash[SerializedVal, T.attached_class]))
     @mapping = {}
+    @marshal_mapping = T.let(nil, T.nilable(T::Hash[String, SerializedVal]))
 
     # Freeze the Enum class and bind the constant names into each of the instances.
     self.constants(false).each do |const_name|
@@ -421,8 +422,19 @@ class T::Enum
     Marshal.dump(serialize)
   end
 
+  # `args` comes straight from the outer Marshal stream. Calling `Marshal.load` on it would start a
+  # nested load that ignores the caller's `proc` and `freeze:` arguments and can instantiate any
+  # class, so instead look it up among the exact bytes `_dump` produces for this enum's values.
   sig { params(args: String).returns(T.attached_class) }
   def self._load(args)
-    deserialize(Marshal.load(args)) # rubocop:disable Security/MarshalLoad
+    mapping = @mapping
+    if mapping.nil?
+      raise(UNBOUND_SERIALIZATION_MAP_MESSAGE % self)
+    end
+    marshal_mapping = @marshal_mapping ||= mapping.each_key.to_h { |val| [Marshal.dump(val).freeze, val] }.freeze
+    if !marshal_mapping.include?(args)
+      raise KeyError.new("Enum #{self} key not found for Marshal data")
+    end
+    deserialize(marshal_mapping[args])
   end
 end
