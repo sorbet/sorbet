@@ -749,6 +749,13 @@ pair<bool, core::packages::Stratum> LSPTypechecker::runSlowPath(LSPFileUpdates &
             core::packages::Stratum currentStratum(stratumIx);
             vector<ast::ParsedFile> stratumFiles, nonPackagedIndexed;
 
+            Timer stratumTimer(*this->config->logger, "stratum",
+                               {
+                                   {"stratum", fmt::format("{}", stratumIx)},
+                                   {"num_packages", fmt::format("{}", stratum.packageFiles.size())},
+                                   {"num_files", fmt::format("{}", stratum.sourceFiles.size())},
+                               });
+
             // When we unpartition the package and non-package files, we'll realloc stratumFiles to hold everything.
             stratumFiles.reserve(stratum.packageFiles.size() + stratum.sourceFiles.size());
 
