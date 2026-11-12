@@ -658,6 +658,13 @@ int realmain(int argc, char *argv[]) {
         for (auto &stratum : strata.strata) {
             ++currentStratum;
 
+            Timer timeit(*logger, "stratum",
+                         {
+                             {"stratum", fmt::format("{}", currentStratum)},
+                             {"num_packages", fmt::format("{}", stratum.packageFiles.size())},
+                             {"num_files", fmt::format("{}", stratum.sourceFiles.size())},
+                         });
+
             // We can unconditionally reset (to drop the vectors) instead of having to consult
             // intentionallyLeakASTs, because if intentionallyLeakASTs, then necessarily
             // packageDirected will be false, and thus this loop will only iterate once, and since
