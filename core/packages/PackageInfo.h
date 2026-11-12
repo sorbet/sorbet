@@ -323,7 +323,7 @@ public:
         const core::GlobalState &gs, std::vector<Import> newImports,
         UnorderedMap<core::packages::MangledName, core::packages::StrictDependenciesLevel> newStrictnessByPkg) const;
 };
-CheckSize(PackageInfo, 248, 8);
+CheckSize(PackageInfo, 216, 8);
 
 } // namespace sorbet::core::packages
 #endif
