@@ -1553,6 +1553,60 @@ public:
         return storage.original();
     }
 
+    enum class OriginalPathTerminal {
+        ConstantLit,
+        NonConstantLit,
+    };
+
+    // Folds original-backed constant parts from leaf/outermost to root, followed by the terminal scope. Returning
+    // false from the part callback stops the fold before the terminal callback. A non-ConstantLit terminal has an
+    // empty symbol.
+    template <class State, class PartFn, class TerminalFn>
+    State foldOriginalPath(State state, PartFn && onPart, TerminalFn && onTerminal) const {
+        constexpr bool validPart =
+            std::is_invocable_r_v<bool, PartFn &, State &, core::LocOffsets, core::SymbolRef, core::NameRef, bool>;
+        constexpr bool validTerminal = []() {
+            if constexpr (std::is_invocable_v<TerminalFn &, State &, core::LocOffsets, core::SymbolRef,
+                                              OriginalPathTerminal>) {
+                return std::is_same_v<std::invoke_result_t<TerminalFn &, State &, core::LocOffsets, core::SymbolRef,
+                                                           OriginalPathTerminal>,
+                                      void>;
+            }
+            return false;
+        }();
+        static_assert(validPart, "PartFn must accept (State &, LocOffsets, SymbolRef, NameRef, bool) and return bool");
+        static_assert(validTerminal,
+                      "TerminalFn must accept (State &, LocOffsets, SymbolRef, OriginalPathTerminal) and return void");
+
+        // If the above `static_assert`s fail, the compilation will fail, but the
+        // compiler will continue processing the function body, producing message
+        // spew.  This condition essentially stops the compiler from processing
+        // anything else.
+        if constexpr (!validPart || !validTerminal) {
+            return state;
+        }
+
+        auto *current = this;
+        bool isOutermost = true;
+        while (auto *original = current->original()) {
+            if (!std::invoke(onPart, state, current->loc(), current->symbol(), core::NameRef(original->cnst),
+                             bool{isOutermost})) {
+                return state;
+            }
+
+            if (auto scope = cast_tree<ConstantLit>(original->scope)) {
+                current = scope.get();
+                isOutermost = false;
+            } else {
+                std::invoke(onTerminal, state, original->scope.loc(), core::SymbolRef{},
+                            OriginalPathTerminal::NonConstantLit);
+                return state;
+            }
+        }
+        std::invoke(onTerminal, state, current->loc(), current->symbol(), OriginalPathTerminal::ConstantLit);
+        return state;
+    }
+
     void _sanityCheck();
 };
 CheckSize(ConstantLit, 16, 8);
