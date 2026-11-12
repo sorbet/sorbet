@@ -23,10 +23,23 @@ shift $((OPTIND - 1))
 
 cd "$(dirname "$0")/../.."
 
+# `--config=dev` builds go to their own output directory. Build clang-format
+# in that configuration after one, so that formatting doesn't make Bazel
+# discard its analysis cache or point `bazel-bin` at the `--config=dbg`
+# outputs.
+case "$(readlink bazel-bin 2> /dev/null || true)" in
+  *-dbg-dev/bin)
+    config="--config=dev"
+    ;;
+  *)
+    config="--config=dbg"
+    ;;
+esac
+
 bazel_args=(
   "--ui_event_filters=-info,-stdout,-stderr"
   "--noshow_progress"
-  "--config=dbg"
+  "$config"
 )
 ./bazel build "${bazel_args[@]}" //tools:clang-format >&2
 
