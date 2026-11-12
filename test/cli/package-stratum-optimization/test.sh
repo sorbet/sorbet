@@ -28,7 +28,7 @@ show_strata
 echo '--- --stratum-split-threshold=3 ---'
 show_strata --stratum-split-threshold=3
 
-# Combine the first two strata to reach the minimum size.
+# Keep all three strata separate: the middle stratum already meets the minimum size.
 echo '--- --min-stratum-size=5 ---'
 show_strata --min-stratum-size=5
 

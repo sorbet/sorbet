@@ -363,7 +363,7 @@ void Condensation::Traversal::optimize(const PackageDB &db, optional<uint32_t> s
 
         for (auto stratum : absl::MakeSpan(strata).subspan(1)) {
             auto candidateSize = stratumSize(db, sccSizes, stratum);
-            if (size < *minStratumSize) {
+            if (size < *minStratumSize && candidateSize < *minStratumSize) {
                 auto length = this->strata.back().size() + stratum.size();
                 this->strata.back() = absl::MakeSpan(this->sccs).subspan(start, length);
                 size += candidateSize;
