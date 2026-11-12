@@ -1798,15 +1798,7 @@ To avoid introducing contradictions like this into the type system, Sorbet requi
 
 ## 5016
 
-> Note: more recent versions of Sorbet have eliminated this error--it is now possible to define generic classes with covariant and contravariant type members.
-
-Sorbet does not allow classes to be covariant nor contravariant.
-
-**Why?** The design of generic classes and interfaces in Sorbet was heavily inspired by the design of C#. This exact question has been answered for C# by Eric Lippert, who worked on the design and implementation of C# for many years.
-
-→ [Why isn't there variance for generic classes?](https://stackoverflow.com/questions/2733346/why-isnt-there-generic-variance-for-classes-in-c-sharp-4-0/2734070#2734070)
-
-The answer concludes that the main selling point of having covariant classes is to make immutable generic classes, at the cost of a more complex implementation of generics.
+As of 0.5.10664, Sorbet [no longer](https://github.com/sorbet/sorbet/commit/0574ee3d01aad9e08b8a0568f18a6a634196eddd) reports this error: classes and modules can both declare covariant (`:out`) and contravariant (`:in`) type members. Older versions of Sorbet only allowed them in modules, and reported this error for any class that declared one. For more, see [Generics](generics.md).
 
 ## 5017
 
