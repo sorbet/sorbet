@@ -3,6 +3,4 @@
 
 class Only::Test < PackageSpec
   test!
-
-  export Only::Test::Thing
 end

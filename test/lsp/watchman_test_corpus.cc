@@ -134,7 +134,6 @@ TEST_CASE_FIXTURE(ProtocolTest, "ZeroingOutPackageFiles") {
         {"__package.rb", "# typed: strict\n"
                          "# frozen_string_literal: true\n"
                          "class Project < PackageSpec\n"
-                         "  export Project::Bar\n"
                          "end\n"},
 
         {"impl.rb", "# typed: strict\n"
@@ -147,7 +146,6 @@ TEST_CASE_FIXTURE(ProtocolTest, "ZeroingOutPackageFiles") {
         {"b/__package.rb", "# typed: strict\n"
                            "# frozen_string_literal: frue\n"
                            "class Project::B < PackageSpec\n"
-                           "  export Project::B::Foo\n"
                            "  import Project::C\n"
                            "end\n"},
 
@@ -166,7 +164,6 @@ TEST_CASE_FIXTURE(ProtocolTest, "ZeroingOutPackageFiles") {
         {"c/__package.rb", "# typed: strict\n"
                            "# frozen_string_literal: true\n"
                            "class Project::C < PackageSpec\n"
-                           "  export Project::C::Bar\n"
                            "end\n"},
 
         {"c/impl.rb", "# typed: strict\n"
@@ -196,7 +193,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "ZeroingOutPackageFiles") {
     vector<unique_ptr<LSPMessage>> requests;
     requests.push_back(watchmanFileUpdate({"c/__package.rb", "c/impl.rb"}));
     assertErrorDiagnostics(send(move(requests)), {
-                                                     {"b/__package.rb", 4, "Unable to resolve constant"},
+                                                     {"b/__package.rb", 3, "Unable to resolve constant"},
                                                      {"b/impl.rb", 5, "is not imported"},
                                                      {"b/impl.rb", 7, "is not imported"},
                                                      {"c/__package.rb", 0, "must contain a package definition"},

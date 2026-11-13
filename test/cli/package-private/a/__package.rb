@@ -2,5 +2,4 @@
 
 class A < PackageSpec
   prelude!
-  export A
 end

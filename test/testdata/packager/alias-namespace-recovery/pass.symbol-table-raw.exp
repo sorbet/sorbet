@@ -8,12 +8,12 @@ class <C <U <root>>> < <C <U Object>> ()
           argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/__package.rb start=??? end=???}
     class <C <U <PackageSpecRegistry>>>::<S <C <U A>> $1>[<C <U <AttachedClass>>>] < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<S <C <U PackageSpec>> $1> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/__package.rb start=4:1 end=4:22}
       type-member(+) <C <U <PackageSpecRegistry>>>::<S <C <U A>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U <PackageSpecRegistry>>>::<S <C <U A>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=A) @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/__package.rb start=4:1 end=4:22}
-      method <C <U <PackageSpecRegistry>>>::<S <C <U A>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/__package.rb start=4:1 end=17:4}
+      method <C <U <PackageSpecRegistry>>>::<S <C <U A>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/__package.rb start=4:1 end=7:4}
         argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/__package.rb start=??? end=???}
     class <C <U <PackageSpecRegistry>>>::<C <U B>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U PackageSpec>> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/b/__package.rb start=5:1 end=5:22}
     class <C <U <PackageSpecRegistry>>>::<S <C <U B>> $1>[<C <U <AttachedClass>>>] < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<S <C <U PackageSpec>> $1> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/b/__package.rb start=5:1 end=5:22}
       type-member(+) <C <U <PackageSpecRegistry>>>::<S <C <U B>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<C <U <PackageSpecRegistry>>>::<S <C <U B>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=B) @ Loc {file=test/testdata/packager/alias-namespace-recovery/b/__package.rb start=5:1 end=5:22}
-      method <C <U <PackageSpecRegistry>>>::<S <C <U B>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/b/__package.rb start=5:1 end=8:4}
+      method <C <U <PackageSpecRegistry>>>::<S <C <U B>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/b/__package.rb start=5:1 end=6:4}
         argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/b/__package.rb start=??? end=???}
     class <C <U <PackageSpecRegistry>>>::<C <U Consumer>> < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<C <U PackageSpec>> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/consumer/__package.rb start=4:1 end=4:29}
     class <C <U <PackageSpecRegistry>>>::<S <C <U Consumer>> $1>[<C <U <AttachedClass>>>] < <C <U Sorbet>>::<C <U Private>>::<C <U Static>>::<S <C <U PackageSpec>> $1> () @ Loc {file=test/testdata/packager/alias-namespace-recovery/consumer/__package.rb start=4:1 end=4:29}
@@ -26,7 +26,7 @@ class <C <U <root>>> < <C <U Object>> ()
       method <C <U <PackageSpecRegistry>>>::<S <C <U Mutex>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/mutex/__package.rb start=4:1 end=5:4}
         argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/mutex/__package.rb start=??? end=???}
   class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
-    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/__package.rb start=4:1 end=17:4}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/__package.rb start=4:1 end=7:4}
       argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/__package.rb start=??? end=???}
     method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/aliases.rb start=3:1 end=15:4}
       argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/aliases.rb start=??? end=???}
@@ -34,7 +34,7 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/__package.rb start=??? end=???}
     method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=4:1 end=31:27}
       argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/a/patch/definitions.rb start=??? end=???}
-    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/b/__package.rb start=5:1 end=8:4}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/b/__package.rb start=5:1 end=6:4}
       argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/b/__package.rb start=??? end=???}
     method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/packager/alias-namespace-recovery/b/definitions.rb start=3:1 end=6:4}
       argument <blk><block> @ Loc {file=test/testdata/packager/alias-namespace-recovery/b/definitions.rb start=??? end=???}

@@ -5,6 +5,4 @@ class E < PackageSpec
   strict_dependencies 'layered'
 
   import D
-
-  export_all!
 end

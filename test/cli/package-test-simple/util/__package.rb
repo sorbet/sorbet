@@ -3,5 +3,4 @@
 # enable-packager: true
 
 class Project::Util < PackageSpec
-  export Project::Util::MyUtil
 end

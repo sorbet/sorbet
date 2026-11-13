@@ -4,5 +4,4 @@
 # stratum: 0
 
 class OtherPackageNotImported < PackageSpec
-  export OtherPackageNotImported::ExportedClass
 end

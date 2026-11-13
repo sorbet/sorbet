@@ -333,12 +333,7 @@ struct PackageSpecBodyWalk {
             }
         }
 
-        if (send.fun == core::Names::export_()) {
-            // Exports have no meaning, because constants are public unless marked `package_private!`. Drop them without
-            // resolving them, so that exports of constants that no longer exist don't report errors.
-            tree = ast::make_expression<ast::EmptyTree>();
-            return;
-        } else if (send.fun == core::Names::import()) {
+        if (send.fun == core::Names::import()) {
             if (send.numPosArgs() == 1) {
                 Import *imp = nullptr;
 
@@ -413,8 +408,6 @@ struct PackageSpecBodyWalk {
                     }
                 }
             }
-        } else if (send.fun == core::Names::exportAll()) {
-            // Has no effect, because constants are public unless marked `package_private!`.
         } else if (send.fun == core::Names::prelude_bang() && !send.hasBlock() && !send.hasNonBlockArgs()) {
             // Handled as a class-level modifier in namer.
         } else if (send.fun == core::Names::visibleTo()) {
@@ -632,9 +625,7 @@ struct PackageSpecBodyWalk {
     bool isSpecMethod(const sorbet::ast::Send &send) const {
         switch (send.fun.rawId()) {
             case core::Names::import().rawId():
-            case core::Names::export_().rawId():
             case core::Names::visibleTo().rawId():
-            case core::Names::exportAll().rawId():
             case core::Names::prelude_bang().rawId():
             case core::Names::test_bang().rawId():
                 return true;
@@ -865,8 +856,8 @@ void validatePackageNamespace(core::Context ctx, const PackageInfo &pkgInfo) {
         e.setHeader("Package `{}` cannot be defined because `{}` is defined in Sorbet's payload", pkgInfo.show(ctx),
                     existing.show(ctx));
         e.addErrorLine(*payloadLoc, "Defined here");
-        e.addErrorNote("Constants from Sorbet's payload do not belong to any package, so this package's imports, "
-                       "exports, and `{}` declarations would have no effect on them",
+        e.addErrorNote("Constants from Sorbet's payload do not belong to any package, so this package's imports "
+                       "and `{}` declarations would have no effect on them",
                        "visible_to");
     }
 }

@@ -39,10 +39,6 @@ string PackageTextBuilder::build() {
         fmt::format_to(back_inserter(out), "  import {}\n", i);
     }
 
-    for (auto &e : this->exports) {
-        fmt::format_to(back_inserter(out), "  export {}\n", e);
-    }
-
     fmt::format_to(back_inserter(out), "end\n");
 
     return out;

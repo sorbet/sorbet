@@ -399,9 +399,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PreemptionCompletionUnblocksRefill
     // Finish preemption only after LSPLoop is waiting on a refilled queue. Waking it requires both checking
     // finished in the Await predicate and notifying finished under the task queue mutex.
     const string source = "# typed: true\nclass Root::A\nend\n";
-    initializePackagedWorkspace(
-        packageDirected,
-        {{"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A"}).build()}, {"a.rb", source}});
+    initializePackagedWorkspace(packageDirected,
+                                {{"__package.rb", PackageTextBuilder().withName("Root").build()}, {"a.rb", source}});
     assertErrorDiagnostics(send(*openFile("a.rb", source)), {});
 
     auto &wrapper = dynamic_cast<MultiThreadedLSPWrapper &>(*lspWrapper);
@@ -909,7 +908,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanCancelSlowPathWithFastPathThatR
 }
 
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelPackageDirectedSlowPathDiscardsQueuedPackageErrors") {
-    auto packageText = PackageTextBuilder().withName("Root").withExports({"Root::Value"}).build();
+    auto packageText = PackageTextBuilder().withName("Root").build();
     initializePackagedWorkspace(
         true, {{"__package.rb", packageText}, {"a.rb", "# typed: strict\nmodule Root\n  Value = 1\nend\n"}});
     assertErrorDiagnostics(send(*openFile("__package.rb", packageText)), {});
@@ -919,7 +918,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelPackageDirectedSlowPathDisca
     // resolving the package's stratum, before typechecking the package AST would drain that queue.
     sendAsync(*changeFile("__package.rb",
                           "# typed: strict\nclass Root < PackageSpec\n"
-                          "  export Root::Value\n  bogus Root::Value\nend\n",
+                          "  bogus Root::Value\nend\n",
                           2, true));
     auto status = getTypecheckRunStatus(*readAsync());
     REQUIRE(status.has_value());
@@ -992,30 +991,29 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelingSlowPathThatAddsPackageFi
     // so a new `__package.rb` displaces a pre-existing source file past the old size; a rollback that truncated to the
     // old size dropped that file from the workspace for good.
     initializePackagedWorkspace(
-        /* packageDirected */ false,
-        {
-            {"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A", "Root::B"}).build()},
-            // `a.rb` and `b.rb` reference each other, so losing either is an unresolved
-            // constant in the other.
-            {"a.rb", "# typed: true\n"
-                     "module Root\n"
-                     "  class A\n"
-                     "    def fun\n"
-                     "      B.new.bar\n"
-                     "    end\n"
-                     "  end\n"
-                     "end\n"},
-            {"b.rb", "# typed: true\n"
-                     "module Root\n"
-                     "  class B\n"
-                     "    def bar\n"
-                     "      A.new.fun\n"
-                     "    end\n"
-                     "  end\n"
-                     "end\n"},
-        });
+        /* packageDirected */ false, {
+                                         {"__package.rb", PackageTextBuilder().withName("Root").build()},
+                                         // `a.rb` and `b.rb` reference each other, so losing either is an unresolved
+                                         // constant in the other.
+                                         {"a.rb", "# typed: true\n"
+                                                  "module Root\n"
+                                                  "  class A\n"
+                                                  "    def fun\n"
+                                                  "      B.new.bar\n"
+                                                  "    end\n"
+                                                  "  end\n"
+                                                  "end\n"},
+                                         {"b.rb", "# typed: true\n"
+                                                  "module Root\n"
+                                                  "  class B\n"
+                                                  "    def bar\n"
+                                                  "      A.new.fun\n"
+                                                  "    end\n"
+                                                  "  end\n"
+                                                  "end\n"},
+                                     });
 
-    // The canceling edit lives in the new package and uses the root package's exports, so it only typechecks cleanly
+    // The canceling edit lives in the new package and uses the root package's constants, so it only typechecks cleanly
     // if nothing was lost along the way.
     assertErrorDiagnostics(
         cancelSlowPathWithNewFile(
@@ -1043,14 +1041,13 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest,
     initializePackagedWorkspace(
         /* packageDirected */ true,
         {
-            {"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A"}).build()},
+            {"__package.rb", PackageTextBuilder().withName("Root").build()},
             {"a.rb", "# typed: true\n"
                      "module Root\n"
                      "  class A\n"
                      "  end\n"
                      "end\n"},
-            {"foo/__package.rb",
-             PackageTextBuilder().withName("Root::Foo").withImports({"Root"}).withExports({"Root::Foo::B"}).build()},
+            {"foo/__package.rb", PackageTextBuilder().withName("Root::Foo").withImports({"Root"}).build()},
             // Root::Foo depends on Root, so `foo/b.rb` is the last file after the stratum
             // sort and the one a new file in Root displaces.
             {"foo/b.rb", "# typed: true\n"
@@ -1095,11 +1092,11 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageStratumOptimizationPreserve
     // Counting __package.rb, A/B form a four-file SCC, C has three files, and D has two.
     // Splitting [A, B, C] / [D] produces [A, B] / [C] / [D], then combining produces [A, B] / [C, D].
     vector<pair<string, string>> files = {
-        {"a/__package.rb", PackageTextBuilder().withName("A").withImports({"B"}).withExports({"A::Base"}).build()},
+        {"a/__package.rb", PackageTextBuilder().withName("A").withImports({"B"}).build()},
         {"a/a.rb", "# typed: true\nclass A::Base; end\n"},
-        {"b/__package.rb", PackageTextBuilder().withName("B").withImports({"A"}).withExports({"B::Base"}).build()},
+        {"b/__package.rb", PackageTextBuilder().withName("B").withImports({"A"}).build()},
         {"b/b.rb", "# typed: true\nclass B::Base < A::Base; end\n"},
-        {"c/__package.rb", PackageTextBuilder().withName("C").withExports({"C::Base"}).build()},
+        {"c/__package.rb", PackageTextBuilder().withName("C").build()},
         {"c/c.rb", "# typed: true\nclass C::Base; end\n"},
         {"c/extra.rb", "# typed: true\nclass C::Extra; end\n"},
         {"d/__package.rb", PackageTextBuilder().withName("D").withImports({"B", "C"}).build()},
@@ -1154,8 +1151,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageStratumOptimizationPreserve
 
     // Changing a package file invalidates the entire prefix. The import graph is unchanged, but the new file
     // counts now produce [A, B] / [C] / [D] when the optimizations run again.
-    checkRestart(send(*openFile("c/__package.rb",
-                                PackageTextBuilder().withName("C").withExports({"C::Base", "C::Extra"}).build())),
+    checkRestart(send(*openFile("c/__package.rb", "# typed: strict\n\nclass C < PackageSpec\n  visible_to D\nend\n")),
                  0);
 
     // D's next slow path uses the new boundary, copying both the A/B and C strata.
@@ -1940,7 +1936,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedPreemptionBeforeSlo
     resetState(opts);
 
     vector<pair<string, string>> files = {
-        {"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A"}).build()},
+        {"__package.rb", PackageTextBuilder().withName("Root").build()},
         {"a.rb", "# typed: true\n"
                  "module Root\n"
                  "  class A\n"
@@ -1948,8 +1944,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedPreemptionBeforeSlo
                  "    end\n"
                  "  end\n"
                  "end\n"},
-        {"foo/__package.rb",
-         PackageTextBuilder().withName("Root::Foo").withExports({"Root::Foo::A"}).withImports({"Root"}).build()},
+        {"foo/__package.rb", PackageTextBuilder().withName("Root::Foo").withImports({"Root"}).build()},
         {"foo/a.rb", "# typed: true\n"
                      "module Root::Foo\n"
                      "  class A\n"
@@ -2097,7 +2092,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedPreemptionAfterSlow
     resetState(opts);
 
     vector<pair<string, string>> files = {
-        {"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A"}).build()},
+        {"__package.rb", PackageTextBuilder().withName("Root").build()},
         {"a.rb", "# typed: true\n"
                  "module Root\n"
                  "  class A\n"
@@ -2105,8 +2100,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedPreemptionAfterSlow
                  "    end\n"
                  "  end\n"
                  "end\n"},
-        {"foo/__package.rb",
-         PackageTextBuilder().withName("Root::Foo").withExports({"Root::Foo::A"}).withImports({"Root"}).build()},
+        {"foo/__package.rb", PackageTextBuilder().withName("Root::Foo").withImports({"Root"}).build()},
         {"foo/a.rb", "# typed: true\n"
                      "module Root::Foo\n"
                      "  class A\n"
@@ -2245,7 +2239,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedPreemptionAfterSlow
 
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedPreemptionWaitsForExtraFastPathFiles") {
     vector<pair<string, string>> files = {
-        {"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A"}).build()},
+        {"__package.rb", PackageTextBuilder().withName("Root").build()},
         {"a.rb", "# typed: true\n"
                  "module Root\n"
                  "  class A\n"

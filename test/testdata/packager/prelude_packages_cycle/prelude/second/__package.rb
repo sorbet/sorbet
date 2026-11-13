@@ -8,6 +8,4 @@ class Prelude::Second < PackageSpec
   strict_dependencies 'layered'
 
   import Prelude::First
-
-  export Prelude::Second::B
 end

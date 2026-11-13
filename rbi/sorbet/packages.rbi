@@ -4,13 +4,7 @@ class Sorbet::Private::Static::PackageSpec
   def self.import(arg0, uses_internals: false); end
 
   sig { params(arg0: T.untyped).void }
-  def self.export(arg0); end
-
-  sig { params(arg0: T.untyped).void }
   def self.visible_to(arg0); end
-
-  sig { void }
-  def self.export_all!; end
 
   sig { params(arg0: String).void }
   def self.strict_dependencies(arg0); end

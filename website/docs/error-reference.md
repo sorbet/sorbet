@@ -629,7 +629,7 @@ This error has been replaced by [4032](#4032).
 
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
 
-All `import` and `export` lines in a `__package.rb` file must have constant literals as their argument. Doing arbitrary computation of imports and exports is not allowed in `__package.rb` files.
+All `import` lines in a `__package.rb` file must have constant literals as their argument. Doing arbitrary computation of imports is not allowed in `__package.rb` files.
 
 Also note that all `import` declarations must be unique, with no duplicated imports.
 
@@ -656,6 +656,8 @@ Even though `__package.rb` files use Ruby syntax, they do not allow arbitrary Ru
 - Sorbet can support things like jump-to-definition inside `__package.rb` files
 
 But despite that, `__package.rb` files must be completely statically analyzable, which means most forms of Ruby expressions are not allowed in these files.
+
+`export` and `export_all!` are no longer part of the package DSL, so an `export` line reports this error for its argument, and both report that the method does not exist ([7003](#7003)). Constants are public unless marked `package_private!`, so delete these lines.
 
 ## 3711
 
@@ -701,6 +703,8 @@ Trying to apply this directive to a constant defined in the `Test::` namespace w
 
 If you're trying to export a constant from the test namespace to be used in other packages, then just use `export`. Otherwise, these lines can be safely deleted.
 
+Sorbet no longer reports this error: `export_for_test` is no longer part of the package DSL.
+
 ## 3716
 
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
@@ -709,7 +713,7 @@ This error means that you're exporting a constant redundantly. In Stripe Package
 
 To fix this error, simply remove the more specific export.
 
-Sorbet no longer reports this error: `export` lines are ignored, because constants are public unless marked `package_private!`.
+Sorbet no longer reports this error: `export` is no longer part of the package DSL, because constants are public unless marked `package_private!`.
 
 ## 3717
 
@@ -780,7 +784,7 @@ class MyPackage < PackageSpec
 end
 ```
 
-Sorbet no longer reports this error: `export` lines are ignored, because constants are public unless marked `package_private!`.
+Sorbet no longer reports this error: `export` is no longer part of the package DSL, because constants are public unless marked `package_private!`.
 
 ## 3722
 
@@ -804,6 +808,8 @@ class A::B < PackageSpec
   # ^ allows referencing `A::B::Types::GoodTypeAlias` in downstream packages
 end
 ```
+
+Sorbet no longer reports this error: `export` is no longer part of the package DSL, because constants are public unless marked `package_private!`.
 
 ## 3723
 

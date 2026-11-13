@@ -1,13 +1,11 @@
 # -- test/testdata/packager/shared_prefix/bar/that/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::<PackageSpecRegistry>::Project::Bar::That<<C That>> < (::Sorbet::Private::Static::PackageSpec)
-    <emptyTree>
   end
 end
 # -- test/testdata/packager/shared_prefix/bar/this/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::<PackageSpecRegistry>::Project::Bar::This<<C This>> < (::Sorbet::Private::Static::PackageSpec)
-    <emptyTree>
   end
 end
 # -- test/testdata/packager/shared_prefix/foo/__package.rb --

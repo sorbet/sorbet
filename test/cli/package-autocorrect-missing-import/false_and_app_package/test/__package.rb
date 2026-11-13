@@ -7,5 +7,4 @@ class Test::Foo::Bar::FalseAndAppPackage < PackageSpec
   strict_dependencies 'false'
 
   import Foo::Bar::FalseAndAppPackage
-  export Test::Foo::Bar::FalseAndAppPackage::TestUtil
 end

@@ -7,5 +7,4 @@ class Test::Foo::Bar::OtherPackage < PackageSpec
   strict_dependencies 'false'
 
   import Foo::Bar::OtherPackage
-  export Test::Foo::Bar::OtherPackage::TestUtil
 end

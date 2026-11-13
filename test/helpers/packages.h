@@ -23,7 +23,6 @@ class PackageTextBuilder {
     std::string strictDeps;
     std::string layer;
     std::vector<std::string> imports;
-    std::vector<std::string> exports;
     bool preludePackage;
 
 public:
@@ -44,11 +43,6 @@ public:
 
     PackageTextBuilder &withImports(std::vector<std::string> imports) {
         this->imports = std::move(imports);
-        return *this;
-    }
-
-    PackageTextBuilder &withExports(std::vector<std::string> imports) {
-        this->exports = std::move(imports);
         return *this;
     }
 

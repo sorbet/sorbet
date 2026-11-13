@@ -7,11 +7,6 @@ end
 # -- test/testdata/packager/nested_inner_namespaces/foo/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::<PackageSpecRegistry>::RootPackage::Foo<<C Foo>> < (::Sorbet::Private::Static::PackageSpec)
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
   end
 end
 # -- test/testdata/packager/nested_inner_namespaces/bar.rb --

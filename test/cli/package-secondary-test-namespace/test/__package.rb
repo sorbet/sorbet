@@ -5,6 +5,4 @@
 
 class Critic < PackageSpec
   test!
-
-  export Critic::Core
 end

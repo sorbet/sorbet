@@ -4,6 +4,4 @@
 
 class Prelude::First < PackageSpec
   prelude!
-
-  export Prelude::First::A
 end

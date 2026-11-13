@@ -4,5 +4,4 @@
 # enable-package-directed: true
 
 class Root::A < PackageSpec
-  export_all!
 end

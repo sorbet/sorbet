@@ -7,6 +7,4 @@ class Application < PackageSpec
 
   import Prelude::First  # error: must be `dag` or higher
   import Prelude::Second # error: must be `dag` or higher
-
-  export Application::B
 end

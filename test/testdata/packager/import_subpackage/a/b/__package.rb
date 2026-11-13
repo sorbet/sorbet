@@ -4,5 +4,4 @@
 # enable-packager: true
 
 class Root::B < PackageSpec
-  export Root::B::Foo
 end

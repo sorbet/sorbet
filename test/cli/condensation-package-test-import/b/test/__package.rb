@@ -5,6 +5,4 @@ class Test::B < PackageSpec
 
   import B
   import C
-
-  export Test::B::Helper
 end

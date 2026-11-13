@@ -6,6 +6,4 @@ class Test::Krabappel < PackageSpec
 
   import Krabappel
   #      ^^^^^^^^^ usage: krabappel-pkg
-
-  export Test::Krabappel::Popquiz
 end

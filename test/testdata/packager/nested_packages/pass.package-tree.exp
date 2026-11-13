@@ -2,16 +2,12 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::<PackageSpecRegistry>::Package<<C Package>> < (::Sorbet::Private::Static::PackageSpec)
     <self>.import(::<PackageSpecRegistry>::<C Package>::<C Subpackage>)
-
-    <emptyTree>
   end
 end
 # -- test/testdata/packager/nested_packages/subpackage/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::<PackageSpecRegistry>::Package::Subpackage<<C Subpackage>> < (::Sorbet::Private::Static::PackageSpec)
     <self>.import(::<PackageSpecRegistry>::<C Package>)
-
-    <emptyTree>
   end
 end
 # -- test/testdata/packager/nested_packages/mainpackage.rb --

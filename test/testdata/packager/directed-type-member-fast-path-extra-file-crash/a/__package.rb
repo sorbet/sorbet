@@ -5,5 +5,4 @@
 # stratum: 0
 
 class A < PackageSpec
-  export A::Gen
 end

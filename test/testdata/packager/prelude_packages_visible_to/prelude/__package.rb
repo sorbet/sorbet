@@ -6,6 +6,4 @@ class Prelude < PackageSpec
   prelude!
 
   visible_to Application::A
-
-  export Prelude::A
 end

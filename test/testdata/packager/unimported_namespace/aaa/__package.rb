@@ -3,5 +3,4 @@
 # enable-packager: true
 
 class AAA < PackageSpec
-  export AAA::AClass
 end

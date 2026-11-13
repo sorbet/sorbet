@@ -2,5 +2,5 @@
 # enable-packager: true
 
 class A < PackageSpec
-  export_all!
+  prelude!
 end

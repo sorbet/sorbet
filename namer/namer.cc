@@ -1822,7 +1822,7 @@ private:
         } else if (!prevPkg.exists()) {
             // TODO(jez) The above condition is a poor-man's way of making this safe for the fast path
             // Previously, we would not run the "definePackage" logic at all for `__package.rb` files.
-            // By making a new package, we blow away all the imports/exports/etc. that were defined
+            // By making a new package, we blow away all the imports/visible_tos/etc. that were defined
             // on the old package, which we don't want to do.
             //
             // Eventually we want to make edits to `__package.rb` files take the fast path, which

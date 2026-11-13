@@ -3,6 +3,4 @@
 
 class Opus::Log < PackageSpec
   import Chalk::Log
-
-  export Opus::Log
 end

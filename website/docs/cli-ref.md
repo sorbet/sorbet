@@ -333,7 +333,7 @@ Usage:
                                 <dir>/Project/FooBar/ belong to Project::FooBar
       --allow-relaxed-packager-checks-for <name>
                                 Packages which are allowed to ignore the restrictions set
-                                by `visible_to` and `export` directives
+                                by `visible_to` directives and `package_private!` markers
       --gen-packages-update-visibility-for <name>
                                 Packages for which to generate `visible_to` autocorrects
                                 in --gen-packages mode

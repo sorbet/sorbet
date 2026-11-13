@@ -6,7 +6,5 @@ class A < PackageSpec
 
   foo 'a'
 
-  export A::CONSTANT_FROM_A
-
   import Prelude
 end
