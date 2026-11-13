@@ -654,7 +654,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  cxxopts::value<vector<string>>(), "<dir>");
     options.add_options(section)("allow-relaxed-packager-checks-for",
                                  "Packages which are allowed to ignore the restrictions set by `visible_to` "
-                                 "and `export` directives",
+                                 "directives and `package_private!` markers",
                                  cxxopts::value<vector<string>>(), "<name>");
     options.add_options(section)("gen-packages-update-visibility-for",
                                  "Packages for which to generate `visible_to` autocorrects in --gen-packages mode",

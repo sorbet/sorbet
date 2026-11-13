@@ -856,8 +856,8 @@ void validatePackageNamespace(core::Context ctx, const PackageInfo &pkgInfo) {
         e.setHeader("Package `{}` cannot be defined because `{}` is defined in Sorbet's payload", pkgInfo.show(ctx),
                     existing.show(ctx));
         e.addErrorLine(*payloadLoc, "Defined here");
-        e.addErrorNote("Constants from Sorbet's payload do not belong to any package, so this package's imports, "
-                       "exports, and `{}` declarations would have no effect on them",
+        e.addErrorNote("Constants from Sorbet's payload do not belong to any package, so this package's imports "
+                       "and `{}` declarations would have no effect on them",
                        "visible_to");
     }
 }
