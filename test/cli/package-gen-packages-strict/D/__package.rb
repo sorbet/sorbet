@@ -5,6 +5,4 @@ class D < PackageSpec
   strict_dependencies 'false'
 
   import E
-
-  export_all!
 end

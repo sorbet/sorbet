@@ -5,6 +5,4 @@
 class Bart < PackageSpec
     # ^^^^ def: bartpkg
     # ^ show-symbol: Bart
-    export Bart::Character
-    export Bart::CatchPhrase
 end

@@ -5,6 +5,4 @@ class B < PackageSpec
   strict_dependencies 'dag'
 
   import A
-
-  export_all!
 end

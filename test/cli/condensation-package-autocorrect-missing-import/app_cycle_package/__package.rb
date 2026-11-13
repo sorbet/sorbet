@@ -8,7 +8,4 @@ class Foo::Bar::AppCyclePackage < PackageSpec
 
   import Foo::Bar::AppCyclePackage::SubPackage
   import Foo::MyPackage
-
-  export Foo::Bar::AppCyclePackage::OtherClass
-  export Foo::Bar::AppCyclePackage::ImportMeTestOnly
 end

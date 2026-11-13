@@ -19,7 +19,7 @@ Errors: 1
    "pkg": "Project::Bar",
    "pkg_scc_id": 0,
    "pkg_stratum": 0,
-   "source_size": 197
+   "source_size": 130
   },
   {
    "path": "./bar/bar.rb",
@@ -49,7 +49,7 @@ Errors: 1
    "pkg": "Project::Foo",
    "pkg_scc_id": 0,
    "pkg_stratum": 0,
-   "source_size": 173
+   "source_size": 106
   },
   {
    "path": "./foo/foo.rb",

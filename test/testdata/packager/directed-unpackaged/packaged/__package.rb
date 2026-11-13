@@ -3,5 +3,4 @@
 
 class MyPackage < PackageSpec
   import OtherPackageImported
-  export MyPackage::MyClass
 end

@@ -7,6 +7,4 @@ class Application < PackageSpec
 
   import Prelude::First # error: Layering violation
   import Prelude::Second
-
-  export Application::B
 end

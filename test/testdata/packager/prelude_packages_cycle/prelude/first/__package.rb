@@ -10,6 +10,4 @@ class Prelude::First < PackageSpec
   strict_dependencies 'layered'
 
   import Prelude::Second
-
-  export Prelude::First::A
 end

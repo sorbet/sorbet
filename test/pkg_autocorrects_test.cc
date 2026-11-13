@@ -171,34 +171,7 @@ TEST_CASE("Simple add import") {
     CHECK_EQ_DIFF(expected, replaced, "msg");
 }
 
-TEST_CASE("Add import with only existing exports") {
-    core::GlobalState gs(errorQueue);
-    makeDefaultPackagerGlobalState(gs);
-
-    string pkg_source = "class MyPackage < PackageSpec\n"
-                        "  export SomethingElse\n"
-                        "end\n";
-
-    // Exports aren't recorded, so the import goes at the end, as if there were no other lines.
-    string expected = "class MyPackage < PackageSpec\n"
-                      "  export SomethingElse\n"
-                      "  import ExamplePackage\n"
-                      "end\n";
-
-    auto parsedFiles =
-        enterPackages(gs, {{examplePackagePath, examplePackage}, {"my_package/__package.rb", pkg_source}});
-    auto &examplePkg = packageInfoFor(gs, parsedFiles[0].file);
-    auto &myPkg = packageInfoFor(gs, parsedFiles[1].file);
-    ENFORCE(examplePkg.exists());
-    ENFORCE(myPkg.exists());
-
-    auto addImport = myPkg.addImport(gs, examplePkg);
-    ENFORCE(addImport, "Expected to get an autocorrect from `addImport`");
-    auto replaced = applySuggestion(gs, *addImport);
-    CHECK_EQ_DIFF(expected, replaced, "-expected,+replaced");
-}
-
-TEST_CASE("Add import to package with neither imports nor exports") {
+TEST_CASE("Add import to package with no imports") {
     core::GlobalState gs(errorQueue);
     makeDefaultPackagerGlobalState(gs);
 
@@ -813,18 +786,16 @@ TEST_CASE("Add visible_to tests to package with existing visible_to entries") {
     CHECK_EQ_DIFF(expected, replaced, "-expected,+replaced");
 }
 
-TEST_CASE("Add visible_to tests to package with imports and exports but no visible_to") {
+TEST_CASE("Add visible_to tests to package with imports but no visible_to") {
     core::GlobalState gs(errorQueue);
     makeDefaultPackagerGlobalState(gs);
 
     string pkg_source = "class MyPackage < PackageSpec\n"
                         "  import ExamplePackage\n"
-                        "  export MyPackage::Foo\n"
                         "end\n";
 
     string expected = "class MyPackage < PackageSpec\n"
                       "  import ExamplePackage\n"
-                      "  export MyPackage::Foo\n"
                       "  visible_to 'tests'\n"
                       "end\n";
 

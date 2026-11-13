@@ -3,5 +3,4 @@
 # enable-packager: true
 
 class Library < PackageSpec
-  export Library::Constant
 end

@@ -5,6 +5,4 @@ class Test::Foo::Bar::OtherPackage < PackageSpec
   test!
 
   import Foo::Bar::OtherPackage
-
-  export Test::Foo::Bar::OtherPackage::TestUtil
 end

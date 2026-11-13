@@ -6,6 +6,4 @@ class Prelude < PackageSpec
   prelude!
 
   import Application # error: `Prelude` may not `import` non-prelude package `Application`
-
-  export Prelude::A
 end

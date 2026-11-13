@@ -19,13 +19,6 @@ class A < PackageSpec
   import B
   import B
 
-  export 123
-  export "hello"
-  export method
-  export A::REFERENCE # Works; it's a constant.
-  export A::AClass
-  export A::AModule
-
   test_import B
 # ^^^^^^^^^^^ error: Method `test_import` does not exist
   #           ^ error: Invalid expression in package

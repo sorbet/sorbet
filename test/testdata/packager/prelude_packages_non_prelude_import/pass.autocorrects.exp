@@ -3,7 +3,6 @@
 # typed: strict
 
 class Application < PackageSpec
-  export Application::B
 end
 # ------------------------------
 # -- test/testdata/packager/prelude_packages_non_prelude_import/application/b.rb --
@@ -28,8 +27,6 @@ end
 class Prelude < PackageSpec
   prelude!
 
-
-  export Prelude::A
 end
 # ------------------------------
 # -- test/testdata/packager/prelude_packages_non_prelude_import/prelude/a.rb --

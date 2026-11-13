@@ -7,7 +7,6 @@ end
 # -- test/testdata/packager/import_subpackage/a/b/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::<PackageSpecRegistry>::Root::B<<C B>> < (::Sorbet::Private::Static::PackageSpec)
-    <emptyTree>
   end
 end
 # -- test/testdata/packager/import_subpackage/a/b/foo.rb --

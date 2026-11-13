@@ -3,9 +3,4 @@
 # Producer package description
 class Producer < PackageSpec
   #   ^^^^^^^^ def: producer-pkg
-  export Producer::Public
-  export Producer::Original::Nested
-  export Producer::Value
-  export Producer::Type
-  export Producer::Missing
 end

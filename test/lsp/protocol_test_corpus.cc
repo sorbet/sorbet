@@ -1303,7 +1303,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "ShowOperationPackaged") {
     }
 
     vector<pair<string, string>> files = {
-        {"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A"}).build()},
+        {"__package.rb", PackageTextBuilder().withName("Root").build()},
         {"a.rb", "# typed: true\n"
                  "module Root\n"
                  "  class A\n"
@@ -1311,8 +1311,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "ShowOperationPackaged") {
                  "    end\n"
                  "  end\n"
                  "end\n"},
-        {"foo/__package.rb",
-         PackageTextBuilder().withName("Root::Foo").withExports({"Root::Foo::A"}).withImports({"Root"}).build()},
+        {"foo/__package.rb", PackageTextBuilder().withName("Root::Foo").withImports({"Root"}).build()},
         {"foo/a.rb", "# typed: true\n"
                      "module Root::Foo\n"
                      "  class A\n"
@@ -1385,7 +1384,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "SlowPathRestarts") {
     resetState(initOpts);
 
     vector<pair<string, string>> files = {
-        {"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A"}).build()},
+        {"__package.rb", PackageTextBuilder().withName("Root").build()},
         {"a.rb", "# typed: true\n"
                  "module Root\n"
                  "  class A\n"
@@ -1393,8 +1392,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "SlowPathRestarts") {
                  "    end\n"
                  "  end\n"
                  "end\n"},
-        {"foo/__package.rb",
-         PackageTextBuilder().withName("Root::Foo").withExports({"Root::Foo::A"}).withImports({"Root"}).build()},
+        {"foo/__package.rb", PackageTextBuilder().withName("Root::Foo").withImports({"Root"}).build()},
         {"foo/a.rb", "# typed: true\n"
                      "module Root::Foo\n"
                      "  class A\n"
@@ -1540,9 +1538,10 @@ TEST_CASE_FIXTURE(ProtocolTest, "SlowPathRestarts") {
     SUBCASE("ModifyPackage") {
         assertErrorDiagnostics(send(*openFile(files[2].first, files[2].second)), {});
 
-        // Remove the exports from Root::Foo's __package.rb, forcing a complete slow path
-        auto resps = send(
-            *changeFile(files[2].first, PackageTextBuilder().withName("Root::Foo").withImports({"Root"}).build(), 2));
+        // Add `visible_to 'tests'` to Root::Foo's __package.rb, forcing a complete slow path
+        auto resps = send(*changeFile(
+            files[2].first,
+            "# typed: strict\n\nclass Root::Foo < PackageSpec\n  import Root\n  visible_to 'tests'\nend\n", 2));
 
         // We should see a starting and ending slow path message, with the end message indicating that the slow path
         // started from stratum 1
@@ -1708,7 +1707,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "FastPathAfterSlowPathRestarts") {
     resetState(initOpts);
 
     vector<pair<string, string>> files = {
-        {"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A"}).build()},
+        {"__package.rb", PackageTextBuilder().withName("Root").build()},
         {"a.rb", "# typed: true\n"
                  "module Root\n"
                  "  class A\n"
@@ -1716,8 +1715,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "FastPathAfterSlowPathRestarts") {
                  "    end\n"
                  "  end\n"
                  "end\n"},
-        {"foo/__package.rb",
-         PackageTextBuilder().withName("Root::Foo").withExports({"Root::Foo::A"}).withImports({"Root"}).build()},
+        {"foo/__package.rb", PackageTextBuilder().withName("Root::Foo").withImports({"Root"}).build()},
         {"foo/a.rb", "# typed: true\n"
                      "module Root::Foo\n"
                      "  class A\n"
@@ -1833,7 +1831,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "ErrorsRemainAfterSlowPathRestart") {
     resetState(initOpts);
 
     vector<pair<string, string>> files = {
-        {"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A"}).build()},
+        {"__package.rb", PackageTextBuilder().withName("Root").build()},
         {"a.rb", "# typed: true\n"
                  "module Root\n"
                  "  class A\n"
@@ -1841,8 +1839,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "ErrorsRemainAfterSlowPathRestart") {
                  "    end\n"
                  "  end\n"
                  "end\n"},
-        {"foo/__package.rb",
-         PackageTextBuilder().withName("Root::Foo").withExports({"Root::Foo::A"}).withImports({"Root"}).build()},
+        {"foo/__package.rb", PackageTextBuilder().withName("Root::Foo").withImports({"Root"}).build()},
         {"foo/a.rb", "# typed: true\n"
                      "module Root::Foo\n"
                      "  class A\n"
@@ -1943,7 +1940,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "ViewingFilesAffectsFastPathEditStratum") {
     resetState(initOpts);
 
     vector<pair<string, string>> files = {
-        {"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A"}).build()},
+        {"__package.rb", PackageTextBuilder().withName("Root").build()},
         {"a.rb", "# typed: true\n"
                  "module Root\n"
                  "  class A\n"
@@ -1951,8 +1948,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "ViewingFilesAffectsFastPathEditStratum") {
                  "    end\n"
                  "  end\n"
                  "end\n"},
-        {"foo/__package.rb",
-         PackageTextBuilder().withName("Root::Foo").withExports({"Root::Foo::A"}).withImports({"Root"}).build()},
+        {"foo/__package.rb", PackageTextBuilder().withName("Root::Foo").withImports({"Root"}).build()},
         {"foo/a.rb", "# typed: true\n"
                      "module Root::Foo\n"
                      "  class A\n"
@@ -2077,7 +2073,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "EarlyErrorsForceInfer") {
     resetState(initOpts);
 
     vector<pair<string, string>> files = {
-        {"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A"}).build()},
+        {"__package.rb", PackageTextBuilder().withName("Root").build()},
         {"a.rb", "# typed: true\n"
                  "module Root\n"
                  "  class A\n"
@@ -2085,8 +2081,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "EarlyErrorsForceInfer") {
                  "    end\n"
                  "  end\n"
                  "end\n"},
-        {"foo/__package.rb",
-         PackageTextBuilder().withName("Root::Foo").withExports({"Root::Foo::A"}).withImports({"Root"}).build()},
+        {"foo/__package.rb", PackageTextBuilder().withName("Root::Foo").withImports({"Root"}).build()},
         {"foo/a.rb", "# typed: true\n"
                      "module Root::Foo\n"
                      "  class A\n"
@@ -2201,7 +2196,6 @@ TEST_CASE_FIXTURE(ProtocolTest, "PackageDirectedPackageDiagnostics") {
     vector<pair<string, string>> files = {
         {"__package.rb", "# typed: strict\n"
                          "class Root < PackageSpec\n"
-                         "  export Root::Value\n"
                          "  unknown_dsl 'value'\n"
                          "end\n"},
         {"a.rb", "# typed: strict\nmodule Root\n  Value = 1\nend\n"},
@@ -2223,17 +2217,14 @@ TEST_CASE_FIXTURE(ProtocolTest, "PackageDirectedPackageDiagnostics") {
         }
     }
     CHECK_EQ(packagePublications, 1);
-    vector<ExpectedDiagnostic> expected = {{"__package.rb", 3, "Method `unknown_dsl` does not exist"}};
+    vector<ExpectedDiagnostic> expected = {{"__package.rb", 2, "Method `unknown_dsl` does not exist"}};
     assertErrorDiagnostics(move(diagnostics), expected);
     assertErrorDiagnostics(send(*openFile("a.rb", files[1].second)), expected);
     assertErrorDiagnostics(send(*changeFile("a.rb", "# typed: strict\nmodule Root\n  Value = 'changed'\nend\n", 2)),
                            expected);
     // A package edit removes the diagnostic and must publish an empty replacement.
     assertErrorDiagnostics(send(*openFile("__package.rb", files[0].second)), expected);
-    assertErrorDiagnostics(send(*changeFile("__package.rb",
-                                            "# typed: strict\nclass Root < PackageSpec\n"
-                                            "  export Root::Value\nend\n",
-                                            2)),
+    assertErrorDiagnostics(send(*changeFile("__package.rb", "# typed: strict\nclass Root < PackageSpec\nend\n", 2)),
                            {});
 }
 

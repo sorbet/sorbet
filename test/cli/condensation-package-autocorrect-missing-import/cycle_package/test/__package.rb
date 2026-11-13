@@ -7,5 +7,4 @@ class Test::Foo::Bar::CyclePackage < PackageSpec
   strict_dependencies 'false'
 
   import Foo::Bar::CyclePackage
-  export Test::Foo::Bar::CyclePackage::TestUtil
 end

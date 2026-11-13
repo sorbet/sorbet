@@ -789,7 +789,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "CachePopulationWithPackages") {
     REQUIRE_NE(this->lspWrapper, nullptr);
 
     vector<pair<string, string>> files = {
-        {"__package.rb", PackageTextBuilder().withName("Root").withExports({"Root::A"}).build()},
+        {"__package.rb", PackageTextBuilder().withName("Root").build()},
         {"a.rb", "# typed: true\n"
                  "module Root\n"
                  "  class A\n"
@@ -797,8 +797,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "CachePopulationWithPackages") {
                  "    end\n"
                  "  end\n"
                  "end\n"},
-        {"foo/__package.rb",
-         PackageTextBuilder().withName("Root::Foo").withExports({"Root::Foo::A"}).withImports({"Root"}).build()},
+        {"foo/__package.rb", PackageTextBuilder().withName("Root::Foo").withImports({"Root"}).build()},
         {"foo/a.rb", "# typed: true\n"
                      "module Root::Foo\n"
                      "  class A\n"

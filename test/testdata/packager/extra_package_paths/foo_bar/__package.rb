@@ -3,6 +3,5 @@
 # typed: strict
 
 class Project::FooBar < PackageSpec
-  export Project::FooBar::Z
 end
 

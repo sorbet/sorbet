@@ -3,8 +3,4 @@
 # enable-package-directed: true
 
 class Exporter < PackageSpec
-  export Exporter::Public
-  export Exporter::Alias
-  export Exporter::StaticField
-  export Exporter::TypeAlias
 end

@@ -5,6 +5,4 @@ class Test::Project::Util < PackageSpec
   test!
 
   import Project::Util
-
-  export Test::Project::Util::UtilHelper
 end

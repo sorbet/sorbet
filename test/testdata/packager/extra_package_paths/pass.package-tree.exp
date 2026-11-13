@@ -11,23 +11,16 @@ end
 # -- test/testdata/packager/extra_package_paths/baz/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::<PackageSpecRegistry>::Project::Baz::Package<<C Package>> < (::Sorbet::Private::Static::PackageSpec)
-    <emptyTree>
-
-    <emptyTree>
   end
 end
 # -- test/testdata/packager/extra_package_paths/foo/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::<PackageSpecRegistry>::Project::Foo<<C Foo>> < (::Sorbet::Private::Static::PackageSpec)
-    <emptyTree>
-
-    <emptyTree>
   end
 end
 # -- test/testdata/packager/extra_package_paths/foo_bar/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::<PackageSpecRegistry>::Project::FooBar<<C FooBar>> < (::Sorbet::Private::Static::PackageSpec)
-    <emptyTree>
   end
 end
 # -- test/testdata/packager/extra_package_paths/bar/bar.rb --

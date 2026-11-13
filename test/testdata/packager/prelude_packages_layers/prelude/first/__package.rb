@@ -8,6 +8,4 @@ class Prelude::First < PackageSpec
 
   layer "product"
   strict_dependencies "dag"
-
-  export Prelude::First::A
 end

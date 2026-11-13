@@ -3,6 +3,4 @@
 
 class Root < PackageSpec
   sorbet min_typed_level: 'true', tests_min_typed_level: 'true'
-
-  export Root::A
 end

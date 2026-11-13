@@ -2,5 +2,4 @@
 # typed: strict
 
 class OtherPackageImported < PackageSpec
-  export OtherPackageImported::ExportedClass
 end

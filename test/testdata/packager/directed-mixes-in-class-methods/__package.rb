@@ -3,6 +3,4 @@
 # enable-package-directed: true
 
 class Root < PackageSpec
-  export Root::CM
-  export Root::Mixin
 end

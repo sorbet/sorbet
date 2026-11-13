@@ -4,6 +4,4 @@
 
 class Prelude::Second < PackageSpec
   prelude!
-
-  export Prelude::Second::B
 end

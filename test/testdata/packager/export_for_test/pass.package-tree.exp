@@ -9,14 +9,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.import(::<PackageSpecRegistry>::<C Opus>::<C Foo>::<C Bar>)
 
     <self>.import(::<PackageSpecRegistry>::<C Opus>::<C Util>)
-
-    <emptyTree>
   end
 end
 # -- test/testdata/packager/export_for_test/foo/bar/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::<PackageSpecRegistry>::Opus::Foo::Bar<<C Bar>> < (::Sorbet::Private::Static::PackageSpec)
-    <emptyTree>
   end
 end
 # -- test/testdata/packager/export_for_test/foo/bar/test/__package.rb --
@@ -25,8 +22,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.test!()
 
     <self>.import(::<PackageSpecRegistry>::<C Opus>::<C Foo>::<C Bar>)
-
-    <emptyTree>
   end
 end
 # -- test/testdata/packager/export_for_test/foo/test/__package.rb --
@@ -52,7 +47,6 @@ end
 # -- test/testdata/packager/export_for_test/test_imported/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::<PackageSpecRegistry>::Opus::TestImported<<C TestImported>> < (::Sorbet::Private::Static::PackageSpec)
-    <emptyTree>
   end
 end
 # -- test/testdata/packager/export_for_test/test_imported/test/__package.rb --
@@ -61,16 +55,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.test!()
 
     <self>.import(::<PackageSpecRegistry>::<C Opus>::<C TestImported>)
-
-    <emptyTree>
   end
 end
 # -- test/testdata/packager/export_for_test/util/__package.rb --
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class ::<PackageSpecRegistry>::Opus::Util<<C Util>> < (::Sorbet::Private::Static::PackageSpec)
-    <emptyTree>
-
-    <emptyTree>
   end
 end
 # -- test/testdata/packager/export_for_test/util/test/__package.rb --
@@ -79,8 +68,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.test!()
 
     <self>.import(::<PackageSpecRegistry>::<C Opus>::<C Util>, :uses_internals, true)
-
-    <emptyTree>
   end
 end
 # -- test/testdata/packager/export_for_test/foo/bar/bar.rb --

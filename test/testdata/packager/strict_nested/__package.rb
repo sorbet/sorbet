@@ -3,6 +3,4 @@
 
 class Root < PackageSpec
   import Root::Nested
-
-  export Root::MyClass
 end

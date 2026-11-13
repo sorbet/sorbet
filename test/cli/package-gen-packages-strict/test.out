@@ -72,12 +72,7 @@ C/__package.rb:8: Package `B` includes explicit visibility modifiers and cannot 
           ^^^^^^^^
   Note:
     Please consult with the owning team before adding a `visible_to` line to the package `B`
-
-C/__package.rb:3: `C` has changes https://srb.help/3734
-     3 |class C < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Done
-Errors: 13
+Errors: 12
 
 ###### cat A/__package.rb ######
 # typed: strict
