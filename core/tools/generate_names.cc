@@ -486,12 +486,10 @@ NameDef names[] = {
 
     // Packager
     {"import"},
-    {"export_", "export"},
     {"legacy"},
     {"strict"},
     {"visibleTo", "visible_to"},
     {"tests"},
-    {"exportAll", "export_all!"},
     {"layer"},
     {"strictDependencies", "strict_dependencies"},
     {"false_", "false"},
