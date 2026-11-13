@@ -613,10 +613,6 @@ bool PackageInfo::isVisibleTo(const core::GlobalState &gs, const PackageInfo &im
     });
 }
 
-void PackageInfo::trackPackageReferences(FileRef file, vector<pair<MangledName, PackageReferenceInfo>> &references) {
-    packagesReferencedByFile[file].swap(references);
-}
-
 void PackageInfo::trackPackageReference(FileRef file, MangledName package, PackageReferenceInfo referenceInfo) {
     auto &references = packagesReferencedByFile[file];
     auto existing = absl::c_find_if(references, [package](const auto &entry) { return entry.first == package; });
