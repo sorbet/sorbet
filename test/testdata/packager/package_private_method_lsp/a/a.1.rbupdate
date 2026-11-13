@@ -1,5 +1,5 @@
 # typed: strict
-# assert-fast-path: a/__package.rb,a/a.rb,b/__package.rb,b/b.rb
+# assert-fast-path: a/a.rb,b/b.rb
 module Root::A
   class Foo
     extend T::Sig

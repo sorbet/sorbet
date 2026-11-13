@@ -1,5 +1,5 @@
 # typed: strict
-# assert-fast-path: lib/__package.rb,lib/_impl.rb,__package.rb,main.rb
+# assert-fast-path: lib/_impl.rb,main.rb
 
 module Lib
   MyStaticField = 1
