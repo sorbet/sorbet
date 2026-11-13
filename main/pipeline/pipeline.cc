@@ -1160,15 +1160,6 @@ ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, vector<ast::ParsedFil
                 what = move(maybeResult.result());
             }
 
-#ifndef SORBET_REALMAIN_MIN
-            // Outside of `--gen-packages`, resolver records every package reference itself.
-            if (opts.cacheSensitiveOptions.sorbetPackages &&
-                opts.genPackagesMode != core::packages::GenPackagesMode::Disabled) {
-                Timer timeit(gs.tracer(), "visibility_checker");
-                packager::VisibilityChecker::checkReferences(gs, workers, what);
-            }
-#endif
-
             if (opts.stressIncrementalResolver) {
                 auto symbolsBefore = gs.symbolsUsedTotal();
                 for (auto &f : what) {

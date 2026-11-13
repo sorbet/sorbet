@@ -414,8 +414,6 @@ private:
 
     static bool shouldCheckPackage(core::Context ctx) {
         return ctx.state.packageDB().enabled() && !ctx.file.data(ctx).isPackage(ctx) &&
-               // TODO(jez) Get this working with GenPackages
-               ctx.state.packageDB().genPackagesMode() == core::packages::GenPackagesMode::Disabled &&
                ctx.state.packageDB().getPackageNameForFile(ctx.file).exists();
     }
 
@@ -543,7 +541,8 @@ private:
     // Whether the current file may reference `result`, which belongs to `otherPackage`, if `result` is covered by a
     // `package_private!` marker. Reports an error the first time it says no.
     static bool canReferencePackagePrivate(core::Context ctx, ConstantResolutionItem &job, core::SymbolRef result,
-                                           bool foundInAncestor, core::packages::MangledName otherPackage) {
+                                           bool foundInAncestor, core::packages::MangledName otherPackage,
+                                           vector<PackageReference> &packageReferences) {
         auto &packageDB = ctx.state.packageDB();
         if (!otherPackage.exists()) {
             return true;
@@ -591,6 +590,11 @@ private:
                 e.addErrorNote("Only `{}` and packages that import it with `{}` may reference it", pkg.show(ctx),
                                "uses_internals: true");
             }
+            // The reference still depends on `otherPackage`. Without recording it, `--gen-packages` would remove the
+            // import that this reference needs, then add it back on the next run.
+            addPackageReference(
+                packageReferences,
+                PackageReference{otherPackage, {.importNeeded = false, .causesModularityError = false}});
         }
         job.resolutionFailed = true;
         return false;
@@ -598,7 +602,8 @@ private:
 
     // Ensures that we only allow resolving `job` to `result` if the package imports allow it
     static core::SymbolRef enforcePackageBoundary(core::Context ctx, ConstantResolutionItem &job,
-                                                  core::SymbolRef result, bool foundInAncestor) {
+                                                  core::SymbolRef result, bool foundInAncestor,
+                                                  vector<PackageReference> &packageReferences) {
         if (!shouldCheckPackage(ctx) || !result.exists()) {
             return result;
         }
@@ -615,7 +620,7 @@ private:
             otherPackage = enclosing.data(ctx)->package;
         }
         if (canReferencePackage(ctx, otherPackage)) {
-            if (!canReferencePackagePrivate(ctx, job, result, foundInAncestor, otherPackage)) {
+            if (!canReferencePackagePrivate(ctx, job, result, foundInAncestor, otherPackage, packageReferences)) {
                 return core::Symbols::noSymbol();
             }
             return result;
@@ -699,7 +704,8 @@ private:
         references.clear();
     }
 
-    static core::SymbolRef resolveConstant(core::Context ctx, ConstantResolutionItem &job) {
+    static core::SymbolRef resolveConstant(core::Context ctx, ConstantResolutionItem &job,
+                                           vector<PackageReference> &packageReferences) {
         auto &c = *job.out->original();
         if (ast::isa_tree<ast::EmptyTree>(c.scope)) {
             auto [result, foundInAncestor] = resolveLhs(ctx, job.scope.get(), c.cnst);
@@ -707,7 +713,7 @@ private:
                 return result;
             }
 
-            return enforcePackageBoundary(ctx, job, result, foundInAncestor);
+            return enforcePackageBoundary(ctx, job, result, foundInAncestor, packageReferences);
         }
         if (auto id = ast::cast_tree<ast::ConstantLit>(c.scope)) {
             auto sym = id->symbol();
@@ -744,7 +750,7 @@ private:
                 }
             }
 
-            return enforcePackageBoundary(ctx, job, result, /* foundInAncestor */ false);
+            return enforcePackageBoundary(ctx, job, result, /* foundInAncestor */ false, packageReferences);
         }
 
         if (!job.resolutionFailed && !job.isMixinAncestor) {
@@ -856,7 +862,14 @@ private:
                                          int &suggestionCount) {
         core::Context ctx(gs, core::Symbols::root(), file);
 
-        auto resolved = resolveConstant(ctx, job);
+        vector<PackageReference> packageReferences;
+        auto resolved = resolveConstant(ctx, job, packageReferences);
+        for (auto &[otherPackage, referenceInfo] : packageReferences) {
+            auto currentPackage = gs.packageDB().getPackageNameForFile(file);
+            gs.packageDB()
+                .getPackageInfoNonConst(currentPackage)
+                ->trackPackageReference(file, otherPackage, referenceInfo);
+        }
         if (resolved.exists() && resolved.isTypeAlias(ctx)) {
             auto resolvedField = resolved.asFieldRef();
             if (resolvedField.data(ctx)->resultType == nullptr) {
@@ -985,7 +998,6 @@ private:
                 auto currentPackage = gs.packageDB().getPackageNameForFile(file);
                 auto currentPackageInfo = gs.packageDB().getPackageInfoNonConst(currentPackage);
                 auto errorLoc = packageBoundaryLoc(ctx, original, cursorPackage);
-                // TODO(jez) This call is still duplicated in VisibilityChecker--remove it after GenPackages cleanups
                 auto referenceInfo = currentPackageInfo->checkReferenceAgainstImports(ctx, errorLoc, cursorPackage);
                 ENFORCE(referenceInfo.has_value());
                 currentPackageInfo->trackPackageReference(file, cursorPackage, referenceInfo.value());
@@ -1057,7 +1069,7 @@ private:
         if (isAlreadyResolved(ctx, *job.out)) {
             return true;
         }
-        auto resolved = resolveConstant(ctx, job);
+        auto resolved = resolveConstant(ctx, job, packageReferences);
         if (!resolved.exists()) {
             return false;
         }

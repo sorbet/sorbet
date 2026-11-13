@@ -13,7 +13,15 @@ class PrivateConsumer < PackageSpec
 end
 
 ###### Running gen-packages (second run) ######
-No errors! Great job.
+private_consumer/use.rb:4: `PrivatePackage::Hidden` is `package_private!` in package `PrivatePackage` https://srb.help/3737
+     4 |PrivatePackage::Hidden
+        ^^^^^^^^^^^^^^^^^^^^^^
+    private/private.rb:4: `PrivatePackage::Hidden` defined here
+     4 |  class Hidden
+          ^^^^^^^^^^^^
+  Note:
+    Only `PrivatePackage` and packages that import it with `uses_internals: true` may reference it
+Errors: 1
 
 ###### cat private_consumer/__package.rb ######
 # typed: strict

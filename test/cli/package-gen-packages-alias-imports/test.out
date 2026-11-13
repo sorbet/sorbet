@@ -3,58 +3,73 @@
 ##################################
 
 ###### Running gen-packages (first run) ######
+target_only_consumer/__package.rb:3: `TargetOnlyConsumer` has changes https://srb.help/3734
+     3 |class TargetOnlyConsumer < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+
 consumer/__package.rb:3: `Consumer` has changes https://srb.help/3734
      3 |class Consumer < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-Errors: 1
+Errors: 2
 
 ###### cat consumer/__package.rb ######
 # typed: strict
 
 class Consumer < PackageSpec
+  import AliasPackage
   import Outer::Inner
-  import TargetPackage
 end
 
 ###### cat target_only_consumer/__package.rb ######
 # typed: strict
 
 class TargetOnlyConsumer < PackageSpec
-  import TargetPackage
+  import AliasPackage
 end
 
 ###### Typechecking ######
-consumer/use.rb:4: `AliasPackage` is not imported https://srb.help/3718
+consumer/use.rb:4: `TargetPackage` is not imported https://srb.help/3718
      4 |AliasPackage::Alias::Thing.new
-        ^^^^^^^^^^^^
-    alias/__package.rb:3: Package defined here
-     3 |class AliasPackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    target/__package.rb:3: Package defined here
+     3 |class TargetPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    consumer/__package.rb:3: Insert `import AliasPackage`
-     3 |class Consumer < PackageSpec
-                                    ^
+    consumer/__package.rb:5: Insert `import TargetPackage`
+     5 |  import Outer::Inner
+                             ^
 
-target_only_consumer/use.rb:4: `AliasPackage` is not imported https://srb.help/3718
+target_only_consumer/use.rb:4: `TargetPackage` is not imported https://srb.help/3718
      4 |AliasPackage::Alias::Thing.new
-        ^^^^^^^^^^^^
-    alias/__package.rb:3: Package defined here
-     3 |class AliasPackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    target/__package.rb:3: Package defined here
+     3 |class TargetPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    target_only_consumer/__package.rb:3: Insert `import AliasPackage`
-     3 |class TargetOnlyConsumer < PackageSpec
-                                              ^
+    target_only_consumer/__package.rb:4: Insert `import TargetPackage`
+     4 |  import AliasPackage
+                             ^
 Errors: 2
 
 ###### Running gen-packages (second run) ######
-No errors! Great job.
+target_only_consumer/__package.rb:3: `TargetOnlyConsumer` has changes https://srb.help/3734
+     3 |class TargetOnlyConsumer < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+
+consumer/__package.rb:3: `Consumer` has changes https://srb.help/3734
+     3 |class Consumer < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+Errors: 2
 
 ###### cat consumer/__package.rb ######
 # typed: strict
 
 class Consumer < PackageSpec
+  import AliasPackage
   import Outer::Inner
   import TargetPackage
 end
@@ -63,51 +78,33 @@ end
 # typed: strict
 
 class TargetOnlyConsumer < PackageSpec
+  import AliasPackage
   import TargetPackage
 end
 
 ###### Typechecking ######
-consumer/use.rb:4: `AliasPackage` is not imported https://srb.help/3718
-     4 |AliasPackage::Alias::Thing.new
-        ^^^^^^^^^^^^
-    alias/__package.rb:3: Package defined here
-     3 |class AliasPackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    consumer/__package.rb:3: Insert `import AliasPackage`
-     3 |class Consumer < PackageSpec
-                                    ^
-
-target_only_consumer/use.rb:4: `AliasPackage` is not imported https://srb.help/3718
-     4 |AliasPackage::Alias::Thing.new
-        ^^^^^^^^^^^^
-    alias/__package.rb:3: Package defined here
-     3 |class AliasPackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    target_only_consumer/__package.rb:3: Insert `import AliasPackage`
-     3 |class TargetOnlyConsumer < PackageSpec
-                                              ^
-Errors: 2
+No errors! Great job.
 ##############################
 ###### Package directed ######
 ##############################
 
 ###### Running gen-packages (first run) ######
+target_only_consumer/__package.rb:3: `TargetOnlyConsumer` has changes https://srb.help/3734
+     3 |class TargetOnlyConsumer < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+
 consumer/__package.rb:3: `Consumer` has changes https://srb.help/3734
      3 |class Consumer < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-
-consumer/use.rb:4: Unable to resolve constant `AliasPackage` https://srb.help/5002
-     4 |AliasPackage::Alias::Thing.new
-        ^^^^^^^^^^^^
 Errors: 2
 
 ###### cat consumer/__package.rb ######
 # typed: strict
 
 class Consumer < PackageSpec
+  import AliasPackage
   import Outer::Inner
 end
 
@@ -115,44 +112,50 @@ end
 # typed: strict
 
 class TargetOnlyConsumer < PackageSpec
-  import TargetPackage
+  import AliasPackage
 end
 
 ###### Typechecking ######
-consumer/use.rb:4: `AliasPackage` is not imported https://srb.help/3718
+consumer/use.rb:4: `TargetPackage` is not imported https://srb.help/3718
      4 |AliasPackage::Alias::Thing.new
-        ^^^^^^^^^^^^
-    alias/__package.rb:3: Package defined here
-     3 |class AliasPackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    target/__package.rb:3: Package defined here
+     3 |class TargetPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    consumer/__package.rb:3: Insert `import AliasPackage`
-     3 |class Consumer < PackageSpec
-                                    ^
+    consumer/__package.rb:5: Insert `import TargetPackage`
+     5 |  import Outer::Inner
+                             ^
 
-target_only_consumer/use.rb:4: `AliasPackage` is not imported https://srb.help/3718
+target_only_consumer/use.rb:4: `TargetPackage` is not imported https://srb.help/3718
      4 |AliasPackage::Alias::Thing.new
-        ^^^^^^^^^^^^
-    alias/__package.rb:3: Package defined here
-     3 |class AliasPackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    target/__package.rb:3: Package defined here
+     3 |class TargetPackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    target_only_consumer/__package.rb:3: Insert `import AliasPackage`
-     3 |class TargetOnlyConsumer < PackageSpec
-                                              ^
+    target_only_consumer/__package.rb:4: Insert `import TargetPackage`
+     4 |  import AliasPackage
+                             ^
 Errors: 2
 
 ###### Running gen-packages (second run) ######
+target_only_consumer/__package.rb:3: `TargetOnlyConsumer` has changes https://srb.help/3734
+     3 |class TargetOnlyConsumer < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+
 consumer/__package.rb:3: `Consumer` has changes https://srb.help/3734
      3 |class Consumer < PackageSpec
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-Errors: 1
+Errors: 2
 
 ###### cat consumer/__package.rb ######
 # typed: strict
 
 class Consumer < PackageSpec
+  import AliasPackage
   import Outer::Inner
   import TargetPackage
 end
@@ -161,29 +164,9 @@ end
 # typed: strict
 
 class TargetOnlyConsumer < PackageSpec
+  import AliasPackage
   import TargetPackage
 end
 
 ###### Typechecking ######
-consumer/use.rb:4: `AliasPackage` is not imported https://srb.help/3718
-     4 |AliasPackage::Alias::Thing.new
-        ^^^^^^^^^^^^
-    alias/__package.rb:3: Package defined here
-     3 |class AliasPackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    consumer/__package.rb:3: Insert `import AliasPackage`
-     3 |class Consumer < PackageSpec
-                                    ^
-
-target_only_consumer/use.rb:4: `AliasPackage` is not imported https://srb.help/3718
-     4 |AliasPackage::Alias::Thing.new
-        ^^^^^^^^^^^^
-    alias/__package.rb:3: Package defined here
-     3 |class AliasPackage < PackageSpec
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    target_only_consumer/__package.rb:3: Insert `import AliasPackage`
-     3 |class TargetOnlyConsumer < PackageSpec
-                                              ^
-Errors: 2
+No errors! Great job.
