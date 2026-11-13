@@ -3,5 +3,5 @@
 
 # Simulates copying `a/__package.rb` to start a new package, before renaming it.
 class A < PackageSpec # error: Redefinition of package `A`
-  export_all!
+  prelude!
 end

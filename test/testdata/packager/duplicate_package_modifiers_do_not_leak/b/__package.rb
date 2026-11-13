@@ -1,6 +1,6 @@
 # typed: strict
 
-# The original definition of `B` uses `export_all!`...
+# The original definition of `B` uses `prelude!`...
 class B < PackageSpec
-  export_all!
+  prelude!
 end

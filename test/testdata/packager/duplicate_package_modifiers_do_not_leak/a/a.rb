@@ -1,5 +1,3 @@
 # typed: strict
 
-module A
-  class NotExported; end
-end
+class ::RootScopedInA; end # error: Defining a root-scoped constant requires this package to be marked `prelude!`
