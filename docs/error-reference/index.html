@@ -477,7 +477,7 @@ test_each(new_values) <span class="hljs-keyword">do</span> <span class="hljs-par
 <blockquote>
 <p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
 </blockquote>
-<p>All <code>import</code> and <code>export</code> lines in a <code>__package.rb</code> file must have constant literals as their argument. Doing arbitrary computation of imports and exports is not allowed in <code>__package.rb</code> files.</p>
+<p>All <code>import</code> lines in a <code>__package.rb</code> file must have constant literals as their argument. Doing arbitrary computation of imports is not allowed in <code>__package.rb</code> files.</p>
 <p>Also note that all <code>import</code> declarations must be unique, with no duplicated imports.</p>
 <h2><a class="anchor" aria-hidden="true" id="3707"></a><a href="#3707" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3707</h2>
 <blockquote>
@@ -500,6 +500,7 @@ test_each(new_values) <span class="hljs-keyword">do</span> <span class="hljs-par
 <li>Sorbet can support things like jump-to-definition inside <code>__package.rb</code> files</li>
 </ul>
 <p>But despite that, <code>__package.rb</code> files must be completely statically analyzable, which means most forms of Ruby expressions are not allowed in these files.</p>
+<p><code>export</code> and <code>export_all!</code> are no longer part of the package DSL, so an <code>export</code> line reports this error for its argument, and both report that the method does not exist (<a href="#7003">7003</a>). Constants are public unless marked <code>package_private!</code>, so delete these lines.</p>
 <h2><a class="anchor" aria-hidden="true" id="3711"></a><a href="#3711" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3711</h2>
 <blockquote>
 <p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
@@ -532,13 +533,14 @@ test_each(new_values) <span class="hljs-keyword">do</span> <span class="hljs-par
 <p>The <code>export_for_test</code> directive is used to say, “Make this constant from the non-test namespace available in the test namespace for the same package.” That means it only makes sense to <code>export_for_test</code> constants from the non-test namespace.</p>
 <p>Trying to apply this directive to a constant defined in the <code>Test::</code> namespace will result in this error.</p>
 <p>If you’re trying to export a constant from the test namespace to be used in other packages, then just use <code>export</code>. Otherwise, these lines can be safely deleted.</p>
+<p>Sorbet no longer reports this error: <code>export_for_test</code> is no longer part of the package DSL.</p>
 <h2><a class="anchor" aria-hidden="true" id="3716"></a><a href="#3716" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3716</h2>
 <blockquote>
 <p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
 </blockquote>
 <p>This error means that you’re exporting a constant redundantly. In Stripe Packages mode, exporting a constant <code>A::B</code> will export anything accessible underneath <code>A::B</code>. That means that if you try to export <code>A::B</code> and <code>A::B::C</code>, you’ll get this error—the latter export is redundant, as it’s implied by export <code>A::B</code>.</p>
 <p>To fix this error, simply remove the more specific export.</p>
-<p>Sorbet no longer reports this error: <code>export</code> lines are ignored, because constants are public unless marked <code>package_private!</code>.</p>
+<p>Sorbet no longer reports this error: <code>export</code> is no longer part of the package DSL, because constants are public unless marked <code>package_private!</code>.</p>
 <h2><a class="anchor" aria-hidden="true" id="3717"></a><a href="#3717" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3717</h2>
 <blockquote>
 <p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
@@ -596,7 +598,7 @@ test_each(new_values) <span class="hljs-keyword">do</span> <span class="hljs-par
   export A::Val1 <span class="hljs-comment"># not allowed, instead the full enum should be exported with `export A`</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>Sorbet no longer reports this error: <code>export</code> lines are ignored, because constants are public unless marked <code>package_private!</code>.</p>
+<p>Sorbet no longer reports this error: <code>export</code> is no longer part of the package DSL, because constants are public unless marked <code>package_private!</code>.</p>
 <h2><a class="anchor" aria-hidden="true" id="3722"></a><a href="#3722" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3722</h2>
 <blockquote>
 <p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
@@ -617,6 +619,7 @@ test_each(new_values) <span class="hljs-keyword">do</span> <span class="hljs-par
   <span class="hljs-comment"># ^ allows referencing `A::B::Types::GoodTypeAlias` in downstream packages</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
+<p>Sorbet no longer reports this error: <code>export</code> is no longer part of the package DSL, because constants are public unless marked <code>package_private!</code>.</p>
 <h2><a class="anchor" aria-hidden="true" id="3723"></a><a href="#3723" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>3723</h2>
 <blockquote>
 <p>This error is specific to Stripe’s custom <code>--sorbet-packages</code> mode. If you are at Stripe, please see <a href="http://go/modularity">go/modularity</a> for more.</p>
