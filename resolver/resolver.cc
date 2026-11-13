@@ -755,26 +755,33 @@ private:
     // squeeze, and reporting the errors on the outermost constant's full loc.
     static core::LocOffsets packageBoundaryLoc(core::Context ctx, const ast::UnresolvedConstantLit &original,
                                                core::packages::MangledName package) {
-        auto result = original.loc;
-        auto *scope = &original.scope;
-        while (auto lit = ast::cast_tree<ast::ConstantLit>(*scope)) {
-            auto symbol = lit->symbol();
-            if (symbol.exists() && symbol != core::Symbols::todo()) {
-                auto enclosing = symbol.enclosingClass(ctx);
-                auto referencesPackage = enclosing.isPackageSpecSymbol(ctx)
-                                             ? core::packages::MangledName(enclosing) == package
-                                             : enclosing.data(ctx)->package == package;
-                if (referencesPackage) {
-                    // Keep walking toward the root to find the first component that crosses this package boundary.
-                    result = lit->loc();
-                }
-            }
-            if (lit->original() == nullptr) {
-                break;
-            }
-            scope = &lit->original()->scope;
+        auto scope = ast::cast_tree<ast::ConstantLit>(original.scope);
+        if (scope == nullptr) {
+            return original.loc;
         }
-        return result;
+
+        auto referencesPackage = [&](core::SymbolRef symbol) {
+            if (!symbol.exists() || symbol == core::Symbols::todo()) {
+                return false;
+            }
+            auto enclosing = symbol.enclosingClass(ctx);
+            return enclosing.isPackageSpecSymbol(ctx) ? core::packages::MangledName(enclosing) == package
+                                                      : enclosing.data(ctx)->package == package;
+        };
+        return scope->foldOriginalPath(
+            original.loc,
+            [&](core::LocOffsets &result, core::LocOffsets loc, core::SymbolRef symbol, core::NameRef, bool) {
+                if (referencesPackage(symbol)) {
+                    result = loc;
+                }
+                return true;
+            },
+            [&](core::LocOffsets &result, core::LocOffsets loc, core::SymbolRef symbol,
+                ast::ConstantLit::OriginalPathTerminal terminal) {
+                if (terminal == ast::ConstantLit::OriginalPathTerminal::ConstantLit && referencesPackage(symbol)) {
+                    result = loc;
+                }
+            });
     }
 
     static const int MAX_SUGGESTION_COUNT = 10;
