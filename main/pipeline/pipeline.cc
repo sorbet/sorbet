@@ -1160,13 +1160,6 @@ ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, vector<ast::ParsedFil
                 what = move(maybeResult.result());
             }
 
-#ifndef SORBET_REALMAIN_MIN
-            if (opts.cacheSensitiveOptions.sorbetPackages) {
-                Timer timeit(gs.tracer(), "visibility_checker");
-                packager::VisibilityChecker::checkReferences(gs, workers, what);
-            }
-#endif
-
             if (opts.stressIncrementalResolver) {
                 auto symbolsBefore = gs.symbolsUsedTotal();
                 for (auto &f : what) {
@@ -1297,13 +1290,6 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
                 return what;
             }
         }
-
-#ifndef SORBET_REALMAIN_MIN
-        if (opts.cacheSensitiveOptions.sorbetPackages) {
-            packager::VisibilityChecker::checkReferences(gs, workers, what);
-        }
-#endif
-
     } catch (SorbetException &) {
         if (auto e = gs.beginError(sorbet::core::Loc::none(), sorbet::core::errors::Internal::InternalError)) {
             e.setHeader("Exception resolving (backtrace is above)");
