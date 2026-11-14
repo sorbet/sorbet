@@ -184,7 +184,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       "its support"
       class <emptyTree>::<C <describe 'its support'>><<C <todo sym>>> < (<self>)
         def foo<<todo method>>(&<blk>)
-          "bar"
+          if <self>.is_a?(<emptyTree>::<C <describe 'bar'>>)
+            begin
+              <cast:<synthetic bind>>(<self>, <todo sym>, <emptyTree>::<C <describe 'bar'>>)
+              "bar"
+            end
+          else
+            begin
+              <cast:<synthetic bind>>(<self>, <todo sym>, <emptyTree>::<C <describe 'bar'>>)
+              "bar"
+            end
+          end
         end
 
         <runtime method definition of foo>
@@ -231,7 +241,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         end
 
         def subject<<todo method>>(&<blk>)
-          <emptyTree>::<C ThingWithSize>.new()
+          if <self>.is_a?(<emptyTree>::<C <describe 'no_such_method'>>)
+            begin
+              <cast:<synthetic bind>>(<self>, <todo sym>, <emptyTree>::<C <describe 'no_such_method'>>)
+              <emptyTree>::<C ThingWithSize>.new()
+            end
+          else
+            begin
+              <cast:<synthetic bind>>(<self>, <todo sym>, <emptyTree>::<C <describe 'size'>>)
+              <emptyTree>::<C ThingWithSize>.new()
+            end
+          end
         end
 
         class <emptyTree>::<C ThingWithSize><<C <todo sym>>> < (::<todo sym>)
