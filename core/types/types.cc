@@ -1121,7 +1121,22 @@ TypePtr Types::applyTypeArguments(const GlobalState &gs, const CallLocs &locs, u
         if (memData->flags.isFixed) {
             // Fixed args are implicitly applied, and won't consume type
             // arguments from the list that's supplied.
-            targs.emplace_back(memType->upperBound);
+            if (memType->upperBound.isFullyDefined()) {
+                targs.emplace_back(memType->upperBound);
+            } else {
+                // If there's still a generic here, we'll need to
+                // instantiate it
+                vector<TypePtr> fauxTargs;
+                for (auto t : targs) {
+                    fauxTargs.emplace_back(t);
+                }
+                for (int j = fauxTargs.size(); j < genericClass.data(gs)->typeMembers().size(); j++) {
+                    fauxTargs.emplace_back(Types::untypedUntracked());
+                }
+                TypePtr::InstantiationContext ictx(genericClass, genericClass, fauxTargs);
+                targs.emplace_back(memType->upperBound._instantiateLambdaParams(gs, ictx));
+                // targs.emplace_back(Types::untypedUntracked());
+            }
         } else if (it != args.end()) {
             auto loc = core::Loc(locs.file, locs.args[it - args.begin()]);
             auto argType = unwrapType(gs, loc, (*it)->type);

@@ -3102,7 +3102,7 @@ class ResolveTypeMembersAndFieldsWalk {
                     ParsedSig emptySig;
                     auto allowSelfType = true;
                     auto allowRebind = false;
-                    auto typeMember = TypeSyntaxArgs::TypeMember::BannedInTypeMember;
+                    auto typeMember = TypeSyntaxArgs::TypeMember::Allowed;
                     auto allowUnspecifiedTypeParameter = false;
                     core::TypePtr resTy = TypeSyntax::getResultType(
                         ctx, value, emptySig,

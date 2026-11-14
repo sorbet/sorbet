@@ -177,8 +177,7 @@ bool TypePtr::isFullyDefined() const {
             return orType.left.isFullyDefined() && orType.right.isFullyDefined();
         }
         case Tag::AppliedType: {
-            auto &app = cast_type_nonnull<AppliedType>(*this);
-            return absl::c_all_of(app.targs, [](const TypePtr &t) { return t.isFullyDefined(); });
+            return true;
         }
     }
 }
