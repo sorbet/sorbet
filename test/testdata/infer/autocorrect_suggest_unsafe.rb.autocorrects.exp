@@ -7,4 +7,13 @@ sig {returns(String)}
 def wrap_in_unsafe
   T.unsafe(nil) # error: Expected `String` but found `NilClass` for method result type
 end
+
+class DSLMethod
+  extend T::Sig
+
+  # The method that `attr_writer` defines uses the whole `attr_writer :foo`
+  # as the loc of its return value.
+  sig {params(foo: Integer).returns(String)}
+  T.unsafe(attr_writer :foo) # error: Expected `String` but found `Integer` for method result type
+end
 # ------------------------------
