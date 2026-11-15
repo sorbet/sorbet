@@ -43,7 +43,7 @@ test.rb:21: Cannot call `Object#requires_x` with a `Hash` keyword splat because 
     test.rb:4: Keyword parameters of `Object#requires_x` begin here:
      4 |sig {params(pos: Integer, x: Integer).void}
                                   ^
-  Got `T::Hash[T.untyped, T.untyped]` originating from:
+  Got `T::Hash[Symbol, T.untyped]` originating from:
     test.rb:21:
     21 |requires_x(0, 1, 2, **opts, x: 0)
                             ^^^^^^^^^^^^
@@ -61,7 +61,7 @@ test.rb:23: Cannot call `Object#requires_x` with a `Hash` keyword splat because 
     test.rb:4: Keyword parameters of `Object#requires_x` begin here:
      4 |sig {params(pos: Integer, x: Integer).void}
                                   ^
-  Got `T::Hash[T.untyped, T.untyped]` originating from:
+  Got `T::Hash[Symbol, T.untyped]` originating from:
     test.rb:23:
     23 |requires_x(0, 1, 2, x: 0, **opts)
                             ^^^^^^^^^^^^
