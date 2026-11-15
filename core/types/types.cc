@@ -524,7 +524,12 @@ ShapeType::ShapeType(vector<TypePtr> keys, vector<TypePtr> values) : keys(move(k
 }
 
 TypePtr ShapeType::underlying(const GlobalState &gs) const {
-    return Types::hashOfUntyped(Symbols::Magic_UntypedSource_shapeUnderlying());
+    if (this->keys.empty()) {
+        return Types::hashOfUntyped(Symbols::Magic_UntypedSource_shapeUnderlying());
+    }
+
+    const auto keys = Types::dropLiteral(gs, Types::lubAll(gs, this->keys));
+    return Types::hashOf(gs, keys, Types::untypedUntracked());
 }
 
 optional<size_t> ShapeType::indexForKey(const TypePtr &t) const {

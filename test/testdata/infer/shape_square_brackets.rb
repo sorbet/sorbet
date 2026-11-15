@@ -16,13 +16,13 @@ def test2(x)
   opts = {
     foo: 'hello'
   }
-  T.reveal_type(opts) # error: Revealed type: `{foo: String("hello")} (shape of T::Hash[T.untyped, T.untyped])`
+  T.reveal_type(opts) # error: Revealed type: `{foo: String("hello")} (shape of T::Hash[Symbol, T.untyped])`
   opts[:foo] = 'world'
   # This type is wrong, because the key `foo:` is now `String("world")`, but that's no worse than normal pinned variables
-  T.reveal_type(opts) # error: Revealed type: `{foo: String("hello")} (shape of T::Hash[T.untyped, T.untyped])`
+  T.reveal_type(opts) # error: Revealed type: `{foo: String("hello")} (shape of T::Hash[Symbol, T.untyped])`
 
   # Non-literal type for key
-  opts[String.new] = 0
+  opts[String.new] = 0 # error: Expected `Symbol` but found `String`
 end
 
 sig {params(x: {foo: Integer, 'bar' => Float}).void}
@@ -30,6 +30,5 @@ def test3(x)
   x[:foo] = '' # error: Expected `Integer` but found `String("")` for key `Symbol(:foo)`
   T.reveal_type(x[:foo]) # error: Revealed type: `T.untyped`
 
-  # This won't error until we change the `underlying` on Shape types to be stricter
-  x[true] = nil
+  x[true] = nil # error: Expected `T.any(Symbol, String)` but found `TrueClass`
 end

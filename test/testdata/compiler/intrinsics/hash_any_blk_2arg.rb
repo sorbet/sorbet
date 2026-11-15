@@ -12,14 +12,14 @@ end
 p result
 
 result = h.any? do |k, v|
-  k == 4
+  k == :d
 end
 
 p result
 
 result = h.any? do |k, v, blank|
   p blank
-  k == 4
+  k == :d
 end
 
 p result
