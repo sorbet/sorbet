@@ -11,7 +11,7 @@ class DSLMethod
   extend T::Sig
 
   # The method that `attr_writer` defines uses the whole `attr_writer :foo`
-  # as the loc of its return value.
+  # as the loc of its return value. There's no expression to wrap.
   sig {params(foo: Integer).returns(String)}
   attr_writer :foo # error: Expected `String` but found `Integer` for method result type
 end
