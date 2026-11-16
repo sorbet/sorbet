@@ -105,14 +105,16 @@ const ast::UnresolvedConstantLit *verifyConstant(core::Context ctx, core::NameRe
 }
 
 bool isRootScopedDefinition(const ast::ConstantLit *lit) {
-    bool isRootScoped = false;
-    lit->walkOriginalPath(
-        [&](core::LocOffsets, core::SymbolRef symbol, bool isConstant) {
-            isRootScoped = isConstant && symbol == core::Symbols::root();
+    struct Walker {
+        bool onRoot(core::LocOffsets, core::SymbolRef symbol, bool isConstant) {
+            return isConstant && symbol == core::Symbols::root();
+        }
+
+        bool onPart(core::LocOffsets, core::SymbolRef, core::NameRef, bool) {
             return true;
-        },
-        [](core::LocOffsets, core::SymbolRef, core::NameRef, bool) { return true; });
-    return isRootScoped;
+        }
+    };
+    return lit->walkOriginalPath(Walker{});
 }
 
 // Namespace definitions are checked by namer. This visitor checks behavior in package namespaces.
