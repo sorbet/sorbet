@@ -616,6 +616,11 @@ class Integer < Numeric
   end
   def ceil(digits=0); end
 
+  # Returns the result of division `self` by `other`. The result is rounded up
+  # to the nearest integer.
+  sig { params(other: Numeric).returns(Integer) }
+  def ceildiv(other); end
+
   # Returns a string containing the character represented by the `int`'s value
   # according to `encoding`.
   #

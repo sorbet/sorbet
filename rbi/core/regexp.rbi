@@ -897,6 +897,22 @@ class Regexp < Object
   end
   def self.last_match(arg0=T.unsafe(nil)); end
 
+  # Returns `true` if matching against `re` can be done in linear time to the
+  # input string.
+  #
+  # Note that this is a property of the ruby interpreter, not of the argument
+  # regular expression. Identical regexp can or cannot run in linear time
+  # depending on your ruby binary. Neither forward nor backward compatibility
+  # is guaranteed about the return value of this method. Our current algorithm
+  # is (*1) but this is subject to change in the future. Alternative
+  # implementations can also behave differently. They might always return false
+  # for everything.
+  #
+  # (*1): doi.org/10.1109/SP40001.2021.00032
+  sig { params(re: Regexp).returns(T::Boolean) }
+  sig { params(re: String, options: BasicObject).returns(T::Boolean) }
+  def self.linear_time?(re, options=_); end
+
   # Try to convert *obj* into a
   # [`Regexp`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html), using
   # to\_regexp method. Returns converted regexp or nil if *obj* cannot be
