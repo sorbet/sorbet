@@ -12,7 +12,7 @@ end
 p result
 
 result = h.any? do |a|
-  a[0] == 3
+  a[0] == :d
 end
 
 p result
