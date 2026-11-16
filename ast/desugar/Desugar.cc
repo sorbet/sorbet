@@ -2401,7 +2401,9 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                             cond = MK::If(loc, move(test), move(true_), move(cond));
                         }
                     }
-                    res = MK::If(when->loc, move(cond), node2TreeImpl(dctx, when->body), move(res));
+                    // The outermost `if` stands for the whole `case`, so give it the `case`'s loc.
+                    auto ifLoc = it + 1 == case_->whens.rend() ? loc : when->loc;
+                    res = MK::If(ifLoc, move(cond), node2TreeImpl(dctx, when->body), move(res));
                 }
 
                 if (assign != nullptr) {

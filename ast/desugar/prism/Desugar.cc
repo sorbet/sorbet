@@ -2164,7 +2164,10 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
                 // but ONLY when the when body is empty. Use the start of nextClauseLoc as the end.
                 auto ifLoc = whenLoc;
                 bool bodyIsEmpty = (then == nullptr || ast::isa_tree<ast::EmptyTree>(then));
-                if (bodyIsEmpty && nextClauseLoc.exists()) {
+                if (it + 1 == prismWhenNodes.rend()) {
+                    // The outermost `if` stands for the whole `case`, so give it the `case`'s loc.
+                    ifLoc = location;
+                } else if (bodyIsEmpty && nextClauseLoc.exists()) {
                     ifLoc = core::LocOffsets{whenLoc.beginPos(), nextClauseLoc.beginPos()};
                 }
                 resultExpr = MK::If(ifLoc, move(patternsResult), move(then), move(resultExpr));
