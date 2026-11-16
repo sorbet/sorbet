@@ -228,7 +228,10 @@ private:
         ResolveItems(core::FileRef file, vector<T> &&items) : file(file), items(move(items)) {};
     };
 
-    using PackageReference = pair<core::packages::MangledName, core::packages::PackageReferenceInfo>;
+    struct PackageReference {
+        core::packages::MangledName mangledName;
+        core::packages::PackageReferenceInfo referenceInfo;
+    };
 
     struct AncestorResolutionItem {
         ast::ConstantLit *ancestor;
@@ -682,12 +685,12 @@ private:
     static void addPackageReference(vector<PackageReference> &references, PackageReference reference) {
         // A file references few distinct packages, so a linear search is cheaper than a map. Merging here keeps
         // each file's list to one entry per package, however many constant literals reference it.
-        auto existing = absl::c_find_if(references, [&](const auto &entry) { return entry.first == reference.first; });
+        auto existing = absl::c_find_if(references, [&](const auto &entry) { return entry.mangledName == reference.mangledName; });
         if (existing == references.end()) {
             references.emplace_back(reference);
         } else {
-            existing->second.importNeeded |= reference.second.importNeeded;
-            existing->second.causesModularityError |= reference.second.causesModularityError;
+            existing->referenceInfo.importNeeded |= reference.referenceInfo.importNeeded;
+            existing->referenceInfo.causesModularityError |= reference.referenceInfo.causesModularityError;
         }
     }
 
@@ -888,7 +891,7 @@ private:
                 auto currentPackage = gs.packageDB().getPackageNameForFile(file);
                 gs.packageDB()
                     .getPackageInfoNonConst(currentPackage)
-                    ->trackPackageReference(file, reference->first, reference->second);
+                    ->trackPackageReference(file, reference->mangledName, reference->referenceInfo);
             }
             return;
         }
