@@ -30,11 +30,25 @@ import os
 project_root = os.path.dirname(os.path.realpath(__file__))
 bazel_workspace = os.path.realpath(os.path.join(project_root, "bazel-sorbet"))
 
+# It seems like macOS builds get absolute paths in the debug info.
+#
+# Linux builds with PWD=/proc/self/cwd, which lldb then resolves against its
+# own PWD, not the build sandbox, so we need to map them to the real path
+# (inside the bazel workspace).
+#
+# It's safe for macOS to see an extra mapping here, it will just never be used.
+#
+# NOTE: settings set replaces the full array setting, so we have to pass
+# everything we want in a single command.
+external_path = os.path.join(bazel_workspace, "external")
+source_map_command = 'settings set -- target.source-map "%s" "%s" /proc/self/cwd/external "%s"' % (
+    bazel_workspace, project_root, external_path
+)
+
 if not(os.path.isdir(bazel_workspace)):
     print("You need to compile Sorbet first before loading this file")
 else:
-    print("(lldb) Mapping paths in ./bazel-sorbet to the project root")
-    source_map_command = 'settings set -- target.source-map "%s" "%s"' % (bazel_workspace, project_root)
+    print("(lldb) %s" % source_map_command)
     ci = lldb.debugger.GetCommandInterpreter()
     res = lldb.SBCommandReturnObject()
     ci.HandleCommand(source_map_command, res)
@@ -45,18 +59,11 @@ def __lldb_init_module(debugger, internal_dict):
     ci = debugger.GetCommandInterpreter()
     ci.HandleCommand("command script add -f lldbinit.cmd_bazelsourcemap bazelsourcemap", result)
 
-    cyan="\x1b[0;36m"
-    cnone="\x1b[0m"
-
-    print("(lldb) Run %sbazelsourcemap%s to set up LLVM source maps" % (cyan, cnone))
-
 
 def cmd_bazelsourcemap(debugger, command, result, dict):
+    # Loading this file already applies the source map. This command applies it
+    # again, e.g. after something else has changed target.source-map.
     ci = debugger.GetCommandInterpreter()
-
-    external_path = ('%s/bazel-sorbet/external' % project_root)
-    # TODO(jez) This hardcodes /proc/self/cwd to get it to work on the buildbox.
-    source_map_command = 'settings set -- target.source-map /proc/self/cwd/external %s' % external_path
     print('(lldb) %s' % source_map_command)
     ci.HandleCommand(source_map_command, result)
 
