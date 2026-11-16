@@ -185,9 +185,16 @@ public:
 
     // `true` if the constant is fully qualified and can be traced back to the root scope, `false` otherwise
     bool isCBaseConstant(const ast::ConstantLit &cnstRef) {
-        return cnstRef.walkOriginalPath([](core::LocOffsets, core::SymbolRef symbol,
-                                           bool isConstant) { return isConstant && symbol == core::Symbols::root(); },
-                                        [](core::LocOffsets, core::SymbolRef, core::NameRef, bool) { return true; });
+        struct Walker {
+            bool onRoot(core::LocOffsets, core::SymbolRef symbol, bool isConstant) {
+                return isConstant && symbol == core::Symbols::root();
+            }
+
+            bool onPart(core::LocOffsets, core::SymbolRef, core::NameRef, bool) {
+                return true;
+            }
+        };
+        return cnstRef.walkOriginalPath(Walker{});
     }
 
     void setNestingAndScope(Reference &ref, const ast::ConstantLit &cnstRef) {
