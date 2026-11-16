@@ -742,7 +742,7 @@ int realmain(int argc, char *argv[]) {
         }
 
         if (opts.genPackagesMode != core::packages::GenPackagesMode::Disabled) {
-            // Generate `visible_to`s after VisibilityChecker has recorded references from all strata.
+            // Generate `visible_to`s after resolver has recorded references from all strata.
             switch (opts.genPackagesMode) {
                 case core::packages::GenPackagesMode::Strict:
                     packager::GenPackages::runStrict(*gs);

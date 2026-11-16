@@ -632,10 +632,6 @@ TEST_CASE("PerPhaseTest") {
             core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
             stratumFiles = move(resolver::Resolver::run(*gs, move(stratumFiles), *workers).result());
 
-            if (opts.cacheSensitiveOptions.sorbetPackages) {
-                packager::VisibilityChecker::checkReferences(*gs, *workers, stratumFiles);
-            }
-
             handler.drainErrors(*gs);
         }
 
@@ -899,10 +895,6 @@ TEST_CASE("PerPhaseTest") {
         trees =
             move(resolver::Resolver::runIncremental(*gs, move(trees), ranIncrementalNamer, *workers, recomputeNoSymbols)
                      .result());
-    }
-
-    if (opts.cacheSensitiveOptions.sorbetPackages) {
-        packager::VisibilityChecker::checkReferences(*gs, *workers, trees);
     }
 
     for (auto &resolvedTree : trees) {

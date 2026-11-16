@@ -10,7 +10,6 @@ cc_library(
     ),
     hdrs = [
         "GenPackages.h",
-        "VisibilityChecker.h",
         "packager.h",
     ],
     linkstatic = select({

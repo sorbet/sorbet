@@ -306,9 +306,7 @@ public:
     // `uses_internals: true`.
     bool canAccessInternalsOf(MangledName other) const;
 
-    // Track that `file` references the packages in `references`, along with some metadata about each reference
-    void trackPackageReferences(const core::FileRef file,
-                                std::vector<std::pair<core::packages::MangledName, PackageReferenceInfo>> &references);
+    // Track that `file` references `package`, along with some metadata about the reference
     void trackPackageReference(const core::FileRef file, MangledName package, PackageReferenceInfo referenceInfo);
     void resetPackageReferences(const core::FileRef file);
 
