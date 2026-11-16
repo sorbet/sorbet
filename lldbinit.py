@@ -30,6 +30,11 @@ import os
 project_root = os.path.dirname(os.path.realpath(__file__))
 bazel_workspace = os.path.realpath(os.path.join(project_root, "bazel-sorbet"))
 
+# `bazel_workspace` is `<output_base>/execroot/<workspace name>`. Its `external`
+# directory only links the repos that the most recent build needed, so map to
+# `<output_base>/external`, which has all of them.
+external_path = os.path.join(os.path.dirname(os.path.dirname(bazel_workspace)), "external")
+
 # It seems like macOS builds get absolute paths in the debug info.
 #
 # Linux builds with PWD=/proc/self/cwd, which lldb then resolves against its
@@ -40,7 +45,6 @@ bazel_workspace = os.path.realpath(os.path.join(project_root, "bazel-sorbet"))
 #
 # NOTE: settings set replaces the full array setting, so we have to pass
 # everything we want in a single command.
-external_path = os.path.join(bazel_workspace, "external")
 source_map_command = 'settings set -- target.source-map "%s" "%s" /proc/self/cwd/external "%s"' % (
     bazel_workspace, project_root, external_path
 )
