@@ -1,6 +1,5 @@
 # -- test/testdata/parser/block_receiver_locs.rb --
 # typed: true
-# disable-parser-comparison: true
 extend T::Sig
 
 # Every expression below starts with a method call that has a block. The
@@ -37,13 +36,13 @@ end
 
 sig { returns(T::Boolean) }
 def receiver_autocorrect
-  [1].map T.must({ |x| x + 1 }.first).even?
+  T.must([1].map { |x| x + 1 }.first).even?
   #                           ^^^^^ error: Method `even?` does not exist on `NilClass` component of `T.nilable(Integer)`
 end
 
 sig { returns(String) }
 def result_type
   [1].map { |x| x + 1 }.first
-  #       ^^^^^^^^^^^^^^^^^^^ error: Expected `String` but found `T.nilable(Integer)` for method result type
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Expected `String` but found `T.nilable(Integer)` for method result type
 end
 # ------------------------------

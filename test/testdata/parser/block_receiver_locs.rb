@@ -1,5 +1,4 @@
 # typed: true
-# disable-parser-comparison: true
 extend T::Sig
 
 # Every expression below starts with a method call that has a block. The
@@ -43,5 +42,5 @@ end
 sig { returns(String) }
 def result_type
   [1].map { |x| x + 1 }.first
-  #       ^^^^^^^^^^^^^^^^^^^ error: Expected `String` but found `T.nilable(Integer)` for method result type
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Expected `String` but found `T.nilable(Integer)` for method result type
 end

@@ -1,7 +1,4 @@
 # typed: strict
-# disable-parser-comparison: true
-# See <https://github.com/sorbet/sorbet/issues/10383>.
-# (This test happens to use syntax that Prism parses differently from Sorbet.)
 extend T::Sig
 
 MyAlias = T.type_alias { String }.checked(:never)
