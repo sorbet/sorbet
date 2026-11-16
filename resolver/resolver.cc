@@ -685,7 +685,7 @@ private:
     static void addPackageReference(vector<PackageReference> &references, PackageReference reference) {
         // A file references few distinct packages, so a linear search is cheaper than a map. Merging here keeps
         // each file's list to one entry per package, however many constant literals reference it.
-        auto existing = absl::c_find_if(references, [&](const auto &entry) { return entry.mangledName == reference.mangledName; });
+        auto existing = absl::c_find_if(references, [=](const auto &entry) { return entry.mangledName == reference.mangledName; });
         if (existing == references.end()) {
             references.emplace_back(reference);
         } else {
