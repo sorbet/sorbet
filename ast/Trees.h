@@ -1579,6 +1579,27 @@ public:
         return std::invoke(onRoot, current->loc(), current->symbol(), true);
     }
 
+    template <class Walker> bool walkOriginalPath(Walker &&walker) const {
+        using WalkerType = std::remove_reference_t<Walker>;
+        using RootResult = decltype(std::declval<WalkerType &>().onRoot(
+            std::declval<core::LocOffsets>(), std::declval<core::SymbolRef>(), std::declval<bool>()));
+        using PartResult = decltype(std::declval<WalkerType &>().onPart(
+            std::declval<core::LocOffsets>(), std::declval<core::SymbolRef>(), std::declval<core::NameRef>(),
+            std::declval<bool>()));
+        static_assert(std::is_same_v<RootResult, bool>,
+                      "Walker::onRoot must accept (LocOffsets, SymbolRef, bool) and return bool");
+        static_assert(std::is_same_v<PartResult, bool>,
+                      "Walker::onPart must accept (LocOffsets, SymbolRef, NameRef, bool) and return bool");
+
+        return walkOriginalPath(
+            [&](core::LocOffsets loc, core::SymbolRef symbol, bool isConstant) {
+                return walker.onRoot(loc, symbol, isConstant);
+            },
+            [&](core::LocOffsets loc, core::SymbolRef symbol, core::NameRef name, bool isOutermost) {
+                return walker.onPart(loc, symbol, name, isOutermost);
+            });
+    }
+
     void _sanityCheck();
 };
 CheckSize(ConstantLit, 16, 8);
