@@ -1,0 +1,50 @@
+--- --parser=original
+test/cli/method-return-op-asgn/method_return_op_asgn.rb:11: Expected `Integer` but found `T.nilable(Integer)` for method result type https://srb.help/7005
+    11 |end
+        ^^^
+  Expected `Integer` for result type of method `or_assign_attr`:
+    test/cli/method-return-op-asgn/method_return_op_asgn.rb:9:
+     9 |def or_assign_attr(a, y)
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `T.nilable(Integer)` originating from:
+    test/cli/method-return-op-asgn/method_return_op_asgn.rb:10:
+    10 |  a.b ||= y
+          ^^^
+
+test/cli/method-return-op-asgn/method_return_op_asgn.rb:16: Expected `Integer` but found `T.nilable(Integer)` for method result type https://srb.help/7005
+    16 |end
+        ^^^
+  Expected `Integer` for result type of method `or_assign_index`:
+    test/cli/method-return-op-asgn/method_return_op_asgn.rb:14:
+    14 |def or_assign_index(h, y)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `T.nilable(Integer)` originating from:
+    test/cli/method-return-op-asgn/method_return_op_asgn.rb:15:
+    15 |  h[:k] ||= y
+          ^^^^^
+Errors: 2
+--- --parser=prism
+test/cli/method-return-op-asgn/method_return_op_asgn.rb:11: Expected `Integer` but found `T.nilable(Integer)` for method result type https://srb.help/7005
+    11 |end
+        ^^^
+  Expected `Integer` for result type of method `or_assign_attr`:
+    test/cli/method-return-op-asgn/method_return_op_asgn.rb:9:
+     9 |def or_assign_attr(a, y)
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `T.nilable(Integer)` originating from:
+    test/cli/method-return-op-asgn/method_return_op_asgn.rb:10:
+    10 |  a.b ||= y
+          ^^^
+
+test/cli/method-return-op-asgn/method_return_op_asgn.rb:16: Expected `Integer` but found `T.nilable(Integer)` for method result type https://srb.help/7005
+    16 |end
+        ^^^
+  Expected `Integer` for result type of method `or_assign_index`:
+    test/cli/method-return-op-asgn/method_return_op_asgn.rb:14:
+    14 |def or_assign_index(h, y)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `T.nilable(Integer)` originating from:
+    test/cli/method-return-op-asgn/method_return_op_asgn.rb:15:
+    15 |  h[:k] ||= y
+          ^^^^^
+Errors: 2
