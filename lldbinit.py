@@ -28,7 +28,12 @@ import os
 # Bazel builds all binaries from a username-specific cache location
 # for lldb to work properly we need to map that path back to our main source
 project_root = os.path.dirname(os.path.realpath(__file__))
-bazel_workspace = os.path.realpath(os.path.join(project_root, "bazel-sorbet"))
+# Bazel names its convenience symlinks after the directory containing the
+# workspace, which isn't `sorbet` in a worktree or a renamed checkout.
+bazel_symlink = "bazel-%s" % os.path.basename(project_root)
+if not(os.path.isdir(os.path.join(project_root, bazel_symlink))):
+    bazel_symlink = "bazel-sorbet"
+bazel_workspace = os.path.realpath(os.path.join(project_root, bazel_symlink))
 
 # `bazel_workspace` is `<output_base>/execroot/<workspace name>`. Its `external`
 # directory only links the repos that the most recent build needed, so map to
