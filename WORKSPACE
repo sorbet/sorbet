@@ -54,6 +54,7 @@ load("@toolchains_llvm//toolchain:rules.bzl", "llvm_toolchain")
 # runtimes). Recheck the archive and older-macOS coverage on future upgrades.
 llvm_toolchain(
     name = "llvm_toolchain_22_1_3",
+    # (False is the default). We explicitly want `False` so that worktrees share caches
     absolute_paths = False,
     alternative_llvm_sources = [
         "https://github.com/sorbet/llvm-project/releases/download/llvmorg-{llvm_version}/{basename}",
