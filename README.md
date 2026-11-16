@@ -50,6 +50,7 @@ docs about Stripe-specific development workflows and historical Stripe context.
 - [Writing docs](#writing-docs)
 - [Editor and environment](#editor-and-environment)
   - [Bazel](#bazel)
+    - [Multiple checkouts and worktrees](#multiple-checkouts-and-worktrees)
   - [Shell](#shell)
   - [Formatting files](#formatting-files)
   - [Editor setup for C++](#editor-setup-for-c)
@@ -976,6 +977,18 @@ script to create a `./.bazelrc.local` and cache folder:
 ```shell
 tools/create_local_bazelrc.sh
 ```
+
+#### Multiple checkouts and worktrees
+
+Each checkout or `git worktree` has its own Bazel output base, and each output base extracts its own copy of the LLVM toolchain (about 12 GB). To share one copy between checkouts, run this in each of them:
+
+```shell
+tools/create_local_bazelrc.sh --share-llvm
+```
+
+The first run moves the checkout's extracted toolchain to `~/.cache/sorbet/llvm/<repository>`, and every run points `.bazelrc.local` at it with `--override_repository`. Action keys don't change, so the disk cache keeps hitting.
+
+The copy is keyed only on the repository's name, which includes the LLVM version. After a change to the toolchain that keeps the name, delete `~/.cache/sorbet/llvm/<repository>` and rerun the script in each checkout. If Bazel reports that the overridden repository's path does not exist, rerun the script. To go back to a private copy, run `tools/create_local_bazelrc.sh --unshare-llvm`.
 
 ### Shell
 

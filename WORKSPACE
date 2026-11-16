@@ -48,6 +48,9 @@ compatibility_proxy_repo()
 
 load("@toolchains_llvm//toolchain:rules.bzl", "llvm_toolchain")
 
+# To share one extracted copy of this toolchain between checkouts, see
+# "Multiple checkouts and worktrees" in README.md.
+#
 # The LLVM 22 ARM64 macOS archive has no x86_64 compiler-rt slice. Bundled
 # LLD ignored it in Intel cross-link probes; int128 helpers resolved via libSystem.
 # Keep driver defaults (not -nodefaultlibs, which also removes sanitizer
