@@ -1553,7 +1553,11 @@ core::TypePtr Environment::processBinding(
                             core::TypeAndOrigins::explainExpected(ctx, expectedReturnType, owner.loc(ctx), for_));
                         e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
                         e.addErrorSections(move(errorDetailsCollector));
-                        if (i.whatLoc != inWhat.implicitReturnLoc) {
+                        // Don't offer to wrap the `end` keyword of an implicit return, or the whole
+                        // method definition, which is what a method synthesized by a DSL (e.g.,
+                        // `attr_writer`) uses as the loc of its return value.
+                        if (i.whatLoc != inWhat.implicitReturnLoc && i.whatLoc != inWhat.loc &&
+                            i.whatLoc != inWhat.declLoc) {
                             auto replaceLoc = ctx.locAt(i.whatLoc);
                             core::TypeErrorDiagnostics::maybeAutocorrect(ctx, e, replaceLoc, constr, expectedReturnType,
                                                                          typeAndOrigin.type);
