@@ -1553,6 +1553,37 @@ public:
         return storage.original();
     }
 
+    // Walks original-backed constant parts from innermost to root. Returning false from either Walker method stops the
+    // walk. `onRoot` receives whether the terminal scope is itself a ConstantLit; its symbol is empty when it is not.
+    template <class Walker> bool walkOriginalPath(Walker && walker) const {
+        using WalkerType = std::remove_reference_t<Walker>;
+        using RootResult = decltype(std::declval<WalkerType &>().onRoot(
+            std::declval<core::LocOffsets>(), std::declval<core::SymbolRef>(), std::declval<bool>()));
+        using PartResult = decltype(std::declval<WalkerType &>().onPart(
+            std::declval<core::LocOffsets>(), std::declval<core::SymbolRef>(), std::declval<core::NameRef>(),
+            std::declval<bool>()));
+        static_assert(std::is_same_v<RootResult, bool>,
+                      "Walker::onRoot must accept (LocOffsets, SymbolRef, bool) and return bool");
+        static_assert(std::is_same_v<PartResult, bool>,
+                      "Walker::onPart must accept (LocOffsets, SymbolRef, NameRef, bool) and return bool");
+
+        auto *current = this;
+        bool isOutermost = true;
+        while (auto *original = current->original()) {
+            if (!walker.onPart(current->loc(), current->symbol(), core::NameRef{original->cnst}, bool{isOutermost})) {
+                return false;
+            }
+
+            auto scope = cast_tree<ConstantLit>(original->scope);
+            if (scope == nullptr) {
+                return walker.onRoot(original->scope.loc(), core::SymbolRef{}, false);
+            }
+            current = scope.get();
+            isOutermost = false;
+        }
+        return walker.onRoot(current->loc(), current->symbol(), true);
+    }
+
     void _sanityCheck();
 };
 CheckSize(ConstantLit, 16, 8);

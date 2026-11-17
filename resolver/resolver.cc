@@ -2288,16 +2288,27 @@ public:
     }
 
     static int constantDepth(ast::ConstantLit *exp) {
-        int depth = 0;
-        ast::ConstantLit *scope = exp;
-        while (auto original = scope->original()) {
-            scope = ast::cast_tree<ast::ConstantLit>(original->scope);
-            if (!scope) {
-                break;
+        struct Walker {
+            int depth = 0;
+            bool hasOriginalPath = false;
+
+            bool onRoot(core::LocOffsets, core::SymbolRef, bool isConstant) {
+                if (hasOriginalPath && isConstant) {
+                    depth++;
+                }
+                return true;
             }
-            depth += 1;
-        }
-        return depth;
+
+            bool onPart(core::LocOffsets, core::SymbolRef, core::NameRef, bool isOutermost) {
+                hasOriginalPath = true;
+                if (!isOutermost) {
+                    depth++;
+                }
+                return true;
+            }
+        } walker;
+        exp->walkOriginalPath(walker);
+        return walker.depth;
     }
 
     static core::ClassOrModuleRef resolvePayloadSuperclassClassName(const core::GlobalState &gs,
