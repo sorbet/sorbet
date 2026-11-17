@@ -92,54 +92,66 @@ core::MethodRef enclosingMethodFromContext(core::Context ctx) {
     }
 }
 
-void matchesQuery(core::Context ctx, const ast::ConstantLit *lit, const core::lsp::Query &lspQuery,
-                  core::SymbolRef symbolBeforeDealias) {
-    // Iterate. Ensures that we match "Foo" in "Foo::Bar" references.
-    auto symbol = symbolBeforeDealias.dealias(ctx);
-    while (lit && symbol.exists() && lit->original()) {
-        auto &unresolved = *lit->original();
-
-        // `<PackageSpecRegistry>` symbols can show up in non-`__package.rb` files now (only in
-        // files with resolver errors), so we have to filter them out of reference results to
-        // pretend that they're not there.
-        auto isPackageCursor = symbolBeforeDealias.isClassOrModule() &&
-                               symbolBeforeDealias.asClassOrModuleRef().isPackageSpecSymbol(ctx) &&
-                               !ctx.file.data(ctx).isPackage(ctx);
-
-        if (!isPackageCursor && (lspQuery.matchesLoc(ctx.locAt(lit->loc())) || lspQuery.matchesSymbol(symbol) ||
-                                 lspQuery.matchesSymbol(symbolBeforeDealias))) {
-            // This basically approximates the cfg::Alias case from Environment::processBinding.
-            core::TypeAndOrigins tp;
-            tp.origins.emplace_back(symbol.loc(ctx));
-
-            if (symbol.isClassOrModule()) {
-                tp.type = symbol.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx).data(ctx)->externalType();
-            } else {
-                auto resultType = symbol.resultType(ctx);
-                tp.type = resultType == nullptr ? core::Types::untyped(symbol) : resultType;
-            }
-
-            core::lsp::ConstantResponse::Scopes scopes;
-            if (symbolBeforeDealias == core::Symbols::StubModule()) {
-                // If the symbol is an alias to a stub symbol, it actually resolved, and so it won't
-                // have resolutionScopes.
-                auto *resolutionScopes = lit->resolutionScopes();
-                scopes.insert(scopes.end(), resolutionScopes->begin(), resolutionScopes->end());
-            } else {
-                scopes = {symbol.owner(ctx)};
-            }
-
-            auto enclosingMethod = enclosingMethodFromContext(ctx);
-            auto resp = core::lsp::ConstantResponse(symbolBeforeDealias, ctx.locAt(lit->loc()), scopes, unresolved.cnst,
-                                                    tp, enclosingMethod);
-            core::lsp::QueryResponse::pushQueryResponse(ctx, resp);
-        }
-        lit = ast::cast_tree<ast::ConstantLit>(unresolved.scope);
-        if (lit) {
-            symbolBeforeDealias = lit->symbol();
-            symbol = symbolBeforeDealias.dealias(ctx);
-        }
+void matchesQuery(core::Context ctx, const ast::ConstantLit *lit, const core::lsp::Query &lspQuery) {
+    if (lit == nullptr) {
+        return;
     }
+
+    struct Walker {
+        core::Context ctx;
+        const core::lsp::Query &lspQuery;
+
+        bool onRoot(core::LocOffsets, core::SymbolRef, bool) {
+            return true;
+        }
+
+        bool onPart(core::LocOffsets loc, core::SymbolRef symbolBeforeDealias, core::NameRef name,
+                    absl::Span<const core::SymbolRef> resolutionScopes, bool) {
+            auto symbol = symbolBeforeDealias.dealias(ctx);
+            if (!symbol.exists()) {
+                return false;
+            }
+
+            // `<PackageSpecRegistry>` symbols can show up in non-`__package.rb` files now (only in
+            // files with resolver errors), so we have to filter them out of reference results to
+            // pretend that they're not there.
+            auto isPackageCursor = symbolBeforeDealias.isClassOrModule() &&
+                                   symbolBeforeDealias.asClassOrModuleRef().isPackageSpecSymbol(ctx) &&
+                                   !ctx.file.data(ctx).isPackage(ctx);
+
+            if (!isPackageCursor && (lspQuery.matchesLoc(ctx.locAt(loc)) || lspQuery.matchesSymbol(symbol) ||
+                                     lspQuery.matchesSymbol(symbolBeforeDealias))) {
+                // This basically approximates the cfg::Alias case from Environment::processBinding.
+                core::TypeAndOrigins tp;
+                tp.origins.emplace_back(symbol.loc(ctx));
+
+                if (symbol.isClassOrModule()) {
+                    tp.type =
+                        symbol.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx).data(ctx)->externalType();
+                } else {
+                    auto resultType = symbol.resultType(ctx);
+                    tp.type = resultType == nullptr ? core::Types::untyped(symbol) : resultType;
+                }
+
+                core::lsp::ConstantResponse::Scopes scopes;
+                if (symbolBeforeDealias == core::Symbols::StubModule()) {
+                    // If the symbol is an alias to a stub symbol, it actually resolved, and so it won't
+                    // have resolutionScopes.
+                    ENFORCE(!resolutionScopes.empty());
+                    scopes.insert(scopes.end(), resolutionScopes.begin(), resolutionScopes.end());
+                } else {
+                    scopes = {symbol.owner(ctx)};
+                }
+
+                auto enclosingMethod = enclosingMethodFromContext(ctx);
+                auto resp =
+                    core::lsp::ConstantResponse(symbolBeforeDealias, ctx.locAt(loc), scopes, name, tp, enclosingMethod);
+                core::lsp::QueryResponse::pushQueryResponse(ctx, resp);
+            }
+            return true;
+        }
+    } walker{ctx, lspQuery};
+    lit->walkOriginalPathWithResolutionScopes(walker);
 }
 
 // This decides if we need to keep a node around incase the current LSP query needs type information for it
@@ -159,7 +171,7 @@ bool shouldLeaveAncestorForIDE(const ast::ExpressionPtr &anc) {
 
 void DefLocSaver::postTransformConstantLit(core::Context ctx, const ast::ConstantLit &lit) {
     const core::lsp::Query &lspQuery = ctx.state.lspQuery;
-    matchesQuery(ctx, &lit, lspQuery, lit.symbol());
+    matchesQuery(ctx, &lit, lspQuery);
 }
 
 void DefLocSaver::preTransformClassDef(core::Context ctx, const ast::ClassDef &classDef) {
@@ -171,13 +183,13 @@ void DefLocSaver::preTransformClassDef(core::Context ctx, const ast::ClassDef &c
     } else {
         // The `<root>` class we wrap all code with uses EmptyTree for the ClassDef::name field.
         auto lit = ast::cast_tree<ast::ConstantLit>(classDef.name);
-        matchesQuery(ctx, lit, lspQuery, lit->symbol());
+        matchesQuery(ctx, lit, lspQuery);
     }
 
     if (classDef.kind == ast::ClassDef::Kind::Class && !classDef.ancestors.empty() &&
         shouldLeaveAncestorForIDE(classDef.ancestors.front())) {
         auto lit = ast::cast_tree<ast::ConstantLit>(classDef.ancestors.front());
-        matchesQuery(ctx, lit, lspQuery, lit->symbol());
+        matchesQuery(ctx, lit, lspQuery);
     }
 
     // declLoc == loc usually implies that this class was synthetic in some way (Class.new, <root>, etc.)
