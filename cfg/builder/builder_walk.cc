@@ -541,17 +541,10 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                 Exception::raise("Should have been eliminated by namer/resolver");
             },
             [&](const ast::ConstantLit &a) {
-                auto aliasName = cctx.newTemporary(core::Names::cfgAlias());
-                auto loc = a.loc();
-
-                if (auto sym = a.symbol(); sym == core::Symbols::StubModule()) {
-                    current->exprs.emplace_back(aliasName, loc, make_insn<Alias>(core::Symbols::untyped()));
-                } else {
-                    current->exprs.emplace_back(aliasName, loc, make_insn<Alias>(sym));
-                }
-
-                synthesizeExpr(current, cctx.target, loc, make_insn<Ident>(aliasName));
-
+                // Walk the scope before loading the constant itself, so that the last instruction
+                // for this expression is the one that writes its value. Callers that need the loc of
+                // the value of a sequence of instructions (e.g., a method's implicit return) use the
+                // loc of its last instruction.
                 if (auto *orig = a.original()) {
                     // Empirically, these are the only two cases we've needed so far to service the
                     // LSP requests we want (hover and completion), but that doesn't mean these are
@@ -564,6 +557,17 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                         current = walk(cctx.withTarget(deadSym), orig->scope, current);
                     }
                 }
+
+                auto aliasName = cctx.newTemporary(core::Names::cfgAlias());
+                auto loc = a.loc();
+
+                if (auto sym = a.symbol(); sym == core::Symbols::StubModule()) {
+                    current->exprs.emplace_back(aliasName, loc, make_insn<Alias>(core::Symbols::untyped()));
+                } else {
+                    current->exprs.emplace_back(aliasName, loc, make_insn<Alias>(sym));
+                }
+
+                synthesizeExpr(current, cctx.target, loc, make_insn<Ident>(aliasName));
 
                 ret = current;
             },

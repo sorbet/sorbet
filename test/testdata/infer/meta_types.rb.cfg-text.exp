@@ -45,10 +45,10 @@ method ::TestMetaType#testit {
 
 bb0[firstDead=-1]():
     <self>: TestMetaType = cast(<self>: NilClass, TestMetaType);
-    <cfgAlias>$7: T.class_of(T::Array) = alias <C Array>
-    <cfgAlias>$9: T.class_of(T) = alias <C T>
+    <cfgAlias>$8: T.class_of(T) = alias <C T>
+    <cfgAlias>$9: T.class_of(T::Array) = alias <C Array>
     <cfgAlias>$11: T.class_of(String) = alias <C String>
-    <statTemp>$5: Runtime object representing type: T::Array[String] = <cfgAlias>$7: T.class_of(T::Array).[](<cfgAlias>$11: T.class_of(String))
+    <statTemp>$5: Runtime object representing type: T::Array[String] = <cfgAlias>$9: T.class_of(T::Array).[](<cfgAlias>$11: T.class_of(String))
     <statTemp>$3: NilClass = <self>: TestMetaType.puts(<statTemp>$5: Runtime object representing type: T::Array[String])
     <ifTemp>$15: T.untyped = <self>: TestMetaType._()
     <ifTemp>$15 -> (T.untyped ? bb2 : bb3)
@@ -61,10 +61,10 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 bb2[firstDead=-1](<self>: TestMetaType):
-    <cfgAlias>$18: T.class_of(T::Array) = alias <C Array>
-    <cfgAlias>$20: T.class_of(T) = alias <C T>
+    <cfgAlias>$19: T.class_of(T) = alias <C T>
+    <cfgAlias>$20: T.class_of(T::Array) = alias <C Array>
     <cfgAlias>$22: T.class_of(String) = alias <C String>
-    <statTemp>$14: Runtime object representing type: T::Array[String] = <cfgAlias>$18: T.class_of(T::Array).[](<cfgAlias>$22: T.class_of(String))
+    <statTemp>$14: Runtime object representing type: T::Array[String] = <cfgAlias>$20: T.class_of(T::Array).[](<cfgAlias>$22: T.class_of(String))
     <unconditional> -> bb4
 
 # backedges
@@ -84,19 +84,19 @@ bb4[firstDead=-1](<self>: TestMetaType, <statTemp>$14: Object):
 # backedges
 # - bb4
 bb5[firstDead=-1](<self>: TestMetaType):
-    <cfgAlias>$28: T.class_of(T::Array) = alias <C Array>
-    <cfgAlias>$30: T.class_of(T) = alias <C T>
+    <cfgAlias>$29: T.class_of(T) = alias <C T>
+    <cfgAlias>$30: T.class_of(T::Array) = alias <C Array>
     <cfgAlias>$32: T.class_of(String) = alias <C String>
-    <statTemp>$24: Runtime object representing type: T::Array[String] = <cfgAlias>$28: T.class_of(T::Array).[](<cfgAlias>$32: T.class_of(String))
+    <statTemp>$24: Runtime object representing type: T::Array[String] = <cfgAlias>$30: T.class_of(T::Array).[](<cfgAlias>$32: T.class_of(String))
     <unconditional> -> bb7
 
 # backedges
 # - bb4
 bb6[firstDead=-1](<self>: TestMetaType):
-    <cfgAlias>$34: T.class_of(T::Array) = alias <C Array>
-    <cfgAlias>$36: T.class_of(T) = alias <C T>
+    <cfgAlias>$35: T.class_of(T) = alias <C T>
+    <cfgAlias>$36: T.class_of(T::Array) = alias <C Array>
     <cfgAlias>$38: T.class_of(Float) = alias <C Float>
-    <statTemp>$24: Runtime object representing type: T::Array[Float] = <cfgAlias>$34: T.class_of(T::Array).[](<cfgAlias>$38: T.class_of(Float))
+    <statTemp>$24: Runtime object representing type: T::Array[Float] = <cfgAlias>$36: T.class_of(T::Array).[](<cfgAlias>$38: T.class_of(Float))
     <unconditional> -> bb7
 
 # backedges
