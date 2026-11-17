@@ -890,13 +890,11 @@ vector<core::NameRef> fullyQualifiedNameFromMangledName(const core::GlobalState 
 
 void populatePackagePathPrefixes(core::MutableContext ctx, core::packages::PackageInfo &info) {
     auto &gs = ctx.state;
-    auto extraPackageFilesDirectoryUnderscorePrefixes = gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes();
     auto extraPackageFilesDirectorySlashDeprecatedPrefixes =
         gs.packageDB().extraPackageFilesDirectorySlashDeprecatedPrefixes();
     auto extraPackageFilesDirectorySlashPrefixes = gs.packageDB().extraPackageFilesDirectorySlashPrefixes();
 
-    const auto numPrefixes = extraPackageFilesDirectoryUnderscorePrefixes.size() +
-                             extraPackageFilesDirectorySlashDeprecatedPrefixes.size() +
+    const auto numPrefixes = extraPackageFilesDirectorySlashDeprecatedPrefixes.size() +
                              extraPackageFilesDirectorySlashPrefixes.size() + 1;
     info.packagePathPrefixes.reserve(numPrefixes);
     auto packageFilePath = ctx.file.data(gs).path();
@@ -905,11 +903,6 @@ void populatePackagePathPrefixes(core::MutableContext ctx, core::packages::Packa
     const auto shortName = absl::StrJoin(fullName, "_", core::packages::NameFormatter(gs));
     const auto slashDirName = absl::StrJoin(fullName, "/", core::packages::NameFormatter(gs)) + "/";
     const string_view dirNameFromShortName = shortName;
-
-    for (const string &prefix : extraPackageFilesDirectoryUnderscorePrefixes) {
-        // Project_FooBar -- munge with underscore
-        info.packagePathPrefixes.emplace_back(absl::StrCat(prefix, dirNameFromShortName, "/"));
-    }
 
     for (const string &prefix : extraPackageFilesDirectorySlashDeprecatedPrefixes) {
         // project/Foo_bar -- convert camel-case to snake-case and munge with slash
