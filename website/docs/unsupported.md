@@ -304,7 +304,7 @@ At a glance, it looks like the syntax error is that the user has forgotten or is
 
 In order to make error messages and autocompletion suggestions better, Sorbet reverts to treating the characters `end` as a keyword, not a method name, after it sees a sequence of `.` followed by `\n`. This is a small change to the Ruby grammar with a small cost to implement, for a large improvement in developer ergonomics when working in an IDE, with a straightforward workaround.
 
-Note that this applies to **all** keywords, not just `end`. For a complete list of Ruby keywords, see [the Ruby docs](https://docs.ruby-lang.org/en/master/keywords_rdoc.html).
+Note that this applies to **all** keywords, not just `end`. For a complete list of Ruby keywords, see [the Ruby docs](https://docs.ruby-lang.org/en/master/syntax/keywords_rdoc.html).
 
 For more, see [#1993](https://github.com/sorbet/sorbet/pull/1993).
 
