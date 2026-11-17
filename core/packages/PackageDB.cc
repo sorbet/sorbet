@@ -160,10 +160,6 @@ const bool PackageDB::enforceLayering() const {
     return !layers_.empty();
 }
 
-absl::Span<const string> PackageDB::extraPackageFilesDirectoryUnderscorePrefixes() const {
-    return absl::MakeSpan(extraPackageFilesDirectoryUnderscorePrefixes_);
-}
-
 absl::Span<const string> PackageDB::extraPackageFilesDirectorySlashDeprecatedPrefixes() const {
     return absl::MakeSpan(extraPackageFilesDirectorySlashDeprecatedPrefixes_);
 }
@@ -233,7 +229,6 @@ PackageDB PackageDB::deepCopy() const {
     result.enabled_ = this->enabled_;
     result.genPackagesMode_ = this->genPackagesMode_;
     result.allowRelaxingTestVisibility_ = this->allowRelaxingTestVisibility_;
-    result.extraPackageFilesDirectoryUnderscorePrefixes_ = this->extraPackageFilesDirectoryUnderscorePrefixes_;
     result.extraPackageFilesDirectorySlashDeprecatedPrefixes_ =
         this->extraPackageFilesDirectorySlashDeprecatedPrefixes_;
     result.extraPackageFilesDirectorySlashPrefixes_ = this->extraPackageFilesDirectorySlashPrefixes_;
