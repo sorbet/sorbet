@@ -1,5 +1,4 @@
 # typed: true
-# disable-parser-comparison: true
 
 begin 1; 2 end
 begin () end

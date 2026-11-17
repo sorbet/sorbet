@@ -543,7 +543,11 @@ public:
     unique_ptr<Node> beginKeyword(const token *begin, unique_ptr<Node> body, const token *end) {
         core::LocOffsets loc = tokLoc(begin).join(tokLoc(end));
         if (body != nullptr) {
-            if (auto *b = parser::cast_node<Begin>(body.get())) {
+            auto *b = parser::cast_node<Begin>(body.get());
+            // Only flatten the `Begin` that `compstmt` synthesizes for `a; b`, which always has
+            // several statements. A `Begin` with fewer came from parens, like `begin (a; b) end`,
+            // and keeps the parens' loc.
+            if (b != nullptr && b->stmts.size() > 1) {
                 return make_unique<Kwbegin>(loc, std::move(b->stmts));
             } else {
                 return make_unique<Kwbegin>(loc, NodeVec1(std::move(body)));
