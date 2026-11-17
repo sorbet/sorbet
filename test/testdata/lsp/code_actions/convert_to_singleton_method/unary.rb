@@ -37,3 +37,12 @@ end
 (A.new + A.new).unary(0)
 
 (A.new ; A.new).unary(0)
+
+(A.new
+ A.new).unary(0)
+
+(A.new.tap { 1; 2 } rescue A.new).unary(0)
+
+(A.new rescue A.new).unary(0)
+
+begin (A.new; A.new) end.unary(0)
