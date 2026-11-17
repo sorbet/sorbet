@@ -837,26 +837,42 @@ private:
     // squeeze, and reporting the errors on the outermost constant's full loc.
     static core::LocOffsets packageBoundaryLoc(core::Context ctx, const ast::UnresolvedConstantLit &original,
                                                core::packages::MangledName package) {
-        auto result = original.loc;
-        auto *scope = &original.scope;
-        while (auto lit = ast::cast_tree<ast::ConstantLit>(*scope)) {
-            auto symbol = lit->symbol();
-            if (symbol.exists() && symbol != core::Symbols::todo()) {
-                auto enclosing = symbol.enclosingClass(ctx);
-                auto referencesPackage = enclosing.isPackageSpecSymbol(ctx)
-                                             ? core::packages::MangledName(enclosing) == package
-                                             : enclosing.data(ctx)->package == package;
-                if (referencesPackage) {
-                    // Keep walking toward the root to find the first component that crosses this package boundary.
-                    result = lit->loc();
-                }
-            }
-            if (lit->original() == nullptr) {
-                break;
-            }
-            scope = &lit->original()->scope;
+        auto scope = ast::cast_tree<ast::ConstantLit>(original.scope);
+        if (scope == nullptr) {
+            return original.loc;
         }
-        return result;
+
+        struct Walker {
+            core::Context ctx;
+            core::packages::MangledName package;
+            core::LocOffsets result;
+
+            bool referencesPackage(core::SymbolRef symbol) {
+                if (!symbol.exists() || symbol == core::Symbols::todo()) {
+                    return false;
+                }
+                auto enclosing = symbol.enclosingClass(ctx);
+                return enclosing.isPackageSpecSymbol(ctx) ? core::packages::MangledName(enclosing) == package
+                                                          : enclosing.data(ctx)->package == package;
+            }
+
+            bool onRoot(core::LocOffsets loc, core::SymbolRef symbol, bool isConstant) {
+                if (isConstant && referencesPackage(symbol)) {
+                    result = loc;
+                }
+                return true;
+            }
+
+            bool onPart(core::LocOffsets loc, core::SymbolRef symbol, core::NameRef, bool) {
+                if (referencesPackage(symbol)) {
+                    // Keep walking toward the root to find the first component that crosses this package boundary.
+                    result = loc;
+                }
+                return true;
+            }
+        } walker{ctx, package, original.loc};
+        scope->walkOriginalPath(walker);
+        return walker.result;
     }
 
     static const int MAX_SUGGESTION_COUNT = 10;

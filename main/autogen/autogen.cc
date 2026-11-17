@@ -50,33 +50,39 @@ class AutogenWalk {
 
     // Convert a constant literal into a fully qualified name
     vector<core::NameRef> constantName(core::Context ctx, const ast::ConstantLit &cnstRef) {
-        vector<core::NameRef> out;
-        auto *cnst = &cnstRef;
-        while (cnst != nullptr && cnst->original() != nullptr) {
-            auto &original = *cnst->original();
-            out.emplace_back(original.cnst);
-            cnst = ast::cast_tree<ast::ConstantLit>(original.scope);
+        struct Walker {
+            core::Context ctx;
+            AutogenWalk &autogen;
+            vector<core::NameRef> names;
 
-            // If any part of the constant literal scope is a class alias, the final name should be scoped
-            // under the *dealiased* scope. This allows subconstants-of-aliases to be referenced
-            // correctly -- otherwise, we'd have missing edges in our static analysis dependency graphs, which
-            // drive pre-loading for our Ruby services at Stripe, and also have to jump hoops with complicated
-            // heuristics in our package generation tooling to determine whether something was resolved via an alias.
-            if (cnst != nullptr && cnst->original() != nullptr) {
-                auto scopeSym = cnst->symbol();
-                if (scopeSym.isStaticField(ctx) && scopeSym.asFieldRef().data(ctx)->isClassAlias()) {
-                    auto resolvedScopeName = symbolName(ctx, scopeSym);
+            bool onRoot(core::LocOffsets, core::SymbolRef, bool) {
+                return true;
+            }
+
+            bool onPart(core::LocOffsets, core::SymbolRef symbol, core::NameRef originalName, bool isOutermost) {
+                // If any part of the constant literal scope is a class alias, the final name should be scoped
+                // under the *dealiased* scope. This allows subconstants-of-aliases to be referenced
+                // correctly -- otherwise, we'd have missing edges in our static analysis dependency graphs, which
+                // drive pre-loading for our Ruby services at Stripe, and also have to jump hoops with complicated
+                // heuristics in our package generation tooling to determine whether something was resolved via an
+                // alias.
+                if (!isOutermost && symbol.isStaticField(ctx) && symbol.asFieldRef().data(ctx)->isClassAlias()) {
+                    auto resolvedScopeName = autogen.symbolName(ctx, symbol);
 
                     // append the name in reverse order to the hitherto-built name vector,
-                    // then break out of the loop.
-                    out.insert(out.end(), resolvedScopeName.rbegin(), resolvedScopeName.rend());
-                    break;
+                    // then stop walking.
+                    names.insert(names.end(), resolvedScopeName.rbegin(), resolvedScopeName.rend());
+                    return false;
                 }
-            }
-        }
 
-        reverse(out.begin(), out.end());
-        return out;
+                names.emplace_back(originalName);
+                return true;
+            }
+        } walker{ctx, *this, {}};
+        cnstRef.walkOriginalPath(walker);
+
+        reverse(walker.names.begin(), walker.names.end());
+        return move(walker.names);
     }
 
 public:
