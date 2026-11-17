@@ -184,16 +184,6 @@ for this_src in "${rb_src[@]}" DUMMY; do
         args+=("--experimental-package-directed")
       fi
 
-      extra_underscore_prefixes=()
-      while IFS='' read -r prefix; do
-        extra_underscore_prefixes+=("$prefix")
-      done < <(grep '# extra-package-files-directory-prefix-underscore: ' "${srcs[@]}" | sort | awk -F': ' '{print $2}')
-      if [ "${#extra_underscore_prefixes[@]}" -gt 0 ]; then
-        for prefix in "${extra_underscore_prefixes[@]}"; do
-          args+=("--extra-package-files-directory-prefix-underscore" "${prefix}")
-        done
-      fi
-
       extra_slash_prefixes_deprecated=()
       while IFS='' read -r prefix; do
         extra_slash_prefixes_deprecated+=("$prefix")

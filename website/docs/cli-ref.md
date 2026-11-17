@@ -314,11 +314,6 @@ Usage:
       --sorbet-packages-hint-message arg
                                 Optional hint message to add to all packaging related
                                 errors (default: "")
-      --extra-package-files-directory-prefix-underscore <dir>
-                                Extra parent directories which contain package files.
-                                Files are associated to a package using a package's
-                                namespace joined by underscores. That is, files in
-                                <dir>/Project_FooBar/ belong to Project::FooBar
       --extra-package-files-directory-prefix-slash-deprecated <dir>
                                 Extra parent directories which contain package files.
                                 Files are associated to a package using slash munging
