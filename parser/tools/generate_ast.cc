@@ -89,12 +89,15 @@ NodeDef nodes[] = {
         "begin",
         vector<FieldDef>({{"stmts", FieldType::NodeVec}}),
     },
-    // A method call with a blockis modelled as a Send node with a Block as a parent.
+    // A method call with a block is modelled as a Send node with a Block as a parent.
     // The `send` is always a `parser::Send` node, and the `params` models the parameters of the block.
+    // Like every node, the `loc` covers all its children, including the `send`. The `blockLoc` is just
+    // the `{ ... }` or `do ... end`.
     {
         "Block",
         "block",
-        vector<FieldDef>({{"send", FieldType::Node},
+        vector<FieldDef>({{"blockLoc", FieldType::Loc},
+                          {"send", FieldType::Node},
                           {"params", FieldType::Node},
                           {"body", FieldType::Node},
                           {"style", FieldType::BlockStyle}}),

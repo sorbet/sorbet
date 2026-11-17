@@ -47,8 +47,8 @@ std::unique_ptr<Node> deepCopy(const Node *node) {
         [&](const parser::Backref *backref) { result = std::make_unique<Backref>(backref->loc, backref->name); },
         [&](const parser::Begin *begin) { result = std::make_unique<Begin>(begin->loc, deepCopyVec(begin->stmts)); },
         [&](const parser::Block *block) {
-            result = std::make_unique<Block>(block->loc, deepCopy(block->send.get()), deepCopy(block->params.get()),
-                                             deepCopy(block->body.get()), block->style);
+            result = std::make_unique<Block>(block->loc, block->blockLoc, deepCopy(block->send.get()),
+                                             deepCopy(block->params.get()), deepCopy(block->body.get()), block->style);
         },
         [&](const parser::BlockParam *blockParam) {
             result = std::make_unique<BlockParam>(blockParam->loc, blockParam->name);

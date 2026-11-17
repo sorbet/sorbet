@@ -208,7 +208,7 @@ ast::Send::BlockType blockStyleToType(parser::BlockStyle style) {
 } // namespace
 
 ExpressionPtr desugarBlock(DesugarContext dctx, parser::Block *block) {
-    block->send->loc = block->send->loc.join(block->loc);
+    block->send->loc = block->loc;
     auto recv = node2TreeImpl(dctx, block->send);
     Send *send;
     ExpressionPtr res;
@@ -223,7 +223,7 @@ ExpressionPtr desugarBlock(DesugarContext dctx, parser::Block *block) {
         res = move(recv);
         auto is = cast_tree<InsSeq>(res);
         if (!is) {
-            if (auto e = dctx.ctx.beginIndexerError(block->loc, core::errors::Desugar::UnsupportedNode)) {
+            if (auto e = dctx.ctx.beginIndexerError(block->blockLoc, core::errors::Desugar::UnsupportedNode)) {
                 e.setHeader("No body in block");
             }
             return MK::EmptyTree();
@@ -240,9 +240,9 @@ ExpressionPtr desugarBlock(DesugarContext dctx, parser::Block *block) {
     auto inBlock = true;
     DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockParamLoc, dctx.enclosingBlockParamName,
                          dctx.enclosingMethodName, inBlock, dctx.inModule, dctx.preserveConcreteSyntax);
-    auto desugaredBody = desugarBody(dctx1, block->loc, block->body, move(destructures));
+    auto desugaredBody = desugarBody(dctx1, block->blockLoc, block->body, move(destructures));
 
-    send->setBlock(MK::Block(block->loc, move(desugaredBody), move(Params)), blockStyleToType(block->style));
+    send->setBlock(MK::Block(block->blockLoc, move(desugaredBody), move(Params)), blockStyleToType(block->style));
     return res;
 }
 
@@ -2618,8 +2618,8 @@ ExpressionPtr node2Tree(core::MutableContext ctx, unique_ptr<parser::Node> what,
         auto result = node2TreeImpl(dctx, what);
         if (result.loc().exists()) {
             // If the desugared expression has a different loc, we want to use that. This can happen
-            // because (:block (:send)) desugars to (:send (:block)), but the (:block) node just has
-            // the loc of the `do ... end`, while the (:send) has the whole loc
+            // because a `begin ... ensure ... end` desugars to a tree whose loc doesn't include the
+            // `begin` and `end` keywords.
             //
             // But if we desugared to EmptyTree (either intentionally or because there was an
             // unsupported node type), we want to use the loc of the original node.

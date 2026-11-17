@@ -477,8 +477,6 @@ public:
         core::LocOffsets loc;
         if (begin != nullptr) {
             loc = tokLoc(begin).join(tokLoc(end));
-        } else if (auto *block = parser::cast_node<Block>(body.get())) {
-            loc = block->send->loc.join(block->loc);
         } else {
             loc = body->loc;
         }
@@ -524,12 +522,8 @@ public:
             }
             auto elseLoc = tokLoc(elseTok).join(maybe_loc(else_));
             stmts.emplace_back(make_unique<Begin>(elseLoc, NodeVec1(std::move(else_))));
-            auto loc = collectionLoc(stmts);
-            if (auto *block = parser::cast_node<Block>(body.get())) {
-                loc = block->send->loc.join(loc);
-            }
 
-            body = make_unique<Begin>(loc, std::move(stmts));
+            body = make_unique<Begin>(collectionLoc(stmts), std::move(stmts));
         }
 
         if (ensure_tok != nullptr) {
@@ -603,7 +597,8 @@ public:
         Node &n = *methodCall;
         const type_info &ty = typeid(n);
         if (ty == typeid(Send) || ty == typeid(CSend) || ty == typeid(Super) || ty == typeid(ZSuper)) {
-            return make_unique<Block>(blockLoc, std::move(methodCall), std::move(args), std::move(body), style);
+            auto loc = methodCall->loc.join(blockLoc);
+            return make_unique<Block>(loc, blockLoc, std::move(methodCall), std::move(args), std::move(body), style);
         }
 
         sorbet::parser::NodeVec *exprs;
@@ -617,7 +612,9 @@ public:
             [&](Node *n) { Exception::raise("Unexpected send node: {}", n->nodeName()); });
 
         auto &send = exprs->front();
-        unique_ptr<Node> block = make_unique<Block>(blockLoc, std::move(send), std::move(args), std::move(body), style);
+        auto loc = send->loc.join(blockLoc);
+        unique_ptr<Node> block =
+            make_unique<Block>(loc, blockLoc, std::move(send), std::move(args), std::move(body), style);
         exprs->front().swap(block);
         return methodCall;
     }
@@ -746,13 +743,8 @@ public:
                 return nullptr;
             case 1:
                 return std::move(nodes.back());
-            default: {
-                auto loc = collectionLoc(nodes);
-                if (auto *block = parser::cast_node<Block>(nodes[0].get())) {
-                    loc = block->send->loc.join(loc);
-                }
-                return make_unique<Begin>(loc, std::move(nodes));
-            }
+            default:
+                return make_unique<Begin>(collectionLoc(nodes), std::move(nodes));
         }
     }
 
