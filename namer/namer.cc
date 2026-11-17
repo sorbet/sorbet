@@ -2513,60 +2513,69 @@ class TreeSymbolizer {
     const PackageMangledStaticFields &packageMangledStaticFields;
     size_t explicitRootScopeDepth = 0;
 
-    core::SymbolRef squashNamesInner(core::Context ctx, core::SymbolRef owner, ast::ExpressionPtr &node, bool firstName,
-                                     bool withinExplicitRootScope) {
-        auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node);
-        if (constLit == nullptr) {
-            if (auto id = ast::cast_tree<ast::ConstantLit>(node)) {
-                return id->symbol().dealias(ctx);
-            }
-            if (auto uid = ast::cast_tree<ast::UnresolvedIdent>(node)) {
-                if (uid->kind != ast::UnresolvedIdent::Kind::Class || uid->name != core::Names::singleton()) {
-                    if (auto e = ctx.beginError(node.loc(), core::errors::Namer::DynamicConstant)) {
-                        e.setHeader("Unsupported constant scope");
-                    }
-                }
-                // emitted via `class << self` blocks
-            } else if (ast::isa_tree<ast::EmptyTree>(node)) {
-                // ::Foo
-            } else if (node.isSelfReference()) {
-                // self::Foo
-            } else {
-                if (auto e = ctx.beginError(node.loc(), core::errors::Namer::DynamicConstant)) {
-                    e.setHeader("Dynamic constant references are unsupported");
-                }
-            }
-            node = ast::MK::EmptyTree();
-            return owner;
-        }
-
-        const bool firstNameRecursive = false;
-        auto newOwner = squashNamesInner(ctx, owner, constLit->scope, firstNameRecursive, withinExplicitRootScope);
-        ENFORCE(newOwner.exists());
-
-        auto mangled = packageMangledClasses.find(
-            {ctx.file, newOwner.asClassOrModuleRef(), constLit->cnst, withinExplicitRootScope});
-        core::SymbolRef existing = mangled != packageMangledClasses.end()
-                                       ? mangled->second
-                                       : ctx.state.lookupClassSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
-        if (firstName && !existing.exists() && newOwner.isClassOrModule()) {
-            existing = ctx.state.lookupStaticFieldSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
-            if (existing.exists()) {
-                existing = existing.dealias(ctx.state);
-            }
-        }
-
-        // NameInserter should have created this symbol
-        ENFORCE(existing.exists());
-
-        node = ast::make_expression<ast::ConstantLit>(existing, node.toUnique<ast::UnresolvedConstantLit>());
-        return existing;
-    }
-
     core::SymbolRef squashNames(core::Context ctx, core::SymbolRef owner, ast::ExpressionPtr &node,
                                 bool withinExplicitRootScope) {
-        const bool firstName = true;
-        return squashNamesInner(ctx, owner, node, firstName, withinExplicitRootScope);
+        struct Walker {
+            core::Context ctx;
+            const PackageMangledClasses &packageMangledClasses;
+            bool withinExplicitRootScope;
+            core::SymbolRef newOwner;
+
+            ast::ExpressionPtr onRoot(ast::ExpressionPtr root) {
+                if (auto id = ast::cast_tree<ast::ConstantLit>(root)) {
+                    newOwner = id->symbol().dealias(ctx);
+                    return root;
+                }
+                if (auto uid = ast::cast_tree<ast::UnresolvedIdent>(root)) {
+                    if (uid->kind != ast::UnresolvedIdent::Kind::Class || uid->name != core::Names::singleton()) {
+                        if (auto e = ctx.beginError(root.loc(), core::errors::Namer::DynamicConstant)) {
+                            e.setHeader("Unsupported constant scope");
+                        }
+                    }
+                    // emitted via `class << self` blocks
+                } else if (ast::isa_tree<ast::EmptyTree>(root)) {
+                    // ::Foo
+                } else if (root.isSelfReference()) {
+                    // self::Foo
+                } else {
+                    if (auto e = ctx.beginError(root.loc(), core::errors::Namer::DynamicConstant)) {
+                        e.setHeader("Dynamic constant references are unsupported");
+                    }
+                }
+                return ast::MK::EmptyTree();
+            }
+
+            ast::ExpressionPtr onPart(std::unique_ptr<ast::UnresolvedConstantLit> constLit, bool isOutermost) {
+                ENFORCE(newOwner.exists());
+
+                auto mangled = packageMangledClasses.find(
+                    {ctx.file, newOwner.asClassOrModuleRef(), constLit->cnst, withinExplicitRootScope});
+                core::SymbolRef existing =
+                    mangled != packageMangledClasses.end()
+                        ? mangled->second
+                        : ctx.state.lookupClassSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
+                if (isOutermost && !existing.exists() && newOwner.isClassOrModule()) {
+                    existing = ctx.state.lookupStaticFieldSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
+                    if (existing.exists()) {
+                        existing = existing.dealias(ctx.state);
+                    }
+                }
+
+                // NameInserter should have created this symbol
+                ENFORCE(existing.exists());
+
+                newOwner = existing;
+                return ast::make_expression<ast::ConstantLit>(existing, std::move(constLit));
+            }
+        } walker{ctx, packageMangledClasses, withinExplicitRootScope, owner};
+
+        if (!ast::isa_tree<ast::UnresolvedConstantLit>(node)) {
+            node = walker.onRoot(std::move(node));
+            return walker.newOwner;
+        }
+
+        node = ast::UnresolvedConstantLit::foldOwned(std::move(node), walker);
+        return walker.newOwner;
     }
 
     ast::ExpressionPtr arg2Symbol(int pos, const core::ParsedParam &parsedArg, ast::ExpressionPtr arg) {
