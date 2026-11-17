@@ -36,13 +36,13 @@ end
 
 (A).unary(A.new + A.new, 0)
 
-(A).unary((A.new ; A.new), 0)
+A.unary(((A.new ; A.new)), 0)
 
-(A).unary(A.new
- A.new, 0)
+A.unary((A.new
+ A.new), 0)
 
 (A).unary((A.new.tap { 1; 2 } rescue A.new), 0)
 
 (A).unary(A.new rescue A.new, 0)
 
-begin (A) end.unary((A.new; A.new), 0)
+begin A end.unary(((A.new; A.new)), 0)

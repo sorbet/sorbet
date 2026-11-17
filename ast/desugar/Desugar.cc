@@ -616,7 +616,10 @@ ClassDef::RHS_store scopeNodeToBody(DesugarContext dctx, unique_ptr<parser::Node
     auto inAnyBlock = false;
     DesugarContext dctx1(dctx.ctx, uniqueCounter, dctx.enclosingBlockParamLoc, dctx.enclosingBlockParamName,
                          dctx.enclosingMethodName, inAnyBlock, dctx.inModule, dctx.preserveConcreteSyntax);
-    if (auto *begin = parser::cast_node<parser::Begin>(node.get())) {
+    auto *begin = parser::cast_node<parser::Begin>(node.get());
+    // A `Begin` with one statement came from parens, like `class A; (a; b); end`. Desugar it as an
+    // expression, so that it gets the parens' loc.
+    if (begin != nullptr && begin->stmts.size() != 1) {
         body.reserve(begin->stmts.size());
         for (auto &stat : begin->stmts) {
             body.emplace_back(node2TreeImpl(dctx1, stat));
@@ -1201,7 +1204,18 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 }
             },
             [&](parser::Block *block) { result = desugarBlock(dctx, block); },
-            [&](parser::Begin *begin) { result = desugarBegin(dctx, loc, begin->stmts); },
+            [&](parser::Begin *begin) {
+                // The parser models `(a; b)` as a `Begin` for the parens wrapping a `Begin` for the
+                // statements, whose loc excludes the parens. Desugar the statements with the parens'
+                // loc, so that autocorrects which wrap this expression produce valid code.
+                auto *inner =
+                    begin->stmts.size() == 1 ? parser::cast_node<parser::Begin>(begin->stmts[0].get()) : nullptr;
+                if (inner != nullptr && inner->stmts.size() > 1) {
+                    result = desugarBegin(dctx, loc, inner->stmts);
+                } else {
+                    result = desugarBegin(dctx, loc, begin->stmts);
+                }
+            },
             [&](parser::Assign *asgn) {
                 auto lhs = node2TreeImpl(dctx, asgn->lhs);
                 auto rhs = node2TreeImpl(dctx, asgn->rhs);

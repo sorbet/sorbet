@@ -3113,8 +3113,10 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
             }
 
             if (auto *stmtsNode = down_cast<pm_statements_node>(body)) {
+                // Use the parens' loc for `(a; b)`, so that autocorrects which wrap this expression
+                // produce valid code.
                 auto inlineIfSingle = false;
-                return desugarStatements(stmtsNode, inlineIfSingle);
+                return desugarStatements(stmtsNode, inlineIfSingle, location);
             } else {
                 return desugar(body);
             }
