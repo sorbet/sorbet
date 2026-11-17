@@ -187,7 +187,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(CFGContext cctx, unique_ptr<CFG> res, absl:
         LocalRef local = kv.second;
         aliasesPrefix.emplace_back(local, core::LocOffsets::none(), make_insn<Alias>(global));
         if (global.isFieldOrStaticField()) {
-            res->minLoops[local.id()] = CFG::MIN_LOOP_FIELD;
+            res->minLoops[local.id()].pin = MinLoops::Pin::Field;
         } else {
             // We used to have special handling here for "MIN_LOOP_GLOBAL" but it was meaningless,
             // because it only happened for type members, and we already prohibit re-assigning type
@@ -200,7 +200,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(CFGContext cctx, unique_ptr<CFG> res, absl:
     for (auto kv : cctx.discoveredUndeclaredFields) {
         aliasesPrefix.emplace_back(kv.second, core::LocOffsets::none(),
                                    make_insn<Alias>(core::Symbols::Magic_undeclaredFieldStub(), kv.first));
-        res->minLoops[kv.second.id()] = CFG::MIN_LOOP_FIELD;
+        res->minLoops[kv.second.id()].pin = MinLoops::Pin::Field;
     }
     histogramInc("cfgbuilder.aliases", aliasesPrefix.size());
     auto basicBlockCreated = res->basicBlocks.size();

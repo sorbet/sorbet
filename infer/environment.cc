@@ -930,7 +930,8 @@ void Environment::computePins(core::Context ctx, const vector<Environment> &envs
         core::TypeAndOrigins tp;
 
         auto bindMinLoops = var.minLoops(inWhat);
-        if (bb->outerLoops == bindMinLoops || bindMinLoops == var.maxLoopWrite(inWhat)) {
+        if (bindMinLoops.pin == cfg::MinLoops::Pin::None &&
+            (bb->outerLoops == bindMinLoops.level || bindMinLoops.level == var.maxLoopWrite(inWhat))) {
             continue;
         }
 
@@ -1013,7 +1014,7 @@ core::TypePtr flatmapHack(core::Context ctx, const core::TypePtr &receiver, cons
 }
 
 core::TypePtr Environment::processBinding(
-    core::Context ctx, const cfg::CFG &inWhat, cfg::Binding &bind, int loopCount, int bindMinLoops,
+    core::Context ctx, const cfg::CFG &inWhat, cfg::Binding &bind, int loopCount, cfg::MinLoops bindMinLoops,
     KnowledgeFilter &knowledgeFilter, core::TypeConstraint &constr, const core::TypePtr &methodReturnType,
     const optional<cfg::BasicBlock::BlockExitCondInfo> &parentUpdateKnowledgeReceiver, bool deadOnEntry) {
     try {
@@ -1802,7 +1803,7 @@ core::TypePtr Environment::processBinding(
         }
         ENFORCE(!tp.origins.empty(), "Inferencer did not assign location");
 
-        if (!noLoopChecking && loopCount != bindMinLoops) {
+        if (!noLoopChecking && (bindMinLoops.pin != cfg::MinLoops::Pin::None || loopCount != bindMinLoops.level)) {
             auto pin = pinnedTypes.find(bind.bind.variable);
             const core::TypeAndOrigins &cur =
                 (pin != pinnedTypes.end()) ? pin->second : getTypeAndOrigin(bind.bind.variable);
@@ -1813,8 +1814,8 @@ core::TypePtr Environment::processBinding(
                                                    core::Types::dropLiteral(ctx, cur.type), errorDetailsCollector);
 
             {
-                switch (bindMinLoops) {
-                    case cfg::CFG::MIN_LOOP_FIELD:
+                switch (bindMinLoops.pin) {
+                    case cfg::MinLoops::Pin::Field:
                         if (!asGoodAs) {
                             if (auto e = ctx.beginError(bind.loc, core::errors::Infer::FieldReassignmentTypeMismatch)) {
                                 e.setHeader("Expected `{}` but found `{}` for field", cur.type.show(ctx),
@@ -1834,7 +1835,7 @@ core::TypePtr Environment::processBinding(
                             tp = cur;
                         }
                         break;
-                    case cfg::CFG::MIN_LOOP_LET:
+                    case cfg::MinLoops::Pin::Let:
                         if (!asGoodAs) {
                             if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PinnedVariableMismatch)) {
                                 e.setHeader("Incompatible assignment to variable declared via `{}`: `{}` is not a "
@@ -1845,7 +1846,7 @@ core::TypePtr Environment::processBinding(
                             tp = cur;
                         }
                         break;
-                    default: {
+                    case cfg::MinLoops::Pin::None: {
                         if (!asGoodAs || (tp.type.isUntyped() && !cur.type.isUntyped())) {
                             if (auto ident = cfg::cast_instruction<cfg::Ident>(bind.value)) {
                                 // See cfg/builder/builder_walk.cc for an explanation of why this is here.

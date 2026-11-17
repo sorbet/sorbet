@@ -321,12 +321,12 @@ void CFGBuilder::computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites
             continue;
         }
 
+        ENFORCE(bb->outerLoops <= MinLoops::MAX_LEVEL);
         RnW.reads[bb->id].forEach([&cfg, &bb](uint32_t local) {
-            auto curMin = cfg.minLoops[local];
-            if (curMin > bb->outerLoops) {
-                curMin = bb->outerLoops;
+            auto &curMin = cfg.minLoops[local];
+            if (curMin.level > bb->outerLoops) {
+                curMin.level = bb->outerLoops;
             }
-            cfg.minLoops[local] = curMin;
         });
     }
     for (const auto &bb : cfg.basicBlocks) {
@@ -336,15 +336,14 @@ void CFGBuilder::computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites
 
         for (const auto &expr : bb->exprs) {
             auto what = expr.bind.variable;
-            int curMin = cfg.minLoops[what.id()];
+            auto &curMin = cfg.minLoops[what.id()];
             int curMax = cfg.maxLoopWrite[what.id()];
-            if (curMin > bb->outerLoops) {
-                curMin = bb->outerLoops;
+            if (curMin.level > bb->outerLoops) {
+                curMin.level = bb->outerLoops;
             }
             if (curMax < bb->outerLoops) {
                 curMax = bb->outerLoops;
             }
-            cfg.minLoops[what.id()] = curMin;
             cfg.maxLoopWrite[what.id()] = curMax;
         }
     }
@@ -398,7 +397,8 @@ vector<UIntSet> CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::R
                         // to how our "pinning" type inference works. We can remove this
                         // inner condition when we get a better type inference
                         // algorithm.
-                        if (bb->outerLoops <= cfg.minLoops[local]) {
+                        const auto &minLoops = cfg.minLoops[local];
+                        if (minLoops.pin == MinLoops::Pin::None && bb->outerLoops <= minLoops.level) {
                             toRemove.add(local);
                         }
                     });

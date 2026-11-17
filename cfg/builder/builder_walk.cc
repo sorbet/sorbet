@@ -399,7 +399,7 @@ tuple<LocalRef, BasicBlock *, BasicBlock *> CFGBuilder::walkDefault(CFGContext c
     if (paramInfo.type != nullptr) {
         auto tmp = cctx.newTemporary(core::Names::castTemp());
         synthesizeExpr(defaultNext, tmp, defLoc, make_insn<Cast>(result, defLoc, paramInfo.type, core::Names::let()));
-        cctx.inWhat.minLoops[tmp.id()] = CFG::MIN_LOOP_LET;
+        cctx.inWhat.minLoops[tmp.id()].pin = MinLoops::Pin::Let;
     }
 
     return {result, presentNext, defaultNext};
@@ -1112,7 +1112,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                 // holding the method's return value, can be the target of a `T.let` in one branch
                 // of an `if` and of some other value in another branch.
                 if (c.cast == core::Names::let() && !cctx.target.isSyntheticTemporary(cctx.inWhat)) {
-                    cctx.inWhat.minLoops[cctx.target.id()] = CFG::MIN_LOOP_LET;
+                    cctx.inWhat.minLoops[cctx.target.id()].pin = MinLoops::Pin::Let;
                 }
 
                 ret = current;
