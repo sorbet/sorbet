@@ -894,8 +894,8 @@ void populatePackagePathPrefixes(core::MutableContext ctx, core::packages::Packa
         gs.packageDB().extraPackageFilesDirectorySlashDeprecatedPrefixes();
     auto extraPackageFilesDirectorySlashPrefixes = gs.packageDB().extraPackageFilesDirectorySlashPrefixes();
 
-    const auto numPrefixes = extraPackageFilesDirectorySlashDeprecatedPrefixes.size() +
-                             extraPackageFilesDirectorySlashPrefixes.size() + 1;
+    const auto numPrefixes =
+        extraPackageFilesDirectorySlashDeprecatedPrefixes.size() + extraPackageFilesDirectorySlashPrefixes.size() + 1;
     info.packagePathPrefixes.reserve(numPrefixes);
     auto packageFilePath = ctx.file.data(gs).path();
     info.packagePathPrefixes.emplace_back(packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1));
