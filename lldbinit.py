@@ -49,7 +49,9 @@ external_path = os.path.join(os.path.dirname(os.path.dirname(bazel_workspace)), 
 # It's safe for macOS to see an extra mapping here, it will just never be used.
 #
 # NOTE: settings set replaces the full array setting, so we have to pass
-# everything we want in a single command.
+# everything we want in a single command. We could consider changing this to
+# e.g. `append` if we wanted something more robust, but there are edge cases
+# there, too.
 source_map_command = 'settings set -- target.source-map "%s" "%s" /proc/self/cwd/external "%s"' % (
     bazel_workspace, project_root, external_path
 )
