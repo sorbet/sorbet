@@ -173,7 +173,8 @@ bool LSPPreprocessor::ensureInitialized(LSPMethod method, const LSPMessage &msg)
 
 unique_ptr<LSPTask> LSPPreprocessor::getTaskForMessage(LSPMessage &msg) {
     if (msg.isResponse()) {
-        // We currently send no requests to the client, so we don't expect any response messages.
+        // preprocessAndEnqueue drops responses (the only requests Sorbet sends are `window/workDoneProgress/create`),
+        // so we don't expect any response messages here.
         return make_unique<SorbetErrorTask>(
             *config, make_unique<SorbetErrorParams>((int)LSPErrorCodes::MethodNotFound, "Unexpected response message"));
     }

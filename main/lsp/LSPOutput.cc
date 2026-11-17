@@ -13,6 +13,7 @@ namespace {
 bool isServerNotification(const LSPMethod method) {
     switch (method) {
         case LSPMethod::$CancelRequest:
+        case LSPMethod::$Progress:
         case LSPMethod::TextDocumentPublishDiagnostics:
         case LSPMethod::WindowShowMessage:
         case LSPMethod::SorbetTypecheckRunInfo:

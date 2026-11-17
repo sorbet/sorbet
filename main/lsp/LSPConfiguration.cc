@@ -118,6 +118,10 @@ LSPClientConfiguration::LSPClientConfiguration(const InitializeParams &params) {
         }
     }
 
+    if (params.capabilities->window.has_value()) {
+        clientWorkDoneProgressSupport = params.capabilities->window.value()->workDoneProgress.value_or(false);
+    }
+
     if (params.initializationOptions) {
         auto &initOptions = *params.initializationOptions;
         enableOperationNotifications = initOptions->supportsOperationNotifications.value_or(false);

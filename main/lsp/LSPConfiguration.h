@@ -65,6 +65,12 @@ public:
     bool clientCodeActionResolveEditSupport = false;
     /** If true, then LSP client can pass additional data between codeAction and codeAction/resolve requests */
     bool clientCodeActionDataSupport = false;
+    /**
+     * If true, the client supports server-initiated `$/progress` notifications
+     * (`capabilities.window.workDoneProgress`). Sorbet uses them to report slow operations to clients that did not
+     * opt into `sorbet/showOperation` notifications.
+     */
+    bool clientWorkDoneProgressSupport = false;
 
     LSPClientConfiguration(const InitializeParams &initializeParams);
 

@@ -158,9 +158,21 @@ For a more in-depth introduction to Sorbet's approach to incrementality, see thi
 
 In [Sorbet's VS Code extension](vscode.md), server statuses are shown out-of-the-box.
 
-In other language clients, showing the server status requires some extra work. To configure other language clients consume these statuses, follow these steps:
+In other language clients, there are two options.
 
-### 1. Pass `supportsOperationNotifications` at initialization
+### Standard `$/progress` notifications
+
+If the client advertises support for server-initiated progress in the [`initialize` request] (`capabilities.window.workDoneProgress: true`) and does **not** pass `supportsOperationNotifications`, Sorbet reports the same operations using the standard LSP [work done progress] protocol: it sends a `window/workDoneProgress/create` request with a fresh token, then a `$/progress` notification with `kind: "begin"` when the operation starts and one with `kind: "end"` when it finishes. The `title` is the human-readable description of the operation (like `"Typechecking..."` or `"Indexing files..."`). Operations can nest, and each one gets its own token.
+
+Many language clients show these progress notifications without any extra configuration.
+
+[work done progress]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#workDoneProgress
+
+### Custom `sorbet/showOperation` notifications
+
+To consume Sorbet's custom `sorbet/showOperation` notifications instead (this is what the VS Code extension does), follow these steps. When `supportsOperationNotifications` is set, Sorbet does not also send `$/progress` notifications.
+
+#### 1. Pass `supportsOperationNotifications` at initialization
 
 Sorbet only sends server statuses if the client declares it's able to understand them. To opt into server statuses, pass the `supportsOperationNotifications` option during the [`initialize` request].
 
@@ -180,7 +192,7 @@ As a reference, it may be helpful to consult the implementation in the Sorbet VS
 
 - [Passing `initializationOptions`](https://github.com/sorbet/sorbet/blob/15df026a4ffe45871809885a26142bddac5cbdde/vscode_extension/src/languageClient.ts#L50-L52)
 
-### 2. Register a handler for `sorbet/showOperation` notifications that come from the server
+#### 2. Register a handler for `sorbet/showOperation` notifications that come from the server
 
 With the above option set, Sorbet will periodically send notifications from the server to the client indicating the starts and ends of operations. Note that these are [notifications] in the same sense as `textDocument/publishDiagnostics` is a notification: they come from the server unprompted, and are not expected to be given a response like a request would be.
 
