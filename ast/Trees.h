@@ -1234,6 +1234,32 @@ public:
         return foldImpl(foldImpl, *this);
     }
 
+    // Consumes a constant path, transforms its terminal scope, and then rebuilds each constant part root-to-leaf.
+    // Each part retains ownership of its original UnresolvedConstantLit node and has its transformed scope installed.
+    template <class Walker> static ExpressionPtr foldOwned(ExpressionPtr tree, Walker && walker) {
+        using WalkerType = std::remove_reference_t<Walker>;
+        using RootResult = decltype(std::declval<WalkerType &>().onRoot(std::declval<ExpressionPtr &&>()));
+        using PartResult = decltype(std::declval<WalkerType &>().onPart(
+            std::declval<std::unique_ptr<UnresolvedConstantLit> &&>(), std::declval<bool>()));
+        static_assert(std::is_same_v<RootResult, ExpressionPtr>,
+                      "Walker::onRoot must accept an owned ExpressionPtr and return an ExpressionPtr");
+        static_assert(std::is_same_v<PartResult, ExpressionPtr>,
+                      "Walker::onPart must accept an owned UnresolvedConstantLit and whether it is outermost, and "
+                      "return an ExpressionPtr");
+
+        auto foldImpl = [&](const auto &self, std::unique_ptr<UnresolvedConstantLit> current,
+                            bool isOutermost) -> ExpressionPtr {
+            auto scope = std::move(current->scope);
+            if (isa_tree<UnresolvedConstantLit>(scope)) {
+                current->scope = self(self, scope.toUnique<UnresolvedConstantLit>(), false);
+            } else {
+                current->scope = walker.onRoot(std::move(scope));
+            }
+            return walker.onPart(std::move(current), bool{isOutermost});
+        };
+        return foldImpl(foldImpl, tree.toUnique<UnresolvedConstantLit>(), true);
+    }
+
     // Follows the `UnresolvedConstantLit` scope chain until we arrive at a `scope`
     // that is not an `UnresolvedConstantLit`, and return a reference to that.
     const ExpressionPtr &outermostScope() const;
