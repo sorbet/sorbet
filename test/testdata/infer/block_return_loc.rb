@@ -25,25 +25,25 @@ module M
 end
 
 example {M::X}
-#        ^ error: Expected `String` but found `Integer` for block result type
+#        ^^^^ error: Expected `String` but found `Integer` for block result type
 
 example {(M::X)}
-#         ^ error: Expected `String` but found `Integer` for block result type
+#         ^^^^ error: Expected `String` but found `Integer` for block result type
 
 example do
   x = 0
   M::X
-# ^ error: Expected `String` but found `Integer` for block result type
+# ^^^^ error: Expected `String` but found `Integer` for block result type
 end
 
 example {begin; 0; M::X; end}
-#                  ^ error: Expected `String` but found `Integer` for block result type
+#                  ^^^^ error: Expected `String` but found `Integer` for block result type
 
 example {M::X.itself}
 #        ^^^^^^^^^^^ error: Expected `String` but found `Integer` for block result type
 
 example {::M::X}
-#        ^^ error: Expected `String` but found `Integer` for block result type
+#        ^^^^^^ error: Expected `String` but found `Integer` for block result type
 
 module M
   module N
@@ -52,7 +52,7 @@ module M
 end
 
 example {M::N::Y}
-#        ^ error: Expected `String` but found `Integer` for block result type
+#        ^^^^^^^ error: Expected `String` but found `Integer` for block result type
 
 sig {params(blk: T.proc.params(x: Integer).returns(String)).void}
 def example_blockpass(&blk)

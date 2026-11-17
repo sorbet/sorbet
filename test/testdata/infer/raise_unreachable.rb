@@ -622,8 +622,7 @@ sig {params(bar: String).void}
 def bottom_read_with_absurd(bar)
   unless true
     impossible = BottomValues::VALUE
-               # ^^^^^^^^^^^^ error: This code is unreachable
-    panic(impossible)
+    panic(impossible) # error: This code is unreachable
     T.absurd(bar)
   end
 end
