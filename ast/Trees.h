@@ -1610,6 +1610,42 @@ public:
         return walker.onRoot(current->loc(), current->symbol(), true);
     }
 
+    // Like `walkOriginalPath`, but also provides each part's resolution scopes. The span is empty for constants that
+    // resolved and nonempty for constants that failed to resolve.
+    template <class Walker> bool walkOriginalPathWithResolutionScopes(Walker && walker) const {
+        using WalkerType = std::remove_reference_t<Walker>;
+        using RootResult = decltype(std::declval<WalkerType &>().onRoot(
+            std::declval<core::LocOffsets>(), std::declval<core::SymbolRef>(), std::declval<bool>()));
+        using PartResult = decltype(std::declval<WalkerType &>().onPart(
+            std::declval<core::LocOffsets>(), std::declval<core::SymbolRef>(), std::declval<core::NameRef>(),
+            std::declval<absl::Span<const core::SymbolRef>>(), std::declval<bool>()));
+        static_assert(std::is_same_v<RootResult, bool>,
+                      "Walker::onRoot must accept (LocOffsets, SymbolRef, bool) and return bool");
+        static_assert(
+            std::is_same_v<PartResult, bool>,
+            "Walker::onPart must accept (LocOffsets, SymbolRef, NameRef, Span<const SymbolRef>, bool) and return bool");
+
+        auto *current = this;
+        bool isOutermost = true;
+        while (auto *original = current->original()) {
+            auto *resolutionScopes = current->resolutionScopes();
+            auto scopes = resolutionScopes == nullptr ? absl::Span<const core::SymbolRef>{}
+                                                      : absl::MakeConstSpan(*resolutionScopes);
+            if (!walker.onPart(current->loc(), current->symbol(), core::NameRef{original->cnst}, scopes,
+                               bool{isOutermost})) {
+                return false;
+            }
+
+            auto scope = cast_tree<ConstantLit>(original->scope);
+            if (scope == nullptr) {
+                return walker.onRoot(original->scope.loc(), core::SymbolRef{}, false);
+            }
+            current = scope.get();
+            isOutermost = false;
+        }
+        return walker.onRoot(current->loc(), current->symbol(), true);
+    }
+
     void _sanityCheck();
 };
 CheckSize(ConstantLit, 16, 8);
