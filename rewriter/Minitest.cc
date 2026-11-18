@@ -364,7 +364,7 @@ ast::ExpressionPtr makeSharedExamplesConstant(core::MutableContext ctx, const as
     // to create the module)
     auto name = fmt::format("<shared_examples '{}'>", to_s(ctx, arg));
     ast::ExpressionPtr scope = rootScoped ? ast::MK::Constant(arg.loc(), core::Symbols::root()) : ast::MK::EmptyTree();
-    return ast::MK::UnresolvedConstant(arg.loc(), move(scope), ctx.state.enterNameConstant(name));
+    return ast::MK::UnresolvedConstant(move(scope), {ctx.state.enterNameConstant(name)}, {arg.loc()});
 }
 
 // Returns the appropriate superclass for a test class (e.g. from `its` or `it_behaves_like`)

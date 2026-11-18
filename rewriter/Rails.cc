@@ -47,9 +47,14 @@ void Rails::run(core::MutableContext ctx, ast::ClassDef *cdef) {
     snprintf(version, sizeof(version), "V%.1f", f.value);
     absl::c_replace(version, '.', '_');
 
-    cdef->ancestors.emplace_back(ast::MK::UnresolvedConstant(
-        arg->loc, ast::MK::UnresolvedConstant(arg->loc, std::move(send->recv), core::Names::Constants::Compatibility()),
-        ctx.state.enterNameConstant(version)));
+    auto &recv = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(send->recv);
+    InlinedVector<core::NameRef, 4> names(recv.names().begin(), recv.names().end());
+    InlinedVector<core::LocOffsets, 4> locs(recv.locs().begin(), recv.locs().end());
+    names.emplace_back(core::Names::Constants::Compatibility());
+    locs.emplace_back(arg->loc);
+    names.emplace_back(ctx.state.enterNameConstant(version));
+    locs.emplace_back(arg->loc);
+    cdef->ancestors.emplace_back(ast::MK::UnresolvedConstant(std::move(recv.scope), names, locs));
     cdef->ancestors.erase(cdef->ancestors.begin(), cdef->ancestors.begin() + 1);
 }
 

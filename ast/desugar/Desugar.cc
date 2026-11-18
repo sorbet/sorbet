@@ -789,6 +789,43 @@ bool isCallToBlockGivenP(parser::Send *sendNode, ast::ExpressionPtr &receiverExp
     return MK::isKernelApproximate(receiverExpr);
 };
 
+ExpressionPtr desugarConstantPath(DesugarContext dctx, parser::Node *node) {
+    InlinedVector<core::NameRef, 4> names;
+    InlinedVector<core::LocOffsets, 4> locs;
+    unique_ptr<parser::Node> *scopeOwner = nullptr;
+    auto *current = node;
+
+    while (current != nullptr) {
+        if (auto constant = parser::cast_node<parser::Const>(current)) {
+            names.emplace_back(constant->name);
+            locs.emplace_back(constant->loc);
+            scopeOwner = &constant->scope;
+            current = constant->scope.get();
+        } else if (auto constant = parser::cast_node<parser::ConstLhs>(current)) {
+            names.emplace_back(constant->name);
+            locs.emplace_back(constant->loc);
+            scopeOwner = &constant->scope;
+            current = constant->scope.get();
+        } else {
+            break;
+        }
+    }
+
+    ExpressionPtr scope;
+    if (current == nullptr) {
+        scope = MK::EmptyTree();
+    } else if (parser::isa_node<parser::Cbase>(current)) {
+        scope = MK::Constant(current->loc, core::Symbols::root());
+    } else {
+        ENFORCE(scopeOwner != nullptr);
+        scope = node2TreeImpl(dctx, *scopeOwner);
+    }
+
+    absl::c_reverse(names);
+    absl::c_reverse(locs);
+    return MK::UnresolvedConstant(std::move(scope), names, locs);
+}
+
 // Translate a tree to an expression. NOTE: this should only be called from `node2TreeImpl`.
 ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
     try {
@@ -805,11 +842,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
             // frequency in pay-server. Do not reorder the top of this list, or
             // add entries here, without consulting the "node.*" counters from a
             // run over a representative code base.
-            [&](parser::Const *const_) {
-                auto scope = node2TreeImpl(dctx, const_->scope);
-                ExpressionPtr res = MK::UnresolvedConstant(loc, move(scope), const_->name);
-                result = move(res);
-            },
+            [&](parser::Const *const_) { result = desugarConstantPath(dctx, const_); },
             [&](parser::Send *send) {
                 Send::Flags flags;
                 auto rec = node2TreeImpl(dctx, send->receiver);
@@ -1614,11 +1647,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 ExpressionPtr res = MK::String(loc, core::Names::currentFile());
                 result = move(res);
             },
-            [&](parser::ConstLhs *constLhs) {
-                auto scope = node2TreeImpl(dctx, constLhs->scope);
-                ExpressionPtr res = MK::UnresolvedConstant(loc, move(scope), constLhs->name);
-                result = move(res);
-            },
+            [&](parser::ConstLhs *constLhs) { result = desugarConstantPath(dctx, constLhs); },
             [&](parser::Cbase *cbase) {
                 ExpressionPtr res = MK::Constant(loc, core::Symbols::root());
                 result = move(res);

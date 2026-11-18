@@ -238,25 +238,17 @@ public:
         return make_expression<ast::Literal>(loc, core::Types::falseClass());
     }
 
-    static ExpressionPtr UnresolvedConstant(core::LocOffsets loc, ExpressionPtr scope, core::NameRef name) {
-        if (auto original = cast_tree<UnresolvedConstantLit>(scope)) {
-            InlinedVector<core::NameRef, 4> names(original->names().begin(), original->names().end());
-            InlinedVector<core::LocOffsets, 4> locs(original->locs().begin(), original->locs().end());
-            names.emplace_back(name);
-            locs.emplace_back(loc);
-            auto root = std::move(original->scope);
-            return UnresolvedConstantLit::create(std::move(root), names, locs);
-        }
-        return UnresolvedConstantLit::create(std::move(scope), absl::MakeConstSpan(&name, 1),
-                                             absl::MakeConstSpan(&loc, 1));
+    static ExpressionPtr UnresolvedConstant(ExpressionPtr scope, absl::Span<const core::NameRef> names,
+                                            absl::Span<const core::LocOffsets> locs) {
+        ENFORCE(names.size() == locs.size());
+        ENFORCE(!names.empty());
+        ENFORCE(!isa_tree<UnresolvedConstantLit>(scope));
+        return UnresolvedConstantLit::create(std::move(scope), names, locs);
     }
 
     static ExpressionPtr UnresolvedConstantParts(core::LocOffsets loc, absl::Span<const core::NameRef> parts) {
-        auto result = EmptyTree();
-        for (const auto part : parts) {
-            result = UnresolvedConstant(loc, std::move(result), part);
-        }
-        return result;
+        InlinedVector<core::LocOffsets, 4> locs(parts.size(), loc);
+        return UnresolvedConstant(EmptyTree(), parts, locs);
     }
 
     static ExpressionPtr Int(core::LocOffsets loc, int64_t val) {

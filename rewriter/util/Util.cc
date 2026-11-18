@@ -14,28 +14,18 @@ unique_ptr<ast::UnresolvedConstantLit> dupUnresolvedConstantLit(const ast::Unres
         return nullptr;
     }
 
-    auto result = cons->foldFromRoot(
-        [](const ast::ExpressionPtr &root) -> ast::ExpressionPtr {
-            if (ast::isa_tree<ast::EmptyTree>(root)) {
-                return ast::MK::EmptyTree();
-            }
-            auto id = ast::cast_tree<ast::ConstantLit>(root);
-            if (id == nullptr) {
-                return nullptr;
-            }
-            ENFORCE(id->symbol() == core::Symbols::root());
-            return ASTUtil::dupType(root);
-        },
-        [](ast::ExpressionPtr scope, core::NameRef name, core::LocOffsets loc) -> ast::ExpressionPtr {
-            if (scope == nullptr) {
-                return nullptr;
-            }
-            return ast::MK::UnresolvedConstant(loc, std::move(scope), name);
-        });
-    if (result == nullptr) {
-        return nullptr;
+    ast::ExpressionPtr scope;
+    if (ast::isa_tree<ast::EmptyTree>(cons->scope)) {
+        scope = ast::MK::EmptyTree();
+    } else {
+        auto id = ast::cast_tree<ast::ConstantLit>(cons->scope);
+        if (id == nullptr) {
+            return nullptr;
+        }
+        ENFORCE(id->symbol() == core::Symbols::root());
+        scope = ASTUtil::dupType(cons->scope);
     }
-    return result.toUnique<ast::UnresolvedConstantLit>();
+    return ast::UnresolvedConstantLit::createUnique(std::move(scope), cons->names(), cons->locs());
 }
 } // namespace
 

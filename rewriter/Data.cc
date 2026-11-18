@@ -129,8 +129,8 @@ vector<ast::ExpressionPtr> Data::run(core::MutableContext ctx, ast::Assign *asgn
     }
 
     ast::ClassDef::ANCESTORS_store ancestors;
-    ancestors.emplace_back(ast::MK::UnresolvedConstant(loc, ast::MK::Constant(loc, core::Symbols::root()),
-                                                       core::Names::Constants::Data()));
+    ancestors.emplace_back(ast::MK::UnresolvedConstant(ast::MK::Constant(loc, core::Symbols::root()),
+                                                       {core::Names::Constants::Data()}, {loc}));
 
     vector<ast::ExpressionPtr> stats;
     stats.emplace_back(ast::MK::Class(loc, loc, std::move(asgn->lhs), std::move(ancestors), std::move(body)));
