@@ -132,4 +132,42 @@ test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:22: Setter method `length=` does
     test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:22: Replace with `T.must(s)`
     22 |  s.length = 0
           ^
-Errors: 11
+
+test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:27: Method `bb` does not exist on `A` https://srb.help/7003
+    27 |  a.bb ||= x
+            ^^
+  Got `A` originating from:
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:26:
+    26 |def misspelled_setter(a, x)
+                              ^
+  Did you mean `b`? Use `-a` to autocorrect
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:27: Replace with `b`
+    27 |  a.bb ||= x
+            ^^
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:5: Defined here
+     5 |  prop :b, T.nilable(Integer)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:27: Setter method `bb=` does not exist on `A` https://srb.help/7003
+    27 |  a.bb ||= x
+          ^^^^
+  Got `A` originating from:
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:26:
+    26 |def misspelled_setter(a, x)
+                              ^
+
+test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:28: Setter method `bb=` does not exist on `A` https://srb.help/7003
+    28 |  a.bb = x
+            ^^
+  Got `A` originating from:
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:26:
+    26 |def misspelled_setter(a, x)
+                              ^
+  Did you mean `b`? Use `-a` to autocorrect
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:28: Replace with `b`
+    28 |  a.bb = x
+            ^^
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:5: Defined here
+     5 |  prop :b, T.nilable(Integer)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 14
