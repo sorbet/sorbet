@@ -14,3 +14,9 @@ cd test/cli/packager-layers || exit 1
 
 # No --packager-layers flag with --sorbet-packages
 ../../../main/sorbet --silence-dev-message --sorbet-packages . 2>&1
+
+# --packager-layers flag with underscored layer names
+../../../main/sorbet --silence-dev-message --sorbet-packages --packager-layers=test_infra,test_helper,test_unit . 2>&1
+
+# --packager-layers flag with a layer name that is not alphanumeric or underscores
+../../../main/sorbet --silence-dev-message --sorbet-packages --packager-layers=test_infra,test-unit . 2>&1
