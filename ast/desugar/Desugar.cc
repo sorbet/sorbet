@@ -2596,7 +2596,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
             },
             [&](parser::EmptyElse *else_) { result = MK::EmptyTree(); },
             [&](parser::ResolvedConst *resolvedConst) {
-                result = make_expression<ConstantLit>(resolvedConst->loc, move(resolvedConst->symbol));
+                result = ast::ConstantLit::create(resolvedConst->loc, move(resolvedConst->symbol));
             },
 
             [&](parser::BlockPass *blockPass) {

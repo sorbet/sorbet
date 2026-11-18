@@ -1765,8 +1765,7 @@ private:
             auto loc = ancestor.loc();
             auto enclosingClass = ctx.owner.enclosingClass(ctx);
             auto nw = ast::MK::UnresolvedConstant(std::move(ancestor), {enclosingClass.data(ctx)->name}, {loc});
-            auto out =
-                ast::make_expression<ast::ConstantLit>(enclosingClass, nw.toUnique<ast::UnresolvedConstantLit>());
+            auto out = ast::ConstantLit::create(enclosingClass, nw.toUnique<ast::UnresolvedConstantLit>());
             job.ancestor = ast::cast_tree<ast::ConstantLit>(out);
             ancestor = std::move(out);
         } else if (ast::isa_tree<ast::EmptyTree>(ancestor)) {
@@ -1866,7 +1865,7 @@ private:
 
             ast::ExpressionPtr onPart(std::unique_ptr<ast::UnresolvedConstantLit> original, bool isOutermost) {
                 auto name = original->cnst();
-                auto out = ast::make_expression<ast::ConstantLit>(core::Symbols::noSymbol(), std::move(original));
+                auto out = ast::ConstantLit::create(core::Symbols::noSymbol(), std::move(original));
                 auto constant = ast::cast_tree<ast::ConstantLit>(out);
 
                 if (scopeWasEmpty) {

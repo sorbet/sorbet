@@ -168,16 +168,24 @@ ExpressionPtr deepCopy(const void *avoid, const Tag tag, const void *tree, bool 
                     // This constant failed to resolve. Its `symbol()` is `StubModule`, which can't be passed to the
                     // constructor. The resolver creates these by marking a constant unresolved, so we do the same.
                     ENFORCE(exp->symbol() == core::Symbols::StubModule());
-                    auto result = make_expression<ConstantLit>(core::Symbols::noSymbol(), move(originalC));
+                    auto result = ConstantLit::create(core::Symbols::noSymbol(), move(originalC));
                     auto &lit = cast_tree_nonnull<ConstantLit>(result);
+                    for (size_t i = 0; i + 1 < exp->original()->segmentCount(); ++i) {
+                        lit.setSegmentSymbol(i, exp->segmentSymbol(i));
+                    }
                     lit.markUnresolved();
                     *lit.resolutionScopes() = *resolutionScopes;
                     return result;
                 }
-                return make_expression<ConstantLit>(exp->symbol(), move(originalC));
+                auto result = ConstantLit::create(exp->symbol(), move(originalC));
+                auto &lit = cast_tree_nonnull<ConstantLit>(result);
+                for (size_t i = 0; i + 1 < exp->original()->segmentCount(); ++i) {
+                    lit.setSegmentSymbol(i, exp->segmentSymbol(i));
+                }
+                return result;
             }
 
-            return make_expression<ConstantLit>(exp->loc(), exp->symbol());
+            return ConstantLit::create(exp->loc(), exp->symbol());
         }
 
         case Tag::ZSuperArgs: {

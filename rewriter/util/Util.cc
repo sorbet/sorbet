@@ -82,10 +82,15 @@ ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
             return nullptr;
         }
         if (orig == nullptr) {
-            return ast::make_expression<ast::ConstantLit>(ident->loc(), ident->symbol());
+            return ast::ConstantLit::create(ident->loc(), ident->symbol());
         }
 
-        return ast::make_expression<ast::ConstantLit>(ident->symbol(), std::move(orig));
+        auto result = ast::ConstantLit::create(ident->symbol(), std::move(orig));
+        auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(result);
+        for (size_t i = 0; i + 1 < ident->original()->segmentCount(); ++i) {
+            lit.setSegmentSymbol(i, ident->segmentSymbol(i));
+        }
+        return result;
     }
 
     auto arrayLit = ast::cast_tree<ast::Array>(orig);

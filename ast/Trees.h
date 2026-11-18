@@ -1304,8 +1304,11 @@ public:
 };
 CheckSize(UnresolvedConstantLit, 16, 8);
 
-EXPRESSION(ConstantLit) {
+EXPRESSION(ConstantLit) : private core::TrailingObjects<ConstantLit, core::SymbolRef> {
 private:
+    friend TrailingObjects;
+    static_assert(std::is_trivially_destructible_v<core::SymbolRef>);
+
     // This is a lot of complexity, but codebases can have a large number of resolved constants,
     // so we put in some work to ensure that these take up the minimal amount of space possible.
     //
@@ -1567,9 +1570,40 @@ private:
 
     Storage storage;
 
-public:
     ConstantLit(core::LocOffsets loc, core::SymbolRef symbol);
     ConstantLit(core::SymbolRef symbol, std::unique_ptr<UnresolvedConstantLit> original);
+
+    size_t numTrailingObjects(OverloadToken<core::SymbolRef>) const {
+        auto *original = storage.original();
+        return original == nullptr ? 0 : original->segmentCount() - 1;
+    }
+
+public:
+    void operator delete(void *ptr) {
+        ::operator delete(ptr);
+    }
+
+    static ExpressionPtr create(core::LocOffsets loc, core::SymbolRef symbol);
+    static ExpressionPtr create(core::SymbolRef symbol, std::unique_ptr<UnresolvedConstantLit> original);
+
+    core::SymbolRef segmentSymbol(size_t index) const {
+        ENFORCE(original() != nullptr);
+        ENFORCE(index < original()->segmentCount());
+        if (index + 1 == original()->segmentCount()) {
+            return symbol();
+        }
+        return getTrailingObjects<core::SymbolRef>()[index];
+    }
+
+    void setSegmentSymbol(size_t index, core::SymbolRef symbol) {
+        ENFORCE(original() != nullptr);
+        ENFORCE(index < original()->segmentCount());
+        if (index + 1 == original()->segmentCount()) {
+            setSymbol(symbol);
+        } else {
+            getTrailingObjects<core::SymbolRef>()[index] = symbol;
+        }
+    }
 
     ExpressionPtr deepCopy() const;
     bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;

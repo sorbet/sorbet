@@ -2587,7 +2587,7 @@ class TreeSymbolizer {
                 ENFORCE(existing.exists());
 
                 newOwner = existing;
-                return ast::make_expression<ast::ConstantLit>(existing, std::move(constLit));
+                return ast::ConstantLit::create(existing, std::move(constLit));
             }
         } walker{ctx, packageMangledClasses, withinExplicitRootScope, owner};
 
@@ -2737,7 +2737,7 @@ public:
                                    ? maybeCnst->second
                                    : ctx.state.lookupStaticFieldSymbol(scope, lhs.cnst());
         ENFORCE(cnst.exists());
-        asgn.lhs = ast::make_expression<ast::ConstantLit>(cnst, asgn.lhs.toUnique<ast::UnresolvedConstantLit>());
+        asgn.lhs = ast::ConstantLit::create(cnst, asgn.lhs.toUnique<ast::UnresolvedConstantLit>());
 
         return tree;
     }
@@ -2917,7 +2917,7 @@ public:
         // Simulates how squashNames in handleAssignment also creates a ConstantLit
         // (simpler than squashNames, because type members are not allowed to use any sort of
         // `A::B = type_member` syntax)
-        asgn.lhs = ast::make_expression<ast::ConstantLit>(sym, asgn.lhs.toUnique<ast::UnresolvedConstantLit>());
+        asgn.lhs = ast::ConstantLit::create(sym, asgn.lhs.toUnique<ast::UnresolvedConstantLit>());
 
         if (send->hasKwArgs()) {
             const auto numKwArgs = send->numKwArgs();

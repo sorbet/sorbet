@@ -369,13 +369,29 @@ ExpressionPtr &UnresolvedConstantLit::outermostScope() {
 
 ConstantLit::ConstantLit(core::LocOffsets loc, core::SymbolRef symbol) : storage(loc, symbol) {
     categoryCounterInc("trees", "resolvedconstantlit");
-    _sanityCheck();
 }
 
 ConstantLit::ConstantLit(core::SymbolRef symbol, unique_ptr<UnresolvedConstantLit> original)
     : storage(symbol, std::move(original)) {
     categoryCounterInc("trees", "resolvedconstantlit");
-    _sanityCheck();
+}
+
+ExpressionPtr ConstantLit::create(core::LocOffsets loc, core::SymbolRef symbol) {
+    auto size = totalSizeToAlloc<core::SymbolRef>(0);
+    auto *raw = ::operator new(size);
+    auto *result = new (raw) ConstantLit(loc, symbol);
+    result->_sanityCheck();
+    return ExpressionPtr::fromUnique(unique_ptr<ConstantLit>(result));
+}
+
+ExpressionPtr ConstantLit::create(core::SymbolRef symbol, unique_ptr<UnresolvedConstantLit> original) {
+    auto trailingSymbols = original->segmentCount() - 1;
+    auto size = totalSizeToAlloc<core::SymbolRef>(trailingSymbols);
+    auto *raw = ::operator new(size);
+    auto *result = new (raw) ConstantLit(symbol, std::move(original));
+    uninitialized_fill_n(result->getTrailingObjects<core::SymbolRef>(), trailingSymbols, core::Symbols::noSymbol());
+    result->_sanityCheck();
+    return ExpressionPtr::fromUnique(unique_ptr<ConstantLit>(result));
 }
 
 optional<pair<core::SymbolRef, vector<core::NameRef>>> ConstantLit::fullUnresolvedPath(const core::Context ctx) const {

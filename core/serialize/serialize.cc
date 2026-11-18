@@ -1564,6 +1564,9 @@ void SerializerImpl::pickle(Pickler &p, const File &f, const ast::ExpressionPtr 
             } else {
                 p.putU4(uint32_t(ast::Tag::UnresolvedConstantLit));
                 pickle(p, f, *original);
+                for (size_t i = 0; i + 1 < original->segmentCount(); ++i) {
+                    p.putU4(a.segmentSymbol(i).rawId());
+                }
             }
             break;
         }
@@ -1851,12 +1854,18 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             unique_ptr<ast::UnresolvedConstantLit> orig;
             if (litTag == uint32_t(ast::Tag::UnresolvedConstantLit)) {
                 orig = unpickleUnresolvedConstantLit(p, gs);
-                return ast::make_expression<ast::ConstantLit>(sym, std::move(orig));
+                auto segmentCount = orig->segmentCount();
+                auto result = ast::ConstantLit::create(sym, std::move(orig));
+                auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(result);
+                for (size_t i = 0; i + 1 < segmentCount; ++i) {
+                    lit.setSegmentSymbol(i, SymbolRef::fromRaw(p.getU4()));
+                }
+                return result;
             } else if (litTag != 0) {
                 Exception::raise("Unknown tag for `ConstantLit::original`: {}", litTag);
             }
             ENFORCE(orig == nullptr);
-            return ast::make_expression<ast::ConstantLit>(loc, sym);
+            return ast::ConstantLit::create(loc, sym);
         }
         case ast::Tag::RuntimeMethodDefinition: {
             auto loc = unpickleLocOffsets(p);

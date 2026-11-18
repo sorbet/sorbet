@@ -309,7 +309,8 @@ bool compareTrees(const core::GlobalState &gs, const void *avoid, const Tag tag,
                     return false;
                 }
                 for (size_t i = 0; i < alit.segmentCount(); ++i) {
-                    if (!Comparator::compareNames(gs, alit.names()[i], blit.names()[i])) {
+                    if (!Comparator::compareNames(gs, alit.names()[i], blit.names()[i]) ||
+                        a->segmentSymbol(i) != b->segmentSymbol(i)) {
                         return false;
                     }
                 }
