@@ -1425,10 +1425,10 @@ void readOptions(Options &opts,
             if (opts.cacheSensitiveOptions.sorbetPackages) {
                 // TODO(neil): This regex was picked on a whim, so open to changing to be more or less restrictive based
                 // on feedback/usecases.
-                std::regex layerValid("[a-zA-Z0-9]+");
+                std::regex layerValid("[a-zA-Z0-9_]+");
                 for (const string &layer : raw["packager-layers"].as<vector<string>>()) {
                     if (!std::regex_match(layer, layerValid)) {
-                        logger->error("--packager-layers must contain items that are alphanumeric.");
+                        logger->error("--packager-layers must contain items that are alphanumeric or underscores.");
                         throw EarlyReturnWithCode(1);
                     }
                     opts.packagerLayers.emplace_back(layer);

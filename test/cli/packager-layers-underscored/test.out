@@ -1,8 +1,45 @@
 ###### Typecheck ######
---packager-layers must contain items that are alphanumeric.
+base_lib/__package.rb:7: Layering violation: cannot import `AppService` (in layer `app_service`) from `BaseLib` (in layer `base_lib`) https://srb.help/3726
+     7 |  import AppService
+          ^^^^^^^^^^^^^^^^^
+    base_lib/__package.rb:4: `BaseLib`'s `layer` declared here
+     4 |  layer 'base_lib'
+                ^^^^^^^^^^
+    app_service/__package.rb:4: `AppService`'s `layer` declared here
+     4 |  layer 'app_service'
+                ^^^^^^^^^^^^^
+
+test/unit/service_test.rb:5: `AppService` is not imported https://srb.help/3718
+     5 |    AppService::Service
+            ^^^^^^^^^^
+    app_service/__package.rb:3: Package defined here
+     3 |class AppService < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/unit/__package.rb:8: Insert `import AppService`
+     8 |  import Test::Helper
+                             ^
+Errors: 2
 
 ###### Running gen-packages ######
---packager-layers must contain items that are alphanumeric.
+test/unit/__package.rb:3: `Test::Unit` is missing imports https://srb.help/3734
+     3 |class Test::Unit < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    test/unit/__package.rb:8: Inserted `import AppService`
+     8 |  import Test::Helper
+                             ^
+
+base_lib/__package.rb:7: Layering violation: cannot import `AppService` (in layer `app_service`) from `BaseLib` (in layer `base_lib`) https://srb.help/3726
+     7 |  import AppService
+          ^^^^^^^^^^^^^^^^^
+    base_lib/__package.rb:4: `BaseLib`'s `layer` declared here
+     4 |  layer 'base_lib'
+                ^^^^^^^^^^
+    app_service/__package.rb:4: `AppService`'s `layer` declared here
+     4 |  layer 'app_service'
+                ^^^^^^^^^^^^^
+Errors: 2
 
 ###### cat ./app_service/__package.rb ######
 # typed: strict
@@ -55,4 +92,5 @@ class Test::Unit < PackageSpec
   strict_dependencies 'false'
 
   import Test::Helper
+  import AppService
 end
