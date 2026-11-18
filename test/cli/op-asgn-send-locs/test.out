@@ -1,0 +1,135 @@
+test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:13: Expected `Integer` but found `T.nilable(Integer)` for argument `x` https://srb.help/7002
+    13 |  takes_integer(a.b ||= x)
+                        ^^^^^^^^^
+  Expected `Integer` for argument `x` of method `Object#takes_integer`:
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:8:
+     8 |sig {params(x: Integer).void}
+                    ^
+  Got `T.nilable(Integer)` originating from:
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:13:
+    13 |  takes_integer(a.b ||= x)
+                        ^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:13: Replace with `T.must(a.b ||= x)`
+    13 |  takes_integer(a.b ||= x)
+                        ^^^^^^^^^
+
+test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:14: Expected `Integer` but found `T.nilable(Integer)` for argument `x` https://srb.help/7002
+    14 |  takes_integer(h[:k] ||= x)
+                        ^^^^^^^^^^^
+  Expected `Integer` for argument `x` of method `Object#takes_integer`:
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:8:
+     8 |sig {params(x: Integer).void}
+                    ^
+  Got `T.nilable(Integer)` originating from:
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:14:
+    14 |  takes_integer(h[:k] ||= x)
+                        ^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:14: Replace with `T.must(h[:k] ||= x)`
+    14 |  takes_integer(h[:k] ||= x)
+                        ^^^^^^^^^^^
+
+test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:15: Expected `Integer` but found `T.nilable(Integer)` for argument `x` https://srb.help/7002
+    15 |  takes_integer(a.b &&= x)
+                        ^^^^^^^^^
+  Expected `Integer` for argument `x` of method `Object#takes_integer`:
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:8:
+     8 |sig {params(x: Integer).void}
+                    ^
+  Got `T.nilable(Integer)` originating from:
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:15:
+    15 |  takes_integer(a.b &&= x)
+                        ^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:15: Replace with `T.must(a.b &&= x)`
+    15 |  takes_integer(a.b &&= x)
+                        ^^^^^^^^^
+
+test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:20: Method `length` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
+    20 |  s.length ||= 0
+            ^^^^^^
+  Got `T.nilable(String)` originating from:
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:19:
+    19 |def setter_errors(s)
+                          ^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:20: Replace with `T.must(s.length)`
+    20 |  s.length ||= 0
+          ^^^^^^^^
+
+test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:20: Setter method `length=` does not exist on `String` component of `T.nilable(String)` https://srb.help/7003
+    20 |  s.length ||= 0
+          ^^^^^^^^
+  Got `T.nilable(String)` originating from:
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:19:
+    19 |def setter_errors(s)
+                          ^
+
+test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:20: Setter method `length=` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
+    20 |  s.length ||= 0
+          ^^^^^^^^
+  Got `T.nilable(String)` originating from:
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:19:
+    19 |def setter_errors(s)
+                          ^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:20: Replace with `T.must(s.length)`
+    20 |  s.length ||= 0
+          ^^^^^^^^
+
+test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:21: Method `length` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
+    21 |  s.length += 1
+            ^^^^^^
+  Got `T.nilable(String)` originating from:
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:19:
+    19 |def setter_errors(s)
+                          ^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:21: Replace with `T.must(s.length)`
+    21 |  s.length += 1
+          ^^^^^^^^
+
+test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:21: Setter method `length=` does not exist on `String` component of `T.nilable(String)` https://srb.help/7003
+    21 |  s.length += 1
+          ^^^^^^^^
+  Got `T.nilable(String)` originating from:
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:19:
+    19 |def setter_errors(s)
+                          ^
+
+test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:21: Setter method `length=` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
+    21 |  s.length += 1
+          ^^^^^^^^
+  Got `T.nilable(String)` originating from:
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:19:
+    19 |def setter_errors(s)
+                          ^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:21: Replace with `T.must(s.length)`
+    21 |  s.length += 1
+          ^^^^^^^^
+
+test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:22: Setter method `length=` does not exist on `String` component of `T.nilable(String)` https://srb.help/7003
+    22 |  s.length = 0
+            ^^^^^^
+  Got `T.nilable(String)` originating from:
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:19:
+    19 |def setter_errors(s)
+                          ^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/string.rbi#L1572: Method `length` defined here without a corresponding setter
+    1572 |  def length(); end
+            ^^^^^^^^^^^^
+
+test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:22: Setter method `length=` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
+    22 |  s.length = 0
+            ^^^^^^
+  Got `T.nilable(String)` originating from:
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:19:
+    19 |def setter_errors(s)
+                          ^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:22: Replace with `T.must(s)`
+    22 |  s.length = 0
+          ^
+Errors: 11
