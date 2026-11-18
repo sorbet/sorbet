@@ -102,14 +102,14 @@ def let_in_then_branch_other_type(c)
   T.reveal_type(x) # error: Revealed type: `T.any(Integer, String)`
 end
 
-# Writing an untyped value in a block is allowed, as it is for a write that a
-# `T.let` has pinned.
+# Writing an untyped value in a block changes the variable's type, as it does
+# for a variable without a `T.let`.
 sig {params(c: T::Boolean, r: T.untyped, xs: T::Array[Integer]).void}
 def untyped_write_in_block(c, r, xs)
   if c
     auth = T.let(r.auth, T.untyped)
   else
-    xs.each { auth = r.auth }
+    xs.each { auth = r.auth } # error: Changing the type of a variable is not permitted in loops and blocks
   end
 end
 
@@ -122,7 +122,7 @@ def read_before_untyped_write_in_block(c, r, xs)
   else
     xs.each do
       T.reveal_type(auth) # error: Revealed type: `NilClass`
-      auth = r.auth
+      auth = r.auth # error: Changing the type of a variable is not permitted in loops and blocks
     end
   end
 end
