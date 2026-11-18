@@ -173,7 +173,7 @@ ExpressionPtr deepCopy(const void *avoid, const Tag tag, const void *tree, bool 
                     for (size_t i = 0; i + 1 < exp->original()->segmentCount(); ++i) {
                         lit.setSegmentSymbol(i, exp->segmentSymbol(i));
                     }
-                    lit.markUnresolved();
+                    lit.markUnresolved(exp->failedSegment());
                     *lit.resolutionScopes() = *resolutionScopes;
                     return result;
                 }

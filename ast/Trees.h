@@ -1398,6 +1398,13 @@ private:
     //
     // We can represent all three of these in 16 bytes of space by doing a bunch of manual
     // pointer tagging.
+    struct FailedResolutionData {
+        std::vector<core::SymbolRef> resolutionScopes;
+        uint32_t failedSegment;
+
+        FailedResolutionData(uint32_t failedSegment) : failedSegment(failedSegment) {}
+    };
+
     enum class Tag : uint8_t {
         KnownSymbol = 1,
         ResolvedSymbol,
@@ -1445,8 +1452,8 @@ private:
             return tagValue(tag, reinterpret_cast<tagged_storage>(ptr));
         }
 
-        static tagged_storage allocateResolutionScopes() {
-            return tagPtr(Tag::FailedResolutionSymbol, new std::vector<core::SymbolRef>());
+        static tagged_storage allocateResolutionData(uint32_t failedSegment) {
+            return tagPtr(Tag::FailedResolutionSymbol, new FailedResolutionData(failedSegment));
         }
 
         Storage(core::LocOffsets loc, core::SymbolRef symbol) : ptr2(tagSymbol(Tag::KnownSymbol, symbol)) {
@@ -1484,8 +1491,7 @@ private:
                     break;
                 }
                 case Tag::FailedResolutionSymbol: {
-                    auto *scopes = resolutionScopes();
-                    delete scopes;
+                    delete resolutionData();
                     auto *ucl = original();
                     delete ucl;
                     break;
@@ -1539,7 +1545,7 @@ private:
                 case Tag::ResolvedSymbol:
                     return nullptr;
                 case Tag::FailedResolutionSymbol:
-                    return reinterpret_cast<std::vector<core::SymbolRef> *>(untaggedPtr2());
+                    return &resolutionData()->resolutionScopes;
             }
         }
 
@@ -1549,8 +1555,18 @@ private:
                 case Tag::ResolvedSymbol:
                     return nullptr;
                 case Tag::FailedResolutionSymbol:
-                    return reinterpret_cast<const std::vector<core::SymbolRef> *>(untaggedPtr2());
+                    return &resolutionData()->resolutionScopes;
             }
+        }
+
+        FailedResolutionData *resolutionData() {
+            ENFORCE(tag() == Tag::FailedResolutionSymbol);
+            return reinterpret_cast<FailedResolutionData *>(untaggedPtr2());
+        }
+
+        const FailedResolutionData *resolutionData() const {
+            ENFORCE(tag() == Tag::FailedResolutionSymbol);
+            return reinterpret_cast<const FailedResolutionData *>(untaggedPtr2());
         }
 
         void setSymbol(core::SymbolRef sym) {
@@ -1559,12 +1575,10 @@ private:
             ptr2 = tagSymbol(Tag::ResolvedSymbol, sym);
         }
 
-        void markUnresolved() {
+        void markUnresolved(uint32_t failedSegment) {
             ENFORCE(tag() == Tag::ResolvedSymbol);
-            if (tag() == Tag::ResolvedSymbol) {
-                ptr2 = allocateResolutionScopes();
-                ENFORCE(tag() == Tag::FailedResolutionSymbol);
-            }
+            ptr2 = allocateResolutionData(failedSegment);
+            ENFORCE(tag() == Tag::FailedResolutionSymbol);
         }
     };
 
@@ -1589,6 +1603,9 @@ public:
     core::SymbolRef segmentSymbol(size_t index) const {
         ENFORCE(original() != nullptr);
         ENFORCE(index < original()->segmentCount());
+        if (resolutionScopes() != nullptr && index >= failedSegment()) {
+            return core::Symbols::StubModule();
+        }
         if (index + 1 == original()->segmentCount()) {
             return symbol();
         }
@@ -1636,8 +1653,15 @@ public:
     }
 
     // Marks this constant as unresolved and allocates a vector for `resolutionScopes`.
-    void markUnresolved() {
-        storage.markUnresolved();
+    void markUnresolved(uint32_t failedSegment = 0) {
+        ENFORCE(original() != nullptr);
+        ENFORCE(failedSegment < original()->segmentCount());
+        storage.markUnresolved(failedSegment);
+    }
+
+    uint32_t failedSegment() const {
+        ENFORCE(resolutionScopes() != nullptr);
+        return storage.resolutionData()->failedSegment;
     }
 
     UnresolvedConstantLit *original() {
@@ -1665,8 +1689,13 @@ public:
         auto *current = this;
         bool isOutermost = true;
         while (auto *original = current->original()) {
-            if (!walker.onPart(current->loc(), current->symbol(), original->cnst(), bool{isOutermost})) {
-                return false;
+            for (size_t i = original->segmentCount(); i > 0; --i) {
+                auto index = i - 1;
+                if (!walker.onPart(original->locs()[index], current->segmentSymbol(index), original->names()[index],
+                                   bool{isOutermost})) {
+                    return false;
+                }
+                isOutermost = false;
             }
 
             auto scope = cast_tree<ConstantLit>(original->scope);
@@ -1674,7 +1703,6 @@ public:
                 return walker.onRoot(original->scope.loc(), core::SymbolRef{}, false);
             }
             current = scope.get();
-            isOutermost = false;
         }
         return walker.onRoot(current->loc(), current->symbol(), true);
     }
@@ -1697,11 +1725,23 @@ public:
         auto *current = this;
         bool isOutermost = true;
         while (auto *original = current->original()) {
-            auto *resolutionScopes = current->resolutionScopes();
-            auto scopes = resolutionScopes == nullptr ? absl::Span<const core::SymbolRef>{}
-                                                      : absl::MakeConstSpan(*resolutionScopes);
-            if (!walker.onPart(current->loc(), current->symbol(), original->cnst(), scopes, bool{isOutermost})) {
-                return false;
+            for (size_t i = original->segmentCount(); i > 0; --i) {
+                auto index = i - 1;
+                absl::Span<const core::SymbolRef> scopes;
+                core::SymbolRef noScope;
+                if (auto *resolutionScopes = current->resolutionScopes()) {
+                    if (index == current->failedSegment()) {
+                        scopes = absl::MakeConstSpan(*resolutionScopes);
+                    } else if (index > current->failedSegment()) {
+                        noScope = core::Symbols::noSymbol();
+                        scopes = absl::MakeConstSpan(&noScope, 1);
+                    }
+                }
+                if (!walker.onPart(original->locs()[index], current->segmentSymbol(index), original->names()[index],
+                                   scopes, bool{isOutermost})) {
+                    return false;
+                }
+                isOutermost = false;
             }
 
             auto scope = cast_tree<ConstantLit>(original->scope);
@@ -1709,7 +1749,6 @@ public:
                 return walker.onRoot(original->scope.loc(), core::SymbolRef{}, false);
             }
             current = scope.get();
-            isOutermost = false;
         }
         return walker.onRoot(current->loc(), current->symbol(), true);
     }

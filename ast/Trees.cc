@@ -415,7 +415,9 @@ optional<pair<core::SymbolRef, vector<core::NameRef>>> ConstantLit::fullUnresolv
         }
 
         auto &orig = *nested->original();
-        namesFailedToResolve.emplace_back(orig.cnst());
+        for (size_t i = orig.segmentCount(); i > nested->failedSegment(); --i) {
+            namesFailedToResolve.emplace_back(orig.names()[i - 1]);
+        }
 
         if (nested->resolutionScopes()->front().exists()) {
             break;
