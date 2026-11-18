@@ -215,7 +215,8 @@ private:
                                core::ClassOrModuleRef packageRegistryCursor, bool isOutermost,
                                PackageCursorPosition packageCursorPosition)
             : scope(move(scope)), out(lit), packageRegistryCursor(packageRegistryCursor), isOutermost(isOutermost),
-              packageCursorPosition(packageCursorPosition) {}
+              packageCursorPosition(packageCursorPosition),
+              packageBoundarySegment(packageCursorPosition == PackageCursorPosition::PackageBoundary ? 0 : -1) {}
         ConstantResolutionItem(ConstantResolutionItem &&rhs) noexcept = default;
         ConstantResolutionItem &operator=(ConstantResolutionItem &&rhs) noexcept = default;
 

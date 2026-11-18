@@ -545,6 +545,78 @@ void showRawConstantSegmentsWithLocs(fmt::memory_buffer &buf, const core::Global
     }
 }
 
+void showRawConstantLit(fmt::memory_buffer &buf, const core::GlobalState &gs, const ConstantLit &constant, int tabs,
+                        core::FileRef file = {}) {
+    auto *original = constant.original();
+    if (original == nullptr) {
+        fmt::format_to(std::back_inserter(buf), "ConstantLit{{\n");
+        if (file.exists()) {
+            printTabs(buf, tabs + 1);
+            fmt::format_to(std::back_inserter(buf), "loc = {}-{}\n", constant.loc().beginLoc, constant.loc().endLoc);
+        }
+        printTabs(buf, tabs + 1);
+        fmt::format_to(std::back_inserter(buf), "symbol = ({} {})\n", constant.symbol().showKind(gs),
+                       constant.symbol().showFullName(gs));
+        printTabs(buf, tabs + 1);
+        fmt::format_to(std::back_inserter(buf), "orig = nullptr\n");
+        printTabs(buf, tabs);
+        fmt::format_to(std::back_inserter(buf), "}}");
+        return;
+    }
+
+    auto currentTabs = tabs;
+    for (size_t i = original->segmentCount(); i > 0; --i) {
+        auto index = i - 1;
+        fmt::format_to(std::back_inserter(buf), "ConstantLit{{\n");
+        if (file.exists()) {
+            printTabs(buf, currentTabs + 1);
+            fmt::format_to(std::back_inserter(buf), "loc = {}-{}\n", original->locs()[index].beginLoc,
+                           original->locs()[index].endLoc);
+        }
+        auto symbol = constant.segmentSymbol(index);
+        printTabs(buf, currentTabs + 1);
+        fmt::format_to(std::back_inserter(buf), "symbol = ({} {})\n", symbol.showKind(gs), symbol.showFullName(gs));
+        printTabs(buf, currentTabs + 1);
+        fmt::format_to(std::back_inserter(buf), "orig = UnresolvedConstantLit{{\n");
+        if (file.exists()) {
+            printTabs(buf, currentTabs + 2);
+            fmt::format_to(std::back_inserter(buf), "loc = {}\n",
+                           core::Loc(file, original->locs()[index]).fileShortPosToString(gs));
+        }
+        printTabs(buf, currentTabs + 2);
+        fmt::format_to(std::back_inserter(buf), "cnst = {}\n", original->names()[index].showRaw(gs));
+        printTabs(buf, currentTabs + 2);
+        fmt::format_to(std::back_inserter(buf), "scope = ");
+        currentTabs += 2;
+    }
+
+    if (file.exists()) {
+        fmt::format_to(std::back_inserter(buf), "{}", original->scope.showRawWithLocs(gs, file, currentTabs));
+    } else {
+        fmt::format_to(std::back_inserter(buf), "{}", original->scope.showRaw(gs, currentTabs));
+    }
+
+    for (size_t index = 0; index < original->segmentCount(); ++index) {
+        currentTabs -= 2;
+        fmt::format_to(std::back_inserter(buf), "\n");
+        printTabs(buf, currentTabs + 1);
+        fmt::format_to(std::back_inserter(buf), "}}\n");
+        if (auto *scopes = constant.resolutionScopes()) {
+            if (index == constant.failedSegment()) {
+                printTabs(buf, currentTabs + 1);
+                fmt::format_to(std::back_inserter(buf), "resolutionScopes = [{}]\n",
+                               fmt::map_join(*scopes, ", ", [&](auto sym) { return sym.showFullName(gs); }));
+            } else if (index > constant.failedSegment()) {
+                printTabs(buf, currentTabs + 1);
+                fmt::format_to(std::back_inserter(buf), "resolutionScopes = [{}]\n",
+                               core::Symbols::noSymbol().showFullName(gs));
+            }
+        }
+        printTabs(buf, currentTabs);
+        fmt::format_to(std::back_inserter(buf), "}}");
+    }
+}
+
 void printElems(const core::GlobalState &gs, fmt::memory_buffer &buf, absl::Span<const ExpressionPtr> args, int tabs) {
     bool first = true;
     bool didshadow = false;
@@ -892,24 +964,7 @@ string ConstantLit::toStringWithTabs(const core::GlobalState &gs, int tabs) cons
 
 string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
-
-    fmt::format_to(std::back_inserter(buf), "{}{{\n", nodeName());
-    printTabs(buf, tabs + 1);
-    fmt::format_to(std::back_inserter(buf), "symbol = ({} {})\n", this->symbol().showKind(gs),
-                   this->symbol().showFullName(gs));
-    printTabs(buf, tabs + 1);
-    fmt::format_to(std::back_inserter(buf), "orig = {}\n",
-                   this->original() ? this->original()->showRaw(gs, tabs + 1) : "nullptr");
-    // If resolutionScopes isn't null, it should not be empty.
-    ENFORCE(resolutionScopes() == nullptr || !resolutionScopes()->empty());
-    if (resolutionScopes() != nullptr && !resolutionScopes()->empty()) {
-        printTabs(buf, tabs + 1);
-        fmt::format_to(std::back_inserter(buf), "resolutionScopes = [{}]\n",
-                       fmt::map_join(*this->resolutionScopes(), ", ", [&](auto sym) { return sym.showFullName(gs); }));
-    }
-    printTabs(buf, tabs);
-
-    fmt::format_to(std::back_inserter(buf), "}}");
+    showRawConstantLit(buf, gs, *this, tabs);
     return fmt::to_string(buf);
 }
 
@@ -1833,26 +1888,7 @@ string EmptyTree::showRawWithLocs(const core::GlobalState &gs, core::FileRef fil
 
 string ConstantLit::showRawWithLocs(const core::GlobalState &gs, core::FileRef file, int tabs) const {
     fmt::memory_buffer buf;
-
-    fmt::format_to(std::back_inserter(buf), "{}{{\n", nodeName());
-    printTabs(buf, tabs + 1);
-    fmt::format_to(std::back_inserter(buf), "loc = {}-{}\n", this->loc().beginLoc, this->loc().endLoc);
-    printTabs(buf, tabs + 1);
-    fmt::format_to(std::back_inserter(buf), "symbol = ({} {})\n", this->symbol().showKind(gs),
-                   this->symbol().showFullName(gs));
-    printTabs(buf, tabs + 1);
-    fmt::format_to(std::back_inserter(buf), "orig = {}\n",
-                   this->original() ? this->original()->showRawWithLocs(gs, file, tabs + 1) : "nullptr");
-    // If resolutionScopes isn't null, it should not be empty.
-    ENFORCE(resolutionScopes() == nullptr || !resolutionScopes()->empty());
-    if (resolutionScopes() != nullptr && !resolutionScopes()->empty()) {
-        printTabs(buf, tabs + 1);
-        fmt::format_to(std::back_inserter(buf), "resolutionScopes = [{}]\n",
-                       fmt::map_join(*this->resolutionScopes(), ", ", [&](auto sym) { return sym.showFullName(gs); }));
-    }
-    printTabs(buf, tabs);
-
-    fmt::format_to(std::back_inserter(buf), "}}");
+    showRawConstantLit(buf, gs, *this, tabs, file);
     return fmt::to_string(buf);
 }
 

@@ -1307,6 +1307,7 @@ CheckSize(UnresolvedConstantLit, 16, 8);
 EXPRESSION(ConstantLit) : private core::TrailingObjects<ConstantLit, core::SymbolRef> {
 private:
     friend TrailingObjects;
+    static_assert(std::is_nothrow_copy_constructible_v<core::SymbolRef>);
     static_assert(std::is_trivially_destructible_v<core::SymbolRef>);
 
     // This is a lot of complexity, but codebases can have a large number of resolved constants,
@@ -1376,7 +1377,7 @@ private:
     //
     //    struct FailedResolutionSymbol {
     //        std::unique_ptr<UnresolvedConstantLit> original;
-    //        std::unique_ptr<std::vector<core::SymbolRef>> resolutionScopes;
+    //        std::unique_ptr<FailedResolutionData> data;
     //    };
     //
     //    We transition the second case -- where the second case is representing a symbol that
@@ -1421,8 +1422,7 @@ private:
         // to the associated UnresolvedConstantLit.
         tagged_storage ptr1;
         // This member is a tagged quantity; its upper 48 bits will be either a raw symbol
-        // ID or a pointer to a vector of SymbolRefs representing the resolution scopes
-        // for a constant that failed to resolve.
+        // ID or a pointer to the data for a constant that failed to resolve.
         //
         // The tag determines the value for both this member and ptr1.
         tagged_storage ptr2;
