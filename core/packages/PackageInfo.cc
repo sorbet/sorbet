@@ -753,6 +753,10 @@ std::string PackageInfo::renderPackageRbContents(
     UnorderedMap<core::packages::MangledName, core::packages::StrictDependenciesLevel> newStrictnessByPkg) const {
     fmt::memory_buffer result;
 
+    if (testPackage()) {
+        fmt::format_to(std::back_inserter(result), "  test!\n");
+    }
+
     if (isPreludePackage()) {
         fmt::format_to(std::back_inserter(result), "  prelude!\n\n");
     }
