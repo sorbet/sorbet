@@ -66,7 +66,7 @@ private:
     std::unique_ptr<WorkerPool> emptyWorkers;
 
     /**
-     * A count of the number of times we've run `commitEdit`. The results of `getTypecheckingPath` are tagged
+     * A count of the number of times we've run `commitEdit`. The results of `predictTypecheckingPath` are tagged
      * with this value, so that we can know when their results have become potentially invalid.
      */
     uint32_t commitCount = 0;
@@ -74,19 +74,23 @@ private:
     void computeFileHashes(const std::vector<std::shared_ptr<core::File>> &files, WorkerPool &workers) const;
 
     /**
-     * Determines if the given edit can take the fast path relative to the most recently committed edit.
-     * It compares the file hashes in the files in `edit` to those in `evictedFiles` and `gs` (in that order).
+     * Decides the typechecking path of an edit that `commitEdit` is committing, and records the fast path files in
+     * `edit`. It compares the file hashes in the files in `edit` to those in `evictedFiles` and `gs` (in that order).
+     *
+     * `predictTypecheckingPath` predicts this decision for edits that haven't been committed yet.
      */
     TypecheckingPath
-    getTypecheckingPath(LSPFileUpdates &edit,
-                        const UnorderedMap<core::FileRef, std::shared_ptr<core::File>> &evictedFiles) const;
+    decideTypecheckingPath(LSPFileUpdates &edit,
+                           const UnorderedMap<core::FileRef, std::shared_ptr<core::File>> &evictedFiles) const;
 
     /**
+     * The computation shared by `decideTypecheckingPath` and `predictTypecheckingPath`.
+     *
      * INVARIANT: `changedFiles` must have hashes computed.
      */
     TypecheckingPathResult
-    getTypecheckingPathInternal(const std::vector<std::shared_ptr<core::File>> &changedFiles,
-                                const UnorderedMap<core::FileRef, std::shared_ptr<core::File>> &evictedFiles) const;
+    computeTypecheckingPath(const std::vector<std::shared_ptr<core::File>> &changedFiles,
+                            const UnorderedMap<core::FileRef, std::shared_ptr<core::File>> &evictedFiles) const;
 
 public:
     LSPIndexer(std::shared_ptr<const LSPConfiguration> config, std::unique_ptr<core::GlobalState> gs,
@@ -94,9 +98,13 @@ public:
     ~LSPIndexer();
 
     /**
-     * Determines if the given files can take the fast path relative to the latest committed edit.
+     * Predicts the typechecking path that `commitEdit` would decide for these files, if it committed them now (relative
+     * to the latest committed edit), without committing them. When they can take the fast path, the result also
+     * describes which files outside of `changedFiles` the fast path would typecheck.
+     *
+     * Used to decide whether a queued edit can preempt a slow path, and at which stratum.
      */
-    TypecheckingPathResult getTypecheckingPath(const std::vector<std::shared_ptr<core::File>> &changedFiles) const;
+    TypecheckingPathResult predictTypecheckingPath(const std::vector<std::shared_ptr<core::File>> &changedFiles) const;
 
     /**
      * Computes state hashes for the given set of files. Is a no-op if the provided files all have hashes.
@@ -142,7 +150,7 @@ public:
     // Determines if it's possible for the head of the task queue to run during preemption.
     bool preemptionPossible(const TaskQueue::QueueType &tasks) const;
 
-    // Indicates if a typechecking path decision is still valid given the current state of the indexer's name table.
+    // Indicates if a typechecking path prediction is still valid given the current state of the indexer's name table.
     bool isTypecheckingPathValid(const TypecheckingPathResult &result) const {
         return this->commitCount == result.commitCount;
     }

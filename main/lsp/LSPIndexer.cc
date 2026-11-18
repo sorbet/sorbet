@@ -82,8 +82,8 @@ void LSPIndexer::computeFileHashes(const vector<shared_ptr<core::File>> &files) 
 // incremental mode(s) that lied between the original fast and slow path. Leaving this comment here
 // because old habits die hard and I still can only remember the name "canTakeFastPath"
 LSPIndexer::TypecheckingPathResult
-LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &changedFiles,
-                                        const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) const {
+LSPIndexer::computeTypecheckingPath(const vector<shared_ptr<core::File>> &changedFiles,
+                                    const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) const {
     TypecheckingPathResult result(this->commitCount);
 
     Timer timeit(*config->logger, "fast_path_decision");
@@ -228,8 +228,8 @@ LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &ch
 }
 
 TypecheckingPath
-LSPIndexer::getTypecheckingPath(LSPFileUpdates &edit,
-                                const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) const {
+LSPIndexer::decideTypecheckingPath(LSPFileUpdates &edit,
+                                   const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) const {
     auto &logger = *config->logger;
     // Path taken after the first time an update has been encountered. Hack since we can't roll back new files just yet.
     if (edit.hasNewFiles) {
@@ -238,11 +238,10 @@ LSPIndexer::getTypecheckingPath(LSPFileUpdates &edit,
         return TypecheckingPath::Slow;
     }
 
-    auto result = getTypecheckingPathInternal(edit.updatedFiles, evictedFiles);
+    auto result = computeTypecheckingPath(edit.updatedFiles, evictedFiles);
     switch (result.path) {
         case TypecheckingPath::Fast: {
-            edit.fastPathUseIncrementalNamer = result.files.useIncrementalNamer;
-            edit.fastPathExtraFiles = std::move(result.files.extraFiles);
+            edit.fastPathFiles = std::move(result.files);
             break;
         }
 
@@ -254,7 +253,7 @@ LSPIndexer::getTypecheckingPath(LSPFileUpdates &edit,
 }
 
 LSPIndexer::TypecheckingPathResult
-LSPIndexer::getTypecheckingPath(const vector<shared_ptr<core::File>> &changedFiles) const {
+LSPIndexer::predictTypecheckingPath(const vector<shared_ptr<core::File>> &changedFiles) const {
     static UnorderedMap<core::FileRef, shared_ptr<core::File>> emptyMap;
 
     // Avoid expensively computing file hashes if there are too many files and it's likely that we'd
@@ -270,7 +269,7 @@ LSPIndexer::getTypecheckingPath(const vector<shared_ptr<core::File>> &changedFil
     // Ensure all files have computed hashes.
     computeFileHashes(changedFiles);
 
-    return getTypecheckingPathInternal(changedFiles, emptyMap);
+    return computeTypecheckingPath(changedFiles, emptyMap);
 }
 
 void LSPIndexer::transferInitializeState(InitializedTask &task) {
@@ -337,7 +336,7 @@ unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edi
     update.updatedFiles = move(edit.updates);
     update.cancellationExpected = edit.sorbetCancellationExpected;
     update.preemptionsExpected = edit.sorbetPreemptionsExpected;
-    // _Wait_ to compute `getTypecheckingPath` until after we compute hashes.
+    // _Wait_ to compute `decideTypecheckingPath` until after we compute hashes.
 
     UnorderedMap<core::FileRef, shared_ptr<core::File>> newlyEvictedFiles;
     // Update globalStateHashes. Keep track of file IDs for these files, along with old hashes for these files.
@@ -371,7 +370,7 @@ unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edi
     }
 
     // _Now_ that we've computed file hashes, we can make a fast path determination.
-    update.typecheckingPath = getTypecheckingPath(update, newlyEvictedFiles);
+    update.typecheckingPath = decideTypecheckingPath(update, newlyEvictedFiles);
 
     auto runningSlowPath = gs->epochManager->getStatus();
     if (runningSlowPath.slowPathRunning) {
@@ -388,7 +387,7 @@ unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edi
             update.mergeOlder(pendingTypecheckUpdates);
             mergeEvictedFiles(evictedFiles, newlyEvictedFiles);
             // The two updates together could end up taking the fast path.
-            update.typecheckingPath = getTypecheckingPath(update, newlyEvictedFiles);
+            update.typecheckingPath = decideTypecheckingPath(update, newlyEvictedFiles);
             update.canceledSlowPath = true;
         }
     }

@@ -12,6 +12,18 @@ namespace sorbet::realmain::lsp {
  */
 class LSPFileUpdates final {
 public:
+    struct FastPathFilesToTypecheckResult {
+        // The number of files that would be checked in the fast path.
+        uint32_t totalChanged = 0;
+
+        // True when we should use the incremental namer, which happens if a symbol name changed and we brought in
+        // additional related files to check.
+        bool useIncrementalNamer = false;
+
+        // Extra files that need to be typechecked because the file mentions the name of one of the changed symbols.
+        std::vector<core::FileRef> extraFiles;
+    };
+
     // The file refs in the indexer's global state that correspond to files at the same index in the `updatedFiles`
     // vector.
     //
@@ -21,12 +33,6 @@ public:
 
     // Files that have been updated in this edit, and need to be sync'd with the typechecker's global state.
     std::vector<std::shared_ptr<core::File>> updatedFiles;
-
-    // Any additional files implicated in a fast path edit.
-    //
-    // FileRefs are used here, because we explicitly ensure that the file refs match up between the indexer and
-    // typechecker global states when applying updates in the slow path.
-    std::vector<core::FileRef> fastPathExtraFiles;
 
     // This specific update contains edits with the given epoch
     uint32_t epoch = 0;
@@ -43,8 +49,13 @@ public:
 
     TypecheckingPath typecheckingPath = TypecheckingPath::Slow;
 
-    // Indicates whether or not the incremental namer should be used on the fast path.
-    bool fastPathUseIncrementalNamer = false;
+    // When `typecheckingPath` is `Fast`, the files outside of `updatedFiles` that the fast path typechecks, and whether
+    // it uses the incremental namer. Decided by `LSPIndexer::commitEdit`, in the same way that
+    // `LSPIndexer::predictTypecheckingPath` predicts them for a queued edit.
+    //
+    // FileRefs are used here, because we explicitly ensure that the file refs match up between the indexer and
+    // typechecker global states when applying updates in the slow path.
+    FastPathFilesToTypecheckResult fastPathFiles;
 
     // Indicates that this update contains a new file. Is a hack for determining if combining two updates can take the
     // fast path.
@@ -74,18 +85,6 @@ public:
 
     LSPFileUpdates(const LSPFileUpdates &other) = delete;
     LSPFileUpdates &operator=(const LSPFileUpdates &other) = delete;
-
-    struct FastPathFilesToTypecheckResult {
-        // The number of files that would be checked in the fast path.
-        uint32_t totalChanged = 0;
-
-        // True when we should use the incremental namer, which happens if a symbol name changed and we brought in
-        // additional related files to check.
-        bool useIncrementalNamer = false;
-
-        // Extra files that need to be typechecked because the file mentions the name of one of the changed symbols.
-        std::vector<core::FileRef> extraFiles;
-    };
 
     // It would be nice to have this accept `...<const core::File>...`
     // As written, it's possible to mutate the files, but that's not intentional.
