@@ -1204,6 +1204,10 @@ CheckSize(Literal, 16, 8);
 EXPRESSION(UnresolvedConstantLit)
     : private core::TrailingObjects<UnresolvedConstantLit, core::NameRef, core::LocOffsets> {
     friend TrailingObjects;
+    static_assert(std::is_nothrow_copy_constructible_v<core::NameRef>);
+    static_assert(std::is_trivially_destructible_v<core::NameRef>);
+    static_assert(std::is_nothrow_copy_constructible_v<core::LocOffsets>);
+    static_assert(std::is_trivially_destructible_v<core::LocOffsets>);
 
     UnresolvedConstantLit(ExpressionPtr scope, uint32_t numSegments);
 
