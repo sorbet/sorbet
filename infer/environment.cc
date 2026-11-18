@@ -1896,6 +1896,16 @@ core::TypePtr Environment::processBinding(
                         }
                         break;
                     case cfg::MinLoops::Pin::Let:
+                        if (pin == pinnedTypes.end()) {
+                            // No `T.let` has pinned this variable on the path to this write yet, so check it
+                            // like a write to a variable without a `T.let`.
+                            if (loopCount != bindMinLoops.level) {
+                                checkLoopTypeChange(ctx, inWhat, bind, tp, cur, asGoodAs, errorDetailsCollector,
+                                                    ownerLoc);
+                            }
+                            break;
+                        }
+
                         if (!asGoodAs) {
                             if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PinnedVariableMismatch)) {
                                 e.setHeader("Incompatible assignment to variable declared via `{}`: `{}` is not a "
