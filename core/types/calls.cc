@@ -826,10 +826,11 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             }
             e.addErrorSection(args.fullType.explainGot(gs, args.originForUninitialized));
 
-            // catch the special case of `interface!`, `abstract!`, `final!`, or `sealed!` and
+            // catch the special case of `interface!`, `abstract!`, `final!`, `sealed!` or `track_descendants!` and
             // suggest adding `extend T::Helpers`.
             if (args.name == core::Names::declareInterface() || args.name == core::Names::declareAbstract() ||
                 args.name == core::Names::declareFinal() || args.name == core::Names::declareSealed() ||
+                args.name == core::Names::declareTrackDescendants() ||
                 args.name == core::Names::mixesInClassMethods() ||
                 (args.name == core::Names::requiresAncestor() && gs.cacheSensitiveOptions.requiresAncestorEnabled)) {
                 auto attachedClass = symbol.data(gs)->attachedClass(gs);

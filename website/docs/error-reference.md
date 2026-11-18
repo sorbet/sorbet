@@ -3116,6 +3116,56 @@ module Opus::Foo::Bar
 end
 ```
 
+## 5087
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+A class or module marked with `track_descendants!` requires every class or module that directly inherits from it (or includes it) to be registered with `T::Descendants.register`. Like [sealed classes](sealed.md), this lets the codebase know the complete set of descendants of a class, but without requiring them all to be defined in the same file. Unlike `sealed!`, descendants may be defined in any package.
+
+Each registration must be made in an RBI file in the same package as the descendant, and must name the file where the descendant is defined:
+
+```ruby
+# -- a/parent.rb --
+class A::Parent
+  extend T::Helpers
+  track_descendants!
+end
+
+# -- b/child.rb --
+class B::Child < A::Parent # error: add T::Descendants.register(A::Parent, B::Child, "b/child.rb") ...
+end
+
+# -- b/descendants.rbi --
+T::Descendants.register(A::Parent, B::Child, "b/child.rb") # fixes the error
+```
+
+The error message contains the exact registration to add.
+
+Descendants of a tracked class or module are themselves tracked, and must be registered against their **direct** parent. For example, if `B::GrandChild < B::Child`, the registration must be `T::Descendants.register(B::Child, B::GrandChild, ...)`, not `T::Descendants.register(A::Parent, B::GrandChild, ...)`.
+
+## 5088
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+A call to `T::Descendants.register` (see [5087](#5087)) is invalid. A valid registration:
+
+- appears in an RBI file,
+- has exactly three positional arguments, with no keyword arguments or block,
+- has a constant literal for each of the first two arguments: the first must resolve to a class or module (the tracked ancestor), and the second to a class or module that descends from it,
+- appears in the same package that defines the descendant (a package cannot register descendants defined in other packages, including its parent package or its subpackages), and
+- has a string literal for the third argument, naming the file where the descendant is defined.
+
+The file path is compared against the path that Sorbet shows for that file in error messages: any prefix that Sorbet strips when printing paths (for example, the input directory when Sorbet is run on a single directory) is ignored, as is a leading `./`.
+
+```ruby
+# -- b/descendants.rbi --
+T::Descendants.register(A::Parent, B::Child)                 # error: missing the file argument
+T::Descendants.register(A::Parent, B::Child.itself, "...")   # error: not a constant literal
+T::Descendants.register(A::Parent, B::Unrelated, "...")      # error: not a descendant of `A::Parent`
+T::Descendants.register(A::Parent, C::Child, "c/child.rb")   # error: `C::Child` is defined in another package
+T::Descendants.register(A::Parent, B::Child, "b/other.rb")   # error: `B::Child` is defined in `b/child.rb`
+```
+
 ## 6001
 
 Certain Ruby keywords like `break`, `next`, and `retry` can only be used inside a Ruby block.

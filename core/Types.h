@@ -818,8 +818,8 @@ private:
     friend TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from,
                                          absl::Span<const ClassOrModuleRef> klasses);
     friend TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &t1);
-    friend class ClassOrModule; // the actual method is `recordSealedSubclass(Mutableconst GlobalState &gs, SymbolRef
-                                // subclass)`, but referring to it introduces a cycle
+    friend class ClassOrModule; // the actual method is `recordClassOnSyntheticMethod`, but referring to it
+                                // introduces a cycle
 
     static TypePtr make_shared(const TypePtr &left, const TypePtr &right);
 };
