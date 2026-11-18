@@ -39,3 +39,5 @@ __package.rb:5: Found `layer` annotation, but `--packager-layers` was not passed
   Note:
     Use `--packager-layers=foo,bar` to define the valid layers, or `--packager-layers` to use the default layers of `library` and `application`
 Errors: 2
+--packager-layers must contain items that are alphanumeric.
+--packager-layers must contain items that are alphanumeric.
