@@ -11,9 +11,9 @@ test/cli/method-return-op-asgn/method_return_op_asgn.rb:10: Expected `Integer` b
     10 |  a.b ||= y
           ^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/method-return-op-asgn/method_return_op_asgn.rb:10: Replace with `T.must(a.b)`
+    test/cli/method-return-op-asgn/method_return_op_asgn.rb:10: Replace with `T.must(a.b ||= y)`
     10 |  a.b ||= y
-          ^^^
+          ^^^^^^^^^
 
 test/cli/method-return-op-asgn/method_return_op_asgn.rb:15: Expected `Integer` but found `T.nilable(Integer)` for method result type https://srb.help/7005
     15 |  h[:k] ||= y
@@ -27,9 +27,9 @@ test/cli/method-return-op-asgn/method_return_op_asgn.rb:15: Expected `Integer` b
     15 |  h[:k] ||= y
           ^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/method-return-op-asgn/method_return_op_asgn.rb:15: Replace with `T.must(h[:k])`
+    test/cli/method-return-op-asgn/method_return_op_asgn.rb:15: Replace with `T.must(h[:k] ||= y)`
     15 |  h[:k] ||= y
-          ^^^^^
+          ^^^^^^^^^^^
 Errors: 2
 --- --parser=prism
 test/cli/method-return-op-asgn/method_return_op_asgn.rb:10: Expected `Integer` but found `T.nilable(Integer)` for method result type https://srb.help/7005
@@ -44,9 +44,9 @@ test/cli/method-return-op-asgn/method_return_op_asgn.rb:10: Expected `Integer` b
     10 |  a.b ||= y
           ^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/method-return-op-asgn/method_return_op_asgn.rb:10: Replace with `T.must(a.b)`
+    test/cli/method-return-op-asgn/method_return_op_asgn.rb:10: Replace with `T.must(a.b ||= y)`
     10 |  a.b ||= y
-          ^^^
+          ^^^^^^^^^
 
 test/cli/method-return-op-asgn/method_return_op_asgn.rb:15: Expected `Integer` but found `T.nilable(Integer)` for method result type https://srb.help/7005
     15 |  h[:k] ||= y
@@ -60,7 +60,7 @@ test/cli/method-return-op-asgn/method_return_op_asgn.rb:15: Expected `Integer` b
     15 |  h[:k] ||= y
           ^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/method-return-op-asgn/method_return_op_asgn.rb:15: Replace with `T.must(h[:k])`
+    test/cli/method-return-op-asgn/method_return_op_asgn.rb:15: Replace with `T.must(h[:k] ||= y)`
     15 |  h[:k] ||= y
-          ^^^^^
+          ^^^^^^^^^^^
 Errors: 2
