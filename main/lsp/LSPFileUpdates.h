@@ -51,7 +51,7 @@ public:
 
     // When `typecheckingPath` is `Fast`, the files outside of `updatedFiles` that the fast path typechecks, and whether
     // it uses the incremental namer. Decided by `LSPIndexer::commitEdit`, in the same way that
-    // `LSPIndexer::predictTypecheckingPath` predicts them for a queued edit.
+    // `LSPIndexer::provisionalTypecheckingPath` predicts them for a queued edit.
     //
     // FileRefs are used here, because we explicitly ensure that the file refs match up between the indexer and
     // typechecker global states when applying updates in the slow path.

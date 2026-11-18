@@ -158,7 +158,7 @@ TypecheckingPath SorbetWorkspaceEditTask::getTypecheckingPath(const LSPIndexer &
     // Predict the typechecking path if there is no prediction, or if the indexer has committed other edits since it was
     // computed.
     if (!cachedPrediction.has_value() || !index.isTypecheckingPathValid(*cachedPrediction)) {
-        cachedPrediction.emplace(index.predictTypecheckingPath(params->updates));
+        cachedPrediction.emplace(index.provisionalTypecheckingPath(params->updates));
     }
 
     return cachedPrediction->path;
