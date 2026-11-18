@@ -253,7 +253,7 @@ LSPIndexer::decideTypecheckingPath(LSPFileUpdates &edit,
 }
 
 LSPIndexer::TypecheckingPathResult
-LSPIndexer::predictTypecheckingPath(const vector<shared_ptr<core::File>> &changedFiles) const {
+LSPIndexer::provisionalTypecheckingPath(const vector<shared_ptr<core::File>> &changedFiles) const {
     static UnorderedMap<core::FileRef, shared_ptr<core::File>> emptyMap;
 
     // Avoid expensively computing file hashes if there are too many files and it's likely that we'd
