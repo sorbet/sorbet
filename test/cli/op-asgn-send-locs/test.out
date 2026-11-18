@@ -54,9 +54,9 @@ test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:20: Method `length` does not exi
     19 |def setter_errors(s)
                           ^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:20: Replace with `T.must(s.length)`
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:20: Replace with `T.must(s)`
     20 |  s.length ||= 0
-          ^^^^^^^^
+          ^
 
 test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:20: Setter method `length=` does not exist on `String` component of `T.nilable(String)` https://srb.help/7003
     20 |  s.length ||= 0
@@ -74,9 +74,9 @@ test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:20: Setter method `length=` does
     19 |def setter_errors(s)
                           ^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:20: Replace with `T.must(s.length)`
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:20: Replace with `T.must(s)`
     20 |  s.length ||= 0
-          ^^^^^^^^
+          ^
 
 test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:21: Method `length` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
     21 |  s.length += 1
@@ -86,9 +86,9 @@ test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:21: Method `length` does not exi
     19 |def setter_errors(s)
                           ^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:21: Replace with `T.must(s.length)`
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:21: Replace with `T.must(s)`
     21 |  s.length += 1
-          ^^^^^^^^
+          ^
 
 test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:21: Setter method `length=` does not exist on `String` component of `T.nilable(String)` https://srb.help/7003
     21 |  s.length += 1
@@ -106,9 +106,9 @@ test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:21: Setter method `length=` does
     19 |def setter_errors(s)
                           ^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:21: Replace with `T.must(s.length)`
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:21: Replace with `T.must(s)`
     21 |  s.length += 1
-          ^^^^^^^^
+          ^
 
 test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:22: Setter method `length=` does not exist on `String` component of `T.nilable(String)` https://srb.help/7003
     22 |  s.length = 0
