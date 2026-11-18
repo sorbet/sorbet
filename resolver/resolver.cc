@@ -1466,7 +1466,8 @@ private:
 
         if (ancestorPresent) {
             saveAncestorTypeForHashing(ctx, job);
-            if (ancestorSym.asClassOrModuleRef().data(ctx)->flags.isTrackedSuperclass &&
+            if (ancestorSym.isClassOrModule() &&
+                ancestorSym.asClassOrModuleRef().data(ctx)->flags.isTrackedSuperclass &&
                 !job.klass.data(ctx)->flags.isTrackedSuperclass) {
                 job.klass.data(ctx)->flags.isTrackedSuperclass = true;
             }
