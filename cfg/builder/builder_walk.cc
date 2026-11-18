@@ -546,6 +546,12 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                 // the value of a sequence of instructions (e.g., a method's implicit return) use the
                 // loc of its last instruction.
                 if (auto *orig = a.original()) {
+                    vector<LocalRef> intermediateTargets;
+                    intermediateTargets.reserve(orig->segmentCount() - 1);
+                    for (size_t i = orig->segmentCount(); i > 1; --i) {
+                        intermediateTargets.emplace_back(cctx.newTemporary(core::Names::keepForIde()));
+                    }
+
                     // Empirically, these are the only two cases we've needed so far to service the
                     // LSP requests we want (hover and completion), but that doesn't mean these are
                     // the **only** we'll ever want.
@@ -555,6 +561,20 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                     } else if (ast::isa_tree<ast::Send>(orig->scope)) {
                         LocalRef deadSym = cctx.newTemporary(core::Names::keepForIde());
                         current = walk(cctx.withTarget(deadSym), orig->scope, current);
+                    }
+
+                    for (size_t i = 0; i + 1 < orig->segmentCount(); ++i) {
+                        auto aliasName = cctx.newTemporary(core::Names::cfgAlias());
+                        auto loc = orig->locs()[i];
+                        auto symbol = a.segmentSymbol(i);
+                        ENFORCE(symbol.exists());
+                        if (symbol == core::Symbols::StubModule()) {
+                            current->exprs.emplace_back(aliasName, loc, make_insn<Alias>(core::Symbols::untyped()));
+                        } else {
+                            current->exprs.emplace_back(aliasName, loc, make_insn<Alias>(symbol));
+                        }
+                        auto target = intermediateTargets[orig->segmentCount() - i - 2];
+                        synthesizeExpr(current, target, loc, make_insn<Ident>(aliasName));
                     }
                 }
 

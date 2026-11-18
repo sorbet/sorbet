@@ -876,7 +876,18 @@ string ConstantLit::toStringWithTabs(const core::GlobalState &gs, int tabs) cons
     if (symbol().exists() && symbol() != core::Symbols::StubModule()) {
         return this->symbol().showFullName(gs);
     }
-    return "Unresolved: " + this->original()->toStringWithTabs(gs, tabs);
+
+    auto &original = *this->original();
+    auto result = original.scope.toStringWithTabs(gs, tabs);
+    for (size_t i = 0; i < original.segmentCount(); ++i) {
+        auto symbol = segmentSymbol(i);
+        if (symbol.exists() && symbol != core::Symbols::StubModule()) {
+            result = symbol.showFullName(gs);
+        } else {
+            result = fmt::format("Unresolved: {}::{}", result, original.names()[i].toString(gs));
+        }
+    }
+    return result;
 }
 
 string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) const {
