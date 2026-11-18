@@ -325,8 +325,8 @@ module T::Helpers
 end
 
 module T::Descendants
-  sig { params(superclass: T::Module[T.anything], subclass: T::Module[T.anything]).void }
-  def self.register(superclass, subclass); end
+  sig { params(superclass: T::Module[T.anything], subclass: T::Module[T.anything], file: String).void }
+  def self.register(superclass, subclass, file); end
 end
 
 module T::Array
