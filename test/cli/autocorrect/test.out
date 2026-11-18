@@ -98,9 +98,9 @@ autocorrect.rb:12: Method `bar` does not exist on `NilClass` component of `T.nil
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    autocorrect.rb:12: Replaced with `T.must(foo.bar)`
+    autocorrect.rb:12: Replaced with `T.must(foo)`
     12 |foo.bar ||= "a"
-        ^^^^^^^
+        ^^^
 
 autocorrect.rb:12: Setter method `bar=` does not exist on `String` component of `T.nilable(String)` https://srb.help/7003
     12 |foo.bar ||= "a"
@@ -118,9 +118,9 @@ autocorrect.rb:12: Setter method `bar=` does not exist on `NilClass` component o
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    autocorrect.rb:12: Replaced with `T.must(foo.bar)`
+    autocorrect.rb:12: Replaced with `T.must(foo)`
     12 |foo.bar ||= "a"
-        ^^^^^^^
+        ^^^
 
 autocorrect.rb:13: Method `bar` does not exist on `String` component of `T.nilable(String)` https://srb.help/7003
     13 |foo.bar &&= "a"
@@ -138,9 +138,9 @@ autocorrect.rb:13: Method `bar` does not exist on `NilClass` component of `T.nil
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    autocorrect.rb:13: Replaced with `T.must(foo.bar)`
+    autocorrect.rb:13: Replaced with `T.must(foo)`
     13 |foo.bar &&= "a"
-        ^^^^^^^
+        ^^^
 
 autocorrect.rb:13: Setter method `bar=` does not exist on `String` component of `T.nilable(String)` https://srb.help/7003
     13 |foo.bar &&= "a"
@@ -158,9 +158,9 @@ autocorrect.rb:13: Setter method `bar=` does not exist on `NilClass` component o
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    autocorrect.rb:13: Replaced with `T.must(foo.bar)`
+    autocorrect.rb:13: Replaced with `T.must(foo)`
     13 |foo.bar &&= "a"
-        ^^^^^^^
+        ^^^
 
 autocorrect.rb:14: Method `bar` does not exist on `String` component of `T.nilable(String)` https://srb.help/7003
     14 |foo.bar |= "a"
@@ -178,9 +178,9 @@ autocorrect.rb:14: Method `bar` does not exist on `NilClass` component of `T.nil
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    autocorrect.rb:14: Replaced with `T.must(foo.bar)`
+    autocorrect.rb:14: Replaced with `T.must(foo)`
     14 |foo.bar |= "a"
-        ^^^^^^^
+        ^^^
 
 autocorrect.rb:14: Setter method `bar=` does not exist on `String` component of `T.nilable(String)` https://srb.help/7003
     14 |foo.bar |= "a"
@@ -198,9 +198,9 @@ autocorrect.rb:14: Setter method `bar=` does not exist on `NilClass` component o
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    autocorrect.rb:14: Replaced with `T.must(foo.bar)`
+    autocorrect.rb:14: Replaced with `T.must(foo)`
     14 |foo.bar |= "a"
-        ^^^^^^^
+        ^^^
 
 autocorrect.rb:15: Method `bar` does not exist on `String` component of `T.nilable(String)` https://srb.help/7003
     15 |foo.bar &= "a"
@@ -218,9 +218,9 @@ autocorrect.rb:15: Method `bar` does not exist on `NilClass` component of `T.nil
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    autocorrect.rb:15: Replaced with `T.must(foo.bar)`
+    autocorrect.rb:15: Replaced with `T.must(foo)`
     15 |foo.bar &= "a"
-        ^^^^^^^
+        ^^^
 
 autocorrect.rb:15: Setter method `bar=` does not exist on `String` component of `T.nilable(String)` https://srb.help/7003
     15 |foo.bar &= "a"
@@ -238,9 +238,9 @@ autocorrect.rb:15: Setter method `bar=` does not exist on `NilClass` component o
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    autocorrect.rb:15: Replaced with `T.must(foo.bar)`
+    autocorrect.rb:15: Replaced with `T.must(foo)`
     15 |foo.bar &= "a"
-        ^^^^^^^
+        ^^^
 
 autocorrect.rb:17: Method `[]` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
     17 |[1].max_by {|l,r| 1}[2]
@@ -293,10 +293,10 @@ sig {params(a: String).void}
 def int(a:); end
 int(a: T.must(foo))
 
-T.must(foo.bar) ||= "a"
-T.must(foo.bar) &&= "a"
-T.must(foo.bar) |= "a"
-T.must(foo.bar) &= "a"
+T.must(foo).bar ||= "a"
+T.must(foo).bar &&= "a"
+T.must(foo).bar |= "a"
+T.must(foo).bar &= "a"
 
 T.must([1].max_by {|l,r| 1})[2]
 

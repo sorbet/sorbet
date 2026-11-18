@@ -1,7 +1,7 @@
 # typed: true
 
   self[&:to_s] &= 123456
-#             | error: Method `[]` does not exist
+#     ^^^^^^^^ error: Method `[]` does not exist
 # ^^^^^^^^^^^^ error: Setter method `[]=` does not exist
 
 class A

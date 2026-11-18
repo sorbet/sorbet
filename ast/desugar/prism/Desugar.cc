@@ -938,14 +938,15 @@ ast::ExpressionPtr Desugarer::translateAndOrAssignment(core::LocOffsets location
 
     if (auto s = ast::cast_tree<ast::Send>(lhs)) {
         auto sendLoc = s->loc;
+        auto recvLoc = s->recv.loc();
         auto [tempRecv, stats, numPosArgs, readArgs, assgnArgs] = copyArgsForOpAsgn(s);
         auto numPosAssgnArgs = numPosArgs + 1;
         assgnArgs.emplace_back(move(rhs));
         auto cond =
-            MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, s->funLoc, numPosArgs, move(readArgs), s->flags);
+            MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun, s->funLoc, numPosArgs, move(readArgs), s->flags);
         auto tempResult = nextUniqueName(s->fun);
         stats.emplace_back(MK::Assign(sendLoc, tempResult, move(cond)));
-        auto body = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(ctx), sendLoc.copyWithZeroLength(),
+        auto body = MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun.addEq(ctx), sendLoc.copyWithZeroLength(),
                              numPosAssgnArgs, move(assgnArgs), s->flags);
         auto elsep = MK::Local(sendLoc, tempResult);
         ExpressionPtr if_;
@@ -1027,14 +1028,15 @@ ast::ExpressionPtr Desugarer::translateAndOrAssignment(core::LocOffsets location
             Exception::raise("Unexpected left-hand side of op=: please file an issue");
         }
         auto sendLoc = s->loc;
+        auto recvLoc = s->recv.loc();
         auto [tempRecv, stats, numPosArgs, readArgs, assgnArgs] = copyArgsForOpAsgn(s);
         auto numPosAssgnArgs = numPosArgs + 1;
         assgnArgs.emplace_back(move(rhs));
         auto cond =
-            MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, s->funLoc, numPosArgs, move(readArgs), s->flags);
+            MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun, s->funLoc, numPosArgs, move(readArgs), s->flags);
         auto tempResult = nextUniqueName(s->fun);
         stats.emplace_back(MK::Assign(sendLoc, tempResult, move(cond)));
-        auto body = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(ctx), sendLoc.copyWithZeroLength(),
+        auto body = MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun.addEq(ctx), sendLoc.copyWithZeroLength(),
                              numPosAssgnArgs, move(assgnArgs), s->flags);
         auto elsep = MK::Local(sendLoc, tempResult);
         auto iff = MK::If(sendLoc, MK::Local(sendLoc, tempResult), move(body), move(elsep));
@@ -1096,11 +1098,12 @@ ast::ExpressionPtr Desugarer::translateOpAssignment(PrismAssignmentNode *node, c
     if (ast::isa_tree<ast::Send>(lhs)) {
         auto s = ast::cast_tree<ast::Send>(lhs);
         auto sendLoc = s->loc;
+        auto recvLoc = s->recv.loc();
         auto [tempRecv, stats, numPosArgs, readArgs, assgnArgs] = copyArgsForOpAsgn(s);
 
         // Create the read operation: obj.method() or obj[index]
         auto prevValue =
-            MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, s->funLoc, numPosArgs, move(readArgs), s->flags);
+            MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun, s->funLoc, numPosArgs, move(readArgs), s->flags);
 
         // Apply the operation: prevValue op rhs
         auto newValue = MK::Send1(sendLoc, move(prevValue), op, opLoc, move(rhs));
@@ -1110,7 +1113,7 @@ ast::ExpressionPtr Desugarer::translateOpAssignment(PrismAssignmentNode *node, c
         auto numPosAssgnArgs = numPosArgs + 1;
 
         // Create the assignment operation: obj.method=(newValue) or obj[]=(index, newValue)
-        auto res = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(ctx), sendLoc.copyWithZeroLength(),
+        auto res = MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun.addEq(ctx), sendLoc.copyWithZeroLength(),
                             numPosAssgnArgs, move(assgnArgs), s->flags);
 
         return MK::InsSeq(location, move(stats), move(res));
@@ -1147,14 +1150,15 @@ ast::ExpressionPtr Desugarer::translateOpAssignment(PrismAssignmentNode *node, c
         }
         // Similar to Send handling above but specialized for InsSeq structure modification
         auto sendLoc = s->loc;
+        auto recvLoc = s->recv.loc();
         auto [tempRecv, stats, numPosArgs, readArgs, assgnArgs] = copyArgsForOpAsgn(s);
         auto prevValue =
-            MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, s->funLoc, numPosArgs, move(readArgs), s->flags);
+            MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun, s->funLoc, numPosArgs, move(readArgs), s->flags);
         auto newValue = MK::Send1(sendLoc, move(prevValue), op, opLoc, move(rhs));
         auto numPosAssgnArgs = numPosArgs + 1;
         assgnArgs.emplace_back(move(newValue));
 
-        auto res = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(ctx), sendLoc.copyWithZeroLength(),
+        auto res = MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun.addEq(ctx), sendLoc.copyWithZeroLength(),
                             numPosAssgnArgs, move(assgnArgs), s->flags);
         auto wrapped = MK::InsSeq(location, move(stats), move(res));
         ifExpr->elsep = move(wrapped);
@@ -1239,16 +1243,17 @@ template <OpAssignKind Kind>
 ast::ExpressionPtr Desugarer::desugarOpAssignSend(core::LocOffsets location, ast::Send *s, ast::ExpressionPtr rhs,
                                                   core::NameRef op, core::LocOffsets opLoc) {
     auto sendLoc = s->loc;
+    auto recvLoc = s->recv.loc();
     auto [tempRecv, stats, numPosArgs, readArgs, assgnArgs] = copyArgsForOpAsgn(s);
 
     if constexpr (Kind == OpAssignKind::And || Kind == OpAssignKind::Or) {
         auto numPosAssgnArgs = numPosArgs + 1;
         assgnArgs.emplace_back(move(rhs));
         auto cond =
-            MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, s->funLoc, numPosArgs, move(readArgs), s->flags);
+            MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun, s->funLoc, numPosArgs, move(readArgs), s->flags);
         auto tempResult = nextUniqueName(s->fun);
         stats.emplace_back(MK::Assign(sendLoc, tempResult, move(cond)));
-        auto body = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(ctx), sendLoc.copyWithZeroLength(),
+        auto body = MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun.addEq(ctx), sendLoc.copyWithZeroLength(),
                              numPosAssgnArgs, move(assgnArgs), s->flags);
         auto elsep = MK::Local(sendLoc, tempResult);
         ExpressionPtr iff;
@@ -1264,7 +1269,7 @@ ast::ExpressionPtr Desugarer::desugarOpAssignSend(core::LocOffsets location, ast
         // OpAssignKind::Operator
         // Create the read operation: obj.method() or obj[index]
         auto prevValue =
-            MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, s->funLoc, numPosArgs, move(readArgs), s->flags);
+            MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun, s->funLoc, numPosArgs, move(readArgs), s->flags);
 
         // Apply the operation: prevValue op rhs
         auto newValue = MK::Send1(sendLoc, move(prevValue), op, opLoc, move(rhs));
@@ -1274,7 +1279,7 @@ ast::ExpressionPtr Desugarer::desugarOpAssignSend(core::LocOffsets location, ast
         auto numPosAssgnArgs = numPosArgs + 1;
 
         // Create the assignment operation: obj.method=(newValue) or obj[]=(index, newValue)
-        auto res = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(ctx), sendLoc.copyWithZeroLength(),
+        auto res = MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun.addEq(ctx), sendLoc.copyWithZeroLength(),
                             numPosAssgnArgs, move(assgnArgs), s->flags);
 
         return MK::InsSeq(location, move(stats), move(res));
@@ -1297,16 +1302,18 @@ ast::ExpressionPtr Desugarer::desugarOpAssignCSend(core::LocOffsets location, as
     }
 
     auto sendLoc = s->loc;
+
+    auto recvLoc = s->recv.loc();
     auto [tempRecv, stats, numPosArgs, readArgs, assgnArgs] = copyArgsForOpAsgn(s);
 
     if constexpr (Kind == OpAssignKind::And || Kind == OpAssignKind::Or) {
         auto numPosAssgnArgs = numPosArgs + 1;
         assgnArgs.emplace_back(move(rhs));
         auto cond =
-            MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, s->funLoc, numPosArgs, move(readArgs), s->flags);
+            MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun, s->funLoc, numPosArgs, move(readArgs), s->flags);
         auto tempResult = nextUniqueName(s->fun);
         stats.emplace_back(MK::Assign(sendLoc, tempResult, move(cond)));
-        auto body = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(ctx), sendLoc.copyWithZeroLength(),
+        auto body = MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun.addEq(ctx), sendLoc.copyWithZeroLength(),
                              numPosAssgnArgs, move(assgnArgs), s->flags);
         auto elsep = MK::Local(sendLoc, tempResult);
         auto iff = MK::If(sendLoc, MK::Local(sendLoc, tempResult), move(body), move(elsep));
@@ -1315,12 +1322,12 @@ ast::ExpressionPtr Desugarer::desugarOpAssignCSend(core::LocOffsets location, as
     } else {
         // OpAssignKind::Operator
         auto prevValue =
-            MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, s->funLoc, numPosArgs, move(readArgs), s->flags);
+            MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun, s->funLoc, numPosArgs, move(readArgs), s->flags);
         auto newValue = MK::Send1(sendLoc, move(prevValue), op, opLoc, move(rhs));
         auto numPosAssgnArgs = numPosArgs + 1;
         assgnArgs.emplace_back(move(newValue));
 
-        auto res = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(ctx), sendLoc.copyWithZeroLength(),
+        auto res = MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun.addEq(ctx), sendLoc.copyWithZeroLength(),
                             numPosAssgnArgs, move(assgnArgs), s->flags);
         auto wrapped = MK::InsSeq(location, move(stats), move(res));
         ifExpr->elsep = move(wrapped);
