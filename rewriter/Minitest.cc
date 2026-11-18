@@ -44,7 +44,7 @@ public:
                 tree = ast::MK::EmptyTree();
                 return;
             }
-            auto name = ast::MK::Symbol(cnst->loc, cnst->cnst);
+            auto name = ast::MK::Symbol(cnst->loc(), cnst->cnst());
 
             // if the constant is already in a T.let, preserve it, otherwise decay it to unsafe
             movedConstants.emplace_back(createConstAssign(*asgn));
@@ -194,7 +194,7 @@ string to_s(core::Context ctx, const ast::ExpressionPtr &arg) {
     }
     auto argConstant = ast::cast_tree<ast::UnresolvedConstantLit>(arg);
     if (argConstant != nullptr) {
-        return string(ctx.locAt(argConstant->loc).source(ctx).value_or("<unknown>"));
+        return string(ctx.locAt(argConstant->loc()).source(ctx).value_or("<unknown>"));
     }
     return arg.toString(ctx);
 }
@@ -270,7 +270,8 @@ bool isRSpec(core::Context ctx, const ast::ExpressionPtr &recv) {
         return false;
     }
 
-    return cnst->cnst == core::Names::Constants::RSpec() && ast::MK::isRootScope(cnst->scope);
+    return cnst->segmentCount() == 1 && cnst->cnst() == core::Names::Constants::RSpec() &&
+           ast::MK::isRootScope(cnst->scope);
 }
 
 // Some RSpec methods are relatively common method names where we really want to make sure that
@@ -363,7 +364,7 @@ ast::ExpressionPtr makeSharedExamplesConstant(core::MutableContext ctx, const as
     // to create the module)
     auto name = fmt::format("<shared_examples '{}'>", to_s(ctx, arg));
     ast::ExpressionPtr scope = rootScoped ? ast::MK::Constant(arg.loc(), core::Symbols::root()) : ast::MK::EmptyTree();
-    return ast::make_expression<ast::UnresolvedConstantLit>(arg.loc(), move(scope), ctx.state.enterNameConstant(name));
+    return ast::MK::UnresolvedConstant(arg.loc(), move(scope), ctx.state.enterNameConstant(name));
 }
 
 // Returns the appropriate superclass for a test class (e.g. from `its` or `it_behaves_like`)

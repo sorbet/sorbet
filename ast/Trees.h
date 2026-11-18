@@ -7,6 +7,7 @@
 #include "core/KwPair.h"
 #include "core/LocalVariable.h"
 #include "core/SymbolRef.h"
+#include "core/TrailingObjects.h"
 #include "core/Types.h"
 #include "core/UntaggedPtr.h"
 #include "core/ZippedPair.h"
@@ -1200,14 +1201,55 @@ public:
 };
 CheckSize(Literal, 16, 8);
 
-EXPRESSION(UnresolvedConstantLit) {
-public:
-    const core::LocOffsets loc;
+EXPRESSION(UnresolvedConstantLit)
+    : private core::TrailingObjects<UnresolvedConstantLit, core::NameRef, core::LocOffsets> {
+    friend TrailingObjects;
 
-    core::NameRef cnst;
+    UnresolvedConstantLit(ExpressionPtr scope, uint32_t numSegments);
+
+    const uint32_t numSegments;
+
+    size_t numTrailingObjects(OverloadToken<core::NameRef>) const {
+        return numSegments;
+    }
+
+public:
+    // Constant names and locations are stored root-to-leaf in parallel trailing arrays. `scope` is the terminal
+    // non-UnresolvedConstantLit scope, so every path requires exactly one allocation.
     ExpressionPtr scope;
 
-    UnresolvedConstantLit(core::LocOffsets loc, ExpressionPtr scope, core::NameRef cnst);
+    void operator delete(void *ptr) {
+        ::operator delete(ptr);
+    }
+
+    static ExpressionPtr create(ExpressionPtr scope, absl::Span<const core::NameRef> names,
+                                absl::Span<const core::LocOffsets> locs);
+    static std::unique_ptr<UnresolvedConstantLit> createUnique(
+        ExpressionPtr scope, absl::Span<const core::NameRef> names, absl::Span<const core::LocOffsets> locs);
+
+    core::LocOffsets loc() const {
+        return locs().back();
+    }
+
+    core::NameRef cnst() const {
+        return names().back();
+    }
+
+    size_t segmentCount() const {
+        return numSegments;
+    }
+
+    absl::Span<const core::NameRef> names() const {
+        return {getTrailingObjects<core::NameRef>(), numSegments};
+    }
+
+    absl::Span<const core::LocOffsets> locs() const {
+        return {getTrailingObjects<core::LocOffsets>(), numSegments};
+    }
+
+    absl::Span<core::NameRef> mutableNames() {
+        return {getTrailingObjects<core::NameRef>(), numSegments};
+    }
 
     ExpressionPtr deepCopy() const;
     bool structurallyEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
@@ -1222,20 +1264,17 @@ public:
     template <class RootFn, class PartFn> auto foldFromRoot(RootFn && onRoot, PartFn && onPart) const {
         using State = std::remove_cvref_t<std::invoke_result_t<RootFn &, const ExpressionPtr &>>;
 
-        auto foldImpl = [&](const auto &self, const UnresolvedConstantLit &current) -> State {
-            State state = [&]() -> State {
-                if (auto scope = cast_tree<UnresolvedConstantLit>(current.scope)) {
-                    return self(self, *scope);
-                }
-                return std::invoke(onRoot, current.scope);
-            }();
-            return std::invoke(onPart, std::move(state), current.cnst, current.loc);
-        };
-        return foldImpl(foldImpl, *this);
+        std::optional<State> state;
+        state.emplace(std::invoke(onRoot, scope));
+        for (size_t i = 0; i < segmentCount(); ++i) {
+            auto next = std::invoke(onPart, std::move(*state), names()[i], locs()[i]);
+            state.emplace(std::move(next));
+        }
+        return std::move(*state);
     }
 
     // Consumes a constant path, transforms its terminal scope, and then rebuilds each constant part root-to-leaf.
-    // Each part retains ownership of its original UnresolvedConstantLit node and has its transformed scope installed.
+    // Each part is presented as an owned, single-segment UnresolvedConstantLit with its transformed scope installed.
     template <class Walker> static ExpressionPtr foldOwned(ExpressionPtr tree, Walker && walker) {
         using WalkerType = std::remove_reference_t<Walker>;
         using RootResult = decltype(std::declval<WalkerType &>().onRoot(std::declval<ExpressionPtr &&>()));
@@ -1247,27 +1286,23 @@ public:
                       "Walker::onPart must accept an owned UnresolvedConstantLit and whether it is outermost, and "
                       "return an ExpressionPtr");
 
-        auto foldImpl = [&](const auto &self, std::unique_ptr<UnresolvedConstantLit> current,
-                            bool isOutermost) -> ExpressionPtr {
-            auto scope = std::move(current->scope);
-            if (isa_tree<UnresolvedConstantLit>(scope)) {
-                current->scope = self(self, scope.toUnique<UnresolvedConstantLit>(), false);
-            } else {
-                current->scope = walker.onRoot(std::move(scope));
-            }
-            return walker.onPart(std::move(current), bool{isOutermost});
-        };
-        return foldImpl(foldImpl, tree.toUnique<UnresolvedConstantLit>(), true);
+        auto original = tree.toUnique<UnresolvedConstantLit>();
+        auto result = walker.onRoot(std::move(original->scope));
+        for (size_t i = 0; i < original->segmentCount(); ++i) {
+            auto part =
+                createUnique(std::move(result), original->names().subspan(i, 1), original->locs().subspan(i, 1));
+            result = walker.onPart(std::move(part), bool{i + 1 == original->segmentCount()});
+        }
+        return result;
     }
 
-    // Follows the `UnresolvedConstantLit` scope chain until we arrive at a `scope`
-    // that is not an `UnresolvedConstantLit`, and return a reference to that.
+    // Returns the terminal non-UnresolvedConstantLit scope.
     const ExpressionPtr &outermostScope() const;
     ExpressionPtr &outermostScope();
 
     void _sanityCheck();
 };
-CheckSize(UnresolvedConstantLit, 24, 8);
+CheckSize(UnresolvedConstantLit, 16, 8);
 
 EXPRESSION(ConstantLit) {
 private:
@@ -1481,7 +1516,7 @@ private:
                     return *reinterpret_cast<const core::LocOffsets *>(&ptr1);
                 case Tag::ResolvedSymbol:
                 case Tag::FailedResolutionSymbol:
-                    return original()->loc;
+                    return original()->loc();
             }
         }
 
@@ -1596,7 +1631,7 @@ public:
         auto *current = this;
         bool isOutermost = true;
         while (auto *original = current->original()) {
-            if (!walker.onPart(current->loc(), current->symbol(), core::NameRef{original->cnst}, bool{isOutermost})) {
+            if (!walker.onPart(current->loc(), current->symbol(), original->cnst(), bool{isOutermost})) {
                 return false;
             }
 
@@ -1631,8 +1666,7 @@ public:
             auto *resolutionScopes = current->resolutionScopes();
             auto scopes = resolutionScopes == nullptr ? absl::Span<const core::SymbolRef>{}
                                                       : absl::MakeConstSpan(*resolutionScopes);
-            if (!walker.onPart(current->loc(), current->symbol(), core::NameRef{original->cnst}, scopes,
-                               bool{isOutermost})) {
+            if (!walker.onPart(current->loc(), current->symbol(), original->cnst(), scopes, bool{isOutermost})) {
                 return false;
             }
 

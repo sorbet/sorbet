@@ -239,7 +239,16 @@ public:
     }
 
     static ExpressionPtr UnresolvedConstant(core::LocOffsets loc, ExpressionPtr scope, core::NameRef name) {
-        return make_expression<UnresolvedConstantLit>(loc, std::move(scope), name);
+        if (auto original = cast_tree<UnresolvedConstantLit>(scope)) {
+            InlinedVector<core::NameRef, 4> names(original->names().begin(), original->names().end());
+            InlinedVector<core::LocOffsets, 4> locs(original->locs().begin(), original->locs().end());
+            names.emplace_back(name);
+            locs.emplace_back(loc);
+            auto root = std::move(original->scope);
+            return UnresolvedConstantLit::create(std::move(root), names, locs);
+        }
+        return UnresolvedConstantLit::create(std::move(scope), absl::MakeConstSpan(&name, 1),
+                                             absl::MakeConstSpan(&loc, 1));
     }
 
     static ExpressionPtr UnresolvedConstantParts(core::LocOffsets loc, absl::Span<const core::NameRef> parts) {
@@ -629,7 +638,7 @@ public:
     static bool isRootConstantLitApproximate(const ast::ExpressionPtr &expr, const core::NameRef name,
                                              const core::ClassOrModuleRef symbol) {
         if (auto c = cast_tree<ast::UnresolvedConstantLit>(expr)) {
-            return c->cnst == name && ast::MK::isRootScope(c->scope);
+            return c->segmentCount() == 1 && c->cnst() == name && ast::MK::isRootScope(c->scope);
         } else if (auto c = cast_tree<ast::ConstantLit>(expr)) {
             return c->symbol() == symbol;
         }

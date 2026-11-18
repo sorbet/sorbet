@@ -505,9 +505,9 @@ private:
             }
 
             // Check for ordering between reference loc and definition loc.
-            const auto &refLoc = c.loc;
+            const auto refLoc = c.loc();
             if (defLoc.beginPos() > refLoc.endPos()) {
-                if (auto e = ctx.beginError(c.loc, core::errors::Resolver::OutOfOrderConstantAccess)) {
+                if (auto e = ctx.beginError(c.loc(), core::errors::Resolver::OutOfOrderConstantAccess)) {
                     e.setHeader("`{}` referenced before it is defined", resolutionResult.show(ctx));
                     e.addErrorLine(ctx.locAt(defLoc), "Defined here");
                 }
@@ -582,7 +582,7 @@ private:
         // later components of the constant literal).
         if (!job.resolutionFailed && !job.isMixinAncestor) {
             auto &pkg = packageDB.getPackageInfo(otherPackage);
-            if (auto e = ctx.beginError(job.out->original()->loc, core::errors::Packager::PackagePrivateConstant)) {
+            if (auto e = ctx.beginError(job.out->original()->loc(), core::errors::Packager::PackagePrivateConstant)) {
                 if (marker == result) {
                     e.setHeader("`{}` is `{}` in package `{}`", result.show(ctx), "package_private!", pkg.show(ctx));
                 } else {
@@ -710,9 +710,13 @@ private:
 
     static core::SymbolRef resolveConstant(core::Context ctx, ConstantResolutionItem &job,
                                            vector<PackageReference> &packageReferences) {
+        if (job.out->symbol().exists()) {
+            return job.out->symbol();
+        }
+
         auto &c = *job.out->original();
         if (ast::isa_tree<ast::EmptyTree>(c.scope)) {
-            auto [result, foundInAncestor] = resolveLhs(ctx, job.scope.get(), c.cnst);
+            auto [result, foundInAncestor] = resolveLhs(ctx, job.scope.get(), c.cnst());
             if (!result.exists()) {
                 return result;
             }
@@ -729,7 +733,7 @@ private:
 
             if (sym.isTypeAlias(ctx) && !job.resolutionFailed) {
                 if (!job.isMixinAncestor) {
-                    if (auto e = ctx.beginError(c.loc, core::errors::Resolver::ConstantInTypeAlias)) {
+                    if (auto e = ctx.beginError(c.loc(), core::errors::Resolver::ConstantInTypeAlias)) {
                         e.setHeader("Resolving constants through type aliases is not supported");
                     }
                 }
@@ -740,7 +744,7 @@ private:
             auto resolved = sym.dealias(ctx);
             core::SymbolRef result;
             if (resolved.isClassOrModule()) {
-                result = resolved.asClassOrModuleRef().data(ctx)->findMemberNoDealias(c.cnst);
+                result = resolved.asClassOrModuleRef().data(ctx)->findMemberNoDealias(c.cnst());
             }
 
             // Private constants are allowed to be resolved, when there is no scope set (the scope is checked above),
@@ -749,7 +753,7 @@ private:
                 ((result.isClassOrModule() && result.asClassOrModuleRef().data(ctx)->flags.isPrivate) ||
                  (result.isStaticField(ctx) && result.asFieldRef().data(ctx)->flags.isStaticFieldPrivate)) &&
                 !ctx.file.data(ctx).isRBI() && !job.isMixinAncestor) {
-                if (auto e = ctx.beginError(c.loc, core::errors::Resolver::PrivateConstantReferenced)) {
+                if (auto e = ctx.beginError(c.loc(), core::errors::Resolver::PrivateConstantReferenced)) {
                     e.setHeader("Non-private reference to private constant `{}` referenced", result.show(ctx));
                 }
             }
@@ -758,7 +762,7 @@ private:
         }
 
         if (!job.resolutionFailed && !job.isMixinAncestor) {
-            if (auto e = ctx.beginError(c.loc, core::errors::Resolver::DynamicConstant)) {
+            if (auto e = ctx.beginError(c.loc(), core::errors::Resolver::DynamicConstant)) {
                 e.setHeader("Dynamic constant references are unsupported");
             }
         }
@@ -839,7 +843,7 @@ private:
                                                core::packages::MangledName package) {
         auto scope = ast::cast_tree<ast::ConstantLit>(original.scope);
         if (scope == nullptr) {
-            return original.loc;
+            return original.loc();
         }
 
         struct Walker {
@@ -870,7 +874,7 @@ private:
                 }
                 return true;
             }
-        } walker{ctx, package, original.loc};
+        } walker{ctx, package, original.loc()};
         scope->walkOriginalPath(walker);
         return walker.result;
     }
@@ -898,7 +902,7 @@ private:
                 auto loc = resolvedField.data(ctx)->loc();
                 if (auto e = ctx.state.beginError(loc, core::errors::Resolver::RecursiveTypeAlias)) {
                     e.setHeader("Unable to resolve right hand side of type alias `{}`", resolved.show(ctx));
-                    e.addErrorLine(ctx.locAt(job.out->original()->loc), "Type alias used here");
+                    e.addErrorLine(ctx.locAt(job.out->original()->loc()), "Type alias used here");
                 }
 
                 resolvedField.data(gs)->resultType = core::Types::untyped(resolved);
@@ -997,7 +1001,7 @@ private:
 
         // This name is an artifact of parser recovery--no need to leak the parser implementation to the user,
         // because an error will have already been reported.
-        auto constantNameMissing = original.cnst == core::Names::Constants::ConstantNameMissing();
+        auto constantNameMissing = original.cnst() == core::Names::Constants::ConstantNameMissing();
         auto suggestScope = job.out->resolutionScopes()->front();
         auto isPackage = ctx.file.data(ctx).isPackage(gs);
         auto isImport = false;
@@ -1039,12 +1043,12 @@ private:
             return;
         }
 
-        if (auto e = ctx.beginError(original.loc, core::errors::Resolver::StubConstant)) {
-            e.setHeader("Unable to resolve constant `{}`", original.cnst.show(ctx));
+        if (auto e = ctx.beginError(original.loc(), core::errors::Resolver::StubConstant)) {
+            e.setHeader("Unable to resolve constant `{}`", original.cnst().show(ctx));
             auto foundCommonTypo = false;
             if (ast::isa_tree<ast::EmptyTree>(original.scope)) {
                 for (const auto &[from, to] : COMMON_TYPOS) {
-                    if (from == original.cnst) {
+                    if (from == original.cnst()) {
                         e.didYouMean(to, ctx.locAt(job.out->loc()));
                         foundCommonTypo = true;
                         break;
@@ -1060,8 +1064,8 @@ private:
                 if (!isPackage && gs.packageDB().enabled()) {
                     filterToPackage = gs.packageDB().getPackageNameForFile(file);
                 }
-                auto suggested = suggestScope.asClassOrModuleRef().data(ctx)->findConstantFuzzyMatch(ctx, original.cnst,
-                                                                                                     filterToPackage);
+                auto suggested = suggestScope.asClassOrModuleRef().data(ctx)->findConstantFuzzyMatch(
+                    ctx, original.cnst(), filterToPackage);
 
                 if (suggested.size() > 3) {
                     suggested.resize(3);
@@ -1861,7 +1865,7 @@ private:
             }
 
             ast::ExpressionPtr onPart(std::unique_ptr<ast::UnresolvedConstantLit> original, bool isOutermost) {
-                auto name = original->cnst;
+                auto name = original->cnst();
                 auto out = ast::make_expression<ast::ConstantLit>(core::Symbols::noSymbol(), std::move(original));
                 auto constant = ast::cast_tree<ast::ConstantLit>(out);
 

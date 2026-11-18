@@ -26,16 +26,11 @@ bool doesExtendConcern(core::MutableContext ctx, ast::ClassDef *klass) {
                 if (firstArg == nullptr) {
                     return;
                 }
-                auto firstArgScope = ast::cast_tree<ast::UnresolvedConstantLit>(firstArg->scope);
-                if (firstArgScope == nullptr) {
+                if (firstArg->segmentCount() != 2) {
                     return;
                 }
-                auto outerScope = ast::cast_tree<ast::UnresolvedConstantLit>(firstArgScope->scope);
-                if (outerScope != nullptr) {
-                    return;
-                }
-                if (firstArg->cnst != core::Names::Constants::Concern() ||
-                    firstArgScope->cnst != core::Names::Constants::ActiveSupport()) {
+                if (firstArg->names()[1] != core::Names::Constants::Concern() ||
+                    firstArg->names()[0] != core::Names::Constants::ActiveSupport()) {
                     return;
                 }
 
@@ -112,7 +107,7 @@ void Concern::run(core::MutableContext ctx, ast::ClassDef *klass) {
             }
         } else if (auto mod = ast::cast_tree<ast::ClassDef>(stat)) {
             auto name = ast::cast_tree<ast::UnresolvedConstantLit>(mod->name);
-            if (name && name->cnst == core::Names::Constants::ClassMethods()) {
+            if (name && name->cnst() == core::Names::Constants::ClassMethods()) {
                 if (classMethodsNode) {
                     // ClassMethods module already exists. Let's add mod->rhs into existing module
                     auto classDef = ast::cast_tree<ast::ClassDef>(classMethodsNode);

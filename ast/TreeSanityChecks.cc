@@ -97,7 +97,11 @@ void ClassDef::_sanityCheck() {
 
 void UnresolvedConstantLit::_sanityCheck() {
     ENFORCE(scope);
-    ENFORCE(cnst.exists());
+    ENFORCE(!isa_tree<UnresolvedConstantLit>(scope));
+    ENFORCE(segmentCount() > 0);
+    for (auto name : names()) {
+        ENFORCE(name.exists());
+    }
 }
 
 void ConstantLit::_sanityCheck() {

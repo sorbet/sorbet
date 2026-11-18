@@ -12,19 +12,18 @@ private:
     T &subst;
 
     void substClassName(core::Context ctx, ExpressionPtr &node) {
-        ExpressionPtr *cur = &node;
-        while (true) {
-            auto constLit = cast_tree<UnresolvedConstantLit>(*cur);
-            if (constLit == nullptr) { // uncommon case. something is strange
-                if (isa_tree<EmptyTree>(*cur)) {
-                    return;
-                }
-                TreeWalk::apply(ctx, *this, *cur);
-                return;
+        auto constLit = cast_tree<UnresolvedConstantLit>(node);
+        if (constLit == nullptr) {
+            if (!isa_tree<EmptyTree>(node)) {
+                TreeWalk::apply(ctx, *this, node);
             }
-
-            constLit->cnst = subst.substituteSymbolName(constLit->cnst);
-            cur = &constLit->scope;
+            return;
+        }
+        for (auto &name : constLit->mutableNames()) {
+            name = subst.substituteSymbolName(name);
+        }
+        if (!isa_tree<EmptyTree>(constLit->scope)) {
+            TreeWalk::apply(ctx, *this, constLit->scope);
         }
     }
 
@@ -158,9 +157,7 @@ public:
     }
 
     void postTransformUnresolvedConstantLit(core::Context ctx, ExpressionPtr &tree) {
-        auto &original = cast_tree_nonnull<UnresolvedConstantLit>(tree);
-        original.cnst = subst.substituteSymbolName(original.cnst);
-        substClassName(ctx, original.scope);
+        substClassName(ctx, tree);
     }
 
     void postTransformRuntimeMethodDefinition(core::Context ctx, ExpressionPtr &original) {

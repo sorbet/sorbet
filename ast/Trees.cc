@@ -122,6 +122,12 @@ template <> struct LocGetter<ConstantLit> {
         return reinterpret_cast<ConstantLit *>(ptr)->loc();
     }
 };
+
+template <> struct LocGetter<UnresolvedConstantLit> {
+    static core::LocOffsets loc(void *ptr) {
+        return reinterpret_cast<UnresolvedConstantLit *>(ptr)->loc();
+    }
+};
 } // namespace
 
 core::LocOffsets ExpressionPtr::loc() const {
@@ -326,22 +332,39 @@ Literal::Literal(core::LocOffsets loc, const core::TypePtr &value) : loc(loc), v
     _sanityCheck();
 }
 
-UnresolvedConstantLit::UnresolvedConstantLit(core::LocOffsets loc, ExpressionPtr scope, core::NameRef cnst)
-    : loc(loc), cnst(cnst), scope(std::move(scope)) {
+UnresolvedConstantLit::UnresolvedConstantLit(ExpressionPtr scope, uint32_t numSegments)
+    : numSegments(numSegments), scope(std::move(scope)) {
     categoryCounterInc("trees", "constantlit");
-    _sanityCheck();
+}
+
+ExpressionPtr UnresolvedConstantLit::create(ExpressionPtr scope, absl::Span<const core::NameRef> names,
+                                            absl::Span<const core::LocOffsets> locs) {
+    return ExpressionPtr::fromUnique(createUnique(std::move(scope), names, locs));
+}
+
+unique_ptr<UnresolvedConstantLit> UnresolvedConstantLit::createUnique(ExpressionPtr scope,
+                                                                      absl::Span<const core::NameRef> names,
+                                                                      absl::Span<const core::LocOffsets> locs) {
+    ENFORCE(names.size() == locs.size());
+    ENFORCE(!names.empty());
+    ENFORCE(names.size() <= numeric_limits<uint32_t>::max());
+
+    auto count = static_cast<uint32_t>(names.size());
+    auto size = totalSizeToAlloc<core::NameRef, core::LocOffsets>(count, count);
+    auto *raw = ::operator new(size);
+    auto *result = new (raw) UnresolvedConstantLit(std::move(scope), count);
+    uninitialized_copy(names.begin(), names.end(), result->getTrailingObjects<core::NameRef>());
+    uninitialized_copy(locs.begin(), locs.end(), result->getTrailingObjects<core::LocOffsets>());
+    result->_sanityCheck();
+    return unique_ptr<UnresolvedConstantLit>(result);
 }
 
 const ExpressionPtr &UnresolvedConstantLit::outermostScope() const {
-    auto current = this;
-    while (auto parent = cast_tree<UnresolvedConstantLit>(current->scope)) {
-        current = parent.get();
-    }
-    return current->scope;
+    return scope;
 }
 
 ExpressionPtr &UnresolvedConstantLit::outermostScope() {
-    return const_cast<ExpressionPtr &>(std::as_const(*this).outermostScope());
+    return scope;
 }
 
 ConstantLit::ConstantLit(core::LocOffsets loc, core::SymbolRef symbol) : storage(loc, symbol) {
@@ -376,7 +399,7 @@ optional<pair<core::SymbolRef, vector<core::NameRef>>> ConstantLit::fullUnresolv
         }
 
         auto &orig = *nested->original();
-        namesFailedToResolve.emplace_back(orig.cnst);
+        namesFailedToResolve.emplace_back(orig.cnst());
 
         if (nested->resolutionScopes()->front().exists()) {
             break;
@@ -457,6 +480,50 @@ void printTabs(fmt::memory_buffer &to, int count) {
     while (i < count) {
         fmt::format_to(std::back_inserter(to), "  ");
         i++;
+    }
+}
+
+void showRawConstantSegments(fmt::memory_buffer &buf, const core::GlobalState &gs, const ExpressionPtr &scope,
+                             absl::Span<const core::NameRef> names, int tabs) {
+    auto currentTabs = tabs;
+    for (size_t i = names.size(); i > 0; --i) {
+        fmt::format_to(std::back_inserter(buf), "UnresolvedConstantLit{{\n");
+        printTabs(buf, currentTabs + 1);
+        fmt::format_to(std::back_inserter(buf), "cnst = {}\n", names[i - 1].showRaw(gs));
+        printTabs(buf, currentTabs + 1);
+        fmt::format_to(std::back_inserter(buf), "scope = ");
+        ++currentTabs;
+    }
+    fmt::format_to(std::back_inserter(buf), "{}", scope.showRaw(gs, currentTabs));
+    for (size_t i = 0; i < names.size(); ++i) {
+        fmt::format_to(std::back_inserter(buf), "\n");
+        --currentTabs;
+        printTabs(buf, currentTabs);
+        fmt::format_to(std::back_inserter(buf), "}}");
+    }
+}
+
+void showRawConstantSegmentsWithLocs(fmt::memory_buffer &buf, const core::GlobalState &gs, core::FileRef file,
+                                     const ExpressionPtr &scope, absl::Span<const core::NameRef> names,
+                                     absl::Span<const core::LocOffsets> locs, int tabs) {
+    ENFORCE(names.size() == locs.size());
+    auto currentTabs = tabs;
+    for (size_t i = names.size(); i > 0; --i) {
+        fmt::format_to(std::back_inserter(buf), "UnresolvedConstantLit{{\n");
+        printTabs(buf, currentTabs + 1);
+        fmt::format_to(std::back_inserter(buf), "loc = {}\n", core::Loc(file, locs[i - 1]).fileShortPosToString(gs));
+        printTabs(buf, currentTabs + 1);
+        fmt::format_to(std::back_inserter(buf), "cnst = {}\n", names[i - 1].showRaw(gs));
+        printTabs(buf, currentTabs + 1);
+        fmt::format_to(std::back_inserter(buf), "scope = ");
+        ++currentTabs;
+    }
+    fmt::format_to(std::back_inserter(buf), "{}", scope.showRawWithLocs(gs, file, currentTabs));
+    for (size_t i = 0; i < names.size(); ++i) {
+        fmt::format_to(std::back_inserter(buf), "\n");
+        --currentTabs;
+        printTabs(buf, currentTabs);
+        fmt::format_to(std::back_inserter(buf), "}}");
     }
 }
 
@@ -764,7 +831,12 @@ string EmptyTree::toStringWithTabs(const core::GlobalState &gs, int tabs) const 
 }
 
 string UnresolvedConstantLit::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
-    return fmt::format("{}::{}", this->scope.toStringWithTabs(gs, tabs), this->cnst.toString(gs));
+    fmt::memory_buffer buf;
+    fmt::format_to(std::back_inserter(buf), "{}", scope.toStringWithTabs(gs, tabs));
+    for (auto name : names()) {
+        fmt::format_to(std::back_inserter(buf), "::{}", name.toString(gs));
+    }
+    return fmt::to_string(buf);
 }
 
 string UnresolvedConstantLit::showRaw(const core::GlobalState &gs, int tabs) const {
@@ -772,9 +844,11 @@ string UnresolvedConstantLit::showRaw(const core::GlobalState &gs, int tabs) con
 
     fmt::format_to(std::back_inserter(buf), "{}{{\n", nodeName());
     printTabs(buf, tabs + 1);
-    fmt::format_to(std::back_inserter(buf), "cnst = {}\n", this->cnst.showRaw(gs));
+    fmt::format_to(std::back_inserter(buf), "cnst = {}\n", cnst().showRaw(gs));
     printTabs(buf, tabs + 1);
-    fmt::format_to(std::back_inserter(buf), "scope = {}\n", this->scope.showRaw(gs, tabs + 1));
+    fmt::format_to(std::back_inserter(buf), "scope = ");
+    showRawConstantSegments(buf, gs, scope, names().first(segmentCount() - 1), tabs + 1);
+    fmt::format_to(std::back_inserter(buf), "\n");
     printTabs(buf, tabs);
     fmt::format_to(std::back_inserter(buf), "}}");
     return fmt::to_string(buf);
@@ -1841,11 +1915,15 @@ string UnresolvedConstantLit::showRawWithLocs(const core::GlobalState &gs, core:
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "{}{{\n", nodeName());
     printTabs(buf, tabs + 1);
-    fmt::format_to(std::back_inserter(buf), "loc = {}\n", core::Loc(file, this->loc).fileShortPosToString(gs));
+    fmt::format_to(std::back_inserter(buf), "loc = {}\n", core::Loc(file, loc()).fileShortPosToString(gs));
     printTabs(buf, tabs + 1);
-    fmt::format_to(std::back_inserter(buf), "cnst = {}\n", this->cnst.showRaw(gs));
+    fmt::format_to(std::back_inserter(buf), "cnst = {}\n", cnst().showRaw(gs));
     printTabs(buf, tabs + 1);
-    fmt::format_to(std::back_inserter(buf), "scope = {}\n", this->scope.showRawWithLocs(gs, file, tabs + 1));
+    fmt::format_to(std::back_inserter(buf), "scope = ");
+    auto scopeSegmentCount = segmentCount() - 1;
+    showRawConstantSegmentsWithLocs(buf, gs, file, scope, names().first(scopeSegmentCount),
+                                    locs().first(scopeSegmentCount), tabs + 1);
+    fmt::format_to(std::back_inserter(buf), "\n");
     printTabs(buf, tabs);
     fmt::format_to(std::back_inserter(buf), "}}");
     return fmt::to_string(buf);

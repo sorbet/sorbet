@@ -250,8 +250,19 @@ public:
         } else {
             if (klass.symbol == core::Symbols::todo()) {
                 const auto &constLit = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(klass.name);
-                found.owner = defineScope(getOwner(), constLit.scope, found.withinExplicitRootScope);
-                found.name = constLit.cnst;
+                auto owner = defineScope(getOwner(), constLit.scope, found.withinExplicitRootScope);
+                for (size_t i = 0; i + 1 < constLit.segmentCount(); ++i) {
+                    core::FoundClass prefix;
+                    prefix.owner = owner;
+                    prefix.name = constLit.names()[i];
+                    prefix.loc = constLit.locs()[i];
+                    prefix.declLoc = constLit.locs()[i];
+                    prefix.classKind = core::FoundClass::Kind::Unknown;
+                    prefix.withinExplicitRootScope = found.withinExplicitRootScope;
+                    owner = foundDefs->addClass(move(prefix));
+                }
+                found.owner = owner;
+                found.name = constLit.cnst();
             } else {
                 // Desugar populates a top-level root() ClassDef.
                 // Nothing else should have been typeAlias by now.
@@ -697,11 +708,22 @@ public:
         auto &lhs = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(asgn.lhs);
 
         auto withinExplicitRootScope = currentOwnerWithinExplicitRootScope() || isExplicitlyRootScoped(asgn.lhs);
+        auto owner = defineScope(getOwner(), lhs.scope, withinExplicitRootScope);
+        for (size_t i = 0; i + 1 < lhs.segmentCount(); ++i) {
+            core::FoundClass prefix;
+            prefix.owner = owner;
+            prefix.name = lhs.names()[i];
+            prefix.loc = lhs.locs()[i];
+            prefix.declLoc = lhs.locs()[i];
+            prefix.classKind = core::FoundClass::Kind::Unknown;
+            prefix.withinExplicitRootScope = withinExplicitRootScope;
+            owner = foundDefs->addClass(move(prefix));
+        }
         core::FoundStaticField found;
-        found.owner = defineScope(getOwner(), lhs.scope, withinExplicitRootScope);
-        found.name = lhs.cnst;
+        found.owner = owner;
+        found.name = lhs.cnst();
         found.asgnLoc = asgn.loc;
-        found.lhsLoc = lhs.loc;
+        found.lhsLoc = lhs.loc();
         found.withinExplicitRootScope = withinExplicitRootScope;
         return foundDefs->addStaticField(move(found));
     }
@@ -716,8 +738,8 @@ public:
         core::FoundTypeMember found;
         found.owner = getOwner();
         found.asgnLoc = asgn.loc;
-        found.nameLoc = typeName->loc;
-        found.name = typeName->cnst;
+        found.nameLoc = typeName->loc();
+        found.name = typeName->cnst();
         // Store name rather than core::Variance type so that we can defer reporting an error until later.
         found.varianceName = core::NameRef();
         found.isTypeTemplate = send->fun == core::Names::typeTemplate();
@@ -766,7 +788,7 @@ public:
         bool result = false;
 
         typecase(
-            s.recv, [&](const ast::UnresolvedConstantLit &c) { result = c.cnst == core::Names::Constants::T(); },
+            s.recv, [&](const ast::UnresolvedConstantLit &c) { result = c.cnst() == core::Names::Constants::T(); },
             [&](const ast::ConstantLit &c) { result = c.symbol() == core::Symbols::T(); },
             [&](const ast::ExpressionPtr &_default) { result = false; });
 
@@ -845,7 +867,7 @@ public:
             fillAssign(ctx, asgn);
         } else if (!send->recv.isSelfReference() && !ast::MK::isSorbetPrivateStatic(send->recv)) {
             handleAssignment(ctx, asgn);
-        } else if (!ast::isa_tree<ast::EmptyTree>(lhs->scope)) {
+        } else if (!ast::isa_tree<ast::EmptyTree>(lhs->scope) || lhs->segmentCount() > 1) {
             handleAssignment(ctx, asgn);
         } else {
             switch (send->fun.rawId()) {
@@ -2549,13 +2571,13 @@ class TreeSymbolizer {
                 ENFORCE(newOwner.exists());
 
                 auto mangled = packageMangledClasses.find(
-                    {ctx.file, newOwner.asClassOrModuleRef(), constLit->cnst, withinExplicitRootScope});
+                    {ctx.file, newOwner.asClassOrModuleRef(), constLit->cnst(), withinExplicitRootScope});
                 core::SymbolRef existing =
                     mangled != packageMangledClasses.end()
                         ? mangled->second
-                        : ctx.state.lookupClassSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
+                        : ctx.state.lookupClassSymbol(newOwner.asClassOrModuleRef(), constLit->cnst());
                 if (isOutermost && !existing.exists() && newOwner.isClassOrModule()) {
-                    existing = ctx.state.lookupStaticFieldSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
+                    existing = ctx.state.lookupStaticFieldSymbol(newOwner.asClassOrModuleRef(), constLit->cnst());
                     if (existing.exists()) {
                         existing = existing.dealias(ctx.state);
                     }
@@ -2691,16 +2713,29 @@ public:
         auto maybeScope = squashNames(ctx, contextClass(ctx, ctx.owner), lhs.scope, withinExplicitRootScope);
         ENFORCE(maybeScope.exists());
 
+        for (size_t i = 0; i + 1 < lhs.segmentCount(); ++i) {
+            if (!maybeScope.isClassOrModule()) {
+                auto scopeName = maybeScope.name(ctx);
+                maybeScope = ctx.state.lookupClassSymbol(maybeScope.owner(ctx).asClassOrModuleRef(), scopeName);
+            }
+            auto mangled = packageMangledClasses.find(
+                {ctx.file, maybeScope.asClassOrModuleRef(), lhs.names()[i], withinExplicitRootScope});
+            maybeScope = mangled != packageMangledClasses.end()
+                             ? mangled->second
+                             : ctx.state.lookupClassSymbol(maybeScope.asClassOrModuleRef(), lhs.names()[i]);
+            ENFORCE(maybeScope.exists());
+        }
+
         if (!maybeScope.isClassOrModule()) {
             auto scopeName = maybeScope.name(ctx);
             maybeScope = ctx.state.lookupClassSymbol(maybeScope.owner(ctx).asClassOrModuleRef(), scopeName);
         }
         auto scope = maybeScope.asClassOrModuleRef();
 
-        auto maybeCnst = packageMangledStaticFields.find({ctx.file, scope, lhs.cnst, withinExplicitRootScope});
+        auto maybeCnst = packageMangledStaticFields.find({ctx.file, scope, lhs.cnst(), withinExplicitRootScope});
         core::SymbolRef cnst = maybeCnst != packageMangledStaticFields.end()
                                    ? maybeCnst->second
-                                   : ctx.state.lookupStaticFieldSymbol(scope, lhs.cnst);
+                                   : ctx.state.lookupStaticFieldSymbol(scope, lhs.cnst());
         ENFORCE(cnst.exists());
         asgn.lhs = ast::make_expression<ast::ConstantLit>(cnst, asgn.lhs.toUnique<ast::UnresolvedConstantLit>());
 
@@ -2769,7 +2804,7 @@ public:
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
 
         auto &lhs = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(asgn.lhs);
-        if (lhs.cnst == core::Names::Constants::AttachedClass()) {
+        if (lhs.cnst() == core::Names::Constants::AttachedClass()) {
             // The rest of the pipeline assumes that any `<AttachedClass>` member is a type member,
             // so don't define a static field with that name.
             return ast::MK::EmptyTree();
@@ -2808,7 +2843,7 @@ public:
                 auto extraArgsLoc = send->getPosArg(1).loc().join(send->getPosArg(send->numPosArgs() - 1).loc());
                 if (auto e = ctx.beginError(extraArgsLoc, core::errors::Namer::InvalidTypeDefinition)) {
                     e.setHeader("Too many arguments in `{}` definition for `{}`", send->fun.show(ctx),
-                                typeName->cnst.show(ctx));
+                                typeName->cnst().show(ctx));
                     auto firstArgLoc = send->getPosArg(0).loc();
                     auto argsLoc = send->argsLoc();
                     auto replacementRange = core::Loc(ctx.file, firstArgLoc.endPos(), argsLoc.endPos());
@@ -2876,7 +2911,7 @@ public:
                 return ignoreBadTypeMember(ctx, move(tree));
         }
 
-        core::SymbolRef sym = ctx.state.lookupTypeMemberSymbol(onSymbol, typeName->cnst);
+        core::SymbolRef sym = ctx.state.lookupTypeMemberSymbol(onSymbol, typeName->cnst());
         ENFORCE(sym.exists());
 
         // Simulates how squashNames in handleAssignment also creates a ConstantLit
@@ -2976,7 +3011,7 @@ public:
             tree = handleAssignment(ctx, std::move(tree));
         } else if (!send->recv.isSelfReference() && !ast::MK::isSorbetPrivateStatic(send->recv)) {
             tree = handleAssignment(ctx, std::move(tree));
-        } else if (!ast::isa_tree<ast::EmptyTree>(lhs->scope)) {
+        } else if (!ast::isa_tree<ast::EmptyTree>(lhs->scope) || lhs->segmentCount() > 1) {
             tree = handleAssignment(ctx, std::move(tree));
         } else {
             switch (send->fun.rawId()) {

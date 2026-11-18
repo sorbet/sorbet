@@ -285,8 +285,13 @@ bool compareTrees(const core::GlobalState &gs, const void *avoid, const Tag tag,
         case Tag::UnresolvedConstantLit: {
             auto *a = reinterpret_cast<const UnresolvedConstantLit *>(tree);
             auto *b = reinterpret_cast<const UnresolvedConstantLit *>(other);
-            if (!Comparator::compareNames(gs, a->cnst, b->cnst)) {
+            if (a->segmentCount() != b->segmentCount()) {
                 return false;
+            }
+            for (size_t i = 0; i < a->segmentCount(); ++i) {
+                if (!Comparator::compareNames(gs, a->names()[i], b->names()[i])) {
+                    return false;
+                }
             }
             return Comparator::compareNodes(gs, avoid, a->scope, b->scope, file);
         }
@@ -300,8 +305,13 @@ bool compareTrees(const core::GlobalState &gs, const void *avoid, const Tag tag,
             if (a->original() && b->original()) {
                 auto &alit = *a->original();
                 auto &blit = *b->original();
-                if (alit.cnst != blit.cnst) {
+                if (alit.segmentCount() != blit.segmentCount()) {
                     return false;
+                }
+                for (size_t i = 0; i < alit.segmentCount(); ++i) {
+                    if (!Comparator::compareNames(gs, alit.names()[i], blit.names()[i])) {
+                        return false;
+                    }
                 }
                 return Comparator::compareNodes(gs, avoid, alit.scope, blit.scope, file);
             } else if (!a->original() && !b->original()) {

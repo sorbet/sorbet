@@ -1226,7 +1226,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 // warnings in `typed: strict` files.
                 if (isa_tree<UnresolvedConstantLit>(lhs) && isa_tree<UnresolvedConstantLit>(rhs)) {
                     auto &rhsConst = cast_tree_nonnull<UnresolvedConstantLit>(rhs);
-                    if (rhsConst.cnst == core::Names::Constants::ErrorNode()) {
+                    if (rhsConst.cnst() == core::Names::Constants::ErrorNode()) {
                         auto rhsLocZero = rhs.loc().copyWithZeroLength();
                         rhs = MK::Let(rhsLocZero, move(rhs), MK::Untyped(rhsLocZero));
                     }
@@ -2454,16 +2454,13 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 }
 
                 Send::ARGS_store args;
-                while (!isa_tree<EmptyTree>(value)) {
-                    auto lit = cast_tree<UnresolvedConstantLit>(value);
-                    if (lit == nullptr) {
-                        args.clear();
-                        break;
+                if (auto lit = cast_tree<UnresolvedConstantLit>(value)) {
+                    if (isa_tree<EmptyTree>(lit->scope)) {
+                        for (size_t i = 0; i < lit->segmentCount(); ++i) {
+                            args.emplace_back(MK::String(lit->locs()[i], lit->names()[i]));
+                        }
                     }
-                    args.emplace_back(MK::String(lit->loc, lit->cnst));
-                    value = move(lit->scope);
                 }
-                absl::c_reverse(args);
 
                 auto numPosArgs = args.size();
                 auto res = MK::Send(loc, MK::Magic(loc), core::Names::defined_p(), locZeroLen, numPosArgs, move(args));

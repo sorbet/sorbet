@@ -141,13 +141,13 @@ optional<ProcessStatResult> processStat(core::MutableContext ctx, ast::ClassDef 
     if (fromWhere != FromWhere::Inside) {
         if (auto e = ctx.beginIndexerError(stat.loc(), core::errors::Rewriter::BadTEnumSyntax)) {
             e.setHeader("Definition of enum value `{}` must be within the `{}` block for this `{}`",
-                        lhs->cnst.show(ctx), "enums do", "T::Enum");
+                        lhs->cnst().show(ctx), "enums do", "T::Enum");
             e.addErrorLine(ctx.locAt(klass->declLoc), "Enclosing definition here");
         }
     }
 
     auto statLocZero = stat.loc().copyWithZeroLength();
-    auto name = ctx.state.enterNameConstant(ctx.state.freshNameUnique(core::UniqueNameKind::TEnum, lhs->cnst, 1));
+    auto name = ctx.state.enterNameConstant(ctx.state.freshNameUnique(core::UniqueNameKind::TEnum, lhs->cnst(), 1));
     auto classCnst = ast::MK::UnresolvedConstant(statLocZero, ast::MK::EmptyTree(), name);
     ast::ClassDef::ANCESTORS_store parent;
     parent.emplace_back(klass->name.deepCopy());
