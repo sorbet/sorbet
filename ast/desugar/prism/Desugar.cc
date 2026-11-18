@@ -5181,9 +5181,13 @@ ast::ExpressionPtr Desugarer::buildConstantPath(pm_node_t *parent, core::LocOffs
         while (true) {
             if (PM_NODE_TYPE_P(current, PM_CONSTANT_PATH_NODE)) {
                 auto *path = down_cast<pm_constant_path_node>(current);
-                auto name = path->name == PM_CONSTANT_ID_UNSET
-                                ? core::Names::Constants::ConstantNameMissing()
-                                : ctx.state.enterNameConstant(translateConstantName(path->name));
+                if (path->name == PM_CONSTANT_ID_UNSET) {
+                    names.emplace_back(core::Names::Constants::ConstantNameMissing());
+                    locs.emplace_back(translateLoc(path->base.location));
+                    scope = MK::EmptyTree();
+                    break;
+                }
+                auto name = ctx.state.enterNameConstant(translateConstantName(path->name));
                 names.emplace_back(name);
                 locs.emplace_back(translateLoc(path->base.location));
                 if (path->parent == nullptr) {
