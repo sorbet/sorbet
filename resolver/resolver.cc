@@ -1,5 +1,6 @@
 #include "core/errors/resolver.h"
 #include "absl/strings/escaping.h"
+#include "absl/strings/strip.h"
 #include "ast/Helpers.h"
 #include "ast/Trees.h"
 #include "ast/ast.h"
@@ -3496,6 +3497,14 @@ class ResolveTypeMembersAndFieldsWalk {
         arg.flags.isKeyword = true;
     }
 
+    // Normalizes a path for the `file` argument of `T::Descendants.register`, so that it matches the path that Sorbet
+    // shows in error messages, regardless of how the file was passed on the command line.
+    static string_view trackedDescendantPath(const core::GlobalState &gs, string_view path) {
+        path = gs.getPrintablePath(path);
+        absl::ConsumePrefix(&path, "./");
+        return path;
+    }
+
     static void resolveTrackDescendant(core::GlobalState &gs, const ResolveTrackDescendantItem &todo) {
         auto send = todo.send;
         auto loc = core::Loc(todo.file, send->loc);
@@ -3508,11 +3517,22 @@ class ResolveTypeMembersAndFieldsWalk {
 
         auto &superclassArg = send->getPosArg(0);
         auto &subclassArg = send->getPosArg(1);
+        auto &fileArg = send->getPosArg(2);
         auto superclassCnst = ast::cast_tree<ast::ConstantLit>(superclassArg);
         auto subclassCnst = ast::cast_tree<ast::ConstantLit>(subclassArg);
         if (superclassCnst == nullptr || subclassCnst == nullptr) {
             if (auto e = gs.beginError(loc, core::errors::Resolver::InvalidDescendantRegistration)) {
-                e.setHeader("Arguments to `{}` must be statically resolvable to classes or modules",
+                e.setHeader("The first two arguments to `{}` must be statically resolvable to classes or modules",
+                            send->fun.show(gs));
+            }
+            return;
+        }
+
+        auto fileStrLit = ast::cast_tree<ast::Literal>(fileArg);
+        if (fileStrLit == nullptr || !fileStrLit->isString()) {
+            auto fileArgLoc = core::Loc(todo.file, fileArg.loc());
+            if (auto e = gs.beginError(fileArgLoc, core::errors::Resolver::InvalidDescendantRegistration)) {
+                e.setHeader("Expected a string file path as the third argument to `{}`",
                             send->fun.show(gs));
             }
             return;
@@ -3523,7 +3543,7 @@ class ResolveTypeMembersAndFieldsWalk {
         if (superclass.exists()) {
             superclass = superclass.dealias(gs);
         }
-        if (!superclass.exists() || !superclass.isClassOrModule()) {
+        if (!superclass.exists() || !superclass.isClassOrModule() || superclass == core::Symbols::StubModule()) {
             if (auto e = gs.beginError(superclassLoc, core::errors::Resolver::InvalidDescendantRegistration)) {
                 e.setHeader("First argument to `{}` must be statically resolvable to a class or module",
                             send->fun.show(gs));
@@ -3547,8 +3567,9 @@ class ResolveTypeMembersAndFieldsWalk {
         auto superclassSym = superclass.asClassOrModuleRef();
         auto subclassSym = subclass.asClassOrModuleRef();
         auto subclassDefLoc = subclassSym.data(gs)->loc();
+        auto subclassDefLocFile = subclassDefLoc.file();
 
-        auto subclassPkgName = gs.packageDB().getPackageNameForFile(subclassDefLoc.file());
+        auto subclassPkgName = gs.packageDB().getPackageNameForFile(subclassDefLocFile);
         auto curPkgName = gs.packageDB().getPackageNameForFile(todo.file);
         if (subclassPkgName != curPkgName) {
             if (auto e = gs.beginError(subclassLoc, core::errors::Resolver::InvalidDescendantRegistration)) {
@@ -3561,6 +3582,15 @@ class ResolveTypeMembersAndFieldsWalk {
             if (auto e = gs.beginError(loc, core::errors::Resolver::InvalidDescendantRegistration)) {
                 e.setHeader("`{}` is not a descendant of `{}`", subclassSym.show(gs), superclassSym.show(gs));
                 e.addErrorLine(subclassSym.data(gs)->loc(), "`{}` defined here", subclassSym.show(gs));
+            }
+            return;
+        }
+
+        auto fileStr = trackedDescendantPath(gs, fileStrLit->asString().shortName(gs));
+        auto subclassPath = trackedDescendantPath(gs, subclassDefLocFile.data(gs).path());
+        if (fileStr != subclassPath) {
+            if (auto e = gs.beginError(loc, core::errors::Resolver::InvalidDescendantRegistration)) {
+                e.setHeader("`{}` is defined in `{}`, not in `{}`", subclassSym.show(gs), subclassPath, fileStr);
             }
             return;
         }
@@ -3833,10 +3863,10 @@ public:
             if (id->symbol() != core::Symbols::T()) {
                 if (id->symbol() == core::Symbols::T_Descendants()) {
                     if (send.fun == core::Names::register_()) {
-                        if (send.numPosArgs() != 2 || send.hasKwArgs() || send.hasBlock()) {
+                        if (send.numPosArgs() != 3 || send.hasKwArgs() || send.hasBlock()) {
                             if (auto e =
                                     ctx.beginError(send.loc, core::errors::Resolver::InvalidDescendantRegistration)) {
-                                e.setHeader("`{}` must be called with exactly 2 positional arguments",
+                                e.setHeader("`{}` must be called with exactly 3 positional arguments",
                                             send.fun.show(ctx));
                             }
                         } else if (ctx.state.packageDB().enabled()) {
@@ -4219,10 +4249,11 @@ public:
             for (auto &threadTodos : combinedTodoCheckTrackDescendantItems) {
                 for (auto &[superclass, subclass] : threadTodos) {
                     if (!absl::c_contains(subclass.data(gs)->trackedSuperClassesToList(gs), superclass)) {
-                        if (auto e =
-                                gs.beginError(subclass.data(gs)->loc(), core::errors::Resolver::UntrackedDescendant)) {
-                            e.setHeader("add T::Descendants.register({}, {}) in an RBI file in this package",
-                                        superclass.show(gs), subclass.show(gs));
+                        auto subclassLoc = subclass.data(gs)->loc();
+                        if (auto e = gs.beginError(subclassLoc, core::errors::Resolver::UntrackedDescendant)) {
+                            e.setHeader("add T::Descendants.register({}, {}, \"{}\") in an RBI file in this package",
+                                        superclass.show(gs), subclass.show(gs),
+                                        trackedDescendantPath(gs, subclassLoc.file().data(gs).path()));
                         }
                     }
                 }
