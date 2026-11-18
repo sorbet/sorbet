@@ -104,7 +104,8 @@ public:
      *
      * Used to decide whether a queued edit can preempt a slow path, and at which stratum.
      */
-    TypecheckingPathResult provisionalTypecheckingPath(const std::vector<std::shared_ptr<core::File>> &changedFiles) const;
+    TypecheckingPathResult
+    provisionalTypecheckingPath(const std::vector<std::shared_ptr<core::File>> &changedFiles) const;
 
     /**
      * Computes state hashes for the given set of files. Is a no-op if the provided files all have hashes.
