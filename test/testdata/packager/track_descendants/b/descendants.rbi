@@ -17,6 +17,10 @@ T::Descendants.register(Root::A::Parent, Root::B::Child, "test/testdata/packager
 
 T::Descendants.register(Root::A::Parent, Root::B::Child, "test/testdata/packager/track_descendants/b/descendants.rbi") # error: `Root::B::Child` is defined in `test/testdata/packager/track_descendants/b/b.rb`, not in `test/testdata/packager/track_descendants/b/descendants.rbi`
 
+T::Descendants.register(Root::A::DoesNotExist, Root::B::Child, "test/testdata/packager/track_descendants/b/b.rb")
+#                       ^^^^^^^^^^^^^^^^^^^^^ error: Unable to resolve constant `DoesNotExist`
+#                       ^^^^^^^^^^^^^^^^^^^^^ error: First argument to `register` must be statically resolvable to a class or module
+
 T::Descendants.register(Root::A::NotAModule, Root::B::Child, "test/testdata/packager/track_descendants/b/b.rb")
 #                       ^^^^^^^^^^^^^^^^^^^ error: First argument to `register` must be statically resolvable to a class or module
 

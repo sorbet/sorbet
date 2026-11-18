@@ -2761,7 +2761,7 @@ class ResolveTypeMembersAndFieldsWalk {
 
     struct ResolveTrackDescendantItem {
         core::FileRef file;
-        ast::Send *send;
+        const ast::Send *send;
     };
 
     struct ResolveTypeMembersAndFieldsWorkerResult {
@@ -3479,8 +3479,8 @@ class ResolveTypeMembersAndFieldsWalk {
     }
 
     static void resolveTrackDescendant(core::GlobalState &gs, const ResolveTrackDescendantItem &todo) {
-        auto send = todo.send;
-        auto loc = core::Loc(todo.file, send->loc);
+        const auto *send = todo.send;
+        const auto loc = core::Loc(todo.file, send->loc);
         if (!todo.file.data(gs).isRBI()) {
             if (auto e = gs.beginError(loc, core::errors::Resolver::InvalidDescendantRegistration)) {
                 e.setHeader("`{}` can only be called in an RBI file", send->fun.show(gs));
@@ -3488,11 +3488,11 @@ class ResolveTypeMembersAndFieldsWalk {
             return;
         }
 
-        auto &superclassArg = send->getPosArg(0);
-        auto &subclassArg = send->getPosArg(1);
-        auto &fileArg = send->getPosArg(2);
-        auto superclassCnst = ast::cast_tree<ast::ConstantLit>(superclassArg);
-        auto subclassCnst = ast::cast_tree<ast::ConstantLit>(subclassArg);
+        const auto &superclassArg = send->getPosArg(0);
+        const auto &subclassArg = send->getPosArg(1);
+        const auto &fileArg = send->getPosArg(2);
+        const auto superclassCnst = ast::cast_tree<ast::ConstantLit>(superclassArg);
+        const auto subclassCnst = ast::cast_tree<ast::ConstantLit>(subclassArg);
         if (superclassCnst == nullptr || subclassCnst == nullptr) {
             if (auto e = gs.beginError(loc, core::errors::Resolver::InvalidDescendantRegistration)) {
                 e.setHeader("The first two arguments to `{}` must be statically resolvable to classes or modules",
@@ -3501,17 +3501,16 @@ class ResolveTypeMembersAndFieldsWalk {
             return;
         }
 
-        auto fileStrLit = ast::cast_tree<ast::Literal>(fileArg);
+        const auto fileStrLit = ast::cast_tree<ast::Literal>(fileArg);
         if (fileStrLit == nullptr || !fileStrLit->isString()) {
-            auto fileArgLoc = core::Loc(todo.file, fileArg.loc());
+            const auto fileArgLoc = core::Loc(todo.file, fileArg.loc());
             if (auto e = gs.beginError(fileArgLoc, core::errors::Resolver::InvalidDescendantRegistration)) {
-                e.setHeader("Expected a string file path as the third argument to `{}`",
-                            send->fun.show(gs));
+                e.setHeader("Expected a string file path as the third argument to `{}`", send->fun.show(gs));
             }
             return;
         }
 
-        auto superclassLoc = core::Loc(todo.file, superclassCnst->loc());
+        const auto superclassLoc = core::Loc(todo.file, superclassCnst->loc());
         auto superclass = superclassCnst->symbol();
         if (superclass.exists()) {
             superclass = superclass.dealias(gs);
@@ -3524,7 +3523,7 @@ class ResolveTypeMembersAndFieldsWalk {
             return;
         }
 
-        auto subclassLoc = core::Loc(todo.file, subclassCnst->loc());
+        const auto subclassLoc = core::Loc(todo.file, subclassCnst->loc());
         auto subclass = subclassCnst->symbol();
         if (subclass.exists()) {
             subclass = subclass.dealias(gs);
@@ -3537,13 +3536,13 @@ class ResolveTypeMembersAndFieldsWalk {
             return;
         }
 
-        auto superclassSym = superclass.asClassOrModuleRef();
-        auto subclassSym = subclass.asClassOrModuleRef();
-        auto subclassDefLoc = subclassSym.data(gs)->loc();
-        auto subclassDefLocFile = subclassDefLoc.file();
+        const auto superclassSym = superclass.asClassOrModuleRef();
+        const auto subclassSym = subclass.asClassOrModuleRef();
+        const auto subclassDefLoc = subclassSym.data(gs)->loc();
+        const auto subclassDefLocFile = subclassDefLoc.file();
 
-        auto subclassPkgName = gs.packageDB().getPackageNameForFile(subclassDefLocFile);
-        auto curPkgName = gs.packageDB().getPackageNameForFile(todo.file);
+        const auto subclassPkgName = gs.packageDB().getPackageNameForFile(subclassDefLocFile);
+        const auto curPkgName = gs.packageDB().getPackageNameForFile(todo.file);
         if (subclassPkgName != curPkgName) {
             if (auto e = gs.beginError(subclassLoc, core::errors::Resolver::InvalidDescendantRegistration)) {
                 e.setHeader("`{}` must be tracked in its own package", subclassSym.show(gs));
@@ -3559,8 +3558,8 @@ class ResolveTypeMembersAndFieldsWalk {
             return;
         }
 
-        auto fileStr = trackedDescendantPath(gs, fileStrLit->asString().shortName(gs));
-        auto subclassPath = trackedDescendantPath(gs, subclassDefLocFile.data(gs).path());
+        const auto fileStr = trackedDescendantPath(gs, fileStrLit->asString().shortName(gs));
+        const auto subclassPath = trackedDescendantPath(gs, subclassDefLocFile.data(gs).path());
         if (fileStr != subclassPath) {
             if (auto e = gs.beginError(loc, core::errors::Resolver::InvalidDescendantRegistration)) {
                 e.setHeader("`{}` is defined in `{}`, not in `{}`", subclassSym.show(gs), subclassPath, fileStr);
@@ -4211,18 +4210,18 @@ public:
         }
         {
             Timer timeit(gs.tracer(), "resolver.resolveTrackDescendants");
-            for (auto &threadTodos : combinedTodoResolveTrackDescendants) {
-                for (auto &todo : threadTodos) {
+            for (const auto &threadTodos : combinedTodoResolveTrackDescendants) {
+                for (const auto &todo : threadTodos) {
                     resolveTrackDescendant(gs, todo);
                 }
             }
         }
         {
             Timer timeit(gs.tracer(), "resolver.checkTrackedDescendants");
-            for (auto &threadTodos : combinedTodoCheckTrackDescendantItems) {
-                for (auto &[superclass, subclass] : threadTodos) {
+            for (const auto &threadTodos : combinedTodoCheckTrackDescendantItems) {
+                for (const auto &[superclass, subclass] : threadTodos) {
                     if (!absl::c_contains(subclass.data(gs)->trackedSuperClassesToList(gs), superclass)) {
-                        auto subclassLoc = subclass.data(gs)->loc();
+                        const auto subclassLoc = subclass.data(gs)->loc();
                         if (auto e = gs.beginError(subclassLoc, core::errors::Resolver::UntrackedDescendant)) {
                             e.setHeader("add T::Descendants.register({}, {}, \"{}\") in an RBI file in this package",
                                         superclass.show(gs), subclass.show(gs),
