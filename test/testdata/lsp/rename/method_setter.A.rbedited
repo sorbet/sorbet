@@ -9,4 +9,4 @@ class A
 end
 
 a = A.new
-a.c== 1
+a.c = 1
