@@ -205,6 +205,9 @@ private:
         // resolves these constants twice. Errors are only reported for the copy in the class body.
         bool isMixinAncestor : 1 = false;
         PackageCursorPosition packageCursorPosition = PackageCursorPosition::None;
+        int resolvedUpToSegment = -1;
+        int packageBoundarySegment = -1;
+        core::ClassOrModuleRef resolvedOwner;
 
         ConstantResolutionItem() = default;
         ConstantResolutionItem(shared_ptr<Nesting> scope, ast::ConstantLit *lit) : scope(move(scope)), out(lit) {}
@@ -219,7 +222,7 @@ private:
         ConstantResolutionItem(const ConstantResolutionItem &rhs) = delete;
         const ConstantResolutionItem &operator=(const ConstantResolutionItem &rhs) = delete;
     };
-    CheckSize(ConstantResolutionItem, 32, 8);
+    CheckSize(ConstantResolutionItem, 48, 8);
 
     template <class T> struct ResolveItems {
         core::FileRef file;
@@ -484,8 +487,7 @@ private:
     // if resolved symbol is only defined in the current file, and
     //    the definition is after the reference loc,
     // then, report an error.
-    static void checkReferenceOrder(core::Context ctx, core::SymbolRef resolutionResult,
-                                    const ast::UnresolvedConstantLit &c,
+    static void checkReferenceOrder(core::Context ctx, core::SymbolRef resolutionResult, core::LocOffsets refLoc,
                                     const UnorderedMap<core::SymbolRef, core::LocOffsets> &firstDefinitionLocs) {
         if (!ctx.file.data(ctx).isRBI() && resolutionResult.exists() &&
             resolutionResult.isOnlyDefinedInFile(ctx.state, ctx.file)) {
@@ -505,9 +507,8 @@ private:
             }
 
             // Check for ordering between reference loc and definition loc.
-            const auto refLoc = c.loc();
             if (defLoc.beginPos() > refLoc.endPos()) {
-                if (auto e = ctx.beginError(c.loc(), core::errors::Resolver::OutOfOrderConstantAccess)) {
+                if (auto e = ctx.beginError(refLoc, core::errors::Resolver::OutOfOrderConstantAccess)) {
                     e.setHeader("`{}` referenced before it is defined", resolutionResult.show(ctx));
                     e.addErrorLine(ctx.locAt(defLoc), "Defined here");
                 }
@@ -544,7 +545,8 @@ private:
     // Whether the current file may reference `result`, which belongs to `otherPackage`, if `result` is covered by a
     // `package_private!` marker. Reports an error the first time it says no.
     static bool canReferencePackagePrivate(core::Context ctx, ConstantResolutionItem &job, core::SymbolRef result,
-                                           bool foundInAncestor, core::packages::MangledName otherPackage,
+                                           core::LocOffsets refLoc, bool foundInAncestor,
+                                           core::packages::MangledName otherPackage,
                                            vector<PackageReference> &packageReferences) {
         auto &packageDB = ctx.state.packageDB();
         if (!otherPackage.exists()) {
@@ -582,7 +584,7 @@ private:
         // later components of the constant literal).
         if (!job.resolutionFailed && !job.isMixinAncestor) {
             auto &pkg = packageDB.getPackageInfo(otherPackage);
-            if (auto e = ctx.beginError(job.out->original()->loc(), core::errors::Packager::PackagePrivateConstant)) {
+            if (auto e = ctx.beginError(refLoc, core::errors::Packager::PackagePrivateConstant)) {
                 if (marker == result) {
                     e.setHeader("`{}` is `{}` in package `{}`", result.show(ctx), "package_private!", pkg.show(ctx));
                 } else {
@@ -605,7 +607,8 @@ private:
 
     // Ensures that we only allow resolving `job` to `result` if the package imports allow it
     static core::SymbolRef enforcePackageBoundary(core::Context ctx, ConstantResolutionItem &job,
-                                                  core::SymbolRef result, bool foundInAncestor,
+                                                  core::SymbolRef result, core::LocOffsets refLoc, bool foundInAncestor,
+                                                  int segment, bool isOutermost,
                                                   vector<PackageReference> &packageReferences) {
         if (!shouldCheckPackage(ctx) || !result.exists()) {
             return result;
@@ -623,18 +626,20 @@ private:
             otherPackage = enclosing.data(ctx)->package;
         }
         if (canReferencePackage(ctx, otherPackage)) {
-            if (!canReferencePackagePrivate(ctx, job, result, foundInAncestor, otherPackage, packageReferences)) {
+            if (!canReferencePackagePrivate(ctx, job, result, refLoc, foundInAncestor, otherPackage,
+                                            packageReferences)) {
                 return core::Symbols::noSymbol();
             }
             return result;
         }
-        if (!job.isOutermost && isStrictPrefixOfAvailablePackage(ctx, otherPackage)) {
+        if (!isOutermost && isStrictPrefixOfAvailablePackage(ctx, otherPackage)) {
             return result;
         }
 
         // Prevent the constant from resolving (even though it resolved) because it's not imported
         job.packageRegistryCursor = otherPackage.owner;
         job.packageCursorPosition = PackageCursorPosition::PackageBoundary;
+        job.packageBoundarySegment = segment;
         return core::Symbols::noSymbol();
     }
 
@@ -708,66 +713,174 @@ private:
         references.clear();
     }
 
+    static core::SymbolRef usePackageRegistryFallback(core::Context ctx, const ConstantResolutionItem &job,
+                                                      core::SymbolRef result, bool allowPackageRegistryFallback) {
+        if (result.exists() || job.resolutionFailed || !allowPackageRegistryFallback ||
+            !job.packageRegistryCursor.exists() || !shouldContinueWithPackageRegistryCursor(ctx, job)) {
+            return result;
+        }
+        return job.packageRegistryCursor;
+    }
+
+    static void reportPrivateConstantReference(core::Context ctx, const ConstantResolutionItem &job,
+                                               core::SymbolRef symbol, core::LocOffsets loc) {
+        auto isPrivate = (symbol.isClassOrModule() && symbol.asClassOrModuleRef().data(ctx)->flags.isPrivate) ||
+                         (symbol.isStaticField(ctx) && symbol.asFieldRef().data(ctx)->flags.isStaticFieldPrivate);
+        if (isPrivate && !ctx.file.data(ctx).isRBI() && !job.isMixinAncestor) {
+            if (auto e = ctx.beginError(loc, core::errors::Resolver::PrivateConstantReferenced)) {
+                e.setHeader("Non-private reference to private constant `{}` referenced", symbol.show(ctx));
+            }
+        }
+    }
+
+    static void recordPackageReference(core::Context ctx, ConstantResolutionItem &job, core::SymbolRef symbol,
+                                       bool isOutermost, vector<PackageReference> &packageReferences) {
+        auto savedIsOutermost = job.isOutermost;
+        job.isOutermost = isOutermost;
+        if (auto reference = packageReference(ctx, job, symbol)) {
+            addPackageReference(packageReferences, *reference);
+        }
+        job.isOutermost = savedIsOutermost;
+    }
+
+    static void advancePackageCursorAfterSegment(core::Context ctx, ConstantResolutionItem &job, core::SymbolRef symbol,
+                                                 core::NameRef nextName, int nextSegment) {
+        auto cursor = advancePackageCursor(ctx, cursorForSymbol(ctx, symbol), nextName);
+        job.packageRegistryCursor = cursor.cursor;
+        job.packageCursorPosition = cursor.position;
+        if (cursor.position == PackageCursorPosition::PackageBoundary) {
+            job.packageBoundarySegment = nextSegment;
+        }
+    }
+
     static core::SymbolRef resolveConstant(core::Context ctx, ConstantResolutionItem &job,
-                                           vector<PackageReference> &packageReferences) {
+                                           vector<PackageReference> &packageReferences,
+                                           bool allowPackageRegistryFallback = false) {
         if (job.out->symbol().exists()) {
             return job.out->symbol();
         }
+        if (job.resolutionFailed) {
+            return core::Symbols::noSymbol();
+        }
 
         auto &c = *job.out->original();
-        if (ast::isa_tree<ast::EmptyTree>(c.scope)) {
-            auto [result, foundInAncestor] = resolveLhs(ctx, job.scope.get(), c.cnst());
-            if (!result.exists()) {
-                return result;
-            }
+        auto segmentCount = static_cast<int>(c.segmentCount());
+        core::ClassOrModuleRef currentOwner;
+        int startSegment;
 
-            return enforcePackageBoundary(ctx, job, result, foundInAncestor, packageReferences);
-        }
-        if (auto id = ast::cast_tree<ast::ConstantLit>(c.scope)) {
-            auto sym = id->symbol();
-            if (!sym.exists()) {
-                // Still waiting for scope to be resolved. Don't mark resolutionFailed yet, just
-                // return noSymbol so that this job is picked up on the next time through the loop.
+        if (job.resolvedUpToSegment < 0) {
+            if (ast::isa_tree<ast::EmptyTree>(c.scope)) {
+                auto [firstSymbol, foundInAncestor] = resolveLhs(ctx, job.scope.get(), c.names()[0]);
+                firstSymbol = usePackageRegistryFallback(ctx, job, firstSymbol, allowPackageRegistryFallback);
+                if (!firstSymbol.exists()) {
+                    return core::Symbols::noSymbol();
+                }
+                firstSymbol = enforcePackageBoundary(ctx, job, firstSymbol, c.locs()[0], foundInAncestor, 0,
+                                                     job.isOutermost && segmentCount == 1, packageReferences);
+                if (segmentCount > 1) {
+                    firstSymbol = usePackageRegistryFallback(ctx, job, firstSymbol, allowPackageRegistryFallback);
+                }
+                if (!firstSymbol.exists() || segmentCount == 1) {
+                    return firstSymbol;
+                }
+                job.out->setSegmentSymbol(0, firstSymbol);
+                recordPackageReference(ctx, job, firstSymbol, false, packageReferences);
+                if (firstSymbol.isTypeAlias(ctx)) {
+                    job.resolvedUpToSegment = 0;
+                    if (!job.isMixinAncestor) {
+                        if (auto e = ctx.beginError(c.locs()[1], core::errors::Resolver::ConstantInTypeAlias)) {
+                            e.setHeader("Resolving constants through type aliases is not supported");
+                        }
+                    }
+                    job.resolutionFailed = true;
+                    return core::Symbols::noSymbol();
+                }
+                auto dealiased = firstSymbol.dealias(ctx);
+                if (!dealiased.isClassOrModule()) {
+                    return core::Symbols::noSymbol();
+                }
+                currentOwner = dealiased.asClassOrModuleRef();
+                job.resolvedUpToSegment = 0;
+                job.resolvedOwner = currentOwner;
+                advancePackageCursorAfterSegment(ctx, job, firstSymbol, c.names()[1], 1);
+                startSegment = 1;
+            } else if (auto scope = ast::cast_tree<ast::ConstantLit>(c.scope)) {
+                auto scopeSymbol = scope->symbol();
+                if (!scopeSymbol.exists()) {
+                    return core::Symbols::noSymbol();
+                }
+                if (scopeSymbol.isTypeAlias(ctx)) {
+                    if (!job.isMixinAncestor) {
+                        if (auto e = ctx.beginError(c.locs()[0], core::errors::Resolver::ConstantInTypeAlias)) {
+                            e.setHeader("Resolving constants through type aliases is not supported");
+                        }
+                    }
+                    job.resolutionFailed = true;
+                    return core::Symbols::noSymbol();
+                }
+                auto dealiased = scopeSymbol.dealias(ctx);
+                if (!dealiased.isClassOrModule()) {
+                    return core::Symbols::noSymbol();
+                }
+                currentOwner = dealiased.asClassOrModuleRef();
+                startSegment = 0;
+            } else {
+                if (!job.isMixinAncestor) {
+                    if (auto e = ctx.beginError(c.locs()[0], core::errors::Resolver::DynamicConstant)) {
+                        e.setHeader("Dynamic constant references are unsupported");
+                    }
+                }
+                job.resolutionFailed = true;
                 return core::Symbols::noSymbol();
             }
+        } else {
+            currentOwner = job.resolvedOwner;
+            startSegment = job.resolvedUpToSegment + 1;
+        }
 
-            if (sym.isTypeAlias(ctx) && !job.resolutionFailed) {
+        for (int segment = startSegment; segment + 1 < segmentCount; ++segment) {
+            auto symbol = currentOwner.data(ctx)->findMemberNoDealias(c.names()[segment]);
+            symbol = usePackageRegistryFallback(ctx, job, symbol, allowPackageRegistryFallback);
+            if (!symbol.exists()) {
+                return core::Symbols::noSymbol();
+            }
+            reportPrivateConstantReference(ctx, job, symbol, c.locs()[segment]);
+            symbol =
+                enforcePackageBoundary(ctx, job, symbol, c.locs()[segment], false, segment, false, packageReferences);
+            symbol = usePackageRegistryFallback(ctx, job, symbol, allowPackageRegistryFallback);
+            if (!symbol.exists()) {
+                return core::Symbols::noSymbol();
+            }
+            job.out->setSegmentSymbol(segment, symbol);
+            recordPackageReference(ctx, job, symbol, false, packageReferences);
+            if (symbol.isTypeAlias(ctx)) {
+                job.resolvedUpToSegment = segment;
                 if (!job.isMixinAncestor) {
-                    if (auto e = ctx.beginError(c.loc(), core::errors::Resolver::ConstantInTypeAlias)) {
+                    if (auto e = ctx.beginError(c.locs()[segment + 1], core::errors::Resolver::ConstantInTypeAlias)) {
                         e.setHeader("Resolving constants through type aliases is not supported");
                     }
                 }
                 job.resolutionFailed = true;
                 return core::Symbols::noSymbol();
             }
-
-            auto resolved = sym.dealias(ctx);
-            core::SymbolRef result;
-            if (resolved.isClassOrModule()) {
-                result = resolved.asClassOrModuleRef().data(ctx)->findMemberNoDealias(c.cnst());
+            auto dealiased = symbol.dealias(ctx);
+            if (!dealiased.isClassOrModule()) {
+                return core::Symbols::noSymbol();
             }
-
-            // Private constants are allowed to be resolved, when there is no scope set (the scope is checked above),
-            // otherwise we should error out. Private constant references _are not_ enforced inside RBI files.
-            if (result.exists() &&
-                ((result.isClassOrModule() && result.asClassOrModuleRef().data(ctx)->flags.isPrivate) ||
-                 (result.isStaticField(ctx) && result.asFieldRef().data(ctx)->flags.isStaticFieldPrivate)) &&
-                !ctx.file.data(ctx).isRBI() && !job.isMixinAncestor) {
-                if (auto e = ctx.beginError(c.loc(), core::errors::Resolver::PrivateConstantReferenced)) {
-                    e.setHeader("Non-private reference to private constant `{}` referenced", result.show(ctx));
-                }
-            }
-
-            return enforcePackageBoundary(ctx, job, result, /* foundInAncestor */ false, packageReferences);
+            currentOwner = dealiased.asClassOrModuleRef();
+            job.resolvedUpToSegment = segment;
+            job.resolvedOwner = currentOwner;
+            advancePackageCursorAfterSegment(ctx, job, symbol, c.names()[segment + 1], segment + 1);
         }
 
-        if (!job.resolutionFailed && !job.isMixinAncestor) {
-            if (auto e = ctx.beginError(c.loc(), core::errors::Resolver::DynamicConstant)) {
-                e.setHeader("Dynamic constant references are unsupported");
-            }
+        auto leaf = segmentCount - 1;
+        auto symbol = currentOwner.data(ctx)->findMemberNoDealias(c.names()[leaf]);
+        if (!symbol.exists()) {
+            return core::Symbols::noSymbol();
         }
-        job.resolutionFailed = true;
-        return core::Symbols::noSymbol();
+        reportPrivateConstantReference(ctx, job, symbol, c.locs()[leaf]);
+        return enforcePackageBoundary(ctx, job, symbol, c.locs()[leaf], false, leaf, job.isOutermost,
+                                      packageReferences);
     }
 
     enum class PackageResolutionAction : uint8_t {
@@ -839,8 +952,25 @@ private:
     //
     // Walking back seems best, but a second best would be deciding that the juice isn't worth the
     // squeeze, and reporting the errors on the outermost constant's full loc.
-    static core::LocOffsets packageBoundaryLoc(core::Context ctx, const ast::UnresolvedConstantLit &original,
-                                               core::packages::MangledName package) {
+    static core::LocOffsets packageBoundaryLoc(core::Context ctx, const ast::ConstantLit &constant,
+                                               core::packages::MangledName package, int packageBoundarySegment) {
+        auto &original = *constant.original();
+        for (size_t i = 0; i < original.segmentCount(); ++i) {
+            auto symbol = constant.segmentSymbol(i);
+            if (!symbol.exists() || symbol == core::Symbols::StubModule() || symbol == core::Symbols::todo()) {
+                continue;
+            }
+            auto enclosing = symbol.enclosingClass(ctx);
+            auto symbolPackage = enclosing.isPackageSpecSymbol(ctx) ? core::packages::MangledName(enclosing)
+                                                                    : enclosing.data(ctx)->package;
+            if (symbolPackage == package) {
+                return original.locs()[i];
+            }
+        }
+        if (packageBoundarySegment >= 0) {
+            ENFORCE(packageBoundarySegment < original.segmentCount());
+            return original.locs()[packageBoundarySegment];
+        }
         auto scope = ast::cast_tree<ast::ConstantLit>(original.scope);
         if (scope == nullptr) {
             return original.loc();
@@ -887,7 +1017,7 @@ private:
         core::Context ctx(gs, core::Symbols::root(), file);
 
         vector<PackageReference> packageReferences;
-        auto resolved = resolveConstant(ctx, job, packageReferences);
+        auto resolved = resolveConstant(ctx, job, packageReferences, true);
         for (auto &[otherPackage, referenceInfo] : packageReferences) {
             auto currentPackage = gs.packageDB().getPackageNameForFile(file);
             gs.packageDB()
@@ -933,8 +1063,17 @@ private:
         if (job.resolutionFailed) {
             // we only set this when a job has failed for other reasons and we've already reported an error, and
             // continuing on will only redundantly report that we can't resolve the constant, so bail early here
-            job.out->markUnresolved();
-            if (auto scope = ast::cast_tree<ast::ConstantLit>(job.out->original()->scope)) {
+            auto &original = *job.out->original();
+            auto failedSegment = static_cast<uint32_t>(job.resolvedUpToSegment + 1);
+            ENFORCE(failedSegment < original.segmentCount());
+            core::SymbolRef resolutionScope;
+            if (failedSegment > 0) {
+                resolutionScope = job.out->segmentSymbol(failedSegment - 1);
+            }
+            job.out->markUnresolved(failedSegment);
+            if (failedSegment > 0) {
+                job.out->resolutionScopes()->emplace_back(resolutionScope);
+            } else if (auto scope = ast::cast_tree<ast::ConstantLit>(original.scope)) {
                 // The scope resolved, but we refused to look up a constant through it (e.g., `A::B`
                 // where `A` is a type alias). Record the scope like any other explicit scope.
                 //
@@ -954,24 +1093,27 @@ private:
         ENFORCE(!job.out->symbol().exists());
 
         auto &original = *job.out->original();
-        auto scope = ast::cast_tree<ast::ConstantLit>(original.scope);
-        auto scopeWasStubbed = scope != nullptr && scope->symbol() == core::Symbols::StubModule();
-        if (shouldCheckPackage(ctx) && !job.isOutermost && job.packageRegistryCursor.exists() && !scopeWasStubbed &&
-            shouldContinueWithPackageRegistryCursor(ctx, job)) {
-            // Lie, and say that this constant resolves to a `<PackageSpecRegistry>`-scoped symbol.
-            //
-            // We want to report the import that would make the outermost constant resolve, which
-            // requires finding the narrowest package which might own that constant. We can hijack
-            // resolution to help us find this by continuing the resolution search on the package
-            // spec symbol. Once a future job can't find the symbol, even on the package spec
-            // cursor, that's the package we need to import.
-            job.out->setSymbol(job.packageRegistryCursor);
-            return;
+        auto failedSegment = job.resolvedUpToSegment + 1;
+        if (failedSegment + 1 < original.segmentCount() && job.out->segmentSymbol(failedSegment).exists()) {
+            failedSegment++;
         }
-
+        ENFORCE(failedSegment >= 0 && failedSegment < original.segmentCount());
+        auto failedName = original.names()[failedSegment];
+        auto failedLoc = original.locs()[failedSegment];
         bool alreadyReported = false;
-        job.out->markUnresolved();
-        if (auto id = ast::cast_tree<ast::ConstantLit>(original.scope)) {
+        core::SymbolRef resolvedScope;
+        if (failedSegment > 0) {
+            resolvedScope = job.out->segmentSymbol(failedSegment - 1);
+        }
+        job.out->markUnresolved(failedSegment);
+        if (failedSegment > 0) {
+            if (resolvedScope == core::Symbols::StubModule()) {
+                alreadyReported = true;
+                job.out->resolutionScopes()->emplace_back(core::Symbols::noSymbol());
+            } else {
+                job.out->resolutionScopes()->emplace_back(resolvedScope);
+            }
+        } else if (auto id = ast::cast_tree<ast::ConstantLit>(original.scope)) {
             auto originalScope = id->symbol();
             if (originalScope == core::Symbols::StubModule()) {
                 // If we were trying to resolve some literal like C::D but `C` itself was already stubbed,
@@ -1001,7 +1143,7 @@ private:
 
         // This name is an artifact of parser recovery--no need to leak the parser implementation to the user,
         // because an error will have already been reported.
-        auto constantNameMissing = original.cnst() == core::Names::Constants::ConstantNameMissing();
+        auto constantNameMissing = failedName == core::Names::Constants::ConstantNameMissing();
         auto suggestScope = job.out->resolutionScopes()->front();
         auto isPackage = ctx.file.data(ctx).isPackage(gs);
         auto isImport = false;
@@ -1021,7 +1163,7 @@ private:
                 auto cursorPackage = core::packages::MangledName(job.packageRegistryCursor);
                 auto currentPackage = gs.packageDB().getPackageNameForFile(file);
                 auto currentPackageInfo = gs.packageDB().getPackageInfoNonConst(currentPackage);
-                auto errorLoc = packageBoundaryLoc(ctx, original, cursorPackage);
+                auto errorLoc = packageBoundaryLoc(ctx, *job.out, cursorPackage, job.packageBoundarySegment);
                 auto referenceInfo = currentPackageInfo->checkReferenceAgainstImports(ctx, errorLoc, cursorPackage);
                 ENFORCE(referenceInfo.has_value());
                 currentPackageInfo->trackPackageReference(file, cursorPackage, referenceInfo.value());
@@ -1043,13 +1185,13 @@ private:
             return;
         }
 
-        if (auto e = ctx.beginError(original.loc(), core::errors::Resolver::StubConstant)) {
-            e.setHeader("Unable to resolve constant `{}`", original.cnst().show(ctx));
+        if (auto e = ctx.beginError(failedLoc, core::errors::Resolver::StubConstant)) {
+            e.setHeader("Unable to resolve constant `{}`", failedName.show(ctx));
             auto foundCommonTypo = false;
-            if (ast::isa_tree<ast::EmptyTree>(original.scope)) {
+            if (failedSegment == 0 && ast::isa_tree<ast::EmptyTree>(original.scope)) {
                 for (const auto &[from, to] : COMMON_TYPOS) {
-                    if (from == original.cnst()) {
-                        e.didYouMean(to, ctx.locAt(job.out->loc()));
+                    if (from == failedName) {
+                        e.didYouMean(to, ctx.locAt(failedLoc));
                         foundCommonTypo = true;
                         break;
                     }
@@ -1064,15 +1206,15 @@ private:
                 if (!isPackage && gs.packageDB().enabled()) {
                     filterToPackage = gs.packageDB().getPackageNameForFile(file);
                 }
-                auto suggested = suggestScope.asClassOrModuleRef().data(ctx)->findConstantFuzzyMatch(
-                    ctx, original.cnst(), filterToPackage);
+                auto suggested = suggestScope.asClassOrModuleRef().data(ctx)->findConstantFuzzyMatch(ctx, failedName,
+                                                                                                     filterToPackage);
 
                 if (suggested.size() > 3) {
                     suggested.resize(3);
                 }
                 for (auto suggestion : suggested) {
                     const auto replacement = suggestion.symbol.show(ctx);
-                    auto replaceLoc = ctx.locAt(job.out->loc());
+                    auto replaceLoc = ctx.locAt(failedLoc);
                     if (replaceLoc.source(ctx) == replacement) {
                         // The replacement is the same as the original.
                         // This can happen for a number of reasons, usually due to things
@@ -1842,75 +1984,44 @@ private:
     }
 
     PackageCursorState walkUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
-        struct Walker {
-            core::Context ctx;
-            ResolveConstantsWalk &resolver;
-            PackageCursorState cursor;
-            bool scopeWasEmpty;
+        auto original = tree.toUnique<ast::UnresolvedConstantLit>();
+        PackageCursorState cursor;
+        if (ast::isa_tree<ast::EmptyTree>(original->scope)) {
+            cursor = cursorForBareConstant(ctx, nesting_.get(), original->names()[0]);
+        } else if (auto scope = ast::cast_tree<ast::ConstantLit>(original->scope)) {
+            cursor = advancePackageCursor(ctx, cursorForSymbol(ctx, scope->symbol()), original->names()[0]);
+        } else {
+            ast::TreeWalk::apply(ctx, *this, original->scope);
+        }
 
-            ast::ExpressionPtr onRoot(ast::ExpressionPtr root) {
-                scopeWasEmpty = ast::isa_tree<ast::EmptyTree>(root);
-                if (scopeWasEmpty) {
-                    cursor = {};
-                } else if (auto lit = ast::cast_tree<ast::ConstantLit>(root)) {
-                    cursor = cursorForSymbol(ctx, lit->symbol());
-                } else {
-                    // Uncommon case. Will result in "Dynamic constant references are not allowed" eventually.
-                    // Still want to do our best to recover (for e.g., LSP queries)
-                    ast::TreeWalk::apply(ctx, resolver, root);
-                    cursor = {};
+        auto out = ast::ConstantLit::create(core::Symbols::noSymbol(), std::move(original));
+        auto constant = ast::cast_tree<ast::ConstantLit>(out);
+        ConstantResolutionItem job{nesting_, constant, cursor.cursor, true, cursor.position};
+        job.isMixinAncestor = inMixinAncestor_;
+        auto resolved = resolveConstantJob(ctx, job, packageReferences_);
+        cursor = {job.packageRegistryCursor, job.packageCursorPosition};
+        if (resolved) {
+            categoryCounterInc("resolve.constants.nonancestor", "firstpass");
+            cursor = cursorForSymbol(ctx, constant->symbol());
+        }
+
+        if (loadTimeScope() && !job.isMixinAncestor) {
+            auto &resolvedOriginal = *constant->original();
+            for (size_t i = 0; i < resolvedOriginal.segmentCount(); ++i) {
+                auto symbol = constant->segmentSymbol(i);
+                if (!symbol.exists() || symbol == core::Symbols::StubModule() ||
+                    (symbol.isClassOrModule() && !symbol.asClassOrModuleRef().data(ctx)->isDeclared())) {
+                    continue;
                 }
-                return root;
+                checkReferenceOrder(ctx, symbol, resolvedOriginal.locs()[i], firstDefinitionLocs);
             }
+        }
 
-            ast::ExpressionPtr onPart(std::unique_ptr<ast::UnresolvedConstantLit> original, bool isOutermost) {
-                auto name = original->cnst();
-                auto out = ast::ConstantLit::create(core::Symbols::noSymbol(), std::move(original));
-                auto constant = ast::cast_tree<ast::ConstantLit>(out);
-
-                if (scopeWasEmpty) {
-                    cursor = cursorForBareConstant(ctx, resolver.nesting_.get(), name);
-                } else {
-                    cursor = advancePackageCursor(ctx, cursor, name);
-                }
-                scopeWasEmpty = false;
-
-                ConstantResolutionItem job{
-                    resolver.nesting_, constant, cursor.cursor, isOutermost, cursor.position,
-                };
-                job.isMixinAncestor = resolver.inMixinAncestor_;
-                auto resolved = resolveConstantJob(ctx, job, resolver.packageReferences_);
-                if (resolved) {
-                    categoryCounterInc("resolve.constants.nonancestor", "firstpass");
-                    // Once a symbol is resolved, we can just use the cursor of that symbol
-                    // (even if empty, i.e. "unpackaged"), rather than having to guess.
-                    cursor = cursorForSymbol(ctx, constant->symbol());
-                    if (resolver.loadTimeScope() && (!constant->symbol().isClassOrModule() ||
-                                                     constant->symbol().asClassOrModuleRef().data(ctx)->isDeclared())) {
-                        // While Sorbet treats class A::B; end like an implicit definition of A, it's actually a
-                        // reference of A--Ruby will require a proper definition of A elsewhere. Long term,
-                        // Sorbet should be taught to emit errors when these references are not actually defined,
-                        // matching Ruby's behavior. Then the reference order checks will be able to check all
-                        // references against their definitions, and not limit them to only isDeclared symbols here.
-
-                        // (Historically, Stripe's custom autoloader used static analysis to predeclare these
-                        // intermediate namespaces, so they would always be defined at the right time. As Stripe's
-                        // codebase moves away from this legacy autoloader, it will be easier to introduce such
-                        // changes into Sorbet.)
-                        if (!job.isMixinAncestor) {
-                            checkReferenceOrder(ctx, constant->symbol(), *constant->original(),
-                                                resolver.firstDefinitionLocs);
-                        }
-                    }
-                } else {
-                    resolver.todo_.emplace_back(std::move(job));
-                }
-                return out;
-            }
-        } walker{ctx, *this, {}, false};
-
-        tree = ast::UnresolvedConstantLit::foldOwned(std::move(tree), walker);
-        return walker.cursor;
+        if (!resolved) {
+            todo_.emplace_back(std::move(job));
+        }
+        tree = std::move(out);
+        return cursor;
     }
 
 public:
@@ -2054,7 +2165,8 @@ public:
         // Check the name we're introducing for a scope, as that counts for requiring a package namespace
         // opening check in the parent scope.
         if (auto name = ast::cast_tree<ast::ConstantLit>(original.name)) {
-            if (!ast::isa_tree<ast::EmptyTree>(name->original()->scope) && nesting_->parent != nullptr) {
+            if ((!ast::isa_tree<ast::EmptyTree>(name->original()->scope) || name->original()->segmentCount() > 1) &&
+                nesting_->parent != nullptr) {
                 nesting_->parent->runtimeResolutionPresent = true;
             }
         }
