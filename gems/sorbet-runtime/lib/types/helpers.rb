@@ -32,8 +32,7 @@ module T::Helpers
   end
 
   # Similar to sealed but allows for descendant class tracking across the whole codebase
-  def track_descendants!
-  end
+  def track_descendants!; end
 
   # Causes a mixin to also mix in class methods from the named module.
   #
@@ -63,6 +62,5 @@ module T::Helpers
   #   end
   #
   # TODO: implement the checks in sorbet-runtime.
-  def requires_ancestor(&block)
-  end
+  def requires_ancestor(&block); end
 end
