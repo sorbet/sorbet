@@ -68,7 +68,7 @@ void SorbetWorkspaceEditTask::index(LSPIndexer &indexer) {
         state = Committed{indexer.commitEdit(*params)};
     } else {
         // HACK: Too many files to `commitEdit` serially. Index in `runSpecial`.
-        this->indexer = &indexer;
+        state = CommitInRunSpecial{&indexer};
         ENFORCE(getTypecheckingPath(indexer) != TypecheckingPath::Fast);
     }
 }
@@ -81,7 +81,6 @@ void SorbetWorkspaceEditTask::run(LSPTypecheckerDelegate &typechecker) {
     ENFORCE(committed != nullptr);
     auto &updates = committed->updates;
     ENFORCE(updates != nullptr);
-    ENFORCE(this->indexer == nullptr);
     if (!updates->canceledSlowPath) {
         latencyCancelSlowPath->cancel();
     }
@@ -105,20 +104,20 @@ void SorbetWorkspaceEditTask::runSpecial(LSPTypechecker &typechecker, WorkerPool
     if (latencyTimer != nullptr) {
         latencyTimer->setTag("path", "slow");
     }
-    if (indexer) {
-        ENFORCE(updates == nullptr);
+    if (auto *deferred = std::get_if<CommitInRunSpecial>(&state)) {
         // Using the `indexer` here is safe; the indexing thread is blocked until `startedNotification.Notify` is called
         // later in this function.
         // This is really gnarly; there's got to be a cleaner way to do threading here. We can't move this out because
         // we need `workers`, which is a resource that is explicitly managed by typechecking.
+        auto *indexer = deferred->indexer;
         state = Committed{indexer->commitEdit(*params, workers)};
 
         // IMPORTANT: We only have unqiue access to the indexer until we notify the LSPTypecheckerCoordinator that we
         // have started, which is done through `startedNotification` below. As there's no mutex that guarantees unique
         // access to the indexer (other than the task queue's mutex) and the LSPTypecheckerCoordinator will allow new
         // tasks to start once we notify through `startedNotification`, we need to make sure that we don't accidentally
-        // use `indexer` again after this point.
-        indexer = nullptr;
+        // use `indexer` again after this point. Replacing `state` drops the stashed pointer, so only the local
+        // `indexer` above remains, and nothing below uses it.
     }
 
     auto *committed = std::get_if<Committed>(&state);
@@ -135,7 +134,6 @@ void SorbetWorkspaceEditTask::runSpecial(LSPTypechecker &typechecker, WorkerPool
     // processing thread that it's safe to move on.
     typechecker.state().epochManager->startCommitEpoch(updates->epoch);
 
-    ENFORCE(indexer == nullptr);
     startedNotification.Notify();
 
     const auto newEditCount = updates->editCount - updates->committedEditCount;
