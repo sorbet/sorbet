@@ -77,35 +77,6 @@ Sometimes, including an entire folder includes too many files. We can refine the
 
 This will ignore input files that contain the given pattern in their paths (relative to the input path passed to Sorbet). Patterns beginning with / match against the prefix of these relative paths; others are substring matches. Matches must be against whole component parts, so `foo` matches `/foo/bar.rb` and `/bar/foo/baz.rb` but not `/foo.rb` or `/foo2/bar.rb`.
 
-### Selecting packages
-
-In package-directed typechecking mode (`--experimental-package-directed`), use `--focus-packages` to check part of a packaged project:
-
-```bash
-srb tc --sorbet-packages --experimental-package-directed --focus-packages=Project::Foo,Project::Bar .
-# Equivalent; the option can be repeated:
-srb tc --sorbet-packages --experimental-package-directed --focus-packages=Project::Foo --focus-packages=Project::Bar .
-```
-
-By default, Sorbet checks the named packages, their downstream consumers (packages that depend on them directly or transitively), and the dependencies needed by all of those packages. Packages in the same dependency cycle are always selected together.
-
-Two optional flags reduce the work performed:
-
-- `--focus-skip-upstream` skips inference for packages included only as dependencies of the focused packages. Sorbet still indexes and resolves their files, and will still run inference on them if any previous pass produced errors.
-- `--focus-skip-downstream` excludes downstream consumers completely, leaving the named packages, their dependency cycles, and their dependencies. For example, selecting a commonly used utility package and passing this flag will not typecheck any consumers of that utility library.
-
-Both flags require `--focus-packages` and can be combined:
-
-```bash
-srb tc --sorbet-packages --experimental-package-directed --focus-packages=Project::Foo --focus-skip-downstream --focus-skip-upstream .
-```
-
-Prelude packages (marked with `prelude!`) are implicit dependencies of every package, so they are always included in indexing and resolution. Explicitly selecting a prelude package switches to checking all packages, even when either skip flag is set.
-
-Continue to supply the project's usual input paths: this option selects packages within those inputs and does not discover additional directories. Sorbet reads all `__package.rb` files to build and validate the graph, so errors in package declarations can still be reported outside the selection. Ordinary source files in unselected packages are not indexed, resolved, or typechecked.
-
-Supply existing, nonempty package names. The option requires `--experimental-package-directed` and cannot be combined with `--lsp`, `--gen-packages`, or `--suggest-typed`.
-
 ### Considerations for memory usage
 
 Using `# typed: ignore` means only "ignore the contents of this file for the purpose of type checking." Sorbet still must read every `# typed: ignore` file in the codebase (to find the sigil in the first place)
