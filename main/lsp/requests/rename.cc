@@ -131,19 +131,25 @@ private:
     string replaceMethodNameInSend(string source, const core::lsp::SendResponse *sendResp) {
         // find the method in the send expression
         auto methodNameLoc = sendResp->getMethodNameLoc(gs);
-        if (!methodNameLoc) {
-            // If there are locations we don't know how to rename, fail the entire rename operation
+        auto methodName = methodNameLoc.has_value() ? methodNameLoc->source(gs) : nullopt;
+        string_view oldText = oldName;
+        string_view newText = newName;
+        if (methodName != oldText && absl::EndsWith(oldText, "=") && absl::EndsWith(newText, "=")) {
+            // A setter call like `a.b = 1` calls `b=`, but its method name is only `b`.
+            oldText.remove_suffix(1);
+            newText.remove_suffix(1);
+        }
+        if (methodName != oldText) {
+            // If there are locations we don't know how to rename (like the setter call in `a.b ||= 1`, whose method
+            // name loc is the `||=`), fail the entire rename operation
             invalid = true;
-            if (methodNameLoc->file().exists()) {
-                auto path = methodNameLoc->file().data(gs).path();
-                error = fmt::format("Failed to rename `{}` method call at {}:{}", oldName, path,
-                                    methodNameLoc->toDetails(gs).first.line);
-            }
+            error = fmt::format("Failed to rename `{}` method call at {}", oldName,
+                                sendResp->termLoc().filePosToString(gs));
             return "";
         }
         // TODO(jez) Use Loc::adjust here?
         string::size_type methodNameOffset = methodNameLoc->beginPos() - sendResp->termLocOffsets.beginPos();
-        auto newsrc = replaceAt(source, methodNameOffset);
+        auto newsrc = replaceAt(source, methodNameOffset, oldText, newText);
         return newsrc;
     }
 
@@ -177,11 +183,11 @@ private:
             ENFORCE(0, "Method name should appear in definition");
             return def;
         }
-        return replaceAt(def, pos);
+        return replaceAt(def, pos, oldName, newName);
     }
-    string replaceAt(string_view input, string::size_type pos) {
-        auto suffixOffset = pos + oldName.length();
-        return absl::StrCat(input.substr(0, pos), newName, input.substr(suffixOffset, input.length() - suffixOffset));
+    string replaceAt(string_view input, string::size_type pos, string_view oldText, string_view newText) {
+        auto suffixOffset = pos + oldText.length();
+        return absl::StrCat(input.substr(0, pos), newText, input.substr(suffixOffset, input.length() - suffixOffset));
     }
 }; // MethodRenamer
 
