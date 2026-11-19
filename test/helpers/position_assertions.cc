@@ -252,7 +252,6 @@ const UnorderedMap<
         {"no-stdlib", BooleanPropertyAssertion::make},
         {"symbol-search", SymbolSearchAssertion::make},
         {"apply-rename", ApplyRenameAssertion::make},
-        {"extra-package-files-directory-prefix-underscore", StringPropertyAssertion::make},
         {"extra-package-files-directory-prefix-slash-deprecated", StringPropertyAssertion::make},
         {"extra-package-files-directory-prefix-slash", StringPropertyAssertion::make},
         {"allow-relaxed-packager-checks-for", StringPropertyAssertion::make},
@@ -655,12 +654,6 @@ realmain::options::Options RangeAssertion::parseOptions(vector<shared_ptr<RangeA
 
     opts.cacheSensitiveOptions.sorbetPackages =
         BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
-    auto extraDirUnderscore =
-        StringPropertyAssertion::getValue("extra-package-files-directory-prefix-underscore", assertions);
-    if (extraDirUnderscore.has_value()) {
-        opts.extraPackageFilesDirectoryUnderscorePrefixes.emplace_back(extraDirUnderscore.value());
-    }
-
     auto extraDirSlashDeprecated =
         StringPropertyAssertion::getValue("extra-package-files-directory-prefix-slash-deprecated", assertions);
     if (extraDirSlashDeprecated.has_value()) {

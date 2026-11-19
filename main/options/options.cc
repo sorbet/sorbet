@@ -636,11 +636,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options(section)("sorbet-packages-hint-message",
                                  "Optional hint message to add to all packaging related errors",
                                  cxxopts::value<string>()->default_value(""));
-    options.add_options(section)("extra-package-files-directory-prefix-underscore",
-                                 "Extra parent directories which contain package files. Files are associated to a "
-                                 "package using a package's namespace joined by underscores. That is, files in "
-                                 "<dir>/Project_FooBar/ belong to Project::FooBar",
-                                 cxxopts::value<vector<string>>(), "<dir>");
     options.add_options(section)("extra-package-files-directory-prefix-slash-deprecated",
                                  "Extra parent directories which contain package files. Files are associated to a "
                                  "package using slash munging conventions. That is, files in "
@@ -1302,17 +1297,6 @@ void readOptions(Options &opts,
             // --store-state builds Sorbet's payload, whose files belong to no package.
             logger->error("--store-state can't be combined with --sorbet-packages");
             throw EarlyReturnWithCode(1);
-        }
-
-        if (raw.count("extra-package-files-directory-prefix-underscore")) {
-            for (const string &dirName : raw["extra-package-files-directory-prefix-underscore"].as<vector<string>>()) {
-                if (dirName.back() != '/') {
-                    logger->error("--extra-package-files-directory-prefix-underscore directory path must have slash "
-                                  "(/) at the end");
-                    throw EarlyReturnWithCode(1);
-                }
-                opts.extraPackageFilesDirectoryUnderscorePrefixes.emplace_back(dirName);
-            }
         }
 
         if (raw.count("extra-package-files-directory-prefix-slash-deprecated")) {

@@ -281,7 +281,6 @@ void LSPIndexer::transferInitializeState(InitializedTask &task) {
     auto typecheckerGS = std::exchange(
         this->gs, this->gs->copyForLSPTypechecker(
                       this->config->opts.cacheSensitiveOptions.sorbetPackages,
-                      this->config->opts.extraPackageFilesDirectoryUnderscorePrefixes,
                       this->config->opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
                       this->config->opts.extraPackageFilesDirectorySlashPrefixes,
                       this->config->opts.allowRelaxedPackagerChecksFor, this->config->opts.updateVisibilityFor,

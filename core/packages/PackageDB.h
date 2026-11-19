@@ -91,7 +91,6 @@ public:
         return this->packageAttributedErrors_;
     }
 
-    absl::Span<const std::string> extraPackageFilesDirectoryUnderscorePrefixes() const;
     absl::Span<const std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes() const;
     absl::Span<const std::string> extraPackageFilesDirectorySlashPrefixes() const;
     // Possible layers for packages to be in. The layers are ordered lowest to highest.
@@ -128,7 +127,6 @@ private:
     GenPackagesMode genPackagesMode_ = GenPackagesMode::Disabled;
     bool allowRelaxingTestVisibility_ = false;
     bool packageAttributedErrors_ = false;
-    std::vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes_;
     std::vector<std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes_;
     std::vector<std::string> extraPackageFilesDirectorySlashPrefixes_;
     std::string errorHint_;

@@ -440,8 +440,7 @@ public:
 
     const packages::PackageDB &packageDB() const;
     packages::PackageDB &packageDB();
-    void setPackagerOptions(const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
-                            const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
+    void setPackagerOptions(const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
                             const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
                             const std::vector<std::string> &skipImportVisibilityCheckFor,
                             const std::vector<std::string> &updateVisibilityFor,
@@ -573,8 +572,7 @@ public:
     // NOTE: this very intentionally will not copy the symbol or name tables. The symbol tables aren't used or populated
     // during indexing, and the name tables will only be written to.
     std::unique_ptr<GlobalState> copyForIndexThread(
-        const bool packagerEnabled, const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
-        const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
+        const bool packagerEnabled, const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
         const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
         const std::vector<std::string> &allowRelaxedPackagerChecksFor,
         const std::vector<std::string> &updateVisibilityFor, const std::vector<std::string> &packagerLayers,
@@ -585,8 +583,7 @@ public:
     // NOTE: this very intentionally will not copy the symbol or name tables. The symbol tables aren't used or populated
     // during indexing, and the name tables will only be written to.
     std::unique_ptr<GlobalState> copyForLSPTypechecker(
-        const bool packagerEnabled, const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
-        const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
+        const bool packagerEnabled, const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
         const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
         const std::vector<std::string> &allowRelaxedPackagerChecksFor,
         const std::vector<std::string> &updateVisibilityFor, const std::vector<std::string> &packagerLayers,
@@ -596,8 +593,7 @@ public:
     // `toStratum` value is passed as something other than the `0` stratum, the prefix of the symbol table leading up to
     // that stratum will be copied over as well.
     std::unique_ptr<GlobalState>
-    copyForSlowPath(const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
-                    const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
+    copyForSlowPath(const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
                     const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
                     const std::vector<std::string> &allowRelaxedPackagerChecksFor,
                     const std::vector<std::string> &updateVisibilityFor, const std::vector<std::string> &packagerLayers,
