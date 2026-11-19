@@ -69,7 +69,6 @@ void SorbetWorkspaceEditTask::index(LSPIndexer &indexer) {
     } else {
         // HACK: Too many files to `commitEdit` serially. Index in `runSpecial`.
         state = CommitInRunSpecial{&indexer};
-        ENFORCE(getTypecheckingPath(indexer) != TypecheckingPath::Fast);
     }
 }
 
@@ -158,6 +157,10 @@ TypecheckingPath SorbetWorkspaceEditTask::getTypecheckingPath(const LSPIndexer &
     if (auto *committed = std::get_if<Committed>(&state)) {
         ENFORCE(committed->updates != nullptr);
         return committed->updates->typecheckingPath;
+    }
+    if (std::holds_alternative<CommitInRunSpecial>(state)) {
+        // Too many files for the fast path.
+        return TypecheckingPath::Slow;
     }
 
     // Predict the typechecking path if there is no prediction, or if the indexer has committed other edits since it was
