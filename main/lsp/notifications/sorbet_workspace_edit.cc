@@ -65,7 +65,7 @@ void SorbetWorkspaceEditTask::index(LSPIndexer &indexer) {
     });
 
     if (params->updates.size() <= config.opts.lspMaxFilesOnFastPath) {
-        updates = indexer.commitEdit(*params);
+        state = Committed{indexer.commitEdit(*params)};
     } else {
         // HACK: Too many files to `commitEdit` serially. Index in `runSpecial`.
         this->indexer = &indexer;
@@ -77,6 +77,9 @@ void SorbetWorkspaceEditTask::run(LSPTypecheckerDelegate &typechecker) {
     if (latencyTimer != nullptr) {
         latencyTimer->setTag("path", "fast");
     }
+    auto *committed = std::get_if<Committed>(&state);
+    ENFORCE(committed != nullptr);
+    auto &updates = committed->updates;
     ENFORCE(updates != nullptr);
     ENFORCE(this->indexer == nullptr);
     if (!updates->canceledSlowPath) {
@@ -108,7 +111,7 @@ void SorbetWorkspaceEditTask::runSpecial(LSPTypechecker &typechecker, WorkerPool
         // later in this function.
         // This is really gnarly; there's got to be a cleaner way to do threading here. We can't move this out because
         // we need `workers`, which is a resource that is explicitly managed by typechecking.
-        updates = indexer->commitEdit(*params, workers);
+        state = Committed{indexer->commitEdit(*params, workers)};
 
         // IMPORTANT: We only have unqiue access to the indexer until we notify the LSPTypecheckerCoordinator that we
         // have started, which is done through `startedNotification` below. As there's no mutex that guarantees unique
@@ -116,9 +119,12 @@ void SorbetWorkspaceEditTask::runSpecial(LSPTypechecker &typechecker, WorkerPool
         // tasks to start once we notify through `startedNotification`, we need to make sure that we don't accidentally
         // use `indexer` again after this point.
         indexer = nullptr;
-    } else {
-        ENFORCE(updates != nullptr);
     }
+
+    auto *committed = std::get_if<Committed>(&state);
+    ENFORCE(committed != nullptr);
+    auto &updates = committed->updates;
+    ENFORCE(updates != nullptr);
 
     if (!updates->canceledSlowPath) {
         latencyCancelSlowPath->cancel();
@@ -151,8 +157,9 @@ void SorbetWorkspaceEditTask::schedulerWaitUntilReady() {
 }
 
 TypecheckingPath SorbetWorkspaceEditTask::getTypecheckingPath(const LSPIndexer &index) const {
-    if (updates != nullptr) {
-        return updates->typecheckingPath;
+    if (auto *committed = std::get_if<Committed>(&state)) {
+        ENFORCE(committed->updates != nullptr);
+        return committed->updates->typecheckingPath;
     }
 
     // Predict the typechecking path if there is no prediction, or if the indexer has committed other edits since it was
