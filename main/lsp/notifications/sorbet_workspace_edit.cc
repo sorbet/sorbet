@@ -31,7 +31,9 @@ LSPTask::Phase SorbetWorkspaceEditTask::finalPhase() const {
 
 void SorbetWorkspaceEditTask::mergeNewer(SorbetWorkspaceEditTask &task) {
     // Merging is only supported *before* we index this update.
-    ENFORCE(updates == nullptr && task.updates == nullptr);
+    auto *queued = std::get_if<Queued>(&state);
+    auto *newerQueued = std::get_if<Queued>(&task.state);
+    ENFORCE(queued != nullptr && newerQueued != nullptr);
     params->merge(*task.params);
     // Don't report a latency metric for merged edits.
     if (task.latencyTimer) {
@@ -42,8 +44,12 @@ void SorbetWorkspaceEditTask::mergeNewer(SorbetWorkspaceEditTask &task) {
     }
 
     // This cached information is now invalid.
-    task.provisionalDecision.reset();
-    provisionalDecision.reset();
+    if (newerQueued != nullptr) {
+        newerQueued->provisionalDecision.reset();
+    }
+    if (queued != nullptr) {
+        queued->provisionalDecision.reset();
+    }
 }
 
 void SorbetWorkspaceEditTask::preprocess(LSPPreprocessor &preprocessor) {
@@ -55,6 +61,8 @@ void SorbetWorkspaceEditTask::preprocess(LSPPreprocessor &preprocessor) {
 }
 
 void SorbetWorkspaceEditTask::index(LSPIndexer &indexer) {
+    ENFORCE(std::holds_alternative<Queued>(state));
+
     // This is the first time that we're able to compare the files in the update set to
     // the indexer's file table. We should determine if any of the updates we've received
     // are no-ops from background notifications, and filter them out to not artificially
@@ -165,11 +173,12 @@ TypecheckingPath SorbetWorkspaceEditTask::getTypecheckingPath(const LSPIndexer &
 
     // Predict the typechecking path if there is no prediction, or if the indexer has committed other edits since it was
     // computed.
-    if (!provisionalDecision.has_value() || !index.isTypecheckingPathValid(*provisionalDecision)) {
-        provisionalDecision.emplace(index.provisionalTypecheckingPath(params->updates));
+    auto &queued = std::get<Queued>(state);
+    if (!queued.provisionalDecision.has_value() || !index.isTypecheckingPathValid(*queued.provisionalDecision)) {
+        queued.provisionalDecision.emplace(index.provisionalTypecheckingPath(params->updates));
     }
 
-    return provisionalDecision->path;
+    return queued.provisionalDecision->path;
 }
 
 bool SorbetWorkspaceEditTask::canPreempt(const LSPIndexer &index) const {
@@ -181,12 +190,14 @@ const SorbetWorkspaceEditParams &SorbetWorkspaceEditTask::getParams() const {
 }
 
 core::packages::Stratum SorbetWorkspaceEditTask::preemptionStratum(FileStratumMapping info) const {
-    ENFORCE(this->updates == nullptr);
+    // Only queued edits are asked for a preemption stratum.
+    auto *queued = std::get_if<Queued>(&state);
+    ENFORCE(queued != nullptr);
 
     // There should be no path to `preemptionStratum` where we haven't cached the fast path info, but just to make sure
     // that we don't crash in a production build if that happens to not be the case, we defensively return the last
     // stratum here.
-    if (!this->provisionalDecision.has_value()) {
+    if (queued == nullptr || !queued->provisionalDecision.has_value()) {
         ENFORCE(false, "Missing cached typechecking path prediction when computing an edit preemption stratum");
         return info.getLastStratum();
     }
@@ -195,8 +206,9 @@ core::packages::Stratum SorbetWorkspaceEditTask::preemptionStratum(FileStratumMa
 
     // The incremental namer will pull in additional files that aren't directly part of the edit. Those may be
     // associated with a later stratum than the edited files, so we need to factor those in if they're present.
-    if (this->provisionalDecision->files.useIncrementalNamer && !this->provisionalDecision->files.extraFiles.empty()) {
-        stratum = std::max(stratum, info.getStratumForFiles(this->provisionalDecision->files.extraFiles));
+    const auto &files = queued->provisionalDecision->files;
+    if (files.useIncrementalNamer && !files.extraFiles.empty()) {
+        stratum = std::max(stratum, info.getStratumForFiles(files.extraFiles));
     }
 
     vector<string_view> paths;
