@@ -42,8 +42,8 @@ void SorbetWorkspaceEditTask::mergeNewer(SorbetWorkspaceEditTask &task) {
     }
 
     // This cached information is now invalid.
-    task.cachedPrediction.reset();
-    cachedPrediction.reset();
+    task.provisionalDecision.reset();
+    provisionalDecision.reset();
 }
 
 void SorbetWorkspaceEditTask::preprocess(LSPPreprocessor &preprocessor) {
@@ -157,11 +157,11 @@ TypecheckingPath SorbetWorkspaceEditTask::getTypecheckingPath(const LSPIndexer &
 
     // Predict the typechecking path if there is no prediction, or if the indexer has committed other edits since it was
     // computed.
-    if (!cachedPrediction.has_value() || !index.isTypecheckingPathValid(*cachedPrediction)) {
-        cachedPrediction.emplace(index.provisionalTypecheckingPath(params->updates));
+    if (!provisionalDecision.has_value() || !index.isTypecheckingPathValid(*provisionalDecision)) {
+        provisionalDecision.emplace(index.provisionalTypecheckingPath(params->updates));
     }
 
-    return cachedPrediction->path;
+    return provisionalDecision->path;
 }
 
 bool SorbetWorkspaceEditTask::canPreempt(const LSPIndexer &index) const {
@@ -178,7 +178,7 @@ core::packages::Stratum SorbetWorkspaceEditTask::preemptionStratum(FileStratumMa
     // There should be no path to `preemptionStratum` where we haven't cached the fast path info, but just to make sure
     // that we don't crash in a production build if that happens to not be the case, we defensively return the last
     // stratum here.
-    if (!this->cachedPrediction.has_value()) {
+    if (!this->provisionalDecision.has_value()) {
         ENFORCE(false, "Missing cached typechecking path prediction when computing an edit preemption stratum");
         return info.getLastStratum();
     }
@@ -187,8 +187,8 @@ core::packages::Stratum SorbetWorkspaceEditTask::preemptionStratum(FileStratumMa
 
     // The incremental namer will pull in additional files that aren't directly part of the edit. Those may be
     // associated with a later stratum than the edited files, so we need to factor those in if they're present.
-    if (this->cachedPrediction->files.useIncrementalNamer && !this->cachedPrediction->files.extraFiles.empty()) {
-        stratum = std::max(stratum, info.getStratumForFiles(this->cachedPrediction->files.extraFiles));
+    if (this->provisionalDecision->files.useIncrementalNamer && !this->provisionalDecision->files.extraFiles.empty()) {
+        stratum = std::max(stratum, info.getStratumForFiles(this->provisionalDecision->files.extraFiles));
     }
 
     vector<string_view> paths;

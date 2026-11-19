@@ -16,7 +16,7 @@ class SorbetWorkspaceEditTask final : public LSPDangerousTypecheckerTask {
     // Caches the indexer's prediction of the typechecking path for the provided update, along with the files outside of
     // the update that the fast path would also typecheck. Becomes invalidated when the update changes, or when the
     // indexer commits another edit (see `LSPIndexer::isTypecheckingPathValid`).
-    mutable std::optional<LSPIndexer::TypecheckingPathResult> cachedPrediction;
+    mutable std::optional<LSPIndexer::TypecheckingPathResult> provisionalDecision;
     // HACK: In the event that this edit is too large to index serially, stash the indexer here for use in `runSpecial`.
     LSPIndexer *indexer = nullptr;
 
