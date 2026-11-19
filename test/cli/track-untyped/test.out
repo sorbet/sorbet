@@ -176,6 +176,13 @@ Errors: 11
    "strict": "Strong",
    "min_error_level": "Max",
    "source_size": 177
+  },
+  {
+   "path": "test/cli/track-untyped/d.rb",
+   "sigil": "True",
+   "strict": "True",
+   "min_error_level": "Strict",
+   "source_size": 43
   }
  ]
 }
@@ -355,6 +362,13 @@ Errors: 11
    "strict": "Strong",
    "min_error_level": "Max",
    "source_size": 177
+  },
+  {
+   "path": "test/cli/track-untyped/d.rb",
+   "sigil": "True",
+   "strict": "True",
+   "min_error_level": "Strict",
+   "source_size": 43
   }
  ]
 }
@@ -536,6 +550,13 @@ Errors: 11
    "strict": "Strong",
    "min_error_level": "Max",
    "source_size": 177
+  },
+  {
+   "path": "test/cli/track-untyped/d.rb",
+   "sigil": "True",
+   "strict": "True",
+   "min_error_level": "Strict",
+   "source_size": 43
   }
  ]
 }
