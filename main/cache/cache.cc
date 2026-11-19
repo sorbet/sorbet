@@ -350,23 +350,16 @@ unique_ptr<OwnedKeyValueStore> SessionCache::open(shared_ptr<::spdlog::logger> l
     return make_unique<OwnedKeyValueStore>(openCache(std::move(logger), this->path, opts));
 }
 
-void SessionCache::commit(shared_ptr<::spdlog::logger> logger, const options::Options &opts) const {
+void SessionCache::commit(spdlog::logger &logger, const options::Options &opts) const {
     if (opts.cacheDir.empty()) {
         return;
     }
-    auto kvstore = this->open(std::move(logger), opts);
-    if (kvstore == nullptr) {
+
+    if (!FileOps::dirExists(this->path)) {
         return;
     }
 
-    // Copy into the destination filesystem before atomically replacing data.mdb. This preserves both the
-    // shared database on a failed copy and the session database for subsequent use.
-    auto stagingPath = fmt::format("{}/{}{}", opts.cacheDir, STAGING_DIR_PREFIX, getpid());
-    removeCacheDir(stagingPath);
-    absl::Cleanup cleanupStagingDirectory = [&stagingPath] { removeCacheDir(stagingPath); };
-
-    kvstore->copyTo(stagingPath);
-    kvstore.reset();
+    Timer timeit(logger, "session_cache.commit");
 
     // Skip publication if the shared cache is still in use.
     auto accessLock = CacheLock::acquireExclusive(opts.cacheDir, /* blocking */ false);
@@ -374,7 +367,18 @@ void SessionCache::commit(shared_ptr<::spdlog::logger> logger, const options::Op
         prodCounterInc("cache.publish_failed");
         return;
     }
-    filesystem::rename(fmt::format("{}/data.mdb", stagingPath), fmt::format("{}/data.mdb", opts.cacheDir));
+
+    auto sourceDb = fmt::format("{}/data.mdb", this->path);
+    auto stagedCopy = fmt::format("{}/data.mdb.staging", opts.cacheDir);
+    absl::Cleanup cleanup = [&stagedCopy] { ::unlink(stagedCopy.c_str()); };
+
+    error_code ec;
+    if (!std::filesystem::copy_file(sourceDb, stagedCopy, filesystem::copy_options::overwrite_existing, ec)) {
+        prodCounterInc("cache.publish_failed");
+        return;
+    }
+
+    filesystem::rename(stagedCopy, fmt::format("{}/data.mdb", opts.cacheDir));
     prodCounterInc("cache.publish_success");
 }
 

@@ -117,7 +117,7 @@ void LSPTypechecker::initialize(TaskQueue &queue, unique_ptr<core::GlobalState> 
     }
 
     if (this->sessionCache) {
-        this->sessionCache->commit(config->logger, config->opts);
+        this->sessionCache->commit(*config->logger, config->opts);
     }
 
     // Unblock the indexer now that its state is fully initialized.
