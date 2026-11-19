@@ -1694,6 +1694,10 @@ string printFileTableJSON(const core::GlobalState &gs, const UnorderedMap<long, 
 
     for (int i = 1; i < gs.filesUsed(); ++i) {
         core::FileRef file(i);
+        // Focused runs reserve file refs for unselected source files without reading them.
+        if (file.dataAllowingUnsafe(gs).sourceType == core::File::Type::NotYetRead) {
+            continue;
+        }
         if (file.data(gs).isPayload()) {
             if (!showFull) {
                 continue;
