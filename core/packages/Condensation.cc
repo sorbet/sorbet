@@ -26,11 +26,10 @@ struct TraversalBuilder {
 
     TraversalBuilder(const core::GlobalState &gs, absl::Span<const Condensation::Node> nodes,
                      UnorderedSet<MangledName> *focusedPackages, bool skipDownstream)
-        : nodes{nodes}, remainingImports(this->nodes.size(), 0) {
+        : nodes{nodes}, remainingImports(this->nodes.size(), 0),
+          // If the focused set is provided, all nodes start out as skipped.
+          skipNode(this->nodes.size(), focusedPackages != nullptr) {
         result.packages.reserve(gs.packageDB().packages().size());
-
-        // Nothing is skipped to start with.
-        this->skipNode = vector(this->nodes.size(), false);
 
         // The high-level summary of the focused algorithm is:
         //
@@ -41,8 +40,6 @@ struct TraversalBuilder {
         //
         // These three sets make up the packages involved in the focused edit.
         if (focusedPackages) {
-            this->skipNode.assign(this->nodes.size(), true);
-
             // Mark all `prelude!` packages as not skippable
             for (auto node : this->nodes) {
                 if (!node.isPrelude) {
@@ -51,13 +48,7 @@ struct TraversalBuilder {
 
                 this->skipNode[node.id] = false;
 
-                for (auto pkg : node.members) {
-                    if (focusedPackages->contains(pkg)) {
-                        continue;
-                    }
-
-                    this->result.upstream.insert(pkg);
-                }
+                this->result.focusedUpstream.insert(node.members.begin(), node.members.end());
             }
 
             auto &db = gs.packageDB();
@@ -110,7 +101,7 @@ struct TraversalBuilder {
                     this->skipNode[id] = false;
 
                     auto &node = this->nodes[id];
-                    this->result.downstream.insert(node.members.begin(), node.members.end());
+                    this->result.focusedDownstream.insert(node.members.begin(), node.members.end());
                     absl::c_copy(node.backEdges, back_inserter(work));
                 }
             }
@@ -137,7 +128,7 @@ struct TraversalBuilder {
                 this->skipNode[id] = false;
 
                 auto &node = this->nodes[id];
-                this->result.upstream.insert(node.members.begin(), node.members.end());
+                this->result.focusedUpstream.insert(node.members.begin(), node.members.end());
                 absl::c_copy(node.imports, back_inserter(work));
             }
 

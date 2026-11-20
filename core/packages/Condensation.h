@@ -76,10 +76,10 @@ public:
         bool cached = false;
 
         // All dependencies of the focused packages.
-        UnorderedSet<MangledName> upstream;
+        UnorderedSet<MangledName> focusedUpstream;
 
         // All dependants of the focused packages.
-        UnorderedSet<MangledName> downstream;
+        UnorderedSet<MangledName> focusedDownstream;
 
         Traversal() = default;
 
@@ -108,8 +108,8 @@ public:
     // packages belong to.
     //
     // Passing `true` for `skipDownstream` will exclude the dependant packages of the focused set.
-    const Traversal computeTraversal(const GlobalState &gs, UnorderedSet<MangledName> *focusedPackages = nullptr,
-                                     bool skipDownstream = false) const;
+    const Traversal computeTraversal(const GlobalState &gs, UnorderedSet<MangledName> *focusedPackages,
+                                     bool skipDownstream) const;
 
     absl::Span<const Node> nodes() const {
         return this->nodes_;

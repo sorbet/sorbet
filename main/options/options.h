@@ -163,8 +163,8 @@ struct Options {
     std::vector<std::string> packagerLayers;
     // Focus on these packages when typechecking
     std::vector<std::string> focusPackages;
-    bool focusSkipDownstream = false;
-    bool focusSkipUpstream = false;
+    bool focusStopAtDependantPackages = false;
+    bool focusAssumePackageDependenciesTypecheck = false;
     std::string typedSource = "";
     std::string cacheDir = "";
     // This configured both maximum filesystem db size and max virtual memory usage

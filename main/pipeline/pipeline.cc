@@ -26,6 +26,7 @@
 #include "core/Unfreeze.h"
 #include "core/errors/infer.h"
 #include "core/errors/namer.h"
+#include "core/errors/packager.h"
 #include "core/errors/parser.h"
 #include "core/errors/resolver.h"
 #include "core/lsp/PreemptionTaskManager.h"
@@ -853,7 +854,9 @@ unique_ptr<UnorderedSet<core::packages::MangledName>> focusedPackages(core::Glob
 
         auto pkgName = core::packages::MangledName::lookupMangledName(gs, parts);
         if (!pkgName.exists()) {
-            gs.errorQueue->logger.error("Unknown package `{}` in --focus-packages", pkgStr);
+            if (auto e = gs.beginError(core::Loc::none(), core::errors::Packager::PackageNotFound)) {
+                e.setHeader("Unknown package `{}` in --focus-package", pkgStr);
+            }
             invalidPackage = true;
             continue;
         }
@@ -862,14 +865,16 @@ unique_ptr<UnorderedSet<core::packages::MangledName>> focusedPackages(core::Glob
         // valid package.
         auto &info = db.getPackageInfo(pkgName);
         if (!info.exists()) {
-            gs.errorQueue->logger.error("Unknown package `{}` in --focus-packages", pkgStr);
+            if (auto e = gs.beginError(core::Loc::none(), core::errors::Packager::PackageNotFound)) {
+                e.setHeader("Unknown package `{}` in --focus-package", pkgStr);
+            }
             invalidPackage = true;
             continue;
         }
 
         // Prelude packages are implicit dependencies of everything, so restricting to dependencies of one would be the
         // same as typechecking the whole codebase.
-        if (db.getPackageInfo(pkgName).isPreludePackage()) {
+        if (info.isPreludePackage()) {
             preludePackage = true;
             continue;
         }
@@ -877,12 +882,7 @@ unique_ptr<UnorderedSet<core::packages::MangledName>> focusedPackages(core::Glob
         result.insert(pkgName);
     }
 
-    if (invalidPackage) {
-        // TODO(trevor): we should figure out a better error recovery here.
-        throw EarlyReturnWithCode(1);
-    }
-
-    if (preludePackage) {
+    if (invalidPackage || preludePackage) {
         return nullptr;
     }
 
@@ -909,15 +909,16 @@ PackageStrata computePackageStrata(core::GlobalState &gs, vector<ast::ParsedFile
 
     auto &db = gs.packageDB();
 
-    auto traversal = db.condensation().computeTraversal(gs, result.focusedPackages.get(), opts.focusSkipDownstream);
+    auto traversal =
+        db.condensation().computeTraversal(gs, result.focusedPackages.get(), opts.focusStopAtDependantPackages);
 
     // The result focused package set represents the set that we will typecheck in focused mode. As we want to
     // explicilty skip the upstream dependencies during infer, we don't include them here.
     if (result.focusedPackages) {
-        if (!opts.focusSkipUpstream) {
-            result.focusedPackages->merge(traversal.upstream);
+        if (!opts.focusAssumePackageDependenciesTypecheck) {
+            result.focusedPackages->merge(traversal.focusedUpstream);
         }
-        result.focusedPackages->merge(traversal.downstream);
+        result.focusedPackages->merge(traversal.focusedDownstream);
     }
 
     // This can happen if we enabled packages and package-directed mode, but there were no packages defined.

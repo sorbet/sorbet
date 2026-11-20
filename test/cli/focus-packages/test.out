@@ -370,48 +370,128 @@ test_top/value.rb:4: Argument does not have asserted type `Integer` https://srb.
 top/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 exit: 100
 --- Unknown package ---
-Unknown package `Missing` in --focus-packages
-exit: 1
+???: Unknown package `Missing` in --focus-package https://srb.help/3704
+base/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+consumer/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+cycle_a/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+cycle_b/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+extra/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+extra_dep/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+generated/Other/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+generated/Target/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+other/syntax.rb:4: unexpected token "end" https://srb.help/2001
+other/unresolved.rb:3: Unable to resolve constant `Missing` https://srb.help/5002
+other/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+prelude/string.rb:8: Expected `Integer` but found `String("wrong")` for method result type https://srb.help/7005
+root/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+sibling/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+target/test/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+target/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+test_consumer/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+test_support/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+test_top/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+top/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+exit: 100
 --- Unknown package after a prelude ---
-Unknown package `Missing` in --focus-packages
-exit: 1
+???: Unknown package `Missing` in --focus-package https://srb.help/3704
+base/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+consumer/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+cycle_a/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+cycle_b/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+extra/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+extra_dep/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+generated/Other/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+generated/Target/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+other/syntax.rb:4: unexpected token "end" https://srb.help/2001
+other/unresolved.rb:3: Unable to resolve constant `Missing` https://srb.help/5002
+other/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+prelude/string.rb:8: Expected `Integer` but found `String("wrong")` for method result type https://srb.help/7005
+root/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+sibling/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+target/test/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+target/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+test_consumer/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+test_support/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+test_top/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+top/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+exit: 100
 --- Unknown package before a prelude ---
-Unknown package `Missing` in --focus-packages
-exit: 1
+???: Unknown package `Missing` in --focus-package https://srb.help/3704
+base/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+consumer/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+cycle_a/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+cycle_b/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+extra/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+extra_dep/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+generated/Other/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+generated/Target/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+other/syntax.rb:4: unexpected token "end" https://srb.help/2001
+other/unresolved.rb:3: Unable to resolve constant `Missing` https://srb.help/5002
+other/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+prelude/string.rb:8: Expected `Integer` but found `String("wrong")` for method result type https://srb.help/7005
+root/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+sibling/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+target/test/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+target/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+test_consumer/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+test_support/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+test_top/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+top/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+exit: 100
 --- Namespace is not itself a package ---
-Unknown package `Lib` in --focus-packages
-exit: 1
+???: Unknown package `Lib` in --focus-package https://srb.help/3704
+base/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+consumer/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+cycle_a/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+cycle_b/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+extra/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+extra_dep/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+generated/Other/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+generated/Target/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+other/syntax.rb:4: unexpected token "end" https://srb.help/2001
+other/unresolved.rb:3: Unable to resolve constant `Missing` https://srb.help/5002
+other/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+prelude/string.rb:8: Expected `Integer` but found `String("wrong")` for method result type https://srb.help/7005
+root/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+sibling/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+target/test/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+target/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+test_consumer/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+test_support/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+test_top/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+top/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+exit: 100
 --- Empty selection ---
-Empty package name given to --focus-packages
+Empty package name given to --focus-package
 exit: 1
 --- Empty name in selection ---
-Empty package name given to --focus-packages
+Empty package name given to --focus-package
 exit: 1
 --- Package mode required ---
 --experimental-package-directed can only be specified in --sorbet-packages mode
 exit: 1
 --- Upstream skipping requires a focused package ---
---focus-skip-upstream requires a set of packaged to be passsed with --focus-packages
+--focus-assume-package-dependencies-typecheck requires one or more packages to be passed with --focus-package
 exit: 1
 --- Downstream skipping requires a focused package ---
---focus-skip-downstream requires a set of packaged to be passsed with --focus-packages
+--focus-stop-at-dependant-packages requires one or more packages to be passed with --focus-package
 exit: 1
 --- Package-directed mode required with either package flag ---
---focus-packages requires --experimental-package-directed
+--focus-package requires --experimental-package-directed
 exit: 1
---focus-packages requires --experimental-package-directed
+--focus-package requires --experimental-package-directed
 exit: 1
 --- LSP requires the whole project ---
---focus-packages can not be used with --lsp is enabled
+--focus-package can not be used when --lsp is enabled
 exit: 1
 --- Stored state requires the whole project ---
 --store-state can't be combined with --sorbet-packages
 exit: 1
 --- Package generation requires the whole project ---
---focus-packages can not be used when --gen-packages is enabled
+--focus-package can not be used when --gen-packages is enabled
 exit: 1
 --- Suggest-typed requires the whole project ---
---focus-packages can not be used with --suggest-typed is enabled
+--focus-package can not be used when --suggest-typed is enabled
 exit: 1
 --- Package declaration errors outside the selection are still reported ---
 other/__package.rb:4: Package `Other` cannot import itself https://srb.help/3709

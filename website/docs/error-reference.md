@@ -619,7 +619,7 @@ Each package must have only one definition. A package definition is the place wh
 
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
 
-Sorbet found an `import` in a `__package.rb` file, but the imported constant did not exist.
+Sorbet found a reference to a package that does not exist.
 
 ## 3705
 

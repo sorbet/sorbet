@@ -197,8 +197,8 @@ TEST_CASE("Condensation Graph - Focused traversal classifies packages") {
 
     // computeTraversal mutates the supplied focus set to include all members of each focused SCC.
     CHECK(focused == UnorderedSet<core::packages::MangledName>{pkgA, pkgB});
-    CHECK(traversal.upstream == UnorderedSet<core::packages::MangledName>{pkgC});
-    CHECK(traversal.downstream == UnorderedSet<core::packages::MangledName>{pkgD});
+    CHECK(traversal.focusedUpstream == UnorderedSet<core::packages::MangledName>{pkgC});
+    CHECK(traversal.focusedDownstream == UnorderedSet<core::packages::MangledName>{pkgD});
     CHECK(absl::c_is_permutation(traversal.packages, vector<core::packages::MangledName>{pkgA, pkgB, pkgC, pkgD}));
 }
 

@@ -676,13 +676,14 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
         "In package-directed mode, split strata above this file count (including `__package.rb` files) into their "
         "component SCCs",
         cxxopts::value<uint32_t>());
-    options.add_options(section)("focus-packages", "Focus typechecking to these packages",
-                                 cxxopts::value<vector<string>>(), "P1,P2,P3,...");
-    options.add_options(section)("focus-skip-upstream",
-                                 "Skip upstream packages during inference, when checking a focused set",
-                                 cxxopts::value<bool>());
-    options.add_options(section)("focus-skip-downstream", "Skip checking packages that depend on the focused set",
-                                 cxxopts::value<bool>());
+    options.add_options(section)("focus-package", "Focus typechecking to <pkg> (repeatable)",
+                                 cxxopts::value<vector<string>>(), "<pkg>[,<pkg>...]");
+    options.add_options(section)("focus-assume-package-dependencies-typecheck",
+                                 "Skip inference for dependencies of the focused set",
+                                 cxxopts::value<bool>()->default_value("false"));
+    options.add_options(section)("focus-stop-at-dependant-packages",
+                                 "Stop typechecking once the focused set has been checked",
+                                 cxxopts::value<bool>()->default_value("false"));
     // }}}
 
     // ----- STRIPE AUTOGEN ----------------------------------------------- {{{
@@ -1330,32 +1331,33 @@ void readOptions(Options &opts,
             }
         }
 
-        if (raw.count("focus-packages")) {
+        if (raw.count("focus-package") > 0) {
             if (!opts.cacheSensitiveOptions.sorbetPackages) {
-                logger->error("--focus-packages can only be specified in --sorbet-packages mode");
+                logger->error("--focus-package can only be specified in --sorbet-packages mode");
                 throw EarlyReturnWithCode(1);
             }
 
-            for (const auto &packages : raw["focus-packages"].as<vector<string>>()) {
-                for (auto &pkg : absl::StrSplit(packages, ',')) {
-                    if (pkg.empty()) {
-                        logger->error("Empty package name given to --focus-packages");
-                        throw EarlyReturnWithCode(1);
-                    }
-                    opts.focusPackages.emplace_back(pkg);
+            for (const auto &pkg : raw["focus-package"].as<vector<string>>()) {
+                if (pkg.empty()) {
+                    logger->error("Empty package name given to --focus-package");
+                    throw EarlyReturnWithCode(1);
                 }
+                opts.focusPackages.emplace_back(pkg);
             }
         }
 
-        opts.focusSkipUpstream = raw["focus-skip-upstream"].as<bool>();
-        if (opts.focusSkipUpstream && opts.focusPackages.empty()) {
-            logger->error("--focus-skip-upstream requires a set of packaged to be passsed with --focus-packages");
+        opts.focusAssumePackageDependenciesTypecheck = raw["focus-assume-package-dependencies-typecheck"].as<bool>();
+        if (opts.focusAssumePackageDependenciesTypecheck && opts.focusPackages.empty()) {
+            logger->error(
+                "--focus-assume-package-dependencies-typecheck requires one or more packages to be passed with "
+                "--focus-package");
             throw EarlyReturnWithCode(1);
         }
 
-        opts.focusSkipDownstream = raw["focus-skip-downstream"].as<bool>();
-        if (opts.focusSkipDownstream && opts.focusPackages.empty()) {
-            logger->error("--focus-skip-downstream requires a set of packaged to be passsed with --focus-packages");
+        opts.focusStopAtDependantPackages = raw["focus-stop-at-dependant-packages"].as<bool>();
+        if (opts.focusStopAtDependantPackages && opts.focusPackages.empty()) {
+            logger->error(
+                "--focus-stop-at-dependant-packages requires one or more packages to be passed with --focus-package");
             throw EarlyReturnWithCode(1);
         }
 
@@ -1553,27 +1555,22 @@ void readOptions(Options &opts,
 
         if (!opts.focusPackages.empty()) {
             if (opts.runLSP) {
-                logger->error("--focus-packages can not be used with --lsp is enabled");
+                logger->error("--focus-package can not be used when --lsp is enabled");
                 throw EarlyReturnWithCode(1);
             }
 
             if (opts.suggestTyped) {
-                logger->error("--focus-packages can not be used with --suggest-typed is enabled");
+                logger->error("--focus-package can not be used when --suggest-typed is enabled");
                 throw EarlyReturnWithCode(1);
             }
 
             if (opts.genPackagesMode != core::packages::GenPackagesMode::Disabled) {
-                logger->error("--focus-packages can not be used when --gen-packages is enabled");
-                throw EarlyReturnWithCode(1);
-            }
-
-            if (!opts.storeState.empty()) {
-                logger->error("--focus-packages can not be used when --store-state is enabled");
+                logger->error("--focus-package can not be used when --gen-packages is enabled");
                 throw EarlyReturnWithCode(1);
             }
 
             if (!opts.packageDirected) {
-                logger->error("--focus-packages requires --experimental-package-directed");
+                logger->error("--focus-package requires --experimental-package-directed");
                 throw EarlyReturnWithCode(1);
             }
         }
