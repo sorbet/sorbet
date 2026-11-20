@@ -8,7 +8,6 @@
 #endif
 #include "ProgressIndicator.h"
 #include "absl/strings/match.h"
-#include "absl/strings/str_split.h"
 #include "ast/Helpers.h"
 #include "ast/desugar/Desugar.h"
 #include "ast/desugar/prism/Desugar.h"
@@ -844,15 +843,10 @@ unique_ptr<UnorderedSet<core::packages::MangledName>> focusedPackages(core::Glob
     bool preludePackage = false;
     UnorderedSet<core::packages::MangledName> result;
 
-    vector<string> parts;
     for (auto &pkgStr : opts.focusPackages) {
-        parts.clear();
         ENFORCE(!pkgStr.empty());
 
-        auto splitter = absl::StrSplit(pkgStr, "::");
-        parts.insert(parts.begin(), splitter.begin(), splitter.end());
-
-        auto pkgName = core::packages::MangledName::lookupMangledName(gs, parts);
+        auto pkgName = core::packages::MangledName::parse(gs, pkgStr);
         if (!pkgName.exists()) {
             if (auto e = gs.beginError(core::Loc::none(), core::errors::Packager::PackageNotFound)) {
                 e.setHeader("Unknown package `{}` in --focus-package", pkgStr);
