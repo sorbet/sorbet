@@ -60,15 +60,18 @@ test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:20: Method `length` does not exi
 
 test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:20: Setter method `length=` does not exist on `String` component of `T.nilable(String)` https://srb.help/7003
     20 |  s.length ||= 0
-          ^^^^^^^^
+            ^^^^^^
   Got `T.nilable(String)` originating from:
     test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:19:
     19 |def setter_errors(s)
                           ^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/string.rbi#L1572: Method `length` defined here without a corresponding setter
+    1572 |  def length(); end
+            ^^^^^^^^^^^^
 
 test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:20: Setter method `length=` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
     20 |  s.length ||= 0
-          ^^^^^^^^
+            ^^^^^^
   Got `T.nilable(String)` originating from:
     test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:19:
     19 |def setter_errors(s)
@@ -92,15 +95,18 @@ test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:21: Method `length` does not exi
 
 test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:21: Setter method `length=` does not exist on `String` component of `T.nilable(String)` https://srb.help/7003
     21 |  s.length += 1
-          ^^^^^^^^
+            ^^^^^^
   Got `T.nilable(String)` originating from:
     test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:19:
     19 |def setter_errors(s)
                           ^
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/string.rbi#L1572: Method `length` defined here without a corresponding setter
+    1572 |  def length(); end
+            ^^^^^^^^^^^^
 
 test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:21: Setter method `length=` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
     21 |  s.length += 1
-          ^^^^^^^^
+            ^^^^^^
   Got `T.nilable(String)` originating from:
     test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:19:
     19 |def setter_errors(s)
@@ -150,11 +156,18 @@ test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:27: Method `bb` does not exist o
 
 test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:27: Setter method `bb=` does not exist on `A` https://srb.help/7003
     27 |  a.bb ||= x
-          ^^^^
+            ^^
   Got `A` originating from:
     test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:26:
     26 |def misspelled_setter(a, x)
                               ^
+  Did you mean `b`? Use `-a` to autocorrect
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:27: Replace with `b`
+    27 |  a.bb ||= x
+            ^^
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:5: Defined here
+     5 |  prop :b, T.nilable(Integer)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:28: Setter method `bb=` does not exist on `A` https://srb.help/7003
     28 |  a.bb = x
