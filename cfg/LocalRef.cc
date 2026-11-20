@@ -10,7 +10,7 @@ core::LocalVariable LocalRef::data(const CFG &cfg) const {
     return cfg.localVariables[this->_id];
 }
 
-int LocalRef::minLoops(const CFG &cfg) const {
+MinLoops LocalRef::minLoops(const CFG &cfg) const {
     ENFORCE(cfg.minLoops.size() > this->_id);
     ENFORCE(this->exists());
     return cfg.minLoops[this->_id];

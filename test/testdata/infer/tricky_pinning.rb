@@ -31,7 +31,7 @@ end
 sig { params(params: Integer).void }
 def example4(params)
   x = T.unsafe(nil)
-  x ||= 0 # error: Incompatible assignment to variable declared via `let`: `Integer(0)` is not a subtype of `T.nilable(FalseClass)`
+  x ||= 0
   x = T.let(0, Integer)
   nil
 end

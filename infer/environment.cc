@@ -930,7 +930,8 @@ void Environment::computePins(core::Context ctx, const vector<Environment> &envs
         core::TypeAndOrigins tp;
 
         auto bindMinLoops = var.minLoops(inWhat);
-        if (bb->outerLoops == bindMinLoops || bindMinLoops == var.maxLoopWrite(inWhat)) {
+        if (bindMinLoops.pin == cfg::MinLoops::Pin::None &&
+            (bb->outerLoops == bindMinLoops.level || bindMinLoops.level == var.maxLoopWrite(inWhat))) {
             continue;
         }
 
@@ -1012,8 +1013,68 @@ core::TypePtr flatmapHack(core::Context ctx, const core::TypePtr &receiver, cons
     return mapType;
 }
 
+namespace {
+
+// Reports an error if the write `bind` changes the type of a variable inside a loop or block.
+void checkLoopTypeChange(core::Context ctx, const cfg::CFG &inWhat, const cfg::Binding &bind, core::TypeAndOrigins &tp,
+                         const core::TypeAndOrigins &cur, bool asGoodAs,
+                         core::ErrorSection::Collector &errorDetailsCollector, core::Loc ownerLoc) {
+    if (!asGoodAs || (tp.type.isUntyped() && !cur.type.isUntyped())) {
+        if (auto ident = cfg::cast_instruction<cfg::Ident>(bind.value)) {
+            // See cfg/builder/builder_walk.cc for an explanation of why this is here.
+            if (ident->what.data(inWhat)._name == core::Names::blockBreakAssign()) {
+                return;
+            }
+
+            if (ident->what.data(inWhat)._name == core::Names::selfRestore()) {
+                // this is a restoration of `self` variable.
+                // our current analysis isn't smart enough to see that it's safe to do this by
+                // construction either https://github.com/sorbet/sorbet/issues/222 or
+                // https://github.com/sorbet/sorbet/issues/224 should allow us to remove this
+                // case
+                return;
+            }
+        }
+        if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PinnedVariableMismatch)) {
+            e.setHeader("Changing the type of a variable is not permitted in loops and blocks");
+            e.addErrorSection(
+                core::ErrorSection(core::ErrorColors::format("Existing variable has type: `{}`", cur.type.show(ctx))));
+            e.addErrorSection(core::ErrorSection(
+                core::ErrorColors::format("Attempting to change type to: `{}`\n", tp.type.show(ctx))));
+
+            if (cur.origins.size() == 1 && cur.origins[0].exists() &&
+                // sometimes a variable has a given type because of a constant outside this method
+                ctx.locAt(inWhat.loc).contains(cur.origins[0]) &&
+                // don't attempt to insert a `T.let` into the method params list
+                (inWhat.symbol.data(ctx)->name.isAnyStaticInitName(ctx) ||
+                 !ctx.locAt(inWhat.declLoc).contains(cur.origins[0]))) {
+                auto suggest = core::Types::any(ctx, dropConstructor(ctx, tp.origins[0], tp.type), cur.type);
+                auto replacement = suggest.show(ctx, core::ShowOptions().withUseValidSyntax());
+                e.replaceWith(fmt::format("Initialize as `{}`", replacement), cur.origins[0], "T.let({}, {})",
+                              cur.origins[0].source(ctx).value(), replacement);
+            } else {
+                e.addErrorSection(core::ErrorSection("Original type from:", cur.origins2Explanations(ctx, ownerLoc)));
+            }
+            e.addErrorSections(move(errorDetailsCollector));
+
+            if (!cur.origins.empty() && !tp.origins.empty() &&
+                absl::c_any_of(cur.origins, [&](auto loc) { return loc.source(ctx) == "rescue"; }) &&
+                absl::c_any_of(tp.origins, [&](auto loc) { return loc.source(ctx) == "rescue"; })) {
+                e.addErrorNote("The exception variables of two `{}` blocks conflict with each other because\n"
+                               "    the second is inside a loop. Either use `{}` to initialize the exception\n"
+                               "    variable before the first `{}`, or pick unique variable names.\n",
+                               "rescue", "T.let", "rescue");
+            }
+        }
+
+        tp.type = core::Types::untypedUntracked();
+    }
+}
+
+} // namespace
+
 core::TypePtr Environment::processBinding(
-    core::Context ctx, const cfg::CFG &inWhat, cfg::Binding &bind, int loopCount, int bindMinLoops,
+    core::Context ctx, const cfg::CFG &inWhat, cfg::Binding &bind, int loopCount, cfg::MinLoops bindMinLoops,
     KnowledgeFilter &knowledgeFilter, core::TypeConstraint &constr, const core::TypePtr &methodReturnType,
     const optional<cfg::BasicBlock::BlockExitCondInfo> &parentUpdateKnowledgeReceiver, bool deadOnEntry) {
     try {
@@ -1802,7 +1863,7 @@ core::TypePtr Environment::processBinding(
         }
         ENFORCE(!tp.origins.empty(), "Inferencer did not assign location");
 
-        if (!noLoopChecking && loopCount != bindMinLoops) {
+        if (!noLoopChecking && (bindMinLoops.pin != cfg::MinLoops::Pin::None || loopCount != bindMinLoops.level)) {
             auto pin = pinnedTypes.find(bind.bind.variable);
             const core::TypeAndOrigins &cur =
                 (pin != pinnedTypes.end()) ? pin->second : getTypeAndOrigin(bind.bind.variable);
@@ -1813,8 +1874,8 @@ core::TypePtr Environment::processBinding(
                                                    core::Types::dropLiteral(ctx, cur.type), errorDetailsCollector);
 
             {
-                switch (bindMinLoops) {
-                    case cfg::CFG::MIN_LOOP_FIELD:
+                switch (bindMinLoops.pin) {
+                    case cfg::MinLoops::Pin::Field:
                         if (!asGoodAs) {
                             if (auto e = ctx.beginError(bind.loc, core::errors::Infer::FieldReassignmentTypeMismatch)) {
                                 e.setHeader("Expected `{}` but found `{}` for field", cur.type.show(ctx),
@@ -1834,7 +1895,17 @@ core::TypePtr Environment::processBinding(
                             tp = cur;
                         }
                         break;
-                    case cfg::CFG::MIN_LOOP_LET:
+                    case cfg::MinLoops::Pin::Let:
+                        if (pin == pinnedTypes.end()) {
+                            // No `T.let` has pinned this variable on the path to this write yet, so check it
+                            // like a write to a variable without a `T.let`.
+                            if (loopCount != bindMinLoops.level) {
+                                checkLoopTypeChange(ctx, inWhat, bind, tp, cur, asGoodAs, errorDetailsCollector,
+                                                    ownerLoc);
+                            }
+                            break;
+                        }
+
                         if (!asGoodAs) {
                             if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PinnedVariableMismatch)) {
                                 e.setHeader("Incompatible assignment to variable declared via `{}`: `{}` is not a "
@@ -1845,63 +1916,9 @@ core::TypePtr Environment::processBinding(
                             tp = cur;
                         }
                         break;
-                    default: {
-                        if (!asGoodAs || (tp.type.isUntyped() && !cur.type.isUntyped())) {
-                            if (auto ident = cfg::cast_instruction<cfg::Ident>(bind.value)) {
-                                // See cfg/builder/builder_walk.cc for an explanation of why this is here.
-                                if (ident->what.data(inWhat)._name == core::Names::blockBreakAssign()) {
-                                    break;
-                                }
-
-                                if (ident->what.data(inWhat)._name == core::Names::selfRestore()) {
-                                    // this is a restoration of `self` variable.
-                                    // our current analysis isn't smart enough to see that it's safe to do this by
-                                    // construction either https://github.com/sorbet/sorbet/issues/222 or
-                                    // https://github.com/sorbet/sorbet/issues/224 should allow us to remove this
-                                    // case
-                                    break;
-                                }
-                            }
-                            if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PinnedVariableMismatch)) {
-                                e.setHeader("Changing the type of a variable is not permitted in loops and blocks");
-                                e.addErrorSection(core::ErrorSection(
-                                    core::ErrorColors::format("Existing variable has type: `{}`", cur.type.show(ctx))));
-                                e.addErrorSection(core::ErrorSection(core::ErrorColors::format(
-                                    "Attempting to change type to: `{}`\n", tp.type.show(ctx))));
-
-                                if (cur.origins.size() == 1 && cur.origins[0].exists() &&
-                                    // sometimes a variable has a given type because of a constant outside this method
-                                    ctx.locAt(inWhat.loc).contains(cur.origins[0]) &&
-                                    // don't attempt to insert a `T.let` into the method params list
-                                    (inWhat.symbol.data(ctx)->name.isAnyStaticInitName(ctx) ||
-                                     !ctx.locAt(inWhat.declLoc).contains(cur.origins[0]))) {
-                                    auto suggest =
-                                        core::Types::any(ctx, dropConstructor(ctx, tp.origins[0], tp.type), cur.type);
-                                    auto replacement = suggest.show(ctx, core::ShowOptions().withUseValidSyntax());
-                                    e.replaceWith(fmt::format("Initialize as `{}`", replacement), cur.origins[0],
-                                                  "T.let({}, {})", cur.origins[0].source(ctx).value(), replacement);
-                                } else {
-                                    e.addErrorSection(core::ErrorSection("Original type from:",
-                                                                         cur.origins2Explanations(ctx, ownerLoc)));
-                                }
-                                e.addErrorSections(move(errorDetailsCollector));
-
-                                if (!cur.origins.empty() && !tp.origins.empty() &&
-                                    absl::c_any_of(cur.origins,
-                                                   [&](auto loc) { return loc.source(ctx) == "rescue"; }) &&
-                                    absl::c_any_of(tp.origins, [&](auto loc) { return loc.source(ctx) == "rescue"; })) {
-                                    e.addErrorNote(
-                                        "The exception variables of two `{}` blocks conflict with each other because\n"
-                                        "    the second is inside a loop. Either use `{}` to initialize the exception\n"
-                                        "    variable before the first `{}`, or pick unique variable names.\n",
-                                        "rescue", "T.let", "rescue");
-                                }
-                            }
-
-                            tp.type = core::Types::untypedUntracked();
-                        }
+                    case cfg::MinLoops::Pin::None:
+                        checkLoopTypeChange(ctx, inWhat, bind, tp, cur, asGoodAs, errorDetailsCollector, ownerLoc);
                         break;
-                    }
                 }
             }
         }

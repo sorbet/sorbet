@@ -162,11 +162,6 @@ public:
     // Verbose debug output
     std::string showRaw(core::Context ctx) const;
 
-    // special minLoops
-    static constexpr int MIN_LOOP_FIELD = -1;
-    // static constexpr int MIN_LOOP_GLOBAL = -2;
-    static constexpr int MIN_LOOP_LET = -3;
-
     // special ruby region id offsets for exception handling
     static constexpr int HANDLERS_REGION_OFFSET = 1;
     static constexpr int ENSURE_REGION_OFFSET = 2;
@@ -195,7 +190,7 @@ private:
     CFG();
     BasicBlock *freshBlock(int outerLoops);
     void enterLocalInternal(core::LocalVariable variable, LocalRef &ref);
-    std::vector<int> minLoops;
+    std::vector<MinLoops> minLoops;
     std::vector<int> maxLoopWrite;
     bool localVariablesFrozen = true;
     /**

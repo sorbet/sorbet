@@ -45,7 +45,7 @@ void CFG::enterLocalInternal(core::LocalVariable variable, LocalRef &ref) {
     this->localVariables.emplace_back(variable);
 
     // Default values
-    this->minLoops.emplace_back(INT_MAX);
+    this->minLoops.emplace_back();
     this->maxLoopWrite.emplace_back(0);
 
     ENFORCE(this->localVariables.size() == this->minLoops.size());
