@@ -43,6 +43,15 @@ module T::Props
     module DecoratorMethods
       extend T::Sig
 
+      # Defines each prop's methods on the decorated class without adding a call cache
+      # entry to it; see T::Private::ClassUtils.
+      METHOD_DEFINED = Module.instance_method(:method_defined?)
+      PRIVATE_METHOD_DEFINED = Module.instance_method(:private_method_defined?)
+      ALIAS_METHOD = Module.instance_method(:alias_method)
+      DEFINE_METHOD = Module.instance_method(:define_method)
+      RUBY2_KEYWORDS = Module.instance_method(:ruby2_keywords)
+      private_constant :METHOD_DEFINED, :PRIVATE_METHOD_DEFINED, :ALIAS_METHOD, :DEFINE_METHOD, :RUBY2_KEYWORDS
+
       sig { returns(T::Hash[Symbol, T.proc.returns(String)]).checked(:never) }
       private def lazily_defined_methods
         @lazily_defined_methods ||= {}
@@ -111,18 +120,16 @@ module T::Props
         methods[name] = blk
 
         cls = decorated_class
-        if cls.method_defined?(name) || cls.private_method_defined?(name)
+        if METHOD_DEFINED.bind_call(cls, name) || PRIVATE_METHOD_DEFINED.bind_call(cls, name)
           # Ruby does not emit "method redefined" warnings for aliased methods
           # (more robust than undef_method that would create a small window in which the method doesn't exist)
-          cls.send(:alias_method, name, name)
+          ALIAS_METHOD.bind_call(cls, name, name)
         end
-        cls.send(:define_method, name) do |*args|
+        DEFINE_METHOD.bind_call(cls, name) do |*args|
           self.class.decorator.send(:eval_lazily_defined_method!, name)
           send(name, *args)
         end
-        if cls.respond_to?(:ruby2_keywords, true)
-          cls.send(:ruby2_keywords, name)
-        end
+        RUBY2_KEYWORDS.bind_call(cls, name)
         cls.send(:private, name)
       end
 
