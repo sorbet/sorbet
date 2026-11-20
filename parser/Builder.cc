@@ -377,8 +377,6 @@ public:
     unique_ptr<Node> assign(unique_ptr<Node> lhs, const token *eql, unique_ptr<Node> rhs) {
         core::LocOffsets loc = lhs->loc.join(rhs->loc);
 
-        // In `x.foo = 1`, the behavior below currently does `foo =` for the methodLoc
-        // That might be wrong. Punting for now.
         if (auto *s = parser::cast_node<Send>(lhs.get())) {
             s->args.emplace_back(std::move(rhs));
             return make_unique<Send>(loc, std::move(s->receiver), s->method, s->methodLoc, std::move(s->args));
