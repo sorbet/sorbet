@@ -4,39 +4,99 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C B> = nil
 
   begin
-    <assignTemp>$2 = nil
-    if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    <assignTemp>$2 = ::<Magic>.<pattern-snapshot>(<emptyTree>::<C T>.unsafe(nil))
+    if <emptyTree>::<C A>.===(<assignTemp>$2)
       <emptyTree>
     else
-      if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      if if <emptyTree>::<C A>.===(<assignTemp>$2)
+          true
+        else
+          <emptyTree>::<C B>.===(<assignTemp>$2)
+        end
         <emptyTree>
       else
-        if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-          <emptyTree>
-        else
-          if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-            begin
-              x = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-              <emptyTree>::<C T>.reveal_type(x)
-            end
-          else
-            if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-              begin
-                x = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-                <emptyTree>::<C T>.reveal_type(x)
-              end
-            else
-              if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+        if begin
+            <pattern-array>$6 = ::<Magic>.<pattern-deconstruct>(<assignTemp>$2, <assignTemp>$2)
+            if <pattern-array>$6.length().==(2)
+              if begin
+                  <pattern-value>$7 = ::<Magic>.<pattern-element>(<pattern-array>$6, 0)
+                  <emptyTree>::<C A>.===(<pattern-value>$7)
+                end
                 begin
-                  x = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-                  y = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-                  begin
-                    <emptyTree>::<C T>.reveal_type(x)
-                    <emptyTree>::<C T>.reveal_type(y)
-                  end
+                  <pattern-value>$8 = ::<Magic>.<pattern-element>(<pattern-array>$6, 1)
+                  <emptyTree>::<C B>.===(<pattern-value>$8)
                 end
               else
                 <emptyTree>
+              end
+            else
+              <emptyTree>
+            end
+          end
+          <emptyTree>
+        else
+          if if <emptyTree>::<C A>.===(<assignTemp>$2)
+              begin
+                x = <assignTemp>$2
+                true
+              end
+            else
+              <emptyTree>
+            end
+            <emptyTree>::<C T>.reveal_type(x)
+          else
+            if if if <emptyTree>::<C A>.===(<assignTemp>$2)
+                  true
+                else
+                  <emptyTree>::<C B>.===(<assignTemp>$2)
+                end
+                begin
+                  x = <assignTemp>$2
+                  true
+                end
+              else
+                <emptyTree>
+              end
+              <emptyTree>::<C T>.reveal_type(x)
+            else
+              if begin
+                  <pattern-array>$3 = ::<Magic>.<pattern-deconstruct>(<assignTemp>$2, <assignTemp>$2)
+                  if <pattern-array>$3.length().==(2)
+                    if begin
+                        <pattern-value>$4 = ::<Magic>.<pattern-element>(<pattern-array>$3, 0)
+                        if <emptyTree>::<C A>.===(<pattern-value>$4)
+                          begin
+                            x = <pattern-value>$4
+                            true
+                          end
+                        else
+                          <emptyTree>
+                        end
+                      end
+                      begin
+                        <pattern-value>$5 = ::<Magic>.<pattern-element>(<pattern-array>$3, 1)
+                        if <emptyTree>::<C B>.===(<pattern-value>$5)
+                          begin
+                            y = <pattern-value>$5
+                            true
+                          end
+                        else
+                          <emptyTree>
+                        end
+                      end
+                    else
+                      <emptyTree>
+                    end
+                  else
+                    <emptyTree>
+                  end
+                end
+                begin
+                  <emptyTree>::<C T>.reveal_type(x)
+                  <emptyTree>::<C T>.reveal_type(y)
+                end
+              else
+                ::Kernel.raise(::<root>::<C NoMatchingPatternError>)
               end
             end
           end

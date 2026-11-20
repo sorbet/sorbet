@@ -1,8 +1,8 @@
 # typed: true
 
-x = nil
+x = T.unsafe(nil)
 
-y = case nil
+y = case T.unsafe(nil)
 in 1
   1
 in 2 if x

@@ -103,8 +103,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       begin
         <self>.puts("before")
         begin
-          <assignTemp>$2 = <self>.x()
-          if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+          <assignTemp>$2 = ::<Magic>.<pattern-snapshot>(<self>.x())
+          if <emptyTree>::<C A>.===(<assignTemp>$2)
             <emptyTree>
           else
             <self>.puts("after")

@@ -585,25 +585,339 @@ void desugarPatternMatchingVars(InsSeq::STATS_store &vars, DesugarContext dctx, 
         for (auto &elt : hash_pattern->pairs) {
             desugarPatternMatchingVars(vars, dctx, elt.get());
         }
+    } else if (auto find_pattern = parser::cast_node<parser::FindPattern>(node)) {
+        for (auto &elt : find_pattern->elements) {
+            desugarPatternMatchingVars(vars, dctx, elt.get());
+        }
+    } else if (auto const_pattern = parser::cast_node<parser::ConstPattern>(node)) {
+        desugarPatternMatchingVars(vars, dctx, const_pattern->pattern.get());
+    } else if (auto trailing = parser::cast_node<parser::MatchWithTrailingComma>(node)) {
+        desugarPatternMatchingVars(vars, dctx, trailing->match.get());
     } else if (auto alt_pattern = parser::cast_node<parser::MatchAlt>(node)) {
         desugarPatternMatchingVars(vars, dctx, alt_pattern->left.get());
         desugarPatternMatchingVars(vars, dctx, alt_pattern->right.get());
     }
 }
 
-// Desugar `in` and `=>` oneline pattern matching
-ExpressionPtr desugarOnelinePattern(DesugarContext dctx, core::LocOffsets loc, parser::Node *match) {
-    auto matchExpr = MK::RaiseUnimplemented(loc);
-    auto bodyExpr = MK::RaiseUnimplemented(loc);
-    auto elseExpr = MK::EmptyTree();
+// Pattern matching. Mirrors the Prism desugarer (ast/desugar/prism/Desugar.cc), which explains the lowering; the two
+// must create unique names in the same order so that they produce the same tree.
 
+ExpressionPtr lowerPattern(DesugarContext dctx, unique_ptr<parser::Node> &node, core::NameRef subject);
+
+ExpressionPtr patternAnd(core::LocOffsets loc, ExpressionPtr lhs, ExpressionPtr rhs) {
+    return MK::If(loc, move(lhs), move(rhs), MK::EmptyTree());
+}
+
+ExpressionPtr patternOr(core::LocOffsets loc, ExpressionPtr lhs, ExpressionPtr rhs) {
+    return MK::If(loc, move(lhs), MK::True(loc), move(rhs));
+}
+
+ExpressionPtr patternBind(core::LocOffsets loc, core::NameRef name, core::NameRef subject) {
+    auto zloc = loc.copyWithZeroLength();
+    return MK::InsSeq1(zloc, MK::Assign(loc, name, MK::Local(zloc, subject)), MK::True(zloc));
+}
+
+ExpressionPtr patternMagic(core::LocOffsets loc, core::NameRef fun, Send::ARGS_store args) {
+    auto zloc = loc.copyWithZeroLength();
+    auto numPosArgs = args.size();
+    return MK::Send(zloc, MK::Magic(zloc), fun, zloc, numPosArgs, move(args));
+}
+
+ExpressionPtr patternValue(core::LocOffsets loc, ExpressionPtr value, core::NameRef subject) {
+    auto zloc = loc.copyWithZeroLength();
+    return MK::Send1(loc, move(value), core::Names::tripleEq(), zloc, MK::Local(zloc, subject));
+}
+
+ExpressionPtr patternUntyped(DesugarContext dctx, core::LocOffsets loc, parser::Node *node) {
     InsSeq::STATS_store vars;
-    desugarPatternMatchingVars(vars, dctx, match);
-    if (!vars.empty()) {
-        bodyExpr = MK::InsSeq(match->loc, move(vars), move(bodyExpr));
+    desugarPatternMatchingVars(vars, dctx, node);
+    auto unknown = MK::RaiseUnimplemented(loc.copyWithZeroLength());
+    if (vars.empty()) {
+        return unknown;
+    }
+    return MK::InsSeq(loc.copyWithZeroLength(), move(vars), move(unknown));
+}
+
+ExpressionPtr raiseNoMatchingPattern(core::LocOffsets loc) {
+    auto zloc = loc.copyWithZeroLength();
+    auto error = MK::UnresolvedConstant(zloc, MK::Constant(zloc, core::Symbols::root()),
+                                        core::Names::Constants::NoMatchingPatternError());
+    auto raise = MK::Send1(zloc, MK::Constant(zloc, core::Symbols::Kernel()), core::Names::raise(), zloc, move(error));
+    cast_tree<Send>(raise)->flags.isRewriterSynthesized = true;
+    return raise;
+}
+
+ExpressionPtr patternSubjectAssign(core::NameRef subject, ExpressionPtr value) {
+    auto loc = value.loc();
+    Send::ARGS_store args;
+    args.emplace_back(move(value));
+    return MK::Assign(loc, subject, patternMagic(loc, core::Names::patternSnapshot(), move(args)));
+}
+
+ExpressionPtr patternSnapshotAssign(core::LocOffsets loc, core::NameRef snapshot, core::NameRef subject) {
+    Send::ARGS_store args;
+    args.emplace_back(MK::Local(loc, subject));
+    return MK::Assign(loc, snapshot, patternMagic(loc, core::Names::patternSnapshot(), move(args)));
+}
+
+// `elts` of an array pattern, split around its rest (`*`, `*rest`, or the implicit one of `[x, ]`).
+struct ArrayPatternParts {
+    vector<unique_ptr<parser::Node> *> requireds;
+    parser::MatchRest *rest = nullptr;
+    bool hasRest = false;
+    vector<unique_ptr<parser::Node> *> posts;
+};
+
+ArrayPatternParts splitArrayPattern(parser::NodeVec &elts, bool implicitRest) {
+    ArrayPatternParts parts;
+    for (auto &elt : elts) {
+        auto *node = &elt;
+        if (auto trailing = parser::cast_node<parser::MatchWithTrailingComma>(node->get())) {
+            node = &trailing->match;
+            parts.hasRest = true;
+        }
+        if (auto rest = parser::cast_node<parser::MatchRest>(node->get())) {
+            parts.rest = rest;
+            parts.hasRest = true;
+            continue;
+        }
+        (parts.hasRest ? parts.posts : parts.requireds).emplace_back(node);
+    }
+    parts.hasRest = parts.hasRest || implicitRest;
+    return parts;
+}
+
+ExpressionPtr lowerArrayPattern(DesugarContext dctx, core::LocOffsets loc, parser::NodeVec &elts, bool implicitRest,
+                                unique_ptr<parser::Node> *constant, core::NameRef subject) {
+    auto zloc = loc.copyWithZeroLength();
+    auto parts = splitArrayPattern(elts, implicitRest);
+    int64_t minLength = parts.requireds.size() + parts.posts.size();
+
+    auto array = dctx.freshNameUnique(core::Names::patternArray());
+
+    vector<ExpressionPtr> tests;
+
+    auto lengthCall = MK::Send0(zloc, MK::Local(zloc, array), core::Names::length(), zloc);
+    tests.emplace_back(MK::Send1(zloc, move(lengthCall), parts.hasRest ? core::Names::geq() : core::Names::eqeq(),
+                                 zloc, MK::Int(zloc, minLength)));
+
+    auto element = [&](unique_ptr<parser::Node> &pattern, int64_t index) {
+        auto patternLoc = pattern->loc.copyWithZeroLength();
+        auto name = dctx.freshNameUnique(core::Names::patternValue());
+        Send::ARGS_store args;
+        args.emplace_back(MK::Local(patternLoc, array));
+        args.emplace_back(MK::Int(patternLoc, index));
+        auto value = patternMagic(patternLoc, core::Names::patternElement(), move(args));
+        return MK::InsSeq1(patternLoc, MK::Assign(patternLoc, name, move(value)), lowerPattern(dctx, pattern, name));
+    };
+
+    for (size_t i = 0; i < parts.requireds.size(); i++) {
+        tests.emplace_back(element(*parts.requireds[i], i));
     }
 
-    return MK::If(loc, move(matchExpr), move(bodyExpr), move(elseExpr));
+    auto restVar = parts.rest == nullptr ? nullptr : parser::cast_node<parser::MatchVar>(parts.rest->var.get());
+    if (restVar != nullptr) {
+        auto var = restVar;
+        auto restLoc = var->loc;
+        Send::ARGS_store args;
+        args.emplace_back(MK::Local(restLoc.copyWithZeroLength(), array));
+        args.emplace_back(MK::Int(restLoc.copyWithZeroLength(), parts.requireds.size()));
+        args.emplace_back(MK::Int(restLoc.copyWithZeroLength(), parts.posts.size()));
+        auto value = patternMagic(restLoc, core::Names::patternRest(), move(args));
+        tests.emplace_back(MK::InsSeq1(restLoc.copyWithZeroLength(), MK::Assign(restLoc, var->name, move(value)),
+                                       MK::True(restLoc.copyWithZeroLength())));
+    }
+
+    for (size_t i = 0; i < parts.posts.size(); i++) {
+        tests.emplace_back(
+            element(*parts.posts[i], static_cast<int64_t>(i) - static_cast<int64_t>(parts.posts.size())));
+    }
+
+    auto matched = move(tests.back());
+    tests.pop_back();
+    while (!tests.empty()) {
+        matched = patternAnd(zloc, move(tests.back()), move(matched));
+        tests.pop_back();
+    }
+
+    auto snapshot = constant == nullptr ? subject : dctx.freshNameUnique(core::Names::patternSnapshot());
+    Send::ARGS_store args;
+    args.emplace_back(MK::Local(zloc, subject));
+    args.emplace_back(MK::Local(zloc, snapshot));
+    auto deconstruct = patternMagic(zloc, core::Names::patternDeconstruct(), move(args));
+    matched = MK::InsSeq1(zloc, MK::Assign(zloc, array, move(deconstruct)), move(matched));
+
+    if (constant == nullptr) {
+        return matched;
+    }
+    auto constantLoc = (*constant)->loc;
+    matched = patternAnd(zloc, patternValue(constantLoc, node2TreeImpl(dctx, *constant), subject), move(matched));
+    return MK::InsSeq1(zloc, patternSnapshotAssign(zloc, snapshot, subject), move(matched));
+}
+
+ExpressionPtr lowerHashPattern(DesugarContext dctx, parser::HashPattern *node, unique_ptr<parser::Node> *constant,
+                               core::NameRef subject) {
+    auto loc = node->loc;
+    auto zloc = loc.copyWithZeroLength();
+
+    // A hash pattern's elements are `k: pattern` pairs, `k:` shorthand (a MatchVar), and at most one `**rest`
+    // (MatchRest) or `**nil` (MatchNilPattern) at the end.
+    vector<parser::Node *> elements;
+    parser::Node *rest = nullptr;
+    for (auto &pair : node->pairs) {
+        if (parser::isa_node<parser::MatchRest>(pair.get()) || parser::isa_node<parser::MatchNilPattern>(pair.get())) {
+            rest = pair.get();
+        } else {
+            elements.emplace_back(pair.get());
+        }
+    }
+
+    ExpressionPtr constantTest;
+    if (constant != nullptr) {
+        constantTest = patternValue((*constant)->loc, node2TreeImpl(dctx, *constant), subject);
+    }
+
+    // After a parse error an element can be some other node; leave such a pattern untyped.
+    auto wellFormed = absl::c_all_of(elements, [](parser::Node *element) {
+        return parser::isa_node<parser::Pair>(element) || parser::isa_node<parser::MatchVar>(element);
+    });
+    if (!wellFormed || (elements.empty() && rest == nullptr) || parser::isa_node<parser::MatchNilPattern>(rest)) {
+        auto untyped = patternUntyped(dctx, loc, node);
+        return constantTest == nullptr ? move(untyped) : patternAnd(zloc, move(constantTest), move(untyped));
+    }
+
+    auto hash = dctx.freshNameUnique(core::Names::patternHash());
+
+    vector<ExpressionPtr> tests;
+    for (auto *elementNode : elements) {
+        auto elementLoc = elementNode->loc;
+        auto elementZloc = elementLoc.copyWithZeroLength();
+
+        ExpressionPtr key;
+        parser::MatchVar *shorthand = nullptr;
+        unique_ptr<parser::Node> *valuePattern = nullptr;
+        if (auto pair = parser::cast_node<parser::Pair>(elementNode)) {
+            key = node2TreeImpl(dctx, pair->key);
+            valuePattern = &pair->value;
+        } else {
+            shorthand = parser::cast_node<parser::MatchVar>(elementNode);
+            ENFORCE(shorthand != nullptr, "unexpected hash pattern element");
+            key = MK::Symbol(elementLoc, shorthand->name);
+        }
+
+        auto hasKey =
+            MK::Send1(elementZloc, MK::Local(elementZloc, hash), core::Names::key_p(), elementZloc, key.deepCopy());
+
+        auto name = dctx.freshNameUnique(core::Names::patternValue());
+        Send::ARGS_store args;
+        args.emplace_back(MK::Local(elementZloc, hash));
+        args.emplace_back(move(key));
+        auto value = patternMagic(elementZloc, core::Names::patternHashValue(), move(args));
+
+        ExpressionPtr valueTest = shorthand != nullptr ? patternBind(elementLoc, shorthand->name, name)
+                                                       : lowerPattern(dctx, *valuePattern, name);
+
+        auto valueThenTest = MK::InsSeq1(elementZloc, MK::Assign(elementZloc, name, move(value)), move(valueTest));
+        tests.emplace_back(patternAnd(elementZloc, move(hasKey), move(valueThenTest)));
+    }
+
+    if (auto restNode = parser::cast_node<parser::MatchRest>(rest)) {
+        if (auto var = parser::cast_node<parser::MatchVar>(restNode->var.get())) {
+            auto restLoc = var->loc;
+            tests.emplace_back(MK::InsSeq1(restLoc.copyWithZeroLength(),
+                                           MK::Assign(restLoc, var->name, MK::RaiseUnimplemented(restLoc)),
+                                           MK::True(restLoc.copyWithZeroLength())));
+        }
+    }
+
+    ExpressionPtr matched = MK::True(zloc);
+    if (!tests.empty()) {
+        matched = move(tests.back());
+        tests.pop_back();
+        while (!tests.empty()) {
+            matched = patternAnd(zloc, move(tests.back()), move(matched));
+            tests.pop_back();
+        }
+    }
+
+    auto snapshot = constantTest == nullptr ? subject : dctx.freshNameUnique(core::Names::patternSnapshot());
+    Send::ARGS_store args;
+    args.emplace_back(MK::Local(zloc, subject));
+    args.emplace_back(MK::Local(zloc, snapshot));
+    auto deconstructKeys = patternMagic(zloc, core::Names::patternDeconstructKeys(), move(args));
+    matched = MK::InsSeq1(zloc, MK::Assign(zloc, hash, move(deconstructKeys)), move(matched));
+
+    if (constantTest == nullptr) {
+        return matched;
+    }
+    matched = patternAnd(zloc, move(constantTest), move(matched));
+    return MK::InsSeq1(zloc, patternSnapshotAssign(zloc, snapshot, subject), move(matched));
+}
+
+ExpressionPtr lowerPattern(DesugarContext dctx, unique_ptr<parser::Node> &owned, core::NameRef subject) {
+    auto *node = owned.get();
+    auto loc = node->loc;
+    auto zloc = loc.copyWithZeroLength();
+
+    if (auto var = parser::cast_node<parser::MatchVar>(node)) {
+        return patternBind(loc, var->name, subject);
+    } else if (auto as = parser::cast_node<parser::MatchAs>(node)) {
+        auto value = lowerPattern(dctx, as->value, subject);
+        auto target = parser::cast_node<parser::MatchVar>(as->as.get());
+        if (target == nullptr) {
+            return value;
+        }
+        auto bind = patternBind(target->loc, target->name, subject);
+        return patternAnd(zloc, move(value), move(bind));
+    } else if (auto alt = parser::cast_node<parser::MatchAlt>(node)) {
+        auto left = lowerPattern(dctx, alt->left, subject);
+        auto right = lowerPattern(dctx, alt->right, subject);
+        return patternOr(zloc, move(left), move(right));
+    } else if (auto pin = parser::cast_node<parser::Pin>(node)) {
+        return patternValue(loc, node2TreeImpl(dctx, pin->var), subject);
+    } else if (auto array = parser::cast_node<parser::ArrayPattern>(node)) {
+        return lowerArrayPattern(dctx, loc, array->elts, false, nullptr, subject);
+    } else if (auto array = parser::cast_node<parser::ArrayPatternWithTail>(node)) {
+        return lowerArrayPattern(dctx, loc, array->elts, true, nullptr, subject);
+    } else if (auto hash = parser::cast_node<parser::HashPattern>(node)) {
+        return lowerHashPattern(dctx, hash, nullptr, subject);
+    } else if (parser::isa_node<parser::FindPattern>(node)) {
+        return patternUntyped(dctx, loc, node);
+    } else if (auto constPattern = parser::cast_node<parser::ConstPattern>(node)) {
+        auto *inner = constPattern->pattern.get();
+        if (auto array = parser::cast_node<parser::ArrayPattern>(inner)) {
+            return lowerArrayPattern(dctx, inner->loc, array->elts, false, &constPattern->scope, subject);
+        } else if (auto array = parser::cast_node<parser::ArrayPatternWithTail>(inner)) {
+            return lowerArrayPattern(dctx, inner->loc, array->elts, true, &constPattern->scope, subject);
+        } else if (auto hash = parser::cast_node<parser::HashPattern>(inner)) {
+            return lowerHashPattern(dctx, hash, &constPattern->scope, subject);
+        }
+        auto untyped = patternUntyped(dctx, loc, inner);
+        auto constantLoc = constPattern->scope->loc;
+        return patternAnd(zloc, patternValue(constantLoc, node2TreeImpl(dctx, constPattern->scope), subject),
+                          move(untyped));
+    } else if (auto trailing = parser::cast_node<parser::MatchWithTrailingComma>(node)) {
+        return lowerPattern(dctx, trailing->match, subject);
+    }
+
+    // A value pattern: `in Integer`, `in 1..`, `in nil`, `in /re/`, `in -> { }`
+    return patternValue(loc, node2TreeImpl(dctx, owned), subject);
+}
+
+ExpressionPtr desugarOnelinePattern(DesugarContext dctx, core::LocOffsets loc, unique_ptr<parser::Node> &value,
+                                    unique_ptr<parser::Node> &pattern, bool raiseOnNoMatch) {
+    auto zloc = loc.copyWithZeroLength();
+    auto subject = dctx.freshNameUnique(core::Names::assignTemp());
+    auto assignSubject = patternSubjectAssign(subject, node2TreeImpl(dctx, value));
+    auto matched = lowerPattern(dctx, pattern, subject);
+
+    ExpressionPtr result;
+    if (raiseOnNoMatch) {
+        result = MK::If(loc, move(matched), MK::Nil(zloc), raiseNoMatchingPattern(loc));
+    } else {
+        result = MK::If(loc, move(matched), MK::True(zloc), MK::False(zloc));
+    }
+    return MK::InsSeq1(loc, move(assignSubject), move(result));
 }
 
 bool locReported = false;
@@ -2511,37 +2825,39 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 result = move(res);
             },
             [&](parser::CaseMatch *caseMatch) {
-                // Create a local var to store the expression used in each match clause
-                auto exprLoc = caseMatch->expr->loc;
-                auto exprName = dctx.freshNameUnique(core::Names::assignTemp());
-                auto exprVar = MK::Assign(exprLoc, exprName, node2TreeImpl(dctx, caseMatch->expr));
+                auto predicate = node2TreeImpl(dctx, caseMatch->expr);
+                auto subject = dctx.freshNameUnique(core::Names::assignTemp());
+                auto assignSubject = patternSubjectAssign(subject, move(predicate));
 
-                // Desugar the `else` block
-                ExpressionPtr res = node2TreeImpl(dctx, caseMatch->elseBody);
+                // Ruby raises `NoMatchingPatternError` when no `in` matches and there is no `else`.
+                ExpressionPtr res = caseMatch->elseBody != nullptr
+                                        ? node2TreeImpl(dctx, caseMatch->elseBody)
+                                        : raiseNoMatchingPattern(core::LocOffsets{loc.endPos() - 3, loc.endPos()});
 
-                // Desugar each `in` as an `if` branch calling `Magic.<pattern-match>()`
                 for (auto it = caseMatch->inBodies.rbegin(); it != caseMatch->inBodies.rend(); ++it) {
                     auto inPattern = parser::cast_node<parser::InPattern>(it->get());
                     ENFORCE(inPattern != nullptr, "case pattern without a in?");
 
-                    // Keep the `in` body for the `then` body of the new `if`
-                    auto pattern = move(inPattern->pattern);
-                    auto body = node2TreeImpl(dctx, inPattern->body);
-
-                    // Desugar match variables found inside the pattern
-                    InsSeq::STATS_store vars;
-                    desugarPatternMatchingVars(vars, dctx, pattern.get());
-                    if (!vars.empty()) {
-                        body = MK::InsSeq(pattern->loc, move(vars), move(body));
+                    ExpressionPtr guard;
+                    if (auto ifGuard = parser::cast_node<parser::IfGuard>(inPattern->guard.get())) {
+                        guard = node2TreeImpl(dctx, ifGuard->condition);
+                    } else if (auto unlessGuard = parser::cast_node<parser::UnlessGuard>(inPattern->guard.get())) {
+                        auto condition = node2TreeImpl(dctx, unlessGuard->condition);
+                        auto conditionLoc = condition.loc();
+                        guard = MK::Send0(conditionLoc, move(condition), core::Names::bang(),
+                                          conditionLoc.copyWithZeroLength());
                     }
 
-                    // Create a new `if` for the branch:
-                    // `in A` => `if (TODO)`
-                    auto match = MK::RaiseUnimplemented(pattern->loc);
+                    auto patternLoc = inPattern->pattern->loc;
+                    auto match = lowerPattern(dctx, inPattern->pattern, subject);
+                    if (guard != nullptr) {
+                        match = patternAnd(patternLoc.copyWithZeroLength(), move(match), move(guard));
+                    }
+
+                    auto body = node2TreeImpl(dctx, inPattern->body);
                     res = MK::If(inPattern->loc, move(match), move(body), move(res));
                 }
-                res = MK::InsSeq1(loc, move(exprVar), move(res));
-                result = move(res);
+                result = MK::InsSeq1(loc, move(assignSubject), move(res));
             },
             [&](parser::Backref *backref) {
                 auto recv = MK::Magic(loc);
@@ -2569,12 +2885,10 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 result = MK::Send0(loc, move(recv), core::Names::getEncoding(), locZeroLen);
             },
             [&](parser::MatchPattern *pattern) {
-                auto res = desugarOnelinePattern(dctx, pattern->loc, pattern->rhs.get());
-                result = move(res);
+                result = desugarOnelinePattern(dctx, pattern->loc, pattern->lhs, pattern->rhs, true);
             },
             [&](parser::MatchPatternP *pattern) {
-                auto res = desugarOnelinePattern(dctx, pattern->loc, pattern->rhs.get());
-                result = move(res);
+                result = desugarOnelinePattern(dctx, pattern->loc, pattern->lhs, pattern->rhs, false);
             },
             [&](parser::EmptyElse *else_) { result = MK::EmptyTree(); },
             [&](parser::ResolvedConst *resolvedConst) {
