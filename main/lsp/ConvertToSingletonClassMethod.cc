@@ -1,4 +1,5 @@
 #include "main/lsp/ConvertToSingletonClassMethod.h"
+#include "absl/strings/ascii.h"
 #include "absl/strings/match.h"
 #include "core/sig_finder/sig_finder.h"
 #include "main/lsp/AbstractRewriter.h"
@@ -86,6 +87,83 @@ unique_ptr<TextDocumentEdit> createMethodDefEdit(const core::GlobalState &gs, LS
     return make_unique<TextDocumentEdit>(move(tdi), move(edits));
 }
 
+// `(x).foo` desugars to just `x.foo`: there's no AST node that records the loc of the parens.
+// But `x` might not be valid as an argument expression without them: `(a rescue b).foo` is fine,
+// but `A.foo(a rescue b)` is a syntax error.
+//
+// This helper tries to find those surrounding parens by scanning outward from the receiver's loc,
+// bounded by the range of the overall send's loc.
+//
+// When in doubt, it returns the receiver's loc unchanged, which is what the code action used before
+// it looked for parens (i.e., no worse than before).
+//
+// The cursors `open` and `close` only ever move away from the receiver, and stay inside the send,
+// so the loop terminates, and it never goes back to a character it has already passed.
+core::LocOffsets receiverWithParens(string_view source, core::LocOffsets send, core::LocOffsets receiver) {
+    // (The receiver of the `x.foo` that `x&.foo` desugars to is a temporary that holds `x`, with a zero-width loc.)
+    if (receiver.empty()) {
+        return receiver;
+    }
+
+    // Make sure the receiver is inside the send.
+    // A receiver without parens starts where its send starts, so the scan below stops right away.
+    if (!(send.beginPos() <= receiver.beginPos() && receiver.endPos() <= send.endPos())) {
+        return receiver;
+    }
+
+    // `[begin, end)` is always the receiver wrapped in zero or more pairs of matched parens.
+    auto begin = receiver.beginPos(), end = receiver.endPos();
+    // These cursors search outwards from the current receiver to find the next pair.
+    auto open = begin, close = end;
+    while (true) {
+        ENFORCE(send.beginPos() <= begin && begin <= receiver.beginPos());
+        ENFORCE(receiver.endPos() <= end && end <= send.endPos());
+
+        // Skip over whitespace
+        while (open > send.beginPos() && absl::ascii_isspace(source[open - 1])) {
+            open--;
+        }
+        while (close < send.endPos() && absl::ascii_isspace(source[close])) {
+            close++;
+        }
+
+        if (open == send.beginPos() || close == send.endPos() || source[open - 1] != '(' || source[close] != ')') {
+            // Reached the bounds of the send, or didn't find parens on both sides.
+            break;
+        }
+
+        // Found matching open/close parentheses, let's consume and look for more.
+        begin = --open;
+        end = ++close;
+
+        ENFORCE(begin < receiver.beginPos() && receiver.endPos() < end);
+        ENFORCE(source[begin] == '(' && source[end - 1] == ')');
+    }
+
+    // Scanning backwards can land on a paren in a comment, not the real paren:
+    //     ( # (
+    //       x).foo
+    // Scanning forwards can't: whitespace and `)` never start a comment.
+    //
+    // Keep scanning to the beginning of the line to try to find something that might be a comment
+    // (either a `#` or an `=` character, as in `=end`). We might find one that doesn't hide any of the
+    // parens, like a comment on a line above them, but oh well:
+    //     begin # hi
+    //       (x) end.foo
+    // (The scan never looks before the send, so code like `"#"; (x).foo` is fine--you have to get
+    // some really contrived cases like that `begin #` for this to matter.)
+    //
+    // If we find something, give up and return the receiver. This is pessimistic and might generate a
+    // bad edit anyways (e.g., in cases where preserving the parens was truly required), but oh well.
+    for (auto i = open; i > send.beginPos() && source[i - 1] != '\n'; i--) {
+        if (source[i - 1] == '#' || source[i - 1] == '=') {
+            return receiver;
+        }
+    }
+
+    return {begin, end};
+}
+
 class MethodCallSiteRewriter : public AbstractRewriter {
     core::MethodRef method;
     core::ClassOrModuleRef owner;
@@ -137,22 +215,18 @@ public:
             return;
         }
 
+        // Both the range to replace with the class name and the text to move into the arguments
+        // include the receiver's parens, so that the moved text is still a valid expression.
         auto receiverLoc =
-            sendResp->receiverLoc().exists() ? sendResp->receiverLoc() : sendResp->termLoc().copyWithZeroLength();
+            sendResp->receiverLoc().exists()
+                ? core::Loc(sendResp->file, receiverWithParens(sendResp->file.data(gs).source(),
+                                                               sendResp->termLocOffsets, sendResp->receiverLocOffsets))
+                : sendResp->termLoc().copyWithZeroLength();
 
         ENFORCE(edits.find(receiverLoc) == edits.end(), "Tried to edit the same call site twice...");
         edits[receiverLoc] = fmt::format("{}{}", owner.show(gs), sendResp->isPrivateOk ? "." : "");
 
-        auto receiverSource = string(sendResp->isPrivateOk ? "self" : sendResp->receiverLoc().source(gs).value());
-        if (absl::StrContains(receiverSource, ";")) {
-            // It never hurts to parenthesize an argument, it's still technically valid.
-            //
-            // If there's a `;` in the receiver, it could either be in a string (`"foo;bar".example`)
-            // OR it could be a statement separator: `(x; y).example`, and `example(x; y)` is a syntax error.
-            //
-            // Let's defend against this by parenthesizing, despite how rare this is likely to be.
-            receiverSource = fmt::format("({})", receiverSource);
-        }
+        auto receiverSource = string(sendResp->isPrivateOk ? "self" : receiverLoc.source(gs).value());
 
         if (!sendResp->argLocOffsets.empty()) {
             auto newFirstArgLoc = core::Loc(sendResp->file, sendResp->argLocOffsets.front().copyWithZeroLength());
