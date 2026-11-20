@@ -86,9 +86,10 @@ end
 
 class EncryptedProp
   include T::Props
-  def self.encrypted_prop(name, kind: nil, **opts); end
-  encrypted_prop :foo
-  encrypted_prop :bar, migrating: true, immutable: true
+  def self.encrypted_prop(name, type, kind: nil, **opts); end
+  encrypted_prop :foo, Opus::DB::Model::Mixins::Encryptable::EncryptedValue
+  encrypted_prop :bar, Opus::DB::Model::Mixins::Encryptable::EncryptedValue, migrating: true, immutable: true
+  encrypted_prop :baz, EncryptedProp
   encrypted_prop :with_errors, "".dne
                                 # ^^^ error: Method `dne` does not exist on `String` component of `String("")`
 end
@@ -137,9 +138,11 @@ def main
 
     T.reveal_type(EncryptedProp.new.foo) # error: Revealed type: `T.nilable(String)`
     T.reveal_type(EncryptedProp.new.encrypted_foo) # error: Revealed type: `T.nilable(Opus::DB::Model::Mixins::Encryptable::EncryptedValue)`
+    T.reveal_type(EncryptedProp.new.encrypted_baz) # error: Revealed type: `T.nilable(EncryptedProp)`
     EncryptedProp.new.foo = "hello"
     EncryptedProp.new.foo = nil
     EncryptedProp.new.bar = "hello" # error: Setter method `bar=` does not exist
+    EncryptedProp.new.with_errors # error: Method `with_errors` does not exist
 
     T.reveal_type(AdvancedODM.new.ifunset) # error: Revealed type: `String`
     T.reveal_type(AdvancedODM.new.ifunset_nilable) # error: Revealed type: `T.nilable(String)`

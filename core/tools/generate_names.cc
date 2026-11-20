@@ -312,11 +312,6 @@ NameDef names[] = {
 
     {"keywordInit", "keyword_init"},
 
-    {"DB", "DB", true},
-    {"Model", "Model", true},
-    {"Mixins", "Mixins", true},
-    {"Encryptable", "Encryptable", true},
-    {"EncryptedValue", "EncryptedValue", true},
     {"Command", "Command", true},
     {"configureCommand", "configure_command"},
     {"loggingDisabled_p", "logging_disabled?"},

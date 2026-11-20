@@ -32,9 +32,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>::<C PropHelpers2>.new().created=(0.000000)
       <emptyTree>::<C T>.reveal_type(<emptyTree>::<C EncryptedProp>.new().foo())
       <emptyTree>::<C T>.reveal_type(<emptyTree>::<C EncryptedProp>.new().encrypted_foo())
+      <emptyTree>::<C T>.reveal_type(<emptyTree>::<C EncryptedProp>.new().encrypted_baz())
       <emptyTree>::<C EncryptedProp>.new().foo=("hello")
       <emptyTree>::<C EncryptedProp>.new().foo=(nil)
       <emptyTree>::<C EncryptedProp>.new().bar=("hello")
+      <emptyTree>::<C EncryptedProp>.new().with_errors()
       <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().ifunset())
       <emptyTree>::<C T>.reveal_type(<emptyTree>::<C AdvancedODM>.new().ifunset_nilable())
       <emptyTree>::<C AdvancedODM>.new().ifunset=(nil)
@@ -580,7 +582,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C EncryptedProp><<C <todo sym>>> < (::<todo sym>)
-    def self.encrypted_prop<<todo method>>(name, kind: = nil, **opts, &<blk>)
+    def self.encrypted_prop<<todo method>>(name, type, kind: = nil, **opts, &<blk>)
       <emptyTree>
     end
 
@@ -636,15 +638,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T.nilable(::String))
     end
 
-    def with_errors<<todo method>>(&<blk>)
+    def baz<<todo method>>(&<blk>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||
-      <self>.returns(::T.nilable(<emptyTree>::<C Opus>::<C DB>::<C Model>::<C Mixins>::<C Encryptable>::<C EncryptedValue>))
+      <self>.returns(::T.nilable(<emptyTree>::<C EncryptedProp>))
     end
 
-    def encrypted_with_errors<<todo method>>(&<blk>)
+    def encrypted_baz<<todo method>>(&<blk>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
@@ -652,15 +654,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:arg0, ::T.nilable(::String)).returns(::T.nilable(::String))
     end
 
-    def with_errors=<<todo method>>(arg0, &<blk>)
+    def baz=<<todo method>>(arg0, &<blk>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||
-      <self>.params(:arg0, ::T.nilable(<emptyTree>::<C Opus>::<C DB>::<C Model>::<C Mixins>::<C Encryptable>::<C EncryptedValue>)).returns(::T.nilable(<emptyTree>::<C Opus>::<C DB>::<C Model>::<C Mixins>::<C Encryptable>::<C EncryptedValue>))
+      <self>.params(:arg0, ::T.nilable(<emptyTree>::<C EncryptedProp>)).returns(::T.nilable(<emptyTree>::<C EncryptedProp>))
     end
 
-    def encrypted_with_errors=<<todo method>>(arg0, &<blk>)
+    def encrypted_baz=<<todo method>>(arg0, &<blk>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
@@ -668,7 +670,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of self.encrypted_prop>
 
-    <self>.encrypted_prop(:foo)
+    <self>.encrypted_prop(:foo, <emptyTree>::<C Opus>::<C DB>::<C Model>::<C Mixins>::<C Encryptable>::<C EncryptedValue>)
 
     <runtime method definition of foo>
 
@@ -678,21 +680,23 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of encrypted_foo=>
 
-    <self>.encrypted_prop(:bar, :migrating, true, :immutable, true)
+    <self>.encrypted_prop(:bar, <emptyTree>::<C Opus>::<C DB>::<C Model>::<C Mixins>::<C Encryptable>::<C EncryptedValue>, :migrating, true, :immutable, true)
 
     <runtime method definition of bar>
 
     <runtime method definition of encrypted_bar>
 
+    <self>.encrypted_prop(:baz, <emptyTree>::<C EncryptedProp>)
+
+    <runtime method definition of baz>
+
+    <runtime method definition of encrypted_baz>
+
+    <runtime method definition of baz=>
+
+    <runtime method definition of encrypted_baz=>
+
     <self>.encrypted_prop(:with_errors, "".dne())
-
-    <runtime method definition of with_errors>
-
-    <runtime method definition of encrypted_with_errors>
-
-    <runtime method definition of with_errors=>
-
-    <runtime method definition of encrypted_with_errors=>
   end
 
   <runtime method definition of main>

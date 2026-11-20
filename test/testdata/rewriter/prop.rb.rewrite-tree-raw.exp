@@ -854,6 +854,38 @@ ClassDef{
           }
           Send{
             flags = {}
+            recv = UnresolvedConstantLit{
+              cnst = <C <U T>>
+              scope = EmptyTree
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Send{
+                flags = {}
+                recv = Send{
+                  flags = {}
+                  recv = UnresolvedConstantLit{
+                    cnst = <C <U EncryptedProp>>
+                    scope = EmptyTree
+                  }
+                  fun = <U new>
+                  block = nullptr
+                  pos_args = 0
+                  args = [
+                  ]
+                }
+                fun = <U encrypted_baz>
+                block = nullptr
+                pos_args = 0
+                args = [
+                ]
+              }
+            ]
+          }
+          Send{
+            flags = {}
             recv = Send{
               flags = {}
               recv = UnresolvedConstantLit{
@@ -913,6 +945,26 @@ ClassDef{
             pos_args = 1
             args = [
               Literal{ value = "hello" }
+            ]
+          }
+          Send{
+            flags = {}
+            recv = Send{
+              flags = {}
+              recv = UnresolvedConstantLit{
+                cnst = <C <U EncryptedProp>>
+                scope = EmptyTree
+              }
+              fun = <U new>
+              block = nullptr
+              pos_args = 0
+              args = [
+              ]
+            }
+            fun = <U with_errors>
+            block = nullptr
+            pos_args = 0
+            args = [
             ]
           }
           Send{
@@ -4709,6 +4761,9 @@ ClassDef{
           params = [UnresolvedIdent{
               kind = Local
               name = <U name>
+            }, UnresolvedIdent{
+              kind = Local
+              name = <U type>
             }, OptionalParam{
               expr = KeywordArg{ expr = UnresolvedIdent{
                 kind = Local
@@ -5334,7 +5389,7 @@ ClassDef{
 
         MethodDef{
           flags = {rewriterSynthesized}
-          name = <U with_errors><<U <todo method>>>
+          name = <U baz><<U <todo method>>>
           params = [BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
@@ -5394,23 +5449,8 @@ ClassDef{
                   pos_args = 1
                   args = [
                     UnresolvedConstantLit{
-                      cnst = <C <U EncryptedValue>>
-                      scope = UnresolvedConstantLit{
-                        cnst = <C <U Encryptable>>
-                        scope = UnresolvedConstantLit{
-                          cnst = <C <U Mixins>>
-                          scope = UnresolvedConstantLit{
-                            cnst = <C <U Model>>
-                            scope = UnresolvedConstantLit{
-                              cnst = <C <U DB>>
-                              scope = UnresolvedConstantLit{
-                                cnst = <C <U Opus>>
-                                scope = EmptyTree
-                              }
-                            }
-                          }
-                        }
-                      }
+                      cnst = <C <U EncryptedProp>>
+                      scope = EmptyTree
                     }
                   ]
                 }
@@ -5424,7 +5464,7 @@ ClassDef{
 
         MethodDef{
           flags = {rewriterSynthesized}
-          name = <U encrypted_with_errors><<U <todo method>>>
+          name = <U encrypted_baz><<U <todo method>>>
           params = [BlockParam{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
@@ -5524,7 +5564,7 @@ ClassDef{
 
         MethodDef{
           flags = {rewriterSynthesized}
-          name = <U with_errors=><<U <todo method>>>
+          name = <U baz=><<U <todo method>>>
           params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
@@ -5590,23 +5630,8 @@ ClassDef{
                     pos_args = 1
                     args = [
                       UnresolvedConstantLit{
-                        cnst = <C <U EncryptedValue>>
-                        scope = UnresolvedConstantLit{
-                          cnst = <C <U Encryptable>>
-                          scope = UnresolvedConstantLit{
-                            cnst = <C <U Mixins>>
-                            scope = UnresolvedConstantLit{
-                              cnst = <C <U Model>>
-                              scope = UnresolvedConstantLit{
-                                cnst = <C <U DB>>
-                                scope = UnresolvedConstantLit{
-                                  cnst = <C <U Opus>>
-                                  scope = EmptyTree
-                                }
-                              }
-                            }
-                          }
-                        }
+                        cnst = <C <U EncryptedProp>>
+                        scope = EmptyTree
                       }
                     ]
                   }
@@ -5627,23 +5652,8 @@ ClassDef{
                   pos_args = 1
                   args = [
                     UnresolvedConstantLit{
-                      cnst = <C <U EncryptedValue>>
-                      scope = UnresolvedConstantLit{
-                        cnst = <C <U Encryptable>>
-                        scope = UnresolvedConstantLit{
-                          cnst = <C <U Mixins>>
-                          scope = UnresolvedConstantLit{
-                            cnst = <C <U Model>>
-                            scope = UnresolvedConstantLit{
-                              cnst = <C <U DB>>
-                              scope = UnresolvedConstantLit{
-                                cnst = <C <U Opus>>
-                                scope = EmptyTree
-                              }
-                            }
-                          }
-                        }
-                      }
+                      cnst = <C <U EncryptedProp>>
+                      scope = EmptyTree
                     }
                   ]
                 }
@@ -5657,7 +5667,7 @@ ClassDef{
 
         MethodDef{
           flags = {rewriterSynthesized}
-          name = <U encrypted_with_errors=><<U <todo method>>>
+          name = <U encrypted_baz=><<U <todo method>>>
           params = [UnresolvedIdent{
               kind = Local
               name = <U arg0>
@@ -5716,9 +5726,28 @@ ClassDef{
           recv = Self
           fun = <U encrypted_prop>
           block = nullptr
-          pos_args = 1
+          pos_args = 2
           args = [
             Literal{ value = :foo }
+            UnresolvedConstantLit{
+              cnst = <C <U EncryptedValue>>
+              scope = UnresolvedConstantLit{
+                cnst = <C <U Encryptable>>
+                scope = UnresolvedConstantLit{
+                  cnst = <C <U Mixins>>
+                  scope = UnresolvedConstantLit{
+                    cnst = <C <U Model>>
+                    scope = UnresolvedConstantLit{
+                      cnst = <C <U DB>>
+                      scope = UnresolvedConstantLit{
+                        cnst = <C <U Opus>>
+                        scope = EmptyTree
+                      }
+                    }
+                  }
+                }
+              }
+            }
           ]
         }
 
@@ -5735,9 +5764,28 @@ ClassDef{
           recv = Self
           fun = <U encrypted_prop>
           block = nullptr
-          pos_args = 1
+          pos_args = 2
           args = [
             Literal{ value = :bar }
+            UnresolvedConstantLit{
+              cnst = <C <U EncryptedValue>>
+              scope = UnresolvedConstantLit{
+                cnst = <C <U Encryptable>>
+                scope = UnresolvedConstantLit{
+                  cnst = <C <U Mixins>>
+                  scope = UnresolvedConstantLit{
+                    cnst = <C <U Model>>
+                    scope = UnresolvedConstantLit{
+                      cnst = <C <U DB>>
+                      scope = UnresolvedConstantLit{
+                        cnst = <C <U Opus>>
+                        scope = EmptyTree
+                      }
+                    }
+                  }
+                }
+              }
+            }
             Literal{ value = :migrating }
             Literal{ value = true }
             Literal{ value = :immutable }
@@ -5748,6 +5796,29 @@ ClassDef{
         <runtime method definition of bar>
 
         <runtime method definition of encrypted_bar>
+
+        Send{
+          flags = {privateOk}
+          recv = Self
+          fun = <U encrypted_prop>
+          block = nullptr
+          pos_args = 2
+          args = [
+            Literal{ value = :baz }
+            UnresolvedConstantLit{
+              cnst = <C <U EncryptedProp>>
+              scope = EmptyTree
+            }
+          ]
+        }
+
+        <runtime method definition of baz>
+
+        <runtime method definition of encrypted_baz>
+
+        <runtime method definition of baz=>
+
+        <runtime method definition of encrypted_baz=>
 
         Send{
           flags = {privateOk}
@@ -5768,14 +5839,6 @@ ClassDef{
             }
           ]
         }
-
-        <runtime method definition of with_errors>
-
-        <runtime method definition of encrypted_with_errors>
-
-        <runtime method definition of with_errors=>
-
-        <runtime method definition of encrypted_with_errors=>
       ]
     }
 
