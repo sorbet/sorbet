@@ -163,7 +163,7 @@ struct Options {
     std::vector<std::string> packagerLayers;
     // Focus on these packages when typechecking
     std::vector<std::string> focusPackages;
-    bool focusStopAtDependantPackages = false;
+    core::packages::FocusExtent focusExtent = core::packages::FocusExtent::Full;
     bool focusAssumePackageDependenciesTypecheck = false;
     std::string typedSource = "";
     std::string cacheDir = "";

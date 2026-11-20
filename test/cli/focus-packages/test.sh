@@ -34,25 +34,28 @@ echo '--- Prelude selection checks all packages ---'
 run --stripe-packages --focus-package=Prelude
 
 echo '--- Prelude selection checks all packages with downstream skipping ---'
-run --stripe-packages --focus-package=Prelude --focus-stop-at-dependant-packages
+run --stripe-packages --focus-package=Prelude --focus-extent=none
 
 echo '--- Prelude selection checks all packages with upstream skipping ---'
 run --stripe-packages --focus-package=Prelude --focus-assume-package-dependencies-typecheck
 
 echo '--- Prelude selection checks all packages with both skip flags ---'
-run --stripe-packages --focus-package=Prelude --focus-stop-at-dependant-packages --focus-assume-package-dependencies-typecheck
+run --stripe-packages --focus-package=Prelude --focus-extent=none --focus-assume-package-dependencies-typecheck
 
 echo '--- Target: includes dependencies and dependents ---'
 run --stripe-packages --focus-package=Target
 
+echo '--- Target: explicit full extent includes dependencies and dependents ---'
+run --stripe-packages --focus-package=Target --focus-extent=full
+
 echo '--- Target: skipping dependents, including explicit test consumers ---'
-run --stripe-packages --focus-package=Target --focus-stop-at-dependant-packages
+run --stripe-packages --focus-package=Target --focus-extent=none
 
 echo '--- Target: skipping inference for dependencies ---'
 run --stripe-packages --focus-package=Target --focus-assume-package-dependencies-typecheck
 
 echo '--- Target: skipping dependents and inference for dependencies ---'
-run --stripe-packages --focus-package=Target --focus-assume-package-dependencies-typecheck --focus-stop-at-dependant-packages
+run --stripe-packages --focus-package=Target --focus-assume-package-dependencies-typecheck --focus-extent=none
 
 # Split every non-prelude stratum into SCCs, then separately combine the entire selection into one stratum.
 echo '--- Target: split strata preserve the selection ---'
@@ -66,20 +69,20 @@ echo '--- Target: split and combine strata ---'
 run --stripe-packages --focus-package=Target --stratum-split-threshold=1 --min-stratum-size=5
 
 echo '--- Target: split and combine strata, skipping dependents ---'
-run --stripe-packages --focus-package=Target --stratum-split-threshold=1 --min-stratum-size=5 --focus-stop-at-dependant-packages
+run --stripe-packages --focus-package=Target --stratum-split-threshold=1 --min-stratum-size=5 --focus-extent=none
 
 echo '--- Target: split and combine strata, skipping inference for dependencies ---'
 run --stripe-packages --focus-package=Target --stratum-split-threshold=1 --min-stratum-size=5 --focus-assume-package-dependencies-typecheck
 
 echo '--- Target: split and combine strata with both skip flags ---'
 run --stripe-packages --focus-package=Target --stratum-split-threshold=1 --min-stratum-size=5 \
-  --focus-assume-package-dependencies-typecheck --focus-stop-at-dependant-packages
+  --focus-assume-package-dependencies-typecheck --focus-extent=none
 
 echo '--- Multiple names, repeated flag, and duplicate roots ---'
 run --sorbet-packages --focus-package=Target,Sibling --focus-package=Target
 
 echo '--- Explicitly selected dependencies are inferred with both skip flags ---'
-run --stripe-packages --focus-package=Target,Lib::Base --focus-assume-package-dependencies-typecheck --focus-stop-at-dependant-packages
+run --stripe-packages --focus-package=Target,Lib::Base --focus-assume-package-dependencies-typecheck --focus-extent=none
 
 echo '--- Namespaced package ---'
 run --stripe-packages --focus-package=Lib::Base
@@ -88,7 +91,7 @@ echo '--- Cycle: dependencies do not pull in their other consumers ---'
 run --stripe-packages --focus-package=CycleB
 
 echo '--- Cycle: both members are inferred with both skip flags ---'
-run --stripe-packages --focus-package=CycleB --focus-stop-at-dependant-packages --focus-assume-package-dependencies-typecheck
+run --stripe-packages --focus-package=CycleB --focus-extent=none --focus-assume-package-dependencies-typecheck
 
 echo '--- Test support selection includes explicit test consumers ---'
 run --stripe-packages --focus-package=TestSupport
@@ -100,7 +103,7 @@ echo '--- Explicitly selected tests retain their dependencies ---'
 run --stripe-packages --focus-package=Top::Test
 
 echo '--- A clean focused package succeeds despite errors elsewhere ---'
-run --stripe-packages --focus-package=Top::Test --focus-assume-package-dependencies-typecheck --focus-stop-at-dependant-packages
+run --stripe-packages --focus-package=Top::Test --focus-assume-package-dependencies-typecheck --focus-extent=none
 
 cache_dir=$(mktemp -d)
 trap 'rm -rf "$cache_dir"' EXIT
@@ -142,7 +145,13 @@ echo '--- Upstream skipping requires a focused package ---'
 run --stripe-packages --focus-assume-package-dependencies-typecheck
 
 echo '--- Downstream skipping requires a focused package ---'
-run --stripe-packages --focus-stop-at-dependant-packages
+run --stripe-packages --focus-extent=none
+
+echo '--- Explicit full extent requires a focused package ---'
+run --stripe-packages --focus-extent=full
+
+echo '--- Invalid focus extent ---'
+run --stripe-packages --focus-package=Target --focus-extent=invalid
 
 echo '--- Package-directed mode required with either package flag ---'
 run --stripe-packages --experimental-package-directed=false --focus-package=Target
@@ -167,5 +176,5 @@ awk '{ print } /^class Other < PackageSpec$/ { print "  import Other" }' \
   other/__package.rb > "$cache_dir/package-error/other/__package.rb"
 (
   cd "$cache_dir/package-error" || exit 1
-  run --stripe-packages --focus-package=Top::Test --focus-assume-package-dependencies-typecheck --focus-stop-at-dependant-packages
+  run --stripe-packages --focus-package=Top::Test --focus-assume-package-dependencies-typecheck --focus-extent=none
 )

@@ -16,6 +16,14 @@ class GlobalState;
 
 namespace sorbet::core::packages {
 
+enum class FocusExtent : uint8_t {
+    // The full extent of the focused set's dependent packages.
+    Full,
+
+    // Don't consider any downstream dependent packages of the focused set.
+    None,
+};
+
 class CondensationBuilder;
 
 class Condensation {
@@ -107,9 +115,9 @@ public:
     // may be modified if it is passed, as it will be augmented to include all the members of the SCCs that the original
     // packages belong to.
     //
-    // Passing `true` for `skipDownstream` will exclude the dependant packages of the focused set.
+    // Passing `FocusExtent::None` will exclude the dependant packages of the focused set.
     const Traversal computeTraversal(const GlobalState &gs, UnorderedSet<MangledName> *focusedPackages,
-                                     bool skipDownstream) const;
+                                     FocusExtent extent) const;
 
     absl::Span<const Node> nodes() const {
         return this->nodes_;

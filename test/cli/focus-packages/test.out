@@ -125,6 +125,23 @@ test_support/value.rb:4: Argument does not have asserted type `Integer` https://
 test_top/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 top/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 exit: 100
+--- Target: explicit full extent includes dependencies and dependents ---
+base/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+consumer/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+cycle_a/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+cycle_b/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+extra/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+extra_dep/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+generated/Target/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+prelude/string.rb:8: Expected `Integer` but found `String("wrong")` for method result type https://srb.help/7005
+root/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+target/test/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+target/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+test_consumer/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+test_support/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+test_top/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+top/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
+exit: 100
 --- Target: skipping dependents, including explicit test consumers ---
 base/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
 generated/Target/value.rb:4: Argument does not have asserted type `Integer` https://srb.help/7007
@@ -474,7 +491,13 @@ exit: 1
 --focus-assume-package-dependencies-typecheck requires one or more packages to be passed with --focus-package
 exit: 1
 --- Downstream skipping requires a focused package ---
---focus-stop-at-dependant-packages requires one or more packages to be passed with --focus-package
+--focus-extent requires one or more packages to be passed with --focus-package
+exit: 1
+--- Explicit full extent requires a focused package ---
+--focus-extent requires one or more packages to be passed with --focus-package
+exit: 1
+--- Invalid focus extent ---
+--focus-extent must be 'full' or 'none', got 'invalid'
 exit: 1
 --- Package-directed mode required with either package flag ---
 --focus-package requires --experimental-package-directed

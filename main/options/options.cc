@@ -681,9 +681,9 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options(section)("focus-assume-package-dependencies-typecheck",
                                  "Skip inference for dependencies of the focused set",
                                  cxxopts::value<bool>()->default_value("false"));
-    options.add_options(section)("focus-stop-at-dependant-packages",
-                                 "Stop typechecking once the focused set has been checked",
-                                 cxxopts::value<bool>()->default_value("false"));
+    options.add_options(section)("focus-extent",
+                                 "The extent of packages that depend on the focused set that will be typechecked",
+                                 cxxopts::value<string>()->default_value("full"), "{[full],none}");
     // }}}
 
     // ----- STRIPE AUTOGEN ----------------------------------------------- {{{
@@ -1354,11 +1354,21 @@ void readOptions(Options &opts,
             throw EarlyReturnWithCode(1);
         }
 
-        opts.focusStopAtDependantPackages = raw["focus-stop-at-dependant-packages"].as<bool>();
-        if (opts.focusStopAtDependantPackages && opts.focusPackages.empty()) {
-            logger->error(
-                "--focus-stop-at-dependant-packages requires one or more packages to be passed with --focus-package");
-            throw EarlyReturnWithCode(1);
+        if (raw.count("focus-extent") > 0) {
+            auto extentStr = raw["focus-extent"].as<string>();
+            if (extentStr == "full") {
+                opts.focusExtent = core::packages::FocusExtent::Full;
+            } else if (extentStr == "none") {
+                opts.focusExtent = core::packages::FocusExtent::None;
+            } else {
+                logger->error("--focus-extent must be 'full' or 'none', got '{}'", extentStr);
+                throw EarlyReturnWithCode(1);
+            }
+
+            if (opts.focusPackages.empty()) {
+                logger->error("--focus-extent requires one or more packages to be passed with --focus-package");
+                throw EarlyReturnWithCode(1);
+            }
         }
 
         if constexpr (debug_mode) {

@@ -354,8 +354,9 @@ Usage:
                                 Focus typechecking to <pkg> (repeatable)
       --focus-assume-package-dependencies-typecheck
                                 Skip inference for dependencies of the focused set
-      --focus-stop-at-dependant-packages
-                                Stop typechecking once the focused set has been checked
+      --focus-extent {[full],none}
+                                The extent of packages that depend on the focused set
+                                that will be typechecked (default: full)
 
 ```
 

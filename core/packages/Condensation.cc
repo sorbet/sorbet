@@ -25,7 +25,7 @@ struct TraversalBuilder {
     Condensation::Traversal result;
 
     TraversalBuilder(const core::GlobalState &gs, absl::Span<const Condensation::Node> nodes,
-                     UnorderedSet<MangledName> *focusedPackages, bool skipDownstream)
+                     UnorderedSet<MangledName> *focusedPackages, FocusExtent extent)
         : nodes{nodes}, remainingImports(this->nodes.size(), 0),
           // If the focused set is provided, all nodes start out as skipped.
           skipNode(this->nodes.size(), focusedPackages != nullptr) {
@@ -34,8 +34,9 @@ struct TraversalBuilder {
         // The high-level summary of the focused algorithm is:
         //
         // 1. Mark all prelude packages as required, and add them to the upstream set.
-        // 2. Traverse down to the leaves of the condensation graph from the focused set to mark the downstream set.
-        //    If we are skipping downstream packages, this step will be skipped and the downstream set will be empty.
+        // 2. Traverse dependent packages of the focused set according to the extent to build the downstream set:
+        //    - full extent adds all packages that depend on the focused set
+        //    - none extent adds no packages to the downstream set
         // 3. Traverse from the union of the focused and downstream sets towards the roots, to mark the upstream set.
         //
         // These three sets make up the packages involved in the focused edit.
@@ -77,33 +78,42 @@ struct TraversalBuilder {
 
             vector<int> work;
 
-            if (!skipDownstream) {
-                // Seed the traversal with the dependant SCCs of the focused set.
-                for (auto pkgName : *focusedPackages) {
-                    if (!pkgName.exists()) {
-                        continue;
+            switch (extent) {
+                // Downstream consists of all dependents of the focused set.
+                case FocusExtent::Full: {
+                    // Seed the traversal with the dependant SCCs of the focused set.
+                    for (auto pkgName : *focusedPackages) {
+                        if (!pkgName.exists()) {
+                            continue;
+                        }
+
+                        auto &info = db.getPackageInfo(pkgName);
+                        ENFORCE(info.exists());
+
+                        absl::c_copy(this->nodes[info.sccID().value()].backEdges, back_inserter(work));
                     }
 
-                    auto &info = db.getPackageInfo(pkgName);
-                    ENFORCE(info.exists());
+                    // Traverse towards the leaves, building the downstream set.
+                    while (!work.empty()) {
+                        auto id = work.back();
+                        work.pop_back();
+                        if (!this->skipNode[id]) {
+                            continue;
+                        }
 
-                    absl::c_copy(this->nodes[info.sccID().value()].backEdges, back_inserter(work));
-                }
+                        this->skipNode[id] = false;
 
-                // Traverse towards the leaves, building the downstream set.
-                while (!work.empty()) {
-                    auto id = work.back();
-                    work.pop_back();
-                    if (!this->skipNode[id]) {
-                        continue;
+                        auto &node = this->nodes[id];
+                        this->result.focusedDownstream.insert(node.members.begin(), node.members.end());
+                        absl::c_copy(node.backEdges, back_inserter(work));
                     }
 
-                    this->skipNode[id] = false;
-
-                    auto &node = this->nodes[id];
-                    this->result.focusedDownstream.insert(node.members.begin(), node.members.end());
-                    absl::c_copy(node.backEdges, back_inserter(work));
+                    break;
                 }
+
+                // Downstream is empty.
+                case FocusExtent::None:
+                    break;
             }
 
             // Seed the traversal with the dependencies of everything marked as not skippable. Prelude nodes only
@@ -301,8 +311,8 @@ struct NodeStratum {
 
 const Condensation::Traversal Condensation::computeTraversal(const core::GlobalState &gs,
                                                              UnorderedSet<MangledName> *focusedPackages,
-                                                             bool skipDownstream) const {
-    TraversalBuilder builder(gs, this->nodes_, focusedPackages, skipDownstream);
+                                                             FocusExtent extent) const {
+    TraversalBuilder builder(gs, this->nodes_, focusedPackages, extent);
 
     if (!focusedPackages && cachedTraversalIsUsable(gs.packageDB())) {
         builder.result.cached = true;
