@@ -53,6 +53,8 @@ class SessionCache {
 
 public:
     static const std::string_view SESSION_DIR_PREFIX;
+
+    // Retained to clean up staging directories created by older versions.
     static const std::string_view STAGING_DIR_PREFIX;
 
     // Removes the session cache.
@@ -78,7 +80,7 @@ public:
     // Attempts a nonblocking exclusive lock on the shared cache before replacement.
     // Does nothing if caching is disabled or the session cache is gone. Skips publication if lock acquisition fails,
     // incrementing cache.publish_failed. Throws on other failures.
-    void commit(std::shared_ptr<::spdlog::logger> logger, const options::Options &opts) const;
+    void commit(::spdlog::logger &logger, const options::Options &opts) const;
 };
 
 } // namespace sorbet::realmain::cache

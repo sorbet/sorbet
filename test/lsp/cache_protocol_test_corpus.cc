@@ -458,17 +458,19 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "CopyCacheAfterInit") {
         auto originalData = FileOps::read(sharedDataPath);
         absl::Notification finished;
         auto publisher = runInAThread("cache-publisher", [&]() {
-            CHECK_NOTHROW(sessionCache->commit(logger, *opts));
+            CHECK_NOTHROW(sessionCache->commit(*logger, *opts));
             finished.Notify();
         });
         CHECK(finished.WaitForNotificationWithTimeout(absl::Seconds(5)));
         CHECK_EQ(FileOps::read(sharedDataPath), originalData);
         sharedLock.reset();
         publisher.reset();
-        CHECK_FALSE(FileOps::dirExists(
-            fmt::format("{}/{}{}", opts->cacheDir, realmain::cache::SessionCache::STAGING_DIR_PREFIX, getpid())));
+        CHECK_FALSE(FileOps::exists(fmt::format("{}/data.mdb.staging", opts->cacheDir)));
     }
-    sessionCache->commit(logger, *opts);
+    sessionCache->commit(*logger, *opts);
+
+    // The staged copy of the kvstore should have been moved over the old db at this point.
+    CHECK_FALSE(FileOps::exists(fmt::format("{}/data.mdb.staging", opts->cacheDir)));
 
     // Verify that committing the session cache overwrites the shared one by checking that the `shared only` key is
     // missing.
@@ -684,7 +686,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "ReapOldCacheDirectories") {
     SUBCASE("Session caches") {
         prefix = realmain::cache::SessionCache::SESSION_DIR_PREFIX;
     }
-    SUBCASE("Publication staging directories") {
+    SUBCASE("Legacy publication staging directories") {
         prefix = realmain::cache::SessionCache::STAGING_DIR_PREFIX;
     }
 
