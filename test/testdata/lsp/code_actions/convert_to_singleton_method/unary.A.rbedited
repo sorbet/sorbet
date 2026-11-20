@@ -46,3 +46,41 @@ A.unary((A.new
 (A).unary(A.new rescue A.new, 0)
 
 begin A end.unary(((A.new; A.new)), 0)
+
+A.unary((((A.new; A.new); A.new)), 0)
+
+((A)).unary(A.new rescue A.new, 0)
+
+( A ).unary(A.new rescue A.new, 0)
+
+(
+  A
+).unary(A.new rescue A.new, 0)
+
+(A).unary((A.new).itself rescue A.new, 0)
+
+(A).unary(A.new.tap { |a| a.unary(0) } rescue A.new, 1)
+
+(A).unary(A.new.tap { <<~EOS } rescue A.new, 0)
+  heredoc
+EOS
+
+begin (A) end.unary(A.new rescue A.new, 0)
+
+begin; A; end.unary(A.new, 0)
+
+( # comment
+  A).unary(A.new rescue A.new, 0)
+
+( # (
+  A).unary(A.new rescue A.new, 0)
+
+(
+=begin
+=end (
+  A).unary(A.new rescue A.new, 0)
+
+begin # comment
+  (A) end.unary(A.new rescue A.new, 0)
+
+"#"; (A).unary(A.new rescue A.new, 0)
