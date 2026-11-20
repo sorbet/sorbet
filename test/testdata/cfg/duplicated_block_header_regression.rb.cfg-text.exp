@@ -2,17 +2,15 @@ method ::<Class:<root>>#<static-init> {
 
 bb0[firstDead=-1]():
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
-    <cfgAlias>$7: T.class_of(T) = alias <C T>
-    <cfgAlias>$8: T.class_of(T::Sig) = alias <C Sig>
-    <statTemp>$3: T.class_of(<root>) = <self>: T.class_of(<root>).extend(<cfgAlias>$8: T.class_of(T::Sig))
-    <statTemp>$10: Integer(0) = 0
-    xyz: Integer = <statTemp>$10: Integer(0).to_i()
-    <cfgAlias>$14: T.class_of(T) = alias <C T>
-    <cfgAlias>$15: Runtime object representing type: T::Boolean = alias <C Boolean>
-    keep_for_ide$12: Runtime object representing type: T::Boolean = <cfgAlias>$15
-    keep_for_ide$12: T.untyped = <keep-alive> keep_for_ide$12
-    <castTemp>$16: TrueClass = true
-    found: T::Boolean = cast(<castTemp>$16: TrueClass, T::Boolean);
+    <cfgAlias>$6: T.class_of(T::Sig) = alias <C Sig>
+    <statTemp>$3: T.class_of(<root>) = <self>: T.class_of(<root>).extend(<cfgAlias>$6: T.class_of(T::Sig))
+    <statTemp>$8: Integer(0) = 0
+    xyz: Integer = <statTemp>$8: Integer(0).to_i()
+    <cfgAlias>$11: Runtime object representing type: T::Boolean = alias <C Boolean>
+    keep_for_ide$10: Runtime object representing type: T::Boolean = <cfgAlias>$11
+    keep_for_ide$10: T.untyped = <keep-alive> keep_for_ide$10
+    <castTemp>$12: TrueClass = true
+    found: T::Boolean = cast(<castTemp>$12: TrueClass, T::Boolean);
     <unconditional> -> bb2
 
 # backedges
@@ -31,8 +29,8 @@ bb2[firstDead=-1](xyz: Integer, found: T::Boolean):
 # - bb2
 # - bb6
 bb4[firstDead=3](xyz: Integer):
-    <cfgAlias>$27: T.class_of(T) = alias <C T>
-    <returnMethodTemp>$2: Integer = <cfgAlias>$27: T.class_of(T).reveal_type(xyz: Integer)
+    <cfgAlias>$23: T.class_of(T) = alias <C T>
+    <returnMethodTemp>$2: Integer = <cfgAlias>$23: T.class_of(T).reveal_type(xyz: Integer)
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer
     <unconditional> -> bb1
 
@@ -42,12 +40,12 @@ bb4[firstDead=3](xyz: Integer):
 bb5[firstDead=-1](xyz: Integer, found: TrueClass):
     # outerLoops: 1
     found: FalseClass = false
-    <arrayTemp>$24: TrueClass = true
-    <arrayTemp>$25: FalseClass = false
-    <magic>$23: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$22: [TrueClass, FalseClass] = <magic>$23: T.class_of(<Magic>).<build-array>(<arrayTemp>$24: TrueClass, <arrayTemp>$25: FalseClass)
-    <ifTemp>$21: T::Boolean = <statTemp>$22: [TrueClass, FalseClass].sample()
-    <ifTemp>$21 -> (T::Boolean ? bb6 : bb2)
+    <arrayTemp>$20: TrueClass = true
+    <arrayTemp>$21: FalseClass = false
+    <magic>$19: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$18: [TrueClass, FalseClass] = <magic>$19: T.class_of(<Magic>).<build-array>(<arrayTemp>$20: TrueClass, <arrayTemp>$21: FalseClass)
+    <ifTemp>$17: T::Boolean = <statTemp>$18: [TrueClass, FalseClass].sample()
+    <ifTemp>$17 -> (T::Boolean ? bb6 : bb2)
 
 # backedges
 # - bb5

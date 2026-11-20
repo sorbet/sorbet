@@ -545,10 +545,11 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                 // for this expression is the one that writes its value. Callers that need the loc of
                 // the value of a sequence of instructions (e.g., a method's implicit return) use the
                 // loc of its last instruction.
-                if (auto *orig = a.original()) {
-                    // Empirically, these are the only two cases we've needed so far to service the
-                    // LSP requests we want (hover and completion), but that doesn't mean these are
-                    // the **only** we'll ever want.
+                //
+                // We only need to walk StubModule constants. DefLocSaver handles hover responses
+                // for resolved constant literals.
+                auto *orig = a.original();
+                if (orig != nullptr && a.symbol() == core::Symbols::StubModule()) {
                     if (ast::isa_tree<ast::ConstantLit>(orig->scope)) {
                         LocalRef deadSym = cctx.newTemporary(core::Names::keepForIde());
                         current = walk(cctx.withTarget(deadSym), orig->scope, current);
