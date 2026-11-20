@@ -1520,7 +1520,7 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
 }
 
 bool shouldTypecheck(const core::GlobalState &gs, const UnorderedSet<core::packages::MangledName> &relevantPackages,
-                     const UnorderedSet<core::FileRef> hadErrors, core::FileRef file) {
+                     const UnorderedSet<core::FileRef> &hadErrors, core::FileRef file) {
     auto pkg = gs.packageDB().getPackageNameForFile(file);
     if (!pkg.exists()) {
         return true;
