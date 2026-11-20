@@ -294,6 +294,8 @@ NameDef names[] = {
     {"includeContext", "include_context"},
     {"itBehavesLike", "it_behaves_like"},
     {"localContext", "local_context"},
+    {"configure"},
+    {"defineDerivedMetadata", "define_derived_metadata"},
     {"RSpec", "RSpec", true},
     {"Core", "Core", true},
     {"ExampleGroup", "ExampleGroup", true},
