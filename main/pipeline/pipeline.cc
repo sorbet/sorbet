@@ -25,6 +25,7 @@
 #include "core/Unfreeze.h"
 #include "core/errors/infer.h"
 #include "core/errors/namer.h"
+#include "core/errors/packager.h"
 #include "core/errors/parser.h"
 #include "core/errors/resolver.h"
 #include "core/lsp/PreemptionTaskManager.h"
@@ -830,6 +831,59 @@ void unpartitionPackageFiles(vector<ast::ParsedFile> &packageFiles, vector<ast::
     }
 }
 
+namespace {
+unique_ptr<UnorderedSet<core::packages::MangledName>> focusedPackages(core::GlobalState &gs,
+                                                                      const options::Options &opts) {
+    auto &db = gs.packageDB();
+    if (!db.enabled() || opts.focusPackages.empty()) {
+        return nullptr;
+    }
+
+    bool invalidPackage = false;
+    bool preludePackage = false;
+    UnorderedSet<core::packages::MangledName> result;
+
+    for (auto &pkgStr : opts.focusPackages) {
+        ENFORCE(!pkgStr.empty());
+
+        auto pkgName = core::packages::MangledName::parse(gs, pkgStr);
+        if (!pkgName.exists()) {
+            if (auto e = gs.beginError(core::Loc::none(), core::errors::Packager::PackageNotFound)) {
+                e.setHeader("Unknown package `{}` in --focus-package", pkgStr);
+            }
+            invalidPackage = true;
+            continue;
+        }
+
+        // The mangled name might point to a valid point in the package-registry namespace, but might not point to a
+        // valid package.
+        auto &info = db.getPackageInfo(pkgName);
+        if (!info.exists()) {
+            if (auto e = gs.beginError(core::Loc::none(), core::errors::Packager::PackageNotFound)) {
+                e.setHeader("Unknown package `{}` in --focus-package", pkgStr);
+            }
+            invalidPackage = true;
+            continue;
+        }
+
+        // Prelude packages are implicit dependencies of everything, so restricting to dependencies of one would be the
+        // same as typechecking the whole codebase.
+        if (info.isPreludePackage()) {
+            preludePackage = true;
+            continue;
+        }
+
+        result.insert(pkgName);
+    }
+
+    if (invalidPackage || preludePackage) {
+        return nullptr;
+    }
+
+    return make_unique<UnorderedSet<core::packages::MangledName>>(move(result));
+}
+} // namespace
+
 PackageStrata computePackageStrata(core::GlobalState &gs, vector<ast::ParsedFile> &packageFiles,
                                    absl::Span<core::FileRef> sourceFiles, const options::Options &opts) {
     Timer timeit(gs.tracer(), "computePackageStrata");
@@ -837,6 +891,7 @@ PackageStrata computePackageStrata(core::GlobalState &gs, vector<ast::ParsedFile
     PackageStrata result;
 
     result.fileToStratum = vector<core::packages::Stratum>(gs.filesUsed(), core::packages::Stratum(0));
+    result.focusedPackages = focusedPackages(gs, opts);
 
     if (!opts.packageDirected) {
         for (auto name : gs.packageDB().packages()) {
@@ -848,7 +903,16 @@ PackageStrata computePackageStrata(core::GlobalState &gs, vector<ast::ParsedFile
 
     auto &db = gs.packageDB();
 
-    auto traversal = db.condensation().computeTraversal(gs);
+    auto traversal = db.condensation().computeTraversal(gs, result.focusedPackages.get(), opts.focusExtent);
+
+    // The result focused package set represents the set that we will typecheck in focused mode. As we want to
+    // explicilty skip the upstream dependencies during infer, we don't include them here.
+    if (result.focusedPackages) {
+        if (!opts.focusAssumePackageDependenciesTypecheck) {
+            result.focusedPackages->merge(traversal.focusedUpstream);
+        }
+        result.focusedPackages->merge(traversal.focusedDownstream);
+    }
 
     // This can happen if we enabled packages and package-directed mode, but there were no packages defined.
     if (traversal.strata.empty()) {
@@ -903,7 +967,8 @@ PackageStrata computePackageStrata(core::GlobalState &gs, vector<ast::ParsedFile
             }
 
             auto stratum = db.getPackageInfo(pkgName).stratum;
-            ENFORCE(stratum != core::packages::Stratum::NONE, "All packages must be present in the condensation graph");
+            ENFORCE(result.focusedPackages != nullptr || stratum != core::packages::Stratum::NONE,
+                    "All packages must be present in the condensation graph unless checking a focused set");
             result.fileToStratum[ix] = stratum;
         }
 
@@ -959,7 +1024,7 @@ PackageStrata computePackageStrata(core::GlobalState &gs, vector<ast::ParsedFile
         }
     }
 
-    ENFORCE(sourceSpan.empty());
+    ENFORCE(result.focusedPackages != nullptr || sourceSpan.empty());
     ENFORCE(!result.strata.empty());
     ENFORCE(result.strata.size() <= maxStrata);
 
@@ -1623,6 +1688,10 @@ string printFileTableJSON(const core::GlobalState &gs, const UnorderedMap<long, 
 
     for (int i = 1; i < gs.filesUsed(); ++i) {
         core::FileRef file(i);
+        // Focused runs reserve file refs for unselected source files without reading them.
+        if (file.dataAllowingUnsafe(gs).sourceType == core::File::Type::NotYetRead) {
+            continue;
+        }
         if (file.data(gs).isPayload()) {
             if (!showFull) {
                 continue;

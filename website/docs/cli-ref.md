@@ -350,6 +350,13 @@ Usage:
                                 In package-directed mode, split strata above this file
                                 count (including `__package.rb` files) into their
                                 component SCCs
+      --focus-package <pkg>[,<pkg>...]
+                                Focus typechecking to <pkg> (repeatable)
+      --focus-assume-package-dependencies-typecheck
+                                Skip inference for dependencies of the focused set
+      --focus-extent {[full],none}
+                                The extent of packages that depend on the focused set
+                                that will be typechecked (default: full)
 
 ```
 

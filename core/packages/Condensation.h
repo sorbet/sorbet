@@ -16,6 +16,14 @@ class GlobalState;
 
 namespace sorbet::core::packages {
 
+enum class FocusExtent : uint8_t {
+    // The full extent of the focused set's dependent packages.
+    Full,
+
+    // Don't consider any downstream dependent packages of the focused set.
+    None,
+};
+
 class CondensationBuilder;
 
 class Condensation {
@@ -75,6 +83,12 @@ public:
         // True when this traversal was restored from a copy of the package DB.
         bool cached = false;
 
+        // All dependencies of the focused packages.
+        UnorderedSet<MangledName> focusedUpstream;
+
+        // All dependants of the focused packages.
+        UnorderedSet<MangledName> focusedDownstream;
+
         Traversal() = default;
 
         Traversal(const Traversal &other) = delete;
@@ -95,7 +109,15 @@ public:
     // Compute a traversal through the condensation graph, that yields groups of SCCs that have no dependencies on each
     // other. These groups are acceptable to typecheck in the same stratum, under the assumption that the package graph
     // is well-formed.
-    const Traversal computeTraversal(const GlobalState &gs) const;
+    //
+    // If the `focusedPackages` set is non-null, those packages will be used to prune the traversal to only include
+    // packages that either are dependencies of or are depended on by the focused set.  NOTE: the `focusedPackages` set
+    // may be modified if it is passed, as it will be augmented to include all the members of the SCCs that the original
+    // packages belong to.
+    //
+    // Passing `FocusExtent::None` will exclude the dependant packages of the focused set.
+    const Traversal computeTraversal(const GlobalState &gs, UnorderedSet<MangledName> *focusedPackages,
+                                     FocusExtent extent) const;
 
     absl::Span<const Node> nodes() const {
         return this->nodes_;

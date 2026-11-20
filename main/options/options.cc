@@ -676,6 +676,14 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
         "In package-directed mode, split strata above this file count (including `__package.rb` files) into their "
         "component SCCs",
         cxxopts::value<uint32_t>());
+    options.add_options(section)("focus-package", "Focus typechecking to <pkg> (repeatable)",
+                                 cxxopts::value<vector<string>>(), "<pkg>[,<pkg>...]");
+    options.add_options(section)("focus-assume-package-dependencies-typecheck",
+                                 "Skip inference for dependencies of the focused set",
+                                 cxxopts::value<bool>()->default_value("false"));
+    options.add_options(section)("focus-extent",
+                                 "The extent of packages that depend on the focused set that will be typechecked",
+                                 cxxopts::value<string>()->default_value("full"), "{[full],none}");
     // }}}
 
     // ----- STRIPE AUTOGEN ----------------------------------------------- {{{
@@ -1323,6 +1331,46 @@ void readOptions(Options &opts,
             }
         }
 
+        if (raw.count("focus-package") > 0) {
+            if (!opts.cacheSensitiveOptions.sorbetPackages) {
+                logger->error("--focus-package can only be specified in --sorbet-packages mode");
+                throw EarlyReturnWithCode(1);
+            }
+
+            for (const auto &pkg : raw["focus-package"].as<vector<string>>()) {
+                if (pkg.empty()) {
+                    logger->error("Empty package name given to --focus-package");
+                    throw EarlyReturnWithCode(1);
+                }
+                opts.focusPackages.emplace_back(pkg);
+            }
+        }
+
+        opts.focusAssumePackageDependenciesTypecheck = raw["focus-assume-package-dependencies-typecheck"].as<bool>();
+        if (opts.focusAssumePackageDependenciesTypecheck && opts.focusPackages.empty()) {
+            logger->error(
+                "--focus-assume-package-dependencies-typecheck requires one or more packages to be passed with "
+                "--focus-package");
+            throw EarlyReturnWithCode(1);
+        }
+
+        if (raw.count("focus-extent") > 0) {
+            auto extentStr = raw["focus-extent"].as<string>();
+            if (extentStr == "full") {
+                opts.focusExtent = core::packages::FocusExtent::Full;
+            } else if (extentStr == "none") {
+                opts.focusExtent = core::packages::FocusExtent::None;
+            } else {
+                logger->error("--focus-extent must be 'full' or 'none', got '{}'", extentStr);
+                throw EarlyReturnWithCode(1);
+            }
+
+            if (opts.focusPackages.empty()) {
+                logger->error("--focus-extent requires one or more packages to be passed with --focus-package");
+                throw EarlyReturnWithCode(1);
+            }
+        }
+
         if constexpr (debug_mode) {
             // TODO(jez) We're no-op'ing the `--gen-packages` flag outside of `dbg` builds of Sorbet
             // because it's not stable enough yet, and we think that it's causing adverse memory usage
@@ -1511,6 +1559,28 @@ void readOptions(Options &opts,
             }
             if (raw["typed"].as<string>() != "strict") {
                 logger->error("--suggest-typed must also include `{}`", "--typed=strict");
+                throw EarlyReturnWithCode(1);
+            }
+        }
+
+        if (!opts.focusPackages.empty()) {
+            if (opts.runLSP) {
+                logger->error("--focus-package can not be used when --lsp is enabled");
+                throw EarlyReturnWithCode(1);
+            }
+
+            if (opts.suggestTyped) {
+                logger->error("--focus-package can not be used when --suggest-typed is enabled");
+                throw EarlyReturnWithCode(1);
+            }
+
+            if (opts.genPackagesMode != core::packages::GenPackagesMode::Disabled) {
+                logger->error("--focus-package can not be used when --gen-packages is enabled");
+                throw EarlyReturnWithCode(1);
+            }
+
+            if (!opts.packageDirected) {
+                logger->error("--focus-package requires --experimental-package-directed");
                 throw EarlyReturnWithCode(1);
             }
         }

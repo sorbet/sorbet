@@ -161,6 +161,10 @@ struct Options {
     std::vector<std::string> allowRelaxedPackagerChecksFor;
     std::vector<std::string> updateVisibilityFor;
     std::vector<std::string> packagerLayers;
+    // Focus on these packages when typechecking
+    std::vector<std::string> focusPackages;
+    core::packages::FocusExtent focusExtent = core::packages::FocusExtent::Full;
+    bool focusAssumePackageDependenciesTypecheck = false;
     std::string typedSource = "";
     std::string cacheDir = "";
     // This configured both maximum filesystem db size and max virtual memory usage
