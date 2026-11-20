@@ -2,6 +2,10 @@
 # typed: true
 
 class T::InexactStruct
+  # Avoids adding a call cache entry to every struct class; see T::Private::ClassUtils.
+  INSTANCE_METHOD = Module.instance_method(:instance_method)
+  private_constant :INSTANCE_METHOD
+
   include T::Props
   include T::Props::Serializable
   include T::Props::Constructor
@@ -10,7 +14,7 @@ end
 class T::Struct < T::InexactStruct
   def self.inherited(subclass)
     super(subclass)
-    original_method = subclass.singleton_class.instance_method(:inherited)
+    original_method = INSTANCE_METHOD.bind_call(subclass.singleton_class, :inherited)
     T::Private::ClassUtils.replace_method(original_method, subclass.singleton_class, :inherited) do |s|
       super(s)
       raise "#{self.name} is a subclass of T::Struct and cannot be subclassed"
@@ -24,7 +28,7 @@ class T::ImmutableStruct < T::InexactStruct
   def self.inherited(subclass)
     super(subclass)
 
-    original_method = subclass.singleton_class.instance_method(:inherited)
+    original_method = INSTANCE_METHOD.bind_call(subclass.singleton_class, :inherited)
     T::Private::ClassUtils.replace_method(original_method, subclass.singleton_class, :inherited) do |s|
       super(s)
       raise "#{self.name} is a subclass of T::ImmutableStruct and cannot be subclassed"

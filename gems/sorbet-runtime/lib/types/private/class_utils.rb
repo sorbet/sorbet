@@ -9,13 +9,34 @@
 # need to reintroduce this functionality, consult the git history for how to do
 # it safely.
 module T::Private::ClassUtils
+  # Calling a method on `mod` caches the lookup in `mod`'s own call cache table, which
+  # lives as long as `mod` does. sorbet-runtime reflects on every module that defines a
+  # method with a sig, so calling these through `bind_call` avoids leaving a cache entry
+  # behind in each of them.
+  PUBLIC_METHOD_DEFINED = Module.instance_method(:public_method_defined?)
+  PROTECTED_METHOD_DEFINED = Module.instance_method(:protected_method_defined?)
+  PRIVATE_METHOD_DEFINED = Module.instance_method(:private_method_defined?)
+  MODULE_EXEC = Module.instance_method(:module_exec)
+  DEFINE_METHOD = Module.instance_method(:define_method)
+  INSTANCE_METHOD = Module.instance_method(:instance_method)
+  RUBY2_KEYWORDS = Module.instance_method(:ruby2_keywords)
+  VISIBILITY_METHODS = {
+    public: Module.instance_method(:public),
+    protected: Module.instance_method(:protected),
+    private: Module.instance_method(:private),
+  }.freeze
+  EQUAL = BasicObject.instance_method(:equal?)
+  private_constant :PUBLIC_METHOD_DEFINED, :PROTECTED_METHOD_DEFINED, :PRIVATE_METHOD_DEFINED,
+                   :MODULE_EXEC, :DEFINE_METHOD, :INSTANCE_METHOD, :RUBY2_KEYWORDS,
+                   :VISIBILITY_METHODS, :EQUAL
+
   # `name` must be an instance method (for class methods, pass in mod.singleton_class)
   def self.visibility_method_name(mod, name)
-    if mod.public_method_defined?(name)
+    if PUBLIC_METHOD_DEFINED.bind_call(mod, name)
       :public
-    elsif mod.protected_method_defined?(name)
+    elsif PROTECTED_METHOD_DEFINED.bind_call(mod, name)
       :protected
-    elsif mod.private_method_defined?(name)
+    elsif PRIVATE_METHOD_DEFINED.bind_call(mod, name)
       :private
     else
       # Raises a NameError formatted like the Ruby VM would (the exact text formatting
@@ -29,26 +50,26 @@ module T::Private::ClassUtils
   end
 
   def self.def_with_visibility(mod, name, visibility, method=nil, &block)
-    mod.module_exec do
+    MODULE_EXEC.bind_call(mod) do
       # Start a visibility (public/protected/private) region, so that
       # all of the method redefinitions happen with the right visibility
       # from the beginning. This ensures that any other code that is
       # triggered by `method_added`, sees the redefined method with the
       # right visibility.
-      send(visibility)
+      VISIBILITY_METHODS.fetch(visibility).bind_call(mod)
 
       if method
-        define_method(name, method)
+        DEFINE_METHOD.bind_call(mod, name, method)
       else
-        define_method(name, &block)
+        DEFINE_METHOD.bind_call(mod, name, &block)
       end
 
-      if block && block.arity < 0 && respond_to?(:ruby2_keywords, true)
+      if block && block.arity < 0
         # Fetch .parameters once: each call builds a fresh array.
-        parameters = instance_method(name).parameters
+        parameters = INSTANCE_METHOD.bind_call(mod, name).parameters
         has_rest = parameters.any? { |kind, _| kind == :rest }
         has_keywords = parameters.any? { |kind, _| kind == :keyrest || kind == :keyreq || kind == :key }
-        ruby2_keywords(name) if has_rest && !has_keywords
+        RUBY2_KEYWORDS.bind_call(mod, name) if has_rest && !has_keywords
       end
     end
   end
@@ -71,7 +92,7 @@ module T::Private::ClassUtils
     # In the common case the method is owned by `mod` itself, in which case the loop below
     # would always `break` before the raise could match (`mod` precedes any non-prepended
     # ancestor in its own ancestor chain), so skip computing `mod.ancestors` entirely.
-    if original_owner != mod
+    if !EQUAL.bind_call(original_owner, mod)
       mod.ancestors.each do |ancestor|
         break if ancestor == mod
         if ancestor == original_owner
