@@ -154,9 +154,12 @@ test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:42: Expected `Integer` but
      4 |sig {params(x: Integer).void}
                     ^
   Got `T.nilable(Integer)` originating from:
-    test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:43:
+    test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:42:
+    42 |    case x
     43 |    in 1
-            ^^
+    44 |    in 2 then 2
+    45 |    else 3
+    46 |    end
     test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:44:
     44 |    in 2 then 2
                       ^
