@@ -45,13 +45,12 @@ method ::TestMetaType#testit {
 
 bb0[firstDead=-1]():
     <self>: TestMetaType = cast(<self>: NilClass, TestMetaType);
-    <cfgAlias>$8: T.class_of(T) = alias <C T>
-    <cfgAlias>$9: T.class_of(T::Array) = alias <C Array>
-    <cfgAlias>$11: T.class_of(String) = alias <C String>
-    <statTemp>$5: Runtime object representing type: T::Array[String] = <cfgAlias>$9: T.class_of(T::Array).[](<cfgAlias>$11: T.class_of(String))
+    <cfgAlias>$7: T.class_of(T::Array) = alias <C Array>
+    <cfgAlias>$9: T.class_of(String) = alias <C String>
+    <statTemp>$5: Runtime object representing type: T::Array[String] = <cfgAlias>$7: T.class_of(T::Array).[](<cfgAlias>$9: T.class_of(String))
     <statTemp>$3: NilClass = <self>: TestMetaType.puts(<statTemp>$5: Runtime object representing type: T::Array[String])
-    <ifTemp>$15: T.untyped = <self>: TestMetaType._()
-    <ifTemp>$15 -> (T.untyped ? bb2 : bb3)
+    <ifTemp>$13: T.untyped = <self>: TestMetaType._()
+    <ifTemp>$13 -> (T.untyped ? bb2 : bb3)
 
 # backedges
 # - bb7
@@ -61,49 +60,46 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 bb2[firstDead=-1](<self>: TestMetaType):
-    <cfgAlias>$19: T.class_of(T) = alias <C T>
-    <cfgAlias>$20: T.class_of(T::Array) = alias <C Array>
-    <cfgAlias>$22: T.class_of(String) = alias <C String>
-    <statTemp>$14: Runtime object representing type: T::Array[String] = <cfgAlias>$20: T.class_of(T::Array).[](<cfgAlias>$22: T.class_of(String))
+    <cfgAlias>$16: T.class_of(T::Array) = alias <C Array>
+    <cfgAlias>$18: T.class_of(String) = alias <C String>
+    <statTemp>$12: Runtime object representing type: T::Array[String] = <cfgAlias>$16: T.class_of(T::Array).[](<cfgAlias>$18: T.class_of(String))
     <unconditional> -> bb4
 
 # backedges
 # - bb0
 bb3[firstDead=-1](<self>: TestMetaType):
-    <statTemp>$14: FalseClass = false
+    <statTemp>$12: FalseClass = false
     <unconditional> -> bb4
 
 # backedges
 # - bb2
 # - bb3
-bb4[firstDead=-1](<self>: TestMetaType, <statTemp>$14: Object):
-    <statTemp>$12: NilClass = <self>: TestMetaType.puts(<statTemp>$14: Object)
-    <ifTemp>$25: T.untyped = <self>: TestMetaType._()
-    <ifTemp>$25 -> (T.untyped ? bb5 : bb6)
+bb4[firstDead=-1](<self>: TestMetaType, <statTemp>$12: Object):
+    <statTemp>$10: NilClass = <self>: TestMetaType.puts(<statTemp>$12: Object)
+    <ifTemp>$21: T.untyped = <self>: TestMetaType._()
+    <ifTemp>$21 -> (T.untyped ? bb5 : bb6)
 
 # backedges
 # - bb4
 bb5[firstDead=-1](<self>: TestMetaType):
-    <cfgAlias>$29: T.class_of(T) = alias <C T>
-    <cfgAlias>$30: T.class_of(T::Array) = alias <C Array>
-    <cfgAlias>$32: T.class_of(String) = alias <C String>
-    <statTemp>$24: Runtime object representing type: T::Array[String] = <cfgAlias>$30: T.class_of(T::Array).[](<cfgAlias>$32: T.class_of(String))
+    <cfgAlias>$24: T.class_of(T::Array) = alias <C Array>
+    <cfgAlias>$26: T.class_of(String) = alias <C String>
+    <statTemp>$20: Runtime object representing type: T::Array[String] = <cfgAlias>$24: T.class_of(T::Array).[](<cfgAlias>$26: T.class_of(String))
     <unconditional> -> bb7
 
 # backedges
 # - bb4
 bb6[firstDead=-1](<self>: TestMetaType):
-    <cfgAlias>$35: T.class_of(T) = alias <C T>
-    <cfgAlias>$36: T.class_of(T::Array) = alias <C Array>
-    <cfgAlias>$38: T.class_of(Float) = alias <C Float>
-    <statTemp>$24: Runtime object representing type: T::Array[Float] = <cfgAlias>$36: T.class_of(T::Array).[](<cfgAlias>$38: T.class_of(Float))
+    <cfgAlias>$28: T.class_of(T::Array) = alias <C Array>
+    <cfgAlias>$30: T.class_of(Float) = alias <C Float>
+    <statTemp>$20: Runtime object representing type: T::Array[Float] = <cfgAlias>$28: T.class_of(T::Array).[](<cfgAlias>$30: T.class_of(Float))
     <unconditional> -> bb7
 
 # backedges
 # - bb5
 # - bb6
-bb7[firstDead=2](<self>: TestMetaType, <statTemp>$24: Object):
-    <returnMethodTemp>$2: NilClass = <self>: TestMetaType.puts(<statTemp>$24: Object)
+bb7[firstDead=2](<self>: TestMetaType, <statTemp>$20: Object):
+    <returnMethodTemp>$2: NilClass = <self>: TestMetaType.puts(<statTemp>$20: Object)
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 

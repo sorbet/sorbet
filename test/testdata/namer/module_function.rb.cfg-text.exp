@@ -150,18 +150,17 @@ bb18[firstDead=-1](<self>: T.class_of(Funcs), <block-pre-call-temp>$57: Sorbet::
 
 # backedges
 # - bb18
-bb19[firstDead=13](<block-pre-call-temp>$57: Sorbet::Private::Static::Void, <selfRestore>$58: T.class_of(Funcs)):
+bb19[firstDead=12](<block-pre-call-temp>$57: Sorbet::Private::Static::Void, <selfRestore>$58: T.class_of(Funcs)):
     <statTemp>$55: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$57, sig>
     <self>: T.class_of(Funcs) = <selfRestore>$58
-    <cfgAlias>$72: T.class_of(T) = alias <C T>
-    <cfgAlias>$73: T.class_of(T::Sig) = alias <C Sig>
-    <statTemp>$68: T.class_of(Funcs) = <self>: T.class_of(Funcs).extend(<cfgAlias>$73: T.class_of(T::Sig))
-    <statTemp>$77: Symbol(:f) = :f
-    <statTemp>$75: Symbol = <self>: T.class_of(Funcs).private(<statTemp>$77: Symbol(:f))
-    <statTemp>$81: Symbol(:g) = :g
-    <statTemp>$79: Symbol = <self>: T.class_of(Funcs).private(<statTemp>$81: Symbol(:g))
-    <statTemp>$85: Symbol(:h) = :h
-    <statTemp>$83: Symbol = <self>: T.class_of(Funcs).private(<statTemp>$85: Symbol(:h))
+    <cfgAlias>$71: T.class_of(T::Sig) = alias <C Sig>
+    <statTemp>$68: T.class_of(Funcs) = <self>: T.class_of(Funcs).extend(<cfgAlias>$71: T.class_of(T::Sig))
+    <statTemp>$75: Symbol(:f) = :f
+    <statTemp>$73: Symbol = <self>: T.class_of(Funcs).private(<statTemp>$75: Symbol(:f))
+    <statTemp>$79: Symbol(:g) = :g
+    <statTemp>$77: Symbol = <self>: T.class_of(Funcs).private(<statTemp>$79: Symbol(:g))
+    <statTemp>$83: Symbol(:h) = :h
+    <statTemp>$81: Symbol = <self>: T.class_of(Funcs).private(<statTemp>$83: Symbol(:h))
     <returnMethodTemp>$2: Symbol(:h) = :h
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:h)
     <unconditional> -> bb1

@@ -1,12 +1,12 @@
 method ::<Class:<root>>#<static-init> {
 
 bb0[firstDead=-1]():
-    @ivar$28: [Symbol, Integer] = alias @ivar
-    @@cvar$40: [Symbol, Integer] = alias @@cvar
-    $gvar$52: T.untyped = alias <C <undeclared-field-stub>> ($gvar)
-    <C ConstantTarget>$65: [Symbol, Integer] = alias <C ConstantTarget>
-    <C ConstantPathTarget>$77: [Symbol, Integer] = alias <C ConstantPathTarget>
-    <C ConstantPathTarget>$285: [Symbol, Integer] = alias <C ConstantPathTarget>
+    @ivar$26: [Symbol, Integer] = alias @ivar
+    @@cvar$38: [Symbol, Integer] = alias @@cvar
+    $gvar$50: T.untyped = alias <C <undeclared-field-stub>> ($gvar)
+    <C ConstantTarget>$63: [Symbol, Integer] = alias <C ConstantTarget>
+    <C ConstantPathTarget>$75: [Symbol, Integer] = alias <C ConstantPathTarget>
+    <C ConstantPathTarget>$281: [Symbol, Integer] = alias <C ConstantPathTarget>
     <self>: T.class_of(<root>) = cast(<self>: NilClass, T.class_of(<root>));
     <block-pre-call-temp>$5: Sorbet::Private::Static::Void = <self>: T.class_of(<root>).sig()
     <selfRestore>$6: T.class_of(<root>) = <self>
@@ -20,102 +20,100 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb5
-bb2[firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(<root>), @ivar$28: [Symbol, Integer], @@cvar$40: [Symbol, Integer], $gvar$52: T.untyped, <C ConstantTarget>$65: [Symbol, Integer], <C ConstantPathTarget>$77: [Symbol, Integer], <C ConstantPathTarget>$285: [Symbol, Integer]):
+bb2[firstDead=-1](<self>: T.class_of(<root>), <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(<root>), @ivar$26: [Symbol, Integer], @@cvar$38: [Symbol, Integer], $gvar$50: T.untyped, <C ConstantTarget>$63: [Symbol, Integer], <C ConstantPathTarget>$75: [Symbol, Integer], <C ConstantPathTarget>$281: [Symbol, Integer]):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb5 : bb3)
 
 # backedges
 # - bb2
-bb3[firstDead=-1](<block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(<root>), @ivar$28: [Symbol, Integer], @@cvar$40: [Symbol, Integer], $gvar$52: T.untyped, <C ConstantTarget>$65: [Symbol, Integer], <C ConstantPathTarget>$77: [Symbol, Integer], <C ConstantPathTarget>$285: [Symbol, Integer]):
+bb3[firstDead=-1](<block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(<root>), @ivar$26: [Symbol, Integer], @@cvar$38: [Symbol, Integer], $gvar$50: T.untyped, <C ConstantTarget>$63: [Symbol, Integer], <C ConstantPathTarget>$75: [Symbol, Integer], <C ConstantPathTarget>$281: [Symbol, Integer]):
     <statTemp>$3: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$5, sig>
     <self>: T.class_of(<root>) = <selfRestore>$6
-    <cfgAlias>$22: T.class_of(T) = alias <C T>
-    <cfgAlias>$23: T.class_of(T::Sig) = alias <C Sig>
-    <statTemp>$18: T.class_of(<root>) = <self>: T.class_of(<root>).extend(<cfgAlias>$23: T.class_of(T::Sig))
-    <cfgAlias>$26: T.class_of(Main) = alias <C Main>
-    <statTemp>$24: T.untyped = <cfgAlias>$26: T.class_of(Main).main()
-    <cfgAlias>$32: T.class_of(Symbol) = alias <C Symbol>
-    <cfgAlias>$34: T.class_of(Integer) = alias <C Integer>
-    <magic>$30: T.class_of(<Magic>) = alias <C <Magic>>
-    keep_for_ide$29: [T.class_of(Symbol), T.class_of(Integer)] = <magic>$30: T.class_of(<Magic>).<build-array>(<cfgAlias>$32: T.class_of(Symbol), <cfgAlias>$34: T.class_of(Integer))
-    keep_for_ide$29: T.untyped = <keep-alive> keep_for_ide$29
-    <arrayTemp>$37: Symbol(:x) = :x
-    <arrayTemp>$38: Integer(0) = 0
-    <magic>$36: T.class_of(<Magic>) = alias <C <Magic>>
-    <castTemp>$35: [Symbol(:x), Integer(0)] = <magic>$36: T.class_of(<Magic>).<build-array>(<arrayTemp>$37: Symbol(:x), <arrayTemp>$38: Integer(0))
-    @ivar$28: [Symbol, Integer] = cast(<castTemp>$35: [Symbol(:x), Integer(0)], [Symbol, Integer]);
-    <cfgAlias>$44: T.class_of(Symbol) = alias <C Symbol>
-    <cfgAlias>$46: T.class_of(Integer) = alias <C Integer>
-    <magic>$42: T.class_of(<Magic>) = alias <C <Magic>>
-    keep_for_ide$41: [T.class_of(Symbol), T.class_of(Integer)] = <magic>$42: T.class_of(<Magic>).<build-array>(<cfgAlias>$44: T.class_of(Symbol), <cfgAlias>$46: T.class_of(Integer))
-    keep_for_ide$41: T.untyped = <keep-alive> keep_for_ide$41
-    <arrayTemp>$49: Symbol(:x) = :x
-    <arrayTemp>$50: Integer(0) = 0
-    <magic>$48: T.class_of(<Magic>) = alias <C <Magic>>
-    <castTemp>$47: [Symbol(:x), Integer(0)] = <magic>$48: T.class_of(<Magic>).<build-array>(<arrayTemp>$49: Symbol(:x), <arrayTemp>$50: Integer(0))
-    @@cvar$40: [Symbol, Integer] = cast(<castTemp>$47: [Symbol(:x), Integer(0)], [Symbol, Integer]);
-    <cfgAlias>$56: T.class_of(Symbol) = alias <C Symbol>
-    <cfgAlias>$58: T.class_of(Integer) = alias <C Integer>
-    <magic>$54: T.class_of(<Magic>) = alias <C <Magic>>
-    keep_for_ide$53: [T.class_of(Symbol), T.class_of(Integer)] = <magic>$54: T.class_of(<Magic>).<build-array>(<cfgAlias>$56: T.class_of(Symbol), <cfgAlias>$58: T.class_of(Integer))
-    keep_for_ide$53: T.untyped = <keep-alive> keep_for_ide$53
-    <arrayTemp>$61: Symbol(:x) = :x
-    <arrayTemp>$62: Integer(0) = 0
-    <magic>$60: T.class_of(<Magic>) = alias <C <Magic>>
-    <castTemp>$59: [Symbol(:x), Integer(0)] = <magic>$60: T.class_of(<Magic>).<build-array>(<arrayTemp>$61: Symbol(:x), <arrayTemp>$62: Integer(0))
-    $gvar$52: [Symbol, Integer] = cast(<castTemp>$59: [Symbol(:x), Integer(0)], [Symbol, Integer]);
-    <cfgAlias>$69: T.class_of(Symbol) = alias <C Symbol>
-    <cfgAlias>$71: T.class_of(Integer) = alias <C Integer>
-    <magic>$67: T.class_of(<Magic>) = alias <C <Magic>>
-    keep_for_ide$66: [T.class_of(Symbol), T.class_of(Integer)] = <magic>$67: T.class_of(<Magic>).<build-array>(<cfgAlias>$69: T.class_of(Symbol), <cfgAlias>$71: T.class_of(Integer))
-    keep_for_ide$66: T.untyped = <keep-alive> keep_for_ide$66
-    <arrayTemp>$74: Symbol(:x) = :x
-    <arrayTemp>$75: Integer(0) = 0
-    <magic>$73: T.class_of(<Magic>) = alias <C <Magic>>
-    <castTemp>$72: [Symbol(:x), Integer(0)] = <magic>$73: T.class_of(<Magic>).<build-array>(<arrayTemp>$74: Symbol(:x), <arrayTemp>$75: Integer(0))
-    <C ConstantTarget>$65: [Symbol, Integer] = cast(<castTemp>$72: [Symbol(:x), Integer(0)], [Symbol, Integer]);
-    <cfgAlias>$81: T.class_of(Symbol) = alias <C Symbol>
-    <cfgAlias>$83: T.class_of(Integer) = alias <C Integer>
-    <magic>$79: T.class_of(<Magic>) = alias <C <Magic>>
-    keep_for_ide$78: [T.class_of(Symbol), T.class_of(Integer)] = <magic>$79: T.class_of(<Magic>).<build-array>(<cfgAlias>$81: T.class_of(Symbol), <cfgAlias>$83: T.class_of(Integer))
-    keep_for_ide$78: T.untyped = <keep-alive> keep_for_ide$78
-    <arrayTemp>$86: Symbol(:x) = :x
-    <arrayTemp>$87: Integer(0) = 0
-    <magic>$85: T.class_of(<Magic>) = alias <C <Magic>>
-    <castTemp>$84: [Symbol(:x), Integer(0)] = <magic>$85: T.class_of(<Magic>).<build-array>(<arrayTemp>$86: Symbol(:x), <arrayTemp>$87: Integer(0))
-    <C ConstantPathTarget>$77: [Symbol, Integer] = cast(<castTemp>$84: [Symbol(:x), Integer(0)], [Symbol, Integer]);
-    <cfgAlias>$92: T.class_of(T) = alias <C T>
-    <cfgAlias>$93: T.class_of(T::Array) = alias <C Array>
-    <cfgAlias>$97: T.class_of(Symbol) = alias <C Symbol>
-    <cfgAlias>$99: T.class_of(Integer) = alias <C Integer>
-    <magic>$95: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$94: [T.class_of(Symbol), T.class_of(Integer)] = <magic>$95: T.class_of(<Magic>).<build-array>(<cfgAlias>$97: T.class_of(Symbol), <cfgAlias>$99: T.class_of(Integer))
-    keep_for_ide$89: Runtime object representing type: T::Array[[Symbol, Integer]] = <cfgAlias>$93: T.class_of(T::Array).[](<statTemp>$94: [T.class_of(Symbol), T.class_of(Integer)])
-    keep_for_ide$89: T.untyped = <keep-alive> keep_for_ide$89
-    <magic>$101: T.class_of(<Magic>) = alias <C <Magic>>
-    <castTemp>$100: [] = <magic>$101: T.class_of(<Magic>).<build-array>()
-    a: T::Array[[Symbol, Integer]] = cast(<castTemp>$100: [], T::Array[[Symbol, Integer]]);
-    <arrayTemp>$107: Symbol(:a) = :a
-    <arrayTemp>$108: Integer(1) = 1
+    <cfgAlias>$21: T.class_of(T::Sig) = alias <C Sig>
+    <statTemp>$18: T.class_of(<root>) = <self>: T.class_of(<root>).extend(<cfgAlias>$21: T.class_of(T::Sig))
+    <cfgAlias>$24: T.class_of(Main) = alias <C Main>
+    <statTemp>$22: T.untyped = <cfgAlias>$24: T.class_of(Main).main()
+    <cfgAlias>$30: T.class_of(Symbol) = alias <C Symbol>
+    <cfgAlias>$32: T.class_of(Integer) = alias <C Integer>
+    <magic>$28: T.class_of(<Magic>) = alias <C <Magic>>
+    keep_for_ide$27: [T.class_of(Symbol), T.class_of(Integer)] = <magic>$28: T.class_of(<Magic>).<build-array>(<cfgAlias>$30: T.class_of(Symbol), <cfgAlias>$32: T.class_of(Integer))
+    keep_for_ide$27: T.untyped = <keep-alive> keep_for_ide$27
+    <arrayTemp>$35: Symbol(:x) = :x
+    <arrayTemp>$36: Integer(0) = 0
+    <magic>$34: T.class_of(<Magic>) = alias <C <Magic>>
+    <castTemp>$33: [Symbol(:x), Integer(0)] = <magic>$34: T.class_of(<Magic>).<build-array>(<arrayTemp>$35: Symbol(:x), <arrayTemp>$36: Integer(0))
+    @ivar$26: [Symbol, Integer] = cast(<castTemp>$33: [Symbol(:x), Integer(0)], [Symbol, Integer]);
+    <cfgAlias>$42: T.class_of(Symbol) = alias <C Symbol>
+    <cfgAlias>$44: T.class_of(Integer) = alias <C Integer>
+    <magic>$40: T.class_of(<Magic>) = alias <C <Magic>>
+    keep_for_ide$39: [T.class_of(Symbol), T.class_of(Integer)] = <magic>$40: T.class_of(<Magic>).<build-array>(<cfgAlias>$42: T.class_of(Symbol), <cfgAlias>$44: T.class_of(Integer))
+    keep_for_ide$39: T.untyped = <keep-alive> keep_for_ide$39
+    <arrayTemp>$47: Symbol(:x) = :x
+    <arrayTemp>$48: Integer(0) = 0
+    <magic>$46: T.class_of(<Magic>) = alias <C <Magic>>
+    <castTemp>$45: [Symbol(:x), Integer(0)] = <magic>$46: T.class_of(<Magic>).<build-array>(<arrayTemp>$47: Symbol(:x), <arrayTemp>$48: Integer(0))
+    @@cvar$38: [Symbol, Integer] = cast(<castTemp>$45: [Symbol(:x), Integer(0)], [Symbol, Integer]);
+    <cfgAlias>$54: T.class_of(Symbol) = alias <C Symbol>
+    <cfgAlias>$56: T.class_of(Integer) = alias <C Integer>
+    <magic>$52: T.class_of(<Magic>) = alias <C <Magic>>
+    keep_for_ide$51: [T.class_of(Symbol), T.class_of(Integer)] = <magic>$52: T.class_of(<Magic>).<build-array>(<cfgAlias>$54: T.class_of(Symbol), <cfgAlias>$56: T.class_of(Integer))
+    keep_for_ide$51: T.untyped = <keep-alive> keep_for_ide$51
+    <arrayTemp>$59: Symbol(:x) = :x
+    <arrayTemp>$60: Integer(0) = 0
+    <magic>$58: T.class_of(<Magic>) = alias <C <Magic>>
+    <castTemp>$57: [Symbol(:x), Integer(0)] = <magic>$58: T.class_of(<Magic>).<build-array>(<arrayTemp>$59: Symbol(:x), <arrayTemp>$60: Integer(0))
+    $gvar$50: [Symbol, Integer] = cast(<castTemp>$57: [Symbol(:x), Integer(0)], [Symbol, Integer]);
+    <cfgAlias>$67: T.class_of(Symbol) = alias <C Symbol>
+    <cfgAlias>$69: T.class_of(Integer) = alias <C Integer>
+    <magic>$65: T.class_of(<Magic>) = alias <C <Magic>>
+    keep_for_ide$64: [T.class_of(Symbol), T.class_of(Integer)] = <magic>$65: T.class_of(<Magic>).<build-array>(<cfgAlias>$67: T.class_of(Symbol), <cfgAlias>$69: T.class_of(Integer))
+    keep_for_ide$64: T.untyped = <keep-alive> keep_for_ide$64
+    <arrayTemp>$72: Symbol(:x) = :x
+    <arrayTemp>$73: Integer(0) = 0
+    <magic>$71: T.class_of(<Magic>) = alias <C <Magic>>
+    <castTemp>$70: [Symbol(:x), Integer(0)] = <magic>$71: T.class_of(<Magic>).<build-array>(<arrayTemp>$72: Symbol(:x), <arrayTemp>$73: Integer(0))
+    <C ConstantTarget>$63: [Symbol, Integer] = cast(<castTemp>$70: [Symbol(:x), Integer(0)], [Symbol, Integer]);
+    <cfgAlias>$79: T.class_of(Symbol) = alias <C Symbol>
+    <cfgAlias>$81: T.class_of(Integer) = alias <C Integer>
+    <magic>$77: T.class_of(<Magic>) = alias <C <Magic>>
+    keep_for_ide$76: [T.class_of(Symbol), T.class_of(Integer)] = <magic>$77: T.class_of(<Magic>).<build-array>(<cfgAlias>$79: T.class_of(Symbol), <cfgAlias>$81: T.class_of(Integer))
+    keep_for_ide$76: T.untyped = <keep-alive> keep_for_ide$76
+    <arrayTemp>$84: Symbol(:x) = :x
+    <arrayTemp>$85: Integer(0) = 0
+    <magic>$83: T.class_of(<Magic>) = alias <C <Magic>>
+    <castTemp>$82: [Symbol(:x), Integer(0)] = <magic>$83: T.class_of(<Magic>).<build-array>(<arrayTemp>$84: Symbol(:x), <arrayTemp>$85: Integer(0))
+    <C ConstantPathTarget>$75: [Symbol, Integer] = cast(<castTemp>$82: [Symbol(:x), Integer(0)], [Symbol, Integer]);
+    <cfgAlias>$89: T.class_of(T::Array) = alias <C Array>
+    <cfgAlias>$93: T.class_of(Symbol) = alias <C Symbol>
+    <cfgAlias>$95: T.class_of(Integer) = alias <C Integer>
+    <magic>$91: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$90: [T.class_of(Symbol), T.class_of(Integer)] = <magic>$91: T.class_of(<Magic>).<build-array>(<cfgAlias>$93: T.class_of(Symbol), <cfgAlias>$95: T.class_of(Integer))
+    keep_for_ide$87: Runtime object representing type: T::Array[[Symbol, Integer]] = <cfgAlias>$89: T.class_of(T::Array).[](<statTemp>$90: [T.class_of(Symbol), T.class_of(Integer)])
+    keep_for_ide$87: T.untyped = <keep-alive> keep_for_ide$87
+    <magic>$97: T.class_of(<Magic>) = alias <C <Magic>>
+    <castTemp>$96: [] = <magic>$97: T.class_of(<Magic>).<build-array>()
+    a: T::Array[[Symbol, Integer]] = cast(<castTemp>$96: [], T::Array[[Symbol, Integer]]);
+    <arrayTemp>$103: Symbol(:a) = :a
+    <arrayTemp>$104: Integer(1) = 1
+    <magic>$102: T.class_of(<Magic>) = alias <C <Magic>>
+    <arrayTemp>$101: [Symbol(:a), Integer(1)] = <magic>$102: T.class_of(<Magic>).<build-array>(<arrayTemp>$103: Symbol(:a), <arrayTemp>$104: Integer(1))
+    <arrayTemp>$107: Symbol(:b) = :b
+    <arrayTemp>$108: Integer(2) = 2
     <magic>$106: T.class_of(<Magic>) = alias <C <Magic>>
-    <arrayTemp>$105: [Symbol(:a), Integer(1)] = <magic>$106: T.class_of(<Magic>).<build-array>(<arrayTemp>$107: Symbol(:a), <arrayTemp>$108: Integer(1))
-    <arrayTemp>$111: Symbol(:b) = :b
-    <arrayTemp>$112: Integer(2) = 2
+    <arrayTemp>$105: [Symbol(:b), Integer(2)] = <magic>$106: T.class_of(<Magic>).<build-array>(<arrayTemp>$107: Symbol(:b), <arrayTemp>$108: Integer(2))
+    <arrayTemp>$111: Symbol(:c) = :c
+    <arrayTemp>$112: Integer(3) = 3
     <magic>$110: T.class_of(<Magic>) = alias <C <Magic>>
-    <arrayTemp>$109: [Symbol(:b), Integer(2)] = <magic>$110: T.class_of(<Magic>).<build-array>(<arrayTemp>$111: Symbol(:b), <arrayTemp>$112: Integer(2))
-    <arrayTemp>$115: Symbol(:c) = :c
-    <arrayTemp>$116: Integer(3) = 3
-    <magic>$114: T.class_of(<Magic>) = alias <C <Magic>>
-    <arrayTemp>$113: [Symbol(:c), Integer(3)] = <magic>$114: T.class_of(<Magic>).<build-array>(<arrayTemp>$115: Symbol(:c), <arrayTemp>$116: Integer(3))
-    <magic>$104: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$103: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]] = <magic>$104: T.class_of(<Magic>).<build-array>(<arrayTemp>$105: [Symbol(:a), Integer(1)], <arrayTemp>$109: [Symbol(:b), Integer(2)], <arrayTemp>$113: [Symbol(:c), Integer(3)])
-    <block-pre-call-temp>$117: Sorbet::Private::Static::Void = <statTemp>$103: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]].each()
-    <selfRestore>$118: T.class_of(<root>) = <self>
+    <arrayTemp>$109: [Symbol(:c), Integer(3)] = <magic>$110: T.class_of(<Magic>).<build-array>(<arrayTemp>$111: Symbol(:c), <arrayTemp>$112: Integer(3))
+    <magic>$100: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$99: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]] = <magic>$100: T.class_of(<Magic>).<build-array>(<arrayTemp>$101: [Symbol(:a), Integer(1)], <arrayTemp>$105: [Symbol(:b), Integer(2)], <arrayTemp>$109: [Symbol(:c), Integer(3)])
+    <block-pre-call-temp>$113: Sorbet::Private::Static::Void = <statTemp>$99: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]].each()
+    <selfRestore>$114: T.class_of(<root>) = <self>
     <unconditional> -> bb6
 
 # backedges
 # - bb2
-bb5[firstDead=9](<self>: T.class_of(<root>), <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(<root>), @ivar$28: [Symbol, Integer], @@cvar$40: [Symbol, Integer], $gvar$52: T.untyped, <C ConstantTarget>$65: [Symbol, Integer], <C ConstantPathTarget>$77: [Symbol, Integer], <C ConstantPathTarget>$285: [Symbol, Integer]):
+bb5[firstDead=9](<self>: T.class_of(<root>), <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: T.class_of(<root>), @ivar$26: [Symbol, Integer], @@cvar$38: [Symbol, Integer], $gvar$50: T.untyped, <C ConstantTarget>$63: [Symbol, Integer], <C ConstantPathTarget>$75: [Symbol, Integer], <C ConstantPathTarget>$281: [Symbol, Integer]):
     # outerLoops: 1
     <self>: T::Private::Methods::DeclBuilder = loadSelf(sig)
     <hashTemp>$10: Symbol(:arg) = :arg
@@ -131,437 +129,437 @@ bb5[firstDead=9](<self>: T.class_of(<root>), <block-pre-call-temp>$5: Sorbet::Pr
 # backedges
 # - bb3
 # - bb9
-bb6[firstDead=-1](<self>: T.class_of(<root>), @ivar$28: [Symbol, Integer], @@cvar$40: [Symbol, Integer], $gvar$52: [Symbol, Integer], <C ConstantTarget>$65: [Symbol, Integer], <C ConstantPathTarget>$77: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$117: Sorbet::Private::Static::Void, <selfRestore>$118: T.class_of(<root>), <C ConstantPathTarget>$285: [Symbol, Integer]):
+bb6[firstDead=-1](<self>: T.class_of(<root>), @ivar$26: [Symbol, Integer], @@cvar$38: [Symbol, Integer], $gvar$50: [Symbol, Integer], <C ConstantTarget>$63: [Symbol, Integer], <C ConstantPathTarget>$75: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$113: Sorbet::Private::Static::Void, <selfRestore>$114: T.class_of(<root>), <C ConstantPathTarget>$281: [Symbol, Integer]):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb9 : bb7)
 
 # backedges
 # - bb6
-bb7[firstDead=-1](@@cvar$40: [Symbol, Integer], $gvar$52: [Symbol, Integer], <C ConstantTarget>$65: [Symbol, Integer], <C ConstantPathTarget>$77: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$117: Sorbet::Private::Static::Void, <selfRestore>$118: T.class_of(<root>), <C ConstantPathTarget>$285: [Symbol, Integer]):
-    <statTemp>$102: T::Array[[Symbol, Integer]] = Solve<<block-pre-call-temp>$117, each>
-    <self>: T.class_of(<root>) = <selfRestore>$118
-    <arrayTemp>$128: Symbol(:a) = :a
-    <arrayTemp>$129: Integer(1) = 1
+bb7[firstDead=-1](@@cvar$38: [Symbol, Integer], $gvar$50: [Symbol, Integer], <C ConstantTarget>$63: [Symbol, Integer], <C ConstantPathTarget>$75: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$113: Sorbet::Private::Static::Void, <selfRestore>$114: T.class_of(<root>), <C ConstantPathTarget>$281: [Symbol, Integer]):
+    <statTemp>$98: T::Array[[Symbol, Integer]] = Solve<<block-pre-call-temp>$113, each>
+    <self>: T.class_of(<root>) = <selfRestore>$114
+    <arrayTemp>$124: Symbol(:a) = :a
+    <arrayTemp>$125: Integer(1) = 1
+    <magic>$123: T.class_of(<Magic>) = alias <C <Magic>>
+    <arrayTemp>$122: [Symbol(:a), Integer(1)] = <magic>$123: T.class_of(<Magic>).<build-array>(<arrayTemp>$124: Symbol(:a), <arrayTemp>$125: Integer(1))
+    <arrayTemp>$128: Symbol(:b) = :b
+    <arrayTemp>$129: Integer(2) = 2
     <magic>$127: T.class_of(<Magic>) = alias <C <Magic>>
-    <arrayTemp>$126: [Symbol(:a), Integer(1)] = <magic>$127: T.class_of(<Magic>).<build-array>(<arrayTemp>$128: Symbol(:a), <arrayTemp>$129: Integer(1))
-    <arrayTemp>$132: Symbol(:b) = :b
-    <arrayTemp>$133: Integer(2) = 2
+    <arrayTemp>$126: [Symbol(:b), Integer(2)] = <magic>$127: T.class_of(<Magic>).<build-array>(<arrayTemp>$128: Symbol(:b), <arrayTemp>$129: Integer(2))
+    <arrayTemp>$132: Symbol(:c) = :c
+    <arrayTemp>$133: Integer(3) = 3
     <magic>$131: T.class_of(<Magic>) = alias <C <Magic>>
-    <arrayTemp>$130: [Symbol(:b), Integer(2)] = <magic>$131: T.class_of(<Magic>).<build-array>(<arrayTemp>$132: Symbol(:b), <arrayTemp>$133: Integer(2))
-    <arrayTemp>$136: Symbol(:c) = :c
-    <arrayTemp>$137: Integer(3) = 3
-    <magic>$135: T.class_of(<Magic>) = alias <C <Magic>>
-    <arrayTemp>$134: [Symbol(:c), Integer(3)] = <magic>$135: T.class_of(<Magic>).<build-array>(<arrayTemp>$136: Symbol(:c), <arrayTemp>$137: Integer(3))
-    <magic>$125: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$124: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]] = <magic>$125: T.class_of(<Magic>).<build-array>(<arrayTemp>$126: [Symbol(:a), Integer(1)], <arrayTemp>$130: [Symbol(:b), Integer(2)], <arrayTemp>$134: [Symbol(:c), Integer(3)])
-    <block-pre-call-temp>$138: Sorbet::Private::Static::Void = <statTemp>$124: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]].each()
-    <selfRestore>$139: T.class_of(<root>) = <self>
+    <arrayTemp>$130: [Symbol(:c), Integer(3)] = <magic>$131: T.class_of(<Magic>).<build-array>(<arrayTemp>$132: Symbol(:c), <arrayTemp>$133: Integer(3))
+    <magic>$121: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$120: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]] = <magic>$121: T.class_of(<Magic>).<build-array>(<arrayTemp>$122: [Symbol(:a), Integer(1)], <arrayTemp>$126: [Symbol(:b), Integer(2)], <arrayTemp>$130: [Symbol(:c), Integer(3)])
+    <block-pre-call-temp>$134: Sorbet::Private::Static::Void = <statTemp>$120: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]].each()
+    <selfRestore>$135: T.class_of(<root>) = <self>
     <unconditional> -> bb10
 
 # backedges
 # - bb6
-bb9[firstDead=6](<self>: T.class_of(<root>), @ivar$28: [Symbol, Integer], @@cvar$40: [Symbol, Integer], $gvar$52: [Symbol, Integer], <C ConstantTarget>$65: [Symbol, Integer], <C ConstantPathTarget>$77: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$117: Sorbet::Private::Static::Void, <selfRestore>$118: T.class_of(<root>), <C ConstantPathTarget>$285: [Symbol, Integer]):
+bb9[firstDead=6](<self>: T.class_of(<root>), @ivar$26: [Symbol, Integer], @@cvar$38: [Symbol, Integer], $gvar$50: [Symbol, Integer], <C ConstantTarget>$63: [Symbol, Integer], <C ConstantPathTarget>$75: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$113: Sorbet::Private::Static::Void, <selfRestore>$114: T.class_of(<root>), <C ConstantPathTarget>$281: [Symbol, Integer]):
     # outerLoops: 1
     <self>: T.class_of(<root>) = loadSelf(each)
-    <blk>$119: [[Symbol, Integer]] = load_yield_params(each)
-    forTemp$2$2: [Symbol, Integer] = yield_load_arg(0, <blk>$119: [[Symbol, Integer]])
-    @ivar$28: [Symbol, Integer] = forTemp$2$2
-    <blockReturnTemp>$120: String("loop body") = "loop body"
-    <blockReturnTemp>$122: T.noreturn = blockreturn<each> <blockReturnTemp>$120: String("loop body")
+    <blk>$115: [[Symbol, Integer]] = load_yield_params(each)
+    forTemp$2$2: [Symbol, Integer] = yield_load_arg(0, <blk>$115: [[Symbol, Integer]])
+    @ivar$26: [Symbol, Integer] = forTemp$2$2
+    <blockReturnTemp>$116: String("loop body") = "loop body"
+    <blockReturnTemp>$118: T.noreturn = blockreturn<each> <blockReturnTemp>$116: String("loop body")
     <unconditional> -> bb6
 
 # backedges
 # - bb7
 # - bb13
-bb10[firstDead=-1](<self>: T.class_of(<root>), @@cvar$40: [Symbol, Integer], $gvar$52: [Symbol, Integer], <C ConstantTarget>$65: [Symbol, Integer], <C ConstantPathTarget>$77: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$138: Sorbet::Private::Static::Void, <selfRestore>$139: T.class_of(<root>), <C ConstantPathTarget>$285: [Symbol, Integer]):
+bb10[firstDead=-1](<self>: T.class_of(<root>), @@cvar$38: [Symbol, Integer], $gvar$50: [Symbol, Integer], <C ConstantTarget>$63: [Symbol, Integer], <C ConstantPathTarget>$75: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$134: Sorbet::Private::Static::Void, <selfRestore>$135: T.class_of(<root>), <C ConstantPathTarget>$281: [Symbol, Integer]):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb13 : bb11)
 
 # backedges
 # - bb10
-bb11[firstDead=-1]($gvar$52: [Symbol, Integer], <C ConstantTarget>$65: [Symbol, Integer], <C ConstantPathTarget>$77: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$138: Sorbet::Private::Static::Void, <selfRestore>$139: T.class_of(<root>), <C ConstantPathTarget>$285: [Symbol, Integer]):
-    <statTemp>$123: T::Array[[Symbol, Integer]] = Solve<<block-pre-call-temp>$138, each>
-    <self>: T.class_of(<root>) = <selfRestore>$139
-    <arrayTemp>$149: Symbol(:a) = :a
-    <arrayTemp>$150: Integer(1) = 1
+bb11[firstDead=-1]($gvar$50: [Symbol, Integer], <C ConstantTarget>$63: [Symbol, Integer], <C ConstantPathTarget>$75: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$134: Sorbet::Private::Static::Void, <selfRestore>$135: T.class_of(<root>), <C ConstantPathTarget>$281: [Symbol, Integer]):
+    <statTemp>$119: T::Array[[Symbol, Integer]] = Solve<<block-pre-call-temp>$134, each>
+    <self>: T.class_of(<root>) = <selfRestore>$135
+    <arrayTemp>$145: Symbol(:a) = :a
+    <arrayTemp>$146: Integer(1) = 1
+    <magic>$144: T.class_of(<Magic>) = alias <C <Magic>>
+    <arrayTemp>$143: [Symbol(:a), Integer(1)] = <magic>$144: T.class_of(<Magic>).<build-array>(<arrayTemp>$145: Symbol(:a), <arrayTemp>$146: Integer(1))
+    <arrayTemp>$149: Symbol(:b) = :b
+    <arrayTemp>$150: Integer(2) = 2
     <magic>$148: T.class_of(<Magic>) = alias <C <Magic>>
-    <arrayTemp>$147: [Symbol(:a), Integer(1)] = <magic>$148: T.class_of(<Magic>).<build-array>(<arrayTemp>$149: Symbol(:a), <arrayTemp>$150: Integer(1))
-    <arrayTemp>$153: Symbol(:b) = :b
-    <arrayTemp>$154: Integer(2) = 2
+    <arrayTemp>$147: [Symbol(:b), Integer(2)] = <magic>$148: T.class_of(<Magic>).<build-array>(<arrayTemp>$149: Symbol(:b), <arrayTemp>$150: Integer(2))
+    <arrayTemp>$153: Symbol(:c) = :c
+    <arrayTemp>$154: Integer(3) = 3
     <magic>$152: T.class_of(<Magic>) = alias <C <Magic>>
-    <arrayTemp>$151: [Symbol(:b), Integer(2)] = <magic>$152: T.class_of(<Magic>).<build-array>(<arrayTemp>$153: Symbol(:b), <arrayTemp>$154: Integer(2))
-    <arrayTemp>$157: Symbol(:c) = :c
-    <arrayTemp>$158: Integer(3) = 3
-    <magic>$156: T.class_of(<Magic>) = alias <C <Magic>>
-    <arrayTemp>$155: [Symbol(:c), Integer(3)] = <magic>$156: T.class_of(<Magic>).<build-array>(<arrayTemp>$157: Symbol(:c), <arrayTemp>$158: Integer(3))
-    <magic>$146: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$145: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]] = <magic>$146: T.class_of(<Magic>).<build-array>(<arrayTemp>$147: [Symbol(:a), Integer(1)], <arrayTemp>$151: [Symbol(:b), Integer(2)], <arrayTemp>$155: [Symbol(:c), Integer(3)])
-    <block-pre-call-temp>$159: Sorbet::Private::Static::Void = <statTemp>$145: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]].each()
-    <selfRestore>$160: T.class_of(<root>) = <self>
+    <arrayTemp>$151: [Symbol(:c), Integer(3)] = <magic>$152: T.class_of(<Magic>).<build-array>(<arrayTemp>$153: Symbol(:c), <arrayTemp>$154: Integer(3))
+    <magic>$142: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$141: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]] = <magic>$142: T.class_of(<Magic>).<build-array>(<arrayTemp>$143: [Symbol(:a), Integer(1)], <arrayTemp>$147: [Symbol(:b), Integer(2)], <arrayTemp>$151: [Symbol(:c), Integer(3)])
+    <block-pre-call-temp>$155: Sorbet::Private::Static::Void = <statTemp>$141: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]].each()
+    <selfRestore>$156: T.class_of(<root>) = <self>
     <unconditional> -> bb14
 
 # backedges
 # - bb10
-bb13[firstDead=6](<self>: T.class_of(<root>), @@cvar$40: [Symbol, Integer], $gvar$52: [Symbol, Integer], <C ConstantTarget>$65: [Symbol, Integer], <C ConstantPathTarget>$77: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$138: Sorbet::Private::Static::Void, <selfRestore>$139: T.class_of(<root>), <C ConstantPathTarget>$285: [Symbol, Integer]):
+bb13[firstDead=6](<self>: T.class_of(<root>), @@cvar$38: [Symbol, Integer], $gvar$50: [Symbol, Integer], <C ConstantTarget>$63: [Symbol, Integer], <C ConstantPathTarget>$75: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$134: Sorbet::Private::Static::Void, <selfRestore>$135: T.class_of(<root>), <C ConstantPathTarget>$281: [Symbol, Integer]):
     # outerLoops: 1
     <self>: T.class_of(<root>) = loadSelf(each)
-    <blk>$140: [[Symbol, Integer]] = load_yield_params(each)
-    forTemp$3$3: [Symbol, Integer] = yield_load_arg(0, <blk>$140: [[Symbol, Integer]])
-    @@cvar$40: [Symbol, Integer] = forTemp$3$3
-    <blockReturnTemp>$141: String("loop body") = "loop body"
-    <blockReturnTemp>$143: T.noreturn = blockreturn<each> <blockReturnTemp>$141: String("loop body")
+    <blk>$136: [[Symbol, Integer]] = load_yield_params(each)
+    forTemp$3$3: [Symbol, Integer] = yield_load_arg(0, <blk>$136: [[Symbol, Integer]])
+    @@cvar$38: [Symbol, Integer] = forTemp$3$3
+    <blockReturnTemp>$137: String("loop body") = "loop body"
+    <blockReturnTemp>$139: T.noreturn = blockreturn<each> <blockReturnTemp>$137: String("loop body")
     <unconditional> -> bb10
 
 # backedges
 # - bb11
 # - bb17
-bb14[firstDead=-1](<self>: T.class_of(<root>), $gvar$52: [Symbol, Integer], <C ConstantTarget>$65: [Symbol, Integer], <C ConstantPathTarget>$77: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$159: Sorbet::Private::Static::Void, <selfRestore>$160: T.class_of(<root>), <C ConstantPathTarget>$285: [Symbol, Integer]):
+bb14[firstDead=-1](<self>: T.class_of(<root>), $gvar$50: [Symbol, Integer], <C ConstantTarget>$63: [Symbol, Integer], <C ConstantPathTarget>$75: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$155: Sorbet::Private::Static::Void, <selfRestore>$156: T.class_of(<root>), <C ConstantPathTarget>$281: [Symbol, Integer]):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb17 : bb15)
 
 # backedges
 # - bb14
-bb15[firstDead=-1](<C ConstantTarget>$65: [Symbol, Integer], <C ConstantPathTarget>$77: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$159: Sorbet::Private::Static::Void, <selfRestore>$160: T.class_of(<root>), <C ConstantPathTarget>$285: [Symbol, Integer]):
-    <statTemp>$144: T::Array[[Symbol, Integer]] = Solve<<block-pre-call-temp>$159, each>
-    <self>: T.class_of(<root>) = <selfRestore>$160
-    <arrayTemp>$170: Symbol(:a) = :a
-    <arrayTemp>$171: Integer(1) = 1
+bb15[firstDead=-1](<C ConstantTarget>$63: [Symbol, Integer], <C ConstantPathTarget>$75: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$155: Sorbet::Private::Static::Void, <selfRestore>$156: T.class_of(<root>), <C ConstantPathTarget>$281: [Symbol, Integer]):
+    <statTemp>$140: T::Array[[Symbol, Integer]] = Solve<<block-pre-call-temp>$155, each>
+    <self>: T.class_of(<root>) = <selfRestore>$156
+    <arrayTemp>$166: Symbol(:a) = :a
+    <arrayTemp>$167: Integer(1) = 1
+    <magic>$165: T.class_of(<Magic>) = alias <C <Magic>>
+    <arrayTemp>$164: [Symbol(:a), Integer(1)] = <magic>$165: T.class_of(<Magic>).<build-array>(<arrayTemp>$166: Symbol(:a), <arrayTemp>$167: Integer(1))
+    <arrayTemp>$170: Symbol(:b) = :b
+    <arrayTemp>$171: Integer(2) = 2
     <magic>$169: T.class_of(<Magic>) = alias <C <Magic>>
-    <arrayTemp>$168: [Symbol(:a), Integer(1)] = <magic>$169: T.class_of(<Magic>).<build-array>(<arrayTemp>$170: Symbol(:a), <arrayTemp>$171: Integer(1))
-    <arrayTemp>$174: Symbol(:b) = :b
-    <arrayTemp>$175: Integer(2) = 2
+    <arrayTemp>$168: [Symbol(:b), Integer(2)] = <magic>$169: T.class_of(<Magic>).<build-array>(<arrayTemp>$170: Symbol(:b), <arrayTemp>$171: Integer(2))
+    <arrayTemp>$174: Symbol(:c) = :c
+    <arrayTemp>$175: Integer(3) = 3
     <magic>$173: T.class_of(<Magic>) = alias <C <Magic>>
-    <arrayTemp>$172: [Symbol(:b), Integer(2)] = <magic>$173: T.class_of(<Magic>).<build-array>(<arrayTemp>$174: Symbol(:b), <arrayTemp>$175: Integer(2))
-    <arrayTemp>$178: Symbol(:c) = :c
-    <arrayTemp>$179: Integer(3) = 3
-    <magic>$177: T.class_of(<Magic>) = alias <C <Magic>>
-    <arrayTemp>$176: [Symbol(:c), Integer(3)] = <magic>$177: T.class_of(<Magic>).<build-array>(<arrayTemp>$178: Symbol(:c), <arrayTemp>$179: Integer(3))
-    <magic>$167: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$166: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]] = <magic>$167: T.class_of(<Magic>).<build-array>(<arrayTemp>$168: [Symbol(:a), Integer(1)], <arrayTemp>$172: [Symbol(:b), Integer(2)], <arrayTemp>$176: [Symbol(:c), Integer(3)])
-    <block-pre-call-temp>$180: Sorbet::Private::Static::Void = <statTemp>$166: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]].each()
-    <selfRestore>$181: T.class_of(<root>) = <self>
+    <arrayTemp>$172: [Symbol(:c), Integer(3)] = <magic>$173: T.class_of(<Magic>).<build-array>(<arrayTemp>$174: Symbol(:c), <arrayTemp>$175: Integer(3))
+    <magic>$163: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$162: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]] = <magic>$163: T.class_of(<Magic>).<build-array>(<arrayTemp>$164: [Symbol(:a), Integer(1)], <arrayTemp>$168: [Symbol(:b), Integer(2)], <arrayTemp>$172: [Symbol(:c), Integer(3)])
+    <block-pre-call-temp>$176: Sorbet::Private::Static::Void = <statTemp>$162: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]].each()
+    <selfRestore>$177: T.class_of(<root>) = <self>
     <unconditional> -> bb18
 
 # backedges
 # - bb14
-bb17[firstDead=6](<self>: T.class_of(<root>), $gvar$52: [Symbol, Integer], <C ConstantTarget>$65: [Symbol, Integer], <C ConstantPathTarget>$77: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$159: Sorbet::Private::Static::Void, <selfRestore>$160: T.class_of(<root>), <C ConstantPathTarget>$285: [Symbol, Integer]):
+bb17[firstDead=6](<self>: T.class_of(<root>), $gvar$50: [Symbol, Integer], <C ConstantTarget>$63: [Symbol, Integer], <C ConstantPathTarget>$75: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$155: Sorbet::Private::Static::Void, <selfRestore>$156: T.class_of(<root>), <C ConstantPathTarget>$281: [Symbol, Integer]):
     # outerLoops: 1
     <self>: T.class_of(<root>) = loadSelf(each)
-    <blk>$161: [[Symbol, Integer]] = load_yield_params(each)
-    forTemp$4$4: [Symbol, Integer] = yield_load_arg(0, <blk>$161: [[Symbol, Integer]])
-    $gvar$52: [Symbol, Integer] = forTemp$4$4
-    <blockReturnTemp>$162: String("loop body") = "loop body"
-    <blockReturnTemp>$164: T.noreturn = blockreturn<each> <blockReturnTemp>$162: String("loop body")
+    <blk>$157: [[Symbol, Integer]] = load_yield_params(each)
+    forTemp$4$4: [Symbol, Integer] = yield_load_arg(0, <blk>$157: [[Symbol, Integer]])
+    $gvar$50: [Symbol, Integer] = forTemp$4$4
+    <blockReturnTemp>$158: String("loop body") = "loop body"
+    <blockReturnTemp>$160: T.noreturn = blockreturn<each> <blockReturnTemp>$158: String("loop body")
     <unconditional> -> bb14
 
 # backedges
 # - bb15
 # - bb21
-bb18[firstDead=-1](<self>: T.class_of(<root>), <C ConstantTarget>$65: [Symbol, Integer], <C ConstantPathTarget>$77: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$180: Sorbet::Private::Static::Void, <selfRestore>$181: T.class_of(<root>), <C ConstantPathTarget>$285: [Symbol, Integer]):
+bb18[firstDead=-1](<self>: T.class_of(<root>), <C ConstantTarget>$63: [Symbol, Integer], <C ConstantPathTarget>$75: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$176: Sorbet::Private::Static::Void, <selfRestore>$177: T.class_of(<root>), <C ConstantPathTarget>$281: [Symbol, Integer]):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb21 : bb19)
 
 # backedges
 # - bb18
-bb19[firstDead=-1](<C ConstantTarget>$65: [Symbol, Integer], <C ConstantPathTarget>$77: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$180: Sorbet::Private::Static::Void, <selfRestore>$181: T.class_of(<root>), <C ConstantPathTarget>$285: [Symbol, Integer]):
-    <statTemp>$165: T::Array[[Symbol, Integer]] = Solve<<block-pre-call-temp>$180, each>
-    <self>: T.class_of(<root>) = <selfRestore>$181
-    <arrayTemp>$193: Symbol(:a) = :a
-    <arrayTemp>$194: Integer(1) = 1
+bb19[firstDead=-1](<C ConstantTarget>$63: [Symbol, Integer], <C ConstantPathTarget>$75: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$176: Sorbet::Private::Static::Void, <selfRestore>$177: T.class_of(<root>), <C ConstantPathTarget>$281: [Symbol, Integer]):
+    <statTemp>$161: T::Array[[Symbol, Integer]] = Solve<<block-pre-call-temp>$176, each>
+    <self>: T.class_of(<root>) = <selfRestore>$177
+    <arrayTemp>$189: Symbol(:a) = :a
+    <arrayTemp>$190: Integer(1) = 1
+    <magic>$188: T.class_of(<Magic>) = alias <C <Magic>>
+    <arrayTemp>$187: [Symbol(:a), Integer(1)] = <magic>$188: T.class_of(<Magic>).<build-array>(<arrayTemp>$189: Symbol(:a), <arrayTemp>$190: Integer(1))
+    <arrayTemp>$193: Symbol(:b) = :b
+    <arrayTemp>$194: Integer(2) = 2
     <magic>$192: T.class_of(<Magic>) = alias <C <Magic>>
-    <arrayTemp>$191: [Symbol(:a), Integer(1)] = <magic>$192: T.class_of(<Magic>).<build-array>(<arrayTemp>$193: Symbol(:a), <arrayTemp>$194: Integer(1))
-    <arrayTemp>$197: Symbol(:b) = :b
-    <arrayTemp>$198: Integer(2) = 2
+    <arrayTemp>$191: [Symbol(:b), Integer(2)] = <magic>$192: T.class_of(<Magic>).<build-array>(<arrayTemp>$193: Symbol(:b), <arrayTemp>$194: Integer(2))
+    <arrayTemp>$197: Symbol(:c) = :c
+    <arrayTemp>$198: Integer(3) = 3
     <magic>$196: T.class_of(<Magic>) = alias <C <Magic>>
-    <arrayTemp>$195: [Symbol(:b), Integer(2)] = <magic>$196: T.class_of(<Magic>).<build-array>(<arrayTemp>$197: Symbol(:b), <arrayTemp>$198: Integer(2))
-    <arrayTemp>$201: Symbol(:c) = :c
-    <arrayTemp>$202: Integer(3) = 3
-    <magic>$200: T.class_of(<Magic>) = alias <C <Magic>>
-    <arrayTemp>$199: [Symbol(:c), Integer(3)] = <magic>$200: T.class_of(<Magic>).<build-array>(<arrayTemp>$201: Symbol(:c), <arrayTemp>$202: Integer(3))
-    <magic>$190: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$189: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]] = <magic>$190: T.class_of(<Magic>).<build-array>(<arrayTemp>$191: [Symbol(:a), Integer(1)], <arrayTemp>$195: [Symbol(:b), Integer(2)], <arrayTemp>$199: [Symbol(:c), Integer(3)])
-    <block-pre-call-temp>$203: Sorbet::Private::Static::Void = <statTemp>$189: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]].each()
-    <selfRestore>$204: T.class_of(<root>) = <self>
+    <arrayTemp>$195: [Symbol(:c), Integer(3)] = <magic>$196: T.class_of(<Magic>).<build-array>(<arrayTemp>$197: Symbol(:c), <arrayTemp>$198: Integer(3))
+    <magic>$186: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$185: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]] = <magic>$186: T.class_of(<Magic>).<build-array>(<arrayTemp>$187: [Symbol(:a), Integer(1)], <arrayTemp>$191: [Symbol(:b), Integer(2)], <arrayTemp>$195: [Symbol(:c), Integer(3)])
+    <block-pre-call-temp>$199: Sorbet::Private::Static::Void = <statTemp>$185: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]].each()
+    <selfRestore>$200: T.class_of(<root>) = <self>
     <unconditional> -> bb22
 
 # backedges
 # - bb18
-bb21[firstDead=6](<self>: T.class_of(<root>), <C ConstantTarget>$65: [Symbol, Integer], <C ConstantPathTarget>$77: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$180: Sorbet::Private::Static::Void, <selfRestore>$181: T.class_of(<root>), <C ConstantPathTarget>$285: [Symbol, Integer]):
+bb21[firstDead=6](<self>: T.class_of(<root>), <C ConstantTarget>$63: [Symbol, Integer], <C ConstantPathTarget>$75: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$176: Sorbet::Private::Static::Void, <selfRestore>$177: T.class_of(<root>), <C ConstantPathTarget>$281: [Symbol, Integer]):
     # outerLoops: 1
     <self>: T.class_of(<root>) = loadSelf(each)
-    <blk>$182: [[Symbol, Integer]] = load_yield_params(each)
-    forTemp$5$5: [Symbol, Integer] = yield_load_arg(0, <blk>$182: [[Symbol, Integer]])
-    <statTemp>$184: [Symbol, Integer] = <self>: T.class_of(<root>).call_target=(forTemp$5$5: [Symbol, Integer])
-    <blockReturnTemp>$183: String("loop body") = "loop body"
-    <blockReturnTemp>$187: T.noreturn = blockreturn<each> <blockReturnTemp>$183: String("loop body")
+    <blk>$178: [[Symbol, Integer]] = load_yield_params(each)
+    forTemp$5$5: [Symbol, Integer] = yield_load_arg(0, <blk>$178: [[Symbol, Integer]])
+    <statTemp>$180: [Symbol, Integer] = <self>: T.class_of(<root>).call_target=(forTemp$5$5: [Symbol, Integer])
+    <blockReturnTemp>$179: String("loop body") = "loop body"
+    <blockReturnTemp>$183: T.noreturn = blockreturn<each> <blockReturnTemp>$179: String("loop body")
     <unconditional> -> bb18
 
 # backedges
 # - bb19
 # - bb25
-bb22[firstDead=-1](<self>: T.class_of(<root>), <C ConstantTarget>$65: [Symbol, Integer], <C ConstantPathTarget>$77: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$203: Sorbet::Private::Static::Void, <selfRestore>$204: T.class_of(<root>), <C ConstantPathTarget>$285: [Symbol, Integer]):
+bb22[firstDead=-1](<self>: T.class_of(<root>), <C ConstantTarget>$63: [Symbol, Integer], <C ConstantPathTarget>$75: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$199: Sorbet::Private::Static::Void, <selfRestore>$200: T.class_of(<root>), <C ConstantPathTarget>$281: [Symbol, Integer]):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb25 : bb23)
 
 # backedges
 # - bb22
-bb23[firstDead=-1](<C ConstantTarget>$65: [Symbol, Integer], <C ConstantPathTarget>$77: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$203: Sorbet::Private::Static::Void, <selfRestore>$204: T.class_of(<root>), <C ConstantPathTarget>$285: [Symbol, Integer]):
-    <statTemp>$188: T::Array[[Symbol, Integer]] = Solve<<block-pre-call-temp>$203, each>
-    <self>: T.class_of(<root>) = <selfRestore>$204
-    <magic>$213: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$212: [] = <magic>$213: T.class_of(<Magic>).<build-array>()
-    <block-pre-call-temp>$214: Sorbet::Private::Static::Void = <statTemp>$212: [].each()
-    <selfRestore>$215: T.class_of(<root>) = <self>
+bb23[firstDead=-1](<C ConstantTarget>$63: [Symbol, Integer], <C ConstantPathTarget>$75: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$199: Sorbet::Private::Static::Void, <selfRestore>$200: T.class_of(<root>), <C ConstantPathTarget>$281: [Symbol, Integer]):
+    <statTemp>$184: T::Array[[Symbol, Integer]] = Solve<<block-pre-call-temp>$199, each>
+    <self>: T.class_of(<root>) = <selfRestore>$200
+    <magic>$209: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$208: [] = <magic>$209: T.class_of(<Magic>).<build-array>()
+    <block-pre-call-temp>$210: Sorbet::Private::Static::Void = <statTemp>$208: [].each()
+    <selfRestore>$211: T.class_of(<root>) = <self>
     <unconditional> -> bb26
 
 # backedges
 # - bb22
-bb25[firstDead=6](<self>: T.class_of(<root>), <C ConstantTarget>$65: [Symbol, Integer], <C ConstantPathTarget>$77: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$203: Sorbet::Private::Static::Void, <selfRestore>$204: T.class_of(<root>), <C ConstantPathTarget>$285: [Symbol, Integer]):
+bb25[firstDead=6](<self>: T.class_of(<root>), <C ConstantTarget>$63: [Symbol, Integer], <C ConstantPathTarget>$75: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$199: Sorbet::Private::Static::Void, <selfRestore>$200: T.class_of(<root>), <C ConstantPathTarget>$281: [Symbol, Integer]):
     # outerLoops: 1
     <self>: T.class_of(<root>) = loadSelf(each)
-    <blk>$205: [[Symbol, Integer]] = load_yield_params(each)
-    forTemp$6$6: [Symbol, Integer] = yield_load_arg(0, <blk>$205: [[Symbol, Integer]])
-    <statTemp>$207: [Symbol, Integer] = <self>: T.class_of(<root>).call_target=(forTemp$6$6: [Symbol, Integer])
-    <blockReturnTemp>$206: String("loop body") = "loop body"
-    <blockReturnTemp>$210: T.noreturn = blockreturn<each> <blockReturnTemp>$206: String("loop body")
+    <blk>$201: [[Symbol, Integer]] = load_yield_params(each)
+    forTemp$6$6: [Symbol, Integer] = yield_load_arg(0, <blk>$201: [[Symbol, Integer]])
+    <statTemp>$203: [Symbol, Integer] = <self>: T.class_of(<root>).call_target=(forTemp$6$6: [Symbol, Integer])
+    <blockReturnTemp>$202: String("loop body") = "loop body"
+    <blockReturnTemp>$206: T.noreturn = blockreturn<each> <blockReturnTemp>$202: String("loop body")
     <unconditional> -> bb22
 
 # backedges
 # - bb23
 # - bb29
-bb26[firstDead=-1](<self>: T.class_of(<root>), <C ConstantTarget>$65: [Symbol, Integer], <C ConstantPathTarget>$77: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$214: Sorbet::Private::Static::Void, <selfRestore>$215: T.class_of(<root>), <C ConstantPathTarget>$285: [Symbol, Integer]):
+bb26[firstDead=-1](<self>: T.class_of(<root>), <C ConstantTarget>$63: [Symbol, Integer], <C ConstantPathTarget>$75: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$210: Sorbet::Private::Static::Void, <selfRestore>$211: T.class_of(<root>), <C ConstantPathTarget>$281: [Symbol, Integer]):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb29 : bb27)
 
 # backedges
 # - bb26
-bb27[firstDead=-1](<C ConstantTarget>$65: [Symbol, Integer], <C ConstantPathTarget>$77: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$214: Sorbet::Private::Static::Void, <selfRestore>$215: T.class_of(<root>), <C ConstantPathTarget>$285: [Symbol, Integer]):
-    <statTemp>$211: T::Array[T.untyped] = Solve<<block-pre-call-temp>$214, each>
-    <self>: T.class_of(<root>) = <selfRestore>$215
-    <arrayTemp>$228: Symbol(:a) = :a
-    <arrayTemp>$229: Integer(1) = 1
+bb27[firstDead=-1](<C ConstantTarget>$63: [Symbol, Integer], <C ConstantPathTarget>$75: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$210: Sorbet::Private::Static::Void, <selfRestore>$211: T.class_of(<root>), <C ConstantPathTarget>$281: [Symbol, Integer]):
+    <statTemp>$207: T::Array[T.untyped] = Solve<<block-pre-call-temp>$210, each>
+    <self>: T.class_of(<root>) = <selfRestore>$211
+    <arrayTemp>$224: Symbol(:a) = :a
+    <arrayTemp>$225: Integer(1) = 1
+    <magic>$223: T.class_of(<Magic>) = alias <C <Magic>>
+    <arrayTemp>$222: [Symbol(:a), Integer(1)] = <magic>$223: T.class_of(<Magic>).<build-array>(<arrayTemp>$224: Symbol(:a), <arrayTemp>$225: Integer(1))
+    <arrayTemp>$228: Symbol(:b) = :b
+    <arrayTemp>$229: Integer(2) = 2
     <magic>$227: T.class_of(<Magic>) = alias <C <Magic>>
-    <arrayTemp>$226: [Symbol(:a), Integer(1)] = <magic>$227: T.class_of(<Magic>).<build-array>(<arrayTemp>$228: Symbol(:a), <arrayTemp>$229: Integer(1))
-    <arrayTemp>$232: Symbol(:b) = :b
-    <arrayTemp>$233: Integer(2) = 2
+    <arrayTemp>$226: [Symbol(:b), Integer(2)] = <magic>$227: T.class_of(<Magic>).<build-array>(<arrayTemp>$228: Symbol(:b), <arrayTemp>$229: Integer(2))
+    <arrayTemp>$232: Symbol(:c) = :c
+    <arrayTemp>$233: Integer(3) = 3
     <magic>$231: T.class_of(<Magic>) = alias <C <Magic>>
-    <arrayTemp>$230: [Symbol(:b), Integer(2)] = <magic>$231: T.class_of(<Magic>).<build-array>(<arrayTemp>$232: Symbol(:b), <arrayTemp>$233: Integer(2))
-    <arrayTemp>$236: Symbol(:c) = :c
-    <arrayTemp>$237: Integer(3) = 3
-    <magic>$235: T.class_of(<Magic>) = alias <C <Magic>>
-    <arrayTemp>$234: [Symbol(:c), Integer(3)] = <magic>$235: T.class_of(<Magic>).<build-array>(<arrayTemp>$236: Symbol(:c), <arrayTemp>$237: Integer(3))
-    <magic>$225: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$224: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]] = <magic>$225: T.class_of(<Magic>).<build-array>(<arrayTemp>$226: [Symbol(:a), Integer(1)], <arrayTemp>$230: [Symbol(:b), Integer(2)], <arrayTemp>$234: [Symbol(:c), Integer(3)])
-    <block-pre-call-temp>$238: Sorbet::Private::Static::Void = <statTemp>$224: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]].each()
-    <selfRestore>$239: T.class_of(<root>) = <self>
+    <arrayTemp>$230: [Symbol(:c), Integer(3)] = <magic>$231: T.class_of(<Magic>).<build-array>(<arrayTemp>$232: Symbol(:c), <arrayTemp>$233: Integer(3))
+    <magic>$221: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$220: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]] = <magic>$221: T.class_of(<Magic>).<build-array>(<arrayTemp>$222: [Symbol(:a), Integer(1)], <arrayTemp>$226: [Symbol(:b), Integer(2)], <arrayTemp>$230: [Symbol(:c), Integer(3)])
+    <block-pre-call-temp>$234: Sorbet::Private::Static::Void = <statTemp>$220: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]].each()
+    <selfRestore>$235: T.class_of(<root>) = <self>
     <unconditional> -> bb30
 
 # backedges
 # - bb26
-bb29[firstDead=7](<self>: T.class_of(<root>), <C ConstantTarget>$65: [Symbol, Integer], <C ConstantPathTarget>$77: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$214: Sorbet::Private::Static::Void, <selfRestore>$215: T.class_of(<root>), <C ConstantPathTarget>$285: [Symbol, Integer]):
+bb29[firstDead=7](<self>: T.class_of(<root>), <C ConstantTarget>$63: [Symbol, Integer], <C ConstantPathTarget>$75: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$210: Sorbet::Private::Static::Void, <selfRestore>$211: T.class_of(<root>), <C ConstantPathTarget>$281: [Symbol, Integer]):
     # outerLoops: 1
     <self>: T.class_of(<root>) = loadSelf(each)
-    <blk>$216: [T.untyped] = load_yield_params(each)
-    forTemp$7$7: T.untyped = yield_load_arg(0, <blk>$216: [T.untyped])
-    <cfgAlias>$220: T.class_of(E) = alias <C E>
-    <statTemp>$218: T.untyped = <cfgAlias>$220: T.class_of(E).e=(forTemp$7$7: T.untyped)
-    <blockReturnTemp>$217: String("loop body") = "loop body"
-    <blockReturnTemp>$222: T.noreturn = blockreturn<each> <blockReturnTemp>$217: String("loop body")
+    <blk>$212: [T.untyped] = load_yield_params(each)
+    forTemp$7$7: T.untyped = yield_load_arg(0, <blk>$212: [T.untyped])
+    <cfgAlias>$216: T.class_of(E) = alias <C E>
+    <statTemp>$214: T.untyped = <cfgAlias>$216: T.class_of(E).e=(forTemp$7$7: T.untyped)
+    <blockReturnTemp>$213: String("loop body") = "loop body"
+    <blockReturnTemp>$218: T.noreturn = blockreturn<each> <blockReturnTemp>$213: String("loop body")
     <unconditional> -> bb26
 
 # backedges
 # - bb27
 # - bb33
-bb30[firstDead=-1](<self>: T.class_of(<root>), <C ConstantTarget>$65: [Symbol, Integer], <C ConstantPathTarget>$77: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$238: Sorbet::Private::Static::Void, <selfRestore>$239: T.class_of(<root>), <C ConstantPathTarget>$285: [Symbol, Integer]):
+bb30[firstDead=-1](<self>: T.class_of(<root>), <C ConstantTarget>$63: [Symbol, Integer], <C ConstantPathTarget>$75: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$234: Sorbet::Private::Static::Void, <selfRestore>$235: T.class_of(<root>), <C ConstantPathTarget>$281: [Symbol, Integer]):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb33 : bb31)
 
 # backedges
 # - bb30
-bb31[firstDead=-1](<C ConstantPathTarget>$77: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$238: Sorbet::Private::Static::Void, <selfRestore>$239: T.class_of(<root>), <C ConstantPathTarget>$285: [Symbol, Integer]):
-    <statTemp>$223: T::Array[[Symbol, Integer]] = Solve<<block-pre-call-temp>$238, each>
-    <self>: T.class_of(<root>) = <selfRestore>$239
-    <arrayTemp>$249: Symbol(:a) = :a
-    <arrayTemp>$250: Integer(1) = 1
+bb31[firstDead=-1](<C ConstantPathTarget>$75: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$234: Sorbet::Private::Static::Void, <selfRestore>$235: T.class_of(<root>), <C ConstantPathTarget>$281: [Symbol, Integer]):
+    <statTemp>$219: T::Array[[Symbol, Integer]] = Solve<<block-pre-call-temp>$234, each>
+    <self>: T.class_of(<root>) = <selfRestore>$235
+    <arrayTemp>$245: Symbol(:a) = :a
+    <arrayTemp>$246: Integer(1) = 1
+    <magic>$244: T.class_of(<Magic>) = alias <C <Magic>>
+    <arrayTemp>$243: [Symbol(:a), Integer(1)] = <magic>$244: T.class_of(<Magic>).<build-array>(<arrayTemp>$245: Symbol(:a), <arrayTemp>$246: Integer(1))
+    <arrayTemp>$249: Symbol(:b) = :b
+    <arrayTemp>$250: Integer(2) = 2
     <magic>$248: T.class_of(<Magic>) = alias <C <Magic>>
-    <arrayTemp>$247: [Symbol(:a), Integer(1)] = <magic>$248: T.class_of(<Magic>).<build-array>(<arrayTemp>$249: Symbol(:a), <arrayTemp>$250: Integer(1))
-    <arrayTemp>$253: Symbol(:b) = :b
-    <arrayTemp>$254: Integer(2) = 2
+    <arrayTemp>$247: [Symbol(:b), Integer(2)] = <magic>$248: T.class_of(<Magic>).<build-array>(<arrayTemp>$249: Symbol(:b), <arrayTemp>$250: Integer(2))
+    <arrayTemp>$253: Symbol(:c) = :c
+    <arrayTemp>$254: Integer(3) = 3
     <magic>$252: T.class_of(<Magic>) = alias <C <Magic>>
-    <arrayTemp>$251: [Symbol(:b), Integer(2)] = <magic>$252: T.class_of(<Magic>).<build-array>(<arrayTemp>$253: Symbol(:b), <arrayTemp>$254: Integer(2))
-    <arrayTemp>$257: Symbol(:c) = :c
-    <arrayTemp>$258: Integer(3) = 3
-    <magic>$256: T.class_of(<Magic>) = alias <C <Magic>>
-    <arrayTemp>$255: [Symbol(:c), Integer(3)] = <magic>$256: T.class_of(<Magic>).<build-array>(<arrayTemp>$257: Symbol(:c), <arrayTemp>$258: Integer(3))
-    <magic>$246: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$245: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]] = <magic>$246: T.class_of(<Magic>).<build-array>(<arrayTemp>$247: [Symbol(:a), Integer(1)], <arrayTemp>$251: [Symbol(:b), Integer(2)], <arrayTemp>$255: [Symbol(:c), Integer(3)])
-    <block-pre-call-temp>$259: Sorbet::Private::Static::Void = <statTemp>$245: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]].each()
-    <selfRestore>$260: T.class_of(<root>) = <self>
+    <arrayTemp>$251: [Symbol(:c), Integer(3)] = <magic>$252: T.class_of(<Magic>).<build-array>(<arrayTemp>$253: Symbol(:c), <arrayTemp>$254: Integer(3))
+    <magic>$242: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$241: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]] = <magic>$242: T.class_of(<Magic>).<build-array>(<arrayTemp>$243: [Symbol(:a), Integer(1)], <arrayTemp>$247: [Symbol(:b), Integer(2)], <arrayTemp>$251: [Symbol(:c), Integer(3)])
+    <block-pre-call-temp>$255: Sorbet::Private::Static::Void = <statTemp>$241: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]].each()
+    <selfRestore>$256: T.class_of(<root>) = <self>
     <unconditional> -> bb34
 
 # backedges
 # - bb30
-bb33[firstDead=6](<self>: T.class_of(<root>), <C ConstantTarget>$65: [Symbol, Integer], <C ConstantPathTarget>$77: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$238: Sorbet::Private::Static::Void, <selfRestore>$239: T.class_of(<root>), <C ConstantPathTarget>$285: [Symbol, Integer]):
+bb33[firstDead=6](<self>: T.class_of(<root>), <C ConstantTarget>$63: [Symbol, Integer], <C ConstantPathTarget>$75: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$234: Sorbet::Private::Static::Void, <selfRestore>$235: T.class_of(<root>), <C ConstantPathTarget>$281: [Symbol, Integer]):
     # outerLoops: 1
     <self>: T.class_of(<root>) = loadSelf(each)
-    <blk>$240: [[Symbol, Integer]] = load_yield_params(each)
-    forTemp$8$8: [Symbol, Integer] = yield_load_arg(0, <blk>$240: [[Symbol, Integer]])
-    <C ConstantTarget>$65: [Symbol, Integer] = forTemp$8$8
-    <blockReturnTemp>$241: String("loop body") = "loop body"
-    <blockReturnTemp>$243: T.noreturn = blockreturn<each> <blockReturnTemp>$241: String("loop body")
+    <blk>$236: [[Symbol, Integer]] = load_yield_params(each)
+    forTemp$8$8: [Symbol, Integer] = yield_load_arg(0, <blk>$236: [[Symbol, Integer]])
+    <C ConstantTarget>$63: [Symbol, Integer] = forTemp$8$8
+    <blockReturnTemp>$237: String("loop body") = "loop body"
+    <blockReturnTemp>$239: T.noreturn = blockreturn<each> <blockReturnTemp>$237: String("loop body")
     <unconditional> -> bb30
 
 # backedges
 # - bb31
 # - bb37
-bb34[firstDead=-1](<self>: T.class_of(<root>), <C ConstantPathTarget>$77: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$259: Sorbet::Private::Static::Void, <selfRestore>$260: T.class_of(<root>), <C ConstantPathTarget>$285: [Symbol, Integer]):
+bb34[firstDead=-1](<self>: T.class_of(<root>), <C ConstantPathTarget>$75: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$255: Sorbet::Private::Static::Void, <selfRestore>$256: T.class_of(<root>), <C ConstantPathTarget>$281: [Symbol, Integer]):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb37 : bb35)
 
 # backedges
 # - bb34
-bb35[firstDead=-1](a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$259: Sorbet::Private::Static::Void, <selfRestore>$260: T.class_of(<root>), <C ConstantPathTarget>$285: [Symbol, Integer]):
-    <statTemp>$244: T::Array[[Symbol, Integer]] = Solve<<block-pre-call-temp>$259, each>
-    <self>: T.class_of(<root>) = <selfRestore>$260
-    <arrayTemp>$270: Symbol(:a) = :a
-    <arrayTemp>$271: Integer(1) = 1
+bb35[firstDead=-1](a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$255: Sorbet::Private::Static::Void, <selfRestore>$256: T.class_of(<root>), <C ConstantPathTarget>$281: [Symbol, Integer]):
+    <statTemp>$240: T::Array[[Symbol, Integer]] = Solve<<block-pre-call-temp>$255, each>
+    <self>: T.class_of(<root>) = <selfRestore>$256
+    <arrayTemp>$266: Symbol(:a) = :a
+    <arrayTemp>$267: Integer(1) = 1
+    <magic>$265: T.class_of(<Magic>) = alias <C <Magic>>
+    <arrayTemp>$264: [Symbol(:a), Integer(1)] = <magic>$265: T.class_of(<Magic>).<build-array>(<arrayTemp>$266: Symbol(:a), <arrayTemp>$267: Integer(1))
+    <arrayTemp>$270: Symbol(:b) = :b
+    <arrayTemp>$271: Integer(2) = 2
     <magic>$269: T.class_of(<Magic>) = alias <C <Magic>>
-    <arrayTemp>$268: [Symbol(:a), Integer(1)] = <magic>$269: T.class_of(<Magic>).<build-array>(<arrayTemp>$270: Symbol(:a), <arrayTemp>$271: Integer(1))
-    <arrayTemp>$274: Symbol(:b) = :b
-    <arrayTemp>$275: Integer(2) = 2
+    <arrayTemp>$268: [Symbol(:b), Integer(2)] = <magic>$269: T.class_of(<Magic>).<build-array>(<arrayTemp>$270: Symbol(:b), <arrayTemp>$271: Integer(2))
+    <arrayTemp>$274: Symbol(:c) = :c
+    <arrayTemp>$275: Integer(3) = 3
     <magic>$273: T.class_of(<Magic>) = alias <C <Magic>>
-    <arrayTemp>$272: [Symbol(:b), Integer(2)] = <magic>$273: T.class_of(<Magic>).<build-array>(<arrayTemp>$274: Symbol(:b), <arrayTemp>$275: Integer(2))
-    <arrayTemp>$278: Symbol(:c) = :c
-    <arrayTemp>$279: Integer(3) = 3
-    <magic>$277: T.class_of(<Magic>) = alias <C <Magic>>
-    <arrayTemp>$276: [Symbol(:c), Integer(3)] = <magic>$277: T.class_of(<Magic>).<build-array>(<arrayTemp>$278: Symbol(:c), <arrayTemp>$279: Integer(3))
-    <magic>$267: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$266: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]] = <magic>$267: T.class_of(<Magic>).<build-array>(<arrayTemp>$268: [Symbol(:a), Integer(1)], <arrayTemp>$272: [Symbol(:b), Integer(2)], <arrayTemp>$276: [Symbol(:c), Integer(3)])
-    <block-pre-call-temp>$280: Sorbet::Private::Static::Void = <statTemp>$266: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]].each()
-    <selfRestore>$281: T.class_of(<root>) = <self>
+    <arrayTemp>$272: [Symbol(:c), Integer(3)] = <magic>$273: T.class_of(<Magic>).<build-array>(<arrayTemp>$274: Symbol(:c), <arrayTemp>$275: Integer(3))
+    <magic>$263: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$262: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]] = <magic>$263: T.class_of(<Magic>).<build-array>(<arrayTemp>$264: [Symbol(:a), Integer(1)], <arrayTemp>$268: [Symbol(:b), Integer(2)], <arrayTemp>$272: [Symbol(:c), Integer(3)])
+    <block-pre-call-temp>$276: Sorbet::Private::Static::Void = <statTemp>$262: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]].each()
+    <selfRestore>$277: T.class_of(<root>) = <self>
     <unconditional> -> bb38
 
 # backedges
 # - bb34
-bb37[firstDead=6](<self>: T.class_of(<root>), <C ConstantPathTarget>$77: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$259: Sorbet::Private::Static::Void, <selfRestore>$260: T.class_of(<root>), <C ConstantPathTarget>$285: [Symbol, Integer]):
+bb37[firstDead=6](<self>: T.class_of(<root>), <C ConstantPathTarget>$75: [Symbol, Integer], a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$255: Sorbet::Private::Static::Void, <selfRestore>$256: T.class_of(<root>), <C ConstantPathTarget>$281: [Symbol, Integer]):
     # outerLoops: 1
     <self>: T.class_of(<root>) = loadSelf(each)
-    <blk>$261: [[Symbol, Integer]] = load_yield_params(each)
-    forTemp$9$9: [Symbol, Integer] = yield_load_arg(0, <blk>$261: [[Symbol, Integer]])
-    <C ConstantPathTarget>$77: [Symbol, Integer] = forTemp$9$9
-    <blockReturnTemp>$262: String("loop body") = "loop body"
-    <blockReturnTemp>$264: T.noreturn = blockreturn<each> <blockReturnTemp>$262: String("loop body")
+    <blk>$257: [[Symbol, Integer]] = load_yield_params(each)
+    forTemp$9$9: [Symbol, Integer] = yield_load_arg(0, <blk>$257: [[Symbol, Integer]])
+    <C ConstantPathTarget>$75: [Symbol, Integer] = forTemp$9$9
+    <blockReturnTemp>$258: String("loop body") = "loop body"
+    <blockReturnTemp>$260: T.noreturn = blockreturn<each> <blockReturnTemp>$258: String("loop body")
     <unconditional> -> bb34
 
 # backedges
 # - bb35
 # - bb41
-bb38[firstDead=-1](<self>: T.class_of(<root>), a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$280: Sorbet::Private::Static::Void, <selfRestore>$281: T.class_of(<root>), <C ConstantPathTarget>$285: [Symbol, Integer]):
+bb38[firstDead=-1](<self>: T.class_of(<root>), a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$276: Sorbet::Private::Static::Void, <selfRestore>$277: T.class_of(<root>), <C ConstantPathTarget>$281: [Symbol, Integer]):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb41 : bb39)
 
 # backedges
 # - bb38
-bb39[firstDead=-1](a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$280: Sorbet::Private::Static::Void, <selfRestore>$281: T.class_of(<root>), <C ConstantPathTarget>$285: [Symbol, Integer]):
-    <statTemp>$265: T::Array[[Symbol, Integer]] = Solve<<block-pre-call-temp>$280, each>
-    <self>: T.class_of(<root>) = <selfRestore>$281
-    <arrayTemp>$292: Symbol(:a) = :a
-    <arrayTemp>$293: Integer(1) = 1
+bb39[firstDead=-1](a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$276: Sorbet::Private::Static::Void, <selfRestore>$277: T.class_of(<root>), <C ConstantPathTarget>$281: [Symbol, Integer]):
+    <statTemp>$261: T::Array[[Symbol, Integer]] = Solve<<block-pre-call-temp>$276, each>
+    <self>: T.class_of(<root>) = <selfRestore>$277
+    <arrayTemp>$288: Symbol(:a) = :a
+    <arrayTemp>$289: Integer(1) = 1
+    <magic>$287: T.class_of(<Magic>) = alias <C <Magic>>
+    <arrayTemp>$286: [Symbol(:a), Integer(1)] = <magic>$287: T.class_of(<Magic>).<build-array>(<arrayTemp>$288: Symbol(:a), <arrayTemp>$289: Integer(1))
+    <arrayTemp>$292: Symbol(:b) = :b
+    <arrayTemp>$293: Integer(2) = 2
     <magic>$291: T.class_of(<Magic>) = alias <C <Magic>>
-    <arrayTemp>$290: [Symbol(:a), Integer(1)] = <magic>$291: T.class_of(<Magic>).<build-array>(<arrayTemp>$292: Symbol(:a), <arrayTemp>$293: Integer(1))
-    <arrayTemp>$296: Symbol(:b) = :b
-    <arrayTemp>$297: Integer(2) = 2
+    <arrayTemp>$290: [Symbol(:b), Integer(2)] = <magic>$291: T.class_of(<Magic>).<build-array>(<arrayTemp>$292: Symbol(:b), <arrayTemp>$293: Integer(2))
+    <arrayTemp>$296: Symbol(:c) = :c
+    <arrayTemp>$297: Integer(3) = 3
     <magic>$295: T.class_of(<Magic>) = alias <C <Magic>>
-    <arrayTemp>$294: [Symbol(:b), Integer(2)] = <magic>$295: T.class_of(<Magic>).<build-array>(<arrayTemp>$296: Symbol(:b), <arrayTemp>$297: Integer(2))
-    <arrayTemp>$300: Symbol(:c) = :c
-    <arrayTemp>$301: Integer(3) = 3
-    <magic>$299: T.class_of(<Magic>) = alias <C <Magic>>
-    <arrayTemp>$298: [Symbol(:c), Integer(3)] = <magic>$299: T.class_of(<Magic>).<build-array>(<arrayTemp>$300: Symbol(:c), <arrayTemp>$301: Integer(3))
-    <magic>$289: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$288: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]] = <magic>$289: T.class_of(<Magic>).<build-array>(<arrayTemp>$290: [Symbol(:a), Integer(1)], <arrayTemp>$294: [Symbol(:b), Integer(2)], <arrayTemp>$298: [Symbol(:c), Integer(3)])
-    <block-pre-call-temp>$302: Sorbet::Private::Static::Void = <statTemp>$288: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]].each()
-    <selfRestore>$303: T.class_of(<root>) = <self>
+    <arrayTemp>$294: [Symbol(:c), Integer(3)] = <magic>$295: T.class_of(<Magic>).<build-array>(<arrayTemp>$296: Symbol(:c), <arrayTemp>$297: Integer(3))
+    <magic>$285: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$284: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]] = <magic>$285: T.class_of(<Magic>).<build-array>(<arrayTemp>$286: [Symbol(:a), Integer(1)], <arrayTemp>$290: [Symbol(:b), Integer(2)], <arrayTemp>$294: [Symbol(:c), Integer(3)])
+    <block-pre-call-temp>$298: Sorbet::Private::Static::Void = <statTemp>$284: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]].each()
+    <selfRestore>$299: T.class_of(<root>) = <self>
     <unconditional> -> bb42
 
 # backedges
 # - bb38
-bb41[firstDead=6](<self>: T.class_of(<root>), a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$280: Sorbet::Private::Static::Void, <selfRestore>$281: T.class_of(<root>), <C ConstantPathTarget>$285: [Symbol, Integer]):
+bb41[firstDead=6](<self>: T.class_of(<root>), a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$276: Sorbet::Private::Static::Void, <selfRestore>$277: T.class_of(<root>), <C ConstantPathTarget>$281: [Symbol, Integer]):
     # outerLoops: 1
     <self>: T.class_of(<root>) = loadSelf(each)
-    <blk>$282: [[Symbol, Integer]] = load_yield_params(each)
-    forTemp$10$10: [Symbol, Integer] = yield_load_arg(0, <blk>$282: [[Symbol, Integer]])
-    <C ConstantPathTarget>$285: [Symbol, Integer] = forTemp$10$10
-    <blockReturnTemp>$283: String("loop body") = "loop body"
-    <blockReturnTemp>$286: T.noreturn = blockreturn<each> <blockReturnTemp>$283: String("loop body")
+    <blk>$278: [[Symbol, Integer]] = load_yield_params(each)
+    forTemp$10$10: [Symbol, Integer] = yield_load_arg(0, <blk>$278: [[Symbol, Integer]])
+    <C ConstantPathTarget>$281: [Symbol, Integer] = forTemp$10$10
+    <blockReturnTemp>$279: String("loop body") = "loop body"
+    <blockReturnTemp>$282: T.noreturn = blockreturn<each> <blockReturnTemp>$279: String("loop body")
     <unconditional> -> bb38
 
 # backedges
 # - bb39
 # - bb45
-bb42[firstDead=-1](<self>: T.class_of(<root>), a: T::Array[[Symbol, Integer]], <C ConstantPathTarget>$285: [Symbol, Integer], <block-pre-call-temp>$302: Sorbet::Private::Static::Void, <selfRestore>$303: T.class_of(<root>)):
+bb42[firstDead=-1](<self>: T.class_of(<root>), a: T::Array[[Symbol, Integer]], <C ConstantPathTarget>$281: [Symbol, Integer], <block-pre-call-temp>$298: Sorbet::Private::Static::Void, <selfRestore>$299: T.class_of(<root>)):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb45 : bb43)
 
 # backedges
 # - bb42
-bb43[firstDead=-1](a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$302: Sorbet::Private::Static::Void, <selfRestore>$303: T.class_of(<root>)):
-    <statTemp>$287: T::Array[[Symbol, Integer]] = Solve<<block-pre-call-temp>$302, each>
-    <self>: T.class_of(<root>) = <selfRestore>$303
-    <arrayTemp>$312: Symbol(:a) = :a
-    <arrayTemp>$313: Integer(1) = 1
+bb43[firstDead=-1](a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$298: Sorbet::Private::Static::Void, <selfRestore>$299: T.class_of(<root>)):
+    <statTemp>$283: T::Array[[Symbol, Integer]] = Solve<<block-pre-call-temp>$298, each>
+    <self>: T.class_of(<root>) = <selfRestore>$299
+    <arrayTemp>$308: Symbol(:a) = :a
+    <arrayTemp>$309: Integer(1) = 1
+    <magic>$307: T.class_of(<Magic>) = alias <C <Magic>>
+    <arrayTemp>$306: [Symbol(:a), Integer(1)] = <magic>$307: T.class_of(<Magic>).<build-array>(<arrayTemp>$308: Symbol(:a), <arrayTemp>$309: Integer(1))
+    <arrayTemp>$312: Symbol(:b) = :b
+    <arrayTemp>$313: Integer(2) = 2
     <magic>$311: T.class_of(<Magic>) = alias <C <Magic>>
-    <arrayTemp>$310: [Symbol(:a), Integer(1)] = <magic>$311: T.class_of(<Magic>).<build-array>(<arrayTemp>$312: Symbol(:a), <arrayTemp>$313: Integer(1))
-    <arrayTemp>$316: Symbol(:b) = :b
-    <arrayTemp>$317: Integer(2) = 2
+    <arrayTemp>$310: [Symbol(:b), Integer(2)] = <magic>$311: T.class_of(<Magic>).<build-array>(<arrayTemp>$312: Symbol(:b), <arrayTemp>$313: Integer(2))
+    <arrayTemp>$316: Symbol(:c) = :c
+    <arrayTemp>$317: Integer(3) = 3
     <magic>$315: T.class_of(<Magic>) = alias <C <Magic>>
-    <arrayTemp>$314: [Symbol(:b), Integer(2)] = <magic>$315: T.class_of(<Magic>).<build-array>(<arrayTemp>$316: Symbol(:b), <arrayTemp>$317: Integer(2))
-    <arrayTemp>$320: Symbol(:c) = :c
-    <arrayTemp>$321: Integer(3) = 3
-    <magic>$319: T.class_of(<Magic>) = alias <C <Magic>>
-    <arrayTemp>$318: [Symbol(:c), Integer(3)] = <magic>$319: T.class_of(<Magic>).<build-array>(<arrayTemp>$320: Symbol(:c), <arrayTemp>$321: Integer(3))
-    <magic>$309: T.class_of(<Magic>) = alias <C <Magic>>
-    <statTemp>$308: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]] = <magic>$309: T.class_of(<Magic>).<build-array>(<arrayTemp>$310: [Symbol(:a), Integer(1)], <arrayTemp>$314: [Symbol(:b), Integer(2)], <arrayTemp>$318: [Symbol(:c), Integer(3)])
-    <block-pre-call-temp>$322: Sorbet::Private::Static::Void = <statTemp>$308: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]].each()
-    <selfRestore>$323: T.class_of(<root>) = <self>
+    <arrayTemp>$314: [Symbol(:c), Integer(3)] = <magic>$315: T.class_of(<Magic>).<build-array>(<arrayTemp>$316: Symbol(:c), <arrayTemp>$317: Integer(3))
+    <magic>$305: T.class_of(<Magic>) = alias <C <Magic>>
+    <statTemp>$304: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]] = <magic>$305: T.class_of(<Magic>).<build-array>(<arrayTemp>$306: [Symbol(:a), Integer(1)], <arrayTemp>$310: [Symbol(:b), Integer(2)], <arrayTemp>$314: [Symbol(:c), Integer(3)])
+    <block-pre-call-temp>$318: Sorbet::Private::Static::Void = <statTemp>$304: [[Symbol(:a), Integer(1)], [Symbol(:b), Integer(2)], [Symbol(:c), Integer(3)]].each()
+    <selfRestore>$319: T.class_of(<root>) = <self>
     <unconditional> -> bb46
 
 # backedges
 # - bb42
-bb45[firstDead=6](<self>: T.class_of(<root>), a: T::Array[[Symbol, Integer]], <C ConstantPathTarget>$285: [Symbol, Integer], <block-pre-call-temp>$302: Sorbet::Private::Static::Void, <selfRestore>$303: T.class_of(<root>)):
+bb45[firstDead=6](<self>: T.class_of(<root>), a: T::Array[[Symbol, Integer]], <C ConstantPathTarget>$281: [Symbol, Integer], <block-pre-call-temp>$298: Sorbet::Private::Static::Void, <selfRestore>$299: T.class_of(<root>)):
     # outerLoops: 1
     <self>: T.class_of(<root>) = loadSelf(each)
-    <blk>$304: [[Symbol, Integer]] = load_yield_params(each)
-    forTemp$11$11: [Symbol, Integer] = yield_load_arg(0, <blk>$304: [[Symbol, Integer]])
-    <C ConstantPathTarget>$285: [Symbol, Integer] = forTemp$11$11
-    <blockReturnTemp>$305: String("loop body") = "loop body"
-    <blockReturnTemp>$307: T.noreturn = blockreturn<each> <blockReturnTemp>$305: String("loop body")
+    <blk>$300: [[Symbol, Integer]] = load_yield_params(each)
+    forTemp$11$11: [Symbol, Integer] = yield_load_arg(0, <blk>$300: [[Symbol, Integer]])
+    <C ConstantPathTarget>$281: [Symbol, Integer] = forTemp$11$11
+    <blockReturnTemp>$301: String("loop body") = "loop body"
+    <blockReturnTemp>$303: T.noreturn = blockreturn<each> <blockReturnTemp>$301: String("loop body")
     <unconditional> -> bb42
 
 # backedges
 # - bb43
 # - bb49
-bb46[firstDead=-1](<self>: T.class_of(<root>), a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$322: Sorbet::Private::Static::Void, <selfRestore>$323: T.class_of(<root>)):
+bb46[firstDead=-1](<self>: T.class_of(<root>), a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$318: Sorbet::Private::Static::Void, <selfRestore>$319: T.class_of(<root>)):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb49 : bb47)
 
 # backedges
 # - bb46
-bb47[firstDead=2](<block-pre-call-temp>$322: Sorbet::Private::Static::Void, <selfRestore>$323: T.class_of(<root>)):
-    <returnMethodTemp>$2: T::Array[[Symbol, Integer]] = Solve<<block-pre-call-temp>$322, each>
+bb47[firstDead=2](<block-pre-call-temp>$318: Sorbet::Private::Static::Void, <selfRestore>$319: T.class_of(<root>)):
+    <returnMethodTemp>$2: T::Array[[Symbol, Integer]] = Solve<<block-pre-call-temp>$318, each>
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T::Array[[Symbol, Integer]]
     <unconditional> -> bb1
 
 # backedges
 # - bb46
-bb49[firstDead=7](<self>: T.class_of(<root>), a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$322: Sorbet::Private::Static::Void, <selfRestore>$323: T.class_of(<root>)):
+bb49[firstDead=7](<self>: T.class_of(<root>), a: T::Array[[Symbol, Integer]], <block-pre-call-temp>$318: Sorbet::Private::Static::Void, <selfRestore>$319: T.class_of(<root>)):
     # outerLoops: 1
     <self>: T.class_of(<root>) = loadSelf(each)
-    <blk>$324: [[Symbol, Integer]] = load_yield_params(each)
-    forTemp$12$12: [Symbol, Integer] = yield_load_arg(0, <blk>$324: [[Symbol, Integer]])
-    <statTemp>$328: Integer(123) = 123
-    <statTemp>$326: [Symbol, Integer] = a: T::Array[[Symbol, Integer]].[]=(<statTemp>$328: Integer(123), forTemp$12$12: [Symbol, Integer])
-    <blockReturnTemp>$325: String("loop body") = "loop body"
-    <blockReturnTemp>$330: T.noreturn = blockreturn<each> <blockReturnTemp>$325: String("loop body")
+    <blk>$320: [[Symbol, Integer]] = load_yield_params(each)
+    forTemp$12$12: [Symbol, Integer] = yield_load_arg(0, <blk>$320: [[Symbol, Integer]])
+    <statTemp>$324: Integer(123) = 123
+    <statTemp>$322: [Symbol, Integer] = a: T::Array[[Symbol, Integer]].[]=(<statTemp>$324: Integer(123), forTemp$12$12: [Symbol, Integer])
+    <blockReturnTemp>$321: String("loop body") = "loop body"
+    <blockReturnTemp>$326: T.noreturn = blockreturn<each> <blockReturnTemp>$321: String("loop body")
     <unconditional> -> bb46
 
 }
