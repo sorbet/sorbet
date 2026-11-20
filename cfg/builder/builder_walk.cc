@@ -247,6 +247,17 @@ BasicBlock *CFGBuilder::walkHash(CFGContext cctx, const ast::Hash &h, BasicBlock
 
 // This doesn't actually "walk" an empty tree, because there's nothing interesting to walk in one.
 // Instead, if conforms to mostly the same interface that `walk` (i.e., returns a BasicBlock *);
+namespace {
+bool isSynthesizedNoMatchingPatternRaise(core::Context ctx, const ast::Send &s) {
+    if (!s.flags.isRewriterSynthesized || s.fun != core::Names::raise() || s.numPosArgs() != 1) {
+        return false;
+    }
+    auto error = ast::cast_tree<ast::ConstantLit>(s.getPosArg(0));
+    return error != nullptr && error->symbol().exists() &&
+           error->symbol().name(ctx) == core::Names::Constants::NoMatchingPatternError();
+}
+} // namespace
+
 BasicBlock *CFGBuilder::walkEmptyTreeInIf(CFGContext cctx, core::LocOffsets nilLoc, BasicBlock *current) {
     synthesizeExpr(current, cctx.target, nilLoc, make_insn<Literal>(core::Types::nilClass()));
     return current;
@@ -684,6 +695,9 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                     return;
                 }
 
+                auto *startBlock = current;
+                auto startSize = current->exprs.size();
+
                 LocalRef recv;
 
                 recv = cctx.newTemporary(core::Names::statTemp());
@@ -858,6 +872,14 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                      */
                 } else {
                     current->exprs.emplace_back(cctx.target, s.loc, std::move(snd).asInsnPtr());
+                }
+
+                // The `raise NoMatchingPatternError` the desugarer adds to a `case`/`in` without `else` never reports as
+                // unreachable: the user didn't write it, and an exhaustive match makes it dead.
+                if (isSynthesizedNoMatchingPatternRaise(cctx.ctx, s) && current == startBlock) {
+                    for (auto i = startSize; i < current->exprs.size(); i++) {
+                        current->exprs[i].value.setSynthetic();
+                    }
                 }
 
                 ret = current;

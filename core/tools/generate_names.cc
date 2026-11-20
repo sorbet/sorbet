@@ -411,6 +411,18 @@ NameDef names[] = {
     {"suggestConstantType", "<suggest-constant-type>"},
     {"suggestFieldType", "<suggest-field-type>"},
     {"checkMatchArray", "<check-match-array>"},
+    {"patternSnapshot", "<pattern-snapshot>"},
+    {"patternDeconstruct", "<pattern-deconstruct>"},
+    {"patternDeconstructKeys", "<pattern-deconstruct-keys>"},
+    {"patternElement", "<pattern-element>"},
+    {"patternRest", "<pattern-rest>"},
+    {"patternHashValue", "<pattern-hash-value>"},
+    {"patternArray", "<pattern-array>"},
+    {"patternHash", "<pattern-hash>"},
+    {"patternValue", "<pattern-value>"},
+    {"deconstruct"},
+    {"deconstructKeys", "deconstruct_keys"},
+    {"length"},
     {"definedInstanceVar", "<defined-instance-var>"},
     {"definedClassVar", "<defined-class-var>"},
     {"arg0"},
@@ -536,6 +548,7 @@ NameDef names[] = {
     {"Regexp", "Regexp", true},
     {"Exception", "Exception", true},
     {"StandardError", "StandardError", true},
+    {"NoMatchingPatternError", "NoMatchingPatternError", true},
     {"Complex", "Complex", true},   // The `::Complex` class
     {"KernelComplex", "Complex"},   // The `Kernel.Complex` method
     {"Rational", "Rational", true}, // The `::Rational` class

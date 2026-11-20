@@ -253,7 +253,20 @@ private:
     // Pattern-matching
     // ... variation of the main desugaring functions for pattern-matching related node.
     ast::ExpressionPtr desugarPattern(pm_node_t *node);
-    ast::ExpressionPtr desugarOnelinePattern(core::LocOffsets loc, pm_node_t *match);
+    ast::ExpressionPtr desugarOnelinePattern(core::LocOffsets loc, pm_node_t *value, pm_node_t *pattern,
+                                             bool raiseOnNoMatch);
+    ast::ExpressionPtr lowerPattern(pm_node_t *node, core::NameRef subject);
+    ast::ExpressionPtr lowerArrayPattern(pm_array_pattern_node *node, core::NameRef subject);
+    ast::ExpressionPtr lowerHashPattern(pm_hash_pattern_node *node, core::NameRef subject);
+    ast::ExpressionPtr patternAnd(core::LocOffsets loc, ast::ExpressionPtr lhs, ast::ExpressionPtr rhs);
+    ast::ExpressionPtr patternOr(core::LocOffsets loc, ast::ExpressionPtr lhs, ast::ExpressionPtr rhs);
+    ast::ExpressionPtr patternBind(core::LocOffsets loc, core::NameRef name, core::NameRef subject);
+    ast::ExpressionPtr patternMagic(core::LocOffsets loc, core::NameRef fun, ast::Send::ARGS_store args);
+    ast::ExpressionPtr patternValue(core::LocOffsets loc, ast::ExpressionPtr value, core::NameRef subject);
+    ast::ExpressionPtr patternUntyped(core::LocOffsets loc, pm_node_t *node);
+    ast::ExpressionPtr raiseNoMatchingPattern(core::LocOffsets loc);
+    ast::ExpressionPtr patternSubjectAssign(core::NameRef subject, ast::ExpressionPtr value);
+    ast::ExpressionPtr patternSnapshotAssign(core::LocOffsets loc, core::NameRef snapshot, core::NameRef subject);
 
     std::string_view sliceLocation(pm_location_t loc) const;
 
@@ -419,10 +432,6 @@ void Desugarer::collectPatternMatchingVarsPrism(ast::InsSeq::STATS_store &vars, 
         vars.emplace_back(MK::Assign(loc, name, move(val)));
         collectPatternMatchingVarsPrism(vars, matchAsNode->value);
     } else if (auto *arrayPatternNode = down_cast<pm_array_pattern_node>(node)) {
-        // Skip ConstPattern - legacy parser doesn't collect variables from ConstPattern
-        if (arrayPatternNode->constant != nullptr) {
-            return;
-        }
         auto requireds = absl::MakeSpan(arrayPatternNode->requireds.nodes, arrayPatternNode->requireds.size);
         for (auto &elt : requireds) {
             collectPatternMatchingVarsPrism(vars, elt);
@@ -436,11 +445,6 @@ void Desugarer::collectPatternMatchingVarsPrism(ast::InsSeq::STATS_store &vars, 
             collectPatternMatchingVarsPrism(vars, elt);
         }
     } else if (auto *hashPatternNode = down_cast<pm_hash_pattern_node>(node)) {
-        // Skip ConstPattern - legacy parser doesn't collect variables from ConstPattern
-        if (hashPatternNode->constant != nullptr) {
-            return;
-        }
-
         auto elements = absl::MakeSpan(hashPatternNode->elements.nodes, hashPatternNode->elements.size);
         for (auto &elt : elements) {
             collectPatternMatchingVarsPrism(vars, elt);
@@ -448,6 +452,13 @@ void Desugarer::collectPatternMatchingVarsPrism(ast::InsSeq::STATS_store &vars, 
 
         // Process rest element
         collectPatternMatchingVarsPrism(vars, hashPatternNode->rest);
+    } else if (auto *findPatternNode = down_cast<pm_find_pattern_node>(node)) {
+        collectPatternMatchingVarsPrism(vars, up_cast(findPatternNode->left));
+        auto requireds = absl::MakeSpan(findPatternNode->requireds.nodes, findPatternNode->requireds.size);
+        for (auto &elt : requireds) {
+            collectPatternMatchingVarsPrism(vars, elt);
+        }
+        collectPatternMatchingVarsPrism(vars, findPatternNode->right);
     } else if (auto *alternationPatternNode = down_cast<pm_alternation_pattern_node>(node)) {
         collectPatternMatchingVarsPrism(vars, alternationPatternNode->left);
         collectPatternMatchingVarsPrism(vars, alternationPatternNode->right);
@@ -464,21 +475,315 @@ void Desugarer::collectPatternMatchingVarsPrism(ast::InsSeq::STATS_store &vars, 
     }
 }
 
-// Desugar `in` and `=>` oneline pattern matching (mirrors desugarOnelinePattern in Desugar.cc)
-ast::ExpressionPtr Desugarer::desugarOnelinePattern(core::LocOffsets loc, pm_node_t *match) {
-    auto matchExpr = MK::RaiseUnimplemented(loc);
-    auto bodyExpr = MK::RaiseUnimplemented(loc);
-    auto elseExpr = MK::EmptyTree();
+// Pattern matching
+//
+// A pattern lowers to a condition that is truthy exactly when the pattern matches the subject, and that assigns the
+// pattern's variables as it goes. `case x in P then body end` becomes `if <P against x> then body else raise
+// NoMatchingPatternError end`, so a binding is assigned on every path into `body` and inference sees its real type:
+//
+//   in Point(Integer => x, y)    `Point === s && (d = <pattern-deconstruct>(s); d.length == 2 &&
+//                                   (e0 = <pattern-element>(d, 0); Integer === e0 && (x = e0; true)) &&
+//                                   (e1 = <pattern-element>(d, 1); (y = e1; true)))`
+//
+// The intrinsics (core/types/calls.cc) read the types off `deconstruct`/`deconstruct_keys` and fall back to
+// `T.untyped`. Find patterns, `**nil`, and an empty hash pattern keep an untyped condition.
 
+ast::ExpressionPtr Desugarer::patternAnd(core::LocOffsets loc, ast::ExpressionPtr lhs, ast::ExpressionPtr rhs) {
+    return MK::If(loc, move(lhs), move(rhs), MK::EmptyTree());
+}
+
+ast::ExpressionPtr Desugarer::patternOr(core::LocOffsets loc, ast::ExpressionPtr lhs, ast::ExpressionPtr rhs) {
+    return MK::If(loc, move(lhs), MK::True(loc), move(rhs));
+}
+
+ast::ExpressionPtr Desugarer::patternBind(core::LocOffsets loc, core::NameRef name, core::NameRef subject) {
+    auto zloc = loc.copyWithZeroLength();
+    return MK::InsSeq1(zloc, MK::Assign(loc, name, MK::Local(zloc, subject)), MK::True(zloc));
+}
+
+ast::ExpressionPtr Desugarer::patternMagic(core::LocOffsets loc, core::NameRef fun, ast::Send::ARGS_store args) {
+    auto zloc = loc.copyWithZeroLength();
+    auto numPosArgs = args.size();
+    return MK::Send(zloc, MK::Magic(zloc), fun, zloc, numPosArgs, move(args));
+}
+
+// `value === subject`, the test for a value pattern (a constant, literal, range, regexp, lambda, or pinned value).
+ast::ExpressionPtr Desugarer::patternValue(core::LocOffsets loc, ast::ExpressionPtr value, core::NameRef subject) {
+    auto zloc = loc.copyWithZeroLength();
+    return MK::Send1(loc, move(value), core::Names::tripleEq(), zloc, MK::Local(zloc, subject));
+}
+
+// A condition Sorbet cannot evaluate, with every variable the pattern binds assigned `T.untyped`.
+ast::ExpressionPtr Desugarer::patternUntyped(core::LocOffsets loc, pm_node_t *node) {
     ast::InsSeq::STATS_store vars;
-    collectPatternMatchingVarsPrism(vars, match);
+    collectPatternMatchingVarsPrism(vars, node);
+    auto unknown = MK::RaiseUnimplemented(loc.copyWithZeroLength());
+    if (vars.empty()) {
+        return unknown;
+    }
+    return MK::InsSeq(loc.copyWithZeroLength(), move(vars), move(unknown));
+}
 
-    if (!vars.empty()) {
-        auto matchLoc = match != nullptr ? translateLoc(match->location) : loc;
-        bodyExpr = MK::InsSeq(matchLoc, move(vars), move(bodyExpr));
+ast::ExpressionPtr Desugarer::raiseNoMatchingPattern(core::LocOffsets loc) {
+    auto zloc = loc.copyWithZeroLength();
+    auto error = MK::UnresolvedConstant(zloc, MK::Constant(zloc, core::Symbols::root()),
+                                        core::Names::Constants::NoMatchingPatternError());
+    auto raise = MK::Send1(zloc, MK::Constant(zloc, core::Symbols::Kernel()), core::Names::raise(), zloc, move(error));
+    ast::cast_tree<ast::Send>(raise)->flags.isRewriterSynthesized = true;
+    return raise;
+}
+
+ast::ExpressionPtr Desugarer::lowerPattern(pm_node_t *node, core::NameRef subject) {
+    auto loc = translateLoc(node->location);
+    auto zloc = loc.copyWithZeroLength();
+
+    switch (PM_NODE_TYPE(node)) {
+        case PM_LOCAL_VARIABLE_TARGET_NODE: { // `in x`
+            auto target = down_cast_nonnull<pm_local_variable_target_node>(node);
+            return patternBind(loc, translateConstantName(target->name), subject);
+        }
+        case PM_CAPTURE_PATTERN_NODE: { // `in Integer => x`
+            auto capture = down_cast_nonnull<pm_capture_pattern_node>(node);
+            auto value = lowerPattern(capture->value, subject);
+            auto targetLoc = translateLoc(capture->target->base.location);
+            auto bind = patternBind(targetLoc, translateConstantName(capture->target->name), subject);
+            return patternAnd(zloc, move(value), move(bind));
+        }
+        case PM_ALTERNATION_PATTERN_NODE: { // `in Integer | Float`
+            auto alternation = down_cast_nonnull<pm_alternation_pattern_node>(node);
+            auto left = lowerPattern(alternation->left, subject);
+            auto right = lowerPattern(alternation->right, subject);
+            return patternOr(zloc, move(left), move(right));
+        }
+        case PM_PINNED_VARIABLE_NODE: { // `in ^x`
+            auto pinned = down_cast_nonnull<pm_pinned_variable_node>(node);
+            return patternValue(loc, desugar(pinned->variable), subject);
+        }
+        case PM_PINNED_EXPRESSION_NODE: { // `in ^(x + 1)`
+            auto pinned = down_cast_nonnull<pm_pinned_expression_node>(node);
+            return patternValue(loc, desugar(pinned->expression), subject);
+        }
+        case PM_ARRAY_PATTERN_NODE: // `in [x, *rest]`, `in Point(x, y)`
+            return lowerArrayPattern(down_cast_nonnull<pm_array_pattern_node>(node), subject);
+        case PM_HASH_PATTERN_NODE: // `in {x:, y: Integer}`, `in Point(x:)`
+            return lowerHashPattern(down_cast_nonnull<pm_hash_pattern_node>(node), subject);
+        case PM_FIND_PATTERN_NODE: { // `in [*, x, *]`
+            auto find = down_cast_nonnull<pm_find_pattern_node>(node);
+            auto untyped = patternUntyped(loc, node);
+            if (find->constant == nullptr) {
+                return untyped;
+            }
+            auto constantLoc = translateLoc(find->constant->location);
+            return patternAnd(zloc, patternValue(constantLoc, desugar(find->constant), subject), move(untyped));
+        }
+        default: // A value pattern: `in Integer`, `in 1..`, `in nil`, `in /re/`, `in -> { }`
+            return patternValue(loc, desugar(node), subject);
+    }
+}
+
+ast::ExpressionPtr Desugarer::lowerArrayPattern(pm_array_pattern_node *node, core::NameRef subject) {
+    auto loc = translateLoc(node->base.location);
+    auto zloc = loc.copyWithZeroLength();
+
+    auto requireds = absl::MakeSpan(node->requireds.nodes, node->requireds.size);
+    auto posts = absl::MakeSpan(node->posts.nodes, node->posts.size);
+    auto *rest = node->rest;
+    bool hasRest = rest != nullptr;
+    int64_t minLength = requireds.size() + posts.size();
+
+    auto array = nextUniqueName(core::Names::patternArray());
+
+    // Built back to front, so that each element test wraps the ones after it.
+    vector<ast::ExpressionPtr> tests;
+
+    auto lengthCall = MK::Send0(zloc, MK::Local(zloc, array), core::Names::length(), zloc);
+    tests.emplace_back(MK::Send1(zloc, move(lengthCall), hasRest ? core::Names::geq() : core::Names::eqeq(), zloc,
+                                 MK::Int(zloc, minLength)));
+
+    auto element = [&](pm_node_t *pattern, int64_t index) {
+        auto patternLoc = translateLoc(pattern->location).copyWithZeroLength();
+        auto name = nextUniqueName(core::Names::patternValue());
+        ast::Send::ARGS_store args;
+        args.emplace_back(MK::Local(patternLoc, array));
+        args.emplace_back(MK::Int(patternLoc, index));
+        auto value = patternMagic(patternLoc, core::Names::patternElement(), move(args));
+        return MK::InsSeq1(patternLoc, MK::Assign(patternLoc, name, move(value)), lowerPattern(pattern, name));
+    };
+
+    for (size_t i = 0; i < requireds.size(); i++) {
+        tests.emplace_back(element(requireds[i], i));
     }
 
-    return MK::If(loc, move(matchExpr), move(bodyExpr), move(elseExpr));
+    if (hasRest && !isa_node<pm_implicit_rest_node>(rest)) {
+        auto splat = down_cast_nonnull<pm_splat_node>(rest);
+        if (splat->expression != nullptr) {
+            auto restLoc = translateLoc(splat->expression->location);
+            auto target = down_cast_nonnull<pm_local_variable_target_node>(splat->expression);
+            ast::Send::ARGS_store args;
+            args.emplace_back(MK::Local(restLoc.copyWithZeroLength(), array));
+            args.emplace_back(MK::Int(restLoc.copyWithZeroLength(), requireds.size()));
+            args.emplace_back(MK::Int(restLoc.copyWithZeroLength(), posts.size()));
+            auto value = patternMagic(restLoc, core::Names::patternRest(), move(args));
+            tests.emplace_back(MK::InsSeq1(restLoc.copyWithZeroLength(),
+                                           MK::Assign(restLoc, translateConstantName(target->name), move(value)),
+                                           MK::True(restLoc.copyWithZeroLength())));
+        }
+    }
+
+    for (size_t i = 0; i < posts.size(); i++) {
+        tests.emplace_back(element(posts[i], static_cast<int64_t>(i) - static_cast<int64_t>(posts.size())));
+    }
+
+    auto matched = move(tests.back());
+    tests.pop_back();
+    while (!tests.empty()) {
+        matched = patternAnd(zloc, move(tests.back()), move(matched));
+        tests.pop_back();
+    }
+
+    auto snapshot = node->constant == nullptr ? subject : nextUniqueName(core::Names::patternSnapshot());
+    ast::Send::ARGS_store args;
+    args.emplace_back(MK::Local(zloc, subject));
+    args.emplace_back(MK::Local(zloc, snapshot));
+    auto deconstruct = patternMagic(zloc, core::Names::patternDeconstruct(), move(args));
+    matched = MK::InsSeq1(zloc, MK::Assign(zloc, array, move(deconstruct)), move(matched));
+
+    if (node->constant == nullptr) {
+        return matched;
+    }
+    auto constantLoc = translateLoc(node->constant->location);
+    matched = patternAnd(zloc, patternValue(constantLoc, desugar(node->constant), subject), move(matched));
+    return MK::InsSeq1(zloc, patternSnapshotAssign(zloc, snapshot, subject), move(matched));
+}
+
+ast::ExpressionPtr Desugarer::lowerHashPattern(pm_hash_pattern_node *node, core::NameRef subject) {
+    auto loc = translateLoc(node->base.location);
+    auto zloc = loc.copyWithZeroLength();
+
+    auto elements = absl::MakeSpan(node->elements.nodes, node->elements.size);
+    auto *rest = node->rest;
+
+    ast::ExpressionPtr constantTest;
+    if (node->constant != nullptr) {
+        auto constantLoc = translateLoc(node->constant->location);
+        constantTest = patternValue(constantLoc, desugar(node->constant), subject);
+    }
+
+    // `in {}` matches only an empty hash and `**nil` only a hash with no other keys; Sorbet can't decide either.
+    if ((elements.empty() && rest == nullptr) || isa_node_nullable<pm_no_keywords_parameter_node>(rest)) {
+        auto untyped = patternUntyped(loc, up_cast(node));
+        // `patternUntyped` skips the bindings of a pattern with a constant, so collect them here.
+        if (constantTest != nullptr) {
+            ast::InsSeq::STATS_store vars;
+            for (auto *element : elements) {
+                collectPatternMatchingVarsPrism(vars, element);
+            }
+            if (!vars.empty()) {
+                untyped = MK::InsSeq(zloc, move(vars), move(untyped));
+            }
+            return patternAnd(zloc, move(constantTest), move(untyped));
+        }
+        return untyped;
+    }
+
+    auto hash = nextUniqueName(core::Names::patternHash());
+
+    vector<ast::ExpressionPtr> tests;
+    for (auto *elementNode : elements) {
+        auto assoc = down_cast_nonnull<pm_assoc_node>(elementNode);
+        auto elementLoc = translateLoc(assoc->base.location);
+        auto elementZloc = elementLoc.copyWithZeroLength();
+
+        auto key = desugar(assoc->key);
+        auto hasKey =
+            MK::Send1(elementZloc, MK::Local(elementZloc, hash), core::Names::key_p(), elementZloc, key.deepCopy());
+
+        auto name = nextUniqueName(core::Names::patternValue());
+        ast::Send::ARGS_store args;
+        args.emplace_back(MK::Local(elementZloc, hash));
+        args.emplace_back(move(key));
+        auto value = patternMagic(elementZloc, core::Names::patternHashValue(), move(args));
+
+        ast::ExpressionPtr valueTest;
+        if (auto implicit = down_cast<pm_implicit_node>(assoc->value)) { // `in {x:}` binds `x`
+            auto target = down_cast_nonnull<pm_local_variable_target_node>(implicit->value);
+            valueTest = patternBind(elementLoc, translateConstantName(target->name), name);
+        } else {
+            valueTest = lowerPattern(assoc->value, name);
+        }
+
+        auto valueThenTest = MK::InsSeq1(elementZloc, MK::Assign(elementZloc, name, move(value)), move(valueTest));
+        tests.emplace_back(patternAnd(elementZloc, move(hasKey), move(valueThenTest)));
+    }
+
+    if (auto splat = down_cast<pm_assoc_splat_node>(rest)) {
+        if (splat->value != nullptr) { // `**rest`: the remaining keys, which Sorbet doesn't track
+            auto target = down_cast_nonnull<pm_local_variable_target_node>(splat->value);
+            auto restLoc = translateLoc(splat->value->location);
+            tests.emplace_back(MK::InsSeq1(
+                restLoc.copyWithZeroLength(),
+                MK::Assign(restLoc, translateConstantName(target->name), MK::RaiseUnimplemented(restLoc)),
+                MK::True(restLoc.copyWithZeroLength())));
+        }
+    }
+
+    ast::ExpressionPtr matched = MK::True(zloc);
+    if (!tests.empty()) {
+        matched = move(tests.back());
+        tests.pop_back();
+        while (!tests.empty()) {
+            matched = patternAnd(zloc, move(tests.back()), move(matched));
+            tests.pop_back();
+        }
+    }
+
+    auto snapshot = constantTest == nullptr ? subject : nextUniqueName(core::Names::patternSnapshot());
+    ast::Send::ARGS_store args;
+    args.emplace_back(MK::Local(zloc, subject));
+    args.emplace_back(MK::Local(zloc, snapshot));
+    auto deconstructKeys = patternMagic(zloc, core::Names::patternDeconstructKeys(), move(args));
+    matched = MK::InsSeq1(zloc, MK::Assign(zloc, hash, move(deconstructKeys)), move(matched));
+
+    if (constantTest == nullptr) {
+        return matched;
+    }
+    matched = patternAnd(zloc, move(constantTest), move(matched));
+    return MK::InsSeq1(zloc, patternSnapshotAssign(zloc, snapshot, subject), move(matched));
+}
+
+// `subject = <Magic>.<pattern-snapshot>(value)`. Going through a call rather than a plain assignment keeps the CFG
+// from dealiasing the temporary back to a user's local, so a pattern narrows only its own copy: narrowing an untyped
+// local to a generic class would make it `C[T.anything]`, stricter than before.
+ast::ExpressionPtr Desugarer::patternSubjectAssign(core::NameRef subject, ast::ExpressionPtr value) {
+    auto loc = value.loc();
+    ast::Send::ARGS_store args;
+    args.emplace_back(move(value));
+    return MK::Assign(loc, subject, patternMagic(loc, core::Names::patternSnapshot(), move(args)));
+}
+
+// `snapshot = <Magic>.<pattern-snapshot>(subject)`, taken before a constant test narrows the subject.
+ast::ExpressionPtr Desugarer::patternSnapshotAssign(core::LocOffsets loc, core::NameRef snapshot,
+                                                    core::NameRef subject) {
+    ast::Send::ARGS_store args;
+    args.emplace_back(MK::Local(loc, subject));
+    return MK::Assign(loc, snapshot, patternMagic(loc, core::Names::patternSnapshot(), move(args)));
+}
+
+// `in` and `=>` one-line pattern matches: `expr in pattern` is a boolean, and `expr => pattern` raises on no match.
+ast::ExpressionPtr Desugarer::desugarOnelinePattern(core::LocOffsets loc, pm_node_t *value, pm_node_t *pattern,
+                                                    bool raiseOnNoMatch) {
+    auto zloc = loc.copyWithZeroLength();
+    auto subject = nextUniqueName(core::Names::assignTemp());
+    auto assignSubject = patternSubjectAssign(subject, desugar(value));
+    auto matched = lowerPattern(pattern, subject);
+
+    ast::ExpressionPtr result;
+    if (raiseOnNoMatch) {
+        result = MK::If(loc, move(matched), MK::Nil(zloc), raiseNoMatchingPattern(loc));
+    } else {
+        result = MK::If(loc, move(matched), MK::True(zloc), MK::False(zloc));
+    }
+    return MK::InsSeq1(loc, move(assignSubject), move(result));
 }
 
 ast::ExpressionPtr Desugarer::make_unsupported_node(core::LocOffsets loc, std::string_view nodeName) const {
@@ -1972,62 +2277,44 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
             auto caseMatchNode = down_cast_nonnull<pm_case_match_node>(node);
 
             auto inNodes = absl::MakeSpan(caseMatchNode->conditions.nodes, caseMatchNode->conditions.size);
-            auto elseClause = desugarNullable(up_cast(caseMatchNode->else_clause));
 
-            // Build an if ladder similar to CASE_NODE
+            auto predicate = desugar(caseMatchNode->predicate);
+            auto subject = nextUniqueName(core::Names::assignTemp());
+            auto assignSubject = patternSubjectAssign(subject, move(predicate));
 
-            // Start with the else clause as the final else
-            ExpressionPtr resultExpr = move(elseClause);
+            // Ruby raises `NoMatchingPatternError` when no `in` matches and there is no `else`.
+            ExpressionPtr resultExpr = caseMatchNode->else_clause != nullptr
+                                           ? desugarNullable(up_cast(caseMatchNode->else_clause))
+                                           : raiseNoMatchingPattern(translateLoc(caseMatchNode->end_keyword_loc));
 
-            // Build the if ladder backwards from the last "in" to the first
             for (auto it = inNodes.rbegin(); it != inNodes.rend(); ++it) {
                 auto inPattern = down_cast_nonnull<pm_in_node>(*it);
+                pm_node_t *pattern = inPattern->pattern;
 
-                // Get the actual pattern location (unwrapping if/unless guards)
-                pm_location_t patternLoc = inPattern->base.location;
-                pm_node_t *actualPattern = inPattern->pattern;
-                if (actualPattern != nullptr) {
-                    if (auto *ifNode = down_cast<pm_if_node>(actualPattern)) {
-                        if (ifNode->statements != nullptr && ifNode->statements->body.size > 0) {
-                            patternLoc = ifNode->statements->body.nodes[0]->location;
-                        }
-                    } else if (auto *unlessNode = down_cast<pm_unless_node>(actualPattern)) {
-                        if (unlessNode->statements != nullptr && unlessNode->statements->body.size > 0) {
-                            patternLoc = unlessNode->statements->body.nodes[0]->location;
-                        }
-                    } else {
-                        patternLoc = actualPattern->location;
-                    }
+                ExpressionPtr guard;
+                if (auto *ifNode = down_cast<pm_if_node>(pattern)) {
+                    guard = desugar(ifNode->predicate);
+                    pattern = ifNode->statements->body.nodes[0];
+                } else if (auto *unlessNode = down_cast<pm_unless_node>(pattern)) {
+                    auto predicate = desugar(unlessNode->predicate);
+                    auto predicateLoc = predicate.loc();
+                    guard = MK::Send0(predicateLoc, move(predicate), core::Names::bang(),
+                                      predicateLoc.copyWithZeroLength());
+                    pattern = unlessNode->statements->body.nodes[0];
                 }
 
-                // Use RaiseUnimplemented as the condition (like desugarOnelinePattern)
-                auto matchExpr = MK::RaiseUnimplemented(translateLoc(patternLoc));
+                auto matchExpr = lowerPattern(pattern, subject);
+                if (guard != nullptr) {
+                    auto patternLoc = translateLoc(pattern->location);
+                    matchExpr = patternAnd(patternLoc.copyWithZeroLength(), move(matchExpr), move(guard));
+                }
 
-                // The body is the statements from the "in" clause
                 auto thenExpr = desugarStatements(inPattern->statements);
-
-                // Collect pattern variable assignments from the pattern
-                ast::InsSeq::STATS_store vars;
-                collectPatternMatchingVarsPrism(vars, inPattern->pattern);
-                if (!vars.empty()) {
-                    auto loc = translateLoc(patternLoc);
-                    thenExpr = MK::InsSeq(loc, move(vars), move(thenExpr));
-                }
-
                 resultExpr =
                     MK::If(translateLoc(inPattern->base.location), move(matchExpr), move(thenExpr), move(resultExpr));
             }
 
-            // Wrap in an InsSeq with the predicate assignment (if there is a predicate)
-            if (caseMatchNode->predicate == nullptr) {
-                return resultExpr;
-            }
-
-            auto predicate = desugar(caseMatchNode->predicate);
-            auto tempName = nextUniqueName(core::Names::assignTemp());
-            auto assignExpr = MK::Assign(predicate.loc(), tempName, move(predicate));
-
-            return MK::InsSeq1(location, move(assignExpr), move(resultExpr));
+            return MK::InsSeq1(location, move(assignSubject), move(resultExpr));
         }
         case PM_CASE_NODE: { // A classic `case` statement that only uses `when` (and not pattern matching with `in`)
             auto caseNode = down_cast_nonnull<pm_case_node>(node);
@@ -2989,18 +3276,12 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
         case PM_MATCH_REQUIRED_NODE: {
             auto matchRequiredNode = down_cast_nonnull<pm_match_required_node>(node);
 
-            auto value = desugarPattern(matchRequiredNode->value);
-            auto pattern = desugarPattern(matchRequiredNode->pattern);
-
-            return desugarOnelinePattern(location, matchRequiredNode->pattern);
+            return desugarOnelinePattern(location, matchRequiredNode->value, matchRequiredNode->pattern, true);
         }
         case PM_MATCH_PREDICATE_NODE: {
             auto matchPredicateNode = down_cast_nonnull<pm_match_predicate_node>(node);
 
-            auto value = desugarPattern(matchPredicateNode->value);
-            auto pattern = desugarPattern(matchPredicateNode->pattern);
-
-            return desugarOnelinePattern(location, matchPredicateNode->pattern);
+            return desugarOnelinePattern(location, matchPredicateNode->value, matchPredicateNode->pattern, false);
         }
         case PM_MATCH_WRITE_NODE: { // A regex match that assigns to a local variable, like `a =~ /wat/`
             auto matchWriteNode = down_cast_nonnull<pm_match_write_node>(node);

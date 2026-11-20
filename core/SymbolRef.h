@@ -1159,6 +1159,10 @@ public:
         return FieldRef::fromRaw(19);
     }
 
+    static FieldRef Magic_UntypedSource_patternMatch() {
+        return FieldRef::fromRaw(20);
+    }
+
     static constexpr int MAX_PROC_ARITY = 10;
     static ClassOrModuleRef Proc0() {
         return ClassOrModuleRef::fromRaw(MAX_SYNTHETIC_CLASS_SYMBOLS - MAX_PROC_ARITY * 2 - 2);
