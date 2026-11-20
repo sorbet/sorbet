@@ -643,7 +643,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||
-      <self>.returns(::T.nilable(<emptyTree>::<C Opus>::<C DB>::<C Model>::<C Mixins>::<C Encryptable>::<C EncryptedValue>))
+      <self>.returns(::T.nilable(<emptyTree>::<C EncryptedProp>))
     end
 
     def encrypted_baz<<todo method>>(&<blk>)
@@ -659,7 +659,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::T::Sig::WithoutRuntime.sig() do ||
-      <self>.params(:arg0, ::T.nilable(<emptyTree>::<C Opus>::<C DB>::<C Model>::<C Mixins>::<C Encryptable>::<C EncryptedValue>)).returns(::T.nilable(<emptyTree>::<C Opus>::<C DB>::<C Model>::<C Mixins>::<C Encryptable>::<C EncryptedValue>))
+      <self>.params(:arg0, ::T.nilable(<emptyTree>::<C EncryptedProp>)).returns(::T.nilable(<emptyTree>::<C EncryptedProp>))
     end
 
     def encrypted_baz=<<todo method>>(arg0, &<blk>)

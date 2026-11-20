@@ -11,16 +11,6 @@ namespace sorbet::rewriter {
 
 namespace {
 
-ast::ExpressionPtr mkNilableEncryptedValue(core::MutableContext ctx, core::LocOffsets loc) {
-    static constexpr core::NameRef parts[6] = {
-        core::Names::Constants::Opus(),        core::Names::Constants::DB(),
-        core::Names::Constants::Model(),       core::Names::Constants::Mixins(),
-        core::Names::Constants::Encryptable(), core::Names::Constants::EncryptedValue(),
-    };
-
-    return ASTUtil::mkNilable(loc, ast::MK::UnresolvedConstantParts(loc, parts));
-}
-
 ast::ExpressionPtr mkNilableString(core::LocOffsets loc) {
     return ASTUtil::mkNilable(loc, ast::MK::Constant(loc, core::Symbols::String()));
 }
@@ -56,6 +46,8 @@ vector<ast::ExpressionPtr> MixinEncryptedProp::run(core::MutableContext ctx, ast
     auto nameLoc = core::LocOffsets{sym->loc.beginPos() + 1, sym->loc.endPos()};
     enc_name = name.prepend(ctx, "encrypted_");
 
+    // Use the encrypted value's type exactly as the call site wrote it, so that the accessors reference
+    // only constants that appear in the source.
     auto &encType = send->getPosArg(1);
     if (!ast::isa_tree<ast::UnresolvedConstantLit>(encType)) {
         return empty;
@@ -77,7 +69,7 @@ vector<ast::ExpressionPtr> MixinEncryptedProp::run(core::MutableContext ctx, ast
     stats.emplace_back(ast::MK::Sig(loc, {}, mkNilableString(loc)));
     stats.emplace_back(ASTUtil::mkSyntheticGet(ctx, loc, name, ast::MK::RaiseUnimplemented(loc)));
 
-    stats.emplace_back(ast::MK::Sig(loc, {}, mkNilableEncryptedValue(ctx, loc)));
+    stats.emplace_back(ast::MK::Sig(loc, {}, ASTUtil::mkNilable(loc, encType.deepCopy())));
     stats.emplace_back(ASTUtil::mkSyntheticGet(ctx, loc, enc_name, ast::MK::RaiseUnimplemented(loc)));
     core::NameRef setName = name.addEq(ctx);
     core::NameRef setEncName = enc_name.addEq(ctx);
@@ -89,7 +81,8 @@ vector<ast::ExpressionPtr> MixinEncryptedProp::run(core::MutableContext ctx, ast
         stats.emplace_back(ASTUtil::mkSyntheticSet(ctx, loc, setName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
 
         stats.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()),
-                                         mkNilableEncryptedValue(ctx, loc), mkNilableEncryptedValue(ctx, loc)));
+                                         ASTUtil::mkNilable(loc, encType.deepCopy()),
+                                         ASTUtil::mkNilable(loc, encType.deepCopy())));
         stats.emplace_back(ASTUtil::mkSyntheticSet(ctx, loc, setEncName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
     }
 

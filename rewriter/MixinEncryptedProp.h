@@ -7,17 +7,17 @@ namespace sorbet::rewriter {
 /**
  * This class desugars things of the form
  *
- *   encrypted_prop :foo
+ *   encrypted_prop :foo, EncryptedValue
  *
  * into
  *
  *   sig {returns(T.nilable(String))}
- *   def foo; T.cast(nil, T.nilable(String)); end
- *   sig {params(arg0: String).returns(NilClass)}
+ *   def foo; end
+ *   sig {params(arg0: T.nilable(String)).returns(T.nilable(String))}
  *   def foo=(arg0); end
- *   sig {returns(T.nilable(String))}
- *   def encrypted_foo; T.cast(nil, T.nilable(String)); end
- *   sig {params(arg0: String).returns(NilClass)}
+ *   sig {returns(T.nilable(EncryptedValue))}
+ *   def encrypted_foo; end
+ *   sig {params(arg0: T.nilable(EncryptedValue)).returns(T.nilable(EncryptedValue))}
  *   def encrypted_foo=(arg0); end
  *
  * We try to implement a simple approximation of the functionality that
@@ -25,7 +25,8 @@ namespace sorbet::rewriter {
  * straddle the line between complexity and usefulness. Specifically:
  *
  * Any `encrypted_prop` method call in a class body whose shape matches is considered.
- * The getter will return `T.nilable(String)` and the setter will take `String`.
+ * The `encrypted_foo` accessors use the type passed as the second argument, which must be a
+ * constant. With `immutable: true`, the setters are omitted.
  *
  * Any deviation from this expected shape stops the desugaring.
  *

@@ -102,10 +102,10 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
     method <C <U EncryptedProp>>#<U encrypted_bar> (<blk>) -> Opus::DB::Model::Mixins::Encryptable::EncryptedValue | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=91:3 end=91:110}
       argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    method <C <U EncryptedProp>>#<U encrypted_baz> (<blk>) -> Opus::DB::Model::Mixins::Encryptable::EncryptedValue | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=92:3 end=92:37}
+    method <C <U EncryptedProp>>#<U encrypted_baz> (<blk>) -> EncryptedProp | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=92:3 end=92:37}
       argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    method <C <U EncryptedProp>>#<U encrypted_baz=> (baz, <blk>) -> Opus::DB::Model::Mixins::Encryptable::EncryptedValue | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=92:3 end=92:37}
-      argument baz<> -> T.nilable(Opus::DB::Model::Mixins::Encryptable::EncryptedValue) @ Loc {file=test/testdata/rewriter/prop.rb start=92:19 end=92:22}
+    method <C <U EncryptedProp>>#<U encrypted_baz=> (baz, <blk>) -> EncryptedProp | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=92:3 end=92:37}
+      argument baz<> -> T.nilable(EncryptedProp) @ Loc {file=test/testdata/rewriter/prop.rb start=92:19 end=92:22}
       argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
     method <C <U EncryptedProp>>#<U encrypted_foo> (<blk>) -> Opus::DB::Model::Mixins::Encryptable::EncryptedValue | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=90:3 end=90:76}
       argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}

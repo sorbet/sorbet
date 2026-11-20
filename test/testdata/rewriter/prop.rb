@@ -138,7 +138,7 @@ def main
 
     T.reveal_type(EncryptedProp.new.foo) # error: Revealed type: `T.nilable(String)`
     T.reveal_type(EncryptedProp.new.encrypted_foo) # error: Revealed type: `T.nilable(Opus::DB::Model::Mixins::Encryptable::EncryptedValue)`
-    T.reveal_type(EncryptedProp.new.encrypted_baz) # error: Revealed type: `T.nilable(Opus::DB::Model::Mixins::Encryptable::EncryptedValue)`
+    T.reveal_type(EncryptedProp.new.encrypted_baz) # error: Revealed type: `T.nilable(EncryptedProp)`
     EncryptedProp.new.foo = "hello"
     EncryptedProp.new.foo = nil
     EncryptedProp.new.bar = "hello" # error: Setter method `bar=` does not exist

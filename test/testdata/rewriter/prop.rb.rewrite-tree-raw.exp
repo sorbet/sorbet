@@ -5449,23 +5449,8 @@ ClassDef{
                   pos_args = 1
                   args = [
                     UnresolvedConstantLit{
-                      cnst = <C <U EncryptedValue>>
-                      scope = UnresolvedConstantLit{
-                        cnst = <C <U Encryptable>>
-                        scope = UnresolvedConstantLit{
-                          cnst = <C <U Mixins>>
-                          scope = UnresolvedConstantLit{
-                            cnst = <C <U Model>>
-                            scope = UnresolvedConstantLit{
-                              cnst = <C <U DB>>
-                              scope = UnresolvedConstantLit{
-                                cnst = <C <U Opus>>
-                                scope = EmptyTree
-                              }
-                            }
-                          }
-                        }
-                      }
+                      cnst = <C <U EncryptedProp>>
+                      scope = EmptyTree
                     }
                   ]
                 }
@@ -5645,23 +5630,8 @@ ClassDef{
                     pos_args = 1
                     args = [
                       UnresolvedConstantLit{
-                        cnst = <C <U EncryptedValue>>
-                        scope = UnresolvedConstantLit{
-                          cnst = <C <U Encryptable>>
-                          scope = UnresolvedConstantLit{
-                            cnst = <C <U Mixins>>
-                            scope = UnresolvedConstantLit{
-                              cnst = <C <U Model>>
-                              scope = UnresolvedConstantLit{
-                                cnst = <C <U DB>>
-                                scope = UnresolvedConstantLit{
-                                  cnst = <C <U Opus>>
-                                  scope = EmptyTree
-                                }
-                              }
-                            }
-                          }
-                        }
+                        cnst = <C <U EncryptedProp>>
+                        scope = EmptyTree
                       }
                     ]
                   }
@@ -5682,23 +5652,8 @@ ClassDef{
                   pos_args = 1
                   args = [
                     UnresolvedConstantLit{
-                      cnst = <C <U EncryptedValue>>
-                      scope = UnresolvedConstantLit{
-                        cnst = <C <U Encryptable>>
-                        scope = UnresolvedConstantLit{
-                          cnst = <C <U Mixins>>
-                          scope = UnresolvedConstantLit{
-                            cnst = <C <U Model>>
-                            scope = UnresolvedConstantLit{
-                              cnst = <C <U DB>>
-                              scope = UnresolvedConstantLit{
-                                cnst = <C <U Opus>>
-                                scope = EmptyTree
-                              }
-                            }
-                          }
-                        }
-                      }
+                      cnst = <C <U EncryptedProp>>
+                      scope = EmptyTree
                     }
                   ]
                 }
