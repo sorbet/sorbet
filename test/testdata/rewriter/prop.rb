@@ -142,6 +142,7 @@ def main
     EncryptedProp.new.foo = "hello"
     EncryptedProp.new.foo = nil
     EncryptedProp.new.bar = "hello" # error: Setter method `bar=` does not exist
+    EncryptedProp.new.with_errors # error: Method `with_errors` does not exist
 
     T.reveal_type(AdvancedODM.new.ifunset) # error: Revealed type: `String`
     T.reveal_type(AdvancedODM.new.ifunset_nilable) # error: Revealed type: `T.nilable(String)`

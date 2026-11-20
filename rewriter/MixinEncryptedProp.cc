@@ -41,7 +41,7 @@ vector<ast::ExpressionPtr> MixinEncryptedProp::run(core::MutableContext ctx, ast
     if (send->fun != core::Names::encryptedProp()) {
         return empty;
     }
-    if (send->numPosArgs() == 0) {
+    if (send->numPosArgs() != 2) {
         return empty;
     }
 
@@ -55,6 +55,11 @@ vector<ast::ExpressionPtr> MixinEncryptedProp::run(core::MutableContext ctx, ast
     ENFORCE(ctx.locAt(sym->loc).source(ctx).value().size() > 1 && ctx.locAt(sym->loc).source(ctx).value()[0] == ':');
     auto nameLoc = core::LocOffsets{sym->loc.beginPos() + 1, sym->loc.endPos()};
     enc_name = name.prepend(ctx, "encrypted_");
+
+    auto &encType = send->getPosArg(1);
+    if (!ast::isa_tree<ast::UnresolvedConstantLit>(encType)) {
+        return empty;
+    }
 
     ast::ExpressionPtr rules;
     rules = ASTUtil::mkKwArgsHash(send);

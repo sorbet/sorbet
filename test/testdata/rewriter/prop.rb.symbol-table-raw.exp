@@ -1,6 +1,6 @@
 class <C <U <root>>> < <C <U Object>> ()
   class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
-    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=2:1 end=150:4}
+    method <S <C <U <root>>> $1>#<N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=2:1 end=151:4}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
   class <C <U AdvancedODM>> < <C <U Object>> (<C <U Props>>) @ Loc {file=test/testdata/rewriter/prop.rb start=38:1 end=38:18}
     method <C <U AdvancedODM>>#<U array> (<blk>) -> AppliedType {       klass = <C <U Array>>       targs = [         <C <U Elem>> = T.untyped       ]     } @ Loc {file=test/testdata/rewriter/prop.rb start=43:5 end=43:23}
@@ -112,20 +112,10 @@ class <C <U <root>>> < <C <U Object>> ()
     method <C <U EncryptedProp>>#<U encrypted_foo=> (foo, <blk>) -> Opus::DB::Model::Mixins::Encryptable::EncryptedValue | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=90:3 end=90:76}
       argument foo<> -> T.nilable(Opus::DB::Model::Mixins::Encryptable::EncryptedValue) @ Loc {file=test/testdata/rewriter/prop.rb start=90:19 end=90:22}
       argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    method <C <U EncryptedProp>>#<U encrypted_with_errors> (<blk>) -> Opus::DB::Model::Mixins::Encryptable::EncryptedValue | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=93:3 end=93:38}
-      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    method <C <U EncryptedProp>>#<U encrypted_with_errors=> (with_errors, <blk>) -> Opus::DB::Model::Mixins::Encryptable::EncryptedValue | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=93:3 end=93:38}
-      argument with_errors<> -> T.nilable(Opus::DB::Model::Mixins::Encryptable::EncryptedValue) @ Loc {file=test/testdata/rewriter/prop.rb start=93:19 end=93:30}
-      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
     method <C <U EncryptedProp>>#<U foo> (<blk>) -> String | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=90:3 end=90:76}
       argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
     method <C <U EncryptedProp>>#<U foo=> (foo, <blk>) -> String | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=90:3 end=90:76}
       argument foo<> -> T.nilable(String) @ Loc {file=test/testdata/rewriter/prop.rb start=90:19 end=90:22}
-      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    method <C <U EncryptedProp>>#<U with_errors> (<blk>) -> String | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=93:3 end=93:38}
-      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    method <C <U EncryptedProp>>#<U with_errors=> (with_errors, <blk>) -> String | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=93:3 end=93:38}
-      argument with_errors<> -> T.nilable(String) @ Loc {file=test/testdata/rewriter/prop.rb start=93:19 end=93:30}
       argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
   class <S <C <U EncryptedProp>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U ClassMethods>>) @ Loc {file=test/testdata/rewriter/prop.rb start=87:1 end=87:20}
     type-member(+) <S <C <U EncryptedProp>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U EncryptedProp>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=EncryptedProp) @ Loc {file=test/testdata/rewriter/prop.rb start=87:1 end=87:20}
