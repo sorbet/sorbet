@@ -37,7 +37,11 @@ void SorbetWorkspaceEditTask::mergeNewer(SorbetWorkspaceEditTask &task) {
     // Merging is only supported *before* we index this update.
     auto *queued = std::get_if<Queued>(&state);
     auto *newerQueued = std::get_if<Queued>(&task.state);
-    ENFORCE(queued != nullptr && newerQueued != nullptr);
+    if (queued == nullptr || newerQueued == nullptr) {
+        Exception::raise("SorbetWorkspaceEditTask::mergeNewer called on edits that aren't both queued state={} "
+                         "newerState={}",
+                         stateName(), task.stateName());
+    }
     params->merge(*task.params);
     // Don't report a latency metric for merged edits.
     if (task.latencyTimer) {
@@ -48,12 +52,8 @@ void SorbetWorkspaceEditTask::mergeNewer(SorbetWorkspaceEditTask &task) {
     }
 
     // This cached information is now invalid.
-    if (newerQueued != nullptr) {
-        newerQueued->provisionalDecision.reset();
-    }
-    if (queued != nullptr) {
-        queued->provisionalDecision.reset();
-    }
+    newerQueued->provisionalDecision.reset();
+    queued->provisionalDecision.reset();
 }
 
 void SorbetWorkspaceEditTask::preprocess(LSPPreprocessor &preprocessor) {
@@ -65,7 +65,9 @@ void SorbetWorkspaceEditTask::preprocess(LSPPreprocessor &preprocessor) {
 }
 
 void SorbetWorkspaceEditTask::index(LSPIndexer &indexer) {
-    ENFORCE(std::holds_alternative<Queued>(state));
+    if (!std::holds_alternative<Queued>(state)) {
+        Exception::raise("SorbetWorkspaceEditTask::index called on an edit that isn't queued state={}", stateName());
+    }
 
     // This is the first time that we're able to compare the files in the update set to
     // the indexer's file table. We should determine if any of the updates we've received
@@ -199,16 +201,13 @@ const SorbetWorkspaceEditParams &SorbetWorkspaceEditTask::getParams() const {
 }
 
 core::packages::Stratum SorbetWorkspaceEditTask::preemptionStratum(FileStratumMapping info) const {
-    // Only queued edits are asked for a preemption stratum.
+    // Only queued edits are asked for a preemption stratum, and only after `canPreempt` has cached their provisional
+    // decision.
     auto *queued = std::get_if<Queued>(&state);
-    ENFORCE(queued != nullptr);
-
-    // There should be no path to `preemptionStratum` where we haven't cached the fast path info, but just to make sure
-    // that we don't crash in a production build if that happens to not be the case, we defensively return the last
-    // stratum here.
     if (queued == nullptr || !queued->provisionalDecision.has_value()) {
-        ENFORCE(false, "Missing cached typechecking path prediction when computing an edit preemption stratum");
-        return info.getLastStratum();
+        Exception::raise("SorbetWorkspaceEditTask::preemptionStratum called on an edit without a provisional "
+                         "typechecking path decision state={}",
+                         stateName());
     }
 
     core::packages::Stratum stratum(0);
