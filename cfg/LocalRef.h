@@ -16,10 +16,10 @@ struct MinLoops {
         Let = 2,
     };
 
-    // If we have a file with more than 500M nesting levels, we have bigger problems.
-    static constexpr int32_t MAX_LEVEL = (1 << 29) - 1;
+    // If we have a file with more than 1B nesting levels, we have bigger problems.
+    static constexpr uint32_t MAX_LEVEL = (1 << 30) - 1;
 
-    int32_t level : 30 = MAX_LEVEL;
+    uint32_t level : 30 = MAX_LEVEL;
     Pin pin : 2 = Pin::None;
 };
 CheckSize(MinLoops, 4, 4);
