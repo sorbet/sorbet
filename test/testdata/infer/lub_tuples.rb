@@ -14,3 +14,21 @@ class Opus::CIBot::Tasks::NotifySlackBuildComplete
     @determined_build_group_status_and_which ||= [true, "fail"]
   end
 end
+
+# Different lengths, same homogenous type
+T.reveal_type(
+  if T.unsafe(nil)
+    [1, 2]
+  else
+    [1, 2, 3]
+  end
+) # error: Revealed type: `T::Array[Integer]`
+
+# Different lengths, different types
+T.reveal_type(
+  if T.unsafe(nil)
+    [1, "two"]
+  else
+    [1, 2, 3]
+  end
+) # error: Revealed type: `T::Array[T.untyped]`
