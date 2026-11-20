@@ -347,6 +347,60 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     }
     options.set_width(defaultCols);
 
+    // ===== Style guide for options =====
+    //
+    // - Arguments that the user fills in are given names wrapped in `<...>`.
+    //
+    //   Example: `<file>`, `<n>`, etc. Something shown as `file` is reserved to mean that the
+    //   option expects the literal string "file" only, like `--parser=prism` or `--color=always`
+    //
+    // - Prefer a descriptive name to something generic like `<string>`. What kind of string?
+    //
+    // - Avoid the `no-` prefix for new options.
+    //
+    //   cxxopts allows all boolean options to take arguments with `=true` or `=false`, and we want
+    //   to avoid double negatives like `--no-config=false`. Instead of using a `no-` prefix, choose
+    //   a different name and possibly choose a different default or implicit value.
+    //
+    //   Long term, it would be great to fix the existing options, but it would be a backwards
+    //   incompatible change.
+    //
+    // - Consider avoiding boolean options entirely.
+    //
+    //   Many options read better when given explicit states, like `--parser={[original],prism}`,
+    //   instead of `--use-prism`. This also makes these options more extensible in the future (new
+    //   enum value, instead of new orthogonal option).
+    //
+    // - Refer to the argument by that name in the description.
+    //
+    //   "Run over the contents of <path>" instead of something like "Run over this path."
+    //
+    // - Conventions for vector options:
+    //
+    //   Give the option a singular name (or try to think of a name where the plurality doesn't matter).
+    //   Put "(repeatable)" in the help text.
+    //   Show the comma-separated form in the argument help, like `<pkg>[,<pkg>...]`
+    //
+    // - Good help text presents the option's behavior in a different word choice, instead of just
+    //   restating the option's name in sentence form. For example:
+    //
+    //       --check-out-of-order-constant-references
+    //                                 Detect when a constant is referenced early in a file, but
+    //                                 defined later in that file. Does not detect out-of-order
+    //                                 references across file boundaries.
+    //
+    //   This implicitly defines "out of order" by way of explaining "referenced early in a file,
+    //   but defined later in that file," because the help text uses different words. This helps
+    //   clarify that this doesn't apply to cross-file out-of-order references.
+    //
+    // - Pay attention to the difference between default and implicit arguments in `cxxopts`, it
+    //   might help inform your option API design.
+    //
+    //   <https://github.com/jarro2783/cxxopts#default-and-implicit-values>
+    //
+    // - New options generally fall into our policy on "Changes to user-facing syntax and APIs,"
+    //   so see CONTRIBUTING.md for more on that policy.
+
     // TODO(neil): we should mention how vector options work/can be used.
     // (ie. that they can be passed as both `--arg 1 --arg 2` and `--arg 1,2`)
     // ----- INPUT -------------------------------------------------------- {{{
