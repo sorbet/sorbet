@@ -173,13 +173,7 @@ const string_view PackageDB::errorHint() const {
 }
 
 void PackageDB::resolvePackagesWithRelaxedChecks(GlobalState &gs) {
-    UnorderedSet<MangledName> packagesWithRelaxedChecks;
-    for (const auto &pkgName : allowRelaxedPackagerChecksFor_) {
-        auto pkgNameParts = absl::StrSplit(pkgName, "::");
-        auto mangledName = MangledName::lookupMangledName(gs, pkgNameParts);
-        packagesWithRelaxedChecks.emplace(mangledName);
-    }
-    this->packagesWithRelaxedChecks_ = move(packagesWithRelaxedChecks);
+    this->packagesWithRelaxedChecks_ = MangledName::parseNames(gs, allowRelaxedPackagerChecksFor_);
 }
 
 void PackageDB::resolvePackagesToUpdateVisibilityFor(GlobalState &gs) {
@@ -187,13 +181,7 @@ void PackageDB::resolvePackagesToUpdateVisibilityFor(GlobalState &gs) {
         return;
     }
 
-    UnorderedSet<MangledName> packagesToUpdateVisibilityFor;
-    for (const auto &pkgName : updateVisibilityFor_) {
-        auto pkgNameParts = absl::StrSplit(pkgName, "::");
-        auto mangledName = MangledName::lookupMangledName(gs, pkgNameParts);
-        packagesToUpdateVisibilityFor.emplace(mangledName);
-    }
-    this->packagesToUpdateVisibilityFor_ = move(packagesToUpdateVisibilityFor);
+    this->packagesToUpdateVisibilityFor_ = MangledName::parseNames(gs, updateVisibilityFor_);
 }
 
 bool PackageDB::allowRelaxedPackagerChecksFor(MangledName mangledName) const {
