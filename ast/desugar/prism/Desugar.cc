@@ -582,7 +582,9 @@ ast::ExpressionPtr Desugarer::lowerPattern(pm_node_t *node, core::NameRef subjec
 }
 
 ast::ExpressionPtr Desugarer::lowerArrayPattern(pm_array_pattern_node *node, core::NameRef subject) {
-    auto loc = translateLoc(node->base.location);
+    // Like the legacy parser's pattern node, the loc excludes a leading constant: `Point(x, y)` is `(x, y)`.
+    auto loc = node->constant == nullptr ? translateLoc(node->base.location)
+                                         : translateLoc(node->opening_loc.start, node->closing_loc.end);
     auto zloc = loc.copyWithZeroLength();
 
     auto requireds = absl::MakeSpan(node->requireds.nodes, node->requireds.size);
@@ -616,9 +618,8 @@ ast::ExpressionPtr Desugarer::lowerArrayPattern(pm_array_pattern_node *node, cor
 
     if (hasRest && !isa_node<pm_implicit_rest_node>(rest)) {
         auto splat = down_cast_nonnull<pm_splat_node>(rest);
-        if (splat->expression != nullptr) {
+        if (auto target = down_cast<pm_local_variable_target_node>(splat->expression)) {
             auto restLoc = translateLoc(splat->expression->location);
-            auto target = down_cast_nonnull<pm_local_variable_target_node>(splat->expression);
             ast::Send::ARGS_store args;
             args.emplace_back(MK::Local(restLoc.copyWithZeroLength(), array));
             args.emplace_back(MK::Int(restLoc.copyWithZeroLength(), requireds.size()));
@@ -657,7 +658,9 @@ ast::ExpressionPtr Desugarer::lowerArrayPattern(pm_array_pattern_node *node, cor
 }
 
 ast::ExpressionPtr Desugarer::lowerHashPattern(pm_hash_pattern_node *node, core::NameRef subject) {
-    auto loc = translateLoc(node->base.location);
+    // Like the legacy parser's pattern node, the loc excludes a leading constant: `Point(x, y)` is `(x, y)`.
+    auto loc = node->constant == nullptr ? translateLoc(node->base.location)
+                                         : translateLoc(node->opening_loc.start, node->closing_loc.end);
     auto zloc = loc.copyWithZeroLength();
 
     auto elements = absl::MakeSpan(node->elements.nodes, node->elements.size);
@@ -669,8 +672,19 @@ ast::ExpressionPtr Desugarer::lowerHashPattern(pm_hash_pattern_node *node, core:
         constantTest = patternValue(constantLoc, desugar(node->constant), subject);
     }
 
+    // After a parse error an element can be some other node; leave such a pattern untyped.
+    auto wellFormed = absl::c_all_of(elements, [](pm_node_t *element) {
+        auto assoc = down_cast<pm_assoc_node>(element);
+        if (assoc == nullptr) {
+            return false;
+        }
+        auto implicit = down_cast<pm_implicit_node>(assoc->value);
+        return implicit == nullptr || isa_node<pm_local_variable_target_node>(implicit->value);
+    });
+
     // `in {}` matches only an empty hash and `**nil` only a hash with no other keys; Sorbet can't decide either.
-    if ((elements.empty() && rest == nullptr) || isa_node_nullable<pm_no_keywords_parameter_node>(rest)) {
+    if (!wellFormed || (elements.empty() && rest == nullptr) ||
+        isa_node_nullable<pm_no_keywords_parameter_node>(rest)) {
         auto untyped = patternUntyped(loc, up_cast(node));
         // `patternUntyped` skips the bindings of a pattern with a constant, so collect them here.
         if (constantTest != nullptr) {
@@ -695,6 +709,17 @@ ast::ExpressionPtr Desugarer::lowerHashPattern(pm_hash_pattern_node *node, core:
         auto elementZloc = elementLoc.copyWithZeroLength();
 
         auto key = desugar(assoc->key);
+        // The legacy parser's loc for the label of `key: pattern` excludes the colon (but keeps the quotes of `"key":`);
+        // for the `key:` shorthand it is the whole label.
+        auto symbol = down_cast<pm_symbol_node>(assoc->key);
+        if (symbol != nullptr && !isa_node<pm_implicit_node>(assoc->value)) {
+            if (symbol->closing_loc.start != nullptr && symbol->closing_loc.end[-1] == ':') {
+                auto keyLoc = translateLoc(assoc->key->location.start, symbol->closing_loc.end - 1);
+                if (auto literal = ast::cast_tree<ast::Literal>(key)) {
+                    key = MK::Symbol(keyLoc, literal->asSymbol());
+                }
+            }
+        }
         auto hasKey =
             MK::Send1(elementZloc, MK::Local(elementZloc, hash), core::Names::key_p(), elementZloc, key.deepCopy());
 
@@ -717,8 +742,8 @@ ast::ExpressionPtr Desugarer::lowerHashPattern(pm_hash_pattern_node *node, core:
     }
 
     if (auto splat = down_cast<pm_assoc_splat_node>(rest)) {
-        if (splat->value != nullptr) { // `**rest`: the remaining keys, which Sorbet doesn't track
-            auto target = down_cast_nonnull<pm_local_variable_target_node>(splat->value);
+        // `**rest`: the remaining keys, which Sorbet doesn't track
+        if (auto target = down_cast<pm_local_variable_target_node>(splat->value)) {
             auto restLoc = translateLoc(splat->value->location);
             tests.emplace_back(MK::InsSeq1(
                 restLoc.copyWithZeroLength(),

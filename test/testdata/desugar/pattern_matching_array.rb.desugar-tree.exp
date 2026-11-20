@@ -2,67 +2,202 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   expr = []
 
   begin
-    <assignTemp>$2 = expr
-    if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-      begin
-        a = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-        <emptyTree>::<C T>.reveal_type(a)
-      end
-    else
-      if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    <assignTemp>$2 = ::<Magic>.<pattern-snapshot>(expr)
+    if if begin
+          <pattern-array>$23 = ::<Magic>.<pattern-deconstruct>(<assignTemp>$2, <assignTemp>$2)
+          <pattern-array>$23.length().==(0)
+        end
         begin
-          b = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-          <emptyTree>::<C T>.reveal_type(b)
+          a = <assignTemp>$2
+          true
         end
       else
-        if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-          begin
-            c = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-            d = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+        <emptyTree>
+      end
+      <emptyTree>::<C T>.reveal_type(a)
+    else
+      if begin
+          <pattern-array>$21 = ::<Magic>.<pattern-deconstruct>(<assignTemp>$2, <assignTemp>$2)
+          if <pattern-array>$21.length().==(1)
             begin
-              <emptyTree>::<C T>.reveal_type(c)
-              <emptyTree>::<C T>.reveal_type(d)
-            end
-          end
-        else
-          if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-            begin
-              e = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-              f = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-              h = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-              g = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+              <pattern-value>$22 = ::<Magic>.<pattern-element>(<pattern-array>$21, 0)
               begin
-                <emptyTree>::<C T>.reveal_type(e)
-                <emptyTree>::<C T>.reveal_type(f)
-                <emptyTree>::<C T>.reveal_type(g)
-                <emptyTree>::<C T>.reveal_type(h)
+                b = <pattern-value>$22
+                true
               end
             end
           else
-            if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-              begin
-                i = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-                <emptyTree>::<C T>.reveal_type(i)
-              end
-            else
-              if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-                begin
-                  k = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-                  l = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+            <emptyTree>
+          end
+        end
+        <emptyTree>::<C T>.reveal_type(b)
+      else
+        if begin
+            <pattern-array>$16 = ::<Magic>.<pattern-deconstruct>(<assignTemp>$2, <assignTemp>$2)
+            if <pattern-array>$16.length().==(2)
+              if begin
+                  <pattern-value>$17 = ::<Magic>.<pattern-element>(<pattern-array>$16, 0)
                   begin
-                    <emptyTree>::<C T>.reveal_type(k)
-                    <emptyTree>::<C T>.reveal_type(l)
+                    c = <pattern-value>$17
+                    true
+                  end
+                end
+                begin
+                  <pattern-value>$18 = ::<Magic>.<pattern-element>(<pattern-array>$16, 1)
+                  begin
+                    <pattern-array>$19 = ::<Magic>.<pattern-deconstruct>(<pattern-value>$18, <pattern-value>$18)
+                    if <pattern-array>$19.length().==(1)
+                      begin
+                        <pattern-value>$20 = ::<Magic>.<pattern-element>(<pattern-array>$19, 0)
+                        begin
+                          d = <pattern-value>$20
+                          true
+                        end
+                      end
+                    else
+                      <emptyTree>
+                    end
                   end
                 end
               else
-                if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-                  begin
-                    m = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-                    n = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+                <emptyTree>
+              end
+            else
+              <emptyTree>
+            end
+          end
+          begin
+            <emptyTree>::<C T>.reveal_type(c)
+            <emptyTree>::<C T>.reveal_type(d)
+          end
+        else
+          if begin
+              <pattern-array>$10 = ::<Magic>.<pattern-deconstruct>(<assignTemp>$2, <assignTemp>$2)
+              if <pattern-array>$10.length().==(3)
+                if begin
+                    <pattern-value>$11 = ::<Magic>.<pattern-element>(<pattern-array>$10, 0)
                     begin
-                      <emptyTree>::<C T>.reveal_type(m)
-                      <emptyTree>::<C T>.reveal_type(n)
+                      e = <pattern-value>$11
+                      true
                     end
+                  end
+                  if begin
+                      <pattern-value>$12 = ::<Magic>.<pattern-element>(<pattern-array>$10, 1)
+                      begin
+                        <pattern-array>$13 = ::<Magic>.<pattern-deconstruct>(<pattern-value>$12, <pattern-value>$12)
+                        if <pattern-array>$13.length().==(1)
+                          begin
+                            <pattern-value>$14 = ::<Magic>.<pattern-element>(<pattern-array>$13, 0)
+                            begin
+                              f = <pattern-value>$14
+                              true
+                            end
+                          end
+                        else
+                          <emptyTree>
+                        end
+                      end
+                    end
+                    begin
+                      <pattern-value>$15 = ::<Magic>.<pattern-element>(<pattern-array>$10, 2)
+                      if begin
+                          g = <pattern-value>$15
+                          true
+                        end
+                        begin
+                          h = <pattern-value>$15
+                          true
+                        end
+                      else
+                        <emptyTree>
+                      end
+                    end
+                  else
+                    <emptyTree>
+                  end
+                else
+                  <emptyTree>
+                end
+              else
+                <emptyTree>
+              end
+            end
+            begin
+              <emptyTree>::<C T>.reveal_type(e)
+              <emptyTree>::<C T>.reveal_type(f)
+              <emptyTree>::<C T>.reveal_type(g)
+              <emptyTree>::<C T>.reveal_type(h)
+            end
+          else
+            if begin
+                <pattern-array>$8 = ::<Magic>.<pattern-deconstruct>(<assignTemp>$2, <assignTemp>$2)
+                if <pattern-array>$8.length().>=(1)
+                  begin
+                    <pattern-value>$9 = ::<Magic>.<pattern-element>(<pattern-array>$8, 0)
+                    begin
+                      i = <pattern-value>$9
+                      true
+                    end
+                  end
+                else
+                  <emptyTree>
+                end
+              end
+              <emptyTree>::<C T>.reveal_type(i)
+            else
+              if begin
+                  <pattern-array>$5 = ::<Magic>.<pattern-deconstruct>(<assignTemp>$2, <assignTemp>$2)
+                  if <pattern-array>$5.length().>=(2)
+                    if begin
+                        <pattern-value>$6 = ::<Magic>.<pattern-element>(<pattern-array>$5, 0)
+                        begin
+                          k = <pattern-value>$6
+                          true
+                        end
+                      end
+                      begin
+                        <pattern-value>$7 = ::<Magic>.<pattern-element>(<pattern-array>$5, -1)
+                        begin
+                          l = <pattern-value>$7
+                          true
+                        end
+                      end
+                    else
+                      <emptyTree>
+                    end
+                  else
+                    <emptyTree>
+                  end
+                end
+                begin
+                  <emptyTree>::<C T>.reveal_type(k)
+                  <emptyTree>::<C T>.reveal_type(l)
+                end
+              else
+                if begin
+                    <pattern-array>$3 = ::<Magic>.<pattern-deconstruct>(<assignTemp>$2, <assignTemp>$2)
+                    if <pattern-array>$3.length().>=(1)
+                      if begin
+                          <pattern-value>$4 = ::<Magic>.<pattern-element>(<pattern-array>$3, 0)
+                          begin
+                            m = <pattern-value>$4
+                            true
+                          end
+                        end
+                        begin
+                          n = ::<Magic>.<pattern-rest>(<pattern-array>$3, 1, 0)
+                          true
+                        end
+                      else
+                        <emptyTree>
+                      end
+                    else
+                      <emptyTree>
+                    end
+                  end
+                  begin
+                    <emptyTree>::<C T>.reveal_type(m)
+                    <emptyTree>::<C T>.reveal_type(n)
                   end
                 else
                   <emptyTree>

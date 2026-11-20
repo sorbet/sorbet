@@ -4,7 +4,7 @@ expr = []
 
 case expr
 in [] => a
-  T.reveal_type(a) # error: Revealed type: `T.untyped`
+  T.reveal_type(a) # error: Revealed type: `[] (0-tuple)`
 in [b]
   T.reveal_type(b) # error: Revealed type: `T.untyped`
 in [c, [d]]
@@ -22,6 +22,6 @@ in [k, *, l]
   T.reveal_type(l) # error: Revealed type: `T.untyped`
 in [m, *n]
   T.reveal_type(m) # error: Revealed type: `T.untyped`
-  T.reveal_type(n) # error: Revealed type: `T.untyped`
+  T.reveal_type(n) # error: Revealed type: `T::Array[T.untyped]`
 else
 end

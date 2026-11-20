@@ -1,23 +1,58 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-    begin
-      a = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+  begin
+    <assignTemp>$2 = ::<Magic>.<pattern-snapshot>([1])
+    if begin
+        <pattern-array>$3 = ::<Magic>.<pattern-deconstruct>(<assignTemp>$2, <assignTemp>$2)
+        if <pattern-array>$3.length().==(1)
+          begin
+            <pattern-value>$4 = ::<Magic>.<pattern-element>(<pattern-array>$3, 0)
+            begin
+              a = <pattern-value>$4
+              true
+            end
+          end
+        else
+          <emptyTree>
+        end
+      end
+      true
+    else
+      false
     end
-  else
-    <emptyTree>
   end
 
   <emptyTree>::<C T>.reveal_type(a)
 
-  if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-    begin
-      a = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-      b = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+  begin
+    <assignTemp>$5 = ::<Magic>.<pattern-snapshot>([1])
+    if begin
+        <pattern-array>$6 = ::<Magic>.<pattern-deconstruct>(<assignTemp>$5, <assignTemp>$5)
+        if <pattern-array>$6.length().==(2)
+          if begin
+              <pattern-value>$7 = ::<Magic>.<pattern-element>(<pattern-array>$6, 0)
+              begin
+                a = <pattern-value>$7
+                true
+              end
+            end
+            begin
+              <pattern-value>$8 = ::<Magic>.<pattern-element>(<pattern-array>$6, 1)
+              begin
+                b = <pattern-value>$8
+                true
+              end
+            end
+          else
+            <emptyTree>
+          end
+        else
+          <emptyTree>
+        end
+      end
+      nil
+    else
+      ::Kernel.raise(::<root>::<C NoMatchingPatternError>)
     end
-  else
-    <emptyTree>
   end
 
   <emptyTree>::<C T>.reveal_type(a)
