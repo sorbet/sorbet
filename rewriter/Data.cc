@@ -105,13 +105,13 @@ vector<ast::ExpressionPtr> Data::run(core::MutableContext ctx, ast::Assign *asgn
         auto argName = ast::MK::Local(symLoc, name);
         newArgs.emplace_back(ast::MK::OptionalParam(symLoc, move(argName), ast::MK::Nil(symLoc)));
 
-        body.emplace_back(ast::MK::SyntheticMethod0(symLoc, symLoc, name, ast::MK::RaiseUnimplemented(loc)));
+        body.emplace_back(ast::MK::SyntheticMethod0(symLoc, symLoc, name, ast::MK::RaiseTypedUnimplemented(loc)));
     }
 
     if (isMissingInitialize(ctx, send)) {
         body.emplace_back(ast::MK::SigVoid(loc, std::move(sigArgs)));
         body.emplace_back(ast::MK::SyntheticMethod(loc, loc, core::Names::initialize(), std::move(newArgs),
-                                                   ast::MK::RaiseUnimplemented(loc)));
+                                                   ast::MK::RaiseTypedUnimplemented(loc)));
     }
 
     if (auto *block = send->block()) {
