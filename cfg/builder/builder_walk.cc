@@ -438,6 +438,10 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
     ENFORCE(!current->bexit.isCondSet() || current == cctx.inWhat.deadBlock(),
             "current block has already been finalized!");
 
+    // CFGContext is passed by copy, so we reset state here for all recursive calls until we know we're at an if chain
+    auto ifChainLoc = cctx.ifChainLoc;
+    cctx.ifChainLoc = core::LocOffsets::none();
+
     try {
         BasicBlock *ret = nullptr;
         typecase(
@@ -507,10 +511,17 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                 auto elseBlock = cctx.inWhat.freshBlock(cctx.loops);
                 conditionalJump(cont, ifSym, thenBlock, elseBlock, cctx.inWhat, a.cond.loc());
 
-                auto thenEnd = ast::isa_tree<ast::EmptyTree>(a.thenp) ? walkEmptyTreeInIf(cctx, a.loc, thenBlock)
+                // The `nil` of an empty branch comes from the end of the whole conditional, like the
+                // value of a method or block that ends without an expression. That's right after the
+                // `end` keyword, or right after the condition of a modifier `if` or `unless`.
+                auto chainLoc = ifChainLoc.exists() ? ifChainLoc : a.loc;
+                auto nilLoc = chainLoc.copyEndWithZeroLength();
+                auto thenEnd = ast::isa_tree<ast::EmptyTree>(a.thenp) ? walkEmptyTreeInIf(cctx, nilLoc, thenBlock)
                                                                       : walk(cctx, a.thenp, thenBlock);
-                auto elseEnd = ast::isa_tree<ast::EmptyTree>(a.elsep) ? walkEmptyTreeInIf(cctx, a.loc, elseBlock)
+                cctx.ifChainLoc = chainLoc;
+                auto elseEnd = ast::isa_tree<ast::EmptyTree>(a.elsep) ? walkEmptyTreeInIf(cctx, nilLoc, elseBlock)
                                                                       : walk(cctx, a.elsep, elseBlock);
+                cctx.ifChainLoc = core::LocOffsets::none();
                 if (thenEnd != cctx.inWhat.deadBlock() || elseEnd != cctx.inWhat.deadBlock()) {
                     if (thenEnd == cctx.inWhat.deadBlock()) {
                         ret = elseEnd;

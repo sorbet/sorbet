@@ -8,10 +8,10 @@ test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:9: Expected `Integer` but 
   Got `T.nilable(Integer)` originating from:
     test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:9:
      9 |  takes_integer(if c then 1 end)
-                        ^^^^^^^^^^^^^^^
+                                  ^
     test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:9:
      9 |  takes_integer(if c then 1 end)
-                                  ^
+                                       ^
   Autocorrect: Use `-a` to autocorrect
     test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:9: Replace with `T.must(if c then 1 end)`
      9 |  takes_integer(if c then 1 end)
@@ -31,13 +31,12 @@ test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:12: Expected `Integer` but
     test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:13:
     13 |      1
               ^
-    test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:14:
-    14 |    elsif x == 2
-    15 |      2
-    16 |    end
     test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:15:
     15 |      2
               ^
+    test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:16:
+    16 |    end
+               ^
   Autocorrect: Use `-a` to autocorrect
     test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:12: Replace with `T.must(if x == 1
           1
@@ -65,10 +64,10 @@ test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:20: Expected `Integer` but
                         ^
     test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:22:
     22 |    when 2 then 2
-            ^^^^^^^^^^^^^
-    test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:22:
-    22 |    when 2 then 2
                         ^
+    test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:23:
+    23 |    end
+               ^
   Autocorrect: Use `-a` to autocorrect
     test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:20: Replace with `T.must(case x
         when 1 then 1
@@ -90,18 +89,15 @@ test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:27: Expected `Integer` but
      4 |sig {params(x: Integer).void}
                     ^
   Got `T.nilable(Integer)` originating from:
-    test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:27:
-    27 |    case x
-    28 |    when 1
-    29 |    when 2 then 2
-    30 |    else 3
-    31 |    end
     test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:29:
     29 |    when 2 then 2
                         ^
     test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:30:
     30 |    else 3
                  ^
+    test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:31:
+    31 |    end
+               ^
   Autocorrect: Use `-a` to autocorrect
     test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:27: Replace with `T.must(case x
         when 1
@@ -129,10 +125,10 @@ test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:35: Expected `Integer` but
                       ^
     test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:37:
     37 |    in 2 then 2
-            ^^^^^^^^^^^
-    test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:37:
-    37 |    in 2 then 2
                       ^
+    test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:38:
+    38 |    end
+               ^
   Autocorrect: Use `-a` to autocorrect
     test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:35: Replace with `T.must(case x
         in 1 then 1
@@ -154,18 +150,15 @@ test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:42: Expected `Integer` but
      4 |sig {params(x: Integer).void}
                     ^
   Got `T.nilable(Integer)` originating from:
-    test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:42:
-    42 |    case x
-    43 |    in 1
-    44 |    in 2 then 2
-    45 |    else 3
-    46 |    end
     test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:44:
     44 |    in 2 then 2
                       ^
     test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:45:
     45 |    else 3
                  ^
+    test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:46:
+    46 |    end
+               ^
   Autocorrect: Use `-a` to autocorrect
     test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:42: Replace with `T.must(case x
         in 1
@@ -188,10 +181,10 @@ test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:49: Expected `Integer` but
   Got `T.nilable(Integer)` originating from:
     test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:49:
     49 |  takes_integer(unless c then 1 end)
-                        ^^^^^^^^^^^^^^^^^^^
+                                      ^
     test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:49:
     49 |  takes_integer(unless c then 1 end)
-                                      ^
+                                           ^
   Autocorrect: Use `-a` to autocorrect
     test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:49: Replace with `T.must(unless c then 1 end)`
     49 |  takes_integer(unless c then 1 end)
@@ -210,7 +203,7 @@ test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:51: Expected `Integer` but
                          ^
     test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:51:
     51 |  takes_integer((1 if c))
-                         ^^^^^^
+                               ^
   Autocorrect: Use `-a` to autocorrect
     test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:51: Replace with `T.must(1 if c)`
     51 |  takes_integer((1 if c))
