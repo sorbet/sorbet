@@ -7,13 +7,12 @@ test/cli/case-missing-else-origin/case_missing_else_origin.rb:9: Expected `Integ
      5 |def one_when(x)
         ^^^^^^^^^^^^^^^
   Got `T.nilable(Integer)` originating from:
-    test/cli/case-missing-else-origin/case_missing_else_origin.rb:6:
-     6 |  case x
-     7 |  when 1 then 2
-     8 |  end
     test/cli/case-missing-else-origin/case_missing_else_origin.rb:7:
      7 |  when 1 then 2
                       ^
+    test/cli/case-missing-else-origin/case_missing_else_origin.rb:8:
+     8 |  end
+             ^
 
 test/cli/case-missing-else-origin/case_missing_else_origin.rb:16: Expected `Integer` but found `T.nilable(Integer)` for method result type https://srb.help/7005
     16 |end
@@ -23,13 +22,12 @@ test/cli/case-missing-else-origin/case_missing_else_origin.rb:16: Expected `Inte
     12 |def one_when_no_predicate(x)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Got `T.nilable(Integer)` originating from:
-    test/cli/case-missing-else-origin/case_missing_else_origin.rb:13:
-    13 |  case
-    14 |  when x == 1 then 2
-    15 |  end
     test/cli/case-missing-else-origin/case_missing_else_origin.rb:14:
     14 |  when x == 1 then 2
                            ^
+    test/cli/case-missing-else-origin/case_missing_else_origin.rb:15:
+    15 |  end
+             ^
 
 test/cli/case-missing-else-origin/case_missing_else_origin.rb:23: Expected `Integer` but found `T.nilable(Integer)` for method result type https://srb.help/7005
     23 |end
@@ -39,13 +37,12 @@ test/cli/case-missing-else-origin/case_missing_else_origin.rb:23: Expected `Inte
     19 |def one_when_temp_predicate(x)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Got `T.nilable(Integer)` originating from:
-    test/cli/case-missing-else-origin/case_missing_else_origin.rb:20:
-    20 |  case x + 1
-    21 |  when 1 then 2
-    22 |  end
     test/cli/case-missing-else-origin/case_missing_else_origin.rb:21:
     21 |  when 1 then 2
                       ^
+    test/cli/case-missing-else-origin/case_missing_else_origin.rb:22:
+    22 |  end
+             ^
 
 test/cli/case-missing-else-origin/case_missing_else_origin.rb:31: Expected `Integer` but found `T.nilable(Integer)` for method result type https://srb.help/7005
     31 |end
@@ -60,10 +57,10 @@ test/cli/case-missing-else-origin/case_missing_else_origin.rb:31: Expected `Inte
                       ^
     test/cli/case-missing-else-origin/case_missing_else_origin.rb:29:
     29 |  when 3 then 4
-          ^^^^^^^^^^^^^
-    test/cli/case-missing-else-origin/case_missing_else_origin.rb:29:
-    29 |  when 3 then 4
                       ^
+    test/cli/case-missing-else-origin/case_missing_else_origin.rb:30:
+    30 |  end
+             ^
 Errors: 4
 --- --parser=prism
 test/cli/case-missing-else-origin/case_missing_else_origin.rb:9: Expected `Integer` but found `T.nilable(Integer)` for method result type https://srb.help/7005
@@ -74,13 +71,12 @@ test/cli/case-missing-else-origin/case_missing_else_origin.rb:9: Expected `Integ
      5 |def one_when(x)
         ^^^^^^^^^^^^^^^
   Got `T.nilable(Integer)` originating from:
-    test/cli/case-missing-else-origin/case_missing_else_origin.rb:6:
-     6 |  case x
-     7 |  when 1 then 2
-     8 |  end
     test/cli/case-missing-else-origin/case_missing_else_origin.rb:7:
      7 |  when 1 then 2
                       ^
+    test/cli/case-missing-else-origin/case_missing_else_origin.rb:8:
+     8 |  end
+             ^
 
 test/cli/case-missing-else-origin/case_missing_else_origin.rb:16: Expected `Integer` but found `T.nilable(Integer)` for method result type https://srb.help/7005
     16 |end
@@ -90,13 +86,12 @@ test/cli/case-missing-else-origin/case_missing_else_origin.rb:16: Expected `Inte
     12 |def one_when_no_predicate(x)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Got `T.nilable(Integer)` originating from:
-    test/cli/case-missing-else-origin/case_missing_else_origin.rb:13:
-    13 |  case
-    14 |  when x == 1 then 2
-    15 |  end
     test/cli/case-missing-else-origin/case_missing_else_origin.rb:14:
     14 |  when x == 1 then 2
                            ^
+    test/cli/case-missing-else-origin/case_missing_else_origin.rb:15:
+    15 |  end
+             ^
 
 test/cli/case-missing-else-origin/case_missing_else_origin.rb:23: Expected `Integer` but found `T.nilable(Integer)` for method result type https://srb.help/7005
     23 |end
@@ -106,13 +101,12 @@ test/cli/case-missing-else-origin/case_missing_else_origin.rb:23: Expected `Inte
     19 |def one_when_temp_predicate(x)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Got `T.nilable(Integer)` originating from:
-    test/cli/case-missing-else-origin/case_missing_else_origin.rb:20:
-    20 |  case x + 1
-    21 |  when 1 then 2
-    22 |  end
     test/cli/case-missing-else-origin/case_missing_else_origin.rb:21:
     21 |  when 1 then 2
                       ^
+    test/cli/case-missing-else-origin/case_missing_else_origin.rb:22:
+    22 |  end
+             ^
 
 test/cli/case-missing-else-origin/case_missing_else_origin.rb:31: Expected `Integer` but found `T.nilable(Integer)` for method result type https://srb.help/7005
     31 |end
@@ -127,8 +121,8 @@ test/cli/case-missing-else-origin/case_missing_else_origin.rb:31: Expected `Inte
                       ^
     test/cli/case-missing-else-origin/case_missing_else_origin.rb:29:
     29 |  when 3 then 4
-          ^^^^^^^^^^^^^
-    test/cli/case-missing-else-origin/case_missing_else_origin.rb:29:
-    29 |  when 3 then 4
                       ^
+    test/cli/case-missing-else-origin/case_missing_else_origin.rb:30:
+    30 |  end
+             ^
 Errors: 4
