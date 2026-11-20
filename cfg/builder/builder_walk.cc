@@ -1108,7 +1108,10 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                 } else {
                     current->exprs.emplace_back(cctx.target, c.loc, make_insn<Cast>(tmp, argLoc, c.type, c.cast));
                 }
-                if (c.cast == core::Names::let()) {
+                // Only pin variables the user can assign to. A synthetic temporary, like the one
+                // holding the method's return value, can be the target of a `T.let` in one branch
+                // of an `if` and of some other value in another branch.
+                if (c.cast == core::Names::let() && !cctx.target.isSyntheticTemporary(cctx.inWhat)) {
                     cctx.inWhat.minLoops[cctx.target.id()] = CFG::MIN_LOOP_LET;
                 }
 
