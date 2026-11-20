@@ -29,6 +29,10 @@ LSPTask::Phase SorbetWorkspaceEditTask::finalPhase() const {
     }
 }
 
+string_view SorbetWorkspaceEditTask::stateName() const {
+    return std::visit([](const auto &alternative) { return alternative.name; }, state);
+}
+
 void SorbetWorkspaceEditTask::mergeNewer(SorbetWorkspaceEditTask &task) {
     // Merging is only supported *before* we index this update.
     auto *queued = std::get_if<Queued>(&state);
@@ -85,7 +89,9 @@ void SorbetWorkspaceEditTask::run(LSPTypecheckerDelegate &typechecker) {
         latencyTimer->setTag("path", "fast");
     }
     auto *committed = std::get_if<Committed>(&state);
-    ENFORCE(committed != nullptr);
+    if (committed == nullptr) {
+        Exception::raise("SorbetWorkspaceEditTask::run called on an edit that isn't committed state={}", stateName());
+    }
     auto &updates = committed->updates;
     ENFORCE(updates != nullptr);
     if (!updates->canceledSlowPath) {
@@ -128,7 +134,10 @@ void SorbetWorkspaceEditTask::runSpecial(LSPTypechecker &typechecker, WorkerPool
     }
 
     auto *committed = std::get_if<Committed>(&state);
-    ENFORCE(committed != nullptr);
+    if (committed == nullptr) {
+        Exception::raise("SorbetWorkspaceEditTask::runSpecial called on an edit that isn't committed state={}",
+                         stateName());
+    }
     auto &updates = committed->updates;
     ENFORCE(updates != nullptr);
 
