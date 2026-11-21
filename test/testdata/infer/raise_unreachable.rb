@@ -238,7 +238,7 @@ def invalid_custom_guard_argument(x)
   unless true
     panic(123)
   # ^^^^^^^^^^ error: This code is unreachable
-    # ^^^^^ hover: NilClass
+    # ^^^^^ hover: null
   end
 end
 
@@ -329,7 +329,7 @@ def explicit_receiver(x, guard)
   unless true
     guard.stop(x)
   # ^^^^^^^^^^^^^ error: This code is unreachable
-    #          ^ hover: NilClass
+    #          ^ hover: null
   end
 end
 
