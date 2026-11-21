@@ -21,3 +21,9 @@ def setter_errors(s)
   s.length += 1
   s.length = 0
 end
+
+sig {params(a: A, x: Integer).void}
+def misspelled_setter(a, x)
+  a.bb ||= x
+  a.bb = x
+end
