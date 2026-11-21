@@ -1598,7 +1598,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 ExpressionPtr nil =
                     MK::Send1(recvLoc.copyEndWithZeroLength(), MK::Magic(zeroLengthLoc),
                               core::Names::nilForSafeNavigation(), zeroLengthLoc, MK::Local(csendLoc, tempRecv));
-                auto iff = MK::If(zeroLengthLoc, move(cond), move(nil), move(send));
+                auto iff = MK::If(loc, move(cond), move(nil), move(send));
                 auto res = MK::InsSeq1(csend->loc, move(assgn), move(iff));
                 result = move(res);
             },

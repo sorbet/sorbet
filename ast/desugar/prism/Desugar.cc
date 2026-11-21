@@ -701,7 +701,7 @@ ast::ExpressionPtr Desugarer::desugarConditionalSend(core::LocOffsets location, 
 
     auto elseBody = body(move(receiverTempLocal), location, methodName, methodNameLoc);
 
-    auto if_ = MK::If(loc0, move(cond), move(nilForSafeNav), move(elseBody));
+    auto if_ = MK::If(location, move(cond), move(nilForSafeNav), move(elseBody));
 
     return MK::InsSeq1(location, move(assignment), move(if_));
 }
