@@ -401,8 +401,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     // - New options generally fall into our policy on "Changes to user-facing syntax and APIs,"
     //   so see CONTRIBUTING.md for more on that policy.
 
-    // TODO(neil): we should mention how vector options work/can be used.
-    // (ie. that they can be passed as both `--arg 1 --arg 2` and `--arg 1,2`)
     // ----- INPUT -------------------------------------------------------- {{{
     section = groupToString(Group::INPUT);
     options.add_options(section)("files", "Input files", cxxopts::value<vector<string>>());
@@ -416,24 +414,24 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options(section)("e-rbi", "Like `-e`, but treat <string> as an RBI file",
                                  cxxopts::value<string>()->default_value(empty.inlineRBIInput), "<string>");
     options.add_options(section)("file",
-                                 "Run over the contents of <path>\n"
+                                 "Run over the contents of <path> (repeatable)\n"
                                  "(Equivalent to passing <path> as a positional argument)",
-                                 cxxopts::value<vector<string>>(), "<path>");
+                                 cxxopts::value<vector<string>>(), "<path>[,<path>...]");
     options.add_options(section)("dir",
-                                 "Run over all Ruby and RBI files in <path>, recursively\n"
+                                 "Run over all Ruby and RBI files in <path>, recursively (repeatable)\n"
                                  "(Equivalent to passing <path> as a positional argument)",
-                                 cxxopts::value<vector<string>>(), "<path>");
+                                 cxxopts::value<vector<string>>(), "<path>[,<path>...]");
     options.add_options(section)("allowed-extension",
                                  "Inside directories, only discover files ending in "
-                                 "<ext>. Passing this option replaces the default list.",
+                                 "<ext>. Passing this option replaces the default list. (repeatable)",
                                  cxxopts::value<vector<string>>()->default_value(".rb,.rbi"), "<ext>[,<ext>...]");
     options.add_options(section)(
         "ignore",
         "Ignores input files that contain <pattern> in their paths (relative to the input path passed to Sorbet).\n"
         "When <pattern> starts with `/` it matches against the prefix of these relative paths; others match anywhere.\n"
         "Matches must be against whole path segments, so `foo` matches `foo/bar.rb` and `bar/foo/baz.rb` but not "
-        "`foo.rb` or `foo2/bar.rb`.",
-        cxxopts::value<vector<string>>(), "<pattern>");
+        "`foo.rb` or `foo2/bar.rb`. (repeatable)",
+        cxxopts::value<vector<string>>(), "<pattern>[,<pattern>...]");
     options.add_options(section)("no-config",
                                  "Do not load the content of the `sorbet/config` file.\n"
                                  "Otherwise, Sorbet reads the `sorbet/config` file and treats each line as if it were "
@@ -504,19 +502,17 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options(section)("check-out-of-order-constant-references",
                                  "Detect when a constant is referenced early in a file, but defined later in that "
                                  "file. Does not detect out-of-order references across file boundaries.");
-    options.add_options(section)("isolate-error-code",
-                                 "Only report errors with code <error-code>. This option can "
-                                 "be passed multiple times. All other errors will be silenced.",
-                                 cxxopts::value<vector<int>>(), "<error-code>");
-    options.add_options(section)("suppress-error-code",
-                                 "Do not report errors with code <error-code>. "
-                                 "This option can be passed multiple times.",
-                                 cxxopts::value<vector<int>>(), "<error-code>");
+    options.add_options(section)(
+        "isolate-error-code",
+        "Only report errors with code <error-code>. All other errors will be silenced. (repeatable)",
+        cxxopts::value<vector<int>>(), "<error-code>[,<error-code>...]");
+    options.add_options(section)("suppress-error-code", "Do not report errors with code <error-code>. (repeatable)",
+                                 cxxopts::value<vector<int>>(), "<error-code>[,<error-code>...]");
     options.add_options(section)("suppress-payload-superclass-redefinition-for",
                                  "Explicitly suppress the superclass redefinition error for "
                                  "<class>, a fully qualified class name defined in Sorbet's "
-                                 "payload, like `IRB::RelineInputMethod`. May be repeated.",
-                                 cxxopts::value<vector<string>>(), "<class>");
+                                 "payload, like `IRB::RelineInputMethod`. (repeatable)",
+                                 cxxopts::value<vector<string>>(), "<class>[,<class>...]");
     options.add_options(section)("experimental-ruby3-keyword-args",
                                  "Enforce use of new (Ruby 3.0-style) keyword arguments. (incomplete and experimental)",
                                  cxxopts::value<bool>());
@@ -539,7 +535,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     section = groupToString(Group::METRIC);
     options.add_options(section)("counters", "Print all internal counters");
     options.add_options(section)("counter", "Print internal counter for <counter> (repeatable)",
-                                 cxxopts::value<vector<string>>(), "<counter>");
+                                 cxxopts::value<vector<string>>(), "<counter>[,<counter>...]");
     options.add_options(section)(
         "track-untyped",
         "Include a per-file counter of untyped usages in the `--print=file-table-json` output. "
@@ -565,9 +561,9 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  cxxopts::value<int>()->default_value(fmt::format("{}", empty.statsdPort)), "<port>");
     options.add_options(section)("statsd-tag-revision", "Tags some metrics with the revision Sorbet was built from",
                                  cxxopts::value<bool>()->default_value(fmt::format("{}", empty.statsdTagRevision)));
-    options.add_options(section)(
-        "metrics-extra-tags", "Extra tags to include in every statsd metric, comma separated (repeatable).",
-        cxxopts::value<vector<string>>()->default_value(""), "<key1>=<value1>,<key2>=<value2>");
+    options.add_options(section)("metrics-extra-tags", "Extra tags to include in every statsd metric. (repeatable)",
+                                 cxxopts::value<vector<string>>()->default_value(""),
+                                 "<key>=<value>[,<key>=<value>...]");
     options.add_options(section)(
         "metrics-latest-version-file",
         "Tag every statsd metric with `is_latest_version:{true,false,unknown}`, by comparing the revision Sorbet "
@@ -597,8 +593,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options(section)("watchman-pause-state-name",
                                  "Defer file change notifications while a client holds the watchman "
                                  "state <state> (see `watchman state-enter`) on the watched root; "
-                                 "they arrive as one batch when the state is left. May be repeated.",
-                                 cxxopts::value<vector<string>>(), "<state>");
+                                 "they arrive as one batch when the state is left. (repeatable)",
+                                 cxxopts::value<vector<string>>(), "<state>[,<state>...]");
     options.add_options(section)("watchman-namespace",
                                  "Only watch files under <namespace>, a directory relative to the watched root",
                                  cxxopts::value<string>()->default_value(empty.watchmanNamespace), "<namespace>");
@@ -607,8 +603,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
         "Directory prefixes that only exist where the LSP server is running, not on the client. "
         "Useful when running Sorbet via an `ssh` connection to a remote server, where the remote server has generated "
         "files that do not exist on the client. References to files in these directories will be sent "
-        "as `sorbet:` URIs to clients that understand them.",
-        cxxopts::value<vector<string>>(), "<path>");
+        "as `sorbet:` URIs to clients that understand them. (repeatable)",
+        cxxopts::value<vector<string>>(), "<path>[,<path>...]");
     options.add_options(section)(
         "forcibly-silence-lsp-multiple-dir-error",
         "Allow the LSP to start with multiple `--dir` options by silencing the error. (WARNING: This flag does not "
@@ -691,31 +687,33 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options(section)("sorbet-packages-hint-message",
                                  "Add <message> as an additional error note in every packaging-related error",
                                  cxxopts::value<string>()->default_value(""), "<message>");
-    options.add_options(section)("extra-package-files-directory-prefix-slash-deprecated",
-                                 "Extra parent directories which contain package files. Files are associated to a "
-                                 "package using slash munging conventions. That is, files in "
-                                 "<dir>/Project/Foo_bar/ belong to Project::FooBar. This is deprecated in favor of "
-                                 "--extra-package-files-directory-prefix-slash since the paths are more readable",
-                                 cxxopts::value<vector<string>>(), "<dir>");
+    options.add_options(section)(
+        "extra-package-files-directory-prefix-slash-deprecated",
+        "Extra parent directories which contain package files. Files are associated to a "
+        "package using slash munging conventions. That is, files in "
+        "<dir>/Project/Foo_bar/ belong to Project::FooBar. This is deprecated in favor of "
+        "--extra-package-files-directory-prefix-slash since the paths are more readable (repeatable)",
+        cxxopts::value<vector<string>>(), "<dir>[,<dir>...]");
     options.add_options(section)("extra-package-files-directory-prefix-slash",
                                  "Extra parent directories which contain package files. Files are associated to a "
                                  "package using a package's namespace join by slashes. That is, files in "
-                                 "<dir>/Project/FooBar/ belong to Project::FooBar",
-                                 cxxopts::value<vector<string>>(), "<dir>");
+                                 "<dir>/Project/FooBar/ belong to Project::FooBar (repeatable)",
+                                 cxxopts::value<vector<string>>(), "<dir>[,<dir>...]");
     options.add_options(section)("allow-relaxed-packager-checks-for",
                                  "Allow <pkg> to ignore the restrictions set by "
-                                 "`visible_to` directives and `package_private!` markers",
-                                 cxxopts::value<vector<string>>(), "<pkg>");
+                                 "`visible_to` directives and `package_private!` markers (repeatable)",
+                                 cxxopts::value<vector<string>>(), "<pkg>[,<pkg>...]");
     options.add_options(section)("gen-packages-update-visibility-for",
-                                 "Generate `visible_to` autocorrects for <pkg> in --gen-packages mode",
-                                 cxxopts::value<vector<string>>(), "<pkg>");
+                                 "Generate `visible_to` autocorrects for <pkg> in --gen-packages mode (repeatable)",
+                                 cxxopts::value<vector<string>>(), "<pkg>[,<pkg>...]");
     options.add_options(section)("gen-packages-allow-relaxing-test-visibility",
                                  "Allow adding `visible_to 'tests'` for packages with visibility updates",
                                  cxxopts::value<bool>());
-    options.add_options(section)(
-        "packager-layers",
-        "Valid layer names for packages, ordered lowest to highest. Passing this flag also enables layering checks.",
-        cxxopts::value<vector<string>>()->implicit_value("library,application"), "<layer-name>");
+    options.add_options(section)("packager-layers",
+                                 "Valid layer names for packages, ordered lowest to highest. Passing this flag also "
+                                 "enables layering checks. (repeatable)",
+                                 cxxopts::value<vector<string>>()->implicit_value("library,application"),
+                                 "<layer-name>[,<layer-name>...]");
     options.add_options(section)("package-attributed-errors",
                                  "Attribute errors to their enclosing package in the error output",
                                  cxxopts::value<bool>());
@@ -744,16 +742,17 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     section = groupToString(Group::STRIPE_AUTOGEN);
     options.add_options(section)("autogen-version", "Write `-p autogen-msgpack` output in format <version>",
                                  cxxopts::value<int>(), "<version>");
-    options.add_options(section)("autogen-subclasses-parent",
-                                 "Generate a list of the subclasses of <class>. Requires `-p autogen-subclasses`",
-                                 cxxopts::value<vector<string>>(), "<class>");
+    options.add_options(section)(
+        "autogen-subclasses-parent",
+        "Generate a list of the subclasses of <class>. Requires `-p autogen-subclasses` (repeatable)",
+        cxxopts::value<vector<string>>(), "<class>[,<class>...]");
     options.add_options(section)("autogen-subclasses-ignore",
-                                 "Like --ignore, but only ignore <pattern> in `-p autogen-subclasses`.",
-                                 cxxopts::value<vector<string>>(), "<pattern>");
+                                 "Like --ignore, but only ignore <pattern> in `-p autogen-subclasses`. (repeatable)",
+                                 cxxopts::value<vector<string>>(), "<pattern>[,<pattern>...]");
     options.add_options(section)("autogen-behavior-allowed-in-rbi-files-paths",
                                  "Autogen may consider RBI files whose paths start "
-                                 "with <path-prefix> to be behavior-defining.",
-                                 cxxopts::value<vector<string>>(), "<path-prefix>");
+                                 "with <path-prefix> to be behavior-defining. (repeatable)",
+                                 cxxopts::value<vector<string>>(), "<path-prefix>[,<path-prefix>...]");
     options.add_options(section)("autogen-msgpack-skip-reference-metadata",
                                  "Skip serializing extra metadata on references when printing msgpack in autogen",
                                  cxxopts::value<bool>());
@@ -780,7 +779,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     auto stableEnd = absl::c_stable_partition(partitioned_print_options, [](const auto &po) { return po.stable; });
     fmt::memory_buffer print_help;
     fmt::format_to(std::back_inserter(print_help),
-                   "Print various internal data structures.\n"
+                   "Print various internal data structures. (repeatable)\n"
                    "By default, the output is to stdout. To send the data to a file, use\n"
                    "--print=<format>:<file>\n"
                    "Most of these formats are unstable, for internal-use only.\n\n"
@@ -793,7 +792,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     fmt::format_to(
         std::back_inserter(print_help), "{}",
         fmt::map_join(stableEnd, partitioned_print_options.end(), ", ", [](const auto &it) { return it.option; }));
-    options.add_options(section)("p,print", to_string(print_help), cxxopts::value<vector<string>>(), "<format>");
+    options.add_options(section)("p,print", to_string(print_help), cxxopts::value<vector<string>>(),
+                                 "<format>[,<format>...]");
     // }}}
 
     // ----- INTERNAL ----------------------------------------------------- {{{
@@ -846,8 +846,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  cxxopts::value<string>()->default_value(""), "<file.rbi>");
     options.add_options(section)("h,help",
                                  "Show help. Pass an optional <section> to show "
-                                 "only that section, instead of all sections",
-                                 cxxopts::value<vector<string>>()->implicit_value("all"), "<section>");
+                                 "only that section, instead of all sections (repeatable)",
+                                 cxxopts::value<vector<string>>()->implicit_value("all"), "<section>[,<section>...]");
     options.add_options(section)("parser",
                                  "Which parser to use. Prism support is experimental and still under active "
                                  "development. Correct code should still parse correctly, but error diagnostics "

@@ -38,21 +38,24 @@ Usage:
                                 passed on the command line (default: "")
       --e-rbi <string>          Like `-e`, but treat <string> as an RBI file (default:
                                 "")
-      --file <path>             Run over the contents of <path>
+      --file <path>[,<path>...]
+                                Run over the contents of <path> (repeatable)
                                 (Equivalent to passing <path> as a positional argument)
-      --dir <path>              Run over all Ruby and RBI files in <path>, recursively
+      --dir <path>[,<path>...]  Run over all Ruby and RBI files in <path>, recursively
+                                (repeatable)
                                 (Equivalent to passing <path> as a positional argument)
       --allowed-extension <ext>[,<ext>...]
                                 Inside directories, only discover files ending in <ext>.
-                                Passing this option replaces the default list. (default:
-                                .rb,.rbi)
-      --ignore <pattern>        Ignores input files that contain <pattern> in their paths
+                                Passing this option replaces the default list.
+                                (repeatable) (default: .rb,.rbi)
+      --ignore <pattern>[,<pattern>...]
+                                Ignores input files that contain <pattern> in their paths
                                 (relative to the input path passed to Sorbet).
                                 When <pattern> starts with `/` it matches against the
                                 prefix of these relative paths; others match anywhere.
                                 Matches must be against whole path segments, so `foo`
                                 matches `foo/bar.rb` and `bar/foo/baz.rb` but not
-                                `foo.rb` or `foo2/bar.rb`.
+                                `foo.rb` or `foo2/bar.rb`. (repeatable)
       --no-config               Do not load the content of the `sorbet/config` file.
                                 Otherwise, Sorbet reads the `sorbet/config` file and
                                 treats each line as if it were passed on the command
@@ -135,17 +138,15 @@ Usage:
                                 Detect when a constant is referenced early in a file, but
                                 defined later in that file. Does not detect out-of-order
                                 references across file boundaries.
-      --isolate-error-code <error-code>
-                                Only report errors with code <error-code>. This option
-                                can be passed multiple times. All other errors will be
-                                silenced.
-      --suppress-error-code <error-code>
-                                Do not report errors with code <error-code>. This option
-                                can be passed multiple times.
-      --suppress-payload-superclass-redefinition-for <class>
+      --isolate-error-code <error-code>[,<error-code>...]
+                                Only report errors with code <error-code>. All other
+                                errors will be silenced. (repeatable)
+      --suppress-error-code <error-code>[,<error-code>...]
+                                Do not report errors with code <error-code>. (repeatable)
+      --suppress-payload-superclass-redefinition-for <class>[,<class>...]
                                 Explicitly suppress the superclass redefinition error for
                                 <class>, a fully qualified class name defined in Sorbet's
-                                payload, like `IRB::RelineInputMethod`. May be repeated.
+                                payload, like `IRB::RelineInputMethod`. (repeatable)
       --experimental-ruby3-keyword-args
                                 Enforce use of new (Ruby 3.0-style) keyword arguments.
                                 (incomplete and experimental)
@@ -167,7 +168,8 @@ Usage:
 
 ```plaintext
       --counters                Print all internal counters
-      --counter <counter>       Print internal counter for <counter> (repeatable)
+      --counter <counter>[,<counter>...]
+                                Print internal counter for <counter> (repeatable)
       --track-untyped [={[nowhere],everywhere,everywhere-but-tests}(=everywhere)]
                                 Include a per-file counter of untyped usages in the
                                 `--print=file-table-json` output. This is in addition to
@@ -192,9 +194,9 @@ Usage:
       --statsd-port <port>      Connect to `--statsd-host` on <port> (default: 8200)
       --statsd-tag-revision     Tags some metrics with the revision Sorbet was built from
                                 (default: true)
-      --metrics-extra-tags <key1>=<value1>,<key2>=<value2>
-                                Extra tags to include in every statsd metric, comma
-                                separated (repeatable). (default: "")
+      --metrics-extra-tags <key>=<value>[,<key>=<value>...]
+                                Extra tags to include in every statsd metric.
+                                (repeatable) (default: "")
       --metrics-latest-version-file <file>
                                 Tag every statsd metric with
                                 `is_latest_version:{true,false,unknown}`, by comparing
@@ -222,22 +224,22 @@ Usage:
       --disable-watchman        When in LSP mode, disable file watching via Watchman
       --watchman-path <path>    Path to watchman executable. Will search on `PATH` if
                                 <path> contains no slashes. (default: watchman)
-      --watchman-pause-state-name <state>
+      --watchman-pause-state-name <state>[,<state>...]
                                 Defer file change notifications while a client holds the
                                 watchman state <state> (see `watchman state-enter`) on
                                 the watched root; they arrive as one batch when the state
-                                is left. May be repeated.
+                                is left. (repeatable)
       --watchman-namespace <namespace>
                                 Only watch files under <namespace>, a directory relative
                                 to the watched root (default: "")
-      --lsp-directories-missing-from-client <path>
+      --lsp-directories-missing-from-client <path>[,<path>...]
                                 Directory prefixes that only exist where the LSP server
                                 is running, not on the client. Useful when running Sorbet
                                 via an `ssh` connection to a remote server, where the
                                 remote server has generated files that do not exist on
                                 the client. References to files in these directories will
                                 be sent as `sorbet:` URIs to clients that understand
-                                them.
+                                them. (repeatable)
       --forcibly-silence-lsp-multiple-dir-error
                                 Allow the LSP to start with multiple `--dir` options by
                                 silencing the error. (WARNING: This flag does not address
@@ -315,30 +317,33 @@ Usage:
       --sorbet-packages-hint-message <message>
                                 Add <message> as an additional error note in every
                                 packaging-related error (default: "")
-      --extra-package-files-directory-prefix-slash-deprecated <dir>
+      --extra-package-files-directory-prefix-slash-deprecated <dir>[,<dir>...]
                                 Extra parent directories which contain package files.
                                 Files are associated to a package using slash munging
                                 conventions. That is, files in <dir>/Project/Foo_bar/
                                 belong to Project::FooBar. This is deprecated in favor of
                                 --extra-package-files-directory-prefix-slash since the
-                                paths are more readable
-      --extra-package-files-directory-prefix-slash <dir>
+                                paths are more readable (repeatable)
+      --extra-package-files-directory-prefix-slash <dir>[,<dir>...]
                                 Extra parent directories which contain package files.
                                 Files are associated to a package using a package's
                                 namespace join by slashes. That is, files in
                                 <dir>/Project/FooBar/ belong to Project::FooBar
-      --allow-relaxed-packager-checks-for <pkg>
+                                (repeatable)
+      --allow-relaxed-packager-checks-for <pkg>[,<pkg>...]
                                 Allow <pkg> to ignore the restrictions set by
                                 `visible_to` directives and `package_private!` markers
-      --gen-packages-update-visibility-for <pkg>
+                                (repeatable)
+      --gen-packages-update-visibility-for <pkg>[,<pkg>...]
                                 Generate `visible_to` autocorrects for <pkg> in
-                                --gen-packages mode
+                                --gen-packages mode (repeatable)
       --gen-packages-allow-relaxing-test-visibility
                                 Allow adding `visible_to 'tests'` for packages with
                                 visibility updates
-      --packager-layers [=<layer-name>(=library,application)]
+      --packager-layers [=<layer-name>[,<layer-name>...](=library,application)]
                                 Valid layer names for packages, ordered lowest to
                                 highest. Passing this flag also enables layering checks.
+                                (repeatable)
       --package-attributed-errors
                                 Attribute errors to their enclosing package in the error
                                 output
@@ -367,15 +372,15 @@ Usage:
 ```plaintext
       --autogen-version <version>
                                 Write `-p autogen-msgpack` output in format <version>
-      --autogen-subclasses-parent <class>
+      --autogen-subclasses-parent <class>[,<class>...]
                                 Generate a list of the subclasses of <class>. Requires
-                                `-p autogen-subclasses`
-      --autogen-subclasses-ignore <pattern>
+                                `-p autogen-subclasses` (repeatable)
+      --autogen-subclasses-ignore <pattern>[,<pattern>...]
                                 Like --ignore, but only ignore <pattern> in `-p
-                                autogen-subclasses`.
-      --autogen-behavior-allowed-in-rbi-files-paths <path-prefix>
+                                autogen-subclasses`. (repeatable)
+      --autogen-behavior-allowed-in-rbi-files-paths <path-prefix>[,<path-prefix>...]
                                 Autogen may consider RBI files whose paths start with
-                                <path-prefix> to be behavior-defining.
+                                <path-prefix> to be behavior-defining. (repeatable)
       --autogen-msgpack-skip-reference-metadata
                                 Skip serializing extra metadata on references when
                                 printing msgpack in autogen
@@ -402,7 +407,8 @@ Usage:
                                 Useful for profiling.
       --trace-lexer             Emit the lexer's token stream in a debug format
       --trace-parser            Enable bison's parser trace functionality
-  -p, --print <format>          Print various internal data structures.
+  -p, --print <format>[,<format>...]
+                                Print various internal data structures. (repeatable)
                                 By default, the output is to stdout. To send the data to
                                 a file, use
                                 --print=<format>:<file>
@@ -480,9 +486,9 @@ Usage:
                                 [experimental] Output a minimal RBI containing the diff
                                 between Sorbet's view of a codebase and the definitions
                                 present in <file.rbi> (default: "")
-  -h, --help [=<section>(=all)]
+  -h, --help [=<section>[,<section>...](=all)]
                                 Show help. Pass an optional <section> to show only that
-                                section, instead of all sections
+                                section, instead of all sections (repeatable)
       --parser {[original],prism}
                                 Which parser to use. Prism support is experimental and
                                 still under active development. Correct code should still
