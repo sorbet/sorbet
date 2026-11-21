@@ -680,11 +680,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
 
     // ----- STRIPE PACKAGES ---------------------------------------------- {{{
     section = groupToString(Group::SORBET_PACKAGES_MODE);
-    options.add_options(section)("stripe-packages", "Enable support for Sorbet's experimental Ruby package system",
-                                 cxxopts::value<bool>());
-    options.add_options(section)("stripe-packages-hint-message",
-                                 "Optional hint message to add to all packaging related errors",
-                                 cxxopts::value<string>()->default_value(""));
     options.add_options(section)("sorbet-packages", "Enable support for Sorbet's experimental Ruby package system",
                                  cxxopts::value<bool>());
     options.add_options(section)("sorbet-packages-hint-message",
@@ -1328,8 +1323,7 @@ void readOptions(Options &opts,
         opts.reserveTypeParameterTableCapacity = raw["reserve-type-argument-table-capacity"].as<uint32_t>();
         opts.reserveTypeMemberTableCapacity = raw["reserve-type-member-table-capacity"].as<uint32_t>();
         opts.uniquelyDefinedBehavior = raw["uniquely-defined-behavior"].as<bool>();
-        opts.cacheSensitiveOptions.sorbetPackages =
-            raw["sorbet-packages"].as<bool>() || raw["stripe-packages"].as<bool>();
+        opts.cacheSensitiveOptions.sorbetPackages = raw["sorbet-packages"].as<bool>();
 
         opts.packageAttributedErrors = raw["package-attributed-errors"].as<bool>();
         if (opts.packageAttributedErrors && !opts.cacheSensitiveOptions.sorbetPackages) {
@@ -1526,9 +1520,6 @@ void readOptions(Options &opts,
         }
 
         opts.sorbetPackagesHint = raw["sorbet-packages-hint-message"].as<string>();
-        if (opts.sorbetPackagesHint.empty()) {
-            opts.sorbetPackagesHint = raw["stripe-packages-hint-message"].as<string>();
-        }
         if (!opts.sorbetPackagesHint.empty() && !opts.cacheSensitiveOptions.sorbetPackages) {
             if (!opts.cacheSensitiveOptions.sorbetPackages) {
                 logger->error("--sorbet-packages-hint-message can only be specified in --sorbet-packages mode");
