@@ -161,7 +161,9 @@ unique_ptr<CFG> CFGBuilder::buildFor(CFGContext cctx, unique_ptr<CFG> res, absl:
             cont = walk(cctx.withTarget(retSym), stats[lastStat], cont);
             finalExprLoc = stats[lastStat].loc();
         } else {
-            cont = walk(cctx.withTarget(retSym), expr, cont);
+            auto bodyCctx = cctx.withTarget(retSym);
+            bodyCctx.isTailPosition = true;
+            cont = walk(bodyCctx, expr, cont);
             finalExprLoc = expr.loc();
         }
     }

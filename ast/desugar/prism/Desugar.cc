@@ -701,7 +701,7 @@ ast::ExpressionPtr Desugarer::desugarConditionalSend(core::LocOffsets location, 
 
     auto elseBody = body(move(receiverTempLocal), location, methodName, methodNameLoc);
 
-    auto if_ = MK::If(loc0, move(cond), move(nilForSafeNav), move(elseBody));
+    auto if_ = MK::If(location, move(cond), move(nilForSafeNav), move(elseBody));
 
     return MK::InsSeq1(location, move(assignment), move(if_));
 }
@@ -952,10 +952,10 @@ ast::ExpressionPtr Desugarer::translateAndOrAssignment(core::LocOffsets location
         ExpressionPtr if_;
         if constexpr (isAndAsgn) {
             // Desugar `lhs &&= rhs` to `if (lhs) { lhs = rhs } else { lhs }`
-            if_ = MK::If(sendLoc, MK::Local(sendLoc, tempResult), move(body), move(elsep));
+            if_ = MK::If(location, MK::Local(sendLoc, tempResult), move(body), move(elsep));
         } else {
             // OrAsgn: if (lhs) { lhs } else { lhs = rhs }
-            if_ = MK::If(sendLoc, MK::Local(sendLoc, tempResult), move(elsep), move(body));
+            if_ = MK::If(location, MK::Local(sendLoc, tempResult), move(elsep), move(body));
         }
         return MK::InsSeq(location, move(stats), move(if_));
     }
@@ -1039,7 +1039,7 @@ ast::ExpressionPtr Desugarer::translateAndOrAssignment(core::LocOffsets location
         auto body = MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun.addEq(ctx), s->funLoc, numPosAssgnArgs,
                              move(assgnArgs), s->flags);
         auto elsep = MK::Local(sendLoc, tempResult);
-        auto iff = MK::If(sendLoc, MK::Local(sendLoc, tempResult), move(body), move(elsep));
+        auto iff = MK::If(location, MK::Local(sendLoc, tempResult), move(body), move(elsep));
         return MK::InsSeq(location, move(stats), move(iff));
     }
 
@@ -1259,10 +1259,10 @@ ast::ExpressionPtr Desugarer::desugarOpAssignSend(core::LocOffsets location, ast
         ExpressionPtr iff;
         if constexpr (Kind == OpAssignKind::And) {
             // Desugar `lhs &&= rhs` to `if (lhs) { lhs = rhs } else { lhs }`
-            iff = MK::If(sendLoc, MK::Local(sendLoc, tempResult), move(body), move(elsep));
+            iff = MK::If(location, MK::Local(sendLoc, tempResult), move(body), move(elsep));
         } else {
             // OrAsgn: if (lhs) { lhs } else { lhs = rhs }
-            iff = MK::If(sendLoc, MK::Local(sendLoc, tempResult), move(elsep), move(body));
+            iff = MK::If(location, MK::Local(sendLoc, tempResult), move(elsep), move(body));
         }
         return MK::InsSeq(location, move(stats), move(iff));
     } else {
@@ -1316,7 +1316,7 @@ ast::ExpressionPtr Desugarer::desugarOpAssignCSend(core::LocOffsets location, as
         auto body = MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun.addEq(ctx), s->funLoc, numPosAssgnArgs,
                              move(assgnArgs), s->flags);
         auto elsep = MK::Local(sendLoc, tempResult);
-        auto iff = MK::If(sendLoc, MK::Local(sendLoc, tempResult), move(body), move(elsep));
+        auto iff = MK::If(location, MK::Local(sendLoc, tempResult), move(body), move(elsep));
         auto wrapped = MK::InsSeq(location, move(stats), move(iff));
         return wrapped;
     } else {

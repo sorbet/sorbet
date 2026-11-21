@@ -252,6 +252,38 @@ BasicBlock *CFGBuilder::walkEmptyTreeInIf(CFGContext cctx, core::LocOffsets nilL
     return current;
 }
 
+// Ends `current`, the end of one branch of `iff` (which is in tail position), with a `return` of
+// `cctx.target`. `conditionalLoc` is the loc of the whole conditional that `iff` belongs to (e.g.,
+// of the `if` that an `elsif` belongs to, or of the `case` that a `when` belongs to).
+//
+// Without this, every value that flows into the method's return value would be joined into a single
+// type before being checked against the method's declared return type. Since `T.untyped` absorbs
+// everything it's joined with, a single untyped branch would hide type errors in all the others.
+BasicBlock *CFGBuilder::returnFromTailPosition(CFGContext cctx, BasicBlock *current, const ast::If &iff, bool isThen,
+                                               core::LocOffsets conditionalLoc) {
+    if (current == cctx.inWhat.deadBlock()) {
+        return current;
+    }
+
+    // Report errors at the loc of the branch's last instruction, which is the loc of the branch's
+    // value, like the method's final `return` does. That loc can be zero-length: the `nil` of a
+    // missing `else` comes from the end of the conditional, and the `nil` of `x&.foo` from the `&`.
+    //
+    // Autocorrects (e.g., `--suggest-unsafe`) wrap the whole conditional instead: desugar invents
+    // some branches (e.g., the `else` of `a && b`, or the `nil` of a missing `else`) that aren't
+    // expressions on their own. If the conditional has no source of its own, there's nothing to wrap.
+    auto &branch = isThen ? iff.thenp : iff.elsep;
+    auto whatLoc = conditionalLoc.exists() && !conditionalLoc.empty() ? conditionalLoc : core::LocOffsets::none();
+    auto loc = current->exprs.empty() ? branch.loc() : current->exprs.back().loc;
+    if (!loc.exists()) {
+        loc = whatLoc;
+    }
+
+    synthesizeExpr(current, LocalRef::finalReturn(), loc, make_insn<Return>(cctx.target, whatLoc));
+    jumpToDead(current, cctx.inWhat, loc);
+    return cctx.inWhat.deadBlock();
+}
+
 BasicBlock *CFGBuilder::walkBlockReturn(CFGContext cctx, core::LocOffsets loc, const ast::ExpressionPtr &expr,
                                         BasicBlock *current) {
     LocalRef exprSym = cctx.newTemporary(core::Names::nextTemp());
@@ -441,6 +473,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
     // CFGContext is passed by copy, so we reset state here for all recursive calls until we know we're at an if chain
     auto ifChainLoc = cctx.ifChainLoc;
     cctx.ifChainLoc = core::LocOffsets::none();
+    auto isTailPosition = cctx.isTailPosition;
+    cctx.isTailPosition = false;
 
     try {
         BasicBlock *ret = nullptr;
@@ -516,12 +550,21 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                 // `end` keyword, or right after the condition of a modifier `if` or `unless`.
                 auto chainLoc = ifChainLoc.exists() ? ifChainLoc : a.loc;
                 auto nilLoc = chainLoc.copyEndWithZeroLength();
+                // If this `if` is in tail position, so are both of its branches. Return from the end
+                // of each branch separately, so that each branch's value is checked against the
+                // method's return type on its own, instead of after joining them.
+                cctx.isTailPosition = isTailPosition;
                 auto thenEnd = ast::isa_tree<ast::EmptyTree>(a.thenp) ? walkEmptyTreeInIf(cctx, nilLoc, thenBlock)
                                                                       : walk(cctx, a.thenp, thenBlock);
                 cctx.ifChainLoc = chainLoc;
                 auto elseEnd = ast::isa_tree<ast::EmptyTree>(a.elsep) ? walkEmptyTreeInIf(cctx, nilLoc, elseBlock)
                                                                       : walk(cctx, a.elsep, elseBlock);
+                cctx.isTailPosition = false;
                 cctx.ifChainLoc = core::LocOffsets::none();
+                if (isTailPosition) {
+                    thenEnd = returnFromTailPosition(cctx, thenEnd, a, true, chainLoc);
+                    elseEnd = returnFromTailPosition(cctx, elseEnd, a, false, chainLoc);
+                }
                 if (thenEnd != cctx.inWhat.deadBlock() || elseEnd != cctx.inWhat.deadBlock()) {
                     if (thenEnd == cctx.inWhat.deadBlock()) {
                         ret = elseEnd;
@@ -687,6 +730,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                     LocalRef temp = cctx.newTemporary(core::Names::statTemp());
                     current = walk(cctx.withTarget(temp), exp, current);
                 }
+                cctx.isTailPosition = isTailPosition;
                 ret = walk(cctx, a.expr, current);
             },
             [&](const ast::Send &s) {
