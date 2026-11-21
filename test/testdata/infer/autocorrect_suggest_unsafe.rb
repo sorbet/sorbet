@@ -19,7 +19,7 @@ end
 sig {params(c: T::Boolean, u: T.untyped).returns(String)}
 def branches(c, u)
   if c
-    0
+    0 # error: Expected `String` but found `Integer(0)` for method result type
   else
     u
   end
@@ -29,17 +29,17 @@ sig {params(c: T::Boolean, u: T.untyped).returns(String)}
 def missing_else(c, u)
   if c
     u
-  end
+  end # error: Expected `String` but found `NilClass` for method result type
 end
 
 sig {params(x: T.untyped).returns(String)}
 def safe_navigation(x)
-  x&.foo
+  x&.foo # error: Expected `String` but found `NilClass` for method result type
 end
 
 sig {params(u: T.untyped).returns(T::Boolean)}
 def and_and(u)
-  u.foo? && u.bar?
+  u.foo? && u.bar? # error: Expected `T::Boolean` but found `T.nilable(FalseClass)` for method result type
 end
 
 sig {params(x: Integer, u: T.untyped).returns(String)}
@@ -48,7 +48,7 @@ def elsif_missing_else(x, u)
     u
   elsif x == 2
     u
-  end
+  end # error: Expected `String` but found `NilClass` for method result type
 end
 
 sig {params(x: T.any(Integer, String, Symbol), u: T.untyped).returns(String)}
@@ -56,23 +56,25 @@ def case_missing_else(x, u)
   case x
   when Integer then u
   when String then u
-  end
+  end # error: Expected `String` but found `NilClass` for method result type
 end
 
 sig {params(u: T.untyped).returns(T::Boolean)}
 def and_and_block(u)
-  u.all? { |k| k.foo } && u.bar
+  u.all? { |k| k.foo } && u.bar # error: Expected `T::Boolean` but found `T.nilable(FalseClass)` for method result type
 end
 
 sig {returns(Integer)}
 def or_assign_ivar
-  @or_assign_ivar ||= 'str'
+  @or_assign_ivar ||= 'str' # error: Expected `Integer` but found `String("str")` for method result type
 end
 
 sig {params(h: T::Hash[T.untyped, Integer], k: T.untyped).returns(String)}
 def or_assign_index(h, k)
   h[k] ||= 0
-end # error: Expected `String` but found `Integer` for method result type
+# ^^^^ error: Expected `String` but found `Integer` for method result type
+# ^^^^ error: Expected `String` but found `Integer(0)` for method result type
+end
 
 module ConstantBranch
   X = T.let('', String)
@@ -81,7 +83,7 @@ end
 sig {params(c: T::Boolean, u: T.untyped).returns(Integer)}
 def constant_branch(c, u)
   if c
-    ConstantBranch::X
+    ConstantBranch::X # error: Expected `Integer` but found `String` for method result type
   else
     u
   end
@@ -89,13 +91,13 @@ end
 
 sig {params(c: T::Boolean, u: T.untyped).returns(String)}
 def modifier_if_missing_else(c, u)
-  u if c
+  u if c # error: Expected `String` but found `NilClass` for method result type
 end
 
 sig {params(c: T::Boolean, u: T.untyped).returns(Integer)}
 def block_branch(c, u)
   if c
-    [1].map { |x| x.to_s }
+    [1].map { |x| x.to_s } # error: Expected `Integer` but found `T::Array[String]` for method result type
   else
     u
   end
@@ -104,7 +106,7 @@ end
 sig {params(c: T::Boolean, u: T.untyped).returns(Integer)}
 def block_receiver_branch(c, u)
   if c
-    [1].to_h { |g| [g, g] }.reject { |k, _| k.nil? }
+    [1].to_h { |g| [g, g] }.reject { |k, _| k.nil? } # error: Expected `Integer` but found `T::Hash[Integer, Integer]` for method result type
   else
     u
   end
