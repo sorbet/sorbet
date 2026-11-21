@@ -259,28 +259,46 @@ class T::Private::Methods::Signature
       raise ArgumentError.new("wrong number of arguments (given #{args_length}, expected #{expected_str})")
     end
 
-    begin
-      it = 0
+    it = 0
+    if @rest_type.nil?
+      while it < args_length
+        arg_type = @arg_types.fetch(it)
+        yield arg_type[0], args[it], arg_type[1]
+        it += 1
+      end
+    else
+      # Required params may follow the rest param (`def m(a, *rest, b)`); Ruby binds those to the
+      # trailing args. `@arg_types` lists the leading params and then the trailing ones.
+      # (Optional params can't be mixed with trailing ones; see the `:req` check in `initialize`.)
+      params = parameters
+      lead_count = @arg_types.length
+      rest_kind, rest_name = params[lead_count]
+      if rest_kind != :rest
+        lead_count = T.must(params.index { |kind, _| kind == :rest })
+        rest_name = params.fetch(lead_count)[1]
+        if args_length < @req_arg_count
+          raise ArgumentError.new("wrong number of arguments (given #{args_length}, expected #{@req_arg_count}+)")
+        end
+      end
+      rest_end = args_length - (@arg_types.length - lead_count)
 
-      # Process given pre-rest args. When there are no rest args,
-      # this is just the given number of args.
-      while it < args_length && it < @arg_types.length
+      while it < lead_count && it < rest_end
         arg_type = @arg_types.fetch(it)
         yield arg_type[0], args[it], arg_type[1]
         it += 1
       end
 
-      if !@rest_type.nil?
-        rest_count = args_length - @arg_types.length
+      while it < rest_end
+        yield rest_name, args[it], @rest_type
+        it += 1
+      end
 
-        if rest_count > 0
-          rest_name = fast_rest_name
-
-          rest_count.times do
-            yield rest_name, args[it], @rest_type
-            it += 1
-          end
-        end
+      post_index = lead_count
+      while it < args_length
+        arg_type = @arg_types.fetch(post_index)
+        yield arg_type[0], args[it], arg_type[1]
+        it += 1
+        post_index += 1
       end
     end
 
@@ -314,12 +332,6 @@ class T::Private::Methods::Signature
     @rest_type&.build_type
     @keyrest_type&.build_type
     @return_type.build_type
-  end
-
-  # The rest param directly follows the positional params unless required params come after it.
-  private def fast_rest_name
-    param_kind, param_name = parameters[@arg_types.length]
-    param_kind == :rest ? param_name : parameter_name(:rest)
   end
 
   private def parameter_name(kind)

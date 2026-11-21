@@ -133,10 +133,8 @@ module Opus::Types::Test
         sig = T::Utils.signature_for_method(c.instance_method(:post_required))
         assert_equal(:rest, sig.rest_name)
 
-        # This captures current, incorrect behavior: sorbet-runtime checks positional args in
-        # order and treats everything after them as rest args, so here it checks the first arg
-        # against `a` and the rest against `rest`, even though Ruby binds the last arg to `a`.
-        err = assert_raises(TypeError) { c.new.post_required(0, 1, 'x') }
+        c.new.post_required('x', 'y', 0)
+        err = assert_raises(TypeError) { c.new.post_required(0, 'x', 'y') }
         assert_match(/Parameter 'rest': Expected type String, got type Integer/, err.message)
       end
 
