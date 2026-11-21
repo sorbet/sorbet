@@ -1,14 +1,14 @@
 # typed: true
 extend T::Sig
 
-# When a method ends with a conditional, the types of its branches are joined
-# before being checked against the method's return type. An untyped branch makes
-# the joined type untyped, which hides errors in the other branches.
+# When a method ends with a conditional, each branch is checked against the
+# method's return type separately, so that an untyped branch does not hide errors
+# in the other branches.
 
 sig {params(u: T.untyped, s: String).returns(Integer)}
 def if_else(u, s)
   if Random.rand(2).even?
-    s
+    s # error: Expected `Integer` but found `String` for method result type
   else
     u
   end
@@ -17,7 +17,7 @@ end
 sig {params(u: T.untyped).returns(Integer)}
 def if_else_literal(u)
   if Random.rand(2).even?
-    'not an int'
+    'not an int' # error: Expected `Integer` but found `String("not an int")` for method result type
   else
     T.unsafe(nil)
   end
@@ -28,9 +28,9 @@ def elsif_chain(c, u)
   if c
     u
   elsif u
-    :sym
+    :sym # error: Expected `Integer` but found `Symbol(:sym)` for method result type
   else
-    2.0
+    2.0 # error: Expected `Integer` but found `Float(2.000000)` for method result type
   end
 end
 
@@ -39,13 +39,13 @@ def case_when(x, u)
   case x
   when Integer then x
   when String then u
-  else x
+  else x # error: Expected `Integer` but found `Symbol` for method result type
   end
 end
 
 sig {params(x: T.nilable(String)).returns(Integer)}
 def or_untyped(x)
-  x || T.unsafe(nil)
+  x || T.unsafe(nil) # error: Expected `Integer` but found `String` for method result type
 end
 
 sig {params(x: T.nilable(Integer)).returns(Integer)}
@@ -62,7 +62,7 @@ def nested_in_begin(c, u)
       if u
         u
       else
-        'nested'
+        'nested' # error: Expected `Integer` but found `String("nested")` for method result type
       end
     else
       u
@@ -88,8 +88,9 @@ def void_method(c, u)
   end
 end
 
-# The same is true when the conditional's value is assigned to a variable, or
-# when it's inside a `begin`/`ensure`, `rescue`, or block.
+# Only tail position is affected. A conditional whose value is assigned to a
+# variable, or which is inside a `begin`/`ensure`, `rescue`, or block, still
+# joins its branches before the result is checked.
 
 sig {params(c: T::Boolean, u: T.untyped).returns(Integer)}
 def assigned_to_variable(c, u)
@@ -136,14 +137,15 @@ def inside_block(c, u)
   end
 end
 
-# `a && b` is a conditional too: `if a then b else a end`.
+# `a && b` is `if a then b else a end`, and its falsy branch returns `a`. When
+# `a` is untyped, that's `nil` or `false`.
 
 sig {params(u: T.untyped).returns(T::Boolean)}
 def and_and_untyped(u)
-  u.foo? && u.bar?
+  u.foo? && u.bar? # error: Expected `T::Boolean` but found `T.nilable(FalseClass)` for method result type
 end
 
 sig {params(x: T.nilable(String), u: T.untyped).returns(String)}
 def and_and_typed_left(x, u)
-  x && u
+  x && u # error: Expected `String` but found `NilClass` for method result type
 end
