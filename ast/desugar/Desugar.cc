@@ -2538,7 +2538,9 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     // Create a new `if` for the branch:
                     // `in A` => `if (TODO)`
                     auto match = MK::RaiseUnimplemented(pattern->loc);
-                    res = MK::If(inPattern->loc, move(match), move(body), move(res));
+                    // The outermost `if` stands for the whole `case`, so give it the `case`'s loc.
+                    auto ifLoc = it + 1 == caseMatch->inBodies.rend() ? loc : inPattern->loc;
+                    res = MK::If(ifLoc, move(match), move(body), move(res));
                 }
                 res = MK::InsSeq1(loc, move(exprVar), move(res));
                 result = move(res);

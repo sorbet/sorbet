@@ -2014,8 +2014,9 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
                     thenExpr = MK::InsSeq(loc, move(vars), move(thenExpr));
                 }
 
-                resultExpr =
-                    MK::If(translateLoc(inPattern->base.location), move(matchExpr), move(thenExpr), move(resultExpr));
+                // The outermost `if` stands for the whole `case`, so give it the `case`'s loc.
+                auto ifLoc = it + 1 == inNodes.rend() ? location : translateLoc(inPattern->base.location);
+                resultExpr = MK::If(ifLoc, move(matchExpr), move(thenExpr), move(resultExpr));
             }
 
             // Wrap in an InsSeq with the predicate assignment (if there is a predicate)
