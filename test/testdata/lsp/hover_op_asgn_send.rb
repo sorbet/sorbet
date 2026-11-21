@@ -12,12 +12,12 @@ def example(a, h, x)
   #     ^ hover-line: 2 # A#b:
   #     ^ hover-line: 3 sig { returns(T.nilable(Integer)) }
   #     ^ hover-line: 4 def b; end
-  #       ^ hover-line: 2 Integer
+  #       ^ hover: (nothing)
   #           ^ hover: Integer
   z = h[:k] ||= x
   #   ^ hover: T::Hash[Symbol, T.nilable(Integer)]
   #    ^ hover: T::Hash[Symbol, T.nilable(Integer)]
-  #         ^ hover-line: 2 Integer
+  #         ^ hover: (nothing)
   # For comparison, the setter call of a plain assignment:
   w = a.b = x
   #     ^ hover-line: 2 # A#b=:

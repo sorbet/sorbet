@@ -946,7 +946,7 @@ ast::ExpressionPtr Desugarer::translateAndOrAssignment(core::LocOffsets location
             MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun, s->funLoc, numPosArgs, move(readArgs), s->flags);
         auto tempResult = nextUniqueName(s->fun);
         stats.emplace_back(MK::Assign(sendLoc, tempResult, move(cond)));
-        auto body = MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun.addEq(ctx), s->funLoc, numPosAssgnArgs,
+        auto body = MK::Send(location, MK::Local(recvLoc, tempRecv), s->fun.addEq(ctx), s->funLoc, numPosAssgnArgs,
                              move(assgnArgs), s->flags);
         auto elsep = MK::Local(sendLoc, tempResult);
         ExpressionPtr if_;
@@ -1036,7 +1036,7 @@ ast::ExpressionPtr Desugarer::translateAndOrAssignment(core::LocOffsets location
             MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun, s->funLoc, numPosArgs, move(readArgs), s->flags);
         auto tempResult = nextUniqueName(s->fun);
         stats.emplace_back(MK::Assign(sendLoc, tempResult, move(cond)));
-        auto body = MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun.addEq(ctx), s->funLoc, numPosAssgnArgs,
+        auto body = MK::Send(location, MK::Local(recvLoc, tempRecv), s->fun.addEq(ctx), s->funLoc, numPosAssgnArgs,
                              move(assgnArgs), s->flags);
         auto elsep = MK::Local(sendLoc, tempResult);
         auto iff = MK::If(sendLoc, MK::Local(sendLoc, tempResult), move(body), move(elsep));
@@ -1113,7 +1113,7 @@ ast::ExpressionPtr Desugarer::translateOpAssignment(PrismAssignmentNode *node, c
         auto numPosAssgnArgs = numPosArgs + 1;
 
         // Create the assignment operation: obj.method=(newValue) or obj[]=(index, newValue)
-        auto res = MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun.addEq(ctx), s->funLoc, numPosAssgnArgs,
+        auto res = MK::Send(location, MK::Local(recvLoc, tempRecv), s->fun.addEq(ctx), s->funLoc, numPosAssgnArgs,
                             move(assgnArgs), s->flags);
 
         return MK::InsSeq(location, move(stats), move(res));
@@ -1158,7 +1158,7 @@ ast::ExpressionPtr Desugarer::translateOpAssignment(PrismAssignmentNode *node, c
         auto numPosAssgnArgs = numPosArgs + 1;
         assgnArgs.emplace_back(move(newValue));
 
-        auto res = MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun.addEq(ctx), s->funLoc, numPosAssgnArgs,
+        auto res = MK::Send(location, MK::Local(recvLoc, tempRecv), s->fun.addEq(ctx), s->funLoc, numPosAssgnArgs,
                             move(assgnArgs), s->flags);
         auto wrapped = MK::InsSeq(location, move(stats), move(res));
         ifExpr->elsep = move(wrapped);
@@ -1253,7 +1253,7 @@ ast::ExpressionPtr Desugarer::desugarOpAssignSend(core::LocOffsets location, ast
             MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun, s->funLoc, numPosArgs, move(readArgs), s->flags);
         auto tempResult = nextUniqueName(s->fun);
         stats.emplace_back(MK::Assign(sendLoc, tempResult, move(cond)));
-        auto body = MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun.addEq(ctx), s->funLoc, numPosAssgnArgs,
+        auto body = MK::Send(location, MK::Local(recvLoc, tempRecv), s->fun.addEq(ctx), s->funLoc, numPosAssgnArgs,
                              move(assgnArgs), s->flags);
         auto elsep = MK::Local(sendLoc, tempResult);
         ExpressionPtr iff;
@@ -1279,7 +1279,7 @@ ast::ExpressionPtr Desugarer::desugarOpAssignSend(core::LocOffsets location, ast
         auto numPosAssgnArgs = numPosArgs + 1;
 
         // Create the assignment operation: obj.method=(newValue) or obj[]=(index, newValue)
-        auto res = MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun.addEq(ctx), s->funLoc, numPosAssgnArgs,
+        auto res = MK::Send(location, MK::Local(recvLoc, tempRecv), s->fun.addEq(ctx), s->funLoc, numPosAssgnArgs,
                             move(assgnArgs), s->flags);
 
         return MK::InsSeq(location, move(stats), move(res));
@@ -1313,7 +1313,7 @@ ast::ExpressionPtr Desugarer::desugarOpAssignCSend(core::LocOffsets location, as
             MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun, s->funLoc, numPosArgs, move(readArgs), s->flags);
         auto tempResult = nextUniqueName(s->fun);
         stats.emplace_back(MK::Assign(sendLoc, tempResult, move(cond)));
-        auto body = MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun.addEq(ctx), s->funLoc, numPosAssgnArgs,
+        auto body = MK::Send(location, MK::Local(recvLoc, tempRecv), s->fun.addEq(ctx), s->funLoc, numPosAssgnArgs,
                              move(assgnArgs), s->flags);
         auto elsep = MK::Local(sendLoc, tempResult);
         auto iff = MK::If(sendLoc, MK::Local(sendLoc, tempResult), move(body), move(elsep));
@@ -1327,7 +1327,7 @@ ast::ExpressionPtr Desugarer::desugarOpAssignCSend(core::LocOffsets location, as
         auto numPosAssgnArgs = numPosArgs + 1;
         assgnArgs.emplace_back(move(newValue));
 
-        auto res = MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun.addEq(ctx), s->funLoc, numPosAssgnArgs,
+        auto res = MK::Send(location, MK::Local(recvLoc, tempRecv), s->fun.addEq(ctx), s->funLoc, numPosAssgnArgs,
                             move(assgnArgs), s->flags);
         auto wrapped = MK::InsSeq(location, move(stats), move(res));
         ifExpr->elsep = move(wrapped);
