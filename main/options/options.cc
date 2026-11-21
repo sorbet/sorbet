@@ -514,7 +514,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options(section)("suppress-payload-superclass-redefinition-for",
                                  "Explicitly suppress the superclass redefinition error for the specified class "
                                  "defined in Sorbet's payload. May be repeated.",
-                                 cxxopts::value<vector<string>>(), "Fully::Qualified::ClassName");
+                                 cxxopts::value<vector<string>>(), "<class>");
     options.add_options(section)("experimental-ruby3-keyword-args",
                                  "Enforce use of new (Ruby 3.0-style) keyword arguments. (incomplete and experimental)",
                                  cxxopts::value<bool>());
@@ -546,7 +546,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options(section)("metrics-file", "Report counters and some timers to <file>, in JSON format.",
                                  cxxopts::value<string>()->default_value(empty.metricsFile), "<file>");
     options.add_options(section)("metrics-prefix", "String to prefix all metrics with, e.g. `my_org.my_repo`.",
-                                 cxxopts::value<string>()->default_value(empty.metricsPrefix), "<string>");
+                                 cxxopts::value<string>()->default_value(empty.metricsPrefix), "<prefix>");
     options.add_options(section)("metrics-branch", "Branch to report in metrics export.",
                                  cxxopts::value<string>()->default_value(empty.metricsBranch), "<branch>");
     options.add_options(section)("metrics-sha", "Set the `sha` field to <sha> in the `--metrics-file` output.",
@@ -684,7 +684,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  cxxopts::value<bool>());
     options.add_options(section)("sorbet-packages-hint-message",
                                  "Optional hint message to add to all packaging related errors",
-                                 cxxopts::value<string>()->default_value(""));
+                                 cxxopts::value<string>()->default_value(""), "<message>");
     options.add_options(section)("extra-package-files-directory-prefix-slash-deprecated",
                                  "Extra parent directories which contain package files. Files are associated to a "
                                  "package using slash munging conventions. That is, files in "
@@ -699,10 +699,10 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options(section)("allow-relaxed-packager-checks-for",
                                  "Packages which are allowed to ignore the restrictions set by `visible_to` "
                                  "directives and `package_private!` markers",
-                                 cxxopts::value<vector<string>>(), "<name>");
+                                 cxxopts::value<vector<string>>(), "<pkg>");
     options.add_options(section)("gen-packages-update-visibility-for",
                                  "Packages for which to generate `visible_to` autocorrects in --gen-packages mode",
-                                 cxxopts::value<vector<string>>(), "<name>");
+                                 cxxopts::value<vector<string>>(), "<pkg>");
     options.add_options(section)("gen-packages-allow-relaxing-test-visibility",
                                  "Allow adding `visible_to 'tests'` for packages with visibility updates",
                                  cxxopts::value<bool>());
@@ -719,12 +719,12 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options(section)(
         "min-stratum-size",
         "In package-directed mode, merge strata below this file count (including `__package.rb` files) with a neighbor",
-        cxxopts::value<uint32_t>());
+        cxxopts::value<uint32_t>(), "<n>");
     options.add_options(section)(
         "stratum-split-threshold",
         "In package-directed mode, split strata above this file count (including `__package.rb` files) into their "
         "component SCCs",
-        cxxopts::value<uint32_t>());
+        cxxopts::value<uint32_t>(), "<n>");
     options.add_options(section)("focus-package", "Focus typechecking to <pkg> (repeatable)",
                                  cxxopts::value<vector<string>>(), "<pkg>[,<pkg>...]");
     options.add_options(section)("focus-assume-package-dependencies-typecheck",
@@ -737,17 +737,17 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
 
     // ----- STRIPE AUTOGEN ----------------------------------------------- {{{
     section = groupToString(Group::STRIPE_AUTOGEN);
-    options.add_options(section)("autogen-version", "Autogen version to output", cxxopts::value<int>());
+    options.add_options(section)("autogen-version", "Autogen version to output", cxxopts::value<int>(), "<version>");
     options.add_options(section)("autogen-subclasses-parent",
                                  "Parent classes for which generate a list of subclasses. "
                                  "This option must be used in conjunction with -p autogen-subclasses",
-                                 cxxopts::value<vector<string>>(), "string");
+                                 cxxopts::value<vector<string>>(), "<class>");
     options.add_options(section)("autogen-subclasses-ignore",
                                  "Like --ignore, but it only affects `-p autogen-subclasses`.",
-                                 cxxopts::value<vector<string>>(), "string");
+                                 cxxopts::value<vector<string>>(), "<pattern>");
     options.add_options(section)("autogen-behavior-allowed-in-rbi-files-paths",
                                  "RBI files defined in these paths can be considered by autogen as behavior-defining.",
-                                 cxxopts::value<vector<string>>(), "string");
+                                 cxxopts::value<vector<string>>(), "<path-prefix>");
     options.add_options(section)("autogen-msgpack-skip-reference-metadata",
                                  "Skip serializing extra metadata on references when printing msgpack in autogen",
                                  cxxopts::value<bool>());
@@ -761,7 +761,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options(section)("wait-for-dbg", "Wait for debugger to attach after starting. Especially useful to "
                                                  "attach to a Sorbet process launched by a language client");
     options.add_options(section)("sleep-in-slow-path", "Add some sleeps to slow path to artificially slow it down",
-                                 cxxopts::value<int>()->implicit_value("3"));
+                                 cxxopts::value<int>()->implicit_value("3"), "<seconds>");
     options.add_options(section)("stress-incremental-resolver",
                                  "Simulate updates which tend to expose namer and resolver bugs");
     options.add_options(section)("simulate-crash", "Raise an uncaught C++ exception on startup to simulate a crash");
@@ -798,7 +798,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  "Do not load Sorbet's payload which defines RBI files for the Ruby standard library");
     options.add_options(section)(
         "store-state", "Store state into three files, separated by commas: <symbol-table>,<name-table>,<file-table>",
-        cxxopts::value<string>()->default_value(""), "file");
+        cxxopts::value<string>()->default_value(""), "<symbol-table>,<name-table>,<file-table>");
     options.add_options(section)("silence-dev-message", "Silence \"You are running a development build\" message");
     options.add_options(section)("censor-for-snapshot-tests",
                                  "When printing raw location information, don't show line numbers");
@@ -840,12 +840,12 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options(section)("h,help",
                                  "Show help. Can pass an optional SECTION to show help for only one section instead of "
                                  "the default of all sections",
-                                 cxxopts::value<vector<string>>()->implicit_value("all"), "SECTION");
+                                 cxxopts::value<vector<string>>()->implicit_value("all"), "<section>");
     options.add_options(section)("parser",
                                  "Which parser to use. Prism support is experimental and still under active "
                                  "development. Correct code should still parse correctly, but error diagnostics "
                                  "and auto-corrections are a work-in-progress.",
-                                 cxxopts::value<string>()->default_value("original"), "{[original], prism}");
+                                 cxxopts::value<string>()->default_value("original"), "{[original],prism}");
 
     // }}}
 

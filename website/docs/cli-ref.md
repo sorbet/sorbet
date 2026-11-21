@@ -141,7 +141,7 @@ Usage:
       --suppress-error-code <error-code>
                                 Which error(s) to exclude from reporting. This option can
                                 be passed multiple times.
-      --suppress-payload-superclass-redefinition-for Fully::Qualified::ClassName
+      --suppress-payload-superclass-redefinition-for <class>
                                 Explicitly suppress the superclass redefinition error for
                                 the specified class defined in Sorbet's payload. May be
                                 repeated.
@@ -173,7 +173,7 @@ Usage:
                                 the codebase-wide `types.input.untyped.usages` counter.
       --metrics-file <file>     Report counters and some timers to <file>, in JSON
                                 format. (default: "")
-      --metrics-prefix <string>
+      --metrics-prefix <prefix>
                                 String to prefix all metrics with, e.g. `my_org.my_repo`.
                                 (default: ruby_typer.unknown)
       --metrics-branch <branch>
@@ -306,7 +306,7 @@ Usage:
 ```plaintext
       --sorbet-packages         Enable support for Sorbet's experimental Ruby package
                                 system
-      --sorbet-packages-hint-message arg
+      --sorbet-packages-hint-message <message>
                                 Optional hint message to add to all packaging related
                                 errors (default: "")
       --extra-package-files-directory-prefix-slash-deprecated <dir>
@@ -321,10 +321,10 @@ Usage:
                                 Files are associated to a package using a package's
                                 namespace join by slashes. That is, files in
                                 <dir>/Project/FooBar/ belong to Project::FooBar
-      --allow-relaxed-packager-checks-for <name>
+      --allow-relaxed-packager-checks-for <pkg>
                                 Packages which are allowed to ignore the restrictions set
                                 by `visible_to` directives and `package_private!` markers
-      --gen-packages-update-visibility-for <name>
+      --gen-packages-update-visibility-for <pkg>
                                 Packages for which to generate `visible_to` autocorrects
                                 in --gen-packages mode
       --gen-packages-allow-relaxing-test-visibility
@@ -339,9 +339,9 @@ Usage:
       --experimental-package-directed
                                 Enable support for checking by package, instead of
                                 processing all files at once
-      --min-stratum-size arg    In package-directed mode, merge strata below this file
+      --min-stratum-size <n>    In package-directed mode, merge strata below this file
                                 count (including `__package.rb` files) with a neighbor
-      --stratum-split-threshold arg
+      --stratum-split-threshold <n>
                                 In package-directed mode, split strata above this file
                                 count (including `__package.rb` files) into their
                                 component SCCs
@@ -358,15 +358,16 @@ Usage:
 ## STRIPE AUTOGEN options
 
 ```plaintext
-      --autogen-version arg     Autogen version to output
-      --autogen-subclasses-parent string
+      --autogen-version <version>
+                                Autogen version to output
+      --autogen-subclasses-parent <class>
                                 Parent classes for which generate a list of subclasses.
                                 This option must be used in conjunction with -p
                                 autogen-subclasses
-      --autogen-subclasses-ignore string
+      --autogen-subclasses-ignore <pattern>
                                 Like --ignore, but it only affects `-p
                                 autogen-subclasses`.
-      --autogen-behavior-allowed-in-rbi-files-paths string
+      --autogen-behavior-allowed-in-rbi-files-paths <path-prefix>
                                 RBI files defined in these paths can be considered by
                                 autogen as behavior-defining.
       --autogen-msgpack-skip-reference-metadata
@@ -383,7 +384,7 @@ Usage:
       --wait-for-dbg            Wait for debugger to attach after starting. Especially
                                 useful to attach to a Sorbet process launched by a
                                 language client
-      --sleep-in-slow-path [=arg(=3)]
+      --sleep-in-slow-path [=<seconds>(=3)]
                                 Add some sleeps to slow path to artificially slow it down
       --stress-incremental-resolver
                                 Simulate updates which tend to expose namer and resolver
@@ -425,7 +426,8 @@ Usage:
                                 uncaught exception)
       --no-stdlib               Do not load Sorbet's payload which defines RBI files for
                                 the Ruby standard library
-      --store-state file        Store state into three files, separated by commas:
+      --store-state <symbol-table>,<name-table>,<file-table>
+                                Store state into three files, separated by commas:
                                 <symbol-table>,<name-table>,<file-table> (default: "")
       --silence-dev-message     Silence "You are running a development build" message
       --censor-for-snapshot-tests
@@ -471,9 +473,10 @@ Usage:
                                 [experimental] Output a minimal RBI containing the diff
                                 between Sorbet's view of a codebase and the definitions
                                 present in this file (default: "")
-  -h, --help [=SECTION(=all)]   Show help. Can pass an optional SECTION to show help for
+  -h, --help [=<section>(=all)]
+                                Show help. Can pass an optional SECTION to show help for
                                 only one section instead of the default of all sections
-      --parser {[original], prism}
+      --parser {[original],prism}
                                 Which parser to use. Prism support is experimental and
                                 still under active development. Correct code should still
                                 parse correctly, but error diagnostics and
