@@ -59,8 +59,11 @@ script_cmd | \
   sed -e $'s/\\\r\\\r*$//' | \
   # Get rid of trailing spaces to make it look nice when reading the markdown
   sed -e 's/ *$//' | \
-  # CI has different number of cores, so the `--max-threads` help output changes
-  sed -e 's/^\( *\)[1-9][0-9]*)/\1number of cores on the system)/' | \
+  # CI has different number of cores, so the `--max-threads` help output changes.
+  # Only rewrite the default in that option's entry (from its first line to the
+  # first line ending in `)`), whether or not it wraps onto its own line.
+  sed -e '/--max-threads/,/)$/s/(default: [1-9][0-9]*)/(default: number of cores on the system)/' \
+      -e '/--max-threads/,/)$/s/^\( *\)[1-9][0-9]*)/\1number of cores on the system)/' | \
   # Convert help sections into markdown sections
   sed -e $'s/^ \\([A-Z].* options\\):/```\\\n\\\n## \\1\\\n\\\n```plaintext/'
 

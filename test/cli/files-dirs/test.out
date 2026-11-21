@@ -24,20 +24,23 @@ Usage:
   -e <string>                   Treat <string> as if it were the contents of a Ruby file passed on 
                                 the command line (default: "")
       --e-rbi <string>          Like `-e`, but treat <string> as an RBI file (default: "")
-      --file <path>             Run over the contents of <path>
+      --file <path>[,<path>...]
+                                Run over the contents of <path> (repeatable)
                                 (Equivalent to passing <path> as a positional argument)
-      --dir <path>              Run over all Ruby and RBI files in <path>, recursively
+      --dir <path>[,<path>...]  Run over all Ruby and RBI files in <path>, recursively (repeatable)
                                 (Equivalent to passing <path> as a positional argument)
       --allowed-extension <ext>[,<ext>...]
-                                Use these extensions to determine which file types Sorbet should 
-                                discover inside directories. (default: .rb,.rbi)
-      --ignore <pattern>        Ignores input files that contain <pattern> in their paths (relative 
+                                Inside directories, only discover files ending in <ext>. Passing 
+                                this option replaces the default list. (repeatable) (default: 
+                                .rb,.rbi)
+      --ignore <pattern>[,<pattern>...]
+                                Ignores input files that contain <pattern> in their paths (relative 
                                 to the input path passed to Sorbet).
                                 When <pattern> starts with `/` it matches against the prefix of 
                                 these relative paths; others match anywhere.
                                 Matches must be against whole path segments, so `foo` matches 
                                 `foo/bar.rb` and `bar/foo/baz.rb` but not `foo.rb` or 
-                                `foo2/bar.rb`.
+                                `foo2/bar.rb`. (repeatable)
       --no-config               Do not load the content of the `sorbet/config` file.
                                 Otherwise, Sorbet reads the `sorbet/config` file and treats each 
                                 line as if it were passed on the command line, unless the line 
