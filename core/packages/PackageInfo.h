@@ -317,9 +317,10 @@ public:
     aggregateMissingVisibleTo(const core::GlobalState &gs, UnorderedSet<core::packages::MangledName> &visibleTos,
                               bool visibleToTests) const;
 
-    std::string renderPackageRbContents(
-        const core::GlobalState &gs, std::vector<Import> newImports,
-        UnorderedMap<core::packages::MangledName, core::packages::StrictDependenciesLevel> newStrictnessByPkg) const;
+    std::string
+    renderPackageRbContents(const core::GlobalState &gs, std::vector<Import> newImports,
+                            const UnorderedMap<core::packages::MangledName, core::packages::StrictDependenciesLevel>
+                                &newStrictnessByPkg) const;
 };
 CheckSize(PackageInfo, 216, 8);
 

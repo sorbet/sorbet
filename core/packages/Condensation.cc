@@ -42,7 +42,7 @@ struct TraversalBuilder {
         // These three sets make up the packages involved in the focused edit.
         if (focusedPackages) {
             // Mark all `prelude!` packages as not skippable
-            for (auto node : this->nodes) {
+            for (auto &node : this->nodes) {
                 if (!node.isPrelude) {
                     continue;
                 }

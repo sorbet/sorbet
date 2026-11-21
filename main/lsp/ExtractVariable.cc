@@ -452,7 +452,7 @@ public:
     vector<core::LocOffsets> matches;
     ExpressionPtrSearchWalk(ast::ExpressionPtr *matchingNode, vector<core::LocOffsets> skippedLocsRange,
                             vector<core::LocOffsets> skippedLocsExact, const core::Loc selectionLoc)
-        : targetNode(matchingNode), skippedLocsRange(skippedLocsRange), skippedLocsExact(skippedLocsExact),
+        : targetNode(matchingNode), skippedLocsRange(move(skippedLocsRange)), skippedLocsExact(move(skippedLocsExact)),
           selectionLoc(selectionLoc) {}
 
     void preTransformExpressionPtr(core::Context ctx, const ast::ExpressionPtr &tree) {
