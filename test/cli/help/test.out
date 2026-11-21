@@ -15,8 +15,8 @@ Usage:
       --dir <path>              Run over all Ruby and RBI files in <path>, recursively
                                 (Equivalent to passing <path> as a positional argument)
       --allowed-extension <ext>[,<ext>...]
-                                Use these extensions to determine which file types Sorbet should 
-                                discover inside directories. (default: .rb,.rbi)
+                                Inside directories, only discover files ending in <ext>. Passing 
+                                this option replaces the default list. (default: .rb,.rbi)
       --ignore <pattern>        Ignores input files that contain <pattern> in their paths (relative 
                                 to the input path passed to Sorbet).
                                 When <pattern> starts with `/` it matches against the prefix of 
@@ -58,8 +58,8 @@ Usage:
       --dir <path>              Run over all Ruby and RBI files in <path>, recursively
                                 (Equivalent to passing <path> as a positional argument)
       --allowed-extension <ext>[,<ext>...]
-                                Use these extensions to determine which file types Sorbet should 
-                                discover inside directories. (default: .rb,.rbi)
+                                Inside directories, only discover files ending in <ext>. Passing 
+                                this option replaces the default list. (default: .rb,.rbi)
       --ignore <pattern>        Ignores input files that contain <pattern> in their paths (relative 
                                 to the input path passed to Sorbet).
                                 When <pattern> starts with `/` it matches against the prefix of 
