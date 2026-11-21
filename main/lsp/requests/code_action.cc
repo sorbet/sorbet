@@ -176,7 +176,8 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                 // file that the user doesn't have open in their editor. The more generic fix would be to save all files
                 // that this code action edits that are also not open in the editor. This also applies below to "Apply
                 // All" code action we construct.
-                if (absl::c_any_of(autocorrect.edits, [&](auto edit) { return edit.loc.file().isPackage(gs); })) {
+                if (absl::c_any_of(autocorrect.edits,
+                                   [&](const auto &edit) { return edit.loc.file().isPackage(gs); })) {
                     action->command = make_unique<Command>("Save package files", "sorbet.savePackageFiles");
                 }
                 action->edit = move(workspaceEdit);
@@ -221,7 +222,7 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
             action->kind = kind;
             auto workspaceEdit = make_unique<WorkspaceEdit>();
             workspaceEdit->documentChanges = autocorrect2DocumentEdits(config, gs, allEdits);
-            if (absl::c_any_of(allEdits, [&](auto edit) { return edit.loc.file().isPackage(gs); })) {
+            if (absl::c_any_of(allEdits, [&](const auto &edit) { return edit.loc.file().isPackage(gs); })) {
                 action->command = make_unique<Command>("Save package files", "sorbet.savePackageFiles");
             }
             action->edit = move(workspaceEdit);
@@ -335,7 +336,7 @@ unique_ptr<ResponseMessage> CodeActionTask::runRequest(LSPTypecheckerDelegate &t
                 for (auto &[nm, method] : overridableMethods) {
                     sorted.emplace_back(nm.shortName(gs), method);
                 }
-                fast_sort(sorted, [](auto left, auto right) { return left.first < right.first; });
+                fast_sort(sorted, [](const auto &left, const auto &right) { return left.first < right.first; });
                 for (auto &[nameStr, method] : sorted) {
                     auto action = make_unique<CodeAction>(
                         fmt::format("Override `{}` (overridable from {})", nameStr, method.data(gs)->owner.show(gs)));

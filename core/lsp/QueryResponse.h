@@ -96,7 +96,7 @@ public:
     using Scopes = InlinedVector<core::SymbolRef, 1>;
     ConstantResponse(core::SymbolRef symbolBeforeDealias, core::Loc termLoc, Scopes scopes, core::NameRef name,
                      core::TypeAndOrigins retType, core::MethodRef enclosingMethod)
-        : symbolBeforeDealias(symbolBeforeDealias), termLoc(termLoc), scopes(scopes), name(name),
+        : symbolBeforeDealias(symbolBeforeDealias), termLoc(termLoc), scopes(std::move(scopes)), name(name),
           enclosingMethod(enclosingMethod), retType(std::move(retType)) {}
     const core::SymbolRef symbolBeforeDealias;
     const core::Loc termLoc;

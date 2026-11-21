@@ -67,7 +67,7 @@ private:
             case core::TypePtr::Tag::AppliedType: {
                 auto &app = core::cast_type_nonnull<core::AppliedType>(type);
                 auto members = app.klass.data(ctx)->typeMembers();
-                auto params = app.targs;
+                const auto &params = app.targs;
 
                 ENFORCE(members.size() == params.size(),
                         "types should be fully saturated, but there are {} members and {} params", members.size(),

@@ -750,7 +750,8 @@ std::optional<core::AutocorrectSuggestion> PackageInfo::aggregateMissingVisibleT
 
 std::string PackageInfo::renderPackageRbContents(
     const core::GlobalState &gs, std::vector<Import> newImports,
-    UnorderedMap<core::packages::MangledName, core::packages::StrictDependenciesLevel> newStrictnessByPkg) const {
+    const UnorderedMap<core::packages::MangledName, core::packages::StrictDependenciesLevel> &newStrictnessByPkg)
+    const {
     fmt::memory_buffer result;
 
     if (testPackage()) {
@@ -766,7 +767,7 @@ std::string PackageInfo::renderPackageRbContents(
         ENFORCE(directiveSource.has_value());
         fmt::format_to(std::back_inserter(result), "  {}\n", directiveSource.value());
     }
-    auto thisPackageStrictness = newStrictnessByPkg[mangledName()];
+    auto thisPackageStrictness = newStrictnessByPkg.at(mangledName());
     if (gs.packageDB().enforceLayering()) {
         if (locs.layer.exists()) {
             fmt::format_to(std::back_inserter(result), "  layer '{}'\n", layer.show(gs));
@@ -818,8 +819,8 @@ std::string PackageInfo::renderPackageRbContents(
         auto &bPkgInfo = gs.packageDB().getPackageInfo(b.mangledName);
         ENFORCE(aPkgInfo.exists());
         ENFORCE(bPkgInfo.exists());
-        return orderImports(gs, aPkgInfo, bPkgInfo, newStrictnessByPkg[a.mangledName],
-                            newStrictnessByPkg[b.mangledName]) < 0;
+        return orderImports(gs, aPkgInfo, bPkgInfo, newStrictnessByPkg.at(a.mangledName),
+                            newStrictnessByPkg.at(b.mangledName)) < 0;
     });
 
     bool layeringViolationsHeaderShown = false;
@@ -847,7 +848,7 @@ std::string PackageInfo::renderPackageRbContents(
                 //
                 // Ex. if only an dag package is imported, we want to skip the 'false' and 'layered'/'layered_dag'
                 // headers, even though they'll be less than the dag package being imported.
-                while (headersIt != headers.end() && headersIt->first <= newStrictnessByPkg[import.mangledName]) {
+                while (headersIt != headers.end() && headersIt->first <= newStrictnessByPkg.at(import.mangledName)) {
                     headerToPrint = headersIt->second;
                     headersIt++;
                 }

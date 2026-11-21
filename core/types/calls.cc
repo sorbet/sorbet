@@ -3102,7 +3102,7 @@ public:
 
         // args[0] is `<self>`
 
-        auto selfTy = *args.args[0];
+        const auto &selfTy = *args.args[0];
         auto mustExist = true;
         auto self = unwrapSymbol(gs, selfTy.type, mustExist);
         auto selfData = self.data(gs);
@@ -3158,8 +3158,8 @@ public:
             return;
         }
 
-        auto selfTy = *args.args[0];
-        auto selfTyAndAnd = *args.args[2];
+        const auto &selfTy = *args.args[0];
+        const auto &selfTyAndAnd = *args.args[2];
 
         if (!isa_type<NamedLiteralType>(args.args[1]->type)) {
             return;
@@ -3577,7 +3577,7 @@ public:
         if (auto idx = shape.indexForKey(arg)) {
             auto valueType = shape.values[*idx];
             auto expectedType = valueType;
-            auto actualType = *args.args[1];
+            const auto &actualType = *args.args[1];
             // This check (with the dropLiteral's) mimics what we do for pinning errors in environment.cc
             // TODO(jez) How should this interact with highlight untyped?
             core::ErrorSection::Collector errorDetailsCollector;

@@ -74,10 +74,10 @@ struct ErrorSection {
     ErrorSection(std::string_view header) : header(header) {}
     ErrorSection(std::string_view header, const std::initializer_list<ErrorLine> &messages)
         : header(header), messages(messages) {}
-    ErrorSection(std::string_view header, const std::vector<ErrorLine> &messages)
-        : header(header), messages(messages) {}
+    ErrorSection(std::string_view header, std::vector<ErrorLine> messages)
+        : header(header), messages(std::move(messages)) {}
     ErrorSection(const std::initializer_list<ErrorLine> &messages) : ErrorSection("", messages) {}
-    ErrorSection(const std::vector<ErrorLine> &messages) : ErrorSection("", messages) {}
+    ErrorSection(std::vector<ErrorLine> messages) : ErrorSection("", std::move(messages)) {}
     std::string toString(const GlobalState &gs) const;
 
     class NoOpCollector {
@@ -122,7 +122,7 @@ public:
     Error(Loc loc, ErrorClass what, std::string header, std::vector<ErrorSection> sections,
           std::vector<AutocorrectSuggestion> autocorrects, bool isSilenced)
         : loc(loc), what(what), header(std::move(header)), isSilenced(isSilenced),
-          autocorrects(std::move(autocorrects)), sections(sections) {
+          autocorrects(std::move(autocorrects)), sections(std::move(sections)) {
         ENFORCE(this->header.empty() || this->header.back() != '.', "Error headers should not end with a period");
         ENFORCE(this->header.find('\n') == std::string::npos, "{} has a newline in it", this->header);
     }
