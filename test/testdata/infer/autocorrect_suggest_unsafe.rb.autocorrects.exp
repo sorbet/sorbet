@@ -35,7 +35,7 @@ end
 
 sig {params(x: T.untyped).returns(String)}
 def safe_navigation(x)
-  x&.foo # error: Expected `String` but found `NilClass` for method result type
+  T.unsafe(x&.foo) # error: Expected `String` but found `NilClass` for method result type
 end
 
 sig {params(u: T.untyped).returns(T::Boolean)}
