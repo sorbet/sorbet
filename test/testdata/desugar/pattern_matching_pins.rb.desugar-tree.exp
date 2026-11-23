@@ -6,17 +6,37 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   c = ""
 
   begin
-    <assignTemp>$2 = nil
-    if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-      <emptyTree>
-    else
-      if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-        <emptyTree>
-      else
-        if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-          <emptyTree>
+    <assignTemp>$2 = ::<Magic>.<pattern-snapshot>(nil)
+    if begin
+        <pattern-array>$5 = ::<Magic>.<pattern-deconstruct>(<assignTemp>$2, <assignTemp>$2)
+        if <pattern-array>$5.length().==(1)
+          begin
+            <pattern-value>$6 = ::<Magic>.<pattern-element>(<pattern-array>$5, 0)
+            a.===(<pattern-value>$6)
+          end
         else
           <emptyTree>
+        end
+      end
+      <emptyTree>
+    else
+      if begin
+          <pattern-hash>$3 = ::<Magic>.<pattern-deconstruct-keys>(<assignTemp>$2, <assignTemp>$2)
+          if <pattern-hash>$3.key?(:b)
+            begin
+              <pattern-value>$4 = ::<Magic>.<pattern-hash-value>(<pattern-hash>$3, :b)
+              b.===(<pattern-value>$4)
+            end
+          else
+            <emptyTree>
+          end
+        end
+        <emptyTree>
+      else
+        if c.===(<assignTemp>$2)
+          <emptyTree>
+        else
+          ::Kernel.raise(::<root>::<C NoMatchingPatternError>)
         end
       end
     end

@@ -14,17 +14,17 @@ in {"k#{"e"}": e, kf: {kg: g}, kh: h} => i
   T.reveal_type(e) # error: Revealed type: `T.untyped`
   T.reveal_type(g) # error: Revealed type: `T.untyped`
   T.reveal_type(h) # error: Revealed type: `T.untyped`
-  T.reveal_type(i) # error: Revealed type: `T.untyped`
+  T.reveal_type(i) # error: Revealed type: `{} (shape of T::Hash[T.untyped, T.untyped])`
 in {"kj": j} | {"kh": l} => m
   T.reveal_type(j) # error: Revealed type: `T.untyped`
   T.reveal_type(l) # error: Revealed type: `T.untyped`
-  T.reveal_type(m) # error: Revealed type: `T.untyped`
+  T.reveal_type(m) # error: Revealed type: `{} (shape of T::Hash[T.untyped, T.untyped])`
 in {"n1":, n2:, "n3":} => n4
   T.reveal_type(n1) # error: Revealed type: `T.untyped`
   T.reveal_type(n2) # error: Revealed type: `T.untyped`
   T.reveal_type(n3) # error: Revealed type: `T.untyped`
-  T.reveal_type(n4) # error: Revealed type: `T.untyped`
+  T.reveal_type(n4) # error: Revealed type: `{} (shape of T::Hash[T.untyped, T.untyped])`
 in **o
   T.reveal_type(o) # error: Revealed type: `T.untyped`
-in **nil
+in **nil # error: This code is unreachable
 end

@@ -2,79 +2,251 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   expr = {}
 
   begin
-    <assignTemp>$3 = expr
-    if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-      begin
-        a = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-        <emptyTree>::<C T>.reveal_type(a)
-      end
-    else
-      if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-        begin
-          b = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-          <emptyTree>::<C T>.reveal_type(b)
-        end
-      else
-        if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    <assignTemp>$3 = ::<Magic>.<pattern-snapshot>(expr)
+    if begin
+        <pattern-hash>$24 = ::<Magic>.<pattern-deconstruct-keys>(<assignTemp>$3, <assignTemp>$3)
+        if <pattern-hash>$24.key?(:a)
           begin
-            c = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-            d = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+            <pattern-value>$25 = ::<Magic>.<pattern-hash-value>(<pattern-hash>$24, :a)
             begin
-              <emptyTree>::<C T>.reveal_type(c)
-              <emptyTree>::<C T>.reveal_type(d)
+              a = <pattern-value>$25
+              true
             end
           end
         else
-          if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+          <emptyTree>
+        end
+      end
+      <emptyTree>::<C T>.reveal_type(a)
+    else
+      if begin
+          <pattern-hash>$22 = ::<Magic>.<pattern-deconstruct-keys>(<assignTemp>$3, <assignTemp>$3)
+          if <pattern-hash>$22.key?(:kb)
             begin
-              i = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-              e = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-              g = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-              h = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+              <pattern-value>$23 = ::<Magic>.<pattern-hash-value>(<pattern-hash>$22, :kb)
               begin
-                <emptyTree>::<C T>.reveal_type(e)
-                <emptyTree>::<C T>.reveal_type(g)
-                <emptyTree>::<C T>.reveal_type(h)
-                <emptyTree>::<C T>.reveal_type(i)
+                b = <pattern-value>$23
+                true
               end
             end
           else
-            if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-              begin
-                m = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-                j = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-                l = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+            <emptyTree>
+          end
+        end
+        <emptyTree>::<C T>.reveal_type(b)
+      else
+        if begin
+            <pattern-hash>$19 = ::<Magic>.<pattern-deconstruct-keys>(<assignTemp>$3, <assignTemp>$3)
+            if if <pattern-hash>$19.key?(:kc)
                 begin
-                  <emptyTree>::<C T>.reveal_type(j)
-                  <emptyTree>::<C T>.reveal_type(l)
-                  <emptyTree>::<C T>.reveal_type(m)
-                end
-              end
-            else
-              if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-                begin
-                  n4 = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-                  n1 = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-                  n2 = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-                  n3 = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+                  <pattern-value>$20 = ::<Magic>.<pattern-hash-value>(<pattern-hash>$19, :kc)
                   begin
-                    <emptyTree>::<C T>.reveal_type(n1)
-                    <emptyTree>::<C T>.reveal_type(n2)
-                    <emptyTree>::<C T>.reveal_type(n3)
-                    <emptyTree>::<C T>.reveal_type(n4)
+                    c = <pattern-value>$20
+                    true
                   end
                 end
               else
-                if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+                <emptyTree>
+              end
+              if <pattern-hash>$19.key?(:kd)
+                begin
+                  <pattern-value>$21 = ::<Magic>.<pattern-hash-value>(<pattern-hash>$19, :kd)
                   begin
-                    o = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-                    <emptyTree>::<C T>.reveal_type(o)
+                    d = <pattern-value>$21
+                    true
                   end
+                end
+              else
+                <emptyTree>
+              end
+            else
+              <emptyTree>
+            end
+          end
+          begin
+            <emptyTree>::<C T>.reveal_type(c)
+            <emptyTree>::<C T>.reveal_type(d)
+          end
+        else
+          if if begin
+                <pattern-hash>$13 = ::<Magic>.<pattern-deconstruct-keys>(<assignTemp>$3, <assignTemp>$3)
+                if if <pattern-hash>$13.key?("ke".intern())
+                    begin
+                      <pattern-value>$14 = ::<Magic>.<pattern-hash-value>(<pattern-hash>$13, "ke".intern())
+                      begin
+                        e = <pattern-value>$14
+                        true
+                      end
+                    end
+                  else
+                    <emptyTree>
+                  end
+                  if if <pattern-hash>$13.key?(:kf)
+                      begin
+                        <pattern-value>$15 = ::<Magic>.<pattern-hash-value>(<pattern-hash>$13, :kf)
+                        begin
+                          <pattern-hash>$16 = ::<Magic>.<pattern-deconstruct-keys>(<pattern-value>$15, <pattern-value>$15)
+                          if <pattern-hash>$16.key?(:kg)
+                            begin
+                              <pattern-value>$17 = ::<Magic>.<pattern-hash-value>(<pattern-hash>$16, :kg)
+                              begin
+                                g = <pattern-value>$17
+                                true
+                              end
+                            end
+                          else
+                            <emptyTree>
+                          end
+                        end
+                      end
+                    else
+                      <emptyTree>
+                    end
+                    if <pattern-hash>$13.key?(:kh)
+                      begin
+                        <pattern-value>$18 = ::<Magic>.<pattern-hash-value>(<pattern-hash>$13, :kh)
+                        begin
+                          h = <pattern-value>$18
+                          true
+                        end
+                      end
+                    else
+                      <emptyTree>
+                    end
+                  else
+                    <emptyTree>
+                  end
+                else
+                  <emptyTree>
+                end
+              end
+              begin
+                i = <assignTemp>$3
+                true
+              end
+            else
+              <emptyTree>
+            end
+            begin
+              <emptyTree>::<C T>.reveal_type(e)
+              <emptyTree>::<C T>.reveal_type(g)
+              <emptyTree>::<C T>.reveal_type(h)
+              <emptyTree>::<C T>.reveal_type(i)
+            end
+          else
+            if if if begin
+                    <pattern-hash>$9 = ::<Magic>.<pattern-deconstruct-keys>(<assignTemp>$3, <assignTemp>$3)
+                    if <pattern-hash>$9.key?(:kj)
+                      begin
+                        <pattern-value>$10 = ::<Magic>.<pattern-hash-value>(<pattern-hash>$9, :kj)
+                        begin
+                          j = <pattern-value>$10
+                          true
+                        end
+                      end
+                    else
+                      <emptyTree>
+                    end
+                  end
+                  true
+                else
+                  begin
+                    <pattern-hash>$11 = ::<Magic>.<pattern-deconstruct-keys>(<assignTemp>$3, <assignTemp>$3)
+                    if <pattern-hash>$11.key?(:kh)
+                      begin
+                        <pattern-value>$12 = ::<Magic>.<pattern-hash-value>(<pattern-hash>$11, :kh)
+                        begin
+                          l = <pattern-value>$12
+                          true
+                        end
+                      end
+                    else
+                      <emptyTree>
+                    end
+                  end
+                end
+                begin
+                  m = <assignTemp>$3
+                  true
+                end
+              else
+                <emptyTree>
+              end
+              begin
+                <emptyTree>::<C T>.reveal_type(j)
+                <emptyTree>::<C T>.reveal_type(l)
+                <emptyTree>::<C T>.reveal_type(m)
+              end
+            else
+              if if begin
+                    <pattern-hash>$5 = ::<Magic>.<pattern-deconstruct-keys>(<assignTemp>$3, <assignTemp>$3)
+                    if if <pattern-hash>$5.key?(:n1)
+                        begin
+                          <pattern-value>$6 = ::<Magic>.<pattern-hash-value>(<pattern-hash>$5, :n1)
+                          begin
+                            n1 = <pattern-value>$6
+                            true
+                          end
+                        end
+                      else
+                        <emptyTree>
+                      end
+                      if if <pattern-hash>$5.key?(:n2)
+                          begin
+                            <pattern-value>$7 = ::<Magic>.<pattern-hash-value>(<pattern-hash>$5, :n2)
+                            begin
+                              n2 = <pattern-value>$7
+                              true
+                            end
+                          end
+                        else
+                          <emptyTree>
+                        end
+                        if <pattern-hash>$5.key?(:n3)
+                          begin
+                            <pattern-value>$8 = ::<Magic>.<pattern-hash-value>(<pattern-hash>$5, :n3)
+                            begin
+                              n3 = <pattern-value>$8
+                              true
+                            end
+                          end
+                        else
+                          <emptyTree>
+                        end
+                      else
+                        <emptyTree>
+                      end
+                    else
+                      <emptyTree>
+                    end
+                  end
+                  begin
+                    n4 = <assignTemp>$3
+                    true
+                  end
+                else
+                  <emptyTree>
+                end
+                begin
+                  <emptyTree>::<C T>.reveal_type(n1)
+                  <emptyTree>::<C T>.reveal_type(n2)
+                  <emptyTree>::<C T>.reveal_type(n3)
+                  <emptyTree>::<C T>.reveal_type(n4)
+                end
+              else
+                if begin
+                    <pattern-hash>$4 = ::<Magic>.<pattern-deconstruct-keys>(<assignTemp>$3, <assignTemp>$3)
+                    begin
+                      o = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+                      true
+                    end
+                  end
+                  <emptyTree>::<C T>.reveal_type(o)
                 else
                   if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
                     <emptyTree>
                   else
-                    <emptyTree>
+                    ::Kernel.raise(::<root>::<C NoMatchingPatternError>)
                   end
                 end
               end

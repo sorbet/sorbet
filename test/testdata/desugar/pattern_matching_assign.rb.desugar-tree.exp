@@ -4,35 +4,47 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C T>.reveal_type(expr)
 
   x = begin
-    <assignTemp>$2 = expr
-    if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-      begin
-        s = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    <assignTemp>$2 = ::<Magic>.<pattern-snapshot>(expr)
+    if if "a".===(<assignTemp>$2)
         begin
-          <emptyTree>::<C T>.reveal_type(s)
-          1
-        end
-      end
-    else
-      if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-        begin
-          x = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-          begin
-            <emptyTree>::<C T>.reveal_type(x)
-            1
-          end
+          s = <assignTemp>$2
+          true
         end
       else
-        if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+        <emptyTree>
+      end
+      begin
+        <emptyTree>::<C T>.reveal_type(s)
+        1
+      end
+    else
+      if if "b".===(<assignTemp>$2)
           begin
-            expr = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-            begin
-              <emptyTree>::<C T>.reveal_type(expr)
-              1
-            end
+            x = <assignTemp>$2
+            true
           end
         else
-          if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+          <emptyTree>
+        end
+        begin
+          <emptyTree>::<C T>.reveal_type(x)
+          1
+        end
+      else
+        if if "c".===(<assignTemp>$2)
+            begin
+              expr = <assignTemp>$2
+              true
+            end
+          else
+            <emptyTree>
+          end
+          begin
+            <emptyTree>::<C T>.reveal_type(expr)
+            1
+          end
+        else
+          if "d".===(<assignTemp>$2)
             begin
               <emptyTree>::<C T>.reveal_type(x)
               <emptyTree>::<C T>.reveal_type(expr)

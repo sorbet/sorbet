@@ -7,375 +7,629 @@ ClassDef{
       orig = nullptr
     }]
   rhs = [
-    If{
-      cond = Send{
-        flags = {rewriterSynthesized}
-        recv = Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::T)
-            orig = nullptr
+    InsSeq{
+      stats = [
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Local
+            name = <D <U <assignTemp>> $2>
           }
-          fun = <U unsafe>
-          block = nullptr
-          pos_args = 1
-          args = [
-            ConstantLit{
-              symbol = (module ::Kernel)
-              orig = nullptr
-            }
-          ]
-        }
-        fun = <U raise>
-        block = nullptr
-        pos_args = 1
-        args = [
-          Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-        ]
-      }
-      thenp = Send{
-        flags = {rewriterSynthesized}
-        recv = Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::T)
-            orig = nullptr
-          }
-          fun = <U unsafe>
-          block = nullptr
-          pos_args = 1
-          args = [
-            ConstantLit{
-              symbol = (module ::Kernel)
-              orig = nullptr
-            }
-          ]
-        }
-        fun = <U raise>
-        block = nullptr
-        pos_args = 1
-        args = [
-          Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-        ]
-      }
-      elsep = EmptyTree
-    }
-
-    If{
-      cond = Send{
-        flags = {rewriterSynthesized}
-        recv = Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::T)
-            orig = nullptr
-          }
-          fun = <U unsafe>
-          block = nullptr
-          pos_args = 1
-          args = [
-            ConstantLit{
-              symbol = (module ::Kernel)
-              orig = nullptr
-            }
-          ]
-        }
-        fun = <U raise>
-        block = nullptr
-        pos_args = 1
-        args = [
-          Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-        ]
-      }
-      thenp = Send{
-        flags = {rewriterSynthesized}
-        recv = Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::T)
-            orig = nullptr
-          }
-          fun = <U unsafe>
-          block = nullptr
-          pos_args = 1
-          args = [
-            ConstantLit{
-              symbol = (module ::Kernel)
-              orig = nullptr
-            }
-          ]
-        }
-        fun = <U raise>
-        block = nullptr
-        pos_args = 1
-        args = [
-          Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-        ]
-      }
-      elsep = EmptyTree
-    }
-
-    If{
-      cond = Send{
-        flags = {rewriterSynthesized}
-        recv = Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::T)
-            orig = nullptr
-          }
-          fun = <U unsafe>
-          block = nullptr
-          pos_args = 1
-          args = [
-            ConstantLit{
-              symbol = (module ::Kernel)
-              orig = nullptr
-            }
-          ]
-        }
-        fun = <U raise>
-        block = nullptr
-        pos_args = 1
-        args = [
-          Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-        ]
-      }
-      thenp = Send{
-        flags = {rewriterSynthesized}
-        recv = Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::T)
-            orig = nullptr
-          }
-          fun = <U unsafe>
-          block = nullptr
-          pos_args = 1
-          args = [
-            ConstantLit{
-              symbol = (module ::Kernel)
-              orig = nullptr
-            }
-          ]
-        }
-        fun = <U raise>
-        block = nullptr
-        pos_args = 1
-        args = [
-          Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-        ]
-      }
-      elsep = EmptyTree
-    }
-
-    If{
-      cond = Send{
-        flags = {rewriterSynthesized}
-        recv = Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::T)
-            orig = nullptr
-          }
-          fun = <U unsafe>
-          block = nullptr
-          pos_args = 1
-          args = [
-            ConstantLit{
-              symbol = (module ::Kernel)
-              orig = nullptr
-            }
-          ]
-        }
-        fun = <U raise>
-        block = nullptr
-        pos_args = 1
-        args = [
-          Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-        ]
-      }
-      thenp = InsSeq{
-        stats = [
-          Assign{
-            lhs = UnresolvedIdent{
-              kind = Local
-              name = <U var>
-            }
-            rhs = Send{
-              flags = {rewriterSynthesized}
-              recv = Send{
-                flags = {}
-                recv = ConstantLit{
-                  symbol = (module ::T)
-                  orig = nullptr
-                }
-                fun = <U unsafe>
-                block = nullptr
-                pos_args = 1
-                args = [
-                  ConstantLit{
-                    symbol = (module ::Kernel)
-                    orig = nullptr
-                  }
-                ]
-              }
-              fun = <U raise>
-              block = nullptr
-              pos_args = 1
-              args = [
-                Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-              ]
-            }
-          }
-        ],
-        expr = Send{
-          flags = {rewriterSynthesized}
-          recv = Send{
+          rhs = Send{
             flags = {}
             recv = ConstantLit{
-              symbol = (module ::T)
+              symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U unsafe>
+            fun = <U <pattern-snapshot>>
             block = nullptr
             pos_args = 1
             args = [
-              ConstantLit{
-                symbol = (module ::Kernel)
-                orig = nullptr
+              Send{
+                flags = {privateOk}
+                recv = Self
+                fun = <U match>
+                block = nullptr
+                pos_args = 0
+                args = [
+                ]
               }
             ]
           }
-          fun = <U raise>
+        }
+      ],
+      expr = If{
+        cond = Send{
+          flags = {}
+          recv = Literal{ value = 1 }
+          fun = <U ===>
           block = nullptr
           pos_args = 1
           args = [
-            Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+            UnresolvedIdent{
+              kind = Local
+              name = <D <U <assignTemp>> $2>
+            }
           ]
         }
+        thenp = Literal{ value = true }
+        elsep = Literal{ value = false }
       }
-      elsep = EmptyTree
     }
 
-    If{
-      cond = Send{
-        flags = {rewriterSynthesized}
-        recv = Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::T)
-            orig = nullptr
+    InsSeq{
+      stats = [
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Local
+            name = <D <U <assignTemp>> $3>
           }
-          fun = <U unsafe>
-          block = nullptr
-          pos_args = 1
-          args = [
-            ConstantLit{
-              symbol = (module ::Kernel)
-              orig = nullptr
-            }
-          ]
-        }
-        fun = <U raise>
-        block = nullptr
-        pos_args = 1
-        args = [
-          Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-        ]
-      }
-      thenp = InsSeq{
-        stats = [
-          Assign{
-            lhs = UnresolvedIdent{
-              kind = Local
-              name = <U var_a>
-            }
-            rhs = Send{
-              flags = {rewriterSynthesized}
-              recv = Send{
-                flags = {}
-                recv = ConstantLit{
-                  symbol = (module ::T)
-                  orig = nullptr
-                }
-                fun = <U unsafe>
-                block = nullptr
-                pos_args = 1
-                args = [
-                  ConstantLit{
-                    symbol = (module ::Kernel)
-                    orig = nullptr
-                  }
-                ]
-              }
-              fun = <U raise>
-              block = nullptr
-              pos_args = 1
-              args = [
-                Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-              ]
-            }
-          }
-          Assign{
-            lhs = UnresolvedIdent{
-              kind = Local
-              name = <U var_b>
-            }
-            rhs = Send{
-              flags = {rewriterSynthesized}
-              recv = Send{
-                flags = {}
-                recv = ConstantLit{
-                  symbol = (module ::T)
-                  orig = nullptr
-                }
-                fun = <U unsafe>
-                block = nullptr
-                pos_args = 1
-                args = [
-                  ConstantLit{
-                    symbol = (module ::Kernel)
-                    orig = nullptr
-                  }
-                ]
-              }
-              fun = <U raise>
-              block = nullptr
-              pos_args = 1
-              args = [
-                Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-              ]
-            }
-          }
-        ],
-        expr = Send{
-          flags = {rewriterSynthesized}
-          recv = Send{
+          rhs = Send{
             flags = {}
             recv = ConstantLit{
-              symbol = (module ::T)
+              symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U unsafe>
+            fun = <U <pattern-snapshot>>
             block = nullptr
             pos_args = 1
             args = [
-              ConstantLit{
-                symbol = (module ::Kernel)
-                orig = nullptr
+              Send{
+                flags = {privateOk}
+                recv = Self
+                fun = <U no_match>
+                block = nullptr
+                pos_args = 0
+                args = [
+                ]
               }
             ]
           }
-          fun = <U raise>
-          block = nullptr
-          pos_args = 1
-          args = [
-            Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-          ]
         }
+      ],
+      expr = If{
+        cond = InsSeq{
+          stats = [
+            Assign{
+              lhs = UnresolvedIdent{
+                kind = Local
+                name = <D <U <pattern-array>> $4>
+              }
+              rhs = Send{
+                flags = {}
+                recv = ConstantLit{
+                  symbol = (class ::<Magic>)
+                  orig = nullptr
+                }
+                fun = <U <pattern-deconstruct>>
+                block = nullptr
+                pos_args = 2
+                args = [
+                  UnresolvedIdent{
+                    kind = Local
+                    name = <D <U <assignTemp>> $3>
+                  }
+                  UnresolvedIdent{
+                    kind = Local
+                    name = <D <U <assignTemp>> $3>
+                  }
+                ]
+              }
+            }
+          ],
+          expr = If{
+            cond = Send{
+              flags = {}
+              recv = Send{
+                flags = {}
+                recv = UnresolvedIdent{
+                  kind = Local
+                  name = <D <U <pattern-array>> $4>
+                }
+                fun = <U length>
+                block = nullptr
+                pos_args = 0
+                args = [
+                ]
+              }
+              fun = <U ==>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Literal{ value = 2 }
+              ]
+            }
+            thenp = If{
+              cond = InsSeq{
+                stats = [
+                  Assign{
+                    lhs = UnresolvedIdent{
+                      kind = Local
+                      name = <D <U <pattern-value>> $5>
+                    }
+                    rhs = Send{
+                      flags = {}
+                      recv = ConstantLit{
+                        symbol = (class ::<Magic>)
+                        orig = nullptr
+                      }
+                      fun = <U <pattern-element>>
+                      block = nullptr
+                      pos_args = 2
+                      args = [
+                        UnresolvedIdent{
+                          kind = Local
+                          name = <D <U <pattern-array>> $4>
+                        }
+                        Literal{ value = 0 }
+                      ]
+                    }
+                  }
+                ],
+                expr = Send{
+                  flags = {}
+                  recv = Literal{ value = 1 }
+                  fun = <U ===>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    UnresolvedIdent{
+                      kind = Local
+                      name = <D <U <pattern-value>> $5>
+                    }
+                  ]
+                }
+              }
+              thenp = InsSeq{
+                stats = [
+                  Assign{
+                    lhs = UnresolvedIdent{
+                      kind = Local
+                      name = <D <U <pattern-value>> $6>
+                    }
+                    rhs = Send{
+                      flags = {}
+                      recv = ConstantLit{
+                        symbol = (class ::<Magic>)
+                        orig = nullptr
+                      }
+                      fun = <U <pattern-element>>
+                      block = nullptr
+                      pos_args = 2
+                      args = [
+                        UnresolvedIdent{
+                          kind = Local
+                          name = <D <U <pattern-array>> $4>
+                        }
+                        Literal{ value = 1 }
+                      ]
+                    }
+                  }
+                ],
+                expr = Send{
+                  flags = {}
+                  recv = Literal{ value = 2 }
+                  fun = <U ===>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    UnresolvedIdent{
+                      kind = Local
+                      name = <D <U <pattern-value>> $6>
+                    }
+                  ]
+                }
+              }
+              elsep = EmptyTree
+            }
+            elsep = EmptyTree
+          }
+        }
+        thenp = Literal{ value = true }
+        elsep = Literal{ value = false }
       }
-      elsep = EmptyTree
+    }
+
+    InsSeq{
+      stats = [
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Local
+            name = <D <U <assignTemp>> $7>
+          }
+          rhs = Send{
+            flags = {}
+            recv = ConstantLit{
+              symbol = (class ::<Magic>)
+              orig = nullptr
+            }
+            fun = <U <pattern-snapshot>>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Array{
+                elems = [
+                  Send{
+                    flags = {privateOk}
+                    recv = Self
+                    fun = <U match_1>
+                    block = nullptr
+                    pos_args = 0
+                    args = [
+                    ]
+                  }
+                  Send{
+                    flags = {privateOk}
+                    recv = Self
+                    fun = <U match_2>
+                    block = nullptr
+                    pos_args = 0
+                    args = [
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      expr = If{
+        cond = InsSeq{
+          stats = [
+            Assign{
+              lhs = UnresolvedIdent{
+                kind = Local
+                name = <D <U <pattern-array>> $8>
+              }
+              rhs = Send{
+                flags = {}
+                recv = ConstantLit{
+                  symbol = (class ::<Magic>)
+                  orig = nullptr
+                }
+                fun = <U <pattern-deconstruct>>
+                block = nullptr
+                pos_args = 2
+                args = [
+                  UnresolvedIdent{
+                    kind = Local
+                    name = <D <U <assignTemp>> $7>
+                  }
+                  UnresolvedIdent{
+                    kind = Local
+                    name = <D <U <assignTemp>> $7>
+                  }
+                ]
+              }
+            }
+          ],
+          expr = If{
+            cond = Send{
+              flags = {}
+              recv = Send{
+                flags = {}
+                recv = UnresolvedIdent{
+                  kind = Local
+                  name = <D <U <pattern-array>> $8>
+                }
+                fun = <U length>
+                block = nullptr
+                pos_args = 0
+                args = [
+                ]
+              }
+              fun = <U ==>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Literal{ value = 2 }
+              ]
+            }
+            thenp = If{
+              cond = InsSeq{
+                stats = [
+                  Assign{
+                    lhs = UnresolvedIdent{
+                      kind = Local
+                      name = <D <U <pattern-value>> $9>
+                    }
+                    rhs = Send{
+                      flags = {}
+                      recv = ConstantLit{
+                        symbol = (class ::<Magic>)
+                        orig = nullptr
+                      }
+                      fun = <U <pattern-element>>
+                      block = nullptr
+                      pos_args = 2
+                      args = [
+                        UnresolvedIdent{
+                          kind = Local
+                          name = <D <U <pattern-array>> $8>
+                        }
+                        Literal{ value = 0 }
+                      ]
+                    }
+                  }
+                ],
+                expr = Send{
+                  flags = {}
+                  recv = Literal{ value = 1 }
+                  fun = <U ===>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    UnresolvedIdent{
+                      kind = Local
+                      name = <D <U <pattern-value>> $9>
+                    }
+                  ]
+                }
+              }
+              thenp = InsSeq{
+                stats = [
+                  Assign{
+                    lhs = UnresolvedIdent{
+                      kind = Local
+                      name = <D <U <pattern-value>> $10>
+                    }
+                    rhs = Send{
+                      flags = {}
+                      recv = ConstantLit{
+                        symbol = (class ::<Magic>)
+                        orig = nullptr
+                      }
+                      fun = <U <pattern-element>>
+                      block = nullptr
+                      pos_args = 2
+                      args = [
+                        UnresolvedIdent{
+                          kind = Local
+                          name = <D <U <pattern-array>> $8>
+                        }
+                        Literal{ value = 1 }
+                      ]
+                    }
+                  }
+                ],
+                expr = Send{
+                  flags = {}
+                  recv = Literal{ value = 2 }
+                  fun = <U ===>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    UnresolvedIdent{
+                      kind = Local
+                      name = <D <U <pattern-value>> $10>
+                    }
+                  ]
+                }
+              }
+              elsep = EmptyTree
+            }
+            elsep = EmptyTree
+          }
+        }
+        thenp = Literal{ value = true }
+        elsep = Literal{ value = false }
+      }
+    }
+
+    InsSeq{
+      stats = [
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Local
+            name = <D <U <assignTemp>> $11>
+          }
+          rhs = Send{
+            flags = {}
+            recv = ConstantLit{
+              symbol = (class ::<Magic>)
+              orig = nullptr
+            }
+            fun = <U <pattern-snapshot>>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Literal{ value = 1 }
+            ]
+          }
+        }
+      ],
+      expr = If{
+        cond = InsSeq{
+          stats = [
+            Assign{
+              lhs = UnresolvedIdent{
+                kind = Local
+                name = <U var>
+              }
+              rhs = UnresolvedIdent{
+                kind = Local
+                name = <D <U <assignTemp>> $11>
+              }
+            }
+          ],
+          expr = Literal{ value = true }
+        }
+        thenp = Literal{ value = true }
+        elsep = Literal{ value = false }
+      }
+    }
+
+    InsSeq{
+      stats = [
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Local
+            name = <D <U <assignTemp>> $12>
+          }
+          rhs = Send{
+            flags = {}
+            recv = ConstantLit{
+              symbol = (class ::<Magic>)
+              orig = nullptr
+            }
+            fun = <U <pattern-snapshot>>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Array{
+                elems = [
+                  Literal{ value = 1 }
+                  Literal{ value = 2 }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      expr = If{
+        cond = InsSeq{
+          stats = [
+            Assign{
+              lhs = UnresolvedIdent{
+                kind = Local
+                name = <D <U <pattern-array>> $13>
+              }
+              rhs = Send{
+                flags = {}
+                recv = ConstantLit{
+                  symbol = (class ::<Magic>)
+                  orig = nullptr
+                }
+                fun = <U <pattern-deconstruct>>
+                block = nullptr
+                pos_args = 2
+                args = [
+                  UnresolvedIdent{
+                    kind = Local
+                    name = <D <U <assignTemp>> $12>
+                  }
+                  UnresolvedIdent{
+                    kind = Local
+                    name = <D <U <assignTemp>> $12>
+                  }
+                ]
+              }
+            }
+          ],
+          expr = If{
+            cond = Send{
+              flags = {}
+              recv = Send{
+                flags = {}
+                recv = UnresolvedIdent{
+                  kind = Local
+                  name = <D <U <pattern-array>> $13>
+                }
+                fun = <U length>
+                block = nullptr
+                pos_args = 0
+                args = [
+                ]
+              }
+              fun = <U ==>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Literal{ value = 2 }
+              ]
+            }
+            thenp = If{
+              cond = InsSeq{
+                stats = [
+                  Assign{
+                    lhs = UnresolvedIdent{
+                      kind = Local
+                      name = <D <U <pattern-value>> $14>
+                    }
+                    rhs = Send{
+                      flags = {}
+                      recv = ConstantLit{
+                        symbol = (class ::<Magic>)
+                        orig = nullptr
+                      }
+                      fun = <U <pattern-element>>
+                      block = nullptr
+                      pos_args = 2
+                      args = [
+                        UnresolvedIdent{
+                          kind = Local
+                          name = <D <U <pattern-array>> $13>
+                        }
+                        Literal{ value = 0 }
+                      ]
+                    }
+                  }
+                ],
+                expr = InsSeq{
+                  stats = [
+                    Assign{
+                      lhs = UnresolvedIdent{
+                        kind = Local
+                        name = <U var_a>
+                      }
+                      rhs = UnresolvedIdent{
+                        kind = Local
+                        name = <D <U <pattern-value>> $14>
+                      }
+                    }
+                  ],
+                  expr = Literal{ value = true }
+                }
+              }
+              thenp = InsSeq{
+                stats = [
+                  Assign{
+                    lhs = UnresolvedIdent{
+                      kind = Local
+                      name = <D <U <pattern-value>> $15>
+                    }
+                    rhs = Send{
+                      flags = {}
+                      recv = ConstantLit{
+                        symbol = (class ::<Magic>)
+                        orig = nullptr
+                      }
+                      fun = <U <pattern-element>>
+                      block = nullptr
+                      pos_args = 2
+                      args = [
+                        UnresolvedIdent{
+                          kind = Local
+                          name = <D <U <pattern-array>> $13>
+                        }
+                        Literal{ value = 1 }
+                      ]
+                    }
+                  }
+                ],
+                expr = InsSeq{
+                  stats = [
+                    Assign{
+                      lhs = UnresolvedIdent{
+                        kind = Local
+                        name = <U var_b>
+                      }
+                      rhs = UnresolvedIdent{
+                        kind = Local
+                        name = <D <U <pattern-value>> $15>
+                      }
+                    }
+                  ],
+                  expr = Literal{ value = true }
+                }
+              }
+              elsep = EmptyTree
+            }
+            elsep = EmptyTree
+          }
+        }
+        thenp = Literal{ value = true }
+        elsep = Literal{ value = false }
+      }
     }
 
     If{
@@ -404,497 +658,895 @@ ClassDef{
           }
         ]
       }
-      thenp = If{
-        cond = Send{
-          flags = {rewriterSynthesized}
-          recv = Send{
+      thenp = InsSeq{
+        stats = [
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <D <U <assignTemp>> $16>
+            }
+            rhs = Send{
+              flags = {}
+              recv = ConstantLit{
+                symbol = (class ::<Magic>)
+                orig = nullptr
+              }
+              fun = <U <pattern-snapshot>>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Array{
+                  elems = [
+                    Literal{ value = 3 }
+                    Literal{ value = 4 }
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        expr = If{
+          cond = InsSeq{
+            stats = [
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <D <U <pattern-array>> $17>
+                }
+                rhs = Send{
+                  flags = {}
+                  recv = ConstantLit{
+                    symbol = (class ::<Magic>)
+                    orig = nullptr
+                  }
+                  fun = <U <pattern-deconstruct>>
+                  block = nullptr
+                  pos_args = 2
+                  args = [
+                    UnresolvedIdent{
+                      kind = Local
+                      name = <D <U <assignTemp>> $16>
+                    }
+                    UnresolvedIdent{
+                      kind = Local
+                      name = <D <U <assignTemp>> $16>
+                    }
+                  ]
+                }
+              }
+            ],
+            expr = If{
+              cond = Send{
+                flags = {}
+                recv = Send{
+                  flags = {}
+                  recv = UnresolvedIdent{
+                    kind = Local
+                    name = <D <U <pattern-array>> $17>
+                  }
+                  fun = <U length>
+                  block = nullptr
+                  pos_args = 0
+                  args = [
+                  ]
+                }
+                fun = <U ==>
+                block = nullptr
+                pos_args = 1
+                args = [
+                  Literal{ value = 2 }
+                ]
+              }
+              thenp = If{
+                cond = InsSeq{
+                  stats = [
+                    Assign{
+                      lhs = UnresolvedIdent{
+                        kind = Local
+                        name = <D <U <pattern-value>> $18>
+                      }
+                      rhs = Send{
+                        flags = {}
+                        recv = ConstantLit{
+                          symbol = (class ::<Magic>)
+                          orig = nullptr
+                        }
+                        fun = <U <pattern-element>>
+                        block = nullptr
+                        pos_args = 2
+                        args = [
+                          UnresolvedIdent{
+                            kind = Local
+                            name = <D <U <pattern-array>> $17>
+                          }
+                          Literal{ value = 0 }
+                        ]
+                      }
+                    }
+                  ],
+                  expr = InsSeq{
+                    stats = [
+                      Assign{
+                        lhs = UnresolvedIdent{
+                          kind = Local
+                          name = <U c>
+                        }
+                        rhs = UnresolvedIdent{
+                          kind = Local
+                          name = <D <U <pattern-value>> $18>
+                        }
+                      }
+                    ],
+                    expr = Literal{ value = true }
+                  }
+                }
+                thenp = InsSeq{
+                  stats = [
+                    Assign{
+                      lhs = UnresolvedIdent{
+                        kind = Local
+                        name = <D <U <pattern-value>> $19>
+                      }
+                      rhs = Send{
+                        flags = {}
+                        recv = ConstantLit{
+                          symbol = (class ::<Magic>)
+                          orig = nullptr
+                        }
+                        fun = <U <pattern-element>>
+                        block = nullptr
+                        pos_args = 2
+                        args = [
+                          UnresolvedIdent{
+                            kind = Local
+                            name = <D <U <pattern-array>> $17>
+                          }
+                          Literal{ value = 1 }
+                        ]
+                      }
+                    }
+                  ],
+                  expr = InsSeq{
+                    stats = [
+                      Assign{
+                        lhs = UnresolvedIdent{
+                          kind = Local
+                          name = <U d>
+                        }
+                        rhs = UnresolvedIdent{
+                          kind = Local
+                          name = <D <U <pattern-value>> $19>
+                        }
+                      }
+                    ],
+                    expr = Literal{ value = true }
+                  }
+                }
+                elsep = EmptyTree
+              }
+              elsep = EmptyTree
+            }
+          }
+          thenp = Literal{ value = true }
+          elsep = Literal{ value = false }
+        }
+      }
+      elsep = EmptyTree
+    }
+
+    InsSeq{
+      stats = [
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Local
+            name = <D <U <assignTemp>> $20>
+          }
+          rhs = Send{
             flags = {}
             recv = ConstantLit{
-              symbol = (module ::T)
+              symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U unsafe>
+            fun = <U <pattern-snapshot>>
             block = nullptr
             pos_args = 1
             args = [
-              ConstantLit{
-                symbol = (module ::Kernel)
-                orig = nullptr
+              Send{
+                flags = {privateOk}
+                recv = Self
+                fun = <U match>
+                block = nullptr
+                pos_args = 0
+                args = [
+                ]
               }
             ]
+          }
+        }
+      ],
+      expr = If{
+        cond = Send{
+          flags = {}
+          recv = Literal{ value = 10 }
+          fun = <U ===>
+          block = nullptr
+          pos_args = 1
+          args = [
+            UnresolvedIdent{
+              kind = Local
+              name = <D <U <assignTemp>> $20>
+            }
+          ]
+        }
+        thenp = Literal{ value = nil }
+        elsep = Send{
+          flags = {rewriterSynthesized}
+          recv = ConstantLit{
+            symbol = (module ::Kernel)
+            orig = nullptr
           }
           fun = <U raise>
           block = nullptr
           pos_args = 1
           args = [
-            Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+            UnresolvedConstantLit{
+              cnst = <C <U NoMatchingPatternError>>
+              scope = ConstantLit{
+                symbol = (class ::<root>)
+                orig = nullptr
+              }
+            }
           ]
         }
-        thenp = InsSeq{
+      }
+    }
+
+    InsSeq{
+      stats = [
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Local
+            name = <D <U <assignTemp>> $21>
+          }
+          rhs = Send{
+            flags = {}
+            recv = ConstantLit{
+              symbol = (class ::<Magic>)
+              orig = nullptr
+            }
+            fun = <U <pattern-snapshot>>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Send{
+                flags = {privateOk}
+                recv = Self
+                fun = <U no_match>
+                block = nullptr
+                pos_args = 0
+                args = [
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      expr = If{
+        cond = InsSeq{
           stats = [
             Assign{
               lhs = UnresolvedIdent{
                 kind = Local
-                name = <U c>
+                name = <D <U <pattern-array>> $22>
               }
               rhs = Send{
-                flags = {rewriterSynthesized}
-                recv = Send{
-                  flags = {}
-                  recv = ConstantLit{
-                    symbol = (module ::T)
-                    orig = nullptr
-                  }
-                  fun = <U unsafe>
-                  block = nullptr
-                  pos_args = 1
-                  args = [
-                    ConstantLit{
-                      symbol = (module ::Kernel)
-                      orig = nullptr
-                    }
-                  ]
+                flags = {}
+                recv = ConstantLit{
+                  symbol = (class ::<Magic>)
+                  orig = nullptr
                 }
-                fun = <U raise>
+                fun = <U <pattern-deconstruct>>
                 block = nullptr
-                pos_args = 1
+                pos_args = 2
                 args = [
-                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-                ]
-              }
-            }
-            Assign{
-              lhs = UnresolvedIdent{
-                kind = Local
-                name = <U d>
-              }
-              rhs = Send{
-                flags = {rewriterSynthesized}
-                recv = Send{
-                  flags = {}
-                  recv = ConstantLit{
-                    symbol = (module ::T)
-                    orig = nullptr
+                  UnresolvedIdent{
+                    kind = Local
+                    name = <D <U <assignTemp>> $21>
                   }
-                  fun = <U unsafe>
-                  block = nullptr
-                  pos_args = 1
-                  args = [
-                    ConstantLit{
-                      symbol = (module ::Kernel)
-                      orig = nullptr
-                    }
-                  ]
-                }
-                fun = <U raise>
-                block = nullptr
-                pos_args = 1
-                args = [
-                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                  UnresolvedIdent{
+                    kind = Local
+                    name = <D <U <assignTemp>> $21>
+                  }
                 ]
               }
             }
           ],
-          expr = Send{
-            flags = {rewriterSynthesized}
-            recv = Send{
+          expr = If{
+            cond = Send{
               flags = {}
-              recv = ConstantLit{
-                symbol = (module ::T)
-                orig = nullptr
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
-                }
-              ]
-            }
-            fun = <U raise>
-            block = nullptr
-            pos_args = 1
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
-          }
-        }
-        elsep = EmptyTree
-      }
-      elsep = EmptyTree
-    }
-
-    If{
-      cond = Send{
-        flags = {rewriterSynthesized}
-        recv = Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::T)
-            orig = nullptr
-          }
-          fun = <U unsafe>
-          block = nullptr
-          pos_args = 1
-          args = [
-            ConstantLit{
-              symbol = (module ::Kernel)
-              orig = nullptr
-            }
-          ]
-        }
-        fun = <U raise>
-        block = nullptr
-        pos_args = 1
-        args = [
-          Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-        ]
-      }
-      thenp = Send{
-        flags = {rewriterSynthesized}
-        recv = Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::T)
-            orig = nullptr
-          }
-          fun = <U unsafe>
-          block = nullptr
-          pos_args = 1
-          args = [
-            ConstantLit{
-              symbol = (module ::Kernel)
-              orig = nullptr
-            }
-          ]
-        }
-        fun = <U raise>
-        block = nullptr
-        pos_args = 1
-        args = [
-          Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-        ]
-      }
-      elsep = EmptyTree
-    }
-
-    If{
-      cond = Send{
-        flags = {rewriterSynthesized}
-        recv = Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::T)
-            orig = nullptr
-          }
-          fun = <U unsafe>
-          block = nullptr
-          pos_args = 1
-          args = [
-            ConstantLit{
-              symbol = (module ::Kernel)
-              orig = nullptr
-            }
-          ]
-        }
-        fun = <U raise>
-        block = nullptr
-        pos_args = 1
-        args = [
-          Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-        ]
-      }
-      thenp = Send{
-        flags = {rewriterSynthesized}
-        recv = Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::T)
-            orig = nullptr
-          }
-          fun = <U unsafe>
-          block = nullptr
-          pos_args = 1
-          args = [
-            ConstantLit{
-              symbol = (module ::Kernel)
-              orig = nullptr
-            }
-          ]
-        }
-        fun = <U raise>
-        block = nullptr
-        pos_args = 1
-        args = [
-          Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-        ]
-      }
-      elsep = EmptyTree
-    }
-
-    If{
-      cond = Send{
-        flags = {rewriterSynthesized}
-        recv = Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::T)
-            orig = nullptr
-          }
-          fun = <U unsafe>
-          block = nullptr
-          pos_args = 1
-          args = [
-            ConstantLit{
-              symbol = (module ::Kernel)
-              orig = nullptr
-            }
-          ]
-        }
-        fun = <U raise>
-        block = nullptr
-        pos_args = 1
-        args = [
-          Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-        ]
-      }
-      thenp = Send{
-        flags = {rewriterSynthesized}
-        recv = Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::T)
-            orig = nullptr
-          }
-          fun = <U unsafe>
-          block = nullptr
-          pos_args = 1
-          args = [
-            ConstantLit{
-              symbol = (module ::Kernel)
-              orig = nullptr
-            }
-          ]
-        }
-        fun = <U raise>
-        block = nullptr
-        pos_args = 1
-        args = [
-          Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-        ]
-      }
-      elsep = EmptyTree
-    }
-
-    If{
-      cond = Send{
-        flags = {rewriterSynthesized}
-        recv = Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::T)
-            orig = nullptr
-          }
-          fun = <U unsafe>
-          block = nullptr
-          pos_args = 1
-          args = [
-            ConstantLit{
-              symbol = (module ::Kernel)
-              orig = nullptr
-            }
-          ]
-        }
-        fun = <U raise>
-        block = nullptr
-        pos_args = 1
-        args = [
-          Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-        ]
-      }
-      thenp = InsSeq{
-        stats = [
-          Assign{
-            lhs = UnresolvedIdent{
-              kind = Local
-              name = <U var_c>
-            }
-            rhs = Send{
-              flags = {rewriterSynthesized}
               recv = Send{
                 flags = {}
-                recv = ConstantLit{
-                  symbol = (module ::T)
-                  orig = nullptr
+                recv = UnresolvedIdent{
+                  kind = Local
+                  name = <D <U <pattern-array>> $22>
                 }
-                fun = <U unsafe>
+                fun = <U length>
                 block = nullptr
-                pos_args = 1
+                pos_args = 0
                 args = [
-                  ConstantLit{
-                    symbol = (module ::Kernel)
-                    orig = nullptr
-                  }
                 ]
               }
-              fun = <U raise>
+              fun = <U ==>
               block = nullptr
               pos_args = 1
               args = [
-                Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                Literal{ value = 2 }
               ]
             }
-          }
-        ],
-        expr = Send{
-          flags = {rewriterSynthesized}
-          recv = Send{
-            flags = {}
-            recv = ConstantLit{
-              symbol = (module ::T)
-              orig = nullptr
-            }
-            fun = <U unsafe>
-            block = nullptr
-            pos_args = 1
-            args = [
-              ConstantLit{
-                symbol = (module ::Kernel)
-                orig = nullptr
+            thenp = If{
+              cond = InsSeq{
+                stats = [
+                  Assign{
+                    lhs = UnresolvedIdent{
+                      kind = Local
+                      name = <D <U <pattern-value>> $23>
+                    }
+                    rhs = Send{
+                      flags = {}
+                      recv = ConstantLit{
+                        symbol = (class ::<Magic>)
+                        orig = nullptr
+                      }
+                      fun = <U <pattern-element>>
+                      block = nullptr
+                      pos_args = 2
+                      args = [
+                        UnresolvedIdent{
+                          kind = Local
+                          name = <D <U <pattern-array>> $22>
+                        }
+                        Literal{ value = 0 }
+                      ]
+                    }
+                  }
+                ],
+                expr = Send{
+                  flags = {}
+                  recv = Literal{ value = 10 }
+                  fun = <U ===>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    UnresolvedIdent{
+                      kind = Local
+                      name = <D <U <pattern-value>> $23>
+                    }
+                  ]
+                }
               }
-            ]
+              thenp = InsSeq{
+                stats = [
+                  Assign{
+                    lhs = UnresolvedIdent{
+                      kind = Local
+                      name = <D <U <pattern-value>> $24>
+                    }
+                    rhs = Send{
+                      flags = {}
+                      recv = ConstantLit{
+                        symbol = (class ::<Magic>)
+                        orig = nullptr
+                      }
+                      fun = <U <pattern-element>>
+                      block = nullptr
+                      pos_args = 2
+                      args = [
+                        UnresolvedIdent{
+                          kind = Local
+                          name = <D <U <pattern-array>> $22>
+                        }
+                        Literal{ value = 1 }
+                      ]
+                    }
+                  }
+                ],
+                expr = Send{
+                  flags = {}
+                  recv = Literal{ value = 20 }
+                  fun = <U ===>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    UnresolvedIdent{
+                      kind = Local
+                      name = <D <U <pattern-value>> $24>
+                    }
+                  ]
+                }
+              }
+              elsep = EmptyTree
+            }
+            elsep = EmptyTree
+          }
+        }
+        thenp = Literal{ value = nil }
+        elsep = Send{
+          flags = {rewriterSynthesized}
+          recv = ConstantLit{
+            symbol = (module ::Kernel)
+            orig = nullptr
           }
           fun = <U raise>
           block = nullptr
           pos_args = 1
           args = [
-            Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+            UnresolvedConstantLit{
+              cnst = <C <U NoMatchingPatternError>>
+              scope = ConstantLit{
+                symbol = (class ::<root>)
+                orig = nullptr
+              }
+            }
           ]
         }
       }
-      elsep = EmptyTree
     }
 
-    If{
-      cond = Send{
-        flags = {rewriterSynthesized}
-        recv = Send{
-          flags = {}
-          recv = ConstantLit{
-            symbol = (module ::T)
-            orig = nullptr
+    InsSeq{
+      stats = [
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Local
+            name = <D <U <assignTemp>> $25>
           }
-          fun = <U unsafe>
-          block = nullptr
-          pos_args = 1
-          args = [
-            ConstantLit{
-              symbol = (module ::Kernel)
-              orig = nullptr
-            }
-          ]
-        }
-        fun = <U raise>
-        block = nullptr
-        pos_args = 1
-        args = [
-          Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-        ]
-      }
-      thenp = InsSeq{
-        stats = [
-          Assign{
-            lhs = UnresolvedIdent{
-              kind = Local
-              name = <U var_c>
-            }
-            rhs = Send{
-              flags = {rewriterSynthesized}
-              recv = Send{
-                flags = {}
-                recv = ConstantLit{
-                  symbol = (module ::T)
-                  orig = nullptr
-                }
-                fun = <U unsafe>
-                block = nullptr
-                pos_args = 1
-                args = [
-                  ConstantLit{
-                    symbol = (module ::Kernel)
-                    orig = nullptr
-                  }
-                ]
-              }
-              fun = <U raise>
-              block = nullptr
-              pos_args = 1
-              args = [
-                Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-              ]
-            }
-          }
-          Assign{
-            lhs = UnresolvedIdent{
-              kind = Local
-              name = <U var_d>
-            }
-            rhs = Send{
-              flags = {rewriterSynthesized}
-              recv = Send{
-                flags = {}
-                recv = ConstantLit{
-                  symbol = (module ::T)
-                  orig = nullptr
-                }
-                fun = <U unsafe>
-                block = nullptr
-                pos_args = 1
-                args = [
-                  ConstantLit{
-                    symbol = (module ::Kernel)
-                    orig = nullptr
-                  }
-                ]
-              }
-              fun = <U raise>
-              block = nullptr
-              pos_args = 1
-              args = [
-                Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-              ]
-            }
-          }
-        ],
-        expr = Send{
-          flags = {rewriterSynthesized}
-          recv = Send{
+          rhs = Send{
             flags = {}
             recv = ConstantLit{
-              symbol = (module ::T)
+              symbol = (class ::<Magic>)
               orig = nullptr
             }
-            fun = <U unsafe>
+            fun = <U <pattern-snapshot>>
             block = nullptr
             pos_args = 1
             args = [
-              ConstantLit{
-                symbol = (module ::Kernel)
-                orig = nullptr
+              Array{
+                elems = [
+                  Send{
+                    flags = {privateOk}
+                    recv = Self
+                    fun = <U match_1>
+                    block = nullptr
+                    pos_args = 0
+                    args = [
+                    ]
+                  }
+                  Send{
+                    flags = {privateOk}
+                    recv = Self
+                    fun = <U match_2>
+                    block = nullptr
+                    pos_args = 0
+                    args = [
+                    ]
+                  }
+                ]
               }
             ]
+          }
+        }
+      ],
+      expr = If{
+        cond = InsSeq{
+          stats = [
+            Assign{
+              lhs = UnresolvedIdent{
+                kind = Local
+                name = <D <U <pattern-array>> $26>
+              }
+              rhs = Send{
+                flags = {}
+                recv = ConstantLit{
+                  symbol = (class ::<Magic>)
+                  orig = nullptr
+                }
+                fun = <U <pattern-deconstruct>>
+                block = nullptr
+                pos_args = 2
+                args = [
+                  UnresolvedIdent{
+                    kind = Local
+                    name = <D <U <assignTemp>> $25>
+                  }
+                  UnresolvedIdent{
+                    kind = Local
+                    name = <D <U <assignTemp>> $25>
+                  }
+                ]
+              }
+            }
+          ],
+          expr = If{
+            cond = Send{
+              flags = {}
+              recv = Send{
+                flags = {}
+                recv = UnresolvedIdent{
+                  kind = Local
+                  name = <D <U <pattern-array>> $26>
+                }
+                fun = <U length>
+                block = nullptr
+                pos_args = 0
+                args = [
+                ]
+              }
+              fun = <U ==>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Literal{ value = 2 }
+              ]
+            }
+            thenp = If{
+              cond = InsSeq{
+                stats = [
+                  Assign{
+                    lhs = UnresolvedIdent{
+                      kind = Local
+                      name = <D <U <pattern-value>> $27>
+                    }
+                    rhs = Send{
+                      flags = {}
+                      recv = ConstantLit{
+                        symbol = (class ::<Magic>)
+                        orig = nullptr
+                      }
+                      fun = <U <pattern-element>>
+                      block = nullptr
+                      pos_args = 2
+                      args = [
+                        UnresolvedIdent{
+                          kind = Local
+                          name = <D <U <pattern-array>> $26>
+                        }
+                        Literal{ value = 0 }
+                      ]
+                    }
+                  }
+                ],
+                expr = Send{
+                  flags = {}
+                  recv = Literal{ value = 10 }
+                  fun = <U ===>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    UnresolvedIdent{
+                      kind = Local
+                      name = <D <U <pattern-value>> $27>
+                    }
+                  ]
+                }
+              }
+              thenp = InsSeq{
+                stats = [
+                  Assign{
+                    lhs = UnresolvedIdent{
+                      kind = Local
+                      name = <D <U <pattern-value>> $28>
+                    }
+                    rhs = Send{
+                      flags = {}
+                      recv = ConstantLit{
+                        symbol = (class ::<Magic>)
+                        orig = nullptr
+                      }
+                      fun = <U <pattern-element>>
+                      block = nullptr
+                      pos_args = 2
+                      args = [
+                        UnresolvedIdent{
+                          kind = Local
+                          name = <D <U <pattern-array>> $26>
+                        }
+                        Literal{ value = 1 }
+                      ]
+                    }
+                  }
+                ],
+                expr = Send{
+                  flags = {}
+                  recv = Literal{ value = 20 }
+                  fun = <U ===>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    UnresolvedIdent{
+                      kind = Local
+                      name = <D <U <pattern-value>> $28>
+                    }
+                  ]
+                }
+              }
+              elsep = EmptyTree
+            }
+            elsep = EmptyTree
+          }
+        }
+        thenp = Literal{ value = nil }
+        elsep = Send{
+          flags = {rewriterSynthesized}
+          recv = ConstantLit{
+            symbol = (module ::Kernel)
+            orig = nullptr
           }
           fun = <U raise>
           block = nullptr
           pos_args = 1
           args = [
-            Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+            UnresolvedConstantLit{
+              cnst = <C <U NoMatchingPatternError>>
+              scope = ConstantLit{
+                symbol = (class ::<root>)
+                orig = nullptr
+              }
+            }
           ]
         }
       }
-      elsep = EmptyTree
+    }
+
+    InsSeq{
+      stats = [
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Local
+            name = <D <U <assignTemp>> $29>
+          }
+          rhs = Send{
+            flags = {}
+            recv = ConstantLit{
+              symbol = (class ::<Magic>)
+              orig = nullptr
+            }
+            fun = <U <pattern-snapshot>>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Literal{ value = 10 }
+            ]
+          }
+        }
+      ],
+      expr = If{
+        cond = InsSeq{
+          stats = [
+            Assign{
+              lhs = UnresolvedIdent{
+                kind = Local
+                name = <U var_c>
+              }
+              rhs = UnresolvedIdent{
+                kind = Local
+                name = <D <U <assignTemp>> $29>
+              }
+            }
+          ],
+          expr = Literal{ value = true }
+        }
+        thenp = Literal{ value = nil }
+        elsep = Send{
+          flags = {rewriterSynthesized}
+          recv = ConstantLit{
+            symbol = (module ::Kernel)
+            orig = nullptr
+          }
+          fun = <U raise>
+          block = nullptr
+          pos_args = 1
+          args = [
+            UnresolvedConstantLit{
+              cnst = <C <U NoMatchingPatternError>>
+              scope = ConstantLit{
+                symbol = (class ::<root>)
+                orig = nullptr
+              }
+            }
+          ]
+        }
+      }
+    }
+
+    InsSeq{
+      stats = [
+        Assign{
+          lhs = UnresolvedIdent{
+            kind = Local
+            name = <D <U <assignTemp>> $30>
+          }
+          rhs = Send{
+            flags = {}
+            recv = ConstantLit{
+              symbol = (class ::<Magic>)
+              orig = nullptr
+            }
+            fun = <U <pattern-snapshot>>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Array{
+                elems = [
+                  Literal{ value = 10 }
+                  Literal{ value = 20 }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      expr = If{
+        cond = InsSeq{
+          stats = [
+            Assign{
+              lhs = UnresolvedIdent{
+                kind = Local
+                name = <D <U <pattern-array>> $31>
+              }
+              rhs = Send{
+                flags = {}
+                recv = ConstantLit{
+                  symbol = (class ::<Magic>)
+                  orig = nullptr
+                }
+                fun = <U <pattern-deconstruct>>
+                block = nullptr
+                pos_args = 2
+                args = [
+                  UnresolvedIdent{
+                    kind = Local
+                    name = <D <U <assignTemp>> $30>
+                  }
+                  UnresolvedIdent{
+                    kind = Local
+                    name = <D <U <assignTemp>> $30>
+                  }
+                ]
+              }
+            }
+          ],
+          expr = If{
+            cond = Send{
+              flags = {}
+              recv = Send{
+                flags = {}
+                recv = UnresolvedIdent{
+                  kind = Local
+                  name = <D <U <pattern-array>> $31>
+                }
+                fun = <U length>
+                block = nullptr
+                pos_args = 0
+                args = [
+                ]
+              }
+              fun = <U ==>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Literal{ value = 2 }
+              ]
+            }
+            thenp = If{
+              cond = InsSeq{
+                stats = [
+                  Assign{
+                    lhs = UnresolvedIdent{
+                      kind = Local
+                      name = <D <U <pattern-value>> $32>
+                    }
+                    rhs = Send{
+                      flags = {}
+                      recv = ConstantLit{
+                        symbol = (class ::<Magic>)
+                        orig = nullptr
+                      }
+                      fun = <U <pattern-element>>
+                      block = nullptr
+                      pos_args = 2
+                      args = [
+                        UnresolvedIdent{
+                          kind = Local
+                          name = <D <U <pattern-array>> $31>
+                        }
+                        Literal{ value = 0 }
+                      ]
+                    }
+                  }
+                ],
+                expr = InsSeq{
+                  stats = [
+                    Assign{
+                      lhs = UnresolvedIdent{
+                        kind = Local
+                        name = <U var_c>
+                      }
+                      rhs = UnresolvedIdent{
+                        kind = Local
+                        name = <D <U <pattern-value>> $32>
+                      }
+                    }
+                  ],
+                  expr = Literal{ value = true }
+                }
+              }
+              thenp = InsSeq{
+                stats = [
+                  Assign{
+                    lhs = UnresolvedIdent{
+                      kind = Local
+                      name = <D <U <pattern-value>> $33>
+                    }
+                    rhs = Send{
+                      flags = {}
+                      recv = ConstantLit{
+                        symbol = (class ::<Magic>)
+                        orig = nullptr
+                      }
+                      fun = <U <pattern-element>>
+                      block = nullptr
+                      pos_args = 2
+                      args = [
+                        UnresolvedIdent{
+                          kind = Local
+                          name = <D <U <pattern-array>> $31>
+                        }
+                        Literal{ value = 1 }
+                      ]
+                    }
+                  }
+                ],
+                expr = InsSeq{
+                  stats = [
+                    Assign{
+                      lhs = UnresolvedIdent{
+                        kind = Local
+                        name = <U var_d>
+                      }
+                      rhs = UnresolvedIdent{
+                        kind = Local
+                        name = <D <U <pattern-value>> $33>
+                      }
+                    }
+                  ],
+                  expr = Literal{ value = true }
+                }
+              }
+              elsep = EmptyTree
+            }
+            elsep = EmptyTree
+          }
+        }
+        thenp = Literal{ value = nil }
+        elsep = Send{
+          flags = {rewriterSynthesized}
+          recv = ConstantLit{
+            symbol = (module ::Kernel)
+            orig = nullptr
+          }
+          fun = <U raise>
+          block = nullptr
+          pos_args = 1
+          args = [
+            UnresolvedConstantLit{
+              cnst = <C <U NoMatchingPatternError>>
+              scope = ConstantLit{
+                symbol = (class ::<root>)
+                orig = nullptr
+              }
+            }
+          ]
+        }
+      }
     }
 
     If{
@@ -923,124 +1575,196 @@ ClassDef{
           }
         ]
       }
-      thenp = If{
-        cond = Send{
-          flags = {rewriterSynthesized}
-          recv = Send{
-            flags = {}
-            recv = ConstantLit{
-              symbol = (module ::T)
-              orig = nullptr
+      thenp = InsSeq{
+        stats = [
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = <D <U <assignTemp>> $34>
             }
-            fun = <U unsafe>
-            block = nullptr
-            pos_args = 1
-            args = [
-              ConstantLit{
-                symbol = (module ::Kernel)
-                orig = nullptr
-              }
-            ]
-          }
-          fun = <U raise>
-          block = nullptr
-          pos_args = 1
-          args = [
-            Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-          ]
-        }
-        thenp = InsSeq{
-          stats = [
-            Assign{
-              lhs = UnresolvedIdent{
-                kind = Local
-                name = <U var_c>
-              }
-              rhs = Send{
-                flags = {rewriterSynthesized}
-                recv = Send{
-                  flags = {}
-                  recv = ConstantLit{
-                    symbol = (module ::T)
-                    orig = nullptr
-                  }
-                  fun = <U unsafe>
-                  block = nullptr
-                  pos_args = 1
-                  args = [
-                    ConstantLit{
-                      symbol = (module ::Kernel)
-                      orig = nullptr
-                    }
-                  ]
-                }
-                fun = <U raise>
-                block = nullptr
-                pos_args = 1
-                args = [
-                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-                ]
-              }
-            }
-            Assign{
-              lhs = UnresolvedIdent{
-                kind = Local
-                name = <U var_d>
-              }
-              rhs = Send{
-                flags = {rewriterSynthesized}
-                recv = Send{
-                  flags = {}
-                  recv = ConstantLit{
-                    symbol = (module ::T)
-                    orig = nullptr
-                  }
-                  fun = <U unsafe>
-                  block = nullptr
-                  pos_args = 1
-                  args = [
-                    ConstantLit{
-                      symbol = (module ::Kernel)
-                      orig = nullptr
-                    }
-                  ]
-                }
-                fun = <U raise>
-                block = nullptr
-                pos_args = 1
-                args = [
-                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-                ]
-              }
-            }
-          ],
-          expr = Send{
-            flags = {rewriterSynthesized}
-            recv = Send{
+            rhs = Send{
               flags = {}
               recv = ConstantLit{
-                symbol = (module ::T)
+                symbol = (class ::<Magic>)
                 orig = nullptr
               }
-              fun = <U unsafe>
+              fun = <U <pattern-snapshot>>
               block = nullptr
               pos_args = 1
               args = [
-                ConstantLit{
-                  symbol = (module ::Kernel)
-                  orig = nullptr
+                Array{
+                  elems = [
+                    Literal{ value = 30 }
+                    Literal{ value = 40 }
+                  ]
                 }
               ]
+            }
+          }
+        ],
+        expr = If{
+          cond = InsSeq{
+            stats = [
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <D <U <pattern-array>> $35>
+                }
+                rhs = Send{
+                  flags = {}
+                  recv = ConstantLit{
+                    symbol = (class ::<Magic>)
+                    orig = nullptr
+                  }
+                  fun = <U <pattern-deconstruct>>
+                  block = nullptr
+                  pos_args = 2
+                  args = [
+                    UnresolvedIdent{
+                      kind = Local
+                      name = <D <U <assignTemp>> $34>
+                    }
+                    UnresolvedIdent{
+                      kind = Local
+                      name = <D <U <assignTemp>> $34>
+                    }
+                  ]
+                }
+              }
+            ],
+            expr = If{
+              cond = Send{
+                flags = {}
+                recv = Send{
+                  flags = {}
+                  recv = UnresolvedIdent{
+                    kind = Local
+                    name = <D <U <pattern-array>> $35>
+                  }
+                  fun = <U length>
+                  block = nullptr
+                  pos_args = 0
+                  args = [
+                  ]
+                }
+                fun = <U ==>
+                block = nullptr
+                pos_args = 1
+                args = [
+                  Literal{ value = 2 }
+                ]
+              }
+              thenp = If{
+                cond = InsSeq{
+                  stats = [
+                    Assign{
+                      lhs = UnresolvedIdent{
+                        kind = Local
+                        name = <D <U <pattern-value>> $36>
+                      }
+                      rhs = Send{
+                        flags = {}
+                        recv = ConstantLit{
+                          symbol = (class ::<Magic>)
+                          orig = nullptr
+                        }
+                        fun = <U <pattern-element>>
+                        block = nullptr
+                        pos_args = 2
+                        args = [
+                          UnresolvedIdent{
+                            kind = Local
+                            name = <D <U <pattern-array>> $35>
+                          }
+                          Literal{ value = 0 }
+                        ]
+                      }
+                    }
+                  ],
+                  expr = InsSeq{
+                    stats = [
+                      Assign{
+                        lhs = UnresolvedIdent{
+                          kind = Local
+                          name = <U var_c>
+                        }
+                        rhs = UnresolvedIdent{
+                          kind = Local
+                          name = <D <U <pattern-value>> $36>
+                        }
+                      }
+                    ],
+                    expr = Literal{ value = true }
+                  }
+                }
+                thenp = InsSeq{
+                  stats = [
+                    Assign{
+                      lhs = UnresolvedIdent{
+                        kind = Local
+                        name = <D <U <pattern-value>> $37>
+                      }
+                      rhs = Send{
+                        flags = {}
+                        recv = ConstantLit{
+                          symbol = (class ::<Magic>)
+                          orig = nullptr
+                        }
+                        fun = <U <pattern-element>>
+                        block = nullptr
+                        pos_args = 2
+                        args = [
+                          UnresolvedIdent{
+                            kind = Local
+                            name = <D <U <pattern-array>> $35>
+                          }
+                          Literal{ value = 1 }
+                        ]
+                      }
+                    }
+                  ],
+                  expr = InsSeq{
+                    stats = [
+                      Assign{
+                        lhs = UnresolvedIdent{
+                          kind = Local
+                          name = <U var_d>
+                        }
+                        rhs = UnresolvedIdent{
+                          kind = Local
+                          name = <D <U <pattern-value>> $37>
+                        }
+                      }
+                    ],
+                    expr = Literal{ value = true }
+                  }
+                }
+                elsep = EmptyTree
+              }
+              elsep = EmptyTree
+            }
+          }
+          thenp = Literal{ value = nil }
+          elsep = Send{
+            flags = {rewriterSynthesized}
+            recv = ConstantLit{
+              symbol = (module ::Kernel)
+              orig = nullptr
             }
             fun = <U raise>
             block = nullptr
             pos_args = 1
             args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+              UnresolvedConstantLit{
+                cnst = <C <U NoMatchingPatternError>>
+                scope = ConstantLit{
+                  symbol = (class ::<root>)
+                  orig = nullptr
+                }
+              }
             ]
           }
         }
-        elsep = EmptyTree
       }
       elsep = EmptyTree
     }

@@ -796,6 +796,35 @@ void GlobalState::initEmpty() {
                  .untypedArg(Names::arg1())
                  .buildWithResultUntyped();
 
+    // Pattern matching: <pattern-snapshot>(subject), <pattern-deconstruct>(subject, snapshot),
+    // <pattern-deconstruct-keys>(subject, snapshot),
+    // <pattern-element>(array, index), <pattern-rest>(array, before, after), <pattern-hash-value>(hash, key).
+    // Their result types come from the intrinsics in calls.cc.
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::patternSnapshot())
+                 .untypedArg(Names::arg0())
+                 .buildWithResultUntyped();
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::patternDeconstruct())
+                 .untypedArg(Names::arg0())
+                 .untypedArg(Names::arg1())
+                 .buildWithResultUntyped();
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::patternDeconstructKeys())
+                 .untypedArg(Names::arg0())
+                 .untypedArg(Names::arg1())
+                 .buildWithResultUntyped();
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::patternElement())
+                 .untypedArg(Names::arg0())
+                 .untypedArg(Names::arg1())
+                 .buildWithResultUntyped();
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::patternRest())
+                 .untypedArg(Names::arg0())
+                 .untypedArg(Names::arg1())
+                 .untypedArg(Names::arg2())
+                 .buildWithResultUntyped();
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::patternHashValue())
+                 .untypedArg(Names::arg0())
+                 .untypedArg(Names::arg1())
+                 .buildWithResultUntyped();
+
     // Synthesize <Magic>.<to-hash-dup>(arg: T.untyped) => T.untyped
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::toHashDup())
                  .untypedArg(Names::arg0())
@@ -906,6 +935,9 @@ void GlobalState::initEmpty() {
 
     field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::Constants::LoadYieldParams());
     ENFORCE_NO_TIMER(field == Symbols::Magic_UntypedSource_LoadYieldParams());
+
+    field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::patternMatch());
+    ENFORCE_NO_TIMER(field == Symbols::Magic_UntypedSource_patternMatch());
 
     int reservedCount = 0;
 

@@ -3942,6 +3942,235 @@ class Magic_checkMatchArray : public IntrinsicMethod {
     }
 } Magic_checkMatchArray;
 
+// Pattern matching (`case ... in`, `expr => pattern`, `expr in pattern`) lowers to calls to the intrinsics below, so
+// that what a pattern binds takes its type from the subject's `deconstruct` and `deconstruct_keys`. They never report
+// errors: Ruby treats a subject that doesn't respond to `deconstruct` as a failed match, not as a mistake. Anything
+// they cannot say precisely is `T.untyped`, which is what every pattern binding used to be.
+namespace {
+
+TypePtr dispatchForPattern(const GlobalState &gs, const DispatchArgs &args, const TypePtr &subject, NameRef method,
+                           InlinedVector<TypeAndOrigins, 2> &argStore) {
+    InlinedVector<const TypeAndOrigins *, 2> sendArgs;
+    for (auto &arg : argStore) {
+        sendArgs.emplace_back(&arg);
+    }
+    TypeAndOrigins subjectAndOrigins{subject, args.args[0]->origins};
+    InlinedVector<LocOffsets, 2> sendArgLocs(sendArgs.size(), args.locs.call);
+    CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], args.locs.fun, absl::MakeSpan(sendArgLocs)};
+    DispatchArgs innerArgs{method,
+                           sendLocs,
+                           static_cast<uint16_t>(sendArgs.size()),
+                           sendArgs,
+                           subject,
+                           subjectAndOrigins,
+                           subject,
+                           nullptr,
+                           args.originForUninitialized,
+                           /* isPrivateOk */ false,
+                           /* suppressErrors */ true,
+                           args.enclosingMethodForSuper};
+    auto dispatched = subject.dispatchCall(gs, innerArgs);
+    if (!allComponentsPresent(dispatched)) {
+        return nullptr;
+    }
+    return dispatched.returnType;
+}
+
+bool isPatternArray(const GlobalState &gs, const TypePtr &type);
+bool isPatternHash(const GlobalState &gs, const TypePtr &type);
+TypePtr patternUntyped();
+
+// What `deconstruct` (or `deconstruct_keys`) gives for `subject`, or nullptr when no member of it can be deconstructed.
+// `Array#deconstruct` and `Hash#deconstruct_keys` return `self`, which keeps a tuple or shape type precise. A member of
+// a union that can't be deconstructed is skipped, because Ruby treats it as a failed match.
+TypePtr deconstructForPattern(const GlobalState &gs, const DispatchArgs &args, const TypePtr &subject, bool keys) {
+    if (subject.isUntyped() || !subject.isFullyDefined()) {
+        return nullptr;
+    }
+    if (auto orType = cast_type<OrType>(subject)) {
+        auto left = deconstructForPattern(gs, args, orType->left, keys);
+        auto right = deconstructForPattern(gs, args, orType->right, keys);
+        if (left == nullptr) {
+            return right;
+        }
+        if (right == nullptr) {
+            return left;
+        }
+        return Types::any(gs, left, right);
+    }
+    if (keys ? isPatternHash(gs, subject) : isPatternArray(gs, subject)) {
+        return subject;
+    }
+
+    InlinedVector<TypeAndOrigins, 2> argStore;
+    if (keys) {
+        argStore.emplace_back(Types::nilClass(), args.callLoc());
+    }
+    auto deconstructed =
+        dispatchForPattern(gs, args, subject, keys ? Names::deconstructKeys() : Names::deconstruct(), argStore);
+    if (deconstructed == nullptr) {
+        return nullptr;
+    }
+    if (!(keys ? isPatternHash(gs, deconstructed) : isPatternArray(gs, deconstructed))) {
+        return patternUntyped();
+    }
+    return deconstructed;
+}
+
+bool isPatternArray(const GlobalState &gs, const TypePtr &type) {
+    return Types::isSubType(gs, type, Types::arrayOfUntyped(Symbols::Magic_UntypedSource_patternMatch()));
+}
+
+bool isPatternHash(const GlobalState &gs, const TypePtr &type) {
+    return Types::isSubType(gs, type, Types::hashOfUntyped(Symbols::Magic_UntypedSource_patternMatch()));
+}
+
+TypePtr patternUntyped() {
+    return Types::untyped(Symbols::Magic_UntypedSource_patternMatch());
+}
+
+// The element at `index` (negative counts from the end) of an array a pattern has already checked the length of.
+TypePtr patternElement(const GlobalState &gs, const TypePtr &array, int64_t index) {
+    if (auto orType = cast_type<OrType>(array)) {
+        return Types::any(gs, patternElement(gs, orType->left, index), patternElement(gs, orType->right, index));
+    }
+    if (auto tuple = cast_type<TupleType>(array)) {
+        auto size = static_cast<int64_t>(tuple->elems.size());
+        auto position = index < 0 ? size + index : index;
+        if (position < 0 || position >= size) {
+            return patternUntyped();
+        }
+        return tuple->elems[position];
+    }
+    if (auto applied = cast_type<AppliedType>(array)) {
+        if (applied->klass == Symbols::Array() && applied->targs.size() == 1) {
+            return applied->targs[0];
+        }
+    }
+    return patternUntyped();
+}
+
+// What a `*rest` binds: the elements left after taking `before` from the front and `after` from the back.
+TypePtr patternRest(const GlobalState &gs, const TypePtr &array, int64_t before, int64_t after) {
+    if (auto orType = cast_type<OrType>(array)) {
+        return Types::any(gs, patternRest(gs, orType->left, before, after),
+                          patternRest(gs, orType->right, before, after));
+    }
+    if (auto tuple = cast_type<TupleType>(array)) {
+        auto size = static_cast<int64_t>(tuple->elems.size());
+        if (before + after > size) {
+            return Types::arrayOfUntyped(Symbols::Magic_UntypedSource_patternMatch());
+        }
+        vector<TypePtr> elems(tuple->elems.begin() + before, tuple->elems.end() - after);
+        return make_type<TupleType>(move(elems));
+    }
+    if (auto applied = cast_type<AppliedType>(array)) {
+        if (applied->klass == Symbols::Array() && applied->targs.size() == 1) {
+            return Types::arrayOf(gs, applied->targs[0]);
+        }
+    }
+    return Types::arrayOfUntyped(Symbols::Magic_UntypedSource_patternMatch());
+}
+
+// The value under `key` in a hash a pattern has already checked has that key.
+TypePtr patternHashValue(const GlobalState &gs, const TypePtr &hash, const TypePtr &key) {
+    if (auto orType = cast_type<OrType>(hash)) {
+        return Types::any(gs, patternHashValue(gs, orType->left, key), patternHashValue(gs, orType->right, key));
+    }
+    if (auto shape = cast_type<ShapeType>(hash)) {
+        if (auto index = shape->indexForKey(key)) {
+            return shape->values[*index];
+        }
+        return patternUntyped();
+    }
+    if (auto applied = cast_type<AppliedType>(hash)) {
+        if (applied->klass == Symbols::Hash() && applied->targs.size() >= 2) {
+            return applied->targs[1];
+        }
+    }
+    return patternUntyped();
+}
+
+} // namespace
+
+// <Magic>.<pattern-snapshot>(subject): the subject's type before a constant pattern narrows it. Narrowing `T.untyped`
+// to a generic class gives `C[T.anything]`, and a binding read from that would be stricter than the untyped subject.
+class Magic_patternSnapshot : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        res.returnType = args.args.size() == 1 ? args.args[0]->type : patternUntyped();
+    }
+} Magic_patternSnapshot;
+
+// <Magic>.<pattern-deconstruct>(subject, snapshot): `subject.deconstruct` when that is an Array, else `T.untyped`.
+class Magic_patternDeconstruct : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        res.returnType = patternUntyped();
+        if (args.args.size() != 2 || args.args[1]->type.isUntyped()) {
+            return;
+        }
+        if (auto deconstructed = deconstructForPattern(gs, args, args.args[0]->type, false)) {
+            res.returnType = deconstructed;
+        }
+    }
+} Magic_patternDeconstruct;
+
+// <Magic>.<pattern-deconstruct-keys>(subject, snapshot): `subject.deconstruct_keys(nil)` when that is a Hash, else
+// `T.untyped`.
+class Magic_patternDeconstructKeys : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        res.returnType = patternUntyped();
+        if (args.args.size() != 2 || args.args[1]->type.isUntyped()) {
+            return;
+        }
+        if (auto deconstructed = deconstructForPattern(gs, args, args.args[0]->type, true)) {
+            res.returnType = deconstructed;
+        }
+    }
+} Magic_patternDeconstructKeys;
+
+// <Magic>.<pattern-element>(array, index)
+class Magic_patternElement : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        res.returnType = patternUntyped();
+        if (args.args.size() != 2 || !isa_type<IntegerLiteralType>(args.args[1]->type)) {
+            return;
+        }
+        auto index = cast_type_nonnull<IntegerLiteralType>(args.args[1]->type).value;
+        res.returnType = patternElement(gs, args.args[0]->type, index);
+    }
+} Magic_patternElement;
+
+// <Magic>.<pattern-rest>(array, before, after)
+class Magic_patternRest : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        res.returnType = Types::arrayOfUntyped(Symbols::Magic_UntypedSource_patternMatch());
+        if (args.args.size() != 3 || !isa_type<IntegerLiteralType>(args.args[1]->type) ||
+            !isa_type<IntegerLiteralType>(args.args[2]->type)) {
+            return;
+        }
+        auto before = cast_type_nonnull<IntegerLiteralType>(args.args[1]->type).value;
+        auto after = cast_type_nonnull<IntegerLiteralType>(args.args[2]->type).value;
+        res.returnType = patternRest(gs, args.args[0]->type, before, after);
+    }
+} Magic_patternRest;
+
+// <Magic>.<pattern-hash-value>(hash, key)
+class Magic_patternHashValue : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        res.returnType = patternUntyped();
+        if (args.args.size() != 2) {
+            return;
+        }
+        res.returnType = patternHashValue(gs, args.args[0]->type, args.args[1]->type);
+    }
+} Magic_patternHashValue;
+
 void digImplementation(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res, NameRef methodToDigWith) {
     if (args.args.size() == 0 || args.numPosArgs != args.args.size()) {
         // A type error was already reported for arg mismatch
@@ -4698,6 +4927,12 @@ const vector<Intrinsic> intrinsics{
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::mergeHash(), &Magic_mergeHash},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::mergeHashValues(), &Magic_mergeHashValues},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::checkMatchArray(), &Magic_checkMatchArray},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::patternSnapshot(), &Magic_patternSnapshot},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::patternDeconstruct(), &Magic_patternDeconstruct},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::patternDeconstructKeys(), &Magic_patternDeconstructKeys},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::patternElement(), &Magic_patternElement},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::patternRest(), &Magic_patternRest},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::patternHashValue(), &Magic_patternHashValue},
 
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::squareBrackets(), &Tuple_squareBrackets},
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::slice(), &Tuple_squareBrackets},
