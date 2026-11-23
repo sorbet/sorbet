@@ -1329,8 +1329,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     core::NameRef tempResult = dctx.freshNameUnique(s->fun);
                     stats.emplace_back(MK::Assign(sendLoc, tempResult, move(cond)));
 
-                    auto body = MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun.addEq(dctx.ctx),
-                                         sendLoc.copyWithZeroLength(), numPosAssgnArgs, move(assgnArgs), s->flags);
+                    auto body = MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun.addEq(dctx.ctx), s->funLoc,
+                                         numPosAssgnArgs, move(assgnArgs), s->flags);
                     auto elsep = MK::Local(sendLoc, tempResult);
                     auto iff = MK::If(sendLoc, MK::Local(sendLoc, tempResult), move(body), move(elsep));
                     auto wrapped = MK::InsSeq(loc, move(stats), move(iff));
@@ -1369,8 +1369,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     core::NameRef tempResult = dctx.freshNameUnique(s->fun);
                     stats.emplace_back(MK::Assign(sendLoc, tempResult, move(cond)));
 
-                    auto body = MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun.addEq(dctx.ctx),
-                                         sendLoc.copyWithZeroLength(), numPosAssgnArgs, move(assgnArgs), s->flags);
+                    auto body = MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun.addEq(dctx.ctx), s->funLoc,
+                                         numPosAssgnArgs, move(assgnArgs), s->flags);
                     auto elsep = MK::Local(sendLoc, tempResult);
                     auto iff = MK::If(sendLoc, MK::Local(sendLoc, tempResult), move(body), move(elsep));
                     auto wrapped = MK::InsSeq(loc, move(stats), move(iff));
@@ -1403,8 +1403,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     core::NameRef tempResult = dctx.freshNameUnique(s->fun);
                     stats.emplace_back(MK::Assign(sendLoc, tempResult, move(cond)));
 
-                    auto elsep = MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun.addEq(dctx.ctx),
-                                          sendLoc.copyWithZeroLength(), numPosAssgnArgs, move(assgnArgs), s->flags);
+                    auto elsep = MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun.addEq(dctx.ctx), s->funLoc,
+                                          numPosAssgnArgs, move(assgnArgs), s->flags);
                     auto body = MK::Local(sendLoc, tempResult);
                     auto iff = MK::If(sendLoc, MK::Local(sendLoc, tempResult), move(body), move(elsep));
                     auto wrapped = MK::InsSeq(loc, move(stats), move(iff));
@@ -1466,8 +1466,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     core::NameRef tempResult = dctx.freshNameUnique(s->fun);
                     stats.emplace_back(MK::Assign(sendLoc, tempResult, move(cond)));
 
-                    auto elsep = MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun.addEq(dctx.ctx),
-                                          sendLoc.copyWithZeroLength(), numPosAssgnArgs, move(assgnArgs), s->flags);
+                    auto elsep = MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun.addEq(dctx.ctx), s->funLoc,
+                                          numPosAssgnArgs, move(assgnArgs), s->flags);
                     auto body = MK::Local(sendLoc, tempResult);
                     auto iff = MK::If(sendLoc, MK::Local(sendLoc, tempResult), move(body), move(elsep));
                     auto wrapped = MK::InsSeq(loc, move(stats), move(iff));
@@ -1498,8 +1498,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     auto numPosAssgnArgs = numPosArgs + 1;
                     assgnArgs.insert(assgnArgs.begin() + numPosArgs, move(newValue));
 
-                    auto res = MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun.addEq(dctx.ctx),
-                                        sendLoc.copyWithZeroLength(), numPosAssgnArgs, move(assgnArgs), s->flags);
+                    auto res = MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun.addEq(dctx.ctx), s->funLoc,
+                                        numPosAssgnArgs, move(assgnArgs), s->flags);
                     auto wrapped = MK::InsSeq(loc, move(stats), move(res));
                     result = move(wrapped);
                 } else if (isa_reference(recv)) {
@@ -1540,8 +1540,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     auto numPosAssgnArgs = numPosArgs + 1;
                     assgnArgs.insert(assgnArgs.begin() + numPosArgs, move(newValue));
 
-                    auto res = MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun.addEq(dctx.ctx),
-                                        sendLoc.copyWithZeroLength(), numPosAssgnArgs, move(assgnArgs), s->flags);
+                    auto res = MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun.addEq(dctx.ctx), s->funLoc,
+                                        numPosAssgnArgs, move(assgnArgs), s->flags);
                     auto wrapped = MK::InsSeq(loc, move(stats), move(res));
                     ifExpr->elsep = move(wrapped);
                     result = move(recv);

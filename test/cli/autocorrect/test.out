@@ -104,7 +104,7 @@ autocorrect.rb:12: Method `bar` does not exist on `NilClass` component of `T.nil
 
 autocorrect.rb:12: Setter method `bar=` does not exist on `String` component of `T.nilable(String)` https://srb.help/7003
     12 |foo.bar ||= "a"
-        ^^^^^^^
+            ^^^
   Got `T.nilable(String)` originating from:
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
@@ -112,7 +112,7 @@ autocorrect.rb:12: Setter method `bar=` does not exist on `String` component of 
 
 autocorrect.rb:12: Setter method `bar=` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
     12 |foo.bar ||= "a"
-        ^^^^^^^
+            ^^^
   Got `T.nilable(String)` originating from:
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
@@ -144,7 +144,7 @@ autocorrect.rb:13: Method `bar` does not exist on `NilClass` component of `T.nil
 
 autocorrect.rb:13: Setter method `bar=` does not exist on `String` component of `T.nilable(String)` https://srb.help/7003
     13 |foo.bar &&= "a"
-        ^^^^^^^
+            ^^^
   Got `T.nilable(String)` originating from:
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
@@ -152,7 +152,7 @@ autocorrect.rb:13: Setter method `bar=` does not exist on `String` component of 
 
 autocorrect.rb:13: Setter method `bar=` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
     13 |foo.bar &&= "a"
-        ^^^^^^^
+            ^^^
   Got `T.nilable(String)` originating from:
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
@@ -184,7 +184,7 @@ autocorrect.rb:14: Method `bar` does not exist on `NilClass` component of `T.nil
 
 autocorrect.rb:14: Setter method `bar=` does not exist on `String` component of `T.nilable(String)` https://srb.help/7003
     14 |foo.bar |= "a"
-        ^^^^^^^
+            ^^^
   Got `T.nilable(String)` originating from:
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
@@ -192,7 +192,7 @@ autocorrect.rb:14: Setter method `bar=` does not exist on `String` component of 
 
 autocorrect.rb:14: Setter method `bar=` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
     14 |foo.bar |= "a"
-        ^^^^^^^
+            ^^^
   Got `T.nilable(String)` originating from:
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
@@ -224,7 +224,7 @@ autocorrect.rb:15: Method `bar` does not exist on `NilClass` component of `T.nil
 
 autocorrect.rb:15: Setter method `bar=` does not exist on `String` component of `T.nilable(String)` https://srb.help/7003
     15 |foo.bar &= "a"
-        ^^^^^^^
+            ^^^
   Got `T.nilable(String)` originating from:
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
@@ -232,7 +232,7 @@ autocorrect.rb:15: Setter method `bar=` does not exist on `String` component of 
 
 autocorrect.rb:15: Setter method `bar=` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
     15 |foo.bar &= "a"
-        ^^^^^^^
+            ^^^
   Got `T.nilable(String)` originating from:
     autocorrect.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
