@@ -31,7 +31,6 @@ class AutogenWalk {
     };
 
     vector<NestingStackEntry> nestingStack;
-    const AutogenConfig *autogenCfg;
 
     UnorderedMap<const ast::ConstantLit *, ReferenceRef> refMap;
 
@@ -86,14 +85,13 @@ class AutogenWalk {
     }
 
 public:
-    AutogenWalk(const AutogenConfig &autogenConfig) {
+    AutogenWalk() {
         auto &def = defs.emplace_back();
         def.id = 0;
         def.type = Definition::Type::Module;
         def.defines_behavior = false;
         def.is_empty = false;
         nestingStack.emplace_back(def.id);
-        autogenCfg = &autogenConfig;
     }
 
     void preTransformClassDef(core::Context ctx, const ast::ClassDef &original) {
@@ -353,9 +351,8 @@ public:
 
 // Convert a Sorbet `ParsedFile` into an Autogen `ParsedFile` by walking it as above and also recording the checksum of
 // the current file
-ParsedFile Autogen::generate(core::Context ctx, ast::ParsedFile tree, const AutogenConfig &autogenCfg,
-                             const CRCBuilder &crcBuilder, bool leakTrees) {
-    AutogenWalk walk(autogenCfg);
+ParsedFile Autogen::generate(core::Context ctx, ast::ParsedFile tree, const CRCBuilder &crcBuilder, bool leakTrees) {
+    AutogenWalk walk;
     ast::ConstTreeWalk::apply(ctx, walk, tree.tree);
 
     if (leakTrees) {

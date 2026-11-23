@@ -104,8 +104,7 @@ void MsgpackWriterFull::packRange(mpack_writer_t *writer, uint32_t begin, uint32
     mpack_write_u32(writer, end - begin);
 }
 
-void MsgpackWriterFull::packDefinition(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Definition &def,
-                                       const AutogenConfig &autogenCfg) {
+void MsgpackWriterFull::packDefinition(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Definition &def) {
     optional<MsgpackArray> defsArray;
 
     if (version <= 6) {
@@ -187,7 +186,7 @@ void MsgpackWriterBase::writeSymbols(core::Context ctx, mpack_writer_t *writer, 
     }
 }
 
-string MsgpackWriterFull::pack(core::Context ctx, ParsedFile &pf, const AutogenConfig &autogenCfg) {
+string MsgpackWriterFull::pack(core::Context ctx, ParsedFile &pf) {
     char *body;
     size_t bodySize;
     mpack_writer_t writer;
@@ -225,7 +224,7 @@ string MsgpackWriterFull::pack(core::Context ctx, ParsedFile &pf, const AutogenC
             {
                 MsgpackArray defs(&temporaryWriter, pf.defs.size());
                 for (auto &def : pf.defs) {
-                    packDefinition(&temporaryWriter, ctx, pf, def, autogenCfg);
+                    packDefinition(&temporaryWriter, ctx, pf, def);
                 }
             }
 

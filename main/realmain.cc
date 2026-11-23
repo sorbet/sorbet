@@ -292,7 +292,7 @@ void runAutogen(core::GlobalState &gs, options::Options &opts, WorkerPool &worke
 
                     core::Context ctx(gs, core::Symbols::root(), tree.file);
                     auto leakTrees = true;
-                    auto pf = autogen::Autogen::generate(ctx, move(tree), autogenCfg, *crcBuilder, leakTrees);
+                    auto pf = autogen::Autogen::generate(ctx, move(tree), *crcBuilder, leakTrees);
                     auto file = pf.file;
 
                     AutogenResult::Serialized serialized;

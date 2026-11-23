@@ -9,8 +9,7 @@
 using namespace std;
 namespace sorbet::autogen {
 
-void MsgpackWriterLite::packDefinition(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Definition &def,
-                                       const AutogenConfig &autogenCfg) {
+void MsgpackWriterLite::packDefinition(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Definition &def) {
     optional<MsgpackArray> defArray;
 
     if (version <= 6) {
@@ -74,7 +73,7 @@ MsgpackWriterLite::MsgpackWriterLite(int version)
     : MsgpackWriterBase(assertValidVersion(version), refAttrMap.at(version), defAttrMap.at(version),
                         parsedFileAttrMap.at(version)) {}
 
-string MsgpackWriterLite::pack(core::Context ctx, ParsedFile &pf, const AutogenConfig &autogenCfg) {
+string MsgpackWriterLite::pack(core::Context ctx, ParsedFile &pf) {
     char *body;
     size_t bodySize;
     mpack_writer_t writer;
@@ -102,7 +101,7 @@ string MsgpackWriterLite::pack(core::Context ctx, ParsedFile &pf, const AutogenC
             {
                 MsgpackArray defs(&temporaryWriter, pf.defs.size());
                 for (auto &def : pf.defs) {
-                    packDefinition(&temporaryWriter, ctx, pf, def, autogenCfg);
+                    packDefinition(&temporaryWriter, ctx, pf, def);
                 }
             }
 
