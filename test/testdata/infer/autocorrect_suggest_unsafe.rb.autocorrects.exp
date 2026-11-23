@@ -19,11 +19,11 @@ end
 
 sig {params(c: T::Boolean, u: T.untyped).returns(String)}
 def branches(c, u)
-  T.unsafe(if c
-    0 # error: Expected `String` but found `Integer(0)` for method result type
+  if c
+    T.unsafe(0) # error: Expected `String` but found `Integer(0)` for method result type
   else
     u
-  end)
+  end
 end
 
 sig {params(c: T::Boolean, u: T.untyped).returns(String)}
@@ -83,11 +83,11 @@ end
 
 sig {params(c: T::Boolean, u: T.untyped).returns(Integer)}
 def constant_branch(c, u)
-  T.unsafe(if c
-    ConstantBranch::X # error: Expected `Integer` but found `String` for method result type
+  if c
+    T.unsafe(ConstantBranch::X) # error: Expected `Integer` but found `String` for method result type
   else
     u
-  end)
+  end
 end
 
 sig {params(c: T::Boolean, u: T.untyped).returns(String)}
@@ -97,19 +97,19 @@ end
 
 sig {params(c: T::Boolean, u: T.untyped).returns(Integer)}
 def block_branch(c, u)
-  T.unsafe(if c
-    [1].map { |x| x.to_s } # error: Expected `Integer` but found `T::Array[String]` for method result type
+  if c
+    T.unsafe([1].map { |x| x.to_s }) # error: Expected `Integer` but found `T::Array[String]` for method result type
   else
     u
-  end)
+  end
 end
 
 sig {params(c: T::Boolean, u: T.untyped).returns(Integer)}
 def block_receiver_branch(c, u)
-  T.unsafe(if c
-    [1].to_h { |g| [g, g] }.reject { |k, _| k.nil? } # error: Expected `Integer` but found `T::Hash[Integer, Integer]` for method result type
+  if c
+    T.unsafe([1].to_h { |g| [g, g] }.reject { |k, _| k.nil? }) # error: Expected `Integer` but found `T::Hash[Integer, Integer]` for method result type
   else
     u
-  end)
+  end
 end
 # ------------------------------

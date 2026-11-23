@@ -252,6 +252,37 @@ BasicBlock *CFGBuilder::walkEmptyTreeInIf(CFGContext cctx, core::LocOffsets nilL
     return current;
 }
 
+namespace {
+
+// A heuristic for whether desugar "invented" the `branch` body of an `If` node.
+// `valueLoc` is the loc of the branch's value. A branch counts as invented if:
+//
+// - Its value has no source of its own (an empty loc), like the `nil` of a missing `else` or of `x&.foo`.
+//
+// - Its value's loc overlaps the condition's, like the copy of `a` in the branch of `a && b`,
+//   `a || b`, or `a ||= b` that returns `a` (when `a` is a variable), or the setter call of
+//   `a[b] ||= c`, which has the loc of `a[b]`. Wrapping it would wrap (part of) the condition, and
+//   `T.unsafe(a[b]) ||= c` isn't valid Ruby.
+//
+// - It reads a temporary that desugar introduced, like the falsy branch of `a.b && c`, which reads
+//   the temporary holding `a.b` with the loc of `a.b`. Wrapping that doesn't silence the error:
+//   `T.unsafe(a.b) && c` still returns `T.untyped` narrowed to falsy, `T.nilable(FalseClass)`.
+bool isInventedBranch(const ast::If &iff, const ast::ExpressionPtr &branch, core::LocOffsets valueLoc) {
+    if (valueLoc.empty()) {
+        return true;
+    }
+
+    auto condLoc = iff.cond.loc();
+    if (condLoc.exists() && valueLoc.beginPos() < condLoc.endPos() && condLoc.beginPos() < valueLoc.endPos()) {
+        return true;
+    }
+
+    auto local = ast::cast_tree<ast::Local>(branch);
+    return local != nullptr && local->localVariable.isSyntheticTemporary();
+}
+
+} // namespace
+
 // Ends `current`, the end of one branch of `iff` (which is in tail position), with a `return` of
 // `cctx.target`. `conditionalLoc` is the loc of the whole conditional that `iff` belongs to (e.g.,
 // of the `if` that an `elsif` belongs to, or of the `case` that a `when` belongs to).
@@ -266,18 +297,19 @@ BasicBlock *CFGBuilder::returnFromTailPosition(CFGContext cctx, BasicBlock *curr
     }
 
     // Report errors at the loc of the branch's last instruction, which is the loc of the branch's
-    // value, like the method's final `return` does. That loc can be zero-length: the `nil` of a
+    // value, like the method's final `return` does, and let autocorrects (e.g., `--suggest-unsafe`)
+    // wrap it, unless desugar invented the branch. That loc can be zero-length: the `nil` of a
     // missing `else` comes from the end of the conditional, and the `nil` of `x&.foo` from the `&`.
-    //
-    // Autocorrects (e.g., `--suggest-unsafe`) wrap the whole conditional instead: desugar invents
-    // some branches (e.g., the `else` of `a && b`, or the `nil` of a missing `else`) that aren't
-    // expressions on their own. If the conditional has no source of its own, there's nothing to wrap.
+    // If the conditional has no source of its own either, there's nothing to wrap.
     auto &branch = isThen ? iff.thenp : iff.elsep;
-    auto whatLoc = conditionalLoc.exists() && !conditionalLoc.empty() ? conditionalLoc : core::LocOffsets::none();
+    auto wholeLoc = conditionalLoc.exists() && !conditionalLoc.empty() ? conditionalLoc : core::LocOffsets::none();
     auto loc = current->exprs.empty() ? branch.loc() : current->exprs.back().loc;
     if (!loc.exists()) {
-        loc = whatLoc;
+        loc = wholeLoc;
     }
+
+    // An autocorrect can't wrap an "invented" a branch on its own, so we fall back to wrapping the whole conditional.
+    auto whatLoc = isInventedBranch(iff, branch, loc) ? wholeLoc : loc;
 
     synthesizeExpr(current, LocalRef::finalReturn(), loc, make_insn<Return>(cctx.target, whatLoc));
     jumpToDead(current, cctx.inWhat, loc);
