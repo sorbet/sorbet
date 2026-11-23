@@ -2174,6 +2174,8 @@ unique_ptr<GlobalState> GlobalState::copyForSlowPath(
     const vector<string> &updateVisibilityFor, const vector<string> &packagerLayers, string errorHint,
     packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility, bool packageAttributedErrors,
     core::packages::Stratum toStratum) const {
+    Timer timeit(this->tracer(), "copyForSlowPath");
+
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
 
     // We omit a call to `initEmpty` here, as the only intended use of this function is to have its symbol table
