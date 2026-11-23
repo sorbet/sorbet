@@ -281,8 +281,6 @@ struct Options {
     std::vector<std::string> autogenSubclassesAbsoluteIgnorePatterns;
     // Ignore patterns that can occur anywhere in a file's path from an input folder.
     std::vector<std::string> autogenSubclassesRelativeIgnorePatterns;
-    // Allow RBI files to define behavior if they are in one of these paths.
-    std::vector<std::string> autogenBehaviorAllowedInRBIFilesPaths;
     // When set, msgpack serialization of references skips extra metadata like inheritance information and expression
     // ranges.
     bool autogenMsgpackSkipReferenceMetadata;

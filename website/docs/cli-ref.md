@@ -378,9 +378,6 @@ Usage:
       --autogen-subclasses-ignore <pattern>[,<pattern>...]
                                 Like --ignore, but only ignore <pattern> in `-p
                                 autogen-subclasses`. (repeatable)
-      --autogen-behavior-allowed-in-rbi-files-paths <path-prefix>[,<path-prefix>...]
-                                Autogen may consider RBI files whose paths start with
-                                <path-prefix> to be behavior-defining. (repeatable)
       --autogen-msgpack-skip-reference-metadata
                                 Skip serializing extra metadata on references when
                                 printing msgpack in autogen

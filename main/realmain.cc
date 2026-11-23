@@ -257,7 +257,6 @@ void runAutogen(core::GlobalState &gs, options::Options &opts, WorkerPool &worke
     }
 
     autogen::AutogenConfig autogenCfg = {
-        .behaviorAllowedInRBIsPaths = std::move(opts.autogenBehaviorAllowedInRBIFilesPaths),
         .msgpackSkipReferenceMetadata = std::move(opts.autogenMsgpackSkipReferenceMetadata),
     };
 

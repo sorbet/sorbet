@@ -1,7 +1,7 @@
 // has to go first because it violates our poisons
 #include "mpack/mpack.h"
 
-#include "absl/strings/match.h"
+#include "absl/algorithm/container.h"
 #include "core/GlobalState.h"
 #include "main/autogen/data/definitions.h"
 #include "main/autogen/data/msgpack.h"
@@ -29,11 +29,7 @@ void MsgpackWriterLite::packDefinition(mpack_writer_t *writer, core::Context ctx
 
     // defines_behavior
     packBool(writer, def.defines_behavior);
-    const auto &filePath = ctx.file.data(ctx).path();
-    ENFORCE(!def.defines_behavior || !ctx.file.data(ctx).isRBI() ||
-                absl::c_any_of(autogenCfg.behaviorAllowedInRBIsPaths,
-                               [&](auto &allowedPath) { return absl::StartsWith(filePath, allowedPath); }),
-            "RBI files should never define behavior");
+    ENFORCE(!def.defines_behavior || !ctx.file.data(ctx).isRBI(), "RBI files should never define behavior");
 
     if (version >= 7) {
         // parent_ref
