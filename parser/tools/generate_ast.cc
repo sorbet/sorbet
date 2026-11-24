@@ -246,7 +246,7 @@ NodeDef nodes[] = {
         "eflipflop",
         vector<FieldDef>({{"left", FieldType::Node}, {"right", FieldType::Node}}),
     },
-    // Pattern matching implicit empty `else` block
+    // An empty `if` or `unless` body, or an `else` keyword with nothing after it
     {
         "EmptyElse",
         "empty_else",

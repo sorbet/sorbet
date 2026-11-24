@@ -707,6 +707,9 @@ public:
 
     unique_ptr<Node> case_(const token *case_, unique_ptr<Node> expr, sorbet::parser::NodeVec whenBodies,
                            const token *elseTok, unique_ptr<Node> elseBody, const token *end) {
+        if (elseTok != nullptr && elseBody == nullptr) {
+            elseBody = empty_else(elseTok);
+        }
         return make_unique<Case>(tokLoc(case_).join(tokLoc(end)), std::move(expr), std::move(whenBodies),
                                  std::move(elseBody));
     }
@@ -768,6 +771,19 @@ public:
         if (end != nullptr) {
             loc = loc.join(tokLoc(end));
         }
+
+        // Mark an empty body, and an `else` with nothing after it, with an `EmptyElse`, so that a missing
+        // branch means that there's no `else` keyword. The `else` of an `if` or `elsif` arrives as
+        // `ifFalse`, already marked, and the `else` of an `unless` arrives as `ifTrue`.
+        auto isUnless = cond_tok->type() == ruby_parser::token_type::kUNLESS;
+        auto &body = isUnless ? ifFalse : ifTrue;
+        if (body == nullptr) {
+            body = make_unique<EmptyElse>(cond->loc.copyEndWithZeroLength());
+        }
+        if (isUnless && else_ != nullptr && ifTrue == nullptr) {
+            ifTrue = empty_else(else_);
+        }
+
         return make_unique<If>(loc, transformCondition(std::move(cond)), std::move(ifTrue), std::move(ifFalse));
     }
 
@@ -2254,6 +2270,11 @@ ForeignPtr defSingleton(SelfPtr builder, ForeignPtr defHead, ForeignPtr args, Fo
         build->defSingleton(build->cast_node(defHead), build->cast_node(args), build->cast_node(body), end));
 }
 
+ForeignPtr empty_else(SelfPtr builder, const token *tok) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->empty_else(tok));
+}
+
 ForeignPtr encodingLiteral(SelfPtr builder, const token *tok) {
     auto build = cast_builder(builder);
     return build->toForeign(build->encodingLiteral(tok));
@@ -2848,6 +2869,7 @@ struct ruby_parser::builder Builder::interface = {
     defsHead,
     defsHeadError,
     defSingleton,
+    empty_else,
     encodingLiteral,
     error_node,
     false_,

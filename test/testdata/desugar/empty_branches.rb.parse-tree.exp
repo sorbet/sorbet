@@ -35,7 +35,8 @@ Begin {
         then_ = Integer {
           val = "1"
         }
-        else_ = NULL
+        else_ = EmptyElse {
+        }
       }
     }
     DefMethod {
@@ -51,7 +52,8 @@ Begin {
         condition = LVar {
           name = <U c>
         }
-        then_ = NULL
+        then_ = EmptyElse {
+        }
         else_ = Integer {
           val = "1"
         }
@@ -70,7 +72,8 @@ Begin {
         condition = LVar {
           name = <U c>
         }
-        then_ = NULL
+        then_ = EmptyElse {
+        }
         else_ = NULL
       }
     }
@@ -130,7 +133,8 @@ Begin {
           then_ = Integer {
             val = "2"
           }
-          else_ = NULL
+          else_ = EmptyElse {
+          }
         }
       }
     }
@@ -157,7 +161,8 @@ Begin {
           condition = LVar {
             name = <U d>
           }
-          then_ = NULL
+          then_ = EmptyElse {
+          }
           else_ = Integer {
             val = "3"
           }
@@ -196,7 +201,8 @@ Begin {
         condition = LVar {
           name = <U c>
         }
-        then_ = NULL
+        then_ = EmptyElse {
+        }
         else_ = Integer {
           val = "1"
         }
@@ -218,7 +224,8 @@ Begin {
         then_ = Integer {
           val = "1"
         }
-        else_ = NULL
+        else_ = EmptyElse {
+        }
       }
     }
     DefMethod {
@@ -235,7 +242,8 @@ Begin {
           name = <U c>
         }
         then_ = NULL
-        else_ = NULL
+        else_ = EmptyElse {
+        }
       }
     }
     DefMethod {
@@ -350,7 +358,8 @@ Begin {
             }
           }
         ]
-        else_ = NULL
+        else_ = EmptyElse {
+        }
       }
     }
     DefMethod {
@@ -469,7 +478,8 @@ Begin {
       body = If {
         condition = Nil {
         }
-        then_ = NULL
+        then_ = EmptyElse {
+        }
         else_ = NULL
       }
     }

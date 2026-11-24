@@ -12,7 +12,8 @@ Begin {
         body = If {
           condition = True {
           }
-          then_ = NULL
+          then_ = EmptyElse {
+          }
           else_ = NULL
         }
       }
