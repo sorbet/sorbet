@@ -1,0 +1,190 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def missing_else<<todo method>>(c, &<blk>)
+    if c
+      1
+    else
+      <emptyTree>
+    end
+  end
+
+  def empty_else<<todo method>>(c, &<blk>)
+    if c
+      1
+    else
+      <emptyTree>
+    end
+  end
+
+  def empty_then<<todo method>>(c, &<blk>)
+    if c
+      <emptyTree>
+    else
+      1
+    end
+  end
+
+  def empty_if<<todo method>>(c, &<blk>)
+    if c
+      <emptyTree>
+    else
+      <emptyTree>
+    end
+  end
+
+  def missing_elsif_else<<todo method>>(c, d, &<blk>)
+    if c
+      1
+    else
+      if d
+        2
+      else
+        <emptyTree>
+      end
+    end
+  end
+
+  def empty_elsif_else<<todo method>>(c, d, &<blk>)
+    if c
+      1
+    else
+      if d
+        2
+      else
+        <emptyTree>
+      end
+    end
+  end
+
+  def empty_elsif<<todo method>>(c, d, &<blk>)
+    if c
+      1
+    else
+      if d
+        <emptyTree>
+      else
+        3
+      end
+    end
+  end
+
+  def unless_missing_else<<todo method>>(c, &<blk>)
+    if c
+      <emptyTree>
+    else
+      1
+    end
+  end
+
+  def unless_empty_else<<todo method>>(c, &<blk>)
+    if c
+      <emptyTree>
+    else
+      1
+    end
+  end
+
+  def unless_empty_body<<todo method>>(c, &<blk>)
+    if c
+      1
+    else
+      <emptyTree>
+    end
+  end
+
+  def empty_unless<<todo method>>(c, &<blk>)
+    if c
+      <emptyTree>
+    else
+      <emptyTree>
+    end
+  end
+
+  def modifier_if<<todo method>>(c, &<blk>)
+    if c
+      1
+    else
+      <emptyTree>
+    end
+  end
+
+  def modifier_unless<<todo method>>(c, &<blk>)
+    if c
+      <emptyTree>
+    else
+      1
+    end
+  end
+
+  def ternary<<todo method>>(c, &<blk>)
+    if c
+      1
+    else
+      2
+    end
+  end
+
+  def case_missing_else<<todo method>>(x, &<blk>)
+    if 1.===(x)
+      2
+    else
+      <emptyTree>
+    end
+  end
+
+  def case_empty_else<<todo method>>(x, &<blk>)
+    if 1.===(x)
+      2
+    else
+      <emptyTree>
+    end
+  end
+
+  def case_empty_when<<todo method>>(x, &<blk>)
+    if 1.===(x)
+      <emptyTree>
+    else
+      3
+    end
+  end
+
+  def case_in_missing_else<<todo method>>(x, &<blk>)
+    begin
+      <assignTemp>$2 = x
+      if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+        2
+      else
+        <emptyTree>
+      end
+    end
+  end
+
+  def case_in_empty_else<<todo method>>(x, &<blk>)
+    begin
+      <assignTemp>$2 = x
+      if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+        2
+      else
+        <emptyTree>
+      end
+    end
+  end
+
+  def case_in_empty_in<<todo method>>(x, &<blk>)
+    begin
+      <assignTemp>$2 = x
+      if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+        <emptyTree>
+      else
+        3
+      end
+    end
+  end
+
+  def dead_empty_body<<todo method>>(&<blk>)
+    if nil
+      <emptyTree>
+    else
+      <emptyTree>
+    end
+  end
+end
