@@ -43,10 +43,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         begin
           <assignTemp>$2 = <self>.to_s()
           if 1.===(<assignTemp>$2)
-            <emptyTree>
+            nil
           else
             if 2.===(<assignTemp>$2)
-              <emptyTree>
+              nil
             else
               <emptyTree>
             end
@@ -54,30 +54,30 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         end
         <emptyTree>::<C T>.bind(<self>, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
         if <emptyTree>::<C Integer>.===(<self>)
-          <emptyTree>
+          nil
         else
           <emptyTree>::<C T>.absurd(<self>)
         end
         lvar = <emptyTree>::<C T>.let(123, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
         if <emptyTree>::<C Integer>.===(lvar)
-          <emptyTree>
+          nil
         else
           <emptyTree>::<C T>.absurd(lvar)
         end
         @ivar = <emptyTree>::<C T>.let(123, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
         if <emptyTree>::<C Integer>.===(@ivar)
-          <emptyTree>
+          nil
         else
           <emptyTree>::<C T>.absurd(@ivar)
         end
         if <emptyTree>::<C Integer>.===(@@cvar)
-          <emptyTree>
+          nil
         else
           <emptyTree>::<C T>.absurd(@@cvar)
         end
         $gvar = <emptyTree>::<C T>.let(123, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
         if <emptyTree>::<C Integer>.===($gvar)
-          <emptyTree>
+          nil
         else
           <emptyTree>::<C T>.absurd($gvar)
         end

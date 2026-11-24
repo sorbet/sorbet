@@ -65,7 +65,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
                     end
                   end
                 else
-                  <emptyTree>
+                  nil
                 end
               end
             end

@@ -21,7 +21,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     begin
       x = "\n    valid"
       if x
-        <emptyTree>
+        nil
       else
         <emptyTree>
       end
@@ -121,7 +121,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     begin
       x = "valid"
       if x
-        <emptyTree>
+        nil
       else
         <emptyTree>
       end

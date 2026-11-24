@@ -78,7 +78,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         if <emptyTree>::<C <ErrorNode>>
           <emptyTree>
         else
-          <emptyTree>
+          nil
         end
       end
     end

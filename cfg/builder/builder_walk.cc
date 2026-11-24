@@ -254,6 +254,17 @@ BasicBlock *CFGBuilder::walkEmptyTreeInIf(CFGContext cctx, core::LocOffsets nilL
 
 namespace {
 
+// Whether `branch` is an empty branch of an `If`: the `EmptyTree` of a missing `else` (or of the
+// missing branch of a modifier `if` or `unless`), or the zero-length `nil` that desugar makes for an
+// empty body or an empty `else`. Neither has any code of its own to report as unreachable.
+bool isEmptyBranch(const core::GlobalState &gs, const ast::ExpressionPtr &branch) {
+    if (ast::isa_tree<ast::EmptyTree>(branch)) {
+        return true;
+    }
+    auto lit = ast::cast_tree<ast::Literal>(branch);
+    return lit != nullptr && lit->loc.empty() && lit->isNil(gs);
+}
+
 // A heuristic for whether desugar "invented" the `branch` body of an `If` node.
 // `valueLoc` is the loc of the branch's value. A branch counts as invented if:
 //
@@ -586,11 +597,11 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::ExpressionPtr &what, Ba
                 // of each branch separately, so that each branch's value is checked against the
                 // method's return type on its own, instead of after joining them.
                 cctx.isTailPosition = isTailPosition;
-                auto thenEnd = ast::isa_tree<ast::EmptyTree>(a.thenp) ? walkEmptyTreeInIf(cctx, nilLoc, thenBlock)
-                                                                      : walk(cctx, a.thenp, thenBlock);
+                auto thenEnd = isEmptyBranch(cctx.ctx, a.thenp) ? walkEmptyTreeInIf(cctx, nilLoc, thenBlock)
+                                                                : walk(cctx, a.thenp, thenBlock);
                 cctx.ifChainLoc = chainLoc;
-                auto elseEnd = ast::isa_tree<ast::EmptyTree>(a.elsep) ? walkEmptyTreeInIf(cctx, nilLoc, elseBlock)
-                                                                      : walk(cctx, a.elsep, elseBlock);
+                auto elseEnd = isEmptyBranch(cctx.ctx, a.elsep) ? walkEmptyTreeInIf(cctx, nilLoc, elseBlock)
+                                                                : walk(cctx, a.elsep, elseBlock);
                 cctx.isTailPosition = false;
                 cctx.ifChainLoc = core::LocOffsets::none();
                 if (isTailPosition) {

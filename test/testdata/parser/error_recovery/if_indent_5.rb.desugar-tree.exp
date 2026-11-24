@@ -3,7 +3,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     class <emptyTree>::<C C1><<C <todo sym>>> < (::<todo sym>)
       def foo<<todo method>>(&<blk>)
         if <emptyTree>::<C <ErrorNode>>
-          <emptyTree>
+          nil
         else
           <emptyTree>
         end
@@ -21,7 +21,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     class <emptyTree>::<C C2><<C <todo sym>>> < (::<todo sym>)
       def foo<<todo method>>(&<blk>)
         if <self>.x()
-          <emptyTree>
+          nil
         else
           <emptyTree>
         end

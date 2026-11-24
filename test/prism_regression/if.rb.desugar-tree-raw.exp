@@ -17,7 +17,7 @@ ClassDef{
         args = [
         ]
       }
-      thenp = EmptyTree
+      thenp = Literal{ value = nil }
       elsep = EmptyTree
     }
 

@@ -67,7 +67,7 @@ ClassDef{
             }
           }
         ],
-        expr = EmptyTree
+        expr = Literal{ value = nil }
       }
       elsep = EmptyTree
     }

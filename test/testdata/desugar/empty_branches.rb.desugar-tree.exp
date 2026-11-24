@@ -11,13 +11,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     if c
       1
     else
-      <emptyTree>
+      nil
     end
   end
 
   def empty_then<<todo method>>(c, &<blk>)
     if c
-      <emptyTree>
+      nil
     else
       1
     end
@@ -25,7 +25,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def empty_if<<todo method>>(c, &<blk>)
     if c
-      <emptyTree>
+      nil
     else
       <emptyTree>
     end
@@ -50,7 +50,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       if d
         2
       else
-        <emptyTree>
+        nil
       end
     end
   end
@@ -60,7 +60,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       1
     else
       if d
-        <emptyTree>
+        nil
       else
         3
       end
@@ -77,7 +77,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def unless_empty_else<<todo method>>(c, &<blk>)
     if c
-      <emptyTree>
+      nil
     else
       1
     end
@@ -87,7 +87,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     if c
       1
     else
-      <emptyTree>
+      nil
     end
   end
 
@@ -95,7 +95,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     if c
       <emptyTree>
     else
-      <emptyTree>
+      nil
     end
   end
 
@@ -135,13 +135,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     if 1.===(x)
       2
     else
-      <emptyTree>
+      nil
     end
   end
 
   def case_empty_when<<todo method>>(x, &<blk>)
     if 1.===(x)
-      <emptyTree>
+      nil
     else
       3
     end
@@ -164,7 +164,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
         2
       else
-        <emptyTree>
+        nil
       end
     end
   end
@@ -173,7 +173,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     begin
       <assignTemp>$2 = x
       if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-        <emptyTree>
+        nil
       else
         3
       end
@@ -182,7 +182,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def dead_empty_body<<todo method>>(&<blk>)
     if nil
-      <emptyTree>
+      nil
     else
       <emptyTree>
     end

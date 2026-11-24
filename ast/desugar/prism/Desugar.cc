@@ -157,6 +157,12 @@ private:
     ast::ExpressionPtr desugarStatements(pm_statements_node *stmtsNode, bool inlineIfSingle = true,
                                          core::LocOffsets overrideLocation = core::LocOffsets::none());
 
+    // Desugars a branch of a conditional whose keyword is present (e.g. an `else`), so that an empty
+    // branch desugars to a `nil` with the zero-length `nilLoc`, from the end of the whole conditional.
+    ast::ExpressionPtr desugarBranch(pm_statements_node *stmtsNode, core::LocOffsets nilLoc);
+    // Desugars the `else` clause (or `elsif`) of a conditional. A missing one desugars to an `EmptyTree`.
+    ast::ExpressionPtr desugarElse(pm_node_t *elseClause, core::LocOffsets nilLoc);
+
     ast::ExpressionPtr desugarRegexpOptions(pm_location_t closingLoc);
     ast::ExpressionPtr desugarRegexp(core::LocOffsets location, core::LocOffsets contentLoc, pm_string_t content,
                                      pm_location_t closingLoc);
@@ -1972,7 +1978,8 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
             auto caseMatchNode = down_cast_nonnull<pm_case_match_node>(node);
 
             auto inNodes = absl::MakeSpan(caseMatchNode->conditions.nodes, caseMatchNode->conditions.size);
-            auto elseClause = desugarNullable(up_cast(caseMatchNode->else_clause));
+            auto nilLoc = location.copyEndWithZeroLength();
+            auto elseClause = desugarElse(up_cast(caseMatchNode->else_clause), nilLoc);
 
             // Build an if ladder similar to CASE_NODE
 
@@ -2004,7 +2011,7 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
                 auto matchExpr = MK::RaiseUnimplemented(translateLoc(patternLoc));
 
                 // The body is the statements from the "in" clause
-                auto thenExpr = desugarStatements(inPattern->statements);
+                auto thenExpr = desugarBranch(inPattern->statements, nilLoc);
 
                 // Collect pattern variable assignments from the pattern
                 ast::InsSeq::STATS_store vars;
@@ -2044,7 +2051,12 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
                 totalPatterns += whenNode->conditions.size;
             }
 
-            auto elseClause = desugarNullable(up_cast(caseNode->else_clause));
+            auto nilLoc = location.copyEndWithZeroLength();
+            // With `preserveConcreteSyntax`, the `else` stays as written, as the last argument of
+            // `<Magic>.<case-when>`, where Extract Variable looks for the body that contains the selection. That
+            // doesn't need to tell an empty `else` from a missing one.
+            auto elseClause = preserveConcreteSyntax ? desugarNullable(up_cast(caseNode->else_clause))
+                                                     : desugarElse(up_cast(caseNode->else_clause), nilLoc);
             // Capture the start of the line containing the `else` keyword (or `end` if no else clause).
             // Whitequark extends empty when bodies to the start of the next line (column 1), not to the
             // `else`/`end` keyword itself. We find the start of the line by scanning backwards for a newline.
@@ -2167,11 +2179,11 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
                     }
                 }
 
-                auto then = desugarStatements(prismWhen->statements);
+                auto then = desugarBranch(prismWhen->statements, nilLoc);
                 // Whitequark extends the when clause location to include the start of the next line,
                 // but ONLY when the when body is empty. Use the start of nextClauseLoc as the end.
                 auto ifLoc = whenLoc;
-                bool bodyIsEmpty = (then == nullptr || ast::isa_tree<ast::EmptyTree>(then));
+                bool bodyIsEmpty = prismWhen->statements == nullptr || prismWhen->statements->body.size == 0;
                 if (it + 1 == prismWhenNodes.rend()) {
                     // The outermost `if` stands for the whole `case`, so give it the `case`'s loc.
                     ifLoc = location;
@@ -2707,8 +2719,9 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
             auto ifNode = down_cast_nonnull<pm_if_node>(node);
 
             auto predicateExpr = desugar(ifNode->predicate);
-            auto thenExpr = desugarStatements(ifNode->statements);
-            auto elseExpr = desugarNullable(ifNode->subsequent);
+            auto nilLoc = location.copyEndWithZeroLength();
+            auto thenExpr = desugarBranch(ifNode->statements, nilLoc);
+            auto elseExpr = desugarElse(ifNode->subsequent, nilLoc);
 
             return MK::If(location, move(predicateExpr), move(thenExpr), move(elseExpr));
         }
@@ -3389,8 +3402,9 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
 
             auto predicateExpr = desugar(unlessNode->predicate);
             // For `unless`, then/else are swapped: `statements` is the else branch, `else_clause` is the then branch
-            auto elseExpr = desugarStatements(unlessNode->statements);
-            ExpressionPtr thenExpr = desugarNullable(up_cast(unlessNode->else_clause));
+            auto nilLoc = location.copyEndWithZeroLength();
+            auto elseExpr = desugarBranch(unlessNode->statements, nilLoc);
+            auto thenExpr = desugarElse(up_cast(unlessNode->else_clause), nilLoc);
 
             return MK::If(location, move(predicateExpr), move(thenExpr), move(elseExpr));
         }
@@ -5150,6 +5164,20 @@ ast::ExpressionPtr Desugarer::desugarBegin(pm_begin_node *beginNodePtr) {
 // Translates the given Prism Statements Node into a `parser::Begin` node or an inlined `parser::Node`.
 // @param inlineIfSingle If enabled and there's 1 child node, we skip the `Begin` and just return the one `parser::Node`
 // @param overrideLocation If provided, use this location for the Begin node instead of the statements node location
+ast::ExpressionPtr Desugarer::desugarBranch(pm_statements_node *stmtsNode, core::LocOffsets nilLoc) {
+    if (stmtsNode == nullptr || stmtsNode->body.size == 0) {
+        return ast::MK::Nil(nilLoc);
+    }
+    return desugarStatements(stmtsNode);
+}
+
+ast::ExpressionPtr Desugarer::desugarElse(pm_node_t *elseClause, core::LocOffsets nilLoc) {
+    if (auto *elseNode = down_cast<pm_else_node>(elseClause)) {
+        return desugarBranch(elseNode->statements, nilLoc);
+    }
+    return desugarNullable(elseClause);
+}
+
 ast::ExpressionPtr Desugarer::desugarStatements(pm_statements_node *stmtsNode, bool inlineIfSingle,
                                                 core::LocOffsets overrideLocation) {
     if (stmtsNode == nullptr || stmtsNode->body.size == 0) {

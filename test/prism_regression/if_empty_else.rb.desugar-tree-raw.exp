@@ -10,7 +10,7 @@ ClassDef{
     If{
       cond = Literal{ value = false }
       thenp = Literal{ value = "five" }
-      elsep = EmptyTree
+      elsep = Literal{ value = nil }
     }
   ]
 }

@@ -10,7 +10,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       begin
         <self>.puts("before")
         if <emptyTree>::<C <ErrorNode>>.===(x)
-          <emptyTree>
+          nil
         else
           <emptyTree>
         end
@@ -21,7 +21,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       begin
         <self>.puts("before")
         if <emptyTree>::<C MethodCompletion>.puts("hello").===(x)
-          <emptyTree>
+          nil
         else
           <emptyTree>
         end
@@ -32,7 +32,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       begin
         <self>.puts("before")
         if <emptyTree>::<C MethodCompletion>.Opus()::<C Log>.info("hello").===(x)
-          <emptyTree>
+          nil
         else
           <emptyTree>
         end
@@ -43,7 +43,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       begin
         <self>.puts("before")
         if <emptyTree>::<C MethodCompletion>.y=(nil).===(x)
-          <emptyTree>
+          nil
         else
           <emptyTree>
         end

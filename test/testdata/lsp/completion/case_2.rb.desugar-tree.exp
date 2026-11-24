@@ -25,7 +25,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       begin
         <self>.puts("before")
         if <emptyTree>::<C ConstantCompletion>.puts("hello").===(x)
-          <emptyTree>
+          nil
         else
           <emptyTree>
         end
@@ -36,7 +36,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       begin
         <self>.puts("before")
         if <emptyTree>::<C ConstantCompletion>::<C Opus>::<C Log>.info("hello").===(x)
-          <emptyTree>
+          nil
         else
           <emptyTree>
         end
@@ -47,7 +47,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       begin
         <self>.puts("before")
         if <emptyTree>::<C ConstantCompletion>.y=(nil).===(x)
-          <emptyTree>
+          nil
         else
           <emptyTree>
         end

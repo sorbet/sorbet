@@ -90,6 +90,25 @@ ExpressionPtr numparamTree(DesugarContext dctx, int num, parser::NodeVec *decls)
 
 ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> &what);
 
+// What a null branch of a conditional means in the parse tree.
+enum class NullBranch {
+    // Finding nullptr in a conditional means "missing." For example, the implicit `else` in `if x; end`
+    Missing,
+
+    // Finding nullptr in a conditional means "present but empty." For example, the `nullptr` in a `when` arm
+    Empty,
+};
+
+// Desugars one branch of a conditional. A missing branch desugars to an `EmptyTree` e.g. the `else` in `if x; end`
+// An explicitly empty one (`if x; else; end`) desugars to a `nil` with `nilLoc` (usually zero-length)
+ExpressionPtr desugarBranch(DesugarContext dctx, unique_ptr<parser::Node> &branch, NullBranch nullBranch,
+                            core::LocOffsets nilLoc) {
+    if ((branch == nullptr && nullBranch == NullBranch::Empty) || parser::isa_node<parser::EmptyElse>(branch.get())) {
+        return MK::Nil(nilLoc);
+    }
+    return node2TreeImpl(dctx, branch);
+}
+
 pair<MethodDef::PARAMS_store, InsSeq::STATS_store> desugarParams(DesugarContext dctx, parser::Node *anyParamsNode) {
     MethodDef::PARAMS_store params;
     InsSeq::STATS_store destructures;
@@ -2314,8 +2333,9 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
             },
             [&](parser::If *if_) {
                 auto cond = node2TreeImpl(dctx, if_->condition);
-                auto thenp = node2TreeImpl(dctx, if_->then_);
-                auto elsep = node2TreeImpl(dctx, if_->else_);
+                auto nilLoc = loc.copyEndWithZeroLength();
+                auto thenp = desugarBranch(dctx, if_->then_, NullBranch::Missing, nilLoc);
+                auto elsep = desugarBranch(dctx, if_->else_, NullBranch::Missing, nilLoc);
                 auto iff = MK::If(loc, move(cond), move(thenp), move(elsep));
                 result = move(iff);
             },
@@ -2389,7 +2409,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     return needsTempLocal ? MK::Local(cloc, temp) : MK::cpRef(condition);
                 };
 
-                ExpressionPtr res = node2TreeImpl(dctx, case_->else_);
+                auto nilLoc = loc.copyEndWithZeroLength();
+                ExpressionPtr res = desugarBranch(dctx, case_->else_, NullBranch::Missing, nilLoc);
                 for (auto it = case_->whens.rbegin(); it != case_->whens.rend(); ++it) {
                     auto when = parser::cast_node<parser::When>(it->get());
                     ENFORCE(when != nullptr, "case without a when?");
@@ -2425,7 +2446,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     }
                     // The outermost `if` stands for the whole `case`, so give it the `case`'s loc.
                     auto ifLoc = it + 1 == case_->whens.rend() ? loc : when->loc;
-                    res = MK::If(ifLoc, move(cond), node2TreeImpl(dctx, when->body), move(res));
+                    auto body = desugarBranch(dctx, when->body, NullBranch::Empty, nilLoc);
+                    res = MK::If(ifLoc, move(cond), move(body), move(res));
                 }
 
                 if (assign != nullptr) {
@@ -2517,7 +2539,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 auto exprVar = MK::Assign(exprLoc, exprName, node2TreeImpl(dctx, caseMatch->expr));
 
                 // Desugar the `else` block
-                ExpressionPtr res = node2TreeImpl(dctx, caseMatch->elseBody);
+                auto nilLoc = loc.copyEndWithZeroLength();
+                ExpressionPtr res = desugarBranch(dctx, caseMatch->elseBody, NullBranch::Missing, nilLoc);
 
                 // Desugar each `in` as an `if` branch calling `Magic.<pattern-match>()`
                 for (auto it = caseMatch->inBodies.rbegin(); it != caseMatch->inBodies.rend(); ++it) {
@@ -2526,7 +2549,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
 
                     // Keep the `in` body for the `then` body of the new `if`
                     auto pattern = move(inPattern->pattern);
-                    auto body = node2TreeImpl(dctx, inPattern->body);
+                    auto body = desugarBranch(dctx, inPattern->body, NullBranch::Empty, nilLoc);
 
                     // Desugar match variables found inside the pattern
                     InsSeq::STATS_store vars;

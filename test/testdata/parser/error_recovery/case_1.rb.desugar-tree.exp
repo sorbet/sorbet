@@ -6,7 +6,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         begin
           <assignTemp>$2 = <emptyTree>::<C <ErrorNode>>
           if <emptyTree>::<C <ErrorNode>>.===(<assignTemp>$2)
-            <emptyTree>
+            nil
           else
             <emptyTree>
           end
@@ -24,7 +24,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         begin
           <assignTemp>$2 = <self>.x()
           if <emptyTree>::<C <ErrorNode>>.===(<assignTemp>$2)
-            <emptyTree>
+            nil
           else
             <emptyTree>
           end
@@ -80,7 +80,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         begin
           <assignTemp>$2 = <self>.x()
           if <emptyTree>::<C A>.===(<assignTemp>$2)
-            <emptyTree>
+            nil
           else
             <self>.puts("after")
           end
@@ -92,7 +92,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       begin
         <self>.puts("before")
         if <emptyTree>::<C A>
-          <emptyTree>
+          nil
         else
           <self>.puts("after")
         end
@@ -105,7 +105,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         begin
           <assignTemp>$2 = <self>.x()
           if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-            <emptyTree>
+            nil
           else
             <self>.puts("after")
           end

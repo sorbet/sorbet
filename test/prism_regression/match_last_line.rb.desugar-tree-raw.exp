@@ -12,7 +12,7 @@ ClassDef{
         symbol = (static-field ::<ErrorNode>)
         orig = nullptr
       }
-      thenp = EmptyTree
+      thenp = Literal{ value = nil }
       elsep = EmptyTree
     }
 
