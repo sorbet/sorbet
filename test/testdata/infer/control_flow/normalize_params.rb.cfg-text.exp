@@ -37,17 +37,21 @@ bb0[firstDead=-1]():
     <ifTemp>$3 -> (T.untyped ? bb2 : bb3)
 
 # backedges
-# - bb11
-bb1[firstDead=-1]():
+# - bb2
+# - bb5
+# - bb7
+bb1[firstDead=-1](<returnMethodTemp>$2):
+    <finalReturn> = return <returnMethodTemp>$2
     <unconditional> -> bb1
 
 # backedges
 # - bb0
-bb2[firstDead=-1](<self>: Test, v: T::Hash[T.untyped, T.untyped]):
+bb2[firstDead=4](<self>: Test, v: T::Hash[T.untyped, T.untyped]):
     <statTemp>$9: T::Array[[T.untyped, T.untyped]] = v: T::Hash[T.untyped, T.untyped].to_a()
     <statTemp>$7: T.untyped = <self>: Test.normalize_params(<statTemp>$9: T::Array[[T.untyped, T.untyped]])
     <returnMethodTemp>$2: T.untyped = <statTemp>$7: T.untyped.sort()
-    <unconditional> -> bb11
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
+    <unconditional> -> bb1
 
 # backedges
 # - bb0
@@ -65,9 +69,10 @@ bb4[firstDead=-1](<self>: Test, v: T::Array[T.untyped]):
 
 # backedges
 # - bb3
-bb5[firstDead=-1](v: T.untyped):
+bb5[firstDead=2](v: T.untyped):
     <returnMethodTemp>$2: T.untyped = v
-    <unconditional> -> bb11
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
+    <unconditional> -> bb1
 
 # backedges
 # - bb4
@@ -78,9 +83,10 @@ bb6[firstDead=-1](<self>: Test, <block-pre-call-temp>$16: Sorbet::Private::Stati
 
 # backedges
 # - bb6
-bb7[firstDead=-1](<block-pre-call-temp>$16: Sorbet::Private::Static::Void, <selfRestore>$17: Test):
+bb7[firstDead=2](<block-pre-call-temp>$16: Sorbet::Private::Static::Void, <selfRestore>$17: Test):
     <returnMethodTemp>$2: T::Array[T.untyped] = Solve<<block-pre-call-temp>$16, map>
-    <unconditional> -> bb11
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T::Array[T.untyped]
+    <unconditional> -> bb1
 
 # backedges
 # - bb6
@@ -92,14 +98,6 @@ bb9[firstDead=5](<self>: Test, <block-pre-call-temp>$16: Sorbet::Private::Static
     <blockReturnTemp>$19: T.untyped = <self>: Test.normalize_params(e$1: T.untyped)
     <blockReturnTemp>$22: T.noreturn = blockreturn<map> <blockReturnTemp>$19: T.untyped
     <unconditional> -> bb6
-
-# backedges
-# - bb2
-# - bb5
-# - bb7
-bb11[firstDead=1](<returnMethodTemp>$2: T.untyped):
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
-    <unconditional> -> bb1
 
 }
 

@@ -87,8 +87,10 @@ bb0[firstDead=-1]():
     <ifTemp>$4 -> (T::Boolean ? bb2 : bb3)
 
 # backedges
-# - bb13
-bb1[firstDead=-1]():
+# - bb11
+# - bb12
+bb1[firstDead=-1](<returnMethodTemp>$2):
+    <finalReturn> = return <returnMethodTemp>$2
     <unconditional> -> bb1
 
 # backedges
@@ -147,25 +149,20 @@ bb10[firstDead=-1](x: T.any(Other, Concrete)):
 
 # backedges
 # - bb10
-bb11[firstDead=-1]():
+bb11[firstDead=2]():
     <returnMethodTemp>$2: NilClass = nil
-    <unconditional> -> bb13
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <unconditional> -> bb1
 
 # backedges
 # - bb10
-bb12[firstDead=-1](x: Concrete):
+bb12[firstDead=6](x: Concrete):
     <cfgAlias>$31: T.class_of(Concrete) = alias <C Concrete>
     keep_for_ide$30: T.class_of(Concrete) = <cfgAlias>$31
     keep_for_ide$30: T.untyped = <keep-alive> keep_for_ide$30
     <castTemp>$32: Concrete = x
     <returnMethodTemp>$2: Concrete = cast(<castTemp>$32: Concrete, Concrete);
-    <unconditional> -> bb13
-
-# backedges
-# - bb11
-# - bb12
-bb13[firstDead=1](<returnMethodTemp>$2: T.nilable(Concrete)):
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(Concrete)
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Concrete
     <unconditional> -> bb1
 
 }
@@ -180,28 +177,25 @@ bb0[firstDead=-1]():
     <ifTemp>$3 -> (T::Boolean ? bb2 : bb3)
 
 # backedges
-# - bb4
-bb1[firstDead=-1]():
+# - bb2
+# - bb3
+bb1[firstDead=-1](<returnMethodTemp>$2):
+    <finalReturn> = return <returnMethodTemp>$2
     <unconditional> -> bb1
 
 # backedges
 # - bb0
-bb2[firstDead=-1](x: Base):
+bb2[firstDead=3](x: Base):
     <cfgAlias>$8: T.class_of(T) = alias <C T>
     <returnMethodTemp>$2: Base = <cfgAlias>$8: T.class_of(T).reveal_type(x: Base)
-    <unconditional> -> bb4
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Base
+    <unconditional> -> bb1
 
 # backedges
 # - bb0
-bb3[firstDead=-1]():
+bb3[firstDead=2]():
     <returnMethodTemp>$2: NilClass = nil
-    <unconditional> -> bb4
-
-# backedges
-# - bb2
-# - bb3
-bb4[firstDead=1](<returnMethodTemp>$2: T.nilable(Base)):
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(Base)
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 }

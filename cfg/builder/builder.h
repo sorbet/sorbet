@@ -35,6 +35,8 @@ private:
                                   LocalRef lhs, BasicBlock *current);
     static BasicBlock *walkHash(CFGContext cctx, const ast::Hash &h, BasicBlock *current, core::NameRef method);
     static BasicBlock *walkEmptyTreeInIf(CFGContext cctx, core::LocOffsets loc, BasicBlock *current);
+    static BasicBlock *returnFromTailPosition(CFGContext cctx, BasicBlock *current, const ast::If &iff, bool isThen,
+                                              core::LocOffsets conditionalLoc);
     static BasicBlock *walkBlockReturn(CFGContext cctx, core::LocOffsets loc, const ast::ExpressionPtr &expr,
                                        BasicBlock *current);
     static BasicBlock *handleSpecialMethods(CFGContext cctx, BasicBlock *current, const ast::Send &s);
@@ -57,6 +59,13 @@ public:
     bool isInsideRubyBlock;
     bool isInsideLambda;
     bool breakIsJump;
+    // Whether the value of the expression being walked will become the method's return value without
+    // passing through any other code first (e.g., the last expression of the method body, or either
+    // branch of an `if` which is itself in tail position).
+    //
+    // `walk` resets this to `false` before walking any children, so only the nodes that explicitly
+    // propagate it to a child (`InsSeq` and `If`) will see it.
+    bool isTailPosition;
     // While walking the `else` branch of an `if`, the loc of the outermost `if` in its chain of
     // `if`/`elsif`/`else` (or `case`/`when`/`else`) branches, and `none` otherwise. `walk` clears
     // this before walking any children, so only the `else` branch's own node sees it.
@@ -85,9 +94,9 @@ private:
                BasicBlock *breakScope, BasicBlock *rescueScope, UnorderedMap<core::SymbolRef, LocalRef> &aliases,
                UnorderedMap<core::NameRef, LocalRef> &discoveredUndeclaredFields, uint32_t &temporaryCounter)
         : ctx(ctx), inWhat(inWhat), target(target), loops(loops), isInsideRubyBlock(false), isInsideLambda(false),
-          breakIsJump(false), ifChainLoc(core::LocOffsets::none()), nextScope(nextScope), breakScope(breakScope),
-          rescueScope(rescueScope), aliases(aliases), discoveredUndeclaredFields(discoveredUndeclaredFields),
-          temporaryCounter(temporaryCounter) {};
+          breakIsJump(false), isTailPosition(false), ifChainLoc(core::LocOffsets::none()), nextScope(nextScope),
+          breakScope(breakScope), rescueScope(rescueScope), aliases(aliases),
+          discoveredUndeclaredFields(discoveredUndeclaredFields), temporaryCounter(temporaryCounter) {};
 };
 } // namespace sorbet::cfg
 #endif // SORBET_BUILDER_H
