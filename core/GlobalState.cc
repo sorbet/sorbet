@@ -2021,6 +2021,33 @@ void GlobalState::copyOptions(const core::GlobalState &other) {
     this->pathPrefix = other.pathPrefix;
 }
 
+NameTable NameTable::deepCopy(int fromGlobalStateId, int toGlobalStateId) const {
+    NameTable result;
+    result.deepCloneHistory = this->deepCloneHistory;
+    result.deepCloneHistory.emplace_back(
+        DeepCloneHistoryEntry{fromGlobalStateId, utf8NamesUsed(), constantNamesUsed(), uniqueNamesUsed()});
+
+    result.strings = this->strings;
+    result.utf8Names.reserve(this->utf8Names.capacity());
+    result.constantNames.reserve(this->constantNames.capacity());
+    result.uniqueNames.reserve(this->uniqueNames.capacity());
+    result.utf8Names = this->utf8Names;
+    if (fromGlobalStateId == toGlobalStateId) {
+        result.constantNames = this->constantNames;
+        result.uniqueNames = this->uniqueNames;
+    } else {
+        for (const auto &name : this->constantNames) {
+            result.constantNames.emplace_back(name.deepCopy(result, toGlobalStateId));
+        }
+        for (const auto &name : this->uniqueNames) {
+            result.uniqueNames.emplace_back(name.deepCopy(result, toGlobalStateId));
+        }
+    }
+
+    result.namesByHash = this->namesByHash;
+    return result;
+}
+
 unique_ptr<GlobalState> GlobalState::deepCopyGlobalState(bool keepId) const {
     Timer timeit(tracer(), "GlobalState::deepCopy", this->creation);
     this->sanityCheck();
@@ -2031,42 +2058,11 @@ unique_ptr<GlobalState> GlobalState::deepCopyGlobalState(bool keepId) const {
     if (keepId) {
         result->globalStateId = this->globalStateId;
     }
-    const auto &fromNames = this->nameTable;
-    auto &toNames = result->nameTable;
-    toNames.deepCloneHistory = fromNames.deepCloneHistory;
-    toNames.deepCloneHistory.emplace_back(
-        NameTable::DeepCloneHistoryEntry{this->globalStateId, utf8NamesUsed(), constantNamesUsed(), uniqueNamesUsed()});
+    result->nameTable = this->nameTable.deepCopy(this->globalStateId, result->globalStateId);
 
-    toNames.strings = fromNames.strings;
     result->files = make_shared<FileTable>(*this->files);
     result->lspQuery = this->lspQuery;
     result->kvstoreUuid = this->kvstoreUuid;
-    toNames.utf8Names.reserve(fromNames.utf8Names.capacity());
-    toNames.constantNames.reserve(fromNames.constantNames.capacity());
-    toNames.uniqueNames.reserve(fromNames.uniqueNames.capacity());
-    if (keepId) {
-        toNames.utf8Names.resize(fromNames.utf8Names.size());
-        ::memcpy(toNames.utf8Names.data(), fromNames.utf8Names.data(), fromNames.utf8Names.size() * sizeof(UTF8Name));
-        toNames.constantNames.resize(fromNames.constantNames.size());
-        ::memcpy(toNames.constantNames.data(), fromNames.constantNames.data(),
-                 fromNames.constantNames.size() * sizeof(ConstantName));
-        toNames.uniqueNames.resize(fromNames.uniqueNames.size());
-        ::memcpy(toNames.uniqueNames.data(), fromNames.uniqueNames.data(),
-                 fromNames.uniqueNames.size() * sizeof(UniqueName));
-    } else {
-        for (auto &utf8Name : fromNames.utf8Names) {
-            toNames.utf8Names.emplace_back(utf8Name.deepCopy(*result));
-        }
-        for (auto &constantName : fromNames.constantNames) {
-            toNames.constantNames.emplace_back(constantName.deepCopy(*result));
-        }
-        for (auto &uniqueName : fromNames.uniqueNames) {
-            toNames.uniqueNames.emplace_back(uniqueName.deepCopy(*result));
-        }
-    }
-
-    toNames.namesByHash.reserve(fromNames.namesByHash.size());
-    toNames.namesByHash = fromNames.namesByHash;
 
     result->classAndModules.reserve(this->classAndModules.capacity());
     for (auto &sym : this->classAndModules) {

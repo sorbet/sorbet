@@ -250,6 +250,9 @@ public:
     uint32_t getNameTableDiffCount() const {
         return this->nameTableDiffCount;
     }
+
+    // Copy names and clone history for the destination ID, leaving cache bookkeeping and freeze state at defaults.
+    NameTable deepCopy(int fromGlobalStateId, int toGlobalStateId) const;
 };
 
 class FileTable {

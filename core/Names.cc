@@ -26,13 +26,15 @@ static_assert(is_nothrow_destructible_v<NameRef>);
 static_assert(is_nothrow_swappable_v<NameRef>);
 
 NameRef::NameRef(const GlobalState &gs, NameKind kind, uint32_t id)
-    : DebugOnlyCheck(gs, kind, id), _id{(id << KIND_BITS) | static_cast<uint32_t>(kind)} {
+    : DebugOnlyCheck(gs.nameTable, gs.globalStateId, kind, id), _id{(id << KIND_BITS) | static_cast<uint32_t>(kind)} {
     // If this fails, the symbol table is too big :(
     ENFORCE_NO_TIMER(id <= MAX_ID);
 }
 
-NameRef::NameRef(const GlobalState &gs, NameRef ref)
-    : DebugOnlyCheck(gs, ref.kind(), ref.unsafeTableIndex()), _id(ref.rawId()) {
+NameRef::NameRef(const GlobalState &gs, NameRef ref) : NameRef(gs.nameTable, gs.globalStateId, ref) {}
+
+NameRef::NameRef(const NameTable &names, int gsId, NameRef ref)
+    : DebugOnlyCheck(names, gsId, ref.kind(), ref.unsafeTableIndex()), _id(ref.rawId()) {
     // If this fails, the symbol table is too big :(
     ENFORCE_NO_TIMER(this->unsafeTableIndex() <= MAX_ID);
 }
@@ -337,11 +339,11 @@ bool NameRef::isMethodDefModifierName() const {
     }
 }
 
-NameRefDebugCheck::NameRefDebugCheck(const GlobalState &gs, NameKind kind, uint32_t index) {
+NameRefDebugCheck::NameRefDebugCheck(const NameTable &names, int gsId, NameKind kind, uint32_t index)
+    : globalStateId(gsId) {
     // store the globalStateId of the creating global state to allow sharing refs between siblings
     // when the ref refers to a name in the common ancestor
-    globalStateId = gs.globalStateId;
-    for (const auto &deepCloneInfo : gs.nameTable.deepCloneHistory) {
+    for (const auto &deepCloneInfo : names.deepCloneHistory) {
         switch (kind) {
             case NameKind::UTF8:
                 if (index < deepCloneInfo.lastUTF8NameKnownByParentGlobalState) {
@@ -489,16 +491,12 @@ NameRef NameRef::prepend(GlobalState &gs, string_view s) const {
     return gs.enterNameUTF8(nameEq);
 }
 
-UTF8Name UTF8Name::deepCopy(const GlobalState &to) const {
-    return UTF8Name{this->utf8};
+ConstantName ConstantName::deepCopy(const NameTable &names, int gsId) const {
+    return ConstantName{NameRef(names, gsId, this->original)};
 }
 
-ConstantName ConstantName::deepCopy(const GlobalState &to) const {
-    return ConstantName{NameRef(to, this->original)};
-}
-
-UniqueName UniqueName::deepCopy(const GlobalState &to) const {
-    return UniqueName{NameRef(to, this->original), this->num, this->uniqueNameKind};
+UniqueName UniqueName::deepCopy(const NameTable &names, int gsId) const {
+    return UniqueName{NameRef(names, gsId, this->original), this->num, this->uniqueNameKind};
 }
 
 UniqueNameData::UniqueNameData(const UniqueName &ref, const GlobalState &gs) : DebugOnlyCheck(gs), name(ref) {}

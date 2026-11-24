@@ -231,6 +231,50 @@ TEST_CASE("CopyForSlowPathPreservesNameRefOwnership") {
     originalInCopy.enforceCorrectGlobalState(*copy);
 }
 
+TEST_CASE("DeepCopyNames") {
+    GlobalState gs(errorQueue);
+    gs.initEmpty();
+    NameRef sharedConstant;
+    {
+        UnfreezeNameTable unfreeze(gs);
+        sharedConstant = gs.enterNameConstant("SharedName");
+    }
+
+    auto parent = gs.deepCopyGlobalState();
+    NameRef parentConstant, unique;
+    {
+        UnfreezeNameTable unfreeze(*parent);
+        parentConstant = parent->enterNameConstant("ClonedName");
+        unique = parent->freshNameUnique(UniqueNameKind::Namer, parentConstant, 1);
+    }
+    parent->markNameTableAsCached();
+    parent->setNameTableDiffCount(7);
+    auto sibling = parent->deepCopyGlobalState();
+
+    for (bool keepId : {false, true}) {
+        INFO("keepId = ", keepId);
+        auto copy = parent->deepCopyGlobalState(keepId);
+        CHECK_EQ(copy->globalStateId == parent->globalStateId, keepId);
+        CHECK_EQ(copy->namesUsedTotal(), parent->namesUsedTotal());
+        CHECK_EQ(copy->lookupNameConstant("SharedName"), sharedConstant);
+        CHECK_EQ(copy->lookupNameConstant("ClonedName"), parentConstant);
+        CHECK_EQ(copy->lookupNameUnique(UniqueNameKind::Namer, parentConstant, 1), unique);
+        CHECK(copy->wasNameTableModified());
+        CHECK_EQ(copy->getNameTableDiffCount(), 0);
+
+        // References inside copied names must retain their shared ancestor's ownership, not the copy's ID.
+        for (auto constant : {sharedConstant, parentConstant}) {
+            constant.dataCnst(*copy)->original.enforceCorrectGlobalState(*sibling);
+        }
+        unique.dataUnique(*copy)->original.enforceCorrectGlobalState(*sibling);
+
+        UnfreezeNameTable unfreeze(*copy);
+        copy->enterNameUTF8("only_in_copy");
+        CHECK_FALSE(parent->lookupNameUTF8("only_in_copy").exists());
+        CHECK_FALSE(sibling->lookupNameUTF8("only_in_copy").exists());
+    }
+}
+
 // Privileged class that is friends with TypePtr
 class TypePtrTestHelper {
 public:
