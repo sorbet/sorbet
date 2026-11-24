@@ -328,7 +328,8 @@ vector<MangledName> PackageInfo::enclosingPackagesMissingImport(const core::Glob
     vector<MangledName> result;
     const auto &db = gs.packageDB();
     for (auto outer = db.getParentPackage(gs, pkg); outer.exists(); outer = db.getParentPackage(gs, outer)) {
-        if (absl::c_any_of(imports, [outer](auto &i) { return i.mangledName == outer; }) || moreImports.contains(outer)) {
+        if (absl::c_any_of(imports, [outer](auto &i) { return i.mangledName == outer; }) ||
+            moreImports.contains(outer)) {
             // This satisfies `outer`, and every marked package enclosing it.
             break;
         }
